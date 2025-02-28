@@ -132,7 +132,7 @@ extern struct criteria_roomentered *g_RoomEnteredCriterias;
 extern struct criteria_throwinroom *g_ThrowInRoomCriterias;
 extern struct criteria_holograph *g_HolographCriterias;
 extern struct sndstate *g_CasingAudioHandles[2];
-extern s32 var8009d0d8;
+extern s32 var8009d0d8; //Time until next casing audio sound is allowed to be made
 extern struct sndstate *g_BgunAudioHandles[MAX_PLAYERS];
 extern struct fireslot g_Fireslots[20];
 extern struct casing g_Casings[20];

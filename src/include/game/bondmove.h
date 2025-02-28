@@ -38,7 +38,7 @@ void bmove0f0cba88(f32 *a, f32 *b, struct coord *c, f32 mult1, f32 mult2);
 void bmoveUpdateMoveInitSpeed(struct coord *newpos);
 void bmoveTick(bool allowc1x, bool allowc1y, bool allowc1buttons, bool ignorec2);
 void bmoveUpdateVerta(void);
-void bmove0f0cc19c(struct coord *arg);
+void bmoveUpdateHoriz(struct coord *arg);
 void bmoveUpdateHead(f32 arg0, f32 arg1, f32 arg2, Mtxf *arg3, f32 arg4);
 void bmove0f0cc654(f32 arg0, f32 arg1, f32 arg2);
 s32 bmoveGetCrouchPos(void);

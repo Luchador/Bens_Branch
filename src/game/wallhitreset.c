@@ -33,54 +33,15 @@ void wallhitReset(void)
 	s32 type = 2;
 	s32 i;
 
-	if (IS4MB()) {
-		type = 0;
-	} else if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && PLAYERCOUNT() == 2) {
-		type = 1;
-	} else if (PLAYERCOUNT() >= 2) {
-		type = 0;
-	}
-
-	switch (type) {
-	case 0:
-		// 4MB or MP with 2+ players
-		g_WallhitsMax = 80;
-		g_MinPropWallhits = 10;
-		g_MaxPropWallhits = 40;
-		g_MinBgWallhitsPerRoom = 1;
-		g_MaxBgWallhitsPerRoom = 25;
-		var8009cc6c = 20;
-		g_WallhitsCriticalSpareLimit = 5;
-		g_WallhitsGoalSpareLimit = 15;
-		g_WallhitTargetBloodRatio = 0.3f;
-		break;
-	case 1:
-		// 2 player coop/anti
-		g_WallhitsMax = 200;
-		g_MinPropWallhits = 25;
-		g_MaxPropWallhits = 100;
-		g_MinBgWallhitsPerRoom = 4;
-		g_MaxBgWallhitsPerRoom = 40;
-		var8009cc6c = 80;
-		g_WallhitsCriticalSpareLimit = 20;
-		g_WallhitsGoalSpareLimit = 30;
-		g_WallhitTargetBloodRatio = 0.4f;
-		break;
-	case 2:
-	default:
-		// 1 player 8MB
-		g_WallhitsMax = 360;
-		g_MinPropWallhits = 50;
-		g_MaxPropWallhits = 120;
-		g_MinBgWallhitsPerRoom = 10;
-		g_MaxBgWallhitsPerRoom = 60;
-		var8009cc6c = 180;
-		g_WallhitsCriticalSpareLimit = 25;
-		g_WallhitsGoalSpareLimit = 40;
-		g_WallhitTargetBloodRatio = 0.5f;
-		break;
-	}
-
+	//Ben's change: remove switches for different amounts of decals based on mode. Massively increase number of allowed decals.
+	g_WallhitsMax = 3600;
+	g_MinPropWallhits = 50;
+	g_MaxPropWallhits = 1200;
+	g_MinBgWallhitsPerRoom = 10;
+	g_MaxBgWallhitsPerRoom = 600;
+	g_WallhitsCriticalSpareLimit = 25;
+	g_WallhitsGoalSpareLimit = 40;
+	g_WallhitTargetBloodRatio = 0.5f;
 	g_WallhitCountsPerRoom = NULL;
 	g_WallhitsNumSettled = 0;
 	g_WallhitsNumFree = 0;

@@ -24,7 +24,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0002",
+        "id": "ANIM_RIFLE_SHOOT_LOW",
         "file": "0002.bin",
         "numframes": 81,
         "bytesperframe": 44,
@@ -36,7 +36,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0003",
+        "id": "ANIM_RIFLE_SHOOT_HIGH",
         "file": "0003.bin",
         "numframes": 90,
         "bytesperframe": 47,
@@ -48,7 +48,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0004",
+        "id": "ANIM_AIM_LEFT_SHOOT",
         "file": "0004.bin",
         "numframes": 85,
         "bytesperframe": 44,
@@ -60,7 +60,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0005",
+        "id": "ANIM_TURN_RIGHT_SHOOT",
         "file": "0005.bin",
         "numframes": 145,
         "bytesperframe": 55,
@@ -72,7 +72,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0006",
+        "id": "ANIM_TURN_RIGHT_SHOOT2",
         "file": "0006.bin",
         "numframes": 121,
         "bytesperframe": 53,
@@ -84,7 +84,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0007",
+        "id": "ANIM_RIFLE_KNEEL_AIM",
         "file": "0007.bin",
         "numframes": 121,
         "bytesperframe": 48,
@@ -108,7 +108,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0009",
+        "id": "ANIM_RIFLE_CROUCH_SHOOT_LEFT",
         "file": "0009.bin",
         "numframes": 125,
         "bytesperframe": 51,
@@ -120,7 +120,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_000A",
+        "id": "ANIM_RIFLE_CROUCH_SHOOT_RIGHT",
         "file": "000a.bin",
         "numframes": 137,
         "bytesperframe": 52,
@@ -132,7 +132,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_000B",
+        "id": "ANIM_ROLL_LEFT_FORWARD",
         "file": "000b.bin",
         "numframes": 184,
         "bytesperframe": 55,
@@ -144,7 +144,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_000C",
+        "id": "ANIM_ROLL_RIGHT",
         "file": "000c.bin",
         "numframes": 126,
         "bytesperframe": 55,
@@ -156,7 +156,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_000D",
+        "id": "ANIM_ROLL_LEFT",
         "file": "000d.bin",
         "numframes": 128,
         "bytesperframe": 53,
@@ -168,7 +168,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_000E",
+        "id": "ANIM_HIT_LEFT_SHOULDER",
         "file": "000e.bin",
         "numframes": 56,
         "bytesperframe": 46,
@@ -180,7 +180,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_000F",
+        "id": "ANIM_HIT_RIGHT_SHOULDER",
         "file": "000f.bin",
         "numframes": 93,
         "bytesperframe": 48,
@@ -192,7 +192,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0010",
+        "id": "ANIM_HIT_LEFT_ARM",
         "file": "0010.bin",
         "numframes": 74,
         "bytesperframe": 49,
@@ -204,7 +204,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0011",
+        "id": "ANIM_HIT_RIGHT_FOREARM",
         "file": "0011.bin",
         "numframes": 74,
         "bytesperframe": 47,
@@ -216,7 +216,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0012",
+        "id": "ANIM_HIT_LEFT_HAND",
         "file": "0012.bin",
         "numframes": 113,
         "bytesperframe": 49,
@@ -228,7 +228,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0013",
+        "id": "ANIM_HIT_RIGHT_HAND",
         "file": "0013.bin",
         "numframes": 143,
         "bytesperframe": 48,
@@ -240,7 +240,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0014",
+        "id": "ANIM_HIT_LEFT_ARM_LIMP",
         "file": "0014.bin",
         "numframes": 112,
         "bytesperframe": 48,
@@ -252,7 +252,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0015",
+        "id": "ANIM_HIT_AND_REEL",
         "file": "0015.bin",
         "numframes": 155,
         "bytesperframe": 47,
@@ -264,7 +264,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0016",
+        "id": "ANIM_WALK_FORWARD01",
         "file": "0016.bin",
         "numframes": 34,
         "bytesperframe": 40,
@@ -276,7 +276,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0017",
+        "id": "ANIM_GRAB_THROAT",
         "file": "0017.bin",
         "numframes": 135,
         "bytesperframe": 48,
@@ -288,7 +288,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0018",
+        "id": "ANIM_RIFLE_WALK",
         "file": "0018.bin",
         "numframes": 94,
         "bytesperframe": 40,
@@ -300,7 +300,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0019",
+        "id": "ANIM_DEATH_AGAINST_WALL",
         "file": "0019.bin",
         "numframes": 90,
         "bytesperframe": 51,

@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "types.h": "c",
+        "constants.h": "c",
+        "ultra64.h": "c",
+        "vector": "c"
+    }
+}

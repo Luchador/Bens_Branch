@@ -441,29 +441,6 @@ MenuItemHandlerResult menuhandlerAlternativeTitle(s32 operation, struct menuitem
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerHiRes(s32 operation, struct menuitem *item, union handlerdata *data)
-{
-	switch (operation) {
-	case MENUOP_CHECKHIDDEN:
-		if (IS4MB()) {
-			return true;
-		}
-		if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
-			if (PLAYERCOUNT() >= 2) {
-				return true;
-			}
-		}
-		break;
-	case MENUOP_GET:
-		return g_HiResEnabled == true;
-	case MENUOP_SET:
-		playerSetHiResEnabled(data->checkbox.value ? 1 : 0);
-		g_Vars.modifiedfiles |= MODFILE_GAME;
-	}
-
-	return 0;
-}
-
 MenuItemHandlerResult menuhandlerAmmoOnScreen(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	u32 mpchrnum;
@@ -2539,24 +2516,6 @@ struct menuitem g_VideoOptionsMenuItems[] = {
 		0,
 		menuhandlerScreenSize,
 	},
-#ifdef PLATFORM_N64
-	{
-		MENUITEMTYPE_DROPDOWN,
-		0,
-		0,
-		L_OPTIONS_216, // "Ratio"
-		0,
-		menuhandlerScreenRatio,
-	},
-	{
-		MENUITEMTYPE_CHECKBOX,
-		0,
-		0,
-		L_OPTIONS_217, // "Hi-Res"
-		0,
-		menuhandlerHiRes,
-	},
-#endif
 #if PAL
 	{
 		MENUITEMTYPE_DROPDOWN,
@@ -2603,24 +2562,6 @@ struct menuitem g_VideoOptionsMenuItems[] = {
 };
 
 struct menuitem g_2PMissionVideoOptionsMenuItems[] = {
-#ifdef PLATFORM_N64
-	{
-		MENUITEMTYPE_DROPDOWN,
-		0,
-		0,
-		L_OPTIONS_216, // "Ratio"
-		0,
-		menuhandlerScreenRatio,
-	},
-	{
-		MENUITEMTYPE_CHECKBOX,
-		0,
-		0,
-		L_OPTIONS_217, // "Hi-Res"
-		0,
-		menuhandlerHiRes,
-	},
-#endif
 #if PAL
 	{
 		MENUITEMTYPE_DROPDOWN,

@@ -2049,8 +2049,6 @@ void bgBuildTables(s32 stagenum)
 		}
 	}
 
-	envSetStageNum(stagenum);
-
 	var8007fc10 = 200;
 
 	wallhitReset();

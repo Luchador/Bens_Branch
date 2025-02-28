@@ -1648,11 +1648,9 @@ void bwalk0f0c69b8(void)
 		mult = g_HeadAnims[HEADANIM_MOVING].translateperframe * 0.5f * g_Vars.lvupdate60freal;
 		spe0 = (g_Vars.currentplayer->speedsideways * spc0 + spc4) * mult;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (cheatIsActive(CHEAT_SMALLJO)) {
 			spe0 /= 0.4f;
 		}
-#endif
 
 		bmove0f0cc654(maxspeed, g_Vars.currentplayer->speedforwards * spc0 + spc8, spe0);
 
@@ -1661,11 +1659,9 @@ void bwalk0f0c69b8(void)
 		spdc = g_Vars.currentplayer->headpos.x;
 		spd8 = g_Vars.currentplayer->headpos.z;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (cheatIsActive(CHEAT_SMALLJO)) {
 			spdc *= 0.4f;
 		}
-#endif
 
 		spcc.f[0] += (spd8 * g_Vars.currentplayer->bond2.unk00.f[0] - spdc * g_Vars.currentplayer->bond2.unk00.f[2]) * g_Vars.lvupdate60freal;
 		spcc.f[2] += (spd8 * g_Vars.currentplayer->bond2.unk00.f[2] + spdc * g_Vars.currentplayer->bond2.unk00.f[0]) * g_Vars.lvupdate60freal;
@@ -1846,20 +1842,16 @@ void bwalkTick(void)
 	bwalk0f0c69b8();
 	bwalkUpdateVertical();
 
-#if VERSION >= VERSION_NTSC_1_0
-	{
-		s32 i;
+	s32 i;
 
-		for (i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {
-			if (g_Vars.currentplayer->floorroom == g_Vars.currentplayer->prop->rooms[i]) {
-				propDeregisterRooms(g_Vars.currentplayer->prop);
-				g_Vars.currentplayer->prop->rooms[0] = g_Vars.currentplayer->floorroom;
-				g_Vars.currentplayer->prop->rooms[1] = -1;
-				break;
-			}
+	for (i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {
+		if (g_Vars.currentplayer->floorroom == g_Vars.currentplayer->prop->rooms[i]) {
+			propDeregisterRooms(g_Vars.currentplayer->prop);
+			g_Vars.currentplayer->prop->rooms[0] = g_Vars.currentplayer->floorroom;
+			g_Vars.currentplayer->prop->rooms[1] = -1;
+			break;
 		}
 	}
-#endif
 
 	bmoveUpdateRooms(g_Vars.currentplayer);
 	objectiveCheckRoomEntered(g_Vars.currentplayer->prop->rooms[0]);
@@ -1875,9 +1867,9 @@ void bwalkTick(void)
 		coord.z = (g_Vars.currentplayer->walkinitstart.z - g_Vars.currentplayer->walkinitpos.z)
 			* (1.0f - g_Vars.currentplayer->walkinitt2) + g_Vars.currentplayer->prop->pos.z;
 
-		bmove0f0cc19c(&coord);
+		bmoveUpdateHoriz(&coord);
 	} else {
-		bmove0f0cc19c(&g_Vars.currentplayer->prop->pos);
+		bmoveUpdateHoriz(&g_Vars.currentplayer->prop->pos);
 	}
 
 	playerUpdatePerimInfo();
