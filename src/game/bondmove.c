@@ -2429,7 +2429,7 @@ void bmoveUpdateVerta(void)
 	}
 }
 
-void bmoveUpdateHoriz(struct coord *arg)
+void bmove0f0cc19c(struct coord *arg)
 {
 	f32 min;
 	f32 mult;
@@ -2464,6 +2464,13 @@ void bmoveUpdateHoriz(struct coord *arg)
 		}
 
 		g_Vars.currentplayer->bond2.unk10.y = (g_Vars.currentplayer->bond2.unk10.y - g_Vars.currentplayer->vv_manground) * mult;
+
+#if VERSION < VERSION_NTSC_1_0
+		if (g_Vars.currentplayer->bond2.unk10.y < 30) {
+			g_Vars.currentplayer->bond2.unk10.y = 30;
+		}
+#endif
+
 		g_Vars.currentplayer->bond2.unk10.y += g_Vars.currentplayer->vv_manground;
 	}
 

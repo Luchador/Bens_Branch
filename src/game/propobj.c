@@ -4807,32 +4807,26 @@ void func0f07079c(struct prop *prop, bool fulltick)
 	}
 }
 
-s32 glassCalculateOpacity(struct coord *pos, f32 opadist, f32 maxopacity, f32 minopacity)
+s32 glassCalculateOpacity(struct coord *pos, f32 xludist, f32 opadist, f32 arg3)
 {
-    struct coord *campos = &g_Vars.currentplayer->cam_pos;
-    s32 opacity;
-    f32 xdiff = pos->x - campos->x;
-    f32 ydiff = pos->y - campos->y;
-    f32 zdiff = pos->z - campos->z;
+	struct coord *campos = &g_Vars.currentplayer->cam_pos;
+	s32 opacity;
+	f32 xdiff = pos->x - campos->x;
+	f32 ydiff = pos->y - campos->y;
+	f32 zdiff = pos->z - campos->z;
 
+	f32 distance = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 
-    f32 distance = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
+	if (distance > opadist) {
+		opacity = 255;
+	} else if (distance < xludist) {
+		opacity = arg3 * 255;
+	} else {
+		opacity = (((distance - xludist) * (1.0f - arg3)) / (opadist - xludist) + arg3) * 255;
+	}
 
-
-    if (distance > opadist)
-    {
-        opacity = maxopacity;
-    }
-    else
-    {
-        float interp = distance / opadist;
-        opacity = minopacity + interp * (maxopacity - minopacity);
-    }
-
-
-    return opacity;
+	return opacity;
 }
-
 
 struct prop *g_Lifts[10] = {NULL};
 
@@ -7746,7 +7740,7 @@ void doorUpdatePortalIfWindowed(struct prop *doorprop, s32 playercount)
 	union modelrwdata *rwdata;
 
 	if (doorobj->doorflags & DOORFLAG_WINDOWED) {
-		doorobj->fadealpha = glassCalculateOpacity(&doorprop->pos, doorobj->opadist, 80.0f, 12.0f);
+		doorobj->fadealpha = glassCalculateOpacity(&doorprop->pos, doorobj->xludist, doorobj->opadist, 0);
 
 		if (doorobj->fadealpha != 255 || doorobj->frac > 0) {
 			canhide = false;
@@ -10777,7 +10771,7 @@ void glassUpdatePortal(struct prop *prop, s32 playercount, bool *arg2)
 	if (g_TintedGlassEnabled) {
 		glass->opacity = 255;
 	} else {
-		glass->opacity = glassCalculateOpacity(&prop->pos, glass->opadist, 80.0f, 12.0f);
+		glass->opacity = glassCalculateOpacity(&prop->pos, glass->xludist, glass->opadist, glass->unk64);
 	}
 
 	if (glass->portalnum >= 0 && playercount == 1) {

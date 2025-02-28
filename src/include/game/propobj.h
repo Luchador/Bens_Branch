@@ -132,7 +132,7 @@ void func0f07063c(struct prop *prop, bool fulltick);
 void objDropRecursively(struct prop *prop, bool arg1);
 void func0f0706f8(struct prop *prop, bool fulltick);
 void func0f07079c(struct prop *prop, bool fulltick);
-s32 glassCalculateOpacity(struct coord *pos, f32 opadist, f32 maxopacity, f32 minopacity);
+s32 glassCalculateOpacity(struct coord *pos, f32 xludist, f32 opadist, f32 arg3);
 void func0f070a1c(struct modelrodata_bbox *bbox, f32 realrot[3][3], struct coord *pos, struct coord *vertices);
 void func0f070bd0(struct modelrodata_type19 *rodata, f32 realrot[3][3], struct coord *pos, struct coord *vertices);
 void func0f070ca0(struct defaultobj *obj, struct geotilef *tile, u32 flags, struct modelrodata_bbox *bbox, struct modelrodata_type19 *rodata);

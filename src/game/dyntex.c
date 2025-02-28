@@ -75,8 +75,8 @@ s32 g_DyntexVerticesCount = 0;
 
 void dyntexUpdateLinear(Vtx *vertices, struct dyntextype *type)
 {
-	//s16 tmp = (s32) (g_Lv80SecIntervalFrac * 10.0f * 4096.0f) % 4096;
-	s16 tmp = (s32) (g_Lv80SecIntervalFrac * (g_StageIndex == STAGEINDEX_AIRBASE ? 1.0f : 10.0f ) * 4096.0f) % 4096; //Slow down the water on Air Base or it scrolls too fast
+	// Old: s16 tmp = (s32) (g_Lv80SecIntervalFrac * 10.0f * 4096.0f) % 4096;
+    s16 tmp = (s32) (g_Lv80SecIntervalFrac * (g_StageIndex == STAGEINDEX_AIRBASE ? 1.0f : 10.0f ) * 4096.0f) % 4096; //Make water in Air Base scroll more slowly
 	s32 i;
 
 	for (i = 0; i < type->numvertices; i++) {
@@ -321,10 +321,9 @@ void dyntexAddVertex(Vtx *vertex)
 void dyntexSetCurrentType(s16 type)
 {
 	// Air Base - don't animate anything (exterior water)
-	//Ben's change: animate that water!
-	//if (g_StageIndex == STAGEINDEX_AIRBASE) {
-	//	return;
-	//}
+	/*if (g_StageIndex == STAGEINDEX_AIRBASE) {
+		return;
+	}*/
 
 	// Investigation - don't animate the puddle of water behind the glass
 	if (g_StageIndex == STAGEINDEX_INVESTIGATION && type == DYNTEXTYPE_RIVER) {

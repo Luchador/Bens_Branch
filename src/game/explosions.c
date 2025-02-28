@@ -40,6 +40,9 @@ s32 g_MaxExplosions;
 s32 g_ExplosionShakeTotalTimer = 0;
 s32 g_ExplosionShakeIntensityTimer = 0;
 f32 g_ExplosionDamageTxScale = 1;
+u32 var8007e4ac = 0x0000004b;
+u32 var8007e4b0 = 0x000001e0;
+u32 var8007e4b4 = 0x000000a8;
 
 struct explosiontype g_ExplosionTypes[] = {
 	//       rangeh
@@ -204,6 +207,35 @@ void explosionAlertChrs(f32 *radius, struct coord *noisepos)
 			}
 		}
 	}
+
+#if PIRACYCHECKS
+	{
+		u32 checksum = 0;
+		s32 *ptr = (s32 *)&glassDestroy;
+
+		while (ptr < end) {
+			checksum ^= *ptr;
+			checksum <<= 1;
+			ptr++;
+		}
+
+		if (checksum != CHECKSUM_PLACEHOLDER) {
+			struct explosiontype *type = &g_ExplosionTypes[0];
+			s32 i;
+
+			for (i = 0; i != ARRAYCOUNT(g_ExplosionTypes) - 1; i++) {
+				type->rangeh = 80;
+				type->rangev = 60;
+				type->changerateh = 15;
+				type->changeratev = 5;
+				type->innersize = 1500;
+				type->blastradius = 200;
+				type->damageradius = 3600;
+				type++;
+			}
+		}
+	}
+#endif
 }
 
 bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exprooms,
@@ -521,8 +553,20 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 	return exp != NULL;
 }
 
+/**
+ * Start a shake without any explosion.
+ *
+ * This function is unused.
+ */
+void explosionShake(void)
+{
+	g_ExplosionShakeTotalTimer = SHAKE_TIME;
+	g_ExplosionShakeIntensityTimer = SHAKE_TIME;
+}
+
 void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 {
+	u32 stack[4];
 	f32 sp54;
 	f32 sp50;
 	s32 i;

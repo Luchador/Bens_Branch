@@ -16,7 +16,6 @@ s32 g_MinPropWallhits;
 u32 g_MaxPropWallhits;
 s32 g_MinBgWallhitsPerRoom;
 s32 g_MaxBgWallhitsPerRoom;
-u32 var8009cc6c;
 s32 g_WallhitsCriticalSpareLimit;
 s32 g_WallhitsGoalSpareLimit;
 f32 g_WallhitTargetBloodRatio;
@@ -33,7 +32,6 @@ void wallhitReset(void)
 	s32 type = 2;
 	s32 i;
 
-	//Ben's change: remove switches for different amounts of decals based on mode. Massively increase number of allowed decals.
 	g_WallhitsMax = 3600;
 	g_MinPropWallhits = 50;
 	g_MaxPropWallhits = 1200;

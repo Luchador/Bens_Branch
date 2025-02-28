@@ -14,12 +14,12 @@ void casingTick(struct casing *casing)
 {
 	f32 tmp;
 	f32 tmp2;
-	f32 casingdeltarot[3][3];
-	f32 casingrot[3][3];
+	f32 sp8c[3][3];
+	f32 sp68[3][3];
 	s32 i;
 	s32 j;
 	f32 lvupdate = g_Vars.lvupdate60freal;
-	f32 randompitch;
+	f32 sp58;
 
 	tmp2 = lvupdate * (1.0f / 3.6f);
 	tmp = casing->speed.y - tmp2;
@@ -42,13 +42,13 @@ void casingTick(struct casing *casing)
 				&& i >= 0
 				&& g_Vars.currentplayer->hands[0].mode != HANDMODE_2
 				&& g_Vars.currentplayer->hands[1].mode != HANDMODE_2) {
-			randompitch = RANDOMFRAC() * 0.25f + 0.98f; // Apply a slight random pitch to every casing landing sound
+			sp58 = RANDOMFRAC() * 0.25f + 0.98f;
 
 			var8009d0d8 = TICKS(20);
 			sndStart(var80095200, SFX_8051, &g_CasingAudioHandles[i], -1, -1, -1.0f, -1, -1);
 
 			if (g_CasingAudioHandles[i]) {
-				audioPostEvent(g_CasingAudioHandles[i], AL_SNDP_PITCH_EVT, *(s32 *)&randompitch);
+				audioPostEvent(g_CasingAudioHandles[i], AL_SNDP_PITCH_EVT, *(s32 *)&sp58);
 			}
 		}
 
@@ -62,20 +62,18 @@ void casingTick(struct casing *casing)
 
 	for (i = 0; i < 3; i++) {
 		for (j = 0; j < 3; j++) {
-			casingdeltarot[i][j] = casing->rotspeed[i][j] * (1.0f / 4096.0f); // Change in casing rotation
-			casingrot[i][j] = casing->rot[i][j] * (1.0f / 4096.0f); // Current casing rotation
+			sp8c[i][j] = casing->rotspeed[i][j] * (1.0f / 4096.0f);
+			sp68[i][j] = casing->rot[i][j] * (1.0f / 4096.0f);
 		}
 	}
 
-	// Apply casing rotation for every 240th of a sec since this function was last called
 	for (i = 0; i < g_Vars.lvupdate240; i++) {
-		mtx00016110(casingdeltarot, casingrot);
+		mtx00016110(sp8c, sp68);
 	}
 
-	// Store the new casing rotation for the next time the function is called
 	for (i = 0; i < 3; i++) {
 		for (j = 0; j < 3; j++) {
-			casing->rot[i][j] = casingrot[i][j] * 4096.0f;
+			casing->rot[i][j] = sp68[i][j] * 4096.0f;
 		}
 	}
 }

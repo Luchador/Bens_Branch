@@ -13,6 +13,7 @@ bool g_FogEnabled;
 bool g_EnvHasTransparency;
 struct distfadesettings *g_EnvDistFadeSettingsPtr;
 struct distfadesettings g_EnvDistFadeSettings;
+u32 var800a65fc;
 
 struct shadesettings g_EnvShadeSettings;
 f32 g_EnvFogMaxFrac;
@@ -24,6 +25,8 @@ struct fogenvironment *g_EnvTransitionTo;
 f32 g_EnvFogMax = MAXFLOAT;
 f32 g_EnvFogMin = 0;
 struct environment g_Env = {900, 1000};
+u32 var800810a8 = 0;
+u32 var800810ac = 0;
 
 #define RGB(col) col >> 16, (col >> 8) & 0xff, col & 0xff
 #define NO_SUNS 0, NULL
@@ -125,6 +128,11 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_TEST_MP20,     15, 20000,   0,  0,  0, RGB(0x00103c), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
 	{ 0 },
 };
+
+void env0f1657c0(s32 arg0, s32 arg1)
+{
+	// empty
+}
 
 struct environment *envGetCurrent(void)
 {
@@ -286,6 +294,11 @@ void envDisableSky(void)
 	g_Env.skybluefrac = 0;
 }
 
+void envSetStageNum(s32 stagenum)
+{
+	// empty
+}
+
 void envChooseAndApply(s32 stagenum, bool allowoverride)
 {
 	struct nofogenvironment *finalenv = NULL;
@@ -328,6 +341,8 @@ void envChooseAndApply(s32 stagenum, bool allowoverride)
 			finalenv = env2;
 		}
 	}
+
+	if (env2);
 
 	if (finalenv == NULL) {
 		finalenv = &g_NoFogEnvironments[0];

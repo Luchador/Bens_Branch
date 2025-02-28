@@ -70,6 +70,10 @@ void chrSetDrCarollImages(struct chrdata *drcaroll, s32 imageleft, s32 imagerigh
 s32 chrsGetNumSlots(void);
 void chrRegister(s32 chrnum, s32 chrindex);
 Vtx *chrAllocateVertices(s32 numvertices);
+void chrsSetVar8006297c(u32 arg0);
+u32 chrsGetVar8006297c(void);
+void chrsSetVar80062980(u32 arg0);
+u32 chrsGetVar80062980(void);
 void chrSetPerimEnabled(struct chrdata *chr, bool enable);
 void chrSetMaxDamage(struct chrdata *chr, f32 maxdamage);
 f32 chrGetMaxDamage(struct chrdata *chr);

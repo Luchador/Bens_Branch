@@ -92,15 +92,29 @@ u32 g_WarpType3Pad;
 s32 g_WarpType2HasDirection;
 u32 g_WarpType2Arg2;
 s32 g_CutsceneCurAnimFrame60;
+
+#if VERSION == VERSION_JPN_FINAL
+s32 g_CutsceneCurAnimFrame240;
+s32 g_CutsceneFrameOverrun240;
+s16 g_CutsceneAnimNum;
+f32 g_CutsceneBlurFrac;
+#elif PAL
+f32 g_CutsceneCurAnimFrame240;
+f32 var8009e388pf;
+s16 g_CutsceneAnimNum;
+f32 g_CutsceneBlurFrac;
+#else
 s32 g_CutsceneCurAnimFrame240;
 s16 g_CutsceneAnimNum;
 f32 g_CutsceneBlurFrac;
 s32 g_CutsceneFrameOverrun240;
+#endif
 
 bool g_CutsceneSkipRequested;
 f32 g_CutsceneCurTotalFrame60f;
 s32 g_CutsceneTweenDuration60;
 f32 g_CutsceneTweenFrac; // 0 when bars across the top and bottom, 1 when fullscreen
+u32 var8009de34;
 s16 g_SpawnPoints[24];
 s32 g_NumSpawnPoints;
 
@@ -117,11 +131,51 @@ struct vimode g_ViModes[] = {
 	// |               |                 |                |                 |          |                 |     |  |     cinemaheight
 	// |               |                 |                |                 |          |                 |     |  |     |  cinematop
 	// |               |                 |                |                 |          |                 |     |  |     |  |
+#if VERSION >= VERSION_JPN_FINAL
 	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                VIMODE_LO, SCREEN_HEIGHT_LO, 0,  180, 20, 136, 42  }, // default
 	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.5,              VIMODE_LO, SCREEN_HEIGHT_HI, 0,  180, 20, 136, 42  }, // hi-res
+#elif VERSION >= VERSION_PAL_BETA
+	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                VIMODE_LO, SCREEN_HEIGHT_LO, 0,  212, 20, 168, 42 }, // default
+	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.71428567171097, VIMODE_LO, SCREEN_HEIGHT_HI, 0,  212, 20, 168, 42 }, // hi-res
+#else
+	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                VIMODE_LO, SCREEN_HEIGHT_LO, 0,  180, 20, 136, 42  }, // default
+	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.5,              VIMODE_LO, SCREEN_HEIGHT_HI, 0,  180, 20, 136, 42  }, // hi-res
+	{ 320,             480,              320,             2,                VIMODE_HI, 440,              20, 360, 60, 272, 104 }, // unused
+	{ 440,             330,              440,             1,                VIMODE_LO, 330,              0,  330, 0,  330, 0   }, // unused
+	{ 440,             240,              440,             (1.0f / 1.375f),  VIMODE_LO, 220,              0,  180, 0,  136, 0   }, // unused
+	{ 400,             300,              400,             1,                VIMODE_HI, 300,              0,  300, 0,  300, 0   }, // unused
+#endif
 };
 
 s32 g_ViRes = VIRES_LO;
+bool g_HiResEnabled = false;
+u32 var800706d0 = 0x00000000;
+u32 var800706d4 = 0x00000000;
+u32 var800706d8 = 0x00000000;
+u32 var800706dc = 0x00000000;
+u32 var800706e0 = 0x00000000;
+u32 var800706e4 = 0xbf800000;
+u32 var800706e8 = 0x00000000;
+u32 var800706ec = 0x3f800000;
+u32 var800706f0 = 0x00000000;
+u32 var800706f4 = 0x00000000;
+u32 var800706f8 = 0x3f800000;
+u32 var800706fc = 0x00000000;
+u32 var80070700 = 0x00000000;
+u32 var80070704 = 0x3f800000;
+u32 var80070708 = 0x00000000;
+u32 var8007070c = 0x00000000;
+u32 var80070710 = 0x00000000;
+u32 var80070714 = 0x00000000;
+u32 var80070718 = 0x00000000;
+u32 var8007071c = 0x00000000;
+u32 var80070720 = 0x00000000;
+u32 var80070724 = 0x00000000;
+u32 var80070728 = 0x3f800000;
+s32 var8007072c = 1;
+u32 var80070730 = 0xffffffff;
+u32 var80070734 = 0xffffffff;
+u32 var80070738 = 0;
 u32 var8007073c = 0;
 struct gecreditsdata *g_CurrentGeCreditsData = NULL;
 bool g_PlayerTriggerGeFadeIn = false;
@@ -284,10 +338,17 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 
 			slangles[sllen] = atan2f(pad.look.x, pad.look.z);
 
+#if VERSION >= VERSION_NTSC_1_0
 			if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false, false)) {
 				slpadindexes[sllen] = p;
 				sllen++;
 			}
+#else
+			if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false)) {
+				slpadindexes[sllen] = p;
+				sllen++;
+			}
+#endif
 
 			padsqdists[p] = -1.0f;
 		}
@@ -316,10 +377,17 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 
 			slangles[sllen] = atan2f(pad.look.x, pad.look.z);
 
+#if VERSION >= VERSION_NTSC_1_0
 			if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false, false)) {
 				slpadindexes[sllen] = p;
 				sllen++;
 			}
+#else
+			if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false)) {
+				slpadindexes[sllen] = p;
+				sllen++;
+			}
+#endif
 
 			padsqdists[p] = -1.0f;
 		}
@@ -370,10 +438,17 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 
 		slangles[sllen] = atan2f(pad.look.x, pad.look.z);
 
+#if VERSION >= VERSION_NTSC_1_0
 		if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false, false)) {
 			slpadindexes[sllen] = i;
 			sllen++;
 		}
+#else
+		if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false)) {
+			slpadindexes[sllen] = i;
+			sllen++;
+		}
+#endif
 
 		padsqdists[i] = -1.0f;
 	}
@@ -520,6 +595,13 @@ void playerStartNewLife(void)
 	invGiveSingleWeapon(WEAPON_UNARMED);
 
 	if (cmd) {
+		if (cmd);
+		if (cmd);
+		if (cmd);
+		if (cmd);
+		if (cmd);
+		if (cmd);
+
 		if (g_Vars.antiplayernum < 0 || g_Vars.currentplayer != g_Vars.anti) {
 			while (cmd[0] != INTROCMD_END) {
 				switch (cmd[0]) {
@@ -685,7 +767,7 @@ void playerLoadDefaults(void)
 	g_Vars.currentplayer->autoxaimprop = NULL;
 	g_Vars.currentplayer->autoxaimtime60 = -1;
 
-	g_Vars.currentplayer->autoaimdamp = 0.979f;
+	g_Vars.currentplayer->autoaimdamp = (PAL ? 0.974f : 0.979f);
 
 	g_Vars.currentplayer->colourscreenred = 0xff;
 	g_Vars.currentplayer->colourscreengreen = 0xff;
@@ -756,10 +838,16 @@ bool playerSpawnAnti(struct chrdata *hostchr, bool force)
 			struct weaponobj *weapon1 = hostchr->weapons_held[0]->weapon;
 			struct weaponobj *weapon2 = hostchr->weapons_held[1]->weapon;
 
+#if VERSION >= VERSION_NTSC_1_0
 			invGiveSingleWeapon(weapon1->weaponnum);
 			invGiveDoubleWeapon(weapon1->weaponnum, weapon1->weaponnum);
 			bgunEquipWeapon2(HAND_RIGHT, weapon1->weaponnum);
 			bgunEquipWeapon2(HAND_LEFT, weapon1->weaponnum);
+#else
+			invGiveDoubleWeapon(weapon1->weaponnum, weapon2->weaponnum);
+			bgunEquipWeapon2(HAND_RIGHT, weapon1->weaponnum);
+			bgunEquipWeapon2(HAND_LEFT, weapon2->weaponnum);
+#endif
 		} else if (hostchr->weapons_held[0]) {
 			// Right hand only
 			struct weaponobj *weapon = hostchr->weapons_held[0]->weapon;
@@ -2767,6 +2855,11 @@ void playerResetLoResIf4Mb(void)
 
 void playerSetHiResEnabled(bool enable)
 {
+#ifdef PLATFORM_N64
+	g_HiResEnabled = enable;
+#else
+	g_HiResEnabled = false;
+#endif
 }
 
 s16 playerGetFbWidth(void)
@@ -3151,7 +3244,7 @@ void playerTick(bool arg0)
 	f32 aspectratio;
 	f32 f20;
 
-	//g_ViRes = g_HiResEnabled;
+	g_ViRes = g_HiResEnabled;
 
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && PLAYERCOUNT() > 1) {
 		g_ViRes = VIRES_LO;
@@ -5385,7 +5478,7 @@ s32 playerTickThirdPerson(struct prop *prop)
 			}
 
 			bmoveUpdateVerta();
-			bmoveUpdateHoriz(&sp9c);
+			bmove0f0cc19c(&sp9c);
 
 			return tickop1;
 		}

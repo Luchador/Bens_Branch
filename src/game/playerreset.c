@@ -135,6 +135,8 @@ void playerReset(void)
 	g_CutsceneFrameOverrun240 = 0;
 #endif
 
+	var8007072c = 1;
+	var80070738 = 0;
 	var8007073c = 0;
 
 	g_CurrentGeCreditsData = NULL;

@@ -66,7 +66,7 @@ struct chrdata *g_CurModelChr;
 
 struct var80062960 *var80062960 = NULL;
 s32 var80062964 = 0;
-f32 g_AnimSpeed = 0;
+f32 var80062968 = 0;
 bool var8006296c = false;
 s32 g_SelectedAnimNum = 0;
 u32 var80062974 = 0x00000000;
@@ -169,6 +169,26 @@ Vtx *chrAllocateVertices(s32 numvertices)
 	return (Vtx *) gfxAllocate(numvertices * sizeof(Vtx));
 }
 
+void chrsSetVar8006297c(u32 arg0)
+{
+	var8006297c = arg0;
+}
+
+u32 chrsGetVar8006297c(void)
+{
+	return var8006297c;
+}
+
+void chrsSetVar80062980(u32 arg0)
+{
+	var80062980 = arg0;
+}
+
+u32 chrsGetVar80062980(void)
+{
+	return var80062980;
+}
+
 void chrSetPerimEnabled(struct chrdata *chr, bool enable)
 {
 	if (chr) {
@@ -199,12 +219,20 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 	struct defaultobj *chair = NULL;
 	s32 cdresult;
 	RoomNum sp84[20];
+#if VERSION < VERSION_NTSC_1_0
+	s32 i;
+#endif
 	struct coord sp78;
 	struct coord sp6c;
 	struct coord sp60;
 	struct coord sp54;
 	f32 value;
 	struct coord sp44;
+#if VERSION < VERSION_NTSC_1_0
+	s32 j;
+	s32 k;
+	s32 l;
+#endif
 
 	// The eyespy can't be pushed
 	if (CHRRACE(chr) == RACE_EYESPY) {
@@ -457,7 +485,11 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 	}
 }
 
+#if VERSION >= VERSION_NTSC_1_0
 bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 arg3, bool arg4)
+#else
+bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 arg3)
+#endif
 {
 	bool result;
 	struct coord newpos;
@@ -551,6 +583,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 			f32 move[2] = {0, 0};
 
 			if (VAR(lvupdate240) > 0) {
+#if VERSION >= VERSION_NTSC_1_0
 				if (chr->aibot->forceslowupdates != 0) {
 					// forceslowupdates is set when the bot is being saved from
 					// falling out of bounds due to high lag. It forces them to
@@ -563,7 +596,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 
 						if (lvupdate240 >= 25) {
 							lvupdate60f = 4.0f;
-							lvupdate60freal = 4.0f;
+							lvupdate60freal = PALUPF(4.0f);
 							lvupdate240 = 16;
 						}
 					}
@@ -571,11 +604,14 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 						&& ((chr->prop->flags & (PROPFLAG_ONANYSCREENTHISTICK | PROPFLAG_ONANYSCREENPREVTICK)) == 0)
 						&& lvupdate240 >= 25) {
 					lvupdate60f = 4.0f;
-					lvupdate60freal = 4.0f;
+					lvupdate60freal = PALUPF(4.0f);
 					lvupdate240 = 16;
 				}
 
 				bot0f1921f8(chr, move, lvupdate240, lvupdate60freal);
+#else
+				bot0f1921f8(chr, move);
+#endif
 			}
 
 			arg2->x = arg1->x + move[0];
@@ -699,9 +735,11 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 
 			dist = sqrtf(xdiff * xdiff + zdiff * zdiff);
 
+#if VERSION >= VERSION_NTSC_1_0
 			if (dist > 100.0f) {
 				dist = 100.0f;
 			}
+#endif
 
 			yincrement += dist;
 
@@ -729,12 +767,18 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 				&& chr->act_skjump.state == SKJUMPSTATE_AIRBORNE
 				&& !chr->act_skjump.needsnewanim
 				&& g_Vars.lvupdate60 != 0) {
+#if VERSION >= VERSION_NTSC_1_0
 			if (chr0f01f264(chr, arg2, spfc, yincrement, true)) {
 				chr->manground += yincrement;
 			}
+#else
+			if (chr0f01f264(chr, arg2, spfc, yincrement)) {
+				chr->manground += yincrement;
+				arg2->y += yincrement;
+			}
+#endif
 
-			//chr->sumground = chr->manground * (PAL ? 8.4175090789795f : 9.999998f);
-			chr->sumground = chr->manground * 10.0f;
+			chr->sumground = chr->manground * (PAL ? 8.4175090789795f : 9.999998f);
 			chr->ground = chr->manground;
 			arg2->y -= chr->manground;
 		} else {
@@ -760,8 +804,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 				}
 #endif
 
-				//chr->sumground = chr->manground * (PAL ? 8.4175090789795f : 9.999998f);
-				chr->sumground = chr->manground * 10.0f;
+				chr->sumground = chr->manground * (PAL ? 8.4175090789795f : 9.999998f);
 				chr->ground = chr->manground;
 				arg2->y -= chr->manground;
 			} else {
@@ -791,6 +834,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 					ground = cdFindGroundInfoAtCyl(sp98, chr->radius, sp94,
 							&chr->floorcol, &chr->floortype, &floorflags, &chr->floorroom, &inlift, &lift);
 
+#if VERSION >= VERSION_NTSC_1_0
 					if (chr->aibot
 							&& chr->aibot->forceslowupdates == 0
 							&& ground < -100000
@@ -813,6 +857,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 						ground = cdFindGroundInfoAtCyl(arg2, chr->radius, spfc,
 								&chr->floorcol, &chr->floortype, &floorflags, &chr->floorroom, &inlift, &lift);
 					}
+#endif
 
 					if (inlift) {
 						chr->inlift = true;
@@ -857,7 +902,11 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 
 						func0f0965e4(&yincrement, &sp68, VAR(lvupdate60freal));
 
+#if VERSION >= VERSION_NTSC_1_0
 						if (chr0f01f264(chr, arg2, spfc, yincrement, false))
+#else
+						if (chr0f01f264(chr, arg2, spfc, yincrement))
+#endif
 						{
 							chr->manground += yincrement;
 							chr->fallspeed.y = sp68;
@@ -865,8 +914,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 
 						if (chr->manground <= chr->ground) {
 							chr->manground = chr->ground;
-							//chr->sumground = chr->ground * (PAL ? 8.4175090789795f : 9.999998f);
-							chr->sumground = chr->ground * 10.0f;
+							chr->sumground = chr->ground * (PAL ? 8.4175090789795f : 9.999998f);
 							chr->fallspeed.y = 0.0f;
 
 							if (floorflags & GEOFLAG_DIE) {
@@ -891,20 +939,16 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 						}
 					} else if (chr->manground <= chr->ground) {
 						for (i = 0; i < g_Vars.lvupdate60; i++) {
-							/*chr->sumground = chr->sumground * (PAL ? 0.88120001554489f : 0.9f) + chr->ground;
+							chr->sumground = chr->sumground * (PAL ? 0.88120001554489f : 0.9f) + chr->ground;
 							chr->fallspeed.x *= (PAL ? 0.88120001554489f : 0.9f);
-							chr->fallspeed.z *= (PAL ? 0.88120001554489f : 0.9f);*/
-							chr->sumground = chr->sumground * 0.9f + chr->ground;
-							chr->fallspeed.x *= 0.9f;
-							chr->fallspeed.z *= 0.9f;
+							chr->fallspeed.z *= (PAL ? 0.88120001554489f : 0.9f);
 						}
 
-						//chr->manground = chr->sumground * (PAL ? 0.11879998445511f : 0.10000002384186f);
-						chr->manground = chr->sumground;
+						chr->manground = chr->sumground * (PAL ? 0.11879998445511f : 0.10000002384186f);
 
 						if (chr->manground < chr->ground - 30.0f) {
 							chr->manground = chr->ground - 30.0f;
-							chr->sumground = (chr->ground - 30.0f) * 10.0f;
+							chr->sumground = (chr->ground - 30.0f) * (PAL ? 8.4175090789795f : 9.999998f);
 						}
 
 						if (chr->fallspeed.x < 0.1f && chr->fallspeed.x > -0.1f) {
@@ -915,6 +959,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 						}
 					}
 
+#if VERSION >= VERSION_NTSC_1_0
 					if (manground != chr->manground) {
 						spd0.x = arg2->x;
 						spd0.y = arg2->y;
@@ -927,7 +972,12 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 						func0f065e74(&spd0, spc0, arg2, spfc);
 						chr0f021fa8(chr, arg2, spfc);
 					}
+#endif
 				}
+
+#if VERSION < VERSION_NTSC_1_0
+				arg2->y += chr->manground - manground;
+#endif
 				arg2->y -= chr->manground;
 			}
 		}
@@ -940,7 +990,10 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 	prop->pos.z = arg2->z;
 
 	if (chr->actiontype == ACT_SKJUMP) {
+#if VERSION >= VERSION_NTSC_1_0
 		f32 ground;
+#endif
+
 		ground = chr->act_skjump.ground;
 
 		if (prop->pos.y < ground) {
@@ -953,6 +1006,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 	propDeregisterRooms(prop);
 	roomsCopy(spfc, prop->rooms);
 
+#if VERSION >= VERSION_NTSC_1_0
 	if (prop->type == PROPTYPE_CHR) {
 		for (i = 0; prop->rooms[i] != -1; i++) {
 			if (chr->floorroom == prop->rooms[i]) {
@@ -963,6 +1017,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 			}
 		}
 	}
+#endif
 
 	chr0f0220ac(chr);
 	propCalculateShadeColour(prop, chr->nextcol, chr->floorcol);
@@ -1166,7 +1221,7 @@ void chrInit(struct prop *prop, u8 *ailist)
 	chr->bdstart = 0;
 	chr->oldframe = 0;
 	chr->magicframe = 0;
-	chr->magicspeed = VERSION >= VERSION_PAL_BETA ? 1 : 0.25; //@Investigate: magicspeed is way slower on NTSC?
+	chr->magicspeed = VERSION >= VERSION_PAL_BETA ? 1 : 0.25;
 
 	i = 0;
 
@@ -1234,7 +1289,10 @@ void chrInit(struct prop *prop, u8 *ailist)
 	chr->timeshooter = 0;
 	chr->noblood = false;
 	chr->rtracked = false;
+
+#if VERSION >= VERSION_NTSC_1_0
 	chr->goposhitcount = 0;
+#endif
 
 	splatResetChr(chr);
 }
@@ -1260,7 +1318,7 @@ struct prop *chr0f020b14(struct prop *prop, struct model *model,
 	model->unk01 = 1;
 	chr->model = model;
 	chrSetLookAngle(chr, faceangle);
-	modelSetAnimPlaySpeed(model, g_AnimSpeed, 0); // Sets how fast characters play their animations. Originally used to speed up animations on PAL. Could use this for a fast animations cheat in the future.
+	modelSetAnimPlaySpeed(model, PALUPF(var80062968), 0);
 
 	testpos.x = pos->x;
 	testpos.y = pos->y + 100;
@@ -1268,8 +1326,7 @@ struct prop *chr0f020b14(struct prop *prop, struct model *model,
 
 	chr->ground = chr->manground = ground = cdFindGroundInfoAtCyl(&testpos, chr->radius, rooms, &chr->floorcol, &chr->floortype, NULL, &chr->floorroom, NULL, NULL);
 
-	//chr->sumground = ground * (PAL ? 8.4175090789795f : 9.999998f);
-	chr->sumground = ground * 10.0f;
+	chr->sumground = ground * (PAL ? 8.4175090789795f : 9.999998f);
 
 	prop->pos.x = testpos.x;
 	prop->pos.y = ground + 100;
@@ -1417,24 +1474,22 @@ void chrClearReferences(s32 propnum)
 	}
 }
 
-// Not used in original code. Leftover from GE's "Fast Animation/Slow Animation"?
-void chrSetAnimSpeed(f32 speed)
+void chr0f0211a8(f32 arg0)
 {
 	s32 i;
 
-	g_AnimSpeed = speed;
+	var80062968 = arg0;
 
 	for (i = 0; i < g_NumChrSlots; i++) {
 		if (g_ChrSlots[i].model) {
-			modelSetAnimPlaySpeed(g_ChrSlots[i].model, g_AnimSpeed, 600);
+			modelSetAnimPlaySpeed(g_ChrSlots[i].model, PALUPF(var80062968), 600);
 		}
 	}
 }
 
-// Not used in original code.
-f32 chrGetAnimSpeed(void)
+f32 chr0f02124c(void)
 {
-	return g_AnimSpeed;
+	return var80062968;
 }
 
 void chrUpdateAimProperties(struct chrdata *chr)
@@ -1502,13 +1557,13 @@ f32 chrGetFlinchAmount(struct chrdata *chr)
 		if (value < 4) {
 			value = sinf(value * 1.5705462694168f / 4);
 		} else {
-			value = 1 - sinf((value - 4) * 0.060405626893044f);
+			value = 1 - sinf((value - 4) * (PAL ? 0.07478791475296f : 0.060405626893044f));
 		}
 	} else {
 		if (value < TICKS(10)) {
 			value = sinf(value * 1.5705462694168f / TICKS(10));
 		} else {
-			value = 1 - sinf((value - TICKS(10)) * 0.078527316451073f);
+			value = 1 - sinf((value - TICKS(10)) * (PAL ? 0.098159141838551f : 0.078527316451073f));
 		}
 	}
 
@@ -1830,7 +1885,13 @@ void chr0f021fa8(struct chrdata *chr, struct coord *pos, RoomNum *rooms)
 	struct coord upper;
 	f32 height = 110;
 
-	if (chr && chr->race == RACE_EYESPY) {
+	if (
+#if VERSION >= VERSION_NTSC_1_0
+			chr && chr->race == RACE_EYESPY
+#else
+			chr->race == RACE_EYESPY
+#endif
+			) {
 		struct eyespy *eyespy = chrToEyespy(chr);
 
 		if (eyespy) {

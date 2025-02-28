@@ -14,7 +14,7 @@ void chrmgrReset(void)
 {
 	s32 i;
 
-	g_AnimSpeed = 1;
+	var80062968 = 1;
 	var8006296c = 0;
 	g_SelectedAnimNum = 0;
 	var80062974 = 0;
