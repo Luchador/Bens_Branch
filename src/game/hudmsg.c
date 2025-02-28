@@ -952,7 +952,8 @@ void hudmsgCalculatePosition(struct hudmessage *msg)
 		}
 		break;
 	case HUDMSGALIGN_YMIDDLE:
-		y = (viewheight - msg->height) / 2 + viewtop + msg->ymargin;
+		//y = (viewheight - msg->height) / 2 + viewtop + msg->ymargin;
+		y = (viewheight - msg->height) / 2 + viewtop + msg->ymargin + 50; //Move "Objective Completed/Failed" message down so it does't block the center of the screen
 		break;
 	case HUDMSGALIGN_BELOWVIEWPORT:
 		y = viewtop + viewheight - (msg->height / 2) + 18;
