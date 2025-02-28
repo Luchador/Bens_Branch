@@ -391,7 +391,8 @@ void lvReset(s32 stagenum)
 	case STAGE_INFILTRATION:
 	case STAGE_DEFECTION:
 	case STAGE_ATTACKSHIP:
-	case STAGE_TEST_OLD:
+	case STAGE_MBR:        // Enable stars on MBR
+	//case STAGE_TEST_OLD: // Comment out the unused stage
 		starsReset();
 		break;
 	}

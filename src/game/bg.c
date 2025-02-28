@@ -1064,7 +1064,8 @@ Gfx *bgRenderScene(Gfx *gdl)
 		if (PLAYERCOUNT() == 1
 				&& (stagenum == STAGE_DEFECTION
 					|| stagenum == STAGE_EXTRACTION
-					|| stagenum == STAGE_TEST_OLD
+//					|| stagenum == STAGE_TEST_OLD //Ben's change: We'll just comment this one out since it isn't used anyway
+					|| stagenum == STAGE_MBR      //And allow stars on Mr. Blone's Revenge
 					|| stagenum == STAGE_INFILTRATION
 					|| stagenum == STAGE_ESCAPE
 					|| stagenum == STAGE_ATTACKSHIP)) {
