@@ -20,5 +20,3 @@ Changes include:
 * Mouse Injector and 1964GEPD authors for some of the 60FPS- and mouselook-related fixes;
 * Raf for the 64-bit port;
 * NicNamSam for the icon;
-* everyone who has submitted pull requests and issues to this repository and tested the port;
-* probably more I'm forgetting.
