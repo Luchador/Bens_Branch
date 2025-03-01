@@ -4,22 +4,12 @@
 	build/ROMID/game/raceinit.o (section); \
 	build/ROMID/game/bodyinit.o (section); \
 	build/ROMID/game/race.o (section); \
-	build/ROMID/game/stubs/game_000840.o (section); \
-	build/ROMID/game/stubs/game_000850.o (section); \
-	build/ROMID/game/stubs/game_000860.o (section); \
-	build/ROMID/game/stubs/game_000870.o (section); \
 	build/ROMID/game/smokeinit.o (section); \
-	build/ROMID/game/stubs/game_0008e0.o (section); \
-	build/ROMID/game/stubs/game_0008f0.o (section); \
-	build/ROMID/game/stubs/game_000900.o (section); \
-	build/ROMID/game/stubs/game_000910.o (section); \
 	build/ROMID/game/dlights.o (section); \
 	build/ROMID/game/footstep.o (section); \
 	build/ROMID/game/game_006900.o (section); \
 	build/ROMID/game/nbomb.o (section); \
-	build/ROMID/game/stubs/game_00b180.o (section); \
 	build/ROMID/game/texinit.o (section); \
-	build/ROMID/game/stubs/game_00b200.o (section); \
 	build/ROMID/game/challengeinit.o (section); \
 	build/ROMID/game/langreset.o (section); \
 	build/ROMID/game/getitlereset.o (section); \
@@ -59,13 +49,8 @@
 	build/ROMID/game/propobjstop.o (section); \
 	build/ROMID/game/propsndstop.o (section); \
 	build/ROMID/game/objectivesstop.o (section); \
-	build/ROMID/game/stubs/game_015260.o (section); \
-	build/ROMID/game/stubs/game_015270.o (section); \
 	build/ROMID/game/explosionsstop.o (section); \
 	build/ROMID/game/smokestop.o (section); \
-	build/ROMID/game/stubs/game_0153f0.o (section); \
-	build/ROMID/game/stubs/game_015400.o (section); \
-	build/ROMID/game/stubs/game_015410.o (section); \
 	build/ROMID/game/shardsstop.o (section); \
 	build/ROMID/game/bondgunstop.o (section); \
 	build/ROMID/game/getitle.o (section); \
@@ -130,7 +115,6 @@
 	build/ROMID/game/menuitem.o (section); \
 	build/ROMID/game/menu.o (section); \
 	build/ROMID/game/activemenu.o (section); \
-	build/ROMID/game/stubs/game_102230.o (section); \
 	build/ROMID/game/mainmenu.o (section); \
 	build/ROMID/game/cheats.o (section); \
 	build/ROMID/game/filemgr.o (section); \
@@ -147,7 +131,6 @@
 	build/ROMID/game/debug1.o (section); \
 	build/ROMID/game/debug2.o (section); \
 	build/ROMID/game/debug3.o (section); \
-	build/ROMID/game/stubs/game_11eff0.o (section); \
 	build/ROMID/game/gailists.o (section); \
 	build/ROMID/game/modeldata/general.o (section); \
 	build/ROMID/game/modeldata/basic.o (section); \
@@ -202,10 +185,8 @@
 	build/ROMID/game/texdecompress.o (section); \
 	build/ROMID/game/texreset.o (section); \
 	build/ROMID/game/tex.o (section); \
-	build/ROMID/game/stubs/game_175f50.o (section); \
 	build/ROMID/game/game_175f90.o (section); \
 	build/ROMID/game/buildtime.o (section); \
-	build/ROMID/game/stubs/game_176000.o (section); \
 	build/ROMID/game/zbuf.o (section); \
 	build/ROMID/game/stagemusic.o (section); \
 	build/ROMID/game/utils.o (section); \

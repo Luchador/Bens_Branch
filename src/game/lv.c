@@ -65,11 +65,6 @@
 #include "game/sparks.h"
 #include "game/splat.h"
 #include "game/stars.h"
-#include "game/stubs/game_015260.h"
-#include "game/stubs/game_015270.h"
-#include "game/stubs/game_0153f0.h"
-#include "game/stubs/game_015400.h"
-#include "game/stubs/game_015410.h"
 #include "game/tex.h"
 #include "game/texdecompress.h"
 #include "game/tiles.h"
@@ -95,9 +90,7 @@
 #include "lib/vars.h"
 #include "lib/vi.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "video.h"
-#endif
 
 struct sndstate *g_MiscSfxAudioHandles[3];
 s32 g_MiscSfxActiveTypes[3];
@@ -2366,21 +2359,16 @@ void lvStop(void)
 	if (g_Vars.stagenum < STAGE_TITLE) {
 		s32 bank = langGetLangBankIndexFromStagenum(g_Vars.stagenum);
 		langClearBank(bank);
-		stub0f015270();
 	}
 
 	chrmgrStop();
 	explosionsStop();
 	smokeStop();
-	stub0f015400();
-	stub0f015410();
 	shardsStop();
-	stub0f0153f0();
 	propsStop();
 	objsStop();
 	weatherStop();
 	objectivesStop();
-	stub0f015260();
 	bgunStop();
 	psStop();
 	musicStop();

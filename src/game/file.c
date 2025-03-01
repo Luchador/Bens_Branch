@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/file.h"
-#include "game/stubs/game_175f50.h"
 #include "bss.h"
 #include "lib/crash.h"
 #include "lib/dma.h"
@@ -4261,7 +4260,6 @@ u32 fileGetInflatedSize(s32 filenum, u32 loadtype)
 	ptr = (u8 *) ((uintptr_t) &buffer[0x10] & ~0xf);
 
 	if (romaddr == 0) {
-		stub0f175f58(file0f166ea8(&g_FileTable[filenum]), ptr, 16);
 	} else {
 		dmaExec(ptr, romaddr, 0x40);
 	}
