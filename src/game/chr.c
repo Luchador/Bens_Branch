@@ -66,7 +66,7 @@ struct chrdata *g_CurModelChr;
 
 struct var80062960 *var80062960 = NULL;
 s32 var80062964 = 0;
-f32 var80062968 = 0;
+f32 g_ChrAnimSpeed = 0;
 bool var8006296c = false;
 s32 g_SelectedAnimNum = 0;
 u32 var80062974 = 0x00000000;
@@ -1318,7 +1318,7 @@ struct prop *chr0f020b14(struct prop *prop, struct model *model,
 	model->unk01 = 1;
 	chr->model = model;
 	chrSetLookAngle(chr, faceangle);
-	modelSetAnimPlaySpeed(model, PALUPF(var80062968), 0);
+	modelSetAnimPlaySpeed(model, PALUPF(g_ChrAnimSpeed), 0);
 
 	testpos.x = pos->x;
 	testpos.y = pos->y + 100;
@@ -1474,22 +1474,22 @@ void chrClearReferences(s32 propnum)
 	}
 }
 
-void chr0f0211a8(f32 arg0)
+void chrSetAnimSpeed(f32 newspeed)
 {
 	s32 i;
 
-	var80062968 = arg0;
+	g_ChrAnimSpeed = newspeed;
 
 	for (i = 0; i < g_NumChrSlots; i++) {
 		if (g_ChrSlots[i].model) {
-			modelSetAnimPlaySpeed(g_ChrSlots[i].model, PALUPF(var80062968), 600);
+			modelSetAnimPlaySpeed(g_ChrSlots[i].model, PALUPF(g_ChrAnimSpeed), 600);
 		}
 	}
 }
 
-f32 chr0f02124c(void)
+f32 chrGetAnimSpeed(void)
 {
-	return var80062968;
+	return g_ChrAnimSpeed;
 }
 
 void chrUpdateAimProperties(struct chrdata *chr)

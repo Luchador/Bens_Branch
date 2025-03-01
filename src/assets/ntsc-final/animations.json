@@ -264,7 +264,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0016",
+        "id": "ANIM_WALK_FORWARD01",
         "file": "0016.bin",
         "numframes": 34,
         "bytesperframe": 40,
@@ -276,7 +276,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0017",
+        "id": "ANIM_GRAB_THROAT",
         "file": "0017.bin",
         "numframes": 135,
         "bytesperframe": 48,
@@ -288,7 +288,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0018",
+        "id": "ANIM_RIFLE_WALK",
         "file": "0018.bin",
         "numframes": 94,
         "bytesperframe": 40,

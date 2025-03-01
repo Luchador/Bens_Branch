@@ -1365,8 +1365,8 @@ struct var80067e6c var80067e6c[] = {
 	{ ANIM_01F9, 0 },
 	{ ANIM_01F8, 0 },
 	{ ANIM_021D, 0 },
-	{ ANIM_0016, 0 },
-	{ ANIM_0018, 0 },
+	{ ANIM_WALK_FORWARD01, 0 },
+	{ ANIM_RIFLE_WALK, 0 },
 	{ ANIM_001B, 0 },
 	{ ANIM_001D, 0 },
 	{ ANIM_001E, 0 },
@@ -5940,7 +5940,7 @@ void chrGoPosChooseAnimation(struct chrdata *chr)
 						anim = ANIM_01F8;
 					} else {
 						if (rngRandom() % 2) {
-							anim = ANIM_0018;
+							anim = ANIM_RIFLE_WALK;
 						} else {
 							anim = ANIM_0028;
 						}
@@ -6042,7 +6042,7 @@ void chrGoPosChooseAnimation(struct chrdata *chr)
 					}
 				} else {
 					// Human, light weapon, walking
-					s32 anims[] = {ANIM_006B, ANIM_001B, ANIM_0016};
+					s32 anims[] = {ANIM_006B, ANIM_001B, ANIM_WALK_FORWARD01};
 
 					if (chr->hitpart == HITPART_LFOOT
 							|| chr->hitpart == HITPART_LSHIN
@@ -6247,9 +6247,9 @@ void chrPatrolChooseAnimation(struct chrdata *chr)
 			speed = 0.5f * func0f02dff0(ANIM_0028) / func0f02dff0(ANIM_006B);
 
 			if (heavy) {
-				modelSetAnimation(chr->model, rngRandom() % 2 ? ANIM_0018 : ANIM_0028, flip, 0, speed, 16);
+				modelSetAnimation(chr->model, rngRandom() % 2 ? ANIM_RIFLE_WALK : ANIM_0028, flip, 0, speed, 16);
 			} else if (ismale) {
-				s32 anims[] = { ANIM_006B, ANIM_001B, ANIM_0016 };
+				s32 anims[] = { ANIM_006B, ANIM_001B, ANIM_WALK_FORWARD01 };
 				modelSetAnimation(chr->model, anims[rngRandom() % 3], flip, 0, speed, 16);
 			} else {
 				modelSetAnimation(chr->model, rngRandom() % 2 ? ANIM_005C : ANIM_0072, flip, 0, speed, 16);
