@@ -43,7 +43,6 @@
 	build/ROMID/game/smokereset.o (section); \
 	build/ROMID/game/sparksreset.o (section); \
 	build/ROMID/game/weatherreset.o (section); \
-	build/ROMID/game/stubs/game_013540.o (section); \
 	build/ROMID/game/wallhitreset.o (section); \
 	build/ROMID/game/shardsreset.o (section); \
 	build/ROMID/game/surfacereset.o (section); \

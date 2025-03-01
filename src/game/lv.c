@@ -65,7 +65,6 @@
 #include "game/sparks.h"
 #include "game/splat.h"
 #include "game/stars.h"
-#include "game/stubs/game_013540.h"
 #include "game/stubs/game_015260.h"
 #include "game/stubs/game_015270.h"
 #include "game/stubs/game_0153f0.h"
@@ -101,13 +100,10 @@
 #endif
 
 struct sndstate *g_MiscSfxAudioHandles[3];
-u32 var800aa5bc;
 s32 g_MiscSfxActiveTypes[3];
 
 u32 var80084010 = 0;
-bool var80084014 = false;
-f32 var80084018 = 1;
-u32 var8008401c = 0x00000001;
+bool g_IsLvlPaused = false;
 
 s32 g_Difficulty = DIFF_A;
 
@@ -126,8 +122,7 @@ u32 g_MiscSfxSounds[] = {
 	SFX_SLAYER_BEEP,
 };
 
-s32 var80084050 = 0;
-
+s32 g_LockScreenTimer = 0;
 s16 g_FadeNumFrames = 0;
 f32 g_FadeFrac = -1;
 u32 g_FadePrevColour = 0;
@@ -179,18 +174,13 @@ void lvSetMiscSfxState(u32 type, bool play)
 		if (lvGetMiscSfxIndex(type) == -1) {
 			s32 index = lvGetMiscSfxIndex(-1);
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (index != -1 && g_MiscSfxAudioHandles[index] == NULL)
-#else
-			if (index != -1)
-#endif
 			{
 				sndStart(var80095200, g_MiscSfxSounds[type], &g_MiscSfxAudioHandles[index], -1, -1, -1, -1, -1);
 				g_MiscSfxActiveTypes[index] = type;
 			}
 		}
 	} else {
-		u32 stack;
 		s32 index = lvGetMiscSfxIndex(type);
 
 		if (index != -1) {
@@ -240,20 +230,12 @@ void lvReset(s32 stagenum)
 {
 	lvFadeReset();
 
-	var80084014 = false;
+	g_IsLvlPaused = false;
 	var80084010 = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
 	joyLockCyclicPolling();
 
 	g_Vars.joydisableframestogo = 10;
-#else
-	if (joyIsCyclicPollingEnabled()) {
-		joyDisableCyclicPolling(760, "lv.c");
-
-		g_Vars.joydisableframestogo = 10;
-	}
-#endif
 
 	g_Vars.paksneededforgame = 0;
 	g_Vars.paksneededformenu = 0;
@@ -263,18 +245,12 @@ void lvReset(s32 stagenum)
 
 	var80084040 = true;
 	g_Vars.lvframenum = 0;
-	var80084050 = 0;
+	g_LockScreenTimer = 0;
 
 	g_Vars.lvframe60 = 0;
 	g_Vars.lvupdate240 = 4;
-
-#if VERSION >= VERSION_NTSC_1_0
 	g_Vars.lvupdate60f = 1.0f;
-	g_Vars.lvupdate60frealprev = PALUPF(1);
-#else
-	g_Vars.lvupdate60frealprev = PALUPF(1);
-	g_Vars.lvupdate60f = 1.0f;
-#endif
+	g_Vars.lvupdate60frealprev = 1.0f;
 
 	g_Vars.lvupdate60freal = g_Vars.lvupdate60frealprev;
 
@@ -312,12 +288,6 @@ void lvReset(s32 stagenum)
 
 	if (stagenum == STAGE_TITLE) {
 		titleReset();
-	} else if (stagenum == STAGE_BOOTPAKMENU) {
-		// empty
-	} else if (stagenum == STAGE_CREDITS) {
-		// empty
-	} else if (stagenum == STAGE_4MBMENU) {
-		// empty
 	} else {
 		s32 i;
 		s32 j;
@@ -400,7 +370,6 @@ void lvReset(s32 stagenum)
 	nbombClearAllNBombs();
 	boltbeamsReset();
 	lasersightsReset();
-	stub0f013540();
 	shardsReset();
 	frReset();
 
@@ -464,7 +433,6 @@ void lvReset(s32 stagenum)
 	}
 
 	modelmgrSetLvResetting(false);
-	var80084018 = 1;
 	schedResetArtifacts();
 	lvSetPaused(0);
 
@@ -1204,11 +1172,11 @@ Gfx *lvRender(Gfx *gdl)
 					&& g_Vars.lvframenum <= 5
 					&& !g_Vars.normmplayerisrunning
 					&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
-				if (var80084050 < 6) {
+				if (g_LockScreenTimer < 6) {
 					g_Vars.lockscreen = 1;
 				}
 
-				var80084050++;
+				g_LockScreenTimer++;
 			} else if (g_Vars.currentplayer->gunctrl.loadall
 					&& var80075d60 == 2
 					&& g_Vars.currentplayer->cameramode != CAMERAMODE_THIRDPERSON
@@ -1804,24 +1772,7 @@ Gfx *lvRender(Gfx *gdl)
 	return gdl;
 }
 
-const char var7f1b7730[] = "fr: %d\n";
-
 u32 g_CutsceneTime240_60 = 0;
-
-#if VERSION >= VERSION_NTSC_1_0
-u32 var800840a8 = 0;
-u32 var800840ac = 0;
-u32 var800840b0 = 0;
-#else
-u32 var80086930nb = 0;
-u32 var800840a8 = 0;
-u32 var800840ac = 0;
-u32 var800840b0 = 0;
-#endif
-
-u32 var800840b4 = 0;
-u32 var800840b8 = 0;
-u32 var800840bc = 0;
 
 void lvUpdateSoloHandicaps(void)
 {
@@ -1993,20 +1944,6 @@ void lvUpdateSoloHandicaps(void)
 	}
 }
 
-#if PIRACYCHECKS
-
-#if PAL
-#define SUBAMOUNT 6661
-#else
-#define SUBAMOUNT 54321
-#endif
-
-s32 sub54321(s32 value)
-{
-	return value - SUBAMOUNT;
-}
-#endif
-
 void lvUpdateCutsceneTime(void)
 {
 	if (g_Vars.in_cutscene) {
@@ -2019,30 +1956,6 @@ void lvUpdateCutsceneTime(void)
 
 s32 lvGetSlowMotionType(void)
 {
-#if PIRACYCHECKS
-#if PAL
-	u32 addr = sub54321(0xb0000340 + SUBAMOUNT);
-	u32 actual;
-	u32 expected = sub54321(0x0330c820 + SUBAMOUNT);
-#else
-	u32 addr = sub54321(0xb0000a5c + SUBAMOUNT);
-	u32 actual;
-	u32 expected = sub54321(0x1740fff9 + SUBAMOUNT);
-#endif
-
-	osPiReadIo(addr, &actual);
-
-	if (actual != expected) {
-		u32 *ptr = (u32 *)&rspbootTextStart;
-		u32 *end = (u32 *)(uintptr_t)ptr + 1024;
-
-		while (ptr < end) {
-			*ptr += 8;
-			ptr++;
-		}
-	}
-#endif
-
 	if (g_Vars.normmplayerisrunning) {
 		if (g_MpSetup.options & MPOPTION_SLOWMOTION_ON) {
 			return SLOWMOTION_ON;
@@ -2100,10 +2013,6 @@ void lvTick(void)
 		}
 
 		g_Vars.joydisableframestogo = -1;
-	}
-
-	if (IS4MB()) {
-		vmPrintStatsIfEnabled();
 	}
 
 	for (j = 0; j < PLAYERCOUNT(); j++) {
@@ -2518,12 +2427,12 @@ void lvSetPaused(bool paused)
 		pakEnableRumbleForAllPlayers();
 	}
 
-	var80084014 = paused;
+	g_IsLvlPaused = paused;
 }
 
 bool lvIsPaused(void)
 {
-	return var80084014;
+	return g_IsLvlPaused;
 }
 
 s32 lvGetDifficulty(void)
