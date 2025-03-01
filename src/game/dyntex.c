@@ -121,8 +121,8 @@ void dyntexUpdateOcean(Vtx *vertices, struct dyntextype *type)
 	static u32 ripsize = 65;
 	static u32 modula = 22;
 
-	mainOverrideVariable("modula", &modula);
-	mainOverrideVariable("ripsize", &ripsize);
+	//mainOverrideVariable("modula", &modula);
+	//mainOverrideVariable("ripsize", &ripsize);
 
 	for (i = 0; i < type->numvertices; i++) {
 		Vtx *vertex = (Vtx *)((uintptr_t)vertices + g_DyntexVertices[type->vertexlistoffset + i].offset);
@@ -152,6 +152,7 @@ void dyntexTickRoom(s32 roomnum, Vtx *vertices)
 {
 	s32 index = -1;
 	s32 i;
+	s32 j;
 
 	for (i = 0; i < g_DyntexRoomsCount; i++) {
 		if (g_DyntexRooms[i].roomnum == roomnum) {
@@ -179,14 +180,14 @@ void dyntexTickRoom(s32 roomnum, Vtx *vertices)
 			s32 adds = 0;
 			s32 addt = 0;
 
-			if (1);
-
 			// @bug: Using i for both outer and inner loops
-			for (i = 0; i < type->numvertices; i++) {
-				Vtx *vertex = (Vtx *)((uintptr_t)vertices + g_DyntexVertices[type->vertexlistoffset + i].offset);
+			// Ben's change: fixing this bug, although I think in practice it happened to be harmless in the original PD.
+			// What it would have done is, if there were multiple types of dynamic textures in one room, only one would animate.
+			for (j = 0; j < type->numvertices; j++) {
+				Vtx *vertex = (Vtx *)((uintptr_t)vertices + g_DyntexVertices[type->vertexlistoffset + j].offset);
 
-				g_DyntexVertices[type->vertexlistoffset + i].s = vertex->s;
-				g_DyntexVertices[type->vertexlistoffset + i].t = vertex->t;
+				g_DyntexVertices[type->vertexlistoffset + j].s = vertex->s;
+				g_DyntexVertices[type->vertexlistoffset + j].t = vertex->t;
 
 				if (vertex->s < mins) {
 					mins = vertex->s;
@@ -400,28 +401,6 @@ void dyntexReset(void)
 
 	size3 = ALIGN64(g_DyntexRoomsMax * sizeof(struct dyntexroom));
 	g_DyntexRooms = mempAlloc(size3, MEMPOOL_STAGE);
-
-	if (g_DyntexVerticesMax);
-	if (g_DyntexTypesMax);
-	if (size1);
-}
-
-u32 var8007f704 = 0x0000001d;
-u32 var8007f708 = 0x0000004a;
-u32 var8007f70c = 0x00000006;
-u32 var8007f710 = 0x00000006;
-u32 var8007f714 = 0x00000038;
-u32 var8007f718 = 0x000003d5;
-u32 var8007f71c = 0x00000018;
-u32 var8007f720 = 0x00000018;
-u32 var8007f724 = 0x00000034;
-u32 var8007f728 = 0x000002f7;
-u32 var8007f72c = 0x00000012;
-u32 var8007f730 = 0x00000012;
-
-void dyntex0f13c4e8(void)
-{
-	// empty
 }
 
 bool dyntexHasRoom(void)
