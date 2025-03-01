@@ -4,12 +4,12 @@
 #include "data.h"
 #include "types.h"
 
-Gfx *func0f008558(Gfx *gdl, s32 depth);
+Gfx *nbombCreateSphere(Gfx *gdl, s32 depth);
 void nbombReset(struct nbomb *nbomb);
 s32 nbombCalculateAlpha(struct nbomb *nbomb);
 Gfx *nbombCreateGdl(void);
 Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl);
-void func0f0099a4(void);
+void nbombClearAllNBombs(void);
 void nbombInflictDamage(struct nbomb *nbomb);
 void nbombTick(struct nbomb *nbomb);
 void nbombsTick(void);

@@ -397,7 +397,7 @@ void lvReset(s32 stagenum)
 		break;
 	}
 
-	func0f0099a4();
+	nbombClearAllNBombs();
 	boltbeamsReset();
 	lasersightsReset();
 	stub0f013540();

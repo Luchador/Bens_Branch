@@ -29,21 +29,17 @@
 s16 var8009cb00;
 s32 var8009cb04;
 struct nbomb g_Nbombs[6];
-u32 var8009cbf8;
 
 bool g_NbombsActive = false;
-f32 var80061644 = 100;
-u32 var80061648 = 0;
+f32 sphereradius = 100;
 
 #define MAKEVERTEX(i, src) \
-	vertices[i].x = src.x * var80061644; \
-	vertices[i].y = src.y * var80061644; \
-	vertices[i].z = src.z * var80061644; \
+	vertices[i].x = src.x * sphereradius; \
+	vertices[i].y = src.y * sphereradius; \
+	vertices[i].z = src.z * sphereradius; \
 	vertices[i].s = src.y * 256.0f * 32.0f; \
 	vertices[i].t = atan2f(src.x, src.z) / M_TAU * 256.0f * 32.0f; \
-	vertices[i].colour = var80061648 * 0; \
-\
-	var80061648 = 1 - var80061648; \
+	vertices[i].colour = 0; \
 \
 	if (var8009cb04 && vertices[i].t == 0) { \
 		vertices[i].t = 256 * 32; \
@@ -51,7 +47,7 @@ u32 var80061648 = 0;
 \
 	vertices[i].t += var8009cb00;
 
-Gfx *func0f006c80(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, s8 depth)
+Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, s8 depth)
 {
 	struct coord sp7c;
 	struct coord sp70;
@@ -104,116 +100,16 @@ Gfx *func0f006c80(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord
 				arg6, arg7 + 2, arg7 + 1,
 				arg7, arg7 + 1, arg7 + 2);
 	} else {
-		gdl = func0f006c80(gdl, arg1, &sp7c, &sp64, arg4, arg7, arg7 + 2, arg7 + 3, depth - 1);
-		gdl = func0f006c80(gdl, arg2, &sp70, &sp7c, arg5, arg7 + 1, arg7, arg7 + 3, depth - 1);
-		gdl = func0f006c80(gdl, arg3, &sp64, &sp70, arg6, arg7 + 2, arg7 + 1, arg7 + 3, depth - 1);
-		gdl = func0f006c80(gdl, &sp7c, &sp70, &sp64, arg7, arg7 + 1, arg7 + 2, arg7 + 3, depth - 1);
+		gdl = nbombCreateSphereSegment(gdl, arg1, &sp7c, &sp64, arg4, arg7, arg7 + 2, arg7 + 3, depth - 1);
+		gdl = nbombCreateSphereSegment(gdl, arg2, &sp70, &sp7c, arg5, arg7 + 1, arg7, arg7 + 3, depth - 1);
+		gdl = nbombCreateSphereSegment(gdl, arg3, &sp64, &sp70, arg6, arg7 + 2, arg7 + 1, arg7 + 3, depth - 1);
+		gdl = nbombCreateSphereSegment(gdl, &sp7c, &sp70, &sp64, arg7, arg7 + 1, arg7 + 2, arg7 + 3, depth - 1);
 	}
 
 	return gdl;
 }
 
-Gfx *func0f0073ac(Gfx *gdl, struct coord *pos, f32 arg2)
-{
-	Mtxf *modelmtx = gfxAllocateMatrix();
-	Vtx *vertices;
-	Col *colours;
-	Mtxf sp104;
-	struct coord spf8[1];
-	struct coord spb0[] = {
-		{ 0,  0,  1  },
-		{ 1,  0,  0  },
-		{ 0,  0,  -1 },
-		{ -1, 0,  0  },
-		{ 0,  1,  0  },
-		{ 0,  -1, 0  },
-	};
-
-	var80061644 = arg2;
-
-	spf8[0].x = 0.0f;
-	spf8[0].y = 0.0f;
-	spf8[0].z = -100.0f;
-
-	mtx4LoadIdentity(&sp104);
-	mtx4LoadTranslation(pos, &sp104);
-	mtx00015be0(camGetWorldToScreenMtxf(), &sp104);
-	mtxF2L(&sp104, modelmtx);
-
-	gSPMatrix(gdl++, osVirtualToPhysical(modelmtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-
-	texSelect(&gdl, &g_TexGeneralConfigs[10], 2, 1, 2, true, NULL);
-
-	gDPPipeSync(gdl++);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetRenderMode(gdl++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
-
-	gDPPipeSync(gdl++);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetRenderMode(gdl++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
-
-	texSelect(&gdl, NULL, 2, 1, 2, true, NULL);
-
-	gDPSetRenderMode(gdl++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-
-	var8009cb00 = 2048.0f * g_20SecIntervalFrac;
-	var8009cb04 = 0;
-
-	vertices = gfxAllocateVertices(6);
-
-	MAKEVERTEX(0, spb0[0]);
-	MAKEVERTEX(1, spb0[1]);
-	MAKEVERTEX(2, spb0[2]);
-	MAKEVERTEX(3, spb0[3]);
-	MAKEVERTEX(4, spb0[4]);
-	MAKEVERTEX(5, spb0[5]);
-
-	colours = gfxAllocateColours(1);
-
-	colours[0].word = PD_BE32(0xff00007f);
-
-	gSPColor(gdl++, osVirtualToPhysical(colours), 1);
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 6, 0);
-
-	gdl = func0f006c80(gdl, &spb0[0], &spb0[4], &spb0[1], 0, 4, 1, 6, 2);
-	gdl = func0f006c80(gdl, &spb0[1], &spb0[4], &spb0[2], 1, 4, 2, 6, 2);
-	gdl = func0f006c80(gdl, &spb0[1], &spb0[5], &spb0[0], 1, 5, 0, 6, 2);
-	gdl = func0f006c80(gdl, &spb0[2], &spb0[5], &spb0[1], 2, 5, 1, 6, 2);
-
-	var8009cb04 = 1;
-
-	vertices = gfxAllocateVertices(6);
-
-	MAKEVERTEX(0, spb0[0]);
-	MAKEVERTEX(1, spb0[1]);
-	MAKEVERTEX(2, spb0[2]);
-	MAKEVERTEX(3, spb0[3]);
-	MAKEVERTEX(4, spb0[4]);
-	MAKEVERTEX(5, spb0[5]);
-
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 6, 0);
-
-	gdl = func0f006c80(gdl, &spb0[2], &spb0[4], &spb0[3], 2, 4, 3, 6, 2);
-	gdl = func0f006c80(gdl, &spb0[3], &spb0[4], &spb0[0], 3, 4, 0, 6, 2);
-	gdl = func0f006c80(gdl, &spb0[3], &spb0[5], &spb0[2], 3, 5, 2, 6, 2);
-	gdl = func0f006c80(gdl, &spb0[0], &spb0[5], &spb0[3], 0, 5, 3, 6, 2);
-
-	return gdl;
-}
-
-Gfx *func0f008558(Gfx *gdl, s32 depth)
+Gfx *nbombCreateSphere(Gfx *gdl, s32 depth)
 {
 	Vtx *vertices;
 	struct coord sp5c[] = {
@@ -225,12 +121,11 @@ Gfx *func0f008558(Gfx *gdl, s32 depth)
 		{ 0,  -1, 0  },
 	};
 
-	var80061648 = 0;
-
 	var8009cb04 = 0;
 
 	vertices = gfxAllocateVertices(6);
 
+	//Make one half of the sphere
 	MAKEVERTEX(0, sp5c[0]);
 	MAKEVERTEX(1, sp5c[1]);
 	MAKEVERTEX(2, sp5c[2]);
@@ -240,15 +135,16 @@ Gfx *func0f008558(Gfx *gdl, s32 depth)
 
 	gSPVertex(gdl++, osVirtualToPhysical(vertices), 6, 0);
 
-	gdl = func0f006c80(gdl, &sp5c[0], &sp5c[4], &sp5c[1], 0, 4, 1, 6, depth);
-	gdl = func0f006c80(gdl, &sp5c[1], &sp5c[4], &sp5c[2], 1, 4, 2, 6, depth);
-	gdl = func0f006c80(gdl, &sp5c[1], &sp5c[5], &sp5c[0], 1, 5, 0, 6, depth);
-	gdl = func0f006c80(gdl, &sp5c[2], &sp5c[5], &sp5c[1], 2, 5, 1, 6, depth);
+	gdl = nbombCreateSphereSegment(gdl, &sp5c[0], &sp5c[4], &sp5c[1], 0, 4, 1, 6, depth);
+	gdl = nbombCreateSphereSegment(gdl, &sp5c[1], &sp5c[4], &sp5c[2], 1, 4, 2, 6, depth);
+	gdl = nbombCreateSphereSegment(gdl, &sp5c[1], &sp5c[5], &sp5c[0], 1, 5, 0, 6, depth);
+	gdl = nbombCreateSphereSegment(gdl, &sp5c[2], &sp5c[5], &sp5c[1], 2, 5, 1, 6, depth);
 
 	var8009cb04 = 1;
 
 	vertices = gfxAllocateVertices(6);
 
+	//Make the other half of the sphere
 	MAKEVERTEX(0, sp5c[0]);
 	MAKEVERTEX(1, sp5c[1]);
 	MAKEVERTEX(2, sp5c[2]);
@@ -258,33 +154,19 @@ Gfx *func0f008558(Gfx *gdl, s32 depth)
 
 	gSPVertex(gdl++, osVirtualToPhysical(vertices), 6, 0);
 
-	gdl = func0f006c80(gdl, &sp5c[2], &sp5c[4], &sp5c[3], 2, 4, 3, 6, depth);
-	gdl = func0f006c80(gdl, &sp5c[3], &sp5c[4], &sp5c[0], 3, 4, 0, 6, depth);
-	gdl = func0f006c80(gdl, &sp5c[3], &sp5c[5], &sp5c[2], 3, 5, 2, 6, depth);
-	gdl = func0f006c80(gdl, &sp5c[0], &sp5c[5], &sp5c[3], 0, 5, 3, 6, depth);
+	gdl = nbombCreateSphereSegment(gdl, &sp5c[2], &sp5c[4], &sp5c[3], 2, 4, 3, 6, depth);
+	gdl = nbombCreateSphereSegment(gdl, &sp5c[3], &sp5c[4], &sp5c[0], 3, 4, 0, 6, depth);
+	gdl = nbombCreateSphereSegment(gdl, &sp5c[3], &sp5c[5], &sp5c[2], 3, 5, 2, 6, depth);
+	gdl = nbombCreateSphereSegment(gdl, &sp5c[0], &sp5c[5], &sp5c[3], 0, 5, 3, 6, depth);
 
 	return gdl;
-}
-
-void nbomb0f0093c4(f32 *arg0)
-{
-	arg0[0] = 0.0f;
-	arg0[1] = RANDOMFRAC() - 0.5f;
-	arg0[2] = RANDOMFRAC() - 0.5f;
-	arg0[3] = RANDOMFRAC() - 0.5f;
-
-	guNormalize(&arg0[1], &arg0[2], &arg0[3]);
 }
 
 void nbombReset(struct nbomb *nbomb)
 {
 	nbomb->age240 = 0;
-#if VERSION >= VERSION_PAL_BETA
 	nbomb->radius = 0;
-#endif
-#ifndef PLATFORM_N64
 	nbomb->spawnframe240 = g_Vars.lvframe240;
-#endif
 }
 
 /**
@@ -356,10 +238,9 @@ Gfx *nbombCreateGdl(void)
 	gSPVertex(gdl++, osVirtualToPhysical(vertices), 1, 0);
 
 	if (index != 0) {
-		u32 stack;
-		gdl = func0f008558(gdl, 1);
+		gdl = nbombCreateSphere(gdl, 1);
 	} else {
-		gdl = func0f008558(gdl, 2);
+		gdl = nbombCreateSphere(gdl, 2);
 	}
 
 	gSPEndDisplayList(gdl++);
@@ -381,7 +262,7 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 	Col *colours;
 
 	mtx = gfxAllocateMatrix();
-	var80061644 = 2000.0f;
+	sphereradius = 2000.0f;
 	colour = nbombCalculateAlpha(nbomb);
 
 	colours = gfxAllocateColours(2);
@@ -415,7 +296,7 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 	return gdl;
 }
 
-void func0f0099a4(void)
+void nbombClearAllNBombs(void)
 {
 	s32 i;
 
@@ -425,17 +306,14 @@ void func0f0099a4(void)
 	for (i = 0; i < ARRAYCOUNT(g_Nbombs); i++) {
 		g_Nbombs[i].age240 = -1;
 
-#if VERSION >= VERSION_NTSC_1_0
 		g_Nbombs[i].audiohandle20 = NULL;
 		g_Nbombs[i].audiohandle24 = NULL;
-#endif
 	}
 }
 
 void nbombInflictDamage(struct nbomb *nbomb)
 {
 	s32 index = 0;
-	u32 stack;
 	s16 propnums[256];
 	struct coord bbmin;
 	struct coord bbmax;
@@ -477,8 +355,6 @@ void nbombInflictDamage(struct nbomb *nbomb)
 
 	roomnums[index] = -1;
 
-	if (1);
-
 	// Iterate props in the affected rooms and damage any chrs
 	roomGetProps(roomnums, propnums, 256);
 
@@ -497,28 +373,18 @@ void nbombInflictDamage(struct nbomb *nbomb)
 
 				if (dist < nbomb->radius) {
 					struct chrdata *chr = prop->chr;
-
-#if VERSION >= VERSION_NTSC_1_0
 					if (chr)
-#endif
 					{
 						struct coord vector = {0, 0, 0};
 						f32 damage = 0.01f * g_Vars.lvupdate60freal;
 
 						chrDamageByMisc(chr, damage, &vector, &gset, nbomb->ownerprop);
-
-#if VERSION >= VERSION_NTSC_1_0
-						if (chr->actiontype);
-#endif
-
 						chr->chrflags |= CHRCFLAG_TRIGGERSHOTLIST;
 
 						if (chr->hidden & CHRHFLAG_CLOAKED) {
 							chrUncloak(chr, true);
 						}
 					}
-
-					if (1);
 				}
 			}
 		}
@@ -531,26 +397,17 @@ void nbombTick(struct nbomb *nbomb)
 {
 	if (nbomb->age240 >= 0) {
 		s32 age60;
-#ifdef PLATFORM_N64
-		s32 increment = (g_Vars.lvupdate240 + 2) >> 2;
-		nbomb->age240 += increment;
-#else
 		s32 oldage240 = nbomb->age240;
 		nbomb->age240 = (g_Vars.lvframe240 - nbomb->spawnframe240) >> 2;
 		s32 increment = nbomb->age240 - oldage240;
-#endif
 
 		if (nbomb->age240 < TICKS(80)) {
-			nbomb->radius = nbomb->age240 / (PAL ? 66.0f : 80.0f);
+			nbomb->radius = nbomb->age240 / 80.0f;
 			nbomb->radius = sqrtf(sqrtf(nbomb->radius));
 			nbomb->unk18 = 0;
 		} else {
-			nbomb->radius = sinf((nbomb->age240 - TICKS(80)) * (PAL ? 0.062800005078316f : 0.0523333363235f)) * 0.05f + 1.0f;
-
-			// Return value is not used - could have been printed
-			sinf((nbomb->age240 - TICKS(80)) * (PAL ? 0.062800005078316f : 0.0523333363235f));
-
-			nbomb->unk18 = ((nbomb->age240 - TICKS(80)) / (PAL ? 225.0f : 270.0f)) * 3.0f;
+			nbomb->radius = sinf((nbomb->age240 - TICKS(80)) * 0.0523333363235f) * 0.05f + 1.0f;
+			nbomb->unk18 = ((nbomb->age240 - TICKS(80)) / 270.0f) * 3.0f;
 		}
 
 		nbomb->radius *= 500.0f;
@@ -563,15 +420,11 @@ void nbombTick(struct nbomb *nbomb)
 			age60 = 40;
 		}
 
-#if PAL
-		nbomb->unk14 += increment * age60 * 60 / 50;
-#else
 		nbomb->unk14 += increment * age60;
-#endif
 
-		nbomb->unk14 %= 0x800;
+		nbomb->unk14 %= 0x800; //0x800 = 2048
 
-		if (nbomb->age240 > (PAL ? 307 : 370)) {
+		if (nbomb->age240 > 370) { // N-Bomb lifespan (6 seconds)
 			nbomb->age240 = -1;
 		}
 	}
@@ -613,7 +466,7 @@ void nbombsTick(void)
 				f32 speed = menuGetSinOscFrac(20) * 0.02f + 0.4f;
 
 				if (youngest240 > TICKS(300)) {
-					volume = (1.0f - (f32)(youngest240 - TICKS(300)) / (PAL ? 41.0f : 50.0f)) * AL_VOL_FULL;
+					volume = (1.0f - (f32)(youngest240 - TICKS(300)) / 50.0f) * AL_VOL_FULL;
 				}
 
 				if (youngest240 >= TICKS(350)) {
@@ -639,16 +492,10 @@ void nbombsTick(void)
 			if (g_Nbombs[i].age240 >= 0) {
 				if (g_Nbombs[i].audiohandle20 && sndGetState(g_Nbombs[i].audiohandle20) != AL_STOPPED) {
 					audioStop(g_Nbombs[i].audiohandle20);
-#if VERSION < VERSION_NTSC_1_0
-					g_Nbombs[i].audiohandle20 = NULL;
-#endif
 				}
 
 				if (g_Nbombs[i].audiohandle24 && sndGetState(g_Nbombs[i].audiohandle24) != AL_STOPPED) {
 					audioStop(g_Nbombs[i].audiohandle24);
-#if VERSION < VERSION_NTSC_1_0
-					g_Nbombs[i].audiohandle24 = NULL;
-#endif
 				}
 			}
 		}
@@ -675,7 +522,6 @@ Gfx *nbombsRender(Gfx *gdl)
 
 void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)
 {
-	u32 stack;
 	s32 oldest240;
 	s32 index;
 	s32 i;
@@ -687,10 +533,8 @@ void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)
 
 	for (i = 0; i < ARRAYCOUNT(g_Nbombs); i++) {
 		if (g_Nbombs[i].age240 == -1
-#if VERSION >= VERSION_NTSC_1_0
 				&& g_Nbombs[i].audiohandle20 == NULL
 				&& g_Nbombs[i].audiohandle24 == NULL
-#endif
 				) {
 			index = i;
 			break;
@@ -710,7 +554,6 @@ void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)
 	g_Nbombs[index].age240 = 0;
 	g_Nbombs[index].ownerprop = ownerprop;
 
-#if VERSION >= VERSION_NTSC_1_0
 	// Newer versions only play audio if the handles are null,
 	// while ntsc-beta clears the handles then plays them unconditionally.
 	if (g_Nbombs[index].audiohandle20 == NULL) {
@@ -732,29 +575,10 @@ void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)
 			audioPostEvent(g_Nbombs[index].audiohandle24, AL_SNDP_PITCH_EVT, param.s32);
 		}
 	}
-#else
-	g_Nbombs[index].audiohandle20 = NULL;
-	g_Nbombs[index].audiohandle24 = NULL;
-
-	sndStart(var80095200, SFX_LAUNCH_ROCKET, &g_Nbombs[index].audiohandle20, -1, -1, -1, -1, -1);
-
-	if (g_Nbombs[index].audiohandle20) {
-		union audioparam param;
-		param.f32 = 0.4f;
-		audioPostEvent(g_Nbombs[index].audiohandle20, AL_SNDP_PITCH_EVT, param.s32);
-	}
-
-	sndStart(var80095200, SFX_LAUNCH_ROCKET, &g_Nbombs[index].audiohandle24, -1, -1, -1, -1, -1);
-
-	if (g_Nbombs[index].audiohandle24) {
-		union audioparam param;
-		param.f32 = 0.4f;
-		audioPostEvent(g_Nbombs[index].audiohandle24, AL_SNDP_PITCH_EVT, param.s32);
-	}
-#endif
 }
 
-bool doorIsOpenOrOpening(s32 tagnum)
+//Nothing ever calls this
+/*bool doorIsOpenOrOpening(s32 tagnum)
 {
 	struct defaultobj *obj = objFindByTagId(tagnum);
 
@@ -776,7 +600,7 @@ bool doorIsOpenOrOpening(s32 tagnum)
 	}
 
 	return false;
-}
+}*/
 
 f32 gasGetDoorFrac(s32 tagnum)
 {
@@ -800,12 +624,9 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 	struct coord campos;
 	s32 finalalpha = 0;
 	s32 i;
-	u32 stack[2];
 	s16 t;
 	s16 s;
-	u32 stack2[2];
 	bool drawn = false;
-	s32 stack3;
 	Col *colours;
 	Vtx *vertices;
 	s16 viewleft;
@@ -849,12 +670,7 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 
 		drawn = true;
 
-		if (1);
-		if (1);
-
 		gdl = func0f0d479c(gdl);
-
-		if (1);
 
 		texSelect(&gdl, &g_TexGeneralConfigs[10], 2, 1, 2, true, NULL);
 
@@ -913,6 +729,7 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 	return gdl;
 }
 
+//The gas rendering for Area 51 Escape is here too
 Gfx *gasRender(Gfx *gdl)
 {
 	bool show = false;
@@ -1003,7 +820,6 @@ Gfx *gasRender(Gfx *gdl)
 			f32 camposz = g_Vars.currentplayer->cam_pos.z;
 			f32 f2;
 			f32 f16;
-			s32 stack;
 			f32 sp78;
 			s16 layer2s;
 			s16 layer1s;
@@ -1023,8 +839,6 @@ Gfx *gasRender(Gfx *gdl)
 			drawn = true;
 
 			gdl = func0f0d479c(gdl);
-
-			if (1);
 
 			texSelect(&gdl, &g_TexGeneralConfigs[6], 4, 1, 2, true, NULL);
 
