@@ -59,7 +59,6 @@ bool func0f01ad5c(void);
 void func0f01adb8(void);
 void titleTickOld(void);
 Gfx *titleRender(Gfx *gdl);
-void titleExitLegal(void);
 s32 getNumPlayers(void);
 void setNumPlayers(s32 numplayers);
 void titleExitNoController(void);

@@ -24,28 +24,20 @@
 #include "data.h"
 #include "types.h"
 
-s32 g_NumActiveHeadsPerGender;
-u32 var8009cd24;
-s32 g_ActiveMaleHeads[8];
-s32 g_ActiveFemaleHeads[8];
-
 s32 g_NumBondBodies = 0;
 s32 g_NumMaleGuardHeads = 0;
 s32 g_NumFemaleGuardHeads = 0;
 s32 g_NumMaleGuardTeamHeads = 0;
-s32 g_NumFemaleGuardTeamHeads = 0;
-s32 var80062b14 = 0;
-s32 var80062b18 = 0;
 
-s32 g_BondBodies[] = {
+s32 g_BondBodies[] = { // Probably left over from GE
 	BODY_DJBOND,
 	BODY_CONNERY,
 	BODY_DALTON,
 	BODY_MOORE,
-	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1,
 };
 
-s32 g_MaleGuardHeads[] = {
+s32 g_MaleGuardHeads[] = { // 42 heads
 	HEAD_BEAU1,
 	HEAD_CHRIST,
 	HEAD_DARLING,
@@ -91,7 +83,7 @@ s32 g_MaleGuardHeads[] = {
 	-1,
 };
 
-s32 g_MaleGuardTeamHeads[] = {
+s32 g_MaleGuardTeamHeads[] = { // 16 heads
 	HEAD_BEAU1,
 	HEAD_CHRIST,
 	HEAD_DARLING,
@@ -111,7 +103,7 @@ s32 g_MaleGuardTeamHeads[] = {
 	-1,
 };
 
-s32 g_FemaleGuardHeads[] = {
+s32 g_FemaleGuardHeads[] = { // Not actually used?
 	HEAD_LESLIE_S,
 	HEAD_ANKA,
 	HEAD_EILEEN_T,
@@ -119,19 +111,20 @@ s32 g_FemaleGuardHeads[] = {
 	-1,
 };
 
-s32 g_FemaleGuardTeamHeads[] = {
+// Not needed. Same as g_FemaleGuardHeads
+/* s32 g_FemaleGuardTeamHeads[] = {
 	HEAD_LESLIE_S,
 	HEAD_ANKA,
 	HEAD_EILEEN_T,
 	HEAD_EILEEN_H,
 	-1,
-};
+};*/
 
-s32 var80062c80 = 0;
+s32 g_RandomBond = 0;
 s32 g_ActiveMaleHeadsIndex = 0;
 s32 g_ActiveFemaleHeadsIndex = 0;
 
-s32 g_FemGuardHeads[3] = {
+s32 g_FemGuardHeads[3] = { // dataDyne female guard heads
 	HEAD_ALEX,
 	HEAD_JULIANNE,
 	HEAD_LAURA,
@@ -309,9 +302,9 @@ struct model *bodyAllocateModel(s32 bodynum, s32 headnum, u32 spawnflags)
 	return body0f02d338(bodynum, headnum, NULL, NULL, sunglasses, varyheight);
 }
 
-s32 body0f02d3f8(void)
+s32 bodyGetRandomBond(void)
 {
-	return g_BondBodies[var80062c80];
+	return g_BondBodies[g_RandomBond];
 }
 
 s32 bodyChooseHead(s32 bodynum)
@@ -319,19 +312,17 @@ s32 bodyChooseHead(s32 bodynum)
 	s32 head;
 
 	if (g_HeadsAndBodies[bodynum].ismale) {
-		head = g_ActiveMaleHeads[g_ActiveMaleHeadsIndex++];
-
-		if (g_ActiveMaleHeadsIndex == g_NumActiveHeadsPerGender) {
-			g_ActiveMaleHeadsIndex = 0;
+		if (cheatIsActive(CHEAT_TEAMHEADSONLY))
+		{
+			head = g_MaleGuardTeamHeads[rngRandom() % g_NumMaleGuardTeamHeads];
+		}
+		else {
+			head = g_MaleGuardHeads[rngRandom() % g_NumMaleGuardHeads];
 		}
 	} else if (bodynum == BODY_FEM_GUARD) {
 		head = g_FemGuardHeads[rngRandom() % 3];
 	} else {
-		head = g_ActiveFemaleHeads[g_ActiveFemaleHeadsIndex++];
-
-		if (g_ActiveFemaleHeadsIndex == g_NumActiveHeadsPerGender) {
-			g_ActiveFemaleHeadsIndex = 0;
-		}
+		head = g_FemaleGuardHeads[rngRandom() % g_NumFemaleGuardHeads];
 	}
 
 	return head;
@@ -385,7 +376,7 @@ void bodyAllocateChr(s32 stagenum, struct packedchr *packed, s32 cmdindex)
 	headmodeldef = NULL;
 
 	if (packed->bodynum == 255) {
-		bodynum = body0f02d3f8();
+		bodynum = bodyGetRandomBond(); // Remember this for the Dinner Party cheat
 	} else {
 		bodynum = packed->bodynum;
 	}
@@ -544,31 +535,6 @@ struct prop *bodyAllocateEyespy(struct pad *pad, RoomNum room)
 	rooms[0] = room;
 	rooms[1] = -1;
 
-#if PIRACYCHECKS
-	{
-		u32 stack[2];
-		u32 checksum = 0;
-		s32 *ptr = (s32 *)&lvReset;
-		s32 *end = (s32 *)&lvConfigureFade;
-
-		while (ptr < end) {
-			checksum <<= 1;
-			checksum ^= *ptr;
-			ptr++;
-		}
-
-		if (checksum != CHECKSUM_PLACEHOLDER) {
-			s32 *ptr2 = (s32 *)_memaFree;
-			s32 *end2 = (s32 *)memaInit;
-
-			while (ptr2 < end2) {
-				ptr2[0] = 0;
-				ptr2++;
-			}
-		}
-	}
-#endif
-
 	model = bodyAllocateModel(BODY_EYESPY, 0, 0);
 
 	if (model) {
@@ -607,23 +573,13 @@ struct prop *bodyAllocateEyespy(struct pad *pad, RoomNum room)
 			chr->height = 200;
 			func0f02e9a0(chr, 0);
 			chr->chrflags |= CHRCFLAG_HIDDEN;
-
-#if VERSION >= VERSION_NTSC_1_0
 			chr->hidden2 |= CHRH2FLAG_CONSIDERPROXIES;
-#else
-			chr->hidden |= CHRHFLAG_CONSIDERPROXIES;
-#endif
 
 			return prop;
 		}
 	}
 
 	return NULL;
-}
-
-void body0f02ddbf(void)
-{
-	// empty
 }
 
 /**

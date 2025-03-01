@@ -172,11 +172,6 @@ void titleInitLegal(void)
 #endif
 }
 
-void titleExitLegal(void)
-{
-	// empty
-}
-
 void titleTickLegal(void)
 {
 	viSetFovY(60);
@@ -2360,7 +2355,6 @@ void titleTick(void)
 
 		switch (g_TitleMode) {
 		case TITLEMODE_LEGAL:
-			titleExitLegal();
 			break;
 		case TITLEMODE_CHECKCONTROLLERS:
 			titleExitCheckControllers();
@@ -2499,7 +2493,6 @@ void titleExit(void)
 {
 	switch (g_TitleMode) {
 	case TITLEMODE_LEGAL:
-		titleExitLegal();
 		break;
 	case TITLEMODE_CHECKCONTROLLERS:
 		titleExitCheckControllers();

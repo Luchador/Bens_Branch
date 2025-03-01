@@ -21,12 +21,6 @@ void bodiesInit(void)
 		g_NumMaleGuardTeamHeads++;
 	}
 
-	g_NumFemaleGuardTeamHeads = 0;
-
-	while (g_FemaleGuardTeamHeads[g_NumFemaleGuardTeamHeads] >= 0) {
-		g_NumFemaleGuardTeamHeads++;
-	}
-
 	g_NumMaleGuardHeads = 0;
 
 	while (g_MaleGuardHeads[g_NumMaleGuardHeads] >= 0) {
