@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/game_097a50.h"
 #include "game/game_097aa0.h"
 #include "bss.h"
 #include "data.h"
