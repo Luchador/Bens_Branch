@@ -5,14 +5,14 @@
 #include "game/game_096b20.h"
 #include "types.h"
 
-void func0f096b20(struct coord *arg0, struct coord *arg1, f32 standfrac, struct coord *vel)
+void InterpTwoPoints(struct coord *arg0, struct coord *arg1, f32 standfrac, struct coord *vel)
 {
 	vel->x = (arg1->x - arg0->x) * standfrac + arg0->x;
 	vel->y = (arg1->y - arg0->y) * standfrac + arg0->y;
 	vel->z = (arg1->z - arg0->z) * standfrac + arg0->z;
 }
 
-void func0f096b70(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, f32 arg4, struct coord *arg5)
+void CatmullRomSplineInterp(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, f32 arg4, struct coord *arg5)
 {
 	f32 stack;
 	f32 mult0;

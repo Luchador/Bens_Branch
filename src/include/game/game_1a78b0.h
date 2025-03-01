@@ -4,6 +4,4 @@
 #include "data.h"
 #include "types.h"
 
-void func0f1a78b0(void);
-
 #endif

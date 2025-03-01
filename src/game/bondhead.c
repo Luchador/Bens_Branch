@@ -232,7 +232,7 @@ void bheadUpdate(f32 arg0, f32 arg1)
 				g_Vars.currentplayer->standfrac -= 1;
 			}
 
-			func0f096b20(
+			InterpTwoPoints(
 					&g_Vars.currentplayer->standlook[g_Vars.currentplayer->standcnt],
 					&g_Vars.currentplayer->standlook[1 - g_Vars.currentplayer->standcnt],
 					g_Vars.currentplayer->standfrac, &lookvel);
@@ -240,7 +240,7 @@ void bheadUpdate(f32 arg0, f32 arg1)
 			lookvel.x *= 1 + 5 * g_Vars.currentplayer->bondbreathing;
 			lookvel.y *= 1 + 5 * g_Vars.currentplayer->bondbreathing;
 
-			func0f096b20(
+			InterpTwoPoints(
 					&g_Vars.currentplayer->standup[g_Vars.currentplayer->standcnt],
 					&g_Vars.currentplayer->standup[1 - g_Vars.currentplayer->standcnt],
 					g_Vars.currentplayer->standfrac, &upvel);

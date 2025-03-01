@@ -42,11 +42,7 @@ u32 colourBlend(u32 a, u32 b, u32 aweight)
 
 void menuTickTimers(void)
 {
-#if VERSION >= VERSION_PAL_BETA
-	g_20SecIntervalFrac = g_20SecIntervalFrac + g_Vars.diffframe240freal / 4800.0f;
-#else
 	g_20SecIntervalFrac = g_20SecIntervalFrac + g_Vars.diffframe240f / 4800.0f;
-#endif
 
 	if (g_20SecIntervalFrac > 1.0f) {
 		g_20SecIntervalFrac -= 1.0f;
@@ -57,31 +53,6 @@ void menuTickTimers(void)
 	if (g_Lv80SecIntervalFrac > 1.0f) {
 		g_Lv80SecIntervalFrac -= 1.0f;
 	}
-
-#if PIRACYCHECKS
-	{
-		u32 *ptr = (u32 *)&mtxGetObfuscatedRomBase;
-		u32 *end = (u32 *)&mtxF2L;
-		u32 checksum = 0;
-
-		while (ptr < end) {
-			checksum ^= ~*ptr;
-			checksum <<= 1;
-			ptr++;
-		}
-
-		if (checksum != CHECKSUM_PLACEHOLDER) {
-			u32 *ptr = (u32 *)&bgReset;
-			ptr += rngRandom() % 0x40;
-			end = &ptr[4];
-
-			while (ptr < end) {
-				*ptr = 0x00000012;
-				ptr++;
-			}
-		}
-	}
-#endif
 }
 
 /**

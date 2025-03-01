@@ -4,7 +4,8 @@
 #include "data.h"
 #include "types.h"
 
-u32 func0f152fa0(f32 arg0)
+// Ben's comment: Takes a float and converts it to an unsigned integer. The line result = -result; is unncessary because the return value is an unsigned int. I've rewritten it slightly.
+/*u32 FloatToUInt32(f32 arg0)
 {
 	u32 result;
 
@@ -24,6 +25,19 @@ u32 func0f152fa0(f32 arg0)
 	}
 
 	return result;
+}*/
+
+u32 FloatToUInt32(f32 arg0)
+{
+	if (arg0 > 32767.9f) {
+		arg0 = 32767.9f;
+	}
+
+	if (arg0 < -32767.9f) {
+		arg0 = -32767.9f;
+	}
+
+	return (u32)(arg0 * 65536);
 }
 
 Gfx *func0f153134(Gfx *gdl)

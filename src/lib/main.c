@@ -621,10 +621,8 @@ void mainInit(void)
 #endif
 
 	vmInit();
-	func0f1a78b0();
 	filesInit();
 	stub0f175f50();
-	func0f175f90();
 
 	if (var8005d9b0) {
 		argSetString("          -ml0 -me0 -mgfx100 -mvtx50 -mt700 -ma400");

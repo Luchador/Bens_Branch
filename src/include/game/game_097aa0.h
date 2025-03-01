@@ -4,8 +4,7 @@
 #include "data.h"
 #include "types.h"
 
-f32 func0f097aa0(f32 arg0);
-void func0f097b40(f32 *a, f32 *b, f32 *dst);
-void func0f097b64(f32 *param_1, f32 *param_2, f32 scale, f32 *dst);
+void ScaleVector2D(f32 *a, f32 *b, f32 *dst);
+void Lerp2D(f32 *param_1, f32 *param_2, f32 scale, f32 *dst);
 
 #endif

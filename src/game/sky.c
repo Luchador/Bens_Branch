@@ -1715,14 +1715,14 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 			| (u32) svtx2->y);
 	gImmp1(gdl++, G_RDPHALF_CONT, (s32) svtx1->y << 16 | (s32) svtx0->y);
 
-	gImmp1(gdl++, G_RDPHALF_1, func0f152fa0(svtx1->x * 0.25f));
-	gImmp1(gdl++, G_RDPHALF_CONT, func0f152fa0(sp384[0]));
+	gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(svtx1->x * 0.25f));
+	gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(sp384[0]));
 
-	gImmp1(gdl++, G_RDPHALF_1, func0f152fa0(sp410));
-	gImmp1(gdl++, G_RDPHALF_CONT, func0f152fa0(sp394[0]));
+	gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(sp410));
+	gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(sp394[0]));
 
-	gImmp1(gdl++, G_RDPHALF_1, func0f152fa0(sp408));
-	gImmp1(gdl++, G_RDPHALF_CONT, func0f152fa0(sp38c[0]));
+	gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(sp408));
+	gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(sp38c[0]));
 
 	if (!textured) {
 		return gdl;
@@ -1832,25 +1832,25 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 		u32 sp130;
 		u32 sp12c;
 
-		sp168 = func0f152fa0(sp210[0]);
-		sp164 = func0f152fa0(sp210[1]);
-		sp160 = func0f152fa0(sp210[2]);
-		sp15c = func0f152fa0(sp210[3]);
+		sp168 = FloatToUInt32(sp210[0]);
+		sp164 = FloatToUInt32(sp210[1]);
+		sp160 = FloatToUInt32(sp210[2]);
+		sp15c = FloatToUInt32(sp210[3]);
 
-		sp158 = func0f152fa0(sp290[0]);
-		sp154 = func0f152fa0(sp290[1]);
-		sp150 = func0f152fa0(sp290[2]);
-		sp14c = func0f152fa0(sp290[3]);
+		sp158 = FloatToUInt32(sp290[0]);
+		sp154 = FloatToUInt32(sp290[1]);
+		sp150 = FloatToUInt32(sp290[2]);
+		sp14c = FloatToUInt32(sp290[3]);
 
-		sp138 = func0f152fa0(sp2b0[0]);
-		sp134 = func0f152fa0(sp2b0[1]);
-		sp130 = func0f152fa0(sp2b0[2]);
-		sp12c = func0f152fa0(sp2b0[3]);
+		sp138 = FloatToUInt32(sp2b0[0]);
+		sp134 = FloatToUInt32(sp2b0[1]);
+		sp130 = FloatToUInt32(sp2b0[2]);
+		sp12c = FloatToUInt32(sp2b0[3]);
 
-		sp148 = func0f152fa0(sp230[0]);
-		sp144 = func0f152fa0(sp230[1]);
-		sp140 = func0f152fa0(sp230[2]);
-		sp13c = func0f152fa0(sp230[3]);
+		sp148 = FloatToUInt32(sp230[0]);
+		sp144 = FloatToUInt32(sp230[1]);
+		sp140 = FloatToUInt32(sp230[2]);
+		sp13c = FloatToUInt32(sp230[3]);
 
 		gImmp1(gdl++, G_RDPHALF_1, (sp168 & 0xffff0000) | (sp164 & 0xffff0000) >> 16);
 		gImmp1(gdl++, G_RDPHALF_CONT, (sp160 & 0xffff0000) | (sp15c & 0xffff0000) >> 16);
@@ -1924,24 +1924,24 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 		u32 spb0;
 		u32 spac;
 
-		spe8 = func0f152fa0(sp210[4] * sp190[0]);
-		spe4 = func0f152fa0(sp210[5] * sp190[0]);
-		spe0 = func0f152fa0(sp210[6] * sp190[0]);
+		spe8 = FloatToUInt32(sp210[4] * sp190[0]);
+		spe4 = FloatToUInt32(sp210[5] * sp190[0]);
+		spe0 = FloatToUInt32(sp210[6] * sp190[0]);
 		spdc = 0;
 
-		spd8 = func0f152fa0(sp290[4] * sp190[0]);
-		spd4 = func0f152fa0(sp290[5] * sp190[0]);
-		spd0 = func0f152fa0(sp290[6] * sp190[0]);
+		spd8 = FloatToUInt32(sp290[4] * sp190[0]);
+		spd4 = FloatToUInt32(sp290[5] * sp190[0]);
+		spd0 = FloatToUInt32(sp290[6] * sp190[0]);
 		spcc = 0;
 
-		spb8 = func0f152fa0(sp2b0[4] * sp190[0]);
-		spb4 = func0f152fa0(sp2b0[5] * sp190[0]);
-		spb0 = func0f152fa0(sp2b0[6] * sp190[0]);
+		spb8 = FloatToUInt32(sp2b0[4] * sp190[0]);
+		spb4 = FloatToUInt32(sp2b0[5] * sp190[0]);
+		spb0 = FloatToUInt32(sp2b0[6] * sp190[0]);
 		spac = 0;
 
-		spc8 = func0f152fa0(sp230[4] * sp190[0]);
-		spc4 = func0f152fa0(sp230[5] * sp190[0]);
-		spc0 = func0f152fa0(sp230[6] * sp190[0]);
+		spc8 = FloatToUInt32(sp230[4] * sp190[0]);
+		spc4 = FloatToUInt32(sp230[5] * sp190[0]);
+		spc0 = FloatToUInt32(sp230[6] * sp190[0]);
 		spbc = 0;
 
 		gImmp1(gdl++, G_RDPHALF_1, (spe8 & 0xffff0000) | (spe4 & 0xffff0000) >> 16);
@@ -2232,14 +2232,14 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 		gImmp1(gdl++, G_RDPHALF_1, (G_TRI_SHADE_TXTR << 24) | 0x00800000 | (u32) vtx2->y);
 		gImmp1(gdl++, G_RDPHALF_CONT, (s32) vtx3->y << 16 | (s32) vtx0->y);
 
-		gImmp1(gdl++, G_RDPHALF_1, func0f152fa0(camGetScreenLeft() + camGetScreenWidth() - 0.25f));
-		gImmp1(gdl++, G_RDPHALF_CONT, func0f152fa0(sp1bc));
+		gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(camGetScreenLeft() + camGetScreenWidth() - 0.25f));
+		gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(sp1bc));
 
-		gImmp1(gdl++, G_RDPHALF_1, func0f152fa0(camGetScreenLeft()));
-		gImmp1(gdl++, G_RDPHALF_CONT, func0f152fa0(0.0f));
+		gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(camGetScreenLeft()));
+		gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(0.0f));
 
-		gImmp1(gdl++, G_RDPHALF_1, func0f152fa0(camGetScreenLeft() + camGetScreenWidth() - 0.25f));
-		gImmp1(gdl++, G_RDPHALF_CONT, func0f152fa0(0.0f));
+		gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(camGetScreenLeft() + camGetScreenWidth() - 0.25f));
+		gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(0.0f));
 	} else {
 		f32 sp198;
 
@@ -2252,14 +2252,14 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 		gImmp1(gdl++, G_RDPHALF_1, 0xce000000 | (u32) vtx2->y);
 		gImmp1(gdl++, G_RDPHALF_CONT, (s32) vtx3->y << 16 | (s32) vtx0->y);
 
-		gImmp1(gdl++, G_RDPHALF_1, func0f152fa0(camGetScreenLeft()));
-		gImmp1(gdl++, G_RDPHALF_CONT, func0f152fa0(sp198));
+		gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(camGetScreenLeft()));
+		gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(sp198));
 
-		gImmp1(gdl++, G_RDPHALF_1, func0f152fa0(camGetScreenLeft() + camGetScreenWidth() - 0.25f));
-		gImmp1(gdl++, G_RDPHALF_CONT, func0f152fa0(0.0f));
+		gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(camGetScreenLeft() + camGetScreenWidth() - 0.25f));
+		gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(0.0f));
 
-		gImmp1(gdl++, G_RDPHALF_1, func0f152fa0(camGetScreenLeft()));
-		gImmp1(gdl++, G_RDPHALF_CONT, func0f152fa0(0.0f));
+		gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(camGetScreenLeft()));
+		gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(0.0f));
 	}
 
 	sp3b0[0] = sp4cc->unk0c * sp3c0;
@@ -2363,10 +2363,10 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 		u32 sp158 = vtx0->b * 65536.0f;
 		u32 sp154 = vtx0->a * 65536.0f;
 
-		u32 sp150 = func0f152fa0((sp170 - vtx0->r) / ((vtx1->x - vtx0->x) * 0.25f));
-		u32 sp14c = func0f152fa0((sp16c - vtx0->g) / ((vtx1->x - vtx0->x) * 0.25f));
-		u32 sp148 = func0f152fa0((sp168 - vtx0->b) / ((vtx1->x - vtx0->x) * 0.25f));
-		u32 sp144 = func0f152fa0((sp164 - vtx0->a) / ((vtx1->x - vtx0->x) * 0.25f));
+		u32 sp150 = FloatToUInt32((sp170 - vtx0->r) / ((vtx1->x - vtx0->x) * 0.25f));
+		u32 sp14c = FloatToUInt32((sp16c - vtx0->g) / ((vtx1->x - vtx0->x) * 0.25f));
+		u32 sp148 = FloatToUInt32((sp168 - vtx0->b) / ((vtx1->x - vtx0->x) * 0.25f));
+		u32 sp144 = FloatToUInt32((sp164 - vtx0->a) / ((vtx1->x - vtx0->x) * 0.25f));
 
 		u32 sp140;
 		u32 sp13c;
@@ -2377,10 +2377,10 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 		u32 sp128;
 		u32 sp124;
 
-		sp140 = sp130 = func0f152fa0((vtx2->r - vtx0->r) / ((vtx2->y - vtx0->y) * 0.25f));
-		sp13c = sp12c = func0f152fa0((vtx2->g - vtx0->g) / ((vtx2->y - vtx0->y) * 0.25f));
-		sp138 = sp128 = func0f152fa0((vtx2->b - vtx0->b) / ((vtx2->y - vtx0->y) * 0.25f));
-		sp124 = sp134 = func0f152fa0((vtx2->a - vtx0->a) / ((vtx2->y - vtx0->y) * 0.25f));
+		sp140 = sp130 = FloatToUInt32((vtx2->r - vtx0->r) / ((vtx2->y - vtx0->y) * 0.25f));
+		sp13c = sp12c = FloatToUInt32((vtx2->g - vtx0->g) / ((vtx2->y - vtx0->y) * 0.25f));
+		sp138 = sp128 = FloatToUInt32((vtx2->b - vtx0->b) / ((vtx2->y - vtx0->y) * 0.25f));
+		sp124 = sp134 = FloatToUInt32((vtx2->a - vtx0->a) / ((vtx2->y - vtx0->y) * 0.25f));
 
 		gImmp1(gdl++, G_RDPHALF_1, (sp160 & 0xffff0000) | (sp15c & 0xffff0000) >> 16);
 		gImmp1(gdl++, G_RDPHALF_CONT, (sp158 & 0xffff0000) | (sp154 & 0xffff0000) >> 16);
@@ -2454,25 +2454,25 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 		u32 spa8;
 		u32 spa4;
 
-		spe0 = func0f152fa0(sp254[0] * sp1c4[0]);
-		spdc = func0f152fa0(sp254[1] * sp1c4[0]);
-		spd8 = func0f152fa0(sp254[2] * sp1c4[0]);
-		spd4 = func0f152fa0(sp254[3] * sp1c4[0]);
+		spe0 = FloatToUInt32(sp254[0] * sp1c4[0]);
+		spdc = FloatToUInt32(sp254[1] * sp1c4[0]);
+		spd8 = FloatToUInt32(sp254[2] * sp1c4[0]);
+		spd4 = FloatToUInt32(sp254[3] * sp1c4[0]);
 
-		spd0 = func0f152fa0(sp2d4[0] * sp1c4[0]);
-		spcc = func0f152fa0(sp2d4[1] * sp1c4[0]);
-		spc8 = func0f152fa0(sp2d4[2] * sp1c4[0]);
-		spc4 = func0f152fa0(sp2d4[3] * sp1c4[0]);
+		spd0 = FloatToUInt32(sp2d4[0] * sp1c4[0]);
+		spcc = FloatToUInt32(sp2d4[1] * sp1c4[0]);
+		spc8 = FloatToUInt32(sp2d4[2] * sp1c4[0]);
+		spc4 = FloatToUInt32(sp2d4[3] * sp1c4[0]);
 
-		spb0 = func0f152fa0(sp2f4[0] * sp1c4[0]);
-		spac = func0f152fa0(sp2f4[1] * sp1c4[0]);
-		spa8 = func0f152fa0(sp2f4[2] * sp1c4[0]);
-		spa4 = func0f152fa0(sp2f4[3] * sp1c4[0]);
+		spb0 = FloatToUInt32(sp2f4[0] * sp1c4[0]);
+		spac = FloatToUInt32(sp2f4[1] * sp1c4[0]);
+		spa8 = FloatToUInt32(sp2f4[2] * sp1c4[0]);
+		spa4 = FloatToUInt32(sp2f4[3] * sp1c4[0]);
 
-		spc0 = func0f152fa0(sp274[0] * sp1c4[0]);
-		spbc = func0f152fa0(sp274[1] * sp1c4[0]);
-		spb8 = func0f152fa0(sp274[2] * sp1c4[0]);
-		spb4 = func0f152fa0(sp274[3] * sp1c4[0]);
+		spc0 = FloatToUInt32(sp274[0] * sp1c4[0]);
+		spbc = FloatToUInt32(sp274[1] * sp1c4[0]);
+		spb8 = FloatToUInt32(sp274[2] * sp1c4[0]);
+		spb4 = FloatToUInt32(sp274[3] * sp1c4[0]);
 
 		gImmp1(gdl++, G_RDPHALF_1, (spe0 & 0xffff0000) | (spdc & 0xffff0000) >> 16);
 		gImmp1(gdl++, G_RDPHALF_CONT, (spd8 & 0xffff0000) | (spd4 & 0xffff0000) >> 16);

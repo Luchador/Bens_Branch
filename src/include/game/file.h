@@ -19,6 +19,5 @@ u32 fileGetLoadedSize(s32 filenum);
 u32 fileGetAllocationSize(s32 filenum);
 void fileSetSize(s32 filenum, void *ptr, u32 size, bool reallocate);
 void filesStop(u8 arg0);
-void func0f167330(void);
 
 #endif

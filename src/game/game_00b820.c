@@ -172,8 +172,3 @@ void stageLoadAllAilistModels(void)
 		cmd = g_StageSetup.ailists[i].list;
 	} while (cmd);
 }
-
-void func0f00c230(void)
-{
-	// empty
-}

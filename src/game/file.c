@@ -4119,29 +4119,13 @@ uintptr_t g_FileTable[NUM_FILES + 1]; // TODO: this is only used to get the file
 
 romptr_t fileGetRomAddress(s32 filenum)
 {
-#ifdef PLATFORM_N64
-	return (romptr_t) g_FileTable[filenum];
-#else
 	return (romptr_t) romdataFileGetData(filenum);
-#endif
 }
 
 u32 fileGetRomSizeByTableAddress(uintptr_t *filetableaddr)
 {
-#ifdef PLATFORM_N64
-	u32 size;
-
-	if (filetableaddr[1]) {
-		size = filetableaddr[1] - filetableaddr[0];
-	} else {
-		size = 0;
-	}
-
-	return size;
-#else
 	const s32 size = romdataFileGetSize(filetableaddr - g_FileTable);
 	return (size < 0) ? 0 : size;
-#endif
 }
 
 s32 fileGetRomSize(s32 filenum)
@@ -4381,9 +4365,4 @@ void filesStop(u8 arg0)
 			g_FileInfo[i].loadedsize = 0;
 		}
 	}
-}
-
-void func0f167330(void)
-{
-	filesStop(5);
 }

@@ -2229,8 +2229,8 @@ bool bgunTickIncAttackingShoot(struct handweaponinfo *info, s32 handnum, struct 
 			f32 floats[12];
 
 			if (autofunc->vibrationstart != NULL && autofunc->vibrationmax != NULL) {
-				func0f097b64(autofunc->vibrationstart, autofunc->vibrationmax, hand->gs_float1, floats);
-				func0f097b40(hand->upgrademult, floats, hand->finalmult);
+				Lerp2D(autofunc->vibrationstart, autofunc->vibrationmax, hand->gs_float1, floats);
+				ScaleVector2D(hand->upgrademult, floats, hand->finalmult);
 			}
 		}
 
@@ -3453,9 +3453,9 @@ void bgunUpdateBlend(struct hand *hand, s32 handnum)
 	s32 pos = hand->curblendpos;
 	struct player *player = g_Vars.currentplayer;
 
-	func0f096b70(&hand->blendpos[(pos + 3) % 4], &hand->blendpos[pos], &hand->blendpos[(pos + 1) % 4], &hand->blendpos[(pos + 2) % 4], hand->dampt, &sp5c);
-	func0f096b70(&hand->blendlook[(pos + 3) % 4], &hand->blendlook[pos], &hand->blendlook[(pos + 1) % 4], &hand->blendlook[(pos + 2) % 4], hand->dampt, &sp50);
-	func0f096b70(&hand->blendup[(pos + 3) % 4], &hand->blendup[pos], &hand->blendup[(pos + 1) % 4], &hand->blendup[(pos + 2) % 4], hand->dampt, &sp44);
+	CatmullRomSplineInterp(&hand->blendpos[(pos + 3) % 4], &hand->blendpos[pos], &hand->blendpos[(pos + 1) % 4], &hand->blendpos[(pos + 2) % 4], hand->dampt, &sp5c);
+	CatmullRomSplineInterp(&hand->blendlook[(pos + 3) % 4], &hand->blendlook[pos], &hand->blendlook[(pos + 1) % 4], &hand->blendlook[(pos + 2) % 4], hand->dampt, &sp50);
+	CatmullRomSplineInterp(&hand->blendup[(pos + 3) % 4], &hand->blendup[pos], &hand->blendup[(pos + 1) % 4], &hand->blendup[(pos + 2) % 4], hand->dampt, &sp44);
 
 	sp5c.x *= player->gunposamplitude;
 	sp5c.y *= player->gunposamplitude;
