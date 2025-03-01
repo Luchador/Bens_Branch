@@ -7,8 +7,6 @@
 
 struct padsfileheader *g_PadsFile;
 u16 *g_PadOffsets;
-u32 var800a2358;
-u32 var800a235c;
 u16 *g_CoverFlags;
 s32 *g_CoverRooms;
 struct covercandidate *g_CoverCandidates;
@@ -21,8 +19,6 @@ void padUnpack(s32 padnum, u32 fields, struct pad *pad)
 	u32 *header;
 	f32 *fbuffer;
 	u8 *ptr;
-
-	if (pad);
 
 	offset = g_PadOffsets[padnum];
 	ptr = (u8 *) &g_StageSetup.padfiledata[offset];
@@ -278,11 +274,6 @@ void padUnsetFlag(s32 padnum, u32 flag)
 	*header = *header ^ ((*header >> 14) ^ ((*header >> 14) & ~flag)) << 14;
 }
 
-bool func0f1162c4(s32 padnum, s32 arg1)
-{
-	return padnum;
-}
-
 s32 coverGetCount(void)
 {
 	return g_PadsFile->numcovers;
@@ -344,11 +335,6 @@ s32 coverGetNumBySpecialNum(s32 index)
 	return g_SpecialCoverNums[index];
 }
 
-s32 func0f116450(s32 arg0, s32 arg1)
-{
-	return arg0;
-}
-
 bool coverIsInUse(s32 covernum)
 {
 	// @bug: Second condition should be >=
@@ -394,9 +380,4 @@ void coverSetOutOfSight(s32 covernum, bool enable)
 bool coverIsSpecial(struct cover *cover)
 {
 	return (cover->flags & (COVERFLAG_SPECIAL1 | COVERFLAG_SPECIAL2 | COVERFLAG_SPECIAL3)) != 0;
-}
-
-s32 func0f1165c0(s32 arg0, s32 arg1)
-{
-	return arg0;
 }

@@ -33,47 +33,9 @@ struct criteria_throwinroom *g_ThrowInRoomCriterias;
 struct criteria_holograph *g_HolographCriterias;
 s32 g_NumTags;
 struct tag **g_TagPtrs;
-u32 var8009d0cc;
 
 s32 g_ObjectiveLastIndex = -1;
 bool g_ObjectiveChecksDisabled = false;
-
-#if PIRACYCHECKS
-u32 xorBaffbeff(u32 value)
-{
-	return value ^ 0xbaffbeff;
-}
-
-u32 xorBabeffff(u32 value)
-{
-	return value ^ 0xbabeffff;
-}
-
-u32 xorBoobless(u32 value)
-{
-	return value ^ 0xb00b1e55;
-}
-
-void func0f095350(u32 arg0, u32 *arg1)
-{
-	volatile u32 *ptr;
-	u32 value;
-
-	__osPiGetAccess();
-
-	ptr = (u32 *)(xorBoobless(0x04600010 ^ 0xb00b1e55) | 0xa0000000);
-
-	value = *ptr;
-
-	while (value & 3) {
-		value = *ptr;
-	}
-
-	*arg1 = *(u32 *)((uintptr_t)osRomBase | arg0 | 0xa0000000);
-
-	__osPiRelAccess();
-}
-#endif
 
 void tagsReset(void)
 {
@@ -105,22 +67,6 @@ void tagsReset(void)
 		g_TagPtrs[tag->tagnum] = tag;
 		tag = tag->next;
 	}
-
-#if PIRACYCHECKS
-	{
-		// mtxGetObfuscatedRomBase() returns the value at ROM offset 0xa5c.
-		// This value should be 0x1740fff9.
-		u32 dummy = xorBaffbeff(0xb0000a5c ^ 0xbaffbeff);
-		u32 expected = xorBabeffff(0x1740fff9 ^ 0xbabeffff);
-
-		if (mtxGetObfuscatedRomBase() != expected) {
-			// Read 4KB from a random ROM location within 128KB from the start of
-			// the ROM, and write it to a random memory location between 0x80010000
-			// and 0x80030ff8. This will corrupt instructions in the lib segment.
-			dmaExec((u8 *)((rngRandom() & 0x1fff8) + 0x80010000), rngRandom() & 0x1fffe, 0x1000);
-		}
-	}
-#endif
 }
 
 struct tag *tagFindById(s32 tag_id)
@@ -199,7 +145,6 @@ u32 objectiveGetDifficultyBits(s32 index)
  */
 s32 objectiveCheck(s32 index)
 {
-	u32 stack[5];
 	s32 objstatus = OBJECTIVE_COMPLETE;
 
 	if (index < ARRAYCOUNT(g_Objectives)) {
@@ -363,7 +308,6 @@ void objectivesDisableChecking(void)
 	g_ObjectiveChecksDisabled = true;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 void objectivesShowHudmsg(char *buffer, s32 hudmsgtype)
 {
 	s32 prevplayernum = g_Vars.currentplayernum;
@@ -379,7 +323,6 @@ void objectivesShowHudmsg(char *buffer, s32 hudmsgtype)
 
 	setCurrentPlayerNum(prevplayernum);
 }
-#endif
 
 void objectivesCheckAll(void)
 {
@@ -395,16 +338,8 @@ void objectivesCheckAll(void)
 				g_ObjectiveStatuses[i] = status;
 
 				if (objectiveGetDifficultyBits(i) & (1 << lvGetDifficulty())) {
-#if VERSION >= VERSION_JPN_FINAL
-					u8 jpnstr[] = {0, 0, 0};
-					jpnstr[0] = 0x80;
-					jpnstr[1] = 0x80 | (0x11 + availableindex);
-					sprintf(buffer, "%s %s: ", langGet(L_MISC_044), jpnstr); // "Objective"
-#else
 					sprintf(buffer, "%s %d: ", langGet(L_MISC_044), availableindex + 1); // "Objective"
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 					// NTSC 1.0 and above shows objective messages to everyone,
 					// while beta only shows them to the current player.
 					if (status == OBJECTIVE_COMPLETE) {
@@ -417,18 +352,6 @@ void objectivesCheckAll(void)
 						strcat(buffer, langGet(L_MISC_047)); // "Failed"
 						objectivesShowHudmsg(buffer, HUDMSGTYPE_OBJECTIVEFAILED);
 					}
-#else
-					if (status == OBJECTIVE_COMPLETE) {
-						strcat(buffer, langGet(L_MISC_045)); // "Completed"
-						hudmsgCreateWithFlags(buffer, HUDMSGTYPE_OBJECTIVECOMPLETE, HUDMSGFLAG_ALLOWDUPES);
-					} else if (status == OBJECTIVE_INCOMPLETE) {
-						strcat(buffer, langGet(L_MISC_046)); // "Incomplete"
-						hudmsgCreateWithFlags(buffer, HUDMSGTYPE_OBJECTIVECOMPLETE, HUDMSGFLAG_ALLOWDUPES);
-					} else if (status == OBJECTIVE_FAILED) {
-						strcat(buffer, langGet(L_MISC_047)); // "Failed"
-						hudmsgCreateWithFlags(buffer, HUDMSGTYPE_OBJECTIVEFAILED, HUDMSGFLAG_ALLOWDUPES);
-					}
-#endif
 				}
 			}
 

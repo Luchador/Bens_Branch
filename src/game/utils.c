@@ -15,41 +15,28 @@ const char var7f1b7d30[] = "";
 const char var7f1b7d34[] = "Utils -> Attempt to normalise zeo length vector\n";
 
 void *var800ac0d0;
-u32 var800ac0d4;
-u32 var800ac0d8;
-u32 var800ac0dc;
-u32 var800ac0e0;
-u32 var800ac0e4;
 u8 *var800ac0e8[4];
-u32 var800ac0f8[4];
 
 f32 var800845d0 = 999999;
-f32 var800845d4 = 0.00001f;
-s32 var800845d8 = 1;
-struct coord var800845dc = {0, 0, 0};
-u32 var800845e8 = 0x00000000;
-u32 var800845ec = 0x3f800000;
-u32 var800845f0 = 0x00000000;
-struct coord var800845f4 = {0, 0, 1};
-u32 var80084600 = 0x3f800000;
-u32 var80084604 = 0x00000000;
-u32 var80084608 = 0x00000000;
-u32 var8008460c = 0xffffffff;
+f32 g_AlmostZero = 0.00001f;
+//s32 var800845d8 = 1;
+struct coord g_ZeroVector = {0, 0, 0};
+struct coord g_RightVector = {0, 0, 1};
 u8 *var80084610 = NULL;
 u8 *var80084614 = NULL;
 u8 *var80084618 = NULL;
-u32 var8008461c = 0x00000004;
-u32 var80084620 = 0x00000000;
 
-void func0f176d70(s32 arg0)
+// Not used
+/*void func0f176d70(s32 arg0)
 {
 	var800845d8 = arg0;
-}
+}*/
 
-s32 func0f176d7c(void)
+// Not used
+/*s32 func0f176d7c(void)
 {
 	return var800845d8;
-}
+}*/
 
 u32 align4(u32 arg0)
 {
@@ -81,7 +68,6 @@ uintptr_t align32(uintptr_t arg0)
 void utilsInit(void)
 {
 	s32 i;
-	u32 stack;
 	u32 slotssize = 0x1900;
 	u32 allocsize;
 
@@ -105,99 +91,94 @@ void utilsInit(void)
 	var80084614 = var80084610;
 }
 
-s32 func0f176eb0(s32 arg0, s32 arg1)
+// Not used
+/*s32 func0f176eb0(s32 arg0, s32 arg1)
 {
 	if (arg0 % arg1 == 0) {
 		return arg0;
 	}
 
 	return (arg0 / arg1 + 1) * arg1;
-}
+}*/
 
-void func0f176f34(struct coord *a, struct coord *b, struct coord *out)
+// Not used
+/*void func0f176f34(struct coord *a, struct coord *b, struct coord *out)
 {
 	out->x = a->x + b->x;
 	out->y = a->y + b->y;
 	out->z = a->z + b->z;
-}
+}*/
 
-void func0f176f68(struct coord *a, struct coord *b, struct coord *c, struct coord *out)
+// Not used
+/*void func0f176f68(struct coord *a, struct coord *b, struct coord *c, struct coord *out)
 {
 	out->x = a->x + b->x + c->x;
 	out->y = a->y + b->y + c->y;
 	out->z = a->z + b->z + c->z;
-}
+}*/
 
-void func0f176fb4(struct coord *a, struct coord *b, struct coord *c, struct coord *d, struct coord *out)
+// Not used
+/*void func0f176fb4(struct coord *a, struct coord *b, struct coord *c, struct coord *d, struct coord *out)
 {
 	out->x = a->x + b->x + c->x + d->x;
 	out->y = a->y + b->y + c->y + d->y;
 	out->z = a->z + b->z + c->z + d->z;
-}
+}*/
 
-void func0f17701c(struct coord *a, struct coord *b, struct coord *out)
+// Not used
+/*void func0f17701c(struct coord *a, struct coord *b, struct coord *out)
 {
 	out->x = b->x - a->x;
 	out->y = b->y - a->y;
 	out->z = b->z - a->z;
-}
+}*/
 
-void func0f177050(struct coord *a, f32 mult, struct coord *out)
+// Not used
+/*void func0f177050(struct coord *a, f32 mult, struct coord *out)
 {
 	out->x = a->x * mult;
 	out->y = a->y * mult;
 	out->z = a->z * mult;
-}
+}*/
 
-f32 func0f17707c(struct coord *a, struct coord *b)
+// Not used
+/*f32 func0f17707c(struct coord *a, struct coord *b)
 {
 	return a->x * b->x + a->y * b->y + a->z * b->z;
-}
+}*/
 
-void func0f1770ac(struct coord *a, struct coord *b, struct coord *out)
+// Calculates in cross product and returns the result in left-handed coordinates. Used in wallhit.c, but nothing is done with the result.
+/*void utilsCalcLeftHandedCross(struct coord *a, struct coord *b, struct coord *out)
 {
 	out->x = a->y * b->z - a->z * b->y;
 	out->y = -(a->x * b->z - a->z * b->x);
 	out->z = a->x * b->y - a->y * b->x;
-}
+}*/
 
-void func0f177120(struct coord *in, struct coord *out)
+bool normalizeVector(struct coord *invec, struct coord *normalizedvec, u32 line, char *file)
 {
-	out->x = in->x;
-	out->y = in->y;
-	out->z = in->z;
-}
-
-void func0f17713c(struct coord *in, struct coord *out)
-{
-	out->x = -in->x;
-	out->y = -in->y;
-	out->z = -in->z;
-}
-
-bool func0f177164(struct coord *arg0, struct coord *arg1, u32 line, char *file)
-{
-	f32 sqdist = arg0->x * arg0->x + arg0->y * arg0->y + arg0->z * arg0->z;
+	f32 sqdist = invec->x * invec->x + invec->y * invec->y + invec->z * invec->z;
 	f32 mult;
 
-	if (sqdist < var800845d4) {
-		arg0->x = var800845f4.x;
-		arg0->y = var800845f4.y;
-		arg0->z = var800845f4.z;
+	if (sqdist < g_AlmostZero) {
+		invec->x = g_RightVector.x;
+		invec->y = g_RightVector.y;
+		invec->z = g_RightVector.z;
 
 		return false;
 	}
 
 	mult = 1.0f / sqrtf(sqdist);
 
-	arg1->x = arg0->x * mult;
-	arg1->y = arg0->y * mult;
-	arg1->z = arg0->z * mult;
+	normalizedvec->x = invec->x * mult;
+	normalizedvec->y = invec->y * mult;
+	normalizedvec->z = invec->z * mult;
 
 	return true;
 }
 
-bool func0f177230(struct coord *a, struct coord *b, struct coord *c)
+// Not used
+/*bool func0f177230(struct coord *a, struct coord *b, struct coord *c)
 {
 	struct coord diff;
 	diff.x = a->x - b->x;
@@ -205,9 +186,10 @@ bool func0f177230(struct coord *a, struct coord *b, struct coord *c)
 	diff.z = a->z - b->z;
 
 	return diff.x * c->x + diff.y * c->y + diff.z * c->z > 0;
-}
+}*/
 
-bool func0f177298(struct coord *a, struct coord *b, struct coord *c)
+// Not used
+/*bool func0f177298(struct coord *a, struct coord *b, struct coord *c)
 {
 	struct coord diff;
 	diff.x = a->x - b->x;
@@ -215,32 +197,33 @@ bool func0f177298(struct coord *a, struct coord *b, struct coord *c)
 	diff.z = a->z - b->z;
 
 	return diff.x * c->x + diff.y * c->y + diff.z * c->z < 0;
-}
+}*/
 
-bool func0f177300(struct coord *a, struct coord *b)
+// Not used
+/*bool func0f177300(struct coord *a, struct coord *b)
 {
 	f32 diff = a->x - b->x;
 
-	if (ABS(diff) < var800845d4) {
+	if (ABS(diff) < g_AlmostZero) {
 		diff = a->y - b->y;
 
-		if (ABS(diff) < var800845d4) {
+		if (ABS(diff) < g_AlmostZero) {
 			diff = a->z - b->z;
 
-			if (ABS(diff) < var800845d4) {
+			if (ABS(diff) < g_AlmostZero) {
 				return true;
 			}
 		}
 	}
 
 	return false;
-}
+}*/
 
-bool func0f1773c8(struct coord *a, struct coord *b)
+bool isPointInBBox(struct coord *point, struct coord *bbox)
 {
-	if (a->x < b->x && -b->x < a->x
-			&& a->y < b->y && -b->y < a->y
-			&& a->z < b->z && -b->z < a->z) {
+	if (point->x < bbox->x && -bbox->x < point->x
+			&& point->y < bbox->y && -bbox->y < point->y
+			&& point->z < bbox->z && -bbox->z < point->z) {
 		return true;
 	}
 
@@ -256,19 +239,20 @@ f32 coordsGetDistance(struct coord *a, struct coord *b)
 	return sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 }
 
-bool func0f1774b4(struct coord *arg0, struct coord *arg1, struct coord *out)
+// Not used
+/*bool func0f1774b4(struct coord *arg0, struct coord *arg1, struct coord *out)
 {
 	struct coord a;
 	struct coord b;
 	struct coord c;
 	f32 mult;
 
-	if (!func0f177164(arg1, &a, 702, "utils.c")) {
+	if (!normalizeVector(arg1, &a, 702, "utils.c")) {
 		osSyncPrintf("UTILS -> DEBUG ERROR - UM_fVec3_MakeNormalTo - Cant normalise\n");
 		return false;
 	}
 
-	if (!func0f177164(arg0, &b, 710, "utils.c")) {
+	if (!normalizeVector(arg0, &b, 710, "utils.c")) {
 		osSyncPrintf("UTILS -> DEBUG ERROR - UM_fVec3_MakeNormalTo - Cant normalise\n");
 		return false;
 	}
@@ -284,9 +268,10 @@ bool func0f1774b4(struct coord *arg0, struct coord *arg1, struct coord *out)
 	out->z = b.z + c.z;
 
 	return true;
-}
+}*/
 
-void func0f17758c(f32 *arg0, f32 *arg1, struct coord *arg2, f32 *arg3)
+// Not used
+/*void func0f17758c(f32 *arg0, f32 *arg1, struct coord *arg2, f32 *arg3)
 {
 	f32 a = arg0[0] - arg1[0];
 	f32 b = arg0[1] - arg1[1];
@@ -300,15 +285,16 @@ void func0f17758c(f32 *arg0, f32 *arg1, struct coord *arg2, f32 *arg3)
 	arg3[0] = a + arg0[0];
 	arg3[1] = b + arg0[1];
 	arg3[2] = c + arg0[2];
-}
+}*/
 
-void func0f177624(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3)
+// Not used
+/*void func0f177624(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3)
 {
 	f32 dist;
 	f32 tmpx;
 	f32 tmpz;
 
-	func0f177164(arg0, arg1, 771, "utils.c");
+	normalizeVector(arg0, arg1, 771, "utils.c");
 
 	dist = sqrtf(arg1->x * arg1->x + arg1->z * arg1->z);
 
@@ -322,11 +308,12 @@ void func0f177624(struct coord *arg0, struct coord *arg1, struct coord *arg2, st
 	arg3->x = arg1->y * tmpz;
 	arg3->y = -dist;
 	arg3->z = arg1->y * arg2->z;
-}
+}*/
 
 const char var7f1b7e00[] = "WARNING - UTILS -> DEBUG - Triangle passed to Planar Poly Test\n";
 
-f32 func0f1776cc(struct coord *a, struct coord *b, struct coord *c)
+// Not used
+/*f32 func0f1776cc(struct coord *a, struct coord *b, struct coord *c)
 {
 	f32 xdiff = c->x - a->x;
 	f32 ydiff = c->y - a->y;
@@ -334,14 +321,15 @@ f32 func0f1776cc(struct coord *a, struct coord *b, struct coord *c)
 
 	f32 sqdist = xdiff * b->x + ydiff * b->y + zdiff * b->z;
 
-	if (sqdist < var800845d4 && sqdist > -var800845d4) {
+	if (sqdist < g_AlmostZero && sqdist > -g_AlmostZero) {
 		return var800845d0;
 	}
 
 	return (xdiff * xdiff + ydiff * ydiff + zdiff * zdiff) / sqdist;
-}
+}*/
 
-bool func0f17776c(struct coord *a, struct coord *b, f32 mult, struct coord *out)
+// Not used
+/*bool func0f17776c(struct coord *a, struct coord *b, f32 mult, struct coord *out)
 {
 	struct coord tmp;
 	tmp.x = b->x * mult;
@@ -353,26 +341,19 @@ bool func0f17776c(struct coord *a, struct coord *b, f32 mult, struct coord *out)
 	out->z = a->z + tmp.z;
 
 	return true;
-}
+}*/
 
-bool func0f1777b8(struct coord *a, struct coord *b, struct coord *c, struct coord *out)
+// Not used
+/*bool func0f1777b8(struct coord *a, struct coord *b, struct coord *c, struct coord *out)
 {
 	f32 mult = func0f1776cc(a, b, c);
 	func0f17776c(a, b, mult, out);
 
 	return true;
-}
+}*/
 
-void utilsReset(void)
-{
-	s32 i;
-
-	for (i = 0; i < ARRAYCOUNT(var800ac0f8); i++) {
-		var800ac0f8[i] = 0;
-	}
-}
-
-bool func0f17781c(struct coord *arg0, s32 arg1)
+// Not used
+/*bool func0f17781c(struct coord *arg0, s32 arg1)
 {
 	s32 i;
 	struct coord sp78;
@@ -393,16 +374,16 @@ bool func0f17781c(struct coord *arg0, s32 arg1)
 	sp6c.y = arg0[2].y - arg0[0].y;
 	sp6c.z = arg0[2].z - arg0[0].z;
 
-	func0f1770ac(&sp78, &sp6c, &sp60);
+	utilsCalcLeftHandedCross(&sp78, &sp6c, &sp60);
 
-	func0f177164(&sp60, &sp60, 1101, "utils.c");
+	normalizeVector(&sp60, &sp60, 1101, "utils.c");
 
 	for (i = 3; i < arg1; i++) {
 		sp50.x = arg0[i].x - arg0[0].x;
 		sp50.y = arg0[i].y - arg0[0].y;
 		sp50.z = arg0[i].z - arg0[0].z;
 
-		func0f177164(&sp50, &sp50, 1109, "utils.c");
+		normalizeVector(&sp50, &sp50, 1109, "utils.c");
 
 		f0 = sp50.x * sp60.x + sp50.y * sp60.y + sp50.z * sp60.z;
 
@@ -412,44 +393,7 @@ bool func0f17781c(struct coord *arg0, s32 arg1)
 	}
 
 	return true;
-}
-
-void func0f1779f0(u32 arg0, u32 arg1, u32 arg2, u32 arg3)
-{
-	u32 stack[2];
-
-	if (stack[0]) {
-		// empty
-	}
-}
-
-void func0f177a10(u32 arg0)
-{
-	// empty
-}
-
-void func0f177a14(u32 arg0, u32 arg1, u32 arg2, u32 arg3)
-{
-	u32 stack[2];
-
-	if (stack[0]) {
-		// empty
-	}
-}
-
-void func0f177a30(u32 arg0)
-{
-	// empty
-}
-
-void func0f177a38(u32 arg0, u32 arg1, u32 arg2, u32 arg3)
-{
-	u32 stack[2];
-
-	if (stack[0]) {
-		// empty
-	}
-}
+}*/
 
 s32 func0f177a54(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3)
 {
@@ -493,7 +437,8 @@ s32 func0f177a54(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3)
 	return v1;
 }
 
-u8 func0f177b44(u8 *arg0, s32 *arg1)
+// Not used
+/*u8 func0f177b44(u8 *arg0, s32 *arg1)
 {
 	static s32 var800ac108;
 
@@ -513,11 +458,11 @@ u8 func0f177b44(u8 *arg0, s32 *arg1)
 	*arg1 += 1;
 
 	return arg0[var800ac108++];
-}
+}*/
 
-const char var7f1b7e50[] = "UM_ZeroRunVerify_U8 - FAILED on item %d\n";
+//const char var7f1b7e50[] = "UM_ZeroRunVerify_U8 - FAILED on item %d\n";
 
-s32 func0f177bb4(u8 *arg0, s32 *arg1, s32 *arg2)
+/*s32 func0f177bb4(u8 *arg0, s32 *arg1, s32 *arg2)
 {
 	s32 result = 0;
 	s32 value;
@@ -563,7 +508,7 @@ s32 func0f177bb4(u8 *arg0, s32 *arg1, s32 *arg2)
 	*arg2 += 1;
 
 	return result;
-}
+}*/
 
 s32 func0f177c8c(u8 *arg0, s32 *arg1, s32 *arg2)
 {
@@ -598,7 +543,8 @@ s32 func0f177c8c(u8 *arg0, s32 *arg1, s32 *arg2)
 	return result;
 }
 
-bool func0f177d5c(u8 *arg0, u8 *arg1)
+// Not used
+/*bool func0f177d5c(u8 *arg0, u8 *arg1)
 {
 	s32 sp34 = 0; \
 	s32 sp30 = 0; \
@@ -613,4 +559,4 @@ bool func0f177d5c(u8 *arg0, u8 *arg1)
 	}
 
 	return true;
-}
+}*/

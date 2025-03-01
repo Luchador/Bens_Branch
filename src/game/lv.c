@@ -417,7 +417,6 @@ void lvReset(s32 stagenum)
 	} else {
 		s32 i;
 
-		utilsReset();
 		casingsReset();
 
 		for (i = 0; i < PLAYERCOUNT(); i++) {

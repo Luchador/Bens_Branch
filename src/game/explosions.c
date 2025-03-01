@@ -28,11 +28,7 @@
 #include "data.h"
 #include "types.h"
 
-#ifdef PLATFORM_N64
-#define SHAKE_TIME 6
-#else
 #define SHAKE_TIME 12
-#endif
 
 struct explosion *g_Explosions;
 s32 g_MaxExplosions;
@@ -40,9 +36,6 @@ s32 g_MaxExplosions;
 s32 g_ExplosionShakeTotalTimer = 0;
 s32 g_ExplosionShakeIntensityTimer = 0;
 f32 g_ExplosionDamageTxScale = 1;
-u32 var8007e4ac = 0x0000004b;
-u32 var8007e4b0 = 0x000001e0;
-u32 var8007e4b4 = 0x000000a8;
 
 struct explosiontype g_ExplosionTypes[] = {
 	//       rangeh
@@ -207,41 +200,11 @@ void explosionAlertChrs(f32 *radius, struct coord *noisepos)
 			}
 		}
 	}
-
-#if PIRACYCHECKS
-	{
-		u32 checksum = 0;
-		s32 *ptr = (s32 *)&glassDestroy;
-
-		while (ptr < end) {
-			checksum ^= *ptr;
-			checksum <<= 1;
-			ptr++;
-		}
-
-		if (checksum != CHECKSUM_PLACEHOLDER) {
-			struct explosiontype *type = &g_ExplosionTypes[0];
-			s32 i;
-
-			for (i = 0; i != ARRAYCOUNT(g_ExplosionTypes) - 1; i++) {
-				type->rangeh = 80;
-				type->rangev = 60;
-				type->changerateh = 15;
-				type->changeratev = 5;
-				type->innersize = 1500;
-				type->blastradius = 200;
-				type->damageradius = 3600;
-				type++;
-			}
-		}
-	}
-#endif
 }
 
 bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exprooms,
 		s16 type, s32 playernum, bool makescorch, struct coord *arg6, RoomNum room, struct coord *arg8)
 {
-	u32 stack;
 	struct explosion *exp = NULL;
 	s32 i;
 
@@ -249,7 +212,7 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 		return false;
 	}
 
-	// Bullet holes: only crate the flame (explosion) if within 4 metres
+	// Bullet holes: only create the flame (explosion) if within 4 metres
 	if (type == EXPLOSIONTYPE_BULLETHOLE) {
 		f32 lodscale = camGetLodScaleZ();
 		struct coord *campos = &g_Vars.currentplayer->cam_pos;
@@ -323,11 +286,8 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 			RoomNum otherroom;
 			RoomNum otherroom2;
 			f32 mult = 1;
-			s32 stack4;
 			s32 portalnum2;
 			struct coord spac;
-			u32 stack2;
-			u32 stack3;
 			s32 j;
 
 			expprop->type = PROPTYPE_EXPLOSION;
@@ -553,17 +513,6 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 	return exp != NULL;
 }
 
-/**
- * Start a shake without any explosion.
- *
- * This function is unused.
- */
-void explosionShake(void)
-{
-	g_ExplosionShakeTotalTimer = SHAKE_TIME;
-	g_ExplosionShakeIntensityTimer = SHAKE_TIME;
-}
-
 void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 {
 	u32 stack[4];
@@ -666,7 +615,6 @@ bool explosionOverlapsProp(struct explosion *exp, struct prop *prop, struct coor
 
 void explosionInflictDamage(struct prop *expprop)
 {
-	s32 stack;
 	struct explosion *exp = expprop->explosion;
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
 	s16 *propnumptr;
@@ -688,26 +636,15 @@ void explosionInflictDamage(struct prop *expprop)
 	if (isfirstframe) {
 		damageradius = type->damageradius;
 	} else {
-#if PAL
-		damageradius = type->blastradius + (type->damageradius - type->blastradius) * exp->age / (type->duration * 0.8333333f);
-#else
 		damageradius = type->blastradius + (type->damageradius - type->blastradius) * exp->age / type->duration;
-#endif
-
 		if (damageradius > type->damageradius) {
 			damageradius = type->damageradius;
 		}
 	}
 
-#if PAL
-	if (exp->age > (s32)((type->duration + 7.0f * type->flarespeed) * 0.8333333f)) {
-		return;
-	}
-#else
 	if (exp->age > (s32)(type->duration + 7.0f * type->flarespeed)) {
 		return;
 	}
-#endif
 
 	// Flicker room lighting
 	for (i = 0; expprop->rooms[i] != -1; i++) {
@@ -725,7 +662,7 @@ void explosionInflictDamage(struct prop *expprop)
 			f32 xdist = expprop->pos.f[0];
 			f32 ydist = expprop->pos.f[1];
 			f32 zdist = expprop->pos.f[2];
-			struct coord sp164;
+			struct coord lightrelpos;
 
 			xdist -= g_BgRooms[roomnum].pos.f[0];
 			ydist -= g_BgRooms[roomnum].pos.f[1];
@@ -734,19 +671,19 @@ void explosionInflictDamage(struct prop *expprop)
 			for (j = 0; j < numlights; j++) {
 				if (lightIsHealthy(roomnum, j)
 						&& lightIsVulnerable(roomnum, j)
-						&& lightGetBboxCentre(roomnum, j, &sp164)) {
-					struct coord sp158;
-					struct coord sp14c;
+						&& lightGetBboxCentre(roomnum, j, &lightrelpos)) {
+					struct coord explosionboxextent;
+					struct coord lighttoexpoffset;
 
-					sp14c.f[0] = sp164.f[0] - xdist; \
-					sp14c.f[1] = sp164.f[1] - ydist; \
-					sp14c.f[2] = sp164.f[2] - zdist;
+					lighttoexpoffset.f[0] = lightrelpos.f[0] - xdist; \
+					lighttoexpoffset.f[1] = lightrelpos.f[1] - ydist; \
+					lighttoexpoffset.f[2] = lightrelpos.f[2] - zdist;
 
-					sp158.f[0] = damageradius;
-					sp158.f[1] = damageradius;
-					sp158.f[2] = damageradius;
+					explosionboxextent.f[0] = damageradius;
+					explosionboxextent.f[1] = damageradius;
+					explosionboxextent.f[2] = damageradius;
 
-					if (func0f1773c8(&sp14c, &sp158)) {
+					if (isPointInBBox(&lighttoexpoffset, &explosionboxextent)) {
 						roomSetLightBroken(roomnum, j);
 					}
 				}
@@ -775,8 +712,6 @@ void explosionInflictDamage(struct prop *expprop)
 				xdist = prop->pos.x - expprop->pos.x;
 				ydist = prop->pos.y - expprop->pos.y;
 				zdist = prop->pos.z - expprop->pos.z;
-
-				if (candamage);
 
 #if VERSION >= VERSION_NTSC_1_0
 				if (obj)

@@ -514,9 +514,9 @@ void wallhitsTick(void)
 
 					wallhit->vertices2 = gfxAllocateVertices(4);
 
-					midx = var800845dc.x; \
-					midy = var800845dc.y; \
-					midz = var800845dc.z;
+					midx = g_ZeroVector.x; \
+					midy = g_ZeroVector.y; \
+					midz = g_ZeroVector.z;
 
 					// Copy the vertices into a float array
 					for (j = 0; j < ARRAYCOUNT(wallhit->vertices); j++) {
@@ -680,17 +680,12 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 	s32 i;
 	s32 room2;
 	u32 range;
-	struct coord sp100;
 
 	sp1b8.x = arg1->x;
 	sp1b8.y = arg1->y;
 	sp1b8.z = arg1->z;
 
-#if VERSION >= VERSION_NTSC_1_0
-	func0f177164(&sp1b8, &sp1b8, 956, "wallhit.c");
-#else
-	func0f177164(&sp1b8, &sp1b8, 955, "wallhit.c");
-#endif
+	normalizeVector(&sp1b8, &sp1b8, 956, "wallhit.c");
 
 #if VERSION >= VERSION_NTSC_1_0
 	paintball = chrIsUsingPaintball(chr);
@@ -827,9 +822,9 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 		sp1ac.f[1] = relpos->y;
 		sp1ac.f[2] = relpos->z;
 
-		xiszero = ABS(arg1->x) < var800845d4 ? true : false;
-		yiszero = ABS(arg1->y) < var800845d4 ? true : false;
-		ziszero = ABS(arg1->z) < var800845d4 ? true : false;
+		xiszero = ABS(arg1->x) < g_AlmostZero ? true : false;
+		yiszero = ABS(arg1->y) < g_AlmostZero ? true : false;
+		ziszero = ABS(arg1->z) < g_AlmostZero ? true : false;
 
 		if (xiszero && ziszero) {
 			sp1f4.x = -1.0f;
@@ -864,13 +859,8 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 			sp130.y = arg4[1];
 			sp130.z = arg4[2];
 
-#if VERSION >= VERSION_NTSC_1_0
-			func0f177164(&sp13c, &sp13c, 1151, "wallhit.c");
-			func0f177164(&sp130, &sp130, 1152, "wallhit.c");
-#else
-			func0f177164(&sp13c, &sp13c, 1142, "wallhit.c");
-			func0f177164(&sp130, &sp130, 1143, "wallhit.c");
-#endif
+			normalizeVector(&sp13c, &sp13c, 1151, "wallhit.c");
+			normalizeVector(&sp130, &sp130, 1152, "wallhit.c");
 
 			f0 = (sp13c.x * sp130.x + sp13c.y * sp130.y + sp13c.z * sp130.z) * -1.0f;
 
@@ -878,7 +868,8 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 			sp118.y = f0 * sp13c.y + sp130.y;
 			sp118.z = f0 * sp13c.z + sp130.z;
 
-			func0f1770ac(&sp13c, &sp118, &sp100);
+			//Calculates a cross product but nothing is done with it
+			//utilsCalcLeftHandedCross(&sp13c, &sp118, &sp100);
 
 			sp1f4.x = sp13c.x;
 			sp1f4.y = sp13c.y;

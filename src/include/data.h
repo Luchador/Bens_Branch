@@ -452,8 +452,8 @@ extern s32 g_LanguageId;
 #endif
 extern struct surfacetype *g_SurfaceTypes[15];
 extern u16 *g_ZbufPtr1;
-extern f32 var800845d4;
-extern struct coord var800845dc;
+extern f32 g_AlmostZero;
+extern struct coord g_ZeroVector;
 extern struct menudialogdef g_2PMissionInventoryHMenuDialog;
 extern struct menudialogdef g_2PMissionInventoryVMenuDialog;
 extern struct menudialogdef g_MpEndscreenChallengeCheatedMenuDialog;

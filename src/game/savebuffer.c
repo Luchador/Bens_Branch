@@ -13,11 +13,8 @@
 #include "data.h"
 #include "types.h"
 
-#if VERSION >= VERSION_NTSC_1_0
+
 Vp *var80070f10 = NULL;
-#else
-Vp var80070f10;
-#endif
 
 s32 var8009de90;
 s32 var8009de94;
@@ -31,7 +28,7 @@ void func0f0d4690(Mtxf *mtx)
 	mtx4LoadIdentity(mtx);
 
 	pos.x = -159.75f;
-	pos.y = PAL ? 136.25f : 120.25f;
+	pos.y = 120.25f;
 	pos.z = 0;
 
 	pos.x = (.5f - viGetWidth()) * 0.5f;

@@ -1026,13 +1026,13 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 			sp80.y = -sp8c.y;
 			sp80.z = -sp8c.z;
 
-			func0f177164(&sp98, &spa4, VERSION >= VERSION_NTSC_1_0 ? 1546 : 1570, "dlights.c");
+			normalizeVector(&sp98, &spa4, VERSION >= VERSION_NTSC_1_0 ? 1546 : 1570, "dlights.c");
 
 			spa4.x += sp80.x;
 			spa4.y += sp80.y;
 			spa4.z += sp80.z;
 
-			func0f177164(&spa4, &spa4, VERSION >= VERSION_NTSC_1_0 ? 1548 : 1572, "dlights.c");
+			normalizeVector(&spa4, &spa4, VERSION >= VERSION_NTSC_1_0 ? 1548 : 1572, "dlights.c");
 
 			room = (void *) (roomnum * sizeof(struct bgroom));
 

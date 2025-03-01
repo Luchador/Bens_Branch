@@ -10,19 +10,9 @@
 
 u8 g_InGameSubtitles = 1;
 u8 g_CutsceneSubtitles = 0;
-u32 var8007fa98 = 0x00000000;
-u32 var8007fa9c = 0x00000001;
-u32 var8007faa0 = 0x00000000;
-u32 var8007faa4 = 0x00000001;
-u32 var8007faa8 = 0x00000001;
-u32 var8007faac = 0x00000001;
 s32 g_ScreenSize = SCREENSIZE_FULL;
 s32 g_ScreenRatio = SCREENRATIO_NORMAL;
 u8 g_ScreenSplit = SCREENSPLIT_HORIZONTAL;
-
-#if VERSION < VERSION_NTSC_1_0
-u16 var8008231cnb = 0x7fff;
-#endif
 
 s32 optionsGetControlMode(s32 mpchrnum)
 {
@@ -234,10 +224,6 @@ void optionsSetHeadRoll(s32 mpchrnum, bool enable)
 
 s32 optionsGetEffectiveScreenSize(void)
 {
-	if (IS4MB()) {
-		return SCREENSIZE_FULL;
-	}
-
 	if (g_MenuData.root == MENUROOT_TRAINING) {
 		g_MpPlayerNum = 0;
 
@@ -252,22 +238,6 @@ s32 optionsGetEffectiveScreenSize(void)
 				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_SoloMissionControlStyleMenuDialog) {
 			return SCREENSIZE_FULL;
 		}
-
-#if VERSION >= VERSION_JPN_FINAL
-		if (g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsFunMenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsGameplayMenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsSoloWeaponsMenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsClassicWeaponsMenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsWeaponsMenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsBuddiesMenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsMenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_AcceptMissionMenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_PreAndPostMissionBriefingMenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_RetryMissionMenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_NextMissionMenuDialog) {
-			return SCREENSIZE_FULL;
-		}
-#endif
 	}
 
 	if (PLAYERCOUNT() >= 2 || g_MenuData.root == MENUROOT_MPSETUP) {
@@ -277,12 +247,10 @@ s32 optionsGetEffectiveScreenSize(void)
 	return g_ScreenSize;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 s32 optionsGetScreenSize(void)
 {
 	return g_ScreenSize;
 }
-#endif
 
 void optionsSetScreenSize(s32 size)
 {
@@ -296,11 +264,7 @@ s32 optionsGetScreenRatio(void)
 
 void optionsSetScreenRatio(s32 ratio)
 {
-#ifdef PLATFORM_N64
-	g_ScreenRatio = ratio;
-#else
 	g_ScreenRatio = SCREENRATIO_NORMAL;
-#endif
 }
 
 u8 optionsGetScreenSplit(void)
@@ -315,23 +279,10 @@ void optionsSetScreenSplit(u8 split)
 
 u16 optionsGetMusicVolume(void)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	return musicGetVolume();
-#else
-	if (g_Vars.stagenum == STAGE_CREDITS) {
-		return 0x7fff;
-	}
-
-	return var8008231cnb;
-#endif
 }
 
 void optionsSetMusicVolume(u16 volume)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	musicSetVolume(volume);
-#else
-	var8008231cnb = volume;
-	musicSetVolume(var8008231cnb);
-#endif
 }
