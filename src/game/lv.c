@@ -1371,7 +1371,7 @@ Gfx *lvRender(Gfx *gdl)
 				propsTestForPickup();
 
 				gdl = bgRender(gdl);
-				chr0f028498(var80075d68 == 15 || g_AnimHostEnabled);
+				chr0f028498(var80075d68 == 15);
 				gdl = propsRenderBeams(gdl);
 				gdl = shardsRender(gdl);
 				gdl = sparksRender(gdl);

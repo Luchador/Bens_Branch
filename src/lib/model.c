@@ -87,7 +87,6 @@ u32 var8005efb0 = 0;
 
 bool g_ModelDistanceDisabled = false;
 f32 g_ModelDistanceScale = 1;
-bool var8005efbc = false;
 f32 var8005efc0 = 0;
 bool (*var8005efc4)(struct model *model, struct modelnode *node) = NULL;
 
@@ -1712,7 +1711,7 @@ f32 modelGetEffectiveAnimSpeed(struct model *model)
 s32 modelConstrainOrWrapAnimFrame(s32 frame, s16 animnum, f32 endframe)
 {
 	if (frame < 0) {
-		if (var8005efbc || (g_Anims[animnum].flags & ANIMFLAG_LOOP)) {
+		if (g_Anims[animnum].flags & ANIMFLAG_LOOP) {
 			frame = animGetNumFrames(animnum) - (-frame % animGetNumFrames(animnum));
 		} else {
 			frame = 0;
@@ -1720,7 +1719,7 @@ s32 modelConstrainOrWrapAnimFrame(s32 frame, s16 animnum, f32 endframe)
 	} else if (endframe >= 0 && frame > (s32)endframe) {
 		frame = ceiltoint(endframe);
 	} else if (frame >= animGetNumFrames(animnum)) {
-		if (var8005efbc || (g_Anims[animnum].flags & ANIMFLAG_LOOP)) {
+		if (g_Anims[animnum].flags & ANIMFLAG_LOOP) {
 			frame = frame % animGetNumFrames(animnum);
 		} else {
 			frame = animGetNumFrames(animnum) - 1;

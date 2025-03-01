@@ -39,7 +39,6 @@ u8 *g_AnimToHeaderSlot = NULL;
 s16 *var8005f014 = NULL;
 s32 g_AnimMaxBytesPerFrame = 176;
 s32 g_AnimMaxHeaderLength = 608;
-bool g_AnimHostEnabled = false;
 u8 *g_AnimHostSegment = NULL;
 
 #ifndef PLATFORM_N64
@@ -96,7 +95,6 @@ void animsInit(void)
 	animsInitTables();
 
 	g_AnimHostSegment = NULL;
-	g_AnimHostEnabled = false;
 }
 
 void animsInitTables(void)
@@ -124,7 +122,6 @@ void animsReset(void)
 {
 	g_NumAnimations = g_NumRomAnimations;
 	g_Anims = g_RomAnims;
-	g_AnimHostEnabled = false;
 }
 
 s32 animGetNumFrames(s16 animnum)
@@ -146,10 +143,10 @@ extern u8 EXT_SEG _animationsSegmentRomStart;
 
 u8 *animDma(u8 *dst, u32 segoffset, u32 len)
 {
-	if (g_AnimHostEnabled) {
+	/*if (g_AnimHostEnabled) {
 		bcopy(&g_AnimHostSegment[segoffset], dst, len);
 		return dst;
-	}
+	}*/
 
 	return dmaExecWithAutoAlign(dst, (romptr_t) REF_SEG _animationsSegmentRomStart + segoffset, len);
 }

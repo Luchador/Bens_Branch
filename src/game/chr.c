@@ -36,6 +36,7 @@
 #include "game/propobj.h"
 #include "game/splat.h"
 #include "game/wallhit.h"
+#include "system.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/main.h"
@@ -44,6 +45,7 @@
 #include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
+#include "game/debug.h"
 #include "data.h"
 #include "gbiex.h"
 #include "types.h"
@@ -69,8 +71,6 @@ s32 var80062964 = 0;
 f32 g_ChrAnimSpeed = 0;
 bool var8006296c = false;
 s32 g_SelectedAnimNum = 0;
-u32 var80062974 = 0x00000000;
-u32 var80062978 = 0x00000000;
 u32 var8006297c = 0;
 u32 var80062980 = 0;
 s32 g_NextChrnum = 5000;
@@ -214,7 +214,6 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 	f32 movex;
 	f32 movez;
 	struct prop *prop = chr->prop;
-	u32 stack;
 	f32 halfradius;
 	struct defaultobj *chair = NULL;
 	s32 cdresult;
@@ -534,26 +533,20 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 	f32 yincrement = 0.0f;
 	bool inlift;
 	u16 floorflags = 0;
-#if VERSION >= VERSION_NTSC_1_0
 	s32 lvupdate240;
 	f32 lvupdate60f;
 	f32 lvupdate60freal;
 	struct coord spd0;
 	RoomNum spc0[8];
-#endif
 
 	// NTSC beta reads g_Vars lvupdate properties throughout this function,
 	// while NTSC 1.0 and newer copy them into stack variables at the start.
 	// A macro is used here for readability
-#if VERSION >= VERSION_NTSC_1_0
 	lvupdate240 = g_Vars.lvupdate240;
 	lvupdate60f = g_Vars.lvupdate60f;
 	lvupdate60freal = g_Vars.lvupdate60freal;
 
 #define VAR(property) property
-#else
-#define VAR(property) g_Vars.property
-#endif
 
 	if (g_Anims[model->anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) {
 		if (chr->hidden & CHRHFLAG_00020000) {
@@ -583,7 +576,6 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 			f32 move[2] = {0, 0};
 
 			if (VAR(lvupdate240) > 0) {
-#if VERSION >= VERSION_NTSC_1_0
 				if (chr->aibot->forceslowupdates != 0) {
 					// forceslowupdates is set when the bot is being saved from
 					// falling out of bounds due to high lag. It forces them to
@@ -609,9 +601,6 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 				}
 
 				bot0f1921f8(chr, move, lvupdate240, lvupdate60freal);
-#else
-				bot0f1921f8(chr, move);
-#endif
 			}
 
 			arg2->x = arg1->x + move[0];
@@ -735,11 +724,9 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 
 			dist = sqrtf(xdiff * xdiff + zdiff * zdiff);
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (dist > 100.0f) {
 				dist = 100.0f;
 			}
-#endif
 
 			yincrement += dist;
 
@@ -767,18 +754,11 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 				&& chr->act_skjump.state == SKJUMPSTATE_AIRBORNE
 				&& !chr->act_skjump.needsnewanim
 				&& g_Vars.lvupdate60 != 0) {
-#if VERSION >= VERSION_NTSC_1_0
 			if (chr0f01f264(chr, arg2, spfc, yincrement, true)) {
 				chr->manground += yincrement;
 			}
-#else
-			if (chr0f01f264(chr, arg2, spfc, yincrement)) {
-				chr->manground += yincrement;
-				arg2->y += yincrement;
-			}
-#endif
 
-			chr->sumground = chr->manground * (PAL ? 8.4175090789795f : 9.999998f);
+			chr->sumground = chr->manground * 10.0f;
 			chr->ground = chr->manground;
 			arg2->y -= chr->manground;
 		} else {
@@ -793,16 +773,9 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 			u8 die;
 
 			if (chr->onladder) {
-#if VERSION >= VERSION_NTSC_1_0
 				if (chr0f01f264(chr, arg2, spfc, yincrement, true)) {
 					chr->manground += yincrement;
 				}
-#else
-				if (chr0f01f264(chr, arg2, spfc, yincrement)) {
-					chr->manground += yincrement;
-					arg2->y += yincrement;
-				}
-#endif
 
 				chr->sumground = chr->manground * (PAL ? 8.4175090789795f : 9.999998f);
 				chr->ground = chr->manground;
@@ -834,7 +807,6 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 					ground = cdFindGroundInfoAtCyl(sp98, chr->radius, sp94,
 							&chr->floorcol, &chr->floortype, &floorflags, &chr->floorroom, &inlift, &lift);
 
-#if VERSION >= VERSION_NTSC_1_0
 					if (chr->aibot
 							&& chr->aibot->forceslowupdates == 0
 							&& ground < -100000
@@ -857,7 +829,6 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 						ground = cdFindGroundInfoAtCyl(arg2, chr->radius, spfc,
 								&chr->floorcol, &chr->floortype, &floorflags, &chr->floorroom, &inlift, &lift);
 					}
-#endif
 
 					if (inlift) {
 						chr->inlift = true;
@@ -902,11 +873,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 
 						func0f0965e4(&yincrement, &sp68, VAR(lvupdate60freal));
 
-#if VERSION >= VERSION_NTSC_1_0
 						if (chr0f01f264(chr, arg2, spfc, yincrement, false))
-#else
-						if (chr0f01f264(chr, arg2, spfc, yincrement))
-#endif
 						{
 							chr->manground += yincrement;
 							chr->fallspeed.y = sp68;
@@ -959,7 +926,6 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 						}
 					}
 
-#if VERSION >= VERSION_NTSC_1_0
 					if (manground != chr->manground) {
 						spd0.x = arg2->x;
 						spd0.y = arg2->y;
@@ -972,12 +938,9 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 						func0f065e74(&spd0, spc0, arg2, spfc);
 						chr0f021fa8(chr, arg2, spfc);
 					}
-#endif
 				}
 
-#if VERSION < VERSION_NTSC_1_0
 				arg2->y += chr->manground - manground;
-#endif
 				arg2->y -= chr->manground;
 			}
 		}
@@ -990,9 +953,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 	prop->pos.z = arg2->z;
 
 	if (chr->actiontype == ACT_SKJUMP) {
-#if VERSION >= VERSION_NTSC_1_0
 		f32 ground;
-#endif
 
 		ground = chr->act_skjump.ground;
 
@@ -1006,7 +967,6 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 	propDeregisterRooms(prop);
 	roomsCopy(spfc, prop->rooms);
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (prop->type == PROPTYPE_CHR) {
 		for (i = 0; prop->rooms[i] != -1; i++) {
 			if (chr->floorroom == prop->rooms[i]) {
@@ -1017,7 +977,6 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 			}
 		}
 	}
-#endif
 
 	chr0f0220ac(chr);
 	propCalculateShadeColour(prop, chr->nextcol, chr->floorcol);
@@ -1221,7 +1180,8 @@ void chrInit(struct prop *prop, u8 *ailist)
 	chr->bdstart = 0;
 	chr->oldframe = 0;
 	chr->magicframe = 0;
-	chr->magicspeed = VERSION >= VERSION_PAL_BETA ? 1 : 0.25;
+	//chr->magicspeed = VERSION >= VERSION_PAL_BETA ? 1 : 0.25; // Magic speed much slower on NTSC?
+	chr->magicspeed = 0.25f;
 
 	i = 0;
 
@@ -1289,10 +1249,7 @@ void chrInit(struct prop *prop, u8 *ailist)
 	chr->timeshooter = 0;
 	chr->noblood = false;
 	chr->rtracked = false;
-
-#if VERSION >= VERSION_NTSC_1_0
 	chr->goposhitcount = 0;
-#endif
 
 	splatResetChr(chr);
 }
@@ -1318,7 +1275,7 @@ struct prop *chr0f020b14(struct prop *prop, struct model *model,
 	model->unk01 = 1;
 	chr->model = model;
 	chrSetLookAngle(chr, faceangle);
-	modelSetAnimPlaySpeed(model, PALUPF(g_ChrAnimSpeed), 0);
+	modelSetAnimPlaySpeed(model, g_ChrAnimSpeed, 0);
 
 	testpos.x = pos->x;
 	testpos.y = pos->y + 100;
@@ -1326,7 +1283,7 @@ struct prop *chr0f020b14(struct prop *prop, struct model *model,
 
 	chr->ground = chr->manground = ground = cdFindGroundInfoAtCyl(&testpos, chr->radius, rooms, &chr->floorcol, &chr->floortype, NULL, &chr->floorroom, NULL, NULL);
 
-	chr->sumground = ground * (PAL ? 8.4175090789795f : 9.999998f);
+	chr->sumground = ground * 10.0f;
 
 	prop->pos.x = testpos.x;
 	prop->pos.y = ground + 100;
@@ -1377,7 +1334,6 @@ void chrRemove(struct prop *prop, bool free)
 	struct model *model = chr->model;
 	struct defaultobj *eyespyobj = NULL;
 	struct prop *child;
-	u32 stack[2];
 
 	bgunFreeFireslotWrapper(chr->fireslots[0]);
 	bgunFreeFireslotWrapper(chr->fireslots[1]);
@@ -1474,7 +1430,7 @@ void chrClearReferences(s32 propnum)
 	}
 }
 
-void chrSetAnimSpeed(f32 newspeed)
+void chrSetAnimSpeed(f32 newspeed) // This function changes animation speed for NPCs. Could be useful for eventually implementing a fast or slow anims cheat. This function could be left over from GE for that reason.
 {
 	s32 i;
 
@@ -1482,12 +1438,12 @@ void chrSetAnimSpeed(f32 newspeed)
 
 	for (i = 0; i < g_NumChrSlots; i++) {
 		if (g_ChrSlots[i].model) {
-			modelSetAnimPlaySpeed(g_ChrSlots[i].model, PALUPF(g_ChrAnimSpeed), 600);
+			modelSetAnimPlaySpeed(g_ChrSlots[i].model, g_ChrAnimSpeed, 600);
 		}
 	}
 }
 
-f32 chrGetAnimSpeed(void)
+f32 chrGetAnimSpeed(void) // Not used
 {
 	return g_ChrAnimSpeed;
 }
@@ -1885,13 +1841,7 @@ void chr0f021fa8(struct chrdata *chr, struct coord *pos, RoomNum *rooms)
 	struct coord upper;
 	f32 height = 110;
 
-	if (
-#if VERSION >= VERSION_NTSC_1_0
-			chr && chr->race == RACE_EYESPY
-#else
-			chr->race == RACE_EYESPY
-#endif
-			) {
+	if (chr && chr->race == RACE_EYESPY) {
 		struct eyespy *eyespy = chrToEyespy(chr);
 
 		if (eyespy) {
@@ -1971,7 +1921,6 @@ void chr0f022214(struct chrdata *chr, struct prop *prop, bool fulltick)
 			&& (obj->flags2 & OBJFLAG2_INVISIBLE) == 0) {
 		Mtxf *sp104 = modelFindNodeMtx(model->attachedtomodel, model->attachedtonode, 0);
 		struct modelrenderdata thing = {NULL, 1, 3};
-		u32 stack;
 		Mtxf sp80;
 		Mtxf sp40;
 
@@ -2045,23 +1994,6 @@ void chrUncloak(struct chrdata *chr, bool value)
 		if (value) {
 			psCreate(0, chr->prop, SFX_CLOAK_OFF, -1, -1, 0, 0, PSTYPE_NONE, 0, -1, 0, -1, -1, -1, -1);
 		}
-
-#if PIRACYCHECKS
-		{
-			u32 checksum = 0;
-			u32 *i = (u32 *)&botPickupProp;
-			u32 *end = (u32 *)&botTestPropForPickup;
-
-			while (i < end) {
-				checksum += ~*i;
-				i++;
-			}
-
-			if (checksum != CHECKSUM_PLACEHOLDER) {
-				((u32 *)&cdReturnZero)[-2] = 0;
-			}
-		}
-#endif
 	}
 }
 
@@ -2381,7 +2313,6 @@ s32 chrTick(struct prop *prop)
 	struct coord sp17c;
 	f32 sp178;
 	struct hoverbikeobj *bike;
-	u8 stack[0x28];
 
 	if (prop->flags & PROPFLAG_NOTYETTICKED) {
 		fulltick = true;
@@ -2445,13 +2376,13 @@ s32 chrTick(struct prop *prop)
 				}
 			}
 
-			if (var80062974) {
+			/*if (var80062974) { //var80062974 is always 0
 				lvupdate240 = 0;
 
 				if (var80062978) {
 					lvupdate240 = 1;
 				}
-			}
+			}*/
 		}
 
 		if (chr->hidden & CHRHFLAG_DELETING) {
@@ -2683,7 +2614,6 @@ s32 chrTick(struct prop *prop)
 			mtx4MultMtx4InPlace(camGetWorldToScreenMtxf(), &sp1a8);
 			sp210.unk00 = &sp1a8;
 		} else if (prop->type == PROPTYPE_PLAYER) {
-			u8 stack[0x14];
 			f32 sp130;
 			player = g_Vars.players[playermgrGetPlayerNumByProp(prop)];
 
@@ -2818,7 +2748,6 @@ s32 chrTick(struct prop *prop)
 					Mtxf sp9c;
 					Mtxf sp5c;
 					s32 hattype = hatGetType(chr->weapons_held[2]);
-					u8 stack[0x0c];
 
 					index = chr->headnum - HEAD_SHAUN;
 
@@ -2955,20 +2884,13 @@ void chrDropItemsForOwnerReap(struct chrdata *chr)
 	chr->hidden |= CHRHFLAG_DROPPINGITEM;
 }
 
-u8 var80062a48[] = { 64, 10, 10 };
+u8 chrbloodstaincolour[] = { 64, 10, 10 }; //Default blood color
 
-void chr0f0246e4(u8 *arg0)
+void chrSetBloodColour(u8 *arg0)
 {
-	var80062a48[0] = arg0[0];
-	var80062a48[1] = arg0[1];
-	var80062a48[2] = arg0[2];
-}
-
-void chr0f024708(u8 *arg0)
-{
-	arg0[0] = var80062a48[0];
-	arg0[1] = var80062a48[1];
-	arg0[2] = var80062a48[2];
+	chrbloodstaincolour[0] = arg0[0];
+	chrbloodstaincolour[1] = arg0[1];
+	chrbloodstaincolour[2] = arg0[2];
 }
 
 void chr0f02472c(void)
@@ -3259,7 +3181,6 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 void chrRenderAttachedObject(struct prop *prop, struct modelrenderdata *renderdata, bool xlupass, struct chrdata *chr)
 {
 	if (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
-		u32 stack;
 		struct defaultobj *obj = prop->obj;
 		struct model *model = obj->model;
 		struct prop *child;
@@ -3357,8 +3278,8 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 	struct eyespy *eyespy;
 	struct prop *child;
 	f32 xrayalphafrac;
-	u8 spec[4];
-	u8 speb = 0;
+	u8 bloodcolour[4];
+	u8 highlightcolour = 0; // Used to highlight characters in Combat Simulator
 
 	// Don't render the eyespy if we're the one controlling it
 	if (CHRRACE(chr) == RACE_EYESPY) {
@@ -3385,8 +3306,8 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		alpha = (f32)alpha * (TICKS(120) - chr->aibot->fadeintimer60) * (1.0f / TICKS(120));
 	}
 
-	chrGetBloodColour(chr->bodynum, spec, NULL);
-	chr0f0246e4(spec);
+	chrGetBloodColour(chr->bodynum, bloodcolour, NULL);
+	chrSetBloodColour(bloodcolour);
 	alpha *= objCalculateFadeDistOpacityFrac(prop, modelGetEffectiveScale(model));
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
@@ -3440,7 +3361,6 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		struct modelrenderdata renderdata = {0, 1, 3};
 		struct screenbox screenbox;
 		s32 colour[4]; // rgba levels, but allowing > 256 temporarily
-		u32 stack;
 
 		if (xlupass && chr->cloakfadefrac > 0 && !chr->cloakfadefinished) {
 			gdl = chrRenderCloak(gdl, chr->prop, chr->prop);
@@ -3470,10 +3390,10 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		}
 
 		if (g_Vars.normmplayerisrunning) {
-			speb = scenarioHighlightProp(prop, colour);
+			highlightcolour = scenarioHighlightProp(prop, colour);
 		}
 
-		if (!speb) {
+		if (!highlightcolour) {
 			colour[3] = colour[3] - func0f068fc8(prop, true);
 
 			if (colour[3] > 0xff) {
@@ -3503,7 +3423,7 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 			colour[3] = 0xff;
 		}
 
-		renderdata.envcolour = var80062a48[0] << 24 | var80062a48[1] << 16 | var80062a48[2] << 8;
+		renderdata.envcolour = chrbloodstaincolour[0] << 24 | chrbloodstaincolour[1] << 16 | chrbloodstaincolour[2] << 8; //Set blood stain color
 		renderdata.fogcolour = colour[0] << 24 | colour[1] << 16 | colour[2] << 8 | colour[3];
 
 		if (alpha < 0xff) {
@@ -3878,11 +3798,7 @@ void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struc
 			}
 
 			while (true) {
-#ifdef PLATFORM_N64
-				s32 op = *(s8 *)&gdlptr->words.w0;
-#else
 				s32 op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
-#endif
 
 				if (op == G_ENDDL) {
 					if (gdlptr2) {
@@ -4180,11 +4096,7 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
 				}
 
 				while (true) {
-#ifdef PLATFORM_N64
-				s32 op = *(s8 *)&gdlptr->words.w0;
-#else
 				s32 op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
-#endif
 
 					if (op == G_ENDDL) {
 						if (gdlptr2) {
@@ -4302,7 +4214,6 @@ void chrDisfigure(struct chrdata *chr, struct coord *exppos, f32 damageradius)
 	Col *colours;
 	struct model *model = chr->model;
 	Vtx *vertices;
-	u32 stack;
 	Gfx *gdlptr;
 	Gfx *gdlptr2;
 	struct modelnode *posnode = NULL;
@@ -4375,11 +4286,7 @@ void chrDisfigure(struct chrdata *chr, struct coord *exppos, f32 damageradius)
 					}
 
 					while (true) {
-#ifdef PLATFORM_N64
-						s32 op = *(s8 *)&gdlptr->words.w0;
-#else
 						s32 op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
-#endif
 
 						if (op == G_ENDDL) {
 							if (gdlptr2 == NULL) {
@@ -4726,40 +4633,15 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 					}
 				}
 
-				// Drop gun
-				if (chr->aibot == NULL && (chr->flags & CHRFLAG0_CANLOSEGUN)) {
-					chr->gunprop = hit->prop;
-					objSetDropped(hit->prop, DROPTYPE_DEFAULT);
-					chr->hidden |= CHRHFLAG_DROPPINGITEM;
-				}
-			} else if (hit->hitpart == HITPART_HAT) {
-				// Shot a chr's hat
-				struct surfacetype *type;
-				s32 index;
-
-				// Create decal depending on the hat's surface type
-				if (hit->hitthing.texturenum < 0) {
-					type = g_SurfaceTypes[0];
-				} else {
-					type = g_SurfaceTypes[g_Textures[hit->hitthing.texturenum].surfacetype];
-				}
-
-				index = rngRandom() % type->numwallhittexes;
-
-				wallhitCreate(
-						&hit->hitthing.pos,
-						&hit->hitthing.unk0c,
-						&shotdata->gunpos3d,
-						0,
-						0,
-						type->wallhittexes[index],
-						1,
-						chr->weapons_held[2],
-						hit->mtxindex,
-						0,
-						g_Vars.currentplayer->prop->chr,
-						0);
-			} else {
+					// Drop gun
+					if (chr->aibot == NULL && (chr->flags & CHRFLAG0_CANLOSEGUN)) 
+					{
+						chr->gunprop = hit->prop;
+						objSetDropped(hit->prop, DROPTYPE_DEFAULT);
+						chr->hidden |= CHRHFLAG_DROPPINGITEM;
+					}
+				} 
+				 else {
 				// Shot a chr in the flesh
 				s32 race = CHRRACE(chr);
 				struct coord sp5c;
@@ -4769,7 +4651,6 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				mtx0001719c(sp58->m, spb0.m);
 				mtx4TransformVec(&spb0, &sp98, &sp5c);
 
-#if VERSION >= VERSION_NTSC_1_0
 				if (!chr->noblood
 						&& race != RACE_DRCAROLL
 						&& race != RACE_ROBOT
@@ -4790,74 +4671,35 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 
 					splatsCreateForChrHit(prop, shotdata, &sp98, &hitpos, darker, 0, g_Vars.currentplayer->prop->chr);
 				}
-#else
-				// NTSC beta wraps all the blood logic in this paintball check.
-				// If paintball is enabled, neither blood nor paint is created.
-				if (!chrIsUsingPaintball(g_Vars.currentplayer->prop->chr)
-						&& !chr->noblood
-						&& race != RACE_DRCAROLL
-						&& race != RACE_ROBOT
-						&& race != RACE_EYESPY
-						&& !ismelee
-						&& shotdata->gset.weaponnum != WEAPON_TRANQUILIZER) {
-					u8 darker;
-
-					if (chr->bodynum == BODY_MRBLONDE || race == RACE_SKEDAR) {
-						darker = true;
-					} else {
-						darker = false;
-					}
-
-					chrBruise(hit->model, hit->hitpart, hit->bboxnode, &sp5c);
-
-					splatsCreateForChrHit(prop, shotdata, &sp98, &hitpos, darker, 0, g_Vars.currentplayer->prop->chr);
-				}
-#endif
 			}
 		}
 	}
 }
 
-void chr0f028490(f32 arg1)
-{
-	// empty
-}
-
 void chr0f028498(bool value)
 {
 	var8006296c = value;
-	var8005efbc = value;
 }
 
-void chr0f0284ac(s32 arg0)
+//Not used. Probably debug for devs to preview different animations
+/*void chr0f0284ac(s32 arg0)
 {
 	g_SelectedAnimNum -= arg0;
 
 	if (g_SelectedAnimNum <= 0) {
 		g_SelectedAnimNum = animGetNumAnimations() - 1;
 	}
-}
+}*/
 
-void chr0f0284f4(s32 arg0)
+//Not used. Same as above
+/*void chr0f0284f4(s32 arg0)
 {
 	g_SelectedAnimNum += arg0;
 
 	if (g_SelectedAnimNum >= animGetNumAnimations()) {
 		g_SelectedAnimNum = 1;
 	}
-}
-
-void chr0f028544(void)
-{
-	var80062974 = !var80062974;
-}
-
-void chr0f02855c(s32 arg0)
-{
-	var80062978 = arg0;
-
-	mainOverrideVariable("selectanimnum", &g_SelectedAnimNum);
-}
+}*/
 
 void chrsCheckForNoise(f32 noiseradius)
 {
@@ -4881,23 +4723,6 @@ void chrsCheckForNoise(f32 noiseradius)
 
 				if (distance > 1.0f) {
 					chrRecordLastHearTargetTime(&g_ChrSlots[i]);
-#if PIRACYCHECKS
-					{
-						s32 *i = (s32 *)&__scHandleRetrace;
-						s32 *end = (s32 *)&__scHandleTasks;
-						u32 checksum = 0;
-
-						while (i < end) {
-							checksum *= 2;
-							checksum += *i;
-							i++;
-						}
-
-						if (checksum != CHECKSUM_PLACEHOLDER) {
-							g_HeadsAndBodies[BODY_SKEDARKING].filenum = 0;
-						}
-					}
-#endif
 				}
 			}
 		}
@@ -5119,7 +4944,6 @@ bool chr0f028e6c(s32 arg0, struct prop *prop, struct prop **propptr, struct mode
 	while (true) {
 		bool result = false;
 		struct model *model;
-		s32 stack;
 
 		if (prop->type == PROPTYPE_CHR || prop->type == PROPTYPE_PLAYER) {
 			model = prop->chr->model;
@@ -5387,39 +5211,39 @@ s32 chr0f0294cc(struct prop *prop, s32 arg1)
 	return result;
 }
 
-void chr0f0295f8(f32 arg0, s32 *arg1, s32 *arg2, s32 *arg3)
+void chrCalcShieldColor(f32 shield, s32 *red, s32 *green, s32 *blue)
 {
-	if (arg0 < 1.5f) {
-		*arg1 = 57 - (s32)((1.5f - arg0) * 28.0f);
-		*arg2 = 75 - (s32)((1.5f - arg0) * 20.0f);
-		*arg3 = 0;
+	if (shield < 1.5f) {
+		*red = 57 - (s32)((1.5f - shield) * 28.0f);
+		*green = 75 - (s32)((1.5f - shield) * 20.0f);
+		*blue = 0;
 		return;
 	}
 
-	if (arg0 < 3.0f) {
-		*arg1 = 102 - (s32)((3.0f - arg0) * 30.0f);
-		*arg2 = 90 - (s32)((3.0f - arg0) * 10.0f);
-		*arg3 = 0;
+	if (shield < 3.0f) {
+		*red = 102 - (s32)((3.0f - shield) * 30.0f);
+		*green = 90 - (s32)((3.0f - shield) * 10.0f);
+		*blue = 0;
 		return;
 	}
 
-	if (arg0 < 4.5f) {
-		*arg1 = 174 - (s32)((4.5f - arg0) * 48.0f);
-		*arg2 = 129 - (s32)((4.5f - arg0) * 26.0f);
-		*arg3 = 0;
+	if (shield < 4.5f) {
+		*red = 174 - (s32)((4.5f - shield) * 48.0f);
+		*green = 129 - (s32)((4.5f - shield) * 26.0f);
+		*blue = 0;
 		return;
 	}
 
-	if (arg0 < 6.0f) {
-		*arg1 = 162 - (s32)((6.0f - arg0) * -8.0f);
-		*arg2 = 54 - (s32)((6.0f - arg0) * -50.0f);
-		*arg3 = 0;
+	if (shield < 6.0f) {
+		*red = 162 - (s32)((6.0f - shield) * -8.0f);
+		*green = 54 - (s32)((6.0f - shield) * -50.0f);
+		*blue = 0;
 		return;
 	}
 
-	*arg1 = 162;
-	*arg2 = 54;
-	*arg3 = 0;
+	*red = 162;
+	*green = 54;
+	*blue = 0;
 }
 
 f32 propGetShieldThing(struct prop **propptr)
@@ -5463,7 +5287,6 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 	s32 zmin;
 	s32 zmax;
 	s32 j;
-	u32 stack;
 	s16 sp180[8][3];
 	u8 alpha1;
 	u8 alpha2;
@@ -5614,7 +5437,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			}
 		}
 
-		chr0f0295f8(shield, &red1, &green1, &blue1);
+		chrCalcShieldColor(shield, &red1, &green1, &blue1);
 
 		red2 = red1 - 20;
 		green2 = green1 - 20;
@@ -5648,8 +5471,8 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			blue3 = 0;
 		}
 
-		st1 = (sinf((g_Vars.thisframestart240 % TICKS(1200)) * PALUPF(0.005235154f)) + 1.0f) * 0.5f * 32.0f * 32.0f;
-		st2 = (cosf((g_Vars.thisframestart240 % TICKS(1200)) * PALUPF(0.005235154f)) + 1.0f) * 0.5f * 32.0f * 32.0f;
+		st1 = (sinf((g_Vars.thisframestart240 % TICKS(1200)) * 0.005235154f) + 1.0f) * 0.5f * 32.0f * 32.0f;
+		st2 = (cosf((g_Vars.thisframestart240 % TICKS(1200)) * 0.005235154f) + 1.0f) * 0.5f * 32.0f * 32.0f;
 		st3 = st1 + 512;
 		st4 = st2 + 512;
 
@@ -5728,11 +5551,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			if (hit->unk011 < arg7) {
 				alpha3 = 0.0f;
 			} else {
-#if PAL
-				alpha3 = ((TICKS(30.0f) - arg6) * 6.4f + 40.0f) * ((hit->unk011 - (f32) arg7 + 1.0f) / hit->unk011);
-#else
 				alpha3 = ((TICKS(30.0f) - arg6) * 5.3333335f + 40.0f) * ((hit->unk011 - (f32) arg7 + 1.0f) / hit->unk011);
-#endif
 				alpha3 *= alpha * (1.0f / 255.0f);
 			}
 
@@ -5794,7 +5613,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			if (side == -1) {
 				if (g_Vars.lvframe60 - hit->lvframe60 <= TICKS(80)) {
-					f32 tmp = (hit->lvframe60 - g_Vars.lvframe60 + TICKS(80)) * (PAL ? 3.8636362552643f : 3.1875f);
+					f32 tmp = (hit->lvframe60 - g_Vars.lvframe60 + TICKS(80)) * 3.1875f;
 					tmp *= alpha * (1.0f / 255.0f);
 
 					alpha1 = (s32) tmp;
@@ -5816,7 +5635,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				if (hit->unk011 < arg7) {
 					alpha4 = 0.0f;
 				} else {
-					alpha4 = (((TICKS(30.0f) - (f32) arg6) * PALUPF(4.0f)) + 40.0f)
+					alpha4 = (((TICKS(30.0f) - (f32) arg6) * 4.0f) + 40.0f)
 						* (((hit->unk011 - (f32) arg7) + 1.0f) / hit->unk011);
 					alpha4 *= alpha * (1.0f / 255.0f);
 				}
@@ -6039,7 +5858,6 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			for (j = 0; j < ARRAYCOUNT(sp104[side]); j++) {
 				s32 next = (j + 1) % 4;
-				u32 stack;
 
 				vertices[0] = vtxtemplate;
 				vertices[0].x = sp180[sp104[side][next]][0];
@@ -6178,7 +5996,6 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 Gfx *shieldhitRender(Gfx *gdl, struct prop *prop1, struct prop *prop2, s32 alpha,
 		bool arg4, s32 cmnum1, s32 cmnum2, s32 cmnum3, s32 cmnum4)
 {
-	u32 stack[4];
 	struct model *model;
 	struct modelnode *specificnode = NULL;
 	struct modelnode *node;
@@ -6416,16 +6233,6 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 						lrs = uls + 15;
 						lrt = ult + 15;
 
-#ifdef PLATFORM_N64
-						gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, OS_K0_TO_PHYSICAL(var8009ccc0[index]));
-						gDPTileSync(gdl++);
-						gDPLoadTextureTile(gdl++, viGetBackBuffer(), G_IM_FMT_RGBA, G_IM_SIZ_16b,
-								viGetWidth(), 0, uls, ult, lrs, lrt,
-								0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
-								4, 4, G_TX_NOLOD, G_TX_NOLOD);
-						gDPPipeSync(gdl++);
-						gSPTextureRectangle(gdl++, 0, 0, 60, 60, G_TX_RENDERTILE, 0, 0, 4096, 1024);
-#else
 						gDPCopyFramebufferEXT(gdl++, var8009ccc0[index], 0, uls, ult, G_ON);
 						gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b,
 							((((lrs - uls + 1) * G_IM_SIZ_16b_BYTES)+7)>>3), 0, 0, 0,
@@ -6434,7 +6241,6 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 						gDPSetTileSize(gdl++, G_TX_RENDERTILE,
 							uls << G_TEXTURE_IMAGE_FRAC, ult << G_TEXTURE_IMAGE_FRAC,
 							lrs << G_TEXTURE_IMAGE_FRAC, lrt << G_TEXTURE_IMAGE_FRAC);
-#endif
 					}
 				}
 			}
@@ -6647,7 +6453,6 @@ void chrSetDrCarollImages(struct chrdata *drcaroll, s32 imageleft, s32 imagerigh
 		union modelrwdata *rwdata;
 		s32 i;
 		s32 j;
-		u32 stack;
 
 		// Iterate model parts relating to images
 		// Parts 0-5 are the left image

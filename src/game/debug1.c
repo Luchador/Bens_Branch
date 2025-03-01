@@ -5,6 +5,7 @@
 #include "bss.h"
 #include "data.h"
 #include "types.h"
+#include <stdio.h>
 
 #ifdef DEBUG
 s32 g_DMenuSelectedOption = 0;
@@ -24,6 +25,20 @@ void dmenu0f118c80nb(void)
 	// empty
 }
 #endif
+
+s32 debug_log(const char *message, s32 num)
+{
+	FILE *debug_file = fopen("debug.log", "a");
+    if (debug_file == NULL) {
+        perror("Error opening debug.log");
+        return 0;
+    }
+
+    fprintf(debug_file, message, num);
+    fclose(debug_file);
+
+	return 1;
+}
 
 void dmenuSetScaleIndex(s32 index)
 {

@@ -1703,7 +1703,6 @@ void bgBuildTables(s32 stagenum)
 	}
 
 	bgSetStageTranslationThing(g_Stages[g_StageIndex].unk14);
-	chr0f028490(g_Stages[g_StageIndex].unk14);
 
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		g_Vars.playerstats[i].scale_bg2gfx = g_Stages[g_StageIndex].unk18;
