@@ -1639,9 +1639,10 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						zoomin = c1buttons & sumask;
 
 						// @bug? Should this be HAND_RIGHT?
-						if (bgunGetWeaponNum(HAND_LEFT) == WEAPON_FARSIGHT) {
+						// Ben's comment: when fixed the zoom feels painfully slow. I'm just going to leave out this check entirely.
+						/*if (bgunGetWeaponNum(HAND_LEFT) == WEAPON_FARSIGHT) {
 							increment = 0.5f;
-						}
+						}*/
 
 						if (zoomout) {
 							movedata.zoomoutfovpersec = increment;

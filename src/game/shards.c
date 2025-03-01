@@ -88,11 +88,11 @@ void shardsCreate(struct coord *pos, f32 *rotx, f32 *roty, f32 *rotz, f32 relxmi
 		 * when you shoot the bottles, half of them don't play any breaking
 		 * sound effect.
 		 */
-		psCreate(NULL, NULL, SFX_BOTTLE_BREAK + (rngRandom() % 2) * 2, -1,
-				-1, 0, 0, PSTYPE_NONE, &prop->pos, -1.0f, prop->rooms, -1, -1.0f, -1.0f, -1.0f);
+		/*psCreate(NULL, NULL, SFX_BOTTLE_BREAK + (rngRandom() % 2) * 2, -1,
+			-1, 0, 0, PSTYPE_NONE, &prop->pos, -1.0f, prop->rooms, -1, -1.0f, -1.0f, -1.0f);*/
+		psCreate(NULL, NULL, SFX_BOTTLE_BREAK, -1, -1, 0, 0, PSTYPE_NONE, &prop->pos, -1.0f, prop->rooms, -1, -1.0f, -1.0f, -1.0f); // Ben's change: fixing the invalid sound effect issue
 	} else if (type == SHARDTYPE_WOOD) {
-		psCreate(NULL, NULL, SFX_WOOD_BREAK, -1,
-				-1, 0, 0, PSTYPE_NONE, &prop->pos, -1.0f, prop->rooms, -1, -1.0f, -1.0f, -1.0f);
+		psCreate(NULL, NULL, SFX_WOOD_BREAK, -1, -1, 0, 0, PSTYPE_NONE, &prop->pos, -1.0f, prop->rooms, -1, -1.0f, -1.0f, -1.0f);
 	}
 
 	xmax = f20 / speci;
