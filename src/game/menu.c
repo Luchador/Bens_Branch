@@ -27,7 +27,6 @@
 #include "game/mplayer/setup.h"
 #include "game/challenge.h"
 #include "game/training.h"
-#include "game/game_1a78b0.h"
 #include "game/gamefile.h"
 #include "game/gfxmemory.h"
 #include "game/lang.h"

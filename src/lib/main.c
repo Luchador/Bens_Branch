@@ -37,7 +37,6 @@
 #include "game/stubs/game_175f50.h"
 #include "game/game_175f90.h"
 #include "game/zbuf.h"
-#include "game/game_1a78b0.h"
 #include "game/mplayer/mplayer.h"
 #include "game/pak.h"
 #include "game/splat.h"
