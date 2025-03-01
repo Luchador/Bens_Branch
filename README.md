@@ -3,11 +3,14 @@
 This is mostly to help me learn the Perfect Dark code and maybe make some cool changes. This is meant for NTSC 1.1/Final only.
 
 Changes include:
-* Far more bullet holes
+* Far more bullet holes supported
 * Tinted glass does not become fully opaque
 * Stars on Mr. Blonde's Revenge
 * Animated water at the bottom of the chasm in Air Base
 * Moved the "Objective Completed/Failed" message down so it doesn't block the center of the screen
+
+Bug fixes:
+* Fix the bug where wine bottles don't play their shatter sound half the time when destroyed
 
 
 ## Credits
