@@ -11,7 +11,7 @@ void weatherTick(void);
 Gfx *weatherRender(Gfx *gdl);
 void weatherSetBoundaries(struct weatherparticledata *data, s32 index, f32 min, f32 max);
 struct weatherparticledata *weatherAllocateParticles(void);
-void func0f131610(struct weatherdata *weather);
+void weatherRollLightning(struct weatherdata *weather);
 void func0f131678(s32 arg0);
 void weatherSetIntensity(s32 intensity);
 void weatherTickRain(struct weatherdata *weather);

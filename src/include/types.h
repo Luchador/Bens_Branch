@@ -4826,8 +4826,8 @@ struct weatherdata {
 	/*0x00*/ f32 windspeedx;
 	/*0x04*/ f32 windspeedz;
 	/*0x08*/ f32 windanglerad;
-	/*0x0c*/ f32 unk0c;
-	/*0x10*/ s32 unk10;
+	/*0x0c*/ f32 newwindangle; // windanglerad transitions to this when a new wind angle is chosen
+	/*0x10*/ s32 windangletransitiontime;
 	/*0x14*/ f32 windspeed;
 	/*0x18*/ u32 unk18;
 	/*0x1c*/ u32 unk1c;
@@ -4842,9 +4842,9 @@ struct weatherdata {
 	/*0x50*/ s32 unk50;
 	/*0x54*/ s32 unk54;
 	/*0x58*/ struct weather58 unk58[4];
-	/*0x88*/ f32 unk88;
-	/*0x8c*/ f32 unk8c;
-	/*0x90*/ s32 unk90;
+	/*0x88*/ f32 sndcurrentvolume;
+	/*0x8c*/ f32 snddesiredvolume;
+	/*0x90*/ s32 sndtransitiontime;
 	/*0x94*/ s32 unk94;
 	/*0x98*/ s32 unk98;
 	/*0x9c*/ s32 unk9c;
@@ -4854,14 +4854,14 @@ struct weatherdata {
 	/*0xac*/ u32 unkac;
 	/*0xb0*/ u32 unkb0;
 	/*0xb4*/ u32 unkb4;
-	/*0xb8*/ f32 unkb8;
-	/*0xbc*/ f32 unkbc;
-	/*0xc0*/ s32 unkc0;
-	/*0xc4*/ f32 unkc4;
-	/*0xc8*/ f32 unkc8;
+	/*0xb8*/ f32 rdcurrentlength; // vertical length of the raindrop
+	/*0xbc*/ f32 rddesiredlength;
+	/*0xc0*/ s32 rdtransitiontime; // used to change the length of raindrops when weather intensity changes
+	/*0xc4*/ f32 lightningchance;
+	/*0xc8*/ f32 raindropfallspeed;
 	/*0xcc*/ s32 intensity;
-	/*0xd0*/ s32 unkd0;
-	/*0xd4*/ s32 unkd4;
+	/*0xd0*/ s32 numcurrentsnowflakes;
+	/*0xd4*/ s32 numdesiredparticles;
 	/*0xd8*/ u32 unkd8;
 	/*0xdc*/ u32 unkdc;
 	/*0xe0*/ u32 unke0;
@@ -4870,7 +4870,7 @@ struct weatherdata {
 	/*0xec*/ u32 unkec;
 	/*0xf0*/ u32 unkf0;
 	/*0xf4*/ u32 unkf4;
-	/*0xf8*/ s16 unkf8;
+	/*0xf8*/ s16 rainsfxindex;
 	/*0xfc*/ u32 unkfc;
 };
 
@@ -4878,7 +4878,7 @@ struct weatherparticle {
 	struct coord pos;
 	s32 active;
 	struct coord inc;
-	f32 unk1c;
+	f32 horizspeed;
 };
 
 struct weatherparticledata {

@@ -68,8 +68,8 @@ void weatherReset(void)
 		g_WeatherData->particledata[0] = weatherAllocateParticles();
 		g_WeatherData->type = -1;
 		g_WeatherData->windanglerad = 0;
-		g_WeatherData->unk0c = 0;
-		g_WeatherData->unk10 = 1;
+		g_WeatherData->newwindangle = 0;
+		g_WeatherData->windangletransitiontime = 1;
 
 #ifdef PLATFORM_N64
 		if (g_StageIndex == STAGEINDEX_CHICAGO || g_StageIndex == STAGEINDEX_G5BUILDING) {
@@ -112,15 +112,15 @@ void weatherReset(void)
 		g_WeatherData->unk58[1].unk08 = 0;
 		g_WeatherData->unk58[2].unk08 = 0;
 		g_WeatherData->unk58[3].unk08 = 0;
-		g_WeatherData->unkb8 = 150;
-		g_WeatherData->unkc0 = 0;
-		g_WeatherData->unkc4 = 0;
-		g_WeatherData->unkc8 = 15;
-		g_WeatherData->unk88 = 1;
-		g_WeatherData->unk90 = 0;
+		g_WeatherData->rdcurrentlength = 150;
+		g_WeatherData->rdtransitiontime = 0;
+		g_WeatherData->lightningchance = 0;
+		g_WeatherData->raindropfallspeed = 15;
+		g_WeatherData->sndcurrentvolume = 1;
+		g_WeatherData->sndtransitiontime = 0;
 		g_WeatherData->intensity = 0;
-		g_WeatherData->unkd0 = 0;
-		g_WeatherData->unkd4 = 0;
+		g_WeatherData->numcurrentsnowflakes = 0;
+		g_WeatherData->numdesiredparticles = 0;
 
 		g_WeatherActive = true;
 	}
