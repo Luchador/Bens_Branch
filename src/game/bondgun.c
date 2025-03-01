@@ -1885,9 +1885,6 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 	static u32 rontime = 2;
 	static u32 rofftime = 4;
 
-	mainOverrideVariable("rontime", &rontime);
-	mainOverrideVariable("rofftime", &rofftime);
-
 	hand->firing = true;
 
 	if ((func->type & 0xff00) == 0x100) {
@@ -2201,8 +2198,6 @@ bool bgunTickIncAttackingShoot(struct handweaponinfo *info, s32 handnum, struct 
 
 	if (hand->stateminor == HANDSTATEMINOR_ATTACK_SHOOT_0) {
 		sp64 = 1;
-
-		mainOverrideVariable("gkef", &var80070128);
 
 		if (hand->statecycles == 0) {
 			hand->gs_float1 = 0;

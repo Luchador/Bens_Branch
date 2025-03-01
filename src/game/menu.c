@@ -2299,9 +2299,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 				static u32 znear = 10;
 				static u32 zfar = 300;
 
-				mainOverrideVariable("mzn", &znear);
-				mainOverrideVariable("mzf", &zfar);
-
 				gdl = func0f0d49c8(gdl);
 
 				viSetViewPosition(x1 * g_ScaleX, g_MenuScissorY1);
@@ -3714,8 +3711,6 @@ u32 g_MenuCThresh = 120;
 
 Gfx *menuRenderDialog(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool lightweight)
 {
-	mainOverrideVariable("cthresh", &g_MenuCThresh);
-
 	textSetWaveBlend(dialog->unk54, dialog->unk58, g_MenuCThresh);
 
 	gdl = dialogRender(gdl, dialog, menu, lightweight);
@@ -5303,8 +5298,6 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
 		}
 		break;
 	case MENUBG_CONEALPHA:
-		mainOverrideVariable("bblur", &bblur);
-
 		if (g_MenuData.screenshottimer) {
 			return gdl;
 		}
@@ -5344,8 +5337,6 @@ u32 var800714f0 = 1;
 Gfx *menuRenderBackgroundLayer2(Gfx *gdl, u8 bg, f32 frac)
 {
 	if (bg == MENUBG_CONEALPHA || bg == MENUBG_CONEOPAQUE) {
-		mainOverrideVariable("cone", &var800714f0);
-
 		if (var800714f0
 				&& (g_MenuData.nextbg == MENUBG_CONEALPHA || g_MenuData.nextbg == 0 || g_MenuData.nextbg == 255)) {
 			gdl = menugfxRenderBgCone(gdl);
@@ -5447,8 +5438,6 @@ Gfx *menuRender(Gfx *gdl)
 				g_MenuData.unk5d4 = 0;
 			}
 		}
-
-		mainOverrideVariable("usePiece", &usepiece);
 
 		if (usepiece) {
 			g_MenuData.usezbuf = false;

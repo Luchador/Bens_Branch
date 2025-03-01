@@ -238,15 +238,6 @@ struct jpncharpixels *langGetJpnCharPixels(s32 codepoint)
 	}
 
 #if VERSION == VERSION_JPN_FINAL
-	mainOverrideVariable("tmul", &tmul);
-	mainOverrideVariable("tload", &tload);
-
-	if (tload) {
-		codepoint = tload;
-	}
-#endif
-
-#if VERSION == VERSION_JPN_FINAL
 #define SHIFTAMOUNT 0
 #define TMUL tmul
 #else

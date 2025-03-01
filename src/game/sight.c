@@ -749,8 +749,6 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 				cornergap = 3;
 			}
 
-			mainOverrideVariable("sight", &sight);
-
 			switch (sight) {
 			case 0:
 				gdl = sightDrawAimer(gdl, x, y, radius, cornergap, colour);
@@ -1543,9 +1541,6 @@ Gfx *sightDrawTarget(Gfx *gdl, f32 crossx, f32 crossy)
 
 	static u32 var80070f9c = 0x00ff00ff;
 	static u32 var80070fa0 = 0x00ff0011;
-
-	mainOverrideVariable("sout", &var80070f9c);
-	mainOverrideVariable("sin", &var80070fa0);
 
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 

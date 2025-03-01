@@ -1768,8 +1768,6 @@ Gfx *menuitemObjectivesRenderOne(Gfx *gdl, struct menudialog *dialog, s32 index,
 		spbc = 12;
 #endif
 	}
-
-	mainOverrideVariable("brcol", &var800711e8);
 	sp120 = langGet(g_Briefing.objectivenames[index]);
 	y = objy;
 	sp12c = MIXCOLOUR(dialog, item_unfocused);

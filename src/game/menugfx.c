@@ -83,8 +83,6 @@ void menugfxCreateBlur(void)
 		fb = (u8 *) viGetFrontBuffer();
 	}
 
-	mainOverrideVariable("cccc", &cccc);
-
 	for (dsty = 0; dsty < BLURIMG_HEIGHT; dsty++) {
 
 		for (dstx = 0; dstx < BLURIMG_WIDTH; dstx++) {

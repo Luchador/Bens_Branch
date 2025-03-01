@@ -17,9 +17,6 @@ void weatherTick(void)
 		return;
 	}
 
-	mainOverrideVariable("wettick", (u32 *)&g_WeatherTickEnabled);
-	mainOverrideVariable("windspeed", &var80062950);
-
 	if (g_WeatherTickEnabled) {
 		switch (g_WeatherData->type) {
 		case WEATHERTYPE_RAIN:

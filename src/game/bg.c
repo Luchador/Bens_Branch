@@ -5366,8 +5366,6 @@ void bgTickPortalsXray(void)
 	player->eraserpos.f[1] = eraserpos.f[1];
 	player->eraserpos.f[2] = eraserpos.f[2];
 
-	mainOverrideVariable("edist", &edist);
-
 	stage = stageGetCurrent();
 
 	player->eraserpropdist = stage->eraserpropdist;

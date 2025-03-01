@@ -18,12 +18,6 @@ u8 *g_GeCreditsData;
 
 u32 setupGetCmdLength(u32 *cmd)
 {
-#if VERSION < VERSION_NTSC_1_0
-	static u32 crash1 = 0;
-
-	mainOverrideVariable("crash1", &crash1);
-#endif
-
 	switch ((u8)PD_BE32(cmd[0])) {
 	case OBJTYPE_CHR:                return sizeof(struct packedchr) / sizeof(u32);
 	case OBJTYPE_DOOR:               return sizeof(struct doorobj) / sizeof(u32);

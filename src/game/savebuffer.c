@@ -206,8 +206,6 @@ Gfx *menugfxDrawPlane(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32
 	sp34 = 1.0f;
 	sp30 = 1.0f;
 
-	mainOverrideVariable("txmul", &txmul);
-
 	if (y1 < var8009de90 && y2 < var8009de90) {
 		return gdl;
 	}
@@ -240,8 +238,6 @@ Gfx *menugfxDrawPlane(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32
 	if (type == MENUPLANE_01) {
 		sp30 = 2.0f;
 	}
-
-	mainOverrideVariable("depthsub", &depthsub);
 
 	a1 = 200;
 
@@ -297,10 +293,7 @@ Gfx *menugfxDrawPlane(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32
 	}
 
 	if (type == MENUPLANE_07) {
-		mainOverrideVariable("rsub", &rsub);
-
 		a1 = -rsub;
-
 		sp30 = 8.0f;
 		sp2a = 256;
 		sp28 = 0;

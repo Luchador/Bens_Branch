@@ -121,9 +121,6 @@ void dyntexUpdateOcean(Vtx *vertices, struct dyntextype *type)
 	static u32 ripsize = 65;
 	static u32 modula = 22;
 
-	//mainOverrideVariable("modula", &modula);
-	//mainOverrideVariable("ripsize", &ripsize);
-
 	for (i = 0; i < type->numvertices; i++) {
 		Vtx *vertex = (Vtx *)((uintptr_t)vertices + g_DyntexVertices[type->vertexlistoffset + i].offset);
 

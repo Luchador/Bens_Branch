@@ -8,7 +8,6 @@ extern s32 g_MainIsBooting;
 
 void mainInit(void);
 void mainProc(void);
-void mainOverrideVariable(char *name, void *value);
 void mainLoop(void);
 void mainTick(void);
 void mainEndStage(void);

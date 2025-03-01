@@ -22,8 +22,6 @@ void langTick(void)
 
 	var8009d370jf = 0;
 
-	mainOverrideVariable("jap", &language);
-
 	if (language < 2) {
 		langSetJpnEnabled(language);
 		language = 99;
@@ -36,8 +34,6 @@ void langTick(void)
 	}
 #elif VERSION >= VERSION_PAL_BETA
 	static u32 language = 99;
-
-	mainOverrideVariable("language", &language);
 
 	if (language < 5) {
 		langSetEuropean(language);

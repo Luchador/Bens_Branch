@@ -1276,7 +1276,6 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 			colours[0].word = PD_BE32(red << 24 | green << 16 | alpha | 0x80800000);
 		} else {
 			static u32 var8007e93c = 0xffffffff;
-			mainOverrideVariable("ecol", &var8007e93c);
 			colours[0].word = 0xffffffff;
 			colours[0].word = var8007e93c;
 		}

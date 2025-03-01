@@ -1064,12 +1064,6 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	static u32 spb = 24;
 	static u32 spi = 6;
 
-	mainOverrideVariable("sp1", &sp1);
-	mainOverrideVariable("sp2", &sp2);
-	mainOverrideVariable("sp3", &sp3);
-	mainOverrideVariable("spb", &spb);
-	mainOverrideVariable("spi", &spi);
-
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);

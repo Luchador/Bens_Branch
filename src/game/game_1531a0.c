@@ -799,8 +799,6 @@ u32 text0f1543ac(s32 x, s32 y, u32 colourarg)
 			f18 = 50.0f;
 			f16 = 22.0f;
 
-			mainOverrideVariable("burncol", &burncol);
-
 			if (g_Blend.diagtimer < f12) {
 				colour = colourBlend(alpha[0], colour, 110);
 			} else if (g_Blend.diagtimer - f14 < f12) {
@@ -1252,8 +1250,6 @@ void textMapCodeUnitToChar(char **text, struct fontchar **arg1, struct fontchar 
 
 	sp2a = ((c1 & 0x7f) << 7) | (c2 & 0x7f);
 	sp29 = 0;
-
-	mainOverrideVariable("ope", &ope);
 
 	if (ope) {
 		sp29 = func0f154784jf(sp2a);
@@ -1926,8 +1922,6 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 			newy--;
 		}
 
-		mainOverrideVariable("sbrd", &sbrd);
-
 		if (sbrd != 0) {
 			tmpcolour = sbrd;
 		}
@@ -1969,8 +1963,6 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 		tmpcolour = var800a463c;
 		colour2 = (colour & 0xffffff00) | (u32) alpha;
 
-		mainOverrideVariable("sbrd", &sbrd);
-
 		if (sbrd) {
 			tmpcolour = sbrd;
 		}
@@ -1984,14 +1976,6 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 		*y = *y - 1;
 	}
 #endif
-
-	mainOverrideVariable("lalpha", &var8007fbac);
-	mainOverrideVariable("subtlety", &var8007fbb8);
-	mainOverrideVariable("subtletx", &var8007fbbc);
-	mainOverrideVariable("coly", &var8007fbc4);
-	mainOverrideVariable("colx", &var8007fbc0);
-	mainOverrideVariable("lfade", &var8007fbb0);
-	mainOverrideVariable("llimbo", &var8007fbb4);
 
 	savedx = *x;
 	savedy = *y;

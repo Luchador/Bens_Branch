@@ -4451,14 +4451,6 @@ void pakExecuteDebugOperations(void)
 	bool disablepolling = false;
 	s8 i;
 
-	mainOverrideVariable("forcescrub", &g_PakDebugForceScrub);
-	mainOverrideVariable("pakdump", &g_PakDebugPakDump);
-	mainOverrideVariable("pakcache", &g_PakDebugPakCache);
-	mainOverrideVariable("pakinit", &g_PakDebugPakInit);
-	mainOverrideVariable("corruptme", &g_PakDebugCorruptMe);
-	mainOverrideVariable("wipeeeprom", &g_PakDebugWipeEeprom);
-	mainOverrideVariable("dumpeeprom", &g_PakDebugDumpEeprom);
-
 	if (g_PakDebugCorruptMe) {
 		g_PakDebugCorruptMe = false;
 		pakCorrupt();
@@ -4526,13 +4518,6 @@ void pakExecuteDebugOperations(void)
 	osSyncPrintf("lvGetPause    = %s", lvIsPaused() ? "TRUE" : "FALSE");
 	osSyncPrintf("MP_GetPause   = %s", mpIsPaused() ? "TRUE" : "FALSE");
 	osSyncPrintf("getnumplayers = %d", PLAYERCOUNT());
-
-	mainOverrideVariable("forcecrc", &g_PakDebugForceCrc);
-	mainOverrideVariable("forcescrub", &g_PakDebugForceScrub);
-	mainOverrideVariable("dumph", &g_PakDebugPakDump);
-	mainOverrideVariable("pakcache", &g_PakDebugPakCache);
-	mainOverrideVariable("pakinit", &g_PakDebugPakInit);
-	mainOverrideVariable("dumpeeprom", &g_PakDebugDumpEeprom);
 
 	if (g_PakDebugDumpEeprom) {
 		g_PakDebugDumpEeprom = false;

@@ -205,28 +205,6 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, s32 offyarg, f32 heightfracarg
 	armourcolours = colours + 24;
 	traumacolours = colours + 40;
 
-	mainOverrideVariable("radmax", &radmax);
-	mainOverrideVariable("radmed", &radmed);
-	mainOverrideVariable("radmin", &radmin);
-	mainOverrideVariable("len1", &len1);
-	mainOverrideVariable("len2", &len2);
-	mainOverrideVariable("len3", &len3);
-	mainOverrideVariable("offx", &offx);
-	mainOverrideVariable("offy", &offy);
-	mainOverrideVariable("shieldcol", &shieldcol);
-	mainOverrideVariable("armourcol", &armourcol);
-	mainOverrideVariable("traumacol", &traumacol);
-	mainOverrideVariable("bgcol", &bgcol);
-	mainOverrideVariable("shieldfade", &shieldfade);
-	mainOverrideVariable("armourfade", &armourfade);
-	mainOverrideVariable("traumafade", &traumafade);
-	mainOverrideVariable("shielddir", &shielddir);
-	mainOverrideVariable("underleft", &underleft);
-	mainOverrideVariable("undertop", &undertop);
-	mainOverrideVariable("underright", &underright);
-	mainOverrideVariable("underbottom", &underbottom);
-	mainOverrideVariable("undercol", &undercol);
-
 	if (chr == NULL || offyarg <= 0 || heightfracarg <= 0.0f) {
 		// Use the player's health
 		shieldfrac = g_Vars.currentplayer->apparentarmour;

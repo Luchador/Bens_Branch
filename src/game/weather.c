@@ -458,8 +458,6 @@ void weatherTickRain(struct weatherdata *weather)
 	f32 rand;
 	s32 lvupdate;
 
-	mainOverrideVariable("rainspeedxtra", &g_RainSpeedExtra);
-
 	if (weather->unk90 > 0) {
 		weather->unk88 += (weather->unk8c - weather->unk88) / weather->unk90;
 	}
@@ -630,9 +628,6 @@ void weatherTickSnow(struct weatherdata *weather)
 	s32 lvupdate;
 	s32 i;
 	struct weatherparticledata *data;
-
-	mainOverrideVariable("snowspeed", &g_SnowSpeed);
-	mainOverrideVariable("snowspeedxtra", &g_SnowSpeedExtra);
 
 #ifdef PLATFORM_N64
 	if (g_StageIndex == STAGEINDEX_AIRBASE) {
@@ -1016,15 +1011,6 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 	numsparksavailable = 1;
 	numtestrooms = 0;
 	numbadrooms = 0;
-
-	mainOverrideVariable("raincol1", &raincol1);
-	mainOverrideVariable("raincol2", &raincol2);
-	mainOverrideVariable("rainwidth", &rainwidth);
-	mainOverrideVariable("rainout", &rainout);
-	mainOverrideVariable("cddiv", &cddiv);
-	mainOverrideVariable("wetclip", &wetclip);
-	mainOverrideVariable("bounder", &bounder);
-	mainOverrideVariable("trypitch", &trypitch);
 
 	if (g_Vars.lvupdate240 <= 0) {
 		numsparksavailable = 0;
@@ -3126,12 +3112,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 	gDPSetCombineLERP(gdl++,
 			0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0,
 			0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0);
-
-	mainOverrideVariable("snowwidth", &snowwidth);
-	mainOverrideVariable("snowheight", &snowheight);
-	mainOverrideVariable("snowcol1", &snowcol1);
-	mainOverrideVariable("snowcol2", &snowcol2);
-
 	particledata = weather->particledata[arg2];
 
 	sp198 = 0;

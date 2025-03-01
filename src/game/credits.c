@@ -868,9 +868,6 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 	static u32 tload = 0x25;
 	static u32 dump = 0;
 
-	mainOverrideVariable("tload", &tload);
-	mainOverrideVariable("dump", &dump);
-
 	colours = gfxAllocateColours(60);
 
 	for (i = 0; i < 4; i++) {
@@ -1694,15 +1691,11 @@ void creditsTick(void)
 	}
 #endif
 
-	mainOverrideVariable("for", &type);
-
 	if (type < 0xffff) {
 		for (i = 0; i < ARRAYCOUNT(g_CreditsData->bglayers); i++) {
 			g_CreditsData->bglayers[i].type = type;
 		}
 	}
-
-	mainOverrideVariable("flick", &flick);
 
 	if (flick) {
 		creditsCreatePendingBgLayers(0xffffffff);

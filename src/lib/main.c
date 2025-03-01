@@ -722,10 +722,10 @@ void mainProc(void)
  * then this function would have looked up the given variable name in the table
  * and written the new value to the variable's address.
  */
-void mainOverrideVariable(char *name, void *value)
-{
+//void mainOverrideVariable(char *name, void *value)
+//{
 	// empty
-}
+//}
 
 /**
  * This function enters an infinite loop which iterates once per stage load.

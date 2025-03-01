@@ -1396,8 +1396,6 @@ s32 door0f068c04(struct prop *prop, s32 *arg1, s32 *arg2)
 
 #if VERSION < VERSION_PAL_BETA
 	static u32 debugdoors = 0;
-
-	mainOverrideVariable("debugdoors", &debugdoors);
 #endif
 
 	sibling = door;
@@ -1576,9 +1574,6 @@ void propCalculateShadeColour(struct prop *prop, u8 *nextcol, u16 floorcol)
 
 	static u32 scol = 0x00;
 	static u32 salp = 0x00;
-
-	mainOverrideVariable("scol", &scol);
-	mainOverrideVariable("salp", &salp);
 
 	if (prop->type == PROPTYPE_OBJ || prop->type == PROPTYPE_WEAPON || prop->type == PROPTYPE_DOOR) {
 		obj = prop->obj;
@@ -6802,10 +6797,6 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 							static u32 kkd = 20;
 							static u32 kkp = 120;
 
-							mainOverrideVariable("kkg", &kkg);
-							mainOverrideVariable("kkd", &kkd);
-							mainOverrideVariable("kkp", &kkp);
-
 							tmp = ((kkd / 100.0f * var80069bc4 / LVUPDATE60FREAL()) + (kkp / 100.00f * sp28c * LVUPDATE60FREAL())) * (kkg / 100.000f);
 
 							var80069bc4 = sp28c;
@@ -7601,8 +7592,6 @@ void doorTick(struct prop *doorprop)
 
 #if VERSION < VERSION_PAL_BETA
 	static u32 debugdoor = 0;
-
-	mainOverrideVariable("debugdoor", &debugdoor);
 
 	// If debugdoor is set to 1 or to the address of this door,
 	// print the distance to the door to console

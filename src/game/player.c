@@ -3278,8 +3278,6 @@ void playerTick(bool arg0)
 	aspectratio *= 1.1904761791229f;
 #endif
 
-	mainOverrideVariable("tps", &var8007083c);
-
 	if (var8007083c != TELEPORTSTATE_INACTIVE) {
 		var8007083c = TELEPORTSTATE_INACTIVE;
 		g_Vars.currentplayer->teleporttime = 0;
