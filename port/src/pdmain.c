@@ -253,7 +253,6 @@ void mainInit(void)
 	langInit();
 	lvInit();
 	cheatsInit();
-	textInit();
 	dhudInit();
 	playermgrInit();
 	frametimeInit();

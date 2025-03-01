@@ -33,15 +33,6 @@ u8 var80062944 = 0;
 u8 var80062948 = 0;
 u8 var8006294c = 0;
 
-const char var7f1a85b0[] = "lvup: %d\n";
-const char var7f1a85bc[] = "file id %x-%x";
-const char var7f1a85cc[] = " ticking: ";
-const char var7f1a85d8[] = "1";
-const char var7f1a85dc[] = "0";
-const char var7f1a85e0[] = "Live: %d\n";
-const char var7f1a85ec[] = "current:";
-const char var7f1a85f8[] = " numactive %d ";
-
 void menuCountDialogs(void)
 {
 	s32 i;
@@ -63,18 +54,10 @@ void menuTick(void)
 	s32 sp340 = true;
 	s32 anyopen = false;
 
-#if PAL
+	//g_ScaleX = g_ViRes == VIRES_HI ? 2 : 1;
 	g_ScaleX = 1;
-#else
-	g_ScaleX = g_ViRes == VIRES_HI ? 2 : 1;
-#endif
 
 	menuTickTimers();
-
-	if (g_MenuData.count) {
-		// empty
-	}
-
 	menuCountDialogs();
 
 	for (i = 0; i < ARRAYCOUNT(g_Menus); i++) {
@@ -153,11 +136,7 @@ void menuTick(void)
 			}
 
 			if (g_MenuData.screenshottimer == 0 || g_MenuData.bg != 0) {
-#if VERSION >= VERSION_PAL_BETA
-				f32 diffframe = g_Vars.diffframe60freal;
-#else
 				f32 diffframe = g_Vars.diffframe60f;
-#endif
 
 				if (diffframe > 4) {
 					diffframe = 4;
@@ -212,7 +191,7 @@ void menuTick(void)
 	}
 
 	// Check if returning from a multiplayer match
-	if (var80087260 > 0) {
+	if (g_MpMatchHasEnded) {
 		if (g_Vars.lvframenum >= 4) {
 			if (g_Vars.stagenum == STAGE_CITRAINING || g_Vars.stagenum == STAGE_4MBMENU) {
 				viBlack(false);
@@ -256,7 +235,7 @@ void menuTick(void)
 				}
 			}
 
-			var80087260 = 0;
+			g_MpMatchHasEnded = false;
 		} else {
 			viBlack(true);
 			g_PlayersWithControl[0] = false;
@@ -366,15 +345,7 @@ void menuTick(void)
 							// Joining from a general area such as the Combat
 							// Simulator menu. We can't open dialogs for other
 							// players here, so they are waiting to join.
-#if VERSION >= VERSION_NTSC_1_0
-							if (!g_Vars.waitingtojoin[i]) {
-								sndStart(var80095200, SFX_EXPLOSION_809A, 0, -1, -1, -1, -1, -1);
-							}
 							g_Vars.waitingtojoin[i] = true;
-#else
-							g_Vars.waitingtojoin[i] = true;
-							sndStart(var80095200, SFX_EXPLOSION_809A, 0, -1, -1, -1, -1, -1);
-#endif
 
 						} else if (g_Vars.mpsetupmenu == MPSETUPMENU_QUICKGO) {
 							// Joining from quick go - open Quick Go dialog
@@ -613,7 +584,7 @@ void menuTick(void)
 				break;
 			case MENUROOT_MPENDSCREEN:
 				if (g_Vars.normmplayerisrunning) {
-					var80087260 = 3;
+					g_MpMatchHasEnded = true;
 				} else if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 					struct mpplayerconfig tmp;
 

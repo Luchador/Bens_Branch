@@ -1765,8 +1765,6 @@ Gfx *creditsDraw(Gfx *gdl)
 
 	static u32 scrolltimer240 = 0;
 
-	text0f1531dc(false);
-
 #if VERSION >= VERSION_JPN_FINAL
 	var800800f0jf = 0;
 #endif

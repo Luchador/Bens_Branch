@@ -491,8 +491,8 @@ Gfx *menugfxDrawDropdownBackground(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
 	vertices[4].colour = 8;
 	vertices[5].colour = 8;
 
-	colour1 = text0f1543ac((x1 + x2) / 2, (y2 + y1) / 2, 0xffffffff) & 0xff;
-	colour2 = (text0f1543ac((x1 + x2) / 2, (y2 + y1) / 2, 0xffffff7f) & 0xff) | 0x00006f00;
+	colour1 = textHighlightSweep((x1 + x2) / 2, (y2 + y1) / 2, 0xffffffff) & 0xff;
+	colour2 = (textHighlightSweep((x1 + x2) / 2, (y2 + y1) / 2, 0xffffff7f) & 0xff) | 0x00006f00;
 
 	colours[0].word = PD_BE32(colour1 | 0x00006f00);
 	colours[1].word = PD_BE32(colour2);
@@ -570,8 +570,8 @@ Gfx *menugfxDrawListGroupHeader(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3
 	alpha1 = alpha;
 	alpha2 = alpha;
 #else
-	alpha1 = text0f1543ac((x1 + x2) / 2, (y1 + y2) / 2, 0xffffffff) & 0xff;
-	alpha2 = text0f1543ac((x1 + x2) / 2, (y1 + y2) / 2, 0xffffff7f) & 0xff;
+	alpha1 = textHighlightSweep((x1 + x2) / 2, (y1 + y2) / 2, 0xffffffff) & 0xff;
+	alpha2 = textHighlightSweep((x1 + x2) / 2, (y1 + y2) / 2, 0xffffff7f) & 0xff;
 #endif
 
 	colours[0].word = PD_BE32(0x00006f00 | alpha1);

@@ -57,14 +57,7 @@
 #define BLUR_OFS 30
 #endif
 
-#if VERSION >= VERSION_PAL_FINAL
-char g_CheatMarqueeString[300];
-#elif VERSION >= VERSION_NTSC_1_0
 char g_CheatMarqueeString[252];
-#else
-char g_StringPointer[104];
-char g_StringPointer2[100];
-#endif
 
 u8 *g_BlurBuffer;
 s32 var8009dfc0;
@@ -80,29 +73,14 @@ s32 g_MenuScissorY1;
 s32 g_MenuScissorY2;
 Vp var800a2048[MAX_PLAYERS][2];
 
-#if VERSION >= VERSION_NTSC_1_0
 struct menudialogdef g_PakCannotReadGameBoyMenuDialog;
 struct menudialogdef g_PakDamagedMenuDialog;
 struct menudialogdef g_PakDataLostMenuDialog;
-#else
-struct menudialogdef g_PakDamagedMenuDialog;
-#endif
-
 struct menudialogdef g_PakFullMenuDialog;
 struct menudialogdef g_PakRemovedMenuDialog;
 struct menudialogdef g_PakRepairFailedMenuDialog;
 struct menudialogdef g_PakRepairSuccessMenuDialog;
 
-#if VERSION >= VERSION_JPN_FINAL
-const struct menucolourpalette g_MenuColours[] = {
-	{ 0x20202000, 0x20202000, 0x20202000, 0x4f4f4f00, 0x00000000, 0x00000000, 0x4f4f4f00, 0x4f4f4f00, 0x4f4f4f00, 0x4f4f4f00, 0x00000000, 0x00000000, 0x4f4f4f00, 0x00000000, 0x00000000 },
-	{ 0x0060bf7f, 0x0000507f, 0x00f0ff7f, 0xffffffff, 0x00002f9f, 0x00006f7f, 0x00ffffff, 0x007f7fff, 0xffffffff, 0x8fffffff, 0x000044ff, 0x000030ff, 0x7f7fffff, 0xffffffff, 0x6644ff7f },
-	{ 0xbf00007f, 0x5000007f, 0xff00007f, 0xffff00ff, 0x2f00009f, 0x6f00007f, 0xff9070ff, 0x7f0000ff, 0xffff00ff, 0xffa090ff, 0x440000ff, 0x003000ff, 0xffff00ff, 0xffffffff, 0xff44447f },
-	{ 0x00bf007f, 0x0050007f, 0x00ff007f, 0xffff00ff, 0x002f009f, 0x00ff0028, 0x55ff55ff, 0x006f00af, 0xffffffff, 0x00000000, 0x004400ff, 0x003000ff, 0xffff00ff, 0xffffffff, 0x44ff447f },
-	{ 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffff9f, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0x00000000, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
-	{ 0xaaaaaaff, 0xaaaaaa7f, 0xaaaaaaff, 0xffffffff, 0xffffff9f, 0xffffffff, 0xffffffff, 0xffffffff, 0xff8888ff, 0xffffffff, 0x00000000, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
-};
-#else
 const struct menucolourpalette g_MenuColours[] = {
 	{ 0x20202000, 0x20202000, 0x20202000, 0x4f4f4f00, 0x00000000, 0x00000000, 0x4f4f4f00, 0x4f4f4f00, 0x4f4f4f00, 0x4f4f4f00, 0x00000000, 0x00000000, 0x4f4f4f00, 0x00000000, 0x00000000 },
 	{ 0x0060bf7f, 0x0000507f, 0x00f0ff7f, 0xffffffff, 0x00002f7f, 0x00006f7f, 0x00ffffff, 0x007f7fff, 0xffffffff, 0x8fffffff, 0x000044ff, 0x000030ff, 0x7f7fffff, 0xffffffff, 0x6644ff7f },
@@ -111,7 +89,6 @@ const struct menucolourpalette g_MenuColours[] = {
 	{ 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0x00000000, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
 	{ 0xaaaaaaff, 0xaaaaaa7f, 0xaaaaaaff, 0xffffffff, 0xffffff2f, 0xffffffff, 0xffffffff, 0xffffffff, 0xff8888ff, 0xffffffff, 0x00000000, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
 };
-#endif
 
 const struct menucolourpalette g_MenuWave1Colours[] = {
 	{ 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x4f4f4f00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0xffffff00, 0x00000000 },
@@ -131,18 +108,14 @@ const struct menucolourpalette g_MenuWave2Colours[] = {
 	{ 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffff7f, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffff5f, 0xffffffff, 0xffffff7f, 0xffffffff },
 };
 
-#if VERSION >= VERSION_NTSC_1_0
 char *g_StringPointer = g_CheatMarqueeString;
 char *g_StringPointer2 = &g_CheatMarqueeString[VERSION >= VERSION_PAL_FINAL ? 150 : 125];
-#endif
 
 s32 g_MpPlayerNum = 0;
 
-#ifndef PLATFORM_N64
 s32 g_MenuMouseControl = true;
 s32 g_MenuUsingMouse = false;
 s32 g_MenuKeyboardPlayer = -1;
-#endif
 
 void menuPlaySound(s32 menusound)
 {
@@ -197,10 +170,8 @@ void menuPlaySound(s32 menusound)
 	if (sound != -1) {
 		struct sndstate *handle;
 
-#if VERSION >= VERSION_NTSC_1_0
 		OSPri prevpri = osGetThreadPri(NULL);
 		osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
-#endif
 
 		handle = sndStart(var80095200, sound, NULL, -1, -1, -1, -1, -1);
 
@@ -212,9 +183,7 @@ void menuPlaySound(s32 menusound)
 			audioPostEvent(handle, AL_SNDP_VOL_EVT, 0x4000);
 		}
 
-#if VERSION >= VERSION_NTSC_1_0
 		osSetThreadPri(0, prevpri);
-#endif
 	}
 }
 
@@ -271,11 +240,7 @@ void menuSetBanner(s32 bannernum, bool allplayers)
 	g_Menus[g_MpPlayerNum].bannernum = bannernum;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 msgnum, s32 arg7, s32 arg8)
-#else
-Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 msgnum)
-#endif
 {
 	s32 midx;
 	s32 x;
@@ -308,22 +273,13 @@ Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 ms
 	font = g_FontHandelGothicSm;
 
 	if (big) {
-#if VERSION >= VERSION_PAL_BETA
 		if (g_CharsHandelGothicMd) {
 			chars = g_CharsHandelGothicMd;
 			font = g_FontHandelGothicMd;
 		}
-#else
-		chars = g_CharsHandelGothicMd;
-		font = g_FontHandelGothicMd;
-#endif
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	midx = (x1 + arg7 + x2 - arg8) / 2;
-#else
-	midx = (x1 + x2) / 2;
-#endif
 
 	y = (y1 + y2) / 2;
 
@@ -332,12 +288,10 @@ Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 ms
 	// "Please Wait..."
 	textMeasure(&waitheight, &waitwidth, langGet(L_MPMENU_495), chars, font, 0);
 
-#if VERSION >= VERSION_NTSC_1_0 && VERSION < VERSION_JPN_FINAL
 	if (msgs[msgnum] == L_MPMENU_491) { // "Checking Controller Pak"
 		// Add space for "TM"
 		textwidth += 7;
 	}
-#endif
 
 	y -= (textheight + waitheight) / 2;
 	texttop = y;
@@ -386,7 +340,6 @@ Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 ms
 	gdl = textRenderProjected(gdl, &x, &y, langGet(L_MPMENU_495),
 			chars, font, 0xbfbfffff, viGetWidth(), viGetWidth(), 0, 0);
 
-#if VERSION >= VERSION_NTSC_1_0 && VERSION < VERSION_JPN_FINAL
 	if (msgs[msgnum] == L_MPMENU_491) { // "Checking Controller Pak"
 		// Render "TM"
 		y = texttop - 1;
@@ -394,14 +347,11 @@ Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 ms
 		gdl = textRenderProjected(gdl, &x, &y, "TM",
 				g_CharsHandelGothicXs, g_FontHandelGothicXs, 0xbfbfffff, viGetWidth(), viGetWidth(), 0, 0);
 	}
-#endif
 
 	gdl = text0f153780(gdl);
 
 	return gdl;
 }
-
-u32 var80071464 = 0;
 
 struct menudfc *func0f0f1338(struct menuitem *item)
 {
@@ -448,11 +398,7 @@ void func0f0f1418(void)
 
 	for (i = 0; i < ARRAYCOUNT(g_Menus[0].unkdfc); i++) {
 		if (g_Menus[g_MpPlayerNum].unkdfc[i].item) {
-#if VERSION >= VERSION_PAL_BETA
-			g_Menus[g_MpPlayerNum].unkdfc[i].unk04 += g_Vars.diffframe60freal / 60.0f;
-#else
 			g_Menus[g_MpPlayerNum].unkdfc[i].unk04 += g_Vars.diffframe60f / 60.0f;
-#endif
 		}
 	}
 }
@@ -876,20 +822,6 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 		break;
 	}
 }
-
-const char var7f1b2400[] = "(BNC:Menu) findItem Warning: Item not found\n";
-const char var7f1b2430[] = "(BNC:Menu) menuFirstFocus - Menu %s does not have any focusable item!\n";
-const char var7f1b2478[] = "(BNC:Menu) menuLastFocus - Menu %s does not have any focusable item!\n";
-const char var7f1b24c0[] = "Init menu %x\n";
-const char var7f1b24d0[] = "[]-[] Added Main menu to ctl slot %d\n";
-const char var7f1b24f8[] = "[]-[] Added Slide menu to ctl slot %d\n";
-const char var7f1b2520[] = "[]-[] StackStart Stats: slides %d, ctlPtr %d slidePtr %d\n";
-const char var7f1b255c[] = "$-$-$avePtr: %d\n";
-const char var7f1b2570[] = "[]-[] Menu End: now %d slides\n";
-const char var7f1b2590[] = "Freeing challenge mem\n";
-const char var7f1b25a8[] = "IG:) style %d gbHead:%d\n";
-const char var7f1b25c4[] = "GRABBED GUN MEM!\n";
-const char var7f1b25d8[] = "Freeing challenge mem\n";
 
 void func0f0f1d6c(struct menudialogdef *dialogdef, struct menudialog *dialog, struct menu *menu)
 {
@@ -2601,7 +2533,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 
 	colour1 = MIXCOLOUR(dialog, item_focused_outer);
 
-	text0f156030(colour1);
+	textSetOutlineColor(colour1);
 
 	var8007fb9c = false;
 
@@ -2973,10 +2905,10 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 #if VERSION >= VERSION_NTSC_1_0
 								if (!(dialog->transitionfrac >= 0.0f && dialog->type2 == 0)
 										&& !(dialog->transitionfrac < 0.0f && dialog->type == 0)) {
-									text0f156024(1);
+											textSetHasOutline(1);
 								}
 #else
-								text0f156024(1);
+								textSetHasOutline(1);
 #endif
 							}
 
@@ -3021,7 +2953,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 						}
 
 						if (focused) {
-							text0f156024(0);
+							textSetHasOutline(0);
 						}
 					}
 
@@ -6190,14 +6122,13 @@ void menuPushPakErrorDialog(s32 paknum, s32 pakerrordialog)
 			menuPushPakDialogForPlayer(&g_PakFullMenuDialog, playernum, paknum);
 		}
 		break;
-#if VERSION >= VERSION_NTSC_1_0
+
 	case PAKERRORDIALOG_GB_UNREADABLE:
 		menuPushPakDialogForPlayer(&g_PakCannotReadGameBoyMenuDialog, playernum, paknum);
 		break;
 	case PAKERRORDIALOG_DATALOST:
 		menuPushPakDialogForPlayer(&g_PakDataLostMenuDialog, playernum, paknum);
 		break;
-#endif
 	}
 
 	g_MpPlayerNum = prevplayernum;

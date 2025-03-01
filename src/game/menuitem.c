@@ -468,17 +468,12 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 						colour = colourBlend(colour, colour & 0xff, 127);
 						colour = colourBlend(colour, spb0, weight);
 
-#if VERSION >= VERSION_NTSC_1_0
 						// If not transitioning the dialog type
 						if ((!(context->dialog->transitionfrac >= 0.0f) || context->dialog->type2 != 0)
 								&& (!(context->dialog->transitionfrac < 0.0f) || context->dialog->type != 0)) {
-							text0f156024(1);
+									textSetHasOutline(1);
 							spb4 = true;
 						}
-#else
-						text0f156024(1);
-						spb4 = true;
-#endif
 					}
 
 					if (context->item->flags & MENUITEMFLAG_LIST_CUSTOMRENDER) {
@@ -628,7 +623,7 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 					}
 
 					if (spb4) {
-						text0f156024(0);
+						textSetHasOutline(0);
 					}
 				}
 

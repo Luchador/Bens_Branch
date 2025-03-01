@@ -3219,8 +3219,6 @@ void playerConfigureVi(void)
 	f32 ratio = player0f0bd358();
 	g_ViRes = VIRES_LO;
 
-	text0f1531dc(false);
-
 #if VERSION >= VERSION_JPN_FINAL
 	var800800f0jf = 0;
 #endif
@@ -3249,16 +3247,6 @@ void playerTick(bool arg0)
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && PLAYERCOUNT() > 1) {
 		g_ViRes = VIRES_LO;
 	}
-
-#if PAL
-	text0f1531dc(false);
-#else
-	if (g_ViRes == VIRES_HI) {
-		text0f1531dc(true);
-	} else {
-		text0f1531dc(false);
-	}
-#endif
 
 #if VERSION >= VERSION_JPN_FINAL
 	var800800f0jf = 0;

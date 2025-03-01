@@ -77,12 +77,6 @@ u32 setupGetCmdLength(u32 *cmd)
 	case OBJTYPE_ESCASTEP:           return sizeof(struct escalatorobj) / sizeof(u32);
 	}
 
-#if VERSION < VERSION_NTSC_1_0
-	if (crash1) {
-		CRASH();
-	}
-#endif
-
 	return 1;
 }
 

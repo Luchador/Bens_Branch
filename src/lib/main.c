@@ -645,7 +645,6 @@ void mainInit(void)
 	lvInit();
 	cheatsInit();
 	func0000e9c0();
-	textInit();
 	dhudInit();
 	playermgrInit();
 	frametimeInit();

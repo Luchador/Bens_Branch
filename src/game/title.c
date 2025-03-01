@@ -465,63 +465,13 @@ Gfx *titleRenderLegal(Gfx *gdl)
 #else
 #define ELEM_TEXT (char *)(elem->textptr ? elem->textptr : langGet(elem->textid))
 #endif
-#if VERSION == VERSION_JPN_FINAL
-				u32 stack;
-				x = elem->x == -1 ? prevx : elem->x;
-				y = elem->y - 1;
-
-				if (elem->type == LEGALELEMENTTYPE_WHITETEXTLG || elem->type == LEGALELEMENTTYPE_WHITETEXTSM) {
-					y -= 3;
-
-					var8007fad0 = 2;
-					var80080108jf = 2;
-
-					if (elem->x == -1) {
-						x += 24;
-					}
-
-					gdl = textRenderProjected(gdl, &x, &y, ELEM_TEXT, font1, font2, colour, viGetWidth(), viGetHeight(), 0, 0);
-
-					var8007fad0 = 1;
-					var80080108jf = 1;
-				} else {
-					gdl = textRenderProjected(gdl, &x, &y, ELEM_TEXT, font1, font2, (colour & 0xffffff00) | ((colour & 0xff) * 2 / 3), viGetWidth(), viGetHeight(), 0, 0);
-
-					x = elem->x == -1 ? prevx : elem->x;
-					y = elem->y;
-					gdl = textRenderProjected(gdl, &x, &y, ELEM_TEXT, font1, font2, colour, viGetWidth(), viGetHeight(), 0, 0);
-
-					prevx = x;
-				}
-#elif VERSION >= VERSION_PAL_FINAL
-				u32 stack;
-				// Render a darker copy of the text one pixel above
-				x = elem->x == -1 ? prevx : elem->x;
-				y = elem->y - 1;
-				gdl = textRenderProjected(gdl, &x, &y, ELEM_TEXT, font1, font2, (colour & 0xffffff00) | ((colour & 0xff) * 2 / 3), viGetWidth(), viGetHeight(), 0, 0);
-
-				// Render the text properly
-				x = elem->x == -1 ? prevx : elem->x;
-				y = elem->y;
-				gdl = textRenderProjected(gdl, &x, &y, ELEM_TEXT, font1, font2, colour, viGetWidth(), viGetHeight(), 0, 0);
-
-				prevx = x;
-#elif VERSION >= VERSION_PAL_BETA
-				x = elem->x == -1 ? prevx : elem->x;
-				y = elem->y;
-				gdl = textRenderProjected(gdl, &x, &y, ELEM_TEXT, font1, font2, colour, viGetWidth(), viGetHeight(), 0, 0);
-				prevx = x;
-#else
 				x = elem->x;
 				y = elem->y;
 				gdl = textRenderProjected(gdl, &x, &y, ELEM_TEXT, font1, font2, colour, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 			}
 		}
 
-#ifndef PLATFORM_N64
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
-#endif
 
 		gdl = text0f153780(gdl);
 	}
@@ -2311,47 +2261,6 @@ Gfx *titleRenderNoController(Gfx *gdl)
 	gdl = titleClear(gdl);
 	gdl = text0f153628(gdl);
 
-#if VERSION >= VERSION_JPN_FINAL
-	y = g_TitleViewHeight / 2 - 50;
-
-	var8007fad0 = 2;
-	var80080108jf = 2;
-
-	// Line 1
-	text = langGet(L_MPWEAPONS_285);
-	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0);
-
-	x = 288 - textwidth;
-	gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, viGetWidth(), viGetHeight(), 0, 0);
-	y += 18;
-
-	// Line 2
-	text = langGet(L_MPWEAPONS_286);
-	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0);
-
-	x = 288 - textwidth;
-	gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, viGetWidth(), viGetHeight(), 0, 0);
-	y += 28;
-
-	// Line 3
-	text = langGet(L_MPWEAPONS_287);
-	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0);
-
-	x = 288 - textwidth;
-	gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, viGetWidth(), viGetHeight(), 0, 0);
-	y += 18;
-
-	// Line 4
-	text = langGet(L_MPWEAPONS_288);
-	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0);
-
-	x = 288 - textwidth;
-	gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, viGetWidth(), viGetHeight(), 0, 0);
-	y += 18;
-
-	var8007fad0 = 1;
-	var80080108jf = 1;
-#else
 	// Line 1
 	text = langGet(L_OPTIONS_071); // "- no controller in controller socket 1 -"
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0);
@@ -2381,7 +2290,6 @@ Gfx *titleRenderNoController(Gfx *gdl)
 		width = viGetWidth();
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, width, viGetHeight(), 0, 0);
 	}
-#endif
 
 	gdl = text0f153780(gdl);
 
@@ -2411,63 +2319,6 @@ void titleTickNoExpansion(void)
 	viSetUseZBuf(0);
 
 	g_TitleTimer += g_Vars.lvupdate60;
-}
-#endif
-
-#if VERSION >= VERSION_JPN_FINAL
-Gfx *titleRenderNoExpansion(Gfx *gdl)
-{
-	s32 textheight;
-	s32 textwidth;
-	s32 x;
-	s32 y;
-	char *text;
-	u32 stack[2];
-	s16 tmp;
-	s16 width;
-
-	if (1);
-	if (1);
-	if (1);
-
-	joyGetConnectedControllers();
-
-	gdl = titleClear(gdl);
-	gdl = text0f153628(gdl);
-
-	x = 50;
-	y = g_TitleViewHeight / 2 - 36;
-
-	var8007fad0 = 2;
-	var80080108jf = 2;
-
-	text = langGet(L_MPWEAPONS_281);
-	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0);
-	x = 288 - textwidth;
-	width = viGetWidth();
-	gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, width, viGetHeight(), 0, 0);
-	y += 18;
-
-	text = langGet(L_MPWEAPONS_282);
-	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0);
-	x = 288 - textwidth;
-	width = viGetWidth();
-	gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, width, viGetHeight(), 0, 0);
-	y += 18;
-
-	text = langGet(L_MPWEAPONS_284);
-	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0);
-	x = 288 - textwidth;
-	width = viGetWidth();
-	gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, width, viGetHeight(), 0, 0);
-	y += 18;
-
-	var8007fad0 = 1;
-	var80080108jf = 1;
-
-	gdl = text0f153780(gdl);
-
-	return gdl;
 }
 #endif
 

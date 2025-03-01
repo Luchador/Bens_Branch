@@ -48,16 +48,10 @@ struct modeldef *var800acc28[18];
 struct mpweaponset g_MpWeaponSets[12];
 s32 g_MpWeaponSetNum;
 
-#ifndef PLATFORM_N64
 u8 g_MpWeaponSetRandomFilters[NUM_MPWEAPONS];
 s32 g_MpWeaponRandomFilterNum;
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
-const char var7f1b8a00[] = "||||||||||||| Starting game... players %d\n";
-#endif
-
-s32 var80087260 = 0x00000000;
+bool g_MpMatchHasEnded = false;
 bool g_MpEnableMusicSwitching = false;
 
 struct mpweapon g_MpWeapons[NUM_MPWEAPONS] = {
