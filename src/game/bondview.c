@@ -32,61 +32,15 @@ char var800a41c0[24];
 #endif
 
 u8 g_IrScanlines[2][480];
-
-#if VERSION < VERSION_NTSC_1_0
-u8 var800a8b58nb[0x1c0];
-#endif
-
-s32 var8007f840 = 0;
-u8 var8007f844 = 0;
+s32 g_NumActiveEffects = 0;
+u8 g_BlurChange = 0;
 u8 var8007f848 = 0;
-s32 g_IrBinocularRadius = PAL ? 102 : 90;
+s32 g_IrBinocularRadius = 90;
 s32 var8007f850 = 3;
-u32 var8007f854 = 0x00000000;
-u32 var8007f858 = 0xb8000000;
-u32 var8007f85c = 0x00000000;
 
 Gfx *bviewDrawIrRect(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
 {
 	gDPFillRectangle(gdl++, x1, y1, x2, y2);
-
-	return gdl;
-}
-
-Gfx *bview0f141864(Gfx *gdl, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5)
-{
-	s32 value = viGetWidth() * arg2 + arg4;
-
-	gDPPipeSync(gdl++);
-	gDPSetTextureImage(gdl++, G_IM_FMT_I, G_IM_SIZ_8b, SCREEN_320, value * 2 + arg1);
-	gDPLoadSync(gdl++);
-	gDPLoadBlock(gdl++, arg3, 0, 0, arg5 - 1, 0);
-
-	return gdl;
-}
-
-Gfx *bview0f141940(Gfx *gdl, s32 arg1, s32 arg2, s32 tile, s32 arg4, s32 width)
-{
-	s32 value = viGetWidth() * arg2 + arg4;
-
-	gDPPipeSync(gdl++);
-	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, value * 2 + arg1);
-	gDPLoadSync(gdl++);
-	gDPLoadBlock(gdl++, tile, 0, 0, width - 1, 0);
-
-	return gdl;
-}
-
-Gfx *bview0f141a20(Gfx *gdl, s32 top, s32 height, s32 left, s32 width)
-{
-	gDPPipeSync(gdl++);
-
-	gSPTextureRectangle(gdl++,
-			left << 2,
-			top << 2,
-			(left + width) << 2,
-			(top + 1) << 2,
-			G_TX_RENDERTILE, 0, 0, height * 1024, 1024);
 
 	return gdl;
 }
@@ -263,15 +217,15 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
 	var8007f848 = true;
 
 	newalpha = alpha;
-	newalpha += var8007f844;
+	newalpha += g_BlurChange;
 
-	if (newalpha > 230) {
-		newalpha = 230;
+	// Reduced from 230 so it doesn't ruin the bloom and sharpen shaders in ReShade
+	if (newalpha > 100) {
+		newalpha = 100;
 	}
 
-	var8007f844 = 0;
+	g_BlurChange = 0;
 
-#ifndef PLATFORM_N64
 	if (!videoFramebuffersSupported()) {
 		return gdl;
 	}
@@ -283,7 +237,6 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
 	if (g_BlurFbDirty) {
 		return gdl;
 	}
-#endif
 
 	fxxx = sfxxx / 1000.0f;
 	fyyy = sfyyy / 1000.0f;
@@ -293,18 +246,11 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
 	somefloat = (viewheight - viewheight / fyyy) * 0.5f;
 	gdl = bviewPrepareStaticRgba16(gdl, colour, newalpha);
 
-#ifdef PLATFORM_N64
-	for (i = viewtop; i < viewtop + viewheight; i++) {
-		gdl = bviewCopyPixels(gdl, fb, viewtop + (s32)somefloat, 5, i, fxxx, viewleft, viewwidth);
-		somefloat += 1.0f / fyyy;
-	}
-#else
 	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_BlurFb);
 	gSPImageRectangleEXT(gdl++,
 		viewleft << 2, viewtop << 2, viewleft, viewtop,
 		(viewleft + viewwidth) << 2, (viewtop + viewheight) << 2, viewleft + viewwidth, viewtop + viewheight,
 		0, videoGetNativeWidth(), videoGetNativeHeight());
-#endif
 
 	return gdl;
 }
@@ -326,20 +272,10 @@ Gfx *bviewDrawStatic(Gfx *gdl, u32 arg1, s32 arg2)
 
 	gdl = bviewPrepareStaticI8(gdl, arg1, arg2);
 
-#ifdef PLATFORM_N64
-	for (y = viewtop; y < viewtop + viewheight; y++) {
-		gdl = bviewCopyPixels(gdl, fb2, rngRandom() % 240, 5, y, 1.0f, viewleft, viewwidth);
-	}
-#else
 	gDPSetCombineLERP(gdl++,
 			NOISE, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT,
 			NOISE, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT);
 	gDPFillRectangleEXT(gdl++, viewleft, viewtop, viewleft + viewwidth, viewtop + viewheight);
-#endif
-
-	if (fb2) {
-		// empty
-	}
 
 	return gdl;
 }
@@ -359,9 +295,9 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, u32 colour, u32 alpha)
 	s32 offset = (s32)(g_20SecIntervalFrac * 600.0f) % 12;
 	f32 increment;
 
-	var8007f840++;
+	g_NumActiveEffects++;
 
-	if (var8007f840 >= 2) {
+	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
 
@@ -373,23 +309,6 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, u32 colour, u32 alpha)
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
-#ifdef PLATFORM_N64
-	for (y = viewtop; y < viewtop + viewheight; y++) {
-		s32 offsety = y - offset;
-
-		if ((offsety % 8) == 0 || y == viewtop) {
-			if ((offsety % 16) < 8) {
-				gDPSetEnvColor(gdl++, 0xff, 0xff, 0x00, 0xff);
-			} else {
-				gDPSetEnvColor(gdl++, 0xff, 0xff, 0xbf, 0xff);
-			}
-		}
-
-		gdl = bviewCopyPixels(gdl, fb, y, 5, y, 2.0f - sinf(angle), viewleft, viewwidth);
-
-		angle += increment;
-	}
-#else
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 	gSPSetExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
 
@@ -408,7 +327,6 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, u32 colour, u32 alpha)
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
-#endif
 
 	return gdl;
 }
@@ -427,9 +345,9 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, u32 colour, u32 alpha)
 	s32 offset = (s32)(g_20SecIntervalFrac * 600.0f) % 12;
 	u32 stack;
 
-	var8007f840++;
+	g_NumActiveEffects++;
 
-	if (var8007f840 >= 2) {
+	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
 
@@ -439,26 +357,6 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, u32 colour, u32 alpha)
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
-#ifdef PLATFORM_N64
-	for (y = viewtop; y < viewtop + viewheight; y++) {
-		s32 offsety = y - offset;
-		s32 tmpy = y;
-
-		if (offsety % 6 == 0 || y == viewtop) {
-			if (offsety % 12 < 6) {
-				gDPSetEnvColor(gdl++, 0x7f, 0xff, 0xff, 0xff);
-			} else {
-				gDPSetEnvColor(gdl++, 0x00, 0xaf, 0xff, 0xff);
-			}
-		}
-
-		if (rngRandom() % 20 == 1) {
-			tmpy = rngRandom() % 200;
-		}
-
-		gdl = bviewCopyPixels(gdl, fb, tmpy, 5, y, 1, viewleft, viewwidth);
-	}
-#else
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 	gSPSetExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
 
@@ -482,7 +380,6 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, u32 colour, u32 alpha)
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
-#endif
 
 	return gdl;
 }
@@ -494,7 +391,6 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, u32 colour, u32 alpha)
  */
 Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 {
-	u16 *fb = viGetFrontBuffer();
 	s32 viewtop = viGetViewTop();
 	s32 viewheight = viGetViewHeight();
 	s32 viewwidth = viGetViewWidth();
@@ -502,13 +398,12 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 	f32 somefloat;
 	s32 i;
 
-	var8007f840++;
+	g_NumActiveEffects++;
 
-	if (var8007f840 >= 2) {
+	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
 
-#ifndef PLATFORM_N64
 	if (!videoFramebuffersSupported()) {
 		return gdl;
 	}
@@ -520,7 +415,6 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 	if (g_BlurFbDirty) {
 		return gdl;
 	}
-#endif
 
 	strcpy(var800a41c0, "stretchBlurGfx");
 
@@ -530,12 +424,6 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
-#ifdef PLATFORM_N64
-	for (i = viewtop; i < viewtop + viewheight; i++) {
-		gdl = bviewCopyPixels(gdl, fb, (s32)somefloat + viewtop, 5, i, arg3, viewleft, viewwidth);
-		somefloat += 1.0f / arg4;
-	}
-#else
 	const f32 xcenter = viewleft + viewwidth * 0.5f;
 	const f32 ycenter = viewtop + viewheight * 0.5f;
 	const f32 halfw = viewwidth * 0.5f * arg3;
@@ -549,7 +437,6 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 		left << 2, top << 2, viewleft, viewtop,
 		right << 2, bottom << 2, viewleft + viewwidth, viewtop + viewheight,
 		0, videoGetNativeWidth(), videoGetNativeHeight());
-#endif
 
 	return gdl;
 }
@@ -574,8 +461,6 @@ f32 bview0f142d74(s32 arg0, f32 arg1, f32 arg2, f32 arg3)
 	return result;
 }
 
-#ifndef PLATFORM_N64
-
 static inline Gfx *bviewDrawFisheyeLine(Gfx *gdl, s32 viewleft, s32 viewwidth, s32 y, f32 scale)
 {
 	if (!videoFramebuffersSupported()) {
@@ -595,8 +480,6 @@ static inline Gfx *bviewDrawFisheyeLine(Gfx *gdl, s32 viewleft, s32 viewwidth, s
 
 	return gdl;
 }
-
-#endif
 
 /**
  * Draw the fisheye curved effect when using an eyespy.
@@ -687,9 +570,9 @@ Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 sta
 
 	starting = (startuptimer60 < TICKS(50));
 
-	var8007f840++;
+	g_NumActiveEffects++;
 
-	if (var8007f840 >= 2) {
+	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
 
@@ -2114,9 +1997,9 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 	u32 mpindex = g_Vars.currentplayerstats->mpindex % MAX_PLAYERS;
 #endif
 
-	var8007f840++;
+	g_NumActiveEffects++;
 
-	if (var8007f840 >= 2) {
+	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
 
@@ -2238,9 +2121,9 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 	outerradius = g_IrBinocularRadius;
 	innerradius = g_IrBinocularRadius / var8007f850;
 
-	var8007f840++;
+	g_NumActiveEffects++;
 
-	if (var8007f840 >= 2) {
+	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
 
@@ -2446,9 +2329,9 @@ Gfx *bviewDrawIntroFaderBlur(Gfx *gdl, s32 arg1)
 	f32 extra;
 	s32 y;
 
-	var8007f840++;
+	g_NumActiveEffects++;
 
-	if (var8007f840 >= 2) {
+	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
 
@@ -2494,9 +2377,9 @@ Gfx *bviewDrawIntroText(Gfx *gdl)
 	s32 viewleft = viGetViewLeft();
 	s32 y;
 
-	var8007f840++;
+	g_NumActiveEffects++;
 
-	if (var8007f840 >= 2) {
+	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
 
@@ -2555,9 +2438,9 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	u32 colour;
 	f32 range;
 
-	var8007f840++;
+	g_NumActiveEffects++;
 
-	if (var8007f840 >= 2) {
+	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
 
@@ -2820,12 +2703,12 @@ Gfx *bview0f148b38(Gfx *gdl)
 
 void bviewSetMotionBlur(u32 bluramount)
 {
-	var8007f840 = 0;
+	g_NumActiveEffects = 0;
 	var8007f848 = 0;
-	var8007f844 = (bluramount << 1) / 3;
+	g_BlurChange = (bluramount << 1) / 3; // same as multiplying by 2/3
 }
 
 void bviewClearMotionBlur(void)
 {
-	var8007f844 = 0;
+	g_BlurChange = 0;
 }

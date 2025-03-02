@@ -31,16 +31,16 @@ struct footstepframe {
 };
 
 struct footstepframe g_FootstepAnims[] = {
-	{ ANIM_002B,               0x08, 0x19 },
-	{ ANIM_0029,               0x05, 0x0e },
+	{ ANIM_WALK_RT_HAND_DOWN,                 0x08, 0x19 },
+	{ ANIM_SPRINT_RIFLE,                      0x05, 0x0e },
 	{ ANIM_006B,               0x08, 0x19 },
 	{ ANIM_0028,               0x1b, 0x08 },
 	{ ANIM_RUNNING_TWOHANDGUN, 0x12, 0x06 },
-	{ ANIM_0052,               0x08, 0x19 },
-	{ ANIM_0053,               0x19, 0x08 },
-	{ ANIM_0054,               0x19, 0x08 },
-	{ ANIM_0055,               0x07, 0x12 },
-	{ ANIM_0056,               0x07, 0x12 },
+	{ ANIM_WALK_AIM_PISTOL_FWD,               0x08, 0x19 },
+	{ ANIM_WALK_AIM_PISTOL_LF,                0x19, 0x08 },
+	{ ANIM_WALK_AIM_PISTOL_RT,                0x19, 0x08 },
+	{ ANIM_RUN_AIM_PISTOL_FWD,                0x07, 0x12 },
+	{ ANIM_RUN_AIM_PISTOL_RT,                 0x07, 0x12 },
 	{ ANIM_0057,               0x12, 0x07 },
 	{ ANIM_0058,               0x0f, 0x05 },
 	{ ANIM_RUNNING_ONEHANDGUN, 0x08, 0x14 },
@@ -56,11 +56,11 @@ struct footstepframe g_FootstepAnims[] = {
 	{ ANIM_0093,               0x17, 0x0a },
 	{ ANIM_0094,               0x0f, 0x05 },
 	{ ANIM_005F,               0x0e, 0x01 },
-	{ ANIM_WALK_FORWARD01,               0x1d, 0x0a },
-	{ ANIM_RIFLE_WALK,                   0x18, 0x2e },
+	{ ANIM_WALK_FORWARD01,                  0x1d, 0x0a },
+	{ ANIM_RIFLE_WALK,                      0x18, 0x2e },
 	{ ANIM_001B,               0x0a, 0x1c },
-	{ ANIM_001D,               0x0d, 0x02 },
-	{ ANIM_001E,               0x0c, 0x01 },
+	{ ANIM_RUN_FWD_001D,                    0x0d, 0x02 },
+	{ ANIM_RUN_FWD_001E,                    0x0c, 0x01 },
 	{ ANIM_005C,               0x13, 0x2a },
 	{ ANIM_005D,               0x0f, 0x05 },
 	{ ANIM_005E,               0x04, 0x0c },
@@ -71,12 +71,12 @@ struct footstepframe g_FootstepAnims[] = {
 bool footstepIsRunning(s32 animnum)
 {
 	switch (animnum) {
-	case ANIM_001D:
-	case ANIM_001E:
-	case ANIM_0029:
+	case ANIM_RUN_FWD_001D:
+	case ANIM_RUN_FWD_001E:
+	case ANIM_SPRINT_RIFLE:
 	case ANIM_RUNNING_TWOHANDGUN:
-	case ANIM_0055:
-	case ANIM_0056:
+	case ANIM_RUN_AIM_PISTOL_FWD:
+	case ANIM_RUN_AIM_PISTOL_RT:
 	case ANIM_0057:
 	case ANIM_0058:
 	case ANIM_RUNNING_ONEHANDGUN:

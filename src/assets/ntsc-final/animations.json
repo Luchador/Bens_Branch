@@ -348,7 +348,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_001D",
+        "id": "ANIM_RUN_FWD_001D",
         "file": "001d.bin",
         "numframes": 22,
         "bytesperframe": 40,
@@ -360,7 +360,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_001E",
+        "id": "ANIM_RUN_FWD_001E",
         "file": "001e.bin",
         "numframes": 21,
         "bytesperframe": 39,
@@ -372,7 +372,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_001F",
+        "id": "ANIM_WALK_RT_ARM_UP",
         "file": "001f.bin",
         "numframes": 108,
         "bytesperframe": 39,
@@ -384,7 +384,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_DEATH_0020",
+        "id": "ANIM_DEATH_TWIST",
         "file": "0020.bin",
         "numframes": 69,
         "bytesperframe": 55,
@@ -492,7 +492,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0029",
+        "id": "ANIM_SPRINT_RIFLE",
         "file": "0029.bin",
         "numframes": 19,
         "bytesperframe": 42,
@@ -516,7 +516,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_002B",
+        "id": "ANIM_WALK_RT_HAND_DOWN",
         "file": "002b.bin",
         "numframes": 35,
         "bytesperframe": 38,
@@ -528,7 +528,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_002C",
+        "id": "ANIM_BOND_INTRO",
         "file": "002c.bin",
         "numframes": 124,
         "bytesperframe": 47,
@@ -540,7 +540,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_002D",
+        "id": "ANIM_BOND_WATCH",
         "file": "002d.bin",
         "numframes": 60,
         "bytesperframe": 7,
@@ -576,7 +576,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0030",
+        "id": "ANIM_WALK_RIFLE_POINTED",
         "file": "0030.bin",
         "numframes": 34,
         "bytesperframe": 37,
@@ -588,7 +588,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0031",
+        "id": "ANIM_JOG_RIFLE_POINTED",
         "file": "0031.bin",
         "numframes": 21,
         "bytesperframe": 39,
@@ -600,7 +600,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0032",
+        "id": "ANIM_RIFLE_IDLE_TO_FIRE",
         "file": "0032.bin",
         "numframes": 106,
         "bytesperframe": 47,
@@ -624,7 +624,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0034",
+        "id": "ANIM_RIFLE_JUMP_LF_FIRE",
         "file": "0034.bin",
         "numframes": 150,
         "bytesperframe": 61,
@@ -636,7 +636,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0035",
+        "id": "ANIM_RIFLE_JUMP_RT_FIRE",
         "file": "0035.bin",
         "numframes": 199,
         "bytesperframe": 60,
@@ -648,7 +648,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0036",
+        "id": "ANIM_HIT_BUTT_0036",
         "file": "0036.bin",
         "numframes": 227,
         "bytesperframe": 52,
@@ -660,7 +660,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0037",
+        "id": "ANIM_HIT_BUTT_0037",
         "file": "0037.bin",
         "numframes": 180,
         "bytesperframe": 53,
@@ -672,7 +672,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0038",
+        "id": "ANIM_DEATH_NECK_LONG",
         "file": "0038.bin",
         "numframes": 245,
         "bytesperframe": 65,
@@ -696,7 +696,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_003A",
+        "id": "ANIM_SIDESTEP_RIFLE_RT",
         "file": "003a.bin",
         "numframes": 62,
         "bytesperframe": 43,
@@ -708,7 +708,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_003B",
+        "id": "ANIM_SIDESTEP_RIFLE_LF",
         "file": "003b.bin",
         "numframes": 57,
         "bytesperframe": 43,
@@ -720,7 +720,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_003C",
+        "id": "ANIM_DEATH_KNOCKED_BK",
         "file": "003c.bin",
         "numframes": 94,
         "bytesperframe": 50,
@@ -756,7 +756,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_003F",
+        "id": "ANIM_TAUNT",
         "file": "003f.bin",
         "numframes": 447,
         "bytesperframe": 54,
@@ -768,7 +768,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0040",
+        "id": "ANIM_SURVEY",
         "file": "0040.bin",
         "numframes": 148,
         "bytesperframe": 42,
@@ -780,7 +780,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0041",
+        "id": "ANIM_PISTOL_FIRE_0041",
         "file": "0041.bin",
         "numframes": 185,
         "bytesperframe": 44,
@@ -792,7 +792,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0042",
+        "id": "ANIM_DRAW_PISTOL_SHOOT",
         "file": "0042.bin",
         "numframes": 150,
         "bytesperframe": 46,
@@ -804,7 +804,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0043",
+        "id": "ANIM_CROSS_ARMS_SHOOT",
         "file": "0043.bin",
         "numframes": 125,
         "bytesperframe": 56,
@@ -816,7 +816,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0044",
+        "id": "ANIM_PISTOL_FIRE_0044",
         "file": "0044.bin",
         "numframes": 125,
         "bytesperframe": 42,
@@ -828,7 +828,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0045",
+        "id": "ANIM_PISTOL_FIRE_0045",
         "file": "0045.bin",
         "numframes": 87,
         "bytesperframe": 44,
@@ -840,7 +840,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0046",
+        "id": "ANIM_PISTOL_FIRE_0046",
         "file": "0046.bin",
         "numframes": 87,
         "bytesperframe": 45,
@@ -852,7 +852,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0047",
+        "id": "ANIM_PISTOL_FIRE_0047",
         "file": "0047.bin",
         "numframes": 160,
         "bytesperframe": 36,
@@ -864,7 +864,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0048",
+        "id": "ANIM_PISTOL_FIRE_0048",
         "file": "0048.bin",
         "numframes": 87,
         "bytesperframe": 49,
@@ -876,7 +876,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0049",
+        "id": "ANIM_PISTOL_FIRE_0049",
         "file": "0049.bin",
         "numframes": 159,
         "bytesperframe": 43,
@@ -888,7 +888,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_004A",
+        "id": "ANIM_PISTOL_FIRE_004A",
         "file": "004a.bin",
         "numframes": 80,
         "bytesperframe": 56,
@@ -900,7 +900,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_KNEEL_SHOOT_RIGHT_HAND",
+        "id": "ANIM_KNEEL_SHOOT_PISTOL_RT_004B",
         "file": "004b.bin",
         "numframes": 170,
         "bytesperframe": 47,
@@ -912,7 +912,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_004C",
+        "id": "ANIM_KNEEL_SHOOT_PISTOL_RT_004C",
         "file": "004c.bin",
         "numframes": 102,
         "bytesperframe": 47,
@@ -924,7 +924,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_004D",
+        "id": "ANIM_KNEEL_SHOOT_PISTOL_RT_004D",
         "file": "004d.bin",
         "numframes": 150,
         "bytesperframe": 46,
@@ -936,7 +936,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_004E",
+        "id": "ANIM_KNEEL_SHOOT_PISTOL_RT_004E",
         "file": "004e.bin",
         "numframes": 95,
         "bytesperframe": 55,
@@ -948,7 +948,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_004F",
+        "id": "ANIM_KNEEL_SHOOT_PISTOL_LF_004F",
         "file": "004f.bin",
         "numframes": 154,
         "bytesperframe": 48,
@@ -960,7 +960,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0050",
+        "id": "ANIM_KNEEL_SHOOT_PISTOL_LF_0050",
         "file": "0050.bin",
         "numframes": 100,
         "bytesperframe": 49,
@@ -972,7 +972,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0051",
+        "id": "ANIM_KNEEL_SHOOT_PISTOL_LF_0051",
         "file": "0051.bin",
         "numframes": 107,
         "bytesperframe": 47,
@@ -984,7 +984,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0052",
+        "id": "ANIM_WALK_AIM_PISTOL_FWD",
         "file": "0052.bin",
         "numframes": 35,
         "bytesperframe": 39,
@@ -996,7 +996,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0053",
+        "id": "ANIM_WALK_AIM_PISTOL_LF",
         "file": "0053.bin",
         "numframes": 35,
         "bytesperframe": 38,
@@ -1008,7 +1008,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0054",
+        "id": "ANIM_WALK_AIM_PISTOL_RT",
         "file": "0054.bin",
         "numframes": 37,
         "bytesperframe": 39,
@@ -1020,7 +1020,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0055",
+        "id": "ANIM_RUN_AIM_PISTOL_FWD",
         "file": "0055.bin",
         "numframes": 23,
         "bytesperframe": 51,
@@ -1032,7 +1032,7 @@
         "flag08": false
     },
     {
-        "id": "ANIM_0056",
+        "id": "ANIM_RUN_AIM_PISTOL_RT",
         "file": "0056.bin",
         "numframes": 24,
         "bytesperframe": 50,

@@ -5,6 +5,7 @@ This is mostly to help me learn the Perfect Dark code and maybe make some cool c
 Changes include:
 * Press G to go into Gangsta Mode whenever you want (hold some guns sideways)
 * Male guards will select from all 42 available heads instead of just 8 like the original game
+* All Guns cheat gives the Slayer on all stages, not just Attack Ship and Ruins.
 * Far more bullet holes supported
 * Twice the smoke puffs supported
 * Tinted glass does not become fully opaque

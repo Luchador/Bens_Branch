@@ -17,7 +17,6 @@ s32 bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, s
 s32 bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c, struct coord *d, struct coord *e, s32 types);
 s32 bwalk0f0c494c(struct coord *a, struct coord *b, struct coord *c, s32 types);
 s32 bwalk0f0c4a5c(struct coord *a, struct coord *b, struct coord *c, s32 types);
-void bwalk0f0c4d98(void);
 void bwalkUpdateSpeedSideways(f32 targetspeed, f32 accelspeed, s32 mult);
 void bwalkUpdateSpeedForwards(f32 targetspeed, f32 accelspeed);
 void bwalkUpdateVertical(void);

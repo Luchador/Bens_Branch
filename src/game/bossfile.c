@@ -40,21 +40,7 @@ bool bossfileLoadFull(void)
 {
 	bossfileLoad();
 
-#if VERSION >= VERSION_PAL_BETA
-	langSetEuropean(g_Vars.language);
-#endif
-
 	return true;
-}
-
-void func0f1106ec(void)
-{
-	// empty
-}
-
-void func0f1106f4(u8 *dst)
-{
-	bcopy(var800a22d0, dst, sizeof(var800a22d0));
 }
 
 u32 bossfileFindFileId(void)

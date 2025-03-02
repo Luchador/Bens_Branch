@@ -83,12 +83,6 @@ void fmbReset(void)
 		challengeDetermineUnlockedFeatures();
 
 		menuPushRootDialog(&g_FilemgrFileSelect4MbMenuDialog, MENUROOT_4MBFILEMGR);
-
-#if PAL
-		if (g_Vars.language >= 6) {
-			menuPushDialog(&g_ChooseLanguageMenuDialog);
-		}
-#endif
 	}
 
 	g_MpPlayerNum = prevplayernum;
@@ -247,7 +241,6 @@ struct menudialogdef g_FilemgrFileSelect4MbMenuDialog = {
 };
 
 struct menuitem g_AudioVideo4MbMenuItems[] = {
-#if VERSION >= VERSION_NTSC_1_0
 	{
 		MENUITEMTYPE_SLIDER,
 		0,
@@ -264,24 +257,6 @@ struct menuitem g_AudioVideo4MbMenuItems[] = {
 		L_MPMENU_000, // ""
 		menuhandlerMusicVolume,
 	},
-#else
-	{
-		MENUITEMTYPE_SLIDER,
-		0,
-		MENUITEMFLAG_SLIDER_FAST | MENUITEMFLAG_SLIDER_HIDEVALUE,
-		L_OPTIONS_308, // "Sound"
-		0x7fff,
-		menuhandlerSfxVolume,
-	},
-	{
-		MENUITEMTYPE_SLIDER,
-		0,
-		MENUITEMFLAG_SLIDER_FAST | MENUITEMFLAG_SLIDER_HIDEVALUE,
-		L_OPTIONS_309, // "Music"
-		0x7fff,
-		menuhandlerMusicVolume,
-	},
-#endif
 	{
 		MENUITEMTYPE_DROPDOWN,
 		0,
@@ -306,16 +281,6 @@ struct menuitem g_AudioVideo4MbMenuItems[] = {
 		0,
 		menuhandlerScreenRatio,
 	},
-#if PAL
-	{
-		MENUITEMTYPE_DROPDOWN,
-		0,
-		0,
-		L_MPWEAPONS_269, // ""
-		0,
-		menuhandlerLanguage,
-	},
-#endif
 	{
 		MENUITEMTYPE_SEPARATOR,
 		0,
@@ -424,7 +389,6 @@ struct menuitem g_MpQuickGo4MbMenuItems[] = {
 		0,
 		(void *)&g_MpReadyMenuDialog,
 	},
-#if VERSION >= VERSION_NTSC_1_0
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
@@ -433,7 +397,6 @@ struct menuitem g_MpQuickGo4MbMenuItems[] = {
 		0,
 		(void *)&g_MpLoadPlayerMenuDialog,
 	},
-#endif
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
@@ -468,7 +431,7 @@ struct menuitem g_MpConfirmChallenge4MbMenuItems[] = {
 		DESCRIPTION_MPCONFIG,
 		0,
 		0x0000007c,
-		(VERSION == VERSION_PAL_FINAL ? 65 : 55),
+		55,
 		NULL,
 	},
 	{
@@ -585,7 +548,6 @@ struct menuitem g_MainMenu4MbMenuItems[] = {
 		0,
 		(void *)&g_ChangeAgentMenuDialog,
 	},
-#ifndef PLATFORM_N64
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
@@ -594,7 +556,6 @@ struct menuitem g_MainMenu4MbMenuItems[] = {
 		0x00000007,
 		(void *)&g_ExitGameMenuDialog,
 	},
-#endif
 	{ MENUITEMTYPE_END },
 };
 

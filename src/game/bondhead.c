@@ -12,8 +12,8 @@
 #include "types.h"
 
 struct headanim g_HeadAnims[] = {
-	{ ANIM_002B, 9.5, 27, 0, 0,   1.5 },
-	{ ANIM_0029, 7.5, 17, 0, 1.5, 100 },
+	{ ANIM_WALK_RT_HAND_DOWN, 9.5, 27, 0, 0,   1.5 },
+	{ ANIM_SPRINT_RIFLE, 7.5, 17, 0, 1.5, 100 },
 };
 
 void bheadFlipAnimation(void)
@@ -45,21 +45,21 @@ void bheadUpdatePos(struct coord *vel)
 
 	if (g_Vars.currentplayer->resetheadpos) {
 		g_Vars.currentplayer->headpossum.x = 0;
-		g_Vars.currentplayer->headpossum.y = vel->y / (PAL ? 0.021499991416931f : 0.018000006f);
+		g_Vars.currentplayer->headpossum.y = vel->y / 0.018000006f;
 		g_Vars.currentplayer->headpossum.z = 0;
 
 		g_Vars.currentplayer->resetheadpos = false;
 	}
 
 	for (i = 0; i < g_Vars.lvupdate240; i++) {
-		g_Vars.currentplayer->headpossum.x = vel->x + (PAL ? 0.9785f : 0.982f) * g_Vars.currentplayer->headpossum.x;
-		g_Vars.currentplayer->headpossum.y = vel->y + (PAL ? 0.9785f : 0.982f) * g_Vars.currentplayer->headpossum.y;
-		g_Vars.currentplayer->headpossum.z = vel->z + (PAL ? 0.9785f : 0.982f) * g_Vars.currentplayer->headpossum.z;
+		g_Vars.currentplayer->headpossum.x = vel->x + 0.982f * g_Vars.currentplayer->headpossum.x;
+		g_Vars.currentplayer->headpossum.y = vel->y + 0.982f * g_Vars.currentplayer->headpossum.y;
+		g_Vars.currentplayer->headpossum.z = vel->z + 0.982f * g_Vars.currentplayer->headpossum.z;
 	}
 
-	g_Vars.currentplayer->headpos.x = g_Vars.currentplayer->headpossum.x * (PAL ? 0.021499991416931f : 0.018000006f);
-	g_Vars.currentplayer->headpos.y = g_Vars.currentplayer->headpossum.y * (PAL ? 0.021499991416931f : 0.018000006f);
-	g_Vars.currentplayer->headpos.z = g_Vars.currentplayer->headpossum.z * (PAL ? 0.021499991416931f : 0.018000006f);
+	g_Vars.currentplayer->headpos.x = g_Vars.currentplayer->headpossum.x * 0.018000006f;
+	g_Vars.currentplayer->headpos.y = g_Vars.currentplayer->headpossum.y * 0.018000006f;
+	g_Vars.currentplayer->headpos.z = g_Vars.currentplayer->headpossum.z * 0.018000006f;
 }
 
 void bheadUpdateRot(struct coord *lookvel, struct coord *upvel)
@@ -195,9 +195,9 @@ void bheadUpdate(f32 arg0, f32 arg1)
 			g_Vars.currentplayer->headwalkingtime60 += g_Vars.lvupdate60;
 
 			if (g_Vars.currentplayer->headwalkingtime60 > TICKS(60)) {
-				bheadSetDamp(PAL ? 0.9785f : 0.982f);
+				bheadSetDamp(0.982f);
 			} else {
-				bheadSetDamp(PAL ? 0.99699f : 0.99748998880386f);
+				bheadSetDamp(0.99748998880386f);
 			}
 		} else {
 			lookvel.x = g_Vars.currentplayer->bondheadmatrices[0].m[2][0];
@@ -208,7 +208,7 @@ void bheadUpdate(f32 arg0, f32 arg1)
 			upvel.y = g_Vars.currentplayer->bondheadmatrices[0].m[1][1];
 			upvel.z = g_Vars.currentplayer->bondheadmatrices[0].m[1][2];
 
-			bheadSetDamp(PAL ? 0.952f : 0.96f);
+			bheadSetDamp(0.96f);
 		}
 	} else {
 		g_Vars.currentplayer->headbodyoffset.x = g_Vars.currentplayer->standbodyoffset.x;
@@ -220,7 +220,7 @@ void bheadUpdate(f32 arg0, f32 arg1)
 		headpos.z = 0;
 
 		g_Vars.currentplayer->headwalkingtime60 = 0;
-		bheadSetDamp(PAL ? 0.99699f : 0.99748998880386f);
+		bheadSetDamp(0.99748998880386f);
 
 		if (bmoveGetCrouchPos() != CROUCHPOS_SQUAT) {
 			g_Vars.currentplayer->standfrac +=

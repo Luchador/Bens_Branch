@@ -6126,12 +6126,6 @@ s32 bgunCreateModelCmdList(struct model *model, struct modelnode *nodearg, uintp
 	return len;
 }
 
-u32 var800701ec = 0x00000000;
-u32 var800701f0 = 0x00000000;
-u32 var800701f4 = 0x00000000;
-u32 var800701f8 = 0x00000000;
-u32 var800701fc = 0x00000000;
-
 struct guncmd var80070200[2] = {
 	{ GUNCMD_PLAYANIMATION, 0, ANIM_0434, 10000 },
 	{ GUNCMD_END },

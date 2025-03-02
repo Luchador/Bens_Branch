@@ -99,16 +99,16 @@ void bgrabInit(void)
 			cdresult = cd000276c8Cyl(obj->geocyl,
 					g_Vars.currentplayer->prop->pos.x,
 					g_Vars.currentplayer->prop->pos.z,
-					VERSION >= VERSION_NTSC_1_0 ? 45 : 40, 0, 0);
+					45, 0, 0);
 		} else {
 			cdresult = cd000274e0Block(obj->geoblock,
 					g_Vars.currentplayer->prop->pos.x,
 					g_Vars.currentplayer->prop->pos.z,
-					VERSION >= VERSION_NTSC_1_0 ? 45 : 40, 0, 0);
+					45, 0, 0);
 		}
 
 		if (cdresult != CDRESULT_COLLISION) {
-			g_Vars.currentplayer->grabbedforcez = VERSION >= VERSION_NTSC_1_0 ? 15 : 10;
+			g_Vars.currentplayer->grabbedforcez = 15;
 		}
 	}
 
@@ -184,11 +184,7 @@ void bgrab0f0ccbf0(struct coord *delta, f32 angle, struct defaultobj *obj)
 			sp98.y = g_Vars.currentplayer->prop->pos.y;
 			sp98.z = delta->z + g_Vars.currentplayer->prop->pos.z;
 
-#if VERSION >= VERSION_NTSC_1_0
 			cdGetEdge(&spb0, &spa4, 201, "bondgrab.c");
-#else
-			cdGetEdge(&spb0, &spa4, 200, "bondgrab.c");
-#endif
 
 			spc8.x = spa4.z - spb0.z;
 			spc8.y = 0.0f;
@@ -216,11 +212,7 @@ void bgrab0f0ccbf0(struct coord *delta, f32 angle, struct defaultobj *obj)
 			struct coord sp50;
 			struct coord sp44;
 
-#if VERSION >= VERSION_NTSC_1_0
 			cdGetEdge(&sp68, &sp5c, 228, "bondgrab.c");
-#else
-			cdGetEdge(&sp68, &sp5c, 227, "bondgrab.c");
-#endif
 
 			if (cdGetSavedPos(&sp50, &sp44)) {
 				sp44.x -= sp50.x;
@@ -351,20 +343,6 @@ s32 bgrabCalculateNewPosition(struct coord *delta, f32 angle, bool arg2)
 
 		func0f065e74(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &pos, rooms);
 
-#if VERSION < VERSION_NTSC_1_0
-		{
-			s32 i;
-
-			for (i = 0; rooms[i] != -1; i++) {
-				if (rooms[i] == g_Vars.currentplayer->floorroom) {
-					rooms[0] = g_Vars.currentplayer->floorroom;
-					rooms[1] = -1;
-					break;
-				}
-			}
-		}
-#endif
-
 		bmoveFindEnteredRoomsByPos(g_Vars.currentplayer, &pos, rooms);
 
 		ismoving = true;
@@ -413,17 +391,17 @@ s32 bgrabCalculateNewPosition(struct coord *delta, f32 angle, bool arg2)
 			posextrasum.f[2] = g_Vars.currentplayer->grabbedposextrasum.f[2];
 
 			for (i = 0; i < g_Vars.lvupdate240; i++) {
-				rotextrasum = (PAL ? 0.9847f : 0.9873f) * rotextrasum + f0 * 6.0f;
+				rotextrasum = 0.9873f * rotextrasum + f0 * 6.0f;
 
-				posextrasum.f[0] = (PAL ? 0.9847f : 0.9873f) * posextrasum.f[0] + sp88.f[0];
-				posextrasum.f[1] = (PAL ? 0.9847f : 0.9873f) * posextrasum.f[1] + sp88.f[1];
-				posextrasum.f[2] = (PAL ? 0.9847f : 0.9873f) * posextrasum.f[2] + sp88.f[2];
+				posextrasum.f[0] = 0.9873f * posextrasum.f[0] + sp88.f[0];
+				posextrasum.f[1] = 0.9873f * posextrasum.f[1] + sp88.f[1];
+				posextrasum.f[2] = 0.9873f * posextrasum.f[2] + sp88.f[2];
 			}
 
-			rotextra = rotextrasum * (PAL ? 0.01529997587204f : 0.012700021266937f);
-			posextra.f[0] = posextrasum.f[0] * (PAL ? 0.01529997587204f : 0.012700021266937f);
-			posextra.f[1] = posextrasum.f[1] * (PAL ? 0.01529997587204f : 0.012700021266937f);
-			posextra.f[2] = posextrasum.f[2] * (PAL ? 0.01529997587204f : 0.012700021266937f);
+			rotextra = rotextrasum * 0.012700021266937f;
+			posextra.f[0] = posextrasum.f[0] * 0.012700021266937f;
+			posextra.f[1] = posextrasum.f[1] * 0.012700021266937f;
+			posextra.f[2] = posextrasum.f[2] * 0.012700021266937f;
 		} else {
 			rotextra = g_Vars.currentplayer->grabbedrotextra;
 			posextra.f[0] = g_Vars.currentplayer->grabbedposextra.f[0];
@@ -557,6 +535,7 @@ bool bgrabCalculateNewPositiontWithPush(struct coord *delta, f32 angle, bool arg
 						&& (obj->hidden & OBJHFLAG_GRABBED) == 0
 						&& (obj->flags3 & OBJFLAG3_PUSHABLE)) {
 					bool canpush = true;
+					
 
 					g_Vars.currentplayer->speedmaxtime60 = 0;
 
@@ -566,7 +545,7 @@ bool bgrabCalculateNewPositiontWithPush(struct coord *delta, f32 angle, bool arg
 					}
 
 					if (canpush) {
-						bgrab0f0ccbf0(delta, angle, obj);
+						bgrab0f0ccbf0(delta, angle, obj); // Can this ever be called?
 
 						if ((obj->hidden & OBJHFLAG_PROJECTILE)
 								&& (obj->projectile->flags & PROJECTILEFLAG_SLIDING)) {
@@ -629,11 +608,7 @@ bool bgrab0f0cdb68(f32 angle)
 	f32 ymax;
 	f32 ymin;
 
-#if VERSION >= VERSION_NTSC_1_0
 	cdGetEdge(&spa4, &sp98, 678, "bondgrab.c");
-#else
-	cdGetEdge(&spa4, &sp98, 674, "bondgrab.c");
-#endif
 
 	sp7c = sp98.f[0] - spa4.f[0];
 	sp78 = sp98.f[2] - spa4.f[2];
@@ -733,11 +708,7 @@ bool bgrab0f0cdf64(struct coord *delta, struct coord *arg1, struct coord *arg2)
 	bool result = bgrabCalculateNewPositiontWithPush(delta, 0, true);
 
 	if (!result) {
-#if VERSION >= VERSION_NTSC_1_0
 		cdGetEdge(arg1, arg2, 815, "bondgrab.c");
-#else
-		cdGetEdge(arg1, arg2, 811, "bondgrab.c");
-#endif
 	}
 
 	return result;
@@ -857,10 +828,10 @@ void bgrabUpdateVertical(void)
 	g_Vars.currentplayer->vv_height =
 		(g_Vars.currentplayer->headpos.y / g_Vars.currentplayer->standheight) *
 		g_Vars.currentplayer->vv_eyeheight;
-	fVar3 = g_Vars.currentplayer->vv_manground / (PAL ? 0.054400026798248f : 0.045499980449677f);
+	fVar3 = g_Vars.currentplayer->vv_manground / 0.045499980449677f;
 
 	for (i = 0; i < g_Vars.lvupdate240; i++) {
-		fVar3 = (PAL ? 0.94559997320175f : 0.9545f) * fVar3 + g_Vars.currentplayer->vv_ground;
+		fVar3 = 0.9545f * fVar3 + g_Vars.currentplayer->vv_ground;
 	}
 
 	f0 = g_Vars.currentplayer->vv_height;
@@ -869,17 +840,15 @@ void bgrabUpdateVertical(void)
 		f0 = 30;
 	}
 
-	tmp = fVar3 * (PAL ? 0.054400026798248f : 0.045499980449677f) + f0 - g_Vars.currentplayer->prop->pos.y;
+	tmp = fVar3 * 0.045499980449677f + f0 - g_Vars.currentplayer->prop->pos.y;
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (g_Vars.currentplayer->prop->pos.y + tmp < g_Vars.currentplayer->vv_ground + 10.0f) {
 		tmp = g_Vars.currentplayer->vv_ground + 10.0f - g_Vars.currentplayer->prop->pos.y;
 	}
-#endif
 
 	if (bgrabTryMoveUpwards(tmp)) {
 		g_Vars.currentplayer->sumground = fVar3;
-		g_Vars.currentplayer->vv_manground = fVar3 * (PAL ? 0.054400026798248f : 0.045499980449677f);
+		g_Vars.currentplayer->vv_manground = fVar3 * 0.045499980449677f;
 	}
 
 	if ((g_Vars.currentplayer->floorflags & GEOFLAG_DIE) &&
@@ -997,7 +966,7 @@ void bgrabApplyMoveData(struct movedata *data)
 
 void bgrabUpdateSpeedTheta(void)
 {
-	f32 mult = (PAL ? 0.97519999742508f : 0.98470002412796f);
+	f32 mult = 0.98470002412796f;
 	f32 speedtheta = g_Vars.currentplayer->speedtheta * 0.75f;
 	s32 i;
 
@@ -1005,7 +974,7 @@ void bgrabUpdateSpeedTheta(void)
 		g_Vars.currentplayer->bondgrabthetaspeedsum = g_Vars.currentplayer->bondgrabthetaspeedsum * mult + speedtheta;
 	}
 
-	g_Vars.currentplayer->speedtheta = g_Vars.currentplayer->bondgrabthetaspeedsum * (PAL ? 0.024800002574921f : 0.01529997587204f);
+	g_Vars.currentplayer->speedtheta = g_Vars.currentplayer->bondgrabthetaspeedsum * 0.01529997587204f;
 }
 
 void bgrab0f0ce924(void)
@@ -1086,12 +1055,10 @@ void bgrab0f0ce924(void)
 		sp84 = g_Vars.currentplayer->headpos.x;
 		sp80 = g_Vars.currentplayer->headpos.z;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (cheatIsActive(CHEAT_SMALLJO)) {
 			sp84 *= 0.4f;
 			sp80 *= 0.4f;
 		}
-#endif
 
 		sp74.x += (sp80 * g_Vars.currentplayer->bond2.unk00.f[0] - sp84 * g_Vars.currentplayer->bond2.unk00.f[2]) * g_Vars.lvupdate60freal;
 		sp74.z += (sp80 * g_Vars.currentplayer->bond2.unk00.f[2] + sp84 * g_Vars.currentplayer->bond2.unk00.f[0]) * g_Vars.lvupdate60freal;
@@ -1167,66 +1134,60 @@ void bgrabTick(void)
 	bgrab0f0ce178();
 	bgrabUpdateVertical();
 
-#if VERSION >= VERSION_NTSC_1_0
-	{
-		s32 i;
+	s32 i;
 
-		for (i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {
-			if (g_Vars.currentplayer->prop->rooms[i] == g_Vars.currentplayer->floorroom) {
-				propDeregisterRooms(g_Vars.currentplayer->prop);
-				g_Vars.currentplayer->prop->rooms[0] = g_Vars.currentplayer->floorroom;
-				g_Vars.currentplayer->prop->rooms[1] = -1;
-				break;
-			}
+	for (i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {
+		if (g_Vars.currentplayer->prop->rooms[i] == g_Vars.currentplayer->floorroom) {
+			propDeregisterRooms(g_Vars.currentplayer->prop);
+			g_Vars.currentplayer->prop->rooms[0] = g_Vars.currentplayer->floorroom;
+			g_Vars.currentplayer->prop->rooms[1] = -1;
+			break;
 		}
 	}
-#endif
 
-	{
-		struct defaultobj *obj = g_Vars.currentplayer->grabbedprop->obj;
-		struct hov *hov = NULL;
+	struct defaultobj *obj = g_Vars.currentplayer->grabbedprop->obj;
+	struct hov *hov = NULL;
 
-		if (obj->type == OBJTYPE_HOVERPROP) {
-			struct hoverpropobj *hoverprop = (struct hoverpropobj *)g_Vars.currentplayer->grabbedprop->obj;
-			hov = &hoverprop->hov;
-		} else if (obj->type == OBJTYPE_HOVERBIKE) {
-			struct hoverbikeobj *hoverbike = (struct hoverbikeobj *)g_Vars.currentplayer->grabbedprop->obj;
-			hov = &hoverbike->hov;
+	if (obj->type == OBJTYPE_HOVERPROP) {
+		struct hoverpropobj *hoverprop = (struct hoverpropobj *)g_Vars.currentplayer->grabbedprop->obj;
+		hov = &hoverprop->hov;
+	} else if (obj->type == OBJTYPE_HOVERBIKE) {
+		struct hoverbikeobj *hoverbike = (struct hoverbikeobj *)g_Vars.currentplayer->grabbedprop->obj;
+		hov = &hoverbike->hov;
+	}
+
+	if (hov) {
+		hovTick(obj, hov);
+	}
+
+	bmoveUpdateRooms(g_Vars.currentplayer);
+	objectiveCheckRoomEntered(g_Vars.currentplayer->prop->rooms[0]);
+	bmove0f0cc19c(&g_Vars.currentplayer->prop->pos);
+	playerUpdatePerimInfo();
+	doorsCheckAutomatic();
+
+	if (g_Vars.currentplayer->grabbedprop) {
+		// Determine if the grabbed prop should be force released
+		f32 ydiff = g_Vars.currentplayer->grabbedprop->pos.y
+			- objGetHovBobOffsetY(g_Vars.currentplayer->grabbedprop->obj)
+			- g_Vars.currentplayer->vv_manground;
+
+		struct prop *grabbedprop = g_Vars.currentplayer->grabbedprop;
+
+		propSetPerimEnabled(g_Vars.currentplayer->prop, false);
+		propSetPerimEnabled(grabbedprop, false);
+
+		if (g_Vars.currentplayer->vv_ground <= -30000
+				|| ydiff < -100 || ydiff > 100
+				|| g_Vars.currentplayer->vv_ground < g_Vars.currentplayer->vv_manground - 50
+				|| !cdTestLos05(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms,
+					&g_Vars.currentplayer->grabbedprop->pos, g_Vars.currentplayer->grabbedprop->rooms,
+					CDTYPE_ALL,
+					GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT)) {
+			bmoveSetMode(MOVEMODE_WALK);
 		}
 
-		if (hov) {
-			hovTick(obj, hov);
-		}
-
-		bmoveUpdateRooms(g_Vars.currentplayer);
-		objectiveCheckRoomEntered(g_Vars.currentplayer->prop->rooms[0]);
-		bmove0f0cc19c(&g_Vars.currentplayer->prop->pos);
-		playerUpdatePerimInfo();
-		doorsCheckAutomatic();
-
-		if (g_Vars.currentplayer->grabbedprop) {
-			// Determine if the grabbed prop should be force released
-			f32 ydiff = g_Vars.currentplayer->grabbedprop->pos.y
-				- objGetHovBobOffsetY(g_Vars.currentplayer->grabbedprop->obj)
-				- g_Vars.currentplayer->vv_manground;
-
-			struct prop *grabbedprop = g_Vars.currentplayer->grabbedprop;
-
-			propSetPerimEnabled(g_Vars.currentplayer->prop, false);
-			propSetPerimEnabled(grabbedprop, false);
-
-			if (g_Vars.currentplayer->vv_ground <= -30000
-					|| ydiff < -100 || ydiff > 100
-					|| g_Vars.currentplayer->vv_ground < g_Vars.currentplayer->vv_manground - 50
-					|| !cdTestLos05(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms,
-						&g_Vars.currentplayer->grabbedprop->pos, g_Vars.currentplayer->grabbedprop->rooms,
-						CDTYPE_ALL,
-						GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT)) {
-				bmoveSetMode(MOVEMODE_WALK);
-			}
-
-			propSetPerimEnabled(g_Vars.currentplayer->prop, true);
-			propSetPerimEnabled(grabbedprop, true);
-		}
+		propSetPerimEnabled(g_Vars.currentplayer->prop, true);
+		propSetPerimEnabled(grabbedprop, true);
 	}
 }

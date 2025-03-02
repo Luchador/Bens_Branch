@@ -10,10 +10,9 @@
 #include "data.h"
 #include "types.h"
 
-void func0f0125a0(s16 animnum, s32 frame, s32 endframe, s32 totalinttranslate[3])
+void bheadResetAnims(s16 animnum, s32 frame, s32 endframe, s32 totalinttranslate[3])
 {
 	s16 inttranslate[3];
-	u32 stack;
 
 	totalinttranslate[0] = 0;
 	totalinttranslate[1] = 0;
@@ -37,10 +36,10 @@ void bheadReset(void)
 	modelInit(&g_Vars.currentplayer->model, &g_PlayerModeldef, g_Vars.currentplayer->bondheadsave, false);
 	animInit(g_Vars.currentplayer->model.anim);
 	modelSetScale(&g_Vars.currentplayer->model, 0.1000000089407f);
-	modelSetAnimPlaySpeed(&g_Vars.currentplayer->model, (PAL ? 1.2f : 1), 0);
+	modelSetAnimPlaySpeed(&g_Vars.currentplayer->model, 1, 0);
 
 	g_Vars.currentplayer->headanim = HEADANIM_RESTING;
-	g_Vars.currentplayer->headdamp = (PAL ? 0.9166f : 0.93f);
+	g_Vars.currentplayer->headdamp = 0.93f;
 	g_Vars.currentplayer->headwalkingtime60 = 0;
 	g_Vars.currentplayer->headamplitude = 1;
 	g_Vars.currentplayer->sideamplitude = 1;
@@ -58,9 +57,9 @@ void bheadReset(void)
 	g_Vars.currentplayer->headpossum.z = 0;
 	g_Vars.currentplayer->headlooksum.x = 0;
 	g_Vars.currentplayer->headlooksum.y = 0;
-	g_Vars.currentplayer->headlooksum.z = (PAL ? 11.990406036377f : 14.285716056824f);
+	g_Vars.currentplayer->headlooksum.z = 14.285716056824f;
 	g_Vars.currentplayer->headupsum.x = 0;
-	g_Vars.currentplayer->headupsum.y = (PAL ? 11.990406036377f : 14.285716056824f);
+	g_Vars.currentplayer->headupsum.y = 14.285716056824f;
 	g_Vars.currentplayer->headupsum.z = 0;
 	g_Vars.currentplayer->resetheadpos = true;
 	g_Vars.currentplayer->resetheadrot = true;
@@ -89,7 +88,7 @@ void bheadReset(void)
 
 	for (i = 0; i < ARRAYCOUNT(g_HeadAnims); i++) {
 		s32 translate[3];
-		func0f0125a0(g_HeadAnims[i].animnum, g_HeadAnims[i].loopframe, g_HeadAnims[i].endframe, translate);
+		bheadResetAnims(g_HeadAnims[i].animnum, g_HeadAnims[i].loopframe, g_HeadAnims[i].endframe, translate);
 		g_HeadAnims[i].translateperframe = (translate[2] * 0.1000000089407f) / (g_HeadAnims[i].endframe - g_HeadAnims[i].loopframe);
 	}
 

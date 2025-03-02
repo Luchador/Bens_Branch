@@ -415,12 +415,7 @@ bool bwalkCalculateNewPositionWithPush(struct coord *delta, f32 rotateamount, bo
 
 				if (door->doorflags & DOORFLAG_DAMAGEONCONTACT) {
 					if (!g_Vars.currentplayer->isdead) {
-#if VERSION >= VERSION_NTSC_1_0
 						cdGetEdge(&sp84, &sp78, 465, "bondwalk.c");
-#else
-						cdGetEdge(&sp84, &sp78, 460, "bondwalk.c");
-#endif
-
 						sp90.x = sp78.f[2] - sp84.f[2];
 						sp90.y = 0;
 						sp90.z = sp84.f[0] - sp78.f[0];
