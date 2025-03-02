@@ -74,95 +74,16 @@
 // Max downwards pitch when changing guns or reloading a classic gun
 #define MAX_PITCH 0.87252569198608f
 
-#if VERSION >= VERSION_PAL_BETA
-struct sndstate *g_CasingAudioHandles[2];
-s32 var8009d0d8;
-u32 fill2;
-struct sndstate *g_BgunAudioHandles[MAX_PLAYERS];
 s32 var8009d0dc;
-u32 fill2_2;
 s32 var8009d0f0[3];
-u32 var8009d0fc;
-u32 var8009d100;
-u32 var8009d104;
-u32 var8009d108;
-u32 var8009d10c;
-u32 var8009d110;
-u32 var8009d114;
-u32 var8009d118;
-u32 var8009d11c;
-u32 var8009d120;
-u32 var8009d124;
-u32 var8009d128;
-u32 var8009d12c;
-u32 var8009d130;
-u32 var8009d134;
-u32 var8009d138;
-u32 var8009d13c;
 f32 var8009d140;
 struct hand *var8009d144;
 s32 var8009d148;
-u32 var8009d14c;
-struct fireslot g_Fireslots[20];
-#elif VERSION >= VERSION_NTSC_1_0
 struct sndstate *g_CasingAudioHandles[2];
-s32 var8009d0d8;
-s32 var8009d0dc;
-struct sndstate *g_BgunAudioHandles[MAX_PLAYERS];
-s32 var8009d0f0[3];
-u32 var8009d0fc;
-u32 var8009d100;
-u32 var8009d104;
-u32 var8009d108;
-u32 var8009d10c;
-u32 var8009d110;
-u32 var8009d114;
-u32 var8009d118;
-u32 var8009d11c;
-u32 var8009d120;
-u32 var8009d124;
-u32 var8009d128;
-u32 var8009d12c;
-u32 var8009d130;
-u32 var8009d134;
-u32 var8009d138;
-u32 var8009d13c;
-f32 var8009d140;
-struct hand *var8009d144;
-s32 var8009d148;
-u32 var8009d14c;
-struct fireslot g_Fireslots[20];
-#else
-s32 var8009d0dc;
-u32 var800a1800nb;
-s32 var8009d0f0[3];
-u32 var8009d0fc;
-u32 var8009d100;
-u32 var8009d104;
-u32 var8009d108;
-u32 var8009d10c;
-u32 var8009d110;
-u32 var8009d114;
-u32 var8009d118;
-u32 var8009d11c;
-u32 var8009d120;
-u32 var8009d124;
-u32 var8009d128;
-u32 var8009d12c;
-u32 var8009d130;
-u32 var8009d134;
-u32 var8009d138;
-u32 var8009d13c;
-f32 var8009d140;
-struct hand *var8009d144;
-s32 var8009d148;
-u32 var8009d14c;
-struct sndstate *g_CasingAudioHandles[2];
-s32 var8009d0d8;
+s32 g_TimeToNextCasingSound;
 struct sndstate *g_BgunAudioHandles[MAX_PLAYERS];
 struct fireslot g_Fireslots[20];
 u32 fill2[1];
-#endif
 
 Lights1 var80070090 = gdSPDefLights1(0x96, 0x96, 0x96, 0xff, 0xff, 0xff, 0xb2, 0x4d, 0x2e);
 
@@ -196,14 +117,10 @@ char var800700bc[][10] = {
 	{ 'x','x','x'                         }, // "xxx"
 };
 
-#ifndef PLATFORM_N64
 s32 g_BgunGeMuzzleFlashes = false;
-#endif
 
-#if !MATCHING || VERSION >= VERSION_NTSC_1_0
 void bgunRumble(s32 handnum, s32 weaponnum)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	u32 stack;
 	s32 contpadtouse1;
 	s32 contpadtouse2;
@@ -251,212 +168,7 @@ void bgunRumble(s32 handnum, s32 weaponnum)
 			pakRumble(contpad1, 0.2f, 2, 4);
 		}
 	}
-#else
-	s32 stack1;
-	s32 stack2;
-	s8 contpad1;
-	s8 contpad2;
-	bool contpad1hasrumble;
-	bool contpad2hasrumble;
-	s32 contpadtouse1;
-	s32 contpadtouse2;
-	s32 controlmode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
-
-	if (controlmode >= CONTROLMODE_21 && controlmode < CONTROLMODE_PC) {
-		contpad1hasrumble = pakGetType(g_Vars.currentplayernum) == PAKTYPE_RUMBLE;
-		contpad2hasrumble = pakGetType(g_Vars.currentplayernum + PLAYERCOUNT()) == PAKTYPE_RUMBLE;
-
-		if (contpad1hasrumble && contpad2hasrumble) {
-			contpadtouse1 = g_Vars.currentplayernum;
-
-			if (handnum == HAND_LEFT) {
-				contpadtouse1 += PLAYERCOUNT();
-			}
-
-			pakRumble(contpadtouse1, 0.2f, 2, 4);
-		} else {
-			contpadtouse2 = g_Vars.currentplayernum;
-
-			if (contpad2hasrumble) {
-				contpadtouse2 += PLAYERCOUNT();
-			}
-
-			pakRumble(contpadtouse2, 0.2f, 2, 4);
-		}
-	} else {
-		pakRumble(g_Vars.currentplayernum, 0.2f, 2, 4);
-	}
-#endif
 }
-#else
-GLOBAL_ASM(
-glabel bgunRumble
-/*  f095b30:	27bdffd0 */ 	addiu	$sp,$sp,-48
-/*  f095b34:	3c08800a */ 	lui	$t0,%hi(g_Vars)
-/*  f095b38:	2508e6c0 */ 	addiu	$t0,$t0,%lo(g_Vars)
-/*  f095b3c:	8d0e0288 */ 	lw	$t6,0x288($t0)
-/*  f095b40:	afbf0014 */ 	sw	$ra,0x14($sp)
-/*  f095b44:	afa40030 */ 	sw	$a0,0x30($sp)
-/*  f095b48:	afa50034 */ 	sw	$a1,0x34($sp)
-/*  f095b4c:	0fc53380 */ 	jal	optionsGetControlMode
-/*  f095b50:	8dc40070 */ 	lw	$a0,0x70($t6)
-/*  f095b54:	3c08800a */ 	lui	$t0,%hi(g_Vars)
-/*  f095b58:	28410004 */ 	slti	$at,$v0,0x4
-/*  f095b5c:	1420007c */ 	bnez	$at,.NB0f095d50
-/*  f095b60:	2508e6c0 */ 	addiu	$t0,$t0,%lo(g_Vars)
-/*  f095b64:	0fc44336 */ 	jal	pakGetType
-/*  f095b68:	8104028f */ 	lb	$a0,0x28f($t0)
-/*  f095b6c:	3c08800a */ 	lui	$t0,%hi(g_Vars)
-/*  f095b70:	2508e6c0 */ 	addiu	$t0,$t0,%lo(g_Vars)
-/*  f095b74:	8d0f006c */ 	lw	$t7,0x6c($t0)
-/*  f095b78:	24050001 */ 	addiu	$a1,$zero,0x1
-/*  f095b7c:	00453026 */ 	xor	$a2,$v0,$a1
-/*  f095b80:	11e00003 */ 	beqz	$t7,.NB0f095b90
-/*  f095b84:	2cc60001 */ 	sltiu	$a2,$a2,0x1
-/*  f095b88:	10000002 */ 	beqz	$zero,.NB0f095b94
-/*  f095b8c:	00a05025 */ 	or	$t2,$a1,$zero
-.NB0f095b90:
-/*  f095b90:	00005025 */ 	or	$t2,$zero,$zero
-.NB0f095b94:
-/*  f095b94:	8d180068 */ 	lw	$t8,0x68($t0)
-/*  f095b98:	00004825 */ 	or	$t1,$zero,$zero
-/*  f095b9c:	00001825 */ 	or	$v1,$zero,$zero
-/*  f095ba0:	13000003 */ 	beqz	$t8,.NB0f095bb0
-/*  f095ba4:	00001025 */ 	or	$v0,$zero,$zero
-/*  f095ba8:	10000001 */ 	beqz	$zero,.NB0f095bb0
-/*  f095bac:	00a04825 */ 	or	$t1,$a1,$zero
-.NB0f095bb0:
-/*  f095bb0:	8d190064 */ 	lw	$t9,0x64($t0)
-/*  f095bb4:	13200003 */ 	beqz	$t9,.NB0f095bc4
-/*  f095bb8:	00000000 */ 	sll	$zero,$zero,0x0
-/*  f095bbc:	10000001 */ 	beqz	$zero,.NB0f095bc4
-/*  f095bc0:	00a01825 */ 	or	$v1,$a1,$zero
-.NB0f095bc4:
-/*  f095bc4:	8d0c0070 */ 	lw	$t4,0x70($t0)
-/*  f095bc8:	11800003 */ 	beqz	$t4,.NB0f095bd8
-/*  f095bcc:	00000000 */ 	sll	$zero,$zero,0x0
-/*  f095bd0:	10000001 */ 	beqz	$zero,.NB0f095bd8
-/*  f095bd4:	00a01025 */ 	or	$v0,$a1,$zero
-.NB0f095bd8:
-/*  f095bd8:	8d18028c */ 	lw	$t8,0x28c($t0)
-/*  f095bdc:	00436821 */ 	addu	$t5,$v0,$v1
-/*  f095be0:	01a97021 */ 	addu	$t6,$t5,$t1
-/*  f095be4:	01ca7821 */ 	addu	$t7,$t6,$t2
-/*  f095be8:	01f82021 */ 	addu	$a0,$t7,$t8
-/*  f095bec:	0004ce00 */ 	sll	$t9,$a0,0x18
-/*  f095bf0:	00192603 */ 	sra	$a0,$t9,0x18
-/*  f095bf4:	0fc44336 */ 	jal	pakGetType
-/*  f095bf8:	afa6001c */ 	sw	$a2,0x1c($sp)
-/*  f095bfc:	8fa6001c */ 	lw	$a2,0x1c($sp)
-/*  f095c00:	3c08800a */ 	lui	$t0,%hi(g_Vars)
-/*  f095c04:	2508e6c0 */ 	addiu	$t0,$t0,%lo(g_Vars)
-/*  f095c08:	10c0002a */ 	beqz	$a2,.NB0f095cb4
-/*  f095c0c:	24050001 */ 	addiu	$a1,$zero,0x1
-/*  f095c10:	14450028 */ 	bne	$v0,$a1,.NB0f095cb4
-/*  f095c14:	8fae0030 */ 	lw	$t6,0x30($sp)
-/*  f095c18:	15c5001c */ 	bne	$t6,$a1,.NB0f095c8c
-/*  f095c1c:	8d0b028c */ 	lw	$t3,0x28c($t0)
-/*  f095c20:	8d0f0070 */ 	lw	$t7,0x70($t0)
-/*  f095c24:	00005025 */ 	or	$t2,$zero,$zero
-/*  f095c28:	00004825 */ 	or	$t1,$zero,$zero
-/*  f095c2c:	11e00003 */ 	beqz	$t7,.NB0f095c3c
-/*  f095c30:	00001825 */ 	or	$v1,$zero,$zero
-/*  f095c34:	10000001 */ 	beqz	$zero,.NB0f095c3c
-/*  f095c38:	240a0001 */ 	addiu	$t2,$zero,0x1
-.NB0f095c3c:
-/*  f095c3c:	8d18006c */ 	lw	$t8,0x6c($t0)
-/*  f095c40:	00001025 */ 	or	$v0,$zero,$zero
-/*  f095c44:	13000003 */ 	beqz	$t8,.NB0f095c54
-/*  f095c48:	00000000 */ 	sll	$zero,$zero,0x0
-/*  f095c4c:	10000001 */ 	beqz	$zero,.NB0f095c54
-/*  f095c50:	24090001 */ 	addiu	$t1,$zero,0x1
-.NB0f095c54:
-/*  f095c54:	8d190068 */ 	lw	$t9,0x68($t0)
-/*  f095c58:	13200003 */ 	beqz	$t9,.NB0f095c68
-/*  f095c5c:	00000000 */ 	sll	$zero,$zero,0x0
-/*  f095c60:	10000001 */ 	beqz	$zero,.NB0f095c68
-/*  f095c64:	24030001 */ 	addiu	$v1,$zero,0x1
-.NB0f095c68:
-/*  f095c68:	8d0c0064 */ 	lw	$t4,0x64($t0)
-/*  f095c6c:	11800003 */ 	beqz	$t4,.NB0f095c7c
-/*  f095c70:	00000000 */ 	sll	$zero,$zero,0x0
-/*  f095c74:	10000001 */ 	beqz	$zero,.NB0f095c7c
-/*  f095c78:	24020001 */ 	addiu	$v0,$zero,0x1
-.NB0f095c7c:
-/*  f095c7c:	01626821 */ 	addu	$t5,$t3,$v0
-/*  f095c80:	01a37021 */ 	addu	$t6,$t5,$v1
-/*  f095c84:	01c97821 */ 	addu	$t7,$t6,$t1
-/*  f095c88:	01ea5821 */ 	addu	$t3,$t7,$t2
-.NB0f095c8c:
-/*  f095c8c:	000b2600 */ 	sll	$a0,$t3,0x18
-/*  f095c90:	0004c603 */ 	sra	$t8,$a0,0x18
-/*  f095c94:	3c053e4c */ 	lui	$a1,0x3e4c
-/*  f095c98:	34a5cccd */ 	ori	$a1,$a1,0xcccd
-/*  f095c9c:	03002025 */ 	or	$a0,$t8,$zero
-/*  f095ca0:	24060002 */ 	addiu	$a2,$zero,0x2
-/*  f095ca4:	0fc45e2f */ 	jal	pakRumble
-/*  f095ca8:	24070004 */ 	addiu	$a3,$zero,0x4
-/*  f095cac:	1000002f */ 	beqz	$zero,.NB0f095d6c
-/*  f095cb0:	8fbf0014 */ 	lw	$ra,0x14($sp)
-.NB0f095cb4:
-/*  f095cb4:	1445001c */ 	bne	$v0,$a1,.NB0f095d28
-/*  f095cb8:	8d0b028c */ 	lw	$t3,0x28c($t0)
-/*  f095cbc:	8d0c0070 */ 	lw	$t4,0x70($t0)
-/*  f095cc0:	00005025 */ 	or	$t2,$zero,$zero
-/*  f095cc4:	00004825 */ 	or	$t1,$zero,$zero
-/*  f095cc8:	11800003 */ 	beqz	$t4,.NB0f095cd8
-/*  f095ccc:	00001825 */ 	or	$v1,$zero,$zero
-/*  f095cd0:	10000001 */ 	beqz	$zero,.NB0f095cd8
-/*  f095cd4:	240a0001 */ 	addiu	$t2,$zero,0x1
-.NB0f095cd8:
-/*  f095cd8:	8d0d006c */ 	lw	$t5,0x6c($t0)
-/*  f095cdc:	00001025 */ 	or	$v0,$zero,$zero
-/*  f095ce0:	11a00003 */ 	beqz	$t5,.NB0f095cf0
-/*  f095ce4:	00000000 */ 	sll	$zero,$zero,0x0
-/*  f095ce8:	10000001 */ 	beqz	$zero,.NB0f095cf0
-/*  f095cec:	24090001 */ 	addiu	$t1,$zero,0x1
-.NB0f095cf0:
-/*  f095cf0:	8d0e0068 */ 	lw	$t6,0x68($t0)
-/*  f095cf4:	11c00003 */ 	beqz	$t6,.NB0f095d04
-/*  f095cf8:	00000000 */ 	sll	$zero,$zero,0x0
-/*  f095cfc:	10000001 */ 	beqz	$zero,.NB0f095d04
-/*  f095d00:	24030001 */ 	addiu	$v1,$zero,0x1
-.NB0f095d04:
-/*  f095d04:	8d0f0064 */ 	lw	$t7,0x64($t0)
-/*  f095d08:	11e00003 */ 	beqz	$t7,.NB0f095d18
-/*  f095d0c:	00000000 */ 	sll	$zero,$zero,0x0
-/*  f095d10:	10000001 */ 	beqz	$zero,.NB0f095d18
-/*  f095d14:	24020001 */ 	addiu	$v0,$zero,0x1
-.NB0f095d18:
-/*  f095d18:	0162c021 */ 	addu	$t8,$t3,$v0
-/*  f095d1c:	0303c821 */ 	addu	$t9,$t8,$v1
-/*  f095d20:	03296021 */ 	addu	$t4,$t9,$t1
-/*  f095d24:	018a5821 */ 	addu	$t3,$t4,$t2
-.NB0f095d28:
-/*  f095d28:	000b2600 */ 	sll	$a0,$t3,0x18
-/*  f095d2c:	00046e03 */ 	sra	$t5,$a0,0x18
-/*  f095d30:	3c053e4c */ 	lui	$a1,0x3e4c
-/*  f095d34:	34a5cccd */ 	ori	$a1,$a1,0xcccd
-/*  f095d38:	01a02025 */ 	or	$a0,$t5,$zero
-/*  f095d3c:	24060002 */ 	addiu	$a2,$zero,0x2
-/*  f095d40:	0fc45e2f */ 	jal	pakRumble
-/*  f095d44:	24070004 */ 	addiu	$a3,$zero,0x4
-/*  f095d48:	10000008 */ 	beqz	$zero,.NB0f095d6c
-/*  f095d4c:	8fbf0014 */ 	lw	$ra,0x14($sp)
-.NB0f095d50:
-/*  f095d50:	3c053e4c */ 	lui	$a1,0x3e4c
-/*  f095d54:	34a5cccd */ 	ori	$a1,$a1,0xcccd
-/*  f095d58:	8104028f */ 	lb	$a0,0x28f($t0)
-/*  f095d5c:	24060002 */ 	addiu	$a2,$zero,0x2
-/*  f095d60:	0fc45e2f */ 	jal	pakRumble
-/*  f095d64:	24070004 */ 	addiu	$a3,$zero,0x4
-/*  f095d68:	8fbf0014 */ 	lw	$ra,0x14($sp)
-.NB0f095d6c:
-/*  f095d6c:	27bd0030 */ 	addiu	$sp,$sp,0x30
-/*  f095d70:	03e00008 */ 	jr	$ra
-/*  f095d74:	00000000 */ 	sll	$zero,$zero,0x0
-);
-#endif
 
 s32 bgunGetUnequippedReloadIndex(s32 weaponnum)
 {
@@ -631,13 +343,8 @@ f32 bgun0f09815c(struct hand *hand)
 
 void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 {
-#if VERSION >= VERSION_PAL_BETA
-	f32 s4;
-	f32 s2;
-#else
 	s32 s2;
 	s32 s4;
-#endif
 	struct guncmd *cmd;
 	f32 animspeed;
 	bool done;
@@ -656,12 +363,9 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 
 	// This condition looks like a bug (using | instead of ||), but it happens
 	// to make no difference anyway. Brackets added for clarity.
-	if ((hand->animmode == (u32)HANDANIMMODE_BUSY) | (hand->animload >= 0)) {
+	if ((hand->animmode == (u32)HANDANIMMODE_BUSY) || (hand->animload >= 0)) { // Ben's comment: fixing it anyway
 		if (hand->gangstarot > 0.0f) {
 			hand->animframeinc = 0;
-#if VERSION >= VERSION_PAL_BETA
-			hand->animframeincfreal = 0.0f;
-#endif
 		}
 
 		if (hand->animload >= 0) {
@@ -681,25 +385,14 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 
 			hand->animload = -1;
 			hand->animmode = HANDANIMMODE_BUSY;
-#if VERSION >= VERSION_PAL_BETA
-			hand->animframeincfreal = modelGetAbsAnimSpeed(&hand->gunmodel) * PALUPF(hand->animframeinc);
-#endif
 		}
 
 		if (hand->unk0cc8_02) {
 			hand->animframeinc = 0;
-#if VERSION >= VERSION_PAL_BETA
-			hand->animframeincfreal = 0.0f;
-#endif
 		}
 
 		s4 = bgun0f09815c(hand);
-
-#if VERSION >= VERSION_PAL_BETA
-		s2 = hand->animframeincfreal + s4;
-#else
 		s2 = hand->animframeinc + s4;
-#endif
 
 		if (s4 == 0 && s2 > 0) {
 			s4--;
@@ -746,21 +439,6 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 						case GUNCMD_WAITFORZRELEASED:
 							if (hand->unk0cc8_01) {
 								if (s2 >= cmd->unk02 && s4 < cmd->unk02 && s4 < s2) {
-#if VERSION >= VERSION_PAL_BETA
-									f32 tmp = cmd->unk02 - bgun0f09815c(hand);
-									tmp /= 2;
-
-									if (hand->animframeincfreal > tmp) {
-#if PAL
-										hand->animframeinc = tmp * 0.83333333f / modelGetAbsAnimSpeed(&hand->gunmodel);
-#else
-										hand->animframeinc = tmp / modelGetAbsAnimSpeed(&hand->gunmodel);
-#endif
-										hand->animframeincfreal = modelGetAbsAnimSpeed(&hand->gunmodel) * PALUPF(hand->animframeinc);
-									}
-
-									s2 = hand->animframeincfreal + s4;
-#else
 									s32 tmp = cmd->unk02 - (s32) bgun0f09815c(hand);
 									tmp /= 2;
 
@@ -769,28 +447,14 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 									}
 
 									s2 = hand->animframeinc + s4;
-#endif
 								}
 							}
 							break;
 						case GUNCMD_REPEATUNTILFULL:
 							if (hand->incrementalreloading && s2 >= cmd->unk02 && s4 < cmd->unk02 && s4 < s2) {
-#if VERSION >= VERSION_PAL_BETA
-								f32 sp78 = s2;
-
-								while (sp78 >= cmd->unk02) {
-									sp78 += cmd->unk04 - cmd->unk02;
-								}
-
-								s4 = sp78;
-								hand->animframeinc = 0;
-								hand->animframeincfreal = 0;
-#else
 								s32 sp78 = cmd->unk04 + (((s32)s2 - cmd->unk02) % ((cmd->unk02 - cmd->unk04) + 1));
 								s4 = sp78;
 								hand->animframeinc = 0;
-#endif
-
 								modelSetAnimFrame(&hand->gunmodel, sp78);
 								hand->animloopcount++;
 								s2 = sp78;
@@ -811,13 +475,7 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 				}
 			}
 		}
-
-#if VERSION >= VERSION_PAL_BETA
-		modelSetAnimPlaySpeed(&hand->gunmodel, PALUPF(4.0f), 0);
-		modelTickAnimQuarterSpeed(&hand->gunmodel, hand->animframeinc, true);
-#else
 		modelTickAnim(&hand->gunmodel, hand->animframeinc, true);
-#endif
 
 		s2 = bgun0f09815c(hand);
 
@@ -826,9 +484,6 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 			struct guncmd *cmd = hand->unk0ce8;
 			f32 speed = 1.0f;
 			bool hasspeed = false;
-#if VERSION < VERSION_NTSC_1_0
-			struct sndstate *audiohandle;
-#endif
 
 			if (cmd) {
 				do {
@@ -838,21 +493,12 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 						if (s2 >= cmd->unk02 && s4 < cmd->unk02 && s4 < s2) {
 							switch (cmd->type) {
 							case GUNCMD_PLAYSOUND:
-#if VERSION >= VERSION_NTSC_1_0
 								if (hasspeed) {
 									snd00010718(0, 0, AL_VOL_FULL, AL_PAN_CENTER, cmd->unk04, speed, 1, -1, 1);
 									hasspeed = false;
 								} else {
 									snd00010718(0, 0, AL_VOL_FULL, AL_PAN_CENTER, cmd->unk04, 1.0f, 1, -1, 1);
 								}
-#else
-								audiohandle = sndStart(var80095200, cmd->unk04, NULL, -1, -1, -1, -1, -1);
-
-								if (hasspeed && audiohandle) {
-									hasspeed = false;
-									audioPostEvent(audiohandle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
-								}
-#endif
 								break;
 							case GUNCMD_SETSOUNDSPEED:
 								speed = cmd->unk04 / 1000.0f;
@@ -1087,11 +733,7 @@ void bgun0f098df8(s32 weaponfunc, struct handweaponinfo *info, struct hand *hand
 			}
 
 			if (checkunequipped && reloadindex >= 0) {
-#if VERSION >= VERSION_PAL_BETA
-				amount -= hand->gunroundsspent[reloadindex] / TICKS(256);
-#else
 				amount -= hand->gunroundsspent[reloadindex] >> 8;
-#endif
 			}
 
 			if (onebullet) {
@@ -3274,16 +2916,6 @@ void bgunTickHand(s32 handnum)
 	struct handweaponinfo info;
 	s32 lvupdate;
 	s32 i = 20;
-
-	if (handnum);
-	if (handnum);
-	if (handnum);
-	if (handnum);
-
-#if VERSION >= VERSION_PAL_BETA
-	if (handnum);
-#endif
-
 	bgunGetWeaponInfo(&info, handnum);
 
 	lvupdate = g_Vars.lvupdate60;
@@ -3949,31 +3581,6 @@ void bgunTickGunLoad(void)
 
 		osSyncPrintf("BriGun:  Set Load State: GUN_LOADSTATE_LOADED\n");
 		player->gunctrl.gunloadstate = GUNLOADSTATE_LOADED;
-
-#if PIRACYCHECKS
-		{
-			s32 *ptr = (s32 *)&tagsReset;
-			s32 *end = (s32 *)&tagFindById;
-			u32 checksum = 0;
-
-			while (ptr < end) {
-				checksum -= ~*ptr;
-				ptr++;
-			}
-
-			if (checksum != CHECKSUM_PLACEHOLDER) {
-				ptr = (s32 *)&tagsReset + 3;
-
-				if (1);
-				end = &ptr[7];
-
-				while (ptr < end) {
-					*ptr |= 0xff;
-					ptr++;
-				}
-			}
-		}
-#endif
 	}
 }
 
@@ -4910,7 +4517,6 @@ void bgunCreateFiredProjectile(s32 handnum)
 			}
 
 			if (weapon) {
-#if VERSION >= VERSION_NTSC_1_0
 				bool failed = false;
 				Mtxf sp78;
 				struct coord sp6c;
@@ -4987,63 +4593,6 @@ void bgunCreateFiredProjectile(s32 handnum)
 					weapon->base.prop = NULL;
 					weapon->base.model = NULL;
 				}
-#else
-				// NTSC beta doesn't have any of the failure checks
-				Mtxf sp78;
-				struct coord sp6c;
-				struct coord sp60;
-
-				weapon->timer240 = funcdef->timer60;
-
-				if (weapon->timer240 != -1) {
-					weapon->timer240 = TICKS(weapon->timer240 * 4);
-				}
-
-				weapon->base.hidden &= 0x0fffffff;
-				weapon->base.hidden |= g_Vars.currentplayernum << 28;
-
-				bgun0f09ed2c(&weapon->base, &spawnpos, &sp210, &sp264, &sp270);
-
-				if (weapon->base.hidden & OBJHFLAG_PROJECTILE) {
-					if (funcdef->base.base.flags & FUNCFLAG_PROJECTILE_LIGHTWEIGHT) {
-						weapon->base.projectile->flags |= PROJECTILEFLAG_LIGHTWEIGHT;
-					} else if (funcdef->base.base.flags & FUNCFLAG_PROJECTILE_POWERED) {
-						weapon->base.projectile->flags |= PROJECTILEFLAG_POWERED;
-					}
-
-					weapon->base.projectile->targetprop = g_Vars.currentplayer->trackedprops[0].prop;
-
-					if (funcdef->scale != 1.0f) {
-						weapon->base.model->scale *= funcdef->scale;
-
-						mtx3ToMtx4(weapon->base.realrot, &sp78);
-						mtx00015f04(funcdef->scale, &sp78);
-						mtx4ToMtx3(&sp78, weapon->base.realrot);
-					}
-
-					weapon->base.projectile->powerlimit240 = TICKS(1200);
-					weapon->base.projectile->unk0a8 = weapon->base.prop->pos.y;
-					weapon->base.projectile->unk0ac = weapon->base.projectile->speed.y;
-					weapon->base.projectile->unk010 = sp250.x;
-					weapon->base.projectile->unk014 = sp250.y;
-					weapon->base.projectile->unk018 = sp250.z;
-					weapon->base.projectile->pickuptimer240 = TICKS(240);
-					weapon->base.projectile->unk08c = funcdef->reflectangle;
-					weapon->base.projectile->unk098 = funcdef->unk50 * 1.6666666f;
-
-					if (funcdef->soundnum > 0) {
-						psCreate(NULL, weapon->base.prop, funcdef->soundnum, -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
-					}
-
-					if (funcdef->base.base.flags & FUNCFLAG_FLYBYWIRE) {
-						playerLaunchSlayerRocket(weapon);
-					}
-
-					if (weapon->base.projectile->flags & PROJECTILEFLAG_LAUNCHING) {
-						projectileLaunch(&weapon->base, weapon->base.projectile, &sp6c, &sp60);
-					}
-				}
-#endif
 			}
 		}
 	}
@@ -6618,7 +6167,7 @@ void bgunUpdateGangsta(struct hand *hand, s32 handnum, struct coord *arg2, struc
 	f32 tmp;
 	struct coord sp38 = {0, 0, 0};
 
-	if (g_Vars.currentplayer->gunctrl.gangsta
+	if ((g_Vars.currentplayer->gunctrl.gangsta || g_Vars.currentplayer->wantsgangsta)
 			&& funcdef
 			&& (funcdef->type & 0xff) == INVENTORYFUNCTYPE_SHOOT
 			&& (hand->state == HANDSTATE_IDLE

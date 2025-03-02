@@ -170,16 +170,15 @@ bool setupGetObjBbox(struct defaultobj *obj, struct coord *pos, f32 realrot[3][3
 	return false;
 }
 
-bool setup0f092304(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
+bool setupGetObjBboxFromMinMax(struct defaultobj *obj, struct coord *min, struct coord *max)
 {
-	return setupGetObjBbox(obj, &obj->prop->pos, obj->realrot, arg1, arg2);
+	return setupGetObjBbox(obj, &obj->prop->pos, obj->realrot, min, max);
 }
 
-void setup0f09233c(struct defaultobj *obj, struct coord *pos, f32 realrot[3][3], RoomNum *rooms)
+void setupGetObjOverlappedRooms(struct defaultobj *obj, struct coord *pos, f32 realrot[3][3], RoomNum *rooms)
 {
 	struct coord a;
 	struct coord b;
-	u32 stack;
 
 	if (setupGetObjBbox(obj, pos, realrot, &a, &b)) {
 		a.x -= 1;
@@ -196,7 +195,7 @@ void setup0f09233c(struct defaultobj *obj, struct coord *pos, f32 realrot[3][3],
 void setup0f0923d4(struct defaultobj *obj)
 {
 	propDeregisterRooms(obj->prop);
-	setup0f09233c(obj, &obj->prop->pos, obj->realrot, obj->prop->rooms);
+	setupGetObjOverlappedRooms(obj, &obj->prop->pos, obj->realrot, obj->prop->rooms);
 	propRegisterRooms(obj->prop);
 }
 
@@ -309,9 +308,7 @@ struct defaultobj *setupFindObjForReuse(s32 wanttype, struct defaultobj **offscr
 				} else if (wanttype != OBJTYPE_WEAPON
 						&& (obj->hidden & OBJHFLAG_PROJECTILE) == 0
 						&& (obj->hidden2 & OBJH2FLAG_CANREGEN) == 0
-#if VERSION >= VERSION_NTSC_1_0
 						&& (obj->flags & OBJFLAG_HELDROCKET) == 0
-#endif
 						&& obj->prop->parent == NULL
 						&& (!musthavemodel || modelmgrCanSlotFitRwdata(obj->model, modeldef))) {
 					if (offscreenobj == NULL && (obj->prop->flags & (PROPFLAG_ONTHISSCREENTHISTICK | PROPFLAG_ONANYSCREENTHISTICK | PROPFLAG_ONANYSCREENPREVTICK)) == 0) {

@@ -2255,6 +2255,7 @@ MenuItemHandlerResult menuhandlerChangeAgent(s32 operation, struct menuitem *ite
 MenuItemHandlerResult menuhandlerExitGame(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
+		debug_erase(); // Ben: erase my debug log
 		exit(0);
 	}
 

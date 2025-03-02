@@ -1647,6 +1647,7 @@ static const struct menubind menuBinds[] = {
 	{ CK_2000,   "Full Crouch [+]\n",   "N64 Ext 2000\n" },
 	{ CK_ACCEPT, "UI Accept [+]\n",     "EXT UI Accept\n" },
 	{ CK_CANCEL, "UI Cancel [+]\n",     "EXT UI Cancel\n" },
+	{ CK_G,      "UI Gangsta [+]\n",    "EXT UI Gangsta\n" },  //Gangsta Key
 };
 
 static const char *menutextBind(struct menuitem *item);
@@ -1686,6 +1687,7 @@ struct menuitem g_ExtendedBindsMenuItems[] = {
 	DEFINE_MENU_BIND(),
 	DEFINE_MENU_BIND(),
 	DEFINE_MENU_BIND(),
+	DEFINE_MENU_BIND(), //Gangsta key
 	{
 		MENUITEMTYPE_SEPARATOR,
 		0,

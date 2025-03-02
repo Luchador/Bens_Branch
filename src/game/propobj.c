@@ -3372,7 +3372,7 @@ bool func0f06d37c(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 	if (prop->pos.x != arg1->x || prop->pos.y != arg1->y || prop->pos.z != arg1->z) {
 		if (obj->hidden & OBJHFLAG_PROJECTILE) {
 			if (cdExamCylMove08(&prop->pos, prop->rooms, &sp80, rooms, radius, CDTYPE_ALL, false, 0.0f, 0.0f) != CDRESULT_COLLISION) {
-				setup0f09233c(obj, &sp80, obj->realrot, rooms);
+				setupGetObjOverlappedRooms(obj, &sp80, obj->realrot, rooms);
 
 				if (cdExamCylMove02(&prop->pos, &sp80, radius, rooms, CDTYPE_ALL, false, 0.0f, 0.0f) != CDRESULT_COLLISION) {
 					prop->pos.x = sp80.x;
@@ -3465,7 +3465,7 @@ bool func0f06d37c(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 					sp4c.z = sp8c.z * f2 + prop->pos.z;
 
 					if (cdExamCylMove07(&prop->pos, prop->rooms, &sp4c, rooms, CDTYPE_ALL, false, 0.0f, 0.0f) != CDRESULT_COLLISION) {
-						setup0f09233c(obj, &sp4c, obj->realrot, rooms);
+						setupGetObjOverlappedRooms(obj, &sp4c, obj->realrot, rooms);
 
 						if (cdTestVolume(&sp4c, radius, rooms, CDTYPE_ALL, CHECKVERTICAL_NO, 0.0f, 0.0f) != CDRESULT_COLLISION) {
 							prop->pos.x = sp4c.x;
@@ -5153,26 +5153,21 @@ void hovUpdateGround(struct defaultobj *obj, struct hov *hov, struct coord *pos,
 	RoomNum testrooms[8];
 	struct coord testpos;
 
-#ifdef PLATFORM_N64
-	if (g_Vars.lvframe60 > hov->prevframe60)
-#endif
-	{
-		testpos.x = pos->x;
-		testpos.y = pos->y - 50;
-		testpos.z = pos->z;
+	testpos.x = pos->x;
+	testpos.y = pos->y - 50;
+	testpos.z = pos->z;
 
-		roomsCopy(rooms, testrooms);
-		setup0f09233c(obj, &testpos, matrix, testrooms);
+	roomsCopy(rooms, testrooms);
+	setupGetObjOverlappedRooms(obj, &testpos, matrix, testrooms);
 
-		ground = cdFindGroundAtCyl(pos, 5, testrooms, &obj->floorcol, NULL);
+	ground = cdFindGroundAtCyl(pos, 5, testrooms, &obj->floorcol, NULL);
 
-		if (ground < -30000) {
-			ground = hov->ground;
-		}
-
-		hov->ground = ground;
-		hov->prevgroundframe60 = g_Vars.lvframe60;
+	if (ground < -30000) {
+		ground = hov->ground;
 	}
+
+	hov->ground = ground;
+	hov->prevgroundframe60 = g_Vars.lvframe60;
 }
 
 void hovTick(struct defaultobj *obj, struct hov *hov)
@@ -5249,7 +5244,7 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 
 			roomsCopy(prop->rooms, sp9c);
 
-			setup0f09233c(obj, &sp90, obj->realrot, sp9c);
+			setupGetObjOverlappedRooms(obj, &sp90, obj->realrot, sp9c);
 
 			func0f065e74(&prop->pos, prop->rooms, &sp1b4, sp198);
 			roomsAppend(sp9c, sp198, ARRAYCOUNT(sp198));
@@ -5534,7 +5529,7 @@ s32 func0f072144(struct defaultobj *obj, struct coord *arg1, f32 arg2, bool arg3
 		pos.z += arg1->z;
 
 		func0f065e74(&prop->pos, prop->rooms, &pos, rooms);
-		setup0f09233c(obj, &pos, sp460, rooms);
+		setupGetObjOverlappedRooms(obj, &pos, sp460, rooms);
 
 		if (obj->type == OBJTYPE_HOVERBIKE) {
 			hoverbike = (struct hoverbikeobj *) obj;
@@ -5560,7 +5555,7 @@ s32 func0f072144(struct defaultobj *obj, struct coord *arg1, f32 arg2, bool arg3
 		}
 	} else {
 		roomsCopy(prop->rooms, rooms);
-		setup0f09233c(obj, &pos, sp460, rooms);
+		setupGetObjOverlappedRooms(obj, &pos, sp460, rooms);
 	}
 
 	if (cdresult == CDRESULT_NOCOLLISION) {

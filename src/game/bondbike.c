@@ -409,7 +409,7 @@ s32 bbikeCalculateNewPosition(struct coord *vel, f32 angledelta)
 				g_Vars.currentplayer->hoverbike->rooms,
 				&dstpos, dstrooms, spa8, 20);
 
-		setup0f09233c(&bike->base, &dstpos, bike->base.realrot, dstrooms);
+		setupGetObjOverlappedRooms(&bike->base, &dstpos, bike->base.realrot, dstrooms);
 
 		hasvel = true;
 

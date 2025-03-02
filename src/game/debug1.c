@@ -40,6 +40,20 @@ s32 debug_log(const char *message, s32 num)
 	return 1;
 }
 
+s32 debug_erase()
+{
+	FILE *file = fopen("debug.log", "w"); // Open in write mode, truncates the file
+    if (file == NULL) {
+        perror("Error opening file");
+        return 1; // Return error code
+    }
+
+    fclose(file); // Close the file
+    printf("Log file erased successfully.\n");
+
+    return 0;
+}
+
 void dmenuSetScaleIndex(s32 index)
 {
 #ifdef DEBUG

@@ -126,16 +126,6 @@ bool sightIsPropFriendly(struct prop *prop)
 	return chrCompareTeams(g_Vars.currentplayer->prop->chr, prop->chr, COMPARE_FRIENDS);
 }
 
-void sight0f0d715c(void)
-{
-	// empty
-}
-
-Gfx *sight0f0d7164(Gfx *gdl)
-{
-	return gdl;
-}
-
 /**
  * Return true if the given prop can be added to the target list.
  */
@@ -783,15 +773,9 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 
 			if (identifytimer & 0x80) {
 				// "Identify"
-#if VERSION == VERSION_JPN_FINAL
-				gdl = func0f1574d0jf(gdl, &textx, &texty, langGet(L_MISC_439),
-						g_CharsHandelGothicXs, g_FontHandelGothicXs, 0x00ff00a0, 0x000000a0,
-						viGetWidth(), viGetHeight(), 0, 0);
-#else
 				gdl = textRender(gdl, &textx, &texty, langGet(L_MISC_439),
 						g_CharsHandelGothicXs, g_FontHandelGothicXs, 0x00ff00a0, 0x000000a0,
 						viGetWidth(), viGetHeight(), 0, 0);
-#endif
 			}
 
 			gdl = sightDrawAimer(gdl, x, y, radius, cornergap, colour);
@@ -1610,15 +1594,11 @@ Gfx *sightDraw(Gfx *gdl, bool sighton, s32 sight)
 	const f32 crossy = g_Vars.currentplayer->crosspos[1];
 #endif
 
-#if PAL
-	g_ScaleX = 1;
-#else
 	if (g_ViRes == VIRES_HI) {
 		g_ScaleX = 2;
 	} else {
 		g_ScaleX = 1;
 	}
-#endif
 
 	if (PLAYERCOUNT() >= 2 && g_Vars.coopplayernum < 0 && g_Vars.antiplayernum < 0) {
 		sight = SIGHT_DEFAULT;

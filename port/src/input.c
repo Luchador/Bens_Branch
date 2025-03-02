@@ -123,7 +123,7 @@ static const char *ckNames[CK_TOTAL_COUNT] = {
 	"CK_0200",
 	"CK_0400",
 	"CK_0800",
-	"CK_1000",
+	"CK_GANGSTAKEY",
 	"CK_2000",
 	"CK_4000",
 	"CK_8000"
@@ -206,7 +206,8 @@ void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode)
 		{ CK_STICK_YNEG,    SDL_SCANCODE_DOWN,   0                   },
 		{ CK_STICK_YPOS,    SDL_SCANCODE_UP,     0                   },
 		{ CK_4000,          SDL_SCANCODE_LSHIFT, 0                   },
-		{ CK_2000,          SDL_SCANCODE_LCTRL,  0                   }
+		{ CK_2000,          SDL_SCANCODE_LCTRL,  0                   },
+		{ CK_GKEY,          SDL_SCANCODE_G,      0                   }  // Gangsta Key
 	};
 
 	static const u32 pcjoybinds[][2] = {

@@ -12,7 +12,7 @@ void casingsReset(void)
 
 	g_CasingAudioHandles[0] = 0;
 	g_CasingAudioHandles[1] = 0;
-	var8009d0d8 = 0;
+	g_TimeToNextCasingSound = 0;
 
 	for (i = 0; i != ARRAYCOUNT(g_BgunAudioHandles); i++) {
 		g_BgunAudioHandles[i] = NULL;

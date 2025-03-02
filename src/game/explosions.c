@@ -704,8 +704,8 @@ void explosionInflictDamage(struct prop *expprop)
 				f32 xdist;
 				f32 ydist;
 				f32 zdist;
-				struct coord sp130;
-				struct coord sp124;
+				struct coord min;
+				struct coord max;
 				struct defaultobj *obj = prop->obj;
 				bool candamage = false;
 
@@ -713,16 +713,14 @@ void explosionInflictDamage(struct prop *expprop)
 				ydist = prop->pos.y - expprop->pos.y;
 				zdist = prop->pos.z - expprop->pos.z;
 
-#if VERSION >= VERSION_NTSC_1_0
 				if (obj)
-#endif
 				{
 					if (xdist <= damageradius && xdist >= -damageradius
 							&& ydist <= damageradius && ydist >= -damageradius
 							&& zdist <= damageradius && zdist >= -damageradius) {
 
-						if (setup0f092304(obj, &sp130, &sp124)) {
-							if (explosionOverlapsProp(exp, prop, &sp130, &sp124)) {
+						if (setupGetObjBboxFromMinMax(obj, &min, &max)) {
+							if (explosionOverlapsProp(exp, prop, &min, &max)) {
 								candamage = true;
 							}
 						} else {

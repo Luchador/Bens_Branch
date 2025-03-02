@@ -5,6 +5,7 @@
 
 #include "platform.h"
 #include "system.h"
+#include "game/debug.h"
 
 #include "gfx_window_manager_api.h"
 #include "gfx_screen_config.h"

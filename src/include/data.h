@@ -245,7 +245,6 @@ extern s32 g_ModelMostModels;
 extern s32 g_ModelMostAnims;
 extern s32 g_ViRes;
 extern bool g_HiResEnabled;
-extern s32 var8007072c;
 extern u32 var80070738;
 extern u32 var8007073c;
 extern struct gecreditsdata *g_CurrentGeCreditsData;

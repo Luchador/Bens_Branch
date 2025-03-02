@@ -28,7 +28,7 @@ void casingTick(struct casing *casing)
 	if (casing->pos.y < casing->ground) {
 		i = -1;
 
-		if (var8009d0d8 == 0) {
+		if (g_TimeToNextCasingSound == 0) {
 			if (g_CasingAudioHandles[0] == NULL) {
 				i = 0;
 			}
@@ -44,7 +44,7 @@ void casingTick(struct casing *casing)
 				&& g_Vars.currentplayer->hands[1].mode != HANDMODE_2) {
 			sp58 = RANDOMFRAC() * 0.25f + 0.98f;
 
-			var8009d0d8 = TICKS(20);
+			g_TimeToNextCasingSound = TICKS(20);
 			sndStart(var80095200, SFX_8051, &g_CasingAudioHandles[i], -1, -1, -1.0f, -1, -1);
 
 			if (g_CasingAudioHandles[i]) {
@@ -84,12 +84,12 @@ void casingsTick(void)
 	struct casing *end;
 	struct casing *casing;
 
-	if (var8009d0d8 > 0) {
-		var8009d0d8 -= g_Vars.lvupdate240;
+	if (g_TimeToNextCasingSound > 0) {
+		g_TimeToNextCasingSound -= g_Vars.lvupdate240;
 	}
 
-	if (var8009d0d8 < 0) {
-		var8009d0d8 = 0;
+	if (g_TimeToNextCasingSound < 0) {
+		g_TimeToNextCasingSound = 0;
 	}
 
 	if (g_CasingsActive) {

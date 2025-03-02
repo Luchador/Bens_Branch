@@ -125,7 +125,7 @@ typedef struct {
 #define CONT_8000      0x80000000
 #define CONT_4000      0x40000000
 #define CONT_2000      0x20000000
-#define CONT_1000      0x10000000
+#define CONT_GKEY      0x10000000 // Gangsta Key
 #define CONT_0800      0x08000000
 #define CONT_0400      0x04000000
 #define CONT_0200      0x02000000
@@ -174,6 +174,7 @@ typedef struct {
 #define D_CBUTTONS	CONT_D
 #define X_BUTTON		CONT_EXTRA0
 #define Y_BUTTON		CONT_EXTRA1
+#define G_BUTTON        CONT_GKEY
 
 /* Controller error number */
 

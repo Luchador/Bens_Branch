@@ -2818,6 +2818,7 @@ struct player {
 	/*0x1c6c*/ u32 unk1c6c;
 	/*0x1c70*/ s16 altdowntime; // for alt-modes, used like invdowntime and amdowntime
 	/*0x1c72*/ s16 amdowntime; // for alt-modes, used like invdowntime and amdowntime
+	/*0x1c76*/ bool wantsgangsta; // player wants to turn weapon sideways
 #ifndef PLATFORM_N64
 	/*0x1c74*/ f32 swivelpos[2];
 #endif

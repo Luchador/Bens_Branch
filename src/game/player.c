@@ -92,23 +92,10 @@ u32 g_WarpType3Pad;
 s32 g_WarpType2HasDirection;
 u32 g_WarpType2Arg2;
 s32 g_CutsceneCurAnimFrame60;
-
-#if VERSION == VERSION_JPN_FINAL
-s32 g_CutsceneCurAnimFrame240;
-s32 g_CutsceneFrameOverrun240;
-s16 g_CutsceneAnimNum;
-f32 g_CutsceneBlurFrac;
-#elif PAL
-f32 g_CutsceneCurAnimFrame240;
-f32 var8009e388pf;
-s16 g_CutsceneAnimNum;
-f32 g_CutsceneBlurFrac;
-#else
 s32 g_CutsceneCurAnimFrame240;
 s16 g_CutsceneAnimNum;
 f32 g_CutsceneBlurFrac;
 s32 g_CutsceneFrameOverrun240;
-#endif
 
 bool g_CutsceneSkipRequested;
 f32 g_CutsceneCurTotalFrame60f;
@@ -131,48 +118,16 @@ struct vimode g_ViModes[] = {
 	// |               |                 |                |                 |          |                 |     |  |     cinemaheight
 	// |               |                 |                |                 |          |                 |     |  |     |  cinematop
 	// |               |                 |                |                 |          |                 |     |  |     |  |
-#if VERSION >= VERSION_JPN_FINAL
-	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                VIMODE_LO, SCREEN_HEIGHT_LO, 0,  180, 20, 136, 42  }, // default
-	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.5,              VIMODE_LO, SCREEN_HEIGHT_HI, 0,  180, 20, 136, 42  }, // hi-res
-#elif VERSION >= VERSION_PAL_BETA
-	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                VIMODE_LO, SCREEN_HEIGHT_LO, 0,  212, 20, 168, 42 }, // default
-	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.71428567171097, VIMODE_LO, SCREEN_HEIGHT_HI, 0,  212, 20, 168, 42 }, // hi-res
-#else
 	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                VIMODE_LO, SCREEN_HEIGHT_LO, 0,  180, 20, 136, 42  }, // default
 	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.5,              VIMODE_LO, SCREEN_HEIGHT_HI, 0,  180, 20, 136, 42  }, // hi-res
 	{ 320,             480,              320,             2,                VIMODE_HI, 440,              20, 360, 60, 272, 104 }, // unused
 	{ 440,             330,              440,             1,                VIMODE_LO, 330,              0,  330, 0,  330, 0   }, // unused
 	{ 440,             240,              440,             (1.0f / 1.375f),  VIMODE_LO, 220,              0,  180, 0,  136, 0   }, // unused
 	{ 400,             300,              400,             1,                VIMODE_HI, 300,              0,  300, 0,  300, 0   }, // unused
-#endif
 };
 
 s32 g_ViRes = VIRES_LO;
 bool g_HiResEnabled = false;
-u32 var800706d0 = 0x00000000;
-u32 var800706d4 = 0x00000000;
-u32 var800706d8 = 0x00000000;
-u32 var800706dc = 0x00000000;
-u32 var800706e0 = 0x00000000;
-u32 var800706e4 = 0xbf800000;
-u32 var800706e8 = 0x00000000;
-u32 var800706ec = 0x3f800000;
-u32 var800706f0 = 0x00000000;
-u32 var800706f4 = 0x00000000;
-u32 var800706f8 = 0x3f800000;
-u32 var800706fc = 0x00000000;
-u32 var80070700 = 0x00000000;
-u32 var80070704 = 0x3f800000;
-u32 var80070708 = 0x00000000;
-u32 var8007070c = 0x00000000;
-u32 var80070710 = 0x00000000;
-u32 var80070714 = 0x00000000;
-u32 var80070718 = 0x00000000;
-u32 var8007071c = 0x00000000;
-u32 var80070720 = 0x00000000;
-u32 var80070724 = 0x00000000;
-u32 var80070728 = 0x3f800000;
-s32 var8007072c = 1;
 u32 var80070730 = 0xffffffff;
 u32 var80070734 = 0xffffffff;
 u32 var80070738 = 0;
@@ -338,17 +293,10 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 
 			slangles[sllen] = atan2f(pad.look.x, pad.look.z);
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false, false)) {
 				slpadindexes[sllen] = p;
 				sllen++;
 			}
-#else
-			if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false)) {
-				slpadindexes[sllen] = p;
-				sllen++;
-			}
-#endif
 
 			padsqdists[p] = -1.0f;
 		}
@@ -377,17 +325,10 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 
 			slangles[sllen] = atan2f(pad.look.x, pad.look.z);
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false, false)) {
 				slpadindexes[sllen] = p;
 				sllen++;
 			}
-#else
-			if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false)) {
-				slpadindexes[sllen] = p;
-				sllen++;
-			}
-#endif
 
 			padsqdists[p] = -1.0f;
 		}
@@ -438,17 +379,10 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 
 		slangles[sllen] = atan2f(pad.look.x, pad.look.z);
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false, false)) {
 			slpadindexes[sllen] = i;
 			sllen++;
 		}
-#else
-		if (chrAdjustPosForSpawn(chrradius, &slpositions[sllen], slrooms[sllen], slangles[sllen], true, false)) {
-			slpadindexes[sllen] = i;
-			sllen++;
-		}
-#endif
 
 		padsqdists[i] = -1.0f;
 	}
@@ -561,9 +495,7 @@ void playerStartNewLife(void)
 			&g_Vars.currentplayer->bond2.unk1c, rooms[0]);
 
 	if (g_Vars.coopplayernum >= 0) {
-		u32 stack;
 		bool ammotypesheld[33];
-		s32 stack2[2];
 
 		for (i = 0; i != ARRAYCOUNT(ammotypesheld); i++) {
 			ammotypesheld[i] = false;
@@ -595,13 +527,6 @@ void playerStartNewLife(void)
 	invGiveSingleWeapon(WEAPON_UNARMED);
 
 	if (cmd) {
-		if (cmd);
-		if (cmd);
-		if (cmd);
-		if (cmd);
-		if (cmd);
-		if (cmd);
-
 		if (g_Vars.antiplayernum < 0 || g_Vars.currentplayer != g_Vars.anti) {
 			while (cmd[0] != INTROCMD_END) {
 				switch (cmd[0]) {
@@ -767,7 +692,7 @@ void playerLoadDefaults(void)
 	g_Vars.currentplayer->autoxaimprop = NULL;
 	g_Vars.currentplayer->autoxaimtime60 = -1;
 
-	g_Vars.currentplayer->autoaimdamp = (PAL ? 0.974f : 0.979f);
+	g_Vars.currentplayer->autoaimdamp = 0.979f;
 
 	g_Vars.currentplayer->colourscreenred = 0xff;
 	g_Vars.currentplayer->colourscreengreen = 0xff;
@@ -817,6 +742,7 @@ void playerLoadDefaults(void)
 	g_Vars.currentplayer->prevoverexposureblue = 0;
 	g_Vars.currentplayer->amdowntime = 0;
 	g_Vars.currentplayer->altdowntime = 0;
+	g_Vars.currentplayer->wantsgangsta = false;
 }
 
 bool playerSpawnAnti(struct chrdata *hostchr, bool force)
@@ -837,17 +763,10 @@ bool playerSpawnAnti(struct chrdata *hostchr, bool force)
 			// Dual wielding
 			struct weaponobj *weapon1 = hostchr->weapons_held[0]->weapon;
 			struct weaponobj *weapon2 = hostchr->weapons_held[1]->weapon;
-
-#if VERSION >= VERSION_NTSC_1_0
 			invGiveSingleWeapon(weapon1->weaponnum);
 			invGiveDoubleWeapon(weapon1->weaponnum, weapon1->weaponnum);
 			bgunEquipWeapon2(HAND_RIGHT, weapon1->weaponnum);
 			bgunEquipWeapon2(HAND_LEFT, weapon1->weaponnum);
-#else
-			invGiveDoubleWeapon(weapon1->weaponnum, weapon2->weaponnum);
-			bgunEquipWeapon2(HAND_RIGHT, weapon1->weaponnum);
-			bgunEquipWeapon2(HAND_LEFT, weapon2->weaponnum);
-#endif
 		} else if (hostchr->weapons_held[0]) {
 			// Right hand only
 			struct weaponobj *weapon = hostchr->weapons_held[0]->weapon;
@@ -1385,11 +1304,6 @@ void playerTickChrBody(void)
 
 		weaponmodelnum = playermgrGetModelOfWeapon(weaponnum);
 
-		if (IS4MB()) {
-			bodynum = BODY_DARK_COMBAT;
-			headnum = HEAD_DARK_COMBAT;
-		}
-
 		if (!g_Vars.mplayerisrunning || (IS4MB() && PLAYERCOUNT() == 1)) {
 			// 1 player
 			if (g_Vars.currentplayer->gunmem2 == NULL) {
@@ -1533,13 +1447,11 @@ void playerTickChrBody(void)
 
 		g_Vars.currentplayer->vv_eyeheight = (s32)g_HeadsAndBodies[bodynum].height;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (g_Vars.antiplayernum >= 0
 				&& g_Vars.currentplayer == g_Vars.anti
 				&& g_Vars.currentplayer->vv_eyeheight > 159) {
 			g_Vars.currentplayer->vv_eyeheight = 159;
 		}
-#endif
 
 		g_Vars.currentplayer->vv_headheight = g_Vars.currentplayer->vv_eyeheight;
 
@@ -3219,10 +3131,6 @@ void playerConfigureVi(void)
 	f32 ratio = player0f0bd358();
 	g_ViRes = VIRES_LO;
 
-#if VERSION >= VERSION_JPN_FINAL
-	var800800f0jf = 0;
-#endif
-
 	playermgrSetFovY(PLAYER_DEFAULT_FOV);
 	playermgrSetAspectRatio(ratio);
 	playermgrSetViewSize(playerGetViewportWidth(), playerGetViewportHeight());
@@ -3248,23 +3156,7 @@ void playerTick(bool arg0)
 		g_ViRes = VIRES_LO;
 	}
 
-#if VERSION >= VERSION_JPN_FINAL
-	var800800f0jf = 0;
-#endif
-
-#ifdef PLATFORM_N64
-	if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-		aspectratio = player0f0bd358() * 1.33333333f;
-	} else {
-		aspectratio = player0f0bd358();
-	}
-#else
 	aspectratio = player0f0bd358();
-#endif
-
-#if PAL
-	aspectratio *= 1.1904761791229f;
-#endif
 
 	if (var8007083c != TELEPORTSTATE_INACTIVE) {
 		var8007083c = TELEPORTSTATE_INACTIVE;
@@ -3307,6 +3199,14 @@ void playerTick(bool arg0)
 	playerTickDamageAndHealth();
 	playerTickExplode();
 
+	// Ben's comment: Check input for gangsta mode. Not sure where to put this so I'll just leave it here for now.
+	s8 contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex); // Gangsta
+	u32 buttonsnow = joyGetButtonsPressedThisFrame(contpadnum, 0xffffffff);
+	if (buttonsnow & CONT_GKEY) {  // Gangsta key pressed
+		g_Vars.currentplayer->wantsgangsta = !g_Vars.currentplayer->wantsgangsta;
+		//debug_log("Wants gangsta: %d \n", g_Vars.currentplayer->wantsgangsta);
+	}
+
 	if (g_Vars.currentplayer->eyespy) {
 		// The stage uses an eyespy
 		struct eyespy *eyespy = g_Vars.currentplayer->eyespy;
@@ -3325,17 +3225,13 @@ void playerTick(bool arg0)
 		} else {
 			if (eyespy->held == false) {
 				// Eyespy is deployed
-#if VERSION >= VERSION_NTSC_1_0
 				if (g_Vars.currentplayer->eyespy->active) {
 					// And is being controlled
 					s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
 					u32 buttons = arg0 ? joyGetButtons(contpad1, 0xffffffff) : 0;
-
-#ifndef PLATFORM_N64
 					if (arg0 && inputKeyJustPressed(VK_ESCAPE)) {
 						buttons |= START_BUTTON;
 					}
-#endif
 
 					if (g_Vars.currentplayer->isdead == false
 							&& g_Vars.currentplayer->pausemode == PAUSEMODE_UNPAUSED
@@ -3347,7 +3243,6 @@ void playerTick(bool arg0)
 						}
 					}
 				}
-#endif
 
 				if (g_Vars.lvupdate240) {
 					eyespyProcessInput(arg0);
@@ -3395,11 +3290,7 @@ void playerTick(bool arg0)
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKET) {
 		if (g_Vars.currentplayer->slayerrocket == NULL || g_Vars.currentplayer->isdead) {
 			g_Vars.currentplayer->slayerrocket = NULL;
-#if VERSION >= VERSION_NTSC_1_0
 			g_Vars.currentplayer->visionmode = VISIONMODE_SLAYERROCKETSTATIC;
-#else
-			g_Vars.currentplayer->visionmode = VISIONMODE_NORMAL;
-#endif
 		}
 	}
 
@@ -3436,12 +3327,7 @@ void playerTick(bool arg0)
 		playerTickChrBody();
 		bmoveTick(0, 0, 0, 1);
 		playerSetCameraMode(CAMERAMODE_EYESPY);
-#if VERSION >= VERSION_JPN_FINAL
-		player0f0c1840(&sp308, &g_Vars.currentplayer->eyespy->up, &g_Vars.currentplayer->eyespy->look,
-				&g_Vars.currentplayer->eyespy->prop->pos, g_Vars.currentplayer->eyespy->prop->rooms);
-#else
 		player0f0c1bd8(&sp308, &g_Vars.currentplayer->eyespy->up, &g_Vars.currentplayer->eyespy->look);
-#endif
 	} else if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_WHITE) {
 		// Deep Sea teleport
 		playerTickChrBody();
@@ -3500,11 +3386,7 @@ void playerTick(bool arg0)
 				g_Vars.currentplayer->badrockettime += g_Vars.lvupdate60;
 
 				if (g_Vars.currentplayer->badrockettime > TICKS(120)) {
-#if VERSION >= VERSION_NTSC_1_0
 					g_Vars.currentplayer->visionmode = VISIONMODE_SLAYERROCKETSTATIC;
-#else
-					g_Vars.currentplayer->visionmode = VISIONMODE_NORMAL;
-#endif
 				}
 			} else if (g_Vars.currentplayer->badrockettime > 0) {
 				// Slayer rocket is in bounds, but was recently out
@@ -3526,9 +3408,7 @@ void playerTick(bool arg0)
 				s8 contpad2 = optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
 				s8 stickx = 0;
 				s8 sticky = 0;
-#ifndef PLATFORM_N64
 				s8 rsticky = joyGetRStickY(contpad1);
-#endif
 				Mtxf sp1fc;
 				Mtxf sp1bc;
 				Mtxf sp17c;
@@ -3617,11 +3497,9 @@ void playerTick(bool arg0)
 					}
 				}
 
-#ifndef PLATFORM_N64
 				if (g_PlayersWithControl[g_Vars.currentplayernum] && inputKeyJustPressed(VK_ESCAPE)) {
 					pause = true;
 				}
-#endif
 
 				if (pause) {
 					if (g_Vars.mplayerisrunning == false) {
@@ -3638,7 +3516,6 @@ void playerTick(bool arg0)
 				sp178 = sticky * LVUPDATE60FREAL() * 0.00025f;
 				sp174 = -stickx * LVUPDATE60FREAL() * 0.00025f;
 
-#ifndef PLATFORM_N64
 				// respect the invert pitch setting
 				if (optionsGetForwardPitch(g_Vars.currentplayerstats->mpindex)) {
 					sp178 = -sp178;
@@ -3659,7 +3536,6 @@ void playerTick(bool arg0)
 						sp174 -= mdx * 0.00025f;
 					}
 				}
-#endif
 
 				f20 = sqrtf(sp2ac.f[0] * sp2ac.f[0] + sp2ac.f[2] * sp2ac.f[2]);
 
@@ -3709,7 +3585,6 @@ void playerTick(bool arg0)
 					targetspeed = 12;
 				}
 
-#ifndef PLATFORM_N64
 				targetspeed += rsticky / 127.f * 12.f;
 				if (targetspeed > 12) {
 					targetspeed = 12;
@@ -3717,7 +3592,6 @@ void playerTick(bool arg0)
 				if (targetspeed < 1) {
 					targetspeed = 1;
 				}
-#endif
 
 				newspeed = prevspeed;
 
@@ -3759,11 +3633,7 @@ void playerTick(bool arg0)
 
 		if (!rocketok) {
 			g_Vars.currentplayer->slayerrocket = NULL;
-#if VERSION >= VERSION_NTSC_1_0
 			g_Vars.currentplayer->visionmode = VISIONMODE_SLAYERROCKETSTATIC;
-#else
-			g_Vars.currentplayer->visionmode = VISIONMODE_NORMAL;
-#endif
 		}
 
 		g_Vars.currentplayer->waitforzrelease = true;

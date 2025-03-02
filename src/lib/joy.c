@@ -63,11 +63,9 @@ OSMesgQueue g_JoyStartCyclicPollingMesgQueue;
 OSMesg g_JoyStartCyclicPollingDoneMesgBuf[1];
 OSMesgQueue g_JoyStartCyclicPollingDoneMesgQueue;
 OSContStatus g_JoyContStatuses[NUM_PADS];
-#if VERSION >= VERSION_NTSC_1_0
 u8 g_JoyPfsStates[100];
 u32 var80099fac;
 u32 var80099fb0;
-#endif
 
 const char var70054080[] = "joyReset\n";
 const char var7005408c[] = "joyReset: doing nothing\n";
@@ -96,25 +94,17 @@ void (*var8005eec8)(struct contsample *samples, s32 samplenum, s32 samplenum2) =
 s32 g_JoyNextPfsStateIndex = (VERSION >= VERSION_NTSC_1_0 ? 0 : 30);
 s32 var8005eed0 = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
 u32 var8005eed4 = 0;
-#endif
 
 u8 var8005eed8 = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
 bool g_JoyPfsPollMasterEnabled = true;
 s32 g_JoyPfsPollInterval = 0;
 s32 g_JoyPfsPollTimeRemaining = -1;
 u32 g_JoyPfsPollCount = 0;
 bool g_JoyPfsPollEnabled = false;
 bool g_JoyCyclicPollingLocked = true;
-#else
-u32 var800612c8nb = 3;
-u8 var800612ccnb = 0;
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 void joyLockCyclicPolling(void)
 {
 	if (g_JoyCyclicPollingLocked) {
@@ -140,7 +130,6 @@ bool joyIsPfsPollEnabled(void)
 {
 	return g_JoyPfsPollEnabled;
 }
-#endif
 
 void joySetPfsPollInterval(s32 value)
 {
@@ -421,21 +410,6 @@ u32 joyGetConnectedControllers(void)
 	return g_JoyConnectedControllers;
 }
 
-#if VERSION < VERSION_NTSC_1_0
-void func00014e9cnb(void *callback, s32 value2)
-{
-	var8005eec4 = callback;
-	g_JoyData[1].unk200 =  value2;
-}
-#endif
-
-#if VERSION < VERSION_NTSC_1_0
-void func00014eb0nb(void *value)
-{
-	var8005eec8 = value;
-}
-#endif
-
 void joyConsumeSamples(struct joydata *joydata)
 {
 	s8 i;
@@ -486,26 +460,6 @@ void joyConsumeSamples(struct joydata *joydata)
 	}
 }
 
-#if VERSION < VERSION_NTSC_1_0
-void joy0001509cnb(void)
-{
-	static bool doingit = false;
-
-	if (!doingit) {
-		doingit = true;
-
-		if (g_JoyNextPfsStateIndex < var8005eed0) {
-			var8005eed0 = 0;
-			joy00013e84();
-			osPfsIsPlug(&g_PiMesgQueue, &var8005eed8);
-			var8005eed8 |= 0x10;
-		}
-
-		doingit = false;
-	}
-}
-#endif
-
 /**
  * The use of the static variable suggests that the function is able to be
  * called recursively, but its behaviour should not be run when recursing.
@@ -536,11 +490,9 @@ void joyDebugJoy(void)
 {
 	static u32 var8005ef08 = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (g_Vars.paksneededformenu) {
 		joyPollPfs(1);
 	}
-#endif
 
 	if (var8005eec4) {
 		g_JoyData[1].nextlast = var8005eec4(g_JoyData[1].samples, g_JoyData[1].curlast);
@@ -554,23 +506,10 @@ void joyDebugJoy(void)
 	}
 
 	if (joyIsCyclicPollingEnabled() && var8005eec0 && joyGetNumSamples() <= 0) {
-#if VERSION >= VERSION_NTSC_FINAL
 		joyDisableCyclicPolling();
 		joy00014238();
 		joyEnableCyclicPolling();
 		joyConsumeSamples(&g_JoyData[0]);
-#elif VERSION >= VERSION_NTSC_1_0
-		joyDisableCyclicPolling();
-		joyEnableCyclicPolling();
-		joyConsumeSamples(&g_JoyData[0]);
-		joy00014238();
-#else
-		joyDisableCyclicPolling(500, "joy.c");
-		joy00014238();
-		joy0001509cnb();
-		joyEnableCyclicPolling(507, "joy.c");
-		joyConsumeSamples(&g_JoyData[0]);
-#endif
 	}
 }
 
@@ -973,22 +912,6 @@ u32 joyGetButtonsPressedThisFrame(s8 contpadnum, u32 mask)
 
 	return g_JoyDataPtr->buttonspressed[contpadnum] & mask;
 }
-
-#if VERSION < VERSION_NTSC_1_0
-u32 joyGetButtonsReleasedThisFrame(s8 contpadnum, u32 mask)
-{
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
-		g_JoyBadReadsButtonsPressed[contpadnum]++;
-		return 0;
-	}
-
-	if (g_JoyDisableCooldown[contpadnum] > 0) {
-		return 0;
-	}
-
-	return g_JoyDataPtr->buttonsreleased[contpadnum] & mask;
-}
-#endif
 
 bool joyIsCyclicPollingEnabled(void)
 {
