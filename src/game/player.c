@@ -3276,11 +3276,6 @@ void playerTick(bool arg0)
 		playerTickTeleport(&aspectratio);
 	}
 
-	if (g_Vars.stagenum == STAGE_TEST_OLD && func0f01ad5c()) {
-		func0f01adb8();
-		return;
-	}
-
 	playermgrSetFovY(PLAYER_DEFAULT_FOV);
 	playermgrSetAspectRatio(aspectratio);
 	playermgrSetViewSize(playerGetViewportWidth(), playerGetViewportHeight());

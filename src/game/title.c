@@ -2569,17 +2569,6 @@ bool func0f01ad5c(void)
 	return true;
 }
 
-void func0f01adb8(void)
-{
-	viSetMode(VIMODE_HI);
-	viSetSize(576, g_TitleViewHeight);
-	viSetBufSize(576, g_TitleViewHeight);
-	playermgrSetViewSize(576, g_TitleViewHeight);
-	viSetViewSize(576, g_TitleViewHeight);
-	playermgrSetViewPosition(0, 0);
-	viSetViewPosition(0, 0);
-}
-
 void titleTickOld(void)
 {
 	if (titleIsKeepingMode()) {
