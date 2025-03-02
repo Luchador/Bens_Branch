@@ -15,8 +15,6 @@
 #include "types.h"
 #include "platform.h"
 
-//This file deals with text
-
 #define SPACE_WIDTH 5
 
 #define BLENDTYPE_DIAGONAL   0x01
@@ -57,7 +55,7 @@ struct blendsettings {
 
 struct blendsettings g_Blend;
 Gfx *var800a4634;
-u32 g_TextOutlineColour;
+u32 g_TextOutlineColor;
 u32 g_TextHasOutline = 0;
 
 s32 g_ScaleX = 1;
@@ -92,12 +90,14 @@ u16 var8007fb5c[] = {
 bool var8007fb9c = false;
 s32 var8007fba0 = 0;
 s32 var8007fba4 = -1;
+u32 var8007fbac = 0x00000001;
+u32 var8007fbb0 = 0x00000064;
+u32 var8007fbb4 = 0x0000002c;
+u32 var8007fbb8 = 0x00000080;
 
-#ifndef PLATFORM_N64
 s32 g_HudCenter = HUDCENTER_NONE;
 u32 g_HudAlignModeL = G_ASPECT_LEFT_EXT;
 u32 g_HudAlignModeR = G_ASPECT_RIGHT_EXT;
-#endif
 
 void textSetRotation90(bool rotated)
 {
@@ -120,7 +120,8 @@ void textLoadFont(u8 *romstart, u8 *romend, struct font **fontptr, struct fontch
 	s32 i;
 	struct font *font;
 	struct fontchar *chars;
-	#define NUMCHARS() 94
+
+#define NUMCHARS() 94
 
 	len = (romptr_t)romend - (romptr_t)romstart;
 	font = mempAlloc(len, MEMPOOL_STAGE);
@@ -196,15 +197,15 @@ void textReset(void)
 	} else {
 		// This unused GE font exists in NTSC but was removed in the PAL version
 		textLoadFont(REF_SEG _fonttahomaSegmentRomStart, REF_SEG _fonttahomaSegmentRomEnd, &g_FontTahoma2, &g_FontTahoma1, false);
+
 		textLoadFont(REF_SEG _fontnumericSegmentRomStart, REF_SEG _fontnumericSegmentRomEnd, &g_FontNumeric, &g_CharsNumeric, false);
 		textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
 		textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
 		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
 
-		// STAGE_TEST_OLD is not used
-		/*if (g_Vars.stagenum == STAGE_TEST_OLD) {
+		if (g_Vars.stagenum == STAGE_TEST_OLD) {
 			textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
-		}*/
+		}
 	}
 }
 
@@ -281,6 +282,8 @@ Gfx *text0f153990(Gfx *gdl, s32 left, s32 top, s32 width, s32 height)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
+	gDPFillRectangle(gdl++, left - 1, top - 1, width + left + 1, top + height + 1);
+
 	gdl = text0f153838(gdl);
 
 	return gdl;
@@ -306,6 +309,7 @@ Gfx *text0f153ab0(Gfx *gdl)
 	allocation = gfxAllocate(sizeof(Gfx) * 530);
 
 	var800a4634 = allocation;
+
 
 	gSPDisplayList(gdl++, var800a4634);
 
@@ -438,7 +442,6 @@ bool textHasDiagonalBlend(void)
 
 u32 textApplyProjectionColour(s32 x, s32 y, u32 colour)
 {
-	u32 stack[3];
 	u32 result = colour;
 
 	if (g_Blend.types & BLENDTYPE_DIAGONAL) {
@@ -455,9 +458,9 @@ u32 textApplyProjectionColour(s32 x, s32 y, u32 colour)
 			f12 = 3000.0f;
 		}
 
-		f14 = 1;
-		f18 = 100;
-		f16 = 44;
+		f14 = var8007fbac;
+		f18 = var8007fbb0;
+		f16 = var8007fbb4;
 
 		if (g_Blend.diagmode == 0) {
 			if (g_Blend.diagtimer < f12) {
@@ -494,7 +497,6 @@ u32 textApplyProjectionColour(s32 x, s32 y, u32 colour)
 	return result;
 }
 
-// This function does the sweeping highlight effect over text
 u32 textHighlightSweep(s32 x, s32 y, u32 colourarg)
 {
 	f32 f14;
@@ -560,9 +562,9 @@ u32 textHighlightSweep(s32 x, s32 y, u32 colourarg)
 			f12 = 3000.0f;
 		}
 
-		f14 = 1;
-		f18 = 100;
-		f16 = 44;
+		f14 = var8007fbac;
+		f18 = var8007fbb0;
+		f16 = var8007fbb4;
 
 		if (g_Blend.diagmode == 0) {
 			if (g_Blend.diagtimer < f12) {
@@ -648,7 +650,7 @@ u32 textHighlightSweep(s32 x, s32 y, u32 colourarg)
 			s32 weight = 60 * (0 - f0);
 			colour = colourBlend(g_Blend.wavecolour1 | (colour & 0xff), colour, weight);
 		} else {
-			s32 weight = 128 * f0;
+			s32 weight = var8007fbb8 * f0;
 			colour = colourBlend(g_Blend.wavecolour2 | (colour & 0xff), colour, weight);
 		}
 	}
@@ -671,7 +673,7 @@ Gfx *text0f154ecc(Gfx *gdl, u32 arg1, u32 arg2)
 
 void textMapCodeUnitToChar(char **text, struct fontchar **arg1, struct fontchar **arg2, struct fontchar *chars, u8 *prevchar);
 
-Gfx *textMakeVerts(Gfx *gdl, s32 *arg1, struct fontchar *curchar, struct fontchar *prevchar,
+Gfx *text0f154f38(Gfx *gdl, s32 *arg1, struct fontchar *curchar, struct fontchar *prevchar,
 		struct font *font, f32 widthscale, f32 heightscale, f32 x, f32 y)
 {
 	s32 tmp1;
@@ -768,8 +770,11 @@ Gfx *text0f1552d4(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
 	totalheight = 0;
 	prevchar = 'H';
 	relx = 0;
-
 	lineheight = chars['['].height + chars['['].baseline;
+
+	if (g_Jpn && lineheight < 14) {
+		lineheight = 14;
+	}
 
 	textMeasure(&textheight, &textwidth, text, chars, font, 0);
 
@@ -777,9 +782,13 @@ Gfx *text0f1552d4(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
 	fx = *ptr - (widthscale - 1.0f) * textwidth * 0.5f * hdir;
 	fy = y - (heightscale - 1.0f) * lineheight * 0.5f * vdir;
 
+	if (fx);
+	if (fy);
+
 	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, osVirtualToPhysical(var8007fb3c));
+
 	gDPLoadSync(gdl++);
 	gDPLoadTLUTCmd(gdl++, 6, 15);
 	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -792,20 +801,14 @@ Gfx *text0f1552d4(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
 			if (*text == ' ') {
 				prevchar = 'H';
 				text += 1;
-				relx = relx + 1 * 5;
+				relx = relx + 5;
 			} else if (*text == '\n') {
 				prevchar = 'H';
 				text += 1;
-
-				if (relx == 0) {
-					totalheight -= 1;
-					relx = 0;
-				} else {
-					totalheight += lineheight;
-					relx = 0;
-				}
+				totalheight += lineheight;
+				relx = 0;
 			} else if (*text < 0x80) {
-				gdl = textMakeVerts(gdl, &relx, &chars[*text - 0x21], &chars[prevchar - 0x21], font,
+				gdl = text0f154f38(gdl, &relx, &chars[*text - 0x21], &chars[prevchar - 0x21], font,
 						widthscale, heightscale, fx, fy);
 				prevchar = *text;
 				text += 1;
@@ -832,11 +835,12 @@ Gfx *text0f1552d4(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
 		}
 	}
 
+
 	return gdl;
 }
 
-Gfx *textRenderChars(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct fontchar *prevchar,
-		struct font *font, s32 savedx, s32 savedy, s32 width, s32 height, s32 vertoffset)
+Gfx *text0f15568c(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct fontchar *prevchar,
+		struct font *font, s32 savedx, s32 savedy, s32 width, s32 height, s32 arg10)
 {
 	s32 tmp;
 	s32 sp90;
@@ -846,7 +850,7 @@ Gfx *textRenderChars(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct 
 		xscale = 1;
 	}
 
-	sp90 = *y + vertoffset;
+	sp90 = *y + arg10;
 	tmp = font->kerning[prevchar->kerningindex * 13 + curchar->kerningindex];
 	*x -= (tmp - 1) * xscale;
 	width *= xscale;
@@ -862,8 +866,10 @@ Gfx *textRenderChars(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct 
 			gDPPipeSync(gdl++);
 
 			if (g_Blend.types) {
-				gdl = text0f154ecc(gdl, *x / g_ScaleX, *y + vertoffset);
+				gdl = text0f154ecc(gdl, *x / g_ScaleX, *y + arg10);
 			}
+
+			if (1);
 
 			if (*x + xscale * curchar->width <= savedx + width) {
 				if (savedy <= curchar->baseline + sp90) {
@@ -892,7 +898,7 @@ Gfx *textRenderChars(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct 
 									1024);
 
 							if (var8007fb9c) {
-								text0f153b6c(*y + vertoffset);
+								text0f153b6c(*y + arg10);
 
 								if (var8007fba0 >= *x / g_ScaleX && *x / g_ScaleX + curchar->width >= var8007fba0) {
 									var800a4634 = menugfxDrawPlane(var800a4634,
@@ -959,11 +965,11 @@ void textSetHasOutline(s32 arg0)
 
 void textSetOutlineColor(u32 colour)
 {
-	g_TextOutlineColour = colour;
+	g_TextOutlineColor = colour;
 }
 
 Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *chars, struct font *font,
-		s32 colour, s32 width, s32 height, s32 vertoffset, s32 lineheight)
+		s32 colour, s32 width, s32 height, s32 arg9, s32 lineheight)
 {
 	s32 savedx;
 	s32 savedy;
@@ -986,19 +992,18 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 		*x *= g_ScaleX;
 	}
 
-	//Render the outline of the text. Used when a menu item is focused.
 	if (g_TextHasOutline) {
 		alpha = (1.0f - menuGetSinOscFrac(40.0f)) * 100.0f + 150.0f;
 		newx = *x / g_ScaleX;
 		newy = *y;
-		tmpcolour = g_TextOutlineColour;
+		tmpcolour = g_TextOutlineColor;
 		colour2 = (colour & 0xffffff00) | (u32) alpha;
 
 		if (sbrd) {
 			tmpcolour = sbrd;
 		}
 
-		gdl = textRender(gdl, &newx, &newy, text, chars, font, colour2, tmpcolour, width, height, vertoffset, lineheight);
+		gdl = textRender(gdl, &newx, &newy, text, chars, font, colour2, tmpcolour, width, height, arg9, lineheight);
 	}
 
 	savedx = *x;
@@ -1007,6 +1012,10 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 
 	if (lineheight == 0) {
 		lineheight = chars['['].height + chars['['].baseline;
+	}
+
+	if (g_Jpn && lineheight < 14) {
+		lineheight = 14;
 	}
 
 	gDPPipeSync(gdl++);
@@ -1031,16 +1040,10 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 			} else if (*text == '\n') {
 				prevchar = 'H';
 				text++;
-
-				if (savedx == *x) {
-					*y -= 1;
-				} else {
-					*y += lineheight;
-				}
-
+				*y += lineheight;
 				*x = savedx;
 			} else if (*text < 0x80) {
-				gdl = textRenderChars(gdl, x, y, &chars[*text - 0x21], &chars[prevchar - 0x21], font, savedx, savedy, width, height, vertoffset);
+				gdl = text0f15568c(gdl, x, y, &chars[*text - 0x21], &chars[prevchar - 0x21], font, savedx, savedy, width, height, arg9);
 				prevchar = *text;
 				text++;
 			} else {
@@ -1059,7 +1062,7 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 				tmpchar.index = codepoint + 0x80;
 				tmpchar.pixeldata = (void *)langGetJpnCharPixels(codepoint);
 
-				gdl = textRenderChars(gdl, x, y, &tmpchar, &tmpchar, font, savedx, savedy, width, height, vertoffset);
+				gdl = text0f15568c(gdl, x, y, &tmpchar, &tmpchar, font, savedx, savedy, width, height, arg9);
 
 				text += 2;
 			}
@@ -1097,12 +1100,12 @@ Gfx *text0f1566cc(Gfx *gdl, u32 arg1, u32 arg2)
 }
 
 Gfx *textRenderChar(Gfx *gdl, s32 *x, s32 *y, struct fontchar *char1, struct fontchar *char2,
-		struct font *font, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 vertoffset)
+		struct font *font, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10)
 {
 	s32 tmp;
 	s32 sp38;
 
-	sp38 = *y + vertoffset;
+	sp38 = *y + arg10;
 
 	tmp = font->kerning[char2->kerningindex * 13 + char1->kerningindex];
 	*x -= (tmp - 1);
@@ -1115,7 +1118,7 @@ Gfx *textRenderChar(Gfx *gdl, s32 *x, s32 *y, struct fontchar *char1, struct fon
 			&& *x >= arg6
 			&& sp38 + char1->baseline + char1->height >= arg7) {
 		if (g_Blend.types) {
-			gdl = text0f1566cc(gdl, *x / g_ScaleX, *y + vertoffset);
+			gdl = text0f1566cc(gdl, *x / g_ScaleX, *y + arg10);
 		}
 
 		gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, char1->pixeldata);
@@ -1123,7 +1126,7 @@ Gfx *textRenderChar(Gfx *gdl, s32 *x, s32 *y, struct fontchar *char1, struct fon
 		gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, ((char1->height * 8 + 17) >> 1) - 1, 2048);
 		gDPPipeSync(gdl++);
 
-		gdl = text0f156a24(gdl, *x - 1, sp38 - 1, char1, arg6, arg7 - 1, arg8, arg9);
+		gdl = textRenderOutline(gdl, *x - 1, sp38 - 1, char1, arg6, arg7 - 1, arg8, arg9);
 	}
 
 	*x += char1->width;
@@ -1131,7 +1134,7 @@ Gfx *textRenderChar(Gfx *gdl, s32 *x, s32 *y, struct fontchar *char1, struct fon
 	return gdl;
 }
 
-Gfx *text0f156a24(Gfx *gdl, s32 x, s32 y, struct fontchar *char1, s32 arg4, s32 arg5, s32 arg6, s32 arg7)
+Gfx *textRenderOutline(Gfx *gdl, s32 x, s32 y, struct fontchar *char1, s32 arg4, s32 arg5, s32 arg6, s32 arg7)
 {
 	if (arg4 + arg6 >= char1->width + x + 2) {
 		if (y + char1->baseline >= arg5) {
@@ -1194,12 +1197,11 @@ Gfx *text0f156a24(Gfx *gdl, s32 x, s32 y, struct fontchar *char1, s32 arg4, s32 
 
 Gfx *textRender(Gfx *gdl, s32 *x, s32 *y, char *text,
 		struct fontchar *chars, struct font *font, u32 arg6, u32 colour,
-		s32 width, s32 height, u32 vertoffset, s32 lineheight)
+		s32 width, s32 height, u32 arg10, s32 lineheight)
 {
 	s32 savedx;
 	s32 savedy;
 	s32 prevchar;
-
 	*x *= g_ScaleX;
 
 	savedx = *x;
@@ -1210,12 +1212,15 @@ Gfx *textRender(Gfx *gdl, s32 *x, s32 *y, char *text,
 		lineheight = chars['['].height + chars['['].baseline;
 	}
 
+	if (g_Jpn && lineheight < 14) {
+		lineheight = 14;
+	}
+
 	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, osVirtualToPhysical(&var8007fb5c));
 	gDPLoadSync(gdl++);
 	gDPLoadTLUTCmd(gdl++, 6, 31);
-	// Use wrap
 	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c);
 	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, 1, 1, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -1246,7 +1251,7 @@ Gfx *textRender(Gfx *gdl, s32 *x, s32 *y, char *text,
 			text++;
 		} else if (*text < 0x80) {
 			gdl = textRenderChar(gdl, x, y, &chars[*text - 0x21], &chars[prevchar - 0x21],
-					font, savedx, savedy, width, height, vertoffset);
+					font, savedx, savedy, width, height, arg10);
 			prevchar = *text;
 			text++;
 		} else {
@@ -1265,7 +1270,7 @@ Gfx *textRender(Gfx *gdl, s32 *x, s32 *y, char *text,
 			sp74.index = codepoint + 0x80;
 			sp74.pixeldata = (void *)langGetJpnCharPixels(codepoint);
 
-			gdl = textRenderChar(gdl, x, y, &sp74, &sp74, font, savedx, savedy, width, height, vertoffset);
+			gdl = textRenderChar(gdl, x, y, &sp74, &sp74, font, savedx, savedy, width, height, arg10);
 
 			text += 2;
 		}
@@ -1295,9 +1300,12 @@ void textMeasure(s32 *textheight, s32 *textwidth, char *text, struct fontchar *f
 	longest = 0;
 	*textheight = 0;
 	*textwidth = 0;
-
 	if (lineheight == 0) {
 		lineheight = font1['['].baseline + font1['['].height;
+	}
+
+	if (g_Jpn && lineheight < 14) {
+		lineheight = 14;
 	}
 
 	if (text) {
@@ -1312,6 +1320,7 @@ void textMeasure(s32 *textheight, s32 *textwidth, char *text, struct fontchar *f
 				text++;
 			} else if (*text == '\n') {
 				// Line break
+
 				if (*textwidth > longest) {
 					longest = *textwidth;
 				}
@@ -1373,11 +1382,13 @@ void textWrap(s32 wrapwidth, char *src, char *dst, struct fontchar *chars, struc
 			src++;
 			wordlen++;
 
-			if (curword[wordlen - 1] >= 0x80) {
-				curword[wordlen] = *src;
-				v1 += chars[*src - 0x21].width;
-				src++;
-				wordlen++;
+			{
+				if (curword[wordlen - 1] >= 0x80) {
+					curword[wordlen] = *src;
+					v1 += chars[*src - 0x21].width;
+					src++;
+					wordlen++;
+				}
 			}
 		}
 
