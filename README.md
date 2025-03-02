@@ -3,6 +3,7 @@
 This is mostly to help me learn the Perfect Dark code and maybe make some cool changes. This is meant for NTSC 1.1/Final only.
 
 Changes include:
+* Press G to go into Gangsta Mode whenever you want (hold some guns sideways)
 * Male guards will select from all 42 available heads instead of just 8 like the original game
 * Far more bullet holes supported
 * Twice the smoke puffs supported

@@ -6167,7 +6167,7 @@ void bgunUpdateGangsta(struct hand *hand, s32 handnum, struct coord *arg2, struc
 	f32 tmp;
 	struct coord sp38 = {0, 0, 0};
 
-	if ((g_Vars.currentplayer->gunctrl.gangsta || g_Vars.currentplayer->wantsgangsta)
+	if ((g_Vars.currentplayer->gunctrl.gangsta || g_Vars.currentplayer->wantsgangsta) // Change it so gangsta happens either within min range OR when the player wants it
 			&& funcdef
 			&& (funcdef->type & 0xff) == INVENTORYFUNCTYPE_SHOOT
 			&& (hand->state == HANDSTATE_IDLE
@@ -6178,13 +6178,13 @@ void bgunUpdateGangsta(struct hand *hand, s32 handnum, struct coord *arg2, struc
 			// Rotate into gangsta position
 			hand->ispare1 += g_Vars.lvupdate240;
 
-			if (hand->ispare1 > TICKS(60)) {
+			//if (hand->ispare1 > TICKS(60)) {
 				hand->gangstarot += LVUPDATE60FREAL() / 30.0f;
 
 				if (hand->gangstarot > 1.0f) {
 					hand->gangstarot = 1.0f;
 				}
-			}
+			//}
 		} else {
 			// Already in gangsta position
 			hand->ispare1 = 0;
@@ -6192,11 +6192,13 @@ void bgunUpdateGangsta(struct hand *hand, s32 handnum, struct coord *arg2, struc
 	} else {
 		// At this point we don't want the gun to be in the gangsta position.
 		// However we don't want it to revert immediately, so a timer is used.
-		f32 inversespeed = 30.0f;
+		//f32 inversespeed = 30.0f;
+		f32 inversespeed = 20.0f;
 
 		if (hand->animmode == HANDANIMMODE_BUSY) {
 			// Revert faster
-			inversespeed = 15.0f;
+			//inversespeed = 15.0f;
+			inversespeed = 10.0f;
 		}
 
 		if (hand->gangstarot > 0.0f) {
@@ -6208,9 +6210,10 @@ void bgunUpdateGangsta(struct hand *hand, s32 handnum, struct coord *arg2, struc
 				hand->ispare1 = TICKS(244);
 			}
 
-			if (hand->ispare1 > TICKS(120)) {
+			// Remove the delay on going out of gangsta
+			//if (hand->ispare1 > TICKS(120)) {
 				revert = true;
-			}
+			//}
 
 			if (hand->animmode == HANDANIMMODE_BUSY && funcdef && (funcdef->type & 0xff) != INVENTORYFUNCTYPE_SHOOT) {
 				revert = true;
