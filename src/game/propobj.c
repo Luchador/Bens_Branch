@@ -727,7 +727,7 @@ bool func0f06797c(struct coord *coord, f32 arg1, s32 padnum)
 	return func0f0678f8(coord, &sp1c, padnum);
 }
 
-bool func0f0679ac(struct model *model, f32 *max, f32 *min, f32 arg3[2], f32 arg4[2])
+bool objTestModelHit(struct model *model, f32 *max, f32 *min, f32 arg3[2], f32 arg4[2])
 {
 	struct modelnode *node = model->definition->rootnode;
 	bool first = true;
@@ -763,8 +763,6 @@ bool func0f0679ac(struct model *model, f32 *max, f32 *min, f32 arg3[2], f32 arg4
 					first = false;
 				}
 			}
-		} else {
-			// empty
 		}
 
 		if (node->child) {
@@ -784,7 +782,7 @@ bool func0f0679ac(struct model *model, f32 *max, f32 *min, f32 arg3[2], f32 arg4
 	return !first;
 }
 
-void func0f067bc4(struct model *model, f32 *max, f32 *min, s32 axis)
+void objFindBBOnAxis(struct model *model, f32 *max, f32 *min, s32 axis)
 {
 	struct modelnode *node = model->definition->rootnode;
 	bool first = true;
@@ -839,8 +837,8 @@ void func0f067bc4(struct model *model, f32 *max, f32 *min, s32 axis)
 
 void func0f067d88(struct model *model, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4)
 {
-	func0f067bc4(model, arg1, arg2, 0);
-	func0f067bc4(model, arg3, arg4, 1);
+	objFindBBOnAxis(model, arg1, arg2, 0);
+	objFindBBOnAxis(model, arg3, arg4, 1);
 }
 
 bool modelGetScreenCoords2(struct model *model, f32 *x2, f32 *x1, f32 *y2, f32 *y1)
@@ -1394,9 +1392,7 @@ s32 door0f068c04(struct prop *prop, s32 *arg1, s32 *arg2)
 	struct prop *loopprop;
 	struct pad pad;
 
-#if VERSION < VERSION_PAL_BETA
 	static u32 debugdoors = 0;
-#endif
 
 	sibling = door;
 
@@ -1498,7 +1494,6 @@ s32 door0f068c04(struct prop *prop, s32 *arg1, s32 *arg2)
 	} else {
 		result = 255;
 	}
-
 	return result;
 }
 
@@ -1603,11 +1598,7 @@ void propCalculateShadeColour(struct prop *prop, u8 *nextcol, u16 floorcol)
 		nextcol[3] = 0xff;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (obj == NULL || (obj->flags & OBJFLAG_IGNOREROOMCOLOUR) == 0 || cheatIsActive(CHEAT_PERFECTDARKNESS))
-#else
-	if (obj == NULL || (obj->flags & OBJFLAG_IGNOREROOMCOLOUR) == 0)
-#endif
 	{
 		s32 shade = func0f068fc8(prop, 0);
 
@@ -1640,8 +1631,6 @@ void propCalculateShadeColour(struct prop *prop, u8 *nextcol, u16 floorcol)
 		tmp >>= 8;
 		nextcol[3] = (0xff - tmp) * 0.9f;
 	}
-
-	if (1);
 
 	// Figure out which colour component is the lowest, middle and highest
 	max = 0;
@@ -1963,15 +1952,9 @@ void objCreateOneDebris(struct defaultobj *obj, s32 partindex, struct prop *prop
 				projectile->speed.y = RANDOMFRAC() * 6.6666665f;
 				projectile->speed.z = dist.z * 3.3333333f;
 
-#if PAL
-				rot.x = RANDOMFRAC() * 0.058895487f - 0.029447744f;
-				rot.y = RANDOMFRAC() * 0.058895487f - 0.029447744f;
-				rot.z = RANDOMFRAC() * 0.058895487f - 0.029447744f;
-#else
 				rot.x = RANDOMFRAC() * 0.04907957f - 0.024539785f;
 				rot.y = RANDOMFRAC() * 0.04907957f - 0.024539785f;
 				rot.z = RANDOMFRAC() * 0.04907957f - 0.024539785f;
-#endif
 
 				mtx4LoadRotation(&rot, &projectile->mtx);
 			}
@@ -2185,11 +2168,7 @@ void func0f06a650(struct defaultobj *obj, struct coord *pos, Mtxf *arg2, RoomNum
 
 	bbox = modelFindBboxRodata(obj->model);
 
-#if VERSION >= VERSION_NTSC_1_0
 	room = cdFindFloorRoomYColourFlagsAtPos(pos, rooms, &sp3c, &obj->floorcol, NULL);
-#else
-	room = cdFindFloorRoomYColourFlagsAtPos(pos, rooms, &sp3c, &obj->floorcol);
-#endif
 
 	if (room > 0) {
 		newpos.x = pos->x;
@@ -2297,11 +2276,7 @@ void func0f06a730(struct defaultobj *obj, struct coord *arg1, Mtxf *mtx, RoomNum
 
 		func0f065e74(arg1, rooms, &pos2, rooms2);
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (cdFindFloorRoomYColourFlagsAtPos(&pos2, rooms2, &y, &obj->floorcol, NULL) > 0)
-#else
-		if (cdFindFloorRoomYColourFlagsAtPos(&pos2, rooms2, &y, &obj->floorcol) > 0)
-#endif
 		{
 			bool updated;
 			struct defaultobj *obj2 = objFindByPos(&pos2, rooms2);
@@ -2577,16 +2552,16 @@ f32 objGetRadius(struct defaultobj *obj)
 
 bool func0f06b39c(struct coord *arg0, struct coord *arg1, struct coord *arg2, f32 arg3)
 {
-	struct coord sp0c;
+	struct coord sp0c; // vector from arg0 to arg2
 	f32 value;
 
 	sp0c.x = arg2->x - arg0->x;
 	sp0c.y = arg2->y - arg0->y;
 	sp0c.z = arg2->z - arg0->z;
 
-	value = arg1->f[0] * sp0c.f[0] + arg1->f[1] * sp0c.f[1] + arg1->f[2] * sp0c.f[2];
+	value = arg1->f[0] * sp0c.f[0] + arg1->f[1] * sp0c.f[1] + arg1->f[2] * sp0c.f[2]; // dot product of arg1 and sp0c
 
-	if (value > 0) {
+	if (value > 0) { // sp0c points in the same general direction as arg1
 		f32 a = arg1->f[0] * arg1->f[0] + arg1->f[1] * arg1->f[1] + arg1->f[2] * arg1->f[2];
 		f32 b = sp0c.f[0] * sp0c.f[0] + sp0c.f[1] * sp0c.f[1] + sp0c.f[2] * sp0c.f[2];
 
@@ -21291,9 +21266,9 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 				f32 rotx = chopper->rotx;
 				f32 roty = chopper->roty;
 
-				rocket = weaponCreateProjectileFromWeaponNum(MODEL_CHRDYROCKETMIS, WEAPON_ROCKET, NULL);
+				rocket = weaponCreateProjectileFromWeaponNum(MODEL_CHRDYROCKETMIS, WEAPON_ROCKET, NULL); // dataDyne chopper fires a rocket
 
-				if (rocket) {
+				if (rocket) { 
 					mtx4LoadIdentity(&sp13c);
 					mtx4LoadXRotation(rotx, &spe0);
 					mtx4LoadYRotation(roty, &spa0);
@@ -21335,17 +21310,7 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 						CDTYPE_OBJS | CDTYPE_DOORS | CDTYPE_CHRS | CDTYPE_PATHBLOCKER| CDTYPE_BG,
 						GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
 				blocked = true;
-#if VERSION >= VERSION_JPN_FINAL
-				cdGetPos(&endpos, 24883, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_FINAL
-				cdGetPos(&endpos, 24873, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-				cdGetPos(&endpos, 24873, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
 				cdGetPos(&endpos, 24482, "propobj.c");
-#else
-				cdGetPos(&endpos, 24137, "propobj.c");
-#endif
 				obstacle = cdGetObstacleProp();
 			}
 

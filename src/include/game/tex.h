@@ -17,7 +17,7 @@ s32 tex0f0b33f8(s32 width, s32 height, s32 lod);
 s32 tex0f0b3468(s32 width, s32 height, s32 lod);
 s32 tex0f0b34d8(s32 width, s32 height, s32 lod);
 s32 tex0f0b3548(s32 width, s32 height, s32 lod);
-void texSetRenderMode(Gfx **gdlptr, s32 arg1, s32 numcycles, s32 arg3);
+void texSetRenderMode(Gfx **gdlptr, s32 rendermode, s32 numcycles, s32 arg3);
 void texLoadFromConfig(struct textureconfig *config);
 void texSelect(Gfx **gdl, struct textureconfig *tconfig, u32 arg2, s32 arg3, u32 ulst, bool arg5, struct texpool *pool);
 

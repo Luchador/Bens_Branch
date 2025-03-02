@@ -685,7 +685,6 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 
 	normalizeVector(&sp1b8, &sp1b8, 956, "wallhit.c");
 
-#if VERSION >= VERSION_NTSC_1_0
 	paintball = chrIsUsingPaintball(chr);
 
 	if (paintball && g_WallhitTexes[texnum].type != WALLHITTYPE_BLOOD) {
@@ -718,39 +717,6 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 	}
 
 	type = paintball ? WALLHITTYPE_PAINT : g_WallhitTexes[texnum].type;
-#else
-	switch (texnum) {
-	case WALLHITTEX_BULLET2:
-	case WALLHITTEX_PAINT:
-	case WALLHITTEX_BLOOD1:
-	case WALLHITTEX_BLOOD2:
-	case WALLHITTEX_BLOOD3:
-	case WALLHITTEX_BLOOD4:
-	case WALLHITTEX_BPGLASS1:
-	case WALLHITTEX_BPGLASS2:
-	case WALLHITTEX_BPGLASS3:
-	case WALLHITTEX_METAL:
-		break;
-	default:
-	case WALLHITTEX_SCORCH:
-	case WALLHITTEX_WOOD:
-		rotdeg = rngRandom() % 360;
-		break;
-	}
-
-	if (chrIsUsingPaintball(chr) && g_WallhitTexes[texnum].type != WALLHITTYPE_BLOOD) {
-		if (texnum != WALLHITTEX_SCORCH) {
-			width = 15.0f;
-			height = 15.0f;
-		}
-
-		rotdeg = rngRandom() % 360;
-		type = WALLHITTYPE_PAINT;
-		timermax = TICKS(10);
-	} else {
-		type = g_WallhitTexes[texnum].type;
-	}
-#endif
 
 	if (g_FreeWallhits != NULL) {
 		// Check if we are at a limit and need to free some old wallhits

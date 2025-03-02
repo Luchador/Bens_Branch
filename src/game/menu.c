@@ -2960,11 +2960,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 				curx = dialogleft;
 
 				for (i = 0; i < dialog->numcols; i++) {
-#if VERSION >= VERSION_NTSC_1_0
 					s32 cury = dialogtop + LINEHEIGHT + 1 + dialog->scroll;
-#else
-					s32 cury = dialogtop + LINEHEIGHT + 1;
-#endif
 					colindex = dialog->colstart + i;
 
 					for (j = 0; j < menu->cols[colindex].numrows; j++) {

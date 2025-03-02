@@ -23,7 +23,7 @@ void propDetach(struct prop *prop);
 Gfx *propRender(Gfx *gdl, struct prop *prop, bool xlupass);
 Gfx *propsRender(Gfx *gdl, RoomNum renderroomnum, s32 renderpass, RoomNum *roomnumsbyprop);
 void weaponPlayWhooshSound(s32 weaponnum, struct prop *prop);
-void func0f060bac(s32 weaponnum, struct prop *prop);
+void weaponPlayMeleeHitSound(s32 weaponnum, struct prop *prop);
 struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpos2d, struct coord *gundir2d, struct coord *gunpos3d, struct coord *gundir3d, u32 arg6, f32 distance, bool arg8);
 struct prop *propFindAimingAt(s32 handnum, bool isshooting, u32 context);
 void shotCreate(s32 handnum, bool arg1, bool dorandom, s32 numshots, bool arg4);

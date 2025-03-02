@@ -2563,7 +2563,6 @@ s32 chrTick(struct prop *prop)
 		needsupdate = false;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (!g_Vars.normmplayerisrunning && needsupdate) {
 		if (chr->actiontype == ACT_DEAD
 				|| (chr->actiontype == ACT_DRUGGEDKO && (chr->chrflags & CHRCFLAG_KEEPCORPSEKO) == 0)) {
@@ -2582,13 +2581,8 @@ s32 chrTick(struct prop *prop)
 			needsupdate = false;
 		}
 	}
-#endif
 
 	if (needsupdate) {
-#ifdef DEBUG
-		debug0f1199f0nb();
-#endif
-
 		prop->flags |= PROPFLAG_ONTHISSCREENTHISTICK | PROPFLAG_ONANYSCREENTHISTICK;
 		chr->chrflags |= CHRCFLAG_EVERONSCREEN;
 

@@ -22,5 +22,6 @@ extern struct textureconfig g_TcLightGlareConfigs[10];
 extern struct textureconfig g_TcSparkConfigs[1];
 extern struct textureconfig g_TcGeneralConfigs[56];
 extern struct textureconfig g_TcRadarConfigs[1];
+extern struct textureconfig g_TcStarsConfigs[1];
 
 #endif

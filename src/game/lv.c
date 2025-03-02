@@ -424,34 +424,6 @@ void lvReset(s32 stagenum)
 	modelmgrSetLvResetting(false);
 	schedResetArtifacts();
 	lvSetPaused(0);
-
-#if PIRACYCHECKS
-	{
-		u32 checksum = 0;
-		s32 *i = (s32 *)&lvGetSlowMotionType;
-		s32 *end = (s32 *)&lvTick;
-
-		while (i < end) {
-			checksum += *i;
-			i++;
-		}
-
-		if (checksum != CHECKSUM_PLACEHOLDER) {
-			// This is writing a file to the start of the EEPROM data.
-			// The file is PAKFILETYPE_TERMINATOR, which is used internally to
-			// mark the end of the usable space. This effectively deletes all
-			// save data on the game pak and makes it permanently unusable.
-			u32 address = 0;
-			u32 buffer[4];
-			buffer[0] = 0xbb8b80bd;
-			buffer[1] = 0xffffffff;
-			buffer[2] = 0x020f0100;
-			buffer[3] = 0xcd31100b;
-			osEepromLongWrite(&g_PiMesgQueue, address, (u8 *)&buffer, 0x10);
-			g_Paks[SAVEDEVICE_GAMEPAK].headercachecount = 0;
-		}
-	}
-#endif
 }
 
 void lvConfigureFade(u32 color, s16 num_frames)
@@ -479,11 +451,7 @@ Gfx *lvRenderFade(Gfx *gdl)
 		if (g_FadeDelay > 0) {
 			g_FadeDelay--;
 		} else {
-#if VERSION >= VERSION_PAL_BETA
-			g_FadeFrac += g_Vars.diffframe60freal / g_FadeNumFrames;
-#else
 			g_FadeFrac += g_Vars.diffframe60f / g_FadeNumFrames;
-#endif
 
 			if (g_FadeFrac >= 1) {
 				g_FadeFrac = -1;
@@ -614,69 +582,6 @@ bool lvUpdateTrackedProp(struct trackedprop *trackedprop, s32 index)
 
 	return true;
 }
-
-#ifdef DEBUG
-Gfx *lvRenderManPosIfEnabled(Gfx *gdl)
-{
-	char bufroom[16];
-	char bufx[16];
-	char bufy[16];
-	char bufz[16];
-	char bufdir[16];
-	s32 x;
-	s32 y;
-	s32 y2;
-
-	if (debugIsManPosEnabled()) {
-		f32 xfrac = g_Vars.currentplayer->bond2.unk00.x;
-		f32 zfrac = g_Vars.currentplayer->bond2.unk00.z;
-
-		char directions[][3] = {
-			{'n', '\0', '\0'},
-			{'n', 'e',  '\0'},
-			{'e', '\0', '\0'},
-			{'s', 'e',  '\0'},
-			{'s', '\0', '\0'},
-			{'s', 'w',  '\0'},
-			{'w', '\0', '\0'},
-			{'n', 'w',  '\0'},
-			{'n', '\0', '\0'},
-		};
-
-		s32 degrees = atan2f(-xfrac, zfrac) * 180.0f / M_PI;
-
-		sprintf(bufroom, "R=%d(%d)", g_Vars.currentplayer->prop->rooms[0], g_Vars.currentplayer->cam_room);
-		sprintf(bufx, "%s%sx %4.0f", "", "", g_Vars.currentplayer->prop->pos.x);
-		sprintf(bufy, "%s%sy %4.0f", "", "", g_Vars.currentplayer->prop->pos.y);
-		sprintf(bufz, "%s%sz %4.0f", "", "", g_Vars.currentplayer->prop->pos.z);
-		sprintf(bufdir, "%s %3d", &directions[(degrees + 22) / 45], degrees);
-
-		x = viGetViewLeft() + 17;
-		y = viGetViewTop() + 17;
-		y2 = y + 10;
-		gdl = text0f153628(gdl);
-		gdl = text0f153a34(gdl, 0, y - 1, viGetWidth(), y2 + 1, 0x00000064);
-
-		gdl = textRenderProjected(gdl, &x, &y, bufroom, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xffffffff, viGetWidth(), viGetHeight(), 0, 0);
-
-		x = viGetViewLeft() + 87;
-		gdl = textRenderProjected(gdl, &x, &y, bufx, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xffffffff, viGetWidth(), viGetHeight(), 0, 0);
-
-		x = viGetViewLeft() + 141;
-		gdl = textRenderProjected(gdl, &x, &y, bufy, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xffffffff, viGetWidth(), viGetHeight(), 0, 0);
-
-		x = viGetViewLeft() + 195;
-		gdl = textRenderProjected(gdl, &x, &y, bufz, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xffffffff, viGetWidth(), viGetHeight(), 0, 0);
-
-		x = viGetViewLeft() + 249;
-		gdl = textRenderProjected(gdl, &x, &y, bufdir, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xffffffff, viGetWidth(), viGetHeight(), 0, 0);
-
-		gdl = text0f153780(gdl);
-	}
-
-	return gdl;
-}
-#endif
 
 void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerpos, bool *activeslots, f32 *distances)
 {
@@ -2194,9 +2099,6 @@ void lvTick(void)
 		musicTick();
 	} else if (g_Vars.stagenum == STAGE_BOOTPAKMENU) {
 		setCurrentPlayerNum(0);
-#if VERSION >= VERSION_PAL_BETA
-		playerConfigureVi();
-#endif
 		menuTick();
 		musicTick();
 		langTick();
@@ -2266,11 +2168,6 @@ void lvTick(void)
 	}
 }
 
-const char var7f1b7738[] = "cutsceneframe: %d\n";
-const char var7f1b774c[] = "pos:%s%s %.2f %.2f %.2f\n";
-const char var7f1b7768[] = "";
-const char var7f1b776c[] = "";
-
 void lvTickPlayer(void)
 {
 	f32 xdiff;
@@ -2326,10 +2223,7 @@ void lvStop(void)
 		menuPlaySound(MENUSOUND_EXPLOSION);
 		g_FileState = FILESTATE_UNSELECTED;
 	}
-
-#if VERSION >= VERSION_NTSC_1_0
 	menuStop();
-#endif
 }
 
 void lvCheckPauseStateChanged(void)

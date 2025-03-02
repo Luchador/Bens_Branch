@@ -279,6 +279,7 @@ extern struct textureconfig *g_TexLightGlareConfigs;
 extern struct textureconfig *g_TexSparkConfigs;
 extern struct textureconfig *g_TexGeneralConfigs;
 extern struct textureconfig *g_TexRadarConfigs;
+extern struct textureconfig *g_TexStarsConfigs;
 extern struct scenariodata g_ScenarioData;
 extern u32 var800ac4cc;
 extern struct chrdata *g_MpAllChrPtrs[MAX_MPCHRS];

@@ -13,6 +13,7 @@
 #include "data.h"
 #include "types.h"
 
+
 s32 g_StarCount;
 s8 *g_StarPositions = NULL;
 f32 *g_StarData3;
@@ -20,6 +21,8 @@ s32 g_StarGridSize;
 s32 *g_StarPosIndexes;
 
 bool g_StarsBelowHorizon = false;
+
+struct textureconfig *g_StarConfig;
 
 void stars0f135c70(void)
 {
@@ -262,6 +265,7 @@ Gfx *starsRender(Gfx *gdl)
 	gdl = textSetPrimColour(gdl, 0xffffffff);
 
 	gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+	//texSelect(&gdl, &g_TexStarsConfigs[0], 2, 1, 2, 1, NULL);
 
 	for (i = 0; i < 6; i++) {
 		if (g_StarsBelowHorizon || i != 2) {

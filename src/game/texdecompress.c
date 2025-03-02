@@ -49,6 +49,7 @@ struct textureconfig *g_TexLightGlareConfigs;
 struct textureconfig *g_TexSparkConfigs;
 struct textureconfig *g_TexGeneralConfigs;
 struct textureconfig *g_TexRadarConfigs;
+struct textureconfig *g_TexStarsConfigs;
 
 u32 var800841b0 = 0x0006ddd0;
 u32 var800841b4 = 0x00000000;

@@ -28,6 +28,7 @@
 #include "game/splat.h"
 #include "game/wallhit.h"
 #include "game/mpstats.h"
+#include "game/debug.h"
 #include "bss.h"
 #include "lib/collision.h"
 #include "lib/lib_17ce0.h"
@@ -43,14 +44,9 @@
 s16 *g_RoomPropListChunkIndexes;
 struct roomproplistchunk *g_RoomPropListChunks;
 struct prop *g_InteractProp;
-s32 var8009cdac;
 
-#if VERSION >= VERSION_NTSC_1_0
-s32 var8009cdb0;
-u32 var8009cdb4;
-u32 var8009cdb8;
-u32 var8009cdbc;
-#endif
+s32 var8009cdac; // @Investigate what this is doing
+s32 var8009cdb0; // @Investigate what this is doing
 
 f32 g_AutoAimScale = 1;
 
@@ -468,7 +464,6 @@ void weaponPlayWhooshSound(s32 weaponnum, struct prop *prop)
 	if (soundnum != -1) {
 		if (prop == g_Vars.currentplayer->prop) {
 			struct sndstate *handle;
-#if VERSION >= VERSION_NTSC_1_0
 			u32 stack;
 			OSPri prevpri = osGetThreadPri(0);
 			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
@@ -480,13 +475,6 @@ void weaponPlayWhooshSound(s32 weaponnum, struct prop *prop)
 			}
 
 			osSetThreadPri(0, prevpri);
-#else
-			handle = sndStart(var80095200, soundnum, NULL, -1, -1, -1, -1, -1);
-
-			if (handle) {
-				audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
-			}
-#endif
 		} else {
 			psCreate(NULL, prop, soundnum, -1,
 					-1, 0, 0, PSTYPE_NONE, NULL, speed, NULL, -1, -1, -1, -1);
@@ -498,41 +486,32 @@ void weaponPlayWhooshSound(s32 weaponnum, struct prop *prop)
  * This is similar to the above but the sound numbers seem wrong...
  * Perhaps the function was from GE and not updated for PD.
  */
-void func0f060bac(s32 weaponnum, struct prop *prop)
+
+// Ben's comment: this is doing sound effects for when the player does a melee attack and hits the background or a non-character prop. It seems to work properly.
+// The confusion may be from some sounds in this bank using a different offset than most sounds.
+void weaponPlayMeleeHitSound(s32 weaponnum, struct prop *prop)
 {
 	s32 soundnum = -1;
 	f32 speed = 1;
 	struct sndstate *handle;
 
-	if (weaponnum == WEAPON_UNARMED) {
-		soundnum = SFX_THUD_808F;
+	if (weaponnum == WEAPON_UNARMED) { // Play one of two random punch sounds
+		soundnum = SFX_THUD_808F; 
 
 		if ((rngRandom() % 2) == 1) {
 			soundnum = SFX_THUD_8094;
 		}
-
 		speed = 1.0f - RANDOMFRAC() * 0.1f;
-	} else if (weaponnum == WEAPON_TRANQUILIZER) {
+	} else if (weaponnum == WEAPON_TRANQUILIZER) { // Play the lethal injection sound
 		soundnum = SFX_RELOAD_04FB;
 		speed = 2.78f;
 	} else {
-#if VERSION >= VERSION_NTSC_1_0
-		soundnum = SFX_HIT_METAL_8079;
+		soundnum = SFX_HIT_METAL_8079; // Combat knife melee hit
 		speed = 1.0f - RANDOMFRAC() * 0.1f;
-#else
-		soundnum = SFX_HIT_METAL_8079;
-
-		if (weaponnum != WEAPON_COMBATKNIFE && (rngRandom() % 2) == 1) {
-			soundnum = SFX_HATHIT_807C;
-		}
-
-		speed = 1.0f - RANDOMFRAC() * 0.1f;
-#endif
 	}
 
 	if (soundnum != -1) {
 		if (prop == g_Vars.currentplayer->prop) {
-#if VERSION >= VERSION_NTSC_1_0
 			OSPri prevpri = osGetThreadPri(0);
 			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 
@@ -543,13 +522,6 @@ void func0f060bac(s32 weaponnum, struct prop *prop)
 			}
 
 			osSetThreadPri(0, prevpri);
-#else
-			handle = sndStart(var80095200, soundnum, 0, -1, -1, -1, -1, -1);
-
-			if (handle) {
-				audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
-			}
-#endif
 		} else {
 			psCreate(NULL, prop, soundnum, -1, -1, 0, 0, PSTYPE_NONE, NULL, speed, NULL, -1, -1, -1, -1);
 		}
@@ -922,8 +894,9 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 			}
 		}
 
+		// Hit something with a melee attack
 		if (hitaprop || hitbg) {
-			func0f060bac(shotdata.gset.weaponnum, g_Vars.currentplayer->prop);
+			weaponPlayMeleeHitSound(shotdata.gset.weaponnum, g_Vars.currentplayer->prop);
 
 			if (shotdata.gset.weaponnum != WEAPON_UNARMED && shotdata.gset.weaponnum != WEAPON_TRANQUILIZER) {
 				if (hitaprop) {
@@ -1328,7 +1301,7 @@ void handInflictMeleeDamage(s32 handnum, struct gset *gset, bool arg2)
 					model = chr->model;
 				}
 
-				if (func0f0679ac(model, &distance, &sp110, spfc, spf4)
+				if (objTestModelHit(model, &distance, &sp110, spfc, spf4)
 						&& sp110 <= 0
 						&& distance >= -rangelimit) {
 					cdtypes = CDTYPE_OBJS | CDTYPE_DOORS | CDTYPE_PATHBLOCKER | CDTYPE_BG;
@@ -1844,10 +1817,8 @@ void propsTickPlayer(bool islastplayer)
 
 	g_Vars.hardfreeabletally = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
 	var8009cdac = 0;
 	var8009cdb0 = 0;
-#endif
 
 	if (islastplayer) {
 		g_Vars.prevupdateframe = g_Vars.updateframe;
@@ -1936,7 +1907,6 @@ void propsTickPlayer(bool islastplayer)
 	// Iterate all active props, decide if they are in the foreground or
 	// background and decide if they should be ticked.
 	done = false;
-	if (1);
 	for (prop = g_Vars.activeprops; !done; ) {
 		op = TICKOP_NONE;
 		savednext = prop->next;
@@ -2376,6 +2346,7 @@ void propsTickPadEffects(void)
 					up.y = -pad.up.y;
 					up.z = -pad.up.z;
 
+					// Used for the AF1 wreck in Crash Site, for example
 					if ((rngRandom() % 2048) <= 50) {
 						sparksCreate(rooms[0], NULL, &pad.pos, &up, &pad.up, SPARKTYPE_ENVIRONMENTAL1);
 						psCreate(NULL, NULL, psGetRandomSparkSound(), -1, -1, 0, 0, PSTYPE_NONE, &pad.pos, -1, rooms, -1, -1, -1, -1);
@@ -2397,7 +2368,9 @@ void propsTickPadEffects(void)
 					if (g_Vars.tickmode != TICKMODE_CUTSCENE || !objectiveIsAllComplete()) {
 						// @bug: This should be a break rather than a return.
 						// Because of this, subsequent pad effects won't tick.
-						return;
+						//return;
+						// Ben's comment: fixing this.
+						break;
 					}
 					// fall-through
 				case PADEFFECT_SPLASH:
@@ -2464,11 +2437,7 @@ void propsTestForPickup(void)
 			struct prop *prop = &g_Vars.props[*propnumptr];
 			s32 op = TICKOP_NONE;
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (prop->timetoregen <= 0 && prop->obj)
-#else
-			if (prop->timetoregen <= 0)
-#endif
 			{
 				switch (prop->type) {
 				case PROPTYPE_OBJ:
@@ -3393,11 +3362,6 @@ void propsDefragRoomProps(void)
 			}
 		}
 	}
-}
-
-void func0f0661fc(void)
-{
-	// empty
 }
 
 void propGetBbox(struct prop *prop, f32 *radius, f32 *ymax, f32 *ymin)

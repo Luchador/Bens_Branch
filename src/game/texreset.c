@@ -108,6 +108,7 @@ void texReset(void)
 		DEFINE_TCPTR(g_TexSparkConfigs, g_TcSparkConfigs),
 		DEFINE_TCPTR(g_TexGeneralConfigs, g_TcGeneralConfigs),
 		DEFINE_TCPTR(g_TexRadarConfigs, g_TcRadarConfigs),
+		DEFINE_TCPTR(g_TexStarsConfigs, g_TcStarsConfigs),
 	};
 	#undef DEFINE_TCPTR
 

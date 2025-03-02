@@ -322,3 +322,7 @@ struct textureconfig g_TcGeneralConfigs[] = {
 struct textureconfig g_TcRadarConfigs[] = {
 	/*0*/ { 0x003c, 64,  64,  1, G_IM_FMT_IA,   G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  },
 };
+
+struct textureconfig g_TcStarsConfigs[] = {
+	/*0*/ { 0x0c50, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
+};
