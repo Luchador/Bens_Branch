@@ -39,7 +39,7 @@ void mpSetRandomWeapons(u8 weapons[]);
 #endif
 void mpApplyWeaponSet(void);
 void mpSetWeaponSet(s32 weaponsetnum);
-void func0f1895e8(void);
+void mpApplyWeaponSetIfValid(void);
 s32 mpGetWeaponSet(void);
 bool mpIsPaused(void);
 void mpSetPaused(u8 mode);

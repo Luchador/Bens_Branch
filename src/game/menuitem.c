@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/camdraw.h"
 #include "game/game_006900.h"
 #include "game/objectives.h"
 #include "game/tex.h"
@@ -2751,9 +2750,6 @@ Gfx *menuitemCarouselRender(Gfx *gdl, struct menurendercontext *context)
 		context->item->handler(MENUOP_GETSELECTEDINDEX, context->item, &data);
 		headorbodynum += data.carousel.value;
 
-		gdl = func0f14f07c(gdl, headorbodynum,
-				context->x + context->width / 2 - 32, context->y,
-				context->x + context->width / 2 + 32, context->y + 64);
 	} else if ((context->item->param2 == 0x7c || context->item->param2 == 0x7d) && context->item->handler) {
 		union handlerdata data;
 		context->item->handler(MENUOP_GETSELECTEDINDEX, context->item, &data);

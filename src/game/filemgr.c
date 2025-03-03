@@ -2468,7 +2468,6 @@ MenuDialogHandlerResult pakChoosePakMenuDialog(s32 operation, struct menudialogd
 			}
 		}
 		joySetDefaultPfsPollInterval();
-		pak0f1189d0();
 		break;
 	}
 #endif
@@ -2482,9 +2481,7 @@ MenuItemHandlerResult filemgrOpenCopyFileMenuHandler(s32 operation, struct menui
 		g_Menus[g_MpPlayerNum].fm.filetypeplusone = item->param + 1;
 		filelistCreate(0, item->param);
 
-#if VERSION >= VERSION_NTSC_1_0
 		g_Menus[g_MpPlayerNum].fm.listnum = 0;
-#endif
 		g_Menus[g_MpPlayerNum].fm.isdeletingforsave = false;
 
 		menuPushDialog(&g_FilemgrCopyMenuDialog);
@@ -2702,10 +2699,6 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(s32 operation, struct me
 			x = renderdata->x + 62;
 			y++;
 
-#if VERSION == VERSION_JPN_FINAL
-			x -= 3;
-#endif
-
 			if (days > 0) {
 				// "Mission Time:"
 				sprintf(buffer, "%s %d:%02d:%02d", langGet(L_OPTIONS_405), days, hours, minutes);
@@ -2715,17 +2708,16 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(s32 operation, struct me
 			}
 
 			// Useless - textwidth and textheight are not used
-#if VERSION >= VERSION_JPN_FINAL
+/*#if VERSION >= VERSION_JPN_FINAL
 			textMeasure(&textheight, &textwidth, buffer, g_CharsHandelGothicSm, g_FontHandelGothicSm, -1);
-#else
+#else*/
 			textMeasure(&textheight, &textwidth, buffer, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
-#endif
 
 			gdl = textRenderProjected(gdl, &x, &y, buffer,
 					g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 
-			// Render seconds part of mission time (uses a smaller font)
-			y += (VERSION == VERSION_JPN_FINAL) ? 3 : 1;
+			// Render seconds part of mission time
+			y += 1;
 			x++;
 			sprintf(buffer, ".%02d", seconds);
 			gdl = textRenderProjected(gdl, &x, &y, buffer,
@@ -2792,11 +2784,6 @@ MenuDialogHandlerResult filemgrMainMenuDialog(s32 operation, struct menudialogde
 	case MENUOP_CLOSE:
 		func0f110bf8();
 		break;
-#if VERSION < VERSION_NTSC_1_0
-	case MENUOP_TICK:
-		filelistsTick();
-		break;
-#endif
 	}
 
 	return 0;
@@ -2807,12 +2794,6 @@ bool filemgrConsiderPushingFileSelectDialog(void)
 	if (g_Menus[g_MpPlayerNum].openinhibit == 0) {
 		g_Menus[g_MpPlayerNum].playernum = 0;
 		menuPushRootDialog(&g_FilemgrFileSelectMenuDialog, MENUROOT_FILEMGR);
-
-#if PAL
-		if (g_Vars.language >= 6) {
-			menuPushDialog(&g_ChooseLanguageMenuDialog);
-		}
-#endif
 
 		return true;
 	}
@@ -2995,11 +2976,7 @@ struct menuitem g_FilemgrFileInUseMenuItems[] = {
 		MENUITEMTYPE_LABEL,
 		0,
 		MENUITEMFLAG_LESSLEFTPADDING,
-#if VERSION >= VERSION_NTSC_1_0
 		(uintptr_t)&filemgrMenuTextFileInUseDescription,
-#else
-		0x54a0,
-#endif
 		0,
 		NULL,
 	},

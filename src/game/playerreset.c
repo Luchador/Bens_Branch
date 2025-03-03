@@ -128,14 +128,8 @@ void playerReset(void)
 	func0f18e558();
 
 	g_InCutscene = false;
-
-#if PAL
-	var8009e388pf = 0;
-#else
 	g_CutsceneFrameOverrun240 = 0;
-#endif
 
-	var80070738 = 0;
 	var8007073c = 0;
 
 	g_CurrentGeCreditsData = NULL;
@@ -152,7 +146,6 @@ void playerReset(void)
 	playerSetTickMode(TICKMODE_GE_FADEIN);
 
 	g_PlayerTriggerGeFadeIn = 0;
-	var80070748 = 0;
 	var8007074c = 0;
 
 	g_Vars.currentplayer->bondviewlevtime60 = 0;

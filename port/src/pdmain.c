@@ -5,7 +5,6 @@
 #include "lib/sched.h"
 #include "lib/vars.h"
 #include "constants.h"
-#include "game/camdraw.h"
 #include "game/cheats.h"
 #include "game/debug.h"
 #include "game/file.h"
@@ -247,9 +246,7 @@ void mainInit(void)
 	profileInit();
 	smokesInit();
 	mpInit();
-	pheadInit();
 	paksInit();
-	pheadInit2();
 	animsInit();
 	racesInit();
 	bodiesInit();
@@ -316,8 +313,6 @@ void mainLoop(void)
 		titleSetNextStage(g_StageNum);
 
 		if (g_StageNum < STAGE_TITLE) {
-			func0f01b148(0);
-
 			if (argFindByPrefix(1, "-hard")) {
 				lvSetDifficulty(argFindByPrefix(1, "-hard")[0] - '0');
 			}
@@ -533,7 +528,7 @@ void mainTick(void)
 				for (i = 0; i < PLAYERCOUNT(); i++) {
 					setCurrentPlayerNum(playermgrGetPlayerAtOrder(i));
 
-					if (!titleIsKeepingMode()) {
+					if (g_StageNum != STAGE_TEST_OLD || !titleIsKeepingMode()) {
 						viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 						viSetFovAspectAndSize(
 								g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,

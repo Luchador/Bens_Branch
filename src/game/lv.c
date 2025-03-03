@@ -10,7 +10,6 @@
 #include "game/bondhead.h"
 #include "game/bondmove.h"
 #include "game/bondview.h"
-#include "game/camdraw.h"
 #include "game/casing.h"
 #include "game/cheats.h"
 #include "game/chr.h"
@@ -406,19 +405,10 @@ void lvReset(s32 stagenum)
 		mpCalculateTeamIsOnlyAi();
 	}
 
-	paksReset();
 	sndResetCurMp3();
 
 	if (stagenum == STAGE_BOOTPAKMENU) {
 		bootmenuReset();
-	}
-
-	if (stagenum == STAGE_4MBMENU) {
-		fmbReset();
-	}
-
-	if (IS8MB()) {
-		pheadReset();
 	}
 
 	modelmgrSetLvResetting(false);
@@ -1067,7 +1057,6 @@ Gfx *lvRender(Gfx *gdl)
 
 				g_LockScreenTimer++;
 			} else if (g_Vars.currentplayer->gunctrl.loadall
-					&& var80075d60 == 2
 					&& g_Vars.currentplayer->cameramode != CAMERAMODE_THIRDPERSON
 					&& g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY
 					&& var8009dfc0 == 0) {
@@ -1086,10 +1075,7 @@ Gfx *lvRender(Gfx *gdl)
 					gdl = menuRender(gdl);
 				}
 			} else {
-				if (var80075d60 == 2) {
-					gdl = playerUpdateShootRot(gdl);
-				}
-
+				gdl = playerUpdateShootRot(gdl);
 				gdl = viRenderViewportEdges(gdl);
 				gdl = skyRender(gdl);
 				bgTick();
@@ -1149,7 +1135,7 @@ Gfx *lvRender(Gfx *gdl)
 					if (frIsInTraining()
 							&& g_Vars.currentplayer->lookingatprop.prop
 							&& bmoveIsInSightAimMode()) {
-						func0f1a0924(g_Vars.currentplayer->lookingatprop.prop);
+						func0f1a0924(g_Vars.currentplayer->lookingatprop.prop); // Ben's comment: I'm not sure if this function is ever called.
 					} else if (lvUpdateTrackedProp(&g_Vars.currentplayer->lookingatprop, -1) == 0) {
 						g_Vars.currentplayer->lookingatprop.prop = NULL;
 					}
@@ -1227,7 +1213,6 @@ Gfx *lvRender(Gfx *gdl)
 				propsTestForPickup();
 
 				gdl = bgRender(gdl);
-				chr0f028498(var80075d68 == 15);
 				gdl = propsRenderBeams(gdl);
 				gdl = shardsRender(gdl);
 				gdl = sparksRender(gdl);
@@ -1237,19 +1222,7 @@ Gfx *lvRender(Gfx *gdl)
 					gdl = nbombsRender(gdl);
 				}
 
-				if (var80075d60 == 2) {
-					gdl = playerRenderHud(gdl);
-
-#ifdef DEBUG
-					gdl = lvRenderManPosIfEnabled(gdl);
-#endif
-				} else {
-					gdl = boltbeamsRender(gdl);
-
-					if (g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
-						gdl = bgRenderArtifacts(gdl);
-					}
-				}
+				gdl = playerRenderHud(gdl);
 
 				if (g_DebugScreenshotRgb <= 0) {
 					static struct sndstate *g_CutsceneStaticAudioHandle = NULL;
@@ -2173,13 +2146,7 @@ void lvTickPlayer(void)
 	f32 xdiff;
 	f32 zdiff;
 
-	if (var80075d64 == 2) {
-		if (var80075d68 == 2) {
-			playerTick(true);
-		} else {
-			playerTick(false);
-		}
-	}
+	playerTick(true);
 
 	xdiff = g_Vars.currentplayer->prop->pos.x - g_Vars.currentplayer->bondprevpos.x;
 	zdiff = g_Vars.currentplayer->prop->pos.z - g_Vars.currentplayer->bondprevpos.z;

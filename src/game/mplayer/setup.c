@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/camdraw.h"
 #include "game/tex.h"
 #include "game/savebuffer.h"
 #include "game/menu.h"
@@ -2103,27 +2102,22 @@ MenuItemHandlerResult mpCharacterHeadMenuHandler(s32 operation, struct menuitem 
 		data->carousel.value = mpGetNumHeads2();
 		break;
 	case MENUOP_11:
-#if VERSION >= VERSION_PAL_BETA
-		diffframe = g_Menus[g_MpPlayerNum].menumodel.curroty + 0.01f * g_Vars.diffframe60freal;
-#else
 		diffframe = g_Menus[g_MpPlayerNum].menumodel.curroty + 0.01f * g_Vars.diffframe60f;
-#endif
-
 		g_Menus[g_MpPlayerNum].menumodel.newroty = diffframe;
 		g_Menus[g_MpPlayerNum].menumodel.curroty = diffframe;
 
-		if (mpheadnum < mpGetNumHeads2()) {
-			headnum = mpGetHeadId(mpheadnum);
+		//if (mpheadnum < mpGetNumHeads2()) { // Always true
+		headnum = mpGetHeadId(mpheadnum);
 
-			g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_FILENUM(g_HeadsAndBodies[headnum].filenum);
-			g_Menus[g_MpPlayerNum].menumodel.isperfecthead = false;
-		} else {
+		g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_FILENUM(g_HeadsAndBodies[headnum].filenum);
+		g_Menus[g_MpPlayerNum].menumodel.isperfecthead = false;
+		/*} else {
 			headnum = mpGetBeauHeadId(func0f14a9f8(mpheadnum - mpGetNumHeads2()));
 
 			g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_FILENUM(g_HeadsAndBodies[headnum].filenum);
 			g_Menus[g_MpPlayerNum].menumodel.isperfecthead = true;
 			g_Menus[g_MpPlayerNum].menumodel.perfectheadnum = mpheadnum - mpGetNumHeads2();
-		}
+		}*/
 
 		g_Menus[g_MpPlayerNum].menumodel.zoomtimer60 = 0;
 		g_Menus[g_MpPlayerNum].menumodel.partvisibility = visibility;
@@ -2139,9 +2133,7 @@ MenuItemHandlerResult mpCharacterHeadMenuHandler(s32 operation, struct menuitem 
 		break;
 	case MENUOP_SET:
 	case MENUOP_FOCUS:
-#if VERSION >= VERSION_NTSC_1_0
 		g_Menus[g_MpPlayerNum].menumodel.loaddelay = 3;
-#endif
 
 		mpGetNumHeads2();
 

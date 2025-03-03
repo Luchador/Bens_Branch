@@ -11667,7 +11667,7 @@ u32 g_TvCmdlist1D[] = {
 	tvcmd_restart(),
 };
 
-u32 var8006a4dc[] = {
+u32 g_TvCmdlist09[] = {
 	tvcmd_settexture(52),
 	tvcmd_setcolour(0xffffffff, 1),
 	tvcmd_pause(5),
@@ -11680,7 +11680,7 @@ u32 var8006a4dc[] = {
 	tvcmd_restart(),
 };
 
-u32 var8006a52c[] = {
+u32 g_TvCmdlist0A[] = {
 	tvcmd_settexture(79),
 	tvcmd_setcolour(0xffffffff, 1),
 	tvcmd_pause(5),
@@ -11693,7 +11693,7 @@ u32 var8006a52c[] = {
 	tvcmd_restart(),
 };
 
-u32 var8006a57c[] = {
+u32 g_TvCmdlist0B[] = {
 	tvcmd_settexture(56),
 	tvcmd_setcolour(0xffffffff, 1),
 	tvcmd_pause(10),
@@ -11706,7 +11706,7 @@ u32 var8006a57c[] = {
 	tvcmd_restart(),
 };
 
-u32 var8006a5cc[] = {
+u32 g_TvCmdlist0C[] = {
 	tvcmd_settexture(60),
 	tvcmd_setcolour(0xffffffff, 1),
 	tvcmd_pause(15),
@@ -11715,7 +11715,7 @@ u32 var8006a5cc[] = {
 	tvcmd_restart(),
 };
 
-u32 var8006a5fc[] = {
+u32 g_TvCmdlist0D[] = {
 	tvcmd_settexture(62),
 	tvcmd_setcolour(0xffffffff, 1),
 	tvcmd_pause(10),
@@ -11730,7 +11730,7 @@ u32 var8006a5fc[] = {
 	tvcmd_restart(),
 };
 
-u32 var8006a65c[] = {
+u32 g_TvCmdlist0E[] = {
 	tvcmd_settexture(67),
 	tvcmd_setcolour(0xffffffff, 1),
 	tvcmd_pause(10),
@@ -11917,7 +11917,7 @@ u32 g_TvCmdlist14[] = {
 	// flow on to next cmdlist
 };
 
-u32 var8006aaa0[] = {
+u32 g_TvCmdlist1E[] = {
 	tvcmd_scaleabsx(1024, 0),
 	tvcmd_scaleabsy(1024, 0),
 	tvcmd_pause(1),
@@ -11927,7 +11927,7 @@ u32 var8006aaa0[] = {
 	tvcmd_restart(),
 };
 
-u32 var8006aae4[] = {
+u32 g_TvCmdlist1F[] = {
 	tvcmd_settexture(0),
 	tvcmd_scrollrelx(1024, 20),
 	tvcmd_pause(20),

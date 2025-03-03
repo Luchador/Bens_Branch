@@ -276,57 +276,10 @@ bool invHasSingleWeaponOrProp(s32 weaponnum)
 	return false;
 }
 
-s32 invAddOneIfCantHaveSlayer(s32 index)
-{
-	/*if (mainGetStageNum());
-
-	if (mainGetStageNum() != STAGE_ATTACKSHIP
-			&& mainGetStageNum() != STAGE_SKEDARRUINS
-			&& index >= WEAPON_SLAYER) {
-		index++;
-	}*/
-	return index++;
-}
-
-s32 currentStageForbidsSlayer(void)
-{
-	/*bool value = VERSION >= VERSION_JPN_FINAL ? 1 : 0;
-
-	if (mainGetStageNum() != STAGE_ATTACKSHIP && mainGetStageNum() != STAGE_SKEDARRUINS) {
-		value++;
-	}*/
-
-	return 0;
-}
-
-bool invCanHaveAllGunsWeapon(s32 weaponnum)
-{
-	bool canhave = true;
-
-#if (VERSION == VERSION_JPN_FINAL) && defined(PLATFORM_N64)
-	if (weaponnum == WEAPON_COMBATKNIFE) {
-		canhave = false;
-	}
-#endif
-
-	if (weaponnum == WEAPON_SLAYER) {
-		canhave = false;
-	}
-
-	// @bug: The stage conditions need an OR. This condition can never pass.
-	if ((mainGetStageNum() == STAGE_ATTACKSHIP && mainGetStageNum() == STAGE_SKEDARRUINS)
-			&& weaponnum == WEAPON_SLAYER) {
-		canhave = true;
-	}
-
-	return canhave;
-}
-
 bool invHasSingleWeaponIncAllGuns(s32 weaponnum)
 {
 	if (g_Vars.currentplayer->equipallguns &&
-			weaponnum && weaponnum <= WEAPON_PSYCHOSISGUN &&
-			invCanHaveAllGunsWeapon(weaponnum)) {
+			weaponnum && weaponnum <= WEAPON_PSYCHOSISGUN) {
 		return true;
 	}
 
@@ -342,8 +295,7 @@ bool invHasDoubleWeaponIncAllGuns(s32 weapon1, s32 weapon2)
 	if (g_Vars.currentplayer->equipallguns &&
 			weapon1 <= WEAPON_PSYCHOSISGUN &&
 			weapon1 == weapon2 &&
-			weaponHasFlag(weapon1, WEAPONFLAG_DUALWIELD) &&
-			invCanHaveAllGunsWeapon(weapon1)) {
+			weaponHasFlag(weapon1, WEAPONFLAG_DUALWIELD)) {
 		return true;
 	}
 
@@ -358,8 +310,7 @@ bool invGiveSingleWeapon(s32 weaponnum)
 		struct invitem *item;
 
 		if (g_Vars.currentplayer->equipallguns &&
-				weaponnum <= WEAPON_PSYCHOSISGUN &&
-				invCanHaveAllGunsWeapon(weaponnum)) {
+				weaponnum <= WEAPON_PSYCHOSISGUN) {
 			return false;
 		}
 
@@ -597,7 +548,7 @@ void invChooseCycleForwardWeapon(s32 *ptr1, s32 *ptr2, bool arg2)
 					candidate = (candidate + 1) % NUM_CYCLEABLE_WEAPONS;
 				}
 
-				if ((!arg2 || bgun0f0a1a10(candidate)) && invCanHaveAllGunsWeapon(candidate)) {
+				if ((!arg2 || bgun0f0a1a10(candidate))) {
 					weapon1 = candidate;
 					weapon2 = WEAPON_NONE;
 					break;
@@ -664,7 +615,7 @@ void invChooseCycleBackWeapon(s32 *ptr1, s32 *ptr2, bool arg2)
 				if (candidate == WEAPON_NONE) {
 					candidate = (candidate + NUM_CYCLEABLE_WEAPONS - 1) % NUM_CYCLEABLE_WEAPONS;
 				}
-			} while ((arg2 && !bgun0f0a1a10(candidate)) || !invCanHaveAllGunsWeapon(candidate));
+			} while ((arg2 && !bgun0f0a1a10(candidate)));
 
 			if (weaponHasFlag(candidate, WEAPONFLAG_DUALWIELD)) {
 				weapon1 = candidate;
@@ -813,7 +764,7 @@ s32 invGetCount(void)
 	struct invitem *item;
 
 	if (g_Vars.currentplayer->equipallguns) {
-		numitems = WEAPON_PSYCHOSISGUN - currentStageForbidsSlayer();
+		numitems = WEAPON_PSYCHOSISGUN;
 	}
 
 	item = g_Vars.currentplayer->weapons;
@@ -859,11 +810,11 @@ struct invitem *invGetItemByIndex(s32 index)
 	struct invitem *item;
 
 	if (g_Vars.currentplayer->equipallguns) {
-		if (index < WEAPON_PSYCHOSISGUN - currentStageForbidsSlayer()) {
+		if (index < WEAPON_PSYCHOSISGUN) {
 			return NULL;
 		}
 
-		index += currentStageForbidsSlayer() - WEAPON_PSYCHOSISGUN;
+		index += 0 - WEAPON_PSYCHOSISGUN;
 	}
 
 	item = g_Vars.currentplayer->weapons;
@@ -959,9 +910,9 @@ s32 invGetWeaponNumByIndex(s32 index)
 			return item->type_weap.weapon1;
 		}
 	} else if (g_Vars.currentplayer->equipallguns) {
-		if (index < WEAPON_PSYCHOSISGUN - currentStageForbidsSlayer()) {
+		if (index < WEAPON_PSYCHOSISGUN) {
 			index++;
-			return invAddOneIfCantHaveSlayer(index);
+			return index;
 		}
 	}
 
@@ -996,9 +947,9 @@ u16 invGetNameIdByIndex(s32 index)
 		}
 	} else {
 		if (g_Vars.currentplayer->equipallguns) {
-			if (index < WEAPON_PSYCHOSISGUN - currentStageForbidsSlayer()) {
+			if (index < WEAPON_PSYCHOSISGUN) {
 				index++;
-				return bgunGetNameId(invAddOneIfCantHaveSlayer(index));
+				return bgunGetNameId(index);
 			}
 		}
 	}
@@ -1042,9 +993,9 @@ char *invGetShortNameByIndex(s32 index)
 #endif
 		}
 	} else if (g_Vars.currentplayer->equipallguns) {
-		if (index < WEAPON_PSYCHOSISGUN - currentStageForbidsSlayer()) {
+		if (index < WEAPON_PSYCHOSISGUN) {
 			index++;
-			return bgunGetShortName(invAddOneIfCantHaveSlayer(index));
+			return bgunGetShortName(index);
 		}
 	}
 

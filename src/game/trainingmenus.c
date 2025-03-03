@@ -1911,82 +1911,15 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(s32 operation, struct menudi
 		{
 			s32 weaponnum = dtGetWeaponByDeviceIndex(dtGetIndexBySlot(g_DtSlot));
 			u16 unused[] = {64250, 38500, 25650, 25700, 12950};
-			func0f1a1ac0();
+			dtInit();
 			g_Menus[g_MpPlayerNum].training.weaponnum = weaponnum;
 			func0f105948(weaponnum);
-
-#ifdef PLATFORM_N64
-#if VERSION == VERSION_PAL_FINAL
-			if (g_ViRes == VIRES_HI) {
-				if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-					g_Menus[g_MpPlayerNum].menumodel.newposx = 84;
-					g_Menus[g_MpPlayerNum].menumodel.curposx = 84;
-				} else {
-					g_Menus[g_MpPlayerNum].menumodel.newposx = 104;
-					g_Menus[g_MpPlayerNum].menumodel.curposx = 104;
-				}
-			} else {
-				if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-					g_Menus[g_MpPlayerNum].menumodel.newposx = 64;
-					g_Menus[g_MpPlayerNum].menumodel.curposx = 64;
-				} else {
-					g_Menus[g_MpPlayerNum].menumodel.newposx = 84;
-					g_Menus[g_MpPlayerNum].menumodel.curposx = 84;
-				}
-			}
-#elif VERSION == VERSION_PAL_BETA
-			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-				g_Menus[g_MpPlayerNum].menumodel.newposx = 64;
-				g_Menus[g_MpPlayerNum].menumodel.curposx = 64;
-			} else {
-				g_Menus[g_MpPlayerNum].menumodel.newposx = 84;
-				g_Menus[g_MpPlayerNum].menumodel.curposx = 84;
-			}
-#else
-			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-				g_Menus[g_MpPlayerNum].menumodel.newposx = 70;
-				g_Menus[g_MpPlayerNum].menumodel.curposx = 70;
-			} else {
-				g_Menus[g_MpPlayerNum].menumodel.newposx = 90;
-				g_Menus[g_MpPlayerNum].menumodel.curposx = 90;
-			}
-#endif
-#endif
-
 			g_Menus[g_MpPlayerNum].menumodel.newscale /= 2.5f;
 		}
 		break;
 	case MENUOP_CLOSE:
 		break;
 	case MENUOP_TICK:
-#ifndef PLATFORM_N64
-#if VERSION == VERSION_PAL_FINAL
-		if (g_ViRes == VIRES_HI) {
-			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-				g_Menus[g_MpPlayerNum].menumodel.newposx = 84;
-				g_Menus[g_MpPlayerNum].menumodel.curposx = 84;
-			} else {
-				g_Menus[g_MpPlayerNum].menumodel.newposx = 104;
-				g_Menus[g_MpPlayerNum].menumodel.curposx = 104;
-			}
-		} else {
-			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-				g_Menus[g_MpPlayerNum].menumodel.newposx = 64;
-				g_Menus[g_MpPlayerNum].menumodel.curposx = 64;
-			} else {
-				g_Menus[g_MpPlayerNum].menumodel.newposx = 84;
-				g_Menus[g_MpPlayerNum].menumodel.curposx = 84;
-			}
-		}
-#elif VERSION == VERSION_PAL_BETA
-		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-			g_Menus[g_MpPlayerNum].menumodel.newposx = 64;
-			g_Menus[g_MpPlayerNum].menumodel.curposx = 64;
-		} else {
-			g_Menus[g_MpPlayerNum].menumodel.newposx = 84;
-			g_Menus[g_MpPlayerNum].menumodel.curposx = 84;
-		}
-#else
 		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
 			g_Menus[g_MpPlayerNum].menumodel.newposx = 70;
 			g_Menus[g_MpPlayerNum].menumodel.curposx = 70;
@@ -1994,11 +1927,9 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(s32 operation, struct menudi
 			g_Menus[g_MpPlayerNum].menumodel.newposx = 90;
 			g_Menus[g_MpPlayerNum].menumodel.curposx = 90;
 		}
-#endif
 
 		g_Menus[g_MpPlayerNum].menumodel.newposx *= ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO) / videoGetAspect();
 		g_Menus[g_MpPlayerNum].menumodel.curposx = g_Menus[g_MpPlayerNum].menumodel.newposx;
-#endif
 
 		if (g_Menus[g_MpPlayerNum].curdialog && g_Menus[g_MpPlayerNum].curdialog->definition == dialogdef) {
 			if (dtGetWeaponByDeviceIndex(dtGetIndexBySlot(g_DtSlot)) == WEAPON_DISGUISE41) {
@@ -2041,7 +1972,7 @@ char *dtMenuTextCancelOrAbort(struct menuitem *item)
 char *dtMenuTextTimeTakenValue(struct menuitem *item)
 {
 	struct trainingdata *data = dtGetData();
-	f32 secs = data->timetaken / (PAL ? 50.0f : 60.0f);
+	f32 secs = data->timetaken / 60.0f;
 
 	if (secs >= 60.0f) {
 		s32 mins = 0;

@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "constants.h"
-#include "game/camdraw.h"
 #include "game/cheats.h"
 #include "game/lang.h"
 #include "game/player.h"

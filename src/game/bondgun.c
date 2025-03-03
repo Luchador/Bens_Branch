@@ -7446,23 +7446,7 @@ void bgun0f0a5550(s32 handnum)
 					renderdata.unk00 = &sp84;
 					renderdata.unk10 = player->hands[HAND_RIGHT].unk0dd8;
 
-#if VERSION >= VERSION_PAL_BETA
-					var8005efd8_2 = true;
-
-					if (a3) {
-						var8005efb0_2 = true;
-					}
-
 					modelSetMatricesWithAnim(&renderdata, &hand->gunmodel);
-
-					var8005efd8_2 = false;
-
-					if (a3) {
-						var8005efb0_2 = false;
-					}
-#else
-					modelSetMatricesWithAnim(&renderdata, &hand->gunmodel);
-#endif
 
 					player->hands[HAND_RIGHT].unk0dd4 = 1;
 
@@ -7478,23 +7462,7 @@ void bgun0f0a5550(s32 handnum)
 					spc4++;
 				}
 			} else {
-#if VERSION >= VERSION_PAL_BETA
-				var8005efd8_2 = true;
-
-				if (a3) {
-					var8005efb0_2 = true;
-				}
-
 				modelSetMatricesWithAnim(&renderdata, &hand->gunmodel);
-
-				var8005efd8_2 = false;
-
-				if (a3) {
-					var8005efb0_2 = false;
-				}
-#else
-				modelSetMatricesWithAnim(&renderdata, &hand->gunmodel);
-#endif
 			}
 
 			g_ModelJointPositionedFunc = 0;

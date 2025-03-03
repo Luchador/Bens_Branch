@@ -47,35 +47,19 @@ s32 g_HudPaddingX = 24;
 s32 g_NumHudMessages = 0;
 struct hudmessage *g_HudMessages = NULL;
 
-#if VERSION < VERSION_NTSC_1_0
-struct sndstate *var800736b0nb = NULL;
-#endif
-
 struct hudmsgtype g_HudmsgTypes[] = {
 	/* 0*/ { 1, 1, 0, &g_CharsHandelGothicSm, &g_FontHandelGothicSm, 0x00ff0000, 0x000000a0, HUDMSGALIGN_LEFT,    HUDMSGALIGN_BOTTOM,        0, 0, 80  },
 	/* 1*/ { 0, 1, 0, &g_CharsHandelGothicMd, &g_FontHandelGothicMd, 0x00ff0000, 0x000000a0, HUDMSGALIGN_XMIDDLE, HUDMSGALIGN_YMIDDLE,       0, 0, 120 },
-#if VERSION == VERSION_JPN_FINAL
-	/* 2*/ { 0, 0, 1, &g_CharsHandelGothicMd, &g_FontHandelGothicMd, 0xff999900, 0xffffffa0, HUDMSGALIGN_XMIDDLE, HUDMSGALIGN_YMIDDLE,       0, 0, 120 },
-#else
 	/* 2*/ { 0, 0, 1, &g_CharsHandelGothicMd, &g_FontHandelGothicMd, 0xff000000, 0xffffffa0, HUDMSGALIGN_XMIDDLE, HUDMSGALIGN_YMIDDLE,       0, 0, 120 },
-#endif
 	/* 3*/ { 0, 1, 0, &g_CharsHandelGothicMd, &g_FontHandelGothicMd, 0x00ff0000, 0x000000a0, HUDMSGALIGN_LEFT,    HUDMSGALIGN_BOTTOM,        0, 0, 120 },
 	/* 4*/ { 1, 1, 0, &g_CharsHandelGothicSm, &g_FontHandelGothicSm, 0x00ffc000, 0x000000a0, HUDMSGALIGN_LEFT,    HUDMSGALIGN_BOTTOM,        0, 0, 40  },
 	/* 5*/ { 0, 0, 0, &g_CharsHandelGothicMd, &g_FontHandelGothicMd, 0x00ff0000, 0x000000a0, HUDMSGALIGN_LEFT,    HUDMSGALIGN_TOP,           0, 0, 120 },
 	/* 6*/ { 1, 0, 0, &g_CharsHandelGothicSm, &g_FontHandelGothicSm, 0x00ff0000, 0x000000a0, HUDMSGALIGN_XMIDDLE, HUDMSGALIGN_TOP,           0, 0, 120 },
 	/* 7*/ { 1, 1, 0, &g_CharsHandelGothicSm, &g_FontHandelGothicSm, 0x00ff0000, 0x000000a0, HUDMSGALIGN_XMIDDLE, HUDMSGALIGN_TOP,           0, 0, -1  },
 	/* 8*/ { 1, 1, 0, &g_CharsHandelGothicSm, &g_FontHandelGothicSm, 0x00ffc000, 0x000000a0, HUDMSGALIGN_XMIDDLE, HUDMSGALIGN_BOTTOM,        0, 0, 500 },
-#if VERSION == VERSION_JPN_FINAL
-	/* 9*/ { 1, 1, 0, &g_CharsHandelGothicSm, &g_FontHandelGothicSm, 0x00ff0000, 0x000000a0, HUDMSGALIGN_LEFT,    HUDMSGALIGN_BOTTOM,        0, 0, 120 },
-#else
 	/* 9*/ { 1, 1, 0, &g_CharsHandelGothicXs, &g_FontHandelGothicXs, 0x00ff0000, 0x000000a0, HUDMSGALIGN_LEFT,    HUDMSGALIGN_BOTTOM,        0, 0, 120 },
-#endif
 	/*10*/ { 1, 1, 0, &g_CharsHandelGothicSm, &g_FontHandelGothicSm, 0x00ff0000, 0x000000a0, HUDMSGALIGN_LEFT,    HUDMSGALIGN_BOTTOM,        0, 0, 240 },
-#if VERSION >= VERSION_NTSC_1_0
 	/*11*/ { 0, 0, 0, &g_CharsHandelGothicSm, &g_FontHandelGothicSm, 0x00ff0000, 0x000000a0, HUDMSGALIGN_XMIDDLE, HUDMSGALIGN_BELOWVIEWPORT, 0, 0, 120 },
-#else
-	/*11*/ { 1, 0, 0, &g_CharsHandelGothicSm, &g_FontHandelGothicSm, 0x00ff0000, 0x000000a0, HUDMSGALIGN_XMIDDLE, HUDMSGALIGN_BELOWVIEWPORT, 0, 0, 120 },
-#endif
 };
 
 u8 hudmsgsAreActive(void)
@@ -90,7 +74,6 @@ s32 hudmsgIsZoomRangeVisible(void)
 				|| !g_Vars.mplayerisrunning
 				|| g_Vars.coopplayernum >= 0
 				|| g_Vars.antiplayernum >= 0)
-		&& var80075d60 == 2
 		&& currentPlayerGetSight() == SIGHT_ZOOM
 		&& g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY
 		&& g_Vars.currentplayer->cameramode != CAMERAMODE_THIRDPERSON;
@@ -139,22 +122,22 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha)
 	timery -= g_HudPaddingY;
 	timery -= 8;
 
-	is4mb = IS4MB();
+	is4mb = false;
 
 	// @bug: There is no check for playercount >= 2 in the next two statements.
 	// Because of this, in 1 player the timer is drawn out of place when the
 	// screen split option is vertical and either the countdown timer is visible
 	// or a zoomable weapon is in use.
-	if ((is4mb || optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) && countdownTimerIsVisible()) {
+	if ((optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) && countdownTimerIsVisible()) {
 		timery -= 8;
 	}
 
-	if ((IS4MB() || optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || playercount >= 3) && hudmsgIsZoomRangeVisible()) {
+	if ((optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || playercount >= 3) && hudmsgIsZoomRangeVisible()) {
 		timery -= 8;
 	}
 
 	if (playercount == 2) {
-		if (IS4MB() || (optionsGetScreenSplit() != SCREENSPLIT_VERTICAL && playernum == 0)) {
+		if ((optionsGetScreenSplit() != SCREENSPLIT_VERTICAL && playernum == 0)) {
 			timery += 10;
 		} else {
 			timery += 2;
@@ -174,7 +157,7 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha)
 	// If this is a second player with their viewport on the right side of the
 	// screen, move the timer left a bit as the safe zone doesn't need to be
 	// considered.
-	if (playercount == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || IS4MB()) && playernum == 1) {
+	if (playercount == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) && playernum == 1) {
 		viewleft -= 14;
 	} else if (playercount >= 3 && (playernum & 1) == 1) {
 		viewleft -= 14;
@@ -243,7 +226,7 @@ Gfx *hudmsgRenderZoomRange(Gfx *gdl, u32 alpha)
 	}
 
 	if (playercount == 2) {
-		if (IS4MB() || (optionsGetScreenSplit() != SCREENSPLIT_VERTICAL && g_Vars.currentplayernum == 0)) {
+		if ((optionsGetScreenSplit() != SCREENSPLIT_VERTICAL && g_Vars.currentplayernum == 0)) {
 			texty += 10;
 		} else {
 			texty += 2;
@@ -281,11 +264,9 @@ Gfx *hudmsgRenderZoomRange(Gfx *gdl, u32 alpha)
 	x2 = x + textwidth;
 	y2 = y + textheight;
 
-#ifndef PLATFORM_N64
 	if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	}
-#endif
 
 	gdl = text0f1538e4(gdl, &x, &y, &x2, &y2);
 	gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, colour, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
@@ -314,9 +295,7 @@ Gfx *hudmsgRenderZoomRange(Gfx *gdl, u32 alpha)
 	gdl = text0f1538e4(gdl, &x, &y, &x2, &y2);
 	gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, colour, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
 
-#ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-#endif
 
 	return gdl;
 }
@@ -368,36 +347,6 @@ Gfx *hudmsgRenderBox(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, f32 bgopacity, u3
 
 s32 hudmsg0f0ddb1c(s32 *arg0, s32 arg1)
 {
-#if VERSION >= VERSION_PAL_FINAL
-	s32 viewwidth = viGetViewWidth() / g_ScaleX;
-	s32 result = 0;
-
-	*arg0 = 24;
-
-	if (PLAYERCOUNT() == 2
-			&& optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
-			&& (!g_InCutscene || g_MainIsEndscreen)) {
-		result -= *arg0 * 2 / 3;
-
-		if (g_Vars.currentplayernum == 0) {
-			*arg0 /= 3;
-		} else {
-			*arg0 /= 6;
-		}
-	}
-
-	result = result + viewwidth - *arg0 - arg1 - 11;
-
-	if (PLAYERCOUNT() == 1 || (PLAYERCOUNT() == 2 && g_InCutscene && !g_MainIsEndscreen)) {
-		result -= 16;
-
-#if VERSION < VERSION_JPN_FINAL
-		if (g_ViRes == VIRES_HI) {
-			result -= 16;
-		}
-#endif
-	}
-#else
 	s32 viewwidth = g_Vars.currentplayer->viewwidth / g_ScaleX;
 	s32 result = 0;
 
@@ -418,7 +367,6 @@ s32 hudmsg0f0ddb1c(s32 *arg0, s32 arg1)
 	if (PLAYERCOUNT() == 1) {
 		result -= 16;
 	}
-#endif
 
 	return result;
 }
@@ -447,10 +395,6 @@ void hudmsgsReset(void)
 	}
 
 	g_NextHudMessageId = 0;
-
-#if VERSION < VERSION_NTSC_1_0
-	var800736b0nb = NULL;
-#endif
 }
 
 void hudmsgRemoveAll(void)
@@ -597,40 +541,6 @@ void hudmsgCreateAsSubtitle(char *srctext, s32 type, u8 colourindex, s32 audioch
 	config->colour = g_HudmsgColours[colourindex];
 
 	if (g_Vars.tickmode == TICKMODE_CUTSCENE && audioduration60 >= 0) {
-#if VERSION == VERSION_JPN_FINAL
-		u16 totallen = strlen(srctext);
-		bool alldone = false;
-		f32 time60perchar = audioduration60 / (f32) totallen;
-		char buffer[300];
-		char *ptr = srctext;
-
-		while (!alldone) {
-			u8 len = 0;
-			bool paragraphdone = false;
-
-			while (!paragraphdone) {
-				if (*ptr == '\0') {
-					alldone = true;
-					paragraphdone = true;
-				} else {
-					if (*ptr == 'P' || *ptr == 'p') {
-						paragraphdone = true;
-					} else {
-						buffer[len] = *ptr;
-						len++;
-					}
-
-					ptr++;
-				}
-			}
-
-			buffer[len] = '\0';
-
-			if (len != 0) {
-				hudmsgCreateWithDuration(buffer, type, config, len * time60perchar);
-			}
-		}
-#else
 		char puncchars[] = { '.', ';', '!', '?', ',' };
 		u16 srclen;
 		s32 sp4a8;
@@ -819,7 +729,6 @@ void hudmsgCreateAsSubtitle(char *srctext, s32 type, u8 colourindex, s32 audioch
 
 			hudmsgCreateWithDuration(accum, type, config, accumlen * time60perchar);
 		}
-#endif
 	} else {
 		hudmsgCreateFromArgs(srctext, type, config->unk00, config->unk01, config->unk02,
 				config->unk04, config->unk08, config->colour, config->unk10, config->alignh,
@@ -854,7 +763,6 @@ void hudmsgCalculatePosition(struct hudmessage *msg)
 	s32 viewheight = g_Vars.players[msg->playernum]->viewheight;
 	s32 v0;
 
-#if VERSION >= VERSION_NTSC_1_0
 	s32 offset = (msg->alignh == HUDMSGALIGN_XMIDDLE) ? 10 : 0;
 
 	if (PLAYERCOUNT() >= 3) {
@@ -866,9 +774,6 @@ void hudmsgCalculatePosition(struct hudmessage *msg)
 	}
 
 	if (PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || IS4MB())) {
-#if VERSION >= VERSION_PAL_FINAL
-		if (!g_InCutscene || g_MainIsEndscreen)
-#endif
 		{
 			viewwidth -= offset;
 
@@ -877,7 +782,6 @@ void hudmsgCalculatePosition(struct hudmessage *msg)
 			}
 		}
 	}
-#endif
 
 	switch (msg->alignh) {
 	case HUDMSGALIGN_SCREENLEFT:
@@ -1011,11 +915,7 @@ void hudmsgCreateFromArgs(char *text, s32 type, s32 conf00, s32 conf01, s32 conf
 			}
 		}
 
-#if PAL
 		g_ScaleX = 1;
-#else
-		g_ScaleX = g_ViRes == VIRES_HI ? 2 : 1;
-#endif
 
 		// Find an unused index for the new message
 		for (index = 0; index < g_NumHudMessages; index++) {
@@ -1051,12 +951,7 @@ void hudmsgCreateFromArgs(char *text, s32 type, s32 conf00, s32 conf01, s32 conf
 			msg = &g_HudMessages[index];
 			wrapwidth = hudmsg0f0ddb1c(&xmarginaextra, conf16);
 			textMeasure(&textheight, &textwidth, text, *conf04, *conf08, 0);
-
-#if VERSION >= VERSION_JPN_FINAL
-			if (textwidth > wrapwidth && (flags & HUDMSGFLAG_NOWRAP) == 0)
-#else
 			if (textwidth > wrapwidth)
-#endif
 			{
 				i = 0;
 				writeindex = 0;
@@ -1122,30 +1017,18 @@ void hudmsgsTick(void)
 	s32 previd;
 	bool show;
 	struct hudmessage *msg;
-#if VERSION >= VERSION_NTSC_1_0
 	s32 prevplayernum;
-#endif
 	s32 i;
 	s32 j;
-#if VERSION >= VERSION_NTSC_1_0
 	s32 index;
 	bool hide;
-#else
-	bool hide;
-	s32 index;
-#endif
 	f32 fadeintime;
 	f32 fadeouttime;
 
 	g_HudmsgsActive = false;
 
-#if PAL
 	g_ScaleX = 1;
-#else
-	g_ScaleX = (g_ViRes == VIRES_HI) ? 2 : 1;
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 	prevplayernum = g_Vars.currentplayernum;
 
 	for (k = 0; k < g_NumHudMessages; k++) {
@@ -1166,13 +1049,6 @@ void hudmsgsTick(void)
 	}
 
 	setCurrentPlayerNum(prevplayernum);
-#else
-	for (k = 0; k < g_NumHudMessages; k++) {
-		if (g_HudMessages[k].state != HUDMSGSTATE_FREE) {
-			hudmsgCalculatePosition(&g_HudMessages[k]);
-		}
-	}
-#endif
 
 	previd = -1; \
 	while (true) {
@@ -1198,7 +1074,6 @@ void hudmsgsTick(void)
 
 		switch (msg->state) {
 		case HUDMSGSTATE_QUEUED:
-#if VERSION >= VERSION_NTSC_1_0
 			if (msg->flags & HUDMSGFLAG_DELAY) {
 				msg->timer++;
 
@@ -1206,7 +1081,6 @@ void hudmsgsTick(void)
 					msg->flags &= ~HUDMSGFLAG_DELAY;
 				}
 			} else
-#endif
 			{
 				show = true;
 
@@ -1281,16 +1155,10 @@ void hudmsgsTick(void)
 				if (msg->timer == 0
 						&& !lvIsPaused()
 						&& !mpIsPaused()
-#if VERSION >= VERSION_NTSC_1_0
 						&& msg->type != HUDMSGTYPE_CUTSCENESUBTITLE
 						&& msg->type != HUDMSGTYPE_INGAMESUBTITLE
-#endif
 						&& PLAYERCOUNT() == 1) {
-#if VERSION >= VERSION_NTSC_1_0
 					sndStart(var80095200, SFX_HUDMSG, NULL, -1, -1, -1, -1, -1);
-#else
-					sndStart(var80095200, SFX_HUDMSG, &var800736b0nb, -1, -1, -1, -1, -1);
-#endif
 				}
 
 				fadeintime = (sqrtf(msg->width * msg->width + msg->height * msg->height) + 132) / PALUPF(7.0f);
@@ -1383,15 +1251,9 @@ Gfx *hudmsgsRender(Gfx *gdl)
 	s32 y;
 	s32 timerthing = 255;
 	s32 spdc = true;
-#ifndef PLATFORM_N64
 	const s32 playercount = PLAYERCOUNT();
-#endif
 
-#if PAL
 	g_ScaleX = 1;
-#else
-	g_ScaleX = g_ViRes == VIRES_HI ? 2 : 1;
-#endif
 
 	gdl = text0f153628(gdl);
 
@@ -1450,7 +1312,6 @@ Gfx *hudmsgsRender(Gfx *gdl)
 			y += (s32)(16.0f * playerGetHealthBarHeightFrac());
 		}
 
-#ifndef PLATFORM_N64
 		const bool doaspectfix = (playercount < 2) || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL);
 		if (doaspectfix && msg->state >= HUDMSGSTATE_FADINGIN) {
 			if (msg->alignh == HUDMSGALIGN_SCREENLEFT || msg->alignh == HUDMSGALIGN_LEFT) {
@@ -1461,18 +1322,11 @@ Gfx *hudmsgsRender(Gfx *gdl)
 				gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, G_ASPECT_CENTER_EXT);
 			}
 		}
-#endif
 
 		if (msg->type == HUDMSGTYPE_CUTSCENESUBTITLE) {
-#if VERSION >= VERSION_NTSC_1_0
 			gDPSetScissor(gdl++, 0,
 					(x - 4) * g_ScaleX, 0,
 					(x + msg->width + 3) * g_ScaleX, viGetBufHeight());
-#else
-			gDPSetScissor(gdl++, 0,
-					(x - 4) * g_ScaleX, y - 4,
-					(x + msg->width + 3) * g_ScaleX, y + msg->height + 3);
-#endif
 		}
 
 		switch (msg->state) {
@@ -1511,23 +1365,14 @@ Gfx *hudmsgsRender(Gfx *gdl)
 				textSetDiagonalBlend(x, y, tmp, DIAGMODE_FADEIN);
 
 				if (msg->boxed) {
-#if VERSION >= VERSION_JPN_FINAL
-					gdl = hudmsgRenderBox(gdl, x - 3, y - 3, x + msg->width + 2, y + msg->height - 1, 1.0f, bordercolour, spc0);
-#else
 					gdl = hudmsgRenderBox(gdl, x - 3, y - 3, x + msg->width + 2, y + msg->height + 2, 1.0f, bordercolour, spc0);
-#endif
 
 					if (spc0 > 0) {
 						gdl = textRenderProjected(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, viGetWidth(), viGetHeight(), 0, 0);
 					}
 				} else {
 					gdl = text0f153a34(gdl, x, y, x + msg->width, y + msg->height, 0);
-
-#if VERSION >= VERSION_JPN_FINAL
-					gdl = func0f1574d0jf(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, glowcolour, viGetWidth(), viGetHeight(), 0, 0);
-#else
 					gdl = textRender(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, glowcolour, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 				}
 
 				if (msg->alignv == 6) {
@@ -1546,21 +1391,13 @@ Gfx *hudmsgsRender(Gfx *gdl)
 					bordercolour = (bordercolour & 0xffffff00) + (alpha & 0xff);
 				}
 
-#if VERSION >= VERSION_JPN_FINAL
-				gdl = hudmsgRenderBox(gdl, x - 3, y - 3, x + msg->width + 2, y + msg->height - 1, 1.0f, bordercolour, 1.0f);
-#else
 				gdl = hudmsgRenderBox(gdl, x - 3, y - 3, x + msg->width + 2, y + msg->height + 2, 1.0f, bordercolour, 1.0f);
-#endif
 
 				gdl = textRenderProjected(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, viGetWidth(), viGetHeight(), 0, 0);
 			} else {
 				gdl = text0f153a34(gdl, x, y, x + msg->width, y + msg->height, 0);
 
-#if VERSION >= VERSION_JPN_FINAL
-				gdl = func0f1574d0jf(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, glowcolour, viGetWidth(), viGetHeight(), 0, 0);
-#else
 				gdl = textRender(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, glowcolour, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 			}
 			if (msg->alignv == 6) {
 				timerthing = 0;
@@ -1595,11 +1432,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 				}
 
 				if (msg->boxed) {
-#if VERSION >= VERSION_JPN_FINAL
-					gdl = hudmsgRenderBox(gdl, x - 3, y - 3, x + msg->width + 2, y + msg->height - 1, 1.0f, bordercolour, 1.0f - spa8);
-#else
 					gdl = hudmsgRenderBox(gdl, x - 3, y - 3, x + msg->width + 2, y + msg->height + 2, 1.0f, bordercolour, 1.0f - spa8);
-#endif
 
 					if (spa8 < 1.0f) {
 						gdl = textRenderProjected(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, viGetWidth(), viGetHeight(), 0, 0);
@@ -1607,11 +1440,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 				} else {
 					gdl = text0f153a34(gdl, x, y, x + msg->width, y + msg->height, 0);
 
-#if VERSION >= VERSION_JPN_FINAL
-					gdl = func0f1574d0jf(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, glowcolour, viGetWidth(), viGetHeight(), 0, 0);
-#else
 					gdl = textRender(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, glowcolour, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 				}
 
 				if (msg->alignv == 6) {
@@ -1623,9 +1452,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 			break;
 		}
 
-#ifndef PLATFORM_N64
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
-#endif
 
 		if (msg->type == HUDMSGTYPE_CUTSCENESUBTITLE) {
 			gDPSetScissor(gdl++, 0,
@@ -1636,7 +1463,6 @@ Gfx *hudmsgsRender(Gfx *gdl)
 
 	if (timerthing) {
 		if (optionsGetShowMissionTime(g_Vars.currentplayerstats->mpindex)
-				&& var80075d60 == 2
 				&& g_Vars.normmplayerisrunning == false
 				&& g_Vars.stagenum != STAGE_CITRAINING
 				&& g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY
@@ -1665,10 +1491,4 @@ void hudmsgsStop(void)
 	for (i = 0; i < g_NumHudMessages; i++) {
 		g_HudMessages[i].state = HUDMSGSTATE_FREE;
 	}
-
-#if VERSION < VERSION_NTSC_1_0
-	if (var800736b0nb && sndGetState(var800736b0nb) != AL_STOPPED) {
-		audioStop(var800736b0nb);
-	}
-#endif
 }

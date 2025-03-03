@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "constants.h"
-#include "game/camdraw.h"
 #include "game/cheats.h"
 #include "game/player.h"
 #include "game/savebuffer.h"
@@ -124,8 +123,6 @@ void filelistsTick(void)
 	for (i = 0, updateall = false; i < ARRAYCOUNT(g_FilelistKnownPlugCounts); i++) {
 		s32 plugcount = pakGetPlugCount(i);
 
-		pak0f11698c(i);
-
 		if (pak0f1167d8(i)) {
 			plugcount = 0;
 		}
@@ -219,9 +216,9 @@ void filelistUpdate(struct filelist *list)
 
 			list->spacesfree[dis2dev[i]] = 0;
 
-			if (list->filetype == FILETYPE_CAMERA) {
+			/*if (list->filetype == FILETYPE_CAMERA) {
 				list->spacesfree[dis2dev[i]] = pakGetNumFreeCameraSpacesInPak(dis2dev[i]);
-			}
+			}*/
 
 			list->deviceguids[dis2dev[i]].fileid = 0;
 			list->deviceguids[dis2dev[i]].deviceserial = pakGetSerial(dis2dev[i]);
@@ -368,9 +365,6 @@ struct textureconfig *pheadGetTexture(s32 playernum, s32 fileid, u16 deviceseria
 		}
 
 		g_Menus[playernum].fm.headtextures->lastupdated240 = g_Vars.thisframestart240;
-
-		//func0f15015c(device, fileid, g_Menus[playernum].fm.headtextures->unk000[freeslot]);
-
 		g_Menus[playernum].fm.headtextures->fileguids[freeslot].fileid = fileid;
 		g_Menus[playernum].fm.headtextures->fileguids[freeslot].deviceserial = deviceserial;
 

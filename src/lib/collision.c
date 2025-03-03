@@ -48,7 +48,6 @@ struct geo *g_CdObstacleGeo;
 s32 var8009a968;
 s32 var8009a96c;
 
-s32 var8005f030 = 0;
 bool g_CdHasSavedBlock = false;
 s32 var8005f038 = 0;
 
@@ -3879,14 +3878,8 @@ bool cd0002e680IntTile(struct geotilei *tile, s32 numvertices, struct coord *ver
 	struct coord sp6c;
 
 	for (i = 0; i < numvertices; i++) {
-		if (var8005f030) {
-			s32 remaining = numvertices - i;
-			next = (remaining + numvertices - 2) % numvertices;
-			curr = remaining - 1;
-		} else {
-			next = (i + 1) % numvertices;
-			curr = i;
-		}
+		next = (i + 1) % numvertices;
+		curr = i;
 
 		if (cd0002ac70IntTile((struct coord *)((uintptr_t)verts + curr * sizeof(struct coord)),
 					(struct coord *)((uintptr_t)verts + next * sizeof(struct coord)),
@@ -3914,14 +3907,9 @@ bool cd0002e82cIntTile(struct geotilef *tile, s32 numvertices, struct coord *ver
 	struct coord sp6c;
 
 	for (i = 0; i < numvertices; i++) {
-		if (var8005f030) {
-			s32 remaining = numvertices - i;
-			next = (remaining + numvertices - 2) % numvertices;
-			curr = remaining - 1;
-		} else {
-			next = (i + 1) % numvertices;
-			curr = i;
-		}
+		s32 remaining = numvertices - i;
+		next = (remaining + numvertices - 2) % numvertices;
+		curr = remaining - 1;
 
 		if (cd0002b128FltTile((struct coord *)((uintptr_t)verts + curr * sizeof(struct coord)),
 					(struct coord *)((uintptr_t)verts + next * sizeof(struct coord)),
@@ -3949,14 +3937,8 @@ bool cd0002e9d8Block(struct geoblock *thisblock, s32 numvertices, struct coord *
 	struct coord sp6c;
 
 	for (i = 0; i < numvertices; i++) {
-		if (var8005f030) {
-			s32 remaining = numvertices - i;
-			next = (remaining + numvertices - 2) % numvertices;
-			curr = remaining - 1;
-		} else {
-			next = (i + 1) % numvertices;
-			curr = i;
-		}
+		next = (i + 1) % numvertices;
+		curr = i;
 
 		if (cd0002b560Block((struct coord *)((uintptr_t)verts + curr * sizeof(struct coord)),
 					(struct coord *)((uintptr_t)verts + next * sizeof(struct coord)),
@@ -3984,14 +3966,9 @@ bool cd0002eb84Cyl(struct geocyl *cyl, s32 numvertices, struct coord *arg2, stru
 	struct coord sp6c;
 
 	for (i = 0; i < numvertices; i++) {
-		if (var8005f030) {
-			s32 remaining = numvertices - i;
-			next = (remaining + numvertices - 2) % numvertices;
-			curr = remaining - 1;
-		} else {
-			next = (i + 1) % numvertices;
-			curr = i;
-		}
+		s32 remaining = numvertices - i;
+		next = (remaining + numvertices - 2) % numvertices;
+		curr = remaining - 1;
 
 		if (cd0002b954Cyl((struct coord *)((uintptr_t)arg2 + curr * sizeof(struct coord)),
 					(struct coord *)((uintptr_t)arg2 + next * sizeof(struct coord)),

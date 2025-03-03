@@ -47,11 +47,6 @@ Vtx *g_PdLogoVertices[NUM_FRAMEBUFFERS];
 Col *g_PdLogoColours[NUM_FRAMEBUFFERS];
 s32 g_PdLogoVtxColIndex;
 
-#if VERSION == VERSION_JPN_FINAL
-f32 var8009d34cjf;
-f32 var8009d350jf;
-f32 var8009d358jf[4];
-#endif
 
 s16 g_TitleViewHeight = 480;
 bool g_IsTitleDemo = false;
@@ -63,18 +58,8 @@ s32 g_TitleNextMode = -1;
 u32 g_TitleDelayedTimer = 2;
 s32 g_TitleDelayedMode = -1;
 s32 g_TitleTimer = 0;
-u32 var800624c8 = 0x00000000;
-u32 var800624cc = 0x00000000;
-u32 var800624d0 = 0x00000000;
-u32 var800624d4 = 0x00000000;
-u32 var800624d8 = 0x00000000;
-u32 var800624dc = 0x00000000;
-u32 var800624e0 = 0x00000000;
 s32 g_TitleNextStage = -1; // appears to be used for more than just title
 s32 var800624e8 = 1;
-u32 var800624ec = 0x00000001;
-u32 var800624f0 = 0x00000000;
-s32 var800624f4 = 1;
 struct model *g_TitleModel = NULL;
 struct model *g_TitleModelNLogo2 = NULL;
 u32 var80062500 = 0x00000000;
@@ -158,7 +143,6 @@ void titleSetLight(Lights1 *light, u8 r, u8 g, u8 b, f32 luminosity, struct coor
 void titleInitLegal(void)
 {
 	musicQueueStopAllEvent();
-	var800624f4 = 1;
 	g_TitleTimer = 0;
 	g_TitleButtonPressed = false;
 	g_TitleFastForward = false;
@@ -609,9 +593,7 @@ void titleInitPdLogo(void)
 		remaining -= size;
 		g_PdLogoColours[1] = (void *)nextaddr;
 
-		if (1);
 		g_PdLogoVtxColIndex = 0;
-		var800624f4 = 1;
 
 		joy00014810(false);
 
@@ -1767,7 +1749,6 @@ void titleInitNintendoLogo(void)
 		g_TitleModel = modelmgrInstantiateModelWithoutAnim(g_ModelStates[MODEL_NINTENDOLOGO].modeldef);
 		modelSetScale(g_TitleModel, 1);
 		modelSetRootPosition(g_TitleModel, &coord);
-		var800624f4 = 1;
 		joy00014810(false);
 	}
 }
@@ -1926,9 +1907,6 @@ void titleInitRareLogo(void)
 		g_TitleModel = modelmgrInstantiateModelWithoutAnim(g_ModelStates[MODEL_RARELOGO].modeldef);
 		modelSetScale(g_TitleModel, 1);
 		modelSetRootPosition(g_TitleModel, &coord);
-
-		var800624f4 = 1;
-
 		musicQueueStopAllEvent();
 		joy00014810(false);
 

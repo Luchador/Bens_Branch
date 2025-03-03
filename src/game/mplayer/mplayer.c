@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/camdraw.h"
 #include "game/title.h"
 #include "game/pdmode.h"
 #include "game/bondgun.h"
@@ -1270,7 +1269,7 @@ void mpSetWeaponSet(s32 weaponsetnum)
 	mpApplyWeaponSet();
 }
 
-void func0f1895e8(void)
+void mpApplyWeaponSetIfValid(void)
 {
 	if (g_MpWeaponSetNum < ARRAYCOUNT(g_MpWeaponSets)) {
 		mpApplyWeaponSet();
@@ -1744,7 +1743,7 @@ struct mphead g_MpHeads[] = {
 	{ /*0x00*/ HEAD_DARK_COMBAT,  0                          },
 	{ /*0x01*/ HEAD_DARK_FROCK,   MPFEATURE_CHR_CI           },
 	{ /*0x02*/ HEAD_DARKAQUA,     MPFEATURE_CHR_PELAGIC      },
-	{ /*0x03*/ HEAD_DARK_SNOW,    MPFEATURE_CHR_DARKSNOW               },
+	{ /*0x03*/ HEAD_DARK_SNOW,    MPFEATURE_CHR_DARKSNOW     },
 	{ /*0x04*/ HEAD_ELVIS,        MPFEATURE_CHR_ELVIS        },
 	{ /*0x05*/ HEAD_ELVIS_GOGS,   MPFEATURE_CHR_ELVIS        },
 	{ /*0x06*/ HEAD_CARRINGTON,   0                          },
@@ -1814,9 +1813,7 @@ struct mphead g_MpHeads[] = {
 	{ /*0x46*/ HEAD_SCOTT_H,      0                          },
 	{ /*0x47*/ HEAD_JOEL,         0                          },
 	{ /*0x48*/ HEAD_GRIFFEY,      0                          },
-#if VERSION != VERSION_JPN_FINAL
 	{ /*0x49*/ HEAD_MOTO,         0                          },
-#endif
 	{ /*0x4a*/ HEAD_WINNER,       0                          },
 };
 
@@ -2533,6 +2530,7 @@ void mpEndMatch(void)
 	func0f0f820c(NULL, -6);
 }
 
+// Ben's comment: I suspect this would have returned g_MpHeads + custom PerfectHeads before that feature was pulled. Now it's the same as mpGetNumHeads.
 s32 mpGetNumHeads2(void)
 {
 	return ARRAYCOUNT(g_MpHeads);
@@ -3534,10 +3532,10 @@ void mpplayerfileSaveWad(s32 playernum, struct savebuffer *buffer)
 	savebufferOr(buffer, g_PlayerConfigsArray[playernum].base.mpheadnum, 7);
 	savebufferOr(buffer, g_PlayerConfigsArray[playernum].base.mpbodynum, 7);
 
-	if (g_PlayerConfigsArray[playernum].base.mpheadnum >= mpGetNumHeads2()) {
-		struct fileguid guid;
-		phGetGuid(g_PlayerConfigsArray[playernum].base.mpheadnum - mpGetNumHeads2(), &guid);
-		savebufferWriteGuid(buffer, &guid);
+	if (g_PlayerConfigsArray[playernum].base.mpheadnum >= mpGetNumHeads2()) { // Never true
+		//struct fileguid guid;
+		//phGetGuid(g_PlayerConfigsArray[playernum].base.mpheadnum - mpGetNumHeads2(), &guid);
+		//savebufferWriteGuid(buffer, &guid);
 	} else {
 		struct fileguid guid;
 		guid.deviceserial = 0;

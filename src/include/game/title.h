@@ -6,10 +6,6 @@
 
 #define TITLE_ALLOCSIZE 1024 * 378
 
-extern u32 var800624d4;
-extern u32 var800624d8;
-extern u32 var800624dc;
-
 void titleInit(void);
 
 void titleReset(void);

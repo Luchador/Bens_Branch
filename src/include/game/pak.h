@@ -19,7 +19,6 @@ PakErr1 pakDeleteGameNote(s8 device, u16 company_code, u32 game_code, char *game
 PakErr1 pak0f1168c4(s8 device, struct pakdata **arg1);
 s32 pakGetType(s8 device);
 s32 pakGetSerial(s8 device);
-void pak0f11698c(s8 device);
 void pak0f116994(void);
 void pak0f1169c8(s8 device, bool tick);
 bool mempakIsReady(s8 device);
@@ -42,13 +41,7 @@ PakErr2 pakReadHeaderAtOffset(s8 device, u32 offset, struct pakfileheader *heade
 void pakDumpBuffer(u8 *buffer, u32 len, char *name);
 void pakDumpEeprom(void);
 s32 _pakSaveAtGuid(s8 device, s32 fileid, s32 filetype, u8 *newdata, s32 *outfileid, u8 *olddata);
-
-#if VERSION >= VERSION_NTSC_1_0
 PakErr1 pakInitPak(OSMesgQueue *mq, OSPfs *pfs, s32 channel, s32 *arg3);
-#else
-PakErr1 pakInitPak(OSMesgQueue *mq, OSPfs *pfs, s32 channel);
-#endif
-
 PakErr1 _pakReadWriteBlock(OSPfs *pfs, s32 file_no, u8 flag, u32 address, u32 len, u8 *buffer);
 PakErr1 pakQueryNumNotes(OSPfs *pfs, s32 *max_files, s32 *files_used);
 PakErr1 pakQueryNumFreeBytes(OSPfs *pfs, s32 *bytes_not_used);
@@ -60,37 +53,23 @@ PakErr1 _pakResizeNote(OSPfs *pfs, u16 company_code, u32 game_code, u8 *game_nam
 s32 pakGetPdNumPages(s8 device);
 u32 pakGetPdNumBytes(s8 device);
 s32 pakQueryNumFreePages(s8 device);
-bool pakCanFitCameraFileInPak(s8 device);
-s32 pakGetNumFreeCameraSpacesInPak(s8 device);
-s32 _pakCreateCameraFile(s8 device, s32 *outfileid);
 bool pakResizeNote(s8 device, s32 numpages);
 void pak0f1185e0(s8 device, s32 arg1, s32 arg2);
 u32 pak0f118674(s8 device, u32 filetype, s32 *outfileid);
-void pak0f1189d0(void);
 void paksInit(void);
 void pakCalculateChecksum(u8 *arg0, u8 *arg1, u16 *arg2);
 s32 _pakReadBodyAtGuid(s8 device, s32 fileid, u8 *body, s32 arg3);
 s32 _pakGetFileIdsByType(s8 device, u32 filetype, u32 *fileids);
 s32 pakCheckFileCanFitInNote(s8 device, s32 filetype, s32 *numspaces);
 u32 pak0f119298(s8 device);
-void pak0f119340(u32 arg0);
 s32 pakFindFile(s8 device, u32 fileid, struct pakfileheader *header);
-#if VERSION >= VERSION_NTSC_FINAL
 bool pakWriteBlankFile(s8 device, u32 offset, struct pakfileheader *header);
-#endif
 bool pakRepairAsBlank(s8 device, u32 *offset, struct pakfileheader *header);
 s32 pakRepairFilesystem(s8 device);
 void pakCorrupt(void);
-
-#if VERSION >= VERSION_NTSC_1_0
 bool pakCreateInitialFiles(s8 device);
-#else
-void pakCreateInitialFiles(s8 device);
-#endif
-
 s32 pakFindMaxFileId(s8 device);
 void pakMergeBlanks(s8 device);
-void paksReset(void);
 void pakSetFeatures(s8 device, u8 features, u32 line, char *file);
 void pakSetDefaults(s8 arg0);
 PakErr1 pakReadWriteBlock(s8 device, OSPfs *pfs, s32 file_no, u8 flag, u32 address, u32 len, u8 *buffer);
@@ -117,8 +96,6 @@ bool gbpakRead(s8 device, u16 address, u8 *buffer, u16 size);
 bool gbpakWrite(s8 device, u16 address, u8 *buffer, u16 size);
 bool pak0f11cd00(s8 device, u16 arg1, char *arg2, s32 arg3, s32 arg4);
 bool pak0f11ce00(s8 device, u16 arg1, char *arg2, s32 arg3, bool arg4);
-void pak0f11d118(u8 *arg0, u8 arg1, u32 arg2);
-void pak0f11d174(s8 device, u8 *arg1);
 void pak0f11d214(u8 *arg0, u32 arg1);
 s32 pak0f11d3f8(s8 device);
 bool pak0f11d478(s8 device);
@@ -127,19 +104,12 @@ s32 pak0f11d540(s8 device, s32 arg1);
 s32 pak0f11d5b0(s8 device);
 void pak0f11d620(s8 device);
 void pak0f11d9c4(s8 device, u8 *arg1, u8 *arg2, u32 arg3);
-
-#if VERSION >= VERSION_NTSC_1_0
 void pakRumble(s32 device, f32 numsecs, s32 onduration, s32 offduration);
-#else
-void pakRumble(s8 device, f32 numsecs, s32 onduration, s32 offduration);
-#endif
-
 void paksStop(bool disablepolling);
 void pakDisableRumbleForPlayer(s8 playernum);
 void pakEnableRumbleForPlayer(s8 playernum);
 void pakDisableRumbleForAllPlayers(void);
 void pakEnableRumbleForAllPlayers(void);
-void pakDumpPak(void);
 void pakTickState(s8 device);
 void pak0f11e3bc(s8 device);
 void pakProbeEeprom(void);
@@ -155,11 +125,5 @@ bool gbpakIsAnyPerfectDark(void);
 bool gbpakStrcmp(char *a, char *b);
 s32 gbpakIdentifyGame(s8 device);
 bool pak0f11ea34(s8 device);
-
-extern const char var7f1b423c[];
-extern const char var7f1b4244[];
-extern const char var7f1b424c[];
-extern const char var7f1b4254[];
-extern const char var7f1b425c[];
 
 #endif

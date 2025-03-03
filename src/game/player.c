@@ -127,14 +127,11 @@ struct vimode g_ViModes[] = {
 };
 
 s32 g_ViRes = VIRES_LO;
-bool g_HiResEnabled = false;
 u32 var80070730 = 0xffffffff;
 u32 var80070734 = 0xffffffff;
-u32 var80070738 = 0;
 u32 var8007073c = 0;
 struct gecreditsdata *g_CurrentGeCreditsData = NULL;
 bool g_PlayerTriggerGeFadeIn = false;
-u32 var80070748 = 0;
 u32 var8007074c = 0;
 
 bool g_PlayersWithControl[] = {
@@ -1611,9 +1608,6 @@ void player0f0b9a20(void)
 	if (mainGetStageNum() == STAGE_TEST_LEN) {
 		playerSetFadeColour(0, 0, 0, 1);
 		playerSetFadeFrac(0, 1);
-	} else if (var80070748 != 0) {
-		playerSetFadeColour(0, 0, 0, 1);
-		playerSetFadeFrac(60, 0);
 	}
 
 	envChooseAndApply(mainGetStageNum(), false);
@@ -2767,11 +2761,7 @@ void playerResetLoResIf4Mb(void)
 
 void playerSetHiResEnabled(bool enable)
 {
-#ifdef PLATFORM_N64
-	g_HiResEnabled = enable;
-#else
-	g_HiResEnabled = false;
-#endif
+	
 }
 
 s16 playerGetFbWidth(void)
@@ -3149,8 +3139,6 @@ void playerTick(bool arg0)
 {
 	f32 aspectratio;
 	f32 f20;
-
-	g_ViRes = g_HiResEnabled;
 
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && PLAYERCOUNT() > 1) {
 		g_ViRes = VIRES_LO;
@@ -5290,9 +5278,7 @@ s32 playerTickThirdPerson(struct prop *prop)
 	}
 
 	if (player->haschrbody && player->model00d4) {
-		if (var80075d60 == 0
-				|| var80075d60 == 1
-				|| (player->cameramode == CAMERAMODE_THIRDPERSON && player->visionmode != VISIONMODE_SLAYERROCKET)) {
+		if ((player->cameramode == CAMERAMODE_THIRDPERSON && player->visionmode != VISIONMODE_SLAYERROCKET)) {
 			chr->chrflags |= CHRCFLAG_FORCETOGROUND;
 
 			player->bondperimenabled = false;

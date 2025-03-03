@@ -79,20 +79,12 @@
  * rwdata (such as the selected head).
  */
 
-#if VERSION >= VERSION_PAL_BETA
-u8 var8005efb0_2 = 0;
-#endif
-
 u32 var8005efb0 = 0;
 
 bool g_ModelDistanceDisabled = false;
 f32 g_ModelDistanceScale = 1;
 f32 var8005efc0 = 0;
 bool (*var8005efc4)(struct model *model, struct modelnode *node) = NULL;
-
-#if VERSION >= VERSION_PAL_BETA
-bool var8005efd8_2 = false;
-#endif
 
 Vtx *(*g_ModelVtxAllocatorFunc)(s32 numvertices) = NULL;
 void (*g_ModelJointPositionedFunc)(s32 mtxindex, Mtxf *mtx) = NULL;
@@ -1099,11 +1091,7 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 				animGetRotTranslateScale(animpart, anim->flip, skel, anim->animnum, anim->frameslot2, &rot2, &translate2, &scale2);
 				modelTweenRot(&rot1, &rot2, spe0);
 
-#if VERSION >= VERSION_PAL_BETA
-				if (sp128 || var8005efd8_2)
-#else
 				if (sp128)
-#endif
 				{
 					modelTweenPos(&translate1, &translate2, spe0);
 				}
@@ -1552,16 +1540,9 @@ void modelSetMatrices(struct modelrenderdata *renderdata, struct model *model)
 	model->matrices = renderdata->unk10;
 
 	renderdata->unk10 += model->definition->nummatrices;
-
-#if VERSION >= VERSION_PAL_BETA
-	if (var8005efb0_2 || !modelasm00018680(renderdata, model)) {
-		modelUpdateMatrices(renderdata, model);
-	}
-#else
 	if (!modelasm00018680(renderdata, model)) {
 		modelUpdateMatrices(renderdata, model);
 	}
-#endif
 }
 
 void modelSetMatricesWithAnim(struct modelrenderdata *renderdata, struct model *model)

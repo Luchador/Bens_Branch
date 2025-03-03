@@ -69,15 +69,6 @@ bool ciIsTourDone(void)
 u8 ciGetFiringRangeScore(s32 weaponindex)
 {
 	// Data at firingrangescores is a u8 array where each score uses 2 bits
-
-#if (VERSION == VERSION_JPN_FINAL) && defined(PLATFORM_N64)
-	if (weaponindex == frGetWeaponIndexByWeapon(WEAPON_COMBATKNIFE)) {
-		// The knife doesn't exist in the JPN version.
-		// Treat it as completed so unlockables still work.
-		return 3;
-	}
-#endif
-
 	return (g_GameFile.firingrangescores[weaponindex >> 2] >> (weaponindex % 4) * 2) & 3;
 }
 
@@ -96,56 +87,6 @@ void frSaveScoreIfBest(s32 weaponindex, s32 difficulty)
 	}
 }
 
-s32 func0f19ca78(u32 weaponnum)
-{
-	s32 slot = -1;
-	s32 i;
-
-	for (i = 0; i <= WEAPON_HORIZONSCANNER; i++) {
-		switch (i) {
-		case WEAPON_FALCON2:
-		case WEAPON_FALCON2_SCOPE:
-		case WEAPON_FALCON2_SILENCER:
-		case WEAPON_MAGSEC4:
-		case WEAPON_MAULER:
-		case WEAPON_PHOENIX:
-		case WEAPON_DY357MAGNUM:
-		case WEAPON_DY357LX:
-		case WEAPON_CMP150:
-		case WEAPON_CYCLONE:
-		case WEAPON_CALLISTO:
-		case WEAPON_RCP120:
-		case WEAPON_LAPTOPGUN:
-		case WEAPON_DRAGON:
-		case WEAPON_K7AVENGER:
-		case WEAPON_AR34:
-		case WEAPON_SUPERDRAGON:
-		case WEAPON_SHOTGUN:
-		case WEAPON_SNIPERRIFLE:
-		case WEAPON_FARSIGHT:
-		case WEAPON_CROSSBOW:
-		case WEAPON_TRANQUILIZER:
-		case WEAPON_REAPER:
-		case WEAPON_DEVASTATOR:
-		case WEAPON_ROCKETLAUNCHER:
-		case WEAPON_SLAYER:
-		case WEAPON_COMBATKNIFE:
-		case WEAPON_LASER:
-		case WEAPON_GRENADE:
-		case WEAPON_TIMEDMINE:
-		case WEAPON_PROXIMITYMINE:
-		case WEAPON_REMOTEMINE:
-			slot++;
-		}
-
-		if (i == weaponnum) {
-			return slot;
-		}
-	}
-
-	return -1;
-}
-
 u8 frIsWeaponFound(s32 weaponnum)
 {
 	u32 byteindex;
@@ -154,17 +95,12 @@ u8 frIsWeaponFound(s32 weaponnum)
 		return true;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (weaponnum < (s32)sizeof(g_GameFile.weaponsfound) * 8) {
 		byteindex = weaponnum >> 3;
 		return g_GameFile.weaponsfound[byteindex] & (1 << (weaponnum % 8));
 	}
 
 	return false;
-#else
-	byteindex = weaponnum >> 3;
-	return g_GameFile.weaponsfound[byteindex] & (1 << (weaponnum % 8));
-#endif
 }
 
 void frSetWeaponFound(s32 weaponnum)
@@ -186,7 +122,7 @@ s32 ciIsStageComplete(s32 stageindex)
 		|| g_GameFile.besttimes[stageindex][2];
 }
 
-bool func0f19cbcc(s32 weapon)
+bool frIsDeviceUnlocked(s32 weapon)
 {
 	if (weapon <= 0 || weapon == WEAPON_PSYCHOSISGUN) {
 		return false;
@@ -205,12 +141,6 @@ bool func0f19cbcc(s32 weapon)
 
 bool frIsWeaponAvailable(s32 weapon)
 {
-#if (VERSION == VERSION_JPN_FINAL) && defined(PLATFORM_N64)
-	if (weapon == WEAPON_COMBATKNIFE) {
-		return false;
-	}
-#endif
-
 	if (weapon < WEAPON_FALCON2 || weapon > WEAPON_REMOTEMINE
 			|| weapon == WEAPON_PSYCHOSISGUN
 			|| weapon == WEAPON_COMBATBOOST
@@ -221,14 +151,6 @@ bool frIsWeaponAvailable(s32 weapon)
 	if (weapon == WEAPON_FALCON2 || weapon == WEAPON_CMP150) {
 		return true;
 	}
-
-#if VERSION < VERSION_NTSC_1_0
-#ifdef DEBUG
-	if (debugIsAllTrainingEnabled() && weapon <= WEAPON_XRAYSCANNER) {
-		return true;
-	}
-#endif
-#endif
 
 	return frIsWeaponFound(weapon);
 }
@@ -343,17 +265,9 @@ s32 frIsClassicWeaponUnlocked(u32 weapon)
 			&& ciGetFiringRangeScore(24) == 3
 			&& ciGetFiringRangeScore(25) == 3;
 	case WEAPON_DMC:
-#if VERSION >= VERSION_NTSC_1_0
 		return ciGetFiringRangeScore(29) == 3
 			&& ciGetFiringRangeScore(30) == 3
 			&& ciGetFiringRangeScore(31) == 3;
-#else
-		return ciGetFiringRangeScore(29) == 3
-			&& ciGetFiringRangeScore(30) == 3
-			&& ciGetFiringRangeScore(32) == 3
-			&& ciGetFiringRangeScore(33) == 3
-			&& ciGetFiringRangeScore(34) == 3;
-#endif
 	case WEAPON_AR53:
 		return ciGetFiringRangeScore(19) == 3
 			&& ciGetFiringRangeScore(20) == 3
@@ -450,9 +364,7 @@ void frReset(void)
 {
 	s32 i;
 
-#if VERSION >= VERSION_NTSC_1_0
 	g_FrScriptOffsets = NULL;
-#endif
 
 	g_FrDataLoaded = false;
 	g_FrIsValidWeapon = false;
@@ -463,7 +375,6 @@ void frReset(void)
 	g_FrData.helpscriptenabled = false;
 	g_FrData.helpscriptsleep = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
 	g_FrData.menucountdown = 0;
 	g_FrData.maxactivetargets = 0;
 
@@ -473,7 +384,6 @@ void frReset(void)
 	}
 
 	g_FrNumSounds = 0;
-#endif
 }
 
 void *frLoadRomData(u32 len)
@@ -996,11 +906,7 @@ void frInitTargets(void)
 
 				pos.f[0] = pad.pos.f[0];
 				pos.f[1] = pad.pos.f[1];
-#if VERSION >= VERSION_NTSC_1_0
 				pos.f[2] = pad.pos.f[2] + 6.0f * i;
-#else
-				pos.f[2] = pad.pos.f[2];
-#endif
 
 				frExecuteTargetScript(i);
 
@@ -1016,17 +922,9 @@ void frInitTargets(void)
 			}
 
 			if (obj->flags2 & OBJFLAG2_INVISIBLE) {
-#if VERSION < VERSION_NTSC_1_0
-				padUnpack(g_FrPads[g_FrData.targets[i].frpadindex], PADFIELD_POS, &pad);
-
-				pos.x = 0.0f;
-				pos.y = 5000.0f;
-				pos.z = 0.0f;
-#else
 				pos.x = 0.0f;
 				pos.y = 5000.0f;
 				pos.z = 6.0f * i;
-#endif
 			}
 
 			if (g_FrData.targets[i].flags & FRTARGETFLAG_SPAWNFACINGAWAY) {
@@ -1168,41 +1066,6 @@ char *frGetWeaponDescription(void)
 	u32 weapon = frGetWeaponBySlot(g_FrData.slot);
 
 	switch (weapon) {
-#if VERSION >= VERSION_PAL_BETA
-	case WEAPON_FALCON2:          return langGet(L_DISH_283);
-	case WEAPON_FALCON2_SCOPE:    return langGet(L_DISH_284);
-	case WEAPON_FALCON2_SILENCER: return langGet(L_DISH_285);
-	case WEAPON_MAGSEC4:          return langGet(L_DISH_286);
-	case WEAPON_MAULER:           return langGet(L_DISH_287);
-	case WEAPON_PHOENIX:          return langGet(L_DISH_288);
-	case WEAPON_DY357MAGNUM:      return langGet(L_DISH_289);
-	case WEAPON_DY357LX:          return langGet(L_DISH_290);
-	case WEAPON_CMP150:           return langGet(L_DISH_291);
-	case WEAPON_CYCLONE:          return langGet(L_DISH_292);
-	case WEAPON_CALLISTO:         return langGet(L_DISH_293);
-	case WEAPON_RCP120:           return langGet(L_DISH_294);
-	case WEAPON_LAPTOPGUN:        return langGet(L_DISH_295);
-	case WEAPON_DRAGON:           return langGet(L_DISH_296);
-	case WEAPON_K7AVENGER:        return langGet(L_DISH_297);
-	case WEAPON_AR34:             return langGet(L_DISH_298);
-	case WEAPON_SUPERDRAGON:      return langGet(L_DISH_299);
-	case WEAPON_SHOTGUN:          return langGet(L_DISH_300);
-	case WEAPON_SNIPERRIFLE:      return langGet(L_DISH_301);
-	case WEAPON_FARSIGHT:         return langGet(L_DISH_302);
-	case WEAPON_CROSSBOW:         return langGet(L_DISH_303);
-	case WEAPON_TRANQUILIZER:     return langGet(L_DISH_304);
-	case WEAPON_REAPER:           return langGet(L_DISH_305);
-	case WEAPON_DEVASTATOR:       return langGet(L_DISH_306);
-	case WEAPON_ROCKETLAUNCHER:   return langGet(L_DISH_307);
-	case WEAPON_SLAYER:           return langGet(L_DISH_308);
-	case WEAPON_COMBATKNIFE:      return langGet(L_DISH_309);
-	case WEAPON_LASER:            return langGet(L_DISH_310);
-	case WEAPON_GRENADE:          return langGet(L_DISH_311);
-	case WEAPON_NBOMB:            return langGet(L_DISH_312);
-	case WEAPON_TIMEDMINE:        return langGet(L_DISH_313);
-	case WEAPON_PROXIMITYMINE:    return langGet(L_DISH_314);
-	case WEAPON_REMOTEMINE:       return langGet(L_DISH_315);
-#else
 	case WEAPON_FALCON2:          return langGet(L_MISC_377);
 	case WEAPON_FALCON2_SCOPE:    return langGet(L_MISC_378);
 	case WEAPON_FALCON2_SILENCER: return langGet(L_MISC_379);
@@ -1236,7 +1099,6 @@ char *frGetWeaponDescription(void)
 	case WEAPON_TIMEDMINE:        return langGet(L_MISC_407);
 	case WEAPON_PROXIMITYMINE:    return langGet(L_MISC_408);
 	case WEAPON_REMOTEMINE:       return langGet(L_MISC_409);
-#endif
 	}
 
 	return NULL;
@@ -1253,13 +1115,11 @@ void frEndSession(bool hidetargets)
 #else
 	RoomNum rooms[20];
 #endif
-	u32 stack1;
 #ifdef AVOID_UB
 	RoomNum rooms2[11]; // prevent bgRoomGetNeighbours from writing out of bounds
 #else
 	RoomNum rooms2[10];
 #endif
-	u32 stack2;
 
 	if (g_FrDataLoaded) {
 		struct defaultobj *terminal = objFindByTagId(0x7f);
@@ -1665,9 +1525,7 @@ void frTick(void)
 	bool oldside;
 	struct modelrodata_bbox *bbox;
 	s32 tmp;
-#if VERSION >= VERSION_NTSC_1_0
 	f32 mult;
-#endif
 	bool newside;
 	struct chrdata *chr;
 	bool cloaked;
@@ -1681,31 +1539,6 @@ void frTick(void)
 			&& invHasSingleWeaponIncAllGuns(frGetWeaponBySlot(g_FrData.slot))) {
 		bgunEquipWeapon(frGetWeaponBySlot(g_FrData.slot));
 	}
-
-	// NTSC beta does the room code then menu code,
-	// while everything else does the menu code then room code
-#if VERSION < VERSION_NTSC_1_0
-	// End the session if the player slipped through the door before it closed
-	if (g_Vars.currentplayer->prop->rooms[0] != ROOM_DISH_FIRINGRANGE) {
-		if (g_FrIsValidWeapon) {
-			for (i = 0; i < ARRAYCOUNT(g_FrData.targets); i++) {
-				if (g_FrData.targets[i].inuse
-						&& g_FrData.targets[i].destroyed == false
-						&& g_FrData.targets[i].silent == false
-						&& g_FrData.targets[i].travelling) {
-					g_FrData.targets[i].silent = true;
-					psStopSound(g_FrData.targets[i].prop, PSTYPE_GENERAL, 0xffff);
-				}
-			}
-
-			g_Vars.currentplayer->training = false;
-			frEndSession(true);
-			g_FrData.menucountdown = 0; // This assignment is in NTSC beta only
-			chrUnsetStageFlag(NULL, STAGEFLAG_CI_IN_TRAINING);
-		}
-		return;
-	}
-#endif
 
 	// Handle the menu countdown
 	if (g_FrData.menucountdown != 0) {
@@ -1749,7 +1582,6 @@ void frTick(void)
 		return;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	// End the session if the player slipped through the door before it closed
 	if (g_Vars.currentplayer->prop->rooms[0] != ROOM_DISH_FIRINGRANGE) {
 		if (g_FrIsValidWeapon) {
@@ -1769,7 +1601,6 @@ void frTick(void)
 		}
 		return;
 	}
-#endif
 
 	if (!g_FrIsValidWeapon) {
 		return;
@@ -2002,9 +1833,7 @@ void frTick(void)
 				if (g_FrData.targets[i].travelspeed == -1) {
 					g_FrData.targets[i].donestopsound = true;
 					g_FrData.targets[i].travelling = false;
-#if VERSION >= VERSION_NTSC_1_0
 					mult = 1;
-#endif
 					dist = -2;
 				} else {
 					diff.x = g_FrData.targets[i].dstpos.x - prop->pos.x;
@@ -2012,42 +1841,22 @@ void frTick(void)
 					diff.z = g_FrData.targets[i].dstpos.z - prop->pos.z;
 
 					dist = sqrtf(diff.f[0] * diff.f[0] + diff.f[1] * diff.f[1] + diff.f[2] * diff.f[2]);
-#if VERSION >= VERSION_NTSC_1_0
 					mult = 1;
-#endif
 
 					if (dist != 0) {
-#if VERSION >= VERSION_NTSC_1_0
-
-#if VERSION >= VERSION_PAL_BETA
-						mult = g_FrData.targets[i].travelspeed * g_Vars.lvupdate60freal;
-#else
 						mult = (g_FrData.targets[i].travelspeed * g_Vars.lvupdate240) * 0.25f;
-#endif
 						diff.x *= 1.0f / dist;
 						diff.y *= 1.0f / dist;
 						diff.z *= 1.0f / dist;
 						newpos.x = diff.x * mult + prop->pos.x;
 						newpos.y = diff.y * mult + prop->pos.y;
 						newpos.z = diff.z * mult + prop->pos.z;
-#else
-						diff.x *= 1.0f / dist;
-						diff.y *= 1.0f / dist;
-						diff.z *= 1.0f / dist;
-						newpos.x = diff.x * g_FrData.targets[i].travelspeed * g_Vars.lvupdate240 * 0.25f + prop->pos.x;
-						newpos.y = diff.y * g_FrData.targets[i].travelspeed * g_Vars.lvupdate240 * 0.25f + prop->pos.y;
-						newpos.z = diff.z * g_FrData.targets[i].travelspeed * g_Vars.lvupdate240 * 0.25f + prop->pos.z;
-#endif
 					} else {
 						dist = -2;
 					}
 				}
 
-#if VERSION >= VERSION_NTSC_1_0
 				if (mult >= dist)
-#else
-				if (dist < g_FrData.targets[i].travelspeed)
-#endif
 				{
 					// Target is stopping
 					newpos.x = g_FrData.targets[i].dstpos.x;
@@ -2085,11 +1894,7 @@ void frTick(void)
 					cloaked = chr->hidden & CHRHFLAG_CLOAKED;
 
 					if (cloaked) {
-#ifdef PLATFORM_N64
-						if (g_FrData.targets[i].angle == M_PI) {
-#else
 						if (g_FrData.targets[i].angle != 0 && !g_FrData.targets[i].rotating) {
-#endif
 							g_FrData.targets[i].timeuntilrotate = TICKS(60);
 							g_FrData.targets[i].rotatetoangle = 0;
 							g_FrData.targets[i].rotatespeed = -M_PI / 90;
@@ -2122,12 +1927,7 @@ void frTick(void)
 				}
 
 				oldside = (u8)oldside;
-
-#if VERSION >= VERSION_PAL_BETA
-				g_FrData.targets[i].angle += speed * g_Vars.lvupdate60freal;
-#else
 				g_FrData.targets[i].angle += speed * g_Vars.lvupdate240 * 0.25f;
-#endif
 
 				newside = 0;
 
@@ -2358,18 +2158,6 @@ struct chrbio *ciGetChrBioByBodynum(u32 bodynum)
 #endif
 	struct chrbio bios[] = {
 		// name, race, age, profile
-#if VERSION >= VERSION_PAL_BETA
-		/*0*/ { L_DISH_125, L_DISH_126, L_DISH_127, L_DISH_128 }, // Joanna Dark
-		/*1*/ { L_DISH_129, L_DISH_130, L_DISH_131, L_DISH_132 }, // Jonathan
-		/*2*/ { L_DISH_133, L_DISH_134, L_DISH_135, L_DISH_136 }, // Daniel Carrington
-		/*3*/ { L_DISH_137, L_DISH_138, L_DISH_139, L_DISH_140 }, // Cassandra De Vries
-		/*4*/ { L_DISH_141, L_DISH_142, L_DISH_143, L_DISH_144 }, // Trent Easton
-		/*5*/ { L_DISH_145, L_DISH_146, L_DISH_147, L_DISH_148 }, // Dr. Caroll
-		/*6*/ { L_DISH_149, L_DISH_150, L_DISH_151, L_DISH_152 }, // Elvis
-		/*7*/ { L_DISH_153, L_DISH_154, L_DISH_155, L_DISH_156 }, // Mr. Blonde
-		/*8*/ { L_DISH_157, L_DISH_158, L_DISH_159, L_DISH_160 }, // Mr. Blonde (repeat)
-		/*9*/ { L_DISH_161, L_DISH_162, L_DISH_163, L_DISH_164 }, // The U.S. President
-#else
 		/*0*/ { L_MISC_219, L_MISC_220, L_MISC_221, L_MISC_222 }, // Joanna Dark
 		/*1*/ { L_MISC_223, L_MISC_224, L_MISC_225, L_MISC_226 }, // Jonathan
 		/*2*/ { L_MISC_227, L_MISC_228, L_MISC_229, L_MISC_230 }, // Daniel Carrington
@@ -2380,7 +2168,6 @@ struct chrbio *ciGetChrBioByBodynum(u32 bodynum)
 		/*7*/ { L_MISC_247, L_MISC_248, L_MISC_249, L_MISC_250 }, // Mr. Blonde
 		/*8*/ { L_MISC_251, L_MISC_252, L_MISC_253, L_MISC_254 }, // Mr. Blonde (repeat)
 		/*9*/ { L_MISC_255, L_MISC_256, L_MISC_257, L_MISC_258 }, // The U.S. President
-#endif
 	};
 
 	switch (bodynum) {
@@ -2455,17 +2242,10 @@ struct miscbio *ciGetMiscBio(s32 index)
 #endif
 	struct miscbio bios[] = {
 		// name, description
-#if VERSION >= VERSION_PAL_BETA
-		{ L_DISH_165, L_DISH_166 },
-		{ L_DISH_167, L_DISH_168 },
-		{ L_DISH_169, L_DISH_170 },
-		{ L_DISH_171, L_DISH_172 },
-#else
 		{ L_MISC_259, L_MISC_260 },
 		{ L_MISC_261, L_MISC_262 },
 		{ L_MISC_263, L_MISC_264 },
 		{ L_MISC_265, L_MISC_266 },
-#endif
 	};
 
 	switch (index) {
@@ -2547,31 +2327,6 @@ struct hangarbio *ciGetHangarBio(s32 index)
 #endif
 	struct hangarbio bios[] = {
 		// name, description
-#if VERSION >= VERSION_PAL_BETA
-		{ L_DISH_196, L_DISH_219 }, // Carrington Institute
-		{ L_DISH_197, L_DISH_220 }, // Lucerne Tower
-		{ L_DISH_198, L_DISH_221 }, // Laboratory Basement
-		{ L_DISH_199, L_DISH_222 }, // Carrington Villa
-		{ L_DISH_200, L_DISH_223 }, // Chicago
-		{ L_DISH_201, L_DISH_224 }, // G5 Building
-		{ L_DISH_202, L_DISH_225 }, // Area 51
-		{ L_DISH_203, L_DISH_226 }, // Alaskan Air Base
-		{ L_DISH_204, L_DISH_227 }, // Air Force One
-		{ L_DISH_205, L_DISH_228 }, // Crash Site
-		{ L_DISH_206, L_DISH_229 }, // Pelagic II
-		{ L_DISH_207, L_DISH_230 }, // Cetan Ship
-		{ L_DISH_208, L_DISH_231 }, // Skedar Assault Ship
-		{ L_DISH_209, L_DISH_232 }, // Skedar Homeworld
-		{ L_DISH_210, L_DISH_233 }, // Jumpship
-		{ L_DISH_211, L_DISH_234 }, // HoverCrate
-		{ L_DISH_212, L_DISH_235 }, // HoverBike
-		{ L_DISH_213, L_DISH_236 }, // Cleaning Hovbot
-		{ L_DISH_214, L_DISH_237 }, // Hovercopter
-		{ L_DISH_215, L_DISH_238 }, // G5 Robot
-		{ L_DISH_216, L_DISH_239 }, // A51 Interceptor
-		{ L_DISH_217, L_DISH_240 }, // Maian Vessel
-		{ L_DISH_218, L_DISH_241 }, // Skedar Shuttle
-#else
 		{ L_MISC_290, L_MISC_313 }, // Carrington Institute
 		{ L_MISC_291, L_MISC_314 }, // Lucerne Tower
 		{ L_MISC_292, L_MISC_315 }, // Laboratory Basement
@@ -2595,7 +2350,6 @@ struct hangarbio *ciGetHangarBio(s32 index)
 		{ L_MISC_310, L_MISC_333 }, // A51 Interceptor
 		{ L_MISC_311, L_MISC_334 }, // Maian Vessel
 		{ L_MISC_312, L_MISC_335 }, // Skedar Shuttle
-#endif
 	};
 
 	switch (index) {
@@ -2628,7 +2382,7 @@ struct hangarbio *ciGetHangarBio(s32 index)
 }
 
 u8 g_DtSlot = 0;
-u8 var80088adc = 0;
+u8 g_DtHasBeenInitiated = 0;
 
 bool ciIsHangarBioUnlocked(u32 bioindex)
 {
@@ -2800,7 +2554,7 @@ void dtPushEndscreen(void)
 
 void dtTick(void)
 {
-	if (var80088adc) {
+	if (g_DtHasBeenInitiated) {
 		if (g_DtData.intraining) {
 			g_DtData.timetaken += g_Vars.lvupdate60;
 
@@ -2818,9 +2572,7 @@ void dtTick(void)
 				g_DtData.completed = true;
 				g_DtData.timeleft = 1;
 				g_DtData.finished = true;
-#ifndef PLATFORM_N64
 				filemgrSaveOrLoad(&g_GameFileGuid, FILEOP_SAVE_GAME_000, 0);
-#endif
 			}
 		} else if (g_DtData.finished) {
 			if (g_DtData.timeleft <= 0) {
@@ -2832,10 +2584,10 @@ void dtTick(void)
 	}
 }
 
-void func0f1a1ac0(void)
+void dtInit(void)
 {
-	if (var80088adc == false) {
-		var80088adc = true;
+	if (g_DtHasBeenInitiated == false) {
+		g_DtHasBeenInitiated = true;
 		g_DtData.intraining = false;
 		g_DtData.failed = false;
 		g_DtData.completed = false;

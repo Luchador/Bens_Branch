@@ -438,11 +438,10 @@ void __n_CSPHandleNextSeqEvent(N_ALCSPlayer *seqp)
 		break;
 
 	case AL_SEQ_END_EVT:
-		if (!var8005f4dc) {
-			seqp->state = AL_STOPPING;
-			evt.type    = AL_SEQP_STOP_EVT;
-			n_alEvtqPostEvent(&seqp->evtq, &evt, AL_EVTQ_END, 0);
-		}
+		//if (!var8005f4dc) // this var is always false, so this always evaluates to true
+		seqp->state = AL_STOPPING;
+		evt.type    = AL_SEQP_STOP_EVT;
+		n_alEvtqPostEvent(&seqp->evtq, &evt, AL_EVTQ_END, 0);
 		break;
 
 	case AL_TRACK_END:

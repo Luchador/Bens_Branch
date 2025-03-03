@@ -951,7 +951,7 @@ Gfx *bgRenderSceneInXray(Gfx *gdl)
 
 				gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
-				if (debugIsPropRenderingEnabled() && getVar80084040()) {
+				if (debugIsPropRenderingEnabled()) {
 					if (thing->roomnum == -1) {
 						gdl = propsRender(gdl, 0, RENDERPASS_XLU, roomnumsbyprop);
 					}
@@ -1133,7 +1133,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 		gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 		gdl = envStopFog(gdl);
 
-		if (debugIsPropRenderingEnabled() && getVar80084040()) {
+		if (debugIsPropRenderingEnabled()) {
 			if (firstroomnum == thing->roomnum) {
 				gdl = propsRender(gdl, 0, RENDERPASS_OPA_PREBG, roomnumsbyprop);
 			}
@@ -1147,7 +1147,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 		gdl = bgScissorWithinViewportF(gdl, thing->box.xmin, thing->box.ymin, thing->box.xmax, thing->box.ymax);
 		gdl = envStartFog(gdl, false);
 
-		if (debugIsBgRenderingEnabled() && getVar80084040()) {
+		if (debugIsBgRenderingEnabled()) {
 			if (g_StageIndex != STAGEINDEX_TEST_OLD) {
 				gdl = bgRenderRoomOpaque(gdl, thing->roomnum);
 			}
@@ -1158,7 +1158,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 
 		gdl = envStopFog(gdl);
 
-		if (debugIsPropRenderingEnabled() && getVar80084040()) {
+		if (debugIsPropRenderingEnabled()) {
 			if (firstroomnum == thing->roomnum) {
 				gdl = propsRender(gdl, 0, RENDERPASS_OPA_POSTBG, roomnumsbyprop);
 			}
@@ -1173,7 +1173,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 	// Render wall hits
 	gSPMatrix(gdl++, osVirtualToPhysical(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
-	if (getVar80084040() && g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
+	if (g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
 		for (i = 0; i < g_BgNumDrawSlots; i++) {
 			roomnum = roomnums[i];
 			gdl = wallhitRenderBgHits(g_BgDrawSlots[roomnum].roomnum, gdl);
@@ -1193,7 +1193,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 		gdl = bgScissorWithinViewportF(gdl, thing->box.xmin, thing->box.ymin, thing->box.xmax, thing->box.ymax);
 		gdl = envStartFog(gdl, true);
 
-		if (debugIsBgRenderingEnabled() && getVar80084040()) {
+		if (debugIsBgRenderingEnabled()) {
 			gdl = bgRenderRoomXlu(gdl, thing->roomnum);
 		}
 
@@ -1202,7 +1202,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 		gdl = envStopFog(gdl);
 
 		// Render prop translucent components
-		if (debugIsPropRenderingEnabled() && getVar80084040()) {
+		if (debugIsPropRenderingEnabled()) {
 			if (firstroomnum == thing->roomnum) {
 				gdl = propsRender(gdl, 0, RENDERPASS_XLU, roomnumsbyprop);
 			}

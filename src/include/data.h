@@ -4,13 +4,8 @@
 #include "constants.h"
 #include "types.h"
 
-#ifdef PLATFORM_N64
-#define EXT_SEG
-#define REF_SEG &
-#else
 #define EXT_SEG *
 #define REF_SEG
-#endif
 
 #define bool s32
 #define ubool u32
@@ -31,7 +26,6 @@ extern OSDevMgr __osViDevMgr;
 extern u32 var8005cefc;
 extern OSDevMgr __osPiDevMgr;
 extern OSPiHandle *__osCurrentHandle[2];
-extern u32 var8005cf30;
 extern OSTime osClockRate;
 extern s32 osViClock;
 extern u32 __osGlobalIntMask;
@@ -53,13 +47,7 @@ extern s32 g_NumLvAilists;
 extern bool g_ModelDistanceDisabled;
 extern f32 g_ModelDistanceScale;
 extern f32 var8005efc0;
-extern u8 var8005efb0_2;
-extern u32 var8005efd0;
-extern bool var8005efd8_2;
 extern bool g_ModelAnimMergingEnabled;
-extern u32 var8005efe0;
-extern u32 var8005efec;
-extern u32 var8005eff8;
 extern u32 g_NextAnimFrameIndex;
 extern s16 g_NumAnimations;
 extern struct animtableentry *g_Anims;
@@ -67,17 +55,13 @@ extern u8 *g_AnimToHeaderSlot;
 extern s16 *var8005f014;
 extern s32 g_AnimMaxBytesPerFrame;
 extern s32 g_AnimMaxHeaderLength;
-extern s32 var8005f030;
 extern s32 g_CdHasSavedBlock;
 extern s32 var8005f038;
 extern u16 *g_RdpOutBufferEnd;
 extern u16 *g_RdpOutBufferStart;
 extern struct rdptask *g_RdpCurTask;
 extern N_ALSndPlayer *g_SndPlayer;
-extern u32 var8005f4dc;
-extern u32 var8005f548;
 extern s16 n_eqpower[];
-extern u32 var8005f66c;
 extern u8 *var8005f6f8;
 extern u8 *var8005f6fc;
 extern u32 var8005f704;
@@ -94,11 +78,6 @@ extern u32 __osContInitialized;
 extern s32 __osPfsLastChannel;
 extern s32 g_PfsPrevChannel;
 extern u8 g_PfsPrevBank;
-extern u32 var80060990;
-extern u32 var800609a0;
-extern u32 var800609c4;
-extern u32 var800609f0;
-extern u32 var800611ec;
 extern OSViMode osViModePalLan1;
 extern OSViMode osViModeMpalLan1;
 extern OSViMode osViModeNtscLan1;
@@ -119,20 +98,12 @@ extern s32 g_TitleNextMode;
 extern u32 g_TitleDelayedTimer;
 extern s32 g_TitleDelayedMode;
 extern s32 g_TitleTimer;
-extern u32 var800624d4;
-extern u32 var800624d8;
-extern u32 var800624dc;
-extern u32 var800624e0;
 extern s32 g_TitleNextStage;
 extern s32 var800624e8;
-extern u32 var800624ec;
-extern u32 var800624f0;
-extern s32 var800624f4;
 extern u8 g_FileState;
 extern u8 var80062944;
 extern u8 var80062948;
 extern u8 var8006294c;
-extern u32 var80062950;
 extern bool g_WeatherTickEnabled;
 extern struct var80062960 *var80062960;
 extern f32 g_ChrAnimSpeed;
@@ -181,7 +152,6 @@ extern s32 g_NumBgChrs;
 extern s16 *g_TeamList;
 extern s16 *g_SquadronList;
 extern struct var80067e6c *var80067fdc[];
-extern s16 var80067ff0[];
 extern f32 g_AutoAimScale;
 extern u32 g_TintedGlassEnabled;
 extern s32 g_AlarmTimer;
@@ -219,19 +189,12 @@ extern struct beam *g_ThrownLaptopBeams;
 extern s32 g_MaxThrownLaptops;
 extern struct prop *g_Lifts[10];
 extern u32 g_TvCmdlist00[];
-extern u32 var8006aaa0[];
-extern u32 var8006aae4[];
+extern u32 g_TvCmdlist1E[];
+extern u32 g_TvCmdlist1F[];
 extern struct pschannel *g_PsChannels;
-extern s8 var8006ae18;
-extern s8 var8006ae1c;
-extern s8 var8006ae20;
-extern s8 var8006ae24;
-extern s8 var8006ae28;
 extern s32 g_ObjectiveLastIndex;
 extern bool g_ObjectiveChecksDisabled;
 extern u16 var8006ae90[];
-extern u16 var8006af0c[];
-extern u16 var8006af8c[];
 extern struct weapon *g_Weapons[];
 extern u32 g_BgunGunMemBaseSize4Mb2P;
 extern bool g_CasingsActive;
@@ -244,12 +207,9 @@ extern s32 g_ModelMostType3;
 extern s32 g_ModelMostModels;
 extern s32 g_ModelMostAnims;
 extern s32 g_ViRes;
-extern bool g_HiResEnabled;
-extern u32 var80070738;
 extern u32 var8007073c;
 extern struct gecreditsdata *g_CurrentGeCreditsData;
 extern bool g_PlayerTriggerGeFadeIn;
-extern u32 var80070748;
 extern u32 var8007074c;
 extern bool g_PlayersWithControl[];
 extern bool g_PlayerInvincible;
@@ -261,13 +221,8 @@ extern s32 g_ScissorX2;
 extern s32 g_ScissorY1;
 extern s32 g_ScissorY2;
 extern u32 var800711f0;
-#if VERSION >= VERSION_NTSC_1_0
 extern char *g_StringPointer;
 extern char *g_StringPointer2;
-#else
-extern char g_StringPointer[];
-extern char g_StringPointer2[];
-#endif
 extern s32 g_MpPlayerNum;
 extern u32 g_MpNumJoined;
 extern u16 g_ControlStyleOptions[];
@@ -297,9 +252,6 @@ extern struct menudialogdef g_AdvancedSetup4MbMenuDialog;
 extern struct filelist *g_FileLists[MAX_PLAYERS];
 extern bool var80075bd0[];
 extern struct headanim g_HeadAnims[2];
-extern s32 var80075d60;
-extern s32 var80075d64;
-extern s32 var80075d68;
 extern s32 g_DebugScreenshotRgb;
 extern u8 unregistered_function1[];
 extern u8 unregistered_function2[];
@@ -393,9 +345,6 @@ extern f32 g_SkyCloudOffset;
 extern f32 g_SkyWindSpeed;
 extern f32 g_SunAlphaFracs[];
 extern s32 g_SunFlareTimers240[];
-extern u32 var8007dba0;
-extern u32 var8007dbb8;
-extern u32 var8007dbd0;
 extern struct coord g_TeleportToPos;
 extern struct coord g_TeleportToUp;
 extern struct coord g_TeleportToLook;
@@ -408,9 +357,7 @@ extern bool g_SparksAreActive;
 extern struct weatherdata *g_WeatherData;
 extern s32 g_NextShardNum;
 extern bool g_ShardsActive;
-extern s32 var800800f0jf;
 extern s32 g_ScaleX;
-extern s32 var80080108jf;
 extern struct font *g_FontNumeric;
 extern struct fontchar *g_CharsNumeric;
 extern struct font *g_FontHandelGothicXs;
@@ -441,9 +388,6 @@ extern s32 g_MusicAge60;
 extern s32 g_MusicLife60;
 extern s32 g_MusicSilenceTimer60;
 extern bool g_Jpn;
-#if VERSION >= VERSION_PAL_BETA
-extern s32 g_LanguageId;
-#endif
 extern struct surfacetype *g_SurfaceTypes[15];
 extern u16 *g_ZbufPtr1;
 extern f32 g_AlmostZero;
@@ -494,7 +438,6 @@ extern u32 g_TeamColours[];
 extern u32 var80087ce4[];
 extern u8 g_BotCount;
 extern struct aibotweaponpreference g_AibotWeaponPreferences[];
-extern u32 var80087eb4;
 extern struct challenge g_MpChallenges[30];
 extern u8 g_FrIsValidWeapon;
 extern s32 g_FrWeaponNum;
@@ -518,8 +461,6 @@ extern struct menudialogdef g_HtDetailsMenuDialog;
 extern struct menudialogdef g_HtFailedMenuDialog;
 extern struct menudialogdef g_HtCompletedMenuDialog;
 extern struct menudialogdef g_HangarListMenuDialog;
-
-#ifndef PLATFORM_N64
 
 extern struct extplayerconfig g_PlayerExtCfg[MAX_PLAYERS];
 
@@ -554,13 +495,5 @@ extern s32 g_MpWeaponRandomFilterNum;
 
 #define TEX_FILTER_2D g_TexFilter2D
 #define ADJUST_ZOOM_FOV(x) ((x) * PLAYER_EXTCFG().fovzoommult)
-
-#else // PLATFORM_N64
-
-#define TEX_FILTER_2D G_TF_BILERP
-#define ADJUST_ZOOM_FOV(x) (x)
-#define PLAYER_DEFAULT_FOV 60.f
-
-#endif // PLATFORM_N64
 
 #endif

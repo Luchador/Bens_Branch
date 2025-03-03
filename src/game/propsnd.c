@@ -21,11 +21,6 @@ struct pschannel *g_PsChannels = NULL;
 
 u32 g_AudioPrevUuid = 0;
 
-s8 var8006ae18 = 0;
-s8 var8006ae1c = 0;
-s8 var8006ae20 = 0;
-s8 var8006ae24 = 0;
-s8 var8006ae28 = 0;
 u32 var8006ae2c = 0;
 u32 var8006ae30 = 0;
 u32 var8006ae34 = 0;

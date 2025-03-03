@@ -6,7 +6,6 @@
 #include "data.h"
 #include "types.h"
 
-u32 var80062950 = 100;
 bool g_WeatherTickEnabled = true;
 
 void weatherTick(void)

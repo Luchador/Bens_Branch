@@ -82,7 +82,7 @@ struct tvscreen var80061a80 = {
 };
 
 struct tvscreen var80061af4 = {
-	var8006aaa0, // cmdlist
+	g_TvCmdlist1E, // cmdlist
 	0,           // offset
 	0xffff,      // pause60
 	0,           // tconfig
@@ -124,7 +124,7 @@ struct tvscreen var80061af4 = {
 };
 
 struct tvscreen var80061b68 = {
-	var8006aae4, // cmdlist
+	g_TvCmdlist1F, // cmdlist
 	0,           // offset
 	0xffff,      // pause60
 	0,           // tconfig

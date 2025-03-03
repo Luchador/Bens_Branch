@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
-#include "game/camdraw.h"
 #include "game/game_006900.h"
 #include "game/body.h"
 #include "game/objectives.h"
@@ -1786,13 +1785,15 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 						s32 mpbodynum = MENUMODELPARAMS_GET_MP_BODYNUM(menumodel->newparams);
 						bodynum = mpGetBodyId(mpbodynum);
 
-						if (mpheadnum < mpGetNumHeads2()) {
+						//if (mpheadnum < mpGetNumHeads2()) { // This is always true
 							headnum = mpGetHeadId(mpheadnum);
-						} else {
+
+						// This would have been used for getting PerfectHead models
+						/*} else {
 							headnum = func0f14a9f8(mpheadnum - mpGetNumHeads2());
 							headnum = mpGetBeauHeadId(headnum);
 							menumodel->perfectheadnum = (mpheadnum - mpGetNumHeads2()) & 0xff;
-						}
+						}*/
 					}
 
 					bodyfilenum = g_HeadsAndBodies[bodynum].filenum;

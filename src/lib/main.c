@@ -3,7 +3,6 @@
 #include "lib/sched.h"
 #include "lib/vars.h"
 #include "constants.h"
-#include "game/camdraw.h"
 #include "game/cheats.h"
 #include "game/debug.h"
 #include "game/file.h"
@@ -645,9 +644,7 @@ void mainInit(void)
 	stub0f000910();
 	stub0f000840();
 	mpInit();
-	pheadInit();
 	paksInit();
-	pheadInit2();
 	animsInit();
 	racesInit();
 	bodiesInit();
@@ -762,8 +759,6 @@ void mainLoop(void)
 		titleSetNextStage(g_StageNum);
 
 		if (g_StageNum < STAGE_TITLE) {
-			func0f01b148(0);
-
 			if (argFindByPrefix(1, "-hard")) {
 				lvSetDifficulty(argFindByPrefix(1, "-hard")[0] - '0');
 			}
@@ -1010,16 +1005,6 @@ void mainTick(void)
 
 			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 0x0100, 6, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-
-#ifdef DEBUG
-			if (g_MainIsDebugMenuOpen || joyGetButtons(0, U_CBUTTONS | D_CBUTTONS) == (U_CBUTTONS | D_CBUTTONS)) {
-				g_MainIsDebugMenuOpen = debugProcessInput(joyGetStickX(0), joyGetStickY(0), joyGetButtons(0, 0xffffffff), joyGetButtonsPressedThisFrame(0, 0xffffffff));
-			} else if (joyGetButtons(0, START_BUTTON) == 0) {
-				var80075d68 = var800786f4nb;
-			} else {
-				g_MainIsDebugMenuOpen = debugProcessInput(joyGetStickX(0), joyGetStickY(0), joyGetButtons(0, 0xffffffff), joyGetButtonsPressedThisFrame(0, 0xffffffff));
-			}
-#endif
 
 			lvTick();
 			playermgrShuffle();

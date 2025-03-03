@@ -43,13 +43,6 @@
 #define DEBUG_VALUE(valueifdebug, valueifnotdebug) (valueifnotdebug)
 #endif
 
-#if VERSION == VERSION_PAL_BETA
-s32 var80075d60 = 2;
-s32 var80075d64 = 2;
-s32 var80075d68 = 2;
-s32 var800786f4nb = 2;
-#endif
-
 #ifdef DEBUG
 s32 g_DebugMenuOffsets[] = {
 	15,
@@ -349,12 +342,7 @@ s32 g_DebugCurMenu = DEBUGMENU_MAIN;
 s32 g_DebugSelectedOptionsByMenu[2] = {0, 0};
 #endif
 
-#if VERSION != VERSION_PAL_BETA
-s32 var80075d60 = 2;
-s32 var80075d64 = 2;
-s32 var80075d68 = 2;
 s32 var800786f4nb = 2;
-#endif
 
 #ifdef DEBUG
 s32 g_DebugProfileMode = 0;
@@ -505,218 +493,9 @@ void debugUpdateMenu(void)
 #endif
 }
 
-#ifdef DEBUG
-void debugSaveSelectedOption(void)
-{
-	g_DebugSelectedOptionsByMenu[g_DebugCurMenu] = dmenuGetSelectedOption();
-}
-
-void debug0f1193e4nb(void) // not called
-{
-	// empty
-}
-
-void debug0f1193ecnb(void) // not called
-{
-	// empty
-}
-
-void debug0f1193f4nb(void) // not called
-{
-	var80075d60 = var80075d64 = var800786f4nb = 2;
-}
-
-void debug0f11941cnb(void) // not called
-{
-	rmon0002fa30(&var800787f4nb, 2);
-	rmon0002fa38(250);
-}
-
-void debug0f11944cnb(void) // not called
-{
-	rmon0002fa40();
-}
-#endif
-
 bool debugProcessInput(s8 stickx, s8 sticky, u32 buttons, u32 buttonsthisframe)
 {
-#ifdef DEBUG
-	s32 i;
-	s32 prev;
-	s32 tmp = 3;
-
-	debugUpdateMenu();
-
-	if (g_DebugScreenshotRgb) {
-		prev = g_DebugScreenshotRgb++;
-
-		if (tmp == prev) {
-			viGrabRgb32();
-			g_DebugScreenshotRgb = 0;
-			viSet16Bit();
-			osViBlack(false);
-		}
-	}
-
-	if (g_DebugScreenshotJpg) {
-		prev = g_DebugScreenshotJpg++;
-
-		if (tmp == prev) {
-			viGrabJpg32();
-			g_DebugScreenshotJpg = 0;
-			viSet16Bit();
-			osViBlack(false);
-		}
-	}
-
-	if (!g_DebugIsMenuOpen) {
-		tmp = (buttons & U_CBUTTONS) && (buttons & D_CBUTTONS);
-		g_DebugIsMenuOpen = tmp;
-		return tmp;
-	}
-
-	if (var80075d68 != -2) {
-		var800786f4nb = var80075d68;
-		var80075d68 = -2;
-	}
-
-	if (buttonsthisframe & (A_BUTTON | START_BUTTON)) {
-		if (g_DebugCurMenu == DEBUGMENU_CUTSCENE) {
-			if (dmenuGetSelectedOption() == 0) {
-				// Selected "main" from cutscene menu
-				g_DebugCurMenu = DEBUGMENU_MAIN;
-				dhudClear();
-				debugUpdateMenu();
-			} else {
-				cutsceneStart(0xc00 + dmenuGetSelectedOption() - 1);
-			}
-		} else if (g_DebugCurMenu == DEBUGMENU_MAIN) {
-			switch (dmenuGetSelectedOption()) {
-#if VERSION == VERSION_PAL_BETA
-			case DEBUGOPT_MANPOS:
-				g_DebugManPos ^= 1;
-				break;
-			case DEBUGOPT_ALLBUDDIES:
-				g_DebugAllBuddies ^= 1;
-				break;
-			case DEBUGOPT_SETCOMPLETE:
-				g_DebugSetComplete ^= 1;
-				break;
-			case DEBUGOPT_VMSTATS:
-				g_VmShowStats ^= 1;
-				break;
-			case DEBUGOPT_MEMINFO:
-				g_DebugMemInfo ^= 1;
-				break;
-			case DEBUGOPT_ALLLEVELS:
-				for (i = 0; i < 21; i++) {
-					for (tmp = 0; tmp < 3; tmp++) {
-						g_GameFile.besttimes[i][tmp] = 7;
-					}
-				}
-
-				g_AltTitleUnlocked = true;
-				break;
-			case DEBUGOPT_ALLCHALLENGES:
-				g_DebugAllChallenges ^= 1;
-				challengeDetermineUnlockedFeatures();
-				break;
-			case DEBUGOPT_ALLTRAINING:
-				g_DebugAllTraining ^= 1;
-
-				for (i = 0; i < ARRAYCOUNT(g_GameFile.firingrangescores); i++) {
-					g_GameFile.firingrangescores[i] = 0xff;
-				}
-
-				gamefileSetFlag(GAMEFILEFLAG_CI_CLOAK_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_DISGUISE_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_XRAY_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_IR_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_RTRACKER_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_DOORDECODER_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_NIGHTVISION_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_CAMSPY_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_ECMMINE_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_UPLINK_DONE);
-				break;
-#else
-			case DEBUGOPT_MANPOS:
-				g_DebugManPos ^= 1;
-				break;
-			case DEBUGOPT_PADS:
-				g_DebugPads = (g_DebugPads + 1) % 4;
-				break;
-			case DEBUGOPT_TILES:
-				g_DebugTiles = (g_DebugTiles + 1) % 4;
-				break;
-			case DEBUGOPT_ALLLEVELS:
-				for (i = 0; i < 21; i++) {
-					for (tmp = 0; tmp < 3; tmp++) {
-						g_GameFile.besttimes[i][tmp] = 7;
-					}
-				}
-
-				g_AltTitleUnlocked = true;
-				break;
-			case DEBUGOPT_ALLCHALLENGES:
-				g_DebugAllChallenges ^= 1;
-				challengeDetermineUnlockedFeatures();
-				break;
-			case DEBUGOPT_ALLBUDDIES:
-				g_DebugAllBuddies ^= 1;
-				break;
-			case DEBUGOPT_ALLTRAINING:
-				g_DebugAllTraining ^= 1;
-
-				for (i = 0; i < ARRAYCOUNT(g_GameFile.firingrangescores); i++) {
-					g_GameFile.firingrangescores[i] = 0xff;
-				}
-
-				gamefileSetFlag(GAMEFILEFLAG_CI_CLOAK_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_DISGUISE_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_XRAY_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_IR_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_RTRACKER_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_DOORDECODER_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_NIGHTVISION_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_CAMSPY_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_ECMMINE_DONE);
-				gamefileSetFlag(GAMEFILEFLAG_CI_UPLINK_DONE);
-				break;
-			case DEBUGOPT_CUTDEBUG:
-				g_DebugCutDebug ^= 1;
-				break;
-			case DEBUGOPT_CHRSTATS:
-				g_DebugChrStats ^= 1;
-				break;
-			case DEBUGOPT_PROPS:
-				g_DebugRenderProps ^= 1;
-				break;
-			case DEBUGOPT_VMSTATS:
-				g_VmShowStats ^= 1;
-				break;
-			case DEBUGOPT_MEMINFO:
-				g_DebugMemInfo ^= 1;
-				break;
-#endif
-			}
-		}
-	}
-
-	if (buttonsthisframe & START_BUTTON) {
-		if (g_DebugIsMenuOpen == true) {
-			dhudClear();
-		}
-
-		g_DebugIsMenuOpen = false;
-	}
-
-	debugSaveSelectedOption();
-
-	return g_DebugIsMenuOpen;
-#else
 	return false;
-#endif
 }
 
 s32 debugGetProfileMode(void)

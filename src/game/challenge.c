@@ -214,12 +214,12 @@ void challengeDetermineUnlockedFeatures(void)
 	for (j = 0; j < func0f188bcc(); j++) {
 		struct mpweapon *weapon = &g_MpWeapons[j];
 
-		if (weapon->unlockfeature > 0 && func0f19cbcc(weapon->weaponnum)) {
+		if (weapon->unlockfeature > 0 && frIsDeviceUnlocked(weapon->weaponnum)) { // X-ray Scanner or Cloaking Device
 			g_MpFeaturesUnlocked[weapon->unlockfeature] |= 1;
 		}
 	}
 
-	func0f1895e8();
+	mpApplyWeaponSetIfValid();
 
 	// If the ability to have 8 simulants hasn't been unlocked, limit them to 4
 	if (!challengeIsFeatureUnlocked(MPFEATURE_8BOTS)) {
@@ -568,7 +568,6 @@ void challengeForceUnlockConfigFeatures(struct mpconfig *config, u8 *array, s32 
 		}
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (challengeindex >= 25) {
 		index = challengeForceUnlockFeature(MPFEATURE_BOTDIFF_DARK, array, index, len);
 	} else if (challengeindex >= 20) {
@@ -580,19 +579,6 @@ void challengeForceUnlockConfigFeatures(struct mpconfig *config, u8 *array, s32 
 	if (challengeindex >= 10) {
 		index = challengeForceUnlockFeature(MPFEATURE_8BOTS, array, index, len);
 	}
-#else
-	if (challengeindex >= 10) {
-		index = challengeForceUnlockFeature(MPFEATURE_8BOTS, array, index, len);
-	}
-
-	if (challengeindex >= 15) {
-		index = challengeForceUnlockFeature(MPFEATURE_SCENARIO_PAC, array, index, len);
-	}
-
-	if (challengeindex >= 20) {
-		index = challengeForceUnlockFeature(MPFEATURE_STAGE_CARPARK, array, index, len);
-	}
-#endif
 
 	// Clear the remainder of the array
 	for (i = index; i < len; i++) {

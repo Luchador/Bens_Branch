@@ -5555,7 +5555,7 @@ bool ai00f6(void)
 {
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
 
-	if (var8007073c == 2) {
+	if (var8007073c == 2) { // Unreachable?
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[2]);
 	} else {
 		g_Vars.aioffset += 3;
@@ -9668,21 +9668,6 @@ bool aiConfigureEnvironment(void)
 	s32 i;
 
 	switch (cmd[4]) {
-	case AIENVCMD_00:
-		var8006ae18 = value;
-		break;
-	case AIENVCMD_01:
-		var8006ae1c = value;
-		break;
-	case AIENVCMD_02:
-		var8006ae20 = value;
-		break;
-	case AIENVCMD_03:
-		var8006ae24 = value;
-		break;
-	case AIENVCMD_04:
-		var8006ae28 = value;
-		break;
 	case AIENVCMD_ROOM_SETAMBIENT:
 		g_Rooms[room_id].flags &= ~ROOMFLAG_PLAYAMBIENTTRACK;
 		if (value) {

@@ -568,7 +568,6 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 
 	if (g_Vars.normmplayerisrunning) {
 		if (g_MpScenarios[g_MpSetup.scenario].hudfunc) {
-#if VERSION >= VERSION_NTSC_1_0
 			if (g_MpSetup.paused != MPPAUSEMODE_GAMEOVER && g_NumReasonsToEndMpMatch == 0) {
 				gDPSetTextureFilter(gdl++, G_TF_POINT);
 				gDPSetColorDither(gdl++, G_CD_DISABLE);
@@ -581,9 +580,6 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 
 				gdl = g_MpScenarios[g_MpSetup.scenario].hudfunc(gdl);
 			}
-#else
-			gdl = g_MpScenarios[g_MpSetup.scenario].hudfunc(gdl);
-#endif
 		}
 
 		playercount = PLAYERCOUNT();
@@ -620,12 +616,10 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 					gDPFillRectangle(gdl++, viewleft, viewtop, viewright - 1, viewtop);
 				}
 			}
-#if VERSION >= VERSION_NTSC_1_0
 			else if (g_Vars.fourmeg2player) {
 				// Draw line at bottom of viewport
 				gDPFillRectangle(gdl++, viewleft, viewheight + viewtop - 2, viewright - 1, viewheight + viewtop - 2);
 			}
-#endif
 			else {
 				// @bug: No consideration is made for vertical splits here,
 				// however when using a vertical split neither line is visible.
