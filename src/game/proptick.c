@@ -12,7 +12,7 @@
 #include "game/game_096360.h"
 #include "game/bondgun.h"
 #include "game/gunfx.h"
-#include "game/game_0b0fd0.h"
+#include "game/weaponutils.h"
 #include "game/modelmgr.h"
 #include "game/tex.h"
 #include "game/camera.h"

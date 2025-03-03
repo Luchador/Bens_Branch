@@ -3,7 +3,7 @@
 #include "game/chraction.h"
 #include "game/game_006900.h"
 #include "game/bondgun.h"
-#include "game/game_0b0fd0.h"
+#include "game/weaponutils.h"
 #include "game/tex.h"
 #include "game/savebuffer.h"
 #include "game/menu.h"

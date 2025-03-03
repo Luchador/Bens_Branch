@@ -8,7 +8,7 @@
 #include "game/dlights.h"
 #include "game/explosions.h"
 #include "game/filemgr.h"
-#include "game/game_0b0fd0.h"
+#include "game/weaponutils.h"
 #include "game/game_1531a0.h"
 #include "game/gamefile.h"
 #include "game/hudmsg.h"

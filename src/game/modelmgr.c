@@ -100,8 +100,6 @@ void modelmgrPrintCounts(void)
 	osSyncPrintf("MOT : Type OA = %d/%d/%d/%d");
 	osSyncPrintf("MOT : g_ObjCount = %d");
 	osSyncPrintf("MOT : g_AnimCount = %d");
-
-	if (IS4MB());
 }
 
 struct model *modelmgrInstantiateModel(struct modeldef *modeldef, bool withanim)

@@ -17,7 +17,7 @@
 #ifndef PLATFORM_N64
 #include "video.h"
 #include "game/gfxmemory.h"
-#include "game/game_13c510.h"
+#include "game/artifacts.h"
 #include "game/player.h"
 #endif
 

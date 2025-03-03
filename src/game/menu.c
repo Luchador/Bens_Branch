@@ -2188,7 +2188,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 			mtx4MultMtx4(&posmtx, &rotmtx, &sp244);
 
 			if (modeltype == MENUMODELTYPE_3) {
-				credits0f13ae04(&sp1c4);
 				mtx4MultMtx4(&sp1c4, &sp244, &sp184);
 				mtx4MultMtx4(&sp184, &sp204, &menumodel->mtx);
 			} else {

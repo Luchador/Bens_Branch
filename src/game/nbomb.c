@@ -26,13 +26,14 @@
 #include "types.h"
 #include "platform.h"
 
-s16 var8009cb00;
+s16 g_TCoordOffset; // Animates the textures going around the sphere
 s32 var8009cb04;
 struct nbomb g_Nbombs[6];
 
 bool g_NbombsActive = false;
 f32 sphereradius = 100;
 
+// Ben's comment: if (var8009cb04 && vertices[i].t == 0) fixes texture seam when atan2f(src.x, src.z) returns 0
 #define MAKEVERTEX(i, src) \
 	vertices[i].x = src.x * sphereradius; \
 	vertices[i].y = src.y * sphereradius; \
@@ -42,10 +43,9 @@ f32 sphereradius = 100;
 	vertices[i].colour = 0; \
 \
 	if (var8009cb04 && vertices[i].t == 0) { \
-		vertices[i].t = 256 * 32; \
 	} \
 \
-	vertices[i].t += var8009cb00;
+	vertices[i].t += g_TCoordOffset; // Ben's comment: scrolls the T coord around the sphere but honestly I can't see much difference when this is commented out
 
 Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, s8 depth)
 {
@@ -125,7 +125,7 @@ Gfx *nbombCreateSphere(Gfx *gdl, s32 depth)
 
 	vertices = gfxAllocateVertices(6);
 
-	//Make one half of the sphere
+	// Make one half of the sphere
 	MAKEVERTEX(0, sp5c[0]);
 	MAKEVERTEX(1, sp5c[1]);
 	MAKEVERTEX(2, sp5c[2]);
@@ -144,7 +144,7 @@ Gfx *nbombCreateSphere(Gfx *gdl, s32 depth)
 
 	vertices = gfxAllocateVertices(6);
 
-	//Make the other half of the sphere
+	// Make the other half of the sphere
 	MAKEVERTEX(0, sp5c[0]);
 	MAKEVERTEX(1, sp5c[1]);
 	MAKEVERTEX(2, sp5c[2]);
@@ -210,7 +210,7 @@ Gfx *nbombCreateGdl(void)
 		index = 1;
 	}
 
-	var8009cb00 = (s32)(g_20SecIntervalFrac * 64.0f * 32.0f * 16.0f) % 0x800;
+	g_TCoordOffset = (s32)(g_20SecIntervalFrac * 64.0f * 32.0f * 16.0f) % 0x800; //0x800 = 2048. g_TCoordOffset goes from 0 to 16 over a period of 20 seconds
 
 	gdl = gdlstart = gfxAllocate(gdlsizes[index]);
 

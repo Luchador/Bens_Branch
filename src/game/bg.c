@@ -15,7 +15,7 @@
 #include "game/sky.h"
 #include "game/stars.h"
 #include "game/dyntex.h"
-#include "game/game_13c510.h"
+#include "game/artifacts.h"
 #include "game/game_1531a0.h"
 #include "game/gfxmemory.h"
 #include "game/gfxreplace.h"
@@ -2047,8 +2047,6 @@ void bgBuildTables(s32 stagenum)
 			g_BgPortals[i].flags &= ~PORTALFLAG_CLOSED & 0xff;
 		}
 	}
-
-	envSetStageNum(stagenum);
 
 	var8007fc10 = 200;
 

@@ -2,7 +2,7 @@
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/chrai.h"
-#include "game/game_00b820.h"
+#include "game/chrutils.h"
 #include "game/playerreset.h"
 #include "game/body.h"
 #include "game/setuputils.h"

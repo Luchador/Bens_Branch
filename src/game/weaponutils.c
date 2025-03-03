@@ -3,7 +3,7 @@
 #include "game/cheats.h"
 #include "game/inv.h"
 #include "game/bondgun.h"
-#include "game/game_0b0fd0.h"
+#include "game/weaponutils.h"
 #include "game/player.h"
 #include "game/hudmsg.h"
 #include "game/playermgr.h"
@@ -330,16 +330,6 @@ bool weaponHasAmmoFlag(s32 weaponnum, s32 funcnum, u32 flag)
 	return false;
 }
 
-void func0f0b18ac(s32 arg0)
-{
-	// empty
-}
-
-void func0f0b18b4(s32 arg0)
-{
-	// empty
-}
-
 s32 currentPlayerGetDeviceState(s32 weaponnum)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
@@ -405,12 +395,6 @@ u16 weaponGetFileNum(s32 weaponnum)
 	}
 
 	if (weapon) {
-#ifdef PLATFORM_N64
-		if (PLAYERCOUNT() >= 2) {
-			return weapon->lo_model;
-		}
-#endif
-
 		return weapon->hi_model;
 	}
 
@@ -526,7 +510,7 @@ f32 gsetGetDamage(struct gset *gset)
 
 u8 gsetGetFireslotDuration(struct gset *gset)
 {
-#if VERSION >= VERSION_PAL_FINAL
+/*#if VERSION >= VERSION_PAL_FINAL
 	struct weaponfunc *func = gsetGetWeaponFunction(gset);
 	u8 result = 0;
 
@@ -540,7 +524,7 @@ u8 gsetGetFireslotDuration(struct gset *gset)
 	}
 
 	return result;
-#else
+#else*/
 	struct weaponfunc *func = gsetGetWeaponFunction(gset);
 
 	if (func && (func->type & 0xff) == INVENTORYFUNCTYPE_SHOOT) {
@@ -549,7 +533,7 @@ u8 gsetGetFireslotDuration(struct gset *gset)
 	}
 
 	return 0;
-#endif
+//#endif
 }
 
 u16 gsetGetSingleShootSound(struct gset *gset)
@@ -588,12 +572,10 @@ s8 weaponGetNumTicksPerShot(u32 weaponnum, u32 funcindex)
 		result = 3600.0f / autofunc->maxrpm;
 	}
 
-#if VERSION != VERSION_PAL_BETA
 	// PAL beta removes this check, only for it to be added back in PAL final
 	if (result > 3) {
 		result = TICKS(result);
 	}
-#endif
 
 	return result;
 }

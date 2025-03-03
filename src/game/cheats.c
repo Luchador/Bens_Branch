@@ -28,51 +28,25 @@ struct menudialogdef g_CheatsBuddiesMenuDialog;
 
 struct cheat g_Cheats[] = {
 	{ L_MPWEAPONS_075, TIME(2 m,  3 s),   SOLOSTAGEINDEX_EXTRACTION,     DIFF_A,  CHEATFLAG_TIMED | CHEATFLAG_TRANSFERPAK      }, // Hurricane Fists
-#if VERSION >= VERSION_NTSC_1_0
 	{ L_MPWEAPONS_076, TIME(1 m, 40 s),   SOLOSTAGEINDEX_G5BUILDING,     DIFF_A,  CHEATFLAG_TIMED | CHEATFLAG_TRANSFERPAK      }, // Cloaking Device
-#else
-	{ L_MPWEAPONS_076, TIME(0 m, 59 s),   SOLOSTAGEINDEX_G5BUILDING,     DIFF_A,  CHEATFLAG_TIMED | CHEATFLAG_TRANSFERPAK      }, // Cloaking Device
-#endif
 	{ L_MPWEAPONS_077, TIME(3 m, 50 s),   SOLOSTAGEINDEX_ESCAPE,         DIFF_A,  CHEATFLAG_TIMED                              }, // Invincible
-#if VERSION >= VERSION_NTSC_1_0
 	{ L_MPWEAPONS_078, TIME(5 m, 31 s),   SOLOSTAGEINDEX_SKEDARRUINS,    DIFF_PA, CHEATFLAG_TIMED | CHEATFLAG_TRANSFERPAK      }, // All Guns in Solo
 	{ L_MPWEAPONS_079, TIME(7 m,  7 s),   SOLOSTAGEINDEX_PELAGIC,        DIFF_SA, CHEATFLAG_TIMED                              }, // Unlimited Ammo
 	{ L_MPWEAPONS_080, TIME(3 m, 11 s),   SOLOSTAGEINDEX_AIRBASE,        DIFF_SA, CHEATFLAG_TIMED                              }, // Unlimited Ammo, No Reloads
-#else
-	{ L_MPWEAPONS_078, TIME(4 m,  7 s),   SOLOSTAGEINDEX_SKEDARRUINS,    DIFF_PA, CHEATFLAG_TIMED | CHEATFLAG_TRANSFERPAK      }, // All Guns in Solo
-	{ L_MPWEAPONS_079, TIME(5 m, 50 s),   SOLOSTAGEINDEX_PELAGIC,        DIFF_SA, CHEATFLAG_TIMED                              }, // Unlimited Ammo
-	{ L_MPWEAPONS_080, TIME(2 m, 59 s),   SOLOSTAGEINDEX_AIRBASE,        DIFF_SA, CHEATFLAG_TIMED                              }, // Unlimited Ammo, No Reloads
-#endif
 	{ L_MPWEAPONS_081, 0,                 SOLOSTAGEINDEX_INVESTIGATION,  DIFF_A,  CHEATFLAG_COMPLETION                         }, // Slo-mo Single Player
 	{ L_MPWEAPONS_082, 0,                 SOLOSTAGEINDEX_CHICAGO,        DIFF_A,  CHEATFLAG_COMPLETION                         }, // DK Mode
 	{ L_MPWEAPONS_083, TIME(2 m, 50 s),   SOLOSTAGEINDEX_CRASHSITE,      DIFF_A,  CHEATFLAG_TIMED                              }, // Trent's Magnum
-#if VERSION >= VERSION_NTSC_1_0
 	{ L_MPWEAPONS_084, TIME(7 m, 27 s),   SOLOSTAGEINDEX_DEEPSEA,        DIFF_PA, CHEATFLAG_TIMED                              }, // FarSight
-#else
-	{ L_MPWEAPONS_084, TIME(5 m, 13 s),   SOLOSTAGEINDEX_DEEPSEA,        DIFF_PA, CHEATFLAG_TIMED                              }, // FarSight
-#endif
 	{ L_MPWEAPONS_085, 0,                 SOLOSTAGEINDEX_G5BUILDING,     DIFF_A,  CHEATFLAG_COMPLETION                         }, // Small Jo
 	{ L_MPWEAPONS_086, 0,                 SOLOSTAGEINDEX_INFILTRATION,   DIFF_A,  CHEATFLAG_COMPLETION                         }, // Small Characters
 	{ L_MPWEAPONS_087, 0,                 SOLOSTAGEINDEX_DEFENSE,        DIFF_A,  CHEATFLAG_COMPLETION                         }, // Enemy Shields
 	{ L_MPWEAPONS_088, 0,                 SOLOSTAGEINDEX_DEEPSEA,        DIFF_A,  CHEATFLAG_COMPLETION                         }, // Jo Shield
-#if VERSION >= VERSION_NTSC_1_0
 	{ L_MPWEAPONS_089, TIME(1 m, 45 s),   SOLOSTAGEINDEX_DEFENSE,        DIFF_A,  CHEATFLAG_TIMED                              }, // Super Shield
-#else
-	{ L_MPWEAPONS_089, TIME(1 m, 12 s),   SOLOSTAGEINDEX_DEFENSE,        DIFF_A,  CHEATFLAG_TIMED                              }, // Super Shield
-#endif
 	{ L_MPWEAPONS_090, 0,                 SOLOSTAGEINDEX_DEFECTION,      DIFF_A,  CHEATFLAG_COMPLETION                         }, // Classic Sight
 	{ L_MPWEAPONS_091, 0,                 SOLOSTAGEINDEX_AIRBASE,        DIFF_A,  CHEATFLAG_COMPLETION                         }, // Team Heads Only
-#if VERSION >= VERSION_NTSC_1_0
 	{ L_MPWEAPONS_092, TIME(7 m, 59 s),   SOLOSTAGEINDEX_RESCUE,         DIFF_PA, CHEATFLAG_TIMED                              }, // Play as Elvis
-#else
-	{ L_MPWEAPONS_092, TIME(7 m,  0 s),   SOLOSTAGEINDEX_RESCUE,         DIFF_PA, CHEATFLAG_TIMED                              }, // Play as Elvis
-#endif
 	{ L_MPWEAPONS_093, 0,                 SOLOSTAGEINDEX_PELAGIC,        DIFF_A,  CHEATFLAG_COMPLETION                         }, // Enemy Rockets
-#if VERSION >= VERSION_NTSC_1_0
 	{ L_MPWEAPONS_094, TIME(3 m, 55 s),   SOLOSTAGEINDEX_AIRFORCEONE,    DIFF_PA, CHEATFLAG_TIMED                              }, // Unlimited Ammo - Laptop Sentry Gun
-#else
-	{ L_MPWEAPONS_094, TIME(2 m, 59 s),   SOLOSTAGEINDEX_AIRFORCEONE,    DIFF_PA, CHEATFLAG_TIMED                              }, // Unlimited Ammo - Laptop Sentry Gun
-#endif
 	{ L_MPWEAPONS_095, TIME(1 m, 30 s),   SOLOSTAGEINDEX_DEFECTION,      DIFF_SA, CHEATFLAG_TIMED                              }, // Marquis of Queensbury Rules
 	{ L_MPWEAPONS_096, 0,                 SOLOSTAGEINDEX_CRASHSITE,      DIFF_A,  CHEATFLAG_COMPLETION                         }, // Perfect Darkness
 	{ L_MPWEAPONS_097, TIME(6 m, 30 s),   SOLOSTAGEINDEX_INVESTIGATION,  DIFF_PA, CHEATFLAG_TIMED                              }, // Pugilist
@@ -86,11 +60,7 @@ struct cheat g_Cheats[] = {
 	{ L_MPWEAPONS_105, 0,                 SOLOSTAGEINDEX_ESCAPE,         DIFF_A,  CHEATFLAG_COMPLETION                         }, // SuperDragon
 	{ L_MPWEAPONS_106, 0,                 SOLOSTAGEINDEX_AIRFORCEONE,    DIFF_A,  CHEATFLAG_COMPLETION                         }, // Laptop Gun
 	{ L_MPWEAPONS_107, 0,                 SOLOSTAGEINDEX_ATTACKSHIP,     DIFF_A,  CHEATFLAG_COMPLETION                         }, // Phoenix
-#if VERSION >= VERSION_NTSC_1_0
 	{ L_MPWEAPONS_108, TIME(2 m,  0 s),   SOLOSTAGEINDEX_CHICAGO,        DIFF_PA, CHEATFLAG_TIMED                              }, // Psychosis Gun
-#else
-	{ L_MPWEAPONS_108, TIME(1 m, 44 s),   SOLOSTAGEINDEX_CHICAGO,        DIFF_PA, CHEATFLAG_TIMED                              }, // Psychosis Gun
-#endif
 	{ L_MPWEAPONS_109, WEAPON_PP9I,       0,                             0,       CHEATFLAG_FIRINGRANGE                        }, // PP9i
 	{ L_MPWEAPONS_110, WEAPON_CC13,       0,                             0,       CHEATFLAG_FIRINGRANGE                        }, // CC13
 	{ L_MPWEAPONS_111, WEAPON_KL01313,    0,                             0,       CHEATFLAG_FIRINGRANGE                        }, // KL01313
@@ -99,9 +69,7 @@ struct cheat g_Cheats[] = {
 	{ L_MPWEAPONS_114, WEAPON_DMC,        0,                             0,       CHEATFLAG_FIRINGRANGE                        }, // DMC
 	{ L_MPWEAPONS_115, WEAPON_AR53,       0,                             0,       CHEATFLAG_FIRINGRANGE                        }, // AR53
 	{ L_MPWEAPONS_116, WEAPON_RCP45,      0,                             0,       CHEATFLAG_FIRINGRANGE                        }, // RC-P45
-#ifndef PLATFORM_N64
 	{ L_MPWEAPONS_215, 0,                 SOLOSTAGEINDEX_EXTRACTION,     DIFF_A,  CHEATFLAG_COMPLETION                         }, // Dual wield all guns
-#endif
 };
 
 u32 cheatIsUnlocked(s32 cheat_id)
@@ -466,173 +434,6 @@ char *cheatGetMarquee(struct menuitem *arg0)
 	char difficultyname[256];
 	char cheatname[256];
 
-#if VERSION >= VERSION_JPN_FINAL
-	s32 len;
-	static s32 var80074020pf = 0;
-	static s32 var80074024pf = 0;
-
-	if (g_Menus[g_MpPlayerNum].curdialog
-			&& g_Menus[g_MpPlayerNum].curdialog->focuseditem
-			&& g_Menus[g_MpPlayerNum].curdialog->focuseditem->type == MENUITEMTYPE_CHECKBOX) {
-		cheat_id = g_Menus[g_MpPlayerNum].curdialog->focuseditem->param;
-
-		if (g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsBuddiesMenuDialog
-				&& g_Menus[g_MpPlayerNum].curdialog->focuseditem == &g_CheatsBuddiesMenuItems[0]) {
-			// Velvet
-			sprintf(g_CheatMarqueeString, "%s %s", langGet(L_MPWEAPONS_143), langGet(L_MPWEAPONS_117)); // "Buddy Available", "Velvet Dark"
-		} else if (cheatIsUnlocked(cheat_id)) {
-			// Show cheat name
-			sprintf(g_CheatMarqueeString, "%s %s\n",
-					g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsBuddiesMenuDialog ? langGet(L_MPWEAPONS_143) : langGet(L_MPWEAPONS_136), // "Buddy Available", "Cheat available"
-					langGet(g_Cheats[cheat_id].nametextid)
-			);
-		} else {
-			// Locked
-			strcpy(cheatname, langGet(g_Cheats[cheat_id].nametextid));
-			ptr = cheatname;
-
-			while (*ptr != '\n') {
-				ptr++;
-			}
-
-			*ptr = '\0';
-
-			if (g_Cheats[cheat_id].flags & CHEATFLAG_COMPLETION) {
-				sprintf(g_CheatMarqueeString, "%s %s %s %s %s",
-						langGet(L_MPWEAPONS_137), // "Complete"
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1),
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2),
-						langGet(L_MPWEAPONS_138), // "for cheat:"
-						&cheatname
-				);
-			} else {
-				// Timed
-				strcpy(difficultyname, langGet(L_OPTIONS_251 + g_Cheats[cheat_id].difficulty));
-				ptr = difficultyname;
-
-				while (*ptr != '\n') {
-					ptr++;
-				}
-
-				*ptr = '\0';
-
-				sprintf(g_CheatMarqueeString, "%s %s %s %s %s %s %d:%02d %s %s",
-						langGet(L_MPWEAPONS_137), // "Complete"
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1),
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2),
-						langGet(L_MPWEAPONS_139), // "on"
-						&difficultyname,
-						langGet(L_MPWEAPONS_140), // "in under"
-						g_Cheats[cheat_id].time / 60,
-						g_Cheats[cheat_id].time % 60,
-						langGet(L_MPWEAPONS_138), // "for cheat:"
-						&cheatname
-				);
-			}
-
-			if (g_Cheats[cheat_id].flags & CHEATFLAG_TRANSFERPAK) {
-				strcat(g_CheatMarqueeString, langGet(L_MPWEAPONS_141)); // " or insert Game Boy ..."
-			}
-
-			strcat(g_CheatMarqueeString, "\n");
-		}
-
-		len = strlen(g_CheatMarqueeString);
-
-		if (var80074024pf != len) {
-			var80074024pf = len;
-
-			if (len > var80074020pf) {
-				var80074020pf = len;
-			}
-		}
-
-		return g_CheatMarqueeString;
-	}
-#elif VERSION >= VERSION_PAL_FINAL
-	s32 len;
-	static s32 var80074020pf = 0;
-	static s32 var80074024pf = 0;
-
-	if (g_Menus[g_MpPlayerNum].curdialog
-			&& g_Menus[g_MpPlayerNum].curdialog->focuseditem
-			&& g_Menus[g_MpPlayerNum].curdialog->focuseditem->type == MENUITEMTYPE_CHECKBOX) {
-		cheat_id = g_Menus[g_MpPlayerNum].curdialog->focuseditem->param;
-
-		if (g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsBuddiesMenuDialog
-				&& g_Menus[g_MpPlayerNum].curdialog->focuseditem == &g_CheatsBuddiesMenuItems[0]) {
-			// Velvet
-			sprintf(g_CheatMarqueeString, "%s: %s", langGet(L_MPWEAPONS_143), langGet(L_MPWEAPONS_117)); // "Buddy Available", "Velvet Dark"
-		} else if (cheatIsUnlocked(cheat_id)) {
-			// Show cheat name
-			sprintf(g_CheatMarqueeString, "%s: %s\n",
-					g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsBuddiesMenuDialog ? langGet(L_MPWEAPONS_143) : langGet(L_MPWEAPONS_136), // "Buddy Available", "Cheat available"
-					langGet(g_Cheats[cheat_id].nametextid)
-			);
-		} else {
-			// Locked
-			strcpy(cheatname, langGet(g_Cheats[cheat_id].nametextid));
-			ptr = cheatname;
-
-			while (*ptr != '\n') {
-				ptr++;
-			}
-
-			*ptr = '\0';
-
-			if (g_Cheats[cheat_id].flags & CHEATFLAG_COMPLETION) {
-				sprintf(g_CheatMarqueeString, "%s %s: %s %s %s",
-						langGet(L_MPWEAPONS_137), // "Complete"
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1),
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2),
-						langGet(L_MPWEAPONS_138), // "for cheat:"
-						&cheatname
-				);
-			} else {
-				// Timed
-				strcpy(difficultyname, langGet(L_OPTIONS_251 + g_Cheats[cheat_id].difficulty));
-				ptr = difficultyname;
-
-				while (*ptr != '\n') {
-					ptr++;
-				}
-
-				*ptr = '\0';
-
-				sprintf(g_CheatMarqueeString, "%s %s: %s %s %s %s %d:%02d %s %s",
-						langGet(L_MPWEAPONS_137), // "Complete"
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1),
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2),
-						langGet(L_MPWEAPONS_139), // "on"
-						&difficultyname,
-						langGet(L_MPWEAPONS_140), // "in under"
-						g_Cheats[cheat_id].time / 60,
-						g_Cheats[cheat_id].time % 60,
-						langGet(L_MPWEAPONS_138), // "for cheat:"
-						&cheatname
-				);
-			}
-
-			if (g_Cheats[cheat_id].flags & CHEATFLAG_TRANSFERPAK) {
-				strcat(g_CheatMarqueeString, langGet(L_MPWEAPONS_141)); // " or insert Game Boy ..."
-			}
-
-			strcat(g_CheatMarqueeString, "\n");
-		}
-
-		len = strlen(g_CheatMarqueeString);
-
-		if (var80074024pf != len) {
-			var80074024pf = len;
-
-			if (len > var80074020pf) {
-				var80074020pf = len;
-			}
-		}
-
-		return g_CheatMarqueeString;
-	}
-#elif VERSION >= VERSION_NTSC_1_0
 	if (g_Menus[g_MpPlayerNum].curdialog
 			&& g_Menus[g_MpPlayerNum].curdialog->focuseditem
 			&& g_Menus[g_MpPlayerNum].curdialog->focuseditem->type == MENUITEMTYPE_CHECKBOX) {
@@ -701,76 +502,6 @@ char *cheatGetMarquee(struct menuitem *arg0)
 
 		return g_CheatMarqueeString;
 	}
-#else
-	if (g_Menus[g_MpPlayerNum].curdialog
-			&& g_Menus[g_MpPlayerNum].curdialog->focuseditem
-			&& g_Menus[g_MpPlayerNum].curdialog->focuseditem->type == MENUITEMTYPE_CHECKBOX) {
-		cheat_id = g_Menus[g_MpPlayerNum].curdialog->focuseditem->param;
-
-		if (g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsBuddiesMenuDialog
-				&& g_Menus[g_MpPlayerNum].curdialog->focuseditem == &g_CheatsBuddiesMenuItems[0]) {
-			// Velvet
-			sprintf(g_StringPointer, "%s: %s", langGet(L_MPWEAPONS_143), langGet(L_MPWEAPONS_117)); // "Buddy Available", "Velvet Dark"
-		} else if (cheatIsUnlocked(cheat_id)) {
-			// Show cheat name
-			sprintf(g_StringPointer, "%s: %s\n",
-					g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsBuddiesMenuDialog ? langGet(L_MPWEAPONS_143) : langGet(L_MPWEAPONS_136), // "Buddy Available", "Cheat available"
-					langGet(g_Cheats[cheat_id].nametextid)
-			);
-		} else {
-			// Locked
-			strcpy(cheatname, langGet(g_Cheats[cheat_id].nametextid));
-			ptr = cheatname;
-
-			while (*ptr != '\n') {
-				ptr++;
-			}
-
-			*ptr = '\0';
-
-			if (g_Cheats[cheat_id].flags & CHEATFLAG_COMPLETION) {
-				sprintf(g_StringPointer, "%s %s: %s %s %s",
-						langGet(L_MPWEAPONS_137), // "Complete"
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1),
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2),
-						langGet(L_MPWEAPONS_138), // "for cheat:"
-						&cheatname
-				);
-			} else {
-				// Timed
-				strcpy(difficultyname, langGet(L_OPTIONS_251 + g_Cheats[cheat_id].difficulty));
-				ptr = difficultyname;
-
-				while (*ptr != '\n') {
-					ptr++;
-				}
-
-				*ptr = '\0';
-
-				sprintf(g_StringPointer, "%s %s: %s %s %s %s %d:%02d %s %s",
-						langGet(L_MPWEAPONS_137), // "Complete"
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1),
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2),
-						langGet(L_MPWEAPONS_139), // "on"
-						&difficultyname,
-						langGet(L_MPWEAPONS_140), // "in under"
-						g_Cheats[cheat_id].time / 60,
-						g_Cheats[cheat_id].time % 60,
-						langGet(L_MPWEAPONS_138), // "for cheat:"
-						&cheatname
-				);
-			}
-
-			if (g_Cheats[cheat_id].flags & CHEATFLAG_TRANSFERPAK) {
-				strcat(g_StringPointer, langGet(L_MPWEAPONS_141)); // " or insert Game Boy ..."
-			}
-
-			strcat(g_StringPointer, "\n");
-		}
-
-		return g_StringPointer;
-	}
-#endif
 
 	// No cheat selected
 	return langGet(L_MPWEAPONS_142); // "Select cheat for information"
@@ -786,7 +517,6 @@ MenuItemHandlerResult cheatMenuHandleTurnOffAllCheats(s32 operation, struct menu
 	return false;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 s32 cheatGetByTimedStageIndex(s32 stage_index, s32 difficulty)
 {
 	s32 cheat_id;
@@ -802,9 +532,7 @@ s32 cheatGetByTimedStageIndex(s32 stage_index, s32 difficulty)
 
 	return -1;
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 s32 cheatGetByCompletedStageIndex(s32 stage_index)
 {
 	s32 cheat_id;
@@ -817,23 +545,17 @@ s32 cheatGetByCompletedStageIndex(s32 stage_index)
 
 	return -1;
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 s32 cheatGetTime(s32 cheat_id)
 {
 	return g_Cheats[cheat_id].time;
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 char *cheatGetName(s32 cheat_id)
 {
 	return langGet(g_Cheats[cheat_id].nametextid);
 }
-#endif
 
-#ifndef PLATFORM_N64
 
 static MenuItemHandlerResult menuhandlerUnlockEverything(s32 operation, struct menuitem *item, union handlerdata *data)
 {
@@ -903,8 +625,6 @@ struct menudialogdef g_CheatsConfirmUnlockMenuDialog = {
 	0,
 	NULL,
 };
-
-#endif
 
 struct menuitem g_CheatsFunMenuItems[] = {
 	{
@@ -1064,7 +784,6 @@ struct menuitem g_CheatsGameplayMenuItems[] = {
 		0,
 		cheatCheckboxMenuHandler,
 	},
-#ifndef PLATFORM_N64
 	{
 		MENUITEMTYPE_CHECKBOX,
 		CHEAT_DUALWIELDALLGUNS,
@@ -1073,7 +792,6 @@ struct menuitem g_CheatsGameplayMenuItems[] = {
 		0,
 		cheatCheckboxMenuHandler,
 	},
-#endif
 	{
 		MENUITEMTYPE_SEPARATOR,
 		0,
@@ -1595,7 +1313,6 @@ struct menuitem g_CheatsMenuItems[] = {
 		0,
 		cheatMenuHandleTurnOffAllCheats,
 	},
-#ifndef PLATFORM_N64
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
@@ -1604,7 +1321,6 @@ struct menuitem g_CheatsMenuItems[] = {
 		0,
 		(void *)&g_CheatsConfirmUnlockMenuDialog,
 	},
-#endif
 	{
 		MENUITEMTYPE_SEPARATOR,
 		0,

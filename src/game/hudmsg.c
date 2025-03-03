@@ -2,7 +2,7 @@
 #include "constants.h"
 #include "constants.h"
 #include "game/propsnd.h"
-#include "game/game_0b0fd0.h"
+#include "game/weaponutils.h"
 #include "game/player.h"
 #include "game/savebuffer.h"
 #include "game/hudmsg.h"

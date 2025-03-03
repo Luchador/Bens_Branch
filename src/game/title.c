@@ -613,12 +613,6 @@ void titleExitPdLogo(void)
 	modelmgrFreeModel(g_TitleModelPdTwo);
 	modelmgrFreeModel(g_TitleModelPdThree);
 
-#if VERSION == VERSION_JPN_FINAL
-	modelmgrFreeModel(g_TitleModelJpnLogo1);
-	modelmgrFreeModel(g_TitleModelJpnLogo2);
-	modelmgrFreeModel(g_TitleModelJpnPd);
-#endif
-
 	joy00014810(true);
 }
 
@@ -632,15 +626,9 @@ void titleTickPdLogo(void)
 	g_TitleTimer += g_Vars.lvupdate60;
 	g_PdLogoVtxColIndex = 1 - g_PdLogoVtxColIndex;
 
-#if VERSION == VERSION_JPN_FINAL
-	if (g_TitleTimer > 950) {
-		g_PdLogoTriggerExit = true;
-	}
-#endif
-
 	if (g_PdLogoTriggerExit) {
 		// Exiting due to player not pressing anything
-		if (g_AltTitleEnabled && IS8MB()) {
+		if (g_AltTitleEnabled) {
 			g_TitleMode = TITLEMODE_SKIP;
 			creditsRequestAltTitle();
 			g_TitleNextStage = STAGE_CREDITS; // for alt title screen
@@ -864,7 +852,6 @@ f32 g_PdLogoTitleStepFrac = 0;
 s32 g_PdLogoTitleStep = 0;
 bool g_PdLogoTitlePresenting = false;
 s32 g_PdLogoPointlessTimer = 0;
-s32 var80062804 = 1;
 f32 g_PdLogoUnusedRot = 1.5705462694168;
 bool g_PdLogoUnusedRotEnabled = false;
 bool g_PdLogoLightMoving = false;
@@ -904,7 +891,6 @@ void titleSkipToPdTitle(void)
 	g_PdLogoTitleStep = 1;
 	g_PdLogoTitlePresenting = true;
 	g_PdLogoPointlessTimer = 0;
-	var80062804 = 1;
 	g_PdLogoUnusedRotEnabled = true;
 	g_PdLogoLightMoving = true;
 	g_TitleTimer = TICKS(549);
@@ -991,7 +977,6 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		g_PdLogoMorphEndTimer = 0;
 		g_PdLogoYRotStopping = false;
 		g_PdLogoDarkenEnabled = false;
-		var80062804 = 1;
 		g_PdLogoPointlessTimerEnabled = false;
 		g_PdLogoPreTitleTimer = 0;
 		g_PdLogoTitleStepFrac = 0.0f;
@@ -1036,12 +1021,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 			g_PdLogoYRotStopping = false;
 		}
 	} else if (g_PdLogoYRotEnabled) {
-#if VERSION >= VERSION_PAL_FINAL
 		g_PdLogoYRotCur += g_PdLogoYRotSpeed * g_Vars.lvupdate60;
-#else
-		g_PdLogoYRotCur += g_PdLogoYRotSpeed * g_Vars.lvupdate60freal;
-#endif
-
 		if (g_PdLogoYRotCur >= M_BADTAU) {
 			g_PdLogoYRotCur -= M_BADTAU;
 		} else if (g_PdLogoYRotCur < 0.0f) {
@@ -1154,35 +1134,6 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		}
 	}
 
-#if VERSION >= VERSION_JPN_FINAL
-	if (g_PdLogoTitleStep >= 0) {
-		g_PdLogoUnusedRotEnabled = true;
-
-		if (g_PdLogoTitleStep < 2) {
-			g_PdLogoTitleStepFrac += g_Vars.lvupdate60f / 12.0f;
-		} else {
-			g_PdLogoTitleStepFrac += 0.05f * g_Vars.lvupdate60f;
-		}
-
-		for (i = 0; i < g_Vars.lvupdate240; i++) {
-			var8009d34cjf = 0.99f * var8009d34cjf + 0.01f;
-		}
-
-		if (g_PdLogoTitleStepFrac >= 1.0f) {
-			firstvalue = var8009d358jf[0];
-			var8009d350jf = var8009d358jf[2];
-
-			for (j = 0; j < 3; j++) {
-				var8009d358jf[j] = var8009d358jf[j + 1];
-			}
-
-			var8009d358jf[3] = g_PdLogoTitleStep > 3 ? firstvalue : var8009d34cjf;
-
-			g_PdLogoTitleStepFrac = 0.0f;
-			g_PdLogoTitleStep++;
-		}
-	}
-#else
 	if (g_PdLogoTitlePresenting) {
 		g_PdLogoUnusedRotEnabled = 1;
 
@@ -1197,19 +1148,13 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		if (g_PdLogoTitleStepFrac >= 1.0f) {
 			g_PdLogoTitleStepFrac = 0.0f;
 			g_PdLogoTitleStep++;
-
-#if VERSION == VERSION_PAL_FINAL
-			if (g_PdLogoTitleStep == 6)
-#else
 			if (g_PdLogoTitleStep == 10)
-#endif
 			{
 				g_PdLogoTitlePresenting = false;
 				g_PdLogoExitTimer = 1;
 			}
 		}
 	}
-#endif
 
 	if (g_PdLogoUnusedRotEnabled) {
 		// Some unused value... maybe a different method of rotating the light?
@@ -1238,23 +1183,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		}
 	}
 
-#if VERSION == VERSION_JPN_FINAL
-	if (g_PdLogoTitleStep < 0) {
-		gdl = viSetFillColour(gdl, 0x00, 0x00, 0x00);
-	} else if (g_PdLogoTitleStep == 0) {
-		step0value = g_PdLogoTitleStepFrac * 255.0f;
-		gdl = viSetFillColour(gdl, step0value, step0value, step0value);
-	} else if (g_PdLogoTitleStep == 1) {
-		step1weight = g_PdLogoTitleStepFrac * 255.0f;
-		step1colour = colourBlend(0xffffffff, 0xa5002c00, step1weight);
-		gdl = viSetFillColour(gdl, ((step1colour >> 24) & 0xff), (step1colour >> 16) & 0xff, (step1colour >> 8) & 0xff);
-	} else {
-		gdl = viSetFillColour(gdl, 0xb9, 0x00, 0x2c);
-	}
-#else
 	gdl = viSetFillColour(gdl, 0x00, 0x00, 0x00);
-#endif
-
 	gdl = viFillBuffer(gdl);
 
 	if (g_PdLogoBlackTimer != 0) {
@@ -1268,53 +1197,14 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	{
 		f32 angle1;
 		f32 angle2;
-#if VERSION == VERSION_JPN_FINAL
-		u8 greenblue;
-		f32 frac;
-#endif
 
 		angle1 = (g_PdLogoLightDirFrac + -1.0f);
 		angle2 = 0.0f - 0.15f * g_PdLogoLightDirFrac;
 		angle1 = M_PI + angle1 * M_PI;
 		angle2 = M_PI + angle2 * M_PI;
 
-#if VERSION == VERSION_JPN_FINAL
-		if (g_PdLogoUseCombinedModel == true) {
-			if (g_PdLogoMorphing) {
-				frac = 1.0f - g_PdLogoFrac * 2.0f;
-
-				if (frac < 0.0f) {
-					frac = 0.0f;
-				}
-
-				greenblue = 255.0f * frac;
-			} else {
-				frac = 0.0f;
-				greenblue = 0;
-			}
-		} else {
-			frac = 1.0f;
-			greenblue = 255;
-		}
-
-		if (g_PdLogoTitleStep < 0) {
-			g_TitleLightPdLogoMain.l[0].l.col[0] = g_TitleLightPdLogoMain.l[0].l.colc[0] = 255;
-			g_TitleLightPdLogoMain.l[0].l.col[1] = g_TitleLightPdLogoMain.l[0].l.col[2] = g_TitleLightPdLogoMain.l[0].l.colc[1] = g_TitleLightPdLogoMain.l[0].l.colc[2] = greenblue;
-		} else {
-			g_TitleLightPdLogoMain.l[0].l.col[0] = g_TitleLightPdLogoMain.l[0].l.colc[0] = 0;
-			g_TitleLightPdLogoMain.l[0].l.col[1] = g_TitleLightPdLogoMain.l[0].l.col[2] = g_TitleLightPdLogoMain.l[0].l.colc[1] = g_TitleLightPdLogoMain.l[0].l.colc[2] = 0;
-		}
-
-		g_TitleLightPdLogoNotFront.a.l.col[0] = g_TitleLightPdLogoNotFront.a.l.colc[0] = 255.0f * g_PdLogoAmbientLightFrac;
-		g_TitleLightPdLogoNotFront.a.l.col[1] = g_TitleLightPdLogoNotFront.a.l.col[2] = g_TitleLightPdLogoNotFront.a.l.colc[1] = g_TitleLightPdLogoNotFront.a.l.colc[2] = 255.0f * frac * g_PdLogoAmbientLightFrac;
-
-		g_TitleLightPdLogoFront.a.l.col[0] = g_TitleLightPdLogoFront.a.l.colc[0] = 255;
-		g_TitleLightPdLogoFront.a.l.col[1] = g_TitleLightPdLogoFront.a.l.col[2] = g_TitleLightPdLogoFront.a.l.colc[1] = g_TitleLightPdLogoFront.a.l.colc[2] = greenblue;
-#else
 		g_TitleLightPdLogoMain.a.l.col[0] = g_TitleLightPdLogoMain.a.l.col[1] = g_TitleLightPdLogoMain.a.l.col[2] = g_TitleLightPdLogoMain.a.l.colc[0] = g_TitleLightPdLogoMain.a.l.colc[1] = g_TitleLightPdLogoMain.a.l.colc[2] = 0;
 		g_TitleLightPdLogoMain.l[0].l.col[0] = g_TitleLightPdLogoMain.l[0].l.col[1] = g_TitleLightPdLogoMain.l[0].l.col[2] = g_TitleLightPdLogoMain.l[0].l.colc[0] = g_TitleLightPdLogoMain.l[0].l.colc[1] = g_TitleLightPdLogoMain.l[0].l.colc[2] = 0xff;
-#endif
-
 		g_TitleLightPdLogoMain.l[0].l.dir[0] = 127.0f * sinf(angle1) * cosf(angle2);
 		g_TitleLightPdLogoMain.l[0].l.dir[1] = 127.0f * sinf(angle2);
 		g_TitleLightPdLogoMain.l[0].l.dir[2] = 127.0f * cosf(angle1) * cosf(angle2);
@@ -1330,240 +1220,86 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	mtx4MultMtx4(&sp2b0, &sp1e8, &sp270);
 	mtx00015f04(g_PdLogoScale, &sp270);
 
-#if VERSION != VERSION_JPN_FINAL
 	g_TitleLightPdLogoNotFront.a.l.col[0] = g_TitleLightPdLogoNotFront.a.l.col[1] = g_TitleLightPdLogoNotFront.a.l.col[2] = g_TitleLightPdLogoNotFront.a.l.colc[0] = g_TitleLightPdLogoNotFront.a.l.colc[1] = g_TitleLightPdLogoNotFront.a.l.colc[2] = 255.0f * g_PdLogoAmbientLightFrac;
-#endif
 
 	// Inject a SetLights command into the displaylists for each of the four logo sides.
 	// The front face gets a different light which makes it remain lit when the other sides go dark.
-#if VERSION == VERSION_JPN_FINAL
-	if (g_PdLogoTitleStep <= 0)
-#endif
-	{
-		s32 numvertices = 0;
-		s32 numcolours = 0;
+	
+	s32 numvertices = 0;
+	s32 numcolours = 0;
 
-		node = modelGetPart(model->definition, MODELPART_LOGO_FRONTSIDE);
+	node = modelGetPart(model->definition, MODELPART_LOGO_FRONTSIDE);
 
-		if (node != NULL) {
-			rodata = &node->rodata->dl;
-			numvertices += rodata->numvertices + 1;
-			numcolours += rodata->numcolours + 1;
-			rwdata = modelGetNodeRwData(model, node);
-			rwdata->gdl = tmpgdl = gfxAllocate(5 * sizeof(Gfx));
+	if (node != NULL) {
+		rodata = &node->rodata->dl;
+		numvertices += rodata->numvertices + 1;
+		numcolours += rodata->numcolours + 1;
+		rwdata = modelGetNodeRwData(model, node);
+		rwdata->gdl = tmpgdl = gfxAllocate(5 * sizeof(Gfx));
 
-			gSPSetLights1(tmpgdl++, g_TitleLightPdLogoFront);
-			gSPBranchList(tmpgdl++, rodata->opagdl);
-		}
-
-		node = modelGetPart(model->definition, MODELPART_LOGO_RIGHTSIDE);
-
-		if (node != NULL) {
-			rodata = &node->rodata->dl;
-			numvertices += rodata->numvertices + 1;
-			numcolours += rodata->numcolours + 1;
-			rwdata = modelGetNodeRwData(model, node);
-			rwdata->gdl = tmpgdl = gfxAllocate(5 * sizeof(Gfx));
-
-			if (g_PdLogoAmbientLightFrac > 0.0f) {
-				gSPSetLights1(tmpgdl++, g_TitleLightPdLogoNotFront);
-				gSPBranchList(tmpgdl++, rodata->opagdl);
-			} else {
-				gSPEndDisplayList(tmpgdl++);
-			}
-		}
-
-		node = modelGetPart(model->definition, MODELPART_LOGO_BACKSIDE);
-
-		if (node != NULL) {
-			rodata = &node->rodata->dl;
-			numvertices += rodata->numvertices + 1;
-			numcolours += rodata->numcolours + 1;
-			rwdata = modelGetNodeRwData(model, node);
-			rwdata->gdl = tmpgdl = gfxAllocate(5 * sizeof(Gfx));
-
-			if (g_PdLogoAmbientLightFrac > 0.0f) {
-				gSPSetLights1(tmpgdl++, g_TitleLightPdLogoNotFront);
-				gSPBranchList(tmpgdl++, rodata->opagdl);
-			} else {
-				gSPEndDisplayList(tmpgdl++);
-			}
-		}
-
-		node = modelGetPart(model->definition, MODELPART_LOGO_LEFTSIDE);
-
-		if (node != NULL) {
-			rodata = &node->rodata->dl;
-			numvertices += rodata->numvertices + 1;
-			numcolours += rodata->numcolours + 1;
-			rwdata = modelGetNodeRwData(model, node);
-			rwdata->gdl = tmpgdl = gfxAllocate(5 * sizeof(Gfx));
-
-			if (g_PdLogoAmbientLightFrac > 0.0f) {
-				gSPSetLights1(tmpgdl++, g_TitleLightPdLogoNotFront);
-				gSPBranchList(tmpgdl++, rodata->opagdl);
-			} else {
-				gSPEndDisplayList(tmpgdl++);
-			}
-		}
-
-		gdl = titleRenderPdLogoModel(gdl, model, var80062804, g_PdLogoFrac, 240, 1.0f, &sp270, gfxAllocateVertices(numvertices), gfxAllocateColours(numcolours));
+		gSPSetLights1(tmpgdl++, g_TitleLightPdLogoFront);
+		gSPBranchList(tmpgdl++, rodata->opagdl);
 	}
 
-	gSPSetLights1(gdl++, g_TitleLightPdLogoMain);
+	node = modelGetPart(model->definition, MODELPART_LOGO_RIGHTSIDE);
 
+	if (node != NULL) {
+		rodata = &node->rodata->dl;
+		numvertices += rodata->numvertices + 1;
+		numcolours += rodata->numcolours + 1;
+		rwdata = modelGetNodeRwData(model, node);
+		rwdata->gdl = tmpgdl = gfxAllocate(5 * sizeof(Gfx));
+
+		if (g_PdLogoAmbientLightFrac > 0.0f) {
+			gSPSetLights1(tmpgdl++, g_TitleLightPdLogoNotFront);
+			gSPBranchList(tmpgdl++, rodata->opagdl);
+		} else {
+			gSPEndDisplayList(tmpgdl++);
+		}
+	}
+
+	node = modelGetPart(model->definition, MODELPART_LOGO_BACKSIDE);
+
+	if (node != NULL) {
+		rodata = &node->rodata->dl;
+		numvertices += rodata->numvertices + 1;
+		numcolours += rodata->numcolours + 1;
+		rwdata = modelGetNodeRwData(model, node);
+		rwdata->gdl = tmpgdl = gfxAllocate(5 * sizeof(Gfx));
+
+		if (g_PdLogoAmbientLightFrac > 0.0f) {
+			gSPSetLights1(tmpgdl++, g_TitleLightPdLogoNotFront);
+			gSPBranchList(tmpgdl++, rodata->opagdl);
+		} else {
+			gSPEndDisplayList(tmpgdl++);
+		}
+	}
+
+	node = modelGetPart(model->definition, MODELPART_LOGO_LEFTSIDE);
+
+	if (node != NULL) {
+		rodata = &node->rodata->dl;
+		numvertices += rodata->numvertices + 1;
+		numcolours += rodata->numcolours + 1;
+		rwdata = modelGetNodeRwData(model, node);
+		rwdata->gdl = tmpgdl = gfxAllocate(5 * sizeof(Gfx));
+
+		if (g_PdLogoAmbientLightFrac > 0.0f) {
+			gSPSetLights1(tmpgdl++, g_TitleLightPdLogoNotFront);
+			gSPBranchList(tmpgdl++, rodata->opagdl);
+		} else {
+			gSPEndDisplayList(tmpgdl++);
+		}
+	}
+
+	gdl = titleRenderPdLogoModel(gdl, model, 1, g_PdLogoFrac, 240, 1.0f, &sp270, gfxAllocateVertices(numvertices), gfxAllocateColours(numcolours));
+
+	gSPSetLights1(gdl++, g_TitleLightPdLogoMain);
 	{
-		u32 stack3[4];
 		struct coord sp64 = {0, 0, 1000};
 		mtx4LoadTranslation(&sp64, &sp1e8);
 	}
 
-#if VERSION == VERSION_JPN_FINAL
-	mtx00015ea8(0.01f, &sp1e8);
-	mtx4MultMtx4(&sp2b0, &sp1e8, &sp230);
-	mtx00015f04(0.308f, &sp230);
-	mtx00015f04(3.5f, &sp230);
-
-	if (g_PdLogoTitleStep >= 0) {
-		// Background flashing logo
-		if (g_PdLogoTitleStep >= 2) {
-			u32 stack4[1];
-			Mtxf sp1b0;
-			u32 stack5[4];
-			s32 mtxindex;
-			u32 envalpha;
-
-			envalpha = (1.0f - g_PdLogoTitleStepFrac) * 255.0f;
-
-			mtx4LoadIdentity(&sp1b0);
-			mtx00015f04(var8009d350jf * 1.5f, &sp1b0);
-			mtx00016ae4(&sp2b0, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-			mtx4MultMtx4InPlace(&sp2b0, &sp1b0);
-			mtx4Copy(&sp1b0, &sp2b0);
-
-			renderdata.unk00 = &sp2b0;
-			renderdata.unk10 = gfxAllocate(g_TitleModelJpnLogo2->definition->nummatrices * sizeof(Mtxf));
-
-			mtx4Copy(&sp2b0, renderdata.unk10);
-
-			g_TitleModelJpnLogo2->matrices = renderdata.unk10;
-
-			modelUpdateRelations(g_TitleModelJpnLogo2);
-
-			renderdata.unk30 = 5;
-			renderdata.zbufferenabled = false;
-			renderdata.fogcolour = 0xff0000ff;
-			renderdata.envcolour = 0xff000000 | envalpha;
-			renderdata.gdl = gdl;
-
-			modelRender(&renderdata, g_TitleModelJpnLogo2);
-
-			gdl = renderdata.gdl;
-
-			for (mtxindex = 0; mtxindex < g_TitleModelJpnLogo2->definition->nummatrices; mtxindex++) {
-				Mtxf mtx;
-				mtx4Copy((Mtxf *) ((uintptr_t) g_TitleModelJpnLogo2->matrices + mtxindex * sizeof(Mtxf)), &mtx);
-				mtxF2L(&mtx, g_TitleModelJpnLogo2->matrices + mtxindex);
-			}
-		}
-
-		// Primary "PERFECT DARK" logo
-		{
-			u32 fogcolour;
-			u32 envcolour;
-			s32 mtxindex;
-
-			if (g_PdLogoTitleStep <= 2) {
-				fogcolour = 0;
-				envcolour = 0;
-			} else if (g_PdLogoTitleStep == 3) {
-				fogcolour = 0;
-				envcolour = (u8) (235.0f * g_PdLogoTitleStepFrac);
-			} else if (g_PdLogoTitleStep == 4) {
-				fogcolour = 235.0f * g_PdLogoTitleStepFrac;
-				envcolour = 255;
-			} else if (g_PdLogoTitleStep == 5) {
-				fogcolour = 235.0f - 138.0f * g_PdLogoTitleStepFrac;
-				envcolour = (u8) (235.0f - 138.0f * g_PdLogoTitleStepFrac);
-			} else {
-				fogcolour = 0x61;
-				envcolour = 0x61;
-			}
-
-			g_TitleLightPdLogoJpn.l[0].l.col[0] = g_TitleLightPdLogoJpn.l[0].l.colc[0] = 255;
-			g_TitleLightPdLogoJpn.l[0].l.col[1] = g_TitleLightPdLogoJpn.l[0].l.col[2] = g_TitleLightPdLogoJpn.l[0].l.colc[1] = g_TitleLightPdLogoJpn.l[0].l.colc[2] = 0;
-
-			gSPSetLights1(gdl++, g_TitleLightPdLogoJpn);
-			gSPSetLights1(gdl++, g_TitleLightPdLogoMain);
-
-			renderdata.unk00 = &sp230;
-
-			renderdata.unk10 = gfxAllocate(g_TitleModelJpnPd->definition->nummatrices * sizeof(Mtxf));
-
-			mtx4Copy(&sp230, renderdata.unk10);
-
-			g_TitleModelJpnPd->matrices = renderdata.unk10;
-
-			modelUpdateRelations(g_TitleModelJpnPd);
-
-			// @bug: || should be | in fogcolour expression
-			renderdata.zbufferenabled = false;
-			renderdata.unk30 = 5;
-			renderdata.fogcolour = fogcolour << 24 || fogcolour << 16 || (fogcolour << 8 | 0xff);
-			renderdata.envcolour = envcolour;
-			renderdata.gdl = gdl;
-
-			modelRender(&renderdata, g_TitleModelJpnPd);
-
-			gdl = renderdata.gdl;
-
-			for (mtxindex = 0; mtxindex < g_TitleModelJpnPd->definition->nummatrices; mtxindex++) {
-				Mtxf mtx;
-				mtx4Copy((Mtxf *) ((uintptr_t) g_TitleModelJpnPd->matrices + mtxindex * sizeof(Mtxf)), &mtx);
-				mtxF2L(&mtx, g_TitleModelJpnPd->matrices + mtxindex);
-			}
-		}
-
-		// Black logo
-		{
-			u32 stack6[1];
-			Mtxf spb0;
-			u32 stack7[4];
-			s32 mtxindex;
-
-			mtx4LoadIdentity(&spb0);
-			mtx00015f04(var8009d34cjf * 1.5f, &spb0);
-			mtx00016ae4(&sp2b0, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-			mtx4MultMtx4InPlace(&sp2b0, &spb0);
-			mtx4Copy(&spb0, &sp2b0);
-
-			renderdata.unk00 = &sp2b0;
-			renderdata.unk10 = gfxAllocate(g_TitleModelJpnLogo1->definition->nummatrices * sizeof(Mtxf));
-
-			mtx4Copy(&sp2b0, renderdata.unk10);
-
-			g_TitleModelJpnLogo1->matrices = renderdata.unk10;
-
-			modelUpdateRelations(g_TitleModelJpnLogo1);
-
-			renderdata.zbufferenabled = false;
-			renderdata.unk30 = 5;
-			renderdata.fogcolour = 0x000000ff;
-			renderdata.envcolour = 0x000000ff;
-			renderdata.gdl = gdl;
-
-			modelRender(&renderdata, g_TitleModelJpnLogo1);
-
-			gdl = renderdata.gdl;
-
-			for (mtxindex = 0; mtxindex < g_TitleModelJpnLogo1->definition->nummatrices; mtxindex++) {
-				Mtxf mtx;
-				mtx4Copy((Mtxf *) ((uintptr_t) g_TitleModelJpnLogo1->matrices + mtxindex * sizeof(Mtxf)), &mtx);
-				mtxF2L(&mtx, g_TitleModelJpnLogo1->matrices + mtxindex);
-			}
-		}
-	}
-#else
 	mtx00015f88(1.0f + sp13c, &sp1e8);
 	mtx4MultMtx4(&sp2b0, &sp1e8, &sp230);
 	mtx00015f04(0.308f, &sp230);
@@ -1589,7 +1325,6 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 			gdl = titleRenderPdLogoModel(gdl, model, false, 1.0f, 255, 1.0f, &sp230, g_PdLogoVertices[g_PdLogoVtxColIndex], g_PdLogoColours[g_PdLogoVtxColIndex]);
 		}
 	}
-#endif
 
 	return gdl;
 }
@@ -1793,11 +1528,7 @@ void titleTickNintendoLogo(void)
 		titleSetNextMode(TITLEMODE_PDLOGO);
 	}
 
-#if VERSION == VERSION_PAL_FINAL
-	if (g_TitleTimer > TICKS(220))
-#else
 	if (g_TitleTimer > TICKS(240))
-#endif
 	{
 		titleSetNextMode(TITLEMODE_PDLOGO);
 	}
@@ -1841,7 +1572,6 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 	}
 
 	titleSetLight(&g_TitleLightNintendoRare, v0, v0, v0, 0.0f, &lightdir);
-
 	{
 		Mtxf spa8;
 		struct coord sp9c;
@@ -1898,22 +1628,21 @@ void titleInitRareLogo(void)
 
 	g_TitleTimer = -3;
 
-	{
-		struct coord coord = {0, 0, 0};
+	struct coord coord = {0, 0, 0};
 
-		g_ModelStates[MODEL_RARELOGO].modeldef = modeldefLoad(g_ModelStates[MODEL_RARELOGO].fileid, nextaddr, TITLE_ALLOCSIZE, 0);
+	g_ModelStates[MODEL_RARELOGO].modeldef = modeldefLoad(g_ModelStates[MODEL_RARELOGO].fileid, nextaddr, TITLE_ALLOCSIZE, 0);
 
-		modelAllocateRwData(g_ModelStates[MODEL_RARELOGO].modeldef);
-		g_TitleModel = modelmgrInstantiateModelWithoutAnim(g_ModelStates[MODEL_RARELOGO].modeldef);
-		modelSetScale(g_TitleModel, 1);
-		modelSetRootPosition(g_TitleModel, &coord);
-		musicQueueStopAllEvent();
-		joy00014810(false);
+	modelAllocateRwData(g_ModelStates[MODEL_RARELOGO].modeldef);
+	g_TitleModel = modelmgrInstantiateModelWithoutAnim(g_ModelStates[MODEL_RARELOGO].modeldef);
+	modelSetScale(g_TitleModel, 1);
+	modelSetRootPosition(g_TitleModel, &coord);
+	musicQueueStopAllEvent();
+	joy00014810(false);
 
-		if (!g_IsTitleDemo && IS8MB()) {
-			g_IsTitleDemo = true;
-		}
+	if (!g_IsTitleDemo && IS8MB()) {
+		g_IsTitleDemo = true;
 	}
+	
 }
 
 void titleExitRareLogo(void)
@@ -2137,11 +1866,6 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 }
 
 s32 g_NumPlayers = 0;
-u32 var80062928 = 0x00000000;
-u32 var8006292c = 0x00000001;
-u32 var80062930 = 0x00000001;
-u32 var80062934 = 0x00000001;
-u32 var80062938 = 0x00000000;
 
 s32 getNumPlayers(void)
 {
@@ -2174,15 +1898,6 @@ void titleInitSkip(void)
 		g_IsTitleDemo++;
 	}
 
-	if (IS4MB()) {
-		g_TitleNextStage = STAGE_4MBMENU;
-		viSetAspect(PAL ? 1.7316017150879f : ((f32) FBALLOC_WIDTH_LO / (f32) FBALLOC_HEIGHT_LO));
-		viSetSize(FBALLOC_WIDTH_LO, FBALLOC_HEIGHT_LO);
-		viSetBufSize(FBALLOC_WIDTH_LO, FBALLOC_HEIGHT_LO);
-		playermgrSetViewSize(FBALLOC_WIDTH_LO, FBALLOC_HEIGHT_LO);
-		viSetViewSize(FBALLOC_WIDTH_LO, FBALLOC_HEIGHT_LO);
-	}
-
 	mainChangeToStage(g_TitleNextStage);
 
 	g_Vars.bondplayernum = 0;
@@ -2196,11 +1911,6 @@ void titleInitSkip(void)
 void titleInitNoController(void)
 {
 	g_TitleTimer = 0;
-}
-
-void titleExitNoController(void)
-{
-	// empty
 }
 
 void titleTickNoController(void)
@@ -2220,13 +1930,8 @@ Gfx *titleRenderNoController(Gfx *gdl)
 	s32 x;
 	s32 y;
 	char *text;
-	u32 stack[2];
 	s16 tmp;
 	s16 width;
-
-	if (1);
-	if (1);
-	if (1);
 
 	// This was likely printed to console
 	joyGetConnectedControllers();
@@ -2241,13 +1946,8 @@ Gfx *titleRenderNoController(Gfx *gdl)
 	x = 288 - (textwidth >> 1);
 	y = (g_TitleViewHeight / 2) - (textheight >> 1) - 12;
 
-	if (g_Jpn) {
-		width = viGetWidth();
-		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, 0x008000ff, width, viGetHeight(), 0, 0);
-	} else {
-		width = viGetWidth();
-		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, width, viGetHeight(), 0, 0);
-	}
+	width = viGetWidth();
+	gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, width, viGetHeight(), 0, 0);
 
 	// Line 2
 	text = langGet(L_OPTIONS_072); // "please power off and attach a controller"
@@ -2256,44 +1956,13 @@ Gfx *titleRenderNoController(Gfx *gdl)
 	x = 288 - (textwidth >> 1);
 	y = (g_TitleViewHeight / 2) - (textheight >> 1) + 12;
 
-	if (g_Jpn) {
-		width = viGetWidth();
-		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, 0x008000ff, width, viGetHeight(), 0, 0);
-	} else {
-		width = viGetWidth();
-		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, width, viGetHeight(), 0, 0);
-	}
+	width = viGetWidth();
+	gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicLg, g_FontHandelGothicLg, 0xffffffff, width, viGetHeight(), 0, 0);
 
 	gdl = text0f153780(gdl);
 
 	return gdl;
 }
-
-#if VERSION >= VERSION_JPN_FINAL
-void titleInitNoExpansion(void)
-{
-	g_TitleTimer = 0;
-}
-#endif
-
-#if VERSION >= VERSION_JPN_FINAL
-void titleExitNoExpansion(void)
-{
-	// empty
-}
-#endif
-
-#if VERSION >= VERSION_JPN_FINAL
-void titleTickNoExpansion(void)
-{
-	viSetFovY(60);
-	viSetAspect(TITLE_ASPECT);
-	viSetZRange(100, 10000);
-	viSetUseZBuf(0);
-
-	g_TitleTimer += g_Vars.lvupdate60;
-}
-#endif
 
 void titleSetNextMode(s32 mode)
 {
@@ -2309,15 +1978,7 @@ s32 titleGetMode(void)
 
 void titleTick(void)
 {
-#ifdef PLATFORM_N64
-#if PAL
-	viSetAspect(576.0f / g_TitleViewHeight * 1.1904761791229f);
-#else
-	viSetAspect(576.0f / g_TitleViewHeight);
-#endif
-#else
 	viSetAspect(videoGetAspect());
-#endif
 	viSetSize(576, g_TitleViewHeight);
 	viSetBufSize(576, g_TitleViewHeight);
 	playermgrSetViewSize(576, g_TitleViewHeight);
@@ -2347,13 +2008,7 @@ void titleTick(void)
 			titleExitRareLogo();
 			break;
 		case TITLEMODE_NOCONTROLLER:
-			titleExitNoController();
 			break;
-#if VERSION >= VERSION_JPN_FINAL
-		case TITLEMODE_NOEXPANSION:
-			titleExitNoExpansion();
-			break;
-#endif
 		}
 
 		if (g_TitleMode != TITLEMODE_CHECKCONTROLLERS) {
@@ -2405,11 +2060,6 @@ void titleTick(void)
 		case TITLEMODE_NOCONTROLLER:
 			titleInitNoController();
 			break;
-#if VERSION >= VERSION_JPN_FINAL
-		case TITLEMODE_NOEXPANSION:
-			titleInitNoExpansion();
-			break;
-#endif
 		}
 
 		if (g_TitleMode != TITLEMODE_CHECKCONTROLLERS && g_TitleMode != TITLEMODE_SKIP) {
@@ -2437,11 +2087,6 @@ void titleTick(void)
 	case TITLEMODE_NOCONTROLLER:
 		titleTickNoController();
 		break;
-#if VERSION >= VERSION_JPN_FINAL
-	case TITLEMODE_NOEXPANSION:
-		titleTickNoExpansion();
-		break;
-#endif
 	case TITLEMODE_SKIP:
 		viSetUseZBuf(false);
 		titleSetNextMode(TITLEMODE_RARELOGO);
@@ -2485,13 +2130,7 @@ void titleExit(void)
 		titleExitRareLogo();
 		break;
 	case TITLEMODE_NOCONTROLLER:
-		titleExitNoController();
 		break;
-#if VERSION >= VERSION_JPN_FINAL
-	case TITLEMODE_NOEXPANSION:
-		titleExitNoExpansion();
-		break;
-#endif
 	case TITLEMODE_RAREPRESENTS1:
 	case TITLEMODE_RAREPRESENTS2:
 		titleExitRarePresents();
@@ -2547,37 +2186,6 @@ bool func0f01ad5c(void)
 	return true;
 }
 
-void titleTickOld(void)
-{
-	if (titleIsKeepingMode()) {
-		joy00014810(false);
-
-		if (g_TitleDelayedTimer == 0) {
-			switch (g_TitleMode) {
-			case TITLEMODE_LEGAL:
-				titleTickLegal();
-				break;
-			case TITLEMODE_CHECKCONTROLLERS:
-				titleTickCheckControllers();
-				break;
-			case TITLEMODE_PDLOGO:
-				titleTickPdLogo();
-				break;
-			case TITLEMODE_NINTENDOLOGO:
-				titleTickNintendoLogo();
-				break;
-			case TITLEMODE_RAREPRESENTS1:
-			case TITLEMODE_RAREPRESENTS2:
-				titleTickRarePresents();
-				break;
-			case TITLEMODE_RARELOGO:
-				titleTickRareLogo();
-				break;
-			}
-		}
-	}
-}
-
 Gfx *titleRender(Gfx *gdl)
 {
 	if (g_TitleDelayedTimer == 0) {
@@ -2604,11 +2212,6 @@ Gfx *titleRender(Gfx *gdl)
 		case TITLEMODE_NOCONTROLLER:
 			gdl = titleRenderNoController(gdl);
 			break;
-#if VERSION >= VERSION_JPN_FINAL
-		case TITLEMODE_NOEXPANSION:
-			gdl = titleRenderNoExpansion(gdl);
-			break;
-#endif
 		}
 	}
 

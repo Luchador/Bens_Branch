@@ -16,7 +16,7 @@
 	build/ROMID/game/titlereset.o (section); \
 	build/ROMID/game/chrmgr.o (section); \
 	build/ROMID/game/bodyreset.o (section); \
-	build/ROMID/game/game_00b820.o (section); \
+	build/ROMID/game/chrutils.o (section); \
 	build/ROMID/game/varsreset.o (section); \
 	build/ROMID/game/setup.o (section); \
 	build/ROMID/game/propsndreset.o (section); \
@@ -84,7 +84,6 @@
 	build/ROMID/game/atan2f.o (section); \
 	build/ROMID/game/acosasin.o (section); \
 	build/ROMID/game/acosfasinf.o (section); \
-	build/ROMID/game/game_096b20.o (section); \
 	build/ROMID/game/quaternion.o (section); \
 	build/ROMID/game/floor.o (section); \
 	build/ROMID/game/ceil.o (section); \
@@ -93,7 +92,7 @@
 	build/ROMID/game/bondgun.o (section); \
 	build/ROMID/game/gunfx.o (section); \
 	build/ROMID/game/mpstats.o (section); \
-	build/ROMID/game/game_0b0fd0.o (section); \
+	build/ROMID/game/weaputils.o (section); \
 	build/ROMID/game/game_0b2150.o (section); \
 	build/ROMID/game/modelmgr.o (section); \
 	build/ROMID/game/texselect.o (section); \
@@ -159,7 +158,7 @@
 	build/ROMID/game/stars.o (section); \
 	build/ROMID/game/credits.o (section); \
 	build/ROMID/game/dyntex.o (section); \
-	build/ROMID/game/game_13c510.o (section); \
+	build/ROMID/game/artifacts.o (section); \
 	build/ROMID/game/wallhit.o (section); \
 	build/ROMID/game/bondview.o (section); \
 	build/ROMID/game/splat.o (section); \

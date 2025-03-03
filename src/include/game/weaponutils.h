@@ -1,5 +1,5 @@
-#ifndef IN_GAME_GAME_0B0FD0_H
-#define IN_GAME_GAME_0B0FD0_H
+#ifndef IN_GAME_WEAPONUTILS_H
+#define IN_GAME_WEAPONUTILS_H
 #include <ultra64.h>
 #include "data.h"
 #include "types.h"

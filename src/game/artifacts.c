@@ -7,7 +7,7 @@
 #include "game/game_0b2150.h"
 #include "game/tex.h"
 #include "game/sky.h"
-#include "game/game_13c510.h"
+#include "game/artifacts.h"
 #include "game/bg.h"
 #include "game/stagetable.h"
 #include "game/room.h"
@@ -491,23 +491,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 				}
 
 				for (k = i; k < i + count; k++) {
-#ifdef PLATFORM_N64
-					u16 tmp;
-					t4 = (artifacts[k].unk02 & 0xfffc) >> 2;
-					tmp = artifacts[k].unk04;
-
-					if (tmp < t4) {
-						v1 = t4 - tmp;
-					} else {
-						v1 = tmp - t4;
-					}
-
-					if (avg >= v1) {
-						t2++;
-					}
-#else
 					t2 += artifacts[k].unk02;
-#endif
 
 					artifacts[k].type = ARTIFACTTYPE_FREE;
 				}

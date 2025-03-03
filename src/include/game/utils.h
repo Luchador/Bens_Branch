@@ -11,6 +11,8 @@ uintptr_t align32(uintptr_t arg0);
 void utilsInit(void);
 //void utilsCalcLeftHandedCross(struct coord *a, struct coord *b, struct coord *out);
 bool normalizeVector(struct coord *arg0, struct coord *arg1, u32 line, char *file);
+void InterpTwoPoints(struct coord *arg0, struct coord *arg1, f32 standfrac, struct coord *vel);
+void CatmullRomSplineInterp(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, f32 arg4, struct coord *arg5);
 bool isPointInBBox(struct coord *a, struct coord *b);
 f32 coordsGetDistance(struct coord *a, struct coord *b);
 //f32 func0f1776cc(struct coord *a, struct coord *b, struct coord *c);

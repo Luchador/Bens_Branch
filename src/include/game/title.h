@@ -52,10 +52,8 @@ bool titleIsKeepingMode(void);
 void titleExit(void);
 void titleInitFromAiCmd(u32 arg0);
 bool func0f01ad5c(void);
-void titleTickOld(void);
 Gfx *titleRender(Gfx *gdl);
 s32 getNumPlayers(void);
 void setNumPlayers(s32 numplayers);
-void titleExitNoController(void);
 
 #endif

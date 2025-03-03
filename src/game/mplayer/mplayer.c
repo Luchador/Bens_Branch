@@ -3,7 +3,7 @@
 #include "game/title.h"
 #include "game/pdmode.h"
 #include "game/bondgun.h"
-#include "game/game_0b0fd0.h"
+#include "game/weaponutils.h"
 #include "game/player.h"
 #include "game/savebuffer.h"
 #include "game/menu.h"

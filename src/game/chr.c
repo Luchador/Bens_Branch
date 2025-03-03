@@ -13,7 +13,7 @@
 #include "game/game_096360.h"
 #include "game/bondgun.h"
 #include "game/gunfx.h"
-#include "game/game_0b0fd0.h"
+#include "game/weaponutils.h"
 #include "game/modelmgr.h"
 #include "game/tex.h"
 #include "game/camera.h"
@@ -55,12 +55,7 @@
 
 void rng2SetSeed(u32 seed);
 
-#ifdef PLATFORM_N64
-void *var8009ccc0[20];
-#else
 s32 var8009ccc0[20];
-#endif
-
 s32 g_NumChrs;
 s16 *g_Chrnums;
 s16 *g_ChrIndexes;
@@ -169,26 +164,6 @@ Vtx *chrAllocateVertices(s32 numvertices)
 	return (Vtx *) gfxAllocate(numvertices * sizeof(Vtx));
 }
 
-void chrsSetVar8006297c(u32 arg0)
-{
-	var8006297c = arg0;
-}
-
-u32 chrsGetVar8006297c(void)
-{
-	return var8006297c;
-}
-
-void chrsSetVar80062980(u32 arg0)
-{
-	var80062980 = arg0;
-}
-
-u32 chrsGetVar80062980(void)
-{
-	return var80062980;
-}
-
 void chrSetPerimEnabled(struct chrdata *chr, bool enable)
 {
 	if (chr) {
@@ -218,20 +193,12 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 	struct defaultobj *chair = NULL;
 	s32 cdresult;
 	RoomNum sp84[20];
-#if VERSION < VERSION_NTSC_1_0
-	s32 i;
-#endif
 	struct coord sp78;
 	struct coord sp6c;
 	struct coord sp60;
 	struct coord sp54;
 	f32 value;
 	struct coord sp44;
-#if VERSION < VERSION_NTSC_1_0
-	s32 j;
-	s32 k;
-	s32 l;
-#endif
 
 	// The eyespy can't be pushed
 	if (CHRRACE(chr) == RACE_EYESPY) {
@@ -254,16 +221,6 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 	}
 
 	func0f065dfc(&prop->pos, prop->rooms, dstpos, dstrooms, sp84, 20);
-
-#if VERSION < VERSION_NTSC_1_0
-	for (i = 0; dstrooms[i] != -1; i++) {
-		if (dstrooms[i] == chr->floorroom) {
-			dstrooms[0] = chr->floorroom;
-			dstrooms[1] = -1;
-			break;
-		}
-	}
-#endif
 
 	chr0f021fa8(chr, dstpos, dstrooms);
 
@@ -290,15 +247,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 
 			moveok = true;
 		} else {
-#if VERSION >= VERSION_PAL_FINAL
 			cdGetEdge(&sp78, &sp6c, 453, "chr/chr.c");
-#elif VERSION >= VERSION_PAL_BETA
-			cdGetEdge(&sp78, &sp6c, 453, "chr.c");
-#elif VERSION >= VERSION_NTSC_1_0
-			cdGetEdge(&sp78, &sp6c, 453, "chr/chr.c");
-#else
-			cdGetEdge(&sp78, &sp6c, 451, "chr.c");
-#endif
 
 			// Attempt to find a valid position - method #1
 			sp60.x = dstpos->x - prop->pos.x;
@@ -320,16 +269,6 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 				sp44.z = sp54.z * value + prop->pos.z;
 
 				func0f065dfc(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
-
-#if VERSION < VERSION_NTSC_1_0
-				for (j = 0; dstrooms[j] != -1; j++) {
-					if (dstrooms[j] == chr->floorroom) {
-						dstrooms[0] = chr->floorroom;
-						dstrooms[1] = -1;
-						break;
-					}
-				}
-#endif
 
 				chr0f021fa8(chr, &sp44, dstrooms);
 
@@ -377,16 +316,6 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 
 						func0f065dfc(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
 
-#if VERSION < VERSION_NTSC_1_0
-						for (k = 0; dstrooms[k] != -1; k++) {
-							if (dstrooms[k] == chr->floorroom) {
-								dstrooms[0] = chr->floorroom;
-								dstrooms[1] = -1;
-								break;
-							}
-						}
-#endif
-
 						chr0f021fa8(chr, &sp44, dstrooms);
 
 						movex = sp44.x - prop->pos.x;
@@ -431,16 +360,6 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 
 							func0f065dfc(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
 
-#if VERSION < VERSION_NTSC_1_0
-							for (l = 0; dstrooms[l] != -1; l++) {
-								if (dstrooms[l] == chr->floorroom) {
-									dstrooms[0] = chr->floorroom;
-									dstrooms[1] = -1;
-									break;
-								}
-							}
-#endif
-
 							chr0f021fa8(chr, &sp44, dstrooms);
 
 							movex = sp44.x - prop->pos.x;
@@ -484,11 +403,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 	}
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 arg3, bool arg4)
-#else
-bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 arg3)
-#endif
 {
 	bool result;
 	struct coord newpos;
@@ -510,12 +425,10 @@ bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 arg
 			ymin - chr->prop->pos.y);
 	chrSetPerimEnabled(chr, true);
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (result == true && arg4) {
 		pos->y = newpos.y;
 		roomsCopy(newrooms, rooms);
 	}
-#endif
 
 	return result == CDRESULT_NOCOLLISION;
 }
@@ -777,7 +690,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 					chr->manground += yincrement;
 				}
 
-				chr->sumground = chr->manground * (PAL ? 8.4175090789795f : 9.999998f);
+				chr->sumground = chr->manground * 10.0f;
 				chr->ground = chr->manground;
 				arg2->y -= chr->manground;
 			} else {

@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/bondmove.h"
-#include "game/game_096b20.h"
+#include "game/utils.h"
 #include "game/bondhead.h"
 #include "bss.h"
 #include "lib/rng.h"
