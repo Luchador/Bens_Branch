@@ -31,41 +31,41 @@ struct footstepframe {
 };
 
 struct footstepframe g_FootstepAnims[] = {
-	{ ANIM_WALK_RT_HAND_DOWN,                 0x08, 0x19 },
-	{ ANIM_SPRINT_RIFLE,                      0x05, 0x0e },
-	{ ANIM_006B,               0x08, 0x19 },
-	{ ANIM_0028,               0x1b, 0x08 },
-	{ ANIM_RUNNING_TWOHANDGUN, 0x12, 0x06 },
-	{ ANIM_WALK_AIM_PISTOL_FWD,               0x08, 0x19 },
-	{ ANIM_WALK_AIM_PISTOL_LF,                0x19, 0x08 },
-	{ ANIM_WALK_AIM_PISTOL_RT,                0x19, 0x08 },
-	{ ANIM_RUN_AIM_PISTOL_FWD,                0x07, 0x12 },
-	{ ANIM_RUN_AIM_PISTOL_RT,                 0x07, 0x12 },
-	{ ANIM_0057,               0x12, 0x07 },
-	{ ANIM_0058,               0x0f, 0x05 },
-	{ ANIM_RUNNING_ONEHANDGUN, 0x08, 0x14 },
-	{ ANIM_005A,               0x06, 0x0f },
-	{ ANIM_006C,               0x19, 0x08 },
-	{ ANIM_006D,               0x19, 0x08 },
-	{ ANIM_006E,               0x08, 0x13 },
-	{ ANIM_006F,               0x15, 0x08 },
-	{ ANIM_0070,               0x0f, 0x05 },
-	{ ANIM_0071,               0x0f, 0x05 },
-	{ ANIM_0072,               0x17, 0x08 },
-	{ ANIM_0073,               0x08, 0x13 },
-	{ ANIM_0093,               0x17, 0x0a },
-	{ ANIM_0094,               0x0f, 0x05 },
-	{ ANIM_005F,               0x0e, 0x01 },
-	{ ANIM_WALK_FORWARD01,                  0x1d, 0x0a },
-	{ ANIM_RIFLE_WALK,                      0x18, 0x2e },
-	{ ANIM_001B,               0x0a, 0x1c },
-	{ ANIM_RUN_FWD_001D,                    0x0d, 0x02 },
-	{ ANIM_RUN_FWD_001E,                    0x0c, 0x01 },
-	{ ANIM_005C,               0x13, 0x2a },
-	{ ANIM_005D,               0x0f, 0x05 },
-	{ ANIM_005E,               0x04, 0x0c },
+	{ ANIM_WALK_RT_HAND_DOWN,                        0x08, 0x19 },
+	{ ANIM_SPRINT_RIFLE,                             0x05, 0x0e },
+	{ ANIM_WALK_FWD_006B,                            0x08, 0x19 },
+	{ ANIM_RIFLE_PATROL,                             0x1b, 0x08 },
+	{ ANIM_RUNNING_TWOHANDGUN,                       0x12, 0x06 },
+	{ ANIM_WALK_AIM_PISTOL_FWD,                      0x08, 0x19 },
+	{ ANIM_WALK_AIM_PISTOL_LF,                       0x19, 0x08 },
+	{ ANIM_WALK_AIM_PISTOL_RT,                       0x19, 0x08 },
+	{ ANIM_RUN_AIM_PISTOL_FWD_0055,                  0x07, 0x12 },
+	{ ANIM_RUN_AIM_PISTOL_RT,                        0x07, 0x12 },
+	{ ANIM_RUN_AIM_PISTOL_LF,                        0x12, 0x07 },
+	{ ANIM_RUN_AIM_PISTOL_FWD_0058,                  0x0f, 0x05 },
+	{ ANIM_RUNNING_ONEHANDGUN,                       0x08, 0x14 },
+	{ ANIM_RUN_WITH_PISTOL_005A,                     0x06, 0x0f },
+	{ ANIM_WALK_FWD_AIMING_GUNS,                     0x19, 0x08 },
+	{ ANIM_WALK_FWD_ARMS_CROSSED,                    0x19, 0x08 },
+	{ ANIM_RUN_FWD_AIMING_GUNS_006E,                 0x08, 0x13 },
+	{ ANIM_RUN_FWD_ARMS_CROSSED_006F,                0x15, 0x08 },
+	{ ANIM_RUN_FWD_AIMING_GUNS_0070,                 0x0f, 0x05 },
+	{ ANIM_RUN_FWD_ARMS_CROSSED_0071,                0x0f, 0x05 },
+	{ ANIM_WALK_FWD_0072,                            0x17, 0x08 },
+	{ ANIM_JOG_0073,                                 0x08, 0x13 },
+	{ ANIM_JOG_FWD_ARMS_UP,                          0x17, 0x0a },
+	{ ANIM_RUN_FWD_ARMS_UP,                          0x0f, 0x05 },
+	{ ANIM_JOG_COVER_FACE,                           0x0e, 0x01 },
+	{ ANIM_WALK_FORWARD01,                           0x1d, 0x0a },
+	{ ANIM_RIFLE_WALK,                               0x18, 0x2e },
+	{ ANIM_WALK_FWD_001B,                            0x0a, 0x1c },
+	{ ANIM_RUN_FWD_001D,                             0x0d, 0x02 },
+	{ ANIM_RUN_FWD_001E,                             0x0c, 0x01 },
+	{ ANIM_FEMALE_WALK,                              0x13, 0x2a },
+	{ ANIM_FEMALE_JOG,                               0x0f, 0x05 },
+	{ ANIM_FEMALE_RUN,                               0x04, 0x0c },
 	{ ANIM_0392,               0x05, 0x14 },
-	{ ANIM_SKEDAR_RUNNING,     0x00, 0x00 },
+	{ ANIM_SKEDAR_RUNNING,                           0x00, 0x00 },
 };
 
 bool footstepIsRunning(s32 animnum)
@@ -75,22 +75,22 @@ bool footstepIsRunning(s32 animnum)
 	case ANIM_RUN_FWD_001E:
 	case ANIM_SPRINT_RIFLE:
 	case ANIM_RUNNING_TWOHANDGUN:
-	case ANIM_RUN_AIM_PISTOL_FWD:
+	case ANIM_RUN_AIM_PISTOL_FWD_0055:
 	case ANIM_RUN_AIM_PISTOL_RT:
-	case ANIM_0057:
-	case ANIM_0058:
+	case ANIM_RUN_AIM_PISTOL_LF:
+	case ANIM_RUN_AIM_PISTOL_FWD_0058:
 	case ANIM_RUNNING_ONEHANDGUN:
-	case ANIM_005A:
-	case ANIM_005D:
-	case ANIM_005E:
-	case ANIM_005F:
-	case ANIM_006E:
-	case ANIM_006F:
-	case ANIM_0070:
-	case ANIM_0071:
-	case ANIM_0073:
-	case ANIM_0093:
-	case ANIM_0094:
+	case ANIM_RUN_WITH_PISTOL_005A:
+	case ANIM_FEMALE_JOG:
+	case ANIM_FEMALE_RUN:
+	case ANIM_JOG_COVER_FACE:
+	case ANIM_RUN_FWD_AIMING_GUNS_006E:
+	case ANIM_RUN_FWD_ARMS_CROSSED_006F:
+	case ANIM_RUN_FWD_AIMING_GUNS_0070:
+	case ANIM_RUN_FWD_ARMS_CROSSED_0071:
+	case ANIM_JOG_0073:
+	case ANIM_JOG_FWD_ARMS_UP:
+	case ANIM_RUN_FWD_ARMS_UP:
 	case ANIM_SKEDAR_RUNNING:
 		return true;
 	}

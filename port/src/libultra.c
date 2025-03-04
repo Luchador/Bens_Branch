@@ -22,7 +22,9 @@
 #define OS_COUNTER_DEN (1000000ULL / 1000ULL)
 
 u64 osClockRate = OS_CLOCK_RATE;
-u32 osMemSize = 16 * 1024 * 1024; /* expansion pak installed plus some extra */
+//u32 osMemSize = 16 * 1024 * 1024; /* expansion pak installed plus some extra */
+// Ben's comment: I need more
+u32 osMemSize = 64 * 1024 * 1024; /* expansion pak installed plus some extra */
 s32 osTvType = OS_TV_NTSC;        /* 0 = PAL, 1 = NTSC, 2 = MPAL */
 s32 osResetType = 0;              /* 0 = cold reset */
 s32 osViClock = VI_NTSC_CLOCK;

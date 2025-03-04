@@ -761,86 +761,12 @@ void amClose(void)
 
 bool amIsCramped(void)
 {
-#if VERSION == VERSION_JPN_FINAL
-	if (PLAYERCOUNT() >= 3 && g_AmMenus[g_AmIndex].screenindex != 1) {
-		return true;
-	}
-
-	if (IS4MB() && PLAYERCOUNT() == 2) {
-		return true;
-	}
-
-	if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL
-			&& PLAYERCOUNT() == 2
-			&& g_AmMenus[g_AmIndex].screenindex != 1) {
-		return true;
-	}
-
-	return false;
-#else
 	return (g_AmMenus[g_AmIndex].screenindex == 0 && PLAYERCOUNT() >= 3)
-		|| (IS4MB() && PLAYERCOUNT() == 2)
 		|| (PLAYERCOUNT() == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL);
-#endif
 }
 
 void amCalculateSlotPosition(s16 column, s16 row, s16 *x, s16 *y)
 {
-#if VERSION == VERSION_JPN_FINAL
-	s32 playercount = PLAYERCOUNT();
-
-	*x = g_AmMenus[g_AmIndex].xradius * (column - 1);
-	*y = (row - 1) * 50;
-
-	if (column != 1 && row != 1) {
-		*x = *x / 2;
-		*y = *y / 2;
-	}
-
-	if (amIsCramped()) {
-		s32 offset = 1;
-
-		if (row == 1) {
-			offset = 3;
-		}
-
-		if (column == 0) {
-			*x = -(g_AmMenus[g_AmIndex].slotwidth / 2) - offset;
-		} else if (column == 2) {
-			*x = g_AmMenus[g_AmIndex].slotwidth / 2 + offset;
-		}
-	} else {
-		if (playercount >= 2) {
-			if (row == 1 && !amIsCramped()) {
-				*x = (*x * 6) / 7;
-			}
-		} else {
-			if (playercount >= 3 && row == 1 && !amIsCramped()) {
-				*x = (*x * 6) / 14;
-			}
-		}
-	}
-
-	if (playercount >= 2) {
-		*y = (*y * 7) / 10;
-	}
-
-	*x += viGetViewLeft() / g_ScaleX + viGetViewWidth() / (g_ScaleX * 2);
-	*y += viGetViewTop() + viGetViewHeight() / 2;
-
-	if (playercount >= 2) {
-		*y += 4;
-	}
-
-	if ((playercount == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || IS4MB()))
-			|| playercount >= 3) {
-		if ((g_Vars.currentplayernum % 2) == 0) {
-			*x += 8;
-		} else {
-			*x -= 8;
-		}
-	}
-#elif VERSION >= VERSION_NTSC_1_0
 	s32 playercount = PLAYERCOUNT();
 
 	*x = g_AmMenus[g_AmIndex].xradius * (column - 1);
@@ -892,54 +818,6 @@ void amCalculateSlotPosition(s16 column, s16 row, s16 *x, s16 *y)
 			*x -= 8;
 		}
 	}
-#else
-	s32 playercount = PLAYERCOUNT();
-
-	*x = g_AmMenus[g_AmIndex].xradius * (column - 1);
-	*y = (row - 1) * 50;
-
-	if (column != 1 && row != 1) {
-		*x = *x / 2;
-		*y = *y / 2;
-
-		if (1);
-	}
-
-	if (row == 1 && amIsCramped() && column != 1) {
-		*x = *x / 2;
-
-		if (*x < 0) {
-			*x -= 4;
-		} else {
-			*x += 4;
-		}
-	}
-
-	if (playercount >= 2) {
-		if (row == 1 && !amIsCramped()) {
-			*x = (*x * 6) / 7;
-		}
-
-		*y = (*y * 3) / 5;
-	} else if (playercount >= 3) {
-		if (row == 1 && !amIsCramped()) {
-			*x = (*x * 6) / 14;
-		}
-
-		*y = (*y * 3) / 5;
-	}
-
-	*x += viGetViewLeft() / g_ScaleX + viGetViewWidth() / (g_ScaleX * 2);
-	*y += viGetViewTop() + viGetViewHeight() / 2;
-
-	if ((playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) || playercount >= 3) {
-		if ((g_Vars.currentplayernum % 2) == 0) {
-			*x += 8;
-		} else {
-			*x -= 8;
-		}
-	}
-#endif
 }
 
 Gfx *amRenderText(Gfx *gdl, char *text, u32 colour, s16 left, s16 top)
@@ -968,21 +846,13 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 	char *weaponname;
 	char *aibotname;
 	s32 offset = 0;
-#if VERSION >= VERSION_NTSC_1_0
 	bool wide = false;
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (PLAYERCOUNT() == 1 && optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
 		wide = true;
 	}
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
-	if ((PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || IS4MB())) || PLAYERCOUNT() >= 3)
-#else
-	if ((PLAYERCOUNT() == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) || PLAYERCOUNT() >= 3)
-#endif
+	if (PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) || PLAYERCOUNT() >= 3)
 	{
 		if ((g_Vars.currentplayernum % 2) == 0) {
 			offset = 8;
@@ -1019,39 +889,13 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 		} else {
 			y = viGetViewTop() + 10;
 		}
-
-#if VERSION >= VERSION_NTSC_1_0
 		if (wide) {
 			x = viGetViewLeft() / g_ScaleX + 32;
 		}
-#endif
 
-#if VERSION >= VERSION_JPN_FINAL
-		gdl = func0f1574d0jf(gdl, &x, &y, aibotname, g_AmFont1, g_AmFont2, -1,
-				0x000000ff, SCREEN_320, SCREEN_240, 0, 0);
+		gdl = textRenderProjected(gdl, &x, &y, aibotname, g_AmFont1, g_AmFont2, -1, SCREEN_320, SCREEN_240, 0, 0);
 
 		y += (PLAYERCOUNT() >= 2) ? 0 : (s32)(textheight * 1.1f);
-#else
-		gdl = textRender(gdl, &x, &y, aibotname, g_AmFont1, g_AmFont2, -1,
-				0x000000ff, SCREEN_320, SCREEN_240, 0, 0);
-
-		y += (PLAYERCOUNT() >= 2) ? 0 : (s32)(textheight * 1.1f);
-		textMeasure(&textheight, &textwidth, weaponname, g_AmFont1, g_AmFont2, 0);
-
-		x = viGetViewLeft() / g_ScaleX
-			+ (s32)(viGetViewWidth() / g_ScaleX * 0.5f)
-			- (s32)(textwidth * 0.5f)
-			+ offset;
-
-#if VERSION >= VERSION_NTSC_1_0
-		if (wide) {
-			x = viGetViewLeft() / g_ScaleX + 32;
-		}
-#endif
-
-		gdl = textRender(gdl, &x, &y, weaponname, g_AmFont1, g_AmFont2, -1,
-				0x000000ff, SCREEN_320, SCREEN_240, 0, 0);
-#endif
 
 		g_Vars.currentplayer->commandingaibot = g_MpAllChrPtrs[buddynum];
 	} else {
@@ -1070,25 +914,20 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 			y = viGetViewTop() + 10;
 		}
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (wide) {
 			x = viGetViewLeft() / g_ScaleX + 32;
 		}
-#endif
 
-#if VERSION >= VERSION_JPN_FINAL
-		gdl = func0f1574d0jf(gdl, &x, &y, title, g_AmFont1, g_AmFont2, -1,
-				0x000000ff, SCREEN_320, SCREEN_240, 0, 0);
-#else
 		gdl = textRender(gdl, &x, &y, title, g_AmFont1, g_AmFont2, -1,
 				0x000000ff, SCREEN_320, SCREEN_240, 0, 0);
-#endif
 	}
 
 	return gdl;
 }
 
-const char var7f1b2b34[] = "Here is where the activemenu sets favourites\n";
+// Ben's comment: were they planning to let the player assign a favorite weapon to a slot in the active menu?
+
+/*const char var7f1b2b34[] = "Here is where the activemenu sets favourites\n";
 const char var7f1b2b64[] = "slot %d = guntype %d\n";
 const char var7f1b2b7c[] = "put it in %d\n";
 
@@ -1099,27 +938,23 @@ const char var7f1b2bb4[] = "activemenu: setting up for single player\n";
 
 const char var7f1b2be0[] = "Put guntype %d in slot %d\n";
 const char var7f1b2bfc[] = "ActiveMenu: Two or more equipped items of guntype %d\n";
-const char var7f1b2c34[] = "FAV: Added gun %d to slot %d\n";
+const char var7f1b2c34[] = "FAV: Added gun %d to slot %d\n";*/
 
 u8 var800719a0[][3] = { {0, 1, 2}, {3, 4, 5}, {6, 7, 8} };
 
 Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
 {
 	static u32 obcol = 0xff00004f; // outer border
-	static u32 ibcol = VERSION >= VERSION_NTSC_1_0 ? 0x3f00008f : 0x3f00006f; // inner background
+	static u32 ibcol = 0x3f00008f; // inner background
 	static u32 defcol = 0xff4f00ff; // text
-	static u32 favcol = 0xffff7fff; // unused
-	static u32 pickcol = 0xff4f00ff; // unused
-	static u32 pickcol2 = 0xff4f00ff; // unused
+	//static u32 favcol = 0xffff7fff; // unused
+	//static u32 pickcol = 0xff4f00ff; // unused
+	//static u32 pickcol2 = 0xff4f00ff; // unused
 
 	u32 colour;
 	s32 paddingtop;
 	s32 paddingbottom;
 
-#if VERSION == VERSION_JPN_FINAL
-	paddingtop = 7;
-	paddingbottom = 7;
-#else
 	paddingtop = 6;
 	paddingbottom = 6;
 
@@ -1127,7 +962,6 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
 		paddingtop = 5;
 		paddingbottom = 3;
 	}
-#endif
 
 	if (text == NULL || strcmp(text, "") == 0) {
 		return gdl;
@@ -1247,19 +1081,12 @@ Gfx *amRender(Gfx *gdl)
 	s16 sloty;
 	s16 tmp1;
 	s16 tmp2;
-
-#if PAL
 	g_ScaleX = 1;
-#else
-	g_ScaleX = g_ViRes == VIRES_HI ? 2 : 1;
-#endif
 
-#ifndef PLATFORM_N64
 	const s32 playercount = PLAYERCOUNT();
 	if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	}
-#endif
 
 	g_AmIndex = g_Vars.currentplayernum;
 	g_Vars.currentplayer->commandingaibot = NULL;
@@ -1392,7 +1219,6 @@ Gfx *amRender(Gfx *gdl)
 					if (mode == AMSLOTMODE_DEFAULT && g_AmMenus[g_AmIndex].screenindex >= 2) {
 						struct chrdata *chr = g_Vars.aibuddies[buddynum]->chr;
 
-#if VERSION >= VERSION_NTSC_1_0
 						if (var800719a0[row][column] == 7) {
 							if (chr->hidden & CHRHFLAG_PASSIVE) {
 								mode = AMSLOTMODE_CURRENT;
@@ -1402,17 +1228,6 @@ Gfx *amRender(Gfx *gdl)
 								mode = AMSLOTMODE_CURRENT;
 							}
 						}
-#else
-						if (chr->hidden & CHRHFLAG_PASSIVE) {
-							if (var800719a0[row][column] == 7) {
-								mode = AMSLOTMODE_CURRENT;
-							}
-						} else {
-							if (var800719a0[row][column] == 1) {
-								mode = AMSLOTMODE_CURRENT;
-							}
-						}
-#endif
 					}
 				} else {
 					if (g_Vars.normmplayerisrunning
@@ -1449,19 +1264,11 @@ Gfx *amRender(Gfx *gdl)
 		{
 			struct g_vars *vars = &g_Vars;
 
-#if VERSION >= VERSION_JPN_FINAL
-			if (!(g_MissionConfig.iscoop && amGetFirstBuddyIndex() >= 0)
-					&& g_Vars.normmplayerisrunning
-					&& g_AmMenus[g_AmIndex].screenindex >= 2) {
-				gdl = amRenderAibotInfo(gdl, g_AmMenus[g_AmIndex].screenindex - 2);
-			}
-#else
 			if (!(g_MissionConfig.iscoop && amGetFirstBuddyIndex() >= 0)
 					&& vars->normmplayerisrunning
 					&& g_AmMenus[g_AmIndex].screenindex >= 2) {
 				gdl = amRenderAibotInfo(gdl, g_AmMenus[g_AmIndex].screenindex - 2);
 			}
-#endif
 		}
 
 		// Note: the column and row values will never be 1 here, so this
@@ -1473,10 +1280,6 @@ Gfx *amRender(Gfx *gdl)
 			s16 above;
 			s16 below;
 
-#if VERSION == VERSION_JPN_FINAL
-			above = 7;
-			below = 7;
-#else
 			above = 6;
 			below = 6;
 
@@ -1484,7 +1287,6 @@ Gfx *amRender(Gfx *gdl)
 				above = 5;
 				below = 3;
 			}
-#endif
 
 			colour = (sinf(g_AmMenus[g_AmIndex].selpulse) + 1) * 127;
 			colour = 0xff0000ff | colour << 8 | colour << 16;
@@ -1497,7 +1299,6 @@ Gfx *amRender(Gfx *gdl)
 
 			halfwidth = g_AmMenus[g_AmIndex].slotwidth / 2;
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (g_AmMenus[g_AmIndex].slotnum == 4) {
 				if (amIsCramped()) {
 					halfwidth = 1;
@@ -1515,11 +1316,6 @@ Gfx *amRender(Gfx *gdl)
 					halfwidth = textwidth / 2 + 2;
 				}
 			}
-#else
-			if (g_AmMenus[g_AmIndex].slotnum == 4 && amIsCramped()) {
-				halfwidth = 4;
-			}
-#endif
 
 			// Top
 			gDPFillRectangleScaled(gdl++,
@@ -1555,7 +1351,6 @@ Gfx *amRender(Gfx *gdl)
 		gdl = text0f153780(gdl);
 	}
 
-#if VERSION != VERSION_JPN_FINAL
 	chr = g_Vars.currentplayer->commandingaibot;
 
 	if (chr) {
@@ -1568,9 +1363,7 @@ Gfx *amRender(Gfx *gdl)
 		s32 barheight;
 		s32 part1width;
 		s32 part1left;
-#if VERSION >= VERSION_NTSC_1_0
 		s32 part2left;
-#endif
 		s32 y;
 		s32 a2;
 
@@ -1578,18 +1371,10 @@ Gfx *amRender(Gfx *gdl)
 			redhealth = true;
 		}
 
-#if VERSION < VERSION_NTSC_1_0
-		{
-			struct player *tmp = g_Vars.players[2];
-			if (tmp);
-		}
-#endif
-
 		barwidth = PLAYERCOUNT() >= 2 ? 48 : 64;
 		barheight = PLAYERCOUNT() >= 2 ? 7 : 11;
 		xoffset = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if ((PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || IS4MB())) || PLAYERCOUNT() >= 3) {
 			xoffset = (g_Vars.currentplayernum & 1) == 0 ? 8 : -8;
 		}
@@ -1602,23 +1387,11 @@ Gfx *amRender(Gfx *gdl)
 				- (s32) (barwidth * 0.5f)
 				+ xoffset;
 		}
-#else
-		if ((PLAYERCOUNT() == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) || PLAYERCOUNT() >= 3) {
-			xoffset = (g_Vars.currentplayernum & 1) == 0 ? 8 : -8;
-		}
-
-		part1left = (s32) ((viGetViewWidth() / g_ScaleX) * 0.5f)
-			+ (s32) (viGetViewLeft() / g_ScaleX)
-			- (s32) (barwidth * 0.5f)
-			+ xoffset;
-#endif
 
 		part1width = (s32) (barwidth * 0.25f) - 1;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (part1width);
 		part2left = part1left + part1width + 2;
-#endif
 
 		if (healthfrac < 0) {
 			healthfrac = 0;
@@ -1633,13 +1406,8 @@ Gfx *amRender(Gfx *gdl)
 
 		// NTSC beta doesn't scale the health bar when hi-res is on,
 		// and it only matches if part2left is an inline expression
-#if VERSION >= VERSION_NTSC_1_0
 #define RECT(gdl, x1, y1, x2, y2) gDPFillRectangleScaled(gdl, x1, y1, x2, y2)
 #define PART2LEFT() part2left
-#else
-#define RECT(gdl, x1, y1, x2, y2) gDPFillRectangle(gdl, x1, y1, x2, y2)
-#define PART2LEFT() (part1left + part1width + 2)
-#endif
 
 		if (redhealth) {
 			a2 = part1left + part1width - (s32) (part1width * (0.25f - healthfrac) * 4.0f);
@@ -1687,11 +1455,8 @@ Gfx *amRender(Gfx *gdl)
 
 		RECT(gdl++, a2, y, part1left + barwidth, y + barheight);
 	}
-#endif
 
-#ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-#endif
 
 	g_ScaleX = 1;
 

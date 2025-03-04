@@ -1348,23 +1348,9 @@ Gfx *mpRenderModalText(Gfx *gdl)
 			y = viGetViewTop() + viGetViewHeight() / 2;
 		}
 
-#if VERSION >= VERSION_JPN_FINAL
-		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
-#elif PAL
-		// Use smaller fonts
-		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
-#else
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicMd, g_FontHandelGothicMd, 0);
-#endif
 		x -= textwidth / 2;
-
-#if VERSION >= VERSION_JPN_FINAL
-		gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, (red << 24) | 0x00ff00ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
-#elif PAL
-		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, (red << 24) | 0x00ff00ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
-#else
 		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicMd, g_FontHandelGothicMd, (red << 24) | 0x00ff00ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
-#endif
 
 		gdl = text0f153780(gdl);
 	} else if (!g_MainIsEndscreen
@@ -1382,50 +1368,31 @@ Gfx *mpRenderModalText(Gfx *gdl)
 
 		x = viGetViewLeft() + viGetViewWidth() / 2;
 
-#if VERSION >= VERSION_JPN_FINAL
-		x = x / g_ScaleX;
-#endif
-
 		y = viGetViewTop() + viGetViewHeight() / 2;
 
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
 		x -= textwidth / 2;
 
-#if VERSION >= VERSION_JPN_FINAL
-		gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xff0000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
-#else
 		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xff0000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
-#endif
 
 		if (g_Vars.currentplayer->deadtimer > 0) {
 			// Render countdown timer
 			s32 countdowny = viGetViewTop() + viGetViewHeight() / 2 + textheight + 2;
 			s32 countdownx = viGetViewLeft() + viGetViewWidth() / 2;
 
-#if VERSION >= VERSION_JPN_FINAL
-			countdownx = countdownx / g_ScaleX;
-#endif
 			sprintf(text, "%d\n", (g_Vars.currentplayer->deadtimer + TICKS(60) - 1) / TICKS(60));
 
 			textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
 			x = countdownx - textwidth / 2;
 			y = countdowny;
 
-#if VERSION >= VERSION_JPN_FINAL
-			gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xff0000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
-#else
 			gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xff0000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
-#endif
 		}
 
 		gdl = text0f153780(gdl);
 
 		g_Menus[g_Vars.currentplayerstats->mpindex].openinhibit = 10;
 	}
-
-#if VERSION >= VERSION_JPN_FINAL
-	g_ScaleX = 1;
-#endif
 
 	return gdl;
 }

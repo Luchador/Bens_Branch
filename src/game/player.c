@@ -2738,20 +2738,9 @@ void playerTickExplode(void)
 void playerResetLoResIf4Mb(void)
 {
 	if (IS4MB()) {
-#if VERSION >= VERSION_PAL_BETA
-		g_ViModes[VIRES_LO].fbwidth = FBALLOC_WIDTH_LO;
-		g_ViModes[VIRES_LO].fbheight = FBALLOC_HEIGHT_LO;
-		g_ViModes[VIRES_LO].width = FBALLOC_WIDTH_LO;
-		g_ViModes[VIRES_LO].yscale = 1;
-		g_ViModes[VIRES_LO].xscale = VIMODE_LO;
-		g_ViModes[VIRES_LO].fullheight = FBALLOC_HEIGHT_LO;
-		g_ViModes[VIRES_LO].fulltop = 0;
-#else
 		g_ViModes[VIRES_LO].fbheight = FBALLOC_HEIGHT_LO;
 		g_ViModes[VIRES_LO].fulltop = 0;
 		g_ViModes[VIRES_LO].fullheight = FBALLOC_HEIGHT_LO;
-#endif
-
 		g_ViModes[VIRES_LO].wideheight = 180;
 		g_ViModes[VIRES_LO].widetop = 20;
 		g_ViModes[VIRES_LO].cinemaheight = 136;
@@ -2837,11 +2826,7 @@ s16 playerGetViewportWidth(void)
 
 s16 playerGetViewportLeft(void)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	s32 something = !playerHasSharedViewport();
-#else
-	s32 something = !((g_InCutscene && !g_MainIsEndscreen) || menuGetRoot() == MENUROOT_COOPCONTINUE);
-#endif
 	s16 left;
 
 	if (PLAYERCOUNT() >= 3 && something != 0) {
@@ -2878,11 +2863,7 @@ s16 playerGetViewportHeight(void)
 	s16 height;
 
 	if (PLAYERCOUNT() >= 2
-#if VERSION >= VERSION_NTSC_1_0
 			&& !playerHasSharedViewport()
-#else
-			&& !((g_InCutscene && !g_MainIsEndscreen) || menuGetRoot() == MENUROOT_COOPCONTINUE)
-#endif
 			) {
 		s16 tmp = g_ViModes[g_ViRes].fullheight;
 
@@ -2929,20 +2910,11 @@ s16 playerGetViewportTop(void)
 	s16 top;
 
 	if (PLAYERCOUNT() >= 2
-#if VERSION >= VERSION_NTSC_1_0
 			&& !playerHasSharedViewport()
-#else
-			&& (!g_InCutscene || g_MainIsEndscreen)
-			&& menuGetRoot() != MENUROOT_COOPCONTINUE
-#endif
 			) {
 		top = g_ViModes[g_ViRes].fulltop;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (optionsGetScreenSplit() != SCREENSPLIT_VERTICAL || PLAYERCOUNT() != 2)
-#else
-		if (optionsGetScreenSplit() != SCREENSPLIT_VERTICAL)
-#endif
 		{
 			if (PLAYERCOUNT() == 2
 					&& g_Vars.currentplayernum == 1
@@ -2996,18 +2968,13 @@ s16 playerGetViewportTop(void)
 f32 player0f0bd358(void)
 {
 	f32 result;
-	s16 stack;
 	s16 height = playerGetViewportHeight();
 	s16 width = playerGetViewportWidth();
 
 	result = (f32)width / (f32)height;
 	result = g_ViModes[g_ViRes].yscale * result;
 
-#ifdef PLATFORM_N64
-	return result;
-#else
 	return result * (videoGetAspect() / ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO));
-#endif
 }
 
 void playerUpdateShake(void)
@@ -3052,10 +3019,6 @@ void playerLaunchSlayerRocket(struct weaponobj *rocket)
 
 void playerTickTeleport(f32 *aspectratio)
 {
-	if (g_Vars.currentplayer->teleportstate) {
-		// empty
-	}
-
 	// State 1: TELEPORTSTATE_PREENTER
 	// Wait in this state for 24 ticks
 	if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_PREENTER) {
@@ -3192,6 +3155,7 @@ void playerTick(bool arg0)
 	u32 buttonsnow = joyGetButtonsPressedThisFrame(contpadnum, 0xffffffff);
 	if (buttonsnow & CONT_GKEY) {  // Gangsta key pressed
 		g_Vars.currentplayer->wantsgangsta = !g_Vars.currentplayer->wantsgangsta;
+		
 		//debug_log("Wants gangsta: %d \n", g_Vars.currentplayer->wantsgangsta);
 	}
 
@@ -4164,8 +4128,8 @@ struct var80070ba4 var80070ba4[4][7] = { // [wieldmode][turnmode]
 		{ &var80070acc,          0,                       0.001, 0,  0.1, 0.52351540327072 },
 		{ &var80070acc,          0,                       0.45,  -1, -1,  0.52351540327072 },
 	}, {
-		{ NULL,                  ANIM_006A,               0.25,  0,  -1,  1.0470308065414  },
-		{ NULL,                  ANIM_006B,               0.5,   -1, -1,  1.0470308065414  },
+		{ NULL,                  ANIM_STAND,              0.25,  0,  -1,  1.0470308065414  },
+		{ NULL,                  ANIM_WALK_FWD_006B,      0.5,   -1, -1,  1.0470308065414  },
 		{ NULL,                  ANIM_RUNNING_ONEHANDGUN, 0.5,   -1, -1,  1.0470308065414  },
 		{ NULL,                  ANIM_0280,               0.001, 0,  0.1, 1.0470308065414  },
 		{ NULL,                  ANIM_0280,               0.503, -1, -1,  1.0470308065414  },

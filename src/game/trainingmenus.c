@@ -1648,7 +1648,7 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(s32 operation, struct menud
 			g_Menus[g_MpPlayerNum].menumodel.partvisibility = vis;
 			g_Menus[g_MpPlayerNum].menumodel.newanimnum = ANIM_013E;
 		} else {
-			g_Menus[g_MpPlayerNum].menumodel.newanimnum = ANIM_006A;
+			g_Menus[g_MpPlayerNum].menumodel.newanimnum = ANIM_STAND;
 		}
 
 		if (bodynum == BODY_THEKING) {
@@ -1933,7 +1933,7 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(s32 operation, struct menudi
 
 		if (g_Menus[g_MpPlayerNum].curdialog && g_Menus[g_MpPlayerNum].curdialog->definition == dialogdef) {
 			if (dtGetWeaponByDeviceIndex(dtGetIndexBySlot(g_DtSlot)) == WEAPON_DISGUISE41) {
-				g_Menus[g_MpPlayerNum].menumodel.newanimnum = ANIM_006A;
+				g_Menus[g_MpPlayerNum].menumodel.newanimnum = ANIM_STAND;
 				g_Menus[g_MpPlayerNum].menumodel.rottimer60 = TICKS(60);
 				g_Menus[g_MpPlayerNum].menumodel.zoomtimer60 = TICKS(120);
 			}

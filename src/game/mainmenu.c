@@ -3883,7 +3883,7 @@ MenuDialogHandlerResult inventoryMenuDialog(s32 operation, struct menudialogdef 
 			}
 
 			if (g_InventoryWeapon == WEAPON_DISGUISE40 || g_InventoryWeapon == WEAPON_DISGUISE41) {
-				g_Menus[g_MpPlayerNum].menumodel.newanimnum = ANIM_006A;
+				g_Menus[g_MpPlayerNum].menumodel.newanimnum = ANIM_STAND;
 				g_Menus[g_MpPlayerNum].menumodel.rottimer60 = TICKS(60);
 				g_Menus[g_MpPlayerNum].menumodel.zoomtimer60 = TICKS(120);
 			}

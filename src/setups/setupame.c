@@ -1035,14 +1035,14 @@ s32 path29[] = {
 u8 func0401_do_some_animation[] = {
 	// Do some animation
 	restart_timer
-	chr_do_animation(ANIM_0066, 0, 1, CHRANIMFLAG_PAUSEATEND, 16, CHR_SELF, 2)
+	chr_do_animation(ANIM_AVOID_0066, 0, 1, CHRANIMFLAG_PAUSEATEND, 16, CHR_SELF, 2)
 
 	beginloop(0x08)
 		if_timer_gt(0, /*goto*/ 0x2c)
 	endloop(0x08)
 
 	label(0x2c)
-	chr_do_animation(ANIM_0066, 1, -1, CHRANIMFLAG_PAUSEATEND, 16, CHR_SELF, 2)
+	chr_do_animation(ANIM_AVOID_0066, 1, -1, CHRANIMFLAG_PAUSEATEND, 16, CHR_SELF, 2)
 
 	beginloop(0x85)
 	endloop(0x85)
@@ -1455,7 +1455,7 @@ u8 func0411_secretary[] = {
 	set_ailist(CHR_SELF, GAILIST_IDLE)
 
 	label(0x2c)
-	chr_do_animation(ANIM_00A1, 0, 193, CHRANIMFLAG_COMPLETED | CHRANIMFLAG_SLOWUPDATE, 16, CHR_SELF, 2)
+	chr_do_animation(ANIM_RIFLE_TAUNT, 0, 193, CHRANIMFLAG_COMPLETED | CHRANIMFLAG_SLOWUPDATE, 16, CHR_SELF, 2)
 
 	beginloop(0x72)
 		set_target_chr(CHR_BOND)

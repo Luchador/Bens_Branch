@@ -1017,14 +1017,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	x2 = x + textwidth; \
 	y2 = y + textheight; \
 	gdl = text0f153858(gdl, &x, &y, &x2, &y2);
-
-#if VERSION >= VERSION_JPN_FINAL
-	gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#else
 	gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 
 	// "H/M"
 	sprintf(text, "%s %s%4.2f", langGet(L_MISC_074), "", g_Vars.currentplayer->eyespy->height * 0.01f);
@@ -1035,13 +1029,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	x2 = x + textwidth; \
 	y2 = y + textheight; \
 	gdl = text0f153858(gdl, &x, &y, &x2, &y2);
-#if VERSION >= VERSION_JPN_FINAL
-	gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#else
 	gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 
 	// "Y/D"
 	sprintf(text, "%s %d", langGet(L_MISC_075), (s32)g_Vars.currentplayer->eyespy->theta);
@@ -1052,13 +1041,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	x2 = x + textwidth; \
 	y2 = y + textheight; \
 	gdl = text0f153858(gdl, &x, &y, &x2, &y2);
-#if VERSION >= VERSION_JPN_FINAL
-	gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#else
 	gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 
 	// "P/D"
 	sprintf(text, "%s %d", langGet(L_MISC_076), (s32)g_Vars.currentplayer->eyespy->verta);
@@ -1069,35 +1053,20 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	x2 = x + textwidth; \
 	y2 = y + textheight; \
 	gdl = text0f153858(gdl, &x, &y, &x2, &y2);
-#if VERSION >= VERSION_JPN_FINAL
-	gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#else
 	gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 
 	// "CI 2023"
 	sprintf(text, "%s", langGet(L_MISC_077));
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 
-#if VERSION >= VERSION_NTSC_1_0
 	x = (vsplit ? -3 : 0) + viewleft + 25 * scale + 5;
 	y = (vsplit ? 18 : 0) + viewbottom - 41;
-#else
-	x = viewleft + 25 * scale + 5;
-	y = viewbottom - 41;
-#endif
 	x2 = x + textwidth; \
 	y2 = y + textheight; \
 	gdl = text0f153858(gdl, &x, &y, &x2, &y2);
-#if VERSION >= VERSION_JPN_FINAL
-	gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-			colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#else
 	gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 			colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 
 	if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {
 		sprintf(text, "%s", langGet(L_MISC_078)); // "YKK: 95935"
@@ -1109,100 +1078,50 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 
-#if VERSION >= VERSION_NTSC_1_0
 	x = viewleft + 25 * scale + (vsplit ? -3 : 0) + 5;
 	y = viewbottom + (vsplit ? 20 : 0) - 34;
-#else
-	x = viewleft + 25 * scale + 5;
-	y = viewbottom - 34;
-#endif
 
 	x2 = x + textwidth; \
 	y2 = y + textheight; \
 	gdl = text0f153858(gdl, &x, &y, &x2, &y2);
-#if VERSION >= VERSION_JPN_FINAL
-	gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-			colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#else
 	gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 			colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 
 	if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {
 		// "CAMSPY"
 		sprintf(text, "   %s", langGet(L_MISC_079));
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
-
-#if VERSION >= VERSION_PAL_FINAL
-		x = viewright - textwidth - 27;
-#else
 		x = viewright - scale * 53 - 25;
-#endif
-#if VERSION >= VERSION_NTSC_1_0
 		y = (vsplit ? -13 : 0) + viewtop + 27;
-#else
-		y = viewtop + 27;
-#endif
 		x2 = x + textwidth; \
 		y2 = y + textheight; \
 		gdl = text0f153858(gdl, &x, &y, &x2, &y2);
-#if VERSION >= VERSION_JPN_FINAL
-		gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-				colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#else
 		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 				colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 	} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 		// "DRUGSPY"
 		sprintf(text, "   %s", langGet(L_MISC_468));
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 
-#if VERSION >= VERSION_PAL_FINAL
-		x = viewright - textwidth - 27;
-#else
 		x = viewright - scale * 53 - 25;
-#endif
-#if VERSION >= VERSION_NTSC_1_0
-		y = (vsplit ? -13 : 0) + viewtop + 27;
-#else
 		y = viewtop + 27;
-#endif
 		x2 = x + textwidth; \
 		y2 = y + textheight; \
 		gdl = text0f153858(gdl, &x, &y, &x2, &y2);
-#if VERSION >= VERSION_JPN_FINAL
-		gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-				colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#else
-		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-				colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#endif
+		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
+				colourtextdull, viGetWidth(), viGetHeight(), 0, 0);
 	} else {
 		// "BOMBSPY"
 		sprintf(text, "   %s", langGet(L_MISC_469));
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 
-#if VERSION >= VERSION_PAL_FINAL
-		x = viewright - textwidth - 27;
-#else
 		x = viewright - scale * 59 - 25;
-#endif
-#if VERSION >= VERSION_NTSC_1_0
-		y = (vsplit ? -13 : 0) + viewtop + 27;
-#else
 		y = viewtop + 27;
-#endif
 		x2 = x + textwidth; \
 		y2 = y + textheight; \
 		gdl = text0f153858(gdl, &x, &y, &x2, &y2);
-#if VERSION >= VERSION_JPN_FINAL
-		gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-				colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#else
 		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 				colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 	}
 
 	// Model number
@@ -1215,26 +1134,15 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	}
 
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
-#if VERSION >= VERSION_PAL_FINAL
-	x = (vsplit ? 3 : 0) + viewright - textwidth - 27;
-	y = (vsplit ? -11 : 0) + viewtop + 34;
-#elif VERSION >= VERSION_NTSC_1_0
 	x = (vsplit ? 3 : 0) + viewright - scale * 46 - 25;
 	y = (vsplit ? -11 : 0) + viewtop + 34;
-#else
 	x = viewright - scale * 46 - 25;
 	y = viewtop + 34;
-#endif
 	x2 = x + textwidth; \
 	y2 = y + textheight; \
 	gdl = text0f153858(gdl, &x, &y, &x2, &y2);
-#if VERSION >= VERSION_JPN_FINAL
-	gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-			colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#else
 	gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 			colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 
 	// Gyrostat/dartammo text
 	if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY
@@ -1245,27 +1153,13 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	}
 
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
-#if VERSION >= VERSION_PAL_FINAL
-	x = viewright - textwidth - 27;
-	y = (vsplit ? -2 : 0) + viewbottom - 12;
-#elif VERSION >= VERSION_NTSC_1_0
 	x = (vsplit ? -35 : 0) + (viewright - viewwidth / 5.0f - 3 - (scale * 5 - 5));
 	y = (vsplit ? -2 : 0) + viewbottom - 12;
-#else
-	x = viewright - viewwidth / 5.0f - 3 - (scale * 5 - 5);
-	y = viewbottom - 12;
-#endif
-	if (1);
 	x2 = x + textwidth; \
 	y2 = y + textheight; \
 	gdl = text0f153858(gdl, &x, &y, &x2, &y2);
-#if VERSION >= VERSION_JPN_FINAL
-	gdl = func0f1574d0jf(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
-			colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#else
 	gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 			colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 
 	gdl = text0f153838(gdl);
 
@@ -1296,9 +1190,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2); \
 		gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (!vsplit)
-#endif
 		{
 			xpos = (scale == 2) ? -76 : -85;
 
@@ -1561,9 +1453,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
 		}
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (!vsplit)
-#endif
 		{
 			tmpval = cstickx * 28.0f / 80.0f;
 
@@ -1597,9 +1487,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
 		}
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (!vsplit)
-#endif
 		{
 			tmpval = csticky * 28.0f / 80.0f;
 
@@ -1619,9 +1507,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		}
 
 		if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {
-#if VERSION >= VERSION_NTSC_1_0
 			if (!vsplit)
-#endif
 			{
 				// Camspy gyrobar 1
 				x = viewright - viewwidth / 5.0f;
@@ -1686,9 +1572,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				x += scale * 2 + scale * 5;
 			}
 		} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_BOMBSPY) {
-#if VERSION >= VERSION_NTSC_1_0
 			if (!vsplit)
-#endif
 			{
 				// Bombspy gyrobar 1
 				x = viewright - viewwidth / 5.0f;
@@ -1756,25 +1640,19 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		} else {
 			// Drugspy ammo
 			s32 i;
-#if VERSION >= VERSION_NTSC_1_0
 			s32 width;
-#endif
 
 			brightness2 = 255;
-#if VERSION >= VERSION_NTSC_1_0
 			width = scale * 30;
-#endif
 
 			y = viewbottom - 13;
 			x = viewright - viewwidth / 5.0f + 5;
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (vsplit) {
 				x -= 12;
 				y -= 3;
 				width = 15;
 			}
-#endif
 
 			for (i = 0; i < MAX_EYESPYDARTS; i++) {
 				if (i >= g_Vars.currentplayer->eyespydarts) {
@@ -1782,11 +1660,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				}
 
 				gDPSetPrimColor(gdl++, 0, 0, 0x10, 0x20, brightness2, 0xff);
-#if VERSION >= VERSION_NTSC_1_0
 				gDPFillRectangle(gdl++, x, y - 4, x + width, y);
-#else
-				gDPFillRectangle(gdl++, x, y - 4, x + 30 * scale, y);
-#endif
 
 				y -= 5;
 			}
@@ -1808,10 +1682,6 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			s8 yoffset;
 			s32 value;
 			s32 i;
-
-#if VERSION == VERSION_PAL_BETA
-			if (centrey);
-#endif
 
 			value = 17.0f * movedist / 25.0f;
 

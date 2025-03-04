@@ -3435,40 +3435,6 @@ Gfx *frRenderHudElement(Gfx *gdl, s32 x, s32 y, char *string1, char *string2, u3
 	x2 = x - (textwidth >> 1);
 	y2 = y;
 	gdl = text0f153858(gdl, &x2, &y2, &textwidth, &textheight);
-
-#if VERSION >= VERSION_JPN_FINAL
-	gdl = func0f1574d0jf(gdl, &x2, &y2, string1,
-			g_CharsHandelGothicMd, g_FontHandelGothicMd, fullcolour, halfalpha, viGetWidth(), viGetHeight(), 0, 0);
-
-	if (string2) {
-		s32 textheight2;
-		s32 textwidth2;
-		s32 textheight3;
-		s32 textwidth3;
-
-		textMeasure(&textheight2, &textwidth2, string2, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
-		textMeasure(&textheight3, &textwidth3, string3, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
-
-		textheight = textheight2;
-		textwidth = textwidth2 + textwidth3;
-		x2 = x - (textwidth >> 1);
-		y2 = y;
-		y2 += 17;
-
-		gdl = text0f153858(gdl, &x2, &y2, &textwidth, &textheight);
-
-		gdl = func0f1574d0jf(gdl, &x2, &y2, string2,
-			g_CharsHandelGothicSm, g_FontHandelGothicSm, fullcolour, halfalpha, viGetWidth(), viGetHeight(), 0, 0);
-
-		y2 = y;
-		y2 += 17;
-		y2++;
-		x2 -= 4;
-
-		gdl = func0f1574d0jf(gdl, &x2, &y2, string3,
-			g_CharsHandelGothicSm, g_FontHandelGothicSm, fullcolour, halfalpha, viGetWidth(), viGetHeight(), 0, 0);
-	}
-#else
 	gdl = textRender(gdl, &x2, &y2, string1,
 			g_CharsHandelGothicMd, g_FontHandelGothicMd, fullcolour, halfalpha, viGetWidth(), viGetHeight(), 0, 0);
 
@@ -3482,7 +3448,6 @@ Gfx *frRenderHudElement(Gfx *gdl, s32 x, s32 y, char *string1, char *string2, u3
 		gdl = textRender(gdl, &x2, &y2, string2,
 			g_CharsHandelGothicXs, g_FontHandelGothicXs, fullcolour, halfalpha, viGetWidth(), viGetHeight(), 0, 0);
 	}
-#endif
 
 	return gdl;
 }
