@@ -420,11 +420,7 @@ bool aiChrDoAnimation(void)
 
 		if (g_Vars.in_cutscene) {
 			if (startframe != 0xfffe) {
-#if PAL
-				fstartframe += var8009e388pf * speed;
-#else
 				fstartframe += g_CutsceneFrameOverrun240 * speed * 0.25f;
-#endif
 			}
 
 			chr->prop->propupdate240 = 0;
@@ -433,7 +429,7 @@ bool aiChrDoAnimation(void)
 		chrTryStartAnim(chr, anim_id, fstartframe, fendframe, cmd[8], cmd[9], speed);
 
 		if (startframe == 0xfffe) {
-			chr0f0220ec(chr, 1, true);
+			chrAdvanceAnims(chr, 1, true);
 
 			if (chr->prop->type == PROPTYPE_PLAYER) {
 				u32 playernum = playermgrGetPlayerNumByProp(chr->prop);
@@ -4972,11 +4968,7 @@ bool aiObjectDoAnimation(void)
 			thing = 1.0f / (s32)cmd[5];
 
 			if (g_Vars.in_cutscene && startframe != 0xfffe) {
-#if PAL
-				fstartframe += var8009e388pf * thing;
-#else
 				fstartframe += g_CutsceneFrameOverrun240 * thing * 0.25f;
-#endif
 			}
 
 			animInit(obj->model->anim);
@@ -5006,7 +4998,7 @@ bool aiEnableChr(void)
 	if (chr && chr->prop && chr->model) {
 		propActivate(chr->prop);
 		propEnable(chr->prop);
-		chr0f0220ac(chr);
+		chrUpdateRooms(chr);
 	}
 
 	g_Vars.aioffset += 3;
@@ -9728,7 +9720,7 @@ bool aiIfDistanceToTarget2LessThan(void)
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
 	f32 distance = (cmd[3] | (cmd[2] << 8)) * 10.0f;
 
-	if (chrGetDistanceToTarget2(g_Vars.chrdata) < distance) {
+	if (chrGetDistanceToTarget(g_Vars.chrdata) < distance) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[4]);
 	} else {
 		g_Vars.aioffset += 5;
@@ -9745,7 +9737,7 @@ bool aiIfDistanceToTarget2GreaterThan(void)
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
 	f32 distance = (cmd[3] | (cmd[2] << 8)) * 10.0f;
 
-	if (chrGetDistanceToTarget2(g_Vars.chrdata) > distance) {
+	if (chrGetDistanceToTarget(g_Vars.chrdata) > distance) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[4]);
 	} else {
 		g_Vars.aioffset += 5;

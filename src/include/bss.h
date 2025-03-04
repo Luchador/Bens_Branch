@@ -154,11 +154,6 @@ extern f32 var8009dd5c;
 extern f32 var8009dd6c;
 extern s32 g_DefaultWeapons[2];
 extern s32 g_CutsceneCurAnimFrame60;
-
-#if PAL
-extern f32 var8009e388pf;
-#endif
-
 extern s16 g_CutsceneAnimNum;
 extern s32 g_CutsceneFrameOverrun240;
 extern bool g_CutsceneSkipRequested;

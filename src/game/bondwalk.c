@@ -485,7 +485,7 @@ bool bwalkCalculateNewPositionWithPush(struct coord *delta, f32 rotateamount, bo
 
 							propDeregisterRooms(obstacle);
 							roomsCopy(newrooms, obstacle->rooms);
-							chr0f0220ac(chr);
+							chrUpdateRooms(chr);
 							modelSetRootPosition(chr->model, &newpos);
 
 							result = bwalkCalculateNewPosition(delta, rotateamount, apply, extrawidth, types);

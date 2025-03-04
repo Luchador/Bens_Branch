@@ -31,7 +31,6 @@
 u8 g_EyespyPickup = false;
 u8 g_EyespyHit = EYESPYHIT_NONE;
 u8 g_EyespyPrevHit = EYESPYHIT_NONE;
-u8 var80070ecc = 0;
 f32 g_EyespyMaxHeight = 160;
 f32 g_EyespyMinHeight = 80;
 u32 g_EyespyFallAccel = 100;
@@ -98,7 +97,7 @@ s32 eyespyTryMoveUpwards(f32 yvel)
 	}
 
 	func0f065e74(&prop->pos, prop->rooms, &dstpos, dstrooms);
-	chr0f021fa8(prop->chr, &dstpos, dstrooms);
+	chrFindEnteredRooms(prop->chr, &dstpos, dstrooms);
 	propSetPerimEnabled(prop, false);
 
 	f0 -= 0.1f;
@@ -167,7 +166,7 @@ s32 eyespyCalculateNewPosition(struct coord *vel)
 			}
 		}
 
-		chr0f021fa8(eyespyprop->chr, &dstpos, dstrooms);
+		chrFindEnteredRooms(eyespyprop->chr, &dstpos, dstrooms);
 
 		// Check if the eyespy is moving 13cm or more along either the X or Z
 		// axis in a single frame. If less, only do a collision check for the
@@ -234,27 +233,6 @@ bool eyespyCalculateNewPositionWithPush(struct coord *vel)
 				g_EyespyHit = EYESPYHIT_DOOR;
 
 				if (door->doorflags & DOORFLAG_DAMAGEONCONTACT) {
-					f32 sp38[3];
-					struct coord sp2c;
-					struct coord sp20;
-
-					cdGetEdge(&sp2c, &sp20, 286, "bondeyespy.c");
-
-					// Nothing is actually done with these coordinates...
-					// This code was likely copied from bondwalk then the bounce
-					// feature removed
-					sp38[0] = sp20.z - sp2c.z;
-					sp38[1] = 0;
-					sp38[2] = sp2c.x - sp20.x;
-
-					if (sp38[0] || sp38[2]) {
-						guNormalize(&sp38[0], &sp38[1], &sp38[2]);
-					} else {
-						sp38[2] = 1;
-					}
-
-					if (prop);
-
 					g_EyespyHit = EYESPYHIT_DAMAGE;
 				}
 			}
@@ -508,7 +486,7 @@ void eyespyUpdateVertical(void)
 
 	g_Vars.currentplayer->eyespy->oldground = newground;
 	chr->ground = chr->manground;
-	chr->sumground = chr->manground * (PAL ? 8.4175090789795f : 9.999998f);
+	chr->sumground = chr->manground * 10.0f;
 
 	// Handle rebound if hitting the min or max height
 	if (g_Vars.currentplayer->eyespy->vel.y != 0) {
@@ -539,7 +517,7 @@ void eyespyUpdateVertical(void)
 		g_EyespyHit = hit;
 	}
 
-	chr0f0220ac(chr);
+	chrUpdateRooms(chr);
 
 	dist.x = prop->pos.x - origpos.x;
 	dist.y = prop->pos.y - origpos.y;
@@ -663,13 +641,8 @@ bool eyespyTryLaunch(void)
 		chr->chrflags &= ~CHRCFLAG_HIDDEN;
 		chr->chrflags &= ~CHRCFLAG_INVINCIBLE;
 
-#if VERSION >= VERSION_NTSC_1_0
 		psCreate(NULL, g_Vars.currentplayer->eyespy->prop, SFX_EYESPY_RUNNING, -1,
 				-1, PSFLAG_REPEATING, 0, PSTYPE_NONE, 0, -1, 0, -1, -1, -1, -1);
-#else
-		psCreate(NULL, g_Vars.currentplayer->eyespy->prop, SFX_EYESPY_RUNNING, -1,
-				-1, 0, 0, PSTYPE_NONE, 0, -1, 0, -1, -1, -1, -1);
-#endif
 	}
 
 	playerSetPerimEnabled(g_Vars.currentplayer->prop, true);
@@ -677,7 +650,7 @@ bool eyespyTryLaunch(void)
 	func0f065e74(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms,
 			&g_Vars.currentplayer->eyespy->prop->pos, g_Vars.currentplayer->eyespy->prop->rooms);
 
-	chr0f0220ac(chr);
+	chrUpdateRooms(chr);
 
 	return launched;
 }
@@ -685,14 +658,14 @@ bool eyespyTryLaunch(void)
 void eyespyProcessInput(bool allowbuttons)
 {
 	struct chrdata *chr = g_Vars.currentplayer->eyespy->prop->chr;
-	f32 spe0 = PAL ? 0.952f : 0.96f;
+	f32 spe0 = 0.96f;
 	f32 f;
 	s32 i;
-	f32 spd4;
-	f32 spd0;
-	f32 spcc;
-	f32 spc8;
-	f32 spc4;
+	f32 sidewaysdelta2;
+	f32 sidewaysdelta1;
+	f32 forwarddelta2;
+	f32 forwarddelta1;
+	f32 yacceleration;
 	s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
 	s8 c1stickx = joyGetStickX(contpad1);
 	s8 c2stickx;
@@ -738,17 +711,10 @@ void eyespyProcessInput(bool allowbuttons)
 
 		c2buttons = allowbuttons ? joyGetButtons(contpad2, 0xffffffff) : 0;
 	} else {
-#ifndef PLATFORM_N64
 		if (controlmode == CONTROLMODE_PC) {
 			c2stickx = joyGetRStickX(contpad1);
 			c2sticky = joyGetRStickY(contpad1);
 		} else
-#else
-		{
-			c2stickx = c1stickx;
-			c2sticky = c1sticky;
-		}
-#endif
 		c2buttons = c1buttons;
 	}
 
@@ -760,12 +726,10 @@ void eyespyProcessInput(bool allowbuttons)
 	} else if (controlmode <= CONTROLMODE_14 || controlmode == CONTROLMODE_PC) {
 		aimpressed = c1buttons & (R_TRIG);
 		shootpressed = c1buttons & Z_TRIG;
-#ifndef PLATFORM_N64
 		if (controlmode == CONTROLMODE_PC) {
 			exitpressed = c1buttons & (BUTTON_WPNBACK | BUTTON_RADIAL);
 			activatepressed = c1buttons & (BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE);
 		} else
-#endif
 		{
 			exitpressed = (c1buttons | c2buttons) & A_BUTTON;
 			activatepressed = (c1buttons | c2buttons) & B_BUTTON;
@@ -889,15 +853,9 @@ void eyespyProcessInput(bool allowbuttons)
 
 	g_EyespyPickup = false;
 
-#if VERSION >= VERSION_PAL_BETA
-	for (f = 1; f < g_Vars.lvupdate60; f++) {
-		spe0 *= PAL ? 0.952f : 0.96f;
-	}
-#else
 	for (f = 1; f < g_Vars.lvupdate60freal; f++) {
 		spe0 *= 0.96f;
 	}
-#endif
 
 	if (g_Vars.currentplayer->eyespy->startuptimer60 < TICKS(50)) {
 		g_Vars.currentplayer->eyespy->startuptimer60 += g_Vars.lvupdate60;
@@ -924,19 +882,6 @@ void eyespyProcessInput(bool allowbuttons)
 	if (g_Vars.currentplayer->eyespy->active && g_PlayersWithControl[g_Vars.currentplayernum]) {
 		g_Vars.currentplayer->joybutinhibit = 0xffffffff;
 
-#if VERSION < VERSION_NTSC_1_0
-		if (g_Vars.currentplayer->isdead == false
-				&& g_Vars.currentplayer->pausemode == PAUSEMODE_UNPAUSED
-				&& (c1buttons & START_BUTTON)) {
-			if (!g_Vars.mplayerisrunning) {
-				playerPause(MENUROOT_MAINMENU);
-			} else {
-				mpPushPauseDialog();
-			}
-		}
-#endif
-
-#ifndef PLATFORM_N64
 		if (g_Vars.currentplayernum == 0) {
 			f32 mdx, mdy;
 			inputMouseGetScaledDelta(&mdx, &mdy);
@@ -953,7 +898,6 @@ void eyespyProcessInput(bool allowbuttons)
 				}
 			}
 		}
-#endif
 
 		// Update theta
 		g_Vars.currentplayer->eyespy->theta += c1stickx * 0.0625f * g_Vars.lvupdate60freal;
@@ -970,16 +914,14 @@ void eyespyProcessInput(bool allowbuttons)
 		g_Vars.currentplayer->eyespy->sintheta = sinf(g_Vars.currentplayer->eyespy->theta * 0.017453292384744f);
 
 		// Update verta
-#ifndef PLATFORM_N64
 		// respect the invert pitch setting
 		if (optionsGetForwardPitch(g_Vars.currentplayerstats->mpindex)) {
 			pitchspeed = -pitchspeed;
 		}
-#endif
 		g_Vars.currentplayer->eyespy->verta -= pitchspeed * 0.0625f * g_Vars.lvupdate60freal;
 
 		if (prevverta != g_Vars.currentplayer->eyespy->verta) {
-#ifndef PLATFORM_N64 // limit eyespy range to 75 degrees
+			// limit eyespy range to 75 degrees
 			while (g_Vars.currentplayer->eyespy->verta > 90.0f) {
 				g_Vars.currentplayer->eyespy->verta -= 360.0f;
 			}
@@ -991,7 +933,6 @@ void eyespyProcessInput(bool allowbuttons)
 			if (g_Vars.currentplayer->eyespy->verta > 75.0f) {
 				g_Vars.currentplayer->eyespy->verta = 75.0f;
 			}
-#endif
 			while (g_Vars.currentplayer->eyespy->verta < 0.0f) {
 				g_Vars.currentplayer->eyespy->verta += 360.0f;
 			}
@@ -1004,11 +945,11 @@ void eyespyProcessInput(bool allowbuttons)
 			g_Vars.currentplayer->eyespy->sinverta = sinf(g_Vars.currentplayer->eyespy->verta * 0.017453292384744f);
 		}
 
-		spc4 = 0.0f;
-		spc8 = 0.0f;
-		spcc = 0.0f;
-		spd0 = 0.0f;
-		spd4 = 0.0f;
+		yacceleration = 0.0f;
+		forwarddelta1 = 0.0f;
+		forwarddelta2 = 0.0f;
+		sidewaysdelta1 = 0.0f;
+		sidewaysdelta2 = 0.0f;
 
 		// Make eyespy look horizontally
 		if (domovecentre) {
@@ -1035,49 +976,49 @@ void eyespyProcessInput(bool allowbuttons)
 				g_Vars.currentplayer->eyespy->sinverta = sinf(g_Vars.currentplayer->eyespy->verta * 0.017453292384744f);
 			}
 
-			spcc += forwardspeed * g_Vars.currentplayer->eyespy->sintheta * 0.15f * g_Vars.lvupdate60freal;
-			spc8 += -forwardspeed * g_Vars.currentplayer->eyespy->costheta * 0.15f * g_Vars.lvupdate60freal;
+			forwarddelta2 += forwardspeed * g_Vars.currentplayer->eyespy->sintheta * 0.15f * g_Vars.lvupdate60freal;
+			forwarddelta1 += -forwardspeed * g_Vars.currentplayer->eyespy->costheta * 0.15f * g_Vars.lvupdate60freal;
 		}
 
 		if (sidespeed != 0) {
-			spd4 += sidespeed * 5 * g_Vars.currentplayer->eyespy->costheta * 0.15f * g_Vars.lvupdate60freal;
-			spd0 += sidespeed * 5 * g_Vars.currentplayer->eyespy->sintheta * 0.15f * g_Vars.lvupdate60freal;
+			sidewaysdelta2 += sidespeed * 5 * g_Vars.currentplayer->eyespy->costheta * 0.15f * g_Vars.lvupdate60freal;
+			sidewaysdelta1 += sidespeed * 5 * g_Vars.currentplayer->eyespy->sintheta * 0.15f * g_Vars.lvupdate60freal;
 		}
 
 		if (ascendspeed != 0) {
-			spc4 += ascendspeed * 3 * 0.15f * g_Vars.lvupdate60freal;
+			yacceleration += ascendspeed * 3 * 0.15f * g_Vars.lvupdate60freal;
 
 			g_Vars.currentplayer->eyespy->bobdir = (ascendspeed < 0.0f) ? -1 : 1;
 			g_Vars.currentplayer->eyespy->bobtimer = 0;
 			g_Vars.currentplayer->eyespy->bobactive = false;
 		}
 
-		g_Vars.currentplayer->eyespy->velf[0] += spcc;
-		g_Vars.currentplayer->eyespy->velf[1] += spc8;
-		g_Vars.currentplayer->eyespy->vels[0] += spd4;
-		g_Vars.currentplayer->eyespy->vels[1] += spd0;
+		g_Vars.currentplayer->eyespy->velf[0] += forwarddelta2;
+		g_Vars.currentplayer->eyespy->velf[1] += forwarddelta1;
+		g_Vars.currentplayer->eyespy->vels[0] += sidewaysdelta2;
+		g_Vars.currentplayer->eyespy->vels[1] += sidewaysdelta1;
 
-		spcc = g_Vars.currentplayer->eyespy->velf[0] * g_Vars.currentplayer->eyespy->velf[0]
+		forwarddelta2 = g_Vars.currentplayer->eyespy->velf[0] * g_Vars.currentplayer->eyespy->velf[0]
 			+ g_Vars.currentplayer->eyespy->velf[1] * g_Vars.currentplayer->eyespy->velf[1];
 
-		if (spcc > 90.25f * g_Vars.lvupdate60freal * g_Vars.lvupdate60freal) {
-			spcc = 9.5f * g_Vars.lvupdate60freal / sqrtf(spcc);
+		if (forwarddelta2 > 90.25f * g_Vars.lvupdate60freal * g_Vars.lvupdate60freal) {
+			forwarddelta2 = 9.5f * g_Vars.lvupdate60freal / sqrtf(forwarddelta2);
 
-			g_Vars.currentplayer->eyespy->velf[0] *= spcc;
-			g_Vars.currentplayer->eyespy->velf[1] *= spcc;
+			g_Vars.currentplayer->eyespy->velf[0] *= forwarddelta2;
+			g_Vars.currentplayer->eyespy->velf[1] *= forwarddelta2;
 		}
 
-		spd4 = g_Vars.currentplayer->eyespy->vels[0] * g_Vars.currentplayer->eyespy->vels[0]
+		sidewaysdelta2 = g_Vars.currentplayer->eyespy->vels[0] * g_Vars.currentplayer->eyespy->vels[0]
 			+ g_Vars.currentplayer->eyespy->vels[1] * g_Vars.currentplayer->eyespy->vels[1];
 
-		if (spd4 > 225.0f * g_Vars.lvupdate60freal * g_Vars.lvupdate60freal) {
-			spd4 = 15.0f * g_Vars.lvupdate60freal / sqrtf(spd4);
+		if (sidewaysdelta2 > 225.0f * g_Vars.lvupdate60freal * g_Vars.lvupdate60freal) {
+			sidewaysdelta2 = 15.0f * g_Vars.lvupdate60freal / sqrtf(sidewaysdelta2);
 
-			g_Vars.currentplayer->eyespy->vels[0] *= spd4;
-			g_Vars.currentplayer->eyespy->vels[1] *= spd4;
+			g_Vars.currentplayer->eyespy->vels[0] *= sidewaysdelta2;
+			g_Vars.currentplayer->eyespy->vels[1] *= sidewaysdelta2;
 		}
 
-		g_Vars.currentplayer->eyespy->vel.y += spc4;
+		g_Vars.currentplayer->eyespy->vel.y += yacceleration;
 
 		if (g_Vars.currentplayer->eyespy->vel.y < -(5 * g_Vars.lvupdate60freal)) {
 			g_Vars.currentplayer->eyespy->vel.y = -(5 * g_Vars.lvupdate60freal);
@@ -1091,17 +1032,13 @@ void eyespyProcessInput(bool allowbuttons)
 	}
 
 	// Update bob
-	if (spc4 == 0.0f) {
+	if (yacceleration == 0.0f) {
 		if (g_Vars.currentplayer->eyespy->bobactive || ABS(g_Vars.currentplayer->eyespy->vel.y) < 0.1f) {
 			g_Vars.currentplayer->eyespy->bobactive = true;
 			g_Vars.currentplayer->eyespy->bobtimer += g_Vars.lvupdate60;
-#ifdef PLATFORM_N64
-			g_Vars.currentplayer->eyespy->vel.y += 0.025f * g_Vars.currentplayer->eyespy->bobdir;
-#else
 			// HACK: how do I scale this properly?
 			const f32 scale = (g_Vars.lvupdate60freal <= 1.1f) ? 0.0055f : 0.0125f;
 			g_Vars.currentplayer->eyespy->vel.y += scale * g_Vars.lvupdate60freal * g_Vars.currentplayer->eyespy->bobdir;
-#endif
 
 			if (g_Vars.currentplayer->eyespy->bobtimer > TICKS(120)) {
 				g_Vars.currentplayer->eyespy->bobtimer = 0;
@@ -1130,7 +1067,6 @@ void eyespyProcessInput(bool allowbuttons)
 
 	g_EyespyPrevHit = g_EyespyHit;
 	g_EyespyHit = EYESPYHIT_NONE;
-	var80070ecc = 0;
 
 	eyespyUpdateVertical();
 

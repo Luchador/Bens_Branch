@@ -3646,7 +3646,7 @@ void projectileFall(struct defaultobj *obj, f32 arg1[3][3])
 		mtx3ToMtx4(obj->realrot, &sp148);
 		mtx4GetRotation(sp148.m, &sp188);
 		mtx4LoadRotation(&sp188, &sp108);
-		quaternion0f096ca0(&sp188, projectile->unk068);
+		quaternionEulerToQuat(&sp188, projectile->unk068);
 		mtx4LoadRotationFrom(sp108.m, spc8.m);
 		mtx4MultMtx4(&spc8, &sp148, &sp88);
 
@@ -3818,8 +3818,8 @@ void projectileFall(struct defaultobj *obj, f32 arg1[3][3])
 		spc8.m[3][3] = 1.0f;
 
 		mtx4GetRotation(spc8.m, &sp188);
-		quaternion0f096ca0(&sp188, projectile->unk078);
-		quaternion0f0976c0(projectile->unk068, projectile->unk078);
+		quaternionEulerToQuat(&sp188, projectile->unk078);
+		quaternionAvoidFlips(projectile->unk068, projectile->unk078);
 
 		projectile->unk060 = 0.0f;
 
@@ -7836,7 +7836,7 @@ void platformDisplaceProps(struct prop *platform, s16 *propnums, struct coord *p
 				propDeregisterRooms(prop);
 
 				func0f065e74(&platform->pos, platform->rooms, &prop->pos, prop->rooms);
-				chr0f0220ac(chr);
+				chrUpdateRooms(chr);
 				modelSetRootPosition(chr->model, &prop->pos);
 
 				nodetype = chr->model->definition->rootnode->type;

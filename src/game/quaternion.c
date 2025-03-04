@@ -7,7 +7,7 @@
 #include "data.h"
 #include "types.h"
 
-void quaternion0f096ca0(struct coord *angle, f32 quat[4])
+void quaternionEulerToQuat(struct coord *angle, f32 quat[4])
 {
 	f32 cosx = cosf(angle->f[0] * 0.5f);
 	f32 sinx = sinf(angle->f[0] * 0.5f);
@@ -219,7 +219,8 @@ void quaternion0f097518(f32 q[4], f32 t, f32 result[4])
 	}
 }
 
-void quaternion0f0976c0(f32 q1[4], f32 q2[4])
+// Ben's comment: Prevents the camera from suddenly flipping such as when using the Hoverbike.
+void quaternionAvoidFlips(f32 q1[4], f32 q2[4])
 {
 	f32 dot = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
 

@@ -2050,13 +2050,13 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 						tmprot.y = menumodel->curroty;
 						tmprot.z = menumodel->currotz;
 
-						quaternion0f096ca0(&tmprot, sp2bc);
+						quaternionEulerToQuat(&tmprot, sp2bc);
 
 						tmprot.x = menumodel->newrotx;
 						tmprot.y = menumodel->newroty;
 						tmprot.z = menumodel->newrotz;
 
-						quaternion0f096ca0(&tmprot, sp2ac);
+						quaternionEulerToQuat(&tmprot, sp2ac);
 						quaternionSlerp(sp2bc, sp2ac, fracnew, sp29c);
 						quaternionToMtx(sp29c, &rotmtx);
 					} else {

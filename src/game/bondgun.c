@@ -4189,7 +4189,7 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 
 				quaternion0f097044(&spf8, sp68);
 				quaternion0f097044(&spb8, sp58);
-				quaternion0f0976c0(sp68, sp58);
+				quaternionAvoidFlips(sp68, sp58);
 
 				frac = 0.34901025891304f / radians;
 
@@ -4432,7 +4432,7 @@ void bgunCreateFiredProjectile(s32 handnum)
 
 						quaternion0f097044(&sp174, spe4);
 						quaternion0f097044(&sp134, spd4);
-						quaternion0f0976c0(spe4, spd4);
+						quaternionAvoidFlips(spe4, spd4);
 
 						frac = 0.17450513f / radians;
 

@@ -64,10 +64,7 @@ struct chrdata *g_CurModelChr;
 struct var80062960 *var80062960 = NULL;
 s32 var80062964 = 0;
 f32 g_ChrAnimSpeed = 0;
-bool var8006296c = false;
 s32 g_SelectedAnimNum = 0;
-u32 var8006297c = 0;
-u32 var80062980 = 0;
 s32 g_NextChrnum = 5000;
 
 struct chrdata *g_ChrSlots = NULL;
@@ -222,7 +219,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 
 	func0f065dfc(&prop->pos, prop->rooms, dstpos, dstrooms, sp84, 20);
 
-	chr0f021fa8(chr, dstpos, dstrooms);
+	chrFindEnteredRooms(chr, dstpos, dstrooms);
 
 	movex = dstpos->x - prop->pos.x;
 	movez = dstpos->z - prop->pos.z;
@@ -270,7 +267,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 
 				func0f065dfc(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
 
-				chr0f021fa8(chr, &sp44, dstrooms);
+				chrFindEnteredRooms(chr, &sp44, dstrooms);
 
 				movex = sp44.x - prop->pos.x;
 				movez = sp44.z - prop->pos.z;
@@ -316,7 +313,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 
 						func0f065dfc(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
 
-						chr0f021fa8(chr, &sp44, dstrooms);
+						chrFindEnteredRooms(chr, &sp44, dstrooms);
 
 						movex = sp44.x - prop->pos.x;
 						movez = sp44.z - prop->pos.z;
@@ -360,7 +357,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 
 							func0f065dfc(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
 
-							chr0f021fa8(chr, &sp44, dstrooms);
+							chrFindEnteredRooms(chr, &sp44, dstrooms);
 
 							movex = sp44.x - prop->pos.x;
 							movez = sp44.z - prop->pos.z;
@@ -418,7 +415,7 @@ bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 arg
 
 	chrGetBbox(chr->prop, &radius, &ymax, &ymin);
 	func0f065e74(pos, rooms, &newpos, newrooms);
-	chr0f021fa8(chr, &newpos, newrooms);
+	chrFindEnteredRooms(chr, &newpos, newrooms);
 	chrSetPerimEnabled(chr, false);
 	result = cdTestVolume(&newpos, radius, newrooms, CDTYPE_ALL, CHECKVERTICAL_YES,
 			ymax - chr->prop->pos.y,
@@ -711,7 +708,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 						sp88.z = arg2->z;
 
 						func0f065e74(arg2, spfc, &sp88, sp78);
-						chr0f021fa8(chr, &sp88, sp78);
+						chrFindEnteredRooms(chr, &sp88, sp78);
 					} else {
 						sp98 = arg2;
 						sp94 = spfc;
@@ -849,7 +846,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 						arg2->y += chr->manground - manground;
 
 						func0f065e74(&spd0, spc0, arg2, spfc);
-						chr0f021fa8(chr, arg2, spfc);
+						chrFindEnteredRooms(chr, arg2, spfc);
 					}
 				}
 
@@ -891,7 +888,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 		}
 	}
 
-	chr0f0220ac(chr);
+	chrUpdateRooms(chr);
 	propCalculateShadeColour(prop, chr->nextcol, chr->floorcol);
 
 	return true;
@@ -1204,7 +1201,7 @@ struct prop *chr0f020b14(struct prop *prop, struct model *model,
 
 	propDeregisterRooms(prop);
 	roomsCopy(rooms, prop->rooms);
-	chr0f0220ac(chr);
+	chrUpdateRooms(chr);
 	modelSetRootPosition(model, &prop->pos);
 
 	nodetype = chr->model->definition->rootnode->type;
@@ -1748,7 +1745,7 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 	}
 }
 
-void chr0f021fa8(struct chrdata *chr, struct coord *pos, RoomNum *rooms)
+void chrFindEnteredRooms(struct chrdata *chr, struct coord *pos, RoomNum *rooms)
 {
 	struct coord lower;
 	struct coord upper;
@@ -1775,19 +1772,19 @@ void chr0f021fa8(struct chrdata *chr, struct coord *pos, RoomNum *rooms)
 	bgFindEnteredRooms(&lower, &upper, rooms, 7, true);
 }
 
-void chr0f022084(struct chrdata *chr, RoomNum *room)
+void chrFindEnteredRoomsWithRoomNum(struct chrdata *chr, RoomNum *room)
 {
-	chr0f021fa8(chr, &chr->prop->pos, room);
+	chrFindEnteredRooms(chr, &chr->prop->pos, room);
 }
 
-void chr0f0220ac(struct chrdata *chr)
+void chrUpdateRooms(struct chrdata *chr)
 {
 	propDeregisterRooms(chr->prop);
-	chr0f022084(chr, chr->prop->rooms);
+	chrFindEnteredRoomsWithRoomNum(chr, chr->prop->rooms);
 	propRegisterRooms(chr->prop);
 }
 
-void chr0f0220ec(struct chrdata *chr, s32 lvupdate240, bool arg2)
+void chrAdvanceAnims(struct chrdata *chr, s32 lvupdate240, bool arg2)
 {
 	struct model *model = chr->model;
 
@@ -2166,12 +2163,6 @@ void chrTickPoisoned(struct chrdata *chr)
 	}
 }
 
-f32 var800629e8 = 1;
-u32 var800629ec = 0x00000000;
-u32 var800629f0 = 0x00000000;
-u32 var800629f4 = 0x00000000;
-u32 var800629f8 = 0x00000000;
-
 bool chrTickBeams(struct prop *prop)
 {
 	struct chrdata *chr = prop->chr;
@@ -2227,17 +2218,16 @@ s32 chrTick(struct prop *prop)
 	f32 sp178;
 	struct hoverbikeobj *bike;
 
+
 	if (prop->flags & PROPFLAG_NOTYETTICKED) {
 		fulltick = true;
 		prop->flags &= ~PROPFLAG_NOTYETTICKED;
 	}
 
 	if (fulltick) {
-#if VERSION >= VERSION_NTSC_1_0
 		if (chr->goposhitcount > 0 && (chr->hidden & CHRHFLAG_BLOCKINGDOOR) == 0) {
 			chr->goposhitcount--;
 		}
-#endif
 
 		if (g_Vars.in_cutscene) {
 			chr->drugheadcount = 0;
@@ -2249,21 +2239,13 @@ s32 chrTick(struct prop *prop)
 			chr->drugheadcount = 0;
 
 			if (chr->drugheadsway > 0.0f) {
-#if VERSION >= VERSION_PAL_BETA
-				chr->drugheadsway -= 0.175f * g_Vars.lvupdate60freal;
-#else
 				chr->drugheadsway -= 0.04375f * g_Vars.lvupdate240;
-#endif
 
 				if (chr->drugheadsway < 0.0f) {
 					chr->drugheadsway = 0.0f;
 				}
 			} else if (chr->drugheadsway < 0.0f) {
-#if VERSION >= VERSION_PAL_BETA
-				chr->drugheadsway += 0.175f * g_Vars.lvupdate60freal;
-#else
 				chr->drugheadsway += 0.04375f * g_Vars.lvupdate240;
-#endif
 
 				if (chr->drugheadsway > 0.0f) {
 					chr->drugheadsway = 0.0f;
@@ -2275,18 +2257,10 @@ s32 chrTick(struct prop *prop)
 		chrTickPoisoned(chr);
 
 		if ((chr->chrflags & CHRCFLAG_HIDDEN) == 0 || (chr->chrflags & CHRCFLAG_NEVERSLEEP)) {
-			if (var8006296c) {
-				if (animHasFrames(g_SelectedAnimNum)) {
-					if (modelGetAnimNum(model) != g_SelectedAnimNum || !animHasFrames(modelGetAnimNum(model))) {
-						modelSetAnimation(model, g_SelectedAnimNum, 0, 0.0f, 0.5f, 0.0f);
-					}
-				}
-			} else {
-				chraTick(chr);
+			chraTick(chr);
 
-				if (chr->model == NULL) {
-					return TICKOP_FREE;
-				}
+			if (chr->model == NULL) {
+				return TICKOP_FREE;
 			}
 
 			/*if (var80062974) { //var80062974 is always 0
@@ -2319,7 +2293,7 @@ s32 chrTick(struct prop *prop)
 			}
 
 			if (fulltick) {
-				chr0f0220ec(chr, lvupdate240, true);
+				chrAdvanceAnims(chr, lvupdate240, true);
 			}
 		} else {
 			needsupdate = false;
@@ -2338,9 +2312,9 @@ s32 chrTick(struct prop *prop)
 			model->anim->average = false;
 
 			if (chr->actiontype == ACT_ANIM && !chr->act_anim.movewheninvis && chr->act_anim.lockpos) {
-				chr0f0220ec(chr, lvupdate240, false);
+				chrAdvanceAnims(chr, lvupdate240, false);
 			} else {
-				chr0f0220ec(chr, lvupdate240, true);
+				chrAdvanceAnims(chr, lvupdate240, true);
 			}
 		}
 
@@ -2369,7 +2343,7 @@ s32 chrTick(struct prop *prop)
 			}
 		} else {
 			if (fulltick) {
-				chr0f0220ec(chr, lvupdate240, true);
+				chrAdvanceAnims(chr, lvupdate240, true);
 			}
 
 			needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
@@ -2392,16 +2366,16 @@ s32 chrTick(struct prop *prop)
 			model->anim->average = false;
 
 			if (needsupdate && !chr->act_anim.lockpos) {
-				chr0f0220ec(chr, lvupdate240, true);
+				chrAdvanceAnims(chr, lvupdate240, true);
 			} else {
-				chr0f0220ec(chr, lvupdate240, false);
+				chrAdvanceAnims(chr, lvupdate240, false);
 			}
 		}
 	} else if (chr->actiontype == ACT_STAND) {
 		model->anim->average = false;
 
 		if (chr->chrflags & CHRCFLAG_FORCETOGROUND) {
-			chr0f0220ec(chr, lvupdate240, true);
+			chrAdvanceAnims(chr, lvupdate240, true);
 			needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
 		} else {
 			needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
@@ -2410,22 +2384,22 @@ s32 chrTick(struct prop *prop)
 				if (fulltick) {
 					if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 						if (needsupdate) {
-							chr0f0220ec(chr, lvupdate240, true);
+							chrAdvanceAnims(chr, lvupdate240, true);
 						} else if (model->anim->animnum2 != 0) {
-							chr0f0220ec(chr, lvupdate240, false);
+							chrAdvanceAnims(chr, lvupdate240, false);
 						}
 					} else {
-						chr0f0220ec(chr, lvupdate240, true);
+						chrAdvanceAnims(chr, lvupdate240, true);
 					}
 				}
 			} else if (needsupdate) {
 				if (chr->act_stand.playwalkanim == true) {
-					chr0f0220ec(chr, lvupdate240, false);
+					chrAdvanceAnims(chr, lvupdate240, false);
 				} else {
-					chr0f0220ec(chr, lvupdate240, true);
+					chrAdvanceAnims(chr, lvupdate240, true);
 				}
 			} else if (model->anim->animnum2 != 0) {
-				chr0f0220ec(chr, lvupdate240, false);
+				chrAdvanceAnims(chr, lvupdate240, false);
 			}
 		}
 	} else if (chr->actiontype == ACT_DEAD) {
@@ -2435,14 +2409,14 @@ s32 chrTick(struct prop *prop)
 				|| (player = g_Vars.players[playermgrGetPlayerNumByProp(prop)], player->cameramode == CAMERAMODE_EYESPY)
 				|| (player->cameramode == CAMERAMODE_THIRDPERSON && player->visionmode == VISIONMODE_SLAYERROCKET))) {
 		model->anim->average = false;
-		chr0f0220ec(chr, lvupdate240, true);
+		chrAdvanceAnims(chr, lvupdate240, true);
 		needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
 	} else {
 		isrepeatframe2 = false;
 
 		if (fulltick) {
 			model->anim->average = false;
-			chr0f0220ec(chr, lvupdate240, true);
+			chrAdvanceAnims(chr, lvupdate240, true);
 		}
 
 		if (chr->model && chr->model->anim && (g_Anims[chr->model->anim->animnum].flags & ANIMFLAG_HASREPEATFRAMES)) {
@@ -2462,11 +2436,7 @@ s32 chrTick(struct prop *prop)
 
 	if (fulltick) {
 		if (chr->actiontype != ACT_STAND || model->anim->animnum2 != 0 || prop->type == PROPTYPE_PLAYER) {
-#if VERSION >= VERSION_NTSC_1_0
 			chr->hidden2 |= CHRH2FLAG_CONSIDERPROXIES;
-#else
-			chr->hidden |= CHRHFLAG_CONSIDERPROXIES;
-#endif
 		}
 
 		chrUpdateAimProperties(chr);
@@ -2566,57 +2536,7 @@ s32 chrTick(struct prop *prop)
 			s32 prevframea;
 			f32 prevfrac2;
 			s32 prevframe2a;
-
-#ifndef PLATFORM_N64 // always interpolate animation
 			anim = model->anim;
-#else
-			if (g_Vars.normmplayerisrunning) {
-				if (g_MpSetup.options & (MPOPTION_SLOWMOTION_ON | MPOPTION_SLOWMOTION_SMART)) {
-					limit = 2000 * 2000;
-				} else {
-					limit = 700 * 700;
-				}
-			} else {
-				if (debugGetSlowMotion() != SLOWMOTION_OFF) {
-					limit = 2000 * 2000;
-				} else {
-					limit = 700 * 700;
-				}
-			}
-
-			anim = model->anim;
-
-			if (anim && anim->animnum != 0) {
-				xdiff = prop->pos.x - campos->x;
-				ydiff = prop->pos.y - campos->y;
-				zdiff = prop->pos.z - campos->z;
-
-				if ((xdiff * xdiff + ydiff * ydiff + zdiff * zdiff) * sp114 * sp114 > limit) {
-					prevfrac = anim->frac;
-					prevframea = anim->framea;
-					prevfrac2 = anim->frac2;
-					prevframe2a = anim->frame2a;
-					restore = true;
-
-					if (anim->frac != 0 && anim->speed * anim->playspeed >= 0.25f) {
-						if (anim->frac > 0.5f) {
-							anim->framea = anim->frameb;
-						}
-
-						anim->frac = 0;
-					}
-
-					if (anim->fracmerge != 0 && anim->speed2 * anim->playspeed >= 0.25f && anim->frac2 != 0) {
-						if (anim->frac2 > 0.5f) {
-							anim->frame2a = anim->frame2b;
-						}
-
-						anim->frac2 = 0;
-					}
-				}
-			}
-#endif
-
 			modelSetMatricesWithAnim(&sp210, model);
 
 			if (restore) {
@@ -2627,7 +2547,7 @@ s32 chrTick(struct prop *prop)
 			}
 
 			g_ModelJointPositionedFunc = NULL;
-			modelSetDistanceScale(var800629e8);
+			modelSetDistanceScale(1.0f);
 
 			if (fulltick) {
 				colourTween(chr->shadecol, chr->nextcol);
@@ -4583,11 +4503,6 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 	}
 }
 
-void chr0f028498(bool value)
-{
-	var8006296c = value;
-}
-
 //Not used. Probably debug for devs to preview different animations
 /*void chr0f0284ac(s32 arg0)
 {
@@ -4857,9 +4772,7 @@ bool chr0f028e6c(s32 arg0, struct prop *prop, struct prop **propptr, struct mode
 		} else {
 			model = prop->obj->model;
 		}
-
-		if (1);
-
+		
 		if (arg0 >= model->definition->nummatrices) {
 			arg0 -= model->definition->nummatrices;
 

@@ -788,11 +788,11 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 			mtx00015be0(&sp78, &sp38);
 			quaternion0f097044(&sp38, spec);
 		} else {
-			quaternion0f096ca0(&rot3, spec);
+			quaternionEulerToQuat(&rot3, spec);
 		}
 
-		quaternion0f096ca0(&rot1, spfc);
-		quaternion0f0976c0(spfc, spec);
+		quaternionEulerToQuat(&rot1, spfc);
+		quaternionAvoidFlips(spfc, spec);
 		quaternionSlerp(spfc, spec, anim->fracmerge, spdc);
 		quaternionToMtx(spdc, &sp1d8);
 	} else {
@@ -893,7 +893,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 		f32 sp3c[4];
 		f32 sp2c[4];
 
-		quaternion0f096ca0(rot, sp3c);
+		quaternionEulerToQuat(rot, sp3c);
 		quaternion0f097518(sp3c, 0.5f, sp2c);
 
 		if (rendermtx != NULL) {
@@ -1112,9 +1112,9 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 				modelTweenRot(&rot3, &rot4, anim->frac2);
 			}
 
-			quaternion0f096ca0(&rot1, sp88);
-			quaternion0f096ca0(&rot3, sp78);
-			quaternion0f0976c0(sp88, sp78);
+			quaternionEulerToQuat(&rot1, sp88);
+			quaternionEulerToQuat(&rot3, sp78);
+			quaternionAvoidFlips(sp88, sp78);
 			quaternionSlerp(sp88, sp78, anim->fracmerge, sp68);
 
 			if (translate1.f[0] != 0.0f || translate1.f[1] != 0.0f || translate1.f[2] != 0.0f) {

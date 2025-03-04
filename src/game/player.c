@@ -1761,14 +1761,8 @@ void playerStartCutscene2(void)
 	bmoveSetModeForAllPlayers(MOVEMODE_CUTSCENE);
 	playersClearMemCamRoom();
 
-#if PAL
-	g_CutsceneCurAnimFrame240 = var8009e388pf;
-	g_CutsceneCurAnimFrame60 = floorf(g_CutsceneCurAnimFrame240 + 0.01f);
-#else
 	g_CutsceneCurAnimFrame240 = g_CutsceneFrameOverrun240;
 	g_CutsceneCurAnimFrame60 = g_CutsceneFrameOverrun240 >> 2;
-#endif
-
 	g_CutsceneBlurFrac = 0;
 	g_CutsceneTweenDuration60 = -1;
 	g_InCutscene = 1;
@@ -1892,11 +1886,7 @@ void playerTickCutscene(bool arg0)
 			}
 
 			if (g_CutsceneCurAnimFrame60 >= endframe) {
-#if PAL
-				var8009e388pf = g_CutsceneCurAnimFrame240 - endframe;
-#else
 				g_CutsceneFrameOverrun240 = g_CutsceneCurAnimFrame240 - endframe * 4;
-#endif
 			}
 
 			if (g_CutsceneCurAnimFrame60 > endframe) {
@@ -1948,7 +1938,7 @@ void playerTickCutscene(bool arg0)
 				g_Vars.bond->bond2.unk28.x, g_Vars.bond->bond2.unk28.y, g_Vars.bond->bond2.unk28.z);
 		quaternion0f097044(&spc4, sp74);
 		quaternion0f097044(&sp84, sp64);
-		quaternion0f0976c0(sp64, sp74);
+		quaternionAvoidFlips(sp64, sp74);
 		quaternionSlerp(sp74, sp64, sp104, sp54);
 		quaternionToMtx(sp54, &rotmtx);
 
@@ -5252,7 +5242,7 @@ s32 playerTickThirdPerson(struct prop *prop)
 			player->vv_ground = chr->ground;
 			player->vv_manground = chr->ground;
 
-			chr0f0220ac(prop->chr);
+			chrUpdateRooms(prop->chr);
 
 			if (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
 				if (player->model00d4->definition->skel == &g_SkelChr) {
