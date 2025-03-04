@@ -16258,7 +16258,7 @@ bool chrIsAvoiding(struct chrdata *chr)
 			|| anim == ANIM_AVOID_0065
 			|| anim == ANIM_AVOID_0066
 			|| anim == ANIM_AVOID_0067
-			|| (chr->chrflags & CHRCFLAG_AVOIDING)) {
+			|| (chr->chrflags & ~CHRCFLAG_AVOIDING)) {
 		return true;
 	}
 

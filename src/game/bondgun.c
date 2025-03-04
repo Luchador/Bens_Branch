@@ -57,6 +57,7 @@
 #include "game/stagetable.h"
 #include "video.h"
 #include "platform.h"
+#include "game/debug.h"
 #endif
 
 #define GUNLOADSTATE_FLUX     0
@@ -5858,6 +5859,7 @@ bool bgunIsMissionCritical(s32 weaponnum)
 }
 #endif
 
+// This is for the player being disarmed
 void bgunDisarm(struct prop *attackerprop)
 {
 	struct player *player = g_Vars.currentplayer;

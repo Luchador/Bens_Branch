@@ -1208,6 +1208,7 @@ void hitCreate(struct shotdata *shotdata, struct prop *prop, f32 hitdistance, s3
 	}
 }
 
+// Ben's comment: also used for pistol whip
 void handInflictMeleeDamage(s32 handnum, struct gset *gset, bool arg2)
 {
 	s32 cdtypes;
@@ -1286,6 +1287,7 @@ void handInflictMeleeDamage(s32 handnum, struct gset *gset, bool arg2)
 #endif
 					struct weaponfunc_melee *meleefunc = (struct weaponfunc_melee *)func;
 					rangelimit = meleefunc->range;
+
 				}
 
 				bgunGetCrossPos(&x, &y);

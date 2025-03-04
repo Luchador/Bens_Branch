@@ -15690,6 +15690,7 @@ void objTestHit(struct prop *prop, struct shotdata *shotdata)
 	}
 }
 
+// Weapon hits a prop
 void objHit(struct shotdata *shotdata, struct hit *hit)
 {
 	struct defaultobj *obj;

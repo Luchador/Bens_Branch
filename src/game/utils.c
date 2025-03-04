@@ -5,6 +5,7 @@
 #include "lib/memp.h"
 #include "data.h"
 #include "types.h"
+#include "game/debug.h"
 
 const char var7f1b7cb0[] = "UM_Make : In\n";
 const char var7f1b7cc0[] = "UM_Make : Out\n";
@@ -226,7 +227,6 @@ bool isPointInBBox(struct coord *point, struct coord *bbox)
 			&& point->z < bbox->z && -bbox->z < point->z) {
 		return true;
 	}
-
 	return false;
 }
 
