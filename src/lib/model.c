@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/game_096700.h"
 #include "game/acosfasinf.h"
 #include "game/quaternion.h"
 #include "game/camera.h"
@@ -921,7 +920,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 		}
 
 		if (roty < 0.890118f) { // 51 degrees
-			roty = func0f096700(roty);
+			roty = sqrtf(sinf(roty) / cosf(roty) + 1);
 		} else {
 			roty = 1.5f;
 		}
@@ -1025,7 +1024,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 		}
 
 		if (roty < 0.890118f) { // 51 degrees
-			roty = func0f096700(roty);
+			roty = sqrtf(sinf(roty) / cosf(roty) + 1);
 		} else {
 			roty = 1.5f;
 		}

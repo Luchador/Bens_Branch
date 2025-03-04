@@ -75,7 +75,6 @@ Gfx *func0f0d479c(Gfx *gdl)
 	gSPMatrix(gdl++, osVirtualToPhysical(mtx2), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gSPMatrix(gdl++, osVirtualToPhysical(mtx1), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (var80070f10 == NULL) {
 		u32 size = align16(sizeof(Vp));
 		var80070f10 = gfxAllocate(size);
@@ -94,29 +93,6 @@ Gfx *func0f0d479c(Gfx *gdl)
 	}
 
 	gSPViewport(gdl++, var80070f10);
-#else
-	var80070f10.vp.vscale[0] = 640;
-	var80070f10.vp.vscale[1] = 480;
-	var80070f10.vp.vscale[2] = 640;
-	var80070f10.vp.vscale[3] = 0;
-
-	var80070f10.vp.vtrans[0] = 640;
-	var80070f10.vp.vtrans[1] = 480;
-	var80070f10.vp.vtrans[2] = 0x1ff;
-	var80070f10.vp.vtrans[3] = 0;
-
-	var80070f10.vp.vscale[0] = viGetWidth() << 1;
-	var80070f10.vp.vscale[1] = viGetHeight() << 1;
-	var80070f10.vp.vscale[2] = 1;
-	var80070f10.vp.vscale[3] = 0;
-
-	var80070f10.vp.vtrans[0] = viGetWidth() << 1;
-	var80070f10.vp.vtrans[1] = viGetHeight() << 1;
-	var80070f10.vp.vtrans[2] = 0x1ff;
-	var80070f10.vp.vtrans[3] = 0;
-
-	gSPViewport(gdl++, &var80070f10);
-#endif
 
 	gDPPipeSync(gdl++);
 

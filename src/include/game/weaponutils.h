@@ -37,5 +37,7 @@ u32 currentPlayerGetSight(void);
 void gsetGetNoiseSettings(struct gset *gset, struct noisesettings *settings);
 struct guncmd *gsetGetPriToSecAnim(struct gset *gset);
 struct guncmd *gsetGetSecToPriAnim(struct gset *gset);
+void Lerp2D(f32 *param_1, f32 *param_2, f32 scale, f32 *dst);
+void ScaleVector2D(f32 *a, f32 *b, f32 *dst);
 
 #endif

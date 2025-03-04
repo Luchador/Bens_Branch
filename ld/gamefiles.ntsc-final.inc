@@ -80,14 +80,12 @@
 	build/ROMID/game/propsnd.o (section); \
 	build/ROMID/game/objectives.o (section); \
 	build/ROMID/game/game_096360.o (section); \
-	build/ROMID/game/game_096700.o (section); \
 	build/ROMID/game/atan2f.o (section); \
 	build/ROMID/game/acosasin.o (section); \
 	build/ROMID/game/acosfasinf.o (section); \
 	build/ROMID/game/quaternion.o (section); \
 	build/ROMID/game/floor.o (section); \
 	build/ROMID/game/ceil.o (section); \
-	build/ROMID/game/game_097aa0.o (section); \
 	build/ROMID/game/invitems.o (section); \
 	build/ROMID/game/bondgun.o (section); \
 	build/ROMID/game/gunfx.o (section); \

@@ -13,7 +13,6 @@
 #include "game/acosfasinf.h"
 #include "game/utils.h"
 #include "game/quaternion.h"
-#include "game/game_097aa0.h"
 #include "game/bondgun.h"
 #include "game/gunfx.h"
 #include "game/weaponutils.h"
