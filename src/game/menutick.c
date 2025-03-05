@@ -193,7 +193,7 @@ void menuTick(void)
 	// Check if returning from a multiplayer match
 	if (g_MpMatchHasEnded) {
 		if (g_Vars.lvframenum >= 4) {
-			if (g_Vars.stagenum == STAGE_CITRAINING || g_Vars.stagenum == STAGE_4MBMENU) {
+			if (g_Vars.stagenum == STAGE_CITRAINING) {
 				viBlack(false);
 				g_MpNumJoined = 0;
 
@@ -214,12 +214,7 @@ void menuTick(void)
 							func0f17fcb0(true);
 						} else if (g_MpNumJoined == 0) {
 							g_MpNumJoined++;
-
-							if (IS4MB()) {
-								menuPushRootDialog(&g_MainMenu4MbMenuDialog, MENUROOT_4MBMAINMENU);
-							} else {
-								menuPushRootDialog(&g_CombatSimulatorMenuDialog, MENUROOT_MPSETUP);
-							}
+							menuPushRootDialog(&g_CombatSimulatorMenuDialog, MENUROOT_MPSETUP);
 						} else {
 							g_Vars.waitingtojoin[i] = true;
 						}
@@ -231,7 +226,7 @@ void menuTick(void)
 				if (g_MpSetup.chrslots & 0xf) {
 					sndStart(var80095200, SFX_EXPLOSION_8098, 0, -1, -1, -1, -1, -1);
 
-					playerPause(IS4MB() ? MENUROOT_4MBMAINMENU : MENUROOT_MPSETUP);
+					playerPause(MENUROOT_MPSETUP);
 				}
 			}
 
@@ -263,7 +258,7 @@ void menuTick(void)
 	if (g_MenuData.count > 0) {
 		var8006294c = 1;
 
-		if (g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU) {
+		if (g_MenuData.root == MENUROOT_MPSETUP) {
 			if (g_MenuData.unk008 == -1) {
 				g_MpSetup.chrslots &= 0xfff0;
 			}
@@ -310,29 +305,11 @@ void menuTick(void)
 				menuProcessInput();
 				setCurrentPlayerNum(prevplayernum);
 			} else {
-				if (g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU) {
+				if (g_MenuData.root == MENUROOT_MPSETUP) {
 					// Check if player is joining the game
 					bool canjoin;
 					u32 buttons = joyGetButtonsPressedThisFrame(i, 0xffffffff);
-
-					if (g_MenuData.root == MENUROOT_4MBMAINMENU) {
-						if (g_Vars.mpsetupmenu == MPSETUPMENU_GENERAL) {
-							// Limit to 2 players? But in a roundabout kind of way
-							canjoin = true;
-
-							for (j = 0; j < MAX_PLAYERS; j++) {
-								if (g_Vars.waitingtojoin[j]) {
-									canjoin = false;
-								}
-							}
-						} else {
-							// Quick go or advanced setup - limit to 2 players
-							canjoin = g_MpNumJoined < 2;
-						}
-					} else {
-						// 8MB - no restrictions on joining
-						canjoin = true;
-					}
+					canjoin = true;
 
 					if (g_BossFile.locktype == MPLOCKTYPE_CHALLENGE) {
 						g_PlayerConfigsArray[i].base.team = 0;
@@ -350,12 +327,7 @@ void menuTick(void)
 						} else if (g_Vars.mpsetupmenu == MPSETUPMENU_QUICKGO) {
 							// Joining from quick go - open Quick Go dialog
 							g_MpNumJoined++;
-
-							if (IS4MB()) {
-								menuPushRootDialog(&g_MpQuickGo4MbMenuDialog, MENUROOT_4MBMAINMENU);
-							} else {
-								menuPushRootDialog(&g_MpQuickGoMenuDialog, MENUROOT_MPSETUP);
-							}
+							menuPushRootDialog(&g_MpQuickGoMenuDialog, MENUROOT_MPSETUP);
 						} else {
 							// Joining from advanced setup
 							g_MpNumJoined++;
@@ -376,12 +348,7 @@ void menuTick(void)
 								// reached the quick go layer - open the dialog
 								g_Vars.waitingtojoin[i] = false;
 								g_MpNumJoined++;
-
-								if (IS4MB()) {
-									menuPushRootDialog(&g_MpQuickGo4MbMenuDialog, MENUROOT_4MBMAINMENU);
-								} else {
-									menuPushRootDialog(&g_MpQuickGoMenuDialog, MENUROOT_MPSETUP);
-								}
+								menuPushRootDialog(&g_MpQuickGoMenuDialog, MENUROOT_MPSETUP);
 							} else if (g_Vars.mpsetupmenu == MPSETUPMENU_ADVSETUP) {
 								// Player was waiting to join and we have just
 								// reached the adv setup layer - open the dialog
@@ -432,7 +399,7 @@ void menuTick(void)
 		}
 
 		if (sp340 &&
-				(g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU)) {
+				(g_MenuData.root == MENUROOT_MPSETUP)) {
 			func0f0f820c(NULL, -5);
 		}
 	} else {
@@ -441,7 +408,7 @@ void menuTick(void)
 
 	if (var8006294c) {
 		if (var80062948 == 0 &&
-				(g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU)) {
+				(g_MenuData.root == MENUROOT_MPSETUP)) {
 			var80062948 = 1;
 			filelistCreate(0, FILETYPE_MPPLAYER);
 			filelistCreate(1, FILETYPE_MPSETUP);
@@ -466,14 +433,11 @@ void menuTick(void)
 	}
 
 	if ((g_MenuData.unk5d5_06 || g_MenuData.unk008 != -1) && sp344 == false) {
-		if ((g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU)
+		if ((g_MenuData.root == MENUROOT_MPSETUP)
 				&& g_MenuData.unk008 == -1) {
 			if (g_Vars.mpsetupmenu == MPSETUPMENU_GENERAL) {
 				g_MenuData.unk008 = MENUROOT_MAINMENU;
-				g_MenuData.unk00c = IS4MB() ? &g_CiMenuViaPauseMenuDialog : &g_CiMenuViaPcMenuDialog;
-			} else if (IS4MB()) {
-				g_MenuData.unk008 = MENUROOT_4MBMAINMENU;
-				g_MenuData.unk00c = &g_MainMenu4MbMenuDialog;
+				g_MenuData.unk00c = &g_CiMenuViaPcMenuDialog;
 			} else {
 				g_MenuData.unk008 = MENUROOT_MPSETUP;
 				g_MenuData.unk00c = &g_CombatSimulatorMenuDialog;
@@ -538,14 +502,14 @@ void menuTick(void)
 				g_FileState = FILESTATE_CHANGINGAGENT;
 				gamefileLoadDefaults(&g_GameFile);
 				gamefileApplyOptions(&g_GameFile);
-				mainChangeToStage(IS4MB() ? STAGE_4MBMENU : STAGE_CITRAINING);
+				mainChangeToStage(STAGE_CITRAINING);
 				musicQueueStopAllEvent();
 			} else {
 				bool startmusic = false;
 				menuPushRootDialog(g_MenuData.unk00c, g_MenuData.unk008);
 				sp344 = true;
 
-				if (g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU) {
+				if (g_MenuData.root == MENUROOT_MPSETUP) {
 					startmusic = true;
 					sndStart(var80095200, SFX_EXPLOSION_8098, 0, -1, -1, -1, -1, -1);
 				}
@@ -553,7 +517,7 @@ void menuTick(void)
 				if (g_MenuData.root == MENUROOT_MAINMENU || g_MenuData.root == MENUROOT_TRAINING) {
 					struct trainingdata *dtdata = dtGetData();
 
-					if ((g_Vars.stagenum == STAGE_CITRAINING || g_Vars.stagenum == STAGE_4MBMENU)
+					if ((g_Vars.stagenum == STAGE_CITRAINING)
 							&& ((g_Vars.currentplayer->prop->rooms[0] >= 0x16 && g_Vars.currentplayer->prop->rooms[0] <= 0x19)
 								|| g_Vars.currentplayer->prop->rooms[0] == 0x0a
 								|| g_Vars.currentplayer->prop->rooms[0] == 0x1e
@@ -613,17 +577,10 @@ void menuTick(void)
 						g_BossFile.locktype = MPLOCKTYPE_NONE;
 					}
 
-					if (IS8MB()) {
-						titleSetNextStage(STAGE_CITRAINING);
-						setNumPlayers(1);
-						titleSetNextMode(TITLEMODE_SKIP);
-						mainChangeToStage(STAGE_CITRAINING);
-					} else {
-						titleSetNextStage(STAGE_4MBMENU);
-						setNumPlayers(1);
-						titleSetNextMode(TITLEMODE_SKIP);
-						mainChangeToStage(STAGE_4MBMENU);
-					}
+					titleSetNextStage(STAGE_CITRAINING);
+					setNumPlayers(1);
+					titleSetNextMode(TITLEMODE_SKIP);
+					mainChangeToStage(STAGE_CITRAINING);
 				}
 				break;
 			case MENUROOT_COOPCONTINUE:
@@ -698,8 +655,6 @@ void menuTick(void)
 			case MENUROOT_MPENDSCREEN:
 			case MENUROOT_FILEMGR:
 			case MENUROOT_BOOTPAKMGR:
-			case MENUROOT_4MBFILEMGR:
-			case MENUROOT_4MBMAINMENU:
 			case MENUROOT_TRAINING:
 				if (g_Menus[mpindex].curdialog) {
 					g_Vars.paksneededformenu = 0x1f;

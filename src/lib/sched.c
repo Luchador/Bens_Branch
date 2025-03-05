@@ -317,9 +317,6 @@ void schedSubmitTask(OSSched *sc, OSScTask *t)
  * Handle a retrace (vsync) event.
  *
  * Audio tasks are scheduled based on retrace + a timer (approximately 6ms).
- * On NTSC, this is done on every second frame if 8MB, or every second frame
- * if 4MB. I guess less memory means the audio queue has to be kept smaller
- * and processed more frequently. On PAL, it's every second frame regardless.
  *
  * Controller input is polled here.
  *
@@ -331,24 +328,16 @@ void __scHandleRetrace(OSSched *sc)
 {
 	sc->frameCount++;
 
-#if PAL
-	if (!g_Resetting && (sc->frameCount & 1)) {
+	if (!g_Resetting && ((sc->frameCount & 1))) {
 		osStopTimer(&g_SchedRspTimer);
 		osSetTimer(&g_SchedRspTimer, 280000, 0, amgrGetFrameMesgQueue(), &g_SchedRspMsg);
 	}
-#else
-	if (!g_Resetting && ((sc->frameCount & 1) || IS4MB())) {
-		osStopTimer(&g_SchedRspTimer);
-		osSetTimer(&g_SchedRspTimer, 280000, 0, amgrGetFrameMesgQueue(), &g_SchedRspMsg);
-	}
-#endif
 
 	if (!g_Resetting) {
 		viHandleRetrace();
 	}
 
 	joysHandleRetrace();
-	sndHandleRetrace();
 	schedRenderCrashPeriodically(sc->frameCount);
 }
 
@@ -865,10 +854,7 @@ s32 __scSchedule(OSSched *sc, OSScTask **sp, OSScTask **dp, s32 availRCP)
 void schedConsiderScreenshot(void)
 {
 	if (g_MenuData.screenshottimer == 1) {
-		if (IS8MB()) {
-			menugfxCreateBlur();
-		}
-
+		menugfxCreateBlur();
 		g_MenuData.screenshottimer = 0;
 	}
 

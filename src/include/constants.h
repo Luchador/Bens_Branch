@@ -58,8 +58,6 @@
 #define CHRRACE(chr)        (chr ? chr->race : RACE_HUMAN)
 #define CRASH()             *(u8 *)0 = 69
 #define CYCLES_PER_FRAME    ((s32) OS_CPU_COUNTER / (PAL ? 50 : 60))
-#define IS4MB()             (g_Is4Mb == true)
-#define IS8MB()             (g_Is4Mb != true)
 #define LINEHEIGHT          (VERSION == VERSION_JPN_FINAL ? 14 : 11)
 #define MIXCOLOUR(dialog, property) dialog->transitionfrac < 0.0f ? g_MenuColours[dialog->type].property : colourBlend(g_MenuColours[dialog->type2].property, g_MenuColours[dialog->type].property, dialog->colourweight)
 #define MPCHR(index)        ((index) < MAX_PLAYERS ? &g_PlayerConfigsArray[index].base : &g_BotConfigsArray[(index) - MAX_PLAYERS].base)
@@ -86,17 +84,9 @@
 		&& EYESPYINACTIVE() \
 		&& (g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit & (device)))
 
-#if VERSION >= VERSION_PAL_BETA
-#define LVUPDATE60FREAL()   g_Vars.lvupdate60freal
-#else
 #define LVUPDATE60FREAL()   g_Vars.lvupdate60f
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 #define VOLUME(volume)      (volume > 0x5000 ? 0x5000 : volume)
-#else
-#define VOLUME(volume)      (volume)
-#endif
 
 #define EYESPYINACTIVE()    (!g_Vars.currentplayer->eyespy || (g_Vars.currentplayer->eyespy && !g_Vars.currentplayer->eyespy->active))
 
@@ -105,17 +95,10 @@
 		(p[1] - g_Vars.currentplayer->eraserpos.f[1]) * (p[1] - g_Vars.currentplayer->eraserpos.f[1]) + \
 		(p[2] - g_Vars.currentplayer->eraserpos.f[2]) * (p[2] - g_Vars.currentplayer->eraserpos.f[2]))
 
-#if PAL
-#define TICKS(val)    ((val) * 50 / 60)
-#define PALUP(val)    ((val) * 60 / 50)
-#define PALUPF(val)   ((val) * 1.2f)
-#define FRAMEDURATION (1 / 50.0f)
-#else
 #define TICKS(val)    (val)
 #define PALUP(val)    (val)
 #define PALUPF(val)   (val)
 #define FRAMEDURATION (1 / 60.0f)
-#endif
 
 // Macro to convert an ASCII character to N64 font code.
 // N64 font code uses 0x0f for space, 0x10-0x19 for 0-9 and 0x1a-0x33 for A-Z.
@@ -451,6 +434,7 @@
 #define CHEAT_AR53                   40
 #define CHEAT_RCP45                  41
 #define CHEAT_DUALWIELDALLGUNS       42
+#define CHEAT_DINNERPARTY			 43
 
 #define CHEATFLAG_TIMED       0
 #define CHEATFLAG_ALWAYSON    1
@@ -3661,22 +3645,10 @@
 #define FBALLOC_HEIGHT    220
 
 // Dimensions used for rendering
-#if VERSION == VERSION_PAL_FINAL
-#define SCREEN_WIDTH_LO  320
-#define SCREEN_HEIGHT_LO 266
-#define SCREEN_WIDTH_HI  448
-#define SCREEN_HEIGHT_HI 266
-#elif VERSION == VERSION_PAL_BETA
-#define SCREEN_WIDTH_LO  320
-#define SCREEN_HEIGHT_LO 252
-#define SCREEN_WIDTH_HI  448
-#define SCREEN_HEIGHT_HI 252
-#else
 #define SCREEN_WIDTH_LO  320
 #define SCREEN_HEIGHT_LO 220
 #define SCREEN_WIDTH_HI  640
 #define SCREEN_HEIGHT_HI 220
-#endif
 
 #define SCREEN_ASPECT ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO)
 
@@ -4453,9 +4425,7 @@ enum weaponnum {
 	/*0x4c*/ WEAPON_KEYCARD4C,
 	/*0x4d*/ WEAPON_SUITCASE,
 	/*0x4e*/ WEAPON_BRIEFCASE,
-#if VERSION >= VERSION_NTSC_1_0
 	/*0x4f*/ WEAPON_SHIELDTECHITEM,
-#endif
 	/*0x50*/ WEAPON_NECKLACE,
 	/*0x51*/ WEAPON_HAMMER,
 	/*0x52*/ WEAPON_SCREWDRIVER,

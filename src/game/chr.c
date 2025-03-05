@@ -1837,7 +1837,7 @@ void chr0f022214(struct chrdata *chr, struct prop *prop, bool fulltick)
 		prop->flags |= PROPFLAG_ONTHISSCREENTHISTICK | PROPFLAG_ONANYSCREENTHISTICK;
 
 		if (obj->hidden & OBJHFLAG_EMBEDDED) {
-			mtx00015be4(sp104, &obj->embedment->matrix, &sp80);
+			mtxApplyAffineTransform(sp104, &obj->embedment->matrix, &sp80);
 			thing.unk00 = &sp80;
 		} else if (CHRRACE(chr) == RACE_SKEDAR) {
 			// The skedar hand position is rotated weirdly, so compensate for it
@@ -2590,7 +2590,7 @@ s32 chrTick(struct prop *prop)
 					mtx00015e24(spe4, &sp9c);
 					mtx00015e80(spe0, &sp9c);
 					mtx00015edc(spdc, &sp9c);
-					mtx00015be4(hatmodel->matrices, &sp9c, &sp5c);
+					mtxApplyAffineTransform(hatmodel->matrices, &sp9c, &sp5c);
 					mtx4Copy(&sp5c, hatmodel->matrices);
 
 					if (hattype == HATTYPE_2) {
@@ -2795,7 +2795,7 @@ bool chr0f024738(struct chrdata *chr)
 								+ thing->unk06c.m[1][2] * campos->f[1]
 								+ thing->unk06c.m[2][2] * campos->f[2]) + thing->unk06c.m[3][2];
 
-						mtx00015be4(&thing->unk06c, camGetProjectionMtxF(), &thing->unk0ac);
+						mtxApplyAffineTransform(&thing->unk06c, camGetProjectionMtxF(), &thing->unk0ac);
 						thing->unk00c = true;
 					}
 
@@ -2874,7 +2874,7 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 					spb0 = false;
 					door = thing->prop->door;
 
-					mtx00015be4(&thing->unk0ac, mtx, &spb4);
+					mtxApplyAffineTransform(&thing->unk0ac, mtx, &spb4);
 
 					if (thing->unk130 == 0) {
 						if (door->doortype == DOORTYPE_VERTICAL) {
@@ -2903,7 +2903,7 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 							sp88.z = thing->bbox.zmin;
 						}
 
-						mtx00015be4(camGetWorldToScreenMtxf(), &thing->unk02c, &thing->unk0ec);
+						mtxApplyAffineTransform(camGetWorldToScreenMtxf(), &thing->unk02c, &thing->unk0ec);
 						mtx4TransformVec(&thing->unk0ec, &spa0, &sp70);
 						cam0f0b4dec(&sp70, thing->unk134);
 						mtx4TransformVec(&thing->unk0ec, &sp94, &sp70);
@@ -3236,10 +3236,10 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 		// Configure colours for night vision if in use
 		if (USINGDEVICE(DEVICE_NIGHTVISION)) {
-			colour[0] = var8009caef;
-			colour[1] = var8009caef;
-			colour[2] = var8009caef;
-			colour[3] = var8009caf0;
+			colour[0] = g_NVChrHighlight;
+			colour[1] = g_NVChrHighlight;
+			colour[2] = g_NVChrHighlight;
+			colour[3] = g_NVChrBrightness;
 		}
 
 		// Configure colours for xray if in use

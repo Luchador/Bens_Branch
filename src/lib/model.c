@@ -808,14 +808,14 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 		mtx4LoadYRotationWithTranslation(sp254, sp250, &sp198);
 	}
 
-	mtx00015be4(&sp198, &sp1d8, &sp158);
+	mtxApplyAffineTransform(&sp198, &sp1d8, &sp158);
 
 	if (scale != 1.0f) {
 		mtx00015f4c(scale, &sp158);
 	}
 
 	if (sp24c) {
-		mtx00015be4(sp24c, &sp158, mtx);
+		mtxApplyAffineTransform(sp24c, &sp158, mtx);
 	} else {
 		mtx4Copy(&sp158, mtx);
 	}
@@ -860,7 +860,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 			mtx00015ea8(arg6->z, &mtx68);
 		}
 
-		mtx00015be4(rendermtx, &mtx68, nodemtx);
+		mtxApplyAffineTransform(rendermtx, &mtx68, nodemtx);
 
 		if (g_ModelJointPositionedFunc != NULL) {
 			g_ModelJointPositionedFunc(mtxindex0, nodemtx);
@@ -897,7 +897,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 
 		if (rendermtx != NULL) {
 			quaternionToTransformMtx(pos, sp2c, &mtx68);
-			mtx00015be4(rendermtx, &mtx68, nodemtx);
+			mtxApplyAffineTransform(rendermtx, &mtx68, nodemtx);
 		} else {
 			quaternionToTransformMtx(pos, sp2c, nodemtx);
 		}
@@ -930,7 +930,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 
 		if (rendermtx != NULL) {
 			Mtxf *nodemtx = &matrices[mtxindex2];
-			mtx00015be4(rendermtx, finalmtx, nodemtx);
+			mtxApplyAffineTransform(rendermtx, finalmtx, nodemtx);
 		}
 	}
 }
@@ -970,7 +970,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 			mtx00015ea8(arg5->z, &mtx58);
 		}
 
-		mtx00015be4(rendermtx, &mtx58, nodemtx);
+		mtxApplyAffineTransform(rendermtx, &mtx58, nodemtx);
 
 		if (g_ModelJointPositionedFunc != NULL) {
 			g_ModelJointPositionedFunc(mtxindex0, nodemtx);
@@ -1001,7 +1001,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 
 		if (rendermtx != NULL) {
 			quaternionToTransformMtx(pos, sp2c, &mtx58);
-			mtx00015be4(rendermtx, &mtx58, nodemtx);
+			mtxApplyAffineTransform(rendermtx, &mtx58, nodemtx);
 		} else {
 			quaternionToTransformMtx(pos, sp2c, nodemtx);
 		}
@@ -1034,7 +1034,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 
 		if (rendermtx != NULL) {
 			Mtxf *nodemtx = &matrices[mtxindex2];
-			mtx00015be4(rendermtx, finalmtx, nodemtx);
+			mtxApplyAffineTransform(rendermtx, finalmtx, nodemtx);
 		}
 	}
 }
@@ -1167,7 +1167,7 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 
 		if (mtx) {
 			mtx4LoadTranslation(&rodata->pos, &spe8);
-			mtx00015be4(mtx, &spe8, &model->matrices[rodata->mtxindex0]);
+			mtxApplyAffineTransform(mtx, &spe8, &model->matrices[rodata->mtxindex0]);
 		} else {
 			mtx4LoadTranslation(&rodata->pos, &model->matrices[rodata->mtxindex0]);
 		}
@@ -1190,7 +1190,7 @@ void modelUpdatePositionHeldNodeMtx(struct modelrenderdata *arg0, struct model *
 
 	if (sp68) {
 		mtx4LoadTranslation(&rodata->positionheld.pos, &sp28);
-		mtx00015be4(sp68, &sp28, &matrices[mtxindex]);
+		mtxApplyAffineTransform(sp68, &sp28, &matrices[mtxindex]);
 	} else {
 		mtx4LoadTranslation(&rodata->positionheld.pos, &matrices[mtxindex]);
 	}

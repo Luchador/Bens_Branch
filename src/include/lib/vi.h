@@ -49,7 +49,5 @@ f32 viGetFovY(void);
 void viSetZRange(f32 arg0, f32 arg1);
 void viGetZRange(struct zrange *zrange);
 Gfx *viSetFillColour(Gfx *gdl, s32 r, s32 g, s32 b);
-void viGrabJpg32(void);
-void viGrabRgb32(void);
 
 #endif

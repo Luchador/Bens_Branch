@@ -352,49 +352,6 @@ const char var7f1b7e00[] = "WARNING - UTILS -> DEBUG - Triangle passed to Planar
 	return true;
 }*/
 
-// Not used
-/*bool func0f17781c(struct coord *arg0, s32 arg1)
-{
-	s32 i;
-	struct coord sp78;
-	struct coord sp6c;
-	struct coord sp60;
-	f32 f0;
-	struct coord sp50;
-
-	if (arg1 == 3) {
-		return true;
-	}
-
-	sp78.x = arg0[1].x - arg0[0].x;
-	sp78.y = arg0[1].y - arg0[0].y;
-	sp78.z = arg0[1].z - arg0[0].z;
-
-	sp6c.x = arg0[2].x - arg0[0].x;
-	sp6c.y = arg0[2].y - arg0[0].y;
-	sp6c.z = arg0[2].z - arg0[0].z;
-
-	utilsCalcLeftHandedCross(&sp78, &sp6c, &sp60);
-
-	normalizeVector(&sp60, &sp60, 1101, "utils.c");
-
-	for (i = 3; i < arg1; i++) {
-		sp50.x = arg0[i].x - arg0[0].x;
-		sp50.y = arg0[i].y - arg0[0].y;
-		sp50.z = arg0[i].z - arg0[0].z;
-
-		normalizeVector(&sp50, &sp50, 1109, "utils.c");
-
-		f0 = sp50.x * sp60.x + sp50.y * sp60.y + sp50.z * sp60.z;
-
-		if (ABS(f0) > 0.001f) {
-			return false;
-		}
-	}
-
-	return true;
-}*/
-
 s32 func0f177a54(u8 *arg0, s32 arg1, u8 *arg2, s32 arg3)
 {
 	s32 i = 0;
@@ -542,24 +499,6 @@ s32 func0f177c8c(u8 *arg0, s32 *arg1, s32 *arg2)
 
 	return result;
 }
-
-// Not used
-/*bool func0f177d5c(u8 *arg0, u8 *arg1)
-{
-	s32 sp34 = 0; \
-	s32 sp30 = 0; \
-	s32 value = func0f177bb4(arg1, &sp34, &sp30);
-
-	while (value >= 0) {
-		if (value != arg0[sp30]) {
-			return false;
-		}
-
-		value = func0f177bb4(arg1, &sp34, &sp30);
-	}
-
-	return true;
-}*/
 
 void InterpTwoPoints(struct coord *arg0, struct coord *arg1, f32 standfrac, struct coord *vel)
 {

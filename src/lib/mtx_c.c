@@ -101,10 +101,10 @@ void mtx4TransformVec(Mtxf *mtx, struct coord *vec, struct coord *dst)
 
 void mtx00015be0(Mtxf *matrix1, Mtxf *matrix2)
 {
-	mtx00015be4(matrix1, matrix2, matrix2);
+	mtxApplyAffineTransform(matrix1, matrix2, matrix2);
 }
 
-void mtx00015be4(Mtxf *arg0, Mtxf *arg1, Mtxf *dst)
+void mtxApplyAffineTransform(Mtxf *arg0, Mtxf *arg1, Mtxf *dst)
 {
 	f32 m00 = arg1->m[0][0];
 	f32 m01 = arg1->m[0][1];

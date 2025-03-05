@@ -551,7 +551,6 @@ struct menudialogdef g_2PMissionEndscreenObjectivesCompletedVMenuDialog = {
 	NULL,
 };
 
-#if VERSION >= VERSION_NTSC_1_0
 /**
  * Displayed after Defense and Skedar Ruins completion screens.
  */
@@ -563,9 +562,7 @@ MenuItemHandlerResult endscreenHandleContinueMission(s32 operation, struct menui
 
 	return 0;
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 struct menuitem g_MissionContinueOrReplyMenuItems[] = {
 	{
 		MENUITEMTYPE_SELECTABLE,
@@ -594,7 +591,6 @@ struct menudialogdef g_MissionContinueOrReplyMenuDialog = {
 	MENUDIALOGFLAG_STARTSELECTS,
 	NULL,
 };
-#endif
 
 #if VERSION >= VERSION_NTSC_1_0
 /**

@@ -24,6 +24,6 @@ void func0f0d5690(u8 *dst, char *buffer);
 void savebufferWriteGuid(struct savebuffer *buffer, struct fileguid *guid);
 void savebufferReadGuid(struct savebuffer *buffer, struct fileguid *guid);
 void formatTime(char *dst, s32 time60, s32 precision);
-void func0f0d5a7c(void);
+void savebufferResetVp(void);
 
 #endif

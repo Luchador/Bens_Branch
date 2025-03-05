@@ -1876,8 +1876,8 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 	strcpy(var800a41c0, "Fullscreen_DrawFaultScope");
 
 	var8009caec = 0xbc;
-	var8009caef = 0xbe;
-	var8009caf0 = 0xde;
+	g_NVChrHighlight = 0xbe; // Character brightness when using NV
+	g_NVChrBrightness = 0xde;
 	var8009caed = 0x50;
 	var8009caee = 0xc0;
 
@@ -2079,8 +2079,8 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 #endif
 
 	var8009caec = 0xff;
-	var8009caef = 0xde;
-	var8009caf0 = 0xde;
+	g_NVChrHighlight = 0xde;
+	g_NVChrBrightness = 0xde;
 
 	gDPPipeSync(gdl++);
 

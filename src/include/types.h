@@ -3831,10 +3831,6 @@ struct menudata_filemgr {
 	/*0xe6c*/ s8 device3;
 };
 
-struct menudata_main4mb {
-	u32 slotindex;
-};
-
 struct menudata_training {
 	u32 unke1c;
 	struct mpconfigfull *mpconfig;
@@ -3987,7 +3983,6 @@ struct menu {
 		struct menudata_mppause mppause;
 		struct menudata_mpend mpend;
 		struct menudata_filemgr fm;
-		struct menudata_main4mb main4mb;
 		struct menudata_training training;
 	};
 };

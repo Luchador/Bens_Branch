@@ -70,17 +70,10 @@ void bwalkInit(void)
 		g_Vars.currentplayer->autocrouchpos = CROUCHPOS_STAND;
 		g_Vars.currentplayer->crouchspeed = 0;
 		g_Vars.currentplayer->crouchoffset = 0;
-
-#if VERSION < VERSION_NTSC_1_0
-		bwalkUpdateCrouchOffsetReal();
-#endif
-
 		g_Vars.currentplayer->guncloseroffset = 0;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	bwalkUpdateCrouchOffsetReal();
-#endif
 
 	if (prevmode != MOVEMODE_GRAB && prevmode != MOVEMODE_WALK) {
 		for (i = 0; i != 3; i++) {
@@ -156,11 +149,7 @@ void bwalk0f0c3b38(struct coord *reltarget, struct defaultobj *obj)
 	abstarget.y = g_Vars.currentplayer->prop->pos.y;
 	abstarget.z = reltarget->z + g_Vars.currentplayer->prop->pos.z;
 
-#if VERSION >= VERSION_NTSC_1_0
 	cdGetEdge(&globalthinga, &globalthingb, 223, "bondwalk.c");
-#else
-	cdGetEdge(&globalthinga, &globalthingb, 221, "bondwalk.c");
-#endif
 
 	vector.x = globalthingb.z - globalthinga.z;
 	vector.y = 0;
@@ -322,16 +311,6 @@ bool bwalkCalculateNewPosition(struct coord *vel, f32 rotateamount, bool apply, 
 
 		func0f065dfc(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms,
 				&dstpos, dstrooms, sp64, 20);
-
-#if VERSION < VERSION_NTSC_1_0
-		for (i = 0; dstrooms[i] != -1; i++) {
-			if (dstrooms[i] == g_Vars.currentplayer->floorroom) {
-				dstrooms[0] = g_Vars.currentplayer->floorroom;
-				dstrooms[1] = -1;
-				break;
-			}
-		}
-#endif
 
 		bmoveFindEnteredRoomsByPos(g_Vars.currentplayer, &dstpos, dstrooms);
 
@@ -547,11 +526,7 @@ s32 bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, s
 	s32 result = bwalkCalculateNewPositionWithPush(delta, 0, true, 0, types);
 
 	if (result == CDRESULT_COLLISION) {
-#if VERSION >= VERSION_NTSC_1_0
 		cdGetEdge(arg1, arg2, 607, "bondwalk.c");
-#else
-		cdGetEdge(arg1, arg2, 602, "bondwalk.c");
-#endif
 	}
 
 	return result;
@@ -575,11 +550,7 @@ s32 bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c,
 		}
 
 		if (result == CDRESULT_COLLISION) {
-#if VERSION >= VERSION_NTSC_1_0
 			cdGetEdge(d, e, 635, "bondwalk.c");
-#else
-			cdGetEdge(d, e, 630, "bondwalk.c");
-#endif
 
 			if (b->x != d->x
 					|| b->y != d->y
@@ -693,11 +664,6 @@ s32 bwalk0f0c4a5c(struct coord *arg0, struct coord *arg1, struct coord *arg2, s3
 	}
 
 	return false;
-}
-
-void bwalk0f0c4d98(void)
-{
-	// empty
 }
 
 void bwalkUpdateSpeedSideways(f32 targetspeed, f32 accelspeed, s32 mult)
@@ -1308,7 +1274,6 @@ void bwalk0f0c63bc(struct coord *arg0, u32 arg1, s32 types)
 	g_Vars.currentplayer->bondonturret = false;
 	g_Vars.currentplayer->autocrouchpos = CROUCHPOS_STAND;
 
-	bwalk0f0c4d98();
 
 	if (bwalk0f0c4764(arg0, &sp100, &sp88, types) == CDRESULT_COLLISION) {
 		struct coord sp76;
@@ -1318,7 +1283,6 @@ void bwalk0f0c63bc(struct coord *arg0, u32 arg1, s32 types)
 
 		if (result >= CDRESULT_NOCOLLISION || result <= CDRESULT_ERROR) {
 			if (result >= CDRESULT_NOCOLLISION) {
-				bwalk0f0c4d98();
 			}
 
 			if (arg1
@@ -1331,7 +1295,6 @@ void bwalk0f0c63bc(struct coord *arg0, u32 arg1, s32 types)
 			struct coord sp36;
 
 			if (bwalk0f0c47d0(arg0, &sp76, &sp64, &sp48, &sp36, types) >= CDRESULT_NOCOLLISION) {
-				bwalk0f0c4d98();
 			}
 
 			if (arg1
@@ -1342,8 +1305,6 @@ void bwalk0f0c63bc(struct coord *arg0, u32 arg1, s32 types)
 			}
 		}
 	}
-
-	bwalk0f0c4d98();
 }
 
 void bwalkUpdatePrevPos(void)
@@ -1423,7 +1384,6 @@ void bwalkApplyMoveData(struct movedata *data)
 			g_Vars.currentplayer->speedmaxtime60 = 0;
 		}
 
-#ifndef PLATFORM_N64
 		if (data->rleanleft) {
 			bwalkSetSwayTarget(-1);
 		} else if (data->rleanright) {
@@ -1433,15 +1393,6 @@ void bwalkApplyMoveData(struct movedata *data)
 		} else {
 			bwalkSetSwayTarget(0);
 		}
-#else
-		if (data->rleanleft) {
-			bwalkSetSwayTarget(-1);
-		} else if (data->rleanright) {
-			bwalkSetSwayTarget(1);
-		} else {
-			bwalkSetSwayTarget(0);
-		}
-#endif
 
 		while (data->crouchdown-- > 0) {
 			bwalkAdjustCrouchPos(-1);
@@ -1453,17 +1404,6 @@ void bwalkApplyMoveData(struct movedata *data)
 
 		g_Vars.currentplayer->eyesshut = data->eyesshut;
 	}
-}
-
-void bwalkUpdateSpeedTheta(void)
-{
-#ifdef PLATFORM_N64
-	if (bmoveGetCrouchPos() == CROUCHPOS_SQUAT) {
-		g_Vars.currentplayer->speedtheta *= 0.5f;
-	} else if (bmoveGetCrouchPos() == CROUCHPOS_DUCK) {
-		g_Vars.currentplayer->speedtheta *= 0.75f;
-	}
-#endif
 }
 
 void bwalk0f0c69b8(void)
@@ -1523,11 +1463,9 @@ void bwalk0f0c69b8(void)
 		spc0 *= 1.25f;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (cheatIsActive(CHEAT_SMALLJO)) {
 		spc0 *= 0.4f;
 	}
-#endif
 
 	if (g_Vars.currentplayer->walkinitmove) {
 		g_Vars.currentplayer->walkinitt += g_Vars.lvupdate60freal * (1.0f / 60.0f);
@@ -1643,11 +1581,9 @@ void bwalk0f0c69b8(void)
 		mult = g_HeadAnims[HEADANIM_MOVING].translateperframe * 0.5f * g_Vars.lvupdate60freal;
 		spe0 = (g_Vars.currentplayer->speedsideways * spc0 + spc4) * mult;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (cheatIsActive(CHEAT_SMALLJO)) {
 			spe0 /= 0.4f;
 		}
-#endif
 
 		bmove0f0cc654(maxspeed, g_Vars.currentplayer->speedforwards * spc0 + spc8, spe0);
 
@@ -1656,11 +1592,9 @@ void bwalk0f0c69b8(void)
 		spdc = g_Vars.currentplayer->headpos.x;
 		spd8 = g_Vars.currentplayer->headpos.z;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (cheatIsActive(CHEAT_SMALLJO)) {
 			spdc *= 0.4f;
 		}
-#endif
 
 		spcc.f[0] += (spd8 * g_Vars.currentplayer->bond2.unk00.f[0] - spdc * g_Vars.currentplayer->bond2.unk00.f[2]) * g_Vars.lvupdate60freal;
 		spcc.f[2] += (spd8 * g_Vars.currentplayer->bond2.unk00.f[2] + spdc * g_Vars.currentplayer->bond2.unk00.f[0]) * g_Vars.lvupdate60freal;
@@ -1841,20 +1775,16 @@ void bwalkTick(void)
 	bwalk0f0c69b8();
 	bwalkUpdateVertical();
 
-#if VERSION >= VERSION_NTSC_1_0
-	{
-		s32 i;
+	s32 i;
 
-		for (i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {
-			if (g_Vars.currentplayer->floorroom == g_Vars.currentplayer->prop->rooms[i]) {
-				propDeregisterRooms(g_Vars.currentplayer->prop);
-				g_Vars.currentplayer->prop->rooms[0] = g_Vars.currentplayer->floorroom;
-				g_Vars.currentplayer->prop->rooms[1] = -1;
-				break;
-			}
+	for (i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {
+		if (g_Vars.currentplayer->floorroom == g_Vars.currentplayer->prop->rooms[i]) {
+			propDeregisterRooms(g_Vars.currentplayer->prop);
+			g_Vars.currentplayer->prop->rooms[0] = g_Vars.currentplayer->floorroom;
+			g_Vars.currentplayer->prop->rooms[1] = -1;
+			break;
 		}
 	}
-#endif
 
 	bmoveUpdateRooms(g_Vars.currentplayer);
 	objectiveCheckRoomEntered(g_Vars.currentplayer->prop->rooms[0]);

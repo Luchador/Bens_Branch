@@ -1254,7 +1254,6 @@ struct menuitem g_FrCompletedMenuItems[] = {
 		0x00000050,
 		frScoringMenuHandler,
 	},
-#if VERSION >= VERSION_NTSC_1_0
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
@@ -1263,7 +1262,6 @@ struct menuitem g_FrCompletedMenuItems[] = {
 		0,
 		menuhandlerFrFailedContinue,
 	},
-#endif
 	{ MENUITEMTYPE_END },
 };
 
@@ -1272,13 +1270,8 @@ struct menudialogdef g_FrCompletedMenuDialog = {
 	L_MPMENU_448, // "Training Stats"
 	g_FrCompletedMenuItems,
 	frTrainingStatsMenuDialog,
-#if VERSION >= VERSION_NTSC_1_0
 	MENUDIALOGFLAG_STARTSELECTS,
 	NULL,
-#else
-	0,
-	&g_FrWeaponListMenuDialog,
-#endif
 };
 
 struct menuitem g_FrFailedMenuItems[] = {
@@ -1290,16 +1283,6 @@ struct menuitem g_FrFailedMenuItems[] = {
 		0,
 		NULL,
 	},
-#if VERSION < VERSION_NTSC_1_0
-	{
-		MENUITEMTYPE_SEPARATOR,
-		0,
-		0,
-		0,
-		0,
-		NULL,
-	},
-#endif
 	{
 		MENUITEMTYPE_LABEL,
 		0,

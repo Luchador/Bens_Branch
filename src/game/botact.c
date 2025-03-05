@@ -519,7 +519,7 @@ void botactCreateSlayerRocket(struct chrdata *chr)
 		mtx00015be0(&sp132, &sp196);
 		mtx4LoadIdentity(&sp260);
 
-		bgun0f09ebcc(&rocket->base, &chr->prop->pos, chr->prop->rooms, &sp196, &sp100, &sp260, chr->prop, &chr->prop->pos);
+		bgunCreateXBowBolt(&rocket->base, &chr->prop->pos, chr->prop->rooms, &sp196, &sp100, &sp260, chr->prop, &chr->prop->pos);
 
 		if (rocket->base.hidden & OBJHFLAG_PROJECTILE) {
 			struct prop *target = chrGetTargetProp(chr);

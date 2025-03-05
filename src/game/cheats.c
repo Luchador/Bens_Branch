@@ -70,6 +70,7 @@ struct cheat g_Cheats[] = {
 	{ L_MPWEAPONS_115, WEAPON_AR53,       0,                             0,       CHEATFLAG_FIRINGRANGE                        }, // AR53
 	{ L_MPWEAPONS_116, WEAPON_RCP45,      0,                             0,       CHEATFLAG_FIRINGRANGE                        }, // RC-P45
 	{ L_MPWEAPONS_215, 0,                 SOLOSTAGEINDEX_EXTRACTION,     DIFF_A,  CHEATFLAG_COMPLETION                         }, // Dual wield all guns
+	{ L_MPWEAPONS_223, 0,                 SOLOSTAGEINDEX_DEFENSE,        DIFF_PA, CHEATFLAG_COMPLETION                         }, // Dinner Party
 };
 
 u32 cheatIsUnlocked(s32 cheat_id)
@@ -359,7 +360,13 @@ MenuItemHandlerResult cheatMenuHandleBuddyCheckbox(s32 operation, struct menuite
 char *cheatGetNameIfUnlocked(struct menuitem *item)
 {
 	if (cheatIsUnlocked(item->param)) {
-		return langGet(g_Cheats[item->param].nametextid);
+		if(item->param < 43 || item-> param > 43) {
+			return langGet(g_Cheats[item->param].nametextid);
+		}
+		else {
+			char *dp = "Dinner Party\n";
+			return dp;
+		}
 	}
 
 	return langGet(L_MPWEAPONS_074); // "----------"
@@ -444,11 +451,19 @@ char *cheatGetMarquee(struct menuitem *arg0)
 			// Velvet
 			sprintf(g_CheatMarqueeString, "%s: %s", langGet(L_MPWEAPONS_143), langGet(L_MPWEAPONS_117)); // "Buddy Available", "Velvet Dark"
 		} else if (cheatIsUnlocked(cheat_id)) {
-			// Show cheat name
-			sprintf(g_CheatMarqueeString, "%s: %s\n",
+			if(cheat_id < 43 || cheat_id > 43) {
+				// Show cheat name
+				sprintf(g_CheatMarqueeString, "%s: %s\n",
+						g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsBuddiesMenuDialog ? langGet(L_MPWEAPONS_143) : langGet(L_MPWEAPONS_136), // "Buddy Available", "Cheat available"
+						langGet(g_Cheats[cheat_id].nametextid)
+				);
+			}
+			else { // Special exception for Dinner Party
+				sprintf(g_CheatMarqueeString, "%s: %s\n",
 					g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsBuddiesMenuDialog ? langGet(L_MPWEAPONS_143) : langGet(L_MPWEAPONS_136), // "Buddy Available", "Cheat available"
-					langGet(g_Cheats[cheat_id].nametextid)
-			);
+					"Dinner Party\n"
+				);
+			}
 		} else {
 			// Locked
 			strcpy(cheatname, langGet(g_Cheats[cheat_id].nametextid));
@@ -461,6 +476,7 @@ char *cheatGetMarquee(struct menuitem *arg0)
 			*ptr = '\0';
 
 			if (g_Cheats[cheat_id].flags & CHEATFLAG_COMPLETION) {
+				if(cheat_id < 43 || cheat_id > 43) {
 				sprintf(g_CheatMarqueeString, "%s %s: %s %s %s",
 						langGet(L_MPWEAPONS_137), // "Complete"
 						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1),
@@ -468,6 +484,17 @@ char *cheatGetMarquee(struct menuitem *arg0)
 						langGet(L_MPWEAPONS_138), // "for cheat:"
 						&cheatname
 				);
+				}
+				else {
+					sprintf(g_CheatMarqueeString, "%s %s: %s %s %s %s",
+						langGet(L_MPWEAPONS_137), // "Complete"
+						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1),
+						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2),
+						"on Perfect Agent ",
+						langGet(L_MPWEAPONS_138), // "for cheat:"
+						"Dinner Party\n"
+				);
+				}
 			} else {
 				// Timed
 				strcpy(difficultyname, langGet(L_OPTIONS_251 + g_Cheats[cheat_id].difficulty));
@@ -670,6 +697,14 @@ struct menuitem g_CheatsFunMenuItems[] = {
 	{
 		MENUITEMTYPE_CHECKBOX,
 		CHEAT_SLOMO,
+		0,
+		(uintptr_t)&cheatGetNameIfUnlocked,
+		0,
+		cheatCheckboxMenuHandler,
+	},
+	{
+		MENUITEMTYPE_CHECKBOX,
+		CHEAT_DINNERPARTY,
 		0,
 		(uintptr_t)&cheatGetNameIfUnlocked,
 		0,

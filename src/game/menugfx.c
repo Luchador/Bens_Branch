@@ -138,17 +138,11 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
 {
 	Col *colours;
 	Vtx *vertices;
-#if (VERSION >= VERSION_PAL_BETA) || !defined(PLATFORM_N64)
+#if !defined(PLATFORM_N64)
 	s32 width;
 	s32 height;
 #endif
 
-	if (IS4MB())
-	{
-		return menugfxRenderGradient(gdl, 0, 0, viGetWidth(), viGetHeight(), 0xff, 0xff, 0xff);
-	}
-
-#ifndef PLATFORM_N64
 	width = viGetWidth();
 	height = viGetHeight();
 	if (g_MenuBlurFb >= 0 && !g_MenuBlurDone) {
@@ -162,7 +156,6 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
 		gDPSetFramebufferTargetEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, 0);
 		gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, 0);
 	}
-#endif
 
 	colours = gfxAllocateColours(1);
 	vertices = gfxAllocateVertices(4);
@@ -174,10 +167,8 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
 			G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
 			G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
 
-#ifndef PLATFORM_N64
 	// LoadTextureBlock will set up the sizes, but we'll use the framebuffer instead of g_BlurBuffer
 	gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, g_MenuScreenFb);
-#endif
 
 	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);

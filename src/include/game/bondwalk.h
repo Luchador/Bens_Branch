@@ -29,7 +29,6 @@ void bwalk0f0c63bc(struct coord *arg0, u32 arg1, s32 types);
 void bwalkUpdatePrevPos(void);
 void bwalkHandleActivate(void);
 void bwalkApplyMoveData(struct movedata *data);
-void bwalkUpdateSpeedTheta(void);
 void bwalk0f0c69b8(void);
 void bwalkTick(void);
 

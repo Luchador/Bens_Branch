@@ -980,11 +980,7 @@ u32 explosionTick(struct prop *prop)
 
 	lvupdate = g_Vars.lvupdate60 < TICKS(15) ? g_Vars.lvupdate60 : (s32)TICKS(15);
 
-#if PAL
-	if (exp->age >= 7 && exp->age < maxage)
-#else
 	if (exp->age >= 8 && exp->age < maxage)
-#endif
 	{
 		hrange = explosionGetHorizontalRangeAtFrame(exp, exp->age);
 		vrange = explosionGetVerticalRangeAtFrame(exp, exp->age);
@@ -999,7 +995,7 @@ u32 explosionTick(struct prop *prop)
 
 		// Barrel explosions ascend upwards
 		if (exp->type == EXPLOSIONTYPE_GASBARREL && exp->age < TICKS(32)) {
-			prop->pos.y += PALUPF(10.0f) * lvupdate;
+			prop->pos.y += 10.0f * lvupdate;
 		}
 
 		// Create new parts
@@ -1168,11 +1164,7 @@ u32 explosionTick(struct prop *prop)
 	}
 
 	// Free explosion if finished
-#if PAL
-	if (exp->age >= maxage + (s32)((16.0f * type->flarespeed) * 0.8333333f))
-#else
 	if (exp->age >= maxage + (s32)(16.0f * type->flarespeed))
-#endif
 	{
 		if (exp->type != EXPLOSIONTYPE_BULLETHOLE) {
 			propUnsetDangerous(exp->prop);
@@ -1293,26 +1285,16 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 			for (j = 0; j < ARRAYCOUNT(exp->parts); j++) {
 				if (exp->parts[j].frame > 0) {
-#if PAL
 					if (i == (s32)((f32)(exp->parts[j].frame - 1) / (g_ExplosionTypes[exp->type].flarespeed * 0.83333331346512f))) {
 						gdl = explosionRenderPart(exp, &exp->parts[j], gdl, coord, i);
 					}
-#else
-					if (i == (s32)((f32)(exp->parts[j].frame - 1) / g_ExplosionTypes[exp->type].flarespeed)) {
-						gdl = explosionRenderPart(exp, &exp->parts[j], gdl, coord, i);
-					}
-#endif
 				}
 			}
 		}
 
 		gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
-#if PAL
 		tmp = (g_ExplosionTypes[exp->type].flarespeed * 15.0f) * 0.83333331346512f;
-#else
-		tmp = g_ExplosionTypes[exp->type].flarespeed * 15.0f;
-#endif
 
 		for (j = 0; j < ARRAYCOUNT(exp->parts); j++) {
 			if (exp->parts[j].frame > tmp) {

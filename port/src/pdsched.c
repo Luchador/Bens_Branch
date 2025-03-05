@@ -272,17 +272,10 @@ void schedEndFrame(OSSched *sc)
 {
 	sc->frameCount++;
 
-#if PAL
 	if (!g_Resetting && (sc->frameCount & 1)) {
 		// osStopTimer(&g_SchedRspTimer);
 		// osSetTimer(&g_SchedRspTimer, 280000, 0, amgrGetFrameMesgQueue(), &g_SchedRspMsg);
 	}
-#else
-	if (!g_Resetting && ((sc->frameCount & 1) || IS4MB())) {
-		// osStopTimer(&g_SchedRspTimer);
-		// osSetTimer(&g_SchedRspTimer, 280000, 0, amgrGetFrameMesgQueue(), &g_SchedRspMsg);
-	}
-#endif
 
 	if (!g_Resetting) {
 		viHandleRetrace();
@@ -294,7 +287,6 @@ void schedEndFrame(OSSched *sc)
 	joyReadData();
 	joy00014238();
 
-	sndHandleRetrace();
 	schedAudioFrame(sc);
 	schedRenderCrashPeriodically(sc->frameCount);
 	videoEndFrame();
@@ -381,9 +373,7 @@ void schedUpdatePendingArtifacts(void)
 void schedConsiderScreenshot(void)
 {
 	if (g_MenuData.screenshottimer == 1) {
-		if (IS8MB()) {
-			menugfxCreateBlur();
-		}
+		menugfxCreateBlur();
 
 		g_MenuData.screenshottimer = 0;
 	}

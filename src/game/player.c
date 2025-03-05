@@ -1053,16 +1053,9 @@ void playerSpawn(void)
 				bgunEquipWeapon2(HAND_RIGHT, g_DefaultWeapons[HAND_RIGHT]);
 			}
 
-#if VERSION >= VERSION_NTSC_1_0
-			if (g_Vars.currentplayer->model00d4 == NULL
-					&& (IS8MB() || g_Vars.fourmeg2player || g_MpAllChrPtrs[g_Vars.currentplayernum] == NULL)) {
-				playerTickChrBody();
-			}
-#else
 			if (g_Vars.currentplayer->model00d4 == NULL) {
 				playerTickChrBody();
 			}
-#endif
 		}
 	}
 
@@ -1134,6 +1127,12 @@ void playerChooseBodyAndHead(s32 *bodynum, s32 *headnum, s32 *arg2)
 
 	outfit = g_Vars.currentplayer->bondtype;
 	solo = !(g_Vars.coopplayernum >= 0) || (g_Vars.currentplayer != g_Vars.coop);
+
+	if(cheatIsActive(CHEAT_DINNERPARTY)) {
+		*bodynum = BODY_DARK_FROCK;
+		*headnum = HEAD_DARK_FROCK;
+		return;
+	}
 
 	if (cheatIsActive(CHEAT_PLAYASELVIS)) {
 		*bodynum = BODY_THEKING;
@@ -1301,7 +1300,7 @@ void playerTickChrBody(void)
 
 		weaponmodelnum = playermgrGetModelOfWeapon(weaponnum);
 
-		if (!g_Vars.mplayerisrunning || (IS4MB() && PLAYERCOUNT() == 1)) {
+		if (!g_Vars.mplayerisrunning) {
 			// 1 player
 			if (g_Vars.currentplayer->gunmem2 == NULL) {
 				if (!var8009dfc0 && bgunChangeGunMem(GUNMEMOWNER_CHRBODY)) {
@@ -1406,7 +1405,7 @@ void playerTickChrBody(void)
 				headnum = -1;
 			} else if (sp60) {
 				headmodeldef = func0f18e57c(headnum, &headnum);
-			} else if (g_Vars.normmplayerisrunning && IS8MB()) {
+			} else if (g_Vars.normmplayerisrunning) {
 				g_HeadsAndBodies[headnum].modeldef = modeldefLoadToNew(g_HeadsAndBodies[headnum].filenum);
 				headmodeldef = g_HeadsAndBodies[headnum].modeldef;
 				g_FileInfo[g_HeadsAndBodies[headnum].filenum].loadedsize = 0;
@@ -1496,7 +1495,7 @@ void playerTickChrBody(void)
 void playerRemoveChrBody(void)
 {
 	if (g_Vars.currentplayer->haschrbody) {
-		if (!g_Vars.mplayerisrunning || (IS4MB() && PLAYERCOUNT() == 1)) {
+		if (!g_Vars.mplayerisrunning) {
 			g_Vars.currentplayer->haschrbody = false;
 			chrRemove(g_Vars.currentplayer->prop, false);
 			g_Vars.currentplayer->model00d4 = NULL;
@@ -2157,7 +2156,6 @@ void playerTickPauseMenu(void)
 		case MENUROOT_FILEMGR:
 			opened = filemgrConsiderPushingFileSelectDialog();
 			break;
-		case MENUROOT_4MBMAINMENU:
 		case MENUROOT_MPSETUP:
 			opened = true;
 			break;
@@ -2725,19 +2723,6 @@ void playerTickExplode(void)
 	}
 }
 
-void playerResetLoResIf4Mb(void)
-{
-	if (IS4MB()) {
-		g_ViModes[VIRES_LO].fbheight = FBALLOC_HEIGHT_LO;
-		g_ViModes[VIRES_LO].fulltop = 0;
-		g_ViModes[VIRES_LO].fullheight = FBALLOC_HEIGHT_LO;
-		g_ViModes[VIRES_LO].wideheight = 180;
-		g_ViModes[VIRES_LO].widetop = 20;
-		g_ViModes[VIRES_LO].cinemaheight = 136;
-		g_ViModes[VIRES_LO].cinematop = 42;
-	}
-}
-
 void playerSetHiResEnabled(bool enable)
 {
 	
@@ -2857,7 +2842,7 @@ s16 playerGetViewportHeight(void)
 			) {
 		s16 tmp = g_ViModes[g_ViRes].fullheight;
 
-		if (IS4MB() && !g_Vars.fourmeg2player) {
+		if (!g_Vars.fourmeg2player) {
 			height = tmp;
 		} else {
 			height = tmp / 2;
@@ -2866,7 +2851,7 @@ s16 playerGetViewportHeight(void)
 		if (PLAYERCOUNT() == 2) {
 			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
 				height = tmp;
-			} else if (g_Vars.currentplayernum == 0 && IS8MB()) {
+			} else if (g_Vars.currentplayernum == 0) {
 				height--;
 			}
 		} else if (g_Vars.currentplayernum == 0 || g_Vars.currentplayernum == 1) {
@@ -4404,6 +4389,9 @@ Gfx *playerRenderHud(Gfx *gdl)
 			gdl = gasRender(gdl);
 		}
 
+		bgunTickGameplay2(); // Dirty hack to stop unwanted shaders from rendering in Cinemas
+		bgunRender(&gdl);
+
 		return gdl;
 	}
 
@@ -4562,7 +4550,6 @@ Gfx *playerRenderHud(Gfx *gdl)
 								shield = chrGetShield(g_Vars.currentplayer->prop->chr) * 0.125f;
 								totalhealth = g_Vars.currentplayer->bondhealth + shield;
 
-#if VERSION >= VERSION_NTSC_FINAL
 								// NTSC final prevents coop from being able to respawn
 								// in Deep Sea after the mid cutscene. Without this condition,
 								// the player could respawn on the other side of the exit trigger.
@@ -4598,35 +4585,6 @@ Gfx *playerRenderHud(Gfx *gdl)
 									// Can't respawn
 									setCurrentPlayerNum(prevplayernum);
 								}
-#else
-								if (totalhealth > 0.125f && canrestart) {
-									playerDisplayHealth();
-
-									stealhealth = totalhealth * 0.5f;
-
-									if (stealhealth < shield) {
-										chrSetShield(g_Vars.currentplayer->prop->chr, (shield - stealhealth) * 8.0f);
-									} else {
-										chrSetShield(g_Vars.currentplayer->prop->chr, 0);
-										g_Vars.currentplayer->bondhealth -= stealhealth - shield;
-									}
-
-									// Back to the player who died
-									setCurrentPlayerNum(prevplayernum);
-									g_Vars.currentplayer->dostartnewlife = true;
-									g_Vars.currentplayer->oldhealth = 0;
-									g_Vars.currentplayer->oldarmour = 0;
-									g_Vars.currentplayer->apparenthealth = 0;
-									g_Vars.currentplayer->apparentarmour = 0;
-									g_Vars.currentplayer->stealhealth = stealhealth;
-								} else {
-									setCurrentPlayerNum(prevplayernum);
-								}
-
-								if (totalhealth > 0.125f) {
-									g_Vars.currentplayer->coopcanrestart = true;
-								}
-#endif
 							}
 						}
 					} else {
@@ -4684,19 +4642,16 @@ Gfx *playerRenderHud(Gfx *gdl)
 			gdl = bgunDrawHud(gdl);
 		}
 
-#if VERSION >= VERSION_NTSC_1_0
 		gdl = radarRender(gdl);
 		gdl = hudmsgsRender(gdl);
-#else
-		gdl = hudmsgsRender(gdl);
-		gdl = radarRender(gdl);
-#endif
 
 		gdl = playerDrawStoredFade(gdl);
 	} else {
 		gdl = bgRenderArtifacts(gdl);
 
 		if (g_Vars.currentplayer->eyespy) {
+			bgunTickGameplay2(); // Dirty hack to stop unwanted shaders from rendering when using CamSpy
+			bgunRender(&gdl);
 			if (g_Vars.currentplayer->eyespy->startuptimer60 < TICKS(50)) {
 				gdl = bviewDrawFisheye(gdl, 0xffffffff, 255, 0, g_Vars.currentplayer->eyespy->startuptimer60, g_Vars.currentplayer->eyespy->hit);
 			} else {
@@ -5251,7 +5206,7 @@ s32 playerTickThirdPerson(struct prop *prop)
 					spe8 = player->model00d4->matrices;
 				}
 
-				mtx00015be4(camGetProjectionMtxF(), spe8, &spa8);
+				mtxApplyAffineTransform(camGetProjectionMtxF(), spe8, &spa8);
 
 				sp9c.x = spa8.m[3][0] + spa8.m[1][0] * 7;
 				sp9c.y = spa8.m[3][1] + spa8.m[1][1] * 7;
@@ -5659,7 +5614,7 @@ void player0f0c3320(Mtxf *matrices, s32 count)
 	s32 j;
 
 	for (i = 0, j = 0; i < count; i++, j += sizeof(Mtxf)) {
-		mtx00015be4(camGetProjectionMtxF(), (Mtxf *)((uintptr_t)matrices + j), &sp40);
+		mtxApplyAffineTransform(camGetProjectionMtxF(), (Mtxf *)((uintptr_t)matrices + j), &sp40);
 
 		sp40.m[3][0] -= g_Vars.currentplayer->globaldrawworldoffset.x;
 		sp40.m[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;

@@ -90,22 +90,13 @@ void gamefileApplyOptions(struct gamefile *file)
 	g_Vars.langfilteron = pakHasBitflag(GAMEFILEFLAG_LANGFILTERON, file->flags);
 
 	if (pakHasBitflag(GAMEFILEFLAG_HIRES, file->flags)) {
-		if (IS4MB()) {
-			playerSetHiResEnabled(false);
-		} else {
 			playerSetHiResEnabled(true);
-		}
 	} else {
 		playerSetHiResEnabled(false);
 	}
 
-	if (IS4MB()) {
-		optionsSetScreenSplit(SCREENSPLIT_HORIZONTAL);
-		optionsSetScreenRatio(SCREENRATIO_NORMAL);
-	} else {
-		optionsSetScreenSplit(pakHasBitflag(GAMEFILEFLAG_SCREENSPLIT, file->flags));
-		optionsSetScreenRatio(pakHasBitflag(GAMEFILEFLAG_SCREENRATIO, file->flags));
-	}
+	optionsSetScreenSplit(pakHasBitflag(GAMEFILEFLAG_SCREENSPLIT, file->flags));
+	optionsSetScreenRatio(pakHasBitflag(GAMEFILEFLAG_SCREENRATIO, file->flags));
 
 	if (pakHasBitflag(GAMEFILEFLAG_SCREENSIZE_CINEMA, file->flags)) {
 		optionsSetScreenSize(SCREENSIZE_CINEMA);
@@ -120,7 +111,7 @@ void gamefileApplyOptions(struct gamefile *file)
 	g_Vars.coopfriendlyfire = pakHasBitflag(GAMEFILEFLAG_COOPFRIENDLYFIRE, file->flags) ? true : false;
 	g_Vars.antiradaron = pakHasBitflag(GAMEFILEFLAG_ANTIRADARON, file->flags) ? true : false;
 
-#if VERSION >= VERSION_PAL_BETA
+/*#if VERSION >= VERSION_PAL_BETA
 	g_Vars.language = 0;
 
 	if (pakHasBitflag(GAMEFILEFLAG_LANGBIT1, file->flags)) {
@@ -136,7 +127,7 @@ void gamefileApplyOptions(struct gamefile *file)
 	}
 
 	langSetEuropean(g_Vars.language);
-#endif
+#endif*/
 }
 
 void gamefileLoadDefaults(struct gamefile *file)
@@ -151,19 +142,13 @@ void gamefileLoadDefaults(struct gamefile *file)
 	file->autodifficulty = 0;
 	file->autostageindex = 0;
 	file->totaltime = 0;
-#if VERSION >= VERSION_NTSC_1_0
 	sndSetSfxVolume(0x5000);
 	optionsSetMusicVolume(0x5000);
-#else
-	sndSetSfxVolume(0x7f80);
-	optionsSetMusicVolume(0x7f80);
-#endif
 	sndSetSoundMode(SOUNDMODE_STEREO);
 	optionsSetControlMode(player1, CONTROLMODE_11);
 	optionsSetControlMode(player2, CONTROLMODE_11);
 	pakClearAllBitflags(file->flags);
 
-#ifndef PLATFORM_N64
 	// override with PC controls if enabled in the config
 	if (g_PlayerExtCfg[0].extcontrols) {
 		optionsSetControlMode(player1, CONTROLMODE_PC);
@@ -171,21 +156,12 @@ void gamefileLoadDefaults(struct gamefile *file)
 	if (g_PlayerExtCfg[1].extcontrols) {
 		optionsSetControlMode(player2, CONTROLMODE_PC);
 	}
-#endif
 
-#ifdef PLATFORM_N64
-	pakSetBitflag(GAMEFILEFLAG_P1_FORWARDPITCH, file->flags, false);
-#else
 	pakSetBitflag(GAMEFILEFLAG_P1_FORWARDPITCH, file->flags, true);
-#endif
 	pakSetBitflag(GAMEFILEFLAG_P1_AUTOAIM, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_P1_AIMCONTROL, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_P1_SIGHTONSCREEN, file->flags, true);
-#ifdef PLATFORM_N64
-	pakSetBitflag(GAMEFILEFLAG_P1_LOOKAHEAD, file->flags, true);
-#else
 	pakSetBitflag(GAMEFILEFLAG_P1_LOOKAHEAD, file->flags, false);
-#endif
 	pakSetBitflag(GAMEFILEFLAG_P1_AMMOONSCREEN, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_P1_HEADROLL, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_P1_SHOWGUNFUNCTION, file->flags, true);
@@ -194,59 +170,38 @@ void gamefileLoadDefaults(struct gamefile *file)
 	pakSetBitflag(GAMEFILEFLAG_P1_SHOWZOOMRANGE, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_P1_SHOWMISSIONTIME, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_P1_PAINTBALL, file->flags, false);
-
-#ifdef PLATFORM_N64
-	pakSetBitflag(GAMEFILEFLAG_P2_FORWARDPITCH, file->flags, false);
-#else
 	pakSetBitflag(GAMEFILEFLAG_P2_FORWARDPITCH, file->flags, true);
-#endif
 	pakSetBitflag(GAMEFILEFLAG_P2_AUTOAIM, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_P2_AIMCONTROL, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_P2_SIGHTONSCREEN, file->flags, true);
-#ifdef PLATFORM_N64
-	pakSetBitflag(GAMEFILEFLAG_P2_LOOKAHEAD, file->flags, true);
-#else
 	pakSetBitflag(GAMEFILEFLAG_P2_LOOKAHEAD, file->flags, false);
-#endif
 	pakSetBitflag(GAMEFILEFLAG_P2_AMMOONSCREEN, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_P2_HEADROLL, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_P2_SHOWGUNFUNCTION, file->flags, true);
-
-#if VERSION >= VERSION_JPN_FINAL
-	pakSetBitflag(GAMEFILEFLAG_CUTSCENESUBTITLES, file->flags, true);
-#else
 	pakSetBitflag(GAMEFILEFLAG_CUTSCENESUBTITLES, file->flags, false);
-#endif
-
 	pakSetBitflag(GAMEFILEFLAG_P2_ALWAYSSHOWTARGET, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_P2_SHOWZOOMRANGE, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_P2_SHOWMISSIONTIME, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_P2_PAINTBALL, file->flags, false);
-
 	pakSetBitflag(GAMEFILEFLAG_SCREENSPLIT, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_SCREENRATIO, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_CINEMA, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_WIDE, file->flags, false);
-
 	pakSetBitflag(GAMEFILEFLAG_HIRES, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_LANGFILTERON, file->flags, false);
-
-#if VERSION >= VERSION_NTSC_1_0
 	pakSetBitflag(GAMEFILEFLAG_FOUNDTIMEDMINE, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_FOUNDPROXYMINE, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_FOUNDREMOTEMINE, file->flags, false);
-#endif
-
 	pakSetBitflag(GAMEFILEFLAG_COOPRADARON, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_COOPFRIENDLYFIRE, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_ANTIRADARON, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_ANTIPLAYERNUM, file->flags, true);
 
-#if VERSION >= VERSION_PAL_BETA
+/*#if VERSION >= VERSION_PAL_BETA
 	pakSetBitflag(GAMEFILEFLAG_LANGBIT1, g_GameFile.flags, ((g_Vars.language & 0x01) == 0x01));
 	pakSetBitflag(GAMEFILEFLAG_LANGBIT2, g_GameFile.flags, ((g_Vars.language & 0x02) == 0x02));
 	pakSetBitflag(GAMEFILEFLAG_LANGBIT3, g_GameFile.flags, ((g_Vars.language & 0x04) == 0x04));
-#endif
+#endif*/
 
 	file->unk1e = 0;
 
@@ -272,24 +227,13 @@ void gamefileLoadDefaults(struct gamefile *file)
 		g_GameFile.firingrangescores[i] = 0;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	for (i = 0; i < ARRAYCOUNT(g_GameFile.weaponsfound); i++)
-#else
-	for (i = 0; i < ARRAYCOUNT(g_GameFile.weaponsfound) - 2; i++)
-#endif
 	{
 		g_GameFile.weaponsfound[i] = 0;
 	}
 
 	gamefileApplyOptions(file);
 }
-
-const char var7f1b38e8[] = "MAX_FUDGE_DATA_SIZE>=sizeof(PakFileTypeGameSetup_s)";
-const char var7f1b391c[] = "pdoptions.c";
-const char var7f1b3928[] = "MAX_FUDGE_DATA_SIZE>=sizeof(PakFileTypeGameSetup_s)";
-const char var7f1b395c[] = "pdoptions.c";
-const char var7f1b3968[] = "MAX_FUDGE_DATA_SIZE>=sizeof(PakFileTypeGameSetup_s)";
-const char var7f1b399c[] = "pdoptions.c";
 
 s32 gamefileLoad(s32 device)
 {

@@ -362,15 +362,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 				colour = 0xffffffff;
 
 				if (elem->textid == L_OPTIONS_074 || elem->textid == L_OPTIONS_073) {
-#if VERSION >= VERSION_PAL_BETA
-					prevx += 10;
-#endif
-
-					if (IS4MB()) {
-						elem->textid = L_OPTIONS_074;
-					} else {
-						elem->textid = L_OPTIONS_073;
-					}
+					elem->textid = L_OPTIONS_073; // "Detected"
 				}
 				break;
 			case LEGALELEMENTTYPE_WHITETEXTSM:
@@ -386,11 +378,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 
 			if (elem->type == LEGALELEMENTTYPE_LINE) {
 				gdl = text0f153780(gdl);
-#if VERSION == VERSION_JPN_FINAL
-				gdl = text0f153a34(gdl, elem->x, elem->y - 1, viGetWidth(), elem->y + 1, 0x7f7fff7f);
-#else
 				gdl = text0f153a34(gdl, elem->x, elem->y, viGetWidth(), elem->y + 2, 0x7f7fff7f);
-#endif
 				gdl = text0f153628(gdl);
 			} else if (elem->type == LEGALELEMENTTYPE_DOLBYLOGO) {
 				gdl = text0f153780(gdl);
@@ -439,11 +427,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 
 				gdl = text0f153628(gdl);
 			} else {
-#ifdef PLATFORM_N64
-#define ELEM_TEXT langGet(elem->textid)
-#else
 #define ELEM_TEXT (char *)(elem->textptr ? elem->textptr : langGet(elem->textid))
-#endif
 				x = elem->x;
 				y = elem->y;
 				gdl = textRenderProjected(gdl, &x, &y, ELEM_TEXT, font1, font2, colour, viGetWidth(), viGetHeight(), 0, 0);
@@ -469,29 +453,6 @@ void titleInitPdLogo(void)
 	u32 size;
 
 	g_TitleTimer = 0;
-
-#if VERSION == VERSION_JPN_FINAL
-	{
-		s32 i;
-		s32 j;
-
-		var8009d34cjf = var8009d350jf = 9.0f;
-
-		for (i = 0; i < 4; i++) {
-			for (j = 0; j < 20; j++) {
-				var8009d34cjf = 0.99f * var8009d34cjf + 0.01f;
-			}
-
-			for (j = 0; j < ARRAYCOUNT(var8009d358jf) - 1; j++) {
-				var8009d358jf[j] = var8009d358jf[j + 1];
-			}
-
-			var8009d358jf[3] = var8009d34cjf;
-		}
-
-		var8009d350jf = var8009d358jf[1];
-	}
-#endif
 
 	{
 		struct coord coord = {0, 0, 0};
@@ -531,34 +492,6 @@ void titleInitPdLogo(void)
 		modelSetScale(g_TitleModelPdTwo, 1);
 		modelSetRootPosition(g_TitleModelPdTwo, &coord);
 	}
-
-#if VERSION == VERSION_JPN_FINAL
-	{
-		struct coord coord = {0, 0, 0};
-		g_ModelStates[MODEL_JPNLOGO].modeldef = modeldefLoad(g_ModelStates[MODEL_JPNLOGO].fileid, nextaddr, remaining, 0);
-		size = ALIGN64(fileGetLoadedSize(g_ModelStates[MODEL_JPNLOGO].fileid));
-		nextaddr += size;
-		remaining -= size;
-		modelAllocateRwData(g_ModelStates[MODEL_JPNLOGO].modeldef);
-
-		g_TitleModelJpnLogo1 = modelmgrInstantiateModelWithoutAnim(g_ModelStates[MODEL_JPNLOGO].modeldef);
-		g_TitleModelJpnLogo2 = modelmgrInstantiateModelWithoutAnim(g_ModelStates[MODEL_JPNLOGO].modeldef);
-		modelSetScale(g_TitleModelJpnLogo1, 1);
-		modelSetScale(g_TitleModelJpnLogo2, 1);
-		modelSetRootPosition(g_TitleModelJpnLogo1, &coord);
-		modelSetRootPosition(g_TitleModelJpnLogo2, &coord);
-
-		g_ModelStates[MODEL_JPNPD].modeldef = modeldefLoad(g_ModelStates[MODEL_JPNPD].fileid, nextaddr, remaining, 0);
-		size = ALIGN64(fileGetLoadedSize(g_ModelStates[MODEL_JPNPD].fileid));
-		nextaddr += size;
-		remaining -= size;
-		modelAllocateRwData(g_ModelStates[MODEL_JPNPD].modeldef);
-
-		g_TitleModelJpnPd = modelmgrInstantiateModelWithoutAnim(g_ModelStates[MODEL_JPNPD].modeldef);
-		modelSetScale(g_TitleModelJpnPd, 1);
-		modelSetRootPosition(g_TitleModelJpnPd, &coord);
-	}
-#endif
 
 	{
 		struct coord coord = {0, 0, 0};
@@ -913,18 +846,10 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	f32 yrotmax = 4.240475f;
 	f32 xrotmax = 0.47116387f;
 	f32 xrotmin = 0.0f;
-
-#if VERSION >= VERSION_PAL_FINAL
-	f32 yrotaccel = PALUPF(0.00018846555f);
-	f32 xrotaccel = PALUPF(0.00011307933f);
-	f32 yrotmaxspeed = PALUPF(0.018846555f);
-	f32 xrotmaxspeed = PALUPF(0.011307933f);
-#else
 	f32 yrotaccel = 0.00018846555f;
 	f32 xrotaccel = 0.00011307933f;
 	f32 yrotmaxspeed = 0.018846555f;
 	f32 xrotmaxspeed = 0.011307933f;
-#endif
 
 	s32 premorphduration = TICKS(80);
 	f32 amblightinc = 0.0075f;
@@ -940,16 +865,6 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	struct modelrwdata_dl *rwdata;
 
 	u32 stack1[8];
-
-#if VERSION == VERSION_JPN_FINAL
-	u32 stack2[1];
-	s32 i;
-	s32 j;
-	f32 firstvalue;
-	s32 step0value;
-	u32 step1weight;
-	u32 step1colour;
-#endif
 
 	f32 sp13c;
 
@@ -1639,7 +1554,7 @@ void titleInitRareLogo(void)
 	musicQueueStopAllEvent();
 	joy00014810(false);
 
-	if (!g_IsTitleDemo && IS8MB()) {
+	if (!g_IsTitleDemo) {
 		g_IsTitleDemo = true;
 	}
 	

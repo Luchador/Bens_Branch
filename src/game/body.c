@@ -4,6 +4,7 @@
 #include "game/chraction.h"
 #include "game/chr.h"
 #include "game/body.h"
+#include "game/debug.h"
 #include "game/prop.h"
 #include "game/atan2f.h"
 #include "game/modelmgr.h"
@@ -189,7 +190,7 @@ struct model *body0f02ce8c(s32 bodynum, s32 headnum, struct modeldef *bodymodeld
 					bodymodeldef->rwdatalen += headmodeldef->rwdatalen;
 				} else if (headnum > 0) {
 					if (headmodeldef == NULL) {
-						if (g_Vars.normmplayerisrunning && !IS4MB()) {
+						if (g_Vars.normmplayerisrunning) {
 							headmodeldef = modeldefLoadToNew(g_HeadsAndBodies[headnum].filenum);
 							g_HeadsAndBodies[headnum].modeldef = headmodeldef;
 							g_FileInfo[g_HeadsAndBodies[headnum].filenum].loadedsize = 0;
@@ -304,7 +305,7 @@ struct model *bodyAllocateModel(s32 bodynum, s32 headnum, u32 spawnflags)
 
 s32 bodyGetRandomBond(void)
 {
-	return g_BondBodies[g_RandomBond];
+	return g_BondBodies[rngRandom() % g_NumBondBodies];
 }
 
 s32 bodyChooseHead(s32 bodynum)
@@ -376,7 +377,7 @@ void bodyAllocateChr(s32 stagenum, struct packedchr *packed, s32 cmdindex)
 	headmodeldef = NULL;
 
 	if (packed->bodynum == 255) {
-		bodynum = bodyGetRandomBond(); // Remember this for the Dinner Party cheat
+		bodynum = bodyGetRandomBond(); // One of the four Bond bodies at random
 	} else {
 		bodynum = packed->bodynum;
 	}
@@ -388,6 +389,15 @@ void bodyAllocateChr(s32 stagenum, struct packedchr *packed, s32 cmdindex)
 			headnum = bodyChooseHead(bodynum);
 		}
 	}
+
+	// Dinner party cheat
+	if(cheatIsActive(CHEAT_DINNERPARTY)) {
+		u32 race = bodyGetRace(bodynum);
+		if(race == RACE_HUMAN && bodynum != BODY_CARRINGTON && bodynum != BODY_CARREVENINGSUIT) {
+			bodynum = bodyGetRandomBond();
+		}
+	}
+
 
 	if (headnum < 0) {
 		index = -1 - headnum;

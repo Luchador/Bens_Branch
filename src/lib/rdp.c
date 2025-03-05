@@ -67,10 +67,6 @@ void rdpInit(void)
 {
 	s32 size = 0x10000;
 
-	if (IS4MB()) {
-		size = 0x8000;
-	}
-
 	g_RdpOutBufferStart = mempAlloc(size, MEMPOOL_PERMANENT);
 	g_RdpOutBufferEnd = (u16 *) ((uintptr_t) g_RdpOutBufferStart + size);
 }
@@ -83,15 +79,6 @@ void rdpCreateTask(Gfx *gdlstart, Gfx *gdlend, u32 arg2, uintptr_t msg)
 	sctask = &g_RdpCurTask->sctask;
 	task = &sctask->list;
 
-#ifdef PLATFORM_N64
-	task->t.ucode_boot = (u64 *) rspbootTextStart;
-	task->t.ucode_boot_size = (uintptr_t) rspbootTextEnd - (uintptr_t) rspbootTextStart;
-
-	if (rspbootTextStart);
-
-	task->t.ucode = (u64 *) &gspTextStart;
-	task->t.ucode_data = (u64 *) &gspDataStart;
-#endif
 	task->t.output_buff = (u64 *)g_RdpOutBufferStart;
 	task->t.output_buff_size = (u64 *)g_RdpOutBufferEnd;
 	task->t.data_ptr = (u64 *) gdlstart;

@@ -9433,13 +9433,13 @@ bool chrGetGunPos(struct chrdata *chr, s32 handnum, struct coord *gunpos)
 				gunpos->y = rodata->pos.y;
 				gunpos->z = rodata->pos.z;
 
-				mtx00015be4(camGetProjectionMtxF(), spac, &sp6c);
+				mtxApplyAffineTransform(camGetProjectionMtxF(), spac, &sp6c);
 				mtx4TransformVecInPlace(&sp6c, gunpos);
 				result = true;
 			} else if ((part1 = modelGetPart(model->definition, MODELPART_0001))) {
 				sp64 = modelFindNodeMtx(model, part1, 0);
 
-				mtx00015be4(camGetProjectionMtxF(), sp64, &sp24);
+				mtxApplyAffineTransform(camGetProjectionMtxF(), sp64, &sp24);
 
 				gunpos->x = sp24.m[3][0];
 				gunpos->y = sp24.m[3][1];
@@ -10048,7 +10048,7 @@ void chrTickShoot(struct chrdata *chr, s32 handnum)
 #endif
 							}
 
-							bgun0f09ebcc(&projectileobj->base, &gunpos, gunrooms, &projectilemtx, &sp16c, &identmtx, chrprop, &gunpos);
+							bgunCreateXBowBolt(&projectileobj->base, &gunpos, gunrooms, &projectilemtx, &sp16c, &identmtx, chrprop, &gunpos);
 
 							if (projectileobj->base.hidden & OBJHFLAG_PROJECTILE) {
 								if (func->base.base.flags & FUNCFLAG_PROJECTILE_LIGHTWEIGHT) {

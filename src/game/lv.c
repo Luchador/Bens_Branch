@@ -25,7 +25,6 @@
 #include "game/weaponutils.h"
 #include "game/modelmgr.h"
 #include "game/portal.h"
-#include "game/fmb.h"
 #include "game/sky.h"
 #include "game/artifacts.h"
 #include "game/game_1531a0.h"
@@ -94,7 +93,7 @@
 struct sndstate *g_MiscSfxAudioHandles[3];
 s32 g_MiscSfxActiveTypes[3];
 
-u32 var80084010 = 0;
+u32 g_LvlIsPausedMP = 0;
 bool g_IsLvlPaused = false;
 
 s32 g_Difficulty = DIFF_A;
@@ -106,7 +105,6 @@ s32 g_MpTeamScoreLimit = 20;
 struct sndstate *g_MiscAudioHandle = NULL;
 s32 g_NumReasonsToEndMpMatch = 0;
 f32 g_StageTimeElapsed1f = 0;
-bool var80084040 = true;
 
 u32 g_MiscSfxSounds[] = {
 	SFX_HEARTBEAT,
@@ -120,16 +118,6 @@ f32 g_FadeFrac = -1;
 u32 g_FadePrevColour = 0;
 u32 g_FadeColour = 0;
 s16 g_FadeDelay = 0;
-
-u32 getVar80084040(void)
-{
-	return var80084040;
-}
-
-void setVar80084040(u32 value)
-{
-	var80084040 = value;
-}
 
 void lvInit(void)
 {
@@ -223,7 +211,7 @@ void lvReset(s32 stagenum)
 	lvFadeReset();
 
 	g_IsLvlPaused = false;
-	var80084010 = 0;
+	g_LvlIsPausedMP = 0;
 
 	joyLockCyclicPolling();
 
@@ -235,7 +223,6 @@ void lvReset(s32 stagenum)
 
 	cheatsReset();
 
-	var80084040 = true;
 	g_Vars.lvframenum = 0;
 	g_LockScreenTimer = 0;
 
@@ -361,12 +348,9 @@ void lvReset(s32 stagenum)
 	shardsReset();
 	frReset();
 
-	if (g_Vars.stagenum == STAGE_TITLE) {
+	if (g_Vars.stagenum == STAGE_TITLE) { // Ben's comment: this if statement is necessary or the game crashes when returning from a mission. Why though?
 		// empty
 	} else if (stagenum == STAGE_BOOTPAKMENU) {
-		setCurrentPlayerNum(0);
-		menuReset();
-	} else if (stagenum == STAGE_4MBMENU) {
 		setCurrentPlayerNum(0);
 		menuReset();
 	} else if (stagenum == STAGE_CREDITS) {
@@ -515,7 +499,7 @@ bool lvUpdateTrackedProp(struct trackedprop *trackedprop, s32 index)
 						g_Vars.currentplayer->targetset[index] = TICKS(129);
 					}
 
-					if (g_Vars.currentplayer->targetset[index] >= (PAL ? 146 : 175)) {
+					if (g_Vars.currentplayer->targetset[index] >= 175) {
 						trackedprop->prop = NULL;
 						return false;
 					}
@@ -802,7 +786,6 @@ void lvFindThreats(void)
 	}
 }
 
-#ifndef PLATFORM_N64
 Gfx *lvRenderFPS(Gfx *gdl)
 {
 	const f32 fps = videoGetAverageFPS();
@@ -839,7 +822,6 @@ Gfx *lvRenderFPS(Gfx *gdl)
 
 	return gdl;
 }
-#endif
 
 /**
  * Renders a complete frame for all players, and also does some other game logic
@@ -851,8 +833,6 @@ Gfx *lvRenderFPS(Gfx *gdl)
  *     // title screen rendering
  * } else if (stage == STAGE_BOOTPAKMENU) {
  *     // boot pak menu rendering
- * } else if (stage == STAGE_4MBMENU) {
- *     // 4MB menu rendering
  * } else if (stage == STAGE_CREDITS) {
  *     // credits rendering
  * } else {
@@ -875,9 +855,7 @@ Gfx *lvRender(Gfx *gdl)
 {
 	gSPSegment(gdl++, SPSEGMENT_PHYSICAL, 0x00000000);
 
-#if VERSION >= VERSION_NTSC_1_0
-	func0f0d5a7c();
-#endif
+	savebufferResetVp();
 
 	if (g_Vars.stagenum == STAGE_TITLE) {
 		gSPDisplayList(gdl++, &var800613a0);
@@ -913,35 +891,6 @@ Gfx *lvRender(Gfx *gdl)
 		gdl = viRenderViewportEdges(gdl);
 		gdl = bgScissorToViewport(gdl);
 		gdl = menuRender(gdl);
-	} else if (g_Vars.stagenum == STAGE_4MBMENU) {
-		gSPClipRatio(gdl++, FRUSTRATIO_2);
-		gSPDisplayList(gdl++, &var800613a0);
-		gSPDisplayList(gdl++, &var80061380);
-
-		setCurrentPlayerNum(0);
-
-#if VERSION >= VERSION_PAL_BETA
-		viSetMode(VIMODE_LO);
-		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
-		viSetSize(playerGetFbWidth(), playerGetFbHeight());
-		viSetBufSize(playerGetFbWidth(), playerGetFbHeight());
-		viSetViewSize(playerGetFbWidth(), playerGetFbHeight());
-#else
-		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
-#endif
-
-		viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
-				g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
-
-		mtx00016748(1);
-
-		gdl = vi0000b1d0(gdl);
-		gdl = bgScissorToViewport(gdl);
-		gdl = menuRender(gdl);
-
-		if (g_Vars.currentplayer->pausemode != PAUSEMODE_UNPAUSED) {
-			playerTickPauseMenu();
-		}
 	} else if (g_Vars.stagenum == STAGE_CREDITS) {
 		gSPClipRatio(gdl++, FRUSTRATIO_2);
 		gSPDisplayList(gdl++, &var800613a0);
@@ -962,13 +911,8 @@ Gfx *lvRender(Gfx *gdl)
 		s32 i;
 		s32 playercount;
 		Gfx *savedgdl;
-#if VERSION >= VERSION_NTSC_1_0
 		bool forcesingleplayer = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 			&& playerHasSharedViewport();
-#else
-		bool forcesingleplayer = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
-			&& ((g_InCutscene && !g_MainIsEndscreen) || menuGetRoot() == MENUROOT_COOPCONTINUE);
-#endif
 		struct player *player;
 		struct chrdata *chr;
 
@@ -1017,12 +961,10 @@ Gfx *lvRender(Gfx *gdl)
 						chr->blurnumtimesdied = 0;
 					}
 
-#ifndef PLATFORM_N64
 					// reset the drug blur to 0 if it's disabled in MP settings
 					if (g_Vars.mplayerisrunning && (g_MpSetup.options & MPOPTION_NODRUGBLUR)) {
 						bluramount = 0;
 					}
-#endif
 				}
 			}
 
@@ -1086,10 +1028,8 @@ Gfx *lvRender(Gfx *gdl)
 				autoaimTick();
 				handsTickAttack();
 
-#ifndef PLATFORM_N64
 				// glares calculated earlier on PC, before prop matrices turn into garbage
 				bgCalculateGlaresForVisibleRooms();
-#endif
 
 				// Calculate lookingatprop
 				if (PLAYERCOUNT() == 1
@@ -1305,50 +1245,44 @@ Gfx *lvRender(Gfx *gdl)
 						}
 					}
 
-#if VERSION >= VERSION_NTSC_1_0
 					if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKETSTATIC) {
 						gdl = bviewDrawStatic(gdl, 0x4fffffff, 255);
 						g_Vars.currentplayer->visionmode = VISIONMODE_NORMAL;
 					}
-#endif
 
 					if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY
 							&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
 						s32 xraything = 99;
 
 						if (g_Vars.currentplayer->erasertime < TICKS(200)) {
-#if PAL
-							xraything = 249 - ((g_Vars.currentplayer->erasertime * 180 / 50) >> 2);
-#else
 							xraything = 249 - (g_Vars.currentplayer->erasertime * 3 >> 2);
-#endif
 						}
 
 						gdl = bviewDrawZoomBlur(gdl, 0xffffffff, xraything, 1.05f, 1.05f);
 					}
 
 					// Handle combat boosts
-					if ((g_Vars.speedpillchange > 0 && g_Vars.speedpillchange < (PAL ? 26 : 30))
+					if ((g_Vars.speedpillchange > 0 && g_Vars.speedpillchange < 30)
 							|| (g_Vars.speedpillwant && !g_Vars.speedpillon)
 							|| (!g_Vars.speedpillwant && g_Vars.speedpillon)) {
-						if (g_Vars.speedpillchange == (PAL ? 26 : 30) && !g_Vars.speedpillwant) {
+						if (g_Vars.speedpillchange == 30 && !g_Vars.speedpillwant) {
 							sndStart(var80095200, lvGetSlowMotionType() ? SFX_JO_BOOST_ACTIVATE : SFX_ARGH_JO_02AD, 0, -1, -1, -1, -1, -1);
 						}
 
-						if (g_Vars.speedpillchange < (PAL ? 13 : 15)) {
+						if (g_Vars.speedpillchange < 15) {
 							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
-									g_Vars.speedpillchange * 180 / (PAL ? 13 : 15),
+									g_Vars.speedpillchange * 180 / 15,
 									(f32)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f,
 									(f32)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f);
 							gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
-									g_Vars.speedpillchange * (PAL ? 0.0076923076994717f : 0.0066666668280959f));
+									g_Vars.speedpillchange * 0.0066666668280959f);
 						} else {
 							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
-									((PAL ? 26 : 30) - g_Vars.speedpillchange) * 180 / (PAL ? 13 : 15),
-									(f32)((PAL ? 26 : 30) - g_Vars.speedpillchange) * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f,
-									(f32)((PAL ? 26 : 30) - g_Vars.speedpillchange) * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f);
+									(30 - g_Vars.speedpillchange) * 180 / 15,
+									(f32)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f,
+									(f32)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f);
 							gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
-									((PAL ? 26.0f : 30.0f) - g_Vars.speedpillchange) * (PAL ? 0.0076923076994717f : 0.0066666668280959f));
+									(30.0f - g_Vars.speedpillchange) * 0.0066666668280959f);
 						}
 
 						if (g_Vars.currentplayernum == 0) {
@@ -1359,14 +1293,14 @@ Gfx *lvRender(Gfx *gdl)
 							}
 						}
 
-						if (g_Vars.speedpillchange > (PAL ? 26 : 30)) {
-							g_Vars.speedpillchange = (PAL ? 26 : 30);
+						if (g_Vars.speedpillchange > 30) {
+							g_Vars.speedpillchange = 30;
 						} else if (g_Vars.speedpillchange < 0) {
 							g_Vars.speedpillchange = 0;
 						}
 					}
 
-					if (g_Vars.speedpillchange > (PAL ? 13 : 15)) {
+					if (g_Vars.speedpillchange > 15) {
 						g_Vars.speedpillon = true;
 					} else {
 						g_Vars.speedpillon = false;
@@ -1382,25 +1316,9 @@ Gfx *lvRender(Gfx *gdl)
 						f32 cutsceneblurfrac = playerGetCutsceneBlurFrac();
 
 						if (cutsceneblurfrac > 0) {
-#if VERSION < VERSION_PAL_BETA
-							u32 stack;
-#endif
 							gdl = bviewDrawMotionBlur(gdl, 0xffffff00, cutsceneblurfrac * 255);
 						}
 					}
-
-#if VERSION >= VERSION_PAL_FINAL
-					if (bluramount);
-					if (bluramount);
-					if (bluramount);
-#elif VERSION >= VERSION_NTSC_1_0
-					if (bluramount);
-					if (bluramount);
-#else
-					if (bluramount);
-					if (bluramount);
-					if (bluramount);
-#endif
 
 					if (debugGetMotionBlur() == 1) {
 						gdl = bviewDrawMotionBlur(gdl, 0xffffff00, 128);
@@ -1444,48 +1362,11 @@ Gfx *lvRender(Gfx *gdl)
 					}
 				}
 
-#if VERSION >= VERSION_NTSC_1_0
 				gdl = scenarioRenderHud(gdl);
 				gdl = lvRenderFade(gdl);
-#else
-				gdl = lvRenderFade(gdl);
-				gdl = scenarioRenderHud(gdl);
-#endif
 
 				if (g_FrIsValidWeapon) {
 					gdl = frRenderHud(gdl);
-				}
-
-				if (debugGetTilesDebugMode() != 0
-						|| debugGetPadsDebugMode() != 0
-						|| debug0f11eea8()
-						|| debug0f11ef80()
-						|| debugIsChrStatsEnabled()
-						|| debug0f11ee40()) {
-#if VERSION < VERSION_NTSC_1_0
-					RoomNum spc8[21];
-					RoomNum spb0[11];
-					RoomNum sp9c[10];
-					s32 j;
-
-					sp9c[0] = g_Vars.currentplayer->memcamroom;
-					sp9c[1] = -1;
-
-					for (j = 0; sp9c[j] != -1; j++) {
-						spc8[j] = sp9c[j];
-					}
-
-					spc8[j] = -1;
-
-					for (j = 0; sp9c[j] != -1; j++) {
-						bgRoomGetNeighbours(sp9c[j], spb0, 10);
-						roomsAppend(spb0, spc8, 20);
-					}
-
-					if (debugIsChrStatsEnabled()) {
-						gdl = chrsRenderChrStats(gdl, spc8);
-					}
-#endif
 				}
 
 				gdl = skyRenderOverexposure(gdl);
@@ -1510,11 +1391,7 @@ Gfx *lvRender(Gfx *gdl)
 			artifactsTick();
 
 			if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
-#if VERSION >= VERSION_NTSC_1_0
 					&& playerHasSharedViewport()
-#else
-					&& ((g_InCutscene && !g_MainIsEndscreen) || menuGetRoot() == MENUROOT_COOPCONTINUE)
-#endif
 					&& g_Vars.currentplayernum != 0) {
 				gdl = savedgdl;
 			}
@@ -1538,30 +1415,22 @@ Gfx *lvRender(Gfx *gdl)
 	// Advance the cutscenes when autoplaying
 	if (!g_Vars.autocutplaying && g_Vars.autocutgroupcur >= 0 && g_Vars.autocutgroupleft > 0) {
 		hudmsgRemoveAll();
-
 		g_Vars.autocutnum = g_Cutscenes[g_Vars.autocutgroupcur].scene;
-
-#if VERSION < VERSION_NTSC_1_0
-		if (mainGetStageNum() != g_Cutscenes[g_Vars.autocutgroupcur].stage)
-#endif
-		{
-			g_MissionConfig.iscoop = false;
-			g_Vars.mplayerisrunning = false;
-			g_Vars.normmplayerisrunning = false;
-			g_Vars.bondplayernum = 0;
-			g_Vars.coopplayernum = -1;
-			g_Vars.antiplayernum = -1;
-			g_MissionConfig.isanti = false;
-			setNumPlayers(1);
-			titleSetNextMode(TITLEMODE_SKIP);
-			g_MissionConfig.difficulty = DIFF_A;
-			lvSetDifficulty(DIFF_A);
-			g_MissionConfig.stageindex = g_Cutscenes[g_Vars.autocutgroupcur].mission;
-			g_MissionConfig.stagenum = g_Cutscenes[g_Vars.autocutgroupcur].stage;
-			titleSetNextStage(g_Cutscenes[g_Vars.autocutgroupcur].stage);
-			mainChangeToStage(g_Cutscenes[g_Vars.autocutgroupcur].stage);
-		}
-
+		g_MissionConfig.iscoop = false;
+		g_Vars.mplayerisrunning = false;
+		g_Vars.normmplayerisrunning = false;
+		g_Vars.bondplayernum = 0;
+		g_Vars.coopplayernum = -1;
+		g_Vars.antiplayernum = -1;
+		g_MissionConfig.isanti = false;
+		setNumPlayers(1);
+		titleSetNextMode(TITLEMODE_SKIP);
+		g_MissionConfig.difficulty = DIFF_A;
+		lvSetDifficulty(DIFF_A);
+		g_MissionConfig.stageindex = g_Cutscenes[g_Vars.autocutgroupcur].mission;
+		g_MissionConfig.stagenum = g_Cutscenes[g_Vars.autocutgroupcur].stage;
+		titleSetNextStage(g_Cutscenes[g_Vars.autocutgroupcur].stage);
+		mainChangeToStage(g_Cutscenes[g_Vars.autocutgroupcur].stage);
 		g_Vars.autocutgroupleft--;
 
 		if (g_Vars.autocutgroupleft > 0) {
@@ -1573,19 +1442,9 @@ Gfx *lvRender(Gfx *gdl)
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, 0, 0, viGetWidth(), viGetHeight());
 
-#ifndef PLATFORM_N64
 	if (videoGetDisplayFPS()) {
 		gdl = lvRenderFPS(gdl);
 	}
-#endif
-
-#if VERSION < VERSION_NTSC_1_0
-	if ((uintptr_t)gdl < (uintptr_t)g_GfxBuffers[g_GfxActiveBufferIndex]
-			|| (uintptr_t)gdl > (uintptr_t)g_GfxBuffers[g_GfxActiveBufferIndex + 1]) {
-		crashSetMessage("lv.c Master DL overrun!");
-		CRASH();
-	}
-#endif
 
 	return gdl;
 }
@@ -1659,11 +1518,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 1;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 1;
-#if VERSION >= VERSION_JPN_FINAL
-			g_AutoAimScale = 0.75f;
-#else
 			g_AutoAimScale = g_Jpn ? 1.1f : 0.75f;
-#endif
 			g_AmmoQuantityScale = 1.5f;
 			g_AttackWalkDurationScale = 0.5f;
 		} else {
@@ -1676,11 +1531,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 1.5f;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 1.5f;
-#if VERSION >= VERSION_JPN_FINAL
-			g_AutoAimScale = 0.2f;
-#else
 			g_AutoAimScale = g_Jpn ? 0.75f : 0.2f;
-#endif
 			g_AmmoQuantityScale = 1;
 			g_AttackWalkDurationScale = 1;
 		}
@@ -1721,11 +1572,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 0.6f;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 0.75f;
-#if VERSION >= VERSION_JPN_FINAL
-			g_AutoAimScale = 0.75f;
-#else
 			g_AutoAimScale = g_Jpn ? 1.1f : 0.75f;
-#endif
 			g_AmmoQuantityScale = 1.5f;
 			g_AttackWalkDurationScale = 0.5f;
 		} else if (g_Difficulty == DIFF_PA) {
@@ -1738,11 +1585,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 1;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 1;
-#if VERSION >= VERSION_JPN_FINAL
-			g_AutoAimScale = 0.2f;
-#else
 			g_AutoAimScale = g_Jpn ? 0.75f : 0.2f;
-#endif
 			g_AmmoQuantityScale = 1;
 			g_AttackWalkDurationScale = 1;
 		} else if (g_Difficulty == DIFF_PD) {
@@ -1803,27 +1646,18 @@ void lvTick(void)
 
 	lvCheckPauseStateChanged();
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (g_Vars.pakstocheck) {
 		paksTick();
 	}
-#endif
 
 	if (g_Vars.joydisableframestogo > 0) {
 		g_Vars.joydisableframestogo--;
 	} else if (g_Vars.joydisableframestogo == 0) {
-#if VERSION >= VERSION_NTSC_1_0
 		joyUnlockCyclicPolling();
-#else
-		if (!joyIsCyclicPollingEnabled()) {
-			joyEnableCyclicPolling(3278, "lv.c");
-		}
-#endif
 
 		if (g_Vars.stagenum == STAGE_TITLE
 				|| g_Vars.stagenum == STAGE_BOOTPAKMENU
-				|| g_Vars.stagenum == STAGE_CREDITS
-				|| g_Vars.stagenum == STAGE_4MBMENU) {
+				|| g_Vars.stagenum == STAGE_CREDITS) {
 			g_Vars.paksneededforgame = 0;
 		} else {
 			g_Vars.paksneededforgame = 0x1f;
@@ -2076,11 +1910,6 @@ void lvTick(void)
 		musicTick();
 		langTick();
 		pakExecuteDebugOperations();
-	} else if (g_Vars.stagenum == STAGE_4MBMENU) {
-		menuTick();
-		musicTick();
-		langTick();
-		pakExecuteDebugOperations();
 	} else if (g_Vars.stagenum == STAGE_CREDITS) {
 		musicTick();
 		langTick();
@@ -2094,7 +1923,6 @@ void lvTick(void)
 		shardsTick();
 		sparksTick();
 		wallhitsTick();
-		splatsTick();
 
 		if (g_WeatherActive) {
 			weatherTick();
@@ -2197,7 +2025,7 @@ void lvCheckPauseStateChanged(void)
 {
 	u32 paused = mpIsPaused();
 
-	if (paused != var80084010) {
+	if (paused != g_LvlIsPausedMP) {
 		if (paused) {
 			pakDisableRumbleForAllPlayers();
 		} else {
@@ -2205,7 +2033,7 @@ void lvCheckPauseStateChanged(void)
 		}
 	}
 
-	var80084010 = paused;
+	g_LvlIsPausedMP = paused;
 }
 
 void lvSetPaused(bool paused)

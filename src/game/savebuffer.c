@@ -14,7 +14,7 @@
 #include "types.h"
 
 
-Vp *var80070f10 = NULL;
+Vp *g_Viewport = NULL;
 
 s32 var8009de90;
 s32 var8009de94;
@@ -75,24 +75,24 @@ Gfx *func0f0d479c(Gfx *gdl)
 	gSPMatrix(gdl++, osVirtualToPhysical(mtx2), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gSPMatrix(gdl++, osVirtualToPhysical(mtx1), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
-	if (var80070f10 == NULL) {
+	if (g_Viewport == NULL) {
 		u32 size = align16(sizeof(Vp));
-		var80070f10 = gfxAllocate(size);
+		g_Viewport = gfxAllocate(size);
 
-		if (var80070f10 != NULL) {
-			var80070f10->vp.vscale[0] = viGetWidth() << 1;
-			var80070f10->vp.vscale[1] = viGetHeight() << 1;
-			var80070f10->vp.vscale[2] = 1;
-			var80070f10->vp.vscale[3] = 0;
+		if (g_Viewport != NULL) {
+			g_Viewport->vp.vscale[0] = viGetWidth() << 1;
+			g_Viewport->vp.vscale[1] = viGetHeight() << 1;
+			g_Viewport->vp.vscale[2] = 1;
+			g_Viewport->vp.vscale[3] = 0;
 
-			var80070f10->vp.vtrans[0] = viGetWidth() << 1;
-			var80070f10->vp.vtrans[1] = viGetHeight() << 1;
-			var80070f10->vp.vtrans[2] = 0x1ff;
-			var80070f10->vp.vtrans[3] = 0;
+			g_Viewport->vp.vtrans[0] = viGetWidth() << 1;
+			g_Viewport->vp.vtrans[1] = viGetHeight() << 1;
+			g_Viewport->vp.vtrans[2] = 0x1ff;
+			g_Viewport->vp.vtrans[3] = 0;
 		}
 	}
 
-	gSPViewport(gdl++, var80070f10);
+	gSPViewport(gdl++, g_Viewport);
 
 	gDPPipeSync(gdl++);
 
@@ -573,9 +573,8 @@ void formatTime(char *dst, s32 time60, s32 precision)
 	}
 }
 
-#if VERSION >= VERSION_NTSC_1_0
-void func0f0d5a7c(void)
+void savebufferResetVp(void)
 {
-	var80070f10 = 0;
+	// Set viewport to NULL
+	g_Viewport = 0;
 }
-#endif

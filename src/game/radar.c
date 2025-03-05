@@ -272,26 +272,18 @@ Gfx *radarRender(Gfx *gdl)
 		return gdl;
 	}
 
-#if PAL
-	g_ScaleX = 1;
-#else
 	if (g_ViRes == VIRES_HI) {
 		g_ScaleX = 2;
 	} else {
 		g_ScaleX = 1;
 	}
-#endif
 
 	g_RadarX = (viGetViewLeft() + viGetViewWidth()) / g_ScaleX - 41;
 
 	if (playercount == 2) {
-		if (IS4MB() || optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
 			if (playernum == 0) {
 				g_RadarX += 16;
-			}
-
-			if (IS4MB()) {
-				g_RadarX -= 4;
 			}
 		} else {
 			g_RadarX -= 7;
@@ -307,16 +299,12 @@ Gfx *radarRender(Gfx *gdl)
 	g_RadarY = viGetViewTop() + (PAL ? 29 : 26);
 
 	if (playercount == 2) {
-		if (IS4MB()) {
-			g_RadarY -= 6;
-		} else if (optionsGetScreenSplit() != SCREENSPLIT_VERTICAL && playernum == 1) {
+		if (optionsGetScreenSplit() != SCREENSPLIT_VERTICAL && playernum == 1) {
 			g_RadarY -= 8;
 		}
-#ifndef PLATFORM_N64
 		if (optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL) {
 			gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeR);
 		}
-#endif
 	} else if (playercount >= 3) {
 		if (playernum >= 2) {
 			g_RadarY -= 8;
@@ -327,20 +315,16 @@ Gfx *radarRender(Gfx *gdl)
 		if (optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
 			g_RadarY -= 6;
 		}
-#ifndef PLATFORM_N64
 		gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeR);
 		gDPSetSubpixelOffsetEXT(gdl++, -2, 2);
-#endif
 	}
 
 	gdl = radarRenderBackground(gdl, tconfig, g_RadarX, g_RadarY, 0x10);
 	gdl = func0f153134(gdl);
 
 	// Draw dots for human players
-#ifndef PLATFORM_N64
 	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
 	if (!(g_MpSetup.options & MPOPTION_NOPLAYERONRADAR)) {
-#endif
 	for (i = 0; i < playercount; i++) {
 		if (i != playernum) {
 			if (g_Vars.players[i]->isdead == false
@@ -361,9 +345,7 @@ Gfx *radarRender(Gfx *gdl)
 			}
 		}
 	}
-#ifndef PLATFORM_N64
 	}
-#endif
 
 	// Draw dots for coop AI buddies
 	if (!g_Vars.normmplayerisrunning && g_MissionConfig.iscoop) {
@@ -385,11 +367,7 @@ Gfx *radarRender(Gfx *gdl)
 	}
 
 	// Draw dots for MP simulants
-#ifdef PLATFORM_N64
-	if (g_Vars.normmplayerisrunning) {
-#else
 	if (g_Vars.normmplayerisrunning && !(g_MpSetup.options & MPOPTION_NOPLAYERONRADAR)) {
-#endif
 		for (i = 0; i < g_BotCount; i++) {
 			if (!chrIsDead(g_MpBotChrPtrs[i])
 					&& (g_MpBotChrPtrs[i]->hidden & CHRHFLAG_CLOAKED) == 0
@@ -432,9 +410,7 @@ Gfx *radarRender(Gfx *gdl)
 		gdl = radarDrawDot(gdl, g_Vars.currentplayer->prop, &pos, colour, 0, 0);
 	}
 
-#ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
-#endif
 
 	g_ScaleX = 1;
 

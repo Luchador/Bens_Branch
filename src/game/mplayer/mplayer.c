@@ -3754,31 +3754,6 @@ char *mpGetPresetNameBySlot(s32 slot)
 	return "";
 }
 
-#if VERSION >= VERSION_NTSC_1_0
-const char var7f1b8c40[] = "bot %d headId %d bodyId %d\n";
-const char var7f1b8c5c[] = "team change %s %d\n";
-
-#if VERSION >= VERSION_PAL_FINAL
-const char var7f1b8c70[] = "options/mplayer.c";
-#else
-const char var7f1b8c70[] = "mplayer.c";
-#endif
-
-const char var7f1b8c7c[] = "team change %s %d\n";
-
-#if VERSION >= VERSION_PAL_FINAL
-const char var7f1b8c90[] = "options/mplayer.c";
-#else
-const char var7f1b8c90[] = "mplayer.c";
-#endif
-
-const char var7f1b8c9c[] = "SaveMultiGameFile : PakId=0x%x, FileId=0x%x\n";
-const char var7f1b8ccc[] = "SaveGame Result: %d   New GUID: %x\n";
-const char var7f1b8cf0[] = "LoadMultiGameFile : PakId=0x%x, FileId=0x%x\n";
-const char var7f1b8d20[] = "LoadGame Result: %d\n";
-const char var7f1b8d38[] = "GBCHead: Call to create head for slot %d (gbcheadobjs[slotno]=%x)\n";
-#endif // >= VERSION_NTSC_1_0
-
 void mpApplyConfig(struct mpconfigfull *config)
 {
 	s32 i;
@@ -3787,17 +3762,9 @@ void mpApplyConfig(struct mpconfigfull *config)
 
 	g_MpSetup.scenario = config->config.setup.scenario;
 
-#if VERSION >= VERSION_PAL_FINAL
-	chrslots = g_MpSetup.chrslots;
-#endif
-
 	scenarioInit();
 
 	g_MpSetup = config->config.setup;
-
-#if VERSION >= VERSION_PAL_FINAL
-	g_MpSetup.chrslots = chrslots;
-#endif
 
 	for (i = 0; i < MAX_BOTS; i++) {
 		g_BotConfigsArray[i].type = config->config.simulants[i].type;
@@ -3808,16 +3775,7 @@ void mpApplyConfig(struct mpconfigfull *config)
 
 		g_BotConfigsArray[i].difficulty = g_MpSimulantDifficultiesPerNumPlayers[i][0];
 
-#if VERSION >= VERSION_NTSC_1_0
-		if (IS4MB()) {
-			// "ShockSim:%d"
-			sprintf(g_BotConfigsArray[i].base.name, langGet(L_MPWEAPONS_241), i + 1);
-		} else {
-			strcpy(g_BotConfigsArray[i].base.name, config->strings.aibotnames[i]);
-		}
-#else
 		strcpy(g_BotConfigsArray[i].base.name, config->strings.aibotnames[i]);
-#endif
 
 		g_BotConfigsArray[i].base.mpheadnum = config->config.simulants[i].mpheadnum;
 		g_BotConfigsArray[i].base.mpbodynum = config->config.simulants[i].mpbodynum;

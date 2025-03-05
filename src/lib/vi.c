@@ -76,36 +76,8 @@ void viConfigureForLogos(void)
 	g_ViFrontData = g_ViDataArray + g_ViFrontIndex;
 	g_ViBackData = g_ViDataArray + g_ViBackIndex;
 
-#if VERSION >= VERSION_PAL_FINAL
-	if (IS4MB()) {
-		g_ViDataArray[0].y = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[0].bufy = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[0].viewy = FBALLOC_HEIGHT_LO;
-
-		g_ViDataArray[1].y = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[1].bufy = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[1].viewy = FBALLOC_HEIGHT_LO;
-
-		g_ViTargetHStart = 0;
-		g_ViTargetVStart = 0;
-	} else {
-		g_ViTargetHStart = 0;
-		g_ViTargetVStart = VERSION >= VERSION_JPN_FINAL ? 0 : 12;
-	}
-#else
 	g_ViTargetHStart = 0;
 	g_ViTargetVStart = 0;
-
-	if (IS4MB()) {
-		g_ViDataArray[0].y = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[0].bufy = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[0].viewy = FBALLOC_HEIGHT_LO;
-
-		g_ViDataArray[1].y = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[1].bufy = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[1].viewy = FBALLOC_HEIGHT_LO;
-	}
-#endif
 }
 
 /**
@@ -124,7 +96,7 @@ void viConfigureForCopyright(u16 *texturedata)
 
 		g_ViDataArray[i].x = 576;
 		g_ViDataArray[i].bufx = 576;
-		g_ViDataArray[i].viewx = (VERSION >= VERSION_NTSC_1_0 ? 576 : 480);
+		g_ViDataArray[i].viewx = 576;
 
 		g_ViDataArray[i].y = 48;
 		g_ViDataArray[i].bufy = 48;
@@ -159,10 +131,6 @@ void viConfigureForLegal(void)
 	}
 
 	g_Vars.fourmeg2player = false;
-
-#if PAL
-	playerResetLoResIf4Mb();
-#endif
 }
 
 const s16 g_ViModeWidths[]  = {FBALLOC_WIDTH_LO,  FBALLOC_WIDTH_LO,  SCREEN_320 * 2};
@@ -189,31 +157,15 @@ void viReset(s32 stagenum)
 	g_Vars.fourmeg2player = false;
 
 	if (stagenum == STAGE_TITLE) {
-		if (IS4MB()) {
-			viSetMode(VIMODE_HI);
-			fbsize = (FBALLOC_WIDTH_LO * 2) * (FBALLOC_HEIGHT_LO * 2) * NUM_FRAMEBUFFERS;
-		} else {
-			viSetMode(VIMODE_HI);
-			fbsize = g_ViModeWidths[2] * g_ViModeHeights[2] * NUM_FRAMEBUFFERS;
-		}
+		viSetMode(VIMODE_HI);
+		fbsize = g_ViModeWidths[2] * g_ViModeHeights[2] * NUM_FRAMEBUFFERS;
 	} else {
 		viSetMode(VIMODE_LO);
 
-		if (1);
 
-		fbsize = IS4MB()
-			? FBALLOC_WIDTH_LO * FBALLOC_HEIGHT_LO * NUM_FRAMEBUFFERS
-			: FBALLOC_WIDTH_HI * FBALLOC_HEIGHT_HI * NUM_FRAMEBUFFERS;
-
-		if (IS4MB() && PLAYERCOUNT() == 2) {
-			// 4MB 2-player: The viewports are 110px tall
-#if VERSION >= VERSION_NTSC_1_0
-			fbsize = FBALLOC_WIDTH_LO * (FBALLOC_HEIGHT_LO / 2) * NUM_FRAMEBUFFERS;
-#else
-			fbsize = SCREEN_320 * (SCREEN_240 / 2) * NUM_FRAMEBUFFERS;
-#endif
-			g_Vars.fourmeg2player = true;
-		} else if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && PLAYERCOUNT() == 2) {
+		fbsize = FBALLOC_WIDTH_HI * FBALLOC_HEIGHT_HI * NUM_FRAMEBUFFERS;
+		
+		if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && PLAYERCOUNT() == 2) {
 			// PAL is using its correct size
 			fbsize = SCREEN_WIDTH_LO * SCREEN_HEIGHT_LO * NUM_FRAMEBUFFERS;
 		}
@@ -274,9 +226,7 @@ void viHandleRetrace(void)
 	offset = g_ViShakeDirection * g_ViShakeIntensity;
 	g_ViShakeDirection = -g_ViShakeDirection;
 
-#if VERSION >= VERSION_NTSC_1_0
 	prevmask = osSetIntMask(1);
-#endif
 
 	reg = g_ViCurVStart0;
 	var8008dd60[1 - var8005ce74]->fldRegs[0].vStart = ADD_LOW_AND_HI_16_TRUNCATE(reg, offset);
@@ -284,14 +234,9 @@ void viHandleRetrace(void)
 	reg = g_ViCurVStart1;
 	var8008dd60[1 - var8005ce74]->fldRegs[1].vStart = ADD_LOW_AND_HI_16_TRUNCATE(reg, offset);
 
-#if VERSION >= VERSION_NTSC_1_0
 	osSetIntMask(prevmask);
-#endif
 
-#ifndef PLATFORM_N64
 	videoSetWindowOffset(0, offset);
-#endif
-
 	osViSetMode(var8008dd60[1 - var8005ce74]);
 	osViBlack(g_ViUnblackTimer);
 	osViSetXScale(g_ViXScalesBySlot[1 - var8005ce74]);
@@ -333,19 +278,11 @@ void viUpdateMode(void)
 	slot = g_ViSlot;
 
 	if (g_ViBackData->mode == 1);
-	if (1);
 
 	g_ViXScalesBySlot[slot] = x;
 	g_ViYScalesBySlot[slot] = y;
 
 	if (g_ViBackData->mode == VIMODE_LO) {
-#if PAL
-		if (g_ViIs16Bit) {
-			var8008dcc0[slot] = osViModeTable[OS_VI_PAL_LAN1];
-		} else {
-			var8008dcc0[slot] = osViModeTable[OS_VI_PAL_LAN2];
-		}
-#else
 		if (g_ViIs16Bit) {
 			if (osTvType == OS_TV_MPAL) {
 				var8008dcc0[slot] = osViModeTable[OS_VI_MPAL_LAN1];
@@ -360,25 +297,14 @@ void viUpdateMode(void)
 				var8008dcc0[slot] = osViModeTable[OS_VI_NTSC_LAN2];
 			}
 		}
-#endif
 
 		var8008dcc0[slot].comRegs.width = g_ViBackData->bufx;
 		var8008dcc0[slot].comRegs.xScale = g_ViBackData->bufx * 1024 / 640;
 		var8008dcc0[slot].fldRegs[0].origin = g_ViBackData->bufx * 2;
 		var8008dcc0[slot].fldRegs[1].origin = g_ViBackData->bufx * 2;
 
-#if PAL
-		var8008dcc0[slot].fldRegs[0].yScale = 1024;
-		var8008dcc0[slot].fldRegs[1].yScale = 1024;
-#else
-		if (IS4MB()) {
-			var8008dcc0[slot].fldRegs[0].yScale = 1024;
-			var8008dcc0[slot].fldRegs[1].yScale = 1024;
-		} else {
-			var8008dcc0[slot].fldRegs[0].yScale = g_ViBackData->bufy * 2048 / 440;
-			var8008dcc0[slot].fldRegs[1].yScale = g_ViBackData->bufy * 2048 / 440;
-		}
-#endif
+		var8008dcc0[slot].fldRegs[0].yScale = g_ViBackData->bufy * 2048 / 440;
+		var8008dcc0[slot].fldRegs[1].yScale = g_ViBackData->bufy * 2048 / 440;
 
 		hstart = var8008dcc0[slot].comRegs.hStart;
 		var8008de08 = var8008dcc0[slot].comRegs.hStart = ADD_LOW_AND_HI_16_MOD(hstart, g_ViTargetHStart);
@@ -390,7 +316,7 @@ void viUpdateMode(void)
 			v1 >>= 1;
 		}
 
-		tmp = ((PAL ? 320 : 277) - v1);
+		tmp = (277 - v1);
 		vstart = ((tmp + 2) << 16) | (tmp + ((v1 - 2) << 1) + 2);
 
 		g_ViCurVStart0 = var8008dcc0[slot].fldRegs[0].vStart = ADD_LOW_AND_HI_16_MOD(vstart, g_ViTargetVStart);
@@ -398,15 +324,11 @@ void viUpdateMode(void)
 
 		g_SchedViModesPending[slot] = true;
 	} else if (g_ViBackData->mode == VIMODE_HI) {
-#if PAL
-		var8008dcc0[slot] = osViModeTable[OS_VI_PAL_HAF1];
-#else
 		if (osTvType == OS_TV_MPAL) {
 			var8008dcc0[slot] = osViModeTable[OS_VI_MPAL_HAF1];
 		} else {
 			var8008dcc0[slot] = osViModeTable[OS_VI_NTSC_HAF1];
 		}
-#endif
 
 		var8008dcc0[slot].comRegs.width = g_ViBackData->bufx;
 		var8008dcc0[slot].comRegs.xScale = g_ViBackData->bufx * 1024 / 640;
@@ -425,13 +347,8 @@ void viUpdateMode(void)
 		g_ViCurVStart1 = var8008dcc0[slot].fldRegs[1].vStart = ADD_LOW_AND_HI_16_MOD(reg, g_ViTargetVStart);
 
 		if (g_MainIsBooting) {
-#if PAL
-			g_ViCurVStart0 = var8008dcc0[slot].fldRegs[0].vStart = ((g_ViTargetVStart + 506) % 0xffff) << 16 | (g_ViTargetVStart + 134) % 0xffff;
-			g_ViCurVStart1 = var8008dcc0[slot].fldRegs[1].vStart = ((g_ViTargetVStart + 508) % 0xffff) << 16 | (g_ViTargetVStart + 132) % 0xffff;
-#else
 			g_ViCurVStart0 = var8008dcc0[slot].fldRegs[0].vStart = ((g_ViTargetVStart + 431) % 0xffff) << 16 | (g_ViTargetVStart + 123) % 0xffff;
 			g_ViCurVStart1 = var8008dcc0[slot].fldRegs[1].vStart = ((g_ViTargetVStart + 433) % 0xffff) << 16 | (g_ViTargetVStart + 121) % 0xffff;
-#endif
 		}
 
 		g_SchedViModesPending[slot] = true;
@@ -472,13 +389,8 @@ void viShake(f32 intensity)
 		intensity = 0;
 	}
 
-#ifdef PLATFORM_N64
-	g_ViShakeIntensity = intensity;
-	g_ViShakeTimer = 10;
-#else
 	g_ViShakeIntensity = intensity * g_ViShakeIntensityMult;
 	g_ViShakeTimer = 20;
-#endif
 }
 
 void viSetMode(s32 mode)
@@ -492,11 +404,6 @@ void viSetMode(s32 mode)
 void viSet16Bit(void)
 {
 	g_ViIs16Bit = true;
-}
-
-void viSet32Bit(void)
-{
-	g_ViIs16Bit = false;
 }
 
 u16 *viGetBackBuffer(void)
@@ -680,17 +587,9 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, 0, 0, viGetWidth(), viGetHeight());
 	gDPSetFillColor(gdl++, GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1));
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (PLAYERCOUNT() == 1
 			|| ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 				&& playerHasSharedViewport() && g_Vars.currentplayernum == 0))
-#else
-	if (PLAYERCOUNT() == 1
-			|| ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
-				&& (
-					(g_InCutscene && !g_MainIsEndscreen) || menuGetRoot() == MENUROOT_COOPCONTINUE
-					) && g_Vars.currentplayernum == 0))
-#endif
 	{
 		// Single viewport
 		if (viGetViewTop() > 0) {
@@ -765,28 +664,6 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 
 	return gdl;
 }
-
-#if VERSION < VERSION_NTSC_1_0
-void viSetVStart(s32 vstart)
-{
-	g_ViTargetVStart = vstart;
-}
-
-s32 viGetVStart(void)
-{
-	return g_ViTargetVStart;
-}
-
-void viSetHStart(s32 hstart)
-{
-	g_ViTargetHStart = hstart;
-}
-
-s32 viGetHStart(void)
-{
-	return g_ViTargetHStart;
-}
-#endif
 
 void viSetBufSize(s16 width, s16 height)
 {
@@ -924,24 +801,4 @@ Gfx *viSetFillColour(Gfx *gdl, s32 r, s32 g, s32 b)
 	}
 
 	return gdl;
-}
-
-void viGrabJpg16(void)
-{
-	// empty
-}
-
-void viGrabJpg32(void)
-{
-	// empty
-}
-
-void viGrabRgb16(void)
-{
-	// empty
-}
-
-void viGrabRgb32(void)
-{
-	// empty
 }

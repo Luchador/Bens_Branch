@@ -14,7 +14,6 @@
 #define LV_SLOMO_TICK_RATE (g_Vars.lvupdate240 / 2)
 #endif
 
-u32 getVar80084040(void);
 void lvInit(void);
 void lvResetMiscSfx(void);
 s32 lvGetMiscSfxIndex(u32 arg0);

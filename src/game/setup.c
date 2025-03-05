@@ -183,8 +183,8 @@ void propsReset(void)
 	g_MaxHatSlots = 10;
 	g_MaxAmmoCrates = 20;
 	g_MaxDebrisSlots = 15;
-	g_MaxProjectiles = IS4MB() ? 20 : 100;
-	g_MaxEmbedments = IS4MB() ? 40 : 80;
+	g_MaxProjectiles = 100;
+	g_MaxEmbedments = 80;
 
 	if (g_Vars.stagenum >= STAGE_TITLE) {
 		g_MaxWeaponSlots = 0;
@@ -951,7 +951,7 @@ void setupCreateSingleMonitor(struct singlemonitorobj *monitor, s32 cmdindex)
 			spa4.z = -spa4.z;
 
 			mtx4LoadTranslation(&spa4, &sp24);
-			mtx00015be4(&sp64, &sp24, &monitor->base.embedment->matrix);
+			mtxApplyAffineTransform(&sp64, &sp24, &monitor->base.embedment->matrix);
 		}
 	} else {
 		setupCreateObject(&monitor->base, cmdindex);
@@ -1449,13 +1449,7 @@ void setupLoadFiles(s32 stagenum)
 		modelmgrAllocateSlots(0, 0);
 	}
 
-	if (IS4MB()) {
-		extra = 40;
-	} else {
-		extra = 60;
-	}
-
-	if (IS4MB());
+	extra = 60;
 
 	g_Vars.maxprops = numobjs + numchrs + extra + 40;
 }

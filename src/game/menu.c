@@ -1002,7 +1002,6 @@ void dialogCalculateContentSize(struct menudialogdef *dialogdef, struct menudial
 	case MENUROOT_MPSETUP:
 	case MENUROOT_MPPAUSE:
 	case MENUROOT_MPENDSCREEN:
-	case MENUROOT_4MBMAINMENU:
 		titleextra = 17;
 		break;
 	}
@@ -1367,7 +1366,6 @@ void menuOpenDialog(struct menudialogdef *dialogdef, struct menudialog *dialog, 
 
 	switch (g_MenuData.root) {
 	case MENUROOT_MPSETUP:
-	case MENUROOT_4MBMAINMENU:
 		dialog->unk6e = 1;
 		break;
 	case MENUROOT_MAINMENU:
@@ -1606,11 +1604,7 @@ void menuCloseDialog(void)
 		menuPlaySound(MENUSOUND_0B);
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (g_MenuData.unk66e > 0 && g_Menus[g_MpPlayerNum].depth == 0)
-#else
-	if (g_MenuData.unk66e > 0)
-#endif
 	{
 		s32 value = g_MenuData.unk66e;
 
@@ -1879,7 +1873,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 		struct modelrenderdata renderdata = {NULL, true, 3};
 		Mtxf *matrices;
 		s32 i;
-		u32 stack[3];
 		struct coord tmpcoord;
 		f32 screenpos[2];
 		Mtxf rotmtx;
@@ -1934,8 +1927,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 					modelFindBboxRodata(&menumodel->bodymodel);
 				}
-
-				if (1);
 			}
 
 			if (dodefaultzoom) {
@@ -1955,64 +1946,56 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 		// For the hudpiece, tween the position and scale to the new values and apply rotation.
 		if (modeltype == MENUMODELTYPE_HUDPIECE) {
-			if (IS8MB()) {
-				s32 i;
+			s32 i;
 
-				if (menumodel->curposx != menumodel->newposx) {
-					for (i = 0; i < g_Vars.diffframe60; i++) {
-						menumodel->curposx = (menumodel->newposx * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposx);
-					}
+			if (menumodel->curposx != menumodel->newposx) {
+				for (i = 0; i < g_Vars.diffframe60; i++) {
+					menumodel->curposx = (menumodel->newposx * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposx);
 				}
-
-				if (menumodel->curposy != menumodel->newposy) {
-					for (i = 0; i < g_Vars.diffframe60; i++) {
-						menumodel->curposy = (menumodel->newposy * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposy);
-					}
-				}
-
-				if (menumodel->curposz != menumodel->newposz) {
-					for (i = 0; i < g_Vars.diffframe60; i++) {
-						menumodel->curposz = (menumodel->newposz * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposz);
-					}
-				}
-
-				if (menumodel->curscale != menumodel->newscale) {
-					for (i = 0; i < g_Vars.diffframe60; i++) {
-						menumodel->curscale = (menumodel->newscale * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curscale);
-					}
-				}
-
-				posx = menumodel->curposx;
-
-#if !PAL
-				if (g_ViRes == VIRES_HI) {
-					posx *= 2.0f;
-				}
-#endif
-
-				posy = menumodel->curposy;
-				posz = menumodel->curposz;
-
-				scale = menumodel->curscale;
-
-				menumodel->currotx = rotx = menumodel->newrotx;
-				menumodel->curroty = roty = menumodel->newroty;
-				menumodel->currotz = rotz = menumodel->newrotz;
-
-				tmpcoord.x = rotx;
-				tmpcoord.y = roty;
-				tmpcoord.z = rotz;
-
-				mtx4LoadRotation(&tmpcoord, &rotmtx);
 			}
+
+			if (menumodel->curposy != menumodel->newposy) {
+				for (i = 0; i < g_Vars.diffframe60; i++) {
+					menumodel->curposy = (menumodel->newposy * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposy);
+				}
+			}
+
+			if (menumodel->curposz != menumodel->newposz) {
+				for (i = 0; i < g_Vars.diffframe60; i++) {
+					menumodel->curposz = (menumodel->newposz * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposz);
+				}
+			}
+
+			if (menumodel->curscale != menumodel->newscale) {
+				for (i = 0; i < g_Vars.diffframe60; i++) {
+					menumodel->curscale = (menumodel->newscale * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curscale);
+				}
+			}
+
+			posx = menumodel->curposx;
+
+			if (g_ViRes == VIRES_HI) {
+				posx *= 2.0f;
+			}
+
+			posy = menumodel->curposy;
+			posz = menumodel->curposz;
+
+			scale = menumodel->curscale;
+
+			menumodel->currotx = rotx = menumodel->newrotx;
+			menumodel->curroty = roty = menumodel->newroty;
+			menumodel->currotz = rotz = menumodel->newrotz;
+
+			tmpcoord.x = rotx;
+			tmpcoord.y = roty;
+			tmpcoord.z = rotz;
+
+			mtx4LoadRotation(&tmpcoord, &rotmtx);
 		} else {
 			// If the caller is reconfiguring the model's position, rotation or scale, tween towards the new values.
 			if (menumodel->configuring) {
-#if VERSION >= VERSION_PAL_BETA
-				menumodel->configurefrac += g_Vars.diffframe60freal / 40.0f;
-#else
 				menumodel->configurefrac += g_Vars.diffframe60f / 40.0f;
-#endif
 
 				if (menumodel->configurefrac > 1.0f) {
 					menumodel->configuring = false;
@@ -2097,13 +2080,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 		screenz[0] = -100.0f + posz;
 
 		if (modeltype == MENUMODELTYPE_HUDPIECE) {
-			if (IS8MB()) {
-				screenpos[0] = menumodel->curposx * g_ScaleX;
-				screenpos[1] = menumodel->curposy;
-			}
-		} else {
-			screenpos[0] = posx * g_ScaleX + viGetViewLeft() + viGetViewWidth() * 0.5f;
-			screenpos[1] = posy + viGetViewTop() + viGetViewHeight() * 0.5f;
+			screenpos[0] = menumodel->curposx * g_ScaleX;
+			screenpos[1] = menumodel->curposy;
 		}
 
 		cam0f0b4c3c(screenpos, &tmpcoord, 1.0f);
@@ -2606,7 +2584,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 
 	// Render the title bar
 	if ((dialog->definition->flags & MENUDIALOGFLAG_DISABLETITLEBAR) == 0) {
-		if (((g_MenuData.root == MENUROOT_MPSETUP) || (g_MenuData.root == MENUROOT_4MBMAINMENU))
+		if ((g_MenuData.root == MENUROOT_MPSETUP)
 				&& (g_MpSetup.options & MPOPTION_TEAMSENABLED)
 				&& g_Vars.mpsetupmenu != MPSETUPMENU_GENERAL) {
 			menuGetTeamTitlebarColours(&colour1, &colour2, &colour3);
@@ -2654,8 +2632,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 			// In MP dialogs, render the player number in the top right
 			if (g_MenuData.root == MENUROOT_MPSETUP
 					|| g_MenuData.root == MENUROOT_MPPAUSE
-					|| g_MenuData.root == MENUROOT_MPENDSCREEN
-					|| g_MenuData.root == MENUROOT_4MBMAINMENU) {
+					|| g_MenuData.root == MENUROOT_MPENDSCREEN) {
 				x = dialogright - 9;
 				y = dialogtop + 2;
 
@@ -3011,7 +2988,6 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 			gdl = menugfxDrawDialogChevron(gdl, dialogright + 5, (dialogtop + dialogbottom) / 2, 9, 3, colour, colour, menuGetSinOscFrac(20));
 
 			if (g_MenuData.root == MENUROOT_MAINMENU
-					|| g_MenuData.root == MENUROOT_4MBFILEMGR
 					|| g_MenuData.root == MENUROOT_TRAINING
 					|| g_MenuData.root == MENUROOT_FILEMGR) {
 				char *title;
@@ -3092,8 +3068,6 @@ void menuGetContPads(s8 *contpadnum1, s8 *contpadnum2)
 	case MENUROOT_MPSETUP:
 	case MENUROOT_FILEMGR:
 	case MENUROOT_BOOTPAKMGR:
-	case MENUROOT_4MBFILEMGR:
-	case MENUROOT_4MBMAINMENU:
 		*contpadnum1 = g_MpPlayerNum;
 		*contpadnum2 = -1;
 		break;
@@ -3244,7 +3218,6 @@ void menuFindAvailableSize(s32 *leftptr, s32 *topptr, s32 *rightptr, s32 *bottom
 
 	switch (g_MenuData.root) {
 	case MENUROOT_MPSETUP:
-	case MENUROOT_4MBMAINMENU:
 		playernum = g_Menus[g_MpPlayerNum].playernum;
 
 		// Make room for the "Press START" labels
@@ -3319,7 +3292,6 @@ void menuFindAvailableSize(s32 *leftptr, s32 *topptr, s32 *rightptr, s32 *bottom
 	case MENUROOT_MPPAUSE:
 	case MENUROOT_MPENDSCREEN:
 	case MENUROOT_PICKTARGET:
-	case MENUROOT_4MBFILEMGR:
 		*leftptr = g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewleft / g_ScaleX;
 		*topptr = g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewtop;
 		*rightptr = (g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewleft + g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewwidth) / g_ScaleX;
@@ -3333,11 +3305,7 @@ void menuFindAvailableSize(s32 *leftptr, s32 *topptr, s32 *rightptr, s32 *bottom
 			}
 		}
 
-#if VERSION >= VERSION_NTSC_1_0
-		if (PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || IS4MB()))
-#else
-		if (PLAYERCOUNT() == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL)
-#endif
+		if (PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL))
 		{
 			if (g_Menus[g_MpPlayerNum].playernum == 0) {
 				*leftptr += 22;
@@ -3553,7 +3521,6 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
 	case MENUROOT_BOOTPAKMGR:
 	case MENUROOT_PICKTARGET:
 	case MENUROOT_COOPCONTINUE:
-	case MENUROOT_4MBFILEMGR:
 	case MENUROOT_TRAINING:
 		g_MenuData.count = 1;
 		break;
@@ -3569,7 +3536,7 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
 			|| root == MENUROOT_MPSETUP
 			|| root == MENUROOT_TRAINING
 			|| root == MENUROOT_FILEMGR) {
-		if (IS8MB() && (g_MenuData.unk5d4 == 0 || g_MenuData.hudpiece.reverseanim)) {
+		if ((g_MenuData.unk5d4 == 0 || g_MenuData.hudpiece.reverseanim)) {
 			if (!g_MenuData.unk5d5_04) {
 				g_MenuData.unk5d5_05 = true;
 			}
@@ -3581,13 +3548,6 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
 	switch (root) {
 	case MENUROOT_MPSETUP:
 		menuSetBackground(MENUBG_CONEALPHA);
-		break;
-	case MENUROOT_4MBFILEMGR:
-		musicStartMenu();
-		g_MenuData.bg = MENUBG_CONEOPAQUE;
-		break;
-	case MENUROOT_4MBMAINMENU:
-		g_MenuData.bg = MENUBG_CONEOPAQUE;
 		break;
 	case MENUROOT_ENDSCREEN:
 		if (dialogdef->type == MENUDIALOGTYPE_DANGER) {
@@ -3784,9 +3744,7 @@ void menuReset(void)
 
 	var8009dfc0 = 0;
 
-	if (IS8MB()) {
-		g_BlurBuffer = mempAlloc(0x4b00, MEMPOOL_STAGE);
-	}
+	g_BlurBuffer = mempAlloc(0x4b00, MEMPOOL_STAGE);
 
 	g_MenuData.unk5d5_01 = false;
 
@@ -3831,25 +3789,19 @@ void menuReset(void)
 			max = 4;
 		}
 
-		if (g_Vars.stagenum == STAGE_4MBMENU) {
-			max = 4;
-		}
-
 		for (i = 0; i < max; i++) {
 #ifdef PLATFORM_64BIT
-			menuResetModel(&g_Menus[i].menumodel, IS4MB() ? 0xb400 : 0x38400, true); // 50% more
+			menuResetModel(&g_Menus[i].menumodel, 0x38400, true); // 50% more
 #else
-			menuResetModel(&g_Menus[i].menumodel, IS4MB() ? 0xb400 : 0x25800, true);
+			menuResetModel(&g_Menus[i].menumodel, 0x25800, true);
 #endif
 		}
 
-		if (IS8MB()) {
 #ifdef PLATFORM_64BIT
 			menuResetModel(&g_MenuData.hudpiece, 0x12c00, true); // 50% more
 #else
 			menuResetModel(&g_MenuData.hudpiece, 0xc800, true);
 #endif
-		}
 
 		g_MenuData.hudpiece.newparams = MENUMODELPARAMS_SET_FILENUM(FILE_GHUDPIECE);
 		g_MenuData.hudpiece.curroty = g_MenuData.hudpiece.newroty = -M_PI;
@@ -3961,8 +3913,6 @@ void menuSwipe(s32 direction)
 		menuPlaySound(MENUSOUND_SWIPE);
 	}
 }
-
-extern struct menudialogdef g_MpDropOut4MbMenuDialog;
 
 void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickflags)
 {
@@ -4422,11 +4372,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 
 		if (inputs->back) {
 			if ((dialog->definition->flags & MENUDIALOGFLAG_DROPOUTONCLOSE) && g_Vars.unk000498) {
-				if (IS4MB()) {
-					menuPushDialog(&g_MpDropOut4MbMenuDialog);
-				} else {
-					menuPushDialog(&g_MpDropOutMenuDialog);
-				}
+				menuPushDialog(&g_MpDropOutMenuDialog);
 			} else if ((dialog->definition->flags & MENUDIALOGFLAG_IGNOREBACK) == 0) {
 				menuPopDialog();
 			}
@@ -4441,26 +4387,17 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 
 	// Scrolling related (when the dialog is too big vertically)
 	if (dialog->focuseditem && (dialog->definition->flags & MENUDIALOGFLAG_DISABLEITEMSCROLL) == 0) {
-#if VERSION >= VERSION_NTSC_1_0
 		s32 dstscroll;
 		s32 itemy;
 		s32 rowindex;
 		s32 colindex;
-#else
-		s32 dstscroll;
-		s32 rowindex;
-		s32 colindex;
-		s32 itemy;
-#endif
 
 		s32 y = dialogFindItem(dialog, dialog->focuseditem, &rowindex, &colindex);
 
 		if ((dialog->focuseditem->flags & MENUITEMFLAG_00010000) == 0) {
-#ifndef PLATFORM_N64
 			if (g_MenuUsingMouse && !dialog->dimmed) {
 				dstscroll = dialog->dstscroll - inputs->mousescroll * LINEHEIGHT;
 			} else
-#endif
 			{
 				itemy = y + menu->rows[rowindex].height / 2;
 				dstscroll = (dialog->height - LINEHEIGHT - 1) / 2 - itemy;
@@ -4479,11 +4416,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 			dialog->dstscroll = 0;
 		}
 	} else if (dialog->definition->flags & MENUDIALOGFLAG_SMOOTHSCROLLABLE) {
-#if VERSION >= VERSION_PAL_BETA
-		s32 adjustment = (s32)(inputs->yaxis * g_Vars.diffframe60freal / 20) - (s32)(inputs->updownheld * g_Vars.diffframe60freal);
-#else
 		s32 adjustment = inputs->yaxis * g_Vars.diffframe60 / 20 - inputs->updownheld * g_Vars.diffframe60;
-#endif
 		dialog->dstscroll += adjustment;
 
 		if (dialog->dstscroll > 0) {
@@ -4558,7 +4491,6 @@ void func0f0fa6ac(void)
 	case MENUROOT_MAINMENU:
 	case MENUROOT_MPSETUP:
 	case MENUROOT_FILEMGR:
-	case MENUROOT_4MBMAINMENU:
 	case MENUROOT_TRAINING:
 		playerUnpause();
 		g_PlayersWithControl[0] = true;
@@ -5107,7 +5039,6 @@ void menuProcessInput(void)
 
 		switch (g_MenuData.root) {
 		case MENUROOT_MPSETUP:
-		case MENUROOT_4MBMAINMENU:
 			// Allow pressing start on most MP setup dialogs to jump straight to
 			// the Ready dialog, or apply the quick start setup.
 			if (inputs.start && !starttoselect && g_Menus[g_MpPlayerNum].curdialog && !dialog->dimmed) {
@@ -5306,7 +5237,7 @@ Gfx *menuRender(Gfx *gdl)
 		g_MenuData.unk5d5_05 = false;
 	}
 
-	if (IS8MB() && g_MenuData.unk5d4) {
+	if (g_MenuData.unk5d4) {
 		bool removepiece = false;
 
 		gSPSetGeometryMode(gdl++, G_ZBUFFER);
@@ -5425,7 +5356,7 @@ Gfx *menuRender(Gfx *gdl)
 		text0f153b40();
 
 		// Render corner texts in combat simulator
-		if (g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU) {
+		if (g_MenuData.root == MENUROOT_MPSETUP) {
 			s32 i;
 			s32 j;
 			s32 viewleft = viGetViewLeft() / g_ScaleX + 20;
@@ -5457,22 +5388,7 @@ Gfx *menuRender(Gfx *gdl)
 					// "Player %d: " and "Ready!"
 					sprintf(text, "%s%s", langGet(L_MPMENU_482), langGet(L_MISC_461));
 				} else {
-					if (g_MenuData.root == MENUROOT_4MBMAINMENU) {
-						if (g_Vars.mpsetupmenu == MPSETUPMENU_GENERAL) {
-							renderit = true;
-
-							for (j = 0; j < ARRAYCOUNT(g_Vars.waitingtojoin); j++) {
-								if (g_Vars.waitingtojoin[j]) {
-									renderit = false;
-								}
-							}
-						} else {
-							renderit = g_MpNumJoined < 2;
-						}
-					} else {
 						renderit = true;
-					}
-
 					// "Player %d: " and "Press START!"
 					sprintf(text, "%s%s", langGet(L_MPMENU_482), langGet(L_MPMENU_483));
 				}
@@ -5483,11 +5399,7 @@ Gfx *menuRender(Gfx *gdl)
 					// Check which controllers are connected
 					// and update the alpha of the label
 					if (((g_MpSetup.chrslots | ~joyGetConnectedControllers()) & (1 << i)) == 0) {
-#if VERSION >= VERSION_PAL_BETA
-						tmp1 = g_Vars.diffframe60freal * 3;
-#else
 						tmp1 = g_Vars.diffframe60 * 3;
-#endif
 
 						if (g_MenuData.playerjoinalpha[i] < 255) {
 							if (255 - g_MenuData.playerjoinalpha[i] > tmp1) {
@@ -5497,11 +5409,7 @@ Gfx *menuRender(Gfx *gdl)
 							}
 						}
 					} else {
-#if VERSION >= VERSION_PAL_BETA
-						tmp2 = g_Vars.diffframe60freal * 9;
-#else
 						tmp2 = g_Vars.diffframe60 * 9;
-#endif
 
 						if (g_MenuData.playerjoinalpha[i] > 0) {
 							if (g_MenuData.playerjoinalpha[i] > tmp2) {
@@ -5567,7 +5475,6 @@ Gfx *menuRender(Gfx *gdl)
 		s32 x2 = (viGetViewLeft() + viGetViewWidth()) / g_ScaleX;
 		s32 y2 = viGetViewTop() + viGetViewHeight();
 
-#if VERSION >= VERSION_NTSC_1_0
 		s32 left = 0;
 		s32 right = 0;
 
@@ -5579,7 +5486,7 @@ Gfx *menuRender(Gfx *gdl)
 			}
 		}
 
-		if (PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || IS4MB())) {
+		if (PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL)) {
 			if (g_Vars.currentplayernum == 1) {
 				right = 15;
 			} else {
@@ -5588,25 +5495,6 @@ Gfx *menuRender(Gfx *gdl)
 		}
 
 		gdl = menuRenderBanner(gdl, x1, y1, x2, y2, PLAYERCOUNT() < 2, g_MenuData.bannernum, left, right);
-#else
-		if (PLAYERCOUNT() >= 3) {
-			if (g_Vars.currentplayernum == 1 || g_Vars.currentplayernum == 3) {
-				x2 -= 10;
-			} else {
-				x1 += 10;
-			}
-		}
-
-		if (PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || IS4MB())) {
-			if (g_Vars.currentplayernum == 1) {
-				x2 -= 10;
-			} else {
-				x1 += 10;
-			}
-		}
-
-		gdl = menuRenderBanner(gdl, x1, y1, x2, y2, PLAYERCOUNT() < 2, g_MenuData.bannernum);
-#endif
 	}
 
 #ifndef PLATFORM_N64
@@ -5663,7 +5551,7 @@ u32 menuChooseMusic(void)
 		return MUSIC_MAINMENU;
 	}
 
-	if (g_MenuData.root == MENUROOT_MPSETUP || g_MenuData.root == MENUROOT_4MBMAINMENU) {
+	if (g_MenuData.root == MENUROOT_MPSETUP) {
 		return MUSIC_COMBATSIM_MENU;
 	}
 
@@ -5679,7 +5567,7 @@ u32 menuChooseMusic(void)
 		return MUSIC_COMBATSIM_COMPLETE;
 	}
 
-	if (g_Vars.stagenum == STAGE_CITRAINING || g_Vars.stagenum == STAGE_4MBMENU) {
+	if (g_Vars.stagenum == STAGE_CITRAINING) {
 		return MUSIC_MAINMENU;
 	}
 

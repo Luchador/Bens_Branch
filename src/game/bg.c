@@ -1473,27 +1473,8 @@ void bgReset(s32 stagenum)
 	uintptr_t scratch;
 
 	var8007fc0c = 8;
-
-#if VERSION >= VERSION_NTSC_1_0
-	if (IS4MB()) {
-		g_BgUnloadDelay240 = 6;
-		g_BgUnloadDelay240_2 = 6;
-	} else {
-		g_BgUnloadDelay240 = 120;
-		g_BgUnloadDelay240_2 = 120;
-	}
-#else
-	if (IS4MB()) {
-		g_BgUnloadDelay240 = 120;
-		g_BgUnloadDelay240_2 = 120;
-	} else {
-		g_BgUnloadDelay240 = 3600;
-		g_BgUnloadDelay240_2 = 3600;
-	}
-
-	var800a4bf4 = 0;
-#endif
-
+	g_BgUnloadDelay240 = 120;
+	g_BgUnloadDelay240_2 = 120;
 	g_StageIndex = bgGetStageIndex(stagenum);
 
 	if (g_StageIndex < 0) {
@@ -2105,34 +2086,6 @@ void bgTickCounter(void)
 
 		bgClearPortalCameraCache();
 	}
-
-#if PIRACYCHECKS
-	if ((g_BgFrameCount & 0xff) == 0xff) {
-		u32 checksum = 0;
-		s32 *ptr = (s32 *)&menuTickTimers;
-		s32 *end = (s32 *)&menuGetSinOscFrac;
-
-		while (ptr < end) {
-			checksum ^= ~*ptr;
-			checksum ^= *ptr << 5;
-			checksum ^= *ptr >> 15;
-			ptr++;
-		}
-
-		if (checksum != CHECKSUM_PLACEHOLDER) {
-			ptr = (s32 *)&bgBuildTables + 20;
-
-			if (1) {
-				end = &ptr[4];
-			}
-
-			while (ptr < end) {
-				*ptr -= 0x24e21;
-				ptr++;
-			}
-		}
-	}
-#endif
 }
 
 void bgTick(void)
@@ -2140,10 +2093,6 @@ void bgTick(void)
 	s32 tickmode;
 
 	g_BgNumForceOnscreenRooms = 0;
-
-#if VERSION < VERSION_NTSC_1_0
-	bgVerifyLightSums("bg.c", 5761);
-#endif
 
 	bgTickCounter();
 
@@ -2156,11 +2105,7 @@ void bgTick(void)
 	if (tickmode == TICKMODE_NORMAL) {
 		var8007fc10 = 4;
 
-#if VERSION >= VERSION_NTSC_1_0
-		if (IS8MB() && var8007fc0c)
-#else
 		if (var8007fc0c)
-#endif
 		{
 			var8007fc0c--;
 			var8007fc10 = 200;
@@ -2176,13 +2121,7 @@ void bgTick(void)
 
 	g_CamRoom = g_Vars.currentplayer->cam_room;
 
-#if VERSION >= VERSION_NTSC_1_0
 	bgTickPortals();
-#else
-	bgVerifyLightSums("bg.c", 5834);
-	bgTickPortals();
-	bgVerifyLightSums("bg.c", 5846);
-#endif
 }
 
 Gfx *bgRender(Gfx *gdl)
@@ -2201,14 +2140,6 @@ Gfx *bgRender(Gfx *gdl)
 	gdl = playerLoadMatrix(gdl);
 
 	return gdl;
-}
-
-/**
- * Leftover from GE.
- */
-f32 bgGetStanThing(s32 roomnum)
-{
-	return g_BgStanThings[roomnum + 1];
 }
 
 Gfx *bgScissorToViewport(Gfx *gdl)
@@ -5882,7 +5813,7 @@ Gfx *bgRenderSceneAndLoadCandidate(Gfx *gdl)
 	}
 
 	// Consider loading one room by finding the load candidate that is closest to the player
-	if (g_BgLoadCandidateTimer240 == 0 && var8007fc10 == 4 && g_Vars.tickmode == TICKMODE_NORMAL && IS8MB()) {
+	if (g_BgLoadCandidateTimer240 == 0 && var8007fc10 == 4 && g_Vars.tickmode == TICKMODE_NORMAL) {
 		struct player *player = g_Vars.currentplayer;
 		s32 i;
 		f32 value;

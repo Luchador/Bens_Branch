@@ -28,9 +28,7 @@
 #include "mod.h"
 #endif
 
-#define MAX_SEQ_SIZE_4MB 1024 * 14
 #define MAX_SEQ_SIZE_8MB 1024 * 18
-
 #define NUM_CACHE_SLOTS 45
 #define NUM_KEYTHINGS 9
 
@@ -1411,11 +1409,7 @@ void seqInit(struct seqinstance *seq)
 
 	func00030c98(&config);
 
-	if (IS4MB()) {
-		g_SeqBufferSize = MAX_SEQ_SIZE_4MB;
-	} else {
-		g_SeqBufferSize = MAX_SEQ_SIZE_8MB;
-	}
+	g_SeqBufferSize = MAX_SEQ_SIZE_8MB;
 
 	seq->data = alHeapAlloc(&g_SndHeap, 1, g_SeqBufferSize);
 	seq->seqp = alHeapAlloc(&g_SndHeap, 1, sizeof(N_ALCSPlayer));
@@ -1445,42 +1439,19 @@ void sndInit(void)
 {
 	ALSndpConfig sndpconfig;
 	ALSynConfig synconfig;
-#if VERSION >= VERSION_PAL_BETA
-	u32 settings[3];
-#endif
 
-#if VERSION >= VERSION_JPN_FINAL
 	u32 heaplen = 1024 * 528;
-#elif VERSION >= VERSION_PAL_BETA
-	u32 heaplen = 1024 * 533;
-#elif VERSION >= VERSION_NTSC_1_0
-	u32 heaplen = 1024 * 528;
-#else
-	u32 heaplen = 1024 * 525;
-#endif
 
 #ifdef PLATFORM_64BIT
 	heaplen = 1024 * 745;
 #endif
 
 	g_Vars.langfilteron = false;
+	g_SndMp3Enabled = true;
+	g_SndMaxFxBusses = 2;
 
-	if (IS4MB()) {
-		g_SndMaxFxBusses = 1;
-
-		heaplen -= 1024 * (PAL ? 6 : 38);
-		heaplen -= 1024 * 137;
-		heaplen -= 1024 * 12;
-		heaplen -= 1024 * 23;
-
+	if (argFindByPrefix(1, "-nomp3")) {
 		g_SndMp3Enabled = false;
-	} else {
-		g_SndMp3Enabled = true;
-		g_SndMaxFxBusses = 2;
-
-		if (argFindByPrefix(1, "-nomp3")) {
-			g_SndMp3Enabled = false;
-		}
 	}
 
 	if (!g_SndDisabled) {
@@ -1552,15 +1523,7 @@ void sndInit(void)
 		sndpconfig.unk10 = NUM_KEYTHINGS;
 		sndpconfig.heap = &g_SndHeap;
 
-#if VERSION >= VERSION_PAL_BETA
-		settings[0] = 22020;
-		settings[1] = 1;
-		settings[2] = 2000;
-
-		amgrCreate(&synconfig, settings);
-#else
 		amgrCreate(&synconfig);
-#endif
 
 		if (g_SndMp3Enabled) {
 			osSyncPrintf("RWI : Initialising the new and improved MP3 player\n");
@@ -1647,7 +1610,6 @@ bool seqPlay(struct seqinstance *seq, s32 tracknum)
 		return false;
 	}
 
-#ifndef PLATFORM_N64
 	// try to load external replacement, which can be either compressed or not
 	u32 extlen = 0;
 	u8 *extseq = modSequenceLoad(seq->tracknum, &extlen);
@@ -1676,7 +1638,6 @@ bool seqPlay(struct seqinstance *seq, s32 tracknum)
 		}
 		sysMemFree(extseq);
 	} else
-#endif
 	{
 		binlen = ALIGN16(g_SeqTable->entries[seq->tracknum].binlen) + 0x40;
 
@@ -1685,9 +1646,6 @@ bool seqPlay(struct seqinstance *seq, s32 tracknum)
 		}
 
 		ziplen = ALIGN16(g_SeqTable->entries[seq->tracknum].ziplen);
-#if VERSION < VERSION_NTSC_1_0
-		if (seq->data);
-#endif
 
 		binstart = seq->data;
 		zipstart = binstart + binlen - ziplen;
@@ -1700,19 +1658,6 @@ bool seqPlay(struct seqinstance *seq, s32 tracknum)
 	preprocessALCMidiHdr(binstart, ziplen, NULL);
 #endif
 
-#if VERSION < VERSION_NTSC_1_0
-	if (ziplen == 0) {
-		char message[128];
-		sprintf(message, "DMA-Crash %s %d Ram: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-				"snd.c", 1676,
-				zipstart[0], zipstart[1], zipstart[2], zipstart[3],
-				zipstart[4], zipstart[5], zipstart[6], zipstart[7],
-				zipstart[8], zipstart[9], zipstart[10], zipstart[11],
-				zipstart[12], zipstart[13], zipstart[14], zipstart[15]);
-		crashSetMessage(message);
-		CRASH();
-	}
-#endif
 
 #if AVOID_UB
 	// To avoid undefined behaviour, we must change the sequence player's state
@@ -1749,11 +1694,6 @@ void seqSetVolume(struct seqinstance *seq, u16 volume)
 
 		n_alCSPSetVol(seq->seqp, tmp);
 	}
-}
-
-void sndHandleRetrace(void)
-{
-	// empty
 }
 
 void snd0000fe20(void)
@@ -2182,23 +2122,14 @@ struct sndstate *sndStart(s32 arg0, s16 sound, struct sndstate **handle, s32 vol
 		return NULL;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (sp40.id < (u32)g_NumSounds) {
-		return func00033820(arg0, sp40.id, volume, pan & 0x7f, pitch, fxmix, IS4MB() ? 0 : fxbus, handle);
+		return func00033820(arg0, sp40.id, volume, pan & 0x7f, pitch, fxmix, fxbus, handle);
 	}
 
 	return NULL;
-#else
-	return func00033820(arg0, sp40.id, volume, pan & 0x7f, pitch, fxmix, IS4MB() ? 0 : fxbus, handle);
-#endif
 }
 
 const char var70053be0[] = "Snd_Play_Universal : Overriding -> Link = %d\n";
-
-#if VERSION < VERSION_NTSC_1_0
-const char var700552f0nb[] = "Snd_Play_Mpeg : sndId=%d, vol=%d, pan=%d\n";
-#endif
-
 const char var70053c10[] = "Snd_Play_Mpeg : SYSTEM IS DISABLED\n";
 const char var70053c34[] = "Snd_Play_Mpeg  : Lib called -> Adr=%x\n";
 const char var70053c5c[] = "Snd_Play_Mpeg  : Chunk size -> Adr=%x\n";

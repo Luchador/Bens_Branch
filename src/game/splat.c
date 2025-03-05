@@ -35,23 +35,14 @@ struct splatdata {
 	s32 timerspeed;
 };
 
-#if VERSION < VERSION_NTSC_1_0
-u32 var80082100nb = 0;
-#endif
-
-f32 var8007f8a0 = 0.15;
-f32 var8007f8a4 = 3;
-f32 var8007f8a8 = 12;
-s32 var8007f8ac = 8;
+f32 g_SplatDistanceScaleFactor = 0.15;
+f32 g_SplatRandomOffsetMax = 12; // When a splat is made there's some randomness from where the hit is calculated to where it's actually placed, with 12 being the max possible distance.
 f32 g_SplatMaxDistance = 180;
-f32 var8007f8b4 = 5;
-f32 var8007f8b8 = 50;
+f32 g_SplatMinSize = 5;
+f32 g_SplatMaxSize = 50;
 
-#if VERSION == VERSION_JPN_FINAL
-#else
 bool splat0f149274(f32 arg0, struct prop *prop, struct shotdata *shotdata, f32 arg3, bool isskedar, s32 arg5, s32 arg6, struct chrdata *chr, s32 arg8);
 void splat0f14986c(struct splatdata *splatdata);
-#endif
 
 void splatTickChr(struct prop *prop)
 {
@@ -126,7 +117,6 @@ void splatTickChr(struct prop *prop)
 
 void splatsCreateForChrHit(struct prop *prop, struct shotdata *shotdata, struct coord *arg2, struct coord *arg3, bool isskedar, s32 splattype, struct chrdata *chr2)
 {
-#if VERSION != VERSION_JPN_FINAL
 	struct chrdata *chr = prop->chr;
 
 	if (chr->bulletstaken < 7) {
@@ -140,16 +130,12 @@ void splatsCreateForChrHit(struct prop *prop, struct shotdata *shotdata, struct 
 			chr->stdsplatsadded += splatsCreate(qty, 0.8f, prop, shotdata, arg2, arg3, isskedar, splattype, TICKS(50), chr2, 0);
 		}
 	}
-#endif
 }
 
 s32 splatsCreate(s32 qty, f32 arg1, struct prop *prop, struct shotdata *shotdataarg,
 		struct coord *arg4, struct coord *arg5, bool isskedar, s32 splattype,
 		s32 timermax, struct chrdata *chr, s32 timerspeed)
 {
-#if VERSION == VERSION_JPN_FINAL
-	return 0;
-#else
 	struct shotdata stackshotdata;
 	struct shotdata *shotdata = splattype == 0 ? shotdataarg : &stackshotdata;
 	struct coord spfc;
@@ -200,7 +186,7 @@ s32 splatsCreate(s32 qty, f32 arg1, struct prop *prop, struct shotdata *shotdata
 
 	for (i = 0; i < qty; i++) {
 		for (j = 0; j < 3; j++) {
-			spe4.f[j] = (RANDOMFRAC() * var8007f8a8 * 2.0f - var8007f8a8) * 0.017453292384744f;
+			spe4.f[j] = (RANDOMFRAC() * g_SplatRandomOffsetMax * 2.0f - g_SplatRandomOffsetMax) * 0.017453292384744f;
 		}
 
 		mtx4LoadRotation(&spe4, &spa4);
@@ -225,15 +211,8 @@ s32 splatsCreate(s32 qty, f32 arg1, struct prop *prop, struct shotdata *shotdata
 	}
 
 	return numdropped;
-#endif
 }
 
-#if VERSION == VERSION_JPN_FINAL
-void splat0f149274(void)
-{
-	osSyncPrintf("Splat : Out of range\n");
-}
-#else
 bool splat0f149274(f32 arg0, struct prop *chrprop, struct shotdata *shotdata, f32 arg3, bool isskedar, s32 splattype, s32 timermax, struct chrdata *chr, s32 timerspeed)
 {
 	struct prop **propptr;
@@ -303,7 +282,6 @@ bool splat0f149274(f32 arg0, struct prop *chrprop, struct shotdata *shotdata, f3
 			room = bestroom;
 			translucent = hitthing.unk2c == 2;
 		} else {
-			osSyncPrintf("Splat : Out of range\n");
 			hasresult = false;
 		}
 	} else {
@@ -328,7 +306,6 @@ bool splat0f149274(f32 arg0, struct prop *chrprop, struct shotdata *shotdata, f3
 			if (prop) {
 				if (prop->type == PROPTYPE_OBJ || prop->type == PROPTYPE_DOOR || prop->type == PROPTYPE_WEAPON) {
 					objTestHit(prop, &stackshotdata);
-					if (1);
 				}
 			}
 
@@ -388,33 +365,20 @@ bool splat0f149274(f32 arg0, struct prop *chrprop, struct shotdata *shotdata, f3
 
 	return false;
 }
-#endif
 
-void splatsTick(void)
-{
-	// empty
-}
-
-#if VERSION == VERSION_JPN_FINAL
-void splat0f14986c(void)
-{
-	// empty
-}
-#else
 void splat0f14986c(struct splatdata *splat)
 {
-	f32 spac;
-	f32 spa8;
+	f32 splatscalex; // Splat width before randomness is applied
+	f32 splatscaley; // Splat height before randomness is applied
 	struct defaultobj *obj;
-	f32 spa0;
-	f32 sp9c;
+	f32 splatscaledbydistance; // Splats get bigger the farther behind a character it's made
+	f32 splatsizetype; // Splats can be little, medium, or big
 	f32 height;
 	f32 width;
 	u8 maxalpha = 0xff;
 	u8 minalpha = 0xc0;
 	s32 texnum;
-	bool sp88 = splat->isskedar & 1;
-	bool sp84 = splat->isskedar & 1;
+	bool isskedarblood = splat->isskedar & 1;
 	bool translucent = splat->translucent;
 	f32 distance;
 	RoomNum smokerooms[2];
@@ -443,48 +407,48 @@ void splat0f14986c(struct splatdata *splat)
 	case 0:
 	case 1:
 	case 2:
-		sp9c = 1.5f;
+		splatsizetype = 1.5f; // 1/2 chance of a little splat
 		break;
 	case 3:
 	case 4:
-		sp9c = 5.0f;
+		splatsizetype = 5.0f; // 1/3 chance of a big splat
 		break;
 	case 5:
-		sp9c = 3.0f;
+		splatsizetype = 3.0f; // 1/6 chance of a medium splat
 		break;
 	}
 
 	distance = coordsGetDistance(&splat->gunpos, &splat->unk0c);
-	spa0 = var8007f8a0 * distance * sp9c;
+	splatscaledbydistance = g_SplatDistanceScaleFactor * distance * splatsizetype;
 
-	if (var8007f8b8 < spa0) {
-		spa0 = var8007f8b8;
+	if (g_SplatMaxSize < splatscaledbydistance) {
+		splatscaledbydistance = g_SplatMaxSize;
 	}
 
-	if (var8007f8b4 > spa0) {
-		spa0 = var8007f8b4;
+	if (g_SplatMinSize > splatscaledbydistance) {
+		splatscaledbydistance = g_SplatMinSize;
 	}
 
-	spac = 0.5f * spa0;
-	spa8 = 0.5f * spa0;
+	splatscalex = 0.5f * splatscaledbydistance;
+	splatscaley = 0.5f * splatscaledbydistance;
 
-	if (spac < 1.0f) {
-		spac = 1.0f;
+	if (splatscalex < 1.0f) {
+		splatscalex = 1.0f;
 	}
 
-	if (spa8 < 1.0f) {
-		spa8 = 1.0f;
+	if (splatscaley < 1.0f) {
+		splatscaley = 1.0f;
 	}
 
-	width = RANDOMFRAC() * spac * 2.0f - spac + spa0;
-	height = RANDOMFRAC() * spa8 * 2.0f - spa8 + spa0;
+	width = RANDOMFRAC() * splatscalex * 2.0f - splatscalex + splatscaledbydistance;
+	height = RANDOMFRAC() * splatscaley * 2.0f - splatscaley + splatscaledbydistance;
 
-	if (width > var8007f8b8) {
-		width = var8007f8b8;
+	if (width > g_SplatMaxSize) {
+		width = g_SplatMaxSize;
 	}
 
-	if (height > var8007f8b8) {
-		height = var8007f8b8;
+	if (height > g_SplatMaxSize) {
+		height = g_SplatMaxSize;
 	}
 
 	width *= splat->unk50;
@@ -498,14 +462,14 @@ void splat0f14986c(struct splatdata *splat)
 			width, height, minalpha, maxalpha,
 			rngRandom() % 360, (u16)splat->timermax, splat->timerspeed, translucent);
 
-	if (sp88 || sp84) {
+	if (isskedarblood) {
 		smokerooms[0] = splat->room;
 		smokerooms[1] = -1;
 
-		smokeCreateSimple(&splat->unk0c, smokerooms, sp88 ? SMOKETYPE_SKCORPSE : SMOKETYPE_14);
+		//smokeCreateSimple(&splat->unk0c, smokerooms, isskedarblood ? SMOKETYPE_SKCORPSE : SMOKETYPE_14); // Ben's comment: this ternary doesn't make sense since the condition must be true?
+		smokeCreateSimple(&splat->unk0c, smokerooms, SMOKETYPE_SKCORPSE);
 	}
 }
-#endif
 
 void splatResetChr(struct chrdata *chr)
 {

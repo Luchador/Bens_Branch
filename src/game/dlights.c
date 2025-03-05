@@ -66,8 +66,8 @@ f32 (*var8009cae8)(s32 roomnum, f32 mult, s32 portalnum1, s32 portalnum2);
 u8 var8009caec;
 u8 var8009caed;
 u8 var8009caee;
-u8 var8009caef;
-u8 var8009caf0;
+u8 g_NVChrHighlight;
+u8 g_NVChrBrightness;
 
 struct var80061420 *var80061420 = NULL;
 u32 var80061424 = 0x00000000;
@@ -892,9 +892,7 @@ void func0f002a98(void)
 	s32 i;
 
 	var8009cae0 = align4(g_Vars.roomcount);
-#if VERSION >= VERSION_NTSC_1_0
 	g_LightsPrevTickMode = 0;
-#endif
 	g_Vars.remakewallhitvtx = 0;
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
@@ -903,10 +901,6 @@ void func0f002a98(void)
 	}
 
 	var80061420 = NULL;
-
-	if (IS4MB()) {
-		var80061444 = 0;
-	}
 }
 
 void roomSetLightsOn(s32 roomnum, s32 enable)

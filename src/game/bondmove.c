@@ -322,7 +322,6 @@ void bmoveUpdateSpeedTheta(void)
 	} else if (g_Vars.currentplayer->bondmovemode == MOVEMODE_GRAB) {
 		bgrabUpdateSpeedTheta();
 	} else if (g_Vars.currentplayer->bondmovemode == MOVEMODE_WALK) {
-		bwalkUpdateSpeedTheta();
 	}
 }
 

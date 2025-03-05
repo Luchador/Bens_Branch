@@ -103,7 +103,6 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha)
 	s32 timery;
 	char buffer[24];
 	u32 textcolour;
-	s32 is4mb;
 	s32 playercount;
 	s32 playernum;
 	s16 viewtop;
@@ -121,8 +120,6 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha)
 	timery += viewtop;
 	timery -= g_HudPaddingY;
 	timery -= 8;
-
-	is4mb = false;
 
 	// @bug: There is no check for playercount >= 2 in the next two statements.
 	// Because of this, in 1 player the timer is drawn out of place when the
@@ -164,7 +161,6 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha)
 	}
 
 	textcolour = textcolour * 160 / 255;
-	if (g_Is4Mb);
 	textcolour |= 0x00ff0000;
 
 	formatTime(buffer, playerGetMissionTime(), TIMEPRECISION_HUNDREDTHS);
@@ -773,7 +769,7 @@ void hudmsgCalculatePosition(struct hudmessage *msg)
 		}
 	}
 
-	if (PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || IS4MB())) {
+	if (PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL)) {
 		{
 			viewwidth -= offset;
 
@@ -793,21 +789,13 @@ void hudmsgCalculatePosition(struct hudmessage *msg)
 		x = viewleft + v0 + msg->xmargin + 3;
 
 		if (PLAYERCOUNT() == 2
-				&& (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || IS4MB())
+				&& (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL)
 				&& (!g_InCutscene || g_MainIsEndscreen)) {
-			if (IS4MB()) {
-				if (msg->playernum == 0) {
-					x--;
-				} else if (msg->playernum == 1) {
-					x -= 16;
-				}
-			} else {
 				if (msg->playernum == 0) {
 					x += 15;
 				} else if (msg->playernum == 1) {
 					x += 4;
 				}
-			}
 		} else if (PLAYERCOUNT() >= 3) {
 			if ((msg->playernum % 2) == 0) {
 				x--;
@@ -838,7 +826,7 @@ void hudmsgCalculatePosition(struct hudmessage *msg)
 		y = viewtop + viewheight - msg->height - msg->ymargin - 14;
 
 		if (PLAYERCOUNT() == 2 && (g_InCutscene == 0 || g_MainIsEndscreen)) {
-			if (IS4MB() || (optionsGetScreenSplit() != SCREENSPLIT_VERTICAL && msg->playernum == 0)) {
+			if ((optionsGetScreenSplit() != SCREENSPLIT_VERTICAL && msg->playernum == 0)) {
 				y += 8;
 			} else {
 				y += 3;
