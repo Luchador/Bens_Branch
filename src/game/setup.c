@@ -165,11 +165,7 @@ struct tvscreen var80061b68 = {
 	0,           // colinc
 };
 
-u32 var80061bdc = 0x00000000;
 f32 g_DoorScale = 1;
-u32 var80061be4 = 0x00000000;
-u32 var80061be8 = 0x00000000;
-u32 var80061bec = 0x00000000;
 
 void propsReset(void)
 {
@@ -195,7 +191,7 @@ void propsReset(void)
 		g_MaxEmbedments = 0;
 	}
 
-	setupReset0f00cc8c();
+	setupResetTVScreens();
 	setupResetProxyMines();
 
 	g_AlarmTimer = 0;
@@ -337,13 +333,13 @@ void setupCreateBlockedPath(struct blockedpathobj *blockedpath)
 	g_BlockedPaths = blockedpath;
 }
 
-void setupReset0f00cc8c(void)
+void setupResetTVScreens(void)
 {
 	struct tvscreen tmp1;
 	struct tvscreen tmp2;
 	struct tvscreen tmp3;
 
-	tmp1 = var80061a80;
+	tmp1 = var80061a80; // Monitors don't work with this commented out
 	var8009ce98 = tmp1;
 
 	tmp2 = var80061af4;
@@ -392,7 +388,6 @@ void setupCreateObject(struct defaultobj *obj, s32 cmdindex)
 	RoomNum rooms[8];
 	struct prop *prop2;
 	u32 flag40;
-	u32 stack;
 	struct chrdata *chr;
 	struct prop *prop;
 
@@ -618,32 +613,15 @@ void setupCreateObject(struct defaultobj *obj, s32 cmdindex)
 void setupPlaceWeapon(struct weaponobj *weapon, s32 cmdindex)
 {
 	if (weapon->base.flags & OBJFLAG_ASSIGNEDTOCHR) {
-		u32 stack[2];
 		struct chrdata *chr = chrFindByLiteralId(weapon->base.pad);
 
 		if (chr && chr->prop && chr->model) {
 			if (cheatIsActive(CHEAT_MARQUIS)) {
 				// NTSC 1.0 and newer simplifies the Marquis logic
-#if VERSION >= VERSION_NTSC_1_0
 				weapon->base.flags &= ~OBJFLAG_DEACTIVATED;
 				weapon->base.flags |= OBJFLAG_WEAPON_AICANNOTUSE;
 				modelmgrLoadProjectileModeldefs(weapon->weaponnum);
 				func0f08b25c(weapon, chr);
-#else
-				if (g_Vars.stagenum == STAGE_INVESTIGATION
-						&& lvGetDifficulty() == DIFF_PA
-						&& weapon->weaponnum == WEAPON_K7AVENGER) {
-					modelmgrLoadProjectileModeldefs(weapon->weaponnum);
-					func0f08b25c(weapon, chr);
-				} else if (g_Vars.stagenum == STAGE_ATTACKSHIP) {
-					weapon->base.flags &= ~OBJFLAG_DEACTIVATED;
-					weapon->base.flags |= OBJFLAG_WEAPON_AICANNOTUSE;
-					modelmgrLoadProjectileModeldefs(weapon->weaponnum);
-					func0f08b25c(weapon, chr);
-				} else {
-					weapon->weaponnum = WEAPON_NONE;
-				}
-#endif
 			} else {
 				if (cheatIsActive(CHEAT_ENEMYROCKETS)) {
 					switch (weapon->weaponnum) {
@@ -870,11 +848,9 @@ void setupCreateAutogun(struct autogunobj *autogun, s32 cmdindex)
 	autogun->shotbondsum = 0;
 
 	if (autogun->targetpad >= 0) {
-		u32 stack1;
 		f32 xdiff;
 		f32 ydiff;
 		f32 zdiff;
-		u32 stack2;
 		struct pad pad;
 
 		padUnpack(autogun->targetpad, PADFIELD_POS, &pad);
@@ -898,8 +874,6 @@ void setupCreateHangingMonitors(struct hangingmonitorsobj *monitors, s32 cmdinde
 
 void setupCreateSingleMonitor(struct singlemonitorobj *monitor, s32 cmdindex)
 {
-	u32 stack[2];
-
 	monitor->screen = var8009ce98;
 	tvscreenSetImageByNum(&monitor->screen, monitor->imagenum);
 
@@ -984,7 +958,6 @@ s32 setupGetPortalByPad(s32 padnum)
 	f32 mult;
 	struct coord centre;
 	struct coord coord;
-	u32 stack;
 	struct pad pad;
 
 	padGetCentre(padnum, &centre);
@@ -1008,7 +981,6 @@ s32 setupGetPortalByDoorPad(s32 padnum)
 	f32 mult;
 	struct coord centre;
 	struct coord coord;
-	u32 stack;
 	struct pad pad;
 
 	padGetCentre(padnum, &centre);
@@ -2043,7 +2015,6 @@ void setupCreateProps(s32 stagenum)
 			index = 0;
 
 			if (g_Vars.normmplayerisrunning && mpHasSimulants()) {
-				u32 stack[4];
 				s32 i;
 				s32 slotsdone[MAX_BOTS];
 				s32 chrnum = 0;

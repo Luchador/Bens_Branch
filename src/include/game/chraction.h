@@ -147,7 +147,6 @@ void robotAttack(struct chrdata *chr);
 void chrTickRobotAttack(struct chrdata *chr);
 void chrTickAttack(struct chrdata *chr);
 void chrTickAttackRoll(struct chrdata *chr);
-void propPrintDangerous(void);
 void chrTickThrowGrenade(struct chrdata *chr);
 bool func0f043f2c(struct chrdata *chr, struct coord *runpos, u32 arg2, f32 *turnspeed);
 void chrTickAttackWalk(struct chrdata *chr);

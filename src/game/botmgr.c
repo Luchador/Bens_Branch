@@ -46,7 +46,6 @@ void botmgrAllocateBot(s32 chrnum, s32 aibotnum)
 
 	if (model != NULL) {
 		struct coord pos = {0.0f, 0.0f, 0.0f};
-		u32 stack;
 
 		prop = chrAllocate(model, &pos, rooms, 0.0f, ailistFindById(GAILIST_AIBOT_INIT));
 

@@ -2110,7 +2110,6 @@ void chrAttackStand(struct chrdata *chr, u32 attackflags, s32 entityid)
 
 void chrAttackLie(struct chrdata *chr, u32 attackflags, s32 entityid)
 {
-	u32 stack[2];
 	struct prop *gun = chrGetHeldProp(chr, HAND_RIGHT);
 	s32 firing[2] = {false, false};
 
@@ -2525,8 +2524,6 @@ void chrAttackRoll(struct chrdata *chr, bool toleft)
 
 void chrStartAnim(struct chrdata *chr, s32 animnum, f32 startframe, f32 endframe, u8 chranimflags, s32 merge, f32 speed)
 {
-	u32 stack;
-
 	if (chr && chr->model) {
 		if (chranimflags & CHRANIMFLAG_REVERSE) {
 			speed = -speed;
@@ -2780,7 +2777,6 @@ void chrAttack(struct chrdata *chr, struct attackanimgroup **animgroups, bool fl
 
 void chrAttackAmount(struct chrdata *chr, u32 attackflags, u32 entityid, u32 maxshots)
 {
-	u32 stack;
 	struct prop *prop = chrGetHeldProp(chr, HAND_RIGHT);
 	struct attackanimgroup **things = NULL;
 	bool firing[] = {false, false};
@@ -3017,7 +3013,6 @@ void chrBeginDeath(struct chrdata *chr, struct coord *dir, f32 relangle, s32 hit
 						&& fval1 - fval2 < 10 && fval1 - fval2 > -10
 						&& !wasknockedout) {
 					struct animtablerow *row = &g_AnimTableHumanSlumped[rngRandom() % 4];
-					u32 stack3;
 
 					chr->act_die.thudframe1 = row->thudframe1;
 					chr->act_die.thudframe2 = row->thudframe2;
@@ -3430,12 +3425,9 @@ void chrYeetFromPos(struct chrdata *chr, struct coord *exppos, f32 force)
 	struct prop *prop = chr->prop;
 	f32 faceangle;
 	f32 latangle;
-	u32 stack1;
 	s32 angleindex;
-	u32 stack2;
 	struct yeetanim *row;
 	struct coord dist;
-	u32 stack3;
 	s32 race = CHRRACE(chr);
 	f32 speed;
 	s32 subindex;
@@ -3539,19 +3531,10 @@ void chrKnockOut(struct chrdata *chr, f32 angle, s32 hitpart, struct gset *gset)
 	if (chr->actiontype != ACT_DRUGGEDCOMINGUP
 			&& chr->actiontype != ACT_DRUGGEDDROP
 			&& chr->actiontype != ACT_DRUGGEDKO) {
-#if VERSION >= VERSION_PAL_FINAL
-		if (mpstatsGetTotalKnockoutCount() < 2) {
-			chr->chrflags |= CHRCFLAG_KEEPCORPSEKO;
 
-			if (mainGetStageNum() == STAGE_VILLA) {
-				chr->hidden |= CHRHFLAG_ANTINONINTERACTABLE;
-			}
-		}
-#elif VERSION >= VERSION_NTSC_1_0
 		if (mpstatsGetTotalKnockoutCount() < 2) {
 			chr->chrflags |= CHRCFLAG_KEEPCORPSEKO;
 		}
-#endif
 
 		mpstatsIncrementTotalKnockoutCount();
 
@@ -5148,7 +5131,6 @@ bool chrIsRoomOffScreen(struct chrdata *chr, struct coord *waypos, RoomNum *wayr
 {
 	struct prop *prop = chr->prop;
 	RoomNum sp7c[20];
-	u32 stack;
 	s32 i;
 	RoomNum sp64[8];
 	bool offscreen = true;
@@ -5261,7 +5243,6 @@ s32 chrGoPosCalculateBaseTtl(struct chrdata *chr)
 {
 	f32 xdiff;
 	f32 zdiff;
-	u32 stack;
 	struct coord pos;
 	RoomNum rooms[8];
 	f32 speed;
@@ -5503,7 +5484,6 @@ void chrNavTickMagic(struct chrdata *chr, struct waydata *waydata, f32 speed, st
 	struct waypoint *waypoint;
 	struct coord spdc;
 	RoomNum spcc[8];
-	u32 stack[4];
 	struct pad pad;
 	struct coord sp5c;
 	RoomNum sp4c[8];
@@ -5655,7 +5635,6 @@ void chrGoPosChooseAnimation(struct chrdata *chr)
 	s32 heavy;
 	s32 race = CHRRACE(chr);
 	s32 anim = -1;
-	u32 stack;
 	f32 speed = 0.5;
 	f32 sp60 = 16;
 	f32 animspeed = -1;
@@ -6309,7 +6288,6 @@ bool chrHasLosToAttackTarget(struct chrdata *chr, struct coord *pos, RoomNum *ro
 bool chrHasLosToChr(struct chrdata *chr, struct chrdata *target, RoomNum *room)
 {
 	bool cansee = false;
-	u32 stack;
 	RoomNum sp88[] = {-1, 0, 0, 0, 0, 0, 0, 0};
 
 	if (!botIsTargetInvisible(chr, target)) {
@@ -6608,7 +6586,6 @@ bool chrTrySidestep(struct chrdata *chr)
 		f32 a = chrGetInverseTheta(chr);
 		f32 b = atan2f(target->pos.x - prop->pos.x, target->pos.z - prop->pos.z);
 		f32 angle = b - a;
-		u32 stack[2];
 
 		if (b < a) {
 			angle += M_BADTAU;
@@ -6642,7 +6619,6 @@ bool chrTryJumpOut(struct chrdata *chr)
 		f32 a = chrGetInverseTheta(chr);
 		f32 b = atan2f(target->pos.x - prop->pos.x, target->pos.z - prop->pos.z);
 		f32 angle = b - a;
-		u32 stack[2];
 
 		if (b < a) {
 			angle += M_BADTAU;
@@ -7028,13 +7004,9 @@ bool chrGoToTarget(struct chrdata *chr, u32 goposflags)
 {
 	if (chrIsReadyForOrders(chr)) {
 		if (
-#if VERSION >= VERSION_NTSC_1_0
 				g_NumChrsSeenPlayerRecently2 <= 8
 				|| (chr->hidden & CHRHFLAG_BASICGUARD) == 0
 				|| (chr->flags & CHRFLAG0_ACTIVATEALARM)
-#else
-				g_NumChrsSeenPlayerRecently2 <= 9
-#endif
 				) {
 			struct prop *prop = chrGetTargetProp(chr);
 
@@ -7051,13 +7023,9 @@ bool chrGoToChr(struct chrdata *chr, u32 dst_chrnum, u32 goposflags)
 {
 	if (chrIsReadyForOrders(chr)) {
 		if (
-#if VERSION >= VERSION_NTSC_1_0
 				g_NumChrsSeenPlayerRecently2 <= 8
 				|| (chr->hidden & CHRHFLAG_BASICGUARD) == 0
 				|| (chr->flags & CHRFLAG0_ACTIVATEALARM)
-#else
-				g_NumChrsSeenPlayerRecently2 <= 9
-#endif
 				) {
 			struct chrdata *dstchr = chrFindById(chr, dst_chrnum);
 
@@ -7434,28 +7402,6 @@ bool chrConsiderGrenadeThrow(struct chrdata *chr, u32 attackflags, u32 entityid)
 			struct prop *rightprop = chrGetHeldProp(chr, HAND_RIGHT);
 			struct weaponobj *weapon;
 
-#if PIRACYCHECKS
-			{
-				u32 checksum = 0;
-				s32 *i = (s32 *)&bgReset;
-				s32 *end = (s32 *)&bgBuildTables;
-				u32 stackpadding[1];
-
-				while (i < end) {
-					checksum += *i;
-					checksum += (*i >> 1);
-					i++;
-				}
-
-				if (checksum != CHECKSUM_PLACEHOLDER) {
-					// Make player explode continuously
-					g_Vars.currentplayer->bondexploding = true;
-					g_Vars.currentplayer->bondnextexplode = g_Vars.lvframe60 + 120;
-					g_Vars.currentplayer->bondcurexplode = 0;
-				}
-			}
-#endif
-
 			// If grenade is equipped in either hand, use it
 			if (rightprop) {
 				weapon = rightprop->weapon;
@@ -7483,7 +7429,6 @@ bool chrConsiderGrenadeThrow(struct chrdata *chr, u32 attackflags, u32 entityid)
 			if (!done && (leftprop == NULL || rightprop == NULL)) {
 				struct prop *prop;
 				u32 flags = 0;
-				u32 stackpadding2[2];
 
 				if (rightprop) {
 					flags = OBJFLAG_WEAPON_LEFTHANDED;
@@ -8773,7 +8718,6 @@ s32 chrTurn(struct chrdata *chr, s32 turning, f32 endanimframe, f32 speed, f32 t
 	if (turning != TURNSTATE_OFF) {
 		struct model *model = chr->model;
 		f32 curframe = modelGetCurAnimFrame(model);
-		u32 stack;
 		f32 finalangle = chrGetInverseTheta(chr);
 		f32 remainingangle;
 		f32 increment = M_BADTAU / 100.0f * speed * g_Vars.lvupdate60f * model->anim->playspeed;
@@ -9261,7 +9205,6 @@ void chrCalculateHit(struct chrdata *chr, bool *angleokptr, bool *hit, struct gs
 	f32 anglediff;
 	f32 limitangle;
 	bool angleok;
-	u32 stack;
 	f32 taperdist;
 	f32 sqdist;
 
@@ -9469,7 +9412,6 @@ bool chrGetGunPos(struct chrdata *chr, s32 handnum, struct coord *gunpos)
 void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord *vector,
 		struct modelnode **nodeptr, s32 *hitpartptr, struct model **modelptr, s32 *sideptr)
 {
-	u32 stack1;
 	struct prop *prop = chr->prop;
 	bool done = false;
 	bool isdifferentmtx;
@@ -9477,7 +9419,6 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 	struct coord sp118;
 	s32 i;
 	struct modelnode *bestnode;
-	u32 stack2[2];
 	Mtxf spc8;
 	f32 bestvolume;
 	Mtxf *worldtoscreenmtx;
@@ -9489,7 +9430,6 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 	Mtxf *mtxptr1;
 	Mtxf *mtxptr2;
 	f32 sides[6];
-	u32 stack3;
 
 	if (prop->type != PROPTYPE_PLAYER || g_Vars.normmplayerisrunning || chrGetShield(chr) > 0) {
 		if (prop->flags & (PROPFLAG_ONTHISSCREENTHISTICK | PROPFLAG_ONANYSCREENTHISTICK | PROPFLAG_ONANYSCREENPREVTICK)) {
@@ -9813,7 +9753,6 @@ void chrTickShoot(struct chrdata *chr, s32 handnum)
 				u32 cdtypes = isaibot
 					? CDTYPE_OBJS | CDTYPE_DOORS | CDTYPE_CHRS | CDTYPE_PATHBLOCKER | CDTYPE_BG | CDTYPE_DOORSWITHOUTFLAG | CDTYPE_PLAYERS
 					: CDTYPE_OBJS | CDTYPE_DOORS | CDTYPE_CHRS | CDTYPE_PATHBLOCKER | CDTYPE_BG | CDTYPE_DOORSWITHOUTFLAG;
-				u32 stack;
 				bool isshootingeyespy = CHRRACE(targetprop->chr) == RACE_EYESPY && chrGetDistanceToTarget(chr) > 150;
 				bool fudgeforeyespy = false;
 
@@ -9964,7 +9903,6 @@ void chrTickShoot(struct chrdata *chr, s32 handnum)
 							// with regard to how they aim their projectiles
 							if (isaibot && chrIsTargetInFov(chr, 30, 0)) {
 								bool hasaimpos = false;
-								u32 stack;
 								struct coord aimpos;
 
 								if (gset.weaponfunc == FUNC_PRIMARY &&
@@ -10016,7 +9954,6 @@ void chrTickShoot(struct chrdata *chr, s32 handnum)
 									f32 sin = sinf(angle);
 									f32 x = vector.f[0];
 									f32 z = vector.f[2];
-									u32 stack;
 
 									vector.x = sin * z + cos * x;
 									vector.z = cos * z - sin * x;
@@ -11060,7 +10997,6 @@ void chrTickAttackRoll(struct chrdata *chr)
 						modelSetAnimEndFrame(model, chr->act_attack.animcfg->unk14);
 					}
 				} else {
-					u32 stack;
 					modelSetAnimEndFrame(model, chr->act_attack.animcfg->unk1c);
 				}
 			}
@@ -11068,29 +11004,6 @@ void chrTickAttackRoll(struct chrdata *chr)
 	}
 
 	chrTickFire(chr);
-}
-
-void propPrintDangerous(void)
-{
-	u8 i;
-
-	osSyncPrintf("Current dangerous items:");
-
-	for (i = 0; i < ARRAYCOUNT(g_DangerousProps); i++) {
-		struct prop *prop = g_DangerousProps[i];
-
-		if (prop) {
-			if (prop->weapon
-					&& prop->weapon->weaponnum == WEAPON_GRENADE
-					&& prop->type == PROPTYPE_WEAPON) {
-				osSyncPrintf("    Grenade %x", prop);
-			} else if (prop->type == PROPTYPE_EXPLOSION) {
-				osSyncPrintf("    Explosion %x", prop);
-			} else {
-				osSyncPrintf("misc dangerous prop");
-			}
-		}
-	}
 }
 
 void propUnsetDangerous(struct prop *prop)
@@ -12147,7 +12060,6 @@ void chrNavTickMain(struct chrdata *chr, struct coord *nextpos, struct waydata *
 			// navigating to the obstacle again, but with different arguments.
 			// This is a more desparate attempt at returning to the path.
 			f32 wantclearance = chr->radius * 1.26f;
-			u32 stack;
 
 			if (chrNavTryObstacle(chr, &waydata->obstacleleft, true, &spf4, wantclearance, false, NULL, waydata, 0, CDTYPE_PATHBLOCKER | CDTYPE_BG, 0)) {
 				// Will go to left side
@@ -12207,10 +12119,8 @@ void chrNavTickMain(struct chrdata *chr, struct coord *nextpos, struct waydata *
 			// the object. This part of the code decides which side to use and
 			// calculates some turning angles.
 			f32 f20;
-			u32 stack;
 			f32 spd0;
 			f32 spcc;
-			u32 stack2;
 			f32 f24 = chr->radius * 1.26f;
 
 			f20 = atan2f(waydata->aimpos.x - prop->pos.x, waydata->aimpos.z - prop->pos.z);
@@ -12244,7 +12154,6 @@ void chrNavTickMain(struct chrdata *chr, struct coord *nextpos, struct waydata *
 			if (spd0 < spcc) {
 				f32 spc0;
 				f32 spbc;
-				u32 stack;
 				f32 f22 = f24 * 1.1f;
 
 				if (chrNavTryObstacle(chr, &waydata->obstacleleft, true, &spf4, f24, false, NULL, waydata, f22, cdtypes, 1)) {
@@ -13243,15 +13152,15 @@ void cutsceneStart(u32 ailistid)
 void chraTickBg(void)
 {
 	s32 i;
-	s32 numchrs = chrsGetNumSlots();
+	s32 numchrs = chrsGetNumSlots(); // Number of players + number of chars in the setup + 200
 	s32 numaliveonscreen;
 	s32 numdeadonscreen;
 	s32 onscreenlen;
 	s32 offscreenlen;
 	s32 spawnslen;
-	struct chrdata *onscreen[5];
-	struct chrdata *offscreen[5];
-	struct chrdata *spawns[10];
+	struct chrdata *onscreen[100]; // Increase original by 20x
+	struct chrdata *offscreen[100]; // Increase original by 20x
+	struct chrdata *spawns[200]; // Increase original by 20x
 	s32 writeindex;
 	s32 maxdeadonscreen;
 
@@ -13305,11 +13214,6 @@ void chraTickBg(void)
 		}
 	}
 
-	// If enabled, print a list of dangerous props to the developer's console
-	if (debugDangerousProps()) {
-		propPrintDangerous();
-	}
-
 	// Handle switching to a new cutscene when using "Play All" from the menu
 	if (g_Vars.autocutnum >= 0) {
 		cutsceneStart(g_Vars.autocutnum + 0xc00);
@@ -13355,7 +13259,7 @@ void chraTickBg(void)
 						spawns[spawnslen] = chr;
 						spawnslen++;
 
-						if (spawnslen >= 10) {
+						if (spawnslen >= 100) { // Increase spawnslen by factor of 10
 							writeindex = rngRandom() % spawnslen;
 							chrFadeCorpse(spawns[writeindex]);
 							spawns[writeindex] = spawns[spawnslen - 1];
@@ -13373,16 +13277,16 @@ void chraTickBg(void)
 
 	// Calculate how many corpses are allowed on screen. Ideally no more than
 	// 5 chrs (alive or dead) to keep the number of polygons low.
-	maxdeadonscreen = 5 - numaliveonscreen;
+	maxdeadonscreen = 100 - numaliveonscreen; // Increase by 20x
 
 	// If the game is lagging, take the number of 60ths over 6 since the
 	// previous frame and reduce the limit by that amount. So if it's been, say,
 	// 8 60ths since the last frame then the max corpses will be reduced by 2.
 	// This is why corpses are more likely to fade on screen when you change
 	// weapons - the lag spike from changing guns triggers a lower corpse limit.
-	if (g_Vars.lvupdate60 > 6) {
+	/*if (g_Vars.lvupdate60 > 6) {
 		maxdeadonscreen = maxdeadonscreen - g_Vars.lvupdate60 + 6;
-	}
+	}*/
 
 	if (maxdeadonscreen < 0) {
 		maxdeadonscreen = 0;
@@ -13416,7 +13320,8 @@ void chraTickBg(void)
 								onscreen[onscreenlen] = chr;
 								onscreenlen++;
 
-								if (onscreenlen >= (VERSION >= VERSION_NTSC_1_0 ? 2 : 3)) {
+								//if (onscreenlen >= (VERSION >= VERSION_NTSC_1_0 ? 2 : 3)) {
+								if (onscreenlen >= 30) { // Increase by factor of 10
 									writeindex = rngRandom() % onscreenlen;
 									chrFadeCorpseWhenOffScreen(onscreen[writeindex]);
 									onscreen[writeindex] = onscreen[onscreenlen - 1];
@@ -13431,7 +13336,7 @@ void chraTickBg(void)
 							offscreenlen++;
 
 							// Allow up to 5 corpses off-screen
-							if (offscreenlen >= (VERSION >= VERSION_NTSC_1_0 ? 5 : 6)) {
+							if (offscreenlen >=  50) { // Increase by factor of 10
 								writeindex = rngRandom() % offscreenlen;
 
 								if (offscreen[writeindex]->actiontype != ACT_DEAD) {
@@ -14287,7 +14192,6 @@ bool chrCanHearAlarm(struct chrdata *chr)
 
 bool waypointIsWithin90DegreesOfPosAngle(struct waypoint *waypoint, struct coord *pos, f32 angle)
 {
-	u32 stack[3];
 	f32 diffangle;
 	struct pad pad;
 
@@ -14773,7 +14677,6 @@ struct prop *chrSpawnAtCoord(s32 bodynum, s32 headnum, struct coord *pos, RoomNu
 	struct prop *prop;
 	struct coord pos2;
 	RoomNum rooms2[8];
-	s32 stack;
 
 	if (chrsGetNumFree() > 1) {
 		if (headnum < 0) {
@@ -14819,31 +14722,18 @@ struct prop *chrSpawnAtCoord(s32 bodynum, s32 headnum, struct coord *pos, RoomNu
 
 	// Low memory - find a corpse to reap
 	if (chrsGetNumFree() < 4) {
-#if VERSION >= VERSION_NTSC_1_0
-		s32 stack2;
 		struct chrdata *replacechr;
 		s32 startindex;
 		s32 index;
-#else
-		s32 startindex;
-		struct chrdata *replacechr;
-		s32 index;
-#endif
 
 		replacechr = NULL;
 		startindex = rngRandom() % g_NumChrSlots;
 		index = startindex;
 
-#if VERSION < VERSION_NTSC_1_0
-		if (startindex);
-#endif
-
 		do {
 			if (g_ChrSlots[index].chrnum >= 0 && g_ChrSlots[index].model && g_ChrSlots[index].prop) {
 				if (g_ChrSlots[index].actiontype == ACT_DEAD
-#if VERSION >= VERSION_NTSC_1_0
 						|| (g_ChrSlots[index].actiontype == ACT_DRUGGEDKO && (g_ChrSlots[index].chrflags & CHRCFLAG_KEEPCORPSEKO) == 0)
-#endif
 						) {
 					// If we've found a chr that's ready to be reaped, great.
 					// Bail out of the loop.
@@ -15360,7 +15250,6 @@ s32 chrGetDistanceLostToTargetInLastSecond(struct chrdata *chr)
 {
 	s32 *bdlist = &chr->bdlist[0];
 	s32 index = chr->bdstart;
-	u32 stack[2];
 
 	s32 x1 = bdlist[(index + 1) % 60];
 	s32 z1 = bdlist[index];

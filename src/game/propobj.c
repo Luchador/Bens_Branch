@@ -2831,7 +2831,6 @@ s32 func0f06be44(struct modelnode *rootnode)
 
 bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelnode *node, struct coord *arg3, struct coord *arg4, void *arg5, f32 *arg6, struct modelnode **arg7, s32 *hitpart, s32 *arg9, struct modelnode **arg10)
 {
-	u32 stack;
 	union modelrodata *rodata;
 	bool ok = false;
 	f32 sp98 = MAXFLOAT;
@@ -3209,7 +3208,6 @@ s32 func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 	s32 cdresult;
 	struct hitthing hitthing;
 	struct coord sp1c4;
-	u32 stack;
 	bool s0;
 	RoomNum spcc[120];
 	RoomNum *ptr;
@@ -3619,7 +3617,6 @@ void projectileFall(struct defaultobj *obj, f32 arg1[3][3])
 	f32 sp80;
 	struct modelrodata_bbox *bbox;
 	s32 i;
-	u32 stack[2];
 	f32 sp6c;
 	struct projectile *projectile;
 	f32 f2;
@@ -3888,7 +3885,6 @@ void func0f06e9cc(struct coord *arg0, Mtxf *arg1)
 	f32 sp104;
 	f32 a;
 	f32 b;
-	f32 stack;
 	f32 spf4;
 	f32 spf0;
 	Mtxf spb0;
@@ -4497,7 +4493,6 @@ void weaponTick(struct prop *prop)
 		if (weapon->timer240 == 0) {
 			// Proxy was triggered or shot
 			if (weapon->weaponnum == WEAPON_NBOMB) {
-				u32 stack;
 				struct prop *ownerprop = NULL;
 				s32 ownerplayernum = (obj->hidden & 0xf0000000) >> 28;
 
@@ -4514,22 +4509,16 @@ void weaponTick(struct prop *prop)
 
 				obj->hidden |= OBJHFLAG_DELETING;
 
-#if VERSION >= VERSION_NTSC_1_0
-				{
-					s32 i;
+				
+				s32 i;
 
-					for (i = 0; i < PLAYERCOUNT(); i++) {
-						if (g_Vars.players[i]->slayerrocket == (struct weaponobj *)obj) {
-							g_Vars.players[i]->slayerrocket = NULL;
-							g_Vars.players[i]->visionmode = VISIONMODE_SLAYERROCKETSTATIC;
-						}
+				for (i = 0; i < PLAYERCOUNT(); i++) {
+					if (g_Vars.players[i]->slayerrocket == (struct weaponobj *)obj) {
+						g_Vars.players[i]->slayerrocket = NULL;
+						g_Vars.players[i]->visionmode = VISIONMODE_SLAYERROCKETSTATIC;
 					}
 				}
-#else
-				if (g_Vars.currentplayer->slayerrocket == (struct weaponobj *) obj) {
-					g_Vars.currentplayer->slayerrocket = NULL;
-				}
-#endif
+				
 			} else {
 				// Regular explosive
 				s32 exptype;
@@ -4743,7 +4732,6 @@ void func0f07079c(struct prop *prop, bool fulltick)
 	if (model->attachedtonode && (obj->hidden & OBJHFLAG_EMBEDDED)) {
 		Mtxf *mtx = modelFindNodeMtx(model->attachedtomodel, model->attachedtonode, 0);
 		struct modelrenderdata renderdata = {NULL, true, 3};
-		u32 stack;
 		Mtxf sp30;
 
 		prop->flags |= PROPFLAG_ONTHISSCREENTHISTICK | PROPFLAG_ONANYSCREENTHISTICK;
@@ -5052,15 +5040,11 @@ void liftUpdateTiles(struct liftobj *lift, bool stationary)
 
 void liftGoToStop(struct liftobj *lift, s32 stopnum)
 {
-#if VERSION >= VERSION_NTSC_1_0
-	u32 stack;
-#endif
 	struct pad curpad;
 	struct pad aimpad;
 	struct pad reqpad;
 
 	if (lift->pads[stopnum] >= 0 && lift->levelaim != stopnum) {
-#if VERSION >= VERSION_NTSC_1_0
 		// If lift is stopped (cur == aim)
 		// or door is not fully closed yet
 		if (lift->levelcur == lift->levelaim ||
@@ -5071,19 +5055,12 @@ void liftGoToStop(struct liftobj *lift, s32 stopnum)
 				return;
 			}
 		}
-#else
-		if (lift->levelcur == lift->levelaim) {
-			lift->levelaim = stopnum;
-			return;
-		}
-#endif
 
 		padUnpack(lift->pads[lift->levelcur], PADFIELD_POS, &curpad);
 		padUnpack(lift->pads[lift->levelaim], PADFIELD_POS, &aimpad);
 		padUnpack(lift->pads[stopnum], PADFIELD_POS, &reqpad);
 
 		// Figure out if the lift needs to reverse direction on any axis
-#if VERSION >= VERSION_NTSC_1_0
 		if (stopnum != lift->levelcur &&
 				((aimpad.pos.x >= curpad.pos.x && reqpad.pos.x >= curpad.pos.x) ||
 				 (curpad.pos.x >= aimpad.pos.x && curpad.pos.x >= reqpad.pos.x)) &&
@@ -5091,14 +5068,6 @@ void liftGoToStop(struct liftobj *lift, s32 stopnum)
 				 (curpad.pos.y >= aimpad.pos.y && curpad.pos.y >= reqpad.pos.y)) &&
 				((aimpad.pos.z >= curpad.pos.z && reqpad.pos.z >= curpad.pos.z) ||
 				 (curpad.pos.z >= aimpad.pos.z && curpad.pos.z >= reqpad.pos.z)))
-#else
-		if (((aimpad.pos.x >= curpad.pos.x && reqpad.pos.x >= aimpad.pos.x) ||
-				 (curpad.pos.x >= aimpad.pos.x && aimpad.pos.x >= reqpad.pos.x)) &&
-				((aimpad.pos.y >= curpad.pos.y && reqpad.pos.y >= aimpad.pos.y) ||
-				 (curpad.pos.y >= aimpad.pos.y && aimpad.pos.y >= reqpad.pos.y)) &&
-				((aimpad.pos.z >= curpad.pos.z && reqpad.pos.z >= aimpad.pos.z) ||
-				 (curpad.pos.z >= aimpad.pos.z && aimpad.pos.z >= reqpad.pos.z)))
-#endif
 		{
 			// Same direction
 			lift->levelaim = stopnum;
@@ -5761,7 +5730,6 @@ void hoverbikeUpdateMovement(struct hoverbikeobj *bike, f32 speedforwards, f32 s
 	f32 sp6c = 0;
 	f32 sp68 = 0;
 	s32 i;
-	u32 stack[6];
 	f32 tmp;
 
 	tmp = speedtheta * 0.04362628236413f;
@@ -6000,7 +5968,6 @@ bool rocketTickFbw(struct weaponobj *rocket)
 	f32 yrot;
 	struct coord newpos;
 	struct coord dir;
-	u32 stack[2];
 	RoomNum newrooms[8];
 
 	if (projectile->ownerprop && projectile->ownerprop->type == PROPTYPE_CHR) {
@@ -6664,7 +6631,6 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 				bool handled = false;
 				Mtxf sp30c;
 				bool homingrocket;
-				u32 stack;
 
 				projectile->losttimer240 += g_Vars.lvupdate240;
 
@@ -6760,7 +6726,6 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 							f32 angle;
 							Mtxf sp20c;
 							f32 tmp;
-							u32 stack[2];
 
 							static f32 var80069bc4 = 0;
 							static u32 kkg = 3;
@@ -7558,9 +7523,7 @@ void doorTick(struct prop *doorprop)
 	struct doorobj *door = (struct doorobj *)doorprop->obj;
 	struct model *model = door->base.model;
 	f32 prevfrac = door->frac;
-	u32 stack[2];
 
-#if VERSION < VERSION_PAL_BETA
 	static u32 debugdoor = 0;
 
 	// If debugdoor is set to 1 or to the address of this door,
@@ -7575,7 +7538,6 @@ void doorTick(struct prop *doorprop)
 			sqrtf(xdiff * xdiff + zdiff * zdiff);
 		}
 	}
-#endif
 
 	// If door should autoclose this tick
 	if (door->lastopen60 > 0
@@ -8858,7 +8820,6 @@ void autogunTick(struct prop *prop)
 			}
 		} else {
 			f32 f0 = 2.0f * limitangle;
-			u32 stack[2];
 
 			if (f12 < f0 && -f0 < f12 && f2 < f0 && -f0 < f2) {
 				autogun->firing = true;
@@ -9584,7 +9545,6 @@ void chopperFireRocket(struct chopperobj *chopper, bool side)
 		struct coord pos;
 		struct prop *targetprop = chopperGetTargetProp(chopper);
 		struct prop *chopperprop = chopper->base.prop;
-		u32 stack;
 		Mtxf sp6c;
 		Mtxf sp2c;
 
@@ -10123,7 +10083,6 @@ void chopperTickFall(struct prop *chopperprop)
 void chopperTickIdle(struct prop *prop)
 {
 	struct chopperobj *chopper = (struct chopperobj *)prop->obj;
-	u32 stack;
 	f32 roty = chopper->roty;
 	f32 rotx = chopper->rotx;
 	struct coord coord;
@@ -10370,7 +10329,6 @@ void hovercarTick(struct prop *prop)
 	RoomNum sp210[2];
 	struct hovercarobj *hovercar = (struct hovercarobj *) prop->obj;
 	struct defaultobj *obj = &hovercar->base;
-	u32 stack;
 	f32 sp200 = hovercar->roty;
 	f32 sp1fc = hovercar->rotx;
 	u32 ishoverbot = obj->flags & OBJFLAG_HOVERCAR_ISHOVERBOT;
@@ -10820,7 +10778,6 @@ void objInitMatrices(struct prop *prop)
 		} else {
 			if (obj->model->definition->nummatrices >= 2) {
 				struct modelrenderdata thing = {NULL, 1, 3};
-				u32 stack;
 				Mtxf sp28;
 
 				mtx4Copy(obj->model->matrices, &sp28);
@@ -13257,12 +13214,10 @@ Gfx *tvscreenRender(struct model *model, struct modelnode *node, struct tvscreen
 		}
 
 		if (tconfig != NULL) {
-			u32 stack[13];
 			f32 f20;
 			f32 f24;
 			f32 f14; // 58
 			f32 f16; // 54
-			u8 stack2[0x8];
 			f32 a;
 			f32 b;
 
@@ -13270,12 +13225,6 @@ Gfx *tvscreenRender(struct model *model, struct modelnode *node, struct tvscreen
 			f24 = screen->yscale / 2.0f;
 			f14 = f20;
 			f16 = f24;
-
-			if (1);
-			if (1);
-			if (1);
-			if (1);
-			if (1);
 
 			if (screen->rot != 0.0f) {
 				f32 f22;
@@ -13290,16 +13239,6 @@ Gfx *tvscreenRender(struct model *model, struct modelnode *node, struct tvscreen
 				f16 *= f22;
 			}
 
-#ifdef PLATFORM_N64
-			vertices[0].s = tconfig->width * (screen->xmid + f20) * 32.0f;
-			vertices[0].t = tconfig->height * (screen->ymid + f24) * 32.0f;
-			vertices[1].s = tconfig->width * (screen->xmid - f14) * 32.0f;
-			vertices[1].t = tconfig->height * (screen->ymid + f16) * 32.0f;
-			vertices[2].s = tconfig->width * (screen->xmid - f20) * 32.0f;
-			vertices[2].t = tconfig->height * (screen->ymid - f24) * 32.0f;
-			vertices[3].s = tconfig->width * (screen->xmid + f14) * 32.0f;
-			vertices[3].t = tconfig->height * (screen->ymid - f16) * 32.0f;
-#else
 			s32 s0 = tconfig->width * (screen->xmid + f20) * 32.0f;
 			s32 t0 = tconfig->height * (screen->ymid + f24) * 32.0f;
 			s32 s1 = tconfig->width * (screen->xmid - f14) * 32.0f;
@@ -13318,7 +13257,6 @@ Gfx *tvscreenRender(struct model *model, struct modelnode *node, struct tvscreen
 			vertices[2].t = t2;
 			vertices[3].s = s3;
 			vertices[3].t = t3;
-#endif
 		}
 
 		colours[0].r = screen->red;
@@ -13337,8 +13275,6 @@ Gfx *tvscreenRender(struct model *model, struct modelnode *node, struct tvscreen
 
 		// Render the image
 		gSPSetGeometryMode(gdl++, G_CULL_BACK);
-
-		if (1);
 
 		texSelect(&gdl, tconfig, arg5, arg4, 2, 1, NULL);
 
@@ -15460,7 +15396,6 @@ void objDamage(struct defaultobj *obj, f32 damage, struct coord *pos, s32 weapon
 		// It appears to handle spawning a weapon when the ammo crate is shot.
 		if (obj->type == OBJTYPE_MULTIAMMOCRATE) {
 			if (objGetDestroyedLevel(obj) == 1) {
-				u32 stack;
 				struct multiammocrateobj *crate = (struct multiammocrateobj *) obj;
 				s32 startindex = rngRandom() % ARRAYCOUNT(crate->slots);
 				s32 i = startindex;
@@ -15972,7 +15907,6 @@ bool objIsHealthy(struct defaultobj *obj)
 
 bool objTestForInteract(struct prop *prop)
 {
-	u32 stack;
 	struct defaultobj *obj = prop->obj;
 	bool maybe = false;
 
@@ -16051,7 +15985,6 @@ bool currentPlayerTryMountHoverbike(struct prop *prop)
 {
 	struct defaultobj *obj = prop->obj;
 	bool mount = false;
-	u32 stack[2];
 
 	if (obj->type == OBJTYPE_HOVERBIKE
 			&& g_Vars.lvframe60 - g_Vars.currentplayer->activatetimelast < TICKS(30)
@@ -17173,7 +17106,6 @@ s32 propPickupByPlayer(struct prop *prop, bool showhudmsg)
 	case OBJTYPE_MULTIAMMOCRATE:
 		{
 			struct multiammocrateobj *crate = (struct multiammocrateobj *)prop->obj;
-			u32 stack;
 			s32 i;
 
 			for (i = 0; i != 19; i++) {
@@ -17611,7 +17543,6 @@ s32 objTestForPickup(struct prop *prop)
 		f32 range;
 		bool usebigrange;
 		bool pickup;
-		u32 stack;
 
 		usebigrange = (obj->flags3 & OBJFLAG3_ONSHELF)
 			&& (cheatIsActive(CHEAT_SMALLJO) || cheatIsActive(CHEAT_PLAYASELVIS));
@@ -17759,7 +17690,6 @@ struct prop *hatApplyToChr(struct hatobj *hat, struct chrdata *chr, struct model
 
 void hatLoadAndApplyToChr(struct hatobj *hat, struct chrdata *chr)
 {
-	u32 stack;
 	s32 modelnum = hat->base.modelnum;
 
 	setupLoadModeldef(modelnum);
@@ -18278,9 +18208,7 @@ struct prop *func0f08ae0c(struct weaponobj *weapon, struct modeldef *modeldef)
 
 bool chrEquipWeapon(struct weaponobj *weapon, struct chrdata *chr)
 {
-	u32 stack1;
 	s32 handnum = (weapon->base.flags & OBJFLAG_WEAPON_LEFTHANDED) ? HAND_LEFT : HAND_RIGHT;
-	u32 stack2[2];
 
 	if (weapon->base.prop && weapon->base.model) {
 		if (g_Vars.mplayerisrunning) {
@@ -18378,7 +18306,6 @@ struct prop *func0f08b108(struct weaponobj *weapon, struct chrdata *chr, struct 
 
 void func0f08b208(struct weaponobj *weapon, struct chrdata *chr)
 {
-	u32 stack;
 	s32 modelnum = weapon->base.modelnum;
 
 	setupLoadModeldef(modelnum);
@@ -18771,7 +18698,6 @@ s32 weaponTestForPickup(struct prop *prop)
 
 void weaponSetGunfireVisible(struct prop *prop, bool visible, RoomNum room)
 {
-	u32 stack[4];
 	bool flash = false;
 	struct defaultobj *obj = prop->obj;
 	struct modelnode *node1;
@@ -18957,7 +18883,6 @@ bool vectorIsInFrontOfDoor(struct doorobj *door, struct coord *vector)
  */
 bool doorIsRangeEmpty(struct doorobj *door)
 {
-	u32 stack;
 	s16 *propnumptr;
 	s16 propnums[256];
 
@@ -19204,7 +19129,6 @@ void door0f08cb20(struct doorobj *door, Vtx *src, Vtx *dst, s32 numvertices)
 	s32 j;
 	s16 ref;
 	struct modelrodata_bbox bbox;
-	s32 stack[5];
 
 	doorGetBbox(door, &bbox);
 
@@ -19924,7 +19848,6 @@ bool func0f08e8ac(struct prop *prop, struct coord *pos, f32 arg2, bool arg3)
 	RoomNum *rooms;
 	RoomNum roomnum;
 	bool result = false;
-	u32 stack;
 
 	rooms = prop->rooms;
 	roomnum = *rooms;
@@ -20353,7 +20276,6 @@ void door0f08f604(struct doorobj *door, f32 *arg1, f32 *arg2, f32 *arg3, f32 *ar
 	f32 y1;
 	f32 x2;
 	f32 y2;
-	u32 stack[4];
 	struct prop *playerprop;
 	f32 spb0;
 	f32 spac;
@@ -20548,7 +20470,6 @@ bool doorTestForInteract(struct prop *prop)
 			if (func0f06797c(&playerprop->pos, 150, door->base.pad)) {
 				maybe = true;
 			} else if ((door->doorflags & (DOORFLAG_0080 | DOORFLAG_0100)) != DOORFLAG_0080) {
-				u32 stack;
 				struct modelrodata_bbox bbox;
 				Mtxf matrix;
 
@@ -20777,8 +20698,6 @@ bool gasIsActive(void)
 
 void gasTick(void)
 {
-	u32 stack;
-
 	if (g_GasReleasing) {
 		g_GasReleaseTimer240 += g_Vars.lvupdate60freal;
 
@@ -20876,7 +20795,6 @@ Gfx *countdownTimerRender(Gfx *gdl)
 
 	if (!g_CountdownTimerOff) {
 		f32 value60 = g_CountdownTimerValue60;
-		u32 stack;
 		s32 viewright = viGetViewLeft() + (viGetViewWidth() >> 1);
 		s32 y = viGetViewTop() + viGetViewHeight() - 18;
 		s32 playercount = PLAYERCOUNT();
@@ -21129,10 +21047,8 @@ void currentPlayerDropAllItems(void)
 
 void weaponCreateForPlayerDrop(s32 weaponnum)
 {
-	u32 stack;
 	struct prop *prop;
 	struct chrdata *chr;
-	u32 stack2;
 
 	chr = g_Vars.currentplayer->prop->chr;
 	prop = weaponCreateForChr(chr, playermgrGetModelOfWeapon(weaponnum), weaponnum, OBJFLAG_WEAPON_AICANNOTUSE, NULL, NULL);
@@ -21152,7 +21068,6 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 	if (!lvIsPaused()) {
 		bool blocked = false;
 		struct coord endpos;
-		u32 stack;
 		f32 x;
 		f32 y;
 		f32 z;
@@ -21162,9 +21077,7 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 		u8 forcebeam = false;
 		struct beam beam;
 		struct coord frompos;
-		u32 stack2;
 		u8 drug = false;
-		u32 stack3;
 
 		frompos.x = pos->x;
 		frompos.y = pos->y;

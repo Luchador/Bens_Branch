@@ -4,12 +4,14 @@ This is mostly to help me learn the Perfect Dark code and maybe make some cool c
 
 Changes include:
 * Press G to go into Gangsta Mode whenever you want (hold some guns sideways)
+* Far more corpses are allowed before they start being removed
 * Male guards will select from all 42 available heads instead of just 8 like the original game
 * All Guns cheat gives the Slayer on all stages, not just Attack Ship and Ruins.
+* Added a cheat called "Dinner Party"
 * Far more bullet holes supported
 * Twice the smoke puffs supported
 * Tinted glass does not become fully opaque
-* Stars on Mr. Blonde's Revenge
+* Stars added on Mr. Blonde's Revenge
 * Animated water at the bottom of the chasm in Air Base
 * Moved the "Objective Completed/Failed" message down so it doesn't block the center of the screen
 

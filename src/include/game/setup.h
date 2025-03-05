@@ -14,7 +14,7 @@ void setupCreatePadlockedDoor(struct padlockeddoorobj *link);
 void setupCreateSafeItem(struct safeitemobj *link);
 void setupCreateConditionalScenery(struct linksceneryobj *link);
 void setupCreateBlockedPath(struct blockedpathobj *link);
-void setupReset0f00cc8c(void);
+void setupResetTVScreens(void);
 void setupResetProxyMines(void);
 s32 setupCountCommandType(u32 type);
 void setupCreateObject(struct defaultobj *obj, s32 cmdindex);

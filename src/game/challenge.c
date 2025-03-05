@@ -791,7 +791,6 @@ bool challengeIsCompleteForEndscreen(void)
 	s32 result = false;
 	s32 aborted = false;
 	s32 i;
-	u32 stack;
 
 	for (i = 0; i < PLAYERCOUNT(); i++) {
 		setCurrentPlayerNum(i);

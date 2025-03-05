@@ -88,15 +88,11 @@ void botReset(struct chrdata *chr, u8 respawning)
 			chrSetShield(chr, 0);
 			chr->cmnum = 0;
 			chr->cmnum2 = 0;
-#ifndef PLATFORM_N64
 			chr->blurdrugamount = 0;
 			chr->poisoncounter = 0;
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 			bgunFreeFireslot(chr->fireslots[0]);
 			bgunFreeFireslot(chr->fireslots[1]);
-#endif
 
 			chr->unk32c_12 = 0;
 			chr->fireslots[0] = -1;
@@ -128,11 +124,7 @@ void botReset(struct chrdata *chr, u8 respawning)
 			aibot->nextbullettimer60[0] = 0;
 			aibot->nextbullettimer60[1] = 0;
 			aibot->distmode = -1;
-
-#if VERSION < VERSION_PAL_BETA
 			aibot->unk030 = 301;
-#endif
-
 			aibot->throwtimer60 = 0;
 			aibot->burstsdone[0] = 0;
 			aibot->burstsdone[1] = 0;
@@ -194,12 +186,9 @@ void botReset(struct chrdata *chr, u8 respawning)
 			aibot->random2 = rngRandom();
 			aibot->randomfrac = RANDOMFRAC();
 			aibot->cheap = 0;
-
-#if VERSION >= VERSION_NTSC_1_0
 			aibot->forceslowupdates = 0;
 			aibot->distoverrideprop = NULL;
 			aibot->distoverridetimer60 = 0;
-#endif
 		}
 
 		if (aibot->config->type == BOTTYPE_TURTLE || aibot->config->type == BOTTYPE_SHIELD) {
@@ -261,7 +250,6 @@ void botSpawn(struct chrdata *chr, u8 respawning)
 		chr->aibot->moveratey = 0;
 		func0f02e9a0(chr, 0);
 
-#ifndef PLATFORM_N64
 		if ((g_MpSetup.options & MPOPTION_SPAWNWITHWEAPON)
 				&& g_MpSetup.weapons[0] != MPWEAPON_NONE
 				&& g_MpSetup.weapons[0] != MPWEAPON_DISABLED
@@ -278,7 +266,6 @@ void botSpawn(struct chrdata *chr, u8 respawning)
 			}
 			botinvSwitchToWeapon(chr, mpweapon->weaponnum, FUNC_PRIMARY);
 		}
-#endif
 	}
 }
 
@@ -291,13 +278,6 @@ void botSpawnAll(void)
 	}
 }
 
-#if PIRACYCHECKS
-u32 add87654321(u32 value)
-{
-	return value + 0x87654321;
-}
-#endif
-
 u32 botPickupProp(struct prop *prop, struct chrdata *chr)
 {
 	struct defaultobj *obj = prop->obj;
@@ -307,8 +287,6 @@ u32 botPickupProp(struct prop *prop, struct chrdata *chr)
 	}
 
 	dprint();
-
-	if (1);
 
 	obj->flags3 &= ~OBJFLAG3_ISFETCHTARGET;
 
@@ -345,26 +323,7 @@ u32 botPickupProp(struct prop *prop, struct chrdata *chr)
 			u32 padding[1];
 			s32 qty;
 			s32 i;
-#if PIRACYCHECKS
-			{
-				u32 *ptr = (u32 *)&doorFinishClose;
-				u32 *end = (u32 *)&doorSetMode;
-				u32 checksum = 0;
 
-				while (ptr < end) {
-					checksum += *ptr;
-					checksum *= 2;
-					ptr++;
-				}
-
-				if (checksum != CHECKSUM_PLACEHOLDER) {
-					u32 *ptr = (u32 *)chrCheckCanSeeTarget;
-					ptr[0] = add87654321(0x24020001 - 0x87654321); // li v0, 1
-					ptr[1] = add87654321(0x03e00008 - 0x87654321); // jr ra
-					ptr[2] = add87654321(0x00000000 - 0x87654321); // nop
-				}
-			}
-#endif
 			dprint();
 
 			for (i = 0; i != 19; i++) {
@@ -459,26 +418,18 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 	struct weapon *weapon;
 	bool singleonly;
 	s32 i;
-
 	struct ammocrateobj *crate;
-
 	s32 weaponnum;
 	bool ignore1;
 	struct multiammocrateobj *crate2;
-
-	u32 stack1;
-
 	struct shieldobj *shield;
 	bool ignore2;
-
 	struct prop *chrprop;
-
 	f32 xdist;
 	f32 ydist;
 	f32 zdist;
 	f32 sqrange;
 	bool sp3c;
-	u32 stack2;
 
 	if (!chr || !chr->aibot || !g_Vars.lvmpbotlevel || chrIsDead(chr)) {
 		return false;
@@ -502,17 +453,9 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 
 	dprint();
 
-	if (1);
-
-#if VERSION >= VERSION_NTSC_1_0
 	if ((obj->hidden & OBJHFLAG_DELETING) || (obj->flags & OBJFLAG_THROWNLAPTOP)) {
 		return false;
 	}
-#else
-	if (obj->flags & OBJFLAG_THROWNLAPTOP) {
-		return false;
-	}
-#endif
 
 	dprint();
 
@@ -530,8 +473,6 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 	}
 
 	dprint();
-
-	if (1);
 
 	if (obj->type == OBJTYPE_WEAPON) {
 		weaponobj = prop->weapon;
@@ -614,11 +555,6 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 	dprint();
 
 	if (chr->aibot->cheap) {
-		if (1);
-		if (1);
-		if (1);
-		if (1);
-		if (1);
 		sqrange = 250 * 250;
 	} else {
 		sqrange = 100 * 100;
@@ -703,9 +639,7 @@ void botCheckPickups(struct chrdata *chr)
 			if (prop->timetoregen == 0) {
 				struct defaultobj *obj = prop->obj;
 
-#if VERSION >= VERSION_NTSC_1_0
 				if (obj)
-#endif
 				{
 					if ((obj->hidden & OBJHFLAG_PROJECTILE) == 0
 							|| obj->projectile == NULL
@@ -808,7 +742,6 @@ bool botIsAboutToAttack(struct chrdata *chr, bool arg1)
 {
 	bool result = false;
 	struct prop *target;
-	u32 stack;
 	s32 mpindex;
 
 	if (chr->target != -1) {
@@ -1115,17 +1048,12 @@ f32 botCalculateMaxSpeed(struct chrdata *chr)
 	return speed;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 void bot0f1921f8(struct chrdata *chr, f32 *move, s32 numupdates, f32 arg3)
-#else
-void bot0f1921f8(struct chrdata *chr, f32 *move)
-#endif
 {
 	s32 i;
 	f32 sp50;
 	f32 cosine;
 	f32 sine;
-	u32 stack[4];
 	f32 sp30[2];
 	f32 speedsideways;
 	f32 speedforwards;
@@ -1161,8 +1089,7 @@ void bot0f1921f8(struct chrdata *chr, f32 *move)
 	move[0] = 0;
 	move[1] = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
-	tmp = (PAL ? 0.065f : 0.055000007152557f) * arg3 / numupdates;
+	tmp = 0.055000007152557f * arg3 / numupdates;
 
 	for (i = 0; i < numupdates; i++) {
 		chr->aibot->moveratex = (PAL ? 0.935f : 0.945f) * chr->aibot->moveratex + sp30[0];
@@ -1171,17 +1098,6 @@ void bot0f1921f8(struct chrdata *chr, f32 *move)
 		move[0] += chr->aibot->moveratex * tmp;
 		move[1] += chr->aibot->moveratey * tmp;
 	}
-#else
-	tmp = (PAL ? 0.065f : 0.055000007152557f) * g_Vars.lvupdate60freal / g_Vars.lvupdate240;
-
-	for (i = 0; i < g_Vars.lvupdate240; i++) {
-		chr->aibot->moveratex = (PAL ? 0.935f : 0.945f) * chr->aibot->moveratex + sp30[0];
-		chr->aibot->moveratey = (PAL ? 0.935f : 0.945f) * chr->aibot->moveratey + sp30[1];
-
-		move[0] += chr->aibot->moveratex * tmp;
-		move[1] += chr->aibot->moveratey * tmp;
-	}
-#endif
 }
 
 char *botGetCommandName(s32 command)
@@ -1645,7 +1561,6 @@ void botChooseGeneralTarget(struct chrdata *botchr)
 	if (botchr->target == -1) {
 		s32 closestavailablechrnum = -1;
 		s32 tmp;
-		s32 stack;
 
 		for (tmp = 0; tmp < g_MpNumChrs; tmp++) {
 			s32 i = aibot->chrnumsbydistanceasc[tmp];
@@ -2098,7 +2013,6 @@ struct prop *botFindPickup(struct chrdata *chr, s32 criteria)
 			s32 desiredsecammo;
 			s32 funcnum;
 			bool include_equipped = true;
-			s32 stack;
 
 			// Don't go after ammo when returning a CTC token
 			if (g_MpSetup.scenario == MPSCENARIO_CAPTURETHECASE && botShouldReturnCtcToken(chr)) {
@@ -2482,19 +2396,11 @@ void botTickUnpaused(struct chrdata *chr)
 				&& (botIsAboutToAttack(chr, true) || chr->myaction == MA_AIBOTDOWNLOAD)) {
 			aibot->cloakdeviceenabled = true;
 		} else {
-#if VERSION >= VERSION_PAL_FINAL
-			if (aibot->ammoheld[AMMOTYPE_CLOAK] > TICKS(1200) + (aibot->random1 >> 5) % TICKS(1200)) {
-				aibot->cloakdeviceenabled = true;
-			} else if (aibot->ammoheld[AMMOTYPE_CLOAK] <= (aibot->random1 >> 17) % TICKS(1200)) {
-				aibot->cloakdeviceenabled = false;
-			}
-#else
 			if (aibot->ammoheld[AMMOTYPE_CLOAK] > 1200 + (aibot->random1 >> 5) % 1200) {
 				aibot->cloakdeviceenabled = true;
 			} else if (aibot->ammoheld[AMMOTYPE_CLOAK] <= (aibot->random1 >> 17) % 1200) {
 				aibot->cloakdeviceenabled = false;
 			}
-#endif
 		}
 
 		// Consider starting or stopping RC-P120 cloak
@@ -2806,7 +2712,6 @@ void botTickUnpaused(struct chrdata *chr)
 							aibot->abortattacktimer60 = TICKS(300);
 						} else {
 							// Go to the hill if not there already
-							u32 stack;
 							struct coord posinhill;
 							f32 angle;
 							s32 padnuminhill;
@@ -3034,9 +2939,6 @@ void botTickUnpaused(struct chrdata *chr)
 						struct chrdata *otherchr = mpGetChrFromPlayerIndex(playernum);
 
 						if (otherchr != chr && !chrIsDead(otherchr)) {
-#if PAL
-							if (1);
-#endif
 							if (chrCompareTeams(chr, otherchr, COMPARE_ENEMIES)
 									&& !botIsTargetInvisible(chr, otherchr)) {
 								newaction = MA_AIBOTATTACK;
@@ -3339,7 +3241,6 @@ void botTickUnpaused(struct chrdata *chr)
 
 		// Iterate both hands and handle shooting
 		{
-			u32 stack;
 			bool firingright = false;
 			s32 i;
 
@@ -3587,13 +3488,6 @@ void botTickUnpaused(struct chrdata *chr)
 						if (weaponGetNumTicksPerShot(aibot->weaponnum, aibot->gunfunc) <= 0 && firing) {
 							struct weaponfunc *func;
 							aibot->nextbullettimer60[i] = botactGetShootInterval60(aibot->weaponnum, aibot->gunfunc);
-
-#if PAL
-							if (aibot->nextbullettimer60[i] >= 6) {
-								aibot->nextbullettimer60[i] = TICKS(aibot->nextbullettimer60[i]);
-							}
-#endif
-
 							func = weaponGetFunctionById(aibot->weaponnum, aibot->gunfunc);
 
 							if (func
@@ -3638,21 +3532,12 @@ void botCheckFetch(struct chrdata *chr)
 	if (chr->myaction == MA_AIBOTGETITEM) {
 		if (chr->act_gopos.waypoints[chr->act_gopos.curindex] == 0) {
 			struct prop *prop = aibot->gotoprop;
-
-#if VERSION >= VERSION_PAL_FINAL
-			// pal-final adds a check for prop->obj
-			if (prop && prop->obj && !prop->parent && prop->timetoregen == 0) {
-				if (prop->type == PROPTYPE_WEAPON || prop->type == PROPTYPE_OBJ) {
-					prop->obj->flags3 |= OBJFLAG3_ISFETCHTARGET;
-				}
-			}
-#else
+			
 			if (prop && !prop->parent && prop->timetoregen == 0) {
 				if (prop->type == PROPTYPE_WEAPON || prop->type == PROPTYPE_OBJ) {
 					prop->obj->flags3 |= OBJFLAG3_ISFETCHTARGET;
 				}
 			}
-#endif
 		}
 
 		aibot->forcemainloop = true;

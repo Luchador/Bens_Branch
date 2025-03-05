@@ -33,13 +33,9 @@ void chrmgrReset(void)
 	var80062960 = mempAlloc(ALIGN16(15 * sizeof(struct var80062960)), MEMPOOL_STAGE);
 
 	for (i = 0; i < ARRAYCOUNT(var8009ccc0); i++) {
-#ifdef PLATFORM_N64
-		var8009ccc0[i] = (void *)ALIGN64(mempAlloc(16 * 16 * sizeof(u16) + 0x40, MEMPOOL_STAGE));
-#else
 		if (!var8009ccc0[i]) {
 			var8009ccc0[i] = videoCreateFramebuffer(16, 16, false, false);
 		}
-#endif
 	}
 
 	resetSomeStageThings();
@@ -49,7 +45,8 @@ void chrmgrConfigure(s32 numchrs)
 {
 	s32 i;
 
-	g_NumChrSlots = PLAYERCOUNT() + numchrs + 10;
+	//g_NumChrSlots = PLAYERCOUNT() + numchrs + 10;
+	g_NumChrSlots = PLAYERCOUNT() + numchrs + 400; // Ben's comment: allow far more chars
 	g_ChrSlots = mempAlloc(ALIGN16(g_NumChrSlots * sizeof(struct chrdata)), MEMPOOL_STAGE);
 
 	for (i = 0; i < g_NumChrSlots; i++) {

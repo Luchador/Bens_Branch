@@ -134,7 +134,8 @@ void *vtxstoreAllocate(s32 count, s32 index, struct modelnode *node, s32 level)
 	s32 tally;
 	s32 rand;
 	u32 size;
-	struct chrdata *chrs[6];
+	//struct chrdata *chrs[6];
+	struct chrdata *chrs[600]; // Increase by factor of 100
 
 	if (count <= g_VtxstoreTypes[index].val2) {
 		for (i = 0; i < g_VtxstoreTypes[index].numallocated; i++) {
@@ -172,7 +173,8 @@ void *vtxstoreAllocate(s32 count, s32 index, struct modelnode *node, s32 level)
 				&& (chr->prop->flags & PROPFLAG_ONANYSCREENPREVTICK) == 0
 				&& chr->actiontype == ACT_DEAD
 				&& chr->act_dead.fadewheninvis == false) {
-			if (tally < 6) {
+			//if (tally < 6) {
+			if (tally < 200) { // Increase by a lot
 				chrs[tally] = chr;
 				tally++;
 			} else {
@@ -186,9 +188,9 @@ void *vtxstoreAllocate(s32 count, s32 index, struct modelnode *node, s32 level)
 	// Enable reaping on half the remaining corpses.
 	// I'm reusing the rand and i variables here in order to get a match.
 	// The original code likely didn't reuse them.
-	rand = tally >> 1;
+	//rand = tally >> 1;
 
-	while (rand) {
+	/*while (rand) {
 		i = rngRandom() % tally;
 
 		if (chrs[i]) {
@@ -196,7 +198,7 @@ void *vtxstoreAllocate(s32 count, s32 index, struct modelnode *node, s32 level)
 			chrs[i] = NULL;
 			rand--;
 		}
-	}
+	}*/
 
 	return NULL;
 }

@@ -436,30 +436,6 @@ s32 g_DebugScreenshotJpg = 0;
 bool g_DebugIsMenuOpen = false;
 #endif
 
-f32 var80075d80 = 0;
-f32 var80075d84 = 0;
-f32 var80075d88 = 0;
-f32 var80075d8c = 0;
-f32 var80075d90 = 0;
-f32 var80075d94 = -1;
-f32 var80075d98 = 0;
-f32 var80075d9c = 1;
-f32 var80075da0 = 0;
-f32 var80075da4 = 0;
-f32 var80075da8 = 1;
-f32 var80075dac = 0;
-f32 var80075db0 = 0;
-f32 var80075db4 = 1;
-f32 var80075db8 = 0;
-f32 var80075dbc = 0;
-f32 var80075dc0 = 0;
-f32 var80075dc4 = 0;
-f32 var80075dc8 = 0;
-f32 var80075dcc = 0;
-f32 var80075dd0 = 0;
-f32 var80075dd4 = 0;
-f32 var80075dd8 = 1;
-
 void debugUpdateMenu(void)
 {
 #ifdef DEBUG

@@ -79,9 +79,7 @@ s32 eyespyTryMoveUpwards(f32 yvel)
 	struct coord dstpos;
 	RoomNum dstrooms[8];
 	s32 types;
-	u32 stack;
 	f32 f0;
-	u32 stack2;
 
 	dstpos.x = prop->pos.x;
 	dstpos.y = prop->pos.y + yvel;
@@ -128,12 +126,10 @@ s32 eyespyCalculateNewPosition(struct coord *vel)
 	f32 ymin;
 	f32 xdiff;
 	f32 zdiff;
-	u32 stack;
 	f32 radius;
 	f32 halfradius;
 	struct prop *prop;
 	s32 playernum;
-	u32 stack2;
 
 	eyespyFindGround(&floorroom);
 
@@ -407,7 +403,6 @@ void eyespyUpdateVertical(void)
 	f32 newy;
 	struct coord sp60;
 	struct coord sp54;
-	u32 stack;
 	struct coord sp44;
 	struct coord sp38;
 
@@ -688,7 +683,6 @@ void eyespyProcessInput(bool allowbuttons)
 	f32 prevverta = g_Vars.currentplayer->eyespy->verta;
 	RoomNum prevrooms[8];
 	s32 contpad2;
-	u32 stack[5];
 	f32 tmp;
 	u32 umask, dmask, lmask, rmask;
 
