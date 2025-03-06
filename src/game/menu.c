@@ -1650,7 +1650,7 @@ void func0f0f3704(struct menudialogdef *dialogdef)
 	menuPushDialog(dialogdef);
 }
 
-void menuConfigureModel(struct menumodel *menumodel, f32 x, f32 y, f32 z, f32 rotx, f32 roty, f32 rotz, f32 scale, u8 flags)
+void menuConfigureModel(struct menumodel *menumodel, f32 x, f32 y, f32 z, f32 rotx, f32 roty, f32 rotz, f32 scale, u8 flags, f32 frac) // Added a frac argument for making the zoom insant if needed
 {
 	menumodel->configuring = true;
 
@@ -1671,7 +1671,7 @@ void menuConfigureModel(struct menumodel *menumodel, f32 x, f32 y, f32 z, f32 ro
 	}
 
 	menumodel->flags = flags;
-	menumodel->configurefrac = 0.0f;
+	menumodel->configurefrac = frac;
 }
 
 void menuUnsetModel(struct menumodel *menumodel)
@@ -1779,15 +1779,13 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 						s32 mpbodynum = MENUMODELPARAMS_GET_MP_BODYNUM(menumodel->newparams);
 						bodynum = mpGetBodyId(mpbodynum);
 
-						//if (mpheadnum < mpGetNumHeads2()) { // This is always true
+						if (mpheadnum < mpGetNumHeads2()) {
 							headnum = mpGetHeadId(mpheadnum);
-
-						// This would have been used for getting PerfectHead models
-						/*} else {
-							headnum = func0f14a9f8(mpheadnum - mpGetNumHeads2());
+						} else {
+							headnum = mpGetNumHeads();
 							headnum = mpGetBeauHeadId(headnum);
 							menumodel->perfectheadnum = (mpheadnum - mpGetNumHeads2()) & 0xff;
-						}*/
+						}
 					}
 
 					bodyfilenum = g_HeadsAndBodies[bodynum].filenum;
@@ -1839,7 +1837,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 					body0f02ce8c(bodynum, headnum, menumodel->bodymodeldef, menumodel->headmodeldef, totalfilelen * 0, &menumodel->bodymodel, false, 1);
 				} else {
 					totalfilelen = ALIGN64(fileGetInflatedSize(menumodel->newparams, LOADTYPE_MODEL)) + 0x4000;
-					if (1);
 
 					texInitPool(&texpool, &menumodel->allocstart[(u32)totalfilelen], menumodel->alloclen - totalfilelen);
 
@@ -1873,6 +1870,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 		struct modelrenderdata renderdata = {NULL, true, 3};
 		Mtxf *matrices;
 		s32 i;
+		u32 stack[3];
 		struct coord tmpcoord;
 		f32 screenpos[2];
 		Mtxf rotmtx;
@@ -1928,7 +1926,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 					modelFindBboxRodata(&menumodel->bodymodel);
 				}
 			}
-
 			if (dodefaultzoom) {
 				struct modelrodata_bbox *bbox = modelFindBboxRodata(&menumodel->bodymodel);
 
@@ -1995,7 +1992,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 		} else {
 			// If the caller is reconfiguring the model's position, rotation or scale, tween towards the new values.
 			if (menumodel->configuring) {
-				menumodel->configurefrac += g_Vars.diffframe60f / 40.0f;
+				menumodel->configurefrac += g_Vars.diffframe60freal / 40.0f;
 
 				if (menumodel->configurefrac > 1.0f) {
 					menumodel->configuring = false;
@@ -2016,6 +2013,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 						posy = menumodel->curposy = menumodel->newposy;
 						posz = menumodel->curposz = menumodel->newposz;
 					}
+
 
 					if (menumodel->flags & MENUMODELFLAG_HASSCALE) {
 						scale = (menumodel->curscale * fraccur) + (fracnew * menumodel->newscale);
@@ -2063,8 +2061,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 				scale = menumodel->curscale = menumodel->newscale;
 
-				if (1);
-
 				menumodel->currotx = rotx = menumodel->newrotx;
 				menumodel->curroty = roty = menumodel->newroty;
 				menumodel->currotz = rotz = menumodel->newrotz;
@@ -2079,10 +2075,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 		screenz[0] = -100.0f + posz;
 
-		if (modeltype == MENUMODELTYPE_HUDPIECE) {
-			screenpos[0] = menumodel->curposx * g_ScaleX;
-			screenpos[1] = menumodel->curposy;
-		}
+		screenpos[0] = menumodel->curposx * g_ScaleX + 160; // Fix screenpos being off center
+		screenpos[1] = menumodel->curposy + 110; // Fix screenpos being off center
 
 		cam0f0b4c3c(screenpos, &tmpcoord, 1.0f);
 
@@ -2122,22 +2116,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 			tmpcoord.y = rotz * tmpcoord.y;
 			tmpcoord.z = rotz * tmpcoord.z;
 		}
-
-#if VERSION < VERSION_NTSC_1_0
-		if (MENUMODELPARAMS_HAS_MASTER_HEADBODY(menumodel->curparams)) {
-			struct coord oldpos;
-			struct coord newpos = {0, 0, 0};
-			u32 stack[3];
-
-			modelUpdateInfo(&menumodel->bodymodel);
-
-			modelGetRootPosition(&menumodel->bodymodel, &oldpos);
-
-			if (joyGetButtons(0, R_TRIG)) {
-				modelSetRootPosition(&menumodel->bodymodel, &newpos);
-			}
-		}
-#endif
 
 		mtx4LoadTranslation(&tmpcoord, &posmtx);
 
@@ -2180,10 +2158,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 				gdl = func0f0d49c8(gdl);
 				gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 			} else {
-#ifdef PLATFORM_N64
-				s32 x1 = g_MenuScissorX1;
-				s32 x2 = g_MenuScissorX2;
-#else
 				s32 halfScreenWidth = SCREEN_WIDTH_LO >> 1;
 				f32 scale = SCREEN_ASPECT / videoGetAspect();
 				f32 width = (g_MenuScissorX2 - g_MenuScissorX1) * scale;
@@ -2192,7 +2166,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 				s32 x1 = (s32)(center - width * 0.5f);
 				s32 x2 = (s32)(center + width * 0.5f);
-#endif
 
 				f32 aspect = (f32) (x2 - x1) / (f32) (g_MenuScissorY2 - g_MenuScissorY1);
 

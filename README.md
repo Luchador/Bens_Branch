@@ -17,6 +17,7 @@ Changes include:
 
 Bug fixes:
 * Fix the bug where wine bottles don't play their shatter sound half the time when destroyed
+* Fixed a very minor bug where using a light switch would change a room's lighting faster than intended
 
 
 ## Credits

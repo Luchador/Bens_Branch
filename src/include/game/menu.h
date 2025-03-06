@@ -17,13 +17,7 @@ bool menuIsSoloMissionOrMp(void);
 bool currentPlayerIsMenuOpenInSoloOrMp(void);
 bool func0f0f0c68(void);
 void menuSetBanner(s32 bannernum, bool allplayers);
-
-#if VERSION >= VERSION_NTSC_1_0
 Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 msgnum, s32 arg7, s32 arg8);
-#else
-Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 msgnum);
-#endif
-
 struct menudfc *func0f0f1338(struct menuitem *item);
 void func0f0f139c(struct menuitem *item, f32 arg1);
 void func0f0f13ec(struct menuitem *item);
@@ -60,7 +54,7 @@ void menuCloseDialog(void);
 void menuUpdateCurFrame(void);
 void menuPopDialog(void);
 void func0f0f3704(struct menudialogdef *dialogdef);
-void menuConfigureModel(struct menumodel *menumodel, f32 x, f32 y, f32 z, f32 rotx, f32 roty, f32 rotz, f32 scale, u8 flags);
+void menuConfigureModel(struct menumodel *menumodel, f32 x, f32 y, f32 z, f32 rotx, f32 roty, f32 rotz, f32 scale, u8 flags, f32 frac);
 void menuUnsetModel(struct menumodel *menumodel);
 Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype);
 void menuGetTeamTitlebarColours(u32 *top, u32 *middle, u32 *bottom);

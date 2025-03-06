@@ -1793,7 +1793,7 @@ void creditsReset(void)
 
 	g_CreditsData->menumodel.removingpiece = false;
 
-	menuConfigureModel(&g_CreditsData->menumodel, 0, 0, 0, 0, 0, 0, 1, MENUMODELFLAG_HASSCALE | MENUMODELFLAG_HASROTATION);
+	menuConfigureModel(&g_CreditsData->menumodel, 0, 0, 0, 0, 0, 0, 1, MENUMODELFLAG_HASSCALE | MENUMODELFLAG_HASROTATION, 0.0f);
 
 	g_CreditsData->menumodel.newposy = 90;
 	g_CreditsData->menumodel.curposx = 8.2;

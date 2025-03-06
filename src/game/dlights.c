@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/dlights.h"
+#include "game/debug.h"
 #include "game/gfxmemory.h"
 #include "game/propsnd.h"
 #include "game/tex.h"
@@ -30,7 +31,7 @@
 #include "types.h"
 #include "platform.h"
 
-const char var7f1a78e0[] = "LIGHTS : Hit occured on light %d in room %d\n";
+/*const char var7f1a78e0[] = "LIGHTS : Hit occured on light %d in room %d\n";
 const char var7f1a7910[] = "L2(%d) -> ";
 const char var7f1a791c[] = "L2 -> BUILD LIGHTS TRANSFER TABLE - Starting\n";
 const char var7f1a794c[] = "L2(%d) -> ";
@@ -54,15 +55,14 @@ const char var7f1a7b58[] = "%s%sL2 -> Surface area bodged for room %d - using %f
 const char var7f1a7b90[] = "";
 const char var7f1a7b94[] = "";
 const char var7f1a7b98[] = "L2(%d) -> ";
-const char var7f1a7ba4[] = "L2 -> Finished\n";
+const char var7f1a7ba4[] = "L2 -> Finished\n";*/
 
 s32 *var8009cad0;
-u32 var8009cad4;
 s32 *var8009cad8;
 s32 g_NumPortals;
 s32 var8009cae0;
 s32 var8009cae4;
-f32 (*var8009cae8)(s32 roomnum, f32 mult, s32 portalnum1, s32 portalnum2);
+f32 (*var8009cae8)(s32 roomnum, f32 mult, s32 portalnum1, s32 portalnum2); // function pointer
 u8 var8009caec;
 u8 var8009caed;
 u8 var8009caee;
@@ -75,7 +75,7 @@ struct coord *var80061428 = NULL;
 u16 **var8006142c = NULL;
 u16 **var80061430 = NULL;
 f32 *var80061434 = NULL;
-bool *var80061438 = NULL;
+bool *g_IsPortalClosed = NULL;
 f32 var8006143c = 50;
 u32 var80061440 = 0x00000000;
 u32 var80061444 = 1;
@@ -83,10 +83,7 @@ u32 var80061448 = 0x00000000;
 bool g_IsSwitchingGoggles = false;
 u32 var80061450 = 0x00000000;
 u32 var80061454 = 0xffffffff;
-
-#if VERSION >= VERSION_NTSC_1_0
 s32 g_LightsPrevTickMode = 0;
-#endif
 
 u32 func0f000920(s32 portalnum1, s32 portalnum2)
 {
@@ -574,15 +571,13 @@ void func0f001c0c(void)
 	u8 *sp48;
 	s32 *sp44;
 	s32 j;
-	s32 stack[4];
 
-	osGetCount();
+	osGetCount(); // This isn't used for anything?
 
 	var80061440 = 0;
 
 	lightsCalculateRoomDimensions();
 
-	if (1);
 	for (g_NumPortals = 0; g_BgPortals[g_NumPortals].verticesoffset != 0; g_NumPortals++);
 
 	if (g_NumPortals == 0) {
@@ -618,7 +613,7 @@ void func0f001c0c(void)
 	var80061434 = (f32 *)ptr;
 	ptr += table1size;
 
-	var80061438 = (bool *)ptr;
+	g_IsPortalClosed = (bool *)ptr;
 	ptr += table2size;
 
 	sp44 = (s32 *)(ptr);
@@ -633,16 +628,15 @@ void func0f001c0c(void)
 
 	for (i = 0; i < g_NumPortals; i++) {
 		if (PORTAL_IS_CLOSED(i)) {
-			var80061438[i] = false;
+			g_IsPortalClosed[i] = false;
 		} else {
-			var80061438[i] = true;
-			if (1);
+			g_IsPortalClosed[i] = true;
 		}
 	}
 
 	if (g_Vars.stagenum == STAGE_EXTRACTION || g_Vars.stagenum == STAGE_DEFECTION) {
-		var80061438[98] = false;
-		var80061438[100] = false;
+		g_IsPortalClosed[98] = false;
+		g_IsPortalClosed[100] = false;
 	}
 
 	func0f00215c(sp48);
@@ -704,8 +698,6 @@ void func0f001c0c(void)
 	}
 
 	osGetCount();
-
-	if (sp68);
 }
 
 f32 func0f002334(s32 roomnum, f32 mult, s32 portalnum1, s32 portalnum2);
@@ -862,7 +854,7 @@ void func0f002844(s32 roomnum, f32 arg1, s32 arg2, s32 portalnum)
 		s32 iterportalnum = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + i];
 		s32 iterroomnum;
 
-		if (var80061438[iterportalnum]) {
+		if (g_IsPortalClosed[iterportalnum]) {
 			if (roomnum == g_BgPortals[iterportalnum].roomnum1) {
 				iterroomnum = g_BgPortals[iterportalnum].roomnum2;
 			} else {
@@ -872,7 +864,7 @@ void func0f002844(s32 roomnum, f32 arg1, s32 arg2, s32 portalnum)
 			if (iterroomnum != otherroomnum) {
 				f32 f0 = var8009cae8(roomnum, arg1, portalnum, iterportalnum);
 
-				if (f0 > var8006143c && arg2 < var8009cae4) {
+				if (f0 > var8006143c && arg2 < var8009cae4) { // f0 > 50.0 &&  arg2 < 20
 					var80061434[roomnum] -= f0;
 					var80061434[iterroomnum] += f0;
 
@@ -951,7 +943,7 @@ void roomSetLightOp(s32 roomnum, s32 operation, u8 br_to, u8 br_from, u8 duratio
 			g_Rooms[roomnum].lightop_to_frac = br_to * 0.01f;
 			g_Rooms[roomnum].lightop_from_frac = br_from * 0.01f;
 			g_Rooms[roomnum].lightop_duration240 = duration60 * 4.0f;
-			g_Rooms[roomnum].lightop_timer240 = duration60;
+			g_Rooms[roomnum].lightop_timer240 = duration60 * 4; // Fix
 			break;
 		case LIGHTOP_SINELOOP:
 			g_Rooms[roomnum].lightop_to_frac = br_to * 0.01f;
@@ -1020,13 +1012,13 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 			sp80.y = -sp8c.y;
 			sp80.z = -sp8c.z;
 
-			normalizeVector(&sp98, &spa4, VERSION >= VERSION_NTSC_1_0 ? 1546 : 1570, "dlights.c");
+			normalizeVector(&sp98, &spa4, 1546, "dlights.c");
 
 			spa4.x += sp80.x;
 			spa4.y += sp80.y;
 			spa4.z += sp80.z;
 
-			normalizeVector(&spa4, &spa4, VERSION >= VERSION_NTSC_1_0 ? 1548 : 1572, "dlights.c");
+			normalizeVector(&spa4, &spa4, 1548, "dlights.c");
 
 			room = (void *) (roomnum * sizeof(struct bgroom));
 
@@ -1075,7 +1067,7 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 	return false;
 }
 
-const char var7f1a7bcc[] = "L2 - g_bfGlobalLightRebuild = %d";
+/*const char var7f1a7bcc[] = "L2 - g_bfGlobalLightRebuild = %d";
 const char var7f1a7bf0[] = "Acoustic Shadowing is %s";
 const char var7f1a7c0c[] = "Enabled";
 const char var7f1a7c14[] = "Disabled";
@@ -1088,7 +1080,7 @@ const char var7f1a7ccc[] = "L2 -> Building portal range table (Num Portals = %d)
 const char var7f1a7d04[] = "L2(%d) -> ";
 const char var7f1a7d10[] = "L2 -> Allocated %uK for the compressed acoustic shadow table\n";
 const char var7f1a7d50[] = "L2(%d) -> ";
-const char var7f1a7d5c[] = "L2 -> Finished building portal range table\n";
+const char var7f1a7d5c[] = "L2 -> Finished building portal range table\n";*/
 
 void lightingTick(void)
 {
@@ -1107,7 +1099,6 @@ void lightingTick(void)
 	}
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 void lightsConfigureForPerfectDarknessCutscene(void)
 {
 	s32 i;
@@ -1130,9 +1121,7 @@ void lightsConfigureForPerfectDarknessCutscene(void)
 		}
 	}
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 void lightsConfigureForPerfectDarknessGameplay(void)
 {
 	s32 i;
@@ -1155,9 +1144,7 @@ void lightsConfigureForPerfectDarknessGameplay(void)
 		}
 	}
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 void lightsTickPerfectDarkness(void)
 {
 	if (g_Vars.tickmode != g_LightsPrevTickMode) {
@@ -1170,17 +1157,11 @@ void lightsTickPerfectDarkness(void)
 		g_LightsPrevTickMode = g_Vars.tickmode;
 	}
 }
-#endif
 
 void roomsTickLighting(void)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	s32 i;
 	s32 numprocessed = 0;
-#else
-	s32 numprocessed = 0;
-	s32 i;
-#endif
 	s32 j;
 	bool wasdirty = false;
 	struct light *light;
@@ -1188,23 +1169,10 @@ void roomsTickLighting(void)
 	s32 timer240;
 	f32 angle;
 	f32 average;
-	u32 stack;
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (cheatIsActive(CHEAT_PERFECTDARKNESS)) {
 		lightsTickPerfectDarkness();
 	}
-#else
-	static s32 prevtickmode = 0;
-
-	if (prevtickmode != g_Vars.tickmode) {
-		if (prevtickmode == TICKMODE_CUTSCENE && g_Vars.tickmode == TICKMODE_NORMAL) {
-			g_IsSwitchingGoggles = 2;
-		}
-
-		prevtickmode = g_Vars.tickmode;
-	}
-#endif
 
 	if (var80061420 == NULL) {
 		return;
@@ -1481,11 +1449,6 @@ void lightsTick(void)
 	}
 }
 
-void func0f004384(void)
-{
-	// empty
-}
-
 /**
  * Set a lighting flash in the given room and its neighbours.
  *
@@ -1514,7 +1477,8 @@ void roomFlashLighting(s32 roomnum, s32 start, s32 limit)
 			}
 
 			// @bug: Should be checking neighbournum flags, not roomnum
-			if (!(g_Rooms[roomnum].flags & ROOMFLAG_OUTDOORS ? 1 : 0)) {
+			//if (!(g_Rooms[roomnum].flags & ROOMFLAG_OUTDOORS ? 1 : 0)) {
+			if (!(g_Rooms[neighbournum].flags & ROOMFLAG_OUTDOORS ? 1 : 0)) { // Fix
 				roomFlashLocalLighting(neighbournum, increment, limit);
 			}
 
@@ -1802,7 +1766,6 @@ void func0f00505c(void)
 	s32 roomnum;
 	s32 l;
 	u16 dist;
-	u32 stack;
 
 	for (i = 0; i < g_NumPortals; i++) {
 		for (j = 0, var8009cad0[0] = i, sp78 = 1; j != sp78; j = (j + 1) & 0x7ff) {

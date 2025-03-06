@@ -224,7 +224,7 @@ MenuDialogHandlerResult frTrainingInfoMenuDialog(s32 operation, struct menudialo
 	case MENUOP_OPEN:
 		weaponnum = frGetWeaponBySlot(frGetSlot());
 		g_Menus[g_MpPlayerNum].training.weaponnum = weaponnum;
-		func0f105948(weaponnum);
+		invMenuGetGunConfigs(weaponnum);
 
 		if (!frIsInTraining()) {
 			frInitAmmo(weaponnum);
@@ -1508,35 +1508,11 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(s32 operation, struct menud
 	f32 y;
 	f32 scale;
 
-#ifndef PLATFORM_N64
-#if VERSION == VERSION_PAL_FINAL
-		if (g_ViRes != VIRES_HI) {
-			x = -117;
+	x = -130;
 
-			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-				x = -87;
-			}
-		} else {
-			x = -177;
-
-			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-				x = -127;
-			}
-		}
-#elif VERSION == VERSION_PAL_BETA
-		x = -117;
-
-		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-			x = -87;
-		}
-#else
-		x = -130;
-
-		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-			x = -100;
-		}
-#endif
-#endif
+	if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
+		x = -100;
+	}
 
 	switch (operation) {
 	case MENUOP_OPEN:
@@ -1551,36 +1527,6 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(s32 operation, struct menud
 		g_Menus[g_MpPlayerNum].menumodel.zoomtimer60 = TICKS(120);
 		g_Menus[g_MpPlayerNum].menumodel.removingpiece = false;
 
-#ifdef PLATFORM_N64
-#if VERSION == VERSION_PAL_FINAL
-		if (g_ViRes != VIRES_HI) {
-			x = -117;
-
-			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-				x = -87;
-			}
-		} else {
-			x = -177;
-
-			if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-				x = -127;
-			}
-		}
-#elif VERSION == VERSION_PAL_BETA
-		x = -117;
-
-		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-			x = -87;
-		}
-#else
-		x = -130;
-
-		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-			x = -100;
-		}
-#endif
-#endif
-
 		y = -15;
 
 		if (bodynum == BODY_MRBLONDE) {
@@ -1591,12 +1537,10 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(s32 operation, struct menud
 			scale = 0.8f;
 		}
 
-#ifndef PLATFORM_N64
 		x = (float)x * ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO) / videoGetAspect();
-#endif
 
 		menuConfigureModel(&g_Menus[g_MpPlayerNum].menumodel, x, y, 0, 0, 0, 0, scale,
-				MENUMODELFLAG_HASSCALE | MENUMODELFLAG_HASPOSITION | MENUMODELFLAG_HASROTATION);
+				MENUMODELFLAG_HASSCALE | MENUMODELFLAG_HASPOSITION | MENUMODELFLAG_HASROTATION, 1.0f);
 
 		g_Menus[g_MpPlayerNum].menumodel.curposx = 8.2f;
 		g_Menus[g_MpPlayerNum].menumodel.curposy = -4.1f;
@@ -1608,10 +1552,8 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(s32 operation, struct menud
 	case MENUOP_CLOSE:
 		break;
 	case MENUOP_TICK:
-#ifndef PLATFORM_N64
 		x = (float)x * ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO) / videoGetAspect();
 		g_Menus[g_MpPlayerNum].menumodel.newposx = x;
-#endif
 
 		if (bodynum == BODY_DRCAROLL) {
 			static struct modelpartvisibility vis[] = {
@@ -1896,7 +1838,7 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(s32 operation, struct menudi
 			u16 unused[] = {64250, 38500, 25650, 25700, 12950};
 			dtInit();
 			g_Menus[g_MpPlayerNum].training.weaponnum = weaponnum;
-			func0f105948(weaponnum);
+			invMenuGetGunConfigs(weaponnum);
 			g_Menus[g_MpPlayerNum].menumodel.newscale /= 2.5f;
 		}
 		break;
@@ -2550,11 +2492,7 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(s32 operation, struct menuitem *i
 			gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 			gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 			gDPSetTextureFilter(gdl++, G_TF_POINT);
-
-#if VERSION >= VERSION_NTSC_1_0
 			gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 255) >> 8);
-#endif
-
 			gSPTextureRectangle(gdl++,
 					((renderdata->x + 6) << 2) * g_ScaleX, (renderdata->y + 3) << 2,
 					((renderdata->x + 60) << 2) * g_ScaleX, (renderdata->y + 39) << 2,
@@ -2645,36 +2583,6 @@ MenuDialogHandlerResult ciHangarHolographMenuDialog(s32 operation, struct menudi
 			break;
 		case MENUOP_TICK:
 			if (g_Menus[g_MpPlayerNum].curdialog) {
-#if VERSION >= VERSION_JPN_FINAL
-				if (g_Menus[g_MpPlayerNum].curdialog->definition == dialogdef) {
-					f32 offset;
-					f32 size;
-
-					index -= NUM_BIO_LOCATIONS;
-
-					offset = items[index].y_offset;
-					size = items[index].size * 0.001f;
-
-					g_Menus[g_MpPlayerNum].menumodel.newscale = size;
-					g_Menus[g_MpPlayerNum].menumodel.curposy = offset;
-					g_Menus[g_MpPlayerNum].menumodel.newposy = offset;
-
-					if (g_Menus[g_MpPlayerNum].menumodel.newparams != items[index].fileid) {
-						g_Menus[g_MpPlayerNum].menumodel.loaddelay = 8;
-					}
-
-					g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_FILENUM(items[index].fileid);
-					g_Menus[g_MpPlayerNum].menumodel.newroty = g_Menus[g_MpPlayerNum].menumodel.curroty + 0.01f * g_Vars.diffframe60freal;
-					g_Menus[g_MpPlayerNum].menumodel.curroty += 0.01f * g_Vars.diffframe60freal;
-					g_Menus[g_MpPlayerNum].menumodel.partvisibility = g_BioPartVisibility;
-				} else {
-					g_Menus[g_MpPlayerNum].menumodel.currotx = g_Menus[g_MpPlayerNum].menumodel.newrotx = 0;
-					g_Menus[g_MpPlayerNum].menumodel.curroty = g_Menus[g_MpPlayerNum].menumodel.newroty = 0;
-					g_Menus[g_MpPlayerNum].menumodel.curposx = g_Menus[g_MpPlayerNum].menumodel.newposx = 0;
-					g_Menus[g_MpPlayerNum].menumodel.curposy = g_Menus[g_MpPlayerNum].menumodel.newposy = 0;
-					g_Menus[g_MpPlayerNum].menumodel.curscale = g_Menus[g_MpPlayerNum].menumodel.newscale = 0;
-				}
-#else
 				if (g_Menus[g_MpPlayerNum].curdialog->definition == dialogdef) {
 					f32 offset;
 					f32 size;
@@ -2688,16 +2596,10 @@ MenuDialogHandlerResult ciHangarHolographMenuDialog(s32 operation, struct menudi
 					g_Menus[g_MpPlayerNum].menumodel.curposy = offset;
 					g_Menus[g_MpPlayerNum].menumodel.newposy = offset;
 					g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_FILENUM(items[index].fileid);
-#if VERSION >= VERSION_PAL_BETA
-					g_Menus[g_MpPlayerNum].menumodel.newroty = g_Menus[g_MpPlayerNum].menumodel.curroty + 0.01f * g_Vars.diffframe60freal;
-					g_Menus[g_MpPlayerNum].menumodel.curroty += 0.01f * g_Vars.diffframe60freal;
-#else
 					g_Menus[g_MpPlayerNum].menumodel.newroty = g_Menus[g_MpPlayerNum].menumodel.curroty + 0.01f * g_Vars.diffframe60f;
 					g_Menus[g_MpPlayerNum].menumodel.curroty += 0.01f * g_Vars.diffframe60f;
-#endif
 					g_Menus[g_MpPlayerNum].menumodel.partvisibility = g_BioPartVisibility;
 				}
-#endif
 			}
 			break;
 		}

@@ -1969,18 +1969,11 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 		gDPSetTextureLOD(gdl++, G_TL_TILE);
 		gDPSetTextureConvert(gdl++, G_TC_FILT);
 
-#if VERSION >= VERSION_NTSC_1_0
 		texSelect(&gdl, g_TexGeneralConfigs + 13 + stageindex, 2, 0, 2, true, NULL);
 		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 		gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
 		gDPSetTextureFilter(gdl++, G_TF_POINT);
 		gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 255 / 256));
-#else
-		texSelect(&gdl, g_TexGeneralConfigs + 13 + stageindex, 1, 0, 2, true, NULL);
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-		gDPSetTextureFilter(gdl++, G_TF_POINT);
-#endif
 
 		gSPTextureRectangle(gdl++,
 				((renderdata->x + 4) << 2) * g_ScaleX, (renderdata->y + 3) << 2,
@@ -1999,20 +1992,12 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 				s32 relx = 63 + k * 17;
 
 				if ((g_GameFile.coopcompletions[k] & (1 << stageindex)) == 0) {
-#if VERSION >= VERSION_NTSC_1_0
 					gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 63 / 256));
-#else
-					gDPSetEnvColorViaWord(gdl++, 0xffffff3f);
-#endif
 					gDPSetCombineLERP(gdl++,
 							TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
 							TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
 				} else {
-#if VERSION >= VERSION_NTSC_1_0
 					gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 207 / 256));
-#else
-					gDPSetEnvColorViaWord(gdl++, 0xffffffcf);
-#endif
 					gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 				}
 
@@ -2027,12 +2012,7 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 			gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 			gDPSetTextureFilter(gdl++, G_TF_POINT);
 			gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-
-#if VERSION >= VERSION_NTSC_1_0
 			gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 175 / 256));
-#else
-			gDPSetEnvColorViaWord(gdl++, 0xffffffaf);
-#endif
 
 			for (k = 0; k < 3; k++) {
 				if (g_GameFile.besttimes[stageindex][k] != 0) {
@@ -3719,12 +3699,13 @@ char *invMenuTextSecondaryFunction(struct menuitem *item)
 	return langGet(L_OPTIONS_003); // "\n"
 }
 
-void func0f105948(s32 weaponnum)
+// How weapons display on the pause menu and the firing range menu
+void invMenuGetGunConfigs(s32 weaponnum)
 {
 	f32 gunconfig[][5] = {
 		{ 23.299999237061f,   -16.799999237061f,  -153.39999389648f,  6.4140100479126f, 0.48769000172615f },
-		{ 22.299999237061f,   -13.5f,             -216.60000610352f,  6.443009853363f,  0.34057000279427f },
-		{ 19.5f,              -31.89999961853f,   -154.89999389648f,  6.3730101585388f, 0.41813001036644f },
+		{ 22.299999237061f,   -13.5f,             -216.60000610352f,  6.443009853363f,  0.34057000279427f }, // Falcon 2 Silenced
+		{ 19.5f,              -31.89999961853f,   -154.89999389648f,  6.3730101585388f, 0.41813001036644f }, // Falcon 2 Scoped
 		{ -2.5f,              14.300000190735f,   16.200000762939f,   6.4340100288391f, 0.34057000279427f },
 		{ -2.4000000953674f,  21.0f,              -98.900001525879f,  5.7630100250244f, 0.32354000210762f },
 		{ -4.0999999046326f,  -30.5f,             -29.39999961853f,   6.3770098686218f, 0.37735998630524f },
@@ -3799,9 +3780,7 @@ void func0f105948(s32 weaponnum)
 		{ -1.8999999761581f,  0.89999997615814f,  -55.0f,             43.142780303955f, 0.14989000558853f },
 		{ 281.89999389648f,   0.89999997615814f,  8.3999996185303f,   5.0027899742126f, 0.18402999639511f },
 		{ -1.8999999761581f,  0.89999997615814f,  -55.0f,             43.142780303955f, 0.14989000558853f },
-#if VERSION >= VERSION_NTSC_1_0
 		{ -3.7999999523163f,  6.1999998092651f,   1.0f,               5.6747899055481f, 0.29199999570847f },
-#endif
 		{ -3.7999999523163f,  6.1999998092651f,   1.0f,               5.8997898101807f, 2.0506100654602f  },
 	};
 
@@ -3830,14 +3809,14 @@ void func0f105948(s32 weaponnum)
 
 		g_Menus[g_MpPlayerNum].menumodel.currotz = g_Menus[g_MpPlayerNum].menumodel.newrotz = 0;
 
-		g_Menus[g_MpPlayerNum].menumodel.displacex = gunconfig[useindex][0];
+		g_Menus[g_MpPlayerNum].menumodel.displacex = gunconfig[useindex][0]; 
 		g_Menus[g_MpPlayerNum].menumodel.displacey = gunconfig[useindex][1];
 		g_Menus[g_MpPlayerNum].menumodel.displacez = gunconfig[useindex][2];
 
 		g_Menus[g_MpPlayerNum].menumodel.newrotx = gunconfig[useindex][3];
 		g_Menus[g_MpPlayerNum].menumodel.currotx = gunconfig[useindex][3];
 
-		menuConfigureModel(&g_Menus[g_MpPlayerNum].menumodel, 0, 0, 0, 0, 0, 0, gunconfig[useindex][4], MENUMODELFLAG_HASSCALE);
+		menuConfigureModel(&g_Menus[g_MpPlayerNum].menumodel, 0, 0, 0, 0, 0, 0, gunconfig[useindex][4], MENUMODELFLAG_HASSCALE, 0.0f);
 
 		g_Menus[g_MpPlayerNum].menumodel.curscale = 0;
 		g_Menus[g_MpPlayerNum].menumodel.partvisibility = weapon->partvisibility;
@@ -3854,7 +3833,7 @@ void func0f105948(s32 weaponnum)
 			g_Menus[g_MpPlayerNum].menumodel.partvisibility = NULL;
 			g_Menus[g_MpPlayerNum].menumodel.removingpiece = false;
 
-			menuConfigureModel(&g_Menus[g_MpPlayerNum].menumodel, 0, 0, 0, 0, 0, 0, 1, MENUMODELFLAG_HASSCALE);
+			menuConfigureModel(&g_Menus[g_MpPlayerNum].menumodel, 0, 0, 0, 0, 0, 0, 1, MENUMODELFLAG_HASSCALE, 0.0f);
 
 			g_Menus[g_MpPlayerNum].menumodel.rottimer60 = TICKS(60);
 			g_Menus[g_MpPlayerNum].menumodel.zoomtimer60 = TICKS(120);
@@ -3878,7 +3857,7 @@ MenuDialogHandlerResult inventoryMenuDialog(s32 operation, struct menudialogdef 
 			g_Menus[g_MpPlayerNum].menumodel.newrotz = 0;
 
 			if (var80072d88 != g_InventoryWeapon) {
-				func0f105948(g_InventoryWeapon);
+				invMenuGetGunConfigs(g_InventoryWeapon);
 				var80072d88 = g_InventoryWeapon;
 			}
 

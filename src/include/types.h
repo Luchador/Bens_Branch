@@ -3860,6 +3860,7 @@ struct perfectheadtexturelist {
 	struct textureconfig selectedtexture;
 };
 
+// Used for menu 3D model turntables
 struct menumodel {
 	/*0x000*/ u8 loaddelay;
 	/*0x002*/ s16 headnum;

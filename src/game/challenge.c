@@ -118,11 +118,6 @@ void challengeDetermineUnlockedFeatures(void)
 			flag = 1;
 			numgifted++;
 		}
-#ifdef DEBUG
-		else if (debugIsAllChallengesEnabled()) {
-			flag = 1;
-		}
-#endif
 
 		g_MpChallenges[challengeindex].availability |= flag;
 	}
@@ -367,11 +362,7 @@ bool challengeIsCompletedByChrWithNumPlayersBySlot(s32 mpchrnum, s32 slot, s32 n
 	return false;
 }
 
-#ifdef PLATFORM_N64
-#define BTYPE s32
-#else
 #define BTYPE uintptr_t
-#endif
 
 struct mpconfigfull *challengeLoadConfig(s32 confignum, u8 *buffer, s32 len)
 {
@@ -380,11 +371,8 @@ struct mpconfigfull *challengeLoadConfig(s32 confignum, u8 *buffer, s32 len)
 	struct mpstrings *loadedstrings;
 	BTYPE bank;
 	u32 language_id = langGetFileNumOffset();
-#ifdef PLATFORM_N64
-	extern struct mpconfig _mpconfigsSegmentRomStart[];
-#else
+
 	extern u8 EXT_SEG _mpconfigsSegmentRomStart;
-#endif
 	extern struct mpstrings EXT_SEG _mpstringsESegmentRomStart;
 	extern struct mpstrings EXT_SEG _mpstringsJSegmentRomStart;
 	extern struct mpstrings EXT_SEG _mpstringsPSegmentRomStart;
@@ -411,11 +399,7 @@ struct mpconfigfull *challengeLoadConfig(s32 confignum, u8 *buffer, s32 len)
 	};
 
 	// Load mpconfigs
-#ifdef PLATFORM_N64
-	mpconfig = dmaExecWithAutoAlign(buffer, (BTYPE)&_mpconfigsSegmentRomStart[confignum], sizeof(struct mpconfig));
-#else
 	mpconfig = dmaExecWithAutoAlign(buffer, (BTYPE)REF_SEG _mpconfigsSegmentRomStart + confignum * sizeof(struct mpconfig), sizeof(struct mpconfig));
-#endif
 
 	// Load mpstrings
 	bank = banks[language_id][0];
@@ -818,13 +802,7 @@ void challengeConsiderMarkingComplete(void)
 {
 	bool result = challengeIsCompleteForEndscreen();
 
-#if VERSION >= VERSION_NTSC_1_0 && defined(DEBUG)
-	if ((g_CheatsActiveBank0 == 0 && g_CheatsActiveBank1 == 0) && (result || debugIsSetCompleteEnabled()))
-#elif VERSION >= VERSION_NTSC_1_0
 	if (g_CheatsActiveBank0 == 0 && g_CheatsActiveBank1 == 0 && result)
-#else
-	if (result && g_CheatsActiveBank0 == 0 && g_CheatsActiveBank1 == 0)
-#endif
 	{
 		u32 prevplayernum;
 		s32 i;

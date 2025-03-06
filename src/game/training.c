@@ -437,11 +437,7 @@ void frInitDefaults(void)
 		g_FrData.targets[i].dstpos.x = pad.pos.x;
 		g_FrData.targets[i].dstpos.y = pad.pos.y;
 		g_FrData.targets[i].dstpos.z = pad.pos.z;
-
-#if VERSION >= VERSION_NTSC_1_0
 		g_FrData.targets[i].dstpos.z += 6.0f * i;
-#endif
-
 		g_FrData.targets[i].inuse = false;
 		g_FrData.targets[i].rotateoncloak = false;
 		g_FrData.targets[i].destroyed = false;
@@ -746,11 +742,7 @@ void frExecuteHelpScript(void)
 			g_FrData.helpscriptoffset += 2;
 			break;
 		case FRCMD_HELPWAITSECONDS:
-#if PAL
-			g_FrData.helpscriptsleep = script[offset + 1] * 50;
-#else
 			g_FrData.helpscriptsleep = SECSTOTIME60(script[offset + 1]);
-#endif
 			g_FrData.helpscriptoffset += 2;
 			break;
 		case FRCMD_WAITUNTILSHOOT:
@@ -797,10 +789,7 @@ bool frExecuteTargetScript(s32 targetnum)
 			g_FrData.targets[targetnum].dstpos.x = pad.pos.x;
 			g_FrData.targets[targetnum].dstpos.y = pad.pos.y;
 			g_FrData.targets[targetnum].dstpos.z = pad.pos.z;
-
-#if VERSION >= VERSION_NTSC_1_0
 			g_FrData.targets[targetnum].dstpos.z += 6.0f * targetnum;
-#endif
 
 			if (script[offset + 2] == 0xff) {
 				g_FrData.targets[targetnum].travelspeed = -1;
@@ -879,9 +868,7 @@ void frInitTargets(void)
 	for (i = 0; i < ARRAYCOUNT(g_FrData.targets); i++) {
 		prop = g_FrData.targets[i].prop;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (prop)
-#endif
 		{
 			obj = prop->obj;
 
