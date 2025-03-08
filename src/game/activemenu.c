@@ -244,7 +244,6 @@ void amSetAiBuddyTemperament(bool aggressive)
 	}
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 void amSetAiBuddyStealth(void)
 {
 	s32 i;
@@ -266,7 +265,6 @@ void amSetAiBuddyStealth(void)
 		}
 	}
 }
-#endif
 
 s32 amGetFirstBuddyIndex(void)
 {
@@ -355,8 +353,8 @@ void amApply(s32 slot)
 						// if we already have it equipped
 						if (weaponnum == WEAPON_REMOTEMINE) {
 							bgunEquipWeapon2(HAND_LEFT, weaponnum);
-						} else if (bgunGetWeaponNum(HAND_LEFT) != WEAPON_NONE) {
-							bgunEquipWeapon2(HAND_LEFT, WEAPON_NONE);
+						} else if (bgunGetWeaponNum(HAND_LEFT) != weaponMatchEnum(WEAPON_NONE)->rank) {
+							bgunEquipWeapon2(HAND_LEFT, weaponMatchEnum(WEAPON_NONE)->rank);
 						}
 					}
 				}

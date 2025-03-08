@@ -105,7 +105,7 @@ void bgunAutoSwitchWeapon(void);
 void bgunEquipWeapon2(s32 handnum, s32 weaponnum);
 s32 bgunIsFiring(s32 handnum);
 s32 bgunGetAttackType(s32 handnum);
-char *bgunGetName(s32 weaponnum);
+char *bgunGetName(s32 rank);
 u16 bgunGetNameId(s32 weaponnum);
 char *bgunGetShortName(s32 arg0);
 void bgunReloadIfPossible(s32 handnum);
@@ -180,7 +180,6 @@ void bgunTickBoost(void);
 void bgunSetSightVisible(u32 bits, bool visible);
 Gfx *bgunDrawSight(Gfx *gdl);
 void bgun0f0abd30(s32 handnum);
-s32 bgunGetWeaponNum2(s32 handnum);
 s8 bgunFreeFireslotWrapper(s32 fireslot);
 s8 bgunFreeFireslot(s32 fireslot);
 

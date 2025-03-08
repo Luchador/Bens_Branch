@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "game/debug.h"
 #include "lib/debughud.h"
+#include "game/inv.h"
 #include "bss.h"
 #include "data.h"
 #include "types.h"
@@ -35,6 +36,20 @@ s32 debug_log(const char *message, s32 num)
     }
 
     fprintf(debug_file, message, num);
+    fclose(debug_file);
+
+	return 1;
+}
+
+s32 debug_log_string(const char *message, const char *param)
+{
+	FILE *debug_file = fopen("debug.log", "a");
+    if (debug_file == NULL) {
+        perror("Error opening debug.log");
+        return 0;
+    }
+
+    fprintf(debug_file, message, param);
     fclose(debug_file);
 
 	return 1;

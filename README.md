@@ -6,6 +6,7 @@ Changes include:
 * Press G to go into Gangsta Mode whenever you want (hold some guns sideways)
 * Far more corpses are allowed before they start being removed
 * Male guards will select from all 42 available heads instead of just 8 like the original game
+* Shotgun pellets do more damage, single blast has smaller spread, but magazine reduced to 8
 * All Guns cheat gives the Slayer on all stages, not just Attack Ship and Ruins.
 * Added a cheat called "Dinner Party"
 * Far more bullet holes supported

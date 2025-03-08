@@ -59,43 +59,16 @@ u32 g_TitleDelayedTimer = 2;
 s32 g_TitleDelayedMode = -1;
 s32 g_TitleTimer = 0;
 s32 g_TitleNextStage = -1; // appears to be used for more than just title
-s32 var800624e8 = 1;
 struct model *g_TitleModel = NULL;
 struct model *g_TitleModelNLogo2 = NULL;
-u32 var80062500 = 0x00000000;
-u32 var80062504 = 0x00000000;
 struct model *g_TitleModelPdTwo = NULL;
 struct model *g_TitleModelPdThree = NULL;
 
-#if VERSION == VERSION_JPN_FINAL
-u32 var800623f0jf = 0;
-struct model *g_TitleModelJpnLogo1 = NULL;
-struct model *g_TitleModelJpnLogo2 = NULL;
-struct model *g_TitleModelJpnPd = NULL;
-#endif
-
-u32 var80062510 = 0x00000000;
-u32 var80062514 = 0x00000000;
-
-Lights1 var80062518 = gdSPDefLights1(0x96, 0x96, 0x96, 0xff, 0xff, 0xff, 0x4d, 0x4d, 0x2e);
 Lights1 g_TitleLightPdLogoFront = gdSPDefLights1(0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-Lights1 var80062548 = gdSPDefLights1(0x3f, 0xff, 0x3f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 Lights1 g_TitleLightPdLogoNotFront = gdSPDefLights1(0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-
-#if VERSION == VERSION_JPN_FINAL
-Lights1 g_TitleLightPdLogoJpn = gdSPDefLights1(0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-#endif
-
 Lights1 g_TitleLightPdLogoMain = gdSPDefLights1(0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x7f);
 Lights1 g_TitleLightNintendoRare = gdSPDefLights1(0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 Lights1 var800625a8 = gdSPDefLights1(0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x7f);
-Lights1 var800625c0 = gdSPDefLights1(0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x7f);
-Lights1 var800625d8 = gdSPDefLights1(0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x7f);
-
-#if VERSION == VERSION_JPN_FINAL
-Lights1 var800624f8jf = gdSPDefLights1(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f);
-Lights1 var80062510jf = gdSPDefLights1(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f);
-#endif
 
 char *mpPlayerGetWeaponOfChoiceName(u32 playernum, u32 slot)
 {
@@ -146,14 +119,6 @@ void titleInitLegal(void)
 	g_TitleTimer = 0;
 	g_TitleButtonPressed = false;
 	g_TitleFastForward = false;
-
-#if VERSION == VERSION_PAL_BETA
-	// Play a sound if player has successfully enabled the crash screen.
-	// This is done in mainInit by holding all four C buttons.
-	if (g_CrashEnabled) {
-		sndStart(var80095200, SFX_8113, 0, -1, -1, -1.0f, -1, -1);
-	}
-#endif
 }
 
 void titleTickLegal(void)
@@ -178,7 +143,6 @@ void titleInitCheckControllers(void)
 
 void titleExitCheckControllers(void)
 {
-	var800624e8 = 0;
 	viConfigureForLogos();
 	viSetMode(VIMODE_HI);
 	viBlack(false);
@@ -252,29 +216,6 @@ struct legalelement {
 };
 
 struct legalelement g_LegalElements[] = {
-#if VERSION == VERSION_JPN_FINAL
-	{ 49,  163, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_077   }, // "Nintendo 64 Product Identification"
-	{ 49,  184, 1, 1, LEGALELEMENTTYPE_LINE,        0               },
-	{ 69,  191, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_078   }, // "Product ID:"
-	{ 69,  211, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_079   }, // "Product Code:"
-	{ 69,  231, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_080   }, // "Variant:"
-	{ 69,  251, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_081   }, // "Developer:"
-	{ 249, 191, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_082   }, // "Perfect Dark"
-	{ 249, 211, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_083   }, // "NUS-NPDE-USA"
-	{ 249, 231, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_084   }, // "NTSC version 8.7 final"
-	{ 249, 251, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_085   }, // "Rare Ltd. (twycross)"
-	{ 69,  274, 1, 1, LEGALELEMENTTYPE_LINE,        0               },
-	{ 69,  283, 0, 1, LEGALELEMENTTYPE_WHITETEXTLG, L_OPTIONS_076   }, // "N64 EXPANSION PAK"
-	{ -1,  283, 0, 1, LEGALELEMENTTYPE_WHITETEXTLG, L_OPTIONS_074   }, // "NOT DETECTED"
-	{ 69,  304, 1, 1, LEGALELEMENTTYPE_LINE,        0               },
-	{ 69,  312, 0, 1, LEGALELEMENTTYPE_BLUETEXTMD,  L_OPTIONS_087   }, // "The Rarewere Logo and Perfect Dark are ..."
-	{ 69,  328, 0, 1, LEGALELEMENTTYPE_BLUETEXTMD,  L_MPWEAPONS_280 }, // "Perfect Dark Registered Trademark No..."
-	{ 138, 343, 0, 1, LEGALELEMENTTYPE_BLUETEXTMD,  L_OPTIONS_088   }, // "Presented in Dolby Surround. Dolby and ..."
-	{ 69,  372, 0, 1, LEGALELEMENTTYPE_BLUETEXTMD,  L_OPTIONS_089   }, // "Uses Miles Sound System ..."
-	{ 69,  428, 1, 1, LEGALELEMENTTYPE_LINE,        0               },
-	{ 69,  433, 0, 1, LEGALELEMENTTYPE_BLUETEXTSM,  L_OPTIONS_093   }, // "rare designs on the future <<<"
-	{ 69,  343, 0, 1, LEGALELEMENTTYPE_DOLBYLOGO,   0               },
-#else
 	{ 49,  179, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_077 }, // "Nintendo 64 Product Identification"
 	{ 49,  200, 1, 1, LEGALELEMENTTYPE_LINE,        0             },
 	{ 69,  207, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_078 }, // "Product ID:"
@@ -287,13 +228,8 @@ struct legalelement g_LegalElements[] = {
 	{ 249, 267, 1, 1, LEGALELEMENTTYPE_BLUETEXTLG,  L_OPTIONS_085 }, // "Rare Ltd. (twycross)"
 	{ 69,  290, 1, 1, LEGALELEMENTTYPE_LINE,        0             },
 	{ 69,  299, 0, 1, LEGALELEMENTTYPE_WHITETEXTLG, L_OPTIONS_076 }, // "N64 EXPANSION PAK"
-#if VERSION >= VERSION_PAL_BETA
-	{ -1,  296, 0, 1, LEGALELEMENTTYPE_WHITETEXTSM, L_OPTIONS_075 }, // "tm"
-	{ -1,  299, 0, 1, LEGALELEMENTTYPE_WHITETEXTLG, L_OPTIONS_074 }, // "NOT DETECTED"
-#else
 	{ 266, 296, 0, 1, LEGALELEMENTTYPE_WHITETEXTSM, L_OPTIONS_075 }, // "tm"
 	{ 286, 299, 0, 1, LEGALELEMENTTYPE_WHITETEXTLG, L_OPTIONS_074 }, // "NOT DETECTED"
-#endif
 	{ 69,  320, 1, 1, LEGALELEMENTTYPE_LINE,        0             },
 	{ 69,  328, 0, 1, LEGALELEMENTTYPE_BLUETEXTMD,  L_OPTIONS_087 }, // "The Rarewere Logo and Perfect Dark are ..."
 	{ 138, 343, 0, 1, LEGALELEMENTTYPE_BLUETEXTMD,  L_OPTIONS_088 }, // "Presented in Dolby Surround. Dolby and ..."
@@ -301,14 +237,10 @@ struct legalelement g_LegalElements[] = {
 	{ 69,  428, 1, 1, LEGALELEMENTTYPE_LINE,        0             },
 	{ 69,  433, 0, 1, LEGALELEMENTTYPE_BLUETEXTSM,  L_OPTIONS_093 }, // "rare designs on the future <<<"
 	{ 69,  344, 0, 1, LEGALELEMENTTYPE_DOLBYLOGO,   0             },
-#endif
 };
 
 Gfx *titleRenderLegal(Gfx *gdl)
 {
-#if VERSION >= VERSION_PAL_BETA
-	s32 prevx = 0;
-#endif
 	struct legalelement *elem;
 	struct legalelement *end;
 	struct modelrenderdata renderdata = { NULL, true, 3 };
@@ -319,14 +251,9 @@ Gfx *titleRenderLegal(Gfx *gdl)
 
 	if (g_LegalEnabled) {
 		gdl = titleClear(gdl);
-#if VERSION == VERSION_JPN_FINAL
-		gdl = func0f0d479c(gdl);
-#endif
 		gdl = text0f153628(gdl);
 
-#ifndef PLATFORM_N64
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-#endif
 
 		elem = g_LegalElements;
 		end = &g_LegalElements[ARRAYCOUNT(g_LegalElements)];
@@ -346,13 +273,13 @@ Gfx *titleRenderLegal(Gfx *gdl)
 			case LEGALELEMENTTYPE_BLUETEXTLG:
 				font1 = g_CharsHandelGothicLg;
 				font2 = g_FontHandelGothicLg;
-#if !defined(PLATFORM_N64) && defined(VERSION_HASH)
+#if defined(VERSION_HASH)
 				if (elem->textid == L_OPTIONS_084) {
 					elem->textptr = VERSION_HASH " (" VERSION_TARGET ")";
 				} else if (elem->textid == L_OPTIONS_083) {
 					elem->textptr = VERSION_ROMID;
 				} else if (elem->textid == L_OPTIONS_082) {
-					elem->textptr = "Perfect Dark (" VERSION_BRANCH ")";
+					elem->textptr = "Perfect Dark (" VERSION_BRANCH ") - Ben's Branch";
 				}
 #endif
 				break;

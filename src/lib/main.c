@@ -490,7 +490,6 @@ void mainInit(void)
 	utilsInit();
 	func000034d0();
 	texInit();
-	langInit();
 	lvInit();
 	cheatsInit();
 	func0000e9c0();

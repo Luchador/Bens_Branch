@@ -25,7 +25,8 @@ void invReset(void)
 
 void invInit(s32 numdoubles)
 {
-	g_Vars.currentplayer->equipmaxitems = numdoubles + 30;
+	//g_Vars.currentplayer->equipmaxitems = numdoubles + 30;
+	g_Vars.currentplayer->equipmaxitems = numdoubles + 31;
 	g_Vars.currentplayer->equipment = mempAlloc(ALIGN16(g_Vars.currentplayer->equipmaxitems * sizeof(struct invitem)), MEMPOOL_STAGE);
 	invClear();
 }

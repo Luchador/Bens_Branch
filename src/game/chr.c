@@ -2019,7 +2019,7 @@ void chrUpdateCloak(struct chrdata *chr)
 
 		// If cloak is enabled via cloaking device or via RCP120
 		if ((g_Vars.currentplayer->devicesactive & DEVICE_CLOAKDEVICE)
-				|| (g_Vars.currentplayer->gunctrl.weaponnum == WEAPON_RCP120
+				|| ((g_Vars.currentplayer->gunctrl.weaponnum == weaponMatchEnum(WEAPON_RCP120)->rank)
 					&& (g_Vars.currentplayer->devicesactive & DEVICE_CLOAKRCP120))) {
 			if ((chr->hidden & CHRHFLAG_CLOAKED) == 0 && chr->cloakpause < 1) {
 				chrCloak(chr, true);
@@ -4418,13 +4418,13 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				s32 index;
 
 				// Shooting an explosive in a chr's hand causes it to explode
-				if (weapon->weaponnum == WEAPON_GRENADE
-						|| weapon->weaponnum == WEAPON_GRENADEROUND
-						|| weapon->weaponnum == WEAPON_ROCKET
-						|| weapon->weaponnum == WEAPON_HOMINGROCKET
-						|| weapon->weaponnum == WEAPON_TIMEDMINE
-						|| weapon->weaponnum == WEAPON_REMOTEMINE
-						|| weapon->weaponnum == WEAPON_PROXIMITYMINE) {
+				if (weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_GRENADE)->rank
+						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_GRENADEROUND)->rank
+						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_ROCKET)->rank
+						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank
+						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
+						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
+						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank) {
 					objSetDropped(hit->prop, DROPTYPE_DEFAULT);
 					chr->hidden |= CHRHFLAG_DROPPINGITEM;
 					objDamage(&weapon->base, gsetGetDamage(&shotdata->gset), &sp98, shotdata->gset.weaponnum, g_Vars.currentplayernum);

@@ -9,6 +9,7 @@
 #include "game/mtxf2lbulk.h"
 #include "game/gfxmemory.h"
 #include "game/file.h"
+#include "game/debug.h"
 #include "bss.h"
 #include "lib/main.h"
 #include "lib/model.h"
@@ -27,6 +28,8 @@ struct lasersight g_LaserSights[MAX_PLAYERS];
 void beamCreate(struct beam *beam, s32 weaponnum, struct coord *from, struct coord *to)
 {
 	f32 distance;
+
+	u16 rank = weaponGetRank(weaponnum);
 
 	beam->from.x = from->x;
 	beam->from.y = from->y;
@@ -49,14 +52,14 @@ void beamCreate(struct beam *beam, s32 weaponnum, struct coord *from, struct coo
 	}
 
 	beam->age = 0;
-	beam->weaponnum = weaponnum;
+	beam->weaponnum = rank;
 	beam->maxdist = distance;
 
 	if (distance < 500) {
 		distance = 500;
 	}
 
-	if (weaponnum == -1) {
+	if (rank == -1) {
 		beam->speed = 0;
 		beam->mindist = distance;
 
@@ -65,7 +68,7 @@ void beamCreate(struct beam *beam, s32 weaponnum, struct coord *from, struct coo
 		}
 
 		beam->dist = 0;
-	} else if (weaponnum == WEAPON_LASER || weaponnum == WEAPON_WATCHLASER) {
+	} else if (rank == weaponMatchEnum(WEAPON_LASER)->rank || rank == weaponMatchEnum(WEAPON_WATCHLASER)->rank) {
 		beam->speed = 0.25f * distance;
 		beam->mindist = 0.6f * distance;
 
@@ -74,7 +77,7 @@ void beamCreate(struct beam *beam, s32 weaponnum, struct coord *from, struct coo
 		}
 
 		beam->dist = (-0.1f - RANDOMFRAC() * 0.3f) * distance;
-	} else if (weaponnum == -2) {
+	} else if (rank == -2) {
 		beam->speed = 0;
 		beam->mindist = distance;
 
@@ -115,9 +118,10 @@ void beamCreateForHand(s32 handnum)
 		// empty
 	} else {
 		struct beam *beam;
-		s32 weaponnum = bgunGetWeaponNum(handnum);
+		s32 weaponnum = weaponGetRank(bgunGetWeaponNum(handnum));
 
-		if (hand->gset.weaponnum == WEAPON_LASER && hand->gset.weaponfunc == FUNC_SECONDARY) {
+		if (weaponGetRank(hand->gset.weaponnum) == weaponMatchEnum(WEAPON_LASER)->rank && weaponGetRank(hand->gset.weaponfunc) == FUNC_SECONDARY) {
+			debug_log("watch laser \n", 0);
 			weaponnum = -2;
 		}
 
@@ -297,7 +301,6 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 
 Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 {
-	u32 stack;
 	Mtxf *sp188;
 	Mtxf sp148;
 
@@ -318,7 +321,6 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 		s32 i;
 		Mtxf *worldtoscreenmtx = camGetWorldToScreenMtxf();
 		s32 j;
-		u32 stack1;
 		s32 spd8;
 		struct coord spcc;
 		f32 tmp;
@@ -330,7 +332,16 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 		f32 spa8;
 		f32 spa4;
 
-		switch (beam->weaponnum) {
+		if(beam->weaponnum == weaponMatchEnum(WEAPON_CYCLONE)->rank)
+		{
+			texconfig = &g_TexBeamConfigs[1];
+		} else if (beam->weaponnum == weaponMatchEnum(WEAPON_TRANQUILIZER)->rank) {
+			texconfig = &g_TexBeamConfigs[3];
+		} else if (beam->weaponnum == weaponMatchEnum(WEAPON_MAULER)->rank || beam->weaponnum == weaponMatchEnum(WEAPON_PHOENIX)->rank || beam->weaponnum == weaponMatchEnum(WEAPON_CALLISTO)->rank || beam->weaponnum == weaponMatchEnum(WEAPON_REAPER)->rank || beam->weaponnum == weaponMatchEnum(WEAPON_FARSIGHT)->rank) {
+			texconfig = &g_TexBeamConfigs[3];
+		}
+
+		/*switch (beam->weaponnum) {
 		case WEAPON_CYCLONE:
 			texconfig = &g_TexBeamConfigs[1];
 			break;
@@ -344,15 +355,15 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 		case WEAPON_FARSIGHT:
 			texconfig = &g_TexBeamConfigs[4];
 			break;
-		}
+		}*/
 
-		if (beam->weaponnum == -1 || beam->weaponnum == WEAPON_CYCLONE) {
+		if (beam->weaponnum == -1 || beam->weaponnum == weaponMatchEnum(WEAPON_CYCLONE)->rank) {
 			colours[0].word = PD_BE32(0xffffff7f);
 		} else {
 			colours[0].word = 0xffffffff;
 		}
 
-		if (beam->weaponnum == WEAPON_LASER) {
+		if (beam->weaponnum == weaponMatchEnum(WEAPON_LASER)->rank) {
 			// Laser primary
 			sp130 = 50.0f;
 			texconfig = &g_TexLaserConfigs[0];
@@ -447,8 +458,6 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 
 			if (spd8) {
 				mtxF2L(&sp148, sp188);
-
-				if (beam->weaponnum);
 
 				if (beam->weaponnum == -2 && PLAYERCOUNT() == 1) {
 					spcc.f[0] = sp138.f[0] + beam->dir.f[0] * sp12c;

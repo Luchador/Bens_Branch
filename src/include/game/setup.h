@@ -19,7 +19,7 @@ void setupResetProxyMines(void);
 s32 setupCountCommandType(u32 type);
 void setupCreateObject(struct defaultobj *obj, s32 cmdindex);
 void setupPlaceWeapon(struct weaponobj *weapon, s32 cmdindex);
-void setupCreateHat(struct hatobj *hat, s32 cmdindex);
+//void setupCreateHat(struct hatobj *hat, s32 cmdindex);
 void setupCreateKey(struct keyobj *key, s32 cmdindex);
 void setupCreateMine(struct mineobj *mine, s32 cmdindex);
 void setupCreateCctv(struct cctvobj *camera, s32 cmdindex);

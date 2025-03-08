@@ -4,8 +4,6 @@
 #include "data.h"
 #include "types.h"
 
-extern u32 var800698f0;
-extern u32 var800698f4;
 extern struct prop *g_EmbedProp;
 extern s32 g_EmbedHitPart;
 extern f32 g_CctvWaitScale;
@@ -260,12 +258,12 @@ s32 propPickupByPlayer(struct prop *prop, bool showhudmsg);
 s32 objTestForPickup(struct prop *prop);
 bool func0f0899dc(struct prop *prop, struct coord *arg1, f32 *arg2, f32 *arg3);
 void modelFreeVertices(s32 vtxstoretype, struct model *model);
-struct prop *hatApplyToChr(struct hatobj *hat, struct chrdata *chr, struct modeldef *modeldef, struct prop *prop, struct model *model);
-void hatLoadAndApplyToChr(struct hatobj *hat, struct chrdata *chr);
-void hatAssignToChr(struct hatobj *hat, struct chrdata *chr);
-struct prop *hatCreateForChr(struct chrdata *chr, s32 modelnum, u32 flags);
+//struct prop *hatApplyToChr(struct hatobj *hat, struct chrdata *chr, struct modeldef *modeldef, struct prop *prop, struct model *model);
+//void hatLoadAndApplyToChr(struct hatobj *hat, struct chrdata *chr);
+//void hatAssignToChr(struct hatobj *hat, struct chrdata *chr);
+//struct prop *hatCreateForChr(struct chrdata *chr, s32 modelnum, u32 flags);
 struct weaponobj *weaponCreate(bool musthaveprop, bool musthavemodel, struct modeldef *modeldef);
-struct hatobj *hatCreate(bool musthaveprop, bool musthavemodel, struct modeldef *modeldef);
+//struct hatobj *hatCreate(bool musthaveprop, bool musthavemodel, struct modeldef *modeldef);
 struct ammocrateobj *ammocrateAllocate(void);
 struct defaultobj *debrisAllocate(void);
 void playerActivateRemoteMineDetonator(s32 playernum);
@@ -342,7 +340,6 @@ void gasStopAudio(void);
 bool gasIsActive(void);
 void gasTick(void);
 Gfx *countdownTimerRender(Gfx *gdl);
-void projectilesDebug(void);
 void alarmTick(void);
 void func0f091030(void);
 void currentPlayerDropAllItems(void);

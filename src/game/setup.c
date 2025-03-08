@@ -175,7 +175,7 @@ void propsReset(void)
 		g_Lifts[i] = NULL;
 	}
 
-	g_MaxWeaponSlots = 50;
+	g_MaxWeaponSlots = 51;
 	g_MaxHatSlots = 10;
 	g_MaxAmmoCrates = 20;
 	g_MaxDebrisSlots = 15;
@@ -628,6 +628,7 @@ void setupPlaceWeapon(struct weaponobj *weapon, s32 cmdindex)
 					case WEAPON_FALCON2:
 					case WEAPON_FALCON2_SILENCER:
 					case WEAPON_FALCON2_SCOPE:
+					case WEAPON_FALCON2_SANDS:
 					case WEAPON_MAGSEC4:
 					case WEAPON_MAULER:
 					case WEAPON_PHOENIX:
@@ -733,7 +734,7 @@ void setupPlaceWeapon(struct weaponobj *weapon, s32 cmdindex)
 	}
 }
 
-void setupCreateHat(struct hatobj *hat, s32 cmdindex)
+/*void setupCreateHat(struct hatobj *hat, s32 cmdindex)
 {
 	if (hat->base.flags & OBJFLAG_ASSIGNEDTOCHR) {
 		struct chrdata *chr = chrFindByLiteralId(hat->base.pad);
@@ -744,7 +745,7 @@ void setupCreateHat(struct hatobj *hat, s32 cmdindex)
 	} else {
 		setupCreateObject(&hat->base, cmdindex);
 	}
-}
+}*/
 
 void setupCreateKey(struct keyobj *key, s32 cmdindex)
 {
@@ -1476,7 +1477,7 @@ void setupCreateProps(s32 stagenum)
 
 		for (j = 0; j < PLAYERCOUNT(); j++) {
 			setCurrentPlayerNum(j);
-			invInit(setupCountCommandType(OBJTYPE_LINKGUNS));
+			invInit(setupCountCommandType(OBJTYPE_LINKGUNS)); // Allocate memory for the player's starting weapons and devices
 		}
 
 		if (g_StageSetup.props) {
@@ -1540,9 +1541,9 @@ void setupCreateProps(s32 stagenum)
 					}
 					break;
 				case OBJTYPE_HAT:
-					if (withchrs && (obj->flags2 & diffflag) == 0) {
+					/*if (withchrs && (obj->flags2 & diffflag) == 0) {
 						setupCreateHat((struct hatobj *)obj, index);
-					}
+					}*/
 					break;
 				case OBJTYPE_CCTV:
 					if (withobjs && (obj->flags2 & diffflag) == 0) {
@@ -1571,11 +1572,7 @@ void setupCreateProps(s32 stagenum)
 					break;
 				case OBJTYPE_SHIELD:
 					if (withobjs) {
-#if VERSION >= VERSION_JPN_FINAL
 						if ((obj->flags2 & diffflag) == 0)
-#else
-						if ((obj->flags2 & diffflag) == 0 || g_Jpn)
-#endif
 						{
 							struct shieldobj *shield = (struct shieldobj *)obj;
 							shield->initialamount = *(s32 *)&shield->initialamount / 65536.0f;

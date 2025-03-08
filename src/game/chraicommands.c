@@ -2318,13 +2318,11 @@ bool aiGiveObjectToChr(void)
 			u32 playernum = playermgrGetPlayerNumByProp(chr->prop);
 			setCurrentPlayerNum(playernum);
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (obj->prop->parent) {
 				objDetach(obj->prop);
 				objFreeEmbedmentOrProjectile(obj->prop);
 				propActivate(obj->prop);
 			}
-#endif
 
 			something = propPickupByPlayer(obj->prop, 0);
 			propExecuteTickOperation(obj->prop, something);
@@ -4165,6 +4163,7 @@ bool aiTryEquipWeapon(void)
 			case WEAPON_FALCON2:
 			case WEAPON_FALCON2_SILENCER:
 			case WEAPON_FALCON2_SCOPE:
+			case WEAPON_FALCON2_SANDS:
 			case WEAPON_MAGSEC4:
 			case WEAPON_MAULER:
 			case WEAPON_PHOENIX:
@@ -4223,7 +4222,8 @@ bool aiTryEquipWeapon(void)
 /**
  * @cmd 00c9
  */
-bool aiTryEquipHat(void)
+// Not used in PD
+/*bool aiTryEquipHat(void)
 {
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
 	u32 flags = (cmd[5] << 16) | (cmd[6] << 8) | cmd[7] | (cmd[4] << 24);
@@ -4241,7 +4241,7 @@ bool aiTryEquipHat(void)
 	}
 
 	return false;
-}
+}*/
 
 /**
  * @cmd 00ca
@@ -4301,10 +4301,11 @@ bool aiDuplicateChr(void)
 				propweaponSetDual(cloneweapon1, cloneweapon0);
 			}
 
-			if (chr->weapons_held[2]) {
+			// Not used in PD
+			/*if (chr->weapons_held[2]) {
 				struct defaultobj *obj = chr->weapons_held[2]->obj;
 				hatCreateForChr(clone, obj->modelnum, 0);
-			}
+			}*/
 
 			clone->flags = chr->flags;
 			clone->flags2 = chr->flags2;
@@ -5910,6 +5911,9 @@ bool aiSetTarget(void)
 			struct chrdata *chr = chrFindById(g_Vars.chrdata, cmd[2]);
 			newtarget = chr->target;
 		}
+		else {
+			newtarget = 0;
+		}
 
 		if (newtarget != g_Vars.chrdata->target) {
 			g_Vars.chrdata->lastvisibletarget60 = 0;
@@ -6119,6 +6123,7 @@ bool aiIfSafety2LessThan(void)
 	case WEAPON_FALCON2:
 	case WEAPON_FALCON2_SILENCER:
 	case WEAPON_FALCON2_SCOPE:
+	case WEAPON_FALCON2_SANDS:
 	case WEAPON_MAGSEC4:
 	case WEAPON_MAULER:
 	case WEAPON_PHOENIX:
@@ -9398,6 +9403,7 @@ bool aiChrSetCutsceneWeapon(void)
 					case WEAPON_FALCON2:
 					case WEAPON_FALCON2_SILENCER:
 					case WEAPON_FALCON2_SCOPE:
+					case WEAPON_FALCON2_SANDS:
 					case WEAPON_MAGSEC4:
 					case WEAPON_MAULER:
 					case WEAPON_PHOENIX:

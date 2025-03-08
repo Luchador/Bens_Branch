@@ -398,10 +398,6 @@ void playermgrAllocatePlayer(s32 index)
 	g_Vars.players[index]->slayerrocket = NULL;
 	g_Vars.players[index]->badrockettime = 0;
 
-#if VERSION >= VERSION_JPN_FINAL
-	g_Vars.players[index]->visionmode = VISIONMODE_NORMAL;
-#endif
-
 	g_Vars.players[index]->gunctrl.gunmemtype = 0;
 	g_Vars.players[index]->gunctrl.gunmem = NULL;
 	g_Vars.players[index]->gunctrl.gunmodeldef = NULL;
@@ -719,6 +715,7 @@ s32 playermgrGetModelOfWeapon(s32 weapon)
 	case WEAPON_PHOENIX:          model = MODEL_CHRMAIANPISTOL; break;
 	case WEAPON_FALCON2_SILENCER: model = MODEL_CHRFALCON2SIL; break;
 	case WEAPON_FALCON2_SCOPE:    model = MODEL_CHRFALCON2SCOPE; break;
+	case WEAPON_FALCON2_SANDS:    model = MODEL_CHRFALCON2SCOPE; break;
 	case WEAPON_CMP150:           model = MODEL_CHRCMP150; break;
 	case WEAPON_AR34:             model = MODEL_CHRAR34; break;
 	case WEAPON_DRAGON:           model = MODEL_CHRDRAGON; break;

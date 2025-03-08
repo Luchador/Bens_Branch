@@ -17,17 +17,369 @@
 #include "data.h"
 #include "types.h"
 
-struct weapon *weaponFindById(s32 itemid)
+struct weapon *weaponGetByRank(u16 rank)
 {
-	if (itemid < 0) {
+	if(rank >= ARRAYCOUNT(g_Weapons)) {
 		return NULL;
 	}
 
-	if (itemid >= ARRAYCOUNT(g_Weapons)) {
+	u16 i;
+
+	for(i = 0; i < ARRAYCOUNT(g_Weapons); i++) {
+		if(g_Weapons[i]->rank == rank) {
+			return g_Weapons[i];
+		}
+	}
+
+	return NULL;
+}
+
+u16 weaponGetRank(u16 rank)
+{
+	if(rank >= ARRAYCOUNT(g_Weapons)) {
+		return 0;
+	}
+
+	u16 i;
+
+	for(i = 0; i < ARRAYCOUNT(g_Weapons); i++) {
+		if(g_Weapons[i]->rank == rank) {
+			return g_Weapons[i]->rank;
+		}
+	}
+
+	return 0;
+}
+
+struct weapon *weaponMatchEnum(u16 num)
+{
+	if(num >= ARRAYCOUNT(g_Weapons)) {
 		return NULL;
 	}
 
-	return g_Weapons[itemid];
+		switch(num) {
+		case WEAPON_NONE:             return g_Weapons[0];
+		case WEAPON_UNARMED:          return g_Weapons[1];
+		case WEAPON_FALCON2:          return g_Weapons[2];
+		case WEAPON_FALCON2_SILENCER: return g_Weapons[3];
+		case WEAPON_FALCON2_SCOPE:    return g_Weapons[4];
+		case WEAPON_FALCON2_SANDS:    return g_Weapons[5];
+		case WEAPON_MAGSEC4:          return g_Weapons[6];
+		case WEAPON_MAULER:           return g_Weapons[7];
+		case WEAPON_PHOENIX:          return g_Weapons[8];
+		case WEAPON_DY357MAGNUM:      return g_Weapons[9];
+		case WEAPON_DY357LX:          return g_Weapons[10];
+		case WEAPON_CMP150:           return g_Weapons[11];
+		case WEAPON_CYCLONE:          return g_Weapons[12];
+		case WEAPON_CALLISTO:         return g_Weapons[13];
+		case WEAPON_RCP120:           return g_Weapons[14];
+		case WEAPON_LAPTOPGUN:        return g_Weapons[15];
+		case WEAPON_DRAGON:           return g_Weapons[16];
+		case WEAPON_K7AVENGER:        return g_Weapons[17];
+		case WEAPON_AR34:             return g_Weapons[18];
+		case WEAPON_SUPERDRAGON:      return g_Weapons[19];
+		case WEAPON_SHOTGUN:          return g_Weapons[20];
+		case WEAPON_REAPER:           return g_Weapons[21];
+		case WEAPON_SNIPERRIFLE:      return g_Weapons[22];
+		case WEAPON_FARSIGHT:         return g_Weapons[23];
+		case WEAPON_DEVASTATOR:       return g_Weapons[24];
+		case WEAPON_ROCKETLAUNCHER:   return g_Weapons[25];
+		case WEAPON_SLAYER:           return g_Weapons[26];
+		case WEAPON_COMBATKNIFE:      return g_Weapons[27];
+		case WEAPON_CROSSBOW:         return g_Weapons[28];
+		case WEAPON_TRANQUILIZER:     return g_Weapons[29];
+		case WEAPON_LASER:            return g_Weapons[30];
+		case WEAPON_GRENADE:          return g_Weapons[31];
+		case WEAPON_NBOMB:            return g_Weapons[32];
+		case WEAPON_TIMEDMINE:        return g_Weapons[33];
+		case WEAPON_PROXIMITYMINE:    return g_Weapons[34];
+		case WEAPON_REMOTEMINE:       return g_Weapons[35];
+		case WEAPON_COMBATBOOST:      return g_Weapons[36];
+		case WEAPON_PP9I:             return g_Weapons[37];
+		case WEAPON_CC13:             return g_Weapons[38];
+		case WEAPON_KL01313:          return g_Weapons[39];
+		case WEAPON_KF7SPECIAL:       return g_Weapons[40];
+		case WEAPON_ZZT:              return g_Weapons[41];
+		case WEAPON_DMC:              return g_Weapons[42];
+		case WEAPON_AR53:             return g_Weapons[43];
+		case WEAPON_RCP45:            return g_Weapons[44];
+		case WEAPON_PSYCHOSISGUN:     return g_Weapons[45];
+		case WEAPON_NIGHTVISION:      return g_Weapons[46];
+		case WEAPON_EYESPY:           return g_Weapons[47];
+		case WEAPON_XRAYSCANNER:      return g_Weapons[48];
+		case WEAPON_IRSCANNER:        return g_Weapons[49];
+		case WEAPON_CLOAKINGDEVICE:   return g_Weapons[50];
+		case WEAPON_HORIZONSCANNER:   return g_Weapons[51];
+		case WEAPON_TESTER:           return g_Weapons[52];
+		case WEAPON_ROCKETLAUNCHER_34:return g_Weapons[53];
+		case WEAPON_ECMMINE:          return g_Weapons[54];
+		case WEAPON_DATAUPLINK:       return g_Weapons[55];
+		case WEAPON_RTRACKER:         return g_Weapons[56];
+		case WEAPON_PRESIDENTSCANNER: return g_Weapons[57];
+		case WEAPON_DOORDECODER:      return g_Weapons[58];
+		case WEAPON_AUTOSURGEON:      return g_Weapons[59];
+		case WEAPON_EXPLOSIVES:       return g_Weapons[60];
+		case WEAPON_SKEDARBOMB:       return g_Weapons[61];
+		case WEAPON_COMMSRIDER:       return g_Weapons[62];
+		case WEAPON_TRACERBUG:        return g_Weapons[63];
+		case WEAPON_TARGETAMPLIFIER:  return g_Weapons[64];
+		case WEAPON_DISGUISE40:       return g_Weapons[65];
+		case WEAPON_DISGUISE41:       return g_Weapons[66];
+		case WEAPON_FLIGHTPLANS:      return g_Weapons[67];
+		case WEAPON_RESEARCHTAPE:     return g_Weapons[68];
+		case WEAPON_BACKUPDISK:       return g_Weapons[69];
+		case WEAPON_KEYCARD45:        return g_Weapons[70];
+		case WEAPON_KEYCARD46:        return g_Weapons[71];
+		case WEAPON_KEYCARD47:        return g_Weapons[72];
+		case WEAPON_KEYCARD48:        return g_Weapons[73];
+		case WEAPON_KEYCARD49:        return g_Weapons[74];
+		case WEAPON_KEYCARD4A:        return g_Weapons[75];
+		case WEAPON_KEYCARD4B:        return g_Weapons[76];
+		case WEAPON_KEYCARD4C:        return g_Weapons[77];
+		case WEAPON_SUITCASE:         return g_Weapons[78];
+		case WEAPON_BRIEFCASE:        return g_Weapons[79];
+		case WEAPON_SHIELDTECHITEM:   return g_Weapons[80];
+		case WEAPON_NECKLACE:         return g_Weapons[81];
+		case WEAPON_HAMMER:           return g_Weapons[82];
+		case WEAPON_SCREWDRIVER:      return g_Weapons[83];
+		case WEAPON_ROCKET:           return g_Weapons[84];
+		case WEAPON_HOMINGROCKET:     return g_Weapons[85];
+		case WEAPON_GRENADEROUND:     return g_Weapons[86];
+		case WEAPON_BOLT:             return g_Weapons[87];
+		case WEAPON_BRIEFCASE2:       return g_Weapons[88];
+		case WEAPON_SKROCKET:         return g_Weapons[89];
+		case WEAPON_CHOPPERGUN:       return g_Weapons[90];
+		case WEAPON_WATCHLASER:       return g_Weapons[91];
+		case WEAPON_MPSHIELD:         return g_Weapons[0];
+		case WEAPON_DISABLED:         return g_Weapons[0];
+		case WEAPON_SUICIDEPILL:      return g_Weapons[93];
+		default:
+			return g_Weapons[1]; // Unarmed
+	}
+
+	/*switch(num) {
+		case WEAPON_NONE:
+			return g_Weapons[0];
+		case WEAPON_UNARMED:
+			return g_Weapons[1];
+		case WEAPON_FALCON2:
+			return g_Weapons[2];
+		case WEAPON_FALCON2_SILENCER:
+			return g_Weapons[3];
+		case WEAPON_FALCON2_SCOPE:
+			return g_Weapons[4];
+		case WEAPON_FALCON2_SANDS:
+			return g_Weapons[93];
+		case WEAPON_MAGSEC4:
+			return g_Weapons[5];
+		case WEAPON_MAULER:
+			return g_Weapons[6];
+		case WEAPON_PHOENIX:
+			return g_Weapons[7];
+		case WEAPON_DY357MAGNUM:
+			return g_Weapons[8];
+		case WEAPON_DY357LX:
+			return g_Weapons[9];
+		case WEAPON_CMP150:
+			return g_Weapons[10];
+		case WEAPON_CYCLONE:
+			return g_Weapons[11];
+		case WEAPON_CALLISTO:
+			return g_Weapons[12];
+		case WEAPON_RCP120:
+			return g_Weapons[13];
+		case WEAPON_LAPTOPGUN:
+			return g_Weapons[14];
+		case WEAPON_DRAGON:
+			return g_Weapons[15];
+		case WEAPON_K7AVENGER:
+			return g_Weapons[16];
+		case WEAPON_AR34:
+			return g_Weapons[17];
+		case WEAPON_SUPERDRAGON:
+			return g_Weapons[18];
+		case WEAPON_SHOTGUN:
+			return g_Weapons[19];
+		case WEAPON_REAPER:
+			return g_Weapons[20];
+		case WEAPON_SNIPERRIFLE:
+			return g_Weapons[21];
+		case WEAPON_FARSIGHT:
+			return g_Weapons[22];
+		case WEAPON_DEVASTATOR:
+			return g_Weapons[23];
+		case WEAPON_ROCKETLAUNCHER:
+			return g_Weapons[24];
+		case WEAPON_SLAYER:
+			return g_Weapons[25];
+		case WEAPON_COMBATKNIFE:
+			return g_Weapons[26];
+		case WEAPON_CROSSBOW:
+			return g_Weapons[27];
+		case WEAPON_TRANQUILIZER:
+			return g_Weapons[28];
+		case WEAPON_LASER:
+			return g_Weapons[29];
+		case WEAPON_GRENADE:
+			return g_Weapons[30];
+		case WEAPON_NBOMB:
+			return g_Weapons[31];
+		case WEAPON_TIMEDMINE:
+			return g_Weapons[32];
+		case WEAPON_PROXIMITYMINE:
+			return g_Weapons[33];
+		case WEAPON_REMOTEMINE:
+			return g_Weapons[34];
+		case WEAPON_COMBATBOOST:
+			return g_Weapons[35];
+		case WEAPON_PP9I:
+			return g_Weapons[36];
+		case WEAPON_CC13:
+			return g_Weapons[37];
+		case WEAPON_KL01313:
+			return g_Weapons[38];
+		case WEAPON_KF7SPECIAL:
+			return g_Weapons[39];
+		case WEAPON_ZZT:
+			return g_Weapons[40];
+		case WEAPON_DMC:
+			return g_Weapons[41];
+		case WEAPON_AR53:
+			return g_Weapons[42];
+		case WEAPON_RCP45:
+			return g_Weapons[43];
+		case WEAPON_PSYCHOSISGUN:
+			return g_Weapons[44];
+		case WEAPON_NIGHTVISION:
+			return g_Weapons[45];
+		case WEAPON_EYESPY:
+			return g_Weapons[46];
+		case WEAPON_XRAYSCANNER:
+			return g_Weapons[47];
+		case WEAPON_IRSCANNER:
+			return g_Weapons[48];
+		case WEAPON_CLOAKINGDEVICE:
+			return g_Weapons[49];
+		case WEAPON_HORIZONSCANNER:
+			return g_Weapons[50];
+		case WEAPON_TESTER:
+			return g_Weapons[51];
+		case WEAPON_ROCKETLAUNCHER_34:
+			return g_Weapons[52];
+		case WEAPON_ECMMINE:
+			return g_Weapons[53];
+		case WEAPON_DATAUPLINK:
+			return g_Weapons[54];
+		case WEAPON_RTRACKER:
+			return g_Weapons[55];
+		case WEAPON_PRESIDENTSCANNER:
+			return g_Weapons[56];
+		case WEAPON_DOORDECODER:
+			return g_Weapons[57];
+		case WEAPON_AUTOSURGEON:
+			return g_Weapons[58];
+		case WEAPON_EXPLOSIVES:
+			return g_Weapons[59];
+		case WEAPON_SKEDARBOMB:
+			return g_Weapons[60];
+		case WEAPON_COMMSRIDER:
+			return g_Weapons[61];
+		case WEAPON_TRACERBUG:
+			return g_Weapons[62];
+		case WEAPON_TARGETAMPLIFIER:
+			return g_Weapons[63];
+		case WEAPON_DISGUISE40:
+			return g_Weapons[64];
+		case WEAPON_DISGUISE41:
+			return g_Weapons[65];
+		case WEAPON_FLIGHTPLANS:
+			return g_Weapons[66];
+		case WEAPON_RESEARCHTAPE:
+			return g_Weapons[67];
+		case WEAPON_BACKUPDISK:
+			return g_Weapons[68];
+		case WEAPON_KEYCARD45:
+			return g_Weapons[69];
+		case WEAPON_KEYCARD46:
+			return g_Weapons[70];
+		case WEAPON_KEYCARD47:
+			return g_Weapons[71];
+		case WEAPON_KEYCARD48:
+			return g_Weapons[72];
+		case WEAPON_KEYCARD49:
+			return g_Weapons[73];
+		case WEAPON_KEYCARD4A:
+			return g_Weapons[74];
+		case WEAPON_KEYCARD4B:
+			return g_Weapons[75];
+		case WEAPON_KEYCARD4C:
+			return g_Weapons[76];
+		case WEAPON_SUITCASE:
+			return g_Weapons[77];
+		case WEAPON_BRIEFCASE:
+			return g_Weapons[78];
+		case WEAPON_SHIELDTECHITEM:
+			return g_Weapons[79];
+		case WEAPON_NECKLACE:
+			return g_Weapons[80];
+		case WEAPON_HAMMER:
+			return g_Weapons[81];
+		case WEAPON_SCREWDRIVER:
+			return g_Weapons[82];
+		case WEAPON_ROCKET:
+			return g_Weapons[83];
+		case WEAPON_HOMINGROCKET:
+			return g_Weapons[84];
+		case WEAPON_GRENADEROUND:
+			return g_Weapons[85];
+		case WEAPON_BOLT:
+			return g_Weapons[86];
+		case WEAPON_BRIEFCASE2:
+			return g_Weapons[87];
+		case WEAPON_SKROCKET:
+			return g_Weapons[88];
+		case WEAPON_CHOPPERGUN:
+			return g_Weapons[89];
+		case WEAPON_WATCHLASER:
+			return g_Weapons[90];
+		case WEAPON_MPSHIELD:
+			return NULL;
+		case WEAPON_DISABLED:
+			return NULL;
+		case WEAPON_SUICIDEPILL:
+			return g_Weapons[92];
+		default:
+			return g_Weapons[1]; // Unarmed
+	}*/
+
+	return NULL;
+}
+
+s32 weaponGetHighestRank()
+{ 
+	s32 i;
+	s32 highest = 0;
+
+	for(i = 0; i < ARRAYCOUNT(g_Weapons); i++) {
+		if(g_Weapons[i]->rank > highest) {
+			highest = g_Weapons[i]->rank;
+		}
+	}
+
+	return highest;
+}
+
+struct weapon *weaponFindById(s32 rank)
+{
+	if (rank < 0) {
+		return NULL;
+	}
+
+	if (rank >= weaponGetHighestRank()) {
+		return NULL;
+	}
+
+	return weaponGetByRank(rank);
 }
 
 struct weaponfunc *weaponGetFunctionById(u32 weaponnum, u32 which)
@@ -57,12 +409,10 @@ struct weaponfunc *gsetGetWeaponFunction(struct gset *gset)
 	struct weapon *weapon = g_Weapons[gset->weaponnum];
 
 	if (weapon) {
-#ifdef AVOID_UB
 		// SuperDragon grenades have FUNC_2, so this can happen
 		if (gset->weaponfunc > FUNC_SECONDARY) {
 			return NULL;
 		}
-#endif
 		return weapon->functions[gset->weaponfunc];
 	}
 
@@ -165,7 +515,7 @@ f32 func0f0b131c(s32 hand)
 	struct weapon *weapon;
 
 	if (hand == 0) {
-		weapon = weaponFindById(bgunGetWeaponNum2(0));
+		weapon = weaponFindById(bgunGetWeaponNum(0));
 		x = weapon->posx;
 
 		if (PLAYERCOUNT() == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
@@ -176,7 +526,7 @@ f32 func0f0b131c(s32 hand)
 			}
 		}
 	} else {
-		weapon = weaponFindById(bgunGetWeaponNum2(1));
+		weapon = weaponFindById(bgunGetWeaponNum(1));
 		x = -weapon->posx;
 
 		if (PLAYERCOUNT() == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
@@ -196,7 +546,7 @@ f32 currentPlayerGetGunZoomFov(void)
 	s32 index = -1;
 	struct weapon *weapon;
 
-	switch (bgunGetWeaponNum2(0)) {
+	switch (bgunGetWeaponNum(0)) {
 	case WEAPON_SNIPERRIFLE:
 		index = 0;
 		break;
@@ -212,7 +562,7 @@ f32 currentPlayerGetGunZoomFov(void)
 		return g_Vars.currentplayer->gunzoomfovs[index];
 	}
 
-	weapon = weaponFindById(bgunGetWeaponNum2(0));
+	weapon = weaponFindById(bgunGetWeaponNum(0));
 
 	if (weapon) {
 		f32 fov = weapon->aimsettings->zoomfov;
@@ -226,7 +576,7 @@ void currentPlayerZoomOut(f32 fovpersec)
 {
 	s32 index = -1;
 
-	switch (bgunGetWeaponNum2(0)) {
+	switch (bgunGetWeaponNum(0)) {
 	case WEAPON_SNIPERRIFLE:
 		index = 0;
 		break;
@@ -241,7 +591,7 @@ void currentPlayerZoomOut(f32 fovpersec)
 	if (index >= 0) {
 		f32 amount = fovpersec * 0.25f * LVUPDATE60FREAL();
 
-		if (bgunGetWeaponNum2(0) == WEAPON_FARSIGHT) {
+		if (bgunGetWeaponNum(0) == WEAPON_FARSIGHT) {
 			amount *= 0.5f;
 		}
 
@@ -257,7 +607,7 @@ void currentPlayerZoomIn(f32 fovpersec)
 {
 	s32 index = -1;
 
-	switch (bgunGetWeaponNum2(0)) {
+	switch (bgunGetWeaponNum(0)) {
 	case WEAPON_SNIPERRIFLE:
 		index = 0;
 		break;
@@ -272,7 +622,7 @@ void currentPlayerZoomIn(f32 fovpersec)
 	if (index >= 0) {
 		f32 amount = fovpersec * 0.25f * LVUPDATE60FREAL();
 
-		if (bgunGetWeaponNum2(0) == WEAPON_FARSIGHT) {
+		if (bgunGetWeaponNum(0) == WEAPON_FARSIGHT) {
 			amount *= 0.5f;
 		}
 
@@ -292,12 +642,10 @@ bool weaponHasFlag(s32 itemid, u32 flag)
 		return false;
 	}
 
-#ifndef PLATFORM_N64
 	// always dual-wieldable if cheat is enabled
 	if (cheatIsActive(CHEAT_DUALWIELDALLGUNS) && (flag == WEAPONFLAG_DUALWIELD)) {
 		return true;
 	}
-#endif
 
 	return (weapon->flags & flag) != 0;
 }
@@ -392,7 +740,7 @@ u16 weaponGetFileNum(s32 weaponnum)
 	struct weapon *weapon = NULL;
 
 	if (weaponnum != -1) {
-		weapon = g_Weapons[weaponnum];
+		weapon = weaponGetByRank(weaponnum);
 	}
 
 	if (weapon) {
@@ -402,17 +750,12 @@ u16 weaponGetFileNum(s32 weaponnum)
 	return 0;
 }
 
-u16 weaponGetFileNum2(s32 weaponnum)
-{
-	return weaponGetFileNum(weaponnum);
-}
-
 void gsetPopulateFromCurrentPlayer(s32 handnum, struct gset *gset)
 {
 	gset->weaponnum = g_Vars.currentplayer->gunctrl.weaponnum;
 	gset->weaponfunc = g_Vars.currentplayer->hands[handnum].gset.weaponfunc;
 	gset->unk063a = g_Vars.currentplayer->hands[handnum].gset.unk063a;
-	gset->unk0639 = g_Vars.currentplayer->hands[handnum].gset.unk0639;
+	gset->gsetrank = g_Vars.currentplayer->hands[handnum].gset.gsetrank;
 
 	if (gset->weaponnum == WEAPON_MAULER) {
 		gset->unk063a = g_Vars.currentplayer->hands[handnum].matmot1 * 10.0f;
@@ -607,58 +950,38 @@ u32 currentPlayerGetSight(void)
 		return SIGHT_CLASSIC;
 	}
 
-	switch (g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponnum) {
-	case WEAPON_HORIZONSCANNER:
-		return SIGHT_NONE;
-	case WEAPON_NONE:
-	case WEAPON_UNARMED:
-	case WEAPON_FALCON2:
-	case WEAPON_FALCON2_SILENCER:
-	case WEAPON_DY357MAGNUM:
-	case WEAPON_DY357LX:
-	case WEAPON_CMP150:
-	case WEAPON_CYCLONE:
-	case WEAPON_RCP120:
-	case WEAPON_SHOTGUN:
-	case WEAPON_DEVASTATOR:
-	case WEAPON_ROCKETLAUNCHER:
-	case WEAPON_SLAYER:
-	case WEAPON_COMBATKNIFE:
-	case WEAPON_CROSSBOW:
-	case WEAPON_TRANQUILIZER:
-	case WEAPON_LASER:
-	case WEAPON_GRENADE:
-	case WEAPON_NBOMB:
-	case WEAPON_TIMEDMINE:
-	case WEAPON_PROXIMITYMINE:
-	case WEAPON_REMOTEMINE:
-	case WEAPON_ECMMINE:
-		return SIGHT_DEFAULT;
-	case WEAPON_FALCON2_SCOPE:
-	case WEAPON_MAGSEC4:
-	case WEAPON_SNIPERRIFLE:
-	case WEAPON_LAPTOPGUN:
-	case WEAPON_DRAGON:
-	case WEAPON_K7AVENGER:
-	case WEAPON_AR34:
-	case WEAPON_SUPERDRAGON:
-		return SIGHT_ZOOM;
-	case WEAPON_MAULER:
-	case WEAPON_REAPER:
-		return SIGHT_SKEDAR;
-	case WEAPON_PHOENIX:
-	case WEAPON_CALLISTO:
-	case WEAPON_FARSIGHT:
+	u16 rank = weaponGetRank(g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponnum);
+
+	if(		rank == weaponMatchEnum(WEAPON_FALCON2_SCOPE)->rank ||
+			//rank == weaponMatchEnum(WEAPON_FALCON2_SANDS)->rank ||
+			rank == weaponMatchEnum(WEAPON_MAGSEC4)->rank ||
+			rank == weaponMatchEnum(WEAPON_SNIPERRIFLE)->rank ||
+			rank == weaponMatchEnum(WEAPON_LAPTOPGUN)->rank ||
+			rank == weaponMatchEnum(WEAPON_DRAGON)->rank ||
+			rank == weaponMatchEnum(WEAPON_K7AVENGER)->rank ||
+			rank == weaponMatchEnum(WEAPON_AR34)->rank ||
+			rank == weaponMatchEnum(WEAPON_SUPERDRAGON)->rank){
+			return SIGHT_ZOOM;
+		}
+	else if(rank == weaponMatchEnum(WEAPON_MAULER)->rank ||
+	        rank == weaponMatchEnum(WEAPON_REAPER)->rank) {
+			return SIGHT_SKEDAR;
+	}
+	else if(rank == weaponMatchEnum(WEAPON_PHOENIX)->rank ||
+			rank == weaponMatchEnum(WEAPON_CALLISTO)->rank ||
+			rank == weaponMatchEnum(WEAPON_FARSIGHT)->rank) {
 		return SIGHT_MAIAN;
-	case WEAPON_PP9I:
-	case WEAPON_CC13:
-	case WEAPON_KL01313:
-	case WEAPON_KF7SPECIAL:
-	case WEAPON_ZZT:
-	case WEAPON_DMC:
-	case WEAPON_AR53:
-	case WEAPON_RCP45:
-		return SIGHT_CLASSIC;
+	}
+	else if(
+			rank == weaponMatchEnum(WEAPON_PP9I)->rank ||
+			rank == weaponMatchEnum(WEAPON_CC13)->rank ||
+			rank == weaponMatchEnum(WEAPON_KL01313)->rank ||
+			rank == weaponMatchEnum(WEAPON_KF7SPECIAL)->rank ||
+			rank == weaponMatchEnum(WEAPON_ZZT)->rank ||
+			rank == weaponMatchEnum(WEAPON_DMC)->rank ||
+			rank == weaponMatchEnum(WEAPON_AR53)->rank ||
+			rank == weaponMatchEnum(WEAPON_RCP45)->rank) {
+	   return SIGHT_CLASSIC;
 	}
 
 	return SIGHT_DEFAULT;

@@ -2303,12 +2303,7 @@ void chrAttackWalk(struct chrdata *chr, bool run)
 	chr->actiontype = ACT_ATTACKWALK;
 
 	chr->act_attackwalk.frame60count = 0;
-#if PAL
-	// This is really TICKS(400.0f), but off by one bit :(
-	chr->act_attackwalk.frame60max = rngRandom() % (s32)(333.33331298828f * g_AttackWalkDurationScale) + TICKS(120);
-#else
 	chr->act_attackwalk.frame60max = rngRandom() % (s32)(400 * g_AttackWalkDurationScale) + TICKS(120);
-#endif
 	chr->act_attackwalk.facedtarget = false;
 	chr->act_attackwalk.animcfg = animcfg;
 	chr->act_attackwalk.nextshot60 = 0;
@@ -4874,8 +4869,6 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 							chr->act_preargh.hitpart = hitpart;
 							chr->act_preargh.aplayernum = aplayernum;
 							chr->act_preargh.gset.weaponnum = gset->weaponnum;
-							chr->act_preargh.gset.unk0639 = gset->unk0639;
-							chr->act_preargh.gset.unk063a = gset->unk063a;
 							chr->act_preargh.gset.weaponfunc = gset->weaponfunc;
 
 							chr->sleep = 0;
@@ -9235,58 +9228,12 @@ void chrCalculateHit(struct chrdata *chr, bool *angleokptr, bool *hit, struct gs
 	*angleokptr = angleok;
 	*hit = false;
 
-	// Determine the distance at which accuracy starts to taper off
-	switch (gset->weaponnum) {
-	case WEAPON_FALCON2:
-	case WEAPON_FALCON2_SILENCER:
-	case WEAPON_MAULER:
-	case WEAPON_PHOENIX:
-	case WEAPON_DY357MAGNUM:
-	case WEAPON_DY357LX:
-	case WEAPON_CMP150:
-	case WEAPON_CYCLONE:
-	case WEAPON_CALLISTO:
-	case WEAPON_RCP120:
-	case WEAPON_LAPTOPGUN:
-	case WEAPON_DRAGON:
-	case WEAPON_K7AVENGER:
-	case WEAPON_AR34:
-	case WEAPON_SUPERDRAGON:
-	case WEAPON_SHOTGUN:
-	case WEAPON_REAPER:
-	case WEAPON_DEVASTATOR:
-	case WEAPON_ROCKETLAUNCHER:
-	case WEAPON_SLAYER:
-	case WEAPON_COMBATKNIFE:
-	case WEAPON_CROSSBOW:
-	case WEAPON_TRANQUILIZER:
-	case WEAPON_LASER:
-	case WEAPON_GRENADE:
-	case WEAPON_NBOMB:
-	case WEAPON_TIMEDMINE:
-	case WEAPON_PROXIMITYMINE:
-	case WEAPON_REMOTEMINE:
-	case WEAPON_COMBATBOOST:
-	case WEAPON_PP9I:
-	case WEAPON_CC13:
-	case WEAPON_KL01313:
-	case WEAPON_KF7SPECIAL:
-	case WEAPON_ZZT:
-	case WEAPON_DMC:
-	case WEAPON_AR53:
-	case WEAPON_RCP45:
-	case WEAPON_PSYCHOSISGUN:
-	default:
-		// Use default distance (300)
-		break;
-	case WEAPON_FALCON2_SCOPE:
-	case WEAPON_MAGSEC4:
+	if(weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_FALCON2_SCOPE) || weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_MAGSEC4)) {
 		taperdist = 600;
-		break;
-	case WEAPON_SNIPERRIFLE:
-	case WEAPON_FARSIGHT:
+	}
+
+	if(weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_SNIPERRIFLE) || weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_FARSIGHT)) {
 		taperdist = 1200;
-		break;
 	}
 
 	if (angleok) {
@@ -10190,6 +10137,7 @@ void chrTickShoot(struct chrdata *chr, s32 handnum)
 			case WEAPON_FALCON2:
 			case WEAPON_FALCON2_SILENCER:
 			case WEAPON_FALCON2_SCOPE:
+			case WEAPON_FALCON2_SANDS:
 			case WEAPON_MAGSEC4:
 			case WEAPON_MAULER:
 			case WEAPON_PHOENIX:

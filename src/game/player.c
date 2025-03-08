@@ -1273,7 +1273,7 @@ void playerTickChrBody(void)
 			0x0fff,                 // floorcol
 			0,                      // tiles
 			WEAPON_FALCON2,         // weaponnum
-			0,                      // unk5d
+			0,                      // rank
 			0,                      // unk5e
 			FUNC_PRIMARY,           // gunfunc
 			0,                      // fadeouttimer60
@@ -1283,13 +1283,12 @@ void playerTickChrBody(void)
 		};
 
 		s32 weaponmodelnum;
-		s32 weaponnum = bgunGetWeaponNum2(HAND_RIGHT);
+		s32 weaponnum = bgunGetWeaponNum(HAND_RIGHT);
 		s32 bodynum = BODY_DARK_COMBAT;
 		s32 headnum = HEAD_DARK_COMBAT;
 		bool sp60 = false;
 		struct model *model = NULL;
 		u32 *rwdatas;
-		u32 stack3[2];
 
 		g_Vars.currentplayer->haschrbody = true;
 		playerChooseBodyAndHead(&bodynum, &headnum, &sp60);

@@ -99,7 +99,6 @@ extern u32 g_TitleDelayedTimer;
 extern s32 g_TitleDelayedMode;
 extern s32 g_TitleTimer;
 extern s32 g_TitleNextStage;
-extern s32 var800624e8;
 extern u8 g_FileState;
 extern u8 var80062944;
 extern u8 var80062948;

@@ -472,9 +472,6 @@ void bgChooseXrayVtxColour(bool *inrange, s16 vertex[3], u32 *colour, struct xra
 					if (f12 < xraydata->unk01c) {
 						anglefrac = xraydata->unk01c;
 						anglefrac = f12 / anglefrac;
-
-						if (1);
-
 						colfrac = sinf((1.0f - anglefrac) * 1.5707964f);
 
 						*colour = (u32)(colfrac * 255.0f) << player->ecol_1
@@ -951,15 +948,11 @@ Gfx *bgRenderSceneInXray(Gfx *gdl)
 
 				gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
-				if (debugIsPropRenderingEnabled()) {
-					if (thing->roomnum == -1) {
-						gdl = propsRender(gdl, 0, RENDERPASS_XLU, roomnumsbyprop);
-					}
-
-					gdl = propsRender(gdl, thing->roomnum, RENDERPASS_XLU, roomnumsbyprop);
+				if (thing->roomnum == -1) {
+					gdl = propsRender(gdl, 0, RENDERPASS_XLU, roomnumsbyprop);
 				}
 
-				if (1);
+				gdl = propsRender(gdl, thing->roomnum, RENDERPASS_XLU, roomnumsbyprop);
 			}
 		}
 	}
@@ -984,10 +977,6 @@ Gfx *bgRenderScene(Gfx *gdl)
 	RoomNum *room;
 	s16 roomorder[60];
 	RoomNum roomnums[60];
-
-#ifdef PLATFORM_N64
-	g_NumRoomsWithGlares = 0;
-#endif
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 		gdl = bgRenderSceneInXray(gdl);
@@ -1036,7 +1025,6 @@ Gfx *bgRenderScene(Gfx *gdl)
 				|| stagenum == g_Stages[STAGEINDEX_DEFECTION].id
 				|| stagenum == g_Stages[STAGEINDEX_EXTRACTION].id
 				|| stagenum == g_Stages[STAGEINDEX_MBR].id
-				|| stagenum == g_Stages[STAGEINDEX_TEST_OLD].id
 				|| stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id)) {
 		gdl = envStopFog(gdl);
 		gdl = vi0000ab78(gdl);
@@ -1054,8 +1042,6 @@ Gfx *bgRenderScene(Gfx *gdl)
 		} else if (stagenum == g_Stages[STAGEINDEX_DEFECTION].id
 				|| stagenum == g_Stages[STAGEINDEX_EXTRACTION].id
 				|| stagenum == g_Stages[STAGEINDEX_MBR].id) {
-			roomnum = 0x01;
-		} else if (stagenum == g_Stages[STAGEINDEX_TEST_OLD].id) {
 			roomnum = 0x01;
 		} else if (stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id) {
 			roomnum = 0x71;
@@ -1133,38 +1119,29 @@ Gfx *bgRenderScene(Gfx *gdl)
 		gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 		gdl = envStopFog(gdl);
 
-		if (debugIsPropRenderingEnabled()) {
-			if (firstroomnum == thing->roomnum) {
-				gdl = propsRender(gdl, 0, RENDERPASS_OPA_PREBG, roomnumsbyprop);
-			}
-
-			gdl = propsRender(gdl, thing->roomnum, RENDERPASS_OPA_PREBG, roomnumsbyprop);
+		if (firstroomnum == thing->roomnum) {
+			gdl = propsRender(gdl, 0, RENDERPASS_OPA_PREBG, roomnumsbyprop);
 		}
+
+		gdl = propsRender(gdl, thing->roomnum, RENDERPASS_OPA_PREBG, roomnumsbyprop);
 
 		// Render BG opaque components
 		gSPMatrix(gdl++, osVirtualToPhysical(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		gdl = bgScissorWithinViewportF(gdl, thing->box.xmin, thing->box.ymin, thing->box.xmax, thing->box.ymax);
 		gdl = envStartFog(gdl, false);
-
-		if (debugIsBgRenderingEnabled()) {
-			if (g_StageIndex != STAGEINDEX_TEST_OLD) {
-				gdl = bgRenderRoomOpaque(gdl, thing->roomnum);
-			}
-		}
+		gdl = bgRenderRoomOpaque(gdl, thing->roomnum);
 
 		// Render prop opaque components - post BG pass
 		gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		gdl = envStopFog(gdl);
 
-		if (debugIsPropRenderingEnabled()) {
-			if (firstroomnum == thing->roomnum) {
-				gdl = propsRender(gdl, 0, RENDERPASS_OPA_POSTBG, roomnumsbyprop);
-			}
-
-			gdl = propsRender(gdl, thing->roomnum, RENDERPASS_OPA_POSTBG, roomnumsbyprop);
+		if (firstroomnum == thing->roomnum) {
+			gdl = propsRender(gdl, 0, RENDERPASS_OPA_POSTBG, roomnumsbyprop);
 		}
+
+		gdl = propsRender(gdl, thing->roomnum, RENDERPASS_OPA_POSTBG, roomnumsbyprop);
 	}
 
 	gdl = envStopFog(gdl);
@@ -1180,8 +1157,6 @@ Gfx *bgRenderScene(Gfx *gdl)
 		}
 	}
 
-	if (1);
-
 	for (i = g_BgNumDrawSlots - 1; i >= 0; i--) {
 		roomnum = roomnums[i];
 
@@ -1192,40 +1167,19 @@ Gfx *bgRenderScene(Gfx *gdl)
 		// Render BG translucent components
 		gdl = bgScissorWithinViewportF(gdl, thing->box.xmin, thing->box.ymin, thing->box.xmax, thing->box.ymax);
 		gdl = envStartFog(gdl, true);
-
-		if (debugIsBgRenderingEnabled()) {
-			gdl = bgRenderRoomXlu(gdl, thing->roomnum);
-		}
+		gdl = bgRenderRoomXlu(gdl, thing->roomnum);
 
 		gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		gdl = envStopFog(gdl);
 
 		// Render prop translucent components
-		if (debugIsPropRenderingEnabled()) {
-			if (firstroomnum == thing->roomnum) {
-				gdl = propsRender(gdl, 0, RENDERPASS_XLU, roomnumsbyprop);
-			}
-
-			gdl = propsRender(gdl, thing->roomnum, RENDERPASS_XLU, roomnumsbyprop);
+		if (firstroomnum == thing->roomnum) {
+			gdl = propsRender(gdl, 0, RENDERPASS_XLU, roomnumsbyprop);
 		}
 
-#ifdef PLATFORM_N64 // on PC we do this earlier, before prop matrices turn into garbage
-		if (!g_Vars.mplayerisrunning) {
-			artifactsCalculateGlaresForRoom(thing->roomnum);
-
-			if (g_NumRoomsWithGlares < 100) {
-				g_GlareRooms[g_NumRoomsWithGlares++] = thing->roomnum;
-			}
-		}
-#endif
+		gdl = propsRender(gdl, thing->roomnum, RENDERPASS_XLU, roomnumsbyprop);
 	}
-
-#if VERSION < VERSION_NTSC_1_0
-#ifdef DEBUG
-	debug0f119a80nb();
-#endif
-#endif
 
 	return gdl;
 }
@@ -1344,78 +1298,6 @@ u8 bgGetPortalAlpha(s32 portalnum)
 {
 	return g_BgPortalAlphas[portalnum];
 }
-
-#if PIRACYCHECKS
-u32 bgNot(u32 arg)
-{
-	return ~arg;
-}
-
-u32 bgXorBabebabe(u32 value)
-{
-	return value ^ 0xbabebabe;
-}
-#endif
-
-#if VERSION < VERSION_NTSC_1_0
-/**
- * The following two functions were surely debug code that was accidentally left
- * in the NTSC beta build, whose purpose is to debug a light data corruption
- * issue.
- *
- * The first function is run on stage start and builds the known good checksums.
- * The second function runs on every tick, re-sums them and induces a crash if
- * they've changed.
- */
-void bgBuildReferenceLightSums(void)
-{
-	s32 i;
-
-	g_BgNumLightsChecksum = 0;
-
-	for (i = 0; i < g_Vars.roomcount; i++) {
-		g_BgNumLightsChecksum += g_Rooms[i].numlights;
-	}
-
-	g_BgLightsOffsetChecksum = 0;
-
-	for (i = 0; i < g_Vars.roomcount; i++) {
-		g_BgLightsOffsetChecksum += g_Rooms[i].lightindex;
-	}
-}
-
-void bgVerifyLightSums(char *file, s32 line)
-{
-	s32 i;
-	s32 sum;
-	char message[128];
-	u32 stack;
-
-	sum = 0;
-
-	for (i = 0; i < g_Vars.roomcount; i++) {
-		sum += g_Rooms[i].numlights;
-	}
-
-	if (sum != g_BgNumLightsChecksum) {
-		sprintf(message, "NumLightsChecksum failed %s %d", file, line);
-		crashSetMessage(message);
-		CRASH();
-	}
-
-	sum = 0;
-
-	for (i = 0; i < g_Vars.roomcount; i++) {
-		sum += g_Rooms[i].lightindex;
-	}
-
-	if (sum != g_BgLightsOffsetChecksum) {
-		sprintf(message, "LightsOffsetChecksum failed %s %d", file, line);
-		crashSetMessage(message);
-		CRASH();
-	}
-}
-#endif
 
 /**
  * Extracts and inflates primary data (room/portal/light tables) from the
@@ -1567,29 +1449,10 @@ void bgReset(s32 stagenum)
 		texLoadFromTextureNum(section2[i] & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff, NULL);
 	}
 
-	if (1);
-
 	// Free section 2
 	mempRealloc(section2, 0, MEMPOOL_STAGE);
 
 	g_BgSection3 = section2start + section2compsize + 4;
-
-#if PIRACYCHECKS
-	{
-		u32 addr = bgNot(PAL ? ~0xb0000340 : ~0xb0000454);
-		u32 actualvalue;
-		u32 expectedvalue = bgXorBabebabe((PAL ? 0x0330c820 : 0x0109082b) ^ 0xbabebabe);
-
-		osPiReadIo(addr, &actualvalue);
-
-		if (actualvalue != expectedvalue) {
-			// Copy 0x40 bytes from a random location in ROM to a random
-			// location in RAM. The write address can be anywhere in the
-			// boot segment or in the lib segment up to modelRenderNodeDl.
-			dmaExec((void *)(PHYS_TO_K0(0x1000) + (rngRandom() & 0x1fff8)), rngRandom() & 0x1fffe, 0x40);
-		}
-	}
-#endif
 
 	var800a4920 = *(u32 *)g_BgPrimaryData;
 
@@ -2713,15 +2576,8 @@ void bgLoadRoom(s32 roomnum)
 	uintptr_t end1;
 	s32 i;
 	s32 len;
-#if VERSION < VERSION_NTSC_1_0
-	s32 stack;
-#endif
 	uintptr_t end2;
 	s32 prev;
-
-#if VERSION < VERSION_NTSC_1_0
-	bgVerifyLightSums("bg.c", 7076);
-#endif
 
 	if (roomnum == 0 || roomnum >= g_Vars.roomcount) {
 		return;
@@ -2742,28 +2598,17 @@ void bgLoadRoom(s32 roomnum)
 			alloclen += 1024;
 		}
 	} else {
-#ifdef PLATFORM_N64
-		alloclen = memaGetLongestFree();
-#else
 		// probably never reaches here in practice as all rooms have gfxdatalen
 		// alloc 10k and hope for the best
 		alloclen = 10240;
-#endif
 	}
 
 #ifdef PLATFORM_64BIT
 	alloclen = alloclen * 4; // just to be safe for now, adjust properly later #TODO
 #endif
 
-
-#ifdef PLATFORM_N64
-	bgGarbageCollectRooms(alloclen, false);
-
-	allocation = memaAlloc(alloclen);
-#else
 	// allocate room data from heap to not take up mema space
 	allocation = sysMemAlloc(alloclen);
-#endif
 
 	if (allocation != NULL) {
 		dyntexSetCurrentRoom(roomnum);
@@ -2903,20 +2748,7 @@ void bgLoadRoom(s32 roomnum)
 		prev = g_Rooms[roomnum].gfxdatalen;
 		g_Rooms[roomnum].gfxdatalen = ALIGN16(gdlpointers[numgdls] - allocation + 0x20);
 
-		if (g_Rooms[roomnum].gfxdatalen > prev) {
-#if VERSION < VERSION_NTSC_1_0
-			crashSetMessage("bg.c: roominf[room].allocsize > calculated!");
-			CRASH();
-#endif
-		}
-
 		g_Rooms[roomnum].loaded240 = 1;
-
-#ifdef PLATFORM_N64
-		if (g_Rooms[roomnum].gfxdatalen != alloclen) {
-			memaRealloc((intptr_t) allocation, alloclen, g_Rooms[roomnum].gfxdatalen);
-		}
-#endif
 
 		// Update gdl pointers in the gfxdata so they point to the ones
 		// that have been processed by textLoadFromGdl.
@@ -3134,7 +2966,7 @@ void bgTickRooms(void)
 	}
 }
 
-Gfx *bgRenderRoomPass(Gfx *gdl, s32 roomnum, struct roomblock *block, bool arg3)
+Gfx *bgRenderRoomPass(Gfx *gdl, s32 roomnum, struct roomblock *block, bool includetransp)
 {
 	uintptr_t v0;
 
@@ -3155,13 +2987,8 @@ Gfx *bgRenderRoomPass(Gfx *gdl, s32 roomnum, struct roomblock *block, bool arg3)
 		v0 = (uintptr_t)g_Rooms[roomnum].colours;
 
 		if (v0 != NULL) {
-#ifdef PLATFORM_N64
-			s32 addr = ALIGN8((uintptr_t)&g_Rooms[roomnum].gfxdata->vertices[g_Rooms[roomnum].gfxdata->numvertices]);
-			v0 += (((intptr_t)block->colours - addr) >> 2) * 4;
-#else
 			uintptr_t addr = ALIGN8((uintptr_t)&g_Rooms[roomnum].gfxdata->vertices[g_Rooms[roomnum].gfxdata->numvertices]);
 			v0 += (((uintptr_t)block->colours - addr) >> 2) * 4;
-#endif
 		} else {
 			v0 = (uintptr_t)block->colours;
 		}
@@ -3170,8 +2997,8 @@ Gfx *bgRenderRoomPass(Gfx *gdl, s32 roomnum, struct roomblock *block, bool arg3)
 
 		gSPDisplayList(gdl++, OS_PHYSICAL_TO_K0(block->gdl));
 
-		if (arg3) {
-			gdl = bgRenderRoomPass(gdl, roomnum, block->next, true);
+		if (includetransp) {
+			gdl = bgRenderRoomPass(gdl, roomnum, block->next, true); // Render double sided translucent textures
 		}
 		break;
 	case ROOMBLOCKTYPE_PARENT:
@@ -3205,7 +3032,7 @@ Gfx *bgRenderRoomPass(Gfx *gdl, s32 roomnum, struct roomblock *block, bool arg3)
 				gdl = bgRenderRoomPass(gdl, roomnum, sp58, false);
 			}
 
-			if (arg3) {
+			if (includetransp) {
 				gdl = bgRenderRoomPass(gdl, roomnum, block->next, true);
 			}
 		}

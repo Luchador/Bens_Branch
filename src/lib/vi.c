@@ -31,6 +31,7 @@ Mtx *var80092870;
 u16 g_ViPerspScale;
 u8 g_ViFrontIndex;
 u8 g_ViBackIndex;
+u16 *g_FrameBuffers[NUM_FRAMEBUFFERS];
 
 struct rend_vidat g_ViDataArray[NUM_GFXTASKS] = {
 	{

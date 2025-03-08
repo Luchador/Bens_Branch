@@ -23,7 +23,7 @@ char *ciMenuTextChrBioName(struct menuitem *item);
 char *ciMenuTextChrBioAge(struct menuitem *item);
 char *ciMenuTextChrBioRace(struct menuitem *item);
 char *ciMenuTextMiscBioName(struct menuitem *item);
-char *dtMenuTextName(struct menuitem *item);
+char *dtMenuTextName();
 char *dtMenuTextOkOrResume(struct menuitem *item);
 char *dtMenuTextCancelOrAbort(struct menuitem *item);
 char *dtMenuTextTimeTakenValue(struct menuitem *item);

@@ -2003,14 +2003,12 @@ u8 func0413_c318[] = {
 
 u8 func100e_check_ecm_mines[] = {
 	yield
-#if VERSION >= VERSION_NTSC_1_0
 	yield
 	yield
 	yield
 	yield
 	yield
 	yield
-#endif
 	if_difficulty_lt(DIFF_SA, /*goto*/ 0x06)
 	give_object_to_chr(OBJ_ECMMINE_BOND, CHR_BOND)
 	give_object_to_chr(OBJ_ECMMINE_COOP, CHR_COOP)

@@ -593,21 +593,20 @@ void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerp
 		}
 
 		weapon = (struct weaponobj *)prop->obj;
+		u16 rank = weaponGetRank(weapon->weaponnum);
 
 		if (weapon && prop->obj->type == OBJTYPE_WEAPON) {
-			switch (weapon->weaponnum) {
-			case WEAPON_GRENADE:
-			case WEAPON_NBOMB:
-			case WEAPON_TIMEDMINE:
-			case WEAPON_PROXIMITYMINE:
-			case WEAPON_REMOTEMINE:
-				pass = true;
-				break;
-			case WEAPON_DRAGON:
-				if (weapon->gunfunc == (u32)FUNC_SECONDARY) {
+			if (rank == weaponMatchEnum(WEAPON_GRENADE)->rank ||
+				rank == weaponMatchEnum(WEAPON_NBOMB)->rank ||
+				rank == weaponMatchEnum(WEAPON_TIMEDMINE)->rank ||
+				rank == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank ||
+				rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
+			pass = true;
+			} else if (rank == weaponMatchEnum(WEAPON_DRAGON)->rank) {
+				if(weapon->gunfunc == (u32)FUNC_SECONDARY)
+				{
 					pass = true;
 				}
-				break;
 			}
 		}
 
@@ -1518,7 +1517,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 1;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 1;
-			g_AutoAimScale = g_Jpn ? 1.1f : 0.75f;
+			g_AutoAimScale = 0.75f;
 			g_AmmoQuantityScale = 1.5f;
 			g_AttackWalkDurationScale = 0.5f;
 		} else {
@@ -1531,7 +1530,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 1.5f;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 1.5f;
-			g_AutoAimScale = g_Jpn ? 0.75f : 0.2f;
+			g_AutoAimScale = 0.2f;
 			g_AmmoQuantityScale = 1;
 			g_AttackWalkDurationScale = 1;
 		}
@@ -1572,7 +1571,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 0.6f;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 0.75f;
-			g_AutoAimScale = g_Jpn ? 1.1f : 0.75f;
+			g_AutoAimScale = 0.75f;
 			g_AmmoQuantityScale = 1.5f;
 			g_AttackWalkDurationScale = 0.5f;
 		} else if (g_Difficulty == DIFF_PA) {
@@ -1585,7 +1584,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 1;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 1;
-			g_AutoAimScale = g_Jpn ? 0.75f : 0.2f;
+			g_AutoAimScale = 0.2f;
 			g_AmmoQuantityScale = 1;
 			g_AttackWalkDurationScale = 1;
 		} else if (g_Difficulty == DIFF_PD) {
@@ -1902,17 +1901,14 @@ void lvTick(void)
 
 	if (g_Vars.stagenum == STAGE_TITLE) {
 		titleTick();
-		langTick();
 		musicTick();
 	} else if (g_Vars.stagenum == STAGE_BOOTPAKMENU) {
 		setCurrentPlayerNum(0);
 		menuTick();
 		musicTick();
-		langTick();
 		pakExecuteDebugOperations();
 	} else if (g_Vars.stagenum == STAGE_CREDITS) {
 		musicTick();
-		langTick();
 	} else {
 		lvUpdateCutsceneTime();
 		vtxstoreTick();
@@ -1947,7 +1943,6 @@ void lvTick(void)
 		}
 
 		musicTick();
-		langTick();
 		propsTickPadEffects();
 
 		if (mainGetStageNum() == STAGE_CITRAINING) {

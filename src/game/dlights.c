@@ -1636,6 +1636,7 @@ void roomHighlight(s32 roomnum)
 					blue = 0;
 				}
 
+				// Sets room color
 				dst[i].r = red;
 				dst[i].g = green;
 				dst[i].b = blue;

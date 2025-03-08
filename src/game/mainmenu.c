@@ -51,11 +51,9 @@ char *menuTextCurrentStageName(struct menuitem *item)
 
 char *soloMenuTextDifficulty(struct menuitem *item)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	if (g_MissionConfig.pdmode) {
 		return langGet(L_MPWEAPONS_221);
 	}
-#endif
 
 	switch (g_MissionConfig.difficulty) {
 	case DIFF_SA:
@@ -169,34 +167,17 @@ MenuItemHandlerResult menuhandlerAimControl(s32 operation, struct menuitem *item
 	u32 playernum = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 		? g_Vars.currentplayerstats->mpindex : item->param3;
 
-#if VERSION >= VERSION_PAL_FINAL
-	s32 index = 0;
-
-	u16 options[2][2] = {
-		{ L_OPTIONS_201,   L_OPTIONS_202   }, // "Hold", "Toggle"
-		{ L_MPWEAPONS_276, L_MPWEAPONS_277 }, // "Hold", "Toggle"
-	};
-
-	if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL && PLAYERCOUNT() >= 2) {
-		index = 1;
-	}
-#else
 	u16 options[] = {
 		L_OPTIONS_201, // "Hold"
 		L_OPTIONS_202, // "Toggle"
 	};
-#endif
 
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
 		data->dropdown.value = 2;
 		break;
 	case MENUOP_GETOPTIONTEXT:
-#if VERSION >= VERSION_PAL_FINAL
-		return (uintptr_t) langGet(options[index][data->dropdown.value]);
-#else
 		return (uintptr_t) langGet(options[data->dropdown.value]);
-#endif
 	case MENUOP_SET:
 		optionsSetAimControl(playernum, data->dropdown.value);
 		g_Vars.modifiedfiles |= MODFILE_GAME;
@@ -282,41 +263,6 @@ MenuItemHandlerResult menuhandlerScreenRatio(s32 operation, struct menuitem *ite
 
 	return 0;
 }
-
-#if PAL
-MenuItemHandlerResult menuhandlerLanguage(s32 operation, struct menuitem *item, union handlerdata *data)
-{
-	u16 labels[] = {
-		L_MPWEAPONS_262, // English
-		L_MPWEAPONS_263, // French
-		L_MPWEAPONS_264, // German
-		L_MPWEAPONS_265, // Italian
-		L_MPWEAPONS_266, // Spanish
-	};
-
-	switch (operation) {
-	case MENUOP_GETOPTIONCOUNT:
-		data->dropdown.value = 5;
-		break;
-	case MENUOP_GETOPTIONTEXT:
-		return (uintptr_t)langGet(labels[data->dropdown.value]);
-	case MENUOP_SET:
-		g_Vars.language = data->dropdown.value;
-		langSetEuropean(g_Vars.language);
-		g_Vars.modifiedfiles |= MODFILE_GAME | MODFILE_BOSS;
-		break;
-	case MENUOP_GETSELECTEDINDEX:
-		data->dropdown.value = g_Vars.language;
-
-		if (data->dropdown.value > LANGUAGE_PAL_ES) {
-			data->dropdown.value = LANGUAGE_PAL_EN;
-		}
-		break;
-	}
-
-	return 0;
-}
-#endif
 
 MenuItemHandlerResult menuhandlerScreenSplit(s32 operation, struct menuitem *item, union handlerdata *data)
 {
@@ -739,9 +685,7 @@ MenuItemHandlerResult menuhandlerAcceptMission(s32 operation, struct menuitem *i
 		titleSetNextMode(TITLEMODE_SKIP);
 		mainChangeToStage(g_MissionConfig.stagenum);
 
-#if VERSION >= VERSION_NTSC_1_0
 		viBlack(true);
-#endif
 	}
 
 	return 0;
@@ -955,7 +899,6 @@ bool isStageDifficultyUnlocked(s32 stageindex, s32 difficulty)
 
 	// Handle special missions
 	if (stageindex > SOLOSTAGEINDEX_SKEDARRUINS) {
-#if VERSION >= VERSION_NTSC_1_0
 		// If the player has completed Skedar Ruins on the same difficulty as
 		// the one that's being queried, then they have access to this
 		// difficulty for all special missions. Agent is gifted here, so if the
@@ -971,7 +914,6 @@ bool isStageDifficultyUnlocked(s32 stageindex, s32 difficulty)
 		if (difficulty <= maxcompleteddiff) {
 			return true;
 		}
-#endif
 
 		// Otherwise, grant them the difficulty if they've completed all prior
 		// difficulties on this stage.
@@ -1093,7 +1035,6 @@ MenuItemHandlerResult menuhandlerSoloDifficulty(s32 operation, struct menuitem *
 {
 	switch (operation) {
 	case MENUOP_CHECKPREFOCUSED:
-#if VERSION >= VERSION_NTSC_1_0
 		if (isStageDifficultyUnlocked(g_MissionConfig.stageindex, item->param)) {
 			if (item->param3 == 0) {
 				return true;
@@ -1102,14 +1043,6 @@ MenuItemHandlerResult menuhandlerSoloDifficulty(s32 operation, struct menuitem *
 				return true;
 			}
 		}
-#else
-		if (item->param3 == 0) {
-			return true;
-		}
-		if (item->param <= (u32)g_GameFile.autodifficulty) {
-			return true;
-		}
-#endif
 		break;
 	case MENUOP_SET:
 		g_MissionConfig.pdmode = false;
@@ -1249,10 +1182,8 @@ MenuItemHandlerResult menuhandlerBuddyOptionsContinue(s32 operation, struct menu
 	return 0;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 s32 getMaxAiBuddies(void)
 {
-	u32 stack;
 	s32 extra = 0;
 	s32 max = 1 - g_MissionConfig.difficulty;
 	s32 d;
@@ -1273,21 +1204,11 @@ s32 getMaxAiBuddies(void)
 		max = 1;
 	}
 
-#if VERSION == VERSION_PAL_BETA
-#ifdef DEBUG
-	if (debugIsAllBuddiesEnabled()) {
-		max = 4;
-	}
-#endif
-#endif
-
 	return max;
 }
-#endif
 
 MenuDialogHandlerResult menudialogCoopAntiOptions(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	if (operation == MENUOP_OPEN) {
 		s32 max = getMaxAiBuddies();
 
@@ -1295,7 +1216,6 @@ MenuDialogHandlerResult menudialogCoopAntiOptions(s32 operation, struct menudial
 			g_Vars.numaibuddies = max;
 		}
 	}
-#endif
 
 	if (operation == MENUOP_TICK) {
 		if (g_Menus[g_MpPlayerNum].curdialog && g_Menus[g_MpPlayerNum].curdialog->definition == dialogdef) {
@@ -3702,150 +3622,60 @@ char *invMenuTextSecondaryFunction(struct menuitem *item)
 // How weapons display on the pause menu and the firing range menu
 void invMenuGetGunConfigs(s32 weaponnum)
 {
-	f32 gunconfig[][5] = {
-		{ 23.299999237061f,   -16.799999237061f,  -153.39999389648f,  6.4140100479126f, 0.48769000172615f },
-		{ 22.299999237061f,   -13.5f,             -216.60000610352f,  6.443009853363f,  0.34057000279427f }, // Falcon 2 Silenced
-		{ 19.5f,              -31.89999961853f,   -154.89999389648f,  6.3730101585388f, 0.41813001036644f }, // Falcon 2 Scoped
-		{ -2.5f,              14.300000190735f,   16.200000762939f,   6.4340100288391f, 0.34057000279427f },
-		{ -2.4000000953674f,  21.0f,              -98.900001525879f,  5.7630100250244f, 0.32354000210762f },
-		{ -4.0999999046326f,  -30.5f,             -29.39999961853f,   6.3770098686218f, 0.37735998630524f },
-		{ 0.69999998807907f,  13.89999961853f,    23.10000038147f,    6.4730100631714f, 0.37735998630524f },
-		{ 0.69999998807907f,  13.89999961853f,    23.10000038147f,    6.4730100631714f, 0.37735998630524f },
-		{ -5.1999998092651f,  36.5f,              -370.39999389648f,  6.5040102005005f, 0.37735998630524f },
-		{ -5.5f,              -79.5f,             -661.0f,            6.3190097808838f, 0.214640006423f   },
-		{ -2.9000000953674f,  -57.200000762939f,  -110.09999847412f,  6.3170099258423f, 0.27739998698235f },
-		{ -6.1999998092651f,  -33.900001525879f,  101.40000152588f,   6.3320097923279f, 0.27739998698235f },
-		{ -23.5f,             -4.0999999046326f,  -209.60000610352f,  6.1110100746155f, 0.214640006423f   },
-		{ -3.9000000953674f,  -63.099998474121f,  -872.0f,            6.3720102310181f, 0.214640006423f   },
-		{ 218.19999694824f,   -56.299999237061f,  -210.89999389648f,  6.3500099182129f, 0.22594000399113f },
-		{ 0.5f,               -84.599998474121f,  -377.20001220703f,  6.1880102157593f, 0.18402999639511f },
-		{ -1.6000000238419f,  -68.400001525879f,  -874.5f,            6.3720102310181f, 0.214640006423f   },
-		{ -3.7999999523163f,  -145.5f,            52.5f,              6.3170099258423f, 0.32354000210762f },
-		{ 117.19999694824f,   -13.800000190735f,  -177.60000610352f,  6.1730098724365f, 0.23782999813557f },
-		{ -69.699996948242f,  -135.10000610352f,  -146.10000610352f,  6.18901014328f,   0.16608999669552f },
-		{ 0.20000000298023f,  -176.60000610352f,  -276.29998779297f,  6.2660098075867f, 0.16608999669552f },
-		{ -0.80000001192093f, -21.200000762939f,  3.5999999046326f,   6.3030200004578f, 0.26352998614311f },
-		{ -94.800003051758f,  -13.300000190735f,  -307.70001220703f,  6.2500200271606f, 0.25034999847412f },
-		{ -2.2000000476837f,  -45.599998474121f,  -131.89999389648f,  6.3580098152161f, 0.19371999800205f },
-		{ -148.69999694824f,  26.10000038147f,    -251.69999694824f,  42.328819274902f, 0.32354000210762f },
-		{ -4.0f,              -3.0f,              -157.60000610352f,  43.489791870117f, 0.48769000172615f },
-		{ -4.8000001907349f,  14.0f,              -89.0f,             43.927791595459f, 0.5688099861145f  },
-		{ -0.40000000596046f, -29.89999961853f,   -8.8000001907349f,  43.981800079346f, 0.73510998487473f },
-		{ -23.700000762939f,  -35.799999237061f,  -237.89999389648f,  43.153789520264f, 0.6983500123024f  },
-		{ -23.700000762939f,  -35.799999237061f,  -237.89999389648f,  43.153789520264f, 0.6983500123024f  },
-		{ 63.700000762939f,   53.0f,              -171.60000610352f,  43.153789520264f, 0.9025200009346f  },
-		{ 63.700000762939f,   53.0f,              -171.60000610352f,  43.153789520264f, 0.9025200009346f  },
-		{ 63.700000762939f,   53.0f,              -171.60000610352f,  43.153789520264f, 0.9025200009346f  },
-		{ 0.20000000298023f,  -1.5f,              1.0f,               43.288791656494f, 6.6717000007629f  },
-		{ -68.400001525879f,  14.699999809265f,   -92.5f,             44.255790710449f, 0.59876000881195f },
-		{ -2.9000000953674f,  33.5f,              61.400001525879f,   44.254791259766f, 0.48769000172615f },
-		{ -1.5f,              41.599998474121f,   -49.900001525879f,  44.198810577393f, 0.41813001036644f },
-		{ -2.5999999046326f,  -0.20000000298023f, -237.10000610352f,  44.029800415039f, 0.21465000510216f },
-		{ -1.2999999523163f,  13.39999961853f,    -43.700000762939f,  44.2587890625f,   0.34057000279427f },
-		{ 0.10000000149012f,  32.099998474121f,   -161.69999694824f,  44.111789703369f, 0.39722999930382f },
-		{ -1.0f,              -31.89999961853f,   -300.0f,            44.034790039062f, 0.18402999639511f },
-		{ 0.30000001192093f,  -44.900001525879f,  45.099998474121f,   44.078788757324f, 0.27739998698235f },
-		{ -4.8000001907349f,  14.0f,              -89.0f,             43.927791595459f, 0.5688099861145f  },
-		{ -0.69999998807907f, -1.7000000476837f,  -9.3000001907349f,  44.255809783936f, 3.6051800251007f  },
-		{ 16.0f,              -56.099998474121f,  7.5f,               44.468811035156f, 0.77380001544952f },
-		{ -0.69999998807907f, -1.7000000476837f,  -9.3000001907349f,  44.255809783936f, 3.6051800251007f  },
-		{ -1.3999999761581f,  -41.5f,             -120.30000305176f,  44.265800476074f, 0.3585000038147f  },
-		{ 1.6000000238419f,   3.5f,               -0.20000000298023f, 44.75479888916f,  0.48769000172615f },
-		{ -5.0999999046326f,  -9.5f,              2.0f,               43.715789794922f, 0.44014000892639f },
-		{ -1.3999999761581f,  -41.5f,             -120.30000305176f,  44.265800476074f, 0.3585000038147f  },
-		{ -1.3999999761581f,  -41.5f,             -120.30000305176f,  44.265800476074f, 0.3585000038147f  },
-		{ -50.099998474121f,  20.0f,              -139.5f,            43.179790496826f, 0.69836002588272f },
-		{ 60.700000762939f,   27.60000038147f,    -146.30000305176f,  43.265789031982f, 0.81453001499176f },
-		{ 0.60000002384186f,  -1.6000000238419f,  -0.5f,              38.538738250732f, 0.90254002809525f },
-		{ 0.60000002384186f,  -1.6000000238419f,  -0.5f,              38.538738250732f, 0.90254002809525f },
-		{ 0.40000000596046f,  0.5f,               -0.60000002384186f, 38.68675994873f,  0.66345000267029f },
-		{ -22.700000762939f,  -1.7999999523163f,  -12.300000190735f,  5.8997898101807f, 0.25036001205444f },
-		{ 4.1999998092651f,   -13.199999809265f,  4.0999999046326f,   43.32479095459f,  0.21465000510216f },
-		{ -8.5f,              -8.1000003814697f,  10.199999809265f,   42.137790679932f, 0.16608999669552f },
-		{ -8.5f,              -8.1000003814697f,  10.199999809265f,   43.388809204102f, 0.54038000106812f },
-		{ -8.5f,              -8.1000003814697f,  10.199999809265f,   43.388809204102f, 0.54038000106812f },
-		{ -8.5f,              -8.1000003814697f,  10.199999809265f,   43.388809204102f, 0.54038000106812f },
-		{ -0.89999997615814f, -14.10000038147f,   1.7000000476837f,   0.0f,             1.0f              },
-		{ -0.89999997615814f, -14.10000038147f,   1.7000000476837f,   0.0f,             1.0f              },
-		{ -2.7000000476837f,  9.1000003814697f,   -2.9000000953674f,  43.391819000244f, 0.54038000106812f },
-		{ -6.0999999046326f,  -0.69999998807907f, -2.0f,              43.391819000244f, 0.69836002588272f },
-		{ 0.40000000596046f,  -7.0f,              1.7999999523163f,   43.211811065674f, 1.6702300310135f  },
-		{ -1.8999999761581f,  0.89999997615814f,  -55.0f,             43.142780303955f, 0.14989000558853f },
-		{ -1.8999999761581f,  0.89999997615814f,  -55.0f,             43.142780303955f, 0.14989000558853f },
-		{ -1.8999999761581f,  0.89999997615814f,  -55.0f,             43.142780303955f, 0.14989000558853f },
-		{ -1.8999999761581f,  0.89999997615814f,  -55.0f,             43.142780303955f, 0.14989000558853f },
-		{ -1.8999999761581f,  0.89999997615814f,  -55.0f,             43.142780303955f, 0.14989000558853f },
-		{ -1.8999999761581f,  0.89999997615814f,  -55.0f,             43.142780303955f, 0.14989000558853f },
-		{ -1.8999999761581f,  0.89999997615814f,  -55.0f,             43.142780303955f, 0.14989000558853f },
-		{ -1.8999999761581f,  0.89999997615814f,  -55.0f,             43.142780303955f, 0.14989000558853f },
-		{ 281.89999389648f,   0.89999997615814f,  8.3999996185303f,   5.0027899742126f, 0.18402999639511f },
-		{ -1.8999999761581f,  0.89999997615814f,  -55.0f,             43.142780303955f, 0.14989000558853f },
-		{ -3.7999999523163f,  6.1999998092651f,   1.0f,               5.6747899055481f, 0.29199999570847f },
-		{ -3.7999999523163f,  6.1999998092651f,   1.0f,               5.8997898101807f, 2.0506100654602f  },
-	};
-
-	s32 useindex;
 	struct weapon *weapon;
-	u32 stack;
-	s32 wantindex;
+	weapon = weaponFindById(weaponnum);
+	if(weapon) {
+		if (weaponHasFlag(weaponnum, WEAPONFLAG_HIDEMENUMODEL) == false && weapon->rank <= ARRAYCOUNT(g_Weapons)) {
+				g_Menus[g_MpPlayerNum].menumodel.loaddelay = 8;
+				g_Menus[g_MpPlayerNum].menumodel.curparams = 0;
+				g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_FILENUM(weaponGetFileNum(weaponnum));
 
-	useindex = weaponnum - 2;
-	wantindex = useindex;
+				g_Menus[g_MpPlayerNum].menumodel.curposx = g_Menus[g_MpPlayerNum].menumodel.newposx = 0;
+				g_Menus[g_MpPlayerNum].menumodel.curposy = g_Menus[g_MpPlayerNum].menumodel.newposy = 0;
+				g_Menus[g_MpPlayerNum].menumodel.curposz = g_Menus[g_MpPlayerNum].menumodel.newposz = 0;
 
-	if ((u32)wantindex < 0 || wantindex >= ARRAYCOUNT(gunconfig)) {
-		useindex = 0;
-	}
+				g_Menus[g_MpPlayerNum].menumodel.currotz = g_Menus[g_MpPlayerNum].menumodel.newrotz = 0;
 
-	if (weaponHasFlag(weaponnum, WEAPONFLAG_HIDEMENUMODEL) == false && (u32)wantindex >= 0 && useindex >= 0) {
-		weapon = weaponFindById(weaponnum);
+				g_Menus[g_MpPlayerNum].menumodel.displacex = weapon->menupos[0]; 
+				g_Menus[g_MpPlayerNum].menumodel.displacey = weapon->menupos[1];
+				g_Menus[g_MpPlayerNum].menumodel.displacez = weapon->menupos[2];
 
-		g_Menus[g_MpPlayerNum].menumodel.loaddelay = 8;
-		g_Menus[g_MpPlayerNum].menumodel.curparams = 0;
-		g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_FILENUM(weaponGetFileNum(weaponnum));
+				g_Menus[g_MpPlayerNum].menumodel.newrotx = weapon->menupos[3];
+				g_Menus[g_MpPlayerNum].menumodel.currotx = weapon->menupos[3];
 
-		g_Menus[g_MpPlayerNum].menumodel.curposx = g_Menus[g_MpPlayerNum].menumodel.newposx = 0;
-		g_Menus[g_MpPlayerNum].menumodel.curposy = g_Menus[g_MpPlayerNum].menumodel.newposy = 0;
-		g_Menus[g_MpPlayerNum].menumodel.curposz = g_Menus[g_MpPlayerNum].menumodel.newposz = 0;
+				menuConfigureModel(&g_Menus[g_MpPlayerNum].menumodel, 0, 0, 0, 0, 0, 0, weapon->menupos[4], MENUMODELFLAG_HASSCALE, 0.0f);
 
-		g_Menus[g_MpPlayerNum].menumodel.currotz = g_Menus[g_MpPlayerNum].menumodel.newrotz = 0;
+				g_Menus[g_MpPlayerNum].menumodel.curscale = 0;
+				g_Menus[g_MpPlayerNum].menumodel.partvisibility = weapon->partvisibility;
+				g_Menus[g_MpPlayerNum].menumodel.zoom = -1;
 
-		g_Menus[g_MpPlayerNum].menumodel.displacex = gunconfig[useindex][0]; 
-		g_Menus[g_MpPlayerNum].menumodel.displacey = gunconfig[useindex][1];
-		g_Menus[g_MpPlayerNum].menumodel.displacez = gunconfig[useindex][2];
+				// These indexes correspond to WEAPON_DISGUISE40 and WEAPON_DISGUISE41
+				if (weapon->rank == weaponMatchEnum(WEAPON_DISGUISE40)->rank || weapon->rank == weaponMatchEnum(WEAPON_DISGUISE41)->rank) { // was 0x3e and 0x3f
+					if (weapon->rank == weaponMatchEnum(WEAPON_DISGUISE40)->rank) { // was 0x3e
+						g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_MP_HEADBODY(MPHEAD_DARK_FROCK, MPBODY_DARKLAB);
+					} else {
+						g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_MP_HEADBODY(MPHEAD_DARK_COMBAT, MPBODY_DARK_AF1);
+					}
 
-		g_Menus[g_MpPlayerNum].menumodel.newrotx = gunconfig[useindex][3];
-		g_Menus[g_MpPlayerNum].menumodel.currotx = gunconfig[useindex][3];
+					g_Menus[g_MpPlayerNum].menumodel.partvisibility = NULL;
+					g_Menus[g_MpPlayerNum].menumodel.removingpiece = false;
 
-		menuConfigureModel(&g_Menus[g_MpPlayerNum].menumodel, 0, 0, 0, 0, 0, 0, gunconfig[useindex][4], MENUMODELFLAG_HASSCALE, 0.0f);
+					menuConfigureModel(&g_Menus[g_MpPlayerNum].menumodel, 0, 0, 0, 0, 0, 0, 1, MENUMODELFLAG_HASSCALE, 0.0f);
 
-		g_Menus[g_MpPlayerNum].menumodel.curscale = 0;
-		g_Menus[g_MpPlayerNum].menumodel.partvisibility = weapon->partvisibility;
-		g_Menus[g_MpPlayerNum].menumodel.zoom = -1;
-
-		// These indexes correspond to WEAPON_DISGUISE40 and WEAPON_DISGUISE41
-		if (wantindex == 0x3e || wantindex == 0x3f) {
-			if ((u32)wantindex == 0x3e) {
-				g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_MP_HEADBODY(MPHEAD_DARK_FROCK, MPBODY_DARKLAB);
-			} else {
-				g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_MP_HEADBODY(MPHEAD_DARK_COMBAT, MPBODY_DARK_AF1);
-			}
-
-			g_Menus[g_MpPlayerNum].menumodel.partvisibility = NULL;
-			g_Menus[g_MpPlayerNum].menumodel.removingpiece = false;
-
-			menuConfigureModel(&g_Menus[g_MpPlayerNum].menumodel, 0, 0, 0, 0, 0, 0, 1, MENUMODELFLAG_HASSCALE, 0.0f);
-
-			g_Menus[g_MpPlayerNum].menumodel.rottimer60 = TICKS(60);
-			g_Menus[g_MpPlayerNum].menumodel.zoomtimer60 = TICKS(120);
-			g_Menus[g_MpPlayerNum].menumodel.curroty = g_Menus[g_MpPlayerNum].menumodel.newroty = -0.2f;
+					g_Menus[g_MpPlayerNum].menumodel.rottimer60 = TICKS(60);
+					g_Menus[g_MpPlayerNum].menumodel.zoomtimer60 = TICKS(120);
+					g_Menus[g_MpPlayerNum].menumodel.curroty = g_Menus[g_MpPlayerNum].menumodel.newroty = -0.2f;
+				}
+			
+		} else {
+			g_Menus[g_MpPlayerNum].menumodel.bodymodeldef = NULL;
+			g_Menus[g_MpPlayerNum].menumodel.curparams = 0;
+			g_Menus[g_MpPlayerNum].menumodel.newparams = 0;
 		}
-	} else {
-		g_Menus[g_MpPlayerNum].menumodel.bodymodeldef = NULL;
-		g_Menus[g_MpPlayerNum].menumodel.curparams = 0;
-		g_Menus[g_MpPlayerNum].menumodel.newparams = 0;
 	}
 }
 
+// Handles the 3D model in the inventory menu
 MenuDialogHandlerResult inventoryMenuDialog(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	if (operation == MENUOP_TICK) {
@@ -3861,7 +3691,7 @@ MenuDialogHandlerResult inventoryMenuDialog(s32 operation, struct menudialogdef 
 				var80072d88 = g_InventoryWeapon;
 			}
 
-			if (g_InventoryWeapon == WEAPON_DISGUISE40 || g_InventoryWeapon == WEAPON_DISGUISE41) {
+			if (g_InventoryWeapon == weaponMatchEnum(WEAPON_DISGUISE40)->rank || g_InventoryWeapon == weaponMatchEnum(WEAPON_DISGUISE41)->rank) {
 				g_Menus[g_MpPlayerNum].menumodel.newanimnum = ANIM_STAND;
 				g_Menus[g_MpPlayerNum].menumodel.rottimer60 = TICKS(60);
 				g_Menus[g_MpPlayerNum].menumodel.zoomtimer60 = TICKS(120);
@@ -3934,9 +3764,9 @@ char *invMenuTextWeaponDescription(struct menuitem *item)
 		}
 
 		if (g_InventoryWeapon == WEAPON_NECKLACE
-				&& g_Vars.stagenum == (VERSION >= VERSION_NTSC_1_0 ? STAGE_ATTACKSHIP : STAGE_SKEDARRUINS)
+				&& g_Vars.stagenum == (STAGE_ATTACKSHIP)
 				&& lvGetDifficulty() >= DIFF_PA) {
-#if VERSION >= VERSION_NTSC_1_0
+					
 			// Phrases included here to assist people searching the code for them:
 			// CDV780322
 			// I8MOZYM8NDI85
@@ -3984,10 +3814,6 @@ char *invMenuTextWeaponDescription(struct menuitem *item)
 			// "Cassandra De Vries' replacement necklace.  Username: %s  Password: %s"
 			sprintf(g_StringPointer, langGet(L_GUN_239), &username, &password);
 			return g_StringPointer;
-#else
-			// ntsc-beta stores the whole thing as a single plain text string
-			return langGet(L_GUN_239);
-#endif
 		}
 
 		return langGet(weapon->description);
@@ -4121,11 +3947,7 @@ struct menudialogdef g_SoloMissionInventoryMenuDialog = {
 	L_OPTIONS_178, // "Inventory"
 	g_SoloMissionInventoryMenuItems,
 	inventoryMenuDialog,
-#if VERSION >= VERSION_JPN_FINAL
-	MENUDIALOGFLAG_0002 | MENUDIALOGFLAG_DISABLERESIZE | MENUDIALOGFLAG_0400 | MENUDIALOGFLAG_1000,
-#else
 	MENUDIALOGFLAG_0002 | MENUDIALOGFLAG_DISABLERESIZE | MENUDIALOGFLAG_0400,
-#endif
 	&g_SoloMissionOptionsMenuDialog,
 };
 

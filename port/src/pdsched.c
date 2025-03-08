@@ -96,8 +96,6 @@ s32 g_ViShakeDirection = 1;
 s32 g_ViShakeIntensity = 0;
 f32 g_ViShakeIntensityMult = 1.f;
 s32 g_ViShakeTimer = 0;
-u32 var8005cea0 = 0;
-u32 var8005cea4 = 0;
 OSScMsg g_SchedRspMsg = {OS_SC_RSP_MSG};
 bool g_SchedIsFirstTask = true;
 

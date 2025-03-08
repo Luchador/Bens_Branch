@@ -973,11 +973,6 @@ char *mpGetWeaponLabel(s32 weaponnum)
 	return "";
 }
 
-#if VERSION >= VERSION_NTSC_1_0
-const char var7f1b8a5c[] = "Gun index %d -> slot %d = gun %d\n\n";
-const char var7f1b8a80[] = "HOLDER: selecting weapon set %d\n";
-#endif
-
 void mpSetWeaponSlot(s32 slot, s32 mpweaponnum)
 {
 	s32 optionindex = mpweaponnum;

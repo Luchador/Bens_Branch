@@ -59,7 +59,7 @@ void bgUnloadRoom(s32 room);
 void bgUnloadAllRooms(void);
 void bgGarbageCollectRooms(s32 bytesneeded, bool desparate);
 void bgTickRooms(void);
-Gfx *bgRenderRoomPass(Gfx *gdl, s32 roomnum, struct roomblock *blocks, bool arg3);
+Gfx *bgRenderRoomPass(Gfx *gdl, s32 roomnum, struct roomblock *blocks, bool includetransp);
 Gfx *bgRenderRoomOpaque(Gfx *gdl, s32 roomnum);
 Gfx *bgRenderRoomXlu(Gfx *gdl, s32 roomnum);
 s32 bgPopulateVtxBatchType(s32 roomnum, struct vtxbatch *batches, Gfx *gdl, s32 batchindex, Vtx *vertices, s32 arg5);

@@ -153,10 +153,6 @@ MenuItemHandlerResult frWeaponListMenuHandler(s32 operation, struct menuitem *it
 		x = renderdata->x + 10;
 		y = renderdata->y;
 
-#if VERSION == VERSION_JPN_FINAL
-		y++;
-#endif
-
 		gdl = text0f153628(gdl);
 		gdl = textRenderProjected(gdl, &x, &y, bgunGetName(weaponnum2), g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 		gdl = text0f153780(gdl);
@@ -584,19 +580,12 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 		struct frdata *frdata = frGetData();
 		char text[128];
 		bool failed = frdata->menutype == FRMENUTYPE_FAILED;
-#if VERSION >= VERSION_JPN_FINAL
-		u32 linecolourmid = failed ? 0xff644477 : 0x00ff0077; // line gradient colour in middle
-		u32 linecolourfig = failed ? 0xff664400 : 0x00ff0000; // line gradient colour at figures
-		u32 linecolourtex = failed ? 0xff664433 : 0x00ff0033; // line gradient colour at target texture
-#else
+
 		u32 linecolourmid = failed ? 0xff000077 : 0x00ff0077; // line gradient colour in middle
 		u32 linecolourfig = failed ? 0xff000000 : 0x00ff0000; // line gradient colour at figures
 		u32 linecolourtex = failed ? 0xff000033 : 0x00ff0033; // line gradient colour at target texture
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 		u32 colour;
-#endif
 
 		static u32 x1 = 0;
 		static u32 x2 = 0;
@@ -607,11 +596,10 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 		static u32 y3 = 0;
 		static u32 y4 = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
 		linecolourmid = (linecolourmid & 0xffffff00) | ((linecolourmid & 0xff) * (renderdata->colour & 0xff) >> 8);
 		linecolourfig = (linecolourfig & 0xffffff00) | ((linecolourfig & 0xff) * (renderdata->colour & 0xff) >> 8);
 		linecolourtex = (linecolourtex & 0xffffff00) | ((linecolourtex & 0xff) * (renderdata->colour & 0xff) >> 8);
-#endif
+
 		gDPPipeSync(gdl++);
 		gDPSetTexturePersp(gdl++, G_TP_NONE);
 		gDPSetAlphaCompare(gdl++, G_AC_NONE);
@@ -625,12 +613,8 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 		gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 		gDPSetTextureFilter(gdl++, G_TF_POINT);
 
-#if VERSION >= VERSION_NTSC_1_0
 		colour = ((failed ? 0xff777799 : 0x55ff5588) & 0xffffff00) | (((failed ? 0xff777799 : 0x55ff5588) & 0xff) * (renderdata->colour & 0xff) >> 8);
 		gDPSetEnvColorViaWord(gdl++, colour);
-#else
-		gDPSetEnvColorViaWord(gdl++, failed ? 0xff777799 : 0x55ff5588);
-#endif
 
 		gDPSetCombineLERP(gdl++,
 				TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
@@ -660,25 +644,16 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 				((renderdata->x + 73) << 2) * g_ScaleX, (renderdata->y + 68) << 2,
 				G_TX_RENDERTILE, 16, 1024, -1024 / g_ScaleX, 1024);
 
-#if VERSION >= VERSION_NTSC_1_0
 		gdl = textSetPrimColour(gdl, ((failed ? 0xff000055 : 0x00ff0055) & 0xffffff00) | (((failed ? 0xff000055 : 0x00ff0055) & 0xff) * (renderdata->colour & 0xff) >> 8));
 		colour = ((failed ? 0xff6969aa : renderdata->colour) & 0xffffff00) | ((((failed ? 0xff6969aa : renderdata->colour) & 0xff) * (renderdata->colour & 0xff)) >> 8);
-#else
-		gdl = textSetPrimColour(gdl, failed ? 0xff000055 : 0x00ff0055);
-#endif
 
 		// NTSC beta uses a static alpha channel, while newer versions take the
 		// alpha from the menu item's renderdata. Additionally, NTSC beta
 		// repeats its colour calculation throughout this function while newer
 		// versions store it in a variable. To prevent having version checks
 		// everywhere, this has been implemented here using macros.
-#if VERSION >= VERSION_NTSC_1_0
 #define COLOUR() (colour)
 #define COLOURWHITE() (0xffffff00 | (((renderdata->colour & 0xff) * 0xff) >> 8))
-#else
-#define COLOUR() (failed ? 0xff6969aa : renderdata->colour)
-#define COLOURWHITE() 0xffffffff
-#endif
 
 		// Bull's-eye count
 		sprintf(text, "%d\n", frdata->numhitsbullseye);
@@ -774,11 +749,6 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 		x = renderdata->x + 133;
 		y = renderdata->y + 63;
 
-#if VERSION >= VERSION_JPN_FINAL
-		x -= 44;
-		y += 3;
-#endif
-
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
@@ -787,11 +757,6 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
 		x = renderdata->x - textheight + 188;
 		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 64 : 63);
-
-#if VERSION >= VERSION_JPN_FINAL
-		x -= 27;
-		y += 3;
-#endif
 
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
@@ -841,19 +806,6 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 62, renderdata->y + 50, renderdata->x + 87, renderdata->y + 51, linecolourtex, linecolourmid);
 		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 70, renderdata->y + 60, renderdata->x + 90, renderdata->y + 61, linecolourtex, linecolourmid);
 
-#if VERSION >= VERSION_JPN_FINAL
-		// Vertical lines
-		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 81, renderdata->y + 17, renderdata->x + 82, renderdata->y + 37, linecolourmid, linecolourmid);
-		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 84, renderdata->y + 29, renderdata->x + 85, renderdata->y + 45, linecolourmid, linecolourmid);
-		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 87, renderdata->y + 41, renderdata->x + 88, renderdata->y + 51, linecolourmid, linecolourmid);
-		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 90, renderdata->y + 53, renderdata->x + 91, renderdata->y + 61, linecolourmid, linecolourmid);
-
-		// Horizontal lines - top right
-		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 81, renderdata->y + 17, renderdata->x + 96, renderdata->y + 18, linecolourmid, linecolourfig);
-		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 84, renderdata->y + 29, renderdata->x + 96, renderdata->y + 30, linecolourmid, linecolourfig);
-		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 87, renderdata->y + 41, renderdata->x + 96, renderdata->y + 42, linecolourmid, linecolourfig);
-		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 90, renderdata->y + 53, renderdata->x + 96, renderdata->y + 54, linecolourmid, linecolourfig);
-#else
 		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 81, renderdata->y + 17, renderdata->x + 82, renderdata->y + 37, linecolourmid, linecolourmid);
 		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 84, renderdata->y + 28, renderdata->x + 85, renderdata->y + 45, linecolourmid, linecolourmid);
 		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 87, renderdata->y + 39, renderdata->x + 88, renderdata->y + 51, linecolourmid, linecolourmid);
@@ -864,7 +816,6 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 84, renderdata->y + 28, renderdata->x + 96, renderdata->y + 29, linecolourmid, linecolourfig);
 		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 87, renderdata->y + 39, renderdata->x + 96, renderdata->y + 40, linecolourmid, linecolourfig);
 		gdl = menugfxDrawDialogBorderLine(gdl, renderdata->x + 90, renderdata->y + 50, renderdata->x + 96, renderdata->y + 51, linecolourmid, linecolourfig);
-#endif
 
 		return (uintptr_t)gdl;
 	}
@@ -872,7 +823,6 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 	return 0;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 MenuItemHandlerResult menuhandlerFrFailedContinue(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
@@ -885,7 +835,6 @@ MenuItemHandlerResult menuhandlerFrFailedContinue(s32 operation, struct menuitem
 
 	return 0;
 }
-#endif
 
 struct menuitem g_FrDifficultyMenuItems[] = {
 	{
@@ -1363,7 +1312,6 @@ struct menuitem g_FrFailedMenuItems[] = {
 		0x00000050,
 		frScoringMenuHandler,
 	},
-#if VERSION >= VERSION_NTSC_1_0
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
@@ -1372,7 +1320,6 @@ struct menuitem g_FrFailedMenuItems[] = {
 		0,
 		menuhandlerFrFailedContinue,
 	},
-#endif
 	{ MENUITEMTYPE_END },
 };
 
@@ -1381,13 +1328,8 @@ struct menudialogdef g_FrFailedMenuDialog = {
 	L_MPMENU_448, // "Training Stats"
 	g_FrFailedMenuItems,
 	frTrainingStatsMenuDialog,
-#if VERSION >= VERSION_NTSC_1_0
 	MENUDIALOGFLAG_STARTSELECTS,
 	NULL,
-#else
-	0,
-	&g_FrWeaponListMenuDialog,
-#endif
 };
 
 MenuItemHandlerResult ciOfficeInformationMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data)
@@ -1590,11 +1532,7 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(s32 operation, struct menud
 		if (g_Menus[g_MpPlayerNum].menumodel.rottimer60 > 0) {
 			g_Menus[g_MpPlayerNum].menumodel.rottimer60 -= g_Vars.diffframe60;
 		} else {
-#if VERSION >= VERSION_PAL_BETA
-			f32 roty = g_Menus[g_MpPlayerNum].menumodel.curroty + 0.01f * g_Vars.diffframe60freal;
-#else
 			f32 roty = g_Menus[g_MpPlayerNum].menumodel.curroty + 0.01f * g_Vars.diffframe60f;
-#endif
 			g_Menus[g_MpPlayerNum].menumodel.newroty = roty;
 			g_Menus[g_MpPlayerNum].menumodel.curroty = roty;
 		}
@@ -1645,7 +1583,7 @@ MenuItemHandlerResult dtDeviceListMenuHandler(s32 operation, struct menuitem *it
 		data->list.value = dtGetNumAvailable();
 		break;
 	case MENUOP_GETOPTIONTEXT:
-		return (uintptr_t) bgunGetName(dtGetWeaponByDeviceIndex(dtGetIndexBySlot(data->list.value)));
+		return (uintptr_t) langGet(dtGetWeapon(data->list.value)->name);
 	case MENUOP_SET:
 		g_DtSlot = data->list.value;
 		menuPushDialog(&g_DtDetailsMenuDialog);
@@ -1666,11 +1604,13 @@ MenuItemHandlerResult dtDeviceListMenuHandler(s32 operation, struct menuitem *it
 	return 0;
 }
 
-char *dtMenuTextName(struct menuitem *item)
+char *dtMenuTextName()
 {
-	u32 weaponnum = dtGetWeaponByDeviceIndex(dtGetIndexBySlot(g_DtSlot));
+	if(dtGetWeapon(g_DtSlot)) {
+		return langGet(dtGetWeapon(g_DtSlot)->name);
+	}
 
-	return bgunGetName(weaponnum);
+	return NULL;
 }
 
 MenuItemHandlerResult menuhandlerDtOkOrResume(s32 operation, struct menuitem *item, union handlerdata *data)
@@ -1834,8 +1774,7 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(s32 operation, struct menudi
 	switch (operation) {
 	case MENUOP_OPEN:
 		{
-			s32 weaponnum = dtGetWeaponByDeviceIndex(dtGetIndexBySlot(g_DtSlot));
-			u16 unused[] = {64250, 38500, 25650, 25700, 12950};
+			s32 weaponnum = dtGetWeapon(g_DtSlot)->rank;
 			dtInit();
 			g_Menus[g_MpPlayerNum].training.weaponnum = weaponnum;
 			invMenuGetGunConfigs(weaponnum);
@@ -1857,7 +1796,8 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(s32 operation, struct menudi
 		g_Menus[g_MpPlayerNum].menumodel.curposx = g_Menus[g_MpPlayerNum].menumodel.newposx;
 
 		if (g_Menus[g_MpPlayerNum].curdialog && g_Menus[g_MpPlayerNum].curdialog->definition == dialogdef) {
-			if (dtGetWeaponByDeviceIndex(dtGetIndexBySlot(g_DtSlot)) == WEAPON_DISGUISE41) {
+			if (dtGetWeapon(g_DtSlot)->rank == weaponMatchEnum(WEAPON_DISGUISE41)->rank) {
+				g_Menus[g_MpPlayerNum].menumodel.displacey = 30;
 				g_Menus[g_MpPlayerNum].menumodel.newanimnum = ANIM_STAND;
 				g_Menus[g_MpPlayerNum].menumodel.rottimer60 = TICKS(60);
 				g_Menus[g_MpPlayerNum].menumodel.zoomtimer60 = TICKS(120);

@@ -986,7 +986,7 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 	shotdata.gset.weaponnum = WEAPON_FALCON2;
 	shotdata.gset.weaponfunc = 0;
 	shotdata.gset.unk063a = 0;
-	shotdata.gset.unk0639 = 0;
+	shotdata.gset.gsetrank = 0;
 
 	shotdata.penetration = 1;
 	shotdata.distance = 999999999.f;
@@ -1409,7 +1409,7 @@ void handTickAttack(s32 handnum)
 				chrUncloakTemporarily(g_Vars.currentplayer->prop->chr);
 				mpstatsIncrementPlayerShotCount2(&gset, 0);
 
-				if (weaponnum == WEAPON_SHOTGUN) {
+				if (weaponGetRank(weaponnum) == weaponMatchEnum(WEAPON_SHOTGUN)->rank) {
 					shotCreate(handnum, true, true, 1, true);
 					shotCreate(handnum, true, true, 1, true);
 					shotCreate(handnum, true, true, 1, true);

@@ -269,7 +269,6 @@ void mainInit(void)
 	challengesInit();
 	utilsInit();
 	texInit();
-	langInit();
 	lvInit();
 	cheatsInit();
 	dhudInit();

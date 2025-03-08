@@ -1905,7 +1905,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 			zoomfov = currentPlayerGetGunZoomFov();
 		}
 
-		if (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_AR34
+		if (bgunGetWeaponNum(HAND_RIGHT) == weaponMatchEnum(WEAPON_AR34)->rank
 				&& g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY) {
 			zoomfov = currentPlayerGetGunZoomFov();
 		}

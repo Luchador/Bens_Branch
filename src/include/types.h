@@ -262,16 +262,6 @@ struct g_vars {
 	// 0f00 = One bit per pak. These paks are checked but not ticked.
 	/*0x4e4*/ u16 pakstocheck;
 
-	/*0x4e8*/ u32 unk0004e8;
-	/*0x4ec*/ u32 unk0004ec;
-	/*0x4f0*/ u32 unk0004f0;
-	/*0x4f4*/ u32 unk0004f4;
-	/*0x4f8*/ u32 unk0004f8;
-	/*0x4fc*/ u32 unk0004fc;
-	/*0x4e0*/ u32 unk000500;
-	/*0x504*/ u32 unk000504;
-	/*0x508*/ u32 unk000508;
-	/*0x50c*/ u32 unk00050c;
 	/*0x510*/ f32 unk000510;
 };
 
@@ -971,7 +961,7 @@ struct act_argh {
 // Gun settings
 struct gset {
 	u8 weaponnum;
-	u8 unk0639;
+	u8 gsetrank;
 	u8 unk063a;
 	u8 weaponfunc; // 0 or 1
 };
@@ -1578,7 +1568,7 @@ struct weaponobj { // objtype 0x08
 		struct gset gset;
 		struct {
 			/*0x5c*/ u8 weaponnum;
-			/*0x5d*/ s8 unk5d;
+			/*0x5d*/ s8 rank;
 			/*0x5e*/ s8 unk5e;
 			/*0x5f*/ u8 gunfunc;
 		};
@@ -1602,6 +1592,7 @@ struct weaponobj { // objtype 0x08
 	};
 
 	/*0x64*/ struct weaponobj *dualweapon; // other weapon when dual wielding
+	u16 weaponobjrank;
 };
 
 struct packedchr { // objtype 0x09
@@ -2247,11 +2238,7 @@ struct hand {
 	/*0x0cb4*/ s32 gs_int4;
 	/*0x0cb8*/ s32 animload;
 	/*0x0cbc*/ s32 animframeinc;
-#if VERSION >= VERSION_PAL_BETA
-	/*0x0cc0*/ f32 animframeincfreal;
-#else
 	/*0x0cc0*/ u32 animframeincfreal;
-#endif
 	/*0x0cc4*/ s32 animmode;
 	/*0x0cc8*/ u8 unk0cc8_01 : 1;
 	/*0x0cc8*/ u8 unk0cc8_02 : 1;
@@ -2819,9 +2806,7 @@ struct player {
 	/*0x1c70*/ s16 altdowntime; // for alt-modes, used like invdowntime and amdowntime
 	/*0x1c72*/ s16 amdowntime; // for alt-modes, used like invdowntime and amdowntime
 	/*0x1c76*/ bool wantsgangsta; // player wants to turn weapon sideways
-#ifndef PLATFORM_N64
 	/*0x1c74*/ f32 swivelpos[2];
-#endif
 };
 
 struct ailist {
@@ -3058,6 +3043,8 @@ struct weapon {
 	/*0x48*/ u16 manufacturer;
 	/*0x4a*/ u16 description;
 	/*0x4c*/ u32 flags;
+	/*0x4d*/ u16 rank;
+	/*0x4e*/ f32 menupos[5];
 };
 
 struct cutscene {
@@ -3319,9 +3306,6 @@ struct menuitemdata_scrollable {
 	s16 unk02; // unused
 	s16 maxscrolloffset;
 	s16 dialogheight;
-#if VERSION >= VERSION_PAL_BETA
-	s16 language;
-#endif
 };
 
 struct menuitemdata_slider {

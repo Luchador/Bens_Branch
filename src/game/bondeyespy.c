@@ -15,6 +15,7 @@
 #include "game/lang.h"
 #include "game/options.h"
 #include "game/propobj.h"
+#include "game/weaponutils.h"
 #include "bss.h"
 #include "lib/joy.h"
 #include "lib/main.h"
@@ -622,7 +623,7 @@ bool eyespyTryLaunch(void)
 		propSetPerimEnabled(g_Vars.currentplayer->eyespy->prop, false);
 
 		// "Not enough room to launch "
-		sprintf(text, "%s%s", langGet(L_MISC_218), bgunGetName(WEAPON_EYESPY));
+		sprintf(text, "%s%s", langGet(L_MISC_218), langGet(weaponMatchEnum(WEAPON_EYESPY)->name));
 		hudmsgCreate(text, HUDMSGTYPE_DEFAULT);
 		launched = false;
 	} else {
