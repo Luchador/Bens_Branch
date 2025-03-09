@@ -4192,13 +4192,13 @@ bool aiTryEquipWeapon(void)
 			case WEAPON_TIMEDMINE:
 			case WEAPON_PROXIMITYMINE:
 			case WEAPON_REMOTEMINE:
-				prop = chrGiveWeapon(g_Vars.chrdata, MODEL_CHRDYROCKET, WEAPON_ROCKETLAUNCHER, flags);
+				prop = chrGiveWeapon(g_Vars.chrdata, MODEL_CHRDYROCKET, weaponMatchEnum(WEAPON_ROCKETLAUNCHER)->rank, flags);
 				break;
 			case WEAPON_K7AVENGER:
 				if (g_Vars.stagenum == STAGE_INVESTIGATION && lvGetDifficulty() == DIFF_PA) {
 					prop = chrGiveWeapon(g_Vars.chrdata, model, cmd[4], flags);
 				} else {
-					prop = chrGiveWeapon(g_Vars.chrdata, MODEL_CHRDYROCKET, WEAPON_ROCKETLAUNCHER, flags);
+					prop = chrGiveWeapon(g_Vars.chrdata, MODEL_CHRDYROCKET, weaponMatchEnum(WEAPON_ROCKETLAUNCHER)->rank, flags);
 				}
 				break;
 			default:
@@ -5041,7 +5041,7 @@ bool aiEnableObj(void)
 		if (g_Vars.currentplayer->eyespy == NULL && obj->type == OBJTYPE_WEAPON) {
 			struct weaponobj *weapon = (struct weaponobj *) obj;
 
-			if (weapon->weaponnum == WEAPON_EYESPY) {
+			if (weapon->weaponnum == weaponMatchEnum(WEAPON_EYESPY)->rank) {
 				playerInitEyespy();
 			}
 		}
@@ -5402,7 +5402,7 @@ bool aiChrDrawWeapon(void)
 		u32 prevplayernum = g_Vars.currentplayernum;
 		u32 playernum = playermgrGetPlayerNumByProp(chr->prop);
 		setCurrentPlayerNum(playernum);
-		bgunEquipWeapon2(0, (s8)cmd[3]);
+		bgunEquipWeapon2(0, weaponMatchEnum((s8)cmd[3])->rank);
 		bgunEquipWeapon2(1, 0);
 		setCurrentPlayerNum(prevplayernum);
 	}
@@ -8889,9 +8889,7 @@ bool aiClearInventory(void)
 
 		if (g_Vars.currentplayer == g_Vars.bond || g_Vars.currentplayer == g_Vars.coop) {
 			invClear();
-#if VERSION >= VERSION_NTSC_1_0
 			g_Vars.currentplayer->devicesactive = 0;
-#endif
 			invGiveSingleWeapon(WEAPON_UNARMED);
 			bgunEquipWeapon(WEAPON_UNARMED);
 		}

@@ -121,14 +121,13 @@ void beamCreateForHand(s32 handnum)
 		s32 weaponnum = weaponGetRank(bgunGetWeaponNum(handnum));
 
 		if (weaponGetRank(hand->gset.weaponnum) == weaponMatchEnum(WEAPON_LASER)->rank && weaponGetRank(hand->gset.weaponfunc) == FUNC_SECONDARY) {
-			debug_log("watch laser \n", 0);
 			weaponnum = -2;
 		}
 
 		beam = &hand->beam;
 		beamCreate(beam, weaponnum, &hand->muzzlepos, &hand->hitpos);
 
-		if (beam->weaponnum == WEAPON_MAULER) {
+		if (beam->weaponnum == weaponMatchEnum(WEAPON_MAULER)->rank) {
 			beam->weaponnum = -3 - (s32)player->hands[handnum].matmot1;
 		}
 
@@ -160,7 +159,7 @@ void beamCreateForHand(s32 handnum)
 				if (!(radians > 0.08725257f) || weaponnum == -2) {
 					beamCreate(&g_Fireslots[chr->fireslots[handnum]].beam, weaponnum, &player->chrmuzzlelastpos[handnum], &hand->hitpos);
 
-					if (g_Fireslots[chr->fireslots[handnum]].beam.weaponnum == WEAPON_MAULER) {
+					if (g_Fireslots[chr->fireslots[handnum]].beam.weaponnum == weaponMatchEnum(WEAPON_MAULER)->rank) {
 						g_Fireslots[chr->fireslots[handnum]].beam.weaponnum = -3 - (s32)player->hands[handnum].matmot1;
 					}
 				}
@@ -304,6 +303,8 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 	Mtxf *sp188;
 	Mtxf sp148;
 
+	struct player *player = g_Vars.currentplayer;
+
 	if (arg3 < 5 && beam->age >= 0) {
 		Col *colours = gfxAllocateColours(1);
 		struct coord sp138;
@@ -341,33 +342,17 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 			texconfig = &g_TexBeamConfigs[3];
 		}
 
-		/*switch (beam->weaponnum) {
-		case WEAPON_CYCLONE:
-			texconfig = &g_TexBeamConfigs[1];
-			break;
-		case WEAPON_TRANQUILIZER:
-			texconfig = &g_TexBeamConfigs[3];
-			break;
-		case WEAPON_MAULER:
-		case WEAPON_PHOENIX:
-		case WEAPON_CALLISTO:
-		case WEAPON_REAPER:
-		case WEAPON_FARSIGHT:
-			texconfig = &g_TexBeamConfigs[4];
-			break;
-		}*/
-
 		if (beam->weaponnum == -1 || beam->weaponnum == weaponMatchEnum(WEAPON_CYCLONE)->rank) {
 			colours[0].word = PD_BE32(0xffffff7f);
 		} else {
 			colours[0].word = 0xffffffff;
 		}
 
-		if (beam->weaponnum == weaponMatchEnum(WEAPON_LASER)->rank) {
+		if (weaponGetRank(beam->weaponnum) == weaponMatchEnum(WEAPON_LASER)->rank) {
 			// Laser primary
 			sp130 = 50.0f;
 			texconfig = &g_TexLaserConfigs[0];
-		} else if (beam->weaponnum == -2) {
+		} else if (weaponGetRank(player->hands[HAND_RIGHT].gset.weaponnum) == weaponMatchEnum(WEAPON_LASER)->rank && player->hands[HAND_RIGHT].gset.weaponfunc == 1) {
 			// Laser secondary
 			sp130 = 10.0f;
 			texconfig = &g_TexLaserConfigs[0];
@@ -430,7 +415,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 		sp118.f[1] *= sp130;
 		sp118.f[2] *= sp130;
 
-		if (beam->weaponnum == WEAPON_LASER) {
+		if (beam->weaponnum == weaponMatchEnum(WEAPON_LASER)->rank) {
 			vertices = gfxAllocateVertices(8);
 		} else {
 			vertices = gfxAllocateVertices(4);
@@ -523,7 +508,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 					vertices[3].t = texconfig->height * 32;
 					vertices[3].colour = 0;
 
-					if (beam->weaponnum == WEAPON_LASER) {
+					if (weaponGetRank(beam->weaponnum) == weaponMatchEnum(WEAPON_LASER)->rank) {
 						f14 = campos->f[0] - sp138.f[0];
 						f16 = campos->f[1] - sp138.f[1];
 						f18 = campos->f[2] - sp138.f[2];
@@ -583,7 +568,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 					gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
 					gSPColor(gdl++, osVirtualToPhysical(colours), 1);
 
-					if (beam->weaponnum == WEAPON_LASER) {
+					if (weaponGetRank(beam->weaponnum) == weaponMatchEnum(WEAPON_LASER)->rank) {
 						texSelect(&gdl, &g_TexGroup03Configs[0], 4, arg2, 2, true, NULL);
 
 						gSPVertex(gdl++, osVirtualToPhysical(vertices), 8, 0);
@@ -719,15 +704,16 @@ void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
 		Mtxf sp64;
 		u32 magic = 0x15aca6;
 		u32 sp5c;
-		u32 stack[3];
 		u32 sp4c;
 		f32 newyspeed;
 		f32 f0;
 
 		casing->ground = ground;
 
-		if (weaponnum == WEAPON_PP9I || weaponnum == WEAPON_CC13
-				|| weaponnum == WEAPON_FALCON2 || weaponnum == WEAPON_MAGSEC4) {
+		u16 rank = weaponGetRank(weaponnum);
+
+		if (rank == weaponMatchEnum(WEAPON_PP9I)->rank || rank == weaponMatchEnum(WEAPON_CC13)->rank
+				|| rank == weaponMatchEnum(WEAPON_FALCON2)->rank || rank == weaponMatchEnum(WEAPON_MAGSEC4)->rank) {
 			casing->speed.x = -(RANDOMFRAC() * 0.5333333f * 0.0625f + 0.5333333f);
 			casing->speed.y = RANDOMFRAC() * 2.5f * 0.0625f + 2.5f;
 			casing->speed.z = 0.0f;
@@ -764,7 +750,7 @@ void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
 				casing->speed.z += (player->hands[handnum].posmtx.m[3][2] - player->hands[handnum].prevmtx.m[3][2]) / g_Vars.lvupdate60freal;
 			}
 		} else {
-			if (weaponnum == WEAPON_REAPER) {
+			if (rank == weaponMatchEnum(WEAPON_REAPER)->rank) {
 				casing->speed.x = -(RANDOMFRAC() * 0.41666666f * 0.125f + 0.41666666f);
 				casing->speed.y = RANDOMFRAC() * 3.3333333f * 0.125f + 3.3333333f;
 			} else {
@@ -774,7 +760,7 @@ void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
 
 			casing->speed.z = 0.0f;
 
-			if (weaponnum == WEAPON_DY357MAGNUM || weaponnum == WEAPON_DY357LX) {
+			if (rank == weaponMatchEnum(WEAPON_DY357MAGNUM)->rank || rank == weaponMatchEnum(WEAPON_DY357LX)->rank) {
 				casing->speed.x = 0.0f;
 				casing->speed.y = 0.0f;
 				casing->speed.z = -1.0f;
@@ -782,7 +768,7 @@ void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
 
 			mtx4RotateVecInPlace(mtx, &casing->speed);
 
-			if (weaponnum == WEAPON_REAPER) {
+			if (rank == weaponMatchEnum(WEAPON_REAPER)->rank) {
 				spa4.x = 2.0f * RANDOMFRAC() * M_BADTAU * 0.015625f - 0.09815914f;
 				spa4.y = 2.0f * RANDOMFRAC() * M_BADTAU * 0.015625f - 0.09815914f;
 				spa4.z = 2.0f * RANDOMFRAC() * M_BADTAU * 0.015625f - 0.09815914f;

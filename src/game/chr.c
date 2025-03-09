@@ -1949,9 +1949,9 @@ void chrUpdateCloak(struct chrdata *chr)
 				chr->aibot->cloakdeviceenabled = false;
 			}
 		} else if (chr->aibot->rcp120cloakenabled) {
-			if (chr->aibot->weaponnum == WEAPON_RCP120
+			if (chr->aibot->weaponnum == weaponMatchEnum(WEAPON_RCP120)->rank
 					&& !chrIsDead(chr)
-					&& botactGetAmmoQuantityByWeapon(chr->aibot, WEAPON_RCP120, 0, 1) > 0) {
+					&& botactGetAmmoQuantityByWeapon(chr->aibot, weaponMatchEnum(WEAPON_RCP120)->rank, 0, 1) > 0) {
 				if (chr->hidden & CHRHFLAG_CLOAKED) {
 					chr->aibot->rcpcloaktimer60 += LVUPDATE60FREAL() * 0.4f;
 
@@ -1966,7 +1966,7 @@ void chrUpdateCloak(struct chrdata *chr)
 								chr->aibot->loadedammo[0] = 0;
 							}
 						} else {
-							ammotype = botactGetAmmoTypeByFunction(WEAPON_RCP120, 0);
+							ammotype = botactGetAmmoTypeByFunction(weaponMatchEnum(WEAPON_RCP120)->rank, 0);
 
 							if (chr->aibot->ammoheld[ammotype] > 0) {
 								chr->aibot->ammoheld[ammotype] -= qty;
@@ -2112,7 +2112,7 @@ void chrTickPoisoned(struct chrdata *chr)
 	if (chr->poisoncounter > 0) {
 		struct coord coord = {0, 0, 0};
 
-		struct gset gset = { WEAPON_COMBATKNIFE, 0, 0, FUNC_POISON };
+		struct gset gset = {weaponMatchEnum(WEAPON_COMBATKNIFE)->rank, 0, 0, FUNC_POISON };
 
 		if (chr->actiontype == ACT_DEAD || chr->actiontype == ACT_DIE) {
 			// Dying chr
@@ -4460,7 +4460,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 					}
 				}
 
-					// Drop gun
+					// Shoot gun out of hand
 					if (chr->aibot == NULL && (chr->flags & CHRFLAG0_CANLOSEGUN)) 
 					{
 						chr->gunprop = hit->prop;
@@ -4483,7 +4483,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 						&& race != RACE_ROBOT
 						&& race != RACE_EYESPY
 						&& !ismelee
-						&& shotdata->gset.weaponnum != WEAPON_TRANQUILIZER) {
+						&& weaponGetRank(shotdata->gset.weaponnum) != weaponMatchEnum(WEAPON_TRANQUILIZER)->rank) {
 					u8 darker;
 
 					if (chr->bodynum == BODY_MRBLONDE || race == RACE_SKEDAR) {

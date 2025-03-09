@@ -633,8 +633,6 @@ void hudmsgCreateAsSubtitle(char *srctext, s32 type, u8 colourindex, s32 audioch
 					}
 				}
 
-				if (1);
-
 				i++;
 			} // end of inner loop
 

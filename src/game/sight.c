@@ -826,30 +826,24 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 
 					weapon = trackedprop->prop->weapon;
 
+					u16 rank = weaponGetRank(weapon->weaponnum);
+
+					// Threat detector labels
 					if (weapon && weapon->base.type == OBJTYPE_WEAPON) {
-						switch (weapon->weaponnum) {
-						case WEAPON_GRENADE:
-							// "PROXY" and "TIMED"
+						if(rank == weaponMatchEnum(WEAPON_GRENADE)->rank) {
 							textid = (weapon->gunfunc == FUNC_SECONDARY) ? L_GUN_212 : L_GUN_213;
-							break;
-						case WEAPON_NBOMB:
-							// "PROXY" and "IMPACT"
+						} else if (rank == weaponMatchEnum(WEAPON_NBOMB)->rank) {
 							textid = (weapon->gunfunc == FUNC_SECONDARY) ? L_GUN_212 : L_GUN_216;
-							break;
-						case WEAPON_TIMEDMINE:
+						} else if (rank == weaponMatchEnum(WEAPON_TIMEDMINE)->rank) {
 							textid = L_GUN_213; // "TIMED"
-							break;
-						case WEAPON_PROXIMITYMINE:
-							textid = L_GUN_212; // "PROXY"
-							break;
-						case WEAPON_REMOTEMINE:
-							textid = L_GUN_214; // "REMOTE"
-							break;
-						case WEAPON_DRAGON:
+						} else if (rank == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank) {
+							textid = L_GUN_212; // "TIMED"
+						} else if (rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
+							textid = L_GUN_214; // "TIMED"
+						} else if (rank == weaponMatchEnum(WEAPON_DRAGON)->rank) {
 							if (weapon->gunfunc == FUNC_SECONDARY) {
 								textid = L_GUN_212; // "PROXY"
 							}
-							break;
 						}
 					}
 

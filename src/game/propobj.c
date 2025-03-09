@@ -1041,7 +1041,7 @@ void projectileReset(struct projectile *projectile)
 
 	projectile->unk060 = 1;
 	projectile->ownerprop = NULL;
-	projectile->unk08c = 0.05f;
+	projectile->pinball = 0.05f;
 	projectile->bouncecount = 0;
 	projectile->bounceframe = -1;
 	projectile->lastwooshframe = -1;
@@ -2382,24 +2382,26 @@ void objFree(struct defaultobj *obj, bool freeprop, bool canregen)
 			weapon->dualweapon = NULL;
 		}
 
-		if (weapon->weaponnum == WEAPON_PROXIMITYMINE) {
+		u16 rank = weaponGetRank(weapon->weaponnum);
+
+		if (rank == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank) {
 			weaponUnregisterProxy(weapon);
 		}
 
-		if (weapon->weaponnum == WEAPON_DRAGON && weapon->gunfunc == FUNC_SECONDARY) {
+		if (rank == weaponMatchEnum(WEAPON_DRAGON)->rank && weapon->gunfunc == FUNC_SECONDARY) {
 			weaponUnregisterProxy(weapon);
 		}
 
-		if (weapon->weaponnum == WEAPON_NBOMB && weapon->gunfunc == FUNC_SECONDARY) {
+		if (rank == weaponMatchEnum(WEAPON_NBOMB)->rank && weapon->gunfunc == FUNC_SECONDARY) {
 			weaponUnregisterProxy(weapon);
 		}
 
-		if (weapon->weaponnum == WEAPON_GRENADE && weapon->gunfunc == FUNC_SECONDARY) {
+		if (rank == weaponMatchEnum(WEAPON_GRENADE)->rank && weapon->gunfunc == FUNC_SECONDARY) {
 			weaponUnregisterProxy(weapon);
 			smokeClearForProp(obj->prop);
 		}
 
-		if (weapon->weaponnum == WEAPON_BOLT) {
+		if (rank == weaponMatchEnum(WEAPON_BOLT)->rank) {
 			s32 beammnum = boltbeamFindByProp(obj->prop);
 
 			if (beammnum != -1) {
@@ -2408,7 +2410,7 @@ void objFree(struct defaultobj *obj, bool freeprop, bool canregen)
 		}
 
 		if (g_Vars.normmplayerisrunning
-				&& weapon->weaponnum == WEAPON_SKROCKET
+				&& rank == weaponMatchEnum(WEAPON_SKROCKET)->rank
 				&& obj->projectile
 				&& obj->projectile->ownerprop) {
 			s32 i;
@@ -4129,7 +4131,7 @@ void objLand(struct prop *prop, struct coord *arg1, struct coord *arg2, bool *em
 
 			bgunPlayPropHitSound(&weapon->gset, g_EmbedProp, -1);
 
-			if (weapon->weaponnum == WEAPON_COMBATKNIFE
+			if (weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank
 					&& (g_EmbedProp->type == PROPTYPE_CHR || g_EmbedProp->type == PROPTYPE_PLAYER)) {
 				chrSetPoisoned(g_EmbedProp->chr, ownerprop);
 			}
@@ -6125,7 +6127,7 @@ s32 projectileLaunch(struct defaultobj *obj, struct projectile *projectile, stru
 		struct weaponobj *weapon = (struct weaponobj *)obj;
 		RoomNum rooms[8];
 
-		if (weapon->weaponnum == WEAPON_ROCKET || weapon->weaponnum == WEAPON_HOMINGROCKET) {
+		if (weapon->weaponnum == weaponMatchEnum(WEAPON_ROCKET)->rank || weapon->weaponnum == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank) {
 			weapon->timer240 = 0;
 
 			func0f065e74(&prop->pos, prop->rooms, arg2, rooms);
@@ -6305,7 +6307,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 					cdresult = func0f072144(obj, &sp404, sp5a8, true);
 
 					if (cdresult != CDRESULT_ERROR && cdresult == CDRESULT_COLLISION) {
-						projectile->unk0dc = -projectile->unk0dc * projectile->unk08c;
+						projectile->unk0dc = -projectile->unk0dc * projectile->pinball;
 						objCollide(obj, &sp404, sp5a8);
 					}
 				}
@@ -6338,7 +6340,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 				cdresult = func0f072144(obj, &sp59c, 0.0f, true);
 
 				if (cdresult == CDRESULT_COLLISION) {
-					sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->unk08c;
+					sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->pinball;
 
 					if (sp58c > 0.0f) {
 						f32 f0;
@@ -6453,7 +6455,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 						cdresult = func0f072144(obj, &sp59c, 0.0f, true);
 
 						if (cdresult == CDRESULT_COLLISION) {
-							sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->unk08c;
+							sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->pinball;
 
 							sp590.x = -projectile->speed.f[0] * sp58c;
 							sp590.y = 0.0f;
@@ -6632,7 +6634,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 
 				homingrocket = false;
 
-				if (obj->type == OBJTYPE_WEAPON && ((struct weaponobj *)obj)->weaponnum == WEAPON_HOMINGROCKET) {
+				if (obj->type == OBJTYPE_WEAPON && ((struct weaponobj *)obj)->weaponnum == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank) {
 					homingrocket = true;
 				}
 
@@ -7156,11 +7158,11 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 							sp350 = true;
 						}
 
-						if (projectile->unk08c > 0.0f) {
+						if (projectile->pinball > 0.0f) {
 							f32 oldyspeed;
 							f32 f0 = projectile->speed.f[0] * sp5f4.f[0] + projectile->speed.f[1] * sp5f4.f[1] + projectile->speed.f[2] * sp5f4.f[2];
 
-							f0 *= -(projectile->unk08c + 1.0f);
+							f0 *= -(projectile->pinball + 1.0f);
 
 							oldyspeed = projectile->speed.y;
 
@@ -7206,7 +7208,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 								if (sp354) {
 									projectileFall(obj, realrot);
 								}
-							} else if (projectile->unk08c > 0.0f) {
+							} else if (projectile->pinball > 0.0f) {
 								if (projectile->speed.y >= 0.0f && projectile->speed.y < 2.2222223f) {
 									if ((projectile->flags & PROJECTILEFLAG_00000002) && projectile->bouncecount == 1) {
 										projectile->speed.y = 2.2222223f;
@@ -9207,14 +9209,14 @@ void autogunTickShoot(struct prop *autogunprop)
 						}
 
 						beam->age = 0;
-						beam->weaponnum = autogun->base.modelnum == MODEL_CETROOFGUN ? WEAPON_CALLISTO : WEAPON_RCP45;
+						beam->weaponnum = autogun->base.modelnum == MODEL_CETROOFGUN ? weaponMatchEnum(WEAPON_CALLISTO)->rank : weaponMatchEnum(WEAPON_RCP45)->rank;
 						beam->maxdist = distance;
 
 						if (distance < 500.0f) {
 							distance = 500.0f;
 						}
 
-						if (beam->weaponnum == WEAPON_LASER) {
+						if (beam->weaponnum == weaponMatchEnum(WEAPON_LASER)->rank) {
 							// Unreachable - weaponnum was assigned above
 							beam->speed = 0.25f * distance;
 							beam->mindist = 0.6f * distance;
@@ -14116,14 +14118,14 @@ void objApplyMomentum(struct defaultobj *obj, struct coord *speed, f32 rotation,
 
 		if (obj->type == OBJTYPE_HOVERPROP || obj->type == OBJTYPE_HOVERBIKE) {
 			if (obj->flags & OBJFLAG_HOVERPROP_20000000) {
-				projectile->unk08c = 0.8f;
+				projectile->pinball = 0.8f;
 				projectile->unk098 = 0.0027777778f;
 				projectile->unk0e0 = 0.000041881234f;
 				projectile->unk0e4 = PAL ? 0.969f : 0.974f;
 				projectile->unk0ec = 0.07852732f;
 				projectile->unk0f0 = 6.6666665f;
 			} else {
-				projectile->unk08c = 0.5f;
+				projectile->pinball = 0.5f;
 				projectile->unk098 = 0.013888889f;
 				projectile->unk0e0 = 0.00020940616f;
 				projectile->unk0e4 = PAL ? 0.953f : 0.961f;
@@ -14139,21 +14141,21 @@ void objApplyMomentum(struct defaultobj *obj, struct coord *speed, f32 rotation,
 		sp20 = objGetRotatedLocalZMaxByMtx3(bbox, obj->realrot) - objGetRotatedLocalZMinByMtx3(bbox, obj->realrot);
 
 		if (sp24 > 150.0f || sp20 > 150.0f) {
-			projectile->unk08c = 0.1f;
+			projectile->pinball = 0.1f;
 			projectile->unk098 = 0.055555556f;
 			projectile->unk0e0 = 0.00083762466f;
 			projectile->unk0e4 = PAL ? 0.953f : 0.961f;
 			projectile->unk0ec = 0.009815915f;
 			projectile->unk0f0 = 0.8333333f;
 		} else if (sp24 > 75.0f || sp20 > 75.0f) {
-			projectile->unk08c = 0.1f;
+			projectile->pinball = 0.1f;
 			projectile->unk098 = 0.055555556f;
 			projectile->unk0e0 = 0.00083762466f;
 			projectile->unk0e4 = PAL ? 0.953f : 0.961f;
 			projectile->unk0ec = 0.01963183f;
 			projectile->unk0f0 = 0.8333333f;
 		} else {
-			projectile->unk08c = 0.1f;
+			projectile->pinball = 0.1f;
 			projectile->unk098 = 0.055555556f;
 			projectile->unk0e0 = 0.00041881233f;
 			projectile->unk0e4 = PAL ? 0.953f : 0.961f;
@@ -15202,23 +15204,20 @@ void objTakeGunfire(struct defaultobj *obj, f32 damage, struct coord *pos, s32 w
 void objDamage(struct defaultobj *obj, f32 damage, struct coord *pos, s32 weaponnum, s32 playernum)
 {
 	// Store the attacker playernum into the object's "hidden" field
-#if VERSION >= VERSION_NTSC_1_0
 	// ...but not for deployed laptop guns in multiplayer, because those bits
 	// designate the owner of the gun
 	if (obj->type != OBJTYPE_AUTOGUN || !g_Vars.normmplayerisrunning) {
 		obj->hidden &= 0x0fffffff;
 		obj->hidden |= (playernum << 28) & 0xf0000000;
 	}
-#else
-	obj->hidden &= 0x0fffffff;
-	obj->hidden |= (playernum << 28) & 0xf0000000;
-#endif
+
+	u16 rank = weaponGetRank(weaponnum);
 
 	if (obj->type == OBJTYPE_GASBOTTLE && objGetDestroyedLevel(obj) == 1) {
 		return;
 	}
 
-	if (weaponnum == WEAPON_NONE) {
+	if (rank == weaponMatchEnum(WEAPON_NONE)->rank) {
 		if (func0f085194(obj)) {
 			return;
 		}
@@ -15243,17 +15242,17 @@ void objDamage(struct defaultobj *obj, f32 damage, struct coord *pos, s32 weapon
 			// zeroing its timer
 			weapon = (struct weaponobj *) obj;
 
-			if (weapon->weaponnum == WEAPON_GRENADE
-					|| weapon->weaponnum == WEAPON_TIMEDMINE
-					|| weapon->weaponnum == WEAPON_REMOTEMINE
-					|| weapon->weaponnum == WEAPON_PROXIMITYMINE
-					|| weapon->weaponnum == WEAPON_ROCKET
-					|| weapon->weaponnum == WEAPON_HOMINGROCKET
-					|| weapon->weaponnum == WEAPON_GRENADEROUND
-					|| (weapon->weaponnum == WEAPON_DRAGON && weapon->gunfunc == FUNC_SECONDARY)) {
+			if (weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_GRENADE)->rank
+					|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
+					|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
+					|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank
+					|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_ROCKET)->rank
+					|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank
+					|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_GRENADEROUND)->rank
+					|| (weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_DRAGON)->rank && weapon->gunfunc == FUNC_SECONDARY)) {
 				// Homing rockets are immune to remote mines? Or maybe they just
 				// don't explode because the mine is exploding anyway
-				if (weapon->weaponnum != WEAPON_HOMINGROCKET || weaponnum != WEAPON_REMOTEMINE) {
+				if (weaponGetRank(weapon->weaponnum) != weaponMatchEnum(WEAPON_HOMINGROCKET)->rank || weaponGetRank(weapon->weaponnum) != weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
 					weapon->timer240 = 0;
 				}
 			}
@@ -15537,10 +15536,10 @@ void func0f0859a0(struct prop *prop, struct shotdata *shotdata)
 
 			hitCreate(shotdata, prop, spd4, hitpart,
 					node1, &hitthing1, spe4, node2,
-					model, isnotglass && shotdata->gset.weaponnum != WEAPON_FARSIGHT,
+					model, isnotglass && weaponGetRank(shotdata->gset.weaponnum) != weaponMatchEnum(WEAPON_FARSIGHT)->rank,
 					(obj->flags2 & OBJFLAG2_BULLETPROOF)
-						&& shotdata->gset.weaponnum != WEAPON_DY357MAGNUM
-						&& shotdata->gset.weaponnum != WEAPON_FARSIGHT,
+						&& weaponGetRank(shotdata->gset.weaponnum) != weaponMatchEnum(WEAPON_DY357MAGNUM)->rank
+						&& weaponGetRank(shotdata->gset.weaponnum) != weaponMatchEnum(WEAPON_FARSIGHT)->rank,
 					&sp7c, &sp70);
 		}
 	}
@@ -15616,10 +15615,8 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 	if (obj->modelnum == MODEL_TARGET) {
 		if (hit->hitthing.texturenum == TEXTURE_0B9E) {
 			frCalculateHit(obj, &sp110, shotdata->gset.unk063a);
-		} else if ((shotdata->gset.weaponnum != WEAPON_CALLISTO || shotdata->gset.weaponfunc != FUNC_SECONDARY)
-#if VERSION >= VERSION_NTSC_1_0
-				&& shotdata->gset.weaponnum != WEAPON_FARSIGHT
-#endif
+		} else if ((weaponGetRank(shotdata->gset.weaponnum) != weaponMatchEnum(WEAPON_CALLISTO)->rank || shotdata->gset.weaponfunc != FUNC_SECONDARY)
+				&& weaponGetRank(shotdata->gset.weaponnum) != weaponMatchEnum(WEAPON_FARSIGHT)->rank
 				) {
 			// For some penetrating weapons, unset hits beyond the shot distance
 			spe4 = hit->prop;
@@ -15669,10 +15666,10 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 	// Create wall hit (bullet hole)
 	if (!ismeleefunc
 			&& hit->hitthing.texturenum != 10000
-			&& shotdata->gset.weaponnum != WEAPON_UNARMED
-			&& shotdata->gset.weaponnum != WEAPON_LASER
-			&& shotdata->gset.weaponnum != WEAPON_TRANQUILIZER
-			&& shotdata->gset.weaponnum != WEAPON_FARSIGHT) {
+			&& weaponGetRank(shotdata->gset.weaponnum) != weaponMatchEnum(WEAPON_UNARMED)->rank
+			&& weaponGetRank(shotdata->gset.weaponnum) != weaponMatchEnum(WEAPON_LASER)->rank
+			&& weaponGetRank(shotdata->gset.weaponnum) != weaponMatchEnum(WEAPON_TRANQUILIZER)->rank
+			&& weaponGetRank(shotdata->gset.weaponnum) != weaponMatchEnum(WEAPON_FARSIGHT)->rank) {
 		if (!hit->slowsbullet) {
 			struct prop *hitprop = hit->prop;
 			s8 iswindoweddoor = obj->model->definition->skel == &g_SkelWindowedDoor ? true : false;
@@ -16359,23 +16356,24 @@ void ammotypePlayPickupSound(u32 ammotype)
 s32 propPlayPickupSound(struct prop *prop, s32 weapon)
 {
 	s16 sound;
+	u16 rank = weaponGetRank(weapon);
 
-	if (weapon == WEAPON_COMBATKNIFE || weapon == WEAPON_COMBATKNIFE) {
+	if (rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
 		sound = SFX_PICKUP_KNIFE;
-	} else if (weapon == WEAPON_REMOTEMINE
-			|| weapon == WEAPON_PROXIMITYMINE
-			|| weapon == WEAPON_TIMEDMINE
-			|| weapon == WEAPON_COMMSRIDER
-			|| weapon == WEAPON_TRACERBUG
-			|| weapon == WEAPON_TARGETAMPLIFIER
-			|| weapon == WEAPON_ECMMINE) {
+	} else if (rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
+			|| rank == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank
+			|| rank == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
+			|| rank == weaponMatchEnum(WEAPON_COMMSRIDER)->rank
+			|| rank == weaponMatchEnum(WEAPON_TRACERBUG)->rank
+			|| rank == weaponMatchEnum(WEAPON_TARGETAMPLIFIER)->rank
+			|| rank == weaponMatchEnum(WEAPON_ECMMINE)->rank) {
 		sound = SFX_PICKUP_MINE;
-	} else if (weapon == WEAPON_GRENADE
-			|| weapon == WEAPON_GRENADEROUND
-			|| weapon == WEAPON_ROCKET
-			|| weapon == WEAPON_HOMINGROCKET) {
+	} else if (rank == weaponMatchEnum(WEAPON_GRENADE)->rank
+			|| rank == weaponMatchEnum(WEAPON_GRENADEROUND)->rank
+			|| rank == weaponMatchEnum(WEAPON_ROCKET)->rank
+			|| rank == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank) {
 		sound = SFX_PICKUP_AMMO;
-	} else if (weapon == WEAPON_LASER) {
+	} else if (rank == weaponMatchEnum(WEAPON_LASER)->rank) {
 		sound = SFX_PICKUP_LASER;
 	} else {
 		sound = SFX_PICKUP_GUN;
@@ -16389,28 +16387,30 @@ void weaponPlayPickupSound(s32 weaponnum)
 {
 	s32 sound;
 
-	if (weaponnum == WEAPON_COMBATKNIFE || weaponnum == WEAPON_COMBATKNIFE) {
+	u16 rank = weaponGetRank(weaponnum);
+
+	if (rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
 		sound = SFX_PICKUP_KNIFE;
-	} else if (weaponnum == WEAPON_REMOTEMINE
-			|| weaponnum == WEAPON_PROXIMITYMINE
-			|| weaponnum == WEAPON_TIMEDMINE
-			|| weaponnum == WEAPON_TRACERBUG
-			|| weaponnum == WEAPON_TARGETAMPLIFIER
-			|| weaponnum == WEAPON_COMMSRIDER
-			|| weaponnum == WEAPON_ECMMINE) {
+	} else if (rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
+			|| rank == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank
+			|| rank == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
+			|| rank == weaponMatchEnum(WEAPON_TRACERBUG)->rank
+			|| rank == weaponMatchEnum(WEAPON_TARGETAMPLIFIER)->rank
+			|| rank == weaponMatchEnum(WEAPON_COMMSRIDER)->rank
+			|| rank == weaponMatchEnum(WEAPON_ECMMINE)->rank) {
 		sound = SFX_PICKUP_MINE;
-	} else if (weaponnum == WEAPON_GRENADE
-			|| weaponnum == WEAPON_GRENADEROUND
-			|| weaponnum == WEAPON_ROCKET
-			|| weaponnum == WEAPON_HOMINGROCKET) {
+	} else if (rank == weaponMatchEnum(WEAPON_GRENADE)->rank
+			|| rank == weaponMatchEnum(WEAPON_GRENADEROUND)->rank
+			|| rank == weaponMatchEnum(WEAPON_ROCKET)->rank
+			|| rank == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank) {
 		sound = SFX_PICKUP_AMMO;
-	} else if (weaponnum == WEAPON_LASER) {
+	} else if (rank == weaponMatchEnum(WEAPON_LASER)->rank) {
 		sound = SFX_PICKUP_LASER;
-	} else if (weaponnum == WEAPON_BOLT) {
+	} else if (rank == weaponMatchEnum(WEAPON_BOLT)->rank) {
 		sound = SFX_PICKUP_GUN;
-	} else if (weaponnum == WEAPON_EYESPY) {
+	} else if (rank == weaponMatchEnum(WEAPON_EYESPY)->rank) {
 		sound = SFX_PICKUP_KEYCARD;
-	} else if (weaponnum > WEAPON_PSYCHOSISGUN) {
+	} else if (rank > weaponMatchEnum(WEAPON_PSYCHOSISGUN)->rank) {
 		sound = SFX_PICKUP_KEYCARD;
 	} else {
 		sound = SFX_PICKUP_GUN;
@@ -16462,25 +16462,25 @@ void ammoHandlePickup(s32 ammotype, s32 quantity, bool withsound, bool withhudms
 		}
 
 		if (ammotype == AMMOTYPE_GRENADE) {
-			weapon = WEAPON_GRENADE;
+			weapon = weaponMatchEnum(WEAPON_GRENADE)->rank;
 		} else if (ammotype == AMMOTYPE_REMOTE_MINE) {
-			weapon = WEAPON_REMOTEMINE;
+			weapon = weaponMatchEnum(WEAPON_REMOTEMINE)->rank;
 		} else if (ammotype == AMMOTYPE_PROXY_MINE) {
-			weapon = WEAPON_PROXIMITYMINE;
+			weapon = weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank;
 		} else if (ammotype == AMMOTYPE_TIMED_MINE) {
-			weapon = WEAPON_TIMEDMINE;
+			weapon = weaponMatchEnum(WEAPON_TIMEDMINE)->rank;
 		} else if (ammotype == AMMOTYPE_NBOMB) {
-			weapon = WEAPON_NBOMB;
+			weapon = weaponMatchEnum(WEAPON_NBOMB)->rank;
 		} else if (ammotype == AMMOTYPE_KNIFE) {
-			weapon = WEAPON_COMBATKNIFE;
+			weapon = weaponMatchEnum(WEAPON_COMBATKNIFE)->rank;
 		} else if (ammotype == AMMOTYPE_ECM_MINE) {
-			weapon = WEAPON_ECMMINE;
+			weapon = weaponMatchEnum(WEAPON_ECMMINE)->rank;
 		} else if (ammotype == AMMOTYPE_TOKEN) {
-			weapon = WEAPON_BRIEFCASE2;
+			weapon = weaponMatchEnum(WEAPON_BRIEFCASE2)->rank;
 		} else if (ammotype == AMMOTYPE_CLOAK) {
-			weapon = WEAPON_CLOAKINGDEVICE;
+			weapon = weaponMatchEnum(WEAPON_CLOAKINGDEVICE)->rank;
 		} else if (ammotype == AMMOTYPE_BOOST) {
-			weapon = WEAPON_COMBATBOOST;
+			weapon = weaponMatchEnum(WEAPON_COMBATBOOST)->rank;
 		} else {
 			weapon = -1;
 		}
@@ -16526,8 +16526,9 @@ s32 weaponGetPickupAmmoQty(struct weaponobj *weapon)
 	}
 
 	ammotype = bgunGetAmmoTypeForWeapon(weapon->weaponnum, 0);
+	u16 rank = weaponGetRank(weapon->weaponnum);
 
-	if (weapon->weaponnum == WEAPON_COMBATKNIFE || weapon->weaponnum == WEAPON_BOLT) {
+	if (rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank || rank == weaponMatchEnum(WEAPON_BOLT)->rank) {
 		return 1;
 	}
 
@@ -16583,6 +16584,7 @@ void weaponGetPickupText(char *buffer, s32 weaponnum, bool dual)
 		&& !(playercount == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL));
 	s32 textid;
 	bool plural = false;
+	u16 rank = weaponnum;
 
 	if (dual) {
 		strcat(buffer, langGet(L_PROPOBJ_001)); // "Double"
@@ -16590,7 +16592,7 @@ void weaponGetPickupText(char *buffer, s32 weaponnum, bool dual)
 		if (full) {
 			strcat(buffer, langGet(L_PROPOBJ_000)); // "Picked up"
 
-			if (weaponnum == WEAPON_EYESPY && g_Vars.currentplayer->eyespy) {
+			if (rank == weaponMatchEnum(WEAPON_EYESPY)->rank && g_Vars.currentplayer->eyespy) {
 				textid = L_PROPOBJ_050; // "your"
 			} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_F_SOME)) {
 				textid = L_PROPOBJ_002; // "some"
@@ -16604,7 +16606,7 @@ void weaponGetPickupText(char *buffer, s32 weaponnum, bool dual)
 
 			strcat(buffer, langGet(textid));
 		} else {
-			if (weaponnum == WEAPON_EYESPY && g_Vars.currentplayer->eyespy) {
+			if (rank == weaponMatchEnum(WEAPON_EYESPY)->rank && g_Vars.currentplayer->eyespy) {
 				textid = L_PROPOBJ_051; // "Your"
 			} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_S_SOME)) {
 				textid = L_PROPOBJ_003; // "Some"
@@ -16717,12 +16719,13 @@ s32 propPickupByPlayer(struct prop *prop, bool showhudmsg)
 		break;
 	case OBJTYPE_WEAPON:
 		{
-			struct weaponobj *weapon = (struct weaponobj *) prop->obj;
+			struct weaponobj *weaponobj = (struct weaponobj *) prop->obj;
 			bool sp70 = false;
 			s32 ammotype;
 			s32 count = 0;
 			s32 sp64;
-			u16 rank = weaponGetRank(weapon->weaponnum);
+
+			u16 rank = weaponGetRank(weaponobj->weaponnum);
 
 			if (g_Vars.normmplayerisrunning) {
 				if (rank == weaponMatchEnum(WEAPON_BRIEFCASE2)->rank) {
@@ -16778,7 +16781,7 @@ s32 propPickupByPlayer(struct prop *prop, bool showhudmsg)
 					showhudmsg = false;
 					sp70 = true;
 				} else {
-					count = invGiveWeaponsByProp(prop);
+					count = invGiveWeaponsByProp(prop); // Give player the weapon
 
 					if (count) {
 						sp70 = true;
@@ -16795,7 +16798,7 @@ s32 propPickupByPlayer(struct prop *prop, bool showhudmsg)
 							hudmsgCreateWithFlags(text, HUDMSGTYPE_DEFAULT, HUDMSGFLAG_ONLYIFALIVE | HUDMSGFLAG_ALLOWDUPES);
 						} else {
 							if (sp70) {
-								currentPlayerQueuePickupWeaponHudmsg(rank, count == 2);
+								currentPlayerQueuePickupWeaponHudmsg(rank, count == 2); // Standard display message
 							}
 						}
 					}
@@ -16813,7 +16816,7 @@ s32 propPickupByPlayer(struct prop *prop, bool showhudmsg)
 			ammotype = bgunGetAmmoTypeForWeapon(rank, FUNC_PRIMARY);
 
 			if (ammotype) {
-				s32 pickupqty = weaponGetPickupAmmoQty(weapon);
+				s32 pickupqty = weaponGetPickupAmmoQty(weaponobj);
 
 				if (pickupqty > 0) {
 					s32 heldqty = bgunGetReservedAmmoCount(ammotype);
@@ -16831,7 +16834,7 @@ s32 propPickupByPlayer(struct prop *prop, bool showhudmsg)
 			}
 
 			if (rank == weaponMatchEnum(WEAPON_SUPERDRAGON)->rank) {
-				s32 pickupqty = weaponGetPickupAmmoQty(weapon);
+				s32 pickupqty = weaponGetPickupAmmoQty(weaponobj);
 
 				if (bgunGetReservedAmmoCount(AMMOTYPE_DEVASTATOR) < bgunGetCapacityByAmmotype(AMMOTYPE_DEVASTATOR)) {
 					s32 quantity = bgunGetReservedAmmoCount(AMMOTYPE_DEVASTATOR) + 5;
@@ -16973,47 +16976,48 @@ s32 objTestForPickup(struct prop *prop)
 		bool maybe = true;
 		s32 leftweaponnum;
 		s32 rightweaponnum;
+		u16 rank = weaponGetRank(weapon->weaponnum);
 
-		if (weapon->weaponnum == weaponMatchEnum(WEAPON_GRENADE)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_GRENADEROUND)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_NBOMB)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_SKROCKET)->rank) {
+		if (rank == weaponMatchEnum(WEAPON_GRENADE)->rank
+				|| rank == weaponMatchEnum(WEAPON_GRENADEROUND)->rank
+				|| rank == weaponMatchEnum(WEAPON_NBOMB)->rank
+				|| rank == weaponMatchEnum(WEAPON_SKROCKET)->rank) {
 			if (weapon->timer240 >= 0 || (obj->hidden & OBJHFLAG_DELETING)) {
 				return TICKOP_NONE;
 			}
 		}
 
-		if (weapon->weaponnum == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
-				|| (weapon->weaponnum == weaponMatchEnum(WEAPON_DRAGON)->rank && weapon->gunfunc == FUNC_SECONDARY)
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_TRACERBUG)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_TARGETAMPLIFIER)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_COMMSRIDER)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_ECMMINE)->rank) {
+		if (rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
+				|| rank == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank
+				|| rank == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
+				|| (rank == weaponMatchEnum(WEAPON_DRAGON)->rank && weapon->gunfunc == FUNC_SECONDARY)
+				|| rank == weaponMatchEnum(WEAPON_TRACERBUG)->rank
+				|| rank == weaponMatchEnum(WEAPON_TARGETAMPLIFIER)->rank
+				|| rank == weaponMatchEnum(WEAPON_COMMSRIDER)->rank
+				|| rank == weaponMatchEnum(WEAPON_ECMMINE)->rank) {
 			if (weapon->timer240 >= 0 || (obj->hidden & OBJHFLAG_DELETING)) {
 				return TICKOP_NONE;
 			}
 		}
 
-		if (weapon->weaponnum == weaponMatchEnum(WEAPON_ROCKET)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_BOLT)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
+		if (rank == weaponMatchEnum(WEAPON_ROCKET)->rank
+				|| rank == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank
+				|| rank == weaponMatchEnum(WEAPON_BOLT)->rank
+				|| rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
 			if (obj->hidden & OBJHFLAG_PROJECTILE) {
 				return TICKOP_NONE;
 			}
 		}
 
-		if (invHasSingleWeaponExcAllGuns(weapon->weaponnum) && bgunGetAmmoTypeForWeapon(weapon->weaponnum, FUNC_PRIMARY)) {
+		if (invHasSingleWeaponExcAllGuns(rank) && bgunGetAmmoTypeForWeapon(rank, FUNC_PRIMARY)) {
 			if (cheatIsActive(CHEAT_UNLIMITEDAMMO) || cheatIsActive(CHEAT_UNLIMITEDAMMONORELOADS)) {
 				maybe = false;
 			} else {
-				maybe = bgunGetAmmoQtyForWeapon(weapon->weaponnum, FUNC_PRIMARY) >= bgunGetAmmoCapacityForWeapon(weapon->weaponnum, FUNC_PRIMARY);
+				maybe = bgunGetAmmoQtyForWeapon(rank, FUNC_PRIMARY) >= bgunGetAmmoCapacityForWeapon(rank, FUNC_PRIMARY);
 			}
 
-			if (weapon->weaponnum == weaponMatchEnum(WEAPON_SUPERDRAGON)->rank) {
-				if (bgunGetAmmoQtyForWeapon(weapon->weaponnum, FUNC_SECONDARY) < bgunGetAmmoCapacityForWeapon(weapon->weaponnum, FUNC_SECONDARY)) {
+			if (rank == weaponMatchEnum(WEAPON_SUPERDRAGON)->rank) {
+				if (bgunGetAmmoQtyForWeapon(rank, FUNC_SECONDARY) < bgunGetAmmoCapacityForWeapon(rank, FUNC_SECONDARY)) {
 					maybe = false;
 				}
 			}
@@ -17021,15 +17025,15 @@ s32 objTestForPickup(struct prop *prop)
 			if (maybe) {
 				if (weapon->dualweapon || weapon->dualweaponnum >= 0) {
 					if (weapon->dualweapon) {
-						leftweaponnum = rightweaponnum = weapon->dualweapon->weaponnum;
+						leftweaponnum = rightweaponnum = weaponGetRank(weapon->dualweapon->weaponnum);
 					} else {
-						leftweaponnum = rightweaponnum = weapon->dualweaponnum;
+						leftweaponnum = rightweaponnum = weaponGetRank(weapon->dualweaponnum);
 					}
 
 					if ((weapon->base.flags & OBJFLAG_DEACTIVATED)) {
-						rightweaponnum = weapon->weaponnum;
+						rightweaponnum = weaponGetRank(weapon->weaponnum);
 					} else {
-						leftweaponnum = weapon->weaponnum;
+						leftweaponnum = weaponGetRank(weapon->weaponnum);
 					}
 
 					if (invHasDoubleWeaponExcAllGuns(leftweaponnum, rightweaponnum)) {
@@ -17037,9 +17041,9 @@ s32 objTestForPickup(struct prop *prop)
 					}
 				} else {
 					if (g_Vars.normmplayerisrunning
-							&& weaponHasFlag(weapon->weaponnum, WEAPONFLAG_DUALWIELD)
-							&& !invHasDoubleWeaponExcAllGuns(weapon->weaponnum, weapon->weaponnum)) {
-						struct invitem *item = invFindSingleWeapon(weapon->weaponnum);
+							&& weaponHasFlag(weaponGetRank(weapon->weaponnum), WEAPONFLAG_DUALWIELD)
+							&& !invHasDoubleWeaponExcAllGuns(weaponGetRank(weapon->weaponnum), weaponGetRank(weapon->weaponnum))) {
+						struct invitem *item = invFindSingleWeapon(weaponGetRank(weapon->weaponnum));
 
 						if ((item && item->type_weap.pickuppad == weapon->base.pad) || weapon->base.pad < 0) {
 							return TICKOP_NONE;
@@ -17699,12 +17703,13 @@ void coordTriggerProxies(struct coord *pos, bool arg1)
 		struct weaponobj *weapon = g_Proxies[i];
 
 		if (weapon && weapon->timer240 == 1) {
+			u16 rank = weaponGetRank(weapon->weaponnum);
 			f32 xdiff;
 			f32 ydiff;
 			f32 zdiff;
 			f32 range = 250 * 250;
 
-			if (weapon->weaponnum == WEAPON_DRAGON) {
+			if (rank == weaponMatchEnum(WEAPON_DRAGON)->rank) {
 				range += range;
 			}
 
@@ -17713,7 +17718,7 @@ void coordTriggerProxies(struct coord *pos, bool arg1)
 			zdiff = pos->z - weapon->base.prop->pos.z;
 
 			if (xdiff * xdiff + ydiff * ydiff + zdiff * zdiff < range) {
-				if (weapon->weaponnum != WEAPON_GRENADE || arg1 == true) {
+				if (rank != weaponMatchEnum(WEAPON_GRENADE)->rank || arg1 == true) {
 					weapon->timer240 = 0;
 				}
 			}
@@ -18143,7 +18148,7 @@ struct weaponobj *weaponCreateProjectileFromGset(s32 modelnum, struct gset *gset
 struct weaponobj *weaponCreateProjectileFromWeaponNum(s32 modelnum, s32 weaponnum, struct chrdata *chr)
 {
 	struct gset gset = {0};
-	gset.weaponnum = weaponnum;
+	gset.weaponnum = weaponGetRank(weaponnum);
 
 	return weaponCreateProjectileFromGset(modelnum, &gset, chr);
 }
@@ -18217,7 +18222,7 @@ struct prop *weaponCreateForChr(struct chrdata *chr, s32 modelnum, s32 weaponnum
 
 		*obj = tmp;
 
-		obj->weaponnum = weaponnum;
+		obj->weaponnum = weaponGetRank(weaponnum);
 		obj->gunfunc = FUNC_PRIMARY;
 		obj->unk5e = 0;
 		obj->rank = 0;
@@ -19159,13 +19164,6 @@ void doorStartClose(struct doorobj *door)
 	}
 }
 
-#if PIRACYCHECKS
-u32 decodeXorAaaaaaaa(u32 value)
-{
-	return value ^ (PAL ? 0x18743082 : 0xaaaaaaaa);
-}
-#endif
-
 void doorFinishOpen(struct doorobj *door)
 {
 	doorPlayOpenedSound(door->soundtype, door->base.prop);
@@ -19218,15 +19216,6 @@ void doorFinishClose(struct doorobj *door)
 #else
 	if (door->doortype == DOORTYPE_LASER) {
 		door->laserfade = 0;
-	}
-#endif
-
-#if PIRACYCHECKS
-	if (osCicId != decodeXorAaaaaaaa(PAL ? (6105 ^ 0x18743082) : (6105 ^ 0xaaaaaaaa))) {
-		u32 *ptr = (u32 *)func0f08f968;
-		ptr[0] = 0x00001025; // li v0, 0
-		ptr[1] = 0x03e00008; // jr ra
-		ptr[2] = 0x00000000; // nop
 	}
 #endif
 }

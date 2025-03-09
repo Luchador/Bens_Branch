@@ -391,9 +391,6 @@ void wallhitRemoveOne(void)
 			}
 		}
 
-		if (1);
-		if (1);
-
 		if (bestroom != -1) {
 			s32 min = bestroom == 0 ? g_MinPropWallhits : g_MinBgWallhitsPerRoom;
 
@@ -408,8 +405,6 @@ void wallhitRemoveOne(void)
 	if (!done) {
 		wallhitRemoveOneInRoom(-1);
 	}
-
-	if (1);
 }
 
 void wallhitsTick(void)
@@ -419,7 +414,6 @@ void wallhitsTick(void)
 	s32 numallocated;
 	s32 i;
 	s32 j;
-	u32 stack[3];
 	f32 midx;
 	f32 midy;
 	f32 midz;
@@ -427,7 +421,6 @@ void wallhitsTick(void)
 	f32 f24;
 	struct wallhit *wallhit;
 	struct coord spc8[4];
-	u32 stack2[4];
 
 	static s32 var8007f834 = 0;
 

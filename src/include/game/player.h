@@ -84,7 +84,7 @@ void player0f0c3320(Mtxf *matrices, s32 count);
 void playerSetTickMode(s32 tickmode);
 void playerBeginGeFadeIn(void);
 void playersBeginMpSwirl(void);
-void player0f0b9a20(void);
+void playerSetup(void);
 void playerEndCutscene(void);
 void playerPrepareWarpType1(s16 pad_id);
 void playerPrepareWarpType2(struct warpparams *cmd, bool hasdir, s32 arg2);

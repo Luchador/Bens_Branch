@@ -542,7 +542,7 @@ void playerStartNewLife(void)
 						if (cmd[2] >= 0) {
 							invGiveDoubleWeapon(cmd[1], cmd[2]);
 						} else {
-							invGiveSingleWeapon(cmd[1]);
+							invGiveSingleWeapon(weaponMatchEnum(cmd[1])->rank);
 						}
 					}
 					cmd += 4;
@@ -891,14 +891,15 @@ void playerSpawn(void)
 		g_Vars.currentplayer->armourscale = 2;
 	}
 
+	// Multiplayer modes
 	if (g_Vars.mplayerisrunning) {
 		if (g_Vars.antiplayernum >= 0 && g_Vars.currentplayer == g_Vars.anti) {
 			numsqdists = 0;
 			force = false;
 
-			invGiveSingleWeapon(WEAPON_SUICIDEPILL);
-			bgunEquipWeapon2(HAND_LEFT, WEAPON_NONE);
-			bgunEquipWeapon2(HAND_RIGHT, WEAPON_UNARMED);
+			invGiveSingleWeapon(weaponMatchEnum(WEAPON_SUICIDEPILL)->rank);
+			bgunEquipWeapon2(HAND_LEFT, weaponMatchEnum(WEAPON_NONE)->rank);
+			bgunEquipWeapon2(HAND_RIGHT, weaponMatchEnum(WEAPON_UNARMED)->rank);
 
 			if (g_Vars.lvframenum > 0) {
 				s32 prevplayernum = g_Vars.currentplayernum;
@@ -1016,18 +1017,13 @@ void playerSpawn(void)
 				g_Vars.currentplayer->prop->chr->blurnumtimesdied = 0;
 			}
 		} else {
-#ifndef PLATFORM_N64
 			if (cheatIsActive(CHEAT_CLOAKINGDEVICE)) {
 				invGiveSingleWeapon(WEAPON_CLOAKINGDEVICE);
-#if VERSION >= VERSION_PAL_FINAL
-				bgunSetAmmoQuantity(AMMOTYPE_CLOAK, TICKS(7200));
-#else
 				bgunSetAmmoQuantity(AMMOTYPE_CLOAK, 7200);
-#endif
 			}
 
 			if (cheatIsActive(CHEAT_PERFECTDARKNESS)) {
-				invGiveSingleWeapon(WEAPON_NIGHTVISION);
+				invGiveSingleWeapon(weaponMatchEnum(WEAPON_NIGHTVISION)->rank);
 			}
 
 			if ((g_MpSetup.options & MPOPTION_SPAWNWITHWEAPON)
@@ -1044,10 +1040,9 @@ void playerSpawn(void)
 					}
 					bgunSetAmmoQuantity(ammotype, startammo);
 				}
-				bgunEquipWeapon2(HAND_LEFT, WEAPON_NONE);
+				bgunEquipWeapon2(HAND_LEFT, weaponMatchEnum(WEAPON_NONE)->rank);
 				bgunEquipWeapon2(HAND_RIGHT, mpweapon->weaponnum);
 			} else
-#endif
 			{
 				bgunEquipWeapon2(HAND_LEFT, g_DefaultWeapons[HAND_LEFT]);
 				bgunEquipWeapon2(HAND_RIGHT, g_DefaultWeapons[HAND_RIGHT]);
@@ -1245,45 +1240,10 @@ void playerTickChrBody(void)
 		u8 *allocation;
 		void *spe8;
 		s32 offset2;
-		u32 stack2;
 		struct weaponobj *weaponobj;
 
-		// Unused
-		struct weaponobj template = {
-			256,                    // extrascale
-			0,                      // hidden2
-			OBJTYPE_WEAPON,         // type
-			MODEL_CHRFALCON2,       // modelnum
-			-1,                     // pad
-			OBJFLAG_ASSIGNEDTOCHR,  // flags
-			0,                      // flags2
-			0,                      // flags3
-			NULL,                   // prop
-			NULL,                   // model
-			1, 0, 0,                // realrot
-			0, 1, 0,
-			0, 0, 1,
-			0,                      // hidden
-			NULL,                   // geo
-			NULL,                   // projectile
-			0,                      // damage
-			1000,                   // maxdamage
-			0xff, 0xff, 0xff, 0x00, // shadecol
-			0xff, 0xff, 0xff, 0x00, // nextcol
-			0x0fff,                 // floorcol
-			0,                      // tiles
-			WEAPON_FALCON2,         // weaponnum
-			0,                      // rank
-			0,                      // unk5e
-			FUNC_PRIMARY,           // gunfunc
-			0,                      // fadeouttimer60
-			-1,                     // dualweaponnum
-			-1,                     // timer240
-			NULL,                   // dualweapon
-		};
-
 		s32 weaponmodelnum;
-		s32 weaponnum = bgunGetWeaponNum(HAND_RIGHT);
+		s32 weaponnum = weaponGetRank(bgunGetWeaponNum(HAND_RIGHT));
 		s32 bodynum = BODY_DARK_COMBAT;
 		s32 headnum = HEAD_DARK_COMBAT;
 		bool sp60 = false;
@@ -1297,7 +1257,8 @@ void playerTickChrBody(void)
 			weaponnum = g_DefaultWeapons[0];
 		}
 
-		weaponmodelnum = playermgrGetModelOfWeapon(weaponnum);
+		
+		weaponmodelnum = playermgrGetModelOfWeapon(weaponGetRank(g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponnum));
 
 		if (!g_Vars.mplayerisrunning) {
 			// 1 player
@@ -1318,20 +1279,16 @@ void playerTickChrBody(void)
 
 			offset1 = 0;
 			var8007fc0c = 8;
-			osSyncPrintf("Gunmem: 0x%08x\n", bgunGetGunMem());
 
 			allocation = g_Vars.currentplayer->gunmem2;
 			model = (struct model *)(allocation + offset1);
-			osSyncPrintf("Gunmem: bondsub 0x%08x\n", (uintptr_t)model);
 			offset1 += ALIGN64(sizeof(struct model));
 
 			model->anim = (struct anim *)(allocation + offset1);
-			osSyncPrintf("Gunmem: bondsub->anim 0x%08x\n", model->anim);
 			offset1 += sizeof(struct anim);
 			offset1 = ALIGN64(offset1);
 
 			rwdatas = (u32 *)(allocation + offset1);
-			osSyncPrintf("Gunmem: savedata 0x%08x\n", (uintptr_t)rwdatas);
 			offset1 += 0x400;
 #ifdef PLATFORM_64BIT
 			offset1 += 0x200;
@@ -1339,7 +1296,7 @@ void playerTickChrBody(void)
 			offset1 = ALIGN64(offset1);
 
 			weaponobj = (struct weaponobj *)(allocation + offset1);
-			osSyncPrintf("Gunmem: wo 0x%08x\n", (uintptr_t)weaponobj);
+
 			offset1 += sizeof(struct weaponobj);
 			offset1 = ALIGN64(offset1);
 
@@ -1597,7 +1554,7 @@ void playerTickMpSwirl(void)
 	}
 }
 
-void player0f0b9a20(void)
+void playerSetup(void)
 {
 	playerSetTickMode(TICKMODE_NORMAL);
 	g_PlayerTriggerGeFadeIn = false;
@@ -1609,8 +1566,8 @@ void player0f0b9a20(void)
 	}
 
 	envChooseAndApply(mainGetStageNum(), false);
-	bgunEquipWeapon2(HAND_LEFT, g_DefaultWeapons[HAND_LEFT]);
-	bgunEquipWeapon2(HAND_RIGHT, g_DefaultWeapons[HAND_RIGHT]);
+	bgunEquipWeaponStart(HAND_LEFT, g_DefaultWeapons[HAND_LEFT]);
+	bgunEquipWeaponStart(HAND_RIGHT, g_DefaultWeapons[HAND_RIGHT]);
 	var8007074c = 0;
 }
 
@@ -1835,9 +1792,6 @@ void playerTickCutscene(bool arg0)
 	s32 endframe;
 	s8 contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
 	u32 buttons;
-#if PAL
-	u8 stack3[0x2c];
-#endif
 	f32 tweenfrac;
 	f32 sp104;
 	Mtxf spc4;
@@ -1860,24 +1814,14 @@ void playerTickCutscene(bool arg0)
 		g_Vars.cutsceneskip60ths = 0;
 
 		if (g_CutsceneCurAnimFrame60 < endframe) {
-#if PAL
-			g_CutsceneCurAnimFrame240 += g_Vars.lvupdate60freal;
-			g_CutsceneCurAnimFrame60 = floorf(g_CutsceneCurAnimFrame240 + 0.01f);
-#else
 			g_CutsceneCurAnimFrame240 += g_Vars.lvupdate240;
 			g_CutsceneCurAnimFrame60 = g_CutsceneCurAnimFrame240 >> 2;
-#endif
 
 			if (g_Anims[g_CutsceneAnimNum].flags & ANIMFLAG_HASCUTSKIPFRAMES) {
 				while (g_CutsceneCurAnimFrame60 < endframe
 						&& animIsFrameCutSkipped(g_CutsceneAnimNum, g_CutsceneCurAnimFrame60)) {
-#if PAL
-					g_CutsceneCurAnimFrame240 += 1.2f;
-					g_CutsceneCurAnimFrame60 = floorf(g_CutsceneCurAnimFrame240 + 0.01f);
-#else
 					g_CutsceneCurAnimFrame60++;
 					g_CutsceneCurAnimFrame240 += 4;
-#endif
 
 					g_Vars.cutsceneskip60ths++;
 				}
@@ -1961,13 +1905,10 @@ void playerTickCutscene(bool arg0)
 		g_CutsceneCurTotalFrame60f += g_Vars.lvupdate60freal;
 	}
 
-#ifndef PLATFORM_N64
 	if (arg0 && inputKeyJustPressed(VK_ESCAPE)) {
 		buttons |= START_BUTTON;
 	}
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (g_CutsceneCurTotalFrame60f > 30 && (buttons & 0xffffffff)) {
 		g_CutsceneSkipRequested = true;
 
@@ -1979,17 +1920,6 @@ void playerTickCutscene(bool arg0)
 			}
 		}
 	}
-#else
-	if (g_CutsceneCurTotalFrame60f > 30) {
-		if (buttons & 0xffffffff) {
-			g_CutsceneSkipRequested = true;
-		}
-
-		if ((buttons & (B_BUTTON | START_BUTTON)) && g_Vars.autocutplaying) {
-			g_Vars.autocutgroupskip = true;
-		}
-	}
-#endif
 }
 
 f32 playerGetCutsceneBlurFrac(void)
@@ -2978,17 +2908,20 @@ void playerAutoWalk(s16 aimpad, u8 walkspeed, u8 turnspeed, u8 lookup, u8 dist)
 
 void playerLaunchSlayerRocket(struct weaponobj *rocket)
 {
-	g_Vars.currentplayer->slayerrocket = rocket;
-	g_Vars.currentplayer->visionmode = VISIONMODE_SLAYERROCKET;
+	if(rocket)
+	{
+		g_Vars.currentplayer->slayerrocket = rocket;
+		g_Vars.currentplayer->visionmode = VISIONMODE_SLAYERROCKET;
 
-	// Turn off these devices
-	g_Vars.currentplayer->devicesactive &= ~(
-			DEVICE_NIGHTVISION |
-			DEVICE_XRAYSCANNER |
-			DEVICE_EYESPY |
-			DEVICE_IRSCANNER);
+		// Turn off these devices
+		g_Vars.currentplayer->devicesactive &= ~(
+				DEVICE_NIGHTVISION |
+				DEVICE_XRAYSCANNER |
+				DEVICE_EYESPY |
+				DEVICE_IRSCANNER);
 
-	g_Vars.currentplayer->badrockettime = 0;
+		g_Vars.currentplayer->badrockettime = 0;
+	}
 }
 
 void playerTickTeleport(f32 *aspectratio)
@@ -3129,8 +3062,6 @@ void playerTick(bool arg0)
 	u32 buttonsnow = joyGetButtonsPressedThisFrame(contpadnum, 0xffffffff);
 	if (buttonsnow & CONT_GKEY) {  // Gangsta key pressed
 		g_Vars.currentplayer->wantsgangsta = !g_Vars.currentplayer->wantsgangsta;
-		
-		//debug_log("Wants gangsta: %d \n", g_Vars.currentplayer->wantsgangsta);
 	}
 
 	if (g_Vars.currentplayer->eyespy) {

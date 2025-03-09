@@ -587,19 +587,11 @@ bool bgun0f098a44(struct hand *hand, s32 time)
 	}
 
 	if (waittimekeyframe >= 0) {
-#if VERSION >= VERSION_PAL_BETA
-		if (hand->unk0cc8_01 && bgun0f09815c(hand) <= zreleasekeyframe) {
-			return false;
-		}
-
-		return (bgun0f09815c(hand) + hand->animframeincfreal >= waittimekeyframe);
-#else
 		if (hand->unk0cc8_01 && (s32)bgun0f09815c(hand) <= zreleasekeyframe) {
 			return false;
 		}
 
 		return (bgun0f09815c(hand) + hand->animframeinc >= waittimekeyframe);
-#endif
 	}
 
 	return true;
@@ -681,11 +673,11 @@ s32 bgunDetermineReloadType(s32 funcnum, struct handweaponinfo *info, struct han
 				&& hand->loadedammo[ammoindex] < hand->clipsizes[ammoindex]) {
 			s32 minqty = 1;
 
-			if (info->weaponnum == WEAPON_SHOTGUN && funcnum == FUNC_SECONDARY) {
+			if (weaponGetRank(info->weaponnum) == weaponMatchEnum(WEAPON_SHOTGUN)->rank && funcnum == FUNC_SECONDARY) {
 				minqty = 2;
 			}
 
-			if (info->weaponnum == WEAPON_TRANQUILIZER && funcnum == FUNC_SECONDARY) {
+			if (weaponGetRank(info->weaponnum) == weaponMatchEnum(WEAPON_TRANQUILIZER)->rank && funcnum == FUNC_SECONDARY) {
 				minqty = bgunGetMinClipQty(WEAPON_TRANQUILIZER, FUNC_SECONDARY);
 			}
 
@@ -1026,7 +1018,6 @@ void bgunSetArmPitch(struct hand *hand, f32 angle)
 
 s32 bgunTickIncAutoSwitch(struct handweaponinfo *info, s32 handnum, struct hand *hand, s32 lvupdate)
 {
-	u32 stack;
 	s32 reloadtype;
 	s32 gunfunc = bgunIsUsingSecondaryFunction();
 
@@ -1069,11 +1060,11 @@ s32 bgunTickIncAutoSwitch(struct handweaponinfo *info, s32 handnum, struct hand 
 		if (hand->inuse) {
 			reloadtype = bgunDetermineReloadType(gunfunc, info, hand);
 
-			if (info->weaponnum == weaponMatchEnum(WEAPON_TIMEDMINE)->rank || info->weaponnum == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank) {
+			if (weaponGetRank(info->weaponnum) == weaponMatchEnum(WEAPON_TIMEDMINE)->rank || weaponGetRank(info->weaponnum) == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank) {
 				hand->gset.weaponfunc = gunfunc;
 			}
 
-			if (info->weaponnum == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
+			if (weaponGetRank(info->weaponnum) == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
 					&& gunfunc != hand->gset.weaponfunc
 					&& bgunSetState(handnum, HANDSTATE_CHANGEFUNC)) {
 				return lvupdate;
@@ -1118,7 +1109,7 @@ s32 bgunTickIncAutoSwitch(struct handweaponinfo *info, s32 handnum, struct hand 
 					hand->count = 0;
 
 					if (bgunSetState(handnum, HANDSTATE_RELOAD)) {
-						if (info->weaponnum == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
+						if (weaponGetRank(info->weaponnum) == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
 							hand->mode = HANDMODE_11;
 							hand->pausetime60 = TICKS(17);
 							hand->count60 = 0;
@@ -1613,10 +1604,8 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 		}
 
 		if (playsound) {
-#if VERSION >= VERSION_NTSC_1_0
 			OSPri prevpri = osGetThreadPri(0);
 			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
-#endif
 
 			if (hand->audiohandle2 && sndGetState(hand->audiohandle2) != AL_STOPPED) {
 				audioStop(hand->audiohandle2);
@@ -1637,7 +1626,7 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 
 				hand->lastshootframe60 = g_Vars.lvframe60;
 
-				if (hand->gset.weaponnum == WEAPON_MAULER && handle) {
+				if (weaponGetRank(hand->gset.weaponnum) == weaponMatchEnum(WEAPON_MAULER)->rank && handle) {
 					s32 matmot = hand->matmot1;
 					f32 tmp;
 					f32 frac = matmot / 3.0f;
@@ -1653,9 +1642,7 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 
 			}
 
-#if VERSION >= VERSION_NTSC_1_0
 			osSetThreadPri(0, prevpri);
-#endif
 		}
 	}
 }
@@ -2271,7 +2258,7 @@ s32 bgunTickIncAttack(struct handweaponinfo *info, s32 handnum, struct hand *han
 	}
 
 	if (finished) {
-		if (hand->gset.weaponnum == WEAPON_REAPER && hand->triggeron) {
+		if (weaponGetRank(hand->gset.weaponnum) == weaponMatchEnum(WEAPON_REAPER)->rank && hand->triggeron) {
 			hand->gset.weaponfunc = FUNC_SECONDARY;
 			finished = false;
 		}
@@ -2380,6 +2367,9 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 {
 	struct weapon *weapon = info->definition;
 
+	u16 rank = weaponGetRank(info->definition->rank);
+	weapon = weaponGetByRank(rank);
+
 	if (hand->statecycles == 0) {
 		if (g_Vars.normmplayerisrunning == false) {
 			hand->pausetime60 = 0;
@@ -2394,8 +2384,8 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 		if (hand->stateminor == HANDSTATEMINOR_CHANGEGUN_UNEQUIP) {
 			bool skipanim = false;
 
-			if (weaponHasFlag(info->weaponnum, WEAPONFLAG_THROWABLE)
-					&& !(info->weaponnum == weaponMatchEnum(WEAPON_REMOTEMINE)->rank && handnum == HAND_LEFT)
+			if (weaponHasFlag(rank, WEAPONFLAG_THROWABLE)
+					&& !(rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank && handnum == HAND_LEFT)
 					&& bgunDetermineReloadType(0, info, hand) < 0) {
 				skipanim = true;
 			}
@@ -2537,8 +2527,8 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 
 			bgun0f098f8c(info, hand);
 
-			if (weaponHasFlag(info->weaponnum, WEAPONFLAG_THROWABLE)
-					&& (info->weaponnum != WEAPON_REMOTEMINE || handnum != HAND_LEFT)
+			if (weaponHasFlag(rank, WEAPONFLAG_THROWABLE)
+					&& (rank != weaponMatchEnum(WEAPON_REMOTEMINE)->rank || handnum != HAND_LEFT)
 					&& bgunDetermineReloadType(0, info, hand) < 0
 					&& bgunSetState(handnum, HANDSTATE_AUTOSWITCH)) {
 				hand->stateminor = HANDSTATEMINOR_AUTOSWITCH_DELETE;
@@ -2562,8 +2552,7 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 				f32 speed3;
 				OSPri prevpri3;
 
-				switch (info->weaponnum) {
-				case WEAPON_HORIZONSCANNER:
+				if(rank == weaponMatchEnum(WEAPON_HORIZONSCANNER)->rank) {
 					speed1 = 3.5f;
 					prevpri1 = osGetThreadPri(0);
 					osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
@@ -2574,88 +2563,85 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 					}
 
 					osSetThreadPri(0, prevpri1);
-					break;
-				case WEAPON_LASER:
+				}
+				else if(rank == weaponMatchEnum(WEAPON_LASER)->rank) {
 					sndStart(var80095200, SFX_PICKUP_LASER, 0, -1, -1, -1, -1, -1);
-					break;
-				case WEAPON_COMBATKNIFE:
+				}
+				else if(rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
 					sndStart(var80095200, SFX_PICKUP_KNIFE, 0, -1, -1, -1, -1, -1);
-					break;
-				case WEAPON_REMOTEMINE:
+				}
+				else if(rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
 					if (handnum == HAND_RIGHT) {
 						sndStart(var80095200, SFX_PICKUP_MINE, 0, -1, -1, -1, -1, -1);
 					}
-					break;
-				case WEAPON_TIMEDMINE:
-				case WEAPON_PROXIMITYMINE:
-				case WEAPON_ECMMINE:
-				case WEAPON_DATAUPLINK:
-				case WEAPON_RTRACKER:
-				case WEAPON_PRESIDENTSCANNER:
-				case WEAPON_DOORDECODER:
-				case WEAPON_AUTOSURGEON:
-				case WEAPON_COMMSRIDER:
-				case WEAPON_TRACERBUG:
-				case WEAPON_TARGETAMPLIFIER:
-					sndStart(var80095200, SFX_PICKUP_MINE, 0, -1, -1, -1, -1, -1);
-					break;
-				case WEAPON_TRANQUILIZER:
-				case WEAPON_PSYCHOSISGUN:
-					speed2 = 1.5f;
-					prevpri2 = osGetThreadPri(0);
-					osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
-					handle2 = sndStart(var80095200, SFX_PICKUP_GUN, 0, -1, -1, -1, -1, -1);
+				}
+				else if(rank == weaponMatchEnum(WEAPON_TIMEDMINE)->rank ||
+						rank == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank ||
+						rank == weaponMatchEnum(WEAPON_ECMMINE)->rank ||
+						rank == weaponMatchEnum(WEAPON_DATAUPLINK)->rank ||
+						rank == weaponMatchEnum(WEAPON_RTRACKER)->rank ||
+						rank == weaponMatchEnum(WEAPON_PRESIDENTSCANNER)->rank ||
+						rank == weaponMatchEnum(WEAPON_DOORDECODER)->rank ||
+						rank == weaponMatchEnum(WEAPON_AUTOSURGEON)->rank ||
+						rank == weaponMatchEnum(WEAPON_COMMSRIDER)->rank ||
+						rank == weaponMatchEnum(WEAPON_TRACERBUG)->rank ||
+						rank == weaponMatchEnum(WEAPON_TARGETAMPLIFIER)->rank) {
+						sndStart(var80095200, SFX_PICKUP_MINE, 0, -1, -1, -1, -1, -1);
+					} else if(rank == weaponMatchEnum(WEAPON_TRANQUILIZER)->rank || rank == weaponMatchEnum(WEAPON_PSYCHOSISGUN)->rank) {
+						speed2 = 1.5f;
+						prevpri2 = osGetThreadPri(0);
+						osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
+						handle2 = sndStart(var80095200, SFX_PICKUP_GUN, 0, -1, -1, -1, -1, -1);
 
-					if (handle2) {
-						audioPostEvent(handle2, AL_SNDP_PITCH_EVT, *(s32 *)&speed2);
-					}
+						if (handle2) {
+							audioPostEvent(handle2, AL_SNDP_PITCH_EVT, *(s32 *)&speed2);
+						}
 
-					osSetThreadPri(0, prevpri2);
-					break;
-				case WEAPON_REAPER:
-					speed3 = 0.85f;
-					prevpri3 = osGetThreadPri(0);
-					osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
-					handle3 = sndStart(var80095200, SFX_PICKUP_GUN, 0, -1, -1, -1, -1, -1);
+						osSetThreadPri(0, prevpri2);
+				} else if(rank == weaponMatchEnum(WEAPON_REAPER)->rank) {
+						speed3 = 0.85f;
+						prevpri3 = osGetThreadPri(0);
+						osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
+						handle3 = sndStart(var80095200, SFX_PICKUP_GUN, 0, -1, -1, -1, -1, -1);
 
-					if (handle3) {
-						audioPostEvent(handle3, AL_SNDP_PITCH_EVT, *(s32 *)&speed3);
-					}
+						if (handle3) {
+							audioPostEvent(handle3, AL_SNDP_PITCH_EVT, *(s32 *)&speed3);
+						}
 
-					osSetThreadPri(0, prevpri3);
-					break;
-				case WEAPON_NONE:
-				case WEAPON_UNARMED:
-				case WEAPON_LAPTOPGUN:
-				case WEAPON_CROSSBOW:
-				case WEAPON_GRENADE:
-				case WEAPON_NBOMB:
-				case WEAPON_COMBATBOOST:
-				case WEAPON_CLOAKINGDEVICE:
-				case WEAPON_EXPLOSIVES:
-				case WEAPON_SKEDARBOMB:
-				case WEAPON_DISGUISE40:
-				case WEAPON_DISGUISE41:
-				case WEAPON_FLIGHTPLANS:
-				case WEAPON_RESEARCHTAPE:
-				case WEAPON_BACKUPDISK:
-				case WEAPON_KEYCARD45:
-				case WEAPON_KEYCARD46:
-				case WEAPON_KEYCARD47:
-				case WEAPON_KEYCARD48:
-				case WEAPON_KEYCARD49:
-				case WEAPON_KEYCARD4A:
-				case WEAPON_KEYCARD4B:
-				case WEAPON_KEYCARD4C:
-				case WEAPON_SUITCASE:
-				case WEAPON_BRIEFCASE:
-				case WEAPON_NECKLACE:
-				case WEAPON_BRIEFCASE2:
-					// No equip sound
-					break;
-				default:
-					sndStart(var80095200, SFX_PICKUP_GUN, 0, -1, -1, -1, -1, -1);
-					break;
+						osSetThreadPri(0, prevpri3);
+				}
+				// No equip sound
+				else if(rank == weaponMatchEnum(WEAPON_UNARMED)->rank ||
+						rank == weaponMatchEnum(WEAPON_LAPTOPGUN)->rank ||
+						rank == weaponMatchEnum(WEAPON_CROSSBOW)->rank ||
+						rank == weaponMatchEnum(WEAPON_GRENADE)->rank ||
+						rank == weaponMatchEnum(WEAPON_NBOMB)->rank ||
+						rank == weaponMatchEnum(WEAPON_COMBATBOOST)->rank ||
+						rank == weaponMatchEnum(WEAPON_CLOAKINGDEVICE)->rank ||
+						rank == weaponMatchEnum(WEAPON_EXPLOSIVES)->rank ||
+						rank == weaponMatchEnum(WEAPON_SKEDARBOMB)->rank ||
+						rank == weaponMatchEnum(WEAPON_DISGUISE40)->rank ||
+						rank == weaponMatchEnum(WEAPON_DISGUISE41)->rank ||
+						rank == weaponMatchEnum(WEAPON_FLIGHTPLANS)->rank ||
+						rank == weaponMatchEnum(WEAPON_RESEARCHTAPE)->rank ||
+						rank == weaponMatchEnum(WEAPON_BACKUPDISK)->rank ||
+						rank == weaponMatchEnum(WEAPON_KEYCARD45)->rank ||
+						rank == weaponMatchEnum(WEAPON_KEYCARD46)->rank ||
+						rank == weaponMatchEnum(WEAPON_KEYCARD47)->rank ||
+						rank == weaponMatchEnum(WEAPON_KEYCARD48)->rank ||
+						rank == weaponMatchEnum(WEAPON_KEYCARD49)->rank ||
+						rank == weaponMatchEnum(WEAPON_KEYCARD4A)->rank ||
+						rank == weaponMatchEnum(WEAPON_KEYCARD4B)->rank ||
+						rank == weaponMatchEnum(WEAPON_KEYCARD4C)->rank ||
+						rank == weaponMatchEnum(WEAPON_SUITCASE)->rank ||
+						rank == weaponMatchEnum(WEAPON_BRIEFCASE)->rank ||
+						rank == weaponMatchEnum(WEAPON_NECKLACE)->rank ||
+						rank == weaponMatchEnum(WEAPON_BRIEFCASE2)->rank
+					) {
+						//empty
+					} 
+				else {
+						sndStart(var80095200, SFX_PICKUP_GUN, 0, -1, -1, -1, -1, -1);
 				}
 			}
 		}
@@ -3884,7 +3870,7 @@ struct defaultobj *bgunCreateThrownProjectile2(struct chrdata *chr, struct gset 
 
 		if (obj->hidden & OBJHFLAG_PROJECTILE) {
 			obj->projectile->flags |= PROJECTILEFLAG_00000002;
-			obj->projectile->unk08c = 0.1f;
+			obj->projectile->pinball = 0.1f;
 			obj->projectile->pickuptimer240 = TICKS(240);
 
 			psCreate(NULL, obj->prop, SFX_THROW, -1,
@@ -3945,7 +3931,7 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 
 	mtx4LoadIdentity(&sp1f4);
 
-	if (gset->weaponnum == WEAPON_COMBATKNIFE) {
+	if (weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
 		mtx4LoadZRotation(4.711639f, &sp1f4);
 		mtx4LoadXRotation(3.1410925f, &sp190);
 		mtx4MultMtx4InPlace(&sp190, &sp1f4);
@@ -4037,14 +4023,14 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 		velocity.y = gundir.y * 16.666666f;
 		velocity.z = gundir.z * 16.666666f;
 
-		if (gset->weaponnum == WEAPON_GRENADE || gset->weaponnum == WEAPON_NBOMB) {
+		if (weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_GRENADE)->rank || weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_NBOMB)->rank) {
 			velocity.y += 1.6666666f;
 		} else {
 			velocity.y += 5.0f;
 		}
 	}
 
-	if (gset->weaponnum == WEAPON_LAPTOPGUN) {
+	if (weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_LAPTOPGUN)->rank) {
 		bgunFreeWeapon(handnum);
 	}
 
@@ -4061,7 +4047,7 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 		if (obj->type == OBJTYPE_WEAPON) {
 			weapon = (struct weaponobj *)obj;
 
-			if (gset->weaponnum == WEAPON_GRENADE && gset->weaponfunc == FUNC_PRIMARY) {
+			if (weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_GRENADE)->rank && gset->weaponfunc == FUNC_PRIMARY) {
 				if (weapon->timer240 < hand->primetimer60 * 4) {
 					weapon->timer240 = 0;
 				} else {
@@ -4069,7 +4055,7 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 				}
 
 				weapon->gunfunc = gset->weaponfunc;
-			} else if (gset->weaponnum == WEAPON_ECMMINE && g_Vars.stagenum == STAGE_CITRAINING) {
+			} else if (weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_ECMMINE)->rank && g_Vars.stagenum == STAGE_CITRAINING) {
 				data = dtGetData();
 
 				if (data->intraining) {
@@ -4084,15 +4070,15 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 			obj->projectile->nextsteppos.y = muzzlepos.y;
 			obj->projectile->nextsteppos.z = muzzlepos.z;
 
-			if (gset->weaponnum == WEAPON_GRENADE && gset->weaponfunc == FUNC_SECONDARY) {
-				obj->projectile->unk08c = 1.0f;
+			if (weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_GRENADE)->rank && gset->weaponfunc == FUNC_SECONDARY) {
+				obj->projectile->pinball = 1.0f;
 			}
 
-			if (gset->weaponnum == WEAPON_COMBATKNIFE) {
+			if (weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
 				// In theory, weapon can be uninitialised here,
 				// but in practice it's always set.
 				weapon->base.projectile->flags |= PROJECTILEFLAG_00000002;
-				weapon->base.projectile->unk08c = 0.1f;
+				weapon->base.projectile->pinball = 0.1f;
 				weapon->base.projectile->pickuptimer240 = TICKS(240);
 				weapon->base.hidden |= OBJHFLAG_THROWNKNIFE;
 			}
@@ -4203,7 +4189,7 @@ void bgunCreateFiredProjectile(s32 handnum)
 	prevpos = &g_Vars.currentplayer->bondprevpos;
 	extrapos = &g_Vars.currentplayer->bondextrapos;
 
-	weapondef = weaponFindById(hand->gset.weaponnum);
+	weapondef = weaponGetByRank(weaponGetRank(hand->gset.weaponnum));
 
 	if (weapondef) {
 		tmp = weapondef->functions[hand->gset.weaponfunc];
@@ -4296,7 +4282,7 @@ void bgunCreateFiredProjectile(s32 handnum)
 				weapon->base.flags &= ~OBJFLAG_HELDROCKET;
 
 				if (funcdef->base.base.flags & FUNCFLAG_HOMINGROCKET) {
-					weapon->weaponnum = WEAPON_HOMINGROCKET;
+					weapon->weaponnum = weaponMatchEnum(WEAPON_HOMINGROCKET)->rank;
 				}
 			} else if (weapondef->rank == weaponMatchEnum(WEAPON_ROCKETLAUNCHER)->rank || weapondef->rank == weaponMatchEnum(WEAPON_SLAYER)->rank) {
 				s32 weaponnum = weaponMatchEnum(WEAPON_ROCKET)->rank;
@@ -4370,7 +4356,7 @@ void bgunCreateFiredProjectile(s32 handnum)
 						weapon->base.projectile->unk014 = sp250.y;
 						weapon->base.projectile->unk018 = sp250.z;
 						weapon->base.projectile->pickuptimer240 = TICKS(240);
-						weapon->base.projectile->unk08c = funcdef->reflectangle;
+						weapon->base.projectile->pinball = funcdef->reflectangle;
 						weapon->base.projectile->unk098 = funcdef->unk50 * 1.6666666f;
 
 						if (funcdef->soundnum > 0) {
@@ -4819,7 +4805,7 @@ void bgunTickSwitch2(void)
 			struct hand *righthand;
 
 			if (currentPlayerGetDeviceState(ctrl->switchtoweaponnum) != DEVICESTATE_UNEQUIPPED) {
-				ctrl->switchtoweaponnum = WEAPON_UNARMED;
+				ctrl->switchtoweaponnum = weaponMatchEnum(WEAPON_UNARMED)->rank;
 			}
 
 			if (ctrl->dualwielding && !invHasDoubleWeaponIncAllGuns(ctrl->switchtoweaponnum, ctrl->switchtoweaponnum)) {
@@ -4858,7 +4844,7 @@ void bgunTickSwitch2(void)
 			if (ctrl->switchtoweaponnum == weaponMatchEnum(WEAPON_NONE)->rank) {
 				lefthand->inuse = false;
 				righthand->inuse = false;
-				ctrl->weaponnum = WEAPON_NONE;
+				ctrl->weaponnum = weaponMatchEnum(WEAPON_NONE)->rank;
 			} else {
 				bgunSetGunMemWeapon(ctrl->switchtoweaponnum);
 				ctrl->weaponnum = ctrl->switchtoweaponnum;
@@ -4953,14 +4939,65 @@ void bgunTickSwitch2(void)
 
 void bgunEquipWeapon(s32 weaponnum)
 {
+	debug_log("bgunequipweapon called: %d \n", weaponnum);
+	u16 rank = weaponGetRank(weaponnum);
+
 	struct player *player = g_Vars.currentplayer;
 
-	if (player->gunctrl.weaponnum == weaponnum && player->gunctrl.switchtoweaponnum == -1) {
+	if (weaponGetRank(player->gunctrl.weaponnum) == rank && player->gunctrl.switchtoweaponnum == -1) {
 		return;
 	}
 
-	player->gunctrl.switchtoweaponnum = weaponnum;
+	player->gunctrl.switchtoweaponnum = rank;
 	player->gunctrl.wantammo = false;
+}
+
+// Only for the player's starting weapons in single player
+void bgunEquipWeaponStart(s32 handnum, s32 weaponnum)
+{
+	debug_log("bgunequipweaponstart called: %d \n", weaponnum);
+	u16 rank = weaponnum;
+    struct weapon *weapon = weaponMatchEnum(rank);
+    rank = weapon->rank;
+
+	if (handnum == HAND_LEFT) {
+		if (weaponnum == weaponMatchEnum(WEAPON_NONE)->rank) {
+			g_Vars.currentplayer->gunctrl.dualwielding = false;
+		} else {
+			g_Vars.currentplayer->gunctrl.dualwielding = true;
+		}
+	} else {
+		if (weaponnum > weaponMatchEnum(WEAPON_SUICIDEPILL)->rank) {
+			weaponnum = weaponMatchEnum(WEAPON_UNARMED)->rank;
+		}
+	}
+
+	struct player *player = g_Vars.currentplayer;
+
+	if (player->gunctrl.weaponnum == rank && player->gunctrl.switchtoweaponnum == -1) {
+		return;
+	}
+
+	player->gunctrl.switchtoweaponnum = rank;
+	player->gunctrl.wantammo = false;
+}
+
+void bgunEquipWeapon2(s32 handnum, s32 weaponnum)
+{
+	debug_log("bgunequipweapon2 called: %d \n", weaponnum);
+	if (handnum == HAND_LEFT) {
+		if (weaponnum == weaponMatchEnum(WEAPON_NONE)->rank) {
+			g_Vars.currentplayer->gunctrl.dualwielding = false;
+		} else {
+			g_Vars.currentplayer->gunctrl.dualwielding = true;
+		}
+	} else {
+		if (weaponnum > weaponMatchEnum(WEAPON_SUICIDEPILL)->rank) {
+			weaponnum = weaponMatchEnum(WEAPON_UNARMED)->rank;
+		}
+
+		bgunEquipWeapon(weaponnum);
+	}
 }
 
 s32 bgunGetWeaponNum(s32 handnum)
@@ -5229,7 +5266,7 @@ void bgunAutoSwitchWeapon(void)
 		bool usable = false;
 
 		if (invHasSingleWeaponIncAllGuns(g_AutoSwitchWeaponsPrimary[i])) {
-			weaponnum = g_AutoSwitchWeaponsPrimary[i];
+			weaponnum = (u16)weaponMatchEnum(g_AutoSwitchWeaponsPrimary[i])->rank;
 			weapon = weaponFindById(weaponnum);
 			func = weaponGetFunctionById(weaponnum, FUNC_PRIMARY);
 
@@ -5237,7 +5274,7 @@ void bgunAutoSwitchWeapon(void)
 				usable = true;
 			}
 
-			if (weaponnum == WEAPON_SUPERDRAGON && !foundsuperdragon) {
+			if (weaponnum == weaponMatchEnum(WEAPON_SUPERDRAGON)->rank && !foundsuperdragon) {
 				foundsuperdragon++;
 			} else {
 				func = weaponGetFunctionById(weaponnum, FUNC_SECONDARY);
@@ -5268,10 +5305,10 @@ void bgunAutoSwitchWeapon(void)
 	}
 
 	if (newweaponnum == -1) {
-		newweaponnum = WEAPON_UNARMED;
+		newweaponnum = weaponMatchEnum(WEAPON_UNARMED)->rank;
 	}
 
-	if (newweaponnum == WEAPON_UNARMED) {
+	if (newweaponnum == weaponMatchEnum(WEAPON_UNARMED)->rank) {
 		bool foundcurrent = false;
 		s32 firstweaponnum = -1;
 		s32 weaponnum;
@@ -5295,7 +5332,7 @@ void bgunAutoSwitchWeapon(void)
 		newweaponnum = firstweaponnum;
 
 		if (newweaponnum == -1) {
-			newweaponnum = WEAPON_UNARMED;
+			newweaponnum = weaponMatchEnum(WEAPON_UNARMED)->rank;
 		}
 
 		if (foundcurrent) {
@@ -5321,23 +5358,6 @@ void bgunAutoSwitchWeapon(void)
 	}
 }
 
-void bgunEquipWeapon2(s32 handnum, s32 weaponnum)
-{
-	if (handnum == HAND_LEFT) {
-		if (weaponnum == weaponMatchEnum(WEAPON_NONE)->rank) {
-			g_Vars.currentplayer->gunctrl.dualwielding = false;
-		} else {
-			g_Vars.currentplayer->gunctrl.dualwielding = true;
-		}
-	} else {
-		if (weaponnum > weaponMatchEnum(WEAPON_SUICIDEPILL)->rank) {
-			weaponnum = weaponMatchEnum(WEAPON_UNARMED)->rank;
-		}
-
-		bgunEquipWeapon(weaponnum);
-	}
-}
-
 s32 bgunIsFiring(s32 handnum)
 {
 	return g_Vars.currentplayer->hands[handnum].firing;
@@ -5350,21 +5370,13 @@ s32 bgunGetAttackType(s32 handnum)
 
 char *bgunGetName(s32 rank)
 {
-	struct weapon *weapon = g_Weapons[rank];
+	struct weapon *weapon = weaponGetByRank(rank);
 
 	if (weapon) {
 		return langGet(weapon->name);
 	}
 
 	return "** error\n";
-
-	/*struct weapon *weapon = weaponGetByRank(rank);
-
-	if (weapon) {
-		return langGet(weapon->name);
-	}
-
-	return "** error\n";*/
 }
 
 u16 bgunGetNameId(s32 weaponnum)
@@ -5619,7 +5631,7 @@ void bgunHandlePlayerDead(void)
 	struct player *player = g_Vars.currentplayer;
 	s32 i;
 
-	if (player->gunctrl.weaponnum != WEAPON_NONE && player->gunctrl.switchtoweaponnum != WEAPON_NONE) {
+	if (weaponGetRank(player->gunctrl.weaponnum) != weaponMatchEnum(WEAPON_NONE)->rank && player->gunctrl.switchtoweaponnum != weaponMatchEnum(WEAPON_NONE)->rank) {
 		// Eject held weapons
 		if (player->hands[HAND_LEFT].inuse) {
 			player->hands[HAND_LEFT].ejectstate = EJECTSTATE_INIT;
@@ -5639,8 +5651,8 @@ void bgunHandlePlayerDead(void)
 			bgunSetState(i, HANDSTATE_IDLE);
 		}
 
-		bgunEquipWeapon2(HAND_LEFT, WEAPON_NONE);
-		bgunEquipWeapon2(HAND_RIGHT, WEAPON_NONE);
+		bgunEquipWeapon2(HAND_LEFT, weaponMatchEnum(WEAPON_NONE)->rank);
+		bgunEquipWeapon2(HAND_RIGHT, weaponMatchEnum(WEAPON_NONE)->rank);
 	}
 }
 
@@ -6124,61 +6136,6 @@ void bgunUpdateSmoke(struct hand *hand, s32 handnum, s32 weaponnum, struct weapo
 				hand->createsmoke = true;
 			}
 		}
-
-		/*switch (rank) {
-		case WEAPON_FALCON2:
-		case WEAPON_FALCON2_SCOPE:
-			if (hand->gunsmokepoint * mult > 0.66f) {
-				hand->createsmoke = true;
-			}
-			break;
-		case WEAPON_MAGSEC4:
-		case WEAPON_MAULER:
-			if (hand->gunsmokepoint * mult > 0.75f) {
-				hand->createsmoke = true;
-			}
-			break;
-		case WEAPON_DY357MAGNUM:
-		case WEAPON_DY357LX:
-			if (hand->gunsmokepoint * mult > 0.9f) {
-				hand->createsmoke = true;
-			}
-			break;
-		case WEAPON_CMP150:
-		case WEAPON_DRAGON:
-		case WEAPON_K7AVENGER:
-		case WEAPON_AR34:
-		case WEAPON_SUPERDRAGON:
-			hand->forcecreatesmoke = true;
-
-			if (hand->burstbullets > 14) {
-				hand->createsmoke = true;
-			}
-			break;
-		case WEAPON_CYCLONE:
-		case WEAPON_LAPTOPGUN:
-			if (hand->burstbullets > 20) {
-				hand->createsmoke = true;
-			}
-
-			hand->forcecreatesmoke = true;
-			break;
-		case WEAPON_RCP120:
-			hand->forcecreatesmoke = true;
-
-			if (hand->burstbullets > 25) {
-				hand->createsmoke = true;
-			}
-			break;
-		case WEAPON_REAPER:
-			hand->forcecreatesmoke = true;
-			// fall-through
-		case WEAPON_SHOTGUN:
-			if (hand->firing) {
-				hand->createsmoke = true;
-			}
-			break;
-		}*/
 	}
 
 	if (hand->createsmoke && (hand->state != HANDSTATE_ATTACK || hand->forcecreatesmoke)) {
@@ -6196,23 +6153,6 @@ void bgunUpdateSmoke(struct hand *hand, s32 handnum, s32 weaponnum, struct weapo
 		{
 			smoketype = SMOKETYPE_MUZZLE_SHOTGUN;
 		}
-
-		/*switch (weaponnum) {
-		case WEAPON_FALCON2:
-		case WEAPON_FALCON2_SCOPE:
-		case WEAPON_MAGSEC4:
-		case WEAPON_MAULER:
-		case WEAPON_DY357MAGNUM:
-		case WEAPON_DY357LX:
-			smoketype = SMOKETYPE_MUZZLE_PISTOL;
-			break;
-		case WEAPON_REAPER:
-			smoketype = SMOKETYPE_MUZZLE_REAPER;
-			break;
-		case WEAPON_SHOTGUN:
-			smoketype = SMOKETYPE_MUZZLE_SHOTGUN;
-			break;
-		}*/
 
 		smokerooms[0] = g_Vars.currentplayer->cam_room;
 		smokerooms[1] = -1;
@@ -6734,6 +6674,8 @@ void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *
 	f32 muzzlez;
 	Mtxf sp70;
 
+	u16 rank = weaponGetRank(weaponnum);
+
 	index = hand->burstbullets % maxburst;
 	shotstotake = hand->shotstotake;
 
@@ -6756,7 +6698,7 @@ void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *
 	mtx00015ea8(muzzlez, &spd8);
 	mtx4Copy(&spd8, mtx);
 
-	if (shotstotake == 0 && weaponnum != WEAPON_REAPER) {
+	if (shotstotake == 0 && rank != weaponMatchEnum(WEAPON_REAPER)->rank) {
 		shotstotake++;
 	}
 
@@ -6779,7 +6721,7 @@ void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *
 		struct modelnode *node = modelGetPart(modeldef, partnum);
 		struct coord sp60;
 
-		if (node && weaponnum != WEAPON_REAPER && weaponnum != WEAPON_SHOTGUN) {
+		if (node && rank != weaponMatchEnum(WEAPON_REAPER)->rank && rank != weaponMatchEnum(WEAPON_SHOTGUN)->rank) {
 			struct modelrodata_position *rodata = &node->rodata->position;
 			s32 mtxindex = modelFindNodeMtxIndex(node, 0);
 
@@ -6873,46 +6815,20 @@ void bgunCreateFx(struct hand *hand, s32 handnum, struct weaponfunc *funcdef, s3
 		}
 	}
 
-	if (createbeam) {
-		switch (weaponnum) {
-		case WEAPON_FALCON2:
-		case WEAPON_FALCON2_SILENCER:
-		case WEAPON_FALCON2_SCOPE:
-		case WEAPON_FALCON2_SANDS:
-		case WEAPON_MAGSEC4:
-		case WEAPON_MAULER:
-		case WEAPON_PHOENIX:
-		case WEAPON_DY357MAGNUM:
-		case WEAPON_DY357LX:
-		case WEAPON_CMP150:
-		case WEAPON_CYCLONE:
-		case WEAPON_CALLISTO:
-		case WEAPON_RCP120:
-		case WEAPON_LAPTOPGUN:
-		case WEAPON_DRAGON:
-		case WEAPON_K7AVENGER:
-		case WEAPON_AR34:
-		case WEAPON_SUPERDRAGON:
-		case WEAPON_REAPER:
-		case WEAPON_SNIPERRIFLE:
-		case WEAPON_FARSIGHT:
-		case WEAPON_TRANQUILIZER:
-		case WEAPON_PP9I:
-		case WEAPON_CC13:
-		case WEAPON_KL01313:
-		case WEAPON_KF7SPECIAL:
-		case WEAPON_ZZT:
-		case WEAPON_DMC:
-		case WEAPON_AR53:
-		case WEAPON_RCP45:
-			beamCreateForHand(handnum);
-			hand->numfires++;
-			return;
-		case WEAPON_LASER:
+	if(createbeam) {
+		if(rank == weaponMatchEnum(WEAPON_LASER)->rank)
+		{
 			hand->numfires++;
 			beamCreateForHand(handnum);
-			break;
 		}
+		else if((rank >= weaponMatchEnum(WEAPON_FALCON2)->rank && rank <= weaponMatchEnum(WEAPON_SUPERDRAGON)->rank) || rank == weaponMatchEnum(WEAPON_REAPER)->rank
+				|| rank == weaponMatchEnum(WEAPON_SNIPERRIFLE)->rank 
+				|| rank == weaponMatchEnum(WEAPON_FARSIGHT)->rank
+				|| rank == weaponMatchEnum(WEAPON_TRANQUILIZER)->rank
+				|| (rank >= weaponMatchEnum(WEAPON_PP9I)->rank && rank <= weaponMatchEnum(WEAPON_RCP45)->rank)) {
+					beamCreateForHand(handnum);
+					hand->numfires++;
+				}
 	}
 }
 
@@ -7595,7 +7511,7 @@ void bgunTickGameplay2(void)
 
 	if (g_Vars.currentplayer->devicesactive &
 			~g_Vars.currentplayer->devicesinhibit & DEVICE_CLOAKRCP120) {
-		if (player->gunctrl.weaponnum == WEAPON_RCP120) {
+		if (weaponGetRank(player->gunctrl.weaponnum) == weaponMatchEnum(WEAPON_RCP120)->rank) {
 			struct chrdata *chr = player->prop->chr;
 
 			// Handle RCP120 cloak ammo usage
@@ -7627,7 +7543,7 @@ void bgunTickGameplay2(void)
 			// No longer using RCP120, so turn off cloak
 			player->devicesactive &= ~DEVICE_CLOAKRCP120;
 		}
-	} else if (player->gunctrl.weaponnum == WEAPON_RCP120) {
+	} else if (weaponGetRank(player->gunctrl.weaponnum) == weaponMatchEnum(WEAPON_RCP120)->rank) {
 		hand = &player->hands[HAND_RIGHT];
 
 		// I think this is handling situations where the player has turned off
@@ -7691,12 +7607,6 @@ s32 bgunAllocateFireslot(void)
 	for (i = 0; i < ARRAYCOUNT(g_Fireslots); i++) {
 		if (g_Fireslots[i].endlvframe < 0) {
 			g_Fireslots[i].endlvframe = 0;
-
-#if VERSION < VERSION_NTSC_1_0
-			g_Fireslots[i].unk04nb = 0;
-			g_Fireslots[i].unk08nb = 0;
-#endif
-
 			g_Fireslots[i].beam.age = -1;
 			index = i;
 			break;
@@ -7755,7 +7665,7 @@ void bgunRender(Gfx **gdlptr)
 
 		hand = player->hands + i;
 
-		weaponnum = bgunGetWeaponNum(i);
+		weaponnum = weaponGetRank(bgunGetWeaponNum(i));
 
 		if (hand->visible) {
 			gdl = beamRender(gdl, &hand->beam, 0, 0);
@@ -7816,15 +7726,15 @@ void bgunRender(Gfx **gdlptr)
 					colour = (ircol[0] << 24 | ircol[1] << 16 | ircol[2] << 8) + ircol[3];
 				}
 
-				if (weaponnum == WEAPON_UNARMED) {
+				if (weaponGetRank(weaponnum) == weaponMatchEnum(WEAPON_UNARMED)->rank) {
 					renderdata.envcolour = colour;
 				}
 			} else {
 				renderdata.envcolour = player->gunshadecol[0] << 24 | player->gunshadecol[1] << 16 | player->gunshadecol[2] << 8 | player->gunshadecol[3];
 				colour = renderdata.envcolour;
 
-				// 838
-				if (hand->gset.weaponnum == WEAPON_MAULER) {
+				// Turn the Mauler red in charge-up
+				if (weaponGetRank(hand->gset.weaponnum) == weaponMatchEnum(WEAPON_MAULER)->rank) {
 					u32 weight = hand->matmot1 * 50.0f;
 					renderdata.envcolour = colourBlend(0xff00007f, renderdata.envcolour, weight);
 				}
@@ -7966,13 +7876,15 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 		return;
 	}
 
-	if (gset->weaponnum == WEAPON_REMOTEMINE
-			|| gset->weaponnum == WEAPON_PROXIMITYMINE
-			|| gset->weaponnum == WEAPON_TIMEDMINE
-			|| gset->weaponnum == WEAPON_COMMSRIDER
-			|| gset->weaponnum == WEAPON_TRACERBUG
-			|| gset->weaponnum == WEAPON_TARGETAMPLIFIER
-			|| gset->weaponnum == WEAPON_ECMMINE) {
+	u16 rank = weaponGetRank(gset->weaponnum);
+
+	if (rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
+			|| rank ==  weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank
+			|| rank ==  weaponMatchEnum(WEAPON_TIMEDMINE)->rank
+			|| rank ==  weaponMatchEnum(WEAPON_COMMSRIDER)->rank
+			|| rank ==  weaponMatchEnum(WEAPON_TRACERBUG)->rank
+			|| rank ==  weaponMatchEnum(WEAPON_TARGETAMPLIFIER)->rank
+			|| rank ==  weaponMatchEnum(WEAPON_ECMMINE)->rank) {
 		psCreate(NULL, prop, SFX_80AA, -1, -1, 0, 0, PSTYPE_NONE, NULL, -1, NULL, -1, -1, -1, -1);
 		return;
 	}
@@ -7989,17 +7901,17 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 
 			if (chrGetShield(chr) > 0) {
 				soundnum = SFX_SHIELD_DAMAGE;
-			} else if (gset->weaponnum == WEAPON_COMBATKNIFE || gset->weaponnum == WEAPON_BOLT) {
+			} else if (rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank || rank == weaponMatchEnum(WEAPON_BOLT)->rank) {
 				soundnum = SFX_05F6;
 				overridden = true;
-			} else if (gset->weaponnum == WEAPON_UNARMED
+			} else if (rank == weaponMatchEnum(WEAPON_UNARMED)->rank
 					|| (gset->weaponfunc == FUNC_SECONDARY
-						&& (gset->weaponnum == WEAPON_FALCON2
-							|| gset->weaponnum == WEAPON_FALCON2_SILENCER
-							|| gset->weaponnum == WEAPON_FALCON2_SCOPE
-							|| gset->weaponnum == WEAPON_FALCON2_SANDS
-							|| gset->weaponnum == WEAPON_DY357MAGNUM
-							|| gset->weaponnum == WEAPON_DY357LX))) {
+						&& (rank == weaponMatchEnum(WEAPON_FALCON2)->rank
+							|| rank == weaponMatchEnum(WEAPON_FALCON2_SILENCER)->rank
+							|| rank == weaponMatchEnum(WEAPON_FALCON2_SCOPE)->rank
+							//|| gset->weaponnum == WEAPON_FALCON2_SANDS
+							|| rank == weaponMatchEnum(WEAPON_DY357MAGNUM)->rank
+							|| rank == weaponMatchEnum(WEAPON_DY357LX)->rank))) {
 				s16 sounds[] = { SFX_002F, SFX_0030, SFX_0031 };
 				soundnum = sounds[rand1 % ARRAYCOUNT(sounds)];
 			} else {
@@ -8027,11 +7939,10 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 			bool overridden = false;
 			s32 vol;
 			s32 pan;
-			u32 stack;
 
 			if (texturenum == 10000) {
 				soundnum = SFX_SHIELD_DAMAGE;
-			} else if (gset->weaponnum == WEAPON_LASER) {
+			} else if (weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_LASER)->rank) {
 				if (gset->weaponfunc == FUNC_PRIMARY || ((gset->unk063a % 4) == 0 && (rngRandom() % 2))) {
 					if ((rngRandom() % 2) == 0) {
 						soundnum = SFX_CLOAK_ON;
@@ -8042,7 +7953,7 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 
 				overridden = true;
 			} else {
-				if (gset->weaponnum == WEAPON_COMBATKNIFE || gset->weaponnum == WEAPON_BOLT) {
+				if (weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank || weaponGetRank(gset->weaponnum) == weaponMatchEnum(WEAPON_BOLT)->rank) {
 					soundnum = SFX_HIT_METAL_8079;
 					overridden = true;
 				} else {
@@ -8137,7 +8048,8 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 		soundnum = -1;
 		overridden = false;
 
-		if (gset->weaponnum == WEAPON_LASER) {
+		u16 rank = weaponGetRank(gset->weaponnum);
+		if (rank == weaponMatchEnum(WEAPON_LASER)->rank) {
 			playdefault = false;
 
 			if (gset->weaponfunc == FUNC_PRIMARY || ((gset->unk063a % 4) == 0 && (rngRandom() % 2))) {
@@ -8147,18 +8059,18 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 				sndStart(var80095200, soundnum, handle, -1, -1, -1, -1, -1);
 				overridden = true;
 			}
-		} else if (gset->weaponnum == WEAPON_COMBATKNIFE || gset->weaponnum == WEAPON_BOLT) {
+		} else if (rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank || rank == weaponMatchEnum(WEAPON_BOLT)->rank) {
 			// Knives and bolts make a metal sound
 			soundnum = SFX_HIT_METAL_8079;
 			sndStart(var80095200, soundnum, handle, -1, -1, -1, -1, -1);
 			overridden = true;
-		} else if (gset->weaponnum == WEAPON_REMOTEMINE
-				|| gset->weaponnum == WEAPON_PROXIMITYMINE
-				|| gset->weaponnum == WEAPON_TIMEDMINE
-				|| gset->weaponnum == WEAPON_COMMSRIDER
-				|| gset->weaponnum == WEAPON_TRACERBUG
-				|| gset->weaponnum == WEAPON_TARGETAMPLIFIER
-				|| gset->weaponnum == WEAPON_ECMMINE) {
+		} else if (rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
+				|| rank == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank
+				|| rank == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
+				|| rank == weaponMatchEnum(WEAPON_COMMSRIDER)->rank
+				|| rank == weaponMatchEnum(WEAPON_TRACERBUG)->rank
+				|| rank == weaponMatchEnum(WEAPON_TARGETAMPLIFIER)->rank
+				|| rank == weaponMatchEnum(WEAPON_ECMMINE)->rank) {
 			// Mine landing/activation sound
 			soundnum = SFX_80AA;
 			sndStart(var80095200, soundnum, handle, -1, -1, -1, -1, -1);
@@ -8254,10 +8166,12 @@ s32 bgunConsiderToggleGunFunction(s32 usedowntime, bool trigpressed, bool fromac
 		if (!trigpressed && extcontrols && fromdedicatedbutton) {
 			if (g_Vars.currentplayer->devicesactive & DEVICE_CLOAKRCP120) {
 				g_Vars.currentplayer->devicesactive &= ~DEVICE_CLOAKRCP120;
+				g_Vars.currentplayer->gunctrl.invertgunfunc = false;
 			} else {
 				g_Vars.currentplayer->devicesactive = (g_Vars.currentplayer->devicesactive & ~DEVICE_CLOAKRCP120) | DEVICE_CLOAKRCP120;
+				g_Vars.currentplayer->gunctrl.invertgunfunc = true;
 			}
-			g_Vars.currentplayer->gunctrl.invertgunfunc = false;
+			
 			return USETIMER_STOP;
 		}
     }
@@ -8364,18 +8278,25 @@ void bgun0f0a8c50(void)
 bool bgunIsUsingSecondaryFunction(void)
 {
 	struct player *player = g_Vars.currentplayer;
-	s32 weaponnum = player->gunctrl.weaponnum;
-	u16 rank = weaponGetRank(weaponnum);
+	s32 weaponnum = weaponGetRank(player->gunctrl.weaponnum);
 
-	if (rank >= weaponMatchEnum(WEAPON_UNARMED)->rank && rank <= weaponMatchEnum(WEAPON_COMBATBOOST)->rank) {
-		s32 index = (rank - 1) >> 3;
-		s32 value = 1 << ((rank - 1) & 7);
+	if (weaponnum >= weaponMatchEnum(WEAPON_UNARMED)->rank && weaponnum <= weaponMatchEnum(WEAPON_COMBATBOOST)->rank) {
+		s32 index = (weaponnum - 1) >> 3;
+		s32 value = 1 << ((weaponnum - 1) & 7);
+
+		if(weaponnum == weaponMatchEnum(WEAPON_RCP120)->rank) {
+			if (g_Vars.currentplayer->devicesactive & DEVICE_CLOAKRCP120) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
 
 		if (g_PlayerConfigsArray[g_Vars.currentplayerstats->mpindex].gunfuncs[index] & value) {
 			if (player->gunctrl.invertgunfunc == true) {
 				return false;
 			}
-
 			return true;
 		}
 	}
@@ -8425,27 +8346,27 @@ void bgunTickGameplay(bool triggeron)
 	// Remove throwable items from inventory if there's no more left
 	for (i = 0; i < invGetCount(); i++) {
 		struct weapon *weapon;
-		s32 weaponnum = weaponGetRank(invGetWeaponNumByIndex(i));
+		s32 rank = weaponGetRank(invGetWeaponNumByIndex(i));
 		s32 equippedweaponnum;
 
-		switch (weaponnum) {
-		case WEAPON_COMBATKNIFE:
-		case WEAPON_GRENADE:
-		case WEAPON_NBOMB:
-		case WEAPON_COMBATBOOST:
-		case WEAPON_CLOAKINGDEVICE:
-		case WEAPON_ECMMINE:
-		case WEAPON_COMMSRIDER:
-		case WEAPON_TRACERBUG:
-		case WEAPON_TARGETAMPLIFIER:
-			weapon = weaponFindById(weaponnum);
+		if(rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank ||
+		   rank == weaponMatchEnum(WEAPON_GRENADE)->rank ||
+		   rank == weaponMatchEnum(WEAPON_NBOMB)->rank ||
+		   rank == weaponMatchEnum(WEAPON_COMBATBOOST)->rank ||
+		   rank == weaponMatchEnum(WEAPON_CLOAKINGDEVICE)->rank ||
+		   rank == weaponMatchEnum(WEAPON_ECMMINE)->rank ||
+		   rank == weaponMatchEnum(WEAPON_COMMSRIDER)->rank ||
+		   rank == weaponMatchEnum(WEAPON_TRACERBUG)->rank ||
+		   rank == weaponMatchEnum(WEAPON_TARGETAMPLIFIER)->rank) {
+
+		weapon = weaponGetByRank(rank);
 
 			if (weapon && weapon->ammos[0]
 					&& bgunGetAmmoCount(weapon->ammos[0]->type) == 0) {
-				equippedweaponnum = bgunGetWeaponNum(HAND_RIGHT);
-				invRemoveItemByNum(weaponnum);
+				equippedweaponnum = weaponGetRank(bgunGetWeaponNum(HAND_RIGHT));
+				invRemoveItemByNum(rank);
 
-				if (weaponnum == equippedweaponnum && !invHasSingleWeaponIncAllGuns(weaponnum)) {
+				if (rank == equippedweaponnum && !invHasSingleWeaponIncAllGuns(rank)) {
 					invCalculateCurrentIndex();
 					bgunEquipWeapon(invGetWeaponNumByIndex(g_Vars.currentplayer->equipcuritem));
 				}
@@ -8467,6 +8388,8 @@ void bgunTickGameplay(bool triggeron)
 		player->doautoselect = true;
 	}
 
+
+
 	// Handle gun firing - particularly alternating
 	// between left and right if dual wielding
 	if (player->playertriggeron) {
@@ -8474,7 +8397,7 @@ void bgunTickGameplay(bool triggeron)
 
 		if (player->hands[HAND_LEFT].inuse
 				&& player->hands[HAND_RIGHT].inuse
-				&& player->gunctrl.weaponnum != WEAPON_REMOTEMINE) {
+				&& weaponGetRank(player->gunctrl.weaponnum) != weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
 			if (player->playertrigtime240 > TICKS(80)) {
 				gunsfiring[player->curguntofire] = 1;
 
@@ -8497,7 +8420,7 @@ void bgunTickGameplay(bool triggeron)
 				player->curguntofire = 1 - player->curguntofire;
 			}
 
-			if (player->gunctrl.weaponnum == WEAPON_REMOTEMINE) {
+			if (weaponGetRank(player->gunctrl.weaponnum) == weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
 				player->curguntofire = 0;
 			}
 
@@ -9313,7 +9236,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 	fncolour = 0xff000040;
 	funcnum = hand->gset.weaponfunc;
-	fnfaderinc = PALUP(g_Vars.lvupdate240 * 2);
+	fnfaderinc = g_Vars.lvupdate240 * 2;
 
 	bgunGetWeaponInfo(&info, HAND_RIGHT);
 	tmpfuncnum = bgunIsUsingSecondaryFunction();
@@ -9330,8 +9253,10 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		xpos += 15;
 	}
 
-	// Draw function square
-	if (funcnum == FUNC_SECONDARY && ctrl->fnfader < 255) {
+	u16 rank = weaponGetRank(bgunGetWeaponNum(HAND_RIGHT));
+
+	// Draw function square (yellow square)
+	if ((funcnum == FUNC_SECONDARY && ctrl->fnfader < 255)) {
 		if (ctrl->fnfader < 128) {
 			ctrl->fnfader = 128;
 		}
@@ -9343,7 +9268,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		}
 	}
 
-	if (funcnum == FUNC_PRIMARY && ctrl->fnfader > 0) {
+	if ((funcnum == FUNC_PRIMARY && ctrl->fnfader > 0)) {
 		if (ctrl->fnfader - fnfaderinc < 0) {
 			ctrl->fnfader = 0;
 		} else {
@@ -9401,7 +9326,6 @@ Gfx *bgunDrawHud(Gfx *gdl)
 			if (ctrl->guntypetimer > 192) {
 				alpha = 255 - (ctrl->guntypetimer - 192) * 255 / 63U;
 				colour = (colour & 0xffffff00) | alpha;
-				if (0xffffff00);
 			}
 
 			gdl = textSetPrimColour(gdl, 0);
@@ -9420,7 +9344,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 			colour = 0xff5555ff;
 
-			if ((ctrl->curfnstr != func->name && ctrl->fnfader > 128) || ctrl->curfnstr == 0) {
+			if ((ctrl->curfnstr != func->name) || ctrl->curfnstr == 0) {
 				ctrl->fnstrtimer = 0;
 				ctrl->curfnstr = func->name;
 			}
@@ -9438,9 +9362,9 @@ Gfx *bgunDrawHud(Gfx *gdl)
 					colour |= 0x00ff0000;
 				}
 
-				if (funcnum == FUNC_PRIMARY && func->name != ctrl->curfnstr) {
-					colour |= 0x00ff0000;
-				}
+				//if (funcnum == FUNC_PRIMARY && func->name != ctrl->curfnstr) {
+				//	colour |= 0x00ff0000;
+				//}
 
 				textMeasure(&textheight, &textwidth, str, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 				textwidth += 2;
@@ -9582,7 +9506,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		}
 
 		// Combat boost timer
-		if (hand->gset.weaponnum == WEAPON_COMBATBOOST) {
+		if (weaponGetRank(hand->gset.weaponnum) == weaponMatchEnum(WEAPON_COMBATBOOST)->rank) {
 			s32 mins;
 			char text[32];
 

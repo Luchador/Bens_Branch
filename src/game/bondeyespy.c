@@ -864,7 +864,7 @@ void eyespyProcessInput(bool allowbuttons)
 
 	roomsCopy(g_Vars.currentplayer->eyespy->prop->rooms, prevrooms);
 
-	if (!invHasSingleWeaponIncAllGuns(WEAPON_EYESPY)) {
+	if (!invHasSingleWeaponIncAllGuns(weaponMatchEnum(WEAPON_EYESPY)->rank)) {
 		g_Vars.currentplayer->eyespy->deployed = false;
 		g_Vars.currentplayer->eyespy->held = true;
 		g_Vars.currentplayer->eyespy->active = false;
@@ -1184,8 +1184,8 @@ void eyespyProcessInput(bool allowbuttons)
 		chr->chrflags |= CHRCFLAG_HIDDEN;
 		chr->chrflags |= CHRCFLAG_INVINCIBLE;
 
-		weaponPlayPickupSound(WEAPON_EYESPY);
-		currentPlayerQueuePickupWeaponHudmsg(WEAPON_EYESPY, false);
+		weaponPlayPickupSound(weaponMatchEnum(WEAPON_EYESPY)->rank);
+		currentPlayerQueuePickupWeaponHudmsg(weaponMatchEnum(WEAPON_EYESPY)->rank, false);
 		psStopSound(g_Vars.currentplayer->eyespy->prop, PSTYPE_GENERAL, 0xffff);
 		chrClearReferences(g_Vars.currentplayer->eyespy->prop - g_Vars.props);
 	}

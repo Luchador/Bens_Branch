@@ -3,6 +3,7 @@
 #include "game/cheats.h"
 #include "game/bondgun.h"
 #include "game/weaponutils.h"
+#include "game/debug.h"
 #include "game/inv.h"
 #include "game/training.h"
 #include "game/lang.h"
@@ -103,16 +104,16 @@ void invInsertItem(struct invitem *item)
 			bool setflag = true;
 
 			if (override) {
-				if (override->weapon >= WEAPON_UNARMED && override->weapon <= WEAPON_NECKLACE) {
+				if (override->weapon >= weaponMatchEnum(WEAPON_UNARMED)->rank && override->weapon <= weaponMatchEnum(WEAPON_NECKLACE)->rank) {
 					setflag = false;
 				}
-				if (override->weapon == WEAPON_MPSHIELD) {
+				if (override->weapon == weaponMatchEnum(WEAPON_MPSHIELD)->rank) {
 					setflag = false;
 				}
-				if (override->weapon == WEAPON_SUICIDEPILL) {
+				if (override->weapon == weaponMatchEnum(WEAPON_SUICIDEPILL)->rank) {
 					setflag = false;
 				}
-				if (override->weapon == WEAPON_BRIEFCASE2) {
+				if (override->weapon == weaponMatchEnum(WEAPON_BRIEFCASE2)->rank) {
 					setflag = false;
 				}
 			}
@@ -279,7 +280,7 @@ bool invHasSingleWeaponOrProp(s32 weaponnum)
 bool invHasSingleWeaponIncAllGuns(s32 weaponnum)
 {
 	if (g_Vars.currentplayer->equipallguns &&
-			weaponnum && weaponnum <= WEAPON_PSYCHOSISGUN) {
+			weaponnum && weaponnum <= weaponMatchEnum(WEAPON_PSYCHOSISGUN)->rank) {
 		return true;
 	}
 
@@ -288,12 +289,12 @@ bool invHasSingleWeaponIncAllGuns(s32 weaponnum)
 
 bool invHasDoubleWeaponIncAllGuns(s32 weapon1, s32 weapon2)
 {
-	if (weapon2 == WEAPON_NONE) {
+	if (weapon2 == weaponMatchEnum(WEAPON_NONE)->rank) {
 		return true;
 	}
 
 	if (g_Vars.currentplayer->equipallguns &&
-			weapon1 <= WEAPON_PSYCHOSISGUN &&
+			weapon1 <= weaponMatchEnum(WEAPON_PSYCHOSISGUN)->rank &&
 			weapon1 == weapon2 &&
 			weaponHasFlag(weapon1, WEAPONFLAG_DUALWIELD)) {
 		return true;
@@ -304,7 +305,12 @@ bool invHasDoubleWeaponIncAllGuns(s32 weapon1, s32 weapon2)
 
 bool invGiveSingleWeapon(s32 weaponnum)
 {
-	u16 rank = weaponGetRank(weaponnum);
+	//u16 rank = weaponGetRank(weaponnum);
+	//struct weapon *weapon = weaponMatchEnum(rank);
+
+	debug_log("inv give single weapon %d \n", weaponnum);
+
+	u16 rank = weaponnum;
 	frSetWeaponFound(rank);
 
 	if (invHasSingleWeaponExcAllGuns(rank) == 0) {
@@ -332,6 +338,7 @@ bool invGiveSingleWeapon(s32 weaponnum)
 
 bool invGiveDoubleWeapon(s32 weapon1, s32 weapon2)
 {
+	debug_log("inv give double weapon \n", 0);
 	if (invHasDoubleWeaponExcAllGuns(weapon1, weapon2) == 0) {
 		if (weaponHasFlag(weapon1, WEAPONFLAG_DUALWIELD)) {
 			struct invitem *item = invFindUnusedSlot();
@@ -393,8 +400,11 @@ void invRemoveItemByNum(s32 weaponnum)
 	}
 }
 
+// Give devices at start of level
 bool invGiveProp(struct prop *prop)
 {
+
+	debug_log("inv give prop\n", 0);
 	struct invitem *item;
 
 	// Don't add duplicate night vision to inventory
@@ -410,6 +420,12 @@ bool invGiveProp(struct prop *prop)
 
 	item = invFindUnusedSlot();
 
+	if(prop->weapon->weaponnum)
+	{
+		//debug_log("prop given: %d \n", prop->weapon->weaponnum);
+	}
+
+	
 	if (item) {
 		item->type = INVITEMTYPE_PROP;
 		item->type_prop.prop = prop;
@@ -443,6 +459,8 @@ void invRemoveProp(struct prop *prop)
 // Used for when the player picks up a weapon from the ground
 s32 invGiveWeaponsByProp(struct prop *prop)
 {
+	debug_log("invGiveWeaponByProp \n", 0);
+
 	s32 numgiven = 0;
 
 	if (prop->type == PROPTYPE_WEAPON) {
@@ -455,7 +473,7 @@ s32 invGiveWeaponsByProp(struct prop *prop)
 		if (obj->type == OBJTYPE_WEAPON) {
 			weapon = prop->weapon;
 			weaponnum = weapon->weaponnum;
-			u16 rank = weaponGetRank(weaponnum);
+			u16 rank = weaponnum;
 			otherweaponnum;
 
 			// always allow picking up a second gun if dual wield cheat is on
@@ -545,13 +563,13 @@ void invChooseCycleForwardWeapon(s32 *ptr1, s32 *ptr2, bool arg2)
 			do {
 				candidate = (candidate + 1) % NUM_CYCLEABLE_WEAPONS;
 
-				if (candidate == WEAPON_NONE) {
+				if (candidate == weaponMatchEnum(WEAPON_NONE)->rank) {
 					candidate = (candidate + 1) % NUM_CYCLEABLE_WEAPONS;
 				}
 
 				if ((!arg2 || bgun0f0a1a10(candidate))) {
 					weapon1 = candidate;
-					weapon2 = WEAPON_NONE;
+					weapon2 = weaponMatchEnum(WEAPON_NONE)->rank;
 					break;
 				}
 			} while (candidate != weapon1);
@@ -564,7 +582,7 @@ void invChooseCycleForwardWeapon(s32 *ptr1, s32 *ptr2, bool arg2)
 				if (item->type_weap.weapon1 < NUM_CYCLEABLE_WEAPONS && item->type_weap.weapon1 > weapon1) {
 					if (!arg2 || bgun0f0a1a10(item->type_weap.weapon1)) {
 						weapon1 = item->type_weap.weapon1;
-						weapon2 = WEAPON_NONE;
+						weapon2 = weaponMatchEnum(WEAPON_NONE)->rank;
 						break;
 					}
 				}
@@ -607,13 +625,13 @@ void invChooseCycleBackWeapon(s32 *ptr1, s32 *ptr2, bool arg2)
 		if (weaponHasFlag(weapon1, WEAPONFLAG_DUALWIELD) && weapon1 == weapon2) {
 			// Switching from dual to single
 			weapon1 = candidate;
-			weapon2 = WEAPON_NONE;
+			weapon2 = weaponMatchEnum(WEAPON_NONE)->rank;
 		} else {
 			// Find prev weapon
 			do {
 				candidate = (candidate + NUM_CYCLEABLE_WEAPONS - 1) % NUM_CYCLEABLE_WEAPONS;
 
-				if (candidate == WEAPON_NONE) {
+				if (candidate == weaponMatchEnum(WEAPON_NONE)->rank) {
 					candidate = (candidate + NUM_CYCLEABLE_WEAPONS - 1) % NUM_CYCLEABLE_WEAPONS;
 				}
 			} while ((arg2 && !bgun0f0a1a10(candidate)));
@@ -623,7 +641,7 @@ void invChooseCycleBackWeapon(s32 *ptr1, s32 *ptr2, bool arg2)
 				weapon2 = candidate;
 			} else {
 				weapon1 = candidate;
-				weapon2 = WEAPON_NONE;
+				weapon2 = weaponMatchEnum(WEAPON_NONE)->rank;
 			}
 		}
 	} else if (g_Vars.currentplayer->weapons != NULL) {
@@ -635,7 +653,7 @@ void invChooseCycleBackWeapon(s32 *ptr1, s32 *ptr2, bool arg2)
 						&& (item->type_weap.weapon1 < weapon1 || (weapon1 == item->type_weap.weapon1 && weapon2 > 0))) {
 					if (!arg2 || bgun0f0a1a10(item->type_weap.weapon1)) {
 						weapon1 = item->type_weap.weapon1;
-						weapon2 = WEAPON_NONE;
+						weapon2 = weaponMatchEnum(WEAPON_NONE)->rank;
 						break;
 					}
 				}
@@ -704,7 +722,7 @@ bool invHasKeyFlags(u32 wantkeyflags)
 bool invHasBriefcase(void)
 {
 	if (g_Vars.currentplayer->isdead == false) {
-		return invHasSingleWeaponExcAllGuns(WEAPON_BRIEFCASE2);
+		return invHasSingleWeaponExcAllGuns(weaponMatchEnum(WEAPON_BRIEFCASE2)->rank);
 	}
 
 	return false;
@@ -713,7 +731,7 @@ bool invHasBriefcase(void)
 bool invHasDataUplink(void)
 {
 	if (g_Vars.currentplayer->isdead == false) {
-		return invHasSingleWeaponExcAllGuns(WEAPON_DATAUPLINK);
+		return invHasSingleWeaponExcAllGuns(weaponMatchEnum(WEAPON_DATAUPLINK)->rank);
 	}
 
 	return false;

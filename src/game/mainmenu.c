@@ -3753,7 +3753,7 @@ char *invMenuTextWeaponDescription(struct menuitem *item)
 	struct weapon *weapon = weaponFindById(g_InventoryWeapon);
 
 	if (weapon) {
-		if (g_InventoryWeapon == WEAPON_EYESPY && g_Vars.currentplayer->eyespy) {
+		if (g_InventoryWeapon == weaponMatchEnum(WEAPON_EYESPY)->rank && g_Vars.currentplayer->eyespy) {
 			if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 				return langGet(L_GUN_237); // Drugspy description
 			}
@@ -4014,7 +4014,7 @@ MenuItemHandlerResult menuhandlerInventoryList(s32 operation, struct menuitem *i
 			s32 weaponnum = invGetWeaponNumByIndex(data->list.value);
 			bool equippable = true;
 
-			if (weaponnum != WEAPON_NONE) {
+			if (weaponnum != weaponMatchEnum(WEAPON_NONE)->rank) {
 				s32 state = currentPlayerGetDeviceState(weaponnum);
 
 				if (state != DEVICESTATE_UNEQUIPPED) {
@@ -4043,7 +4043,7 @@ MenuItemHandlerResult menuhandlerInventoryList(s32 operation, struct menuitem *i
 					if (weaponnum == WEAPON_REMOTEMINE) {
 						bgunEquipWeapon2(HAND_LEFT, weaponnum);
 					} else {
-						bgunEquipWeapon2(HAND_LEFT, WEAPON_NONE);
+						bgunEquipWeapon2(HAND_LEFT, weaponMatchEnum(WEAPON_NONE)->rank);
 					}
 				}
 			}
@@ -4058,7 +4058,7 @@ MenuItemHandlerResult menuhandlerInventoryList(s32 operation, struct menuitem *i
 		{
 			s32 weaponnum = invGetWeaponNumByIndex(data->list.value);
 
-			if (weaponnum != WEAPON_NONE) {
+			if (weaponnum != weaponMatchEnum(WEAPON_NONE)->rank) {
 				s32 state = currentPlayerGetDeviceState(weaponnum);
 
 				if (state != DEVICESTATE_UNEQUIPPED) {
@@ -4346,7 +4346,6 @@ u32 g_CutsceneCountsByMission[] = {
 	/* 1*/ 3,  // 1 mission completed => 3 cutscenes available (Def intro, outro, Invest intro)
 	/* 2*/ 5,
 	/* 3*/ 7,
-#if VERSION >= VERSION_NTSC_1_0
 	// NTSC beta has an extra Villa cutscene
 	// so the numbers are bumped forward in that version
 	/* 4*/ 9,
@@ -4363,22 +4362,6 @@ u32 g_CutsceneCountsByMission[] = {
 	/*15*/ 35,
 	/*16*/ 37,
 	/*17*/ 38,
-#else
-	/* 4*/ 10,
-	/* 5*/ 12,
-	/* 6*/ 15,
-	/* 7*/ 17,
-	/* 8*/ 19,
-	/* 9*/ 22,
-	/*10*/ 24,
-	/*11*/ 27,
-	/*12*/ 29,
-	/*13*/ 31,
-	/*14*/ 34,
-	/*15*/ 36,
-	/*16*/ 38,
-	/*17*/ 39,
-#endif
 };
 
 s32 getNumCompletedMissions(void)
@@ -4417,7 +4400,6 @@ MenuItemHandlerResult menuhandlerCinema(s32 operation, struct menuitem *item, un
 		{ /* 0*/  0, L_OPTIONS_436 }, // "Special"
 		{ /* 1*/  1, L_OPTIONS_438 }, // "Mission 1 - dataDyne Central"
 		{ /* 2*/  7, L_OPTIONS_439 },
-#if VERSION >= VERSION_NTSC_1_0
 		{ /* 3*/  9, L_OPTIONS_440 },
 		{ /* 4*/ 14, L_OPTIONS_441 },
 		{ /* 5*/ 21, L_OPTIONS_442 },
@@ -4426,16 +4408,6 @@ MenuItemHandlerResult menuhandlerCinema(s32 operation, struct menuitem *item, un
 		{ /* 8*/ 35, L_OPTIONS_445 },
 		{ /* 9*/ 37, L_OPTIONS_446 }, // "Mission 9 - Skedar Ruins"
 		{ /*10*/ 39, L_OPTIONS_447 }, // "Finale"
-#else
-		{ /* 3*/ 10, L_OPTIONS_440 },
-		{ /* 4*/ 15, L_OPTIONS_441 },
-		{ /* 5*/ 22, L_OPTIONS_442 },
-		{ /* 6*/ 29, L_OPTIONS_443 },
-		{ /* 7*/ 34, L_OPTIONS_444 },
-		{ /* 8*/ 36, L_OPTIONS_445 },
-		{ /* 9*/ 38, L_OPTIONS_446 }, // "Mission 9 - Skedar Ruins"
-		{ /*10*/ 40, L_OPTIONS_447 }, // "Finale"
-#endif
 	};
 
 	switch (operation) {

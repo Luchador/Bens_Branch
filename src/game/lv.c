@@ -1106,14 +1106,14 @@ Gfx *lvRender(Gfx *gdl)
 							direction.z = g_Vars.currentplayer->eyespy->look.z;
 
 							projectileCreate(g_Vars.currentplayer->eyespy->prop, 0,
-									&g_Vars.currentplayer->eyespy->prop->pos, &direction, WEAPON_TRANQUILIZER, NULL);
+									&g_Vars.currentplayer->eyespy->prop->pos, &direction, weaponMatchEnum(WEAPON_TRANQUILIZER)->rank, NULL);
 						} else {
 							// No dart ammo
 							sndStart(var80095200, SFX_FIREEMPTY, 0, -1, -1, -1, -1, -1);
 						}
 					} else { // EYESPYMODE_BOMBSPY
 						struct coord vel = {0, 0, 0};
-						struct gset gset = {WEAPON_GRENADE, 0, 0, FUNC_PRIMARY};
+						struct gset gset = {weaponMatchEnum(WEAPON_GRENADE)->rank, 0, 0, FUNC_PRIMARY};
 						explosionCreateSimple(g_Vars.currentplayer->eyespy->prop,
 								&g_Vars.currentplayer->eyespy->prop->pos,
 								g_Vars.currentplayer->eyespy->prop->rooms,

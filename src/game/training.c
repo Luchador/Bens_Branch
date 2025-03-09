@@ -128,11 +128,11 @@ bool frIsDeviceUnlocked(s32 weapon)
 		return false;
 	}
 
-	if (weapon == WEAPON_XRAYSCANNER && ciIsStageComplete(SOLOSTAGEINDEX_INFILTRATION)) {
+	if (weapon == weaponMatchEnum(WEAPON_XRAYSCANNER)->rank && ciIsStageComplete(SOLOSTAGEINDEX_INFILTRATION)) {
 		return true;
 	}
 
-	if (weapon == WEAPON_CLOAKINGDEVICE && ciIsStageComplete(SOLOSTAGEINDEX_CHICAGO)) {
+	if (weapon == weaponMatchEnum(WEAPON_CLOAKINGDEVICE)->rank && ciIsStageComplete(SOLOSTAGEINDEX_CHICAGO)) {
 		return true;
 	}
 
@@ -1162,19 +1162,21 @@ void frEndSession(bool hidetargets)
 					if (obj->type == OBJTYPE_WEAPON) {
 						struct weaponobj *weapon = (struct weaponobj *)obj;
 
-						if (weapon->weaponnum == WEAPON_NBOMB
-								|| weapon->weaponnum == WEAPON_BOLT
-								|| weapon->weaponnum == WEAPON_COMBATKNIFE
-								|| weapon->weaponnum == WEAPON_HOMINGROCKET
-								|| weapon->weaponnum == WEAPON_GRENADE
-								|| weapon->weaponnum == WEAPON_GRENADEROUND
-								|| weapon->weaponnum == WEAPON_PROXIMITYMINE
-								|| weapon->weaponnum == WEAPON_REMOTEMINE
-								|| weapon->weaponnum == WEAPON_ROCKET
-								|| weapon->weaponnum == WEAPON_TIMEDMINE
-								|| weapon->weaponnum == WEAPON_SKROCKET
-								|| (weapon->weaponnum == WEAPON_DRAGON && weapon->gunfunc == FUNC_SECONDARY)
-								|| (weapon->weaponnum == WEAPON_LAPTOPGUN && weapon->gunfunc == FUNC_SECONDARY)) {
+						u16 rank = weaponGetRank(weapon->weaponnum);
+
+						if (rank == weaponMatchEnum(WEAPON_NBOMB)->rank
+								|| rank == weaponMatchEnum(WEAPON_BOLT)->rank
+								|| rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank
+								|| rank == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank
+								|| rank == weaponMatchEnum(WEAPON_GRENADE)->rank
+								|| rank == weaponMatchEnum(WEAPON_GRENADEROUND)->rank
+								|| rank == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank
+								|| rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
+								|| rank == weaponMatchEnum(WEAPON_ROCKET)->rank
+								|| rank == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
+								|| rank == weaponMatchEnum(WEAPON_SKROCKET)->rank
+								|| (rank == weaponMatchEnum(WEAPON_DRAGON)->rank && weapon->gunfunc == FUNC_SECONDARY)
+								|| (rank == weaponMatchEnum(WEAPON_LAPTOPGUN)->rank && weapon->gunfunc == FUNC_SECONDARY)) {
 							objFreePermanently(obj, true);
 						}
 					}
@@ -1424,30 +1426,30 @@ bool frIsAmmoWasted(void)
 				prop = &g_Vars.props[*propnumptr];
 				child = prop->child;
 
-				if ((child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == WEAPON_TIMEDMINE)
-						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == WEAPON_REMOTEMINE)
-						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == WEAPON_PROXIMITYMINE)
-						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == WEAPON_GRENADEROUND)) {
+				if ((child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == weaponMatchEnum(WEAPON_TIMEDMINE)->rank)
+						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == weaponMatchEnum(WEAPON_REMOTEMINE)->rank)
+						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank)
+						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == weaponMatchEnum(WEAPON_GRENADEROUND)->rank)) {
 					return false;
 				}
 
 				if (prop->type == PROPTYPE_WEAPON) {
-					if (prop->weapon->weaponnum == WEAPON_ROCKET
-							|| prop->weapon->weaponnum == WEAPON_HOMINGROCKET
-							|| prop->weapon->weaponnum == WEAPON_GRENADE
-							|| prop->weapon->weaponnum == WEAPON_GRENADEROUND) {
+					if (prop->weapon->weaponnum == weaponMatchEnum(WEAPON_ROCKET)->rank
+							|| prop->weapon->weaponnum == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank
+							|| prop->weapon->weaponnum == weaponMatchEnum(WEAPON_GRENADE)->rank
+							|| prop->weapon->weaponnum == weaponMatchEnum(WEAPON_GRENADEROUND)->rank) {
 						return false;
 					}
 
-					if (prop->weapon->weaponnum == WEAPON_BOLT
-							|| prop->weapon->weaponnum == WEAPON_COMBATKNIFE) {
+					if (prop->weapon->weaponnum == weaponMatchEnum(WEAPON_BOLT)->rank
+							|| prop->weapon->weaponnum == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
 						if (prop->obj->hidden & OBJHFLAG_PROJECTILE) {
 							return false;
 						}
-					} else if (prop->weapon->weaponnum == WEAPON_TIMEDMINE
-							|| prop->weapon->weaponnum == WEAPON_REMOTEMINE) {
+					} else if (prop->weapon->weaponnum == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
+							|| prop->weapon->weaponnum == weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
 						return false;
-					} else if (prop->weapon->weaponnum == WEAPON_PROXIMITYMINE) {
+					} else if (prop->weapon->weaponnum == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank) {
 						if (g_FrData.proxyendtimer == -255) {
 							return false;
 						}

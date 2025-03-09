@@ -1353,7 +1353,7 @@ struct projectile {
 	/*0x068*/ f32 unk068[4];
 	/*0x078*/ f32 unk078[4];
 	/*0x088*/ struct prop *ownerprop;
-	/*0x08c*/ f32 unk08c;
+	/*0x08c*/ f32 pinball;
 	/*0x090*/ s32 bouncecount;
 	/*0x094*/ s32 bounceframe;
 	/*0x098*/ f32 unk098;
