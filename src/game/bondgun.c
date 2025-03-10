@@ -8273,7 +8273,7 @@ s32 bgunConsiderToggleGunFunction(s32 usedowntime, bool trigpressed, bool fromac
 	const bool extcontrols = PLAYER_EXTCFG().extcontrols;
 	bool docontinue;
 	switch (bgunGetWeaponNum(HAND_RIGHT)) {
-	case WEAPON_SNIPERRIFLE:
+	/*case WEAPON_SNIPERRIFLE:
 		if (extcontrols && usedowntime < 0) {
 			return USETIMER_CONTINUE;
 		}
@@ -8310,7 +8310,7 @@ s32 bgunConsiderToggleGunFunction(s32 usedowntime, bool trigpressed, bool fromac
 
 		// Do crouch or stand
 		g_Vars.currentplayer->hands[HAND_RIGHT].activatesecondary = true;
-		return (extcontrols ? USETIMER_STOP : USETIMER_REPEAT);
+		return (extcontrols ? USETIMER_STOP : USETIMER_REPEAT);*/
 	case WEAPON_RCP120:
 		// very special alt-button handling for RCP-120's cloaking
 		if (!trigpressed && extcontrols && fromdedicatedbutton) {

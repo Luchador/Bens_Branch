@@ -4047,17 +4047,39 @@ struct weaponfunc_shootsingle invfunc_sniperrifle_singleshot = {
 	1, // penetration
 };
 
-struct weaponfunc_special invfunc_sniperrifle_crouch = {
+/*struct weaponfunc_special invfunc_sniperrifle_ap = {
 	INVENTORYFUNCTYPE_SPECIAL,
 	L_GUN_130, // name
 	0, // unused
-	-1, // ammoindex
+	0, // ammoindex
 	&invnoisesettings_silent,
 	NULL, // fire animation
 	FUNCFLAG_NOMUZZLEFLASH | FUNCFLAG_AUTOSWITCHUNSELECTABLE,
 	HANDATTACKTYPE_CROUCH,
 	30, // recoverytime60
 	0, // soundnum (unused)
+};*/
+
+struct weaponfunc_shootsingle invfunc_sniperrifle_ap = {
+	INVENTORYFUNCTYPE_SHOOT_SINGLE,
+	L_GUN_130, // name
+	0, // unused
+	0, // ammoindex
+	&invnoisesettings_sniper,
+	NULL, // fire animation
+	FUNCFLAG_NOMUZZLEFLASH, // flags
+	&invrecoilsettings_default,
+	16, // recoverytime60
+	1.5, // damage
+	3, // spread
+	6, 10, 0, 0,
+	10, // recoildist
+	2, // recoilangle
+	0, // slidemax
+	6, // impactforce
+	4, // duration60
+	SFX_8058, // shootsound
+	3, // penetration
 };
 
 struct inventory_ammo invammo_sniperrifle = {
@@ -4080,7 +4102,7 @@ struct weapon invitem_sniperrifle = {
 	NULL, // unequip animation
 	NULL, // pritosec animation
 	NULL, // sectopri animation
-	{ &invfunc_sniperrifle_singleshot, &invfunc_sniperrifle_crouch }, // functions
+	{ &invfunc_sniperrifle_singleshot, &invfunc_sniperrifle_ap }, // functions
 	&invammo_sniperrifle, // pri ammo
 	NULL, // sec ammo
 	&invaimsettings_sniperrifle,
