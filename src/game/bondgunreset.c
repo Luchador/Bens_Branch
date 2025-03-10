@@ -3,7 +3,6 @@
 #include "game/inv.h"
 #include "game/bondgun.h"
 #include "game/stagetable.h"
-#include "game/weaponutils.h"
 #include "bss.h"
 #include "lib/memp.h"
 #include "data.h"
@@ -242,22 +241,22 @@ void bgunReset(void)
 	g_Vars.currentplayer->gunzoomfovs[2] = ADJUST_ZOOM_FOV(30);
 
 	if (stageGetIndex(g_Vars.stagenum) == STAGEINDEX_AIRBASE) {
-		g_Weapons[weaponMatchEnum(WEAPON_EYESPY)->rank]->name = L_GUN_061; // "DrugSpy"
-		g_Weapons[weaponMatchEnum(WEAPON_EYESPY)->rank]->shortname = L_GUN_061; // "DrugSpy"
-		g_Weapons[weaponMatchEnum(WEAPON_EYESPY)->rank]->flags &= ~(WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN);
+		g_Weapons[WEAPON_EYESPY]->name = L_GUN_061; // "DrugSpy"
+		g_Weapons[WEAPON_EYESPY]->shortname = L_GUN_061; // "DrugSpy"
+		g_Weapons[WEAPON_EYESPY]->flags &= ~(WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN);
 	} else if (stageGetIndex(g_Vars.stagenum) == STAGEINDEX_CHICAGO
 			|| (stageGetIndex(g_Vars.stagenum) == STAGEINDEX_MBR)) {
-		g_Weapons[weaponMatchEnum(WEAPON_EYESPY)->rank]->name = L_GUN_062; // "BombSpy"
-		g_Weapons[weaponMatchEnum(WEAPON_EYESPY)->rank]->shortname = L_GUN_062; // "BombSpy"
-		g_Weapons[weaponMatchEnum(WEAPON_EYESPY)->rank]->flags &= ~(WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN);
+		g_Weapons[WEAPON_EYESPY]->name = L_GUN_062; // "BombSpy"
+		g_Weapons[WEAPON_EYESPY]->shortname = L_GUN_062; // "BombSpy"
+		g_Weapons[WEAPON_EYESPY]->flags &= ~(WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN);
 	} else {
 		// This is setting the "an" determiner for the camspy which seems
 		// unusual at first. The theory is that during development it was called
 		// the eyespy, then the pickup message was changed to "your camspy"
 		// which made the determiner unused, hence no need to update it.
-		g_Weapons[weaponMatchEnum(WEAPON_EYESPY)->rank]->name = L_GUN_060; // "CamSpy"
-		g_Weapons[weaponMatchEnum(WEAPON_EYESPY)->rank]->shortname = L_GUN_060; // "CamSpy"
-		g_Weapons[weaponMatchEnum(WEAPON_EYESPY)->rank]->flags |= (WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN);
+		g_Weapons[WEAPON_EYESPY]->name = L_GUN_060; // "CamSpy"
+		g_Weapons[WEAPON_EYESPY]->shortname = L_GUN_060; // "CamSpy"
+		g_Weapons[WEAPON_EYESPY]->flags |= (WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN);
 	}
 
 	bgunInitHandAnims();

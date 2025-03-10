@@ -244,6 +244,7 @@ void amSetAiBuddyTemperament(bool aggressive)
 	}
 }
 
+#if VERSION >= VERSION_NTSC_1_0
 void amSetAiBuddyStealth(void)
 {
 	s32 i;
@@ -265,6 +266,7 @@ void amSetAiBuddyStealth(void)
 		}
 	}
 }
+#endif
 
 s32 amGetFirstBuddyIndex(void)
 {
@@ -305,7 +307,7 @@ void amApply(s32 slot)
 		numinvitems = invGetCount();
 
 		if (invindex < numinvitems) {
-			weaponnum = weaponGetRank(invGetWeaponNumByIndex(invindex));
+			weaponnum = invGetWeaponNumByIndex(invindex);
 			pass = true;
 
 			if (weaponnum) {
@@ -326,9 +328,9 @@ void amApply(s32 slot)
 				pass = true;
 
 				if (g_FrIsValidWeapon) {
-					s32 weaponnum = weaponGetRank(frGetWeaponBySlot(frGetSlot()));
+					s32 weaponnum = frGetWeaponBySlot(frGetSlot());
 
-					if (weaponGetRank(g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponnum) == weaponnum) {
+					if (g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponnum == weaponnum) {
 						pass = false;
 					}
 				}
@@ -351,10 +353,10 @@ void amApply(s32 slot)
 
 						// don't unequip detonator
 						// if we already have it equipped
-						if (weaponnum == weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
+						if (weaponnum == WEAPON_REMOTEMINE) {
 							bgunEquipWeapon2(HAND_LEFT, weaponnum);
-						} else if (bgunGetWeaponNum(HAND_LEFT) != weaponMatchEnum(WEAPON_NONE)->rank) {
-							bgunEquipWeapon2(HAND_LEFT, weaponMatchEnum(WEAPON_NONE)->rank);
+						} else if (bgunGetWeaponNum(HAND_LEFT) != WEAPON_NONE) {
+							bgunEquipWeapon2(HAND_LEFT, WEAPON_NONE);
 						}
 					}
 				}
@@ -362,9 +364,9 @@ void amApply(s32 slot)
 		}
 		break;
 	case 1: // Function
-		if (weaponGetRank(g_Vars.currentplayer->gunctrl.weaponnum) >= weaponMatchEnum(WEAPON_UNARMED)->rank
-				&& weaponGetRank(g_Vars.currentplayer->gunctrl.weaponnum) <= weaponMatchEnum(WEAPON_COMBATBOOST)->rank
-				&& g_PlayerConfigsArray[g_Vars.currentplayerstats->mpindex].gunfuncs[(weaponGetRank(g_Vars.currentplayer->gunctrl.weaponnum) - 1) >> 3] & (1 << ((weaponGetRank(g_Vars.currentplayer->gunctrl.weaponnum) - 1) & 7))) {
+		if (g_Vars.currentplayer->gunctrl.weaponnum >= WEAPON_UNARMED
+				&& g_Vars.currentplayer->gunctrl.weaponnum <= WEAPON_COMBATBOOST
+				&& g_PlayerConfigsArray[g_Vars.currentplayerstats->mpindex].gunfuncs[(g_Vars.currentplayer->gunctrl.weaponnum - 1) >> 3] & (1 << ((g_Vars.currentplayer->gunctrl.weaponnum - 1) & 7))) {
 			if (slot == 1) {
 				g_AmMenus[g_AmIndex].togglefunc = true;
 			}
@@ -381,8 +383,10 @@ void amApply(s32 slot)
 					amSetAiBuddyTemperament(true); // aggressive
 				} else if (slot == 7) {
 					amSetAiBuddyTemperament(false); // passive
+#if VERSION >= VERSION_NTSC_1_0
 				} else if (slot == 3) {
 					amSetAiBuddyStealth();
+#endif
 				}
 			}
 		} else if (g_Vars.normmplayerisrunning) {
@@ -519,7 +523,7 @@ void amReset(void)
 		if (g_Vars.normmplayerisrunning) {
 			s32 index = 0;
 
-			g_AmMenus[i].favourites[g_AmMapping[index]] = weaponMatchEnum(WEAPON_UNARMED)->rank;
+			g_AmMenus[i].favourites[g_AmMapping[index]] = WEAPON_UNARMED;
 			index++;
 
 			for (j = 0; j < MIN(ARRAYCOUNT(g_AmMapping), ARRAYCOUNT(g_MpSetup.weapons)); j++) {
@@ -539,6 +543,10 @@ void amReset(void)
 		}
 	}
 
+#if VERSION == VERSION_JPN_FINAL
+	g_AmFont1 = g_CharsHandelGothicSm;
+	g_AmFont2 = g_FontHandelGothicSm;
+#else
 	if (PLAYERCOUNT() >= 2) {
 		g_AmFont1 = g_CharsHandelGothicXs;
 		g_AmFont2 = g_FontHandelGothicXs;
@@ -546,6 +554,7 @@ void amReset(void)
 		g_AmFont1 = g_CharsHandelGothicSm;
 		g_AmFont2 = g_FontHandelGothicSm;
 	}
+#endif
 
 	g_AmIndex = 0;
 }

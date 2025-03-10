@@ -539,12 +539,12 @@ void botinvScoreWeapon(struct chrdata *chr, s32 weaponnum, s32 funcnum, s32 arg3
 			score2 = 16;
 		}
 		break;
-	case WEAPON_FALCON2_SANDS:
+	/*case WEAPON_FALCON2_SANDS:
 		if (funcnum != FUNC_PRIMARY) {
 			score1 = 16;
 			score2 = 16;
 		}
-		break;
+		break;*/
 	case WEAPON_MAGSEC4:
 		if (funcnum == FUNC_PRIMARY) {
 			score1 = arg4 ? 91 : 63;

@@ -28,7 +28,6 @@
 #include "game/lv.h"
 #include "game/texdecompress.h"
 #include "game/wallhit.h"
-#include "game/weaponutils.h"
 #include "bss.h"
 #include "lib/crash.h"
 #include "lib/dma.h"
@@ -5107,7 +5106,7 @@ void bgTickPortalsXray(void)
 	xmax = player->screenxmaxf;
 	ymax = player->screenymaxf;
 
-	if (bgunGetWeaponNum(HAND_RIGHT) == weaponMatchEnum(WEAPON_FARSIGHT)->rank && player->gunsightoff == 0) {
+	if (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_FARSIGHT && player->gunsightoff == 0) {
 		player->eraserdepth = -500.0f / camGetLodScaleZ();
 	} else {
 		player->eraserdepth = -500.0f;

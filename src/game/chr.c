@@ -1949,9 +1949,9 @@ void chrUpdateCloak(struct chrdata *chr)
 				chr->aibot->cloakdeviceenabled = false;
 			}
 		} else if (chr->aibot->rcp120cloakenabled) {
-			if (chr->aibot->weaponnum == weaponMatchEnum(WEAPON_RCP120)->rank
+			if (chr->aibot->weaponnum == WEAPON_RCP120
 					&& !chrIsDead(chr)
-					&& botactGetAmmoQuantityByWeapon(chr->aibot, weaponMatchEnum(WEAPON_RCP120)->rank, 0, 1) > 0) {
+					&& botactGetAmmoQuantityByWeapon(chr->aibot, WEAPON_RCP120, 0, 1) > 0) {
 				if (chr->hidden & CHRHFLAG_CLOAKED) {
 					chr->aibot->rcpcloaktimer60 += LVUPDATE60FREAL() * 0.4f;
 
@@ -1966,7 +1966,7 @@ void chrUpdateCloak(struct chrdata *chr)
 								chr->aibot->loadedammo[0] = 0;
 							}
 						} else {
-							ammotype = botactGetAmmoTypeByFunction(weaponMatchEnum(WEAPON_RCP120)->rank, 0);
+							ammotype = botactGetAmmoTypeByFunction(WEAPON_RCP120, 0);
 
 							if (chr->aibot->ammoheld[ammotype] > 0) {
 								chr->aibot->ammoheld[ammotype] -= qty;
@@ -2019,7 +2019,7 @@ void chrUpdateCloak(struct chrdata *chr)
 
 		// If cloak is enabled via cloaking device or via RCP120
 		if ((g_Vars.currentplayer->devicesactive & DEVICE_CLOAKDEVICE)
-				|| ((g_Vars.currentplayer->gunctrl.weaponnum == weaponMatchEnum(WEAPON_RCP120)->rank)
+				|| (g_Vars.currentplayer->gunctrl.weaponnum == WEAPON_RCP120
 					&& (g_Vars.currentplayer->devicesactive & DEVICE_CLOAKRCP120))) {
 			if ((chr->hidden & CHRHFLAG_CLOAKED) == 0 && chr->cloakpause < 1) {
 				chrCloak(chr, true);
@@ -2112,7 +2112,7 @@ void chrTickPoisoned(struct chrdata *chr)
 	if (chr->poisoncounter > 0) {
 		struct coord coord = {0, 0, 0};
 
-		struct gset gset = {weaponMatchEnum(WEAPON_COMBATKNIFE)->rank, 0, 0, FUNC_POISON };
+		struct gset gset = { WEAPON_COMBATKNIFE, 0, 0, FUNC_POISON };
 
 		if (chr->actiontype == ACT_DEAD || chr->actiontype == ACT_DIE) {
 			// Dying chr
@@ -4418,13 +4418,13 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				s32 index;
 
 				// Shooting an explosive in a chr's hand causes it to explode
-				if (weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_GRENADE)->rank
-						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_GRENADEROUND)->rank
-						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_ROCKET)->rank
-						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank
-						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
-						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
-						|| weaponGetRank(weapon->weaponnum) == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank) {
+				if (weapon->weaponnum == WEAPON_GRENADE
+						|| weapon->weaponnum == WEAPON_GRENADEROUND
+						|| weapon->weaponnum == WEAPON_ROCKET
+						|| weapon->weaponnum == WEAPON_HOMINGROCKET
+						|| weapon->weaponnum == WEAPON_TIMEDMINE
+						|| weapon->weaponnum == WEAPON_REMOTEMINE
+						|| weapon->weaponnum == WEAPON_PROXIMITYMINE) {
 					objSetDropped(hit->prop, DROPTYPE_DEFAULT);
 					chr->hidden |= CHRHFLAG_DROPPINGITEM;
 					objDamage(&weapon->base, gsetGetDamage(&shotdata->gset), &sp98, shotdata->gset.weaponnum, g_Vars.currentplayernum);
@@ -4460,7 +4460,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 					}
 				}
 
-					// Shoot gun out of hand
+					// Drop gun
 					if (chr->aibot == NULL && (chr->flags & CHRFLAG0_CANLOSEGUN)) 
 					{
 						chr->gunprop = hit->prop;
@@ -4483,7 +4483,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 						&& race != RACE_ROBOT
 						&& race != RACE_EYESPY
 						&& !ismelee
-						&& weaponGetRank(shotdata->gset.weaponnum) != weaponMatchEnum(WEAPON_TRANQUILIZER)->rank) {
+						&& shotdata->gset.weaponnum != WEAPON_TRANQUILIZER) {
 					u8 darker;
 
 					if (chr->bodynum == BODY_MRBLONDE || race == RACE_SKEDAR) {

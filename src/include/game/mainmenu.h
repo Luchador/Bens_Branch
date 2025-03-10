@@ -29,7 +29,6 @@ char *func0f1056a0(struct menuitem *item);
 char *invMenuTextPrimaryFunction(struct menuitem *item);
 char *invMenuTextSecondaryFunction(struct menuitem *item);
 void invMenuGetGunConfigs(s32 weaponnum);
-void invMenuGetGunConfigs2(u16 weaponnum);
 char *invMenuTextWeaponName(struct menuitem *item);
 char *invMenuTextWeaponManufacturer(struct menuitem *item);
 char *invMenuTextWeaponDescription(struct menuitem *item);

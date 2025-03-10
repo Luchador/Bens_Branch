@@ -128,31 +128,31 @@ bool frIsDeviceUnlocked(s32 weapon)
 		return false;
 	}
 
-	if (weapon == weaponMatchEnum(WEAPON_XRAYSCANNER)->rank && ciIsStageComplete(SOLOSTAGEINDEX_INFILTRATION)) {
+	if (weapon == WEAPON_XRAYSCANNER && ciIsStageComplete(SOLOSTAGEINDEX_INFILTRATION)) {
 		return true;
 	}
 
-	if (weapon == weaponMatchEnum(WEAPON_CLOAKINGDEVICE)->rank && ciIsStageComplete(SOLOSTAGEINDEX_CHICAGO)) {
+	if (weapon == WEAPON_CLOAKINGDEVICE && ciIsStageComplete(SOLOSTAGEINDEX_CHICAGO)) {
 		return true;
 	}
 
 	return frIsWeaponFound(weapon);
 }
 
-bool frIsWeaponAvailable(s32 rank)
+bool frIsWeaponAvailable(s32 weapon)
 {
-	if (rank < weaponMatchEnum(WEAPON_FALCON2)->rank || rank > weaponMatchEnum(WEAPON_REMOTEMINE)->rank
-			|| rank == weaponMatchEnum(WEAPON_PSYCHOSISGUN)->rank
-			|| rank == weaponMatchEnum(WEAPON_COMBATBOOST)->rank
-			|| rank == weaponMatchEnum(WEAPON_NBOMB)->rank) {
+	if (weapon < WEAPON_FALCON2 || weapon > WEAPON_REMOTEMINE
+			|| weapon == WEAPON_PSYCHOSISGUN
+			|| weapon == WEAPON_COMBATBOOST
+			|| weapon == WEAPON_NBOMB) {
 		return false;
 	}
 
-	if (rank == weaponMatchEnum(WEAPON_FALCON2)->rank || rank == weaponMatchEnum(WEAPON_CMP150)->rank) {
+	if (weapon == WEAPON_FALCON2 || weapon == WEAPON_CMP150) {
 		return true;
 	}
 
-	return frIsWeaponFound(rank);
+	return frIsWeaponFound(weapon);
 }
 
 u32 frGetWeaponIndexByWeapon(u32 weaponnum)
@@ -833,6 +833,7 @@ bool frExecuteTargetScript(s32 targetnum)
 				g_FrData.targets[targetnum].scriptenabled = false;
 			}
 
+			if (1);
 			g_FrData.targets[targetnum].scriptoffset += 3;
 			return true;
 		}
@@ -1162,21 +1163,19 @@ void frEndSession(bool hidetargets)
 					if (obj->type == OBJTYPE_WEAPON) {
 						struct weaponobj *weapon = (struct weaponobj *)obj;
 
-						u16 rank = weaponGetRank(weapon->weaponnum);
-
-						if (rank == weaponMatchEnum(WEAPON_NBOMB)->rank
-								|| rank == weaponMatchEnum(WEAPON_BOLT)->rank
-								|| rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank
-								|| rank == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank
-								|| rank == weaponMatchEnum(WEAPON_GRENADE)->rank
-								|| rank == weaponMatchEnum(WEAPON_GRENADEROUND)->rank
-								|| rank == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank
-								|| rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
-								|| rank == weaponMatchEnum(WEAPON_ROCKET)->rank
-								|| rank == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
-								|| rank == weaponMatchEnum(WEAPON_SKROCKET)->rank
-								|| (rank == weaponMatchEnum(WEAPON_DRAGON)->rank && weapon->gunfunc == FUNC_SECONDARY)
-								|| (rank == weaponMatchEnum(WEAPON_LAPTOPGUN)->rank && weapon->gunfunc == FUNC_SECONDARY)) {
+						if (weapon->weaponnum == WEAPON_NBOMB
+								|| weapon->weaponnum == WEAPON_BOLT
+								|| weapon->weaponnum == WEAPON_COMBATKNIFE
+								|| weapon->weaponnum == WEAPON_HOMINGROCKET
+								|| weapon->weaponnum == WEAPON_GRENADE
+								|| weapon->weaponnum == WEAPON_GRENADEROUND
+								|| weapon->weaponnum == WEAPON_PROXIMITYMINE
+								|| weapon->weaponnum == WEAPON_REMOTEMINE
+								|| weapon->weaponnum == WEAPON_ROCKET
+								|| weapon->weaponnum == WEAPON_TIMEDMINE
+								|| weapon->weaponnum == WEAPON_SKROCKET
+								|| (weapon->weaponnum == WEAPON_DRAGON && weapon->gunfunc == FUNC_SECONDARY)
+								|| (weapon->weaponnum == WEAPON_LAPTOPGUN && weapon->gunfunc == FUNC_SECONDARY)) {
 							objFreePermanently(obj, true);
 						}
 					}
@@ -1426,30 +1425,30 @@ bool frIsAmmoWasted(void)
 				prop = &g_Vars.props[*propnumptr];
 				child = prop->child;
 
-				if ((child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == weaponMatchEnum(WEAPON_TIMEDMINE)->rank)
-						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == weaponMatchEnum(WEAPON_REMOTEMINE)->rank)
-						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank)
-						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == weaponMatchEnum(WEAPON_GRENADEROUND)->rank)) {
+				if ((child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == WEAPON_TIMEDMINE)
+						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == WEAPON_REMOTEMINE)
+						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == WEAPON_PROXIMITYMINE)
+						|| (child && child->type == PROPTYPE_WEAPON && child->weapon->weaponnum == WEAPON_GRENADEROUND)) {
 					return false;
 				}
 
 				if (prop->type == PROPTYPE_WEAPON) {
-					if (prop->weapon->weaponnum == weaponMatchEnum(WEAPON_ROCKET)->rank
-							|| prop->weapon->weaponnum == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank
-							|| prop->weapon->weaponnum == weaponMatchEnum(WEAPON_GRENADE)->rank
-							|| prop->weapon->weaponnum == weaponMatchEnum(WEAPON_GRENADEROUND)->rank) {
+					if (prop->weapon->weaponnum == WEAPON_ROCKET
+							|| prop->weapon->weaponnum == WEAPON_HOMINGROCKET
+							|| prop->weapon->weaponnum == WEAPON_GRENADE
+							|| prop->weapon->weaponnum == WEAPON_GRENADEROUND) {
 						return false;
 					}
 
-					if (prop->weapon->weaponnum == weaponMatchEnum(WEAPON_BOLT)->rank
-							|| prop->weapon->weaponnum == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
+					if (prop->weapon->weaponnum == WEAPON_BOLT
+							|| prop->weapon->weaponnum == WEAPON_COMBATKNIFE) {
 						if (prop->obj->hidden & OBJHFLAG_PROJECTILE) {
 							return false;
 						}
-					} else if (prop->weapon->weaponnum == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
-							|| prop->weapon->weaponnum == weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
+					} else if (prop->weapon->weaponnum == WEAPON_TIMEDMINE
+							|| prop->weapon->weaponnum == WEAPON_REMOTEMINE) {
 						return false;
-					} else if (prop->weapon->weaponnum == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank) {
+					} else if (prop->weapon->weaponnum == WEAPON_PROXIMITYMINE) {
 						if (g_FrData.proxyendtimer == -255) {
 							return false;
 						}
@@ -2143,7 +2142,10 @@ u8 g_ChrBioSlot = 0;
 
 struct chrbio *ciGetChrBioByBodynum(u32 bodynum)
 {
-	static struct chrbio bios[] = {
+#ifdef AVOID_UB
+	static
+#endif
+	struct chrbio bios[] = {
 		// name, race, age, profile
 		/*0*/ { L_MISC_219, L_MISC_220, L_MISC_221, L_MISC_222 }, // Joanna Dark
 		/*1*/ { L_MISC_223, L_MISC_224, L_MISC_225, L_MISC_226 }, // Jonathan
@@ -2506,12 +2508,9 @@ void dtRestorePlayer(void)
 
 	g_DtData.obj = NULL;
 
-	// Remove ECM Mine after training
-	if(dtGetWeapon(g_DtSlot)->rank == weaponMatchEnum(WEAPON_ECMMINE)->rank)
-	{
+	if (dtGetWeaponByDeviceIndex(dtGetIndexBySlot(g_DtSlot)) == 53) { // 53 = WEAPON_ECMMINE
 		bgunSetAmmoQuantity(AMMOTYPE_ECM_MINE, 0);
 	}
-	
 
 	if (g_Vars.currentplayer->eyespy) {
 		struct chrdata *chr = g_Vars.currentplayer->eyespy->prop->chr;
@@ -2679,23 +2678,32 @@ s32 dtGetIndexBySlot(s32 wantindex)
 	return 0;
 }
 
-struct weapon *dtGetWeapon(s32 deviceindex)
+u32 dtGetWeaponByDeviceIndex(s32 deviceindex)
 {
+	u32 weapons[] = {
+		/*weaponMatchEnum(WEAPON_DATAUPLINK)->rank, // WEAPON_DATAUPLINK
+		weaponMatchEnum(WEAPON_ECMMINE)->rank, // WEAPON_ECMMINE
+		weaponMatchEnum(WEAPON_EYESPY)->rank, // WEAPON_EYESPY
+		weaponMatchEnum(WEAPON_NIGHTVISION)->rank, // WEAPON_NIGHTVISION
+		weaponMatchEnum(WEAPON_DOORDECODER)->rank, // WEAPON_DOORDECODER
+		weaponMatchEnum(WEAPON_RTRACKER)->rank, // WEAPON_RTRACKER
+		weaponMatchEnum(WEAPON_IRSCANNER)->rank, // WEAPON_IRSCANNER
+		weaponMatchEnum(WEAPON_XRAYSCANNER)->rank, // WEAPON_XRAYSCANNER
+		weaponMatchEnum(WEAPON_DISGUISE41)->rank, // WEAPON_DISGUISE41
+		weaponMatchEnum(WEAPON_CLOAKINGDEVICE)->rank, // WEAPON_CLOAKINGDEVICE*/
+		WEAPON_DATAUPLINK,
+		WEAPON_ECMMINE,
+		WEAPON_EYESPY,
+		WEAPON_NIGHTVISION,
+		WEAPON_DOORDECODER,
+		WEAPON_RTRACKER,
+		WEAPON_IRSCANNER,
+		WEAPON_XRAYSCANNER,
+		WEAPON_DISGUISE41,
+		WEAPON_CLOAKINGDEVICE,
+	};
 
-	switch(deviceindex) {
-		case 0: 	return weaponMatchEnum(WEAPON_DATAUPLINK);
-		case 1: 	return weaponMatchEnum(WEAPON_ECMMINE);
-		case 2: 	return weaponMatchEnum(WEAPON_EYESPY);
-		case 3: 	return weaponMatchEnum(WEAPON_NIGHTVISION);
-		case 4: 	return weaponMatchEnum(WEAPON_DOORDECODER);
-		case 5: 	return weaponMatchEnum(WEAPON_RTRACKER);
-		case 6: 	return weaponMatchEnum(WEAPON_IRSCANNER);
-		case 7: 	return weaponMatchEnum(WEAPON_XRAYSCANNER);
-		case 8: 	return weaponMatchEnum(WEAPON_DISGUISE41);
-		case 9: 	return weaponMatchEnum(WEAPON_CLOAKINGDEVICE);
-	}
-
-	return NULL;
+	return weapons[deviceindex];
 }
 
 u32 ciGetStageFlagByDeviceIndex(u32 deviceindex)
@@ -2953,6 +2961,15 @@ s32 htGetIndexBySlot(s32 slot)
 char *htGetName(s32 index)
 {
 	u32 texts[] = {
+#if VERSION >= VERSION_PAL_BETA
+		L_DISH_316, // "Holo 1 - Looking Around"
+		L_DISH_317, // "Holo 2 - Movement 1"
+		L_DISH_318, // "Holo 3 - Movement 2"
+		L_DISH_319, // "Holo 4 - Unarmed Combat 1"
+		L_DISH_320, // "Holo 5 - Unarmed Combat 2"
+		L_DISH_321, // "Holo 6 - Live Combat 1"
+		L_DISH_322, // "Holo 7 - Live Combat 2"
+#else
 		L_MISC_410, // "Holo 1 - Looking Around"
 		L_MISC_411, // "Holo 2 - Movement 1"
 		L_MISC_412, // "Holo 3 - Movement 2"
@@ -2960,6 +2977,7 @@ char *htGetName(s32 index)
 		L_MISC_414, // "Holo 5 - Unarmed Combat 2"
 		L_MISC_415, // "Holo 6 - Live Combat 1"
 		L_MISC_416, // "Holo 7 - Live Combat 2"
+#endif
 	};
 
 	return langGet(texts[index]);
@@ -2984,6 +3002,15 @@ u32 func0f1a25c0(s32 index)
 char *htGetDescription(void)
 {
 	u32 texts[] = {
+#if VERSION >= VERSION_PAL_BETA
+		L_DISH_242,
+		L_DISH_243,
+		L_DISH_244,
+		L_DISH_245,
+		L_DISH_246,
+		L_DISH_247,
+		L_DISH_248,
+#else
 		L_MISC_336,
 		L_MISC_337,
 		L_MISC_338,
@@ -2991,6 +3018,7 @@ char *htGetDescription(void)
 		L_MISC_340,
 		L_MISC_341,
 		L_MISC_342,
+#endif
 	};
 
 	return langGet(texts[htGetIndexBySlot(var80088bb4)]);
@@ -2999,6 +3027,15 @@ char *htGetDescription(void)
 char *htGetTip1(void)
 {
 	u32 texts[] = {
+#if VERSION >= VERSION_PAL_BETA
+		L_DISH_249, // "For greater precision..."
+		L_DISH_250, // "Think about where you want to go..."
+		L_DISH_251, // "Ducking enables you to..."
+		L_DISH_252, // "Attacking opponents from behind..."
+		L_DISH_253, // "Only stay close long enough..."
+		L_DISH_254, // "Don't hang around and wait..."
+		L_DISH_255, // "Go for the armed opponents..."
+#else
 		L_MISC_343, // "For greater precision..."
 		L_MISC_344, // "Think about where you want to go..."
 		L_MISC_345, // "Ducking enables you to..."
@@ -3006,6 +3043,7 @@ char *htGetTip1(void)
 		L_MISC_347, // "Only stay close long enough..."
 		L_MISC_348, // "Don't hang around and wait..."
 		L_MISC_349, // "Go for the armed opponents..."
+#endif
 	};
 
 	return langGet(texts[htGetIndexBySlot(var80088bb4)]);
@@ -3014,6 +3052,15 @@ char *htGetTip1(void)
 char *htGetTip2(void)
 {
 	u32 texts[] = {
+#if VERSION >= VERSION_PAL_BETA
+		L_DISH_256, // "For greater precision..."
+		L_DISH_257, // "Sidestepping and strafing..."
+		L_DISH_258, // "Ducking enables you to..."
+		L_DISH_259, // "Attacking opponents from behind..."
+		L_DISH_260, // "Only stay close long enough..."
+		L_DISH_261, // "Don't hang around and wait..."
+		L_DISH_262, // "Go for the armed opponents..."
+#else
 		L_MISC_350, // "For greater precision..."
 		L_MISC_351, // "Sidestepping and strafing..."
 		L_MISC_352, // "Ducking enables you to..."
@@ -3021,16 +3068,25 @@ char *htGetTip2(void)
 		L_MISC_354, // "Only stay close long enough..."
 		L_MISC_355, // "Don't hang around and wait..."
 		L_MISC_356, // "Go for the armed opponents..."
+#endif
 	};
 
 	return langGet(texts[htGetIndexBySlot(var80088bb4)]);
 }
 
+#if VERSION >= VERSION_JPN_FINAL
+void frGetGoalTargetsText(char *buffer, char *buffer2)
+{
+	sprintf(buffer, "%s", langGet(L_MISC_417));
+	sprintf(buffer2, "%d\n", g_FrData.goaltargets);
+}
+#else
 void frGetGoalTargetsText(char *buffer)
 {
 	// "GOAL TARGETS:"
 	sprintf(buffer, "%s %d\n", langGet(L_MISC_417), g_FrData.goaltargets);
 }
+#endif
 
 void frGetTargetsDestroyedValue(char *buffer)
 {
@@ -3042,6 +3098,18 @@ void frGetScoreValue(char *buffer)
 	sprintf(buffer, "%03d\n", g_FrData.score);
 }
 
+#if VERSION >= VERSION_JPN_FINAL
+void frGetGoalScoreText(char *buffer1, char *buffer2)
+{
+	if (g_FrData.goalscore) {
+		sprintf(buffer1, "%s", langGet(L_MISC_418));
+		sprintf(buffer2, "%d\n", g_FrData.goalscore);
+	} else {
+		sprintf(buffer1, "");
+		sprintf(buffer2, "");
+	}
+}
+#else
 void frGetGoalScoreText(char *buffer)
 {
 	if (g_FrData.goalscore) {
@@ -3051,6 +3119,7 @@ void frGetGoalScoreText(char *buffer)
 		sprintf(buffer, "");
 	}
 }
+#endif
 
 f32 frGetAccuracy(char *buffer)
 {
@@ -3073,6 +3142,15 @@ f32 frGetAccuracy(char *buffer)
 	return accuracy;
 }
 
+#if VERSION >= VERSION_JPN_FINAL
+bool frGetMinAccuracy(char *buffer1, f32 accuracy, char *buffer2)
+{
+	sprintf(buffer1, "%s", langGet(L_MISC_419));
+	sprintf(buffer2, "%d%%\n", g_FrData.goalaccuracy);
+
+	return accuracy < g_FrData.goalaccuracy;
+}
+#else
 bool frGetMinAccuracy(char *buffer, f32 accuracy)
 {
 	// "MIN ACCURACY:"
@@ -3080,6 +3158,7 @@ bool frGetMinAccuracy(char *buffer, f32 accuracy)
 
 	return accuracy < g_FrData.goalaccuracy;
 }
+#endif
 
 /**
  * Formats either the time taken or time limit into buffer, and returns true if
@@ -3122,6 +3201,43 @@ bool frFormatTime(char *buffer)
 	return failed;
 }
 
+#if VERSION >= VERSION_JPN_FINAL
+bool frGetHudMiddleSubtext(char *buffer1, char *buffer2)
+{
+	s32 secs;
+	s32 mins;
+
+	sprintf(buffer2, "");
+
+	if (g_FrData.timetaken < TICKS(-180)) {
+		sprintf(buffer1, "%s", langGet(L_MISC_420)); // "FIRE TO START"
+		return false;
+	}
+
+	if (g_FrData.timetaken < 0) {
+		sprintf(buffer1, "%s", langGet(L_MISC_421)); // "GET READY!"
+		return true;
+	}
+
+	if (g_FrData.timelimit == 255) {
+		return false;
+	}
+
+	secs = g_FrData.timelimit;
+	mins = 0;
+
+	if (secs >= 60) {
+		while (secs >= 60) {
+			secs -= 60;
+			mins++;
+		}
+	}
+
+	sprintf(buffer1, "%s", langGet(L_MISC_422)); // "LIMIT:"
+	sprintf(buffer2, "%02d:%02d\n", mins, secs);
+	return true;
+}
+#else
 bool frGetHudMiddleSubtext(char *buffer)
 {
 	s32 secs;
@@ -3154,7 +3270,61 @@ bool frGetHudMiddleSubtext(char *buffer)
 	sprintf(buffer, "%s %02d:%02d\n", langGet(L_MISC_422), mins, secs); // "LIMIT:"
 	return true;
 }
+#endif
 
+#if VERSION >= VERSION_JPN_FINAL
+bool frGetFeedback(char *scorebuffer, char *zonebuffer, char *extrabuffer)
+{
+	u32 texts[] = {
+		L_MISC_423, // "ZONE 3"
+		L_MISC_424, // "ZONE 2"
+		L_MISC_425, // "ZONE 1"
+		L_MISC_426, // "BULL'S-EYE"
+		L_MISC_427, // "EXPLODED"
+	};
+
+	sprintf(extrabuffer, "");
+
+	if (g_FrData.feedbackzone) {
+		g_FrData.feedbackttl -= g_Vars.lvupdate60;
+
+		if (g_FrData.feedbackttl <= 0) {
+			g_FrData.feedbackzone = 0;
+			g_FrData.feedbackttl = 0;
+			return false;
+		}
+
+		if (g_FrData.feedbackzone == FRZONE_EXPLODE) {
+			sprintf(scorebuffer, "010\n");
+		} else {
+			sprintf(scorebuffer, "%03d\n", g_FrData.feedbackzone);
+		}
+
+		switch (g_FrData.feedbackzone) {
+		case FRZONE_RING3:
+			sprintf(zonebuffer, "%s", langGet(texts[0]));
+			return true;
+		case FRZONE_RING2:
+			sprintf(zonebuffer, "%s", langGet(texts[1]));
+			return true;
+		case FRZONE_RING1:
+			sprintf(zonebuffer, "%s", langGet(texts[2]));
+			return true;
+		case FRZONE_BULLSEYE:
+			sprintf(zonebuffer, "%s", langGet(texts[3]));
+			return true;
+		case FRZONE_EXPLODE:
+			sprintf(zonebuffer, "%s", langGet(texts[4]));
+			return true;
+		}
+
+		sprintf(zonebuffer, "\n");
+		return true;
+	}
+
+	return false;
+}
+#else
 bool frGetFeedback(char *scorebuffer, char *zonebuffer)
 {
 	u32 texts[] = {
@@ -3204,8 +3374,13 @@ bool frGetFeedback(char *scorebuffer, char *zonebuffer)
 
 	return false;
 }
+#endif
 
+#if VERSION >= VERSION_JPN_FINAL
+Gfx *frRenderHudElement(Gfx *gdl, s32 x, s32 y, char *string1, char *string2, char *string3, u32 colour, u8 alpha)
+#else
 Gfx *frRenderHudElement(Gfx *gdl, s32 x, s32 y, char *string1, char *string2, u32 colour, u8 alpha)
+#endif
 {
 	s32 textheight;
 	s32 textwidth;
@@ -3237,6 +3412,78 @@ Gfx *frRenderHudElement(Gfx *gdl, s32 x, s32 y, char *string1, char *string2, u3
 	return gdl;
 }
 
+#if VERSION >= VERSION_JPN_FINAL
+Gfx *frRenderHud(Gfx *gdl)
+{
+	char string1[128];
+	char string2[128];
+	char string3[128];
+	bool red;
+	bool exists;
+	s32 alpha = 0xa0;
+	f32 mult;
+
+	if (viGetViewWidth() > 400) {
+		mult = 1.7f;
+	} else {
+		mult = 1;
+	}
+
+	if (!g_FrIsValidWeapon && g_FrData.menucountdown <= 0) {
+		return gdl;
+	}
+
+	if (g_FrData.menucountdown != 0) {
+		alpha = (f32)(g_FrData.menucountdown * 160) / TICKS(60.0f);
+	}
+
+	gdl = text0f153628(gdl);
+
+	// Time
+	red = frFormatTime(string1);
+	exists = frGetHudMiddleSubtext(string2, string3);
+
+	gdl = frRenderHudElement(gdl, viGetViewWidth() >> 1, viGetViewTop() + 12,
+			string1,
+			exists ? string2 : NULL,
+			exists ? string3 : NULL,
+			red ? 0xff4444ff : 0x00ff00a0,
+			alpha);
+
+	// Score
+	frGetScoreValue(string1);
+	frGetGoalScoreText(string2, string3);
+	gdl = frRenderHudElement(gdl, viGetViewLeft() + 65.0f * mult, viGetViewTop() + 12,
+			string1, string2, string3, 0x00ff00a0, alpha);
+
+	// Feedback
+	if (frGetFeedback(string1, string2, string3)) {
+		gdl = frRenderHudElement(gdl,viGetViewLeft() + 65.0f * mult, viGetViewTop() + 48,
+				string1, string2, string3, 0x00ff00a0, alpha);
+	}
+
+	if (g_FrData.goalaccuracy > 0) {
+		red = frGetMinAccuracy(string2, frGetAccuracy(string1), string3);
+
+		gdl = frRenderHudElement(gdl, viGetViewLeft() + viGetViewWidth() - 70.0f * mult, viGetViewTop() + 12,
+				string1, string2, string3,
+				red ? 0xff4444ff : 0x00ff00a0,
+				alpha);
+	} else if (g_FrData.goaltargets != 255) {
+		frGetTargetsDestroyedValue(string1);
+		frGetGoalTargetsText(string2, string3);
+
+		if (mult == 2) {
+			mult = 2.4;
+		}
+
+		gdl = frRenderHudElement(gdl, viGetViewLeft() + viGetViewWidth() - 70.0f * mult, viGetViewTop() + 12,
+				string1, string2, string3, 0x00ff00a0, alpha);
+	}
+
+	return text0f153780(gdl);
+}
+#else
 Gfx *frRenderHud(Gfx *gdl)
 {
 	char string1[128];
@@ -3246,8 +3493,8 @@ Gfx *frRenderHud(Gfx *gdl)
 	s32 alpha = 0xa0;
 	f32 mult;
 
-	if (viGetViewWidth() > 400) {
-		mult = 2;
+	if (viGetViewWidth() > (VERSION >= VERSION_PAL_FINAL ? 330 : 400)) {
+		mult = VERSION >= VERSION_PAL_FINAL ? 1.5f : 2;
 	} else {
 		mult = 1;
 	}
@@ -3304,3 +3551,4 @@ Gfx *frRenderHud(Gfx *gdl)
 
 	return text0f153780(gdl);
 }
+#endif

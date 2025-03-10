@@ -24,7 +24,6 @@
 #include "game/mplayer/mplayer.h"
 #include "game/pad.h"
 #include "game/propobj.h"
-#include "game/weaponutils.h"
 #include "bss.h"
 #include "lib/args.h"
 #include "lib/memp.h"
@@ -613,48 +612,69 @@ void setupCreateObject(struct defaultobj *obj, s32 cmdindex)
  */
 void setupPlaceWeapon(struct weaponobj *weapon, s32 cmdindex)
 {
-	struct weaponobj* newweapon = weapon;
-
-	u16 rank = weaponGetRank(weapon->weaponnum);
-	struct weapon *weapondef = weaponMatchEnum(rank);
-	rank = weapondef->rank;
-
-	newweapon->gset.weaponnum = rank;
-
-
-	if (newweapon->base.flags & OBJFLAG_ASSIGNEDTOCHR) {
-		struct chrdata *chr = chrFindByLiteralId(newweapon->base.pad);
+	if (weapon->base.flags & OBJFLAG_ASSIGNEDTOCHR) {
+		struct chrdata *chr = chrFindByLiteralId(weapon->base.pad);
 
 		if (chr && chr->prop && chr->model) {
-			if (cheatIsActive(CHEAT_MARQUIS)) 
-			{
+			if (cheatIsActive(CHEAT_MARQUIS)) {
 				// NTSC 1.0 and newer simplifies the Marquis logic
-				newweapon->base.flags &= ~OBJFLAG_DEACTIVATED;
-				newweapon->base.flags |= OBJFLAG_WEAPON_AICANNOTUSE;
-				modelmgrLoadProjectileModeldefs(weaponGetRank(newweapon->gset.weaponnum));
-				func0f08b25c(newweapon, chr);
-			} 
-			else 
-			{
-				if (cheatIsActive(CHEAT_ENEMYROCKETS))
-				{
-					if((newweapon->gset.weaponnum >= weaponMatchEnum(WEAPON_FALCON2)->rank && newweapon->gset.weaponnum <= weaponMatchEnum(WEAPON_REMOTEMINE)->rank))
-					{
-						if(!((newweapon->gset.weaponnum == weaponMatchEnum(WEAPON_K7AVENGER)->rank) && (g_Vars.stagenum == STAGE_INVESTIGATION) && (lvGetDifficulty() == DIFF_PA || lvGetDifficulty() == DIFF_PD ))) 
-						{
-							newweapon->gset.weaponnum = weaponMatchEnum(WEAPON_ROCKETLAUNCHER)->rank;
-                            newweapon->base.modelnum = MODEL_CHRDYROCKET;
-                            newweapon->base.extrascale = 256;
+				weapon->base.flags &= ~OBJFLAG_DEACTIVATED;
+				weapon->base.flags |= OBJFLAG_WEAPON_AICANNOTUSE;
+				modelmgrLoadProjectileModeldefs(weapon->weaponnum);
+				func0f08b25c(weapon, chr);
+			} else {
+				if (cheatIsActive(CHEAT_ENEMYROCKETS)) {
+					switch (weapon->weaponnum) {
+					case WEAPON_FALCON2:
+					case WEAPON_FALCON2_SILENCER:
+					case WEAPON_FALCON2_SCOPE:
+					//case WEAPON_FALCON2_SANDS:
+					case WEAPON_MAGSEC4:
+					case WEAPON_MAULER:
+					case WEAPON_PHOENIX:
+					case WEAPON_DY357MAGNUM:
+					case WEAPON_DY357LX:
+					case WEAPON_CMP150:
+					case WEAPON_CYCLONE:
+					case WEAPON_CALLISTO:
+					case WEAPON_RCP120:
+					case WEAPON_LAPTOPGUN:
+					case WEAPON_DRAGON:
+					case WEAPON_AR34:
+					case WEAPON_SUPERDRAGON:
+					case WEAPON_SHOTGUN:
+					case WEAPON_REAPER:
+					case WEAPON_SNIPERRIFLE:
+					case WEAPON_FARSIGHT:
+					case WEAPON_DEVASTATOR:
+					case WEAPON_ROCKETLAUNCHER:
+					case WEAPON_SLAYER:
+					case WEAPON_COMBATKNIFE:
+					case WEAPON_CROSSBOW:
+					case WEAPON_TRANQUILIZER:
+					case WEAPON_GRENADE:
+					case WEAPON_NBOMB:
+					case WEAPON_TIMEDMINE:
+					case WEAPON_PROXIMITYMINE:
+					case WEAPON_REMOTEMINE:
+						weapon->weaponnum = WEAPON_ROCKETLAUNCHER;
+						weapon->base.modelnum = MODEL_CHRDYROCKET;
+						weapon->base.extrascale = 256;
+						break;
+					case WEAPON_K7AVENGER:
+						// Don't replace the K7 guard's weapon in Investigation
+						// because it would make an objective impossible.
+						// @bug: It's still replaced on PD mode difficulty.
+						if (g_Vars.stagenum != STAGE_INVESTIGATION || lvGetDifficulty() != DIFF_PA) {
+							weapon->weaponnum = WEAPON_ROCKETLAUNCHER;
+							weapon->base.modelnum = MODEL_CHRDYROCKET;
+							weapon->base.extrascale = 256;
 						}
-						else
-						{
-                            newweapon->gset.weaponnum = weaponMatchEnum(WEAPON_K7AVENGER)->rank;
-                            newweapon->base.modelnum = MODEL_CHRAVENGER;
-						}
-
+						break;
 					}
 				}
-				modelmgrLoadProjectileModeldefs(weaponGetRank(weapon->weaponnum));
+
+				modelmgrLoadProjectileModeldefs(weapon->weaponnum);
 				func0f08b25c(weapon, chr);
 			}
 		}
@@ -707,7 +727,7 @@ void setupPlaceWeapon(struct weaponobj *weapon, s32 cmdindex)
 			}
 		}
 
-		if (weapon->weaponnum != weaponMatchEnum(WEAPON_NONE)->rank && createweapon) {
+		if (weapon->weaponnum != WEAPON_NONE && createweapon) {
 			modelmgrLoadProjectileModeldefs(weapon->weaponnum);
 			setupCreateObject(&weapon->base, cmdindex);
 		}
@@ -1552,7 +1572,11 @@ void setupCreateProps(s32 stagenum)
 					break;
 				case OBJTYPE_SHIELD:
 					if (withobjs) {
+#if VERSION >= VERSION_JPN_FINAL
 						if ((obj->flags2 & diffflag) == 0)
+#else
+						if ((obj->flags2 & diffflag) == 0 || g_Jpn)
+#endif
 						{
 							struct shieldobj *shield = (struct shieldobj *)obj;
 							shield->initialamount = *(s32 *)&shield->initialamount / 65536.0f;

@@ -448,14 +448,12 @@ void weaponPlayWhooshSound(s32 weaponnum, struct prop *prop)
 	s32 soundnum = -1;
 	f32 speed = 1;
 
-	u16 rank = weaponGetRank(weaponnum);
-
-	if (rank == weaponMatchEnum(WEAPON_TRANQUILIZER)->rank) {
+	if (weaponnum == WEAPON_TRANQUILIZER) {
 		soundnum = SFX_RELOAD_04FB;
 		speed = 2.78f;
-	} else if (rank == weaponMatchEnum(WEAPON_REAPER)->rank) {
+	} else if (weaponnum == WEAPON_REAPER) {
 		// empty
-	} else if (rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) {
+	} else if (weaponnum == WEAPON_COMBATKNIFE) {
 		soundnum = rngRandom() % 2 == 1 ? SFX_8060 : SFX_8061;
 		speed = 1.05f - RANDOMFRAC() * 0.2f;
 	} else {
@@ -497,14 +495,14 @@ void weaponPlayMeleeHitSound(s32 weaponnum, struct prop *prop)
 	f32 speed = 1;
 	struct sndstate *handle;
 
-	if (weaponGetRank(weaponnum) == weaponMatchEnum(WEAPON_UNARMED)->rank) { // Play one of two random punch sounds
+	if (weaponnum == WEAPON_UNARMED) { // Play one of two random punch sounds
 		soundnum = SFX_THUD_808F; 
 
 		if ((rngRandom() % 2) == 1) {
 			soundnum = SFX_THUD_8094;
 		}
 		speed = 1.0f - RANDOMFRAC() * 0.1f;
-	} else if (weaponGetRank(weaponnum) == weaponMatchEnum(WEAPON_TRANQUILIZER)->rank) { // Play the lethal injection sound
+	} else if (weaponnum == WEAPON_TRANQUILIZER) { // Play the lethal injection sound
 		soundnum = SFX_RELOAD_04FB;
 		speed = 2.78f;
 	} else {
@@ -616,7 +614,7 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 		}
 	}
 
-	if (weaponGetRank(shotdata.gset.weaponnum) == weaponMatchEnum(WEAPON_LASER)->rank && shotdata.gset.weaponfunc == FUNC_SECONDARY) {
+	if (shotdata.gset.weaponnum == WEAPON_LASER && shotdata.gset.weaponfunc == FUNC_SECONDARY) {
 		laserstream = true;
 	}
 
@@ -656,7 +654,7 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 	portal00018148(&playerprop->pos, &shotdata.gunpos3d, playerprop->rooms, spc8, 0, 0);
 	portal00018148(&shotdata.gunpos3d, &hitpos, spc8, spb8, rooms, 30);
 
-	if (weaponGetRank(shotdata.gset.weaponnum) != weaponMatchEnum(WEAPON_FARSIGHT)->rank || g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
+	if (shotdata.gset.weaponnum != WEAPON_FARSIGHT || g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
 		roomsptr = rooms;
 
 		while (*roomsptr != -1) {
@@ -692,7 +690,7 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 		}
 	}
 
-	if (hitbg && weaponGetRank(shotdata.gset.weaponnum) != weaponMatchEnum(WEAPON_FARSIGHT)->rank) {
+	if (hitbg && shotdata.gset.weaponnum != WEAPON_FARSIGHT) {
 		mtx4TransformVec(camGetWorldToScreenMtxf(), &sp694.pos, &sp658);
 
 		if (shotdata.distance > -sp658.z) {
@@ -805,12 +803,11 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 
 			bgunSetHitPos(&sp694.pos);
 
-			//TODO: investigate adding scorch marks for the laser
 			if (surfacetype->numwallhittexes > 0 && (!func || (func->type & 0xff) != INVENTORYFUNCTYPE_MELEE)) {
-				if (weaponGetRank(shotdata.gset.weaponnum) != weaponMatchEnum(WEAPON_UNARMED)->rank
-						&& weaponGetRank(shotdata.gset.weaponnum) != weaponMatchEnum(WEAPON_LASER)->rank
-						&& weaponGetRank(shotdata.gset.weaponnum) != weaponMatchEnum(WEAPON_TRANQUILIZER)->rank
-						&& weaponGetRank(shotdata.gset.weaponnum) != weaponMatchEnum(WEAPON_FARSIGHT)->rank) {
+				if (shotdata.gset.weaponnum != WEAPON_UNARMED
+						&& shotdata.gset.weaponnum != WEAPON_LASER
+						&& shotdata.gset.weaponnum != WEAPON_TRANQUILIZER
+						&& shotdata.gset.weaponnum != WEAPON_FARSIGHT) {
 					texnum = rngRandom() % surfacetype->numwallhittexes;
 					texnum = surfacetype->wallhittexes[texnum];
 
@@ -847,26 +844,10 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 								&& sp694.pos.z > -32000 && sp694.pos.z < 32000) {
 							sparktype = SPARKTYPE_DEFAULT;
 
-							u16 rank = weaponGetRank(shotdata.gset.weaponnum);
 							if (chrIsUsingPaintball(g_Vars.currentplayer->prop->chr)) {
 								sparktype = SPARKTYPE_PAINT;
-							} else if (rank == weaponMatchEnum(WEAPON_FARSIGHT)->rank || rank == weaponMatchEnum(WEAPON_CYCLONE)->rank || rank == weaponMatchEnum(WEAPON_MAULER)->rank || 
-									   rank == weaponMatchEnum(WEAPON_PHOENIX)->rank || rank == weaponMatchEnum(WEAPON_CALLISTO)->rank || rank == weaponMatchEnum(WEAPON_REAPER)->rank || rank == weaponMatchEnum(WEAPON_TRANQUILIZER)->rank) {
-								if(rank == weaponMatchEnum(WEAPON_FARSIGHT)->rank){
-									sparktype = SPARKTYPE_BGHIT_ORANGE;
-								}
-								else if(rank == weaponMatchEnum(WEAPON_CYCLONE)->rank) {
-									sparktype = SPARKTYPE_ELECTRICAL;
-								}
-								else if(rank == weaponMatchEnum(WEAPON_MAULER)->rank || 
-								        rank == weaponMatchEnum(WEAPON_PHOENIX)->rank || rank == weaponMatchEnum(WEAPON_CALLISTO)->rank || rank == weaponMatchEnum(WEAPON_REAPER)->rank) {
-									sparktype = SPARKTYPE_BGHIT_GREEN;
-								}
-								else if(rank == weaponMatchEnum(WEAPON_TRANQUILIZER)->rank) {
-									sparktype = SPARKTYPE_BGHIT_TRANQULIZER;
-								}
-
-								/*switch (shotdata.gset.weaponnum) {
+							} else {
+								switch (shotdata.gset.weaponnum) {
 								case WEAPON_FARSIGHT:
 									sparktype = SPARKTYPE_BGHIT_ORANGE;
 									break;
@@ -882,7 +863,7 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 								case WEAPON_TRANQUILIZER:
 									sparktype = SPARKTYPE_BGHIT_TRANQULIZER;
 									break;
-								}*/
+								}
 
 								texnum = g_Textures[sp694.texturenum].surfacetype;
 
@@ -917,7 +898,7 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 		if (hitaprop || hitbg) {
 			weaponPlayMeleeHitSound(shotdata.gset.weaponnum, g_Vars.currentplayer->prop);
 
-			if (weaponGetRank(shotdata.gset.weaponnum) != weaponMatchEnum(WEAPON_UNARMED)->rank && weaponGetRank(shotdata.gset.weaponnum) != weaponMatchEnum(WEAPON_TRANQUILIZER)->rank) {
+			if (shotdata.gset.weaponnum != WEAPON_UNARMED && shotdata.gset.weaponnum != WEAPON_TRANQUILIZER) {
 				if (hitaprop) {
 					sparksCreate(shotdata.hits[hitindex].prop->rooms[0], NULL, &shotdata.hits[hitindex].pos, &shotdata.gundir3d, &shotdata.hits[hitindex].dir, SPARKTYPE_DEFAULT);
 				} else {
@@ -1005,7 +986,7 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 	shotdata.gset.weaponnum = WEAPON_FALCON2;
 	shotdata.gset.weaponfunc = 0;
 	shotdata.gset.unk063a = 0;
-	shotdata.gset.gsetrank = 0;
+	shotdata.gset.unk0639 = 0;
 
 	shotdata.penetration = 1;
 	shotdata.distance = 999999999.f;
@@ -1428,7 +1409,7 @@ void handTickAttack(s32 handnum)
 				chrUncloakTemporarily(g_Vars.currentplayer->prop->chr);
 				mpstatsIncrementPlayerShotCount2(&gset, 0);
 
-				if (weaponGetRank(weaponnum) == weaponMatchEnum(WEAPON_SHOTGUN)->rank) {
+				if (weaponnum == WEAPON_SHOTGUN) {
 					shotCreate(handnum, true, true, 1, true);
 					shotCreate(handnum, true, true, 1, true);
 					shotCreate(handnum, true, true, 1, true);
@@ -2627,10 +2608,10 @@ void farsightChooseTarget(void)
 	struct prop *besttarget = NULL;
 	f32 bestthing = 1;
 	f32 bestdist = -1;
-	s32 weaponnum = weaponGetRank(bgunGetWeaponNum(HAND_RIGHT));
+	s32 weaponnum = bgunGetWeaponNum(HAND_RIGHT);
 	s32 i;
 
-	if (weaponnum == weaponMatchEnum(WEAPON_FARSIGHT)->rank) {
+	if (weaponnum == WEAPON_FARSIGHT) {
 		s32 numchrs = chrsGetNumSlots();
 
 		for (i = numchrs - 1; i >= 0; i--) {
@@ -2698,7 +2679,7 @@ void autoaimTick(void)
 		farsightChooseTarget();
 	}
 
-	if (weaponGetRank(bgunGetWeaponNum(HAND_RIGHT)) == weaponMatchEnum(WEAPON_CMP150)->rank
+	if (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_CMP150
 			&& g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY) {
 		iscmpsec = true;
 	}

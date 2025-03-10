@@ -15,7 +15,6 @@
 #include "game/lang.h"
 #include "game/options.h"
 #include "game/propobj.h"
-#include "game/weaponutils.h"
 #include "bss.h"
 #include "lib/joy.h"
 #include "lib/main.h"
@@ -623,7 +622,7 @@ bool eyespyTryLaunch(void)
 		propSetPerimEnabled(g_Vars.currentplayer->eyespy->prop, false);
 
 		// "Not enough room to launch "
-		sprintf(text, "%s%s", langGet(L_MISC_218), langGet(weaponMatchEnum(WEAPON_EYESPY)->name));
+		sprintf(text, "%s%s", langGet(L_MISC_218), bgunGetName(WEAPON_EYESPY));
 		hudmsgCreate(text, HUDMSGTYPE_DEFAULT);
 		launched = false;
 	} else {
@@ -864,7 +863,7 @@ void eyespyProcessInput(bool allowbuttons)
 
 	roomsCopy(g_Vars.currentplayer->eyespy->prop->rooms, prevrooms);
 
-	if (!invHasSingleWeaponIncAllGuns(weaponMatchEnum(WEAPON_EYESPY)->rank)) {
+	if (!invHasSingleWeaponIncAllGuns(WEAPON_EYESPY)) {
 		g_Vars.currentplayer->eyespy->deployed = false;
 		g_Vars.currentplayer->eyespy->held = true;
 		g_Vars.currentplayer->eyespy->active = false;
@@ -1184,8 +1183,8 @@ void eyespyProcessInput(bool allowbuttons)
 		chr->chrflags |= CHRCFLAG_HIDDEN;
 		chr->chrflags |= CHRCFLAG_INVINCIBLE;
 
-		weaponPlayPickupSound(weaponMatchEnum(WEAPON_EYESPY)->rank);
-		currentPlayerQueuePickupWeaponHudmsg(weaponMatchEnum(WEAPON_EYESPY)->rank, false);
+		weaponPlayPickupSound(WEAPON_EYESPY);
+		currentPlayerQueuePickupWeaponHudmsg(WEAPON_EYESPY, false);
 		psStopSound(g_Vars.currentplayer->eyespy->prop, PSTYPE_GENERAL, 0xffff);
 		chrClearReferences(g_Vars.currentplayer->eyespy->prop - g_Vars.props);
 	}

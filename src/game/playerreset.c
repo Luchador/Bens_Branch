@@ -5,12 +5,10 @@
 #include "game/cheats.h"
 #include "game/inv.h"
 #include "game/playerreset.h"
-#include "game/weaponutils.h"
 #include "game/chr.h"
 #include "game/body.h"
 #include "game/prop.h"
 #include "game/setuputils.h"
-#include "game/debug.h"
 #include "game/bondgun.h"
 #include "game/player.h"
 #include "game/inv.h"
@@ -90,8 +88,8 @@ void playerInitEyespy(void)
 
 				if (stageGetIndex(g_Vars.stagenum) == STAGEINDEX_AIRBASE) {
 					g_Vars.currentplayer->eyespy->mode = EYESPYMODE_DRUGSPY;
-					g_Weapons[weaponMatchEnum(WEAPON_EYESPY)->rank]->name = L_GUN_061; // "DrugSpy"
-					g_Weapons[weaponMatchEnum(WEAPON_EYESPY)->rank]->shortname = L_GUN_061; // "DrugSpy"
+					g_Weapons[WEAPON_EYESPY]->name = L_GUN_061; // "DrugSpy"
+					g_Weapons[WEAPON_EYESPY]->shortname = L_GUN_061; // "DrugSpy"
 				} else if (stageGetIndex(g_Vars.stagenum) == STAGEINDEX_MBR || stageGetIndex(g_Vars.stagenum) == STAGEINDEX_CHICAGO) {
 					g_Vars.currentplayer->eyespy->mode = EYESPYMODE_BOMBSPY;
 				} else {
@@ -180,12 +178,11 @@ void playerReset(void)
 						modelmgrLoadProjectileModeldefs(cmd->param2);
 						invGiveDoubleWeapon(cmd->param1, cmd->param2);
 					} else {
-						invGiveSingleWeapon(weaponMatchEnum(cmd->param1)->rank); // Give player their starting weapons
+						invGiveSingleWeapon(cmd->param1);
 					}
 
 					if (!hasdefaultweapon) {
 						g_DefaultWeapons[HAND_RIGHT] = cmd->param1;
-						
 
 						if (cmd->param2 >= 0) {
 							g_DefaultWeapons[HAND_LEFT] = cmd->param2;
@@ -194,7 +191,7 @@ void playerReset(void)
 						hasdefaultweapon = true;
 					}
 
-					if (cmd->param1 == weaponMatchEnum(WEAPON_EYESPY)->rank) {
+					if (cmd->param1 == WEAPON_EYESPY) {
 						haseyespy = true;
 					}
 				}
@@ -243,58 +240,58 @@ void playerReset(void)
 		}
 	}
 
-	invGiveSingleWeapon(weaponMatchEnum(WEAPON_UNARMED)->rank);
+	invGiveSingleWeapon(WEAPON_UNARMED);
 
 	if (cheatIsActive(CHEAT_TRENTSMAGNUM)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_DY357LX)->rank);
+		invGiveSingleWeapon(WEAPON_DY357LX);
 		bgunSetAmmoQuantity(AMMOTYPE_MAGNUM, 80);
 	}
 
 	if (cheatIsActive(CHEAT_FARSIGHT)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_FARSIGHT)->rank);
+		invGiveSingleWeapon(WEAPON_FARSIGHT);
 		bgunSetAmmoQuantity(AMMOTYPE_FARSIGHT, 80);
 	}
 
 	if (cheatIsActive(CHEAT_CLOAKINGDEVICE)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_CLOAKINGDEVICE)->rank);
+		invGiveSingleWeapon(WEAPON_CLOAKINGDEVICE);
 		bgunSetAmmoQuantity(AMMOTYPE_CLOAK, 7200);
 	}
 
 	if (cheatIsActive(CHEAT_PERFECTDARKNESS)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_NIGHTVISION)->rank);
+		invGiveSingleWeapon(WEAPON_NIGHTVISION);
 	}
 
 	if (cheatIsActive(CHEAT_RTRACKER)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_RTRACKER)->rank);
+		invGiveSingleWeapon(WEAPON_RTRACKER);
 	}
 
 	if (cheatIsActive(CHEAT_ROCKETLAUNCHER)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_ROCKETLAUNCHER)->rank);
+		invGiveSingleWeapon(WEAPON_ROCKETLAUNCHER);
 		bgunSetAmmoQuantity(AMMOTYPE_ROCKET, 10);
 	}
 
 	if (cheatIsActive(CHEAT_SNIPERRIFLE)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_SNIPERRIFLE)->rank);
+		invGiveSingleWeapon(WEAPON_SNIPERRIFLE);
 		bgunSetAmmoQuantity(AMMOTYPE_RIFLE, 200);
 	}
 
 	if (cheatIsActive(CHEAT_XRAYSCANNER)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_XRAYSCANNER)->rank);
+		invGiveSingleWeapon(WEAPON_XRAYSCANNER);
 	}
 
 	if (cheatIsActive(CHEAT_SUPERDRAGON)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_SUPERDRAGON)->rank);
+		invGiveSingleWeapon(WEAPON_SUPERDRAGON);
 		bgunSetAmmoQuantity(AMMOTYPE_RIFLE, 200);
 		bgunSetAmmoQuantity(AMMOTYPE_DEVASTATOR, 20);
 	}
 
 	if (cheatIsActive(CHEAT_LAPTOPGUN)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_LAPTOPGUN)->rank);
+		invGiveSingleWeapon(WEAPON_LAPTOPGUN);
 		bgunSetAmmoQuantity(AMMOTYPE_SMG, 200);
 	}
 
 	if (cheatIsActive(CHEAT_PHOENIX)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_PHOENIX)->rank);
+		invGiveSingleWeapon(WEAPON_PHOENIX);
 		bgunSetAmmoQuantity(AMMOTYPE_PISTOL, 200);
 	}
 
@@ -302,52 +299,52 @@ void playerReset(void)
 		bgunSetAmmoQuantity(AMMOTYPE_PSYCHOSIS, 4);
 
 		if (cheatIsActive(CHEAT_PSYCHOSISGUN)) {
-			invGiveSingleWeapon(weaponMatchEnum(WEAPON_PSYCHOSISGUN)->rank);
+			invGiveSingleWeapon(WEAPON_PSYCHOSISGUN);
 		}
 	}
 
 	if (cheatIsActive(CHEAT_PP9I)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_PP9I)->rank);
+		invGiveSingleWeapon(WEAPON_PP9I);
 		bgunSetAmmoQuantity(AMMOTYPE_PISTOL, 200);
 	}
 
 	if (cheatIsActive(CHEAT_CC13)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_CC13)->rank);
+		invGiveSingleWeapon(WEAPON_CC13);
 		bgunSetAmmoQuantity(AMMOTYPE_PISTOL, 200);
 	}
 
 	if (cheatIsActive(CHEAT_KL01313)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_KL01313)->rank);
+		invGiveSingleWeapon(WEAPON_KL01313);
 		bgunSetAmmoQuantity(AMMOTYPE_SMG, 200);
 	}
 
 	if (cheatIsActive(CHEAT_KF7SPECIAL)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_KF7SPECIAL)->rank);
+		invGiveSingleWeapon(WEAPON_KF7SPECIAL);
 		bgunSetAmmoQuantity(AMMOTYPE_RIFLE, 200);
 	}
 
 	if (cheatIsActive(CHEAT_ZZT)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_ZZT)->rank);
+		invGiveSingleWeapon(WEAPON_ZZT);
 		bgunSetAmmoQuantity(AMMOTYPE_SMG, 200);
 	}
 
 	if (cheatIsActive(CHEAT_DMC)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_DMC)->rank);
+		invGiveSingleWeapon(WEAPON_DMC);
 		bgunSetAmmoQuantity(AMMOTYPE_SMG, 200);
 	}
 
 	if (cheatIsActive(CHEAT_AR53)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_AR53)->rank);
+		invGiveSingleWeapon(WEAPON_AR53);
 		bgunSetAmmoQuantity(AMMOTYPE_RIFLE, 200);
 	}
 
 	if (cheatIsActive(CHEAT_RCP45)) {
-		invGiveSingleWeapon(weaponMatchEnum(WEAPON_RCP45)->rank);
+		invGiveSingleWeapon(WEAPON_RCP45);
 		bgunSetAmmoQuantity(AMMOTYPE_SMG, 200);
 	}
 
 	if (!hasdefaultweapon) {
-		g_DefaultWeapons[HAND_RIGHT] = weaponMatchEnum(WEAPON_UNARMED)->rank;
+		g_DefaultWeapons[HAND_RIGHT] = WEAPON_UNARMED;
 	}
 
 	g_Vars.currentplayer->prop = propAllocate();
@@ -439,7 +436,7 @@ void playerReset(void)
 	if (g_Vars.normmplayerisrunning) {
 		playersBeginMpSwirl();
 	} else {
-		playerSetup();
+		player0f0b9a20();
 	}
 
 	g_NumDeathAnimations = 0;

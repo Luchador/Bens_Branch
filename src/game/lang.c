@@ -54,10 +54,21 @@
  * relevant offsets within that buffer.
  */
 
+#if VERSION >= VERSION_PAL_BETA
+bool g_Jpn = VERSION == VERSION_JPN_FINAL ? true : false;
+u8 *g_LangBuffer = NULL;
+u8 *g_LangBufferPos = NULL;
+s32 g_LangBufferSize = 0;
+uintptr_t *g_LangBanks[69];
+struct jpncharpixels *g_JpnCharCachePixels;
+struct jpncacheitem *g_JpnCacheCacheItems;
+s32 g_LanguageId = LANGUAGE_NTSC_EN;
+#else
 uintptr_t *g_LangBanks[69];
 struct jpncharpixels *g_JpnCharCachePixels;
 struct jpncacheitem *g_JpnCacheCacheItems;
 bool g_Jpn = false;
+#endif
 
 u16 g_LangFiles[] = {
 	/* 0*/ 0,
@@ -217,12 +228,22 @@ struct jpncharpixels *langGetJpnCharPixels(s32 codepoint)
 	s32 freeindexmulti = -1;
 	bool multibyte = false;
 
+#if VERSION == VERSION_JPN_FINAL
+	static u32 tload = 0;
+	static u32 tmul = 8;
+#endif
+
 	if (codepoint & 0x2000) {
 		multibyte = true;
 	}
 
+#if VERSION == VERSION_JPN_FINAL
+#define SHIFTAMOUNT 0
+#define TMUL tmul
+#else
 #define SHIFTAMOUNT 1
 #define TMUL 8
+#endif
 
 	for (i = 0; i < MAX_JPN_CACHE_ITEMS(); i++) {
 		if (!multibyte && (codepoint >> SHIFTAMOUNT) == g_JpnCacheCacheItems[i].codepoint) {
@@ -257,14 +278,44 @@ struct jpncharpixels *langGetJpnCharPixels(s32 codepoint)
 		}
 	}
 
+#if VERSION == VERSION_JPN_FINAL
+	if (!multibyte && freeindexsingle >= 0) {
+		g_JpnCacheCacheItems[freeindexsingle].ttl = 2;
+		g_JpnCacheCacheItems[freeindexsingle].codepoint = codepoint;
+
+		dmaExec((u8 *) (freeindexsingle * (TMUL * 0x0c) + (romptr_t) &g_JpnCharCachePixels[0]),
+				(romptr_t) REF_SEG _fontjpnSegmentRomStart + ((codepoint * TMUL) * 0xc + TMUL * (24 * 0xc)),
+				TMUL * 0x0c);
+
+#ifndef PLATFORM_N64
+		// indicate that this is a new texture
+		videoFreeCachedTexture(&g_JpnCharCachePixels[TMUL * freeindexsingle]);
+#endif
+
+		return &g_JpnCharCachePixels[TMUL * freeindexsingle];
+	}
+
+	if (multibyte && freeindexmulti >= 0) {
+		g_JpnCacheCacheItems[freeindexmulti + 0].ttl = 2;
+		g_JpnCacheCacheItems[freeindexmulti + 1].ttl = 2;
+		g_JpnCacheCacheItems[freeindexmulti + 0].codepoint = codepoint;
+		g_JpnCacheCacheItems[freeindexmulti + 1].codepoint = codepoint;
+		return &g_JpnCharCachePixels[0];
+	} else {
+		var8009d370jf++;
+		return &g_JpnCharCachePixels[0];
+	}
+#else
 	if (!multibyte && freeindexsingle >= 0) {
 		g_JpnCacheCacheItems[freeindexsingle].ttl = 2;
 		g_JpnCacheCacheItems[freeindexsingle].codepoint = codepoint >> 1;
 
 		dmaExec(&g_JpnCharCachePixels[freeindexsingle * 8], (romptr_t) REF_SEG _fontjpnsingleSegmentRomStart + (codepoint >> SHIFTAMOUNT) * 0x60, 0x60);
 
+#ifndef PLATFORM_N64
 		// indicate that this is a new texture
 		videoFreeCachedTexture(&g_JpnCharCachePixels[freeindexsingle * 8]);
+#endif
 
 		return &g_JpnCharCachePixels[freeindexsingle * 8];
 	}
@@ -277,13 +328,16 @@ struct jpncharpixels *langGetJpnCharPixels(s32 codepoint)
 
 		dmaExec(&g_JpnCharCachePixels[freeindexmulti * 8], (romptr_t) REF_SEG _fontjpnmultiSegmentRomStart + ((codepoint & 0x1fff) >> SHIFTAMOUNT) * 0x80, 0x80);
 
+#ifndef PLATFORM_N64
 		// indicate that this is a new texture
 		videoFreeCachedTexture(&g_JpnCharCachePixels[freeindexmulti * 8]);
+#endif
 
 		return &g_JpnCharCachePixels[freeindexmulti * 8];
 	}
 
 	return &g_JpnCharCachePixels[0];
+#endif
 }
 
 /**
@@ -292,6 +346,10 @@ struct jpncharpixels *langGetJpnCharPixels(s32 codepoint)
  */
 s32 langGetFileNumOffset(void)
 {
+#if PAL
+	s32 offset = g_LanguageId;
+	return offset + 2;
+#else
 	s32 offset = 0;
 
 	if (g_Jpn) {
@@ -299,6 +357,7 @@ s32 langGetFileNumOffset(void)
 	}
 
 	return offset;
+#endif
 }
 
 s32 langGetFileId(s32 bank)
@@ -308,9 +367,23 @@ s32 langGetFileId(s32 bank)
 
 void langLoad(s32 bank)
 {
+#if VERSION >= VERSION_PAL_BETA
+	s32 len = fileGetInflatedSize(langGetFileId(bank), LOADTYPE_LANG);
+
+	if ((uintptr_t)g_LangBuffer + len + g_LangBufferSize - (uintptr_t)g_LangBufferPos >= 0) {
+		s32 len2 = (uintptr_t)g_LangBuffer + g_LangBufferSize - (uintptr_t)g_LangBufferPos;
+		len2 = len2 / 32 * 32;
+		g_LoadType = LOADTYPE_LANG;
+		g_LangBanks[bank] = fileLoadToAddr(langGetFileId(bank), FILELOADMETHOD_DEFAULT, (u8 *)g_LangBufferPos, len2);
+		g_LangBufferPos = (u8 *)(align32((uintptr_t)g_LangBufferPos + len));
+	} else {
+		CRASH();
+	}
+#else
 	s32 file_id = langGetFileId(bank);
 	g_LoadType = LOADTYPE_LANG;
 	g_LangBanks[bank] = fileLoadToNew(file_id, FILELOADMETHOD_DEFAULT, LOADTYPE_LANG);
+#endif
 }
 
 void langLoadToAddr(s32 bank, u8 *dst, s32 size)
@@ -350,3 +423,70 @@ char *langGet(s32 textid)
 
 	return (char *)addr;
 }
+
+#if VERSION >= VERSION_PAL_BETA
+void langReload(void)
+{
+	s32 i;
+
+	g_LangBufferPos = (u8 *) align32((uintptr_t) g_LangBuffer);
+
+	for (i = 0; i < ARRAYCOUNT(g_LangBanks); i++) {
+		if (g_LangBanks[i] != NULL) {
+			langLoad(i);
+		}
+	}
+}
+#endif
+
+#if VERSION >= VERSION_PAL_BETA
+void langSetEuropean(u32 arg0)
+{
+	u8 teams;
+	bool hasoptionslang = false;
+
+	if (g_LangBanks[LANGBANK_OPTIONS] != NULL) {
+		hasoptionslang = true;
+	}
+
+	if (hasoptionslang) {
+		mpGetTeamsWithDefaultName(&teams);
+	}
+
+	switch (arg0) {
+	case 0:
+		g_LanguageId = LANGUAGE_PAL_EN;
+		break;
+	case 1:
+		g_LanguageId = LANGUAGE_PAL_DE;
+		break;
+	case 2:
+		g_LanguageId = LANGUAGE_PAL_FR;
+		break;
+	case 3:
+		g_LanguageId = LANGUAGE_PAL_ES;
+		break;
+	case 4:
+		g_LanguageId = LANGUAGE_PAL_IT;
+		break;
+	case 5:
+		g_LanguageId = -2;
+		break;
+	}
+
+	langReload();
+
+	if (hasoptionslang) {
+		mpSetTeamNamesToDefault(teams);
+	}
+}
+#endif
+
+#if VERSION == VERSION_JPN_FINAL
+void langSetJpnEnabled(bool enable)
+{
+	g_Jpn = enable ? true : false;
+
+	langReload();
+}
+#endif

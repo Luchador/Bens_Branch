@@ -5,8 +5,6 @@
 #include "game/player.h"
 #include "game/playermgr.h"
 #include "game/propobj.h"
-#include "game/weaponutils.h"
-#include "game/debug.h"
 #include "bss.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
@@ -400,6 +398,10 @@ void playermgrAllocatePlayer(s32 index)
 	g_Vars.players[index]->slayerrocket = NULL;
 	g_Vars.players[index]->badrockettime = 0;
 
+#if VERSION >= VERSION_JPN_FINAL
+	g_Vars.players[index]->visionmode = VISIONMODE_NORMAL;
+#endif
+
 	g_Vars.players[index]->gunctrl.gunmemtype = 0;
 	g_Vars.players[index]->gunctrl.gunmem = NULL;
 	g_Vars.players[index]->gunctrl.gunmodeldef = NULL;
@@ -705,59 +707,6 @@ void playermgrSetAspectRatio(f32 aspect)
 s32 playermgrGetModelOfWeapon(s32 weapon)
 {
 	s32 model;
-	u16 rank = weaponGetRank(weapon);
-	
-	/*if(rank == weaponMatchEnum(WEAPON_NONE)->rank || rank == weaponMatchEnum(WEAPON_UNARMED)->rank) { model = -1; return model;}
-	if(rank == weaponMatchEnum(WEAPON_FALCON2)->rank) { model = MODEL_CHRFALCON2; return model;}
-	if(rank == weaponMatchEnum(WEAPON_MAGSEC4)->rank) { model = MODEL_CHRLEEGUN1; return model;}
-	if(rank == weaponMatchEnum(WEAPON_MAULER)->rank) { model = MODEL_CHRMAULER; return model;}
-	if(rank == weaponMatchEnum(WEAPON_DY357MAGNUM)->rank) { model = MODEL_CHRDY357; return model;}
-	if(rank == weaponMatchEnum(WEAPON_DY357LX)->rank) { model = MODEL_CHRDY357TRENT; return model;}
-	if(rank == weaponMatchEnum(WEAPON_PHOENIX)->rank) { model = MODEL_CHRMAIANPISTOL; return model;}
-	if(rank == weaponMatchEnum(WEAPON_FALCON2_SILENCER)->rank) { model = MODEL_CHRFALCON2SIL; return model;}
-	if(rank == weaponMatchEnum(WEAPON_FALCON2_SCOPE)->rank) { model = MODEL_CHRFALCON2SCOPE; return model;}
-	if(rank == weaponMatchEnum(WEAPON_FALCON2_SANDS)->rank) { model = MODEL_CHRFALCON2SCOPE; return model;}
-	if(rank == weaponMatchEnum(WEAPON_CMP150)->rank) { model = MODEL_CHRCMP150; return model;}
-	if(rank == weaponMatchEnum(WEAPON_AR34)->rank) { model = MODEL_CHRAR34; return model;}
-	if(rank == weaponMatchEnum(WEAPON_DRAGON)->rank) { model = MODEL_CHRDRAGON; return model;}
-	if(rank == weaponMatchEnum(WEAPON_SUPERDRAGON)->rank) { model = MODEL_CHRSUPERDRAGON; return model;}
-	if(rank == weaponMatchEnum(WEAPON_K7AVENGER)->rank) { model = MODEL_CHRAVENGER; return model;}
-	if(rank == weaponMatchEnum(WEAPON_CYCLONE)->rank) { model = MODEL_CHRCYCLONE; return model;}
-	if(rank == weaponMatchEnum(WEAPON_CALLISTO)->rank) { model = MODEL_CHRMAIANSMG; return model;}
-	if(rank == weaponMatchEnum(WEAPON_RCP120)->rank) { model = MODEL_CHRRCP120; return model;}
-	if(rank == weaponMatchEnum(WEAPON_LAPTOPGUN)->rank) { model = MODEL_CHRPCGUN; return model;}
-	if(rank == weaponMatchEnum(WEAPON_SHOTGUN)->rank) { model = MODEL_CHRSHOTGUN; return model;}
-	if(rank == weaponMatchEnum(WEAPON_REAPER)->rank) { model = MODEL_CHRSKMINIGUN; return model;}
-	if(rank == weaponMatchEnum(WEAPON_ROCKETLAUNCHER)->rank) { model = MODEL_CHRDYROCKET; return model;}
-	if(rank == weaponMatchEnum(WEAPON_DEVASTATOR)->rank) { model = MODEL_CHRDEVASTATOR; return model;}
-	if(rank == weaponMatchEnum(WEAPON_SLAYER)->rank) { model = MODEL_CHRSKROCKET; return model;}
-	if(rank == weaponMatchEnum(WEAPON_FARSIGHT)->rank) { model = MODEL_CHRZ2020; return model;}
-	if(rank == weaponMatchEnum(WEAPON_SNIPERRIFLE)->rank) { model = MODEL_CHRSNIPERRIFLE; return model;}
-	if(rank == weaponMatchEnum(WEAPON_CROSSBOW)->rank) { model = MODEL_CHRCROSSBOW; return model;}
-	if(rank == weaponMatchEnum(WEAPON_LASER)->rank) { model = MODEL_CHRLASER; return model;}
-	if(rank == weaponMatchEnum(WEAPON_COMBATKNIFE)->rank) { model = MODEL_CHRKNIFE; return model;}
-	if(rank == weaponMatchEnum(WEAPON_TRANQUILIZER)->rank) { model = MODEL_CHRDRUGGUN; return model;}
-	if(rank == weaponMatchEnum(WEAPON_PSYCHOSISGUN)->rank) { model = MODEL_CHRDRUGGUN; return model;}
-	if(rank == weaponMatchEnum(WEAPON_NBOMB)->rank) { model = MODEL_CHRNBOMB; return model;}
-	if(rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank) { model = MODEL_CHRREMOTEMINE; return model;}
-	if(rank == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank) { model = MODEL_CHRPROXIMITYMINE; return model;}
-	if(rank == weaponMatchEnum(WEAPON_TIMEDMINE)->rank) { model = MODEL_CHRTIMEDMINE; return model;}
-	if(rank == weaponMatchEnum(WEAPON_BRIEFCASE2)->rank) { model = MODEL_CHRBRIEFCASE; return model;}
-	if(rank == weaponMatchEnum(WEAPON_CLOAKINGDEVICE)->rank) { model = MODEL_CHRCLOAKER; return model;}
-	if(rank == weaponMatchEnum(WEAPON_PP9I)->rank) { model = MODEL_CHRWPPK; return model;}
-	if(rank == weaponMatchEnum(WEAPON_CC13)->rank) { model = MODEL_CHRTT33; return model;}
-	if(rank == weaponMatchEnum(WEAPON_KL01313)->rank) { model = MODEL_CHRSKORPION; return model;}
-	if(rank == weaponMatchEnum(WEAPON_KF7SPECIAL)->rank) { model = MODEL_CHRKALASH; return model;}
-	if(rank == weaponMatchEnum(WEAPON_ZZT)->rank) { model = MODEL_CHRUZI; return model;}
-	if(rank == weaponMatchEnum(WEAPON_DMC)->rank) { model = MODEL_CHRMP5K; return model;}
-	if(rank == weaponMatchEnum(WEAPON_AR53)->rank) { model = MODEL_CHRM16; return model;}
-	if(rank == weaponMatchEnum(WEAPON_RCP45)->rank) { model = MODEL_CHRFNP90; return model;}
-	if(rank == weaponMatchEnum(WEAPON_HAMMER)->rank) { model = MODEL_CHRLUMPHAMMER; return model;}
-	if(rank == weaponMatchEnum(WEAPON_SCREWDRIVER)->rank) { model = MODEL_CHRSONICSCREWER; return model;}
-	if(rank <= weaponMatchEnum(WEAPON_PSYCHOSISGUN)->rank) { model = MODEL_CHRSNIPERRIFLE; return model;}
-	else {
-		return -1;
-	}*/
 
 	switch (weapon) {
 	case WEAPON_NONE:
@@ -770,7 +719,7 @@ s32 playermgrGetModelOfWeapon(s32 weapon)
 	case WEAPON_PHOENIX:          model = MODEL_CHRMAIANPISTOL; break;
 	case WEAPON_FALCON2_SILENCER: model = MODEL_CHRFALCON2SIL; break;
 	case WEAPON_FALCON2_SCOPE:    model = MODEL_CHRFALCON2SCOPE; break;
-	case WEAPON_FALCON2_SANDS:    model = MODEL_CHRFALCON2SCOPE; break;
+	//case WEAPON_FALCON2_SANDS:    model = MODEL_CHRFALCON2SCOPE; break;
 	case WEAPON_CMP150:           model = MODEL_CHRCMP150; break;
 	case WEAPON_AR34:             model = MODEL_CHRAR34; break;
 	case WEAPON_DRAGON:           model = MODEL_CHRDRAGON; break;
@@ -815,7 +764,6 @@ s32 playermgrGetModelOfWeapon(s32 weapon)
 		break;
 	}
 
-	model = -1; // Nothing matched
 	return model;
 }
 
@@ -830,10 +778,9 @@ void playermgrCreateWeapon(s32 hand)
 
 	if (chr->weapons_held[hand] == NULL) {
 		s32 weaponnum = bgunGetWeaponNum(hand);
-		u16 rank = weaponGetRank(weaponnum);
-		s32 modelnum = playermgrGetModelOfWeapon(rank);
+		s32 modelnum = playermgrGetModelOfWeapon(weaponnum);
 
-		if (hand == HAND_LEFT && rank == weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
+		if (hand == HAND_LEFT && weaponnum == WEAPON_REMOTEMINE) {
 			modelnum = -1;
 		}
 
@@ -846,7 +793,7 @@ void playermgrCreateWeapon(s32 hand)
 				flags = OBJFLAG_WEAPON_LEFTHANDED;
 			}
 
-			weaponCreateForChr(chr, modelnum, rank, flags, NULL, NULL);
+			weaponCreateForChr(chr, modelnum, weaponnum, flags, NULL, NULL);
 		}
 	}
 }

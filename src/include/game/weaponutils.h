@@ -4,10 +4,8 @@
 #include "data.h"
 #include "types.h"
 
-struct weapon *weaponGetByRank(u16 rank);
+struct weapon *weaponGetRank(u16 rank);
 struct weapon *weaponMatchEnum(u16 weaponnum);
-s32 weaponGetHighestRank();
-u16 weaponGetRank(u16 rank);
 struct weapon *weaponFindById(s32 itemid);
 struct weaponfunc *weaponGetFunctionById(u32 weaponnum, u32 which);
 struct weaponfunc *gsetGetWeaponFunction2(struct gset *gset);
@@ -21,12 +19,13 @@ f32 func0f0b131c(s32 handnum);
 f32 currentPlayerGetGunZoomFov(void);
 void currentPlayerZoomOut(f32 fovpersec);
 void currentPlayerZoomIn(f32 fovpersec);
-bool weaponHasFlag(s32 rank, u32 flag);
+bool weaponHasFlag(s32 itemid, u32 flag);
 bool weaponHasAimFlag(s32 weaponnum, u32 flag);
 bool weaponHasAmmoFlag(s32 weaponnum, s32 funcnum, u32 flag);
 s32 currentPlayerGetDeviceState(s32 weaponnum);
 void currentPlayerSetDeviceActive(s32 weaponum, bool active);
 u16 weaponGetFileNum(s32 weaponnum);
+u16 weaponGetFileNum2(s32 weaponnum);
 void gsetPopulateFromCurrentPlayer(s32 handnum, struct gset *gset);
 struct inventory_ammo *gsetGetAmmoDefinition(struct gset *gset);
 u8 gsetGetSinglePenetration(struct gset *gset);

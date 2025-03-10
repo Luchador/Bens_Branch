@@ -490,7 +490,7 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 			}
 
 			// Ignore rockets that are in flight
-			if ((weaponobj->weaponnum == weaponMatchEnum(WEAPON_ROCKET)->rank || weaponobj->weaponnum == weaponMatchEnum(WEAPON_HOMINGROCKET)->rank)
+			if ((weaponobj->weaponnum == WEAPON_ROCKET || weaponobj->weaponnum == WEAPON_HOMINGROCKET)
 					&& (obj->hidden & OBJHFLAG_PROJECTILE)) {
 				return false;
 			}
@@ -594,14 +594,14 @@ s32 botIsObjCollectable(struct defaultobj *obj)
 	if (obj->type == OBJTYPE_WEAPON) {
 		struct weaponobj *weapon = (struct weaponobj *)obj;
 
-		if (weapon->weaponnum == weaponMatchEnum(WEAPON_NBOMB)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_GRENADE)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_GRENADEROUND)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_PROXIMITYMINE)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_REMOTEMINE)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_TIMEDMINE)->rank
-				|| weapon->weaponnum == weaponMatchEnum(WEAPON_SKROCKET)->rank
-				|| (weapon->weaponnum == weaponMatchEnum(WEAPON_DRAGON)->rank && weapon->gunfunc == FUNC_SECONDARY)) {
+		if (weapon->weaponnum == WEAPON_NBOMB
+				|| weapon->weaponnum == WEAPON_GRENADE
+				|| weapon->weaponnum == WEAPON_GRENADEROUND
+				|| weapon->weaponnum == WEAPON_PROXIMITYMINE
+				|| weapon->weaponnum == WEAPON_REMOTEMINE
+				|| weapon->weaponnum == WEAPON_TIMEDMINE
+				|| weapon->weaponnum == WEAPON_SKROCKET
+				|| (weapon->weaponnum == WEAPON_DRAGON && weapon->gunfunc == FUNC_SECONDARY)) {
 			return false;
 		}
 
@@ -2387,7 +2387,7 @@ void botTickUnpaused(struct chrdata *chr)
 		}
 
 		// The laser has unlimited ammo
-		if (weaponGetRank(aibot->weaponnum) == weaponMatchEnum(WEAPON_LASER)->rank) {
+		if (aibot->weaponnum == WEAPON_LASER) {
 			chr->aibot->loadedammo[HAND_RIGHT] = 999;
 		}
 
@@ -3343,7 +3343,7 @@ void botTickUnpaused(struct chrdata *chr)
 										case WEAPON_FALCON2:
 										case WEAPON_FALCON2_SILENCER:
 										case WEAPON_FALCON2_SCOPE:
-										case WEAPON_FALCON2_SANDS:
+										//case WEAPON_FALCON2_SANDS:
 										case WEAPON_DY357MAGNUM:
 										case WEAPON_DY357LX:
 										case WEAPON_COMBATKNIFE:
@@ -3361,7 +3361,7 @@ void botTickUnpaused(struct chrdata *chr)
 											break;
 										case WEAPON_TRANQUILIZER:
 											aibot->punchtimer60[0] = TICKS(60);
-											aibot->loadedammo[0] -= bgunGetMinClipQty(weaponMatchEnum(WEAPON_TRANQUILIZER)->rank, FUNC_SECONDARY);
+											aibot->loadedammo[0] -= bgunGetMinClipQty(WEAPON_TRANQUILIZER, FUNC_SECONDARY);
 											break;
 										case WEAPON_REAPER:
 											aibot->punchtimer60[0] = 0;
@@ -3371,7 +3371,7 @@ void botTickUnpaused(struct chrdata *chr)
 								}
 							}
 						}
-					} else if (aibot->weaponnum == weaponMatchEnum(WEAPON_SLAYER)->rank && aibot->gunfunc != FUNC_PRIMARY && chr->target != -1) {
+					} else if (aibot->weaponnum == WEAPON_SLAYER && aibot->gunfunc != FUNC_PRIMARY && chr->target != -1) {
 						// Bots fire Slayer rockets regardless of where they are
 						// on the map provided they have ammo
 						if (aibot->loadedammo[0] > 0) {
@@ -3388,8 +3388,8 @@ void botTickUnpaused(struct chrdata *chr)
 
 							if (chr->aibot->throwtimer60 <= 0) {
 								if (botactGetAmmoQuantityByWeapon(aibot, aibot->weaponnum, aibot->gunfunc, false) > 0
-										|| aibot->weaponnum == weaponMatchEnum(WEAPON_LAPTOPGUN)->rank
-										|| aibot->weaponnum == weaponMatchEnum(WEAPON_DRAGON)->rank) {
+										|| aibot->weaponnum == WEAPON_LAPTOPGUN
+										|| aibot->weaponnum == WEAPON_DRAGON) {
 									bool throw = false;
 
 									if (chr->target != -1
@@ -3410,7 +3410,7 @@ void botTickUnpaused(struct chrdata *chr)
 
 										if (func && (func->flags & FUNCFLAG_DISCARDWEAPON)) {
 											botinvRemoveItem(chr, aibot->weaponnum);
-											botinvSwitchToWeapon(chr, weaponMatchEnum(WEAPON_UNARMED)->rank, FUNC_PRIMARY);
+											botinvSwitchToWeapon(chr, WEAPON_UNARMED, FUNC_PRIMARY);
 										}
 
 										aibot->throwtimer60 = botactGetProjectileThrowInterval(chr->aibot->weaponnum);

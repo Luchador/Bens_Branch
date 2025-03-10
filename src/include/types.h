@@ -961,7 +961,7 @@ struct act_argh {
 // Gun settings
 struct gset {
 	u8 weaponnum;
-	u8 gsetrank;
+	u8 unk0639;
 	u8 unk063a;
 	u8 weaponfunc; // 0 or 1
 };
@@ -1353,7 +1353,7 @@ struct projectile {
 	/*0x068*/ f32 unk068[4];
 	/*0x078*/ f32 unk078[4];
 	/*0x088*/ struct prop *ownerprop;
-	/*0x08c*/ f32 pinball;
+	/*0x08c*/ f32 unk08c;
 	/*0x090*/ s32 bouncecount;
 	/*0x094*/ s32 bounceframe;
 	/*0x098*/ f32 unk098;
@@ -1568,7 +1568,7 @@ struct weaponobj { // objtype 0x08
 		struct gset gset;
 		struct {
 			/*0x5c*/ u8 weaponnum;
-			/*0x5d*/ s8 rank;
+			/*0x5d*/ s8 unk5d;
 			/*0x5e*/ s8 unk5e;
 			/*0x5f*/ u8 gunfunc;
 		};
@@ -1592,7 +1592,6 @@ struct weaponobj { // objtype 0x08
 	};
 
 	/*0x64*/ struct weaponobj *dualweapon; // other weapon when dual wielding
-	u16 weaponobjrank;
 };
 
 struct packedchr { // objtype 0x09
@@ -2238,7 +2237,11 @@ struct hand {
 	/*0x0cb4*/ s32 gs_int4;
 	/*0x0cb8*/ s32 animload;
 	/*0x0cbc*/ s32 animframeinc;
+#if VERSION >= VERSION_PAL_BETA
+	/*0x0cc0*/ f32 animframeincfreal;
+#else
 	/*0x0cc0*/ u32 animframeincfreal;
+#endif
 	/*0x0cc4*/ s32 animmode;
 	/*0x0cc8*/ u8 unk0cc8_01 : 1;
 	/*0x0cc8*/ u8 unk0cc8_02 : 1;
@@ -2806,7 +2809,9 @@ struct player {
 	/*0x1c70*/ s16 altdowntime; // for alt-modes, used like invdowntime and amdowntime
 	/*0x1c72*/ s16 amdowntime; // for alt-modes, used like invdowntime and amdowntime
 	/*0x1c76*/ bool wantsgangsta; // player wants to turn weapon sideways
+#ifndef PLATFORM_N64
 	/*0x1c74*/ f32 swivelpos[2];
+#endif
 };
 
 struct ailist {
@@ -3306,6 +3311,9 @@ struct menuitemdata_scrollable {
 	s16 unk02; // unused
 	s16 maxscrolloffset;
 	s16 dialogheight;
+#if VERSION >= VERSION_PAL_BETA
+	s16 language;
+#endif
 };
 
 struct menuitemdata_slider {

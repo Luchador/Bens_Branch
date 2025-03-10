@@ -40,6 +40,9 @@
 #define gunviscmd_sethidden(modelpart) \
 	{ GUNVISCMD_ALWAYSTRUE, 0, GUNVISOP_IFTRUE_SETHIDDEN, modelpart, 0 },
 
+#define gunviscmd_checkupgrade(upgrade, operator, modelpart) \
+	{ GUNVISCMD_CHECKUPGRADE, upgrade, operator, modelpart, 0 },
+
 #define gunviscmd_checkinlefthand(operator, modelpart) \
 	{ GUNVISCMD_CHECKINLEFTHAND, 0, operator, modelpart, 0 },
 

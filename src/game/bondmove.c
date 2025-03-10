@@ -27,7 +27,6 @@
 #include "game/mplayer/mplayer.h"
 #include "game/options.h"
 #include "game/propobj.h"
-#include "game/debug.h"
 #include "bss.h"
 #include "lib/lib_17ce0.h"
 #include "lib/vi.h"
@@ -1153,7 +1152,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							&& joyGetStickY(contpad2) < -30;
 					}
 
-					if (weaponGetRank(bgunGetWeaponNum(HAND_RIGHT)) == weaponMatchEnum(WEAPON_FARSIGHT)->rank) {
+					if (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_FARSIGHT) {
 						if (g_Vars.currentplayer->insightaimmode) {
 							movedata.unk14 = 0;
 						}
@@ -1173,7 +1172,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 								|| ((c1buttons & B_BUTTON) && (c1buttonsthisframe & A_BUTTON))
 								|| ((c2buttons & A_BUTTON) && (c2buttonsthisframe & B_BUTTON))
 								|| ((c2buttons & B_BUTTON) && (c2buttonsthisframe & A_BUTTON)))
-							&& weaponGetRank(weaponnum) == weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
+							&& weaponnum == WEAPON_REMOTEMINE) {
 						movedata.detonating = true;
 						movedata.weaponbackoffset = 0;
 						movedata.weaponforwardoffset = 0;
@@ -1652,6 +1651,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							movedata.zoominfovpersec = increment;
 						}
 
+#ifndef PLATFORM_N64
 						if (controlmode == CONTROLMODE_PC) {
 							if (c2sticky < 0) {
 								movedata.zoomoutfovpersec = -c2sticky / 70.0f;
@@ -1672,6 +1672,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 								movedata.zoominfovpersec = movedata.zoominfovpersec + movedata.zoominfovpersec;
 							}
 						}
+#endif
 					}
 
 					// Handle C-button and analog crouch and uncrouch, if enabled
@@ -1743,7 +1744,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							&& joyGetButtons(contpad1, c1allowedbuttons & sdmask);
 					}
 
-					if (weaponGetRank(bgunGetWeaponNum(HAND_RIGHT)) == weaponMatchEnum(WEAPON_FARSIGHT)->rank) {
+					if (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_FARSIGHT) {
 						movedata.farsighttempautoseek = g_Vars.currentplayer->insightaimmode && (c1buttons & (srmask | slmask));
 						if (controlmode == CONTROLMODE_PC && g_Vars.currentplayer->insightaimmode) {
 								movedata.unk14 = 1;
@@ -1765,7 +1766,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 					if (controlmode != CONTROLMODE_PC) {
 						if ((((c1buttons & invbuttons) && (c1buttonsthisframe & B_BUTTON))
 								|| ((c1buttons & B_BUTTON) && (c1buttonsthisframe & invbuttons)))
-								&& weaponGetRank(weaponnum) == weaponMatchEnum(WEAPON_REMOTEMINE)->rank) {
+								&& weaponnum == WEAPON_REMOTEMINE) {
 							movedata.detonating = true;
 							movedata.weaponbackoffset = 0;
 							movedata.weaponforwardoffset = 0;
@@ -1867,7 +1868,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 		zoomfov = PLAYER_DEFAULT_FOV;
 
 		// FarSight in secondary function
-		if (weaponGetRank(bgunGetWeaponNum(HAND_RIGHT)) == weaponMatchEnum(WEAPON_FARSIGHT)->rank
+		if (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_FARSIGHT
 				&& g_Vars.currentplayer->insightaimmode
 				&& (movedata.farsighttempautoseek || g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY)
 				&& g_Vars.currentplayer->autoeraserdist > 0) {
@@ -1904,7 +1905,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 			zoomfov = currentPlayerGetGunZoomFov();
 		}
 
-		if (bgunGetWeaponNum(HAND_RIGHT) == weaponMatchEnum(WEAPON_AR34)->rank
+		if (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_AR34
 				&& g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY) {
 			zoomfov = currentPlayerGetGunZoomFov();
 		}
@@ -1928,6 +1929,9 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 		}
 
 		if (g_Vars.currentplayer->speedboost > 1.25f) {
+#if PIRACYCHECKS
+			piracyRestore();
+#endif
 			g_Vars.currentplayer->speedboost = 1.25f;
 		}
 	} else {
@@ -1991,9 +1995,11 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 			}
 		}
 
+#if VERSION >= VERSION_NTSC_1_0
 		if (g_Vars.currentplayer->bondmovemode == MOVEMODE_BIKE) {
 			g_Vars.currentplayer->docentreupdown = false;
 		}
+#endif
 
 		if (g_Vars.currentplayer->docentreupdown) {
 			if (offbike) {
@@ -2140,21 +2146,21 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 				 && g_Vars.currentplayer->autoyaimprop
 				 && weaponHasAimFlag(weaponnum, INVAIMFLAG_AUTOAIM)
 				)
-				|| (weaponGetRank(bgunGetWeaponNum(HAND_RIGHT)) == weaponMatchEnum(WEAPON_CMP150)->rank && g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY)) {
+				|| (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_CMP150 && g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY)) {
 			// Auto aim - move crosshair towards target
 			s32 followlockon = false;
 
-			if (weaponGetRank(bgunGetWeaponNum(HAND_RIGHT)) == weaponMatchEnum(WEAPON_CMP150)->rank
+			if (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_CMP150
 					&& g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY) {
 				followlockon = true;
 			}
 
-			if (g_Vars.currentplayer->autoaimdamp > 0.963f) {
-				g_Vars.currentplayer->autoaimdamp -= 0.00031999943894334f * g_Vars.lvupdate60freal;
+			if (g_Vars.currentplayer->autoaimdamp > (PAL ? 0.955f : 0.963f)) {
+				g_Vars.currentplayer->autoaimdamp -= (PAL ? 0.00037999986670911f : 0.00031999943894334f) * g_Vars.lvupdate60freal;
 			}
 
-			if (g_Vars.currentplayer->autoaimdamp < 0.963f) {
-				g_Vars.currentplayer->autoaimdamp = 0.963f;
+			if (g_Vars.currentplayer->autoaimdamp < (PAL ? 0.955f : 0.963f)) {
+				g_Vars.currentplayer->autoaimdamp = (PAL ? 0.955f : 0.963f);
 			}
 
 			x = g_Vars.currentplayer->autoaimx;
@@ -2176,6 +2182,10 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 				g_Vars.currentplayer->autoaimdamp = (PAL ? 0.974f : 0.979f);
 			}
 
+#ifdef PLATFORM_N64
+			x = g_Vars.currentplayer->speedtheta * 0.3f + g_Vars.currentplayer->gunextraaimx;
+			y = -g_Vars.currentplayer->speedverta * 0.1f + g_Vars.currentplayer->gunextraaimy;
+#else
 			f32 xscale, yscale;
 			if (movedata.freelookdx || movedata.freelookdy) {
 				xscale = PLAYER_EXTCFG().crosshairsway * 0.20f;
@@ -2185,6 +2195,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 			}
 			x = g_Vars.currentplayer->speedtheta * 0.3f * xscale + g_Vars.currentplayer->gunextraaimx;
 			y = -g_Vars.currentplayer->speedverta * 0.1f * yscale + g_Vars.currentplayer->gunextraaimy;
+#endif
 
 			bgunSwivelWithDamp(x, y, PAL ? 0.955f : 0.963f);
 		}
@@ -2192,6 +2203,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 		// Adjust crosshair's position on screen
 		// when holding aim and moving stick
 		bgunSetAimType(0);
+#ifndef PLATFORM_N64
 		if (allowmcross) {
 			// joystick is inactive, move crosshair using the mouse
 			const f32 xcoeff = 320.f / 1080.f;
@@ -2207,6 +2219,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 			bgunSwivelWithDamp(x, y, 0.01f);
 			return;
 		}
+#endif
 		bgunSwivelWithoutDamp((movedata.c1stickxraw * 0.65f) / 80.0f, (movedata.c1stickyraw * 0.65f) / 80.0f);
 	}
 }

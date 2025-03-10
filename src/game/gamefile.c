@@ -110,6 +110,24 @@ void gamefileApplyOptions(struct gamefile *file)
 	g_Vars.coopradaron = pakHasBitflag(GAMEFILEFLAG_COOPRADARON, file->flags) ? true : false;
 	g_Vars.coopfriendlyfire = pakHasBitflag(GAMEFILEFLAG_COOPFRIENDLYFIRE, file->flags) ? true : false;
 	g_Vars.antiradaron = pakHasBitflag(GAMEFILEFLAG_ANTIRADARON, file->flags) ? true : false;
+
+/*#if VERSION >= VERSION_PAL_BETA
+	g_Vars.language = 0;
+
+	if (pakHasBitflag(GAMEFILEFLAG_LANGBIT1, file->flags)) {
+		g_Vars.language |= 0x01;
+	}
+
+	if (pakHasBitflag(GAMEFILEFLAG_LANGBIT2, file->flags)) {
+		g_Vars.language |= 0x02;
+	}
+
+	if (pakHasBitflag(GAMEFILEFLAG_LANGBIT3, file->flags)) {
+		g_Vars.language |= 0x04;
+	}
+
+	langSetEuropean(g_Vars.language);
+#endif*/
 }
 
 void gamefileLoadDefaults(struct gamefile *file)

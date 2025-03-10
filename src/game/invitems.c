@@ -606,7 +606,7 @@ struct weapon invitem_falcon2silencer = {
 	L_GUN_157, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_GANGSTA,
 	3,  // rank
-	.menupos = {22.299999237061f, -13.5f, -216.60000610352f, 6.443009853363f, 0.34057000279427f}, // menu pos x, pos y, pos z, pitch, scale
+	.menupos = { 22.299999237061f,   -13.5f,             -216.60000610352f,  6.443009853363f,  0.34057000279427f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
 struct weapon invitem_falcon2scope = {
@@ -659,8 +659,8 @@ struct weapon invitem_falcon2sands = {
 	L_GUN_150, // manufacturer
 	L_GUN_147, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS,
-	5, // rank
-	.menupos = {22.299999237061f, -13.5f, -216.60000610352f, 6.443009853363f, 0.34057000279427f}, // menu pos x, pos y, pos z, pitch, scale
+	//TODO: add rank
+	.menupos = { 19.5f,              -31.89999961853f,   -154.89999389648f,  6.3730101585388f, 0.41813001036644f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
 struct modelpartvisibility invpartvisibility_magsec[] = {
@@ -809,7 +809,7 @@ struct weapon invitem_magsec = {
 	L_GUN_151, // manufacturer
 	L_GUN_159, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_GANGSTA,
-	6, // rank
+	5, // rank
 	.menupos = { -2.5f, 14.300000190735f,   16.200000762939f,   6.4340100288391f, 0.34057000279427f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -1002,7 +1002,7 @@ struct weapon invitem_dy357 = {
 	L_GUN_149, // manufacturer
 	L_GUN_161, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS,
-	9, // rank
+	8, // rank
 	.menupos = { 0.69999998807907f,  13.89999961853f,    23.10000038147f,    6.4730100631714f, 0.37735998630524f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -1029,7 +1029,7 @@ struct weapon invitem_dy357lx = {
 	L_GUN_149, // manufacturer
 	L_GUN_162, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS,
-	10, // rank
+	9, // rank
 	.menupos = { 0.69999998807907f,  13.89999961853f,    23.10000038147f,    6.4730100631714f, 0.37735998630524f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -1151,7 +1151,7 @@ struct weapon invitem_phoenix = {
 	L_GUN_153, // manufacturer
 	L_GUN_163, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_GANGSTA,
-	8, // rank
+	7, // rank
 	.menupos = { -4.0999999046326f,  -30.5f,             -29.39999961853f,   6.3770098686218f, 0.37735998630524f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -1293,7 +1293,7 @@ struct weapon invitem_mauler = {
 	L_GUN_152, // manufacturer
 	L_GUN_160, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS,
-	7, // rank
+	6, // rank
 	.menupos = { -2.4000000953674f,  21.0f, -98.900001525879f,  5.7630100250244f, 0.32354000210762f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -1454,7 +1454,7 @@ struct weapon invitem_cmp150 = {
 	L_GUN_149, // manufacturer
 	L_GUN_164, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_04000000 | WEAPONFLAG_AIMTRACK | WEAPONFLAG_GANGSTA,
-	11, // rank
+	10, // rank
 	.menupos = {-5.1999998092651f,  36.5f, -370.39999389648f,  6.5040102005005f, 0.37735998630524f}, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -1584,7 +1584,7 @@ struct weapon invitem_cyclone = {
 	L_GUN_151, // manufacturer
 	L_GUN_169, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS,
-	12, // rank
+	11, // rank
 	.menupos = { -5.5f, -79.5f, -661.0f, 6.3190097808838f, 0.214640006423f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -1691,7 +1691,7 @@ struct weapon invitem_rcp120 = {
 	L_GUN_151, // manufacturer
 	L_GUN_170, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN,
-	14, // rank
+	13, // rank
 	.menupos = { -6.1999998092651f,  -33.900001525879f,  101.40000152588f,   6.3320097923279f, 0.27739998698235f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -1808,7 +1808,7 @@ struct weapon invitem_callisto = {
 	L_GUN_153, // manufacturer
 	L_GUN_171, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS,
-	13, // rank
+	12, // rank
 	.menupos = { -2.9000000953674f,  -57.200000762939f,  -110.09999847412f,  6.3170099258423f, 0.27739998698235f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -1913,7 +1913,7 @@ struct weapon invitem_dragon = {
 	L_GUN_149, // manufacturer
 	L_GUN_166, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_04000000,
-	16, // rank
+	15, // rank
 	.menupos = { -3.9000000953674f,  -63.099998474121f,  -872.0f,            6.3720102310181f, 0.214640006423f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -2074,7 +2074,7 @@ struct weapon invitem_superdragon = {
 	L_GUN_149, // manufacturer
 	L_GUN_167, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS,
-	19, // rank
+	18, // rank
 	.menupos = { -1.6000000238419f,  -68.400001525879f,  -874.5f,            6.3720102310181f, 0.214640006423f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -2204,7 +2204,7 @@ struct weapon invitem_ar34 = {
 	L_GUN_000, // manufacturer
 	L_GUN_165, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN | WEAPONFLAG_04000000,
-	18, // rank
+	17, // rank
 	.menupos = { 0.5f, -84.599998474121f,  -377.20001220703f,  6.1880102157593f, 0.18402999639511f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -2348,7 +2348,7 @@ struct weapon invitem_k7avenger = {
 	L_GUN_149, // manufacturer
 	L_GUN_168, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_HASHANDS,
-	17, // rank
+	16, // rank
 	.menupos = { 218.19999694824f, -56.299999237061f, -210.89999389648f, 6.3500099182129f, 0.22594000399113f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -2484,7 +2484,7 @@ struct weapon invitem_laptopgun = {
 	L_GUN_150, // manufacturer
 	L_GUN_172, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_04000000,
-	15, // rank
+	14, // rank
 	.menupos = { -23.5f,             -4.0999999046326f,  -209.60000610352f,  6.1110100746155f, 0.214640006423f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -2560,7 +2560,7 @@ struct weaponfunc_shootsingle invfunc_shotgun_double = {
 	0, // recoverytime60
 	0.6, // damage
 	//16, // spread
-	15.0f,
+	1.0,
 	20, 28, 0, 0,
 	0, // recoildist
 	0, // recoilangle
@@ -2603,7 +2603,7 @@ struct weapon invitem_shotgun = {
 	L_GUN_149, // manufacturer
 	L_GUN_173, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS,
-	20, // rank
+	19, // rank
 	.menupos = { -3.7999999523163f, -145.5f, 52.5f, 6.3170099258423f, 0.32354000210762f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -2734,7 +2734,7 @@ struct weapon invitem_reaper = {
 	L_GUN_152, // manufacturer
 	L_GUN_174, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_HASHANDS,
-	21, // rank
+	20, // rank
 	.menupos = { 117.19999694824f,   -13.800000190735f,  -177.60000610352f,  6.1730098724365f, 0.23782999813557f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -2874,7 +2874,7 @@ struct weapon invitem_rocketlauncher = {
 	L_GUN_149, // manufacturer
 	L_GUN_175, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_AIMTRACK,
-	25, // rank
+	24, // rank
 	.menupos = { -94.800003051758f,  -13.300000190735f,  -307.70001220703f,  6.2500200271606f, 0.25034999847412f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -2986,7 +2986,7 @@ struct weapon invitem_slayer = {
 	L_GUN_152, // manufacturer
 	L_GUN_177, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_02000000,
-	26, // rank
+	25, // rank
 	.menupos = { -2.2000000476837f,  -45.599998474121f,  -131.89999389648f,  6.3580098152161f, 0.19371999800205f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -3113,7 +3113,7 @@ struct weapon invitem_devastator = {
 	L_GUN_149, // manufacturer
 	L_GUN_176, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS,
-	24, // rank
+	23, // rank
 	.menupos = { -0.80000001192093f, -21.200000762939f,  3.5999999046326f,   6.3030200004578f, 0.26352998614311f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -3189,7 +3189,7 @@ struct weapon invitem_timedmine = {
 	L_GUN_000, // manufacturer
 	L_GUN_185, // description
 	WEAPONFLAG_THROWABLE | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00002000 | WEAPONFLAG_HASHANDS,
-	33, // rank
+	32, // rank
 	.menupos = { 63.700000762939f,   53.0f,              -171.60000610352f,  43.153789520264f, 0.9025200009346f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -3281,7 +3281,7 @@ struct weapon invitem_remotemine = {
 	L_GUN_000, // manufacturer
 	L_GUN_187, // description
 	WEAPONFLAG_THROWABLE | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00002000 | WEAPONFLAG_HASHANDS,
-	35, // rank
+	34, // rank
 	.menupos = { 63.700000762939f, 53.0f, -171.60000610352f,  43.153789520264f, 0.9025200009346f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -3330,7 +3330,7 @@ struct weapon invitem_proximitymine = {
 	L_GUN_000, // manufacturer
 	L_GUN_186, // description
 	WEAPONFLAG_THROWABLE | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00002000 | WEAPONFLAG_HASHANDS,
-	34, // rank
+	33, // rank
 	.menupos = { 63.700000762939f, 53.0f, -171.60000610352f,  43.153789520264f, 0.9025200009346f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -3395,7 +3395,7 @@ struct weapon invitem_ecmmine = {
 	L_GUN_000, // manufacturer
 	L_GUN_188, // description
 	WEAPONFLAG_THROWABLE | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_00002000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN | WEAPONFLAG_UNDROPPABLE,
-	54, // rank
+	53, // rank
 	.menupos = { -50.099998474121f,  20.0f, -139.5f, 43.179790496826f, 0.69836002588272f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -3477,7 +3477,7 @@ struct weapon invitem_grenade = {
 	L_GUN_000, // manufacturer
 	L_GUN_183, // description
 	WEAPONFLAG_THROWABLE | WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS,
-	31, // rank
+	30, // rank
 	.menupos = { -23.700000762939f,  -35.799999237061f,  -237.89999389648f,  43.153789520264f, 0.6983500123024f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -3540,7 +3540,7 @@ struct weapon invitem_nbomb = {
 	L_GUN_000, // manufacturer
 	L_GUN_184, // description
 	WEAPONFLAG_THROWABLE | WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN,
-	32, // rank
+	31, // rank
 	.menupos = { -23.700000762939f,  -35.799999237061f,  -237.89999389648f,  43.153789520264f, 0.6983500123024f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -3655,7 +3655,7 @@ struct weapon invitem_farsight = {
 	L_GUN_000, // manufacturer
 	L_GUN_178, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS,
-	23, // rank
+	22, // rank
 	.menupos = { 0.20000000298023f,  -176.60000610352f,  -276.29998779297f,  6.2660098075867f, 0.16608999669552f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -3801,7 +3801,7 @@ struct weapon invitem_crossbow = {
 	L_GUN_000, // manufacturer
 	L_GUN_180, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_HASHANDS,
-	28, // rank
+	27, // rank
 	.menupos = { -4.0f,              -3.0f,              -157.60000610352f,  43.489791870117f, 0.48769000172615f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -3928,7 +3928,7 @@ struct weapon invitem_tranquilizer = {
 	L_GUN_000, // manufacturer
 	L_GUN_181, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS,
-	29, // rank
+	28, // rank
 	.menupos = { -4.8000001907349f,  14.0f,              -89.0f,             43.927791595459f, 0.5688099861145f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -3985,7 +3985,7 @@ struct weapon invitem_psychosisgun = {
 	L_GUN_000, // manufacturer
 	L_GUN_210, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS,
-	45, // rank
+	44, // rank
 	.menupos = { -4.8000001907349f,  14.0f,              -89.0f,             43.927791595459f, 0.5688099861145f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4096,7 +4096,7 @@ struct weapon invitem_sniperrifle = {
 	L_GUN_000, // manufacturer
 	L_GUN_179, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS,
-	22, // rank
+	21, // rank
 	.menupos = { -69.699996948242f,  -135.10000610352f,  -146.10000610352f,  6.18901014328f,   0.16608999669552f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4183,7 +4183,7 @@ struct weapon invitem_laser = {
 	L_GUN_150, // manufacturer
 	L_GUN_189, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_DONTCOUNTSHOTS | WEAPONFLAG_04000000,
-	30, // rank
+	29, // rank
 	.menupos = { -0.40000000596046f, -29.89999961853f,   -8.8000001907349f,  43.981800079346f, 0.73510998487473f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4256,7 +4256,7 @@ struct weapon invitem_pp9i = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_GANGSTA,
-	37, // rank
+	36, // rank
 	.menupos = { -68.400001525879f,  14.699999809265f,   -92.5f,             44.255790710449f, 0.59876000881195f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4319,7 +4319,7 @@ struct weapon invitem_cc13 = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_GANGSTA,
-	38, // rank
+	37, // rank
 	.menupos = { -2.9000000953674f,  33.5f,              61.400001525879f,   44.254791259766f, 0.48769000172615f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4382,7 +4382,7 @@ struct weapon invitem_kl01313 = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00008000,
-	39, // rank
+	38, // rank
 	.menupos = { -1.5f,              41.599998474121f,   -49.900001525879f,  44.198810577393f, 0.41813001036644f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4445,7 +4445,7 @@ struct weapon invitem_kf7special = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00008000,
-	40, // rank
+	39, // rank
 	.menupos = { -2.5999999046326f,  -0.20000000298023f, -237.10000610352f,  44.029800415039f, 0.21465000510216f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4508,7 +4508,7 @@ struct weapon invitem_zzt9mm = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00008000 | WEAPONFLAG_GANGSTA,
-	41, // rank
+	40, // rank
 	.menupos = { -1.2999999523163f,  13.39999961853f,    -43.700000762939f,  44.2587890625f,   0.34057000279427f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4571,7 +4571,7 @@ struct weapon invitem_dmc = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00008000,
-	42, // rank
+	41, // rank
 	.menupos = { 0.10000000149012f,  32.099998474121f,   -161.69999694824f,  44.111789703369f, 0.39722999930382f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4634,7 +4634,7 @@ struct weapon invitem_ar53 = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00008000 | WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN,
-	43, // rank
+	42, // rank
 	.menupos = { -1.0f,              -31.89999961853f,   -300.0f,            44.034790039062f, 0.18402999639511f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4697,7 +4697,7 @@ struct weapon invitem_rcp45 = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00008000 | WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN,
-	44, // rank
+	43, // rank
 	.menupos = { 0.30000001192093f,  -44.900001525879f,  45.099998474121f,   44.078788757324f, 0.27739998698235f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4739,7 +4739,7 @@ struct weapon invitem_briefcase2 = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_00000800 | WEAPONFLAG_HIDEMENUMODEL | WEAPONFLAG_DONTCOUNTSHOTS | WEAPONFLAG_DETERMINER_S_THE | WEAPONFLAG_DETERMINER_F_THE,
-	88, // rank
+	87, // rank
 	.menupos = { 0.0f,   0.0f,  0.0f,  0.0f, 1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4802,7 +4802,7 @@ struct weapon invitem_choppergun = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_DUALWIELD,
-	90, // rank
+	89, // rank
 	.menupos = { 0.0f,   0.0f,  0.0f,  0.0f, 1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4865,7 +4865,7 @@ struct weapon invitem_watchlaser = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_DUALWIELD,
-	91, // rank
+	90, // rank
 	.menupos = { 0.0f,   0.0f,  0.0f,  0.0f, 1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -4994,7 +4994,7 @@ struct weapon invitem_combatknife = {
 	L_GUN_000, // manufacturer
 	L_GUN_182, // description
 	WEAPONFLAG_THROWABLE | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_04000000,
-	27, // rank
+	26, // rank
 	.menupos = { -148.69999694824f,  26.10000038147f,    -251.69999694824f,  42.328819274902f, 0.32354000210762f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5057,7 +5057,7 @@ struct weapon invitem_commsrider = {
 	L_GUN_000, // manufacturer
 	L_GUN_204, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_UNDROPPABLE,
-	62, // rank
+	61, // rank
 	.menupos = { -8.5f,              -8.1000003814697f,  10.199999809265f,   43.388809204102f, 0.54038000106812f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5084,7 +5084,7 @@ struct weapon invitem_tracerbug = {
 	L_GUN_000, // manufacturer
 	L_GUN_205, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_UNDROPPABLE,
-	63, // rank
+	62, // rank
 	.menupos = { -8.5f,              -8.1000003814697f,  10.199999809265f,   43.388809204102f, 0.54038000106812f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5111,7 +5111,7 @@ struct weapon invitem_targetamplifier = {
 	L_GUN_000, // manufacturer
 	L_GUN_206, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_UNDROPPABLE,
-	64, // rank
+	63, // rank
 	.menupos = { -8.5f,              -8.1000003814697f,  10.199999809265f,   43.388809204102f, 0.54038000106812f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5149,7 +5149,7 @@ struct weapon invitem_nightvision = {
 	L_GUN_000, // manufacturer
 	L_GUN_191, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000080 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_UNDROPPABLE,
-	46, // rank
+	45, // rank
 	.menupos = { -0.69999998807907f, -1.7000000476837f,  -9.3000001907349f,  44.255809783936f, 3.6051800251007f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5198,7 +5198,7 @@ struct weapon invitem_horizonscanner = {
 	L_GUN_000, // manufacturer
 	L_GUN_196, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN | WEAPONFLAG_UNDROPPABLE,
-	51, // rank
+	50, // rank
 	.menupos = { -5.0999999046326f,  -9.5f,              2.0f,               43.715789794922f, 0.44014000892639f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5244,7 +5244,7 @@ struct weapon invitem_cloakingdevice = {
 	L_GUN_000, // manufacturer
 	L_GUN_195, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_04000000,
-	50, // rank
+	49, // rank
 	.menupos = { 1.6000000238419f,   3.5f,               -0.20000000298023f, 44.75479888916f,  0.48769000172615f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5305,7 +5305,7 @@ struct weapon invitem_combatboost = {
 	L_GUN_000, // manufacturer
 	L_GUN_190, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_04000000 | WEAPONFLAG_DETERMINER_S_SOME | WEAPONFLAG_DETERMINER_F_SOME,
-	36, // rank
+	35, // rank
 	.menupos = { 0.20000000298023f,  -1.5f,              1.0f,               43.288791656494f, 6.6717000007629f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5343,8 +5343,8 @@ struct weapon invitem_suicidepill = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_UNDROPPABLE,
-	93, // rank
-	.menupos = { 0.20000000298023f,  -1.5f,              1.0f,               43.288791656494f, 6.6717000007629f }, // menu pos x, pos y, pos z, pitch, scale
+	92, // rank
+	.menupos = { 0.0f,   0.0f,  0.0f,  0.0f, 1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
 struct weaponfunc_device invfunc_irscanner_primary = {
@@ -5381,7 +5381,7 @@ struct weapon invitem_irscanner = {
 	L_GUN_000, // manufacturer
 	L_GUN_194, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_UNDROPPABLE,
-	49, // rank
+	48, // rank
 	.menupos = { -1.3999999761581f,  -41.5f,             -120.30000305176f,  44.265800476074f, 0.3585000038147f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5418,7 +5418,7 @@ struct weapon invitem_disguise40 = {
 	L_GUN_000, // manufacturer
 	L_GUN_211, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_UNDROPPABLE | WEAPONFLAG_FIRETOACTIVATE,
-	65, // rank
+	64, // rank
 	.menupos = { -0.89999997615814f, -14.10000038147f,   1.7000000476837f,   0.0f,             1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5445,7 +5445,7 @@ struct weapon invitem_disguise41 = {
 	L_GUN_000, // manufacturer
 	L_GUN_211, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_UNDROPPABLE | WEAPONFLAG_FIRETOACTIVATE,
-	66, // rank
+	65, // rank
 	.menupos = { -0.89999997615814f, -14.10000038147f,   1.7000000476837f,   0.0f,             1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5483,7 +5483,7 @@ struct weapon invitem_camspy = {
 	L_GUN_000, // manufacturer
 	L_GUN_192, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALWIELD | WEAPONFLAG_UNDROPPABLE,
-	47, // rank
+	46, // rank
 	.menupos = { 16.0f,              -56.099998474121f,  7.5f,               44.468811035156f, 0.77380001544952f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5521,7 +5521,7 @@ struct weapon invitem_rtracker = {
 	L_GUN_000, // manufacturer
 	L_GUN_198, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALWIELD | WEAPONFLAG_UNDROPPABLE,
-	57, // rank
+	55, // rank
 	.menupos = { 0.60000002384186f,  -1.6000000238419f,  -0.5f,              38.538738250732f, 0.90254002809525f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5559,7 +5559,7 @@ struct weapon invitem_xrayscanner = {
 	L_GUN_000, // manufacturer
 	L_GUN_193, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN | WEAPONFLAG_UNDROPPABLE,
-	48, // rank
+	47, // rank
 	.menupos = { -0.69999998807907f, -1.7000000476837f,  -9.3000001907349f,  44.255809783936f, 3.6051800251007f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5614,7 +5614,7 @@ struct weapon invitem_datauplink = {
 	L_GUN_000, // manufacturer
 	L_GUN_197, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_00000040 | WEAPONFLAG_00002000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_UNDROPPABLE | WEAPONFLAG_FIRETOACTIVATE,
-	55, // rank
+	54, // rank
 	.menupos = { 60.700000762939f,   27.60000038147f,    -146.30000305176f,  43.265789031982f, 0.81453001499176f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5646,7 +5646,7 @@ struct weapon invitem_doordecoder = {
 	L_GUN_000, // manufacturer
 	L_GUN_200, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_UNDROPPABLE | WEAPONFLAG_FIRETOACTIVATE,
-	58, // rank
+	57, // rank
 	.menupos = { 0.40000000596046f,  0.5f,               -0.60000002384186f, 38.68675994873f,  0.66345000267029f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5674,7 +5674,7 @@ struct weapon invitem_rocket = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	0, // flags
-	89, // rank
+	88, // rank
 	.menupos = { 0.0f,   0.0f,  0.0f,  0.0f, 1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5702,7 +5702,7 @@ struct weapon invitem_homingrocket = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	0, // flags
-	85, // rank
+	84, // rank
 	.menupos = { 0.0f,   0.0f,  0.0f,  0.0f, 1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5729,7 +5729,7 @@ struct weapon invitem_grenaderound = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	0, // flags
-	86, // rank
+	85, // rank
 	.menupos = { 0.0f,   0.0f,  0.0f,  0.0f, 1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5756,7 +5756,7 @@ struct weapon invitem_bolt = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	0, // flags
-	87, // rank
+	86, // rank
 	.menupos = { 0.0f,   0.0f,  0.0f,  0.0f, 1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5784,7 +5784,7 @@ struct weapon invitem_skedarbomb = {
 	L_GUN_000, // manufacturer
 	L_GUN_203, // description
 	WEAPONFLAG_FIRETOACTIVATE,
-	61, // rank
+	60, // rank
 	.menupos = { -8.5f,              -8.1000003814697f,  10.199999809265f,   42.137790679932f, 0.16608999669552f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5812,7 +5812,7 @@ struct weapon invitem_explosives = {
 	L_GUN_000, // manufacturer
 	L_GUN_202, // description
 	WEAPONFLAG_FIRETOACTIVATE,
-	60, // rank
+	59, // rank
 	.menupos = { 4.1999998092651f,   -13.199999809265f,  4.0999999046326f,   43.32479095459f,  0.21465000510216f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5850,7 +5850,7 @@ struct weapon invitem_presidentscanner = {
 	L_GUN_000, // manufacturer
 	L_GUN_199, // description
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALWIELD | WEAPONFLAG_UNDROPPABLE,
-	57, // rank
+	56, // rank
 	.menupos = { 0.60000002384186f,  -1.6000000238419f,  -0.5f,              38.538738250732f, 0.90254002809525f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5878,7 +5878,7 @@ struct weapon invitem_autosurgeon = {
 	L_GUN_000, // manufacturer
 	L_GUN_201, // description
 	WEAPONFLAG_UNDROPPABLE | WEAPONFLAG_FIRETOACTIVATE,
-	59, // rank
+	58, // rank
 	.menupos = { -22.700000762939f,  -1.7999999523163f,  -12.300000190735f,  5.8997898101807f, 0.25036001205444f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5906,7 +5906,7 @@ struct weapon invitem_flightplans = {
 	L_GUN_000, // manufacturer
 	L_GUN_207, // description
 	WEAPONFLAG_UNDROPPABLE,
-	67, // rank
+	66, // rank
 	.menupos = { -2.7000000476837f,  9.1000003814697f,   -2.9000000953674f,  43.391819000244f, 0.54038000106812f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5934,7 +5934,7 @@ struct weapon invitem_researchtape = {
 	L_GUN_000, // manufacturer
 	L_GUN_208, // description
 	WEAPONFLAG_UNDROPPABLE,
-	68, // rank
+	67, // rank
 	.menupos = { -6.0999999046326f,  -0.69999998807907f, -2.0f,              43.391819000244f, 0.69836002588272f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5962,7 +5962,7 @@ struct weapon invitem_backupdisk = {
 	L_GUN_000, // manufacturer
 	L_GUN_209, // description
 	WEAPONFLAG_UNDROPPABLE,
-	69, // rank
+	68, // rank
 	.menupos = { 0.40000000596046f, -7.0f, 1.7999999523163f, 43.211811065674f, 1.6702300310135f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -5990,8 +5990,8 @@ struct weapon invitem_briefcase = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_HIDEMENUMODEL | WEAPONFLAG_UNDROPPABLE,
-	79, // rank
-	.menupos = {  281.89999389648f,   0.89999997615814f,  8.3999996185303f,   5.0027899742126f, 0.18402999639511f }, // menu pos x, pos y, pos z, pitch, scale
+	78, // rank
+	.menupos = { -3.7999999523163f,  6.1999998092651f,   1.0f,               5.6747899055481f, 0.29199999570847f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
 struct weapon invitem_suitcase = {
@@ -6018,8 +6018,8 @@ struct weapon invitem_suitcase = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_UNDROPPABLE | WEAPONFLAG_FIRETOACTIVATE,
-	78, // rank
-	.menupos = {  281.89999389648f,   0.89999997615814f,  8.3999996185303f,   5.0027899742126f, 0.18402999639511f }, // menu pos x, pos y, pos z, pitch, scale
+	77, // rank
+	.menupos = { -3.7999999523163f,  6.1999998092651f,   1.0f,               5.6747899055481f, 0.29199999570847f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
 struct weapon invitem_necklace = {
@@ -6046,8 +6046,8 @@ struct weapon invitem_necklace = {
 	L_GUN_000, // manufacturer
 	L_GUN_238, // description
 	WEAPONFLAG_UNDROPPABLE,
-	81, // rank
-	.menupos = { 0.0f,   3.0f,  0.0f,  -70.0f, 2.0f }, // menu pos x, pos y, pos z, pitch, scale
+	80, // rank
+	.menupos = { 0.0f,   0.0f,  0.0f,  0.0f, 1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
 struct weapon invitem_shieldtechitem = {
@@ -6074,8 +6074,8 @@ struct weapon invitem_shieldtechitem = {
 	L_GUN_000, // manufacturer
 	L_GUN_241, // description
 	WEAPONFLAG_UNDROPPABLE,
-	80, // rank
-	.menupos = { -8.5f,              -8.1000003814697f,  10.199999809265f,   43.388809204102f, 0.40038000106812f }, // menu pos x, pos y, pos z, pitch, scale
+	79, // rank
+	.menupos = { 0.0f, 0.0f, 0.0f, 0.0f, 1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
 struct weapon invitem_keycard = {
@@ -6102,7 +6102,7 @@ struct weapon invitem_keycard = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_UNDROPPABLE,
-	70, // rank
+	69, // rank
 	.menupos = { -1.8999999761581f, 0.89999997615814f, -55.0f, 43.142780303955f, 0.14989000558853f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -6168,7 +6168,7 @@ struct weapon invitem_rocketlauncher_34 = {
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_AIMTRACK,
-	53, // rank
+	52, // rank
 	.menupos = { 0.0f,   0.0f,  0.0f,  0.0f, 1.0f }, // menu pos x, pos y, pos z, pitch, scale
 };
 
@@ -6178,71 +6178,71 @@ struct weapon *g_Weapons[] = {
 	/* 2 */  &invitem_falcon2,
 	/* 3 */  &invitem_falcon2silencer,
 	/* 4 */  &invitem_falcon2scope,
-	/* 5 */  &invitem_falcon2sands,
-	/* 6 */  &invitem_magsec,
-	/* 7 */  &invitem_mauler,
-	/* 8 */  &invitem_phoenix,
-	/* 9 */  &invitem_dy357,
-	/* 10 */ &invitem_dy357lx,
-	/* 11 */ &invitem_cmp150,
-	/* 12 */ &invitem_cyclone,
-	/* 13 */ &invitem_callisto,
-	/* 14 */ &invitem_rcp120,
-	/* 15 */ &invitem_laptopgun,
-	/* 16 */ &invitem_dragon,
-	/* 17 */ &invitem_k7avenger,
-	/* 18 */ &invitem_ar34,
-	/* 19 */ &invitem_superdragon,
-	/* 20 */ &invitem_shotgun,
-	/* 21 */ &invitem_reaper,
-	/* 22 */ &invitem_sniperrifle,
-	/* 23 */ &invitem_farsight,
-	/* 24 */ &invitem_devastator,
-	/* 25 */ &invitem_rocketlauncher,
-	/* 26 */ &invitem_slayer,
-	/* 27 */ &invitem_combatknife,
-	/* 28 */ &invitem_crossbow,
-	/* 29 */ &invitem_tranquilizer,
-	/* 30 */ &invitem_laser,
-	/* 31 */ &invitem_grenade,
-	/* 32 */ &invitem_nbomb,
-	/* 33 */ &invitem_timedmine,
-	/* 34 */ &invitem_proximitymine,
-	/* 35 */ &invitem_remotemine,
-	/* 36 */ &invitem_combatboost,
-	/* 37 */ &invitem_pp9i,
-	/* 38 */ &invitem_cc13,
-	/* 39 */ &invitem_kl01313,
-	/* 40 */ &invitem_kf7special,
-	/* 41 */ &invitem_zzt9mm,
-	/* 42 */ &invitem_dmc,
-	/* 43 */ &invitem_ar53,
-	/* 44 */ &invitem_rcp45,
-	/* 45 */ &invitem_psychosisgun,
-	/* 46 */ &invitem_nightvision,
-	/* 47 */ &invitem_camspy,
-	/* 48 */ &invitem_xrayscanner,
-	/* 49 */ &invitem_irscanner,
-	/* 50 */ &invitem_cloakingdevice,
-	/* 51 */ &invitem_horizonscanner,
+	/* 5 */  &invitem_magsec,
+	/* 6 */  &invitem_mauler,
+	/* 7 */  &invitem_phoenix,
+	/* 8 */  &invitem_dy357,
+	/* 9 */  &invitem_dy357lx,
+	/* 10 */ &invitem_cmp150,
+	/* 11 */ &invitem_cyclone,
+	/* 12 */ &invitem_callisto,
+	/* 13 */ &invitem_rcp120,
+	/* 14 */ &invitem_laptopgun,
+	/* 15 */ &invitem_dragon,
+	/* 16 */ &invitem_k7avenger,
+	/* 17 */ &invitem_ar34,
+	/* 18 */ &invitem_superdragon,
+	/* 19 */ &invitem_shotgun,
+	/* 20 */ &invitem_reaper,
+	/* 21 */ &invitem_sniperrifle,
+	/* 22 */ &invitem_farsight,
+	/* 23 */ &invitem_devastator,
+	/* 24 */ &invitem_rocketlauncher,
+	/* 25 */ &invitem_slayer,
+	/* 26 */ &invitem_combatknife,
+	/* 27 */ &invitem_crossbow,
+	/* 28 */ &invitem_tranquilizer,
+	/* 29 */ &invitem_laser,
+	/* 30 */ &invitem_grenade,
+	/* 31 */ &invitem_nbomb,
+	/* 32 */ &invitem_timedmine,
+	/* 33 */ &invitem_proximitymine,
+	/* 34 */ &invitem_remotemine,
+	/* 35 */ &invitem_combatboost,
+	/* 36 */ &invitem_pp9i,
+	/* 37 */ &invitem_cc13,
+	/* 38 */ &invitem_kl01313,
+	/* 39 */ &invitem_kf7special,
+	/* 40 */ &invitem_zzt9mm,
+	/* 41 */ &invitem_dmc,
+	/* 42 */ &invitem_ar53,
+	/* 43 */ &invitem_rcp45,
+	/* 44 */ &invitem_psychosisgun,
+	/* 45 */ &invitem_nightvision,
+	/* 46 */ &invitem_camspy,
+	/* 47 */ &invitem_xrayscanner,
+	/* 48 */ &invitem_irscanner,
+	/* 49 */ &invitem_cloakingdevice,
+	/* 50 */ &invitem_horizonscanner,
+	/* 51 */ NULL, // Tester
 	/* 52 */ &invitem_rocketlauncher_34,
-	/* 53 */ &invitem_rocketlauncher_34,
-	/* 54 */ &invitem_ecmmine,
-	/* 55 */ &invitem_datauplink,
-	/* 56 */ &invitem_rtracker,
-	/* 57 */ &invitem_presidentscanner,
-	/* 58 */ &invitem_doordecoder,
-	/* 59 */ &invitem_autosurgeon,
-	/* 60 */ &invitem_explosives,
-	/* 61 */ &invitem_skedarbomb,
-	/* 62 */ &invitem_commsrider,
-	/* 63 */ &invitem_tracerbug,
-	/* 64 */ &invitem_targetamplifier,
-	/* 65 */ &invitem_disguise40,
-	/* 66 */ &invitem_disguise41,
-	/* 67 */ &invitem_flightplans,
-	/* 68 */ &invitem_researchtape,
-	/* 69 */ &invitem_backupdisk,
+	/* 53 */ &invitem_ecmmine,
+	/* 54 */ &invitem_datauplink,
+	/* 55 */ &invitem_rtracker,
+	/* 56 */ &invitem_presidentscanner,
+	/* 57 */ &invitem_doordecoder,
+	/* 58 */ &invitem_autosurgeon,
+	/* 59 */ &invitem_explosives,
+	/* 60 */ &invitem_skedarbomb,
+	/* 61 */ &invitem_commsrider,
+	/* 62 */ &invitem_tracerbug,
+	/* 63 */ &invitem_targetamplifier,
+	/* 64 */ &invitem_disguise40,
+	/* 65 */ &invitem_disguise41,
+	/* 66 */ &invitem_flightplans,
+	/* 67 */ &invitem_researchtape,
+	/* 68 */ &invitem_backupdisk,
+	/* 69 */ &invitem_keycard,
 	/* 70 */ &invitem_keycard,
 	/* 71 */ &invitem_keycard,
 	/* 72 */ &invitem_keycard,
@@ -6250,118 +6250,21 @@ struct weapon *g_Weapons[] = {
 	/* 74 */ &invitem_keycard,
 	/* 75 */ &invitem_keycard,
 	/* 76 */ &invitem_keycard,
-	/* 77 */ &invitem_keycard,
-	/* 78 */ &invitem_suitcase,
-	/* 79 */ &invitem_briefcase,
-	/* 80 */ &invitem_shieldtechitem,
-	/* 81 */ &invitem_necklace,
+	/* 77 */ &invitem_suitcase,
+	/* 78 */ &invitem_briefcase,
+	/* 79 */ &invitem_shieldtechitem,
+	/* 80 */ &invitem_necklace,
+	/* 81 */ &invitem_hammer,
 	/* 82 */ &invitem_hammer,
-	/* 83 */ &invitem_hammer,
-	/* 84 */ &invitem_rocket,
-	/* 85 */ &invitem_homingrocket,
-	/* 86 */ &invitem_grenaderound,
-	/* 87 */ &invitem_bolt,
-	/* 88 */ &invitem_briefcase2,
-	/* 89 */ &invitem_rocket,
-	/* 90 */ &invitem_choppergun,
-	/* 91 */ &invitem_watchlaser,
-	/* 92 */ &invitem_hammer,
-	/* 93 */ &invitem_suicidepill,
+	/* 83 */ &invitem_rocket,
+	/* 84 */ &invitem_homingrocket,
+	/* 85 */ &invitem_grenaderound,
+	/* 86 */ &invitem_bolt,
+	/* 87 */ &invitem_briefcase2,
+	/* 88 */ &invitem_rocket,
+	/* 89 */ &invitem_choppergun,
+	/* 90 */ &invitem_watchlaser,
+	/* 91 */ &invitem_hammer,
+	/* 92 */ &invitem_suicidepill,
+	/* 93 */ &invitem_falcon2sands,
 };
-
-// struct weapon *g_Weapons[] = {
-// 	/* 0 */  &invitem_nothing,
-// 	/* 1 */  &invitem_unarmed,
-// 	/* 2 */  &invitem_falcon2,
-// 	/* 3 */  &invitem_falcon2silencer,
-// 	/* 4 */  &invitem_falcon2scope,
-// 	/* 5 */  &invitem_magsec,
-// 	/* 6 */  &invitem_mauler,
-// 	/* 7 */  &invitem_phoenix,
-// 	/* 8 */  &invitem_dy357,
-// 	/* 9 */  &invitem_dy357lx,
-// 	/* 10 */ &invitem_cmp150,
-// 	/* 11 */ &invitem_cyclone,
-// 	/* 12 */ &invitem_callisto,
-// 	/* 13 */ &invitem_rcp120,
-// 	/* 14 */ &invitem_laptopgun,
-// 	/* 15 */ &invitem_dragon,
-// 	/* 16 */ &invitem_k7avenger,
-// 	/* 17 */ &invitem_ar34,
-// 	/* 18 */ &invitem_superdragon,
-// 	/* 19 */ &invitem_shotgun,
-// 	/* 20 */ &invitem_reaper,
-// 	/* 21 */ &invitem_sniperrifle,
-// 	/* 22 */ &invitem_farsight,
-// 	/* 23 */ &invitem_devastator,
-// 	/* 24 */ &invitem_rocketlauncher,
-// 	/* 25 */ &invitem_slayer,
-// 	/* 26 */ &invitem_combatknife,
-// 	/* 27 */ &invitem_crossbow,
-// 	/* 28 */ &invitem_tranquilizer,
-// 	/* 29 */ &invitem_laser,
-// 	/* 30 */ &invitem_grenade,
-// 	/* 31 */ &invitem_nbomb,
-// 	/* 32 */ &invitem_timedmine,
-// 	/* 33 */ &invitem_proximitymine,
-// 	/* 34 */ &invitem_remotemine,
-// 	/* 35 */ &invitem_combatboost,
-// 	/* 36 */ &invitem_pp9i,
-// 	/* 37 */ &invitem_cc13,
-// 	/* 38 */ &invitem_kl01313,
-// 	/* 39 */ &invitem_kf7special,
-// 	/* 40 */ &invitem_zzt9mm,
-// 	/* 41 */ &invitem_dmc,
-// 	/* 42 */ &invitem_ar53,
-// 	/* 43 */ &invitem_rcp45,
-// 	/* 44 */ &invitem_psychosisgun,
-// 	/* 45 */ &invitem_nightvision,
-// 	/* 46 */ &invitem_camspy,
-// 	/* 47 */ &invitem_xrayscanner,
-// 	/* 48 */ &invitem_irscanner,
-// 	/* 49 */ &invitem_cloakingdevice,
-// 	/* 50 */ &invitem_horizonscanner,
-// 	/* 51 */ &invitem_rocketlauncher_34,
-// 	/* 52 */ &invitem_rocketlauncher_34,
-// 	/* 53 */ &invitem_ecmmine,
-// 	/* 54 */ &invitem_datauplink,
-// 	/* 55 */ &invitem_rtracker,
-// 	/* 56 */ &invitem_presidentscanner,
-// 	/* 57 */ &invitem_doordecoder,
-// 	/* 58 */ &invitem_autosurgeon,
-// 	/* 59 */ &invitem_explosives,
-// 	/* 60 */ &invitem_skedarbomb,
-// 	/* 61 */ &invitem_commsrider,
-// 	/* 62 */ &invitem_tracerbug,
-// 	/* 63 */ &invitem_targetamplifier,
-// 	/* 64 */ &invitem_disguise40,
-// 	/* 65 */ &invitem_disguise41,
-// 	/* 66 */ &invitem_flightplans,
-// 	/* 67 */ &invitem_researchtape,
-// 	/* 68 */ &invitem_backupdisk,
-// 	/* 69 */ &invitem_keycard,
-// 	/* 70 */ &invitem_keycard,
-// 	/* 71 */ &invitem_keycard,
-// 	/* 72 */ &invitem_keycard,
-// 	/* 73 */ &invitem_keycard,
-// 	/* 74 */ &invitem_keycard,
-// 	/* 75 */ &invitem_keycard,
-// 	/* 76 */ &invitem_keycard,
-// 	/* 77 */ &invitem_suitcase,
-// 	/* 78 */ &invitem_briefcase,
-// 	/* 79 */ &invitem_shieldtechitem,
-// 	/* 80 */ &invitem_necklace,
-// 	/* 81 */ &invitem_hammer,
-// 	/* 82 */ &invitem_hammer,
-// 	/* 83 */ &invitem_rocket,
-// 	/* 84 */ &invitem_homingrocket,
-// 	/* 85 */ &invitem_grenaderound,
-// 	/* 86 */ &invitem_bolt,
-// 	/* 87 */ &invitem_briefcase2,
-// 	/* 88 */ &invitem_rocket,
-// 	/* 89 */ &invitem_choppergun,
-// 	/* 90 */ &invitem_watchlaser,
-// 	/* 91 */ &invitem_hammer,
-// 	/* 92 */ &invitem_suicidepill,
-// 	/* 93 */ &invitem_falcon2sands,
-// };

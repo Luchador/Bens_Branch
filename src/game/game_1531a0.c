@@ -768,11 +768,18 @@ Gfx *text0f1552d4(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
 	relx = 0;
 	lineheight = chars['['].height + chars['['].baseline;
 
+	if (g_Jpn && lineheight < 14) {
+		lineheight = 14;
+	}
+
 	textMeasure(&textheight, &textwidth, text, chars, font, 0);
 
 	ptr = &x;
 	fx = *ptr - (widthscale - 1.0f) * textwidth * 0.5f * hdir;
 	fy = y - (heightscale - 1.0f) * lineheight * 0.5f * vdir;
+
+	if (fx);
+	if (fy);
 
 	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
@@ -1003,6 +1010,10 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 		lineheight = chars['['].height + chars['['].baseline;
 	}
 
+	if (g_Jpn && lineheight < 14) {
+		lineheight = 14;
+	}
+
 	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, osVirtualToPhysical(var8007fb3c));
@@ -1197,6 +1208,10 @@ Gfx *textRender(Gfx *gdl, s32 *x, s32 *y, char *text,
 		lineheight = chars['['].height + chars['['].baseline;
 	}
 
+	if (g_Jpn && lineheight < 14) {
+		lineheight = 14;
+	}
+
 	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, osVirtualToPhysical(&var8007fb5c));
@@ -1283,6 +1298,10 @@ void textMeasure(s32 *textheight, s32 *textwidth, char *text, struct fontchar *f
 	*textwidth = 0;
 	if (lineheight == 0) {
 		lineheight = font1['['].baseline + font1['['].height;
+	}
+
+	if (g_Jpn && lineheight < 14) {
+		lineheight = 14;
 	}
 
 	if (text) {
