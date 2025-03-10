@@ -13664,6 +13664,7 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		colour[3] = 0xff;
 	}
 
+	// Lasers stay bright even if the room becomes dark
 	if(door->doortype == DOORTYPE_LASER)
 	{
 		colour[0] = 0xff;

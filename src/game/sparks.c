@@ -20,11 +20,11 @@ struct sparkgroup g_SparkGroups[10];
 s32 g_NextSparkGroupIndex;
 
 struct sparktype g_SparkTypes[] = {
-	//                                     weight
-	//                                     |     max age
-	//                                     |     |                                        decel
-	//                                     |     |                                        |
-	/*0x00*/ { 100, 28,  100,  1,   0,  0, 2,                60,  60,  15, 1, 0xffff80ff, 0xffffffff, 0.02 },
+	//         velocity x/z                weight
+	//         |    velocity y             |     max age
+	//         |    |    length            |     |                                        decel
+	//         |    |    |     width       |     |                                        |
+	/*0x00*/ { 100, 28,  100,  1,   0,  0, 2,                60,  60,  15, 1, 0xffd080ff, 0xffffffff, 0.02 },
 	/*0x01*/ { 100, 28,  100,  1,   0,  0, 2,                60,  60,  15, 1, 0x80ffffff, 0xffffffff, 0.02 },
 	/*0x02*/ { 40,  -1,  30,   30,  0,  0, 2,                35,  35,  5,  1, 0x301010ff, 0x401010ff, 0.02 },
 	/*0x03*/ { 40,  -1,  300,  200, 0,  0, 0.15,             5,   5,   4,  1, 0xffffff40, 0x560011a0, 0.02 },
@@ -39,7 +39,7 @@ struct sparktype g_SparkTypes[] = {
 	/*0x0c*/ { 20,  10,  100,  1,   0,  0, 2,                60,  60,  15, 1, 0xffff80ff, 0xffffffff, 0.02 },
 	/*0x0d*/ { 20,  10,  20,   5,   0,  0, 1.5,              60,  60,  20, 1, 0xa0a0e0ff, 0xffffffff, 0.02 },
 	/*0x0e*/ { 1,   0,   80,   1,   30, 5, 0,                120, 90,  15, 0, 0x0808f000, 0xffffffff, 0.02 },
-	/*0x0f*/ { 70,  0,   150,  15,  0,  0, 6,                40,  10,  3,  0, 0x11112880, 0xaaaaaa40, 0.02 },
+	/*0x0f*/ { 70,  70,  250,  15,  0,  0, 6,                40,  10,  5,  0, 0x3385b0a0, 0xabc0d080, 0.02 }, // Water
 	/*0x10*/ { 50,  28,  100,  1,   0,  0, 1,                60,  30,  10, 1, 0xffff80ff, 0xffffffff, 0.02 },
 	/*0x11*/ { 300, 100, 100,  2,   0,  0, 0.3,              30,  1,   40, 2, 0xffff80ff, 0xffffffff, 0.1  },
 	/*0x12*/ { 170, 80,  60,   5,   0,  0, 0.4,              30,  5,   10, 3, 0xa0a0e0ff, 0xffffffff, 0.1  },
