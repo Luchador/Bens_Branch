@@ -13664,6 +13664,13 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		colour[3] = 0xff;
 	}
 
+	if(door->doortype == DOORTYPE_LASER)
+	{
+		colour[0] = 0xff;
+		colour[1] = 0x00;
+		colour[2] = 0x00;
+	}
+
 	objMergeColourFracs(colour, shademode, shadecolourfracs);
 
 	if (USINGDEVICE(DEVICE_NIGHTVISION)) {
@@ -15661,7 +15668,7 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 	if (!ismeleefunc
 			&& hit->hitthing.texturenum != 10000
 			&& shotdata->gset.weaponnum != WEAPON_UNARMED
-			//&& shotdata->gset.weaponnum != WEAPON_LASER
+			&& shotdata->gset.weaponnum != WEAPON_LASER
 			&& shotdata->gset.weaponnum != WEAPON_TRANQUILIZER
 			&& shotdata->gset.weaponnum != WEAPON_FARSIGHT) {
 		if (!hit->slowsbullet) {
@@ -15701,11 +15708,6 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 				if ((obj->model->definition->skel == &g_SkelWindowedDoor && hit->dlnode == modelGetPart(obj->model->definition, MODELPART_WINDOWEDDOOR_0003))
 						|| (obj->model->definition->skel == &g_SkelCctv && hit->dlnode == modelGetPart(obj->model->definition, MODELPART_CCTV_LENS))) {
 					spcb = true;
-				}
-
-				if (shotdata->gset.weaponnum == WEAPON_LASER) {
-					surfacetype = g_SurfaceTypes[SURFACETYPE_DIRT];
-					spcc = rngRandom() % surfacetype->numwallhittexes;
 				}
 
 				textureindex = surfacetype->wallhittexes[spcc];

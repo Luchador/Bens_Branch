@@ -14,6 +14,7 @@ Changes include:
 * Laser weapon leaves scorch marks on props and background
 * Twice the smoke puffs supported
 * Tinted glass does not become fully opaque
+* Laser obstacles stay fully bright even if a room's lights are destroyed
 * Stars added on Mr. Blonde's Revenge
 * Animated water at the bottom of the chasm in Air Base
 * Moved the "Objective Completed/Failed" message down so it doesn't block the center of the screen
