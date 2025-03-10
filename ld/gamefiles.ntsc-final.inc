@@ -124,7 +124,6 @@
 	build/ROMID/game/pak.o (section); \
 	build/ROMID/game/debug1.o (section); \
 	build/ROMID/game/debug2.o (section); \
-	build/ROMID/game/debug3.o (section); \
 	build/ROMID/game/gailists.o (section); \
 	build/ROMID/game/modeldata/general.o (section); \
 	build/ROMID/game/modeldata/basic.o (section); \

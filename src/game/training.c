@@ -2681,16 +2681,6 @@ s32 dtGetIndexBySlot(s32 wantindex)
 u32 dtGetWeaponByDeviceIndex(s32 deviceindex)
 {
 	u32 weapons[] = {
-		/*weaponMatchEnum(WEAPON_DATAUPLINK)->rank, // WEAPON_DATAUPLINK
-		weaponMatchEnum(WEAPON_ECMMINE)->rank, // WEAPON_ECMMINE
-		weaponMatchEnum(WEAPON_EYESPY)->rank, // WEAPON_EYESPY
-		weaponMatchEnum(WEAPON_NIGHTVISION)->rank, // WEAPON_NIGHTVISION
-		weaponMatchEnum(WEAPON_DOORDECODER)->rank, // WEAPON_DOORDECODER
-		weaponMatchEnum(WEAPON_RTRACKER)->rank, // WEAPON_RTRACKER
-		weaponMatchEnum(WEAPON_IRSCANNER)->rank, // WEAPON_IRSCANNER
-		weaponMatchEnum(WEAPON_XRAYSCANNER)->rank, // WEAPON_XRAYSCANNER
-		weaponMatchEnum(WEAPON_DISGUISE41)->rank, // WEAPON_DISGUISE41
-		weaponMatchEnum(WEAPON_CLOAKINGDEVICE)->rank, // WEAPON_CLOAKINGDEVICE*/
 		WEAPON_DATAUPLINK,
 		WEAPON_ECMMINE,
 		WEAPON_EYESPY,

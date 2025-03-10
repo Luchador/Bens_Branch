@@ -3048,8 +3048,6 @@ struct weapon {
 	/*0x48*/ u16 manufacturer;
 	/*0x4a*/ u16 description;
 	/*0x4c*/ u32 flags;
-	/*0x4d*/ u16 rank;
-	/*0x4e*/ f32 menupos[5];
 };
 
 struct cutscene {

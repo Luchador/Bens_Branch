@@ -4,8 +4,6 @@
 #include "data.h"
 #include "types.h"
 
-struct weapon *weaponGetRank(u16 rank);
-struct weapon *weaponMatchEnum(u16 weaponnum);
 struct weapon *weaponFindById(s32 itemid);
 struct weaponfunc *weaponGetFunctionById(u32 weaponnum, u32 which);
 struct weaponfunc *gsetGetWeaponFunction2(struct gset *gset);

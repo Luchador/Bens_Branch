@@ -117,10 +117,6 @@ s32 g_StageIndex = 1;
 uintptr_t var8007fc04 = 0;
 u8 *var8007fc08 = NULL;
 
-#if VERSION < VERSION_NTSC_1_0
-u32 var80082474nb = 0;
-#endif
-
 s16 var8007fc0c = 0;
 s16 var8007fc10 = 0;
 s32 g_NumRoomsWithGlares = 0;
@@ -179,14 +175,8 @@ void bgSetRoomOnscreen(s32 roomnum, s32 draworder, struct screenbox *box)
 {
 	s32 index;
 
-#if VERSION < VERSION_NTSC_1_0
-	g_Rooms[roomnum].flags |= ROOMFLAG_ONSCREEN;
-#endif
-
 	if ((g_Rooms[roomnum].flags & ROOMFLAG_DISABLEDBYSCRIPT) == 0) {
-#if VERSION >= VERSION_NTSC_1_0
 		g_Rooms[roomnum].flags |= ROOMFLAG_ONSCREEN;
-#endif
 
 		if (g_Rooms[roomnum].flags & ROOMFLAG_BBOXHACK) {
 			box->xmin = g_BgDrawSlots[60].box.xmin;
@@ -3388,7 +3378,6 @@ bool bgTestLineIntersectsBbox(struct coord *arg0, struct coord *arg1, struct coo
 bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, Gfx *gdl,
 		Gfx *gdl2, Vtx *vertices, struct hitthing *hitthing)
 {
-	s16 stack;
 	s16 triref;
 	s32 trisremaining;
 	bool intersectsbbox;
@@ -3426,9 +3415,6 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 		} else if (gdl->dma.cmd == G_VTX) {
 			ptr = var800a6470;
 			count = gdl->bytes[GFX_W0_BYTE(1)] & 0xf;
-#ifdef PLATFORM_N64
-			offset = (UNSEGADDR(gdl->words.w1) & 0xffffff);
-#else
 			if (gdl->words.w1 & 1) {
 				// segmented address
 				offset = (UNSEGADDR(gdl->words.w1) & 0xffffff);
@@ -3436,7 +3422,6 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 				// linear address
 				offset = gdl->words.w1 - (uintptr_t)vertices;
 			}
-#endif
 			numvertices = (((u32) gdl->bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
 			vtx = (Vtx *)((uintptr_t)vertices + offset);
 			vtx -= count;
@@ -5352,8 +5337,6 @@ void bgConsumeSnakeItem(struct bgsnakeitem *item)
 			newfoundroom = tmp;
 		}
 
-		if (1);
-
 		// Avoid adding a room twice in a row, which would happen if there are
 		// multiple portals between the same two rooms.
 		if (prevfoundroom != newfoundroom) {
@@ -5927,8 +5910,6 @@ void bgInitPortal(s32 portalnum)
 	if (tmp2 <= sp28.min && sp18) {
 		bgPortalSwapRooms(portalnum);
 	}
-
-	if (sp18);
 }
 
 /**
@@ -6003,11 +5984,6 @@ void bgSetPortalOpenState(s32 portal, bool open)
 Gfx *bgRenderPortals(Gfx *gdl, s32 arg1, s32 arg2)
 {
 	return gdl;
-}
-
-void bg0f164e80(s32 arg0, s32 arg1)
-{
-	// empty
 }
 
 f32 var8007fcb4 = 0;
@@ -6163,8 +6139,6 @@ end:
 	rooms[len] = -1;
 }
 
-#ifndef PLATFORM_N64
-
 void bgCalculateGlaresForVisibleRooms(void)
 {
 	s32 i;
@@ -6182,5 +6156,3 @@ void bgCalculateGlaresForVisibleRooms(void)
 		}
 	}
 }
-
-#endif
