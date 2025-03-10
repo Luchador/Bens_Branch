@@ -8319,7 +8319,6 @@ s32 bgunConsiderToggleGunFunction(s32 usedowntime, bool trigpressed, bool fromac
 			} else {
 				g_Vars.currentplayer->devicesactive = (g_Vars.currentplayer->devicesactive & ~DEVICE_CLOAKRCP120) | DEVICE_CLOAKRCP120;
 			}
-			g_Vars.currentplayer->gunctrl.invertgunfunc = false;
 			return USETIMER_STOP;
 		}
 	case WEAPON_LAPTOPGUN:
@@ -8395,6 +8394,16 @@ bool bgunIsUsingSecondaryFunction(void)
 {
 	struct player *player = g_Vars.currentplayer;
 	s32 weaponnum = player->gunctrl.weaponnum;
+
+	if(weaponnum == WEAPON_RCP120)
+	{
+		if(g_Vars.currentplayer->devicesactive & DEVICE_CLOAKRCP120) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 
 	if (weaponnum >= WEAPON_UNARMED && weaponnum <= WEAPON_COMBATBOOST) {
 		s32 index = (weaponnum - 1) >> 3;
@@ -9359,8 +9368,9 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		xpos += 15;
 	}
 
-	// Draw function square
-	if (funcnum == FUNC_SECONDARY && ctrl->fnfader < 255) {
+
+	// Draw function square (red square or yellow sqaure)
+	if ((funcnum == FUNC_SECONDARY) && ctrl->fnfader < 255) {
 		if (ctrl->fnfader < 128) {
 			ctrl->fnfader = 128;
 		}
@@ -9372,7 +9382,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		}
 	}
 
-	if (funcnum == FUNC_PRIMARY && ctrl->fnfader > 0) {
+	if ((funcnum == FUNC_PRIMARY) && ctrl->fnfader > 0) {
 		if (ctrl->fnfader - fnfaderinc < 0) {
 			ctrl->fnfader = 0;
 		} else {
@@ -9403,8 +9413,6 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 		if (ctrl->guntypetimer < 255) {
 			colour = 0x55ffffff;
-
-			if (ctrl->guntypetimer);
 
 			if (ctrl->guntypetimer + g_Vars.lvupdate60 > 255) {
 				ctrl->guntypetimer = 255;
@@ -9456,6 +9464,18 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 			str = langGet(ctrl->curfnstr);
 
+			struct player *player = g_Vars.currentplayer;
+			s32 weaponnum = player->gunctrl.weaponnum;
+
+			if(weaponnum == WEAPON_RCP120) {
+				if(g_Vars.currentplayer->devicesactive & DEVICE_CLOAKRCP120) {
+					str = "Cloak\n";
+				}
+				else {
+					str = "Rapid Fire\n";
+				}
+			}
+
 			if (ctrl->fnstrtimer < 255) {
 				if (ctrl->fnstrtimer + g_Vars.lvupdate60 > 255) {
 					ctrl->fnstrtimer = 255;
@@ -9463,12 +9483,12 @@ Gfx *bgunDrawHud(Gfx *gdl)
 					ctrl->fnstrtimer += (u16) g_Vars.lvupdate60;
 				}
 
-				if (funcnum == FUNC_SECONDARY && func->name == ctrl->curfnstr) {
-					colour |= 0x00ff0000;
+				if ((funcnum == FUNC_SECONDARY || g_Vars.currentplayer->devicesactive & DEVICE_CLOAKRCP120) && func->name == ctrl->curfnstr) {
+					colour = 0xffff55ff;
 				}
 
-				if (funcnum == FUNC_PRIMARY && func->name != ctrl->curfnstr) {
-					colour |= 0x00ff0000;
+				if ((funcnum == FUNC_PRIMARY || g_Vars.currentplayer->devicesactive & DEVICE_CLOAKRCP120) && func->name != ctrl->curfnstr) {
+					colour = 0xff5555ff;
 				}
 
 				textMeasure(&textheight, &textwidth, str, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);

@@ -2537,7 +2537,7 @@ struct weaponfunc_shootsingle invfunc_shotgun_single = {
 	//0.6, // damage
 	1.0,
 	//30, // spread
-	15,
+	14,
 	20, 28, 0, 0,
 	0, // recoildist
 	0, // recoilangle
@@ -2558,9 +2558,9 @@ struct weaponfunc_shootsingle invfunc_shotgun_double = {
 	FUNCFLAG_BURST2,
 	&invrecoilsettings_default,
 	0, // recoverytime60
-	0.6, // damage
+	1.0, // damage
 	//16, // spread
-	1.0,
+	15,
 	20, 28, 0, 0,
 	0, // recoildist
 	0, // recoilangle

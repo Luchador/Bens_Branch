@@ -322,7 +322,7 @@ static u32 convertProps(u8* dst, u8* src)
 				convertDefaultObj(&dstobj->base, cmd);
 
 				PD_CONV_VAL(dstobj->weaponnum, srcobj->weaponnum);
-				PD_CONV_VAL(dstobj->rank, srcobj->rank);
+				PD_CONV_VAL(dstobj->unk5d, srcobj->unk5d);
 				PD_CONV_VAL(dstobj->unk5e, srcobj->unk5e);
 				PD_CONV_VAL(dstobj->gunfunc, srcobj->gunfunc);
 

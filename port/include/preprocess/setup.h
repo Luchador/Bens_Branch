@@ -127,7 +127,7 @@ struct n64_ammocrateobj {
 
 struct n64_gset {
 	u8 weaponnum;
-	u8 gsetrank;
+	u8 unk0639;
 	u8 unk063a;
 	u8 weaponfunc;
 };
@@ -139,7 +139,7 @@ struct n64_weaponobj {
 		struct n64_gset gset;
 		struct {
 			u8 weaponnum;
-			s8 rank;
+			s8 unk5d;
 			s8 unk5e;
 			u8 gunfunc;
 		};
