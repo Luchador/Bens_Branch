@@ -3130,8 +3130,6 @@ void playerTick(bool arg0)
 	u32 buttonsnow = joyGetButtonsPressedThisFrame(contpadnum, 0xffffffff);
 	if (buttonsnow & CONT_GKEY) {  // Gangsta key pressed
 		g_Vars.currentplayer->wantsgangsta = !g_Vars.currentplayer->wantsgangsta;
-		
-		//debug_log("Wants gangsta: %d \n", g_Vars.currentplayer->wantsgangsta);
 	}
 
 	if (g_Vars.currentplayer->eyespy) {

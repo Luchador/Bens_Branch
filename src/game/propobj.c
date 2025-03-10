@@ -15661,7 +15661,7 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 	if (!ismeleefunc
 			&& hit->hitthing.texturenum != 10000
 			&& shotdata->gset.weaponnum != WEAPON_UNARMED
-			&& shotdata->gset.weaponnum != WEAPON_LASER
+			//&& shotdata->gset.weaponnum != WEAPON_LASER
 			&& shotdata->gset.weaponnum != WEAPON_TRANQUILIZER
 			&& shotdata->gset.weaponnum != WEAPON_FARSIGHT) {
 		if (!hit->slowsbullet) {
@@ -15701,6 +15701,11 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 				if ((obj->model->definition->skel == &g_SkelWindowedDoor && hit->dlnode == modelGetPart(obj->model->definition, MODELPART_WINDOWEDDOOR_0003))
 						|| (obj->model->definition->skel == &g_SkelCctv && hit->dlnode == modelGetPart(obj->model->definition, MODELPART_CCTV_LENS))) {
 					spcb = true;
+				}
+
+				if (shotdata->gset.weaponnum == WEAPON_LASER) {
+					surfacetype = g_SurfaceTypes[SURFACETYPE_DIRT];
+					spcc = rngRandom() % surfacetype->numwallhittexes;
 				}
 
 				textureindex = surfacetype->wallhittexes[spcc];

@@ -805,7 +805,6 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 
 			if (surfacetype->numwallhittexes > 0 && (!func || (func->type & 0xff) != INVENTORYFUNCTYPE_MELEE)) {
 				if (shotdata.gset.weaponnum != WEAPON_UNARMED
-						&& shotdata.gset.weaponnum != WEAPON_LASER
 						&& shotdata.gset.weaponnum != WEAPON_TRANQUILIZER
 						&& shotdata.gset.weaponnum != WEAPON_FARSIGHT) {
 					texnum = rngRandom() % surfacetype->numwallhittexes;
@@ -814,6 +813,15 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 					if (texnum >= WALLHITTEX_GLASS1 && texnum <= WALLHITTEX_GLASS3) {
 						// Use bulletproof glass hit textures instead
 						texnum += 10;
+					}
+
+					if (shotdata.gset.weaponnum == WEAPON_LASER)
+					{
+						if(surfacetype != g_SurfaceTypes[SURFACETYPE_SHALLOWWATER] && surfacetype != g_SurfaceTypes[SURFACETYPE_DEEPWATER]) {
+							surfacetype = g_SurfaceTypes[SURFACETYPE_DIRT];
+							texnum = rngRandom() % surfacetype->numwallhittexes;
+							texnum = surfacetype->wallhittexes[texnum];
+						}
 					}
 
 					if (texnum) {
