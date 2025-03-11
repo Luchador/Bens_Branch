@@ -212,7 +212,6 @@ void objDeform(struct defaultobj *obj, s32 level);
 void objBounce(struct defaultobj *obj, struct coord *gundir2d);
 void objSetDropped(struct prop *prop, u32 droptype);
 void objApplyMomentum(struct defaultobj *obj, struct coord *speed, f32 rotation, bool addspeed, bool addrotation);
-void piracyRestore(void);
 void func0f082e84(struct defaultobj *obj, struct coord *pos, struct coord *dir, struct coord *tween, bool addrotation);
 void objDetach(struct prop *prop);
 bool objDrop(struct prop *prop, bool lazy);

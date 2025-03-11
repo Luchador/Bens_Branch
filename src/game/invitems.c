@@ -1441,7 +1441,7 @@ struct weapon invitem_cmp150 = {
 	L_GUN_015, // name
 	L_GUN_149, // manufacturer
 	L_GUN_164, // description
-	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_04000000 | WEAPONFLAG_AIMTRACK,
+	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_00008000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_04000000 | WEAPONFLAG_AIMTRACK | WEAPONFLAG_GANGSTA,
 };
 
 struct modelpartvisibility invpartvisibility_cyclone[] = {
@@ -2513,8 +2513,8 @@ struct weaponfunc_shootsingle invfunc_shotgun_single = {
 	0, // flags
 	&invrecoilsettings_default,
 	0, // recoverytime60
-	0.6, // damage
-	30, // spread
+	1.0, // damage
+	15, // spread
 	20, 28, 0, 0,
 	0, // recoildist
 	0, // recoilangle
@@ -2535,7 +2535,7 @@ struct weaponfunc_shootsingle invfunc_shotgun_double = {
 	FUNCFLAG_BURST2,
 	&invrecoilsettings_default,
 	0, // recoverytime60
-	0.6, // damage
+	1.0, // damage
 	16, // spread
 	20, 28, 0, 0,
 	0, // recoildist
@@ -2550,7 +2550,7 @@ struct weaponfunc_shootsingle invfunc_shotgun_double = {
 struct inventory_ammo invammo_shotgun = {
 	AMMOTYPE_SHOTGUN,
 	CASING_SHOTGUN,
-	9, // clip size
+	8, // clip size
 	invanim_shotgun_reload, // reload animation
 	AMMOFLAG_INCREMENTALRELOAD, // flags
 };
@@ -4063,7 +4063,7 @@ struct weaponfunc_shootsingle invfunc_sniperrifle_ap = {
 	&invrecoilsettings_default,
 	16, // recoverytime60
 	1.5, // damage
-	3, // spread
+	4, // spread
 	6, 10, 0, 0,
 	10, // recoildist
 	2, // recoilangle
@@ -4509,7 +4509,7 @@ struct weapon invitem_zzt9mm = {
 	L_GUN_054, // name
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
-	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00008000,
+	WEAPONFLAG_00000004 | WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_DUALFLIP | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_DUALWIELD | WEAPONFLAG_00008000 | WEAPONFLAG_GANGSTA,
 };
 
 struct weaponfunc_shootauto invfunc_dmc_shoot = {

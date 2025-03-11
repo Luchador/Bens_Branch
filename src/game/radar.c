@@ -3,7 +3,7 @@
 #include "game/cheats.h"
 #include "game/chraction.h"
 #include "game/atan2f.h"
-#include "game/game_0b2150.h"
+#include "game/utils.h"
 #include "game/tex.h"
 #include "game/game_152fa0.h"
 #include "game/game_1531a0.h"
@@ -79,8 +79,10 @@ Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, s32 arg2, s3
 	spa8[1] = arg4;
 
 	texSelect(&gdl, tconfig, 2, 0, 0, 1, NULL);
-	func0f0b278c(&gdl, spb0, spa8, tconfig->width, tconfig->height,
-			0, 0, 0, 0, 0xff, 0, 40, tconfig->level > 0, 0);
+
+	gDPSetEnvColor(gdl++, 0, 0xff, 0, 40);
+	gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
+	textureCalcScreenCoords(&gdl, spb0, spa8, tconfig->width, tconfig->height, 0, 0, 0, false);
 
 	gDPPipeSync(gdl++);
 	gDPSetColorDither(gdl++, G_CD_BAYER);

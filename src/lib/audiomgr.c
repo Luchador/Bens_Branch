@@ -10,27 +10,14 @@
 #include "lib/libc/ll.h"
 #include "data.h"
 #include "types.h"
+#include "game/debug.h"
 
-u32 var80091560;
-u32 var80091564;
 u64 var80091568;
 u64 var80091570;
 u64 var80091578;
 u64 var80091580;
 u64 var80091588;
 u64 var80091590;
-u32 var80091598;
-u32 var8009159c;
-u32 var800915a0;
-u32 var800915a4;
-u32 var800915a8;
-u32 var800915ac;
-u32 var800915b0;
-u32 var800915b4;
-u32 var800915b8;
-u32 var800915bc;
-u32 var800915c0;
-u32 var800915c4;
 AMAudioMgr g_AudioManager;
 OSScClient g_AudioSchedClient;
 u32 var800918dc;
@@ -47,16 +34,13 @@ void amgrHandleDoneMsg(AudioInfo *info);
 void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo);
 void amgrMain(void *arg);
 
+// Used in PC port
 void amgrInit(void)
 {
 	g_AudioSp = bootAllocateStack(THREAD_AUDIO, STACKSIZE_AUDIO);
 }
 
-#if VERSION >= VERSION_PAL_BETA
-void amgrCreate(ALSynConfig *config, u32 *settings)
-#else
 void amgrCreate(ALSynConfig *config)
-#endif
 {
 	f32 freqpertick;
 	s32 i;

@@ -36,6 +36,7 @@ bool debugIsChrStatsEnabled(void);
 bool debug0f11ef80(void);
 bool debugIsMemInfoEnabled(void);
 s32 debug_log(const char *message, s32 num);
+s32 debug_log_float(const char *message, f32 num);
 s32 debug_erase();
 s32 dmenuGetSelectedOption(void);
 void dmenuSetSelectedOption(s32 option);

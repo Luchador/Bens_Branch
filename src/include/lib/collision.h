@@ -28,19 +28,11 @@ bool cd000276c8Cyl(struct geocyl *tile, f32 x, f32 z, f32 width, struct prop *pr
 bool cdFindLadder(struct coord *pos, f32 width, f32 ymax, f32 ymin, RoomNum *rooms, u16 geoflags, struct coord *laddernormal);
 bool cd0002a13c(struct coord *pos, f32 radius, f32 arg2, f32 arg3, RoomNum *rooms, u16 geoflags);
 f32 cdFindGroundInfoAtCyl(struct coord *pos, f32 radius, RoomNum *rooms, u16 *floorcol, u8 *floortype, u16 *floorflags, RoomNum *floorroom, s32 *inlift, struct prop **lift);
-f32 cdReturnZero(void);
 f32 cdFindGroundAtCyl(struct coord *pos, f32 radius, RoomNum *rooms, u16 *floorcol, u8 *floortype);
 f32 cdFindFloorYColourTypeAtPos(struct coord *pos, RoomNum *rooms, u16 *floorcol, u8 *floortype);
 s32 cdFindFloorRoomAtPos(struct coord *pos, RoomNum *nearrooms);
-
-#if VERSION >= VERSION_NTSC_1_0
 RoomNum cdFindFloorRoomYColourFlagsAtPos(struct coord *pos, RoomNum *rooms, f32 *arg2, u16 *floorcolptr, u16 *flagsptr);
 RoomNum cdFindCeilingRoomYColourFlagsAtPos(struct coord *pos, RoomNum *rooms, f32 *arg2, u16 *floorcolptr, u16 *flagsptr);
-#else
-RoomNum cdFindFloorRoomYColourFlagsAtPos(struct coord *pos, RoomNum *rooms, f32 *arg2, u16 *floorcolptr);
-RoomNum cdFindCeilingRoomYColourFlagsAtPos(struct coord *pos, RoomNum *rooms, f32 *arg2, u16 *floorcolptr);
-#endif
-
 RoomNum cdFindFloorRoomYColourNormalPropAtPos(struct coord *pos, RoomNum *rooms, f32 *arg2, u16 *floorcol, struct coord *normal, struct prop **propptr);
 RoomNum cdFindCeilingRoomYColourFlagsNormalAtPos(struct coord *pos, RoomNum *rooms, f32 *arg2, u16 *floorcol, u16 *geoflags, struct coord *normal);
 s32 cdTestVolume(struct coord *pos, f32 radius, RoomNum *rooms, s32 types, bool checkvertical, f32 ymax, f32 ymin);

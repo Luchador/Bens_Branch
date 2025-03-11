@@ -367,7 +367,7 @@ void splat0f14986c(struct splatdata *splat)
 	f32 splatscaley; // Splat height before randomness is applied
 	struct defaultobj *obj;
 	f32 splatscaledbydistance; // Splats get bigger the farther behind a character it's made
-	f32 splatsizetype; // Splats can be little, medium, or big
+	f32 splatsizetype = 0; // Splats can be little, medium, or big
 	f32 height;
 	f32 width;
 	u8 maxalpha = 0xff;

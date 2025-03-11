@@ -20,9 +20,20 @@ Changes include:
 * Moved the "Objective Completed/Failed" message down so it doesn't block the center of the screen
 
 Bug fixes:
+* Fixed Jonathan being unable to shoot the player in The Duel
 * Fixed the bug where wine bottles don't play their shatter sound half the time when destroyed
 * Fixed the function indicator not turning yellow during RC-P120 secondary mode
 * Fixed a very minor bug where using a light switch would change a room's lighting faster than intended
+
+Stage changes:
+
+Note: These changes require alterations to files I can't upload to this branch. At some point I may upload them and link them for download.
+
+* Investigation: Added tables with microscopes in some lab rooms
+* Investigation: Fixed Night Vision goggles item using the IR Specs model
+* Villa: Brightened up the dock clipping tiles, which were oddly dark
+* Villa: Fixed the broken texture underneath the stove hood
+* Villa: Made some vertex coloring tweaks to the bedroom and bathroom
 
 ## Credits
 

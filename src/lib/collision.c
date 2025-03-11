@@ -2231,18 +2231,6 @@ f32 cdFindGroundInfoAtCyl(struct coord *pos, f32 radius, RoomNum *rooms, u16 *fl
 	return ground;
 }
 
-/**
- * This function must come immediately after cdFindGroundInfoAtCyl.
- *
- * A piracy check looks for this function, then backtracks two instructions to
- * nop the jr ra at the end of cdFindGroundInfoAtCyl, causing it to flow into this
- * function and return 0.
- */
-f32 cdReturnZero(void)
-{
-	return 0;
-}
-
 f32 cdFindGroundAtCyl(struct coord *pos, f32 radius, RoomNum *rooms, u16 *floorcol, u8 *floortype)
 {
 	return cdFindGroundInfoAtCyl(pos, radius, rooms, floorcol, floortype, NULL, NULL, NULL, NULL);

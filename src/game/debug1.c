@@ -3,6 +3,7 @@
 #include "game/debug.h"
 #include "lib/debughud.h"
 #include "bss.h"
+#include "lib/vi.h"
 #include "data.h"
 #include "types.h"
 #include <stdio.h>
@@ -27,6 +28,20 @@ void dmenu0f118c80nb(void)
 #endif
 
 s32 debug_log(const char *message, s32 num)
+{
+	FILE *debug_file = fopen("debug.log", "a");
+    if (debug_file == NULL) {
+        perror("Error opening debug.log");
+        return 0;
+    }
+
+    fprintf(debug_file, message, num);
+    fclose(debug_file);
+
+	return 1;
+}
+
+s32 debug_log_float(const char *message, f32 num)
 {
 	FILE *debug_file = fopen("debug.log", "a");
     if (debug_file == NULL) {

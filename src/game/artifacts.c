@@ -4,7 +4,7 @@
 #include "game/camera.h"
 #include "game/dlights.h"
 #include "game/env.h"
-#include "game/game_0b2150.h"
+#include "game/utils.h"
 #include "game/tex.h"
 #include "game/sky.h"
 #include "game/artifacts.h"
@@ -21,6 +21,7 @@
 #include "lib/lib_17ce0.h"
 #include "game/player.h"
 #include "game/prop.h"
+#include "game/debug.h"
 #endif
 
 u8 *var800a41a0;
@@ -431,14 +432,13 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 	u16 t4;
 	f32 add;
 	s32 l;
-	f32 brightness;
+	f32 brightness; // The closer you get to an artifact, the higher this becomes. Max 750.
 	s32 avg;
 	f32 f0;
 	s32 v1;
 	s32 r;
 	s32 g;
 	s32 b;
-	s32 stack;
 	u8 colour[4];
 	s16 lightroompos[3];
 	struct coord lightworldpos;
@@ -593,8 +593,9 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 						spd4[0] = f24;
 						spd4[1] = f26;
 
-						func0f0b2740(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
+						textureCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
 
+						// Seems to make artifacts slightly brighter when true
 						if (extra) {
 							colour[0] = 0xff;
 							colour[1] = 0xff;
@@ -607,7 +608,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 							spd4[0] = f24 * 0.4f;
 							spd4[1] = f26 * 0.4f;
 
-							func0f0b2740(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
+							textureCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
 						}
 					}
 				}

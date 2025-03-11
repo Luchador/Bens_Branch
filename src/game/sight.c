@@ -3,7 +3,7 @@
 #include "game/chraction.h"
 #include "game/bondgun.h"
 #include "game/weaponutils.h"
-#include "game/game_0b2150.h"
+#include "game/utils.h"
 #include "game/tex.h"
 #include "game/savebuffer.h"
 #include "game/sight.h"
@@ -17,6 +17,7 @@
 #include "lib/vi.h"
 #include "lib/main.h"
 #include "lib/snd.h"
+#include "game/debug.h"
 #include "data.h"
 #include "types.h"
 #ifndef PLATFORM_N64
@@ -893,11 +894,8 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	s32 x2;
 	s32 y1;
 	s32 y2;
-#ifdef PLATFORM_N64
-	const s32 halfw = (tconfig->width >> 1);
-#else
+
 	const s32 halfw = roundf((f32)(tconfig->width >> 1) * (SCREEN_ASPECT / videoGetAspect()));
-#endif
 
 	if (!sighton) {
 		return gdl;
@@ -931,9 +929,12 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 
 	texSelect(&gdl, tconfig, 2, 0, 0, 1, NULL);
 
-	func0f0b278c(&gdl, spc4, spbc, tconfig->width, tconfig->height,
-			0, 0, 1, 0xff, 0xff, 0xff, 0x7f, tconfig->level > 0, 0);
+	gDPSetEnvColor(gdl++, 0xff, 0xff, 0xff, 0x7f);
 
+	gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
+
+	textureCalcScreenCoords(&gdl, spc4, spbc, tconfig->width, tconfig->height, 0, 0, 0, false);
+	
 	gDPPipeSync(gdl++);
 	gDPSetColorDither(gdl++, G_CD_BAYER);
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);

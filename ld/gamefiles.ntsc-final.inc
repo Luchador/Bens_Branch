@@ -89,7 +89,6 @@
 	build/ROMID/game/gunfx.o (section); \
 	build/ROMID/game/mpstats.o (section); \
 	build/ROMID/game/weaputils.o (section); \
-	build/ROMID/game/game_0b2150.o (section); \
 	build/ROMID/game/modelmgr.o (section); \
 	build/ROMID/game/texselect.o (section); \
 	build/ROMID/game/camera.o (section); \

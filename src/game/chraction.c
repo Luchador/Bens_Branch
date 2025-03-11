@@ -14434,9 +14434,10 @@ bool chrCompareTeams(struct chrdata *chr1, struct chrdata *chr2, u8 checktype)
 				if (g_Vars.bond && g_Vars.bond->prop) {
 					struct chrdata *playerchr = g_Vars.bond->prop->chr;
 
-					// @bug: This makes Jon an ally in Duel
+					// @bug fix: Only make Jon an ally if the stage is not Duel
 					if(!g_Vars.stagenum == STAGE_DEFECTION)
 					{
+						// @bug: This makes Jon an ally in Duel
 						if ((chr2 == playerchr && chr1->headnum == HEAD_JONATHAN) ||
 								(chr1 == playerchr && chr2->headnum == HEAD_JONATHAN)) {
 							return true;
@@ -14457,9 +14458,10 @@ bool chrCompareTeams(struct chrdata *chr1, struct chrdata *chr2, u8 checktype)
 				if (g_Vars.bond && g_Vars.bond->prop) {
 					struct chrdata *playerchr = g_Vars.bond->prop->chr;
 
-					// @bug: This makes Jon an ally in Duel
+					// @bug fix: Only make Jon an ally if the stage is not Duel
 					if(!g_Vars.stagenum == STAGE_DEFECTION)
 					{
+						// @bug: This makes Jon an ally in Duel
 						if ((chr2 == playerchr && chr1->headnum == HEAD_JONATHAN) ||
 								(chr1 == playerchr && chr2->headnum == HEAD_JONATHAN)) {
 							return false;

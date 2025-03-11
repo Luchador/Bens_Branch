@@ -9,6 +9,7 @@ u32 align4(u32 arg0);
 u32 align16(u32 arg0);
 uintptr_t align32(uintptr_t arg0);
 void utilsInit(void);
+void textureCalcScreenCoords(Gfx **gdl, f32 *arg1, f32 *arg2, s32 width, s32 height, bool arg5, bool arg6, bool arg7, bool arg8);
 //void utilsCalcLeftHandedCross(struct coord *a, struct coord *b, struct coord *out);
 bool normalizeVector(struct coord *arg0, struct coord *arg1, u32 line, char *file);
 void InterpTwoPoints(struct coord *arg0, struct coord *arg1, f32 standfrac, struct coord *vel);

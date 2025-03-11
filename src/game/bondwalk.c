@@ -800,20 +800,11 @@ void bwalkUpdateVertical(void)
 		ground = -30000;
 	}
 
-#if PIRACYCHECKS
-	if (g_Vars.currentplayer->inlift && newinlift == false) {
-		// Exiting a lift
-		piracyRestore();
-	}
-#endif
-
 	if (g_Vars.currentplayer->inlift && newinlift && g_Vars.currentplayer->onladder == false) {
 		// Remaining in a lift
 		moveamount = ground - g_Vars.currentplayer->vv_ground;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (moveamount != 0)
-#endif
 		{
 			// The lift is moving
 			if (g_Vars.currentplayer->isfalling == false && lift == g_Vars.currentplayer->lift) {

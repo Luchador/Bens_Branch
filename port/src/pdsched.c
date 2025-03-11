@@ -20,6 +20,7 @@
 #include "lib/joy.h"
 #include "data.h"
 #include "types.h"
+#include "game/debug.h"
 
 #include "video.h"
 #include "audio.h"

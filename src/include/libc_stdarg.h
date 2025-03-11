@@ -45,7 +45,6 @@ typedef char *va_list;
 #else // TARGET_N64
 
 #include_next <stdarg.h>
-#warning fuck
 
 #endif
 

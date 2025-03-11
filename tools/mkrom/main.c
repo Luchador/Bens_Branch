@@ -7,7 +7,7 @@ struct state state;
 /**
  * mkrom - do ROM finalisation steps
  *
- * mkrom <romfile> <mapfile> <piracychecks> <zipmagic> <copylen> <outfile>
+ * mkrom <romfile> <mapfile> <zipmagic> <copylen> <outfile>
  *
  * <romfile>
  * This is the path to the stage1 binary. This file is similar to the final ROM,
@@ -19,13 +19,6 @@ struct state state;
  * <mapfile>
  * This is the path to the linker map, which is used to determine where the
  * uncompressed segments are and where they should be placed.
- *
- * <piracychecks>
- * This should be 0 or 1 to indicate whether this version of the ROM contains
- * piracy checks or not. Some piracy checks work by checksumming functions in
- * memory at runtime and comparing it with a known value. If set to 1, mkrom
- * will calculate the checksums for these functions and patch them into the
- * piracy checks.
  *
  * <zipmagic>
  * This is a two byte hex value which is used when zipping the game segments.
@@ -46,25 +39,15 @@ struct state state;
 int main(int argc, char **argv)
 {
 	if (argc < 7) {
-		fprintf(stderr, "Usage: mkrom <romfile> <mapfile> <piracychecks> <zipmagic> <copylen> <outfile>\n");
+		fprintf(stderr, "Usage: mkrom <romfile> <mapfile> <zipmagic> <copylen> <outfile>\n");
 		exit(1);
 	}
 
 	rom_load(argv[1]);
 	map_open(argv[2]);
 
-	state.piracychecks = atoi(argv[3]);
 	state.zipmagic = strtol(argv[4], NULL, 16);
 	state.copylen = atoi(argv[5]);
-
-	// Compute piracy checksums if requested
-	if (state.piracychecks) {
-		piracy_patch_checksums();
-	}
-
-	if (state.is_ntscbeta) {
-		piracy_patch_mainloop();
-	}
 
 	// Slice the game segment into chunks and zip each of them to create the
 	// gamezips segment

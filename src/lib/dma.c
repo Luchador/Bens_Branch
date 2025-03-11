@@ -7,7 +7,6 @@
 #include "types.h"
 
 volatile u32 g_DmaNumSlotsBusy;
-u32 var80094ae4;
 OSIoMesg g_DmaIoMsgs[32];
 volatile u8 g_DmaSlotsBusy[32];
 OSMesg g_DmaMesgs[32];
@@ -30,138 +29,17 @@ void dmaInit(void)
 
 void dmaStart(void *memaddr, romptr_t romaddr, u32 len, bool priority)
 {
-#ifdef PLATFORM_N64
-	u32 numiterations;
-	u32 remainder;
-	s32 i;
-
-#if VERSION < VERSION_NTSC_1_0
-	if (romaddr >= ROM_SIZE * 1024 * 1024) {
-		crashSetMessage("DMA : Off the end of the rom");
-		CRASH();
-	}
-#endif
-
-	if (g_DmaNumSlotsBusy) {
-		dmaWait();
-	}
-
-	if (len < 0x4000 * ARRAYCOUNT(g_DmaIoMsgs)) {
-		numiterations = len / 0x4000;
-		remainder = len % 0x4000;
-	} else {
-		// DMA size is 0x80000 or more. It won't fit in the queue, so do it
-		// all in one call to osPiStartDma using the remainder variable.
-		numiterations = 0;
-		remainder = len;
-	}
-
-	osInvalDCache(memaddr, len);
-
-	for (i = 0; i != numiterations; i++) {
-		g_DmaSlotsBusy[i] = true;
-		g_DmaNumSlotsBusy++;
-
-		osPiStartDma(&g_DmaIoMsgs[i], priority, 0, romaddr, memaddr, 0x4000, &g_DmaMesgQueue);
-
-		romaddr += 0x4000;
-		memaddr = (void *)((uintptr_t) memaddr + 0x4000);
-	}
-
-	if (remainder) {
-		g_DmaSlotsBusy[i] = true;
-		g_DmaNumSlotsBusy++;
-
-		osPiStartDma(&g_DmaIoMsgs[i], priority, 0, romaddr, memaddr, remainder, &g_DmaMesgQueue);
-	}
-#else // PLATFORM_N64
 	bcopy((const void *)romaddr, memaddr, len);
-#endif // PLATFORM_N64
-}
-
-#if VERSION >= VERSION_NTSC_1_0
-u32 xorDeadbeef(u32 value)
-{
-	return value ^ 0xdeadbeef;
-}
-
-u32 xorDeadbabe(u32 value)
-{
-	return value ^ 0xdeadbabe;
-}
-
-/**
- * This is executed after a DMA transfer. It xors the first 8 words with
- * 0x0330c820, then reads a value from the boot loader (0x340 in ROM) which
- * should be the same value, and xors the memory again with that value.
- */
-void dmaCheckPiracy(void *memaddr, u32 len)
-{
-	if (g_LoadType != LOADTYPE_NONE && len > 128) {
-#if PIRACYCHECKS
-		u32 value = xorDeadbeef((PAL ? 0x0109082b : 0x0330c820) ^ 0xdeadbeef);
-		u32 *ptr = (u32 *)memaddr;
-		u32 data;
-		u32 devaddr;
-		s32 i;
-
-		for (i = 0; i < 8; i++) {
-			ptr[i] ^= value;
-		}
-
-		devaddr = xorDeadbabe((PAL ? 0xb0000454 : 0xb0000340) ^ 0xdeadbabe);
-
-		osPiReadIo(devaddr, &data);
-
-		for (i = 0; i < 8; i++) {
-			ptr[i] ^= data;
-		}
-#endif
-#ifdef PLATFORM_N64 // we're actually using g_LoadType for something on pc, the value gets reset later
-		g_LoadType = LOADTYPE_NONE;
-#endif
-	}
-}
-#endif
-
-void dmaWait(void)
-{
-#ifdef PLATFORM_N64
-	u32 stack;
-	OSIoMesg *msg;
-	s32 i;
-
-	while (g_DmaNumSlotsBusy) {
-		osRecvMesg(&g_DmaMesgQueue, (OSMesg) &msg, OS_MESG_BLOCK);
-
-		for (i = 0; i < ARRAYCOUNT(g_DmaIoMsgs); i++) {
-			if (&g_DmaIoMsgs[i] == msg) {
-				break;
-			}
-		}
-
-		g_DmaSlotsBusy[i] = false;
-		g_DmaNumSlotsBusy--;
-	}
-#endif
 }
 
 void dmaExec(void *memaddr, romptr_t romaddr, u32 len)
 {
 	dmaStart(memaddr, romaddr, len, false);
-	dmaWait();
-#if VERSION >= VERSION_NTSC_1_0
-	dmaCheckPiracy(memaddr, len);
-#endif
 }
 
 void dmaExecHighPriority(void *memaddr, romptr_t romaddr, u32 len)
 {
 	dmaStart(memaddr, romaddr, len, true);
-	dmaWait();
-#if VERSION >= VERSION_NTSC_1_0
-	dmaCheckPiracy(memaddr, len);
-#endif
 }
 
 /**

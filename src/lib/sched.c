@@ -19,6 +19,7 @@
 #include "lib/joy.h"
 #include "data.h"
 #include "types.h"
+#include "game/debug.h"
 
 /*
  * private typedefs and defines
@@ -175,6 +176,7 @@ void osCreateScheduler(OSSched *sc, OSThread *thread, u8 mode, u32 numFields)
 	osStartThread(sc->thread);
 }
 
+// Not called in PC port
 void osScAddClient(OSSched *sc, OSScClient *c, OSMesgQueue *msgQ, bool is30fps)
 {
 	OSIntMask mask;
@@ -189,34 +191,6 @@ void osScAddClient(OSSched *sc, OSScClient *c, OSMesgQueue *msgQ, bool is30fps)
 	osSetIntMask(mask);
 }
 
-#if VERSION < VERSION_NTSC_1_0
-void osScRemoveClient(OSSched *sc, OSScClient *c)
-{
-	OSScClient *client = sc->clientList;
-	OSScClient *prev   = 0;
-	OSIntMask  mask;
-
-	mask = osSetIntMask(OS_IM_NONE);
-
-	while (client) {
-		if (client == c) {
-			if (prev) {
-				prev->next = c->next;
-			} else {
-				sc->clientList = c->next;
-			}
-
-			break;
-		}
-
-		prev = client;
-		client = client->next;
-	}
-
-	osSetIntMask(mask);
-}
-#endif
-
 OSMesgQueue *osScGetCmdQ(OSSched *sc)
 {
 	return &sc->cmdQ;
@@ -228,6 +202,8 @@ OSMesgQueue *osScGetCmdQ(OSSched *sc)
  * Most N64 games do the task scheduling on retrace (VIDEO_MSG), but PD does
  * task scheduling both at retrace and when the RDP completes a task.
  */
+
+ // Not called in PC port
 void __scMain(void *arg)
 {
 	OSMesg msg = 0;
@@ -384,28 +360,6 @@ void __scHandleTasks(OSSched *sc)
 			osSendMesg(client->msgQ, (OSMesg) &sc->retraceMsg, OS_MESG_NOBLOCK);
 		}
 	}
-
-#if PIRACYCHECKS
-	{
-		u32 checksum = 0;
-		s32 *end = (s32 *)&bootAllocateStack;
-		s32 *ptr = (s32 *)&boot;
-		s32 i;
-
-		while (ptr < end) {
-			checksum ^= *ptr;
-			ptr++;
-		}
-
-		if (checksum != CHECKSUM_PLACEHOLDER) {
-			u8 *addr = &g_SndCache;
-
-			for (i = 0; i < 40; i++) {
-				addr[4 + i] = 0xff;
-			}
-		}
-	}
-#endif
 }
 
 /**

@@ -20,7 +20,7 @@
 #include "game/env.h"
 #include "game/gunfx.h"
 #include "game/weaponutils.h"
-#include "game/game_0b2150.h"
+#include "game/utils.h"
 #include "game/tex.h"
 #include "game/camera.h"
 #include "game/player.h"
@@ -4356,7 +4356,7 @@ Gfx *playerRenderShield(Gfx *gdl)
 		gDPSetPrimColor(gdl++, 0, 0, 0xff, 0xff, 0xff, (s32)(175 * f20 * f20));
 		gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_01);
 
-		func0f0b2740(&gdl, sp90, sp88, g_TexShieldConfigs->width, g_TexShieldConfigs->height,
+		textureCalcScreenCoords(&gdl, sp90, sp88, g_TexShieldConfigs->width, g_TexShieldConfigs->height,
 				(g_Vars.currentplayer->shieldshowrnd & 1) != 0,
 				(g_Vars.currentplayer->shieldshowrnd & 2) != 0,
 				(g_Vars.currentplayer->shieldshowrnd & 4) != 0,
