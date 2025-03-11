@@ -1,0 +1,73 @@
+|Background - **The alarm has been given, and there are dataDyne shock troops ready for you throughout the building. Exit via the foyer is impossible due to the number of ground troops present. The transport will collect you and Dr. Caroll from the helipad.**|Carrington - **I don't have to remind you to protect Dr. Caroll at all costs, Joanna. Cassandra and dataDyne are going to be throwing all the obstacles they can in your path to prevent you from getting Dr. Caroll out. Good luck.**|Objective One: - Gain Access to Upper Floors**Fight your way around the foyer until you can get access to one of the lifts that will take you and Dr. Caroll to the upper floors of the building.**|Objective Two: - Reactivate Elevator**We traced an order to shut down the only accessible elevator to a PC on the lowest floor of offices. You have to find that PC and change the order to get the elevator going again.**|Objective Three: - Destroy dataDyne Gunship**There is a dataDyne security gunship circling the building which outguns your jumpship and will shoot you out of the sky. Terminate it with extreme prejudice, since it will be trying to do the same thing to you.**|Objective Four: - Defeat Cassandra's Bodyguards**We suspect that Cassandra has deployed her bodyguards to block the route to the helipad. It is almost certain that you'll be unable to avoid them, so expect serious resistance when you encounter them.**|Objective Five: - Return to Helipad for Evacuation**Get to the helipad where your dropship will be waiting. And don't forget Dr. Caroll.**END*
+LUCERNE TOWER*
+|Background - **The alarm has been given, and there are dataDyne shock troops ready for you throughout the building. Exit via the foyer is impossible due to the number of ground troops present. The transport will collect you and Dr. Caroll from the helipad.**|Carrington - **I don't have to remind you to protect Dr. Caroll at all costs, Joanna. Cassandra and dataDyne are going to be throwing all the obstacles they can in your path to prevent you from getting Dr. Caroll out. Good luck.**|Objective One: - Gain Access to Upper Floors**Fight your way around the foyer until you can get access to one of the lifts that will take you and Dr. Caroll to the upper floors of the building.**|Objective Two: - Destroy dataDyne Gunship**There is a dataDyne security gunship circling the building which outguns your jumpship and will shoot you out of the sky. Terminate it with extreme prejudice, since it will be trying to do the same thing to you.**|Objective Three: - Defeat Cassandra's Bodyguards**We suspect that Cassandra has deployed her bodyguards to block the route to the helipad. It is almost certain that you'll be unable to avoid them, so expect serious resistance when you encounter them.**|Objective Four: - Return to Helipad for Evacuation**Get to the helipad where your dropship will be waiting. And don't forget Dr. Caroll.**END*
+|Background - **The alarm has been given, and there are dataDyne shock troops ready for you throughout the building. Exit via the foyer is impossible due to the number of ground troops present. The transport will collect you and Dr. Caroll from the helipad.**|Carrington - **I don't have to remind you to protect Dr. Caroll at all costs, Joanna. Cassandra and dataDyne are going to be throwing all the obstacles they can in your path to prevent you from getting Dr. Caroll out. Good luck.**|Objective One: - Gain Access to Upper Floors**Fight your way around the foyer until you can get access to one of the lifts that will take you and Dr. Caroll to the upper floors of the building.**|Objective Two: - Defeat Cassandra's Bodyguards**We suspect that Cassandra has deployed her bodyguards to block the route to the helipad. It is almost certain that you'll be unable to avoid them, so expect serious resistance when you encounter them.**|Objective Three: - Return to Helipad for Evacuation**Get to the helipad where your dropship will be waiting. And don't forget Dr. Caroll.**END*
+
+
+
+
+
+Access foyer elevator*
+Reactivate office elevator*
+Destroy dataDyne hovercopter*
+Defeat Cassandra's bodyguards*
+Rendezvous at helipad*
+Accessing elevator controls...*
+LIGHTS ARE NOW ON!*
+Dr. Caroll has been killed!*
+Dr. Caroll is under attack!*
+Dr. Caroll has been damaged!*
+Too late! She's here...*
+You've become quite an annoyance...*
+Good night, Ms. Dark.*
+LIGHTS NOW ON*
+LIGHTS NOW OFF*
+MISSION FAILED*
+MISSION SUCCESSFUL*
+Helichopper warning goes here.*
+Obtain Night Vision.*
+Cassandra De Vries'*
+Night Vision*
+Night Vision*
+Picked up Night Vision.*
+We meet again, girl!*
+Foyer elevator accessed.*
+Office elevator door has been unlocked.*
+DataDyne Hovercopter eliminated.*
+Cassandra's bodyguards have been defeated.*
+That's not how it goes.*
+Yes, it is.*
+Give it to me - you're doing it wrong.*
+Stop annoying me.*
+Will you just hurry up!*
+Oh, no...too late.*
+She's here...*
+Get her!*
+Critical mission object destroyed. *
+Obtain CamSpy.*
+Dr. Caroll's*
+CamSpy*
+A CamSpy*
+Picked up a CamSpy.*
+They've locked down the ground floor - *get to the elevator!*
+That copter needs to be taken out, or *the jumpship'll get shot down!*
+I can't leave any bodyguards standing.*
+Don't keep the jumpship waiting - *get back to the landing pad.*
+Obtain alpha key card.*
+Guard's*
+Office key card*
+Office key card*
+Picked up Cassandra's office key card.*
+Sound the alarm - she's here!*
+Lights out!*
+What the...?*
+Going somewhere?*
+Something I can do for you, old woman?*
+Return our sapient immediately! You don't *know what you're doing.*
+Yes I do. I'm leaving.*
+One more chance! Give it back, and you *could come and work for me.*
+Sorry! Gotta shoot.*
+You must get the sapient back. We cannot *proceed without it.*
+I know that!*
+I also know who to talk to... *Mr. Carrington.*
+Elevator door is inactive on this floor.*

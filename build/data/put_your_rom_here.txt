@@ -1,0 +1,1 @@
+Must be a NTSC 1.1/Final ROM named pd.ntsc-final.z64

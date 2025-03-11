@@ -1,0 +1,68 @@
+|Background - **Trent Easton has flown to meet the President at the air base in Alaska, preparing for the President's foreign visit. From the evidence gathered in Chicago, we assume that this is the start of his move against the President, and as such, it must be prevented. **|Carrington - **Care is needed here, Joanna. There are many innocent people about in the air base. Only Trent's men or those strange Blonde men are viable targets. Remember, the longer that you stay in the disguise, the greater your chance of success.**|Objective One: - Obtain Disguise and Enter Base**The stewardess arriving on the cable car is carrying her uniform in her bag. Subdue her and her escort and use the uniform as a disguise to enter the air base. Remember, these people know nothing of Trent's conspiracy and must not be killed.**|Objective Two: - Check In Equipment**Get rid of your equipment as soon as possible; avoid carrying suspicious items around with you that could compromise your disguise. You can collect it later after loading it aboard Air Force One using a Hover trolley. First, though, you need to find a case to put the equipment in.**|Objective Three: - Subvert Security Monitoring System**You can fool humans with the disguise, but the security screening system will need a different approach. If it detects the weapon in your equipment, then the alarm will sound and the base will be locked down. Prevent the alarm from being given by whatever means you can.**|Objective Four: - Obtain Flight Plans From Safe**The planned flight path for Air Force One is held in a safe in the base. If you get hold of it, then we can use the data to vector Elvis in on Air Force One during the flight as backup for you in case anything goes wrong.**|Objective Five: - Board Air Force One**Don't let the plane leave without you. If your diguise is still active, then you should be able to use the docking shuttle to get on board. If not, you will have to find another way. **END*
+PRESIDENTIAL TERMINAL *US AIRBASE, ALASKA*
+|Background - **Trent Easton has flown to meet the President at the air base in Alaska, preparing for the President's foreign visit. From the evidence gathered in Chicago, we assume that this is the start of his move against the President, and as such, it must be prevented. **|Carrington - **Care is needed here, Joanna. There are many innocent people about in the air base. Only Trent's men or those strange Blonde men are viable targets. Remember, the longer that you stay in the disguise, the greater your chance of success.**|Objective One: - Obtain Disguise and Enter Base**The stewardess arriving on the cable car is carrying her uniform in her bag. Subdue her and her escort and use the uniform as a disguise to enter the air base. Remember, these people know nothing of Trent's conspiracy and must not be killed.**|Objective Two: - Check In Equipment**Get rid of your equipment as soon as possible; avoid carrying suspicious items around with you that could compromise your disguise. You can collect it later after loading it aboard Air Force One using a hover trolley. First, though, you need to find a case to put the equipment in.**|Objective Three: - Subvert Security Monitoring System**You can fool humans with the disguise, but the security screening system will need a different approach. If it detects the weapon in your equipment,then the alarm will sound and the base will be locked down. Prevent the alarm from being given by whatever means you can.**|Objective Four: - Board Air Force One**Don't let the plane leave without you. If your diguise is still active, then you should be able to use the docking shuttle to get on board. If not, you will have to find another way. **END*
+|Background - **Trent Easton has flown to meet the President at the air base in Alaska, preparing for the President's foreign visit. From the evidence gathered in Chicago, we assume that this is the start of his move against the President, and as such, it must be prevented. **|Carrington - **Care is needed here, Joanna. There are many innocent people about in the air base. Only Trent's men or those strange Blonde men are viable targets. Remember, the longer that you stay in the disguise, the greater your chance of success.**|Objective One: - Obtain Disguise and Enter Base**The stewardess arriving on the cable car is carrying her uniform in her bag. Subdue her and her escort and use the uniform as a disguise to enter the air base. Remember, these people know nothing of Trent's conspiracy and must not be killed.**|Objective Two: - Subvert Security Monitoring System**You can fool humans with the disguise, but the security screening system will need a different approach. If it detects the weapon in your equipment, then the alarm will sound and the base will be locked down. Prevent the alarm from being given by whatever means you can.**|Objective Three: - Board Air Force One**Don't let the plane leave without you. If your diguise is still active, then you should be able to use the docking shuttle to get on board. If not, you will have to find another way. **END*
+*
+Obtain disguise and enter base*
+Check in equipment*
+Subvert security monitoring system*
+Obtain flight plans from safe*
+Board Air Force One*
+Obtain suitcase.*
+*
+Suitcase*
+Suitcase*
+Picked up a suitcase.*
+Obtain air stewardess uniform.*
+*
+Disguise*
+Disguise*
+Picked up a stewardess uniform.*
+Obtain flight plans from safe.*
+*
+Flight Plans*
+Flight Plans*
+Picked up the flight plans.*
+Look out - it's an intruder...*
+Innocent civilians have been killed.*
+Is he OK?*
+I'll go and get some help.*
+Good afternoon.*
+OK, you know the way from here.*
+You'll have to check that weapon in here.*
+Oh, my God!*
+Weapons are not allowed in the base.*
+Right, I'm calling security.*
+System shutdown initiated...*
+Security systems have been shut down.*
+Weapons have been detected.*
+Suitcase has been deposited.*
+Suitcase has been scanned.*
+Hey, you - this is a restricted area.*
+Are you new around here?*
+Hey - give me back my case.*
+You get security - I'll deal with her...*
+Upstairs...there's an intruder.*
+Laser grid access denied.*
+Laser grid system has been overloaded.*
+Too many neutral casualties inflicted.*
+Stop them from getting the safe...*
+Disguise worn.*
+Now's your chance! Grab the stewardess's *bag and get her uniform.*
+Use that case to conceal your equipment.*
+The case will get stopped unless you do something.*
+So that's Air Force One? ... Huh, smaller *than I thought.*
+Stop them - they're breaking into the safe...*
+Agent Dark in position. I can see the main entrance to the base, and I can just make out the cable car arrival point.*
+Excellent, Joanna. That cable car is your way in... Our observer at the lower terminus has spotted a member of the flight crew boarding a minute ago. She is being escorted by air base troops. I don't have to remind you that...*
+That they're probably innocent of any involvement in Trent's little scheme. And I can't shoot them even if they shoot at me. What about the NSA Agents?*
+I don't know how far the conspiracy has spread through the NSA, but I'm willing to bet that the men Trent has around him here are loyal to him and his plan. You have to get the evidence of Trent's betrayal onto Air Force One and show it to the President.*
+Yes, and protect him from his abductors. Do you have any idea what Trent's plan might be yet, and what about those blonde guys?*
+Only vague suspicions, and I won't distract you with those. Good luck. Carrington out.*
+Lift inoperative - security system is active.*
+Critical mission personnel disabled.*
+Critical mission object destroyed.*
+Entrance to base secured.*
+We're taking over!!*
+Hover trolley has been shut down.*
+Equipment cannot be checked in.*
