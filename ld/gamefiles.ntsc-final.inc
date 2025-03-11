@@ -157,7 +157,6 @@
 	build/ROMID/game/splat.o (section); \
 	build/ROMID/game/shards.o (section); \
 	build/ROMID/game/options.o (section); \
-	build/ROMID/game/game_152fa0.o (section); \
 	build/ROMID/game/game_1531a0.o (section); \
 	build/ROMID/game/collisionutils.o (section); \
 	build/ROMID/game/bg.o (section); \

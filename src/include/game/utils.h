@@ -5,6 +5,7 @@
 #include "types.h"
 
 void func0f176d70(s32 arg0);
+u32 FloatToUInt32(f32 arg0);
 u32 align4(u32 arg0);
 u32 align16(u32 arg0);
 uintptr_t align32(uintptr_t arg0);

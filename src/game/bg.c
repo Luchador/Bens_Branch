@@ -470,9 +470,6 @@ void bgChooseXrayVtxColour(bool *inrange, s16 vertex[3], u32 *colour, struct xra
 					} else {
 						anglefrac = (f12 - xraydata->unk01c) / (1.0f - xraydata->unk01c);
 						anglefrac = 0.65f * anglefrac + 0.35f;
-
-						if (1);
-
 						colfrac = sinf(anglefrac * 1.5707964f);
 
 						*colour = (u32)(colfrac * 255.0f) << player->ecol_3
@@ -1794,14 +1791,10 @@ void bgBuildTables(s32 stagenum)
 			g_Rooms[r].bbmax[1] = *bboxptr + g_BgRooms[r].pos.y; bboxptr++;
 			g_Rooms[r].bbmax[2] = *bboxptr + g_BgRooms[r].pos.z; bboxptr++;
 
-			if (1);
-
 			// Calculate centre
 			g_Rooms[r].centre.x = (g_Rooms[r].bbmin[0] + g_Rooms[r].bbmax[0]) / 2.0f;
 			g_Rooms[r].centre.y = (g_Rooms[r].bbmin[1] + g_Rooms[r].bbmax[1]) / 2.0f;
 			g_Rooms[r].centre.z = (g_Rooms[r].bbmin[2] + g_Rooms[r].bbmax[2]) / 2.0f;
-
-			if (1);
 
 			// Calculate radius
 			g_Rooms[r].radius = sqrtf((g_Rooms[r].bbmin[0] - g_Rooms[r].bbmax[0]) * (g_Rooms[r].bbmin[0] - g_Rooms[r].bbmax[0])
@@ -2999,7 +2992,6 @@ Gfx *bgRenderRoomPass(Gfx *gdl, s32 roomnum, struct roomblock *block, bool inclu
 			f32 sum;
 			f32 sp40[3];
 			f32 sp34[3];
-			u32 stack;
 
 			sp58 = block->child;
 			sp54 = sp58->next;
@@ -3057,8 +3049,6 @@ Gfx *bgRenderRoomOpaque(Gfx *gdl, s32 roomnum)
  */
 Gfx *bgRenderRoomXlu(Gfx *gdl, s32 roomnum)
 {
-	u32 stack;
-
 	if (roomnum == 0 || roomnum >= g_Vars.roomcount) {
 		return gdl;
 	}
@@ -3254,7 +3244,6 @@ bool bgTestLineIntersectsIntBbox(struct coord *arg0, struct coord *arg1, s32 *ar
 
 bool bgTestLineIntersectsBbox(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3)
 {
-	u32 stack[4];
 	f32 f0;
 	f32 f0_2;
 	f32 f2;
@@ -3745,8 +3734,6 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 			ptr = &var800a6470[count * 3];
 
 			while (numvertices > 0) {
-				if (1);
-
 				ptr[0] = vtx->x;
 				ptr[1] = vtx->y;
 				ptr[2] = vtx->z;
@@ -3965,7 +3952,6 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 
 bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct vtxbatch *batch, s32 roomnum, struct hitthing *hitthing)
 {
-	s16 stack;
 	s16 triref;
 	s32 trisremaining;
 	Gfx *gdl = batch->gdl;
@@ -4178,10 +4164,6 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 			}
 
 			trisremaining--;
-
-			if (1);
-			if (1);
-			if (1);
 
 			if (trisremaining == 2) {
 				points[0] = tri4gdl->tri4.x2;
@@ -5028,10 +5010,6 @@ struct bgcmd *bgCmdExecuteBranch(struct bgcmd *cmd, bool execute)
 			cmd += cmd->len;
 			return cmd;
 		default:
-			if (1);
-			if (1);
-			if (1);
-			if (1);
 			return cmd;
 		}
 	}
@@ -5145,9 +5123,6 @@ void bgTickPortalsXray(void)
 
 			if (xmin);
 			if (g_Rooms[i].bbmax);
-			if (1);
-			if (1);
-			if (1);
 
 			if (index < 60) {
 				f32 x;
@@ -5441,7 +5416,6 @@ void bgChooseRoomsToLoad(void)
 {
 	s32 i;
 	s32 j;
-	u32 stack;
 
 	g_BgNumRoomLoadCandidates = 0;
 
@@ -5758,10 +5732,8 @@ void bgCalculateScreenProperties(void)
 {
 	struct player *player = g_Vars.currentplayer;
 	f32 width = viGetWidth();
-	u32 stack;
 	f32 height = viGetHeight();
-	u32 stack2;
-
+	
 	player->screenxminf = viGetViewLeft();
 
 	if (player->screenxminf < 0) {

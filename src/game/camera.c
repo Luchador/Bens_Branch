@@ -328,16 +328,6 @@ Mtxf *camGetPrevWorldToScreenMtxf(void)
 	return g_Vars.currentplayer->prevworldtoscreenmtx;
 }
 
-void camSetMtxF1748(Mtxf *mtx)
-{
-	g_Vars.currentplayer->mtxf1748 = mtx;
-}
-
-Mtxf *camGetMtxF1748(void)
-{
-	return g_Vars.currentplayer->mtxf1748;
-}
-
 void camSetProjectionMtxF(Mtxf *mtx)
 {
 	struct player *player = g_Vars.currentplayer;

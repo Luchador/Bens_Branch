@@ -8,7 +8,6 @@ typedef u8 *(*preprocessfunc)(u8 *data, u32 size, u32 *outSize);
 u8* preprocessAnimations(u8 *data, u32 size, u32 *outSize);
 u8* preprocessMpConfigs(u8 *data, u32 size, u32 *outSize);
 u8* preprocessFont(u8 *data, u32 size, u32 *outSize);
-u8* preprocessJpnFont(u8 *data, u32 size, u32 *outSize);
 u8* preprocessALBankFile(u8 *data, u32 size, u32 *outSize);
 u8 *preprocessALCMidiHdr(u8 *data, u32 size, u32 *outSize);
 u8* preprocessSequences(u8 *data, u32 size, u32 *outSize);

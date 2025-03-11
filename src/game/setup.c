@@ -1572,11 +1572,7 @@ void setupCreateProps(s32 stagenum)
 					break;
 				case OBJTYPE_SHIELD:
 					if (withobjs) {
-#if VERSION >= VERSION_JPN_FINAL
-						if ((obj->flags2 & diffflag) == 0)
-#else
 						if ((obj->flags2 & diffflag) == 0 || g_Jpn)
-#endif
 						{
 							struct shieldobj *shield = (struct shieldobj *)obj;
 							shield->initialamount = *(s32 *)&shield->initialamount / 65536.0f;

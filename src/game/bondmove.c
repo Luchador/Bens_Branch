@@ -2336,8 +2336,6 @@ void bmoveTick(bool allowc1x, bool allowc1y, bool allowc1buttons, bool ignorec2)
 		bbikeTick();
 	} else if (g_Vars.currentplayer->bondmovemode == MOVEMODE_GRAB) {
 		bgrabTick();
-	} else if (g_Vars.currentplayer->bondmovemode == MOVEMODE_CUTSCENE) {
-		bcutsceneTick();
 	} else if (g_Vars.currentplayer->bondmovemode == MOVEMODE_WALK) {
 		bwalkTick();
 	}

@@ -30,9 +30,7 @@ void amTick(void)
 			if (bgunConsiderToggleGunFunction(60, false, true, 0) > 0) {
 				g_AmMenus[g_AmIndex].togglefunc = false;
 			}
-		} else {
-			// empty
-		}
+		} 
 
 		if (g_Vars.normmplayerisrunning == false
 				&& invGetCount() != g_AmMenus[g_AmIndex].numitems) {
@@ -66,14 +64,10 @@ void amTick(void)
 				s8 gotonextscreen = false;
 				s8 cstickx = joyGetStickXOnSample(j, contpadnum);
 				s8 csticky = joyGetStickYOnSample(j, contpadnum);
-#ifdef AVOID_UB
+
 				// if cstickx is -128, it will get negated and stored into absstickx, negating it again if it's 8 bit
 				s32 absstickx;
 				s32 abssticky;
-#else
-				s8 absstickx;
-				s8 abssticky;
-#endif
 				u32 buttonsstate = joyGetButtonsOnSample(j, contpadnum, 0xffffffff);
 				u32 buttonspressed = joyGetButtonsPressedOnSample(j, contpadnum, 0xffffffff);
 				bool stickpushed = false;
@@ -90,7 +84,6 @@ void amTick(void)
 
 				g_AmMenus[g_AmIndex].allbots = false;
 
-#ifndef PLATFORM_N64
 				s32 newstickx = (s32)cstickx;
 				s32 newsticky = (s32)csticky;
 				if (j == 0 && g_Vars.currentplayernum == 0 && inputMouseIsLocked()) {
@@ -108,7 +101,6 @@ void amTick(void)
 				}
 				cstickx = (newstickx < -128) ? -128 : (newstickx > 127) ? 127 : newstickx;
 				csticky = (newsticky < -128) ? -128 : (newsticky > 127) ? 127 : newsticky;
-#endif
 
 				if (g_Vars.currentplayer->activemenumode == AMMODE_EDIT) {
 					buttonsstate = buttonsstate & amask;
@@ -124,13 +116,9 @@ void amTick(void)
 					}
 
 					if (buttonsstate & A_BUTTON) {
-#if VERSION >= VERSION_JPN_FINAL || !defined(PLATFORM_N64)
 						if (g_Vars.currentplayer->numaibuddies > 0) {
 							g_AmMenus[g_AmIndex].allbots = true;
 						}
-#else
-						g_AmMenus[g_AmIndex].allbots = true;
-#endif
 					}
 				} else {
 					if (buttonsstate & amask) {
@@ -138,13 +126,9 @@ void amTick(void)
 					}
 
 					if (buttonsstate & lrtmask) {
-#if VERSION >= VERSION_JPN_FINAL || !defined(PLATFORM_N64)
 						if (g_Vars.currentplayer->numaibuddies > 0) {
 							g_AmMenus[g_AmIndex].allbots = true;
 						}
-#else
-						g_AmMenus[g_AmIndex].allbots = true;
-#endif
 					}
 				}
 
@@ -263,12 +247,6 @@ void amTick(void)
 					stayopen = false;
 				}
 
-#if (VERSION >= VERSION_NTSC_1_0) && defined(PLATFORM_N64)
-				if (g_Vars.lvupdate240 == 0) {
-					stayopen = false;
-				}
-#endif
-
 				if (!stayopen &&
 						(g_Vars.currentplayer->activemenumode != AMMODE_EDIT || g_Menus[g_MpPlayerNum].curdialog == NULL)) {
 					amClose();
@@ -294,18 +272,11 @@ void amTick(void)
 								amOpenPickTarget();
 							} else if (g_AmMenus[g_AmIndex].allbots == false) {
 								gotonextscreen = true;
-#if VERSION < VERSION_NTSC_1_0
-								if (g_AmMenus[g_AmIndex].slotnum != 4) {
-									amApply(g_AmMenus[g_AmIndex].slotnum);
-								}
-#endif
 							}
 
-#if VERSION >= VERSION_NTSC_1_0
 							if (g_AmMenus[g_AmIndex].slotnum != 4) {
 								amApply(g_AmMenus[g_AmIndex].slotnum);
 							}
-#endif
 						}
 					} else {
 						// Weapon or function screen
@@ -384,12 +355,10 @@ void amTick(void)
 				}
 			}
 		}
-#ifndef PLATFORM_N64
 		else {
 			g_AmMenus[g_AmIndex].mousex = 0.f;
 			g_AmMenus[g_AmIndex].mousey = 0.f;
 		}
-#endif
 
 		if (g_Vars.currentplayer->activemenumode != AMMODE_EDIT) {
 			s16 dist;

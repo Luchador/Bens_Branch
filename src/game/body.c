@@ -164,7 +164,6 @@ struct model *body0f02ce8c(s32 bodynum, s32 headnum, struct modeldef *bodymodeld
 	f32 scale = g_HeadsAndBodies[bodynum].scale * 0.10000001f;
 	f32 animscale = g_HeadsAndBodies[bodynum].animscale;
 	struct modelnode *node = NULL;
-	u32 stack[2];
 
 	if (cheatIsActive(CHEAT_DKMODE)) {
 		scale *= 0.8f;
@@ -235,8 +234,6 @@ struct model *body0f02ce8c(s32 bodynum, s32 headnum, struct modeldef *bodymodeld
 				f32 frac = RANDOMFRAC();
 				scale *= 2.0f * (0.1f * frac) - 0.1f + 0.75f;
 			}
-
-			if (1);
 		}
 	}
 

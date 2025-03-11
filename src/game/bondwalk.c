@@ -888,7 +888,6 @@ void bwalkUpdateVertical(void)
 			if (bwalkTryMoveUpwards(sumground - g_Vars.currentplayer->vv_manground) == CDRESULT_NOCOLLISION) {
 				g_Vars.currentplayer->vv_manground = sumground;
 			}
-#if VERSION >= VERSION_NTSC_1_0
 			else {
 				// Not enough room above. If on a hoverbike, blow it up
 				prop = cdGetObstacleProp();
@@ -905,7 +904,6 @@ void bwalkUpdateVertical(void)
 					}
 				}
 			}
-#endif
 		}
 
 		// Kill player if standing on tile with GEOFLAG_DIE
@@ -961,7 +959,6 @@ void bwalkUpdateVertical(void)
 			}
 		} else {
 			// Not falling
-#if VERSION >= VERSION_NTSC_1_0
 			if (g_Vars.normmplayerisrunning == false
 					&& g_Vars.currentplayer->vv_ground < g_Vars.currentplayer->vv_manground - 30) {
 				// Not falling - but still at least 30 units off the ground.
@@ -987,9 +984,8 @@ void bwalkUpdateVertical(void)
 					}
 				}
 			}
-#endif
 
-			g_Vars.currentplayer->bdeltapos.y = VERSION >= VERSION_NTSC_1_0 ? 0.0f : 0;
+			g_Vars.currentplayer->bdeltapos.y = 0.0f;
 
 			if (g_Vars.currentplayer->isfalling) {
 				g_Vars.currentplayer->isfalling = false;
@@ -1113,11 +1109,9 @@ void bwalkUpdateVertical(void)
 		newpos.z = g_Vars.currentplayer->prop->pos.z;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (newpos.y < g_Vars.currentplayer->vv_ground + 10) {
 		newpos.y = g_Vars.currentplayer->vv_ground + 10;
 	}
-#endif
 
 	if (newpos.x != g_Vars.currentplayer->prop->pos.x
 			|| newpos.y != g_Vars.currentplayer->prop->pos.y
@@ -1244,13 +1238,9 @@ void bwalkUpdateTheta(void)
 	f32 rotateamount;
 	struct coord delta = {0, 0, 0};
 
-#ifdef PLATFORM_N64
-	// Turn speed is calculated from the chr's height
-	mult = 159.0f / g_Vars.currentplayer->vv_eyeheight;
-#else
 	// Same turn speed for all heights
 	mult = 1.f;
-#endif
+
 	rotateamount = g_Vars.currentplayer->speedtheta * mult
 		* g_Vars.lvupdate60freal * 0.0174505133f * 3.5f;
 

@@ -5,6 +5,5 @@
 #include "types.h"
 
 void bcutsceneInit(void);
-void bcutsceneTick(void);
 
 #endif

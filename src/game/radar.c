@@ -5,7 +5,6 @@
 #include "game/atan2f.h"
 #include "game/utils.h"
 #include "game/tex.h"
-#include "game/game_152fa0.h"
 #include "game/game_1531a0.h"
 #include "game/mplayer/scenarios.h"
 #include "game/radar.h"
@@ -68,14 +67,14 @@ Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, s32 arg2, s3
 	gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00000000);
 
 	gDPFillRectangle(gdl++,
-			arg2 * g_ScaleX,
+			arg2,
 			arg3,
-			(arg2 + tconfig->width) * g_ScaleX,
+			(arg2 + tconfig->width),
 			arg3 + tconfig->width);
 
-	spb0[0] = arg2 * g_ScaleX;
+	spb0[0] = arg2;
 	spb0[1] = arg3;
-	spa8[0] = arg4 * g_ScaleX;
+	spa8[0] = arg4;
 	spa8[1] = arg4;
 
 	texSelect(&gdl, tconfig, 2, 0, 0, 1, NULL);
@@ -243,8 +242,6 @@ Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, u32 colour1, 
 
 Gfx *radarRender(Gfx *gdl)
 {
-	s32 stack;
-	s32 stack2;
 	s32 playercount;
 	s32 playernum;
 	struct textureconfig *tconfig;
@@ -274,13 +271,7 @@ Gfx *radarRender(Gfx *gdl)
 		return gdl;
 	}
 
-	if (g_ViRes == VIRES_HI) {
-		g_ScaleX = 2;
-	} else {
-		g_ScaleX = 1;
-	}
-
-	g_RadarX = (viGetViewLeft() + viGetViewWidth()) / g_ScaleX - 41;
+	g_RadarX = (viGetViewLeft() + viGetViewWidth()) - 41;
 
 	if (playercount == 2) {
 		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
@@ -322,7 +313,11 @@ Gfx *radarRender(Gfx *gdl)
 	}
 
 	gdl = radarRenderBackground(gdl, tconfig, g_RadarX, g_RadarY, 0x10);
-	gdl = func0f153134(gdl);
+
+	gDPPipeSync(gdl++);
+	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
+	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	// Draw dots for human players
 	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
@@ -414,8 +409,6 @@ Gfx *radarRender(Gfx *gdl)
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
-	g_ScaleX = 1;
-
 	return gdl;
 }
 
@@ -425,9 +418,7 @@ Gfx *radarRenderRTrackedProps(Gfx *gdl)
 	struct coord *playerpos = &g_Vars.currentplayer->prop->pos;
 	struct defaultobj *obj;
 	struct chrdata *chr;
-	u32 stack1;
 	struct coord dist1;
-	u32 stack2;
 	struct coord dist2;
 
 	while (prop) {

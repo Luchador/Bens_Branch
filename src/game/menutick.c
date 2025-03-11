@@ -54,7 +54,6 @@ void menuTick(void)
 	s32 sp340 = true;
 	s32 anyopen = false;
 
-	//g_ScaleX = g_ViRes == VIRES_HI ? 2 : 1;
 	g_ScaleX = 1;
 
 	menuTickTimers();

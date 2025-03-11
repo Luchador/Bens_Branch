@@ -120,13 +120,8 @@ struct vimode g_ViModes[] = {
 	// |               |                 |                |                 |          |                 |     |  |     |  |
 	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                VIMODE_LO, SCREEN_HEIGHT_LO, 0,  180, 20, 136, 42  }, // default
 	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.5,              VIMODE_LO, SCREEN_HEIGHT_HI, 0,  180, 20, 136, 42  }, // hi-res
-	{ 320,             480,              320,             2,                VIMODE_HI, 440,              20, 360, 60, 272, 104 }, // unused
-	{ 440,             330,              440,             1,                VIMODE_LO, 330,              0,  330, 0,  330, 0   }, // unused
-	{ 440,             240,              440,             (1.0f / 1.375f),  VIMODE_LO, 220,              0,  180, 0,  136, 0   }, // unused
-	{ 400,             300,              400,             1,                VIMODE_HI, 300,              0,  300, 0,  300, 0   }, // unused
 };
 
-s32 g_ViRes = VIRES_LO;
 u32 var80070730 = 0xffffffff;
 u32 var80070734 = 0xffffffff;
 u32 var8007073c = 0;
@@ -1603,12 +1598,6 @@ void player0f0b9a20(void)
 	playerSetTickMode(TICKMODE_NORMAL);
 	g_PlayerTriggerGeFadeIn = false;
 	bmoveSetMode(MOVEMODE_WALK);
-
-	if (mainGetStageNum() == STAGE_TEST_LEN) {
-		playerSetFadeColour(0, 0, 0, 1);
-		playerSetFadeFrac(0, 1);
-	}
-
 	envChooseAndApply(mainGetStageNum(), false);
 	bgunEquipWeapon2(HAND_LEFT, g_DefaultWeapons[HAND_LEFT]);
 	bgunEquipWeapon2(HAND_RIGHT, g_DefaultWeapons[HAND_RIGHT]);
@@ -2723,20 +2712,15 @@ void playerTickExplode(void)
 	}
 }
 
-void playerSetHiResEnabled(bool enable)
-{
-	
-}
-
 s16 playerGetFbWidth(void)
 {
-	s16 width = g_ViModes[g_ViRes].fbwidth;
+	s16 width = g_ViModes[0].fbwidth;
 	return width;
 }
 
 s16 playerGetFbHeight(void)
 {
-	s16 height = g_ViModes[g_ViRes].fbheight;
+	s16 height = g_ViModes[0].fbheight;
 
 	if (g_Vars.fourmeg2player) {
 		height = height >> 1;
@@ -2770,7 +2754,7 @@ s16 playerGetViewportWidth(void)
 	{
 		if (PLAYERCOUNT() >= 3) {
 			// 3/4 players
-			width = g_ViModes[g_ViRes].width / 2;
+			width = g_ViModes[0].width / 2;
 
 			if (g_Vars.currentplayernum == 0 || g_Vars.currentplayernum == 2) {
 				width--;
@@ -2778,22 +2762,22 @@ s16 playerGetViewportWidth(void)
 		} else if (PLAYERCOUNT() == 2) {
 			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || g_Vars.fourmeg2player) {
 				// 2 players vsplit
-				width = g_ViModes[g_ViRes].width / 2;
+				width = g_ViModes[0].width / 2;
 
 				if (g_Vars.currentplayernum == 0) {
 					width--;
 				}
 			} else {
 				// 2 players full width
-				width = g_ViModes[g_ViRes].width;
+				width = g_ViModes[0].width;
 			}
 		} else {
 			// 1 player
-			width = g_ViModes[g_ViRes].width;
+			width = g_ViModes[0].width;
 		}
 	} else {
 		// Probably cutscene
-		width = g_ViModes[g_ViRes].width;
+		width = g_ViModes[0].width;
 	}
 
 	return width;
@@ -2807,27 +2791,27 @@ s16 playerGetViewportLeft(void)
 	if (PLAYERCOUNT() >= 3 && something != 0) {
 		if (g_Vars.currentplayernum == 1 || g_Vars.currentplayernum == 3) {
 			// 3/4 players - right side
-			left = g_ViModes[g_ViRes].width / 2 + g_ViModes[g_ViRes].fbwidth - g_ViModes[g_ViRes].width;
+			left = g_ViModes[0].width / 2 + g_ViModes[0].fbwidth - g_ViModes[0].width;
 		} else {
 			// 3/4 players - left side
-			left = g_ViModes[g_ViRes].fbwidth - g_ViModes[g_ViRes].width;
+			left = g_ViModes[0].fbwidth - g_ViModes[0].width;
 		}
 	} else if (PLAYERCOUNT() == 2 && something != 0) {
 		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || g_Vars.fourmeg2player) {
 			if (g_Vars.currentplayernum == 1) {
 				// 2 players vsplit - right side
-				left = (g_ViModes[g_ViRes].width / 2) + g_ViModes[g_ViRes].fbwidth - g_ViModes[g_ViRes].width;
+				left = (g_ViModes[0].width / 2) + g_ViModes[0].fbwidth - g_ViModes[0].width;
 			} else {
 				// 2 players vsplit - left side
-				left = g_ViModes[g_ViRes].fbwidth - g_ViModes[g_ViRes].width;
+				left = g_ViModes[0].fbwidth - g_ViModes[0].width;
 			}
 		} else {
 			// 2 players - full width
-			left = g_ViModes[g_ViRes].fbwidth - g_ViModes[g_ViRes].width;
+			left = g_ViModes[0].fbwidth - g_ViModes[0].width;
 		}
 	} else {
 		// Full screen
-		left = g_ViModes[g_ViRes].fbwidth - g_ViModes[g_ViRes].width;
+		left = g_ViModes[0].fbwidth - g_ViModes[0].width;
 	}
 
 	return left;
@@ -2840,7 +2824,7 @@ s16 playerGetViewportHeight(void)
 	if (PLAYERCOUNT() >= 2
 			&& !playerHasSharedViewport()
 			) {
-		s16 tmp = g_ViModes[g_ViRes].fullheight;
+		s16 tmp = g_ViModes[0].fullheight;
 
 		if (!g_Vars.fourmeg2player) {
 			height = tmp;
@@ -2859,21 +2843,21 @@ s16 playerGetViewportHeight(void)
 		}
 	} else {
 		if (optionsGetEffectiveScreenSize() == SCREENSIZE_WIDE) {
-			height = g_ViModes[g_ViRes].wideheight;
+			height = g_ViModes[0].wideheight;
 		} else if (optionsGetEffectiveScreenSize() == SCREENSIZE_CINEMA) {
-			height = g_ViModes[g_ViRes].cinemaheight;
+			height = g_ViModes[0].cinemaheight;
 		} else if (g_InCutscene && !var8009dfc0) {
 			if (g_CutsceneTweenDuration60 >= 1) {
-				f32 a = g_ViModes[g_ViRes].wideheight;
-				f32 b = g_ViModes[g_ViRes].fullheight;
+				f32 a = g_ViModes[0].wideheight;
+				f32 b = g_ViModes[0].fullheight;
 				a = a * (1.0f - g_CutsceneTweenFrac);
 				b = b * g_CutsceneTweenFrac;
 				height = a + b;
 			} else {
-				height = g_ViModes[g_ViRes].wideheight;
+				height = g_ViModes[0].wideheight;
 			}
 		} else {
-			height = g_ViModes[g_ViRes].fullheight;
+			height = g_ViModes[0].fullheight;
 		}
 	}
 
@@ -2887,7 +2871,7 @@ s16 playerGetViewportTop(void)
 	if (PLAYERCOUNT() >= 2
 			&& !playerHasSharedViewport()
 			) {
-		top = g_ViModes[g_ViRes].fulltop;
+		top = g_ViModes[0].fulltop;
 
 		if (optionsGetScreenSplit() != SCREENSPLIT_VERTICAL || PLAYERCOUNT() != 2)
 		{
@@ -2896,43 +2880,43 @@ s16 playerGetViewportTop(void)
 					&& optionsGetScreenSplit() != SCREENSPLIT_VERTICAL
 					&& !g_Vars.fourmeg2player) {
 				// 2 players hsplit - bottom side
-				top = g_ViModes[g_ViRes].fulltop + g_ViModes[g_ViRes].fullheight / 2;
+				top = g_ViModes[0].fulltop + g_ViModes[0].fullheight / 2;
 			} else if (g_Vars.currentplayernum == 2 || g_Vars.currentplayernum == 3) {
 				// 3/4 players - bottom side
-				top = g_ViModes[g_ViRes].fulltop + g_ViModes[g_ViRes].fullheight / 2;
+				top = g_ViModes[0].fulltop + g_ViModes[0].fullheight / 2;
 			}
 		}
 	} else {
 		if (optionsGetEffectiveScreenSize() == SCREENSIZE_WIDE) {
 			if (g_InCutscene && optionsGetCutsceneSubtitles() && g_Vars.stagenum != STAGE_CITRAINING) {
 				if (g_CutsceneTweenDuration60 >= 1) {
-					f32 a = g_ViModes[g_ViRes].fulltop;
-					f32 b = g_ViModes[g_ViRes].widetop;
+					f32 a = g_ViModes[0].fulltop;
+					f32 b = g_ViModes[0].widetop;
 					a = a * (1.0f - g_CutsceneTweenFrac);
 					b = b * g_CutsceneTweenFrac;
 					top = a + b;
 				} else {
-					top = g_ViModes[g_ViRes].fulltop;
+					top = g_ViModes[0].fulltop;
 				}
 			} else {
-				top = g_ViModes[g_ViRes].widetop;
+				top = g_ViModes[0].widetop;
 			}
 		} else if (optionsGetEffectiveScreenSize() == SCREENSIZE_CINEMA) {
-			top = g_ViModes[g_ViRes].cinematop;
+			top = g_ViModes[0].cinematop;
 		} else {
 			if (g_InCutscene && !var8009dfc0
 					&& (!optionsGetCutsceneSubtitles() || g_Vars.stagenum == STAGE_CITRAINING)) {
 				if (g_CutsceneTweenDuration60 >= 1) {
-					f32 a = g_ViModes[g_ViRes].widetop;
-					f32 b = g_ViModes[g_ViRes].fulltop;
+					f32 a = g_ViModes[0].widetop;
+					f32 b = g_ViModes[0].fulltop;
 					a = a * (1.0f - g_CutsceneTweenFrac);
 					b = b * g_CutsceneTweenFrac;
 					top = a + b;
 				} else {
-					top = g_ViModes[g_ViRes].widetop;
+					top = g_ViModes[0].widetop;
 				}
 			} else {
-				return g_ViModes[g_ViRes].fulltop;
+				return g_ViModes[0].fulltop;
 			}
 		}
 	}
@@ -2947,7 +2931,7 @@ f32 player0f0bd358(void)
 	s16 width = playerGetViewportWidth();
 
 	result = (f32)width / (f32)height;
-	result = g_ViModes[g_ViRes].yscale * result;
+	result = g_ViModes[0].yscale * result;
 
 	return result * (videoGetAspect() / ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO));
 }
@@ -3057,14 +3041,13 @@ void playerTickTeleport(f32 *aspectratio)
 void playerConfigureVi(void)
 {
 	f32 ratio = player0f0bd358();
-	g_ViRes = VIRES_LO;
 
 	playermgrSetFovY(PLAYER_DEFAULT_FOV);
 	playermgrSetAspectRatio(ratio);
 	playermgrSetViewSize(playerGetViewportWidth(), playerGetViewportHeight());
 	playermgrSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
 
-	viSetMode(g_ViModes[g_ViRes].xscale);
+	viSetMode(g_ViModes[0].xscale);
 
 	viSetFovAspectAndSize(PLAYER_DEFAULT_FOV, ratio, playerGetViewportWidth(), playerGetViewportHeight());
 
@@ -3073,14 +3056,10 @@ void playerConfigureVi(void)
 	viSetBufSize(playerGetFbWidth(), playerGetFbHeight());
 }
 
-void playerTick(bool arg0)
+void playerTick()
 {
 	f32 aspectratio;
 	f32 f20;
-
-	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && PLAYERCOUNT() > 1) {
-		g_ViRes = VIRES_LO;
-	}
 
 	aspectratio = player0f0bd358();
 
@@ -3099,7 +3078,7 @@ void playerTick(bool arg0)
 	playermgrSetViewSize(playerGetViewportWidth(), playerGetViewportHeight());
 	playermgrSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
 
-	viSetMode(g_ViModes[g_ViRes].xscale);
+	viSetMode(g_ViModes[0].xscale);
 	viSetFovAspectAndSize(PLAYER_DEFAULT_FOV, aspectratio, playerGetViewportWidth(), playerGetViewportHeight());
 	viSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
 	viSetSize(playerGetFbWidth(), playerGetFbHeight());
@@ -3153,8 +3132,8 @@ void playerTick(bool arg0)
 				if (g_Vars.currentplayer->eyespy->active) {
 					// And is being controlled
 					s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-					u32 buttons = arg0 ? joyGetButtons(contpad1, 0xffffffff) : 0;
-					if (arg0 && inputKeyJustPressed(VK_ESCAPE)) {
+					u32 buttons = joyGetButtons(contpad1, 0xffffffff);
+					if (inputKeyJustPressed(VK_ESCAPE)) {
 						buttons |= START_BUTTON;
 					}
 
@@ -3170,7 +3149,7 @@ void playerTick(bool arg0)
 				}
 
 				if (g_Vars.lvupdate240) {
-					eyespyProcessInput(arg0);
+					eyespyProcessInput(true);
 				}
 			} else {
 				// Eyespy is held
@@ -3232,7 +3211,7 @@ void playerTick(bool arg0)
 		if (g_Vars.currentplayer->haschrbody) {
 			g_Vars.currentplayer->invdowntime = TICKS(-40);
 			bmoveTick(0, 0, 0, 1);
-			playerTickCutscene(arg0);
+			playerTickCutscene(true);
 			g_Vars.currentplayer->invdowntime = TICKS(-40);
 		}
 
@@ -3581,7 +3560,7 @@ void playerTick(bool arg0)
 		playerRemoveChrBody();
 
 		if (g_PlayersWithControl[g_Vars.currentplayernum]) {
-			bmoveTick(1, 1, arg0, 0);
+			bmoveTick(1, 1, true, 0);
 		} else {
 			bmoveTick(0, 0, 0, 1);
 		}
@@ -3861,7 +3840,7 @@ void playerTick(bool arg0)
 		}
 	} else if (g_Vars.tickmode == TICKMODE_GE_FADEIN || g_Vars.tickmode == TICKMODE_GE_FADEOUT) {
 		playerRemoveChrBody();
-		bmoveTick(1, 1, arg0, 0);
+		bmoveTick(1, 1, true, 0);
 		playerUpdateShake();
 		playerSetCameraMode(CAMERAMODE_DEFAULT);
 		player0f0c1840(&g_Vars.currentplayer->bond2.unk10,
@@ -3984,12 +3963,6 @@ void playerTick(bool arg0)
 				g_Vars.currentplayer->prop->rooms);
 	}
 
-#ifdef DEBUG
-	if (debug0f11ed88()) {
-		debug0f119a14nb();
-	}
-#endif
-
 	// Increment the time on Bond's watch (leftover from GE)
 	g_Vars.currentplayer->bondwatchtime60 += g_Vars.diffframe60freal;
 
@@ -3997,9 +3970,7 @@ void playerTick(bool arg0)
 	if (var8007074c) {
 		s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
 
-		if (!lvIsPaused()
-				&& arg0
-				&& joyGetButtonsPressedThisFrame(contpad1, A_BUTTON | B_BUTTON | Z_TRIG | START_BUTTON | R_TRIG)) {
+		if (!lvIsPaused() && joyGetButtonsPressedThisFrame(contpad1, A_BUTTON | B_BUTTON | Z_TRIG | START_BUTTON | R_TRIG)) {
 			var8007074c = 2;
 
 			if (playerIsFadeComplete()) {
@@ -4705,11 +4676,7 @@ void playerDie(bool force)
 
 void playerDieByShooter(u32 shooter, bool force)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	if (!g_Vars.currentplayer->isdead && (force || !g_Vars.currentplayer->invincible))
-#else
-	if (!g_Vars.currentplayer->isdead && (force || !g_Vars.currentplayer->invincible || !g_Vars.currentplayer->training))
-#endif
 	{
 		u32 prevplayernum = g_MpPlayerNum;
 		g_MpPlayerNum = g_Vars.currentplayerstats->mpindex;
@@ -4852,22 +4819,12 @@ void player0f0c1840(struct coord *pos, struct coord *up, struct coord *look, str
 			if (!bgRoomContainsCoord(pos, sp54[i])) {
 				s32 j;
 
-#if VERSION >= VERSION_NTSC_1_0
 				for (j = i + 1; sp54[j] != -1; j++) {
 					sp54[j - 1] = sp54[j];
 				}
 
 				sp54[j - 1] = -1;
 				i--;
-#else
-				// ntsc-beta corrupts the array by overwriting the first shifted
-				// value with -1, and leaving a duplicate at the end.
-				for (j = i + 1; sp54[j] != -1; j++) {
-					sp54[j - 1] = sp54[j];
-				}
-
-				sp54[i] = -1;
-#endif
 			}
 		}
 

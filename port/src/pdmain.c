@@ -77,7 +77,6 @@ u32 g_MainNumGfxTasks = 0;
 bool g_MainIsEndscreen = false;
 s32 g_DoBootPakMenu = 0;
 
-u32 var8005dd3c = 0x00000000;
 u32 var8005dd40 = 0x00000000;
 u32 var8005dd44 = 0x00000000;
 u32 var8005dd48 = 0x00000000;
@@ -329,7 +328,6 @@ void mainLoop(void)
 	s32 ending = false;
 	s32 index;
 	s32 numplayers;
-	u32 stack;
 
 	func0f175f98();
 

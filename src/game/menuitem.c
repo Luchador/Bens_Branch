@@ -3304,7 +3304,6 @@ Gfx *menuitemMarqueeRender(Gfx *gdl, struct menurendercontext *context)
 		textwidth += zero;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	g_ScissorX1 = context->x * g_ScaleX;
 	g_ScissorX2 = (context->x + context->width) * g_ScaleX;
 	g_ScissorY1 = context->y;
@@ -3351,11 +3350,6 @@ Gfx *menuitemMarqueeRender(Gfx *gdl, struct menurendercontext *context)
 	}
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
-#else
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE,
-			context->x * g_ScaleX, context->y,
-			(context->x + context->width) * g_ScaleX, context->y + context->height - 1);
-#endif
 
 	textBackupAndResetBlends();
 
@@ -3381,8 +3375,6 @@ Gfx *menuitemMarqueeRender(Gfx *gdl, struct menurendercontext *context)
 
 	return gdl;
 }
-
-u32 var800711f0 = 0x00000002;
 
 bool menuitemMarqueeTick(struct menuitem *item, union menuitemdata *data)
 {

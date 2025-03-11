@@ -203,11 +203,6 @@ void mainInit(void)
 		} else if (i >= 2) {
 			joyDebugJoy();
 		}
-
-#if VERSION >= VERSION_NTSC_1_0
-		if (1);
-		if (1);
-#endif
 	}
 
 	if (argFindByPrefix(1, "-level_") == NULL) {
@@ -497,11 +492,8 @@ void mainInit(void)
 	dhudInit();
 	playermgrInit();
 	frametimeInit();
-	stub0f00b200();
 	profileInit();
-	stub0f000870();
 	smokesInit();
-	stub0f0008e0();
 	stub0f0008f0();
 	stub0f000900();
 	stub0f00b180();
@@ -519,15 +511,8 @@ void mainInit(void)
 	viBlack(true);
 
 	g_MainIsBooting = 0;
-
-#if VERSION >= VERSION_PAL_BETA && VERSION < VERSION_JPN_FINAL
-	if (g_DoBootPakMenu) {
-		osGetCount();
-	}
-#endif
 }
 
-u32 var8005dd3c = 0x00000000;
 u32 var8005dd40 = 0x00000000;
 u32 var8005dd44 = 0x00000000;
 u32 var8005dd48 = 0x00000000;
@@ -535,18 +520,6 @@ u32 var8005dd4c = 0x00000000;
 u32 var8005dd50 = 0x00000000;
 s32 g_MainChangeToStageNum = -1;
 bool g_MainIsDebugMenuOpen = false;
-
-#if VERSION < VERSION_NTSC_1_0
-void main000e000nb(void)
-{
-	var8005d9bc = true;
-}
-
-void main000e010nb(void)
-{
-	var8005d9c0 ^= 1;
-}
-#endif
 
 void mainProc(void)
 {
@@ -841,21 +814,6 @@ void mainTick(void)
 
 			gdl = lvRender(gdl);
 			func000034e0(&gdl);
-
-#ifdef DEBUG
-			if (debugIsLineModeEnabled()) {
-				gDPPipeSync(gdl++);
-				gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-				gDPSetBlendColor(gdl++, 0xff, 0xff, 0xff, 0xff);
-				gDPSetPrimDepth(gdl++, 0xffff, 0xffff);
-				gDPSetDepthSource(gdl++, G_ZS_PRIM);
-				gDPSetRenderMode(gdl++, G_RM_VISCVG, G_RM_VISCVG2);
-				gDPFillRectangle(gdl++, 0, 0, viGetWidth() - 1, viGetHeight() - 1);
-			}
-
-			gdl = dhudRender(gdl);
-			dhudClear();
-#endif
 
 			if (debugGetProfileMode() >= 2) {
 				gdl = profileRender(gdl);

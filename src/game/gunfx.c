@@ -1075,8 +1075,6 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	gDPSetTextureLUT(gdl++, G_TT_NONE);
 	gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
 
-	if (f20);
-
 	mtx4LoadIdentity(&sp164);
 	mtx00015be0(camGetWorldToScreenMtxf(), &sp164);
 	mtx4LoadIdentity(&sp124);

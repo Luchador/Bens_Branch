@@ -780,7 +780,6 @@ void bgrab0f0ce178(void)
 
 void bgrabUpdateVertical(void)
 {
-	f32 stack;
 	s32 i;
 	f32 tmp;
 	s32 inlift;

@@ -4,7 +4,6 @@
 #include "game/utils.h"
 #include "game/camera.h"
 #include "game/sky.h"
-#include "game/game_152fa0.h"
 #include "game/env.h"
 #include "game/pad.h"
 #include "game/tex.h"
@@ -70,7 +69,6 @@ bool skyIsScreenCornerInSky(struct coord *corner3dpos, struct coord *dstpos, f32
 	f32 sp2c;
 	f32 f12_2;
 	f32 sp24;
-	u32 stack[2];
 
 	if (f12 > 1.0f) {
 		f12 = 1.0f;
@@ -109,7 +107,6 @@ bool skyIsCornerInWater(struct coord *corner3dpos, struct coord *dstpos, f32 *ds
 	f32 sp2c;
 	f32 f12_2;
 	f32 sp24;
-	u32 stack[2];
 
 	if (f12 > 1.0f) {
 		f12 = 1.0f;
@@ -1280,102 +1277,56 @@ Gfx *skyRender(Gfx *gdl)
 			SHADE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0, SHADE,
 			SHADE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0, SHADE);
 
-	if (1) {
-		s32 stack;
-		Mtxf sp1ec;
-		Mtxf sp1ac;
-		struct skyvtx2d skyvertices2d[5];
-		s32 i;
+	Mtxf sp1ec;
+	Mtxf sp1ac;
+	struct skyvtx2d skyvertices2d[5];
+	s32 i;
 
-		mtx4MultMtx4(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp1ec);
-		guScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
-		mtx4MultMtx4(&sp1ec, &g_SkyMtx, &sp1ac);
+	mtx4MultMtx4(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp1ec);
+	guScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
+	mtx4MultMtx4(&sp1ec, &g_SkyMtx, &sp1ac);
 
-		for (i = 0; i < numvertices; i++) {
-			skyConvertVertex(&skyvertices3d[i], &sp1ac, 130, 65535.0f, 65535.0f, &skyvertices2d[i]);
+	for (i = 0; i < numvertices; i++) {
+		skyConvertVertex(&skyvertices3d[i], &sp1ac, 130, 65535.0f, 65535.0f, &skyvertices2d[i]);
 
-			skyvertices2d[i].x = skyClamp(skyvertices2d[i].x, camGetScreenLeft() * 4.0f, (camGetScreenLeft() + camGetScreenWidth()) * 4.0f - 1.0f);
-			skyvertices2d[i].y = skyClamp(skyvertices2d[i].y, camGetScreenTop() * 4.0f, (camGetScreenTop() + camGetScreenHeight()) * 4.0f - 1.0f);
-		}
-
-#ifdef PLATFORM_N64
-		if (numvertices == 4) {
-			if (cornerstate == CORNERSTATE_TOP) {
-				if (sp548 < sp54c) {
-					if (skyvertices2d[3].y >= skyvertices2d[1].y + 4.0f) {
-						skyvertices2d[0].x = camGetScreenLeft() * 4.0f;
-						skyvertices2d[0].y = camGetScreenTop() * 4.0f;
-						skyvertices2d[1].x = (camGetScreenLeft() + camGetScreenWidth()) * 4.0f - 1.0f;
-						skyvertices2d[1].y = camGetScreenTop() * 4.0f;
-						skyvertices2d[2].x = camGetScreenLeft() * 4.0f;
-						skyvertices2d[3].x = (camGetScreenLeft() + camGetScreenWidth()) * 4.0f - 1.0f;
-
-						gdl = skyRenderFull(gdl, &skyvertices2d[0], &skyvertices2d[1], &skyvertices2d[2], &skyvertices2d[3], 130.0f);
-					} else {
-						gdl = skyRenderTri(gdl, &skyvertices2d[0], &skyvertices2d[1], &skyvertices2d[2], 130.0f, true);
-					}
-				} else if (skyvertices2d[2].y >= skyvertices2d[0].y + 4.0f) {
-					skyvertices2d[0].x = camGetScreenLeft() * 4.0f;
-					skyvertices2d[0].y = camGetScreenTop() * 4.0f;
-					skyvertices2d[1].x = (camGetScreenLeft() + camGetScreenWidth()) * 4.0f - 1.0f;
-					skyvertices2d[1].y = camGetScreenTop() * 4.0f;
-					skyvertices2d[2].x = camGetScreenLeft() * 4.0f;
-					skyvertices2d[3].x = (camGetScreenLeft() + camGetScreenWidth()) * 4.0f - 1.0f;
-
-					gdl = skyRenderFull(gdl, &skyvertices2d[1], &skyvertices2d[0], &skyvertices2d[3], &skyvertices2d[2], 130.0f);
-				} else {
-					gdl = skyRenderTri(gdl, &skyvertices2d[1], &skyvertices2d[0], &skyvertices2d[3], 130.0f, true);
-				}
-			} else {
-				gdl = skyRenderTri(gdl, &skyvertices2d[0], &skyvertices2d[1], &skyvertices2d[3], 130.0f, true);
-				gdl = skyRenderTri(gdl, &skyvertices2d[3], &skyvertices2d[2], &skyvertices2d[0], 130.0f, true);
-			}
-		} else if (numvertices == 5) {
-			// Three corners are in the sky
-			gdl = skyRenderTri(gdl, &skyvertices2d[0], &skyvertices2d[1], &skyvertices2d[2], 130.0f, true);
-			gdl = skyRenderTri(gdl, &skyvertices2d[0], &skyvertices2d[2], &skyvertices2d[3], 130.0f, true);
-			gdl = skyRenderTri(gdl, &skyvertices2d[0], &skyvertices2d[3], &skyvertices2d[4], 130.0f, true);
-		} else if (numvertices == 3) {
-			// One corner is in the sky
-			gdl = skyRenderTri(gdl, &skyvertices2d[0], &skyvertices2d[1], &skyvertices2d[2], 130.0f, true);
-		}
-#else
-		Vtx *verts = gfxAllocateVertices(numvertices);
-		Col *cols = gfxAllocateColours(numvertices);
-		Mtxf *mtx = gfxAllocateMatrix();
-		mtx4MultMtx4(camGetWorldToScreenMtxf(), &g_SkyMtx, mtx);
-		mtxF2L(mtx, mtx);
-
-		gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
-		gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
-		gSPColor(gdl++, osVirtualToPhysical(cols), numvertices);
-		gSPVertex(gdl++, osVirtualToPhysical(verts), numvertices, 0);
-
-		for (s32 i = 0; i < numvertices; ++i) {
-			verts[i].x = skyvertices3d[i].x;
-			verts[i].y = skyvertices3d[i].y;
-			verts[i].z = skyvertices3d[i].z;
-			verts[i].s = skyClamp(skyvertices3d[i].s, -32768.f, 32767.f);
-			verts[i].t = skyClamp(skyvertices3d[i].t, -32768.f, 32767.f);
-			verts[i].colour = i * 4;
-			cols[i].r = skyvertices3d[i].r;
-			cols[i].g = skyvertices3d[i].g;
-			cols[i].b = skyvertices3d[i].b;
-			cols[i].a = skyvertices3d[i].a;
-		}
-
-		if (numvertices == 4) {
-			gSPTri2(gdl++, 0, 1, 3, 3, 2, 0);
-		} else if (numvertices == 5) {
-			gSPTri3(gdl++, 0, 1, 2, 0, 2, 3, 0, 3, 4);
-		} else if (numvertices == 3) {
-			gSPTri1(gdl++, 0, 1, 2);
-		}
-
-		gSPPopMatrix(gdl++, G_MTX_MODELVIEW);
-		gSPClearExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
-#endif
+		skyvertices2d[i].x = skyClamp(skyvertices2d[i].x, camGetScreenLeft() * 4.0f, (camGetScreenLeft() + camGetScreenWidth()) * 4.0f - 1.0f);
+		skyvertices2d[i].y = skyClamp(skyvertices2d[i].y, camGetScreenTop() * 4.0f, (camGetScreenTop() + camGetScreenHeight()) * 4.0f - 1.0f);
 	}
+
+	Vtx *verts = gfxAllocateVertices(numvertices);
+	Col *cols = gfxAllocateColours(numvertices);
+	Mtxf *mtx = gfxAllocateMatrix();
+	mtx4MultMtx4(camGetWorldToScreenMtxf(), &g_SkyMtx, mtx);
+	mtxF2L(mtx, mtx);
+
+	gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
+	gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
+	gSPColor(gdl++, osVirtualToPhysical(cols), numvertices);
+	gSPVertex(gdl++, osVirtualToPhysical(verts), numvertices, 0);
+
+	for (s32 i = 0; i < numvertices; ++i) {
+		verts[i].x = skyvertices3d[i].x;
+		verts[i].y = skyvertices3d[i].y;
+		verts[i].z = skyvertices3d[i].z;
+		verts[i].s = skyClamp(skyvertices3d[i].s, -32768.f, 32767.f);
+		verts[i].t = skyClamp(skyvertices3d[i].t, -32768.f, 32767.f);
+		verts[i].colour = i * 4;
+		cols[i].r = skyvertices3d[i].r;
+		cols[i].g = skyvertices3d[i].g;
+		cols[i].b = skyvertices3d[i].b;
+		cols[i].a = skyvertices3d[i].a;
+	}
+
+	if (numvertices == 4) {
+		gSPTri2(gdl++, 0, 1, 3, 3, 2, 0);
+	} else if (numvertices == 5) {
+		gSPTri3(gdl++, 0, 1, 2, 0, 2, 3, 0, 3, 4);
+	} else if (numvertices == 3) {
+		gSPTri1(gdl++, 0, 1, 2);
+	}
+
+	gSPPopMatrix(gdl++, G_MTX_MODELVIEW);
+	gSPClearExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
 
 	return gdl;
 }
@@ -1577,10 +1528,8 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 	f32 sp208[1];
 	f32 sp204[1];
 	f32 sp200[1];
-	u32 stack[4];
 	f32 sp1d0[8];
 	f32 sp1b0[8];
-	u32 stack2;
 	f32 sp1a8[1];
 	f32 sp1a4[1];
 	f32 sp1a0[1];
@@ -1588,7 +1537,6 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 	struct skyvtx2d *swap2;
 	struct skyvtx2d *swap3;
 	f32 sp190[1];
-	u32 stack3;
 
 	if (skyVerticesAreSame(vtx0, vtx1) || skyVerticesAreSame(vtx1, vtx2) || skyVerticesAreSame(vtx2, vtx0)) {
 		return gdl;
@@ -1982,7 +1930,6 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 	struct skyvtx2d *sp4c8;
 	struct skyvtx2d *sp4c4;
 	s32 i;
-	u32 stack;
 	f32 sp4b8;
 	f32 sp4b4;
 	f32 sp4b0;
@@ -2009,10 +1956,7 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 	struct skyvtx2d *swap2;
 	struct skyvtx2d *swap3;
 	f32 sp454[1];
-	u32 stack07;
 	f32 svtx2y[1];
-	u32 stack08;
-	u32 stack09;
 	f32 sp440[1];
 	f32 sp43c[1];
 	f32 sp438[1];
@@ -2078,29 +2022,15 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 	f32 sp294[8];
 	f32 sp274[8];
 	f32 sp254[8];
-	u32 stack10;
-	u32 stack11;
-	u32 stack12;
-	u32 stack13;
-	u32 stack00;
 	f32 sp23c[1];
 	f32 sp238[1];
 	f32 sp234[1];
 	f32 sp214[8];
 	f32 sp1f4[8];
-	u32 stack03;
-	u32 stack04;
-	u32 stack05;
-	u32 stack06;
-	u32 stack15;
 	f32 sp1dc[1];
 	f32 sp1d8[1];
 	f32 sp1d4[1];
-	u32 stack01;
-	u32 stack02;
-	u32 stack14;
 	f32 sp1c4[1];
-	u32 stack16;
 
 	if (skyVerticesAreSame(vtx0, vtx1)
 			|| skyVerticesAreSame(vtx1, vtx2)
@@ -2560,7 +2490,6 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 	s32 i;
 	f32 sp134[2];
 	f32 sp12c[2];
-	s32 xscale;
 	f32 sp124;
 	bool onscreen;
 	f32 radius;
@@ -2569,17 +2498,9 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 	sp168 = camGetMtxF1754();
 	env = envGetCurrent();
 
-	xscale = 1;
-
 	if (env->numsuns <= 0 || !g_ZbufPtr1 || g_Vars.mplayerisrunning) {
 		return gdl;
 	}
-
-#if !PAL
-	if (g_ViRes == 1) {
-		xscale = 2;
-	}
-#endif
 
 	viewleft = viGetViewLeft();
 	viewtop = viGetViewTop();
@@ -2715,12 +2636,9 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 
 					sp134[0] = g_SunScreenXPositions[i];
 					sp134[1] = g_SunScreenYPositions[i];
-					sp12c[0] = radius * 0.50f * xscale;
+					sp12c[0] = radius * 0.50f;
 					sp12c[1] = radius * 0.50f;
-
-#ifndef PLATFORM_N64
 					sp12c[0] *=  SCREEN_ASPECT / videoGetAspect();
-#endif
 
 					textureCalcScreenCoords(&gdl, sp134, sp12c, g_TexLightGlareConfigs[5].width, g_TexLightGlareConfigs[5].height, 0, 1, 1, 1);
 
@@ -2772,16 +2690,7 @@ Gfx *skyRenderFlare(Gfx *gdl, f32 x, f32 y, f32 intensityfrac, f32 size, s32 fla
 
 	f32 xdist;
 	f32 ydist;
-	s32 scale;
 	f32 fovy;
-
-	scale = 1;
-
-#if !PAL
-	if (g_ViRes == VIRES_HI) {
-		scale = 2;
-	}
-#endif
 
 	xdist = (x - viGetViewWidth() / 2.0f) * 0.01f;
 	ydist = (y - viGetViewHeight() / 2.0f) * 0.01f;
@@ -2811,7 +2720,7 @@ Gfx *skyRenderFlare(Gfx *gdl, f32 x, f32 y, f32 intensityfrac, f32 size, s32 fla
 	sp17c[0] = x;
 	sp17c[1] = y;
 	sp174[1] = f2 * 0.5f;
-	sp174[0] = f2 * 0.5f * scale;
+	sp174[0] = f2 * 0.5f;
 
 #ifndef PLATFORM_N64
 	sp174[0] *=  SCREEN_ASPECT / videoGetAspect();
@@ -2872,11 +2781,9 @@ Gfx *skyRenderFlare(Gfx *gdl, f32 x, f32 y, f32 intensityfrac, f32 size, s32 fla
 		sp17c[1] = f14;
 
 		sp174[1] = tmp * 0.5f;
-		sp174[0] = tmp * 0.5f * scale;
+		sp174[0] = tmp * 0.5f;
 
-#ifndef PLATFORM_N64
 		sp174[0] *=  SCREEN_ASPECT / videoGetAspect();
-#endif
 
 		textureCalcScreenCoords(&gdl, sp17c, sp174, g_TexLightGlareConfigs[1].width, g_TexLightGlareConfigs[1].height, 0, 0, 0, 0);
 	}
@@ -3109,7 +3016,6 @@ s32 skyCalculateOverexposureComponent(s32 old, s32 new)
 Gfx *skyRenderOverexposure(Gfx *gdl)
 {
 	s32 value;
-	u32 stack;
 
 	g_Vars.currentplayer->overexposurered = skyCalculateOverexposureComponent(g_Vars.currentplayer->prevoverexposurered, g_Vars.currentplayer->overexposurered);
 	g_Vars.currentplayer->overexposuregreen = skyCalculateOverexposureComponent(g_Vars.currentplayer->prevoverexposuregreen, g_Vars.currentplayer->overexposuregreen);

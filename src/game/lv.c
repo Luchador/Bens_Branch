@@ -1974,7 +1974,7 @@ void lvTickPlayer(void)
 	f32 xdiff;
 	f32 zdiff;
 
-	playerTick(true);
+	playerTick();
 
 	xdiff = g_Vars.currentplayer->prop->pos.x - g_Vars.currentplayer->bondprevpos.x;
 	zdiff = g_Vars.currentplayer->prop->pos.z - g_Vars.currentplayer->bondprevpos.z;

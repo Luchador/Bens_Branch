@@ -25,9 +25,6 @@
 #endif
 
 u8 *var800a41a0;
-u32 var800a41a4;
-u32 var800a41a8;
-u32 var800a41ac;
 
 void artifactsClear(void)
 {
@@ -357,9 +354,7 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 								}
 
 								if (index < MAX_ARTIFACTS) {
-#ifndef PLATFORM_N64
 									artifact->unk02 = artifactTestLos(&spec, &g_BgRooms[roomnum].pos, xi, yi);
-#endif
 									artifact->unk04 = func0f13c574(f0) >> 2;
 									artifact->unk08 = &g_ZbufPtr1[viGetWidth() * yi + xi];
 									artifact->light = &roomlights[i];
@@ -432,7 +427,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 	u16 t4;
 	f32 add;
 	s32 l;
-	f32 brightness; // The closer you get to an artifact, the higher this becomes. Max 750.
+	f32 brightness; // The closer you get to an artifact, the higher this becomes.
 	s32 avg;
 	f32 f0;
 	s32 v1;
@@ -509,6 +504,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 
 						brightness = 1.0f;
 					} else if (lightTickBroken(roomnum, lightindex - g_Rooms[roomnum].gfxdata->lightsindex)) {
+						// Decrease artifact brightness on broken lights to 40%
 						brightness = 0.4f;
 					} else {
 						continue;
@@ -595,7 +591,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 
 						textureCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
 
-						// Seems to make artifacts slightly brighter when true
+						// Make artifacts slightly brighter when true
 						if (extra) {
 							colour[0] = 0xff;
 							colour[1] = 0xff;

@@ -103,7 +103,6 @@ void bbikeUpdateVehicleOffset(void)
 
 void bbikeTryDismountAngle(f32 relativeangle, f32 distance)
 {
-	u32 stack;
 	struct hoverbikeobj *bike;
 	f32 angle;
 	struct coord pos;
@@ -448,7 +447,6 @@ s32 bbikeCalculateNewPosition(struct coord *vel, f32 angledelta)
 	}
 
 	if (angledelta) {
-		u32 stack[2];
 		f32 newangle = hoverpropGetTurnAngle(&bike->base) - angledelta;
 		Mtxf sp44;
 
@@ -817,7 +815,6 @@ void bbikeTick(void)
 	struct prop *prop;
 	s32 i;
 	f32 sp200;
-	u32 stack;
 	f32 sp1f8;
 	f32 sp1f4;
 	struct coord sp1e8;
@@ -892,8 +889,6 @@ void bbikeTick(void)
 			psSetVolume(g_Vars.currentplayer->hoverbike, var80070f04 * 300.0f);
 			psSetVolume(g_Vars.currentplayer->prop, sp200);
 		}
-
-		if (1);
 
 		bbike0f0d363c(bike->w * g_Vars.lvupdate60freal);
 

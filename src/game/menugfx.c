@@ -54,75 +54,6 @@ static bool g_MenuBlurDone = false;
  */
 void menugfxCreateBlur(void)
 {
-#ifdef PLATFORM_N64
-	u8 *fb = (u8 *) viGetFrontBuffer();
-	s32 dstx;
-	s32 dsty;
-#if PAL
-	s32 fbwidthinbytes = viGetWidth() * 2;
-	f32 scale = viGetWidth() / (f32) SCREEN_WIDTH_LO;
-#else
-	s32 fbwidthinbytes = PXTOBYTES(viGetWidth());
-#endif
-	s32 srcx;
-	s32 srcy;
-	u32 r;
-	u32 g;
-	u32 b;
-	u16 colour;
-
-	static u32 cccc = 1;
-
-#if PAL
-	g_ScaleX = 1;
-#else
-	g_ScaleX = (g_ViRes == VIRES_HI) ? 2 : 1;
-#endif
-
-	if (cccc == 1) {
-		fb = (u8 *) viGetFrontBuffer();
-	}
-
-	for (dsty = 0; dsty < BLURIMG_HEIGHT; dsty++) {
-
-		for (dstx = 0; dstx < BLURIMG_WIDTH; dstx++) {
-			s32 dstindex = PXTOBYTES(dsty * BLURIMG_WIDTH) + PXTOBYTES(dstx);
-
-#if PAL
-			s32 samplestartindex = (((s32) ((f32) dstx * 2 * 4 * 2 * scale) + (s32) (dsty * fbwidthinbytes * 8)) & 0xfffffffe);
-#else
-			s32 samplestartindex = PXTOBYTES(dstx * SAMPLE_WIDTH) * g_ScaleX + dsty * fbwidthinbytes * SAMPLE_HEIGHT;
-#endif
-
-			r = g = b = 0;
-
-			for (srcx = 0; srcx < SAMPLE_WIDTH; srcx++) {
-				for (srcy = 0; srcy < SAMPLE_HEIGHT; srcy++) {
-#if PAL
-					s32 index = (samplestartindex + (s32) (PXTOBYTES((f32) srcx) * scale) + srcy * fbwidthinbytes) & 0xfffffffe;
-#else
-					s32 index = samplestartindex + PXTOBYTES(srcx) * g_ScaleX + srcy * fbwidthinbytes;
-#endif
-
-					colour = fb[index] << 8 | fb[index + 1];
-
-					r = r + (colour >> 11 & 0x1f);
-					g = g + (colour >> 6 & 0x1f);
-					b = b + (colour >> 1 & 0x1f);
-				}
-			}
-
-			r /= SAMPLE_WIDTH * SAMPLE_HEIGHT;
-			g /= SAMPLE_WIDTH * SAMPLE_HEIGHT;
-			b /= SAMPLE_WIDTH * SAMPLE_HEIGHT;
-
-			g_BlurBuffer[dstindex + 0] = ((r << 3) | (g >> 2)) & 0xffff;
-			g_BlurBuffer[dstindex + 1] = ((g << 6) | ((b & 0x1f) << 1)) & 0xffff;
-		}
-	}
-
-	g_ScaleX = 1;
-#else
 	if (g_MenuBlurFb < 0) {
 		g_MenuBlurFb = videoCreateFramebuffer(BLURIMG_WIDTH, BLURIMG_HEIGHT, true, false);
 		g_MenuScreenFb = videoCreateFramebuffer(0, 0, false, true);
@@ -131,7 +62,6 @@ void menugfxCreateBlur(void)
 	videoCopyFramebuffer(g_MenuBlurFb, 0, -1, -1);
 	// we'll generate a blurred version later
 	g_MenuBlurDone = false;
-#endif
 }
 
 Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)

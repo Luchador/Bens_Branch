@@ -93,6 +93,19 @@ void utilsInit(void)
 	var80084614 = var80084610;
 }
 
+u32 FloatToUInt32(f32 arg0)
+{
+	if (arg0 > 32767.9f) {
+		arg0 = 32767.9f;
+	}
+
+	if (arg0 < -32767.9f) {
+		arg0 = -32767.9f;
+	}
+
+	return (u32)(arg0 * 65536);
+}
+
 // Not used
 /*s32 func0f176eb0(s32 arg0, s32 arg1)
 {

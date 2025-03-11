@@ -20595,12 +20595,6 @@ Gfx *countdownTimerRender(Gfx *gdl)
 			}
 		}
 
-#if !PAL
-		if (g_ViRes == VIRES_HI) {
-			viewright = viewright / 2;
-		}
-#endif
-
 		if (value60 < 0) {
 			value60 = -value60;
 		}
@@ -20609,11 +20603,9 @@ Gfx *countdownTimerRender(Gfx *gdl)
 		secs = (s32)floorf(value60 * (1.0f / 60.0f)) - mins * 60;
 		ms = (s32)floorf(value60 * 1.6666666269302f) - mins * 6000 - secs * 100;
 
-#ifndef PLATFORM_N64
 		if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 			gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 		}
-#endif
 
 		gdl = text0f153628(gdl);
 		gdl = bgunDrawHudInteger(gdl, (mins % 100) / 10, viewright - 18, HUDHALIGN_MIDDLE, y, HUDVALIGN_MIDDLE, 0x00ff00a0);
@@ -20643,25 +20635,11 @@ void alarmTick(void)
 	if (alarmIsActive()) {
 		s16 sound;
 
-		// These sounds are alarm sounds.
-		// They go for a fraction of a second and are repeated by this function.
-#ifdef PLATFORM_N64
-		switch (g_Vars.stagenum) {
-		case STAGE_CHICAGO:      sound = SFX_ALARM_CHICAGO; break;
-		case STAGE_G5BUILDING:   sound = SFX_ALARM_2; break;
-		case STAGE_AIRBASE:      sound = SFX_ALARM_AIRBASE; break;
-		case STAGE_PELAGIC:      sound = SFX_ALARM_2; break;
-		case STAGE_ATTACKSHIP:   sound = SFX_ALARM_ATTACKSHIP; break;
-		case STAGE_INFILTRATION: sound = SFX_ALARM_INFILTRATION; break;
-		default:                 sound = SFX_ALARM_DEFAULT; break;
-		}
-#else
 		// allow user to override alarm
 		sound = g_Stages[g_StageIndex].alarm;
 		if (!sound) {
 			sound = SFX_ALARM_DEFAULT;
 		}
-#endif
 
 		if (!lvIsPaused()) {
 			if (g_AlarmAudioHandle) {

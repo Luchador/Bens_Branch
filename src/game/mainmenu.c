@@ -4225,8 +4225,6 @@ MenuItemHandlerResult menuhandlerInventoryList(s32 operation, struct menuitem *i
 					}
 				}
 			}
-
-			var800711f0 = data->list.value;
 		}
 		break;
 	case MENUOP_GETSELECTEDINDEX:

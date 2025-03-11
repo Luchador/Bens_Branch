@@ -20,7 +20,6 @@
 #include "game/debug.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include <math.h>
 #include "video.h"
 
@@ -83,15 +82,6 @@ static inline s32 sightGetAdjustedX(const f32 x)
 	const f32 cx = (x - (f32)(SCREEN_WIDTH_LO / 2)) * sightGetScaleX();
 	return roundf((f32)(SCREEN_WIDTH_LO / 2) + cx);
 }
-
-#else
-
-#define SIGHT_COLOUR 0x00ff0028
-#define SIGHT_SCALE 2
-#define sightGetScaleX() 1.f
-#define sightGetAdjustedX(x) (x)
-
-#endif
 
 /**
  * Return true if the prop is considered friendly (blue sight).
@@ -406,9 +396,9 @@ s32 sightCalculateBoxBound(s32 targetx, s32 viewleft, s32 timeelapsed, s32 timee
  */
 Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, s32 textid, s32 time)
 {
-	s32 viewleft = viGetViewLeft() / g_ScaleX;
+	s32 viewleft = viGetViewLeft();
 	s32 viewtop = viGetViewTop();
-	s32 viewwidth = viGetViewWidth() / g_ScaleX;
+	s32 viewwidth = viGetViewWidth();
 	s32 viewheight = viGetViewHeight();
 	s32 viewright = viewleft + viewwidth - 1;
 	s32 viewbottom = viewtop + viewheight - 1;
@@ -423,9 +413,9 @@ Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, s32 textid, s
 		time = TICKS(512);
 	}
 
-	boxleft = sightCalculateBoxBound(trackedprop->x1 / g_ScaleX, viewleft, time, TICKS(80));
+	boxleft = sightCalculateBoxBound(trackedprop->x1, viewleft, time, TICKS(80));
 	boxtop = sightCalculateBoxBound(trackedprop->y1, viewtop, time, TICKS(80));
-	boxright = sightCalculateBoxBound(trackedprop->x2 / g_ScaleX, viewright, time, TICKS(80));
+	boxright = sightCalculateBoxBound(trackedprop->x2, viewright, time, TICKS(80));
 	boxbottom = sightCalculateBoxBound(trackedprop->y2, viewbottom, time, TICKS(80));
 
 	if (trackedprop->prop) {
@@ -490,20 +480,18 @@ Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, s32 textid, s
 
 Gfx *sightDrawAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colour)
 {
-	s32 viewleft = viGetViewLeft() / g_ScaleX;
+	s32 viewleft = viGetViewLeft();
 	s32 viewtop = viGetViewTop();
-	s32 viewwidth = viGetViewWidth() / g_ScaleX;
+	s32 viewwidth = viGetViewWidth();
 	s32 viewheight = viGetViewHeight();
 	s32 viewright = viewleft + viewwidth - 1;
 	s32 viewbottom = viewtop + viewheight - 1;
 
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
-#ifndef PLATFORM_N64
 	x = sightGetAdjustedX(x);
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
-#endif
 
 	// Draw the lines that span most of the viewport
 	if (PLAYERCOUNT() == 1) {
@@ -537,10 +525,8 @@ Gfx *sightDrawAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colou
 	gDPHudRectangle(gdl++, x - radius, y + radius, x - cornergap, y + radius);
 	gDPHudRectangle(gdl++, x + cornergap, y + radius, x + radius, y + radius);
 
-#ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
-#endif
 
 	gdl = text0f153838(gdl);
 
@@ -569,7 +555,6 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u3
 	s32 i;
 	f32 dist;
 	f32 accel;
-	u32 stack;
 
 	static f32 xpos = 160;
 	static f32 ypos = 120;
@@ -700,7 +685,7 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	s32 radius;
 	s32 cornergap;
 	u32 colour;
-	s32 x = (s32) crossx / g_ScaleX;
+	s32 x = (s32) crossx;
 	s32 y = crossy;
 	struct trackedprop *trackedprop;
 	s32 i;
@@ -709,8 +694,6 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	static s32 identifytimer = 0;
 
 	gdl = text0f153628(gdl);
-
-	if (1);
 
 	switch (g_Vars.currentplayer->sighttracktype) {
 	case SIGHTTRACKTYPE_NONE:
@@ -924,7 +907,7 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	spc4[0] = x;
 	spc4[1] = y;
 
-	spbc[0] = halfw * (f32)g_ScaleX;
+	spbc[0] = halfw;
 	spbc[1] = tconfig->height >> 1;
 
 	texSelect(&gdl, tconfig, 2, 0, 0, 1, NULL);
@@ -1049,15 +1032,15 @@ Gfx *sightDrawSkedarTriangle(Gfx *gdl, s32 x, s32 y, s32 dir, u32 colour)
 
 Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 {
-	s32 viewleft = viGetViewLeft() / g_ScaleX;
+	s32 viewleft = viGetViewLeft();
 	s32 viewtop = viGetViewTop();
-	s32 viewwidth = viGetViewWidth() / g_ScaleX;
+	s32 viewwidth = viGetViewWidth();
 	s32 viewheight = viGetViewHeight();
 	s32 viewright = viewleft + viewwidth - 1;
 	s32 viewbottom = viewtop + viewheight - 1;
 	s32 paddingy = viewheight / 4;
 	s32 paddingx = viewwidth / 4;
-	s32 x = (s32) (crossx / g_ScaleX);
+	s32 x = (s32) (crossx);
 	s32 trix1;
 	s32 trix2;
 	s32 y = crossy;
@@ -1242,9 +1225,9 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 
 Gfx *sightDrawZoom(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 {
-	s32 viewleft = viGetViewLeft() / g_ScaleX;
+	s32 viewleft = viGetViewLeft();
 	s32 viewtop = viGetViewTop();
-	s32 viewhalfwidth = (viGetViewWidth() / g_ScaleX) >> 1;
+	s32 viewhalfwidth = (viGetViewWidth()) >> 1;
 	s32 viewhalfheight = viGetViewHeight() >> 1;
 	s32 viewright = viewleft + viewhalfwidth * 2 - 1;
 	s32 viewbottom = viewtop + viewhalfheight * 2 - 1;
@@ -1401,13 +1384,13 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 
 Gfx *sightDrawMaian(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 {
-	s32 viewleft = viGetViewLeft() / g_ScaleX;
+	s32 viewleft = viGetViewLeft();
 	s32 viewtop = viGetViewTop();
-	s32 viewwidth = viGetViewWidth() / g_ScaleX;
+	s32 viewwidth = viGetViewWidth();
 	s32 viewheight = viGetViewHeight();
 	s32 viewright = viewleft + viewwidth - 1;
 	s32 viewbottom = viewtop + viewheight - 1;
-	s32 x = (s32)crossx / g_ScaleX;
+	s32 x = (s32)crossx;
 	s32 y = crossy;
 	Vtx *vertices;
 	Col *colours;
@@ -1517,7 +1500,7 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 
 Gfx *sightDrawTarget(Gfx *gdl, f32 crossx, f32 crossy)
 {
-	s32 x = sightGetAdjustedX((s32)crossx / g_ScaleX);
+	s32 x = sightGetAdjustedX((s32)crossx);
 	s32 y = crossy;
 
 	static u32 var80070f9c = 0x00ff00ff;
@@ -1525,14 +1508,12 @@ Gfx *sightDrawTarget(Gfx *gdl, f32 crossx, f32 crossy)
 
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
-#ifndef PLATFORM_N64
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
 	if (SIGHT_SCALE == 0) {
 		// Draw single rectangle to preserve intended opacity
 		gDPHudRectangle(gdl++, x, y, x, y);
 	} else
-#endif
 	{
 		gDPHudRectangle(gdl++, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 3 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
 		gDPHudRectangle(gdl++, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 2 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
@@ -1544,10 +1525,8 @@ Gfx *sightDrawTarget(Gfx *gdl, f32 crossx, f32 crossy)
 		gDPHudRectangle(gdl++, x + 0 * SIGHT_SCALE, y - 2 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1 * SIGHT_SCALE);
 	}
 
-#ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
-#endif
 
 	gdl = text0f153838(gdl);
 
@@ -1591,22 +1570,14 @@ Gfx *sightDraw(Gfx *gdl, bool sighton, s32 sight)
 	const f32 crossy = g_Vars.currentplayer->crosspos[1];
 #endif
 
-	if (g_ViRes == VIRES_HI) {
-		g_ScaleX = 2;
-	} else {
-		g_ScaleX = 1;
-	}
-
 	if (PLAYERCOUNT() >= 2 && g_Vars.coopplayernum < 0 && g_Vars.antiplayernum < 0) {
 		sight = SIGHT_DEFAULT;
 	}
 
-#ifndef PLATFORM_N64
 	if (g_Vars.currentplayer->bondhealth <= 0.0f) {
 		// Hide crosshair during death animation
 		sight = SIGHT_NONE;
 	}
-#endif
 
 	sightTick(sighton);
 
@@ -1645,8 +1616,6 @@ Gfx *sightDraw(Gfx *gdl, bool sighton, s32 sight)
 			gdl = sightDrawTarget(gdl, crossx, crossy);
 		}
 	}
-
-	g_ScaleX = 1;
 
 	return gdl;
 }

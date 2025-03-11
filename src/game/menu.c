@@ -513,16 +513,8 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 
 	switch (item->type) {
 	case MENUITEMTYPE_CONTROLLER:
-#if VERSION == VERSION_JPN_FINAL
-		*height = 190;
-		*width = 240;
-#elif PAL
-		*height = 156;
-		*width = 230;
-#else
 		*height = 150;
 		*width = 230;
-#endif
 		break;
 	case MENUITEMTYPE_18:
 		*height = item->param2 == 1 ? 170 : 126;
@@ -538,11 +530,7 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 		break;
 	case MENUITEMTYPE_KEYBOARD:
 		*width = 130;
-#ifndef PLATFORM_N64
 		*height = 84;
-#else
-		*height = 73;
-#endif
 		break;
 	case MENUITEMTYPE_LIST:
 		if (item->param2 > 0) {
@@ -550,22 +538,12 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 		} else {
 			*width = 80;
 
-#if VERSION >= VERSION_NTSC_1_0
 			if ((item->flags & MENUITEMFLAG_LIST_WIDE) != 0) {
 				*width = 180;
 			}
-#else
-			if ((item->flags && MENUITEMFLAG_LIST_WIDE) != 0) {
-				*width = 180;
-			}
-#endif
 		}
 
-#if VERSION >= VERSION_JPN_FINAL
-		*height = item->param3 > 0 ? item->param3 : 112;
-#else
 		*height = item->param3 > 0 ? item->param3 : 121;
-#endif
 		break;
 	case MENUITEMTYPE_DROPDOWN:
 		text = menuResolveParam2Text(item);
@@ -582,7 +560,7 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 			}
 
 			*width = textwidth + 20;
-			*height = VERSION == VERSION_JPN_FINAL ? 14 : 12;
+			*height = 12;
 
 			if (item->handler) {
 				handlerdata2.dropdown.value = 0;
@@ -590,16 +568,7 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 				handlerdata2.dropdown.unk04 = 0;
 				text2 = (char *)item->handler(MENUOP_GETOPTIONTEXT, item, &handlerdata2);
 				textMeasure(&textheight, &textwidth, text2, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
-
-#if VERSION >= VERSION_PAL_FINAL
-				if ((item->flags & MENUITEMFLAG_ADJUSTWIDTH) == 0) {
-					*width += textwidth + 10;
-				} else {
-					*width += textwidth + 3;
-				}
-#else
 				*width += textwidth + 10;
-#endif
 			}
 		}
 		break;
@@ -615,14 +584,14 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 		}
 
 		*width = 150;
-		*height = VERSION == VERSION_JPN_FINAL ? 14 : 12;
+		*height = 12;
 
 		if (item->flags & MENUITEMFLAG_SLIDER_ALTSIZE) {
 			*height = 22;
 			*width = 120;
 		} else if (item->flags & MENUITEMFLAG_SLIDER_WIDE) {
 			*width = 200;
-			*height = VERSION == VERSION_JPN_FINAL ? 14 : 12;
+			*height = 12;
 		}
 		break;
 	case MENUITEMTYPE_CHECKBOX:
@@ -642,7 +611,7 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 			textMeasure(&textheight, &textwidth, text, chars, font, 0);
 			*width = (s16)textwidth + 34;
 		}
-		*height = VERSION == VERSION_JPN_FINAL ? 14 : 12;
+		*height = 12;
 		break;
 	case MENUITEMTYPE_MODEL:
 		*width = item->param2;
@@ -653,19 +622,15 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 		if (item->param2) {
 			*width = item->param2;
 		}
-		*height = VERSION == VERSION_JPN_FINAL ? 2 : 5;
+		*height = 5;
 		break;
 	case MENUITEMTYPE_MARQUEE:
 		*width = 1;
-#if VERSION == VERSION_JPN_FINAL
-		*height = LINEHEIGHT;
-#else
 		if (item->flags & MENUITEMFLAG_SMALLFONT) {
 			*height = LINEHEIGHT;
 		} else {
 			*height = LINEHEIGHT + 2;
 		}
-#endif
 		break;
 	case MENUITEMTYPE_LABEL:
 	case MENUITEMTYPE_SELECTABLE:
@@ -698,22 +663,16 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 				*width += 20;
 			}
 
-#if VERSION == VERSION_JPN_FINAL
-			*height = textheight;
-#else
 			*height = textheight + 3;
 
 			if (item->flags & MENUITEMFLAG_SMALLFONT) {
 				*height -= 2;
 			}
-#endif
 
 			if ((item->flags & (MENUITEMFLAG_LABEL_HASRIGHTTEXT | MENUITEMFLAG_BIGFONT)) == 0) {
-#ifndef PLATFORM_N64
 				if (item->flags & MENUITEMFLAG_LITERAL_TEXT) {
 					text = (const char *)item->param3;
 				} else
-#endif
 				text = menuResolveText(item->param3, item);
 
 				// @bug: This is not how you check for an empty string
@@ -751,26 +710,6 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 			}
 		}
 
-#if VERSION >= VERSION_JPN_FINAL
-		if (item->param == 0) {
-			*height = 9 + numobjectives * 24;
-		} else if (item->param == 1) {
-			*height = 9 + numobjectives * 16;
-		} else if (item->param == 2) {
-			*height = 9 + numobjectives * 36;
-			*height -= 5;
-			*width = 120;
-		}
-#elif VERSION >= VERSION_PAL_FINAL
-		if (item->param == 0) {
-			*height = 9 + numobjectives * 18;
-		} else if (item->param == 1) {
-			*height = 9 + numobjectives * 14;
-		} else if (item->param == 2) {
-			*height = 9 + numobjectives * 34;
-			*width = 120;
-		}
-#else
 		if (item->param == 0) {
 			*height = 9 + numobjectives * 18;
 		} else if (item->param == 1) {
@@ -779,7 +718,6 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 			*height = 9 + numobjectives * 30;
 			*width = 120;
 		}
-#endif
 		break;
 	case MENUITEMTYPE_07:
 		*width = 120;
@@ -1970,11 +1908,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 			}
 
 			posx = menumodel->curposx;
-
-			if (g_ViRes == VIRES_HI) {
-				posx *= 2.0f;
-			}
-
 			posy = menumodel->curposy;
 			posz = menumodel->curposz;
 
@@ -2075,7 +2008,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 		screenz[0] = -100.0f + posz;
 
-		screenpos[0] = menumodel->curposx * g_ScaleX + 160; // Fix screenpos being off center
+		screenpos[0] = menumodel->curposx + 160; // Fix screenpos being off center
 		screenpos[1] = menumodel->curposy + 110; // Fix screenpos being off center
 
 		cam0f0b4c3c(screenpos, &tmpcoord, 1.0f);
@@ -2174,8 +2107,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 				gdl = func0f0d49c8(gdl);
 
-				viSetViewPosition(x1 * g_ScaleX, g_MenuScissorY1);
-				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (x2 - x1) * g_ScaleX, g_MenuScissorY2 - g_MenuScissorY1);
+				viSetViewPosition(x1, g_MenuScissorY1);
+				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (x2 - x1), g_MenuScissorY2 - g_MenuScissorY1);
 
 				gdl = vi0000af00(gdl, var800a2048[g_MpPlayerNum]);
 				gdl = vi0000aca4(gdl, znear, zfar);
@@ -2286,7 +2219,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 					cam0f0b4d04(&pos, screenpos);
 
-					g_MenuProjectFromX = ((s32)screenpos[0] - viGetWidth() / 2) / g_ScaleX;
+					g_MenuProjectFromX = ((s32)screenpos[0] - viGetWidth() / 2);
 					g_MenuProjectFromY = (s32)screenpos[1] - viGetHeight() / 2;
 				}
 			}
@@ -2369,9 +2302,8 @@ Gfx *menuApplyScissor(Gfx *gdl)
 {
 	gDPPipeSync(gdl++);
 
-#if VERSION >= VERSION_NTSC_1_0
-	g_ScissorX1 = g_MenuScissorX1 * g_ScaleX;
-	g_ScissorX2 = g_MenuScissorX2 * g_ScaleX;
+	g_ScissorX1 = g_MenuScissorX1;
+	g_ScissorX2 = g_MenuScissorX2;
 	g_ScissorY1 = g_MenuScissorY1;
 	g_ScissorY2 = g_MenuScissorY2;
 
@@ -2416,11 +2348,6 @@ Gfx *menuApplyScissor(Gfx *gdl)
 	}
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
-#else
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE,
-			g_MenuScissorX1 * g_ScaleX, g_MenuScissorY1,
-			g_MenuScissorX2 * g_ScaleX, g_MenuScissorY2);
-#endif
 
 	return gdl;
 }
@@ -2665,9 +2592,9 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 
 	{
 		struct menulayer *layer;
-		s32 viewleft = viGetViewLeft() / g_ScaleX;
+		s32 viewleft = viGetViewLeft();
 		s32 viewtop = viGetViewTop();
-		s32 viewright = (viGetViewLeft() + viGetViewWidth()) / g_ScaleX;
+		s32 viewright = (viGetViewLeft() + viGetViewWidth());
 		s32 viewbottom = viGetViewTop() + viGetViewHeight();
 
 		g_MenuScissorX1 = dialogleft + 2;
@@ -3144,9 +3071,9 @@ void menuFindAvailableSize(s32 *leftptr, s32 *topptr, s32 *rightptr, s32 *bottom
 void menuFindAvailableSize(s32 *leftptr, s32 *topptr, s32 *rightptr, s32 *bottomptr)
 #endif
 {
-	s32 left = viGetViewLeft() / g_ScaleX + 20;
+	s32 left = viGetViewLeft() + 20;
 	s32 top = viGetViewTop() + 4;
-	s32 right = (viGetViewLeft() + viGetViewWidth()) / g_ScaleX - 20;
+	s32 right = (viGetViewLeft() + viGetViewWidth()) - 20;
 	s32 bottom = viGetViewTop() + viGetViewHeight() - 4;
 	s32 playernum;
 	u32 stack1;
@@ -3265,9 +3192,9 @@ void menuFindAvailableSize(s32 *leftptr, s32 *topptr, s32 *rightptr, s32 *bottom
 	case MENUROOT_MPPAUSE:
 	case MENUROOT_MPENDSCREEN:
 	case MENUROOT_PICKTARGET:
-		*leftptr = g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewleft / g_ScaleX;
+		*leftptr = g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewleft;
 		*topptr = g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewtop;
-		*rightptr = (g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewleft + g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewwidth) / g_ScaleX;
+		*rightptr = (g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewleft + g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewwidth);
 		*bottomptr = g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewtop + g_Vars.players[g_Menus[g_MpPlayerNum].playernum]->viewheight;
 
 		if (PLAYERCOUNT() > 2) {
@@ -3337,7 +3264,7 @@ void dialogCalculatePosition(struct menudialog *dialog)
 		}
 
 		if (hdir > 0) {
-			dialog->dstx = (viGetViewLeft() + viGetViewWidth()) / g_ScaleX + 4;
+			dialog->dstx = (viGetViewLeft() + viGetViewWidth()) + 4;
 		}
 
 		if (vdir < 0) {
@@ -3590,7 +3517,7 @@ Gfx *menuRenderDialogs(Gfx *gdl)
 		if (g_MenuData.root == MENUROOT_MPPAUSE
 				|| g_MenuData.root == MENUROOT_PICKTARGET
 				|| g_MenuData.root == MENUROOT_MPENDSCREEN) {
-			g_MenuProjectFromX = g_Menus[g_MpPlayerNum].curdialog->x + g_Menus[g_MpPlayerNum].curdialog->width / 2 - viGetWidth() / (g_ScaleX * 2);
+			g_MenuProjectFromX = g_Menus[g_MpPlayerNum].curdialog->x + g_Menus[g_MpPlayerNum].curdialog->width / 2 - viGetWidth() / 2;
 			g_MenuProjectFromY = g_Menus[g_MpPlayerNum].curdialog->y + g_Menus[g_MpPlayerNum].curdialog->height / 2 - viGetHeight() / 2;
 
 			gdl = menuRenderDialog(gdl, g_Menus[g_MpPlayerNum].curdialog, &g_Menus[g_MpPlayerNum], 0);
@@ -3646,36 +3573,22 @@ Gfx *menuRenderDialogs(Gfx *gdl)
 				s32 xmax;
 				s32 ymax;
 
-#if VERSION >= VERSION_JPN_FINAL
-				menuFindAvailableSize(&xmin, &ymin, &xmax, &ymax, NULL);
-#else
 				menuFindAvailableSize(&xmin, &ymin, &xmax, &ymax);
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 				gdl = menuRenderBanner(gdl, xmin, ymin, xmax, ymax, false, g_Menus[g_MpPlayerNum].bannernum, 0, 0);
-#else
-				gdl = menuRenderBanner(gdl, xmin, ymin, xmax, ymax, false, g_Menus[g_MpPlayerNum].bannernum);
-#endif
 			} else {
-				s32 xmin = viGetViewLeft() / g_ScaleX;
+				s32 xmin = viGetViewLeft();
 				s32 ymin = viGetViewTop();
-				s32 xmax = (viGetViewLeft() + viGetViewWidth()) / g_ScaleX;
+				s32 xmax = (viGetViewLeft() + viGetViewWidth());
 				s32 ymax = viGetViewTop() + viGetViewHeight();
 
-#if VERSION >= VERSION_NTSC_1_0
 				gdl = menuRenderBanner(gdl, xmin, ymin, xmax, ymax, true, g_Menus[g_MpPlayerNum].bannernum, 0, 0);
-#else
-				gdl = menuRenderBanner(gdl, xmin, ymin, xmax, ymax, true, g_Menus[g_MpPlayerNum].bannernum);
-#endif
 			}
 		}
 	}
 
 	return gdl;
 }
-
-u32 var800714e8 = 0;
 
 void menuResetModel(struct menumodel *menumodel, u32 allocationlen, bool allocate)
 {
@@ -3712,8 +3625,6 @@ void menuResetModel(struct menumodel *menumodel, u32 allocationlen, bool allocat
 void menuReset(void)
 {
 	s32 i;
-
-	func0f110bf0();
 
 	var8009dfc0 = 0;
 
@@ -3984,17 +3895,9 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 		if (g_MenuData.root == MENUROOT_ENDSCREEN
 				&& dialog->type == MENUDIALOGTYPE_SUCCESS
 				&& (g_MenuData.bg == MENUBG_8 || g_MenuData.bg == MENUBG_SUCCESS)) {
-#if VERSION >= VERSION_PAL_BETA
-			dialog->transitionfrac += g_Vars.diffframe60freal * 0.01f;
-#else
 			dialog->transitionfrac += g_Vars.diffframe60f * 0.01f;
-#endif
 		} else {
-#if VERSION >= VERSION_PAL_BETA
-			dialog->transitionfrac += g_Vars.diffframe60freal * 0.042f;
-#else
 			dialog->transitionfrac += g_Vars.diffframe60f * 0.042f;
-#endif
 		}
 
 		if (dialog->transitionfrac > 1.0f) {
@@ -4012,11 +3915,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 	if (dialog->state == MENUDIALOGSTATE_POPULATED) {
 		if (g_MenuData.nextbg != MENUBG_CONEALPHA) {
 			if (dialog->redrawtimer < 0.0f) {
-#if VERSION >= VERSION_PAL_BETA
-				dialog->statefrac += g_Vars.diffframe60freal / 120.0f;
-#else
 				dialog->statefrac += g_Vars.diffframe60f / 120.0f;
-#endif
 
 				if (dialog->statefrac > 1.0f) {
 					dialog->redrawtimer = 0.0f;
@@ -4030,11 +3929,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 	// When populating the text for the first time, wait for both the redraw
 	// timer to finish and a minimum duration.
 	if (dialog->state == MENUDIALOGSTATE_POPULATING) {
-#if VERSION >= VERSION_PAL_BETA
-		dialog->statefrac -= 0.05f * g_Vars.diffframe60freal;
-#else
 		dialog->statefrac -= 0.05f * g_Vars.diffframe60f;
-#endif
 
 		if (dialog->statefrac < 0.0f) {
 			dialog->statefrac = 0.0f;
@@ -4053,11 +3948,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 
 		if (dialog->statefrac != dialog->height) {
 			for (i = 0; i < g_Vars.diffframe60; i++) {
-#if PAL
-				dialog->statefrac = dialog->height * 0.235f + 0.765f * dialog->statefrac;
-#else
 				dialog->statefrac = dialog->height * 0.2f + 0.8f * dialog->statefrac;
-#endif
 			}
 		}
 
@@ -4071,7 +3962,6 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 		}
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (dialog->state == MENUDIALOGSTATE_PREOPEN) {
 		if (dialog->definition == &g_MpReadyMenuDialog) {
 			if (dialog->statefrac < 0.1f) {
@@ -4083,11 +3973,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 			}
 		} else if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && menuGetRoot() == MENUROOT_MPENDSCREEN) {
 			if (var8009dfc0) {
-#if VERSION >= VERSION_PAL_BETA
-				dialog->statefrac += g_Vars.diffframe240freal / 60.0f;
-#else
 				dialog->statefrac += g_Vars.diffframe240 / 60.0f;
-#endif
 
 				if (dialog->statefrac > 1.0f) {
 					dialog->state = MENUDIALOGSTATE_OPENING;
@@ -4103,34 +3989,17 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 			}
 		}
 	}
-#else
-	if (dialog->state == MENUDIALOGSTATE_PREOPEN) {
-		if (g_MenuData.nextbg == 255 || g_MenuData.bg != 0) {
-			dialog->state = MENUDIALOGSTATE_OPENING;
-			dialog->redrawtimer = 0.0f;
-			dialog->statefrac = 0.5f;
-		}
-	}
-#endif
 
 	// Increment the redraw timer, which makes the contents fade and then get
 	// redrawn. The initial draw is done faster than subsequent draws.
 	if (dialog->redrawtimer < 0.0f) {
 		// Redraw not active
 	} else {
-#if VERSION >= VERSION_PAL_BETA
-		if (dialog->state == MENUDIALOGSTATE_POPULATED) {
-			dialog->redrawtimer += g_Vars.diffframe60freal + g_Vars.diffframe60freal;
-		} else {
-			dialog->redrawtimer += 5 * g_Vars.diffframe60freal;
-		}
-#else
 		if (dialog->state == MENUDIALOGSTATE_POPULATED) {
 			dialog->redrawtimer += 2 * g_Vars.diffframe60;
 		} else {
 			dialog->redrawtimer += 5 * g_Vars.diffframe60;
 		}
-#endif
 
 		if (dialog->redrawtimer > 600.0f) {
 			dialog->redrawtimer = -1.0f;
@@ -4158,11 +4027,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 			newx = dialog->x;
 
 			for (i = 0; i < g_Vars.diffframe60; i++) {
-#if PAL
-				newx = dialog->dstx * 0.348f + 0.652f * newx;
-#else
 				newx = dialog->dstx * 0.3f + 0.7f * newx;
-#endif
 			}
 
 			dialog->x = newx;
@@ -4182,11 +4047,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 			newy = dialog->y;
 
 			for (i = 0; i < g_Vars.diffframe60; i++) {
-#if PAL
-				newy = dialog->dsty * 0.348f + 0.652f * newy;
-#else
 				newy = dialog->dsty * 0.3f + 0.7f * newy;
-#endif
 			}
 
 			dialog->y = newy;
@@ -4207,11 +4068,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 		newwidth = dialog->width;
 
 		for (i = 0; i < g_Vars.diffframe60; i++) {
-#if PAL
-			newwidth = dialog->dstwidth * 0.348f + 0.652f * newwidth;
-#else
 			newwidth = dialog->dstwidth * 0.3f + 0.7f * newwidth;
-#endif
 		}
 
 		dialog->width = newwidth;
@@ -4232,11 +4089,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 		newheight = dialog->height;
 
 		for (i = 0; i < g_Vars.diffframe60; i++) {
-#if PAL
-			newheight = dialog->dstheight * 0.348f + 0.652f * newheight;
-#else
 			newheight = dialog->dstheight * 0.3f + 0.7f * newheight;
-#endif
 		}
 
 		dialog->height = newheight;
@@ -4317,11 +4170,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 	}
 
 	// Apply default navigational behaviour if requested
-#ifdef AVOID_UB
 	if (usedefaultbehaviour && (tickflags & MENUTICKFLAG_DIALOGISCURRENT) && !dialog->dimmed && g_Menus[g_MpPlayerNum].depth >= 1) {
-#else
-	if (usedefaultbehaviour && (tickflags & MENUTICKFLAG_DIALOGISCURRENT) && !dialog->dimmed) {
-#endif
 		struct menulayer *layer = &g_Menus[g_MpPlayerNum].layers[g_Menus[g_MpPlayerNum].depth - 1];
 
 		if (layer->numsiblings <= 1) {
@@ -4410,11 +4259,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 			s32 i;
 
 			for (i = 0; i < g_Vars.diffframe60; i++) {
-#if PAL
-				newscroll = (dialog->dstscroll * 0.235f) + (0.765f * newscroll);
-#else
 				newscroll = (dialog->dstscroll * 0.2f) + (0.8f * newscroll);
-#endif
 			}
 
 			dialog->scroll = newscroll;
@@ -4517,7 +4362,6 @@ void menuProcessInput(void)
 	inputs.shoulder = 0;
 	inputs.back2 = 0;
 
-#ifndef PLATFORM_N64
 	inputs.mousemoved = false;
 	inputs.mousescroll = 0;
 	inputs.mousex = 0;
@@ -4545,7 +4389,6 @@ void menuProcessInput(void)
 			}
 		}
 	}
-#endif
 
 	if (g_Menus[g_MpPlayerNum].curdialog) {
 		stickx = 0;
@@ -4602,7 +4445,6 @@ void menuProcessInput(void)
 				inputs.select = 1;
 			}
 
-#ifndef PLATFORM_N64
 			// separate buttons for UI accept/cancel
 			if (buttonsnow & BUTTON_UI_ACCEPT) {
 				inputs.select = 1;
@@ -4611,7 +4453,6 @@ void menuProcessInput(void)
 			if (buttonsnow & BUTTON_UI_CANCEL) {
 				inputs.back = 1;
 			}
-#endif
 
 			if (buttonsnow & B_BUTTON) {
 				inputs.back = 1;
@@ -4633,21 +4474,17 @@ void menuProcessInput(void)
 				stickx = thisstickx;
 			}
 
-#ifndef PLATFORM_N64
 			if ((stickx < 0 ? -stickx : stickx) < (thisrstickx < 0 ? -thisrstickx : thisrstickx)) {
 				stickx = thisrstickx;
 			}
-#endif
 
 			if ((sticky < 0 ? -sticky : sticky) < (thissticky < 0 ? -thissticky : thissticky)) {
 				sticky = thissticky;
 			}
 
-#ifndef PLATFORM_N64
 			if ((sticky < 0 ? -sticky : sticky) < (thisrsticky < 0 ? -thisrsticky : thisrsticky)) {
 				sticky = thisrsticky;
 			}
-#endif
 
 			if (buttons & U_CBUTTONS) {
 				yhelddir = -1;
@@ -4802,12 +4639,6 @@ void menuProcessInput(void)
 				}
 
 				if (interval > 0) {
-#if VERSION >= VERSION_PAL_BETA
-					if (interval > 3) {
-						interval = TICKS(interval);
-					}
-#endif
-
 					oldslot = menu->xrepeattimer60 / interval;
 					newslot = (menu->xrepeattimer60 + g_Vars.diffframe60) / interval;
 
@@ -5174,12 +5005,6 @@ Gfx *menuRender(Gfx *gdl)
 
 	g_MpPlayerNum = 0;
 
-#if PAL
-	g_ScaleX = 1;
-#else
-	g_ScaleX = g_ViRes == VIRES_HI ? 2 : 1;
-#endif
-
 	gdl = func0f0d479c(gdl);
 
 	gSPDisplayList(gdl++, var800613a0);
@@ -5196,9 +5021,7 @@ Gfx *menuRender(Gfx *gdl)
 		gdl = menuRenderBackgroundLayer1(gdl, g_MenuData.bg, 1.0f);
 	}
 
-#ifndef PLATFORM_N64
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-#endif
 
 	// Calculate hudpiece things then render it
 	if (g_MenuData.unk5d5_05) {
@@ -5332,9 +5155,9 @@ Gfx *menuRender(Gfx *gdl)
 		if (g_MenuData.root == MENUROOT_MPSETUP) {
 			s32 i;
 			s32 j;
-			s32 viewleft = viGetViewLeft() / g_ScaleX + 20;
+			s32 viewleft = viGetViewLeft() / 20;
 			s32 viewtop = viGetViewTop() + 4;
-			s32 viewright = (viGetViewLeft() + viGetViewWidth()) / g_ScaleX - 20;
+			s32 viewright = (viGetViewLeft() + viGetViewWidth()) / -20;
 			s32 viewbottom = viGetViewTop() + viGetViewHeight() - 4;
 			s32 textheight;
 			s32 textwidth;
@@ -5443,9 +5266,9 @@ Gfx *menuRender(Gfx *gdl)
 	// Render banner messages, such as "Please Wait...",
 	// "Checking Controller Pak" and some unused game boy camera texts.
 	if (g_MenuData.bannernum != -1) {
-		s32 x1 = viGetViewLeft() / g_ScaleX;
+		s32 x1 = viGetViewLeft();
 		s32 y1 = viGetViewTop();
-		s32 x2 = (viGetViewLeft() + viGetViewWidth()) / g_ScaleX;
+		s32 x2 = (viGetViewLeft() + viGetViewWidth());
 		s32 y2 = viGetViewTop() + viGetViewHeight();
 
 		s32 left = 0;
@@ -5470,18 +5293,12 @@ Gfx *menuRender(Gfx *gdl)
 		gdl = menuRenderBanner(gdl, x1, y1, x2, y2, PLAYERCOUNT() < 2, g_MenuData.bannernum, left, right);
 	}
 
-#ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
-#endif
 
 	gdl = func0f0d49c8(gdl);
 
-	g_ScaleX = 1;
-
 	return gdl;
 }
-
-const char var7f1b27a4[] = "Tune Selector - mode %d\n";
 
 u32 menuChooseMusic(void)
 {

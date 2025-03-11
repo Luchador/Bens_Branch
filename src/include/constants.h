@@ -1120,7 +1120,6 @@
 #define GAMEFILEFLAG_ANTIPLAYERNUM        0x1f
 #define GAMEFILEFLAG_P1_PAINTBALL         0x20
 #define GAMEFILEFLAG_P2_PAINTBALL         0x21
-#define GAMEFILEFLAG_HIRES                0x22
 #define GAMEFILEFLAG_USED_TRANSFERPAK     0x23
 #define GAMEFILEFLAG_CI_TOUR_DONE         0x24
 #define GAMEFILEFLAG_CI_HOLO7_DONE        0x29
@@ -4299,9 +4298,6 @@
 #define VIMODE_NONE 0
 #define VIMODE_LO   1
 #define VIMODE_HI   2
-
-#define VIRES_LO 0
-#define VIRES_HI 1
 
 #define VISIONMODE_NORMAL             0
 #define VISIONMODE_XRAY               1

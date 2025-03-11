@@ -29,12 +29,7 @@
 #define DEBUGOPT_MEMINFO       70
 #define DEBUGOPT_ALLBUDDIES    94
 #define DEBUGOPT_SETCOMPLETE   95
-
-#if VERSION == VERSION_PAL_BETA
-#define DEBUGOPT_MANPOS        102
-#else
 #define DEBUGOPT_MANPOS        101
-#endif
 
 // The DEBUG_VALUE macro is used for readability.
 #ifdef DEBUG
@@ -342,8 +337,6 @@ s32 g_DebugCurMenu = DEBUGMENU_MAIN;
 s32 g_DebugSelectedOptionsByMenu[2] = {0, 0};
 #endif
 
-s32 var800786f4nb = 2;
-
 #ifdef DEBUG
 s32 g_DebugProfileMode = 0;
 bool g_DebugRenderBg = true;
@@ -352,7 +345,6 @@ s32 var80078704nb = 1;
 s32 var80078708nb = 0;
 bool g_DebugRoomState = false;
 s32 var80078710nb = 0;
-s32 var80078714nb = 0;
 s32 g_DebugRoomGfxExtraMem = 0;
 bool g_DebugObjDeform = false;
 #endif
@@ -506,16 +498,6 @@ void debugSetManPos(bool enabled)
 #endif
 }
 
-bool debug0f11eda0(void) // not called
-{
-	return DEBUG_VALUE(var80078710nb, false);
-}
-
-bool debug0f11eda8(void) // not called
-{
-	return DEBUG_VALUE(var80078714nb, false);
-}
-
 bool debugIsRoomGfxExtraMemEnabled(void)
 {
 	return DEBUG_VALUE(g_DebugRoomGfxExtraMem, false);
@@ -530,43 +512,6 @@ bool debugIsRoomStateDebugEnabled(void)
 {
 	return DEBUG_VALUE(g_DebugRoomState, false);
 }
-
-bool debugIsLineModeEnabled(void)
-{
-	return g_DebugLineMode;
-}
-
-void debugSetLineModeEnabled(bool enabled)
-{
-	g_DebugLineMode = enabled;
-}
-
-#ifndef DEBUG
-bool debug0f11ede0(void) // not called
-{
-	return false;
-}
-
-bool debug0f11ede8(void) // not called
-{
-	return false;
-}
-
-bool debug0f11edf0(void) // not called
-{
-	return false;
-}
-
-void debug0f11edf8(void) // not called
-{
-	// empty
-}
-
-void debug0f11ee00(void) // not called
-{
-	// empty
-}
-#endif
 
 bool debugIsTurboModeEnabled(void)
 {

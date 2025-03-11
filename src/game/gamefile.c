@@ -89,12 +89,6 @@ void gamefileApplyOptions(struct gamefile *file)
 
 	g_Vars.langfilteron = pakHasBitflag(GAMEFILEFLAG_LANGFILTERON, file->flags);
 
-	if (pakHasBitflag(GAMEFILEFLAG_HIRES, file->flags)) {
-			playerSetHiResEnabled(true);
-	} else {
-		playerSetHiResEnabled(false);
-	}
-
 	optionsSetScreenSplit(pakHasBitflag(GAMEFILEFLAG_SCREENSPLIT, file->flags));
 	optionsSetScreenRatio(pakHasBitflag(GAMEFILEFLAG_SCREENRATIO, file->flags));
 
@@ -187,7 +181,6 @@ void gamefileLoadDefaults(struct gamefile *file)
 	pakSetBitflag(GAMEFILEFLAG_SCREENRATIO, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_CINEMA, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_WIDE, file->flags, false);
-	pakSetBitflag(GAMEFILEFLAG_HIRES, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_LANGFILTERON, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_FOUNDTIMEDMINE, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_FOUNDPROXYMINE, file->flags, false);
@@ -282,7 +275,6 @@ s32 gamefileLoad(s32 device)
 			optionsSetControlMode(p1index, savebufferReadBits(&buffer, 3));
 			optionsSetControlMode(p2index, savebufferReadBits(&buffer, 3));
 
-#ifndef PLATFORM_N64
 			// override with PC controls if enabled in the config
 			if (g_PlayerExtCfg[0].extcontrols) {
 				optionsSetControlMode(p1index, CONTROLMODE_PC);
@@ -290,7 +282,6 @@ s32 gamefileLoad(s32 device)
 			if (g_PlayerExtCfg[1].extcontrols) {
 				optionsSetControlMode(p2index, CONTROLMODE_PC);
 			}
-#endif
 
 			for (i = 0; i < ARRAYCOUNT(g_GameFile.flags); i++) {
 				g_GameFile.flags[i] = savebufferReadBits(&buffer, 8);
@@ -325,7 +316,6 @@ s32 gamefileLoad(s32 device)
 				g_GameFile.weaponsfound[i] = savebufferReadBits(&buffer, 8);
 			}
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (pakHasBitflag(GAMEFILEFLAG_FOUNDTIMEDMINE, g_GameFile.flags)) {
 				frSetWeaponFound(WEAPON_TIMEDMINE);
 			}
@@ -337,7 +327,6 @@ s32 gamefileLoad(s32 device)
 			if (pakHasBitflag(GAMEFILEFLAG_FOUNDREMOTEMINE, g_GameFile.flags)) {
 				frSetWeaponFound(WEAPON_REMOTEMINE);
 			}
-#endif
 
 			func0f0d54c4(&buffer);
 			gamefileApplyOptions(&g_GameFile);
@@ -379,7 +368,6 @@ s32 gamefileSave(s32 device, s32 fileid, u16 deviceserial)
 	pakSetBitflag(GAMEFILEFLAG_P1_SHOWZOOMRANGE, g_GameFile.flags, optionsGetShowZoomRange(p1index));
 	pakSetBitflag(GAMEFILEFLAG_P1_SHOWMISSIONTIME, g_GameFile.flags, optionsGetShowMissionTime(p1index));
 	pakSetBitflag(GAMEFILEFLAG_P1_PAINTBALL, g_GameFile.flags, optionsGetPaintball(p1index));
-
 	pakSetBitflag(GAMEFILEFLAG_P2_FORWARDPITCH, g_GameFile.flags, optionsGetForwardPitch(p2index));
 	pakSetBitflag(GAMEFILEFLAG_P2_AUTOAIM, g_GameFile.flags, optionsGetAutoAim(p2index));
 	pakSetBitflag(GAMEFILEFLAG_P2_AIMCONTROL, g_GameFile.flags, optionsGetAimControl(p2index));
@@ -392,34 +380,18 @@ s32 gamefileSave(s32 device, s32 fileid, u16 deviceserial)
 	pakSetBitflag(GAMEFILEFLAG_P2_SHOWZOOMRANGE, g_GameFile.flags, optionsGetShowZoomRange(p2index));
 	pakSetBitflag(GAMEFILEFLAG_P2_SHOWMISSIONTIME, g_GameFile.flags, optionsGetShowMissionTime(p2index));
 	pakSetBitflag(GAMEFILEFLAG_P2_PAINTBALL, g_GameFile.flags, optionsGetPaintball(p2index));
-
 	pakSetBitflag(GAMEFILEFLAG_SCREENSPLIT, g_GameFile.flags, optionsGetScreenSplit());
 	pakSetBitflag(GAMEFILEFLAG_SCREENRATIO, g_GameFile.flags, optionsGetScreenRatio());
-
-#if VERSION >= VERSION_NTSC_1_0
 	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_WIDE, g_GameFile.flags, optionsGetScreenSize() == SCREENSIZE_WIDE);
 	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_CINEMA, g_GameFile.flags, optionsGetScreenSize() == SCREENSIZE_CINEMA);
-#else
-	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_WIDE, g_GameFile.flags, optionsGetEffectiveScreenSize() == SCREENSIZE_WIDE);
-	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_CINEMA, g_GameFile.flags, optionsGetEffectiveScreenSize() == SCREENSIZE_CINEMA);
-#endif
-
-	pakSetBitflag(GAMEFILEFLAG_HIRES, g_GameFile.flags, g_ViRes == VIRES_HI);
 	pakSetBitflag(GAMEFILEFLAG_INGAMESUBTITLES, g_GameFile.flags, optionsGetInGameSubtitles());
 	pakSetBitflag(GAMEFILEFLAG_CUTSCENESUBTITLES, g_GameFile.flags, optionsGetCutsceneSubtitles());
 	pakSetBitflag(GAMEFILEFLAG_LANGFILTERON, g_GameFile.flags, g_Vars.langfilteron);
-
-#if VERSION >= VERSION_NTSC_1_0
 	pakSetBitflag(GAMEFILEFLAG_FOUNDTIMEDMINE, g_GameFile.flags, frIsWeaponFound(WEAPON_TIMEDMINE));
 	pakSetBitflag(GAMEFILEFLAG_FOUNDPROXYMINE, g_GameFile.flags, frIsWeaponFound(WEAPON_PROXIMITYMINE));
 	pakSetBitflag(GAMEFILEFLAG_FOUNDREMOTEMINE, g_GameFile.flags, frIsWeaponFound(WEAPON_REMOTEMINE));
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 	switch (optionsGetScreenSize())
-#else
-	switch (optionsGetEffectiveScreenSize())
-#endif
 	{
 	case SCREENSIZE_FULL:
 		break;
@@ -433,12 +405,6 @@ s32 gamefileSave(s32 device, s32 fileid, u16 deviceserial)
 	pakSetBitflag(GAMEFILEFLAG_COOPRADARON, g_GameFile.flags, g_Vars.coopradaron == true);
 	pakSetBitflag(GAMEFILEFLAG_COOPFRIENDLYFIRE, g_GameFile.flags, g_Vars.coopfriendlyfire == true);
 	pakSetBitflag(GAMEFILEFLAG_ANTIRADARON, g_GameFile.flags, g_Vars.antiradaron == true);
-
-#if VERSION >= VERSION_PAL_BETA
-	pakSetBitflag(GAMEFILEFLAG_LANGBIT1, g_GameFile.flags, (g_Vars.language & 0x01) == 0x01);
-	pakSetBitflag(GAMEFILEFLAG_LANGBIT2, g_GameFile.flags, (g_Vars.language & 0x02) == 0x02);
-	pakSetBitflag(GAMEFILEFLAG_LANGBIT3, g_GameFile.flags, (g_Vars.language & 0x04) == 0x04);
-#endif
 
 	if (device >= 0) {
 		savebufferClear(&buffer);
@@ -458,16 +424,11 @@ s32 gamefileSave(s32 device, s32 fileid, u16 deviceserial)
 		value = g_SoundMode;
 		savebufferOr(&buffer, value, 2);
 
-#ifdef PLATFORM_N64
-		savebufferOr(&buffer, optionsGetControlMode(p1index), 3);
-		savebufferOr(&buffer, optionsGetControlMode(p2index), 3);
-#else
 		// PC control mode is enabled in the .ini to avoid changing the save structure
 		s32 controlmode = optionsGetControlMode(p1index);
 		savebufferOr(&buffer, ((controlmode == CONTROLMODE_PC) ? CONTROLMODE_11 : controlmode), 3);
 		controlmode = optionsGetControlMode(p2index);
 		savebufferOr(&buffer, ((controlmode == CONTROLMODE_PC) ? CONTROLMODE_11 : controlmode), 3);
-#endif
 
 		for (i = 0; i < ARRAYCOUNT(g_GameFile.flags); i++) {
 			savebufferOr(&buffer, g_GameFile.flags[i], 8);
@@ -526,16 +487,10 @@ void gamefileGetOverview(char *arg0, char *name, u8 *stage, u8 *difficulty, u32 
 
 	*stage = savebufferReadBits(&buffer, 5);
 
-#if VERSION >= VERSION_NTSC_1_0
 	*time = savebufferReadBits(&buffer, 32);
-#else
-	*time = (u16) savebufferReadBits(&buffer, 32);
-#endif
 
 	*difficulty = savebufferReadBits(&buffer, 2);
 }
-
-#ifndef PLATFORM_N64
 
 // Unlock all of the unlockables.
 // These hacks are taken from the original debug mode.
@@ -588,5 +543,3 @@ void gamefileUnlockEverything(void)
 	gamefileSetFlag(GAMEFILEFLAG_CI_ECMMINE_DONE);
 	gamefileSetFlag(GAMEFILEFLAG_CI_UPLINK_DONE);
 }
-
-#endif

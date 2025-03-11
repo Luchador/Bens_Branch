@@ -7219,15 +7219,7 @@ bool chrTryRunFromTarget(struct chrdata *chr)
 		if (cdExamCylMove03(&prop->pos, prop->rooms, &dst,
 					CDTYPE_OBJS | CDTYPE_DOORS | CDTYPE_PATHBLOCKER | CDTYPE_BG,
 					1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION) {
-#if VERSION >= VERSION_JPN_FINAL
-			cdGetPos(&dst, 8796, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_FINAL
-			cdGetPos(&dst, 8793, "chr/chraction.c");
-#elif VERSION >= VERSION_NTSC_1_0
 			cdGetPos(&dst, 8788, "chraction.c");
-#else
-			cdGetPos(&dst, 8782, "chraction.c");
-#endif
 		}
 
 		// Adjust dst to be two chr widths closer to avoid collision with wall
@@ -7299,7 +7291,8 @@ bool chrGoToCoverProp(struct chrdata *chr)
 
 				// @bug: This condition cannot pass
 				// (should be chrdist < targetdist + targetdist)
-				if (chrdist < 300 && chrdist > targetdist + targetdist && targetdist > 800) {
+				//if (chrdist < 300 && chrdist > targetdist + targetdist && targetdist > 800) {
+				if (chrdist < 300 && chrdist < targetdist + targetdist + targetdist && targetdist > 800) { // Ben's comment: fixing this, although no character actually makes use of it
 					f32 propymax;
 					f32 propymin;
 					f32 propradius;
@@ -15202,7 +15195,8 @@ bool chrRunFromPos(struct chrdata *chr, u32 goposflags, f32 rundist, struct coor
 		// @bug: This check should be &&. The runfrompos will fail if the
 		// frompos is on the same X or Z axis as the chr, which is unlikely
 		// because it's a floating point number.
-		if (delta.f[0] == 0.0f || delta.f[2] == 0.0f) {
+		//if (delta.f[0] == 0.0f || delta.f[2] == 0.0f) {
+		if (delta.f[0] == 0.0f && delta.f[2] == 0.0f) { // Ben's comment: fixing this
 			return false;
 		}
 
@@ -15213,17 +15207,7 @@ bool chrRunFromPos(struct chrdata *chr, u32 goposflags, f32 rundist, struct coor
 		chrSetPerimEnabled(chr, false);
 
 		if (cdExamLos08(&chr->prop->pos, chr->prop->rooms, &delta, CDTYPE_ALL, GEOFLAG_WALL) == CDRESULT_COLLISION) {
-#if VERSION >= VERSION_JPN_FINAL
-			cdGetPos(&delta, 18592, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_FINAL
-			cdGetPos(&delta, 18555, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_BETA
-			cdGetPos(&delta, 18550, "chraction.c");
-#elif VERSION >= VERSION_NTSC_1_0
 			cdGetPos(&delta, 18547, "chraction.c");
-#else
-			cdGetPos(&delta, 18277, "chraction.c");
-#endif
 		}
 
 		chrSetPerimEnabled(chr, true);

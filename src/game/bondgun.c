@@ -100,21 +100,6 @@ u16 g_CartFileNums[] = {
 	FILE_GCARTSHELL,
 };
 
-u32 var800700b8 = 0x00000000;
-
-char var800700bc[][10] = {
-	{ 'i','d','l','e'                     }, // "idle"
-	{ 'p','r','e','p','a','r','e'         }, // "prepare"
-	{ 'c','a','n','t','u','s','e'         }, // "cantuse"
-	{ 'n','o','a','m','m','o'             }, // "noammo"
-	{ 'u','s','e','2'                     }, // "use2"
-	{ 'c','h','a','n','g','e'             }, // "change"
-	{ 'u','p','g','r','a','d','e'         }, // "upgrade"
-	{ 'c','h','a','n','g','e','f','n'     }, // "changefn"
-	{ 'i','d','l','e','s','t','u','c','k' }, // "idlestuck"
-	{ 'x','x','x'                         }, // "xxx"
-};
-
 s32 g_BgunGeMuzzleFlashes = false;
 
 void bgunRumble(s32 handnum, s32 weaponnum)
@@ -420,8 +405,6 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 							if (index == -1) {
 								index = s0;
 								s0++;
-
-								if (1);
 
 								partnums[index] = cmd->unk04;
 								partframes[index] = -1;
@@ -3381,7 +3364,6 @@ void bgunTickGunLoad(void)
 		fileinfo->allocsize = allocsize;
 		end = ALIGN16((uintptr_t)ptr + allocsize);
 		allocsize = end - ptr;
-		if (1);
 		remaining -= allocsize;
 
 		osSyncPrintf("BriGun:  Texture Block at 0x%08x size %d, endp 0x%08x\n");
@@ -9146,8 +9128,6 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 			bool newstate = false;
 			u32 weight;
 
-			if (1);
-
 			if (abmag->change > 0) {
 				// Loading or reloading
 				if (i >= numunits - (s32)ref - abmag->change && i < numunits - (s32)ref) {
@@ -9318,9 +9298,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 	if (g_Vars.lvframenum < 5) {
 		return gdl;
 	}
-
-	g_ScaleX = g_ViRes == VIRES_HI ? 2 : 1;
-
+	
 	gdl = text0f153628(gdl);
 
 	if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
@@ -9360,7 +9338,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		funcnum = tmpfuncnum;
 	}
 
-	xpos = (viGetViewLeft() + viGetViewWidth()) / g_ScaleX - barwidth - 24;
+	xpos = (viGetViewLeft() + viGetViewWidth()) / 1 - barwidth - 24;
 
 	if (playercount == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) && playernum == 0) {
 		xpos += 15;
@@ -9538,7 +9516,6 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		if (ammoindex == -1) {
 			gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 			gdl = text0f153780(gdl);
-			g_ScaleX = 1;
 			return gdl;
 		}
 	}
@@ -9554,7 +9531,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 	if (lefthand->inuse
 			&& weapon->ammos[ammoindex] != NULL
 			&& lefthand->gset.weaponnum != WEAPON_REMOTEMINE) {
-		xpos = viGetViewLeft() / g_ScaleX + 24;
+		xpos = viGetViewLeft() / 25;
 
 		if (playercount == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) && playernum == 1) {
 			xpos -= 14;
@@ -9584,7 +9561,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 		ammotype = player->gunctrl.ammotypes[ammoindex];
 
-		xpos = (viGetViewLeft() + viGetViewWidth()) / g_ScaleX - barwidth - 24;
+		xpos = (viGetViewLeft() + viGetViewWidth()) / 1 - barwidth - 24;
 
 		if (playercount == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) && playernum == 0) {
 			xpos += 15;
@@ -9652,8 +9629,6 @@ Gfx *bgunDrawHud(Gfx *gdl)
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
 	gdl = text0f153780(gdl);
-
-	g_ScaleX = 1;
 
 	return gdl;
 }

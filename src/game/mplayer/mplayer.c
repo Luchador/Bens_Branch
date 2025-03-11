@@ -1319,10 +1319,6 @@ Gfx *mpRenderModalText(Gfx *gdl)
 	char text[50];
 	s32 stack1;
 
-#if VERSION >= VERSION_JPN_FINAL
-	g_ScaleX = g_ViRes == VIRES_HI ? 2 : 1;
-#endif
-
 	if (g_MpSetup.paused == MPPAUSEMODE_PAUSED) {
 		s32 red = (s32) ((1.0f - g_20SecIntervalFrac) * 20.0f * 255.0f) % 255;
 		s32 stack2;
@@ -1333,15 +1329,7 @@ Gfx *mpRenderModalText(Gfx *gdl)
 
 		x = viGetViewLeft() + viGetViewWidth() / 2;
 
-#if VERSION >= VERSION_JPN_FINAL
-		x = x / g_ScaleX;
-#endif
-
-#if VERSION >= VERSION_NTSC_1_0
 		if (g_Menus[g_Vars.currentplayerstats->mpindex].curdialog)
-#else
-		if (g_Menus[g_Vars.currentplayernum].curdialog)
-#endif
 		{
 			y = viGetViewTop() + 10;
 		} else {
@@ -1539,11 +1527,7 @@ struct mpweaponset g_MpWeaponSets[12] = {
 	{ /*0x08*/ L_MPWEAPONS_047, { WEAPON_MAGSEC4,          WEAPON_CMP150,      WEAPON_AR34,        WEAPON_DEVASTATOR,     WEAPON_MPSHIELD, WEAPON_DISABLED }, { MPFEATURE_WEAPON_DEVASTATOR,      0,                           0,                              0                       }, WEAPON_DISABLED,    WEAPON_DISABLED,    WEAPON_DISABLED,  WEAPON_DISABLED,       WEAPON_DISABLED, WEAPON_DISABLED }, // Grenade Launcher
 	{ /*0x09*/ L_MPWEAPONS_046, { WEAPON_MAULER,           WEAPON_CYCLONE,     WEAPON_DRAGON,      WEAPON_ROCKETLAUNCHER, WEAPON_MPSHIELD, WEAPON_DISABLED }, { MPFEATURE_WEAPON_MAULER,          0,                           0,                              0                       }, WEAPON_FALCON2,     WEAPON_CYCLONE,     WEAPON_DRAGON,    WEAPON_ROCKETLAUNCHER, WEAPON_MPSHIELD, WEAPON_DISABLED }, // Rocket Launcher
 	{ /*0x0a*/ L_MPWEAPONS_045, { WEAPON_MAGSEC4,          WEAPON_LAPTOPGUN,   WEAPON_K7AVENGER,   WEAPON_PROXIMITYMINE,  WEAPON_MPSHIELD, WEAPON_DISABLED }, { MPFEATURE_WEAPON_LAPTOPGUN,       MPFEATURE_WEAPON_K7AVENGER,  MPFEATURE_WEAPON_PROXIMITYMINE, 0                       }, WEAPON_DISABLED,    WEAPON_DISABLED,    WEAPON_DISABLED,  WEAPON_DISABLED,       WEAPON_DISABLED, WEAPON_DISABLED }, // Proximity Mine
-#if (VERSION == VERSION_JPN_FINAL) && defined(PLATFORM_N64)
-	{ /*0x0b*/ L_MPWEAPONS_044, { WEAPON_TIMEDMINE,        WEAPON_CROSSBOW,    WEAPON_TIMEDMINE,   WEAPON_CROSSBOW,       WEAPON_MPSHIELD, WEAPON_DISABLED }, { MPFEATURE_WEAPON_CROSSBOW,        0,                           0,                              0                       }, WEAPON_TIMEDMINE,   WEAPON_TIMEDMINE,   WEAPON_TIMEDMINE, WEAPON_TIMEDMINE,      WEAPON_MPSHIELD, WEAPON_DISABLED }, // Close Combat
-#else
 	{ /*0x0b*/ L_MPWEAPONS_044, { WEAPON_COMBATKNIFE,      WEAPON_COMBATKNIFE, WEAPON_TIMEDMINE,   WEAPON_CROSSBOW,       WEAPON_MPSHIELD, WEAPON_DISABLED }, { MPFEATURE_WEAPON_CROSSBOW,        0,                           0,                              0                       }, WEAPON_COMBATKNIFE, WEAPON_COMBATKNIFE, WEAPON_TIMEDMINE, WEAPON_TIMEDMINE,      WEAPON_MPSHIELD, WEAPON_DISABLED }, // Close Combat
-#endif
 };
 
 s32 g_MpWeaponSetNum = 0x00000000;
@@ -1570,21 +1554,13 @@ u16 g_AwardNames[] = {
 
 void mpCalculatePlayerTitle(struct mpplayerconfig *mpplayer)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	const u32 tiers[] = { 2, 4, 8, 16, 28, 60, 100, 150, 210, 300 };
-#else
-	const u32 tiers[] = { 2, 4, 8, 16, 28, 48, 78, 138, 198, 300 };
-#endif
 	s32 tallies[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	s32 sum;
 	s32 max;
 	s32 i;
 
-#if VERSION >= VERSION_NTSC_1_0
 #define MULT(val) (val * 3)
-#else
-#define MULT(val) (val)
-#endif
 
 	for (i = 0; i < ARRAYCOUNT(tiers); i++) {
 		if (mpplayer->kills >= tiers[i] * MULT(20)) {
@@ -1684,17 +1660,6 @@ void mpCalculatePlayerTitle(struct mpplayerconfig *mpplayer)
 		mpplayer->title = max;
 	}
 }
-
-#if VERSION >= VERSION_NTSC_1_0
-const char var7f1b8ad0[] = "%s%sAccuracy Peak! real value: %f (*100)\n";
-const char var7f1b8afc[] = "";
-const char var7f1b8b00[] = "";
-const char var7f1b8b04[] = "%splayer %d Accuracy :%f\n";
-const char var7f1b8b20[] = "";
-const char var7f1b8b24[] = "%splayer %d dist:%f -> %f = %d\n";
-const char var7f1b8b44[] = "";
-const char var7f1b8b48[] = "Player %d TitleCalc ============\n";
-#endif
 
 struct mphead g_MpBeauHeads[] = {
 	// head, require feature
@@ -1837,9 +1802,7 @@ u32 g_BotHeads[] = {
 	MPHEAD_SCOTT_H,
 	MPHEAD_JOEL,
 	MPHEAD_GRIFFEY,
-#if VERSION != VERSION_JPN_FINAL
 	MPHEAD_MOTO,
-#endif
 };
 
 struct botprofile g_BotProfiles[] = {
@@ -1973,9 +1936,7 @@ u32 g_MpMaleHeads[] = {
 	HEAD_KEN,
 	HEAD_SCOTT_H,
 	HEAD_JOEL,
-#if VERSION != VERSION_JPN_FINAL
 	HEAD_MOTO,
-#endif
 };
 
 u32 g_MpFemaleHeads[] = {
@@ -2004,20 +1965,11 @@ void mpCalculateAwards(void)
 	// overflow occurs in mpGetPlayerRankings. The overflow writes into the
 	// metrics array (above) which is yet to be initialised, so this bug has
 	// no effect on IDO.
-#ifdef AVOID_UB
 	struct ranking playerrankings[MAX_MPCHRS];
-#else
-	struct ranking playerrankings[1];
-#endif
 
 	s32 numchrs;
-#if VERSION >= VERSION_NTSC_1_0
 	s32 numteams;
 	struct ranking teamrankings[MAX_MPCHRS];
-	u32 stack[4];
-#else
-	u32 stack[3];
-#endif
 
 	playercount = PLAYERCOUNT();
 
@@ -2026,9 +1978,7 @@ void mpCalculateAwards(void)
 	func00033dd8();
 
 	numchrs = mpGetPlayerRankings(playerrankings);
-#if VERSION >= VERSION_NTSC_1_0
 	numteams = (g_MpSetup.options & MPOPTION_TEAMSENABLED) ? mpGetTeamRankings(teamrankings) : 0;
-#endif
 
 	prevplayernum = g_Vars.currentplayernum;
 
@@ -2038,11 +1988,7 @@ void mpCalculateAwards(void)
 	for (i = 0; i < playercount; i++) {
 		struct mpchrconfig *mpchr = mpGetChrConfigBySlotNum(i);
 		struct mpplayerconfig *mpplayer = (struct mpplayerconfig *)mpchr;
-#if VERSION >= VERSION_NTSC_1_0
 		s32 chrnum = mpGetChrIndexBySlotNum(i);
-#else
-		s32 chrnum = i;
-#endif
 		s32 sum;
 
 		setCurrentPlayerNum(i);
@@ -2057,11 +2003,7 @@ void mpCalculateAwards(void)
 		metrics[i].numsuicides = 0;
 
 		for (j = 0; j < MAX_MPCHRS; j++) {
-#if VERSION >= VERSION_NTSC_1_0
 			if (chrnum == j)
-#else
-			if (i == j)
-#endif
 			{
 				metrics[i].numsuicides += mpchr->killcounts[j];
 			} else {
@@ -2071,11 +2013,7 @@ void mpCalculateAwards(void)
 
 		for (j = 0; j < MAX_MPCHRS; j++) {
 			struct mpchrconfig *othermpchr = MPCHR(j);
-#if VERSION >= VERSION_NTSC_1_0
 			metrics[i].numdeaths += othermpchr->killcounts[chrnum];
-#else
-			metrics[i].numdeaths += othermpchr->killcounts[i];
-#endif
 		}
 
 		metrics[i].ksratio = metrics[i].numkills * 100.0f / (metrics[i].numshots + 1.0f);
@@ -2114,7 +2052,6 @@ void mpCalculateAwards(void)
 			mpplayer->time += duration60 / 60;
 			mpplayer->distance += (u32)(g_Vars.playerstats[i].distance / 10000.0f);
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (metrics[i].numshots > 0) {
 				if (mpplayer->gamesplayed < 2) {
 					mpplayer->accuracy = metrics[i].accuracyfrac * 1000.0f;
@@ -2122,28 +2059,19 @@ void mpCalculateAwards(void)
 					mpplayer->accuracy = ((metrics[i].accuracyfrac * 0.3f) + (mpplayer->accuracy / 1000.0f * 0.7f)) * 1000.0f;
 				}
 			}
-#else
-			mpplayer->accuracy = ((metrics[i].accuracyfrac * 0.3f) + (mpplayer->accuracy / 1000.0f * 0.7f)) * 1000.0f;
-#endif
 
 			mpplayer->damagedealt += (u32)(g_Vars.playerstats[i].damtransmitted / 0.1f);
 			mpplayer->painreceived += (u32)(g_Vars.playerstats[i].damreceived / 0.1f);
 			mpplayer->headshots += metrics[i].numheadshots;
 			mpplayer->ammoused += metrics[i].numshots;
 
-#if VERSION >= VERSION_NTSC_1_0
 			if ((numchrs >= 2 && (g_MpSetup.options & MPOPTION_TEAMSENABLED) == 0) || numteams >= 2)
-#else
-			if (numchrs >= 2)
-#endif
 			{
 				if (mpplayer->base.placement == 0) {
 					bool lost = false;
 
 					for (j = 0; j < MAX_MPCHRS; j++) {
-#if VERSION >= VERSION_NTSC_1_0
 						if (g_MpSetup.chrslots & (1 << j))
-#endif
 						{
 							struct mpchrconfig *othermpchr = MPCHR(j);
 
@@ -2160,19 +2088,13 @@ void mpCalculateAwards(void)
 					}
 				}
 
-#if VERSION >= VERSION_NTSC_1_0
 				if (((g_MpSetup.options & MPOPTION_TEAMSENABLED) == 0 && numchrs == mpplayer->base.placement + 1)
 						|| ((g_MpSetup.options & MPOPTION_TEAMSENABLED) && numteams == mpplayer->base.placement + 1))
-#else
-				if (mpplayer->base.placement == numchrs - 1)
-#endif
 				{
 					bool won = false;
 
 					for (j = 0; j < MAX_MPCHRS; j++) {
-#if VERSION >= VERSION_NTSC_1_0
 						if (g_MpSetup.chrslots & (1 << j))
-#endif
 						{
 							struct mpchrconfig *othermpchr = MPCHR(j);
 
@@ -2189,11 +2111,9 @@ void mpCalculateAwards(void)
 					}
 				}
 			}
-#if VERSION >= VERSION_NTSC_1_0
 			else {
 				// empty
 			}
-#endif
 		}
 	}
 
@@ -2762,11 +2682,7 @@ struct mptrack g_MpTracks[] = {
 	/*0x27*/ { MUSIC_SKEDARRUINS,     120, L_MISC_163, SOLOSTAGEINDEX_SKEDARRUINS }, // "Skedar Ruins"
 	/*0x28*/ { MUSIC_SKEDARRUINS_X,   120, L_MISC_164, SOLOSTAGEINDEX_SKEDARRUINS }, // "Skedar Ruins X"
 	/*0x29*/ { MUSIC_CREDITS,         120, L_MISC_165, SOLOSTAGEINDEX_SKEDARRUINS }, // "End Credits"
-#if VERSION < VERSION_PAL_BETA
 	/*0x2a*/ { MUSIC_SKEDARRUINS_KING,120, L_MISC_261, SOLOSTAGEINDEX_SKEDARRUINS }, // "Skedar Warrior" (Skedar Leader)
-#else
-	/*0x2a*/ { MUSIC_SKEDARRUINS_KING,120, L_MISC_041, SOLOSTAGEINDEX_SKEDARRUINS }, // "E R R O R" (can't find a good approximation for Skedar Leader)
-#endif
 };
 
 bool mpIsTrackUnlocked(s32 tracknum)
@@ -3022,7 +2938,6 @@ struct mpchrconfig *mpGetChrConfigBySlotNum(s32 slot)
 	return result;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 s32 mpGetChrIndexBySlotNum(s32 slot)
 {
 	s32 count = 0;
@@ -3042,7 +2957,6 @@ s32 mpGetChrIndexBySlotNum(s32 slot)
 
 	return result;
 }
-#endif
 
 s32 mpGetNumChrs(void)
 {
@@ -3161,7 +3075,6 @@ void mpRemoveSimulant(s32 index)
 	mpGenerateBotNames();
 }
 
-#ifndef PLATFORM_N64
 void mpCopySimulant(s32 index)
 {
 	s32 dest = mpGetSlotForNewBot();
@@ -3174,7 +3087,6 @@ void mpCopySimulant(s32 index)
 	g_BotConfigsArray[dest].difficulty = g_BotConfigsArray[index].difficulty;
 	mpGenerateBotNames();
 }
-#endif
 
 bool mpHasSimulants(void)
 {
@@ -3302,14 +3214,6 @@ void mpGenerateBotNames(void)
 		}
 	}
 }
-
-#if VERSION >= VERSION_NTSC_1_0
-const char var7f1b8b80[] = "Adding GBCHead to load to slot %d: guid is %x-%x, player is %d\n";
-const char var7f1b8bc0[] = "PakId for player %d: %d\n";
-const char var7f1b8bdc[] = "Save Player Result: %d   New GUID: %x\n";
-const char var7f1b8c04[] = "PakId for player %d: %d\n";
-const char var7f1b8c20[] = "Load Player - Result: %d\n";
-#endif
 
 s32 mpPlayerGetIndex(struct chrdata *chr)
 {
@@ -3465,12 +3369,10 @@ void mpplayerfileLoadWad(s32 playernum, struct savebuffer *buffer, s32 arg2)
 	g_PlayerConfigsArray[playernum].controlmode = savebufferReadBits(buffer, 2);
 	g_PlayerConfigsArray[playernum].options = savebufferReadBits(buffer, 12);
 
-#ifndef PLATFORM_N64
 	// override with PC controls if enabled in the config
 	if (g_PlayerExtCfg[playernum % MAX_PLAYERS].extcontrols) {
 		g_PlayerConfigsArray[playernum].controlmode = CONTROLMODE_PC;
 	}
-#endif
 
 	for (i = 0; i < ARRAYCOUNT(g_MpChallenges); i++) {
 		for (j = 1; j < MAX_PLAYERS + 1; j++) {
@@ -3602,13 +3504,9 @@ void mpplayerfileSaveWad(s32 playernum, struct savebuffer *buffer)
 
 	savebufferOr(buffer, g_PlayerConfigsArray[playernum].survivormedals, 16);
 
-#ifdef PLATFORM_N64
-	savebufferOr(buffer, g_PlayerConfigsArray[playernum].controlmode, 2);
-#else
 	// PC control mode is enabled in the .ini to avoid changing the save structure
 	const u32 controlmode = g_PlayerConfigsArray[playernum].controlmode;
 	savebufferOr(buffer, ((controlmode == CONTROLMODE_PC) ? CONTROLMODE_11 : controlmode), 2);
-#endif
 
 	savebufferOr(buffer, g_PlayerConfigsArray[playernum].options, 12);
 
