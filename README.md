@@ -39,7 +39,7 @@ Note: These changes require alterations to the game's original files. You can fi
 
 These instructions taken from the [PC Port](https://github.com/fgsfdsfgs/perfect_dark) project by fgsfdsfgs.
 
-You must have a * `ntsc-final`/`US V1.1`/`US Rev 1` (md5 `e03b088b6ac9e0080440efed07c1e40f`) ROM. Name it pd.ntsc-final.z64
+You must have a * `ntsc-final`/`US V1.1`/`US Rev 1` (md5 `e03b088b6ac9e0080440efed07c1e40f`) ROM.
 
 This assumes that you're using an x86_64 build. If you aren't, replace `x86_64` below with your arch (e.g. `i686`).
 
