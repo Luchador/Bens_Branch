@@ -24,16 +24,9 @@
 struct fileguid g_FilemgrFileToCopy;
 struct fileguid var800a21e8;
 
-#if VERSION >= VERSION_JPN_FINAL
-struct fileguid g_FilemgrFileToDelete[MAX_PLAYERS];
-#else
 struct fileguid g_FilemgrFileToDelete;
-#endif
 
 s32 g_FilemgrLastPakError;
-#if VERSION == VERSION_JPN_FINAL
-u8 jpnfill4[8];
-#endif
 struct gamefile g_GameFile;
 u32 var800a22bc;
 struct fileguid g_GameFileGuid;
@@ -871,35 +864,6 @@ bool filemgrSaveOrLoad(struct fileguid *guid, s32 fileop, uintptr_t playernum)
 
 void filemgrDeleteCurrentFile(void)
 {
-#if VERSION >= VERSION_JPN_FINAL
-	// JPN uses an array for g_FilemgrFileToDelete
-	bool error = false;
-	s8 device = pakFindBySerial(g_FilemgrFileToDelete[g_MpPlayerNum].deviceserial);
-	s32 i;
-
-	if (device >= 0) {
-		if (pakDeleteFile(device, g_FilemgrFileToDelete[g_MpPlayerNum].fileid) != 0) {
-			error = true;
-		}
-	} else {
-		error = true;
-	}
-
-	g_FileLists[g_Menus[g_MpPlayerNum].fm.listnum]->timeuntilupdate = 1;
-
-	if (error) {
-		g_Menus[g_MpPlayerNum].fm.device1 = device;
-		filemgrPushErrorDialog(FILEERROR_DELETEFAILED);
-	} else {
-		// If deleting a loaded MP player, reset them to default
-		for (i = 0; i < MAX_PLAYERS; i++) {
-			if (g_FilemgrFileToDelete[g_MpPlayerNum].fileid == g_PlayerConfigsArray[i].fileguid.fileid
-					&& g_FilemgrFileToDelete[g_MpPlayerNum].deviceserial == g_PlayerConfigsArray[i].fileguid.deviceserial) {
-				mpPlayerSetDefaults(i, true);
-			}
-		}
-	}
-#else
 	bool error = false;
 	s8 device = pakFindBySerial(g_FilemgrFileToDelete.deviceserial);
 	s32 i;
@@ -926,7 +890,6 @@ void filemgrDeleteCurrentFile(void)
 			}
 		}
 	}
-#endif
 }
 
 struct menuitem g_FilemgrFileSavedMenuItems[] = {
@@ -1940,13 +1903,8 @@ MenuItemHandlerResult filemgrFileToDeleteListMenuHandler(s32 operation, struct m
 				menuPushDialog(&g_FilemgrFileInUseMenuDialog);
 			} else {
 				filemgrSetFileToDelete(file, g_FileLists[g_Menus[g_MpPlayerNum].fm.listnum]->filetype);
-#if VERSION >= VERSION_JPN_FINAL
-				g_FilemgrFileToDelete[g_MpPlayerNum].fileid = file->fileid;
-				g_FilemgrFileToDelete[g_MpPlayerNum].deviceserial = file->deviceserial;
-#else
 				g_FilemgrFileToDelete.fileid = file->fileid;
 				g_FilemgrFileToDelete.deviceserial = file->deviceserial;
-#endif
 				menuPushDialog(&g_FilemgrConfirmDeleteMenuDialog);
 			}
 		}
@@ -1970,9 +1928,7 @@ MenuItemHandlerResult filemgrFileToCopyListMenuHandler(s32 operation, struct men
 			g_FilemgrFileToCopy.fileid = file->fileid;
 			g_FilemgrFileToCopy.deviceserial = file->deviceserial;
 
-#if VERSION >= VERSION_NTSC_1_0
 			filemgrGetFileName(g_Menus[g_MpPlayerNum].fm.filename, file);
-#endif
 			filemgrPushSelectLocationDialog(g_Menus[g_MpPlayerNum].fm.filetypeplusone, g_Menus[g_MpPlayerNum].fm.filetypeplusone - 1);
 		}
 	}
@@ -2139,11 +2095,6 @@ MenuItemHandlerResult pakGameNoteListMenuHandler(s32 operation, struct menuitem 
 
 	return 0;
 }
-
-#if VERSION >= VERSION_NTSC_1_0
-const char var7f1b34dc[] = "GOT OKed!\n";
-const char var7f1b34e8[] = "Try to find last opened file...\n";
-#endif
 
 /**
  * Controller pak note listing dialog.

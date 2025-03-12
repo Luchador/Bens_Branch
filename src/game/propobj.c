@@ -1041,7 +1041,7 @@ void projectileReset(struct projectile *projectile)
 
 	projectile->unk060 = 1;
 	projectile->ownerprop = NULL;
-	projectile->unk08c = 0.05f;
+	projectile->bounciness = 0.05f;
 	projectile->bouncecount = 0;
 	projectile->bounceframe = -1;
 	projectile->lastwooshframe = -1;
@@ -5979,12 +5979,12 @@ bool rocketTickFbw(struct weaponobj *rocket)
 	newpos.z = rocketprop->pos.z;
 
 	for (i = 0; i < g_Vars.lvupdate60; i++) {
-		projectile->unk010 += PAL ? 0.0021600001f : 0.0018f;
+		projectile->unk010 += 0.0018f;
 
 		speed = projectile->unk010;
 
 		if (ownerchr && ownerchr->target == -1) {
-			speed = PAL ? 0.120000004f : 0.10f;
+			speed = 0.10f;
 		}
 
 		newpos.x += dir.x * speed;
@@ -6296,7 +6296,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 					cdresult = func0f072144(obj, &sp404, sp5a8, true);
 
 					if (cdresult != CDRESULT_ERROR && cdresult == CDRESULT_COLLISION) {
-						projectile->unk0dc = -projectile->unk0dc * projectile->unk08c;
+						projectile->unk0dc = -projectile->unk0dc * projectile->bounciness;
 						objCollide(obj, &sp404, sp5a8);
 					}
 				}
@@ -6329,7 +6329,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 				cdresult = func0f072144(obj, &sp59c, 0.0f, true);
 
 				if (cdresult == CDRESULT_COLLISION) {
-					sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->unk08c;
+					sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->bounciness;
 
 					if (sp58c > 0.0f) {
 						f32 f0;
@@ -6347,15 +6347,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 							sp3c4.y -= sp3d0.y;
 							sp3c4.z -= sp3d0.z;
 						} else {
-#if VERSION >= VERSION_PAL_FINAL
-							cdGetEdge(&sp3d0, &sp3c4, 8360, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-							cdGetEdge(&sp3d0, &sp3c4, 8360, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
 							cdGetEdge(&sp3d0, &sp3c4, 8339, "propobj.c");
-#else
-							cdGetEdge(&sp3d0, &sp3c4, 8289, "propobj.c");
-#endif
 
 							sp3d0.x -= sp3c4.x;
 							sp3d0.y -= sp3c4.y;
@@ -6389,15 +6381,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 
 						projectile->unk0dc += f0;
 
-#if VERSION >= VERSION_PAL_FINAL
-						cdGetEdge(&sp3e8, &sp3dc, 8398, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-						cdGetEdge(&sp3e8, &sp3dc, 8398, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
 						cdGetEdge(&sp3e8, &sp3dc, 8377, "propobj.c");
-#else
-						cdGetEdge(&sp3e8, &sp3dc, 8327, "propobj.c");
-#endif
 
 						sp3f4.x = sp3dc.z - sp3e8.z;
 						sp3f4.y = 0.0f;
@@ -6444,7 +6428,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 						cdresult = func0f072144(obj, &sp59c, 0.0f, true);
 
 						if (cdresult == CDRESULT_COLLISION) {
-							sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->unk08c;
+							sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->bounciness;
 
 							sp590.x = -projectile->speed.f[0] * sp58c;
 							sp590.y = 0.0f;
@@ -7147,11 +7131,11 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 							sp350 = true;
 						}
 
-						if (projectile->unk08c > 0.0f) {
+						if (projectile->bounciness > 0.0f) {
 							f32 oldyspeed;
 							f32 f0 = projectile->speed.f[0] * sp5f4.f[0] + projectile->speed.f[1] * sp5f4.f[1] + projectile->speed.f[2] * sp5f4.f[2];
 
-							f0 *= -(projectile->unk08c + 1.0f);
+							f0 *= -(projectile->bounciness + 1.0f);
 
 							oldyspeed = projectile->speed.y;
 
@@ -7197,7 +7181,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 								if (sp354) {
 									projectileFall(obj, realrot);
 								}
-							} else if (projectile->unk08c > 0.0f) {
+							} else if (projectile->bounciness > 0.0f) {
 								if (projectile->speed.y >= 0.0f && projectile->speed.y < 2.2222223f) {
 									if ((projectile->flags & PROJECTILEFLAG_00000002) && projectile->bouncecount == 1) {
 										projectile->speed.y = 2.2222223f;
@@ -7377,19 +7361,11 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 					sp5ac.y = prop->pos.y + sp98;
 					sp5ac.z = prop->pos.z;
 
-#if VERSION >= VERSION_NTSC_1_0
 					roomnum = cdFindCeilingRoomYColourFlagsAtPos(&sp5ac, prop->rooms, &spa4, &obj->floorcol, &geoflags);
 
 					if (roomnum <= 0 || cdTestLos03(&sp5c8, sp5b8, &sp5ac, CDTYPE_OBJS | CDTYPE_BG, GEOFLAG_FLOOR1 | GEOFLAG_FLOOR2)) {
 						roomnum = cdFindFloorRoomYColourFlagsAtPos(&prop->pos, prop->rooms, &spa4, &obj->floorcol, &geoflags);
 					}
-#else
-					roomnum = cdFindCeilingRoomYColourFlagsAtPos(&sp5ac, prop->rooms, &spa4, &obj->floorcol);
-
-					if (roomnum <= 0 || cdTestLos03(&sp5c8, sp5b8, &sp5ac, CDTYPE_BG, GEOFLAG_FLOOR1 | GEOFLAG_FLOOR2)) {
-						roomnum = cdFindFloorRoomYColourFlagsAtPos(&prop->pos, prop->rooms, &spa4, &obj->floorcol);
-					}
-#endif
 
 					if (roomnum <= 0) {
 						prop->pos.x = sp5c8.x;
@@ -7397,12 +7373,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 
 						propDeregisterRooms(prop);
 						roomsCopy(sp5b8, prop->rooms);
-
-#if VERSION >= VERSION_NTSC_1_0
 						roomnum = cdFindFloorRoomYColourFlagsAtPos(&prop->pos, prop->rooms, &spa4, &obj->floorcol, &geoflags);
-#else
-						roomnum = cdFindFloorRoomYColourFlagsAtPos(&prop->pos, prop->rooms, &spa4, &obj->floorcol);
-#endif
 
 						projectile->speed.x = 0.0f;
 						projectile->speed.z = 0.0f;
@@ -7411,11 +7382,9 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 					if (roomnum > 0) {
 						prop->pos.y = spa4 - sp98 + func0f06a620(obj);
 
-#if VERSION >= VERSION_NTSC_1_0
 						if (geoflags & GEOFLAG_DIE) {
 							obj->hidden |= OBJHFLAG_DELETING;
 						}
-#endif
 					} else {
 						prop->pos.y = sp5c8.y;
 					}
@@ -7533,12 +7502,8 @@ void doorTick(struct prop *doorprop)
 	}
 
 	// Update frac
-#ifdef PLATFORM_N64
-	if (door->lastcalc60 < g_Vars.lvframe60 || g_Vars.lvupdate240 == 0) {
-#else
 	// lastcalc60 actually stores lvframe240
 	if (door->lastcalc60 < g_Vars.lvframe240 || g_Vars.lvupdate240 == 0) {
-#endif
 		doorsCalcFrac(door);
 	}
 
@@ -7581,8 +7546,6 @@ struct escastepkeyframe g_EscaStepKeyframesZ[] = {
 	{ 800, { -3151.39, -511,    -3824.58 } },
 	{ -1,  { 0,        0,       0        } },
 };
-
-const char var7f1a9fe8[] = "************** RWI : Door Stuck Mate -> Sort it out\n";
 
 void doorUpdatePortalIfWindowed(struct prop *doorprop, s32 playercount)
 {
@@ -7743,7 +7706,6 @@ void platformDisplaceProps(struct prop *platform, s16 *propnums, struct coord *p
 			s32 prevplayernum;
 
 			if (platformobj->type == OBJTYPE_LIFT) {
-#if VERSION >= VERSION_NTSC_1_0
 				if (g_Vars.players[playernum]->lift == platform && g_Vars.players[playernum]->bondmovemode == MOVEMODE_WALK) {
 					if (platformobj->flags & OBJFLAG_LIFT_LATERALMOVEMENT) {
 						g_Vars.players[playernum]->bondextrapos.x += newpos->x - prevpos->x;
@@ -7807,34 +7769,6 @@ void platformDisplaceProps(struct prop *platform, s16 *propnums, struct coord *p
 						}
 					}
 				}
-#else
-				if ((platformobj->flags & OBJFLAG_LIFT_LATERALMOVEMENT)
-						&& g_Vars.players[playernum]->lift == platform
-						&& g_Vars.players[playernum]->bondmovemode == MOVEMODE_WALK) {
-					g_Vars.players[playernum]->bondextrapos.x += newpos->x - prevpos->x;
-					g_Vars.players[playernum]->bondextrapos.y += newpos->y - prevpos->y;
-					g_Vars.players[playernum]->bondextrapos.z += newpos->z - prevpos->z;
-
-					prevplayernum = g_Vars.currentplayernum;
-
-					sp8c.x = newpos->x - prevpos->x;
-					sp8c.y = 0.0f;
-					sp8c.z = newpos->z - prevpos->z;
-
-					setCurrentPlayerNum(playernum);
-					bwalk0f0c63bc(&sp8c, 1, CDTYPE_BG);
-
-					prop->pos.y += newpos->y - prevpos->y;
-
-					g_Vars.players[playernum]->vv_ground += newpos->y - prevpos->y;
-					g_Vars.players[playernum]->vv_manground += newpos->y - prevpos->y;
-					g_Vars.players[playernum]->sumground = g_Vars.players[playernum]->vv_manground / (PAL ? 0.054400026798248f : 0.045499980449677f);
-
-					playerUpdatePerimInfo();
-					bmoveUpdateRooms(g_Vars.players[playernum]);
-					setCurrentPlayerNum(prevplayernum);
-				}
-#endif
 			}
 		}
 
@@ -7859,9 +7793,7 @@ void liftTick(struct prop *prop)
 	struct coord newpos;
 	RoomNum newrooms[8];
 	struct coord prevpos;
-#if VERSION >= VERSION_NTSC_1_0
 	f32 prevdist;
-#endif
 	s16 propnums[256];
 	s32 stop;
 
@@ -7907,27 +7839,17 @@ void liftTick(struct prop *prop)
 
 			segdist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 
-#if VERSION >= VERSION_NTSC_1_0
 			prevdist = lift->dist;
-#endif
 
 			applySpeed(&lift->dist, segdist, &lift->speed, lift->accel, lift->accel, lift->maxspeed);
 
 			// If arriving at the destination, set the distance explicitly
 			if (lift->speed < 1 && lift->speed > -1) {
-#if VERSION >= VERSION_NTSC_1_0
 				if (prevdist < segdist && lift->dist >= segdist) {
 					lift->dist = segdist;
 				} else if (prevdist > 0 && lift->dist <= 0) {
 					lift->dist = 0;
 				}
-#else
-				if (lift->dist >= segdist) {
-					lift->dist = segdist;
-				} else if (lift->dist <= 0) {
-					lift->dist = 0;
-				}
-#endif
 			}
 
 			frac = segdist == 0 ? 0 : lift->dist / segdist;
@@ -8515,8 +8437,6 @@ void autogunTick(struct prop *prop)
 					target = chr->prop;
 					break;
 				}
-
-				if (1);
 			}
 		} else {
 			// Not configured for teams, so target a player
@@ -8982,15 +8902,7 @@ void autogunTickShoot(struct prop *autogunprop)
 						|| (targetprop && (targetprop->type == PROPTYPE_CHR))
 						|| (g_Vars.antiplayernum >= 0 && targetprop && targetprop == g_Vars.anti->prop)) {
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos, CDTYPE_ALL, GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-#if VERSION >= VERSION_PAL_FINAL
-						cdGetPos(&hitpos, 11480, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-						cdGetPos(&hitpos, 11480, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
 						cdGetPos(&hitpos, 11458, "propobj.c");
-#else
-						cdGetPos(&hitpos, 11296, "propobj.c");
-#endif
 
 						hitprop = cdGetObstacleProp();
 
@@ -9039,15 +8951,7 @@ void autogunTickShoot(struct prop *autogunprop)
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos,
 								CDTYPE_ALL & ~CDTYPE_PLAYERS,
 								GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-#if VERSION >= VERSION_PAL_FINAL
-						cdGetPos(&hitpos, 11535, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-						cdGetPos(&hitpos, 11535, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
 						cdGetPos(&hitpos, 11513, "propobj.c");
-#else
-						cdGetPos(&hitpos, 11351, "propobj.c");
-#endif
 
 						hitprop = cdGetObstacleProp();
 						missed = true;
@@ -9077,15 +8981,7 @@ void autogunTickShoot(struct prop *autogunprop)
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos,
 								CDTYPE_DOORS | CDTYPE_BG,
 								GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-#if VERSION >= VERSION_PAL_FINAL
-						cdGetPos(&hitpos, 11561, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-						cdGetPos(&hitpos, 11561, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
 						cdGetPos(&hitpos, 11539, "propobj.c");
-#else
-						cdGetPos(&hitpos, 11377, "propobj.c");
-#endif
 
 						missed = true;
 					}
@@ -9592,19 +9488,6 @@ void chopperIncrementBarrel(struct prop *chopperprop, bool firing)
 
 	chopper->barrelrot += chopper->barrelrotspeed * LVUPDATE60FREAL();
 
-#if PAL
-	applySpeed(&gunroty, angleh, &gunturnyspeed60, 0.0027920822612941f * speedmult, 0.0055841645225883f * speedmult, 0.16752494871616f * speedmult);
-
-	if (gunroty == angleh && gunturnyspeed60 <= 0.0055841645225883f * speedmult && -0.0055841645225883f * speedmult <= gunturnyspeed60) {
-		gunturnyspeed60 = 0.0f;
-	}
-
-	applySpeed(&gunrotx, anglev, &gunturnxspeed60, 0.0027920822612941f * speedmult, 0.0055841645225883f * speedmult, 0.16752494871616f * speedmult);
-
-	if (gunrotx == anglev && gunturnxspeed60 <= 0.0055841645225883f * speedmult && -0.0055841645225883f * speedmult <= gunturnxspeed60) {
-		gunturnxspeed60 = 0.0f;
-	}
-#else
 	applySpeed(&gunroty, angleh, &gunturnyspeed60, 0.0023267353f * speedmult, 0.0046534706f * speedmult, 0.1396041f * speedmult);
 
 	if (gunroty == angleh && gunturnyspeed60 <= 0.0046534706f * speedmult && -0.0046534706f * speedmult <= gunturnyspeed60) {
@@ -9616,7 +9499,6 @@ void chopperIncrementBarrel(struct prop *chopperprop, bool firing)
 	if (gunrotx == anglev && gunturnxspeed60 <= 0.0046534706f * speedmult && -0.0046534706f * speedmult <= gunturnxspeed60) {
 		gunturnxspeed60 = 0.0f;
 	}
-#endif
 
 	chopper->gunroty = gunroty;
 	chopper->gunrotx = gunrotx;
@@ -9709,10 +9591,10 @@ void chopperIncrementMovement(struct prop *prop, f32 goalroty, f32 goalrotx, str
 
 	dir->y += chopper->bobstrength * sinf(chopper->bob);
 
-	f2 = PAL ? 0.976f : 0.98f;
+	f2 = 0.98f;
 
 	for (i = 1; i < g_Vars.lvupdate60; i++) {
-		f2 *= PAL ? 0.976f : 0.98f;
+		f2 *= 0.98f;
 	}
 
 	chopper->vx += dir->x;
@@ -9745,19 +9627,6 @@ void chopperIncrementMovement(struct prop *prop, f32 goalroty, f32 goalrotx, str
 		goalrotx = 5.8f;
 	}
 
-#if PAL
-	applyRotation(&curroty, goalroty, &turnyspeed, 0.00026175772654824f, 0.00052351545309648f, 0.015705462545156f);
-
-	if (curroty == goalroty && turnyspeed <= 0.00052351545309648f && turnyspeed >= -0.00052351545309648f) {
-		turnyspeed = 0.0f;
-	}
-
-	applyRotation(&currotx, goalrotx, &turnxspeed, 0.00026175772654824, 0.00052351545309648f, 0.015705462545156f);
-
-	if (currotx == goalrotx && turnxspeed <= 0.00052351545309648f && turnxspeed >= -0.00052351545309648f) {
-		turnxspeed = 0.0f;
-	}
-#else
 	applyRotation(&curroty, goalroty, &turnyspeed, 0.00021813141938765f, 0.00043626284f, 0.013087885f);
 
 	if (curroty == goalroty && turnyspeed <= 0.00043626284f && turnyspeed >= -0.00043626284f) {
@@ -9769,7 +9638,6 @@ void chopperIncrementMovement(struct prop *prop, f32 goalroty, f32 goalrotx, str
 	if (currotx == goalrotx && turnxspeed <= 0.00043626284f && turnxspeed >= -0.00043626284f) {
 		turnxspeed = 0.0f;
 	}
-#endif
 
 	currotz += (-turnyspeed * 40.0f - currotz) * 0.1f;
 
@@ -9890,12 +9758,7 @@ void chopperTickFall(struct prop *chopperprop)
 		// Haven't started falling yet
 		chopper->timer60 -= g_Vars.lvupdate60;
 	} else {
-#if VERSION >= VERSION_NTSC_1_0
 		if (*y > -0.7f)
-#else
-			// NTSC beta reads from an uninitialised variable
-		if (speed.y > -0.7f)
-#endif
 		{
 			// Increase fall speed
 			*y -= 0.009f * g_Vars.lvupdate60f;
@@ -9961,15 +9824,7 @@ void chopperTickFall(struct prop *chopperprop)
 			ground = cdFindGroundAtCyl(&chopperprop->pos, 5, chopperprop->rooms, NULL, NULL);
 			chopperprop->pos.y -= 100;
 
-#if VERSION >= VERSION_PAL_FINAL
-			cdGetPos(&sp64, 12476, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-			cdGetPos(&sp64, 12476, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
 			cdGetPos(&sp64, 12449, "propobj.c");
-#else
-			cdGetPos(&sp64, 12286, "propobj.c");
-#endif
 
 			newpos.x = sp64.x;
 			newpos.y = ground + 20;
@@ -10108,8 +9963,8 @@ void chopperTickCombat(struct prop *chopperprop)
 	struct pad pad;
 	struct pad nextpad;
 	f32 f20;
-	s32 sp90;
-	s32 sp8c;
+	s32 sp90 = 0;
+	s32 sp8c = 0;
 	bool reverse;
 	s8 numsteps;
 	s8 tmp;
@@ -10998,8 +10853,8 @@ s32 objTickPlayer(struct prop *prop)
 			RoomNum sp220[8];
 			s32 numchrs;
 			Mtxf sp152;
-			s32 sp148;
-			s32 sp144;
+			s32 sp148 = 0;
+			s32 sp144 = 0;
 			s32 i;
 			struct coord translate;
 			struct coord sp116 = {0, 0, 0};
@@ -14115,14 +13970,14 @@ void objApplyMomentum(struct defaultobj *obj, struct coord *speed, f32 rotation,
 
 		if (obj->type == OBJTYPE_HOVERPROP || obj->type == OBJTYPE_HOVERBIKE) {
 			if (obj->flags & OBJFLAG_HOVERPROP_20000000) {
-				projectile->unk08c = 0.8f;
+				projectile->bounciness = 0.8f;
 				projectile->unk098 = 0.0027777778f;
 				projectile->unk0e0 = 0.000041881234f;
 				projectile->unk0e4 = PAL ? 0.969f : 0.974f;
 				projectile->unk0ec = 0.07852732f;
 				projectile->unk0f0 = 6.6666665f;
 			} else {
-				projectile->unk08c = 0.5f;
+				projectile->bounciness = 0.5f;
 				projectile->unk098 = 0.013888889f;
 				projectile->unk0e0 = 0.00020940616f;
 				projectile->unk0e4 = PAL ? 0.953f : 0.961f;
@@ -14138,21 +13993,21 @@ void objApplyMomentum(struct defaultobj *obj, struct coord *speed, f32 rotation,
 		sp20 = objGetRotatedLocalZMaxByMtx3(bbox, obj->realrot) - objGetRotatedLocalZMinByMtx3(bbox, obj->realrot);
 
 		if (sp24 > 150.0f || sp20 > 150.0f) {
-			projectile->unk08c = 0.1f;
+			projectile->bounciness = 0.1f;
 			projectile->unk098 = 0.055555556f;
 			projectile->unk0e0 = 0.00083762466f;
 			projectile->unk0e4 = PAL ? 0.953f : 0.961f;
 			projectile->unk0ec = 0.009815915f;
 			projectile->unk0f0 = 0.8333333f;
 		} else if (sp24 > 75.0f || sp20 > 75.0f) {
-			projectile->unk08c = 0.1f;
+			projectile->bounciness = 0.1f;
 			projectile->unk098 = 0.055555556f;
 			projectile->unk0e0 = 0.00083762466f;
 			projectile->unk0e4 = PAL ? 0.953f : 0.961f;
 			projectile->unk0ec = 0.01963183f;
 			projectile->unk0f0 = 0.8333333f;
 		} else {
-			projectile->unk08c = 0.1f;
+			projectile->bounciness = 0.1f;
 			projectile->unk098 = 0.055555556f;
 			projectile->unk0e0 = 0.00041881233f;
 			projectile->unk0e4 = PAL ? 0.953f : 0.961f;
@@ -16642,23 +16497,15 @@ void ammotypeGetPickupMessage(char *dst, s32 ammotype, s32 qty)
 
 	*dst = '\0';
 
-	if (g_Jpn) {
-		ammotypeGetPickupName(dst, ammotype, qty);
 
-		if (full) {
-			ammotypeGetPickedUpText(dst);
-		}
-
-		strcat(dst, "\n");
-	} else {
-		if (full) {
-			ammotypeGetPickedUpText(dst); // "Picked up"
-		}
-
-		ammotypeGetDeterminer(dst, ammotype, qty); // "a", "an", "some" or "the"
-		ammotypeGetPickupName(dst, ammotype, qty); // name of ammo type
-		strcat(dst, ".\n");
+	if (full) {
+		ammotypeGetPickedUpText(dst); // "Picked up"
 	}
+
+	ammotypeGetDeterminer(dst, ammotype, qty); // "a", "an", "some" or "the"
+	ammotypeGetPickupName(dst, ammotype, qty); // name of ammo type
+	strcat(dst, ".\n");
+	
 }
 
 void currentPlayerQueuePickupAmmoHudmsg(s32 ammotype, s32 pickupqty)
@@ -16812,38 +16659,36 @@ void weaponGetPickupText(char *buffer, s32 weaponnum, bool dual)
 	if (dual) {
 		strcat(buffer, langGet(L_PROPOBJ_001)); // "Double"
 	} else {
-		if (!g_Jpn) {
-			if (full) {
-				strcat(buffer, langGet(L_PROPOBJ_000)); // "Picked up"
+		if (full) {
+			strcat(buffer, langGet(L_PROPOBJ_000)); // "Picked up"
 
-				if (weaponnum == WEAPON_EYESPY && g_Vars.currentplayer->eyespy) {
-					textid = L_PROPOBJ_050; // "your"
-				} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_F_SOME)) {
-					textid = L_PROPOBJ_002; // "some"
-				} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_F_AN)) {
-					textid = L_PROPOBJ_006; // "an"
-				} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_F_THE)) {
-					textid = L_PROPOBJ_008; // "the"
-				} else {
-					textid = L_PROPOBJ_004; // "a"
-				}
-
-				strcat(buffer, langGet(textid));
+			if (weaponnum == WEAPON_EYESPY && g_Vars.currentplayer->eyespy) {
+				textid = L_PROPOBJ_050; // "your"
+			} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_F_SOME)) {
+				textid = L_PROPOBJ_002; // "some"
+			} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_F_AN)) {
+				textid = L_PROPOBJ_006; // "an"
+			} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_F_THE)) {
+				textid = L_PROPOBJ_008; // "the"
 			} else {
-				if (weaponnum == WEAPON_EYESPY && g_Vars.currentplayer->eyespy) {
-					textid = L_PROPOBJ_051; // "Your"
-				} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_S_SOME)) {
-					textid = L_PROPOBJ_003; // "Some"
-				} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_S_AN)) {
-					textid = L_PROPOBJ_007; // "An"
-				} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_S_THE)) {
-					textid = L_PROPOBJ_009; // "The"
-				} else {
-					textid = L_PROPOBJ_005; // "A"
-				}
-
-				strcat(buffer, langGet(textid));
+				textid = L_PROPOBJ_004; // "a"
 			}
+
+			strcat(buffer, langGet(textid));
+		} else {
+			if (weaponnum == WEAPON_EYESPY && g_Vars.currentplayer->eyespy) {
+				textid = L_PROPOBJ_051; // "Your"
+			} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_S_SOME)) {
+				textid = L_PROPOBJ_003; // "Some"
+			} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_S_AN)) {
+				textid = L_PROPOBJ_007; // "An"
+			} else if (weaponHasFlag(weaponnum, WEAPONFLAG_DETERMINER_S_THE)) {
+				textid = L_PROPOBJ_009; // "The"
+			} else {
+				textid = L_PROPOBJ_005; // "A"
+			}
+
+			strcat(buffer, langGet(textid));
 		}
 	}
 
@@ -16865,16 +16710,6 @@ void weaponGetPickupText(char *buffer, s32 weaponnum, bool dual)
 		}
 
 		strcat(buffer, "s");
-	}
-
-	// For JPN, their translation of "picked up" comes after the weapon name
-	if (g_Jpn && full) {
-		if (buffer[strlen(buffer) - 1] == '\n') {
-			buffer[strlen(buffer) - 1] = '\0';
-		}
-
-		strcat(buffer, langGet(L_PROPOBJ_000)); // "Picked up"
-		strcat(buffer, "\n"); // This just gets removed immediately below
 	}
 
 	if (buffer[strlen(buffer) - 1] == '\n') {

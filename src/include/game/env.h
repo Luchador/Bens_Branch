@@ -15,7 +15,7 @@ f32 envGetSquaredFogMax(void);
 void envTick(void);
 void envApplyFogEnvironment(struct fogenvironment *sky);
 void envApplyNoFogEnvironment(struct nofogenvironment *sky);
-void envChooseAndApply(s32 stagenum, bool allowoverride);
+void envChooseAndApply(s32 stagenum);
 void envApplyTransitionFrac(f32 arg0);
 Gfx *envStartFog(Gfx *gdl, bool xlupass);
 Gfx *envStopFog(Gfx *gdl);

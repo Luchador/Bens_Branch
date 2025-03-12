@@ -8,6 +8,7 @@
 #include "types.h"
 #include "game/mainmenu.h"
 #include "game/menu.h"
+#include "game/lang.h"
 #include "game/gamefile.h"
 #include "game/player.h"
 #include "video.h"

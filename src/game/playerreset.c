@@ -8,6 +8,7 @@
 #include "game/chr.h"
 #include "game/body.h"
 #include "game/prop.h"
+#include "game/lang.h"
 #include "game/setuputils.h"
 #include "game/bondgun.h"
 #include "game/player.h"
@@ -116,7 +117,6 @@ void playerReset(void)
 	bool hasdefaultweapon = false;
 	struct cmd32 *cmd = (struct cmd32 *)g_StageSetup.intro;
 	u8 haseyespy = false;
-	s32 stack[7];
 	s32 i;
 	s32 numchrs;
 	struct gecreditsdata *thing;

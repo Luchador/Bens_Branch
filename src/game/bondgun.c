@@ -728,6 +728,7 @@ void bgunRefillMagazine(s32 weaponfunc, struct handweaponinfo *info, struct hand
 			// In most versions of the game, reloading the shotgun while going
 			// through a teleport in Deep Sea will cause the shotgun to load
 			// more ammo than its capacity. JPN Final fixes this here.
+			// Ben's comment: integrating the JPN change
 			if (amount > hand->clipsizes[ammoindex] - hand->loadedammo[ammoindex]) {
 				amount = hand->clipsizes[ammoindex] - hand->loadedammo[ammoindex];
 			}
@@ -1659,46 +1660,7 @@ bool bgun0f09aba4(struct hand *hand, struct handweaponinfo *info, s32 handnum, s
 	f32 recoildist;
 	f32 recoilangle;
 	f32 mult2;
-	u32 stack;
 
-#if PAL
-	unk24 = func->unk24;
-	unk25 = func->unk25;
-	unk26 = func->unk26;
-	unk27 = func->unk27;
-	recoverytime60 = func->recoverytime60;
-	weapondef = info->definition;
-
-	if (unk24 >= 4) {
-		unk24 = TICKS(unk24);
-	}
-
-	if (unk25 >= 4) {
-		unk25 = TICKS(unk25);
-	}
-
-	if (unk26 >= 4) {
-		unk26 = TICKS(unk26);
-	}
-
-	if (unk27 >= 4) {
-		unk27 = TICKS(unk27);
-	}
-
-	if (recoverytime60 >= 4) {
-		recoverytime60 = TICKS(recoverytime60);
-	}
-
-	sum = unk24 + unk25;
-#elif VERSION >= VERSION_JPN_FINAL
-	unk24 = func->unk24;
-	unk25 = func->unk25;
-	unk26 = func->unk26;
-	unk27 = func->unk27;
-	recoverytime60 = func->recoverytime60;
-	weapondef = info->definition;
-	sum = unk24 + unk25;
-#else
 	unk24 = func->unk24;
 	unk25 = func->unk25;
 	sum = unk24 + unk25;
@@ -1706,7 +1668,6 @@ bool bgun0f09aba4(struct hand *hand, struct handweaponinfo *info, s32 handnum, s
 	unk27 = func->unk27;
 	recoverytime60 = func->recoverytime60;
 	weapondef = info->definition;
-#endif
 
 	frames = hand->stateframes - hand->statevar1;
 
@@ -3928,7 +3889,7 @@ struct defaultobj *bgunCreateThrownProjectile2(struct chrdata *chr, struct gset 
 
 		if (obj->hidden & OBJHFLAG_PROJECTILE) {
 			obj->projectile->flags |= PROJECTILEFLAG_00000002;
-			obj->projectile->unk08c = 0.1f;
+			obj->projectile->bounciness = 0.1f;
 			obj->projectile->pickuptimer240 = TICKS(240);
 
 			psCreate(NULL, obj->prop, SFX_THROW, -1,
@@ -4104,41 +4065,44 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 	if (obj) {
 		if (obj->type == OBJTYPE_WEAPON) {
 			weapon = (struct weaponobj *)obj;
+			if(weapon)
+			{
+				if (gset->weaponnum == WEAPON_GRENADE && gset->weaponfunc == FUNC_PRIMARY) {
+					if (weapon->timer240 < hand->primetimer60 * 4) {
+						weapon->timer240 = 0;
+					} else {
+						weapon->timer240 -= hand->primetimer60 * 4;
+					}
 
-			if (gset->weaponnum == WEAPON_GRENADE && gset->weaponfunc == FUNC_PRIMARY) {
-				if (weapon->timer240 < hand->primetimer60 * 4) {
-					weapon->timer240 = 0;
-				} else {
-					weapon->timer240 -= hand->primetimer60 * 4;
+					weapon->gunfunc = gset->weaponfunc;
+				} else if (gset->weaponnum == WEAPON_ECMMINE && g_Vars.stagenum == STAGE_CITRAINING) {
+					data = dtGetData();
+
+					if (data->intraining) {
+						data->obj = obj;
+					}
 				}
+			
 
-				weapon->gunfunc = gset->weaponfunc;
-			} else if (gset->weaponnum == WEAPON_ECMMINE && g_Vars.stagenum == STAGE_CITRAINING) {
-				data = dtGetData();
+				if (obj->hidden & OBJHFLAG_PROJECTILE) {
+					obj->projectile->flags |= PROJECTILEFLAG_LAUNCHING;
+					obj->projectile->nextsteppos.x = muzzlepos.x;
+					obj->projectile->nextsteppos.y = muzzlepos.y;
+					obj->projectile->nextsteppos.z = muzzlepos.z;
 
-				if (data->intraining) {
-					data->obj = obj;
+					if (gset->weaponnum == WEAPON_GRENADE && gset->weaponfunc == FUNC_SECONDARY) {
+						obj->projectile->bounciness = 1.0f;
+					}
+
+					if (gset->weaponnum == WEAPON_COMBATKNIFE) {
+						// In theory, weapon can be uninitialised here,
+						// but in practice it's always set.
+						weapon->base.projectile->flags |= PROJECTILEFLAG_00000002;
+						weapon->base.projectile->bounciness = 0.1f;
+						weapon->base.projectile->pickuptimer240 = TICKS(240);
+						weapon->base.hidden |= OBJHFLAG_THROWNKNIFE;
+					}
 				}
-			}
-		}
-
-		if (obj->hidden & OBJHFLAG_PROJECTILE) {
-			obj->projectile->flags |= PROJECTILEFLAG_LAUNCHING;
-			obj->projectile->nextsteppos.x = muzzlepos.x;
-			obj->projectile->nextsteppos.y = muzzlepos.y;
-			obj->projectile->nextsteppos.z = muzzlepos.z;
-
-			if (gset->weaponnum == WEAPON_GRENADE && gset->weaponfunc == FUNC_SECONDARY) {
-				obj->projectile->unk08c = 1.0f;
-			}
-
-			if (gset->weaponnum == WEAPON_COMBATKNIFE) {
-				// In theory, weapon can be uninitialised here,
-				// but in practice it's always set.
-				weapon->base.projectile->flags |= PROJECTILEFLAG_00000002;
-				weapon->base.projectile->unk08c = 0.1f;
-				weapon->base.projectile->pickuptimer240 = TICKS(240);
-				weapon->base.hidden |= OBJHFLAG_THROWNKNIFE;
 			}
 		}
 	}
@@ -4415,7 +4379,7 @@ void bgunCreateFiredProjectile(s32 handnum)
 						weapon->base.projectile->unk014 = sp250.y;
 						weapon->base.projectile->unk018 = sp250.z;
 						weapon->base.projectile->pickuptimer240 = TICKS(240);
-						weapon->base.projectile->unk08c = funcdef->reflectangle;
+						weapon->base.projectile->bounciness = funcdef->reflectangle;
 						weapon->base.projectile->unk098 = funcdef->unk50 * 1.6666666f;
 
 						if (funcdef->soundnum > 0) {

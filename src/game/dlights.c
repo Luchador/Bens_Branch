@@ -398,8 +398,6 @@ void roomInitLights(s32 roomnum)
 				&& roomnum == 0x0001) // moon
 			|| ((g_StageIndex == STAGEINDEX_SKEDARRUINS || g_StageIndex == STAGEINDEX_WAR)
 				&& roomnum == 0x0002) // fake sky
-			|| ((s32)g_StageIndex == STAGEINDEX_TEST_OLD
-				&& roomnum == 0x0001)
 			|| (g_StageIndex == STAGEINDEX_ATTACKSHIP
 				&& roomnum == 0x0071)) { // planet
 		room->flags |= ROOMFLAG_RENDERALWAYS;

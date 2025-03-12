@@ -50,17 +50,7 @@ struct fogenvironment g_FogEnvironments[] = {
 	{ STAGE_CRASHSITE,        15, 10000,    0,    0,   0, 994, 1000, RGB(0x9b2d1e), SUNS(suns_crashsite), 1,  1500,    0, RGB(0xfafa00), 0, -5000, 0, RGB(0x000000), 0  },
 	{ STAGE_PELAGIC,          15, 15000, 3333, 4444, 600, 995, 1000, RGB(0x2d3e60), NO_SUNS,              1,  5000,    0, RGB(0xf0f0f0), 0, -2000, 0, RGB(0x14212b), 0  },
 	{ STAGE_VILLA,            15, 20000,    0,    0,   0, 981, 1047, RGB(0x46a0ff), SUNS(suns_villa),     1,  5000,    0, RGB(0xffffff), 0, -1850, 1, RGB(0x00ffff), 0  },
-	{ STAGE_PELAGIC + 900,    30, 15000, 3333, 4444, 600, 995, 1000, RGB(0x103060), NO_SUNS,              1,  5000,    0, RGB(0xffffff), 0, -1000, 0, RGB(0x000000), 0  },
-	{ STAGE_24,                2, 25000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              1, 10000,    0, RGB(0xffffff), 0,     0, 1, RGB(0x00ffff), 7  },
-	{ STAGE_2B,                2,  2000, 2500, 3055, 750, 957, 1000, RGB(0x201010), NO_SUNS,              1,  5000,    0, RGB(0x3a1100), 0, -1000, 1, RGB(0x00ffff), 20 },
-	{ STAGE_2B + 900,          2,  8000, 6000, 8000, 800, 991, 1000, RGB(0x201010), NO_SUNS,              1,  5000,    0, RGB(0x3a1100), 0, -1000, 1, RGB(0x00ffff), 0  },
-	{ 238,                    10,  6000,    0,    0,   0, 996, 1000, RGB(0x181818), NO_SUNS,              1, 10000,    0, RGB(0x787878), 0,  -500, 0, RGB(0x000000), 0  },
-	{ 338,                    10,  6000,    0,    0,   0, 996, 1000, RGB(0x181818), NO_SUNS,              1, 10000,    0, RGB(0x787878), 0,  -500, 0, RGB(0x000000), 0  },
-	{ 438,                    10,  6000,    0,    0,   0, 996, 1000, RGB(0x181818), NO_SUNS,              1, 10000,    0, RGB(0x787878), 0,  -500, 0, RGB(0x000000), 0  },
-	{ 200,                    10,  7500,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
-	{ 300,                    10,  6000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
-	{ 400,                    10,  5000,    0,    0,   0, 996, 1000, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
-	{ 0,                       0,     0,    0,    0,   0,   0,    0, RGB(0x000000), NO_SUNS,              0,     0,    0, RGB(0x000000), 0,     0, 0, RGB(0x000000), 0  },
+	{ 0 }, // Need a 0 at the end so it doesn't crash
 };
 
 struct nofogenvironment g_NoFogEnvironments[] = {
@@ -73,23 +63,16 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_ATTACKSHIP,    15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
 	{ STAGE_INFILTRATION,  15, 12000,   0,  0,  0, RGB(0x000000), SUNS(suns_area51),  0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_ESCAPE,        15, 10000,   0,  0,  0, RGB(0x000000), SUNS(suns_area51),  0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
-	{ STAGE_TEST_ARCH,     15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
 	{ STAGE_DEEPSEA,       15, 10000,   0,  0,  0, RGB(0x050000), NO_SUNS,            0, RGB(0x9b9b9b),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
-	{ STAGE_TEST_DEST,     15, 10000,   0,  0,  0, RGB(0x103060), NO_SUNS,            1, RGB(0xe6e6e6),  3000,   0, 1, RGB(0xffff96),   -150,    2, 0, 0 },
-	{ STAGE_TEST_LEN,      15, 10000,   0,  0,  0, RGB(0x304010), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 0 },
-	{ STAGE_TEST_ASH,      15, 25000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_DEFENSE,       15, 10000,   0,  0,  0, RGB(0x65b2ff), SUNS(suns_ci),      0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_CITRAINING,    15, 10000,   0,  0,  0, RGB(0x65b2ff), SUNS(suns_ci),      0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_DUEL,          10, 10000,   0,  0,  0, RGB(0x65b2ff), SUNS(suns_ci),      0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
-	{ STAGE_RETAKING,      15, 10000,   0,  0,  0, RGB(0x65b2ff), SUNS(suns_ci),      0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_DEFECTION,     10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_MBR,           10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_EXTRACTION,    10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_SKEDARRUINS,   15, 10000,   0,  0,  0, RGB(0x6565ff), SUNS(suns_skedar),  0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_WAR,           15, 10000,   0,  0,  0, RGB(0x6565ff), SUNS(suns_skedar),  0, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
-	{ STAGE_TEST_RUN,      15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),      0,    0, 0, 1 },
 	{ STAGE_MP_SKEDAR,     15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
-	{ STAGE_TEST_SILO,     15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x3a1100),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
 	{ STAGE_CHICAGO,       10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x50280a),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
 	{ STAGE_G5BUILDING,    15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x50280a),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
 	{ STAGE_AIRFORCEONE,   15, 20000,   0,  0,  0, RGB(0x001040), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 1, RGB(0xffffff),  -5000,    2, 0, 1 },
@@ -100,29 +83,16 @@ struct nofogenvironment g_NoFogEnvironments[] = {
 	{ STAGE_MP_G5BUILDING, 15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x5a90a5),  4500,   0, 0, RGB(0x000000), -20000,    0, 0, 0 },
 	{ STAGE_MP_TEMPLE,     15, 10000,   0,  0,  0, RGB(0x001080), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x00ffff),  -1850,    1, 0, 1 },
 	{ STAGE_MP_COMPLEX,    15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_UFF,      10, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_OLD,      15, 30000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_LAM,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_BASE,       15, 20000,   0,  0,  0, RGB(0x040000), NO_SUNS,            1, RGB(0x82b464),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_MP2,      15, 20000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x46c7ba),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_AREA52,     15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x46c7ba),  4500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_WAREHOUSE,  15, 10000,   0,  0,  0, RGB(0x020000), NO_SUNS,            1, RGB(0x82aac8),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_CARPARK,    15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x64c886),  5500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_MP6,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_MP7,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_MP8,      15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_RUINS,      15, 10000,   0,  0,  0, RGB(0x030000), NO_SUNS,            1, RGB(0x82e6aa),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_SEWERS,     15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x646464),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_FELICITY,   10, 10000,   0,  0,  0, RGB(0x040500), NO_SUNS,            1, RGB(0x64d282),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_FORTRESS,   15, 10000,   0,  0,  0, RGB(0x000008), NO_SUNS,            1, RGB(0x5a90a5),  5500,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_VILLA,      15, 10000,   0,  0,  0, RGB(0x8888dc), NO_SUNS,            1, RGB(0xffaa2a),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_MP14,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
 	{ STAGE_MP_GRID,       15, 10000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_MP16,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_MP17,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            1, RGB(0x64c886), 10000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_MP18,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_MP19,     15, 20000,   0,  0,  0, RGB(0x000000), NO_SUNS,            0, RGB(0x1e1e1e),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 0 },
-	{ STAGE_TEST_MP20,     15, 20000,   0,  0,  0, RGB(0x00103c), NO_SUNS,            1, RGB(0xffffff),  5000,   0, 0, RGB(0x000000),  -5000,    0, 0, 1 },
 	{ 0 },
 };
 
@@ -286,7 +256,7 @@ void envDisableSky(void)
 	g_Env.skybluefrac = 0;
 }
 
-void envChooseAndApply(s32 stagenum, bool allowoverride)
+void envChooseAndApply(s32 stagenum)
 {
 	struct nofogenvironment *finalenv = NULL;
 	struct nofogenvironment *env2;
@@ -296,20 +266,6 @@ void envChooseAndApply(s32 stagenum, bool allowoverride)
 
 	g_EnvFogMax = MAXFLOAT;
 	g_EnvFogMin = 0;
-
-	// If allowoverride is set, try to find an env1 with stage + 900.
-	// But allowoverride is never set, so this never happens.
-	if (allowoverride) {
-		for (env1 = &g_FogEnvironments[0]; env1->stage != 0; env1++) {
-			if (env1->stage == stagenum + 900) {
-				g_EnvOrigFogEnvironment = env1;
-				g_EnvTransitionFrom = env1;
-				g_EnvTransitionTo = env1 + 1;
-				envApplyFogEnvironment(g_EnvOrigFogEnvironment);
-				return;
-			}
-		}
-	}
 
 	// Try to find an env1
 	for (env1 = &g_FogEnvironments[0]; env1->stage != 0; env1++) {

@@ -2,6 +2,7 @@
 #include "game/chraicommands.h"
 #include "game/prop.h"
 #include "game/inv.h"
+#include "game/lang.h"
 #include "stagesetup.h"
 #include "data.h"
 #include "types.h"
@@ -584,11 +585,7 @@ struct weapon invitem_falcon2 = {
 	1, // sway
 	gunviscmds_falcon2, // gunviscmds
 	invpartvisibility_falcon2, // part visibility
-#if VERSION == VERSION_JPN_FINAL
-	L_GUN_257, // short name
-#else
 	L_GUN_007, // short name
-#endif
 	L_GUN_007, // name
 	L_GUN_150, // manufacturer
 	L_GUN_156, // description
@@ -3361,11 +3358,7 @@ struct weapon invitem_ecmmine = {
 	1, // sway
 	NULL, // gunviscmds
 	NULL, // part visibility
-#if VERSION >= VERSION_JPN_FINAL
-	L_GUN_256, // short name
-#else
 	L_GUN_041, // short name
-#endif
 	L_GUN_041, // name
 	L_GUN_000, // manufacturer
 	L_GUN_188, // description
@@ -5763,11 +5756,7 @@ struct weapon invitem_skedarbomb = {
 	1, // sway
 	NULL, // gunviscmds
 	NULL, // part visibility
-#if VERSION >= VERSION_JPN_FINAL
-	L_GUN_259, // short name
-#else
 	L_GUN_221, // short name
-#endif
 	L_GUN_221, // name
 	L_GUN_000, // manufacturer
 	L_GUN_203, // description
@@ -5993,11 +5982,7 @@ struct weapon invitem_suitcase = {
 	1, // sway
 	NULL, // gunviscmds
 	NULL, // part visibility
-#if VERSION >= VERSION_JPN_FINAL
-	L_GUN_258, // short name
-#else
 	L_GUN_067, // short name
-#endif
 	L_GUN_067, // name
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description

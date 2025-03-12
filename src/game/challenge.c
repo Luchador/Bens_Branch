@@ -370,7 +370,7 @@ struct mpconfigfull *challengeLoadConfig(s32 confignum, u8 *buffer, s32 len)
 	u8 buffer2[sizeof(struct mpstrings) + 40];
 	struct mpstrings *loadedstrings;
 	BTYPE bank;
-	u32 language_id = langGetFileNumOffset();
+	u32 language_id = 0;
 
 	extern u8 EXT_SEG _mpconfigsSegmentRomStart;
 	extern struct mpstrings EXT_SEG _mpstringsESegmentRomStart;

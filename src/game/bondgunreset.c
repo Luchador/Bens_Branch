@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/inv.h"
+#include "game/lang.h"
 #include "game/bondgun.h"
 #include "game/stagetable.h"
 #include "bss.h"

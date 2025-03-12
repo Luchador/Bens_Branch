@@ -109,7 +109,6 @@ void amTick(void)
 					buttonspressed = 0;
 				}
 
-				// JPN fixes the bug that's documented in amChangeScreen
 				if (controlmode == CONTROLMODE_13 || controlmode == CONTROLMODE_14) {
 					if (buttonsstate & (L_TRIG | R_TRIG)) {
 						stayopen = true;

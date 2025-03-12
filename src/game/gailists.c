@@ -2,6 +2,7 @@
 #include "game/chraicommands.h"
 #include "game/prop.h"
 #include "stagesetup.h"
+#include "game/lang.h"
 #include "data.h"
 #include "types.h"
 

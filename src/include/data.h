@@ -375,7 +375,6 @@ extern s32 g_MusicDeathTimer240;
 extern s32 g_MusicAge60;
 extern s32 g_MusicLife60;
 extern s32 g_MusicSilenceTimer60;
-extern bool g_Jpn;
 extern struct surfacetype *g_SurfaceTypes[15];
 extern u16 *g_ZbufPtr1;
 extern f32 g_AlmostZero;

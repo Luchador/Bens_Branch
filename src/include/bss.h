@@ -242,8 +242,6 @@ extern u32 g_AudioXReasonsActive[4];
 extern s32 g_MusicXReasonMinDurations[4];
 extern s32 g_MusicXReasonMaxDurations[4];
 extern uintptr_t *g_LangBanks[69];
-extern struct jpncharpixels *g_JpnCharCachePixels;
-extern struct jpncacheitem *g_JpnCacheCacheItems;
 extern struct texture *g_Textures;
 extern struct texpool g_TexSharedPool;
 extern struct texcacheitem g_TexCacheItems[150];
@@ -283,7 +281,6 @@ extern u8 g_AmBotCommands[9];
 extern struct mpsetup g_MpSetup;
 extern struct bossfile g_BossFile;
 extern struct chrdata *g_MpBotChrPtrs[MAX_BOTS];
-extern s32 g_JpnMaxCacheItems;
 extern s32 var8009d370jf;
 #ifndef PLATFORM_N64
 extern bool g_ValidGbcRomFound;

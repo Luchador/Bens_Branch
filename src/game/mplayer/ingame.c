@@ -435,7 +435,7 @@ struct menudialogdef g_MpPausePlayerStatsMenuDialog = {
 	(uintptr_t)&mpMenuTitleStatsFor,
 	g_MpInGamePlayerStatsMenuItems,
 	NULL,
-	VERSION >= VERSION_JPN_FINAL ? MENUDIALOGFLAG_1000 : 0,
+	0,
 	&g_MpPauseInventoryMenuDialog,
 };
 
@@ -444,7 +444,7 @@ struct menudialogdef g_MpEndscreenPlayerStatsMenuDialog = {
 	(uintptr_t)&mpMenuTitleStatsFor,
 	g_MpInGamePlayerStatsMenuItems,
 	NULL,
-	VERSION >= VERSION_JPN_FINAL ? MENUDIALOGFLAG_1000 : 0,
+	0,
 	NULL,
 };
 
@@ -465,7 +465,7 @@ struct menudialogdef g_MpPausePlayerRankingMenuDialog = {
 	L_MPMENU_276, // "Player Ranking"
 	g_MpPlayerRankingMenuItems,
 	NULL,
-	VERSION >= VERSION_JPN_FINAL ? MENUDIALOGFLAG_1000 : 0,
+	0,
 	&g_MpPausePlayerStatsMenuDialog,
 };
 
@@ -474,7 +474,7 @@ struct menudialogdef g_MpEndscreenPlayerRankingMenuDialog = {
 	L_MPMENU_276, // "Player Ranking"
 	g_MpPlayerRankingMenuItems,
 	NULL,
-	VERSION >= VERSION_JPN_FINAL ? MENUDIALOGFLAG_1000 : 0,
+	0,
 	&g_MpEndscreenPlayerStatsMenuDialog,
 };
 
@@ -495,7 +495,7 @@ struct menudialogdef g_MpPauseTeamRankingsMenuDialog = {
 	L_MPMENU_279, // "Team Ranking"
 	g_MpTeamRankingsMenuItems,
 	NULL,
-	VERSION >= VERSION_JPN_FINAL ? MENUDIALOGFLAG_1000 : 0,
+	0,
 	&g_MpPausePlayerRankingMenuDialog,
 };
 
@@ -504,7 +504,7 @@ struct menudialogdef g_MpEndscreenTeamRankingMenuDialog = {
 	L_MPMENU_279, // "Team Ranking"
 	g_MpTeamRankingsMenuItems,
 	NULL,
-	VERSION >= VERSION_JPN_FINAL ? MENUDIALOGFLAG_1000 : 0,
+	0,
 	&g_MpEndscreenPlayerRankingMenuDialog,
 };
 

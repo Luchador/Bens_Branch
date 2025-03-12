@@ -283,41 +283,6 @@ MenuItemHandlerResult menuhandlerScreenRatio(s32 operation, struct menuitem *ite
 	return 0;
 }
 
-#if PAL
-MenuItemHandlerResult menuhandlerLanguage(s32 operation, struct menuitem *item, union handlerdata *data)
-{
-	u16 labels[] = {
-		L_MPWEAPONS_262, // English
-		L_MPWEAPONS_263, // French
-		L_MPWEAPONS_264, // German
-		L_MPWEAPONS_265, // Italian
-		L_MPWEAPONS_266, // Spanish
-	};
-
-	switch (operation) {
-	case MENUOP_GETOPTIONCOUNT:
-		data->dropdown.value = 5;
-		break;
-	case MENUOP_GETOPTIONTEXT:
-		return (uintptr_t)langGet(labels[data->dropdown.value]);
-	case MENUOP_SET:
-		g_Vars.language = data->dropdown.value;
-		langSetEuropean(g_Vars.language);
-		g_Vars.modifiedfiles |= MODFILE_GAME | MODFILE_BOSS;
-		break;
-	case MENUOP_GETSELECTEDINDEX:
-		data->dropdown.value = g_Vars.language;
-
-		if (data->dropdown.value > LANGUAGE_PAL_ES) {
-			data->dropdown.value = LANGUAGE_PAL_EN;
-		}
-		break;
-	}
-
-	return 0;
-}
-#endif
-
 MenuItemHandlerResult menuhandlerScreenSplit(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	u16 options[] = {
@@ -2247,13 +2212,7 @@ struct menuitem g_SoloMissionControlStyleMenuItems[] = {
 		0,
 		MENUITEMFLAG_LIST_AUTOWIDTH,
 		0x00000028,
-#if VERSION == VERSION_JPN_FINAL
-		0xbe,
-#elif PAL
-		0x9c,
-#else
 		0x96,
-#endif
 		menuhandler001024dc,
 	},
 	{
@@ -2282,13 +2241,7 @@ struct menuitem g_CiControlStyleMenuItems[] = {
 		0,
 		MENUITEMFLAG_LIST_AUTOWIDTH,
 		0x00000028,
-#if VERSION == VERSION_JPN_FINAL
-		0xbe,
-#elif PAL
-		0x9c,
-#else
 		0x96,
-#endif
 		menuhandler001024dc,
 	},
 	{
@@ -2317,13 +2270,7 @@ struct menuitem g_CiControlStylePlayer2MenuItems[] = {
 		0,
 		MENUITEMFLAG_LIST_AUTOWIDTH,
 		0x00000028,
-#if VERSION == VERSION_JPN_FINAL
-		0xbe,
-#elif PAL
-		0x9c,
-#else
 		0x96,
-#endif
 		menuhandler001024fc,
 	},
 	{
@@ -2379,7 +2326,6 @@ struct menuitem g_AudioOptionsMenuItems[] = {
 		0,
 		menuhandlerSoundMode,
 	},
-#if VERSION != VERSION_JPN_FINAL
 	{
 		MENUITEMTYPE_CHECKBOX,
 		0,
@@ -2388,7 +2334,6 @@ struct menuitem g_AudioOptionsMenuItems[] = {
 		0,
 		menuhandlerLangFilter,
 	},
-#endif
 	{
 		MENUITEMTYPE_SEPARATOR,
 		0,
@@ -2450,7 +2395,6 @@ struct menuitem g_2PMissionAudioOptionsVMenuItems[] = {
 		0,
 		menuhandlerSoundMode,
 	},
-#if VERSION != VERSION_JPN_FINAL
 	{
 		MENUITEMTYPE_CHECKBOX,
 		0,
@@ -2459,7 +2403,6 @@ struct menuitem g_2PMissionAudioOptionsVMenuItems[] = {
 		0,
 		menuhandlerLangFilter,
 	},
-#endif
 	{
 		MENUITEMTYPE_SEPARATOR,
 		0,
@@ -4002,7 +3945,7 @@ struct menuitem g_SoloMissionInventoryMenuItems[] = {
 		0,
 		0,
 		0x0000006e,
-		(VERSION >= VERSION_JPN_FINAL ? 0x54 : 0x63),
+		0x63,
 		menuhandlerInventoryList,
 	},
 	{
@@ -4026,7 +3969,7 @@ struct menuitem g_SoloMissionInventoryMenuItems[] = {
 		0,
 		0,
 		0x0000008c,
-		(VERSION >= VERSION_JPN_FINAL ? 0x14 : 0x37),
+		0x37,
 		NULL,
 	},
 	{
@@ -4121,11 +4064,7 @@ struct menudialogdef g_SoloMissionInventoryMenuDialog = {
 	L_OPTIONS_178, // "Inventory"
 	g_SoloMissionInventoryMenuItems,
 	inventoryMenuDialog,
-#if VERSION >= VERSION_JPN_FINAL
-	MENUDIALOGFLAG_0002 | MENUDIALOGFLAG_DISABLERESIZE | MENUDIALOGFLAG_0400 | MENUDIALOGFLAG_1000,
-#else
 	MENUDIALOGFLAG_0002 | MENUDIALOGFLAG_DISABLERESIZE | MENUDIALOGFLAG_0400,
-#endif
 	&g_SoloMissionOptionsMenuDialog,
 };
 

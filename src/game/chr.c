@@ -3437,10 +3437,8 @@ void chrEmitSparks(struct chrdata *chr, struct prop *prop, s32 hitpart, struct c
 		sparksCreate(chrprop->rooms[0], chrprop, &coord3, coord2, 0, SPARKTYPE_FLESH_LARGE);
 	}
 
-#if VERSION < VERSION_JPN_FINAL
 	sparksCreate(chrprop->rooms[0], chrprop, coord, coord2, 0, SPARKTYPE_BLOOD);
 	sparksCreate(chrprop->rooms[0], chrprop, coord, coord2, 0, SPARKTYPE_FLESH);
-#endif
 }
 
 void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struct coord *arg3)

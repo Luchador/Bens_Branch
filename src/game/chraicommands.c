@@ -4975,11 +4975,7 @@ bool aiObjectDoAnimation(void)
 			}
 
 			animInit(obj->model->anim);
-#if VERSION >= VERSION_JPN_FINAL
 			modelSetAnimPlaySpeed(obj->model, 1, 0);
-#elif VERSION >= VERSION_PAL_BETA
-			modelSetAnimPlaySpeed(obj->model, 1.2, 0);
-#endif
 			modelSetAnimation(obj->model, anim_id, 0, fstartframe, thing, 0);
 			modelSetAnimScale(obj->model, bgGetStageTranslationThing() * obj->model->scale * 100.0f);
 		}

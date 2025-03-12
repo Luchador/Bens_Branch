@@ -165,9 +165,6 @@ void lvSetMiscSfxState(u32 type, bool play)
 
 		if (index != -1) {
 			audioStop(g_MiscSfxAudioHandles[index]);
-#if VERSION < VERSION_NTSC_1_0
-			g_MiscSfxAudioHandles[index] = 0;
-#endif
 			g_MiscSfxActiveTypes[index] = -1;
 		}
 	}
@@ -329,6 +326,7 @@ void lvReset(s32 stagenum)
 	sparksReset();
 	weatherReset();
 	lvResetMiscSfx();
+	langClear();
 
 	switch (g_Vars.stagenum) {
 	case STAGE_ESCAPE:
@@ -337,7 +335,6 @@ void lvReset(s32 stagenum)
 	case STAGE_DEFECTION:
 	case STAGE_ATTACKSHIP:
 	case STAGE_MBR: // Enable stars on MBR
-	//case STAGE_TEST_OLD:
 		starsReset();
 		break;
 	}
@@ -1518,7 +1515,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 1;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 1;
-			g_AutoAimScale = g_Jpn ? 1.1f : 0.75f;
+			g_AutoAimScale = 0.75f;
 			g_AmmoQuantityScale = 1.5f;
 			g_AttackWalkDurationScale = 0.5f;
 		} else {
@@ -1531,7 +1528,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 1.5f;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 1.5f;
-			g_AutoAimScale = g_Jpn ? 0.75f : 0.2f;
+			g_AutoAimScale = 0.2f;
 			g_AmmoQuantityScale = 1;
 			g_AttackWalkDurationScale = 1;
 		}
@@ -1572,7 +1569,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 0.6f;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 0.75f;
-			g_AutoAimScale = g_Jpn ? 1.1f : 0.75f;
+			g_AutoAimScale =  0.75f;
 			g_AmmoQuantityScale = 1.5f;
 			g_AttackWalkDurationScale = 0.5f;
 		} else if (g_Difficulty == DIFF_PA) {
@@ -1585,7 +1582,7 @@ void lvUpdateSoloHandicaps(void)
 			g_PlayerDamageRxScale = 1;
 			g_PlayerDamageTxScale = 1;
 			g_ExplosionDamageTxScale = 1;
-			g_AutoAimScale = g_Jpn ? 0.75f : 0.2f;
+			g_AutoAimScale = 0.2f;
 			g_AmmoQuantityScale = 1;
 			g_AttackWalkDurationScale = 1;
 		} else if (g_Difficulty == DIFF_PD) {
@@ -1975,6 +1972,8 @@ void lvTickPlayer(void)
 	f32 zdiff;
 
 	playerTick();
+
+
 
 	xdiff = g_Vars.currentplayer->prop->pos.x - g_Vars.currentplayer->bondprevpos.x;
 	zdiff = g_Vars.currentplayer->prop->pos.z - g_Vars.currentplayer->bondprevpos.z;

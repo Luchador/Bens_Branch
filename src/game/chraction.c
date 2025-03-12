@@ -6326,7 +6326,6 @@ bool chrHasLosToTarget(struct chrdata *chr)
 	bool cansee;
 	struct prop *prop;
 
-#if VERSION >= VERSION_JPN_FINAL
 	cansee = false;
 	prop = chrGetTargetProp(chr);
 
@@ -6337,14 +6336,6 @@ bool chrHasLosToTarget(struct chrdata *chr)
 			chrRecordLastVisibleTargetTime(chr);
 		}
 	}
-#else
-	prop = chrGetTargetProp(chr);
-	cansee = chrHasLosToChr(chr, prop->chr, NULL);
-
-	if (cansee) {
-		chrRecordLastVisibleTargetTime(chr);
-	}
-#endif
 
 	return cansee;
 }
@@ -9794,15 +9785,7 @@ void chrTickShoot(struct chrdata *chr, s32 handnum)
 
 				if (cdExamLos08(&gunpos, gunrooms, &hitpos, cdtypes, GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
 					hitsomething = true;
-#if VERSION >= VERSION_JPN_FINAL
-					cdGetPos(&hitpos, 12080, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_FINAL
-					cdGetPos(&hitpos, 12077, "chr/chraction.c");
-#elif VERSION >= VERSION_NTSC_1_0
 					cdGetPos(&hitpos, 12072, "chraction.c");
-#else
-					cdGetPos(&hitpos, 12086, "chraction.c");
-#endif
 					hitprop = cdGetObstacleProp();
 				}
 
@@ -9993,7 +9976,7 @@ void chrTickShoot(struct chrdata *chr, s32 handnum)
 								projectileobj->base.projectile->unk018 = sp15c.z;
 
 								projectileobj->base.projectile->pickuptimer240 = TICKS(240);
-								projectileobj->base.projectile->unk08c = func->reflectangle;
+								projectileobj->base.projectile->bounciness = func->reflectangle;
 								projectileobj->base.projectile->unk098 = func->unk50 * (1.0f / 0.6f);
 
 								projectileobj->base.projectile->targetprop = chrGetTargetProp(chr);
@@ -11571,17 +11554,7 @@ bool chrNavCanSeeNextPos(struct chrdata *chr, struct coord *chrpos, RoomNum *chr
 	if (cdExamCylMove07(chrpos, chrrooms, &sp6c, sp50, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION
 			|| cdExamCylMove03(&sp6c, sp50, &sp60, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION) {
 		spbc = true;
-#if VERSION >= VERSION_JPN_FINAL
-		cdGetEdge(&spac, &spa0, 14154, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_FINAL
-		cdGetEdge(&spac, &spa0, 14151, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_BETA
-		cdGetEdge(&spac, &spa0, 14146, "chraction.c");
-#elif VERSION >= VERSION_NTSC_1_0
 		cdGetEdge(&spac, &spa0, 14145, "chraction.c");
-#else
-		cdGetEdge(&spac, &spa0, 14158, "chraction.c");
-#endif
 		func0f044b68(&spac, &spa0, &spd4);
 	}
 
@@ -11596,17 +11569,7 @@ bool chrNavCanSeeNextPos(struct chrdata *chr, struct coord *chrpos, RoomNum *chr
 	if (cdExamCylMove07(chrpos, chrrooms, &sp6c, sp50, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION
 			|| cdExamCylMove03(&sp6c, chrrooms, &sp60, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION) {
 		spb8 = true;
-#if VERSION >= VERSION_JPN_FINAL
-		cdGetEdge(&sp94, &sp88, 14169, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_FINAL
-		cdGetEdge(&sp94, &sp88, 14166, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_BETA
-		cdGetEdge(&sp94, &sp88, 14161, "chraction.c");
-#elif VERSION >= VERSION_NTSC_1_0
 		cdGetEdge(&sp94, &sp88, 14160, "chraction.c");
-#else
-		cdGetEdge(&sp94, &sp88, 14173, "chraction.c");
-#endif
 		func0f044b68(&sp94, &sp88, &spd4);
 	}
 
@@ -11641,17 +11604,7 @@ bool chrNavCanSeeNextPos(struct chrdata *chr, struct coord *chrpos, RoomNum *chr
 			&& (!arg9 || cdExamCylMove01(chrpos, aimpos, chrradius, sp40, cdtypes, CHECKVERTICAL_YES, ymax - prop->pos.y, ymin - prop->pos.y) != CDRESULT_COLLISION)) {
 		result = true;
 	} else {
-#if VERSION >= VERSION_JPN_FINAL
-		cdGetEdge(leftpos, rightpos, 14239, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_FINAL
-		cdGetEdge(leftpos, rightpos, 14236, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_BETA
-		cdGetEdge(leftpos, rightpos, 14231, "chraction.c");
-#elif VERSION >= VERSION_NTSC_1_0
 		cdGetEdge(leftpos, rightpos, 14230, "chraction.c");
-#else
-		cdGetEdge(leftpos, rightpos, 14243, "chraction.c");
-#endif
 		func0f044b68(leftpos, rightpos, &spd4);
 	}
 
@@ -11730,17 +11683,7 @@ bool chrNavCheckForObstacle(struct chrdata *chr, struct coord *chrpos, RoomNum *
 	if (cdExamCylMove07(chrpos, chrrooms, &sp6c, sp50, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION
 			|| cdExamCylMove03(&sp6c, sp50, &sp60, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION) {
 		spbc = true;
-#if VERSION >= VERSION_JPN_FINAL
-		cdGetEdge(&spac, &spa0, 14319, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_FINAL
-		cdGetEdge(&spac, &spa0, 14316, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_BETA
-		cdGetEdge(&spac, &spa0, 14311, "chraction.c");
-#elif VERSION >= VERSION_NTSC_1_0
 		cdGetEdge(&spac, &spa0, 14310, "chraction.c");
-#else
-		cdGetEdge(&spac, &spa0, 14323, "chraction.c");
-#endif
 		func0f044b68(&spac, &spa0, &spd4);
 		value1 = cd00024e40();
 	}
@@ -11756,17 +11699,7 @@ bool chrNavCheckForObstacle(struct chrdata *chr, struct coord *chrpos, RoomNum *
 	if (cdExamCylMove07(chrpos, chrrooms, &sp6c, sp50, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION
 			|| cdExamCylMove03(&sp6c, chrrooms, &sp60, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION) {
 		spb8 = true;
-#if VERSION >= VERSION_JPN_FINAL
-		cdGetEdge(&sp94, &sp88, 14334, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_FINAL
-		cdGetEdge(&sp94, &sp88, 14331, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_BETA
-		cdGetEdge(&sp94, &sp88, 14326, "chraction.c");
-#elif VERSION >= VERSION_NTSC_1_0
 		cdGetEdge(&sp94, &sp88, 14325, "chraction.c");
-#else
-		cdGetEdge(&sp94, &sp88, 14338, "chraction.c");
-#endif
 		func0f044b68(&sp94, &sp88, &spd4);
 		value2 = cd00024e40();
 	}
@@ -11809,17 +11742,7 @@ bool chrNavCheckForObstacle(struct chrdata *chr, struct coord *chrpos, RoomNum *
 			&& (!hasobstacle || cdExamCylMove01(chrpos, aimpos, chrradius, sp40, cdtypes, CHECKVERTICAL_YES, ymax - prop->pos.y, ymin - prop->pos.y) != CDRESULT_COLLISION)) {
 		result = true;
 	} else {
-#if VERSION >= VERSION_JPN_FINAL
-		cdGetEdge(leftpos, rightpos, 14404, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_FINAL
-		cdGetEdge(leftpos, rightpos, 14401, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_BETA
-		cdGetEdge(leftpos, rightpos, 14396, "chraction.c");
-#elif VERSION >= VERSION_NTSC_1_0
 		cdGetEdge(leftpos, rightpos, 14395, "chraction.c");
-#else
-		cdGetEdge(leftpos, rightpos, 14408, "chraction.c");
-#endif
 		func0f044b68(leftpos, rightpos, &spd4);
 	}
 
@@ -15348,17 +15271,7 @@ bool chr0f04c874(struct chrdata *chr, u32 angle360, struct coord *pos, u8 arg3, 
 			f32 zdiff;
 			f32 tmp;
 
-#if VERSION >= VERSION_JPN_FINAL
-			cdGetPos(pos, 18731, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_FINAL
-			cdGetPos(pos, 18694, "chr/chraction.c");
-#elif VERSION >= VERSION_PAL_BETA
-			cdGetPos(pos, 18689, "chraction.c");
-#elif VERSION >= VERSION_NTSC_1_0
 			cdGetPos(pos, 18686, "chraction.c");
-#else
-			cdGetPos(pos, 18416, "chraction.c");
-#endif
 
 			xdiff = pos->x - chrpos.x;
 			zdiff = pos->z - chrpos.z;

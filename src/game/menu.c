@@ -919,15 +919,7 @@ void dialogCalculateContentSize(struct menudialogdef *dialogdef, struct menudial
 		}
 	}
 
-#if VERSION == VERSION_JPN_FINAL
-	contentheight += 15;
-
-	if ((dialog->definition->flags & MENUDIALOGFLAG_1000) == 0) {
-		contentheight += 2;
-	}
-#else
 	contentheight += 12;
-#endif
 
 	// Calculate and consider the title width.
 	// Some of the multiplayer dialogs have a player number
@@ -2933,11 +2925,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 
 				textMeasure(&textheight, &textwidth, title, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 
-#if VERSION == VERSION_JPN_FINAL
-				x = dialogright + 13;
-#else
 				x = dialogright + 7;
-#endif
 				y = (dialogtop + dialogbottom) / 2 + 3;
 
 				if (y + textwidth > dialogbottom) {
@@ -3065,46 +3053,14 @@ void func0f0f7594(s32 arg0, s32 *vdir, s32 *hdir)
  * padding. There are some trickier calculations for MP setup where the players
  * are sharing a viewport.
  */
-#if VERSION >= VERSION_JPN_FINAL
-void menuFindAvailableSize(s32 *leftptr, s32 *topptr, s32 *rightptr, s32 *bottomptr, struct menudialog *dialog)
-#else
 void menuFindAvailableSize(s32 *leftptr, s32 *topptr, s32 *rightptr, s32 *bottomptr)
-#endif
 {
 	s32 left = viGetViewLeft() + 20;
 	s32 top = viGetViewTop() + 4;
 	s32 right = (viGetViewLeft() + viGetViewWidth()) - 20;
 	s32 bottom = viGetViewTop() + viGetViewHeight() - 4;
 	s32 playernum;
-	u32 stack1;
-#if VERSION >= VERSION_JPN_FINAL
-	bool v1 = false;
-#endif
-	u32 stack2;
 
-#if VERSION >= VERSION_JPN_FINAL
-	if (currentPlayerIsMenuOpenInSoloOrMp()) {
-		v1 = true;
-	}
-
-	if (dialog) {
-		if (dialog->definition == &g_CiControlStylePlayer2MenuDialog
-				|| dialog->definition == &g_CiControlStyleMenuDialog
-				|| dialog->definition == &g_SoloMissionControlStyleMenuDialog) {
-			v1 = false;
-		}
-	}
-
-	if (v1) {
-		// Make room for health bar
-		top += 22;
-
-		if (optionsGetEffectiveScreenSize() == SCREENSIZE_CINEMA) {
-			top -= 8;
-			bottom += 4;
-		}
-	}
-#else
 	if (currentPlayerIsMenuOpenInSoloOrMp()) {
 		// Make room for health bar
 		top += 22;
@@ -3114,7 +3070,6 @@ void menuFindAvailableSize(s32 *leftptr, s32 *topptr, s32 *rightptr, s32 *bottom
 			bottom += 4;
 		}
 	}
-#endif
 
 	switch (g_MenuData.root) {
 	case MENUROOT_MPSETUP:
@@ -3234,11 +3189,7 @@ void dialogCalculatePosition(struct menudialog *dialog)
 	s32 vdir;
 	s32 hdir;
 
-#if VERSION >= VERSION_JPN_FINAL
-	menuFindAvailableSize(&xmin, &ymin, &xmax, &ymax, dialog);
-#else
 	menuFindAvailableSize(&xmin, &ymin, &xmax, &ymax);
-#endif
 
 	height = ymax - ymin - 6;
 	width = xmax - xmin - 6;
@@ -5238,14 +5189,8 @@ Gfx *menuRender(Gfx *gdl)
 
 						if (g_Vars.mpsetupmenu == MPSETUPMENU_GENERAL && g_Vars.waitingtojoin[i]) {
 							// "Ready!"
-#if VERSION >= VERSION_JPN_FINAL
-							colour = L_MISC_461;
-							strcpy(text, langGet(colour));
-							colour = 0xffffffff;
-#else
 							strcpy(text, langGet(L_MISC_461));
 							colour = g_MenuData.playerjoinalpha[i] | 0xd00020ff;
-#endif
 						} else {
 							// "Press START!"
 							strcpy(text, langGet(L_MPMENU_483));
@@ -5932,7 +5877,6 @@ struct menuitem g_PakFullMenuItems[] = {
 		0,
 		NULL,
 	},
-#if VERSION != VERSION_JPN_FINAL
 	{
 		MENUITEMTYPE_LABEL,
 		0,
@@ -5941,7 +5885,6 @@ struct menuitem g_PakFullMenuItems[] = {
 		0,
 		NULL,
 	},
-#endif
 	{
 		MENUITEMTYPE_LABEL,
 		0,

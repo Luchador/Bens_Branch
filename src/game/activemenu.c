@@ -543,10 +543,6 @@ void amReset(void)
 		}
 	}
 
-#if VERSION == VERSION_JPN_FINAL
-	g_AmFont1 = g_CharsHandelGothicSm;
-	g_AmFont2 = g_FontHandelGothicSm;
-#else
 	if (PLAYERCOUNT() >= 2) {
 		g_AmFont1 = g_CharsHandelGothicXs;
 		g_AmFont2 = g_FontHandelGothicXs;
@@ -554,7 +550,6 @@ void amReset(void)
 		g_AmFont1 = g_CharsHandelGothicSm;
 		g_AmFont2 = g_FontHandelGothicSm;
 	}
-#endif
 
 	g_AmIndex = 0;
 }

@@ -610,7 +610,6 @@ void bodyCalculateHeadOffset(struct modeldef *headmodeldef, s32 headnum, s32 bod
 			return;
 		}
 
-		// Same as JPN, but sets the value rather than adjusts
 		switch (g_HeadsAndBodies[headnum].type) {
 		default:
 		case HEADBODYTYPE_FEMALE:

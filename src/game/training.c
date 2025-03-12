@@ -3064,19 +3064,11 @@ char *htGetTip2(void)
 	return langGet(texts[htGetIndexBySlot(var80088bb4)]);
 }
 
-#if VERSION >= VERSION_JPN_FINAL
-void frGetGoalTargetsText(char *buffer, char *buffer2)
-{
-	sprintf(buffer, "%s", langGet(L_MISC_417));
-	sprintf(buffer2, "%d\n", g_FrData.goaltargets);
-}
-#else
 void frGetGoalTargetsText(char *buffer)
 {
 	// "GOAL TARGETS:"
 	sprintf(buffer, "%s %d\n", langGet(L_MISC_417), g_FrData.goaltargets);
 }
-#endif
 
 void frGetTargetsDestroyedValue(char *buffer)
 {
@@ -3088,18 +3080,6 @@ void frGetScoreValue(char *buffer)
 	sprintf(buffer, "%03d\n", g_FrData.score);
 }
 
-#if VERSION >= VERSION_JPN_FINAL
-void frGetGoalScoreText(char *buffer1, char *buffer2)
-{
-	if (g_FrData.goalscore) {
-		sprintf(buffer1, "%s", langGet(L_MISC_418));
-		sprintf(buffer2, "%d\n", g_FrData.goalscore);
-	} else {
-		sprintf(buffer1, "");
-		sprintf(buffer2, "");
-	}
-}
-#else
 void frGetGoalScoreText(char *buffer)
 {
 	if (g_FrData.goalscore) {
@@ -3109,7 +3089,6 @@ void frGetGoalScoreText(char *buffer)
 		sprintf(buffer, "");
 	}
 }
-#endif
 
 f32 frGetAccuracy(char *buffer)
 {
@@ -3132,15 +3111,6 @@ f32 frGetAccuracy(char *buffer)
 	return accuracy;
 }
 
-#if VERSION >= VERSION_JPN_FINAL
-bool frGetMinAccuracy(char *buffer1, f32 accuracy, char *buffer2)
-{
-	sprintf(buffer1, "%s", langGet(L_MISC_419));
-	sprintf(buffer2, "%d%%\n", g_FrData.goalaccuracy);
-
-	return accuracy < g_FrData.goalaccuracy;
-}
-#else
 bool frGetMinAccuracy(char *buffer, f32 accuracy)
 {
 	// "MIN ACCURACY:"
@@ -3148,7 +3118,6 @@ bool frGetMinAccuracy(char *buffer, f32 accuracy)
 
 	return accuracy < g_FrData.goalaccuracy;
 }
-#endif
 
 /**
  * Formats either the time taken or time limit into buffer, and returns true if
@@ -3191,43 +3160,6 @@ bool frFormatTime(char *buffer)
 	return failed;
 }
 
-#if VERSION >= VERSION_JPN_FINAL
-bool frGetHudMiddleSubtext(char *buffer1, char *buffer2)
-{
-	s32 secs;
-	s32 mins;
-
-	sprintf(buffer2, "");
-
-	if (g_FrData.timetaken < TICKS(-180)) {
-		sprintf(buffer1, "%s", langGet(L_MISC_420)); // "FIRE TO START"
-		return false;
-	}
-
-	if (g_FrData.timetaken < 0) {
-		sprintf(buffer1, "%s", langGet(L_MISC_421)); // "GET READY!"
-		return true;
-	}
-
-	if (g_FrData.timelimit == 255) {
-		return false;
-	}
-
-	secs = g_FrData.timelimit;
-	mins = 0;
-
-	if (secs >= 60) {
-		while (secs >= 60) {
-			secs -= 60;
-			mins++;
-		}
-	}
-
-	sprintf(buffer1, "%s", langGet(L_MISC_422)); // "LIMIT:"
-	sprintf(buffer2, "%02d:%02d\n", mins, secs);
-	return true;
-}
-#else
 bool frGetHudMiddleSubtext(char *buffer)
 {
 	s32 secs;
@@ -3260,61 +3192,7 @@ bool frGetHudMiddleSubtext(char *buffer)
 	sprintf(buffer, "%s %02d:%02d\n", langGet(L_MISC_422), mins, secs); // "LIMIT:"
 	return true;
 }
-#endif
 
-#if VERSION >= VERSION_JPN_FINAL
-bool frGetFeedback(char *scorebuffer, char *zonebuffer, char *extrabuffer)
-{
-	u32 texts[] = {
-		L_MISC_423, // "ZONE 3"
-		L_MISC_424, // "ZONE 2"
-		L_MISC_425, // "ZONE 1"
-		L_MISC_426, // "BULL'S-EYE"
-		L_MISC_427, // "EXPLODED"
-	};
-
-	sprintf(extrabuffer, "");
-
-	if (g_FrData.feedbackzone) {
-		g_FrData.feedbackttl -= g_Vars.lvupdate60;
-
-		if (g_FrData.feedbackttl <= 0) {
-			g_FrData.feedbackzone = 0;
-			g_FrData.feedbackttl = 0;
-			return false;
-		}
-
-		if (g_FrData.feedbackzone == FRZONE_EXPLODE) {
-			sprintf(scorebuffer, "010\n");
-		} else {
-			sprintf(scorebuffer, "%03d\n", g_FrData.feedbackzone);
-		}
-
-		switch (g_FrData.feedbackzone) {
-		case FRZONE_RING3:
-			sprintf(zonebuffer, "%s", langGet(texts[0]));
-			return true;
-		case FRZONE_RING2:
-			sprintf(zonebuffer, "%s", langGet(texts[1]));
-			return true;
-		case FRZONE_RING1:
-			sprintf(zonebuffer, "%s", langGet(texts[2]));
-			return true;
-		case FRZONE_BULLSEYE:
-			sprintf(zonebuffer, "%s", langGet(texts[3]));
-			return true;
-		case FRZONE_EXPLODE:
-			sprintf(zonebuffer, "%s", langGet(texts[4]));
-			return true;
-		}
-
-		sprintf(zonebuffer, "\n");
-		return true;
-	}
-
-	return false;
-}
-#else
 bool frGetFeedback(char *scorebuffer, char *zonebuffer)
 {
 	u32 texts[] = {
@@ -3364,13 +3242,8 @@ bool frGetFeedback(char *scorebuffer, char *zonebuffer)
 
 	return false;
 }
-#endif
 
-#if VERSION >= VERSION_JPN_FINAL
-Gfx *frRenderHudElement(Gfx *gdl, s32 x, s32 y, char *string1, char *string2, char *string3, u32 colour, u8 alpha)
-#else
 Gfx *frRenderHudElement(Gfx *gdl, s32 x, s32 y, char *string1, char *string2, u32 colour, u8 alpha)
-#endif
 {
 	s32 textheight;
 	s32 textwidth;
@@ -3402,78 +3275,6 @@ Gfx *frRenderHudElement(Gfx *gdl, s32 x, s32 y, char *string1, char *string2, u3
 	return gdl;
 }
 
-#if VERSION >= VERSION_JPN_FINAL
-Gfx *frRenderHud(Gfx *gdl)
-{
-	char string1[128];
-	char string2[128];
-	char string3[128];
-	bool red;
-	bool exists;
-	s32 alpha = 0xa0;
-	f32 mult;
-
-	if (viGetViewWidth() > 400) {
-		mult = 1.7f;
-	} else {
-		mult = 1;
-	}
-
-	if (!g_FrIsValidWeapon && g_FrData.menucountdown <= 0) {
-		return gdl;
-	}
-
-	if (g_FrData.menucountdown != 0) {
-		alpha = (f32)(g_FrData.menucountdown * 160) / TICKS(60.0f);
-	}
-
-	gdl = text0f153628(gdl);
-
-	// Time
-	red = frFormatTime(string1);
-	exists = frGetHudMiddleSubtext(string2, string3);
-
-	gdl = frRenderHudElement(gdl, viGetViewWidth() >> 1, viGetViewTop() + 12,
-			string1,
-			exists ? string2 : NULL,
-			exists ? string3 : NULL,
-			red ? 0xff4444ff : 0x00ff00a0,
-			alpha);
-
-	// Score
-	frGetScoreValue(string1);
-	frGetGoalScoreText(string2, string3);
-	gdl = frRenderHudElement(gdl, viGetViewLeft() + 65.0f * mult, viGetViewTop() + 12,
-			string1, string2, string3, 0x00ff00a0, alpha);
-
-	// Feedback
-	if (frGetFeedback(string1, string2, string3)) {
-		gdl = frRenderHudElement(gdl,viGetViewLeft() + 65.0f * mult, viGetViewTop() + 48,
-				string1, string2, string3, 0x00ff00a0, alpha);
-	}
-
-	if (g_FrData.goalaccuracy > 0) {
-		red = frGetMinAccuracy(string2, frGetAccuracy(string1), string3);
-
-		gdl = frRenderHudElement(gdl, viGetViewLeft() + viGetViewWidth() - 70.0f * mult, viGetViewTop() + 12,
-				string1, string2, string3,
-				red ? 0xff4444ff : 0x00ff00a0,
-				alpha);
-	} else if (g_FrData.goaltargets != 255) {
-		frGetTargetsDestroyedValue(string1);
-		frGetGoalTargetsText(string2, string3);
-
-		if (mult == 2) {
-			mult = 2.4;
-		}
-
-		gdl = frRenderHudElement(gdl, viGetViewLeft() + viGetViewWidth() - 70.0f * mult, viGetViewTop() + 12,
-				string1, string2, string3, 0x00ff00a0, alpha);
-	}
-
-	return text0f153780(gdl);
-}
-#else
 Gfx *frRenderHud(Gfx *gdl)
 {
 	char string1[128];
@@ -3541,4 +3342,3 @@ Gfx *frRenderHud(Gfx *gdl)
 
 	return text0f153780(gdl);
 }
-#endif

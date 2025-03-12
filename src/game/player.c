@@ -1524,7 +1524,7 @@ void playersBeginMpSwirl(void)
 	g_MpSwirlForwardSpeed = 0;
 	g_MpSwirlDistance = 80;
 
-	envChooseAndApply(mainGetStageNum(), false);
+	envChooseAndApply(mainGetStageNum());
 }
 
 void playerTickMpSwirl(void)
@@ -1598,7 +1598,7 @@ void player0f0b9a20(void)
 	playerSetTickMode(TICKMODE_NORMAL);
 	g_PlayerTriggerGeFadeIn = false;
 	bmoveSetMode(MOVEMODE_WALK);
-	envChooseAndApply(mainGetStageNum(), false);
+	envChooseAndApply(mainGetStageNum());
 	bgunEquipWeapon2(HAND_LEFT, g_DefaultWeapons[HAND_LEFT]);
 	bgunEquipWeapon2(HAND_RIGHT, g_DefaultWeapons[HAND_RIGHT]);
 	var8007074c = 0;

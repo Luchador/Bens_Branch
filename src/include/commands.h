@@ -2219,15 +2219,6 @@
 	label,
 
 /**
- * Switch to the stage's alternative sky/fog settings. The switch is instant.
- *
- * The stage must use a type 1 sky (in the g_FogEnvironments table) and the
- * alternative sky must be placed immediately after it.
- */
-#define switch_to_alt_sky \
-	mkshort(0x00f2),
-
-/**
  * Makes the given player invincible.
  */
 #define set_invincible(chr) \

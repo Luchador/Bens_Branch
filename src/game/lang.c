@@ -1,7 +1,11 @@
 #include <ultra64.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "constants.h"
 #include "game/file.h"
 #include "game/lang.h"
+#include "game/debug.h"
 #include "game/mplayer/mplayer.h"
 #include "game/utils.h"
 #include "bss.h"
@@ -13,6 +17,8 @@
 #ifndef PLATFORM_N64
 #include "video.h"
 #endif
+
+u16 *g_FrameBuffers[NUM_FRAMEBUFFERS];
 
 /**
  * Officially, the NTSC versions are American English only, while the PAL
@@ -55,11 +61,80 @@
  */
 
 uintptr_t *g_LangBanks[69];
-struct jpncharpixels *g_JpnCharCachePixels;
-struct jpncacheitem *g_JpnCacheCacheItems;
-bool g_Jpn = false;
 
 u16 g_LangFiles[] = {
+	/* 0*/ 0,
+	/* 1*/ FILE_LAMEE,
+	/* 2*/ FILE_LARCHE,
+	/* 3*/ FILE_LARKE,
+	/* 4*/ FILE_LASHE,
+	/* 5*/ FILE_LAZTE,
+	/* 6*/ FILE_LCATE,
+	/* 7*/ FILE_LCAVEE,
+	/* 8*/ FILE_LARECE,
+	/* 9*/ FILE_LCRADE,
+	/*10*/ FILE_LCRYPE,
+	/*11*/ FILE_LDAME,
+	/*12*/ FILE_LDEPOE,
+	/*13*/ FILE_LDESTE,
+	/*14*/ FILE_LDISHE,
+	/*15*/ FILE_LEARE,
+	/*16*/ FILE_LELDE,
+	/*17*/ FILE_LIMPE,
+	/*18*/ FILE_LJUNE,
+	/*19*/ FILE_LLEEE,
+	/*20*/ FILE_LLENE,
+	/*21*/ FILE_LLIPE,
+	/*22*/ FILE_LLUEE,
+	/*23*/ FILE_LOATE,
+	/*24*/ FILE_LPAME,
+	/*25*/ FILE_LPETEE,
+	/*26*/ FILE_LREFE,
+	/*27*/ FILE_LRITE,
+	/*28*/ FILE_LRUNE,
+	/*29*/ FILE_LSEVBE,
+	/*30*/ FILE_LSEVE,
+	/*31*/ FILE_LSEVXE,
+	/*32*/ FILE_LSEVXBE,
+	/*33*/ FILE_LSHOE,
+	/*34*/ FILE_LSILOE,
+	/*35*/ FILE_LSTATE,
+	/*36*/ FILE_LTRAE,
+	/*37*/ FILE_LWAXE,
+	/*38*/ FILE_LGUNE,
+	/*39*/ FILE_LTITLEE,
+	/*40*/ FILE_LMPMENUE,
+	/*41*/ FILE_LPROPOBJE,
+	/*42*/ FILE_LMPWEAPONSE,
+	/*43*/ FILE_LOPTIONSE,
+	/*44*/ FILE_LMISCE,
+	/*45*/ FILE_LUFFE,
+	/*46*/ FILE_LOLDE,
+	/*47*/ FILE_LATEE,
+	/*48*/ FILE_LLAME,
+	/*49*/ FILE_LMP1E,
+	/*50*/ FILE_LMP2E,
+	/*51*/ FILE_LMP3E,
+	/*52*/ FILE_LMP4E,
+	/*53*/ FILE_LMP5E,
+	/*54*/ FILE_LMP6E,
+	/*55*/ FILE_LMP7E,
+	/*56*/ FILE_LMP8E,
+	/*57*/ FILE_LMP9E,
+	/*58*/ FILE_LMP10E,
+	/*59*/ FILE_LMP11E,
+	/*60*/ FILE_LMP12E,
+	/*61*/ FILE_LMP13E,
+	/*62*/ FILE_LMP14E,
+	/*63*/ FILE_LMP15E,
+	/*64*/ FILE_LMP16E,
+	/*65*/ FILE_LMP17E,
+	/*66*/ FILE_LMP18E,
+	/*67*/ FILE_LMP19E,
+	/*68*/ FILE_LMP20E,
+};
+
+u16 g_TextFiles[] = {
 	/* 0*/ 0,
 	/* 1*/ FILE_LAMEE,
 	/* 2*/ FILE_LARCHE,
@@ -138,12 +213,7 @@ u32 langGetLangBankIndexFromStagenum(s32 stagenum)
 	switch (stagenum) {
 	case STAGE_PELAGIC:       bank = LANGBANK_DAM; break;
 	case STAGE_EXTRACTION:    bank = LANGBANK_ARK; break;
-	case STAGE_TEST_RUN:      bank = LANGBANK_RUN; break;
-	case STAGE_24:            bank = LANGBANK_SEVX; break;
 	case STAGE_MAIANSOS:      bank = LANGBANK_SEV; break;
-	case STAGE_TEST_DEST:     bank = LANGBANK_DEST; break;
-	case STAGE_2B:            bank = LANGBANK_SEVXB; break;
-	case STAGE_RETAKING:      bank = LANGBANK_SEVB; break;
 	case STAGE_WAR:           bank = LANGBANK_STAT; break;
 	case STAGE_CHICAGO:       bank = LANGBANK_PETE; break;
 	case STAGE_G5BUILDING:    bank = LANGBANK_DEPO; break;
@@ -154,49 +224,31 @@ u32 langGetLangBankIndexFromStagenum(s32 stagenum)
 	case STAGE_CITRAINING:    bank = LANGBANK_DISH; break;
 	case STAGE_MP_COMPLEX:    bank = LANGBANK_REF; break;
 	case STAGE_MP_SKEDAR:     bank = LANGBANK_OAT; break;
-	case STAGE_TEST_LEN:      bank = LANGBANK_LEN; break;
 	case STAGE_DEFECTION:     bank = LANGBANK_AME; break;
 	case STAGE_VILLA:         bank = LANGBANK_ELD; break;
 	case STAGE_DEFENSE:       bank = LANGBANK_IMP; break;
-	case STAGE_TEST_ASH:      bank = LANGBANK_ASH; break;
 	case STAGE_INVESTIGATION: bank = LANGBANK_EAR; break;
 	case STAGE_ATTACKSHIP:    bank = LANGBANK_LEE; break;
 	case STAGE_RESCUE:        bank = LANGBANK_LIP; break;
 	case STAGE_INFILTRATION:  bank = LANGBANK_LUE; break;
-	case STAGE_28:            bank = LANGBANK_DAM; break;
 	case STAGE_DEEPSEA:       bank = LANGBANK_PAM; break;
 	case STAGE_SKEDARRUINS:   bank = LANGBANK_SHO; break;
 	case STAGE_AIRFORCEONE:   bank = LANGBANK_RIT; break;
-	case STAGE_TEST_ARCH:     bank = LANGBANK_ARCH; break;
 	case STAGE_MP_RAVINE:     bank = LANGBANK_AREC; break;
 	case STAGE_CRASHSITE:     bank = LANGBANK_AZT; break;
 	case STAGE_AIRBASE:       bank = LANGBANK_CAVE; break;
-	case STAGE_TEST_UFF:      bank = LANGBANK_UFF; break;
-	case STAGE_TEST_OLD:      bank = LANGBANK_OLD; break;
 	case STAGE_DUEL:          bank = LANGBANK_ATE; break;
-	case STAGE_TEST_LAM:      bank = LANGBANK_LAM; break;
 	case STAGE_MP_BASE:       bank = LANGBANK_MP1; break;
-	case STAGE_TEST_MP2:      bank = LANGBANK_MP2; break;
 	case STAGE_MP_AREA52:     bank = LANGBANK_MP3; break;
 	case STAGE_MP_WAREHOUSE:  bank = LANGBANK_MP4; break;
 	case STAGE_MP_CARPARK:    bank = LANGBANK_MP5; break;
-	case STAGE_TEST_MP6:      bank = LANGBANK_MP6; break;
-	case STAGE_TEST_MP7:      bank = LANGBANK_MP7; break;
-	case STAGE_TEST_MP8:      bank = LANGBANK_MP8; break;
 	case STAGE_MP_RUINS:      bank = LANGBANK_MP9; break;
 	case STAGE_MP_SEWERS:     bank = LANGBANK_MP10; break;
 	case STAGE_MP_FELICITY:   bank = LANGBANK_MP11; break;
 	case STAGE_MP_FORTRESS:   bank = LANGBANK_MP12; break;
 	case STAGE_MP_VILLA:      bank = LANGBANK_MP13; break;
-	case STAGE_TEST_MP14:     bank = LANGBANK_MP14; break;
 	case STAGE_MP_GRID:       bank = LANGBANK_MP15; break;
-	case STAGE_TEST_MP16:     bank = LANGBANK_MP16; break;
-	case STAGE_TEST_MP17:     bank = LANGBANK_MP17; break;
-	case STAGE_TEST_MP18:     bank = LANGBANK_MP18; break;
-	case STAGE_TEST_MP19:     bank = LANGBANK_MP19; break;
-	case STAGE_TEST_MP20:     bank = LANGBANK_MP20; break;
 	case STAGE_MBR:           bank = LANGBANK_WAX; break;
-	case STAGE_TEST_SILO:     bank = LANGBANK_SILO; break;
 	default:
 		while (true) {
 			// empty
@@ -206,104 +258,44 @@ u32 langGetLangBankIndexFromStagenum(s32 stagenum)
 	return bank;
 }
 
-extern u8 EXT_SEG _fontjpnSegmentRomStart;
-extern u8 EXT_SEG _fontjpnsingleSegmentRomStart;
-extern u8 EXT_SEG _fontjpnmultiSegmentRomStart;
-
-struct jpncharpixels *langGetJpnCharPixels(s32 codepoint)
-{
-	s32 i;
-	s32 freeindexsingle = -1;
-	s32 freeindexmulti = -1;
-	bool multibyte = false;
-
-	if (codepoint & 0x2000) {
-		multibyte = true;
+TextData* loadFileIntoMemory(const char *filename) {
+	FILE *file = fopen(filename, "r");
+	if(!file) {
+		perror("Error opening file");
+		return NULL;
 	}
 
-#define SHIFTAMOUNT 1
-#define TMUL 8
+	TextData *filedata = malloc(sizeof(TextData));
+	filedata->lines = NULL;
+	filedata-> count = 0;
 
-	for (i = 0; i < MAX_JPN_CACHE_ITEMS(); i++) {
-		if (!multibyte && (codepoint >> SHIFTAMOUNT) == g_JpnCacheCacheItems[i].codepoint) {
-			break;
-		}
+	char buffer[MAX_LINE_LENGTH];
+	while (fgets(buffer, sizeof(buffer), file)) {
+		filedata->count++;
 
-		if (multibyte && i + 1 < MAX_JPN_CACHE_ITEMS()
-				&& (codepoint >> SHIFTAMOUNT) == g_JpnCacheCacheItems[i].codepoint
-				&& (codepoint >> SHIFTAMOUNT) == g_JpnCacheCacheItems[i + 1].codepoint) {
-			break;
-		}
-
-		if (g_JpnCacheCacheItems[i].ttl == 0) {
-			freeindexsingle = i;
-		}
-
-		if (g_JpnCacheCacheItems[i].ttl == 0 && g_JpnCacheCacheItems[i + 1].ttl == 0 && i + 1 < MAX_JPN_CACHE_ITEMS()) {
-			freeindexmulti = i;
-		}
+		filedata->lines = realloc(filedata->lines, filedata->count * sizeof(char *));
+		filedata->lines[filedata->count - 1] = strdup(buffer);
 	}
 
-	if (i < MAX_JPN_CACHE_ITEMS()) {
-		if (!multibyte) {
-			g_JpnCacheCacheItems[i].ttl = 2;
-
-			return &g_JpnCharCachePixels[i * TMUL];
-		} else {
-			g_JpnCacheCacheItems[i + 0].ttl = 2;
-			g_JpnCacheCacheItems[i + 1].ttl = 2;
-
-			return &g_JpnCharCachePixels[TMUL * i];
-		}
-	}
-
-	if (!multibyte && freeindexsingle >= 0) {
-		g_JpnCacheCacheItems[freeindexsingle].ttl = 2;
-		g_JpnCacheCacheItems[freeindexsingle].codepoint = codepoint >> 1;
-
-		dmaExec(&g_JpnCharCachePixels[freeindexsingle * 8], (romptr_t) REF_SEG _fontjpnsingleSegmentRomStart + (codepoint >> SHIFTAMOUNT) * 0x60, 0x60);
-
-		// indicate that this is a new texture
-		videoFreeCachedTexture(&g_JpnCharCachePixels[freeindexsingle * 8]);
-
-		return &g_JpnCharCachePixels[freeindexsingle * 8];
-	}
-
-	if (multibyte && freeindexmulti >= 0) {
-		g_JpnCacheCacheItems[freeindexmulti + 0].ttl = 2;
-		g_JpnCacheCacheItems[freeindexmulti + 1].ttl = 2;
-		g_JpnCacheCacheItems[freeindexmulti + 0].codepoint = codepoint >> 1;
-		g_JpnCacheCacheItems[freeindexmulti + 1].codepoint = codepoint >> 1;
-
-		dmaExec(&g_JpnCharCachePixels[freeindexmulti * 8], (romptr_t) REF_SEG _fontjpnmultiSegmentRomStart + ((codepoint & 0x1fff) >> SHIFTAMOUNT) * 0x80, 0x80);
-
-		// indicate that this is a new texture
-		videoFreeCachedTexture(&g_JpnCharCachePixels[freeindexmulti * 8]);
-
-		return &g_JpnCharCachePixels[freeindexmulti * 8];
-	}
-
-	return &g_JpnCharCachePixels[0];
+	fclose(file);
+	return filedata;
 }
 
-/**
- * NTSC only supports English, while PAL supports 4 languages and JPN has its
- * own. Each English file is followed immediately by the other translations.
- */
-s32 langGetFileNumOffset(void)
+// Fetch the text data for a particular stage
+void langInit(u8 stagenum)
 {
-	s32 offset = 0;
+	debug_log("lang init on stage: %d \n", stagenum);
+}
 
-	if (g_Jpn) {
-		offset = 1;
-	}
-
-	return offset;
+// Free up the memory used in langInit after the stage ends
+void langClear()
+{
+	debug_log("lang clear\n", 0);
 }
 
 s32 langGetFileId(s32 bank)
 {
-	return g_LangFiles[bank] + langGetFileNumOffset();
+	return g_LangFiles[bank];
 }
 
 void langLoad(s32 bank)
@@ -349,4 +341,11 @@ char *langGet(s32 textid)
 	}
 
 	return (char *)addr;
+}
+
+const char* langGetText(TextData *filedata, int line) {
+	if (line < 1 || line > filedata->count) {
+		return NULL;
+	}
+	return filedata->lines[line - 1];
 }

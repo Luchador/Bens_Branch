@@ -108,28 +108,7 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
-#if VERSION >= VERSION_JPN_FINAL
-	width = viGetWidth() * 10;
-	height = viGetHeight() * 10;
-
-	*(u16 *)&vertices[0].x = arg2;
-	*(u16 *)&vertices[0].y = arg3;
-	vertices[0].z = -10;
-	*(u16 *)&vertices[1].x = arg2 + SCREEN_320 * 10u + 40;
-	*(u16 *)&vertices[1].y = arg3;
-	vertices[1].z = -10;
-	*(u16 *)&vertices[2].x = arg2 + SCREEN_320 * 10u + 40;
-	*(u16 *)&vertices[2].y = arg3 + SCREEN_240 * 10u + 50;
-	vertices[2].z = -10;
-	*(u16 *)&vertices[3].x = arg2;
-	*(u16 *)&vertices[3].y = arg3 + SCREEN_240 * 10u + 50;
-	vertices[3].z = -10;
-#elif PAL || !defined(PLATFORM_N64)
-#ifdef PLATFORM_N64
-	width = viGetWidth() * 10;
-#else
 	width = SCREEN_320 * 10;
-#endif
 	height = viGetHeight() * 10;
 
 	*(u16 *)&vertices[0].x = arg2;
@@ -144,20 +123,6 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
 	*(u16 *)&vertices[3].x = arg2;
 	*(u16 *)&vertices[3].y = (s32)height + arg3 + 50;
 	vertices[3].z = -10;
-#else
-	*(u16 *)&vertices[0].x = arg2;
-	*(u16 *)&vertices[0].y = arg3;
-	vertices[0].z = -10;
-	*(u16 *)&vertices[1].x = arg2 + SCREEN_320 * 10u + 40;
-	*(u16 *)&vertices[1].y = arg3;
-	vertices[1].z = -10;
-	*(u16 *)&vertices[2].x = arg2 + SCREEN_320 * 10u + 40;
-	*(u16 *)&vertices[2].y = arg3 + SCREEN_240 * 10u + 50;
-	vertices[2].z = -10;
-	*(u16 *)&vertices[3].x = arg2;
-	*(u16 *)&vertices[3].y = arg3 + SCREEN_240 * 10u + 50;
-	vertices[3].z = -10;
-#endif
 
 	vertices[0].s = 0;
 	vertices[0].t = 0;
@@ -180,9 +145,7 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
 
 	gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
 
-#ifndef PLATFORM_N64
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-#endif
 
 	return gdl;
 }

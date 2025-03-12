@@ -844,10 +844,6 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x01b6*/ { NULL, FILE_PDD_DR_NONREF,          0x1000 },
 	/*0x01b7*/ { NULL, FILE_PCETANDOORSIDE,         0x1000 },
 	/*0x01b8*/ { NULL, FILE_PBUDDYBRIDGE,           0x0199 },
-#if VERSION == VERSION_JPN_FINAL
-	/*0x01b9*/ { NULL, FILE_PJPNLOGO,               0x1000 },
-	/*0x01ba*/ { NULL, FILE_PJPNPD,                 0x1000 },
-#endif
 };
 
 s8 g_PropExplosionTypes[] = {
@@ -1301,25 +1297,5 @@ s8 g_PropExplosionTypes[] = {
 	/*0x01bf*/ EXPLOSIONTYPE_NONE,
 	/*0x01c0*/ EXPLOSIONTYPE_NONE,
 	/*0x01c1*/ EXPLOSIONTYPE_NONE,
-#if VERSION >= VERSION_JPN_FINAL
-	/*0x01c2*/ EXPLOSIONTYPE_NONE,
-	/*0x01c3*/ EXPLOSIONTYPE_NONE,
-#endif
 	0xff,
 };
-
-u32 var8007bff8 = 0x00000000;
-u32 var8007bffc = 0x00000000;
-u32 var8007c000 = 0x00000000;
-u32 var8007c004 = 0x00000000;
-u32 var8007c008 = 0x00000000;
-u32 var8007c00c = 0x00000000;
-u32 var8007c010 = 0xf8f4f1e0;
-u32 var8007c014 = 0x473f41dd;
-u32 var8007c018 = 0xa510c9c6;
-u32 var8007c01c = 0xbcae0bd1;
-u32 var8007c020 = 0x0ff73a30;
-u32 var8007c024 = 0x724083b7;
-u32 var8007c028 = 0xffffffff;
-u32 var8007c02c = 0xffffffff;
-u32 var8007c030 = 0xffffffff;

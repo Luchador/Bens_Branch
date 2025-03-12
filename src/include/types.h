@@ -4,7 +4,6 @@
 #include <PR/ultrasched.h>
 #include "n_libaudio.h"
 #include "constants.h"
-#include "lang.h"
 #include "pads.h"
 #include "tiles.h"
 #include "gbi.h"
@@ -45,6 +44,12 @@ typedef union {
 	u32 l[4][4];
 	s32 unused;
 } Mtxf;
+
+// Ben's comment: used for loading plaintext files for game strings e.g. briefings, weapon names, etc...
+typedef struct {
+	char **lines;
+	int count;
+} TextData;
 
 // This hacky structure allows coords to be accessed using
 // coord->x, coord->y and coord->z, but also as
@@ -1353,7 +1358,7 @@ struct projectile {
 	/*0x068*/ f32 unk068[4];
 	/*0x078*/ f32 unk078[4];
 	/*0x088*/ struct prop *ownerprop;
-	/*0x08c*/ f32 unk08c;
+	/*0x08c*/ f32 bounciness;
 	/*0x090*/ s32 bouncecount;
 	/*0x094*/ s32 bounceframe;
 	/*0x098*/ f32 unk098;
@@ -4914,17 +4919,6 @@ struct texture {
 	u32 unk04_04 : 4;
 	u32 unk04_08 : 4;
 	u32 unk04_0c : 4;
-};
-
-struct jpncharpixels {
-	/*0x00*/ u32 unk00;
-	/*0x04*/ u32 unk04;
-	/*0x08*/ u32 unk08;
-};
-
-struct jpncacheitem {
-	u16 ttl : 2;
-	u16 codepoint : 14;
 };
 
 struct bgcmd {
