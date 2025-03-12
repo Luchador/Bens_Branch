@@ -1,1 +1,1 @@
-pd.x86_64.exe --moddir mods
+pd.x86_64 --moddir mods

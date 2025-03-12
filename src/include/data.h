@@ -477,6 +477,15 @@ extern s32 g_FileAutoSelect;
 extern u8 g_MpWeaponSetRandomFilters[NUM_MPWEAPONS];
 extern s32 g_MpWeaponRandomFilterNum;
 
+extern TextData *g_TextMissionData;
+extern TextData *g_TextGunData;
+extern TextData *g_TextMiscData;
+extern TextData *g_TextMPMenuData;
+extern TextData *g_TextMPWeaponsData;
+extern TextData *g_TextOptionsData;
+extern TextData *g_TextPropObjData;
+extern TextData *g_TextTitleData;
+
 #define PLAYER_EXTCFG() g_PlayerExtCfg[g_Vars.currentplayerstats->mpindex & 3]
 #define PLAYER_DEFAULT_FOV (PLAYER_EXTCFG().fovy)
 

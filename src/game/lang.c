@@ -14,6 +14,7 @@
 #include "data.h"
 #include "types.h"
 #include "platform.h"
+#include "fs.h"
 #ifndef PLATFORM_N64
 #include "video.h"
 #endif
@@ -60,7 +61,18 @@ u16 *g_FrameBuffers[NUM_FRAMEBUFFERS];
  * relevant offsets within that buffer.
  */
 
-uintptr_t *g_LangBanks[69];
+TextData *g_TextMissionData;
+TextData *g_TextGunData;
+TextData *g_TextMiscData;
+TextData *g_TextMPMenuData;
+TextData *g_TextMPWeaponsData;
+TextData *g_TextOptionsData;
+TextData *g_TextPropObjData;
+TextData *g_TextTitleData;
+
+char *g_FullPath;
+
+uintptr_t *g_LangBanks[64];
 
 u16 g_LangFiles[] = {
 	/* 0*/ 0,
@@ -127,11 +139,6 @@ u16 g_LangFiles[] = {
 	/*61*/ FILE_LMP13E,
 	/*62*/ FILE_LMP14E,
 	/*63*/ FILE_LMP15E,
-	/*64*/ FILE_LMP16E,
-	/*65*/ FILE_LMP17E,
-	/*66*/ FILE_LMP18E,
-	/*67*/ FILE_LMP19E,
-	/*68*/ FILE_LMP20E,
 };
 
 u16 g_TextFiles[] = {
@@ -199,11 +206,6 @@ u16 g_TextFiles[] = {
 	/*61*/ FILE_LMP13E,
 	/*62*/ FILE_LMP14E,
 	/*63*/ FILE_LMP15E,
-	/*64*/ FILE_LMP16E,
-	/*65*/ FILE_LMP17E,
-	/*66*/ FILE_LMP18E,
-	/*67*/ FILE_LMP19E,
-	/*68*/ FILE_LMP20E,
 };
 
 u32 langGetLangBankIndexFromStagenum(s32 stagenum)
@@ -218,12 +220,7 @@ u32 langGetLangBankIndexFromStagenum(s32 stagenum)
 	case STAGE_CHICAGO:       bank = LANGBANK_PETE; break;
 	case STAGE_G5BUILDING:    bank = LANGBANK_DEPO; break;
 	case STAGE_ESCAPE:        bank = LANGBANK_TRA; break;
-	case STAGE_MP_TEMPLE:     bank = LANGBANK_JUN; break;
-	case STAGE_MP_PIPES:      bank = LANGBANK_CRAD; break;
-	case STAGE_MP_G5BUILDING: bank = LANGBANK_CRYP; break;
 	case STAGE_CITRAINING:    bank = LANGBANK_DISH; break;
-	case STAGE_MP_COMPLEX:    bank = LANGBANK_REF; break;
-	case STAGE_MP_SKEDAR:     bank = LANGBANK_OAT; break;
 	case STAGE_DEFECTION:     bank = LANGBANK_AME; break;
 	case STAGE_VILLA:         bank = LANGBANK_ELD; break;
 	case STAGE_DEFENSE:       bank = LANGBANK_IMP; break;
@@ -281,21 +278,105 @@ TextData* loadFileIntoMemory(const char *filename) {
 	return filedata;
 }
 
-// Fetch the text data for a particular stage
-void langInit(u8 stagenum)
-{
-	debug_log("lang init on stage: %d \n", stagenum);
+
+#define PATH_SEPARATOR "/"
+
+char* combinePaths(const char *basePath, const char *subPath) {
+    if (!basePath || !subPath) return NULL;  // Handle null inputs
+
+    size_t baseLen = strlen(basePath);
+    size_t subLen = strlen(subPath);
+    size_t totalLen = baseLen + subLen + 2;  // Extra for separator & null terminator
+
+    char *fullPath = malloc(totalLen);
+    if (!fullPath) return NULL;  // Memory allocation failed
+
+    strcpy(fullPath, basePath);
+
+    // Ensure there's exactly **one** path separator between basePath and subPath
+    if (baseLen > 0 && fullPath[baseLen - 1] != PATH_SEPARATOR[0]) {
+        strcat(fullPath, PATH_SEPARATOR);
+    }
+    if (subLen > 0 && subPath[0] == PATH_SEPARATOR[0]) {
+        subPath++;  // Avoid double separator ("/subpath" case)
+    }
+
+    strcat(fullPath, subPath);
+    return fullPath;  // Caller must free() this memory
 }
 
-// Free up the memory used in langInit after the stage ends
+char* buildDynamicPath(const char *directory, const char *filename) {
+    size_t len = strlen(directory) + strlen(filename) + 2; // +1 for `/`, +1 for `\0`
+    char *path = malloc(len);
+    if (!path) return NULL;
+
+    snprintf(path, len, "%s/%s", directory, filename);
+    return path;
+}
+
+const char* langGetText(TextData *filedata, int line) {
+	if (line < 1 || line > filedata->count) {
+		return NULL;
+	}
+	return filedata->lines[line - 1];
+}
+
+
+// Fetch the text data for a particular stage
+void langInit()
+{
+	/*char *modpath = fsGetModDir();
+	char *textpath = "text";
+	g_FullPath = combinePaths(modpath, textpath);
+
+	char* gundatadir = buildDynamicPath(g_FullPath, "LgunE.txt");
+	char* miscdatadir = buildDynamicPath(g_FullPath, "LmiscE.txt");
+	char* mpmenudatadir = buildDynamicPath(g_FullPath, "LmpmenuE.txt");
+	char* mpweaponsdatadir = buildDynamicPath(g_FullPath, "LmpweaponsE.txt");
+	char* optionsdatadir = buildDynamicPath(g_FullPath, "LoptionsE.txt");
+	char* propobjdatadir = buildDynamicPath(g_FullPath, "LpropobjE.txt");
+	char* titledatadir = buildDynamicPath(g_FullPath, "LtitleE.txt");
+
+	g_TextGunData = loadFileIntoMemory(gundatadir);
+	g_TextMiscData = loadFileIntoMemory(miscdatadir);
+	g_TextMPMenuData = loadFileIntoMemory(mpmenudatadir);
+	g_TextMPWeaponsData = loadFileIntoMemory(mpweaponsdatadir);
+	g_TextOptionsData = loadFileIntoMemory(optionsdatadir);
+	g_TextPropObjData = loadFileIntoMemory(propobjdatadir);
+	g_TextTitleData = loadFileIntoMemory(titledatadir);*/
+}
+
+void langLoadStageText(u8 stagenum)
+{
+	char* missiondatadir;
+	//g_TextMissionData = loadFileIntoMemory(amedatadir);
+
+	/*switch(g_Vars.stagenum)
+	{
+
+	}*/
+}
+
+
+// Free up the memory used in langLoadStageText after the stage ends
 void langClear()
 {
-	debug_log("lang clear\n", 0);
+	if(g_TextMissionData) {
+		for (int i = 0; i < g_TextMissionData->count; i++) {
+			free(g_TextMissionData->lines[i]);  // Free each line
+		}
+		free(g_TextMissionData->lines);
+		free(g_TextMissionData);
+	}
 }
 
 s32 langGetFileId(s32 bank)
 {
-	return g_LangFiles[bank];
+	if(bank > 0 && bank < ARRAYCOUNT(g_LangFiles)) {
+		return g_LangFiles[bank];
+	}
+
+	return 0;
 }
 
 void langLoad(s32 bank)
@@ -343,9 +424,41 @@ char *langGet(s32 textid)
 	return (char *)addr;
 }
 
-const char* langGetText(TextData *filedata, int line) {
-	if (line < 1 || line > filedata->count) {
-		return NULL;
-	}
-	return filedata->lines[line - 1];
+char *langGet2(u8 bank, s32 textid)
+{
+	char* errorstring = "Text not found. \n";
+
+	/*switch(bank) {
+		case LANGBANK_MISSION:
+			return langGetText(g_TextMissionData, textid);
+		case LANGBANK_GUN:
+			return langGetText(g_TextGunData, textid);
+		case LANGBANK_TITLE:
+			return langGetText(g_TextTitleData, textid);
+		case LANGBANK_MPMENU:
+			return langGetText(g_TextMPMenuData, textid);
+		case LANGBANK_PROPOBJ:
+			return langGetText(g_TextPropObjData, textid);
+		case LANGBANK_MPWEAPONS:
+			return langGetText(g_TextMPWeaponsData, textid);
+		case LANGBANK_OPTIONS:
+			return langGetText(g_TextOptionsData, textid);
+		case LANGBANK_MISC:
+			return langGetText(g_TextMiscData, textid);
+		default:
+			return errorstring;
+	}*/
+	/*s32 bankindex = textid >> 9;
+	s32 textindex = textid & 0x1ff;
+	uintptr_t *bank = (uintptr_t*)g_LangBanks[bankindex];
+	uintptr_t addr;
+
+	if (bank && bank[textindex]) {
+		addr = (uintptr_t)bank + bank[textindex];
+	} else {
+		addr = 0;
+	}*/
+
+	//return (char *)addr;
+	return errorstring;
 }

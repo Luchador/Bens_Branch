@@ -11,7 +11,8 @@ void langTick(void);
 
 u32 langGetLangBankIndexFromStagenum(s32 stagenum);
 s32 langGetFileId(s32 bank);
-void langInit(u8 stagenum);
+void langInit();
+void langLoadStageText(u8);
 void langClear();
 void langLoad(s32 bank);
 void langLoadToAddr(s32 bank, u8 *dst, s32 size);

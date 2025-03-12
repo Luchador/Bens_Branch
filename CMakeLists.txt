@@ -138,6 +138,7 @@ set(BUILD_ID "${VERSION_ROMID}-${VERSION_TARGET}")
 
 add_definitions(
   -DMATCHING=0
+  -DPIRACYCHECKS=0
   -DROM_SIZE=32
   -DAVOID_UB=1
   -D_LANGUAGE_C=1
@@ -326,7 +327,7 @@ endif()
 
 # Asset files
 
-#generate_asset_headers("lang/" "${CMAKE_SOURCE_DIR}/tools/assetmgr/mklang" "en" JSON_HEADERS)
+generate_asset_headers("lang/" "${CMAKE_SOURCE_DIR}/tools/assetmgr/mklang" "en" JSON_HEADERS)
 generate_asset_headers("pads/" "${CMAKE_SOURCE_DIR}/tools/assetmgr/mkpads" "" JSON_HEADERS)
 generate_asset_headers("tiles/" "${CMAKE_SOURCE_DIR}/tools/assetmgr/mktiles" "" JSON_HEADERS)
 generate_asset_headers("animations.json" "${CMAKE_SOURCE_DIR}/tools/assetmgr/mkanims" "" JSON_HEADERS)

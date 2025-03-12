@@ -4285,7 +4285,6 @@ u32 fileGetInflatedSize(s32 filenum, u32 loadtype)
 void *fileLoadToNew(s32 filenum, u32 method, u32 loadtype)
 {
 	struct fileinfo *info = &g_FileInfo[filenum];
-	u32 stack;
 	void *ptr;
 
 	if (method == FILELOADMETHOD_EXTRAMEM || method == FILELOADMETHOD_DEFAULT) {
