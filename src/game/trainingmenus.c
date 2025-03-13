@@ -193,9 +193,7 @@ MenuItemHandlerResult frWeaponListMenuHandler(s32 operation, struct menuitem *it
 				colour = 0x99999944;
 			}
 
-#if VERSION >= VERSION_NTSC_1_0
 			colour = (colour & 0xffffff00) | (((colour & 0xff) * (renderdata->colour & 0xff)) >> 8);
-#endif
 
 			gDPSetEnvColorViaWord(gdl++, colour);
 
@@ -1084,7 +1082,7 @@ struct menuitem g_FrTrainingInfoPreGameMenuItems[] = {
 		MENUITEMTYPE_SELECTABLE,
 		0,
 		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG | MENUITEMFLAG_SELECTABLE_CENTRE,
-		L_OPTIONS_003, // ""
+		L_OPTIONS_004, // ""
 		L_MPMENU_427, // "Ok"
 		frDetailsOkMenuHandler,
 	},
@@ -1092,7 +1090,7 @@ struct menuitem g_FrTrainingInfoPreGameMenuItems[] = {
 		MENUITEMTYPE_SELECTABLE,
 		0,
 		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG | MENUITEMFLAG_SELECTABLE_CENTRE,
-		L_OPTIONS_003, // ""
+		L_OPTIONS_004, // ""
 		L_MPMENU_429, // "Cancel"
 		frAbortMenuHandler,
 	},
@@ -1998,17 +1996,10 @@ char *bioMenuTextName(struct menuitem *item)
  */
 char *ciMenuTextHangarBioSubheading(struct menuitem *item)
 {
-	s32 index = 0;
 	struct hangarbio *bio = ciGetHangarBio(ciGetHangarBioIndexBySlot(g_HangarBioSlot));
-	char *name = langGet(bio->name);
+	char *subheading = langGet(bio->subheading);
 
-	while (name[index] != '|') {
-		index++;
-	}
-
-	sprintf(g_StringPointer, "%s\n", &name[index + 1]);
-
-	return g_StringPointer;
+	return subheading;
 }
 
 struct menuitem g_DtDetailsMenuItems[] = {

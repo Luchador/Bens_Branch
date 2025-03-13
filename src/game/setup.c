@@ -1206,9 +1206,7 @@ void setupLoadBriefing(s32 stagenum, u8 *buffer, s32 bufferlen, struct briefing 
 		langbuffer = &buffer[setupfilesize];
 		langbufferlen = bufferlen - setupfilesize;
 
-		briefing->langbank = langGetLangBankIndexFromStagenum(stagenum);
-
-		langLoadToAddr(briefing->langbank, langbuffer, langbufferlen);
+		//briefing->langbank = langGetLangBankIndexFromStagenum(stagenum);
 
 		start = (struct defaultobj *)((uintptr_t)setup + (uintptr_t)setup->props);
 
@@ -1233,7 +1231,6 @@ void setupLoadBriefing(s32 stagenum, u8 *buffer, s32 bufferlen, struct briefing 
 			obj = start;
 
 			while (obj->type != OBJTYPE_END) {
-				if (1);
 				switch (obj->type) {
 				case OBJTYPE_BRIEFING:
 					briefingobj = (struct briefingobj *) obj;
@@ -1294,7 +1291,6 @@ void setupLoadFiles(s32 stagenum)
 
 		g_GeCreditsData = (u8 *)fileLoadToNew(filenum, FILELOADMETHOD_DEFAULT, LOADTYPE_SETUP);
 		setup = (struct stagesetup *)g_GeCreditsData;
-		langLoad(langGetLangBankIndexFromStagenum(stagenum));
 
 		g_StageSetup.intro = (s32 *)((uintptr_t)setup + (uintptr_t)setup->intro);
 		g_StageSetup.props = (u32 *)((uintptr_t)setup + (uintptr_t)setup->props);

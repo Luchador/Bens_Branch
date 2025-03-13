@@ -1426,7 +1426,6 @@ void menuPushDialog(struct menudialogdef *dialogdef)
 	}
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 bool func0f0f3220(s32 arg0)
 {
 	bool save = true;
@@ -1474,33 +1473,6 @@ bool func0f0f3220(s32 arg0)
 
 	return save;
 }
-#else
-void func0f0f3220(s32 arg0)
-{
-	s32 i;
-
-	if (g_MenuData.unk669[arg0] == 4) {
-		s32 prevplayernum = g_MpPlayerNum;
-
-		for (i = ARRAYCOUNT(g_Menus) - 1; i >= 0; i--) {
-			if (g_Menus[i].curdialog) {
-				g_MpPlayerNum = i;
-			}
-		}
-
-		filemgrSaveOrLoad(&g_GameFileGuid, FILEOP_SAVE_GAME_000, 0);
-
-		g_MpPlayerNum = prevplayernum;
-	} else if (g_MenuData.unk669[arg0] < 4) {
-		s32 prevplayernum = g_MpPlayerNum;
-		g_MpPlayerNum = g_MenuData.unk669[arg0];
-		filemgrSaveOrLoad(&g_PlayerConfigsArray[g_MpPlayerNum].fileguid, FILEOP_SAVE_MPPLAYER, g_MpPlayerNum);
-		g_MpPlayerNum = prevplayernum;
-	}
-
-	g_MenuData.unk66e--;
-}
-#endif
 
 void menuCloseDialog(void)
 {
@@ -2383,13 +2355,11 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 	bgx2 = dialog->x + dialog->width;
 	bgy2 = dialog->y + dialog->height;
 
-#if VERSION >= VERSION_NTSC_1_0
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 			&& menuGetRoot() == MENUROOT_MPENDSCREEN
 			&& !var8009dfc0) {
 		return gdl;
 	}
-#endif
 
 	colour1 = MIXCOLOUR(dialog, item_focused_outer);
 
@@ -2410,19 +2380,15 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 	dialogheight = dialog->height;
 
 	if (dialog->state == MENUDIALOGSTATE_PREOPEN) {
-#if VERSION >= VERSION_NTSC_1_0
 		if (dialog->definition == &g_MpReadyMenuDialog) {
 			return gdl;
 		}
-#endif
 
 		sp170 = 1.0f - g_MenuData.unk010;
 
-#if VERSION >= VERSION_NTSC_1_0
 		if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && menuGetRoot() == MENUROOT_MPENDSCREEN) {
 			sp170 = 1.0f - dialog->statefrac;
 		}
-#endif
 
 		sp170 = 1.0f - sp170 * sp170;
 		dialogheight *= sp170;
@@ -2944,12 +2910,6 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 	return gdl;
 }
 
-const char var7f1b2668[] = "[]-[] Terminate Complete\n";
-const char var7f1b2684[] = "Enabling control %d\n";
-const char var7f1b269c[] = "NOT IN MODE MULTIINGAME!\n";
-const char var7f1b26b8[] = "Numactive now:%d\n";
-const char var7f1b26cc[] = "[]-[] SwitchMenuMode called, context %d\n";
-
 void menuGetContPads(s8 *contpadnum1, s8 *contpadnum2)
 {
 	switch (g_MenuData.root) {
@@ -3352,9 +3312,7 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
 
 	g_PlayersWithControl[g_Menus[g_MpPlayerNum].playernum] = false;
 
-#ifndef PLATFORM_N64
 	inputAutoLockMouse(false);
-#endif
 
 	func0f0f1494();
 
@@ -3449,12 +3407,6 @@ Gfx *menuRenderDialog(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bo
 	return gdl;
 }
 
-const char var7f1b2700[] = "[]-[] slide from %d";
-const char var7f1b2714[] = " to %d\n";
-const char var7f1b271c[] = "UNPAUSE: enabling control 0\n";
-const char var7f1b273c[] = "file: type %d guid %x-%x data %x err %d\n";
-const char var7f1b2768[] = "StartSelects\n";
-
 /**
  * Render all dialogs for the current player.
  *
@@ -3476,7 +3428,6 @@ Gfx *menuRenderDialogs(Gfx *gdl)
 			s32 i;
 			s32 j;
 
-#if VERSION >= VERSION_NTSC_1_0
 			// NTSC 1.0 and newer renders one "other" dialog plus the current
 			// dialog. The other dialog is only rendered if on-screen, and it
 			// ensures the current dialog is drawn last.
@@ -3503,16 +3454,6 @@ Gfx *menuRenderDialogs(Gfx *gdl)
 			if (g_Menus[g_MpPlayerNum].curdialog) {
 				gdl = menuRenderDialog(gdl, g_Menus[g_MpPlayerNum].curdialog, &g_Menus[g_MpPlayerNum], 0);
 			}
-#else
-			// NTSC beta renders all dialogs all the time, and in their natural order
-			for (i = 0; i < g_Menus[g_MpPlayerNum].depth; i++) {
-				struct menulayer *layer = &g_Menus[g_MpPlayerNum].layers[i];
-
-				for (j = 0; j < layer->numsiblings; j++) {
-					gdl = menuRenderDialog(gdl, layer->siblings[j], &g_Menus[g_MpPlayerNum], 0);
-				}
-			}
-#endif
 		}
 
 		// Render banner messages
@@ -3768,7 +3709,6 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 	s32 oldheight;
 	f32 newheight;
 	s32 i;
-	u32 stack;
 
 	usedefaultbehaviour = false;
 	definition = dialog->definition;
@@ -4688,12 +4628,6 @@ void menuProcessInput(void)
 				}
 
 				if (interval > 0) {
-#if VERSION >= VERSION_PAL_BETA
-					if (interval > 3) {
-						interval = TICKS(interval);
-					}
-#endif
-
 					oldslot = menu->yrepeattimer60 / interval;
 					newslot = (menu->yrepeattimer60 + g_Vars.diffframe60) / interval;
 

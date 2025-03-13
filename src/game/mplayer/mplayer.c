@@ -470,7 +470,7 @@ void mpPlayerSetDefaults(s32 playernum, bool autonames)
 
 	if (autonames) {
 		// "Player 1" etc
-		sprintf(g_PlayerConfigsArray[playernum].base.name, "%s %d\n", langGet(L_MISC_437), playernum + 1);
+		sprintf(g_PlayerConfigsArray[playernum].base.name, "%s %d\n", langRemoveNewline(langGet(L_MISC_437)), playernum + 1);
 	} else {
 		g_PlayerConfigsArray[playernum].base.name[0] = '\0';
 	}
@@ -592,34 +592,6 @@ void mpInit(void)
 	g_MpSetup.chrslots = 0;
 }
 
-#if VERSION >= VERSION_PAL_BETA
-void mpGetTeamsWithDefaultName(u8 *mask)
-{
-	s32 i;
-
-	*mask = 0;
-
-	for (i = 0; i < ARRAYCOUNT(g_BossFile.teamnames); i++) {
-		if (strcmp(g_BossFile.teamnames[i], langGet(L_OPTIONS_008 + i)) == 0) {
-			*mask |= 1 << i;
-		}
-	}
-}
-#endif
-
-#if VERSION >= VERSION_PAL_BETA
-void mpSetTeamNamesToDefault(u8 mask)
-{
-	s32 i;
-
-	for (i = 0; i < ARRAYCOUNT(g_BossFile.teamnames); i++) {
-		if (mask & (1 << i)) {
-			strcpy(g_BossFile.teamnames[i], langGet(L_OPTIONS_008 + i));
-		}
-	}
-}
-#endif
-
 void mpSetDefaultNamesIfEmpty(void)
 {
 	s32 i;
@@ -639,7 +611,7 @@ void mpSetDefaultNamesIfEmpty(void)
 	// Player names
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		if (g_PlayerConfigsArray[i].base.name[0] == '\0') {
-			sprintf(g_PlayerConfigsArray[i].base.name, "%s %d\n", langGet(L_MISC_437), i + 1); // "Player 1" etc
+			sprintf(g_PlayerConfigsArray[i].base.name, "%s %d\n", langRemoveNewline(langGet(L_MISC_437)), i + 1); // "Player 1" etc
 		}
 	}
 }
@@ -796,19 +768,12 @@ s32 mpGetPlayerRankings(struct ranking *rankings)
 			}
 
 			mpchrs[j]->placement = placement;
-#if VERSION >= VERSION_NTSC_1_0
 			mpchrs[j]->rankablescore = 255 - placement;
-#endif
 		} else {
 			mpchrs[j]->placement = j;
-#if VERSION >= VERSION_NTSC_1_0
 			mpchrs[j]->rankablescore = rankablescores[j];
-#endif
 		}
 
-#if VERSION < VERSION_NTSC_1_0
-		mpchrs[j]->rankablescore = rankablescores[j];
-#endif
 
 		if (chrnums[j] < 4) {
 			loser = chrnums[j];
@@ -972,11 +937,6 @@ char *mpGetWeaponLabel(s32 weaponnum)
 
 	return "";
 }
-
-#if VERSION >= VERSION_NTSC_1_0
-const char var7f1b8a5c[] = "Gun index %d -> slot %d = gun %d\n\n";
-const char var7f1b8a80[] = "HOLDER: selecting weapon set %d\n";
-#endif
 
 void mpSetWeaponSlot(s32 slot, s32 mpweaponnum)
 {
@@ -3203,11 +3163,11 @@ void mpGenerateBotNames(void)
 				if (counts[profilenum] >= 0) {
 					// Multiple bots using this profile - append the number
 					counts[profilenum]++;
-					sprintf(name, "%s:%d\n", langGet(g_BotProfiles[profilenum].name), counts[profilenum]);
+					sprintf(name, "%s:%d\n", langRemoveNewline(langGet(g_BotProfiles[profilenum].name)), counts[profilenum]);
 					strcpy(g_BotConfigsArray[i - 4].base.name, name);
 				} else {
 					// One bots using this profile - just use the profile name
-					sprintf(name, "%s\n", langGet(g_BotProfiles[profilenum].name));
+					sprintf(name, "%s\n", langRemoveNewline(langGet(g_BotProfiles[profilenum].name)));
 					strcpy(g_BotConfigsArray[i - 4].base.name, name);
 				}
 			}

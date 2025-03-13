@@ -338,7 +338,7 @@ void objectivesCheckAll(void)
 				g_ObjectiveStatuses[i] = status;
 
 				if (objectiveGetDifficultyBits(i) & (1 << lvGetDifficulty())) {
-					sprintf(buffer, "%s %d: ", langGet(L_MISC_044), availableindex + 1); // "Objective"
+					sprintf(buffer, "%s %d: ", langRemoveNewline(langGet(L_MISC_044)), availableindex + 1); // "Objective"
 
 					// NTSC 1.0 and above shows objective messages to everyone,
 					// while beta only shows them to the current player.

@@ -878,7 +878,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 
 	if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {
 		// "CAMSPY"
-		sprintf(text, "   %s", langGet(L_MISC_079));
+		sprintf(text, "   %s", langGet(L_GUN_060));
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 		x = viewright - scale * 53 - 25;
 		y = (vsplit ? -13 : 0) + viewtop + 27;
@@ -889,7 +889,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
 	} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 		// "DRUGSPY"
-		sprintf(text, "   %s", langGet(L_MISC_468));
+		sprintf(text, "   %s", langGet(L_GUN_061));
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 
 		x = viewright - scale * 53 - 25;
@@ -901,7 +901,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				colourtextdull, viGetWidth(), viGetHeight(), 0, 0);
 	} else {
 		// "BOMBSPY"
-		sprintf(text, "   %s", langGet(L_MISC_469));
+		sprintf(text, "   %s", langGet(L_GUN_062));
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 
 		x = viewright - scale * 59 - 25;

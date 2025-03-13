@@ -1,0 +1,48 @@
+|Background - **The conspirators have thrown caution to the winds and have committed an act of piracy, taking over the Pelagic II and commencing hurried diving operations in the Pacific Ocean. Both dataDyne and its strange allies are involved in what appears to be a joint operation.**|Carrington - **Although this move seems reckless, it only serves to highlight how important the operation on the seabed must be to dataDyne and its allies. Disrupt the operation as extensively as possible, but remember our minimum force rules for noncombatants.**|Objective One: - Disable Primary Power Source**Shutting down the primary power source will help cause the ship to wander from the operating location, but it will also cause blackouts in nonessential sections of the ship. Use the x-ray scanner to find the active switches on the power core.**|Objective Two: - Secure Laboratories and Research Data**We want any information that dataDyne has amassed on this project. Secure the labs on the science deck and remember to stun the scientists and technicians working there; we will want to interrogate them later.**|Objective Three: - Deactivate GPS and Autopilot**Getting both the GPS location system and the ship's autopilot offline will cause the ship to drift off station; if only one is shut down, it will not be enough to prevent the diving operations from continuing. Do not harm any innocent civilians you come across.**|Objective Four: - Activate Moon Pool Lift**This will activate the automatic pilot on the deep submersible, recalling it for you and Elvis to use. The controls are in the sub hangar.**|Objective Five: - Rendezvous and Escape With Elvis**Find Elvis and return to the Moon Pool to prep both the deep submersible and yourselves for the dive to the seafloor.**END*
+Cetan Ship
+|Background - **The conspirators have thrown caution to the winds and have committed an act of piracy, taking over the Pelagic II and commencing hurried diving operations in the Pacific Ocean. Both dataDyne and its strange allies are involved in what appears to be a joint operation.**|Carrington - **Although this move seems reckless, it only serves to highlight how important the operation on the seabed must be to dataDyne and its allies. Disrupt the operation as extensively as possible, but remember our minimum force rules for noncombatants.**|Objective One: - Disable Primary Power Source**Shutting down the primary power source will help cause the ship to wander from the operating location, but it will also cause blackouts in nonessential sections of the ship. Use the x-ray scanner to find the active switches on the power core.**|Objective Two: - Deactivate GPS and Autopilot**Getting both the GPS location system and the ship's autopilot offline will cause the ship to drift off station; if only one is shut down, it will not be enough to prevent the diving operations from continuing. Do not harm any innocent civilians you come across.**|Objective Three: - Activate Moon Pool Lift**This will activate the automatic pilot on the deep submersible, recalling it for you and Elvis to use. The controls are in the sub hangar.**|Objective Four: - Rendezvous and Escape With Elvis**Find Elvis and return to the Moon Pool to prep both the deep submersible and yourselves for the dive to the seafloor.**END*
+|Background - **The conspirators have thrown caution to the winds and have committed an act of piracy, taking over the Pelagic II and commencing hurried diving operations in the Pacific Ocean. Both dataDyne and its strange allies are involved in what appears to be a joint operation.**|Carrington - **Although this move seems reckless, it only serves to highlight how important the operation on the seabed must be to dataDyne and its allies. Disrupt the operation as extensively as possible, but remember our minimum force rules for noncombatants.**|Objective One: - Disable Primary Power Source**Shutting down the primary power source will help cause the ship to wander from the operating location, but it will also cause blackouts in nonessential sections of the ship. Use the x-ray scanner to find the active switches on the power core.**|Objective Two: - Deactivate GPS and Autopilot**Getting both the GPS location system and the ship's autopilot offline will cause the ship to drift off station; if only one is shut down, it will not be enough to prevent the diving operations from continuing. Do not harm any innocent civilians you come across.**|Objective Three: - Rendezvous and Escape With Elvis**Find Elvis and return to the Moon Pool to prep both the deep submersible and yourselves for the dive to the seafloor.**END*
+
+Deactivate GPS and autopilot
+Disable primary power source
+Secure laboratories and research data
+Activate Moon Pool lift
+Rendezvous and escape with Elvis
+Cripple the engines and the ship will *drift... Perfect!
+This must be where the sub's controlled from.
+Without the autopilot and the GPS, the ship *will wander off station.
+They'll be unable to conduct any operations *without any power.
+Autopilot system has been deactivated.
+GPS system has been deactivated.
+Critical mission object has been destroyed.
+Reactor shutdown control hatch opened.
+Reactor has been shut down.
+Diving control center has been located.
+Critical mission personnel killed.
+Research data has been secured.
+
+
+Research data disk
+A research data disk
+Picked up a research data disk.
+Critical mission personnel have been killed.
+Lift door has been unlocked.
+Lift has been activated.
+Operation denied - hangar doors still closed.
+Unlocking sequence has been reset.
+You go on ahead, Jo. I'll secure the perimeter. *We'll meet up later.
+Elvis has been killed.
+Joanna... What took you so long? Follow me - *let's get out of this old tub.
+Civilians have been killed.
+Critical mission object has been destroyed.
+Alarm has been activated.
+Alarm has been deactivated.
+Right. The diving operation has been disrupted on the surface. *Time for a swim.
+I hope the government don't want to use this ship anytime soon.
+Do you think we were a little heavy-handed?
+Naaahhhh.
+Pull the plug on that now.
+Switch this thing off.
+I'll shut it down.
+Please don't hurt me.
+Die, you traitors.

@@ -4139,7 +4139,6 @@ u32 file0f166ea8(uintptr_t *filetableaddr)
 
 void fileLoad(u8 *dst, u32 allocationlen, romptr_t *romaddrptr, struct fileinfo *info)
 {
-#ifndef PLATFORM_N64
 	// load the file first
 	const s32 filenum = (uintptr_t *)romaddrptr - g_FileTable;
 	u32 romsize = 0;
@@ -4148,9 +4147,6 @@ void fileLoad(u8 *dst, u32 allocationlen, romptr_t *romaddrptr, struct fileinfo 
 		return;
 	}
 	romaddrptr = (romptr_t *)&filedata;
-#else
-	u32 romsize = fileGetRomSizeByTableAddress(romaddrptr);
-#endif
 
 	u8 buffer[5 * 1024];
 
@@ -4165,23 +4161,9 @@ void fileLoad(u8 *dst, u32 allocationlen, romptr_t *romaddrptr, struct fileinfo 
 			info->loadedsize = 0;
 		} else {
 			s32 result;
-#if VERSION < VERSION_NTSC_1_0
-			char sp54[128];
-			u32 stack[2];
-#endif
 
 			dmaExec(scratch, *romaddrptr, romsize);
 			result = rzipInflate(scratch, dst, buffer);
-
-#if VERSION < VERSION_NTSC_1_0
-			if (result == 0) {
-				sprintf(sp54, "DMA-Crash %s %d Ram: %02x%02x%02x%02x%02x%02x%02x%02x", "ob.c", 204,
-						scratch[0], scratch[1], scratch[2], scratch[3],
-						scratch[4], scratch[5], scratch[6], scratch[7]);
-				crashSetMessage(sp54);
-				CRASH();
-			}
-#endif
 
 			result = ALIGN16(result);
 
@@ -4189,12 +4171,10 @@ void fileLoad(u8 *dst, u32 allocationlen, romptr_t *romaddrptr, struct fileinfo 
 		}
 	}
 
-#ifndef PLATFORM_N64
 	// byteswap/preprocess file according to g_LoadType right after inflating it
 	const u32 dstsize = allocationlen ? info->loadedsize : romsize; 
 	romdataFilePreprocess(filenum, g_LoadType, dst, dstsize, &info->loadedsize);
 	g_LoadType = LOADTYPE_NONE;
-#endif
 }
 
 void filesInit(void)
@@ -4243,20 +4223,11 @@ u32 fileGetInflatedSize(s32 filenum, u32 loadtype)
 	u8 *ptr;
 	u8 buffer[0x50];
 	uintptr_t *romaddrptr;
-#if VERSION < VERSION_NTSC_1_0
-	char message[128];
-#endif
 	uintptr_t romaddr;
 
 	romaddrptr = &g_FileTable[filenum];
 
-	if (1);
-
-#ifdef PLATFORM_N64
-	romaddr = *romaddrptr;
-#else
 	romaddr = (uintptr_t)romdataFileGetData(filenum);
-#endif
 	ptr = (u8 *) ((uintptr_t) &buffer[0x10] & ~0xf);
 
 	if (romaddr == 0) {
@@ -4267,17 +4238,6 @@ u32 fileGetInflatedSize(s32 filenum, u32 loadtype)
 	if (rzipIs1173(ptr)) {
 		return romdataFileGetEstimatedSize((ptr[2] << 16) | (ptr[3] << 8) | ptr[4], loadtype);
 	}
-
-#if VERSION < VERSION_NTSC_1_0
-	sprintf(message, "DMA-Crash %s %d Ram: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-			"ob.c", 446,
-			ptr[0x00], ptr[0x01], ptr[0x02], ptr[0x03],
-			ptr[0x04], ptr[0x05], ptr[0x06], ptr[0x07],
-			ptr[0x08], ptr[0x09], ptr[0x0a], ptr[0x0b],
-			ptr[0x0c], ptr[0x0d], ptr[0x0e], ptr[0x0f]);
-	crashSetMessage(message);
-	CRASH();
-#endif
 
 	return 0;
 }

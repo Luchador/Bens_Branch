@@ -100,7 +100,7 @@ char *endscreenMenuTitleRetryMission(struct menudialogdef *dialogdef)
 		return langGet(L_OPTIONS_300); // "Objectives"
 	}
 
-	prefix = langGet(L_OPTIONS_296); // "Retry"
+	prefix = langRemoveNewline(langGet(L_OPTIONS_296)); // "Retry"
 	name = langGet(g_SoloStages[g_MissionConfig.stageindex].name3);
 
 	sprintf(g_StringPointer, "%s: %s\n", prefix, name);
@@ -117,7 +117,7 @@ char *endscreenMenuTitleNextMission(struct menudialogdef *dialogdef)
 		return langGet(L_OPTIONS_300); // "Objectives"
 	}
 
-	prefix = langGet(L_OPTIONS_297); // "Next Mission"
+	prefix = langRemoveNewline(langGet(L_OPTIONS_297)); // "Next Mission"
 	name = langGet(g_SoloStages[g_MissionConfig.stageindex].name3);
 
 	sprintf(g_StringPointer, "%s: %s\n", prefix, name);
@@ -369,7 +369,7 @@ char *endscreenMenuTextAgentStatus(struct menuitem *item)
 char *endscreenMenuTitleStageCompleted(struct menuitem *item)
 {
 	sprintf(g_StringPointer, "%s: %s\n",
-			langGet(g_SoloStages[g_Menus[g_MpPlayerNum].endscreen.stageindex].name3),
+		langRemoveNewline(langGet(g_SoloStages[g_Menus[g_MpPlayerNum].endscreen.stageindex].name3)),
 			langGet(L_OPTIONS_276)); // "Completed"
 
 	return g_StringPointer;
@@ -386,7 +386,7 @@ char *endscreenMenuTextCurrentStageName3(struct menuitem *item)
 char *endscreenMenuTitleStageFailed(struct menuitem *item)
 {
 	sprintf(g_StringPointer, "%s: %s\n",
-			langGet(g_SoloStages[g_MissionConfig.stageindex].name3),
+		langRemoveNewline(langGet(g_SoloStages[g_MissionConfig.stageindex].name3)),
 			langGet(L_OPTIONS_277)); // "Failed"
 
 	return g_StringPointer;
@@ -690,34 +690,7 @@ MenuDialogHandlerResult endscreenHandle2PCompleted(s32 operation, struct menudia
 					}
 
 					if (g_Menus[g_MpPlayerNum].endscreen.unke1c == 0) {
-#if VERSION >= VERSION_NTSC_1_0
 						endscreenContinue(0);
-#else
-						if (g_Vars.stagenum == STAGE_DEEPSEA) {
-							if (g_Vars.antiplayernum >= 0 || (g_Vars.coopplayernum >= 0 && PLAYERCOUNT() >= 2)) {
-								menuPopDialog();
-							} else {
-								g_MissionConfig.stageindex++;
-								g_MissionConfig.stagenum = g_SoloStages[g_MissionConfig.stageindex].stagenum;
-
-								titleSetNextStage(g_MissionConfig.stagenum);
-								lvSetDifficulty(g_MissionConfig.difficulty);
-								titleSetNextMode(TITLEMODE_SKIP);
-								mainChangeToStage(g_MissionConfig.stagenum);
-							}
-						} else if (g_Vars.antiplayernum >= 0
-								|| (g_Vars.coopplayernum >= 0 && PLAYERCOUNT() >= 2)
-								|| (stageGetIndex(g_MissionConfig.stagenum) < 0
-									|| g_Vars.stagenum == STAGE_CITRAINING
-									|| g_MissionConfig.stageindex > SOLOSTAGEINDEX_SKEDARRUINS
-									|| ((g_CheatsActiveBank0 || g_CheatsActiveBank1)
-										&& !isStageDifficultyUnlocked(g_MissionConfig.stageindex + 1, g_MissionConfig.difficulty)))) {
-							menuPopDialog();
-						} else {
-							endscreenResetModels();
-							menuPushDialog(endscreenAdvance());
-						}
-#endif
 					}
 				}
 
@@ -742,7 +715,7 @@ MenuDialogHandlerResult endscreenHandle2PFailed(s32 operation, struct menudialog
 				struct menuinputs *inputs = data->dialog2.inputs;
 
 				if (inputs->select || inputs->back || inputs->start) {
-					g_Menus[g_MpPlayerNum].endscreen.unke1c = VERSION >= VERSION_NTSC_1_0 ? 6 : 3;
+					g_Menus[g_MpPlayerNum].endscreen.unke1c = 6;
 				}
 
 				if (g_Menus[g_MpPlayerNum].endscreen.unke1c) {
@@ -951,7 +924,6 @@ struct menuitem g_2PMissionEndscreenVMenuItems[] = {
 	{ MENUITEMTYPE_END },
 };
 
-#if VERSION >= VERSION_NTSC_1_0
 /**
  * This function is re-used for several values on the endscreen.
  * item->param is used to determine which value it is. Values are:
@@ -1025,7 +997,6 @@ MenuItemHandlerResult endscreenHandleCheatInfo(s32 operation, struct menuitem *i
 
 	return false;
 }
-#endif
 
 struct menuitem g_MissionEndscreenMenuItems[] = {
 	{
@@ -1044,7 +1015,6 @@ struct menuitem g_MissionEndscreenMenuItems[] = {
 		(uintptr_t)&endscreenMenuTextAgentStatus,
 		NULL,
 	},
-#if VERSION >= VERSION_NTSC_1_0
 	{
 		MENUITEMTYPE_LABEL,
 		0,
@@ -1181,105 +1151,6 @@ struct menuitem g_MissionEndscreenMenuItems[] = {
 		(uintptr_t)&endscreenMenuTextNumOtherShots,
 		endscreenHandleCheatInfo,
 	},
-#else
-	// NTSC beta's endscreen dialog lacks cheat information
-	{
-		MENUITEMTYPE_LABEL,
-		0,
-		0,
-		L_OPTIONS_280, // "Mission Time:"
-		(uintptr_t)&endscreenMenuTextMissionTime,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_LABEL,
-		0,
-		0,
-		L_MPWEAPONS_129, // "Difficulty:"
-		(uintptr_t)&soloMenuTextDifficulty,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_SEPARATOR,
-		0,
-		0,
-		0,
-		0,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_LABEL,
-		0,
-		0,
-		L_OPTIONS_281, // "Weapon of Choice:"
-		(uintptr_t)&mpMenuTextWeaponOfChoiceName,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_LABEL,
-		0,
-		0,
-		L_OPTIONS_282, // "Kills:"
-		(uintptr_t)&endscreenMenuTextNumKills,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_LABEL,
-		0,
-		0,
-		L_OPTIONS_283, // "Accuracy:"
-		(uintptr_t)&endscreenMenuTextAccuracy,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_SEPARATOR,
-		0,
-		0,
-		0,
-		0,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_LABEL,
-		0,
-		0,
-		L_OPTIONS_284, // "Shot Total:"
-		(uintptr_t)&endscreenMenuTextNumShots,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_LABEL,
-		0,
-		0,
-		L_OPTIONS_285, // "Head Shots:"
-		(uintptr_t)&endscreenMenuTextNumHeadShots,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_LABEL,
-		0,
-		0,
-		L_OPTIONS_286, // "Body Shots:"
-		(uintptr_t)&endscreenMenuTextNumBodyShots,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_LABEL,
-		0,
-		0,
-		L_OPTIONS_287, // "Limb Shots:"
-		(uintptr_t)&endscreenMenuTextNumLimbShots,
-		NULL,
-	},
-	{
-		MENUITEMTYPE_LABEL,
-		0,
-		0,
-		L_OPTIONS_288, // "Others:"
-		(uintptr_t)&endscreenMenuTextNumOtherShots,
-		NULL,
-	},
-#endif
 	{
 		MENUITEMTYPE_SEPARATOR,
 		0,
@@ -1602,11 +1473,9 @@ void endscreenPushCoop(void)
 
 	g_MpPlayerNum = g_Vars.currentplayerstats->mpindex;
 
-#if VERSION >= VERSION_NTSC_1_0
 	g_Menus[g_MpPlayerNum].endscreen.cheatinfo = 0;
 	g_Menus[g_MpPlayerNum].endscreen.isfirstcompletion = false;
 	g_Menus[g_MpPlayerNum].endscreen.stageindex = g_MissionConfig.stageindex;
-#endif
 
 	g_Menus[g_MpPlayerNum].playernum = g_Vars.currentplayernum;
 
@@ -1700,11 +1569,9 @@ void endscreenPushAnti(void)
 
 	g_MpPlayerNum = g_Vars.currentplayerstats->mpindex;
 
-#if VERSION >= VERSION_NTSC_1_0
 	g_Menus[g_MpPlayerNum].endscreen.cheatinfo = 0;
 	g_Menus[g_MpPlayerNum].endscreen.isfirstcompletion = false;
 	g_Menus[g_MpPlayerNum].endscreen.stageindex = g_MissionConfig.stageindex;
-#endif
 
 	g_Menus[g_MpPlayerNum].playernum = g_Vars.currentplayernum;
 

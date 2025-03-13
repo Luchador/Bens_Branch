@@ -2309,6 +2309,7 @@ bool ciIsHangarBioAVehicle(s32 index)
 
 u8 g_HangarBioSlot = 0;
 
+// Ben's comment: due to the subheading not loading correctly, I've assigned them their own strings in LmiscE.txt
 struct hangarbio *ciGetHangarBio(s32 index)
 {
 #ifdef AVOID_UB
@@ -2316,29 +2317,29 @@ struct hangarbio *ciGetHangarBio(s32 index)
 #endif
 	struct hangarbio bios[] = {
 		// name, description
-		{ L_MISC_290, L_MISC_313 }, // Carrington Institute
-		{ L_MISC_291, L_MISC_314 }, // Lucerne Tower
-		{ L_MISC_292, L_MISC_315 }, // Laboratory Basement
-		{ L_MISC_293, L_MISC_316 }, // Carrington Villa
-		{ L_MISC_294, L_MISC_317 }, // Chicago
-		{ L_MISC_295, L_MISC_318 }, // G5 Building
-		{ L_MISC_296, L_MISC_319 }, // Area 51
-		{ L_MISC_297, L_MISC_320 }, // Alaskan Air Base
-		{ L_MISC_298, L_MISC_321 }, // Air Force One
-		{ L_MISC_299, L_MISC_322 }, // Crash Site
-		{ L_MISC_300, L_MISC_323 }, // Pelagic II
-		{ L_MISC_301, L_MISC_324 }, // Cetan Ship
-		{ L_MISC_302, L_MISC_325 }, // Skedar Assault Ship
-		{ L_MISC_303, L_MISC_326 }, // Skedar Homeworld
-		{ L_MISC_304, L_MISC_327 }, // Jumpship
-		{ L_MISC_305, L_MISC_328 }, // HoverCrate
-		{ L_MISC_306, L_MISC_329 }, // HoverBike
-		{ L_MISC_307, L_MISC_330 }, // Cleaning Hovbot
-		{ L_MISC_308, L_MISC_331 }, // Hovercopter
-		{ L_MISC_309, L_MISC_332 }, // G5 Robot
-		{ L_MISC_310, L_MISC_333 }, // A51 Interceptor
-		{ L_MISC_311, L_MISC_334 }, // Maian Vessel
-		{ L_MISC_312, L_MISC_335 }, // Skedar Shuttle
+		{ L_MISC_290, L_MISC_313, L_MISC_476 }, // Carrington Institute
+		{ L_MISC_291, L_MISC_314, L_MISC_477 }, // Lucerne Tower
+		{ L_MISC_292, L_MISC_315, L_MISC_478 }, // Laboratory Basement
+		{ L_MISC_293, L_MISC_316, L_MISC_479 }, // Carrington Villa
+		{ L_MISC_294, L_MISC_317, L_MISC_480 }, // Chicago
+		{ L_MISC_295, L_MISC_318, L_MISC_481 }, // G5 Building
+		{ L_MISC_296, L_MISC_319, L_MISC_482 }, // Area 51
+		{ L_MISC_297, L_MISC_320, L_MISC_483 }, // Alaskan Air Base
+		{ L_MISC_298, L_MISC_321, L_MISC_484 }, // Air Force One
+		{ L_MISC_299, L_MISC_322, L_MISC_485 }, // Crash Site
+		{ L_MISC_300, L_MISC_323, L_MISC_486 }, // Pelagic II
+		{ L_MISC_301, L_MISC_324, L_MISC_487 }, // Cetan Ship
+		{ L_MISC_302, L_MISC_325, L_MISC_488 }, // Skedar Assault Ship
+		{ L_MISC_303, L_MISC_326, L_MISC_489 }, // Skedar Homeworld
+		{ L_MISC_304, L_MISC_327, L_MISC_490 }, // Jumpship
+		{ L_MISC_305, L_MISC_328, L_MISC_491 }, // HoverCrate
+		{ L_MISC_306, L_MISC_329, L_MISC_492 }, // HoverBike
+		{ L_MISC_307, L_MISC_330, L_MISC_493 }, // Cleaning Hovbot
+		{ L_MISC_308, L_MISC_331, L_MISC_494 }, // Hovercopter
+		{ L_MISC_309, L_MISC_332, L_MISC_495 }, // G5 Robot
+		{ L_MISC_310, L_MISC_333, L_MISC_496 }, // A51 Interceptor
+		{ L_MISC_311, L_MISC_334, L_MISC_497 }, // Maian Vessel
+		{ L_MISC_312, L_MISC_335, L_MISC_498 }, // Skedar Shuttle
 	};
 
 	switch (index) {
@@ -3017,15 +3018,6 @@ char *htGetDescription(void)
 char *htGetTip1(void)
 {
 	u32 texts[] = {
-#if VERSION >= VERSION_PAL_BETA
-		L_DISH_249, // "For greater precision..."
-		L_DISH_250, // "Think about where you want to go..."
-		L_DISH_251, // "Ducking enables you to..."
-		L_DISH_252, // "Attacking opponents from behind..."
-		L_DISH_253, // "Only stay close long enough..."
-		L_DISH_254, // "Don't hang around and wait..."
-		L_DISH_255, // "Go for the armed opponents..."
-#else
 		L_MISC_343, // "For greater precision..."
 		L_MISC_344, // "Think about where you want to go..."
 		L_MISC_345, // "Ducking enables you to..."
@@ -3033,7 +3025,6 @@ char *htGetTip1(void)
 		L_MISC_347, // "Only stay close long enough..."
 		L_MISC_348, // "Don't hang around and wait..."
 		L_MISC_349, // "Go for the armed opponents..."
-#endif
 	};
 
 	return langGet(texts[htGetIndexBySlot(var80088bb4)]);
@@ -3042,15 +3033,6 @@ char *htGetTip1(void)
 char *htGetTip2(void)
 {
 	u32 texts[] = {
-#if VERSION >= VERSION_PAL_BETA
-		L_DISH_256, // "For greater precision..."
-		L_DISH_257, // "Sidestepping and strafing..."
-		L_DISH_258, // "Ducking enables you to..."
-		L_DISH_259, // "Attacking opponents from behind..."
-		L_DISH_260, // "Only stay close long enough..."
-		L_DISH_261, // "Don't hang around and wait..."
-		L_DISH_262, // "Go for the armed opponents..."
-#else
 		L_MISC_350, // "For greater precision..."
 		L_MISC_351, // "Sidestepping and strafing..."
 		L_MISC_352, // "Ducking enables you to..."
@@ -3058,7 +3040,6 @@ char *htGetTip2(void)
 		L_MISC_354, // "Only stay close long enough..."
 		L_MISC_355, // "Don't hang around and wait..."
 		L_MISC_356, // "Go for the armed opponents..."
-#endif
 	};
 
 	return langGet(texts[htGetIndexBySlot(var80088bb4)]);

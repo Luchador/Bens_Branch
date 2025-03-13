@@ -27,6 +27,7 @@
 #include "lib/model.h"
 #include "lib/snd.h"
 #include "lib/mtx.h"
+#include "string.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
@@ -35,11 +36,7 @@
 #include "video.h"
 #endif
 
-#ifdef PLATFORM_N64
-#define TITLE_ASPECT 1.33333333f
-#else
 #define TITLE_ASPECT (videoGetAspect())
-#endif
 
 u8 *var8009cca0;
 u32 var8009cca4;
@@ -87,7 +84,7 @@ char *mpPlayerGetWeaponOfChoiceName(u32 playernum, u32 slot)
 	name = bgunGetName(weapon);
 	setCurrentPlayerNum(prevplayernum);
 
-	return name;
+	return strcat(langRemoveNewline(name), "\n");
 }
 
 void titleSetLight(Lights1 *light, u8 r, u8 g, u8 b, f32 luminosity, struct coord *dir)

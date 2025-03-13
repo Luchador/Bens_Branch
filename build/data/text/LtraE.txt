@@ -1,0 +1,85 @@
+|Background - **A craft carrying Institute advisors has been shot down in Nevada. Debris from the crash and the bodies of the advisors have been taken to Area 51. A spy inside the base has managed to get footage to the Institute of a possible survivor. This mission is to rescue that survivor.**|Carrington - **I know you have questions, Jo, and I'm afraid that this isn't the time to answer them. I can tell you that the little fellow you just rescued is a Maian, and he is a bodyguard for the Ambassador whose ship was shot down. Other details and background can wait until later.**|Objective One: - Locate Alien AutoSurgeon Device**All Maian craft carry a device called an AutoSurgeon. Using this is the fastest and safest way of waking him up since they are designed to work on Maian physiology. It should be amongst the wreckage of the ship, or if not, with the items taken to the labs for analysis.**|Objective Two: - Rendezvous With Agent**Jonathan reports that he is now under suspicion and expects to be arrested in a matter of minutes. Find him before the patrols do.**|Objective Three: - Gain Entry to Secret Hangar**Our agent has been unable to get into the secret hangar before because that would have meant blowing his cover, but the time for such worries is past. Keep the guards off Jonathan as he hacks into the door to the hangar where we suspect an intact Maian ship is kept.**|Objective Four: - Revive Maian Bodyguard**Wake the Maian up before trying to get out - a hoverbed is not the easiest thing to steer even in normal situations. Once he's up and about, he should be able to fly the Maian craft out of Area 51.**|Objective Five: - Escape From Area 51**That is, get the Maian bodyguard to the ship first. Then you and Jonathan get aboard the craft with him, and you should be able to fly out past the air defenses you took care of earlier.**END*
+AREA 51 - ESCAPE*
+|Background - **A craft carrying Institute advisors has been shot down in Nevada. Debris from the crash and the bodies of the advisors have been taken to Area 51. A spy inside the base has managed to get footage to the Institute of a possible survivor. This mission is to rescue that survivor.**|Carrington - **I know you have questions, Jo, and I'm afraid that this isn't the time to answer them. I can tell you that the little fellow you just rescued is a Maian, and he is a bodyguard for the Ambassador whose ship was shot down. Other details and background can wait until later.**|Objective One: - Rendezvous With Agent**Jonathan reports that he is now under suspicion and expects to be arrested in a matter of minutes. Find him before the patrols do.**|Objective Two: - Gain Entry to Secret Hangar**Our agent has been unable to get into the secret hangar before because that would have meant blowing his cover, but the time for such worries is past. Keep the guards off Jonathan as he hacks into the door to the hangar where we suspect an intact Maian ship is kept.**|Objective Three: - Revive Maian Bodyguard**Wake the Maian up before trying to get out - a hoverbed is not the easiest thing to steer even in normal situations. Once he's up and about, he should be able to fly the Maian craft out of Area 51.**|Objective Four: - Escape From Area 51**That is, get the Maian bodyguard to the ship first. Then you and Jonathan get aboard the craft with him, and you should be able to fly out past the air defenses you took care of earlier.**END*
+|Background - **A craft carrying Institute advisors has been shot down in Nevada. Debris from the crash and the bodies of the advisors have been taken to Area 51. A spy inside the base has managed to get footage to the Institute of a possible survivor. This mission is to rescue that survivor.**|Carrington - **I know you have questions, Jo, and I'm afraid that this isn't the time to answer them. I can tell you that the little fellow you just rescued is a Maian, and he is a bodyguard for the Ambassador whose ship was shot down. Other details and background can wait until later.**|Objective One: - Rendezvous With Agent**Jonathan reports that he is now under suspicion and expects to be arrested in a matter of minutes. Find him before the patrols do.**|Objective Two: - Gain Entry to Secret Hangar**Our agent has been unable to get into the secret hangar before because that would have meant blowing his cover, but the time for such worries is past. Keep the guards off Jonathan as he hacks into the door to the hangar where we suspect an intact Maian ship is kept.**|Objective Three: - Escape From Area 51**That is, get the Maian bodyguard to the ship first. Then you and Jonathan get aboard the craft with him, and you should be able to fly out past the air defenses you took care of earlier.**END*
+*
+*
+*
+*
+*
+Locate alien tech medpack
+Rendezvous with CI spy
+Revive Maian Bodyguard
+Locate secret hangar
+Escape from Area 51
+Joanna - this is Jonathan. You're in grave danger.
+They've flooded the area with nerve gas.
+Get our friend to the containment lab. *There's a hiding place there.
+I'll contact you when you get there - good luck!
+Good work, Jo. We need to meet up. They're *getting suspicious of me.
+Use the maintenance hatch I've opened *in one of the containment labs. Hurry.
+Obtain alien medpack.
+Cassandra De Vries'
+Alien medpack
+
+Picked up an alien medpack.
+Joanna - over here.
+We need to get back to our friend.
+Right, we're near. Cover me, Jo...
+Okay - stand back.
+Jonathan has been killed.
+Elvis has been killed.
+The secret hangar has been located.
+Okay, Jo - let's go.
+Alien medpack activated.
+Alien medpack operation aborted.
+Alien medpack has been administered.
+Mission critical object destroyed.
+Outer hangar door is opening.
+Outer hangar door is closing.
+Inner hangar door is opening.
+Inner hangar door is closing.
+It's the only way out of here.
+You're the only one who can fly it, Elvis, so get in.
+But we can't leave you behind.
+There must be a way out of here.
+One of us will have to stay behind and open the *hangar doors.
+I'll get out on that hoverbike. Cover me while I *open the doors.
+Jonathan, go with Elvis. I'll see to the consoles.
+It's dangerous, Jo...
+I can handle it... Trust me.
+...Okay.
+Damn it, Joanna... cover me!
+I'll cover the stairs - you take the ramp.
+The hangar doors are now open.
+Medical containment doors unlocked.
+The medpack's got to be somewhere around here.
+Time to hook up with Jonathan, before he gets *into any more trouble.
+That smell... oil... I smelt that in the other *hangars.
+The jetbike should get me out before they lock *the base down.
+Oh, no! We have a problem. It's a single seater!
+Two can get in but no more.
+Plus, it's got no style, you know what I'm saying?
+I'm not having this. That specimen is government property and should not leave the base.
+Let's see how that overconfident thief deals with our gas defense system. She'll think twice before messing with me again!
+What's that noise? Can't be... Gas!
+Noooo, that wasn't meant to happen!
+Please stop! I'm not supposed to die. She... Arggghhh!
+You idiot! We'd better get out of here.
+Gasps, chokes, and wheezes.
+***aahh...! aahaa...! aaaaahhh!  aha.  ahh.****
+I'm alive. I thought I'd be chopped up like the others by now. You're from the Institute, aren't you? I recognize you from before. You helped me. Thank you.
+You... You speak our language?
+Watch her... she's sharp.
+Earrggghh...eerggh...
+What's wrong?
+I have a headache. And with a head this big, that's no joke.
+Can you walk? We must leave before they get organized and hunt us down.
+I think so. What's your name?
+I'm Agent Dark. Or Joanna, if you prefer.
+Well, Joanna, I'm Protector One. But you can call me... Elvis!
+Console is not active.
+What the hell do you think you're doing? *This is supposed to be a sealed room! *Don't you know anything about autopsy *procedures?
+Director Easton will hear about this, *young lady.
+You can't take that! It's government property! *This is intolerable! It's... it's... *unprofessional!!
+I don't care much for procedures!

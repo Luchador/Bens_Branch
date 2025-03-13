@@ -1,0 +1,55 @@
+|Background - **Knocked unconscious during the evacuation of the Carrington Institute, Joanna wakes to find herself a prisoner aboard a Skedar assault ship.**|Carrington - Not Available.**|Elvis - **Joanna! I'm following the assault ship that is holding you! With me are two Maian protectors from the delegation at the White House. If you can get us aboard, we can help you take over the ship.**|Objective One: - Disable Shield System**The shield system prevents any docking maneuvers from taking place. Drop the shields so Elvis and his companions can start an approach.**|Objective Two: - Open Hangar Doors**The docking system is normally controlled automatically - it must have been overridden from the bridge. Open the doors using the local controls overlooking the hangar, and Elvis can finish the landing cycle.**|Objective Three: - Access Navigational Systems**Get Elvis to the star map so that he can find out where the assault ship is heading. There might also be the locations of Skedar strongholds within the star map - this information can be used for decisive strikes by the Maian Fleet.**|Objective Four: - Sabotage Engine Systems**The plan to take over the assault ship might go awry if the Commander alters from the set course. Tamper with the engines so that the ship comes to a halt.**|Objective Five: - Gain Control of Bridge**Once the bridge is taken, the ship is no longer under Skedar control. Only the Commander remains inside.**END*
+SKEDAR ASSAULT SHIP*
+|Background - **Knocked unconscious during the evacuation of the Carrington Institute, Joanna wakes to find herself a prisoner aboard a Skedar assault ship.**|Carrington - Not Available.**|Elvis - **Joanna! I'm following the assault ship that is holding you! With me are two Maian protectors from the delegation at the White House. If you can get us aboard, we can help you take over the ship.**|Objective One: - Disable Shield System**The shield system prevents any docking maneuvers from taking place. Drop the shields so Elvis and his companions can start an approach.**|Objective Two: - Access Navigational Systems**Get Elvis to the star map so that he can find out where the assault ship is heading. There might also be the locations of Skedar strongholds within the star map - this information can be used for decisive strikes by the Maian Fleet.**|Objective Three: - Sabotage Engine Systems**The plan to take over the assault ship might go awry if the Commander alters from the set course. Tamper with the engines so that the ship comes to a halt.**|Objective Four: - Gain Control of Bridge**Once the bridge is taken, the ship is no longer under Skedar control. Only the Commander remains inside.**END*
+|Background - **Knocked unconscious during the evacuation of the Carrington Institute, Joanna wakes to find herself a prisoner aboard a Skedar assault ship.**|Carrington - Not Available.**|Elvis - **Joanna! I'm following the assault ship that is holding you! With me are two Maian protectors from the delegation at the White House. If you can get us aboard, we can help you take over the ship.**|Objective One: - Disable Shield System**The shield system prevents any docking maneuvers from taking place. Drop the shields so Elvis and his companions can start an approach.**|Objective Two: - Access Navigational Systems**Get Elvis to the star map so that he can find out where the assault ship is heading. There might also be the locations of Skedar strongholds within the star map - this information can be used for decisive strikes by the Maian Fleet.**|Objective Three: - Gain Control of Bridge**Once the bridge is taken, the ship is no longer under Skedar control. Only the Commander remains inside.**END*
+
+Disable shield system
+Open hangar doors
+Access navigational systems
+Sabotage engine systems
+Gain control of bridge
+Ship's shields have been lowered.
+Hangar doors have been opened.
+Elvis has been killed.
+Navigational information has been retrieved.
+Lift has been activated.
+All hangar Skedar have been killed.
+Outside, Joanna. Get the shields down and *we can help you.
+You've got to open the hangar doors so we can dock.
+Okay, we're in. I'll meet you in the hangar.
+Good to see you, Joanna.
+Take this - you should find it useful...
+Received AR34 assault rifle.
+Time to head upwards. I'll take this lift; *you take the other one.
+Engines have been disabled.
+Look out, Joanna! I think we've made them angry...
+Bridge has been captured.
+You go on ahead, Jo. I'll secure the perimeter. *We'll meet up later.
+I've got to get those shields down to let Elvis *in. I need all the help I can get.
+Now only the hangar bay doors are in the way.
+This machine contains the Skedar star maps.
+If we control the bridge, then the ship is ours.
+Time to head upwards...
+Oohhh... I'd better not be where I think I am.
+And it's worse than that, my dear. Just look who you've got for company.
+You! I thought you'd managed to escape. We found no trace of you at all.
+You couldn't find me. But there was no hiding from the Skedar, as you and Mr. Carrington just discovered.
+This is it. Wait there! I'll make a distraction; it will give you a chance to get out. Use it or we'll both die.
+Why are you doing this, Cassandra?
+The Skedar used me, Joanna. You are my best chance for revenge.
+Eeeeaaarrrrggghhh!!!
+Wow. That's the first time I've seen another planet from space. It's beautiful.
+Hmmmm?
+I don't... I don't believe it!
+Elvis? What is it?
+Where are you going?
+We have to get down to the surface! Follow me!
+We have to get out of here!
+Hangar doors locked - shields still active.
+Critical mission object destroyed.
+Ammo depleted - consoles can't be destroyed.
+Obtain De Vries' necklace.
+Cassandra De Vries'
+Necklace
+De Vries' necklace
+Picked up De Vries' necklace.

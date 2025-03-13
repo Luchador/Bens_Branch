@@ -23,10 +23,7 @@
 struct menudialogdef g_MpEndscreenChallengeCompletedMenuDialog;
 struct menudialogdef g_MpEndscreenIndGameOverMenuDialog;
 struct menudialogdef g_MpEndscreenTeamGameOverMenuDialog;
-
-#if VERSION >= VERSION_NTSC_1_0
 struct menudialogdef g_MpEndscreenSavePlayerMenuDialog;
-#endif
 
 MenuItemHandlerResult mpStatsForPlayerDropdownHandler(s32 operation, struct menuitem *item, union handlerdata *data)
 {
@@ -128,13 +125,13 @@ char *mpMenuTextInGameLimit(struct menuitem *item)
 
 	switch (item->param) {
 	case 0:
-		sprintf(g_StringPointer, langGet(L_MPMENU_114), g_MpSetup.timelimit + 1);
+		sprintf(g_StringPointer, langRemoveNewline(langGet(L_MPMENU_114)), g_MpSetup.timelimit + 1);
 		break;
 	case 1:
-		sprintf(g_StringPointer, langGet(L_MPMENU_113), g_MpSetup.scorelimit + 1);
+		sprintf(g_StringPointer, langRemoveNewline(langGet(L_MPMENU_113)), g_MpSetup.scorelimit + 1);
 		break;
 	case 2:
-		sprintf(g_StringPointer, langGet(L_MPMENU_113), mpCalculateTeamScoreLimit() + 1);
+		sprintf(g_StringPointer, langRemoveNewline(langGet(L_MPMENU_113)), mpCalculateTeamScoreLimit() + 1);
 		break;
 	}
 
@@ -190,11 +187,7 @@ char *menutextPauseOrUnpause(s32 arg0)
 
 char *menutextMatchTime(s32 arg0)
 {
-#if PAL
-	formatTime(g_StringPointer, lvGetStageTime60() * 60 / 50, TIMEPRECISION_SECONDS);
-#else
 	formatTime(g_StringPointer, lvGetStageTime60(), TIMEPRECISION_SECONDS);
-#endif
 
 	return g_StringPointer;
 }
@@ -345,7 +338,7 @@ char *mpMenuTitleStatsFor(struct menudialogdef *dialogdef)
 	struct mpchrconfig *mpchr = MPCHR(g_MpSelectedPlayersForStats[g_MpPlayerNum]);
 
 	// "Stats for %s"
-	sprintf(g_StringPointer, langGet(L_MPMENU_280), mpchr->name);
+	sprintf(g_StringPointer, langRemoveNewline(langGet(L_MPMENU_280)), mpchr->name);
 	return g_StringPointer;
 }
 
@@ -525,7 +518,7 @@ char *mpMenuTextPlacementWithSuffix(struct menuitem *item)
 		L_MPMENU_275, // "12th"
 	};
 
-	return langGet(suffixes[g_PlayerConfigsArray[g_MpPlayerNum].base.placement]);
+	return langRemoveNewline(langGet(suffixes[g_PlayerConfigsArray[g_MpPlayerNum].base.placement]));
 }
 
 MenuItemHandlerResult mpPlacementMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data)
@@ -613,7 +606,7 @@ MenuItemHandlerResult mpPlayerTitleMenuHandler(s32 operation, struct menuitem *i
 
 char *mpMenuTextPlayerTitle(s32 arg0)
 {
-	return langGet(L_MISC_185 + g_PlayerConfigsArray[g_MpPlayerNum].title);
+	return langRemoveNewline(langGet(L_MISC_185 + g_PlayerConfigsArray[g_MpPlayerNum].title));
 }
 
 MenuItemHandlerResult mpConfirmPlayerNameHandler(s32 operation, struct menuitem *item, union handlerdata *data)

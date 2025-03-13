@@ -5580,44 +5580,6 @@ bool bgun0f0a27c8(void)
 	return false;
 }
 
-/**
- * This function is the same as above but it doesn't call bgun0f098a44().
- *
- * This function is unused.
- */
-bool bgun0f0a28d8(void)
-{
-	struct hand *hand;
-	struct weaponfunc *func;
-
-	hand = &g_Vars.currentplayer->hands[HAND_RIGHT];
-	func = gsetGetWeaponFunction2(&hand->gset);
-
-	if (func
-			&& (func->type & 0xff) == INVENTORYFUNCTYPE_MELEE
-			&& hand->state == HANDSTATE_ATTACK
-			&& hand->unk0ce8 != NULL
-			&& hand->animmode == HANDANIMMODE_BUSY) {
-		return true;
-	}
-
-	hand = &g_Vars.currentplayer->hands[HAND_LEFT];
-
-	if (hand->inuse) {
-		func = gsetGetWeaponFunction2(&hand->gset);
-
-		if (func
-				&& (func->type & 0xff) == INVENTORYFUNCTYPE_MELEE
-				&& hand->state == HANDSTATE_ATTACK
-				&& hand->unk0ce8 != NULL
-				&& hand->animmode == HANDANIMMODE_BUSY) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
 void bgunHandlePlayerDead(void)
 {
 	struct player *player = g_Vars.currentplayer;
@@ -9346,7 +9308,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 	if (optionsGetShowGunFunction(g_Vars.currentplayerstats->mpindex)) {
 		func = weaponGetFunctionById(hand->gset.weaponnum, hand->gset.weaponfunc);
 		nameid = invGetNameIdByIndex(invGetCurrentIndex());
-		str = langGet(nameid);
+		str = langRemoveNewline(langGet(nameid));
 
 		if (ctrl->curgunstr != nameid) {
 			ctrl->guntypetimer = 0;
@@ -9375,7 +9337,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 				x = xpos - textwidth - 2;
 			}
 
-			y = bottom - textheight - 15;
+			y = bottom - textheight - 20;
 
 			if (ctrl->guntypetimer > 192) {
 				alpha = 255 - (ctrl->guntypetimer - 192) * 255 / 63U;

@@ -34,6 +34,7 @@ Note: These changes require alterations to the game's original files. You can fi
 * Villa: Brightened up the dock clipping tiles, which were oddly dark
 * Villa: Fixed the broken texture underneath the stove hood
 * Villa: Made some vertex coloring tweaks to the bedroom and bathroom
+* Chicago: Fixed the missing window over the canal
 
 ## Running (Windows only)
 

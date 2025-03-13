@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <constants.h>
 #include <sys/stat.h>
 #include <PR/ultratypes.h>
 #include "config.h"
@@ -11,8 +12,6 @@
 #include "platform.h"
 #include "utils.h"
 #include "fs.h"
-
-#define DEFAULT_BASEDIR_NAME "data"
 
 static char baseDir[FS_MAXPATH + 1]; // replaces $B
 static char modDir[FS_MAXPATH + 1];  // replaces $M

@@ -1,0 +1,496 @@
+Most Suicidal
+Who Needs Ammo?
+Least Shielded
+Best Protected
+Marksmanship
+Most Professional
+Most Deadly
+Most Harmless
+Most Cowardly
+Most Frantic
+Most Honorable
+Most Dishonorable
+Shortest Life
+Longest Life
+Double Kill
+Triple Kill
+Quad Kill
+Game Setup
+Load Settings
+Scenario
+Arena
+Options
+Teams
+Weapons
+Limits
+Simulants
+Save Settings
+Abort Game
+Player Setup
+Load Player
+Name
+Character
+Handicap
+Control
+Player Options
+Statistics
+Start Game
+Drop Out
+Save Player
+Save Copy of Player
+Stuff
+Soundtrack
+Team Names
+Ratio
+Lock
+None
+Last Winner*
+Last Loser*
+Random*
+Challenge*
+Combat Challenges*
+Abort Challenge*
+Abort*
+Are you sure you want*to abort the game?
+Abort
+Cancel
+%s*
+Accept
+Cancel
+Team Names
+Back
+Change Team Name
+Soundtrack
+Current:
+Multiple Tunes
+Back
+Multiple Tunes
+Random
+Select Tunes
+Select Tune
+Team Control
+Teams Enabled
+Teams:
+Auto Team...
+Back
+Auto Team
+Two Teams
+Three Teams
+Four Teams
+Maximum Teams
+Humans vs. Simulants
+Human-Simulant Pairs
+Cancel
+Simulants
+Add Simulant...
+1:
+2:
+3:
+4:
+5:
+6:
+7:
+8:
+Clear All
+Back
+Difficulty:
+Change Type...
+Character...
+Delete Simulant
+Back
+Simulant Character
+Add Simulant
+Change Simulant
+Normal Simulants
+Special Simulants
+Ready!
+...and waiting
+Limits
+Time
+Score
+Restore Defaults
+Back
+No Limit
+%d
+%d Min
+Arena
+Dark
+Classic
+Random
+Skedar
+Pipes
+Ravine
+G5 Building
+Sewers
+Warehouse
+Grid
+Ruins
+Area 52
+Base
+Rooftop
+Fortress
+Villa
+Car Park
+Temple
+Complex
+Felicity
+Random
+Load Player*
+B Button to cancel*
+Load Game Settings*
+%s:  Scenario: %s   Arena: %s    Simulants: %d
+Presets
+Player Name
+Character
+Load Head...
+Stats for %s
+Kills:
+Deaths:
+Accuracy:
+Head Shots:
+Ammo Used:
+Damage Dealt:
+Pain Received:
+Games Played:
+Games Won:
+Games Lost:
+Time:
+Distance:
+Medals Won:
+   Accuracy:
+   Head Shot:
+   KillMaster:
+   Survivor:
+Your Title:
+Back
+Completed Challenges
+Back
+Options
+Highlight Pickups
+Highlight Players
+Highlight Teams
+Radar
+Back
+Weapons
+Set:
+Current Weapon Setup:
+1:
+2:
+3:
+4:
+5:
+6:
+Back
+Save Game Setup
+Do you want to save*over your original*game file?
+Save Over Original
+Save Copy
+Do Not Save
+Game File Name
+Enter a name for your*game setup file:
+Confirm
+Your player file is*always saved*automatically.
+Save a copy now?
+No
+Yes
+Drop Out
+Are you sure you*want to drop out?
+Drop Out
+Cancel
+Control
+Control Style
+Reverse Pitch
+Look Ahead
+Head Roll
+Auto-Aim
+Aim Control
+Sight on Screen
+Show Target
+Zoom Range
+Ammo on Screen
+Gun Function
+Paintball
+Back
+Hold
+Toggle
+Combat Options
+Briefcase Options
+Hacker Options
+Pop a Cap Options
+Hill Options
+Capture Options
+Boxes Options
+One-Hit Kills
+Slow Motion
+Fast Movement
+Display Team
+No Radar
+No Auto-Aim
+No Player Highlight
+No Pickup Highlight
+Highlight Target
+Highlight Terminal
+Boxes on Radar
+Hill on Radar
+Mobile Hill
+Time
+Show on Radar
+Highlight Briefcase
+Show on Radar
+Back
+Off
+On
+Smart
+Scenario
+Free for All!
+-Teamwork-
+Combat
+Hold the Briefcase
+Hacker Central
+Pop a Cap
+King of the Hill
+Capture the Case
+Touch That Box
+Combat
+Briefcase
+Hacker
+Pop
+Hill
+Capture
+Boxes
+Game Over
+Title:
+Weapon of Choice:
+Awards:
+1st*
+2nd*
+3rd*
+4th*
+5th*
+6th*
+7th*
+8th*
+9th*
+10th*
+11th*
+12th*
+Player Ranking*
+Deaths*
+Score*
+Team Ranking*
+Stats for %s
+Suicides
+Deaths
+Kills
+Inventory
+Control
+Game Time:
+End Game
+Pause
+Unpause
+End Game
+Are you sure?
+Cancel
+End Game
+PerfectHead*
+Load A Saved Head*
+Make A New Head*
+Edit A Loaded Head*
+Edit A PerfectHead*
+Choose slot to edit:*
+Cancel*
+Make A New Head*
+Load A Saved Head*
+Where do you want to be able*
+to use this head?*
+Combat Simulator*
+All Missions*
+Both*
+Cancel*
+Camera Setup*
+Insert your camera into your*
+Game Boy Pak.*
+Then, insert your Game Boy Pak*
+into any controller.*
+OK
+Cancel
+Error
+Game Boy Camera Not Detected!*
+Please check all connections*
+and try again.*
+Cancel*
+Choose Camera*
+More than one camera detected.*
+Please select which camera you*want to use*
+OK
+Cancel
+PerfectHead*
+Take A Picture Now*
+Load Picture From Camera*
+Cancel*
+Load From Camera*
+Choose picture to read from camera:*
+Cancel*
+Take Picture*
+Shoot!*
+Cancel*
+Keep Picture*
+Try Again*
+Load PerfectHead*
+Insert the Controller Pak*
+containing the head you*
+wish to load into any*
+controller.*
+Controller Pak:*
+Cancel*
+Source:*
+Pak 1
+Pak 2
+Pak 3
+Pak 4
+<none>
+PerfectHead Editor*
+Take Another Picture*
+Change Head*
+Position Picture*
+Color Face & Hair*
+Shape Head*
+Remove Head*
+Cancel Changes*
+Keep Changes*
+Shape Head*
+Depth*
+OK
+Cancel
+Position Image*
+Brightness*
+OK
+Cancel
+Choose Head*
+OK
+Cancel
+Remove PerfectHead*
+Are you sure you want to*
+remove this head from memory?*
+Delete*
+Cancel*
+Cancel Changes*
+Are you sure you want to*
+throw away your changes?*
+Throw Away*
+Go Back To Editor*
+Save PerfectHead*
+You have edited this head.*
+Do you want to keep your changes?*
+Keep*
+Revert*
+Save PerfectHead*
+Your changes will be kept in memory.*
+Would you like to save your changes*
+to the Controller Pak?*
+Save*
+Don't Save*
+Save PerfectHead*
+You can now save your head on to*
+a Controller Pak if you wish.*
+If you want to do this, please*
+ensure a Controller Pak is inserted*
+and choose "Save".*
+Save*
+Don't Save*
+Head Complete!*
+To use your head in the combat simulator,*
+select the head from the character menu*
+of the player/simulant settings menu.*
+Your Mission heads will now appear*
+in any of the missions you play.*
+You can now edit your head further if you wish.*
+Finish*
+Edit Head*
+Head Color*
+Face:*
+Hairstyle:*
+OK
+Cancel
+Press the B Button to go back.
+Hangar Information
+Holotraining
+Device List
+Information
+Locations
+Vehicles
+Character Profiles
+Other Information
+Training Stats
+Time Taken:
+Completed!
+Failed!
+Ok
+Resume
+Cancel
+Abort
+Character Profile
+Name:
+Age:
+Race:
+Press the B Button to go back.
+Cheats*
+It is now safe to turn off your computer.*
+Cancel
+Bronze
+Silver
+Gold
+Difficulty
+Difficulty:
+Select Difficulty:
+   *
+Weapon
+Training Info
+Training Stats
+Completed!
+Score:
+Targets Destroyed:
+Difficulty:
+Time Taken:
+Weapon:
+Accuracy:
+Not Failed
+Out of Ammo
+Time Over
+Score Unattainable
+Too Inaccurate
+Bull's-eye
+Zone 1
+Zone 2
+Zone 3
+Hit total
+Scoring
+10
+5
+2
+1
+Ammo Limit:
+Time Limit:
+Min Accuracy:
+Goal Targets:
+Goal Score:
+Cheats
+Done
+Warning
+If you activate any cheats, then you*will be unable to progress further in the game*while those cheats are active.
+OK
+Cancel
+Player %d: 
+Press START!
+Searching for Camera!*
+Calibrating Camera*
+Downloading Image*
+Loading Image*
+Saving Image*
+Transfering Image*
+Uploading Segment*
+Checking Controller Pak
+Getting PerfectHead*
+Saving PerfectHead*
+Auto Camera Adjustment*
+Please Wait...

@@ -326,7 +326,6 @@ void lvReset(s32 stagenum)
 	sparksReset();
 	weatherReset();
 	lvResetMiscSfx();
-	langClear();
 
 	switch (g_Vars.stagenum) {
 	case STAGE_ESCAPE:
@@ -1987,11 +1986,6 @@ void lvStop(void)
 
 	if (g_MiscAudioHandle && sndGetState(g_MiscAudioHandle)) {
 		audioStop(g_MiscAudioHandle);
-	}
-
-	if (g_Vars.stagenum < STAGE_TITLE) {
-		s32 bank = langGetLangBankIndexFromStagenum(g_Vars.stagenum);
-		langClearBank(bank);
 	}
 
 	chrmgrStop();

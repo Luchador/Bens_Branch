@@ -13,7 +13,7 @@ extern s32 g_LangBufferSize;
 
 void langReset(s32 stagenum)
 {
-	s32 i;
+	/*s32 i;
 	s32 size;
 
 	for (i = 0; i < ARRAYCOUNT(g_LangBanks); i++) {
@@ -42,5 +42,5 @@ void langReset(s32 stagenum)
 	if (stagenum == STAGE_CREDITS) {
 		g_LoadType = LOADTYPE_LANG;
 		g_LangBanks[LANGBANK_TITLE] = fileLoadToNew(langGetFileId(LANGBANK_TITLE), FILELOADMETHOD_DEFAULT, LOADTYPE_LANG);
-	}
+	}*/
 }

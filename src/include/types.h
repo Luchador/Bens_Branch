@@ -3111,6 +3111,12 @@ struct stagetableentry {
 	/*0x3a*/ u16 extragunmem;
 };
 
+struct langbank {
+	u16 id;
+	u32 begin;
+	u32 end;
+};
+
 struct mpweaponset {
 	/*0x00*/ u16 name;
 	/*0x02*/ u8 slots[NUM_MPWEAPONSLOTS];
@@ -4628,7 +4634,7 @@ struct miscbio {
 struct hangarbio {
 	u32 name;
 	u32 description;
-	u32 unk08;
+	u32 subheading;
 	u32 unk0c;
 };
 

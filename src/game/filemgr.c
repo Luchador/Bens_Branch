@@ -2469,19 +2469,19 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(s32 operation, struct me
 					g_CharsHandelGothicMd, g_FontHandelGothicMd, renderdata->colour, viGetWidth(), viGetHeight(), 0, 1);
 
 			// Prepare and render stage name
-			y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 16 : 18);
+			y = renderdata->y + 18;
 			x = renderdata->x + 62;
 
 			if (stage > 0) {
 				sprintf(buffer, "%s %s",
-						langGet(g_SoloStages[stage - 1].name1),
-						langGet(g_SoloStages[stage - 1].name2));
+					langRemoveNewline(langGet(g_SoloStages[stage - 1].name1)),
+					langGet(g_SoloStages[stage - 1].name2));
 			} else {
 				// "New Recruit"
 				strcpy(buffer, langGet(L_OPTIONS_404));
 			}
 
-			strcat(buffer, "\n");
+			strcat(buffer, "\0");
 			gdl = textRenderProjected(gdl, &x, &y, buffer,
 					g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 
@@ -2491,10 +2491,10 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(s32 operation, struct me
 
 			if (days > 0) {
 				// "Mission Time:"
-				sprintf(buffer, "%s %d:%02d:%02d", langGet(L_OPTIONS_405), days, hours, minutes);
+				sprintf(buffer, "%s %d:%02d:%02d", langRemoveNewline(langGet(L_OPTIONS_405)), days, hours, minutes);
 			} else {
 				// "Mission Time:"
-				sprintf(buffer, "%s %02d:%02d", langGet(L_OPTIONS_405), hours, minutes);
+				sprintf(buffer, "%s %02d:%02d", langRemoveNewline(langGet(L_OPTIONS_405)), hours, minutes);
 			}
 
 			// Useless - textwidth and textheight are not used

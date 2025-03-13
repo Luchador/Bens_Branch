@@ -2729,7 +2729,6 @@ s16 playerGetFbHeight(void)
 	return height;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 bool playerHasSharedViewport(void)
 {
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
@@ -2740,7 +2739,6 @@ bool playerHasSharedViewport(void)
 
 	return (g_InCutscene && !g_MainIsEndscreen) || menuGetRoot() == MENUROOT_COOPCONTINUE;
 }
-#endif
 
 s16 playerGetViewportWidth(void)
 {

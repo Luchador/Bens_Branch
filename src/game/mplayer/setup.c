@@ -4643,9 +4643,6 @@ struct menudialogdef g_MpChallengeListOrDetailsViaAdvChallengeMenuDialog = {
 #if VERSION >= VERSION_NTSC_1_0
 	0x00000808,
 	&g_MpAdvancedSetupViaAdvChallengeMenuDialog,
-#else
-	MENUDIALOGFLAG_DROPOUTONCLOSE,
-	&g_MpAdvancedSetupMenuDialog,
 #endif
 };
 
@@ -4655,7 +4652,7 @@ struct menuitem g_MpConfirmChallengeMenuItems[] = {
 		DESCRIPTION_MPCONFIG,
 		0,
 		0x0000007c,
-		PAL ? 0x41 : 0x37,
+		0x37,
 		NULL,
 	},
 	{
@@ -5764,7 +5761,6 @@ struct menuitem g_MpQuickGoMenuItems[] = {
 		0,
 		(void *)&g_MpReadyMenuDialog,
 	},
-#if VERSION >= VERSION_NTSC_1_0
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
@@ -5773,7 +5769,6 @@ struct menuitem g_MpQuickGoMenuItems[] = {
 		0,
 		(void *)&g_MpLoadPlayerMenuDialog,
 	},
-#endif
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,

@@ -10,15 +10,10 @@ void langReset(s32 stagenum);
 void langTick(void);
 
 u32 langGetLangBankIndexFromStagenum(s32 stagenum);
-s32 langGetFileId(s32 bank);
 void langInit();
-void langLoadStageText(u8);
-void langClear();
-void langLoad(s32 bank);
-void langLoadToAddr(s32 bank, u8 *dst, s32 size);
-void langClearBank(s32 bank);
 char *langGet(s32 textid);
 void langReload(void);
+char *langRemoveNewline(char *str);
 
 #define LANGBANK_AME       0x01
 #define LANGBANK_ARCH      0x02
@@ -76,6 +71,7 @@ void langReload(void);
 #define LANGBANK_MP12      0x3c
 #define LANGBANK_MP13      0x3d
 #define LANGBANK_MP15      0x3f
+#define LANGBANK_MISSION 0x40
 
  enum l_ame {
 	L_AME_000 = 0x200,
@@ -1902,6 +1898,30 @@ enum l_misc {
 	L_MISC_473,
 	L_MISC_474,
 	L_MISC_475,
+	L_MISC_476, 
+	L_MISC_477, 
+	L_MISC_478, 
+	L_MISC_479, 
+	L_MISC_480, 
+	L_MISC_481,
+ 	L_MISC_482, 
+ 	L_MISC_483,
+  	L_MISC_484, 
+ 	L_MISC_485, 
+ 	L_MISC_486, 
+	L_MISC_487, 
+	L_MISC_488, 
+	L_MISC_489, 
+	L_MISC_490, 
+	L_MISC_491, 
+	L_MISC_492, 
+	L_MISC_493, 
+	L_MISC_494, 
+	L_MISC_495, 
+	L_MISC_496, 
+	L_MISC_497, 
+	L_MISC_498,
+	L_MISC_499,
 	L_MISC_END
 };
 

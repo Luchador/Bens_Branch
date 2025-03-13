@@ -241,7 +241,7 @@ extern struct seqchannel g_SeqChannels[3];
 extern u32 g_AudioXReasonsActive[4];
 extern s32 g_MusicXReasonMinDurations[4];
 extern s32 g_MusicXReasonMaxDurations[4];
-extern uintptr_t *g_LangBanks[64];
+extern struct langbank g_LangBanks[29];
 extern struct texture *g_Textures;
 extern struct texpool g_TexSharedPool;
 extern struct texcacheitem g_TexCacheItems[150];

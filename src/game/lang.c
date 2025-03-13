@@ -21,191 +21,68 @@
 
 u16 *g_FrameBuffers[NUM_FRAMEBUFFERS];
 
-/**
- * Officially, the NTSC versions are American English only, while the PAL
- * versions support British English, French, German, Italian and Spanish, and
- * the Japanese version is Japanese only. However all versions actually have
- * support for all 7 languages, despite some being inaccessible and not even
- * translated.
- *
- * All strings are categorised into areas, which we call banks. There is one
- * bank per stage, as well as some common banks such as menus and weapon names.
- * Each bank contains 7 files; one for each translation.
- *
- * An example language filename is LoptionsE. "options" is the bank name, and E
- * means it's the American English file.
- *
- * The list of suffixes are:
- * E - American English
- * J - Japanese
- * P - British English (P is for PAL)
- * _str_f = French
- * _str_g = German
- * _str_i = Italian
- * _str_s = Spanish
- *
- * Banks are loaded based on the current stage. When loading a bank, only the
- * current translation is loaded.
- *
- * Text is referenced using a 16 bit text ID. The text ID is made up of a 7-bit
- * bank index and a 9-bit string index within that bank:
- *
- *     bbbbbbbs ssssssss
- *
- * For versions prior to PAL, the language files are loaded during stage load
- * and allocated from memp. This method doesn't work for PAL because PAL
- * supports changing the language mid-stage and memp allocations cannot be freed
- * until a new stage is loaded. So for PAL, during stage load a single buffer is
- * allocated from memp to hold all loaded language files. The buffer is
- * repopulated when the language is changed, and the lang banks point to their
- * relevant offsets within that buffer.
- */
-
-TextData *g_TextMissionData;
 TextData *g_TextGunData;
-TextData *g_TextMiscData;
+TextData *g_TextTitleData;
 TextData *g_TextMPMenuData;
+TextData *g_TextPropObjData;
 TextData *g_TextMPWeaponsData;
 TextData *g_TextOptionsData;
-TextData *g_TextPropObjData;
-TextData *g_TextTitleData;
+TextData *g_TextMiscData;
+TextData *g_TextameData;
+TextData *g_TextearData;
+TextData *g_TextarkData;
+TextData *g_TexteldData;
+TextData *g_TextpeteData;
+TextData *g_TextdepoData;
+TextData *g_TextlueData;
+TextData *g_TextlipData;
+TextData *g_TexttraData;
+TextData *g_TextcaveData;
+TextData *g_TextritData;
+TextData *g_TextaztData;
+TextData *g_TextdamData;
+TextData *g_TextpamData;
+TextData *g_TextimpData;
+TextData *g_TextleeData;
+TextData *g_TextshoData;
+TextData *g_TextwaxData;
+TextData *g_TextsevData;
+TextData *g_TextstatData;
+TextData *g_TextateData;
+TextData *g_TextdishData;
 
-char *g_FullPath;
-
-uintptr_t *g_LangBanks[64];
-
-u16 g_LangFiles[] = {
-	/* 0*/ 0,
-	/* 1*/ FILE_LAMEE,
-	/* 2*/ FILE_LARCHE,
-	/* 3*/ FILE_LARKE,
-	/* 4*/ FILE_LASHE,
-	/* 5*/ FILE_LAZTE,
-	/* 6*/ FILE_LCATE,
-	/* 7*/ FILE_LCAVEE,
-	/* 8*/ FILE_LARECE,
-	/* 9*/ FILE_LCRADE,
-	/*10*/ FILE_LCRYPE,
-	/*11*/ FILE_LDAME,
-	/*12*/ FILE_LDEPOE,
-	/*13*/ FILE_LDESTE,
-	/*14*/ FILE_LDISHE,
-	/*15*/ FILE_LEARE,
-	/*16*/ FILE_LELDE,
-	/*17*/ FILE_LIMPE,
-	/*18*/ FILE_LJUNE,
-	/*19*/ FILE_LLEEE,
-	/*20*/ FILE_LLENE,
-	/*21*/ FILE_LLIPE,
-	/*22*/ FILE_LLUEE,
-	/*23*/ FILE_LOATE,
-	/*24*/ FILE_LPAME,
-	/*25*/ FILE_LPETEE,
-	/*26*/ FILE_LREFE,
-	/*27*/ FILE_LRITE,
-	/*28*/ FILE_LRUNE,
-	/*29*/ FILE_LSEVBE,
-	/*30*/ FILE_LSEVE,
-	/*31*/ FILE_LSEVXE,
-	/*32*/ FILE_LSEVXBE,
-	/*33*/ FILE_LSHOE,
-	/*34*/ FILE_LSILOE,
-	/*35*/ FILE_LSTATE,
-	/*36*/ FILE_LTRAE,
-	/*37*/ FILE_LWAXE,
-	/*38*/ FILE_LGUNE,
-	/*39*/ FILE_LTITLEE,
-	/*40*/ FILE_LMPMENUE,
-	/*41*/ FILE_LPROPOBJE,
-	/*42*/ FILE_LMPWEAPONSE,
-	/*43*/ FILE_LOPTIONSE,
-	/*44*/ FILE_LMISCE,
-	/*45*/ FILE_LUFFE,
-	/*46*/ FILE_LOLDE,
-	/*47*/ FILE_LATEE,
-	/*48*/ FILE_LLAME,
-	/*49*/ FILE_LMP1E,
-	/*50*/ FILE_LMP2E,
-	/*51*/ FILE_LMP3E,
-	/*52*/ FILE_LMP4E,
-	/*53*/ FILE_LMP5E,
-	/*54*/ FILE_LMP6E,
-	/*55*/ FILE_LMP7E,
-	/*56*/ FILE_LMP8E,
-	/*57*/ FILE_LMP9E,
-	/*58*/ FILE_LMP10E,
-	/*59*/ FILE_LMP11E,
-	/*60*/ FILE_LMP12E,
-	/*61*/ FILE_LMP13E,
-	/*62*/ FILE_LMP14E,
-	/*63*/ FILE_LMP15E,
-};
-
-u16 g_TextFiles[] = {
-	/* 0*/ 0,
-	/* 1*/ FILE_LAMEE,
-	/* 2*/ FILE_LARCHE,
-	/* 3*/ FILE_LARKE,
-	/* 4*/ FILE_LASHE,
-	/* 5*/ FILE_LAZTE,
-	/* 6*/ FILE_LCATE,
-	/* 7*/ FILE_LCAVEE,
-	/* 8*/ FILE_LARECE,
-	/* 9*/ FILE_LCRADE,
-	/*10*/ FILE_LCRYPE,
-	/*11*/ FILE_LDAME,
-	/*12*/ FILE_LDEPOE,
-	/*13*/ FILE_LDESTE,
-	/*14*/ FILE_LDISHE,
-	/*15*/ FILE_LEARE,
-	/*16*/ FILE_LELDE,
-	/*17*/ FILE_LIMPE,
-	/*18*/ FILE_LJUNE,
-	/*19*/ FILE_LLEEE,
-	/*20*/ FILE_LLENE,
-	/*21*/ FILE_LLIPE,
-	/*22*/ FILE_LLUEE,
-	/*23*/ FILE_LOATE,
-	/*24*/ FILE_LPAME,
-	/*25*/ FILE_LPETEE,
-	/*26*/ FILE_LREFE,
-	/*27*/ FILE_LRITE,
-	/*28*/ FILE_LRUNE,
-	/*29*/ FILE_LSEVBE,
-	/*30*/ FILE_LSEVE,
-	/*31*/ FILE_LSEVXE,
-	/*32*/ FILE_LSEVXBE,
-	/*33*/ FILE_LSHOE,
-	/*34*/ FILE_LSILOE,
-	/*35*/ FILE_LSTATE,
-	/*36*/ FILE_LTRAE,
-	/*37*/ FILE_LWAXE,
-	/*38*/ FILE_LGUNE,
-	/*39*/ FILE_LTITLEE,
-	/*40*/ FILE_LMPMENUE,
-	/*41*/ FILE_LPROPOBJE,
-	/*42*/ FILE_LMPWEAPONSE,
-	/*43*/ FILE_LOPTIONSE,
-	/*44*/ FILE_LMISCE,
-	/*45*/ FILE_LUFFE,
-	/*46*/ FILE_LOLDE,
-	/*47*/ FILE_LATEE,
-	/*48*/ FILE_LLAME,
-	/*49*/ FILE_LMP1E,
-	/*50*/ FILE_LMP2E,
-	/*51*/ FILE_LMP3E,
-	/*52*/ FILE_LMP4E,
-	/*53*/ FILE_LMP5E,
-	/*54*/ FILE_LMP6E,
-	/*55*/ FILE_LMP7E,
-	/*56*/ FILE_LMP8E,
-	/*57*/ FILE_LMP9E,
-	/*58*/ FILE_LMP10E,
-	/*59*/ FILE_LMP11E,
-	/*60*/ FILE_LMP12E,
-	/*61*/ FILE_LMP13E,
-	/*62*/ FILE_LMP14E,
-	/*63*/ FILE_LMP15E,
+// Each language bank by ID, a beginning offset, and an end offset to match with the language enums in lang.h
+struct langbank g_LangBanks[29] = {
+	//       id,                     begin,     end
+	/*0x00*/ LANGBANK_GUN,           19456,     19700,
+	/*0x01*/ LANGBANK_TITLE,         19968,     20120,
+	/*0x02*/ LANGBANK_MPMENU,        20480,     20976,
+	/*0x03*/ LANGBANK_PROPOBJ,       20992,     21044,
+	/*0x04*/ LANGBANK_MPWEAPONS,     21504,     21768,
+	/*0x05*/ LANGBANK_OPTIONS,       22016,     22512,
+	/*0x06*/ LANGBANK_MISC,          22528,     23028,
+	/*0x07*/ LANGBANK_AME,           512,       624,
+	/*0x08*/ LANGBANK_EAR,           7680,      7788,
+	/*0x09*/ LANGBANK_ARK,           1536,      1612,
+	/*0x10*/ LANGBANK_ELD,           8192,      8244,
+	/*0x11*/ LANGBANK_PETE,          12800,     12876,
+	/*0x12*/ LANGBANK_DEPO,          6144,      6228,
+	/*0x13*/ LANGBANK_LUE,           11264,     11340,
+	/*0x14*/ LANGBANK_LIP,           10752,     10860,
+	/*0x15*/ LANGBANK_TRA,           18432,     18520,
+	/*0x16*/ LANGBANK_CAVE,          3584,      3652,
+	/*0x17*/ LANGBANK_RIT,           13824,     13912,
+	/*0x18*/ LANGBANK_AZT,           2560,      2608,
+	/*0x19*/ LANGBANK_DAM,           5632,      5680,
+	/*0x20*/ LANGBANK_PAM,           12288,     12336,
+	/*0x21*/ LANGBANK_IMP,           8704,      8760,
+	/*0x22*/ LANGBANK_LEE,           9728,      9784,
+	/*0x23*/ LANGBANK_SHO,           16896,     16952,
+	/*0x24*/ LANGBANK_WAX,           18944,     18972,
+	/*0x25*/ LANGBANK_SEV,           15360,     15376,
+	/*0x26*/ LANGBANK_STAT,          17920,     17932,
+	/*0x27*/ LANGBANK_ATE,           24064,     24080,
+	/*0x28*/ LANGBANK_DISH,          7168,      7296,
 };
 
 u32 langGetLangBankIndexFromStagenum(s32 stagenum)
@@ -235,16 +112,6 @@ u32 langGetLangBankIndexFromStagenum(s32 stagenum)
 	case STAGE_CRASHSITE:     bank = LANGBANK_AZT; break;
 	case STAGE_AIRBASE:       bank = LANGBANK_CAVE; break;
 	case STAGE_DUEL:          bank = LANGBANK_ATE; break;
-	case STAGE_MP_BASE:       bank = LANGBANK_MP1; break;
-	case STAGE_MP_AREA52:     bank = LANGBANK_MP3; break;
-	case STAGE_MP_WAREHOUSE:  bank = LANGBANK_MP4; break;
-	case STAGE_MP_CARPARK:    bank = LANGBANK_MP5; break;
-	case STAGE_MP_RUINS:      bank = LANGBANK_MP9; break;
-	case STAGE_MP_SEWERS:     bank = LANGBANK_MP10; break;
-	case STAGE_MP_FELICITY:   bank = LANGBANK_MP11; break;
-	case STAGE_MP_FORTRESS:   bank = LANGBANK_MP12; break;
-	case STAGE_MP_VILLA:      bank = LANGBANK_MP13; break;
-	case STAGE_MP_GRID:       bank = LANGBANK_MP15; break;
 	case STAGE_MBR:           bank = LANGBANK_WAX; break;
 	default:
 		while (true) {
@@ -258,7 +125,7 @@ u32 langGetLangBankIndexFromStagenum(s32 stagenum)
 TextData* loadFileIntoMemory(const char *filename) {
 	FILE *file = fopen(filename, "r");
 	if(!file) {
-		perror("Error opening file");
+		debug_log("Error opening file\n", 0);
 		return NULL;
 	}
 
@@ -278,33 +145,6 @@ TextData* loadFileIntoMemory(const char *filename) {
 	return filedata;
 }
 
-
-#define PATH_SEPARATOR "/"
-
-char* combinePaths(const char *basePath, const char *subPath) {
-    if (!basePath || !subPath) return NULL;  // Handle null inputs
-
-    size_t baseLen = strlen(basePath);
-    size_t subLen = strlen(subPath);
-    size_t totalLen = baseLen + subLen + 2;  // Extra for separator & null terminator
-
-    char *fullPath = malloc(totalLen);
-    if (!fullPath) return NULL;  // Memory allocation failed
-
-    strcpy(fullPath, basePath);
-
-    // Ensure there's exactly **one** path separator between basePath and subPath
-    if (baseLen > 0 && fullPath[baseLen - 1] != PATH_SEPARATOR[0]) {
-        strcat(fullPath, PATH_SEPARATOR);
-    }
-    if (subLen > 0 && subPath[0] == PATH_SEPARATOR[0]) {
-        subPath++;  // Avoid double separator ("/subpath" case)
-    }
-
-    strcat(fullPath, subPath);
-    return fullPath;  // Caller must free() this memory
-}
-
 char* buildDynamicPath(const char *directory, const char *filename) {
     size_t len = strlen(directory) + strlen(filename) + 2; // +1 for `/`, +1 for `\0`
     char *path = malloc(len);
@@ -314,151 +154,195 @@ char* buildDynamicPath(const char *directory, const char *filename) {
     return path;
 }
 
+// Replaces asterisks with newline characters. Asterisks are used to represent new lines in the PD text files.
+void langReplaceAsterisk(TextData *data) {
+    
+	int i = 0;
+	for(i = 0; i < data->count; i++)
+	{
+		char *str = data->lines[i];
+		while (*str) {
+			if (*str == '*') {
+				*str = '\n';
+			}
+			str++;
+		}
+	}
+}
+
+char* langRemoveNewline(char *str) {
+    char *pos = strchr(str, '\n');  // Find the first newline
+    if (pos) {
+        *pos = '\0';  // Replace it with null terminator
+    }
+
+	return str;
+}
+
+
 const char* langGetText(TextData *filedata, int line) {
 	if (line < 1 || line > filedata->count) {
 		return NULL;
 	}
-	return filedata->lines[line - 1];
+
+    if(filedata->lines[line - 1]) {
+		return filedata->lines[line - 1];
+	}
+	else {
+		return "no string found \n";
+	}
 }
 
 
-// Fetch the text data for a particular stage
+// Ben's comment: Fetch the text data for everything. Unlike the original we won't be swapping out text banks on stage loads. This makes things far simpler.
 void langInit()
 {
-	/*char *modpath = fsGetModDir();
-	char *textpath = "text";
-	g_FullPath = combinePaths(modpath, textpath);
+	char *fullpath = "./" DEFAULT_BASEDIR_NAME "/text"; // ./data/text
 
-	char* gundatadir = buildDynamicPath(g_FullPath, "LgunE.txt");
-	char* miscdatadir = buildDynamicPath(g_FullPath, "LmiscE.txt");
-	char* mpmenudatadir = buildDynamicPath(g_FullPath, "LmpmenuE.txt");
-	char* mpweaponsdatadir = buildDynamicPath(g_FullPath, "LmpweaponsE.txt");
-	char* optionsdatadir = buildDynamicPath(g_FullPath, "LoptionsE.txt");
-	char* propobjdatadir = buildDynamicPath(g_FullPath, "LpropobjE.txt");
-	char* titledatadir = buildDynamicPath(g_FullPath, "LtitleE.txt");
+	g_TextGunData = loadFileIntoMemory(buildDynamicPath(fullpath, "LgunE.txt"));
+	g_TextMiscData = loadFileIntoMemory(buildDynamicPath(fullpath, "LmiscE.txt"));
+	g_TextMPMenuData = loadFileIntoMemory(buildDynamicPath(fullpath, "LmpmenuE.txt"));
+	g_TextMPWeaponsData = loadFileIntoMemory(buildDynamicPath(fullpath, "LmpweaponsE.txt"));
+	g_TextOptionsData = loadFileIntoMemory(buildDynamicPath(fullpath, "LoptionsE.txt"));
+	g_TextPropObjData = loadFileIntoMemory(buildDynamicPath(fullpath, "LpropobjE.txt"));
+	g_TextTitleData = loadFileIntoMemory(buildDynamicPath(fullpath, "LtitleE.txt"));
+	g_TextameData = loadFileIntoMemory(buildDynamicPath(fullpath, "LameE.txt"));
+	g_TextearData = loadFileIntoMemory(buildDynamicPath(fullpath, "LearE.txt"));
+	g_TextarkData = loadFileIntoMemory(buildDynamicPath(fullpath, "LarkE.txt"));
+	g_TexteldData = loadFileIntoMemory(buildDynamicPath(fullpath, "LeldE.txt"));
+	g_TextpeteData = loadFileIntoMemory(buildDynamicPath(fullpath, "LpeteE.txt"));
+	g_TextdepoData = loadFileIntoMemory(buildDynamicPath(fullpath, "LdepoE.txt"));
+	g_TextlueData = loadFileIntoMemory(buildDynamicPath(fullpath, "LlueE.txt"));
+	g_TextlipData = loadFileIntoMemory(buildDynamicPath(fullpath, "LlipE.txt"));
+	g_TexttraData = loadFileIntoMemory(buildDynamicPath(fullpath, "LtraE.txt"));
+	g_TextcaveData = loadFileIntoMemory(buildDynamicPath(fullpath, "LcaveE.txt"));
+	g_TextritData = loadFileIntoMemory(buildDynamicPath(fullpath, "LritE.txt"));
+	g_TextaztData = loadFileIntoMemory(buildDynamicPath(fullpath, "LaztE.txt"));
+	g_TextdamData = loadFileIntoMemory(buildDynamicPath(fullpath, "LdamE.txt"));
+	g_TextpamData = loadFileIntoMemory(buildDynamicPath(fullpath, "LpamE.txt"));
+	g_TextimpData = loadFileIntoMemory(buildDynamicPath(fullpath, "LimpE.txt"));
+	g_TextleeData = loadFileIntoMemory(buildDynamicPath(fullpath, "LleeE.txt"));
+	g_TextshoData = loadFileIntoMemory(buildDynamicPath(fullpath, "LshoE.txt"));
+	g_TextwaxData = loadFileIntoMemory(buildDynamicPath(fullpath, "LwaxE.txt"));
+	g_TextsevData = loadFileIntoMemory(buildDynamicPath(fullpath, "LsevE.txt"));
+	g_TextstatData = loadFileIntoMemory(buildDynamicPath(fullpath, "LstatE.txt"));
+	g_TextateData = loadFileIntoMemory(buildDynamicPath(fullpath, "LateE.txt"));
+	g_TextdishData = loadFileIntoMemory(buildDynamicPath(fullpath, "LdishE.txt"));
 
-	g_TextGunData = loadFileIntoMemory(gundatadir);
-	g_TextMiscData = loadFileIntoMemory(miscdatadir);
-	g_TextMPMenuData = loadFileIntoMemory(mpmenudatadir);
-	g_TextMPWeaponsData = loadFileIntoMemory(mpweaponsdatadir);
-	g_TextOptionsData = loadFileIntoMemory(optionsdatadir);
-	g_TextPropObjData = loadFileIntoMemory(propobjdatadir);
-	g_TextTitleData = loadFileIntoMemory(titledatadir);*/
+	// The original language files use an asterisk to represent a new line. Those asterisks need to be swapped for a newline character.
+	langReplaceAsterisk(g_TextGunData);
+	langReplaceAsterisk(g_TextMiscData);
+	langReplaceAsterisk(g_TextMPMenuData);
+	langReplaceAsterisk(g_TextMPWeaponsData);
+	langReplaceAsterisk(g_TextOptionsData);
+	langReplaceAsterisk(g_TextPropObjData);
+	langReplaceAsterisk(g_TextTitleData);
+	langReplaceAsterisk(g_TextameData);
+	langReplaceAsterisk(g_TextearData);
+	langReplaceAsterisk(g_TextarkData);
+	langReplaceAsterisk(g_TexteldData);
+	langReplaceAsterisk(g_TextpeteData);
+	langReplaceAsterisk(g_TextdepoData);
+	langReplaceAsterisk(g_TextlueData);
+	langReplaceAsterisk(g_TextlipData);
+	langReplaceAsterisk(g_TexttraData);
+	langReplaceAsterisk(g_TextcaveData);
+	langReplaceAsterisk(g_TextritData);
+	langReplaceAsterisk(g_TextaztData);
+	langReplaceAsterisk(g_TextdamData);
+	langReplaceAsterisk(g_TextpamData);
+	langReplaceAsterisk(g_TextimpData);
+	langReplaceAsterisk(g_TextleeData);
+	langReplaceAsterisk(g_TextshoData);
+	langReplaceAsterisk(g_TextwaxData);
+	langReplaceAsterisk(g_TextsevData);
+	langReplaceAsterisk(g_TextstatData);
+	langReplaceAsterisk(g_TextateData);
+	langReplaceAsterisk(g_TextdishData);
+
 }
 
-void langLoadStageText(u8 stagenum)
-{
-	char* missiondatadir;
-	//g_TextMissionData = loadFileIntoMemory(amedatadir);
-
-	/*switch(g_Vars.stagenum)
-	{
-
-	}*/
-}
-
-
-// Free up the memory used in langLoadStageText after the stage ends
-void langClear()
-{
-	if(g_TextMissionData) {
-		for (int i = 0; i < g_TextMissionData->count; i++) {
-			free(g_TextMissionData->lines[i]);  // Free each line
-		}
-		free(g_TextMissionData->lines);
-		free(g_TextMissionData);
-	}
-}
-
-s32 langGetFileId(s32 bank)
-{
-	if(bank > 0 && bank < ARRAYCOUNT(g_LangFiles)) {
-		return g_LangFiles[bank];
-	}
-
-	return 0;
-}
-
-void langLoad(s32 bank)
-{
-	s32 file_id = langGetFileId(bank);
-	g_LoadType = LOADTYPE_LANG;
-	g_LangBanks[bank] = fileLoadToNew(file_id, FILELOADMETHOD_DEFAULT, LOADTYPE_LANG);
-}
-
-void langLoadToAddr(s32 bank, u8 *dst, s32 size)
-{
-	s32 file_id = langGetFileId(bank);
-	g_LoadType = LOADTYPE_LANG;
-	g_LangBanks[bank] = fileLoadToAddr(file_id, FILELOADMETHOD_DEFAULT, dst, size);
-}
-
-void langClearBank(s32 bank)
-{
-	g_LangBanks[bank] = NULL;
-}
-
-/**
- * Resolve a text ID to a string.
- *
- * g_LangBanks is an array of pointers to language file data in RAM. Many of
- * those pointers will be NULL because only the necessary language files are
- * loaded at any given time.
- *
- * The language file data consists of a variable-length array of offsets into
- * the file. Not to be confused with pointers.
- */
 char *langGet(s32 textid)
 {
-	s32 bankindex = textid >> 9;
-	s32 textindex = textid & 0x1ff;
-	uintptr_t *bank = (uintptr_t*)g_LangBanks[bankindex];
-	uintptr_t addr;
-
-	if (bank && bank[textindex]) {
-		addr = (uintptr_t)bank + bank[textindex];
-	} else {
-		addr = 0;
+	if(textid == L_MPWEAPONS_129)
+	{
+		return "Difficulty\n";
 	}
 
-	return (char *)addr;
-}
-
-char *langGet2(u8 bank, s32 textid)
-{
-	char* errorstring = "Text not found. \n";
-
-	/*switch(bank) {
-		case LANGBANK_MISSION:
-			return langGetText(g_TextMissionData, textid);
-		case LANGBANK_GUN:
-			return langGetText(g_TextGunData, textid);
-		case LANGBANK_TITLE:
-			return langGetText(g_TextTitleData, textid);
-		case LANGBANK_MPMENU:
-			return langGetText(g_TextMPMenuData, textid);
-		case LANGBANK_PROPOBJ:
-			return langGetText(g_TextPropObjData, textid);
-		case LANGBANK_MPWEAPONS:
-			return langGetText(g_TextMPWeaponsData, textid);
-		case LANGBANK_OPTIONS:
-			return langGetText(g_TextOptionsData, textid);
-		case LANGBANK_MISC:
-			return langGetText(g_TextMiscData, textid);
-		default:
-			return errorstring;
-	}*/
-	/*s32 bankindex = textid >> 9;
-	s32 textindex = textid & 0x1ff;
-	uintptr_t *bank = (uintptr_t*)g_LangBanks[bankindex];
-	uintptr_t addr;
-
-	if (bank && bank[textindex]) {
-		addr = (uintptr_t)bank + bank[textindex];
-	} else {
-		addr = 0;
-	}*/
-
-	//return (char *)addr;
-	return errorstring;
+	int i = 0;
+	for(i = 0; i < ARRAYCOUNT(g_LangBanks); i++)
+	{
+		if(textid >= g_LangBanks[i].begin && textid < g_LangBanks[i].end)
+		{
+			textid -= g_LangBanks[i].begin - 1;
+			switch(i){
+				case 0:
+					return langGetText(g_TextGunData, textid);
+				case 1:
+					return langGetText(g_TextTitleData, textid);
+				case 2:
+					return langGetText(g_TextMPMenuData, textid);
+				case 3:
+					return langGetText(g_TextPropObjData, textid);
+				case 4:
+					if(textid == L_MPWEAPONS_129 + g_LangBanks[i].end + 1)
+					{
+						return langRemoveNewline(langGetText(g_TextMPWeaponsData, textid)); // Stop the "Difficulty" text from creating a new line on the end screen
+					}
+					return langGetText(g_TextMPWeaponsData, textid);
+				case 5:
+					return langGetText(g_TextOptionsData, textid);
+				case 6:
+					return langGetText(g_TextMiscData, textid);
+				case 7:
+					return langGetText(g_TextameData, textid);
+				case 8:
+					return langGetText(g_TextearData, textid);
+				case 9:
+					return langGetText(g_TextarkData, textid);
+				case 10:
+					return langGetText(g_TexteldData, textid);
+				case 11:
+					return langGetText(g_TextpeteData, textid);
+				case 12:
+					return langGetText(g_TextdepoData, textid);
+				case 13:
+					return langGetText(g_TextlueData, textid);
+				case 14:
+					return langGetText(g_TextlipData, textid);
+				case 15:
+					return langGetText(g_TexttraData, textid);
+				case 16:
+					return langGetText(g_TextcaveData, textid);
+				case 17:
+					return langGetText(g_TextritData, textid);
+				case 18:
+					return langGetText(g_TextaztData, textid);
+				case 19:
+					return langGetText(g_TextdamData, textid);
+				case 20:
+					return langGetText(g_TextpamData, textid);
+				case 21:
+					return langGetText(g_TextimpData, textid);
+				case 22:
+					return langGetText(g_TextleeData, textid);
+				case 23:
+					return langGetText(g_TextshoData, textid);
+				case 24:
+					return langGetText(g_TextwaxData, textid);
+				case 25:
+					return langGetText(g_TextsevData, textid);
+				case 26:
+					return langGetText(g_TextstatData, textid);
+				case 27:
+					return langGetText(g_TextateData, textid);
+				case 28:
+					return langGetText(g_TextdishData, textid);
+				default:
+					return("error \n");
+			}
+		}
+	}
+	
+	return "string not found \n";
 }

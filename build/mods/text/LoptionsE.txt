@@ -93,23 +93,23 @@ Uses Miles Sound System Copyright 1991-1999 RAD Game Tools Inc.*MPEG Layer-3 pla
 
 rare designs on the future <<<*
 Published by Rareware.*
-Perfect Dark*
-Choose Your Reality*
-New...*
-New Agent...*
-Game Files*
-Copy:*
-Delete:*
-Delete Game Notes...*
-Single Player Agent File*
-Combat Simulator Settings File*
-Combat Simulator Player File*
+Perfect Dark: Ben's Branch
+Choose Your Reality
+New...
+New Agent...
+Game Files
+Copy:
+Delete:
+Delete Game Notes...
+Single Player Agent File
+Combat Simulator Settings File
+Combat Simulator Player File
 PerfectHead Files*
 Controller Pak Menu*
 Use this menu to delete game notes*from your Controller Paks.*
 Choose Controller Pak to Edit:*
 Exit*
-Game Pak*
+Game Pak
 Controller Pak 1*
 Controller Pak 2*
 Controller Pak 3*
@@ -173,9 +173,9 @@ The Duel
 Status*
 Abort!*
 Warning*
-Do you want to abort the mission?*
-Cancel*
-Abort*
+Do you want to abort the mission?
+Cancel
+Abort
 Inventory*
 Weapons Available*
 Options*
@@ -187,20 +187,20 @@ Cheats*
 Save Game*
 Change Agent...*
 Warning*
-Do you want to load another agent?*
-Yes*
-No*
-Control Options*
-Control Player 2*
-Control Style*
-Reverse Pitch*
-Look Ahead*
-Head Roll*
-Auto-Aim*
-Aim Control*
-Back*
-Hold*
-Toggle*
+Do you want to load another agent?
+Yes
+No
+Control Options
+Control Player 2
+Control Style
+Reverse Pitch
+Look Ahead
+Head Roll
+Auto-Aim
+Aim Control
+Back
+Hold
+Toggle
 Display Options*
 Display Player 2*
 Sight on Screen*
@@ -211,13 +211,13 @@ Show Gun Function*
 Paintball*
 Subtitles*
 Show Mission Time*
-Back*
+Back
 Video Options*
 Screen Size*
 Ratio*
 Hi-Res*
 2-Player Screen Split*
-Back*
+Back
 Full*
 Wide*
 Cinema*
@@ -229,7 +229,7 @@ Audio Options*
 Sound*
 Music*
 Sound Mode*
-Back*
+Back
 Mono
 Stereo
 Headphone
@@ -245,20 +245,20 @@ Double*
 2.2
 2.3
 2.4
-Briefing*
-Select Difficulty*
-Difficulty*
-Best Time*
-Agent*
-Special Agent*
-Perfect Agent*
-Cancel*
+Briefing
+Select Difficulty
+Difficulty
+Best Time
+Agent
+Special Agent
+Perfect Agent
+Cancel
 Co-Operative Options*
 Radar On*
 Friendly Fire*
 Perfect Buddy*
 Continue*
-Cancel*
+Cancel
 Human
 1 Simulant
 2 Simulants
@@ -268,140 +268,140 @@ Counter-Operative Options*
 Radar On*
 Counter-Operative*
 Continue*
-Cancel*
+Cancel
 Player 1
 Player 2
 Overview*
-Accept*
-Decline*
-Completed*
-Failed*
-Mission Status:*
-Agent Status:*
-Mission Time:*
-Weapon of Choice:*
-Kills:*
-Accuracy:*
-Shot Total:*
-    Head Shots:*
-    Body Shots:*
-    Limb Shots:*
-    Others:*
-Press START*
-Deceased*
-Active*
-Disavowed*
-Failed*
-Completed*
-Aborted*
+Accept
+Decline
+Completed
+Failed
+Mission Status:
+Agent Status:
+Mission Time:
+Weapon of Choice:
+Kills:
+Accuracy:
+Shot Total:
+    Head Shots:
+    Body Shots:
+    Limb Shots:
+    Others:
+Press START
+Deceased
+Active
+Disavowed
+Failed
+Completed
+Aborted
 Retry
 Next Mission
-Accept*
-Decline*
-Objectives*
-Press START*
-Small but Perfect Menu*
-Combat Simulator*
-Training*
-Audio/Video*
-Change Agent*
-Audio/Visual*
-Sound*
-Music*
-Sound Mode*
-Ratio*
-Back*
-< Empty >*
+Accept
+Decline
+Objectives
+Press START
+Small but Perfect Menu
+Combat Simulator
+Training
+Audio/Video
+Change Agent
+Audio/Visual
+Sound
+Music
+Sound Mode
+Ratio
+Back
+< Empty >
 DEL
 CAPS
 CANCEL
 OK
-Combat Simulator Heads*
-Mission Heads*
-Error*
-Cancel*
-The Controller Pak*was not found*in any controller.*
-File was not saved.*
-File would not load.*
-Could not delete the file.*
-Out of memory.*
-This player is already*loaded for this game.*
-has been removed.*
-Controller Pak is damaged or incorrectly inserted.*
-Game note delete failed.*
-Error Loading Game*
-Error Saving Game*
-Error Loading Player*
-Error Saving Player*
-Error Loading PerfectHead*
-Error Saving PerfectHead*
-Error Reading File*
-Error Writing File*
-Error*
-Delete Failed*
-Could not delete the file.*
-- Check that the Controller Pak is*inserted correctly.*
-Cancel*
-There is no space.*
-Cool!*
-File Saved.*
-OK*
-An error occurred while*trying to save.*
-Try Again*
-Save Elsewhere*
-Cancel*
-An error occurred while*trying to load.*
-Try Again*
-Cancel*
-Need Space For Head*
-Choose a head to load over:*
-OK*
-Cancel*
-Save*
-Would you like to save*your file elsewhere?*
-Yes*
-No*
-Please insert the Controller Pak containing your %s into any controller.*
-Please insert the*Controller Pak*you are saving to*into any controller.*
-OK*
-Cancel*
-Select Location*
-Where*
-Spaces*
-Delete Files...*
-Cancel*
+Combat Simulator Heads
+Mission Heads
+Error
+Cancel
+The Controller Pak*was not found*in any controller.
+File was not saved.
+File would not load.
+Could not delete the file.
+Out of memory.
+This player is already*loaded for this game.
+has been removed.
+Controller Pak is damaged or incorrectly inserted.
+Game note delete failed.
+Error Loading Game
+Error Saving Game
+Error Loading Player
+Error Saving Player
+Error Loading PerfectHead
+Error Saving PerfectHead
+Error Reading File
+Error Writing File
+Error
+Delete Failed
+Could not delete the file.
+- Check that the Controller Pak is*inserted correctly.
+Cancel
+There is no space.
+Cool!
+File Saved.
+OK
+An error occurred while*trying to save.
+Try Again
+Save Elsewhere
+Cancel
+An error occurred while*trying to load.
+Try Again
+Cancel
+Need Space For Head
+Choose a head to load over:
+OK
+Cancel
+Save
+Would you like to save*your file elsewhere?
+Yes
+No
+Please insert the Controller Pak containing your %s into any controller.
+Please insert the*Controller Pak*you are saving to*into any controller.
+OK
+Cancel
+Select Location
+Where
+Spaces
+Delete Files...
+Cancel
 Full
-Copy File*
-Select a file to copy:*
-Press B Button to exit.*
-Delete File*
-Select a file to delete:*
-Press B Button to exit.*
-Warning*
-Are you sure you want*to delete this file?*
-Cancel*
-OK*
-Delete Game Note*
-Are you sure you*want to delete*this game note?*
-No*
-Yes*
-Game Notes*
-Delete Game Notes:*
-Note*
-Pages*
-Press the B Button to exit.*
-Empty*
---*
-Pages Free: *
-Pages Free: %d*
-Pages Used: *
-Pages Used: %d*
-Perfect Dark note already exists*on this Controller Pak.*
-There is enough space for*Perfect Dark note.*
-Controller Pak is too full to save note- 1 note*and 28 pages required to save to Controller Pak.*
-Enter Agent Name*
-New...*
-New Agent...*
+Copy File
+Select a file to copy:
+Press B Button to exit.
+Delete File
+Select a file to delete:
+Press B Button to exit.
+Warning
+Are you sure you want*to delete this file?
+Cancel
+OK
+Delete Game Note
+Are you sure you*want to delete*this game note?
+No
+Yes
+Game Notes
+Delete Game Notes:
+Note
+Pages
+Press the B Button to exit.
+Empty
+--
+Pages Free: 
+Pages Free: %d
+Pages Used: 
+Pages Used: %d
+Perfect Dark note already exists*on this Controller Pak.
+There is enough space for*Perfect Dark note.
+Controller Pak is too full to save note- 1 note*and 28 pages required to save to Controller Pak.
+Enter Agent Name
+New...
+New Agent...
 New Recruit
 Mission Time:
 Challenge 1
@@ -434,8 +434,8 @@ Challenge 27
 Challenge 28
 Challenge 29
 Challenge 30
-Special*
-Intro*
+Special
+Intro
 Mission 1 - dataDyne Central*
 Mission 2 - Carrington Villa*
 Mission 3 - G5 Building*
