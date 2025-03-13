@@ -168,8 +168,6 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 	u8 verybadpads[24];
 	u8 badpads[24];
 	f32 padsqdists[24];
-
-	u8 stack1[0x10];
 	f32 xdiff;
 	f32 ydiff;
 	f32 zdiff;
@@ -186,9 +184,7 @@ f32 playerChooseSpawnLocation(f32 chrradius, struct coord *dstpos, RoomNum *dstr
 	s32 p;
 	s32 playercount = PLAYERCOUNT();
 	f32 dstangle;
-	u8 stack2[0x10];
 	struct pad pad;
-	s32 stack3[2];
 	RoomNum tmppadrooms[2];
 	f32 bestsqdist;
 #ifdef AVOID_UB
@@ -446,10 +442,8 @@ void playerStartNewLife(void)
 	g_Vars.currentplayer->damagetype = DAMAGETYPE_7;
 	g_Vars.currentplayer->gunammooff = 0;
 	g_Vars.currentplayer->gunsightoff = 2;
-#ifndef PLATFORM_N64
 	g_Vars.currentplayer->prop->chr->blurdrugamount = 0;
 	g_Vars.currentplayer->prop->chr->poisoncounter = 0;
-#endif
 
 	hudmsgsSetOn(0xffffffff);
 
@@ -1011,14 +1005,9 @@ void playerSpawn(void)
 				g_Vars.currentplayer->prop->chr->blurnumtimesdied = 0;
 			}
 		} else {
-#ifndef PLATFORM_N64
 			if (cheatIsActive(CHEAT_CLOAKINGDEVICE)) {
 				invGiveSingleWeapon(WEAPON_CLOAKINGDEVICE);
-#if VERSION >= VERSION_PAL_FINAL
-				bgunSetAmmoQuantity(AMMOTYPE_CLOAK, TICKS(7200));
-#else
 				bgunSetAmmoQuantity(AMMOTYPE_CLOAK, 7200);
-#endif
 			}
 
 			if (cheatIsActive(CHEAT_PERFECTDARKNESS)) {
@@ -1042,7 +1031,6 @@ void playerSpawn(void)
 				bgunEquipWeapon2(HAND_LEFT, WEAPON_NONE);
 				bgunEquipWeapon2(HAND_RIGHT, mpweapon->weaponnum);
 			} else
-#endif
 			{
 				bgunEquipWeapon2(HAND_LEFT, g_DefaultWeapons[HAND_LEFT]);
 				bgunEquipWeapon2(HAND_RIGHT, g_DefaultWeapons[HAND_RIGHT]);
@@ -1701,8 +1689,6 @@ void playerExecutePreparedWarp(void)
 		memcampos.y = pad.pos.y;
 		memcampos.z = pad.pos.z;
 
-		if (1);
-
 		if (g_WarpType2HasDirection != 1) {
 			look.x = cosf(g_WarpType2Params->look[1]) * sinf(g_WarpType2Params->look[0]);
 			look.y = sinf(g_WarpType2Params->look[1]);
@@ -1793,7 +1779,6 @@ void playerReorientForCutsceneStop(s32 tweenduration60)
 	Mtxf rotmtx;
 	s32 lastframe;
 	f32 theta;
-	u32 stack;
 
 	g_CutsceneTweenDuration60 = tweenduration60;
 	lastframe = animGetNumFrames(g_CutsceneAnimNum) - 1;
@@ -1825,9 +1810,6 @@ void playerTickCutscene(bool arg0)
 	s32 endframe;
 	s8 contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
 	u32 buttons;
-#if PAL
-	u8 stack3[0x2c];
-#endif
 	f32 tweenfrac;
 	f32 sp104;
 	Mtxf spc4;
@@ -1850,24 +1832,14 @@ void playerTickCutscene(bool arg0)
 		g_Vars.cutsceneskip60ths = 0;
 
 		if (g_CutsceneCurAnimFrame60 < endframe) {
-#if PAL
-			g_CutsceneCurAnimFrame240 += g_Vars.lvupdate60freal;
-			g_CutsceneCurAnimFrame60 = floorf(g_CutsceneCurAnimFrame240 + 0.01f);
-#else
 			g_CutsceneCurAnimFrame240 += g_Vars.lvupdate240;
 			g_CutsceneCurAnimFrame60 = g_CutsceneCurAnimFrame240 >> 2;
-#endif
 
 			if (g_Anims[g_CutsceneAnimNum].flags & ANIMFLAG_HASCUTSKIPFRAMES) {
 				while (g_CutsceneCurAnimFrame60 < endframe
 						&& animIsFrameCutSkipped(g_CutsceneAnimNum, g_CutsceneCurAnimFrame60)) {
-#if PAL
-					g_CutsceneCurAnimFrame240 += 1.2f;
-					g_CutsceneCurAnimFrame60 = floorf(g_CutsceneCurAnimFrame240 + 0.01f);
-#else
 					g_CutsceneCurAnimFrame60++;
 					g_CutsceneCurAnimFrame240 += 4;
-#endif
 
 					g_Vars.cutsceneskip60ths++;
 				}
@@ -1951,13 +1923,10 @@ void playerTickCutscene(bool arg0)
 		g_CutsceneCurTotalFrame60f += g_Vars.lvupdate60freal;
 	}
 
-#ifndef PLATFORM_N64
 	if (arg0 && inputKeyJustPressed(VK_ESCAPE)) {
 		buttons |= START_BUTTON;
 	}
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (g_CutsceneCurTotalFrame60f > 30 && (buttons & 0xffffffff)) {
 		g_CutsceneSkipRequested = true;
 
@@ -1969,17 +1938,6 @@ void playerTickCutscene(bool arg0)
 			}
 		}
 	}
-#else
-	if (g_CutsceneCurTotalFrame60f > 30) {
-		if (buttons & 0xffffffff) {
-			g_CutsceneSkipRequested = true;
-		}
-
-		if ((buttons & (B_BUTTON | START_BUTTON)) && g_Vars.autocutplaying) {
-			g_Vars.autocutgroupskip = true;
-		}
-	}
-#endif
 }
 
 f32 playerGetCutsceneBlurFrac(void)
@@ -2744,11 +2702,7 @@ s16 playerGetViewportWidth(void)
 {
 	s16 width;
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (!playerHasSharedViewport())
-#else
-	if ((!g_InCutscene || g_MainIsEndscreen) && menuGetRoot() != MENUROOT_COOPCONTINUE)
-#endif
 	{
 		if (PLAYERCOUNT() >= 3) {
 			// 3/4 players
@@ -5087,11 +5041,7 @@ void playerSetShieldFrac(f32 frac)
 
 s32 playerGetMissionTime(void)
 {
-#if PAL
-	return g_Vars.currentplayer->bondviewlevtime60 * 60 / 50;
-#else
 	return g_Vars.currentplayer->bondviewlevtime60;
-#endif
 }
 
 s32 playerTickBeams(struct prop *prop)

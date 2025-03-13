@@ -85,7 +85,7 @@ struct sndstate *g_BgunAudioHandles[MAX_PLAYERS];
 struct fireslot g_Fireslots[20];
 u32 fill2[1];
 
-Lights1 var80070090 = gdSPDefLights1(0x96, 0x96, 0x96, 0xff, 0xff, 0xff, 0xb2, 0x4d, 0x2e);
+Lights1 g_GunLight = gdSPDefLights1(0x96, 0x96, 0x96, 0xff, 0xff, 0xff, 0xb2, 0x4d, 0x2e);
 
 #ifdef PLATFORM_64BIT
 u32 g_BgunGunMemBaseSizeDefault = 150 * 1024 * 2; // #TODO adjust these values properly
@@ -576,19 +576,11 @@ bool bgun0f098a44(struct hand *hand, s32 time)
 	}
 
 	if (waittimekeyframe >= 0) {
-#if VERSION >= VERSION_PAL_BETA
-		if (hand->unk0cc8_01 && bgun0f09815c(hand) <= zreleasekeyframe) {
-			return false;
-		}
-
-		return (bgun0f09815c(hand) + hand->animframeincfreal >= waittimekeyframe);
-#else
 		if (hand->unk0cc8_01 && (s32)bgun0f09815c(hand) <= zreleasekeyframe) {
 			return false;
 		}
 
 		return (bgun0f09815c(hand) + hand->animframeinc >= waittimekeyframe);
-#endif
 	}
 
 	return true;
@@ -743,7 +735,8 @@ void bgunRefillMagazine(s32 weaponfunc, struct handweaponinfo *info, struct hand
 	}
 }
 
-void bgun0f098f8c(struct handweaponinfo *info, struct hand *hand)
+// Fill magazine when the weapon is drawn
+void bgunFillMagazine(struct handweaponinfo *info, struct hand *hand)
 {
 	s32 i;
 
@@ -754,7 +747,7 @@ void bgun0f098f8c(struct handweaponinfo *info, struct hand *hand)
 	}
 }
 
-bool bgun0f099008(s32 handnum)
+bool bgunDetermineReloadTypeByHand(s32 handnum)
 {
 	struct handweaponinfo info;
 
@@ -1538,9 +1531,6 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 	if (func->flags & FUNCFLAG_NOMUZZLEFLASH) {
 		hand->flashon = false;
 	} else {
-#ifdef PLATFORM_N64
-		hand->flashon = true;
-#else
 		if (g_BgunGeMuzzleFlashes) {
 			if (func->type == INVENTORYFUNCTYPE_SHOOT_SINGLE || (hand->shotstotake & 1)) {
 				hand->flashon = true;
@@ -1548,7 +1538,6 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 		} else {
 			hand->flashon = true;
 		}
-#endif
 	}
 
 	bgunStartSlide(handnum);
@@ -1599,10 +1588,8 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 		}
 
 		if (playsound) {
-#if VERSION >= VERSION_NTSC_1_0
 			OSPri prevpri = osGetThreadPri(0);
 			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
-#endif
 
 			if (hand->audiohandle2 && sndGetState(hand->audiohandle2) != AL_STOPPED) {
 				audioStop(hand->audiohandle2);
@@ -1639,9 +1626,7 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 
 			}
 
-#if VERSION >= VERSION_NTSC_1_0
 			osSetThreadPri(0, prevpri);
-#endif
 		}
 	}
 }
@@ -2542,7 +2527,7 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 				playermgrCreateWeapon(handnum);
 			}
 
-			bgun0f098f8c(info, hand);
+			bgunFillMagazine(info, hand);
 
 			if (weaponHasFlag(info->weaponnum, WEAPONFLAG_THROWABLE)
 					&& (info->weaponnum != WEAPON_REMOTEMINE || handnum != HAND_LEFT)
@@ -7694,7 +7679,7 @@ void bgunRender(Gfx **gdlptr)
 			gdl = beamRender(gdl, &hand->beam, 0, 0);
 
 			if (weaponHasFlag(hand->gset.weaponnum, WEAPONFLAG_00008000)) {
-				gSPSetLights1(gdl++, var80070090);
+				gSPSetLights1(gdl++, g_GunLight);
 				gSPLookAt(gdl++, camGetLookAt());
 			}
 
@@ -8424,13 +8409,13 @@ void bgunTickGameplay(bool triggeron)
 			if (player->playertrigtime240 > TICKS(80)) {
 				gunsfiring[player->curguntofire] = 1;
 
-				if (bgun0f099008(1 - player->curguntofire)
+				if (bgunDetermineReloadTypeByHand(1 - player->curguntofire)
 						|| player->hands[1 - player->curguntofire].triggeron) {
 					gunsfiring[1 - player->curguntofire] = 1;
 				}
 			} else {
 				if (player->playertriggerprev == false &&
-						(bgun0f099008(1 - player->curguntofire) || !bgun0f099008(player->curguntofire))) {
+						(bgunDetermineReloadTypeByHand(1 - player->curguntofire) || !bgunDetermineReloadTypeByHand(player->curguntofire))) {
 					player->curguntofire = 1 - player->curguntofire;
 				}
 
@@ -9457,13 +9442,16 @@ Gfx *bgunDrawHud(Gfx *gdl)
 	if (lefthand->inuse
 			&& weapon->ammos[ammoindex] != NULL
 			&& lefthand->gset.weaponnum != WEAPON_REMOTEMINE) {
-		xpos = viGetViewLeft() / 25;
+		
+		/*xpos = viGetViewLeft() / 25;
 
 		if (playercount == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) && playernum == 1) {
-			xpos -= 14;
+			xpos += 14;
 		} else if (playercount >= 3 && (playernum & 1) == 1) {
-			xpos -= 14;
-		}
+			xpos += 14;
+		}*/
+
+		xpos = 28;
 
 		if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 			gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeL);

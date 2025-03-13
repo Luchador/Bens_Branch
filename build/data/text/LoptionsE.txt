@@ -6,69 +6,69 @@ Failed*
 earth:
    prehistory
 rare presents
-Red*
-Yellow*
-Blue*
-Magenta*
-Cyan*
-Orange*
-Pink*
-Brown*
-Joanna Combat*
-Joanna Trench Coat*
-Joanna Party Frock*
-Joanna Frock (Ripped)*
-Joanna Stewardess*
-Joanna Wet Suit*
-Joanna Aqualung*
-Joanna Arctic*
-Joanna Lab Tech.*
-Elvis*
-Maian*
-Daniel Carrington*
-Carrington Evening Wear*
-Mr. Blonde*
-Cassandra De Vries*
-Trent Easton*
-Jonathan*
-CI Male Lab Technician*
-CI Female Lab Technician*
-CI Soldier*
-dataDyne Shock Trooper*
-dataDyne Female Guard*
-dataDyne Security*
-dataDyne Infantry*
-dataDyne Trooper*
-Secretary*
-Office Suit*
-Office Casual*
-Negotiator*
-dataDyne Sniper*
-G5 Guard*
-G5 SWAT Guard*
-CIA Agent*
-FBI Agent*
-Area 51 Guard*
-Area 51 Trooper*
-Pilot*
-Overalls*
-NSA Bodyguard*
-Male Lab Technician*
-Female Lab Technician*
-dataDyne Lab Technician*
-Biotechnician*
-Alaskan Guard*
-Air Force One Pilot*
-Steward*
-Stewardess*
-Head Stewardess*
-The President*
-NSA Lackey*
-Presidential Security*
-President"s Clone*
-Pelagic II Guard*
-Maian Soldier*
-Dinner Jacket*
+Red
+Yellow
+Blue
+Magenta
+Cyan
+Orange
+Pink
+Brown
+Joanna Combat
+Joanna Trench Coat
+Joanna Party Frock
+Joanna Frock (Ripped)
+Joanna Stewardess
+Joanna Wet Suit
+Joanna Aqualung
+Joanna Arctic
+Joanna Lab Tech.
+Elvis
+Maian
+Daniel Carrington
+Carrington Evening Wear
+Mr. Blonde
+Cassandra De Vries
+Trent Easton
+Jonathan
+CI Male Lab Technician
+CI Female Lab Technician
+CI Soldier
+dataDyne Shock Trooper
+dataDyne Female Guard
+dataDyne Security
+dataDyne Infantry
+dataDyne Trooper
+Secretary
+Office Suit
+Office Casual
+Negotiator
+dataDyne Sniper
+G5 Guard
+G5 SWAT Guard
+CIA Agent
+FBI Agent
+Area 51 Guard
+Area 51 Trooper
+Pilot
+Overalls
+NSA Bodyguard
+Male Lab Technician
+Female Lab Technician
+dataDyne Lab Technician
+Biotechnician
+Alaskan Guard
+Air Force One Pilot
+Steward
+Stewardess
+Head Stewardess
+The President
+NSA Lackey
+Presidential Security
+President"s Clone
+Pelagic II Guard
+Maian Soldier
+Dinner Jacket
 - no controller in controller socket 1 -
 please power off and attach a controller
 DETECTED
@@ -316,45 +316,45 @@ DEL
 CAPS
 CANCEL
 OK
-Combat Simulator Heads*
-Mission Heads*
-Error*
+Combat Simulator Heads
+Mission Heads
+Error
 Cancel
-The Controller Pak*was not found*in any controller.*
-File was not saved.*
-File would not load.*
-Could not delete the file.*
-Out of memory.*
-This player is already*loaded for this game.*
-has been removed.*
-Controller Pak is damaged or incorrectly inserted.*
-Game note delete failed.*
-Error Loading Game*
-Error Saving Game*
-Error Loading Player*
-Error Saving Player*
-Error Loading PerfectHead*
-Error Saving PerfectHead*
-Error Reading File*
-Error Writing File*
-Error*
-Delete Failed*
-Could not delete the file.*
-- Check that the Controller Pak is*inserted correctly.*
+The Controller Pak*was not found*in any controller.
+File was not saved.
+File would not load.
+Could not delete the file.
+Out of memory.
+This player is already*loaded for this game.
+has been removed.
+Controller Pak is damaged or incorrectly inserted.
+Game note delete failed.
+Error Loading Game
+Error Saving Game
+Error Loading Player
+Error Saving Player
+Error Loading PerfectHead
+Error Saving PerfectHead
+Error Reading File
+Error Writing File
+Error
+Delete Failed
+Could not delete the file.
+- Check that the Controller Pak is*inserted correctly.
 Cancel
-There is no space.*
+There is no space.
 Cool!
-File Saved.*
+File Saved.
 OK
-An error occurred while*trying to save.*
-Try Again*
-Save Elsewhere*
-Cancel*
-An error occurred while*trying to load.*
-Try Again*
+An error occurred while*trying to save.
+Try Again
+Save Elsewhere
 Cancel
-Need Space For Head*
-Choose a head to load over:*
+An error occurred while*trying to load.
+Try Again
+Cance
+Need Space For Head
+Choose a head to load over:
 OK
 Cancel
 Save

@@ -182,7 +182,7 @@ Repair Successful*
 The Controller Pak has*been repaired.*
 Repair Failed*
 The Controller Pak *cannot be repaired.*You will not be able to*load from or save to*this Controller Pak.*
-Player Handicaps*
+Player Handicaps
 L/R BUTTONS: 
 UP C BUTTON: 
 LEFT/RIGHT C BUTTONS: 
@@ -217,8 +217,8 @@ Control Style %s %s*
 Hold Weapon button for quick-menu.*Hold Action button to toggle function.*Action+Fire temporarily changes function.*Aim allows you to target accurately.*Aim + Down C Button crouches.*Aim + Up C Button gets up.*
 Turn off all Cheats
 Language Filter*
-USERNAME:*
-PASSWORD:*
+USERNAME:
+PASSWORD:
 Perfect Dark
 Choose Settings:
 Enemy Reaction Speed:
@@ -228,34 +228,34 @@ Enemy Accuracy:
 OK
 Cancel
 Controller Pak Not Found*
-Name:*
-Location:*
-Duplicate File Name*
-already contains*
-a file named*
-Rename File*
-Change Location*
-Cancel*
-Change File Name*
-Enter new file name:*
-The file you are copying*cannot be deleted.*
-ShockSim:%d*
-Target Time:*
-New Cheat Available!:*
-Continue*
-Replay Last Level*
-Save Player*
-Save new player*and statistics?*
-Save Now*
-No Thanks!*
-Confirm player name:*
-The saved file has*been erased due*to corruption*or damage.*
-Continue*
-Error*
-Cannot read Game Boy Game Pak.*Check connections and make sure*correct Game Boy Game Pak is*being used.*
+Name:
+Location:
+Duplicate File Name
+already contains
+a file named
+Rename File
+Change Location
 Cancel
-Error*
-The saved data has*
-been erased due to*
-corruption or damage.*
+Change File Name
+Enter new file name:
+The file you are copying*cannot be deleted.
+ShockSim:%d
+Target Time:
+New Cheat Available!:
+Continue
+Replay Last Level
+Save Player
+Save new player*and statistics?
+Save Now
+No Thanks!
+Confirm player name:
+The saved file has*been erased due*to corruption*or damage.
+Continue
+Error
+Cannot read Game Boy Game Pak.*Check connections and make sure*correct Game Boy Game Pak is*being used.
+Cancel
+Error
+The saved data has
+been erased due to
+corruption or damage.
 Cancel

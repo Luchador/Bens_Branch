@@ -18,6 +18,7 @@ Changes include:
 * Stars added on Mr. Blonde's Revenge
 * Animated water at the bottom of the chasm in Air Base
 * Moved the "Objective Completed/Failed" message down so it doesn't block the center of the screen
+* The game now reads text data from plaintext files instead of compressed files. You can find the text files in data/text and edit them easily.
 
 Bug fixes:
 * Fixed Jonathan being unable to shoot the player in The Duel
@@ -29,6 +30,8 @@ Stage changes:
 
 Note: These changes require alterations to the game's original files. You can find these files in the build/mods folder.
 
+* CI Training: Added more decorations including models contained in the original game's ROM, but never used
+* CI Training: Front doors and hangar doors are openable
 * Investigation: Added tables with microscopes in some lab rooms
 * Investigation: Fixed Night Vision goggles item using the IR Specs model
 * Villa: Brightened up the dock clipping tiles, which were oddly dark
