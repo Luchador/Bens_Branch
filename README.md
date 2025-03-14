@@ -15,8 +15,6 @@ Changes include:
 * Twice the smoke puffs supported
 * Tinted glass does not become fully opaque
 * Laser obstacles stay fully bright even if a room's lights are destroyed
-* Stars added on Mr. Blonde's Revenge
-* Animated water at the bottom of the chasm in Air Base
 * Moved the "Objective Completed/Failed" message down so it doesn't block the center of the screen
 * The game now reads text data from plaintext files instead of compressed files. You can find the text files in data/text and edit them easily.
 
@@ -28,7 +26,7 @@ Bug fixes:
 
 Stage changes:
 
-Note: These changes require alterations to the game's original files. You can find these files in the build/mods folder.
+Note: These changes often require alterations to the game's original files. You can find these files in the build/mods folder.
 
 * CI Training: Added more decorations including models contained in the original game's ROM, but never used
 * CI Training: Front doors and hangar doors are openable
@@ -38,6 +36,8 @@ Note: These changes require alterations to the game's original files. You can fi
 * Villa: Fixed the broken texture underneath the stove hood
 * Villa: Made some vertex coloring tweaks to the bedroom and bathroom
 * Chicago: Fixed the missing window over the canal
+* Air Base: Animated water at the bottom of the chasm
+* Mr. Blonde's Revenge: Stars added to the sky (the lack of stars was probably just an oversight by the original developers)
 
 ## Running (Windows only)
 
