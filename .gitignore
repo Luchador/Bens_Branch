@@ -22,7 +22,7 @@ build/*.addon64
 build/arch.c
 build/*.cmake
 build/CMakeCache.txt
-data/textures
+build/data/textures
 src/assets/*/*.bin
 src/assets/*/*.ctl
 src/assets/*/*.tbl
