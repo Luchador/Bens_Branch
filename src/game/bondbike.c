@@ -21,6 +21,7 @@
 #include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
+#include "game/debug.h"
 #include "lib/joy.h"
 #include "data.h"
 #include "types.h"
@@ -547,20 +548,6 @@ void bbikeUpdateVertical(struct coord *pos)
 
 	func0f065e74(&bike->prop->pos, bike->prop->rooms, pos, newrooms);
 
-#if VERSION < VERSION_NTSC_1_0
-	{
-		s32 i;
-
-		for (i = 0; newrooms[i] != -1; i++) {
-			if (g_Vars.currentplayer->floorroom == newrooms[i]) {
-				newrooms[0] = g_Vars.currentplayer->floorroom;
-				newrooms[1] = -1;
-				break;
-			}
-		}
-	}
-#endif
-
 	bmoveFindEnteredRoomsByPos(g_Vars.currentplayer, pos, newrooms);
 	propDeregisterRooms(g_Vars.currentplayer->prop);
 	roomsCopy(newrooms, g_Vars.currentplayer->prop->rooms);
@@ -819,9 +806,7 @@ void bbikeTick(void)
 	f32 sp1f4;
 	struct coord sp1e8;
 	Mtxf sp1a8;
-#if VERSION >= VERSION_NTSC_1_0
 	s32 j;
-#endif
 	Mtxf sp164;
 	Mtxf sp124;
 	Mtxf spe4;
@@ -836,7 +821,7 @@ void bbikeTick(void)
 	f32 sp70;
 	f32 sqdist;
 
-	static f32 var80070f04 = 0;
+	static f32 hovbikespeed = 0; // Ranges between 0 and 1
 
 	if (g_Vars.lvupdate240 > 0) {
 		g_Vars.currentplayer->bondprevpos.x = g_Vars.currentplayer->prop->pos.x;
@@ -874,19 +859,21 @@ void bbikeTick(void)
 			}
 
 			for (i = 0; i < g_Vars.lvupdate240; i++) {
-				var80070f04 += (sqdist - var80070f04) * (PAL ? 0.003f : 0.0025f);
+				hovbikespeed += (sqdist - hovbikespeed) * (PAL ? 0.003f : 0.0025f);
 			}
 
-			sp200 = 1.0f - (var80070f04 + var80070f04);
+			sp200 = 1.0f - (hovbikespeed + hovbikespeed);
 
-			if (var80070f04 + var80070f04 > 1.0f) {
+			if (hovbikespeed + hovbikespeed > 1.0f) {
 				sp200 = 0.0f;
 			}
 
 			sp200 *= 300.0f;
 
-			psSetPitch(g_Vars.currentplayer->hoverbike, var80070f04, -1);
-			psSetVolume(g_Vars.currentplayer->hoverbike, var80070f04 * 300.0f);
+			g_Vars.currentplayer->hovspeed = hovbikespeed;
+
+			psSetPitch(g_Vars.currentplayer->hoverbike, hovbikespeed, -1);
+			psSetVolume(g_Vars.currentplayer->hoverbike, hovbikespeed * 300.0f);
 			psSetVolume(g_Vars.currentplayer->prop, sp200);
 		}
 

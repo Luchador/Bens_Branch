@@ -3,12 +3,12 @@ CARRINGTON VILLA*
 |Background - **Daniel Carrington is being held hostage at his private villa. A message from Cassandra De Vries has laid out the terms: Daniel's life for the return of the AI known as Dr. Caroll. What dataDyne doesn't know is that the AI was at the villa when they struck. Our guess is that Daniel concealed it safely before they found him.** |Carrington - **Not Available.**|Objective One: - Save the Negotiator**A member of the Institute's staff has volunteered to be used as a distraction to help you get in. She will almost certainly be shot by dataDyne soldiers unless you take out those soldiers quickly. Hit the ground moving.**|Objective Two: - Eliminate Rooftop Snipers**As soon as we got the ransom demand, we did a recon overflight of the villa. An examination of the data revealed that there are several snipers on the rooftops - if you are to move around safely, you'll have to take them out.**|Objective Two: - Activate Wind Generator**The wind generator and power storage device are not active - we suspect Daniel shut them down to deny the dataDyne hit squad access to the villa's systems. Once the power is restored, the door to the villa's lower basement will be open to you.**|Objective Four: - Rescue Carrington**Only Daniel knows the exact whereabouts of Dr. Caroll. Sooner or later dataDyne will figure this out and get to work on Daniel to make him tell them what they want to know. Once they know where the AI is, Daniel's life is forfeit.**END*
 |Background - **Daniel Carrington is being held hostage at his private villa. A message from Cassandra De Vries has laid out the terms: Daniel's life for the return of the AI known as Dr. Caroll. What dataDyne doesn't know is that the AI was at the villa when they struck. Our guess is that Daniel concealed it safely before they found him.** |Carrington - **Not Available.**|Objective One: - Save the Negotiator**A member of the Institute's staff has volunteered to be used as a distraction to help you get in. She will almost certainly be shot by dataDyne soldiers unless you take out those soldiers quickly. Hit the ground moving.**|Objective Two: - Activate Wind Generator**The wind generator and power storage device are not active - we suspect Daniel shut them down to deny the dataDyne hit squad access to the villa's systems. Once the power is restored, the door to the villa's lower basement will be open to you.**|Objective Three: - Rescue Carrington**Only Daniel knows the exact whereabouts of Dr. Caroll. Sooner or later dataDyne will figure this out and get to work on Daniel to make him tell them what they want to know. Once they know where the AI is, Daniel's life is forfeit.**END*
 *
-Save the negotiator*
-Eliminate rooftop snipers*
-Activate wind generator*
-Locate and eliminate dataDyne hackers*
-Rescue Carrington*
-Capture dataDyne guard*
+Save the negotiator
+Eliminate rooftop snipers
+Activate wind generator
+Locate and eliminate dataDyne hackers
+Rescue Carrington
+Capture dataDyne guard
 Negotiator has been killed.
 Snipers have been eliminated.
 Negotiator has escaped to safety.

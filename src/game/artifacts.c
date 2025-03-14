@@ -100,8 +100,6 @@ s32 func0f13c710(f32 arg0)
 	return arg0;
 }
 
-#ifndef PLATFORM_N64
-
 bool artifactTestLos(struct coord *spec, struct coord *roompos, s32 xi, s32 yi)
 {
 	s32 i = 0;
@@ -125,8 +123,6 @@ bool artifactTestLos(struct coord *spec, struct coord *roompos, s32 xi, s32 yi)
 
 	return shotTestLos(&gunpos2d, &gundir2d, &gunpos3d, &gundir3d, &endpos);
 }
-
-#endif
 
 void artifactsCalculateGlaresForRoom(s32 roomnum)
 {

@@ -115,21 +115,8 @@
 #define ALIGNED16 __attribute__ ((aligned (16)))
 #endif
 
-#if VERSION >= VERSION_NTSC_1_0
 #define ROM_COMPANYCODE 0x3459
-#else
-#define ROM_COMPANYCODE 0x3031
-#endif
-
-#if VERSION == VERSION_JPN_FINAL
-#define ROM_GAMECODE    'NPDJ'
-#elif PAL
-#define ROM_GAMECODE    'NPDP'
-#else
 #define ROM_GAMECODE    'NPDE'
-#endif
-
-#define MAX_JPN_CACHE_ITEMS() 124
 
 // These actions are assigned to chr->actiontype
 #define ACT_INIT             0
@@ -4429,6 +4416,7 @@ enum weaponnum {
 #define WEAPONFLAG_00002000          0x00002000
 #define WEAPONFLAG_00004000          0x00004000
 #define WEAPONFLAG_00008000          0x00008000 // Editor: "Special environment mapping"
+#define WEAPONFLAG_TURNUP            0x00010000 // Editor: "Special environment mapping"
 #define WEAPONFLAG_HASHANDS          0x00020000
 #define WEAPONFLAG_HIDEMENUMODEL     0x00040000 // Don't display the rotating model in the inventory menu
 #define WEAPONFLAG_GANGSTA           0x00080000 // Allow turning the gun sideways at close range

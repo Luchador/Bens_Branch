@@ -4,51 +4,31 @@
 #include "data.h"
 #include "types.h"
 
-extern u8 *g_LangBuffer;
-
 void langReset(s32 stagenum);
-void langTick(void);
-
-u32 langGetLangBankIndexFromStagenum(s32 stagenum);
 void langInit();
 char *langGet(s32 textid);
-void langReload(void);
 char *langRemoveNewline(char *str);
 
 #define LANGBANK_AME       0x01
-#define LANGBANK_ARCH      0x02
 #define LANGBANK_ARK       0x03
-#define LANGBANK_ASH       0x04
 #define LANGBANK_AZT       0x05
-#define LANGBANK_CAT       0x06
 #define LANGBANK_CAVE      0x07
-#define LANGBANK_AREC      0x08
-#define LANGBANK_CRAD      0x09
-#define LANGBANK_CRYP      0x0a
 #define LANGBANK_DAM       0x0b
 #define LANGBANK_DEPO      0x0c
-#define LANGBANK_DEST      0x0d
 #define LANGBANK_DISH      0x0e
 #define LANGBANK_EAR       0x0f
 #define LANGBANK_ELD       0x10
 #define LANGBANK_IMP       0x11
-#define LANGBANK_JUN       0x12
 #define LANGBANK_LEE       0x13
-#define LANGBANK_LEN       0x14
 #define LANGBANK_LIP       0x15
 #define LANGBANK_LUE       0x16
-#define LANGBANK_OAT       0x17
 #define LANGBANK_PAM       0x18
 #define LANGBANK_PETE      0x19
-#define LANGBANK_REF       0x1a
 #define LANGBANK_RIT       0x1b
 #define LANGBANK_RUN       0x1c
 #define LANGBANK_SEVB      0x1d
 #define LANGBANK_SEV       0x1e
-#define LANGBANK_SEVX      0x1f
-#define LANGBANK_SEVXB     0x20
 #define LANGBANK_SHO       0x21
-#define LANGBANK_SILO      0x22
 #define LANGBANK_STAT      0x23
 #define LANGBANK_TRA       0x24
 #define LANGBANK_WAX       0x25
@@ -60,18 +40,6 @@ char *langRemoveNewline(char *str);
 #define LANGBANK_OPTIONS   0x2b
 #define LANGBANK_MISC      0x2c
 #define LANGBANK_ATE       0x2f
-#define LANGBANK_LAM       0x30
-#define LANGBANK_MP1       0x31
-#define LANGBANK_MP3       0x33
-#define LANGBANK_MP4       0x34
-#define LANGBANK_MP5       0x35
-#define LANGBANK_MP9       0x39
-#define LANGBANK_MP10      0x3a
-#define LANGBANK_MP11      0x3b
-#define LANGBANK_MP12      0x3c
-#define LANGBANK_MP13      0x3d
-#define LANGBANK_MP15      0x3f
-#define LANGBANK_MISSION 0x40
 
  enum l_ame {
 	L_AME_000 = 0x200,

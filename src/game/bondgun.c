@@ -7,6 +7,7 @@
 #include "game/inv.h"
 #include "game/game_006900.h"
 #include "game/chr.h"
+#include "game/bg.h"
 #include "game/prop.h"
 #include "game/propsnd.h"
 #include "game/game_096360.h"
@@ -50,6 +51,7 @@
 #include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/lib_317f0.h"
+#include "lib/lib_17ce0.h"
 #include "data.h"
 #include "types.h"
 #ifndef PLATFORM_N64
@@ -84,6 +86,8 @@ s32 g_TimeToNextCasingSound;
 struct sndstate *g_BgunAudioHandles[MAX_PLAYERS];
 struct fireslot g_Fireslots[20];
 u32 fill2[1];
+bool g_CloseToWall = 0;
+s32 g_CloseToWallTimer = 0;
 
 Lights1 g_GunLight = gdSPDefLights1(0x96, 0x96, 0x96, 0xff, 0xff, 0xff, 0xb2, 0x4d, 0x2e);
 
@@ -104,7 +108,6 @@ s32 g_BgunGeMuzzleFlashes = false;
 
 void bgunRumble(s32 handnum, s32 weaponnum)
 {
-	u32 stack;
 	s32 contpadtouse1;
 	s32 contpadtouse2;
 	bool singlewield = false;
@@ -2688,6 +2691,73 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 	return 0;
 }
 
+void bgunUpdateHandState2(struct hand *hand, s32 handnum, struct coord *viewmodelpos, struct weaponfunc *funcdef, Mtxf *arg4, Mtxf *arg5)
+{
+	f32 tmp;
+	struct coord sp38 = {0, 0, 0};
+	
+	// Go into turn up mode if the player has been looking at a wall for more than half a second OR the player is moving quickly on a hoverbike
+	if ((g_CloseToWallTimer > TICKS(30) || (g_Vars.currentplayer->bondmovemode == MOVEMODE_BIKE && g_Vars.currentplayer->hovspeed >= 0.8f)) && funcdef && (funcdef->type & 0xff) == INVENTORYFUNCTYPE_SHOOT && (hand->state == HANDSTATE_IDLE || hand->state == HANDSTATE_2)) {
+		if (hand->turnuprot < 1.0f) {
+			// Rotate into turned up position
+				hand->turnuprot += LVUPDATE60FREAL() / 30.0f;
+
+				if (hand->turnuprot > 1.0f) {
+					hand->turnuprot = 1.0f;
+				}
+		}
+	} else {
+		// At this point we don't want the gun to be in the turned up position.
+		// However we don't want it to revert immediately, so a timer is used.
+		//f32 inversespeed = 30.0f;
+		f32 inversespeed = 20.0f;
+
+		if (hand->animmode == HANDANIMMODE_BUSY) {
+			// Revert faster
+			//inversespeed = 15.0f;
+			inversespeed = 5.0f;
+		}
+
+		if (hand->turnuprot > 0.0f) {
+			bool revert = false;
+
+			revert = true;
+
+			if (hand->animmode == HANDANIMMODE_BUSY && funcdef && (funcdef->type & 0xff) != INVENTORYFUNCTYPE_SHOOT) {
+				revert = true;
+			}
+
+			if (hand->state != HANDSTATE_IDLE
+					&& hand->state != HANDSTATE_2
+					&& hand->state != HANDSTATE_ATTACKEMPTY
+					&& hand->state != HANDSTATE_ATTACK) {
+				revert = true;
+			}
+
+			if (revert) {
+				hand->turnuprot -= LVUPDATE60FREAL() / inversespeed;
+			}
+
+			if (hand->turnuprot < 0.0f) {
+				hand->turnuprot = 0.0f;
+			}
+		} else {
+			// Not rotated
+		}
+	}
+	
+
+	tmp = -cosf(hand->turnuprot * M_PI) * 0.5f + 0.50f;
+	sp38.x = (tmp * 90.0f * 0.017453292f * -1.0f); // 0.017453292f for degree to radian conversion
+	sp38.y = (tmp * 10.0f * 0.017453292f) * (handnum != HAND_RIGHT ? -1.0f : 1.0f);
+
+	mtx4LoadRotation(&sp38, arg4);
+	mtx00015be0(arg4, arg5);
+
+	viewmodelpos->y -= 1.0f * hand->turnuprot;
+	viewmodelpos->x -= 9.0f * hand->turnuprot * (handnum != HAND_RIGHT ? 1.0f : -1.0f);
+}
+
 /**
  * This function may have implemented an early beta feature where the gun could
  * be held at the side of the screen, pointed upwards. The feature was shown in
@@ -3400,36 +3470,6 @@ void bgunTickGunLoad(void)
 		player->gunctrl.gunloadstate = GUNLOADSTATE_LOADED;
 	}
 }
-
-/*const char var7f1abcd8[] = "need a new gun loading (lock %d gunmemnew %d)\n";
-const char var7f1abd08[] = "loading gun file: %d type: %d\n";
-const char var7f1abd28[] = "BriGun: Process MASTER_GUN_LOADSTATE_FLUX\n";
-const char var7f1abd54[] = "BriGun: Set Master State: MASTER_GUN_LOADSTATE_HANDS\n";
-const char var7f1abd8c[] = "BriGun: Process MASTER_GUN_LOADSTATE_HANDS\n";
-const char var7f1abdb8[] = "BriGun: Setup Hand Load\n";
-const char var7f1abdd4[] = "Hand  : Using cached hands\n";
-const char var7f1abdf0[] = "Hand  : Look ma no hands!\n";
-const char var7f1abe0c[] = "BriGun: Set Master State: MASTER_GUN_LOADSTATE_GUN\n";
-const char var7f1abe40[] = "BriGun: Process MASTER_GUN_LOADSTATE_GUN\n";
-const char var7f1abe6c[] = "BriGun: Setup Gun Load\n";
-const char var7f1abe84[] = "BriGun: Set Master State: MASTER_GUN_LOADSTATE_CARTS\n";
-const char var7f1abebc[] = "BriGun: Process MASTER_GUN_LOADSTATE_CARTS\n";
-const char var7f1abee8[] = "BriGun: Cart Loaded setting GUN_LOADSTATE_FLUX\n";
-const char var7f1abf18[] = "BriGun: Cart loading - looking for carts\n";
-const char var7f1abf44[] = "BriGun: Loading cart %d\n";
-const char var7f1abf60[] = "BriGun: Request for cart %d ignored - cart already loaded\n";
-const char var7f1abf9c[] = "BriGun: Compile Hand 0x%08x Gun 0x%0x8\n";
-const char var7f1abfc4[] = "Gun   : Compiled Gun 0x%08x\n";
-const char var7f1abfe4[] = "Gun   : Compiled Size %d\n";
-const char var7f1ac000[] = "Hand  : Compiled Hand 0x%08x\n";
-const char var7f1ac020[] = "Hand  : Compiled Size %d\n";
-const char var7f1ac03c[] = "Gun   : Compile overhead %d bytes\n";
-const char var7f1ac060[] = "Hand  : Hand Obj 0x%08x Gun Obj 0x%08x \n";
-const char var7f1ac08c[] = "Gun   : After Comp : Base 0x%08x Free %d\n";
-const char var7f1ac0b8[] = "Gun   : After Cached Setup : Base 0x%08x Free %d\n";
-const char var7f1ac0ec[] = "Gun   : TotalUsed %d, Free %d\n";
-const char var7f1ac10c[] = "BriGun: Set Master State: MASTER_GUN_LOADSTATE_LOADED\n";
-const char var7f1ac144[] = "GunLockTimer: %d\n";*/
 
 void bgunTickMasterLoad(void)
 {
@@ -5904,7 +5944,9 @@ void bgunStartDetonateAnimation(s32 playernum)
  * rotation (reloading and equip/unequip do not). It also implements a delay on
  * reverting to the normal rotation.
  */
-void bgunUpdateGangsta(struct hand *hand, s32 handnum, struct coord *arg2, struct weaponfunc *funcdef, Mtxf *arg4, Mtxf *arg5)
+
+// Ben's comment: in this version, it also checks if the player wants their gun to go into gangsta mode.
+void bgunUpdateGangsta(struct hand *hand, s32 handnum, struct coord *viewmodelpos, struct weaponfunc *funcdef, Mtxf *arg4, Mtxf *arg5)
 {
 	f32 tmp;
 	struct coord sp38 = {0, 0, 0};
@@ -5987,8 +6029,8 @@ void bgunUpdateGangsta(struct hand *hand, s32 handnum, struct coord *arg2, struc
 	mtx4LoadRotation(&sp38, arg4);
 	mtx00015be0(arg4, arg5);
 
-	arg2->y += 4.0f * hand->gangstarot;
-	arg2->x += 2.0f * hand->gangstarot * (handnum != HAND_RIGHT ? 1.0f : -1.0f);
+	viewmodelpos->y += 4.0f * hand->gangstarot;
+	viewmodelpos->x += 2.0f * hand->gangstarot * (handnum != HAND_RIGHT ? 1.0f : -1.0f);
 }
 
 /**
@@ -6186,7 +6228,7 @@ void bgunUpdateLasersight(struct hand *hand, struct modeldef *modeldef, s32 hand
 
 		busy = false;
 
-		if (hand->animmode == HANDANIMMODE_BUSY) {
+		if (hand->animmode == HANDANIMMODE_BUSY || hand->turnuprot > 0.0f) {
 			busy = true;
 		}
 
@@ -6820,6 +6862,48 @@ static inline f32 bgunGetFovOffsetY(void)
 	return (PLAYER_DEFAULT_FOV - 60.f) / (2.75f * 4.f);
 }
 
+bool bgunCheckForCloseWall()
+{
+	bool nearbywall = false;
+	struct hitthing hit;
+	struct coord hitpos;
+	RoomNum spc8[8];
+	RoomNum spb8[8];
+	RoomNum rooms[131];
+	RoomNum *roomsptr;
+	float checkdistance = 100;
+	struct prop *playerprop = g_Vars.currentplayer->prop;
+
+	if (!g_Vars.currentplayer) {
+		return false;
+	}
+
+	struct coord checkpos;
+	checkpos.x = g_Vars.currentplayer->cam_pos.x + g_Vars.currentplayer->cam_look.x * checkdistance;
+	checkpos.y = g_Vars.currentplayer->cam_pos.y + g_Vars.currentplayer->cam_look.y * checkdistance;
+	checkpos.z = g_Vars.currentplayer->cam_pos.z + g_Vars.currentplayer->cam_look.z * checkdistance;
+
+	spc8[0] = g_Vars.currentplayer->cam_room;
+	spc8[1] = -1;
+	portal00018148(&g_Vars.currentplayer->cam_pos, &checkpos, spc8, spb8, rooms, 30);
+
+	roomsptr = rooms;
+
+	while (*roomsptr != -1) {
+		roomsptr++;
+	}
+
+	int i = 0;
+
+	for (i = 0; rooms[i] != -1; i++) {
+		nearbywall = bgTestHitInRoom(&g_Vars.currentplayer->cam_pos, &checkpos, rooms[i], &hit);
+		if(nearbywall) {
+			return true;
+		}
+	}
+	
+	return false;
+}
 
 void bgun0f0a5550(s32 handnum)
 {
@@ -6827,7 +6911,7 @@ void bgun0f0a5550(s32 handnum)
 	Mtxf sp2c4;
 	Mtxf sp284;
 	struct modeldef *modeldef = NULL;
-	struct coord sp274 = {0, 0, 0};
+	struct coord viewmodelpos = {0, 0, 0};
 	Mtxf sp234;
 	Mtxf sp1f4;
 	union modelrodata *rodata;
@@ -6896,30 +6980,30 @@ void bgun0f0a5550(s32 handnum)
 	}
 
 	if (handnum == HAND_RIGHT) {
-		sp274.x = func0f0b131c(handnum) + hand->damppos.f[0] + hand->adjustpos.f[0];
-		sp274.y = weapondef->posy + hand->damppos.f[1] + hand->adjustpos.f[1];
-		sp274.z = weapondef->posz + hand->damppos.f[2] + hand->adjustpos.f[2];
+		viewmodelpos.x = func0f0b131c(handnum) + hand->damppos.f[0] + hand->adjustpos.f[0];
+		viewmodelpos.y = weapondef->posy + hand->damppos.f[1] + hand->adjustpos.f[1];
+		viewmodelpos.z = weapondef->posz + hand->damppos.f[2] + hand->adjustpos.f[2];
 	} else if (isdetonator) {
-		sp274.x = 6.5f + hand->damppos.f[0] - hand->adjustpos.f[0];
-		sp274.y = -16.5f + hand->damppos.f[1] + hand->adjustpos.f[1];
-		sp274.z = -16.0f + hand->damppos.f[2] + hand->adjustpos.f[2];
+		viewmodelpos.x = 6.5f + hand->damppos.f[0] - hand->adjustpos.f[0];
+		viewmodelpos.y = -16.5f + hand->damppos.f[1] + hand->adjustpos.f[1];
+		viewmodelpos.z = -16.0f + hand->damppos.f[2] + hand->adjustpos.f[2];
 	} else {
-		sp274.x = func0f0b131c(handnum) + hand->damppos.f[0] - hand->adjustpos.f[0];
-		sp274.y = weapondef->posy + hand->damppos.f[1] + hand->adjustpos.f[1];
-		sp274.z = weapondef->posz + hand->damppos.f[2] + hand->adjustpos.f[2];
+		viewmodelpos.x = func0f0b131c(handnum) + hand->damppos.f[0] - hand->adjustpos.f[0];
+		viewmodelpos.y = weapondef->posy + hand->damppos.f[1] + hand->adjustpos.f[1];
+		viewmodelpos.z = weapondef->posz + hand->damppos.f[2] + hand->adjustpos.f[2];
 	}
 
-	sp274.y += player->guncloseroffset * 5.0f / -90.0f * 50.0f;
-	sp274.z -= player->guncloseroffset * 15.0f / -90.0f * 50.0f;
+	viewmodelpos.y += player->guncloseroffset * 5.0f / -90.0f * 50.0f;
+	viewmodelpos.z -= player->guncloseroffset * 15.0f / -90.0f * 50.0f;
 
 	// adjust viewmodel position for different FOVs
-	sp274.y -= bgunGetFovOffsetY();
-	sp274.z += bgunGetFovOffsetZ();
+	viewmodelpos.y -= bgunGetFovOffsetY();
+	viewmodelpos.z += bgunGetFovOffsetZ();
 
 	if (hand->firing && shootfunc && g_Vars.lvupdate240 != 0 && shootfunc->recoilsettings != NULL) {
-		sp274.x += (RANDOMFRAC() - 0.5f) * shootfunc->recoilsettings->xrange * hand->finalmult[0];
-		sp274.y += (RANDOMFRAC() - 0.5f) * shootfunc->recoilsettings->yrange * hand->finalmult[0];
-		sp274.z += (RANDOMFRAC() - 0.5f) * shootfunc->recoilsettings->zrange * hand->finalmult[0];
+		viewmodelpos.x += (RANDOMFRAC() - 0.5f) * shootfunc->recoilsettings->xrange * hand->finalmult[0];
+		viewmodelpos.y += (RANDOMFRAC() - 0.5f) * shootfunc->recoilsettings->yrange * hand->finalmult[0];
+		viewmodelpos.z += (RANDOMFRAC() - 0.5f) * shootfunc->recoilsettings->zrange * hand->finalmult[0];
 	}
 
 	hand->fspare1 = (player->crosspos2[0] - camGetScreenLeft() - camGetScreenWidth() * 0.5f) * weapondef->aimsettings->guntransside / (camGetScreenWidth() * 0.5f);
@@ -6933,8 +7017,8 @@ void bgun0f0a5550(s32 handnum)
 	fspare1 = hand->fspare1;
 	fspare2 = hand->fspare2;
 
-	sp274.f[0] += fspare1;
-	sp274.f[1] -= fspare2;
+	viewmodelpos.f[0] += fspare1;
+	viewmodelpos.f[1] -= fspare2;
 
 	hand->visible = true;
 
@@ -6975,13 +7059,29 @@ void bgun0f0a5550(s32 handnum)
 	mtx4LoadIdentity(&sp234);
 
 	if (PLAYERCOUNT() == 1 && weaponHasFlag(weaponnum, WEAPONFLAG_GANGSTA)) {
-		bgunUpdateGangsta(hand, handnum, &sp274, funcdef, &sp284, &sp234);
+		bgunUpdateGangsta(hand, handnum, &viewmodelpos, funcdef, &sp284, &sp234);
+	}
+
+	// Ben's comment: weapons with the gangsta flag check for a nearby wall to see if they can be turned up
+	if (weaponHasFlag(weaponnum, WEAPONFLAG_TURNUP)) {
+		g_CloseToWall = bgunCheckForCloseWall();
+		if(g_CloseToWall) {
+			g_CloseToWallTimer++;
+		}
+		else {
+			g_CloseToWallTimer = 0;
+			//hand->turnuprot -= LVUPDATE60FREAL() * 5;
+			if(hand->turnuprot < 0) {
+				hand->turnuprot = 0;
+			}
+		}
+		bgunUpdateHandState2(hand, handnum, &viewmodelpos, funcdef, &sp284, &sp234);
 	}
 
 	if (hand->useposrot) {
-		sp274.f[0] += hand->posrotmtx.m[3][0];
-		sp274.f[1] += hand->posrotmtx.m[3][1];
-		sp274.f[2] += hand->posrotmtx.m[3][2];
+		viewmodelpos.f[0] += hand->posrotmtx.m[3][0];
+		viewmodelpos.f[1] += hand->posrotmtx.m[3][1];
+		viewmodelpos.f[2] += hand->posrotmtx.m[3][2];
 
 		mtx00015be0(&hand->posrotmtx, &sp234);
 
@@ -7011,8 +7111,8 @@ void bgun0f0a5550(s32 handnum)
 
 	bgun0f0a24f0(&sp118, handnum);
 
-	sp1a4.y = -bgun0f0a2498(sp118.x, sp118.z, sp274.f[0], sp274.f[2]);
-	sp1a4.x = bgun0f0a2498(sp118.y, sp118.z, sp274.f[1], sp274.f[2]);
+	sp1a4.y = -bgun0f0a2498(sp118.x, sp118.z, viewmodelpos.f[0], viewmodelpos.f[2]);
+	sp1a4.x = bgun0f0a2498(sp118.y, sp118.z, viewmodelpos.f[1], viewmodelpos.f[2]);
 
 	hand->lastrotangx = sp1a4.f[0];
 	hand->lastrotangy = sp1a4.f[1];
@@ -7021,7 +7121,7 @@ void bgun0f0a5550(s32 handnum)
 	mtx4MultMtx4(&sp124, &sp164, &sp284);
 	mtx4MultMtx4InPlace(&sp284, &sp234);
 	mtx4Copy(&sp234, &sp2c4);
-	mtx4SetTranslation(&sp274, &sp2c4);
+	mtx4SetTranslation(&viewmodelpos, &sp2c4);
 
 	mtx4Copy(&sp2c4, &hand->cammtx);
 	mtx4Copy(&hand->posmtx, &hand->prevmtx);
@@ -7577,18 +7677,6 @@ void bgunTickGameplay2(void)
 
 s8 bgunFreeFireslotWrapper(s32 slotnum)
 {
-#if VERSION < VERSION_NTSC_1_0
-	if (slotnum >= 0) {
-		if (g_Fireslots[slotnum].unk04nb && sndGetState(g_Fireslots[slotnum].unk04nb) != AL_STOPPED) {
-			audioStop(g_Fireslots[slotnum].unk04nb);
-		}
-
-		if (g_Fireslots[slotnum].unk08nb && sndGetState(g_Fireslots[slotnum].unk08nb) != AL_STOPPED) {
-			audioStop(g_Fireslots[slotnum].unk08nb);
-		}
-	}
-#endif
-
 	return bgunFreeFireslot(slotnum);
 }
 

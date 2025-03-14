@@ -312,7 +312,6 @@ void mainLoop(void)
 
 		memaReset(mempAlloc(g_MainMemaHeapSize, MEMPOOL_STAGE), g_MainMemaHeapSize);
 		langInit();
-		//langReset(g_StageNum);
 		playermgrReset();
 
 		if (g_StageNum >= STAGE_TITLE) {

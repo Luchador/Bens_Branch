@@ -489,10 +489,8 @@ void amGetSlotDetails(s32 slot, u32 *flags, char *label)
 				strcpy(label, langGet(L_MISC_472)); // "Aggressive"
 			} else if (slot == 7) {
 				strcpy(label, langGet(L_MISC_473)); // "Passive"
-#if VERSION >= VERSION_NTSC_1_0
 			} else if (slot == 3) {
 				strcpy(label, langGet(L_MISC_475)); // "Stealth"
-#endif
 			}
 		} else {
 			if (slot == 4) {
@@ -572,15 +570,11 @@ s16 amCalculateSlotWidth(void)
 		}
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (PLAYERCOUNT() > 1) {
 		max += 3;
 	} else {
 		max += 4;
 	}
-#else
-	max += 4;
-#endif
 
 	return max;
 }
@@ -920,21 +914,6 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 	return gdl;
 }
 
-// Ben's comment: were they planning to let the player assign a favorite weapon to a slot in the active menu?
-
-/*const char var7f1b2b34[] = "Here is where the activemenu sets favourites\n";
-const char var7f1b2b64[] = "slot %d = guntype %d\n";
-const char var7f1b2b7c[] = "put it in %d\n";
-
-#if VERSION < VERSION_JPN_FINAL
-const char var7f1b2b8c[] = "activemenu: setting up for multiplayer\n";
-const char var7f1b2bb4[] = "activemenu: setting up for single player\n";
-#endif
-
-const char var7f1b2be0[] = "Put guntype %d in slot %d\n";
-const char var7f1b2bfc[] = "ActiveMenu: Two or more equipped items of guntype %d\n";
-const char var7f1b2c34[] = "FAV: Added gun %d to slot %d\n";*/
-
 u8 var800719a0[][3] = { {0, 1, 2}, {3, 4, 5}, {6, 7, 8} };
 
 Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
@@ -942,9 +921,6 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
 	static u32 obcol = 0xff00004f; // outer border
 	static u32 ibcol = 0x3f00008f; // inner background
 	static u32 defcol = 0xff4f00ff; // text
-	//static u32 favcol = 0xffff7fff; // unused
-	//static u32 pickcol = 0xff4f00ff; // unused
-	//static u32 pickcol2 = 0xff4f00ff; // unused
 
 	u32 colour;
 	s32 paddingtop;

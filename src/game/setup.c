@@ -1206,8 +1206,6 @@ void setupLoadBriefing(s32 stagenum, u8 *buffer, s32 bufferlen, struct briefing 
 		langbuffer = &buffer[setupfilesize];
 		langbufferlen = bufferlen - setupfilesize;
 
-		//briefing->langbank = langGetLangBankIndexFromStagenum(stagenum);
-
 		start = (struct defaultobj *)((uintptr_t)setup + (uintptr_t)setup->props);
 
 		if (start != NULL) {

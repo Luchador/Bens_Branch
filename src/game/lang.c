@@ -85,43 +85,6 @@ struct langbank g_LangBanks[29] = {
 	/*0x28*/ LANGBANK_DISH,          7168,      7296,
 };
 
-u32 langGetLangBankIndexFromStagenum(s32 stagenum)
-{
-	u32 bank;
-
-	switch (stagenum) {
-	case STAGE_PELAGIC:       bank = LANGBANK_DAM; break;
-	case STAGE_EXTRACTION:    bank = LANGBANK_ARK; break;
-	case STAGE_MAIANSOS:      bank = LANGBANK_SEV; break;
-	case STAGE_WAR:           bank = LANGBANK_STAT; break;
-	case STAGE_CHICAGO:       bank = LANGBANK_PETE; break;
-	case STAGE_G5BUILDING:    bank = LANGBANK_DEPO; break;
-	case STAGE_ESCAPE:        bank = LANGBANK_TRA; break;
-	case STAGE_CITRAINING:    bank = LANGBANK_DISH; break;
-	case STAGE_DEFECTION:     bank = LANGBANK_AME; break;
-	case STAGE_VILLA:         bank = LANGBANK_ELD; break;
-	case STAGE_DEFENSE:       bank = LANGBANK_IMP; break;
-	case STAGE_INVESTIGATION: bank = LANGBANK_EAR; break;
-	case STAGE_ATTACKSHIP:    bank = LANGBANK_LEE; break;
-	case STAGE_RESCUE:        bank = LANGBANK_LIP; break;
-	case STAGE_INFILTRATION:  bank = LANGBANK_LUE; break;
-	case STAGE_DEEPSEA:       bank = LANGBANK_PAM; break;
-	case STAGE_SKEDARRUINS:   bank = LANGBANK_SHO; break;
-	case STAGE_AIRFORCEONE:   bank = LANGBANK_RIT; break;
-	case STAGE_MP_RAVINE:     bank = LANGBANK_AREC; break;
-	case STAGE_CRASHSITE:     bank = LANGBANK_AZT; break;
-	case STAGE_AIRBASE:       bank = LANGBANK_CAVE; break;
-	case STAGE_DUEL:          bank = LANGBANK_ATE; break;
-	case STAGE_MBR:           bank = LANGBANK_WAX; break;
-	default:
-		while (true) {
-			// empty
-		}
-	}
-
-	return bank;
-}
-
 TextData* loadFileIntoMemory(const char *filename) {
 	FILE *file = fopen(filename, "r");
 	if(!file) {
@@ -266,7 +229,7 @@ char *langGet(s32 textid)
 {
 	if(textid == L_MPWEAPONS_129)
 	{
-		return "Difficulty\n";
+		return "Difficulty\n"; // Stop the "Difficulty" text from creating a new line on the end screen
 	}
 
 	int i = 0;
@@ -285,10 +248,6 @@ char *langGet(s32 textid)
 				case 3:
 					return langGetText(g_TextPropObjData, textid);
 				case 4:
-					if(textid == L_MPWEAPONS_129 + g_LangBanks[i].end + 1)
-					{
-						return langRemoveNewline(langGetText(g_TextMPWeaponsData, textid)); // Stop the "Difficulty" text from creating a new line on the end screen
-					}
 					return langGetText(g_TextMPWeaponsData, textid);
 				case 5:
 					return langGetText(g_TextOptionsData, textid);

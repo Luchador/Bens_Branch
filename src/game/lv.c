@@ -1898,17 +1898,14 @@ void lvTick(void)
 
 	if (g_Vars.stagenum == STAGE_TITLE) {
 		titleTick();
-		langTick();
 		musicTick();
 	} else if (g_Vars.stagenum == STAGE_BOOTPAKMENU) {
 		setCurrentPlayerNum(0);
 		menuTick();
 		musicTick();
-		langTick();
 		pakExecuteDebugOperations();
 	} else if (g_Vars.stagenum == STAGE_CREDITS) {
 		musicTick();
-		langTick();
 	} else {
 		lvUpdateCutsceneTime();
 		vtxstoreTick();
@@ -1943,7 +1940,6 @@ void lvTick(void)
 		}
 
 		musicTick();
-		langTick();
 		propsTickPadEffects();
 
 		if (mainGetStageNum() == STAGE_CITRAINING) {

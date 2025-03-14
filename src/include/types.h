@@ -2294,7 +2294,7 @@ struct hand {
 	/*0x0da0*/ u32 ispare10;
 	/*0x0da4*/ f32 fspare1;
 	/*0x0da8*/ f32 fspare2;
-	/*0x0dac*/ f32 fspare3;
+	/*0x0dac*/ f32 turnuprot; // Hand turning up when facing wall rotation
 	/*0x0db0*/ f32 fspare4;
 	/*0x0db4*/ f32 fspare5;
 	/*0x0db8*/ f32 gunsmokepoint;
@@ -2639,7 +2639,7 @@ struct player {
 	/*0x17a0*/ f32 screenymaxf;
 	/*0x17a4*/ u32 gunsightoff;
 	/*0x17a8*/ s32 ammoheldarr[33]; // ammo quantities not loaded into a gun
-	/*0x182c*/ u32 unk182c;
+	/*0x182c*/ f32 hovspeed;
 	/*0x1830*/ u32 unk1830;
 	/*0x1834*/ u32 unk1834;
 	/*0x1838*/ u32 unk1838;
