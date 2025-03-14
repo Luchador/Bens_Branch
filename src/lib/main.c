@@ -53,7 +53,7 @@
 #include "lib/lib_2f490.h"
 #include "lib/rmon.h"
 #include "lib/rng.h"
-#include "lib/str.h"
+#include "string.h"
 #include "data.h"
 #include "types.h"
 

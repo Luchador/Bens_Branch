@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "lib/sched.h"
-#include "lib/str.h"
+#include "string.h"
 #include "game/cheats.h"
 #include "game/inv.h"
 #include "game/playermgr.h"

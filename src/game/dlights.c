@@ -530,12 +530,7 @@ void roomSetLightsFaulty(s32 roomnum, s32 chance)
 		}
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	g_Rooms[roomnum].br_base = 50;
-#else
-	g_Rooms[roomnum].br_base = 15;
-#endif
-
 	g_Rooms[roomnum].flags |= ROOMFLAG_LIGHTS_DIRTY;
 }
 

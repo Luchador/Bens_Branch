@@ -2,7 +2,7 @@
 #include "constants.h"
 #include "bss.h"
 #include "lib/args.h"
-#include "lib/str.h"
+#include "string.h"
 #include "lib/rmon.h"
 #include "string.h"
 #include "data.h"

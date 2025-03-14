@@ -22,7 +22,7 @@
 #include "lib/main.h"
 #include "lib/mtx.h"
 #include "lib/ailist.h"
-#include "lib/str.h"
+#include "string.h"
 #include "data.h"
 #include "types.h"
 

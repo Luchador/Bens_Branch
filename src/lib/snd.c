@@ -14,7 +14,7 @@
 #include "lib/snd.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
-#include "lib/str.h"
+#include "string.h"
 #include "lib/lib_2fc60.h"
 #include "lib/lib_317f0.h"
 #include "lib/mp3.h"

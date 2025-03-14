@@ -18,7 +18,7 @@
 #include "lib/dma.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
-#include "lib/str.h"
+#include "string.h"
 #include "lib/mtx.h"
 #include "data.h"
 #include "types.h"

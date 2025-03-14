@@ -18,7 +18,7 @@
 #include "lib/snd.h"
 #include "lib/vi.h"
 #include "lib/rng.h"
-#include "lib/str.h"
+#include "string.h"
 #include "data.h"
 #include "gbiex.h"
 #include "types.h"

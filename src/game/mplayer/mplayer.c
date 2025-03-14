@@ -23,7 +23,7 @@
 #include "lib/vi.h"
 #include "lib/main.h"
 #include "lib/rng.h"
-#include "lib/str.h"
+#include "string.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"

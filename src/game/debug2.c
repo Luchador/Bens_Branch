@@ -7,7 +7,7 @@
 #include "lib/ailist.h"
 #include "lib/debughud.h"
 #include "lib/rmon.h"
-#include "lib/str.h"
+#include "string.h"
 #include "lib/vi.h"
 #include "lib/vm.h"
 #include "bss.h"

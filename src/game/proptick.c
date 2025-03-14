@@ -9,7 +9,7 @@
 #include "game/prop.h"
 #include "game/propsnd.h"
 #include "game/objectives.h"
-#include "game/game_096360.h"
+#include "game/mtxutils.h"
 #include "game/bondgun.h"
 #include "game/gunfx.h"
 #include "game/weaponutils.h"

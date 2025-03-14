@@ -31,7 +31,7 @@ u32 mtxGetObfuscatedRomBase(void);
 void mtxF2L(Mtxf *src, Mtxf *dst);
 void mtx00016110(f32 mtx1[3][3], f32 mtx2[3][3]);
 void mtx00016140(f32 mtx1[3][3], f32 mtx2[3][3], f32 dst[3][3]);
-void mtx000161b0(f32 arg0[3][3], f32 src[3], f32 dest[3]);
+void mtx3LinearTransform(f32 arg0[3][3], f32 src[3], f32 dest[3]);
 void mtx00016208(f32 mtx[3][3], struct coord *coord);
 void mtx4LoadYRotationWithTranslation(struct coord *pos, f32 radians, Mtxf *mtx);
 void mtx4LoadXRotation(f32 radians, Mtxf *mtx);

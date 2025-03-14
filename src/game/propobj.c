@@ -14,7 +14,7 @@
 #include "game/setuputils.h"
 #include "game/propsnd.h"
 #include "game/objectives.h"
-#include "game/game_096360.h"
+#include "game/mtxutils.h"
 #include "game/atan2f.h"
 #include "game/acosfasinf.h"
 #include "game/quaternion.h"
@@ -23,6 +23,7 @@
 #include "game/bondgun.h"
 #include "game/gunfx.h"
 #include "game/weaponutils.h"
+#include "game/utils.h"
 #include "game/modelmgr.h"
 #include "game/tex.h"
 #include "game/camera.h"
@@ -63,7 +64,7 @@
 #include "lib/dma.h"
 #include "lib/main.h"
 #include "lib/snd.h"
-#include "lib/str.h"
+#include "string.h"
 #include "lib/memp.h"
 #include "lib/model.h"
 #include "lib/path.h"
@@ -6731,7 +6732,7 @@ s32 projectileTick(struct defaultobj *obj, bool *embedded)
 				sp5dc.z += projectile->speed.z * g_Vars.lvupdate60freal;
 
 				mtx3ToMtx4(obj->realrot, &sp30c);
-				func0f096698(&sp30c, &projectile->mtx, g_Vars.lvupdate240);
+				mtxApplyRotation(&sp30c, &projectile->mtx, g_Vars.lvupdate240); // Makes projectiles spin as they fall. This includes dropped weapons.
 				mtx4ToMtx3(&sp30c, obj->realrot);
 
 				sp5c8.x = prop->pos.x;
@@ -14215,7 +14216,8 @@ bool objDrop(struct prop *prop, bool lazy)
 				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
 			} else {
 				// DROPTYPE_OWNERREAP
-				func0f0964b4(&projectile->speed, (Mtxf *)&projectile->mtx);
+				// Ben's comment: This gives dropped weapons a random velocity instead of just dropping straight down.
+				mtxRandomToss(&projectile->speed, (Mtxf *)&projectile->mtx);
 			}
 
 			if (!lazy && (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK)) {

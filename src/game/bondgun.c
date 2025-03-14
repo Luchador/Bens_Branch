@@ -10,7 +10,7 @@
 #include "game/bg.h"
 #include "game/prop.h"
 #include "game/propsnd.h"
-#include "game/game_096360.h"
+#include "game/mtxutils.h"
 #include "game/acosfasinf.h"
 #include "game/utils.h"
 #include "game/quaternion.h"

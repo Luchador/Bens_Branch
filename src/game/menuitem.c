@@ -18,7 +18,7 @@
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/main.h"
-#include "lib/str.h"
+#include "string.h"
 #include "data.h"
 #include "types.h"
 #ifndef PLATFORM_N64

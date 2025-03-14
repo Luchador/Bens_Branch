@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/objectives.h"
-#include "game/game_096360.h"
+#include "game/mtxutils.h"
 #include "game/tex.h"
 #include "game/training.h"
 #include "game/propobj.h"
@@ -22,7 +22,7 @@ void mtxLoadRandomRotation(Mtxf *mtx)
 	mtx4LoadRotation(&coord, mtx);
 }
 
-void func0f0964b4(struct coord *coord, Mtxf *mtx)
+void mtxRandomToss(struct coord *coord, Mtxf *mtx)
 {
 	coord->x = RANDOMFRAC() * 1.6666666269302f * 4.0f - 3.3333332538605f;
 	coord->y = RANDOMFRAC() * 1.6666666269302f * 4.0f;
@@ -38,15 +38,8 @@ void func0f0965e4(f32 *arg0, f32 *arg1, f32 arg2)
 	arg1[0] = tmp;
 }
 
-void func0f096628(f32 *arg0, f32 *arg1, f32 arg2)
-{
-	func0f0965e4(&arg0[1], &arg1[1], arg2);
-
-	arg0[0] += arg2 * arg1[0];
-	arg0[2] += arg2 * arg1[2];
-}
-
-void func0f096698(Mtxf *arg0, Mtxf *arg1, s32 count)
+// Used for spinning falling objects such as grenades and dropped guns
+void mtxApplyRotation(Mtxf *arg0, Mtxf *arg1, s32 count)
 {
 	s32 i;
 

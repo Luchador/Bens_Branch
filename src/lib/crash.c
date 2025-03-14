@@ -7,7 +7,7 @@
 #include "lib/dma.h"
 #include "lib/rmon.h"
 #include "lib/sched.h"
-#include "lib/str.h"
+#include "string.h"
 #include "lib/vi.h"
 #include "data.h"
 #include "types.h"

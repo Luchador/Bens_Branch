@@ -428,8 +428,6 @@ f32 coordsGetDistance(struct coord *a, struct coord *b)
 	arg3->z = arg1->y * arg2->z;
 }*/
 
-const char var7f1b7e00[] = "WARNING - UTILS -> DEBUG - Triangle passed to Planar Poly Test\n";
-
 // Not used
 /*f32 func0f1776cc(struct coord *a, struct coord *b, struct coord *c)
 {

@@ -18,7 +18,7 @@
 #include "lib/main.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
-#include "lib/str.h"
+#include "string.h"
 #include "data.h"
 #include "types.h"
 #include "string.h"
