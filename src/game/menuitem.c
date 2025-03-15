@@ -8,7 +8,7 @@
 #include "game/menu.h"
 #include "game/mainmenu.h"
 #include "game/objectives.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/lv.h"
 #include "game/challenge.h"
 #include "game/training.h"

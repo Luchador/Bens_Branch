@@ -146,7 +146,7 @@ void bgunPlayGlassHitSound(struct coord *pos, RoomNum *rooms, s32 texturenum);
 void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum, RoomNum *rooms);
 void bgunSetTriggerOn(s32 handnum, bool on);
 s32 bgunConsiderToggleGunFunction(s32 usedowntime, bool trigpressed, bool fromactivemenu, bool fromdedicatedbutton);
-void bgun0f0a8c50(void);
+void bgunDisallowInvertFunc(void);
 bool bgunIsUsingSecondaryFunction(void);
 void bgunTickGameplay(bool triggeron);
 void bgunSetPassiveMode(bool enable);

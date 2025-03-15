@@ -8,7 +8,7 @@
 #include "game/savebuffer.h"
 #include "game/menu.h"
 #include "game/playermgr.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/lv.h"
 #include "game/music.h"
 #include "game/mplayer/setup.h"
@@ -405,10 +405,10 @@ void func0f187fbc(s32 playernum)
 {
 	g_PlayerConfigsArray[playernum].base.unk18 = 80;
 	g_PlayerConfigsArray[playernum].base.unk1a = 80;
-	g_PlayerConfigsArray[playernum].base.unk1c = 75;
+	g_PlayerConfigsArray[playernum].base.unk1c = 75; // Seems to be involved in movement deceleration
 }
 
-void func0f187fec(void)
+void mpSetScoringDefaults(void)
 {
 	g_MpSetup.timelimit = 9;
 	g_MpSetup.scorelimit = 9;
@@ -549,7 +549,7 @@ void mpInit(void)
 
 	g_Vars.mphilltime = 10;
 
-	func0f187fec();
+	mpSetScoringDefaults();
 
 	g_MpSetup.fileguid.fileid = 0;
 	g_MpSetup.fileguid.deviceserial = 0;
@@ -3868,7 +3868,7 @@ s32 mpsetupfileLoad(s32 device, s32 fileid, u16 deviceserial)
 	return -1;
 }
 
-void func0f18e558(void)
+void mpResetHeads(void)
 {
 	s32 i;
 
@@ -3877,7 +3877,7 @@ void func0f18e558(void)
 	}
 }
 
-struct modeldef *func0f18e57c(s32 index, s32 *headnum)
+struct modeldef *mpClearHeads(s32 index, s32 *headnum)
 {
 	return var800acc28[index];
 }

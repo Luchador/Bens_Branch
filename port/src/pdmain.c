@@ -19,7 +19,7 @@
 #include "game/objectives.h"
 #include "game/endscreen.h"
 #include "game/playermgr.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/gfxmemory.h"
 #include "game/lang.h"
 #include "game/lv.h"

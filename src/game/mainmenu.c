@@ -8,7 +8,7 @@
 #include "game/debug.h"
 #include "game/filemgr.h"
 #include "game/weaponutils.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/gamefile.h"
 #include "game/inv.h"
 #include "game/lang.h"

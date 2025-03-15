@@ -108,8 +108,8 @@ void raceInitAnims(void)
 			}
 		}
 
-		for (i = 0; var80067fdc[race][i].animnum >= 0; i++) {
-			var80067fdc[race][i].value = race0f0005c0(var80067fdc[race][i].animnum);
+		for (i = 0; g_MoveAnims[race][i].animnum >= 0; i++) {
+			g_MoveAnims[race][i].value = race0f0005c0(g_MoveAnims[race][i].animnum);
 		}
 	}
 

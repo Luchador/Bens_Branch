@@ -17,7 +17,7 @@
 #include "game/filelist.h"
 #include "game/filemgr.h"
 #include "game/credits.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/file.h"
 #include "game/lv.h"
 #include "game/mplayer/setup.h"
@@ -1591,14 +1591,10 @@ void menuUnsetModel(struct menumodel *menumodel)
 	menumodel->curanimnum = 0;
 	menumodel->perfectheadnum = 0;
 	menumodel->isperfecthead = false;
-	menumodel->unk5b1_02 = false;
-	menumodel->unk5b1_03 = false;
 	menumodel->reverseanim = false;
 	menumodel->configuring = false;
-	menumodel->unk5b1_06 = false;
 	menumodel->drawbehinddialog = false;
 	menumodel->partvisibility = NULL;
-	menumodel->unk560 = -1;
 	menumodel->headnum = -1;
 	menumodel->bodynum = -1;
 	menumodel->newrotx = menumodel->newroty = menumodel->newrotz = 0.0f;
@@ -1606,8 +1602,6 @@ void menuUnsetModel(struct menumodel *menumodel)
 	menumodel->displacex = menumodel->displacey = menumodel->displacez = 0.0f;
 	menumodel->currotx = menumodel->curroty = menumodel->currotz = 0.0f;
 	menumodel->curposx = menumodel->curposy = menumodel->curposz = 0.0f;
-	menumodel->unk558 = 0.0f;
-	menumodel->unk55c = 1.0f;
 	menumodel->curscale = 1.0f;
 	menumodel->newscale = 1.0f;
 	menumodel->zoom = -1.0f;
@@ -2323,7 +2317,7 @@ Gfx *menuApplyScissor(Gfx *gdl)
  * variant of the dialog is rendered which has no borders, less background,
  * no overlays and no models such as inventory weapons.
  */
-Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool lightweight)
+Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 {
 	s32 i;
 	s32 dialogleft;
@@ -2369,7 +2363,6 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 
 	if (g_Menus[g_MpPlayerNum].curdialog == dialog
 			&& (dialog->definition->flags & MENUDIALOGFLAG_0002)
-			&& !lightweight
 			&& g_Menus[g_MpPlayerNum].menumodel.drawbehinddialog == true) {
 		gSPSetGeometryMode(gdl++, G_ZBUFFER);
 		gdl = menuRenderModel(gdl, &g_Menus[g_MpPlayerNum].menumodel, MENUMODELTYPE_2);
@@ -2459,10 +2452,6 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 
 		context.unk18 = false;
 
-		if (lightweight) {
-			context.unk18 = true;
-		}
-
 		{
 			char *sp154[] = {
 				"1\n",
@@ -2529,19 +2518,17 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 	colour2 = MIXCOLOUR(dialog, unused14);
 
 	// Draw the dialog's background and outer borders
-	if (!lightweight) {
-		if (dialog->state == MENUDIALOGSTATE_OPENING) {
-			gdl = menugfxRenderDialogBackground(gdl, dialogleft + 1, dialogtop + LINEHEIGHT, dialogright - 1, dialogbottom, dialog, colour1, colour2, 1.0f);
-		} else if (dialog->state == MENUDIALOGSTATE_POPULATING) {
-			gdl = menugfxRenderDialogBackground(gdl, dialogleft + 1, dialogtop + LINEHEIGHT, dialogright - 1, dialogbottom, dialog, colour1, colour2, dialog->statefrac);
-		} else {
-			gdl = menugfxRenderDialogBackground(gdl, dialogleft + 1, dialogtop + LINEHEIGHT, dialogright - 1, dialogbottom, dialog, colour1, colour2, -1.0f);
-		}
+	if (dialog->state == MENUDIALOGSTATE_OPENING) {
+		gdl = menugfxRenderDialogBackground(gdl, dialogleft + 1, dialogtop + LINEHEIGHT, dialogright - 1, dialogbottom, dialog, colour1, colour2, 1.0f);
+	} else if (dialog->state == MENUDIALOGSTATE_POPULATING) {
+		gdl = menugfxRenderDialogBackground(gdl, dialogleft + 1, dialogtop + LINEHEIGHT, dialogright - 1, dialogbottom, dialog, colour1, colour2, dialog->statefrac);
+	} else {
+		gdl = menugfxRenderDialogBackground(gdl, dialogleft + 1, dialogtop + LINEHEIGHT, dialogright - 1, dialogbottom, dialog, colour1, colour2, -1.0f);
+	}
 
-		// No dialog has this flag, so this branch is unused
-		if (dialog->definition->flags & MENUDIALOGFLAG_DISABLETITLEBAR) {
-			gdl = menugfxDrawDialogBorderLine(gdl, dialogleft + 1, dialogtop + LINEHEIGHT, dialogright - 1, dialogtop + LINEHEIGHT + 1, MIXCOLOUR(dialog, dialog_border1), MIXCOLOUR(dialog, dialog_border2));
-		}
+	// No dialog has this flag, so this branch is unused
+	if (dialog->definition->flags & MENUDIALOGFLAG_DISABLETITLEBAR) {
+		gdl = menugfxDrawDialogBorderLine(gdl, dialogleft + 1, dialogtop + LINEHEIGHT, dialogright - 1, dialogtop + LINEHEIGHT + 1, MIXCOLOUR(dialog, dialog_border1), MIXCOLOUR(dialog, dialog_border2));
 	}
 
 	if (dialog->state == MENUDIALOGSTATE_PREOPEN) {
@@ -2602,7 +2589,6 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 		// Render models (inventory, chr/vehicle bios)
 		if (g_Menus[g_MpPlayerNum].curdialog == dialog
 				&& (dialog->definition->flags & MENUDIALOGFLAG_0002)
-				&& !lightweight
 				&& !g_Menus[g_MpPlayerNum].menumodel.drawbehinddialog) {
 			gSPSetGeometryMode(gdl++, G_ZBUFFER);
 
@@ -2703,7 +2689,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 							prevwaslist = false;
 						}
 
-						if ((item->flags & MENUITEMFLAG_DARKERBG) && !lightweight) {
+						if ((item->flags & MENUITEMFLAG_DARKERBG)) {
 							// Render a darker background behind the item
 							s32 x1 = context.x;
 							s32 y1 = context.y;
@@ -2789,37 +2775,36 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool l
 			}
 
 			// Render overlays, such as dropdown menus
-			if (!lightweight) {
-				gdl = textSetPrimColour(gdl, 0x00000000);
+			gdl = textSetPrimColour(gdl, 0x00000000);
 
-				curx = dialogleft;
+			curx = dialogleft;
 
-				for (i = 0; i < dialog->numcols; i++) {
-					s32 cury = dialogtop + LINEHEIGHT + 1 + dialog->scroll;
-					colindex = dialog->colstart + i;
+			for (i = 0; i < dialog->numcols; i++) {
+				s32 cury = dialogtop + LINEHEIGHT + 1 + dialog->scroll;
+				colindex = dialog->colstart + i;
 
-					for (j = 0; j < menu->cols[colindex].numrows; j++) {
-						union menuitemdata *itemdata;
-						struct menuitem *item;
+				for (j = 0; j < menu->cols[colindex].numrows; j++) {
+					union menuitemdata *itemdata;
+					struct menuitem *item;
 
-						rowindex = menu->cols[colindex].rowstart + j;
-						itemdata = NULL;
-						item = &dialog->definition->items[menu->rows[rowindex].itemindex];
+					rowindex = menu->cols[colindex].rowstart + j;
+					itemdata = NULL;
+					item = &dialog->definition->items[menu->rows[rowindex].itemindex];
 
-						if (menu->rows[rowindex].blockindex != -1) {
-							itemdata = (union menuitemdata *)&menu->blocks[menu->rows[rowindex].blockindex];
-						}
-
-						gdl = menuitemOverlay(gdl, curx, cury, menu->cols[colindex].width, menu->rows[rowindex].height, item, dialog, itemdata);
-
-						cury += menu->rows[rowindex].height;
+					if (menu->rows[rowindex].blockindex != -1) {
+						itemdata = (union menuitemdata *)&menu->blocks[menu->rows[rowindex].blockindex];
 					}
 
-					curx += menu->cols[colindex].width;
+					gdl = menuitemOverlay(gdl, curx, cury, menu->cols[colindex].width, menu->rows[rowindex].height, item, dialog, itemdata);
+
+					cury += menu->rows[rowindex].height;
 				}
 
-				gdl = text0f153838(gdl);
+				curx += menu->cols[colindex].width;
 			}
+
+			gdl = text0f153838(gdl);
+			
 
 			gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
 					viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
@@ -3396,11 +3381,11 @@ void func0f0f85e0(struct menudialogdef *dialogdef, s32 root)
 
 u32 g_MenuCThresh = 120;
 
-Gfx *menuRenderDialog(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool lightweight)
+Gfx *menuRenderDialog(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 {
 	textSetWaveBlend(dialog->unk54, dialog->unk58, g_MenuCThresh);
 
-	gdl = dialogRender(gdl, dialog, menu, lightweight);
+	gdl = dialogRender(gdl, dialog, menu);
 
 	textResetBlends();
 
@@ -3423,7 +3408,7 @@ Gfx *menuRenderDialogs(Gfx *gdl)
 			g_MenuProjectFromX = g_Menus[g_MpPlayerNum].curdialog->x + g_Menus[g_MpPlayerNum].curdialog->width / 2 - viGetWidth() / 2;
 			g_MenuProjectFromY = g_Menus[g_MpPlayerNum].curdialog->y + g_Menus[g_MpPlayerNum].curdialog->height / 2 - viGetHeight() / 2;
 
-			gdl = menuRenderDialog(gdl, g_Menus[g_MpPlayerNum].curdialog, &g_Menus[g_MpPlayerNum], 0);
+			gdl = menuRenderDialog(gdl, g_Menus[g_MpPlayerNum].curdialog, &g_Menus[g_MpPlayerNum]);
 		} else {
 			s32 i;
 			s32 j;
@@ -3447,12 +3432,12 @@ Gfx *menuRenderDialogs(Gfx *gdl)
 
 			// Render the other dialog if any
 			if (dialogs[0]) {
-				gdl = menuRenderDialog(gdl, dialogs[0], &g_Menus[g_MpPlayerNum], 0);
+				gdl = menuRenderDialog(gdl, dialogs[0], &g_Menus[g_MpPlayerNum]);
 			}
 
 			// Render the current dialog
 			if (g_Menus[g_MpPlayerNum].curdialog) {
-				gdl = menuRenderDialog(gdl, g_Menus[g_MpPlayerNum].curdialog, &g_Menus[g_MpPlayerNum], 0);
+				gdl = menuRenderDialog(gdl, g_Menus[g_MpPlayerNum].curdialog, &g_Menus[g_MpPlayerNum]);
 			}
 		}
 
@@ -3503,13 +3488,9 @@ void menuResetModel(struct menumodel *menumodel, u32 allocationlen, bool allocat
 
 	menumodel->displacex = menumodel->displacey = menumodel->displacez = 0.0f;
 
-	menumodel->unk56c = 0;
-	menumodel->unk570 = 0;
 	menumodel->partvisibility = NULL;
 	menumodel->isperfecthead = false;
-	menumodel->unk5b1_02 = false;
 	menumodel->reverseanim = false;
-	menumodel->unk5b1_06 = false;
 	menumodel->headnum = -1;
 	menumodel->bodynum = -1;
 }
@@ -3606,7 +3587,6 @@ void menuReset(void)
 		g_Menus[i].bannernum = -1;
 		g_Menus[i].fm.unke41 = 0;
 		g_Menus[i].fm.unke64 = 0;
-		g_Menus[i].fm.headtextures = NULL;
 	}
 
 	g_MenuData.unk668 = -1;

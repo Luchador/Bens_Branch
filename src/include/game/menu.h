@@ -43,13 +43,7 @@ s32 dialogChangeItemFocusHorizontally(struct menudialog *dialog, s32 leftright);
 s32 dialogChangeItemFocus(struct menudialog *dialog, struct menuinputs *inputs);
 void menuOpenDialog(struct menudialogdef *dialogdef, struct menudialog *arg1, struct menu *menu);
 void menuPushDialog(struct menudialogdef *dialogdef);
-
-#if VERSION >= VERSION_NTSC_1_0
 bool func0f0f3220(s32 arg0);
-#else
-void func0f0f3220(s32 arg0);
-#endif
-
 void menuCloseDialog(void);
 void menuUpdateCurFrame(void);
 void menuPopDialog(void);
@@ -59,16 +53,10 @@ void menuUnsetModel(struct menumodel *menumodel);
 Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype);
 void menuGetTeamTitlebarColours(u32 *top, u32 *middle, u32 *bottom);
 Gfx *menuApplyScissor(Gfx *gdl);
-Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool lightweight);
+Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu);
 void menuGetContPads(s8 *contpadnum1, s8 *contpadnum2);
 void func0f0f7594(s32 arg0, s32 *vdir, s32 *hdir);
-
-#if VERSION >= VERSION_JPN_FINAL
-void menuFindAvailableSize(s32 *xmin, s32 *ymin, s32 *xmax, s32 *ymax, struct menudialog *dialog);
-#else
 void menuFindAvailableSize(s32 *xmin, s32 *ymin, s32 *xmax, s32 *ymax);
-#endif
-
 void dialogCalculatePosition(struct menudialog *dialog);
 void menuClose(void);
 void func0f0f8120(void);
@@ -77,7 +65,7 @@ void menuSetBackground(s32 bg);
 void func0f0f8300(void);
 void menuPushRootDialog(struct menudialogdef *dialogdef, s32 arg1);
 void func0f0f85e0(struct menudialogdef *dialogdef, s32 root);
-Gfx *menuRenderDialog(Gfx *gdl, struct menudialog *dialog, struct menu *menu, bool lightweight);
+Gfx *menuRenderDialog(Gfx *gdl, struct menudialog *dialog, struct menu *menu);
 Gfx *menuRenderDialogs(Gfx *gdl);
 void menuResetModel(struct menumodel *menumodel, u32 allocationlen, bool allocate);
 void menuReset(void);

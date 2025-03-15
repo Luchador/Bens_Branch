@@ -28,7 +28,7 @@
 #include "game/inv.h"
 #include "game/playermgr.h"
 #include "game/smoke.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/file.h"
 #include "game/lv.h"
 #include "game/texdecompress.h"
@@ -8354,7 +8354,7 @@ s32 bgunConsiderToggleGunFunction(s32 usedowntime, bool trigpressed, bool fromac
 	}
 }
 
-void bgun0f0a8c50(void)
+void bgunDisallowInvertFunc(void)
 {
 	switch (bgunGetWeaponNum(HAND_RIGHT)) {
 	case WEAPON_RCP120:

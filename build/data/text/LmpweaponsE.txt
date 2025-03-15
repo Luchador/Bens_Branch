@@ -107,14 +107,14 @@ SuperDragon*
 Laptop Gun*
 Phoenix*
 Psychosis Gun*
-PP9i*
-CC13*
-KL01313*
-KF7 Special*
-ZZT (9mm)*
-DMC*
-AR53*
-RC-P45*
+PP7
+DD44
+Klobb
+KF7 Soviet
+ZMG (9mm)
+D5K Deutsche
+AR33
+RC-P90
 Velvet Dark*
 Fun
 Gameplay

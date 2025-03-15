@@ -6,7 +6,7 @@
 #include "game/menu.h"
 #include "game/filemgr.h"
 #include "game/bossfile.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/gamefile.h"
 #include "game/lang.h"
 #include "game/mplayer/mplayer.h"
@@ -1713,7 +1713,6 @@ MenuItemHandlerResult filemgrConfirmDeleteMenuHandler(s32 operation, struct menu
 	return 0;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 char *filemgrMenuTextFileInUseDescription(struct menuitem *item)
 {
 	if (menuIsDialogOpen(&g_FilemgrCopyMenuDialog)) {
@@ -1722,60 +1721,9 @@ char *filemgrMenuTextFileInUseDescription(struct menuitem *item)
 
 	return langGet(L_MPWEAPONS_160); // "Cannot delete file as it is being used."
 }
-#endif
-
-/**
- * This is a dirty decomp hack where we intentionally declare
- * an incorrect function signature in order to get a match.
- * pheadGetTexture uses u16 as its last argument
- * but filemgrRenderPerfectHeadThumbnail will only match if
- * it's an s32 with a 0xffff mask.
- */
-struct textureconfig *pheadGetTexture(s32 playernum, s32 fileid, s32 deviceserial);
 
 Gfx *filemgrRenderPerfectHeadThumbnail(Gfx *gdl, struct menuitemrenderdata *renderdata, s32 fileid, s32 deviceserial)
 {
-	struct textureconfig *texture = pheadGetTexture(g_MpPlayerNum, fileid, deviceserial & 0xffff);
-
-	if (texture) {
-		gSPDisplayList(gdl++, &var800613a0);
-		gSPDisplayList(gdl++, &var80061360);
-
-		gDPPipeSync(gdl++);
-		gDPSetTexturePersp(gdl++, G_TP_NONE);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
-		gDPSetTextureLOD(gdl++, G_TL_TILE);
-		gDPSetTextureConvert(gdl++, G_TC_FILT);
-
-		texSelect(&gdl, texture, 1, 0, 2, 1, NULL);
-
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetTextureFilter(gdl++, G_TF_POINT);
-		gDPSetEnvColor(gdl++, 0xff, 0xff, 0xff, renderdata->colour);
-
-		gDPSetCombineLERP(gdl++,
-				TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
-				TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
-
-		gDPLoadSync(gdl++);
-		gDPTileSync(gdl++);
-
-		gSPTextureRectangle(gdl++,
-				((renderdata->x + 4) << 2) * g_ScaleX,
-				(renderdata->y + 2) << 2,
-				((renderdata->x + 20) << 2) * g_ScaleX,
-				(renderdata->y + 18) << 2,
-				G_TX_RENDERTILE, 0, 512, 1024 / g_ScaleX, -1024);
-
-		gDPLoadSync(gdl++);
-		gDPTileSync(gdl++);
-		gDPPipeSync(gdl++);
-
-		if (deviceserial) {
-			// empty
-		}
-	}
-
 	return gdl;
 }
 

@@ -104,22 +104,13 @@ s32 g_MaleGuardTeamHeads[] = { // 16 heads
 	-1,
 };
 
-s32 g_FemaleGuardHeads[] = { // Not actually used?
+s32 g_FemaleGuardHeads[] = { // Ben's comment: Not actually used?
 	HEAD_LESLIE_S,
 	HEAD_ANKA,
 	HEAD_EILEEN_T,
 	HEAD_EILEEN_H,
 	-1,
 };
-
-// Not needed. Same as g_FemaleGuardHeads
-/* s32 g_FemaleGuardTeamHeads[] = {
-	HEAD_LESLIE_S,
-	HEAD_ANKA,
-	HEAD_EILEEN_T,
-	HEAD_EILEEN_H,
-	-1,
-};*/
 
 s32 g_RandomBond = 0;
 s32 g_ActiveMaleHeadsIndex = 0;
@@ -185,7 +176,7 @@ struct model *body0f02ce8c(s32 bodynum, s32 headnum, struct modeldef *bodymodeld
 
 			if (node != NULL) {
 				if (headnum < 0) {
-					headmodeldef = func0f18e57c(-1 - headnum, &headnum);
+					headmodeldef = mpClearHeads(-1 - headnum, &headnum);
 					bodymodeldef->rwdatalen += headmodeldef->rwdatalen;
 				} else if (headnum > 0) {
 					if (headmodeldef == NULL) {
@@ -400,7 +391,7 @@ void bodyAllocateChr(s32 stagenum, struct packedchr *packed, s32 cmdindex)
 		index = -1 - headnum;
 
 		if (index >= 0 && index < 22) {
-			headmodeldef = func0f18e57c(index, &headnum);
+			headmodeldef = mpClearHeads(index, &headnum);
 		}
 
 		model = body0f02ce8c(bodynum, headnum, NULL, headmodeldef, false, NULL, false, false);

@@ -5,7 +5,7 @@
 #include "game/atan2f.h"
 #include "game/utils.h"
 #include "game/tex.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/mplayer/scenarios.h"
 #include "game/radar.h"
 #include "game/options.h"

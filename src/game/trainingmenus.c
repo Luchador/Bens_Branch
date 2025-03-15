@@ -9,7 +9,7 @@
 #include "game/menu.h"
 #include "game/mainmenu.h"
 #include "game/inv.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/file.h"
 #include "game/texdecompress.h"
 #include "game/trainingmenus.h"

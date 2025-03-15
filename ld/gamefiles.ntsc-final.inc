@@ -11,7 +11,6 @@
 	build/ROMID/game/texinit.o (section); \
 	build/ROMID/game/challengeinit.o (section); \
 	build/ROMID/game/langreset.o (section); \
-	build/ROMID/game/getitlereset.o (section); \
 	build/ROMID/game/titlereset.o (section); \
 	build/ROMID/game/chrmgr.o (section); \
 	build/ROMID/game/bodyreset.o (section); \
@@ -52,7 +51,6 @@
 	build/ROMID/game/smokestop.o (section); \
 	build/ROMID/game/shardsstop.o (section); \
 	build/ROMID/game/bondgunstop.o (section); \
-	build/ROMID/game/getitle.o (section); \
 	build/ROMID/game/title.o (section); \
 	build/ROMID/game/titleclear.o (section); \
 	build/ROMID/game/pdmode.o (section); \
@@ -157,7 +155,7 @@
 	build/ROMID/game/splat.o (section); \
 	build/ROMID/game/shards.o (section); \
 	build/ROMID/game/options.o (section); \
-	build/ROMID/game/game_1531a0.o (section); \
+	build/ROMID/game/textutils.o (section); \
 	build/ROMID/game/collisionutils.o (section); \
 	build/ROMID/game/bg.o (section); \
 	build/ROMID/game/bgbss.o (section); \

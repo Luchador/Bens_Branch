@@ -101,7 +101,7 @@ static void bgunProcessInputAltButton(struct movedata *data, s8 contpad, s32 i)
 			}
 		}
 		g_Vars.currentplayer->altdowntime = 0;
-		bgun0f0a8c50();
+		bgunDisallowInvertFunc();
 	}
 }
 
@@ -1068,7 +1068,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 								}
 
 								g_Vars.currentplayer->usedowntime = 0;
-								bgun0f0a8c50();
+								bgunDisallowInvertFunc();
 							}
 						}
 					}
@@ -1538,7 +1538,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 								}
 
 								g_Vars.currentplayer->usedowntime = 0;
-								bgun0f0a8c50();
+								bgunDisallowInvertFunc();
 							}
 						}
 					}

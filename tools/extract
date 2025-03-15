@@ -26,7 +26,6 @@ class Extractor:
         self.extract_firingrange()
         self.extract_fonts()
         self.extract_game()
-        self.extract_getitle()
         self.extract_jpnfonts()
         self.extract_lib()
         self.extract_mpconfigs()
@@ -268,10 +267,6 @@ class Extractor:
     def extract_textureconfig(self):
         addr = self.val('textureconfig')
         self.write_extracted('textureconfig.bin', self.rom[addr:addr+0xb50])
-
-    def extract_getitle(self):
-        addr = self.val('textureconfig') + 0xb50
-        self.write_extracted('getitle.bin', self.rom[addr:addr+0x65d0])
 
     #
     # Misc functions

@@ -115,11 +115,11 @@ Holoprogram 7 has been completed successfully.
 TERMINALS*- Press B Button next to terminal to use it.
 Now activate the red terminals on the wall.
 PP7
-TT33
-Skorpion
-AK47
-Uzi 9mm
-MP5K
-M-16
-FNP90
+DD44
+Klobb
+KF7 Soviet
+ZMG (9mm)
+D5K Deutsche
+AR33
+RC-P90
 Okay, Jo, I'll leave you to prepare for the mission.

@@ -7,6 +7,7 @@
 #include "game/tex.h"
 #include "game/camera.h"
 #include "game/mtxf2lbulk.h"
+#include "game/debug.h"
 #include "game/gfxmemory.h"
 #include "game/file.h"
 #include "bss.h"
@@ -1405,10 +1406,6 @@ void lasersightSetBeam(s32 id, s32 arg1, struct coord *near, struct coord *far)
 
 		g_LaserSights[i].id = id;
 	}
-
-	g_LaserSights[i].unk04.x = near->x;
-	g_LaserSights[i].unk04.y = near->y;
-	g_LaserSights[i].unk04.z = near->z;
 
 	g_LaserSights[i].beamnear.x = near->x;
 	g_LaserSights[i].beamnear.y = near->y;

@@ -39,7 +39,7 @@
 #include "game/explosions.h"
 #include "game/smoke.h"
 #include "game/sparks.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/bg.h"
 #include "game/stagetable.h"
 #include "game/env.h"
@@ -10859,7 +10859,7 @@ s32 objTickPlayer(struct prop *prop)
 			s32 i;
 			struct coord translate;
 			struct coord sp116 = {0, 0, 0};
-			f32 sp112;
+			f32 sp112 = 0.0f;
 			s32 tagnum;
 			struct geo *geos[2];
 			u8 *end;
@@ -13322,7 +13322,7 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 	s32 sp84;
 	s32 healththing;
 	s32 alpha = 0xff;
-	f32 xrayalphafrac;
+	f32 xrayalphafrac = 0.0f;
 	s32 mult;
 	struct weaponobj *weapon;
 	struct doorobj *door;
@@ -13335,6 +13335,8 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 	Col *newcolours;
 	f32 objdist;
 	s32 i;
+
+	memset(&door, 0, sizeof(door));
 
 	shademode = envGetObjShadeMode(prop, shadecolourfracs);
 
@@ -13521,11 +13523,13 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 	}
 
 	// Lasers stay bright even if the room becomes dark
-	if(door->doortype == DOORTYPE_LASER)
-	{
-		colour[0] = 0xff;
-		colour[1] = 0x00;
-		colour[2] = 0x00;
+	if(door) {
+		if(door->doortype == DOORTYPE_LASER)
+		{
+			colour[0] = 0xff;
+			colour[1] = 0x00;
+			colour[2] = 0x00;
+		}
 	}
 
 	objMergeColourFracs(colour, shademode, shadecolourfracs);

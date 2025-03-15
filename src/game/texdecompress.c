@@ -2345,12 +2345,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 				pool->rightpos->next = 0;
 
 				if (tail != NULL) {
-					tail->next = (uintptr_t) pool->rightpos
-					#ifdef PLATFORM_N64
-						& 0xffffff;
-					#else
-						;
-					#endif
+					tail->next = (uintptr_t) pool->rightpos;
 				} else {
 					pool->head = pool->rightpos;
 				}
@@ -2388,9 +2383,4 @@ void texLoadFromTextureNum(u32 texturenum, struct texpool *pool)
 	texnum_t texturenumcopy = texturenum;
 
 	texLoad(&texturenumcopy, pool, true);
-}
-
-s32 func0f173510(s32 arg0, s32 arg1, s32 arg3)
-{
-	return arg0;
 }

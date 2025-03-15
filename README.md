@@ -3,12 +3,13 @@
 This is mostly to help me learn the Perfect Dark code and maybe make some cool changes. This is meant for NTSC 1.1/Final only.
 
 Changes include:
-* Press G to go into Gangsta Mode whenever you want (hold some guns sideways including the CMP150 and ZZT 9mm)
+* Press G to go into Gangsta Mode whenever you want (hold some guns sideways including the Falcon 2, DY357, and CMP150)
 * Far more corpses are allowed before they start being removed
 * Male guards will select from all 42 available heads instead of just 8 like the original game
 * Shotgun pellets do more damage and single blast has smaller spread, but magazine size reduced to 8
 * Sniper Rifle has new secondary mode, Armor Piercing. Bullets do more damage and penetrate up to 3 objects at the cost of a small accuracy penalty
 * All Guns cheat gives the Slayer on all stages, not just Attack Ship and Ruins
+* Some guns will turn upwards if the player faces a wall or rides a hoverbike at high speed
 * Added a cheat called "Dinner Party"
 * Far more bullet holes supported
 * Laser weapon leaves scorch marks on props and background
@@ -16,6 +17,7 @@ Changes include:
 * Tinted glass does not become fully opaque
 * Laser obstacles stay fully bright even if a room's lights are destroyed
 * Moved the "Objective Completed/Failed" message down so it doesn't block the center of the screen
+* GoldenEye weapons reverted to their GoldenEye names
 * The game now reads text data from plaintext files instead of compressed files. You can find the text files in data/text and edit them easily.
 
 Bug fixes:
@@ -28,6 +30,7 @@ Stage changes:
 
 Note: These changes often require alterations to the game's original files. You can find these files in the build/mods folder.
 
+* CI Training: The display cases in the firing range show weapon names when used, as originally intended
 * CI Training: Added more decorations including models contained in the original game's ROM, but never used
 * CI Training: Front doors and hangar doors are openable
 * Investigation: Added tables with microscopes in some lab rooms

@@ -35,7 +35,7 @@
 #include "game/playermgr.h"
 #include "game/explosions.h"
 #include "game/bondview.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/bg.h"
 #include "game/stagetable.h"
 #include "game/room.h"
@@ -1387,7 +1387,7 @@ void playerTickChrBody(void)
 			if (g_HeadsAndBodies[bodynum].unk00_01) {
 				headnum = -1;
 			} else if (sp60) {
-				headmodeldef = func0f18e57c(headnum, &headnum);
+				headmodeldef = mpClearHeads(headnum, &headnum);
 			} else if (g_Vars.normmplayerisrunning) {
 				g_HeadsAndBodies[headnum].modeldef = modeldefLoadToNew(g_HeadsAndBodies[headnum].filenum);
 				headmodeldef = g_HeadsAndBodies[headnum].modeldef;

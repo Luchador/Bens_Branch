@@ -20,7 +20,7 @@
 #include "game/footstep.h"
 #include "game/game_006900.h"
 #include "game/weaponutils.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/gunfx.h"
 #include "game/inv.h"
 #include "game/lv.h"
@@ -1183,7 +1183,7 @@ s32 g_NumBgChrs = 0;
 s16 *g_TeamList = NULL;
 s16 *g_SquadronList = NULL;
 
-struct var80067e6c var80067e6c[] = {
+struct animsmovement humanmoveanims[] = {
 	{ ANIM_RIFLE_PATROL,                0 },
 	{ ANIM_RUNNING_TWOHANDGUN,          0 },
 	{ ANIM_SPRINT_RIFLE,                0 },
@@ -1221,32 +1221,32 @@ struct var80067e6c var80067e6c[] = {
 	{ -1 },
 };
 
-struct var80067e6c var80067f84[] = {
+struct animsmovement skedarmoveanims[] = {
 	{ ANIM_0392, 0 },
 	{ ANIM_0393, 0 },
 	{ ANIM_SKEDAR_RUNNING, 0 },
 	{ -1 },
 };
 
-struct var80067e6c var80067fa4[] = {
+struct animsmovement var80067fa4[] = {
 	{ ANIM_015F, 0 },
 	{ ANIM_0160, 0 },
 	{ -1 },
 };
 
-struct var80067e6c var80067fbc[] = {
+struct animsmovement var80067fbc[] = {
 	{ ANIM_015F, 0 },
 	{ -1 },
 };
 
-struct var80067e6c var80067fcc[] = {
+struct animsmovement var80067fcc[] = {
 	{ ANIM_0238, 0 },
 	{ -1 },
 };
 
-struct var80067e6c *var80067fdc[] = {
-	var80067e6c,
-	var80067f84,
+struct animsmovement *g_MoveAnims[] = {
+	humanmoveanims,
+	skedarmoveanims,
 	var80067fa4,
 	var80067fbc,
 	var80067fcc,
@@ -1256,17 +1256,17 @@ f32 func0f02dff0(s16 animnum)
 {
 	s32 i;
 
-	for (i = 0; i < ARRAYCOUNT(var80067fdc); i++) {
+	for (i = 0; i < ARRAYCOUNT(g_MoveAnims); i++) {
 		s32 j = 0;
-		s16 thisanimnum = var80067fdc[i][j].animnum;
+		s16 thisanimnum = g_MoveAnims[i][j].animnum;
 
 		while (thisanimnum >= 0) {
 			if (thisanimnum == animnum) {
-				return var80067fdc[i][j].value;
+				return g_MoveAnims[i][j].value;
 			}
 
 			j++;
-			thisanimnum = var80067fdc[i][j].animnum;
+			thisanimnum = g_MoveAnims[i][j].animnum;
 		}
 	}
 

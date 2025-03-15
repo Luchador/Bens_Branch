@@ -29,7 +29,7 @@
 #include "game/playermgr.h"
 #include "game/explosions.h"
 #include "game/bondview.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/bg.h"
 #include "game/stagetable.h"
 #include "game/room.h"

@@ -8,7 +8,7 @@
 #include "game/hudmsg.h"
 #include "game/menugfx.h"
 #include "game/playermgr.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/lv.h"
 #include "game/mplayer/mplayer.h"
 #include "game/options.h"

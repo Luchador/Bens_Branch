@@ -124,7 +124,7 @@ void playerReset(void)
 	s32 bodynum;
 	s32 headnum;
 
-	func0f18e558();
+	mpResetHeads();
 
 	g_InCutscene = false;
 	g_CutsceneFrameOverrun240 = 0;

@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/getitle.h"
 #include "game/title.h"
 #include "bss.h"
 #include "lib/memp.h"
@@ -14,6 +13,4 @@ void titleReset(void)
 	g_TitleDelayedMode = -1;
 
 	var8009cca0 = mempAlloc(TITLE_ALLOCSIZE, MEMPOOL_STAGE);
-
-	getitleReset();
 }

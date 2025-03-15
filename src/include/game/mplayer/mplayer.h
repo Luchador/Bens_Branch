@@ -10,7 +10,7 @@ void mpStartMatch(void);
 void mpReset(void);
 void mpCalculateTeamIsOnlyAi(void);
 void func0f187fbc(s32 playernum);
-void func0f187fec(void);
+void mpSetScoringDefaults(void);
 void mpPlayerSetDefaults(s32 playernum, bool autonames);
 void func0f1881d4(s32 index);
 void mpInit(void);
@@ -123,7 +123,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer);
 void mpsetupfileGetOverview(char *arg0, char *filename, u16 *numsims, u16 *stagenum, u16 *scenarionum);
 s32 mpsetupfileSave(s32 device, s32 filenum, u16 deviceserial);
 s32 mpsetupfileLoad(s32 device, s32 filenum, u16 deviceserial);
-void func0f18e558(void);
-struct modeldef *func0f18e57c(s32 index, s32 *headnum);
+void mpResetHeads(void);
+struct modeldef *mpClearHeads(s32 index, s32 *headnum);
 
 #endif

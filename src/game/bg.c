@@ -16,7 +16,7 @@
 #include "game/stars.h"
 #include "game/dyntex.h"
 #include "game/artifacts.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/gfxmemory.h"
 #include "game/gfxreplace.h"
 #include "game/bg.h"
@@ -43,12 +43,10 @@
 #include "data.h"
 #include "gbiex.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "preprocess.h"
 #include "system.h"
 #include "video.h"
 #include "platform.h"
-#endif
 
 #define BGCMD_END                               0x00
 #define BGCMD_PUSH                              0x01
@@ -3366,12 +3364,12 @@ bool bgTestLineIntersectsBbox(struct coord *arg0, struct coord *arg1, struct coo
 bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, Gfx *gdl,
 		Gfx *gdl2, Vtx *vertices, struct hitthing *hitthing)
 {
-	s16 triref;
-	s32 trisremaining;
+	s16 triref = 0;
+	s32 trisremaining = 0;
 	bool intersectsbbox;
 	f32 *ptr;
-	f32 tmp;
-	f32 sqdist;
+	f32 tmp = 0.0f;
+	f32 sqdist = 0.0f;
 	bool hit = false;
 	struct coord *point1;
 	struct coord *point2;
@@ -3382,7 +3380,7 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 	f32 lowestsqdist = MAXFLOAT;
 	uintptr_t offset;
 	s32 numvertices;
-	Gfx *tri4gdl;
+	Gfx *tri4gdl = NULL;
 	s32 count;
 	struct coord min;
 	struct coord max;
@@ -3676,8 +3674,8 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2, struct coord *arg3,
 		Gfx *gdl, Gfx *gdl2, Vtx *vertices, f32 *sqdistptr, struct hitthing *hitthing)
 {
-	s16 triref;
-	s32 i;
+	s16 triref = 0;
+	s32 i = 0;
 	bool intersectsbbox;
 	s32 count;
 	s32 spdc;
@@ -3951,16 +3949,16 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 
 bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct vtxbatch *batch, s32 roomnum, struct hitthing *hitthing)
 {
-	s16 triref;
-	s32 trisremaining;
+	s16 triref = 0;
+	s32 trisremaining = 0;
 	Gfx *gdl = batch->gdl;
 	bool hit;
 	s32 points[3];
-	s32 numvertices;
-	f32 sqdist;
-	f32 lowestsqdist;
-	s32 texturenum;
-	s32 index;
+	s32 numvertices = 0;
+	f32 sqdist = 0.0f;
+	f32 lowestsqdist = 0.0f;
+	s32 texturenum = 0;
+	s32 index = 0;
 	struct coord *point1;
 	struct coord *point2;
 	struct coord *point3;

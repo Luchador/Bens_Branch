@@ -9,7 +9,7 @@
 #include "game/explosions.h"
 #include "game/filemgr.h"
 #include "game/weaponutils.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/gamefile.h"
 #include "game/hudmsg.h"
 #include "game/inv.h"
@@ -329,9 +329,9 @@ void frInitLighting(void)
 	if (g_FrData.donelighting == false) {
 		s32 roomnum;
 
-		for (roomnum = ROOM_DISH_0007; roomnum <= ROOM_DISH_0009; roomnum++) {
+		/*for (roomnum = ROOM_DISH_0007; roomnum <= ROOM_DISH_0009; roomnum++) {
 			roomSetLightOp(roomnum, LIGHTOP_TRANSITION, 50, 100, TICKS(32));
-		}
+		}*/
 
 		roomSetLightOp(ROOM_DISH_FIRINGRANGE, LIGHTOP_TRANSITION, 25, 100, TICKS(32));
 
@@ -348,9 +348,9 @@ void frRestoreLighting(void)
 	if (g_FrData.donelighting == true) {
 		s32 roomnum;
 
-		for (roomnum = ROOM_DISH_0007; roomnum <= ROOM_DISH_0009; roomnum++) {
+		/*for (roomnum = ROOM_DISH_0007; roomnum <= ROOM_DISH_0009; roomnum++) {
 			roomSetLightOp(roomnum, LIGHTOP_TRANSITION, 100, 50, TICKS(8));
-		}
+		}*/
 
 		roomSetLightOp(ROOM_DISH_FIRINGRANGE, LIGHTOP_TRANSITION, 100, 25, TICKS(8));
 

@@ -3824,11 +3824,8 @@ struct menudata_filemgr {
 	/*0xe4c*/ u32 deviceserial;
 	/*0xe50*/ u16 isretryingsave;
 	/*0xe52*/ u8 device2;
-#if VERSION >= VERSION_NTSC_1_0
 	/*0xe53*/ char filename[16];
-#endif
 	/*0xe64*/ u32 unke64;
-	/*0xe68*/ struct perfectheadtexturelist *headtextures;
 	/*0xe6c*/ s8 device3;
 };
 
@@ -3852,13 +3849,6 @@ struct textureconfig {
 	u8 s;
 	u8 t;
 	u8 unk0b;
-};
-
-struct perfectheadtexturelist {
-	u8 unk000[16][0x80];
-	struct fileguid fileguids[16];
-	s32 lastupdated240;
-	struct textureconfig selectedtexture;
 };
 
 // Used for menu 3D model turntables
@@ -3899,36 +3889,16 @@ struct menumodel {
 	/*0x54c*/ f32 newroty;
 	/*0x550*/ f32 newrotz;
 	/*0x554*/ f32 zoom; // character selection: far = 100, near = 370
-	/*0x558*/ f32 unk558; // unused
-	/*0x55c*/ f32 unk55c; // unused
-	/*0x560*/ s16 unk560; // unused
 	/*0x564*/ f32 configurefrac;
 	/*0x568*/ u8 flags;
 	/*0x56a*/ s16 bodynum;
-	/*0x56c*/ s32 unk56c; // unused
-	/*0x570*/ s32 unk570; // unused
 	/*0x574*/ s32 zoomtimer60;
 	/*0x578*/ s32 rottimer60;
-	/*0x57c*/ s32 unk57c; // unused
 	/*0x580*/ bool removingpiece;
-	/*0x584*/ s32 unk584; // unused
-	/*0x588*/ s32 unk588; // unused
-	/*0x58c*/ s32 unk58c; // unused
-	/*0x590*/ s32 unk590; // unused
-	/*0x594*/ s32 unk594; // unused
-	/*0x598*/ s32 unk598; // unused
-	/*0x59c*/ s32 unk59c; // unused
-	/*0x5a0*/ s32 unk5a0; // unused
-	/*0x5a4*/ s32 unk5a4; // unused
-	/*0x5a8*/ s32 unk5a8; // unused
-	/*0x5ac*/ s32 unk5ac; // unused
 	/*0x5b0*/ u8 perfectheadnum;
 	/*0x5b1*/ u8 isperfecthead : 1;
-	/*0x5b1*/ u8 unk5b1_02 : 1; // unused
-	/*0x5b1*/ u8 unk5b1_03 : 1; // unused
 	/*0x5b1*/ u8 reverseanim : 1;
 	/*0x5b1*/ u8 configuring : 1;
-	/*0x5b1*/ u8 unk5b1_06 : 1; // unused
 	/*0x5b1*/ u8 drawbehinddialog : 1;
 	/*0x5b4*/ struct modelpartvisibility *partvisibility;
 };
@@ -3948,14 +3918,14 @@ struct menucolumn {
 };
 
 struct menu {
-	struct menudialog dialogs[VERSION >= VERSION_NTSC_1_0 ? 10 : 9];
+	struct menudialog dialogs[10];
 	/*0x460*/ s16 numdialogs;
 	/*0x464*/ struct menulayer layers[6];
 	/*0x4f4*/ s16 depth; // index into layers. 1-indexed?
 	/*0x4f8*/ struct menudialog *curdialog;
-	/*0x4fc*/ struct menurow rows[VERSION >= VERSION_NTSC_1_0 ? 88 : 80];
+	/*0x4fc*/ struct menurow rows[88];
 	/*0x65c*/ s32 rowend;
-	/*0x660*/ struct menucolumn cols[VERSION >= VERSION_NTSC_1_0 ? 12 : 10];
+	/*0x660*/ struct menucolumn cols[12];
 	/*0x6d8*/ s32 colend;
 	/*0x6dc*/ u32 blocks[80]; // for menuitemdata
 	/*0x81c*/ s32 blockend;
@@ -3968,12 +3938,8 @@ struct menu {
 	/*0x834*/ s16 yrepeatcount;
 	/*0x836*/ s16 yrepeatdir;
 	/*0x838*/ s16 yrepeatmode;
-	/*0x83a*/ u8 unk83a;
 	/*0x83b*/ u8 playernum;
 	/*0x83c*/ u8 openinhibit;
-	/*0x83d*/ u8 unk83d;
-	/*0x83e*/ u8 unk83e;
-	/*0x83f*/ u8 unk83f;
 	/*0x840*/ struct menumodel menumodel;
 	/*0xdf8*/ s8 bannernum;
 	/*0xdfc*/ struct menudfc unkdfc[4];
@@ -5069,29 +5035,16 @@ struct movedata {
 	/*0xa0*/ s32 analogpitch;
 	/*0xa4*/ s32 analogstrafe;
 	/*0xa8*/ s32 analogwalk;
-#ifndef PLATFORM_N64
 	/*0xac*/ s32 alt1tapcount;
 	/*    */ f32 freelookdx; // how much the mouse moved ...
 	/*    */ f32 freelookdy; // ... scaled by sensitivity
 	/*    */ f32 analoglean; // how much we're trying to lean
-#endif
 
 };
 
 struct attackanimgroup {
 	struct attackanimconfig *animcfg;
 	s32 len;
-};
-
-struct modelthing {
-	/*0x00*/ u32 unk00;
-	/*0x04*/ u32 unk04;
-	/*0x08*/ u32 unk08;
-	/*0x0c*/ u32 unk0c;
-	/*0x10*/ s16 unk10;
-	/*0x12*/ u16 unk12;
-	/*0x14*/ u16 unk14;
-	/*0x16*/ u16 unk16;
 };
 
 struct animtableentry {
@@ -5258,7 +5211,6 @@ struct seqinstance {
 
 struct lasersight {
 	s32 id;
-	struct coord unk04;
 	struct coord beamnear;
 	struct coord beamfar;
 	f32 unk28;
@@ -5379,7 +5331,7 @@ struct pakfileheader {
 	u32 version : 1;        // 0, but can be set to 1 using -forceversion argument
 };
 
-struct var80067e6c {
+struct animsmovement {
 	s16 animnum;
 	f32 value;
 };

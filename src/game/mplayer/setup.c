@@ -5,7 +5,7 @@
 #include "game/menu.h"
 #include "game/mainmenu.h"
 #include "game/filemgr.h"
-#include "game/game_1531a0.h"
+#include "game/textutils.h"
 #include "game/music.h"
 #include "game/mplayer/ingame.h"
 #include "game/mplayer/setup.h"
@@ -489,12 +489,10 @@ MenuItemHandlerResult menuhandlerMpSaveSetupCopy(s32 operation, struct menuitem 
 	return 0;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 char *mpMenuTextSetupName(struct menuitem *item)
 {
 	return g_MpSetup.name;
 }
-#endif
 
 MenuItemHandlerResult func0f179b68(s32 operation, struct menuitem *item, union handlerdata *data)
 {
@@ -542,15 +540,6 @@ MenuItemHandlerResult func0f179cc0(s32 operation, struct menuitem *item, union h
 	case MENUOP_GETSLIDERLABEL:
 		sprintf(data->slider.label, "%d%%\n", data->slider.value + 25);
 		break;
-	}
-
-	return 0;
-}
-
-MenuItemHandlerResult func0f179d6c(s32 operation, struct menuitem *item, union handlerdata *data)
-{
-	if (operation == MENUOP_SET) {
-		func0f187fbc(g_MpPlayerNum);
 	}
 
 	return 0;
@@ -2467,7 +2456,7 @@ MenuItemHandlerResult menuhandlerMpTeamScoreLimitSlider(s32 operation, struct me
 MenuItemHandlerResult menuhandlerMpRestoreScoreDefaults(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
-		func0f187fec();
+		mpSetScoringDefaults();
 	}
 
 	return 0;

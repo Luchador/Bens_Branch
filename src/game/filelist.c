@@ -85,12 +85,10 @@ s32 filelistFindOrCreate(u8 filetype)
 	return -1;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 void filelistInvalidatePak(s32 device)
 {
 	g_FilelistKnownPlugCounts[device] = -1;
 }
-#endif
 
 void filelistsTick(void)
 {
@@ -107,27 +105,12 @@ void filelistsTick(void)
 		doneinit = true;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	for (i = 0, updateall = false; i < ARRAYCOUNT(g_FilelistKnownPlugCounts); i++) {
 		if (pak0f1167d8(i) && pakGetPlugCount(i) != g_FilelistKnownPlugCounts[i]) {
 			updateall = true;
 			g_FilelistKnownPlugCounts[i] = pakGetPlugCount(i);
 		}
 	}
-#else
-	for (i = 0, updateall = false; i < ARRAYCOUNT(g_FilelistKnownPlugCounts); i++) {
-		s32 plugcount = pakGetPlugCount(i);
-
-		if (pak0f1167d8(i)) {
-			plugcount = 0;
-		}
-
-		if (g_FilelistKnownPlugCounts[i] != plugcount) {
-			updateall = true;
-			g_FilelistKnownPlugCounts[i] = plugcount;
-		}
-	}
-#endif
 
 	for (i = 0; i < ARRAYCOUNT(g_FileLists); i++) {
 		if (g_FileLists[i] != NULL) {
@@ -263,114 +246,4 @@ void filelistUpdate(struct filelist *list)
 			}
 		}
 	}
-}
-
-void pheadAllocateTextures(s32 playernum, struct perfectheadtexturelist *textures)
-{
-	s32 i;
-	s32 j;
-	s32 k;
-
-	if (g_Menus[playernum].fm.headtextures == NULL) {
-		if (textures == NULL) {
-			g_Menus[playernum].fm.unke40_01 = true;
-			bgGarbageCollectRooms(align16(sizeof(struct perfectheadtexturelist)), 1);
-			g_Menus[playernum].fm.headtextures = memaAlloc(align16(sizeof(struct perfectheadtexturelist)));
-		} else {
-			g_Menus[playernum].fm.headtextures = textures;
-			g_Menus[playernum].fm.unke40_01 = false;
-		}
-	}
-
-	if (g_Menus[playernum].fm.headtextures == NULL) {
-#if VERSION >= VERSION_NTSC_1_0
-		faultAssert("tc != NULL", "gamefile.c", 458);
-#else
-		faultAssert("tc != NULL", "gamefile.c", 450);
-#endif
-	}
-
-	for (i = 0; i != ARRAYCOUNT(g_Menus[playernum].fm.headtextures->fileguids); i++) {
-		g_Menus[playernum].fm.headtextures->fileguids[i].fileid = 0;
-		g_Menus[playernum].fm.headtextures->fileguids[i].deviceserial = 0;
-	}
-
-	g_Menus[playernum].fm.headtextures->lastupdated240 = 0;
-
-	g_Menus[playernum].fm.headtextures->selectedtexture.width = 16;
-	g_Menus[playernum].fm.headtextures->selectedtexture.height = 16;
-	g_Menus[playernum].fm.headtextures->selectedtexture.level = 0;
-	g_Menus[playernum].fm.headtextures->selectedtexture.format = G_IM_FMT_I;
-	g_Menus[playernum].fm.headtextures->selectedtexture.depth = 0;
-	g_Menus[playernum].fm.headtextures->selectedtexture.s = 0;
-	g_Menus[playernum].fm.headtextures->selectedtexture.t = 1;
-	g_Menus[playernum].fm.headtextures->selectedtexture.unk0b = 0;
-
-	for (j = 0; j < 16; j++) {
-		for (k = 0; k < 0x80; k++) {
-			g_Menus[playernum].fm.headtextures->unk000[j][k] = k & 0xff;
-		}
-	}
-}
-
-void pheadFreeTextures(s32 playernum)
-{
-	if (g_Menus[playernum].fm.headtextures != NULL) {
-		if (g_Menus[playernum].fm.unke40_01) {
-			memaFree(g_Menus[playernum].fm.headtextures, align16(sizeof(struct perfectheadtexturelist)));
-		}
-
-		g_Menus[playernum].fm.headtextures = NULL;
-	}
-}
-
-struct textureconfig *pheadGetTexture(s32 playernum, s32 fileid, u16 deviceserial)
-{
-	s32 i;
-	s32 freeslot = -1;
-	s32 indextouse = -1;
-
-	for (i = 0; i < 16; i++) {
-		if (g_Menus[playernum].fm.headtextures->fileguids[i].fileid == fileid
-				&& g_Menus[playernum].fm.headtextures->fileguids[i].deviceserial == deviceserial) {
-			indextouse = i;
-			break;
-		}
-
-		if (g_Menus[playernum].fm.headtextures->fileguids[i].fileid == 0) {
-			if (g_Menus[playernum].fm.headtextures->fileguids[i].deviceserial == 0) {
-				freeslot = i;
-			}
-		}
-	}
-
-	if (indextouse == -1) {
-		s8 device = pakFindBySerial(deviceserial);
-
-		if (device < 0) {
-			return NULL;
-		}
-
-		if (freeslot == -1) {
-			return NULL;
-		}
-
-		if (g_Vars.thisframestart240 - g_Menus[playernum].fm.headtextures->lastupdated240 < 20) {
-			return NULL;
-		}
-
-		g_Menus[playernum].fm.headtextures->lastupdated240 = g_Vars.thisframestart240;
-		g_Menus[playernum].fm.headtextures->fileguids[freeslot].fileid = fileid;
-		g_Menus[playernum].fm.headtextures->fileguids[freeslot].deviceserial = deviceserial;
-
-		indextouse = freeslot;
-	}
-
-	if (indextouse == -1) {
-		return NULL;
-	}
-
-	g_Menus[playernum].fm.headtextures->selectedtexture.textureptr = g_Menus[playernum].fm.headtextures->unk000[indextouse];
-
-	return &g_Menus[playernum].fm.headtextures->selectedtexture;
 }

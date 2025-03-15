@@ -92,7 +92,6 @@ SECTIONS
 	osMemSize = 0x80000318;
 	osAppNMIBuffer = 0x8000031c;
 
-	getitle0f0155f0_hack = getitle0f0155f0;
 	nbombCreateStorm_hack = nbombCreateStorm;
 	viGetHeight_hack = viGetHeight;
 
@@ -385,29 +384,6 @@ SECTIONS
 		. = ALIGN(0x10);
 	}
 	END_SEG(textureconfig)
-
-	/***************************************************************************
-	 * getitle
-	 * -------------------------------------------------------------------------
-	 * ROM range: 0x007ebdc0 - 0x007f2390
-	 * RAM range: N/A
-	 * -------------------------------------------------------------------------
-	 */
-
-	BEGIN_SEG(getitle)
-	{
-		build/ROMID/getitle.o (.data);
-	}
-	END_SEG(getitle)
-
-	_getitleSegmentStart = ROM_SIZE * 1024 * 1024;
-	_getitleSegmentEnd = _getitleSegmentStart + 0x65d0;
-	var020043f8 = _getitleSegmentStart + 0x43f8;
-	var02004468 = _getitleSegmentStart + 0x4468;
-	var02004700 = _getitleSegmentStart + 0x4700;
-	var02004d28 = _getitleSegmentStart + 0x4d28;
-	var02004dc8 = _getitleSegmentStart + 0x4dc8;
-	var02005dd0 = _getitleSegmentStart + 0x5dd0;
 
 	/***************************************************************************
 	 * fonts
