@@ -114,12 +114,12 @@ Holoprogram 6 has been completed successfully.
 Holoprogram 7 has been completed successfully.
 TERMINALS*- Press B Button next to terminal to use it.
 Now activate the red terminals on the wall.
-PP7
-DD44
+PP7 Special Issue
+DD44 Dostovei
 Klobb
 KF7 Soviet
 ZMG (9mm)
 D5K Deutsche
-AR33
+US AR33 Assault Rifle
 RC-P90
 Okay, Jo, I'll leave you to prepare for the mission.

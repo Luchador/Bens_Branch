@@ -16048,7 +16048,6 @@ void ammotypeGetDeterminer(char *dst, s32 ammotype, s32 qty)
 	langRemoveNewline(dst);
 }
 
-#if VERSION < VERSION_PAL_BETA
 void ammotypeGetPickupName(char *dst, s32 ammotype2, s32 qty)
 {
 	s32 ammotype = ammotype2;
@@ -16056,7 +16055,7 @@ void ammotypeGetPickupName(char *dst, s32 ammotype2, s32 qty)
 	if (ammotype == AMMOTYPE_PISTOL || ammotype == AMMOTYPE_SMG || ammotype == AMMOTYPE_RIFLE) {
 		strcat(dst, langGet(L_PROPOBJ_010)); // "ammo"
 	} else if (ammotype == AMMOTYPE_KNIFE) {
-		strcat(dst, langGet(L_PROPOBJ_021)); // "combat"
+		strcat(dst, langRemoveNewline(langGet(L_PROPOBJ_021))); // "combat"
 
 		if (qty == 1) {
 			strcat(dst, langGet(L_PROPOBJ_022)); // "knife"
@@ -16100,7 +16099,6 @@ void ammotypeGetPickupName(char *dst, s32 ammotype2, s32 qty)
 		}
 	}
 }
-#endif
 
 void ammotypePlayPickupSound(u32 ammotype)
 {
