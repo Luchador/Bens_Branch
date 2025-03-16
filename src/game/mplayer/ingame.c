@@ -1,6 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/title.h"
 #include "game/weaponutils.h"
 #include "game/tex.h"
@@ -606,7 +606,7 @@ MenuItemHandlerResult mpPlayerTitleMenuHandler(s32 operation, struct menuitem *i
 
 char *mpMenuTextPlayerTitle(s32 arg0)
 {
-	return langRemoveNewline(langGet(L_MISC_185 + g_PlayerConfigsArray[g_MpPlayerNum].title));
+	return (langGet(L_MISC_185 + g_PlayerConfigsArray[g_MpPlayerNum].title));
 }
 
 MenuItemHandlerResult mpConfirmPlayerNameHandler(s32 operation, struct menuitem *item, union handlerdata *data)

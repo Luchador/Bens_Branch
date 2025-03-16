@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/dlights.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/atan2f.h"
 #include "game/savebuffer.h"
 #include "game/sky.h"
@@ -950,7 +950,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 			colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	{
 		s8 contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
@@ -1977,7 +1977,7 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	gDPFillRectangle(gdl++, viewleft, viewtop, viewleft + viewwidth, lenstop);
 	gDPFillRectangle(gdl++, viewleft, lenstop + lensheight, viewleft + viewwidth, viewtop + viewheight);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	// Prepare text buffers
 	sprintf(directiontext, "%s %s:%03d", arrows, &directions[(turnangle + 22) / 45], turnangle);

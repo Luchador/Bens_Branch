@@ -1,6 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/bondgun.h"
 #include "game/tex.h"
 #include "game/savebuffer.h"
@@ -181,7 +181,7 @@ Gfx *menugfxRenderDialogBackground(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, str
 
 	gDPFillRectangleScaled(gdl++, x1, y1, x2, y2);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	if (dialog->transitionfrac < 0.0f) {
 		leftcolour = g_MenuColours[dialog->type].dialog_border1;
@@ -1302,7 +1302,7 @@ Gfx *menugfxDrawCheckbox(Gfx *gdl, s32 x, s32 y, s32 size, bool fill, u32 border
 	if (fill) {
 		gdl = textSetPrimColour(gdl, fillcolour);
 		gDPFillRectangleScaled(gdl++, x, y, x + size, y + size);
-		gdl = text0f153838(gdl);
+		gdl = textSetCCCustom02(gdl);
 	}
 
 	gdl = textSetPrimColour(gdl, bordercolour);
@@ -1312,7 +1312,7 @@ Gfx *menugfxDrawCheckbox(Gfx *gdl, s32 x, s32 y, s32 size, bool fill, u32 border
 	gDPFillRectangleScaled(gdl++, x, y + 1, x + 1, y + size);
 	gDPFillRectangleScaled(gdl++, x + size, y + 1, x + size + 1, y + size);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
 }

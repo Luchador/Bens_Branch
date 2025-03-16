@@ -2,7 +2,7 @@
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/dlights.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/setup.h"
 #include "game/prop.h"
 #include "game/propsnd.h"

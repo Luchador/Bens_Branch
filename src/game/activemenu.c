@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/chraction.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/bondgun.h"
 #include "game/weaponutils.h"
 #include "game/tex.h"
@@ -965,7 +965,7 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
 			x + g_AmMenus[g_AmIndex].slotwidth / 2,
 			y + paddingbottom);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	// Render borders
 	colour = obcol;
@@ -1014,7 +1014,7 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
 			x + g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y + paddingbottom);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	// Render text
 	colour = defcol;
@@ -1316,7 +1316,7 @@ Gfx *amRender(Gfx *gdl)
 					g_AmMenus[g_AmIndex].selx + halfwidth + 1,
 					g_AmMenus[g_AmIndex].sely + below);
 
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 		}
 
 		gdl = text0f153780(gdl);

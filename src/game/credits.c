@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/camera.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/title.h"
 #include "game/tex.h"
 #include "game/player.h"
@@ -576,7 +576,7 @@ Gfx *creditsFillFramebuffer(Gfx *gdl, u32 colour)
 
 	gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
 }

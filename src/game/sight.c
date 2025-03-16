@@ -455,7 +455,7 @@ Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, s32 textid, s
 					(boxright < viewright ? boxright : viewright), boxbottom);
 		}
 
-		gdl = text0f153838(gdl);
+		gdl = textSetCCCustom02(gdl);
 
 		if (textid != 0 && textonscreen) {
 			s32 x = boxright + 3;
@@ -506,7 +506,7 @@ Gfx *sightDrawAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colou
 		gDPHudRectangle(gdl++, x, y + radius - 2, x, viewbottom);
 	}
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 	gdl = textSetPrimColour(gdl, colour);
 
 	// Draw the box
@@ -528,7 +528,7 @@ Gfx *sightDrawAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colou
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
 }
@@ -651,7 +651,7 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u3
 	gDPHudRectangle(gdl++, x - 1, y + 0, x + 1, y + 0);
 	gDPHudRectangle(gdl++, x - 1, y + 1, x + 1, y + 1);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	gdl = textSetPrimColour(gdl, colour);
 
@@ -671,7 +671,7 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u3
 	gDPHudRectangle(gdl++, boxx - radius, boxy + radius, boxx - cornergap, boxy + radius);
 	gDPHudRectangle(gdl++, boxx + cornergap, boxy + radius, boxx + radius, boxy + radius);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 #ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
@@ -1373,7 +1373,7 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 		gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
 #endif
 
-		gdl = text0f153838(gdl);
+		gdl = textSetCCCustom02(gdl);
 		gdl = text0f153780(gdl);
 	}
 
@@ -1488,7 +1488,7 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	gDPHudRectangle(gdl++, x - 4, y - 4, x + 4, y - 4); // top
 	gDPHudRectangle(gdl++, x - 4, y + 4, x + 4, y + 4); // bottom
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 #ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
@@ -1528,7 +1528,7 @@ Gfx *sightDrawTarget(Gfx *gdl, f32 crossx, f32 crossy)
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
 }

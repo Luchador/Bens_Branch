@@ -8,7 +8,7 @@
 #include "game/cheats.h"
 #include "game/chraction.h"
 #include "game/footstep.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/chr.h"
 #include "game/prop.h"
 #include "game/atan2f.h"

@@ -1,6 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/objectives.h"
 #include "game/tex.h"
 #include "game/menugfx.h"
@@ -1136,7 +1136,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 	}
 
 	// Render text value
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	x = context->x + 4;
 	y = context->y + 2;
@@ -1163,7 +1163,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 
 	gDPFillRectangleScaled(gdl++, x + 1, context->y + 2, x + 3, context->y + 9);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	// Render horizontal grid lines
 	for (row = 0; row < MENU_KEYBOARD_ROWS + 1; row++) {
@@ -2169,11 +2169,11 @@ Gfx *menuitemMeterRender(Gfx *gdl, struct menurendercontext *context)
 
 	gdl = textSetPrimColour(gdl, colour1);
 	gDPFillRectangleScaled(gdl++, x1, context->y, x2, context->y + 5);
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	gdl = textSetPrimColour(gdl, colour2);
 	gDPFillRectangleScaled(gdl++, x2, context->y, x3, context->y + 5);
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	text = menuResolveParam2Text(context->item);
 
@@ -2212,7 +2212,7 @@ Gfx* menuitemColorBoxRender(Gfx *gdl, struct menurendercontext *context)
 
 	gdl = textSetPrimColour(gdl, colour1);
 	gDPFillRectangleScaled(gdl++, x1, context->y, x2, context->y + height);
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
 }

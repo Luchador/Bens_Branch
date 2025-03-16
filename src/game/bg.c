@@ -2,7 +2,7 @@
 #include "constants.h"
 #include "game/debug.h"
 #include "game/dlights.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/portal.h"
 #include "game/room.h"
 #include "game/chr.h"

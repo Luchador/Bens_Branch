@@ -18,7 +18,7 @@
 #include "game/env.h"
 #include "game/explosions.h"
 #include "game/footstep.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/weaponutils.h"
 #include "game/textutils.h"
 #include "game/gunfx.h"

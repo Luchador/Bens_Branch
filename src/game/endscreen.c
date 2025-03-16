@@ -2,7 +2,7 @@
 #include "constants.h"
 #include "game/bossfile.h"
 #include "game/cheats.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/title.h"
 #include "game/pdmode.h"
 #include "game/objectives.h"

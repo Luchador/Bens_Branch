@@ -128,8 +128,6 @@ Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, u32 colour1, 
 	f32 sqdist;
 	f32 spcc;
 
-	osSyncPrintf("RadarDrawDot : Prop=%x", prop);
-
 	spcc = (atan2f(dist->x, dist->z) * 180.0f) / M_PI + g_Vars.currentplayer->vv_theta + 180.0f;
 	sqdist = sqrtf(dist->z * dist->z + dist->x * dist->x) * (1.0f / 250.0f);
 
@@ -150,44 +148,44 @@ Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, u32 colour1, 
 			gDPFillRectangleScaled(gdl++, x - 2, y + 2, x + 1, y + 3);
 			gDPFillRectangleScaled(gdl++, x - 3, y - 1, x + 2, y + 2);
 			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 1, y - 1);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gDPFillRectangleScaled(gdl++, x - 1, y + 1, x + 0, y + 2);
 			gDPFillRectangleScaled(gdl++, x - 2, y + 0, x + 1, y + 1);
 			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 0, y + 0);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y > 250) {
 			// Up triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gDPFillRectangleScaled(gdl++, x - 3, y - 1, x + 2, y + 2);
 			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 1, y - 1);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gDPFillRectangleScaled(gdl++, x - 2, y + 0, x + 1, y + 1);
 			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 0, y + 0);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y < -250) {
 			// Down triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gDPFillRectangleScaled(gdl++, x - 3, y - 2, x + 2, y + 1);
 			gDPFillRectangleScaled(gdl++, x - 2, y + 1, x + 1, y + 2);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gDPFillRectangleScaled(gdl++, x - 2, y - 1, x + 1, y + 0);
 			gDPFillRectangleScaled(gdl++, x - 1, y + 0, x + 0, y + 1);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 		} else {
 			// Dot
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 2, y + 2);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 1, y + 1);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 		}
 	} else {
 		if (prop == g_Vars.currentplayer->prop) {
@@ -196,44 +194,44 @@ Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, u32 colour1, 
 			gDPFillRectangleScaled(gdl++, x - 2, y + 2, x + 1, y + 3);
 			gDPFillRectangleScaled(gdl++, x - 3, y - 1, x + 2, y + 2);
 			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 1, y - 1);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gDPFillRectangleScaled(gdl++, x - 1, y + 1, x + 0, y + 2);
 			gDPFillRectangleScaled(gdl++, x - 2, y + 0, x + 1, y + 1);
 			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 0, y + 0);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y > 250) {
 			// Up triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gDPFillRectangleScaled(gdl++, x - 3, y - 1, x + 2, y + 2);
 			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 1, y - 1);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gDPFillRectangleScaled(gdl++, x - 2, y + 0, x + 1, y + 1);
 			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 0, y + 0);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y < -250) {
 			// Down triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gDPFillRectangleScaled(gdl++, x - 3, y - 2, x + 2, y + 1);
 			gDPFillRectangleScaled(gdl++, x - 2, y + 1, x + 1, y + 2);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gDPFillRectangleScaled(gdl++, x - 2, y - 1, x + 1, y + 0);
 			gDPFillRectangleScaled(gdl++, x - 1, y + 0, x + 0, y + 1);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 		} else {
 			// Dot
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 2, y + 2);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 1, y + 1);
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 		}
 	}
 
@@ -289,7 +287,7 @@ Gfx *radarRender(Gfx *gdl)
 		}
 	}
 
-	g_RadarY = viGetViewTop() + (PAL ? 29 : 26);
+	g_RadarY = viGetViewTop() + 26;
 
 	if (playercount == 2) {
 		if (optionsGetScreenSplit() != SCREENSPLIT_VERTICAL && playernum == 1) {

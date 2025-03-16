@@ -5,7 +5,7 @@
 #include "game/cheats.h"
 #include "game/chraction.h"
 #include "game/inv.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/chr.h"
 #include "game/bg.h"
 #include "game/prop.h"
@@ -2697,7 +2697,7 @@ void bgunUpdateHandState2(struct hand *hand, s32 handnum, struct coord *viewmode
 	struct coord sp38 = {0, 0, 0};
 	
 	// Go into turn up mode if the player has been looking at a wall for more than half a second OR the player is moving quickly on a hoverbike
-	if ((g_CloseToWallTimer > TICKS(30) || (g_Vars.currentplayer->bondmovemode == MOVEMODE_BIKE && g_Vars.currentplayer->hovspeed >= 0.8f)) && funcdef && (funcdef->type & 0xff) == INVENTORYFUNCTYPE_SHOOT && (hand->state == HANDSTATE_IDLE || hand->state == HANDSTATE_2)) {
+	if (((g_CloseToWallTimer > TICKS(30) && g_Vars.currentplayer->speedforwards < 0.9f && g_Vars.currentplayer->speedforwards > -0.9f ) || (g_Vars.currentplayer->bondmovemode == MOVEMODE_BIKE && g_Vars.currentplayer->hovspeed >= 0.8f)) && funcdef && (funcdef->type & 0xff) == INVENTORYFUNCTYPE_SHOOT && (hand->state == HANDSTATE_IDLE || hand->state == HANDSTATE_2)) {
 		if (hand->turnuprot < 1.0f) {
 			// Rotate into turned up position
 				hand->turnuprot += LVUPDATE60FREAL() / 30.0f;
@@ -9102,7 +9102,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 				gDPFillRectangleScaled(gdl++, x1, gaugetop, x2, partitiony);
 			}
 
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 		}
 
 		// Render filled partition
@@ -9245,7 +9245,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 		}
 	}
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 
@@ -9375,7 +9375,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 	gDPFillRectangleScaled(gdl++, xpos - 13, bottom - 11, xpos - 2, bottom);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	// Draw weapon name and function name
 	if (optionsGetShowGunFunction(g_Vars.currentplayerstats->mpindex)) {
@@ -9422,7 +9422,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 			gDPFillRectangleScaled(gdl++, x - 1, y - 1, xpos - 11, bottom);
 
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 			textSetWaveBlend(g_20SecIntervalFrac * 50.0f, 0, 50);
 			textSetWaveColours(0xffffffff, 0xffffffff);
 			gdl = textRenderProjected(gdl, &x, &y, str, g_CharsHandelGothicXs, g_FontHandelGothicXs, colour, textwidth, 1000, 0, 0);
@@ -9488,7 +9488,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 				gDPFillRectangleScaled(gdl++, x - 1, y - 1, xpos - 11, bottom + 3);
 
-				gdl = text0f153838(gdl);
+				gdl = textSetCCCustom02(gdl);
 
 				textSetWaveBlend(g_20SecIntervalFrac * 50.0f, 0, 50);
 				textSetWaveColours(0xffffffff, 0xffffffff);

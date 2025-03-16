@@ -15,7 +15,7 @@ void textReset(void);
 Gfx *text0f153628(Gfx *gdl);
 Gfx *text0f153780(Gfx *gdl);
 Gfx *textSetPrimColour(Gfx *gdl, u32 colour);
-Gfx *text0f153838(Gfx *gdl);
+Gfx *textSetCCCustom02(Gfx *gdl);
 Gfx *text0f153858(Gfx *gdl, s32 *x1, s32 *y1, s32 *x2, s32 *y2);
 Gfx *text0f1538e4(Gfx *gdl, s32 *x1, s32 *y1, s32 *x2, s32 *y2);
 Gfx *text0f153990(Gfx *gdl, s32 left, s32 top, s32 width, s32 height);

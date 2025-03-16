@@ -6,7 +6,7 @@
 
 void mpstatsIncrementPlayerShotCount(struct gset *gset, s32 region);
 void mpstatsIncrementPlayerShotCount2(struct gset *gset, s32 region);
-void mpstats0f0b0520(void);
+void mpstatsResetShotsShouldCount(void);
 s32 mpstatsGetPlayerShotCountByRegion(u32 type);
 void mpstatsIncrementTotalKillCount(void);
 void mpstatsIncrementTotalKnockoutCount(void);

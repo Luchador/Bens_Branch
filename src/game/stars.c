@@ -1,6 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/tex.h"
 #include "game/stars.h"
 #include "game/textutils.h"
@@ -220,22 +220,19 @@ Gfx *starsRender(Gfx *gdl)
 		return gdl;
 	}
 
-	if (g_Vars.stagenum == STAGE_DEFECTION || g_Vars.stagenum == STAGE_EXTRACTION) {
+	if (g_Vars.stagenum == STAGE_DEFECTION || g_Vars.stagenum == STAGE_EXTRACTION || g_Vars.stagenum == STAGE_MBR) {
 		isddtower = true;
 	}
 
-	colours[0] = colourBlend(0xffffff7f, 0x7777777f, menuGetSinOscFrac(2) * 255);
-	colours[1] = colourBlend(0x0000aa7f, 0x2222ff7f, menuGetSinOscFrac(4) * 255);
-	colours[2] = colourBlend(0x0000ff7f, 0x5555ff7f, menuGetCosOscFrac(2) * 255);
-	colours[3] = colourBlend(0xaaaaff7f, 0x7777ff7f, menuGetCosOscFrac(4) * 255);
+	// Ben's comment: make stars twinkle. This code was in the original game, it was just missing the colours[i] assignment in the for loop. I also made the stars twinkle 5x faster.
+	colours[0] = colourBlend(0xffffff7f, 0x7777777f, menuGetSinOscFrac(10) * 255);
+	colours[1] = colourBlend(0x0000aa7f, 0x2222ff7f, menuGetSinOscFrac(20) * 255);
+	colours[2] = colourBlend(0x0000ff7f, 0x5555ff7f, menuGetCosOscFrac(10) * 255);
+	colours[3] = colourBlend(0xaaaaff7f, 0x7777ff7f, menuGetCosOscFrac(20) * 255);
 
 	if (isddtower) {
 		for (i = 0; i < 3; i++) {
-			// Nothing is done with the return value here, so this has no
-			// effect. Maybe the original code incorrectly did a comparison
-			// instead of an assign? eg. colours[i] == colourBlend(...)
-			// Doing this would make the stars more transparent.
-			colourBlend(colours[i], colours[i] & 0xff, 0x5f);
+			colours[i] = colourBlend(colours[i], colours[i] & 0xff, 0x5f);
 		}
 	}
 
@@ -331,7 +328,7 @@ Gfx *starsRender(Gfx *gdl)
 		}
 	}
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
 }

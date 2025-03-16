@@ -17,7 +17,7 @@
 #include "data.h"
 #include "types.h"
 
-u32 var80070590 = 0x00000000;
+bool g_mpstatsShotShouldCount = false;
 
 void mpstatsIncrementPlayerShotCount(struct gset *gset, s32 region)
 {
@@ -30,23 +30,23 @@ void mpstatsIncrementPlayerShotCount2(struct gset *gset, s32 region)
 {
 	if (region == 0) {
 		if (!weaponHasFlag(gset->weaponnum, WEAPONFLAG_DONTCOUNTSHOTS)) {
-			var80070590 = 1;
+			g_mpstatsShotShouldCount = true;
 			g_Vars.currentplayerstats->shotcount[region]++;
 		}
 	} else {
-		if (var80070590) {
+		if (g_mpstatsShotShouldCount) {
 			if (!weaponHasFlag(gset->weaponnum, WEAPONFLAG_DONTCOUNTSHOTS)) {
 				g_Vars.currentplayerstats->shotcount[region]++;
 			}
 
-			var80070590 = 0;
+			g_mpstatsShotShouldCount = false;
 		}
 	}
 }
 
-void mpstats0f0b0520(void)
+void mpstatsResetShotsShouldCount(void)
 {
-	var80070590 = 0;
+	g_mpstatsShotShouldCount = false;
 }
 
 s32 mpstatsGetPlayerShotCountByRegion(u32 type)

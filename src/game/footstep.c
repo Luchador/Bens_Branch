@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/debug.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/lv.h"
 #include "game/propsnd.h"
 #include "game/bg.h"

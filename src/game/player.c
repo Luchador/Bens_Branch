@@ -3012,7 +3012,7 @@ void playerTick()
 {
 	f32 aspectratio;
 	f32 f20;
-
+	
 	aspectratio = player0f0bd358();
 
 	if (var8007083c != TELEPORTSTATE_INACTIVE) {

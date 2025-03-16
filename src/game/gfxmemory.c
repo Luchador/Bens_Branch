@@ -52,19 +52,10 @@ u8 *g_GfxMemPos;
 u8 g_GfxActiveBufferIndex;
 u32 g_GfxRequestedDisplayList;
 
-u32 g_GfxSizesByPlayerCount[] = {
-	0x00010000 * GFX_SIZE_MULTIPLIER,
-	0x00018000 * GFX_SIZE_MULTIPLIER,
-	0x00020000 * GFX_SIZE_MULTIPLIER,
-	0x00028000 * GFX_SIZE_MULTIPLIER,
-};
+// Ben's comment: originally there was an array that changed this based on player count. I'm just using a constant value, the one used for 4 players.
+u32 g_GfxSize = 0x00028000 * GFX_SIZE_MULTIPLIER;
 
-u32 g_VtxSizesByPlayerCount[] = {
-	0x00010000,
-	0x00018000,
-	0x00020000,
-	0x00028000,
-};
+u32 g_VtxSize = 0x00028000;
 
 s32 g_GfxNumSwapsPerBuffer[NUM_GFXTASKS] = {0, 1};
 u32 g_GfxNumSwaps = 2;
@@ -77,8 +68,6 @@ u32 g_GfxNumSwaps = 2;
  */
 void gfxReset(void)
 {
-	s32 stack;
-
 	if (argFindByPrefix(1, "-mgfx")) {
 		// Argument specified master_dl_size\n
 		s32 gfx;
@@ -103,23 +92,23 @@ void gfxReset(void)
 		// ******** Original Amount required = %dK ber buffer\n
 		// ******** Extra Amount required = %dK ber buffer\n
 		// ******** Total of %dK (Double Buffered)\n
-		g_GfxSizesByPlayerCount[PLAYERCOUNT() - 1] = (gfx + gfxtra) * GFX_SIZE_MULTIPLIER;
+		g_GfxSize = (gfx + gfxtra) * GFX_SIZE_MULTIPLIER;
 	}
 
 	if (argFindByPrefix(1, "-mvtx")) {
 		// Argument specified mtxvtx_size\n
-		g_VtxSizesByPlayerCount[PLAYERCOUNT() - 1] = strtol(argFindByPrefix(1, "-mvtx"), NULL, 0) * 1024;
+		g_VtxSize = strtol(argFindByPrefix(1, "-mvtx"), NULL, 0) * 1024;
 	}
 
 	// %d Players : Allocating %d bytes for master dl's\n
-	g_GfxBuffers[0] = mempAlloc(g_GfxSizesByPlayerCount[PLAYERCOUNT() - 1] * NUM_GFXTASKS, MEMPOOL_STAGE);
-	g_GfxBuffers[1] = g_GfxBuffers[0] + g_GfxSizesByPlayerCount[PLAYERCOUNT() - 1];
-	g_GfxBuffers[2] = g_GfxBuffers[1] + g_GfxSizesByPlayerCount[PLAYERCOUNT() - 1];
+	g_GfxBuffers[0] = mempAlloc(g_GfxSize * NUM_GFXTASKS, MEMPOOL_STAGE);
+	g_GfxBuffers[1] = g_GfxBuffers[0] + g_GfxSize;
+	g_GfxBuffers[2] = g_GfxBuffers[1] + g_GfxSize;
 
 	// Allocating %d bytes for mtxvtx space\n
-	g_VtxBuffers[0] = mempAlloc(g_VtxSizesByPlayerCount[PLAYERCOUNT() - 1] * NUM_GFXTASKS, MEMPOOL_STAGE);
-	g_VtxBuffers[1] = g_VtxBuffers[0] + g_VtxSizesByPlayerCount[PLAYERCOUNT() - 1];
-	g_VtxBuffers[2] = g_VtxBuffers[1] + g_VtxSizesByPlayerCount[PLAYERCOUNT() - 1];
+	g_VtxBuffers[0] = mempAlloc(g_VtxSize * NUM_GFXTASKS, MEMPOOL_STAGE);
+	g_VtxBuffers[1] = g_VtxBuffers[0] + g_VtxSize;
+	g_VtxBuffers[2] = g_VtxBuffers[1] + g_VtxSize;
 
 	g_GfxActiveBufferIndex = 0;
 	g_GfxRequestedDisplayList = false;

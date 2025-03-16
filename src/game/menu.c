@@ -1,7 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/body.h"
 #include "game/objectives.h"
 #include "game/quaternion.h"
@@ -299,18 +299,18 @@ Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 ms
 	// Black fill
 	gdl = textSetPrimColour(gdl, 0x0000007f);
 	gDPFillRectangleScaled(gdl++, x1, y1, x2, y2);
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	// Dark blue fill
 	gdl = textSetPrimColour(gdl, 0x00007f7f);
 	gDPFillRectangleScaled(gdl++, x1, bannertop, x2, bannerbottom);
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	// Top and bottom borders (light blue)
 	gdl = textSetPrimColour(gdl, 0x7f7fff7f);
 	gDPFillRectangleScaled(gdl++, x1, bannerbottom + 2, x2, bannerbottom + 4);
 	gDPFillRectangleScaled(gdl++, x1, bannertop - 4, x2, bannertop - 2);
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	gdl = text0f153628(gdl);
 
@@ -2703,7 +2703,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 
 							gdl = textSetPrimColour(gdl, colour);
 							gDPFillRectangleScaled(gdl++, x1, y1, x2, y2);
-							gdl = text0f153838(gdl);
+							gdl = textSetCCCustom02(gdl);
 						}
 
 						if (focused) {
@@ -2803,7 +2803,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 				curx += menu->cols[colindex].width;
 			}
 
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 			
 
 			gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
@@ -4774,7 +4774,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
 			gSPDisplayList(gdl++, var800613a0);
 			gdl = textSetPrimColour(gdl, colour);
 			gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 		}
 		break;
 	case MENUBG_SUCCESS:
@@ -4783,7 +4783,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
 			gSPDisplayList(gdl++, var800613a0);
 			gdl = textSetPrimColour(gdl, 0x000000ff);
 			gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 
 			// Render the success BG
 			gdl = menugfxRenderBgSuccess(gdl);
@@ -4796,7 +4796,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
 					gSPDisplayList(gdl++, var800613a0);
 					gdl = textSetPrimColour(gdl, alpha);
 					gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
-					gdl = text0f153838(gdl);
+					gdl = textSetCCCustom02(gdl);
 				}
 			}
 		}
@@ -4809,7 +4809,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
 			gSPDisplayList(gdl++, var800613a0);
 			gdl = textSetPrimColour(gdl, channel << 24 | channel << 16 | channel << 8 | 0xff);
 			gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
-			gdl = text0f153838(gdl);
+			gdl = textSetCCCustom02(gdl);
 
 			// Render the failure BG
 			gdl = menugfxRenderBgFailure(gdl);
@@ -4833,7 +4833,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
 				alpha = (1.0f - frac) * 255;
 				gdl = textSetPrimColour(gdl, 0xff000000 | alpha);
 				gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
-				gdl = text0f153838(gdl);
+				gdl = textSetCCCustom02(gdl);
 			}
 		}
 		break;

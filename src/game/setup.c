@@ -1432,7 +1432,7 @@ void setupCreateProps(s32 stagenum)
 	s32 i;
 	s32 j;
 
-	withhovercars = !(stagenum == STAGE_EXTRACTION || stagenum == STAGE_DEFECTION)
+	withhovercars = !(stagenum == STAGE_EXTRACTION || stagenum == STAGE_DEFECTION || stagenum == STAGE_MBR)
 		|| !(g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0);
 
 	escstepx = 0;

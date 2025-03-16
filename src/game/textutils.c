@@ -1,6 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/gfxmemory.h"
 #include "game/savebuffer.h"
 #include "game/textutils.h"
@@ -245,7 +245,7 @@ Gfx *textSetPrimColour(Gfx *gdl, u32 colour)
 	return gdl;
 }
 
-Gfx *text0f153838(Gfx *gdl)
+Gfx *textSetCCCustom02(Gfx *gdl)
 {
 	gDPSetCombineMode(gdl++, G_CC_CUSTOM_02, G_CC_CUSTOM_02);
 
@@ -258,7 +258,7 @@ Gfx *text0f153858(Gfx *gdl, s32 *x1, s32 *y1, s32 *x2, s32 *y2)
 
 	gDPFillRectangle(gdl++, *x1, *y1, *x2, *y2);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
 }
@@ -269,7 +269,7 @@ Gfx *text0f1538e4(Gfx *gdl, s32 *x1, s32 *y1, s32 *x2, s32 *y2)
 
 	gDPFillRectangleScaled(gdl++, *x1, *y1, *x2, *y2);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
 }
@@ -280,7 +280,7 @@ Gfx *text0f153990(Gfx *gdl, s32 left, s32 top, s32 width, s32 height)
 
 	gDPFillRectangle(gdl++, left - 1, top - 1, width + left + 1, top + height + 1);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
 }
@@ -291,7 +291,7 @@ Gfx *text0f153a34(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour)
 
 	gDPFillRectangle(gdl++, x1, y1, x2, y2);
 
-	gdl = text0f153838(gdl);
+	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
 }

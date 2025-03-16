@@ -19,7 +19,7 @@
 #include "game/dlights.h"
 #include "game/explosions.h"
 #include "game/filemgr.h"
-#include "game/game_006900.h"
+#include "game/menuutils.h"
 #include "game/chrutils.h"
 #include "game/gunfx.h"
 #include "game/weaponutils.h"
@@ -452,7 +452,7 @@ Gfx *lvRenderFade(Gfx *gdl)
 			viGetViewLeft() + viGetViewWidth() + 1,
 			viGetViewTop() + viGetViewHeight() - inset + 2);
 
-	return text0f153838(gdl);
+	return textSetCCCustom02(gdl);
 }
 
 bool lvIsFadeActive(void)

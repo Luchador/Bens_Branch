@@ -1428,7 +1428,7 @@ void handTickAttack(s32 handnum)
 					shotCreate(handnum, true, true, bgunGetShotsToTake(handnum), g_Vars.mplayerisrunning);
 				}
 
-				mpstats0f0b0520();
+				mpstatsResetShotsShouldCount();
 			}
 			break;
 		case HANDATTACKTYPE_MELEE:

@@ -798,7 +798,7 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, COLOURWHITE(), viGetWidth(), viGetHeight(), 0, 0);
 
-		gdl = text0f153838(gdl);
+		gdl = textSetCCCustom02(gdl);
 
 		// Render lines between the score table and the target texture
 

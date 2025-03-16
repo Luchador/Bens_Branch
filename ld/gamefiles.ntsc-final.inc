@@ -6,7 +6,7 @@
 	build/ROMID/game/smokeinit.o (section); \
 	build/ROMID/game/dlights.o (section); \
 	build/ROMID/game/footstep.o (section); \
-	build/ROMID/game/game_006900.o (section); \
+	build/ROMID/game/menuutils.o (section); \
 	build/ROMID/game/nbomb.o (section); \
 	build/ROMID/game/texinit.o (section); \
 	build/ROMID/game/challengeinit.o (section); \
