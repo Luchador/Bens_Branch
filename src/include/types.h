@@ -7,21 +7,13 @@
 #include "pads.h"
 #include "tiles.h"
 #include "gbi.h"
-#ifndef PLATFORM_N64
 #include "platform.h"
-#endif
 
 #define bool s32
 #define ubool u32
 
-#ifdef PLATFORM_N64
-#define intptr_t s32
-#define uintptr_t u32
-#define romptr_t u32
-#else
 #include <stdint.h>
 #define romptr_t uintptr_t
-#endif
 
 typedef s32 PakErr1;
 typedef s32 PakErr2;
@@ -29,11 +21,7 @@ typedef s32 MenuDialogHandlerResult;
 typedef uintptr_t MenuItemHandlerResult;
 typedef s16 RoomNum;
 
-#ifdef PLATFORM_N64
-#define texnum_t s32
-#else
 #define texnum_t uintptr_t
-#endif
 
 // Float version of a graphics matrix, which has higher precision than an Mtx.
 // Matrices are stored as Mtxfs then converted to an Mtx when passed to the GPU.
@@ -5872,8 +5860,6 @@ struct xz {
 	f32 z;
 };
 
-#ifndef PLATFORM_N64
-
 struct extplayerconfig {
 	f32 fovy;
 	f32 fovzoommult;
@@ -5891,6 +5877,31 @@ struct extplayerconfig {
 	s32 usereloads;
 };
 
-#endif
+#pragma pack(1)
+
+// Used for importing .bmp files to replace texture files in the ROM
+typedef struct {
+    uint16_t type;      // File type ("BM" for BMP)
+    uint32_t size;      // File size in bytes
+    uint16_t reserved1; // Unused (must be 0)
+    uint16_t reserved2; // Unused (must be 0)
+    uint32_t offset;    // Offset where pixel data starts
+} BMPFileHeader;
+
+typedef struct {
+    uint32_t size;          // Header size (40 bytes)
+    int32_t width;          // Image width
+    int32_t height;         // Image height
+    uint16_t planes;        // Must be 1
+    uint16_t bitCount;      // Bits per pixel (24 for RGB)
+    uint32_t compression;   // Compression type (0 = none)
+    uint32_t imageSize;     // Image data size (can be 0 if uncompressed)
+    int32_t xPixelsPerMeter; // Horizontal resolution
+    int32_t yPixelsPerMeter; // Vertical resolution
+    uint32_t colorsUsed;     // Number of colors in the palette (0 = all)
+    uint32_t colorsImportant;// Important colors (0 = all)
+} BMPInfoHeader;
+
+#pragma pack()
 
 #endif

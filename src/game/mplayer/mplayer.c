@@ -79,9 +79,7 @@ struct mpweapon g_MpWeapons[NUM_MPWEAPONS] = {
 	/*0x16*/ { WEAPON_DEVASTATOR,       AMMOTYPE_DEVASTATOR,  16,  0,                   0,  1, MPFEATURE_WEAPON_DEVASTATOR,      MODEL_CHRDEVASTATOR,    256 },
 	/*0x17*/ { WEAPON_ROCKETLAUNCHER,   AMMOTYPE_ROCKET,      3,   0,                   0,  1, 0,                                MODEL_CHRDYROCKET,      256 },
 	/*0x18*/ { WEAPON_SLAYER,           AMMOTYPE_ROCKET,      3,   0,                   0,  1, MPFEATURE_WEAPON_SLAYER,          MODEL_CHRSKROCKET,      256 },
-#if !((VERSION == VERSION_JPN_FINAL) && defined(PLATFORM_N64))
 	/*0x19*/ { WEAPON_COMBATKNIFE,      AMMOTYPE_KNIFE,       5,   0,                   0,  1, 0,                                MODEL_CHRKNIFE,         256 },
-#endif
 	/*0x1a*/ { WEAPON_CROSSBOW,         AMMOTYPE_CROSSBOW,    10,  0,                   0,  1, MPFEATURE_WEAPON_CROSSBOW,        MODEL_CHRCROSSBOW,      256 },
 	/*0x1b*/ { WEAPON_TRANQUILIZER,     AMMOTYPE_SEDATIVE,    50,  0,                   0,  1, MPFEATURE_WEAPON_TRANQUILIZER,    MODEL_CHRDRUGGUN,       256 },
 	/*0x1c*/ { WEAPON_GRENADE,          AMMOTYPE_GRENADE,     5,   0,                   0,  0, 0,                                MODEL_CHRGRENADE,       256 },
@@ -90,15 +88,9 @@ struct mpweapon g_MpWeapons[NUM_MPWEAPONS] = {
 	/*0x1f*/ { WEAPON_PROXIMITYMINE,    AMMOTYPE_PROXY_MINE,  5,   0,                   0,  0, MPFEATURE_WEAPON_PROXIMITYMINE,   MODEL_CHRPROXIMITYMINE, 384 },
 	/*0x20*/ { WEAPON_REMOTEMINE,       AMMOTYPE_REMOTE_MINE, 5,   0,                   0,  0, MPFEATURE_WEAPON_REMOTEMINE,      MODEL_CHRREMOTEMINE,    384 },
 	/*0x21*/ { WEAPON_LASER,            0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_LASER,           MODEL_CHRLASER,         512 },
-#ifndef PLATFORM_N64
-	// fix X-Ray Scanner model
 	/*0x22*/ { WEAPON_XRAYSCANNER,      0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_XRAYSCANNER,     MODEL_XRAYSPECS,        256 },
-#else
-	/*0x22*/ { WEAPON_XRAYSCANNER,      0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_XRAYSCANNER,     MODEL_CHRNIGHTSIGHT,    256 },
-#endif
 	/*0x23*/ { WEAPON_CLOAKINGDEVICE,   0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_CLOAKINGDEVICE,  MODEL_CHRCLOAKER,       256 },
 	/*0x24*/ { WEAPON_COMBATBOOST,      0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_COMBATBOOST,     MODEL_CHRSPEEDPILL,     256 },
-#ifndef PLATFORM_N64
 	/*0x25*/ { WEAPON_PP9I,             AMMOTYPE_PISTOL,      80,  0,                   0,  1, 0,                                MODEL_CHRWPPK,          256 },
 	/*0x26*/ { WEAPON_CC13,             AMMOTYPE_PISTOL,      80,  0,                   0,  1, 0,                                MODEL_CHRTT33,          256 },
 	/*0x27*/ { WEAPON_KL01313,          AMMOTYPE_SMG,         100, 0,                   0,  1, 0,                                MODEL_CHRSKORPION,      256 },
@@ -107,7 +99,6 @@ struct mpweapon g_MpWeapons[NUM_MPWEAPONS] = {
 	/*0x2a*/ { WEAPON_DMC,              AMMOTYPE_SMG,         100, 0,                   0,  1, 0,                                MODEL_CHRMP5K,          256 },
 	/*0x2b*/ { WEAPON_AR53,             AMMOTYPE_RIFLE,       150, 0,                   0,  1, 0,                                MODEL_CHRM16,           256 },
 	/*0x2c*/ { WEAPON_RCP45,            AMMOTYPE_SMG,         150, 0,                   0,  1, 0,                                MODEL_CHRFNP90,         256 },
-#endif
 	/*0x2d*/ { WEAPON_MPSHIELD,         0,                    0,   0,                   0,  1, MPFEATURE_WEAPON_SHIELD,          MODEL_CHRSHIELD,        256 },
 	/*0x2e*/ { WEAPON_DISABLED }, // 0x25 on N64
 };
@@ -302,9 +293,7 @@ void mpReset(void)
 
 		func0f187838(mpchr);
 
-#if VERSION >= VERSION_NTSC_1_0
 		g_MpAllChrPtrs[i] = NULL;
-#endif
 	}
 
 	g_MpSetup.paused = false;

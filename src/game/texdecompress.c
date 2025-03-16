@@ -1,7 +1,9 @@
 #include <ultra64.h>
 #include "constants.h"
+#include "game/debug.h"
 #include "game/tex.h"
 #include "game/texdecompress.h"
+#include "game/file.h"
 #include "bss.h"
 #include "lib/crash.h"
 #include "lib/dma.h"
@@ -13,10 +15,12 @@
 #ifndef PLATFORM_N64
 #include "mod.h"
 #include "platform.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 #endif
 
 struct texture *g_Textures;
-u32 var800aabc4;
 struct texpool g_TexSharedPool;
 struct texcacheitem g_TexCacheItems[150];
 s32 g_TexCacheCount;
@@ -24,7 +28,6 @@ s32 g_TexNumToLoad;
 u8 *g_TexBitstring;
 u32 g_TexAccumValue;
 s32 g_TexAccumNumBits;
-u32 var800ab54c;
 u32 g_TexBase;
 u8 *g_TextureConfigSegment;
 s32 g_TexNumConfigs;
@@ -51,75 +54,119 @@ struct textureconfig *g_TexGeneralConfigs;
 struct textureconfig *g_TexRadarConfigs;
 struct textureconfig *g_TexStarsConfigs;
 
-u32 var800841b0 = 0x0006ddd0;
-u32 var800841b4 = 0x00000000;
-
 // The number of channels, excluding 1-bit alpha channels.
-s32 g_TexFormatNumChannels[] = { 4, 3, 3, 3, 2, 2, 1, 1, 1, 1, 1, 1, 1 };
+s32 g_TexFormatNumChannels[] = { 
+	4, 	 // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
+	3, 	 // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
+	3, 	 // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
+	3, 	 // TEXFORMAT_RGB15 15-bit RGB (5/5/5)
+	2,	 // TEXFORMAT_IA16 16-bit grayscale+alpha
+	2,	 // TEXFORMAT_IA8-bit grayscale+alpha (4/4)
+	1, 	 // TEXFORMAT_IA4 4-bit grayscale+alpha (3/1)
+	1, 	 // TEXFORMAT_I8 8-bit grayscale
+	1, 	 // TEXFORMAT_I4 4-bit grayscale
+	1,	 // TEXFORMAT_RGBA16_CI8 16-bit 5551 paletted colour with 8-bit palette indexes
+	1,	 // TEXFORMAT_RGBA16_CI4 16-bit 5551 paletted colour with 4-bit palette indexes
+	1, 	 // TEXFORMAT_IA16_CI8 16-bit 88 paletted greyscale+alpha with 8-bit palette indexes
+	1 }; // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 
 // Whether each format supports a 1-bit alpha channel.
-s32 g_TexFormatHas1BitAlpha[] = { 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
+s32 g_TexFormatHas1BitAlpha[] = { 
+	0,    // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
+	1,    // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
+	0,    // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
+	0,    // TEXFORMAT_RGB15 15-bit RGB (5/5/5)
+	0,    // TEXFORMAT_IA16 16-bit grayscale+alpha
+	0,    // TEXFORMAT_IA8-bit grayscale+alpha (4/4)
+	1,    // TEXFORMAT_IA4 4-bit grayscale+alpha (3/1)
+	0,    // TEXFORMAT_I8 8-bit grayscale
+	0,    // TEXFORMAT_I4 4-bit grayscale
+	0,    // TEXFORMAT_RGBA16_CI8 16-bit 5551 paletted colour with 8-bit palette indexes
+	0,    // TEXFORMAT_RGBA16_CI4 16-bit 5551 paletted colour with 4-bit palette indexes
+	0,    // TEXFORMAT_IA16_CI8 16-bit 88 paletted greyscale+alpha with 8-bit palette indexes
+	0 };  // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 
 // For non-paletted images, size in decimal of each colour channel.
 // Eg. 32 means each channel can store up to 32 values (5-bits per channel).
 // For paletted images, same thing but for the palette indices instead.
-s32 g_TexFormatChannelSizes[] = { 256, 32, 256, 32, 256, 16, 8, 256, 16, 256, 16, 256, 16 };
+s32 g_TexFormatChannelSizes[] = { 
+	256,   // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
+	32,    // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
+	256,   // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
+	32,    // TEXFORMAT_RGB15 15-bit RGB (5/5/5)
+	256,   // TEXFORMAT_IA16 16-bit grayscale+alpha
+	16,    // TEXFORMAT_IA8-bit grayscale+alpha (4/4)
+	8,     // TEXFORMAT_IA4 4-bit grayscale+alpha (3/1)
+	256,   // TEXFORMAT_I8 8-bit grayscale
+	16,    // TEXFORMAT_I4 4-bit grayscale
+	256,   // TEXFORMAT_RGBA16_CI8 16-bit 5551 paletted colour with 8-bit palette indexes
+	16,    // TEXFORMAT_RGBA16_CI4 16-bit 5551 paletted colour with 4-bit palette indexes
+	256,   // TEXFORMAT_IA16_CI8 16-bit 88 paletted greyscale+alpha with 8-bit palette indexes
+	16 };  // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 
-s32 g_TexFormatBitsPerPixel[] = { 32, 16, 24, 15, 16, 8, 4, 8, 4, 16, 16, 16, 16 };
+s32 g_TexFormatBitsPerPixel[] = { 
+	32,   // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
+	16,   // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
+	24,   // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
+	15,   // TEXFORMAT_RGB15 15-bit RGB (5/5/5)
+	16,   // TEXFORMAT_IA16 16-bit grayscale+alpha
+	8,    // TEXFORMAT_IA8-bit grayscale+alpha (4/4)
+	4,    // TEXFORMAT_IA4 4-bit grayscale+alpha (3/1)
+	8,    // TEXFORMAT_I8 8-bit grayscale
+	4,    // TEXFORMAT_I4 4-bit grayscale
+	16,   // TEXFORMAT_RGBA16_CI8 16-bit 5551 paletted colour with 8-bit palette indexes
+	16,   // TEXFORMAT_RGBA16_CI4 16-bit 5551 paletted colour with 4-bit palette indexes
+	16,   // TEXFORMAT_IA16_CI8 16-bit 88 paletted greyscale+alpha with 8-bit palette indexes
+	16 }; // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 
 // Mapping to GBI format
 s32 g_TexFormatGbiMappings[] = {
-	G_IM_FMT_RGBA,
-	G_IM_FMT_RGBA,
-	G_IM_FMT_RGBA,
-	G_IM_FMT_RGBA,
-	G_IM_FMT_IA,
-	G_IM_FMT_IA,
-	G_IM_FMT_IA,
-	G_IM_FMT_I,
-	G_IM_FMT_I,
-	G_IM_FMT_CI,
-	G_IM_FMT_CI,
-	G_IM_FMT_CI,
-	G_IM_FMT_CI,
+	G_IM_FMT_RGBA,   // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
+	G_IM_FMT_RGBA,   // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
+	G_IM_FMT_RGBA,   // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
+	G_IM_FMT_RGBA,   // TEXFORMAT_RGB15 15-bit RGB (5/5/5)
+	G_IM_FMT_IA,     // TEXFORMAT_IA16 16-bit grayscale+alpha
+	G_IM_FMT_IA,     // TEXFORMAT_IA8-bit grayscale+alpha (4/4)
+	G_IM_FMT_IA,     // TEXFORMAT_IA4 4-bit grayscale+alpha (3/1)
+	G_IM_FMT_I,      // TEXFORMAT_I8 8-bit grayscale
+	G_IM_FMT_I,      // TEXFORMAT_I4 4-bit grayscale
+	G_IM_FMT_CI,     // TEXFORMAT_RGBA16_CI8 16-bit 5551 paletted colour with 8-bit palette indexes
+	G_IM_FMT_CI,     // TEXFORMAT_RGBA16_CI4 16-bit 5551 paletted colour with 4-bit palette indexes
+	G_IM_FMT_CI,     // TEXFORMAT_IA16_CI8 16-bit 88 paletted greyscale+alpha with 8-bit palette indexes
+	G_IM_FMT_CI,     // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 };
 
 s32 g_TexFormatDepths[] = {
-	G_IM_SIZ_32b,
-	G_IM_SIZ_16b,
-	G_IM_SIZ_32b,
-	G_IM_SIZ_16b,
-	G_IM_SIZ_16b,
-	G_IM_SIZ_8b,
-	G_IM_SIZ_4b,
-	G_IM_SIZ_8b,
-	G_IM_SIZ_4b,
-	G_IM_SIZ_8b,
-	G_IM_SIZ_4b,
-	G_IM_SIZ_8b,
-	G_IM_SIZ_4b,
+	G_IM_SIZ_32b,  // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
+	G_IM_SIZ_16b,  // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
+	G_IM_SIZ_32b,  // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
+	G_IM_SIZ_16b,  // TEXFORMAT_RGB15 15-bit RGB (5/5/5)
+	G_IM_SIZ_16b,  // TEXFORMAT_IA16 16-bit grayscale+alpha
+	G_IM_SIZ_8b,   // TEXFORMAT_IA8-bit grayscale+alpha (4/4)
+	G_IM_SIZ_4b,   // TEXFORMAT_IA4 4-bit grayscale+alpha (3/1)
+	G_IM_SIZ_8b,   // TEXFORMAT_I8 8-bit grayscale
+	G_IM_SIZ_4b,   // TEXFORMAT_I4 4-bit grayscale
+	G_IM_SIZ_8b,   // TEXFORMAT_RGBA16_CI8 16-bit 5551 paletted colour with 8-bit palette indexes
+	G_IM_SIZ_4b,   // TEXFORMAT_RGBA16_CI4 16-bit 5551 paletted colour with 4-bit palette indexes
+	G_IM_SIZ_8b,   // TEXFORMAT_IA16_CI8 16-bit 88 paletted greyscale+alpha with 8-bit palette indexes
+	G_IM_SIZ_4b,   // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 };
 
 s32 g_TexFormatLutModes[] = {
-	G_TT_NONE,
-	G_TT_NONE,
-	G_TT_NONE,
-	G_TT_NONE,
-	G_TT_NONE,
-	G_TT_NONE,
-	G_TT_NONE,
-	G_TT_NONE,
-	G_TT_NONE,
-	G_TT_RGBA16,
-	G_TT_RGBA16,
-	G_TT_IA16,
-	G_TT_IA16,
+	G_TT_NONE,    // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
+	G_TT_NONE,    // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
+	G_TT_NONE,    // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
+	G_TT_NONE,    // TEXFORMAT_RGB15 15-bit RGB (5/5/5)
+	G_TT_NONE,    // TEXFORMAT_IA16 16-bit grayscale+alpha
+	G_TT_NONE,    // TEXFORMAT_IA8-bit grayscale+alpha (4/4)
+	G_TT_NONE,    // TEXFORMAT_IA4 4-bit grayscale+alpha (3/1)
+	G_TT_NONE,    // TEXFORMAT_I8 8-bit grayscale
+	G_TT_NONE,    // TEXFORMAT_I4 4-bit grayscale
+	G_TT_RGBA16,  // TEXFORMAT_RGBA16_CI8 16-bit 5551 paletted colour with 8-bit palette indexes
+	G_TT_RGBA16,  // TEXFORMAT_RGBA16_CI4 16-bit 5551 paletted colour with 4-bit palette indexes
+	G_TT_IA16,    // TEXFORMAT_IA16_CI8 16-bit 88 paletted greyscale+alpha with 8-bit palette indexes
+	G_TT_IA16,    // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 };
-
-void func0f16e810(u32 arg0)
-{
-	// empty
-}
 
 /**
  * Inflate images (levels of detail) from a zlib-compressed texture.
@@ -146,7 +193,7 @@ void func0f16e810(u32 arg0)
  *
  * The zlib data is prefixed with the standard 5-byte rarezip header.
  */
-s32 texInflateZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct texpool *pool, bool unusedarg)
+s32 texInflateZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct texpool *pool)
 {
 	s32 i;
 	s32 imagebytesout;
@@ -215,17 +262,7 @@ s32 texInflateZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct texpoo
 		}
 
 		if (rzipInflate(g_TexBitstring, scratch2, scratch) == 0) {
-#if VERSION < VERSION_NTSC_1_0
-			char message[128];
-			sprintf(message, "DMA-Crash %s %d Ram: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-					"texdecompress.c", 357,
-					g_TexBitstring[0], g_TexBitstring[1], g_TexBitstring[2], g_TexBitstring[3],
-					g_TexBitstring[4], g_TexBitstring[5], g_TexBitstring[6], g_TexBitstring[7],
-					g_TexBitstring[8], g_TexBitstring[9], g_TexBitstring[10], g_TexBitstring[11],
-					g_TexBitstring[12], g_TexBitstring[13], g_TexBitstring[14], g_TexBitstring[15]);
-			crashSetMessage(message);
-			CRASH();
-#endif
+
 		}
 
 		imagebytesout = texAlignIndices(scratch2, width, height, format, &dst[totalbytesout]);
@@ -671,7 +708,7 @@ s32 texFindClosestColourIndexIA(u16 *palette, s32 numcolours, s32 intensity, s32
  * h = height in pixels
  * c = compression method (see TEXCOMPMETHOD constants)
  */
-s32 texInflateNonZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct texpool *pool, bool unusedarg)
+s32 texInflateNonZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct texpool *pool)
 {
 	u8 scratch[0x2000];
 	u8 lookup[0x1000];
@@ -1899,9 +1936,6 @@ s32 texInflateLookupFromBuffer(u8 *src, s32 width, s32 height, u8 *dst, u8 *look
 /**
  * For every second row, swap every pair of words within that row.
  */
-#ifdef PLATFORM_N64
-void texSwizzle(u8 *dst, s32 width, s32 height, s32 format)
-#else
 s32 texConfigToFormat(const struct textureconfig *tex)
 {
 	switch (tex->format) {
@@ -1968,7 +2002,6 @@ void texSwizzle(u8 *dst, s32 width, s32 height, s32 format)
 }
 
 void texSwizzleInternal(u8 *dst, s32 width, s32 height, s32 format, u32 dstlen)
-#endif
 {
 	s32 x;
 	s32 y;
@@ -2005,11 +2038,7 @@ void texSwizzleInternal(u8 *dst, s32 width, s32 height, s32 format, u32 dstlen)
 
 	if (format == TEXFORMAT_RGBA32 || format == TEXFORMAT_RGB24) {
 		for (y = 1; y < height; y += 2) {
-#ifdef PLATFORM_N64
-			for (x = 0; x < wordsperrow; x += 4) {
-#else
 			for (x = 0; x < wordsperrow && row + x < end; x += 4) {
-#endif
 				tmp = row[x + 0];
 				row[x + 0] = row[x + 2];
 				row[x + 2] = tmp;
@@ -2023,11 +2052,7 @@ void texSwizzleInternal(u8 *dst, s32 width, s32 height, s32 format, u32 dstlen)
 		}
 	} else {
 		for (y = 1; y < height; y += 2) {
-#ifdef PLATFORM_N64
-			for (x = 0; x < wordsperrow; x += 2) {
-#else
 			for (x = 0; x < wordsperrow && row + x < end; x += 2) {
-#endif
 				tmp = row[x + 0];
 				row[x + 0] = row[x + 1];
 				row[x + 1] = tmp;
@@ -2152,7 +2177,7 @@ void texLoadFromDisplayList(Gfx *gdl, struct texpool *pool, s32 arg2)
 	while (bytes[GFX_W0_BYTE(0)] != (u8)G_ENDDL) {
 		// Look for GBI sequence: fd...... abcd....
 		if (bytes[GFX_W0_BYTE(0)] == G_SETTIMG && bytes[GFX_W1_BYTE(0)] == 0xab && bytes[GFX_W1_BYTE(1)] == 0xcd) {
-			texLoad((texnum_t *)((uintptr_t)bytes + ofs), pool, arg2);
+			texLoad((texnum_t *)((uintptr_t)bytes + ofs), pool);
 		}
 
 		bytes += sizeof(Gfx);
@@ -2196,7 +2221,7 @@ extern u8 EXT_SEG _texturesdataSegmentRomStart;
  * z = texture is compressed with zlib
  * l = number of levels of detail within the texture
  */
-void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
+void texLoad(texnum_t *updateword, struct texpool *pool)
 {
 	u8 compbuffer[4 * 1024 + 0x40];
 	u8 *compptr;
@@ -2205,7 +2230,6 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 	s32 numlods;
 	struct tex *tex;
 	u8 *alignedcompbuffer;
-	u32 stack;
 	struct tex *tail;
 	u32 freebytes;
 	u8 usingsharedpool = 0;
@@ -2238,9 +2262,6 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 
 			alignedcompbuffer = (u8 *) (((uintptr_t)compbuffer + 0xf) >> 4 << 4);
 
-			if (alignedcompbuffer);
-			if (tex);
-
 			osWritebackDCacheAll();
 			osInvalDCache(alignedcompbuffer, DCACHE_SIZE);
 
@@ -2252,12 +2273,10 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 				return;
 			}
 
-#ifndef PLATFORM_N64
 			// try to load external replacement if present
 			if (modTextureLoad(g_TexNumToLoad, alignedcompbuffer, 4096) > 0) {
 				compptr = alignedcompbuffer;
 			} else
-#endif
 			{
 				// Copy the compressed texture to RAM
 				dmaExec(alignedcompbuffer,
@@ -2323,9 +2342,9 @@ void texLoad(texnum_t *updateword, struct texpool *pool, bool unusedarg)
 
 			// Extract the texture data to the allocation (pool->leftpos)
 			if (iszlib) {
-				bytesout = texInflateZlib(compptr, pool->leftpos, hasloddata, numlods, pool, unusedarg);
+				bytesout = texInflateZlib(compptr, pool->leftpos, hasloddata, numlods, pool);
 			} else {
-				bytesout = texInflateNonZlib(compptr, pool->leftpos, hasloddata, numlods, pool, unusedarg);
+				bytesout = texInflateNonZlib(compptr, pool->leftpos, hasloddata, numlods, pool);
 			}
 
 			// If we're using the shared pool, the data must be copied out of
@@ -2370,7 +2389,7 @@ void texLoadFromConfigs(struct textureconfig *configs, s32 numconfigs, struct te
 
 	for (i = 0; i < numconfigs; i++) {
 		if ((uintptr_t)configs[i].texturenum < NUM_TEXTURES) {
-			texLoad(&configs[i].texturenum, pool, true);
+			texLoad(&configs[i].texturenum, pool);
 			configs[i].unk0b = 1;
 		} else {
 			configs[i].texturenum += arg3;
@@ -2382,5 +2401,73 @@ void texLoadFromTextureNum(u32 texturenum, struct texpool *pool)
 {
 	texnum_t texturenumcopy = texturenum;
 
-	texLoad(&texturenumcopy, pool, true);
+	texLoad(&texturenumcopy, pool);
+}
+
+unsigned char *texLoadBMP(const char *filename, int *width, int *height) {
+    FILE *file = fopen(filename, "rb");  // Open in binary mode
+    if (!file) {
+        debug_log("Error: Could not open BMP file.\n", 0);
+        return NULL;
+    }
+
+    // Read BMP headers
+    BMPFileHeader fileHeader;
+    BMPInfoHeader infoHeader;
+
+    fread(&fileHeader, sizeof(BMPFileHeader), 1, file);
+    fread(&infoHeader, sizeof(BMPInfoHeader), 1, file);
+
+    // Check BMP signature ("BM")
+    if (fileHeader.type != 0x4D42) {
+        debug_log("Error: Not a valid BMP file.\n", 0);
+        fclose(file);
+        return NULL;
+    }
+
+    // Store width & height
+    *width = infoHeader.width;
+    *height = infoHeader.height;
+
+    // Ensure it's a 24-bit BMP (uncompressed)
+    if (infoHeader.bitCount != 24 || infoHeader.compression != 0) {
+        debug_log("Error: Only uncompressed 24-bit BMP files are supported.\n", 0);
+        fclose(file);
+        return NULL;
+    }
+
+    // Allocate memory for pixel data (3 bytes per pixel: R, G, B)
+    int row_padded = (*width * 3 + 3) & (~3); // Align rows to 4 bytes
+    unsigned char *data = (unsigned char *)malloc(row_padded * (*height));
+    if (!data) {
+        debug_log("Error: Memory allocation failed.\n", 0);
+        fclose(file);
+        return NULL;
+    }
+
+    // Move file pointer to the pixel data location
+    fseek(file, fileHeader.offset, SEEK_SET);
+
+    // Read pixel data (BMP is stored bottom-to-top)
+    for (int i = 0; i < *height; i++) {
+        fread(data + (i * row_padded), 1, row_padded, file);
+    }
+
+    fclose(file);
+    return data;
+}
+
+//	createBMP("0255.bmp");
+
+void createBMP(char *filename)
+{
+	char *fullpath = "./" DEFAULT_BASEDIR_NAME "/textures"; // ./data/textures
+
+	int width, height;
+	unsigned char *imageData = texLoadBMP(buildDynamicPath(fullpath, filename), &width, &height);
+
+	if(imageData)
+	{
+		debug_log("BMP loaded: %d \n", imageData[2]);
+	}
 }

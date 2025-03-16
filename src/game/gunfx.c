@@ -632,7 +632,6 @@ struct casing *casingCreate(struct modeldef *modeldef, Mtxf *mtx)
 	f32 rot[3][3];
 	struct casing *casing = g_Casings;
 	struct casing *end = g_Casings + ARRAYCOUNT(g_Casings);
-	u32 stack;
 
 	while (casing < end && casing->modeldef != NULL) {
 		casing++;
@@ -694,10 +693,6 @@ void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
 		return;
 	}
 
-	if (PLAYERCOUNT() >= 2) {
-		return;
-	}
-
 	mtx4Copy(mtx, &spec);
 
 	modeldef = bgunGetCartModeldef();
@@ -711,7 +706,6 @@ void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
 		Mtxf sp64;
 		u32 magic = 0x15aca6;
 		u32 sp5c;
-		u32 stack[3];
 		u32 sp4c;
 		f32 newyspeed;
 		f32 f0;

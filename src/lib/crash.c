@@ -607,51 +607,36 @@ u32 crashGenerate(OSThread *thread, u32 *callstack, s32 *tracelen)
 
 	rmonPrintf("\n\nFAULT-\n");
 
-#if VERSION >= VERSION_NTSC_1_0
-	if (!g_Vars.fourmeg2player)
-#endif
-	{
-		// Print a stack trace in a dodgy way.
-		// It works by iterating through the stack allocation, looking for any
-		// values which could potentially be a return address, and prints them.
-		u32 *stackend = (u32 *) crashGetStackEnd(ctx->sp, thread->id);
-		rmonPrintf("DodgyStackTrace: %08llx ", ctx->ra & 0xffffffff);
-		tmpsp = (u32 *) ctx->sp;
+	// Print a stack trace in a dodgy way.
+	// It works by iterating through the stack allocation, looking for any
+	// values which could potentially be a return address, and prints them.
+	u32 *stackend = (u32 *) crashGetStackEnd(ctx->sp, thread->id);
+	rmonPrintf("DodgyStackTrace: %08llx ", ctx->ra & 0xffffffff);
+	tmpsp = (u32 *) ctx->sp;
 
-		while (tmpsp < stackend) {
-			if (crashIsReturnAddress((u32 *)*tmpsp)) {
-				rmonPrintf("%08x ", *tmpsp);
-			}
-
-			tmpsp++;
+	while (tmpsp < stackend) {
+		if (crashIsReturnAddress((u32 *)*tmpsp)) {
+			rmonPrintf("%08x ", *tmpsp);
 		}
 
-		rmonPrintf(".\n");
+		tmpsp++;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
+	rmonPrintf(".\n");
 	rmonPrintf("%H#@! Another Perfect Crash (tm)\n");
-#else
-	rmonPrintf("\nPerfect Crash (tm)\n\n");
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
-	if (!g_Vars.fourmeg2player)
-#endif
-	{
-		// Print floating point registers
-		crashPrint2Floats(0, ctx->fp0.f.f_odd, ctx->fp0.f.f_even);
-		crashPrint3Floats(2, ctx->fp2.f.f_odd, ctx->fp2.f.f_even, ctx->fp4.f.f_odd);
-		crashPrint3Floats(5, ctx->fp4.f.f_even, ctx->fp6.f.f_odd, ctx->fp6.f.f_even);
-		crashPrint3Floats(8, ctx->fp8.f.f_odd, ctx->fp8.f.f_even, ctx->fp10.f.f_odd);
-		crashPrint3Floats(11, ctx->fp10.f.f_even, ctx->fp12.f.f_odd, ctx->fp12.f.f_even);
-		crashPrint3Floats(14, ctx->fp14.f.f_odd, ctx->fp14.f.f_even, ctx->fp16.f.f_odd);
-		crashPrint3Floats(17, ctx->fp16.f.f_even, ctx->fp18.f.f_odd, ctx->fp18.f.f_even);
-		crashPrint3Floats(20, ctx->fp20.f.f_odd, ctx->fp20.f.f_even, ctx->fp22.f.f_odd);
-		crashPrint3Floats(23, ctx->fp22.f.f_even, ctx->fp24.f.f_odd, ctx->fp24.f.f_even);
-		crashPrint3Floats(26, ctx->fp26.f.f_odd, ctx->fp26.f.f_even, ctx->fp28.f.f_odd);
-		crashPrint3Floats(29, ctx->fp28.f.f_even, ctx->fp30.f.f_odd, ctx->fp30.f.f_even);
-	}
+	// Print floating point registers
+	crashPrint2Floats(0, ctx->fp0.f.f_odd, ctx->fp0.f.f_even);
+	crashPrint3Floats(2, ctx->fp2.f.f_odd, ctx->fp2.f.f_even, ctx->fp4.f.f_odd);
+	crashPrint3Floats(5, ctx->fp4.f.f_even, ctx->fp6.f.f_odd, ctx->fp6.f.f_even);
+	crashPrint3Floats(8, ctx->fp8.f.f_odd, ctx->fp8.f.f_even, ctx->fp10.f.f_odd);
+	crashPrint3Floats(11, ctx->fp10.f.f_even, ctx->fp12.f.f_odd, ctx->fp12.f.f_even);
+	crashPrint3Floats(14, ctx->fp14.f.f_odd, ctx->fp14.f.f_even, ctx->fp16.f.f_odd);
+	crashPrint3Floats(17, ctx->fp16.f.f_even, ctx->fp18.f.f_odd, ctx->fp18.f.f_even);
+	crashPrint3Floats(20, ctx->fp20.f.f_odd, ctx->fp20.f.f_even, ctx->fp22.f.f_odd);
+	crashPrint3Floats(23, ctx->fp22.f.f_even, ctx->fp24.f.f_odd, ctx->fp24.f.f_even);
+	crashPrint3Floats(26, ctx->fp26.f.f_odd, ctx->fp26.f.f_even, ctx->fp28.f.f_odd);
+	crashPrint3Floats(29, ctx->fp28.f.f_even, ctx->fp30.f.f_odd, ctx->fp30.f.f_even);
 
 	// Print integer registers
 	rmonPrintf("at 0x%016llx v0 0x%016llx v1 0x%016llx\n", ctx->at, ctx->v0, ctx->v1);
@@ -665,13 +650,8 @@ u32 crashGenerate(OSThread *thread, u32 *callstack, s32 *tracelen)
 	rmonPrintf("t9 0x%016llx gp 0x%016llx sp 0x%016llx\n", ctx->t9, ctx->gp, ctx->sp);
 	rmonPrintf("s8 0x%016llx ra 0x%016llx\n", ctx->s8, ctx->ra);
 
-#if VERSION >= VERSION_NTSC_1_0
 	rmonPrintf("TID %d epc %08x caus %08x fp %08x badv %08x sr %08x\n",
 			thread->id, ctx->pc, ctx->cause, ctx->fpcsr, ctx->badvaddr, ctx->sr);
-#else
-	rmonPrintf("TID %d epc %08x cause %08x fp %08x badv %08x sr %08x\n",
-			thread->id, ctx->pc, ctx->cause, ctx->fpcsr, ctx->badvaddr, ctx->sr);
-#endif
 
 	// Print the address of the faulted instruction, along with the instruction
 	// itself and the next three - presumably to help the developer locate it.

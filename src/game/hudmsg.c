@@ -79,22 +79,6 @@ s32 hudmsgIsZoomRangeVisible(void)
 		&& g_Vars.currentplayer->cameramode != CAMERAMODE_THIRDPERSON;
 }
 
-/**
- * hudmsgRenderMissionTimer calls viGetWidth (which returns an s16), then stores
- * the width in sp42 while it calls viGetHeight. However, when we do this it
- * stores the width to sp40 instead.
- *
- * Changing the definition of viGetHeight to return an s32 fixes this, but is
- * surely wrong and creates mismatches elsewhere. So we declare a new function
- * with the return type we need, and link it to the same address as viGetHeight
- * via the linker config.
- */
-#ifdef PLATFORM_N64
-extern s32 viGetHeight_hack(void);
-#else
-#define viGetHeight_hack viGetHeight
-#endif
-
 Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha)
 {
 	s32 x;
@@ -168,17 +152,13 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha)
 	x = viewleft + g_HudPaddingX + 3;
 	y = timery;
 
-#ifndef PLATFORM_N64
 	if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 		gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeL);
 	}
-#endif
 
-	gdl = textRender(gdl, &x, &y, buffer, g_CharsNumeric, g_FontNumeric, textcolour, 0x000000a0, viGetWidth(), viGetHeight_hack(), 0, 0);
+	gdl = textRender(gdl, &x, &y, buffer, g_CharsNumeric, g_FontNumeric, textcolour, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
 
-#ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
-#endif
 
 	return gdl;
 }

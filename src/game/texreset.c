@@ -152,8 +152,8 @@ void texReset(void)
 	}
 
 	for (i = 0; i < ARRAYCOUNT(g_TcExplosionTexturePairs); i++) {
-		texLoad(&g_ExplosionTexturePairs[i].texturenum1, NULL, false);
-		texLoad(&g_ExplosionTexturePairs[i].texturenum2, NULL, false);
+		texLoad(&g_ExplosionTexturePairs[i].texturenum1, NULL);
+		texLoad(&g_ExplosionTexturePairs[i].texturenum2, NULL);
 	}
 
 	texLoadFromDisplayList(g_TexGdl1, 0, 0);

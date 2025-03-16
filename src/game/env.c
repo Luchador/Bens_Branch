@@ -262,8 +262,6 @@ void envChooseAndApply(s32 stagenum)
 	struct nofogenvironment *env2;
 	struct fogenvironment *env1;
 
-	if (PLAYERCOUNT());
-
 	g_EnvFogMax = MAXFLOAT;
 	g_EnvFogMin = 0;
 

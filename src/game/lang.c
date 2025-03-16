@@ -85,38 +85,6 @@ struct langbank g_LangBanks[29] = {
 	/*0x28*/ LANGBANK_DISH,          7168,      7296,
 };
 
-TextData* loadFileIntoMemory(const char *filename) {
-	FILE *file = fopen(filename, "r");
-	if(!file) {
-		debug_log("Error opening file\n", 0);
-		return NULL;
-	}
-
-	TextData *filedata = malloc(sizeof(TextData));
-	filedata->lines = NULL;
-	filedata-> count = 0;
-
-	char buffer[MAX_LINE_LENGTH];
-	while (fgets(buffer, sizeof(buffer), file)) {
-		filedata->count++;
-
-		filedata->lines = realloc(filedata->lines, filedata->count * sizeof(char *));
-		filedata->lines[filedata->count - 1] = strdup(buffer);
-	}
-
-	fclose(file);
-	return filedata;
-}
-
-char* buildDynamicPath(const char *directory, const char *filename) {
-    size_t len = strlen(directory) + strlen(filename) + 2; // +1 for `/`, +1 for `\0`
-    char *path = malloc(len);
-    if (!path) return NULL;
-
-    snprintf(path, len, "%s/%s", directory, filename);
-    return path;
-}
-
 // Replaces asterisks with newline characters. Asterisks are used to represent new lines in the PD text files.
 void langReplaceAsterisk(TextData *data) {
     

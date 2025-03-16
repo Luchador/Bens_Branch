@@ -338,7 +338,6 @@ void psTickChannel(s32 channelnum)
 			newvol = -1;
 		}
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (channel->targetpan != channel->currentpan) {
 			if (channel->flags & PSFLAG_FIRSTTICK) {
 				channel->currentpan = channel->targetpan;
@@ -358,14 +357,6 @@ void psTickChannel(s32 channelnum)
 		} else {
 			newpan = -1;
 		}
-#else
-		if (newpan != channel->currentpan) {
-			channel->flags |= PSFLAG_CHANGINGPAN;
-			channel->currentpan = newpan;
-		} else {
-			newpan = -1;
-		}
-#endif
 
 		if (newfx != channel->currentfx) {
 			channel->currentfx = newfx;

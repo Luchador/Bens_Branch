@@ -93,7 +93,6 @@ SECTIONS
 	osAppNMIBuffer = 0x8000031c;
 
 	nbombCreateStorm_hack = nbombCreateStorm;
-	viGetHeight_hack = viGetHeight;
 
 	/***************************************************************************
 	 * romheader

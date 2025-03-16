@@ -64,7 +64,7 @@ struct footstepframe g_FootstepAnims[] = {
 	{ ANIM_FEMALE_WALK,                              0x13, 0x2a },
 	{ ANIM_FEMALE_JOG,                               0x0f, 0x05 },
 	{ ANIM_FEMALE_RUN,                               0x04, 0x0c },
-	{ ANIM_0392,               0x05, 0x14 },
+	{ ANIM_0392,                                     0x05, 0x14 },
 	{ ANIM_SKEDAR_RUNNING,                           0x00, 0x00 },
 };
 
@@ -177,7 +177,6 @@ void footstepCheckDefault(struct chrdata *chr)
 							chr->footstep = 2;
 						}
 					} else {
-#ifndef PLATFORM_N64
 						// fix spamming footsteps at >= 60fps
 						if (g_Vars.lvupdate240 < 4) {
 							const s32 roundedframe = (s32)(frame * (4.f / (f32)g_Vars.lvupdate240));
@@ -187,7 +186,6 @@ void footstepCheckDefault(struct chrdata *chr)
 								chr->footstep = 2;
 							}
 						} else
-#endif
 						if (frame >= g_FootstepAnims[i].frame1 && prevframe < g_FootstepAnims[i].frame1) {
 							chr->footstep = 1;
 						} else if (frame >= g_FootstepAnims[i].frame2 && prevframe < g_FootstepAnims[i].frame2) {

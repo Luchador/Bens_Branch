@@ -197,23 +197,7 @@ char *var80084494[] = {
 	"deep water",
 };
 
-const char var7f1b7c24[] = "";
-const char var7f1b7c28[] = "";
-const char var7f1b7c2c[] = "";
-
 bool g_TexPipeSynced = false;
-u32 var800844d4 = 0x00000000;
-u32 var800844d8 = 0x00000000;
-u32 var800844dc = 0x00000000;
-u32 var800844e0 = 0x00000103;
-u32 var800844e4 = 0x00000000;
-u32 var800844e8 = 0x00000000;
-u32 var800844ec = 0x00000000;
-
-void tex0f173a00(void)
-{
-	// empty
-}
 
 void texResetTiles(void)
 {
@@ -569,7 +553,6 @@ Gfx *texWriteTileLods(Gfx *gdl, struct tex *tex, s32 smode, s32 tmode, s32 offse
 	}
 
 	for (tile = starttile; tile < numlods + starttile && tile < 6; tile++) {
-		s32 stack[2];
 		s32 lod = tile - starttile;
 		s32 masks = texDimensionToMask(texGetWidthAtLod(tex, lod));
 		s32 maskt = texDimensionToMask(texGetHeightAtLod(tex, lod));

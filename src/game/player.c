@@ -2605,15 +2605,11 @@ Gfx *playerRenderHealthBar(Gfx *gdl)
 	Mtxf matrix;
 	Mtxf *addr = gfxAllocateMatrix();
 
-#ifdef PLATFORM_N64
-	mtx00016ae4(&matrix, 0, 370, 0, 0, 0, 0, 0, 0, -1);
-#else
 	f32 fovsc = 60.f / PLAYER_DEFAULT_FOV;
 	if (fovsc > 1.01f) {
 		fovsc *= 1.1f;
 	}
 	mtx00016ae4(&matrix, 0, 370.f * fovsc, 0, 0, 0, 0, 0, 0, -1);
-#endif
 	mtxF2L(&matrix, addr);
 
 	gSPMatrix(gdl++, osVirtualToPhysical((void *)addr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -2680,10 +2676,6 @@ s16 playerGetFbHeight(void)
 {
 	s16 height = g_ViModes[0].fbheight;
 
-	if (g_Vars.fourmeg2player) {
-		height = height >> 1;
-	}
-
 	return height;
 }
 
@@ -2712,7 +2704,7 @@ s16 playerGetViewportWidth(void)
 				width--;
 			}
 		} else if (PLAYERCOUNT() == 2) {
-			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || g_Vars.fourmeg2player) {
+			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
 				// 2 players vsplit
 				width = g_ViModes[0].width / 2;
 
@@ -2729,7 +2721,7 @@ s16 playerGetViewportWidth(void)
 		}
 	} else {
 		// Probably cutscene
-		width = g_ViModes[0].width;
+		width = g_ViModes[0].width; //320
 	}
 
 	return width;
@@ -2737,10 +2729,10 @@ s16 playerGetViewportWidth(void)
 
 s16 playerGetViewportLeft(void)
 {
-	s32 something = !playerHasSharedViewport();
+	s32 playerHasSingleViewport = !playerHasSharedViewport();
 	s16 left;
 
-	if (PLAYERCOUNT() >= 3 && something != 0) {
+	if (PLAYERCOUNT() >= 3 && playerHasSingleViewport != 0) {
 		if (g_Vars.currentplayernum == 1 || g_Vars.currentplayernum == 3) {
 			// 3/4 players - right side
 			left = g_ViModes[0].width / 2 + g_ViModes[0].fbwidth - g_ViModes[0].width;
@@ -2748,8 +2740,8 @@ s16 playerGetViewportLeft(void)
 			// 3/4 players - left side
 			left = g_ViModes[0].fbwidth - g_ViModes[0].width;
 		}
-	} else if (PLAYERCOUNT() == 2 && something != 0) {
-		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || g_Vars.fourmeg2player) {
+	} else if (PLAYERCOUNT() == 2 && playerHasSingleViewport != 0) {
+		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
 			if (g_Vars.currentplayernum == 1) {
 				// 2 players vsplit - right side
 				left = (g_ViModes[0].width / 2) + g_ViModes[0].fbwidth - g_ViModes[0].width;
@@ -2773,16 +2765,10 @@ s16 playerGetViewportHeight(void)
 {
 	s16 height;
 
-	if (PLAYERCOUNT() >= 2
-			&& !playerHasSharedViewport()
-			) {
+	if (PLAYERCOUNT() >= 2 && !playerHasSharedViewport()) {
 		s16 tmp = g_ViModes[0].fullheight;
 
-		if (!g_Vars.fourmeg2player) {
-			height = tmp;
-		} else {
-			height = tmp / 2;
-		}
+		height = tmp / 2;
 
 		if (PLAYERCOUNT() == 2) {
 			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
@@ -2820,19 +2806,16 @@ s16 playerGetViewportTop(void)
 {
 	s16 top;
 
-	if (PLAYERCOUNT() >= 2
-			&& !playerHasSharedViewport()
-			) {
+	if (PLAYERCOUNT() >= 2 && !playerHasSharedViewport()) {
 		top = g_ViModes[0].fulltop;
 
 		if (optionsGetScreenSplit() != SCREENSPLIT_VERTICAL || PLAYERCOUNT() != 2)
 		{
 			if (PLAYERCOUNT() == 2
 					&& g_Vars.currentplayernum == 1
-					&& optionsGetScreenSplit() != SCREENSPLIT_VERTICAL
-					&& !g_Vars.fourmeg2player) {
+					&& optionsGetScreenSplit() != SCREENSPLIT_VERTICAL) {
 				// 2 players hsplit - bottom side
-				top = g_ViModes[0].fulltop + g_ViModes[0].fullheight / 2;
+				top = g_ViModes[0].fulltop + g_ViModes[0].fullheight / 2; // 110
 			} else if (g_Vars.currentplayernum == 2 || g_Vars.currentplayernum == 3) {
 				// 3/4 players - bottom side
 				top = g_ViModes[0].fulltop + g_ViModes[0].fullheight / 2;

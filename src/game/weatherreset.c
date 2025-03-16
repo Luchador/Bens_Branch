@@ -45,7 +45,6 @@ void weatherReset(void)
 	g_WeatherActive = false;
 	g_WeatherData = NULL;
 
-#ifndef PLATFORM_N64
 	// find the weather config for this stage, if any
 	g_CurWeatherConfig = &g_DefaultWeatherConfig;
 	for (s32 i = 0; i < ARRAYCOUNT(g_WeatherConfig) && g_WeatherConfig[i].stagenum; ++i) {
@@ -56,13 +55,6 @@ void weatherReset(void)
 	}
 
 	if (g_CurWeatherConfig != &g_DefaultWeatherConfig)
-#else
-	if ((g_StageIndex == STAGEINDEX_CHICAGO
-				|| g_StageIndex == STAGEINDEX_AIRBASE
-				|| g_StageIndex == STAGEINDEX_G5BUILDING
-				|| g_StageIndex == STAGEINDEX_CRASHSITE)
-			&& PLAYERCOUNT() < 2)
-#endif
 	{
 		g_WeatherData = mempAlloc(sizeof(struct weatherdata), MEMPOOL_STAGE);
 		g_WeatherData->particledata[0] = weatherAllocateParticles();
@@ -71,21 +63,11 @@ void weatherReset(void)
 		g_WeatherData->newwindangle = 0;
 		g_WeatherData->windangletransitiontime = 1;
 
-#ifdef PLATFORM_N64
-		if (g_StageIndex == STAGEINDEX_CHICAGO || g_StageIndex == STAGEINDEX_G5BUILDING) {
-			g_WeatherData->windspeed = 20;
-		} else if (g_StageIndex == STAGEINDEX_CRASHSITE) {
-			g_WeatherData->windspeed = 10;
-		} else {
-			g_WeatherData->windspeed = 5;
-		}
-#else
 		g_WeatherData->windspeed = g_CurWeatherConfig->windspeed;
 		// set up the weatherproof flags in all rooms
 		if (g_Vars.stagenum != STAGE_TITLE) {
 			weatherResetRooms();
 		}
-#endif
 
 		g_WeatherData->audiohandles[0] = 0;
 		g_WeatherData->audiohandles[1] = 0;

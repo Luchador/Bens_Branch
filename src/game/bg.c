@@ -1032,13 +1032,12 @@ Gfx *bgRenderScene(Gfx *gdl)
 			roomnum = 0x71;
 		}
 
-		if (PLAYERCOUNT() == 1
-				&& (stagenum == STAGE_DEFECTION
+		if (stagenum == STAGE_DEFECTION
 					|| stagenum == STAGE_EXTRACTION
 					|| stagenum == STAGE_MBR      // Enable stars in Mr. Blonde's Revenge
 					|| stagenum == STAGE_INFILTRATION
 					|| stagenum == STAGE_ESCAPE
-					|| stagenum == STAGE_ATTACKSHIP)) {
+					|| stagenum == STAGE_ATTACKSHIP) {
 			gdl = text0f153628(gdl);
 
 			gSPMatrix(gdl++, osVirtualToPhysical(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);

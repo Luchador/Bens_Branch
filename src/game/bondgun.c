@@ -3332,8 +3332,6 @@ void bgunTickGunLoad(void)
 	uintptr_t end;
 
 	if (player->gunctrl.gunloadstate == GUNLOADSTATE_MODEL) {
-		osSyncPrintf("BriGun:  BriGunLoadTick process GUN_LOADSTATE_LOAD_OBJ\n");
-
 		ptr = *player->gunctrl.loadmemptr;
 		remaining = *player->gunctrl.loadmemremaining;
 
@@ -3349,17 +3347,12 @@ void bgunTickGunLoad(void)
 
 		loadsize = ALIGN64(fileGetInflatedSize(player->gunctrl.loadfilenum, LOADTYPE_MODEL)) + 0x8000;
 
-		osSyncPrintf("BriGun:  Loading - %s, pMem 0x%08x Size %d\n");
-
 		if (loadsize > remaining) {
-			osSyncPrintf("BriGun:  Warning: LoadSize > MemSize, clamping decomp. buffer from %d to %d (%d Bytes)\n", allocsize, remaining, remaining);
 			loadsize = remaining;
 		}
 
 		// Load the model file to ptr
 		g_LoadType = LOADTYPE_GUN;
-
-		osSyncPrintf("BriGun:  obLoadto at 0x%08x, size %d\n", ptr, loadsize);
 
 		modeldef = fileLoadToAddr(player->gunctrl.loadfilenum, FILELOADMETHOD_EXTRAMEM, (u8 *)ptr, loadsize);
 
@@ -3369,11 +3362,6 @@ void bgunTickGunLoad(void)
 		allocsize += 0xe00;
 #endif
 
-		osSyncPrintf("BriGun:  Used size %d (Ob Size %d)\n");
-		osSyncPrintf("BriGun:  block len %d usedsize %d\n");
-		osSyncPrintf("BriGun:  obln ram_len %d block_len %d\n");
-		osSyncPrintf("BriGun:  new used size %d\n");
-
 		fileGetLoadedSize(player->gunctrl.loadfilenum);
 
 		fileinfo = &g_FileInfo[player->gunctrl.loadfilenum];
@@ -3381,8 +3369,6 @@ void bgunTickGunLoad(void)
 		end = ALIGN16((uintptr_t)ptr + allocsize);
 		allocsize = end - ptr;
 		remaining -= allocsize;
-
-		osSyncPrintf("BriGun:  Texture Block at 0x%08x size %d, endp 0x%08x\n");
 
 		texInitPool(&player->gunctrl.texpool, (u8 *)end, remaining);
 
@@ -3395,14 +3381,11 @@ void bgunTickGunLoad(void)
 		player->gunctrl.nexttexturetoload = 0;
 		player->gunctrl.fileinfo = *fileinfo;
 
-		osSyncPrintf("BriGun:  Set Load State: GUN_LOADSTATE_DECOMPRESS_TEXTURES\n");
 		player->gunctrl.gunloadstate = GUNLOADSTATE_TEXTURES;
 		return;
 	}
 
 	if (player->gunctrl.gunloadstate == GUNLOADSTATE_TEXTURES) {
-		osSyncPrintf("BriGun:  BriGunLoadTick process GUN_LOADSTATE_DECOMPRESS_TEXTURES\n");
-
 		gunfileinfo = &player->gunctrl.fileinfo;
 		fileinfo = &g_FileInfo[player->gunctrl.loadfilenum];
 		*fileinfo = *gunfileinfo;
@@ -3412,11 +3395,8 @@ void bgunTickGunLoad(void)
 		numthistick = 0;
 
 		for (i = player->gunctrl.nexttexturetoload; i < modeldef->numtexconfigs; i++) {
-			osSyncPrintf("BriGun:  at texture %d\n", i);
-
 			if (modeldef->texconfigs[i].texturenum < NUM_TEXTURES) {
-				osSyncPrintf("BriGun:  Uncompress %d of %d\n", i, modeldef->numtexconfigs);
-				texLoad(&modeldef->texconfigs[i].texturenum, &player->gunctrl.texpool, true);
+				texLoad(&modeldef->texconfigs[i].texturenum, &player->gunctrl.texpool);
 				modeldef->texconfigs[i].unk0b = 1;
 			}
 
@@ -3434,14 +3414,11 @@ void bgunTickGunLoad(void)
 
 		*gunfileinfo = *fileinfo;
 
-		osSyncPrintf("BriGun:  Set Load State: GUN_LOADSTATE_DECOMPRESS_DLS\n");
 		player->gunctrl.gunloadstate = GUNLOADSTATE_DLS;
 		return;
 	}
 
 	if (player->gunctrl.gunloadstate == GUNLOADSTATE_DLS) {
-		osSyncPrintf("BriGun:  BriGunLoadTick process GUN_LOADSTATE_DECOMPRESS_DLS\n");
-
 		fileinfo = &g_FileInfo[player->gunctrl.loadfilenum];
 		*fileinfo = player->gunctrl.fileinfo;
 		modeldef = *player->gunctrl.loadtomodeldef;
@@ -3455,19 +3432,13 @@ void bgunTickGunLoad(void)
 
 		modelAllocateRwData(modeldef);
 
-		osSyncPrintf("BriGun:  propgfx_decompress 0x%08x\n");
-		osSyncPrintf("BriGun:  DL waste space %d from %d (Used %d, Ramlen %d, ObSize %d)\n");
-		osSyncPrintf("Increase GUNSAVESIZE to %d!!!\n");
-
 		newvalue = ALIGN64(texGetPoolLeftPos(&player->gunctrl.texpool));
 		remaining = *player->gunctrl.loadmemremaining;
 		remaining -= (intptr_t)(newvalue - *player->gunctrl.loadmemptr);
 
 		*player->gunctrl.loadmemptr = newvalue;
 		*player->gunctrl.loadmemremaining = remaining;
-
-		osSyncPrintf("BriGun:  Set Load State: GUN_LOADSTATE_LOADED\n");
-		player->gunctrl.gunloadstate = GUNLOADSTATE_LOADED;
+		 player->gunctrl.gunloadstate = GUNLOADSTATE_LOADED;
 	}
 }
 
@@ -7058,7 +7029,7 @@ void bgun0f0a5550(s32 handnum)
 
 	mtx4LoadIdentity(&sp234);
 
-	if (PLAYERCOUNT() == 1 && weaponHasFlag(weaponnum, WEAPONFLAG_GANGSTA)) {
+	if (weaponHasFlag(weaponnum, WEAPONFLAG_GANGSTA)) {
 		bgunUpdateGangsta(hand, handnum, &viewmodelpos, funcdef, &sp284, &sp234);
 	}
 

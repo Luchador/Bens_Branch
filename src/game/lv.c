@@ -1122,12 +1122,11 @@ Gfx *lvRender(Gfx *gdl)
 				// Handle opening doors and reloading
 				if (g_Vars.currentplayer->bondactivateorreload & JO_ACTION_ACTIVATE) {
 					if (!currentPlayerInteract(false)) {
-#ifndef PLATFORM_N64
+
 						// n64 behavior: interact sucessful, cancel reload
 						if (!PLAYER_EXTCFG().extcontrols || PLAYER_EXTCFG().usereloads) {
 							g_Vars.currentplayer->bondactivateorreload = (g_Vars.currentplayer->bondactivateorreload & ~JO_ACTION_RELOAD);
 						}
-#endif
 					}
 				} else if (g_Vars.currentplayer->eyespy
 						&& g_Vars.currentplayer->eyespy->active

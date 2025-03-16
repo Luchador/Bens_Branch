@@ -19,5 +19,7 @@ u32 fileGetLoadedSize(s32 filenum);
 u32 fileGetAllocationSize(s32 filenum);
 void fileSetSize(s32 filenum, void *ptr, u32 size, bool reallocate);
 void filesStop(u8 arg0);
+TextData* loadFileIntoMemory(const char *filename);
+char* buildDynamicPath(const char *directory, const char *filename);
 
 #endif

@@ -308,11 +308,7 @@ void gfxReplaceGbiCommands(Gfx *startgdl, Gfx *endgdl, s32 type)
 
 	Gfx *gdl = startgdl;
 
-#ifdef PLATFORM_N64
-	while ((endgdl && gdl < endgdl) || (!endgdl && *(s8 *)gdl != G_ENDDL)) {
-#else
 	while ((endgdl && gdl < endgdl) || (!endgdl && (s8)gdl->bytes[GFX_W0_BYTE(0)] != G_ENDDL)) {
-#endif
 		Gfx *src = groups[type];
 
 		while (src->words.w0 != 0) {
