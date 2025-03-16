@@ -25,7 +25,6 @@
 #include "game/lv.h"
 #include "game/timing.h"
 #include "game/music.h"
-#include "game/game_175f90.h"
 #include "game/zbuf.h"
 #include "game/mplayer/mplayer.h"
 #include "game/pak.h"
@@ -239,7 +238,9 @@ void mainLoop(void)
 	s32 index;
 	s32 numplayers;
 
-	func0f175f98();
+	filesStop(5);
+	mempResetPool(MEMPOOL_5);
+	filesStop(5);
 
 	var8005d9c4 = 0;
 	argGetLevel(&g_StageNum);

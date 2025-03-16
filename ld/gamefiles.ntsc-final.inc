@@ -173,7 +173,6 @@
 	build/ROMID/game/texdecompress.o (section); \
 	build/ROMID/game/texreset.o (section); \
 	build/ROMID/game/tex.o (section); \
-	build/ROMID/game/game_175f90.o (section); \
 	build/ROMID/game/buildtime.o (section); \
 	build/ROMID/game/zbuf.o (section); \
 	build/ROMID/game/stagemusic.o (section); \

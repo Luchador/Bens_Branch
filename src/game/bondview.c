@@ -798,7 +798,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	}
 
 	// "S/MPS"
-	sprintf(text, "%s %s%5.2f", langGet(L_MISC_073), "", movedist * 0.6f);
+	sprintf(text, "%s %s%5.2f", langRemoveNewline(langGet(L_MISC_073)), "", movedist * 0.6f);
 	savedy = viewtop + 14;
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 	x = viewleft + 25 * scale;
@@ -810,7 +810,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
 
 	// "H/M"
-	sprintf(text, "%s %s%4.2f", langGet(L_MISC_074), "", g_Vars.currentplayer->eyespy->height * 0.01f);
+	sprintf(text, "%s %s%4.2f", langRemoveNewline(langGet(L_MISC_074)), "", g_Vars.currentplayer->eyespy->height * 0.01f);
 	savedy += 9;
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 	x = viewleft + 25 * scale;
@@ -822,7 +822,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
 
 	// "Y/D"
-	sprintf(text, "%s %d", langGet(L_MISC_075), (s32)g_Vars.currentplayer->eyespy->theta);
+	sprintf(text, "%s %d", langRemoveNewline(langGet(L_MISC_075)), (s32)g_Vars.currentplayer->eyespy->theta);
 	savedy += 9;
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 	x = viewleft + 25 * scale;
@@ -834,7 +834,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
 
 	// "P/D"
-	sprintf(text, "%s %d", langGet(L_MISC_076), (s32)g_Vars.currentplayer->eyespy->verta);
+	sprintf(text, "%s %d", langRemoveNewline(langGet(L_MISC_076)), (s32)g_Vars.currentplayer->eyespy->verta);
 	savedy += 9;
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 	x = viewleft + 25 * scale;
@@ -846,7 +846,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
 
 	// "CI 2023"
-	sprintf(text, "%s", langGet(L_MISC_077));
+	sprintf(text, "%s", langRemoveNewline(langGet(L_MISC_077)));
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 
 	x = (vsplit ? -3 : 0) + viewleft + 25 * scale + 5;
@@ -858,11 +858,11 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
 
 	if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {
-		sprintf(text, "%s", langGet(L_MISC_078)); // "YKK: 95935"
+		sprintf(text, "%s", langRemoveNewline(langGet(L_MISC_078))); // "YKK: 95935"
 	} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
-		sprintf(text, "%s", langGet(L_MISC_208)); // "JM: 201172"
+		sprintf(text, "%s", langRemoveNewline(langGet(L_MISC_208))); // "JM: 201172"
 	} else {
-		sprintf(text, "%s", langGet(L_MISC_217)); // "BNC: 15877"
+		sprintf(text, "%s", langRemoveNewline(langGet(L_MISC_217))); // "BNC: 15877"
 	}
 
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);

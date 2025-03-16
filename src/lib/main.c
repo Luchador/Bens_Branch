@@ -23,7 +23,6 @@
 #include "game/lv.h"
 #include "game/timing.h"
 #include "game/music.h"
-#include "game/game_175f90.h"
 #include "game/zbuf.h"
 #include "game/mplayer/mplayer.h"
 #include "game/pak.h"
@@ -544,7 +543,9 @@ void mainLoop(void)
 	s32 index;
 	s32 numplayers;
 
-	func0f175f98();
+	filesStop(5);
+	mempResetPool(MEMPOOL_5);
+	filesStop(5);
 
 	var8005d9c4 = 0;
 	argGetLevel(&g_StageNum);
@@ -716,17 +717,6 @@ void mainLoop(void)
 				// maybe graphics tasks stop being created after pre NMI?
 				g_MainNumGfxTasks = 4;
 				break;
-#if VERSION < VERSION_NTSC_1_0
-			default:
-				{
-					char message[80];
-					u32 stack2;
-					sprintf(message, "boss.c default: %08x type %d\n", (uintptr_t) msg, *(s16 *) msg);
-					crashSetMessage(message);
-					CRASH();
-				}
-				break;
-#endif
 			}
 		}
 
@@ -735,16 +725,11 @@ void mainLoop(void)
 		mempDisablePool(MEMPOOL_7);
 		filesStop(4);
 		viBlack(true);
-#if VERSION >= VERSION_NTSC_1_0
 		pak0f116994();
-#endif
 
 		g_StageNum = g_MainChangeToStageNum;
 		g_MainChangeToStageNum = -1;
 	}
-
-	// Unreachable
-	func0f175fc8();
 }
 
 void mainTick(void)
