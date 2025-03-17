@@ -803,15 +803,15 @@ void setupCreateCctv(struct cctvobj *cctv, s32 cmdindex)
 		mtx00015f04(obj->model->scale, &cctv->camrotm);
 
 		cctv->toleft = 0;
-		cctv->yleft = *(s32 *)&cctv->yleft * M_BADTAU / 65536.0f;
-		cctv->yright = *(s32 *)&cctv->yright * M_BADTAU / 65536.0f;
+		cctv->yleft = *(s32 *)&cctv->yleft * M_TAU / 65536.0f;
+		cctv->yright = *(s32 *)&cctv->yright * M_TAU / 65536.0f;
 		cctv->yspeed = 0.0f;
-		cctv->ymaxspeed = *(s32 *)&cctv->ymaxspeed * M_BADTAU / 65536.0f;
+		cctv->ymaxspeed = *(s32 *)&cctv->ymaxspeed * M_TAU / 65536.0f;
 		cctv->maxdist = *(s32 *)&cctv->maxdist;
 		cctv->yrot = cctv->yleft;
 
 		cctv->yzero = atan2f(xdiff, zdiff);
-		cctv->xzero = M_BADTAU - atan2f(ydiff, sqrtf(xdiff * xdiff + zdiff * zdiff));
+		cctv->xzero = M_TAU - atan2f(ydiff, sqrtf(xdiff * xdiff + zdiff * zdiff));
 
 		if (xdiff || zdiff) {
 			// empty
@@ -825,10 +825,10 @@ void setupCreateAutogun(struct autogunobj *autogun, s32 cmdindex)
 {
 	setupCreateObject(&autogun->base, cmdindex);
 
-	autogun->maxspeed = *(s32 *)&autogun->maxspeed * PALUPF(M_BADTAU) / 65536.0f;
+	autogun->maxspeed = *(s32 *)&autogun->maxspeed * PALUPF(M_TAU) / 65536.0f;
 	autogun->aimdist = *(s32 *)&autogun->aimdist * 100.0f / 65536.0f;
-	autogun->ymaxleft = *(s32 *)&autogun->ymaxleft * M_BADTAU / 65536.0f;
-	autogun->ymaxright = *(s32 *)&autogun->ymaxright * M_BADTAU / 65536.0f;
+	autogun->ymaxleft = *(s32 *)&autogun->ymaxleft * M_TAU / 65536.0f;
+	autogun->ymaxright = *(s32 *)&autogun->ymaxright * M_TAU / 65536.0f;
 
 	autogun->firecount = 0;
 	autogun->lastseebond60 = -1;
@@ -1731,7 +1731,7 @@ void setupCreateProps(s32 stagenum)
 						} else {
 							step->frame = escstepx;
 							escstepx += 40;
-							mtx4LoadYRotation(M_BADPI, (Mtxf *) &sp1a8);
+							mtx4LoadYRotation(M_PI, (Mtxf *) &sp1a8);
 							mtx4ToMtx3((Mtxf *) &sp1a8, sp184);
 							mtx00016110(sp184, obj->realrot);
 						}

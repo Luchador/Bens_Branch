@@ -421,6 +421,7 @@
 #define CHEAT_RCP45                  41
 #define CHEAT_DUALWIELDALLGUNS       42
 #define CHEAT_DINNERPARTY			 43
+#define CHEAT_TURBOMODE              44
 
 #define CHEATFLAG_TIMED       0
 #define CHEATFLAG_ALWAYSON    1

@@ -20,7 +20,6 @@
  * @ailist GAILIST_IDLE
  */
 u8 func0000_idle[] = {
-	dprint 'd','y','e','n','g',0,
 	beginloop(0x0d)
 	endloop(0x0d)
 
@@ -100,7 +99,6 @@ u8 func0006_unalerted[] = {
 	if_chr_knockedout(CHR_SELF, /*goto*/ 0x15)
 	if_just_injured(CHR_SELF, /*goto*/ 0x16)
 	if_has_gun(CHR_SELF, /*goto*/ 0x13)
-	dprint 'N','O','G','U','N','\n',0,
 	goto_next(0x16)
 
 	// Has gun
@@ -109,14 +107,12 @@ u8 func0006_unalerted[] = {
 
 	// Dying
 	label(0x15)
-	dprint 'D','I','E',' ','I','N','S','C','A','N','\n',0,
 	set_shotlist(GAILIST_IDLE)
 	set_ailist(CHR_SELF, GAILIST_IDLE)
 
 	// Injured or gun has just been shot out of hand
 	label(0x16)
 	say_quip(CHR_BOND, QUIP_SHOTUNALERT, 0x78, 0x03, 0x00, BANK_0, 0x00, 0x00)
-	dprint 'N','O','G','U','N',',','\n',0,
 	if_self_flag_bankx_eq(CHRFLAG1_DOINGIDLEANIMATION, FALSE, BANK_1, /*goto*/ 0x06)
 	unset_self_flag_bankx(CHRFLAG1_DOINGIDLEANIMATION, BANK_1)
 	if_chr_idle_action_eq(IDLEACTION_SITTING_TYPING, /*goto*/ 0x05)
@@ -125,19 +121,15 @@ u8 func0006_unalerted[] = {
 
 	// Injured or gun dropped while sitting -> stand up
 	label(0x05)
-	dprint 'N','O','G','U','N','2','\n',0,
-	dprint 'A','N','I','M',' ','O','B','J','E','C','T',' ','N','O','W','\n',0,
 	set_chr_maxdamage(CHR_SELF, 40)
 	object_do_animation(ANIM_025A, 0xff, 0x02, 0xffff)
 	chr_do_animation(ANIM_STAND_UP_FROM_SITTING, 0, -1, CHRANIMFLAG_MOVEWHENINVIS, 16, CHR_SELF, 2)
 	unset_self_flag_bankx(CHRFLAG1_DOINGIDLEANIMATION, BANK_1)
 	set_chr_special_death_animation(CHR_SELF, SPECIALDIE_NONE)
-	dprint 'B','4',' ','W','A','T','\n',0,
 	goto_next(0x0c)
 
 	// Injured or gun dropped while standing
 	label(0x06)
-	dprint 'B','E','E','N',' ','S','H','O','T','\n',0,
 	if_chr_has_hiddenflag(CHR_TARGET, CHRHFLAG_ASKEDABOUTGUN, /*goto*/ 0x14)
 	goto_next(0x13)
 

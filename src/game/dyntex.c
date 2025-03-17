@@ -124,10 +124,10 @@ void dyntexUpdateOcean(Vtx *vertices, struct dyntextype *type)
 	for (i = 0; i < type->numvertices; i++) {
 		Vtx *vertex = (Vtx *)((uintptr_t)vertices + g_DyntexVertices[type->vertexlistoffset + i].offset);
 
-		angle = ((g_DyntexVertices[type->vertexlistoffset + i].t % modula) / (f32) modula + f24) * M_BADTAU;
+		angle = ((g_DyntexVertices[type->vertexlistoffset + i].t % modula) / (f32) modula + f24) * M_TAU;
 		vertex->t = g_DyntexVertices[type->vertexlistoffset + i].t + (s16) (sinf(angle) * ripsize);
 
-		angle = (((g_DyntexVertices[type->vertexlistoffset + i].s + 22) % modula) / (f32) modula + f24) * M_BADTAU;
+		angle = (((g_DyntexVertices[type->vertexlistoffset + i].s + 22) % modula) / (f32) modula + f24) * M_TAU;
 		vertex->s = g_DyntexVertices[type->vertexlistoffset + i].s + (s16) (cosf(angle) * ripsize);
 	}
 }

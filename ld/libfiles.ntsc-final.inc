@@ -3,7 +3,6 @@
 	build/ROMID/lib/segments.o (section); \
 	build/ROMID/lib/boot.o (section); \
 	build/ROMID/lib/sched.o (section); \
-	build/ROMID/lib/reset.o (section); \
 	build/ROMID/lib/ultra/os/maptlbrdb.o (section); \
 	build/ROMID/lib/ultra/io/vimgr.o (section); \
 	build/ROMID/lib/ultra/io/pimgr.o (section); \
@@ -30,7 +29,6 @@
 	build/ROMID/lib/rzip.o (section); \
 	build/ROMID/lib/audiomgr.o (section); \
 	build/ROMID/lib/audiodma.o (section); \
-	build/ROMID/lib/profile.o (section); \
 	build/ROMID/lib/vi.o (section); \
 	build/ROMID/lib/fault.o (section); \
 	build/ROMID/lib/crash.o (section); \
@@ -46,10 +44,8 @@
 	build/ROMID/lib/ultra/libc/sprintf.o (section); \
 	build/ROMID/lib/pimgr.o (section); \
 	build/ROMID/lib/videbug.o (section); \
-	build/ROMID/lib/debughud.o (section); \
 	build/ROMID/lib/base.o (section); \
 	build/ROMID/lib/joy.o (section); \
-	build/ROMID/lib/lib_15850.o (section); \
 	build/ROMID/lib/varsinit.o (section); \
 	build/ROMID/lib/mtxasm.o (section); \
 	build/ROMID/lib/mtx.o (section); \
@@ -211,9 +207,7 @@
 	build/ROMID/lib/ultra/gu/align.o (section); \
 	build/ROMID/lib/ultra/gu/coss.o (section); \
 	build/ROMID/lib/ultra/gu/sins.o (section); \
-	build/ROMID/lib/ultra/gu/ortho.o (section); \
 	build/ROMID/lib/ultra/gu/frustum.o (section); \
-	build/ROMID/lib/ultra/gu/translate.o (section); \
 	build/ROMID/lib/ultra/gu/scale.o (section); \
 	build/ROMID/lib/ultra/io/conteepprobe.o (section); \
 	build/ROMID/lib/ultra/io/conteepread.o (section); \

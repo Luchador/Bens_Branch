@@ -32,18 +32,6 @@
 #define ROMDATA_ROM_DESC "NTSC v1.1"
 #define ROMDATA_FILES_OFS 0x28080
 #define ROMDATA_DATA_OFS 0x39850
-#elif VERSION == VERSION_PAL_FINAL
-#define ROMDATA_ROM_TITLE "Perfect Dark"
-#define ROMDATA_ROM_ID "NPDP"
-#define ROMDATA_ROM_DESC "PAL"
-#define ROMDATA_FILES_OFS 0x28910
-#define ROMDATA_DATA_OFS 0x39850
-#elif VERSION == VERSION_JPN_FINAL
-#define ROMDATA_ROM_TITLE "PERFECT DARK"
-#define ROMDATA_ROM_ID "NPDJ"
-#define ROMDATA_ROM_DESC "JPN"
-#define ROMDATA_FILES_OFS 0x28800
-#define ROMDATA_DATA_OFS 0x39850
 #else
 #error "This ROM version is unsupported."
 #endif
@@ -148,13 +136,7 @@ u8 *_animationsTableRomEnd;
 
 #undef ROMSEG_DECL_SEG
 
-#if VERSION == VERSION_NTSC_FINAL
 #define ROMSEG_DECL_SEG(name, ofs_ntsc, ofs_pal, ofs_jpn, size, preproc) { &ROMSEG_START(name), &ROMSEG_END(name), #name, (u8 *)ofs_ntsc, size, preproc },
-#elif VERSION == VERSION_PAL_FINAL
-#define ROMSEG_DECL_SEG(name, ofs_ntsc, ofs_pal, ofs_jpn, size, preproc) { &ROMSEG_START(name), &ROMSEG_END(name), #name, (u8 *)ofs_pal, size, preproc },
-#elif VERSION == VERSION_JPN_FINAL
-#define ROMSEG_DECL_SEG(name, ofs_ntsc, ofs_pal, ofs_jpn, size, preproc) { &ROMSEG_START(name), &ROMSEG_END(name), #name, (u8 *)ofs_jpn, size, preproc },
-#endif
 
 static struct romfile romSegs[] = {
 	ROMSEG_LIST()
@@ -167,7 +149,7 @@ static preprocessfunc filePreprocFuncs[] = {
 	/* LOADTYPE_NONE  */ NULL,
 	/* LOADTYPE_BG    */ NULL, // loaded in parts
 	/* LOADTYPE_TILES */ preprocessTilesFile,
-	/* LOADTYPE_LANG  */ preprocessLangFile,
+	/* LOADTYPE_LANG  */ NULL,
 	/* LOADTYPE_SETUP */ preprocessSetupFile,
 	/* LOADTYPE_PADS  */ preprocessPadsFile,
 	/* LOADTYPE_MODEL */ preprocessModelFile,

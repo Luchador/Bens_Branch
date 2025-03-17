@@ -647,7 +647,7 @@ void creditsResetParticles(void)
 
 		g_CreditsData->particles[i].unk12 = rngRandom() % 4;
 		g_CreditsData->particles[i].colourindex = rngRandom() % 4;
-		g_CreditsData->particles[i].rotation = RANDOMFRAC() * M_BADTAU;
+		g_CreditsData->particles[i].rotation = RANDOMFRAC() * M_TAU;
 
 		if (g_CreditsData->particleminsize < g_CreditsData->particlemaxsize) {
 			g_CreditsData->particles[i].size = g_CreditsData->particleminsize
@@ -749,7 +749,7 @@ void creditsTickParticles(void)
 			g_CreditsData->particles[i].y = RANDOMFRAC() * 2.0f * 3000.0f - 3000.0f;
 			g_CreditsData->particles[i].unk12 = rngRandom() % 4;
 			g_CreditsData->particles[i].colourindex = rngRandom() % 4;
-			g_CreditsData->particles[i].rotation = RANDOMFRAC() * M_BADTAU;
+			g_CreditsData->particles[i].rotation = RANDOMFRAC() * M_TAU;
 
 			if (g_CreditsData->particleminsize < g_CreditsData->particlemaxsize) {
 				g_CreditsData->particles[i].size = g_CreditsData->particleminsize
@@ -787,7 +787,7 @@ void creditsGetParticlePos(struct coord *pos, struct particle *particle, s32 par
 
 	switch (particle->movetype) {
 	case MOVETYPE_WAVE:
-		sp44 = g_CreditsParticleRotationFrac * M_BADTAU;
+		sp44 = g_CreditsParticleRotationFrac * M_TAU;
 		sp4c = particle->x;
 		sp48 = -400.0f + (sinf(particle->x / 300.0f) + cosf(particle->z / 300.0f)) * 100.0f;
 
@@ -808,7 +808,7 @@ void creditsGetParticlePos(struct coord *pos, struct particle *particle, s32 par
 		sp40 = particle->x / 5.0f;
 		sp3c = particle->y / 5.0f;
 		sp38 = particle->z / -8000.0f;
-		sp38 = sp38 * sp38 * M_BADTAU;
+		sp38 = sp38 * sp38 * M_TAU;
 
 		if (sp40 < 0.0f) {
 			sp40 -= 420.0f;
@@ -835,7 +835,7 @@ void creditsGetParticlePos(struct coord *pos, struct particle *particle, s32 par
 			sp30 = -sp30;
 		}
 
-		sp2c = sp2c * sp2c * M_BADTAU + g_CreditsParticleRotationFrac * M_BADTAU;
+		sp2c = sp2c * sp2c * M_TAU + g_CreditsParticleRotationFrac * M_TAU;
 
 		pos->x = sinf(sp2c) * sp34 + cosf(sp2c) * sp30;
 		pos->y = cosf(sp2c) * sp34 - sinf(sp2c) * sp30;
@@ -989,13 +989,13 @@ Gfx *creditsDrawBackgroundText(Gfx *gdl, s32 x, s32 y, char *text, struct fontch
 	u32 colour3;
 	s32 i;
 
-	sp98 = ((y / 2) % 100) * M_BADTAU / 100.0f;
+	sp98 = ((y / 2) % 100) * M_TAU / 100.0f;
 
 	colour1 = colourBlend(0x00ffff00, 0xffffff00, 255.0f * spread);
 	colour2 = colourBlend(0x0000af00, 0xffffff00, 255.0f * spread);
 
 	for (i = 4; i >= 0; i--) {
-		f32 f24 = i * 0.2f + g_CreditsParticleRotationFrac * 10.0f * M_BADTAU + sp98;
+		f32 f24 = i * 0.2f + g_CreditsParticleRotationFrac * 10.0f * M_TAU + sp98;
 		f32 f26 = i * 0.1f * (spread + 0.5f) + 1.0f;
 
 		if ((rngRandom() % 256) == 1) {

@@ -712,7 +712,6 @@ s32 texInflateNonZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct tex
 {
 	u8 scratch[0x2000];
 	u8 lookup[0x1000];
-	u32 stack;
 	s32 i;
 	s32 numimages;
 	s32 width;
@@ -2338,7 +2337,6 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 			tex = pool->rightpos;
 			tex->texturenum = g_TexNumToLoad;
 			tex->data = pool->leftpos;
-			tex->unk0c_03 = false;
 
 			// Extract the texture data to the allocation (pool->leftpos)
 			if (iszlib) {

@@ -536,7 +536,7 @@ f32 bmoveCalculateLookahead(void)
 					&& sp78 - ground < 200
 					&& sp78 - ground > -200) {
 				angle = atan2f(sp78 - g_Vars.currentplayer->vv_ground, value);
-				angle = (angle * 360) / M_BADTAU + -4;
+				angle = (angle * 360) / M_TAU + -4;
 
 				if (angle >= 180) {
 					angle -= 360;
@@ -2399,8 +2399,8 @@ void bmoveUpdateVerta(void)
 		g_Vars.currentplayer->vv_verta = -90;
 	}
 
-	g_Vars.currentplayer->vv_costheta = cosf(BADDEG2RAD(g_Vars.currentplayer->vv_theta));
-	g_Vars.currentplayer->vv_sintheta = sinf(BADDEG2RAD(g_Vars.currentplayer->vv_theta));
+	g_Vars.currentplayer->vv_costheta = cosf(DEG2RAD(g_Vars.currentplayer->vv_theta));
+	g_Vars.currentplayer->vv_sintheta = sinf(DEG2RAD(g_Vars.currentplayer->vv_theta));
 
 	g_Vars.currentplayer->vv_verta360 = g_Vars.currentplayer->vv_verta;
 
@@ -2408,8 +2408,8 @@ void bmoveUpdateVerta(void)
 		g_Vars.currentplayer->vv_verta360 += 360;
 	}
 
-	g_Vars.currentplayer->vv_cosverta = cosf(BADDEG2RAD(g_Vars.currentplayer->vv_verta360));
-	g_Vars.currentplayer->vv_sinverta = sinf(BADDEG2RAD(g_Vars.currentplayer->vv_verta360));
+	g_Vars.currentplayer->vv_cosverta = cosf(DEG2RAD(g_Vars.currentplayer->vv_verta360));
+	g_Vars.currentplayer->vv_sinverta = sinf(DEG2RAD(g_Vars.currentplayer->vv_verta360));
 
 	g_Vars.currentplayer->bond2.unk00.x = -g_Vars.currentplayer->vv_sintheta;
 	g_Vars.currentplayer->bond2.unk00.y = 0;
@@ -2419,7 +2419,7 @@ void bmoveUpdateVerta(void)
 		struct chrdata *chr = g_Vars.currentplayer->prop->chr;
 
 		if (chr && chr->model) {
-			chrSetLookAngle(chr, BADDEG2RAD(360 - g_Vars.currentplayer->vv_theta));
+			chrSetLookAngle(chr, DEG2RAD(360 - g_Vars.currentplayer->vv_theta));
 		}
 	}
 }
@@ -2506,7 +2506,7 @@ void bmoveUpdateHead(f32 arg0, f32 arg1, f32 arg2, Mtxf *arg3, f32 arg4)
 	}
 
 	bheadUpdate(sp244, arg2);
-	mtx4LoadXRotation(BADDEG2RAD(360 - g_Vars.currentplayer->vv_verta360), &sp180);
+	mtx4LoadXRotation(DEG2RAD(360 - g_Vars.currentplayer->vv_verta360), &sp180);
 
 	if (optionsGetHeadRoll(g_Vars.currentplayerstats->mpindex)) {
 		mtx00016d58(&sp116,
@@ -2516,7 +2516,7 @@ void bmoveUpdateHead(f32 arg0, f32 arg1, f32 arg2, Mtxf *arg3, f32 arg4)
 		mtx4MultMtx4InPlace(&sp116, &sp180);
 	}
 
-	mtx4LoadYRotation(BADDEG2RAD(360 - g_Vars.currentplayer->vv_theta), &sp116);
+	mtx4LoadYRotation(DEG2RAD(360 - g_Vars.currentplayer->vv_theta), &sp116);
 	mtx4MultMtx4InPlace(&sp116, &sp180);
 
 	if (arg3) {

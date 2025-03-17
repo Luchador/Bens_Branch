@@ -25,20 +25,13 @@ OSThread g_SchedThread;
 OSMesgQueue g_MainMesgQueue;
 OSMesg g_MainMesgBuf[32];
 OSMesgQueue *g_SchedCmdQ;
-u32 var8008dbcc;
 OSSched g_Sched;
 OSScClient g_MainSchedClient;
 u32 g_OsMemSize;
 
-u32 var8005ce00 = 0;
-u32 var8005ce04 = 0;
-u32 var8005ce08 = 0;
-u32 var8005ce0c = 0;
 u8 *g_StackLeftAddrs[NUM_THREADS] = {0};
 u8 *g_StackRightAddrs[NUM_THREADS] = {0};
 u8 *g_StackAllocatedPos = (u8 *) K0BASE + 4 * 1024 * 1024;
-u32 var8005ce4c = 0x00000002;
-u32 var8005ce50 = 0x10000000;
 
 extern u8 *_libSegmentStart;
 extern u8 *_datazipSegmentRomStart;
@@ -48,12 +41,10 @@ extern u8 *_inflateSegmentStart;
 extern u8 *_inflateSegmentRomStart;
 extern u8 *_inflateSegmentRomEnd;
 
-#if VERSION >= VERSION_NTSC_1_0
 s32 bootGetMemSize(void)
 {
 	return g_OsMemSize;
 }
-#endif
 
 u32 __osGetFpcCsr(void);
 u32 __osSetFpcCsr(u32 arg0);
@@ -81,21 +72,16 @@ void boot(void)
 	s32 numlibwords;
 	u32 flags;
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (osResetType == RESETTYPE_WARM) {
 		g_OsMemSize = *(u32 *) STACK_START;
 	} else {
 		*(u32 *) STACK_START = g_OsMemSize = osMemSize;
 	}
-#endif
 
 	// Copy compressed .data and inflate segments
 	// .data is copied from ROM to 0x701eb000 - 0x70200000
 	// inflate is copied from ROM to 0x70200000 - 0x702013f0
 	datacomplen = (romptr_t) &_datazipSegmentRomEnd - (romptr_t) &_datazipSegmentRomStart;
-#if VERSION >= VERSION_NTSC_1_0
-	if (1);
-#endif
 	inflatelen = (romptr_t) &_inflateSegmentRomEnd - (romptr_t) &_inflateSegmentRomStart;
 	copylen = datacomplen + inflatelen;
 	libram = (u32 *) ((romptr_t) &_libSegmentStart + 0x2000);
@@ -132,8 +118,6 @@ void boot(void)
 		g_StackRightAddrs[i] = NULL;
 	}
 
-	osInitialize();
-
 	// Write all data memory cache into physical memory
 	osWritebackDCacheAll();
 
@@ -149,12 +133,6 @@ void boot(void)
 	flags |= FPCSR_EV; // enable invalid operation
 
 	__osSetFpcCsr(flags);
-
-#if VERSION < VERSION_NTSC_1_0
-	var800902e4 = (void *) 0xbc000c02;
-	var800902e8 = 0x4040;
-	*(s16 *) 0xbc000c02 = 0x4040;
-#endif
 
 	// Create and start the main thread
 	osCreateThread(&g_MainThread, THREAD_MAIN, bootCreateThreads, NULL, bootAllocateStack(THREAD_MAIN, STACKSIZE_MAIN), THREADPRI_MAIN);
@@ -196,33 +174,8 @@ void *bootAllocateStack(s32 threadid, s32 size)
 		ptr8[i] = ((0xf - (threadid & 0xf)) << 4) | (threadid & 0xf);
 	}
 
-#if VERSION < VERSION_NTSC_1_0
-	// Mark the first 8 words specially
-	ptr32 = (u32 *)g_StackLeftAddrs[threadid];
-
-	for (j = 0; j < 8; j++) {
-		*ptr32 = 0xdeadbabe;
-		ptr32++;
-	}
-#endif
-
 	return g_StackAllocatedPos + size - 8;
 }
-
-#if VERSION < VERSION_NTSC_1_0
-u8 *bootGetStackPos(void)
-{
-	return g_StackAllocatedPos;
-}
-#endif
-
-#if VERSION < VERSION_NTSC_1_0
-void func00001978(void)
-{
-	var8005ce4c = 1;
-	var8005ce50 = 0x10000000;
-}
-#endif
 
 void idleproc(void *data)
 {
@@ -270,51 +223,3 @@ void bootCreateThreads(void *arg)
 	bootCreateSchedThread();
 	mainProc();
 }
-
-#if VERSION < VERSION_NTSC_1_0
-void bootCountUnusedStack(void)
-{
-	s32 threadid;
-
-	for (threadid = 0; threadid < NUM_THREADS; threadid++) {
-		u8 *left = g_StackLeftAddrs[threadid];
-		u8 *right = g_StackRightAddrs[threadid];
-
-		if (left != NULL) {
-			u32 byte = ((0xf - (threadid & 0xf)) << 4) | (threadid & 0xf);
-
-			left += 0x20;
-
-			while (*left == byte && left < right) {
-				left++;
-			}
-		}
-	}
-}
-
-void bootCheckStackOverflow(void)
-{
-	s32 threadid;
-
-	for (threadid = 0; threadid < NUM_THREADS; threadid++) {
-		if (g_StackLeftAddrs[threadid] != NULL) {
-			u32 *ptr = (u32 *) g_StackLeftAddrs[threadid];
-			s32 i;
-
-			for (i = 0; i < 8; i++) {
-				if (*ptr != 0xdeadbabe) {
-					char message[128];
-
-					bootCountUnusedStack();
-
-					sprintf(message, "Stack overflow thread %d", threadid);
-					crashSetMessage(message);
-					CRASH();
-				}
-
-				ptr++;
-			}
-		}
-	}
-}
-#endif

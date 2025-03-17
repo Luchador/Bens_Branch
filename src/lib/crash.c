@@ -140,35 +140,6 @@ struct crashdescription g_CrashFpcsrDescriptions[] = {
 
 char (*g_CrashCharBuffer)[71] = NULL;
 
-#ifdef DEBUG
-u32 var8005f138nb[] = {
-	0x00000000, 0x22220200, 0x55000000, 0x05f5f500,
-	0x27427200, 0x05124500, 0x34255300, 0x22000000,
-	0x24444420, 0x42222240, 0x06f6f600, 0x00272000,
-	0x00000240, 0x00070000, 0x00000200, 0x11224480,
-	0x25555200, 0x26222700, 0x25125700, 0x61211600,
-	0x33557300, 0x64611600, 0x24655200, 0x71112200,
-	0x25755200, 0x25531600, 0x00200200, 0x00200640,
-	0x01242100, 0x00707000, 0x04212400, 0x07120200,
-	0x25ff5700, 0x02557d00, 0x06575e00, 0x07445300,
-	0x07555600, 0x07565700, 0x07564400, 0x07c95700,
-	0x05575500, 0x07222700, 0x03111600, 0x05665500,
-	0x04445f00, 0x0dff9d00, 0x0f777d00, 0x07dd5700,
-	0x07564600, 0x07995770, 0x07565500, 0x07461e00,
-	0x07222200, 0x0d999600, 0x0d552200, 0x0df77500,
-	0x0d625500, 0x05622600, 0x07125700, 0x32222230,
-	0x44222110, 0x62222260, 0x25000000, 0x00000700,
-	0x42200000, 0x0067d700, 0x44755700, 0x00788600,
-	0x117dd700, 0x006fc700, 0x32722700, 0x007dd730,
-	0x44755500, 0x02622700, 0x02711130, 0x44766500,
-	0x62222700, 0x00ffff00, 0x00755d00, 0x006dd600,
-	0x00755740, 0x00799710, 0x00744600, 0x00775700,
-	0x02722300, 0x00555700, 0x00552200, 0x00577500,
-	0x00562500, 0x00552220, 0x00703700, 0x12242210,
-	0x02222220, 0x42212240, 0x005a0000,
-};
-#endif
-
 u16 *g_CrashFrameBuffer = NULL;
 
 extern u32 _libSegmentStart;
@@ -865,33 +836,21 @@ void crashRenderChar(s32 x, s32 y, char c)
 		fbpos = g_CrashFrameBuffer + x + y * width;
 	}
 
-#ifdef DEBUG
-	a2 = var8005f138nb[c - ' '];
-#else
 	a2 = 0;
-#endif
 
 	for (i = 0; i < CHAR_H; i++) {
 		for (j = 0; j < CHAR_W; j++) {
 			u32 gray = a2 & 0x80000000;
 
 			if (gray) {
-#if VERSION == VERSION_NTSC_BETA
-				fbpos[0] = GPACK_RGBA5551(0xff, 0xff, 0xff, 1);
-#else
 				fbpos[0] = GPACK_RGBA5551(0x78, 0x78, 0x78, 1);
-#endif
 			} else {
 				fbpos[0] = GPACK_RGBA5551(0, 0, 0, 1);
 			}
 
 			if (hires) {
 				if (gray) {
-#if VERSION == VERSION_NTSC_BETA
 					fbpos[1] = GPACK_RGBA5551(0xff, 0xff, 0xff, 1);
-#else
-					fbpos[1] = GPACK_RGBA5551(0x78, 0x78, 0x78, 1);
-#endif
 				} else {
 					fbpos[1] = GPACK_RGBA5551(0, 0, 0, 1);
 				}

@@ -207,8 +207,6 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	gDPTileSync(gdl++);
 
 	for (i = 0; i < MAX_ARTIFACTS; i++) {
-		if (1);
-
 		if (artifacts[i].type != ARTIFACTTYPE_FREE) {
 			s2 = &sp44[s4];
 			image = &sp4c[artifacts[i].unk0c.u16_1 * viGetWidth()];
@@ -226,8 +224,6 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 
 			artifacts[i].unk0c.u16p = s2;
 			s4++;
-
-			if (s2);
 		}
 	}
 

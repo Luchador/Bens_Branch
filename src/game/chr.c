@@ -1402,7 +1402,7 @@ void chrFlinchHead(struct chrdata *chr, f32 arg1)
 
 	chr->hidden2 &= 0x0fff;
 	chr->hidden2 |= CHRH2FLAG_HEADSHOTTED;
-	value = (arg1 + 0.3926365673542f) * 8.0f / M_BADTAU;
+	value = (arg1 + 0.3926365673542f) * 8.0f / M_TAU;
 
 	if (value < 0) {
 		value = 0;
@@ -1496,17 +1496,17 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 		mtx->m[3][2] = 0.0f;
 
 		if (gunrotx < 0.0f) {
-			gunrotx += M_BADTAU;
+			gunrotx += M_TAU;
 		}
 
 		if (gunroty < 0.0f) {
-			gunroty += M_BADTAU;
+			gunroty += M_TAU;
 		}
 
-		gunrot = M_BADTAU - theta + 1.5707963705063f;
+		gunrot = M_TAU - theta + 1.5707963705063f;
 
-		if (gunrot >= M_BADTAU) {
-			gunrot -= M_BADTAU;
+		if (gunrot >= M_TAU) {
+			gunrot -= M_TAU;
 		}
 
 		mtx4LoadYRotation(gunrot, &spb8);
@@ -1516,8 +1516,8 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 
 		gunrot = gunroty + theta;
 
-		if (gunrot >= M_BADTAU) {
-			gunrot -= M_BADTAU;
+		if (gunrot >= M_TAU) {
+			gunrot -= M_TAU;
 		}
 
 		mtx4LoadYRotation(gunrot, &spb8);
@@ -1611,8 +1611,8 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 						&& g_Vars.tickmode != TICKMODE_CUTSCENE
 						&& g_CurModelChr->actiontype != ACT_DEAD
 						&& g_CurModelChr->actiontype != ACT_DIE) {
-					zrot = g_CurModelChr->drugheadsway / 360.0f * M_BADTAU;
-					xrot -= (28.0f - ABS(g_CurModelChr->drugheadsway)) / 250.0f * M_BADTAU;
+					zrot = g_CurModelChr->drugheadsway / 360.0f * M_TAU;
+					xrot -= (28.0f - ABS(g_CurModelChr->drugheadsway)) / 250.0f * M_TAU;
 				}
 			}
 
@@ -1632,15 +1632,15 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 						}
 
 						if (flinchtype >= 5 && flinchtype < 8) {
-							zrot -= flinchamount * (M_BADTAU * mult / 360.0f);
+							zrot -= flinchamount * (M_TAU * mult / 360.0f);
 						} else if (flinchtype > 0 && flinchtype < 4) {
-							zrot += flinchamount * (M_BADTAU * mult / 360.0f);
+							zrot += flinchamount * (M_TAU * mult / 360.0f);
 						}
 
 						if (flinchtype == 7 || flinchtype == 0 || flinchtype == 1) {
-							xrot += flinchamount * (M_BADTAU * mult / 360.0f);
+							xrot += flinchamount * (M_TAU * mult / 360.0f);
 						} else if (flinchtype >= 3 && flinchtype < 6) {
-							xrot -= flinchamount * (M_BADTAU * mult / 360.0f);
+							xrot -= flinchamount * (M_TAU * mult / 360.0f);
 						}
 					}
 				} else if (joint == rshoulderjoint || joint == lshoulderjoint) {
@@ -1687,11 +1687,11 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 				if (xrot < 0.0f) {
 					xrot = -xrot;
 				} else {
-					xrot = M_BADTAU - xrot;
+					xrot = M_TAU - xrot;
 				}
 
 				if (yrot < 0.0f) {
-					yrot += M_BADTAU;
+					yrot += M_TAU;
 				}
 
 				mtx00015be0(camGetProjectionMtxF(), mtx);
@@ -1708,7 +1708,7 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 					yrot -= aimangle;
 
 					if (yrot < 0.0f) {
-						yrot += M_BADTAU;
+						yrot += M_TAU;
 					}
 
 					mtx4LoadYRotation(yrot, &tmpmtx);
@@ -1848,7 +1848,7 @@ void chr0f022214(struct chrdata *chr, struct prop *prop, bool fulltick)
 			thing.unk00 = &sp80;
 		} else if (prop == chr->weapons_held[HAND_LEFT]) {
 			// Flip the model
-			mtx4LoadZRotation(M_BADPI, &sp80);
+			mtx4LoadZRotation(M_PI, &sp80);
 			mtx4MultMtx4InPlace(sp104, &sp80);
 			thing.unk00 = &sp80;
 		} else {
@@ -2234,7 +2234,7 @@ s32 chrTick(struct prop *prop)
 			chr->drugheadsway = 0;
 		} else if (chr->blurdrugamount > TICKS(1000) && chr->actiontype != ACT_DRUGGEDKO) {
 			chr->drugheadcount += g_Vars.lvupdate240 >> 1;
-			chr->drugheadsway = cosf(chr->drugheadcount / 255.0f * M_BADTAU) * 20.0f;
+			chr->drugheadsway = cosf(chr->drugheadcount / 255.0f * M_TAU) * 20.0f;
 		} else if (chr->drugheadsway != 0.0f) {
 			chr->drugheadcount = 0;
 

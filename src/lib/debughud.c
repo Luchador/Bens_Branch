@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "bss.h"
-#include "lib/debughud.h"
 #include "lib/vi.h"
 #include "game/gfxmemory.h"
 #include "data.h"
@@ -112,45 +111,6 @@ void dhud00014000nb(void)
 }
 #endif
 
-void dhudInit(void)
-{
-#ifdef DEBUG
-	s32 i;
-	s32 x;
-	s32 y;
-	u32 stack;
-
-	Gfx cmd = {0, 0};
-
-	g_DHudCharBufferPtr = g_DHudCharBuffer;
-	g_DHudFgGbiPtrs = g_DHudFgGbi;
-	g_DHudBgGbiPtrs = g_DHudBgGbi;
-
-	g_DHudInitialised = true;
-
-	for (x = 0; x < NUM_COLS; x++) {
-		for (y = 0; y < NUM_ROWS; y++) {
-			g_DHudCharBufferPtr[x][y].c = '\0';
-			g_DHudCharBufferPtr[x][y].paletteindex = 0;
-		}
-	}
-
-	for (i = 0; i < MAX_COLOURS; i++) {
-		g_DHudFgGbiPtrs[i] = cmd;
-		g_DHudBgGbiPtrs[i] = cmd;
-	}
-#endif
-}
-
-void dhudReset(void)
-{
-#ifdef DEBUG
-	if (g_DHudInitialised) {
-		dhudClear();
-	}
-#endif
-}
-
 #ifdef DEBUG
 void dhudPutCharAt(s32 x, s32 y, char c)
 {
@@ -180,16 +140,6 @@ havepalette:
 }
 #endif
 
-void dhudResetPos(void)
-{
-#ifdef DEBUG
-	if (g_DHudInitialised) {
-		g_DHudPosX = g_DHudBaseX;
-		g_DHudPosY = g_DHudBaseY;
-	}
-#endif
-}
-
 void dhudClear(void)
 {
 #ifdef DEBUG
@@ -205,7 +155,6 @@ void dhudClear(void)
 
 		g_DHudIsEmpty = true;
 
-		dhudResetPos();
 		dhud00014000nb();
 
 		g_DHudNextPaletteIndex = 0;
@@ -272,18 +221,6 @@ void dhudPrintChar(u8 c)
 	}
 #endif
 }
-
-#if VERSION != VERSION_PAL_BETA
-void dhudPrintCharAt(s32 x, s32 y, char c)
-{
-#ifdef DEBUG
-	if (g_DHudInitialised) {
-		dhudSetPos(x, y);
-		dhudPrintChar(c);
-	}
-#endif
-}
-#endif
 
 void dhudPrintString(char *str)
 {

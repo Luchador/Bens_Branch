@@ -75,7 +75,7 @@ struct langbank g_LangBanks[29] = {
 	/*0x18*/ LANGBANK_AZT,           2560,      2608,
 	/*0x19*/ LANGBANK_DAM,           5632,      5680,
 	/*0x20*/ LANGBANK_PAM,           12288,     12336,
-	/*0x21*/ LANGBANK_IMP,           8704,      8760,
+	/*0x21*/ LANGBANK_IMP,           8704,      8768,
 	/*0x22*/ LANGBANK_LEE,           9728,      9784,
 	/*0x23*/ LANGBANK_SHO,           16896,     16952,
 	/*0x24*/ LANGBANK_WAX,           18944,     18972,

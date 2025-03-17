@@ -110,23 +110,6 @@ s32 osRecvMesg(OSMesgQueue *mq, OSMesg *msg, s32 flag)
 	return 0;
 }
 
-/* Vi */
-
-void osCreateViManager(OSPri pri)
-{
-
-}
-
-void osViSetMode(OSViMode *mode)
-{
-
-}
-
-void osViSetEvent(OSMesgQueue *mq, OSMesg msg, u32 retraceCount)
-{
-
-}
-
 void osViBlack(u8 active)
 {
 	if (active) {
@@ -135,21 +118,6 @@ void osViBlack(u8 active)
 }
 
 void osViSetSpecialFeatures(u32 func)
-{
-
-}
-
-void osViSwapBuffer(void *vaddr)
-{
-
-}
-
-void osViSetXScale(f32 value)
-{
-
-}
-
-void osViSetYScale(f32 value)
 {
 
 }

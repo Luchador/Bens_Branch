@@ -1716,7 +1716,7 @@ bool bgun0f09aba4(struct hand *hand, struct handweaponinfo *info, s32 handnum, s
 				hand->posstart.z = hand->posoffset.z;
 			}
 
-			hand->rotxend = M_BADTAU - (recoilangle * M_BADTAU) / 360.0f;
+			hand->rotxend = M_TAU - (recoilangle * M_TAU) / 360.0f;
 
 			hand->posend.x = (func0f0b131c(handnum) - hand->aimpos.x) * recoildist / 1000.0f;
 			hand->posend.y = 0;
@@ -3072,7 +3072,7 @@ void bgun0f09d8dc(f32 breathing, f32 arg1, f32 arg2, f32 arg3, f32 arg4)
 		player->gunposamplitude = 1.0f;
 	} else {
 		if (arg1 > 0.1f) {
-			f32 tmp = 1.0f - cosf((arg1 - 0.1f) * M_BADTAU / 2.8f);
+			f32 tmp = 1.0f - cosf((arg1 - 0.1f) * M_TAU / 2.8f);
 			player->gunposamplitude = 0.8f * tmp + 0.2f;
 		} else {
 			player->gunposamplitude = 0.1f;
@@ -6556,25 +6556,25 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			hand->unk0d20.f[0] = (RANDOMFRAC() - 0.5f) * 0.5333333f * 0.0625f + 0.5333333f;
 			hand->unk0d20.f[1] = RANDOMFRAC() * 2.5f * 0.0625f + 2.5f;
 			hand->unk0d20.f[2] = 0.0f;
-			spd0.f[0] = RANDOMFRAC() * 2.0f * M_BADTAU / 184.0f - 0.03414231f;
-			spd0.f[1] = RANDOMFRAC() * 2.0f * M_BADTAU / 184.0f - 0.03414231f;
-			spd0.f[2] = RANDOMFRAC() * 2.0f * M_BADTAU / 184.0f - 0.03414231f;
+			spd0.f[0] = RANDOMFRAC() * 2.0f * M_TAU / 184.0f - 0.03414231f;
+			spd0.f[1] = RANDOMFRAC() * 2.0f * M_TAU / 184.0f - 0.03414231f;
+			spd0.f[2] = RANDOMFRAC() * 2.0f * M_TAU / 184.0f - 0.03414231f;
 			break;
 		case EJECTTYPE_GRENADEPIN:
 			hand->unk0d20.f[0] = -((RANDOMFRAC() - 0.5f) * 0.5333333f * 0.0625f + mult * 0.5333333f);
 			hand->unk0d20.f[1] = RANDOMFRAC() * 2.5f * 0.125f + 2.5f;
 			hand->unk0d20.f[2] = -(RANDOMFRAC() + 1.0f);
-			spd0.f[0] = (RANDOMFRAC() + 3.0f) * PALUPF(M_BADTAU) / 208.0f;
-			spd0.f[1] = RANDOMFRAC() * 2.0f * M_BADTAU / 544.0f - 0.0115481345f;
-			spd0.f[2] = RANDOMFRAC() * 2.0f * M_BADTAU / 544.0f - 0.0115481345f;
+			spd0.f[0] = (RANDOMFRAC() + 3.0f) * PALUPF(M_TAU) / 208.0f;
+			spd0.f[1] = RANDOMFRAC() * 2.0f * M_TAU / 544.0f - 0.0115481345f;
+			spd0.f[2] = RANDOMFRAC() * 2.0f * M_TAU / 544.0f - 0.0115481345f;
 			break;
 		case EJECTTYPE_TRANQCASE:
 			hand->unk0d20.f[0] = 0.0f;
 			hand->unk0d20.f[1] = RANDOMFRAC() * 2.5f * 0.125f + 2.5f;
 			hand->unk0d20.f[2] = (RANDOMFRAC() + 1.0f) * 0.25f;
-			spd0.f[0] = (RANDOMFRAC() + 3.0f) * PALUPF(M_BADTAU) / 368.0f;
-			spd0.f[1] = RANDOMFRAC() * 2.0f * M_BADTAU / 944.0f - 0.006654857f;
-			spd0.f[2] = RANDOMFRAC() * 2.0f * M_BADTAU / 944.0f - 0.006654857f;
+			spd0.f[0] = (RANDOMFRAC() + 3.0f) * PALUPF(M_TAU) / 368.0f;
+			spd0.f[1] = RANDOMFRAC() * 2.0f * M_TAU / 944.0f - 0.006654857f;
+			spd0.f[2] = RANDOMFRAC() * 2.0f * M_TAU / 944.0f - 0.006654857f;
 			break;
 		}
 
@@ -6650,7 +6650,7 @@ void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *
 	mtx4LoadIdentity(&spd8);
 
 	if (funcdef && (funcdef->flags & FUNCFLAG_00000001)) {
-		mtx4LoadZRotation(RANDOMFRAC() * M_BADTAU, &spd8);
+		mtx4LoadZRotation(RANDOMFRAC() * M_TAU, &spd8);
 	}
 
 	mtx4LoadZRotation((RANDOMFRAC() * 0.3 - 0.15), &spd8);
@@ -6695,7 +6695,7 @@ void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *
 			sp60.z = rodata->pos.x * spd8.m[0][2] + rodata->pos.y * spd8.m[1][2] + rodata->pos.z * spd8.m[2][2] + spd8.m[3][2];
 
 			mtx4LoadIdentity(&sp70);
-			mtx4Align(sp70.m, RANDOMFRAC() * M_BADTAU, -sp60.x, -sp60.y, -sp60.z);
+			mtx4Align(sp70.m, RANDOMFRAC() * M_TAU, -sp60.x, -sp60.y, -sp60.z);
 			mtx00015f04(0.10000001f * spb4, &sp70);
 
 			mtx = (Mtxf *)allocation;

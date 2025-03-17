@@ -1377,11 +1377,11 @@ f32 chrGetAttackEntityRelativeAngle(struct chrdata *chr, s32 attackflags, s32 en
 	}
 
 	if (attackflags & ATTACKFLAG_AIMATDIRECTION) {
-		angle = entityid * (M_BADTAU / 65536);
+		angle = entityid * (M_TAU / 65536);
 		angle -= chrGetInverseTheta(chr);
 
 		if (angle < 0) {
-			angle += M_BADTAU;
+			angle += M_TAU;
 		}
 
 		return angle;
@@ -1635,7 +1635,6 @@ bool chrFaceCover(struct chrdata *chr)
 	chr->act_stand.reaim = 0;
 	chr->act_stand.flags = ATTACKFLAG_AIMATDIRECTION;
 	chr->act_stand.turning = TURNSTATE_TURNING;
-	//chr->act_stand.entityid = atan2f(-cover.look->x, -cover.look->z) * (0x4000 / BADDEG2RAD(90));
 	chr->act_stand.entityid = atan2f(-cover.look->x, -cover.look->z) * 10432.039f;
 
 	return true;
@@ -1797,8 +1796,7 @@ void chrDoSurprisedOneHand(struct chrdata *chr)
 	struct prop *prop = chrGetTargetProp(chr);
 	f32 angle = chrGetAngleToPos(chr, &prop->pos);
 
-	// BADDEG2RAD(10) doesn't match due to float precision :(
-	if (angle < 0.17450514435768f || angle > BADDEG2RAD(350)) {
+	if (angle < DEG2RAD(10) || angle > DEG2RAD(350)) {
 		chrStopFiring(chr);
 		chr->actiontype = ACT_SURPRISED;
 		chr->act_surprised.type = 1;
@@ -2657,7 +2655,7 @@ void chrAttack(struct chrdata *chr, struct attackanimgroup **animgroups, bool fl
 			angle = chrGetAttackEntityRelativeAngle(chr, attackflags, entityid);
 
 			if (flip) {
-				groupindex = (M_BADTAU - angle) * 5.0937690734863f + 0.5f;
+				groupindex = (M_TAU - angle) * 5.0937690734863f + 0.5f;
 			} else {
 				groupindex = angle * 5.0937690734863f + 0.5f;
 			}
@@ -2998,12 +2996,12 @@ void chrBeginDeath(struct chrdata *chr, struct coord *dir, f32 relangle, s32 hit
 				angle1 = angle2 + 3.3155977725983f;
 				angle2 += 2.966587305069f;
 
-				if (angle1 >= M_BADTAU) {
-					angle1 -= M_BADTAU;
+				if (angle1 >= M_TAU) {
+					angle1 -= M_TAU;
 				}
 
-				if (angle2 >= M_BADTAU) {
-					angle2 -= M_BADTAU;
+				if (angle2 >= M_TAU) {
+					angle2 -= M_TAU;
 				}
 
 				fval1 = func0f02e684(prop, angle1, 150);
@@ -3457,7 +3455,7 @@ void chrYeetFromPos(struct chrdata *chr, struct coord *exppos, f32 force)
 		chr->fallspeed.z = dist.z;
 
 		if (latangle < faceangle) {
-			angletoexplosion += M_BADTAU;
+			angletoexplosion += M_TAU;
 		}
 
 		angleindex = angletoexplosion * 1.2734422683716f + 0.5f;
@@ -6376,7 +6374,7 @@ bool chrHasLosToPosWasteful(struct chrdata *chr, struct coord *pos, RoomNum *roo
 	f32 diffangle = posangle - facingangle;
 
 	if (posangle < facingangle) {
-		diffangle += M_BADTAU;
+		diffangle += M_TAU;
 	}
 
 	if ((diffangle < 1.7450513839722f || diffangle > 4.5371336936951f)
@@ -6466,7 +6464,7 @@ bool chrCheckCanSeeTarget(struct chrdata *chr)
 	bool result = false;
 
 	if (angletotarget < invtheta) {
-		angle += M_BADTAU;
+		angle += M_TAU;
 	}
 
 	sqdistance = x * x + y * y + z * z;
@@ -6484,7 +6482,7 @@ bool chrCheckCanSeeTarget(struct chrdata *chr)
 				tmp = angle;
 
 				if (tmp > M_PI) {
-					tmp = M_BADTAU - angle;
+					tmp = M_TAU - angle;
 				}
 
 				tmp -= 0.7852731347084f;
@@ -6579,7 +6577,7 @@ bool chrTrySidestep(struct chrdata *chr)
 		f32 angle = b - a;
 
 		if (b < a) {
-			angle += M_BADTAU;
+			angle += M_TAU;
 		}
 
 		if (angle < 0.7852731347084f || angle > 5.4969120025635f
@@ -6612,15 +6610,11 @@ bool chrTryJumpOut(struct chrdata *chr)
 		f32 angle = b - a;
 
 		if (b < a) {
-			angle += M_BADTAU;
+			angle += M_TAU;
 		}
-
-		// This commented code is what the floats represent, but mismatches due
-		// to float precision:
-		//if (angle < BADDEG2RAD(45) || angle > BADDEG2RAD(315)
-		//		|| (angle > BADDEG2RAD(135) && angle < BADDEG2RAD(225))) {
-		if (angle < 0.7852731347084f || angle > 5.4969120025635f
-				|| (angle > 2.3558194637299f && angle < BADDEG2RAD(225))) {
+		
+		if (angle < DEG2RAD(45) || angle > DEG2RAD(315)
+				|| (angle > DEG2RAD(135) && angle < DEG2RAD(225))) {
 			bool side = (rngRandom() % 2) == 0;
 
 			if (chrCanJumpInDirection(chr, side, 200)) {
@@ -7788,8 +7782,8 @@ void chrTickStand(struct chrdata *chr)
 	for (i = 0; i < ARRAYCOUNT(sp74); i++) {
 		sp6c += 0.7852731347084f;
 
-		if (sp6c >= M_BADTAU) {
-			sp6c -= M_BADTAU;
+		if (sp6c >= M_TAU) {
+			sp6c -= M_TAU;
 		}
 
 		sp74[i] = func0f02e550(chr->prop, sp6c, 1000, CDTYPE_BG, 0, 1);
@@ -7837,8 +7831,8 @@ void chrTickStand(struct chrdata *chr)
 		i = sp44[index];
 		angle = sp70 + i * 0.7852731347084f;
 
-		if (angle >= M_BADTAU) {
-			angle -= M_BADTAU;
+		if (angle >= M_TAU) {
+			angle -= M_TAU;
 		}
 
 		chrFaceEntity(chr, ATTACKFLAG_AIMATDIRECTION, angle * 10432.0390625f);
@@ -8602,10 +8596,10 @@ f32 chrGetInverseTheta(struct chrdata *chr)
 		struct player *player = g_Vars.players[playermgrGetPlayerNumByProp(chr->prop)];
 		f32 angle = (360.0f - player->vv_theta) * 0.017450513318181f;
 
-		if (angle >= M_BADTAU) {
-			angle -= M_BADTAU;
+		if (angle >= M_TAU) {
+			angle -= M_TAU;
 		} else if (angle < 0) {
-			angle += M_BADTAU;
+			angle += M_TAU;
 		}
 
 		return angle;
@@ -8646,10 +8640,10 @@ f32 chrGetAimAngle(struct chrdata *chr)
 	f32 angle = chrGetInverseTheta(chr) + chr->aimsideback;
 	f32 offset = 0;
 
-	if (angle >= M_BADTAU) {
-		angle -= M_BADTAU;
+	if (angle >= M_TAU) {
+		angle -= M_TAU;
 	} else if (angle < 0) {
-		angle += M_BADTAU;
+		angle += M_TAU;
 	}
 
 	if (chr->aibot) {
@@ -8668,15 +8662,15 @@ f32 chrGetAimAngle(struct chrdata *chr)
 
 	if (offset) {
 		if (chr->model->anim->flip) {
-			offset = M_BADTAU - offset;
+			offset = M_TAU - offset;
 		}
 
 		angle += offset;
 
-		if (angle >= M_BADTAU) {
-			angle -= M_BADTAU;
-		} else if (angle < M_BADTAU) {
-			angle += M_BADTAU;
+		if (angle >= M_TAU) {
+			angle -= M_TAU;
+		} else if (angle < M_TAU) {
+			angle += M_TAU;
 		}
 	}
 
@@ -8688,7 +8682,7 @@ f32 chrGetPitchAngle(struct chrdata *chr)
 	f32 sum = chr->aimuprshoulder + chr->aimupback;
 
 	if (sum < 0) {
-		sum += M_BADTAU;
+		sum += M_TAU;
 	}
 
 	return sum;
@@ -8704,7 +8698,7 @@ s32 chrTurn(struct chrdata *chr, s32 turning, f32 endanimframe, f32 speed, f32 t
 		f32 curframe = modelGetCurAnimFrame(model);
 		f32 finalangle = chrGetInverseTheta(chr);
 		f32 remainingangle;
-		f32 increment = M_BADTAU / 100.0f * speed * g_Vars.lvupdate60f * model->anim->playspeed;
+		f32 increment = M_TAU / 100.0f * speed * g_Vars.lvupdate60f * model->anim->playspeed;
 
 		if (chr->aibot) {
 			struct prop *target = chrGetTargetProp(chr);
@@ -8726,15 +8720,15 @@ s32 chrTurn(struct chrdata *chr, s32 turning, f32 endanimframe, f32 speed, f32 t
 		remainingangle -= toleranceangle;
 
 		if (remainingangle < 0) {
-			remainingangle += M_BADTAU;
+			remainingangle += M_TAU;
 		}
 
-		if (increment > remainingangle || M_BADTAU - increment < remainingangle) {
+		if (increment > remainingangle || M_TAU - increment < remainingangle) {
 			// Close enough to stop
 			finalangle += remainingangle;
 
-			if (finalangle >= M_BADTAU) {
-				finalangle -= M_BADTAU;
+			if (finalangle >= M_TAU) {
+				finalangle -= M_TAU;
 			}
 
 			chrSetLookAngle(chr, finalangle);
@@ -8743,8 +8737,8 @@ s32 chrTurn(struct chrdata *chr, s32 turning, f32 endanimframe, f32 speed, f32 t
 			// Turning in one direction
 			finalangle += increment;
 
-			if (finalangle >= M_BADTAU) {
-				finalangle -= M_BADTAU;
+			if (finalangle >= M_TAU) {
+				finalangle -= M_TAU;
 			}
 
 			chrSetLookAngle(chr, finalangle);
@@ -8753,7 +8747,7 @@ s32 chrTurn(struct chrdata *chr, s32 turning, f32 endanimframe, f32 speed, f32 t
 			finalangle -= increment;
 
 			if (finalangle < 0) {
-				finalangle += M_BADTAU;
+				finalangle += M_TAU;
 			}
 
 			chrSetLookAngle(chr, finalangle);
@@ -8868,7 +8862,7 @@ bool func0f03e9f4(struct chrdata *chr, struct attackanimconfig *animcfg, bool fi
 			shootrotx = atan2f(sp174, sqrtf(sp178 * sp178 + sp170 * sp170));
 
 			if (shootrotx >= M_PI) {
-				shootrotx -= M_BADTAU;
+				shootrotx -= M_TAU;
 			}
 		}
 
@@ -8970,7 +8964,7 @@ bool func0f03e9f4(struct chrdata *chr, struct attackanimconfig *animcfg, bool fi
 			aimendsideback = anglev - aimangle;
 
 			if (anglev < aimangle) {
-				aimendsideback += M_BADTAU;
+				aimendsideback += M_TAU;
 			}
 
 			chrrwdata = modelGetNodeRwData(chr->model, chr->model->definition->rootnode);
@@ -8979,11 +8973,11 @@ bool func0f03e9f4(struct chrdata *chr, struct attackanimconfig *animcfg, bool fi
 				aimendsideback -= chrrwdata->unk5c * chrrwdata->unk58;
 
 				if (aimendsideback < 0.0f) {
-					aimendsideback += M_BADTAU;
+					aimendsideback += M_TAU;
 				}
 
-				if (aimendsideback >= M_BADTAU) {
-					aimendsideback -= M_BADTAU;
+				if (aimendsideback >= M_TAU) {
+					aimendsideback -= M_TAU;
 				}
 			}
 
@@ -8995,16 +8989,16 @@ bool func0f03e9f4(struct chrdata *chr, struct attackanimconfig *animcfg, bool fi
 				aimendsideback += chrGetAimLimitAngle(sqdist) * 0.5f * sinf((((s32) (g_Vars.lvframe60 * chr->model->anim->playspeed) + chr->chrnum) % 60) * 0.10470308f);
 
 				if (aimendsideback < 0.0f) {
-					aimendsideback += M_BADTAU;
+					aimendsideback += M_TAU;
 				}
 
-				if (aimendsideback >= M_BADTAU) {
-					aimendsideback -= M_BADTAU;
+				if (aimendsideback >= M_TAU) {
+					aimendsideback -= M_TAU;
 				}
 			}
 
 			if (aimendsideback >= M_PI) {
-				aimendsideback -= M_BADTAU;
+				aimendsideback -= M_TAU;
 			}
 
 			aimendsideback += chr->aimsideback;
@@ -9211,10 +9205,10 @@ void chrCalculateHit(struct chrdata *chr, bool *angleokptr, bool *hit, struct gs
 	limitangle = chrGetAimLimitAngle(sqdist);
 
 	if (anglediff < 0) {
-		anglediff += M_BADTAU;
+		anglediff += M_TAU;
 	}
 
-	angleok = anglediff < limitangle || anglediff > M_BADTAU - limitangle;
+	angleok = anglediff < limitangle || anglediff > M_TAU - limitangle;
 
 	*angleokptr = angleok;
 	*hit = false;
@@ -10434,7 +10428,7 @@ void chrTickFire(struct chrdata *chr)
 		}
 
 		if (model->anim->flip) {
-			f2 = M_BADTAU - f2;
+			f2 = M_TAU - f2;
 		}
 
 		chr->act_attack.turning = chrTurn(chr, chr->act_attack.turning, f12, chrGetRangedSpeed(chr, 1, 1.6f), f2);
@@ -10695,11 +10689,11 @@ void chrTickRobotAttack(struct chrdata *chr)
 			roty = atan2f(targetprop->pos.x - act->pos[i].x, targetprop->pos.z - act->pos[i].z) - invtheta;
 
 			if (roty < 0.0f) {
-				roty += M_BADTAU;
+				roty += M_TAU;
 			}
 
-			if (roty > M_BADPI) {
-				roty -= M_BADTAU;
+			if (roty > M_PI) {
+				roty -= M_TAU;
 			}
 
 			if (roty < -0.524f) {
@@ -10713,10 +10707,10 @@ void chrTickRobotAttack(struct chrdata *chr)
 #define X() (targetprop->pos.x - act->pos[i].x)
 #define Z() (targetprop->pos.z - act->pos[i].z)
 
-			rotx = M_BADTAU - atan2f(aimy - act->pos[i].y, sqrtf(Z() * Z() + X() * X()));
+			rotx = M_TAU - atan2f(aimy - act->pos[i].y, sqrtf(Z() * Z() + X() * X()));
 
-			if (rotx > M_BADPI) {
-				rotx -= M_BADTAU;
+			if (rotx > M_PI) {
+				rotx -= M_TAU;
 			}
 
 			if (rotx < -0.524f) {
@@ -10737,17 +10731,17 @@ void chrTickRobotAttack(struct chrdata *chr)
 				f32 gunroty = chr->gunroty[i];
 
 				if (gunrotx < 0.0f) {
-					gunrotx += M_BADTAU;
+					gunrotx += M_TAU;
 				}
 
 				if (gunroty < 0.0f) {
-					gunroty += M_BADTAU;
+					gunroty += M_TAU;
 				}
 
 				gunroty += invtheta;
 
-				if (gunroty >= M_BADTAU) {
-					gunroty -= M_BADTAU;
+				if (gunroty >= M_TAU) {
+					gunroty -= M_TAU;
 				}
 
 				act->dir[i].x = sinf(gunroty) * cosf(gunrotx);
@@ -11131,18 +11125,18 @@ bool func0f043f2c(struct chrdata *chr, struct coord *runpos, u32 arg2, f32 *turn
 	angle2 = angle1 - finalangle;
 
 	if (finalangle > angle1) {
-		angle2 += M_BADTAU;
+		angle2 += M_TAU;
 	}
 
 	if (chr->aibot) {
 		if (chr->blurdrugamount > 0) {
 			angle1 += chr->blurdrugamount * PALUPF(0.00031410926021636f) * sinf((g_Vars.lvframe60 % TICKS(1200)) * PALUPF(0.0052351541817188f));
 
-			if (angle1 >= M_BADTAU) {
-				angle1 -= M_BADTAU;
+			if (angle1 >= M_TAU) {
+				angle1 -= M_TAU;
 			}
 
-			angle1 += M_BADTAU;
+			angle1 += M_TAU;
 		}
 
 		finalangle = angle1;
@@ -11151,8 +11145,8 @@ bool func0f043f2c(struct chrdata *chr, struct coord *runpos, u32 arg2, f32 *turn
 	} else {
 		angle3 = angle2;
 
-		if (angle2 > M_BADPI) {
-			angle3 = M_BADTAU - angle3;
+		if (angle2 > M_PI) {
+			angle3 = M_TAU - angle3;
 		}
 
 		if ((arg2 % 4) == 2) {
@@ -11797,7 +11791,7 @@ bool chrNavTryObstacle(struct chrdata *chr, struct coord *arg1, bool arg2, struc
 	}
 
 	if (!arg2 && angle != 0.0f) {
-		angle = M_BADTAU - angle;
+		angle = M_TAU - angle;
 	}
 
 	sp48.x = -cosf(angle) * sp68.f[0] + sinf(angle) * sp68.f[2];
@@ -12046,11 +12040,11 @@ void chrNavTickMain(struct chrdata *chr, struct coord *nextpos, struct waydata *
 			spcc = f20 - atan2f(waydata->obstacleright.x - prop->pos.x, waydata->obstacleright.z - prop->pos.z);
 
 			if (spd0 < 0) {
-				spd0 += M_BADTAU;
+				spd0 += M_TAU;
 			}
 
-			if (spd0 >= M_BADPI) {
-				spd0 -= M_BADTAU;
+			if (spd0 >= M_PI) {
+				spd0 -= M_TAU;
 			}
 
 			if (spd0 < 0) {
@@ -12058,11 +12052,11 @@ void chrNavTickMain(struct chrdata *chr, struct coord *nextpos, struct waydata *
 			}
 
 			if (spcc < 0) {
-				spcc += M_BADTAU;
+				spcc += M_TAU;
 			}
 
-			if (spcc >= M_BADPI) {
-				spcc -= M_BADTAU;
+			if (spcc >= M_PI) {
+				spcc -= M_TAU;
 			}
 
 			if (spcc < 0) {
@@ -12083,11 +12077,11 @@ void chrNavTickMain(struct chrdata *chr, struct coord *nextpos, struct waydata *
 				spbc = f20 - atan2f(spf4.x - prop->pos.x, spf4.z - prop->pos.z);
 
 				if (spc0 < 0) {
-					spc0 += M_BADTAU;
+					spc0 += M_TAU;
 				}
 
-				if (spc0 >= M_BADPI) {
-					spc0 -= M_BADTAU;
+				if (spc0 >= M_PI) {
+					spc0 -= M_TAU;
 				}
 
 				if (spc0 < 0) {
@@ -12095,11 +12089,11 @@ void chrNavTickMain(struct chrdata *chr, struct coord *nextpos, struct waydata *
 				}
 
 				if (spbc < 0) {
-					spbc += M_BADTAU;
+					spbc += M_TAU;
 				}
 
-				if (spbc >= M_BADPI) {
-					spbc -= M_BADTAU;
+				if (spbc >= M_PI) {
+					spbc -= M_TAU;
 				}
 
 				if (spbc < 0) {
@@ -12126,11 +12120,11 @@ void chrNavTickMain(struct chrdata *chr, struct coord *nextpos, struct waydata *
 				spac = f20 - atan2f(spf4.x - prop->pos.x, spf4.z - prop->pos.z);
 
 				if (spb0 < 0) {
-					spb0 += M_BADTAU;
+					spb0 += M_TAU;
 				}
 
-				if (spb0 >= M_BADPI) {
-					spb0 -= M_BADTAU;
+				if (spb0 >= M_PI) {
+					spb0 -= M_TAU;
 				}
 
 				if (spb0 < 0) {
@@ -12138,11 +12132,11 @@ void chrNavTickMain(struct chrdata *chr, struct coord *nextpos, struct waydata *
 				}
 
 				if (spac < 0) {
-					spac += M_BADTAU;
+					spac += M_TAU;
 				}
 
-				if (spac >= M_BADPI) {
-					spac -= M_BADTAU;
+				if (spac >= M_PI) {
+					spac -= M_TAU;
 				}
 
 				if (spac < 0) {
@@ -12739,7 +12733,6 @@ void chrTickPatrol(struct chrdata *chr)
 		}
 
 		chrNavTickMain(chr, &sp58, &chr->act_patrol.waydata, true);
-		footstepCheckDefault(chr);
 	}
 }
 
@@ -13029,7 +13022,6 @@ void chraTick(struct chrdata *chr)
 		chr->hidden2 &= ~CHRH2FLAG_CONSIDERPROXIES;
 
 		if (pass) {
-			footstepCheckDefault(chr);
 		}
 	} else {
 		footstepCheckMagic(chr);
@@ -13300,7 +13292,7 @@ f32 chrGetAngleToPos(struct chrdata *chr, struct coord *pos)
 
 	if (chr->prop->type == PROPTYPE_PLAYER) {
 		u32 playernum = playermgrGetPlayerNumByProp(chr->prop);
-		chranglerad = (360 - g_Vars.players[playernum]->vv_theta) * (M_BADTAU / 360);
+		chranglerad = (360 - g_Vars.players[playernum]->vv_theta) * (M_TAU / 360);
 	} else {
 		chranglerad = chrGetInverseTheta(chr);
 	}
@@ -13310,7 +13302,7 @@ f32 chrGetAngleToPos(struct chrdata *chr, struct coord *pos)
 	result = propanglerad - chranglerad;
 
 	if (propanglerad < chranglerad) { // Make the result between 0 and 2*pi
-		result += M_BADTAU;
+		result += M_TAU;
 	}
 
 	return result; // Return the angle in radians
@@ -13397,7 +13389,7 @@ f32 chrGetAngleFromTargetsFov(struct chrdata *chr)
 
 		if (target->type == PROPTYPE_PLAYER) {
 			s32 playernum = playermgrGetPlayerNumByProp(target);
-			targetfacingangle = (360.0f - g_Vars.players[playernum]->vv_theta) * M_BADTAU / 360.0f;
+			targetfacingangle = (360.0f - g_Vars.players[playernum]->vv_theta) * M_TAU / 360.0f;
 		} else if (target->type == PROPTYPE_CHR) {
 			targetfacingangle = chrGetInverseTheta(target->chr);
 		}
@@ -13405,7 +13397,7 @@ f32 chrGetAngleFromTargetsFov(struct chrdata *chr)
 		result = angletotarget - targetfacingangle;
 
 		if (angletotarget < targetfacingangle) {
-			result += M_BADTAU;
+			result += M_TAU;
 		}
 	}
 
@@ -13430,7 +13422,7 @@ f32 chrGetVerticalAngleToTarget(struct chrdata *chr)
 		result = atan2f(ydiff, sqrtf(xdiff * xdiff + zdiff * zdiff));
 
 		if (result < 0) {
-			result += M_BADTAU;
+			result += M_TAU;
 		}
 	}
 
@@ -13442,7 +13434,7 @@ bool chrIsInTargetsFovX(struct chrdata *chr, u8 fov360)
 	f32 angle = chrGetAngleFromTargetsFov(chr);
 
 	if ((angle < fov360 * 0.024539785459638f && angle < M_PI)
-			|| (angle > M_BADTAU - fov360 * 0.024539785459638f && angle > M_PI)) {
+			|| (angle > M_TAU - fov360 * 0.024539785459638f && angle > M_PI)) {
 		return true;
 	}
 
@@ -13454,7 +13446,7 @@ bool chrIsVerticalAngleToTargetWithin(struct chrdata *chr, u8 fov360)
 	f32 val = chrGetVerticalAngleToTarget(chr);
 
 	if ((val < fov360 * 0.024539785459638f && val < M_PI)
-			|| (val > M_BADTAU - fov360 * 0.024539785459638f && val > M_PI)) {
+			|| (val > M_TAU - fov360 * 0.024539785459638f && val > M_PI)) {
 		return true;
 	}
 
@@ -13477,7 +13469,7 @@ f32 chrGetAngleToTarget2(struct chrdata *chr, u8 reverse)
 	result = angle1 - angle2;
 
 	if (angle1 < angle2) {
-		result += M_BADTAU;
+		result += M_TAU;
 	}
 
 	return result;
@@ -13488,7 +13480,7 @@ bool chrIsTargetInFov(struct chrdata *chr, u8 arg1, u8 reverse)
 	f32 angle = chrGetAngleToTarget2(chr, reverse);
 
 	if ((angle < arg1 * 0.024539785459638f && angle < M_PI)
-			|| (angle > M_BADTAU - arg1 * 0.024539785459638f && angle > M_PI)) {
+			|| (angle > M_TAU - arg1 * 0.024539785459638f && angle > M_PI)) {
 		return true;
 	}
 
@@ -13500,7 +13492,7 @@ bool chrIsLookingAtPos(struct chrdata *chr, struct coord *pos, u8 arg2)
 	f32 angle = chrGetAngleToPos(chr, pos);
 
 	if ((angle < arg2 * 0.024539785459638f && angle < M_PI) ||
-			(M_BADTAU - arg2 * 0.024539785459638f < angle && M_PI < angle)) {
+			(M_TAU - arg2 * 0.024539785459638f < angle && M_PI < angle)) {
 		return true;
 	}
 
@@ -14118,7 +14110,7 @@ bool waypointIsWithin90DegreesOfPosAngle(struct waypoint *waypoint, struct coord
 	diffangle = angle - atan2f(pad.pos.x - pos->x, pad.pos.z - pos->z);
 
 	if (diffangle < 0) {
-		diffangle += M_BADTAU;
+		diffangle += M_TAU;
 	}
 
 	if (diffangle < 1.5705462694168f || diffangle > 4.7116389274597f) {
@@ -14150,7 +14142,7 @@ s32 chrFindWaypointWithinPosQuadrant(struct coord *pos, RoomNum *rooms, f32 angl
 	if (waypoint) {
 		switch (quadrant) {
 		case QUADRANT_BACK:
-			angle += M_BADPI;
+			angle += M_PI;
 			break;
 		case QUADRANT_SIDE1:
 			angle += 1.5705462694168f;
@@ -14162,8 +14154,8 @@ s32 chrFindWaypointWithinPosQuadrant(struct coord *pos, RoomNum *rooms, f32 angl
 			break;
 		}
 
-		if (angle >= M_BADTAU) {
-			angle -= M_BADTAU;
+		if (angle >= M_TAU) {
+			angle -= M_TAU;
 		}
 
 		if (waypointIsWithin90DegreesOfPosAngle(waypoint, pos, angle)) {
@@ -14244,7 +14236,7 @@ bool chrSetPadPresetToWaypointWithinTargetQuadrant(struct chrdata *chr, u8 quadr
 	prop = chrGetTargetProp(chr);
 
 	if (prop->type == PROPTYPE_PLAYER) {
-		angle = (360.0f - g_Vars.players[playermgrGetPlayerNumByProp(prop)]->vv_theta) * M_BADTAU / 360.0f;
+		angle = (360.0f - g_Vars.players[playermgrGetPlayerNumByProp(prop)]->vv_theta) * M_TAU / 360.0f;
 	} else if (prop->type == PROPTYPE_CHR) {
 		angle = chrGetInverseTheta(prop->chr);
 	}
@@ -14529,8 +14521,8 @@ bool chrAdjustPosForSpawn(f32 chrradius, struct coord *pos, RoomNum *rooms, f32 
 		// Add 45 degrees to the angle here, but this isn't necessary.
 		curangle += 0.7852731347084f;
 
-		if (curangle >= M_BADTAU) {
-			curangle -= M_BADTAU;
+		if (curangle >= M_TAU) {
+			curangle -= M_TAU;
 		}
 	} else {
 		// Check that the chr isn't being spawned out of bounds, and do a volume
@@ -14582,8 +14574,8 @@ bool chrAdjustPosForSpawn(f32 chrradius, struct coord *pos, RoomNum *rooms, f32 
 
 		curangle += 0.7852731347084f;
 
-		if (curangle >= M_BADTAU) {
-			curangle -= M_BADTAU;
+		if (curangle >= M_TAU) {
+			curangle -= M_TAU;
 		}
 	}
 
@@ -14794,7 +14786,7 @@ bool chrMoveToPos(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 an
 			player = g_Vars.players[playermgrGetPlayerNumByProp(chr->prop)];
 			player->vv_manground = ground;
 			player->vv_ground = ground;
-			player->vv_theta = ((M_BADTAU - angle) * 360.0f) / M_BADTAU;
+			player->vv_theta = ((M_TAU - angle) * 360.0f) / M_TAU;
 			player->vv_verta = 0;
 			player->unk1c64 = 1;
 		}
@@ -15208,7 +15200,7 @@ f32 func0f04c784(struct chrdata *chr)
 	}
 
 	angletotarget = atan2f(target->pos.z - chr->prop->pos.z, target->pos.x - chr->prop->pos.x);
-	result = (angletotarget * 360 / M_BADTAU - targetfacingangle) + 90;
+	result = (angletotarget * 360 / M_TAU - targetfacingangle) + 90;
 
 	if (result > 180) {
 		result -= 360;
@@ -15585,7 +15577,7 @@ void chrAvoid(struct chrdata *chr)
 
 	s32 animindex;
 	struct prop *target = chrGetTargetProp(chr);
-	f32 relangle = chrGetAngleToPos(chr, &target->pos) / M_BADTAU * 360;
+	f32 relangle = chrGetAngleToPos(chr, &target->pos) / M_TAU * 360;
 	u32 chranimflags = 0;
 	f32 ymax;
 	f32 ymin;

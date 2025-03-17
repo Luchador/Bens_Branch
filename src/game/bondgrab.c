@@ -57,7 +57,7 @@ void bgrabInit(void)
 	g_Vars.currentplayer->gunextraaimx = 0;
 	g_Vars.currentplayer->gunextraaimy = 0;
 
-	mtx4LoadYRotation((g_Vars.currentplayer->vv_theta * M_BADTAU) / 360.0f, &matrix);
+	mtx4LoadYRotation((g_Vars.currentplayer->vv_theta * M_TAU) / 360.0f, &matrix);
 	mtx4RotateVecInPlace(&matrix, &g_Vars.currentplayer->grabbedposoffset);
 
 	g_Vars.currentplayer->bondprevtheta = g_Vars.currentplayer->vv_theta;
@@ -84,12 +84,12 @@ void bgrabInit(void)
 
 		if (hov) {
 			g_Vars.currentplayer->grabbedrotoffset =
-				hov->yrot - (M_BADTAU - (g_Vars.currentplayer->vv_theta * M_BADTAU) / 360.0f);
+				hov->yrot - (M_TAU - (g_Vars.currentplayer->vv_theta * M_TAU) / 360.0f);
 
-			if (g_Vars.currentplayer->grabbedrotoffset >= M_BADTAU) {
-				g_Vars.currentplayer->grabbedrotoffset -= M_BADTAU;
+			if (g_Vars.currentplayer->grabbedrotoffset >= M_TAU) {
+				g_Vars.currentplayer->grabbedrotoffset -= M_TAU;
 			} else if (g_Vars.currentplayer->grabbedrotoffset < 0) {
-				g_Vars.currentplayer->grabbedrotoffset += M_BADTAU;
+				g_Vars.currentplayer->grabbedrotoffset += M_TAU;
 			}
 		}
 
@@ -151,12 +151,12 @@ void bgrabExit(void)
 			moveamount.z = (g_Vars.currentplayer->grabbedprop->pos.z - g_Vars.currentplayer->grabbedprevpos.z) / g_Vars.lvupdate60freal;
 
 			rotateamount = -(g_Vars.currentplayer->vv_theta - g_Vars.currentplayer->bondprevtheta)
-				* M_BADTAU / 360;
+				* M_TAU / 360;
 
 			if (rotateamount < -M_PI) {
-				rotateamount += M_BADTAU;
+				rotateamount += M_TAU;
 			} else if (rotateamount >= M_PI) {
-				rotateamount -= M_BADTAU;
+				rotateamount -= M_TAU;
 			}
 
 			rotateamount /= g_Vars.lvupdate60freal;
@@ -422,19 +422,19 @@ s32 bgrabCalculateNewPosition(struct coord *delta, f32 angle, bool arg2)
 		}
 
 		if (hov != NULL) {
-			sp78 = M_BADTAU
-				- g_Vars.currentplayer->vv_theta * M_BADTAU / 360.0f
+			sp78 = M_TAU
+				- g_Vars.currentplayer->vv_theta * M_TAU / 360.0f
 				+ -angle
 				+ g_Vars.currentplayer->grabbedrotoffset
 				- hov->yrot
 				+ rotextra;
 
 			while (sp78 >= M_PI) {
-				sp78 -= M_BADTAU;
+				sp78 -= M_TAU;
 			}
 
 			while (sp78 < -M_PI) {
-				sp78 += M_BADTAU;
+				sp78 += M_TAU;
 			}
 		}
 
@@ -442,12 +442,12 @@ s32 bgrabCalculateNewPosition(struct coord *delta, f32 angle, bool arg2)
 			f32 f12;
 			f32 f18;
 
-			sp74 = M_BADTAU - g_Vars.currentplayer->vv_theta * M_BADTAU / 360.0f - angle;
+			sp74 = M_TAU - g_Vars.currentplayer->vv_theta * M_TAU / 360.0f - angle;
 
-			if (sp74 >= M_BADTAU) {
-				sp74 -= M_BADTAU;
+			if (sp74 >= M_TAU) {
+				sp74 -= M_TAU;
 			} else if (sp74 < 0.0f) {
-				sp74 += M_BADTAU;
+				sp74 += M_TAU;
 			}
 
 			sp70 = cosf(sp74);
@@ -479,7 +479,7 @@ s32 bgrabCalculateNewPosition(struct coord *delta, f32 angle, bool arg2)
 		var8009de70 = NULL;
 
 		if (arg2) {
-			f32 theta = g_Vars.currentplayer->vv_theta + angle * 360.0f / M_BADTAU;
+			f32 theta = g_Vars.currentplayer->vv_theta + angle * 360.0f / M_TAU;
 
 			while (theta < 0.0f) {
 				theta += 360.0f;
@@ -1064,7 +1064,7 @@ void bgrab0f0ce924(void)
 
 		bmoveUpdateMoveInitSpeed(&sp74);
 
-		if (debugIsTurboModeEnabled()) {
+		if (cheatIsActive(CHEAT_TURBOMODE)) { // Ben's comment: was formerly a turbo mode debug function
 			sp74.x += (g_Vars.currentplayer->bond2.unk00.f[0] * g_Vars.currentplayer->speedforwards - (g_Vars.currentplayer->bond2.unk00.f[2] * g_Vars.currentplayer->speedsideways)) * g_Vars.lvupdate60freal * 10.0f;
 			sp74.z += (g_Vars.currentplayer->bond2.unk00.f[2] * g_Vars.currentplayer->speedforwards + (g_Vars.currentplayer->bond2.unk00.f[0] * g_Vars.currentplayer->speedsideways)) * g_Vars.lvupdate60freal * 10.0f;
 		}

@@ -28,15 +28,14 @@ f32 g_WallhitTargetBloodRatio;
  */
 void wallhitReset(void)
 {
-	s32 stack;
 	s32 type = 2;
 	s32 i;
 
-	g_WallhitsMax = 3600;
+	g_WallhitsMax = 10000;
 	g_MinPropWallhits = 50;
 	g_MaxPropWallhits = 1200;
 	g_MinBgWallhitsPerRoom = 10;
-	g_MaxBgWallhitsPerRoom = 600;
+	g_MaxBgWallhitsPerRoom = 1200;
 	g_WallhitsCriticalSpareLimit = 25;
 	g_WallhitsGoalSpareLimit = 40;
 	g_WallhitTargetBloodRatio = 0.5f;

@@ -541,19 +541,19 @@ void modelSetChrRotY(struct model *model, f32 angle)
 		f32 diff = angle - rwdata->yrot;
 
 		if (diff < 0) {
-			diff += M_BADTAU;
+			diff += M_TAU;
 		}
 
 		rwdata->unk30 += diff;
 
-		if (rwdata->unk30 >= M_BADTAU) {
-			rwdata->unk30 -= M_BADTAU;
+		if (rwdata->unk30 >= M_TAU) {
+			rwdata->unk30 -= M_TAU;
 		}
 
 		rwdata->unk20 += diff;
 
-		if (rwdata->unk20 >= M_BADTAU) {
-			rwdata->unk20 -= M_BADTAU;
+		if (rwdata->unk20 >= M_TAU) {
+			rwdata->unk20 -= M_TAU;
 		}
 
 		rwdata->yrot = angle;
@@ -589,20 +589,20 @@ f32 modelTweenRotAxis(f32 curangle, f32 goalangle, f32 mult)
 	f32 diff = goalangle - curangle;
 
 	if (goalangle < curangle) {
-		diff += M_BADTAU;
+		diff += M_TAU;
 	}
 
 	if (diff < M_PI) {
 		curangle += diff * mult;
 
-		if (curangle >= M_BADTAU) {
-			curangle -= M_BADTAU;
+		if (curangle >= M_TAU) {
+			curangle -= M_TAU;
 		}
 	} else {
-		curangle -= (M_BADTAU - diff) * mult;
+		curangle -= (M_TAU - diff) * mult;
 
 		if (curangle < 0) {
-			curangle += M_BADTAU;
+			curangle += M_TAU;
 		}
 	}
 
@@ -910,13 +910,13 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 		if (roty < M_PI) {
 			roty *= 0.5f;
 		} else {
-			roty = M_BADTAU - (M_BADTAU - roty) * 0.5f;
+			roty = M_TAU - (M_TAU - roty) * 0.5f;
 		}
 
 		mtx4LoadYRotation(roty, finalmtx);
 
 		if (roty >= M_PI) {
-			roty = M_BADTAU - roty;
+			roty = M_TAU - roty;
 		}
 
 		if (roty < 0.890118f) { // 51 degrees
@@ -1014,13 +1014,13 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 		if (roty < M_PI) {
 			roty *= 0.5f;
 		} else {
-			roty = M_BADTAU - (M_BADTAU - roty) * 0.5f;
+			roty = M_TAU - (M_TAU - roty) * 0.5f;
 		}
 
 		mtx4LoadYRotation(roty, finalmtx);
 
 		if (roty >= M_PI) {
-			roty = M_BADTAU - roty;
+			roty = M_TAU - roty;
 		}
 
 		if (roty < 0.890118f) { // 51 degrees
@@ -1866,8 +1866,8 @@ void modelSetAnimation2(struct model *model, s16 animnum, s32 flip, f32 fstartfr
 					if (rwdata->unk18 == 0) {
 						rwdata->unk20 = rwdata->unk30 + sp84;
 
-						if (rwdata->unk20 >= M_BADTAU) {
-							rwdata->unk20 -= M_BADTAU;
+						if (rwdata->unk20 >= M_TAU) {
+							rwdata->unk20 -= M_TAU;
 						}
 					}
 
@@ -1892,7 +1892,7 @@ void modelSetAnimation2(struct model *model, s16 animnum, s32 flip, f32 fstartfr
 					angle = rwdata->yrot - sp84;
 
 					if (angle < 0) {
-						angle += M_BADTAU;
+						angle += M_TAU;
 					}
 
 					rwdata->unk30 = modelTweenRotAxis(rwdata->yrot, angle, anim->frac);
@@ -1900,8 +1900,8 @@ void modelSetAnimation2(struct model *model, s16 animnum, s32 flip, f32 fstartfr
 					if (rwdata->unk18 == 0) {
 						rwdata->unk20 = rwdata->unk30 + sp84;
 
-						if (rwdata->unk20 >= M_BADTAU) {
-							rwdata->unk20 -= M_BADTAU;
+						if (rwdata->unk20 >= M_TAU) {
+							rwdata->unk20 -= M_TAU;
 						}
 					}
 
@@ -2295,7 +2295,7 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, f32 curframe, f32 endfr
 								translate.z = -translate.z;
 
 								if (f22 > 0.0f) {
-									f22 = M_BADTAU - f22;
+									f22 = M_TAU - f22;
 								}
 							}
 
@@ -2313,8 +2313,8 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, f32 curframe, f32 endfr
 							if (rwdata->unk18 == 0.0f) {
 								f30 += f22;
 
-								if (f30 >= M_BADTAU) {
-									f30 -= M_BADTAU;
+								if (f30 >= M_TAU) {
+									f30 -= M_TAU;
 								}
 							}
 						}
@@ -2344,7 +2344,7 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, f32 curframe, f32 endfr
 								translate.z = -translate.z;
 
 								if (f22 > 0.0f) {
-									f22 = M_BADTAU - f22;
+									f22 = M_TAU - f22;
 								}
 							}
 
@@ -2401,17 +2401,17 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, f32 curframe, f32 endfr
 								f22 += rwdata->unk58 * increment;
 
 								if (f22 < 0.0f) {
-									f22 += M_BADTAU;
-								} else if (f22 >= M_BADTAU) {
-									f22 -= M_BADTAU;
+									f22 += M_TAU;
+								} else if (f22 >= M_TAU) {
+									f22 -= M_TAU;
 								}
 							}
 
 							if (rwdata->unk18 == 0.0f) {
 								spcc = f30 + f22;
 
-								if (spcc >= M_BADTAU) {
-									spcc -= M_BADTAU;
+								if (spcc >= M_TAU) {
+									spcc -= M_TAU;
 								}
 							}
 						}
@@ -3385,7 +3385,7 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 		tmp = -(spe0.f[0] * mtx->m[0][0] + spe0.f[1] * mtx->m[0][1] + spe0.f[2] * mtx->m[0][2]);
 
 		if (tmp < 0) {
-			spf0 = M_BADTAU - spf0;
+			spf0 = M_TAU - spf0;
 		}
 
 		spdc = cosf(spf0);

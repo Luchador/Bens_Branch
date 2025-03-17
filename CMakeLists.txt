@@ -265,10 +265,6 @@ file(GLOB SRC_LIB_NAUDIO "${CMAKE_SOURCE_DIR}/src/lib/naudio/*.c")
 file(GLOB SRC_LIB_ULTRA_AUDIO "${CMAKE_SOURCE_DIR}/src/lib/ultra/audio/*.c")
 file(GLOB SRC_LIB_GU "${CMAKE_SOURCE_DIR}/src/lib/ultra/gu/*.c")
 set(SRC_LIB
-  src/lib/ultra/io/vimodentsclan1.c
-  src/lib/ultra/io/vimodepallan1.c
-  src/lib/ultra/io/vimodempallan1.c
-  src/lib/ultra/io/vitbl.c
   src/lib/ailist.c
   src/lib/anim.c
   src/lib/args.c
@@ -276,18 +272,15 @@ set(SRC_LIB
   src/lib/audiomgr.c
   src/lib/base.c
   src/lib/collision.c
-  src/lib/debughud.c
   src/lib/dma.c
   src/lib/fault.c
   src/lib/joy.c
   src/lib/lib_2f490_c.c
   src/lib/lib_2fc60.c
   src/lib/lib_3e3e0.c
-  src/lib/lib_04f60nb.c
   src/lib/lib_17ce0.c
   src/lib/lib_034d0.c
   src/lib/lib_39c80.c
-  src/lib/lib_15850.c
   src/lib/mema.c
   src/lib/memp.c
   src/lib/model.c
@@ -297,7 +290,6 @@ set(SRC_LIB
   src/lib/mtx.c
   src/lib/music.c
   src/lib/path.c
-  src/lib/profile.c
   src/lib/rdp.c
   src/lib/rmon.c
   src/lib/rng_c.c

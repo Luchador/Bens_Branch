@@ -855,12 +855,7 @@ Gfx *lvRender(Gfx *gdl)
 
 	if (g_Vars.stagenum == STAGE_TITLE) {
 		gSPDisplayList(gdl++, &var800613a0);
-
-		if (debugIsZBufferDisabled()) {
-			gSPDisplayList(gdl++, &var80061360);
-		} else {
-			gSPDisplayList(gdl++, &var80061380);
-		}
+		gSPDisplayList(gdl++, &var80061380);
 
 		gdl = viPrepareZbuf(gdl);
 		gdl = vi0000b1d0(gdl);
@@ -967,12 +962,7 @@ Gfx *lvRender(Gfx *gdl)
 			bviewSetMotionBlur(bluramount);
 
 			gSPDisplayList(gdl++, &var800613a0);
-
-			if (debugIsZBufferDisabled()) {
-				gSPDisplayList(gdl++, &var80061360);
-			} else {
-				gSPDisplayList(gdl++, &var80061380);
-			}
+			gSPDisplayList(gdl++, &var80061380);
 
 			viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 			viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
@@ -1159,66 +1149,65 @@ Gfx *lvRender(Gfx *gdl)
 
 				gdl = playerRenderHud(gdl);
 
-				if (g_DebugScreenshotRgb <= 0) {
-					static struct sndstate *g_CutsceneStaticAudioHandle = NULL;
-					static s32 g_CutsceneStaticTimer = 100;
-					static u8 g_CutsceneStaticActive = false;
-					bool cutscenehasstatic = false;
-					u32 alpha;
+				static struct sndstate *g_CutsceneStaticAudioHandle = NULL;
+				static s32 g_CutsceneStaticTimer = 100;
+				static u8 g_CutsceneStaticActive = false;
+				bool cutscenehasstatic = false;
+				u32 alpha;
 
-					if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
-						// Handle visual effects in cutscenes
-						switch (g_CutsceneAnimNum) {
-						case ANIM_CUT_CAVE_INTRO_CAM:
-							// Horizon scanner in Air Base intro
-							if (g_CutsceneCurAnimFrame60 > 839 && g_CutsceneCurAnimFrame60 < 1411) {
-								gdl = bviewDrawHorizonScanner(gdl);
-							}
-							break;
-						case ANIM_CUT_LUE_INTRO_CAM_01:
-						case ANIM_CUT_LUE_INTRO_CAM_02:
-						case ANIM_CUT_LUE_INTRO_CAM_03:
-							{
-								// Show static randomly in Infiltration intro
-								s32 cutscenestatic = 0;
-								cutscenehasstatic = true;
-
-								if (g_CutsceneStaticAudioHandle == NULL) {
-									sndStart(var80095200, SFX_INFIL_STATIC_LONG, &g_CutsceneStaticAudioHandle, -1, -1, -1, -1, -1);
-								}
-
-								g_CutsceneStaticTimer -= g_Vars.diffframe60;
-
-								if (g_CutsceneStaticTimer < 0) {
-									g_CutsceneStaticTimer = rngRandom() % TICKS(200) + TICKS(40);
-									g_CutsceneStaticActive = false;
-								}
-
-								gdl = bviewDrawFilmInterlace(gdl, 0xffffffff, 0xffffffff);
-
-								if (g_CutsceneStaticTimer < TICKS(15)) {
-									if (g_CutsceneStaticActive == false) {
-										g_CutsceneStaticActive = true;
-										sndStart(var80095200, SFX_INFIL_STATIC_MEDIUM, NULL, -1, -1, -1, -1, -1);
-									}
-
-									cutscenestatic = 225 - g_CutsceneStaticTimer * PALUP(10);
-								}
-
-								// Consider a single frame of static, separate
-								// to the main static above
-								if (rngRandom() % 60 == 1) {
-									cutscenestatic = 255;
-									sndStart(var80095200, SFX_INFIL_STATIC_SHORT, NULL, -1, -1, -1, -1, -1);
-								}
-
-								if (cutscenestatic) {
-									gdl = bviewDrawStatic(gdl, 0xffffffff, cutscenestatic);
-								}
-							}
-							break;
+				if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
+					// Handle visual effects in cutscenes
+					switch (g_CutsceneAnimNum) {
+					case ANIM_CUT_CAVE_INTRO_CAM:
+						// Horizon scanner in Air Base intro
+						if (g_CutsceneCurAnimFrame60 > 839 && g_CutsceneCurAnimFrame60 < 1411) {
+							gdl = bviewDrawHorizonScanner(gdl);
 						}
+						break;
+					case ANIM_CUT_LUE_INTRO_CAM_01:
+					case ANIM_CUT_LUE_INTRO_CAM_02:
+					case ANIM_CUT_LUE_INTRO_CAM_03:
+						{
+							// Show static randomly in Infiltration intro
+							s32 cutscenestatic = 0;
+							cutscenehasstatic = true;
+
+							if (g_CutsceneStaticAudioHandle == NULL) {
+								sndStart(var80095200, SFX_INFIL_STATIC_LONG, &g_CutsceneStaticAudioHandle, -1, -1, -1, -1, -1);
+							}
+
+							g_CutsceneStaticTimer -= g_Vars.diffframe60;
+
+							if (g_CutsceneStaticTimer < 0) {
+								g_CutsceneStaticTimer = rngRandom() % TICKS(200) + TICKS(40);
+								g_CutsceneStaticActive = false;
+							}
+
+							gdl = bviewDrawFilmInterlace(gdl, 0xffffffff, 0xffffffff);
+
+							if (g_CutsceneStaticTimer < TICKS(15)) {
+								if (g_CutsceneStaticActive == false) {
+									g_CutsceneStaticActive = true;
+									sndStart(var80095200, SFX_INFIL_STATIC_MEDIUM, NULL, -1, -1, -1, -1, -1);
+								}
+
+								cutscenestatic = 225 - g_CutsceneStaticTimer * PALUP(10);
+							}
+
+							// Consider a single frame of static, separate
+							// to the main static above
+							if (rngRandom() % 60 == 1) {
+								cutscenestatic = 255;
+								sndStart(var80095200, SFX_INFIL_STATIC_SHORT, NULL, -1, -1, -1, -1, -1);
+							}
+
+							if (cutscenestatic) {
+								gdl = bviewDrawStatic(gdl, 0xffffffff, cutscenestatic);
+							}
+						}
+						break;
 					}
+					
 
 					if (g_CutsceneStaticAudioHandle && !cutscenehasstatic) {
 						audioStop(g_CutsceneStaticAudioHandle);
@@ -1313,14 +1302,6 @@ Gfx *lvRender(Gfx *gdl)
 						if (cutsceneblurfrac > 0) {
 							gdl = bviewDrawMotionBlur(gdl, 0xffffff00, cutsceneblurfrac * 255);
 						}
-					}
-
-					if (debugGetMotionBlur() == 1) {
-						gdl = bviewDrawMotionBlur(gdl, 0xffffff00, 128);
-					} else if (debugGetMotionBlur() == 2) {
-						gdl = bviewDrawMotionBlur(gdl, 0xffffff00, 192);
-					} else if (debugGetMotionBlur() == 3) {
-						gdl = bviewDrawMotionBlur(gdl, 0xffffff00, 230);
 					}
 
 					// Render white when teleporting
@@ -1622,12 +1603,6 @@ s32 lvGetSlowMotionType(void)
 	} else {
 		if (cheatIsActive(CHEAT_SLOMO)) {
 			return SLOWMOTION_ON;
-		}
-		if (debugGetSlowMotion() == SLOWMOTION_ON) {
-			return SLOWMOTION_ON;
-		}
-		if (debugGetSlowMotion() == SLOWMOTION_SMART) {
-			return SLOWMOTION_SMART;
 		}
 	}
 

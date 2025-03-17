@@ -12,8 +12,7 @@ void mainLoop(void);
 void mainTick(void);
 void mainEndStage(void);
 void mainChangeToStage(s32 stagenum);
-void func0000e990(void);
-void func0000e9c0(void);
+void mainFinalObjectiveCheck(void);
 s32 mainGetStageNum(void);
 
 #endif

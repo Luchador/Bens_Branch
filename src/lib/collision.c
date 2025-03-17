@@ -49,7 +49,6 @@ s32 var8009a968;
 s32 var8009a96c;
 
 bool g_CdHasSavedBlock = false;
-s32 var8005f038 = 0;
 
 f32 cd00024e40(void)
 {
@@ -125,7 +124,6 @@ void cdClearResults(void)
 	var8009a8ec = 0;
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
-	var8005f038 = 0;
 }
 
 void cdSetObstacleVtxProp(struct coord *vtx1, struct coord *vtx2, struct prop *prop)
@@ -145,7 +143,6 @@ void cdSetObstacleVtxProp(struct coord *vtx1, struct coord *vtx2, struct prop *p
 	var8009a8ec = 0;
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
-	var8005f038 = 0;
 }
 
 void cdSetObstacleVtxPropFlt(struct coord *vtx1, struct coord *vtx2, struct prop *prop, f32 arg3)
@@ -167,7 +164,6 @@ void cdSetObstacleVtxPropFlt(struct coord *vtx1, struct coord *vtx2, struct prop
 	var8009a8ec = 0;
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
-	var8005f038 = 0;
 }
 
 void cd000250cc(struct coord *arg0, struct coord *arg1, f32 width)
@@ -203,7 +199,6 @@ void cdSetObstacleProp(struct prop *prop)
 	var8009a8ec = 0;
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
-	var8005f038 = 0;
 }
 
 void cdSetObstacleVtxColProp(struct coord *vtxpos1, struct coord *vtxpos2, struct coord *collisionpos, struct prop *prop)
@@ -227,7 +222,6 @@ void cdSetObstacleVtxColProp(struct coord *vtxpos1, struct coord *vtxpos2, struc
 	var8009a8ec = 0;
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
-	var8005f038 = 0;
 }
 
 void cdSetObstacleVtxColPropFltGeo(struct coord *vtxpos1, struct coord *vtxpos2, struct coord *collisionpos, struct prop *prop, f32 arg4, struct geo *geo)
@@ -253,7 +247,6 @@ void cdSetObstacleVtxColPropFltGeo(struct coord *vtxpos1, struct coord *vtxpos2,
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
 	g_CdObstacleGeo = geo;
-	var8005f038 = 1;
 }
 
 void cdSetSavedPos(struct coord *pos1, struct coord *pos2)

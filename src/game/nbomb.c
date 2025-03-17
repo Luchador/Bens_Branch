@@ -828,7 +828,7 @@ Gfx *gasRender(Gfx *gdl)
 			f2 = (camposx + camposz) / 3000.0f;
 			f16 = (f2 - (s32) f2);
 
-			sp78 = atan2f(-lookx, lookz) / M_BADTAU;
+			sp78 = atan2f(-lookx, lookz) / M_TAU;
 
 			layer2s = ((s32) (2.0f * ((menuGetSinOscFrac(4.0f) - 0.5f) / 6.0f + sp78 + f16 * 1.5f) * 128.0f * 32.0f) % 2048);
 			layer1s = ((s32) (2.0f * ((menuGetCosOscFrac(4.0f) - 0.5f) / -9.0f + sp78 + f16) * 128.0f * 32.0f) % 2048);

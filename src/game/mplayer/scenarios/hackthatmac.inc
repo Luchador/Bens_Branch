@@ -508,7 +508,7 @@ void htmTickChr(struct chrdata *chr)
 
 		if (chr) {
 			chrpos = &chr->prop->pos;
-			angle = (M_BADTAU - chrGetInverseTheta(chr)) * 57.295776367188f;
+			angle = (M_TAU - chrGetInverseTheta(chr)) * 57.295776367188f;
 			holdinguplink = chr->aibot->weaponnum == WEAPON_UNARMED;
 		} else {
 			chrpos = &g_Vars.currentplayer->prop->pos;

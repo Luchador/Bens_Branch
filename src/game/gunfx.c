@@ -720,9 +720,9 @@ void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
 
 			mtx4RotateVecInPlace(mtx, &casing->speed);
 
-			spa4.x = 2.0f * RANDOMFRAC() * M_BADTAU * 0.0625f - 0.39263657f;
-			spa4.y = 2.0f * RANDOMFRAC() * M_BADTAU * 0.0625f - 0.39263657f;
-			spa4.z = 2.0f * RANDOMFRAC() * M_BADTAU * 0.0625f - 0.39263657f;
+			spa4.x = 2.0f * RANDOMFRAC() * M_TAU * 0.0625f - 0.39263657f;
+			spa4.y = 2.0f * RANDOMFRAC() * M_TAU * 0.0625f - 0.39263657f;
+			spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.0625f - 0.39263657f;
 
 			mtx4LoadRotation(&spa4, &sp64);
 			mtx4ToMtx3(&sp64, spc8);
@@ -769,17 +769,17 @@ void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
 			mtx4RotateVecInPlace(mtx, &casing->speed);
 
 			if (weaponnum == WEAPON_REAPER) {
-				spa4.x = 2.0f * RANDOMFRAC() * M_BADTAU * 0.015625f - 0.09815914f;
-				spa4.y = 2.0f * RANDOMFRAC() * M_BADTAU * 0.015625f - 0.09815914f;
-				spa4.z = 2.0f * RANDOMFRAC() * M_BADTAU * 0.015625f - 0.09815914f;
+				spa4.x = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
+				spa4.y = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
+				spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 
 				mtx4LoadRotation(&spa4, &sp64);
 				mtx4RotateVecInPlace(&sp64, &casing->speed);
 			}
 
-			spa4.x = 2.0f * RANDOMFRAC() * M_BADTAU * 0.015625f - 0.09815914f;
-			spa4.y = 2.0f * RANDOMFRAC() * M_BADTAU * 0.015625f - 0.09815914f;
-			spa4.z = 2.0f * RANDOMFRAC() * M_BADTAU * 0.015625f - 0.09815914f;
+			spa4.x = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
+			spa4.y = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
+			spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 
 			mtx4LoadRotation(&spa4, &sp64);
 			mtx4ToMtx3(&sp64, spc8);

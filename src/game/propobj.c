@@ -2200,7 +2200,7 @@ void func0f06a730(struct defaultobj *obj, struct coord *arg1, Mtxf *mtx, RoomNum
 	bool isnegative;
 
 	if (obj->flags & OBJFLAG_UPSIDEDOWN) {
-		mtx4LoadZRotation(M_BADPI, &sp70);
+		mtx4LoadZRotation(M_PI, &sp70);
 		mtx4MultMtx4InPlace(mtx, &sp70);
 
 		pos2.x = centre->x - sp70.m[1][0] * max;
@@ -2320,7 +2320,7 @@ void func0f06ab60(struct defaultobj *obj, struct coord *arg1, Mtxf *arg2, RoomNu
 	mult = objGetLocalZMin(bbox);
 
 	mtx4LoadXRotation(4.7116389274597f, &sp5c);
-	mtx4LoadYRotation(M_BADPI, &sp1c);
+	mtx4LoadYRotation(M_PI, &sp1c);
 	mtx4MultMtx4InPlace(&sp1c, &sp5c);
 	mtx4MultMtx4InPlace(arg2, &sp5c);
 
@@ -3580,19 +3580,19 @@ void applyRotation(f32 *angle, f32 maxrot, f32 *speed, f32 accel, f32 decel, f32
 	f32 tmp = maxrot - *angle;
 
 	if (tmp < -M_PI) {
-		maxrot += M_BADTAU;
+		maxrot += M_TAU;
 	} else if (tmp >= M_PI) {
-		maxrot -= M_BADTAU;
+		maxrot -= M_TAU;
 	}
 
 	applySpeed(angle, maxrot, speed, accel, decel, maxspeed);
 
 	if (*angle < 0) {
-		*angle += M_BADTAU;
+		*angle += M_TAU;
 	}
 
-	if (*angle >= M_BADTAU) {
-		*angle -= M_BADTAU;
+	if (*angle >= M_TAU) {
+		*angle -= M_TAU;
 	}
 }
 
@@ -5185,19 +5185,19 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 			groundangle = atan2f(ground1 - ground2, sp1cc - sp1d0);
 
 			if (groundangle >= M_PI) {
-				groundangle -= M_BADTAU;
+				groundangle -= M_TAU;
 			}
 		} else if (ground1 >= -30000.0f) {
 			groundangle = atan2f(ground1 - hov->ground, -sp1d0);
 
 			if (groundangle >= M_PI) {
-				groundangle -= M_BADTAU;
+				groundangle -= M_TAU;
 			}
 		} else if (ground2 >= -30000.0f) {
 			groundangle = atan2f(hov->ground - ground2, sp1cc);
 
 			if (groundangle >= M_PI) {
-				groundangle -= M_BADTAU;
+				groundangle -= M_TAU;
 			}
 		} else {
 			groundangle = 0.0f;
@@ -5242,7 +5242,7 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 			hov->bobpitchspeed = 0.0f;
 
 			if (hov->bobpitchtarget < M_PI) {
-				hov->bobpitchtarget = M_BADTAU - type->bobpitchminangle - RANDOMFRAC() * type->bobpitchrandangle;
+				hov->bobpitchtarget = M_TAU - type->bobpitchminangle - RANDOMFRAC() * type->bobpitchrandangle;
 			} else {
 				hov->bobpitchtarget = type->bobpitchminangle + RANDOMFRAC() * type->bobpitchrandangle;
 			}
@@ -5257,7 +5257,7 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 			hov->bobrollspeed = 0.0f;
 
 			if (hov->bobrolltarget < M_PI) {
-				hov->bobrolltarget = M_BADTAU - type->bobrollminangle - RANDOMFRAC() * type->bobrollrandangle;
+				hov->bobrolltarget = M_TAU - type->bobrollminangle - RANDOMFRAC() * type->bobrollrandangle;
 			} else {
 				hov->bobrolltarget = type->bobrollminangle + RANDOMFRAC() * type->bobrollrandangle;
 			}
@@ -5331,10 +5331,10 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 
 	xrot = hov->groundpitch + hov->bobpitchcur;
 
-	if (xrot >= M_BADTAU) {
-		xrot -= M_BADTAU;
+	if (xrot >= M_TAU) {
+		xrot -= M_TAU;
 	} else if (xrot < 0.0f) {
-		xrot += M_BADTAU;
+		xrot += M_TAU;
 	}
 
 	mtx4LoadXRotation(xrot, &sp108);
@@ -5415,10 +5415,10 @@ s32 func0f072144(struct defaultobj *obj, struct coord *arg1, f32 arg2, bool arg3
 		if (arg2 != 0.0f) {
 			yrot = arg2 + hoverpropGetTurnAngle(obj);
 
-			if (yrot >= M_BADTAU) {
-				yrot -= M_BADTAU;
+			if (yrot >= M_TAU) {
+				yrot -= M_TAU;
 			} else if (yrot < 0.0f) {
-				yrot += M_BADTAU;
+				yrot += M_TAU;
 			}
 		} else {
 			yrot = hoverpropGetTurnAngle(obj);
@@ -5431,10 +5431,10 @@ s32 func0f072144(struct defaultobj *obj, struct coord *arg1, f32 arg2, bool arg3
 		yrot = 0.0f;
 
 		if (arg2 != 0.0f) {
-			if (arg2 >= M_BADTAU) {
-				arg2 -= M_BADTAU;
+			if (arg2 >= M_TAU) {
+				arg2 -= M_TAU;
 			} else if (arg2 < 0.0f) {
-				arg2 += M_BADTAU;
+				arg2 += M_TAU;
 			}
 
 			mtx4LoadYRotation(arg2, &sp64);
@@ -5751,7 +5751,7 @@ void hoverbikeUpdateMovement(struct hoverbikeobj *bike, f32 speedforwards, f32 s
 		}
 	}
 
-	sp70 += f12 * 0.04f * M_BADTAU;
+	sp70 += f12 * 0.04f * M_TAU;
 
 	if (speedsideways >= 0) {
 		f12 = (speedsideways + 0.1f) * 0.3f * g_Vars.lvupdate60freal;
@@ -5963,7 +5963,7 @@ bool rocketTickFbw(struct weaponobj *rocket)
 			projectile->unk014 = modelTweenRotAxis(projectile->unk014, yrot, PAL ? 0.02246f : 0.01875f);
 		}
 
-		mtx4LoadXRotation(M_BADTAU - projectile->unk014, &sp118);
+		mtx4LoadXRotation(M_TAU - projectile->unk014, &sp118);
 		mtx4LoadYRotation(projectile->unk018, &spd8);
 		mtx4MultMtx4(&spd8, &sp118, &sp98);
 		mtx00015f04(rocket->base.model->scale, &sp98);
@@ -7597,7 +7597,7 @@ void doorInitMatrices(struct prop *prop)
 
 	if (model->definition->skel == &g_Skel11) {
 		union modelrodata *rodata;
-		f32 xrot = M_BADTAU - door->frac * 0.017450513318181f;
+		f32 xrot = M_TAU - door->frac * 0.017450513318181f;
 
 		rodata = modelGetPartRodata(model->definition, MODELPART_0001);
 		mtx4LoadXRotation(xrot, MTX(1));
@@ -7605,7 +7605,7 @@ void doorInitMatrices(struct prop *prop)
 		mtx4MultMtx4InPlace(MTX(0), MTX(1));
 
 		rodata = modelGetPartRodata(model->definition, MODELPART_0002);
-		mtx4LoadXRotation(M_BADTAU - xrot, MTX(2));
+		mtx4LoadXRotation(M_TAU - xrot, MTX(2));
 		mtx4SetTranslation(&rodata->position.pos, MTX(2));
 		mtx4MultMtx4InPlace(MTX(0), MTX(2));
 	} else if (model->definition->skel == &g_Skel13) {
@@ -8021,31 +8021,31 @@ void cctvTick(struct prop *camprop)
 		f32 finalangle;
 
 		if (yrot < 0) {
-			yrot += M_BADTAU;
-		} else if (yrot >= M_BADTAU) {
-			yrot -= M_BADTAU;
+			yrot += M_TAU;
+		} else if (yrot >= M_TAU) {
+			yrot -= M_TAU;
 		}
 
 		yrot += camera->yzero;
 
-		if (yrot >= M_BADTAU) {
-			yrot -= M_BADTAU;
+		if (yrot >= M_TAU) {
+			yrot -= M_TAU;
 		}
 
 		finalangle = angle - yrot;
 
 		if (angle < yrot) {
-			finalangle += M_BADTAU;
+			finalangle += M_TAU;
 		}
 
-		finalangle -= M_BADPI;
+		finalangle -= M_PI;
 
 		if (finalangle < 0) {
-			finalangle += M_BADTAU;
+			finalangle += M_TAU;
 		}
 
-		if (finalangle > M_BADPI) {
-			finalangle -= M_BADTAU;
+		if (finalangle > M_PI) {
+			finalangle -= M_TAU;
 		}
 
 		if (finalangle > 0.7852731347084f || finalangle < -0.7852731347084f) {
@@ -8059,15 +8059,15 @@ void cctvTick(struct prop *camprop)
 		f32 finalangle = angle - camera->xzero;
 
 		if (angle < camera->xzero) {
-			finalangle = angle - camera->xzero + M_BADTAU;
+			finalangle = angle - camera->xzero + M_TAU;
 		}
 
-		if (finalangle > M_BADTAU) {
-			finalangle -= M_BADTAU;
+		if (finalangle > M_TAU) {
+			finalangle -= M_TAU;
 		}
 
-		if (finalangle > M_BADPI) {
-			finalangle -= M_BADTAU;
+		if (finalangle > M_PI) {
+			finalangle -= M_TAU;
 		}
 
 		if (finalangle);
@@ -8177,9 +8177,9 @@ void cctvInitMatrices(struct prop *prop, Mtxf *mtx)
 	f32 yrot = cctv->yrot;
 
 	if (yrot < 0) {
-		yrot += M_BADTAU;
-	} else if (yrot >= M_BADTAU) {
-		yrot -= M_BADTAU;
+		yrot += M_TAU;
+	} else if (yrot >= M_TAU) {
+		yrot -= M_TAU;
 	}
 
 	mtx4LoadYRotation(yrot, &sp24);
@@ -8235,8 +8235,8 @@ void fanTick(struct prop *prop)
 	if (fan->yspeed > 0) {
 		fan->yrot += fan->yspeed * g_Vars.lvupdate60freal;
 
-		while (fan->yrot >= 1.5705462694168f) { // almost BADDEG2RAD(90)
-			fan->yrot -= 1.5705462694168f;
+		while (fan->yrot >= DEG2RAD(90)) {
+			fan->yrot -= DEG2RAD(90);
 		}
 
 		fan->yrotprev = fan->yrot;
@@ -8251,8 +8251,8 @@ void fanUpdateModel(struct prop *prop)
 	f32 sp24[3][3];
 	f32 angle = fan->yspeed * g_Vars.lvupdate60freal;
 
-	while (angle >= M_BADTAU) {
-		angle -= M_BADTAU;
+	while (angle >= M_TAU) {
+		angle -= M_TAU;
 	}
 
 	mtx4LoadYRotation(angle, &sp6c);
@@ -8307,7 +8307,7 @@ void autogunTick(struct prop *prop)
 			autogun->yzero = autogun->yrot;
 		} else if (autogun->yrot == autogun->yzero && autogun->xrot == autogun->xzero) {
 			autogun->xzero = (RANDOMFRAC() * 39.0f + 1.0f) * 0.017450513f;
-			autogun->yzero = RANDOMFRAC() * M_BADTAU;
+			autogun->yzero = RANDOMFRAC() * M_TAU;
 		}
 
 		applyRotation(&autogun->yrot, autogun->yzero, &autogun->yspeed, PALUPF(0.00001163367596746f), PALUPF(0.00001163367596746f), PALUPF(0.00069802056532353f));
@@ -8324,7 +8324,7 @@ void autogunTick(struct prop *prop)
 			autogun->xzero = autogun->xrot;
 			autogun->yzero = autogun->yrot;
 		} else if (autogun->yrot == autogun->yzero) {
-			autogun->yzero = RANDOMFRAC() * M_BADTAU;
+			autogun->yzero = RANDOMFRAC() * M_TAU;
 		}
 
 		applyRotation(&autogun->yrot, autogun->yzero, &autogun->yspeed, PALUPF(0.00001163367596746f), PALUPF(0.00001163367596746f), PALUPF(0.00069802056532353f));
@@ -8361,8 +8361,8 @@ void autogunTick(struct prop *prop)
 		if (autogun->barrelspeed > 0.0f) {
 			autogun->barrelrot += autogun->barrelspeed * g_Vars.lvupdate60freal;
 
-			while (autogun->barrelrot >= M_BADTAU) {
-				autogun->barrelrot -= M_BADTAU;
+			while (autogun->barrelrot >= M_TAU) {
+				autogun->barrelrot -= M_TAU;
 			}
 		}
 
@@ -8499,21 +8499,21 @@ void autogunTick(struct prop *prop)
 				f12 = targetangleh - autogun->yrot;
 
 				if (f12 < 0.0f) {
-					f12 += M_BADTAU;
+					f12 += M_TAU;
 				}
 
-				if (f12 > M_BADPI) {
-					f12 -= M_BADTAU;
+				if (f12 > M_PI) {
+					f12 -= M_TAU;
 				}
 
 				f2 = targetanglev - autogun->xrot;
 
 				if (f2 < 0.0f) {
-					f2 += M_BADTAU;
+					f2 += M_TAU;
 				}
 
-				if (f2 > M_BADPI) {
-					f2 -= M_BADTAU;
+				if (f2 > M_PI) {
+					f2 -= M_TAU;
 				}
 
 				if (f12 < 1.221536f && f12 > -1.221536f) {
@@ -8526,9 +8526,9 @@ void autogunTick(struct prop *prop)
 				track = true;
 
 				if (relangleh < -M_PI) {
-					relangleh += M_BADTAU;
+					relangleh += M_TAU;
 				} else if (relangleh >= M_PI) {
-					relangleh -= M_BADTAU;
+					relangleh -= M_TAU;
 				}
 
 				// Decide if target can be tracked
@@ -8603,20 +8603,20 @@ void autogunTick(struct prop *prop)
 		goalyrot += limitangle * 0.8f * sinf((g_Vars.lvframe60 % TICKS(120)) * PALUPF(0.05235154f));
 
 		if (goalyrot < 0.0f) {
-			goalyrot += M_BADTAU;
+			goalyrot += M_TAU;
 		}
 
-		if (goalyrot >= M_BADTAU) {
-			goalyrot -= M_BADTAU;
+		if (goalyrot >= M_TAU) {
+			goalyrot -= M_TAU;
 		}
 	}
 
 	f0 = goalyrot - autogun->yzero;
 
 	if (f0 < -M_PI) {
-		f0 += M_BADTAU;
+		f0 += M_TAU;
 	} else if (f0 >= M_PI) {
-		f0 -= M_BADTAU;
+		f0 -= M_TAU;
 	}
 
 	if (f0 > autogun->ymaxleft) {
@@ -8626,11 +8626,11 @@ void autogunTick(struct prop *prop)
 	}
 
 	if (goalyrot < 0.0f) {
-		goalyrot += M_BADTAU;
+		goalyrot += M_TAU;
 	}
 
-	if (goalyrot >= M_BADTAU) {
-		goalyrot -= M_BADTAU;
+	if (goalyrot >= M_TAU) {
+		goalyrot -= M_TAU;
 	}
 
 	applyRotation(&autogun->yrot, goalyrot, &autogun->yspeed, PALUPF(0.00087252567755058f), PALUPF(0.00087252567755058f), autogun->maxspeed);
@@ -8639,21 +8639,21 @@ void autogunTick(struct prop *prop)
 	f12 = goalyrot - autogun->yrot;
 
 	if (f12 < 0.0f) {
-		f12 += M_BADTAU;
+		f12 += M_TAU;
 	}
 
-	if (f12 > M_BADPI) {
-		f12 -= M_BADTAU;
+	if (f12 > M_PI) {
+		f12 -= M_TAU;
 	}
 
 	f2 = goalxrot - autogun->xrot;
 
 	if (f2 < 0.0f) {
-		f2 += M_BADTAU;
+		f2 += M_TAU;
 	}
 
-	if (f2 > M_BADPI) {
-		f2 -= M_BADTAU;
+	if (f2 > M_PI) {
+		f2 -= M_TAU;
 	}
 
 	autogun->firing = false;
@@ -8706,8 +8706,8 @@ void autogunTick(struct prop *prop)
 	if (autogun->barrelspeed > 0.0f) {
 		autogun->barrelrot += autogun->barrelspeed * g_Vars.lvupdate60freal;
 
-		while (autogun->barrelrot >= M_BADTAU) {
-			autogun->barrelrot -= M_BADTAU;
+		while (autogun->barrelrot >= M_TAU) {
+			autogun->barrelrot -= M_TAU;
 		}
 	}
 }
@@ -8727,8 +8727,8 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 	struct modelnode *node4;
 	struct modelnode *node6;
 
-	if (yrot >= M_BADTAU) {
-		yrot -= M_BADTAU;
+	if (yrot >= M_TAU) {
+		yrot -= M_TAU;
 	}
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_AUTOGUN_0001);
@@ -9179,7 +9179,7 @@ void chopperInitMatrices(struct prop *prop)
 	Mtxf sp28;
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_CHOPPER_0001);
-	mtx4LoadZRotation(M_BADTAU - chopper->gunrotx, &sp68);
+	mtx4LoadZRotation(M_TAU - chopper->gunrotx, &sp68);
 	mtx4LoadYRotation(chopper->gunroty + 1.5707963705063f, &sp28);
 	mtxApplyAffineTransform(&sp28, &sp68, &spa8);
 
@@ -9223,7 +9223,7 @@ bool chopperCheckTargetInFov(struct chopperobj *hovercar, u8 fov)
 		f32 anglediff = angle - roty;
 
 		if (angle < roty) {
-			anglediff += M_BADTAU;
+			anglediff += M_TAU;
 		}
 
 		visible = false;
@@ -9232,7 +9232,7 @@ bool chopperCheckTargetInFov(struct chopperobj *hovercar, u8 fov)
 		// actually the not viewable area and starts at the back of the chopper,
 		// which makes sense because the chopper's windows go around the side.
 		if (!(anglediff < fov * 0.024539785459638f && anglediff < M_PI)
-				&& !(anglediff > M_BADTAU - fov * 0.024539785459638f && anglediff > M_PI)) {
+				&& !(anglediff > M_TAU - fov * 0.024539785459638f && anglediff > M_PI)) {
 			visible = true;
 		}
 
@@ -9449,27 +9449,27 @@ void chopperIncrementBarrel(struct prop *chopperprop, bool firing)
 		angleh = atan2f(targetprop->pos.x - gunpos.x, targetprop->pos.z - gunpos.z);
 
 		if (angleh <= 0.0f) {
-			angleh += M_BADTAU;
+			angleh += M_TAU;
 		}
 
-		if (angleh > M_BADTAU) {
-			angleh -= M_BADTAU;
+		if (angleh > M_TAU) {
+			angleh -= M_TAU;
 		}
 
 		angleh -= chopper->roty;
 
 		if (angleh > M_PI) {
-			angleh -= M_BADTAU;
+			angleh -= M_TAU;
 		}
 
 		if (angleh < -M_PI) {
-			angleh += M_BADTAU;
+			angleh += M_TAU;
 		}
 
-		anglev = atan2f(gunaimy - gunpos.y, sqrtf((targetprop->pos.x - gunpos.x) * (targetprop->pos.x - gunpos.x) + (targetprop->pos.z - gunpos.z) * (targetprop->pos.z - gunpos.z))) - chopper->rotx + M_BADTAU;
+		anglev = atan2f(gunaimy - gunpos.y, sqrtf((targetprop->pos.x - gunpos.x) * (targetprop->pos.x - gunpos.x) + (targetprop->pos.z - gunpos.z) * (targetprop->pos.z - gunpos.z))) - chopper->rotx + M_TAU;
 
 		if (anglev > M_PI) {
-			anglev -= M_BADTAU;
+			anglev -= M_TAU;
 		}
 
 		if (chopper->barrelrotspeed < 0.34906584f) {
@@ -9581,7 +9581,7 @@ void chopperIncrementMovement(struct prop *prop, f32 goalroty, f32 goalrotx, str
 
 	chopper->bob += 0.052359f;
 
-	if (chopper->bob > M_BADTAU) {
+	if (chopper->bob > M_TAU) {
 		chopper->bob = 0.0f;
 		chopper->bobstrength = ((rngRandom() % 8) + 2) * 0.01f;
 
@@ -9642,14 +9642,14 @@ void chopperIncrementMovement(struct prop *prop, f32 goalroty, f32 goalrotx, str
 
 	currotz += (-turnyspeed * 40.0f - currotz) * 0.1f;
 
-	spfc.x = M_BADTAU - currotx;
+	spfc.x = M_TAU - currotx;
 	spfc.y = curroty;
 	spfc.z = 0.0f;
 
 	if (currotz >= 0) {
 		mtx4LoadZRotation(currotz, &sp3c);
 	} else {
-		mtx4LoadZRotation(currotz + M_BADTAU, &sp3c);
+		mtx4LoadZRotation(currotz + M_TAU, &sp3c);
 	}
 
 	mtx4LoadRotation(&spfc, &sp7c);
@@ -9794,7 +9794,7 @@ void chopperTickFall(struct prop *chopperprop)
 
 		bob = chopper->bob + 0.052358999848366f;
 
-		if (bob > M_BADTAU) {
+		if (bob > M_TAU) {
 			bob = 0;
 
 			chopper->bobstrength = (rngRandom() % 8 + 2) * 0.01f;
@@ -10357,14 +10357,14 @@ void hovercarTick(struct prop *prop)
 			sp188 += (-sp184 * 120 - sp188) * 0.1f;
 		}
 
-		sp12c.x = ishoverbot ? M_BADTAU - sp18c : 0;
+		sp12c.x = ishoverbot ? M_TAU - sp18c : 0;
 		sp12c.y = sp190;
 		sp12c.z = 0;
 
 		if (sp188 >= 0) {
 			mtx4LoadZRotation(sp188, &sp6c);
 		} else {
-			mtx4LoadZRotation(sp188 + M_BADTAU, &sp6c);
+			mtx4LoadZRotation(sp188 + M_TAU, &sp6c);
 		}
 
 		mtx4LoadRotation(&sp12c, &spac);
@@ -12891,18 +12891,18 @@ Gfx *tvscreenRender(struct model *model, struct modelnode *node, struct tvscreen
 				screen->offset += 3;
 				break;
 			case TVCMD_ROTATEABS:
-				screen->rot = cmd->arg1 * (M_BADTAU / 65536.0f);
+				screen->rot = cmd->arg1 * (M_TAU / 65536.0f);
 				screen->offset += 2;
 				break;
 			case TVCMD_ROTATEREL:
-				screen->rot += g_Vars.lvupdate60f * cmd->arg1 * (M_BADTAU / 65536.0f);
+				screen->rot += g_Vars.lvupdate60f * cmd->arg1 * (M_TAU / 65536.0f);
 
-				if (screen->rot >= M_BADTAU) {
-					screen->rot -= M_BADTAU;
+				if (screen->rot >= M_TAU) {
+					screen->rot -= M_TAU;
 				}
 
 				if (screen->rot < 0.0f) {
-					screen->rot += M_BADTAU;
+					screen->rot += M_TAU;
 				}
 
 				screen->offset += 2;
@@ -13612,9 +13612,6 @@ void objDeform(struct defaultobj *obj, s32 level)
 	volatile s32 salt;
 	bool ok = true;
 	f32 mult;
-#if VERSION < VERSION_NTSC_1_0
-	s32 uninitialisedvariable;
-#endif
 	bool swap;
 	s32 axis;
 	s32 chance;
@@ -13623,14 +13620,7 @@ void objDeform(struct defaultobj *obj, s32 level)
 
 	salt = 0;
 
-	if (debugIsObjDeformDebugEnabled());
-	if (debugIsObjDeformDebugEnabled());
-
 	salt = rngRandom();
-
-	if (debugIsObjDeformDebugEnabled()) {
-		salt &= 0xffff;
-	}
 
 	wallhitsFreeByProp(obj->prop, 1);
 
@@ -14132,10 +14122,10 @@ bool objDrop(struct prop *prop, bool lazy)
 			spa0 = atan2f(spe4.x, spe4.z);
 			spa0 += RANDOMFRAC() * 0.7852731347084f - 0.3926365673542f;
 
-			if (spa0 >= M_BADTAU) {
-				spa0 -= M_BADTAU;
+			if (spa0 >= M_TAU) {
+				spa0 -= M_TAU;
 			} else if (spa0 < 0.0f) {
-				spa0 += M_BADTAU;
+				spa0 += M_TAU;
 			}
 
 			projectile->speed.x += spa4 * sinf(spa0);
@@ -15653,14 +15643,14 @@ bool objTestForInteract(struct prop *prop)
 		}
 
 		if (x * x + z * z < range * range && y < range && y > -range) {
-			f32 angle = atan2f(x, z) - (360.0f - g_Vars.currentplayer->vv_theta) * M_BADTAU / 360.0f;
+			f32 angle = atan2f(x, z) - (360.0f - g_Vars.currentplayer->vv_theta) * M_TAU / 360.0f;
 
 			if (angle < 0.0f) {
-				angle += M_BADTAU;
+				angle += M_TAU;
 			}
 
-			if (angle > M_BADPI) {
-				angle = M_BADTAU - angle;
+			if (angle > M_PI) {
+				angle = M_TAU - angle;
 			}
 
 			if (angle <= 0.3926365673542f) {
@@ -15709,7 +15699,7 @@ bool currentPlayerTryMountHoverbike(struct prop *prop)
 		angle -= hoverpropGetTurnAngle(obj);
 
 		if (angle < 0) {
-			angle += M_BADTAU;
+			angle += M_TAU;
 		}
 
 		if ((angle > 0.3926365673542f && angle < 2.3558194637299f)
@@ -16901,7 +16891,7 @@ s32 objTestForPickup(struct prop *prop)
 	}
 
     // adjust pickup threshold (from -45 to -60)
-	if (g_Vars.currentplayer->vv_verta * M_BADTAU / 360.0f < -60.0f * M_BADTAU / 360.0f) {
+	if (g_Vars.currentplayer->vv_verta * M_TAU / 360.0f < -60.0f * M_TAU / 360.0f) {
 		if (g_Vars.currentplayer->magnetattracttime < 0) {
 			return TICKOP_NONE;
 		}
@@ -18401,7 +18391,7 @@ void doorUpdateTiles(struct doorobj *door)
 
 		if (door->doortype == DOORTYPE_AZTECCHAIR) {
 			if (door->base.flags & OBJFLAG_DOOR_OPENTOFRONT) {
-				mtx4LoadZRotation(M_BADTAU - door->frac * 0.017450513318181f, &sp98);
+				mtx4LoadZRotation(M_TAU - door->frac * 0.017450513318181f, &sp98);
 			} else {
 				mtx4LoadZRotation(door->frac * 0.017450513318181f, &sp98);
 			}
@@ -18413,7 +18403,7 @@ void doorUpdateTiles(struct doorobj *door)
 			}
 		} else {
 			if (door->base.flags & OBJFLAG_DOOR_OPENTOFRONT) {
-				mtx4LoadYRotation(M_BADTAU - door->frac * 0.017450513318181f, &sp98);
+				mtx4LoadYRotation(M_TAU - door->frac * 0.017450513318181f, &sp98);
 			} else {
 				mtx4LoadYRotation(door->frac * 0.017450513318181f, &sp98);
 			}
@@ -19574,15 +19564,15 @@ f32 func0f08f538(f32 x, f32 y)
 			&& g_Vars.currentplayer->eyespy->prop->chr) {
 		angle -= chrGetInverseTheta(g_Vars.currentplayer->eyespy->prop->chr);
 	} else {
-		angle -= (360.0f - g_Vars.currentplayer->vv_theta) * M_BADTAU / 360.0f;
+		angle -= (360.0f - g_Vars.currentplayer->vv_theta) * M_TAU / 360.0f;
 	}
 
 	if (angle < 0) {
-		angle += M_BADTAU;
+		angle += M_TAU;
 	}
 
-	if (angle > M_BADPI) {
-		angle -= M_BADTAU;
+	if (angle > M_PI) {
+		angle -= M_TAU;
 	}
 
 	return angle;
@@ -19660,7 +19650,7 @@ void door0f08f604(struct doorobj *door, f32 *arg1, f32 *arg2, f32 *arg3, f32 *ar
 			value3 = value1;
 
 			if (door->base.flags & OBJFLAG_DOOR_OPENTOFRONT) {
-				angle = M_BADTAU - angle;
+				angle = M_TAU - angle;
 			}
 
 			cosine = cosf(angle);
@@ -19727,7 +19717,7 @@ bool func0f08f968(struct doorobj *door, bool altcoordsystem)
 		}
 
 		if (maybe && ((sp50 >= -limit && sp50 <= limit && sp4c >= -limit && sp4c <= limit)
-					|| (sp4c - sp50 < M_BADPI && sp50 < 0.0f && sp4c > 0.0f))) {
+					|| (sp4c - sp50 < M_PI && sp50 < 0.0f && sp4c > 0.0f))) {
 			g_InteractProp = door->base.prop;
 			checkmore = false;
 		} else if (sp58 >= -limit && sp58 <= limit && sp54 >= -limit && sp54 <= limit) {
@@ -19752,7 +19742,7 @@ bool func0f08f968(struct doorobj *door, bool altcoordsystem)
 				sibling = sibling->sibling;
 			}
 
-			if (sp54 - sp58 < M_BADPI && sp58 < 0.0f && sp54 > 0.0f) {
+			if (sp54 - sp58 < M_PI && sp58 < 0.0f && sp54 > 0.0f) {
 				g_InteractProp = door->base.prop;
 				checkmore = false;
 			}

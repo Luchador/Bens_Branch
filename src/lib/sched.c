@@ -150,45 +150,27 @@ void osCreateScheduler(OSSched *sc, OSThread *thread, u8 mode, u32 numFields)
 	sc->prenmiMsg.type = OS_SC_PRE_NMI_MSG;
 	sc->thread = thread;
 
-	resetThreadCreate();
+	//resetThreadCreate();
 
 	osCreateMesgQueue(&sc->interruptQ, sc->intBuf, OS_SC_MAX_MESGS);
 	osCreateMesgQueue(&sc->cmdQ, sc->cmdMsgBuf, OS_SC_MAX_MESGS);
 
-	osCreateViManager(OS_PRIORITY_VIMGR);
-
-	var8008de08 = osViModeTable[mode].comRegs.hStart;
-	g_ViCurVStart0 = osViModeTable[mode].fldRegs[0].vStart;
-	g_ViCurVStart1 = osViModeTable[mode].fldRegs[1].vStart;
+	//var8008de08 = osViModeTable[mode].comRegs.hStart;
+	//g_ViCurVStart0 = osViModeTable[mode].fldRegs[0].vStart;
+	//g_ViCurVStart1 = osViModeTable[mode].fldRegs[1].vStart;
 
 	var8008dd60[0] = &var8008dd68[0];
 	var8008dd60[1] = &var8008dd68[1];
 
-	var8008dd68[0] = osViModeTable[mode];
-	var8008dd68[1] = osViModeTable[mode];
+	//var8008dd68[0] = osViModeTable[mode];
+	//var8008dd68[1] = osViModeTable[mode];
 
 	osSetEventMesg(OS_EVENT_SP, &sc->interruptQ, (OSMesg)RSP_DONE_MSG);
 	osSetEventMesg(OS_EVENT_DP, &sc->interruptQ, (OSMesg)RDP_DONE_MSG);
 
-	osViSetEvent(&sc->interruptQ, (OSMesg)VIDEO_MSG, numFields);
 	schedInitCrashLastRendered();
 	osCreateThread(sc->thread, THREAD_SCHED, &__scMain, sc, bootAllocateStack(THREAD_SCHED, STACKSIZE_SCHED), THREADPRI_SCHED);
 	osStartThread(sc->thread);
-}
-
-// Not called in PC port
-void osScAddClient(OSSched *sc, OSScClient *c, OSMesgQueue *msgQ, bool is30fps)
-{
-	OSIntMask mask;
-
-	mask = osSetIntMask(1);
-
-	c->msgQ = msgQ;
-	c->is30fps = is30fps;
-	c->next = sc->clientList;
-	sc->clientList = c;
-
-	osSetIntMask(mask);
 }
 
 OSMesgQueue *osScGetCmdQ(OSSched *sc)
@@ -302,14 +284,12 @@ void __scHandleRetrace(OSSched *sc)
 {
 	sc->frameCount++;
 
-	if (!g_Resetting && ((sc->frameCount & 1))) {
+	if (((sc->frameCount & 1))) {
 		osStopTimer(&g_SchedRspTimer);
 		osSetTimer(&g_SchedRspTimer, 280000, 0, amgrGetFrameMesgQueue(), &g_SchedRspMsg);
 	}
 
-	if (!g_Resetting) {
-		viHandleRetrace();
-	}
+	viHandleRetrace();
 
 	joysHandleRetrace();
 	schedRenderCrashPeriodically(sc->frameCount);
@@ -327,8 +307,6 @@ void __scHandleTasks(OSSched *sc)
 	OSScClient  *client;
 	OSScTask    *sp = 0;
 	OSScTask    *dp = 0;
-
-	profileTick();
 
 	/**
 	 * This is default scheduler code. In PD, clients pass tasks to the
@@ -371,40 +349,31 @@ void __scHandleRSP(OSSched *sc)
 	OSScTask *t, *sp = 0, *dp = 0;
 	s32 state;
 
-	if (!g_Resetting) {
-		t = sc->curRSPTask;
-		sc->curRSPTask = 0;
+	t = sc->curRSPTask;
+	sc->curRSPTask = 0;
 
-		profileSetMarker(PROFILE_RSP_END);
+	if ((t->state & OS_SC_YIELD) && osSpTaskYielded(&t->list)) {
+		t->state |= OS_SC_YIELDED;
 
-		if ((t->state & OS_SC_YIELD) && osSpTaskYielded(&t->list)) {
-			t->state |= OS_SC_YIELDED;
+		if ((t->flags & OS_SC_TYPE_MASK) == OS_SC_XBUS) {
+			// Push the task back on the list
+			t->next = sc->gfxListHead;
+			sc->gfxListHead = t;
 
-			if ((t->flags & OS_SC_TYPE_MASK) == OS_SC_XBUS) {
-				// Push the task back on the list
-				t->next = sc->gfxListHead;
-				sc->gfxListHead = t;
-
-				if (sc->gfxListTail == 0) {
-					sc->gfxListTail = t;
-				}
+			if (sc->gfxListTail == 0) {
+				sc->gfxListTail = t;
 			}
-		} else {
-			t->state &= ~OS_SC_NEEDS_RSP;
-			__scTaskComplete(sc, t);
 		}
-
-		state = ((sc->curRSPTask == 0) << 1) | (sc->curRDPTask == 0);
-
-		if (__scSchedule(sc, &sp, &dp, state) != state) {
-			__scExec(sc, sp, dp);
-		}
+	} else {
+		t->state &= ~OS_SC_NEEDS_RSP;
+		__scTaskComplete(sc, t);
 	}
-}
 
-u32 *schedGetDpCounters(void)
-{
-	return g_SchedDpCounters;
+	state = ((sc->curRSPTask == 0) << 1) | (sc->curRDPTask == 0);
+
+	if (__scSchedule(sc, &sp, &dp, state) != state) {
+		__scExec(sc, sp, dp);
+	}
 }
 
 void schedInitArtifacts(void)
@@ -519,7 +488,6 @@ void __scHandleRDP(OSSched *sc)
 			schedConsiderScreenshot();
 		}
 
-		profileSetMarker(PROFILE_RDP_END);
 		osDpGetCounters(g_SchedDpCounters);
 
 		t = sc->curRDPTask;
@@ -592,10 +560,10 @@ s32 __scTaskComplete(OSSched *sc, OSScTask *t)
 
 					osSetIntMask(mask);
 
-					osViSetMode(var8008dd60[1 - var8005ce74]);
+					//osViSetMode(var8008dd60[1 - var8005ce74]);
 					osViBlack(g_ViUnblackTimer);
-					osViSetXScale(g_ViXScalesBySlot[1 - var8005ce74]);
-					osViSetYScale(g_ViYScalesBySlot[1 - var8005ce74]);
+					//osViSetXScale(g_ViXScalesBySlot[1 - var8005ce74]);
+					//osViSetYScale(g_ViYScalesBySlot[1 - var8005ce74]);
 					osViSetSpecialFeatures(OS_VI_GAMMA_OFF | OS_VI_DITHER_FILTER_ON);
 				}
 
@@ -665,13 +633,6 @@ void __scExec(OSSched *sc, OSScTask *sp, OSScTask *dp)
 		// Clear RDP timing counters for graphics tasks, unless they're being resumed
 		if (sp->list.t.type != M_AUDTASK && (sp->state & OS_SC_YIELD) == 0) {
 			osDpSetStatus(DPC_CLR_TMEM_CTR | DPC_CLR_PIPE_CTR | DPC_CLR_CMD_CTR | DPC_CLR_CLOCK_CTR);
-		}
-
-		if (sp->list.t.type == M_AUDTASK) {
-			profileSetMarker(PROFILE_RSP_START);
-		} else {
-			profileSetMarker(PROFILE_RDP_START1);
-			profileSetMarker(PROFILE_RDP_START2);
 		}
 
 		sp->state &= ~(OS_SC_YIELD | OS_SC_YIELDED);

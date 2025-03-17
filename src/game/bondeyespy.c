@@ -1106,7 +1106,7 @@ void eyespyProcessInput(bool allowbuttons)
 		angle += 360.0f;
 	}
 
-	angle = angle / 360.0f * M_BADTAU;
+	angle = angle / 360.0f * M_TAU;
 
 	chrSetLookAngle(chr, angle);
 

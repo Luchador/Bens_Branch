@@ -123,8 +123,8 @@ void bbikeTryDismountAngle(f32 relativeangle, f32 distance)
 
 		angle += relativeangle;
 
-		if (angle >= M_BADTAU) {
-			angle -= M_BADTAU;
+		if (angle >= M_TAU) {
+			angle -= M_TAU;
 		}
 
 		pos.x = g_Vars.currentplayer->hoverbike->pos.x + sinf(angle) * distance;
@@ -294,13 +294,13 @@ void bbikeApplyMoveData(struct movedata *data)
 		if (bike->hov.bobpitchcur < M_PI) {
 			sp3c += -bike->hov.bobpitchcur * 0.8f;
 		} else {
-			sp3c += (M_BADTAU - bike->hov.bobpitchcur) * 0.8f;
+			sp3c += (M_TAU - bike->hov.bobpitchcur) * 0.8f;
 		}
 
 		if (sp3c < 0) {
-			sp3c += M_BADTAU;
-		} else if (sp3c >= M_BADTAU) {
-			sp3c -= M_BADTAU;
+			sp3c += M_TAU;
+		} else if (sp3c >= M_TAU) {
+			sp3c -= M_TAU;
 		}
 
 		sp30.f[0] = 0;
@@ -451,10 +451,10 @@ s32 bbikeCalculateNewPosition(struct coord *vel, f32 angledelta)
 		f32 newangle = hoverpropGetTurnAngle(&bike->base) - angledelta;
 		Mtxf sp44;
 
-		if (newangle >= M_BADTAU) {
-			newangle -= M_BADTAU;
+		if (newangle >= M_TAU) {
+			newangle -= M_TAU;
 		} else if (newangle < 0.0f) {
-			newangle += M_BADTAU;
+			newangle += M_TAU;
 		}
 
 		hoverpropSetTurnAngle(&bike->base, newangle);
@@ -552,7 +552,7 @@ void bbikeUpdateVertical(struct coord *pos)
 	propDeregisterRooms(g_Vars.currentplayer->prop);
 	roomsCopy(newrooms, g_Vars.currentplayer->prop->rooms);
 
-	g_Vars.currentplayer->vv_theta = (M_BADTAU - angle) * 360.0f / M_BADTAU;
+	g_Vars.currentplayer->vv_theta = (M_TAU - angle) * 360.0f / M_TAU;
 
 	g_Vars.currentplayer->prop->pos.x = pos->x;
 	g_Vars.currentplayer->prop->pos.y = pos->y;
@@ -955,7 +955,7 @@ void bbikeTick(void)
 			g_Vars.currentplayer->bondentert = 1.0f;
 		}
 
-		g_Vars.currentplayer->bondentert2 = (cosf(g_Vars.currentplayer->bondentert * M_BADTAU * 0.5f) + 1.0f) * 0.5f;
+		g_Vars.currentplayer->bondentert2 = (cosf(g_Vars.currentplayer->bondentert * M_TAU * 0.5f) + 1.0f) * 0.5f;
 
 		if (g_Vars.currentplayer->bondentert >= 1.0f) {
 			g_Vars.currentplayer->bondvehiclemode = VEHICLEMODE_ENGINESTART;

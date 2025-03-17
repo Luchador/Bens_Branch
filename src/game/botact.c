@@ -144,19 +144,13 @@ s32 botactTryRemoveAmmoFromReserve(struct aibot *aibot, s32 weaponnum, s32 funcn
 		return tryqty;
 	}
 
-	dprint();
 	*ammoheld -= tryqty;
 
 	if (*ammoheld < 0) {
 		amountremoved = tryqty + *ammoheld;
 		*ammoheld = 0;
-
-		if (dprint()) {
-			return amountremoved;
-		}
 	} else {
 		amountremoved = tryqty;
-		dprint();
 	}
 
 	return amountremoved;
@@ -168,7 +162,6 @@ void botactGiveAmmoByWeapon(struct aibot *aibot, s32 weaponnum, s32 funcnum, s32
 	s32 *heldquantity = &aibot->ammoheld[botactGetAmmoTypeByFunction(weaponnum, funcnum)];
 
 	if (aibot && (aibot->flags & BOTFLAG_UNLIMITEDAMMO) == 0 && qty > 0) {
-		dprint();
 		*heldquantity += qty;
 
 		if (heldquantity);
@@ -178,8 +171,6 @@ void botactGiveAmmoByWeapon(struct aibot *aibot, s32 weaponnum, s32 funcnum, s32
 		if (*heldquantity > max) {
 			*heldquantity = max;
 		}
-
-		dprint();
 	}
 }
 
@@ -192,8 +183,6 @@ void botactGiveAmmoByType(struct aibot *aibot, u32 ammotype, s32 quantity)
 		return;
 	}
 
-	dprint();
-
 	*heldquantity += quantity;
 
 	if (heldquantity);
@@ -203,8 +192,6 @@ void botactGiveAmmoByType(struct aibot *aibot, u32 ammotype, s32 quantity)
 	if (*heldquantity > max) {
 		*heldquantity = max;
 	}
-
-	dprint();
 }
 
 bool botactShootFarsight(struct chrdata *chr, s32 arg1, struct coord *vector, struct coord *arg3)
@@ -369,12 +356,9 @@ void botactThrow(struct chrdata *chr)
 
 		chrCalculateTrajectory(&prop->pos, 16.666666f, &sp56, &sp152);
 	} else {
-		// These numbers are about 2 billionths away from BADDEG2RAD(20),
-		// but tweaking the multiplier in BADDEG2RAD doesn't make this match
-		// without creating mismatches in other places :(
-		sp152.x = cosf(0.34901028871536f) * sinf(sp80);
-		sp152.y = sinf(0.34901028871536f);
-		sp152.z = cosf(0.34901028871536f) * cosf(sp80);
+		sp152.x = cosf((float)DEG2RAD(20)) * sinf(sp80);
+		sp152.y = sinf((float)DEG2RAD(20));
+		sp152.z = cosf((float)DEG2RAD(20)) * cosf(sp80);
 	}
 
 	mult = 16.666666f;
@@ -386,8 +370,8 @@ void botactThrow(struct chrdata *chr)
 	mtx4LoadIdentity(&sp164);
 
 	if (chr->aibot->weaponnum == WEAPON_COMBATKNIFE) {
-		mtx4LoadZRotation(M_BADPI * 1.5f, &sp164);
-		mtx4LoadXRotation(M_BADPI, &sp84);
+		mtx4LoadZRotation(M_PI * 1.5f, &sp164);
+		mtx4LoadXRotation(M_PI, &sp84);
 		mtx4MultMtx4InPlace(&sp84, &sp164);
 	}
 

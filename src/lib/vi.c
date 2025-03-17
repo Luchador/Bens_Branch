@@ -232,10 +232,10 @@ void viHandleRetrace(void)
 	osSetIntMask(prevmask);
 
 	videoSetWindowOffset(0, offset);
-	osViSetMode(var8008dd60[1 - var8005ce74]);
+	//osViSetMode(var8008dd60[1 - var8005ce74]);
 	osViBlack(g_ViUnblackTimer);
-	osViSetXScale(g_ViXScalesBySlot[1 - var8005ce74]);
-	osViSetYScale(g_ViYScalesBySlot[1 - var8005ce74]);
+	//osViSetXScale(g_ViXScalesBySlot[1 - var8005ce74]);
+	//osViSetYScale(g_ViYScalesBySlot[1 - var8005ce74]);
 	osViSetSpecialFeatures(OS_VI_GAMMA_OFF | OS_VI_DITHER_FILTER_ON);
 }
 
@@ -254,7 +254,7 @@ void viUpdateMode(void)
 	if (g_ViFrontData->mode != g_ViBackData->mode) {
 		switch (g_ViBackData->mode) {
 		case VIMODE_NONE:
-			osViSetYScale(1.0f);
+			//osViSetYScale(1.0f);
 			osViBlack(true);
 			break;
 		case VIMODE_LO:
@@ -280,16 +280,16 @@ void viUpdateMode(void)
 	if (g_ViBackData->mode == VIMODE_LO) {
 		if (g_ViIs16Bit) {
 			if (osTvType == OS_TV_MPAL) {
-				var8008dcc0[slot] = osViModeTable[OS_VI_MPAL_LAN1];
+				//var8008dcc0[slot] = osViModeTable[OS_VI_MPAL_LAN1];
 			} else {
-				var8008dcc0[slot] = osViModeTable[OS_VI_NTSC_LAN1];
+				//var8008dcc0[slot] = osViModeTable[OS_VI_NTSC_LAN1];
 			}
 		} else {
 			if (osTvType == OS_TV_MPAL) {
 				if (g_ViIs16Bit && g_ViIs16Bit && g_ViIs16Bit);
-				var8008dcc0[slot] = osViModeTable[OS_VI_MPAL_LAN2];
+				//var8008dcc0[slot] = osViModeTable[OS_VI_MPAL_LAN2];
 			} else {
-				var8008dcc0[slot] = osViModeTable[OS_VI_NTSC_LAN2];
+				//var8008dcc0[slot] = osViModeTable[OS_VI_NTSC_LAN2];
 			}
 		}
 
@@ -320,9 +320,9 @@ void viUpdateMode(void)
 		g_SchedViModesPending[slot] = true;
 	} else if (g_ViBackData->mode == VIMODE_HI) {
 		if (osTvType == OS_TV_MPAL) {
-			var8008dcc0[slot] = osViModeTable[OS_VI_MPAL_HAF1];
+			//var8008dcc0[slot] = osViModeTable[OS_VI_MPAL_HAF1];
 		} else {
-			var8008dcc0[slot] = osViModeTable[OS_VI_NTSC_HAF1];
+			//var8008dcc0[slot] = osViModeTable[OS_VI_NTSC_HAF1];
 		}
 
 		var8008dcc0[slot].comRegs.width = g_ViBackData->bufx;

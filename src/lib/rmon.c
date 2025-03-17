@@ -74,17 +74,11 @@ char *rmonProut(char *dst, const char *src, size_t count)
 
 void rmonPrintf(const char *format, ...)
 {
-#ifndef PLATFORM_N64
 	char msg[2048];
-#endif
 	va_list ap;
 	va_start(ap, format);
 
-#ifdef PLATFORM_N64
-	_Printf(rmonProut, NULL, format, ap);
-#else
 	vsnprintf(msg, sizeof(msg), format, ap);
 	va_end(ap);
 	sysLogPrintf(LOG_NOTE, "rmonPrintf: %s", msg);
-#endif
 }

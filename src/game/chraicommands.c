@@ -1649,7 +1649,7 @@ bool aiIfTargetInFovLeft(void)
 {
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
 
-	if (chrGetAngleToTarget(g_Vars.chrdata) < cmd[2] * M_BADTAU * 0.00390625f) {
+	if (chrGetAngleToTarget(g_Vars.chrdata) < cmd[2] * M_TAU * 0.00390625f) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[3]);
 	} else {
 		g_Vars.aioffset += 4;
@@ -1665,7 +1665,7 @@ bool aiIfTargetOutOfFovLeft(void)
 {
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
 
-	if (chrGetAngleToTarget(g_Vars.chrdata) > cmd[2] * M_BADTAU * 0.00390625f) {
+	if (chrGetAngleToTarget(g_Vars.chrdata) > cmd[2] * M_TAU * 0.00390625f) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[3]);
 	} else {
 		g_Vars.aioffset += 4;
@@ -3812,15 +3812,6 @@ bool aiChrCopyPadPreset(void)
 bool aiPrint(void)
 {
 	u32 len;
-	u32 result = dprint();
-
-	if (result) {
-		result = 2;
-	}
-
-	if (result == 2) {
-		// empty
-	}
 
 	len = chraiGetCommandLength(g_Vars.ailist, g_Vars.aioffset);
 
@@ -4744,7 +4735,7 @@ bool aiSetRotorSpeed(void)
 {
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
 	f32 speedtime = cmd[5] | (cmd[4] << 8);
-	f32 speedaim = (cmd[3] | (cmd[2] << 8)) * M_BADTAU / 3600;
+	f32 speedaim = (cmd[3] | (cmd[2] << 8)) * M_TAU / 3600;
 
 	if (g_Vars.heli) {
 		g_Vars.heli->rotoryspeedaim = speedaim;
@@ -4815,14 +4806,12 @@ bool aiNoOp00db(void)
  */
 bool aiEndLevel(void)
 {
-	if (debugAllowEndLevel()) {
-		if (g_IsTitleDemo) {
-			mainChangeToStage(STAGE_TITLE);
-		} else if (g_Vars.autocutplaying) {
-			g_Vars.autocutfinished = true;
-		} else {
-			func0000e990();
-		}
+	if (g_IsTitleDemo) {
+		mainChangeToStage(STAGE_TITLE);
+	} else if (g_Vars.autocutplaying) {
+		g_Vars.autocutfinished = true;
+	} else {
+		mainFinalObjectiveCheck();
 	}
 
 	g_Vars.aioffset += 2;
@@ -5521,7 +5510,7 @@ bool ai00f4(void)
 	s16 height2 = cmd[11] | (cmd[10] << 8);
 	s32 posangle = cmd[13] | (cmd[12] << 8);
 
-	playerPrepareWarpType3(posangle * M_BADTAU / 65536, rotangle * M_BADTAU / 65536, range, height1, height2, padnum);
+	playerPrepareWarpType3(posangle * M_TAU / 65536, rotangle * M_TAU / 65536, range, height1, height2, padnum);
 
 	g_Vars.aioffset += 14;
 

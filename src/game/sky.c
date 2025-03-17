@@ -2860,7 +2860,7 @@ Gfx *skyRenderTeleportFlare(Gfx *gdl, f32 x, f32 y, f32 z, f32 size, f32 intensi
  */
 Gfx *skyRenderTeleportFlares(Gfx *gdl)
 {
-	f32 sp154 = g_20SecIntervalFrac * M_BADTAU;
+	f32 sp154 = g_20SecIntervalFrac * M_TAU;
 	s32 i;
 	f32 sizefrac = 0.0f;
 	f32 f20_2;

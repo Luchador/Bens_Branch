@@ -20,7 +20,6 @@
 
 u32 g_OsMemSize = 0;
 s32 g_OsMemSizeMb = 32;
-s8 g_Resetting = false;
 OSSched g_Sched;
 
 OSMesgQueue g_MainMesgQueue;

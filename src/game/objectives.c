@@ -280,10 +280,6 @@ s32 objectiveCheck(s32 index)
 		}
 	}
 
-	if (debugForceAllObjectivesComplete()) {
-		objstatus = OBJECTIVE_COMPLETE;
-	}
-
 	return objstatus;
 }
 

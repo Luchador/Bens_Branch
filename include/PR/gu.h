@@ -95,10 +95,6 @@ extern void 	guDPLoadTextureTile (Gfx *glistp, void *timg,
  */
 extern void guMtxIdent(Mtx *m);
 extern void guMtxIdentF(float mf[4][4]);
-extern void guOrtho(Mtx *m, float l, float r, float b, float t,
-		    float n, float f, float scale);
-extern void guOrthoF(float mf[4][4], float l, float r, float b, float t,
-		     float n, float f, float scale);
 extern void guFrustum(Mtx *m, float l, float r, float b, float t,
 		      float n, float f, float scale);
 extern void guFrustumF(float mf[4][4], float l, float r, float b, float t,
@@ -154,14 +150,11 @@ extern void guAlign(Mtx *m, float a, float x, float y, float z);
 extern void guAlignF(float mf[4][4], float a, float x, float y, float z);
 extern void guScale(Mtx *m, float x, float y, float z);
 extern void guScaleF(float mf[4][4], float x, float y, float z);
-extern void guTranslate(Mtx *m, float x, float y, float z);
-extern void guTranslateF(float mf[4][4], float x, float y, float z);
 extern void guPosition(Mtx *m, float r, float p, float h, float s,
 		       float x, float y, float z);
 extern void guPositionF(float mf[4][4], float r, float p, float h, float s,
 			float x, float y, float z);
 extern void guMtxF2L(float mf[4][4], Mtx *m);
-extern void guMtxL2F(float mf[4][4], Mtx *m);
 extern void guMtxCatF(float m[4][4], float n[4][4], float r[4][4]);
 extern void guMtxCatL(Mtx *m, Mtx *n, Mtx *res);
 extern void guMtxXFMF(float mf[4][4], float x, float y, float z,

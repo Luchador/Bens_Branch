@@ -149,66 +149,6 @@ s32 footstepChooseSound(struct chrdata *chr, s32 footstepindex)
 }
 
 /**
- * Check if a footstep sound should play for the given chr and play it if so.
- *
- * It is assumed that the chr is moving normally and not via magic.
- */
-void footstepCheckDefault(struct chrdata *chr)
-{
-	if (debugIsFootstepsEnabled() && PLAYERCOUNT() == 1 && chr) {
-		chr->footstep = 0;
-		chr->magicanim = -1;
-		chr->magicframe = 0;
-
-		if (chr->model && chr->model->anim) {
-			s32 soundnum;
-			f32 prevframe = chr->oldframe;
-			f32 frame = chr->model->anim->frame;
-			s32 i;
-
-			chr->oldframe = frame;
-
-			for (i = 0; i < ARRAYCOUNT(g_FootstepAnims); i++) {
-				if (modelGetAnimNum(chr->model) == g_FootstepAnims[i].animnum) {
-					if (CHRRACE(chr) == RACE_SKEDAR && g_FootstepAnims[i].animnum == ANIM_SKEDAR_RUNNING) {
-						if ((frame >= 2 && prevframe < 2) || (frame >= 17 && prevframe < 17)) { \
-							chr->footstep = 1;
-						} else if ((frame >= 10 && prevframe < 10) || (frame >= 25 && prevframe < 25)) {
-							chr->footstep = 2;
-						}
-					} else {
-						// fix spamming footsteps at >= 60fps
-						if (g_Vars.lvupdate240 < 4) {
-							const s32 roundedframe = (s32)(frame * (4.f / (f32)g_Vars.lvupdate240));
-							if (roundedframe == (g_FootstepAnims[i].frame1*2) && prevframe < g_FootstepAnims[i].frame1) {
-								chr->footstep = 1;
-							} else if (roundedframe == (g_FootstepAnims[i].frame2*2) && prevframe < g_FootstepAnims[i].frame2) {
-								chr->footstep = 2;
-							}
-						} else
-						if (frame >= g_FootstepAnims[i].frame1 && prevframe < g_FootstepAnims[i].frame1) {
-							chr->footstep = 1;
-						} else if (frame >= g_FootstepAnims[i].frame2 && prevframe < g_FootstepAnims[i].frame2) {
-							chr->footstep = 2;
-						}
-					}
-
-					soundnum = footstepChooseSound(chr, i);
-
-					if (soundnum != -1 && chr->footstep != 0) {
-						psCreate(NULL, chr->prop, soundnum, -1, -1, PSFLAG_0400, 0, PSTYPE_FOOTSTEP, NULL, -1, NULL, -1, -1, -1, -1);
-					}
-
-					chr->magicanim = i;
-					chr->magicspeed = chr->model->anim->speed;
-					return;
-				}
-			}
-		}
-	}
-}
-
-/**
  * Assuming the given chr is moving using magic, check if a footstep sound
  * should play and play it if so.
  *
@@ -226,7 +166,7 @@ void footstepCheckMagic(struct chrdata *chr)
 	f32 zdiff;
 	s32 soundnum;
 
-	if (debugIsFootstepsEnabled() && PLAYERCOUNT() == 1 && chr->magicanim >= 0) {
+	if (PLAYERCOUNT() == 1 && chr->magicanim >= 0) {
 		chr->magicframe += g_Vars.lvupdate240 * chr->magicspeed;
 
 		if (chr->prop) {

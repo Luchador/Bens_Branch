@@ -1280,7 +1280,7 @@ f32 frGetTargetAngleToPos(struct coord *targetpos, f32 targetangle, struct coord
 	f32 relativeangle = directangle - targetangle;
 
 	if (directangle < targetangle) {
-		relativeangle += M_BADTAU;
+		relativeangle += M_TAU;
 	}
 
 	return relativeangle;
@@ -1935,12 +1935,12 @@ void frTick(void)
 					g_FrData.targets[i].scriptenabled = true;
 					g_FrData.targets[i].scriptsleep = 0;
 
-					while (g_FrData.targets[i].angle > M_BADTAU) {
-						g_FrData.targets[i].angle -= M_BADTAU;
+					while (g_FrData.targets[i].angle > M_TAU) {
+						g_FrData.targets[i].angle -= M_TAU;
 					}
 
 					while (g_FrData.targets[i].angle < 0) {
-						g_FrData.targets[i].angle += M_BADTAU;
+						g_FrData.targets[i].angle += M_TAU;
 					}
 				}
 

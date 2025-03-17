@@ -14,6 +14,7 @@
 #include "game/botcmd.h"
 #include "game/gfxmemory.h"
 #include "game/training.h"
+#include "game/debug.h"
 #include "game/lang.h"
 #include "game/mplayer/mplayer.h"
 #include "game/options.h"

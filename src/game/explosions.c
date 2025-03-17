@@ -499,7 +499,7 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 			exp->parts[0].pos.y = exppos->y;
 			exp->parts[0].pos.z = exppos->z;
 			exp->parts[0].size = g_ExplosionTypes[type].innersize * (RANDOMFRAC() * 0.5f + 1);
-			exp->parts[0].rot = RANDOMFRAC() * M_BADTAU;
+			exp->parts[0].rot = RANDOMFRAC() * M_TAU;
 			exp->parts[0].bb = 0;
 
 			if (g_Vars.mplayerisrunning) {
@@ -1092,7 +1092,7 @@ u32 explosionTick(struct prop *prop)
 					exp->parts[j].bb = bb;
 					exp->parts[j].frame = 1;
 					exp->parts[j].size = (1.0f + RANDOMFRAC() * 0.5f) * type->innersize;
-					exp->parts[j].rot = RANDOMFRAC() * M_BADTAU;
+					exp->parts[j].rot = RANDOMFRAC() * M_TAU;
 					break;
 				}
 			}

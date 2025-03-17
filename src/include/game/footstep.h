@@ -5,7 +5,6 @@
 #include "types.h"
 
 s32 footstepChooseSound(struct chrdata *chr, s32 index);
-void footstepCheckDefault(struct chrdata *chr);
 void footstepCheckMagic(struct chrdata *chr);
 
 #endif

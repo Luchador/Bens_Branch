@@ -286,8 +286,6 @@ u32 botPickupProp(struct prop *prop, struct chrdata *chr)
 		return 0;
 	}
 
-	dprint();
-
 	obj->flags3 &= ~OBJFLAG3_ISFETCHTARGET;
 
 	switch (obj->type) {
@@ -300,7 +298,6 @@ u32 botPickupProp(struct prop *prop, struct chrdata *chr)
 
 			if (1);
 			qty = ammocrateGetPickupAmmoQty(crate);
-			dprint();
 
 			if (qty) {
 				botactGiveAmmoByType(chr->aibot, crate->ammotype, qty);
@@ -311,10 +308,6 @@ u32 botPickupProp(struct prop *prop, struct chrdata *chr)
 				-1, PSFLAG_0400, 0, PSTYPE_NONE, 0, -1, 0, -1, -1, -1, -1);
 
 			objFree(obj, false, obj->hidden2 & OBJH2FLAG_CANREGEN);
-
-			if (qty) {
-				dprint();
-			}
 		}
 		return 2;
 	case OBJTYPE_MULTIAMMOCRATE:
@@ -324,14 +317,8 @@ u32 botPickupProp(struct prop *prop, struct chrdata *chr)
 			s32 qty;
 			s32 i;
 
-			dprint();
-
 			for (i = 0; i != 19; i++) {
 				qty = crate->slots[i].quantity;
-
-				if (qty) {
-					dprint();
-				}
 
 				if (qty) {
 					botactGiveAmmoByType(chr->aibot, i + 1, qty);
@@ -435,8 +422,6 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 		return false;
 	}
 
-	dprint();
-
 	if (prop->timetoregen != 0) {
 		return false;
 	}
@@ -451,13 +436,9 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 		}
 	}
 
-	dprint();
-
 	if ((obj->hidden & OBJHFLAG_DELETING) || (obj->flags & OBJFLAG_THROWNLAPTOP)) {
 		return false;
 	}
-
-	dprint();
 
 	if ((obj->hidden & OBJHFLAG_PROJECTILE)
 			&& obj->projectile
@@ -466,13 +447,9 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 		return false;
 	}
 
-	dprint();
-
 	if (!objCanPickupFromSafe(obj)) {
 		return false;
 	}
-
-	dprint();
 
 	if (obj->type == OBJTYPE_WEAPON) {
 		weaponobj = prop->weapon;
@@ -507,7 +484,6 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 		ignore1 = true;
 
 		if (objGetDestroyedLevel(obj)) {
-			dprint();
 			return false;
 		}
 
@@ -519,7 +495,6 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 					ignore1 = false;
 
 					if (weaponnum && !botinvGetItemType(chr, weaponnum)) {
-						dprint();
 						botinvGiveProp(chr, prop);
 					}
 
@@ -552,8 +527,6 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 	ydist = prop->pos.y - chrprop->pos.y;
 	zdist = prop->pos.z - chrprop->pos.z;
 
-	dprint();
-
 	if (chr->aibot->cheap) {
 		sqrange = 250 * 250;
 	} else {
@@ -563,8 +536,6 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 	sp3c = xdist * xdist + zdist * zdist <= sqrange && ydist >= -200 && ydist <= 200;
 
 	if (sp3c) {
-		dprint();
-
 		if ((obj->flags2 & OBJFLAG2_PICKUPWITHOUTLOS) == 0
 				&& !cdTestLos06(&chrprop->pos, chrprop->rooms, &prop->pos, prop->rooms, CDTYPE_DOORS | CDTYPE_BG)) {
 			sp3c = false;
@@ -572,7 +543,6 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 	}
 
 	if (sp3c) {
-		dprint();
 		return botPickupProp(prop, chr);
 	}
 
@@ -648,8 +618,6 @@ void botCheckPickups(struct chrdata *chr)
 						if (botIsObjCollectable(obj)) {
 							if (botTestPropForPickup(prop, chr)) {
 								propExecuteTickOperation(prop, TICKOP_FREE);
-							} else {
-								dprint();
 							}
 						}
 					}
@@ -694,7 +662,7 @@ bool botApplyMovement(struct chrdata *chr)
 	angle = chrGetInverseTheta(chr) - chrGetRotY(chr);
 
 	if (angle < 0) {
-		angle += M_BADTAU;
+		angle += M_TAU;
 	}
 
 	speedforwards = aibot->speedmultforwards * cosf(angle) - sinf(angle) * aibot->speedmultsideways;
@@ -705,11 +673,11 @@ bool botApplyMovement(struct chrdata *chr)
 	angle2 = chrGetInverseTheta(chr) - aibot->angleoffset;
 
 	if (angle2 < 0) {
-		angle2 += M_BADTAU;
+		angle2 += M_TAU;
 	}
 
-	if (angle2 >= M_BADTAU) {
-		angle2 -= M_BADTAU;
+	if (angle2 >= M_TAU) {
+		angle2 -= M_TAU;
 	}
 
 	modelSetChrRotY(chr->model, angle2);
@@ -786,11 +754,11 @@ bool botIsAboutToAttack(struct chrdata *chr, bool arg1)
 			f32 angle = atan2f(target->pos.x - chr->prop->pos.x, target->pos.z - chr->prop->pos.z) - tmp;
 
 			if (angle < 0) {
-				angle += M_BADTAU;
+				angle += M_TAU;
 			}
 
 			if (angle > M_PI) {
-				angle = M_BADTAU - angle;
+				angle = M_TAU - angle;
 			}
 
 			if (chr->aibot->config->difficulty == BOTDIFF_MEAT) {
@@ -879,31 +847,31 @@ s32 botTick(struct prop *prop)
 				targetangle = chrGetRotY(chr);
 			}
 
-			while (targetangle >= M_BADTAU) {
-				targetangle -= M_BADTAU;
+			while (targetangle >= M_TAU) {
+				targetangle -= M_TAU;
 			}
 
 			while (targetangle < 0) {
-				targetangle += M_BADTAU;
+				targetangle += M_TAU;
 			}
 
 			if (chr->blurdrugamount > 0 && !chrIsDead(chr) && aibot->skrocket == NULL) {
 				targetangle += chr->blurdrugamount * PALUPF(0.00031410926021636f) * sinf((g_Vars.lvframe60 % TICKS(120)) * PALUPF(0.052351541817188f));
 
-				if (targetangle >= M_BADTAU) {
-					targetangle -= M_BADTAU;
+				if (targetangle >= M_TAU) {
+					targetangle -= M_TAU;
 				}
 
-				targetangle += M_BADTAU;
+				targetangle += M_TAU;
 			}
 
 			tweenangle = g_Vars.lvupdate60freal * 0.061590049415827f;
 			diffangle = targetangle - oldangle;
 
 			if (diffangle < -M_PI) {
-				diffangle += M_BADTAU;
+				diffangle += M_TAU;
 			} else if (diffangle >= M_PI) {
-				diffangle -= M_BADTAU;
+				diffangle -= M_TAU;
 			}
 
 			if (diffangle >= 0) {
@@ -912,8 +880,8 @@ s32 botTick(struct prop *prop)
 				} else {
 					newangle = oldangle + tweenangle;
 
-					if (newangle >= M_BADTAU) {
-						newangle -= M_BADTAU;
+					if (newangle >= M_TAU) {
+						newangle -= M_TAU;
 					}
 				}
 			} else {
@@ -923,7 +891,7 @@ s32 botTick(struct prop *prop)
 					newangle = oldangle - tweenangle;
 
 					if (newangle < 0) {
-						newangle += M_BADTAU;
+						newangle += M_TAU;
 					}
 				}
 			}
@@ -931,22 +899,22 @@ s32 botTick(struct prop *prop)
 			aibot->speedtheta = newangle - oldangle;
 
 			if (aibot->speedtheta < 0) {
-				aibot->speedtheta += M_BADTAU;
+				aibot->speedtheta += M_TAU;
 			}
 
 			if (aibot->speedtheta >= M_PI) {
-				aibot->speedtheta -= M_BADTAU;
+				aibot->speedtheta -= M_TAU;
 			}
 
 			aibot->speedtheta /= g_Vars.lvupdate60freal;
 			aibot->speedtheta *= 16.236389160156f;
 
-			while (newangle >= M_BADTAU) {
-				newangle -= M_BADTAU;
+			while (newangle >= M_TAU) {
+				newangle -= M_TAU;
 			}
 
 			while (newangle < 0) {
-				newangle += M_BADTAU;
+				newangle += M_TAU;
 			}
 
 			chrSetLookAngle(chr, newangle);

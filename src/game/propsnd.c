@@ -385,20 +385,12 @@ void psTickChannel(s32 channelnum)
 			} else {
 				if ((channel->flags & PSFLAG_OUTOFRANGE) == 0) {
 					if (channel->audiohandle != NULL && sndGetState(channel->audiohandle) != AL_STOPPED) {
-#if VERSION >= VERSION_NTSC_1_0
 						audioStop(channel->audiohandle);
-#else
-						osSyncPrintf("PS_AUTO : Pausing %d\n", channelnum);
-						audioStop(channel->audiohandle);
-						channel->audiohandle = NULL;
-#endif
 					}
 
 					channel->flags |= PSFLAG_OUTOFRANGE;
 				}
-#if VERSION >= VERSION_NTSC_1_0
 				channel->flags &= ~PSFLAG_FIRSTTICK;
-#endif
 			}
 		}
 
@@ -407,15 +399,9 @@ void psTickChannel(s32 channelnum)
 		 */
 		if ((channel->flags & PSFLAG_OUTOFRANGE) == 0) {
 			if (channel->flags & PSFLAG_FIRSTTICK) {
-#if VERSION < VERSION_NTSC_1_0
-				osSyncPrintf("SND : Propsound needs play : Id %d is flaged g\n", channelnum);
-#endif
-
-
 				if (channel->flags & PSFLAG_ISMP3) {
 					sndStartMp3(channel->soundnum26, newvol, newpan, (channel->flags2 & PSFLAG2_RESPONDHELLO) ? 1 : 0);
 				} else {
-#if VERSION >= VERSION_NTSC_1_0
 					if (channel->flags & PSFLAG_0400) {
 						if (newvol) {
 							snd00010718(&channel->audiohandle, channel->flags & PSFLAG_ISMP3, newvol, newpan,
@@ -427,10 +413,6 @@ void psTickChannel(s32 channelnum)
 									channel->soundnum26, newpitch, channel->fxbus, newfx, 1);
 						}
 					}
-#else
-					snd00010718(&channel->audiohandle, channel->flags & PSFLAG_ISMP3, newvol, newpan,
-							channel->soundnum26, newpitch, channel->fxbus, newfx, 1);
-#endif
 				}
 
 				channel->flags &= ~PSFLAG_FIRSTTICK;
@@ -444,7 +426,6 @@ void psTickChannel(s32 channelnum)
 		 * The channel doesn't need to tick any more.
 		 * If it's not marked, free it.
 		 */
-#if VERSION >= VERSION_NTSC_1_0
 		if (channel->type != PSTYPE_MARKER) {
 			if (channel->flags & PSFLAG_ISMP3) {
 				if (!sndIsPlayingMp3()) {
@@ -466,35 +447,13 @@ void psTickChannel(s32 channelnum)
 				channel->flags = PSFLAG_FREE;
 			}
 		}
-#else
-		if (channel->flags & PSFLAG_ISMP3) {
-			if (!sndIsPlayingMp3()) {
-				if (channel->flags & PSFLAG_FORPROP) {
-					propDecrementSoundCount(channel->prop);
-				}
-
-				if (channel->flags & PSFLAG_FORHUDMSG) {
-					hudmsgsHideByChannel(channelnum);
-				}
-			}
-		} else if (channel->audiohandle == NULL) {
-			if (channel->flags & PSFLAG_FORPROP) {
-				propDecrementSoundCount(channel->prop);
-			}
-		}
-
-		channel->flags = PSFLAG_FREE;
-#endif
 	}
 
 	if (g_PsPrintFlagged && (channel->flags2 & PSFLAG2_PRINTABLE)) {
 		psPrintChannel(channel);
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	channel->flags &= ~PSFLAG_FIRSTTICK;
-#endif
-
 	channel->flags &= ~PSFLAG_CHANGINGPAN;
 }
 
@@ -507,34 +466,22 @@ void psTick(void)
 	for (i = 0; i < CHANNELCOUNT(); i++) {
 		struct pschannel *channel = &g_PsChannels[i];
 
-#if VERSION < VERSION_NTSC_1_0
-		// Doing a proper check for the free flag here causes a regalloc mismatch.
-		osSyncPrintf("AISND : Channel %d - %s", i, 1 ? "FREE" : "IN USE");
-#endif
-
 		if ((channel->flags & PSFLAG_FREE) == 0) {
 			psTickChannel(i);
 			count++;
-
-#if VERSION >= VERSION_NTSC_1_0
 			if (g_PsPrintAll) {
 				psPrintChannel(&g_PsChannels[i]);
 			}
-#endif
 		}
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (g_PsPrintAll) {
 		g_PsPrintAll = false;
 	}
-#endif
 
 	if (count > peakcount) {
 		peakcount = count;
 	}
-
-	osSyncPrintf("Propsnd : Using %d of %d (Peek = %d of %d)", count, CHANNELCOUNT(), peakcount, CHANNELCOUNT());
 }
 
 void psSetPitch(struct prop *prop, f32 targetpitch, s32 changespeed)
@@ -552,14 +499,10 @@ void psSetPitch(struct prop *prop, f32 targetpitch, s32 changespeed)
 				g_PsChannels[i].pitchchangespeed = -1;
 			}
 
-#if VERSION >= VERSION_NTSC_1_0
 			prevpri = osGetThreadPri(0);
 			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 			psTickChannel(i);
 			osSetThreadPri(0, prevpri);
-#else
-			psTickChannel(i);
-#endif
 		}
 	}
 }
@@ -571,7 +514,6 @@ void psSetVolume(struct prop *prop, s32 volpercentage)
 
 	for (i = 0; i < CHANNELCOUNT(); i++) {
 		if ((g_PsChannels[i].flags & PSFLAG_FREE) == 0 && prop == g_PsChannels[i].prop) {
-#if VERSION >= VERSION_NTSC_1_0
 			if (volpercentage > 100) {
 				volpercentage = 100;
 			}
@@ -583,10 +525,6 @@ void psSetVolume(struct prop *prop, s32 volpercentage)
 			psTickChannel(i);
 
 			osSetThreadPri(0, prevpri);
-#else
-			g_PsChannels[i].vol10 = volpercentage * AL_VOL_FULL / 100;
-			psTickChannel(i);
-#endif
 		}
 	}
 }
@@ -628,14 +566,11 @@ s16 psCreate(struct pschannel *channel, struct prop *prop, s16 soundnum, s16 pad
 {
 	union soundnumhack spac;
 	OSPri prevpri;
-	u32 stack[2];
 	s32 pan;
 
 	struct pad pad;
 	s32 i;
 	s32 j;
-
-	osSyncPrintf("AISOUND: aisoundnewtypeflags - Channel %d -> Playing sound number id=%d(%x)\n", channel, soundnum, soundnum);
 
 	if (type == PSTYPE_CHRSHOOT) {
 		psStopOneShootChannel(prop);

@@ -46,7 +46,7 @@ s32 raceInitAnimGroup(struct attackanimconfig *configs)
 			if (angle < 0x8000) {
 				config->unk08 = angle * 0.00009585853695171f / config->unk04;
 			} else {
-				config->unk08 = (angle * 0.00009585853695171f - M_BADTAU) / config->unk04;
+				config->unk08 = (angle * 0.00009585853695171f - M_TAU) / config->unk04;
 			}
 		} else {
 			config->unk08 = 0;

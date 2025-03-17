@@ -120,7 +120,6 @@
 	build/ROMID/game/pad.o (section); \
 	build/ROMID/game/pak.o (section); \
 	build/ROMID/game/debug1.o (section); \
-	build/ROMID/game/debug2.o (section); \
 	build/ROMID/game/gailists.o (section); \
 	build/ROMID/game/modeldata/general.o (section); \
 	build/ROMID/game/modeldata/basic.o (section); \
@@ -132,7 +131,6 @@
 	build/ROMID/game/modeldata/classicgun.o (section); \
 	build/ROMID/game/modeldata/casing.o (section); \
 	build/ROMID/game/modeldata/skel06.o (section); \
-	build/ROMID/game/modeldata/uzi.o (section); \
 	build/ROMID/game/modeldata/weapon.o (section); \
 	build/ROMID/game/modeldata/chr.o (section); \
 	build/ROMID/game/modeldata/skedar.o (section); \

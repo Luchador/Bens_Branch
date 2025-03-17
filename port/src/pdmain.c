@@ -46,9 +46,7 @@
 #include "lib/memp.h"
 #include "lib/mema.h"
 #include "lib/model.h"
-#include "lib/profile.h"
 #include "lib/videbug.h"
-#include "lib/debughud.h"
 #include "lib/anim.h"
 #include "lib/rdp.h"
 #include "lib/lib_34d0.h"
@@ -75,12 +73,6 @@ bool g_MainGameLogicEnabled = true;
 u32 g_MainNumGfxTasks = 0;
 bool g_MainIsEndscreen = false;
 s32 g_DoBootPakMenu = 0;
-
-u32 var8005dd40 = 0x00000000;
-u32 var8005dd44 = 0x00000000;
-u32 var8005dd48 = 0x00000000;
-u32 var8005dd4c = 0x00000000;
-u32 var8005dd50 = 0x00000000;
 s32 g_MainChangeToStageNum = -1;
 bool g_MainIsDebugMenuOpen = false;
 
@@ -180,10 +172,8 @@ void mainInit(void)
 	texInit();
 	lvInit();
 	cheatsInit();
-	dhudInit();
 	playermgrInit();
 	frametimeInit();
-	profileInit();
 	smokesInit();
 	mpInit();
 	paksInit();
@@ -376,12 +366,10 @@ void mainLoop(void)
 
 		gfxReset();
 		joyReset();
-		dhudReset();
 		zbufReset(g_StageNum);
 		lvReset(g_StageNum);
 		viReset(g_StageNum);
 		frametimeCalculate();
-		profileReset();
 
 		while (g_MainChangeToStageNum < 0) {
 			const s32 cycles = osGetCount() - g_Vars.thisframestartt;
@@ -416,8 +404,6 @@ void mainTick(void)
 
 	if (g_MainChangeToStageNum < 0) {
 		frametimeCalculate();
-		profileReset();
-		profileSetMarker(PROFILE_MAINTICK_START);
 		joyDebugJoy();
 		schedSetCrashEnable2(false);
 
@@ -447,10 +433,6 @@ void mainTick(void)
 
 			gdl = lvRender(gdl);
 
-			if (debugGetProfileMode() >= 2) {
-				gdl = profileRender(gdl);
-			}
-
 			gDPFullSync(gdl++);
 			gSPEndDisplayList(gdl++);
 		}
@@ -462,7 +444,6 @@ void mainTick(void)
 
 		rdpCreateTask(gdlstart, gdl, 0, (uintptr_t) &msg);
 		memaPrint();
-		profileSetMarker(PROFILE_MAINTICK_END);
 	}
 }
 
@@ -522,7 +503,7 @@ s32 mainGetStageNum(void)
 	return g_StageNum;
 }
 
-void func0000e990(void)
+void mainFinalObjectiveCheck(void)
 {
 	objectivesCheckAll();
 	objectivesDisableChecking();

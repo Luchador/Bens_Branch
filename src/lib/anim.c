@@ -559,23 +559,23 @@ void animGetRotTranslateScale(s32 part, bool flip, struct skeleton *skel, s16 an
 			introt[2] <<= 16 - framelen;
 			bitoffset += readbitlen;
 
-			rot->x = introt[0] * M_BADTAU / 65536.0f;
+			rot->x = introt[0] * M_TAU / 65536.0f;
 
 			if (flip) {
 				if (introt[1] != 0) {
-					rot->y = (0x10000 - introt[1]) * M_BADTAU / 65536.0f;
+					rot->y = (0x10000 - introt[1]) * M_TAU / 65536.0f;
 				} else {
 					rot->y = 0.0f;
 				}
 
 				if (introt[2] != 0) {
-					rot->z = (0x10000 - introt[2]) * M_BADTAU / 65536.0f;
+					rot->z = (0x10000 - introt[2]) * M_TAU / 65536.0f;
 				} else {
 					rot->z = 0.0f;
 				}
 			} else {
-				rot->y = introt[1] * M_BADTAU / 65536.0f;
-				rot->z = introt[2] * M_BADTAU / 65536.0f;
+				rot->y = introt[1] * M_TAU / 65536.0f;
+				rot->z = introt[2] * M_TAU / 65536.0f;
 			}
 		} else if (flags & ANIMFIELD_F32_ROTATE) {
 			s32 sp38;
@@ -594,11 +594,11 @@ void animGetRotTranslateScale(s32 part, bool flip, struct skeleton *skel, s16 an
 
 			if (flip) {
 				if (rot->y != 0.0f) {
-					rot->y = M_BADTAU - rot->y;
+					rot->y = M_TAU - rot->y;
 				}
 
 				if (rot->z != 0.0f) {
-					rot->z = M_BADTAU - rot->z;
+					rot->z = M_TAU - rot->z;
 				}
 			}
 		} else {
@@ -734,7 +734,7 @@ f32 animGetTranslateAngle(s32 part, bool flip, struct skeleton *skel, s16 animnu
 	translate->y = inttranslate[1];
 	translate->z = inttranslate[2];
 
-	return angle * M_BADTAU / 65536.0f;
+	return angle * M_TAU / 65536.0f;
 }
 
 /**

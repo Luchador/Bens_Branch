@@ -257,7 +257,7 @@ Gfx *menugfxRenderBgGreenHaze(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
 	for (i = 0; i < 2; i++) {
 		s16 tmp = i * 256;
 		f0 = g_20SecIntervalFrac;
-		f26 = M_BADTAU * g_20SecIntervalFrac;
+		f26 = M_TAU * g_20SecIntervalFrac;
 
 		if (i == 1) {
 			f26 = -f26;
@@ -1843,8 +1843,8 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 		// Draw the particles
 		for (i = NUM_SUCCESS_PARTICLES - 1; i >= 0; i--) {
 			s32 s3 = 0;
-			f32 sine = sinf(f0 * M_BADTAU + M_BADTAU * (i / 15.0f));
-			f32 cosine = cosf(f0 * M_BADTAU + M_BADTAU * (i / 15.0f));
+			f32 sine = sinf(f0 * M_TAU + M_TAU * (i / 15.0f));
+			f32 cosine = cosf(f0 * M_TAU + M_TAU * (i / 15.0f));
 
 			pos.x = g_MenuParticles[i].x;
 			pos.y = g_MenuParticles[i].y;

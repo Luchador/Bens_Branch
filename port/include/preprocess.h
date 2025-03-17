@@ -21,7 +21,6 @@ void preprocessBgSection2Header(u8 *data, u32 size);
 void preprocessBgSection3Header(u8 *data, u32 size);
 u32 preprocessBgRoom(u8* data, u32 size, u32 room_ofs);
 
-u8 *preprocessLangFile(u8 *data, u32 size, u32 *outSize);
 u8 *preprocessPadsFile(u8 *data, u32 size, u32 *outSize);
 u8 *preprocessTilesFile(u8 *data, u32 size, u32 *outSize);
 u8 *preprocessSetupFile(u8 *data, u32 size, u32 *outSize);

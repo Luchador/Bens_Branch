@@ -5757,12 +5757,7 @@ struct tex {
 	/*0x0b*/ u8 depth : 2;
 	/*0x0c*/ u32 lutmodeindex : 2;
 	/*0x0c*/ u32 hasloddata : 1;
-	/*0x0c*/ u32 unk0c_03 : 1;
-#ifdef PLATFORM_N64
-	/*0x0c*/ u32 next : 24;
-#else
 	/*0x0c*/ uintptr_t next;
-#endif
 };
 
 struct texcacheitem {

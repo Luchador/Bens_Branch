@@ -5573,11 +5573,7 @@ struct weapon invitem_datauplink = {
 	1, // sway
 	NULL, // gunviscmds
 	NULL, // part visibility
-#if VERSION >= VERSION_PAL_FINAL
-	L_GUN_243, // short name
-#else
 	L_GUN_075, // short name
-#endif
 	L_GUN_075, // name
 	L_GUN_000, // manufacturer
 	L_GUN_197, // description

@@ -42,15 +42,8 @@ s8 joyGetRStickY(s8 contpadnum);
 u32 joyGetButtons(s8 contpadnum, u32 mask);
 u32 joyGetButtonsPressedThisFrame(s8 contpadnum, u32 mask);
 bool joyIsCyclicPollingEnabled(void);
-
-#if VERSION >= VERSION_NTSC_1_0
 void joyDisableCyclicPolling(void);
 void joyEnableCyclicPolling(void);
-#else
-void joyDisableCyclicPolling(s32 line, char *file);
-void joyEnableCyclicPolling(s32 line, char *file);
-#endif
-
 void joyDestroy(void);
 void joyGetContpadNumsForPlayer(s8 playernum, s32 *pad1, s32 *pad2);
 void joyStopRumble(s8 device, bool disablepolling);

@@ -351,7 +351,7 @@ bool bwalkCalculateNewPosition(struct coord *vel, f32 rotateamount, bool apply, 
 	}
 
 	if (result == CDRESULT_NOCOLLISION && apply) {
-		f32 angle = g_Vars.currentplayer->vv_theta + (rotateamount * 360) / M_BADTAU;
+		f32 angle = g_Vars.currentplayer->vv_theta + (rotateamount * 360) / M_TAU;
 
 		while (angle < 0) {
 			angle += 360;
@@ -920,7 +920,8 @@ void bwalkUpdateVertical(void)
 		fallspeed = g_Vars.currentplayer->bdeltapos.y;
 		newmanground = g_Vars.currentplayer->vv_manground;
 
-		if (debugIsTurboModeEnabled()
+		//if (debugIsTurboModeEnabled()
+		if (cheatIsActive(CHEAT_TURBOMODE)
 				&& g_Vars.currentplayer->bondforcespeed.x == 0
 				&& g_Vars.currentplayer->bondforcespeed.z == 0) {
 			multiplier = 0.277777777f * 5;
@@ -1456,7 +1457,7 @@ void bwalk0f0c69b8(void)
 			g_Vars.currentplayer->walkinitmove = false;
 		}
 
-		g_Vars.currentplayer->walkinitt2 = 1.0f - (cosf(g_Vars.currentplayer->walkinitt * M_BADPI) + 1.0f) * 0.5f;
+		g_Vars.currentplayer->walkinitt2 = 1.0f - (cosf(g_Vars.currentplayer->walkinitt * M_PI) + 1.0f) * 0.5f;
 
 		bmoveUpdateHead(0.0f, 0.0f, 0.0f, &g_Vars.currentplayer->walkinitmtx, 1.0f - g_Vars.currentplayer->walkinitt2);
 
@@ -1584,7 +1585,8 @@ void bwalk0f0c69b8(void)
 
 		bmoveUpdateMoveInitSpeed(&spcc);
 
-		if (debugIsTurboModeEnabled()) {
+		//if (debugIsTurboModeEnabled()) {
+		if(cheatIsActive(CHEAT_TURBOMODE)) {
 			spcc.f[0] += (g_Vars.currentplayer->bond2.unk00.f[0] * g_Vars.currentplayer->speedforwards - g_Vars.currentplayer->bond2.unk00.f[2] * g_Vars.currentplayer->speedsideways) * g_Vars.lvupdate60freal * 10.0f;
 			spcc.f[2] += (g_Vars.currentplayer->bond2.unk00.f[2] * g_Vars.currentplayer->speedforwards + g_Vars.currentplayer->bond2.unk00.f[0] * g_Vars.currentplayer->speedsideways) * g_Vars.lvupdate60freal * 10.0f;
 		}

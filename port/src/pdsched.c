@@ -7,13 +7,11 @@
 #include "bss.h"
 #include "lib/args.h"
 #include "lib/audiomgr.h"
-#include "lib/reset.h"
 #include "lib/rzip.h"
 #include "lib/crash.h"
 #include "lib/main.h"
 #include "lib/snd.h"
 #include "lib/pimgr.h"
-#include "lib/profile.h"
 #include "lib/rmon.h"
 #include "lib/lib_48150.h"
 #include "lib/vi.h"
@@ -165,19 +163,16 @@ void osCreateScheduler(OSSched *sc, OSThread *thread, u8 mode, u32 numFields)
 	osCreateMesgQueue(&sc->interruptQ, sc->intBuf, OS_SC_MAX_MESGS);
 	osCreateMesgQueue(&sc->cmdQ, sc->cmdMsgBuf, OS_SC_MAX_MESGS);
 
-	osCreateViManager(OS_PRIORITY_VIMGR);
-
-	var8008de08 = osViModeTable[mode].comRegs.hStart;
-	g_ViCurVStart0 = osViModeTable[mode].fldRegs[0].vStart;
-	g_ViCurVStart1 = osViModeTable[mode].fldRegs[1].vStart;
+	//var8008de08 = osViModeTable[mode].comRegs.hStart;
+	//g_ViCurVStart0 = osViModeTable[mode].fldRegs[0].vStart;
+	//g_ViCurVStart1 = osViModeTable[mode].fldRegs[1].vStart;
 
 	var8008dd60[0] = &var8008dd68[0];
 	var8008dd60[1] = &var8008dd68[1];
 
-	var8008dd68[0] = osViModeTable[mode];
-	var8008dd68[1] = osViModeTable[mode];
+	//var8008dd68[0] = osViModeTable[mode];
+	//var8008dd68[1] = osViModeTable[mode];
 
-	osViSetEvent(&sc->interruptQ, (OSMesg)VIDEO_MSG, numFields);
 	schedInitCrashLastRendered();
 
 	g_PrevFrameFb = videoCreateFramebuffer(0, 0, false, true);
@@ -271,14 +266,12 @@ void schedEndFrame(OSSched *sc)
 {
 	sc->frameCount++;
 
-	if (!g_Resetting && (sc->frameCount & 1)) {
+	if ((sc->frameCount & 1)) {
 		// osStopTimer(&g_SchedRspTimer);
 		// osSetTimer(&g_SchedRspTimer, 280000, 0, amgrGetFrameMesgQueue(), &g_SchedRspMsg);
 	}
 
-	if (!g_Resetting) {
-		viHandleRetrace();
-	}
+	viHandleRetrace();
 
 	inputUpdate();
 

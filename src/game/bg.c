@@ -84,7 +84,7 @@
 #define VTXBATCHTYPE_OPA 0x01
 #define VTXBATCHTYPE_XLU 0x02
 
-struct drawslot g_BgDrawSlots[61];
+struct drawslot g_BgDrawSlots[251]; // 61 to 251
 u8 *g_BgPrimaryData;
 u32 var800a4920;
 u32 g_BgSection3;
@@ -121,7 +121,7 @@ s32 g_NumRoomsWithGlares = 0;
 u32 var8007fc18 = 0x01000100;
 u32 var8007fc1c = 0;
 s32 g_CamRoom = 1;
-struct drawslot *g_BgSpecialDrawSlot = &g_BgDrawSlots[60];
+struct drawslot *g_BgSpecialDrawSlot = &g_BgDrawSlots[250]; // 60 to 250
 s32 g_BgLoadCandidateTimer240 = 0;
 s32 g_BgNumDrawSlots = 0;
 s32 g_BgNumAttemptedDrawSlots = 0;
@@ -177,10 +177,10 @@ void bgSetRoomOnscreen(s32 roomnum, s32 draworder, struct screenbox *box)
 		g_Rooms[roomnum].flags |= ROOMFLAG_ONSCREEN;
 
 		if (g_Rooms[roomnum].flags & ROOMFLAG_BBOXHACK) {
-			box->xmin = g_BgDrawSlots[60].box.xmin;
-			box->ymin = g_BgDrawSlots[60].box.ymin;
-			box->xmax = g_BgDrawSlots[60].box.xmax;
-			box->ymax = g_BgDrawSlots[60].box.ymax;
+			box->xmin = g_BgDrawSlots[250].box.xmin; // 60 to 250
+			box->ymin = g_BgDrawSlots[250].box.ymin;
+			box->xmax = g_BgDrawSlots[250].box.xmax;
+			box->ymax = g_BgDrawSlots[250].box.ymax;
 		}
 
 		if (g_BgFrameCount == g_BgDrawSlotsByRoom[roomnum].updatedframe) {
@@ -202,8 +202,8 @@ void bgSetRoomOnscreen(s32 roomnum, s32 draworder, struct screenbox *box)
 		} else {
 			index = g_BgNumDrawSlots;
 
-			if (index > 59) {
-				index = 59;
+			if (index > 249) { // 59 to 249
+				index = 249;
 			}
 
 			g_BgDrawSlots[index].roomnum = roomnum;
@@ -227,7 +227,7 @@ void bgSetRoomOnscreen(s32 roomnum, s32 draworder, struct screenbox *box)
 
 			g_BgNumAttemptedDrawSlots++;
 
-			if (g_BgNumAttemptedDrawSlots < 60) {
+			if (g_BgNumAttemptedDrawSlots < 250) { // 60 to 250
 				g_BgNumDrawSlots = g_BgNumAttemptedDrawSlots;
 			}
 
@@ -251,7 +251,7 @@ void bgGetRoomBrightnessRange(s32 roomnum, u8 *min, u8 *max)
 
 struct drawslot *bgGetRoomDrawSlot(s32 roomnum)
 {
-	s32 index = 60;
+	s32 index = 250; // 60 to 250
 
 	if (g_BgFrameCount == g_BgDrawSlotsByRoom[roomnum].updatedframe) {
 		index = g_BgDrawSlotsByRoom[roomnum].slotnum;
@@ -960,8 +960,8 @@ Gfx *bgRenderScene(Gfx *gdl)
 	struct prop *prop;
 	s16 tmp;
 	RoomNum *room;
-	s16 roomorder[60];
-	RoomNum roomnums[60];
+	s16 roomorder[250]; // 60 to 250
+	RoomNum roomnums[250]; // 60 to 250
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 		gdl = bgRenderSceneInXray(gdl);
@@ -2370,30 +2370,7 @@ s32 bgFindPortalByVertices(struct portalvertices *target)
  */
 void bgPrintLoadedRooms(void)
 {
-	if (debugIsRoomStateDebugEnabled()) {
-		u8 string[704];
-		s32 len = 0;
-		s32 i;
 
-		for (i = 1; i < g_Vars.roomcount; i++) {
-			if ((i - 1) % 40 == 0) {
-				if (i != 1) {
-					string[len] = '\n';
-					len++;
-				}
-			}
-
-			if (g_Rooms[i].loaded240) {
-				string[len] = 'L';
-			} else {
-				string[len] = '.';
-			}
-
-			len++;
-		}
-
-		string[len] = '\0';
-	}
 }
 
 u32 bgInflate(u8 *src, u8 *dst, u32 len)
@@ -2572,10 +2549,6 @@ void bgLoadRoom(s32 roomnum)
 	// 2. The inflated room data and the displaylists a second time.
 	if (g_Rooms[roomnum].gfxdatalen > 0) {
 		alloclen = g_Rooms[roomnum].gfxdatalen;
-
-		if (debugIsRoomGfxExtraMemEnabled()) {
-			alloclen += 1024;
-		}
 	} else {
 		// probably never reaches here in practice as all rooms have gfxdatalen
 		// alloc 10k and hope for the best

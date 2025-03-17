@@ -1308,12 +1308,6 @@ MenuItemHandlerResult menuhandlerCoopBuddy(s32 operation, struct menuitem *item,
 				maxbuddies = 1;
 			}
 
-#ifdef DEBUG
-			if (debugIsAllBuddiesEnabled()) {
-				maxbuddies = 4;
-			}
-#endif
-
 			data->dropdown.value = human + maxbuddies;
 		}
 #endif

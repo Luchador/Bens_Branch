@@ -43,9 +43,7 @@
 #include "lib/snd.h"
 #include "lib/memp.h"
 #include "lib/mema.h"
-#include "lib/profile.h"
 #include "lib/videbug.h"
-#include "lib/debughud.h"
 #include "lib/anim.h"
 #include "lib/rdp.h"
 #include "lib/lib_34d0.h"
@@ -463,11 +461,8 @@ void mainInit(void)
 	texInit();
 	lvInit();
 	cheatsInit();
-	func0000e9c0();
-	dhudInit();
 	playermgrInit();
 	frametimeInit();
-	profileInit();
 	smokesInit();
 	stub0f0008f0();
 	stub0f000900();
@@ -488,11 +483,6 @@ void mainInit(void)
 	g_MainIsBooting = 0;
 }
 
-u32 var8005dd40 = 0x00000000;
-u32 var8005dd44 = 0x00000000;
-u32 var8005dd48 = 0x00000000;
-u32 var8005dd4c = 0x00000000;
-u32 var8005dd50 = 0x00000000;
 s32 g_MainChangeToStageNum = -1;
 bool g_MainIsDebugMenuOpen = false;
 
@@ -681,25 +671,15 @@ void mainLoop(void)
 
 		gfxReset();
 		joyReset();
-		dhudReset();
 		zbufReset(g_StageNum);
 		lvReset(g_StageNum);
 		viReset(g_StageNum);
 		frametimeCalculate();
-		profileReset();
-
-		while (osRecvMesg(&g_MainMesgQueue, &msg, OS_MESG_NOBLOCK) != -1) {
-			// empty
-		}
 
 		while (g_MainChangeToStageNum < 0 || g_MainNumGfxTasks != 0) {
 			s32 cycles;
 
 			osRecvMesg(&g_MainMesgQueue, &msg, OS_MESG_BLOCK);
-
-#if VERSION < VERSION_NTSC_1_0
-			bootCheckStackOverflow();
-#endif
 
 			switch (*(s16 *) msg) {
 			case OS_SC_RETRACE_MSG:
@@ -741,9 +721,6 @@ void mainTick(void)
 
 	if (g_MainChangeToStageNum < 0 && g_MainNumGfxTasks < NUM_GFXTASKS) {
 		frametimeCalculate();
-		profile00009a98();
-		profileReset();
-		profileSetMarker(PROFILE_MAINTICK_START);
 		func000034d8();
 		joyDebugJoy();
 		schedSetCrashEnable2(false);
@@ -775,17 +752,6 @@ void mainTick(void)
 			gdl = lvRender(gdl);
 			func000034e0(&gdl);
 
-			if (debugGetProfileMode() >= 2) {
-				gdl = profileRender(gdl);
-			}
-
-#ifdef DEBUG
-			if (g_MainIsDebugMenuOpen) {
-				debugUpdateMenu();
-				gdl = dmenuRender(gdl);
-			}
-#endif
-
 			gDPFullSync(gdl++);
 			gSPEndDisplayList(gdl++);
 		}
@@ -799,13 +765,6 @@ void mainTick(void)
 		g_MainNumGfxTasks++;
 		memaPrint();
 		func0f16cf94();
-		profileSetMarker(PROFILE_MAINTICK_END);
-
-#if VERSION == VERSION_PAL_BETA
-#ifdef DEBUG
-		debug0f119a80nb();
-#endif
-#endif
 	}
 }
 
@@ -857,9 +816,7 @@ void mainEndStage(void)
  */
 void mainChangeToStage(s32 stagenum)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	pak0f11c6d0();
-#endif
 
 	g_MainChangeToStageNum = stagenum;
 }
@@ -869,14 +826,9 @@ s32 mainGetStageNum(void)
 	return g_StageNum;
 }
 
-void func0000e990(void)
+void mainFinalObjectiveCheck(void)
 {
 	objectivesCheckAll();
 	objectivesDisableChecking();
 	mainEndStage();
-}
-
-void func0000e9c0(void)
-{
-	// empty
 }

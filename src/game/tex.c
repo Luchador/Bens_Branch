@@ -406,7 +406,6 @@ Gfx *texWriteTileFromDefinition(Gfx *gdl, struct tex *tex, s32 offset, s32 shift
 	s32 masks;
 	s32 maskt;
 	s32 line;
-	u32 stack[4];
 	s32 uls;
 	s32 ult;
 	s32 lrs;
@@ -881,11 +880,7 @@ s32 texLoadFromGdl(Gfx *instart, s32 gdlsizeinbytes, Gfx *outstart, struct texpo
 
 			tex1 = texFindInPool(texturenum, pool);
 
-			if (tex1 != NULL) {
-				spf4 = tex1->unk0c_03;
-			} else {
-				spf4 = 0;
-			}
+			spf4 = 0;
 
 			if (tex1 != NULL) {
 				outgdl = texWriteTextureCmd(outgdl, texcmd, tex1, appendtex);

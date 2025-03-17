@@ -788,8 +788,6 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	struct modelrodata_dl *rodata;
 	struct modelrwdata_dl *rwdata;
 
-	u32 stack1[8];
-
 	f32 sp13c;
 
 	Gfx *tmpgdl;
@@ -847,12 +845,12 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 				g_PdLogoYRotSpeed = 0.0f;
 			}
 
-			if (g_PdLogoYRotCur >= M_BADTAU) {
-				g_PdLogoYRotCur -= M_BADTAU;
-				g_PdLogoEndYRot -= M_BADTAU;
+			if (g_PdLogoYRotCur >= M_TAU) {
+				g_PdLogoYRotCur -= M_TAU;
+				g_PdLogoEndYRot -= M_TAU;
 			} else if (g_PdLogoYRotCur < 0.0f) {
-				g_PdLogoYRotCur += M_BADTAU;
-				g_PdLogoEndYRot += M_BADTAU;
+				g_PdLogoYRotCur += M_TAU;
+				g_PdLogoEndYRot += M_TAU;
 			}
 		}
 
@@ -861,10 +859,10 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		}
 	} else if (g_PdLogoYRotEnabled) {
 		g_PdLogoYRotCur += g_PdLogoYRotSpeed * g_Vars.lvupdate60;
-		if (g_PdLogoYRotCur >= M_BADTAU) {
-			g_PdLogoYRotCur -= M_BADTAU;
+		if (g_PdLogoYRotCur >= M_TAU) {
+			g_PdLogoYRotCur -= M_TAU;
 		} else if (g_PdLogoYRotCur < 0.0f) {
-			g_PdLogoYRotCur += M_BADTAU;
+			g_PdLogoYRotCur += M_TAU;
 		}
 	}
 
@@ -919,10 +917,10 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 			g_PdLogoYRotEnabled = false;
 			g_PdLogoYRotStopping = true;
 
-			tmp = g_PdLogoYRotCur * 4.0f / M_BADTAU;
+			tmp = g_PdLogoYRotCur * 4.0f / M_TAU;
 			tmp += 2;
 
-			g_PdLogoEndYRot = tmp * M_BADTAU / 4.0f;
+			g_PdLogoEndYRot = tmp * M_TAU / 4.0f;
 		}
 
 		if (g_PdLogoMorphEndTimer > TICKS(100) && g_PdLogoMorphEndTimer - g_Vars.lvupdate60 <= TICKS(100)) {
@@ -999,8 +997,8 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		// Some unused value... maybe a different method of rotating the light?
 		g_PdLogoUnusedRot += unusedrotinc * g_Vars.lvupdate60freal;
 
-		if (g_PdLogoUnusedRot >= M_BADTAU) {
-			g_PdLogoUnusedRot -= M_BADTAU;
+		if (g_PdLogoUnusedRot >= M_TAU) {
+			g_PdLogoUnusedRot -= M_TAU;
 		}
 	}
 

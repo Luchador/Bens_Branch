@@ -137,8 +137,6 @@ void botinvClear(struct chrdata *chr)
 		for (i = 0; i < chr->aibot->maxitems; i++) {
 			chr->aibot->items[i].type = -1;
 		}
-
-		dprint();
 	}
 }
 
@@ -162,8 +160,6 @@ struct invitem *botinvGetFreeSlot(struct chrdata *chr)
 			return &chr->aibot->items[i];
 		}
 	}
-
-	dprint();
 
 	return NULL;
 }

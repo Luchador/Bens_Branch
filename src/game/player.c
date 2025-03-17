@@ -447,7 +447,7 @@ void playerStartNewLife(void)
 
 	hudmsgsSetOn(0xffffffff);
 
-	angle = M_BADTAU - scenarioChooseSpawnLocation(30, &pos, rooms, g_Vars.currentplayer->prop); // var7f1ad534
+	angle = M_TAU - scenarioChooseSpawnLocation(30, &pos, rooms, g_Vars.currentplayer->prop); // var7f1ad534
 
 	groundy = cdFindGroundInfoAtCyl(&pos, 30, rooms,
 			&g_Vars.currentplayer->floorcol,
@@ -459,7 +459,7 @@ void playerStartNewLife(void)
 	pos.y = groundy + g_Vars.currentplayer->vv_eyeheight;
 
 	g_Vars.currentplayer->vv_manground = groundy;
-	g_Vars.currentplayer->vv_theta = angle * 360.0f / M_BADTAU;
+	g_Vars.currentplayer->vv_theta = angle * 360.0f / M_TAU;
 	g_Vars.currentplayer->vv_ground = groundy;
 
 	playerResetBond(&g_Vars.currentplayer->bond2, &pos);
@@ -1216,7 +1216,7 @@ void playerChooseBodyAndHead(s32 *bodynum, s32 *headnum, s32 *arg2)
  */
 void playerTickChrBody(void)
 {
-	f32 turnangle = (360.0f - g_Vars.currentplayer->vv_theta) * M_BADTAU / 360.0f;
+	f32 turnangle = (360.0f - g_Vars.currentplayer->vv_theta) * M_TAU / 360.0f;
 
 	if (g_Vars.currentplayer->haschrbody == false) {
 		struct chrdata *chr;
@@ -1716,12 +1716,12 @@ void playerExecutePreparedWarp(void)
 
 		g_WarpType3PosAngle += g_WarpType3RotAngle * g_Vars.lvupdate60freal;
 
-		while (g_WarpType3PosAngle >= M_BADTAU) {
-			g_WarpType3PosAngle -= M_BADTAU;
+		while (g_WarpType3PosAngle >= M_TAU) {
+			g_WarpType3PosAngle -= M_TAU;
 		}
 
 		while (g_WarpType3PosAngle < 0) {
-			g_WarpType3PosAngle += M_BADTAU;
+			g_WarpType3PosAngle += M_TAU;
 		}
 	}
 
@@ -1789,7 +1789,7 @@ void playerReorientForCutsceneStop(s32 tweenduration60)
 	mtx4LoadRotation(&rot, &rotmtx);
 
 	theta = atan2f(-rotmtx.m[2][0], -rotmtx.m[2][2]);
-	theta = (M_BADTAU - theta) * 57.304901123047f;
+	theta = (M_TAU - theta) * 57.304901123047f;
 	g_Vars.bond->vv_theta = theta;
 
 	chrSetLookAngle(g_Vars.bond->prop->chr, (360 - theta) * 0.017450513318181f);
@@ -3539,21 +3539,21 @@ void playerTick()
 						prop = chrSpawnAtCoord(BODY_DARK_COMBAT, HEAD_VD,
 								&g_Vars.currentplayer->prop->pos,
 								g_Vars.currentplayer->prop->rooms,
-								BADDEG2RAD(g_Vars.currentplayer->vv_theta / 2),
+								DEG2RAD(g_Vars.currentplayer->vv_theta / 2),
 								ailistFindById(GAILIST_INIT_DEFAULT_BUDDY),
 								SPAWNFLAG_ALLOWONSCREEN);
 					} else if (stageGetIndex(g_Vars.stagenum) == STAGEINDEX_MBR) {
 						prop = chrSpawnAtCoord(BODY_MRBLONDE, HEAD_MRBLONDE,
 								&g_Vars.currentplayer->prop->pos,
 								g_Vars.currentplayer->prop->rooms,
-								BADDEG2RAD(g_Vars.currentplayer->vv_theta),
+								DEG2RAD(g_Vars.currentplayer->vv_theta),
 								ailistFindById(GAILIST_INIT_DEFAULT_BUDDY),
 								SPAWNFLAG_ALLOWONSCREEN);
 					} else {
 						prop = chrSpawnAtCoord(BODY_DARK_COMBAT, HEAD_VD,
 								&g_Vars.currentplayer->prop->pos,
 								g_Vars.currentplayer->prop->rooms,
-								BADDEG2RAD(g_Vars.currentplayer->vv_theta / 2),
+								DEG2RAD(g_Vars.currentplayer->vv_theta / 2),
 								ailistFindById(GAILIST_INIT_DEFAULT_BUDDY),
 								SPAWNFLAG_ALLOWONSCREEN);
 					}
@@ -3592,14 +3592,14 @@ void playerTick()
 						prop = chrSpawnAtCoord(BODY_MRBLONDE, HEAD_MRBLONDE,
 								&g_Vars.currentplayer->prop->pos,
 								g_Vars.currentplayer->prop->rooms,
-								BADDEG2RAD(g_Vars.currentplayer->vv_theta),
+								DEG2RAD(g_Vars.currentplayer->vv_theta),
 								ailistFindById(GAILIST_INIT_DEFAULT_BUDDY),
 								SPAWNFLAG_ALLOWONSCREEN);
 					} else {
 						prop = chrSpawnAtCoord(BODY_CARRINGTON, HEAD_JAMIE,
 								&g_Vars.currentplayer->prop->pos,
 								g_Vars.currentplayer->prop->rooms,
-								BADDEG2RAD(g_Vars.currentplayer->vv_theta),
+								DEG2RAD(g_Vars.currentplayer->vv_theta),
 								ailistFindById(GAILIST_INIT_PUGILIST_BUDDY),
 								SPAWNFLAG_ALLOWONSCREEN);
 					}
@@ -3636,14 +3636,14 @@ void playerTick()
 						prop = chrSpawnAtCoord(BODY_MRBLONDE, HEAD_MRBLONDE,
 								&g_Vars.currentplayer->prop->pos,
 								g_Vars.currentplayer->prop->rooms,
-								BADDEG2RAD(g_Vars.currentplayer->vv_theta),
+								DEG2RAD(g_Vars.currentplayer->vv_theta),
 								ailistFindById(GAILIST_INIT_DEFAULT_BUDDY),
 								SPAWNFLAG_ALLOWONSCREEN);
 					} else {
 						prop = chrSpawnAtCoord(BODY_MRBLONDE, HEAD_MARK2,
 								&g_Vars.currentplayer->prop->pos,
 								g_Vars.currentplayer->prop->rooms,
-								BADDEG2RAD(g_Vars.currentplayer->vv_theta),
+								DEG2RAD(g_Vars.currentplayer->vv_theta),
 								ailistFindById(GAILIST_INIT_DEFAULT_BUDDY),
 								SPAWNFLAG_ALLOWONSCREEN);
 					}
@@ -3682,14 +3682,14 @@ void playerTick()
 						prop = chrSpawnAtCoord(BODY_MRBLONDE, HEAD_MRBLONDE,
 								&g_Vars.currentplayer->prop->pos,
 								g_Vars.currentplayer->prop->rooms,
-								BADDEG2RAD(g_Vars.currentplayer->vv_theta),
+								DEG2RAD(g_Vars.currentplayer->vv_theta),
 								ailistFindById(GAILIST_INIT_DEFAULT_BUDDY),
 								SPAWNFLAG_ALLOWONSCREEN);
 					} else {
 						prop = chrSpawnAtCoord(BODY_CISOLDIER, HEAD_CHRIST,
 								&g_Vars.currentplayer->prop->pos,
 								g_Vars.currentplayer->prop->rooms,
-								BADDEG2RAD(g_Vars.currentplayer->vv_theta),
+								DEG2RAD(g_Vars.currentplayer->vv_theta),
 								ailistFindById(GAILIST_INIT_DEFAULT_BUDDY),
 								SPAWNFLAG_ALLOWONSCREEN);
 					}
@@ -3729,14 +3729,14 @@ void playerTick()
 						prop = chrSpawnAtCoord(BODY_MRBLONDE, HEAD_MRBLONDE,
 								&g_Vars.currentplayer->prop->pos,
 								g_Vars.currentplayer->prop->rooms,
-								BADDEG2RAD(g_Vars.currentplayer->vv_theta),
+								DEG2RAD(g_Vars.currentplayer->vv_theta),
 								ailistFindById(GAILIST_INIT_DEFAULT_BUDDY),
 								SPAWNFLAG_ALLOWONSCREEN);
 					} else {
 						prop = chrSpawnAtCoord(BODY_ELVIS1, HEAD_MAIAN_S,
 								&g_Vars.currentplayer->prop->pos,
 								g_Vars.currentplayer->prop->rooms,
-								BADDEG2RAD(g_Vars.currentplayer->vv_theta),
+								DEG2RAD(g_Vars.currentplayer->vv_theta),
 								ailistFindById(GAILIST_INIT_DEFAULT_BUDDY),
 								SPAWNFLAG_ALLOWONSCREEN);
 					}
@@ -3818,32 +3818,32 @@ void playerTick()
 		zdist = pad.pos.z - g_Vars.currentplayer->bond2.unk10.z;
 		targetangle = atan2f(xdist, zdist);
 
-		if (targetangle > M_BADTAU) {
-			targetangle -= M_BADTAU;
+		if (targetangle > M_TAU) {
+			targetangle -= M_TAU;
 		}
 
 		if (targetangle < 0) {
-			targetangle += M_BADTAU;
+			targetangle += M_TAU;
 		}
 
 		oldangle = atan2f(g_Vars.currentplayer->bond2.unk00.x, g_Vars.currentplayer->bond2.unk00.z);
 
-		if (oldangle > M_BADTAU) {
-			oldangle -= M_BADTAU;
+		if (oldangle > M_TAU) {
+			oldangle -= M_TAU;
 		}
 
 		if (oldangle < 0) {
-			oldangle += M_BADTAU;
+			oldangle += M_TAU;
 		}
 
 		diffangle = oldangle - targetangle;
 
 		if (diffangle > M_PI) {
-			diffangle -= M_BADTAU;
+			diffangle -= M_TAU;
 		}
 
 		if (diffangle < -M_PI) {
-			diffangle += M_BADTAU;
+			diffangle += M_TAU;
 		}
 
 		direction = (diffangle / M_PI < 0) ? -1 : 1;
@@ -3860,7 +3860,7 @@ void playerTick()
 		}
 
 		if (g_Vars.currentplayer->vv_verta <= 30) {
-			g_Vars.currentplayer->vv_verta += g_Vars.currentplayer->autocontrol_lookup / 360.0f * M_BADTAU;
+			g_Vars.currentplayer->vv_verta += g_Vars.currentplayer->autocontrol_lookup / 360.0f * M_TAU;
 		}
 
 		if (g_Vars.currentplayer->autocontrol_walkspeed) {
@@ -3923,7 +3923,7 @@ void playerTick()
 		if (var8007074c == 2
 				&& playerIsFadeComplete()
 				&& g_Vars.currentplayer->colourscreenfrac == 1) {
-			func0000e990();
+			mainFinalObjectiveCheck();
 		}
 	}
 
@@ -4143,10 +4143,10 @@ Gfx *playerUpdateShootRot(Gfx *gdl)
 	value = sqrtf(sp3c.z * sp3c.z + sp3c.x * sp3c.x);
 
 	rotx = atan2f(y, value);
-	rotx += (g_Vars.currentplayer->vv_verta * M_BADTAU) / 360.0f;
+	rotx += (g_Vars.currentplayer->vv_verta * M_TAU) / 360.0f;
 
 	if (rotx >= M_PI) {
-		rotx -= M_BADTAU;
+		rotx -= M_TAU;
 	}
 
 	g_Vars.currentplayer->shootrotx = rotx;
@@ -4154,7 +4154,7 @@ Gfx *playerUpdateShootRot(Gfx *gdl)
 	roty = atan2f(-sp3c.x, -sp3c.z);
 
 	if (roty >= M_PI) {
-		roty -= M_BADTAU;
+		roty -= M_TAU;
 	}
 
 	g_Vars.currentplayer->shootroty = roty;
@@ -4208,10 +4208,10 @@ Gfx *playerRenderShield(Gfx *gdl)
 			g_Vars.currentplayer->shieldshowrot -= maxrotf;
 		}
 
-		f20 = (sinf(g_Vars.currentplayer->shieldshowrot * (M_BADTAU / maxrotf)) + 1) * 0.5f;
+		f20 = (sinf(g_Vars.currentplayer->shieldshowrot * (M_TAU / maxrotf)) + 1) * 0.5f;
 		sp90[0] = camGetScreenLeft() + camGetScreenWidth() * f20;
 
-		f20 = (cosf(g_Vars.currentplayer->shieldshowrot * (M_BADTAU / maxrotf)) + 1) * 0.5f;
+		f20 = (cosf(g_Vars.currentplayer->shieldshowrot * (M_TAU / maxrotf)) + 1) * 0.5f;
 		sp90[1] = camGetScreenTop() + camGetScreenHeight() * f20;
 
 		sp88[0] = camGetScreenWidth() * (1.0f + 0.002f * ((g_Vars.currentplayer->shieldshowrnd >> 20) % 100) + (g_Vars.currentplayer->shieldshowtime * (0.2f + 0.002f * (g_Vars.currentplayer->shieldshowrnd % 100)) * (1.0f / 60.0f)));
@@ -5098,14 +5098,14 @@ s32 playerTickThirdPerson(struct prop *prop)
 				sp9c.y = spa8.m[3][1] + spa8.m[1][1] * 7;
 				sp9c.z = spa8.m[3][2] + spa8.m[1][2] * 7;
 
-				player->vv_theta = (M_BADTAU - chrGetInverseTheta(chr)) * 360.0f / M_BADTAU;
+				player->vv_theta = (M_TAU - chrGetInverseTheta(chr)) * 360.0f / M_TAU;
 				player->vv_verta = 0;
 			} else {
 				sp9c.x = player->prop->pos.x;
 				sp9c.y = player->prop->pos.y;
 				sp9c.z = player->prop->pos.z;
 
-				player->vv_theta = (M_BADTAU - chrGetInverseTheta(chr)) * 360.0f / M_BADTAU;
+				player->vv_theta = (M_TAU - chrGetInverseTheta(chr)) * 360.0f / M_TAU;
 				player->vv_verta = 0;
 			}
 
@@ -5170,10 +5170,10 @@ s32 playerTickThirdPerson(struct prop *prop)
 
 		angle = (360.0f - player->vv_theta) * 0.017450513318181f - player->angleoffset;
 
-		if (angle >= M_BADTAU) {
-			angle -= M_BADTAU;
+		if (angle >= M_TAU) {
+			angle -= M_TAU;
 		} else if (angle < 0) {
-			angle += M_BADTAU;
+			angle += M_TAU;
 		}
 
 		chrSetLookAngle(chr, angle);
@@ -5366,8 +5366,8 @@ void playerChooseThirdPersonAnimation(struct chrdata *chr, s32 crouchpos, f32 sp
 			} else {
 				angle = atan2f(speedsideways, speedforwards);
 
-				if (angle >= M_BADPI) {
-					angle -= M_BADTAU;
+				if (angle >= M_PI) {
+					angle -= M_TAU;
 				}
 
 				if (crouchpos == CROUCHPOS_SQUAT) {
@@ -5403,10 +5403,10 @@ void playerChooseThirdPersonAnimation(struct chrdata *chr, s32 crouchpos, f32 sp
 				}
 
 				if (angle < -1.6333680152893f) {
-					angle += M_BADPI;
+					angle += M_PI;
 					speed = -speed;
 				} else if (angle > 1.6333680152893f) {
-					angle -= M_BADPI;
+					angle -= M_PI;
 					speed = -speed;
 				}
 
