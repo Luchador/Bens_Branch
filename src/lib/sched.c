@@ -284,12 +284,14 @@ void __scHandleRetrace(OSSched *sc)
 {
 	sc->frameCount++;
 
-	if (((sc->frameCount & 1))) {
+	if (!g_Resetting && ((sc->frameCount & 1))) {
 		osStopTimer(&g_SchedRspTimer);
 		osSetTimer(&g_SchedRspTimer, 280000, 0, amgrGetFrameMesgQueue(), &g_SchedRspMsg);
 	}
 
-	viHandleRetrace();
+	if (!g_Resetting) {
+		viHandleRetrace();
+	}
 
 	joysHandleRetrace();
 	schedRenderCrashPeriodically(sc->frameCount);
@@ -349,31 +351,38 @@ void __scHandleRSP(OSSched *sc)
 	OSScTask *t, *sp = 0, *dp = 0;
 	s32 state;
 
-	t = sc->curRSPTask;
-	sc->curRSPTask = 0;
+	if (!g_Resetting) {
+		t = sc->curRSPTask;
+		sc->curRSPTask = 0;
 
-	if ((t->state & OS_SC_YIELD) && osSpTaskYielded(&t->list)) {
-		t->state |= OS_SC_YIELDED;
+		if ((t->state & OS_SC_YIELD) && osSpTaskYielded(&t->list)) {
+			t->state |= OS_SC_YIELDED;
 
-		if ((t->flags & OS_SC_TYPE_MASK) == OS_SC_XBUS) {
-			// Push the task back on the list
-			t->next = sc->gfxListHead;
-			sc->gfxListHead = t;
+			if ((t->flags & OS_SC_TYPE_MASK) == OS_SC_XBUS) {
+				// Push the task back on the list
+				t->next = sc->gfxListHead;
+				sc->gfxListHead = t;
 
-			if (sc->gfxListTail == 0) {
-				sc->gfxListTail = t;
+				if (sc->gfxListTail == 0) {
+					sc->gfxListTail = t;
+				}
 			}
+		} else {
+			t->state &= ~OS_SC_NEEDS_RSP;
+			__scTaskComplete(sc, t);
 		}
-	} else {
-		t->state &= ~OS_SC_NEEDS_RSP;
-		__scTaskComplete(sc, t);
-	}
 
-	state = ((sc->curRSPTask == 0) << 1) | (sc->curRDPTask == 0);
+		state = ((sc->curRSPTask == 0) << 1) | (sc->curRDPTask == 0);
 
-	if (__scSchedule(sc, &sp, &dp, state) != state) {
-		__scExec(sc, sp, dp);
+		if (__scSchedule(sc, &sp, &dp, state) != state) {
+			__scExec(sc, sp, dp);
+		}
 	}
+}
+
+u32 *schedGetDpCounters(void)
+{
+	return g_SchedDpCounters;
 }
 
 void schedInitArtifacts(void)

@@ -266,12 +266,14 @@ void schedEndFrame(OSSched *sc)
 {
 	sc->frameCount++;
 
-	if ((sc->frameCount & 1)) {
+	if (!g_Resetting && (sc->frameCount & 1)) {
 		// osStopTimer(&g_SchedRspTimer);
 		// osSetTimer(&g_SchedRspTimer, 280000, 0, amgrGetFrameMesgQueue(), &g_SchedRspMsg);
 	}
 
-	viHandleRetrace();
+	if (!g_Resetting) {
+		viHandleRetrace();
+	}
 
 	inputUpdate();
 

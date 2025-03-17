@@ -43,3 +43,4 @@ tools/mkrom/mkrom
 CppProperties.json
 .idea
 .vscode/settings.json
+tools/recomp

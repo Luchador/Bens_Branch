@@ -17,7 +17,7 @@ f32 *var8009c6d8;
 f32 *var8009c6dc;
 
 u32 var8005f700 = 0;
-u32 g_MP3InitDecoder = 0;
+u32 var8005f704 = 0;
 
 s32 mp3main00043dd0(struct asistream *stream)
 {
@@ -158,13 +158,14 @@ bool mp3main00043ef8(struct asistream *stream, s32 arg1)
 	return true;
 }
 
-void mp3mainInit(void)
+u32 mp3mainInit(void)
 {
-	if (g_MP3InitDecoder++) {
-		return;
+	if (var8005f704++) {
+		return 2;
 	}
 
 	mp3decInit();
+	return 0;
 }
 
 struct asistream *mp3main00044460(s32 arg0, void *arg1, s32 arg2)
