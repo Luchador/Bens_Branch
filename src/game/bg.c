@@ -94,8 +94,7 @@ RoomNum g_BgForceOnscreenRooms[350];
 s32 g_BgNumForceOnscreenRooms;
 u16 g_BgUnloadDelay240;
 u16 g_BgUnloadDelay240_2;
-u32 var800a4bf4;
-RoomNum g_GlareRooms[100];
+RoomNum g_GlareRooms[300]; // Tripled
 uintptr_t *g_BgPrimaryData2;
 struct bgroom *g_BgRooms;
 struct bgportal *g_BgPortals;
@@ -112,14 +111,11 @@ struct portalcamcacheitem *g_PortalCameraCache;
 struct bgsnake g_BgSnake;
 
 s32 g_StageIndex = 1;
-uintptr_t var8007fc04 = 0;
 u8 *var8007fc08 = NULL;
 
 s16 var8007fc0c = 0;
 s16 var8007fc10 = 0;
 s32 g_NumRoomsWithGlares = 0;
-u32 var8007fc18 = 0x01000100;
-u32 var8007fc1c = 0;
 s32 g_CamRoom = 1;
 struct drawslot *g_BgSpecialDrawSlot = &g_BgDrawSlots[250]; // 60 to 250
 s32 g_BgLoadCandidateTimer240 = 0;
@@ -1148,6 +1144,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 		thing = &g_BgDrawSlots[roomnum];
 
 		// Render BG translucent components
+		gSPClearGeometryMode(gdl++, G_CULL_BOTH); // Ben's comment: this fixes transparent textures like railings from going invisible in levels exported by the Setup Editor, though it doesn't fix their sorting problems
 		gdl = bgScissorWithinViewportF(gdl, thing->box.xmin, thing->box.ymin, thing->box.xmax, thing->box.ymax);
 		gdl = envStartFog(gdl, true);
 		gdl = bgRenderRoomXlu(gdl, thing->roomnum);
@@ -1188,11 +1185,7 @@ Gfx *bgRenderArtifacts(Gfx *gdl)
 
 void bgLoadFile(void *memaddr, u32 offset, u32 len)
 {
-	if (var8007fc04) {
-		bcopy(var8007fc08 + offset, memaddr, len);
-	} else {
-		fileLoadPartToAddr(g_Stages[g_StageIndex].bgfileid, memaddr, offset, len);
-	}
+	fileLoadPartToAddr(g_Stages[g_StageIndex].bgfileid, memaddr, offset, len);
 }
 
 s32 bgGetStageIndex(s32 stagenum)
@@ -1524,12 +1517,8 @@ void bgBuildTables(s32 stagenum)
 		g_Rooms[i].unk4d = 0;
 		g_Rooms[i].lightop = 0;
 		g_Rooms[i].unk4e_04 = 0;
-#ifndef PLATFORM_N64
 		g_Rooms[i].extra_flags = 0;
-#endif
 	}
-
-	bgSetStageTranslationThing(g_Stages[g_StageIndex].unk14);
 
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		g_Vars.playerstats[i].scale_bg2gfx = g_Stages[g_StageIndex].unk18;
@@ -1771,9 +1760,7 @@ void bgBuildTables(s32 stagenum)
 
 		bgLoadFile(scratch, g_BgSection3 + 4, ((section3compsize - 1) | 0xf) + 1);
 		bgInflate(scratch, section3, section3compsize);
-#ifndef PLATFORM_N64
 		preprocessBgSection3(section3, section3compsize);
-#endif
 
 		// Section 3 starts with a table of room bounding boxes
 		bboxptr = (s16 *) section3;
@@ -1876,21 +1863,12 @@ void bgBuildTables(s32 stagenum)
 	wallhitReset();
 	func0f002a98();
 	func0f001c0c();
-
-#if VERSION < VERSION_NTSC_1_0
-	bgBuildReferenceLightSums();
-#endif
 }
 
 void bgStop(void)
 {
 	bgUnloadAllRooms();
 	mtx00016748(1);
-}
-
-void bgSetStageTranslationThing(f32 arg0)
-{
-	// empty
 }
 
 f32 bgGetStageTranslationThing(void)
@@ -2002,7 +1980,6 @@ Gfx *bgScissorWithinViewportF(Gfx *gdl, f32 viewleft, f32 viewtop, f32 viewright
 
 Gfx *bgScissorWithinViewport(Gfx *gdl, s32 viewleft, s32 viewtop, s32 viewright, s32 viewbottom)
 {
-#ifndef PLATFORM_N64
 	const s32 xmargin = videoGetWidth() / SCREEN_320 - 1;
 	const s32 ymargin = videoGetHeight() / SCREEN_240 - 1;
 	if (xmargin > 0) {
@@ -2013,7 +1990,6 @@ Gfx *bgScissorWithinViewport(Gfx *gdl, s32 viewleft, s32 viewtop, s32 viewright,
 		viewtop -= ymargin;
 		viewbottom += ymargin;
 	}
-#endif
 
 	if (viewleft < g_Vars.currentplayer->viewleft) {
 		viewleft = g_Vars.currentplayer->viewleft;
@@ -2359,44 +2335,13 @@ s32 bgFindPortalByVertices(struct portalvertices *target)
 	return 0;
 }
 
-/**
- * Build a string showing the state of all rooms in the stage.
- *
- * The string contains "L" if a room is loaded, "." if not, and has line breaks
- * every 40 characters.
- *
- * Nothing is done with the string though. It's likely that debug versions of
- * the game would send the string to the host computer or display it on the HUD.
- */
-void bgPrintLoadedRooms(void)
-{
-
-}
-
 u32 bgInflate(u8 *src, u8 *dst, u32 len)
 {
 	u32 result;
 	u8 scratch[5120];
-#if VERSION < VERSION_NTSC_1_0
-	char message[128];
-#endif
 
 	if (rzipIs1173(src)) {
 		result = rzipInflate(src, dst, &scratch);
-
-#if VERSION < VERSION_NTSC_1_0
-		if (!result) {
-			sprintf(message, "DMA-Crash %s %d Ram: %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-					"bg.c", 6914,
-					src[0], src[1], src[2], src[3],
-					src[4], src[5], src[6], src[7],
-					src[8], src[9], src[10], src[11],
-					src[12], src[13], src[14], src[15]);
-
-			crashSetMessage(message);
-			CRASH();
-		}
-#endif
 	} else {
 		result = len;
 		bcopy(src, dst, len);
@@ -2412,11 +2357,6 @@ Gfx *bgGetNextGdlInBlock(struct roomblock *block, Gfx *start, Gfx *end)
 		if (block == NULL) {
 			return end;
 		}
-
-		if (start);
-		if (start);
-		if (start);
-		if (start);
 
 		switch (block->type) {
 		case ROOMBLOCKTYPE_LEAF:
@@ -2556,7 +2496,7 @@ void bgLoadRoom(s32 roomnum)
 	}
 
 #ifdef PLATFORM_64BIT
-	alloclen = alloclen * 4; // just to be safe for now, adjust properly later #TODO
+	alloclen = alloclen * 8; // just to be safe for now, adjust properly later #TODO
 #endif
 
 	// allocate room data from heap to not take up mema space
@@ -2588,9 +2528,7 @@ void bgLoadRoom(s32 roomnum)
 
 		// Inflate the data to the left side of the allocation
 		inflatedlen = bgInflate(memaddr, allocation, g_BgRooms[roomnum + 1].unk00 - g_BgRooms[roomnum].unk00);
-#ifndef PLATFORM_N64
 		inflatedlen = preprocessBgRoom(allocation, inflatedlen, g_BgRooms[roomnum].unk00);
-#endif
 
 		g_Rooms[roomnum].gfxdata = (struct roomgfxdata *)allocation;
 
@@ -2749,58 +2687,20 @@ void bgLoadRoom(s32 roomnum)
 		g_Rooms[roomnum].colours = NULL;
 
 		dyntexSetCurrentRoom(-1);
-
-#if VERSION < VERSION_NTSC_1_0
-		bgVerifyLightSums("bg.c", 7474);
-#endif
 	}
 }
-
-const char var7f1b7420[] = "Checking Convex Room %d";
-const char var7f1b7438[] = " Portal %d %s%s%.1f < %.1f";
-const char var7f1b7454[] = "";
-const char var7f1b7458[] = "";
-const char var7f1b745c[] = " Convex Room Failed (1)";
-const char var7f1b7474[] = " Portal %d %s%s%.1f > %.1f";
-const char var7f1b7490[] = "";
-const char var7f1b7494[] = "";
-const char var7f1b7498[] = " Convex Room Failed (0)";
-const char var7f1b74b0[] = "Checking Concave Room %d";
-const char var7f1b74cc[] = " Checking Portal %d";
-const char var7f1b74e0[] = "Reject P:%d (%s%s%.1f %.1f n3=%.1f)";
-const char var7f1b7504[] = "";
-const char var7f1b7508[] = "";
-const char var7f1b750c[] = "Reject P:%d (%s%s%.1f %.1f n4=%.1f)";
-const char var7f1b7530[] = "";
-const char var7f1b7534[] = "";
-const char var7f1b7538[] = " Full %d%s%s %.1f %.1f (%.1f %.1f)";
-const char var7f1b755c[] = "";
-const char var7f1b7560[] = "";
-const char var7f1b7564[] = " Failed 2 - Crossed portal %d";
-const char var7f1b7584[] = " Failed 1 - Crossed portal %d";
-const char var7f1b75a4[] = " Passed";
 
 void bgUnloadRoom(s32 roomnum)
 {
 	u32 size;
 
 	if (g_Rooms[roomnum].vtxbatches) {
-#ifdef PLATFORM_N64
-		size = ((g_Rooms[roomnum].numvtxbatches) * sizeof(struct vtxbatch) + 0xf) & ~0xf;
-		memaFree(g_Rooms[roomnum].vtxbatches, size);
-#else
 		sysMemFree(g_Rooms[roomnum].vtxbatches);
-#endif
 		g_Rooms[roomnum].vtxbatches = NULL;
 	}
 
 	if (g_Rooms[roomnum].gfxdatalen > 0) {
-#ifdef PLATFORM_N64
-		size = g_Rooms[roomnum].gfxdatalen;
-		memaFree(g_Rooms[roomnum].gfxdata, size);
-#else
 		sysMemFree(g_Rooms[roomnum].gfxdata);
-#endif
 		g_Rooms[roomnum].gfxdata = NULL;
 	}
 
@@ -2819,69 +2719,6 @@ void bgUnloadAllRooms(void)
 }
 
 /**
- * Find rooms which were recently visible and not yet unloaded, and unload them
- * until the given bytesneeded amount is available in mema.
- *
- * Rooms are unloaded in order of least recently visible.
- *
- * If there's still not enough space after 30 unloads and the desparate argument
- * is true, do a final iteration through all the rooms and free everything
- * that's not visible.
- */
-void bgGarbageCollectRooms(s32 bytesneeded, bool desparate)
-{
-#ifdef PLATFORM_N64 // don't need this on PC as rooms are allocated from heap
-	s32 bytesfree = memaGetLongestFree();
-	s32 oldestroom;
-	s32 oldesttimer;
-	s32 count = 0;
-	s32 i;
-
-	while (bytesfree < bytesneeded) {
-		oldestroom = 0;
-		oldesttimer = 0;
-
-		for (i = 1; i < g_Vars.roomcount; i++) {
-			if (g_Rooms[i].loaded240 > oldesttimer) {
-				oldestroom = i;
-				oldesttimer = g_Rooms[i].loaded240;
-			}
-		}
-
-		if (oldestroom != 0) {
-			bgUnloadRoom(oldestroom);
-			memaDefrag();
-		}
-
-		bytesfree = memaGetLongestFree();
-		count++;
-
-		if (count == 30) {
-			if (desparate == true) {
-				for (i = 1; i < g_Vars.roomcount; i++) {
-#if VERSION >= VERSION_NTSC_1_0
-					if (g_Rooms[i].loaded240 > 8)
-#else
-					if (g_Rooms[i].loaded240)
-#endif
-					{
-						bgUnloadRoom(i);
-						memaDefrag();
-
-						if (memaGetLongestFree() >= bytesneeded) {
-							return;
-						}
-					}
-				}
-			}
-
-			break;
-		}
-	}
-#endif
-}
-
-/**
  * Increase the loaded240 timers for rooms which are no longer visible.
  * If any rooms have reached the timer limit then unload them, but don't unload
  * more than 2 rooms per frame.
@@ -2893,11 +2730,7 @@ void bgTickRooms(void)
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
 		if (g_Rooms[i].loaded240) {
-#if VERSION >= VERSION_NTSC_1_0
 			g_Rooms[i].loaded240++;
-#else
-			g_Rooms[i].loaded240 += g_Vars.lvupdate240;
-#endif
 
 			if (g_Rooms[i].loaded240 >= g_BgUnloadDelay240) {
 				g_Rooms[i].loaded240 = g_BgUnloadDelay240;
@@ -2909,9 +2742,7 @@ void bgTickRooms(void)
 
 			if (numunloaded < 2 && g_Rooms[i].loaded240 == g_BgUnloadDelay240_2) {
 				bgUnloadRoom(i);
-#if VERSION >= VERSION_NTSC_1_0
 				memaDefrag();
-#endif
 				numunloaded++;
 			}
 		}
@@ -3160,12 +2991,7 @@ void bgFindRoomVtxBatches(s32 roomnum)
 			}
 
 			batchindex += xlucount;
-
-#ifdef PLATFORM_N64
-			batches = memaAlloc((batchindex * sizeof(struct vtxbatch) + 0xf) & ~0xf);
-#else
 			batches = sysMemAlloc((batchindex * sizeof(struct vtxbatch) + 0xf) & ~0xf);
-#endif
 
 			if (batches != NULL) {
 				gdl = bgGetNextGdlInLayer(roomnum, NULL, VTXBATCHTYPE_OPA);
@@ -3580,19 +3406,10 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 									hit = true;
 
 									if (imggdl == NULL
-#ifdef PLATFORM_N64
-										|| (imggdl->words.w1 & 0x0f000000) == 0x0f000000
-										|| (imggdl->words.w1 & 0x05000000) == 0x05000000) {
-#else // not sure if the above check even works right on N64, but we can test easily for seg addresses
 										|| (imggdl->words.w1 & 1)) {
-#endif
 										texturenum = -1;
 									} else {
-#ifdef PLATFORM_N64
-										s32 tmp = PHYS_TO_K0(UNSEGADDR(imggdl->words.w1) - 8);
-#else
 										uintptr_t tmp = PHYS_TO_K0(UNSEGADDR(imggdl->words.w1) - 8);
-#endif
 										texturenum = *(s16 *) tmp;
 									}
 
@@ -4082,27 +3899,14 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 											}
 
 											if (tmpgdl == gdl
-#ifdef PLATFORM_N64
-													|| (tmpgdl->words.w1 & 0x0f000000) == 0x0f000000
-													|| (tmpgdl->words.w1 & 0x05000000) == 0x05000000) {
-#else // not sure if the above check even works right on N64, but we can test easily for seg addresses
 													|| (tmpgdl->words.w1 & 1)) {
-#endif
 												texturenum = -1;
 											} else {
-#ifdef PLATFORM_N64
-												s32 tmp = UNSEGADDR(tmpgdl->words.w1) - 8;
-#else
 												uintptr_t tmp = UNSEGADDR(tmpgdl->words.w1) - 8;
-#endif
 												texturenum = *(s16 *) PHYS_TO_K0(tmp);
 											}
 
-#ifdef AVOID_UB
 											if (batch->type == VTXBATCHTYPE_XLU && texturenum >= 0 && g_Textures[texturenum].surfacetype == SURFACETYPE_DEFAULT) {
-#else
-											if (batch->type == VTXBATCHTYPE_XLU && g_Textures[texturenum].surfacetype == SURFACETYPE_DEFAULT) {
-#endif
 												hit = false;
 											}
 

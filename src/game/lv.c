@@ -206,7 +206,7 @@ void lvUpdateMiscSfx(void)
 void lvReset(s32 stagenum)
 {
 	lvFadeReset();
-
+	
 	g_IsLvlPaused = false;
 	g_LvlIsPausedMP = 0;
 

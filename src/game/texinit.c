@@ -6,6 +6,8 @@
 #include "data.h"
 #include "types.h"
 
+s32 g_ReplacementTextureList[4000];
+
 void texInit(void)
 {
 	extern u8 EXT_SEG _textureslistSegmentRomStart;
@@ -16,4 +18,9 @@ void texInit(void)
 	g_Textures = mempAlloc(len, MEMPOOL_PERMANENT);
 
 	dmaExec(g_Textures, (romptr_t) REF_SEG _textureslistSegmentRomStart, len);
+
+	s32 i = 0;
+	for(i = 0; i < ARRAYCOUNT(g_ReplacementTextureList); i++) {
+		g_ReplacementTextureList[i] = -1;
+	}
 }

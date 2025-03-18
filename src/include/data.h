@@ -482,6 +482,8 @@ extern TextData *g_TextOptionsData;
 extern TextData *g_TextPropObjData;
 extern TextData *g_TextTitleData;
 
+extern s32 g_ReplacementTextureList[4000]; // There's 3502 textures in the ROM
+
 #define PLAYER_EXTCFG() g_PlayerExtCfg[g_Vars.currentplayerstats->mpindex & 3]
 #define PLAYER_DEFAULT_FOV (PLAYER_EXTCFG().fovy)
 

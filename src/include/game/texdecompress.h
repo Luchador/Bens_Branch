@@ -36,7 +36,7 @@ void texLoadFromConfigs(struct textureconfig *configs, s32 numconfigs, struct te
 void texLoadFromTextureNum(u32 arg0, struct texpool *pool);
 void texSwizzleInternal(u8 *dst, s32 width, s32 height, s32 format, u32 dstlen);
 s32 texConfigToFormat(const struct textureconfig *tex);
-unsigned char *texLoadBMP(const char *filename, int *width, int *height);
-void createBMP(char *filename);
+unsigned char *texLoadBMP(const char *filename, int width, int height);
+s32 createBMP(u16 num, int width, int height, void *dst, u32 dstSize);
 
 #endif

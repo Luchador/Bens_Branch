@@ -68,7 +68,6 @@ const char var7f1ad290[] = "ACOUSTIC -> Portal %3d - A=%.2f, V=%.2f\n";
 const char var7f1ad2bc[] = "ACOUSTIC -> DGD WARNING: portalAVReset no portals!\n";
 
 struct roomacousticdata *g_RoomAcousticData;
-u32 var8009dd74;
 struct var8009dd78 var8009dd78[10];
 u16 *g_PortalXluFracs;
 s32 g_NumPortalXluFracs;

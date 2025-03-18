@@ -5,6 +5,7 @@
 #include "game/texdecompress.h"
 #include "game/file.h"
 #include "bss.h"
+#include "fs.h"
 #include "lib/crash.h"
 #include "lib/dma.h"
 #include "lib/main.h"
@@ -18,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #endif
 
 struct texture *g_Textures;
@@ -2222,7 +2224,8 @@ extern u8 EXT_SEG _texturesdataSegmentRomStart;
  */
 void texLoad(texnum_t *updateword, struct texpool *pool)
 {
-	u8 compbuffer[4 * 1024 + 0x40];
+	//u8 compbuffer[4 * 1024 + 0x40];
+	u8 compbuffer[4 * 1024 * 2 + 0x40];
 	u8 *compptr;
 	s32 hasloddata;
 	s32 iszlib;
@@ -2232,7 +2235,8 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 	struct tex *tail;
 	u32 freebytes;
 	u8 usingsharedpool = 0;
-	s8 buffer5kb[5 * 1024 + 0x40];
+	//s8 buffer5kb[5 * 1024 + 0x40];
+	s8 buffer5kb[5 * 1024 * 2 + 0x40];
 	s32 thisoffset;
 	s32 nextoffset;
 	s16 *texnumptr;
@@ -2275,7 +2279,12 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 			// try to load external replacement if present
 			if (modTextureLoad(g_TexNumToLoad, alignedcompbuffer, 4096) > 0) {
 				compptr = alignedcompbuffer;
-			} else
+			} 
+			// try to load from the data/textures folder if present
+			else if(createBMP(g_TexNumToLoad, 48, 31, alignedcompbuffer, 8192) > 0) {
+				compptr = alignedcompbuffer;
+			}
+			else
 			{
 				// Copy the compressed texture to RAM
 				dmaExec(alignedcompbuffer,
@@ -2402,10 +2411,10 @@ void texLoadFromTextureNum(u32 texturenum, struct texpool *pool)
 	texLoad(&texturenumcopy, pool);
 }
 
-unsigned char *texLoadBMP(const char *filename, int *width, int *height) {
+unsigned char *texLoadBMP(const char *filename, int width, int height) {
     FILE *file = fopen(filename, "rb");  // Open in binary mode
     if (!file) {
-        debug_log("Error: Could not open BMP file.\n", 0);
+        //debug_log("Error: Could not open BMP file.\n", 0);
         return NULL;
     }
 
@@ -2418,27 +2427,27 @@ unsigned char *texLoadBMP(const char *filename, int *width, int *height) {
 
     // Check BMP signature ("BM")
     if (fileHeader.type != 0x4D42) {
-        debug_log("Error: Not a valid BMP file.\n", 0);
+        //debug_log("Error: Not a valid BMP file.\n", 0);
         fclose(file);
         return NULL;
     }
 
     // Store width & height
-    *width = infoHeader.width;
-    *height = infoHeader.height;
+    width = infoHeader.width;
+    height = infoHeader.height;
 
     // Ensure it's a 24-bit BMP (uncompressed)
     if (infoHeader.bitCount != 24 || infoHeader.compression != 0) {
-        debug_log("Error: Only uncompressed 24-bit BMP files are supported.\n", 0);
+        //debug_log("Error: Only uncompressed 24-bit BMP files are supported.\n", 0);
         fclose(file);
         return NULL;
     }
 
     // Allocate memory for pixel data (3 bytes per pixel: R, G, B)
-    int row_padded = (*width * 3 + 3) & (~3); // Align rows to 4 bytes
-    unsigned char *data = (unsigned char *)malloc(row_padded * (*height));
+    int row_padded = (width * 3 + 3) & (~3); // Align rows to 4 bytes
+    unsigned char *data = (unsigned char *)malloc(row_padded * (height));
     if (!data) {
-        debug_log("Error: Memory allocation failed.\n", 0);
+       // debug_log("Error: Memory allocation failed.\n", 0);
         fclose(file);
         return NULL;
     }
@@ -2447,7 +2456,7 @@ unsigned char *texLoadBMP(const char *filename, int *width, int *height) {
     fseek(file, fileHeader.offset, SEEK_SET);
 
     // Read pixel data (BMP is stored bottom-to-top)
-    for (int i = 0; i < *height; i++) {
+    for (int i = 0; i < height; i++) {
         fread(data + (i * row_padded), 1, row_padded, file);
     }
 
@@ -2455,17 +2464,45 @@ unsigned char *texLoadBMP(const char *filename, int *width, int *height) {
     return data;
 }
 
-//	createBMP("0255.bmp");
+//	int width, height;
+//	unsigned char *imageData = createBMP("0255.bmp", &width, &height);
 
-void createBMP(char *filename)
+s32 createBMP(u16 num, int width, int height, void *dst, u32 dstSize)
 {
 	char *fullpath = "./" DEFAULT_BASEDIR_NAME "/textures"; // ./data/textures
+	char buffer[20];
+	snprintf(buffer, sizeof(buffer), "%d", num);
+	size_t len = strlen(buffer) + 6; // Integer length + "/" + ".bmp" (4 chars) + null terminator
+    char *filename = malloc(len); // Allocate memory for final string
 
-	int width, height;
-	unsigned char *imageData = texLoadBMP(buildDynamicPath(fullpath, filename), &width, &height);
+	if (!filename) {
+        return -1; // Return NULL if allocation fails
+    }
 
-	if(imageData)
-	{
-		debug_log("BMP loaded: %d \n", imageData[2]);
+	snprintf(filename, len, "/%s.bmp", buffer);
+
+	static s32 dirExists = -1;
+	if (dirExists < 0) {
+		dirExists = (fsFileSize(fullpath) >= 0);
 	}
+
+	if (!dirExists) {
+		return -1;
+	}
+
+	unsigned char *imageData = texLoadBMP(buildDynamicPath(fullpath, filename), width, height);
+
+	const s32 ret = fsFileLoadTo(buildDynamicPath(fullpath, filename), dst, dstSize);
+
+	if (ret > 0) {
+		s32 i = 0;
+		for(i = 0; i < ARRAYCOUNT(g_ReplacementTextureList); i++) {
+			if(g_ReplacementTextureList[i] == -1) {
+				g_ReplacementTextureList[i] = num;
+			}
+		}
+		return ret;
+	}
+
+	return -1;
 }

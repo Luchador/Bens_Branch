@@ -196,7 +196,7 @@ void textReset(void)
 		textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
 	} else {
 		// This unused GE font exists in NTSC but was removed in the PAL version
-		textLoadFont(REF_SEG _fonttahomaSegmentRomStart, REF_SEG _fonttahomaSegmentRomEnd, &g_FontTahoma2, &g_FontTahoma1, false);
+		//textLoadFont(REF_SEG _fonttahomaSegmentRomStart, REF_SEG _fonttahomaSegmentRomEnd, &g_FontTahoma2, &g_FontTahoma1, false);
 
 		textLoadFont(REF_SEG _fontnumericSegmentRomStart, REF_SEG _fontnumericSegmentRomEnd, &g_FontNumeric, &g_CharsNumeric, false);
 		textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
@@ -666,8 +666,6 @@ Gfx *text0f154ecc(Gfx *gdl, u32 arg1, u32 arg2)
 
 	return gdl;
 }
-
-void textMapCodeUnitToChar(char **text, struct fontchar **arg1, struct fontchar **arg2, struct fontchar *chars, u8 *prevchar);
 
 Gfx *text0f154f38(Gfx *gdl, s32 *arg1, struct fontchar *curchar, struct fontchar *prevchar,
 		struct font *font, f32 widthscale, f32 heightscale, f32 x, f32 y)
