@@ -9253,21 +9253,11 @@ bool aiChrBeginOrEndTeleport(void)
 		g_Vars.currentplayer->teleportpad = pad_id;
 		g_Vars.currentplayer->teleportcamerapad = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
-		mainpri = osGetThreadPri(0);
-		audiopri = osGetThreadPri(&g_AudioManager.thread);
-		osSetThreadPri(0, audiopri + 1);
-#endif
-
 		handle = sndStart(var80095200, SFX_RELOAD_FARSIGHT, NULL, -1, -1, -1, -1, -1);
 
 		if (handle) {
 			audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(u32 *)&fvalue);
 		}
-
-#if VERSION >= VERSION_NTSC_1_0
-		osSetThreadPri(0, mainpri);
-#endif
 	}
 
 	g_Vars.aioffset += 5;
@@ -9303,22 +9293,11 @@ bool aiIfChrTeleportFullWhite(void)
 		g_Vars.aioffset += 4;
 	} else {
 		fvalue = 0.4;
-
-#if VERSION >= VERSION_NTSC_1_0
-		mainpri = osGetThreadPri(0);
-		audiopri = osGetThreadPri(&g_AudioManager.thread);
-		osSetThreadPri(0, audiopri + 1);
-#endif
-
 		handle = sndStart(var80095200, SFX_FIRE_SHOTGUN, NULL, -1, -1, -1, -1, -1);
 
 		if (handle) {
 			audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(u32 *)&fvalue);
 		}
-
-#if VERSION >= VERSION_NTSC_1_0
-		osSetThreadPri(0, mainpri);
-#endif
 
 		g_Vars.currentplayer->teleportstate = TELEPORTSTATE_WHITE;
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[2]);

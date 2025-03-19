@@ -273,7 +273,6 @@ set(SRC_LIB
   src/lib/base.c
   src/lib/collision.c
   src/lib/dma.c
-  src/lib/fault.c
   src/lib/joy.c
   src/lib/lib_2f490_c.c
   src/lib/lib_2fc60.c
@@ -291,7 +290,6 @@ set(SRC_LIB
   src/lib/music.c
   src/lib/path.c
   src/lib/rdp.c
-  src/lib/rmon.c
   src/lib/rng_c.c
   src/lib/rzip_c.c
   src/lib/snd.c

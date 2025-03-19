@@ -9,6 +9,6 @@ struct admastate;
 void admaInit(void);
 void *admaNew(struct admastate **state);
 void admaBeginFrame(void);
-void admaReceiveAll(void);
+//void admaReceiveAll(void);
 
 #endif

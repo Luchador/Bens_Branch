@@ -476,14 +476,14 @@ void playermgrAllocatePlayer(s32 index)
 	g_Vars.players[index]->lastroomforoffset = -1;
 
 	g_Vars.players[index]->c_screenwidth = SCREEN_320;
-	g_Vars.players[index]->c_screenheight = PAL ? 272 : SCREEN_240;
+	g_Vars.players[index]->c_screenheight = SCREEN_240;
 	g_Vars.players[index]->c_screenleft = 0;
 	g_Vars.players[index]->c_screentop = 0;
 	g_Vars.players[index]->c_perspnear = 10;
 	g_Vars.players[index]->c_perspfovy = 46;
 	g_Vars.players[index]->c_perspaspect = 1;
 	g_Vars.players[index]->c_halfwidth = SCREEN_320 / 2;
-	g_Vars.players[index]->c_halfheight = (PAL ? 272 : SCREEN_240) / 2;
+	g_Vars.players[index]->c_halfheight = SCREEN_240 / 2;
 	g_Vars.players[index]->c_scalex = 1;
 	g_Vars.players[index]->c_scaley = 1;
 	g_Vars.players[index]->c_recipscalex = 1;

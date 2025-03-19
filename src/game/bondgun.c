@@ -1591,9 +1591,6 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 		}
 
 		if (playsound) {
-			OSPri prevpri = osGetThreadPri(0);
-			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
-
 			if (hand->audiohandle2 && sndGetState(hand->audiohandle2) != AL_STOPPED) {
 				audioStop(hand->audiohandle2);
 			}
@@ -1628,8 +1625,6 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 				}
 
 			}
-
-			osSetThreadPri(0, prevpri);
 		}
 	}
 }
@@ -2177,17 +2172,13 @@ s32 bgunTickIncAttackEmpty(struct handweaponinfo *info, s32 handnum, struct hand
 			{
 				// Maian weapons have a wet sounding click effect
 				f32 speed = 2.07f;
-				OSPri prevpri = osGetThreadPri(0);
 				struct sndstate *handle;
-				osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 
 				handle = sndStart(var80095200, SFX_HIT_WATER, NULL, -1, -1, -1, -1, -1);
 
 				if (handle) {
 					audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
 				}
-
-				osSetThreadPri(0, prevpri);
 			}
 			// fall-through - unsure if intentional
 		case WEAPON_TRANQUILIZER:
@@ -2196,16 +2187,12 @@ s32 bgunTickIncAttackEmpty(struct handweaponinfo *info, s32 handnum, struct hand
 				// The tranquliser and psychosis gun use the standard click
 				// effect but slightly faster.
 				f32 speed = 1.5f;
-				OSPri prevpri = osGetThreadPri(0);
 				struct sndstate *handle;
-				osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 				handle = sndStart(var80095200, SFX_FIREEMPTY, NULL, -1, -1, -1, -1, -1);
 
 				if (handle) {
 					audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
 				}
-
-				osSetThreadPri(0, prevpri);
 			}
 			break;
 		case WEAPON_UNARMED:
@@ -2560,15 +2547,12 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 				switch (info->weaponnum) {
 				case WEAPON_HORIZONSCANNER:
 					speed1 = 3.5f;
-					prevpri1 = osGetThreadPri(0);
-					osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 					handle1 = sndStart(var80095200, SFX_EQUIP_HORIZONSCANNER, 0, -1, -1, -1, -1, -1);
 
 					if (handle1) {
 						audioPostEvent(handle1, AL_SNDP_PITCH_EVT, *(s32 *)&speed1);
 					}
 
-					osSetThreadPri(0, prevpri1);
 					break;
 				case WEAPON_LASER:
 					sndStart(var80095200, SFX_PICKUP_LASER, 0, -1, -1, -1, -1, -1);
@@ -2597,27 +2581,21 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 				case WEAPON_TRANQUILIZER:
 				case WEAPON_PSYCHOSISGUN:
 					speed2 = 1.5f;
-					prevpri2 = osGetThreadPri(0);
-					osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 					handle2 = sndStart(var80095200, SFX_PICKUP_GUN, 0, -1, -1, -1, -1, -1);
 
 					if (handle2) {
 						audioPostEvent(handle2, AL_SNDP_PITCH_EVT, *(s32 *)&speed2);
 					}
 
-					osSetThreadPri(0, prevpri2);
 					break;
 				case WEAPON_REAPER:
 					speed3 = 0.85f;
-					prevpri3 = osGetThreadPri(0);
-					osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 					handle3 = sndStart(var80095200, SFX_PICKUP_GUN, 0, -1, -1, -1, -1, -1);
 
 					if (handle3) {
 						audioPostEvent(handle3, AL_SNDP_PITCH_EVT, *(s32 *)&speed3);
 					}
 
-					osSetThreadPri(0, prevpri3);
 					break;
 				case WEAPON_NONE:
 				case WEAPON_UNARMED:

@@ -209,17 +209,17 @@ void admaBeginFrame(void)
  * a message queue, and that means the messages have to be read off it at some
  * point. This is done here.
  */
-void admaReceiveAll(void)
-{
-	s32 i;
+//void admaReceiveAll(void)
+//{
+	//s32 i;
 
 	/**
 	 * Don't block here. If dma's aren't complete, you've had an audio
 	 * overrun. Bad news, but go for it anyway, and try and recover.
 	 */
-	for (i = 0; i < g_AdmaNumItemsThisFrame; i++) {
-		if (osRecvMesg(&g_AdmaMesgQueue, 0, OS_MESG_NOBLOCK) == -1) {
-			// empty
-		}
-	}
-}
+	//for (i = 0; i < g_AdmaNumItemsThisFrame; i++) {
+	//	if (osRecvMesg(&g_AdmaMesgQueue, 0, OS_MESG_NOBLOCK) == -1) {
+	//		// empty
+	//	}
+	//}
+//}

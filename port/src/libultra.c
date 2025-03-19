@@ -22,9 +22,7 @@
 #define OS_COUNTER_DEN (1000000ULL / 1000ULL)
 
 u64 osClockRate = OS_CLOCK_RATE;
-//u32 osMemSize = 16 * 1024 * 1024; /* expansion pak installed plus some extra */
-// Ben's comment: I need more
-u32 osMemSize = 64 * 1024 * 1024; /* expansion pak installed plus some extra */
+u32 osMemSize = 16 * 1024 * 1024; /* expansion pak installed plus some extra */
 s32 osTvType = OS_TV_NTSC;        /* 0 = PAL, 1 = NTSC, 2 = MPAL */
 s32 osResetType = 0;              /* 0 = cold reset */
 s32 osViClock = VI_NTSC_CLOCK;
@@ -46,45 +44,6 @@ u32 osGetCount(void)
 	return (u32)osGetTime();
 }
 
-/* Thread */
-
-void osCreateThread(OSThread *thrd, OSId id, void (*entry)(void *), void *arg, void *sp, OSPri p)
-{
-	thrd->id = id;
-	thrd->state = OS_STATE_STOPPED;
-}
-
-void osDestroyThread(OSThread *thrd)
-{
-	thrd->id = 0;
-	thrd->state = 0;
-}
-
-void osYieldThread(void)
-{
-
-}
-
-void osStartThread(OSThread *thrd)
-{
-	thrd->state = OS_STATE_RUNNING;
-}
-
-void osStopThread(OSThread *thrd)
-{
-	thrd->state = OS_STATE_STOPPED;
-}
-
-OSPri osGetThreadPri(OSThread *thrd)
-{
-	return 0;
-}
-
-void osSetThreadPri(OSThread *thrd, OSPri pri)
-{
-
-}
-
 /* Mesg */
 
 void osCreateMesgQueue(OSMesgQueue *mq, OSMesg *msgBuf, s32 count)
@@ -93,11 +52,6 @@ void osCreateMesgQueue(OSMesgQueue *mq, OSMesg *msgBuf, s32 count)
 	mq->first = 0;
 	mq->msgCount = count;
 	mq->msg = msgBuf;
-}
-
-void osSetEventMesg(OSEvent e, OSMesgQueue *mq, OSMesg msg)
-{
-
 }
 
 s32 osSendMesg(OSMesgQueue *mq, OSMesg msg, s32 flag)

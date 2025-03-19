@@ -206,19 +206,12 @@ void psTickChannel(s32 channelnum)
 {
 	struct pschannel *channel = &g_PsChannels[channelnum];
 
-#if VERSION >= VERSION_NTSC_1_0
 	if ((channel->flags2 & PSFLAG2_STOPPED) == 0
 			&& channel->type != PSTYPE_MARKER
 			&& ((channel->audiohandle != NULL && sndGetState(channel->audiohandle) != AL_STOPPED)
 				|| (channel->flags & PSFLAG_REPEATING)
 				|| (channel->flags & PSFLAG_FIRSTTICK)
 				|| ((channel->flags & PSFLAG_ISMP3) && sndIsPlayingMp3())))
-#else
-	if ((channel->audiohandle != NULL && sndGetState(channel->audiohandle) != AL_STOPPED)
-			|| (channel->flags & PSFLAG_REPEATING)
-			|| (channel->flags & PSFLAG_FIRSTTICK)
-			|| ((channel->flags & PSFLAG_ISMP3) && sndIsPlayingMp3()))
-#endif
 	{
 		struct coord *pos = NULL;
 		RoomNum *rooms = NULL;
@@ -237,8 +230,6 @@ void psTickChannel(s32 channelnum)
 		if (channel->posptr != NULL) {
 			pos = channel->posptr;
 		}
-
-		if (1);
 
 		if (g_Vars.langfilteron && (channel->flags2 & PSFLAG2_OFFENSIVE)) {
 			channel->targetvol = 0;
@@ -297,7 +288,6 @@ void psTickChannel(s32 channelnum)
 		if (channel->currentvol == -1) {
 			newvol = channel->targetvol;
 		} else if (channel->volchangetimer60 >= 0) {
-			osSyncPrintf("Propsnd : USING TIME 60\n");
 
 			if (channel->volchangetimer60 > g_Vars.lvupdate60) {
 				newvol = channel->currentvol + (channel->targetvol - channel->currentvol) * g_Vars.lvupdate60 / channel->volchangetimer60;
@@ -306,11 +296,7 @@ void psTickChannel(s32 channelnum)
 			channel->volchangetimer60 -= g_Vars.lvupdate60;
 		} else if (channel->volchangespeed && channel->currentvol != channel->targetvol) {
 			f32 f12 = channel->targetvol - channel->currentvol;
-#if VERSION >= VERSION_PAL_BETA
-			f32 f14 = (1.0f / 6000.0f) * g_Vars.lvupdate60freal * channel->volchangespeed;
-#else
 			f32 f14 = (1.0f / 6000.0f) * g_Vars.lvupdate60 * channel->volchangespeed;
-#endif
 
 			if (ABS(f12) > 1.0f) {
 				if (f14 > 1.0f) {
@@ -498,11 +484,7 @@ void psSetPitch(struct prop *prop, f32 targetpitch, s32 changespeed)
 			} else {
 				g_PsChannels[i].pitchchangespeed = -1;
 			}
-
-			prevpri = osGetThreadPri(0);
-			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 			psTickChannel(i);
-			osSetThreadPri(0, prevpri);
 		}
 	}
 }
@@ -518,13 +500,8 @@ void psSetVolume(struct prop *prop, s32 volpercentage)
 				volpercentage = 100;
 			}
 
-			prevpri = osGetThreadPri(0);
-			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
-
 			g_PsChannels[i].vol10 = volpercentage * AL_VOL_FULL / 100;
 			psTickChannel(i);
-
-			osSetThreadPri(0, prevpri);
 		}
 	}
 }
@@ -745,16 +722,9 @@ s16 psCreate(struct pschannel *channel, struct prop *prop, s16 soundnum, s16 pad
 
 	if (sndIsMp3(soundnum)) {
 		channel->flags |= PSFLAG_ISMP3;
-
-		prevpri = osGetThreadPri(0);
-		osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 		psTickChannel(channel->channelnum);
-		osSetThreadPri(0, prevpri);
 	} else {
-		prevpri = osGetThreadPri(0);
-		osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 		psTickChannel(channel->channelnum);
-		osSetThreadPri(0, prevpri);
 	}
 
 	if (channel->flags & PSFLAG_0400) {
@@ -921,10 +891,7 @@ void psModify(s32 channelnum, s32 volume, s16 padnum, struct prop *prop, s32 vol
 			}
 
 			if (!hastimer || channel->volchangetimer60 == 0) {
-				OSPri prevpri = osGetThreadPri(0);
-				osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 				psTickChannel(channelnum);
-				osSetThreadPri(0, prevpri);
 			}
 		}
 	}

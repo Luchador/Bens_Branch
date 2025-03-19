@@ -33,7 +33,6 @@
 #include "bss.h"
 #include "lib/audiomgr.h"
 #include "lib/args.h"
-#include "lib/boot.h"
 #include "lib/vm.h"
 #include "lib/rzip.h"
 #include "lib/vi.h"
@@ -46,7 +45,6 @@
 #include "lib/memp.h"
 #include "lib/mema.h"
 #include "lib/model.h"
-#include "lib/videbug.h"
 #include "lib/anim.h"
 #include "lib/rdp.h"
 #include "lib/lib_34d0.h"
@@ -141,7 +139,6 @@ void mainInit(void)
 	dmaInit();
 	amgrInit();
 	varsInit();
-	mempInit();
 	memaInit();
 	joyInit();
 	joyReset();

@@ -168,9 +168,6 @@ void menuPlaySound(s32 menusound)
 	if (sound != -1) {
 		struct sndstate *handle;
 
-		OSPri prevpri = osGetThreadPri(NULL);
-		osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
-
 		handle = sndStart(var80095200, sound, NULL, -1, -1, -1, -1, -1);
 
 		if (handle && setpitch) {
@@ -180,8 +177,6 @@ void menuPlaySound(s32 menusound)
 		if (handle && setvol) {
 			audioPostEvent(handle, AL_SNDP_VOL_EVT, 0x4000);
 		}
-
-		osSetThreadPri(0, prevpri);
 	}
 }
 

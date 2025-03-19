@@ -12102,7 +12102,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 				if (obj->flags2 & OBJFLAG2_DRAWONTOP) {
 					sp60 = 0;
 				} else if (obj->flags & OBJFLAG_DEACTIVATED) {
-					sp60 = wallhit0f140750(&prop->pos);
+					sp60 = wallhitOcclude(&prop->pos);
 				} else {
 					sp60 = 1;
 				}
@@ -12116,7 +12116,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 				if (obj->flags2 & OBJFLAG2_DRAWONTOP) {
 					sp60 = 0;
 				} else if (obj->flags & OBJFLAG_DEACTIVATED) {
-					sp60 = wallhit0f140750(&prop->pos);
+					sp60 = wallhitOcclude(&prop->pos);
 				} else {
 					sp60 = 1;
 				}
@@ -12126,7 +12126,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 				if (obj->flags2 & OBJFLAG2_DRAWONTOP) {
 					sp60 = 0;
 				} else if (obj->flags & (OBJFLAG_DEACTIVATED | OBJFLAG_MONITOR_20000000)) {
-					sp60 = wallhit0f140750(&prop->pos);
+					sp60 = wallhitOcclude(&prop->pos);
 				} else {
 					sp60 = 1;
 				}

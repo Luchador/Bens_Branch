@@ -107,40 +107,7 @@ typedef struct OSThread_s {
 #define	OS_PRIORITY_APPMAX	127
 #define OS_PRIORITY_IDLE	  0	/* Must be 0 */
 
-
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
-
-/**************************************************************************
- *
- * Macro definitions
- *
- */
-
-
-/**************************************************************************
- *
- * Extern variables
- *
- */
-
-
-/**************************************************************************
- *
- * Function prototypes
- *
- */
-
-/* Thread operations */
-
-extern void		osCreateThread(OSThread *, OSId, void (*)(void *), void *, void *, OSPri);
-extern void		osDestroyThread(OSThread *);
-extern void		osYieldThread(void);
-extern void		osStartThread(OSThread *);
-extern void		osStopThread(OSThread *);
-extern OSId		osGetThreadId(OSThread *);
-extern void		osSetThreadPri(OSThread *, OSPri);
-extern OSPri		osGetThreadPri(OSThread *);
-
 
 #endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
 

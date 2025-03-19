@@ -10,9 +10,6 @@
 #define bool s32
 #define ubool u32
 
-extern u8 *g_StackLeftAddrs[NUM_THREADS];
-extern u8 *g_StackRightAddrs[NUM_THREADS];
-extern u8 *g_StackAllocatedPos;
 extern s32 var8005ce74;
 extern f32 g_ViXScalesBySlot[NUM_GFXTASKS];
 extern f32 g_ViYScalesBySlot[NUM_GFXTASKS];
@@ -203,7 +200,6 @@ extern s32 g_ModelMostModels;
 extern s32 g_ModelMostAnims;
 extern u32 var8007073c;
 extern struct gecreditsdata *g_CurrentGeCreditsData;
-extern bool g_PlayerTriggerGeFadeIn;
 extern u32 var8007074c;
 extern bool g_PlayersWithControl[];
 extern bool g_PlayerInvincible;

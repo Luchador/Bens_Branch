@@ -43,25 +43,10 @@ s32 g_FileAutoSelect = -1;
 
 extern s32 g_StageNum;
 
-s32 bootGetMemSize(void)
-{
-	return (s32)g_OsMemSize;
-}
-
-void *bootAllocateStack(s32 threadid, s32 size)
-{
-	static u8 bruh[0x1000];
-	return bruh;
-}
-
 void bootCreateSched(void)
 {
 	osCreateMesgQueue(&g_MainMesgQueue, g_MainMesgBuf, ARRAYCOUNT(g_MainMesgBuf));
-	if (osTvType == OS_TV_MPAL) {
-		osCreateScheduler(&g_Sched, NULL, OS_VI_MPAL_LAN1, 1);
-	} else {
-		osCreateScheduler(&g_Sched, NULL, OS_VI_NTSC_LAN1, 1);
-	}
+	osCreateScheduler(&g_Sched, NULL, OS_VI_NTSC_LAN1, 1);
 }
 
 static void gameInit(void)

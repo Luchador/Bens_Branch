@@ -2,7 +2,6 @@
 #include "lib/tlb.h"
 #include "constants.h"
 #include "bss.h"
-#include "lib/boot.h"
 #include "lib/crash.h"
 #include "lib/rzip.h"
 #include "lib/dma.h"

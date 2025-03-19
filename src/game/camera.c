@@ -11,6 +11,7 @@
 #include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
+#include "game/debug.h"
 
 struct coord var8009dd20;
 f32 var8009dd2c;

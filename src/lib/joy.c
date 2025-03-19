@@ -280,8 +280,6 @@ void joyInit(void)
 	osCreateMesgQueue(&g_JoyStartCyclicPollingDoneMesgQueue, g_JoyStartCyclicPollingDoneMesgBuf, ARRAYCOUNT(g_JoyStartCyclicPollingDoneMesgBuf));
 	osCreateMesgQueue(&g_PiMesgQueue, g_PiMesgBuf, ARRAYCOUNT(g_PiMesgBuf));
 
-	osSetEventMesg(OS_EVENT_SI, &g_PiMesgQueue, NULL);
-
 	g_JoyQueuesCreated = true;
 
 	var8005eec4 = NULL;
@@ -925,13 +923,7 @@ bool joyIsCyclicPollingEnabled(void)
  *
  * If cyclic polling was already disabled, simply increase the disable count.
  */
-void joyDisableCyclicPolling(
-#if VERSION >= VERSION_NTSC_1_0
-		void
-#else
-		s32 line, char *file
-#endif
-		)
+void joyDisableCyclicPolling(void)
 {
 	OSMesg msg;
 
@@ -947,13 +939,7 @@ void joyDisableCyclicPolling(
  * Indicate that the caller is done with cyclic polling being disabled,
  * and enable cyclic polling if there are no callers left who want it disabled.
  */
-void joyEnableCyclicPolling(
-#if VERSION >= VERSION_NTSC_1_0
-		void
-#else
-		s32 line, char *file
-#endif
-		)
+void joyEnableCyclicPolling(void)
 {
 	OSMesg msg;
 
@@ -965,24 +951,11 @@ void joyEnableCyclicPolling(
 	}
 }
 
-#if VERSION < VERSION_NTSC_1_0
-void joySetDataIndex(s32 arg0)
-{
-	g_JoyDataPtr = &g_JoyData[arg0];
-}
-
-s32 joyGetDataIndex(void)
-{
-	return g_JoyDataPtr - g_JoyData;
-}
-#endif
-
 void joyDestroy(void)
 {
 	s32 i;
 
 	osCreateMesgQueue(&g_PiMesgQueue, g_PiMesgBuf, ARRAYCOUNT(g_PiMesgBuf));
-	osSetEventMesg(OS_EVENT_SI, &g_PiMesgQueue, 0);
 
 	for (i = 0; i < NUM_PADS; i++) {
 		if (osMotorProbe(&g_PiMesgQueue, PFS(i), i) == 0) {
@@ -993,7 +966,6 @@ void joyDestroy(void)
 	}
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 void joyGetContpadNumsForPlayer(s8 playernum, s32 *pad1, s32 *pad2)
 {
 	if (g_Vars.normmplayerisrunning) {
@@ -1012,24 +984,15 @@ void joyGetContpadNumsForPlayer(s8 playernum, s32 *pad1, s32 *pad2)
 
 	*pad2 = -1;
 }
-#endif
 
 void joyStopRumble(s8 arg0, bool disablepolling)
 {
 	if (arg0 != SAVEDEVICE_GAMEPAK) {
-#if VERSION >= VERSION_NTSC_1_0
 		s32 device = arg0;
-#else
-		s32 device = g_Vars.playertojoymap[arg0];
-#endif
 
 		if (g_Paks[device].type != PAKTYPE_MEMORY && g_Paks[device].type != PAKTYPE_GAMEBOY) {
 			if (disablepolling) {
-#if VERSION >= VERSION_NTSC_1_0
 				joyDisableCyclicPolling();
-#else
-				joyDisableCyclicPolling(1054, "joy.c");
-#endif
 			}
 
 			if (osMotorProbe(&g_PiMesgQueue, PFS(device), device) == 0) {
@@ -1039,11 +1002,7 @@ void joyStopRumble(s8 arg0, bool disablepolling)
 			}
 
 			if (disablepolling) {
-#if VERSION >= VERSION_NTSC_1_0
 				joyEnableCyclicPolling();
-#else
-				joyEnableCyclicPolling(1066, "joy.c");
-#endif
 			}
 
 			if (g_Paks[device].rumblestate != RUMBLESTATE_DISABLED_STOPPING
