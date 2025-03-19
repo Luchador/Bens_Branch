@@ -82,6 +82,7 @@ Gfx *playerRender(struct prop *prop, Gfx *gdl, bool xlupass);
 Gfx *playerLoadMatrix(Gfx *gdl);
 void player0f0c3320(Mtxf *matrices, s32 count);
 void playerSetTickMode(s32 tickmode);
+void playerBeginGeFadeIn(void);
 void playersBeginMpSwirl(void);
 void player0f0b9a20(void);
 void playerEndCutscene(void);

@@ -1890,9 +1890,9 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 		gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 255 / 256));
 
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 4) << 2), (renderdata->y + 3) << 2,
-				((renderdata->x + 60) << 2), (renderdata->y + 39) << 2,
-				G_TX_RENDERTILE, 0, 0x0480, 1024, -1024);
+				((renderdata->x + 4) << 2) * g_ScaleX, (renderdata->y + 3) << 2,
+				((renderdata->x + 60) << 2) * g_ScaleX, (renderdata->y + 39) << 2,
+				G_TX_RENDERTILE, 0, 0x0480, 1024 / g_ScaleX, -1024);
 
 		if (g_MissionConfig.isanti) {
 			// No stars
@@ -1916,9 +1916,9 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 				}
 
 				gSPTextureRectangle(gdl++,
-						((renderdata->x + relx) << 2), (renderdata->y + 25) << 2,
-						((renderdata->x + relx + 14) << 2), (renderdata->y + 39) << 2,
-						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024);
+						((renderdata->x + relx) << 2) * g_ScaleX, (renderdata->y + 25) << 2,
+						((renderdata->x + relx + 14) << 2) * g_ScaleX, (renderdata->y + 39) << 2,
+						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024 / g_ScaleX, -1024);
 			}
 		} else {
 			texSelect(&gdl, &g_TexGeneralConfigs[34], 2, 0, 2, true, NULL);
@@ -1946,9 +1946,9 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 				}
 
 				gSPTextureRectangle(gdl++,
-						((renderdata->x + relx) << 2), (renderdata->y + 25) << 2,
-						((renderdata->x + relx + 14) << 2), (renderdata->y + 39) << 2,
-						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024);
+						((renderdata->x + relx) << 2) * g_ScaleX, (renderdata->y + 25) << 2,
+						((renderdata->x + relx + 14) << 2) * g_ScaleX, (renderdata->y + 39) << 2,
+						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024 / g_ScaleX, -1024);
 			}
 		}
 
@@ -2112,7 +2112,7 @@ MenuItemHandlerResult menuhandler001057ec(s32 operation, struct menuitem *item, 
 MenuItemHandlerResult menuhandlerChangeAgent(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
-		menuOpenPerfectMenu(NULL, -7);
+		func0f0f820c(NULL, -7);
 	}
 
 	return 0;
@@ -4498,7 +4498,7 @@ MenuItemHandlerResult menuhandlerMainMenuCombatSimulator(s32 operation, struct m
 		g_Vars.antiplayernum = -1;
 		challengeDetermineUnlockedFeatures();
 		g_Vars.mpsetupmenu = MPSETUPMENU_GENERAL;
-		menuOpenPerfectMenu(&g_CombatSimulatorMenuDialog, MENUROOT_MPSETUP);
+		func0f0f820c(&g_CombatSimulatorMenuDialog, MENUROOT_MPSETUP);
 		func0f0f8300();
 	}
 

@@ -31,6 +31,7 @@
 #include "bss.h"
 #include "lib/audiomgr.h"
 #include "lib/args.h"
+#include "lib/boot.h"
 #include "lib/vm.h"
 #include "lib/rzip.h"
 #include "lib/vi.h"
@@ -42,6 +43,7 @@
 #include "lib/snd.h"
 #include "lib/memp.h"
 #include "lib/mema.h"
+#include "lib/videbug.h"
 #include "lib/anim.h"
 #include "lib/rdp.h"
 #include "lib/lib_34d0.h"
@@ -140,7 +142,345 @@ extern u8 EXT_SEG _bssSegmentEnd;
  */
 void mainInit(void)
 {
+	s32 x;
+	s32 dsty;
+	OSMesg msg;
+	u16 *texture;
+	OSTimer timer;
+	OSMesgQueue queue;
+	s32 i;
+	s32 j;
+	u16 *fb;
+	s32 srcy;
+	u32 addr;
+	u8 *start;
 
+	faultInit();
+	dmaInit();
+	amgrInit();
+	varsInit();
+	mempInit();
+	memaInit();
+	videbugInit();
+	viConfigureForLogos();
+	var8005d9b0 = rmonIsDisabled();
+	joyInit();
+	osCreateMesgQueue(&queue, &msg, 1);
+
+	// Wait a bit, reset the controllers and wait a bit more
+	for (i = 0; i < 4; i++) {
+		osSetTimer(&timer, OS_CPU_COUNTER / 60 * 6, 0, &queue, &msg);
+		osRecvMesg(&queue, &msg, OS_MESG_BLOCK);
+
+		if (i == 1) {
+			joyReset();
+		} else if (i >= 2) {
+			joyDebugJoy();
+		}
+	}
+
+	if (argFindByPrefix(1, "-level_") == NULL) {
+		var8005d9b0 = true;
+	}
+
+#if VERSION >= VERSION_NTSC_1_0
+	// If holding start on any controller, open boot pak menu
+	if (joyGetButtons(0, START_BUTTON) == 0
+			&& joyGetButtons(1, START_BUTTON) == 0
+			&& joyGetButtons(2, START_BUTTON) == 0
+			&& joyGetButtons(3, START_BUTTON) == 0) {
+		g_DoBootPakMenu = false;
+	} else {
+		g_DoBootPakMenu = true;
+	}
+
+#if VERSION == VERSION_PAL_BETA
+	// In PAL beta, pressing all C buttons during poweron sets g_CrashEnabled.
+	// If it's set, a sound effect is played on the legal screen to confirm
+	// and the crash screen will be shown if the game crashes.
+#define BUTTON_MASK (U_CBUTTONS | D_CBUTTONS | L_CBUTTONS | R_CBUTTONS)
+
+	if (joyGetButtons(0, BUTTON_MASK) == BUTTON_MASK
+			|| joyGetButtons(1, BUTTON_MASK) == BUTTON_MASK
+			|| joyGetButtons(2, BUTTON_MASK) == BUTTON_MASK
+			|| joyGetButtons(3, BUTTON_MASK) == BUTTON_MASK) {
+		g_CrashEnabled = true;
+	}
+#endif
+
+	{
+		s32 numpages;
+		OSMesg receivedmsg = NULL;
+		OSScMsg scdonemsg = { OS_SC_DONE_MSG };
+		u8 scratch[1024 * 5];
+#if PAL
+		u32 stack[2];
+#endif
+
+		// Choose where to place the temporary framebuffer.
+		// In 4MB mode, place it close to the end of memory,
+		// but before the thread stacks and VM system.
+		// In 8MB mode, put it at the end of the expansion pak.
+		if (bootGetMemSize() <= 4 * 1024 * 1024) {
+			addr = K0BASE + 4 * 1024 * 1024;
+			addr -= STACKSIZE_MAIN;
+			addr -= STACKSIZE_IDLE;
+			addr -= STACKSIZE_RMON;
+			addr -= STACKSIZE_SCHED;
+			addr -= STACKSIZE_AUDIO;
+			addr -= 8; // markers for stack overflow detection
+			addr -= g_VmNumPages * 8; // vm state table
+			addr -= VM_NUM_SLOTS * VM_PAGE_SIZE; // vm loaded pages buffer
+			addr -= addr % 0x2000; // align down to a multiple of 0x2000
+			addr -= VM_BIGGEST_ZIP; // buffer for single biggest game zip
+		} else {
+			addr = K0BASE + 8 * 1024 * 1024;
+		}
+
+		addr -= 640 * 480 * NUM_FRAMEBUFFERS; // the framebuffer itself
+		addr -= 0x40; // align down to a multiple of 0x40
+
+		fb = (u16 *) ALIGN64(PHYS_TO_K0(addr));
+
+		// Prepare space for the unzipped texture immediately before the framebuffer.
+		// Both textures are 507x48.
+		texture = fb - 507 * 48;
+
+		// DMA the compressed texture from the ROM to the framebuffer.
+		// It's using the framebuffer as a temporary data buffer.
+		if (g_DoBootPakMenu) {
+			dmaExec(fb, (romptr_t) REF_SEG _accessingpakSegmentRomStart, REF_SEG _accessingpakSegmentRomEnd - REF_SEG _accessingpakSegmentRomStart);
+		} else {
+			dmaExec(fb, (romptr_t) REF_SEG _copyrightSegmentRomStart, REF_SEG _copyrightSegmentRomEnd - REF_SEG _copyrightSegmentRomStart);
+		}
+
+		// This is required for a match
+		numpages = g_VmNumPages;
+		if ((f64) numpages && (f64) numpages);
+
+		// Unzip the compressed texture from fb to texture
+		rzipInflate(fb, texture, scratch);
+
+		// Clear the framebuffer except for the bottom 48 rows,
+		// because that's where the texture will go.
+		// The increment here is too small, so some pixels are zeroed twice.
+		for (dsty = 0; dsty < (480 - 48) * 640; dsty += 576) {
+			for (x = 0; x < 640; x++) {
+				fb[dsty + x] = 0;
+			}
+		}
+
+#if VERSION >= VERSION_JPN_FINAL
+		if (osTvType == OS_TV_NTSC)
+#elif PAL
+		if (osTvType == OS_TV_PAL)
+#else
+		if (osTvType != OS_TV_PAL)
+#endif
+		{
+			// Copy the texture to the framebuffer.
+			// The framebuffer will be displayed at 576 wide,
+			// and the texture is right aligned.
+			dsty = 0;
+
+			for (srcy = 0; srcy < 507 * 48; srcy += 507) {
+				for (x = 0; x < 507; x++) {
+					fb[dsty + (576 - 507) + x] = texture[srcy + x];
+				}
+
+				dsty += 576;
+			}
+		}
+
+		viSetMode(VIMODE_HI);
+		viConfigureForCopyright(fb);
+
+		g_RdpOutBufferStart = texture;
+		g_RdpOutBufferEnd = texture + 0x400; // 0x800 bytes, because texture is u16
+
+		while (osRecvMesg(&g_MainMesgQueue, &receivedmsg, OS_MESG_NOBLOCK) == 0) {
+			// empty
+		}
+
+		j = 0;
+
+		while (j < 6) {
+			osRecvMesg(&g_MainMesgQueue, &receivedmsg, OS_MESG_BLOCK);
+
+			if (*(s16 *) receivedmsg == OS_SC_RETRACE_MSG) {
+				viUpdateMode();
+				rdpCreateTask(var8005dcc8, var8005dcc8 + ARRAYCOUNT(var8005dcc8), 0, (uintptr_t) &scdonemsg);
+				j++;
+			}
+		}
+	}
+
+	// From the N64 SDK:
+	//
+	//     Please design the game program so that it won't execute normally
+	//     when an unexpected television system format is detected by osTvType.
+	//     Design the program to either go into an infinite loop or display a
+	//     message indicating a system error.
+	//
+#if VERSION >= VERSION_JPN_FINAL
+	if (osTvType != OS_TV_NTSC) {
+		while (1);
+	}
+#elif PAL
+	if (osTvType != OS_TV_PAL) {
+		while (1);
+	}
+#else
+	if (osTvType == OS_TV_PAL) {
+		while (1);
+	}
+#endif
+
+#else
+	// NTSC beta
+	if (osTvType != OS_TV_NTSC) {
+		var8005d9b0 = true;
+
+		while (1);
+	}
+
+	if (joyGetButtons(0, START_BUTTON) == 0
+			&& joyGetButtons(1, START_BUTTON) == 0
+			&& joyGetButtons(2, START_BUTTON) == 0
+			&& joyGetButtons(3, START_BUTTON) == 0) {
+		s32 numpages;
+		OSMesg receivedmsg = NULL;
+		OSScMsg scdonemsg = { OS_SC_DONE_MSG };
+		u8 scratch[1024 * 5];
+
+		g_DoBootPakMenu = false;
+
+		// Choose where to place the temporary framebuffer.
+		// In 4MB mode, place it close to the end of memory,
+		// but before the thread stacks and VM system.
+		// In 8MB mode, put it at the end of the expansion pak.
+		if (osGetMemSize() <= 4 * 1024 * 1024) {
+			addr = K0BASE + 4 * 1024 * 1024;
+			addr -= STACKSIZE_MAIN;
+			addr -= STACKSIZE_IDLE;
+			addr -= STACKSIZE_RMON;
+			addr -= STACKSIZE_SCHED;
+			addr -= STACKSIZE_AUDIO;
+			addr -= g_VmNumPages * 8; // vm state table
+			addr -= VM_NUM_SLOTS * VM_PAGE_SIZE; // vm loaded pages buffer
+			addr -= addr % 0x2000; // align down to a multiple of 0x2000
+			addr -= VM_BIGGEST_ZIP; // buffer for single biggest game zip
+		} else {
+			addr = K0BASE + 8 * 1024 * 1024;
+		}
+
+		addr -= 640 * 480 * NUM_FRAMEBUFFERS; // the framebuffer itself
+		addr -= 0x40; // align down to a multiple of 0x40
+
+		fb = (u16 *) ALIGN64(PHYS_TO_K0(addr));
+
+		// Prepare space for the unzipped texture immediately before the framebuffer.
+		// Both textures are 507x48.
+		texture = fb - 507 * 48;
+
+		// DMA the compressed texture from the ROM to the framebuffer.
+		// It's using the framebuffer as a temporary data buffer.
+		dmaExec(fb, (romptr_t) &_copyrightSegmentRomStart, &_copyrightSegmentRomEnd - &_copyrightSegmentRomStart);
+
+		numpages = g_VmNumPages;
+		if ((f64) numpages && (f64) numpages);
+
+		// Unzip the compressed texture from fb to texture
+		rzipInflate(fb, texture, scratch);
+
+		// Clear the framebuffer except for the bottom 48 rows,
+		// because that's where the texture will go.
+		// The increment here is too small, so some pixels are zeroed twice.
+		for (dsty = 0; dsty < (480 - 48) * 640; dsty += 576) {
+			if (1);
+			for (i = 0; i < 640; i++) {
+				fb[dsty + i] = 0;
+			}
+		}
+
+		// Copy the texture to the framebuffer.
+		// The framebuffer will be displayed at 576 wide,
+		// and the texture is right aligned.
+		dsty = 0;
+
+		for (srcy = 0; srcy < 507 * 48; srcy += 507) {
+			for (x = 0; x < 507; x++) {
+				fb[dsty + (576 - 507) + x] = texture[srcy + x];
+			}
+
+			dsty += 576;
+		}
+
+		viSetMode(VIMODE_HI);
+		viConfigureForCopyright(fb);
+
+		g_RdpOutBufferStart = texture;
+		g_RdpOutBufferEnd = texture + 0x400; // 0x800 bytes, because texture is u16
+
+		while (osRecvMesg(&g_MainMesgQueue, &receivedmsg, OS_MESG_NOBLOCK) == 0);
+
+		i = 0;
+
+		while (i < 6) {
+			osRecvMesg(&g_MainMesgQueue, &receivedmsg, OS_MESG_BLOCK);
+
+			if (*(s16 *) receivedmsg == OS_SC_RETRACE_MSG) {
+				viUpdateMode();
+				rdpCreateTask(var8005dcc8, var8005dcc8 + ARRAYCOUNT(var8005dcc8), 0, (uintptr_t) &scdonemsg);
+				i++;
+			}
+		}
+	} else {
+		g_DoBootPakMenu = true;
+	}
+#endif
+
+	vmInit();
+	filesInit();
+	stub0f175f50();
+
+	if (var8005d9b0) {
+		argSetString("          -ml0 -me0 -mgfx100 -mvtx50 -mt700 -ma400");
+	}
+
+	start = (u8 *) PHYS_TO_K0(osVirtualToPhysical(REF_SEG _bssSegmentEnd));
+	if (g_VmMarker);
+	mempSetHeap(start, g_VmMarker - start);
+
+	mempResetPool(MEMPOOL_8);
+	mempResetPool(MEMPOOL_PERMANENT);
+	crashReset();
+	challengesInit();
+	utilsInit();
+	func000034d0();
+	texInit();
+	lvInit();
+	cheatsInit();
+	playermgrInit();
+	frametimeInit();
+	smokesInit();
+	stub0f0008f0();
+	stub0f000900();
+	stub0f00b180();
+	stub0f000910();
+	stub0f000840();
+	mpInit();
+	paksInit();
+	animsInit();
+	racesInit();
+	bodiesInit();
+	stub0f000850();
+	stub0f000860();
+	titleInit();
+	viConfigureForLegal();
+	viBlack(true);
+
+	g_MainIsBooting = 0;
 }
 
 s32 g_MainChangeToStageNum = -1;

@@ -90,7 +90,15 @@
 #define	gDPSetEnvColorViaWord(pkt, rgba) gDPSetColor(pkt, G_SETENVCOLOR, rgba)
 #define	gDPSetFogColorViaWord(pkt, rgba) gDPSetColor(pkt, G_SETFOGCOLOR, rgba)
 
-#define gDPHudRectangle(pkt, x1, y1, x2, y2) gDPFillRectangle(pkt, x1, y1, x2 + 1, y2 + 1)
+/**
+ * gDPFillRectangleScaled - a wrapper around gDPFillRectangle which applies
+ * g_ScaleX to the X coordinates.
+ *
+ * g_ScaleX is normally 1, but 2 when using hi-res.
+ */
+#define gDPFillRectangleScaled(pkt, x1, y1, x2, y2) gDPFillRectangle(pkt, (x1) * g_ScaleX, y1, (x2) * g_ScaleX, y2)
+
+#define gDPHudRectangle(pkt, x1, y1, x2, y2) gDPFillRectangle(pkt, (x1) * g_ScaleX, y1, ((x2 + 1)) * g_ScaleX, (y2) + 1)
 
 /**
  * Custom combiner modes.
@@ -304,8 +312,16 @@
 
 #define gDPClearDepthEXT(pkt) gDPNoParam(pkt, G_CLEAR_DEPTH_EXT)
 
+#undef gDPFillRectangleScaled
+#define gDPFillRectangleScaled(pkt, x1, y1, x2, y2) gDPFillRectangleEXT(pkt, (x1) * g_ScaleX, y1, (x2) * g_ScaleX, y2)
+
 #undef gDPHudRectangle
-#define gDPHudRectangle(pkt, x1, y1, x2, y2) gDPFillRectangleEXT(pkt, x1, y1, x2 + 1, y2 + 1)
+#define gDPHudRectangle(pkt, x1, y1, x2, y2) gDPFillRectangleEXT(pkt, (x1) * g_ScaleX, y1, ((x2 + 1)) * g_ScaleX, (y2) + 1)
+
+#else // PLATFORM_N64
+
+#define gDPFillRectangleEXT gDPFillRectangle
+#define gSPTextureRectangleEXT gSPTextureRectangle
 
 #endif // PLATFORM_N64
 

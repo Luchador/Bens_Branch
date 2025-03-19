@@ -1090,8 +1090,10 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 	}
 }
 
-// Ben's comment: this seems to be involved in occluding decals when they're behind surfaces
-s32 wallhitOcclude(struct coord *coord)
+/**
+ * Maybe a LOD calculation?
+ */
+s32 wallhit0f140750(struct coord *coord)
 {
 	f32 x;
 	f32 y;
@@ -1158,7 +1160,9 @@ Gfx *wallhitRenderOpaBgHits(s32 roomnum, Gfx *gdl)
 
 	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
 	gSPSetGeometryMode(gdl++, G_CULL_BACK);
+#if VERSION >= VERSION_NTSC_1_0
 	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
+#endif
 	gDPSetColorDither(gdl++, G_CD_NOISE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 
@@ -1174,7 +1178,7 @@ Gfx *wallhitRenderOpaBgHits(s32 roomnum, Gfx *gdl)
 			if (wallhit->xlu) {
 				wallhit->unk6b = 1;
 			} else {
-				wallhit->unk6b = wallhitOcclude(&wallhit->relpos);
+				wallhit->unk6b = wallhit0f140750(&wallhit->relpos);
 			}
 
 			if (wallhit->texturenum != prevtexturenum || wallhit->unk6b != prev6b) {
@@ -1218,7 +1222,9 @@ Gfx *wallhitRenderXluBgHits(s32 roomnum, Gfx *gdl)
 	s32 prev6b;
 
 	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+#if VERSION >= VERSION_NTSC_1_0
 	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
+#endif
 	gDPSetColorDither(gdl++, G_CD_NOISE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 
@@ -1286,7 +1292,9 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 		gSPSetGeometryMode(gdl++, G_CULL_BACK);
 	}
 
+#if VERSION >= VERSION_NTSC_1_0
 	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
+#endif
 	gDPSetColorDither(gdl++, G_CD_NOISE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 
@@ -1312,7 +1320,7 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 					sp74.y = wallhit->relpos.y + prop->pos.y;
 					sp74.z = wallhit->relpos.z + prop->pos.z;
 
-					wallhit->unk6b = wallhitOcclude(&sp74);
+					wallhit->unk6b = wallhit0f140750(&sp74);
 				}
 			} else {
 				wallhit->unk6b = 1;

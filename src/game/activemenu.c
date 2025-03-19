@@ -797,7 +797,7 @@ void amCalculateSlotPosition(s16 column, s16 row, s16 *x, s16 *y)
 		*y = (*y * 3) / 5;
 	}
 
-	*x += viGetViewLeft() + viGetViewWidth() / 2;
+	*x += viGetViewLeft() / g_ScaleX + viGetViewWidth() / (g_ScaleX * 2);
 	*y += viGetViewTop() + viGetViewHeight() / 2;
 
 	if ((playercount == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL))
@@ -869,8 +869,8 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 
 		textMeasure(&textheight, &textwidth, aibotname, g_AmFont1, g_AmFont2, 0);
 
-		x = viGetViewLeft()
-			+ (s32)(viGetViewWidth() * 0.5f)
+		x = viGetViewLeft() / g_ScaleX
+			+ (s32)(viGetViewWidth() / g_ScaleX * 0.5f)
 			- (s32)(textwidth * 0.5f)
 			+ offset;
 
@@ -880,7 +880,7 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 			y = viGetViewTop() + 10;
 		}
 		if (wide) {
-			x = viGetViewLeft() + 32;
+			x = viGetViewLeft() / g_ScaleX + 32;
 		}
 
 		gdl = textRenderProjected(gdl, &x, &y, aibotname, g_AmFont1, g_AmFont2, -1, SCREEN_320, SCREEN_240, 0, 0);
@@ -893,8 +893,8 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 
 		textMeasure(&textheight, &textwidth, title, g_AmFont1, g_AmFont2, 0);
 
-		x = viGetViewLeft()
-			+ (s32)(viGetViewWidth() * 0.5f)
+		x = viGetViewLeft() / g_ScaleX
+			+ (s32)(viGetViewWidth() / g_ScaleX * 0.5f)
 			- (s32)(textwidth * 0.5f)
 			+ offset;
 
@@ -905,7 +905,7 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 		}
 
 		if (wide) {
-			x = viGetViewLeft() + 32;
+			x = viGetViewLeft() / g_ScaleX + 32;
 		}
 
 		gdl = textRender(gdl, &x, &y, title, g_AmFont1, g_AmFont2, -1,
@@ -960,7 +960,7 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
 
 	gdl = textSetPrimColour(gdl, colour);
 
-	gDPFillRectangle(gdl++,
+	gDPFillRectangleScaled(gdl++,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y - paddingtop + 1,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2,
@@ -988,28 +988,28 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
 	gdl = textSetPrimColour(gdl, colour);
 
 	// Top border
-	gDPFillRectangle(gdl++,
+	gDPFillRectangleScaled(gdl++,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2,
 			y - paddingtop,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y - paddingtop + 1);
 
 	// Bottom border
-	gDPFillRectangle(gdl++,
+	gDPFillRectangleScaled(gdl++,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2,
 			y + paddingbottom,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y + paddingbottom + 1);
 
 	// Left border
-	gDPFillRectangle(gdl++,
+	gDPFillRectangleScaled(gdl++,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2,
 			y - paddingtop + 1,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y + paddingbottom);
 
 	// Right border
-	gDPFillRectangle(gdl++,
+	gDPFillRectangleScaled(gdl++,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2,
 			y - paddingtop + 1,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
@@ -1053,6 +1053,7 @@ Gfx *amRender(Gfx *gdl)
 	s16 sloty;
 	s16 tmp1;
 	s16 tmp2;
+	g_ScaleX = 1;
 
 	const s32 playercount = PLAYERCOUNT();
 	if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
@@ -1289,28 +1290,28 @@ Gfx *amRender(Gfx *gdl)
 			}
 
 			// Top
-			gDPFillRectangle(gdl++,
+			gDPFillRectangleScaled(gdl++,
 					g_AmMenus[g_AmIndex].selx - halfwidth,
 					g_AmMenus[g_AmIndex].sely - above,
 					g_AmMenus[g_AmIndex].selx + halfwidth + 1,
 					g_AmMenus[g_AmIndex].sely - above + 1);
 
 			// Bottom
-			gDPFillRectangle(gdl++,
+			gDPFillRectangleScaled(gdl++,
 					g_AmMenus[g_AmIndex].selx - halfwidth,
 					g_AmMenus[g_AmIndex].sely + below,
 					g_AmMenus[g_AmIndex].selx + halfwidth + 1,
 					g_AmMenus[g_AmIndex].sely + below + 1);
 
 			// Left
-			gDPFillRectangle(gdl++,
+			gDPFillRectangleScaled(gdl++,
 					g_AmMenus[g_AmIndex].selx - halfwidth,
 					g_AmMenus[g_AmIndex].sely - above + 1,
 					g_AmMenus[g_AmIndex].selx - halfwidth + 1,
 					g_AmMenus[g_AmIndex].sely + below);
 
 			// Right
-			gDPFillRectangle(gdl++,
+			gDPFillRectangleScaled(gdl++,
 					g_AmMenus[g_AmIndex].selx + halfwidth,
 					g_AmMenus[g_AmIndex].sely - above + 1,
 					g_AmMenus[g_AmIndex].selx + halfwidth + 1,
@@ -1351,10 +1352,10 @@ Gfx *amRender(Gfx *gdl)
 		}
 
 		if (PLAYERCOUNT() == 1 && optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
-			part1left = viGetViewLeft() + 32;
+			part1left = viGetViewLeft() / g_ScaleX + 32;
 		} else {
-			part1left = (s32) ((viGetViewWidth()) * 0.5f)
-				+ (s32) (viGetViewLeft())
+			part1left = (s32) ((viGetViewWidth() / g_ScaleX) * 0.5f)
+				+ (s32) (viGetViewLeft() / g_ScaleX)
 				- (s32) (barwidth * 0.5f)
 				+ xoffset;
 		}
@@ -1377,7 +1378,7 @@ Gfx *amRender(Gfx *gdl)
 
 		// NTSC beta doesn't scale the health bar when hi-res is on,
 		// and it only matches if part2left is an inline expression
-#define RECT(gdl, x1, y1, x2, y2) gDPFillRectangle(gdl, x1, y1, x2, y2)
+#define RECT(gdl, x1, y1, x2, y2) gDPFillRectangleScaled(gdl, x1, y1, x2, y2)
 #define PART2LEFT() part2left
 
 		if (redhealth) {
@@ -1428,6 +1429,8 @@ Gfx *amRender(Gfx *gdl)
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
+
+	g_ScaleX = 1;
 
 	return gdl;
 }

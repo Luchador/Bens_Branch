@@ -54,6 +54,8 @@ void menuTick(void)
 	s32 sp340 = true;
 	s32 anyopen = false;
 
+	g_ScaleX = 1;
+
 	menuTickTimers();
 	menuCountDialogs();
 
@@ -397,7 +399,7 @@ void menuTick(void)
 
 		if (sp340 &&
 				(g_MenuData.root == MENUROOT_MPSETUP)) {
-			menuOpenPerfectMenu(NULL, -5);
+			func0f0f820c(NULL, -5);
 		}
 	} else {
 		var8006294c = 0;
@@ -673,5 +675,6 @@ void menuTick(void)
 		}
 	}
 
+	g_ScaleX = 1;
 	g_MenuData.unk5d5_06 = sp344 ? true : false;
 }

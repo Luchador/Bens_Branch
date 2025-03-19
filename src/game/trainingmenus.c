@@ -202,9 +202,9 @@ MenuItemHandlerResult frWeaponListMenuHandler(s32 operation, struct menuitem *it
 					TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
 
 			gSPTextureRectangle(gdl++,
-					(((renderdata->x + i * 13) + 125) << 2), (renderdata->y) << 2,
-					(((renderdata->x + i * 13) + 136) << 2), (renderdata->y + 11) << 2,
-					G_TX_RENDERTILE, 0, 0x0160, 1024, -1024);
+					(((renderdata->x + i * 13) + 125) << 2) * g_ScaleX, (renderdata->y) << 2,
+					(((renderdata->x + i * 13) + 136) << 2) * g_ScaleX, (renderdata->y + 11) << 2,
+					G_TX_RENDERTILE, 0, 0x0160, 1024 / g_ScaleX, -1024);
 		}
 
 		return (uintptr_t)gdl;
@@ -624,27 +624,27 @@ MenuItemHandlerResult frScoringMenuHandler(s32 operation, struct menuitem *item,
 
 		// Top left quarter of target
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 10) << 2), (renderdata->y + 5) << 2,
-				((renderdata->x + 42) << 2), (renderdata->y + 37) << 2,
-				G_TX_RENDERTILE, 16, 1024, 1024, -1024);
+				((renderdata->x + 10) << 2) * g_ScaleX, (renderdata->y + 5) << 2,
+				((renderdata->x + 42) << 2) * g_ScaleX, (renderdata->y + 37) << 2,
+				G_TX_RENDERTILE, 16, 1024, 1024 / g_ScaleX, -1024);
 
 		// Top right quarter of target
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 41) << 2), (renderdata->y + 5) << 2,
-				((renderdata->x + 73) << 2), (renderdata->y + 37) << 2,
-				G_TX_RENDERTILE, 16, 1024, -1024, -1024);
+				((renderdata->x + 41) << 2) * g_ScaleX, (renderdata->y + 5) << 2,
+				((renderdata->x + 73) << 2) * g_ScaleX, (renderdata->y + 37) << 2,
+				G_TX_RENDERTILE, 16, 1024, -1024 / g_ScaleX, -1024);
 
 		// Bottom left quarter of target
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 10) << 2), (renderdata->y + 36) << 2,
-				((renderdata->x + 42) << 2), (renderdata->y + 68) << 2,
-				G_TX_RENDERTILE, 16, 1024, 1024, 1024);
+				((renderdata->x + 10) << 2) * g_ScaleX, (renderdata->y + 36) << 2,
+				((renderdata->x + 42) << 2) * g_ScaleX, (renderdata->y + 68) << 2,
+				G_TX_RENDERTILE, 16, 1024, 1024 / g_ScaleX, 1024);
 
 		// Bottom right quarter of target
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 41) << 2), (renderdata->y + 36) << 2,
-				((renderdata->x + 73) << 2), (renderdata->y + 68) << 2,
-				G_TX_RENDERTILE, 16, 1024, -1024, 1024);
+				((renderdata->x + 41) << 2) * g_ScaleX, (renderdata->y + 36) << 2,
+				((renderdata->x + 73) << 2) * g_ScaleX, (renderdata->y + 68) << 2,
+				G_TX_RENDERTILE, 16, 1024, -1024 / g_ScaleX, 1024);
 
 		gdl = textSetPrimColour(gdl, ((failed ? 0xff000055 : 0x00ff0055) & 0xffffff00) | (((failed ? 0xff000055 : 0x00ff0055) & 0xff) * (renderdata->colour & 0xff) >> 8));
 		colour = ((failed ? 0xff6969aa : renderdata->colour) & 0xffffff00) | ((((failed ? 0xff6969aa : renderdata->colour) & 0xff) * (renderdata->colour & 0xff)) >> 8);
@@ -1874,11 +1874,11 @@ MenuItemHandlerResult htHoloListMenuHandler(s32 operation, struct menuitem *item
 	case MENUOP_GETOPTIONTEXT:
 		return (uintptr_t) htGetName(htGetIndexBySlot(data->list.value));
 	case MENUOP_SET:
-		g_HtScenario = data->list.value;
+		var80088bb4 = data->list.value;
 		menuPushDialog(&g_HtDetailsMenuDialog);
 		break;
 	case MENUOP_GETSELECTEDINDEX:
-		data->list.value = g_HtScenario;
+		data->list.value = var80088bb4;
 		break;
 	case MENUOP_GETOPTGROUPCOUNT:
 		data->list.value = 0;
@@ -1895,7 +1895,7 @@ MenuItemHandlerResult htHoloListMenuHandler(s32 operation, struct menuitem *item
 
 char *htMenuTextName(struct menuitem *item)
 {
-	return htGetName(htGetIndexBySlot(g_HtScenario));
+	return htGetName(htGetIndexBySlot(var80088bb4));
 }
 
 MenuItemHandlerResult menuhandler001a6a34(s32 operation, struct menuitem *item, union handlerdata *data)
@@ -2427,9 +2427,9 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(s32 operation, struct menuitem *i
 			gDPSetTextureFilter(gdl++, G_TF_POINT);
 			gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 255) >> 8);
 			gSPTextureRectangle(gdl++,
-					((renderdata->x + 6) << 2), (renderdata->y + 3) << 2,
-					((renderdata->x + 60) << 2), (renderdata->y + 39) << 2,
-					G_TX_RENDERTILE, 0, 0x0480, 1024, -1024);
+					((renderdata->x + 6) << 2) * g_ScaleX, (renderdata->y + 3) << 2,
+					((renderdata->x + 60) << 2) * g_ScaleX, (renderdata->y + 39) << 2,
+					G_TX_RENDERTILE, 0, 0x0480, 1024 / g_ScaleX, -1024);
 
 			leftmargin = -1;
 		} else {

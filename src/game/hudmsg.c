@@ -94,7 +94,7 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha)
 
 	textcolour = alpha;
 
-	viewleft = viGetViewLeft();
+	viewleft = viGetViewLeft() / g_ScaleX;
 	viewtop = viGetViewTop();
 	viewheight = viGetViewHeight();
 	playercount = PLAYERCOUNT();
@@ -187,8 +187,8 @@ Gfx *hudmsgRenderZoomRange(Gfx *gdl, u32 alpha)
 
 	colour = (alpha * 0xa0 / 255) | 0x00ff0000;
 	viewtop = viGetViewTop();
-	viewleft = viGetViewLeft();
-	viewhalfwidth = (viGetViewWidth()) >> 1;
+	viewleft = viGetViewLeft() / g_ScaleX;
+	viewhalfwidth = (viGetViewWidth() / g_ScaleX) >> 1;
 	viewheight = viGetViewHeight();
 	texty = viewheight + viewtop - 1;
 	maxzoom = 1.0f;
@@ -311,9 +311,9 @@ Gfx *hudmsgRenderBox(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, f32 bgopacity, u3
 		f32 height = (y1 + y2) * 0.5f;
 
 		gdl = text0f153a34(gdl,
-				(s32)((width - f22) + 1.0f),
+				(s32)((width - f22) + 1.0f) * g_ScaleX,
 				(height - f20) + 1.0f,
-				(s32)(width + f22),
+				(s32)(width + f22) * g_ScaleX,
 				height + f20,
 				128.0f * textopacity);
 	}
@@ -323,7 +323,7 @@ Gfx *hudmsgRenderBox(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, f32 bgopacity, u3
 
 s32 hudmsg0f0ddb1c(s32 *arg0, s32 arg1)
 {
-	s32 viewwidth = g_Vars.currentplayer->viewwidth;
+	s32 viewwidth = g_Vars.currentplayer->viewwidth / g_ScaleX;
 	s32 result = 0;
 
 	*arg0 = 24;
@@ -733,9 +733,9 @@ void hudmsgCalculatePosition(struct hudmessage *msg)
 {
 	s32 x;
 	s32 y;
-	s32 viewleft = g_Vars.players[msg->playernum]->viewleft;
+	s32 viewleft = g_Vars.players[msg->playernum]->viewleft / g_ScaleX;
 	s32 viewtop = g_Vars.players[msg->playernum]->viewtop;
-	s32 viewwidth = g_Vars.players[msg->playernum]->viewwidth;
+	s32 viewwidth = g_Vars.players[msg->playernum]->viewwidth / g_ScaleX;
 	s32 viewheight = g_Vars.players[msg->playernum]->viewheight;
 	s32 v0;
 
@@ -883,6 +883,8 @@ void hudmsgCreateFromArgs(char *text, s32 type, s32 conf00, s32 conf01, s32 conf
 			}
 		}
 
+		g_ScaleX = 1;
+
 		// Find an unused index for the new message
 		for (index = 0; index < g_NumHudMessages; index++) {
 			if (g_HudMessages[index].state == HUDMSGSTATE_FREE) {
@@ -972,6 +974,8 @@ void hudmsgCreateFromArgs(char *text, s32 type, s32 conf00, s32 conf01, s32 conf
 				msg->channelnum = arg14;
 			}
 		}
+
+		g_ScaleX = 1;
 	}
 }
 
@@ -990,6 +994,8 @@ void hudmsgsTick(void)
 	f32 fadeouttime;
 
 	g_HudmsgsActive = false;
+
+	g_ScaleX = 1;
 
 	prevplayernum = g_Vars.currentplayernum;
 
@@ -1174,6 +1180,8 @@ void hudmsgsTick(void)
 			break;
 		}
 	}
+
+	g_ScaleX = 1;
 }
 
 void hudmsgsSetOn(u32 reason)
@@ -1212,6 +1220,8 @@ Gfx *hudmsgsRender(Gfx *gdl)
 	s32 timerthing = 255;
 	s32 spdc = true;
 	const s32 playercount = PLAYERCOUNT();
+
+	g_ScaleX = 1;
 
 	gdl = text0f153628(gdl);
 
@@ -1283,8 +1293,8 @@ Gfx *hudmsgsRender(Gfx *gdl)
 
 		if (msg->type == HUDMSGTYPE_CUTSCENESUBTITLE) {
 			gDPSetScissor(gdl++, 0,
-					(x - 4), 0,
-					(x + msg->width + 3), viGetBufHeight());
+					(x - 4) * g_ScaleX, 0,
+					(x + msg->width + 3) * g_ScaleX, viGetBufHeight());
 		}
 
 		switch (msg->state) {
@@ -1436,6 +1446,8 @@ Gfx *hudmsgsRender(Gfx *gdl)
 	}
 
 	gdl = text0f153780(gdl);
+
+	g_ScaleX = 1;
 
 	return gdl;
 }

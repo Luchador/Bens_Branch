@@ -2363,7 +2363,7 @@ void mpEndMatch(void)
 	}
 #endif
 
-	menuOpenPerfectMenu(NULL, -6);
+	func0f0f820c(NULL, -6);
 }
 
 // Ben's comment: I suspect this would have returned g_MpHeads + custom PerfectHeads before that feature was pulled. Now it's the same as mpGetNumHeads.

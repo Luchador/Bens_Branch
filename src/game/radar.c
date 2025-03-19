@@ -32,7 +32,7 @@ u32 g_TeamColours[] = {
 	0x88445500, // Brown
 };
 
-/*u32 var80087ce4[] = { // Doesn't do anything?
+u32 var80087ce4[] = {
 	0xf801f801,
 	0xffc1ffc1,
 	0x003f003f,
@@ -41,7 +41,7 @@ u32 g_TeamColours[] = {
 	0xfc55fc55,
 	0xfc63fc63,
 	0x8a158a15,
-};*/
+};
 
 void radarSetYIndicatorsEnabled(bool enable)
 {
@@ -145,92 +145,92 @@ Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, u32 colour1, 
 		if (prop == g_Vars.currentplayer->prop) {
 			// Box
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
-			gDPFillRectangle(gdl++, x - 2, y + 2, x + 1, y + 3);
-			gDPFillRectangle(gdl++, x - 3, y - 1, x + 2, y + 2);
-			gDPFillRectangle(gdl++, x - 2, y - 2, x + 1, y - 1);
+			gDPFillRectangleScaled(gdl++, x - 2, y + 2, x + 1, y + 3);
+			gDPFillRectangleScaled(gdl++, x - 3, y - 1, x + 2, y + 2);
+			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 1, y - 1);
 			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
-			gDPFillRectangle(gdl++, x - 1, y + 1, x + 0, y + 2);
-			gDPFillRectangle(gdl++, x - 2, y + 0, x + 1, y + 1);
-			gDPFillRectangle(gdl++, x - 1, y - 1, x + 0, y + 0);
+			gDPFillRectangleScaled(gdl++, x - 1, y + 1, x + 0, y + 2);
+			gDPFillRectangleScaled(gdl++, x - 2, y + 0, x + 1, y + 1);
+			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 0, y + 0);
 			gdl = textSetCCCustom02(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y > 250) {
 			// Up triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
-			gDPFillRectangle(gdl++, x - 3, y - 1, x + 2, y + 2);
-			gDPFillRectangle(gdl++, x - 2, y - 2, x + 1, y - 1);
+			gDPFillRectangleScaled(gdl++, x - 3, y - 1, x + 2, y + 2);
+			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 1, y - 1);
 			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
-			gDPFillRectangle(gdl++, x - 2, y + 0, x + 1, y + 1);
-			gDPFillRectangle(gdl++, x - 1, y - 1, x + 0, y + 0);
+			gDPFillRectangleScaled(gdl++, x - 2, y + 0, x + 1, y + 1);
+			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 0, y + 0);
 			gdl = textSetCCCustom02(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y < -250) {
 			// Down triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
-			gDPFillRectangle(gdl++, x - 3, y - 2, x + 2, y + 1);
-			gDPFillRectangle(gdl++, x - 2, y + 1, x + 1, y + 2);
+			gDPFillRectangleScaled(gdl++, x - 3, y - 2, x + 2, y + 1);
+			gDPFillRectangleScaled(gdl++, x - 2, y + 1, x + 1, y + 2);
 			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
-			gDPFillRectangle(gdl++, x - 2, y - 1, x + 1, y + 0);
-			gDPFillRectangle(gdl++, x - 1, y + 0, x + 0, y + 1);
+			gDPFillRectangleScaled(gdl++, x - 2, y - 1, x + 1, y + 0);
+			gDPFillRectangleScaled(gdl++, x - 1, y + 0, x + 0, y + 1);
 			gdl = textSetCCCustom02(gdl);
 		} else {
 			// Dot
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
-			gDPFillRectangle(gdl++, x - 2, y - 2, x + 2, y + 2);
+			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 2, y + 2);
 			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
-			gDPFillRectangle(gdl++, x - 1, y - 1, x + 1, y + 1);
+			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 1, y + 1);
 			gdl = textSetCCCustom02(gdl);
 		}
 	} else {
 		if (prop == g_Vars.currentplayer->prop) {
 			// Box
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
-			gDPFillRectangle(gdl++, x - 2, y + 2, x + 1, y + 3);
-			gDPFillRectangle(gdl++, x - 3, y - 1, x + 2, y + 2);
-			gDPFillRectangle(gdl++, x - 2, y - 2, x + 1, y - 1);
+			gDPFillRectangleScaled(gdl++, x - 2, y + 2, x + 1, y + 3);
+			gDPFillRectangleScaled(gdl++, x - 3, y - 1, x + 2, y + 2);
+			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 1, y - 1);
 			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
-			gDPFillRectangle(gdl++, x - 1, y + 1, x + 0, y + 2);
-			gDPFillRectangle(gdl++, x - 2, y + 0, x + 1, y + 1);
-			gDPFillRectangle(gdl++, x - 1, y - 1, x + 0, y + 0);
+			gDPFillRectangleScaled(gdl++, x - 1, y + 1, x + 0, y + 2);
+			gDPFillRectangleScaled(gdl++, x - 2, y + 0, x + 1, y + 1);
+			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 0, y + 0);
 			gdl = textSetCCCustom02(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y > 250) {
 			// Up triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
-			gDPFillRectangle(gdl++, x - 3, y - 1, x + 2, y + 2);
-			gDPFillRectangle(gdl++, x - 2, y - 2, x + 1, y - 1);
+			gDPFillRectangleScaled(gdl++, x - 3, y - 1, x + 2, y + 2);
+			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 1, y - 1);
 			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
-			gDPFillRectangle(gdl++, x - 2, y + 0, x + 1, y + 1);
-			gDPFillRectangle(gdl++, x - 1, y - 1, x + 0, y + 0);
+			gDPFillRectangleScaled(gdl++, x - 2, y + 0, x + 1, y + 1);
+			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 0, y + 0);
 			gdl = textSetCCCustom02(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y < -250) {
 			// Down triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
-			gDPFillRectangle(gdl++, x - 3, y - 2, x + 2, y + 1);
-			gDPFillRectangle(gdl++, x - 2, y + 1, x + 1, y + 2);
+			gDPFillRectangleScaled(gdl++, x - 3, y - 2, x + 2, y + 1);
+			gDPFillRectangleScaled(gdl++, x - 2, y + 1, x + 1, y + 2);
 			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
-			gDPFillRectangle(gdl++, x - 2, y - 1, x + 1, y + 0);
-			gDPFillRectangle(gdl++, x - 1, y + 0, x + 0, y + 1);
+			gDPFillRectangleScaled(gdl++, x - 2, y - 1, x + 1, y + 0);
+			gDPFillRectangleScaled(gdl++, x - 1, y + 0, x + 0, y + 1);
 			gdl = textSetCCCustom02(gdl);
 		} else {
 			// Dot
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
-			gDPFillRectangle(gdl++, x - 2, y - 2, x + 2, y + 2);
+			gDPFillRectangleScaled(gdl++, x - 2, y - 2, x + 2, y + 2);
 			gdl = textSetCCCustom02(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
-			gDPFillRectangle(gdl++, x - 1, y - 1, x + 1, y + 1);
+			gDPFillRectangleScaled(gdl++, x - 1, y - 1, x + 1, y + 1);
 			gdl = textSetCCCustom02(gdl);
 		}
 	}

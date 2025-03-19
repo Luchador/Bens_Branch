@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include "lib/boot.h"
 #include "lib/sched.h"
 #include "naudio/n_synthInternals.h"
 #include "constants.h"
@@ -15,7 +16,7 @@ u64 var80091570;
 u64 var80091578;
 u64 var80091580;
 u64 var80091588;
-u64 syselapsedtimed;
+u64 var80091590;
 AMAudioMgr g_AudioManager;
 OSScClient g_AudioSchedClient;
 u32 var800918dc;
@@ -35,10 +36,9 @@ void amgrMain(void *arg);
 // Used in PC port
 void amgrInit(void)
 {
-	//g_AudioSp = bootAllocateStack(THREAD_AUDIO, STACKSIZE_AUDIO);
+	g_AudioSp = bootAllocateStack(THREAD_AUDIO, STACKSIZE_AUDIO);
 }
 
-// Called on PC
 void amgrCreate(ALSynConfig *config)
 {
 	f32 freqpertick;
@@ -107,12 +107,14 @@ void amgrCreate(ALSynConfig *config)
 
 	n_alInit(&g_AudioManager.g, config);
 	func00030bfc(0, 60);
+	osCreateThread(&g_AudioManager.thread, THREAD_AUDIO, &amgrMain, 0, g_AudioSp, THREADPRI_AUDIO);
 }
 
 s8 g_AudioIsThreadRunning = false;
 
 void amgrStartThread(void)
 {
+	osStartThread(&g_AudioManager.thread);
 	g_AudioIsThreadRunning = true;
 }
 
@@ -129,7 +131,7 @@ OSMesgQueue *amgrGetFrameMesgQueue(void)
 void amgrStopThread(void)
 {
 	if (g_AudioIsThreadRunning) {
-		g_AudioIsThreadRunning = false;
+		osStopThread(&g_AudioManager.thread);
 	}
 }
 
@@ -137,7 +139,7 @@ extern u32 g_AdmaCurFrame;
 
 void amgrMain(void *arg)
 {
-	/*s32 count = 0;
+	s32 count = 0;
 	bool done = false;
 	s16 *msg = NULL;
 	AudioInfo *info = NULL;
@@ -160,18 +162,18 @@ void amgrMain(void *arg)
 
 			count++;
 
-			syselapsedtimed = osGetTime();
-			var80091570 = syselapsedtimed - var80091588;
+			var80091590 = osGetTime();
+			var80091570 = var80091590 - var80091588;
 
 			if (count % 240 == 0) {
 				var80091578 = var80091580 / 240;
 				var80091580 = 0; var80091568 = 0;
 			} else {
-				var80091580 = (var80091580 + syselapsedtimed) - var80091588;
+				var80091580 = (var80091580 + var80091590) - var80091588;
 			}
 
-			if (var80091568 < syselapsedtimed - var80091588) {
-				var80091568 = syselapsedtimed - var80091588;
+			if (var80091568 < var80091590 - var80091588) {
+				var80091568 = var80091590 - var80091588;
 			}
 
 			if (var8005d514 == 0) {
@@ -190,7 +192,7 @@ void amgrMain(void *arg)
 		}
 	}
 
-	n_alClose(&g_AudioManager.g);*/
+	n_alClose(&g_AudioManager.g);
 }
 
 void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo)
@@ -211,12 +213,15 @@ void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo)
 
 	admaBeginFrame();
 
+#ifdef PLATFORM_N64
+	somevalue = IO_READ(OS_PHYSICAL_TO_K1(AI_LEN_REG)) / 4;
+#else
 	somevalue = osAiGetLength() / 4;
 	// HACK: only allow small frames if really needed
 	if (somevalue < 1100) {
 		somevalue = 248;
 	}
-
+#endif
 	datastart = g_AudioManager.ACMDList[var8005cf90];
 	outbuffer = (s16 *) osVirtualToPhysical(info->data);
 
@@ -245,6 +250,14 @@ void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo)
 	g_AmgrCurrentCmdList->flags = OS_SC_NEEDS_RSP;
 	g_AmgrCurrentCmdList->list.t.type = M_AUDTASK;
 	g_AmgrCurrentCmdList->list.t.flags = 0;
+#ifdef PLATFORM_N64
+	g_AmgrCurrentCmdList->list.t.ucode_boot = (u64 *) &rspbootTextStart;
+	g_AmgrCurrentCmdList->list.t.ucode_boot_size = (uintptr_t) &rspbootTextEnd - (uintptr_t) &rspbootTextStart;
+	g_AmgrCurrentCmdList->list.t.ucode = (u64 *) &aspTextStart;
+	g_AmgrCurrentCmdList->list.t.ucode_data = (u64 *) &aspDataStart;
+	g_AmgrCurrentCmdList->list.t.ucode_size = SP_UCODE_SIZE;
+	g_AmgrCurrentCmdList->list.t.ucode_data_size = SP_UCODE_DATA_SIZE;
+#endif
 	g_AmgrCurrentCmdList->list.t.data_ptr = (u64 *) datastart;
 	g_AmgrCurrentCmdList->list.t.data_size = (cmd - datastart) * sizeof(Acmd);
 	g_AmgrCurrentCmdList->list.t.yield_data_ptr = NULL;
@@ -262,6 +275,7 @@ void amgrHandleDoneMsg(AudioInfo *info)
 	}
 }
 
+#ifndef PLATFORM_N64
 void amgrFrame(void)
 {
 	static AudioInfo *previnfo = NULL;
@@ -298,23 +312,24 @@ void amgrFrame(void)
 
 	var8005cf90 ^= 1;
 
-	//admaReceiveAll();
+	admaReceiveAll();
 
 	previnfo = info;
 
 	count++;
 
-	syselapsedtimed = osGetTime();
-	var80091570 = syselapsedtimed - var80091588;
+	var80091590 = osGetTime();
+	var80091570 = var80091590 - var80091588;
 
 	if (count % 240 == 0) {
 		var80091578 = var80091580 / 240;
 		var80091580 = 0; var80091568 = 0;
 	} else {
-		var80091580 = (var80091580 + syselapsedtimed) - var80091588;
+		var80091580 = (var80091580 + var80091590) - var80091588;
 	}
 
-	if (var80091568 < syselapsedtimed - var80091588) {
-		var80091568 = syselapsedtimed - var80091588;
+	if (var80091568 < var80091590 - var80091588) {
+		var80091568 = var80091590 - var80091588;
 	}
 }
+#endif

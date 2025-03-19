@@ -10,7 +10,9 @@
 #include "data.h"
 #include "textureconfig.h"
 #include "types.h"
+#ifndef PLATFORM_N64
 #include "video.h"
+#endif
 
 void texSetBitstring(u8 *bitstring)
 {
@@ -45,8 +47,39 @@ extern u8 EXT_SEG _textureconfigSegmentEnd;
 void texReset(void)
 {
 	s32 stage;
+#ifdef PLATFORM_N64
+	u32 len = &_textureconfigSegmentEnd - &_textureconfigSegmentStart;
+#endif
 	s32 i;
 
+#ifdef PLATFORM_N64
+	g_TextureConfigSegment = mempAlloc(len, MEMPOOL_STAGE);
+	dmaExec(g_TextureConfigSegment, (romptr_t)&_textureconfigSegmentRomStart, len);
+	g_TexBase = (uintptr_t)g_TextureConfigSegment - ROM_SIZE * 1024 * 1024;
+
+	g_TexGdl1 = (Gfx *)(g_TexBase + (uintptr_t)g_TcGdl1);
+	g_TexGdl2 = (Gfx *)(g_TexBase + (uintptr_t)g_TcGdl2);
+	g_TexGdl3 = (Gfx *)(g_TexBase + (uintptr_t)g_TcGdl3);
+	g_ExplosionTexturePairs = (void *)(g_TexBase + (uintptr_t)g_TcExplosionTexturePairs);
+	g_TexWallhitConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcWallhitConfigs);
+	g_TexBeamConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcBeamConfigs);
+	g_TexLaserConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcLaserConfigs);
+	g_TexGroup03Configs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcGroup03Configs);
+	g_TexGeCrosshairConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcGeCrosshairConfigs);
+	g_TexRedLinesConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcRedLineConfigs);
+	g_TexShadowConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcShadowConfigs);
+	g_TexShieldConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcShieldConfigs);
+	g_TexShardConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcShardConfigs);
+	g_TexScreenConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcScreenConfigs);
+	g_TexSkyWaterConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcSkyWaterConfigs);
+	g_TexGroup11Configs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcGroup11Configs);
+	g_TexLightGlareConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcLightGlareConfigs);
+	g_TexSparkConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcSparkConfigs);
+	g_TexGeneralConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcGeneralConfigs);
+	g_TexRadarConfigs = (struct textureconfig *)(g_TexBase + (uintptr_t)g_TcRadarConfigs);
+
+	g_TexNumConfigs = (len - (uintptr_t)&g_TcWallhitConfigs + ROM_SIZE * 1024 * 1024) / sizeof(struct textureconfig);
+#else
 	// HACK: define a big table of pointers we need to fill and sizes of the textureconfig data that goes there
 	#define DEFINE_TCPTR(ptr, data) { (void **)&ptr, (const void *)data, sizeof(data), ARRAYCOUNT(data) }
 	static const struct {
@@ -110,6 +143,7 @@ void texReset(void)
 
 	// notify blur code that the blur framebuffer is probably full of garbage
 	g_BlurFbDirty = true;
+#endif
 
 	g_TexWords = mempAlloc(ALIGN16(g_TexNumConfigs * sizeof(uintptr_t)), MEMPOOL_STAGE);
 

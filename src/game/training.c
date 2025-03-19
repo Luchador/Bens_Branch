@@ -2788,7 +2788,7 @@ void htPushEndscreen(void)
 	g_HtData.finished = false;
 }
 
-u8 g_HtScenario = 0;
+u8 var80088bb4 = 0;
 u8 var80088bb8 = 0;
 
 void htTick(void)
@@ -2811,7 +2811,9 @@ void htTick(void)
 				g_HtData.completed = true;
 				g_HtData.timeleft = 1;
 				g_HtData.finished = true;
+#ifndef PLATFORM_N64
 				filemgrSaveOrLoad(&g_GameFileGuid, FILEOP_SAVE_GAME_000, 0);
+#endif
 			}
 		} else if (g_HtData.finished) {
 			if (g_HtData.timeleft <= 0) {
@@ -2848,7 +2850,7 @@ void htBegin(void)
 	chrUnsetStageFlag(NULL, STAGEFLAG_CI_HOLO_ABORTING);
 	chrUnsetStageFlag(NULL, STAGEFLAG_CI_TRIGGER_HOLO_SUCCESS);
 	chrUnsetStageFlag(NULL, STAGEFLAG_CI_TRIGGER_HOLO_FAILURE);
-	chrSetStageFlag(NULL, func0f1a25c0(htGetIndexBySlot(g_HtScenario)));
+	chrSetStageFlag(NULL, func0f1a25c0(htGetIndexBySlot(var80088bb4)));
 
 	// Disable segment leading out of the door
 	navDisableSegment(&waypoints[0x20], &waypoints[0x31]);
@@ -2869,7 +2871,7 @@ void htEnd(void)
 	g_HtData.intraining = false;
 	chrSetStageFlag(NULL, STAGEFLAG_CI_HOLO_ABORTING);
 	chrUnsetStageFlag(NULL, STAGEFLAG_CI_TRIGGER_HOLO_FAILURE);
-	chrUnsetStageFlag(NULL, func0f1a25c0(htGetIndexBySlot(g_HtScenario)));
+	chrUnsetStageFlag(NULL, func0f1a25c0(htGetIndexBySlot(var80088bb4)));
 
 	// Enable segment leading out of the door
 	navEnableSegment(&waypoints[0x20], &waypoints[0x31]);
@@ -2950,6 +2952,15 @@ s32 htGetIndexBySlot(s32 slot)
 char *htGetName(s32 index)
 {
 	u32 texts[] = {
+#if VERSION >= VERSION_PAL_BETA
+		L_DISH_316, // "Holo 1 - Looking Around"
+		L_DISH_317, // "Holo 2 - Movement 1"
+		L_DISH_318, // "Holo 3 - Movement 2"
+		L_DISH_319, // "Holo 4 - Unarmed Combat 1"
+		L_DISH_320, // "Holo 5 - Unarmed Combat 2"
+		L_DISH_321, // "Holo 6 - Live Combat 1"
+		L_DISH_322, // "Holo 7 - Live Combat 2"
+#else
 		L_MISC_410, // "Holo 1 - Looking Around"
 		L_MISC_411, // "Holo 2 - Movement 1"
 		L_MISC_412, // "Holo 3 - Movement 2"
@@ -2957,6 +2968,7 @@ char *htGetName(s32 index)
 		L_MISC_414, // "Holo 5 - Unarmed Combat 2"
 		L_MISC_415, // "Holo 6 - Live Combat 1"
 		L_MISC_416, // "Holo 7 - Live Combat 2"
+#endif
 	};
 
 	return langGet(texts[index]);
@@ -2981,6 +2993,15 @@ u32 func0f1a25c0(s32 index)
 char *htGetDescription(void)
 {
 	u32 texts[] = {
+#if VERSION >= VERSION_PAL_BETA
+		L_DISH_242,
+		L_DISH_243,
+		L_DISH_244,
+		L_DISH_245,
+		L_DISH_246,
+		L_DISH_247,
+		L_DISH_248,
+#else
 		L_MISC_336,
 		L_MISC_337,
 		L_MISC_338,
@@ -2988,9 +3009,10 @@ char *htGetDescription(void)
 		L_MISC_340,
 		L_MISC_341,
 		L_MISC_342,
+#endif
 	};
 
-	return langGet(texts[htGetIndexBySlot(g_HtScenario)]);
+	return langGet(texts[htGetIndexBySlot(var80088bb4)]);
 }
 
 char *htGetTip1(void)
@@ -3005,7 +3027,7 @@ char *htGetTip1(void)
 		L_MISC_349, // "Go for the armed opponents..."
 	};
 
-	return langGet(texts[htGetIndexBySlot(g_HtScenario)]);
+	return langGet(texts[htGetIndexBySlot(var80088bb4)]);
 }
 
 char *htGetTip2(void)
@@ -3020,7 +3042,7 @@ char *htGetTip2(void)
 		L_MISC_356, // "Go for the armed opponents..."
 	};
 
-	return langGet(texts[htGetIndexBySlot(g_HtScenario)]);
+	return langGet(texts[htGetIndexBySlot(var80088bb4)]);
 }
 
 void frGetGoalTargetsText(char *buffer)

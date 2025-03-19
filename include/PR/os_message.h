@@ -137,6 +137,8 @@ extern s32		osRecvMesg(OSMesgQueue *, OSMesg *, s32);
 
 /* Event operations */
 
+extern void		osSetEventMesg(OSEvent, OSMesgQueue *, OSMesg);
+
 
 #endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
 

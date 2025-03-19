@@ -1717,20 +1717,26 @@ void snd0000fe80(void)
 
 void sndTick(void)
 {
+#if VERSION >= VERSION_NTSC_1_0
 	struct sndstate *stateptrs[64];
 	struct sndstate states[64];
 	s32 i;
 	s32 curtime;
 	struct sndstate *state;
+#endif
 	OSPri prevpri;
 	s32 s0;
 	union soundnumhack sp50;
 	s32 index;
 	s32 stack;
 
+#if VERSION >= VERSION_NTSC_1_0
 	static s32 g_SndMostEverPlaying2 = -1;
 
 	sndIncrementAges();
+
+	prevpri = osGetThreadPri(NULL);
+	osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 
 	curtime = sndpGetCurTime();
 	state = sndpGetHeadState();
@@ -1757,6 +1763,8 @@ void sndTick(void)
 		i++;
 	}
 
+	osSetThreadPri(0, prevpri);
+
 	if (g_SndNumPlaying > g_SndMostEverPlaying) {
 		g_SndMostEverPlaying = g_SndNumPlaying;
 	}
@@ -1764,6 +1772,7 @@ void sndTick(void)
 	if (g_SndMostEverPlaying != g_SndMostEverPlaying2) {
 		g_SndMostEverPlaying2 = g_SndMostEverPlaying;
 	}
+#endif
 
 	if (!g_SndDisabled && g_SndMp3Enabled) {
 		if (g_Vars.stagenum == STAGE_AIRFORCEONE) {
@@ -2014,11 +2023,14 @@ void sndAdjust(struct sndstate **handle, bool ismp3, s32 vol, s32 pan, s32 sound
 
 struct sndstate *snd00010718(struct sndstate **handle, s32 flags, s32 volume, s32 pan, s32 soundnum, f32 pitch, s32 fxbus, s32 fxmixarg, bool forcefxmix)
 {
+	OSPri prevpri = osGetThreadPri(NULL);
 	s32 fxmix = -1;
 	struct sndstate *state;
 	union soundnumhack sp30;
 	union soundnumhack sp2c;
 	struct audioconfig *config;
+
+	osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 
 	if (forcefxmix || fxmixarg != -1) {
 		if (fxmixarg != -1) {
@@ -2027,9 +2039,15 @@ struct sndstate *snd00010718(struct sndstate **handle, s32 flags, s32 volume, s3
 			fxmix = 0;
 		}
 
+#if VERSION >= VERSION_NTSC_1_0
 		if (pan != -1 && g_SoundMode == SOUNDMODE_SURROUND && (pan & 0x80)) {
 			fxmix += 128;
 		}
+#else
+		if (g_SoundMode == SOUNDMODE_SURROUND && (pan & 0x80)) {
+			fxmix += 128;
+		}
+#endif
 	}
 
 	if (soundnum) {
@@ -2060,6 +2078,8 @@ struct sndstate *snd00010718(struct sndstate **handle, s32 flags, s32 volume, s3
 	}
 
 	state = sndStart(var80095200, soundnum, handle, volume, pan, pitch, fxbus, fxmix);
+
+	osSetThreadPri(0, prevpri);
 
 	return state;
 }
