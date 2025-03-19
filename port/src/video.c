@@ -62,6 +62,9 @@ static f64 accumDelta = 0.0;
 static f64 fpsTime = 0.0;
 static s32 fpsNumFrames = 0;
 
+static bool framebuffers_enabled;
+static bool detail_textures;
+
 static s32 videoInitDisplayModes(void);
 
 s32 videoInit(void)
@@ -72,8 +75,8 @@ s32 videoInit(void)
 	gfx_current_native_viewport.width = 320;
 	gfx_current_native_viewport.height = 220;
 	gfx_current_native_aspect = 320.f / 220.f;
-	gfx_framebuffers_enabled = (bool)vidFramebuffers;
-	gfx_detail_textures_enabled = (bool)texDetail;
+	framebuffers_enabled = (bool)vidFramebuffers;
+	detail_textures = (bool)texDetail;
 	gfx_msaa_level = vidMSAA;
 
 	struct GfxInitSettings set = {
@@ -444,7 +447,7 @@ void videoSetTextureFilter2D(s32 filter)
 void videoSetDetailTextures(s32 detail)
 {
 	texDetail = !!detail;
-	gfx_detail_textures_enabled = (bool)texDetail;
+	detail_textures = (bool)texDetail;
 }
 
 s32 videoCreateFramebuffer(u32 w, u32 h, s32 upscale, s32 autoresize)
@@ -491,7 +494,7 @@ void videoResetFramebuffer(void)
 
 s32 videoFramebuffersSupported(void)
 {
-	return gfx_framebuffers_enabled;
+	return framebuffers_enabled;
 }
 
 void videoResizeFramebuffer(s32 target, u32 w, u32 h, s32 upscale, s32 autoresize)

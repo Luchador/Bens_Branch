@@ -281,6 +281,7 @@ extern void		osViSetYScale(f32);
 extern void		osViExtendVStart(u32);
 extern void		osViSetSpecialFeatures(u32);
 extern void		osViSetMode(OSViMode *);
+extern void		osViSetEvent(OSMesgQueue *, OSMesg, u32);
 extern void		osViSwapBuffer(void *);
 extern void		osViBlack(u8);
 extern void		osViFade(u8, u16);

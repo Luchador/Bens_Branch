@@ -19,6 +19,7 @@
 #include "data.h"
 #include "types.h"
 #include "game/debug.h"
+#include <PR/os_vi.h>
 
 #include "video.h"
 #include "audio.h"

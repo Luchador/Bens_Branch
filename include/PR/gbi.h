@@ -322,6 +322,7 @@
 #define G_IM_FMT_CI   2
 #define G_IM_FMT_IA   3
 #define G_IM_FMT_I    4
+#define G_IM_FMT_CUSTOMFONT    5
 
 /*
  * G_SETIMG siz: set image pixel size

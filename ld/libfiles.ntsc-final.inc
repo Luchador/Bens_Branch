@@ -30,6 +30,7 @@
 	build/ROMID/lib/audiomgr.o (section); \
 	build/ROMID/lib/audiodma.o (section); \
 	build/ROMID/lib/vi.o (section); \
+	build/ROMID/lib/ultra/io/viint.o (section); \
 	build/ROMID/lib/fault.o (section); \
 	build/ROMID/lib/crash.o (section); \
 	build/ROMID/lib/dma.o (section); \

@@ -3,13 +3,10 @@
 
 #include <PR/ultratypes.h>
 #include <PR/gbi.h>
+#include <os_internal.h>
 
 // maximum framerate; if the game runs faster than this, things will break
-#if PAL
-#define VIDEO_MAX_FPS 200
-#else
 #define VIDEO_MAX_FPS 240
-#endif
 
 typedef struct {
 	s32 width;

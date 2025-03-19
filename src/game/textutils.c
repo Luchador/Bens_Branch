@@ -1,11 +1,13 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/menuutils.h"
+#include "game/debug.h"
 #include "game/gfxmemory.h"
 #include "game/savebuffer.h"
 #include "game/textutils.h"
 #include "game/file.h"
 #include "game/lang.h"
+#include "fs.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/dma.h"
@@ -14,6 +16,10 @@
 #include "data.h"
 #include "types.h"
 #include "platform.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
 
 #define SPACE_WIDTH 5
 
@@ -22,6 +28,10 @@
 #define BLENDTYPE_WAVE       0x04
 #define BLENDTYPE_MENU       0x08
 #define BLENDTYPE_HORIZONTAL 0x10
+
+#define ASCII_START 33
+#define ASCII_END 126
+#define TOTAL_CHARS (ASCII_END - ASCII_START)
 
 struct blendsettings {
 	/*0x00*/ u8 types;
@@ -62,8 +72,6 @@ s32 g_ScaleX = 1;
 bool g_TextRotated90 = false;
 s32 g_WrapIndentCount = 0;
 
-struct font *g_FontTahoma2 = NULL;
-struct fontchar *g_FontTahoma1 = NULL;
 struct font *g_FontNumeric = NULL;
 struct fontchar *g_CharsNumeric = NULL;
 struct font *g_FontHandelGothicXs = NULL;
@@ -74,6 +82,10 @@ struct font *g_FontHandelGothicMd = NULL;
 struct fontchar *g_CharsHandelGothicMd = NULL;
 struct font *g_FontHandelGothicLg = NULL;
 struct fontchar *g_CharsHandelGothicLg = NULL;
+
+struct fontchar *g_CharToRender;
+
+struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
 
 u16 var8007fb3c[] = {
 	0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00,
@@ -134,7 +146,6 @@ void textLoadFont(u8 *romstart, u8 *romend, struct font **fontptr, struct fontch
 		chars[i].pixeldata += (uintptr_t)font;
 	}
 
-	// If requested monospace, set all widths to the max, minus 1 for some reason
 	if (monospace) {
 		maxwidth = 0;
 
@@ -159,7 +170,6 @@ void textReset(void)
 {
 	extern u8 EXT_SEG _fontbankgothicSegmentRomStart,     EXT_SEG _fontbankgothicSegmentRomEnd;
 	extern u8 EXT_SEG _fontzurichSegmentRomStart,         EXT_SEG _fontzurichSegmentRomEnd;
-	extern u8 EXT_SEG _fonttahomaSegmentRomStart,         EXT_SEG _fonttahomaSegmentRomEnd;
 	extern u8 EXT_SEG _fontnumericSegmentRomStart,        EXT_SEG _fontnumericSegmentRomEnd;
 	extern u8 EXT_SEG _fonthandelgothicsmSegmentRomStart, EXT_SEG _fonthandelgothicsmSegmentRomEnd;
 	extern u8 EXT_SEG _fonthandelgothicxsSegmentRomStart, EXT_SEG _fonthandelgothicxsSegmentRomEnd;
@@ -168,14 +178,12 @@ void textReset(void)
 	extern u8 EXT_SEG _fontocramdSegmentRomStart,         EXT_SEG _fontocramdSegmentRomEnd;
 	extern u8 EXT_SEG _fontocralgSegmentRomStart,         EXT_SEG _fontocralgSegmentRomEnd;
 
-	g_FontTahoma2 = NULL;
 	g_FontNumeric = NULL;
 	g_FontHandelGothicXs = NULL;
 	g_FontHandelGothicSm = NULL;
 	g_FontHandelGothicMd = NULL;
 	g_FontHandelGothicLg = NULL;
 
-	g_FontTahoma1 = NULL;
 	g_CharsNumeric = NULL;
 	g_CharsHandelGothicXs = NULL;
 	g_CharsHandelGothicSm = NULL;
@@ -195,14 +203,16 @@ void textReset(void)
 		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
 		textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
 	} else {
-		// This unused GE font exists in NTSC but was removed in the PAL version
-		//textLoadFont(REF_SEG _fonttahomaSegmentRomStart, REF_SEG _fonttahomaSegmentRomEnd, &g_FontTahoma2, &g_FontTahoma1, false);
-
 		textLoadFont(REF_SEG _fontnumericSegmentRomStart, REF_SEG _fontnumericSegmentRomEnd, &g_FontNumeric, &g_CharsNumeric, false);
 		textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
 		textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
 		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
 	}
+
+	// Fonts are loaded again every time a stage is loaded so free the memory allocated for the previous fonts
+	textFreeFontCharacters();
+
+	textLoadCustomFont(); // Load custom HD fonts into memory
 }
 
 Gfx *text0f153628(Gfx *gdl)
@@ -667,7 +677,7 @@ Gfx *text0f154ecc(Gfx *gdl, u32 arg1, u32 arg2)
 	return gdl;
 }
 
-Gfx *text0f154f38(Gfx *gdl, s32 *arg1, struct fontchar *curchar, struct fontchar *prevchar,
+Gfx *textMakeCreditVerts(Gfx *gdl, s32 *arg1, struct fontchar *curchar, struct fontchar *prevchar,
 		struct font *font, f32 widthscale, f32 heightscale, f32 x, f32 y)
 {
 	s32 tmp1;
@@ -748,7 +758,7 @@ Gfx *text0f154f38(Gfx *gdl, s32 *arg1, struct fontchar *curchar, struct fontchar
 	return gdl;
 }
 
-Gfx *text0f1552d4(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
+Gfx *textRenderCredit(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
 		char *text, struct fontchar *chars, struct font *font, u32 colour, s32 hdir, s32 vdir)
 {
 	s32 totalheight;
@@ -798,7 +808,7 @@ Gfx *text0f1552d4(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
 				totalheight += lineheight;
 				relx = 0;
 			} else if (*text < 0x80) {
-				gdl = text0f154f38(gdl, &relx, &chars[*text - 0x21], &chars[prevchar - 0x21], font,
+				gdl = textMakeCreditVerts(gdl, &relx, &chars[*text - 0x21], &chars[prevchar - 0x21], font,
 						widthscale, heightscale, fx, fy);
 				prevchar = *text;
 				text += 1;
@@ -812,21 +822,16 @@ Gfx *text0f1552d4(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
 	return gdl;
 }
 
-Gfx *text0f15568c(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct fontchar *prevchar,
+// Render the text in menus. Doesn't do the highlight effect for the focused menu option.
+Gfx *textRenderUnhighlighted(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct fontchar *prevchar,
 		struct font *font, s32 savedx, s32 savedy, s32 width, s32 height, s32 arg10)
 {
 	s32 tmp;
 	s32 sp90;
-	s32 xscale = 1;
-
-	if (g_TextRotated90) {
-		xscale = 1;
-	}
 
 	sp90 = *y + arg10;
 	tmp = font->kerning[prevchar->kerningindex * 13 + curchar->kerningindex];
-	*x -= (tmp - 1) * xscale;
-	width *= xscale;
+	*x -= (tmp - 1);
 
 	if (g_TextRotated90 || (*x > 0 && *x <= viGetWidth() && sp90 + curchar->baseline <= viGetHeight())) {
 		if (savedx + width >= *x
@@ -834,6 +839,9 @@ Gfx *text0f15568c(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct fon
 				&& *x >= savedx
 				&& curchar->baseline + sp90 + curchar->height >= savedy) {
 			gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, curchar->pixeldata);
+			g_CharToRender = curchar;
+			//gDPSetTextureImage(gdl++, G_IM_FMT_CUSTOMFONT, G_IM_SIZ_16b, 1, &g_HandelGothicData[g_CharToRender->index].pixeldata);
+			gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 			gDPLoadSync(gdl++);
 			gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, ((curchar->height * 8 + 17) >> 1) - 1, 2048);
 			gDPPipeSync(gdl++);
@@ -842,9 +850,7 @@ Gfx *text0f15568c(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct fon
 				gdl = text0f154ecc(gdl, *x / g_ScaleX, *y + arg10);
 			}
 
-			if (1);
-
-			if (*x + xscale * curchar->width <= savedx + width) {
+			if (*x + 1 * curchar->width <= savedx + width) {
 				if (savedy <= curchar->baseline + sp90) {
 					if (curchar->baseline + sp90 + curchar->height <= savedy + height) {
 						if (g_TextRotated90) {
@@ -926,7 +932,7 @@ Gfx *text0f15568c(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct fon
 		}
 	}
 
-	*x += curchar->width * xscale;
+	*x += curchar->width;
 
 	return gdl;
 }
@@ -986,14 +992,17 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 	if (lineheight == 0) {
 		lineheight = chars['['].height + chars['['].baseline;
 	}
-
+ 
 	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, osVirtualToPhysical(var8007fb3c));
+	//gDPSetTextureImage(gdl++, G_IM_FMT_CUSTOMFONT, G_IM_SIZ_16b, 1, &g_HandelGothicData[50].pixeldata);
 	gDPLoadSync(gdl++);
 	gDPLoadTLUTCmd(gdl++, 6, 15);
 	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+	//gDPSetTile(gdl++, G_IM_FMT_CUSTOMFONT, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c);
+	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 128, 128);
 	gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
 	gDPPipeSync(gdl++);
 
@@ -1012,7 +1021,7 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 				*y += lineheight;
 				*x = savedx;
 			} else if (*text < 0x80) {
-				gdl = text0f15568c(gdl, x, y, &chars[*text - 0x21], &chars[prevchar - 0x21], font, savedx, savedy, width, height, arg9);
+				gdl = textRenderUnhighlighted(gdl, x, y, &chars[*text - 0x21], &chars[prevchar - 0x21], font, savedx, savedy, width, height, arg9);
 				prevchar = *text;
 				text++;
 			} else {
@@ -1406,3 +1415,150 @@ void textWrap(s32 wrapwidth, char *src, char *dst, struct fontchar *chars, struc
 		src++;
 	}
 }
+
+u8 *textLoadBMP(const char *filename, u16 *width, u16 *height) {
+    FILE *file = fopen(filename, "rb");  // Open in binary mode
+    if (!file) {
+        printf("Error: Could not open BMP file.\n");
+        return NULL;
+    }
+
+    // Read BMP headers
+    BMPFileHeader fileHeader;
+    BMPInfoHeader infoHeader;
+
+    fread(&fileHeader, sizeof(BMPFileHeader), 1, file);
+    fread(&infoHeader, sizeof(BMPInfoHeader), 1, file);
+
+    // Check BMP signature ("BM")
+    if (fileHeader.type != 0x4D42) {
+        printf("Error: Not a valid BMP file.\n");
+        fclose(file);
+        return NULL;
+    }
+
+    // Store width & height
+    *width = infoHeader.width;
+    *height = infoHeader.height;
+
+    // Ensure it's a 24-bit BMP (uncompressed)
+    if (infoHeader.bitCount != 24 || infoHeader.compression != 0) {
+        printf("Error: Only uncompressed 24-bit BMP files are supported.\n");
+        fclose(file);
+        return NULL;
+    }
+
+    // Allocate memory for pixel data (3 bytes per pixel: R, G, B)
+    int row_padded = (*width * 3 + 3) & (~3);  // Align rows to 4 bytes
+    u8 *data = (u8 *)malloc(row_padded * (*height));
+    if (!data) {
+        printf("Error: Memory allocation failed.\n");
+        fclose(file);
+        return NULL;
+    }
+
+    // Temporary buffer for flipped data
+    u8 *flipped_data = (u8 *)malloc(row_padded * (*height));
+    if (!flipped_data) {
+        printf("Error: Memory allocation for flipping failed.\n");
+        free(data);
+        fclose(file);
+        return NULL;
+    }
+
+    // Move file pointer to the pixel data location
+    fseek(file, fileHeader.offset, SEEK_SET);
+
+    // Read pixel data (BMP is stored bottom-to-top)
+    for (int i = 0; i < *height; i++) {
+        fread(data + (i * row_padded), 1, row_padded, file);
+    }
+
+    fclose(file);
+
+    // Flip the image vertically
+    for (int i = 0; i < *height; i++) {
+        memcpy(flipped_data + (i * row_padded), data + ((*height - 1 - i) * row_padded), row_padded);
+    }
+
+    free(data);  // Free old data
+    return flipped_data;  // Return the flipped image
+}
+
+struct fontchar *createChar(char *filename, u16 index)
+{
+	struct fontchar *newchar = malloc(sizeof(struct fontchar));
+	newchar->index = index;
+
+	u16 width;
+	u16 height;
+
+	if (!newchar) return NULL;  // Handle memory allocation failure
+
+	char *fullpath = "./" DEFAULT_BASEDIR_NAME "/fonts/handelgothic/"; // ./data/fonts/handelgothic
+
+	static s32 dirExists = -1;
+	if (dirExists < 0) {
+		dirExists = (fsFileSize(fullpath) >= 0);
+	}
+
+	newchar->pixeldata = textLoadBMP(buildDynamicPath(fullpath, filename), &width, &height);
+	newchar->width = width;
+	newchar->height = height;
+	newchar->baseline = 0;
+	newchar->kerningindex = -1;
+
+	return newchar;
+}
+
+// Load the characters in the HD Handel Gothic font. The bmp's are named hg_0.bmp, hg_1.bmp, etc...with the images in ASCII order
+void textLoadCustomFont()
+{
+	u16 i = 0;
+	for (i = 0; i < TOTAL_CHARS; i++) {
+		char filename[20];
+		snprintf(filename, sizeof(filename), "hg_%d.bmp", ASCII_START + i);
+        g_HandelGothicData[i] = *createChar(filename, i); // Load in our .bmp
+    }
+}
+
+// Memory cleanup for custom font .bmp's on level reset
+void textFreeFontCharacters() {
+    for (int i = 0; i < TOTAL_CHARS; i++) {
+        free(g_HandelGothicData[i].pixeldata);  // Free pixel data if allocated
+    }
+}
+
+// Test function to see if .bmp's are loading correctly
+/*char *generateBitmapASCII(struct fontchar *charData) {
+    if (!charData || !charData->pixeldata) {
+        return strdup("Error: No pixel data available!\n");
+    }
+
+    int width = charData->width;
+    int height = charData->height;
+    u8 *pixelData = charData->pixeldata;
+
+    // Calculate required string size (each pixel = 1 char, each row = width + newline)
+    int totalSize = (width + 1) * height + 1;  // +1 for null terminator
+    char *asciiArt = (char *)malloc(totalSize);
+    if (!asciiArt) {
+        return strdup("Error: Memory allocation failed!\n");
+    }
+
+    char *ptr = asciiArt;
+
+    // BMP data is stored bottom-to-top, so we print it in reverse row order
+    for (int y = height - 1; y >= 0; y--) {
+        for (int x = 0; x < width; x++) {
+            int pixelIndex = (y * width + x) * 3;  // 24-bit BMP (3 bytes per pixel: R, G, B)
+            
+            // Since it's 24-bit BMP, we assume grayscale and check the RED channel
+            *ptr++ = (pixelData[pixelIndex] == 0) ? '0' : '1';
+        }
+        *ptr++ = '\n';  // Newline at the end of each row
+    }
+
+    *ptr = '\0';  // Null-terminate the string
+    return asciiArt;
+}*/

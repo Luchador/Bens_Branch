@@ -484,6 +484,9 @@ extern TextData *g_TextTitleData;
 
 extern s32 g_ReplacementTextureList[4000]; // There's 3502 textures in the ROM
 
+extern struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
+extern struct fontchar *g_CharToRender; // Character to render using the HD font
+
 #define PLAYER_EXTCFG() g_PlayerExtCfg[g_Vars.currentplayerstats->mpindex & 3]
 #define PLAYER_DEFAULT_FOV (PLAYER_EXTCFG().fovy)
 

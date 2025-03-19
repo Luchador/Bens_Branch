@@ -34,8 +34,8 @@ extern struct XYWidthHeight
 extern uint32_t gfx_msaa_level;
 extern struct XYWidthHeight gfx_current_native_viewport; // The internal/native video mode of the game
 extern float gfx_current_native_aspect; // The aspect ratio of the above mode
-extern bool gfx_framebuffers_enabled;
-extern bool gfx_detail_textures_enabled;
+//bool gfx_framebuffers_enabled;
+//extern bool gfx_detail_textures_enabled;
 
 void gfx_init(const struct GfxInitSettings *settings);
 void gfx_destroy(void);

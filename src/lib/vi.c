@@ -78,6 +78,14 @@ void viConfigureForLogos(void)
 
 	g_ViTargetHStart = 0;
 	g_ViTargetVStart = 0;
+
+	g_ViDataArray[0].y = FBALLOC_HEIGHT_LO;
+	g_ViDataArray[0].bufy = FBALLOC_HEIGHT_LO;
+	g_ViDataArray[0].viewy = FBALLOC_HEIGHT_LO;
+
+	g_ViDataArray[1].y = FBALLOC_HEIGHT_LO;
+	g_ViDataArray[1].bufy = FBALLOC_HEIGHT_LO;
+	g_ViDataArray[1].viewy = FBALLOC_HEIGHT_LO;
 }
 
 /**
@@ -96,7 +104,7 @@ void viConfigureForCopyright(u16 *texturedata)
 
 		g_ViDataArray[i].x = 576;
 		g_ViDataArray[i].bufx = 576;
-		g_ViDataArray[i].viewx = 576;
+		g_ViDataArray[i].viewx = (VERSION >= VERSION_NTSC_1_0 ? 576 : 480);
 
 		g_ViDataArray[i].y = 48;
 		g_ViDataArray[i].bufy = 48;
@@ -107,6 +115,7 @@ void viConfigureForCopyright(u16 *texturedata)
 	g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
 
 	g_ViReconfigured = true;
+	g_Vars.fourmeg2player = false;
 }
 
 /**
@@ -128,10 +137,12 @@ void viConfigureForLegal(void)
 		g_ViDataArray[i].bufy = FBALLOC_HEIGHT_LO;
 		g_ViDataArray[i].viewy = FBALLOC_HEIGHT_LO;
 	}
+
+	g_Vars.fourmeg2player = false;
 }
 
 const s16 g_ViModeWidths[]  = {FBALLOC_WIDTH_LO,  FBALLOC_WIDTH_LO,  SCREEN_320 * 2};
-const s16 g_ViModeHeights[] = {FBALLOC_HEIGHT_LO, FBALLOC_HEIGHT_LO, 220 * 2};
+const s16 g_ViModeHeights[] = {FBALLOC_HEIGHT_LO, FBALLOC_HEIGHT_LO, (PAL ? 252 : 220) * 2};
 
 /**
  * Allocate the colour framebuffers for the given stage.
@@ -151,16 +162,20 @@ void viReset(s32 stagenum)
 	u8 *fb0;
 	u8 *fb1;
 
+	g_Vars.fourmeg2player = false;
+
 	if (stagenum == STAGE_TITLE) {
-		viSetMode(VIMODE_HI);
-		fbsize = g_ViModeWidths[2] * g_ViModeHeights[2] * NUM_FRAMEBUFFERS;
+			viSetMode(VIMODE_HI);
+			fbsize = g_ViModeWidths[2] * g_ViModeHeights[2] * NUM_FRAMEBUFFERS;
 	} else {
 		viSetMode(VIMODE_LO);
 
-
 		fbsize = FBALLOC_WIDTH_HI * FBALLOC_HEIGHT_HI * NUM_FRAMEBUFFERS;
-		
-		if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && PLAYERCOUNT() == 2) {
+
+		if (PLAYERCOUNT() == 2) {
+			fbsize = FBALLOC_WIDTH_LO * (FBALLOC_HEIGHT_LO / 2) * NUM_FRAMEBUFFERS;
+			g_Vars.fourmeg2player = true;
+		} else if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && PLAYERCOUNT() == 2) {
 			// PAL is using its correct size
 			fbsize = SCREEN_WIDTH_LO * SCREEN_HEIGHT_LO * NUM_FRAMEBUFFERS;
 		}
@@ -311,7 +326,7 @@ void viUpdateMode(void)
 			v1 >>= 1;
 		}
 
-		tmp = (277 - v1);
+		tmp = ((PAL ? 320 : 277) - v1);
 		vstart = ((tmp + 2) << 16) | (tmp + ((v1 - 2) << 1) + 2);
 
 		g_ViCurVStart0 = var8008dcc0[slot].fldRegs[0].vStart = ADD_LOW_AND_HI_16_MOD(vstart, g_ViTargetVStart);
@@ -399,6 +414,11 @@ void viSetMode(s32 mode)
 void viSet16Bit(void)
 {
 	g_ViIs16Bit = true;
+}
+
+void viSet32Bit(void)
+{
+	g_ViIs16Bit = false;
 }
 
 u16 *viGetBackBuffer(void)
@@ -635,7 +655,7 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 			gDPPipeSync(gdl++);
 
 			if (PLAYERCOUNT() >= 3 ||
-					(PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL))) {
+					(PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || g_Vars.fourmeg2player))) {
 				if (PLAYERCOUNT() == 2) {
 					tmpplayernum = 0;
 				}

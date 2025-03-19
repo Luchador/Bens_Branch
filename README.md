@@ -16,6 +16,7 @@ Changes include:
 * Twice the smoke puffs supported
 * Tinted glass does not become fully opaque
 * Laser obstacles stay fully bright even if a room's lights are destroyed
+* Stars twinkle (most of the code for this was in the original game but unused)
 * Moved the "Objective Completed/Failed" message down so it doesn't block the center of the screen
 * GoldenEye weapons reverted to their GoldenEye names
 * The game now reads text data from plaintext files instead of compressed files. You can find the text files in data/text and edit them easily.

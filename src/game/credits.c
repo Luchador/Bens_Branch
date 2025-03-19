@@ -1010,7 +1010,7 @@ Gfx *creditsDrawBackgroundText(Gfx *gdl, s32 x, s32 y, char *text, struct fontch
 			f32 value = (i * 0.3f * (spread + 0.5f)) + 1.0f;
 			u32 stack[2];
 
-			gdl = text0f1552d4(gdl, x + sinf(f24) * mult, y + cosf(f24) * mult, f26, value, text, chars, font, colour3, 0, 1);
+			gdl = textRenderCredit(gdl, x + sinf(f24) * mult, y + cosf(f24) * mult, f26, value, text, chars, font, colour3, 0, 1);
 		}
 	}
 
@@ -1059,7 +1059,7 @@ Gfx *creditsDrawForegroundText(Gfx *gdl, s32 x, s32 y, char *text, struct fontch
 
 	colour = 0xffffff00 | (u32) (255.0f * opacityfrac);
 
-	gdl = text0f1552d4(gdl, x, y, widthscale, heightscale, text, chars, font, colour, hdir, vdir);
+	gdl = textRenderCredit(gdl, x, y, widthscale, heightscale, text, chars, font, colour, hdir, vdir);
 
 	return gdl;
 }

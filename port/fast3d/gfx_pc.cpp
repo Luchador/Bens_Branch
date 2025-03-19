@@ -25,15 +25,20 @@
 
 #include "platform.h"
 
+#include <stdio.h>
+
 #include "gfx_pc.h"
 #include "gfx_cc.h"
 #include "gfx_window_manager_api.h"
 #include "gfx_rendering_api.h"
 #include "gfx_screen_config.h"
 
-uintptr_t gfxFramebuffer;
+#include "types.h"
+#include "data.h"
+#include <stdbool.h>
+#undef bool // Ben's comment: for some reason line 1445 "bool used_textures[2] = {false, false};" kept getting treated as an int, not a bool. The #undef here fixes it.
 
-#define ALIGN(x, a) (((x) + (a - 1)) & ~(a - 1))
+uintptr_t gfxFramebuffer;
 
 #define SUPPORT_CHECK(x) assert(x)
 
@@ -57,7 +62,8 @@ uintptr_t gfxFramebuffer;
 #define MAX_VERTICES 128
 #define MAX_VERTEX_COLORS 64
 
-#define TEXTURE_CACHE_MAX_SIZE 1024
+//#define TEXTURE_CACHE_MAX_SIZE 1024
+#define TEXTURE_CACHE_MAX_SIZE 65536
 
 #define C0(pos, width) ((cmd->words.w0 >> (pos)) & ((1U << width) - 1))
 #define C1(pos, width) ((cmd->words.w1 >> (pos)) & ((1U << width) - 1))
@@ -214,8 +220,11 @@ static struct GfxDimensions gfx_prev_dimensions;
 struct XYWidthHeight gfx_current_game_window_viewport;
 struct XYWidthHeight gfx_current_native_viewport;
 float gfx_current_native_aspect = 4.f / 3.f;
-bool gfx_framebuffers_enabled = true;
-bool gfx_detail_textures_enabled = true;
+//bool gfx_framebuffers_enabled = true;
+//bool gfx_detail_textures_enabled = true;
+
+bool fbenabled = true;
+bool dtenabled = true;
 
 static bool game_renders_to_framebuffer;
 static int game_framebuffer;
@@ -306,6 +315,21 @@ static const char* acmux_to_string(uint32_t acmux) {
     };
     return tbl[acmux];
 }
+
+s32 debug_log(const char *message, s32 num)
+{
+	FILE *debug_file = fopen("debug.log", "a");
+    if (debug_file == NULL) {
+        perror("Error opening debug.log");
+        return 0;
+    }
+
+    fprintf(debug_file, message, num);
+    fclose(debug_file);
+
+	return 1;
+}
+
 
 static void gfx_generate_cc(struct ColorCombiner* comb, const ColorCombinerKey& key) {
     bool is_2cyc = (key.options & (uint64_t)SHADER_OPT_2CYC) != 0;
@@ -846,6 +870,25 @@ static void import_texture_ci8(int tile, const LoadedTexture& loaded_texture, bo
     // DumpTexture(loaded_texture.otr_path, rgba32_buf, width, height);
 }
 
+static void render_custom_font() {
+    const uint32_t width = 128;
+    const uint32_t height = 128;
+
+    uint8_t *dest = tex_upload_buffer;
+    for (uint32_t i = 0; i < width * height * 3; i +=3, dest += 4) {
+        const uint8_t intensity = g_HandelGothicData[g_CharToRender->index].pixeldata[i];
+        const uint8_t alpha = g_HandelGothicData[g_CharToRender->index].pixeldata[i];
+        dest[0] = intensity;
+        dest[1] = intensity;
+        dest[2] = intensity;
+        dest[3] = alpha;
+    }
+
+    //debug_log("render custom font %d \n", g_CharToRender->index);
+    gfx_rapi->upload_texture(tex_upload_buffer, width, height);
+    // DumpTexture(loaded_texture.otr_path, rgba32_buf, width, height);
+}
+
 static void import_texture(int i, int tile, bool importReplacement) {
     LoadedTexture& loaded_texture = rdp.loaded_texture[rdp.texture_tile[tile].tmem];
     const uint8_t fmt = rdp.texture_tile[tile].fmt;
@@ -917,6 +960,8 @@ static void import_texture(int i, int tile, bool importReplacement) {
         } else {
             sysFatalError("Bad size for I texture in tile %d: %02x", tile, siz);
         }
+    } else if (fmt == G_IM_FMT_CUSTOMFONT) {
+            render_custom_font();
     } else {
         sysFatalError("Bad texture format in tile %d: %02x %02x", tile, fmt, siz);
     }
@@ -1186,7 +1231,7 @@ static void gfx_sp_modify_vertex(uint16_t vtx_idx, uint8_t where, uint32_t val) 
 }
 
 static inline int gfx_lod_tile_offset(const int i) {
-    if (gfx_detail_textures_enabled)
+    if (dtenabled)
         return ((rdp.tex_lod && !rdp.tex_detail) ? 0 : i);
     return (rdp.tex_lod ? rdp.tex_detail : i);
 }
@@ -1410,10 +1455,10 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
         rendering_state.alpha_blend = use_alpha;
         rendering_state.modulate = use_modulate;
     }
-    uint8_t num_inputs;
-    bool used_textures[2];
+    uint8_t num_inputs = 0;
+    bool used_textures[2] = {false, false};
 
-    gfx_rapi->shader_get_info(prg, &num_inputs, used_textures);
+    gfx_rapi->shader_get_info(prg, &num_inputs, (bool*)used_textures);
 
     struct GfxClipParameters clip_parameters = gfx_rapi->get_clip_parameters();
 
@@ -2531,7 +2576,7 @@ extern "C" void gfx_init(const GfxInitSettings *settings) {
     game_framebuffer = gfx_rapi->create_framebuffer();
     game_framebuffer_msaa_resolved = gfx_rapi->create_framebuffer();
 
-    if (gfx_msaa_level > 1 && !gfx_framebuffers_enabled) {
+    if (gfx_msaa_level > 1 && !fbenabled) {
         sysLogPrintf(LOG_WARNING, "F3D: MSAA set to %d, but framebuffers are not available; disabling", gfx_msaa_level);
         gfx_msaa_level = 1;
     }
@@ -2604,7 +2649,7 @@ extern "C" void gfx_start_frame(void) {
 
     bool different_size = gfx_current_dimensions.width != gfx_current_game_window_viewport.width ||
                           gfx_current_dimensions.height != gfx_current_game_window_viewport.height;
-    if (gfx_framebuffers_enabled && (different_size || gfx_msaa_level > 1)) {
+    if (fbenabled && (different_size || gfx_msaa_level > 1)) {
         game_renders_to_framebuffer = true;
         if (different_size) {
             gfx_rapi->update_framebuffer_parameters(game_framebuffer, gfx_current_dimensions.width,

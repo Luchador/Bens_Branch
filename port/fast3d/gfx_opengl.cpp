@@ -19,6 +19,7 @@
 #include "gfx_cc.h"
 #include "gfx_rendering_api.h"
 #include "gfx_pc.h"
+#include "gfx_api.h"
 
 using namespace std;
 
@@ -62,6 +63,8 @@ static char gl_glsl_version_str[16] = "130";
 static GLenum gl_mirror_clamp = GL_MIRROR_CLAMP_TO_EDGE;
 static bool gl_es = false;
 static bool gl_core_profile = false;
+
+static bool fbenabled = true;
 
 static int gfx_opengl_get_max_texture_size() {
     GLint max_texture_size;
@@ -962,11 +965,11 @@ static void gfx_opengl_init(void) {
         // maybe replace this with sysFatalError, though the GLSL compiler will cause that later anyway
     }
 
-    if (!gfx_framebuffers_enabled) {
+    if (!fbenabled) {
         sysLogPrintf(LOG_WARNING, "GL: framebuffer effects disabled by user");
     } else if (!gfx_opengl_supports_framebuffers()) {
         sysLogPrintf(LOG_WARNING, "GL: GL_ARB_framebuffer_object unsupported, framebuffer effects disabled");
-        gfx_framebuffers_enabled = false;
+        fbenabled = false;
     }
 
     if ((GLVersion.major < 4 || GLVersion.minor < 4) && !GLAD_GL_ARB_texture_mirror_clamp_to_edge) {
@@ -1043,7 +1046,7 @@ static int gfx_opengl_create_framebuffer() {
     glBindTexture(GL_TEXTURE_2D, 0);
     framebuffers[i].clrbuf = clrbuf;
 
-    if (!gfx_framebuffers_enabled) {
+    if (!fbenabled) {
         return i;
     }
 
@@ -1073,7 +1076,7 @@ static void gfx_opengl_update_framebuffer_parameters(int fb_id, uint32_t width, 
     width = max(width, 1U);
     height = max(height, 1U);
 
-    if (gfx_framebuffers_enabled) {
+    if (fbenabled) {
         glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
 
         if (fb_id != 0) {
@@ -1120,7 +1123,7 @@ static void gfx_opengl_update_framebuffer_parameters(int fb_id, uint32_t width, 
 }
 
 bool gfx_opengl_start_draw_to_framebuffer(int fb_id, float noise_scale) {
-    if (gfx_framebuffers_enabled && fb_id < (int)framebuffers.size()) {
+    if (fbenabled && fb_id < (int)framebuffers.size()) {
         Framebuffer& fb = framebuffers[fb_id];
         if (noise_scale != 0.0f) {
             current_noise_scale = 1.0f / noise_scale;
@@ -1154,7 +1157,7 @@ void gfx_opengl_clear_framebuffer(bool clear_color, bool clear_depth) {
 }
 
 void gfx_opengl_resolve_msaa_color_buffer(int fb_id_target, int fb_id_source) {
-    if (!gfx_framebuffers_enabled) {
+    if (!fbenabled) {
         return;
     }
 
@@ -1182,7 +1185,7 @@ void gfx_opengl_select_texture_fb(int fb_id) {
 }
 
 void gfx_opengl_copy_framebuffer(int fb_dst, int fb_src, int left, int top, bool flip_y, bool use_back) {
-    if (!gfx_framebuffers_enabled || fb_dst >= (int)framebuffers.size() || fb_src >= (int)framebuffers.size()) {
+    if (!fbenabled || fb_dst >= (int)framebuffers.size() || fb_src >= (int)framebuffers.size()) {
         return;
     }
 
