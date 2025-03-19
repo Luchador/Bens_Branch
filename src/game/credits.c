@@ -1654,8 +1654,6 @@ Gfx *creditsDraw(Gfx *gdl)
 
 	static u32 scrolltimer240 = 0;
 
-	g_ScaleX = 1;
-
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
 	gdl = viPrepareZbuf(gdl);

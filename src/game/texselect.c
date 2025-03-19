@@ -9,6 +9,7 @@
 #include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
+#include "game/debug.h"
 
 s32 texGetMask(s32 value)
 {

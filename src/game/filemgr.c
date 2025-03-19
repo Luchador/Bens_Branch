@@ -461,7 +461,7 @@ void filemgrHandleSuccess(void)
 		g_Vars.bossfileid = g_Menus[g_MpPlayerNum].fm.fileid;
 		g_Vars.bossdeviceserial = g_Menus[g_MpPlayerNum].fm.deviceserial;
 		bossfileSave();
-		func0f0f820c(&g_CiMenuViaPcMenuDialog, MENUROOT_MAINMENU);
+		menuOpenPerfectMenu(&g_CiMenuViaPcMenuDialog, MENUROOT_MAINMENU);
 		break;
 	case FILEOP_READ_GAME:
 	case FILEOP_READ_MPSETUP:
@@ -2397,14 +2397,14 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(s32 operation, struct me
 				TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
 
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 4) << 2) * g_ScaleX,
+				((renderdata->x + 4) << 2),
 				(renderdata->y + 2) << 2,
-				((renderdata->x + 60) << 2) * g_ScaleX,
+				((renderdata->x + 60) << 2),
 				(renderdata->y + 38) << 2,
-				G_TX_RENDERTILE, 0, 1152, 1024 / g_ScaleX, -1024);
+				G_TX_RENDERTILE, 0, 1152, 1024, -1024);
 
 		x = renderdata->x + 62;
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 3 : 4);
+		y = renderdata->y + 4;
 		gdl = text0f153628(gdl);
 
 		if (data->list.unk04 == g_FileLists[0]->numfiles) {

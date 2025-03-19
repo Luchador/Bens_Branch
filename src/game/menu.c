@@ -298,18 +298,18 @@ Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 ms
 
 	// Black fill
 	gdl = textSetPrimColour(gdl, 0x0000007f);
-	gDPFillRectangleScaled(gdl++, x1, y1, x2, y2);
+	gDPFillRectangle(gdl++, x1, y1, x2, y2);
 	gdl = textSetCCCustom02(gdl);
 
 	// Dark blue fill
 	gdl = textSetPrimColour(gdl, 0x00007f7f);
-	gDPFillRectangleScaled(gdl++, x1, bannertop, x2, bannerbottom);
+	gDPFillRectangle(gdl++, x1, bannertop, x2, bannerbottom);
 	gdl = textSetCCCustom02(gdl);
 
 	// Top and bottom borders (light blue)
 	gdl = textSetPrimColour(gdl, 0x7f7fff7f);
-	gDPFillRectangleScaled(gdl++, x1, bannerbottom + 2, x2, bannerbottom + 4);
-	gDPFillRectangleScaled(gdl++, x1, bannertop - 4, x2, bannertop - 2);
+	gDPFillRectangle(gdl++, x1, bannerbottom + 2, x2, bannerbottom + 4);
+	gDPFillRectangle(gdl++, x1, bannertop - 4, x2, bannertop - 2);
 	gdl = textSetCCCustom02(gdl);
 
 	gdl = text0f153628(gdl);
@@ -2359,8 +2359,6 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 
 	textSetOutlineColor(colour1);
 
-	var8007fb9c = false;
-
 	if (g_Menus[g_MpPlayerNum].curdialog == dialog
 			&& (dialog->definition->flags & MENUDIALOGFLAG_0002)
 			&& g_Menus[g_MpPlayerNum].menumodel.drawbehinddialog == true) {
@@ -2498,8 +2496,6 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 			} else {
 				textSetDiagonalBlend(dialog->x, dialog->y, dialog->redrawtimer, DIAGMODE_FADEIN);
 			}
-
-			var8007fb9c = true;
 		}
 	} else if (dialog->state == MENUDIALOGSTATE_POPULATED) {
 		textSetMenuBlend(dialog->statefrac);
@@ -2702,7 +2698,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 							colour = colourBlend(colour2, colour2 & 0xffffff00, 127);
 
 							gdl = textSetPrimColour(gdl, colour);
-							gDPFillRectangleScaled(gdl++, x1, y1, x2, y2);
+							gDPFillRectangle(gdl++, x1, y1, x2, y2);
 							gdl = textSetCCCustom02(gdl);
 						}
 
@@ -3237,7 +3233,8 @@ void func0f0f8120(void)
 #endif
 }
 
-void func0f0f820c(struct menudialogdef *dialogdef, s32 root)
+// Open the menu with "Carrington Institute, Solo Missions, Combat Simulator, etc..."
+void menuOpenPerfectMenu(struct menudialogdef *dialogdef, s32 root)
 {
 	s32 i;
 	s32 prevplayernum = g_MpPlayerNum;

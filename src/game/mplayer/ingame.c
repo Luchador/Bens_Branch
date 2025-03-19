@@ -577,11 +577,11 @@ MenuItemHandlerResult mpAwardsMenuHandler(s32 operation, struct menuitem *item, 
 				gDPSetEnvColorViaWord(gdl++, colour);
 
 				gSPTextureRectangle(gdl++,
-						(x << 2) * g_ScaleX,
+						(x << 2),
 						(renderdata->y - 2) << 2,
-						((x + 11) << 2) * g_ScaleX,
+						((x + 11) << 2),
 						(renderdata->y + 9) << 2,
-						G_TX_RENDERTILE, 0x0010, 0x0150, 1024 / g_ScaleX, -1024);
+						G_TX_RENDERTILE, 0x0010, 0x0150, 1024, -1024);
 
 				x -= 14;
 			}

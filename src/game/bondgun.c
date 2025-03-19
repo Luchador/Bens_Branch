@@ -9068,9 +9068,9 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 			gdl = textSetPrimColour(gdl, emptycolour);
 
 			if (flip) {
-				gDPFillRectangleScaled(gdl++, x1, y2 - partitiony + y1, x2, gaugeheight + y1);
+				gDPFillRectangle(gdl++, x1, y2 - partitiony + y1, x2, gaugeheight + y1);
 			} else {
-				gDPFillRectangleScaled(gdl++, x1, gaugetop, x2, partitiony);
+				gDPFillRectangle(gdl++, x1, gaugetop, x2, partitiony);
 			}
 
 			gdl = textSetCCCustom02(gdl);
@@ -9080,9 +9080,9 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 		gdl = textSetPrimColour(gdl, filledcolour);
 
 		if (flip) {
-			gDPFillRectangleScaled(gdl++, x1, y2 - tmp + y1, x2, y2 - partitiony + y1);
+			gDPFillRectangle(gdl++, x1, y2 - tmp + y1, x2, y2 - partitiony + y1);
 		} else {
-			gDPFillRectangleScaled(gdl++, x1, partitiony, x2, y2);
+			gDPFillRectangle(gdl++, x1, partitiony, x2, y2);
 		}
 	} else {
 		u32 colour;
@@ -9169,9 +9169,9 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 					if (unitbottom >= 0) {
 						// Render empty or transitioning unit of merged gauge
 						if (flip) {
-							gDPFillRectangleScaled(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
+							gDPFillRectangle(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
 						} else {
-							gDPFillRectangleScaled(gdl++, x1, unittop, x2, unitbottom);
+							gDPFillRectangle(gdl++, x1, unittop, x2, unitbottom);
 						}
 					}
 
@@ -9197,9 +9197,9 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 			// Render separated blocks
 			if (unitheight >= 3) {
 				if (flip) {
-					gDPFillRectangleScaled(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
+					gDPFillRectangle(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
 				} else {
-					gDPFillRectangleScaled(gdl++, x1, unittop, x2, unitbottom);
+					gDPFillRectangle(gdl++, x1, unittop, x2, unitbottom);
 				}
 			}
 		} // end loop
@@ -9209,9 +9209,9 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 			s32 stack;
 
 			if (flip) {
-				gDPFillRectangleScaled(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
+				gDPFillRectangle(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
 			} else {
-				gDPFillRectangleScaled(gdl++, x1, unittop, x2, unitbottom);
+				gDPFillRectangle(gdl++, x1, unittop, x2, unitbottom);
 			}
 		}
 	}
@@ -9344,7 +9344,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 	gdl = textSetPrimColour(gdl, fncolour);
 
-	gDPFillRectangleScaled(gdl++, xpos - 13, bottom - 11, xpos - 2, bottom);
+	gDPFillRectangle(gdl++, xpos - 13, bottom - 11, xpos - 2, bottom);
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -9391,7 +9391,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 			gdl = textSetPrimColour(gdl, 0);
 
-			gDPFillRectangleScaled(gdl++, x - 1, y - 1, xpos - 11, bottom);
+			gDPFillRectangle(gdl++, x - 1, y - 1, xpos - 11, bottom);
 
 			gdl = textSetCCCustom02(gdl);
 			textSetWaveBlend(g_20SecIntervalFrac * 50.0f, 0, 50);
@@ -9457,7 +9457,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 				gdl = textSetPrimColour(gdl, 0);
 
-				gDPFillRectangleScaled(gdl++, x - 1, y - 1, xpos - 11, bottom + 3);
+				gDPFillRectangle(gdl++, x - 1, y - 1, xpos - 11, bottom + 3);
 
 				gdl = textSetCCCustom02(gdl);
 

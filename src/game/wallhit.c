@@ -1095,7 +1095,7 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
  */
 s32 wallhit0f140750(struct coord *coord)
 {
-	f32 x;
+	/*f32 x;
 	f32 y;
 	f32 z;
 	f32 tmp;
@@ -1148,7 +1148,9 @@ s32 wallhit0f140750(struct coord *coord)
 		return 64;
 	}
 
-	return 128;
+	return 128;*/
+
+	return 0;
 }
 
 Gfx *wallhitRenderOpaBgHits(s32 roomnum, Gfx *gdl)
@@ -1292,9 +1294,7 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 		gSPSetGeometryMode(gdl++, G_CULL_BACK);
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-#endif
 	gDPSetColorDither(gdl++, G_CD_NOISE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 

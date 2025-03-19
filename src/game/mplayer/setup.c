@@ -741,12 +741,12 @@ MenuItemHandlerResult mpChallengesListHandler(s32 operation, struct menuitem *it
 					TEXEL0, 0, ENVIRONMENT, 0);
 
 			gSPTextureRectangle(gdl++,
-					((renderdata->x + loopx) << 2) * g_ScaleX,
+					((renderdata->x + loopx) << 2),
 					(renderdata->y + size) << 2,
-					((renderdata->x + size + loopx) << 2) * g_ScaleX,
+					((renderdata->x + size + loopx) << 2),
 					(renderdata->y + size * 2) << 2,
 					G_TX_RENDERTILE,
-					0, 0x0160, 0x0400 / g_ScaleX, 0xfc00);
+					0, 0x0160, 0x0400, 0xfc00);
 
 			loopx += 13;
 		}
@@ -759,9 +759,6 @@ MenuItemHandlerResult mpChallengesListHandler(s32 operation, struct menuitem *it
 
 	return 0;
 }
-
-const char var7f1b7ea8[] = "Menu99 -> Calling Camera Module Start\n";
-const char var7f1b7ed0[] = "Menu99 -> Calling Camera Module Finish\n";
 
 char *mpMenuTextKills(struct menuitem *item)
 { \
@@ -981,9 +978,9 @@ MenuItemHandlerResult mpMedalMenuHandler(s32 operation, struct menuitem *item, u
 				TEXEL0, 0, ENVIRONMENT, 0);
 
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 9) << 2) * g_ScaleX, renderdata->y << 2,
-				((renderdata->x + 20) << 2) * g_ScaleX, (renderdata->y + 11) << 2,
-				G_TX_RENDERTILE, 0, 0x0160, 1024 / g_ScaleX, -1024);
+				((renderdata->x + 9) << 2), renderdata->y << 2,
+				((renderdata->x + 20) << 2), (renderdata->y + 11) << 2,
+				G_TX_RENDERTILE, 0, 0x0160, 1024, -1024);
 
 		return (uintptr_t) gdl;
 	}
@@ -2239,7 +2236,7 @@ MenuItemHandlerResult mpLoadSettingsMenuHandler(s32 operation, struct menuitem *
 		}
 
 		if (item->param == 1) {
-			func0f0f820c(&g_MpQuickGoMenuDialog, MENUROOT_MPSETUP);
+			menuOpenPerfectMenu(&g_MpQuickGoMenuDialog, MENUROOT_MPSETUP);
 		}
 		break;
 	case MENUOP_GETSELECTEDINDEX:
@@ -4747,19 +4744,11 @@ MenuItemHandlerResult mpChallengesListMenuHandler(s32 operation, struct menuitem
 		gDPSetTextureFilter(gdl++, G_TF_POINT);
 
 		for (i = 0; i < maxchrs; i++) {
-#if VERSION >= VERSION_NTSC_1_0
 			if (challengeIsCompletedByAnyChrWithNumPlayersBySlot(data->type19.unk04, i + 1)) {
 				gDPSetEnvColorViaWord(gdl++, (renderdata->colour & 0xff) * 0xff >> 8 | 0xffe56500);
 			} else {
 				gDPSetEnvColorViaWord(gdl++, (renderdata->colour & 0xff) * 0xff >> 8 | 0x43430000);
 			}
-#else
-			if (challengeIsCompletedByAnyChrWithNumPlayersBySlot(data->type19.unk04, i + 1)) {
-				gDPSetEnvColorViaWord(gdl++, 0xffe565ff);
-			} else {
-				gDPSetEnvColorViaWord(gdl++, 0x434300ff);
-			}
-#endif
 
 			gDPSetCombineLERP(gdl++,
 				TEXEL0, 0, ENVIRONMENT, 0,
@@ -4768,9 +4757,9 @@ MenuItemHandlerResult mpChallengesListMenuHandler(s32 operation, struct menuitem
 				TEXEL0, 0, ENVIRONMENT, 0);
 
 			gSPTextureRectangle(gdl++,
-				((renderdata->x + marginleft) << 2) * g_ScaleX, (renderdata->y + 11) << 2,
-				((renderdata->x + marginleft + 11) << 2) * g_ScaleX, (renderdata->y + 22) << 2,
-				G_TX_RENDERTILE, 0, 0x0160, 1024 / g_ScaleX, -1024);
+				((renderdata->x + marginleft) << 2), (renderdata->y + 11) << 2,
+				((renderdata->x + marginleft + 11) << 2), (renderdata->y + 22) << 2,
+				G_TX_RENDERTILE, 0, 0x0160, 1024, -1024);
 
 			marginleft += 13;
 		}
@@ -4829,11 +4818,9 @@ MenuItemHandlerResult menuhandlerMpStartChallenge(s32 operation, struct menuitem
 
 char *mpMenuTextChallengeName(struct menuitem *item)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	if (g_BossFile.locktype != MPLOCKTYPE_CHALLENGE) {
 		return langGet(L_MPMENU_050); // "Combat Challenges"
 	}
-#endif
 
 	sprintf(g_StringPointer, "%s:\n", challengeGetName(challengeGetCurrent()));
 	return g_StringPointer;
@@ -4867,7 +4854,7 @@ MenuItemHandlerResult menuhandler0017ec64(s32 operation, struct menuitem *item, 
 {
 	if (operation == MENUOP_SET) {
 		challengeSetCurrentBySlot(g_Menus[g_MpPlayerNum].mpsetup.slotindex);
-		func0f0f820c(&g_MpQuickGoMenuDialog, 3);
+		menuOpenPerfectMenu(&g_MpQuickGoMenuDialog, 3);
 	}
 
 	return 0;
@@ -4958,9 +4945,9 @@ MenuItemHandlerResult menuhandler0017ef30(s32 operation, struct menuitem *item, 
 {
 	if (operation == MENUOP_SET) {
 		if (g_Vars.stagenum == STAGE_CITRAINING) {
-			func0f0f820c(&g_CiMenuViaPcMenuDialog, 2);
+			menuOpenPerfectMenu(&g_CiMenuViaPcMenuDialog, 2);
 		} else {
-			func0f0f820c(&g_SoloMissionPauseMenuDialog, 2);
+			menuOpenPerfectMenu(&g_SoloMissionPauseMenuDialog, 2);
 		}
 	}
 
@@ -5128,7 +5115,7 @@ void mpConfigureQuickTeamSimulants(void)
 void func0f17f428(void)
 {
 	mpConfigureQuickTeamPlayers();
-	func0f0f820c(&g_MpQuickGoMenuDialog, MENUROOT_MPSETUP);
+	menuOpenPerfectMenu(&g_MpQuickGoMenuDialog, MENUROOT_MPSETUP);
 }
 
 MenuItemHandlerResult menuhandlerMpFinishedSetup(s32 operation, struct menuitem *item, union handlerdata *data)
@@ -5330,7 +5317,7 @@ MenuDialogHandlerResult menudialogCombatSimulator(s32 operation, struct menudial
 MenuItemHandlerResult menuhandlerMpAdvancedSetup(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
-		func0f0f820c(&g_MpAdvancedSetupMenuDialog, 3);
+		menuOpenPerfectMenu(&g_MpAdvancedSetupMenuDialog, 3);
 	}
 
 	return 0;

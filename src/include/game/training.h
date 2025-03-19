@@ -7,7 +7,7 @@
 extern u8 g_FrIsValidWeapon;
 extern s32 g_FrWeaponNum;
 extern u8 g_ChrBioSlot;
-extern u8 var80088bb4;
+extern u8 g_HtScenario;
 extern u8 g_HangarBioSlot;
 extern u8 g_DtSlot;
 

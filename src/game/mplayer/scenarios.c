@@ -566,8 +566,8 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 			gDPSetRenderMode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 			gDPPipelineMode(gdl++, G_PM_1PRIMITIVE);
 
-			colour = var80087ce4[radarGetTeamIndex(chr->team)];
-			gDPSetFillColor(gdl++, colour);
+			//colour = var80087ce4[radarGetTeamIndex(chr->team)];
+			//gDPSetFillColor(gdl++, colour);
 
 			viewleft = viGetViewLeft();
 			viewright = viewleft + viGetViewWidth();

@@ -60,7 +60,7 @@ void menuFindAvailableSize(s32 *xmin, s32 *ymin, s32 *xmax, s32 *ymax);
 void dialogCalculatePosition(struct menudialog *dialog);
 void menuClose(void);
 void func0f0f8120(void);
-void func0f0f820c(struct menudialogdef *dialogdef, s32 root);
+void menuOpenPerfectMenu(struct menudialogdef *dialogdef, s32 root);
 void menuSetBackground(s32 bg);
 void func0f0f8300(void);
 void menuPushRootDialog(struct menudialogdef *dialogdef, s32 arg1);

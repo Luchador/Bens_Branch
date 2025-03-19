@@ -68,7 +68,6 @@ Gfx *var800a4634;
 u32 g_TextOutlineColor;
 u32 g_TextHasOutline = 0;
 
-s32 g_ScaleX = 1;
 bool g_TextRotated90 = false;
 s32 g_WrapIndentCount = 0;
 
@@ -99,7 +98,6 @@ u16 var8007fb5c[] = {
 	0xff00, 0xff18, 0xff30, 0xff5c, 0xff88, 0xffb4, 0xffd8, 0xffff,
 };
 
-bool var8007fb9c = false;
 s32 var8007fba0 = 0;
 s32 var8007fba4 = -1;
 u32 var8007fbac = 0x00000001;
@@ -277,7 +275,7 @@ Gfx *text0f1538e4(Gfx *gdl, s32 *x1, s32 *y1, s32 *x2, s32 *y2)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
-	gDPFillRectangleScaled(gdl++, *x1, *y1, *x2, *y2);
+	gDPFillRectangle(gdl++, *x1, *y1, *x2, *y2);
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -310,8 +308,6 @@ Gfx *text0f153ab0(Gfx *gdl)
 {
 	Gfx *allocation;
 
-	var8007fb9c = true;
-
 	allocation = gfxAllocate(sizeof(Gfx) * 530);
 
 	var800a4634 = allocation;
@@ -329,8 +325,6 @@ Gfx *text0f153ab0(Gfx *gdl)
 
 void text0f153b40(void)
 {
-	var8007fb9c = false;
-
 	gSPEndDisplayList(var800a4634++);
 }
 
@@ -847,7 +841,7 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar,
 			gDPPipeSync(gdl++);
 
 			if (g_Blend.types) {
-				gdl = text0f154ecc(gdl, *x / g_ScaleX, *y + arg10);
+				gdl = text0f154ecc(gdl, *x, *y + arg10);
 			}
 
 			if (*x + 1 * curchar->width <= savedx + width) {
@@ -876,10 +870,10 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar,
 									1024,
 									1024);
 
-							if (var8007fb9c) {
+							if (!g_Vars.normmplayerisrunning) { // Do the menu redraw effect. For some reason this crashes the game if enabled in Combat Sim.
 								text0f153b6c(*y + arg10);
 
-								if (var8007fba0 >= *x / g_ScaleX && *x / g_ScaleX + curchar->width >= var8007fba0) {
+								if (var8007fba0 >= *x && *x + curchar->width >= var8007fba0) {
 									var800a4634 = menugfxDrawPlane(var800a4634,
 											var8007fba0,
 											curchar->baseline + sp90,
@@ -890,7 +884,7 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar,
 											MENUPLANE_00);
 								}
 
-								if (var8007fba0 - 3 >= *x / g_ScaleX && *x / g_ScaleX + curchar->width >= var8007fba0 - 3) {
+								if (var8007fba0 - 3 >= *x && *x + curchar->width >= var8007fba0 - 3) {
 									var800a4634 = menugfxDrawPlane(var800a4634,
 											var8007fba0,
 											curchar->baseline + sp90,
@@ -964,16 +958,9 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 
 	spb0 = 1;
 
-	if (g_TextRotated90) {
-		*y *= g_ScaleX;
-		spb0 = 1;
-	} else {
-		*x *= g_ScaleX;
-	}
-
 	if (g_TextHasOutline) {
 		alpha = (1.0f - menuGetSinOscFrac(40.0f)) * 100.0f + 150.0f;
-		newx = *x / g_ScaleX;
+		newx = *x;
 		newy = *y;
 		tmpcolour = g_TextOutlineColor;
 		colour2 = (colour & 0xffffff00) | (u32) alpha;
@@ -1030,12 +1017,6 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 		}
 	}
 
-	if (g_TextRotated90) {
-		*y = *y / g_ScaleX;
-	} else {
-		*x = *x / g_ScaleX;
-	}
-
 	return gdl;
 }
 
@@ -1079,7 +1060,7 @@ Gfx *textRenderChar(Gfx *gdl, s32 *x, s32 *y, struct fontchar *char1, struct fon
 			&& *x >= arg6
 			&& sp38 + char1->baseline + char1->height >= arg7) {
 		if (g_Blend.types) {
-			gdl = text0f1566cc(gdl, *x / g_ScaleX, *y + arg10);
+			gdl = text0f1566cc(gdl, *x, *y + arg10);
 		}
 
 		gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, char1->pixeldata);
@@ -1163,7 +1144,6 @@ Gfx *textRender(Gfx *gdl, s32 *x, s32 *y, char *text,
 	s32 savedx;
 	s32 savedy;
 	s32 prevchar;
-	*x *= g_ScaleX;
 
 	savedx = *x;
 	savedy = *y;
@@ -1222,7 +1202,6 @@ Gfx *textRender(Gfx *gdl, s32 *x, s32 *y, char *text,
 			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0,
 			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
 
-	*x = *x / g_ScaleX;
 
 	return gdl;
 }

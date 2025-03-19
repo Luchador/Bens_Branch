@@ -179,7 +179,7 @@ Gfx *menugfxRenderDialogBackground(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, str
 	// Render the dialog's background fill
 	gdl = textSetPrimColour(gdl, colour1);
 
-	gDPFillRectangleScaled(gdl++, x1, y1, x2, y2);
+	gDPFillRectangle(gdl++, x1, y1, x2, y2);
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -1301,16 +1301,16 @@ Gfx *menugfxDrawCheckbox(Gfx *gdl, s32 x, s32 y, s32 size, bool fill, u32 border
 {
 	if (fill) {
 		gdl = textSetPrimColour(gdl, fillcolour);
-		gDPFillRectangleScaled(gdl++, x, y, x + size, y + size);
+		gDPFillRectangle(gdl++, x, y, x + size, y + size);
 		gdl = textSetCCCustom02(gdl);
 	}
 
 	gdl = textSetPrimColour(gdl, bordercolour);
 
-	gDPFillRectangleScaled(gdl++, x, y, x + size + 1, y + 1);
-	gDPFillRectangleScaled(gdl++, x, y + size, x + size + 1, y + size + 1);
-	gDPFillRectangleScaled(gdl++, x, y + 1, x + 1, y + size);
-	gDPFillRectangleScaled(gdl++, x + size, y + 1, x + size + 1, y + size);
+	gDPFillRectangle(gdl++, x, y, x + size + 1, y + 1);
+	gDPFillRectangle(gdl++, x, y + size, x + size + 1, y + size + 1);
+	gDPFillRectangle(gdl++, x, y + 1, x + 1, y + size);
+	gDPFillRectangle(gdl++, x + size, y + 1, x + size + 1, y + size);
 
 	gdl = textSetCCCustom02(gdl);
 
