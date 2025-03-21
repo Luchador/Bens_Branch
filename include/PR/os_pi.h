@@ -91,11 +91,6 @@ typedef struct OSPiHandle_s {
         __OSTranxInfo           transferInfo;	/* for disk only */
 } OSPiHandle;
 
-typedef struct {
-        u8      type;
-        u32     address;
-} OSPiInfo;
-
 /*
  * Structure for I/O message block
  */
@@ -115,76 +110,11 @@ typedef struct {
 	OSPiHandle	*piHandle;	/* PI device handle */
 } OSIoMesg;
 
-/*
- * Structure for device manager block
- */
-typedef struct {
-        s32             active;		/* Status flag */
-	OSThread	*thread;	/* Calling thread */
-        OSMesgQueue  	*cmdQueue;	/* Command queue */
-        OSMesgQueue  	*evtQueue;	/* Event queue */
-        OSMesgQueue  	*acsQueue;	/* Access queue */
-					/* Raw DMA routine */
-        s32             (*dma)(s32, u32, void *, u32);
-        s32             (*edma)(OSPiHandle *, s32, u32, void *, u32);
-} OSDevMgr;
-
 
 #endif /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
 
-/**************************************************************************
- *
- * Global definitions
- *
- */
-
-/* Flags to indicate direction of data transfer */
-
-#define	OS_READ			0		/* device -> RDRAM */
-#define	OS_WRITE		1		/* device <- RDRAM */
-#define	OS_OTHERS		2		/* for Leo disk only */
-
-/*
- * I/O message types
- */
-#define OS_MESG_TYPE_BASE	(10)
-#define OS_MESG_TYPE_LOOPBACK	(OS_MESG_TYPE_BASE+0)
-#define OS_MESG_TYPE_DMAREAD	(OS_MESG_TYPE_BASE+1)
-#define OS_MESG_TYPE_DMAWRITE	(OS_MESG_TYPE_BASE+2)
-#define OS_MESG_TYPE_VRETRACE	(OS_MESG_TYPE_BASE+3)
-#define OS_MESG_TYPE_COUNTER	(OS_MESG_TYPE_BASE+4)
-#define OS_MESG_TYPE_EDMAREAD	(OS_MESG_TYPE_BASE+5)
-#define OS_MESG_TYPE_EDMAWRITE	(OS_MESG_TYPE_BASE+6)
-
-/*
- * I/O message priority
- */
-#define OS_MESG_PRI_NORMAL	0
-#define OS_MESG_PRI_HIGH	1
-
-/*
- * PI/EPI
- */
-#define PI_DOMAIN1      0
-#define PI_DOMAIN2      1
-
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
-
-/**************************************************************************
- *
- * Macro definitions
- *
- */
-
-
-/**************************************************************************
- *
- * Extern variables
- *
- */
-
-extern OSPiHandle      *__osPiTable;    /* The head of OSPiHandle link list */
 
 
 /**************************************************************************
@@ -194,25 +124,10 @@ extern OSPiHandle      *__osPiTable;    /* The head of OSPiHandle link list */
  */
 
 /* Peripheral interface (Pi) */
-extern u32 		osPiGetStatus(void);
-extern s32		osPiGetDeviceType(void);
-extern s32		osPiWriteIo(u32, u32);
-extern s32		osPiReadIo(u32, u32 *);
-extern s32		osPiStartDma(OSIoMesg *, s32, s32, uintptr_t, void *, u32,
+extern s32		osPiStartDma(OSIoMesg *, uintptr_t, void *, u32,
 				     OSMesgQueue *);
-extern void		osCreatePiManager(OSPri, OSMesgQueue *, OSMesg *, s32);
 
 /* Enhanced PI interface */
-
-extern OSPiHandle *osCartRomInit(void);
-extern OSPiHandle *osLeoDiskInit(void);
-extern OSPiHandle *osDriveRomInit(void);
-
-extern s32 osEPiDeviceType(OSPiHandle *, OSPiInfo *);
-extern s32 osEPiWriteIo(OSPiHandle *, u32 , u32 );
-extern s32 osEPiReadIo(OSPiHandle *, u32 , u32 *);
-extern s32 osEPiStartDma(OSPiHandle *, OSIoMesg *, s32);
-extern s32 osEPiLinkHandle(OSPiHandle *);
 
 
 #endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */

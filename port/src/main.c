@@ -20,7 +20,6 @@
 
 u32 g_OsMemSize = 0;
 s32 g_OsMemSizeMb = 32;
-s8 g_Resetting = false;
 OSSched g_Sched;
 
 OSMesgQueue g_MainMesgQueue;
@@ -32,7 +31,6 @@ u32 g_MempHeapSize = 0;
 u32 g_VmNumTlbMisses = 0;
 u32 g_VmNumPageMisses = 0;
 u32 g_VmNumPageReplaces = 0;
-u8 g_VmShowStats = 0;
 
 s32 g_TickRateDiv = 1;
 s32 g_TickExtraSleep = true;
@@ -56,18 +54,11 @@ void *bootAllocateStack(s32 threadid, s32 size)
 
 void bootCreateSched(void)
 {
-	osCreateMesgQueue(&g_MainMesgQueue, g_MainMesgBuf, ARRAYCOUNT(g_MainMesgBuf));
-	if (osTvType == OS_TV_MPAL) {
-		osCreateScheduler(&g_Sched, NULL, OS_VI_MPAL_LAN1, 1);
-	} else {
-		osCreateScheduler(&g_Sched, NULL, OS_VI_NTSC_LAN1, 1);
-	}
+	osCreateScheduler(&g_Sched, NULL, OS_VI_NTSC_LAN1, 1);
 }
 
 static void gameInit(void)
 {
-	osMemSize = g_OsMemSizeMb * 1024 * 1024;
-
 	for (s32 i = 0; i < MAX_PLAYERS; ++i) {
 		struct extplayerconfig *cfg = g_PlayerExtCfg + i;
 		cfg->fovzoommult = cfg->fovzoom ? cfg->fovy / 60.0f : 1.0f;

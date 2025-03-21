@@ -5,8 +5,6 @@
 	build/ROMID/lib/sched.o (section); \
 	build/ROMID/lib/ultra/os/maptlbrdb.o (section); \
 	build/ROMID/lib/ultra/io/vimgr.o (section); \
-	build/ROMID/lib/ultra/io/pimgr.o (section); \
-	build/ROMID/lib/lib_034d0.o (section); \
 	build/ROMID/lib/ultra/os/exceptvars.o (section); \
 	build/ROMID/lib/ultra/os/exceptasm.o (section); \
 	build/ROMID/lib/ultra/os/createthread.o (section); \
@@ -25,14 +23,12 @@
 	build/ROMID/lib/ultra/io/conteeplongwrite.o (section); \
 	build/ROMID/lib/ultra/io/pfsresizefile.o (section); \
 	build/ROMID/lib/ultra/io/pfsinitpak.o (section); \
-	build/ROMID/lib/vminit.o (section); \
 	build/ROMID/lib/rzip.o (section); \
 	build/ROMID/lib/audiomgr.o (section); \
 	build/ROMID/lib/audiodma.o (section); \
 	build/ROMID/lib/vi.o (section); \
 	build/ROMID/lib/ultra/io/viint.o (section); \
 	build/ROMID/lib/fault.o (section); \
-	build/ROMID/lib/crash.o (section); \
 	build/ROMID/lib/dma.o (section); \
 	build/ROMID/lib/main.o (section); \
 	build/ROMID/lib/snd.o (section); \
@@ -43,8 +39,6 @@
 	build/ROMID/lib/args.o (section); \
 	build/ROMID/lib/str.o (section); \
 	build/ROMID/lib/ultra/libc/sprintf.o (section); \
-	build/ROMID/lib/pimgr.o (section); \
-	build/ROMID/lib/videbug.o (section); \
 	build/ROMID/lib/base.o (section); \
 	build/ROMID/lib/joy.o (section); \
 	build/ROMID/lib/varsinit.o (section); \
@@ -59,7 +53,6 @@
 	build/ROMID/lib/collision.o (section); \
 	build/ROMID/lib/lib_2f490.o (section); \
 	build/ROMID/lib/rdp.o (section); \
-	build/ROMID/lib/rmon.o (section); \
 	build/ROMID/lib/ultra/audio/heap.o (section); \
 	build/ROMID/lib/naudio/n_sl.o (section); \
 	build/ROMID/lib/lib_2fc60.o (section); \
@@ -117,7 +110,6 @@
 	build/ROMID/lib/naudio/n_resample.o (section); \
 	build/ROMID/lib/mp3/lib_47d20.o (section); \
 	build/ROMID/lib/mp3/lib_47ef0.o (section); \
-	build/ROMID/lib/ultra/io/vitbl.o (section); \
 	build/ROMID/lib/ultra/os/writebackdcacheall.o (section); \
 	build/ROMID/lib/ultra/os/invalicache.o (section); \
 	build/ROMID/lib/ultra/os/getfpccsr.o (section); \

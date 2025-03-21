@@ -1,5 +1,3 @@
-#include <os_internal.h>
-#include <ultraerror.h>
 #include "synthInternals.h"
 
 /**

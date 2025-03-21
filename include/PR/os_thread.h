@@ -89,58 +89,8 @@ typedef struct OSThread_s {
  *
  */
 
-/* Thread states */
-
-#define OS_STATE_STOPPED	1
-#define OS_STATE_RUNNABLE	2
-#define OS_STATE_RUNNING	4
-#define OS_STATE_WAITING	8
-
-/* Recommended thread priorities for the system threads */
-
-#define OS_PRIORITY_MAX		255
-#define OS_PRIORITY_VIMGR	254
-#define OS_PRIORITY_RMON	250
-#define OS_PRIORITY_RMONSPIN	200
-#define OS_PRIORITY_PIMGR	150
-#define OS_PRIORITY_SIMGR	140
-#define	OS_PRIORITY_APPMAX	127
-#define OS_PRIORITY_IDLE	  0	/* Must be 0 */
-
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
-
-/**************************************************************************
- *
- * Macro definitions
- *
- */
-
-
-/**************************************************************************
- *
- * Extern variables
- *
- */
-
-
-/**************************************************************************
- *
- * Function prototypes
- *
- */
-
-/* Thread operations */
-
-extern void		osCreateThread(OSThread *, OSId, void (*)(void *), void *, void *, OSPri);
-extern void		osDestroyThread(OSThread *);
-extern void		osYieldThread(void);
-extern void		osStartThread(OSThread *);
-extern void		osStopThread(OSThread *);
-extern OSId		osGetThreadId(OSThread *);
-extern void		osSetThreadPri(OSThread *, OSPri);
-extern OSPri		osGetThreadPri(OSThread *);
-
 
 #endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
 

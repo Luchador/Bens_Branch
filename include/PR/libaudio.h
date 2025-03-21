@@ -85,29 +85,13 @@ typedef u8      ALPan;
  * Error handling
  ***********************************************************************/
 
-#ifdef _DEBUG
-#define ALFailIf(condition, error)	\
-            if (condition) {		\
-                __osError(error, 0);	\
-                return; }
-
-#else
 #define ALFailIf(condition, error)	\
             if (condition) {		\
                 return; }
-#endif
 
-#ifdef _DEBUG
-#define ALFlagFailIf(condition, flag, error)	\
-            if (condition) {		\
-                if(flag) __osError(error, 0);	\
-                return; }
-
-#else
 #define ALFlagFailIf(condition, flag, error)	\
             if (condition) {		\
                 return; }
-#endif
 
 /***********************************************************************
  * Audio Library global routines

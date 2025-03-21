@@ -6,17 +6,16 @@
 #include "bss.h"
 #include "lib/audiodma.h"
 #include "lib/lib_2fc60.h"
-#include "lib/libc/ll.h"
 #include "data.h"
 #include "types.h"
 #include "game/debug.h"
 
 u64 var80091568;
-u64 var80091570;
+u64 g_AmgrTimeDiff;
 u64 var80091578;
 u64 var80091580;
-u64 var80091588;
-u64 var80091590;
+u64 g_AmgrElapsedGameTime;
+u64 g_AmgrElapsedGameTime2;
 AMAudioMgr g_AudioManager;
 OSScClient g_AudioSchedClient;
 u32 var800918dc;
@@ -31,7 +30,6 @@ u8 var8005cf94 = 1;
 
 void amgrHandleDoneMsg(AudioInfo *info);
 void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo);
-void amgrMain(void *arg);
 
 // Used in PC port
 void amgrInit(void)
@@ -44,7 +42,7 @@ void amgrCreate(ALSynConfig *config)
 	f32 freqpertick;
 	s32 i;
 
-	config->outputRate = osAiSetFrequency(22020);
+	config->outputRate = 22020;
 	config->dmaproc = admaNew;
 	freqpertick = config->outputRate / 30.0f;
 	g_AmgrFreqPerTick = (s32)freqpertick;
@@ -57,11 +55,6 @@ void amgrCreate(ALSynConfig *config)
 	var800918dc = g_AmgrFreqPerTick - SAMPLES;
 	var800918e4 = g_AmgrFreqPerTick + 80;
 	var8005cf94 = 0;
-
-	admaInit();
-
-	osCreateMesgQueue(&g_AudioManager.audioReplyMsgQ, g_AudioManager.audioReplyMsgBuf, ARRAYCOUNT(g_AudioManager.audioFrameMsgBuf));
-	osCreateMesgQueue(&g_AudioManager.audioFrameMsgQ, g_AudioManager.audioFrameMsgBuf, ARRAYCOUNT(g_AudioManager.audioFrameMsgBuf));
 
 	var800918ec = 2000;
 
@@ -107,93 +100,16 @@ void amgrCreate(ALSynConfig *config)
 
 	n_alInit(&g_AudioManager.g, config);
 	func00030bfc(0, 60);
-	osCreateThread(&g_AudioManager.thread, THREAD_AUDIO, &amgrMain, 0, g_AudioSp, THREADPRI_AUDIO);
 }
 
 s8 g_AudioIsThreadRunning = false;
 
 void amgrStartThread(void)
 {
-	osStartThread(&g_AudioManager.thread);
 	g_AudioIsThreadRunning = true;
 }
 
-OSMesgQueue *amgrGetFrameMesgQueue(void)
-{
-	return &g_AudioManager.audioFrameMsgQ;
-}
-
-/**
- * This doesn't set g_AudioIsThreadRunning to false, but that's okay because
- * this is only called when resetting the console, and when that happens the
- * variable is likely reset too.
- */
-void amgrStopThread(void)
-{
-	if (g_AudioIsThreadRunning) {
-		osStopThread(&g_AudioManager.thread);
-	}
-}
-
 extern u32 g_AdmaCurFrame;
-
-void amgrMain(void *arg)
-{
-	s32 count = 0;
-	bool done = false;
-	s16 *msg = NULL;
-	AudioInfo *info = NULL;
-
-	static u32 var8005d514 = 1;
-
-	// 8MB - Receive retrace events every second retrace
-	// 4MB - Receive retrace events every retrace due to smaller command buffer
-	//osScAddClient(&g_Sched, &g_AudioSchedClient, &g_AudioManager.audioFrameMsgQ, !IS4MB()); 
-	osScAddClient(&g_Sched, &g_AudioSchedClient, &g_AudioManager.audioFrameMsgQ, true);
-
-	while (!done) {
-		osRecvMesg(&g_AudioManager.audioFrameMsgQ, (OSMesg *) &msg, OS_MESG_BLOCK);
-
-		switch (*msg) {
-		case OS_SC_RSP_MSG:
-			var80091588 = osGetTime();
-			amgrHandleFrameMsg(g_AudioManager.audioInfo[g_AdmaCurFrame % 3], info);
-			admaReceiveAll();
-
-			count++;
-
-			var80091590 = osGetTime();
-			var80091570 = var80091590 - var80091588;
-
-			if (count % 240 == 0) {
-				var80091578 = var80091580 / 240;
-				var80091580 = 0; var80091568 = 0;
-			} else {
-				var80091580 = (var80091580 + var80091590) - var80091588;
-			}
-
-			if (var80091568 < var80091590 - var80091588) {
-				var80091568 = var80091590 - var80091588;
-			}
-
-			if (var8005d514 == 0) {
-				osRecvMesg(&g_AudioManager.audioReplyMsgQ, (OSMesg *) &info, OS_MESG_BLOCK);
-			}
-
-			var8005d514 = 0;
-			amgrHandleDoneMsg(info);
-			break;
-		case OS_SC_PRE_NMI_MSG:
-			done = true;
-			break;
-		case OS_SC_QUIT_MSG:
-			done = true;
-			break;
-		}
-	}
-
-	n_alClose(&g_AudioManager.g);
-}
 
 void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo)
 {
@@ -213,15 +129,12 @@ void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo)
 
 	admaBeginFrame();
 
-#ifdef PLATFORM_N64
-	somevalue = IO_READ(OS_PHYSICAL_TO_K1(AI_LEN_REG)) / 4;
-#else
 	somevalue = osAiGetLength() / 4;
 	// HACK: only allow small frames if really needed
 	if (somevalue < 1100) {
 		somevalue = 248;
 	}
-#endif
+
 	datastart = g_AudioManager.ACMDList[var8005cf90];
 	outbuffer = (s16 *) osVirtualToPhysical(info->data);
 
@@ -250,14 +163,6 @@ void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo)
 	g_AmgrCurrentCmdList->flags = OS_SC_NEEDS_RSP;
 	g_AmgrCurrentCmdList->list.t.type = M_AUDTASK;
 	g_AmgrCurrentCmdList->list.t.flags = 0;
-#ifdef PLATFORM_N64
-	g_AmgrCurrentCmdList->list.t.ucode_boot = (u64 *) &rspbootTextStart;
-	g_AmgrCurrentCmdList->list.t.ucode_boot_size = (uintptr_t) &rspbootTextEnd - (uintptr_t) &rspbootTextStart;
-	g_AmgrCurrentCmdList->list.t.ucode = (u64 *) &aspTextStart;
-	g_AmgrCurrentCmdList->list.t.ucode_data = (u64 *) &aspDataStart;
-	g_AmgrCurrentCmdList->list.t.ucode_size = SP_UCODE_SIZE;
-	g_AmgrCurrentCmdList->list.t.ucode_data_size = SP_UCODE_DATA_SIZE;
-#endif
 	g_AmgrCurrentCmdList->list.t.data_ptr = (u64 *) datastart;
 	g_AmgrCurrentCmdList->list.t.data_size = (cmd - datastart) * sizeof(Acmd);
 	g_AmgrCurrentCmdList->list.t.yield_data_ptr = NULL;
@@ -275,13 +180,12 @@ void amgrHandleDoneMsg(AudioInfo *info)
 	}
 }
 
-#ifndef PLATFORM_N64
 void amgrFrame(void)
 {
 	static AudioInfo *previnfo = NULL;
 	static s32 count = 0;
 
-	var80091588 = osGetTime();
+	g_AmgrElapsedGameTime = osGetTime();
 
 	AudioInfo *info = g_AudioManager.audioInfo[g_AdmaCurFrame % 3];
 
@@ -301,7 +205,7 @@ void amgrFrame(void)
 		var8005cf94 = 2;
 	} else {
 		// have space in audio queue, render 2 naudio frames this frame (and 1 extra on PAL)
-		info->frameSamples = 368 + PAL * 184;
+		info->frameSamples = 368;
 
 		if (var8005cf94 != 0) {
 			var8005cf94--;
@@ -312,24 +216,21 @@ void amgrFrame(void)
 
 	var8005cf90 ^= 1;
 
-	admaReceiveAll();
-
 	previnfo = info;
 
 	count++;
 
-	var80091590 = osGetTime();
-	var80091570 = var80091590 - var80091588;
+	g_AmgrElapsedGameTime2 = osGetTime();
+	g_AmgrTimeDiff = g_AmgrElapsedGameTime2 - g_AmgrElapsedGameTime;
 
 	if (count % 240 == 0) {
 		var80091578 = var80091580 / 240;
 		var80091580 = 0; var80091568 = 0;
 	} else {
-		var80091580 = (var80091580 + var80091590) - var80091588;
+		var80091580 = (var80091580 + g_AmgrElapsedGameTime2) - g_AmgrElapsedGameTime;
 	}
 
-	if (var80091568 < var80091590 - var80091588) {
-		var80091568 = var80091590 - var80091588;
+	if (var80091568 < g_AmgrElapsedGameTime2 - g_AmgrElapsedGameTime) {
+		var80091568 = g_AmgrElapsedGameTime2 - g_AmgrElapsedGameTime;
 	}
 }
-#endif

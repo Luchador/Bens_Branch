@@ -34,11 +34,8 @@
 #include "lib/audiomgr.h"
 #include "lib/args.h"
 #include "lib/boot.h"
-#include "lib/vm.h"
 #include "lib/rzip.h"
 #include "lib/vi.h"
-#include "lib/fault.h"
-#include "lib/crash.h"
 #include "lib/dma.h"
 #include "lib/joy.h"
 #include "lib/main.h"
@@ -46,12 +43,9 @@
 #include "lib/memp.h"
 #include "lib/mema.h"
 #include "lib/model.h"
-#include "lib/videbug.h"
 #include "lib/anim.h"
 #include "lib/rdp.h"
-#include "lib/lib_34d0.h"
 #include "lib/lib_2f490.h"
-#include "lib/rmon.h"
 #include "lib/rng.h"
 #include "string.h"
 #include "data.h"
@@ -63,7 +57,7 @@ extern u32 g_MempHeapSize;
 
 void rngSetSeed(u32 seed);
 
-bool var8005d9b0 = false;
+bool g_AcceptCMDParams = false;
 s32 g_StageNum = STAGE_TITLE;
 u32 g_MainMemaHeapSize = 1024 * 300;
 bool var8005d9bc = false;
@@ -137,7 +131,6 @@ void mainInit(void)
 	s32 j;
 	u32 addr;
 
-	faultInit();
 	dmaInit();
 	amgrInit();
 	varsInit();
@@ -146,9 +139,7 @@ void mainInit(void)
 	joyInit();
 	joyReset();
 
-	var8005d9b0 = rmonIsDisabled();
-
-	g_VmShowStats = 0;
+	g_AcceptCMDParams = true;
 
 	// no copyright screen
 	viSetMode(VIMODE_HI);
@@ -158,7 +149,7 @@ void mainInit(void)
 
 	filesInit();
 
-	if (var8005d9b0) {
+	if (g_AcceptCMDParams) {
 		argSetString("          -ml0 -me0 -mgfx100 -mvtx50 -mt700 -ma400");
 	}
 
@@ -166,7 +157,6 @@ void mainInit(void)
 
 	mempResetPool(MEMPOOL_8);
 	mempResetPool(MEMPOOL_PERMANENT);
-	crashReset();
 	challengesInit();
 	utilsInit();
 	texInit();
@@ -197,20 +187,6 @@ void mainProc(void)
 		mainLoop();
 	}
 }
-
-/**
- * It's suspected that this function would have allowed developers to override
- * the value of variables while the game is running in order to view their
- * effects immediately rather than having to recompile the game each time.
- *
- * The developers would have used rmon to create a table of name/value pairs,
- * then this function would have looked up the given variable name in the table
- * and written the new value to the variable's address.
- */
-//void mainOverrideVariable(char *name, void *value)
-//{
-	// empty
-//}
 
 /**
  * This function enters an infinite loop which iterates once per stage load.
@@ -258,7 +234,7 @@ void mainLoop(void)
 		g_MainGameLogicEnabled = true;
 		g_MainIsEndscreen = false;
 
-		if (var8005d9b0 && var8005d9c4 == 0) {
+		if (g_AcceptCMDParams && var8005d9c4 == 0) {
 			index = -1;
 
 			if (g_StageNum < STAGE_TITLE && getNumPlayers() >= 2) {
@@ -405,7 +381,6 @@ void mainTick(void)
 	if (g_MainChangeToStageNum < 0) {
 		frametimeCalculate();
 		joyDebugJoy();
-		schedSetCrashEnable2(false);
 
 		if (g_MainGameLogicEnabled) {
 			gdl = gdlstart = gfxGetMasterDisplayList();
@@ -442,6 +417,7 @@ void mainTick(void)
 			viUpdateMode();
 		}
 
+		// Used in PC port
 		rdpCreateTask(gdlstart, gdl, 0, (uintptr_t) &msg);
 		memaPrint();
 	}

@@ -10,11 +10,8 @@
 
 struct admaitem {
 	ALLink node;
-#ifdef PLATFORM_N64
-	s32 startaddr;
-#else
 	uintptr_t startaddr;
-#endif
+
 	s32 lastframe;
 	u8 *ptr;
 };
@@ -34,11 +31,6 @@ OSMesgQueue g_AdmaMesgQueue;
 OSMesg g_AdmaMesgs[ADMA_MAX_ITEMS];
 u32 g_AdmaCurFrame;
 
-void admaInit(void)
-{
-	osCreateMesgQueue(&g_AdmaMesgQueue, g_AdmaMesgs, ARRAYCOUNT(g_AdmaMesgs));
-}
-
 /**
  * This routine handles the DMA'ing of samples from ROM to RAM. First it checks
  * the current buffers to see if the samples needed are already in place.
@@ -50,23 +42,15 @@ void admaInit(void)
  * that this buffer was last used in this frame. This is important for the
  * admaBeginFrame routine.
  */
-#ifdef PLATFORM_N64
-s32 admaExec(s32 offset, s32 len, void *state)
-#else
 uintptr_t admaExec(uintptr_t offset, s32 len, void *state)
-#endif
 {
 	void *foundbuffer;
 	s32 delta;
 	struct admaitem *item = g_AdmaState.firstused;
 	struct admaitem *lastitem = NULL;
-#ifdef PLATFORM_N64
-	s32 end = offset + len;
-	s32 buffend;
-#else
+
 	uintptr_t end = offset + len;
 	uintptr_t buffend;
-#endif
 
 	// Check to see if a buffer already contains the sample
 	while (item) {
@@ -125,9 +109,7 @@ uintptr_t admaExec(uintptr_t offset, s32 len, void *state)
 	item->startaddr = offset;
 	item->lastframe = g_AdmaCurFrame;
 
-	osInvalDCache((void *) PHYS_TO_K0(offset), ADMA_ITEM_SIZE);
-
-	osPiStartDma(&g_AdmaIoMsgs[g_AdmaNumItemsThisFrame++], OS_MESG_PRI_HIGH, OS_READ, offset, foundbuffer, ADMA_ITEM_SIZE, &g_AdmaMesgQueue);
+	osPiStartDma(&g_AdmaIoMsgs[g_AdmaNumItemsThisFrame++], offset, foundbuffer, ADMA_ITEM_SIZE, &g_AdmaMesgQueue);
 
 	return osVirtualToPhysical(foundbuffer) + delta;
 }
@@ -198,28 +180,4 @@ void admaBeginFrame(void)
 
 	g_AdmaCurFrame++;
 	g_AdmaNumItemsThisFrame = 0;
-}
-
-/**
- * Receive all messages from the message queue.
- *
- * The message queue isn't really used. The audio DMA system just wants to fire
- * off DMA requests and then forget about them. If the data arrives in time for
- * playback then great, otherwise nothing can be done. But osPiStartDma requires
- * a message queue, and that means the messages have to be read off it at some
- * point. This is done here.
- */
-void admaReceiveAll(void)
-{
-	s32 i;
-
-	/**
-	 * Don't block here. If dma's aren't complete, you've had an audio
-	 * overrun. Bad news, but go for it anyway, and try and recover.
-	 */
-	for (i = 0; i < g_AdmaNumItemsThisFrame; i++) {
-		if (osRecvMesg(&g_AdmaMesgQueue, 0, OS_MESG_NOBLOCK) == -1) {
-			// empty
-		}
-	}
 }

@@ -1,8 +1,6 @@
 #include "versions.h"
 #include <libaudio.h>
 #include <os_convert.h>
-#include <os_internal.h>
-#include <ultraerror.h>
 #include "n_libaudio.h"
 #include "n_seqp.h"
 #include "cseq.h"
@@ -725,10 +723,6 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 				n_alEvtqPostEvent(&seqp->evtq, &evt, deltaTime, 0);
 			}
 
-			if ((chanstate->unk10 & 1) && seqp->queue) {
-				osSendMesg(seqp->queue, (OSMesg)((var8009c350[chan] & 0xffffff00) | (chanstate->unk10 >> 2)), OS_MESG_NOBLOCK);
-			}
-
 			break;
 		}
 
@@ -757,10 +751,6 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 				__n_seqpReleaseVoice((N_ALSeqPlayer*)seqp, &vstate->voice,
 						vstate->sound->envelope->releaseTime);
 			}
-		}
-
-		if ((chanstate->unk10 & 2) && seqp->queue) {
-			osSendMesg(seqp->queue, (OSMesg)(key << 16 | 8 | chanstate->unk10 >> 2), OS_MESG_NOBLOCK);
 		}
 
 		break;
@@ -896,9 +886,6 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 			}
 			break;
 		case (0x1e):
-			if (seqp->queue) {
-				osSendMesg(seqp->queue, (OSMesg)((byte2 & 7) | 0x10 | ((seqp->node.samplesLeft << 5) & 0xffffff00)), OS_MESG_NOBLOCK);
-			}
 			break;
 		case (AL_MIDI_VOLUME_CTRL):
 			seqp->chanState[chan].vol = byte2;
@@ -1192,11 +1179,8 @@ void __n_CSPHandleMetaMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 
 void __n_CSPRepostEvent(ALEventQueue *evtq, N_ALEventListItem *item)
 {
-	OSIntMask mask;
 	ALLink *node;
 	N_ALEventListItem *nextItem;
-
-	mask = osSetIntMask(OS_IM_NONE);
 
 	for (node = &evtq->allocList; node != 0; node = node->next) {
 		if (!node->next) {
@@ -1214,8 +1198,6 @@ void __n_CSPRepostEvent(ALEventQueue *evtq, N_ALEventListItem *item)
 			item->delta -= nextItem->delta;
 		}
 	}
-
-	osSetIntMask(mask);
 }
 
 void __n_setUsptFromTempo(N_ALCSPlayer *seqp, f32 tempo)
@@ -1244,9 +1226,4 @@ void __n_CSPPostNextSeqEvent(N_ALCSPlayer *seqp)
 
 	evt.type = AL_SEQ_REF_EVT;
 	n_alEvtqPostEvent(&seqp->evtq, &evt, deltaTicks * seqp->uspt, 0);
-}
-
-void func00037634(N_ALCSPlayer *seqp, u8 value)
-{
-	seqp->unk88 = value;
 }

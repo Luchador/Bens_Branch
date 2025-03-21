@@ -28,7 +28,6 @@ static inline s32 rzipInflate1172(z_stream *strm, u8 *src, void *dst)
 		strm->avail_out = 0x2000;
 		strm->next_out = dst;
 		if (inflate(strm, Z_FINISH) == Z_STREAM_ERROR) {
-			rmonPrintf("rzipInflate1172: Z_STREAM_ERROR\n");
 			return 0;
 		}
 	} while (strm->avail_out == 0);
@@ -44,7 +43,6 @@ static inline s32 rzipInflate1173(z_stream *strm, u8 *src, void *dst, u32 dstLen
 	strm->next_out = dst;
 
 	if (inflate(strm, Z_SYNC_FLUSH) == Z_STREAM_ERROR) {
-		rmonPrintf("rzipInflate1173: Z_STREAM_ERROR\n");
 		return 0;
 	}
 
@@ -59,7 +57,6 @@ s32 rzipInflate(void *srcp, void *dst, void *scratch)
 
 	ret = inflateInit2(&strm, -15);
 	if (ret != Z_OK) {
-		rmonPrintf("rzipInflate: inflateInit2 failed: %d\n", ret);
 		return 0;
 	}
 
@@ -71,7 +68,6 @@ s32 rzipInflate(void *srcp, void *dst, void *scratch)
 		// 1172, uncompressed length unknown
 		ret = rzipInflate1172(&strm, src + 2, dst);
 	} else {
-		rmonPrintf("rzipInflate: input not in any known rare zip format\n");
 		ret = 0;
 	}
 

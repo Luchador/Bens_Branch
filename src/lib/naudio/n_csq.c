@@ -1,7 +1,5 @@
 #include <libaudio.h>
 #include "n_libaudio.h"
-#include <os_internal.h>
-#include <ultraerror.h>
 #include "types.h"
 
 u32 __n_alCSeqGetTrackEvent(ALCSeq *seq, u32 track, N_ALEvent *event, s32 arg3);

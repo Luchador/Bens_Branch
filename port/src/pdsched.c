@@ -8,12 +8,8 @@
 #include "lib/args.h"
 #include "lib/audiomgr.h"
 #include "lib/rzip.h"
-#include "lib/crash.h"
 #include "lib/main.h"
 #include "lib/snd.h"
-#include "lib/pimgr.h"
-#include "lib/rmon.h"
-#include "lib/lib_48150.h"
 #include "lib/vi.h"
 #include "lib/joy.h"
 #include "data.h"
@@ -27,14 +23,6 @@
 #include "mixer.h"
 
 /*
- * private typedefs and defines
- */
-#define VIDEO_MSG       666
-#define RSP_DONE_MSG    667
-#define RDP_DONE_MSG    668
-#define PRE_NMI_MSG     669
-
-/*
  * OSScTask state
  */
 #define OS_SC_DP                0x0001  /* set if still needs dp        */
@@ -46,11 +34,6 @@
  * OSScTask->flags type identifier
  */
 #define OS_SC_XBUS      (OS_SC_SP | OS_SC_DP)
-#define OS_SC_DRAM      (OS_SC_SP | OS_SC_DP | OS_SC_DRAM_DLIST)
-#define OS_SC_DP_XBUS   (OS_SC_SP)
-#define OS_SC_DP_DRAM   (OS_SC_SP | OS_SC_DRAM_DLIST)
-#define OS_SC_SP_XBUS   (OS_SC_DP)
-#define OS_SC_SP_DRAM   (OS_SC_DP | OS_SC_DRAM_DLIST)
 
 /*
  * private functions
@@ -63,7 +46,6 @@ void __scAppendList(OSSched *s, OSScTask *t);
 OSScTask *__scTaskReady(OSScTask *t);
 s32 __scTaskComplete(OSSched *s,OSScTask *t);
 void __scExec(OSSched *sc, OSScTask *sp, OSScTask *dp);
-void __scYield(OSSched *s);
 s32 __scSchedule(OSSched *sc, OSScTask **sp, OSScTask **dp, s32 availRCP);
 
 OSViMode var8008dcc0[NUM_GFXTASKS];
@@ -75,17 +57,11 @@ s32 g_ViCurVStart1;
 u32 var8008de14;
 OSTimer g_SchedRspTimer;
 u32 g_SchedDpCounters[4];
-struct artifact g_ArtifactLists[3][120];
+struct artifact g_ArtifactLists[3][240];
 u8 g_SchedSpecialArtifactIndexes[3];
 s32 g_SchedWriteArtifactsIndex;
 s32 g_SchedFrontArtifactsIndex;
 s32 g_SchedPendingArtifactsIndex;
-
-bool g_SchedCrashedUnexpectedly = false;
-bool g_SchedCrashEnable1 = false;
-bool g_SchedCrashEnable2 = false;
-u32 g_SchedCrashRenderInterval = 45000000;
-u32 g_SchedCrashLastRendered = 0;
 
 s32 var8005ce74 = 0;
 f32 g_ViXScalesBySlot[NUM_GFXTASKS] = {1, 1};
@@ -104,49 +80,6 @@ s32 g_BlurFb = -1;
 s32 g_BlurFbCapTimer = -1;
 bool g_BlurFbDirty = true;
 
-void schedSetCrashEnable1(bool enable)
-{
-	g_SchedCrashEnable1 = enable;
-}
-
-void schedSetCrashedUnexpectedly(bool enable)
-{
-	g_SchedCrashedUnexpectedly = enable;
-}
-
-void schedSetCrashEnable2(bool enable)
-{
-	g_SchedCrashEnable2 = enable;
-}
-
-void schedSetCrashRenderInterval(u32 cycles)
-{
-	g_SchedCrashRenderInterval = cycles;
-}
-
-void schedRenderCrashOnBuffer(void *framebuffer)
-{
-	if ((g_SchedCrashEnable2 && g_SchedCrashEnable1) || g_SchedCrashedUnexpectedly) {
-		// crashRenderFrame(framebuffer);
-		g_SchedCrashLastRendered = osGetCount();
-	}
-}
-
-void schedRenderCrashPeriodically(u32 framecount)
-{
-	if ((framecount & 0xf) == 0 && ((g_SchedCrashEnable2 && g_SchedCrashEnable1) || g_SchedCrashedUnexpectedly)) {
-		if (osGetCount() - g_SchedCrashLastRendered > g_SchedCrashRenderInterval) {
-			// crashRenderFrame(g_FrameBuffers[0]);
-			// crashRenderFrame(g_FrameBuffers[1]);
-		}
-	}
-}
-
-void schedInitCrashLastRendered(void)
-{
-	g_SchedCrashLastRendered = osGetCount();
-}
-
 void osCreateScheduler(OSSched *sc, OSThread *thread, u8 mode, u32 numFields)
 {
 	sc->curRSPTask = 0;
@@ -161,9 +94,6 @@ void osCreateScheduler(OSSched *sc, OSThread *thread, u8 mode, u32 numFields)
 	sc->prenmiMsg.type = OS_SC_PRE_NMI_MSG;
 	sc->thread = thread;
 
-	osCreateMesgQueue(&sc->interruptQ, sc->intBuf, OS_SC_MAX_MESGS);
-	osCreateMesgQueue(&sc->cmdQ, sc->cmdMsgBuf, OS_SC_MAX_MESGS);
-
 	//var8008de08 = osViModeTable[mode].comRegs.hStart;
 	//g_ViCurVStart0 = osViModeTable[mode].fldRegs[0].vStart;
 	//g_ViCurVStart1 = osViModeTable[mode].fldRegs[1].vStart;
@@ -174,29 +104,13 @@ void osCreateScheduler(OSSched *sc, OSThread *thread, u8 mode, u32 numFields)
 	//var8008dd68[0] = osViModeTable[mode];
 	//var8008dd68[1] = osViModeTable[mode];
 
-	schedInitCrashLastRendered();
-
 	g_PrevFrameFb = videoCreateFramebuffer(0, 0, false, true);
 	g_BlurFb = videoCreateFramebuffer(0, 0, false, true);
-}
-
-void osScAddClient(OSSched *sc, OSScClient *c, OSMesgQueue *msgQ, bool is30fps)
-{
-	c->msgQ = msgQ;
-	c->is30fps = is30fps;
-	c->next = sc->clientList;
-	sc->clientList = c;
-}
-
-OSMesgQueue *osScGetCmdQ(OSSched *sc)
-{
-	return &sc->cmdQ;
 }
 
 void __scUpdateViMode(void)
 {
 	if (g_SchedIsFirstTask) {
-		osViBlack(false);
 		g_SchedIsFirstTask = false;
 	}
 
@@ -267,14 +181,7 @@ void schedEndFrame(OSSched *sc)
 {
 	sc->frameCount++;
 
-	if (!g_Resetting && (sc->frameCount & 1)) {
-		// osStopTimer(&g_SchedRspTimer);
-		// osSetTimer(&g_SchedRspTimer, 280000, 0, amgrGetFrameMesgQueue(), &g_SchedRspMsg);
-	}
-
-	if (!g_Resetting) {
-		viHandleRetrace();
-	}
+	viHandleRetrace();
 
 	inputUpdate();
 
@@ -283,7 +190,6 @@ void schedEndFrame(OSSched *sc)
 	joy00014238();
 
 	schedAudioFrame(sc);
-	schedRenderCrashPeriodically(sc->frameCount);
 	videoEndFrame();
 
 	if (g_MainIsBooting == 0) {

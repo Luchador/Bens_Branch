@@ -48,7 +48,6 @@
 #include "lib/ailist.h"
 #include "lib/anim.h"
 #include "lib/lib_317f0.h"
-#include "lib/libc/ll.h"
 #include "data.h"
 #include "types.h"
 
@@ -59,8 +58,6 @@ bool aiGoToNext(void)
 {
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
 	g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[2]);
-	osSyncPrintf(" (%d)\n", cmd[2]);
-
 	return false;
 }
 
@@ -71,8 +68,6 @@ bool aiGoToFirst(void)
 {
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
 	g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, 0, cmd[2]);
-	osSyncPrintf(" (%d)\n", cmd[2]);
-
 	return false;
 }
 
@@ -180,12 +175,6 @@ bool aiSetShotList(void)
 
 	if (g_Vars.chrdata) {
 		g_Vars.chrdata->aishotlist = ailistid;
-	} else if (g_Vars.truck) {
-		osSyncPrintf("set shot list(void) doesn't work for g_Vars.CommandInfo.truck!\n");
-	} else if (g_Vars.heli) {
-		osSyncPrintf("set shot list(void) doesn't work for g_Vars.CommandInfo.heli!\n");
-	} else if (g_Vars.hovercar) {
-		osSyncPrintf("set shot list(void) doesn't work for g_Vars.CommandInfo.hovercar!\n");
 	}
 
 	g_Vars.aioffset += 4;
@@ -9253,21 +9242,11 @@ bool aiChrBeginOrEndTeleport(void)
 		g_Vars.currentplayer->teleportpad = pad_id;
 		g_Vars.currentplayer->teleportcamerapad = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
-		mainpri = osGetThreadPri(0);
-		audiopri = osGetThreadPri(&g_AudioManager.thread);
-		osSetThreadPri(0, audiopri + 1);
-#endif
-
 		handle = sndStart(var80095200, SFX_RELOAD_FARSIGHT, NULL, -1, -1, -1, -1, -1);
 
 		if (handle) {
 			audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(u32 *)&fvalue);
 		}
-
-#if VERSION >= VERSION_NTSC_1_0
-		osSetThreadPri(0, mainpri);
-#endif
 	}
 
 	g_Vars.aioffset += 5;
@@ -9304,21 +9283,11 @@ bool aiIfChrTeleportFullWhite(void)
 	} else {
 		fvalue = 0.4;
 
-#if VERSION >= VERSION_NTSC_1_0
-		mainpri = osGetThreadPri(0);
-		audiopri = osGetThreadPri(&g_AudioManager.thread);
-		osSetThreadPri(0, audiopri + 1);
-#endif
-
 		handle = sndStart(var80095200, SFX_FIRE_SHOTGUN, NULL, -1, -1, -1, -1, -1);
 
 		if (handle) {
 			audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(u32 *)&fvalue);
 		}
-
-#if VERSION >= VERSION_NTSC_1_0
-		osSetThreadPri(0, mainpri);
-#endif
 
 		g_Vars.currentplayer->teleportstate = TELEPORTSTATE_WHITE;
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[2]);

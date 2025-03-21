@@ -6,21 +6,18 @@
 #include "game/file.h"
 #include "bss.h"
 #include "fs.h"
-#include "lib/crash.h"
 #include "lib/dma.h"
 #include "lib/main.h"
 #include "lib/memp.h"
 #include "lib/rzip.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "mod.h"
 #include "platform.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#endif
 
 struct texture *g_Textures;
 struct texpool g_TexSharedPool;
@@ -2264,9 +2261,6 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 			}
 
 			alignedcompbuffer = (u8 *) (((uintptr_t)compbuffer + 0xf) >> 4 << 4);
-
-			osWritebackDCacheAll();
-			osInvalDCache(alignedcompbuffer, DCACHE_SIZE);
 
 			thisoffset = g_Textures[g_TexNumToLoad].dataoffset;
 			nextoffset = g_Textures[g_TexNumToLoad + 1].dataoffset;

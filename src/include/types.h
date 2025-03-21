@@ -4,7 +4,6 @@
 #include <PR/ultrasched.h>
 #include "n_libaudio.h"
 #include "constants.h"
-#include "pads.h"
 #include "tiles.h"
 #include "gbi.h"
 #include "platform.h"

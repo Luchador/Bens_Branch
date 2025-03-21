@@ -32,59 +32,8 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #endif
 
-#define OS_M_PI		3.14159265358979323846
-#define M_DTOR		(3.14159265358979323846/180.0)
-
 #define	FTOFIX32(x)	(int)((x) * (float)0x00010000)
-#define	FIX32TOF(x)	((float)(x) * (1.0f / (float)0x00010000))
 #define	FTOFRAC8(x)	((int) MIN(((x) * (128.0f)), 127.0f) & 0xff)
-
-#define  FILTER_WRAP 0
-#define  FILTER_CLAMP 1
-
-#define RAND(x) (guRandom()%x)	/* random number between 0 to x */
-
-/*
- * Data Structures
- */
-typedef struct {
-	unsigned char   *base;
-	int             fmt, siz;
-	int             xsize, ysize;
-	int             lsize;
-	/* current tile info */
-	int             addr;
-	int             w, h;
-	int             s, t;
-} Image;
-
-typedef struct {
-	float	col[3];
-	float	pos[3];
-	float	a1, a2;		/* actual color = col/(a1*dist + a2) */
-} PositionalLight;
-
-
-/*
- * Function Prototypes
- */
-
-extern int guLoadTextureBlockMipMap(Gfx **glist, unsigned char *tbuf, Image *im,
-		unsigned char startTile, unsigned char pal, unsigned char cms,
-		unsigned char cmt, unsigned char masks, unsigned char maskt,
-		unsigned char shifts, unsigned char shiftt, unsigned char cfs,
-		unsigned char cft);
-
-extern int 	guGetDPLoadTextureTileSz (int ult, int lrt);
-extern void 	guDPLoadTextureTile (Gfx *glistp, void *timg,
-			int texl_fmt, int texl_size,
-			int img_width, int img_height,
-			int uls, int ult, int lrs, int lrt,
-			int palette,
-			int cms, int cmt,
-			int masks, int maskt,
-			int shifts, int shiftt);
-
 
 /*
  * matrix operations:
@@ -165,18 +114,6 @@ extern void guMtxXFML(Mtx *m, float x, float y, float z,
 /* vector utility: */
 extern void guNormalize(float *x, float *y, float *z);
 
-/* light utilities: */
-void guPosLight(PositionalLight *pl, Light *l,
-                float xOb, float yOb, float zOb);
-void guPosLightHilite(PositionalLight *pl1, PositionalLight *pl2,
-                Light *l1, Light *l2,
-                LookAt *l, Hilite *h,
-                float xEye, float yEye, float zEye,
-                float xOb,  float yOb,  float zOb,
-                float xUp,  float yUp,  float zUp,
-                int twidth, int theight);
-extern int guRandom(void);
-
 /*
  *  Math functions
  */
@@ -185,75 +122,5 @@ extern float cosf(float angle);
 extern signed short sins (unsigned short angle);
 extern signed short coss (unsigned short angle);
 extern float sqrtf(float value);
-
-/*
- *  Dump routines for low-level display lists
- */
-/* flag values for guParseRdpDL() */
-#define GU_PARSERDP_VERBOSE		1
-#define GU_PARSERDP_PRAREA		2
-#define GU_PARSERDP_PRHISTO		4
-#define GU_PARSERDP_DUMPONLY           32  /* doesn't need to be same as */
-                                           /* GU_PARSEGBI_DUMPOLNY, but this */
-                                           /* allows app to use interchangeably */
-
-extern void guParseRdpDL(u64 *rdp_dl, u64 nbytes, u8 flags);
-extern void guParseString(char *StringPointer, u64 nbytes);
-
-/*
- * NO LONGER SUPPORTED,
- * use guParseRdpDL with GU_PARSERDP_DUMPONLY flags
- */
-/* extern void guDumpRawRdpDL(u64 *rdp_dl, u64 nbytes); */
-
-/* flag values for guBlinkRdpDL() */
-#define GU_BLINKRDP_HILITE		1
-#define GU_BLINKRDP_EXTRACT		2
-
-extern void
-guBlinkRdpDL(u64 *rdp_dl_in, u64 nbytes_in,
-             u64 *rdp_dl_out, u64 *nbytes_out,
-             u32 x, u32 y, u32 radius,
-             u8  red, u8 green, u8 blue,
-             u8 flags);
-
-/* flag values for guParseGbiDL() */
-#define GU_PARSEGBI_ROWMAJOR	        1
-#define GU_PARSEGBI_NONEST		2
-#define GU_PARSEGBI_FLTMTX		4
-#define GU_PARSEGBI_SHOWDMA		8
-#define GU_PARSEGBI_ALLMTX		16
-#define GU_PARSEGBI_DUMPONLY		32
-/*
-#define GU_PARSEGBI_HANGAFTER		64
-#define GU_PARSEGBI_NOTEXTURES		128
-*/
-extern void guParseGbiDL(u64 *gbi_dl, u32 nbytes, u8 flags);
-extern void guDumpGbiDL(OSTask *tp,u8 flags);
-
-#define  GU_PARSE_GBI_TYPE    1
-#define  GU_PARSE_RDP_TYPE    2
-#define  GU_PARSE_READY       3
-#define  GU_PARSE_MEM_BLOCK   4
-#define  GU_PARSE_ABI_TYPE    5
-#define  GU_PARSE_STRING_TYPE 6
-
-typedef struct {
-    int    dataSize;
-    int    dlType;
-    int    flags;
-    u32    paddr;
-} guDLPrintCB;
-
-void guSprite2DInit(uSprite *SpritePointer,
-		    void *SourceImagePointer,
-		    void *TlutPointer,
-		    int Stride,
-		    int SubImageWidth,
-		    int SubImageHeight,
-		    int SourceImageType,
-		    int SourceImageBitSize,
-		    int SourceImageOffsetS,
-		    int SourceImageOffsetT);
 
 #endif /* !_GU_H_ */

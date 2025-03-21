@@ -464,9 +464,6 @@ void weaponPlayWhooshSound(s32 weaponnum, struct prop *prop)
 	if (soundnum != -1) {
 		if (prop == g_Vars.currentplayer->prop) {
 			struct sndstate *handle;
-			u32 stack;
-			OSPri prevpri = osGetThreadPri(0);
-			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 
 			handle = sndStart(var80095200, soundnum, NULL, -1, -1, -1, -1, -1);
 
@@ -474,7 +471,6 @@ void weaponPlayWhooshSound(s32 weaponnum, struct prop *prop)
 				audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
 			}
 
-			osSetThreadPri(0, prevpri);
 		} else {
 			psCreate(NULL, prop, soundnum, -1,
 					-1, 0, 0, PSTYPE_NONE, NULL, speed, NULL, -1, -1, -1, -1);
@@ -512,16 +508,12 @@ void weaponPlayMeleeHitSound(s32 weaponnum, struct prop *prop)
 
 	if (soundnum != -1) {
 		if (prop == g_Vars.currentplayer->prop) {
-			OSPri prevpri = osGetThreadPri(0);
-			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
-
 			handle = sndStart(var80095200, soundnum, 0, -1, -1, -1, -1, -1);
 
 			if (handle) {
 				audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
 			}
 
-			osSetThreadPri(0, prevpri);
 		} else {
 			psCreate(NULL, prop, soundnum, -1, -1, 0, 0, PSTYPE_NONE, NULL, speed, NULL, -1, -1, -1, -1);
 		}

@@ -1951,7 +1951,7 @@ Gfx *menuitemLabelRender(Gfx *gdl, struct menurendercontext *context)
 	s32 x;
 	s32 y;
 	struct menudfc *menudfc;
-	u8 savedvalue = var8007fb9c;
+	u8 savedvalue = g_DoRedrawEffect;
 	struct fontchar *font1 = g_CharsHandelGothicSm;
 	struct font *font2 = g_FontHandelGothicSm;
 
@@ -2046,7 +2046,7 @@ Gfx *menuitemLabelRender(Gfx *gdl, struct menurendercontext *context)
 
 		textBackupDiagonalBlendSettings();
 		textSetDiagonalBlend(x, y, menudfc->unk04 * 300, 0);
-		var8007fb9c = true;
+		g_DoRedrawEffect = true;
 	}
 
 	colour2 = colour1;
@@ -2105,7 +2105,7 @@ Gfx *menuitemLabelRender(Gfx *gdl, struct menurendercontext *context)
 			func0f0f13ec(context->item);
 		}
 
-		var8007fb9c = savedvalue;
+		g_DoRedrawEffect = savedvalue;
 
 		textRestoreDiagonalBlendSettings();
 	}

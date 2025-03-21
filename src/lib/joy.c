@@ -67,9 +67,6 @@ u8 g_JoyPfsStates[100];
 u32 var80099fac;
 u32 var80099fb0;
 
-const char var70054080[] = "joyReset\n";
-const char var7005408c[] = "joyReset: doing nothing\n";
-
 struct joydata *g_JoyDataPtr = &g_JoyData[0];
 bool g_JoyBusy = false;
 u32 var8005ee68 = 0;
@@ -133,16 +130,12 @@ bool joyIsPfsPollEnabled(void)
 
 void joySetPfsPollInterval(s32 value)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	g_JoyPfsPollTimeRemaining = g_JoyPfsPollInterval = value * 11000;
-#else
-	g_JoyNextPfsStateIndex = value;
-#endif
 }
 
 void joySetDefaultPfsPollInterval(void)
 {
-	joySetPfsPollInterval(VERSION >= VERSION_NTSC_1_0 ? 10 : 30);
+	joySetPfsPollInterval(10);
 }
 
 /**
@@ -151,7 +144,6 @@ void joySetDefaultPfsPollInterval(void)
  */
 s32 joyShiftPfsStates(void)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	s32 pfsstate = 0;
 	s32 i;
 
@@ -168,12 +160,8 @@ s32 joyShiftPfsStates(void)
 	}
 
 	return pfsstate;
-#else
-	return var8005eed8;
-#endif
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 void joyRecordPfsState(u8 pfsstate)
 {
 	if (g_JoyNextPfsStateIndex + 1 >= ARRAYCOUNT(g_JoyPfsStates)) {
@@ -185,9 +173,7 @@ void joyRecordPfsState(u8 pfsstate)
 		g_JoyNextPfsStateIndex++;
 	}
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 /**
  * Scan controllers for controller paks, but only under certain conditions.
  *
@@ -244,12 +230,7 @@ void joyPollPfs(s32 force)
 
 		doingit = false;
 	}
-
-#if VERSION < VERSION_PAL_BETA
-	if (force);
-#endif
 }
-#endif
 
 /**
  * "Temporarily" because the next time joyPollPfs runs, the true state will be
@@ -260,27 +241,15 @@ void joyPollPfs(s32 force)
  */
 void joySetPfsTemporarilyPlugged(s8 index)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	u8 bitpattern = var8005eed8 & ~(1 << index);
 
 	joyRecordPfsState(bitpattern);
-#else
-	var8005eed8 &= ~(1 << index);
-#endif
 }
 
 void joyInit(void)
 {
 	s32 i;
 	s32 j;
-
-	osCreateMesgQueue(&g_JoyStopCyclicPollingMesgQueue, g_JoyStopCyclicPollingMesgBuf, ARRAYCOUNT(g_JoyStopCyclicPollingMesgBuf));
-	osCreateMesgQueue(&g_JoyStopCyclicPollingDoneMesgQueue, g_JoyStopCyclicPollingDoneMesgBuf, ARRAYCOUNT(g_JoyStopCyclicPollingDoneMesgBuf));
-	osCreateMesgQueue(&g_JoyStartCyclicPollingMesgQueue, g_JoyStartCyclicPollingMesgBuf, ARRAYCOUNT(g_JoyStartCyclicPollingMesgBuf));
-	osCreateMesgQueue(&g_JoyStartCyclicPollingDoneMesgQueue, g_JoyStartCyclicPollingDoneMesgBuf, ARRAYCOUNT(g_JoyStartCyclicPollingDoneMesgBuf));
-	osCreateMesgQueue(&g_PiMesgQueue, g_PiMesgBuf, ARRAYCOUNT(g_PiMesgBuf));
-
-	osSetEventMesg(OS_EVENT_SI, &g_PiMesgQueue, NULL);
 
 	g_JoyQueuesCreated = true;
 
@@ -326,16 +295,10 @@ void joyDisableTemporarily(void)
 
 void joyReset(void)
 {
-	OSMesg msg;
 
 	if (g_JoyQueuesCreated) {
-		osSendMesg(&g_JoyStopCyclicPollingMesgQueue, &msg, OS_MESG_NOBLOCK);
-		osRecvMesg(&g_JoyStopCyclicPollingDoneMesgQueue, &msg, OS_MESG_BLOCK);
 
 		joy00013e84();
-
-		osSendMesg(&g_JoyStartCyclicPollingMesgQueue, &msg, OS_MESG_NOBLOCK);
-		osRecvMesg(&g_JoyStartCyclicPollingDoneMesgQueue, &msg, OS_MESG_BLOCK);
 
 		var8005eec0 = 1;
 	}
@@ -361,8 +324,6 @@ void joy00013e84(void)
 		u32 slots = 0xf;
 		s32 i;
 
-		osContStartQuery(&g_PiMesgQueue);
-		osRecvMesg(&g_PiMesgQueue, NULL, OS_MESG_BLOCK);
 		osContGetQuery(g_JoyContStatuses);
 
 		for (i = 0; i < ARRAYCOUNT(g_JoyContStatuses); i++) {
@@ -513,21 +474,9 @@ void joyDebugJoy(void)
 	}
 }
 
-#if VERSION >= VERSION_NTSC_1_0
-const char var700540b4[] = "JOY : g_EnableCyclicPolling=%d";
-const char var700540d4[] = "JOY : g_JoyReCheckInterval=%d";
-const char var700540f4[] = "JOY : g_JoyReCheckEventIn=%d";
-const char var70054114[] = "JOY : g_JoyRecheckDone=%d";
-#endif
-
-const char var70054130[] = "osContStartReadData -> Failed - CONT_NO_RESPONSE_ERROR\n";
-const char var70054168[] = "osContStartReadData -> Failed - CONT_OVERRUN_ERROR\n";
-const char var7005419c[] = "joyTickRetrace:joy%derrno%d->%d\n";
-const char var700541c0[] = "joyTickRetrace:joy%derrno%d->%d\n";
-
 s32 joyStartReadData(OSMesgQueue *mq)
 {
-	return osContStartReadData(mq);
+	return 0;
 }
 
 void joyReadData(void)
@@ -551,107 +500,75 @@ void joysHandleRetrace(void)
 	OSMesg msg;
 	s8 i;
 
-#if VERSION < VERSION_NTSC_1_0
-	var8005eed0++;
-#endif
 
-	if (osRecvMesg(&g_JoyStopCyclicPollingMesgQueue, &msg, OS_MESG_NOBLOCK) == 0) {
-		if (g_JoyBusy) {
-			osRecvMesg(&g_PiMesgQueue, &msg, OS_MESG_BLOCK);
+	if (g_JoyBusy) {
 
-			g_JoyBusy = false;
-			joyReadData();
+		g_JoyBusy = false;
+		joyReadData();
 
-			// Check if error state has changed for any controller
-			for (i = 0; i < NUM_PADS; i++) {
-				if ((g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum == 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum != 0)
-						|| (g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum != 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum == 0)) {
-					joy00013e84();
-					break;
-				}
+		// Check if error state has changed for any controller
+		for (i = 0; i < NUM_PADS; i++) {
+			if ((g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum == 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum != 0)
+					|| (g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum != 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum == 0)) {
+				joy00013e84();
+				break;
 			}
 		}
-
-		osSendMesg(&g_JoyStopCyclicPollingDoneMesgQueue, &msg, OS_MESG_NOBLOCK);
-
-		var8005ee68++;
-
-#if VERSION >= VERSION_NTSC_1_0
-		joyPollPfs(0);
-#endif
-		return;
 	}
 
-	if (osRecvMesg(&g_JoyStartCyclicPollingMesgQueue, &msg, OS_MESG_NOBLOCK) == 0) {
-		var8005ee68--;
+	joyPollPfs(0);
+	return;
 
-		if (var8005ee68 == 0) {
-			joyStartReadData(&g_PiMesgQueue);
-			g_JoyBusy = true;
-		}
-
-		osSendMesg(&g_JoyStartCyclicPollingDoneMesgQueue, &msg, OS_MESG_NOBLOCK);
-		return;
+	if (var8005ee68 == 0) {
+		joyStartReadData(&g_PiMesgQueue);
+		g_JoyBusy = true;
 	}
-
-#if VERSION < VERSION_NTSC_1_0
-	if (var8005ee68) {
-		return;
-	}
-#endif
+	return;
 
 	if (g_JoyInitDone) {
-#if VERSION >= VERSION_NTSC_1_0
 		if (var8005ee68) {
 			joyPollPfs(0);
 			return;
 		}
-#endif
 
-		if (osRecvMesg(&g_PiMesgQueue, &msg, OS_MESG_NOBLOCK) == 0) {
-			static s32 count = 0;
+		static s32 count = 0;
 
-			g_JoyBusy = false;
-			joyReadData();
+		g_JoyBusy = false;
+		joyReadData();
 
-			// Check if error state has changed for any controller
+		// Check if error state has changed for any controller
+		for (i = 0; i < NUM_PADS; i++) {
+			if ((g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum == 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum != 0)
+					|| (g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum != 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum == 0)) {
+				joy00013e84();
+				break;
+			}
+		}
+
+		joy00014238();
+
+		joyPollPfs(0);
+
+		joyStartReadData(&g_PiMesgQueue);
+		g_JoyBusy = true;
+
+		count++;
+
+		if (count >= 60) {
+			s32 i;
+
 			for (i = 0; i < NUM_PADS; i++) {
-				if ((g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum == 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum != 0)
-						|| (g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum != 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum == 0)) {
-					joy00013e84();
-					break;
+				if (g_JoyBadReadsStickX[i] || g_JoyBadReadsStickY[i] || g_JoyBadReadsRStickX[i] || g_JoyBadReadsRStickY[i] || g_JoyBadReadsButtons[i] || g_JoyBadReadsButtonsPressed[i]) {
+					g_JoyBadReadsStickX[i] = 0;
+					g_JoyBadReadsStickY[i] = 0;
+					g_JoyBadReadsRStickX[i] = 0;
+					g_JoyBadReadsRStickY[i] = 0;
+					g_JoyBadReadsButtons[i] = 0;
+					g_JoyBadReadsButtonsPressed[i] = 0;
 				}
 			}
 
-			joy00014238();
-
-#if VERSION >= VERSION_NTSC_1_0
-			joyPollPfs(0);
-#else
-			joy0001509cnb();
-#endif
-
-			joyStartReadData(&g_PiMesgQueue);
-			g_JoyBusy = true;
-
-			count++;
-
-			if (count >= 60) {
-				s32 i;
-
-				for (i = 0; i < NUM_PADS; i++) {
-					if (g_JoyBadReadsStickX[i] || g_JoyBadReadsStickY[i] || g_JoyBadReadsRStickX[i] || g_JoyBadReadsRStickY[i] || g_JoyBadReadsButtons[i] || g_JoyBadReadsButtonsPressed[i]) {
-						g_JoyBadReadsStickX[i] = 0;
-						g_JoyBadReadsStickY[i] = 0;
-						g_JoyBadReadsRStickX[i] = 0;
-						g_JoyBadReadsRStickY[i] = 0;
-						g_JoyBadReadsButtons[i] = 0;
-						g_JoyBadReadsButtonsPressed[i] = 0;
-					}
-				}
-
-				count = 0;
-			}
+			count = 0;
 		}
 	}
 }
@@ -925,20 +842,9 @@ bool joyIsCyclicPollingEnabled(void)
  *
  * If cyclic polling was already disabled, simply increase the disable count.
  */
-void joyDisableCyclicPolling(
-#if VERSION >= VERSION_NTSC_1_0
-		void
-#else
-		s32 line, char *file
-#endif
-		)
+void joyDisableCyclicPolling(void)
 {
 	OSMesg msg;
-
-	if (g_JoyCyclicPollDisableCount == 0) {
-		osSendMesg(&g_JoyStopCyclicPollingMesgQueue, &msg, OS_MESG_NOBLOCK);
-		osRecvMesg(&g_JoyStopCyclicPollingDoneMesgQueue, &msg, OS_MESG_BLOCK);
-	}
 
 	g_JoyCyclicPollDisableCount++;
 }
@@ -947,42 +853,15 @@ void joyDisableCyclicPolling(
  * Indicate that the caller is done with cyclic polling being disabled,
  * and enable cyclic polling if there are no callers left who want it disabled.
  */
-void joyEnableCyclicPolling(
-#if VERSION >= VERSION_NTSC_1_0
-		void
-#else
-		s32 line, char *file
-#endif
-		)
+void joyEnableCyclicPolling(void)
 {
-	OSMesg msg;
 
 	g_JoyCyclicPollDisableCount--;
-
-	if (g_JoyCyclicPollDisableCount == 0) {
-		osSendMesg(&g_JoyStartCyclicPollingMesgQueue, &msg, OS_MESG_NOBLOCK);
-		osRecvMesg(&g_JoyStartCyclicPollingDoneMesgQueue, &msg, OS_MESG_BLOCK);
-	}
 }
-
-#if VERSION < VERSION_NTSC_1_0
-void joySetDataIndex(s32 arg0)
-{
-	g_JoyDataPtr = &g_JoyData[arg0];
-}
-
-s32 joyGetDataIndex(void)
-{
-	return g_JoyDataPtr - g_JoyData;
-}
-#endif
 
 void joyDestroy(void)
 {
 	s32 i;
-
-	osCreateMesgQueue(&g_PiMesgQueue, g_PiMesgBuf, ARRAYCOUNT(g_PiMesgBuf));
-	osSetEventMesg(OS_EVENT_SI, &g_PiMesgQueue, 0);
 
 	for (i = 0; i < NUM_PADS; i++) {
 		if (osMotorProbe(&g_PiMesgQueue, PFS(i), i) == 0) {
@@ -993,7 +872,6 @@ void joyDestroy(void)
 	}
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 void joyGetContpadNumsForPlayer(s8 playernum, s32 *pad1, s32 *pad2)
 {
 	if (g_Vars.normmplayerisrunning) {
@@ -1012,24 +890,15 @@ void joyGetContpadNumsForPlayer(s8 playernum, s32 *pad1, s32 *pad2)
 
 	*pad2 = -1;
 }
-#endif
 
 void joyStopRumble(s8 arg0, bool disablepolling)
 {
 	if (arg0 != SAVEDEVICE_GAMEPAK) {
-#if VERSION >= VERSION_NTSC_1_0
 		s32 device = arg0;
-#else
-		s32 device = g_Vars.playertojoymap[arg0];
-#endif
 
 		if (g_Paks[device].type != PAKTYPE_MEMORY && g_Paks[device].type != PAKTYPE_GAMEBOY) {
 			if (disablepolling) {
-#if VERSION >= VERSION_NTSC_1_0
 				joyDisableCyclicPolling();
-#else
-				joyDisableCyclicPolling(1054, "joy.c");
-#endif
 			}
 
 			if (osMotorProbe(&g_PiMesgQueue, PFS(device), device) == 0) {
@@ -1039,11 +908,7 @@ void joyStopRumble(s8 arg0, bool disablepolling)
 			}
 
 			if (disablepolling) {
-#if VERSION >= VERSION_NTSC_1_0
 				joyEnableCyclicPolling();
-#else
-				joyEnableCyclicPolling(1066, "joy.c");
-#endif
 			}
 
 			if (g_Paks[device].rumblestate != RUMBLESTATE_DISABLED_STOPPING

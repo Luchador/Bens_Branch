@@ -20,7 +20,6 @@
 #include "game/propobj.h"
 #include "game/savebuffer.h"
 #include "bss.h"
-#include "lib/crash.h"
 #include "lib/joy.h"
 #include "lib/vi.h"
 #include "lib/main.h"
@@ -32,9 +31,7 @@
 #include "data.h"
 #include "types.h"
 #include "string.h"
-#ifndef PLATFORM_N64
 #include "video.h"
-#endif
 
 #define TITLE_ASPECT (videoGetAspect())
 
@@ -1351,7 +1348,7 @@ void titleTickNintendoLogo(void)
 	}
 
 	if (joyGetButtonsPressedThisFrame(0, 0xffffffff)) {
-		if (osResetType == RESETTYPE_WARM) {
+		if (0 == 1) { // "Warm" reset
 			g_TitleButtonPressed = true;
 			titleSetNextMode(TITLEMODE_PDLOGO);
 		} else if (!g_TitleButtonPressed) {
@@ -1515,7 +1512,7 @@ void titleTickRareLogo(void)
 		g_TitleTimer += g_Vars.lvupdate60;
 
 		if (joyGetButtonsPressedThisFrame(0, 0xffffffff)) {
-			if (osResetType == RESETTYPE_WARM) {
+			if (0 == 1) { // "Warm reset"
 				g_TitleButtonPressed = true;
 				titleSetNextMode(TITLEMODE_PDLOGO);
 			} else if (!g_TitleButtonPressed) {

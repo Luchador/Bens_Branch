@@ -190,38 +190,11 @@ typedef struct {
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 
-/**************************************************************************
- *
- * Macro definitions
- *
- */
-
-
-/**************************************************************************
- *
- * Extern variables
- *
- */
-
-
-/**************************************************************************
- *
- * Function prototypes
- *
- */
-
 /* Controller interface */
 
 extern s32		osContInit(OSMesgQueue *, u8 *, OSContStatus *);
-extern s32		osContReset(OSMesgQueue *, OSContStatus *);
-extern s32		osContStartQuery(OSMesgQueue *);
-extern s32		osContStartReadData(OSMesgQueue *);
-#ifndef _HW_VERSION_1
-extern s32		osContSetCh(u8);
-#endif
 extern void		osContGetQuery(OSContStatus *);
 extern void		osContGetReadData(OSContPad *);
-
 
 #endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
 

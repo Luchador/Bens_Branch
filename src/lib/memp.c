@@ -2,7 +2,6 @@
 #include "constants.h"
 #include "bss.h"
 #include "lib/boot.h"
-#include "lib/crash.h"
 #include "lib/memp.h"
 #include "data.h"
 #include "types.h"
@@ -47,8 +46,7 @@
 #ifndef PLATFORM_N64
 // TODO: set this in a config or something
 //#define MEMP_EXPANSION_POOL_SIZE (8 * 1024 * 1024)
-// Ben's comment: need more memory!
-#define MEMP_EXPANSION_POOL_SIZE (8 * 1024 * 1024 * 2)
+#define MEMP_EXPANSION_POOL_SIZE (8 * 1024 * 1024)
 #endif
 
 struct memorypool {
@@ -203,30 +201,6 @@ void *mempAlloc(u32 len, u8 pool)
 	if (allocation) {
 		return allocation;
 	}
-
-#if VERSION < VERSION_NTSC_1_0
-#ifdef DEBUG
-	if (pool != MEMPOOL_8 && pool != MEMPOOL_7 && len) {
-		char buffer[80];
-		u32 stack;
-		u32 size;
-		u32 free;
-
-		if (pool == MEMPOOL_STAGE) {
-			free = mempGetPoolFree(MEMPOOL_STAGE, MEMBANK_ONBOARD);
-			size = mempGetPoolSize(MEMPOOL_STAGE, MEMBANK_ONBOARD);
-			sprintf(buffer, "Out of mem - LEV: %d f %d s %d", len, free, size);
-		} else {
-			free = mempGetPoolFree(MEMPOOL_PERMANENT, MEMBANK_ONBOARD);
-			size = mempGetPoolSize(MEMPOOL_PERMANENT, MEMBANK_ONBOARD);
-			sprintf(buffer, "Out of mem - ETR: %d f %d s %d", len, free, size);
-		}
-
-		crashSetMessage(buffer);
-		CRASH();
-	}
-#endif
-#endif
 
 	return allocation;
 }

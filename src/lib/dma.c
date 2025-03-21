@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "bss.h"
-#include "lib/crash.h"
 #include "lib/dma.h"
 #include "data.h"
 #include "types.h"
@@ -23,8 +22,6 @@ void dmaInit(void)
 	}
 
 	g_DmaNumSlotsBusy = 0;
-
-	osCreateMesgQueue(&g_DmaMesgQueue, g_DmaMesgs, ARRAYCOUNT(g_DmaMesgs));
 }
 
 void dmaStart(void *memaddr, romptr_t romaddr, u32 len, bool priority)

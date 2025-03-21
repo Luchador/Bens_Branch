@@ -486,7 +486,6 @@ void psTick(void)
 
 void psSetPitch(struct prop *prop, f32 targetpitch, s32 changespeed)
 {
-	OSPri prevpri;
 	s32 i;
 
 	for (i = 0; i < CHANNELCOUNT(); i++) {
@@ -499,17 +498,13 @@ void psSetPitch(struct prop *prop, f32 targetpitch, s32 changespeed)
 				g_PsChannels[i].pitchchangespeed = -1;
 			}
 
-			prevpri = osGetThreadPri(0);
-			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 			psTickChannel(i);
-			osSetThreadPri(0, prevpri);
 		}
 	}
 }
 
 void psSetVolume(struct prop *prop, s32 volpercentage)
 {
-	OSPri prevpri;
 	s32 i;
 
 	for (i = 0; i < CHANNELCOUNT(); i++) {
@@ -518,13 +513,8 @@ void psSetVolume(struct prop *prop, s32 volpercentage)
 				volpercentage = 100;
 			}
 
-			prevpri = osGetThreadPri(0);
-			osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
-
 			g_PsChannels[i].vol10 = volpercentage * AL_VOL_FULL / 100;
 			psTickChannel(i);
-
-			osSetThreadPri(0, prevpri);
 		}
 	}
 }
@@ -565,7 +555,6 @@ s16 psCreate(struct pschannel *channel, struct prop *prop, s16 soundnum, s16 pad
 		f32 dist1, f32 dist2, f32 dist3)
 {
 	union soundnumhack spac;
-	OSPri prevpri;
 	s32 pan;
 
 	struct pad pad;
@@ -745,16 +734,9 @@ s16 psCreate(struct pschannel *channel, struct prop *prop, s16 soundnum, s16 pad
 
 	if (sndIsMp3(soundnum)) {
 		channel->flags |= PSFLAG_ISMP3;
-
-		prevpri = osGetThreadPri(0);
-		osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 		psTickChannel(channel->channelnum);
-		osSetThreadPri(0, prevpri);
 	} else {
-		prevpri = osGetThreadPri(0);
-		osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 		psTickChannel(channel->channelnum);
-		osSetThreadPri(0, prevpri);
 	}
 
 	if (channel->flags & PSFLAG_0400) {
@@ -921,10 +903,7 @@ void psModify(s32 channelnum, s32 volume, s16 padnum, struct prop *prop, s32 vol
 			}
 
 			if (!hastimer || channel->volchangetimer60 == 0) {
-				OSPri prevpri = osGetThreadPri(0);
-				osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
 				psTickChannel(channelnum);
-				osSetThreadPri(0, prevpri);
 			}
 		}
 	}

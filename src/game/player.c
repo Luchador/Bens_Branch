@@ -125,8 +125,6 @@ struct vimode g_ViModes[] = {
 u32 var80070730 = 0xffffffff;
 u32 var80070734 = 0xffffffff;
 u32 var8007073c = 0;
-struct gecreditsdata *g_CurrentGeCreditsData = NULL;
-bool g_PlayerTriggerGeFadeIn = false;
 u32 var8007074c = 0;
 
 bool g_PlayersWithControl[] = {
@@ -1495,16 +1493,9 @@ void playerSetTickMode(s32 tickmode)
 	g_Vars.in_cutscene = false;
 }
 
-void playerBeginGeFadeIn(void)
-{
-	playerSetTickMode(TICKMODE_GE_FADEIN);
-	g_PlayerTriggerGeFadeIn = false;
-}
-
 void playersBeginMpSwirl(void)
 {
 	playerSetTickMode(TICKMODE_MPSWIRL);
-	g_PlayerTriggerGeFadeIn = false;
 	bmoveSetMode(MOVEMODE_WALK);
 
 	g_MpSwirlRotateSpeed = 0;
@@ -1584,7 +1575,6 @@ void playerTickMpSwirl(void)
 void player0f0b9a20(void)
 {
 	playerSetTickMode(TICKMODE_NORMAL);
-	g_PlayerTriggerGeFadeIn = false;
 	bmoveSetMode(MOVEMODE_WALK);
 	envChooseAndApply(mainGetStageNum());
 	bgunEquipWeapon2(HAND_LEFT, g_DefaultWeapons[HAND_LEFT]);
@@ -1600,7 +1590,6 @@ void playerEndCutscene(void)
 		g_Vars.autocutfinished = true;
 	} else {
 		playerSetTickMode(TICKMODE_NORMAL);
-		g_PlayerTriggerGeFadeIn = false;
 		bmoveSetModeForAllPlayers(MOVEMODE_WALK);
 	}
 }
@@ -1608,7 +1597,6 @@ void playerEndCutscene(void)
 void playerPrepareWarpType1(s16 pad)
 {
 	playerSetTickMode(TICKMODE_WARP);
-	g_PlayerTriggerGeFadeIn = false;
 	bmoveSetModeForAllPlayers(MOVEMODE_CUTSCENE);
 	playersClearMemCamRoom();
 
@@ -1618,7 +1606,6 @@ void playerPrepareWarpType1(s16 pad)
 void playerPrepareWarpType2(struct warpparams *cmd, bool hasdir, s32 arg2)
 {
 	playerSetTickMode(TICKMODE_WARP);
-	g_PlayerTriggerGeFadeIn = false;
 	bmoveSetModeForAllPlayers(MOVEMODE_CUTSCENE);
 	playersClearMemCamRoom();
 
@@ -1632,7 +1619,6 @@ void playerPrepareWarpType2(struct warpparams *cmd, bool hasdir, s32 arg2)
 void playerPrepareWarpType3(f32 posangle, f32 rotangle, f32 range, f32 height1, f32 height2, s32 padnum)
 {
 	playerSetTickMode(TICKMODE_WARP);
-	g_PlayerTriggerGeFadeIn = false;
 	bmoveSetModeForAllPlayers(MOVEMODE_CUTSCENE);
 	playersClearMemCamRoom();
 
@@ -1731,7 +1717,6 @@ void playerExecutePreparedWarp(void)
 void playerStartCutscene2(void)
 {
 	playerSetTickMode(TICKMODE_CUTSCENE);
-	g_PlayerTriggerGeFadeIn = false;
 	bmoveSetModeForAllPlayers(MOVEMODE_CUTSCENE);
 	playersClearMemCamRoom();
 
@@ -3925,10 +3910,6 @@ void playerTick()
 				&& g_Vars.currentplayer->colourscreenfrac == 1) {
 			mainFinalObjectiveCheck();
 		}
-	}
-
-	if (g_PlayerTriggerGeFadeIn) {
-		playerBeginGeFadeIn();
 	}
 
 	// Handle mission exit on death

@@ -1,5 +1,3 @@
-#include <os_internal.h>
-#include <ultraerror.h>
 #include "n_synthInternals.h"
 
 s32 _allocatePVoice(N_PVoice **pvoice, s16 priority);

@@ -37,7 +37,6 @@
 
 #define OS_SC_RETRACE_MSG       1
 #define OS_SC_DONE_MSG          2
-#define OS_SC_RDP_DONE_MSG      3
 #define OS_SC_RSP_MSG           4  // custom - tells audiomgr it's time to do an audio frame
 #define OS_SC_PRE_NMI_MSG       5
 #define OS_SC_QUIT_MSG          10
@@ -64,15 +63,8 @@ typedef struct OSScTask_s {
 /*
  * OSScTask flags:
  */
-#define OS_SC_NEEDS_RDP	        0x0001	/* uses the RDP */
 #define OS_SC_NEEDS_RSP	        0x0002  /* uses the RSP */
-#define OS_SC_DRAM_DLIST        0x0004  /* SP & DP communicate through DRAM */
-#define OS_SC_PARALLEL_TASK     0x0010	/* must be first gfx task on list */
-#define OS_SC_LAST_TASK	        0x0020	/* last task in queue for frame */
 #define OS_SC_SWAPBUFFER        0x0040	/* swapbuffers when gfx task done */
-
-#define OS_SC_RCP_MASK		0x0003	/* mask for needs bits */
-#define OS_SC_TYPE_MASK		0x0007	/* complete type mask */
 /*
  * OSScClient:
  *
@@ -106,9 +98,6 @@ typedef struct {
 } OSSched;
 
 void            osCreateScheduler(OSSched *s, OSThread *thread, u8 mode, u32 numFields);
-void            osScAddClient(OSSched *s, OSScClient *c, OSMesgQueue *msgQ, s32 is30fps);
-void            osScRemoveClient(OSSched *s, OSScClient *c);
-OSMesgQueue     *osScGetCmdQ(OSSched *s);
 
 #endif
 

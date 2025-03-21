@@ -11,7 +11,6 @@
 #include "lib/anim.h"
 #include "lib/collision.h"
 #include "lib/lib_2f490.h"
-#include "lib/libc/ll.h"
 #include "data.h"
 #include "types.h"
 

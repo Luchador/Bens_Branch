@@ -195,7 +195,6 @@ void starsReset(void)
 
 Gfx *starsRender(Gfx *gdl)
 {
-	bool isddtower = false;
 	Mtxf mtx;
 	f32 viewleft = viGetViewLeft();
 	f32 viewright = viewleft + viGetViewWidth();
@@ -217,21 +216,13 @@ Gfx *starsRender(Gfx *gdl)
 		return gdl;
 	}
 
-	if (g_Vars.stagenum == STAGE_DEFECTION || g_Vars.stagenum == STAGE_EXTRACTION || g_Vars.stagenum == STAGE_MBR) {
-		isddtower = true;
-	}
-
 	// Ben's comment: make stars twinkle. This code was in the original game, it was just missing the colours[i] assignment in the for loop. I also made the stars twinkle 5x faster.
 	colours[0] = colourBlend(0xffffff7f, 0x7777777f, menuGetSinOscFrac(10) * 255);
 	colours[1] = colourBlend(0x0000aa7f, 0x2222ff7f, menuGetSinOscFrac(20) * 255);
 	colours[2] = colourBlend(0x0000ff7f, 0x5555ff7f, menuGetCosOscFrac(10) * 255);
 	colours[3] = colourBlend(0xaaaaff7f, 0x7777ff7f, menuGetCosOscFrac(20) * 255);
 
-	if (isddtower) {
-		for (i = 0; i < 3; i++) {
-			colours[i] = colourBlend(colours[i], colours[i] & 0xff, 0x5f);
-		}
-	}
+	colours[i] = colourBlend(colours[i], colours[i] & 0xff, 0x5f);
 
 	sp154 = cosf(0.017453199252486f * (90.0f - viGetFovY() / viGetAspect() * 0.5f));
 

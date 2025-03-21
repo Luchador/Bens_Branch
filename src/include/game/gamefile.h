@@ -7,7 +7,6 @@
 u32 gamefileHasFlag(u32 value);
 void gamefileSetFlag(u32 value);
 void gamefileUnsetFlag(u32 value);
-void gamefilePrintFlags(void);
 void gamefileApplyOptions(struct gamefile *file);
 void gamefileLoadDefaults(struct gamefile *file);
 s32 gamefileLoad(s32 device);

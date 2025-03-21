@@ -18950,8 +18950,6 @@ void doorFinishOpen(struct doorobj *door)
 	}
 }
 
-extern s32 osCicId;
-
 void doorFinishClose(struct doorobj *door)
 {
 	bool pass = true;

@@ -306,28 +306,6 @@ void mtx00015f88(f32 mult, Mtxf *mtx)
 	mtx->m[3][2] *= mult;
 }
 
-u32 mtxGetObfuscatedRomBase(void)
-{
-#ifdef PLATFORM_N64
-	u32 value;
-
-	osRecvMesg(&__osPiAccessQueue, NULL, OS_MESG_BLOCK * 0x10000);
-
-	while (IO_READ(PI_STATUS_REG) & (PI_STATUS_DMA_BUSY | PI_STATUS_IO_BUSY));
-
-	// osRomBase is 0xb0000000
-	// load address is 0xb0000a5c
-	// value is 0x1740fff9
-	value = *(u32 *) (((uintptr_t) osRomBase | 0xb764b4fd) ^ 0x0764bea1);
-
-	osSendMesg(&__osPiAccessQueue, 0, 0);
-
-	return value;
-#else
-	return 0;
-#endif
-}
-
 void mtxF2L(Mtxf *src, Mtxf *dst)
 {
 #ifndef GBI_FLOATS

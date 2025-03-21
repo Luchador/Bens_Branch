@@ -8,7 +8,6 @@
 #include "lib/collision.h"
 #include "lib/rng.h"
 #include "lib/anim.h"
-#include "lib/libc/ll.h"
 #include "data.h"
 #include "types.h"
 

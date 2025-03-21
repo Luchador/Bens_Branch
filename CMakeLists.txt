@@ -278,7 +278,6 @@ set(SRC_LIB
   src/lib/lib_2fc60.c
   src/lib/lib_3e3e0.c
   src/lib/lib_17ce0.c
-  src/lib/lib_034d0.c
   src/lib/lib_39c80.c
   src/lib/mema.c
   src/lib/memp.c

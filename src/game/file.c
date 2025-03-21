@@ -2,7 +2,6 @@
 #include "constants.h"
 #include "game/file.h"
 #include "bss.h"
-#include "lib/crash.h"
 #include "lib/dma.h"
 #include "lib/memp.h"
 #include "lib/rng.h"

@@ -14,7 +14,6 @@
 #include "game/options.h"
 #include "game/utils.h"
 #include "bss.h"
-#include "lib/fault.h"
 #include "lib/snd.h"
 #include "string.h"
 #include "data.h"
@@ -38,16 +37,6 @@ void gamefileUnsetFlag(u32 value)
 u32 gamefileHasFlag(u32 value)
 {
 	return pakHasBitflag(value, g_GameFile.flags);
-}
-
-void gamefilePrintFlags(void)
-{
-	s32 i;
-
-	for (i = 0x23; i != 0x4f; i++) {
-		osSyncPrintf("Flag %d = %s", i,
-				pakHasBitflag(i, g_GameFile.flags) ? "TRUE" : "FALSE");
-	}
 }
 
 void gamefileApplyOptions(struct gamefile *file)

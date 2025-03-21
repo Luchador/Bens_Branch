@@ -131,7 +131,6 @@ void playerReset(void)
 
 	var8007073c = 0;
 
-	g_CurrentGeCreditsData = NULL;
 	g_Vars.currentplayer->bondexploding = false;
 	g_NumSpawnPoints = 0;
 	g_Vars.currentplayer->bondtankexplode = false;
@@ -144,7 +143,6 @@ void playerReset(void)
 
 	playerSetTickMode(TICKMODE_GE_FADEIN);
 
-	g_PlayerTriggerGeFadeIn = 0;
 	var8007074c = 0;
 
 	g_Vars.currentplayer->bondviewlevtime60 = 0;
@@ -228,7 +226,6 @@ void playerReset(void)
 				break;
 			case INTROCMD_CREDITOFFSET:
 				thing = (struct gecreditsdata *)((uintptr_t)g_GeCreditsData + cmd->param1);
-				g_CurrentGeCreditsData = thing;
 				while (thing->text1 || thing->text2) {
 					thing++;
 				}

@@ -1,6 +1,4 @@
 #include <libaudio.h>
-#include <os_internal.h>
-#include <ultraerror.h>
 #include "types.h"
 
 void _bnkfPatchBank(ALBank *bank, uintptr_t offset, uintptr_t table);

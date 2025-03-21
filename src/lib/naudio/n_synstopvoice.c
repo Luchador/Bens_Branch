@@ -1,5 +1,3 @@
-#include <os_internal.h>
-#include <ultraerror.h>
 #include "n_synthInternals.h"
 
 void n_alSynStopVoice(N_ALVoice *v)

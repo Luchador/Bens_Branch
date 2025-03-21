@@ -236,7 +236,7 @@ void viHandleRetrace(void)
 	offset = g_ViShakeDirection * g_ViShakeIntensity;
 	g_ViShakeDirection = -g_ViShakeDirection;
 
-	prevmask = osSetIntMask(1);
+	prevmask = 0;
 
 	reg = g_ViCurVStart0;
 	var8008dd60[1 - var8005ce74]->fldRegs[0].vStart = ADD_LOW_AND_HI_16_TRUNCATE(reg, offset);
@@ -244,14 +244,14 @@ void viHandleRetrace(void)
 	reg = g_ViCurVStart1;
 	var8008dd60[1 - var8005ce74]->fldRegs[1].vStart = ADD_LOW_AND_HI_16_TRUNCATE(reg, offset);
 
-	osSetIntMask(prevmask);
-
 	videoSetWindowOffset(0, offset);
-	//osViSetMode(var8008dd60[1 - var8005ce74]);
-	osViBlack(g_ViUnblackTimer);
+
+	if(g_ViUnblackTimer) {
+		videoClearScreen();
+	}
 	//osViSetXScale(g_ViXScalesBySlot[1 - var8005ce74]);
 	//osViSetYScale(g_ViYScalesBySlot[1 - var8005ce74]);
-	osViSetSpecialFeatures(OS_VI_GAMMA_OFF | OS_VI_DITHER_FILTER_ON);
+	//osViSetSpecialFeatures(OS_VI_GAMMA_OFF | OS_VI_DITHER_FILTER_ON);
 }
 
 void viUpdateMode(void)
@@ -270,7 +270,7 @@ void viUpdateMode(void)
 		switch (g_ViBackData->mode) {
 		case VIMODE_NONE:
 			//osViSetYScale(1.0f);
-			osViBlack(true);
+			videoClearScreen();
 			break;
 		case VIMODE_LO:
 			break;
@@ -293,21 +293,6 @@ void viUpdateMode(void)
 	g_ViYScalesBySlot[slot] = y;
 
 	if (g_ViBackData->mode == VIMODE_LO) {
-		if (g_ViIs16Bit) {
-			if (osTvType == OS_TV_MPAL) {
-				//var8008dcc0[slot] = osViModeTable[OS_VI_MPAL_LAN1];
-			} else {
-				//var8008dcc0[slot] = osViModeTable[OS_VI_NTSC_LAN1];
-			}
-		} else {
-			if (osTvType == OS_TV_MPAL) {
-				if (g_ViIs16Bit && g_ViIs16Bit && g_ViIs16Bit);
-				//var8008dcc0[slot] = osViModeTable[OS_VI_MPAL_LAN2];
-			} else {
-				//var8008dcc0[slot] = osViModeTable[OS_VI_NTSC_LAN2];
-			}
-		}
-
 		var8008dcc0[slot].comRegs.width = g_ViBackData->bufx;
 		var8008dcc0[slot].comRegs.xScale = g_ViBackData->bufx * 1024 / 640;
 		var8008dcc0[slot].fldRegs[0].origin = g_ViBackData->bufx * 2;
@@ -334,11 +319,6 @@ void viUpdateMode(void)
 
 		g_SchedViModesPending[slot] = true;
 	} else if (g_ViBackData->mode == VIMODE_HI) {
-		if (osTvType == OS_TV_MPAL) {
-			//var8008dcc0[slot] = osViModeTable[OS_VI_MPAL_HAF1];
-		} else {
-			//var8008dcc0[slot] = osViModeTable[OS_VI_NTSC_HAF1];
-		}
 
 		var8008dcc0[slot].comRegs.width = g_ViBackData->bufx;
 		var8008dcc0[slot].comRegs.xScale = g_ViBackData->bufx * 1024 / 640;

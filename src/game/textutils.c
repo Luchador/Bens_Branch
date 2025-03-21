@@ -99,7 +99,7 @@ u16 var8007fb5c[] = {
 	0xff00, 0xff18, 0xff30, 0xff5c, 0xff88, 0xffb4, 0xffd8, 0xffff,
 };
 
-bool var8007fb9c = false;
+bool g_DoRedrawEffect = false;
 s32 var8007fba0 = 0;
 s32 var8007fba4 = -1;
 u32 var8007fbac = 0x00000001;
@@ -310,7 +310,7 @@ Gfx *text0f153ab0(Gfx *gdl)
 {
 	Gfx *allocation;
 
-	var8007fb9c = true;
+	g_DoRedrawEffect = true;
 
 	allocation = gfxAllocate(sizeof(Gfx) * 530);
 
@@ -329,7 +329,7 @@ Gfx *text0f153ab0(Gfx *gdl)
 
 void text0f153b40(void)
 {
-	var8007fb9c = false;
+	g_DoRedrawEffect = false;
 
 	gSPEndDisplayList(var800a4634++);
 }
@@ -876,7 +876,8 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar,
 									1024,
 									1024);
 
-							if (var8007fb9c) {
+							// Does the redraw effect for menus
+							if (g_DoRedrawEffect) {
 								text0f153b6c(*y + arg10);
 
 								if (var8007fba0 >= *x / g_ScaleX && *x / g_ScaleX + curchar->width >= var8007fba0) {

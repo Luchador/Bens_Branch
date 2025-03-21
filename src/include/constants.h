@@ -3,6 +3,7 @@
 #include "versions.h"
 #include "math.h"
 #include "animations.h"
+#include "input.h"
 #include "files.h"
 #include "sequences.h"
 #include "sfx.h"
@@ -15,7 +16,7 @@
 
 #define DEFAULT_BASEDIR_NAME "data"
 
-#define MAX_ARTIFACTS          120
+#define MAX_ARTIFACTS          240 // Ben's comment: Doubled
 #define MAX_BOTS               8
 #define MAX_CHRSPERSQUADRON    16
 #define MAX_CHRSPERTEAM        32
@@ -60,8 +61,8 @@
 #define CHRNAVSEED(chr)     ((g_Vars.lvframe60 >> 9) * 128 + chr->chrnum * 8)
 #define CHRRACE(chr)        (chr ? chr->race : RACE_HUMAN)
 #define CRASH()             *(u8 *)0 = 69
-#define CYCLES_PER_FRAME    ((s32) OS_CPU_COUNTER / (PAL ? 50 : 60))
-#define LINEHEIGHT          (VERSION == VERSION_JPN_FINAL ? 14 : 11)
+#define CYCLES_PER_FRAME    ((s32) 62500000LL*3/4 / 60)
+#define LINEHEIGHT          (11)
 #define MIXCOLOUR(dialog, property) dialog->transitionfrac < 0.0f ? g_MenuColours[dialog->type].property : colourBlend(g_MenuColours[dialog->type2].property, g_MenuColours[dialog->type].property, dialog->colourweight)
 #define MPCHR(index)        ((index) < MAX_PLAYERS ? &g_PlayerConfigsArray[index].base : &g_BotConfigsArray[(index) - MAX_PLAYERS].base)
 #define RANDOMFRAC()        (rngRandom() * (1.0f / U32_MAX))

@@ -1,7 +1,5 @@
 #include <libaudio.h>
 #include "n_libaudio.h"
-#include <os_internal.h>
-#include <ultraerror.h>
 
 void n_alEvtqNew(ALEventQueue *evtq, N_ALEventListItem *items, s32 itemCount)
 {
@@ -22,9 +20,6 @@ ALMicroTime n_alEvtqNextEvent(ALEventQueue *evtq, N_ALEvent *evt)
 {
 	N_ALEventListItem *item;
 	ALMicroTime delta;
-	OSIntMask mask;
-
-	mask = osSetIntMask(OS_IM_NONE);
 
 	item = (N_ALEventListItem *)evtq->allocList.next;
 
@@ -43,8 +38,6 @@ ALMicroTime n_alEvtqNextEvent(ALEventQueue *evtq, N_ALEvent *evt)
 		delta = 0;
 	}
 
-	osSetIntMask(mask);
-
 	return delta;
 }
 
@@ -54,19 +47,14 @@ void n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *evt, ALMicroTime delta, s3
 	N_ALEventListItem *nextItem;
 	ALLink *node;
 	s32 postAtEnd = 0;
-	OSIntMask mask;
-
-	mask = osSetIntMask(OS_IM_NONE);
 
 	item = (N_ALEventListItem *)evtq->freeList.next;
 
 	if (!item) {
-		osSetIntMask(mask);
 		return;
 	}
 
 	if (!item->node.next && !arg3) {
-		osSetIntMask(mask);
 		return;
 	}
 
@@ -101,8 +89,6 @@ void n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *evt, ALMicroTime delta, s3
 			delta -= nextItem->delta;
 		}
 	}
-
-	osSetIntMask(mask);
 }
 
 void n_alEvtqFlushType(ALEventQueue *evtq, s16 type)
@@ -110,10 +96,7 @@ void n_alEvtqFlushType(ALEventQueue *evtq, s16 type)
 	ALLink *thisNode;
 	ALLink *nextNode;
 	N_ALEventListItem *thisItem, *nextItem;
-	OSIntMask mask;
-
-	mask = osSetIntMask(OS_IM_NONE);
-
+	
 	thisNode = evtq->allocList.next;
 
 	while (thisNode != 0) {
@@ -132,6 +115,4 @@ void n_alEvtqFlushType(ALEventQueue *evtq, s16 type)
 
 		thisNode = nextNode;
 	}
-
-	osSetIntMask(mask);
 }

@@ -1,6 +1,4 @@
 #include "n_synthInternals.h"
-#include <ultraerror.h>
-#include <os_internal.h>
 
 void n_alSynStartVoiceParams(N_ALVoice *v, ALWaveTable *w, f32 pitch, s16 vol,
 		ALPan pan, u8 fxmix, u8 arg6, f32 arg7, u8 arg8, ALMicroTime t)

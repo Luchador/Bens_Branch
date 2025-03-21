@@ -29,7 +29,6 @@
 #include "game/texdecompress.h"
 #include "game/wallhit.h"
 #include "bss.h"
-#include "lib/crash.h"
 #include "lib/dma.h"
 #include "lib/lib_17ce0.h"
 #include "lib/lib_2f490.h"
@@ -84,7 +83,7 @@
 #define VTXBATCHTYPE_OPA 0x01
 #define VTXBATCHTYPE_XLU 0x02
 
-struct drawslot g_BgDrawSlots[251]; // 61 to 251
+struct drawslot g_BgDrawSlots[61];
 u8 *g_BgPrimaryData;
 u32 var800a4920;
 u32 g_BgSection3;
@@ -94,7 +93,7 @@ RoomNum g_BgForceOnscreenRooms[350];
 s32 g_BgNumForceOnscreenRooms;
 u16 g_BgUnloadDelay240;
 u16 g_BgUnloadDelay240_2;
-RoomNum g_GlareRooms[300]; // Tripled
+RoomNum g_GlareRooms[100];
 uintptr_t *g_BgPrimaryData2;
 struct bgroom *g_BgRooms;
 struct bgportal *g_BgPortals;
@@ -117,7 +116,7 @@ s16 var8007fc0c = 0;
 s16 var8007fc10 = 0;
 s32 g_NumRoomsWithGlares = 0;
 s32 g_CamRoom = 1;
-struct drawslot *g_BgSpecialDrawSlot = &g_BgDrawSlots[250]; // 60 to 250
+struct drawslot *g_BgSpecialDrawSlot = &g_BgDrawSlots[60];
 s32 g_BgLoadCandidateTimer240 = 0;
 s32 g_BgNumDrawSlots = 0;
 s32 g_BgNumAttemptedDrawSlots = 0;
@@ -173,10 +172,10 @@ void bgSetRoomOnscreen(s32 roomnum, s32 draworder, struct screenbox *box)
 		g_Rooms[roomnum].flags |= ROOMFLAG_ONSCREEN;
 
 		if (g_Rooms[roomnum].flags & ROOMFLAG_BBOXHACK) {
-			box->xmin = g_BgDrawSlots[250].box.xmin; // 60 to 250
-			box->ymin = g_BgDrawSlots[250].box.ymin;
-			box->xmax = g_BgDrawSlots[250].box.xmax;
-			box->ymax = g_BgDrawSlots[250].box.ymax;
+			box->xmin = g_BgDrawSlots[60].box.xmin;
+			box->ymin = g_BgDrawSlots[60].box.ymin;
+			box->xmax = g_BgDrawSlots[60].box.xmax;
+			box->ymax = g_BgDrawSlots[60].box.ymax;
 		}
 
 		if (g_BgFrameCount == g_BgDrawSlotsByRoom[roomnum].updatedframe) {
@@ -198,8 +197,8 @@ void bgSetRoomOnscreen(s32 roomnum, s32 draworder, struct screenbox *box)
 		} else {
 			index = g_BgNumDrawSlots;
 
-			if (index > 249) { // 59 to 249
-				index = 249;
+			if (index > 59) {
+				index = 59;
 			}
 
 			g_BgDrawSlots[index].roomnum = roomnum;
@@ -223,7 +222,7 @@ void bgSetRoomOnscreen(s32 roomnum, s32 draworder, struct screenbox *box)
 
 			g_BgNumAttemptedDrawSlots++;
 
-			if (g_BgNumAttemptedDrawSlots < 250) { // 60 to 250
+			if (g_BgNumAttemptedDrawSlots < 60) {
 				g_BgNumDrawSlots = g_BgNumAttemptedDrawSlots;
 			}
 
@@ -247,7 +246,7 @@ void bgGetRoomBrightnessRange(s32 roomnum, u8 *min, u8 *max)
 
 struct drawslot *bgGetRoomDrawSlot(s32 roomnum)
 {
-	s32 index = 250; // 60 to 250
+	s32 index = 60;
 
 	if (g_BgFrameCount == g_BgDrawSlotsByRoom[roomnum].updatedframe) {
 		index = g_BgDrawSlotsByRoom[roomnum].slotnum;

@@ -1,5 +1,4 @@
 #include <os.h>
-#include <os_internal.h>
 #include "n_synthInternals.h"
 
 #define RANGE 2.0f

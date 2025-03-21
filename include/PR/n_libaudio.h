@@ -404,13 +404,6 @@ void     n_alSndpStop(void);
 ALSndId  n_alSndpGetSound(void);
 void     n_alSndpSetSound(ALSndId id);
 
-
-/*
- *  for n_audio micro code
- */
-extern long long int    n_aspMainTextStart[], n_aspMainTextEnd[];
-extern long long int    n_aspMainDataStart[], n_aspMainDataEnd[];
-
 f32 func0003b9d4(s32 arg0);
 void func0003ba64(struct fx *fx, f32 outputrate);
 s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel);

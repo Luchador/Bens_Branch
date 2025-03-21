@@ -6,7 +6,7 @@
 #include "lib/memp.h"
 #include "lib/sched.h"
 
-ALIGNED16 u8 g_RdpDramStack[SP_DRAM_STACK_SIZE8];
+ALIGNED16 u8 g_RdpDramStack[1024];
 ALIGNED16 u8 g_RdpYieldData[0xb00];
 
 u16 *g_RdpOutBufferEnd = NULL;
@@ -22,15 +22,15 @@ struct rdptask g_RdpTaskA = {
 		{
 			// OSTask
 			M_GFXTASK,               // type
-			OS_TASK_DP_WAIT,         // flags
+			0x0002,         // flags
 			NULL,
 			0,
 			NULL,
-			SP_UCODE_SIZE,           // ucode_size
+			4096,           // ucode_size
 			NULL,
-			SP_UCODE_DATA_SIZE,      // ucode_data_size
+			2048,      // ucode_data_size
 			(u64 *) &g_RdpDramStack, // dram_stack
-			SP_DRAM_STACK_SIZE8,     // dram_stack_size
+			1024,     // dram_stack_size
 		}
 	}
 };
@@ -45,15 +45,15 @@ struct rdptask g_RdpTaskB = {
 		{
 			// OSTask
 			M_GFXTASK,               // type
-			OS_TASK_DP_WAIT,         // flags
+			0x0002,         // flags
 			NULL,
 			0,
 			NULL,
-			SP_UCODE_SIZE,           // ucode_size
+			4096,           // ucode_size
 			NULL,
-			SP_UCODE_DATA_SIZE,      // ucode_data_size
+			2048,      // ucode_data_size
 			(u64 *) &g_RdpDramStack, // dram_stack
-			SP_DRAM_STACK_SIZE8,     // dram_stack_size
+			1024,     // dram_stack_size
 		}
 	}
 };
@@ -87,12 +87,11 @@ void rdpCreateTask(Gfx *gdlstart, Gfx *gdlend, u32 arg2, uintptr_t msg)
 	task->t.yield_data_size = sizeof(g_RdpYieldData);
 
 	sctask->next = NULL;
-	sctask->flags = OS_SC_NEEDS_RSP | OS_SC_NEEDS_RDP | OS_SC_LAST_TASK | OS_SC_SWAPBUFFER;
+	sctask->flags = OS_SC_NEEDS_RSP | OS_SC_SWAPBUFFER;
 	sctask->msgQ = &g_MainMesgQueue;
 	sctask->msg = (void *) msg;
 	sctask->framebuffer = g_RdpCurTask->framebuffer;
 
-	osWritebackDCacheAll();
 	schedSubmitTask(&g_Sched, sctask);
 
 	// Swap g_RdpCurTask

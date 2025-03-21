@@ -1217,7 +1217,6 @@ void filemgrGetRenameName(char *buffer)
 }
 #endif
 
-#if VERSION >= VERSION_NTSC_1_0
 void filemgrSetRenameName(char *name)
 {
 	switch (g_Menus[g_MpPlayerNum].fm.unke3e) {
@@ -1247,10 +1246,6 @@ void filemgrSetRenameName(char *name)
 	}
 }
 
-const char var7f1b32dc[] = "SetFileNameForThePurposesOfTheFileRenamingChecker: Unknown type %d\n";
-#endif
-
-#if VERSION >= VERSION_NTSC_1_0
 bool filemgrIsNameAvailable(s32 device)
 {
 	static u8 lookup[] = {1, 2, 3, 4, 0};
@@ -1305,8 +1300,6 @@ bool filemgrIsNameAvailable(s32 device)
 		}
 	}
 
-	osSyncPrintf("CheckFileName: Comparing range %d-%d\n", startindex, endindex);
-
 	// Iterate files
 	for (i = startindex; i < endindex; i++) {
 		filemgrGetFileName(loopname, &g_FileLists[g_Menus[g_MpPlayerNum].fm.listnum]->files[i]);
@@ -1325,24 +1318,13 @@ bool filemgrIsNameAvailable(s32 device)
 			}
 		}
 
-		// Compare names
-		osSyncPrintf("Compare '%s' to '%s' = %d\n", findname, loopname, strcmp(findname, loopname));
-
 		if (strcmp(findname, loopname) == 0) {
-			osSyncPrintf("OI! DUPLICATE FILE NAME! NO!\n");
 			return false;
 		}
 	}
 
 	return true;
 }
-#endif
-
-#if VERSION >= VERSION_NTSC_1_0
-const char var7f1b3384[] = "()()()()()() Writing MPLAYER\n";
-const char var7f1b33a4[] = "()()()()()() Writing MGAME\n";
-const char var7f1b33c0[] = "Write Attempt Made...\n";
-const char var7f1b33d8[] = "decided location: %d\n";
 
 /**
  * Used for both saving new files and copying files.
@@ -1380,9 +1362,7 @@ void filemgrSaveToDevice(void)
 		}
 	}
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 MenuItemHandlerResult filemgrConfirmRenameMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	char *name = data->keyboard.string;
@@ -1401,9 +1381,7 @@ MenuItemHandlerResult filemgrConfirmRenameMenuHandler(s32 operation, struct menu
 
 	return 0;
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 MenuItemHandlerResult filemgrDuplicateRenameMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
@@ -1413,9 +1391,7 @@ MenuItemHandlerResult filemgrDuplicateRenameMenuHandler(s32 operation, struct me
 
 	return 0;
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 MenuItemHandlerResult filemgrDuplicateCancelMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
@@ -1425,16 +1401,12 @@ MenuItemHandlerResult filemgrDuplicateCancelMenuHandler(s32 operation, struct me
 
 	return 0;
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 char *filemgrMenuTextDeviceNameContainingDuplicateFile(struct menuitem *item)
 {
 	return filemgrGetDeviceName(g_Menus[g_MpPlayerNum].fm.device2);
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 char *filemgrMenuTextDuplicateFileName(struct menuitem *item)
 {
 	char buffer[32];
@@ -1444,9 +1416,7 @@ char *filemgrMenuTextDuplicateFileName(struct menuitem *item)
 
 	return g_StringPointer;
 }
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 struct menuitem g_FilemgrRenameMenuItems[] = {
 	{
 		MENUITEMTYPE_LABEL,
@@ -1475,9 +1445,7 @@ struct menudialogdef g_FilemgrRenameMenuDialog = {
 	MENUDIALOGFLAG_DISABLEBANNER,
 	NULL,
 };
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 struct menuitem g_FilemgrDuplicateMenuMenuItems[] = {
 	{
 		MENUITEMTYPE_LABEL,
@@ -1546,7 +1514,6 @@ struct menudialogdef g_FilemgrDuplicateNameMenuDialog = {
 	MENUDIALOGFLAG_DISABLEBANNER,
 	NULL,
 };
-#endif
 
 char *filemgrMenuTextLocationName2(struct menuitem *item)
 {
@@ -1597,18 +1564,6 @@ char *filemgrMenuTextSaveLocationSpaces(struct menuitem *item)
 	sprintf(g_StringPointer, "%d", spacesfree);
 	return g_StringPointer;
 }
-
-#if VERSION >= VERSION_NTSC_1_0
-const char var7f1b33fc[] = "GOT OKed!, item->data = %d\n";
-const char var7f1b3418[] = "GOT CANCELLED!\n";
-const char var7f1b3428[] = "Picking Location, type %d wadtype %d wad %d\n";
-const char var7f1b3458[] = "Torching file %d\n";
-const char var7f1b346c[] = "Copying file %d\n";
-const char var7f1b3480[] = "item: %x\n";
-const char var7f1b348c[] = "Switched Wads Back\n";
-const char var7f1b34a0[] = "MenuClosed\n";
-const char var7f1b34ac[] = "Deleting files, wad %d\n";
-#endif
 
 /**
  * item->param is a SAVEDEVICE constant.

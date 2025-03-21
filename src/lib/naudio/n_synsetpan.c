@@ -1,5 +1,3 @@
-#include <os_internal.h>
-#include <ultraerror.h>
 #include "n_synthInternals.h"
 
 void n_alSynSetPan(N_ALVoice *v, u8 pan)

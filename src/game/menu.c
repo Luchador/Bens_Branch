@@ -168,9 +168,6 @@ void menuPlaySound(s32 menusound)
 	if (sound != -1) {
 		struct sndstate *handle;
 
-		OSPri prevpri = osGetThreadPri(NULL);
-		osSetThreadPri(0, osGetThreadPri(&g_AudioManager.thread) + 1);
-
 		handle = sndStart(var80095200, sound, NULL, -1, -1, -1, -1, -1);
 
 		if (handle && setpitch) {
@@ -180,8 +177,6 @@ void menuPlaySound(s32 menusound)
 		if (handle && setvol) {
 			audioPostEvent(handle, AL_SNDP_VOL_EVT, 0x4000);
 		}
-
-		osSetThreadPri(0, prevpri);
 	}
 }
 
@@ -2359,7 +2354,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 
 	textSetOutlineColor(colour1);
 
-	var8007fb9c = false;
+	g_DoRedrawEffect = false;
 
 	if (g_Menus[g_MpPlayerNum].curdialog == dialog
 			&& (dialog->definition->flags & MENUDIALOGFLAG_0002)
@@ -2499,7 +2494,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 				textSetDiagonalBlend(dialog->x, dialog->y, dialog->redrawtimer, DIAGMODE_FADEIN);
 			}
 
-			var8007fb9c = true;
+			g_DoRedrawEffect = true;
 		}
 	} else if (dialog->state == MENUDIALOGSTATE_POPULATED) {
 		textSetMenuBlend(dialog->statefrac);
