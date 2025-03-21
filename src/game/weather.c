@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/dlights.h"
@@ -899,7 +900,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 
 		mtxF2L(&worldtoscreenmtx, mtx);
 
-		gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+		gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 		campos.f[0] = g_Vars.currentplayer->cam_pos.f[0];
 		campos.f[1] = g_Vars.currentplayer->cam_pos.f[1];
@@ -1159,7 +1160,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 		colours[0].word = PD_BE32(raincol1);
 		colours[1].word = PD_BE32(raincol2);
 
-		gSPColor(gdl++, osVirtualToPhysical(colours), 2);
+		gSPColor(gdl++, (uintptr_t)(colours), 2);
 
 		timings2[0] = osGetCount();
 
@@ -1344,7 +1345,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 							vertices[vtxindex + 2].z = positions[2].f[2];
 
 							if (numtris == 3) {
-								gSPVertex(gdl++, osVirtualToPhysical(vertices), 12, 0);
+								gSPVertex(gdl++, (uintptr_t)(vertices), 12, 0);
 								gSPTri4(gdl++, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 								numtris = 0;
 							} else {
@@ -1362,7 +1363,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 		}
 
 		if (numtris > 0) {
-			gSPVertex(gdl++, osVirtualToPhysical(vertices), 12, 0);
+			gSPVertex(gdl++, (uintptr_t)(vertices), 12, 0);
 
 			if (numtris == 1) {
 				gSPTri1(gdl++, 0, 1, 2);
@@ -1478,7 +1479,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 
 	mtxF2L(&sp1cc, mtx);
 
-	gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	sp234.f[0] = g_Vars.currentplayer->cam_pos.f[0];
 	sp234.f[1] = g_Vars.currentplayer->cam_pos.f[1];
@@ -1655,7 +1656,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 		colours[j].word = PD_BE32((snowcol1 & 0xffffff00) | alpha);
 	}
 
-	gSPColor(gdl++, osVirtualToPhysical(colours), numcolours);
+	gSPColor(gdl++, (uintptr_t)(colours), numcolours);
 
 	// 51f8
 	for (p = 0; p < 500; p++) {
@@ -1915,7 +1916,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 						vertices[tmp2 + 3].z = sp19c[3].f[2];
 
 						if (sp198 == 1) {
-							gSPVertex(gdl++, osVirtualToPhysical(vertices), 8, 0);
+							gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
 							gSPTri4(gdl++, 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4);
 							sp198 = 0;
 						} else {
@@ -1928,7 +1929,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 	}
 
 	if (sp198 > 0) {
-		gSPVertex(gdl++, osVirtualToPhysical(vertices), 8, 0);
+		gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
 		gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
 	}
 

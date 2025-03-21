@@ -6,12 +6,6 @@
 #include "lib/memp.h"
 #include "lib/sched.h"
 
-ALIGNED16 u8 g_RdpDramStack[1024];
-ALIGNED16 u8 g_RdpYieldData[0xb00];
-
-u16 *g_RdpOutBufferEnd = NULL;
-u16 *g_RdpOutBufferStart = NULL;
-
 struct rdptask g_RdpTaskA = {
 	{
 		// OSScTask
@@ -29,7 +23,7 @@ struct rdptask g_RdpTaskA = {
 			4096,           // ucode_size
 			NULL,
 			2048,      // ucode_data_size
-			(u64 *) &g_RdpDramStack, // dram_stack
+			NULL, // dram_stack
 			1024,     // dram_stack_size
 		}
 	}
@@ -52,7 +46,7 @@ struct rdptask g_RdpTaskB = {
 			4096,           // ucode_size
 			NULL,
 			2048,      // ucode_data_size
-			(u64 *) &g_RdpDramStack, // dram_stack
+			NULL, // dram_stack
 			1024,     // dram_stack_size
 		}
 	}
@@ -60,18 +54,15 @@ struct rdptask g_RdpTaskB = {
 
 struct rdptask *g_RdpCurTask = &g_RdpTaskA;
 
-extern u8 gspTextStart;
-extern u8 gspDataStart;
-
 void rdpInit(void)
 {
-	s32 size = 0x10000;
+	//s32 size = 0x10000;
 
-	g_RdpOutBufferStart = mempAlloc(size, MEMPOOL_PERMANENT);
-	g_RdpOutBufferEnd = (u16 *) ((uintptr_t) g_RdpOutBufferStart + size);
+	//g_RdpOutBufferStart = mempAlloc(size, MEMPOOL_PERMANENT);
+	//g_RdpOutBufferEnd = (u16 *) ((uintptr_t) g_RdpOutBufferStart + size);
 }
 
-void rdpCreateTask(Gfx *gdlstart, Gfx *gdlend, u32 arg2, uintptr_t msg)
+void rdpCreateTask(Gfx *gdlstart, Gfx *gdlend, u32 arg2)
 {
 	OSScTask *sctask;
 	OSTask *task;
@@ -79,19 +70,20 @@ void rdpCreateTask(Gfx *gdlstart, Gfx *gdlend, u32 arg2, uintptr_t msg)
 	sctask = &g_RdpCurTask->sctask;
 	task = &sctask->list;
 
-	task->t.output_buff = (u64 *)g_RdpOutBufferStart;
-	task->t.output_buff_size = (u64 *)g_RdpOutBufferEnd;
+	//task->t.output_buff = (u64 *)g_RdpOutBufferStart;
+	//task->t.output_buff_size = (u64 *)g_RdpOutBufferEnd;
 	task->t.data_ptr = (u64 *) gdlstart;
 	task->t.data_size = (gdlend - gdlstart) * sizeof(Gfx);
-	task->t.yield_data_ptr = (u64 *)&g_RdpYieldData;
-	task->t.yield_data_size = sizeof(g_RdpYieldData);
+	//task->t.yield_data_ptr = (u64 *)&g_RdpYieldData;
+	//task->t.yield_data_size = sizeof(g_RdpYieldData);
 
-	sctask->next = NULL;
-	sctask->flags = OS_SC_NEEDS_RSP | OS_SC_SWAPBUFFER;
-	sctask->msgQ = &g_MainMesgQueue;
-	sctask->msg = (void *) msg;
-	sctask->framebuffer = g_RdpCurTask->framebuffer;
+	//sctask->next = NULL;
+	//sctask->flags = OS_SC_NEEDS_RSP | OS_SC_SWAPBUFFER;
+	//sctask->msgQ = &g_MainMesgQueue;
+	//sctask->msg = (void *) msg;
+	//sctask->framebuffer = g_RdpCurTask->framebuffer;
 
+	// Used on PC port
 	schedSubmitTask(&g_Sched, sctask);
 
 	// Swap g_RdpCurTask

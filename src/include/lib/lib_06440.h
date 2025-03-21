@@ -4,6 +4,6 @@
 #include "data.h"
 #include "types.h"
 
-s32 osEepromLongWrite(OSMesgQueue *mq, u8 address, u8 *buffer, int nbytes);
+s32 osEepromLongWrite(u8 address, u8 *buffer, int nbytes);
 
 #endif

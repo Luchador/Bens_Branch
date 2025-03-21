@@ -33,7 +33,6 @@
 #include "bss.h"
 #include "lib/audiomgr.h"
 #include "lib/args.h"
-#include "lib/boot.h"
 #include "lib/rzip.h"
 #include "lib/vi.h"
 #include "lib/dma.h"
@@ -61,8 +60,6 @@ bool g_AcceptCMDParams = false;
 s32 g_StageNum = STAGE_TITLE;
 u32 g_MainMemaHeapSize = 1024 * 300;
 bool var8005d9bc = false;
-s32 var8005d9c0 = 0;
-s32 var8005d9c4 = 0;
 bool g_MainGameLogicEnabled = true;
 u32 g_MainNumGfxTasks = 0;
 bool g_MainIsEndscreen = false;
@@ -114,27 +111,12 @@ struct stageallocation g_StageAllocations8Mb[] = {
 	{ 0,                   "-ml0 -me0 -mgfx120 -mvtx98 -ma300"             },
 };
 
-Gfx var8005dcc8[] = {
-	gsSPSegment(0x00, 0x00000000),
-	gsSPDisplayList(&var800613a0),
-	gsSPDisplayList(&var80061380),
-	gsDPFullSync(),
-	gsSPEndDisplayList(),
-};
-
 s32 g_MainIsBooting = 1;
 
 void mainInit(void)
 {
-	s32 x;
-	s32 i;
-	s32 j;
-	u32 addr;
-
 	dmaInit();
-	amgrInit();
 	varsInit();
-	mempInit();
 	memaInit();
 	joyInit();
 	joyReset();
@@ -208,7 +190,6 @@ void mainLoop(void)
 	mempResetPool(MEMPOOL_5);
 	filesStop(5);
 
-	var8005d9c4 = 0;
 	argGetLevel(&g_StageNum);
 
 	if (g_DoBootPakMenu) {
@@ -234,7 +215,7 @@ void mainLoop(void)
 		g_MainGameLogicEnabled = true;
 		g_MainIsEndscreen = false;
 
-		if (g_AcceptCMDParams && var8005d9c4 == 0) {
+		if (g_AcceptCMDParams) {
 			index = -1;
 
 			if (g_StageNum < STAGE_TITLE && getNumPlayers() >= 2) {
@@ -266,8 +247,6 @@ void mainLoop(void)
 			argSetString(g_StageAllocations8Mb[index].string);
 			
 		}
-
-		var8005d9c4 = 0;
 
 		mempResetPool(MEMPOOL_7);
 		mempResetPool(MEMPOOL_STAGE);
@@ -375,7 +354,6 @@ void mainTick(void)
 {
 	Gfx *gdl = NULL;
 	Gfx *gdlstart = NULL;
-	OSScMsg msg = {OS_SC_DONE_MSG};
 	s32 i;
 
 	if (g_MainChangeToStageNum < 0) {
@@ -418,7 +396,7 @@ void mainTick(void)
 		}
 
 		// Used in PC port
-		rdpCreateTask(gdlstart, gdl, 0, (uintptr_t) &msg);
+		rdpCreateTask(gdlstart, gdl, 0);
 		memaPrint();
 	}
 }

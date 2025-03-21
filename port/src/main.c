@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <PR/ultratypes.h>
 #include <PR/ultrasched.h>
-#include <PR/os_message.h>
 
 #include "lib/main.h"
 #include "bss.h"
@@ -22,15 +21,8 @@ u32 g_OsMemSize = 0;
 s32 g_OsMemSizeMb = 32;
 OSSched g_Sched;
 
-OSMesgQueue g_MainMesgQueue;
-OSMesg g_MainMesgBuf[32];
-
 u8 *g_MempHeap = NULL;
 u32 g_MempHeapSize = 0;
-
-u32 g_VmNumTlbMisses = 0;
-u32 g_VmNumPageMisses = 0;
-u32 g_VmNumPageReplaces = 0;
 
 s32 g_TickRateDiv = 1;
 s32 g_TickExtraSleep = true;
@@ -40,22 +32,6 @@ s32 g_SkipIntro = false;
 s32 g_FileAutoSelect = -1;
 
 extern s32 g_StageNum;
-
-s32 bootGetMemSize(void)
-{
-	return (s32)g_OsMemSize;
-}
-
-void *bootAllocateStack(s32 threadid, s32 size)
-{
-	static u8 bruh[0x1000];
-	return bruh;
-}
-
-void bootCreateSched(void)
-{
-	osCreateScheduler(&g_Sched, NULL, OS_VI_NTSC_LAN1, 1);
-}
 
 static void gameInit(void)
 {
@@ -109,9 +85,11 @@ int main(int argc, const char **argv)
 
 	atexit(cleanup);
 
-	bootCreateSched();
+	// Needed for the CamSpy
+	g_PrevFrameFb = videoCreateFramebuffer(0, 0, false, true);
+	g_BlurFb = videoCreateFramebuffer(0, 0, false, true);
 
-	g_OsMemSize = osGetMemSize();
+	g_OsMemSize = 16 * 1024 * 1024; /* expansion pak installed plus some extra */
 
 	g_MempHeapSize = g_OsMemSize;
 	g_MempHeap = sysMemZeroAlloc(g_MempHeapSize);

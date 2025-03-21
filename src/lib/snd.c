@@ -1525,24 +1525,16 @@ void sndInit(void)
 		amgrCreate(&synconfig);
 
 		if (g_SndMp3Enabled) {
-			osSyncPrintf("RWI : Initialising the new and improved MP3 player\n");
-
 			mp3Init(&g_SndHeap);
 			func00037f08(0x7fff, 1);
 			func00037f5c(0, true);
-
-			osSyncPrintf("RWI : MP3 player Initialising Done\n");
 		}
 
 		for (i = 0; i < ARRAYCOUNT(g_SeqInstances); i++) {
 			seqInit(&g_SeqInstances[i]);
 		}
 
-		osSyncPrintf("gsSndpNew\n");
-
 		n_alSndpNew(&sndpconfig);
-
-		osSyncPrintf("Set the sample callbacks\n");
 
 		sndpSetAddRefCallback(sndAddRef);
 		sndpSetRemoveRefCallback(sndRemoveRef);

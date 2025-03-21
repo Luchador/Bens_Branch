@@ -4,7 +4,6 @@
 #include "data.h"
 #include "types.h"
 
-void mempInit(void);
 void mempSetHeap(u8 *heapstart, u32 heaplen);
 u32 mempGetStageFree(void);
 void *mempGetNextStageAllocation(void);

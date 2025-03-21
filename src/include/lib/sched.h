@@ -5,13 +5,6 @@
 #include "types.h"
 
 void schedSubmitTask(OSSched *sc, OSScTask *t);
-void __scHandleRetrace(OSSched *sc);
-void __scHandleRSP(OSSched *sc);
-void __scHandleRDP(OSSched *sc);
-void __scHandleTasks(OSSched *sc);
-void __scAppendList(OSSched *sc, OSScTask *t);
-void __scExec(OSSched *sc, OSScTask *sp, OSScTask *dp);
-void __scMain(void *arg);
 void schedInitArtifacts(void);
 void schedResetArtifacts(void);
 struct artifact *schedGetWriteArtifacts(void);

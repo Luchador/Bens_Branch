@@ -23,10 +23,9 @@
 #define _ULTRA64_H_
 
 #include <PR/ultratypes.h>
-#include <PR/R4300.h>
+#include "platform.h"
 #include <PR/ultratypes.h>
 #include <PR/os.h>
-#include <PR/region.h>
 #include <PR/sptask.h>
 #include <PR/mbi.h>
 #include <PR/libaudio.h>

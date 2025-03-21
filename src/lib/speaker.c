@@ -12,7 +12,7 @@
 #include "data.h"
 #include "types.h"
 
-struct var8009c340 var8009c340;
+struct N_SpeakerType N_SpeakerType;
 u8 var8009c344[2];
 u8 var8009c346[2];
 u8 var8009c348[4];
@@ -21,19 +21,19 @@ void speakersSetMode(u8 mode)
 {
 	s32 i;
 
-	var8009c340.surround = 0;
-	var8009c340.mono = 0;
-	var8009c340.headphone = 0;
+	N_SpeakerType.surround = 0;
+	N_SpeakerType.mono = 0;
+	N_SpeakerType.headphone = 0;
 
 	switch (mode) {
 	case SPEAKERMODE_MONO:
-		var8009c340.mono = 1;
+		N_SpeakerType.mono = 1;
 		break;
 	case SPEAKERMODE_HEADPHONE:
-		var8009c340.headphone = 1;
+		N_SpeakerType.headphone = 1;
 		break;
 	case SPEAKERMODE_SURROUND:
-		var8009c340.surround = 1;
+		N_SpeakerType.surround = 1;
 		break;
 	}
 
@@ -53,22 +53,22 @@ void speaker00034104(s32 index, s32 arg1)
 
 	switch (arg1) {
 	case 2:
-		if (var8009c340.surround) {
+		if (N_SpeakerType.surround) {
 			var8009c346[index] = 1;
 		}
 		break;
 	case 3:
-		if (var8009c340.surround) {
+		if (N_SpeakerType.surround) {
 			var8009c344[index] = 1;
 		}
 		break;
 	case 4:
-		if (!var8009c340.mono) {
+		if (!N_SpeakerType.mono) {
 			var8009c344[index] = 1;
 		}
 		break;
 	case 5:
-		if (!var8009c340.mono) {
+		if (!N_SpeakerType.mono) {
 			var8009c344[index] = 1;
 			var8009c346[index] = 1;
 		}

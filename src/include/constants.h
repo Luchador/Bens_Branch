@@ -43,8 +43,6 @@
 #define NUM_SOLOSTAGES        21
 #define NUM_TEXTURES          3503
 
-#define osSyncPrintf
-
 #define S32_MAX  2147483647
 #define U32_MAX  4294967295
 #define MINFLOAT ((float)-3.40282346638528860e+38)

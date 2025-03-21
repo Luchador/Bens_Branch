@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/player.h"
 #include "game/healthbar.h"
@@ -524,8 +525,8 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, s32 offyarg, f32 heightfracarg
 	// The colours are loaded all at once, but the vertices are split into two.
 	numverts = numshieldmarkers * 2;
 
-	gSPColor2(gdl++, osVirtualToPhysical(colours), numverts);
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 14, 0);
+	gSPColor2(gdl++, (uintptr_t)(colours), numverts);
+	gSPVertex(gdl++, (uintptr_t)(vertices), 14, 0);
 
 	gSPTri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
 	gSPTri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
@@ -538,7 +539,7 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, s32 offyarg, f32 heightfracarg
 	// and separates numvertsremaining and numverts - 12.
 	// Both are required for a match.
 	gDma1p(gdl++, G_VTX,
-			osVirtualToPhysical(vertices + 12),
+			(uintptr_t)(vertices + 12),
 			numvertsremaining * (s32) sizeof(Vtx),
 			(numverts - 12 - 1) << 4);
 
@@ -558,8 +559,8 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, s32 offyarg, f32 heightfracarg
 	numverts = numarmourmarkers * 2;
 	coloursize = numverts * 4;
 
-	gSPColor2(gdl++, osVirtualToPhysical(colours + 24), numverts);
-	gSPVertex(gdl++, osVirtualToPhysical(vertices + 24), numverts, 0);
+	gSPColor2(gdl++, (uintptr_t)(colours + 24), numverts);
+	gSPVertex(gdl++, (uintptr_t)(vertices + 24), numverts, 0);
 
 	gSPTri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
 	gSPTri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
@@ -578,8 +579,8 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, s32 offyarg, f32 heightfracarg
 	numverts = numtraumamarkers * 2;
 	coloursize = numverts * 4;
 
-	gSPColor2(gdl++, osVirtualToPhysical(colours + 40), numverts);
-	gSPVertex(gdl++, osVirtualToPhysical(vertices + 40), numverts, 0);
+	gSPColor2(gdl++, (uintptr_t)(colours + 40), numverts);
+	gSPVertex(gdl++, (uintptr_t)(vertices + 40), numverts, 0);
 
 	gSPTri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
 	gSPTri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);

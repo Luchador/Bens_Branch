@@ -20,6 +20,12 @@ typedef s32 MenuDialogHandlerResult;
 typedef uintptr_t MenuItemHandlerResult;
 typedef s16 RoomNum;
 
+#ifdef PLATFORM_64BIT
+typedef u64 k_ptr_t;
+#else
+typedef u32 k_ptr_t;
+#endif
+
 #define texnum_t uintptr_t
 
 // Float version of a graphics matrix, which has higher precision than an Mtx.
@@ -244,7 +250,6 @@ struct g_vars {
 	/*0x4d7*/ s8 autocutgroupskip; // true if pressed start during auto cutscene
 	/*0x4d8*/ s32 joydisableframestogo;
 	/*0x4dc*/ u8 playertojoymap[MAX_PLAYERS];
-	/*0x4e0*/ u8 fourmeg2player;
 	/*0x4e1*/ u8 remakewallhitvtx;
 	/*0x4e2*/ u8 cutsceneskip60ths;
 	/*0x4e3*/ u8 langfilteron;
@@ -5495,19 +5500,6 @@ struct font {
 	struct fontchar chars[94]; // can be 135 in PAL
 };
 
-typedef union {
-	struct {
-		short     type;
-	} gen;
-
-	struct {
-		short     type;
-		struct    AudioInfo_s *info;
-	} done;
-
-	OSScMsg       app;
-} AudioMsg;
-
 typedef struct AudioInfo_s {
 	short         *data;          /* Output data pointer */
 	short         frameSamples;   /* # of samples synthesized in this frame */
@@ -5517,26 +5509,13 @@ typedef struct AudioInfo_s {
 typedef struct {
 	Acmd          *ACMDList[2];
 	AudioInfo     *audioInfo[3];
-	OSThread      thread;
-	OSMesgQueue   audioFrameMsgQ;
-	OSMesg        audioFrameMsgBuf[8];
-	OSMesgQueue   audioReplyMsgQ;
-	OSMesg        audioReplyMsgBuf[8];
+	//OSThread      thread;
+	//OSMesgQueue   audioFrameMsgQ;
+	//OSMesg        audioFrameMsgBuf[8];
+	//OSMesgQueue   audioReplyMsgQ;
+	//OSMesg        audioReplyMsgBuf[8];
 	N_ALGlobals   g;
 } AMAudioMgr;
-
-typedef struct {
-	ALLink        node;
-	u32           startAddr;
-	u32           lastFrame;
-	char          *ptr;
-} AMDMABuffer;
-
-typedef struct {
-	u8            initialized;
-	AMDMABuffer   *firstUsed;
-	AMDMABuffer   *firstFree;
-} AMDMAState;
 
 union audioparam {
 	s32 s32;

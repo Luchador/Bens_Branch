@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/chraction.h"
@@ -91,7 +92,7 @@ Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, 
 	MAKEVERTEX(1, sp70);
 	MAKEVERTEX(2, sp64);
 
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 3, arg7);
+	gSPVertex(gdl++, (uintptr_t)(vertices), 3, arg7);
 
 	if (depth == 0) {
 		gSPTri4(gdl++,
@@ -133,7 +134,7 @@ Gfx *nbombCreateSphere(Gfx *gdl, s32 depth)
 	MAKEVERTEX(4, sp5c[4]);
 	MAKEVERTEX(5, sp5c[5]);
 
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 6, 0);
+	gSPVertex(gdl++, (uintptr_t)(vertices), 6, 0);
 
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[0], &sp5c[4], &sp5c[1], 0, 4, 1, 6, depth);
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[1], &sp5c[4], &sp5c[2], 1, 4, 2, 6, depth);
@@ -152,7 +153,7 @@ Gfx *nbombCreateSphere(Gfx *gdl, s32 depth)
 	MAKEVERTEX(4, sp5c[4]);
 	MAKEVERTEX(5, sp5c[5]);
 
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 6, 0);
+	gSPVertex(gdl++, (uintptr_t)(vertices), 6, 0);
 
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[2], &sp5c[4], &sp5c[3], 2, 4, 3, 6, depth);
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[3], &sp5c[4], &sp5c[0], 3, 4, 0, 6, depth);
@@ -235,7 +236,7 @@ Gfx *nbombCreateGdl(void)
 	vertices[0].x = vertices[0].z;
 	vertices[0].s = vertices[0].t;
 
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 1, 0);
+	gSPVertex(gdl++, (uintptr_t)(vertices), 1, 0);
 
 	if (index != 0) {
 		gdl = nbombCreateSphere(gdl, 1);
@@ -269,7 +270,7 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 	colours[0].word = PD_BE32(colour);
 	colours[1].word = PD_BE32(0xffffff00);
 
-	gSPColor(gdl++, osVirtualToPhysical(colours), 2);
+	gSPColor(gdl++, (uintptr_t)(colours), 2);
 
 	sp3c.x = 0;
 	sp3c.y = 0;
@@ -289,7 +290,7 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 	mtx00015be0(camGetWorldToScreenMtxf(), &spc8);
 	mtxF2L(&spc8, mtx);
 
-	gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	gSPDisplayList(gdl++, subgdl);
 
@@ -716,8 +717,8 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 
 		colours[0].word = PD_BE32(finalalpha);
 
-		gSPColor(gdl++, osVirtualToPhysical(colours), 1);
-		gSPVertex(gdl++, osVirtualToPhysical(vertices), 4, 0);
+		gSPColor(gdl++, (uintptr_t)(colours), 1);
+		gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
 		gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
 	}
@@ -916,8 +917,8 @@ Gfx *gasRender(Gfx *gdl)
 
 			colours[0].word = PD_BE32(0x3faf1100 | alpha);
 
-			gSPColor(gdl++, osVirtualToPhysical(colours), 1);
-			gSPVertex(gdl++, osVirtualToPhysical(vertices), 8, 0);
+			gSPColor(gdl++, (uintptr_t)(colours), 1);
+			gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
 
 			gSPTri4(gdl++, 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4);
 		}

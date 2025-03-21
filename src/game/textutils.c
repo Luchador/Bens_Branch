@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/debug.h"
@@ -787,7 +788,7 @@ Gfx *textRenderCredit(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
 
 	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
-	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, osVirtualToPhysical(var8007fb3c));
+	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (uintptr_t)(var8007fb3c));
 
 	gDPLoadSync(gdl++);
 	gDPLoadTLUTCmd(gdl++, 6, 15);
@@ -996,7 +997,7 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
  
 	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
-	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, osVirtualToPhysical(var8007fb3c));
+	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (uintptr_t)(var8007fb3c));
 	//gDPSetTextureImage(gdl++, G_IM_FMT_CUSTOMFONT, G_IM_SIZ_16b, 1, &g_HandelGothicData[50].pixeldata);
 	gDPLoadSync(gdl++);
 	gDPLoadTLUTCmd(gdl++, 6, 15);
@@ -1176,7 +1177,7 @@ Gfx *textRender(Gfx *gdl, s32 *x, s32 *y, char *text,
 
 	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
-	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, osVirtualToPhysical(&var8007fb5c));
+	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (uintptr_t)(&var8007fb5c));
 	gDPLoadSync(gdl++);
 	gDPLoadTLUTCmd(gdl++, 6, 31);
 	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);

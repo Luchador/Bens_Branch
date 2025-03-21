@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/dlights.h"
 #include "game/camera.h"
@@ -376,7 +377,7 @@ Gfx *sparksRender(Gfx *gdl)
 						colours[1].a *= frac;
 					}
 
-					gSPColor(gdl++, osVirtualToPhysical(colours), 2);
+					gSPColor(gdl++, (uintptr_t)(colours), 2);
 
 					sp120 *= 0.2f;
 					sp120 *= viGetFovY() / 60.0f;
@@ -395,7 +396,7 @@ Gfx *sparksRender(Gfx *gdl)
 					mtx = gfxAllocateMatrix();
 					mtxF2L(&spd4, mtx);
 
-					gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+					gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 					index = group->startindex;
 
@@ -466,7 +467,7 @@ Gfx *sparksRender(Gfx *gdl)
 								break;
 							}
 
-							gSPVertex(gdl++, osVirtualToPhysical(vertices), 3, 0);
+							gSPVertex(gdl++, (uintptr_t)(vertices), 3, 0);
 							gSP1Triangle(gdl++, 0, 1, 2, 0);
 						}
 

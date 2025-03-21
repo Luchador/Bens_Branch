@@ -4,7 +4,6 @@
 #include "data.h"
 #include "types.h"
 
-void amgrInit(void);
 void amgrCreate(ALSynConfig *config);
 void amgrStartThread(void);
 void amgrFrame(void);

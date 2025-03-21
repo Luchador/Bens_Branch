@@ -1,9 +1,11 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "bss.h"
 #include "lib/audiodma.h"
 #include "data.h"
 #include "types.h"
+#include "string.h"
 
 #define ADMA_MAX_ITEMS 80
 #define ADMA_ITEM_SIZE 0x400
@@ -26,9 +28,6 @@ s32 g_AdmaNumItemsThisFrame = 0;
 
 struct admastate g_AdmaState;
 struct admaitem g_AdmaItems[ADMA_MAX_ITEMS];
-OSIoMesg g_AdmaIoMsgs[ADMA_MAX_ITEMS];
-OSMesgQueue g_AdmaMesgQueue;
-OSMesg g_AdmaMesgs[ADMA_MAX_ITEMS];
 u32 g_AdmaCurFrame;
 
 /**
@@ -64,7 +63,7 @@ uintptr_t admaExec(uintptr_t offset, s32 len, void *state)
 			item->lastframe = g_AdmaCurFrame;
 			foundbuffer = item->ptr + offset - item->startaddr;
 
-			return osVirtualToPhysical(foundbuffer);
+			return (uintptr_t)(foundbuffer);
 		}
 
 		lastitem = item;
@@ -78,7 +77,7 @@ uintptr_t admaExec(uintptr_t offset, s32 len, void *state)
 	// "send back a bogus pointer, it's better than nothing".
 	// @bug: This can make incorrect audio play when the DMA queue is full.
 	if (item == NULL) {
-		return osVirtualToPhysical(g_AdmaState.firstused);
+		return (uintptr_t)(g_AdmaState.firstused);
 	}
 
 	g_AdmaState.firstfree = (struct admaitem *) item->node.next;
@@ -109,9 +108,9 @@ uintptr_t admaExec(uintptr_t offset, s32 len, void *state)
 	item->startaddr = offset;
 	item->lastframe = g_AdmaCurFrame;
 
-	osPiStartDma(&g_AdmaIoMsgs[g_AdmaNumItemsThisFrame++], offset, foundbuffer, ADMA_ITEM_SIZE, &g_AdmaMesgQueue);
+	memcpy(foundbuffer, (const void *)offset, ADMA_ITEM_SIZE);
 
-	return osVirtualToPhysical(foundbuffer) + delta;
+	return (uintptr_t)(foundbuffer) + delta;
 }
 
 /**

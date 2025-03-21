@@ -31,32 +31,6 @@
 #include "types.h"
 #include "platform.h"
 
-/*const char var7f1a78e0[] = "LIGHTS : Hit occured on light %d in room %d\n";
-const char var7f1a7910[] = "L2(%d) -> ";
-const char var7f1a791c[] = "L2 -> BUILD LIGHTS TRANSFER TABLE - Starting\n";
-const char var7f1a794c[] = "L2(%d) -> ";
-const char var7f1a7958[] = "L2_BuildTransferTables -> Found %d portals\n";
-const char var7f1a7984[] = "L2(%d) -> ";
-const char var7f1a7990[] = "L2_BuildTransferTables -> Found %d rooms\n";
-const char var7f1a79bc[] = "L2(%d) -> ";
-const char var7f1a79c8[] = "L2_BuildTransferTables -> Alloc %u bytes of free memory\n";
-const char var7f1a7a04[] = "L2(%d) -> ";
-const char var7f1a7a10[] = "L2_BuildTransferTables -> Alloc %u bytes for scratch\n";
-const char var7f1a7a48[] = "L2(%d) -> ";
-const char var7f1a7a54[] = "L2 -> Building room based light transmission table\n";
-const char var7f1a7a88[] = "L2(%d) -> ";
-const char var7f1a7a94[] = "L2 -> Finished\n";
-const char var7f1a7aa4[] = "L2(%d) -> ";
-const char var7f1a7ab0[] = "L2 -> Generating room parameters from BG data\n";
-const char var7f1a7ae0[] = "L2(%d) -> ";
-const char var7f1a7aec[] = "L2 -> Light2_ProcessBgParams room %d does not have a 3D bounding box => Room Volume is bodged!\n";
-const char var7f1a7b4c[] = "L2(%d) -> ";
-const char var7f1a7b58[] = "%s%sL2 -> Surface area bodged for room %d - using %f\n";
-const char var7f1a7b90[] = "";
-const char var7f1a7b94[] = "";
-const char var7f1a7b98[] = "L2(%d) -> ";
-const char var7f1a7ba4[] = "L2 -> Finished\n";*/
-
 s32 *var8009cad0;
 s32 *var8009cad8;
 s32 g_NumPortals;
@@ -77,7 +51,6 @@ u16 **var80061430 = NULL;
 f32 *var80061434 = NULL;
 bool *g_IsPortalClosed = NULL;
 f32 var8006143c = 50;
-u32 var80061440 = 0x00000000;
 u32 var80061444 = 1;
 u32 var80061448 = 0x00000000;
 bool g_IsSwitchingGoggles = false;
@@ -567,8 +540,6 @@ void func0f001c0c(void)
 
 	osGetCount(); // This isn't used for anything?
 
-	var80061440 = 0;
-
 	lightsCalculateRoomDimensions();
 
 	for (g_NumPortals = 0; g_BgPortals[g_NumPortals].verticesoffset != 0; g_NumPortals++);
@@ -704,7 +675,6 @@ void func0f00215c(u8 *arg0)
 
 	var8006143c = 50.0f;
 	var8009cae4 = 20;
-	var80061440 = 0;
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
 		u8 *ptr = &arg0[i * var8009cae0];
@@ -832,8 +802,6 @@ void func0f002844(s32 roomnum, f32 arg1, s32 arg2, s32 portalnum)
 {
 	s32 i;
 	s32 otherroomnum = -1;
-
-	var80061440++;
 
 	if (portalnum != -1) {
 		if (roomnum == g_BgPortals[portalnum].roomnum1) {
@@ -1059,21 +1027,6 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 
 	return false;
 }
-
-/*const char var7f1a7bcc[] = "L2 - g_bfGlobalLightRebuild = %d";
-const char var7f1a7bf0[] = "Acoustic Shadowing is %s";
-const char var7f1a7c0c[] = "Enabled";
-const char var7f1a7c14[] = "Disabled";
-const char var7f1a7c20[] = "L2 - Fading Rm%d - Mode=%d%%";
-const char var7f1a7c40[] = "RWI : Re-light all affected char props : g_bfGlobalLightRebuild";
-const char var7f1a7c80[] = "L2 - %d Rooms have been processed";
-const char var7f1a7ca4[] = "L2 - %d Chars need lighting";
-const char var7f1a7cc0[] = "L2(%d) -> ";
-const char var7f1a7ccc[] = "L2 -> Building portal range table (Num Portals = %d)\n";
-const char var7f1a7d04[] = "L2(%d) -> ";
-const char var7f1a7d10[] = "L2 -> Allocated %uK for the compressed acoustic shadow table\n";
-const char var7f1a7d50[] = "L2(%d) -> ";
-const char var7f1a7d5c[] = "L2 -> Finished building portal range table\n";*/
 
 void lightingTick(void)
 {
@@ -1553,7 +1506,8 @@ void roomHighlight(s32 roomnum)
 				dst[i].r = src[i].r;
 				dst[i].g = src[i].g;
 				dst[i].b = src[i].b;
-				dst[i].a = src[i].a * (1.0f / 255.0f * br_settled_regional);
+				//dst[i].a = src[i].a * (1.0f / 255.0f * br_settled_regional); // Ben's comment: this line was causing some walls to become transparent when lights in a room were destroyed
+				dst[i].a = src[i].a;
 			} else {
 				if (USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) {
 					tmpr = tmpg = tmpb = (src[i].r > src[i].g && src[i].r > src[i].b)

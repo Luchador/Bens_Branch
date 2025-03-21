@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/acosfasinf.h"
 #include "game/quaternion.h"
@@ -3137,7 +3138,7 @@ void modelRenderNodeGundl(struct modelrenderdata *renderdata, struct model *mode
 	}
 
 	if ((renderdata->flags & MODELRENDERFLAG_OPA) && rodata->opagdl) {
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, osVirtualToPhysical(rodata->baseaddr));
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->baseaddr));
 
 		if (renderdata->cullmode) {
 			modelApplyCullMode(renderdata);
@@ -3168,7 +3169,7 @@ void modelRenderNodeGundl(struct modelrenderdata *renderdata, struct model *mode
 	}
 
 	if ((renderdata->flags & MODELRENDERFLAG_XLU) && rodata->opagdl && rodata->unk12 == 4 && rodata->xlugdl) {
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, osVirtualToPhysical(rodata->baseaddr));
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->baseaddr));
 
 		if (renderdata->cullmode) {
 			modelApplyCullMode(renderdata);
@@ -3192,7 +3193,7 @@ void modelRenderNodeDl(struct modelrenderdata *renderdata, struct model *model, 
 		union modelrwdata *rwdata = modelGetNodeRwData(model, node);
 
 		if (rwdata->dl.gdl) {
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, osVirtualToPhysical(rodata->dl.colours));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->dl.colours));
 
 			if (renderdata->cullmode) {
 				modelApplyCullMode(renderdata);
@@ -3213,8 +3214,8 @@ void modelRenderNodeDl(struct modelrenderdata *renderdata, struct model *model, 
 				break;
 			}
 
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, osVirtualToPhysical(rwdata->dl.vertices));
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, osVirtualToPhysical(rwdata->dl.colours));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)(rwdata->dl.vertices));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (uintptr_t)(rwdata->dl.colours));
 
 			gSPDisplayList(renderdata->gdl++, rwdata->dl.gdl);
 
@@ -3230,14 +3231,14 @@ void modelRenderNodeDl(struct modelrenderdata *renderdata, struct model *model, 
 		union modelrwdata *rwdata = modelGetNodeRwData(model, node);
 
 		if (rwdata->dl.gdl && rodata->dl.mcount == 4 && rodata->dl.xlugdl) {
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, osVirtualToPhysical(rodata->dl.colours));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->dl.colours));
 
 			if (renderdata->cullmode) {
 				modelApplyCullMode(renderdata);
 			}
 
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, osVirtualToPhysical(rwdata->dl.vertices));
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, osVirtualToPhysical(rwdata->dl.colours));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)(rwdata->dl.vertices));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (uintptr_t)(rwdata->dl.colours));
 
 			modelApplyRenderModeType4(renderdata, false);
 
@@ -3267,9 +3268,9 @@ void modelRenderNodeStarGunfire(struct modelrenderdata *renderdata, struct model
 			Vtx *src = (Vtx *) rodata->vertices;
 			Vtx *dst = g_ModelVtxAllocatorFunc(rodata->unk00 * 4);
 
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, osVirtualToPhysical(dst));
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, osVirtualToPhysical((void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2])));
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, osVirtualToPhysical(rodata->baseaddr));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)(dst));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (uintptr_t)((void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2])));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->baseaddr));
 
 			gDPSetFogColor(renderdata->gdl++, 0x00, 0x00, 0x00, 0x00);
 			gSPDisplayList(renderdata->gdl++, rodata->gdl);
@@ -3438,7 +3439,7 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 		vertices[3].y = sp90.f[1] - spc4;
 		vertices[3].z = sp90.f[2] + negspc8 + -spbc;
 
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, osVirtualToPhysical(rodata->baseaddr));
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->baseaddr));
 
 		if (rodata->texture) {
 			s32 centre;
@@ -3469,9 +3470,9 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 		}
 
 		gSPSetGeometryMode(renderdata->gdl++, G_CULL_BACK);
-		gSPMatrix(renderdata->gdl++, osVirtualToPhysical(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-		gSPColor(renderdata->gdl++, osVirtualToPhysical(colours), 1);
-		gSPVertex(renderdata->gdl++, osVirtualToPhysical(vertices), 4, 0);
+		gSPMatrix(renderdata->gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+		gSPColor(renderdata->gdl++, (uintptr_t)(colours), 1);
+		gSPVertex(renderdata->gdl++, (uintptr_t)(vertices), 4, 0);
 		gSPTri2(renderdata->gdl++, 0, 1, 2, 2, 3, 0);
 	}
 }
@@ -3483,7 +3484,7 @@ void modelRender(struct modelrenderdata *renderdata, struct model *model)
 	u32 type;
 	struct modelnode *node = model->definition->rootnode;
 
-	gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_MTX, osVirtualToPhysical(model->matrices));
+	gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_MTX, (uintptr_t)(model->matrices));
 
 	while (node) {
 		type = node->type & 0xff;

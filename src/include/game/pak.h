@@ -41,7 +41,7 @@ PakErr2 pakReadHeaderAtOffset(s8 device, u32 offset, struct pakfileheader *heade
 void pakDumpBuffer(u8 *buffer, u32 len, char *name);
 void pakDumpEeprom(void);
 s32 _pakSaveAtGuid(s8 device, s32 fileid, s32 filetype, u8 *newdata, s32 *outfileid, u8 *olddata);
-PakErr1 pakInitPak(OSMesgQueue *mq, OSPfs *pfs, s32 channel, s32 *arg3);
+PakErr1 pakInitPak(OSPfs *pfs, s32 channel, s32 *arg3);
 PakErr1 _pakReadWriteBlock(OSPfs *pfs, s32 file_no, u8 flag, u32 address, u32 len, u8 *buffer);
 PakErr1 pakQueryNumNotes(OSPfs *pfs, s32 *max_files, s32 *files_used);
 PakErr1 pakQueryNumFreeBytes(OSPfs *pfs, s32 *bytes_not_used);
@@ -66,7 +66,6 @@ s32 pakFindFile(s8 device, u32 fileid, struct pakfileheader *header);
 bool pakWriteBlankFile(s8 device, u32 offset, struct pakfileheader *header);
 bool pakRepairAsBlank(s8 device, u32 *offset, struct pakfileheader *header);
 s32 pakRepairFilesystem(s8 device);
-void pakCorrupt(void);
 bool pakCreateInitialFiles(s8 device);
 s32 pakFindMaxFileId(s8 device);
 void pakMergeBlanks(s8 device);
@@ -123,7 +122,6 @@ s8 pakFindBySerial(s32 deviceserial);
 s32 pak0f11e750(s8 device);
 bool gbpakIsAnyPerfectDark(void);
 bool gbpakStrcmp(char *a, char *b);
-s32 gbpakIdentifyGame(s8 device);
 bool pak0f11ea34(s8 device);
 
 #endif

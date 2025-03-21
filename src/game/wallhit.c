@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/dlights.h"
 #include "game/chr.h"
@@ -856,9 +857,6 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 			sp1e8.z = sp1b8.y * zvalue;
 		}
 
-		osSyncPrintf("AFT : tVecU (along) = (%s%s%f,%f,%f)\n", "", "", sp1f4.x, sp1f4.y, sp1f4.z);
-		osSyncPrintf("AFT : tVecV (up)    = (%s%s%f,%f,%f)\n", "", "", sp1e8.x, sp1e8.y, sp1e8.z);
-
 		if (rotdeg != 0) {
 			u32 stack[6];
 			f32 spd0 = sinf(rotdeg * 0.017453292f);
@@ -1070,7 +1068,6 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 					a = alpha ? alpha : 255;
 					break;
 				default:
-					osSyncPrintf("Wallhit colour %d not implemented, substituting black\n", type);
 					r = g = b = 0;
 					a = alpha ? alpha : 255;
 					break;
@@ -1194,12 +1191,12 @@ Gfx *wallhitRenderOpaBgHits(s32 roomnum, Gfx *gdl)
 			colours[2] = wallhit->finalcolours[2];
 			colours[3] = wallhit->finalcolours[3];
 
-			gSPColor(gdl++, osVirtualToPhysical(colours), 4);
+			gSPColor(gdl++, (uintptr_t)(colours), 4);
 
 			if (wallhit->vertices2 != NULL) {
 				gSPVertex(gdl++, wallhit->vertices2, 4, 0);
 			} else {
-				gSPVertex(gdl++, osVirtualToPhysical(&wallhit->vertices), 4, 0);
+				gSPVertex(gdl++, (uintptr_t)(&wallhit->vertices), 4, 0);
 			}
 
 			gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
@@ -1252,12 +1249,12 @@ Gfx *wallhitRenderXluBgHits(s32 roomnum, Gfx *gdl)
 			colours[2] = wallhit->finalcolours[2];
 			colours[3] = wallhit->finalcolours[3];
 
-			gSPColor(gdl++, osVirtualToPhysical(colours), 4);
+			gSPColor(gdl++, (uintptr_t)(colours), 4);
 
 			if (wallhit->vertices2 != NULL) {
 				gSPVertex(gdl++, wallhit->vertices2, 4, 0);
 			} else {
-				gSPVertex(gdl++, osVirtualToPhysical(&wallhit->vertices), 4, 0);
+				gSPVertex(gdl++, (uintptr_t)(&wallhit->vertices), 4, 0);
 			}
 
 			gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
@@ -1308,7 +1305,7 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 				Mtxf *mtx = &obj->model->matrices[wallhit->mtxindex];
 				if (wallhit->mtxindex);
 				prevmtxindex = wallhit->mtxindex;
-				gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+				gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 			}
 
 			if (!xlu) {
@@ -1339,12 +1336,12 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 			colours[2] = wallhit->finalcolours[2];
 			colours[3] = wallhit->finalcolours[3];
 
-			gSPColor(gdl++, osVirtualToPhysical(colours), 4);
+			gSPColor(gdl++, (uintptr_t)(colours), 4);
 
 			if (wallhit->vertices2 != NULL) {
 				gSPVertex(gdl++, wallhit->vertices2, 4, 0);
 			} else {
-				gSPVertex(gdl++, osVirtualToPhysical(&wallhit->vertices), 4, 0);
+				gSPVertex(gdl++, (uintptr_t)(&wallhit->vertices), 4, 0);
 			}
 
 			gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);

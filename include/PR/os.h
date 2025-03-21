@@ -30,20 +30,13 @@
 #ifndef _OS_H_
 #define	_OS_H_
 
-#include <PR/os_thread.h>
-#include <PR/os_message.h>
+#define	ALIGN(s, align)	(((u32)(s) + ((align)-1)) & ~((align)-1))
+
 #include <PR/ultratypes.h>
-#include <PR/os_pi.h>
-#include <PR/os_vi.h>
-#include <PR/os_ai.h>
-#include <PR/os_time.h>
 #include <PR/os_cont.h>
 #include <PR/os_pfs.h>
-#include <PR/os_gbpak.h>
 #include <PR/os_reg.h>
-#include <PR/os_system.h>
 #include <PR/os_eeprom.h>
-#include <PR/os_convert.h>
 #include <PR/os_motor.h>
 #include <PR/os_libc.h>
 

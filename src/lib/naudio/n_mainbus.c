@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include "n_synthInternals.h"
+#include <stdint.h>
 
 s32 func00037fc0(s32 arg0, Acmd **cmd);
 void func0003ba64(struct fx *fx, f32 outputrate);
@@ -39,10 +40,10 @@ Acmd *n_alMainBusPull(s32 sampleOffset, Acmd *p)
 				func0003ba64(&bus44->fx, n_syn->outputRate);
 			}
 
-			n_aLoadADPCM(ptr++, 32, osVirtualToPhysical(&bus44->fx.unk08));
+			n_aLoadADPCM(ptr++, 32, (uintptr_t)(&bus44->fx.unk08));
 
-			n_aPoleFilter(ptr++, 0, N_AL_MAIN_L_OUT, 0, osVirtualToPhysical(bus44->unk2c) & 0xffffff);
-			n_aPoleFilter(ptr++, 0, N_AL_MAIN_R_OUT, 0, osVirtualToPhysical(bus44->unk30) & 0xffffff);
+			n_aPoleFilter(ptr++, 0, N_AL_MAIN_L_OUT, 0, (uintptr_t)(bus44->unk2c) & 0xffffff);
+			n_aPoleFilter(ptr++, 0, N_AL_MAIN_R_OUT, 0, (uintptr_t)(bus44->unk30) & 0xffffff);
 
 			bus44->unk28 = 0;
 		}

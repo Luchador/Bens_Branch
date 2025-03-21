@@ -2,6 +2,7 @@
 #include <os.h>
 #include <gu.h>
 #include "types.h"
+#include <stdint.h>
 
 void func0003ba64(struct fx *fx, f32 outputrate);
 
@@ -31,13 +32,13 @@ Acmd *n_alResamplePull2(N_PVoice *e, s16 *outp, s32 outCount, Acmd *p)
 			func0003ba64(&e->fx, 22050);
 		}
 
-		n_aLoadADPCM(ptr++, 32, osVirtualToPhysical(e->fx.unk08))
+		n_aLoadADPCM(ptr++, 32, (uintptr_t)(e->fx.unk08))
 
 		if (e->unkb8 == 2) {
 			e->unkb8 = 0;
 		}
 
-		n_aPoleFilter(ptr++, e->unkb8, *outp, 0, osVirtualToPhysical(e->unkbc) & 0xffffff);
+		n_aPoleFilter(ptr++, e->unkb8, *outp, 0, (uintptr_t)(e->unkbc) & 0xffffff);
 
 		e->unkb8 = 0;
 	}

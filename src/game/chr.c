@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "lib/sched.h"
 #include "constants.h"
 #include "game/bondmove.h"
@@ -5156,12 +5157,12 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 	sp180[7][1] = ymax;
 	sp180[7][2] = zmax;
 
-	gSPMatrix(gdl++, osVirtualToPhysical(modelmtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPMatrix(gdl++, (uintptr_t)(modelmtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	if (side == -7) {
 		colours = gfxAllocateColours(1);
 
-		gSPColor(gdl++, osVirtualToPhysical(colours), 1);
+		gSPColor(gdl++, (uintptr_t)(colours), 1);
 
 		colours[0].r = 0xff;
 		colours[0].g = 0xff;
@@ -5193,7 +5194,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices[3].s = 0;
 			vertices[3].t = 512;
 
-			gSPVertex(gdl++, osVirtualToPhysical(vertices), 4, 0);
+			gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
 			gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
 
@@ -5260,7 +5261,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 		if (side == -3 || side == -4 || side == -5 || side == -6) {
 			colours = gfxAllocateColours(1);
 
-			gSPColor(gdl++, osVirtualToPhysical(colours), 1);
+			gSPColor(gdl++, (uintptr_t)(colours), 1);
 
 			if (side == -3) {
 				colours[0].r = red2;
@@ -5320,7 +5321,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				vertices[3].s = st1;
 				vertices[3].t = st4;
 
-				gSPVertex(gdl++, osVirtualToPhysical(vertices), 4, 0);
+				gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
 				gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
 
@@ -5344,7 +5345,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			colours = gfxAllocateColours(3);
 
-			gSPColor(gdl++, osVirtualToPhysical(colours), 3);
+			gSPColor(gdl++, (uintptr_t)(colours), 3);
 
 			colours[0].r = red3;
 			colours[1].r = red3;
@@ -5383,7 +5384,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				vertices[4].t = (st2 + st4) >> 1;
 				vertices[4].colour = 4;
 
-				gSPVertex(gdl++, osVirtualToPhysical(vertices), 5, 0);
+				gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
 
 				gSPTri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
@@ -5404,7 +5405,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 				colours = gfxAllocateColours(1);
 
-				gSPColor(gdl++, osVirtualToPhysical(colours), 1);
+				gSPColor(gdl++, (uintptr_t)(colours), 1);
 
 				colours[0].r = red1;
 				colours[0].g = green1;
@@ -5429,7 +5430,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 				colours = gfxAllocateColours(1);
 
-				gSPColor(gdl++, osVirtualToPhysical(colours), 1);
+				gSPColor(gdl++, (uintptr_t)(colours), 1);
 
 				colours[0].r = red3;
 				colours[0].g = green3;
@@ -5496,7 +5497,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices[11].s = st3;
 			vertices[11].t = st2;
 
-			gSPVertex(gdl++, osVirtualToPhysical(vertices), 12, 0);
+			gSPVertex(gdl++, (uintptr_t)(vertices), 12, 0);
 
 			gSPTri4(gdl++, 0, 1, 9, 0, 9, 8, 11, 5, 4, 11, 4, 10);
 
@@ -5527,7 +5528,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			colours = gfxAllocateColours(5);
 
-			gSPColor(gdl++, osVirtualToPhysical(colours), 5);
+			gSPColor(gdl++, (uintptr_t)(colours), 5);
 
 			colours[0].r = red1;
 			colours[0].g = green1;
@@ -5631,7 +5632,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices[4].s = (st1 + st3) >> 1;
 			vertices[4].t = (st2 + st4) >> 1;
 
-			gSPVertex(gdl++, osVirtualToPhysical(vertices), 5, 0);
+			gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
 
 			gSPTri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
@@ -5709,7 +5710,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				vertices[4].s = (st1 + st3) >> 1;
 				vertices[4].t = (st2 + st4) >> 1;
 
-				gSPVertex(gdl++, osVirtualToPhysical(vertices), 5, 0);
+				gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
 
 				gSPTri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
@@ -5756,7 +5757,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices[4].s = (st1 + st3) >> 1;
 			vertices[4].t = (st2 + st4) >> 1;
 
-			gSPVertex(gdl++, osVirtualToPhysical(vertices), 5, 0);
+			gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
 
 			gSPTri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 		}
@@ -6054,7 +6055,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 			gDPPipeSync(gdl++);
 			gDPLoadSync(gdl++);
 			gDPTileSync(gdl++);
-			gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), OS_K0_TO_PHYSICAL(viGetBackBuffer()));
+			gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
 			gDPSetScissor(gdl++, G_SC_NON_INTERLACE, 0, 0, viGetWidth(), viGetHeight());
 			gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 			gDPSetRenderMode(gdl++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);

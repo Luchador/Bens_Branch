@@ -78,7 +78,7 @@ extern "C" {
 
 /* Miscellaneous operations */
 
-extern u32		osGetCount(void);
+extern u64		osGetCount(void);
 
 
 #endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */

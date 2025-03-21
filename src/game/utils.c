@@ -358,37 +358,6 @@ f32 coordsGetDistance(struct coord *a, struct coord *b)
 }
 
 // Not used
-/*bool func0f1774b4(struct coord *arg0, struct coord *arg1, struct coord *out)
-{
-	struct coord a;
-	struct coord b;
-	struct coord c;
-	f32 mult;
-
-	if (!normalizeVector(arg1, &a, 702, "utils.c")) {
-		osSyncPrintf("UTILS -> DEBUG ERROR - UM_fVec3_MakeNormalTo - Cant normalise\n");
-		return false;
-	}
-
-	if (!normalizeVector(arg0, &b, 710, "utils.c")) {
-		osSyncPrintf("UTILS -> DEBUG ERROR - UM_fVec3_MakeNormalTo - Cant normalise\n");
-		return false;
-	}
-
-	mult = -(a.x * b.x + a.y * b.y + a.z * b.z);
-
-	c.x = mult * a.x;
-	c.y = mult * a.y;
-	c.z = mult * a.z;
-
-	out->x = b.x + c.x;
-	out->y = b.y + c.y;
-	out->z = b.z + c.z;
-
-	return true;
-}*/
-
-// Not used
 /*void func0f17758c(f32 *arg0, f32 *arg1, struct coord *arg2, f32 *arg3)
 {
 	f32 a = arg0[0] - arg1[0];

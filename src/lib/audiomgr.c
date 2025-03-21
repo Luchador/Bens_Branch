@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include "lib/boot.h"
+#include <stdint.h>
 #include "lib/sched.h"
 #include "naudio/n_synthInternals.h"
 #include "constants.h"
@@ -8,6 +8,7 @@
 #include "lib/lib_2fc60.h"
 #include "data.h"
 #include "types.h"
+#include "audio.h"
 #include "game/debug.h"
 
 u64 var80091568;
@@ -17,10 +18,8 @@ u64 var80091580;
 u64 g_AmgrElapsedGameTime;
 u64 g_AmgrElapsedGameTime2;
 AMAudioMgr g_AudioManager;
-OSScClient g_AudioSchedClient;
 u32 var800918dc;
 u32 g_AmgrFreqPerTick;
-u32 var800918e4;
 s32 var800918e8;
 s32 var800918ec;
 void *g_AudioSp;
@@ -30,12 +29,6 @@ u8 var8005cf94 = 1;
 
 void amgrHandleDoneMsg(AudioInfo *info);
 void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo);
-
-// Used in PC port
-void amgrInit(void)
-{
-	g_AudioSp = bootAllocateStack(THREAD_AUDIO, STACKSIZE_AUDIO);
-}
 
 void amgrCreate(ALSynConfig *config)
 {
@@ -53,7 +46,6 @@ void amgrCreate(ALSynConfig *config)
 
 	g_AmgrFreqPerTick = g_AmgrFreqPerTick / SAMPLES * SAMPLES + SAMPLES;
 	var800918dc = g_AmgrFreqPerTick - SAMPLES;
-	var800918e4 = g_AmgrFreqPerTick + 80;
 	var8005cf94 = 0;
 
 	var800918ec = 2000;
@@ -129,17 +121,17 @@ void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo)
 
 	admaBeginFrame();
 
-	somevalue = osAiGetLength() / 4;
+	somevalue = audioGetBytesBuffered() / 4;
 	// HACK: only allow small frames if really needed
 	if (somevalue < 1100) {
 		somevalue = 248;
 	}
 
 	datastart = g_AudioManager.ACMDList[var8005cf90];
-	outbuffer = (s16 *) osVirtualToPhysical(info->data);
+	outbuffer = (s16 *) (uintptr_t)(info->data);
 
 	if (previnfo) {
-		osAiSetNextBuffer(previnfo->data, previnfo->frameSamples * 4);
+		audioSetNextBuffer(previnfo->data, previnfo->frameSamples * 4);
 	}
 
 	if (somevalue > 248 && var8005cf94 == 0) {
@@ -158,9 +150,9 @@ void amgrHandleFrameMsg(AudioInfo *info, AudioInfo *previnfo)
 	g_AmgrCurrentCmdList = &info->task;
 
 	g_AmgrCurrentCmdList->next = NULL;
-	g_AmgrCurrentCmdList->msgQ = &g_AudioManager.audioReplyMsgQ;
-	g_AmgrCurrentCmdList->msg = info;
-	g_AmgrCurrentCmdList->flags = OS_SC_NEEDS_RSP;
+	//g_AmgrCurrentCmdList->msgQ = &g_AudioManager.audioReplyMsgQ;
+	//g_AmgrCurrentCmdList->msg = info;
+	//g_AmgrCurrentCmdList->flags = OS_SC_NEEDS_RSP;
 	g_AmgrCurrentCmdList->list.t.type = M_AUDTASK;
 	g_AmgrCurrentCmdList->list.t.flags = 0;
 	g_AmgrCurrentCmdList->list.t.data_ptr = (u64 *) datastart;
@@ -175,7 +167,7 @@ void amgrHandleDoneMsg(AudioInfo *info)
 {
 	static bool firsttime = true;
 
-	if ((s32)osAiGetLength() >> 2 == 0 && firsttime == false) {
+	if ((s32)audioGetBytesBuffered() >> 2 == 0 && firsttime == false) {
 		firsttime = false;
 	}
 }
@@ -185,18 +177,18 @@ void amgrFrame(void)
 	static AudioInfo *previnfo = NULL;
 	static s32 count = 0;
 
-	g_AmgrElapsedGameTime = osGetTime();
+	g_AmgrElapsedGameTime = osGetCount();
 
 	AudioInfo *info = g_AudioManager.audioInfo[g_AdmaCurFrame % 3];
 
 	admaBeginFrame();
 
-	const s32 somevalue = osAiGetLength() / 4;
+	const s32 somevalue = audioGetBytesBuffered() / 4;
 	Acmd *datastart = g_AudioManager.ACMDList[var8005cf90];
-	s16 *outbuffer = (s16 *) osVirtualToPhysical(info->data);
+	s16 *outbuffer = (s16 *) (uintptr_t)(info->data);
 
 	if (previnfo) {
-		osAiSetNextBuffer(previnfo->data, previnfo->frameSamples * 4);
+		audioSetNextBuffer(previnfo->data, previnfo->frameSamples * 4);
 	}
 
 	if (somevalue > 1100 && var8005cf94 == 0) {
@@ -220,7 +212,7 @@ void amgrFrame(void)
 
 	count++;
 
-	g_AmgrElapsedGameTime2 = osGetTime();
+	g_AmgrElapsedGameTime2 = osGetCount();
 	g_AmgrTimeDiff = g_AmgrElapsedGameTime2 - g_AmgrElapsedGameTime;
 
 	if (count % 240 == 0) {

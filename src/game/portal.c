@@ -168,8 +168,6 @@ void acousticReset(void)
 	f32 depth;
 	f32 halfsurfacearea;
 
-	osSyncPrintf("Acoustic Reset -> Allocating %d bytes for %d roomacousticdata structures\n", size, g_Vars.roomcount);
-
 	g_RoomAcousticData = mempAlloc(size, MEMPOOL_STAGE);
 
 	for (i = 0; i < g_Vars.roomcount; i++) {
@@ -179,14 +177,12 @@ void acousticReset(void)
 		g_RoomAcousticData[i].surfacearea = 1;
 
 		for (j = 0; j < 3; j++) {
-			osSyncPrintf("ACOUSTIC ->    room %d bb %f %f\n", i, g_Rooms[i].bbmin[j], g_Rooms[i].bbmax[j]);
 
 			range = g_Rooms[i].bbmax[j] - g_Rooms[i].bbmin[j];
 
 			if (range > 0) {
 				g_RoomAcousticData[i].roomvolume *= (g_Rooms[i].bbmax[j] - g_Rooms[i].bbmin[j]) / 100;
 			} else {
-				osSyncPrintf("ACOUSTIC -> DGD: acousticReset room %d does not have a 3D bounding box => radata[room].roomvolume is bodged!\n", i);
 				allgood = false;
 			}
 		}
@@ -214,7 +210,6 @@ void acousticReset(void)
 
 			g_RoomAcousticData[i].surfacearea = halfsurfacearea + halfsurfacearea;
 		} else {
-			osSyncPrintf("%s%sL2 -> Surface area bodged for room %d - using %f\n", "", "", i, 20000000);
 			g_RoomAcousticData[i].surfacearea = 20000000;
 		}
 	}

@@ -142,59 +142,14 @@
 #define PAKFEATURE_GAMEBOY 0x04
 
 const char g_N64FontCodeMap[] = "\0************** 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#'*+,-./:=?@";
-const char var7f1b3ad4[] = "Pak %d -> Pak_UpdateAndGetPakNoteInfo - ERROR - ekPakErrorPakFatal\n";
-const char var7f1b3b18[] = "Pak %d -> Pak_UpdateAndGetPakNoteInfo - ERROR - ekPakErrorNoPakPresent\n";
 
 struct pak g_Paks[5]; // controller paks + EEPROM
 
-u32 var800a317c;
-
 OSPfs g_Pfses[MAX_PLAYERS];
-u32 var800a3320;
-u32 var800a3324;
-u32 var800a3328;
-u32 var800a332c;
-u32 var800a3330;
-u32 var800a3334;
-u32 var800a3338;
-u32 var800a333c;
-u32 var800a3340;
-u32 var800a3344;
-u32 var800a3348;
-u32 var800a334c;
-u32 var800a3350;
-u32 var800a3354;
-u32 var800a3358;
-u32 var800a335c;
-u32 var800a3360;
-u32 var800a3364;
-u32 var800a3368;
-u32 var800a336c;
-u32 var800a3370;
-u32 var800a3374;
-u32 var800a3378;
-u32 var800a337c;
-u32 var800a3380;
-u32 var800a3384;
-
-#ifndef DEBUG
-// This is likely g_DebugCutsceneLabelPtrs and/or g_DebugCutsceneLabelBuffers
-// but with reduced lengths
-u32 var800a3388;
-u32 var800a338c;
-u32 var800a3390;
-u32 var800a3394;
-u32 var800a3398;
-u32 var800a339c;
-#endif
 
 u16 var80075cb0 = ROM_COMPANYCODE;
 char var80075cb4[] = "PerfDark";
 char var80075cc0[] = "PerfDark";
-//char var80078058nb[] = "POCKETCAMERA";
-//char var80078068nb[] = "GAMEBOYCAMERA";
-//char var80078078nb[] = "PerfDark";
-//char var80078084nb[] = "GAMEBOYCAMERA";
 
 u32 var80075ccc = 0x00000400;
 u32 g_PakHasEeprom = false;
@@ -207,7 +162,6 @@ u32 g_PakDebugPakCache = 1;
 u32 g_PakDebugPakInit = 0;
 
 u32 g_PakDebugWipeEeprom = 0;
-u32 g_PakDebugCorruptMe = 0;
 
 char g_PakNoteGameName[] = {
 	N64CHAR('P'),
@@ -230,7 +184,6 @@ char g_PakNoteGameName[] = {
 
 char g_PakNoteExtName[] = {0, 0, 0, 0};
 
-u32 var80075d0c = 0x00000000;
 u8 g_PaksPlugged = 0;
 
 bool var80075d14 = true;
@@ -683,7 +636,6 @@ void pakDumpBuffer(u8 *buffer, u32 len, char *name)
 
 	for (i = 0; i != len; i++) {
 		if ((i % 16) == 0) {
-			osSyncPrintf(line);
 			sprintf(line, "\nAddress = %u : ", i);
 		}
 
@@ -692,8 +644,6 @@ void pakDumpBuffer(u8 *buffer, u32 len, char *name)
 	}
 
 	strcat(line, "\n");
-
-	osSyncPrintf(line);
 }
 
 void pakDumpEeprom(void)
@@ -701,7 +651,7 @@ void pakDumpEeprom(void)
 	u8 buffer[2048];
 
 	joyDisableCyclicPolling(JOYARGS(1098));
-	osEepromLongRead(&g_PiMesgQueue, 0, buffer, 2048);
+	osEepromLongRead(0, buffer, 2048);
 	joyEnableCyclicPolling(JOYARGS(1100));
 
 	pakDumpBuffer(buffer, 2048, "EEPROM DUMP");
@@ -789,10 +739,6 @@ s32 _pakSaveAtGuid(s8 device, s32 fileid, s32 filetype, u8 *newdata, s32 *outfil
 		return 4;
 	}
 
-	if (outfileid) {
-		osSyncPrintf("PakSaveAtGuid: new guid = %x\n", outfileid);
-	}
-
 	// NTSC Beta skips marking the old file as vacant if the file wasn't found
 	// and returns an OK value. NTSC Final makes it return an error instead.
 	// @bug: The 0xeeeeeeee check should have been done earlier for swapoffset
@@ -812,7 +758,7 @@ s32 _pakSaveAtGuid(s8 device, s32 fileid, s32 filetype, u8 *newdata, s32 *outfil
 	return 0;
 }
 
-PakErr1 pakInitPak(OSMesgQueue *mq, OSPfs *pfs, s32 channel, s32 *arg3)
+PakErr1 pakInitPak(OSPfs *pfs, s32 channel, s32 *arg3)
 {
 	if (pfs) {
 		return inputRumbleSupported(channel) ? 11 : 1;
@@ -1553,24 +1499,13 @@ bool pakRepairAsBlank(s8 device, u32 *offsetptr, struct pakfileheader *header)
 	s32 result;
 	u32 bodylen;
 
-#if VERSION < VERSION_NTSC_FINAL
-	osSyncPrintf("Pak %d -> Pak_RepairAsBlank : Repairing as Blank, Offset=%u, pH=%x\n", device, offset, header);
-#endif
-
 	// Skip past the header if given
 	if (header != NULL) {
 		offset += header->filelen;
 	}
 
-#if VERSION >= VERSION_NTSC_FINAL
-	if (1);
-#endif
-
 	while (offset < g_Paks[device].pdnumbytes) {
 		result = pakReadHeaderAtOffset(device, offset, &iterheader);
-
-#if VERSION >= VERSION_NTSC_FINAL
-		if (1);
 
 		if (result == PAK_ERR2_OK) {
 			// Found a valid header
@@ -1595,60 +1530,14 @@ bool pakRepairAsBlank(s8 device, u32 *offsetptr, struct pakfileheader *header)
 			pakWriteFileAtOffset(device, start, PAKFILETYPE_TERMINATOR, NULL, 0, NULL, NULL, 0, 1);
 			return true;
 		}
-#elif VERSION >= VERSION_NTSC_1_0
-		osSyncPrintf("Pak %d -> Pak_RepairAsBlank -> Summing @ offset=%u, ret=%d\n", device, offset, result);
-
-		if (result == PAK_ERR2_OK) {
-			// Found a valid header
-			if (iterheader.filetype & PAKFILETYPE_BLANK) {
-				// empty
-			} else {
-				break;
-			}
-		} else if (result == PAK_ERR2_NOPAK) {
-			return false;
-		}
-
-		// No header at this offset
-		offset += pakGetBlockSize(device);
-
-		if (offset - start > maxfilesize) {
-			osSyncPrintf("Pak %d -> Pak_RepairAsBlank -> Fault Speads Over More Than One File - TERMINAL", device);
-			*offsetptr = offset;
-			return false;
-		}
-#else
-		osSyncPrintf("Pak %d -> Pak_RepairAsBlank -> Summing @ offset=%u, ret=%d\n", device, offset, result);
-
-		if (result == PAK_ERR2_OK) {
-			// Found a valid header
-			if (iterheader.filetype & PAKFILETYPE_BLANK) {
-				// empty
-			} else {
-				break;
-			}
-		}
-
-		// No header at this offset
-		offset += pakGetBlockSize(device);
-
-		if (offset - start > maxfilesize) {
-			osSyncPrintf("Pak %d -> Pak_RepairAsBlank -> Fault Speads Over More Than One File - TERMINAL", device);
-			*offsetptr = offset;
-			return false;
-		}
-#endif
 	}
 
 	bodylen = pakGetBodyLenByFileLen(offset - start);
-
-	osSyncPrintf("Pak %d -> Pak_RepairAsBlank - St=%u, Ed=%u, Gap=%u, Blank Size=%u\n", device, start, offset, offset - start, bodylen);
 
 	// Write the blank file ranging from to the start to the current offset
 	result = pakWriteFileAtOffset(device, start, PAKFILETYPE_BLANK, NULL, bodylen, NULL, NULL, 0, 1);
 
 	if (result != 0) {
-		osSyncPrintf("Pak %d -> Pak_RepairAsBlank - Fatal Error at tOffset %u\n", device, offset);
 		*offsetptr = offset;
 		return false;
 	}
@@ -1656,14 +1545,6 @@ bool pakRepairAsBlank(s8 device, u32 *offsetptr, struct pakfileheader *header)
 	*offsetptr = offset;
 	return true;
 }
-
-#if VERSION >= VERSION_NTSC_1_0
-const char var7f1b411c[] = "Pak %d -> Pak_ValidateVersion - Start - Game File Size = %d\n";
-const char var7f1b415c[] = "Pak %d -> Pak_ValidateVersion - Clearing cache 2\n";
-const char var7f1b4190[] = "Pak %d -> Pak_ValidateVersion 1 - Loaded with ret=%d at offset %u\n";
-const char var7f1b41d4[] = "Pak %d -> Pak_ValidateVersion 1 - Blank at %u\n";
-const char var7f1b4204[] = "Pak %d -> Pak_ValidateVersion 2 - Loaded  at offset %u\n";
-#endif
 
 struct serialcount {
 	u32 serial;
@@ -1699,29 +1580,15 @@ s32 pakRepairFilesystem(s8 device)
 	s32 numheaders = 0;
 	u32 headeroffsets[50];
 	u32 offset;
-#if VERSION >= VERSION_NTSC_FINAL
 	s32 i;
 	bool foundduplicate;
 	struct serialcount serials[100];
-	u32 stack[1];
-#else
-	bool foundduplicate;
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
-	if (device);
-	if (device);
-	if (device);
-	if (device);
-	if (device);
-	if (device);
-#endif
-
-	g_Paks[device].serial = (VERSION >= VERSION_NTSC_1_0 ? 0xbaba : 0);
+	g_Paks[device].serial = 0xbaba;
 	g_Paks[device].headercachecount = 0;
 
 	if (pak0f1167d8(device) != 0) {
-		return (VERSION >= VERSION_NTSC_1_0 ? 1 : 0);
+		return 1;
 	}
 
 	// Iterate the headers on the pak and copy each one onto the stack.
@@ -1736,23 +1603,14 @@ s32 pakRepairFilesystem(s8 device)
 
 		if (ret == PAK_ERR2_OK) {
 			if (header.filetype & PAKFILETYPE_BLANK) {
-#if VERSION >= VERSION_NTSC_FINAL
 				break;
-#else
-				fatal = !pakRepairAsBlank(device, &offset, NULL);
-				continue;
-#endif
 			}
 
 			if (header.filetype & PAKFILETYPE_TERMINATOR) {
 				break;
 			}
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (offset + header.filelen >= g_Paks[device].pdnumbytes)
-#else
-			if (false)
-#endif
 			{
 				// File overflows the device length -> replace with terminator
 				ret = pakWriteFileAtOffset(device, offset, PAKFILETYPE_TERMINATOR, NULL, 0, NULL, NULL, 0, 1);
@@ -1800,7 +1658,6 @@ s32 pakRepairFilesystem(s8 device)
 				}
 			}
 		} else {
-#if VERSION >= VERSION_NTSC_1_0
 			if (ret == PAK_ERR2_NOPAK) {
 				return 1;
 			} else if (ret == PAK_ERR2_CHECKSUM) {
@@ -1823,25 +1680,7 @@ s32 pakRepairFilesystem(s8 device)
 				fatal = true;
 				break;
 			}
-#else
-			if (ret == PAK_ERR2_CHECKSUM) {
-				fatal = pakRepairAsBlank(device, &offset, NULL) == false;
-			} else if (ret == PAK_ERR2_INCOMPLETE) {
-				fatal = pakRepairAsBlank(device, &offset, &header) == false;
-			} else if (ret == PAK_ERR2_VERSION) {
-				foundotherversion = true;
-				break;
-			} else if (ret == PAK_ERR2_BADOFFSET || ret == PAK_ERR2_NOPAK || ret == PAK_ERR2_CORRUPT) {
-				return 0;
-			} else {
-				return 0;
-			}
-#endif
 		}
-
-#if VERSION < VERSION_NTSC_1_0
-		if (offset);
-#endif
 	}
 
 	// Recheck all the headers.
@@ -1849,7 +1688,6 @@ s32 pakRepairFilesystem(s8 device)
 	// Return 1 if any header still has problems.
 	offset = 0;
 
-#if VERSION >= VERSION_NTSC_1_0
 	while (!foundotherversion && !fatal && offset < g_Paks[device].pdnumbytes) {
 		ret = pakReadHeaderAtOffset(device, offset, &header);
 
@@ -1857,17 +1695,6 @@ s32 pakRepairFilesystem(s8 device)
 			if (header.filetype & PAKFILETYPE_BLANK) {
 				// empty
 			} else if (offset) {
-#if VERSION < VERSION_NTSC_FINAL
-				if (header.deviceserial != g_Paks[device].serial) {
-					if (pakRepairAsBlank(device, &offset, &header)) {
-						// empty
-					} else {
-						fatal = true;
-					}
-				}
-
-				g_Paks[device].serial = header.deviceserial;
-#endif
 			} else {
 				g_Paks[device].serial = header.deviceserial;
 
@@ -1887,37 +1714,10 @@ s32 pakRepairFilesystem(s8 device)
 		} else if (ret == PAK_ERR2_NOPAK) {
 			return 1;
 		} else {
-			return (VERSION >= VERSION_NTSC_FINAL ? 1 : -1);
+			return 1;
 		}
 	}
-#else
-	while (!foundotherversion && !fatal && offset < g_Paks[device].pdnumbytes) {
-		ret = pakReadHeaderAtOffset(device, offset, &header);
 
-		if (ret == PAK_ERR2_OK) {
-			if (header.filetype & PAKFILETYPE_TERMINATOR) {
-				break;
-			} else if (header.filetype & PAKFILETYPE_BLANK) {
-				// emtpy
-			} else if (offset) {
-				if (header.deviceserial);
-				g_Paks[device].serial = header.deviceserial;
-			} else {
-				g_Paks[device].serial = header.deviceserial;
-
-			}
-
-			offset += header.filelen;
-		} else if (ret == PAK_ERR2_VERSION) {
-			foundotherversion = true;
-			offset += header.filelen;
-		} else {
-			return 0;
-		}
-	}
-#endif
-
-#if VERSION >= VERSION_NTSC_FINAL
 	// NTSC Final ensures serials are all the same
 	if (!foundotherversion && !fatal) {
 		// Build list of serials and how many times each was found.
@@ -1976,12 +1776,6 @@ s32 pakRepairFilesystem(s8 device)
 				// Apply the chosen serial
 				g_Paks[device].serial = serials[bestindex].serial;
 
-#if VERSION >= VERSION_PAL_BETA
-				if (g_Paks[device].serial < 0x10) {
-					g_Paks[device].serial = pakGenerateSerial(device);
-				}
-#endif
-
 				offset = 0;
 
 				while (offset < g_Paks[device].pdnumbytes) {
@@ -2010,62 +1804,22 @@ s32 pakRepairFilesystem(s8 device)
 			g_Paks[device].serial = serials[0].serial;
 		}
 	}
-#endif
 
 	if (fatal) {
-		return (VERSION >= VERSION_NTSC_1_0 ? -1 : 0);
+		return -1;
 	}
 
 	if (foundotherversion) {
-		return (VERSION >= VERSION_NTSC_1_0 ? -1 : 0);
+		return -1;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (device != SAVEDEVICE_GAMEPAK && g_Paks[device].serial == 0) {
 		g_Paks[device].serial = pakGenerateSerial(device);
 		return -1;
 	}
-#else
-	if (device != SAVEDEVICE_GAMEPAK && g_Paks[device].serial == 0) {
-		g_Paks[device].serial = 0x10 + rngRandom() % 0x1ff0;
-		return 0;
-	}
-#endif
 
 	return (VERSION >= VERSION_NTSC_1_0 ? 0 : 1);
 }
-
-#if VERSION >= VERSION_NTSC_1_0
-/**
- * Find all game files on the game pak and write random data into them.
- * This should cause a checksum mismatch the next time the file is read.
- */
-void pakCorrupt(void)
-{
-	struct pakfileheader header;
-	u32 fileids[1025];
-	s32 address;
-	s32 i;
-	s32 j;
-	u8 payload[8];
-
-	pakGetFileIdsByType(SAVEDEVICE_GAMEPAK, PAKFILETYPE_GAME, fileids);
-
-	for (i = 0; fileids[i] != 0; i++) {
-		for (j = 0; j < 8; j++) {
-			payload[j] = rngRandom() & 0xff;
-		}
-
-		address = pakFindFile(SAVEDEVICE_GAMEPAK, fileids[i], &header);
-		address += i * 8;
-		address += 0x30;
-
-		joyDisableCyclicPolling();
-		osEepromLongWrite(&g_PiMesgQueue, address, payload, sizeof(payload));
-		joyEnableCyclicPolling();
-	}
-}
-#endif
 
 /**
  * Create the initial files on a pak. Return true if all good.
@@ -2192,11 +1946,6 @@ void pakMergeBlanks(s8 device)
 		if (PAKFILETYPE_BLANK == header.filetype) {
 			if (mergestartoffset != 0xffff) {
 				u32 filelen = offset - mergestartoffset + header.filelen - sizeof(struct pakfileheader);
-
-				if (pakWriteFileAtOffset(device, mergestartoffset, PAKFILETYPE_BLANK, NULL, filelen, NULL, NULL, 0, 1) != 0) {
-					osSyncPrintf("> Pak_DefragPak_Level1 - Merge of two blanks failed");
-				}
-
 				nextoffset = 0;
 				mergestartoffset = 0xffff;
 			} else {
@@ -2301,8 +2050,6 @@ bool pakQueryTotalUsage(s8 device)
 	s32 ret;
 	s32 i;
 
-	osSyncPrintf("Pak %d -> Pak_Memory_UpdateNoteInfo\n", device);
-
 	if (!pak->unk2b8_02) {
 		return true;
 	}
@@ -2359,14 +2106,7 @@ void pakQueryPdSize(s8 device)
 		g_Paks[device].pdnumpages = g_Paks[device].pdnumbytes / 256;
 		g_Paks[device].pdnumnotes = g_Paks[device].pdnumbytes / (256 * NUM_PAGES);
 	}
-
-	// These strings belong in this function, but the function needs to be
-	// reworked to put them in their correct places
-	osSyncPrintf("Pak %d -> Couldn't assertain the game note size\n");
-	osSyncPrintf("Pak %d -> Pak_AnalyseCurrentGameNote - Game note size = %uk\n");
 }
-
-const char var7f1b44bc[] = "Pak %d -> Searching for the game file\n";
 
 /**
  * Prepare a controller pak for use by making sure a note is allocated and that
@@ -2489,7 +2229,7 @@ bool pakProbe(s8 device)
 	joyDisableCyclicPolling();
 
 	// Try memory pak
-	ret = pakInitPak(&g_PiMesgQueue, PFS(device), device, NULL);
+	ret = pakInitPak(PFS(device), device, NULL);
 
 	if (pakHandleResult(ret, device, true, LINE_3829)) {
 		g_Paks[device].state = PAKSTATE_MEM_DISPATCH;
@@ -2514,7 +2254,7 @@ bool pakProbe(s8 device)
 
 		if (!done) {
 			// Try rumble pak
-			ret = osMotorProbe(&g_PiMesgQueue, PFS(device), device);
+			ret = osMotorProbe(PFS(device), device);
 
 			if (pakHandleResult(ret, device, false, LINE_3865)) {
 				g_Paks[device].type = PAKTYPE_RUMBLE;
@@ -2531,7 +2271,7 @@ bool pakProbe(s8 device)
 
 			if (!done) {
 				// Try game boy pak
-				ret = osGbpakInit(&g_PiMesgQueue, PFS(device), device);
+				ret = 1;
 
 				if (pakHandleResult(ret, device, false, LINE_3889)) {
 					g_Paks[device].type = PAKTYPE_GAMEBOY;
@@ -2569,7 +2309,6 @@ void pakWipe(s8 device, u32 blocknumstart, u32 blocknumend)
 		g_Paks[device].headercachecount = 0;
 
 		if (!pakHandleResult(result, device, true, LINE_3948)) {
-			osSyncPrintf("Pak %d -> Game file wipe failed\n", device);
 			g_Paks[device].pdnoteindex = -1;
 			break;
 		}
@@ -3174,11 +2913,6 @@ void pakExecuteDebugOperations(void)
 	bool disablepolling = false;
 	s8 i;
 
-	if (g_PakDebugCorruptMe) {
-		g_PakDebugCorruptMe = false;
-		pakCorrupt();
-	}
-
 	if (g_PakDebugPakDump) {
 		g_PakDebugPakDump = false;
 	}
@@ -3197,7 +2931,7 @@ void pakExecuteDebugOperations(void)
 		s32 device = g_PakDebugPakInit - 1;
 
 		joyDisableCyclicPolling();
-		pakInitPak(&g_PiMesgQueue, PFS(device), device, 0);
+		pakInitPak(PFS(device), device, 0);
 		joyEnableCyclicPolling();
 
 		g_PakDebugPakInit = false;
@@ -3234,26 +2968,6 @@ void pakExecuteDebugOperations(void)
 		g_JoyPfsPollMasterEnabled = true;
 	}
 }
-
-/*const char var7f1b46a8[] = "\nOS_GBPAK_GBCART_ON       - ";
-const char var7f1b46c8[] = "\nOS_GBPAK_GBCART_PULL     - ";
-const char var7f1b46e8[] = "\nOS_GBPAK_POWER           - ";
-const char var7f1b4708[] = "\nOS_GBPAK_RSTB_DETECTION  - ";
-const char var7f1b4728[] = "Pak -> Dumping contents of Game Boy Pack(TM) Id file";
-const char var7f1b4760[] = "(u16) - Fixed1             - %d\n";
-const char var7f1b4784[] = "(u16) - StartAddress       - %d\n";
-const char var7f1b47a8[] = "(u8*) - Nintendo chr data  - %s\n";
-const char var7f1b47cc[] = "(u8*) - Game Title         - %s\n";
-const char var7f1b47f0[] = "(u16) - Company Code       - %d\n";
-const char var7f1b4814[] = "(u8 ) - Body Code          - %d\n";
-const char var7f1b4838[] = "(u8 ) - Rom Size           - %d\n";
-const char var7f1b485c[] = "(u8 ) - Ram Size           - %d\n";
-const char var7f1b4880[] = "(u8 ) - country_code       - %d\n";
-const char var7f1b48a4[] = "(u8 ) - Fixed 2 (0x33)     - %d\n";
-const char var7f1b48c8[] = "(u8 ) - Version Number     - %d\n";
-const char var7f1b48ec[] = "(u8 ) - isum               - %d\n";
-const char var7f1b4910[] = "(u16) - sum                - %d\n";
-const char var7f1b4934[] = "Pak -> Finished Dump";*/
 
 void pakCheckPlugged(void)
 {
@@ -3312,7 +3026,7 @@ void gbpakHandleError(u32 err)
 
 bool gbpakRead(s8 device, u16 address, u8 *buffer, u16 size)
 {
-	s32 result = osGbpakReadWrite(PFS(device), 0, address, buffer, size); // Read
+	s32 result = 1; // Read
 
 	if (result) {
 		gbpakHandleError(result);
@@ -3324,7 +3038,7 @@ bool gbpakRead(s8 device, u16 address, u8 *buffer, u16 size)
 
 bool gbpakWrite(s8 device, u16 address, u8 *buffer, u16 size)
 {
-	s32 result = osGbpakReadWrite(PFS(device), 1, address, buffer, size); // Write
+	s32 result = 1; // Write
 
 	if (result) {
 		gbpakHandleError(result);
@@ -3967,7 +3681,7 @@ PakErr1 pakReadEeprom(u8 address, u8 *buffer, u32 len)
 	s32 result;
 
 	joyDisableCyclicPolling(JOYARGS(6234));
-	result = osEepromLongRead(&g_PiMesgQueue, address, buffer, len);
+	result = osEepromLongRead(address, buffer, len);
 	joyEnableCyclicPolling(JOYARGS(6236));
 
 	return result == PAK_ERR1_OK ? PAK_ERR1_OK : PAK_ERR1_EEPROMREADFAILED;
@@ -3978,7 +3692,7 @@ PakErr1 pakWriteEeprom(u8 address, u8 *buffer, u32 len)
 	s32 result;
 
 	joyDisableCyclicPolling(JOYARGS(6269));
-	result = osEepromLongWrite(&g_PiMesgQueue, address, buffer, len);
+	result = osEepromLongWrite(address, buffer, len);
 	joyEnableCyclicPolling(JOYARGS(6271));
 
 	return result == PAK_ERR1_OK ? PAK_ERR1_OK : PAK_ERR1_EEPROMWRITEFAILED;
@@ -4119,66 +3833,6 @@ bool gbpakStrcmp(char *a, char *b)
 }
 
 bool pak0f11eaec(s8 device);
-
-s32 gbpakIdentifyGame(s8 device)
-{
-	OSGbpakId id;
-	u8 status;
-	s32 ret;
-	s32 game = GBGAME_OTHER;
-	bool poweredon = false;
-	bool ok = true;
-
-	if (g_Paks[device].type != PAKTYPE_GAMEBOY) {
-		return GBGAME_OTHER;
-	}
-
-	joyDisableCyclicPolling();
-
-	ret = osGbpakReadId(PFS(device), &id, &status);
-
-	// NTSC Final sets poweredon to true unconditionally.
-	// If we just set it to true without the if-statement then it creates a
-	// mismatch because the compiler optimises out the poweredon = false line
-	// earlier. Using this if-statement with a condition that's always true
-	// makes the compiler optimise out the if-statement but leave both
-	// assignments to poweredon intact.
-	if (ok) {
-		poweredon = true;
-	}
-
-	if (ret != PAK_ERR1_OK) {
-		ok = false;
-	}
-
-	if (var80075cb0 == id.company_code) {
-		// PerfDark or PerfDark
-		if (gbpakStrcmp(var80075cb4, id.game_title) || gbpakStrcmp(var80075cc0, id.game_title)) {
-			g_Paks[device].isgbcamera = false;
-			g_Paks[device].isgbpd = true;
-			game = GBGAME_PD;
-		}
-	}
-
-	if (game != GBGAME_PD) {
-		ok = false;
-	}
-
-	if (poweredon) {
-		if (osGbpakPower(PFS(device), OS_GBPAK_POWER_OFF) != PAK_ERR1_OK) {
-			ok = false;
-		}
-	}
-
-	joyEnableCyclicPolling();
-
-	if (ok) {
-		return game;
-	}
-
-	g_Paks[device].state = PAKSTATE_GB_OPEN_UNREADABLE;
-	return GBGAME_OTHER;
-}
 
 bool pak0f11ea34(s8 arg0)
 {

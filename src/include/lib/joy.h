@@ -21,10 +21,8 @@ void joy00013e84(void);
 u32 joyGetConnectedControllers(void);
 void joy00014238(void);
 void joyDebugJoy(void);
-s32 joyStartReadData(OSMesgQueue *mq);
 void joyReadData(void);
-void joysHandleRetrace(void);
-void joy00014810(bool value);
+void joySetAllowTitleInput(bool value); // Determines if the player can press a button to skip part of the intro or has to wait
 s32 joyGetNumSamples(void);
 s32 joyGetRStickXOnSample(s32 samplenum, s8 contpadnum);
 s32 joyGetRStickYOnSample(s32 samplenum, s8 contpadnum);

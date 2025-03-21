@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/camera.h"
@@ -72,8 +73,8 @@ Gfx *func0f0d479c(Gfx *gdl)
 	mtxF2L(&mtx, mtx1);
 	mtx00016784();
 
-	gSPMatrix(gdl++, osVirtualToPhysical(mtx2), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-	gSPMatrix(gdl++, osVirtualToPhysical(mtx1), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, (uintptr_t)(mtx2), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPMatrix(gdl++, (uintptr_t)(mtx1), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	if (g_Viewport == NULL) {
 		u32 size = align16(sizeof(Vp));
@@ -101,8 +102,8 @@ Gfx *func0f0d479c(Gfx *gdl)
 
 Gfx *func0f0d49c8(Gfx *gdl)
 {
-	gSPViewport(gdl++, OS_K0_TO_PHYSICAL(viGetCurrentPlayerViewport()));
-	gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPViewport(gdl++, (uintptr_t)(viGetCurrentPlayerViewport()));
+	gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	return gdl;
 }
@@ -135,7 +136,7 @@ Gfx *func0f0d4a3c(Gfx *gdl, s32 arg1)
 	func0f0d4690(&mtx);
 	mtxF2L(&mtx, mtxptr);
 
-	gSPMatrix(gdl++, osVirtualToPhysical(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	return gdl;
 }
@@ -150,7 +151,7 @@ Gfx *func0f0d4c80(Gfx *gdl)
 	mtx00015e4c(0.1f, &mtx);
 	mtxF2L(&mtx, mtxptr);
 
-	gSPMatrix(gdl++, osVirtualToPhysical(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	return gdl;
 }
@@ -330,8 +331,8 @@ Gfx *menugfxDrawPlane(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32
 	colours[0].word = PD_BE32(colour1);
 	colours[1].word = PD_BE32(colour2);
 
-	gSPColor(gdl++, osVirtualToPhysical(colours), 2);
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 4, 0);
+	gSPColor(gdl++, (uintptr_t)(colours), 2);
+	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 	gSPTri2(gdl++, 0, 1, 3, 3, 2, 0);
 
 	return gdl;

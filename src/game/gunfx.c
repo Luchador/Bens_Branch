@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/acosfasinf.h"
 #include "game/bondgun.h"
@@ -285,12 +286,12 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	vertices[3].colour = 4;
 
 	gSPClearGeometryMode(gdl++, G_CULL_BACK);
-	gSPMatrix(gdl++, osVirtualToPhysical(spc8), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-	gSPColor(gdl++, osVirtualToPhysical(colours), 2);
+	gSPMatrix(gdl++, (uintptr_t)(spc8), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPColor(gdl++, (uintptr_t)(colours), 2);
 
 	texSelect(&gdl, texconfig, 4, 1, 2, true, NULL);
 
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 4, 0);
+	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 	gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
 
 	return gdl;
@@ -565,7 +566,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 					}
 
 					gSPClearGeometryMode(gdl++, G_CULL_BACK);
-					gSPMatrix(gdl++, osVirtualToPhysical(sp188), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+					gSPMatrix(gdl++, (uintptr_t)(sp188), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 					gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 					gDPSetColorDither(gdl++, G_CD_DISABLE);
 					gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
@@ -573,12 +574,12 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 					gDPSetTextureLOD(gdl++, G_TL_TILE);
 					gDPSetTextureConvert(gdl++, G_TC_FILT);
 					gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
-					gSPColor(gdl++, osVirtualToPhysical(colours), 1);
+					gSPColor(gdl++, (uintptr_t)(colours), 1);
 
 					if (beam->weaponnum == WEAPON_LASER) {
 						texSelect(&gdl, &g_TexGroup03Configs[0], 4, arg2, 2, true, NULL);
 
-						gSPVertex(gdl++, osVirtualToPhysical(vertices), 8, 0);
+						gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
 						gSPTri2(gdl++, 4, 5, 6, 4, 5, 7);
 
 						texSelect(&gdl, texconfig, 4, arg2, 2, true, NULL);
@@ -587,7 +588,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 					} else {
 						texSelect(&gdl, texconfig, 4, arg2, 2, true, NULL);
 
-						gSPVertex(gdl++, osVirtualToPhysical(vertices), 4, 0);
+						gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 						gSPTri2(gdl++, 0, 2, 3, 0, 3, 1);
 					}
 				}
@@ -1093,7 +1094,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	mtx = gfxAllocateMatrix();
 	mtxF2L(&sp1b0, mtx);
 
-	gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	for (i = 0; i < ARRAYCOUNT(g_LaserSights); i++) {
 		if (g_LaserSights[i].id != -1) {
@@ -1115,7 +1116,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 			colours[0].word = PD_BE32(0xff00005f);
 			colours[1].word = PD_BE32(0xff00000f);
 
-			gSPColor(gdl++, osVirtualToPhysical(colours), 2);
+			gSPColor(gdl++, (uintptr_t)(colours), 2);
 
 			if (g_LaserSights[i].unk28 > 0.0f) {
 				if (!(g_LaserSights[i].dotpos.f[0] < 0.0000001f) || !(g_LaserSights[i].dotpos.f[0] > -0.000001f)
@@ -1219,7 +1220,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 					vertices[3].y = pos.f[1] + (-f20 * f00) + (-f20 * spc8);
 					vertices[3].z = pos.f[2] + (-f20 * f24) + (-f20 * spc4);
 
-					gSPVertex(gdl++, osVirtualToPhysical(vertices), 4, 0);
+					gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
 					gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
 				}
@@ -1279,7 +1280,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	mtx = gfxAllocateMatrix();
 	mtxF2L(&sp198, mtx);
 
-	gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	for (i = 0; i < ARRAYCOUNT(g_LaserSights); i++) {
 		if (g_LaserSights[i].id != -1) {
@@ -1332,7 +1333,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 			colours[0].word = PD_BE32(0xff00005f);
 			colours[1].word = PD_BE32(0xff00000f);
 
-			gSPColor(gdl++, osVirtualToPhysical(colours), 2);
+			gSPColor(gdl++, (uintptr_t)(colours), 2);
 
 			vertices = gfxAllocateVertices(6);
 
@@ -1380,7 +1381,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 			vertices[5].y = spcc.f[1] + (400 * spb4.f[1]) + (spa8.f[1] * 15.0f);
 			vertices[5].z = spcc.f[2] + (400 * spb4.f[2]) + (spa8.f[2] * 15.0f);
 
-			gSPVertex(gdl++, osVirtualToPhysical(vertices), 6, 0);
+			gSPVertex(gdl++, (uintptr_t)(vertices), 6, 0);
 
 			gSPTri4(gdl++, 0, 1, 2, 2, 3, 1, 2, 3, 5, 2, 5, 4);
 		}

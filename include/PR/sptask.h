@@ -105,17 +105,6 @@ typedef union {
 
 #endif /* _LANGUAGE_C */
 
-#ifdef _LANGUAGE_ASSEMBLY
-
-/*
- * For the RSP ucode:
- *	offsets into the task structure
- */
-
-#include <PR/sptaskoff.h>
-
-#endif
-
 /**************************************************************************
  *
  * Global definitions

@@ -142,13 +142,7 @@ void psStopChannel(s32 channelnum)
 {
 	struct pschannel *channel = &g_PsChannels[channelnum];
 
-#if VERSION < VERSION_NTSC_1_0
-	osSyncPrintf("SND : Stop -> Prop=%x, Id=%d\n", channel->prop, channelnum);
-#endif
-
-#if VERSION >= VERSION_NTSC_1_0
 	channel->flags2 |= PSFLAG2_STOPPED;
-#endif
 
 	if (channel->flags & PSFLAG_FORHUDMSG) {
 		hudmsgsHideByChannel(channelnum);
@@ -163,10 +157,6 @@ void psStopChannel(s32 channelnum)
 	} else if (channel->audiohandle && sndGetState(channel->audiohandle) != AL_STOPPED) {
 		audioStop(channel->audiohandle);
 	}
-
-#if VERSION < VERSION_NTSC_1_0
-	channel->flags = PSFLAG_FREE;
-#endif
 }
 
 void psPrintChannel(struct pschannel *channel)
@@ -297,8 +287,6 @@ void psTickChannel(s32 channelnum)
 		if (channel->currentvol == -1) {
 			newvol = channel->targetvol;
 		} else if (channel->volchangetimer60 >= 0) {
-			osSyncPrintf("Propsnd : USING TIME 60\n");
-
 			if (channel->volchangetimer60 > g_Vars.lvupdate60) {
 				newvol = channel->currentvol + (channel->targetvol - channel->currentvol) * g_Vars.lvupdate60 / channel->volchangetimer60;
 			}
@@ -306,11 +294,7 @@ void psTickChannel(s32 channelnum)
 			channel->volchangetimer60 -= g_Vars.lvupdate60;
 		} else if (channel->volchangespeed && channel->currentvol != channel->targetvol) {
 			f32 f12 = channel->targetvol - channel->currentvol;
-#if VERSION >= VERSION_PAL_BETA
-			f32 f14 = (1.0f / 6000.0f) * g_Vars.lvupdate60freal * channel->volchangespeed;
-#else
 			f32 f14 = (1.0f / 6000.0f) * g_Vars.lvupdate60 * channel->volchangespeed;
-#endif
 
 			if (ABS(f12) > 1.0f) {
 				if (f14 > 1.0f) {
@@ -377,8 +361,6 @@ void psTickChannel(s32 channelnum)
 		if (channel->flags & PSFLAG_REPEATING) {
 			if (channel->currentvol > 0) {
 				if (channel->flags & PSFLAG_OUTOFRANGE) {
-					osSyncPrintf("PS_AUTO : Un-Pausing %d\n", channelnum);
-
 					channel->flags &= ~PSFLAG_OUTOFRANGE;
 					channel->flags |= PSFLAG_FIRSTTICK;
 				}
@@ -756,13 +738,11 @@ s32 psPlayFromProp(s32 channelnum, s16 soundnum, s32 vol, struct prop *prop, s16
 	if (type == PSTYPE_MARKER) {
 		if (CHANNEL_IS_AI(channelnum)) {
 			if (g_PsChannels[channelnum].flags & PSFLAG_FREE) {
-				osSyncPrintf("AISOUND: PSTYPE_MARKER - Channel %d -> Playing sound number id=%d(%x)\n", channelnum, soundnum, soundnum);
 				g_PsChannels[channelnum].soundnum26 = soundnum;
 				g_PsChannels[channelnum].type = PSTYPE_MARKER;
 				g_PsChannels[channelnum].flags &= ~PSFLAG_FREE;
 				retchannelnum = channelnum;
 			} else {
-				osSyncPrintf("AISOUND: PSTYPE_MARKER - Channel %d -> Playing sound number id=%d(%x)\n", channelnum, soundnum, soundnum);
 				g_PsChannels[channelnum].soundnum26 = soundnum;
 				g_PsChannels[channelnum].type = PSTYPE_MARKER;
 				g_PsChannels[channelnum].flags &= ~PSFLAG_FREE;
@@ -781,7 +761,6 @@ s32 psPlayFromProp(s32 channelnum, s16 soundnum, s32 vol, struct prop *prop, s16
 		 * Flag PSFLAG_CUTSCENE is set so propsnd knows the channel
 		 * was allocated as part of AIMULTI instead of via the game engine.
 		 */
-		osSyncPrintf("AISOUND: CUTSCENE -> Playing sound number id=%d(%x))\n", soundnum, soundnum);
 
 		retchannelnum = psCreate(NULL, prop, soundnum, -1,
 				(vol ? 0 : -1), flags | PSFLAG_CUTSCENE, 0, type, 0, -1, 0, -1, -1, -1, -1);
@@ -791,11 +770,6 @@ s32 psPlayFromProp(s32 channelnum, s16 soundnum, s32 vol, struct prop *prop, s16
 		 * This is a game engine sound.
 		 * Allocate a channel automatically from the heap and return it.
 		 */
-		osSyncPrintf("AISOUND: Channel %d -> Playing sound number id=%d(%x), Prop=%x, Flags=%x, Type=%d, Zero=%d\n",
-				channelnum, soundnum, soundnum, prop, flags, type, 0);
-		osSyncPrintf("AISOUND: Channel %d -> Playing sound number id=%d(%x), Prop=%x, Flags=%x, Type=%d\n",
-				channelnum, soundnum, soundnum, prop, flags, type);
-
 		retchannelnum = psCreate(NULL, prop, soundnum, -1,
 			(vol ? 0 : -1), flags, 0, type, 0, -1, 0, -1, -1, -1, -1);
 	}
@@ -824,8 +798,6 @@ void psMuteChannel(s32 channelnum)
 	if (channelnum == CHANNEL_CUTSCENE) {
 		s32 i;
 
-		osSyncPrintf("AISOUND: CUTSCENE -> Stopping all cutscene sounds\n");
-
 		for (i = CHANNEL_HEAP_FIRST; i < CHANNELCOUNT(); i++) {
 			if ((g_PsChannels[i].flags & PSFLAG_FREE) == 0
 					&& (g_PsChannels[i].flags & PSFLAG_CUTSCENE)) {
@@ -833,7 +805,6 @@ void psMuteChannel(s32 channelnum)
 			}
 		}
 	} else if (CHANNEL_IS_AI(channelnum)) {
-		osSyncPrintf("AISOUND: Stop sound channel %d\n", channelnum);
 		psStopChannel(channelnum);
 	}
 }
@@ -863,13 +834,8 @@ void psModify(s32 channelnum, s32 volume, s16 padnum, struct prop *prop, s32 vol
 	bool hastimer = (volchangetimer60 >= 6) ? true : false;
 	bool repeating = (flags & PSFLAG_REPEATING) ? true : false;
 
-	osSyncPrintf("AISOUND: Channel %d -> Setting params : Vol=%d, Pad=%d, Prop=%x, Time=%d, Far=%d, Silence=%d, Flags=%u\n",
-			channelnum, volume, padnum, prop, volchangetimer60, dist2, dist3, flags);
-
 	if (CHANNEL_IS_AI(channelnum)) {
 		if (channel->type == PSTYPE_MARKER) {
-			osSyncPrintf("AISOUND : This channel has a marker -> Shall start and use ID = %d(%x)\n", channelnum, &g_PsChannels[channelnum]);
-
 			g_PsChannels[channelnum].channelnum = (u16)channelnum;
 
 			psCreate(&g_PsChannels[channelnum], prop, channel->soundnum26, -1,

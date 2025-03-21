@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "data.h"
 #include "game/atan2f.h"
@@ -224,7 +225,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 		gDPSetTextureFilter(gdl++, G_TF_BILERP);
 		gDPSetCycleType(gdl++, G_CYC_2CYCLE);
 		gDPSetTextureLOD(gdl++, G_TL_LOD);
-		gSPMatrix(gdl++, osVirtualToPhysical(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		for (i = 0; i < g_MaxShards; i++) {
 			if (g_Shards[i].age60 > 0 && g_Shards[i].type == SHARDTYPE_WOOD) {
@@ -269,7 +270,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 					{
 						mtxF2L(&shardmtx, mtx);
 
-						gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+						gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 						if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 							Col *colours = gfxAllocateColours(3);
@@ -293,17 +294,17 @@ Gfx *shardsRenderWood(Gfx *gdl)
 								colours[j].a = g_Shards[g_NextShardNum].colours[j].a * alphamult;
 							}
 
-							gSPColor(gdl++, osVirtualToPhysical(colours), 3);
+							gSPColor(gdl++, (uintptr_t)(colours), 3);
 						} else {
 							if (g_Shards[i].room != prevroom) {
 								gdl = lightsSetForRoom(gdl, g_Shards[i].room);
 								prevroom = g_Shards[i].room;
 							}
 
-							gSPColor(gdl++, osVirtualToPhysical(g_Shards[i].colours), 3);
+							gSPColor(gdl++, (uintptr_t)(g_Shards[i].colours), 3);
 						}
 
-						gSPVertex(gdl++, osVirtualToPhysical(g_Shards[i].vertices), 3, 0);
+						gSPVertex(gdl++, (uintptr_t)(g_Shards[i].vertices), 3, 0);
 						gSP1Triangle(gdl++, 0, 1, 2, 0);
 					}
 				}
@@ -346,7 +347,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 			gSPSetGeometryMode(gdl++, G_LIGHTING | G_TEXTURE_GEN);
 		}
 
-		gSPMatrix(gdl++, osVirtualToPhysical(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		for (i = 0; i < g_MaxShards; i++) {
 			if (g_Shards[i].age60 > 0 && g_Shards[i].type != SHARDTYPE_WOOD) {
@@ -391,7 +392,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 					{
 						mtxF2L(&shardmtx, mtx);
 
-						gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+						gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 						if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 							Col *colours = gfxAllocateColours(3);
@@ -415,17 +416,17 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 								colours[j].a = g_Shards[g_NextShardNum].colours[j].a * alphamult;
 							}
 
-							gSPColor(gdl++, osVirtualToPhysical(colours), 3);
+							gSPColor(gdl++, (uintptr_t)(colours), 3);
 						} else {
 							if (g_Shards[i].room != prevroom) {
 								gdl = lightsSetForRoom(gdl, g_Shards[i].room);
 								prevroom = g_Shards[i].room;
 							}
 
-							gSPColor(gdl++, osVirtualToPhysical(g_Shards[i].colours), 3);
+							gSPColor(gdl++, (uintptr_t)(g_Shards[i].colours), 3);
 						}
 
-						gSPVertex(gdl++, osVirtualToPhysical(g_Shards[i].vertices), 3, 0);
+						gSPVertex(gdl++, (uintptr_t)(g_Shards[i].vertices), 3, 0);
 						gSP1Triangle(gdl++, 0, 1, 2, 0);
 					}
 				}

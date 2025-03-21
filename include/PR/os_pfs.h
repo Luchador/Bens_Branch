@@ -35,7 +35,6 @@ extern "C" {
 #endif
 
 #include <PR/ultratypes.h>
-#include "os_message.h"
 
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
@@ -51,7 +50,7 @@ extern "C" {
  */
 typedef struct {
 	int		status;
-	OSMesgQueue 	*queue;
+	//OSMesgQueue 	*queue;
 	int		channel;
 	u8		id[32];
 	u8		label[32];
@@ -76,34 +75,7 @@ typedef struct {
 
 #endif /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
 
-/* File System error number */
-
-
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
-
-/**************************************************************************
- *
- * Macro definitions
- *
- */
-
-
-/**************************************************************************
- *
- * Extern variables
- *
- */
-
-
-/**************************************************************************
- *
- * Function prototypes
- *
- */
-
-/* file system interface */
-
-s32 osPfsIsPlug(OSMesgQueue *, u8 *);
 
 #endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
 

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include <n_libaudio.h>
 #include "naudio/n_abi.h"
 #include "ultra/audio/synthInternals.h"
@@ -250,12 +251,12 @@ s32 func00037fc0(s32 arg0, Acmd **cmd)
 				g_Mp3Vars.var8009c3c8 = sp58;
 
 				for (i = 0; i < sp5c; i++) {
-					acmd08((*cmd)++, osVirtualToPhysical(g_Mp3Vars.var8009c3d4[i]));
+					acmd08((*cmd)++, (uintptr_t)(g_Mp3Vars.var8009c3d4[i]));
 #ifdef PLATFORM_N64
-					acmd07((*cmd)++, g_Mp3Vars.var8009c3d8, osVirtualToPhysical(sp58));
+					acmd07((*cmd)++, g_Mp3Vars.var8009c3d8, (uintptr_t)(sp58));
 #else
 					// hijack the command to pass the entirety of the mp3 data to the mixer
-					acmd07((*cmd)++, g_Mp3Vars.romaddr, g_Mp3Vars.filesize, osVirtualToPhysical(sp58), g_Mp3Vars.reset);
+					acmd07((*cmd)++, g_Mp3Vars.romaddr, g_Mp3Vars.filesize, (uintptr_t)(sp58), g_Mp3Vars.reset);
 					g_Mp3Vars.reset = 0;
 #endif
 
@@ -277,11 +278,11 @@ s32 func00037fc0(s32 arg0, Acmd **cmd)
 		}
 
 		if (sp54 != NULL) {
-			n_aLoadBuffer((*cmd)++, sp50 + sp50, sp4c, osVirtualToPhysical(sp54));
+			n_aLoadBuffer((*cmd)++, sp50 + sp50, sp4c, (uintptr_t)(sp54));
 
 			if (g_Mp3Vars.var8009c3f1) {
 				sp54++;
-				n_aLoadBuffer((*cmd)++, sp50 + sp50, sp48, osVirtualToPhysical(sp54));
+				n_aLoadBuffer((*cmd)++, sp50 + sp50, sp48, (uintptr_t)(sp54));
 			}
 
 			sp4c += sp50 + sp50;
@@ -292,11 +293,11 @@ s32 func00037fc0(s32 arg0, Acmd **cmd)
 		if (arg0 > 0 && g_Mp3Vars.var8009c3c8) {
 			sp54 = (struct mp3thing *)(g_Mp3Vars.var8009c3d0 * 2 + (uintptr_t)g_Mp3Vars.var8009c3c8);
 
-			n_aLoadBuffer((*cmd)++, arg0 + arg0, sp4c, osVirtualToPhysical(sp54));
+			n_aLoadBuffer((*cmd)++, arg0 + arg0, sp4c, (uintptr_t)(sp54));
 
 			if (g_Mp3Vars.var8009c3f1) {
 				sp54++;
-				n_aLoadBuffer((*cmd)++, arg0 + arg0, sp48, osVirtualToPhysical(sp54));
+				n_aLoadBuffer((*cmd)++, arg0 + arg0, sp48, (uintptr_t)(sp54));
 			}
 
 			g_Mp3Vars.var8009c3d0 += arg0;
@@ -319,9 +320,9 @@ s32 func00037fc0(s32 arg0, Acmd **cmd)
 				n_aSetVolume((*cmd)++, A_VOL | A_LEFT, g_Mp3Vars.ivol1, g_Mp3Vars.var8009c3a4, g_Mp3Vars.var8009c3a6);
 				n_aSetVolume((*cmd)++, A_VOL | A_RIGHT, g_Mp3Vars.var8009c3b2, g_Mp3Vars.ratem2, g_Mp3Vars.ratel2);
 				n_aSetVolume((*cmd)++, A_RATE, g_Mp3Vars.var8009c3ac, g_Mp3Vars.ratem1, g_Mp3Vars.ratel1);
-				n_aEnvMixer((*cmd)++, 1, g_Mp3Vars.ivol2, osVirtualToPhysical(g_Mp3Vars.var8009c398));
+				n_aEnvMixer((*cmd)++, 1, g_Mp3Vars.ivol2, (uintptr_t)(g_Mp3Vars.var8009c398));
 			} else {
-				n_aEnvMixer((*cmd)++, 0, 0, osVirtualToPhysical(g_Mp3Vars.var8009c398));
+				n_aEnvMixer((*cmd)++, 0, 0, (uintptr_t)(g_Mp3Vars.var8009c398));
 			}
 
 			g_Mp3Vars.samples += SAMPLES;
@@ -362,10 +363,10 @@ void func00038924(struct mp3vars *vars)
 		vars->var8009c39e = vars->var8009c3e4;
 
 		if (vars->var8009c39c != vars->var8009c3ec) {
-			if (var8009c340.headphone) {
+			if (N_SpeakerType.headphone) {
 				vars->var8009c39c = ((s16)(vars->var8009c3ec & 0x7f) >> 1) + 32;
 			} else {
-				if (var8009c340.mono) {
+				if (N_SpeakerType.mono) {
 					vars->var8009c39c = 64;
 				} else {
 					vars->var8009c39c = vars->var8009c3ec;
@@ -402,7 +403,7 @@ s32 func00038ba8(s32 arg0, u8 *arg1, s32 arg2, s32 arg3)
 	}
 
 	proc = n_syn->dma(&sp1c);
-	sp1c = OS_K0_TO_PHYSICAL(proc(g_Mp3Vars.romaddr + g_Mp3Vars.var8009c3c4, arg2, 0));
+	sp1c = (uintptr_t)(proc(g_Mp3Vars.romaddr + g_Mp3Vars.var8009c3c4, arg2, 0));
 
 	bcopy((u8 *)sp1c, arg1, arg2);
 

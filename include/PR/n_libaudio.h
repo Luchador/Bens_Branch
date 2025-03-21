@@ -30,14 +30,14 @@ extern "C" {
 #include <PR/mbi.h>
 #include "platform.h"
 
-struct var8009c340 {
+struct N_SpeakerType {
 	u8 surround;
 	u8 mono;
 	u8 headphone;
 	u8 unk03;
 };
 
-extern struct var8009c340 var8009c340;
+extern struct N_SpeakerType N_SpeakerType;
 extern u8 var8009c344[2];
 extern u8 var8009c346[2];
 extern u8 var8009c348[4];

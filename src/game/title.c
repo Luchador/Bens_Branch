@@ -449,7 +449,7 @@ void titleInitPdLogo(void)
 
 		g_PdLogoVtxColIndex = 0;
 
-		joy00014810(false);
+		joySetAllowTitleInput(false);
 
 		g_PdLogoIsFirstTick = true;
 		g_PdLogoTriggerExit = false;
@@ -467,7 +467,7 @@ void titleExitPdLogo(void)
 	modelmgrFreeModel(g_TitleModelPdTwo);
 	modelmgrFreeModel(g_TitleModelPdThree);
 
-	joy00014810(true);
+	joySetAllowTitleInput(true);
 }
 
 void titleTickPdLogo(void)
@@ -1169,7 +1169,7 @@ bool g_TitleTypewriterFinishing = false;
 void titleInitRarePresents(void)
 {
 	g_TitleTimer = 0;
-	joy00014810(false);
+	joySetAllowTitleInput(false);
 	g_TitleAudioHandle = NULL;
 }
 
@@ -1180,7 +1180,7 @@ void titleExitRarePresents(void)
 	}
 
 	g_TitleAudioHandle = NULL;
-	joy00014810(true);
+	joySetAllowTitleInput(true);
 }
 
 void titleTickRarePresents(void)
@@ -1318,14 +1318,14 @@ void titleInitNintendoLogo(void)
 		g_TitleModel = modelmgrInstantiateModelWithoutAnim(g_ModelStates[MODEL_NINTENDOLOGO].modeldef);
 		modelSetScale(g_TitleModel, 1);
 		modelSetRootPosition(g_TitleModel, &coord);
-		joy00014810(false);
+		joySetAllowTitleInput(false);
 	}
 }
 
 void titleExitNintendoLogo(void)
 {
 	modelmgrFreeModel(g_TitleModel);
-	joy00014810(true);
+	joySetAllowTitleInput(true);
 }
 
 /**
@@ -1471,7 +1471,7 @@ void titleInitRareLogo(void)
 	modelSetScale(g_TitleModel, 1);
 	modelSetRootPosition(g_TitleModel, &coord);
 	musicQueueStopAllEvent();
-	joy00014810(false);
+	joySetAllowTitleInput(false);
 
 	if (!g_IsTitleDemo) {
 		g_IsTitleDemo = true;
@@ -1482,7 +1482,7 @@ void titleInitRareLogo(void)
 void titleExitRareLogo(void)
 {
 	modelmgrFreeModel(g_TitleModel);
-	joy00014810(true);
+	joySetAllowTitleInput(true);
 }
 
 /**

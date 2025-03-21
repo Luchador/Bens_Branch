@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/menuutils.h"
@@ -2042,7 +2043,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 		if (modeltype < MENUMODELTYPE_3) {
 			if (modeltype != MENUMODELTYPE_DEFAULT) {
 				gdl = func0f0d49c8(gdl);
-				gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+				gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 			} else {
 				s32 halfScreenWidth = SCREEN_WIDTH_LO >> 1;
 				f32 scale = SCREEN_ASPECT / videoGetAspect();
@@ -3178,9 +3179,7 @@ void menuClose(void)
 	g_Menus[g_MpPlayerNum].curdialog = NULL;
 	g_Menus[g_MpPlayerNum].openinhibit = 10;
 
-#ifndef PLATFORM_N64
 	inputAutoLockMouse(true);
-#endif
 
 	if (g_MenuData.root == MENUROOT_MPPAUSE) {
 		g_PlayersWithControl[g_Menus[g_MpPlayerNum].playernum] = true;
@@ -3199,14 +3198,9 @@ void menuClose(void)
 
 void func0f0f8120(void)
 {
-#ifdef AVOID_UB
 	u32 mpindex = g_MpPlayerNum % MAX_PLAYERS;
 	struct menudialog *prev = g_Menus[mpindex].curdialog;
 	s32 i;
-#else
-	struct menudialog *prev = g_Menus[g_MpPlayerNum].curdialog;
-	s32 i;
-#endif
 
 	if (g_MenuData.unk66e > 0) {
 		for (i = g_MenuData.unk66e; i >= 0; i--) {
@@ -3214,7 +3208,6 @@ void func0f0f8120(void)
 		}
 	}
 
-#ifdef AVOID_UB
 	mpindex = g_MpPlayerNum;
 	if (mpindex >= MAX_PLAYERS)
 		mpindex -= MAX_PLAYERS;
@@ -3223,13 +3216,6 @@ void func0f0f8120(void)
 			menuPopDialog();
 		}
 	}
-#else
-	if (g_Menus[g_MpPlayerNum].curdialog == prev) {
-		while (g_Menus[g_MpPlayerNum].depth > 0) {
-			menuPopDialog();
-		}
-	}
-#endif
 }
 
 void func0f0f820c(struct menudialogdef *dialogdef, s32 root)
@@ -5006,7 +4992,7 @@ Gfx *menuRender(Gfx *gdl)
 
 		g_MpPlayerNum = 0;
 
-		gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 		gSPDisplayList(gdl++, var800613a0);
 
 		text0f153b40();

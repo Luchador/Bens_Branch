@@ -1,6 +1,7 @@
 #include "n_synthInternals.h"
 #include <os.h>
 #include <math.h>
+#include <stdint.h>
 
 #define N_EQPOWER_LENGTH 128
 
@@ -80,15 +81,15 @@ Acmd *n_alEnvmixerPull(N_PVoice *filter, s32 sampleOffset, Acmd *p)
 				e->em_pan    = param->pan;
 				e->em_dryamt = (n_eqpower[param->fxMix & 0x7f] & 0xfffe) | (param->fxMix >> 7);
 
-				if (!var8009c340.surround) {
+				if (!N_SpeakerType.surround) {
 					e->em_dryamt &= 0xfffe;
 				}
 
 				e->em_wetamt = n_eqpower[N_EQPOWER_LENGTH - (param->fxMix & 0x7f) - 1] & 0xfffe;
 
-				if (var8009c340.headphone) {
+				if (N_SpeakerType.headphone) {
 					e->em_pan = (e->em_pan >> 1) + 32;
-				} else if (var8009c340.mono) {
+				} else if (N_SpeakerType.mono) {
 					e->em_pan = 64;
 				}
 
@@ -152,9 +153,9 @@ Acmd *n_alEnvmixerPull(N_PVoice *filter, s32 sampleOffset, Acmd *p)
 				 * This should result in a change to the current
 				 * segment rate and target
 				 */
-				if (var8009c340.headphone) {
+				if (N_SpeakerType.headphone) {
 					e->em_pan = ((s16)e->em_ctrlList->data.i >> 1) + 32;
-				} else if (var8009c340.mono) {
+				} else if (N_SpeakerType.mono) {
 					e->em_pan = 64;
 				} else {
 					e->em_pan = (s16) e->em_ctrlList->data.i;
@@ -180,7 +181,7 @@ Acmd *n_alEnvmixerPull(N_PVoice *filter, s32 sampleOffset, Acmd *p)
 
 			if (e->em_ctrlList->type == AL_FILTER_SET_FXAMT) {
 				if (((e->em_dryamt ^ e->em_wetamt) & 1) ^ ((e->em_ctrlList->data.i + 1) >> 7)) {
-					if (var8009c340.surround) {
+					if (N_SpeakerType.surround) {
 						if (e->em_pan > 64) {
 							e->em_dryamt ^= 1;
 						} else {
@@ -353,9 +354,9 @@ Acmd *_pullSubFrame(N_PVoice *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p
 		n_aSetVolume(ptr++, A_LEFT  | A_VOL, e->em_cvolL, e->em_dryamt, e->em_wetamt);
 		n_aSetVolume(ptr++, A_RIGHT | A_VOL, e->em_rtgt, e->em_rratm,  e->em_rratl);
 		n_aSetVolume(ptr++, A_RATE, e->em_ltgt, e->em_lratm, e->em_lratl);
-		n_aEnvMixer (ptr++, A_INIT, e->em_cvolR, osVirtualToPhysical(e->em_state));
+		n_aEnvMixer (ptr++, A_INIT, e->em_cvolR, (uintptr_t)(e->em_state));
 	} else {
-		n_aEnvMixer(ptr++, A_CONTINUE, 0, osVirtualToPhysical(e->em_state));
+		n_aEnvMixer(ptr++, A_CONTINUE, 0, (uintptr_t)(e->em_state));
 	}
 
 	/*

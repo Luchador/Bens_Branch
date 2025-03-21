@@ -2788,7 +2788,7 @@ void htPushEndscreen(void)
 	g_HtData.finished = false;
 }
 
-u8 var80088bb4 = 0;
+u8 g_HtScenario = 0;
 u8 var80088bb8 = 0;
 
 void htTick(void)
@@ -2850,7 +2850,7 @@ void htBegin(void)
 	chrUnsetStageFlag(NULL, STAGEFLAG_CI_HOLO_ABORTING);
 	chrUnsetStageFlag(NULL, STAGEFLAG_CI_TRIGGER_HOLO_SUCCESS);
 	chrUnsetStageFlag(NULL, STAGEFLAG_CI_TRIGGER_HOLO_FAILURE);
-	chrSetStageFlag(NULL, func0f1a25c0(htGetIndexBySlot(var80088bb4)));
+	chrSetStageFlag(NULL, func0f1a25c0(htGetIndexBySlot(g_HtScenario)));
 
 	// Disable segment leading out of the door
 	navDisableSegment(&waypoints[0x20], &waypoints[0x31]);
@@ -2871,7 +2871,7 @@ void htEnd(void)
 	g_HtData.intraining = false;
 	chrSetStageFlag(NULL, STAGEFLAG_CI_HOLO_ABORTING);
 	chrUnsetStageFlag(NULL, STAGEFLAG_CI_TRIGGER_HOLO_FAILURE);
-	chrUnsetStageFlag(NULL, func0f1a25c0(htGetIndexBySlot(var80088bb4)));
+	chrUnsetStageFlag(NULL, func0f1a25c0(htGetIndexBySlot(g_HtScenario)));
 
 	// Enable segment leading out of the door
 	navEnableSegment(&waypoints[0x20], &waypoints[0x31]);
@@ -3012,7 +3012,7 @@ char *htGetDescription(void)
 #endif
 	};
 
-	return langGet(texts[htGetIndexBySlot(var80088bb4)]);
+	return langGet(texts[htGetIndexBySlot(g_HtScenario)]);
 }
 
 char *htGetTip1(void)
@@ -3027,7 +3027,7 @@ char *htGetTip1(void)
 		L_MISC_349, // "Go for the armed opponents..."
 	};
 
-	return langGet(texts[htGetIndexBySlot(var80088bb4)]);
+	return langGet(texts[htGetIndexBySlot(g_HtScenario)]);
 }
 
 char *htGetTip2(void)
@@ -3042,7 +3042,7 @@ char *htGetTip2(void)
 		L_MISC_356, // "Go for the armed opponents..."
 	};
 
-	return langGet(texts[htGetIndexBySlot(var80088bb4)]);
+	return langGet(texts[htGetIndexBySlot(g_HtScenario)]);
 }
 
 void frGetGoalTargetsText(char *buffer)

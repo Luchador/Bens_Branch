@@ -159,8 +159,6 @@ void pacReset(void)
 	data->victimindex = -1;
 	data->age240 = 0;
 
-	osSyncPrintf("PopACapReset -> num_mplayers=%d : Working\n", g_MpNumChrs);
-
 	for (i = 0; i != MAX_MPCHRS; i++) {
 		data->killcounts[i] = 0;
 		data->survivalcounts[i] = 0;
@@ -184,14 +182,6 @@ void pacReset(void)
 			i++;
 		}
 	}
-
-	osSyncPrintf("PopACapReset -> Generated %d victims for this game : Listing\n", i);
-
-	for (j = 0; j < g_MpNumChrs; j++) {
-		osSyncPrintf("PopACapReset -> Victim %d is player %d\n", j, data->victims[j]);
-	}
-
-	osSyncPrintf("PopACapReset -> Done\n");
 }
 
 void pacInit(void)
@@ -293,8 +283,6 @@ void pacTick(void)
 
 	if (data->victimindex == -1) {
 		pacApplyNextVictim();
-		osSyncPrintf("PopACapTick : Current Victim = %d (Player %d)\n",
-				data->victimindex, data->victims[data->victimindex]);
 	}
 
 	if (data->victimindex >= 0) {

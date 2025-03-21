@@ -1,6 +1,7 @@
 #include "n_synthInternals.h"
 #include <os.h>
-#include <R4300.h>
+#include "platform.h"
+#include <types.h>
 
 #define ADPCMFBYTES      9
 #define LFSAMPLES        4
@@ -32,7 +33,7 @@ Acmd *n_alAdpcmPull(N_PVoice *filter, s16 *outp, s32 outCount, Acmd *p)
 
 	inp = N_AL_DECODER_IN;
 
-	aLoadADPCM(ptr++, f->dc_bookSize, K0_TO_PHYS(f->dc_table->waveInfo.adpcmWave.book->book));
+	aLoadADPCM(ptr++, f->dc_bookSize, (k_ptr_t)(f->dc_table->waveInfo.adpcmWave.book->book));
 
 	looped = (outCount + f->dc_sample > f->dc_loop.end) && (f->dc_loop.count != 0);
 
@@ -275,10 +276,10 @@ Acmd *_decodeChunk(Acmd *ptr, N_PVoice *f, s32 tsam, s32 nbytes, s16 outp, s16 i
 	}
 
 	if (flags & A_LOOP) {
-		aSetLoop(ptr++, K0_TO_PHYS(f->dc_lstate));
+		aSetLoop(ptr++, (k_ptr_t)(f->dc_lstate));
 	}
 
-	n_aADPCMdec(ptr++, K0_TO_PHYS(f->dc_state), flags, tsam << 1, dramAlign, outp);
+	n_aADPCMdec(ptr++, (k_ptr_t)(f->dc_state), flags, tsam << 1, dramAlign, outp);
 
 	f->dc_first = 0;
 

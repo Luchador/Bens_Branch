@@ -1874,11 +1874,11 @@ MenuItemHandlerResult htHoloListMenuHandler(s32 operation, struct menuitem *item
 	case MENUOP_GETOPTIONTEXT:
 		return (uintptr_t) htGetName(htGetIndexBySlot(data->list.value));
 	case MENUOP_SET:
-		var80088bb4 = data->list.value;
+		g_HtScenario = data->list.value;
 		menuPushDialog(&g_HtDetailsMenuDialog);
 		break;
 	case MENUOP_GETSELECTEDINDEX:
-		data->list.value = var80088bb4;
+		data->list.value = g_HtScenario;
 		break;
 	case MENUOP_GETOPTGROUPCOUNT:
 		data->list.value = 0;
@@ -1895,7 +1895,7 @@ MenuItemHandlerResult htHoloListMenuHandler(s32 operation, struct menuitem *item
 
 char *htMenuTextName(struct menuitem *item)
 {
-	return htGetName(htGetIndexBySlot(var80088bb4));
+	return htGetName(htGetIndexBySlot(g_HtScenario));
 }
 
 MenuItemHandlerResult menuhandler001a6a34(s32 operation, struct menuitem *item, union handlerdata *data)

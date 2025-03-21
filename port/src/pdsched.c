@@ -1,6 +1,5 @@
 #include <PR/ultratypes.h>
 #include <PR/ultrasched.h>
-#include "lib/boot.h"
 #include "lib/sched.h"
 #include "constants.h"
 #include "game/menugfx.h"
@@ -15,48 +14,12 @@
 #include "data.h"
 #include "types.h"
 #include "game/debug.h"
-#include <PR/os_vi.h>
 
 #include "video.h"
 #include "audio.h"
 #include "input.h"
 #include "mixer.h"
 
-/*
- * OSScTask state
- */
-#define OS_SC_DP                0x0001  /* set if still needs dp        */
-#define OS_SC_SP                0x0002  /* set if still needs sp        */
-#define OS_SC_YIELD             0x0010  /* set if yield requested       */
-#define OS_SC_YIELDED           0x0020  /* set if yield completed       */
-
-/*
- * OSScTask->flags type identifier
- */
-#define OS_SC_XBUS      (OS_SC_SP | OS_SC_DP)
-
-/*
- * private functions
- */
-void __scMain(void *arg);
-void __scHandleTasks(OSSched *s);
-void __scHandleRSP(OSSched *s);
-void __scHandleRDP(OSSched *s);
-void __scAppendList(OSSched *s, OSScTask *t);
-OSScTask *__scTaskReady(OSScTask *t);
-s32 __scTaskComplete(OSSched *s,OSScTask *t);
-void __scExec(OSSched *sc, OSScTask *sp, OSScTask *dp);
-s32 __scSchedule(OSSched *sc, OSScTask **sp, OSScTask **dp, s32 availRCP);
-
-OSViMode var8008dcc0[NUM_GFXTASKS];
-OSViMode *var8008dd60[NUM_GFXTASKS];
-OSViMode var8008dd68[NUM_GFXTASKS];
-s32 var8008de08;
-s32 g_ViCurVStart0;
-s32 g_ViCurVStart1;
-u32 var8008de14;
-OSTimer g_SchedRspTimer;
-u32 g_SchedDpCounters[4];
 struct artifact g_ArtifactLists[3][240];
 u8 g_SchedSpecialArtifactIndexes[3];
 s32 g_SchedWriteArtifactsIndex;
@@ -72,41 +35,12 @@ s32 g_ViShakeDirection = 1;
 s32 g_ViShakeIntensity = 0;
 f32 g_ViShakeIntensityMult = 1.f;
 s32 g_ViShakeTimer = 0;
-OSScMsg g_SchedRspMsg = {OS_SC_RSP_MSG};
 bool g_SchedIsFirstTask = true;
 
 s32 g_PrevFrameFb = -1;
 s32 g_BlurFb = -1;
 s32 g_BlurFbCapTimer = -1;
 bool g_BlurFbDirty = true;
-
-void osCreateScheduler(OSSched *sc, OSThread *thread, u8 mode, u32 numFields)
-{
-	sc->curRSPTask = 0;
-	sc->curRDPTask = 0;
-	sc->clientList = 0;
-	sc->frameCount = 0;
-	sc->audioListHead = 0;
-	sc->gfxListHead = 0;
-	sc->audioListTail = 0;
-	sc->gfxListTail = 0;
-	sc->retraceMsg.type = OS_SC_RETRACE_MSG;
-	sc->prenmiMsg.type = OS_SC_PRE_NMI_MSG;
-	sc->thread = thread;
-
-	//var8008de08 = osViModeTable[mode].comRegs.hStart;
-	//g_ViCurVStart0 = osViModeTable[mode].fldRegs[0].vStart;
-	//g_ViCurVStart1 = osViModeTable[mode].fldRegs[1].vStart;
-
-	var8008dd60[0] = &var8008dd68[0];
-	var8008dd60[1] = &var8008dd68[1];
-
-	//var8008dd68[0] = osViModeTable[mode];
-	//var8008dd68[1] = osViModeTable[mode];
-
-	g_PrevFrameFb = videoCreateFramebuffer(0, 0, false, true);
-	g_BlurFb = videoCreateFramebuffer(0, 0, false, true);
-}
 
 void __scUpdateViMode(void)
 {
@@ -139,9 +73,7 @@ void __scUpdateViMode(void)
  */
 void schedSubmitTask(OSSched *sc, OSScTask *t)
 {
-	if (sc->doAudio && t->list.t.type == M_AUDTASK) {
-		// send this into the mixer
-	} else if (t->list.t.type == M_GFXTASK) {
+	if (t->list.t.type == M_GFXTASK) {
 		videoSubmitCommands((Gfx *)t->list.t.data_ptr);
 	}
 }
@@ -185,7 +117,6 @@ void schedEndFrame(OSSched *sc)
 
 	inputUpdate();
 
-	joyStartReadData(&g_PiMesgQueue);
 	joyReadData();
 	joy00014238();
 

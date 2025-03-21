@@ -52,24 +52,11 @@ struct joydata {
 
 struct joydata g_JoyData[NUM_DATA];
 s32 g_JoyDisableCooldown[NUM_PADS];
-OSMesgQueue g_PiMesgQueue;
-OSMesg g_PiMesgBuf[10];
-OSMesg g_JoyStopCyclicPollingMesgBuf[1];
-OSMesgQueue g_JoyStopCyclicPollingMesgQueue;
-OSMesg g_JoyStopCyclicPollingDoneMesgBuf[1];
-OSMesgQueue g_JoyStopCyclicPollingDoneMesgQueue;
-OSMesg g_JoyStartCyclicPollingMesgBuf[1];
-OSMesgQueue g_JoyStartCyclicPollingMesgQueue;
-OSMesg g_JoyStartCyclicPollingDoneMesgBuf[1];
-OSMesgQueue g_JoyStartCyclicPollingDoneMesgQueue;
 OSContStatus g_JoyContStatuses[NUM_PADS];
 u8 g_JoyPfsStates[100];
-u32 var80099fac;
-u32 var80099fb0;
 
 struct joydata *g_JoyDataPtr = &g_JoyData[0];
 bool g_JoyBusy = false;
-u32 var8005ee68 = 0;
 
 // Number of times per pad that different inputs were attempted to be read
 // when controller was disconnected or not ready.
@@ -89,11 +76,6 @@ u32 var8005eec0 = 1;
 s32 (*var8005eec4)(struct contsample *samples, s32 samplenum) = NULL;
 void (*var8005eec8)(struct contsample *samples, s32 samplenum, s32 samplenum2) = NULL;
 s32 g_JoyNextPfsStateIndex = (VERSION >= VERSION_NTSC_1_0 ? 0 : 30);
-s32 var8005eed0 = 0;
-
-u32 var8005eed4 = 0;
-
-u8 var8005eed8 = 0;
 
 bool g_JoyPfsPollMasterEnabled = true;
 s32 g_JoyPfsPollInterval = 0;
@@ -215,7 +197,18 @@ void joyPollPfs(s32 force)
 				joyDisableCyclicPolling();
 			}
 
-			osPfsIsPlug(&g_PiMesgQueue, &bitpattern);
+			bitpattern =
+   			(inputRumbleSupported(0) << 0) |
+   			(inputRumbleSupported(1) << 1) |
+    		(inputRumbleSupported(2) << 2) |
+    		(inputRumbleSupported(3) << 3);
+
+			s32 i = 0;
+			for (i = 0; i < MAXCONTROLLERS; ++i) {
+				if (inputRumbleSupported(i)) {
+					bitpattern |= 1 << i;
+				}
+			}
 
 			if (force) {
 				joyEnableCyclicPolling();
@@ -232,18 +225,9 @@ void joyPollPfs(s32 force)
 	}
 }
 
-/**
- * "Temporarily" because the next time joyPollPfs runs, the true state will be
- * recorded.
- *
- * Note that var8005eed8 is always zero, so this record will suggest that this
- * pak is the only one connected.
- */
 void joySetPfsTemporarilyPlugged(s8 index)
 {
-	u8 bitpattern = var8005eed8 & ~(1 << index);
-
-	joyRecordPfsState(bitpattern);
+	joyRecordPfsState(0);
 }
 
 void joyInit(void)
@@ -314,7 +298,7 @@ void joy00013e84(void)
 	if (g_JoyNeedsInit) {
 		s32 i;
 		g_JoyNeedsInit = false;
-		osContInit(&g_PiMesgQueue, &g_JoyConnectedControllers, g_JoyContStatuses);
+		osContInit(&g_JoyConnectedControllers, g_JoyContStatuses);
 		g_JoyInitDone = true;
 
 		for (i = 0; i < NUM_PADS; i++) {
@@ -324,7 +308,17 @@ void joy00013e84(void)
 		u32 slots = 0xf;
 		s32 i;
 
-		osContGetQuery(g_JoyContStatuses);
+		for (s32 i = 0; i < MAXCONTROLLERS; ++i) {
+			if (inputControllerConnected(i)) {
+				g_JoyContStatuses[i].errnum = 0;
+				g_JoyContStatuses[i].type = CONT_ABSOLUTE;
+				g_JoyContStatuses[i].status = CONT_CARD_ON;
+			} else {
+				g_JoyContStatuses[i].errnum = CONT_NO_RESPONSE_ERROR;
+				g_JoyContStatuses[i].type = 0;
+				g_JoyContStatuses[i].status = 0;
+			}
+		}
 
 		for (i = 0; i < ARRAYCOUNT(g_JoyContStatuses); i++) {
 			if (g_JoyContStatuses[i].errnum & CONT_NO_RESPONSE_ERROR) {
@@ -474,11 +468,6 @@ void joyDebugJoy(void)
 	}
 }
 
-s32 joyStartReadData(OSMesgQueue *mq)
-{
-	return 0;
-}
-
 void joyReadData(void)
 {
 	s32 index = (g_JoyData[0].nextlast + 1) % NUM_SAMPLES;
@@ -489,91 +478,26 @@ void joyReadData(void)
 		index = g_JoyData[0].nextlast;
 	}
 
-	osContGetReadData(g_JoyData[0].samples[index].pads);
+	for (s32 i = 0; i < MAXCONTROLLERS; ++i) {
+		g_JoyData[0].samples[index].pads[i].button = 0;
+		g_JoyData[0].samples[index].pads[i].stick_x = 0;
+		g_JoyData[0].samples[index].pads[i].stick_y = 0;
+		g_JoyData[0].samples[index].pads[i].rstick_x = 0;
+		g_JoyData[0].samples[index].pads[i].rstick_y = 0;
+		if (inputReadController(i, &g_JoyData[0].samples[index].pads[i]) < 0) {
+			g_JoyData[0].samples[index].pads[i].errnum = CONT_NO_RESPONSE_ERROR;
+		} else {
+			g_JoyData[0].samples[index].pads[i].errnum = 0;
+		}
+	}
+
+	//osContGetReadData(g_JoyData[0].samples[index].pads);
 
 	g_JoyData[0].nextlast = index;
 	g_JoyData[0].nextsecondlast = (g_JoyData[0].nextlast + NUM_SAMPLES - 1) % NUM_SAMPLES;
 }
 
-void joysHandleRetrace(void)
-{
-	OSMesg msg;
-	s8 i;
-
-
-	if (g_JoyBusy) {
-
-		g_JoyBusy = false;
-		joyReadData();
-
-		// Check if error state has changed for any controller
-		for (i = 0; i < NUM_PADS; i++) {
-			if ((g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum == 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum != 0)
-					|| (g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum != 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum == 0)) {
-				joy00013e84();
-				break;
-			}
-		}
-	}
-
-	joyPollPfs(0);
-	return;
-
-	if (var8005ee68 == 0) {
-		joyStartReadData(&g_PiMesgQueue);
-		g_JoyBusy = true;
-	}
-	return;
-
-	if (g_JoyInitDone) {
-		if (var8005ee68) {
-			joyPollPfs(0);
-			return;
-		}
-
-		static s32 count = 0;
-
-		g_JoyBusy = false;
-		joyReadData();
-
-		// Check if error state has changed for any controller
-		for (i = 0; i < NUM_PADS; i++) {
-			if ((g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum == 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum != 0)
-					|| (g_JoyData[0].samples[g_JoyData[0].nextlast].pads[i].errnum != 0 && g_JoyData[0].samples[g_JoyData[0].nextsecondlast].pads[i].errnum == 0)) {
-				joy00013e84();
-				break;
-			}
-		}
-
-		joy00014238();
-
-		joyPollPfs(0);
-
-		joyStartReadData(&g_PiMesgQueue);
-		g_JoyBusy = true;
-
-		count++;
-
-		if (count >= 60) {
-			s32 i;
-
-			for (i = 0; i < NUM_PADS; i++) {
-				if (g_JoyBadReadsStickX[i] || g_JoyBadReadsStickY[i] || g_JoyBadReadsRStickX[i] || g_JoyBadReadsRStickY[i] || g_JoyBadReadsButtons[i] || g_JoyBadReadsButtonsPressed[i]) {
-					g_JoyBadReadsStickX[i] = 0;
-					g_JoyBadReadsStickY[i] = 0;
-					g_JoyBadReadsRStickX[i] = 0;
-					g_JoyBadReadsRStickY[i] = 0;
-					g_JoyBadReadsButtons[i] = 0;
-					g_JoyBadReadsButtonsPressed[i] = 0;
-				}
-			}
-
-			count = 0;
-		}
-	}
-}
-
-void joy00014810(bool value)
+void joySetAllowTitleInput(bool value)
 {
 	var8005eec0 = value;
 }
@@ -844,8 +768,6 @@ bool joyIsCyclicPollingEnabled(void)
  */
 void joyDisableCyclicPolling(void)
 {
-	OSMesg msg;
-
 	g_JoyCyclicPollDisableCount++;
 }
 
@@ -864,7 +786,7 @@ void joyDestroy(void)
 	s32 i;
 
 	for (i = 0; i < NUM_PADS; i++) {
-		if (osMotorProbe(&g_PiMesgQueue, PFS(i), i) == 0) {
+		if (osMotorProbe(PFS(i), i) == 0) {
 			osMotorStop(PFS(i));
 			osMotorStop(PFS(i));
 			osMotorStop(PFS(i));
@@ -901,7 +823,7 @@ void joyStopRumble(s8 arg0, bool disablepolling)
 				joyDisableCyclicPolling();
 			}
 
-			if (osMotorProbe(&g_PiMesgQueue, PFS(device), device) == 0) {
+			if (osMotorProbe(PFS(device), device) == 0) {
 				osMotorStop(PFS(device));
 				osMotorStop(PFS(device));
 				osMotorStop(PFS(device));

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/camera.h"
@@ -14,10 +15,8 @@
 #include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "video.h"
 #include "platform.h"
-#endif
 
 #define TO_U16_A(x) ((u16)(x))
 #define TO_U16_B(x) ((x) & 0xffff)
@@ -115,7 +114,6 @@ void viConfigureForCopyright(u16 *texturedata)
 	g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
 
 	g_ViReconfigured = true;
-	g_Vars.fourmeg2player = false;
 }
 
 /**
@@ -137,8 +135,6 @@ void viConfigureForLegal(void)
 		g_ViDataArray[i].bufy = FBALLOC_HEIGHT_LO;
 		g_ViDataArray[i].viewy = FBALLOC_HEIGHT_LO;
 	}
-
-	g_Vars.fourmeg2player = false;
 }
 
 const s16 g_ViModeWidths[]  = {FBALLOC_WIDTH_LO,  FBALLOC_WIDTH_LO,  SCREEN_320 * 2};
@@ -162,8 +158,6 @@ void viReset(s32 stagenum)
 	u8 *fb0;
 	u8 *fb1;
 
-	g_Vars.fourmeg2player = false;
-
 	if (stagenum == STAGE_TITLE) {
 			viSetMode(VIMODE_HI);
 			fbsize = g_ViModeWidths[2] * g_ViModeHeights[2] * NUM_FRAMEBUFFERS;
@@ -174,7 +168,6 @@ void viReset(s32 stagenum)
 
 		if (PLAYERCOUNT() == 2) {
 			fbsize = FBALLOC_WIDTH_LO * (FBALLOC_HEIGHT_LO / 2) * NUM_FRAMEBUFFERS;
-			g_Vars.fourmeg2player = true;
 		} else if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && PLAYERCOUNT() == 2) {
 			// PAL is using its correct size
 			fbsize = SCREEN_WIDTH_LO * SCREEN_HEIGHT_LO * NUM_FRAMEBUFFERS;
@@ -221,9 +214,7 @@ void viBlack(bool black)
 
 void viHandleRetrace(void)
 {
-	s32 prevmask;
 	s32 offset;
-	s32 reg;
 
 	if (g_ViShakeTimer != 0) {
 		g_ViShakeTimer--;
@@ -236,22 +227,11 @@ void viHandleRetrace(void)
 	offset = g_ViShakeDirection * g_ViShakeIntensity;
 	g_ViShakeDirection = -g_ViShakeDirection;
 
-	prevmask = 0;
-
-	reg = g_ViCurVStart0;
-	var8008dd60[1 - var8005ce74]->fldRegs[0].vStart = ADD_LOW_AND_HI_16_TRUNCATE(reg, offset);
-
-	reg = g_ViCurVStart1;
-	var8008dd60[1 - var8005ce74]->fldRegs[1].vStart = ADD_LOW_AND_HI_16_TRUNCATE(reg, offset);
-
 	videoSetWindowOffset(0, offset);
 
 	if(g_ViUnblackTimer) {
 		videoClearScreen();
 	}
-	//osViSetXScale(g_ViXScalesBySlot[1 - var8005ce74]);
-	//osViSetYScale(g_ViYScalesBySlot[1 - var8005ce74]);
-	//osViSetSpecialFeatures(OS_VI_GAMMA_OFF | OS_VI_DITHER_FILTER_ON);
 }
 
 void viUpdateMode(void)
@@ -293,54 +273,8 @@ void viUpdateMode(void)
 	g_ViYScalesBySlot[slot] = y;
 
 	if (g_ViBackData->mode == VIMODE_LO) {
-		var8008dcc0[slot].comRegs.width = g_ViBackData->bufx;
-		var8008dcc0[slot].comRegs.xScale = g_ViBackData->bufx * 1024 / 640;
-		var8008dcc0[slot].fldRegs[0].origin = g_ViBackData->bufx * 2;
-		var8008dcc0[slot].fldRegs[1].origin = g_ViBackData->bufx * 2;
-
-		var8008dcc0[slot].fldRegs[0].yScale = g_ViBackData->bufy * 2048 / 440;
-		var8008dcc0[slot].fldRegs[1].yScale = g_ViBackData->bufy * 2048 / 440;
-
-		hstart = var8008dcc0[slot].comRegs.hStart;
-		var8008de08 = var8008dcc0[slot].comRegs.hStart = ADD_LOW_AND_HI_16_MOD(hstart, g_ViTargetHStart);
-
-		v1 = g_ViBackData->bufy;
-		v1 = v1 * 1024 / var8008dcc0[slot].fldRegs[0].yScale;
-
-		if (v1 > 300) {
-			v1 >>= 1;
-		}
-
-		tmp = ((PAL ? 320 : 277) - v1);
-		vstart = ((tmp + 2) << 16) | (tmp + ((v1 - 2) << 1) + 2);
-
-		g_ViCurVStart0 = var8008dcc0[slot].fldRegs[0].vStart = ADD_LOW_AND_HI_16_MOD(vstart, g_ViTargetVStart);
-		g_ViCurVStart1 = var8008dcc0[slot].fldRegs[1].vStart = ADD_LOW_AND_HI_16_MOD(vstart, g_ViTargetVStart);
-
 		g_SchedViModesPending[slot] = true;
 	} else if (g_ViBackData->mode == VIMODE_HI) {
-
-		var8008dcc0[slot].comRegs.width = g_ViBackData->bufx;
-		var8008dcc0[slot].comRegs.xScale = g_ViBackData->bufx * 1024 / 640;
-		var8008dcc0[slot].fldRegs[0].yScale = 2048;
-		var8008dcc0[slot].fldRegs[1].yScale = 2048;
-		var8008dcc0[slot].fldRegs[0].origin = g_ViBackData->bufx * 2;
-		var8008dcc0[slot].fldRegs[1].origin = g_ViBackData->bufx * 4;
-
-		reg = var8008dcc0[slot].comRegs.hStart;
-		var8008de08 = var8008dcc0[slot].comRegs.hStart = ADD_LOW_AND_HI_16_MOD(reg, g_ViTargetHStart);
-
-		reg = var8008dcc0[slot].fldRegs[0].vStart;
-		g_ViCurVStart0 = var8008dcc0[slot].fldRegs[0].vStart = ADD_LOW_AND_HI_16_MOD(reg, g_ViTargetVStart);
-
-		reg = var8008dcc0[slot].fldRegs[1].vStart;
-		g_ViCurVStart1 = var8008dcc0[slot].fldRegs[1].vStart = ADD_LOW_AND_HI_16_MOD(reg, g_ViTargetVStart);
-
-		if (g_MainIsBooting) {
-			g_ViCurVStart0 = var8008dcc0[slot].fldRegs[0].vStart = ((g_ViTargetVStart + 431) % 0xffff) << 16 | (g_ViTargetVStart + 123) % 0xffff;
-			g_ViCurVStart1 = var8008dcc0[slot].fldRegs[1].vStart = ((g_ViTargetVStart + 433) % 0xffff) << 16 | (g_ViTargetVStart + 121) % 0xffff;
-		}
-
 		g_SchedViModesPending[slot] = true;
 	} else {
 		g_SchedViModesPending[slot] = false;
@@ -349,7 +283,7 @@ void viUpdateMode(void)
 	slot = (slot + 1) % NUM_GFXTASKS;
 	g_ViSlot = slot;
 
-	g_RdpCurTask->framebuffer = g_ViIs16Bit ? g_ViBackData->fb : g_FrameBuffers[0];
+	//g_RdpCurTask->framebuffer = g_ViIs16Bit ? g_ViBackData->fb : g_FrameBuffers[0];
 
 	prevdata = g_ViBackData;
 
@@ -451,8 +385,8 @@ Gfx *vi0000ab78(Gfx *gdl)
 	sp48 = gfxAllocateMatrix();
 	guMtxF2L(sp50.m, sp48);
 
-	gSPMatrix(gdl++, OS_K0_TO_PHYSICAL(sp4c), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-	gSPMatrix(gdl++, OS_K0_TO_PHYSICAL(sp48), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPMatrix(gdl++, (uintptr_t)(sp4c), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, (uintptr_t)(sp48), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gSPPerspNormalize(gdl++, sp46);
 
 	return gdl;
@@ -467,7 +401,7 @@ Gfx *vi0000aca4(Gfx *gdl, f32 znear, f32 zfar)
 	guPerspectiveF(tmp.m, &scale, g_ViBackData->fovy, g_ViBackData->aspect, znear, zfar, 1);
 	guMtxF2L(tmp.m, mtx);
 
-	gSPMatrix(gdl++, OS_K0_TO_PHYSICAL(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	gSPPerspNormalize(gdl++, scale);
 
 	return gdl;
@@ -481,13 +415,13 @@ Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 	vp[g_ViBackIndex].vp.vscale[1] = g_ViBackData->viewy * 2;
 	vp[g_ViBackIndex].vp.vtrans[1] = g_ViBackData->viewy * 2 + g_ViBackData->viewtop * 4;
 
-	gSPViewport(gdl++, OS_K0_TO_PHYSICAL(&vp[g_ViBackIndex]));
+	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
 	var80092870 = gfxAllocateMatrix();
 	guPerspectiveF(var80092830.m, &g_ViPerspScale, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
 	guMtxF2L(var80092830.m, var80092870);
 
-	gSPMatrix(gdl++, OS_K0_TO_PHYSICAL(var80092870), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, (uintptr_t)(var80092870), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	gSPPerspNormalize(gdl++, g_ViPerspScale);
 
 	camSetPerspectiveMtxL(var80092870);
@@ -510,13 +444,13 @@ Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 	vp[g_ViBackIndex].vp.vscale[3] = 0;
 	vp[g_ViBackIndex].vp.vtrans[3] = 0;
 
-	gSPViewport(gdl++, OS_K0_TO_PHYSICAL(&vp[g_ViBackIndex]));
+	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
 	var80092870 = gfxAllocateMatrix();
 	guPerspectiveF(var80092830.m, &g_ViPerspScale, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
 	guMtxF2L(var80092830.m, var80092870);
 
-	gSPMatrix(gdl++, OS_K0_TO_PHYSICAL(var80092870), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, (uintptr_t)(var80092870), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	gSPPerspNormalize(gdl++, g_ViPerspScale);
 
 	camSetPerspectiveMtxL(var80092870);
@@ -533,7 +467,7 @@ Gfx *vi0000b0e8(Gfx *gdl, f32 fovy, f32 aspect)
 	guPerspectiveF(tmp.m, &g_ViPerspScale, fovy, aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
 	guMtxF2L(tmp.m, mtx);
 
-	gSPMatrix(gdl++, OS_K0_TO_PHYSICAL(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	gSPPerspNormalize(gdl++, g_ViPerspScale);
 
 	return gdl;
@@ -549,9 +483,9 @@ Gfx *vi0000b1d0(Gfx *gdl)
 	gdl = vi0000b1a8(gdl);
 
 	if (g_ViIs16Bit) {
-		gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_ViBackData->bufx, OS_K0_TO_PHYSICAL(g_ViBackData->fb));
+		gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_ViBackData->bufx, (uintptr_t)(g_ViBackData->fb));
 	} else {
-		gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_32b, g_ViBackData->bufx, OS_K0_TO_PHYSICAL(g_FrameBuffers[0]));
+		gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_32b, g_ViBackData->bufx, (uintptr_t)(g_FrameBuffers[0]));
 	}
 
 	return gdl;
@@ -635,7 +569,7 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 			gDPPipeSync(gdl++);
 
 			if (PLAYERCOUNT() >= 3 ||
-					(PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL || g_Vars.fourmeg2player))) {
+					(PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL))) {
 				if (PLAYERCOUNT() == 2) {
 					tmpplayernum = 0;
 				}

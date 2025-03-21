@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/debug.h"
 #include "game/tex.h"
@@ -2133,7 +2134,7 @@ struct tex *texFindInPool(s32 texturenum, struct texpool *pool)
 				return NULL;
 			}
 
-			cur = (struct tex *) PHYS_TO_K0(cur->next);
+			cur = (struct tex *) (k_ptr_t)(cur->next);
 		}
 
 		return NULL;
@@ -2308,7 +2309,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 			}
 
 			if ((!iszlib && freebytes < 4300) || (iszlib && freebytes < 2600)) {
-				*updateword = osVirtualToPhysical(pool->start);
+				*updateword = (uintptr_t)(pool->start);
 				return;
 			}
 
@@ -2326,7 +2327,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 						break;
 					}
 
-					tail = (struct tex *) PHYS_TO_K0(tail->next);
+					tail = (struct tex *) (k_ptr_t)(tail->next);
 				}
 			}
 
@@ -2380,7 +2381,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 			}
 		}
 
-		*updateword = osVirtualToPhysical(tex->data);
+		*updateword = (uintptr_t)(tex->data);
 	}
 }
 

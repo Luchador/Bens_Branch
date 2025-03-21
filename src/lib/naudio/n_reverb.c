@@ -1,5 +1,6 @@
 #include <os.h>
 #include "n_synthInternals.h"
+#include <stdint.h>
 
 #define RANGE 2.0f
 
@@ -259,7 +260,7 @@ Acmd *_n_loadOutputBuffer(ALFx *r, ALDelay *d, s32 arg2, s32 buff, Acmd *p)
 		ratio = (s32)(fratio * UNITY_PITCH);
 
 		tmp = buff >> 8;
-		n_aResample(ptr++, osVirtualToPhysical(d->rs->state[arg2]), d->rs->first, ratio, rbuff + (ramalign << 1), tmp);
+		n_aResample(ptr++, (uintptr_t)(d->rs->state[arg2]), d->rs->first, ratio, rbuff + (ramalign << 1), tmp);
 
 		d->rs->first = 0;
 		d->rsdelta += count - incount;
@@ -289,10 +290,10 @@ Acmd *_n_loadBuffer(ALFx *r, s32 arg1, s16 *curr_ptr, s32 buff,s32 count, Acmd *
 		after_end = updated_ptr - delay_end;
 		before_end = delay_end - curr_ptr;
 
-		n_aLoadBuffer(ptr++, before_end << 1, buff, osVirtualToPhysical(curr_ptr));
-		n_aLoadBuffer(ptr++, after_end << 1, buff + (before_end << 1), osVirtualToPhysical(r->base[arg1]));
+		n_aLoadBuffer(ptr++, before_end << 1, buff, (uintptr_t)(curr_ptr));
+		n_aLoadBuffer(ptr++, after_end << 1, buff + (before_end << 1), (uintptr_t)(r->base[arg1]));
 	} else {
-		n_aLoadBuffer(ptr++, count << 1, buff, osVirtualToPhysical(curr_ptr));
+		n_aLoadBuffer(ptr++, count << 1, buff, (uintptr_t)(curr_ptr));
 	}
 
 	return ptr;
@@ -316,10 +317,10 @@ Acmd *_n_saveBuffer(ALFx *r, s32 arg1, s16 *curr_ptr, s32 buff, Acmd *p)
 		after_end = updated_ptr - delay_end;
 		before_end = delay_end - curr_ptr;
 
-		n_aSaveBuffer(ptr++, before_end << 1, buff, osVirtualToPhysical(curr_ptr));
-		n_aSaveBuffer(ptr++, after_end << 1, buff + (before_end << 1), osVirtualToPhysical(r->base[arg1]));
+		n_aSaveBuffer(ptr++, before_end << 1, buff, (uintptr_t)(curr_ptr));
+		n_aSaveBuffer(ptr++, after_end << 1, buff + (before_end << 1), (uintptr_t)(r->base[arg1]));
 	} else {
-		n_aSaveBuffer(ptr++, FIXED_SAMPLE << 1, buff, osVirtualToPhysical(curr_ptr));
+		n_aSaveBuffer(ptr++, FIXED_SAMPLE << 1, buff, (uintptr_t)(curr_ptr));
 	}
 
 	return ptr;
@@ -330,8 +331,8 @@ Acmd *_n_filterBuffer(ALLowPass *lp, s32 buff, s32 count, Acmd *p)
 	Acmd *ptr = p;
 	s16 tmp = count >> 8;
 
-	n_aLoadADPCM(ptr++, 32, osVirtualToPhysical(lp->fcvec.fccoef));
-	n_aPoleFilter(ptr++, lp->first, lp->fgain, tmp, osVirtualToPhysical(lp->fstate[buff]));
+	n_aLoadADPCM(ptr++, 32, (uintptr_t)(lp->fcvec.fccoef));
+	n_aPoleFilter(ptr++, lp->first, lp->fgain, tmp, (uintptr_t)(lp->fstate[buff]));
 	lp->first = 0;
 
 	return ptr;

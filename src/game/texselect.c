@@ -288,7 +288,7 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, u32 rendermode, s32 
 
 		if (tconfig->unk0b == 1) {
 			ptr = (u16 *)tconfig->textureptr;
-			texturenum = ((u16 *)PHYS_TO_K0(ptr))[-4];
+			texturenum = ((u16 *)(k_ptr_t)(ptr))[-4];
 
 			// GCC has problems with this area because it seems to think that
 			// registers are 64 bits wide. To do the index < g_TexNumConfigs

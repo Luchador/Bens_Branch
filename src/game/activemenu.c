@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/menuutils.h"
@@ -1161,8 +1162,8 @@ Gfx *amRender(Gfx *gdl)
 		colours[0].word = PD_BE32(0x22222200);
 		colours[1].word = PD_BE32(0x0000004f);
 
-		gSPColor(gdl++, osVirtualToPhysical(colours), 2);
-		gSPVertex(gdl++, osVirtualToPhysical(vertices), 8, 0);
+		gSPColor(gdl++, (uintptr_t)(colours), 2);
+		gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
 
 		gSPTri2(gdl++, 4, 5, 6, 6, 7, 4);
 		gSPTri4(gdl++, 0, 4, 7, 7, 3, 0, 0, 1, 5, 5, 4, 0);

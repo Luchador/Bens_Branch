@@ -193,7 +193,7 @@ Gfx *bviewDrawStatic(Gfx *gdl, u32 arg1, s32 arg2)
 	s32 viewheight = viGetViewHeight();
 	s32 viewwidth = viGetViewWidth();
 	s32 viewleft = viGetViewLeft();
-	u16 *fb2 = (u16 *) PHYS_TO_K0(rngRandom() & 0xfff00);
+	u16 *fb2 = (u16 *) (k_ptr_t)(rngRandom() & 0xfff00);
 	s32 y;
 
 	gDPPipeSync(gdl++);

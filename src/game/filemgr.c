@@ -1903,25 +1903,11 @@ MenuItemHandlerResult pakGameNoteListMenuHandler(s32 operation, struct menuitem 
 	Gfx *gdl;
 	struct menuitemrenderdata *renderdata;
 	OSPfsState *note;
-#if VERSION >= VERSION_JPN_FINAL
-	char tmpname[52];
-	char tmpext[20];
-	char generalbuffer[80];
-	char extbuffer[80];
-	char pagesbuffer[80];
-#elif VERSION >= VERSION_NTSC_1_0
 	char tmpname[40];
 	char tmpext[12];
 	char generalbuffer[60];
 	char extbuffer[60];
 	char pagesbuffer[60];
-#else
-	char tmpname[20];
-	char tmpext[8];
-	char generalbuffer[28];
-	char extbuffer[28];
-	char pagesbuffer[28];
-#endif
 	s32 textwidth;
 	s32 textheight;
 

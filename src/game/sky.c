@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/quaternion.h"
 #include "game/utils.h"
@@ -861,9 +862,9 @@ Gfx *skyRender(Gfx *gdl)
 			mtxF2L(mtx, mtx);
 
 			gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
-			gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
-			gSPColor(gdl++, osVirtualToPhysical(cols), numvertices);
-			gSPVertex(gdl++, osVirtualToPhysical(verts), numvertices, 0);
+			gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
+			gSPColor(gdl++, (uintptr_t)(cols), numvertices);
+			gSPVertex(gdl++, (uintptr_t)(verts), numvertices, 0);
 
 			for (s32 i = 0; i < numvertices; ++i) {
 				verts[i].x = watervertices3d[i].x;
@@ -1300,9 +1301,9 @@ Gfx *skyRender(Gfx *gdl)
 	mtxF2L(mtx, mtx);
 
 	gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
-	gSPMatrix(gdl++, osVirtualToPhysical(mtx), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
-	gSPColor(gdl++, osVirtualToPhysical(cols), numvertices);
-	gSPVertex(gdl++, osVirtualToPhysical(verts), numvertices, 0);
+	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
+	gSPColor(gdl++, (uintptr_t)(cols), numvertices);
+	gSPVertex(gdl++, (uintptr_t)(verts), numvertices, 0);
 
 	for (s32 i = 0; i < numvertices; ++i) {
 		verts[i].x = skyvertices3d[i].x;

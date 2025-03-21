@@ -83,7 +83,6 @@ s32 portalCalculateIntersection(s32 portalnum, struct coord *pos1, struct coord 
 	f32 value1;
 	f32 value2;
 	f32 tmp;
-	u32 stack;
 
 	lastside = 0;
 	pvertices = (struct portalvertices *)((uintptr_t)g_BgPortals + g_BgPortals[portalnum].verticesoffset);

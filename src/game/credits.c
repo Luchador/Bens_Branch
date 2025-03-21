@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/camera.h"
 #include "game/menuutils.h"
@@ -396,8 +397,8 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, u8 type, u8 layernum, f32 arg3, u32 al
 
 	creditsChooseBgColours(vertices, colours, g_CreditsData->bglayers[layernum].confignum, alpha, arg5 * 90);
 
-	gSPColor(gdl++, osVirtualToPhysical(colours), 3);
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 9, 0);
+	gSPColor(gdl++, (uintptr_t)(colours), 3);
+	gSPVertex(gdl++, (uintptr_t)(vertices), 9, 0);
 
 	gSPTri4(gdl++, 0, 1, 3, 1, 4, 3, 1, 2, 5, 5, 4, 1);
 	gSPTri4(gdl++, 3, 4, 7, 7, 6, 3, 4, 5, 7, 5, 8, 7);
@@ -617,8 +618,8 @@ Gfx *creditsRenderLine(Gfx *gdl, struct coord *from, struct coord *to)
 	colours[0].word = 0xffffffff;
 	colours[1].word = 0xffffffff;
 
-	gSPColor(gdl++, osVirtualToPhysical(colours), 2);
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 4, 0);
+	gSPColor(gdl++, (uintptr_t)(colours), 2);
+	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
 	gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
 
@@ -887,7 +888,7 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 		}
 	}
 
-	gSPColor(gdl++, osVirtualToPhysical(colours), 60);
+	gSPColor(gdl++, (uintptr_t)(colours), 60);
 
 	for (confignum = 0; confignum < ARRAYCOUNT(g_CreditParticleConfigs); confignum++) {
 		bool donetexture = false;
@@ -971,7 +972,7 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 				vertices[2].colour = offset;
 				vertices[3].colour = offset;
 
-				gSPVertex(gdl++, osVirtualToPhysical(vertices), 4, 0);
+				gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
 				gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
 			}
@@ -1707,7 +1708,7 @@ Gfx *creditsDraw(Gfx *gdl)
 
 			gdl = menuRenderModel(gdl, &g_CreditsData->menumodel, MENUMODELTYPE_CREDITSLOGO);
 
-			gSPMatrix(gdl++, osVirtualToPhysical(matrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+			gSPMatrix(gdl++, (uintptr_t)(matrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 			gdl = creditsFillFramebuffer(gdl, 0x000000d8);
 		}
@@ -1716,7 +1717,7 @@ Gfx *creditsDraw(Gfx *gdl)
 		mtxF2L(&sp68, matrix);
 		camSetWorldToScreenMtxf(&sp68);
 
-		gSPMatrix(gdl++, osVirtualToPhysical(matrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+		gSPMatrix(gdl++, (uintptr_t)(matrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 		gdl = creditsDrawBackground(gdl);
 		gdl = creditsDrawParticles(gdl);

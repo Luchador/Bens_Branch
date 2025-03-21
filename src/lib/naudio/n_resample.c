@@ -1,5 +1,6 @@
 #include "n_synthInternals.h"
 #include <os.h>
+#include <stdint.h>
 
 Acmd *n_alResamplePull(N_PVoice *e, s16 *outp, Acmd *p)
 {
@@ -49,7 +50,7 @@ Acmd *n_alResamplePull(N_PVoice *e, s16 *outp, Acmd *p)
 		 * construct our portion of the command list
 		 */
 		incr = (s32)(e->rs_ratio * UNITY_PITCH);
-		n_aResample(ptr++, osVirtualToPhysical(e->rs_state), e->rs_first, incr, inp, 0);
+		n_aResample(ptr++, (uintptr_t)(e->rs_state), e->rs_first, incr, inp, 0);
 		e->rs_first = 0;
 	}
 

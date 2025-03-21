@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/dlights.h"
@@ -1230,7 +1231,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		}
 
 		gSPClearGeometryMode(gdl++, G_CULL_BOTH | G_FOG);
-		gSPMatrix(gdl++, osVirtualToPhysical(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		gdl = roomApplyMtx(gdl, roomnum);
 
@@ -1270,7 +1271,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 			colours[0].word = var8007e93c;
 		}
 
-		gSPColor(gdl++, osVirtualToPhysical(colours), 1);
+		gSPColor(gdl++, (uintptr_t)(colours), 1);
 
 		for (i = 14; i >= 0; i--) {
 			gDPSetTextureImage(gdl++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, g_ExplosionTexturePairs[i].texturenum1);
@@ -1292,7 +1293,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 			}
 		}
 
-		gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		tmp = (g_ExplosionTypes[exp->type].flarespeed * 15.0f) * 0.83333331346512f;
 
@@ -1463,7 +1464,7 @@ Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx 
 		vertices[j].colour = 0;
 	}
 
-	gSPVertex(gdl++, osVirtualToPhysical(vertices), 4, 0);
+	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
 	gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
 

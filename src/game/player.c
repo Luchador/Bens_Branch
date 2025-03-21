@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/bondeyespy.h"
 #include "game/bondmove.h"
@@ -1300,20 +1301,16 @@ void playerTickChrBody(void)
 
 			offset1 = 0;
 			var8007fc0c = 8;
-			osSyncPrintf("Gunmem: 0x%08x\n", bgunGetGunMem());
 
 			allocation = g_Vars.currentplayer->gunmem2;
 			model = (struct model *)(allocation + offset1);
-			osSyncPrintf("Gunmem: bondsub 0x%08x\n", (uintptr_t)model);
 			offset1 += ALIGN64(sizeof(struct model));
 
 			model->anim = (struct anim *)(allocation + offset1);
-			osSyncPrintf("Gunmem: bondsub->anim 0x%08x\n", model->anim);
 			offset1 += sizeof(struct anim);
 			offset1 = ALIGN64(offset1);
 
 			rwdatas = (u32 *)(allocation + offset1);
-			osSyncPrintf("Gunmem: savedata 0x%08x\n", (uintptr_t)rwdatas);
 			offset1 += 0x400;
 #ifdef PLATFORM_64BIT
 			offset1 += 0x200;
@@ -1321,7 +1318,6 @@ void playerTickChrBody(void)
 			offset1 = ALIGN64(offset1);
 
 			weaponobj = (struct weaponobj *)(allocation + offset1);
-			osSyncPrintf("Gunmem: wo 0x%08x\n", (uintptr_t)weaponobj);
 			offset1 += sizeof(struct weaponobj);
 			offset1 = ALIGN64(offset1);
 
@@ -1366,12 +1362,6 @@ void playerTickChrBody(void)
 #endif
 
 			texGetPoolLeftPos(&texpool);
-
-			// @TODO: Figure out these arguments
-			osSyncPrintf("Jo using %d bytes gunmem (gunmemsize %d)\n");
-			osSyncPrintf("Gunmem: bondmeml 0x%08x size 0x%08x\n", bgunGetGunMem(), bgunCalculateGunMemCapacity());
-			osSyncPrintf("Gunmem: tex block free 0x%08x\n");
-			osSyncPrintf("Gunmem: Free at end %d\n");
 
 			texGetPoolLeftPos(&texpool);
 		} else {
@@ -2156,7 +2146,7 @@ Gfx *player0f0baf84(Gfx *gdl)
 		guPerspective(a, &b, g_Vars.currentplayer->zoominfovy,
 				PAL ? 1.7316017150879f : 1.4545454978943f, 10, 300, 1);
 
-		gSPMatrix(gdl++, OS_PHYSICAL_TO_K0(a), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gSPMatrix(gdl++, (uintptr_t)(a), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 		gSPPerspNormalize(gdl++, b);
 	}
 
@@ -2597,7 +2587,7 @@ Gfx *playerRenderHealthBar(Gfx *gdl)
 	mtx00016ae4(&matrix, 0, 370.f * fovsc, 0, 0, 0, 0, 0, 0, -1);
 	mtxF2L(&matrix, addr);
 
-	gSPMatrix(gdl++, osVirtualToPhysical((void *)addr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPMatrix(gdl++, (uintptr_t)((void *)addr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
@@ -2612,7 +2602,7 @@ Gfx *playerRenderHealthBar(Gfx *gdl)
 
 	gdl = healthbarDraw(gdl, NULL, 0, 0);
 
-	gSPMatrix(gdl++, osVirtualToPhysical(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	return gdl;
 }
