@@ -1831,7 +1831,7 @@ void bgBuildTables(s32 stagenum)
 	var8007fc10 = 200;
 
 	wallhitReset();
-	func0f002a98();
+	dlightsReset();
 	func0f001c0c();
 }
 

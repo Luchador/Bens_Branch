@@ -4007,7 +4007,6 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 		velocity.x = gundir.x * 21.666666f;
 		velocity.y = gundir.y * 21.666666f;
 		velocity.z = gundir.z * 21.666666f;
-		velocity.y += 10.0f;
 	} else {
 		// Simple velocity
 		velocity.x = gundir.x * 16.666666f;
@@ -7133,9 +7132,9 @@ void bgun0f0a5550(s32 handnum)
 		{
 			bool a0 = true;
 			struct modelrenderdata renderdata = {NULL, true, 3};
-//#if VERSION >= VERSION_PAL_BETA
+#if VERSION >= VERSION_PAL_BETA
 			bool a3 = false;
-//#endif
+#endif
 			s32 spcc;
 			Mtxf *spc8;
 			Mtxf *spc4;
@@ -7191,7 +7190,7 @@ void bgun0f0a5550(s32 handnum)
 				a0 = false;
 			}
 
-//#if VERSION >= VERSION_PAL_BETA
+#if VERSION >= VERSION_PAL_BETA
 			switch (modelGetAnimNum(&hand->gunmodel)) {
 			case ANIM_GUN_CROSSBOW_EQUIP:
 			case ANIM_GUN_LAPTOP_EQUIP:
@@ -7211,7 +7210,7 @@ void bgun0f0a5550(s32 handnum)
 				a3 = 1;
 				break;
 			}
-//#endif
+#endif
 
 			if (a0) {
 				if (player->hands[HAND_RIGHT].unk0dd4 == -1) {
@@ -7387,9 +7386,9 @@ void bgun0f0a5550(s32 handnum)
 
 	hand->animframeinc = 0;
 
-//#if VERSION >= VERSION_PAL_BETA
+#if VERSION >= VERSION_PAL_BETA
 	hand->animframeincfreal = 0;
-//#endif
+#endif
 }
 
 void bgunTickMaulerCharge(void)
@@ -7703,9 +7702,9 @@ void bgunRender(Gfx **gdlptr)
 		struct hand *hand;
 		s32 j;
 		s32 alpha;
-		s32 weaponnum; // ec
-		struct modelnode *node; // e8
-		u32 colour; // e4
+		s32 weaponnum;
+		struct modelnode *node;
+		u32 colour;
 
 		hand = player->hands + i;
 

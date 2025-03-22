@@ -4264,8 +4264,8 @@ Gfx *playerRenderHud(Gfx *gdl)
 			gdl = gasRender(gdl);
 		}
 
-		bgunTickGameplay2(); // Dirty hack to stop unwanted shaders from rendering in Cinemas
-		bgunRender(&gdl);
+		//bgunTickGameplay2(); // Dirty hack to stop unwanted shaders from rendering in Cinemas
+		//bgunRender(&gdl);
 
 		return gdl;
 	}
@@ -4525,8 +4525,8 @@ Gfx *playerRenderHud(Gfx *gdl)
 		gdl = bgRenderArtifacts(gdl);
 
 		if (g_Vars.currentplayer->eyespy) {
-			bgunTickGameplay2(); // Dirty hack to stop unwanted shaders from rendering when using CamSpy
-			bgunRender(&gdl);
+			//bgunTickGameplay2(); // Dirty hack to stop unwanted shaders from rendering when using CamSpy
+			//bgunRender(&gdl);
 			if (g_Vars.currentplayer->eyespy->startuptimer60 < TICKS(50)) {
 				gdl = bviewDrawFisheye(gdl, 0xffffffff, 255, 0, g_Vars.currentplayer->eyespy->startuptimer60, g_Vars.currentplayer->eyespy->hit);
 			} else {

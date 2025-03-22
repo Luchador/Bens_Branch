@@ -9519,47 +9519,52 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 /**
  * Calculates the trajectory for thrown items.
  */
-void chrCalculateTrajectory(struct coord *frompos, f32 velocity, struct coord *aimpos, struct coord *out)
+void chrCalculateTrajectory(struct coord *frompos, f32 arg1, struct coord *aimpos, struct coord *arg3)
 {
-    float dx = aimpos->x - frompos->x;
-    float dy = aimpos->y - frompos->y;
-    float dz = aimpos->z - frompos->z;
+	f32 xvel;
+	f32 yvel;
+	f32 zvel;
+	f32 latvel;
+	f32 vel;
+	f32 sp40;
+	f32 sp3c;
+	f32 sp38;
+	f32 sp30;
+	f32 sp2c;
+	f32 sp24;
+	f32 sp28;
+	f32 sp20;
 
-    float totalDist = sqrtf(dx * dx + dy * dy + dz * dz);
+	arg1 *= 0.59999999f;
 
-    if (totalDist < 0.0001f) {
-        out->x = 0;
-        out->y = velocity;
-        out->z = 0;
-        return;
-    }
+	xvel = (aimpos->x - frompos->x) * 0.01f;
+	yvel = (aimpos->y - frompos->y) * 0.01f;
+	zvel = (aimpos->z - frompos->z) * 0.01f;
 
-    // Normalize base direction
-    float nx = dx / totalDist;
-    float ny = dy / totalDist;
-    float nz = dz / totalDist;
+	vel = sqrtf(xvel * xvel + yvel * yvel + zvel * zvel);
+	latvel = sqrtf(xvel * xvel + zvel * zvel);
+	sp38 = latvel / vel;
+	sp40 = acosf(sp38);
 
-    // Camera vertical aim: -1 = down, +1 = up
-    float lookPitch = g_Vars.currentplayer->cam_look.y;
+	if (yvel < 0) {
+		sp40 = -sp40;
+	}
 
-    // Add dynamic arc bias based on look direction
-    float arc_bias = lookPitch * ARC_BIAS_STRENGTH;
+	sp2c = (vel * 9.81f * sp38 * sp38) / (arg1 * arg1) + yvel / vel;
 
-    // Add upward pop
-    ny += arc_bias + POP_BIAS;
+	if (sp2c < -1) {
+		sp2c = -1;
+	} else if (sp2c > 1) {
+		sp2c = 1;
+	}
 
-    // Normalize final vector
-    float mag = sqrtf(nx * nx + ny * ny + nz * nz);
+	sp3c = (asinf(sp2c) - sp40) * 0.5f + sp40;
+	sp28 = cosf(sp3c);
+	sp30 = sinf(sp3c);
 
-    if (mag > 0.0001f) {
-        out->x = (nx * velocity) / mag;
-        out->y = (ny * velocity) / mag;
-        out->z = (nz * velocity) / mag;
-    } else {
-        out->x = 0;
-        out->y = velocity;
-        out->z = 0;
-    }
+	arg3->x = xvel / latvel * sp28;
+	arg3->y = sp30;
+	arg3->z = zvel / latvel * sp28;
 }
 
 /**
@@ -14299,7 +14304,7 @@ bool chrCompareTeams(struct chrdata *chr1, struct chrdata *chr2, u8 checktype)
 					struct chrdata *playerchr = g_Vars.bond->prop->chr;
 
 					// @bug fix: Only make Jon an ally if the stage is not Duel
-					if(!g_Vars.stagenum == STAGE_DEFECTION)
+					if(!g_Vars.stagenum == STAGE_DUEL)
 					{
 						// @bug: This makes Jon an ally in Duel
 						if ((chr2 == playerchr && chr1->headnum == HEAD_JONATHAN) ||
@@ -14323,7 +14328,7 @@ bool chrCompareTeams(struct chrdata *chr1, struct chrdata *chr2, u8 checktype)
 					struct chrdata *playerchr = g_Vars.bond->prop->chr;
 
 					// @bug fix: Only make Jon an ally if the stage is not Duel
-					if(!g_Vars.stagenum == STAGE_DEFECTION)
+					if(!g_Vars.stagenum == STAGE_DUEL)
 					{
 						// @bug: This makes Jon an ally in Duel
 						if ((chr2 == playerchr && chr1->headnum == HEAD_JONATHAN) ||

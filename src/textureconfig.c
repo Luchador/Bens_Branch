@@ -92,16 +92,30 @@ struct textureconfig g_TcWallhitConfigs[] = {
 	/*17*/ { 0x0d72, 32,  24,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  },
 };
 
+// struct textureconfig g_TcBeamConfigs[] = {
+// 	/*0*/ { 0x0006, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
+// 	/*1*/ { 0x0007, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
+// 	/*2*/ { 0x0008, 16,  32,  1, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
+// 	/*3*/ { 0x0859, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
+// 	/*4*/ { 0x085a, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
+// };
+
+// Ben's comment: levels exported from the Setup Editor break beams for some reason. This can be solved by setting the beam level (4th parameter) to 0.
+// I also found it necessary to re-export the Cyclone's beam (texture 0007) with no mipmaps
 struct textureconfig g_TcBeamConfigs[] = {
-	/*0*/ { 0x0006, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
-	/*1*/ { 0x0007, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
-	/*2*/ { 0x0008, 16,  32,  1, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
-	/*3*/ { 0x0859, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
-	/*4*/ { 0x085a, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
+	/*0*/ { 0x0006, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Most guns
+	/*1*/ { 0x0007, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Cyclone
+	/*2*/ { 0x0008, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Unused red beam
+	/*3*/ { 0x0859, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Tranquilizer
+	/*4*/ { 0x085a, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Alien gun green beams
 };
 
+// struct textureconfig g_TcLaserConfigs[] = {
+// 	/*0*/ { 0x0009, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   },
+// };
+
 struct textureconfig g_TcLaserConfigs[] = {
-	/*0*/ { 0x0009, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
+	/*0*/ { 0x0009, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   },
 };
 
 struct textureconfig g_TcGroup03Configs[] = {
@@ -264,7 +278,7 @@ struct textureconfig g_TcGeneralConfigs[] = {
 	/* 0*/ { 0x001b, 16,  16,  3, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
 	/* 1*/ { 0x0001, 1,   1,   0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
 	/* 2*/ { 0x0c97, 16,  16,  3, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
-	/* 3*/ { 0x001c, 2,   8,   1, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
+	/* 3*/ { 0x001c, 2,   8,   0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  }, // Falcon 2 laser beam. Set level to 0 to prevent weird bugs in levels exported by the Setup Editor
 	/* 4*/ { 0x001d, 8,   8,   1, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_MIRROR, G_TX_MIRROR },
 	/* 5*/ { 0x001c, 2,   8,   1, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
 	/* 6*/ { 0x01e5, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
@@ -274,27 +288,27 @@ struct textureconfig g_TcGeneralConfigs[] = {
 	/*10*/ { 0x063b, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
 	/*11*/ { 0x0c9a, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
 	/*12*/ { 0x063c, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*13*/ { 0x0385, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*14*/ { 0x0617, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*15*/ { 0x0618, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*16*/ { 0x0619, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*17*/ { 0x061a, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*18*/ { 0x061b, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*19*/ { 0x061c, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*20*/ { 0x061d, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*21*/ { 0x061e, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*22*/ { 0x061f, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*23*/ { 0x0620, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*24*/ { 0x0621, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*25*/ { 0x0622, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*26*/ { 0x0623, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*27*/ { 0x0624, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*28*/ { 0x0625, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*29*/ { 0x0626, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*30*/ { 0x0b4f, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*31*/ { 0x0b52, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*32*/ { 0x0b50, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*33*/ { 0x0b51, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
+	/*13*/ { 0x0385, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Defection thumbnail
+	/*14*/ { 0x0617, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Investigation thumbnail
+	/*15*/ { 0x0618, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Extraction thumbnail
+	/*16*/ { 0x0619, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Villa thumbnail
+	/*17*/ { 0x061a, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Chicago thumbnail
+	/*18*/ { 0x061b, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // G5 Building thumbnail
+	/*19*/ { 0x061c, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Infiltration thumbnail
+	/*20*/ { 0x061d, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Rescue thumbnail
+	/*21*/ { 0x061e, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Escape thumbnail
+	/*22*/ { 0x061f, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Air Base thumbnail
+	/*23*/ { 0x0620, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // AF1 thumbnail
+	/*24*/ { 0x0621, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Crash Site thumbnail
+	/*25*/ { 0x0622, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Pelagic II thumbnail
+	/*26*/ { 0x0623, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Deep Sea thumbnail
+	/*27*/ { 0x0624, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // CI Defense thumbnail
+	/*28*/ { 0x0625, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Attack Ship thumbnail
+	/*29*/ { 0x0626, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Skedar Ruins thumbnail
+	/*30*/ { 0x0b4f, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // MBR thumbnail
+	/*31*/ { 0x0b52, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Maian SOS thumbnail
+	/*32*/ { 0x0b50, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // WAR! Thumbnail
+	/*33*/ { 0x0b51, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // The Duel thumbnail
 	/*34*/ { 0x0858, 14,  14,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
 	/*35*/ { 0x084e, 11,  11,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
 	/*36*/ { 0x08f4, 14,  14,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },

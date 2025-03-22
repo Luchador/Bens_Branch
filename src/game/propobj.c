@@ -12533,10 +12533,10 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 	if (USINGDEVICE(DEVICE_NIGHTVISION)) {
 		if ((obj->flags & OBJFLAG_PATHBLOCKER) == 0) {
-			colour[0] = var8009caed;
-			colour[1] = var8009caed;
-			colour[2] = var8009caed;
-			colour[3] = var8009caee;
+			colour[0] = g_NVPropBrightness;
+			colour[1] = g_NVPropBrightness;
+			colour[2] = g_NVPropBrightness;
+			colour[3] = g_NVPropHighlight;
 		}
 	} else if (USINGDEVICE(DEVICE_IRSCANNER)) {
 		if ((obj->hidden & OBJHFLAG_CONDITIONALSCENERY) || (obj->flags3 & OBJFLAG3_INFRARED)) {

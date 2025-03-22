@@ -20,12 +20,9 @@
 #include "data.h"
 #include "types.h"
 #include "gbiex.h"
-#ifndef PLATFORM_N64
 #include "game/player.h"
 #include "video.h"
-#endif
 
-char var800a41c0[26];
 u8 g_IrScanlines[2][480];
 s32 g_NumActiveEffects = 0;
 u8 g_BlurChange = 0;
@@ -229,8 +226,6 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, u32 colour, u32 alpha)
 		return gdl;
 	}
 
-	strcpy(var800a41c0, "interlaceGfx");
-
 	gDPPipeSync(gdl++);
 
 	increment = (2.6179938316345f - angle) / viewheight;
@@ -278,8 +273,6 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, u32 colour, u32 alpha)
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "BlueInterlaceGfx");
 
 	gDPPipeSync(gdl++);
 
@@ -343,8 +336,6 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 	if (g_BlurFbDirty) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "stretchBlurGfx");
 
 	gDPPipeSync(gdl++);
 
@@ -460,8 +451,6 @@ Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 sta
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "blurGfxFisheye");
 
 	s3 = 1;
 
@@ -1616,13 +1605,11 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 		return gdl;
 	}
 
-	strcpy(var800a41c0, "Fullscreen_DrawFaultScope");
-
-	var8009caec = 0xbc;
-	g_NVChrHighlight = 0xbe; // Character brightness when using NV
+	g_NVBRBrightness = 0xbc; // Brightness of the background when using NV
+	g_NVChrHighlight = 0xbe; // Character extra brightness when using NV
 	g_NVChrBrightness = 0xde;
-	var8009caed = 0x50;
-	var8009caee = 0xc0;
+	g_NVPropBrightness = 0x50;
+	g_NVPropHighlight = 0xc0;
 
 	brightness = roomGetFinalBrightness(g_Vars.currentplayer->prop->rooms[0]);
 
@@ -1710,8 +1697,6 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 		return gdl;
 	}
 
-	strcpy(var800a41c0, "Fullscreen_DrawFaultScope");
-
 	viewbottom = viewtop + viewheight;
 	viewcentrey = (viewtop + viewbottom) / 2;
 	scantop = viewcentrey - outerradius;
@@ -1759,7 +1744,7 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 		g_Vars.currentplayer->fsscanline++;
 	}
 
-	var8009caec = 0xff;
+	g_NVBRBrightness = 0xff;
 	g_NVChrHighlight = 0xde;
 	g_NVChrBrightness = 0xde;
 
@@ -1845,8 +1830,6 @@ Gfx *bviewDrawIntroFaderBlur(Gfx *gdl, s32 arg1)
 		return gdl;
 	}
 
-	strcpy(var800a41c0, "IntroFaderBlurGfx");
-
 	gDPPipeSync(gdl++);
 
 	gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 255);
@@ -1892,8 +1875,6 @@ Gfx *bviewDrawIntroText(Gfx *gdl)
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "IntroTextInterfereGfx");
 
 	gDPPipeSync(gdl++);
 
@@ -1951,8 +1932,6 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "BinocularViewGfx");
 
 	if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL && PLAYERCOUNT() >= 2) {
 		vsplit = true;

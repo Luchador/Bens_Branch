@@ -1,6 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/quaternion.h"
 #include "game/camera.h"
@@ -79,15 +77,185 @@
  * rwdata (such as the selected head).
  */
 
+#if VERSION >= VERSION_PAL_BETA
+u8 var8005efb0_2 = 0;
+#endif
+
 u32 var8005efb0 = 0;
 
 bool g_ModelDistanceDisabled = false;
 f32 g_ModelDistanceScale = 1;
+bool var8005efbc = false;
 f32 var8005efc0 = 0;
 bool (*var8005efc4)(struct model *model, struct modelnode *node) = NULL;
 
+#if VERSION >= VERSION_PAL_BETA
+bool var8005efd8_2 = false;
+#endif
+
 Vtx *(*g_ModelVtxAllocatorFunc)(s32 numvertices) = NULL;
 void (*g_ModelJointPositionedFunc)(s32 mtxindex, Mtxf *mtx) = NULL;
+
+// Ben's comment: this is ancient trigonometric code using lookup tables. I'd like to replace it but it causes occasional graphical bugs. For now I'll just let it be.
+u16 var8006ae90[] = {
+	0x8000, 0x7eba, 0x7d74, 0x7c2d, 0x7ae7, 0x79a0, 0x7859, 0x7711,
+	0x75c9, 0x7480, 0x7337, 0x71ec, 0x70a1, 0x6f55, 0x6e07, 0x6cb8,
+	0x6b68, 0x6a17, 0x68c4, 0x6770, 0x661a, 0x64c1, 0x6367, 0x620b,
+	0x60ad, 0x5f4c, 0x5de9, 0x5c83, 0x5b1a, 0x59ae, 0x583e, 0x56cb,
+	0x5555, 0x53db, 0x525c, 0x50d9, 0x4f51, 0x4dc5, 0x4c32, 0x4a9a,
+	0x48fc, 0x4757, 0x45ab, 0x43f7, 0x423a, 0x4075, 0x3ea5, 0x3ccb,
+	0x3ae5, 0x38f1, 0x36ef, 0x34dc, 0x32b7, 0x307d, 0x2e2b, 0x2bbd,
+	0x292e, 0x2678, 0x2391, 0x206c, 0x1cf6, 0x0000, 0x1cf6, 0x1cbb,
+	0x1c80, 0x1c45, 0x1c08, 0x1bcc, 0x1b8f, 0x1b51, 0x1b13, 0x1ad4,
+	0x1a95, 0x1a55, 0x1a14, 0x19d3, 0x1992, 0x194f, 0x190c, 0x18c9,
+	0x1884, 0x183f, 0x17f9, 0x17b3, 0x176b, 0x1723, 0x16da, 0x1690,
+	0x1645, 0x15f9, 0x15ac, 0x155e, 0x150f, 0x14be, 0x146d, 0x141a,
+	0x13c6, 0x1370, 0x1319, 0x12c1, 0x1267, 0x120b, 0x11ad, 0x114e,
+	0x10ec, 0x1088, 0x1022, 0x0fb9, 0x0f4d, 0x0ede, 0x0e6c, 0x0df7,
+	0x0d7d, 0x0d00, 0x0c7d, 0x0bf4, 0x0b66, 0x0ad0, 0x0a31, 0x0989,
+	0x08d3, 0x080e, 0x0734, 0x063d, 0x0518, 0x039a, 0x039a, 0x031e,
+	0x028c, 0x01cd, 0x0000,
+};
+
+s32 func0f096890(s32 arg0)
+{
+	u16 *array;
+	s32 shiftamount;
+	s32 mask;
+	s32 index;
+	s32 value;
+	s32 nextvalue;
+
+	if (arg0 >= 32736) {
+		mask = 0x07;
+		shiftamount = 3;
+		array = &var8006ae90[126];
+		arg0 -= 32736;
+	} else if (arg0 >= 30720) {
+		mask = 0x1f;
+		shiftamount = 5;
+		array = &var8006ae90[62];
+		arg0 -= 30720;
+	} else {
+		mask = 0x1ff;
+		shiftamount = 9;
+		array = &var8006ae90[0];
+	}
+
+	index = arg0 >> shiftamount;
+	value = array[index];
+	nextvalue = array[index + 1];
+
+	return value - (((value - nextvalue) * (arg0 & mask)) >> shiftamount);
+}
+
+f32 func0f096700(f32 value)
+{
+	return sqrtf(sinf(value) / cosf(value) + 1);
+}
+
+u16 acosx(s16 arg0)
+{
+	s32 value = arg0 >= 0 ? arg0 : -arg0;
+
+	value = func0f096890(value);
+
+	if (arg0 < 0) {
+		value = 0xffff - value;
+	}
+
+	return value;
+}
+
+s16 asinx(s16 arg0)
+{
+	s32 value = arg0 >= 0 ? arg0 : -arg0;
+
+	value = func0f096890(value);
+
+	if (arg0 >= 0) {
+		value = 0x7fff - value;
+	} else {
+		value -= 0x8000;
+	}
+
+	return value;
+}
+
+f32 acosf(f32 value)
+{
+	s16 intval;
+
+	if (value >= 1) {
+		intval = 32767;
+	} else if (value <= -1) {
+		intval = -32767;
+	} else {
+		intval = value * 32767.0f;
+	}
+
+	return acosx(intval) * M_PI / 65535.0f;
+}
+
+f32 asinf(f32 value)
+{
+	s16 intval;
+
+	if (value >= 1) {
+		intval = 32767;
+	} else if (value <= -1) {
+		intval = -32767;
+	} else {
+		intval = value * 32767.0f;
+	}
+
+	return asinx(intval) * M_PI / 65535.0f;
+}
+
+
+f32 atan2f(f32 x, f32 z)
+{
+	f32 result;
+
+	if (x == 0) {
+		if (z >= 0) {
+			result = 0;
+		} else {
+			result = M_PI;
+		}
+	} else if (z == 0) {
+		if (x > 0) {
+			result = 1.5707963705063f;
+		} else {
+			result = 1.5707963705063f * 3;
+		}
+	} else {
+		result = sqrtf(x * x + z * z);
+
+		if (z < x) {
+			result = acosf(z / result);
+
+			if (x < 0) {
+				result = M_TAU - result;
+			}
+		} else {
+			result = acosf(x / result);
+			result = 1.5707963705063f - result;
+
+			if (z < 0) {
+				result = M_PI - result;
+			}
+
+			if (result < 0) {
+				result = result + M_TAU;
+			}
+		}
+	}
+
+	return result;
+}
+
+
 
 void modelSetDistanceChecksDisabled(bool disabled)
 {
@@ -921,7 +1089,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 		}
 
 		if (roty < 0.890118f) { // 51 degrees
-			roty = sqrtf(sinf(roty) / cosf(roty) + 1);
+			roty = func0f096700(roty);
 		} else {
 			roty = 1.5f;
 		}
@@ -1025,7 +1193,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 		}
 
 		if (roty < 0.890118f) { // 51 degrees
-			roty = sqrtf(sinf(roty) / cosf(roty) + 1);
+			roty = func0f096700(roty);
 		} else {
 			roty = 1.5f;
 		}
@@ -1091,7 +1259,11 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 				animGetRotTranslateScale(animpart, anim->flip, skel, anim->animnum, anim->frameslot2, &rot2, &translate2, &scale2);
 				modelTweenRot(&rot1, &rot2, spe0);
 
+#if VERSION >= VERSION_PAL_BETA
+				if (sp128 || var8005efd8_2)
+#else
 				if (sp128)
+#endif
 				{
 					modelTweenPos(&translate1, &translate2, spe0);
 				}
@@ -1540,9 +1712,16 @@ void modelSetMatrices(struct modelrenderdata *renderdata, struct model *model)
 	model->matrices = renderdata->unk10;
 
 	renderdata->unk10 += model->definition->nummatrices;
+
+#if VERSION >= VERSION_PAL_BETA
+	if (var8005efb0_2 || !modelasm00018680(renderdata, model)) {
+		modelUpdateMatrices(renderdata, model);
+	}
+#else
 	if (!modelasm00018680(renderdata, model)) {
 		modelUpdateMatrices(renderdata, model);
 	}
+#endif
 }
 
 void modelSetMatricesWithAnim(struct modelrenderdata *renderdata, struct model *model)
@@ -1692,7 +1871,7 @@ f32 modelGetEffectiveAnimSpeed(struct model *model)
 s32 modelConstrainOrWrapAnimFrame(s32 frame, s16 animnum, f32 endframe)
 {
 	if (frame < 0) {
-		if (g_Anims[animnum].flags & ANIMFLAG_LOOP) {
+		if (var8005efbc || (g_Anims[animnum].flags & ANIMFLAG_LOOP)) {
 			frame = animGetNumFrames(animnum) - (-frame % animGetNumFrames(animnum));
 		} else {
 			frame = 0;
@@ -1700,7 +1879,7 @@ s32 modelConstrainOrWrapAnimFrame(s32 frame, s16 animnum, f32 endframe)
 	} else if (endframe >= 0 && frame > (s32)endframe) {
 		frame = ceiltoint(endframe);
 	} else if (frame >= animGetNumFrames(animnum)) {
-		if (g_Anims[animnum].flags & ANIMFLAG_LOOP) {
+		if (var8005efbc || (g_Anims[animnum].flags & ANIMFLAG_LOOP)) {
 			frame = frame % animGetNumFrames(animnum);
 		} else {
 			frame = animGetNumFrames(animnum) - 1;
@@ -3138,7 +3317,7 @@ void modelRenderNodeGundl(struct modelrenderdata *renderdata, struct model *mode
 	}
 
 	if ((renderdata->flags & MODELRENDERFLAG_OPA) && rodata->opagdl) {
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->baseaddr));
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
 
 		if (renderdata->cullmode) {
 			modelApplyCullMode(renderdata);
@@ -3169,7 +3348,7 @@ void modelRenderNodeGundl(struct modelrenderdata *renderdata, struct model *mode
 	}
 
 	if ((renderdata->flags & MODELRENDERFLAG_XLU) && rodata->opagdl && rodata->unk12 == 4 && rodata->xlugdl) {
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->baseaddr));
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
 
 		if (renderdata->cullmode) {
 			modelApplyCullMode(renderdata);
@@ -3193,7 +3372,7 @@ void modelRenderNodeDl(struct modelrenderdata *renderdata, struct model *model, 
 		union modelrwdata *rwdata = modelGetNodeRwData(model, node);
 
 		if (rwdata->dl.gdl) {
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->dl.colours));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->dl.colours);
 
 			if (renderdata->cullmode) {
 				modelApplyCullMode(renderdata);
@@ -3214,8 +3393,8 @@ void modelRenderNodeDl(struct modelrenderdata *renderdata, struct model *model, 
 				break;
 			}
 
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)(rwdata->dl.vertices));
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (uintptr_t)(rwdata->dl.colours));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, rwdata->dl.vertices);
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, rwdata->dl.colours);
 
 			gSPDisplayList(renderdata->gdl++, rwdata->dl.gdl);
 
@@ -3231,14 +3410,14 @@ void modelRenderNodeDl(struct modelrenderdata *renderdata, struct model *model, 
 		union modelrwdata *rwdata = modelGetNodeRwData(model, node);
 
 		if (rwdata->dl.gdl && rodata->dl.mcount == 4 && rodata->dl.xlugdl) {
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->dl.colours));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->dl.colours);
 
 			if (renderdata->cullmode) {
 				modelApplyCullMode(renderdata);
 			}
 
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)(rwdata->dl.vertices));
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (uintptr_t)(rwdata->dl.colours));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, rwdata->dl.vertices);
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, rwdata->dl.colours);
 
 			modelApplyRenderModeType4(renderdata, false);
 
@@ -3268,9 +3447,9 @@ void modelRenderNodeStarGunfire(struct modelrenderdata *renderdata, struct model
 			Vtx *src = (Vtx *) rodata->vertices;
 			Vtx *dst = g_ModelVtxAllocatorFunc(rodata->unk00 * 4);
 
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)(dst));
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (uintptr_t)((void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2])));
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->baseaddr));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, dst);
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2]));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
 
 			gDPSetFogColor(renderdata->gdl++, 0x00, 0x00, 0x00, 0x00);
 			gSPDisplayList(renderdata->gdl++, rodata->gdl);
@@ -3439,7 +3618,7 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 		vertices[3].y = sp90.f[1] - spc4;
 		vertices[3].z = sp90.f[2] + negspc8 + -spbc;
 
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)(rodata->baseaddr));
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
 
 		if (rodata->texture) {
 			s32 centre;
@@ -3470,9 +3649,9 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 		}
 
 		gSPSetGeometryMode(renderdata->gdl++, G_CULL_BACK);
-		gSPMatrix(renderdata->gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-		gSPColor(renderdata->gdl++, (uintptr_t)(colours), 1);
-		gSPVertex(renderdata->gdl++, (uintptr_t)(vertices), 4, 0);
+		gSPMatrix(renderdata->gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+		gSPColor(renderdata->gdl++, colours, 1);
+		gSPVertex(renderdata->gdl++, vertices, 4, 0);
 		gSPTri2(renderdata->gdl++, 0, 1, 2, 2, 3, 0);
 	}
 }
@@ -3484,7 +3663,7 @@ void modelRender(struct modelrenderdata *renderdata, struct model *model)
 	u32 type;
 	struct modelnode *node = model->definition->rootnode;
 
-	gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_MTX, (uintptr_t)(model->matrices));
+	gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_MTX, model->matrices);
 
 	while (node) {
 		type = node->type & 0xff;

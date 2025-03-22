@@ -37,34 +37,31 @@ s32 g_NumPortals;
 s32 var8009cae0;
 s32 var8009cae4;
 f32 (*var8009cae8)(s32 roomnum, f32 mult, s32 portalnum1, s32 portalnum2); // function pointer
-u8 var8009caec;
-u8 var8009caed;
-u8 var8009caee;
+u8 g_NVBRBrightness;
+u8 g_NVPropBrightness;
+u8 g_NVPropHighlight;
 u8 g_NVChrHighlight;
 u8 g_NVChrBrightness;
 
 struct var80061420 *var80061420 = NULL;
-u32 var80061424 = 0x00000000;
 struct coord *var80061428 = NULL;
 u16 **var8006142c = NULL;
-u16 **var80061430 = NULL;
+u16 **g_PortalPairs = NULL;
 f32 *var80061434 = NULL;
 bool *g_IsPortalClosed = NULL;
 f32 var8006143c = 50;
 u32 var80061444 = 1;
 u32 var80061448 = 0x00000000;
 bool g_IsSwitchingGoggles = false;
-u32 var80061450 = 0x00000000;
-u32 var80061454 = 0xffffffff;
 s32 g_LightsPrevTickMode = 0;
 
-u32 func0f000920(s32 portalnum1, s32 portalnum2)
+u32 roomFindUpperAndLowerPortal(s32 portalnum1, s32 portalnum2)
 {
 	if (portalnum1 != portalnum2) {
 		s32 upper = (portalnum1 > portalnum2) ? portalnum1 : portalnum2;
 		s32 lower = (portalnum1 < portalnum2) ? portalnum1 : portalnum2;
 
-		return var80061430[upper][lower];
+		return g_PortalPairs[upper][lower];
 	}
 
 	return 0;
@@ -95,7 +92,7 @@ u8 roomGetFinalBrightnessForPlayer(s32 roomnum)
 	s32 brightness = g_Rooms[roomnum].br_flash;
 
 	if (USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) {
-		brightness += var8009caec;
+		brightness += g_NVBRBrightness;
 	} else {
 		brightness += g_Rooms[roomnum].br_settled_regional;
 	}
@@ -121,7 +118,7 @@ u8 roomGetSettledRegionalBrightnessForPlayer(s32 roomnum)
 	u32 brightness;
 
 	if (USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) {
-		return var8009caec;
+		return g_NVBRBrightness;
 	}
 
 	if (g_Rooms[roomnum].flags & ROOMFLAG_BRIGHTNESS_CALCED) {
@@ -253,15 +250,6 @@ void lightGetDirection(s32 roomnum, u32 lightnum, struct coord *dir)
 	dir->x = light->dirx;
 	dir->y = light->diry;
 	dir->z = light->dirz;
-}
-
-void func0f0010b4(void)
-{
-	if (var80061424) {
-		var80061424 = 0;
-	}
-
-	var80061424 = 1;
 }
 
 void roomSetDefaults(struct room *room)
@@ -770,12 +758,9 @@ void func0f00259c(s32 roomnum)
 	}
 
 	var80061434[roomnum] = sqrtf(g_Rooms[roomnum].volume) * 255.0f;
-	if (1);
 
 	if (g_Rooms[roomnum].numportals != 0) {
 		func0f002844(roomnum, var80061434[roomnum], 0, -1);
-		if (1);
-		if (1);
 	}
 
 	for (i = 0; i < g_Rooms[roomnum].numportals; i++) {
@@ -840,7 +825,7 @@ void func0f002844(s32 roomnum, f32 arg1, s32 arg2, s32 portalnum)
 	}
 }
 
-void func0f002a98(void)
+void dlightsReset(void)
 {
 	s32 i;
 
@@ -1628,16 +1613,16 @@ void func0f004c6c(void)
 
 	s4 = align16(s4);
 	ptr = mempAlloc(align16(s4), MEMPOOL_STAGE);
-	var80061430 = (void *)ptr;
+	g_PortalPairs = (void *)ptr;
 
 	ptr += sp38;
 
 	for (i = 0; i < g_NumPortals; i++) {
 		if (i != 0) {
-			var80061430[i] = (void *)ptr;
+			g_PortalPairs[i] = (void *)ptr;
 			ptr += i * 2;
 		} else {
-			var80061430[i] = 0;
+			g_PortalPairs[i] = 0;
 		}
 	}
 
@@ -1698,7 +1683,7 @@ void func0f004c6c(void)
 			u16 a = var8006142c[i][j];
 			u16 b = var8006142c[j][i];
 
-			var80061430[i][j] = a < b ? a : b;
+			g_PortalPairs[i][j] = a < b ? a : b;
 		}
 	}
 }
@@ -1755,80 +1740,80 @@ void func0f00505c(void)
 	}
 }
 
-f32 func0f0053d0(s32 roomnum1, struct coord *pos1, s32 portalnum1, s32 roomnum2, struct coord *pos2, s32 portalnum2, f32 *arg6)
+f32 roomShortestDistanceViaPortals(s32 roomnum1, struct coord *pos1, s32 portalnum1, s32 roomnum2, struct coord *pos2, s32 portalnum2, f32 *inoutDistance)
 {
-	f32 sp6c;
-	f32 *sp68;
-	f32 sp64;
+	f32 defaultMaxDist;
+	f32 *maxDistPtr;
+	f32 maxDist;
 	f32 xdiff;
 	f32 ydiff;
 	f32 zdiff;
 
-	sp6c = 32767.0f;
-	sp68 = arg6 ? arg6 : &sp6c;
-	sp64 = *sp68;
+	defaultMaxDist = 32767.0f;
+	maxDistPtr = inoutDistance ? inoutDistance : &defaultMaxDist;
+	maxDist = *maxDistPtr;
 
 	xdiff = pos1->x - pos2->x;
 	xdiff = xdiff > 0.0f ? xdiff : -xdiff;
 
-	if (xdiff < sp64) {
+	if (xdiff < maxDist) {
 		zdiff = pos1->z - pos2->z;
 		zdiff = zdiff > 0.0f ? zdiff : -zdiff;
 
-		if (zdiff < sp64) {
+		if (zdiff < maxDist) {
 			ydiff = pos1->y - pos2->y;
 			ydiff = ydiff > 0.0f ? ydiff : -ydiff;
 
-			if (ydiff < sp64) {
+			if (ydiff < maxDist) {
 				f32 dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 
-				if (dist < sp64) {
+				if (dist < maxDist) {
 					if (roomnum1 == roomnum2 || portalnum1 == portalnum2) {
-						if (dist < *sp68) {
-							*sp68 = dist;
+						if (dist < *maxDistPtr) {
+							*maxDistPtr = dist;
 						}
 					} else {
-						f32 sp50 = func0f000920(portalnum1, portalnum2);
+						f32 sp50 = roomFindUpperAndLowerPortal(portalnum1, portalnum2);
 
-						if (sp50 < sp64) {
+						if (sp50 < maxDist) {
 							struct coord sp44;
 							f32 xdiff2;
 							f32 zdiff2;
 
 							portalGetAvgVertexPos(portalnum1, &sp44);
-							sp64 -= sp50;
+							maxDist -= sp50;
 
 							xdiff2 = sp44.x - pos1->x;
 							xdiff2 = xdiff2 > 0.0f ? xdiff2 : -xdiff2;
 
-							if (xdiff2 < sp64) {
+							if (xdiff2 < maxDist) {
 								zdiff2 = sp44.z - pos1->z;
 								zdiff2 = zdiff2 > 0.0f ? zdiff2 : -zdiff2;
 
-								if (zdiff2 < sp64) {
+								if (zdiff2 < maxDist) {
 									f32 sp38 = sqrtf(xdiff2 * xdiff2 + zdiff2 * zdiff2);
 
-									if (sp38 < sp64) {
+									if (sp38 < maxDist) {
 										struct coord sp2c;
 										f32 xdiff3;
 										f32 zdiff3;
 
 										portalGetAvgVertexPos(portalnum2, &sp2c);
-										sp64 -= sp38;
+										maxDist -= sp38;
 
 										xdiff3 = sp2c.x - pos2->x;
 										xdiff3 = xdiff3 > 0.0f ? xdiff3 : -xdiff3;
 
-										if (xdiff3 < sp64) {
+										if (xdiff3 < maxDist) {
 											zdiff3 = sp2c.z - pos2->z;
 											zdiff3 = zdiff3 > 0.0f ? zdiff3 : -zdiff3;
 
-											if (zdiff3 < sp64) {
+											if (zdiff3 < maxDist) {
 												f32 dist3 = sqrtf(xdiff3 * xdiff3 + zdiff3 * zdiff3);
 
-												if (dist3 < sp64) {
-													sp64 -= dist3;
-													*sp68 -= sp64;
+												if (dist3 < maxDist) {
+													maxDist -= dist3;
+													*maxDistPtr -= maxDist;
 												}
 											}
 										}
@@ -1842,7 +1827,7 @@ f32 func0f0053d0(s32 roomnum1, struct coord *pos1, s32 portalnum1, s32 roomnum2,
 		}
 	}
 
-	return *sp68;
+	return *maxDistPtr;
 }
 
 void func0f0056f4(s32 roomnum1, struct coord *pos1, s32 roomnum2, struct coord *pos2, s32 arg4, f32 *result, s32 arg6)
@@ -1895,7 +1880,7 @@ void func0f0056f4(s32 roomnum1, struct coord *pos1, s32 roomnum2, struct coord *
 			for (j = 0; j < g_Rooms[roomnum2].numportals; j++) {
 				portalnum2 = g_RoomPortals[g_Rooms[roomnum2].roomportallistoffset + j];
 
-				dist = func0f0053d0(roomnum1, pos1, portalnum1, roomnum2, pos2, portalnum2, result);
+				dist = roomShortestDistanceViaPortals(roomnum1, pos1, portalnum1, roomnum2, pos2, portalnum2, result);
 
 				if (dist < *result) {
 					*result = dist;
@@ -1929,7 +1914,7 @@ void func0f0059fc(s32 roomnum1, struct coord *pos1, s32 roomnum2, struct coord *
 			if (j);
 			if (j);
 
-			dist = func0f0053d0(roomnum1, pos1, portalnum1, roomnum2, pos2, portalnum2, NULL);
+			dist = roomShortestDistanceViaPortals(roomnum1, pos1, portalnum1, roomnum2, pos2, portalnum2, NULL);
 
 			if (dist < *result) {
 				*result = dist;
