@@ -1,6 +1,6 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
-#include "game/atan2f.h"
 #include "game/padhalllv.h"
 #include "bss.h"
 #include "lib/lib_17ce0.h"

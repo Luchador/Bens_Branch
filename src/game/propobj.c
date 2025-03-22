@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/bondmove.h"
 #include "game/bondwalk.h"
@@ -16,8 +17,6 @@
 #include "game/propsnd.h"
 #include "game/objectives.h"
 #include "game/mtxutils.h"
-#include "game/atan2f.h"
-#include "game/acosfasinf.h"
 #include "game/quaternion.h"
 #include "game/floor.h"
 #include "game/ceil.h"
@@ -176,9 +175,6 @@ bool doorCallLift(struct prop *doorprop, bool allowclose)
 					doorsActivate(link->lift, allowclose);
 				} else if (type == OBJTYPE_LIFT) {
 					if (allowclose
-#if VERSION < VERSION_NTSC_1_0
-							&& g_Vars.currentplayer->lift == link->lift
-#endif
 							&& door->base.type == OBJTYPE_DOOR
 							&& !doorIsClosed(door)) {
 						handled = false;

@@ -1,9 +1,9 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/chraicommands.h"
 #include "game/dlights.h"
 #include "game/propsnd.h"
-#include "game/atan2f.h"
 #include "game/hudmsg.h"
 #include "game/file.h"
 #include "game/lv.h"

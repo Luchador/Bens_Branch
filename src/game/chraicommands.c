@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "../lib/naudio/n_sndp.h"
 #include "constants.h"
 #include "game/bondmove.h"
@@ -15,7 +16,6 @@
 #include "game/setuputils.h"
 #include "game/propsnd.h"
 #include "game/objectives.h"
-#include "game/atan2f.h"
 #include "game/bondgun.h"
 #include "game/weaponutils.h"
 #include "game/modelmgr.h"

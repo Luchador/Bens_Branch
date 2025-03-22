@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/bondmove.h"
@@ -11,7 +12,6 @@
 #include "game/prop.h"
 #include "game/propsnd.h"
 #include "game/mtxutils.h"
-#include "game/acosfasinf.h"
 #include "game/utils.h"
 #include "game/quaternion.h"
 #include "game/bondgun.h"
@@ -3897,7 +3897,7 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 	bool droppinggrenade = false;
 	struct hand *hand;
 	struct coord aimpos;
-	struct coord sp140;
+	struct coord outvector;
 	f32 frac;
 	f32 radians;
 	Mtxf spf8;
@@ -3972,14 +3972,14 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 			aimpos.y = hand->dotpos.y;
 			aimpos.z = hand->dotpos.z;
 
-			chrCalculateTrajectory(&spawnpos, 21.666666f, &aimpos, &sp140);
+			chrCalculateTrajectory(&spawnpos, 21.666666f, &aimpos, &outvector);
 
-			radians = acosf(gundir.f[0] * sp140.f[0] + gundir.f[1] * sp140.f[1] + gundir.f[2] * sp140.f[2]);
+			radians = acosf(gundir.f[0] * outvector.f[0] + gundir.f[1] * outvector.f[1] + gundir.f[2] * outvector.f[2]);
 
 			// Check within 20 degrees
 			if (radians > 0.34901026f || radians < -0.34901026f) {
 				mtx00016b58(&spf8, 0, 0, 0, gundir.x, gundir.y, gundir.z, 0, 1, 0);
-				mtx00016b58(&spb8, 0, 0, 0, sp140.x, sp140.y, sp140.z, 0, 1, 0);
+				mtx00016b58(&spb8, 0, 0, 0, outvector.x, outvector.y, outvector.z, 0, 1, 0);
 
 				quaternion0f097044(&spf8, sp68);
 				quaternion0f097044(&spb8, sp58);
@@ -3998,20 +3998,22 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 				gundir.y = -sp78.m[2][1];
 				gundir.z = -sp78.m[2][2];
 			} else {
-				gundir.x = sp140.x;
-				gundir.y = sp140.y;
-				gundir.z = sp140.z;
+				gundir.x = outvector.x;
+				gundir.y = outvector.y;
+				gundir.z = outvector.z;
 			}
 		}
 
 		velocity.x = gundir.x * 21.666666f;
 		velocity.y = gundir.y * 21.666666f;
 		velocity.z = gundir.z * 21.666666f;
+		velocity.y += 10.0f;
 	} else {
 		// Simple velocity
 		velocity.x = gundir.x * 16.666666f;
 		velocity.y = gundir.y * 16.666666f;
 		velocity.z = gundir.z * 16.666666f;
+
 
 		if (gset->weaponnum == WEAPON_GRENADE || gset->weaponnum == WEAPON_NBOMB) {
 			velocity.y += 1.6666666f;

@@ -59,6 +59,17 @@ struct coord {
 	};
 };
 
+/*struct coord {
+	union {
+		struct {
+			double x;
+			double y;
+			double z;
+		};
+		double f[3];
+	};
+};*/
+
 struct bbox {
 	f32 xmin;
 	f32 xmax;
@@ -215,7 +226,7 @@ struct g_vars {
 	/*0x458*/ u32 modifiedfiles;
 	/*0x45c*/ s32 speedpilltime; // in time60
 	/*0x460*/ s32 speedpillchange;
-	/*0x464*/ u32 speedpillwant;
+	/*0x464*/ bool speedpillwant;
 	/*0x468*/ bool speedpillon;
 	/*0x46c*/ s32 restartlevel;
 	/*0x470*/ s32 perfectbuddynum;

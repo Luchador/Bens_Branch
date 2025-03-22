@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
 #include "game/bondeyespy.h"
@@ -15,7 +16,6 @@
 #include "game/prop.h"
 #include "game/propsnd.h"
 #include "game/objectives.h"
-#include "game/atan2f.h"
 #include "game/quaternion.h"
 #include "game/bondgun.h"
 #include "game/env.h"

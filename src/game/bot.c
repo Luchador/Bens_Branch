@@ -1,11 +1,11 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/debug.h"
 #include "game/chr.h"
 #include "game/prop.h"
 #include "game/propsnd.h"
-#include "game/atan2f.h"
 #include "game/bondgun.h"
 #include "game/weaponutils.h"
 #include "game/player.h"

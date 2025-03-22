@@ -1,6 +1,6 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
-#include "game/acosfasinf.h"
 #include "game/quaternion.h"
 #include "bss.h"
 #include "lib/mtx.h"

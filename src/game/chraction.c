@@ -1,7 +1,6 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
-#include "game/acosfasinf.h"
-#include "game/atan2f.h"
 #include "game/bg.h"
 #include "game/body.h"
 #include "game/bondgun.h"
@@ -56,6 +55,11 @@
 #include "lib/vi.h"
 #include "data.h"
 #include "types.h"
+#include "game/debug.h"
+
+// Adjust this to tune the arc curvature.
+#define ARC_BIAS_STRENGTH -0.3f
+#define POP_BIAS 0.5f   
 
 s32 g_RecentQuipsPlayed[5];
 u8 g_RecentQuipsIndex;
@@ -3431,6 +3435,10 @@ void chrYeetFromPos(struct chrdata *chr, struct coord *exppos, f32 force)
 	s32 subindex;
 	f32 angletoexplosion;
 
+	if (!chr || !chr->model || !chr->prop) {
+		return;
+	}
+
 	if (race != RACE_DRCAROLL && race != RACE_EYESPY && race != RACE_ROBOT) {
 		faceangle = chrGetInverseTheta(chr);
 		latangle = atan2f(prop->pos.x - exppos->x, prop->pos.z - exppos->z);
@@ -3439,11 +3447,14 @@ void chrYeetFromPos(struct chrdata *chr, struct coord *exppos, f32 force)
 		dist.y = prop->pos.y - exppos->y;
 		dist.z = prop->pos.z - exppos->z;
 
-		if (dist.f[0] == 0 && dist.f[1] == 0 && dist.f[2] == 0) {
-			dist.z = 1;
+		f32 magnitude = sqrtf(dist.x * dist.x + dist.y * dist.y + dist.z * dist.z); // Ben's comment: Rewrote this code to prevent division by 0
+		if (magnitude < 0.001f) 
+		{
+			magnitude = 0.001f;
 		}
 
-		speed = 0.625f * force / sqrtf(dist.f[0] * dist.f[0] + dist.f[1] * dist.f[1] + dist.f[2] * dist.f[2]);
+		speed = 0.625f * force / magnitude;
+
 		angletoexplosion = latangle - faceangle;
 
 		dist.x *= speed;
@@ -3460,24 +3471,30 @@ void chrYeetFromPos(struct chrdata *chr, struct coord *exppos, f32 force)
 
 		angleindex = angletoexplosion * 1.2734422683716f + 0.5f;
 
-		if (angleindex >= 8) {
+		if (angleindex < 0 || angleindex >= 8) { // Original code didn't check for less than 0
 			angleindex = 0;
 		}
 
-		subindex = rngRandom() % g_YeetAnimIndexesByRaceAngle[race][angleindex].count;
+		u8 count = g_YeetAnimIndexesByRaceAngle[race][angleindex].count;
+		if (count == 0)  {
+			count = 1; // Prevent division by 0
+		}
+
+		subindex = rngRandom() % count;
 
 		if (race == RACE_HUMAN) {
 			row = &g_YeetAnimsHuman[g_YeetAnimIndexesByRaceAngle[race][angleindex].indexes[subindex]];
 		} else if (race == RACE_SKEDAR) {
 			row = &g_YeetAnimsSkedar[g_YeetAnimIndexesByRaceAngle[race][angleindex].indexes[subindex]];
 		}
+		else { // Safety check
+			return; 
+		}
 
 		chrStopFiring(chr);
 		chrUncloak(chr, true);
 
-#if VERSION >= VERSION_NTSC_1_0
 		chr->chrflags &= ~CHRCFLAG_HIDDEN;
-#endif
 
 		chr->actiontype = ACT_DIE;
 
@@ -4140,7 +4157,6 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 		return;
 	}
 
-#ifndef PLATFORM_N64
 	// Don't damage if team multiplayer and friendly fire is off
 	if (g_Vars.mplayerisrunning
 			&& (g_MpSetup.options & MPOPTION_TEAMSENABLED)
@@ -4151,7 +4167,6 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 			&& chr->team == aprop->chr->team) {
 		return;
 	}
-#endif
 
 	if (gset == NULL) {
 		gset = &gset2;
@@ -4272,7 +4287,6 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 	if (vprop->type == PROPTYPE_PLAYER) {
 		s32 prevplayernum = g_Vars.currentplayernum;
 
-#if VERSION >= VERSION_NTSC_1_0
 		s32 contpad1;
 		s32 contpad2;
 
@@ -4287,16 +4301,6 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 		if (contpad2 >= 0) {
 			pakRumble(contpad2, 0.25f, -1, -1);
 		}
-#else
-		setCurrentPlayerNum(playermgrGetPlayerNumByProp(vprop));
-
-		pakRumble((s8)g_Vars.currentplayernum, 0.25f, -1, -1);
-
-		s32 controlmode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
-		if (controlmode >= CONTROLMODE_21 && controlmode < CONTROLMODE_PC) {
-			pakRumble((s8)(PLAYERCOUNT() + g_Vars.currentplayernum), 0.25f, -1, -1);
-		}
-#endif
 
 		setCurrentPlayerNum(prevplayernum);
 	}
@@ -4380,28 +4384,6 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 
 			showshield = true;
 			usedshield = true;
-		}
-	}
-
-	// Handle hat shots. This is left over from GE, as hats don't exist in PD
-	if (damage > 0 && hitpart == HITPART_HAT && chr->weapons_held[2]) {
-		s32 type = hatGetType(chr->weapons_held[2]);
-
-		if (type == HATTYPE_CLOTH) {
-			// Hat remains on head and damages the chr (eg. Moonraker Elite)
-			hitpart = HITPART_HEAD;
-		} else if (type != HATTYPE_METAL) {
-			// Normal hat
-			damage = 0;
-			objSetDropped(chr->weapons_held[2], DROPTYPE_HAT);
-			chr->hidden |= CHRHFLAG_DROPPINGITEM;
-		} else {
-			// Metal helmets don't fall off and make a metallic chink noise when shot
-			u16 sounds[] = { SFX_HIT_METAL_807B, SFX_HIT_METAL_8079, SFX_HATHIT_807C };
-			damage = 0;
-
-			psCreate(NULL, chr->prop, sounds[rngRandom() % 3], -1,
-					-1, 0, 0, PSTYPE_NONE, NULL, -1, NULL, -1, -1, -1, -1);
 		}
 	}
 
@@ -4657,11 +4639,6 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 			}
 
 			setCurrentPlayerNum(prevplayernum);
-			return;
-		}
-
-		// This check is pointless - a similar check and return exists earlier
-		if (chr->actiontype == ACT_DIE || chr->actiontype == ACT_DEAD) {
 			return;
 		}
 
@@ -9461,9 +9438,7 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 
 				if (bestvolume);
 
-#if VERSION >= VERSION_NTSC_1_0
 				if (bestnode != NULL)
-#endif
 				{
 					Mtxf sp48;
 					struct modelrodata_bbox *rodata = &bestnode->rodata->bbox;
@@ -9544,55 +9519,48 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 /**
  * Calculates the trajectory for thrown items.
  */
-void chrCalculateTrajectory(struct coord *frompos, f32 arg1, struct coord *aimpos, struct coord *arg3)
+void chrCalculateTrajectory(struct coord *frompos, f32 velocity, struct coord *aimpos, struct coord *out)
 {
-	f32 xvel;
-	f32 yvel;
-	f32 zvel;
-	f32 latvel;
-	f32 vel;
-	f32 sp40;
-	f32 sp3c;
-	f32 sp38;
-	f32 sp30;
-	f32 sp2c;
-	f32 sp24;
-	f32 sp28;
-	f32 sp20;
+    float dx = aimpos->x - frompos->x;
+    float dy = aimpos->y - frompos->y;
+    float dz = aimpos->z - frompos->z;
 
-	arg1 *= 0.59999999f;
+    float totalDist = sqrtf(dx * dx + dy * dy + dz * dz);
 
-	xvel = (aimpos->x - frompos->x) * 0.01f;
-	yvel = (aimpos->y - frompos->y) * 0.01f;
-	zvel = (aimpos->z - frompos->z) * 0.01f;
+    if (totalDist < 0.0001f) {
+        out->x = 0;
+        out->y = velocity;
+        out->z = 0;
+        return;
+    }
 
-	vel = sqrtf(xvel * xvel + yvel * yvel + zvel * zvel);
-	latvel = sqrtf(xvel * xvel + zvel * zvel);
-	sp38 = latvel / vel;
-	sp40 = acosf(sp38);
+    // Normalize base direction
+    float nx = dx / totalDist;
+    float ny = dy / totalDist;
+    float nz = dz / totalDist;
 
-	if (yvel < 0) {
-		sp40 = -sp40;
-	}
+    // Camera vertical aim: -1 = down, +1 = up
+    float lookPitch = g_Vars.currentplayer->cam_look.y;
 
-	sp2c = (vel * 9.81f * sp38 * sp38) / (arg1 * arg1) + yvel / vel;
+    // Add dynamic arc bias based on look direction
+    float arc_bias = lookPitch * ARC_BIAS_STRENGTH;
 
-	if (sp2c < -1) {
-		sp2c = -1;
-	} else if (sp2c > 1) {
-		sp2c = 1;
-	}
+    // Add upward pop
+    ny += arc_bias + POP_BIAS;
 
-	sp3c = (asinf(sp2c) - sp40) * 0.5f + sp40;
-	sp28 = cosf(sp3c);
-	sp30 = sinf(sp3c);
+    // Normalize final vector
+    float mag = sqrtf(nx * nx + ny * ny + nz * nz);
 
-	arg3->x = xvel / latvel * sp28;
-	arg3->y = sp30;
-	arg3->z = zvel / latvel * sp28;
+    if (mag > 0.0001f) {
+        out->x = (nx * velocity) / mag;
+        out->y = (ny * velocity) / mag;
+        out->z = (nz * velocity) / mag;
+    } else {
+        out->x = 0;
+        out->y = velocity;
+        out->z = 0;
+    }
 }
-
-const char var7f1a8ae4[] = "aimadjust=%d";
 
 /**
  * Fire the chr's gun, check what was hit and do all the appropriate things

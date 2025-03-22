@@ -1,7 +1,7 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
-#include "game/acosfasinf.h"
 #include "game/bondgun.h"
 #include "game/gunfx.h"
 #include "game/weaponutils.h"
@@ -320,7 +320,6 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 		s32 i;
 		Mtxf *worldtoscreenmtx = camGetWorldToScreenMtxf();
 		s32 j;
-		u32 stack1;
 		s32 spd8;
 		struct coord spcc;
 		f32 tmp;

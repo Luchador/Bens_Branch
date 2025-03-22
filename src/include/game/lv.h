@@ -24,7 +24,7 @@ Gfx *lvRenderFade(Gfx *gdl);
 void lvFadeReset(void);
 bool lvUpdateTrackedProp(struct trackedprop *trackedprop, s32 index);
 void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerpos, s32 *activeslots, f32 *param_5);
-void func0f168f24(struct prop *prop, bool inchild, struct coord *playerpos, s32 *activeslots, f32 *distances);
+void lvPositionThreatBox(struct prop *prop, bool inchild, struct coord *playerpos, s32 *activeslots, f32 *distances);
 void lvFindThreats(void);
 Gfx *lvRender(Gfx *gdl);
 void lvUpdateSoloHandicaps(void);

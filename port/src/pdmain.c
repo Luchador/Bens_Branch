@@ -59,7 +59,6 @@ void rngSetSeed(u32 seed);
 bool g_AcceptCMDParams = false;
 s32 g_StageNum = STAGE_TITLE;
 u32 g_MainMemaHeapSize = 1024 * 300;
-bool var8005d9bc = false;
 bool g_MainGameLogicEnabled = true;
 u32 g_MainNumGfxTasks = 0;
 bool g_MainIsEndscreen = false;
@@ -117,7 +116,6 @@ void mainInit(void)
 {
 	dmaInit();
 	varsInit();
-	memaInit();
 	joyInit();
 	joyReset();
 

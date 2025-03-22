@@ -1,6 +1,6 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
-#include "game/atan2f.h"
 #include "game/bg.h"
 #include "game/bondgun.h"
 #include "game/chraction.h"

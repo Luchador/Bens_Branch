@@ -1168,7 +1168,7 @@ Gfx *bgRenderArtifacts(Gfx *gdl)
 {
 	s32 i;
 
-	if (g_Vars.mplayerisrunning == false && g_NumRoomsWithGlares > 0) {
+	//if (g_Vars.mplayerisrunning == false && g_NumRoomsWithGlares > 0) {
 		gdl = artifactsConfigureForGlares(gdl);
 
 		for (i = 0; i < g_NumRoomsWithGlares; i++) {
@@ -1176,7 +1176,7 @@ Gfx *bgRenderArtifacts(Gfx *gdl)
 		}
 
 		gdl = artifactsUnconfigureForGlares(gdl);
-	}
+	//}
 
 	gdl = skyRenderArtifacts(gdl);
 
@@ -1342,9 +1342,7 @@ void bgReset(s32 stagenum)
 	// Copy section 1 header to stack and parse into variables
 	header = (u8 *)ALIGN16((uintptr_t)headerbuffer);
 	bgLoadFile(header, 0, 0x40);
-#ifndef PLATFORM_N64
 	preprocessBgSection1Header(header, 0x40);
-#endif
 	inflatedsize = *(u32 *)&header[0];
 	section1compsize = *(u32 *)&header[4];
 	primcompsize = *(u32 *)&header[8];
@@ -1374,9 +1372,7 @@ void bgReset(s32 stagenum)
 	scratch += 0xc;
 	bgInflate((u8 *) scratch, g_BgPrimaryData, primcompsize);
 
-#ifndef PLATFORM_N64
 	preprocessBgSection1(g_BgPrimaryData, inflatedsize, 0x0f000000);
-#endif
 
 	// Shrink the allocation (ie. free the scratch space)
 	mempRealloc(g_BgPrimaryData, inflatedsize, MEMPOOL_STAGE);
@@ -1385,28 +1381,14 @@ void bgReset(s32 stagenum)
 	section2start = section1compsize + 0xc;
 
 	bgLoadFile(header, section2start, 0x40);
-#ifndef PLATFORM_N64
 	preprocessBgSection2Header(header, 0x40);
-#endif
 
 	inflatedsize = (*(u16 *) &header[0] & 0x7fff) - 1;
 	section2compsize = *(u16 *) &header[2];
 	inflatedsize = (inflatedsize | 0xf) + 1;
 
-	// Allocate space for the section 2 data (texture ID list).
-	// This is the cause and fix for the Challenge 7 memory corruption bug in
-	// NTSC 1.0. A full writeup about the bug and how the fix works can be found
-	// in the docs folder of this project.
-#ifdef AVOID_UB
 	section2 = mempAlloc(inflatedsize + section2compsize, MEMPOOL_STAGE);
 	scratch = (uintptr_t) section2 + inflatedsize;
-#elif VERSION >= VERSION_NTSC_FINAL
-	section2 = mempAlloc(inflatedsize + 0x8000, MEMPOOL_STAGE);
-	scratch = (uintptr_t) section2 + 0x8000;
-#else
-	section2 = mempAlloc(inflatedsize + 0x800, MEMPOOL_STAGE);
-	scratch = (uintptr_t) section2 + 0x800;
-#endif
 
 	// Load compressed data from ROM to scratch
 	bgLoadFile((u8 *) scratch, section2start + 4, ((section2compsize - 1) | 0xf) + 1);
@@ -1417,9 +1399,7 @@ void bgReset(s32 stagenum)
 	// Iterate texture IDs and ensure they're loaded
 	inflatedsize = (*(u16 *) &header[0] & 0x7fff) >> 1;
 
-#ifndef PLATFORM_N64
 	preprocessBgSection2((u8 *)section2, inflatedsize);
-#endif
 
 	for (i = 0; i ^ inflatedsize; i++) {
 		texLoadFromTextureNum(section2[i] & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff, NULL);
@@ -1435,7 +1415,6 @@ void bgReset(s32 stagenum)
 	if (var800a4920 == 0) {
 		g_BgPrimaryData2 = (uintptr_t*)g_BgPrimaryData;
 		g_BgRooms = (struct bgroom *)(g_BgPrimaryData2[1] + g_BgPrimaryData - 0x0f000000);
-		goto foo; foo:;
 		g_Vars.roomcount = 0;
 
 		for (j = 1; g_BgRooms[j].unk00 != 0; j++) {
@@ -1639,6 +1618,7 @@ void bgBuildTables(s32 stagenum)
 						} else {
 							thisneighbournum = g_BgPortals[g_RoomPortals[g_Rooms[i].roomportallistoffset + j]].roomnum1;
 						}
+						k = j; // Fix
 					}
 				}
 			}
@@ -1739,24 +1719,14 @@ void bgBuildTables(s32 stagenum)
 		// Load and read the header
 		header = (u8 *)ALIGN16((uintptr_t)headerbuffer);
 		bgLoadFile(header, g_BgSection3, 0x40);
-#ifndef PLATFORM_N64
 		preprocessBgSection3Header(header, 0x40);
-#endif
 		inflatedsize = (*(u16 *)&header[0] & 0x7fff) - 1;
 		section3compsize = *(u16 *)&header[2];
 		inflatedsize = (inflatedsize | 0xf) + 1;
 
 		// Load and inflate section 3
-#ifdef AVOID_UB
 		section3 = mempAlloc(inflatedsize + section3compsize, MEMPOOL_STAGE);
 		scratch = section3 + inflatedsize;
-#elif VERSION >= VERSION_NTSC_FINAL
-		section3 = mempAlloc(inflatedsize + 0x8000, MEMPOOL_STAGE);
-		scratch = section3 + 0x8000;
-#else
-		section3 = mempAlloc(inflatedsize + 0x1000, MEMPOOL_STAGE);
-		scratch = section3 + 0x1000;
-#endif
 
 		bgLoadFile(scratch, g_BgSection3 + 4, ((section3compsize - 1) | 0xf) + 1);
 		bgInflate(scratch, section3, section3compsize);
@@ -1842,7 +1812,7 @@ void bgBuildTables(s32 stagenum)
 		}
 
 		for (i = 0; g_BgPortals[i].verticesoffset != 0; i++) {
-			bgInitPortal(i);
+			bgInitPortal(i); // Ben's comment: This plays a role in the laser sight bug
 		}
 
 		for (i = 1; i < g_Vars.roomcount; i++) {
@@ -5632,8 +5602,6 @@ void bgInitPortal(s32 portalnum)
 
 	tmp1 = sp28.normal.f[0] * room1centre.f[0] + sp28.normal.f[1] * room1centre.f[1] + sp28.normal.f[2] * room1centre.f[2];
 
-	if (tmp1);
-
 	sp18 = 0;
 
 	if (tmp1 > sp28.max) {
@@ -5724,11 +5692,6 @@ void bgInitRoom(s32 roomnum)
 void bgSetPortalOpenState(s32 portal, bool open)
 {
 	g_BgPortals[portal].flags = (g_BgPortals[portal].flags | PORTALFLAG_CLOSED) ^ (open != false);
-}
-
-Gfx *bgRenderPortals(Gfx *gdl, s32 arg1, s32 arg2)
-{
-	return gdl;
 }
 
 f32 var8007fcb4 = 0;

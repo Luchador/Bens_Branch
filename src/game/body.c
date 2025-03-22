@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/chraction.h"
@@ -6,7 +7,6 @@
 #include "game/body.h"
 #include "game/debug.h"
 #include "game/prop.h"
-#include "game/atan2f.h"
 #include "game/modelmgr.h"
 #include "game/lv.h"
 #include "game/modeldef.h"

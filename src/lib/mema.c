@@ -209,11 +209,6 @@ void _memaFree(uintptr_t addr, u64 size)
 	curr->size = size;
 }
 
-void memaInit(void)
-{
-	// empty
-}
-
 void memaReset(void *heapaddr, u64 heapsize)
 {
 	struct memaspace *space;
@@ -246,10 +241,6 @@ void memaReset(void *heapaddr, u64 heapsize)
 
 	g_MemaHeap.spaces[0].addr = g_MemaHeapStart = (uintptr_t) heapaddr;
 	g_MemaHeap.spaces[0].size = g_MemaHeapSize = heapsize;
-
-#if VERSION == VERSION_PAL_BETA
-	g_MemaLeastEverFree = 1000000;
-#endif
 }
 
 /**

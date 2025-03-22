@@ -5,7 +5,6 @@
 #include "types.h"
 
 void memaDefrag(void);
-void memaInit(void);
 void memaReset(void *ptr, u64 size);
 void memaPrint(void);
 void *memaAlloc(u64 size);

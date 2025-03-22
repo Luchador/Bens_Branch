@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "bss.h"
 #include "data.h"
@@ -63,7 +64,6 @@ static void modelasmMathPain3(void);
 static void modelasmMathPain4(void);
 static void modelasmMtxMultiply(Mtxf *src, Mtxf *dst);
 static Mtxf *modelasmFindNodeMtx(struct model *model, struct modelnode *node);
-static f32 modelasmAcosOrAsin(f32 f6);
 
 /**
  * Reads animation data for the given model and applies matrix transformations
@@ -411,7 +411,7 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 						f4 = f5 * 0.5f;
 						f0 += f4;
 					} else {
-						f7 = modelasmAcosOrAsin(f6);
+						f7 = acosf(f6);
 						f17 = f0;
 						f12 = f6 * 0.5f;
 						s1 = t1;
@@ -1209,35 +1209,6 @@ static union modelrwdata *modelasmGetNodeRwData(struct model *model, struct mode
 	return (union modelrwdata *) &rwdatas[index];
 }
 
-#if VERSION < VERSION_NTSC_1_0
-void *modelGetNodeRwData(struct model *model, struct modelnode *node)
-{
-	u32 index = 0;
-	u32 *rwdatas = model->rwdatas;
-	u8 type = node->type & 0xff;
-
-	if (type < ARRAYCOUNT(var8005ef90)) {
-		if (var8005ef90[type] != 0xff) {
-			index = *(u16 *) ((uintptr_t) node->rodata + var8005ef90[type]);
-		}
-	}
-
-	if (model->unk00) {
-		while (node->parent) {
-			node = node->parent;
-
-			if ((node->type & 0xff) == MODELNODETYPE_HEADSPOT) {
-				struct modelrwdata_headspot *tmp = modelGetNodeRwData(model, node);
-				rwdatas = tmp->rwdatas;
-				break;
-			}
-		}
-	}
-
-	return &rwdatas[index];
-}
-#endif
-
 /**
  * Expects: f0-f3, f16-f22
  */
@@ -1287,7 +1258,7 @@ static void modelasmMathPain1(f32 f30)
 	}
 
 	if (f6 <= 0.99994999170303f) {
-		f7 = modelasmAcosOrAsin(f6);
+		f7 = acosf(f6);
 		f20 = f0;
 		f21 = sinf(f7);
 		f22 = sinf((1.0f - f30) * f7);
@@ -1526,141 +1497,4 @@ static Mtxf *modelasmFindNodeMtx(struct model *model, struct modelnode *node)
 	} while (node);
 
 	return NULL;
-}
-
-/**
- * See similar function func0f096890.
- */
-static f32 modelasmAcosOrAsin(f32 f6)
-{
-	s32 t2;
-	s32 t3;
-	u16 *array;
-	s32 shiftamount;
-	s32 mask;
-	s32 s0;
-	s32 s1;
-	s32 s2;
-	s32 s3;
-	s32 s4;
-
-	t2 = f6 * 32767.0f;
-
-	if (t2 > 32767) {
-		t2 = 32767;
-	} else if (t2 < -32767) {
-		t2 = -32767;
-	}
-
-	t3 = t2;
-
-	if (t3 < 0) {
-		t3 = -t3;
-	}
-
-	if (t3 >= 32736) {
-		array = &var8006ae90[126];
-		t3 -= 32736;
-		shiftamount = 3;
-		mask = 0x07;
-	} else if (t3 >= 30720) {
-		array = &var8006ae90[62];
-		t3 -= 30720;
-		shiftamount = 5;
-		mask = 0x1f;
-	} else {
-		array = &var8006ae90[0];
-		shiftamount = 9;
-		mask = 0x1ff;
-	}
-
-	s0 = t3 >> shiftamount;
-	array += s0;
-	s1 = array[0];
-	s2 = array[1];
-	s3 = s1 - s2;
-	s4 = t3 & mask;
-	s3 *= s4;
-	s3 >>= shiftamount;
-	t3 = s1 - s3;
-
-	if (t2 < 0) {
-		t3 = 0xffff - t3;
-	}
-
-	return 0.000047937632189132f * t3;
-}
-
-f32 cosf(f32 radians)
-{
-	return sinf(radians + 1.570796251297f);
-}
-
-f32 sinf(f32 radians)
-{
-	f32 f0;
-	f32 f13;
-	f32 f14;
-	f32 f15;
-	s32 t0;
-	s32 t1;
-	f32 ret;
-
-	t0 = *(u32 *) &radians;
-	t0 = (t0 >> 22) & 0x1ff;
-
-	if (t0 < 255) {
-		if (t0 >= 230) {
-			f14 = radians * radians;
-
-			ret = 0.0000026057805371238f;
-			ret *= f14;
-			ret += -0.0001980960223591f;
-			ret *= f14;
-			ret += 0.0083330664783716f;
-			ret *= f14;
-			ret += -0.16666659712791f;
-			ret *= f14;
-			ret *= radians;
-			ret += radians;
-		} else {
-			ret = radians;
-		}
-	} else {
-		if (t0 < 310) {
-			f14 = radians * 0.31830987334251f;
-
-			t1 = (s32) (f14 > 0.0f ? f14 + 0.5f : f14 - 0.5f);
-			f14 = t1;
-
-			f15 = M_PI;
-			f15 *= f14;
-			radians -= f15;
-
-			f15 = 0.000000031786509424592f;
-			f15 *= f14;
-			radians -= f15;
-
-			f14 = radians * radians;
-
-			ret = 0.0000026057805371238f;
-			ret *= f14;
-			ret += -0.0001980960223591f;
-			ret *= f14;
-			ret += 0.0083330664783716f;
-			ret *= f14;
-			ret += -0.16666659712791f;
-			ret *= f14;
-			ret *= radians;
-			ret += radians;
-
-			if (t1 & 1) {
-				ret = -ret;
-			}
-		} else {
-			ret = 0;
-		}
-	}
-
-	return ret;
 }

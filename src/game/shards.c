@@ -1,8 +1,8 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
 #include "data.h"
-#include "game/atan2f.h"
 #include "game/dlights.h"
 #include "game/file.h"
 #include "game/propsnd.h"

@@ -1,9 +1,9 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/chrai.h"
 #include "game/chraicommands.h"
 #include "game/prop.h"
-#include "game/atan2f.h"
 #include "game/playermgr.h"
 #include "game/mplayer/setup.h"
 #include "game/bot.h"

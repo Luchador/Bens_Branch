@@ -516,7 +516,6 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 
 void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 {
-	u32 stack[4];
 	f32 sp54;
 	f32 sp50;
 	s32 i;

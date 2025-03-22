@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/activemenu.h"
 #include "game/bondbike.h"
@@ -11,7 +12,6 @@
 #include "game/menuutils.h"
 #include "game/chr.h"
 #include "game/prop.h"
-#include "game/atan2f.h"
 #include "game/quaternion.h"
 #include "game/bondgun.h"
 #include "game/weaponutils.h"

@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/acosasin.h"
 #include "bss.h"
 #include "data.h"
 #include "types.h"
@@ -17,7 +16,7 @@ f32 acosf(f32 value)
 		intval = value * 32767.0f;
 	}
 
-	return acosx(intval) * M_PI / 65535.0f;
+	//return acosx(intval) * M_PI / 65535.0f;
 }
 
 f32 asinf(f32 value)
@@ -32,5 +31,5 @@ f32 asinf(f32 value)
 		intval = value * 32767.0f;
 	}
 
-	return asinx(intval) * M_PI / 65535.0f;
+	//return asinx(intval) * M_PI / 65535.0f;
 }

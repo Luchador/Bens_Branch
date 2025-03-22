@@ -1,7 +1,7 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
-#include "game/acosfasinf.h"
 #include "game/quaternion.h"
 #include "game/camera.h"
 #include "game/floor.h"

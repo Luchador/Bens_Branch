@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
@@ -10,7 +11,6 @@
 #include "game/chraction.h"
 #include "game/prop.h"
 #include "game/objectives.h"
-#include "game/atan2f.h"
 #include "game/tex.h"
 #include "game/camera.h"
 #include "game/savebuffer.h"

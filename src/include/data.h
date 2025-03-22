@@ -163,7 +163,6 @@ extern u32 g_TvCmdlist1F[];
 extern struct pschannel *g_PsChannels;
 extern s32 g_ObjectiveLastIndex;
 extern bool g_ObjectiveChecksDisabled;
-extern u16 var8006ae90[];
 extern struct weapon *g_Weapons[];
 extern bool g_CasingsActive;
 extern s32 g_MaxModels;

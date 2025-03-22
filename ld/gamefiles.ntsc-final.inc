@@ -76,9 +76,6 @@
 	build/ROMID/game/propsnd.o (section); \
 	build/ROMID/game/objectives.o (section); \
 	build/ROMID/game/game_096360.o (section); \
-	build/ROMID/game/atan2f.o (section); \
-	build/ROMID/game/acosasin.o (section); \
-	build/ROMID/game/acosfasinf.o (section); \
 	build/ROMID/game/quaternion.o (section); \
 	build/ROMID/game/floor.o (section); \
 	build/ROMID/game/ceil.o (section); \

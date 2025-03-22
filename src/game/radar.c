@@ -1,8 +1,8 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/chraction.h"
-#include "game/atan2f.h"
 #include "game/utils.h"
 #include "game/tex.h"
 #include "game/textutils.h"

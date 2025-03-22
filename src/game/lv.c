@@ -3,7 +3,6 @@
 #include "bss.h"
 #include "data.h"
 #include "game/activemenu.h"
-#include "game/atan2f.h"
 #include "game/bg.h"
 #include "game/body.h"
 #include "game/bondgun.h"
@@ -234,7 +233,7 @@ void lvReset(s32 stagenum)
 
 	g_Vars.speedpilltime = 0;
 	g_Vars.speedpillchange = 0;
-	g_Vars.speedpillwant = 0;
+	g_Vars.speedpillwant = false;
 	g_Vars.speedpillon = false;
 
 	g_Vars.restartlevel = false;
@@ -343,7 +342,7 @@ void lvReset(s32 stagenum)
 	shardsReset();
 	frReset();
 
-	if (g_Vars.stagenum == STAGE_TITLE) { // Ben's comment: this if statement is necessary or the game crashes when returning from a mission. Why though?
+	if (g_Vars.stagenum == STAGE_TITLE) { // Ben's comment: this if statement is necessary or the game crashes when returning from a mission.
 		// empty
 	} else if (stagenum == STAGE_BOOTPAKMENU) {
 		setCurrentPlayerNum(0);
@@ -680,7 +679,8 @@ void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerp
 	}
 }
 
-void func0f168f24(struct prop *prop, bool inchild, struct coord *playerpos, s32 *activeslots, f32 *distances)
+// This function positions the four corners of the threat box on the screen
+void lvPositionThreatBox(struct prop *prop, bool inchild, struct coord *playerpos, s32 *activeslots, f32 *distances)
 {
 	s32 i;
 	f32 sp128;
@@ -729,11 +729,11 @@ void func0f168f24(struct prop *prop, bool inchild, struct coord *playerpos, s32 
 	}
 
 	if (prop->child) {
-		func0f168f24(prop->child, true, playerpos, activeslots, distances);
+		lvPositionThreatBox(prop->child, true, playerpos, activeslots, distances);
 	}
 
 	if (inchild && prop->next) {
-		func0f168f24(prop->next, inchild, playerpos, activeslots, distances);
+		lvPositionThreatBox(prop->next, inchild, playerpos, activeslots, distances);
 	}
 }
 
@@ -754,7 +754,7 @@ void lvFindThreats(void)
 		prop = *propptr;
 
 		if (prop) {
-			func0f168f24(prop, false, &campos, activeslots, distances);
+			lvPositionThreatBox(prop, false, &campos, activeslots, distances);
 		}
 
 		propptr--;
@@ -1206,136 +1206,137 @@ Gfx *lvRender(Gfx *gdl)
 						}
 						break;
 					}
+				}
 					
+				// Disable static noise on the Infiltration intro after the cut scene has finished
+				if (g_CutsceneStaticAudioHandle && !cutscenehasstatic) {
+					audioStop(g_CutsceneStaticAudioHandle);
+				}
+				
 
-					if (g_CutsceneStaticAudioHandle && !cutscenehasstatic) {
-						audioStop(g_CutsceneStaticAudioHandle);
-					}
+				// Slayer rocket shows static when flying out of bounds
+				if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKET
+						&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
+					gdl = bviewDrawSlayerRocketInterlace(gdl, 0xffffffff, 0xffffffff);
 
-					// Slayer rocket shows static when flying out of bounds
-					if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKET
-							&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
-						gdl = bviewDrawSlayerRocketInterlace(gdl, 0xffffffff, 0xffffffff);
+					if (g_Vars.currentplayer->badrockettime > 0) {
+						u32 slayerstatic = g_Vars.currentplayer->badrockettime * 255 / TICKS(90);
 
-						if (g_Vars.currentplayer->badrockettime > 0) {
-							u32 slayerstatic = g_Vars.currentplayer->badrockettime * 255 / TICKS(90);
-
-							if (slayerstatic > 255) {
-								slayerstatic = 255;
-							}
-
-							gdl = bviewDrawStatic(gdl, 0x4fffffff, slayerstatic);
-						}
-					}
-
-					if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKETSTATIC) {
-						gdl = bviewDrawStatic(gdl, 0x4fffffff, 255);
-						g_Vars.currentplayer->visionmode = VISIONMODE_NORMAL;
-					}
-
-					if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY
-							&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
-						s32 xraything = 99;
-
-						if (g_Vars.currentplayer->erasertime < TICKS(200)) {
-							xraything = 249 - (g_Vars.currentplayer->erasertime * 3 >> 2);
+						if (slayerstatic > 255) {
+							slayerstatic = 255;
 						}
 
-						gdl = bviewDrawZoomBlur(gdl, 0xffffffff, xraything, 1.05f, 1.05f);
-					}
-
-					// Handle combat boosts
-					if ((g_Vars.speedpillchange > 0 && g_Vars.speedpillchange < 30)
-							|| (g_Vars.speedpillwant && !g_Vars.speedpillon)
-							|| (!g_Vars.speedpillwant && g_Vars.speedpillon)) {
-						if (g_Vars.speedpillchange == 30 && !g_Vars.speedpillwant) {
-							sndStart(var80095200, lvGetSlowMotionType() ? SFX_JO_BOOST_ACTIVATE : SFX_ARGH_JO_02AD, 0, -1, -1, -1, -1, -1);
-						}
-
-						if (g_Vars.speedpillchange < 15) {
-							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
-									g_Vars.speedpillchange * 180 / 15,
-									(f32)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f,
-									(f32)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f);
-							gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
-									g_Vars.speedpillchange * 0.0066666668280959f);
-						} else {
-							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
-									(30 - g_Vars.speedpillchange) * 180 / 15,
-									(f32)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f,
-									(f32)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f);
-							gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
-									(30.0f - g_Vars.speedpillchange) * 0.0066666668280959f);
-						}
-
-						if (g_Vars.currentplayernum == 0) {
-							if (g_Vars.speedpillwant) {
-								g_Vars.speedpillchange++;
-							} else {
-								g_Vars.speedpillchange--;
-							}
-						}
-
-						if (g_Vars.speedpillchange > 30) {
-							g_Vars.speedpillchange = 30;
-						} else if (g_Vars.speedpillchange < 0) {
-							g_Vars.speedpillchange = 0;
-						}
-					}
-
-					if (g_Vars.speedpillchange > 15) {
-						g_Vars.speedpillon = true;
-					} else {
-						g_Vars.speedpillon = false;
-					}
-
-					if (bluramount) {
-						bviewClearMotionBlur();
-						gdl = bviewDrawMotionBlur(gdl, 0xffffffff, bluramount);
-					}
-
-					// Handle blur effect in cutscenes (Extraction intro?)
-					if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
-						f32 cutsceneblurfrac = playerGetCutsceneBlurFrac();
-
-						if (cutsceneblurfrac > 0) {
-							gdl = bviewDrawMotionBlur(gdl, 0xffffff00, cutsceneblurfrac * 255);
-						}
-					}
-
-					// Render white when teleporting
-					if (g_Vars.currentplayer->teleportstate > TELEPORTSTATE_INACTIVE) {
-						alpha = 0;
-
-						if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_WHITE) {
-							alpha = 255;
-						}
-
-						if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_EXITING
-								&& g_Vars.currentplayer->teleporttime < 16) {
-							alpha = -g_Vars.currentplayer->teleporttime * 16 + 240;
-						}
-
-						if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_ENTERING) {
-							if (g_Vars.currentplayer->teleporttime > 32) {
-								alpha = g_Vars.currentplayer->teleporttime * 16 - 512;
-							}
-
-							if (g_Vars.currentplayer->teleporttime == 48) {
-								alpha = 255;
-							}
-						}
-
-						if (alpha) {
-							gdl = text0f153628(gdl);
-							gdl = text0f153a34(gdl,
-									viGetViewLeft(), viGetViewTop(),
-									viGetViewLeft() + viGetViewWidth(),
-									viGetViewTop() + viGetViewHeight(), 0xffffff00 | alpha);
-							gdl = text0f153780(gdl);
-						}
+						gdl = bviewDrawStatic(gdl, 0x4fffffff, slayerstatic);
 					}
 				}
+
+				if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKETSTATIC) {
+					gdl = bviewDrawStatic(gdl, 0x4fffffff, 255);
+					g_Vars.currentplayer->visionmode = VISIONMODE_NORMAL;
+				}
+
+				if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY
+						&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
+					s32 xraything = 99;
+
+					if (g_Vars.currentplayer->erasertime < TICKS(200)) {
+						xraything = 249 - (g_Vars.currentplayer->erasertime * 3 >> 2);
+					}
+
+					gdl = bviewDrawZoomBlur(gdl, 0xffffffff, xraything, 1.05f, 1.05f);
+				}
+
+				// Handle combat boosts
+				if ((g_Vars.speedpillchange > 0 && g_Vars.speedpillchange < (PAL ? 26 : 30))
+						|| (g_Vars.speedpillwant && !g_Vars.speedpillon)
+						|| (!g_Vars.speedpillwant && g_Vars.speedpillon)) {
+					if (g_Vars.speedpillchange == (PAL ? 26 : 30) && !g_Vars.speedpillwant) {
+						sndStart(var80095200, lvGetSlowMotionType() ? SFX_JO_BOOST_ACTIVATE : SFX_ARGH_JO_02AD, 0, -1, -1, -1, -1, -1);
+					}
+
+					if (g_Vars.speedpillchange < (PAL ? 13 : 15)) {
+						gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
+								g_Vars.speedpillchange * 180 / (PAL ? 13 : 15),
+								(f32)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f,
+								(f32)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f);
+						gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
+								g_Vars.speedpillchange * (PAL ? 0.0076923076994717f : 0.0066666668280959f));
+					} else {
+						gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
+								((PAL ? 26 : 30) - g_Vars.speedpillchange) * 180 / (PAL ? 13 : 15),
+								(f32)((PAL ? 26 : 30) - g_Vars.speedpillchange) * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f,
+								(f32)((PAL ? 26 : 30) - g_Vars.speedpillchange) * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f);
+						gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
+								((PAL ? 26.0f : 30.0f) - g_Vars.speedpillchange) * (PAL ? 0.0076923076994717f : 0.0066666668280959f));
+					}
+
+					if (g_Vars.currentplayernum == 0) {
+						if (g_Vars.speedpillwant) {
+							g_Vars.speedpillchange++;
+						} else {
+							g_Vars.speedpillchange--;
+						}
+					}
+
+					if (g_Vars.speedpillchange > (PAL ? 26 : 30)) {
+						g_Vars.speedpillchange = (PAL ? 26 : 30);
+					} else if (g_Vars.speedpillchange < 0) {
+						g_Vars.speedpillchange = 0;
+					}
+				}
+
+				if (g_Vars.speedpillchange > (PAL ? 13 : 15)) {
+					g_Vars.speedpillon = true;
+				} else {
+					g_Vars.speedpillon = false;
+				}
+
+				if (bluramount) {
+					bviewClearMotionBlur();
+					gdl = bviewDrawMotionBlur(gdl, 0xffffffff, bluramount);
+				}
+				// Handle blur effect in cutscenes (Extraction intro?)
+				if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
+					f32 cutsceneblurfrac = playerGetCutsceneBlurFrac();
+
+					if (cutsceneblurfrac > 0) {
+						gdl = bviewDrawMotionBlur(gdl, 0xffffff00, cutsceneblurfrac * 255);
+					}
+				}
+
+				// Render white when teleporting
+				if (g_Vars.currentplayer->teleportstate > TELEPORTSTATE_INACTIVE) {
+					alpha = 0;
+
+					if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_WHITE) {
+						alpha = 255;
+					}
+
+					if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_EXITING
+							&& g_Vars.currentplayer->teleporttime < 16) {
+						alpha = -g_Vars.currentplayer->teleporttime * 16 + 240;
+					}
+
+					if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_ENTERING) {
+						if (g_Vars.currentplayer->teleporttime > 32) {
+							alpha = g_Vars.currentplayer->teleporttime * 16 - 512;
+						}
+
+						if (g_Vars.currentplayer->teleporttime == 48) {
+							alpha = 255;
+						}
+					}
+
+					if (alpha) {
+						gdl = text0f153628(gdl);
+						gdl = text0f153a34(gdl,
+								viGetViewLeft(), viGetViewTop(),
+								viGetViewLeft() + viGetViewWidth(),
+								viGetViewTop() + viGetViewHeight(), 0xffffff00 | alpha);
+						gdl = text0f153780(gdl);
+					}
+				}
+				
 
 				gdl = scenarioRenderHud(gdl);
 				gdl = lvRenderFade(gdl);
@@ -2053,9 +2054,4 @@ f32 lvGetStageTimeInSeconds(void)
 s32 lvGetStageTime60(void)
 {
 	return g_StageTimeElapsed60;
-}
-
-u32 func0f16ce04(u32 arg0)
-{
-	return arg0;
 }
