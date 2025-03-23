@@ -1270,7 +1270,6 @@ MenuItemHandlerResult menuhandlerCoopBuddy(s32 operation, struct menuitem *item,
 
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
-#if VERSION >= VERSION_NTSC_1_0
 		{
 			s32 maxaibuddies = getMaxAiBuddies();
 			s32 human = 0;
@@ -1281,36 +1280,6 @@ MenuItemHandlerResult menuhandlerCoopBuddy(s32 operation, struct menuitem *item,
 
 			data->dropdown.value = human + maxaibuddies;
 		}
-#else
-		{
-			s32 extrabuddies = 0;
-			s32 i;
-			s32 maxbuddies = 1 - g_MissionConfig.difficulty;
-			s32 human = 0;
-
-			if (joyGetConnectedControllers() & 2) {
-				human = 1;
-			}
-
-			for (i = 0; i < 3; i++) {
-				if ((g_GameFile.coopcompletions[i] | 0xfffe0000) == 0xffffffff) {
-					extrabuddies = i + 1;
-				}
-			}
-
-			maxbuddies += extrabuddies;
-
-			if (maxbuddies > 4) {
-				maxbuddies = 4;
-			}
-
-			if (maxbuddies < 1) {
-				maxbuddies = 1;
-			}
-
-			data->dropdown.value = human + maxbuddies;
-		}
-#endif
 		break;
 	case MENUOP_GETOPTIONTEXT:
 		{
@@ -2118,17 +2087,15 @@ MenuItemHandlerResult menuhandlerChangeAgent(s32 operation, struct menuitem *ite
 	return 0;
 }
 
-#ifndef PLATFORM_N64
 MenuItemHandlerResult menuhandlerExitGame(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
-		debug_erase(); // Ben: erase my debug log
+		debug_erase(); // Ben's comment: erase my debug log
 		exit(0);
 	}
 
 	return 0;
 }
-#endif
 
 struct menuitem g_2PMissionControlStyleMenuItems[] = {
 	{
@@ -2244,11 +2211,7 @@ struct menuitem g_AudioOptionsMenuItems[] = {
 		0,
 		MENUITEMFLAG_SLIDER_FAST | MENUITEMFLAG_SLIDER_HIDEVALUE,
 		L_OPTIONS_228, // "Sound"
-#if VERSION >= VERSION_NTSC_1_0
-		L_MPMENU_000, // ""
-#else
 		0x7fff,
-#endif
 		menuhandlerSfxVolume,
 	},
 	{
@@ -2256,11 +2219,7 @@ struct menuitem g_AudioOptionsMenuItems[] = {
 		0,
 		MENUITEMFLAG_SLIDER_FAST | MENUITEMFLAG_SLIDER_HIDEVALUE,
 		L_OPTIONS_229, // "Music"
-#if VERSION >= VERSION_NTSC_1_0
-		L_MPMENU_000, // ""
-#else
 		0x7fff,
-#endif
 		menuhandlerMusicVolume,
 	},
 	{
@@ -2313,11 +2272,7 @@ struct menuitem g_2PMissionAudioOptionsVMenuItems[] = {
 		0,
 		MENUITEMFLAG_SLIDER_FAST | MENUITEMFLAG_SLIDER_HIDEVALUE | MENUITEMFLAG_SLIDER_ALTSIZE,
 		L_OPTIONS_228, // "Sound"
-#if VERSION >= VERSION_NTSC_1_0
-		L_MPMENU_000, // ""
-#else
 		0x7fff,
-#endif
 		menuhandlerSfxVolume,
 	},
 	{
@@ -2325,11 +2280,7 @@ struct menuitem g_2PMissionAudioOptionsVMenuItems[] = {
 		0,
 		MENUITEMFLAG_SLIDER_FAST | MENUITEMFLAG_SLIDER_HIDEVALUE | MENUITEMFLAG_SLIDER_ALTSIZE,
 		L_OPTIONS_229, // "Music"
-#if VERSION >= VERSION_NTSC_1_0
-		L_MPMENU_000, // ""
-#else
 		0x7fff,
-#endif
 		menuhandlerMusicVolume,
 	},
 	{
@@ -2620,11 +2571,7 @@ struct menuitem g_2PMissionDisplayOptionsVMenuItems[] = {
 		MENUITEMTYPE_CHECKBOX,
 		0,
 		0,
-#if VERSION >= VERSION_PAL_FINAL
-		L_MPWEAPONS_279, // "In-Game Subtitles"
-#else
 		L_MPWEAPONS_169, // "In-Game Subtitles"
-#endif
 		0x00000004,
 		menuhandlerInGameSubtitles,
 	},
@@ -2632,11 +2579,7 @@ struct menuitem g_2PMissionDisplayOptionsVMenuItems[] = {
 		MENUITEMTYPE_CHECKBOX,
 		0,
 		0,
-#if VERSION >= VERSION_PAL_FINAL
-		L_MPWEAPONS_278, // "Cutscene Subtitles"
-#else
 		L_MPWEAPONS_168, // "Cutscene Subtitles"
-#endif
 		0x00000004,
 		menuhandlerCutsceneSubtitles,
 	},
@@ -3328,11 +3271,7 @@ struct menuitem g_2PMissionOptionsVMenuItems[] = {
 		MENUITEMFLAG_SELECTABLE_OPENSDIALOG,
 		L_OPTIONS_183, // "Control"
 		0,
-#if VERSION >= VERSION_PAL_FINAL
-		(void *)&g_CiControlOptionsMenuDialog2,
-#else
 		(void *)&g_MissionControlOptionsMenuDialog,
-#endif
 	},
 	{
 		MENUITEMTYPE_SELECTABLE,
@@ -3486,7 +3425,7 @@ char *invMenuTextPrimaryFunction(struct menuitem *item)
 	struct weaponfunc *secondaryfunc = weaponGetFunctionById(g_InventoryWeapon, 1);
 
 	if (primaryfunc && secondaryfunc) {
-		return langGet(primaryfunc->name);
+		return langRemoveNewline(langGet(primaryfunc->name));
 	}
 
 	return langGet(L_OPTIONS_003); // "\n"
@@ -3498,11 +3437,11 @@ char *invMenuTextSecondaryFunction(struct menuitem *item)
 	struct weaponfunc *secondaryfunc = weaponGetFunctionById(g_InventoryWeapon, 1);
 
 	if (secondaryfunc) {
-		return langGet(secondaryfunc->name);
+		return langRemoveNewline(langGet(secondaryfunc->name));
 	}
 
 	if (primaryfunc) {
-		return langGet(primaryfunc->name);
+		return langRemoveNewline(langGet(primaryfunc->name));
 	}
 
 	return langGet(L_OPTIONS_003); // "\n"
@@ -3696,7 +3635,7 @@ char *invMenuTextWeaponName(struct menuitem *item)
 			return langGet(L_OPTIONS_003); // "\n"
 		}
 
-		return langGet(weapon->name);
+		return langRemoveNewline(langGet(weapon->name));
 	}
 
 	return langGet(L_OPTIONS_003); // "\n"
@@ -3715,13 +3654,13 @@ char *invMenuTextWeaponManufacturer(struct menuitem *item)
 	}
 
 	if (textid != L_GUN_000) {
-		return langGet(textid);
+		return langRemoveNewline(langGet(textid));
 	}
 
 	weapon = weaponFindById(g_InventoryWeapon);
 
 	if (weapon) {
-		return langGet(weapon->name);
+		return langRemoveNewline(langGet(weapon->name));
 	}
 
 	return langGet(L_OPTIONS_003); // "\n"
@@ -3745,7 +3684,6 @@ char *invMenuTextWeaponDescription(struct menuitem *item)
 		if (g_InventoryWeapon == WEAPON_NECKLACE
 				&& g_Vars.stagenum == (VERSION >= VERSION_NTSC_1_0 ? STAGE_ATTACKSHIP : STAGE_SKEDARRUINS)
 				&& lvGetDifficulty() >= DIFF_PA) {
-#if VERSION >= VERSION_NTSC_1_0
 			// Phrases included here to assist people searching the code for them:
 			// CDV780322
 			// I8MOZYM8NDI85
@@ -3793,10 +3731,6 @@ char *invMenuTextWeaponDescription(struct menuitem *item)
 			// "Cassandra De Vries' replacement necklace.  Username: %s  Password: %s"
 			sprintf(g_StringPointer, langGet(L_GUN_239), &username, &password);
 			return g_StringPointer;
-#else
-			// ntsc-beta stores the whole thing as a single plain text string
-			return langGet(L_GUN_239);
-#endif
 		}
 
 		return langGet(weapon->description);
@@ -3818,7 +3752,7 @@ struct menuitem g_SoloMissionInventoryMenuItems[] = {
 		MENUITEMTYPE_LABEL,
 		0,
 		MENUITEMFLAG_NEWCOLUMN | MENUITEMFLAG_00000002 | MENUITEMFLAG_SMALLFONT,
-		L_OPTIONS_003, // ""
+		L_OPTIONS_004, // ""
 		(uintptr_t)&invMenuTextWeaponManufacturer,
 		NULL,
 	},
@@ -3826,7 +3760,7 @@ struct menuitem g_SoloMissionInventoryMenuItems[] = {
 		MENUITEMTYPE_LABEL,
 		0,
 		MENUITEMFLAG_00000002 | MENUITEMFLAG_LABEL_ALTCOLOUR | MENUITEMFLAG_SMALLFONT,
-		L_OPTIONS_003, // ""
+		L_OPTIONS_004, // ""
 		(uintptr_t)&invMenuTextWeaponName,
 		NULL,
 	},
@@ -3842,7 +3776,7 @@ struct menuitem g_SoloMissionInventoryMenuItems[] = {
 		MENUITEMTYPE_LABEL,
 		0,
 		MENUITEMFLAG_00000002 | MENUITEMFLAG_SMALLFONT,
-		L_OPTIONS_003, // ""
+		L_OPTIONS_004, // ""
 		(uintptr_t)&invMenuTextPrimaryFunction,
 		NULL,
 	},
@@ -3850,7 +3784,7 @@ struct menuitem g_SoloMissionInventoryMenuItems[] = {
 		MENUITEMTYPE_LABEL,
 		0,
 		MENUITEMFLAG_00000002 | MENUITEMFLAG_SMALLFONT,
-		L_OPTIONS_003, // ""
+		L_OPTIONS_004, // ""
 		(uintptr_t)&invMenuTextSecondaryFunction,
 		NULL,
 	},

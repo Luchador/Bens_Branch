@@ -3697,10 +3697,6 @@ struct fireslotthing {
 
 struct fireslot {
 	/*0x00*/ s32 endlvframe;
-#if VERSION < VERSION_NTSC_1_0
-	struct sndstate *unk04nb;
-	struct sndstate *unk08nb;
-#endif
 	/*0x04*/ struct beam beam;
 };
 

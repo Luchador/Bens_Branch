@@ -351,6 +351,12 @@ void roomInitLights(s32 roomnum)
 			room->br_base = 2;
 		}
 		break;
+	case STAGE_CITRAINING:
+	case STAGE_DEFENSE:
+			if (roomnum == 0x0005 || roomnum == 0x004b) { // "CI" statue. Temporary hack to stop textures getting messed up due to muzzle flashes
+				room->flags |= ROOMFLAG_OUTDOORS;
+			}
+			break;
 	}
 
 	if (((g_StageIndex == STAGEINDEX_INFILTRATION || g_StageIndex == STAGEINDEX_RESCUE || g_StageIndex == STAGEINDEX_ESCAPE || g_StageIndex == STAGEINDEX_MAIANSOS)
@@ -368,26 +374,9 @@ void roomInitLights(s32 roomnum)
 
 	room->flags |= ROOMFLAG_LIGHTS_DIRTY;
 
-#if VERSION < VERSION_NTSC_1_0
-	if (cheatIsActive(CHEAT_PERFECTDARKNESS) && (room->flags & ROOMFLAG_RENDERALWAYS) == 0) {
-		room->lightop = LIGHTOP_SET;
-		room->lightop_to_frac = 0.0f;
-	}
-#endif
-
 	light = (struct light *)&g_BgLightsFileData[(u32)g_Rooms[roomnum].lightindex * 0x22];
 
 	for (i = 0; i < room->numlights; i++) {
-#if VERSION < VERSION_NTSC_1_0
-		if (cheatIsActive(CHEAT_PERFECTDARKNESS)) {
-			light->brightness = 0;
-			light->sparkable = (rngRandom() % 2) ? true : false;
-			light->healthy = false;
-			light->on = false;
-			light->sparking = false;
-			light->vulnerable = false;
-		} else
-#endif
 		{
 			light->brightness = g_Rooms[roomnum].br_light_each;
 			light->sparkable = true;
