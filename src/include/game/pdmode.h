@@ -8,6 +8,5 @@ f32 pdmodeGetEnemyReactionSpeed(void);
 f32 pdmodeGetEnemyHealth(void);
 f32 pdmodeGetEnemyDamage(void);
 f32 pdmodeGetEnemyAccuracy(void);
-void titleSetNextStage(s32 stagenum);
 
 #endif

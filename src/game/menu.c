@@ -2059,7 +2059,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 				viSetViewPosition(x1, g_MenuScissorY1);
 				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (x2 - x1), g_MenuScissorY2 - g_MenuScissorY1);
 
-				gdl = vi0000af00(gdl, var800a2048[g_MpPlayerNum]);
+				gdl = viSetupViewportAndProjection(gdl, var800a2048[g_MpPlayerNum]);
 				gdl = vi0000aca4(gdl, znear, zfar);
 			}
 		}

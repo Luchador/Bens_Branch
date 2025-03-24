@@ -17,6 +17,7 @@
 #include "types.h"
 #include "video.h"
 #include "platform.h"
+#include "game/debug.h"
 
 #define TO_U16_A(x) ((u16)(x))
 #define TO_U16_B(x) ((x) & 0xffff)
@@ -59,12 +60,12 @@ struct rend_vidat g_ViDataArray[NUM_GFXTASKS] = {
 	},
 };
 
-s32 g_ViTargetHStart = 0;
-s32 g_ViTargetVStart = 0;
+//s32 g_ViTargetHStart = 0;
+//s32 g_ViTargetVStart = 0;
 struct rend_vidat *g_ViFrontData = &g_ViDataArray[0];
 struct rend_vidat *g_ViBackData = &g_ViDataArray[0];
 bool g_ViReconfigured = false;
-s32 g_ViSlot = 0;
+//s32 g_ViSlot = 0;
 
 void viConfigureForLogos(void)
 {
@@ -74,16 +75,24 @@ void viConfigureForLogos(void)
 	g_ViFrontData = g_ViDataArray + g_ViFrontIndex;
 	g_ViBackData = g_ViDataArray + g_ViBackIndex;
 
-	g_ViTargetHStart = 0;
-	g_ViTargetVStart = 0;
+	//g_ViTargetHStart = 0;
+	//g_ViTargetVStart = 0;
 
-	g_ViDataArray[0].y = FBALLOC_HEIGHT_LO;
+	/*g_ViDataArray[0].y = FBALLOC_HEIGHT_LO;
 	g_ViDataArray[0].bufy = FBALLOC_HEIGHT_LO;
 	g_ViDataArray[0].viewy = FBALLOC_HEIGHT_LO;
 
 	g_ViDataArray[1].y = FBALLOC_HEIGHT_LO;
 	g_ViDataArray[1].bufy = FBALLOC_HEIGHT_LO;
-	g_ViDataArray[1].viewy = FBALLOC_HEIGHT_LO;
+	g_ViDataArray[1].viewy = FBALLOC_HEIGHT_LO;*/
+
+	g_ViDataArray[0].y = videoGetHeight();
+	g_ViDataArray[0].bufy = videoGetHeight();
+	g_ViDataArray[0].viewy = videoGetHeight();
+
+	g_ViDataArray[1].y = videoGetHeight();
+	g_ViDataArray[1].bufy = videoGetHeight();
+	g_ViDataArray[1].viewy = videoGetHeight();
 }
 
 /**
@@ -100,13 +109,13 @@ void viConfigureForCopyright(u16 *texturedata)
 	for (i = 0; i < NUM_GFXTASKS; i++) {
 		g_FrameBuffers[i] = texturedata;
 
-		g_ViDataArray[i].x = 576;
-		g_ViDataArray[i].bufx = 576;
-		g_ViDataArray[i].viewx = (VERSION >= VERSION_NTSC_1_0 ? 576 : 480);
+		g_ViDataArray[i].x = videoGetWidth();
+		g_ViDataArray[i].bufx = videoGetWidth();
+		g_ViDataArray[i].viewx = videoGetWidth();
 
-		g_ViDataArray[i].y = 48;
-		g_ViDataArray[i].bufy = 48;
-		g_ViDataArray[i].viewy = 48;
+		g_ViDataArray[i].y = videoGetHeight();
+		g_ViDataArray[i].bufy = videoGetHeight();
+		g_ViDataArray[i].viewy = videoGetHeight();
 	}
 
 	g_ViFrontData->fb = g_FrameBuffers[g_ViFrontIndex];
@@ -126,18 +135,18 @@ void viConfigureForLegal(void)
 	s32 i;
 
 	for (i = 0; i < NUM_GFXTASKS; i++) {
-		g_ViDataArray[i].x = FBALLOC_WIDTH_LO;
-		g_ViDataArray[i].bufx = FBALLOC_WIDTH_LO;
-		g_ViDataArray[i].viewx = FBALLOC_WIDTH_LO;
+		g_ViDataArray[i].x = videoGetWidth();
+		g_ViDataArray[i].bufx = videoGetWidth();
+		g_ViDataArray[i].viewx = videoGetWidth();
 
-		g_ViDataArray[i].y = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[i].bufy = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[i].viewy = FBALLOC_HEIGHT_LO;
+		g_ViDataArray[i].y = videoGetHeight();
+		g_ViDataArray[i].bufy = videoGetHeight();
+		g_ViDataArray[i].viewy = videoGetHeight();
 	}
 }
 
 const s16 g_ViModeWidths[]  = {FBALLOC_WIDTH_LO,  FBALLOC_WIDTH_LO,  SCREEN_320 * 2};
-const s16 g_ViModeHeights[] = {FBALLOC_HEIGHT_LO, FBALLOC_HEIGHT_LO, (PAL ? 252 : 220) * 2};
+const s16 g_ViModeHeights[] = {FBALLOC_HEIGHT_LO, FBALLOC_HEIGHT_LO, (220) * 2};
 
 /**
  * Allocate the colour framebuffers for the given stage.
@@ -158,10 +167,10 @@ void viReset(s32 stagenum)
 	u8 *fb1;
 
 	if (stagenum == STAGE_TITLE) {
-			viSetMode(VIMODE_HI);
+			//viSetMode(VIMODE_HI);
 			fbsize = g_ViModeWidths[2] * g_ViModeHeights[2] * NUM_FRAMEBUFFERS;
 	} else {
-		viSetMode(VIMODE_LO);
+		//viSetMode(VIMODE_LO);
 
 		fbsize = FBALLOC_WIDTH_HI * FBALLOC_HEIGHT_HI * NUM_FRAMEBUFFERS;
 
@@ -251,10 +260,10 @@ void viUpdateMode(void)
 			//osViSetYScale(1.0f);
 			videoClearScreen();
 			break;
-		case VIMODE_LO:
+		/*case VIMODE_LO:
 			break;
 		case VIMODE_HI:
-			break;
+			break;*/
 		}
 	}
 
@@ -271,8 +280,6 @@ void viUpdateMode(void)
 	g_SchedViModesPending[slot] = true;*/
 
 	if (g_ViBackData->mode == VIMODE_LO) {
-		g_SchedViModesPending[slot] = true;
-	} else if (g_ViBackData->mode == VIMODE_HI) {
 		g_SchedViModesPending[slot] = true;
 	} else {
 		g_SchedViModesPending[slot] = false;
@@ -395,7 +402,7 @@ Gfx *vi0000aca4(Gfx *gdl, f32 znear, f32 zfar)
 	return gdl;
 }
 
-Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
+Gfx *viSetupViewportAndProjection(Gfx *gdl, Vp *vp)
 {
 	vp[g_ViBackIndex].vp.vscale[0] = g_ViBackData->viewx * 2;
 	vp[g_ViBackIndex].vp.vtrans[0] = g_ViBackData->viewx * 2 + g_ViBackData->viewleft * 4;
@@ -418,8 +425,8 @@ Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 	return gdl;
 }
 
-// Involved in rendering 3D menu models
-Gfx *vi0000af00(Gfx *gdl, Vp *vp)
+// Involved in rendering 3D menu models. Replaced with above function.
+/*Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 {
 	vp[g_ViBackIndex].vp.vscale[0] = g_ViBackData->viewx * 2;
 	vp[g_ViBackIndex].vp.vtrans[0] = g_ViBackData->viewx * 2 + g_ViBackData->viewleft * 4;
@@ -446,7 +453,7 @@ Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 	camSetMtxF1754(&var80092830);
 
 	return gdl;
-}
+}*/
 
 Gfx *vi0000b0e8(Gfx *gdl, f32 fovy, f32 aspect)
 {
@@ -462,20 +469,11 @@ Gfx *vi0000b0e8(Gfx *gdl, f32 fovy, f32 aspect)
 	return gdl;
 }
 
-Gfx *vi0000b1a8(Gfx *gdl)
-{
-	return vi0000ad5c(gdl, &g_Vars.currentplayer->viewport[0]);
-}
-
 Gfx *vi0000b1d0(Gfx *gdl)
 {
-	gdl = vi0000b1a8(gdl);
+	gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
 
-	//if (g_ViIs16Bit) {
-	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_ViBackData->bufx, (uintptr_t)(g_ViBackData->fb));
-	/*} else {
-		gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_32b, g_ViBackData->bufx, (uintptr_t)(g_FrameBuffers[0]));
-	}*/
+	//gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_ViBackData->bufx, (uintptr_t)(g_ViBackData->fb));
 
 	return gdl;
 }
@@ -591,12 +589,14 @@ void viSetBufSize(s16 width, s16 height)
 
 s16 viGetBufWidth(void)
 {
-	return g_ViBackData->bufx;
+	//return g_ViBackData->bufx;
+	return videoGetWidth();
 }
 
 s16 viGetBufHeight(void)
 {
-	return g_ViBackData->bufy;
+	//return g_ViBackData->bufy;
+	return videoGetHeight();
 }
 
 void viSetSize(s16 width, s16 height)

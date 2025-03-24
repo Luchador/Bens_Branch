@@ -141,12 +141,12 @@ void playerReset(void)
 	g_PlayersWithControl[3] = true;
 	g_PlayerInvincible = false;
 
-	playerSetTickMode(TICKMODE_GE_FADEIN);
+	//playerSetTickMode(TICKMODE_GE_FADEIN);
 
 	var8007074c = 0;
 
 	g_Vars.currentplayer->bondviewlevtime60 = 0;
-	g_Vars.currentplayer->bondwatchtime60 = 0;
+	//g_Vars.currentplayer->bondwatchtime60 = 0;
 	g_Vars.currentplayer->introanimnum = 0;
 
 	g_DefaultWeapons[HAND_LEFT] = 0;
@@ -215,14 +215,14 @@ void playerReset(void)
 				cmd = (struct cmd32 *)((uintptr_t)cmd + 40);
 				break;
 			case INTROCMD_WATCHTIME:
-				g_Vars.currentplayer->bondwatchtime60 = 0;
-				if (cmd->param2 > 0) {
+				//g_Vars.currentplayer->bondwatchtime60 = 0;
+				/*if (cmd->param2 > 0) {
 					g_Vars.currentplayer->bondwatchtime60 += (cmd->param2 % 60) * 3600;
 				}
 				if (cmd->param1 > 0) {
 					g_Vars.currentplayer->bondwatchtime60 += (cmd->param1 % 12) * 3600 * 60;
-				}
-				cmd = (struct cmd32 *)((uintptr_t)cmd + 12);
+				}*/
+				//cmd = (struct cmd32 *)((uintptr_t)cmd + 12);
 				break;
 			case INTROCMD_CREDITOFFSET:
 				thing = (struct gecreditsdata *)((uintptr_t)g_GeCreditsData + cmd->param1);

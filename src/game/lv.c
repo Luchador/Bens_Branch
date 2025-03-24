@@ -892,7 +892,7 @@ Gfx *lvRender(Gfx *gdl)
 				g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
 		mtx00016748(1);
 
-		gdl = vi0000b1a8(gdl);
+		gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
 		gdl = vi0000b1d0(gdl);
 		gdl = viRenderViewportEdges(gdl);
 		gdl = creditsDraw(gdl);

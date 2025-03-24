@@ -1808,57 +1808,6 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 }
 
 /**
- * Draw a horizontal blur/sretch effect. Unused.
- *
- * The term "Intro" used in the string suggests that was made for an older
- * version of the title screen, similar to bviewDrawIntroText.
- */
-Gfx *bviewDrawIntroFaderBlur(Gfx *gdl, s32 arg1)
-{
-	u16 *fb = viGetBackBuffer();
-	s32 viewtop = viGetViewTop();
-	s32 viewheight = viGetViewHeight();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewleft = viGetViewLeft();
-	f32 halfheight;
-	f32 extra;
-	s32 y;
-
-	g_NumActiveEffects++;
-
-	if (g_NumActiveEffects >= 2) {
-		return gdl;
-	}
-
-	gDPPipeSync(gdl++);
-
-	gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 255);
-
-	halfheight = viewheight * 0.5f;
-
-	extra = 0.5f;
-	extra += 0.5f;
-
-	for (y = viewtop; y < viewtop + viewheight; y++) {
-		f32 frac = (y - viewtop - halfheight) / halfheight;
-
-		if (frac < 0.0f) {
-			frac = -frac;
-		}
-
-		frac += extra;
-
-		if (frac > 1.0f) {
-			frac = 1.0f;
-		}
-
-		gdl = bviewCopyPixels(gdl, fb, y, 5, y, RANDOMFRAC() * frac + 1.0f, viewleft, viewwidth);
-	}
-
-	return gdl;
-}
-
-/**
  * Called from the title screen's "Rare Presents" mode, which is unused.
  */
 Gfx *bviewDrawIntroText(Gfx *gdl)

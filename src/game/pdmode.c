@@ -41,8 +41,3 @@ f32 pdmodeGetEnemyAccuracy(void)
 
 	return 1;
 }
-
-void titleSetNextStage(s32 stagenum)
-{
-	g_TitleNextStage = stagenum;
-}

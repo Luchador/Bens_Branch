@@ -12,5 +12,5 @@ void titleReset(void)
 	g_TitleDelayedTimer = 2;
 	g_TitleDelayedMode = -1;
 
-	var8009cca0 = mempAlloc(TITLE_ALLOCSIZE, MEMPOOL_STAGE);
+	g_TitleModelBuffer = mempAlloc(TITLE_ALLOCSIZE, MEMPOOL_STAGE);
 }

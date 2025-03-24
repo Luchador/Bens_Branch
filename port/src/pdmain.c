@@ -122,7 +122,7 @@ void mainInit(void)
 	g_AcceptCMDParams = true;
 
 	// no copyright screen
-	viSetMode(VIMODE_HI);
+	viSetMode(VIMODE_LO);
 	viConfigureForLegal();
 	viBlack(true);
 	viUpdateMode();

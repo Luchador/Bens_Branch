@@ -55,7 +55,7 @@ extern s32 g_MaxBgWallhitsPerRoom;
 extern s32 g_WallhitsCriticalSpareLimit;
 extern s32 g_WallhitsGoalSpareLimit;
 extern f32 g_WallhitTargetBloodRatio;
-extern u8 *var8009cca0;
+extern u8 *g_TitleModelBuffer;
 extern int var8009ccc0[20];
 extern s32 g_NumChrs;
 extern s16 *g_Chrnums;

@@ -102,7 +102,6 @@ bool g_CutsceneSkipRequested;
 f32 g_CutsceneCurTotalFrame60f;
 s32 g_CutsceneTweenDuration60;
 f32 g_CutsceneTweenFrac; // 0 when bars across the top and bottom, 1 when fullscreen
-u32 var8009de34;
 s16 g_SpawnPoints[24];
 s32 g_NumSpawnPoints;
 
@@ -123,8 +122,6 @@ struct vimode g_ViModes[] = {
 	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.5,              VIMODE_LO, SCREEN_HEIGHT_HI, 0,  180, 20, 136, 42  }, // hi-res
 };
 
-u32 var80070730 = 0xffffffff;
-u32 var80070734 = 0xffffffff;
 u32 var8007073c = 0;
 u32 var8007074c = 0;
 
@@ -133,7 +130,7 @@ bool g_PlayersWithControl[] = {
 };
 
 bool g_PlayerInvincible = false;
-s32 g_InCutscene = 0x00000000;
+bool g_InCutscene = false;
 
 s16 g_DeathAnimations[] = {
 	ANIM_DEATH_001A,
@@ -2839,7 +2836,7 @@ f32 player0f0bd358(void)
 	s16 width = playerGetViewportWidth();
 
 	result = (f32)width / (f32)height;
-	result = g_ViModes[0].yscale * result;
+	//result = g_ViModes[0].yscale * result;
 
 	return result * (videoGetAspect() / ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO));
 }
@@ -3001,7 +2998,7 @@ void playerTick()
 	bgunSetGunAmmoVisible(GUNAMMOREASON_OPTION, optionsGetAmmoOnScreen(g_Vars.currentplayerstats->mpindex));
 	bgunSetSightVisible(GUNSIGHTREASON_1, true);
 
-	if ((g_Vars.tickmode == TICKMODE_GE_FADEIN || g_Vars.tickmode == TICKMODE_NORMAL) && !g_InCutscene && !g_MainIsEndscreen) {
+	if ((g_Vars.tickmode == TICKMODE_NORMAL) && !g_InCutscene && !g_MainIsEndscreen) {
 		g_Vars.currentplayer->bondviewlevtime60 += g_Vars.lvupdate60;
 	}
 
@@ -3746,7 +3743,7 @@ void playerTick()
 				g_Vars.aibuddies[i] = prop;
 			}
 		}
-	} else if (g_Vars.tickmode == TICKMODE_GE_FADEIN || g_Vars.tickmode == TICKMODE_GE_FADEOUT) {
+	} /*else if (g_Vars.tickmode == TICKMODE_GE_FADEIN || g_Vars.tickmode == TICKMODE_GE_FADEOUT) {
 		playerRemoveChrBody();
 		bmoveTick(1, 1, true, 0);
 		playerUpdateShake();
@@ -3756,7 +3753,7 @@ void playerTick()
 				&g_Vars.currentplayer->bond2.unk1c,
 				&g_Vars.currentplayer->prop->pos,
 				g_Vars.currentplayer->prop->rooms);
-	} else if (g_Vars.tickmode == TICKMODE_MPSWIRL) {
+	}*/ else if (g_Vars.tickmode == TICKMODE_MPSWIRL) {
 		// Start of an MP match where the camera circles around the player
 		playerTickChrBody();
 		bmoveTick(0, 0, 0, 1);
@@ -3924,9 +3921,9 @@ void playerTick()
 		}
 	}
 
-	if (g_Vars.tickmode == TICKMODE_GE_FADEOUT && playerIsFadeComplete()) {
+	/*if (g_Vars.tickmode == TICKMODE_GE_FADEOUT && playerIsFadeComplete()) {
 		mainEndStage();
-	}
+	}*/
 }
 
 #define WIELDMODE_PISTOL   0
