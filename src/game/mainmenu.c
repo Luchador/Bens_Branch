@@ -1924,7 +1924,7 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 		x = renderdata->x + 62;
 		y = renderdata->y + 3;
 
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 
 		// Draw first part of name
 		strcpy(text, langRemoveNewline(langGet(g_SoloStages[stageindex].name1)));

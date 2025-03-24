@@ -9,13 +9,7 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3);
 Gfx *menugfxRenderDialogBackground(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct menudialog *dialog, u32 colour1, u32 colour2, f32 arg8);
 Gfx *menugfxRenderBgGreenHaze(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2);
 Gfx *menugfxDrawDropdownBackground(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2);
-
-#if VERSION >= VERSION_NTSC_1_0
 Gfx *menugfxDrawListGroupHeader(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3, u8 alpha);
-#else
-Gfx *menugfxDrawListGroupHeader(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3);
-#endif
-
 Gfx *menugfxRenderGradient(Gfx *gdl, s32 x, s32 y, s32 width, s32 height, u32 colour1, u32 colour2, u32 colour3);
 Gfx *menugfxRenderSlider(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, s32 markerx, u32 colour);
 Gfx *menugfx0f0e2348(Gfx *gdl);
@@ -31,7 +25,6 @@ Gfx *menugfxDrawDialogChevron(Gfx *gdl, s32 x, s32 y, s32 arg2, s32 arg3, u32 co
 Gfx *menugfxDrawCheckbox(Gfx *gdl, s32 x, s32 y, s32 size, bool fill, u32 bordercolour, u32 fillcolour);
 Gfx *menugfxRenderBgFailure(Gfx *gdl);
 Gfx *menugfxRenderBgCone(Gfx *gdl);
-Gfx *menugfxRenderBgFailureCopy(Gfx *gdl);
 void menugfxFreeParticles(void);
 u32 menugfxGetParticleArraySize(void);
 Gfx *menugfxRenderBgSuccess(Gfx *gdl);

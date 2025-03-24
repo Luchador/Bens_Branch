@@ -1285,14 +1285,12 @@ void playerTickChrBody(void)
 		if (!g_Vars.mplayerisrunning) {
 			// 1 player
 			if (g_Vars.currentplayer->gunmem2 == NULL) {
-				if (!var8009dfc0 && bgunChangeGunMem(GUNMEMOWNER_CHRBODY)) {
+				if (!g_GameIsPaused && bgunChangeGunMem(GUNMEMOWNER_CHRBODY)) {
 					g_Vars.currentplayer->gunmem2 = bgunGetGunMem();
 				} else {
-					if (var8009dfc0);
-
 					g_Vars.currentplayer->haschrbody = false;
 
-					if (!var8009dfc0) {
+					if (!g_GameIsPaused) {
 						g_Vars.lockscreen = true;
 					}
 					return;
@@ -2658,7 +2656,7 @@ bool playerHasSharedViewport(void)
 {
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 			&& menuGetRoot() == MENUROOT_MPENDSCREEN
-			&& var8009dfc0 == 0) {
+			&& g_GameIsPaused == 0) {
 		return true;
 	}
 
@@ -2759,7 +2757,7 @@ s16 playerGetViewportHeight(void)
 			height = g_ViModes[0].wideheight;
 		} else if (optionsGetEffectiveScreenSize() == SCREENSIZE_CINEMA) {
 			height = g_ViModes[0].cinemaheight;
-		} else if (g_InCutscene && !var8009dfc0) {
+		} else if (g_InCutscene && !g_GameIsPaused) {
 			if (g_CutsceneTweenDuration60 >= 1) {
 				f32 a = g_ViModes[0].wideheight;
 				f32 b = g_ViModes[0].fullheight;
@@ -2814,7 +2812,7 @@ s16 playerGetViewportTop(void)
 		} else if (optionsGetEffectiveScreenSize() == SCREENSIZE_CINEMA) {
 			top = g_ViModes[0].cinematop;
 		} else {
-			if (g_InCutscene && !var8009dfc0
+			if (g_InCutscene && !g_GameIsPaused
 					&& (!optionsGetCutsceneSubtitles() || g_Vars.stagenum == STAGE_CITRAINING)) {
 				if (g_CutsceneTweenDuration60 >= 1) {
 					f32 a = g_ViModes[0].widetop;
@@ -3877,7 +3875,7 @@ void playerTick()
 	g_Vars.currentplayer->bondwatchtime60 += g_Vars.diffframe60freal;
 
 	// Also a leftover from GE? Maybe cancelling fade in mission intros?
-	if (var8007074c) {
+	/*if (var8007074c) {
 		s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
 
 		if (!lvIsPaused() && joyGetButtonsPressedThisFrame(contpad1, A_BUTTON | B_BUTTON | Z_TRIG | START_BUTTON | R_TRIG)) {
@@ -3900,7 +3898,7 @@ void playerTick()
 				&& g_Vars.currentplayer->colourscreenfrac == 1) {
 			mainFinalObjectiveCheck();
 		}
-	}
+	}*/
 
 	// Handle mission exit on death
 	if (g_Vars.currentplayer->isdead) {
@@ -4272,13 +4270,16 @@ Gfx *playerRenderHud(Gfx *gdl)
 
 	if (g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY) {
 		bgunTickGameplay2();
-		gdl = boltbeamsRender(gdl);
-		bgunRender(&gdl);
-		gdl = lasersightRenderDot(gdl);
 
+		gdl = lasersightRenderDot(gdl);
+		
 		if (g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
 			gdl = bgRenderArtifacts(gdl);
 		}
+
+		// Move gun rendering after artifact rendering to the gun draws on top
+		gdl = boltbeamsRender(gdl);
+		bgunRender(&gdl);
 
 		if (g_NbombsActive) {
 			gdl = nbombRenderOverlay(gdl);
@@ -4337,7 +4338,7 @@ Gfx *playerRenderHud(Gfx *gdl)
 		s32 c = viGetViewLeft() + viGetViewWidth();
 		s32 d = viGetViewTop() + viGetViewHeight();
 
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 		gdl = text0f153a34(gdl, a, b, c, d, 0x000000a0);
 		gdl = text0f153780(gdl);
 	}
@@ -4554,7 +4555,7 @@ Gfx *playerRenderHud(Gfx *gdl)
 			s32 c = viGetViewLeft() + viGetViewWidth();
 			s32 d = viGetViewTop() + viGetViewHeight();
 
-			gdl = text0f153628(gdl);
+			gdl = textConfigureGfxPipeline(gdl);
 			gdl = text0f153a34(gdl, a, b, c, d, 0x000000a0);
 			gdl = text0f153780(gdl);
 		}

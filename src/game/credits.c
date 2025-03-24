@@ -1445,7 +1445,7 @@ Gfx *creditsDrawSlide(Gfx *gdl)
 		cury += textheights[index + 1];
 	}
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	// Draw text repetitions
 	for (i = 0; i < g_CreditsData->numthisslide * 2; i++) {

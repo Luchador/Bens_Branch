@@ -157,7 +157,7 @@ MenuItemHandlerResult frWeaponListMenuHandler(s32 operation, struct menuitem *it
 		y++;
 #endif
 
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRenderProjected(gdl, &x, &y, bgunGetName(weaponnum2), g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 		gdl = text0f153780(gdl);
 
@@ -2437,7 +2437,7 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(s32 operation, struct menuitem *i
 			leftmargin = item->param2 / 2;
 		}
 
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 
 		// Render title
 		text = bioMenuTextName(NULL);

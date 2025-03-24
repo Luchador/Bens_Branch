@@ -808,7 +808,7 @@ Gfx *lvRenderFPS(Gfx *gdl)
 
 		gSPSetExtraGeometryModeEXT(gdl++, g_HudAlignModeL);
 
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRender(gdl, &x, &y, buffer, g_CharsNumeric, g_FontNumeric, color, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
 		gdl = text0f153780(gdl);
 
@@ -986,14 +986,14 @@ Gfx *lvRender(Gfx *gdl)
 			} else if (g_Vars.currentplayer->gunctrl.loadall
 					&& g_Vars.currentplayer->cameramode != CAMERAMODE_THIRDPERSON
 					&& g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY
-					&& var8009dfc0 == 0) {
+					&& g_GameIsPaused == 0) {
 				g_Vars.currentplayer->gunctrl.loadall = bgunLoadAll();
 			}
 
 			if (g_Vars.lockscreen) {
 				gdl = bviewDrawMotionBlur(gdl, 0xffffffff, 255);
 				g_Vars.lockscreen--;
-			} else if (var8009dfc0) {
+			} else if (g_GameIsPaused) {
 				gdl = viRenderViewportEdges(gdl);
 				gdl = bgScissorToViewport(gdl);
 				mtx00016748(1);
@@ -1328,7 +1328,7 @@ Gfx *lvRender(Gfx *gdl)
 					}
 
 					if (alpha) {
-						gdl = text0f153628(gdl);
+						gdl = textConfigureGfxPipeline(gdl);
 						gdl = text0f153a34(gdl,
 								viGetViewLeft(), viGetViewTop(),
 								viGetViewLeft() + viGetViewWidth(),

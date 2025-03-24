@@ -596,7 +596,7 @@ Gfx *htmRenderHud(Gfx *gdl)
 		barright = t6 + a1 / 2;
 		s1 = barleft + (s32) (a1 * (dltime / TICKS(4800.0f)));
 
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textSetPrimColour(gdl, 0x60000060);
 
 		gDPFillRectangle(gdl++, barleft, viewtop + 8, barright, viewtop + 16);

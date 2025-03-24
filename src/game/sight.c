@@ -693,7 +693,7 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	static s32 sight = 0;
 	static s32 identifytimer = 0;
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	switch (g_Vars.currentplayer->sighttracktype) {
 	case SIGHTTRACKTYPE_NONE:
@@ -1274,7 +1274,7 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	}
 
 	if (showzoomrange) {
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
 		if (frac < 0.2f) {

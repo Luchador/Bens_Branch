@@ -1034,7 +1034,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 					|| stagenum == STAGE_INFILTRATION
 					|| stagenum == STAGE_ESCAPE
 					|| stagenum == STAGE_ATTACKSHIP) {
-			gdl = text0f153628(gdl);
+			gdl = textConfigureGfxPipeline(gdl);
 
 			gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 

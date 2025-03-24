@@ -1272,7 +1272,7 @@ Gfx *mpRenderModalText(Gfx *gdl)
 		s32 red = (s32) ((1.0f - g_20SecIntervalFrac) * 20.0f * 255.0f) % 255;
 		s32 stack2;
 
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 
 		strcpy(text, langGet(L_MPWEAPONS_040)); // "Paused"
 
@@ -1299,7 +1299,7 @@ Gfx *mpRenderModalText(Gfx *gdl)
 			&& !(g_Vars.antiplayernum >= 0 && ((g_Vars.currentplayer != g_Vars.anti || g_InCutscene)))
 			&& g_NumReasonsToEndMpMatch == 0) {
 		// Render "Press START" text
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 
 		strcpy(text, langGet(L_MPWEAPONS_039));
 

@@ -12,7 +12,7 @@ void textSetRotation90(bool rotated);
 void textSetWrapIndent(s32 count);
 void textLoadFont(u8 *romstart, u8 *romend, struct font **fontptr, struct fontchar **charsptr, bool monospace);
 void textReset(void);
-Gfx *text0f153628(Gfx *gdl);
+Gfx *textConfigureGfxPipeline(Gfx *gdl);
 Gfx *text0f153780(Gfx *gdl);
 Gfx *textSetPrimColour(Gfx *gdl, u32 colour);
 Gfx *textSetCCCustom02(Gfx *gdl);

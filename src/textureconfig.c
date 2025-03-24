@@ -275,18 +275,18 @@ struct textureconfig g_TcSparkConfigs[] = {
 };
 
 struct textureconfig g_TcGeneralConfigs[] = {
-	/* 0*/ { 0x001b, 16,  16,  3, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
+	/* 0*/ { 0x001b, 16,  16,  3, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  }, // Snowflakes
 	/* 1*/ { 0x0001, 1,   1,   0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
-	/* 2*/ { 0x0c97, 16,  16,  3, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
+	/* 2*/ { 0x0c97, 16,  16,  3, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  }, // Unused
 	/* 3*/ { 0x001c, 2,   8,   0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  }, // Falcon 2 laser beam. Set level to 0 to prevent weird bugs in levels exported by the Setup Editor
-	/* 4*/ { 0x001d, 8,   8,   1, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_MIRROR, G_TX_MIRROR },
-	/* 5*/ { 0x001c, 2,   8,   1, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
-	/* 6*/ { 0x01e5, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
-	/* 7*/ { 0x0c98, 8,   8,   0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
-	/* 8*/ { 0x0c99, 2,   16,  1, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
-	/* 9*/ { 0x0385, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*10*/ { 0x063b, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
-	/*11*/ { 0x0c9a, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
+	/* 4*/ { 0x001d, 8,   8,   0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_MIRROR, G_TX_MIRROR }, // Falcon 2 laser dot
+	/* 5*/ { 0x001c, 2,   8,   1, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   }, // Unused
+	/* 6*/ { 0x01e5, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   }, // Menu background
+	/* 7*/ { 0x0c98, 8,   8,   0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   }, // Unused
+	/* 8*/ { 0x0c99, 2,   16,  1, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   }, // Unused
+	/* 9*/ { 0x0385, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Defection thumbnail (unused)
+	/*10*/ { 0x063b, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   }, // N-bomb sphere
+	/*11*/ { 0x0638, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
 	/*12*/ { 0x063c, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
 	/*13*/ { 0x0385, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Defection thumbnail
 	/*14*/ { 0x0617, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Investigation thumbnail
@@ -309,28 +309,28 @@ struct textureconfig g_TcGeneralConfigs[] = {
 	/*31*/ { 0x0b52, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Maian SOS thumbnail
 	/*32*/ { 0x0b50, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // WAR! Thumbnail
 	/*33*/ { 0x0b51, 56,  36,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // The Duel thumbnail
-	/*34*/ { 0x0858, 14,  14,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*35*/ { 0x084e, 11,  11,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
+	/*34*/ { 0x0858, 14,  14,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  }, // Mission select menu stars
+	/*35*/ { 0x084e, 11,  11,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  }, // Firing range stars
 	/*36*/ { 0x08f4, 14,  14,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*37*/ { 0x060a, 32,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_WRAP,   G_TX_WRAP   },
-	/*38*/ { 0x0c9b, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
-	/*39*/ { 0x0112, 64,  64,  5, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
-	/*40*/ { 0x0c9c, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
-	/*41*/ { 0x0c9d, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
-	/*42*/ { 0x0c9e, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
-	/*43*/ { 0x0c9f, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
-	/*44*/ { 0x0ca0, 64,  64,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_WRAP,   G_TX_WRAP   },
-	/*45*/ { 0x0ca1, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
-	/*46*/ { 0x0ca2, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
-	/*47*/ { 0x0a9a, 64,  24,  0, G_IM_FMT_I,    G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
-	/*48*/ { 0x0ca3, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_MIRROR, G_TX_MIRROR },
-	/*49*/ { 0x0b99, 32,  48,  0, G_IM_FMT_I,    G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  },
-	/*50*/ { 0x0caf, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   },
-	/*51*/ { 0x0da0, 32,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*52*/ { 0x0da1, 32,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*53*/ { 0x0da2, 32,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*54*/ { 0x0da3, 32,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  },
-	/*55*/ { 0x0da4, 4,   4,   0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_WRAP,   G_TX_WRAP   },
+	/*37*/ { 0x060a, 32,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_WRAP,   G_TX_WRAP   }, // Unused
+	/*38*/ { 0x0c9b, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   }, // Unused
+	/*39*/ { 0x0112, 64,  64,  5, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  }, // Unused
+	/*40*/ { 0x0c9c, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  }, // Unused
+	/*41*/ { 0x0c9d, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  }, // Unused
+	/*42*/ { 0x0c9e, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   }, // Unused
+	/*43*/ { 0x0c9f, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   }, // Unused
+	/*44*/ { 0x0ca0, 64,  64,  0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_WRAP,   G_TX_WRAP   }, // Unused
+	/*45*/ { 0x0ca1, 64,  64,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   }, // Unused
+	/*46*/ { 0x0ca2, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   }, // Unused
+	/*47*/ { 0x0a9a, 64,  24,  0, G_IM_FMT_I,    G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  }, // Dolby Surround logo
+	/*48*/ { 0x0ca3, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_MIRROR, G_TX_MIRROR }, // Unused
+	/*49*/ { 0x0b99, 32,  48,  0, G_IM_FMT_I,    G_IM_SIZ_8b,  G_TX_CLAMP,  G_TX_CLAMP  }, // Rare logo
+	/*50*/ { 0x0caf, 32,  32,  0, G_IM_FMT_IA,   G_IM_SIZ_8b,  G_TX_WRAP,   G_TX_WRAP   }, // Firing range scoring menu target
+	/*51*/ { 0x0da0, 32,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  }, // N64 controller part 1
+	/*52*/ { 0x0da1, 32,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  }, // N64 controller part 2
+	/*53*/ { 0x0da2, 32,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  }, // N64 controller part 3
+	/*54*/ { 0x0da3, 32,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  }, // N64 controller part 4
+	/*55*/ { 0x0da4, 4,   4,   0, G_IM_FMT_RGBA, G_IM_SIZ_16b, G_TX_WRAP,   G_TX_WRAP   }, // N64 controller menu lines
 };
 
 struct textureconfig g_TcRadarConfigs[] = {

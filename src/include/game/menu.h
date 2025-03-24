@@ -84,7 +84,7 @@ char *menuTextSaveDeviceName(struct menuitem *item);
 s32 menuPakNumToPlayerNum(s32 paknum);
 bool menuIsReadyForPakError(s32 device, s32 arg1);
 void menuPushPakErrorDialog(s32 arg0, s32 arg1);
-void func0f0fd494(struct coord *pos);
+void menuPointTunnelToPC(struct coord *pos);
 void func0f0fd548(s32 arg0);
 struct menudialog *menuIsDialogOpen(struct menudialogdef *dialogdef);
 struct chrdata *currentPlayerGetCommandingAibot(void);

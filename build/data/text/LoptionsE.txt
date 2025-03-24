@@ -358,26 +358,26 @@ Choose a head to load over:
 OK
 Cancel
 Save
-Would you like to save*your file elsewhere?*
-Yes*
-No*
-Please insert the Controller Pak containing your %s into any controller.*
-Please insert the*Controller Pak*you are saving to*into any controller.*
+Would you like to save*your file elsewhere?
+Yes
+No
+Please insert the Controller Pak containing your %s into any controller.
+Please insert the*Controller Pak*you are saving to*into any controller.
 OK
 Cancel
-Select Location*
-Where*
-Spaces*
-Delete Files...*
+Select Location
+Where
+Spaces
+Delete Files...
 Cancel
 Full
-Copy File*
-Select a file to copy:*
-Press B Button to exit.*
-Delete File*
-Select a file to delete:*
-Press B Button to exit.*
-Warning*
+Copy File
+Select a file to copy:
+Press B Button to exit.
+Delete File
+Select a file to delete:
+Press B Button to exit.
+Warning
 Are you sure you want*to delete this file?
 Cancel
 OK

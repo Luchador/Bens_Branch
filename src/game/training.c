@@ -3279,7 +3279,7 @@ Gfx *frRenderHud(Gfx *gdl)
 		alpha = (f32)(g_FrData.menucountdown * 160) / TICKS(60.0f);
 	}
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	// Time
 	red = frFormatTime(string1);

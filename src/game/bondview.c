@@ -1972,7 +1972,7 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 
 	sprintf(zoomtext, "%s %s%s%4.2fX", arrows, "", "", fovy);
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	// Arrows left of product name
 	if (vsplit) {

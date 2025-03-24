@@ -245,7 +245,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 
 	if (g_LegalEnabled) {
 		gdl = titleClear(gdl);
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 
@@ -300,7 +300,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 			if (elem->type == LEGALELEMENTTYPE_LINE) {
 				gdl = text0f153780(gdl);
 				gdl = text0f153a34(gdl, elem->x, elem->y, viGetWidth(), elem->y + 2, 0x7f7fff7f);
-				gdl = text0f153628(gdl);
+				gdl = textConfigureGfxPipeline(gdl);
 			} else if (elem->type == LEGALELEMENTTYPE_DOLBYLOGO) {
 				gdl = text0f153780(gdl);
 
@@ -323,7 +323,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 						(elem->y + 24) << 2,
 						G_TX_RENDERTILE, 0, 0x0300, 0x0400, -0x0400);
 
-				gdl = text0f153628(gdl);
+				gdl = textConfigureGfxPipeline(gdl);
 			} else if (elem->type == LEGALELEMENTTYPE_RARELOGO) {
 				gdl = text0f153780(gdl);
 
@@ -346,7 +346,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 						(elem->y + 42) << 2,
 						G_TX_RENDERTILE, 0, 0x0540, 0x0400, -0x0400);
 
-				gdl = text0f153628(gdl);
+				gdl = textConfigureGfxPipeline(gdl);
 			} else {
 #define ELEM_TEXT (char *)(elem->textptr ? elem->textptr : langGet(elem->textid))
 				x = elem->x;
@@ -1244,7 +1244,7 @@ Gfx *titleRenderRarePresents(Gfx *gdl)
 	s32 colourcomponent = 255;
 
 	gdl = titleClear(gdl);
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	x = viGetViewLeft() + 50;
 	y = viGetViewTop() + viGetViewHeight() - 80;
@@ -1771,7 +1771,7 @@ Gfx *titleRenderNoController(Gfx *gdl)
 	joyGetConnectedControllers();
 
 	gdl = titleClear(gdl);
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	// Line 1
 	text = langGet(L_OPTIONS_071); // "- no controller in controller socket 1 -"

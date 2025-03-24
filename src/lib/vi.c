@@ -63,7 +63,6 @@ s32 g_ViTargetHStart = 0;
 s32 g_ViTargetVStart = 0;
 struct rend_vidat *g_ViFrontData = &g_ViDataArray[0];
 struct rend_vidat *g_ViBackData = &g_ViDataArray[0];
-bool g_ViIs16Bit = true;
 bool g_ViReconfigured = false;
 s32 g_ViSlot = 0;
 
@@ -259,7 +258,7 @@ void viUpdateMode(void)
 		}
 	}
 
-	x = (f32) g_ViBackData->x / (f32) g_ViBackData->bufx;
+	/*x = (f32) g_ViBackData->x / (f32) g_ViBackData->bufx;
 	y = (f32) g_ViBackData->y / (f32) g_ViBackData->bufy;
 
 	if (g_ViBackData->mode == VIMODE_NONE) {
@@ -267,10 +266,9 @@ void viUpdateMode(void)
 	} \
 	slot = g_ViSlot;
 
-	if (g_ViBackData->mode == 1);
-
 	g_ViXScalesBySlot[slot] = x;
 	g_ViYScalesBySlot[slot] = y;
+	g_SchedViModesPending[slot] = true;*/
 
 	if (g_ViBackData->mode == VIMODE_LO) {
 		g_SchedViModesPending[slot] = true;
@@ -280,22 +278,22 @@ void viUpdateMode(void)
 		g_SchedViModesPending[slot] = false;
 	}
 
-	slot = (slot + 1) % NUM_GFXTASKS;
-	g_ViSlot = slot;
+	//slot = (slot + 1) % NUM_GFXTASKS;
+	//g_ViSlot = slot;
 
 	//g_RdpCurTask->framebuffer = g_ViIs16Bit ? g_ViBackData->fb : g_FrameBuffers[0];
 
 	prevdata = g_ViBackData;
 
-	g_ViFrontIndex = (g_ViFrontIndex + 1) % NUM_FRAMEBUFFERS;
+	/*g_ViFrontIndex = (g_ViFrontIndex + 1) % NUM_FRAMEBUFFERS;
 	g_ViBackIndex = (g_ViBackIndex + 1) % NUM_FRAMEBUFFERS;
 
 	g_ViFrontData = g_ViDataArray + g_ViFrontIndex;
-	g_ViBackData = g_ViDataArray + g_ViBackIndex;
+	g_ViBackData = g_ViDataArray + g_ViBackIndex;*/
 
 	bcopy(prevdata, g_ViBackData, sizeof(struct rend_vidat));
 
-	g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
+	//g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
 
 	if (g_ViReconfigured) {
 		g_ViReconfigured = false;
@@ -323,16 +321,6 @@ void viSetMode(s32 mode)
 
 	g_ViBackData->x = g_ViBackData->bufx = g_ViModeWidths[mode];
 	g_ViBackData->y = g_ViBackData->bufy = g_ViModeHeights[mode];
-}
-
-void viSet16Bit(void)
-{
-	g_ViIs16Bit = true;
-}
-
-void viSet32Bit(void)
-{
-	g_ViIs16Bit = false;
 }
 
 u16 *viGetBackBuffer(void)
@@ -430,6 +418,7 @@ Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 	return gdl;
 }
 
+// Involved in rendering 3D menu models
 Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 {
 	vp[g_ViBackIndex].vp.vscale[0] = g_ViBackData->viewx * 2;
@@ -482,11 +471,11 @@ Gfx *vi0000b1d0(Gfx *gdl)
 {
 	gdl = vi0000b1a8(gdl);
 
-	if (g_ViIs16Bit) {
-		gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_ViBackData->bufx, (uintptr_t)(g_ViBackData->fb));
-	} else {
+	//if (g_ViIs16Bit) {
+	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_ViBackData->bufx, (uintptr_t)(g_ViBackData->fb));
+	/*} else {
 		gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_32b, g_ViBackData->bufx, (uintptr_t)(g_FrameBuffers[0]));
-	}
+	}*/
 
 	return gdl;
 }
@@ -723,11 +712,11 @@ void viGetZRange(struct zrange *zrange)
 
 Gfx *viSetFillColour(Gfx *gdl, s32 r, s32 g, s32 b)
 {
-	if (g_ViIs16Bit) {
+	//if (g_ViIs16Bit) {
 		gDPSetFillColor(gdl++, (GPACK_RGBA5551(r, g, b, 1) << 16) | GPACK_RGBA5551(r, g, b, 1));
-	} else {
+	/*} else {
 		(gdl++, r << 24 | g << 16 | b << 8 | 0xff);
-	}
+	}*/
 
 	return gdl;
 }

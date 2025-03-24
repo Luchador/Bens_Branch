@@ -83,10 +83,10 @@ struct font *g_FontHandelGothicMd = NULL;
 struct fontchar *g_CharsHandelGothicMd = NULL;
 struct font *g_FontHandelGothicLg = NULL;
 struct fontchar *g_CharsHandelGothicLg = NULL;
+struct font *g_FontHandelGothicHD = NULL;
+struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
 
 struct fontchar *g_CharToRender;
-
-struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
 
 u16 var8007fb3c[] = {
 	0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00,
@@ -216,7 +216,7 @@ void textReset(void)
 	textLoadCustomFont(); // Load custom HD fonts into memory
 }
 
-Gfx *text0f153628(Gfx *gdl)
+Gfx *textConfigureGfxPipeline(Gfx *gdl)
 {
 	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
@@ -962,8 +962,6 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 	s32 newy;
 	f32 alpha;
 
-	static u32 sbrd = 0x00000000;
-
 	spb0 = 1;
 
 	if (g_TextRotated90) {
@@ -979,10 +977,6 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 		newy = *y;
 		tmpcolour = g_TextOutlineColor;
 		colour2 = (colour & 0xffffff00) | (u32) alpha;
-
-		if (sbrd) {
-			tmpcolour = sbrd;
-		}
 
 		gdl = textRender(gdl, &newx, &newy, text, chars, font, colour2, tmpcolour, width, height, arg9, lineheight);
 	}

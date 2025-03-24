@@ -181,7 +181,7 @@ Gfx *menuitemListRenderHeader(Gfx *gdl, s16 x1, s16 y1, s16 width, s16 arg4, s16
 #else
 	gdl = menugfxDrawListGroupHeader(gdl, x1, y1, x1 + width, y1 + height, x1 + arg4);
 #endif
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	x = x1 + 3;
 	y = y1 + 2;
@@ -340,7 +340,7 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 	firstonscreenoptionindex = menuitem0f0e5d2c(itemdata->curoffsety - halfheight, context->item);
 	y = context->y + tmp;
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	optionindex = firstonscreenoptionindex;
 
@@ -525,7 +525,6 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 
 						gDPPipeSync(gdl++);
 
-#if VERSION >= VERSION_NTSC_1_0
 						g_ScissorX1 = sp94left * g_ScaleX;
 						g_ScissorX2 = sp8cright * g_ScaleX;
 						g_ScissorY1 = sp90top;
@@ -572,9 +571,6 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 						}
 
 						gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
-#else
-						gDPSetScissor(gdl++, G_SC_NON_INTERLACE, sp94left * g_ScaleX, sp90top, sp8cright * g_ScaleX, sp88bottom);
-#endif
 
 						spb8.type19.gdl = gdl;
 						spb8.type19.unk04 = optionindex;
@@ -891,7 +887,7 @@ Gfx *menuitemDropdownRender(Gfx *gdl, struct menurendercontext *context)
 		textSetWaveColours(g_MenuWave2Colours[context->dialog->type].item_disabled, g_MenuWave1Colours[context->dialog->type].item_disabled);
 	}
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	x = context->x + 10;
 	y = context->y + 2;
@@ -1141,7 +1137,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 	x = context->x + 4;
 	y = context->y + 2;
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 	gdl = textRenderProjected(gdl, &x, &y, data->string, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xffffffff, context->width, context->height, 0, 0);
 	gdl = text0f153780(gdl);
 
@@ -1190,7 +1186,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 			context->x + 10 * 12 + 5, context->y + 6 * 11 + 14, 0x00ffff7f, 0x00ffff7f);
 #endif
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	x = context->x + 10;
 	y = context->y + 2;
@@ -1764,7 +1760,7 @@ Gfx *menuitemObjectivesRenderOne(Gfx *gdl, struct menudialog *dialog, s32 index,
 	buffer[0] = '\0';
 
 	// Render objective number
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 	sprintf(buffer, "%d: ", position);
 	textMeasure(&textheight, &textwidth, buffer, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
 	x = objx - textwidth + 25;
@@ -2067,7 +2063,7 @@ Gfx *menuitemLabelRender(Gfx *gdl, struct menurendercontext *context)
 		colour1 = data.label.colour1;
 	}
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 	gdl = textRenderProjected(gdl, &x, &y, text,
 			font1, font2, colour1, context->width, context->height, 0, 0);
 
@@ -2178,7 +2174,7 @@ Gfx *menuitemMeterRender(Gfx *gdl, struct menurendercontext *context)
 	text = menuResolveParam2Text(context->item);
 
 	if (text) {
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 		x = context->x;
 		y = context->y - 1;
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
@@ -2316,7 +2312,7 @@ Gfx *menuitemSelectableRender(Gfx *gdl, struct menurendercontext *context)
 		y += 6;
 	}
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 	gdl = textRenderProjected(gdl, &x, &y, text, font1, font2,
 			leftcolour, context->width, context->height, 0, 0);
 
@@ -2461,7 +2457,7 @@ Gfx *menuitemSliderRender(Gfx *gdl, struct menurendercontext *context)
 		textSetWaveColours(g_MenuWave2Colours[context->dialog->type].item_unfocused, g_MenuWave1Colours[context->dialog->type].item_unfocused);
 	}
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 	gdl = textRenderProjected(gdl, &x, &y, label, g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, context->width, context->height, 0, 0);
 
 	if ((context->item->flags & MENUITEMFLAG_SLIDER_HIDEVALUE) == 0) {
@@ -2832,7 +2828,7 @@ Gfx *menuitemCheckboxRender(Gfx *gdl, struct menurendercontext *context)
 				g_MenuWave1Colours[context->dialog->type].item_unfocused);
 	}
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	if (context->focused) {
 		// Mismatch: The addiu and lui at ec8fc and ec900 are swapped. The addiu
@@ -3032,7 +3028,7 @@ Gfx *menuitemScrollableRender(Gfx *gdl, struct menurendercontext *context)
 			g_MenuWave2Colours[context->dialog->type].item_unfocused,
 			g_MenuWave1Colours[context->dialog->type].item_unfocused);
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	// Heading text shadow
 	x = context->x + 3;
@@ -3279,7 +3275,7 @@ Gfx *menuitemMarqueeRender(Gfx *gdl, struct menurendercontext *context)
 		textSetHorizontalBlend(context->x, context->x, 14);
 	}
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 	gdl = textRenderProjected(gdl, &x, &y, &text[i], font1, font2, colour,
 			context->width + context->x - x, context->height, 0, 0);
 	gdl = text0f153780(gdl);
@@ -3381,7 +3377,7 @@ Gfx *menuitemRankingRender(Gfx *gdl, struct menurendercontext *context)
 		numrows = mpGetPlayerRankings(rankings);
 	}
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	// Gap from last item to bottom of dialog + header height
 	gap = numrows * (LINEHEIGHT - 1) - context->height + 18;
@@ -3507,7 +3503,7 @@ Gfx *menuitemRankingRender(Gfx *gdl, struct menurendercontext *context)
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	for (i = 0; i < numrows; i++) {
 		struct ranking *ranking = &rankings[i];
@@ -3606,7 +3602,7 @@ Gfx *menuitemPlayerStatsRender(Gfx *gdl, struct menurendercontext *context)
 
 	mpchr = MPCHR(playernum);
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	// Write selected player's name
 	weight = menuGetSinOscFrac(40) * 255;
@@ -4051,7 +4047,7 @@ Gfx *menuitemControllerRenderText(Gfx *gdl, s32 curmode, struct menurendercontex
 
 	s32 i;
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	for (i = 0; i < ARRAYCOUNT(labels); i++) {
 		ry = i * 7 + context->y + pady;
@@ -4060,7 +4056,7 @@ Gfx *menuitemControllerRenderText(Gfx *gdl, s32 curmode, struct menurendercontex
 		if ((curmode < CONTROLMODE_21 || curmode == CONTROLMODE_PC) || (i >= 4 && i <= 7)) {
 			// Rendering a label such as "L/R BUTTONS:"
 			rx = context->x + padx + 76;
-			gdl = textRenderProjected(gdl, &rx, &ry, langGet(labels[i]),
+			gdl = textRenderProjected(gdl, &rx, &ry, langRemoveNewline(langGet(labels[i])),
 					g_CharsHandelGothicXs, g_FontHandelGothicXs, labelcolour, viGetWidth(), viGetHeight(), 0, 0);
 		}
 
@@ -4182,7 +4178,7 @@ Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context)
 
 	textalpha = data->textfadetimer;
 	contalpha = data->contfadetimer;
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	if (dialog->transitionfrac < 0) {
 		colour = g_MenuColours[dialog->type].item_unfocused;
@@ -4230,7 +4226,7 @@ Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context)
 #if VERSION == VERSION_JPN_FINAL
 		y += 34;
 #endif
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRenderProjected(gdl, &x, &y,
 				"PC Port control scheme.\n"
 				"Only change to another control scheme\n"
@@ -4253,7 +4249,7 @@ Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context)
 		x = context->x;
 		y = context->y + 92;
 
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRenderProjected(gdl, &x, &y, langGet(L_MPWEAPONS_216), // "Hold weapon button for ..."
 				g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);
 		gdl = text0f153780(gdl);

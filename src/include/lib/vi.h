@@ -13,7 +13,6 @@ void viHandleRetrace(void);
 void viUpdateMode(void);
 void viShake(f32 intensity);
 void viSetMode(s32 mode);
-void viSet16Bit(void);
 u16 *viGetBackBuffer(void);
 u16 *viGetFrontBuffer(void);
 Vp *viGetCurrentPlayerViewport(void);

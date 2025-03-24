@@ -32,13 +32,11 @@
 
 void menuStop(void)
 {
-#ifndef PLATFORM_N64
 	inputAutoLockMouse(true);
-#endif
 
-	if (var80062944) {
-		var80062944 = 0;
-		var80062948 = 0;
+	if (g_FileListIsOpen) {
+		g_FileListIsOpen = 0;
+		g_MPMenuIsOpen = 0;
 		joySetDefaultPfsPollInterval();
 		func0f110bf8();
 	}

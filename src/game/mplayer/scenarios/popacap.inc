@@ -340,7 +340,7 @@ Gfx *pacRenderHud(Gfx *gdl)
 		}
 #endif
 
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 
 		x -= textwidth / 2;

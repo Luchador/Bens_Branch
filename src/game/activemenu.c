@@ -176,7 +176,7 @@ MenuItemHandlerResult amPickTargetMenuList(s32 operation, struct menuitem *item,
 			x = renderdata->x + 10;
 			y = renderdata->y + 1;
 
-			gdl = text0f153628(gdl);
+			gdl = textConfigureGfxPipeline(gdl);
 			gdl = textRenderProjected(gdl, &x, &y, g_MpAllChrConfigPtrs[chrindex]->name, g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);
 			gdl = text0f153780(gdl);
 			return (uintptr_t)gdl;
@@ -1066,7 +1066,7 @@ Gfx *amRender(Gfx *gdl)
 
 	if (g_Vars.currentplayer->activemenumode != AMMODE_CLOSED) {
 		// Draw diamond
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 
 		if (g_Vars.normmplayerisrunning
 				&& g_AmMenus[g_AmIndex].screenindex >= 2) {

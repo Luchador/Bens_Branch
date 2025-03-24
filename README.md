@@ -17,11 +17,13 @@ Changes include:
 * Tinted glass does not become fully opaque
 * Laser obstacles stay fully bright even if a room's lights are destroyed
 * Stars twinkle (most of the code for this was in the original game but unused)
+* Stars enabled for split screen co-op and counter-op
 * Moved the "Objective Completed/Failed" message down so it doesn't block the center of the screen
 * GoldenEye weapons reverted to their GoldenEye names
 * The game now reads text data from plaintext files instead of compressed files. You can find the text files in data/text and edit them easily.
 
 Bug fixes:
+* Fixed light glares rendering on top of first person models
 * Fixed Jonathan being unable to shoot the player in The Duel
 * Fixed the bug where wine bottles don't play their shatter sound half the time when destroyed
 * Fixed the function indicator not turning yellow during RC-P120 secondary mode

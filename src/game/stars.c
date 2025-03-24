@@ -105,7 +105,6 @@ void starsReset(void)
 	s32 i;
 	f32 spc0;
 	f32 spbc;
-	f32 stack[1];
 	s32 count;
 	s32 spb0;
 	f32 f0;
@@ -118,10 +117,7 @@ void starsReset(void)
 	g_StarsBelowHorizon = false;
 	g_StarGridSize = 3;
 
-	if (g_Vars.stagenum == STAGE_DEFECTION || g_Vars.stagenum == STAGE_EXTRACTION) {
-		g_StarCount = 200;
-		g_StarGridSize = 2;
-	} else if (g_Vars.stagenum == STAGE_ATTACKSHIP) {
+	if (g_Vars.stagenum == STAGE_ATTACKSHIP) {
 		g_StarsBelowHorizon = true;
 		g_StarCount = 1200;
 	} else {

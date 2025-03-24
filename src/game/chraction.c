@@ -15452,7 +15452,7 @@ Gfx *chrsRenderChrStats(Gfx *gdl, RoomNum *rooms)
 	s32 i;
 	s32 numchrs = chrsGetNumSlots();
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	for (i = 0; i < numchrs; i++) {
 		struct chrdata *chr = &g_ChrSlots[i];

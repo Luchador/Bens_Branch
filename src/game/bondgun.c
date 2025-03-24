@@ -3248,7 +3248,7 @@ bool bgunChangeGunMem(s32 newowner)
 				unlock = true;
 			}
 
-			if (newowner == GUNMEMOWNER_INVMENU && var8009dfc0 != 0) {
+			if (newowner == GUNMEMOWNER_INVMENU && g_GameIsPaused != 0) {
 				unlock = true;
 				playerRemoveChrBody();
 			}
@@ -9245,7 +9245,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		return gdl;
 	}
 	
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 		gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeR);

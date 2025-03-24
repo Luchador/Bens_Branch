@@ -47,22 +47,17 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "video.h"
 #include "input.h"
 #include "platform.h"
+#include "game/debug.h"
 #define BLUR_OFS 10
-#else
-#define BLUR_OFS 30
-#endif
 
 char g_CheatMarqueeString[252];
 
 u8 *g_BlurBuffer;
-s32 var8009dfc0;
-u32 var8009dfc4;
+bool g_GameIsPaused;
 struct briefing g_Briefing;
-u32 var8009dfe4;
 struct missionconfig g_MissionConfig;
 struct menu g_Menus[MAX_PLAYERS];
 struct menudata g_MenuData;
@@ -108,7 +103,7 @@ const struct menucolourpalette g_MenuWave2Colours[] = {
 };
 
 char *g_StringPointer = g_CheatMarqueeString;
-char *g_StringPointer2 = &g_CheatMarqueeString[VERSION >= VERSION_PAL_FINAL ? 150 : 125];
+char *g_StringPointer2 = &g_CheatMarqueeString[125];
 
 s32 g_MpPlayerNum = 0;
 
@@ -308,7 +303,7 @@ Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 ms
 	gDPFillRectangleScaled(gdl++, x1, bannertop - 4, x2, bannertop - 2);
 	gdl = textSetCCCustom02(gdl);
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	// Render the selected message's shadow
 	x = midx - textwidth / 2 + 2;
@@ -2347,7 +2342,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 			&& menuGetRoot() == MENUROOT_MPENDSCREEN
-			&& !var8009dfc0) {
+			&& !g_GameIsPaused) {
 		return gdl;
 	}
 
@@ -2444,7 +2439,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 		x = dialogleft + 2;
 		y = dialogtop + 2;
 
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 
 		context.unk18 = false;
 
@@ -2838,7 +2833,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 				textResetBlends();
 				textSetRotation90(true);
 
-				gdl = text0f153628(gdl);
+				gdl = textConfigureGfxPipeline(gdl);
 
 				// Left/previous title
 				previndex = layer->cursibling - 1;
@@ -3480,7 +3475,7 @@ void menuReset(void)
 {
 	s32 i;
 
-	var8009dfc0 = 0;
+	g_GameIsPaused = 0;
 
 	g_BlurBuffer = mempAlloc(0x4b00, MEMPOOL_STAGE);
 
@@ -3824,7 +3819,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 				dialog->statefrac = 0.5f;
 			}
 		} else if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && menuGetRoot() == MENUROOT_MPENDSCREEN) {
-			if (var8009dfc0) {
+			if (g_GameIsPaused) {
 				dialog->statefrac += g_Vars.diffframe240 / 60.0f;
 
 				if (dialog->statefrac > 1.0f) {
@@ -5015,7 +5010,7 @@ Gfx *menuRender(Gfx *gdl)
 			s32 y;
 			s32 colour;
 
-			gdl = text0f153628(gdl);
+			gdl = textConfigureGfxPipeline(gdl);
 
 			for (i = 0; i < MAX_PLAYERS; i++) {
 				// Figure out what text will be displayed. The text calculated
@@ -5638,7 +5633,8 @@ void menuPushPakErrorDialog(s32 paknum, s32 pakerrordialog)
 	g_MpPlayerNum = prevplayernum;
 }
 
-void func0f0fd494(struct coord *pos)
+// This makes the blue boxy tunnel in the background point to the computer terminal when you press use on it in Carrington Traning
+void menuPointTunnelToPC(struct coord *pos)
 {
 	f32 xy[2];
 	struct coord coord;
@@ -5747,11 +5743,7 @@ struct menudialogdef g_PakDamagedMenuDialog = {
 	L_MPWEAPONS_064, // "Damaged Controller Pak"
 	g_PakDamagedMenuItems,
 	menudialog000fcd48,
-#if VERSION >= VERSION_NTSC_1_0
 	0x00000020,
-#else
-	0,
-#endif
 	NULL,
 };
 
@@ -5812,15 +5804,10 @@ struct menudialogdef g_PakFullMenuDialog = {
 	L_MPWEAPONS_070, // "Full Controller Pak"
 	g_PakFullMenuItems,
 	menudialog000fcd48,
-#if VERSION >= VERSION_NTSC_1_0
 	0x00000020,
-#else
-	0,
-#endif
 	NULL,
 };
 
-#if VERSION >= VERSION_NTSC_1_0
 struct menuitem g_PakCannotReadGameBoyMenuItems[] = {
 	{
 		MENUITEMTYPE_LABEL,
@@ -5918,4 +5905,3 @@ struct menudialogdef g_PakDataLostMenuDialog = {
 	MENUDIALOGFLAG_IGNOREBACK,
 	NULL,
 };
-#endif

@@ -74,9 +74,9 @@ extern s32 g_TitleDelayedMode;
 extern s32 g_TitleTimer;
 extern s32 g_TitleNextStage;
 extern u8 g_FileState;
-extern u8 var80062944;
-extern u8 var80062948;
-extern u8 var8006294c;
+extern bool g_FileListIsOpen;
+extern bool g_MPMenuIsOpen;
+extern bool g_MenuIsOpen;
 extern bool g_WeatherTickEnabled;
 extern struct var80062960 *var80062960;
 extern f32 g_ChrAnimSpeed;
@@ -321,6 +321,9 @@ extern struct font *g_FontHandelGothicMd;
 extern struct fontchar *g_CharsHandelGothicMd;
 extern struct font *g_FontHandelGothicLg;
 extern struct fontchar *g_CharsHandelGothicLg;
+extern struct font *g_FontHandelGothicHD;
+extern struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
+extern struct fontchar *g_CharToRender; // Character to render using the HD font
 extern bool g_DoRedrawEffect;
 extern s32 g_StageIndex;
 extern s16 var8007fc0c;
@@ -452,9 +455,6 @@ extern TextData *g_TextPropObjData;
 extern TextData *g_TextTitleData;
 
 extern s32 g_ReplacementTextureList[4000]; // There's 3502 textures in the ROM
-
-extern struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
-extern struct fontchar *g_CharToRender; // Character to render using the HD font
 
 #define PLAYER_EXTCFG() g_PlayerExtCfg[g_Vars.currentplayerstats->mpindex & 3]
 #define PLAYER_DEFAULT_FOV (PLAYER_EXTCFG().fovy)

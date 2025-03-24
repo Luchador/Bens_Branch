@@ -14774,7 +14774,7 @@ bool propobjInteract(struct prop *prop)
 			sndStart(var80095200, SFX_TYPING_8118, NULL, -1, -1, -1, -1, -1);
 		}
 
-		func0f0fd494(&prop->pos);
+		menuPointTunnelToPC(&prop->pos);
 	} else if (obj->type == OBJTYPE_ALARM) {
 		// Button press sound
 		sndStart(var80095200, SFX_PRESS_SWITCH, NULL, -1, -1, -1, -1, -1);
@@ -19140,7 +19140,7 @@ Gfx *countdownTimerRender(Gfx *gdl)
 			gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 		}
 
-		gdl = text0f153628(gdl);
+		gdl = textConfigureGfxPipeline(gdl);
 		gdl = bgunDrawHudInteger(gdl, (mins % 100) / 10, viewright - 18, HUDHALIGN_MIDDLE, y, HUDVALIGN_MIDDLE, 0x00ff00a0);
 		gdl = bgunDrawHudInteger(gdl, mins % 10, viewright - 14, HUDHALIGN_MIDDLE, y, HUDVALIGN_MIDDLE, 0x00ff00a0);
 		gdl = bgunDrawHudString(gdl, fmt, viewright - 8, HUDHALIGN_MIDDLE, y, HUDVALIGN_MIDDLE, 0x00ff00a0);

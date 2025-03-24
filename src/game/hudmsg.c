@@ -1223,7 +1223,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 
 	g_ScaleX = 1;
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 			&& g_InCutscene

@@ -509,7 +509,7 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, s32 offyarg, f32 heightfracarg
 		traumacolours++;
 	}
 
-	gdl = text0f153628(gdl);
+	gdl = textConfigureGfxPipeline(gdl);
 	gdl = text0f153a34(gdl, underleft, undertop, underright, underbottom, undercol);
 	gdl = text0f153780(gdl);
 
