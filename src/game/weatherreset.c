@@ -6,22 +6,17 @@
 #include "data.h"
 #include "types.h"
 
-s32 g_WeatherActive = false;
-u32 var800623f4 = 0x00000000;
-u32 var800623f8 = 0x00000000;
-u32 var800623fc = 0x00000000;
-
-#ifndef PLATFORM_N64
+bool g_WeatherActive = false;
 
 static void weatherResetRooms(void)
 {
 	if (g_CurWeatherConfig->flags & WEATHERFLAG_INCLUDE) {
 		// weather is present only in skiprooms, so mark every room as weatherproof
-		for (s32 i = 0; i < g_Vars.roomcount; ++i) {
+		for (int i = 0; i < g_Vars.roomcount; ++i) {
 			g_Rooms[i].extra_flags |= ROOMFLAG_EX_WEATHERPROOF;
 		}
 		// then unmark skiprooms
-		for (s32 i = 0; i < WEATHERCFG_MAX_SKIPROOMS && g_CurWeatherConfig->skiprooms[i]; ++i) {
+		for (int i = 0; i < WEATHERCFG_MAX_SKIPROOMS && g_CurWeatherConfig->skiprooms[i]; ++i) {
 			const RoomNum room = g_CurWeatherConfig->skiprooms[i];
 			if (room >= 0 && room < g_Vars.roomcount) {
 				g_Rooms[room].extra_flags &= ~ROOMFLAG_EX_WEATHERPROOF;
@@ -29,7 +24,7 @@ static void weatherResetRooms(void)
 		}
 	} else {
 		// weather is present in all rooms except skiprooms
-		for (s32 i = 0; i < WEATHERCFG_MAX_SKIPROOMS && g_CurWeatherConfig->skiprooms[i]; ++i) {
+		for (int i = 0; i < WEATHERCFG_MAX_SKIPROOMS && g_CurWeatherConfig->skiprooms[i]; ++i) {
 			const RoomNum room = g_CurWeatherConfig->skiprooms[i];
 			if (room >= 0 && room < g_Vars.roomcount) {
 				g_Rooms[room].extra_flags |= ROOMFLAG_EX_WEATHERPROOF;
@@ -38,8 +33,6 @@ static void weatherResetRooms(void)
 	}
 }
 
-#endif
-
 void weatherReset(void)
 {
 	g_WeatherActive = false;
@@ -47,7 +40,7 @@ void weatherReset(void)
 
 	// find the weather config for this stage, if any
 	g_CurWeatherConfig = &g_DefaultWeatherConfig;
-	for (s32 i = 0; i < ARRAYCOUNT(g_WeatherConfig) && g_WeatherConfig[i].stagenum; ++i) {
+	for (int i = 0; i < ARRAYCOUNT(g_WeatherConfig) && g_WeatherConfig[i].stagenum; ++i) {
 		if (g_WeatherConfig[i].stagenum == g_Stages[g_StageIndex].id) {
 			g_CurWeatherConfig = &g_WeatherConfig[i];
 			break;

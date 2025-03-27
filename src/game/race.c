@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/race.h"
 #include "game/floor.h"
@@ -7,10 +8,10 @@
 #include "data.h"
 #include "types.h"
 
-u16 raceGetAnimSumAngleAsInt(s16 animnum, s32 frame, s32 endframe)
+uint16_t raceGetAnimSumAngleAsInt(int16_t animnum, int frame, int endframe)
 {
-	s16 inttranslate[3];
-	u16 sumangle = 0;
+	int16_t inttranslate[3];
+	uint16_t sumangle = 0;
 
 	while (frame < endframe) {
 		sumangle += animGetPosAngleAsInt(0, false, &g_SkelChr, animnum, frame, inttranslate, false);
@@ -20,10 +21,10 @@ u16 raceGetAnimSumAngleAsInt(s16 animnum, s32 frame, s32 endframe)
 	return sumangle;
 }
 
-s32 raceGetAnimSumForwardAsInt(s16 animnum, s32 frame, s32 endframe)
+int raceGetAnimSumForwardAsInt(int16_t animnum, int frame, int endframe)
 {
-	s32 sumforward = 0;
-	s16 inttranslate[3];
+	int sumforward = 0;
+	int16_t inttranslate[3];
 
 	while (frame < endframe) {
 		animGetPosAngleAsInt(0, false, &g_SkelChr, animnum, frame, inttranslate, false);
@@ -34,13 +35,13 @@ s32 raceGetAnimSumForwardAsInt(s16 animnum, s32 frame, s32 endframe)
 	return sumforward;
 }
 
-s32 raceInitAnimGroup(struct attackanimconfig *configs)
+int raceInitAnimGroup(struct attackanimconfig *configs)
 {
-	s32 count = 0;
+	int count = 0;
 	struct attackanimconfig *config = configs;
 
 	while (config->animnum != 0) {
-		u16 angle = raceGetAnimSumAngleAsInt(config->animnum, 0, floortoint(config->unk04));
+		uint16_t angle = raceGetAnimSumAngleAsInt(config->animnum, 0, floortoint(config->unk04));
 
 		if (config->unk04 > 0) {
 			if (angle < 0x8000) {
@@ -61,7 +62,7 @@ s32 raceInitAnimGroup(struct attackanimconfig *configs)
 
 void raceInitAnimGroups(struct attackanimgroup **groups)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < 32; i++) {
 		if (groups[i]->len < 0) {
@@ -70,18 +71,18 @@ void raceInitAnimGroups(struct attackanimgroup **groups)
 	}
 }
 
-s32 raceCountAnims(struct animtablerow *rows)
+int raceCountAnims(struct animtablerow *rows)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; rows[i].animnum > 0; i++);
 
 	return i;
 }
 
-f32 race0f0005c0(s16 animnum)
+float race0f0005c0(int16_t animnum)
 {
-	f32 avgforward = raceGetAnimSumForwardAsInt(animnum, 0, animGetNumFrames(animnum) - 1) / (f32) animGetNumFrames(animnum);
+	float avgforward = raceGetAnimSumForwardAsInt(animnum, 0, animGetNumFrames(animnum) - 1) / (f32) animGetNumFrames(animnum);
 
 	var8005f014[animnum] = avgforward;
 
@@ -90,8 +91,8 @@ f32 race0f0005c0(s16 animnum)
 
 void raceInitAnims(void)
 {
-	s32 race;
-	s32 i;
+	int race;
+	int i;
 
 	for (race = 0; race < ARRAYCOUNT(g_AnimTablesByRace); race++) {
 		for (i = 0; g_AnimTablesByRace[race][i].hitpart != -1; i++) {

@@ -58,6 +58,7 @@
 #include "game/propobj.h"
 #include "game/wallhit.h"
 #include "game/shards.h"
+#include "video.h"
 #include "bss.h"
 #include "tvcmds.h"
 #include "lib/vi.h"
@@ -924,7 +925,7 @@ void func0f06803c(struct coord *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4
 	struct coord sp4c;
 	f32 sp44[2];
 
-	f32 aspect = viGetAspect();
+	f32 aspect = videoGetAspect();
 	f32 fovy = viGetFovY();
 
 	if (g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit & DEVICE_EYESPY) {
@@ -3229,7 +3230,7 @@ s32 func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 	if ((prop->pos.x != pos->x || prop->pos.y != pos->y || prop->pos.z != pos->z)
 			&& (obj->hidden & OBJHFLAG_PROJECTILE)
 			&& (obj->projectile->flags & PROJECTILEFLAG_STICKY)) {
-		portal00018148(&prop->pos, &sp1c4, prop->rooms, spb8, spcc, 20);
+		portalComputeReachableRooms(&prop->pos, &sp1c4, prop->rooms, spb8, spcc, 20);
 
 		ptr = spcc;
 
@@ -9049,7 +9050,7 @@ void autogunTickShoot(struct prop *autogunprop)
 				}
 
 				if (missed) {
-					portal00018148(&gunpos, &hitpos, gunrooms, hitrooms, NULL, 0);
+					portalComputeReachableRooms(&gunpos, &hitpos, gunrooms, hitrooms, NULL, 0);
 
 					if (chrIsUsingPaintball(ownerchr)) {
 						sparksCreate(hitrooms[0], NULL, &hitpos, 0, 0, SPARKTYPE_PAINT);

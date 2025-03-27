@@ -2139,10 +2139,10 @@ Gfx *player0f0baf84(Gfx *gdl)
 		u16 b;
 
 		guPerspective(a, &b, g_Vars.currentplayer->zoominfovy,
-				PAL ? 1.7316017150879f : 1.4545454978943f, 10, 300, 1);
+				1.4545454978943f, 10, 300, 1);
 
 		gSPMatrix(gdl++, (uintptr_t)(a), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-		gSPPerspNormalize(gdl++, b);
+		//gSPPerspNormalize(gdl++, b);
 	}
 
 	return gdl;
@@ -4087,7 +4087,7 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	camSetWorldToScreenMtxf(g_Vars.currentplayer->mtxf0064);
 	camSetProjectionMtxF(g_Vars.currentplayer->mtxf0068);
 	camSetLookAt(lookat);
-	cam0f0b5838();
+	camComputeFrustumPlanes();
 	playerSetGlobalDrawCameraOffset();
 }
 
@@ -4312,7 +4312,6 @@ Gfx *playerRenderHud(Gfx *gdl)
 				&& (!g_Vars.currentplayer->eyespy || (g_Vars.currentplayer->eyespy && !g_Vars.currentplayer->eyespy->active))
 				&& ((g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit) & DEVICE_NIGHTVISION)) {
 			gdl = bviewDrawNvLens(gdl);
-			gdl = bviewDrawNvBinoculars(gdl);
 		} else if (g_Vars.currentplayer->isdead == false
 				&& g_InCutscene == 0
 				&& (!g_Vars.currentplayer->eyespy || (g_Vars.currentplayer->eyespy && !g_Vars.currentplayer->eyespy->active))
@@ -4715,7 +4714,7 @@ void player0f0c1840(struct coord *pos, struct coord *up, struct coord *look, str
 	s32 room;
 
 	if (rooms2 != NULL && *rooms2 != -1) {
-		portal00018148(pos2, pos, rooms2, sp54, NULL, 0);
+		portalComputeReachableRooms(pos2, pos, rooms2, sp54, NULL, 0);
 
 		// Remove values from sp54 (room numbers) if that room doesn't contain
 		// the coord, and shuffle the array back when removing values.

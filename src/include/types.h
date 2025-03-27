@@ -5798,7 +5798,7 @@ struct portalthing2 {
 	bool behind;
 };
 
-struct var800a6538 {
+struct hitbatch {
 	s32 vtxbatchindex;
 	f32 unk04;
 };

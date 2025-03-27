@@ -854,10 +854,10 @@ Gfx *lvRender(Gfx *gdl)
 
 	if (g_Vars.stagenum == STAGE_TITLE) {
 		gSPDisplayList(gdl++, &var800613a0);
-		gSPDisplayList(gdl++, &var80061380);
+		//gSPDisplayList(gdl++, &var80061380);
 
 		gdl = viPrepareZbuf(gdl);
-		gdl = vi0000b1d0(gdl);
+		gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
 
 		gDPSetScissorFrac(gdl++, 0,
 				viGetViewLeft() * 4.0f, viGetViewTop() * 4.0f,
@@ -869,22 +869,7 @@ Gfx *lvRender(Gfx *gdl)
 	} else if (g_Vars.stagenum == STAGE_BOOTPAKMENU) {
 		gSPClipRatio(gdl++, FRUSTRATIO_2);
 		gSPDisplayList(gdl++, &var800613a0);
-		gSPDisplayList(gdl++, &var80061380);
-
-		setCurrentPlayerNum(0);
-		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
-		viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
-				g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
-		mtx00016748(1);
-
-		gdl = vi0000b1d0(gdl);
-		gdl = viRenderViewportEdges(gdl);
-		gdl = bgScissorToViewport(gdl);
-		gdl = menuRender(gdl);
-	} else if (g_Vars.stagenum == STAGE_CREDITS) {
-		gSPClipRatio(gdl++, FRUSTRATIO_2);
-		gSPDisplayList(gdl++, &var800613a0);
-		gSPDisplayList(gdl++, &var80061380);
+		//gSPDisplayList(gdl++, &var80061380);
 
 		setCurrentPlayerNum(0);
 		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
@@ -893,7 +878,22 @@ Gfx *lvRender(Gfx *gdl)
 		mtx00016748(1);
 
 		gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
-		gdl = vi0000b1d0(gdl);
+		gdl = viRenderViewportEdges(gdl);
+		gdl = bgScissorToViewport(gdl);
+		gdl = menuRender(gdl);
+	} else if (g_Vars.stagenum == STAGE_CREDITS) {
+		gSPClipRatio(gdl++, FRUSTRATIO_2);
+		gSPDisplayList(gdl++, &var800613a0);
+		//gSPDisplayList(gdl++, &var80061380);
+
+		setCurrentPlayerNum(0);
+		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
+		viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
+				g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
+		mtx00016748(1);
+
+		gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
+		gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
 		gdl = viRenderViewportEdges(gdl);
 		gdl = creditsDraw(gdl);
 	} else {
@@ -961,7 +961,7 @@ Gfx *lvRender(Gfx *gdl)
 			bviewSetMotionBlur(bluramount);
 
 			gSPDisplayList(gdl++, &var800613a0);
-			gSPDisplayList(gdl++, &var80061380);
+			//gSPDisplayList(gdl++, &var80061380);
 
 			viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 			viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
@@ -970,7 +970,7 @@ Gfx *lvRender(Gfx *gdl)
 			envTick();
 			zbufSwap();
 			gdl = viPrepareZbuf(gdl);
-			gdl = vi0000b1d0(gdl);
+			gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
 			gdl = bgScissorToViewport(gdl);
 			artifactsClear();
 

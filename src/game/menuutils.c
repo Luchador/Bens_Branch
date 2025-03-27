@@ -15,14 +15,14 @@
  *
  * The value is commonly used for menus, so it increments while paused.
  */
-f32 g_20SecIntervalFrac = 0;
+float g_20SecIntervalFrac = 0;
 
 /**
  * Increments from 0 to 1 over 80 seconds then snaps back to 0.
  *
  * The value is paused when the game is paused.
  */
-f32 g_Lv80SecIntervalFrac = 0;
+float g_Lv80SecIntervalFrac = 0;
 
 /**
  * Blends two colours together.
@@ -30,9 +30,9 @@ f32 g_Lv80SecIntervalFrac = 0;
  * The aweight argument is how much weight is given to colour A, on a scale of
  * 0 to 255.
  */
-u32 colourBlend(u32 a, u32 b, u32 aweight)
+unsigned int colourBlend(unsigned int a, unsigned int b, unsigned int aweight)
 {
-	u32 bweight = 0xff - aweight;
+	unsigned int bweight = 0xff - aweight;
 
 	return (((aweight * ((a >> 24) & 0xff) + bweight * ((b >> 24) & 0xff)) >> 8) << 24)
 		| (((aweight * ((a >> 16) & 0xff) + bweight * ((b >> 16) & 0xff)) >> 8) << 16)
@@ -62,7 +62,7 @@ void menuTickTimers(void)
  *
  * freq is the amount of oscillations per 20 seconds.
  */
-f32 menuGetSinOscFrac(f32 freq)
+float menuGetSinOscFrac(float freq)
 {
 	return sinf((freq * g_20SecIntervalFrac + freq * g_20SecIntervalFrac) * M_PI) / 2.0f + 0.5f;
 }
@@ -74,7 +74,7 @@ f32 menuGetSinOscFrac(f32 freq)
  *
  * freq is the amount of oscillations per 20 seconds.
  */
-f32 menuGetCosOscFrac(f32 freq)
+float menuGetCosOscFrac(float freq)
 {
 	return cosf((freq * g_20SecIntervalFrac + freq * g_20SecIntervalFrac) * M_PI) / 2.0f + 0.5f;
 }
@@ -87,11 +87,11 @@ f32 menuGetCosOscFrac(f32 freq)
  *
  * freq is the amount of intervals per 20 seconds.
  */
-f32 menuGetLinearIntervalFrac(f32 freq)
+float menuGetLinearIntervalFrac(float freq)
 {
-	f32 tmp = g_20SecIntervalFrac * freq;
+	float tmp = g_20SecIntervalFrac * freq;
 
-	tmp -= (s32)tmp;
+	tmp -= (int)tmp;
 
 	return tmp;
 }
@@ -107,10 +107,10 @@ f32 menuGetLinearIntervalFrac(f32 freq)
  * It's used on the Combat Simulator's character selection menu
  * to determine the camera's zoom.
  */
-f32 menuGetLinearOscPauseFrac(f32 frac)
+float menuGetLinearOscPauseFrac(float frac)
 {
-	s32 ival = frac * 4.0f;
-	f32 fval = frac * 4.0f - (f32)(ival / 4) * 4.0f;
+	int ival = frac * 4.0f;
+	float fval = frac * 4.0f - (float)(ival / 4) * 4.0f;
 
 	if (fval < 1.0f) {
 		return fval;

@@ -1660,7 +1660,7 @@ Gfx *creditsDraw(Gfx *gdl)
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
 	gdl = viPrepareZbuf(gdl);
-	gdl = vi0000b1d0(gdl);
+	gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
 	gdl = creditsFillFramebuffer(gdl, 0x000000ff);
 
 	gDPSetScissorFrac(gdl++, G_SC_NON_INTERLACE, 0, 120, viGetWidth() * 4.0f, (viGetHeight() - 30) * 4.0f);

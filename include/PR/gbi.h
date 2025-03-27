@@ -124,12 +124,6 @@
 #define G_RDPHALF_CONT      (G_IMMFIRST-13)  /* -78 / 0xb2 */
 #define G_TRI4              (G_IMMFIRST-14)  /* -79 / 0xb1 */
 
-/* We are overloading 2 of the immediate commands
-   to keep the byte alignment of dmem the same */
-
-#define G_SPRITE2D_SCALEFLIP (G_IMMFIRST-1)
-#define G_SPRITE2D_DRAW      (G_IMMFIRST-2)
-
 /* RDP commands: */
 #define G_NOOP            0xc0 /*   0 */
 
@@ -291,28 +285,6 @@
 #define G_LIGHTING           0x00020000
 #define G_TEXTURE_GEN        0x00040000
 #define G_TEXTURE_GEN_LINEAR 0x00080000
-#define G_LOD                0x00100000 /* NOT IMPLEMENTED */
-#define G_CLIPPING           0x00000000
-
-#ifdef _LANGUAGE_ASSEMBLY
-#define G_FOG_H                (G_FOG/0x10000)
-#define G_LIGHTING_H           (G_LIGHTING/0x10000)
-#define G_TEXTURE_GEN_H        (G_TEXTURE_GEN/0x10000)
-#define G_TEXTURE_GEN_LINEAR_H (G_TEXTURE_GEN_LINEAR/0x10000)
-#define G_LOD_H                (G_LOD/0x10000) /* NOT IMPLEMENTED */
-#endif
-
-/* Need these defined for Sprite Microcode */
-#ifdef _LANGUAGE_ASSEMBLY
-#define G_TX_LOADTILE   7
-#define G_TX_RENDERTILE 0
-#define G_TX_NOMIRROR   0
-#define G_TX_WRAP       0
-#define G_TX_MIRROR     1
-#define G_TX_CLAMP      2
-#define G_TX_NOMASK     0
-#define G_TX_NOLOD      0
-#endif
 
 /*
  * G_SETIMG fmt: set image formats
@@ -949,7 +921,6 @@
 /*
  * BEGIN C-specific section: (typedef's)
  */
-#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 
 /*
  * Data Structures
@@ -1718,7 +1689,6 @@ typedef union {
 #define gsSPNoOp()   gsDma0p(G_SPNOOP, 0, 0)
 
 #define gSPMatrix(pkt, m, p) gDma1p(pkt, G_MTX, m, sizeof(Mtx), p)
-#define gsSPMatrix(m, p)     gsDma1p(G_MTX, m, sizeof(Mtx), p)
 
 #define gSPVertex(pkt, v, n, v0)                           \
     gDma1p(pkt, G_VTX, v, sizeof(Vtx)*(n),((n)-1)<<4|(v0))
@@ -1733,27 +1703,12 @@ typedef union {
     gsDma1p(      G_MOVEMEM, (v), sizeof(Vp), G_MV_VIEWPORT)
 
 #define gSPDisplayList(pkt,dl)  gDma1p(pkt,G_DL,dl,0,G_DL_PUSH)
-#define gsSPDisplayList(   dl)  gsDma1p(   G_DL,dl,0,G_DL_PUSH)
 
 #define gSPBranchList(pkt,dl)   gDma1p(pkt,G_DL,dl,0,G_DL_NOPUSH)
-#define gsSPBranchList(   dl)   gsDma1p(   G_DL,dl,0,G_DL_NOPUSH)
-
-#define gSPSprite2DBase(pkt, s) gDma1p(pkt, G_SPRITE2D_BASE, s, sizeof(uSprite), 0)
-#define gsSPSprite2DBase(s)     gsDma1p(G_SPRITE2D_BASE, s, sizeof(uSprite), 0)
 
 /*
  * RSP short command (no DMA required) macros
  */
-#define gImmp0(pkt, c)                  \
-{                                       \
-    Gfx *_g = (Gfx *)(pkt);             \
-    _g->words.w0 = _SHIFTL((c), 24, 8); \
-}
-
-#define gsImmp0(c)      \
-{                       \
-    _SHIFTL((c), 24, 8) \
-}
 
 #define gImmp1(pkt, c, p0)              \
 {                                       \
@@ -1781,21 +1736,6 @@ typedef union {
     _SHIFTL((c), 24, 8),  _SHIFTL((p0), 16, 16) | _SHIFTL((p1), 8, 8) \
 }
 
-#define gImmp3(pkt, c, p0, p1, p2)                                \
-{                                                                 \
-    Gfx *_g = (Gfx *)(pkt);                                       \
-                                                                  \
-    _g->words.w0 = _SHIFTL((c), 24, 8);                           \
-    _g->words.w1 = (_SHIFTL((p0), 16, 16) | _SHIFTL((p1), 8, 8) | \
-            _SHIFTL((p2), 0, 8));                                 \
-}
-
-#define gsImmp3(c, p0, p1, p2)                         \
-{                                                      \
-    _SHIFTL((c), 24, 8), (_SHIFTL((p0), 16, 16) |      \
-            _SHIFTL((p1), 8, 8) | _SHIFTL((p2), 0, 8)) \
-}
-
 #define gImmp21(pkt, c, p0, p1, dat)                              \
 {                                                                 \
     Gfx *_g = (Gfx *)(pkt);                                       \
@@ -1817,45 +1757,6 @@ typedef union {
 #define gsMoveWd(index, offset, data)         \
     gsImmp21(G_MOVEWORD, offset, index, data)
 
-/* Sprite immediate macros, there is also a sprite dma macro above */
-
-#define gSPSprite2DScaleFlip(pkt, sx, sy, fx, fy)          \
-{                                                          \
-    Gfx *_g = (Gfx *)(pkt);                                \
-                                                           \
-    _g->words.w0 = (_SHIFTL(G_SPRITE2D_SCALEFLIP, 24, 8) | \
-            _SHIFTL((fx), 8, 8) |                          \
-            _SHIFTL((fy), 0, 8));                          \
-    _g->words.w1 = (_SHIFTL((sx), 16, 16) |                \
-            _SHIFTL((sy),  0, 16));                        \
-}
-
-#define gsSPSprite2DScaleFlip(sx, sy, fx, fy) \
-{                                             \
-    (_SHIFTL(G_SPRITE2D_SCALEFLIP, 24, 8) |   \
-     _SHIFTL((fx), 8, 8) |                    \
-     _SHIFTL((fy), 0, 8)),                    \
-    (_SHIFTL((sx), 16, 16) |                  \
-     _SHIFTL((sy),  0, 16))                   \
-}
-
-#define gSPSprite2DDraw(pkt, px, py)                  \
-{                                                     \
-    Gfx *_g = (Gfx *)(pkt);                           \
-                                                      \
-    _g->words.w0 = (_SHIFTL(G_SPRITE2D_DRAW, 24, 8)); \
-    _g->words.w1 = (_SHIFTL((px), 16, 16) |           \
-            _SHIFTL((py),  0, 16));                   \
-}
-
-#define gsSPSprite2DDraw(px, py)       \
-{                                      \
-    (_SHIFTL(G_SPRITE2D_DRAW, 24, 8)), \
-    (_SHIFTL((px), 16, 16) |           \
-     _SHIFTL((py),  0, 16))            \
-}
-
-
 /*
  * Note: the SP1Triangle() and line macros multiply the vertex indices
  * by 10, this is an optimization for the microcode.
@@ -1863,10 +1764,6 @@ typedef union {
 #define __gsSP1Triangle_w1f(v0, v1, v2, flag)     \
     (_SHIFTL((flag), 24,8)|_SHIFTL((v0)*10,16,8)| \
      _SHIFTL((v1)*10, 8,8)|_SHIFTL((v2)*10, 0,8))
-
-#define __gsSPLine3D_w1f(v0, v1, wd, flag)        \
-    (_SHIFTL((flag), 24,8)|_SHIFTL((v0)*10,16,8)| \
-     _SHIFTL((v1)*10, 8,8)|_SHIFTL((wd),    0,8))
 
 /***
  ***  1 Triangle
@@ -1885,96 +1782,15 @@ typedef union {
     __gsSP1Triangle_w1f(v0, v1, v2, flag) \
 }
 
-/***
- ***  Line
- ***/
-#define gSPLine3D(pkt, v0, v1, flag)                  \
-{                                                     \
-    Gfx *_g = (Gfx *)(pkt);                           \
-                                                      \
-    _g->words.w0 = _SHIFTL(G_LINE3D, 24, 8);          \
-    _g->words.w1 = __gsSPLine3D_w1f(v0, v1, 0, flag); \
-}
-
-#define gsSPLine3D(v0, v1, flag)      \
-{                                     \
-    _SHIFTL(G_LINE3D, 24, 8),         \
-    __gsSPLine3D_w1f(v0, v1, 0, flag) \
-}
-
-/***
- ***  LineW
- ***/
-/* these macros are the same as SPLine3D, except they have an
- * additional parameter for width. The width is added to the "minimum"
- * thickness, which is 1.5 pixels. The units for width are in
- * half-pixel units, so a width of 1 translates to (.5 + 1.5) or
- * a 2.0 pixels wide line.
- */
-#define gSPLineW3D(pkt, v0, v1, wd, flag)              \
-{                                                      \
-    Gfx *_g = (Gfx *)(pkt);                            \
-                                                       \
-    _g->words.w0 = _SHIFTL(G_LINE3D, 24, 8);           \
-    _g->words.w1 = __gsSPLine3D_w1f(v0, v1, wd, flag); \
-}
-
-#define gsSPLineW3D(v0, v1, wd, flag)  \
-{                                      \
-    _SHIFTL(G_LINE3D, 24, 8),          \
-    __gsSPLine3D_w1f(v0, v1, wd, flag) \
-}
-
-/***
- ***  1 Quadrangle
- ***/
-#define gSP1Quadrangle(pkt, v0, v1, v2, v3, flag)                \
-{                                                                \
-    Gfx *_g = (Gfx *)(pkt);                                      \
-                                                                 \
-    _g->words.w0 = (_SHIFTL(G_TRI2, 24, 8)|                      \
-            __gsSP1Quadrangle_w1f(v0, v1, v2, v3, flag));        \
-    _g->words.w1 =  __gsSP1Quadrangle_w2f(v0, v1, v2, v3, flag); \
-}
-
-#define gsSP1Quadrangle(v0, v1, v2, v3, flag)      \
-{                                                  \
-    (_SHIFTL(G_TRI2, 24, 8)|                       \
-     __gsSP1Quadrangle_w1f(v0, v1, v2, v3, flag)), \
-    __gsSP1Quadrangle_w2f(v0, v1, v2, v3, flag)    \
-}
-
-// Removed in PD
-#define gSPCullDisplayList(pkt,vstart,vend)                \
-{                                                          \
-    Gfx *_g = (Gfx *)(pkt);                                \
-                                                           \
-    _g->words.w0 = _SHIFTL(G_CULLDL, 24, 8) |              \
-    ((0x0f & (vstart))*40);                                \
-    _g->words.w1 = (uintptr_t)((0x0f & ((vend)+1))*40);    \
-}
-
-// Removed in PD
-#define gsSPCullDisplayList(vstart,vend)               \
-{                                                      \
-    _SHIFTL(G_CULLDL, 24, 8) | ((0x0f & (vstart))*40), \
-    ((0x0f & ((vend)+1))*40)                           \
-}
-
 #define gSPSegment(pkt, segment, base)            \
     gMoveWd(pkt, G_MW_SEGMENT, (segment)*4, base)
 
 #define gsSPSegment(segment, base)            \
     gsMoveWd(G_MW_SEGMENT, (segment)*4, base)
 
-#ifdef PLATFORM_N64
-#define SEGADDR(x) x
-#define UNSEGADDR(x) x
-#else
 // we mark all segmented addresses so that it'll be easier to recognize them later
 #define SEGADDR(x) ((void *)((uintptr_t)(x) | 1))
 #define UNSEGADDR(x) ((uintptr_t)(x) & ~1)
-#endif
 
 /*
  * Clipping Macros
@@ -2001,57 +1817,6 @@ typedef union {
     gMoveWd(pkt, G_MW_CLIP, G_MWO_CLIP_RPX, FR_POS_##r); \
     gMoveWd(pkt, G_MW_CLIP, G_MWO_CLIP_RPY, FR_POS_##r); \
 }
-
-#define gsSPClipRatio(r)                             \
-    gsMoveWd(G_MW_CLIP, G_MWO_CLIP_RNX, FR_NEG_##r), \
-    gsMoveWd(G_MW_CLIP, G_MWO_CLIP_RNY, FR_NEG_##r), \
-    gsMoveWd(G_MW_CLIP, G_MWO_CLIP_RPX, FR_POS_##r), \
-    gsMoveWd(G_MW_CLIP, G_MWO_CLIP_RPY, FR_POS_##r)
-
-/*
- * Insert values into Matrix
- *
- * where = element of matrix (byte offset)
- * num   = new element (32 bit value replacing 2 int or 2 frac matrix
- *                                 componants
- */
-#define gSPInsertMatrix(pkt, where, num)  \
-    gMoveWd(pkt, G_MW_MATRIX, where, num)
-
-#define gsSPInsertMatrix(where, num)  \
-    gsMoveWd(G_MW_MATRIX, where, num)
-
-/*
- * Load new matrix directly
- *
- * mptr = pointer to matrix
- */
-#define gSPForceMatrix(pkt, mptr)                                 \
-{                                                                 \
-    gDma1p(pkt, G_MOVEMEM, mptr,              16, G_MV_MATRIX_1); \
-    gDma1p(pkt, G_MOVEMEM, (char *)(mptr)+16, 16, G_MV_MATRIX_2); \
-    gDma1p(pkt, G_MOVEMEM, (char *)(mptr)+32, 16, G_MV_MATRIX_3); \
-    gDma1p(pkt, G_MOVEMEM, (char *)(mptr)+48, 16, G_MV_MATRIX_4); \
-}
-
-#define gsSPForceMatrix(mptr)                                 \
-    gsDma1p(G_MOVEMEM, mptr,              16, G_MV_MATRIX_1), \
-    gsDma1p(G_MOVEMEM, (char *)(mptr)+16, 16, G_MV_MATRIX_2), \
-    gsDma1p(G_MOVEMEM, (char *)(mptr)+32, 16, G_MV_MATRIX_3), \
-    gsDma1p(G_MOVEMEM, (char *)(mptr)+48, 16, G_MV_MATRIX_4)
-
-/*
- * Insert values into Points
- *
- * point = point number 0-15
- * where = which element of point to modify (byte offset into point)
- * num   = new value (32 bit)
- */
-#define gSPModifyVertex(pkt, vtx, where, val)        \
-    gMoveWd(pkt, G_MW_POINTS, (vtx)*40+(where), val)
-
-#define gsSPModifyVertex(vtx, where, val)        \
-    gsMoveWd(G_MW_POINTS, (vtx)*40+(where), val)
 
 /*
  * Lighting Macros
@@ -2136,11 +1901,6 @@ typedef union {
     gSPLight(pkt,&name.a,2);       \
 }
 
-#define gsSPSetLights1(name)    \
-    gsSPNumLights(NUMLIGHTS_1), \
-    gsSPLight(&name.l[0],1),    \
-    gsSPLight(&name.a,2)
-
 /*
  * Reflection/Hiliting Macros
  */
@@ -2155,26 +1915,6 @@ typedef union {
     gSPLookAtY(pkt,(char *)(la)+16) \
 }
 
-#define gsSPLookAt(la)           \
-    gsSPLookAtX(la),             \
-    gsSPLookAtY((char *)(la)+16)
-
-#define gDPSetHilite1Tile(pkt, tile, hilite, width, height)                                      \
-    gDPSetTileSize(pkt, tile, (hilite)->h.x1 & 0xfff, (hilite)->h.y1 & 0xfff,                    \
-            ((((width)-1)*4)+(hilite)->h.x1) & 0xfff, ((((height)-1)*4)+(hilite)->h.y1) & 0xfff)
-
-#define gsDPSetHilite1Tile(tile, hilite, width, height)                                          \
-    gsDPSetTileSize(tile, (hilite)->h.x1 & 0xfff, (hilite)->h.y1 & 0xfff,                        \
-            ((((width)-1)*4)+(hilite)->h.x1) & 0xfff, ((((height)-1)*4)+(hilite)->h.y1) & 0xfff)
-
-#define gDPSetHilite2Tile(pkt, tile, hilite, width, height)                                      \
-    gDPSetTileSize(pkt, tile, (hilite)->h.x2 & 0xfff, (hilite)->h.y2 & 0xfff,                    \
-            ((((width)-1)*4)+(hilite)->h.x2) & 0xfff, ((((height)-1)*4)+(hilite)->h.y2) & 0xfff)
-
-#define gsDPSetHilite2Tile(tile, hilite, width, height)                                          \
-    gsDPSetTileSize(tile, (hilite)->h.x2 & 0xfff, (hilite)->h.y2 & 0xfff,                        \
-            ((((width)-1)*4)+(hilite)->h.x2) & 0xfff, ((((height)-1)*4)+(hilite)->h.y2) & 0xfff)
-
 /*
  * FOG macros
  * fm = z multiplier
@@ -2188,21 +1928,9 @@ typedef union {
  * max is where fog is thickest (usually 1000)
  *
  */
-#define gSPFogFactor(pkt, fm, fo)                   \
-    gMoveWd(pkt, G_MW_FOG, G_MWO_FOG,               \
-            (_SHIFTL(fm,16,16) | _SHIFTL(fo,0,16)))
-
-#define gsSPFogFactor(fm, fo)                       \
-    gsMoveWd(G_MW_FOG, G_MWO_FOG,                   \
-            (_SHIFTL(fm,16,16) | _SHIFTL(fo,0,16)))
 
 #define gSPFogPosition(pkt, min, max)                        \
     gMoveWd(pkt, G_MW_FOG, G_MWO_FOG,                        \
-            (_SHIFTL((128000/((max)-(min))),16,16) |         \
-             _SHIFTL(((500-(min))*256/((max)-(min))),0,16)))
-
-#define gsSPFogPosition(min, max)                            \
-    gsMoveWd(G_MW_FOG, G_MWO_FOG,                            \
             (_SHIFTL((128000/((max)-(min))),16,16) |         \
              _SHIFTL(((500-(min))*256/((max)-(min))),0,16)))
 
@@ -2240,19 +1968,10 @@ typedef union {
     _g->words.w1 = (_SHIFTL((s),16,16)|_SHIFTL((t),0,16));          \
 }
 
-#define gsSPTextureL(s, t, level, xparam, tile, on)                \
-{                                                                  \
-    (_SHIFTL(G_TEXTURE,24,8)|_SHIFTL((xparam),16,8)|               \
-     _SHIFTL((level),11,3)|_SHIFTL((tile),8,3)|_SHIFTL((on),0,8)), \
-    (_SHIFTL((s),16,16)|_SHIFTL((t),0,16))                         \
-}
-
 #define gSPPerspNormalize(pkt, s) gMoveWd(pkt, G_MW_PERSPNORM, 0, (s))
-#define gsSPPerspNormalize(s)     gsMoveWd(    G_MW_PERSPNORM, 0, (s))
 
 // Removed in PD
 #define gSPPopMatrix(pkt, n) gImmp1(pkt, G_POPMTX, n)
-#define gsSPPopMatrix(n)     gsImmp1(    G_POPMTX, n)
 
 #define gSPEndDisplayList(pkt)              \
 {                                           \
@@ -2338,14 +2057,11 @@ typedef union {
  * The bits are reserved for future use.
  * Fri May 26 13:45:55 PDT 1995
  */
-#define gDPSetBlendMask(pkt, mask) gDPNoOp(pkt)
-#define gsDPSetBlendMask(mask)     gsDPNoOp()
 
 #define gDPSetAlphaCompare(pkt, type) gSPSetOtherMode(pkt, G_SETOTHERMODE_L, G_MDSFT_ALPHACOMPARE, 2, type)
 #define gsDPSetAlphaCompare(type)     gsSPSetOtherMode(    G_SETOTHERMODE_L, G_MDSFT_ALPHACOMPARE, 2, type)
 
 #define gDPSetDepthSource(pkt, src)   gSPSetOtherMode(pkt, G_SETOTHERMODE_L, G_MDSFT_ZSRCSEL, 1, src)
-#define gsDPSetDepthSource(src)       gsSPSetOtherMode(    G_SETOTHERMODE_L, G_MDSFT_ZSRCSEL, 1, src)
 
 #define gDPSetRenderMode(pkt, c0, c1) gSPSetOtherMode(pkt, G_SETOTHERMODE_L, G_MDSFT_RENDERMODE, 29, (c0) | (c1))
 #define gsDPSetRenderMode(c0, c1)     gsSPSetOtherMode(    G_SETOTHERMODE_L, G_MDSFT_RENDERMODE, 29, (c0) | (c1))
@@ -2367,15 +2083,9 @@ typedef union {
 }
 
 #define gDPSetColorImage(pkt, f, s, w, i) gSetImage(pkt, G_SETCIMG, f, s, w, i)
-#define gsDPSetColorImage(f, s, w, i)     gsSetImage(G_SETCIMG, f, s, w, i)
 
 /* use these for new code */
 #define gDPSetDepthImage(pkt, i) gSetImage(pkt, G_SETZIMG, 0, 0, 1, i)
-#define gsDPSetDepthImage(i)     gsSetImage(G_SETZIMG, 0, 0, 1, i)
-
-/* kept for compatibility */
-#define gDPSetMaskImage(pkt, i) gDPSetDepthImage(pkt, i)
-#define gsDPSetMaskImage(i)     gsDPSetDepthImage(i)
 
 #define gDPSetTextureImage(pkt, f, s, w, i) gSetImage(pkt, G_SETTIMG, f, s, w, i)
 #define gsDPSetTextureImage(f, s, w, i)     gsSetImage(G_SETTIMG, f, s, w, i)
@@ -2487,21 +2197,9 @@ typedef union {
              _SHIFTL(b, 8, 8) | _SHIFTL(a, 0, 8)))
 
 #define gDPSetEnvColor(pkt, r, g, b, a)   DPRGBColor(pkt, G_SETENVCOLOR, r,g,b,a)
-#define gsDPSetEnvColor(r, g, b, a)       sDPRGBColor(    G_SETENVCOLOR, r,g,b,a)
 #define gDPSetBlendColor(pkt, r, g, b, a) DPRGBColor(pkt, G_SETBLENDCOLOR, r,g,b,a)
-#define gsDPSetBlendColor(r, g, b, a)     sDPRGBColor(    G_SETBLENDCOLOR, r,g,b,a)
 #define gDPSetFogColor(pkt, r, g, b, a)   DPRGBColor(pkt, G_SETFOGCOLOR, r,g,b,a)
-#define gsDPSetFogColor(r, g, b, a)       sDPRGBColor(    G_SETFOGCOLOR, r,g,b,a)
 #define gDPSetFillColor(pkt, d)           gDPSetColor(pkt, G_SETFILLCOLOR, (d))
-#define gsDPSetFillColor(d)               gsDPSetColor(    G_SETFILLCOLOR, (d))
-
-#define gDPSetPrimDepth(pkt, z, dz)                  \
-    gDPSetColor(pkt, G_SETPRIMDEPTH,                 \
-            _SHIFTL(z, 16, 16) | _SHIFTL(dz, 0, 16))
-
-#define gsDPSetPrimDepth(z, dz)                       \
-    gsDPSetColor(G_SETPRIMDEPTH, _SHIFTL(z, 16, 16) | \
-            _SHIFTL(dz, 0, 16))
 
 #define gDPSetPrimColor(pkt, m, l, r, g, b, a)              \
 {                                                           \
@@ -2511,56 +2209,6 @@ typedef union {
             _SHIFTL(m, 8, 8) | _SHIFTL(l, 0, 8));           \
     _g->words.w1 = (_SHIFTL(r, 24, 8) | _SHIFTL(g, 16, 8) | \
             _SHIFTL(b, 8, 8) | _SHIFTL(a, 0, 8));           \
-}
-
-#define gsDPSetPrimColor(m, l, r, g, b, a)                      \
-{                                                               \
-    (_SHIFTL(G_SETPRIMCOLOR, 24, 8) | _SHIFTL(m, 8, 8) |        \
-     _SHIFTL(l, 0, 8)),                                         \
-    (_SHIFTL(r, 24, 8) | _SHIFTL(g, 16, 8) | _SHIFTL(b, 8, 8) | \
-     _SHIFTL(a, 0, 8))                                          \
-}
-
-/*
- * gDPSetOtherMode (This is for expert user.)
- *
- * This command makes all othermode parameters set.
- * Do not use this command in the same DL with another g*SPSetOtherMode DLs.
- *
- * [Usage]
- *  gDPSetOtherMode(pkt, modeA, modeB)
- *
- *      'modeA' is described all parameters of GroupA GBI command.
- *      'modeB' is also described all parameters of GroupB GBI command.
- *
- *  GroupA:
- *    gDPPipelineMode, gDPSetCycleType, gSPSetTexturePersp,
- *    gDPSetTextureDetail, gDPSetTextureLOD, gDPSetTextureLUT,
- *    gDPSetTextureFilter, gDPSetTextureConvert, gDPSetCombineKey,
- *    gDPSetColorDither, gDPSetAlphaDither
- *
- *  GroupB:
- *    gDPSetAlphaCompare, gDPSetDepthSource, gDPSetRenderMode
- *
- *  Use 'OR' operation to get modeA and modeB.
- *
- *  modeA = G_PM_* | G_CYC_* | G_TP_* | G_TD_* | G_TL_* | G_TT_* | G_TF_*
- *    G_TC_* | G_CK_*  | G_CD_* | G_AD_*;
- *
- *  modeB = G_AC_* | G_ZS_*  | G_RM_* | G_RM_*2;
- */
-#define gDPSetOtherMode(pkt, mode0, mode1)                              \
-{                                                                       \
-    Gfx *_g = (Gfx *)(pkt);                                             \
-                                                                        \
-    _g->words.w0 = _SHIFTL(G_RDPSETOTHERMODE,24,8)|_SHIFTL(mode0,0,24); \
-    _g->words.w1 = (uintptr_t)(mode1);                                  \
-}
-
-#define gsDPSetOtherMode(mode0, mode1)                   \
-{                                                        \
-    _SHIFTL(G_RDPSETOTHERMODE,24,8)|_SHIFTL(mode0,0,24), \
-    (uintptr_t)(mode1)                                   \
 }
 
 /*
@@ -2737,26 +2385,6 @@ typedef union {
             ((height)-1) << G_TEXTURE_IMAGE_FRAC)                 \
 }
 
-#define gDPLoadTextureBlockYuv(pkt, timg, fmt, siz, width, height, \
-        pal, cms, cmt, masks, maskt, shifts, shiftt)               \
-{                                                                  \
-    gDPSetTextureImage(pkt, fmt, siz##_LOAD_BLOCK, 1, timg);       \
-    gDPSetTile(pkt, fmt, siz##_LOAD_BLOCK, 0, 0, G_TX_LOADTILE,    \
-            0 , cmt, maskt, shiftt, cms, masks, shifts);           \
-    gDPLoadSync(pkt);                                              \
-    gDPLoadBlock(pkt, G_TX_LOADTILE, 0, 0,                         \
-            (((width)*(height) + siz##_INCR) >> siz##_SHIFT) -1,   \
-            CALC_DXT(width, siz##_BYTES));                         \
-    gDPPipeSync(pkt);                                              \
-    gDPSetTile(pkt, fmt, siz,                                      \
-            (((width) * 1)+7)>>3, 0,                               \
-            G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks,  \
-            shifts);                                               \
-    gDPSetTileSize(pkt, G_TX_RENDERTILE, 0, 0,                     \
-            ((width)-1) << G_TEXTURE_IMAGE_FRAC,                   \
-            ((height)-1) << G_TEXTURE_IMAGE_FRAC)                  \
-}
-
 /* Load fix rww 27jun95 */
 /* The S at the end means odd lines are already word Swapped */
 
@@ -2798,25 +2426,6 @@ typedef union {
             rtile, pal, cmt, maskt, shiftt, cms, masks,             \
             shifts);                                                \
     gDPSetTileSize(pkt, rtile, 0, 0,                                \
-            ((width)-1) << G_TEXTURE_IMAGE_FRAC,                    \
-            ((height)-1) << G_TEXTURE_IMAGE_FRAC)                   \
-}
-
-#define gDPLoadTextureBlockYuvS(pkt, timg, fmt, siz, width, height, \
-        pal, cms, cmt, masks, maskt, shifts, shiftt)                \
-{                                                                   \
-    gDPSetTextureImage(pkt, fmt, siz##_LOAD_BLOCK, 1, timg);        \
-    gDPSetTile(pkt, fmt, siz##_LOAD_BLOCK, 0, 0, G_TX_LOADTILE,     \
-            0 , cmt, maskt, shiftt, cms, masks, shifts);            \
-    gDPLoadSync(pkt);                                               \
-    gDPLoadBlock(pkt, G_TX_LOADTILE, 0, 0,                          \
-            (((width)*(height) + siz##_INCR) >> siz##_SHIFT)-1,0);  \
-    gDPPipeSync(pkt);                                               \
-    gDPSetTile(pkt, fmt, siz,                                       \
-            (((width) * 1)+7)>>3, 0,                                \
-            G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks,   \
-            shifts);                                                \
-    gDPSetTileSize(pkt, G_TX_RENDERTILE, 0, 0,                      \
             ((width)-1) << G_TEXTURE_IMAGE_FRAC,                    \
             ((height)-1) << G_TEXTURE_IMAGE_FRAC)                   \
 }
@@ -2906,27 +2515,6 @@ typedef union {
                                         ((width)-1) << G_TEXTURE_IMAGE_FRAC,            \
                                         ((height)-1) << G_TEXTURE_IMAGE_FRAC)
 
-/* Here is the static form of the pre-swapped texture block loading */
-/* See gDPLoadTextureBlockS() for reference.  Basically, just don't
-   calculate DxT, use 0 */
-
-#define gsDPLoadTextureBlockS(timg, fmt, siz, width, height,                            \
-        pal, cms, cmt, masks, maskt, shifts, shiftt)                                    \
-                                                                                        \
-        gsDPSetTextureImage(fmt, siz##_LOAD_BLOCK, 1, timg),                            \
-        gsDPSetTile(fmt, siz##_LOAD_BLOCK, 0, 0, G_TX_LOADTILE, 0 ,                     \
-                cmt, maskt,shiftt, cms, masks, shifts),                                 \
-                gsDPLoadSync(),                                                         \
-                gsDPLoadBlock(G_TX_LOADTILE, 0, 0,                                      \
-                        (((width)*(height) + siz##_INCR) >> siz##_SHIFT)-1, 0 ),        \
-                        gsDPPipeSync(),                                                 \
-                        gsDPSetTile(fmt, siz, ((((width) * siz##_LINE_BYTES)+7)>>3), 0, \
-                                G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks,   \
-                                shifts),                                                \
-                                gsDPSetTileSize(G_TX_RENDERTILE, 0, 0,                  \
-                                        ((width)-1) << G_TEXTURE_IMAGE_FRAC,            \
-                                        ((height)-1) << G_TEXTURE_IMAGE_FRAC)
-
 /*
  *  Allow tmem address to be specified
  */
@@ -2947,28 +2535,6 @@ typedef union {
                                 shifts),                                              \
                                 gsDPSetTileSize(G_TX_RENDERTILE, 0, 0,                \
                                         ((width)-1) << G_TEXTURE_IMAGE_FRAC,          \
-                                        ((height)-1) << G_TEXTURE_IMAGE_FRAC)
-
-/*
- *  Allow tmem address and render_tile to be specified
- */
-#define _gsDPLoadTextureBlockTile(timg, tmem, rtile, fmt, siz, width,         \
-        height, pal, cms, cmt, masks, maskt, shifts, shiftt)                  \
-                                                                              \
-        gsDPSetTextureImage(fmt, siz##_LOAD_BLOCK, 1, timg),                  \
-        gsDPSetTile(fmt, siz##_LOAD_BLOCK, 0, tmem, G_TX_LOADTILE,            \
-                0 , cmt, maskt, shiftt, cms, masks, shifts),                  \
-                gsDPLoadSync(),                                               \
-                gsDPLoadBlock(G_TX_LOADTILE, 0, 0,                            \
-                        (((width)*(height) + siz##_INCR) >> siz##_SHIFT)-1,   \
-                        CALC_DXT(width, siz##_BYTES)),                        \
-                        gsDPPipeSync(),                                       \
-                        gsDPSetTile(fmt, siz,                                 \
-                                ((((width) * siz##_LINE_BYTES)+7)>>3), tmem,  \
-                                rtile, pal, cmt, maskt, shiftt, cms, masks,   \
-                                shifts),                                      \
-                                gsDPSetTileSize(rtile, 0, 0,                  \
-                                        ((width)-1) << G_TEXTURE_IMAGE_FRAC,  \
                                         ((height)-1) << G_TEXTURE_IMAGE_FRAC)
 
 
@@ -3004,22 +2570,6 @@ typedef union {
  *  calculate DxT, use 0
  */
 
-#define gsDPLoadMultiBlockS(timg, tmem, rtile, fmt, siz, width, height,                    \
-        pal, cms, cmt, masks, maskt, shifts, shiftt)                                       \
-                                                                                           \
-        gsDPSetTextureImage(fmt, siz##_LOAD_BLOCK, 1, timg),                               \
-        gsDPSetTile(fmt, siz##_LOAD_BLOCK, 0, tmem, G_TX_LOADTILE, 0 ,                     \
-                cmt, maskt,shiftt, cms, masks, shifts),                                    \
-                gsDPLoadSync(),                                                            \
-                gsDPLoadBlock(G_TX_LOADTILE, 0, 0,                                         \
-                        (((width)*(height) + siz##_INCR) >> siz##_SHIFT)-1, 0 ),           \
-                        gsDPPipeSync(),                                                    \
-                        gsDPSetTile(fmt, siz, ((((width) * siz##_LINE_BYTES)+7)>>3), tmem, \
-                                rtile, pal, cmt, maskt, shiftt, cms, masks,                \
-                                shifts),                                                   \
-                                gsDPSetTileSize(rtile, 0, 0,                               \
-                                        ((width)-1) << G_TEXTURE_IMAGE_FRAC,               \
-                                        ((height)-1) << G_TEXTURE_IMAGE_FRAC)
 
 
 #define gDPLoadTextureBlock_4b(pkt, timg, fmt, width, height,     \
@@ -3032,27 +2582,6 @@ typedef union {
     gDPLoadBlock(pkt, G_TX_LOADTILE, 0, 0,                        \
             (((width)*(height)+3)>>2)-1,                          \
             CALC_DXT_4b(width));                                  \
-    gDPPipeSync(pkt);                                             \
-    gDPSetTile(pkt, fmt, G_IM_SIZ_4b, ((((width)>>1)+7)>>3), 0,   \
-            G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks, \
-            shifts);                                              \
-    gDPSetTileSize(pkt, G_TX_RENDERTILE, 0, 0,                    \
-            ((width)-1) << G_TEXTURE_IMAGE_FRAC,                  \
-            ((height)-1) << G_TEXTURE_IMAGE_FRAC)                 \
-}
-
-/* Load fix rww 27jun95 */
-/* The S at the end means odd lines are already word Swapped */
-
-#define gDPLoadTextureBlock_4bS(pkt, timg, fmt, width, height,    \
-        pal, cms, cmt, masks, maskt, shifts, shiftt)              \
-{                                                                 \
-    gDPSetTextureImage(pkt, fmt, G_IM_SIZ_16b, 1, timg);          \
-    gDPSetTile(pkt, fmt, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0,    \
-            cmt, maskt, shiftt, cms, masks, shifts);              \
-    gDPLoadSync(pkt);                                             \
-    gDPLoadBlock(pkt, G_TX_LOADTILE, 0, 0,                        \
-            (((width)*(height)+3)>>2)-1, 0 );                     \
     gDPPipeSync(pkt);                                             \
     gDPSetTile(pkt, fmt, G_IM_SIZ_4b, ((((width)>>1)+7)>>3), 0,   \
             G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks, \
@@ -3084,48 +2613,6 @@ typedef union {
             ((height)-1) << G_TEXTURE_IMAGE_FRAC)                        \
 }
 
-/*
- *  4-bit load block.  Allows tmem and render tile to be specified.  Useful when
- *  loading multiple tiles.  The S means odd lines are already word swapped.
- */
-#define gDPLoadMultiBlock_4bS(pkt, timg, tmem, rtile, fmt, width, height, \
-        pal, cms, cmt, masks, maskt, shifts, shiftt)                      \
-{                                                                         \
-    gDPSetTextureImage(pkt, fmt, G_IM_SIZ_16b, 1, timg);                  \
-    gDPSetTile(pkt, fmt, G_IM_SIZ_16b, 0, tmem, G_TX_LOADTILE, 0,         \
-            cmt, maskt, shiftt, cms, masks, shifts);                      \
-    gDPLoadSync(pkt);                                                     \
-    gDPLoadBlock(pkt, G_TX_LOADTILE, 0, 0,                                \
-            (((width)*(height)+3)>>2)-1, 0 );                             \
-    gDPPipeSync(pkt);                                                     \
-    gDPSetTile(pkt, fmt, G_IM_SIZ_4b, ((((width)>>1)+7)>>3), tmem,        \
-            rtile, pal, cmt, maskt, shiftt, cms, masks,                   \
-            shifts);                                                      \
-    gDPSetTileSize(pkt, rtile, 0, 0,                                      \
-            ((width)-1) << G_TEXTURE_IMAGE_FRAC,                          \
-            ((height)-1) << G_TEXTURE_IMAGE_FRAC)                         \
-}
-
-
-#define _gDPLoadTextureBlock_4b(pkt, timg, tmem, fmt, width, height, \
-        pal, cms, cmt, masks, maskt, shifts, shiftt)                 \
-{                                                                    \
-    gDPSetTextureImage(pkt, fmt, G_IM_SIZ_16b, 1, timg);             \
-    gDPSetTile(pkt, fmt, G_IM_SIZ_16b, 0, tmem, G_TX_LOADTILE, 0,    \
-            cmt, maskt, shiftt, cms, masks, shifts);                 \
-    gDPLoadSync(pkt);                                                \
-    gDPLoadBlock(pkt, G_TX_LOADTILE, 0, 0,                           \
-            (((width)*(height)+3)>>2)-1,                             \
-            CALC_DXT_4b(width));                                     \
-    gDPPipeSync(pkt);                                                \
-    gDPSetTile(pkt, fmt, G_IM_SIZ_4b, ((((width)>>1)+7)>>3), tmem,   \
-            G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks,    \
-            shifts);                                                 \
-    gDPSetTileSize(pkt, G_TX_RENDERTILE, 0, 0,                       \
-            ((width)-1) << G_TEXTURE_IMAGE_FRAC,                     \
-            ((height)-1) << G_TEXTURE_IMAGE_FRAC)                    \
-}
-
 #define gsDPLoadTextureBlock_4b(timg, fmt, width, height,                             \
         pal, cms, cmt, masks, maskt, shifts, shiftt)                                  \
                                                                                       \
@@ -3142,22 +2629,6 @@ typedef union {
                                 gsDPSetTileSize(G_TX_RENDERTILE, 0, 0,                \
                                         ((width)-1) << G_TEXTURE_IMAGE_FRAC,          \
                                         ((height)-1) << G_TEXTURE_IMAGE_FRAC)
-
-#define gsDPLoadTextureBlock_4bS(timg, fmt, width, height,                         \
-        pal, cms, cmt, masks, maskt, shifts, shiftt)                               \
-                                                                                   \
-        gsDPSetTextureImage(fmt, G_IM_SIZ_16b, 1, timg),                           \
-        gsDPSetTile(fmt, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0 , cmt,               \
-                maskt, shiftt, cms, masks, shifts),                                \
-                gsDPLoadSync(),                                                    \
-                gsDPLoadBlock(G_TX_LOADTILE, 0, 0, (((width)*(height)+3)>>2)-1,0), \
-                gsDPPipeSync(),                                                    \
-                gsDPSetTile(fmt, G_IM_SIZ_4b, ((((width)>>1)+7)>>3), 0,            \
-                        G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks,      \
-                        shifts),                                                   \
-                        gsDPSetTileSize(G_TX_RENDERTILE, 0, 0,                     \
-                                ((width)-1) << G_TEXTURE_IMAGE_FRAC,               \
-                                ((height)-1) << G_TEXTURE_IMAGE_FRAC)
 
 /*
  *  4-bit load block.  Allows tmem address and render tile to be specified.
@@ -3201,26 +2672,6 @@ typedef union {
                                 ((width)-1) << G_TEXTURE_IMAGE_FRAC,               \
                                 ((height)-1) << G_TEXTURE_IMAGE_FRAC)
 
-
-/*
- *  Allows tmem address to be specified
- */
-#define _gsDPLoadTextureBlock_4b(timg, tmem, fmt, width, height,                      \
-        pal, cms, cmt, masks, maskt, shifts, shiftt)                                  \
-                                                                                      \
-        gsDPSetTextureImage(fmt, G_IM_SIZ_16b, 1, timg),                              \
-        gsDPSetTile(fmt, G_IM_SIZ_16b, 0, tmem, G_TX_LOADTILE, 0 , cmt,               \
-                maskt, shiftt, cms, masks, shifts),                                   \
-                gsDPLoadSync(),                                                       \
-                gsDPLoadBlock(G_TX_LOADTILE, 0, 0, (((width)*(height)+3)>>2)-1,       \
-                        CALC_DXT_4b(width)),                                          \
-                        gsDPPipeSync(),                                               \
-                        gsDPSetTile(fmt, G_IM_SIZ_4b, ((((width)>>1)+7)>>3), tmem,    \
-                                G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks, \
-                                shifts),                                              \
-                                gsDPSetTileSize(G_TX_RENDERTILE, 0, 0,                \
-                                        ((width)-1) << G_TEXTURE_IMAGE_FRAC,          \
-                                        ((height)-1) << G_TEXTURE_IMAGE_FRAC)
 
 #define gDPLoadTextureTile(pkt, timg, fmt, siz, width, height,    \
         uls, ult, lrs, lrt, pal,                                  \
@@ -3306,201 +2757,6 @@ typedef union {
                                         (lrs)<<G_TEXTURE_IMAGE_FRAC,                  \
                                         (lrt)<<G_TEXTURE_IMAGE_FRAC)
 
-/*
- *  Load texture tile.  Allows tmem address and render tile to be specified.
- *  Useful for loading multiple tiles.
- */
-#define gsDPLoadMultiTile(timg, tmem, rtile, fmt, siz, width, height,             \
-        uls, ult, lrs, lrt, pal,                                                  \
-        cms, cmt, masks, maskt, shifts, shiftt)                                   \
-                                                                                  \
-        gsDPSetTextureImage(fmt, siz, width, timg),                               \
-        gsDPSetTile(fmt, siz,                                                     \
-                (((((lrs)-(uls)+1) * siz##_TILE_BYTES)+7)>>3),                    \
-                tmem, G_TX_LOADTILE, 0 , cmt, maskt, shiftt, cms,                 \
-                masks, shifts),                                                   \
-                gsDPLoadSync(),                                                   \
-                gsDPLoadTile(G_TX_LOADTILE,                                       \
-                        (uls)<<G_TEXTURE_IMAGE_FRAC,                              \
-                        (ult)<<G_TEXTURE_IMAGE_FRAC,                              \
-                        (lrs)<<G_TEXTURE_IMAGE_FRAC,                              \
-                        (lrt)<<G_TEXTURE_IMAGE_FRAC),                             \
-                        gsDPPipeSync(),                                           \
-                        gsDPSetTile(fmt, siz,                                     \
-                                (((((lrs)-(uls)+1) * siz##_LINE_BYTES)+7)>>3),    \
-                                tmem, rtile, pal, cmt, maskt, shiftt, cms, masks, \
-                                shifts),                                          \
-                                gsDPSetTileSize(rtile,                            \
-                                        (uls)<<G_TEXTURE_IMAGE_FRAC,              \
-                                        (ult)<<G_TEXTURE_IMAGE_FRAC,              \
-                                        (lrs)<<G_TEXTURE_IMAGE_FRAC,              \
-                                        (lrt)<<G_TEXTURE_IMAGE_FRAC)
-
-#define gDPLoadTextureTile_4b(pkt, timg, fmt, width, height,       \
-        uls, ult, lrs, lrt, pal,                                   \
-        cms, cmt, masks, maskt, shifts, shiftt)                    \
-{                                                                  \
-    gDPSetTextureImage(pkt, fmt, G_IM_SIZ_8b, ((width)>>1), timg); \
-    gDPSetTile(pkt, fmt, G_IM_SIZ_8b,                              \
-            (((((lrs)-(uls)+1)>>1)+7)>>3), 0,                      \
-            G_TX_LOADTILE, 0 , cmt, maskt, shiftt, cms, masks,     \
-            shifts);                                               \
-    gDPLoadSync(pkt);                                              \
-    gDPLoadTile(pkt, G_TX_LOADTILE,                                \
-            (uls)<<(G_TEXTURE_IMAGE_FRAC-1),                       \
-            (ult)<<(G_TEXTURE_IMAGE_FRAC),                         \
-            (lrs)<<(G_TEXTURE_IMAGE_FRAC-1),                       \
-            (lrt)<<(G_TEXTURE_IMAGE_FRAC));                        \
-    gDPPipeSync(pkt);                                              \
-    gDPSetTile(pkt, fmt, G_IM_SIZ_4b,                              \
-            (((((lrs)-(uls)+1)>>1)+7)>>3), 0,                      \
-            G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms,         \
-            masks, shifts);                                        \
-    gDPSetTileSize(pkt, G_TX_RENDERTILE,                           \
-            (uls)<<G_TEXTURE_IMAGE_FRAC,                           \
-            (ult)<<G_TEXTURE_IMAGE_FRAC,                           \
-            (lrs)<<G_TEXTURE_IMAGE_FRAC,                           \
-            (lrt)<<G_TEXTURE_IMAGE_FRAC)                           \
-}
-
-/*
- *  Load texture tile.  Allows tmem address and render tile to be specified.
- *  Useful for loading multiple tiles.
- */
-#define gDPLoadMultiTile_4b(pkt, timg, tmem, rtile, fmt, width, height, \
-        uls, ult, lrs, lrt, pal,                                        \
-        cms, cmt, masks, maskt, shifts, shiftt)                         \
-{                                                                       \
-    gDPSetTextureImage(pkt, fmt, G_IM_SIZ_8b, ((width)>>1), timg);      \
-    gDPSetTile(pkt, fmt, G_IM_SIZ_8b,                                   \
-            (((((lrs)-(uls)+1)>>1)+7)>>3), tmem,                        \
-            G_TX_LOADTILE, 0 , cmt, maskt, shiftt, cms, masks,          \
-            shifts);                                                    \
-    gDPLoadSync(pkt);                                                   \
-    gDPLoadTile(pkt, G_TX_LOADTILE,                                     \
-            (uls)<<(G_TEXTURE_IMAGE_FRAC-1),                            \
-            (ult)<<(G_TEXTURE_IMAGE_FRAC),                              \
-            (lrs)<<(G_TEXTURE_IMAGE_FRAC-1),                            \
-            (lrt)<<(G_TEXTURE_IMAGE_FRAC));                             \
-    gDPPipeSync(pkt);                                                   \
-    gDPSetTile(pkt, fmt, G_IM_SIZ_4b,                                   \
-            (((((lrs)-(uls)+1)>>1)+7)>>3), tmem,                        \
-            rtile, pal, cmt, maskt, shiftt, cms, masks,                 \
-            shifts);                                                    \
-    gDPSetTileSize(pkt, rtile,                                          \
-            (uls)<<G_TEXTURE_IMAGE_FRAC,                                \
-            (ult)<<G_TEXTURE_IMAGE_FRAC,                                \
-            (lrs)<<G_TEXTURE_IMAGE_FRAC,                                \
-            (lrt)<<G_TEXTURE_IMAGE_FRAC)                                \
-}
-
-#define gsDPLoadTextureTile_4b(timg, fmt, width, height,                                \
-        uls, ult, lrs, lrt, pal,                                                        \
-        cms, cmt, masks, maskt, shifts, shiftt)                                         \
-                                                                                        \
-        gsDPSetTextureImage(fmt, G_IM_SIZ_8b, ((width)>>1), timg),                      \
-        gsDPSetTile(fmt, G_IM_SIZ_8b, (((((lrs)-(uls)+1)>>1)+7)>>3), 0,                 \
-                G_TX_LOADTILE, 0 , cmt, maskt, shiftt, cms, masks,                      \
-                shifts),                                                                \
-                gsDPLoadSync(),                                                         \
-                gsDPLoadTile(G_TX_LOADTILE,                                             \
-                        (uls)<<(G_TEXTURE_IMAGE_FRAC-1),                                \
-                        (ult)<<(G_TEXTURE_IMAGE_FRAC),                                  \
-                        (lrs)<<(G_TEXTURE_IMAGE_FRAC-1),                                \
-                        (lrt)<<(G_TEXTURE_IMAGE_FRAC)),                                 \
-                        gsDPPipeSync(),                                                 \
-                        gsDPSetTile(fmt, G_IM_SIZ_4b, (((((lrs)-(uls)+1)>>1)+7)>>3), 0, \
-                                G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks,   \
-                                shifts),                                                \
-                                gsDPSetTileSize(G_TX_RENDERTILE,                        \
-                                        (uls)<<G_TEXTURE_IMAGE_FRAC,                    \
-                                        (ult)<<G_TEXTURE_IMAGE_FRAC,                    \
-                                        (lrs)<<G_TEXTURE_IMAGE_FRAC,                    \
-                                        (lrt)<<G_TEXTURE_IMAGE_FRAC)
-
-/*
- *  Load texture tile.  Allows tmem address and render tile to be specified.
- *  Useful for loading multiple tiles.
- */
-#define gsDPLoadMultiTile_4b(timg, tmem, rtile, fmt, width, height,                  \
-        uls, ult, lrs, lrt, pal,                                                     \
-        cms, cmt, masks, maskt, shifts, shiftt)                                      \
-                                                                                     \
-        gsDPSetTextureImage(fmt, G_IM_SIZ_8b, ((width)>>1), timg),                   \
-        gsDPSetTile(fmt, G_IM_SIZ_8b, (((((lrs)-(uls)+1)>>1)+7)>>3),                 \
-                tmem, G_TX_LOADTILE, 0 , cmt, maskt, shiftt, cms,                    \
-                masks, shifts),                                                      \
-                gsDPLoadSync(),                                                      \
-                gsDPLoadTile(G_TX_LOADTILE,                                          \
-                        (uls)<<(G_TEXTURE_IMAGE_FRAC-1),                             \
-                        (ult)<<(G_TEXTURE_IMAGE_FRAC),                               \
-                        (lrs)<<(G_TEXTURE_IMAGE_FRAC-1),                             \
-                        (lrt)<<(G_TEXTURE_IMAGE_FRAC)),                              \
-                        gsDPPipeSync(),                                              \
-                        gsDPSetTile(fmt, G_IM_SIZ_4b, (((((lrs)-(uls)+1)>>1)+7)>>3), \
-                                tmem, rtile, pal, cmt, maskt, shiftt, cms, masks,    \
-                                shifts),                                             \
-                                gsDPSetTileSize(rtile,                               \
-                                        (uls)<<G_TEXTURE_IMAGE_FRAC,                 \
-                                        (ult)<<G_TEXTURE_IMAGE_FRAC,                 \
-                                        (lrs)<<G_TEXTURE_IMAGE_FRAC,                 \
-                                        (lrt)<<G_TEXTURE_IMAGE_FRAC)
-
-/*
- *  Load a 16-entry palette (for 4-bit CI textures)
- *  Assumes a 16 entry tlut is being loaded, palette # is 0-15
- */
-#define gDPLoadTLUT_pal16(pkt, pal, dram)                          \
-{                                                                  \
-    gDPSetTextureImage(pkt, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, dram); \
-    gDPTileSync(pkt);                                              \
-    gDPSetTile(pkt, 0, 0, 0, (256+(((pal)&0xf)*16)),               \
-            G_TX_LOADTILE, 0 , 0, 0, 0, 0, 0, 0);                  \
-    gDPLoadSync(pkt);                                              \
-    gDPLoadTLUTCmd(pkt, G_TX_LOADTILE, 15);                        \
-    gDPPipeSync(pkt)                                               \
-}
-
-
-/*
- *  Load a 16-entry palette (for 4-bit CI textures)
- *  Assumes a 16 entry tlut is being loaded, palette # is 0-15
- */
-#define gsDPLoadTLUT_pal16(pal, dram)                          \
-                                                               \
-    gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, dram), \
-    gsDPTileSync(),                                            \
-    gsDPSetTile(0, 0, 0, (256+(((pal)&0xf)*16)),               \
-            G_TX_LOADTILE, 0 , 0, 0, 0, 0, 0, 0),              \
-            gsDPLoadSync(),                                    \
-            gsDPLoadTLUTCmd(G_TX_LOADTILE, 15),                \
-            gsDPPipeSync()
-
-/*
- *  Load a 256-entry palette (for 8-bit CI textures)
- *  Assumes a 256 entry tlut is being loaded, palette # is not used
- */
-#define gDPLoadTLUT_pal256(pkt, dram)                              \
-{                                                                  \
-    gDPSetTextureImage(pkt, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, dram); \
-    gDPTileSync(pkt);                                              \
-    gDPSetTile(pkt, 0, 0, 0, 256,                                  \
-            G_TX_LOADTILE, 0 , 0, 0, 0, 0, 0, 0);                  \
-    gDPLoadSync(pkt);                                              \
-    gDPLoadTLUTCmd(pkt, G_TX_LOADTILE, 255);                       \
-    gDPPipeSync(pkt)                                               \
-}
-
-#define gsDPLoadTLUT_pal256(dram)                              \
-                                                               \
-    gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, dram), \
-    gsDPTileSync(),                                            \
-    gsDPSetTile(0, 0, 0, 256,                                  \
-            G_TX_LOADTILE, 0 , 0, 0, 0, 0, 0, 0),              \
-            gsDPLoadSync(),                                    \
-            gsDPLoadTLUTCmd(G_TX_LOADTILE, 255),               \
-            gsDPPipeSync()
-
 #define gDPLoadTLUT(pkt, count, tmemaddr, dram)                    \
 {                                                                  \
     gDPSetTextureImage(pkt, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, dram); \
@@ -3546,26 +2802,6 @@ typedef union {
     _SHIFTL((int)((lry)), 0, 12);                        \
 }
 
-#define gsDPSetScissor(mode, ulx, uly, lrx, lry) \
-{                                                \
-    _SHIFTL(G_SETSCISSOR, 24, 8) |               \
-    _SHIFTL((int)((float)(ulx)*4.0F), 12, 12) |  \
-    _SHIFTL((int)((float)(uly)*4.0F), 0, 12),    \
-    _SHIFTL(mode, 24, 2) |                       \
-    _SHIFTL((int)((float)(lrx)*4.0F), 12, 12) |  \
-    _SHIFTL((int)((float)(lry)*4.0F), 0, 12)     \
-}
-
-#define gsDPSetScissorFrac(mode, ulx, uly, lrx, lry) \
-{                                                    \
-    _SHIFTL(G_SETSCISSOR, 24, 8) |                   \
-    _SHIFTL((int)((ulx)), 12, 12) |                  \
-    _SHIFTL((int)((uly)), 0, 12),                    \
-    _SHIFTL(mode, 24, 2) |                           \
-    _SHIFTL((int)(lrx), 12, 12) |                    \
-    _SHIFTL((int)(lry), 0, 12)                       \
-}
-
 /* Fraction never used in fill */
 #define gDPFillRectangle(pkt, ulx, uly, lrx, lry)                    \
 {                                                                    \
@@ -3593,58 +2829,6 @@ typedef union {
             _SHIFTL(MAX((lry),0), 2, 10));            \
     _g->words.w1 = (_SHIFTL(MAX((ulx),0), 14, 10) |   \
             _SHIFTL(MAX((uly),0), 2, 10));            \
-}
-
-#define gDPSetConvert(pkt, k0, k1, k2, k3, k4, k5)            \
-{                                                             \
-    Gfx *_g = (Gfx *)(pkt);                                   \
-                                                              \
-    _g->words.w0 = (_SHIFTL(G_SETCONVERT, 24, 8) |            \
-            _SHIFTL(k0, 13, 9) | _SHIFTL(k1, 4, 9) |          \
-            _SHIFTR(k2, 5, 4));                               \
-    _g->words.w1 = (_SHIFTL(k2, 27, 5) | _SHIFTL(k3, 18, 9) | \
-            _SHIFTL(k4, 9, 9) | _SHIFTL(k5, 0, 9));           \
-}
-
-#define gsDPSetConvert(k0, k1, k2, k3, k4, k5)                     \
-{                                                                  \
-    (_SHIFTL(G_SETCONVERT, 24, 8) |                                \
-     _SHIFTL(k0, 13, 9) | _SHIFTL(k1, 4, 9) | _SHIFTL(k2, 5, 4)),  \
-    (_SHIFTL(k2, 27, 5) | _SHIFTL(k3, 18, 9) | _SHIFTL(k4, 9, 9) | \
-     _SHIFTL(k5, 0, 9))                                            \
-}
-
-#define gDPSetKeyR(pkt, cR, sR, wR)                           \
-{                                                             \
-    Gfx *_g = (Gfx *)(pkt);                                   \
-                                                              \
-    _g->words.w0 = _SHIFTL(G_SETKEYR, 24, 8);                 \
-    _g->words.w1 = (_SHIFTL(wR, 16, 12) | _SHIFTL(cR, 8, 8) | \
-            _SHIFTL(sR, 0, 8));                               \
-}
-
-#define gsDPSetKeyR(cR, sR, wR)                                 \
-{                                                               \
-    _SHIFTL(G_SETKEYR, 24, 8),                                  \
-    _SHIFTL(wR, 16, 12) | _SHIFTL(cR, 8, 8) | _SHIFTL(sR, 0, 8) \
-}
-
-#define gDPSetKeyGB(pkt, cG, sG, wG, cB, sB, wB)              \
-{                                                             \
-    Gfx *_g = (Gfx *)(pkt);                                   \
-                                                              \
-    _g->words.w0 = (_SHIFTL(G_SETKEYGB, 24, 8) |              \
-            _SHIFTL(wG, 12, 12) | _SHIFTL(wB, 0, 12));        \
-    _g->words.w1 = (_SHIFTL(cG, 24, 8) | _SHIFTL(sG, 16, 8) | \
-            _SHIFTL(cB, 8, 8) | _SHIFTL(sB, 0, 8));           \
-}
-
-#define gsDPSetKeyGB(cG, sG, wG, cB, sB, wB)                       \
-{                                                                  \
-    (_SHIFTL(G_SETKEYGB, 24, 8) | _SHIFTL(wG, 12, 12) |            \
-     _SHIFTL(wB, 0, 12)),                                          \
-    (_SHIFTL(cG, 24, 8) | _SHIFTL(sG, 16, 8) | _SHIFTL(cB, 8, 8) | \
-     _SHIFTL(sB, 0, 8))                                            \
 }
 
 #define gDPNoParam(pkt, cmd)            \
@@ -3713,19 +2897,6 @@ typedef union {
     _SHIFTL(dsdx, 16, 16) | _SHIFTL(dtdy, 0, 16)                         \
 }
 
-#define gDPTextureRectangleFlip(pkt, xl, yl, xh, yh, tile, s, t, dsdx, dtdy) \
-{                                                                            \
-    Gfx *_g = (Gfx *)(pkt);                                                  \
-    if (pkt);                                                                \
-    _g->words.w0 = (_SHIFTL(G_TEXRECTFLIP, 24, 8) | _SHIFTL(xh, 12, 12) |    \
-            _SHIFTL(yh, 0, 12));                                             \
-    _g->words.w1 = (_SHIFTL(tile, 24, 3) | _SHIFTL(xl, 12, 12) |             \
-            _SHIFTL(yl, 0, 12));                                             \
-    _g ++;                                                                   \
-    _g->words.w0 = (_SHIFTL(s, 16, 16) | _SHIFTL(t, 0, 16));                 \
-    _g->words.w1 = (_SHIFTL(dsdx, 16, 16) | _SHIFTL(dtdy, 0, 16));           \
-}
-
 #define gsSPTextureRectangle(xl, yl, xh, yh, tile, s, t, dsdx, dtdy)        \
     (_SHIFTL(G_TEXRECT, 24, 8) | _SHIFTL(xh, 12, 12) | _SHIFTL(yh, 0, 12)), \
     (_SHIFTL(tile, 24, 3) | _SHIFTL(xl, 12, 12) | _SHIFTL(yl, 0, 12)),      \
@@ -3772,13 +2943,6 @@ typedef union {
                 _SHIFTL((dtdy), 0, 16)));                                       \
 }
 
-#define gsSPTextureRectangleFlip(xl, yl, xh, yh, tile, s, t, dsdx, dtdy)  \
-    (_SHIFTL(G_TEXRECTFLIP, 24, 8) | _SHIFTL(xh, 12, 12) |                \
-     _SHIFTL(yh, 0, 12)),                                                 \
-     (_SHIFTL(tile, 24, 3) | _SHIFTL(xl, 12, 12) | _SHIFTL(yl, 0, 12)),   \
-     gsImmp1(G_RDPHALF_1, (_SHIFTL(s, 16, 16) | _SHIFTL(t, 0, 16))),      \
-     gsImmp1(G_RDPHALF_2, (_SHIFTL(dsdx, 16, 16) | _SHIFTL(dtdy, 0, 16)))
-
 #define gSPTextureRectangleFlip(pkt, xl, yl, xh, yh, tile, s, t, dsdx, dtdy)  \
 {                                                                             \
     Gfx *_g = (Gfx *)(pkt);                                                   \
@@ -3791,31 +2955,12 @@ typedef union {
     gImmp1(pkt, G_RDPHALF_2, (_SHIFTL(dsdx, 16, 16) | _SHIFTL(dtdy, 0, 16))); \
 }
 
-#define gsDPWord(wordhi, wordlo)                  \
-    gsImmp1(G_RDPHALF_1, (unsigned int)(wordhi)), \
-    gsImmp1(G_RDPHALF_2, (unsigned int)(wordlo))
-
-#define gDPWord(pkt, wordhi, wordlo)                  \
-{                                                     \
-    Gfx *_g = (Gfx *)(pkt);                           \
-                                                      \
-    gImmp1(pkt, G_RDPHALF_1, (unsigned int)(wordhi)); \
-    gImmp1(pkt, G_RDPHALF_2, (unsigned int)(wordlo)); \
-}
-
 #define gDPFullSync(pkt)     gDPNoParam(pkt, G_RDPFULLSYNC)
-#define gsDPFullSync()       gsDPNoParam(G_RDPFULLSYNC)
 #define gDPTileSync(pkt)     gDPNoParam(pkt, G_RDPTILESYNC)
 #define gsDPTileSync()       gsDPNoParam(G_RDPTILESYNC)
 #define gDPPipeSync(pkt)     gDPNoParam(pkt, G_RDPPIPESYNC)
 #define gsDPPipeSync()       gsDPNoParam(G_RDPPIPESYNC)
 #define gDPLoadSync(pkt)     gDPNoParam(pkt, G_RDPLOADSYNC)
 #define gsDPLoadSync()       gsDPNoParam(G_RDPLOADSYNC)
-#define gDPNoOp(pkt)         gDPNoParam(pkt, G_NOOP)
-#define gsDPNoOp()           gsDPNoParam(G_NOOP)
-#define gDPNoOpTag(pkt, tag) gDPParam(pkt, G_NOOP, tag)
-#define gsDPNoOpTag(tag)     gsDPParam(G_NOOP, tag)
-
-#endif /* _LANGUAGE_C */
 
 #endif /* _GBI_H_ */

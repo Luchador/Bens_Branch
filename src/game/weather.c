@@ -215,7 +215,7 @@ Gfx *weatherRender(Gfx *gdl)
 	weather = g_WeatherData;
 
 	gSPDisplayList(gdl++, &var800613a0);
-	gSPDisplayList(gdl++, &var80061380);
+	//gSPDisplayList(gdl++, &var80061380);
 
 	if (weather->type == WEATHERTYPE_SNOW) {
 		texSelect(&gdl, &g_TexGeneralConfigs[1], 2, 1, 2, 1, NULL);
@@ -1180,7 +1180,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 				sp108.f[1] = particle2->pos.f[1] + particledata->unk3e80.f[1];
 				sp108.f[2] = particle2->pos.f[2] + particledata->unk3e80.f[2];
 
-				if (cam0f0b5b9c(&sp108, 150)) {
+				if (camIsPointInFrustum(&sp108, 150)) {
 					timings1[7] = timings1[7] + osGetCount() - timings2[7];
 
 					sp218[0] = particle2->pos.f[0];
@@ -1671,7 +1671,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 			sp124.f[1] = particle->pos.f[1] + particledata->unk3e80.f[1];
 			sp124.f[2] = particle->pos.f[2] + particledata->unk3e80.f[2];
 
-			if (cam0f0b5b9c(&sp124, 5)) {
+			if (camIsPointInFrustum(&sp124, 5)) {
 				sp137c[0] = sp137c[0] + osGetCount() - sp1354[0];
 
 				sp21c = particle->pos.f[0];

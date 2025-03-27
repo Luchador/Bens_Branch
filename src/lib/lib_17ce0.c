@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/padhalllv.h"
 #include "bss.h"
@@ -12,11 +13,11 @@ u8 var8005ef20 = 254;
 
 u8 var8009a4e0[456][2];
 
-void portalGetAvgVertexPos(s32 portalnum, struct coord *avg)
+void portalGetAvgVertexPos(int portalnum, struct coord *avg)
 {
 	struct portalvertices *pvertices = (struct portalvertices *)((uintptr_t)g_BgPortals + g_BgPortals[portalnum].verticesoffset);
-	f32 f0;
-	s32 i;
+	float f0;
+	int i;
 
 	avg->x = pvertices->vertices[0].x;
 	avg->y = pvertices->vertices[0].y;
@@ -42,9 +43,9 @@ void portalGetAvgVertexPos(s32 portalnum, struct coord *avg)
  * The list is assumed to have 16 slots, with the last being reserved for the
  * -1 terminator.
  */
-void portal00017dc4(RoomNum *rooms, RoomNum roomnum)
+void portalAppendRoom(RoomNum *rooms, RoomNum roomnum)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < 16 && rooms[i] != -1; i++) {
 		if (rooms[i] == roomnum) {
@@ -69,20 +70,20 @@ void portal00017dc4(RoomNum *rooms, RoomNum roomnum)
  *
  * The portal's normal vector is the front.
  */
-s32 portalCalculateIntersection(s32 portalnum, struct coord *pos1, struct coord *pos2)
+int portalCalculateIntersection(int portalnum, struct coord *pos1, struct coord *pos2)
 {
-	s32 i;
+	int i;
 	struct coord sp60;
 	struct portalvertices *pvertices;
 	struct coord *curr;
 	struct coord *next;
 	struct coord sp48;
-	u8 lastside;
-	f32 sp40[1];
+	int8_t lastside;
+	float sp40[1];
 	struct coord sp34;
-	f32 value1;
-	f32 value2;
-	f32 tmp;
+	float value1;
+	float value2;
+	float tmp;
 
 	lastside = 0;
 	pvertices = (struct portalvertices *)((uintptr_t)g_BgPortals + g_BgPortals[portalnum].verticesoffset);
@@ -151,13 +152,13 @@ s32 portalCalculateIntersection(s32 portalnum, struct coord *pos1, struct coord 
 		: PORTALINTERSECTION_FRONTTOBEHIND;
 }
 
-void portal00018148(struct coord *pos1, struct coord *pos2, RoomNum *rooms1, RoomNum *rooms2, RoomNum *rooms3, s32 arg5)
+void portalComputeReachableRooms(struct coord *pos1, struct coord *pos2, RoomNum *rooms1, RoomNum *rooms2, RoomNum *allVisitedRooms, int maxVisited)
 {
-	s32 i;
-	s32 j;
-	s32 roomnum;
-	s32 numportals;
-	s16 *portalnums;
+	int i;
+	int j;
+	int roomnum;
+	int numportals;
+	int16_t *portalnums;
 	RoomNum rooms9c[16];
 	RoomNum rooms7c[16];
 	RoomNum rooms5c[16];
@@ -189,8 +190,8 @@ void portal00018148(struct coord *pos1, struct coord *pos2, RoomNum *rooms1, Roo
 			portalnums = &g_RoomPortals[g_Rooms[roomnum].roomportallistoffset];
 
 			for (i = 0; i < numportals; i++) {
-				s32 portalnum = *portalnums;
-				u8 *s1 = var8009a4e0[portalnum];
+				int portalnum = *portalnums;
+				int8_t *s1 = var8009a4e0[portalnum];
 
 				if (s1[0] != var8005ef20) {
 					s1[0] = var8005ef20;
@@ -200,16 +201,16 @@ void portal00018148(struct coord *pos1, struct coord *pos2, RoomNum *rooms1, Roo
 				if (s1[1] != PORTALINTERSECTION_NONE) {
 					if (s1[1] == PORTALINTERSECTION_BEHINDTOFRONT) {
 						if (roomnum == g_BgPortals[portalnum].roomnum1) {
-							portal00017dc4(rooms7c, g_BgPortals[portalnum].roomnum2);
-							portal00017dc4(rooms5c, g_BgPortals[portalnum].roomnum2);
+							portalAppendRoom(rooms7c, g_BgPortals[portalnum].roomnum2);
+							portalAppendRoom(rooms5c, g_BgPortals[portalnum].roomnum2);
 							s1[1] = PORTALINTERSECTION_NONE;
 						}
 					}
 
 					if (s1[1] == PORTALINTERSECTION_FRONTTOBEHIND) {
 						if (roomnum == g_BgPortals[portalnum].roomnum2) {
-							portal00017dc4(rooms7c, g_BgPortals[portalnum].roomnum1);
-							portal00017dc4(rooms5c, g_BgPortals[portalnum].roomnum1);
+							portalAppendRoom(rooms7c, g_BgPortals[portalnum].roomnum1);
+							portalAppendRoom(rooms5c, g_BgPortals[portalnum].roomnum1);
 							s1[1] = PORTALINTERSECTION_NONE;
 						}
 					}
@@ -238,15 +239,15 @@ void portal00018148(struct coord *pos1, struct coord *pos2, RoomNum *rooms1, Roo
 
 	rooms2[i] = -1;
 
-	if (rooms3 != NULL) {
-		for (i = 0; i < arg5; i++) {
-			rooms3[i] = rooms5c[i];
+	if (allVisitedRooms != NULL) {
+		for (i = 0; i < maxVisited; i++) {
+			allVisitedRooms[i] = rooms5c[i];
 
 			if (rooms5c[i] == -1) {
 				break;
 			}
 		}
 
-		rooms3[i] = -1;
+		allVisitedRooms[i] = -1;
 	}
 }

@@ -54,14 +54,6 @@ struct rdptask g_RdpTaskB = {
 
 struct rdptask *g_RdpCurTask = &g_RdpTaskA;
 
-void rdpInit(void)
-{
-	//s32 size = 0x10000;
-
-	//g_RdpOutBufferStart = mempAlloc(size, MEMPOOL_PERMANENT);
-	//g_RdpOutBufferEnd = (u16 *) ((uintptr_t) g_RdpOutBufferStart + size);
-}
-
 void rdpCreateTask(Gfx *gdlstart, Gfx *gdlend, u32 arg2)
 {
 	OSScTask *sctask;
@@ -84,7 +76,7 @@ void rdpCreateTask(Gfx *gdlstart, Gfx *gdlend, u32 arg2)
 	//sctask->framebuffer = g_RdpCurTask->framebuffer;
 
 	// Used on PC port
-	schedSubmitTask(&g_Sched, sctask);
+	schedSubmitTask(sctask);
 
 	// Swap g_RdpCurTask
 	g_RdpCurTask = (struct rdptask *)((uintptr_t) g_RdpCurTask ^ (uintptr_t) &g_RdpTaskA ^ (uintptr_t) &g_RdpTaskB);

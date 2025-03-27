@@ -11,7 +11,7 @@ void sndpSetAddRefCallback(void *fn);
 struct sndstate *func00033390(s32 arg0, ALSound *sound);
 void sndpSetRemoveRefCallback(void *fn);
 s32 sndGetState(struct sndstate *handle);
-struct sndstate *func00033820(s32 arg0, s16 soundnum, u16 vol, ALPan pan, f32 pitch, u8 fxmix, u8 fxbus, struct sndstate **handleptr);
+struct sndstate *audioStartSoundEffect(s32 arg0, s16 soundnum, u16 vol, ALPan pan, f32 pitch, u8 fxmix, u8 fxbus, struct sndstate **handleptr);
 void audioStop(struct sndstate *handle);
 void func00033bc0(struct sndstate *handle);
 void func00033db0(void);

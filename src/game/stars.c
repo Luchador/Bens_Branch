@@ -5,6 +5,7 @@
 #include "game/stars.h"
 #include "game/textutils.h"
 #include "game/camera.h"
+#include "video.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/memp.h"
@@ -220,7 +221,7 @@ Gfx *starsRender(Gfx *gdl)
 
 	colours[i] = colourBlend(colours[i], colours[i] & 0xff, 0x5f);
 
-	sp154 = cosf(0.017453199252486f * (90.0f - viGetFovY() / viGetAspect() * 0.5f));
+	sp154 = cosf(0.017453199252486f * (90.0f - viGetFovY() / videoGetAspect() * 0.5f));
 
 	mtx4LoadIdentity(&mtx);
 	mtx00015be0(camGetWorldToScreenMtxf(), &mtx);

@@ -643,8 +643,8 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 		hitpos.z = shotdata.gunpos3d.z + shotdata.gundir3d.z * 65536;
 	}
 
-	portal00018148(&playerprop->pos, &shotdata.gunpos3d, playerprop->rooms, spc8, 0, 0);
-	portal00018148(&shotdata.gunpos3d, &hitpos, spc8, spb8, rooms, 30);
+	portalComputeReachableRooms(&playerprop->pos, &shotdata.gunpos3d, playerprop->rooms, spc8, 0, 0);
+	portalComputeReachableRooms(&shotdata.gunpos3d, &hitpos, spc8, spb8, rooms, 30);
 
 	if (shotdata.gset.weaponnum != WEAPON_FARSIGHT || g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
 		roomsptr = rooms;
@@ -1000,7 +1000,7 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 	rooms[0] = rooms[130] = -1;
 	spc8[0] = g_Vars.currentplayer->cam_room;
 	spc8[1] = -1;
-	portal00018148(&shotdata.gunpos3d, endpos3d, spc8, spb8, rooms, 30);
+	portalComputeReachableRooms(&shotdata.gunpos3d, endpos3d, spc8, spb8, rooms, 30);
 
 	roomsptr = rooms;
 
@@ -3175,7 +3175,7 @@ void func0f065d1c(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomN
 	s32 index;
 	s32 i;
 
-	portal00018148(pos, newpos, rooms, stackrooms, morerooms, arg5);
+	portalComputeReachableRooms(pos, newpos, rooms, stackrooms, morerooms, arg5);
 
 	index = 0;
 

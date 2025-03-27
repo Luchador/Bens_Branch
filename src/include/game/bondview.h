@@ -25,6 +25,5 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl);
 Gfx *bviewDrawIrBinoculars(Gfx *gdl);
 void bviewSetMotionBlur(u32 bluramount);
 void bviewClearMotionBlur(void);
-Gfx *bviewDrawNvBinoculars(Gfx *gdl);
 
 #endif

@@ -1772,7 +1772,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 		// Types 2 and 3 are unused. Type 4 is the credits scrolling logo.
 		if (modeltype < MENUMODELTYPE_3 && g_MenuData.usezbuf) {
 			gdl = viPrepareZbuf(gdl);
-			gdl = vi0000b1d0(gdl);
+			gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
 
 			g_MenuData.usezbuf = false;
 
@@ -1783,7 +1783,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 			gSPSetGeometryMode(gdl++, G_ZBUFFER);
 		}
 
-		gSPDisplayList(gdl++, var80061380);
+		//gSPDisplayList(gdl++, var80061380);
 		gSPDisplayList(gdl++, var800613a0);
 
 		haszoom = false;

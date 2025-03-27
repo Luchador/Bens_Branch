@@ -104,11 +104,7 @@ typedef struct ALLink_s {
 void    alUnlink(ALLink *element);
 void    alLink(ALLink *element, ALLink *after);
 
-#ifdef PLATFORM_N64
-typedef s32 (*ALDMAproc)(s32 addr, s32 len, void *state);
-#else
 typedef uintptr_t (*ALDMAproc)(uintptr_t addr, s32 len, void *state);
-#endif
 typedef ALDMAproc (*ALDMANew)(void *state);
 
 void    alCopy(void *src, void *dest, s32 len);
@@ -128,11 +124,7 @@ void    alHeapInit(ALHeap *hp, u8 *base, s32 len);
 void    *alHeapDBAlloc(u8 *file, s32 line, ALHeap *hp, s32 num, s32 size);
 s32     alHeapCheck(ALHeap *hp);
 
-#ifdef _DEBUG
-#define alHeapAlloc(hp, elem ,size) alHeapDBAlloc((u8 *) __FILE__,__LINE__,(hp),(elem),(size))
-#else
 #define alHeapAlloc(hp, elem ,size) alHeapDBAlloc(0, 0,(hp),(elem),(size))
-#endif
 
 /***********************************************************************
  * FX Stuff

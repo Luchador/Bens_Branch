@@ -41,7 +41,7 @@ Note: These changes often require alterations to the game's original files. You 
 * Villa: Brightened the dock clipping tiles, which were oddly dark
 * Villa: Fixed the broken texture underneath the stove hood
 * Villa: Replaced a few doors with glass doors
-* Villa: Made some vertex coloring tweaks to the bedroom and bathroom
+* Villa: Fixed some geometry seams
 * Air Base: Animated water at the bottom of the chasm
 * Mr. Blonde's Revenge: Added stars to the sky (the lack of stars was probably just an oversight by the original developers)
 * Mr. Blonde's Revenge: Added hovercars (again, probably an oversight by the developers)

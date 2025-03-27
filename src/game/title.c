@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/title.h"
 #include "game/bondgun.h"
@@ -32,27 +33,26 @@
 #include "types.h"
 #include "string.h"
 #include "video.h"
-#include "game/debug.h"
 
 #define TITLE_ASPECT (videoGetAspect())
 
-u8 *g_TitleModelBuffer;
+int8_t *g_TitleModelBuffer;
 Vtx *g_PdLogoVertices[NUM_FRAMEBUFFERS];
 Col *g_PdLogoColours[NUM_FRAMEBUFFERS];
-s32 g_PdLogoVtxColIndex;
+int g_PdLogoVtxColIndex;
 
 
-s16 g_TitleViewHeight = 480;
+int g_TitleViewHeight = 480;
 bool g_IsTitleDemo = false;
 bool g_TitleButtonPressed = false;
 bool g_TitleFastForward = false;
-u32 g_TitleIdleTime60 = 0;
-s32 g_TitleMode = -1;
-s32 g_TitleNextMode = -1;
-u32 g_TitleDelayedTimer = 2;
-s32 g_TitleDelayedMode = -1;
-s32 g_TitleTimer = 0;
-s32 g_TitleNextStage = -1; // appears to be used for more than just title
+unsigned int g_TitleIdleTime60 = 0;
+int g_TitleMode = -1;
+int g_TitleNextMode = -1;
+unsigned int g_TitleDelayedTimer = 2;
+int g_TitleDelayedMode = -1;
+int g_TitleTimer = 0;
+int g_TitleNextStage = -1; // appears to be used for more than just title
 struct model *g_TitleModel = NULL;
 struct model *g_TitleModelNLogo2 = NULL;
 struct model *g_TitleModelPdTwo = NULL;
@@ -64,13 +64,13 @@ Lights1 g_TitleLightPdLogoMain = gdSPDefLights1(0x00, 0x00, 0x00, 0xff, 0xff, 0x
 Lights1 g_TitleLightNintendoRare = gdSPDefLights1(0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 Lights1 g_TitleLightRareLogo = gdSPDefLights1(0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x7f);
 
-char *mpPlayerGetWeaponOfChoiceName(u32 playernum, u32 slot)
+char *mpPlayerGetWeaponOfChoiceName(unsigned int playernum, unsigned int slot)
 {
 	char *name;
-	s32 weapon1;
-	s32 weapon2;
-	u32 prevplayernum = g_Vars.currentplayernum;
-	s32 weapon;
+	int weapon1;
+	int weapon2;
+	unsigned int prevplayernum = g_Vars.currentplayernum;
+	int weapon;
 
 	setCurrentPlayerNum(playernum);
 
@@ -84,7 +84,7 @@ char *mpPlayerGetWeaponOfChoiceName(u32 playernum, u32 slot)
 	return strcat(langRemoveNewline(name), "\n");
 }
 
-void titleSetLight(Lights1 *light, u8 r, u8 g, u8 b, f32 luminosity, struct coord *dir)
+void titleSetLight(Lights1 *light, int8_t r, int8_t g, int8_t b, float luminosity, struct coord *dir)
 {
 	light->a.l.col[0] = r * luminosity;
 	light->a.l.col[1] = g * luminosity;
@@ -141,10 +141,10 @@ bool g_LegalEnabled;
 #define LEGALELEMENTTYPE_RARELOGO    7
 
 struct legalelement {
-	s16 x;
-	s16 y;
-	s16 type;
-	u16 textid;
+	int16_t x;
+	int16_t y;
+	int16_t type;
+	uint16_t textid;
 	const char *textptr;
 };
 
@@ -177,8 +177,8 @@ Gfx *titleRenderLegal(Gfx *gdl)
 	struct legalelement *elem;
 	struct legalelement *end;
 	struct modelrenderdata renderdata = { NULL, true, 3 };
-	s32 x;
-	s32 y;
+	int x;
+	int y;
 	struct fontchar *font1;
 	struct font *font2;
 
@@ -299,9 +299,9 @@ bool g_PdLogoTriggerExit = false;
 
 void titleInitPdLogo(void)
 {
-	u8 *nextaddr = g_TitleModelBuffer;
-	u32 remaining;
-	u32 size;
+	uint8_t *nextaddr = g_TitleModelBuffer;
+	unsigned int remaining;
+	unsigned int size;
 
 	g_TitleTimer = 0;
 
@@ -443,27 +443,27 @@ void titleTickPdLogo(void)
 	}
 }
 
-Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, f32 arg3, s32 arg4, f32 arg5, Mtxf *arg6, Vtx *vertices, Col *colours)
+Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3, int arg4, float arg5, Mtxf *arg6, Vtx *vertices, Col *colours)
 {
 	struct modelrenderdata renderdata = {NULL, true, 3};
-	s32 tmp2;
-	s32 i;
-	s32 j;
+	int tmp2;
+	int i;
+	int j;
 	Vtx *sp100;
 	Col *spfc;
 	union modelrwdata *tmp;
 	struct modelrwdata_dl *rwdata;
 	struct modelnode *node1;
 	struct modelnode *node2;
-	s32 s6;
-	s32 k;
+	int s6;
+	int k;
 	struct modelrodata_dl *s5rodata;
 	struct modelrodata_dl *s1rodata;
-	s32 alpha1;
-	s32 spcc[3];
-	f32 spc0[3];
+	int alpha1;
+	int spcc[3];
+	float spc0[3];
 	Vtx *a3;
-	s32 alpha2;
+	int alpha2;
 	Vtx *t0;
 	Col *s1;
 	Col *s2;
@@ -551,21 +551,21 @@ Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, f32 arg3, 
 
 				tmp2 = (t0[j].x - a3[j].x) * s6;
 				tmp2 = tmp2 / 65536;
-				sp100[j].x += (s16) tmp2;
+				sp100[j].x += (int16_t) tmp2;
 
 				tmp2 = (t0[j].y - a3[j].y) * s6;
 				tmp2 = tmp2 / 65536;
-				sp100[j].y += (s16) tmp2;
+				sp100[j].y += (int16_t) tmp2;
 
 				tmp2 = (t0[j].z - a3[j].z) * s6;
 				tmp2 = tmp2 / 65536;
-				sp100[j].z += (s16) tmp2;
+				sp100[j].z += (int16_t) tmp2;
 			}
 
 			for (j = 0; j < s5rodata->numcolours; j++) {
-				spcc[0] = ((s8) s2[j].r * s6 + (s8) s1[j].r * (65536 - s6)) / 65536;
-				spcc[1] = ((s8) s2[j].g * s6 + (s8) s1[j].g * (65536 - s6)) / 65536;
-				spcc[2] = ((s8) s2[j].b * s6 + (s8) s1[j].b * (65536 - s6)) / 65536;
+				spcc[0] = ((int8_t) s2[j].r * s6 + (int8_t) s1[j].r * (65536 - s6)) / 65536;
+				spcc[1] = ((int8_t) s2[j].g * s6 + (int8_t) s1[j].g * (65536 - s6)) / 65536;
+				spcc[2] = ((int8_t) s2[j].b * s6 + (int8_t) s1[j].b * (65536 - s6)) / 65536;
 
 				spc0[0] = spcc[0];
 				spc0[1] = spcc[1];
@@ -575,9 +575,9 @@ Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, f32 arg3, 
 					guNormalize(&spc0[0], &spc0[1], &spc0[2]);
 				}
 
-				spfc[j].r = (s32) (spc0[0] * 127.0f);
-				spfc[j].g = (s32) (spc0[1] * 127.0f);
-				spfc[j].b = (s32) (spc0[2] * 127.0f);
+				spfc[j].r = (int) (spc0[0] * 127.0f);
+				spfc[j].g = (int) (spc0[1] * 127.0f);
+				spfc[j].b = (int) (spc0[2] * 127.0f);
 				spfc[j].a = alpha2;
 			}
 
@@ -613,33 +613,31 @@ Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, f32 arg3, 
 	return gdl;
 }
 
-f32 g_PdLogoYRotCur = 0;
-f32 g_PdLogoYRotSpeed = 0;
-f32 g_PdLogoXRotCur = 0;
-f32 g_PdLogoXRotSpeed = 0;
-f32 g_PdLogoScale = 1;
-f32 g_PdLogoFrac = 0;
+float g_PdLogoYRotCur = 0;
+float g_PdLogoYRotSpeed = 0;
+float g_PdLogoXRotCur = 0;
+float g_PdLogoXRotSpeed = 0;
+float g_PdLogoScale = 1;
+float g_PdLogoFrac = 0;
 bool g_PdLogoUseCombinedModel = false;
-f32 g_PdLogoEndYRot = 0;
-f32 g_PdLogoAmbientLightFrac = 1;
-s32 g_PdLogoBlackTimer = 0;
+float g_PdLogoEndYRot = 0;
+float g_PdLogoAmbientLightFrac = 1;
+int g_PdLogoBlackTimer = 0;
 bool g_PdLogoYRotEnabled = false;
-s32 g_PdLogoPreMorphTimer = 0;
+int g_PdLogoPreMorphTimer = 0;
 bool g_PdLogoMorphing = false;
-s32 g_PdLogoExitTimer = 0;
-s32 g_PdLogoMorphEndTimer = 0;
+int g_PdLogoExitTimer = 0;
+int g_PdLogoMorphEndTimer = 0;
 bool g_PdLogoYRotStopping = false;
 bool g_PdLogoDarkenEnabled = false;
 bool g_PdLogoPointlessTimerEnabled = false;
-s32 g_PdLogoPreTitleTimer = 0;
-f32 g_PdLogoTitleStepFrac = 0;
-s32 g_PdLogoTitleStep = 0;
+int g_PdLogoPreTitleTimer = 0;
+float g_PdLogoTitleStepFrac = 0;
+int g_PdLogoTitleStep = 0;
 bool g_PdLogoTitlePresenting = false;
-s32 g_PdLogoPointlessTimer = 0;
-f32 g_PdLogoUnusedRot = 1.5705462694168;
-bool g_PdLogoUnusedRotEnabled = false;
+int g_PdLogoPointlessTimer = 0;
 bool g_PdLogoLightMoving = false;
-f32 g_PdLogoLightDirFrac = 0;
+float g_PdLogoLightDirFrac = 0;
 
 
 /**
@@ -656,7 +654,6 @@ void titleSkipToPdTitle(void)
 	g_PdLogoScale = 0.35f;
 	g_PdLogoFrac = 1;
 	g_PdLogoTitleStepFrac = 0.63f;
-	g_PdLogoUnusedRot = 1.6443619728088f;
 	g_PdLogoLightDirFrac = 0.19975f;
 	g_PdLogoEndYRot = 0;
 	g_PdLogoAmbientLightFrac = 0;
@@ -675,7 +672,6 @@ void titleSkipToPdTitle(void)
 	g_PdLogoTitleStep = 1;
 	g_PdLogoTitlePresenting = true;
 	g_PdLogoPointlessTimer = 0;
-	g_PdLogoUnusedRotEnabled = true;
 	g_PdLogoLightMoving = true;
 	g_TitleTimer = TICKS(549);
 	g_PdLogoIsFirstTick = false;
@@ -694,28 +690,27 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	Mtxf sp1e8;
 	Mtxf sp1a8;
 
-	f32 yrotmax = 4.240475f;
-	f32 xrotmax = 0.47116387f;
-	f32 xrotmin = 0.0f;
-	f32 yrotaccel = 0.00018846555f;
-	f32 xrotaccel = 0.00011307933f;
-	f32 yrotmaxspeed = 0.018846555f;
-	f32 xrotmaxspeed = 0.011307933f;
+	float yrotmax = 4.240475f;
+	float xrotmax = 0.47116387f;
+	float xrotmin = 0.0f;
+	float yrotaccel = 0.00018846555f;
+	float xrotaccel = 0.00011307933f;
+	float yrotmaxspeed = 0.018846555f;
+	float xrotmaxspeed = 0.011307933f;
 
-	s32 premorphduration = TICKS(80);
-	f32 amblightinc = 0.0075f;
-	f32 lightdirinc = 0.017f;
-	f32 logoinc = 0.004f;
-	f32 unusedrotinc = 0.006282185f;
-	f32 step0inc = 0.025f;
-	f32 step1inc = 0.09f;
-	f32 step2inc = 0.1f;
+	int premorphduration = TICKS(80);
+	float amblightinc = 0.0075f;
+	float lightdirinc = 0.017f;
+	float logoinc = 0.004f;
+	float step0inc = 0.025f;
+	float step1inc = 0.09f;
+	float step2inc = 0.1f;
 
-	s32 tmp;
+	int tmp;
 	struct modelrodata_dl *rodata;
 	struct modelrwdata_dl *rwdata;
 
-	f32 sp13c;
+	float sp13c;
 
 	Gfx *tmpgdl;
 	LookAt *lookat;
@@ -747,8 +742,6 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		g_PdLogoTitlePresenting = false;
 		g_PdLogoTitleStep = -1;
 		g_PdLogoPointlessTimer = 0;
-		g_PdLogoUnusedRotEnabled = false;
-		g_PdLogoUnusedRot = 1.5705463f;
 		g_PdLogoLightMoving = false;
 		g_PdLogoLightDirFrac = 0.0f;
 	}
@@ -797,7 +790,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		g_PdLogoPreMorphTimer += g_Vars.lvupdate60;
 
 		if (g_PdLogoPreMorphTimer > 0) {
-			g_PdLogoFrac = (f32) g_PdLogoPreMorphTimer / premorphduration;
+			g_PdLogoFrac = (float) g_PdLogoPreMorphTimer / premorphduration;
 		} else {
 			g_PdLogoFrac = 0.0f;
 		}
@@ -899,7 +892,6 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	}
 
 	if (g_PdLogoTitlePresenting) {
-		g_PdLogoUnusedRotEnabled = 1;
 
 		if (g_PdLogoTitleStep == 0) {
 			g_PdLogoTitleStepFrac += step0inc;
@@ -917,15 +909,6 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 				g_PdLogoTitlePresenting = false;
 				g_PdLogoExitTimer = 1;
 			}
-		}
-	}
-
-	if (g_PdLogoUnusedRotEnabled) {
-		// Some unused value... maybe a different method of rotating the light?
-		g_PdLogoUnusedRot += unusedrotinc * g_Vars.lvupdate60freal;
-
-		if (g_PdLogoUnusedRot >= M_TAU) {
-			g_PdLogoUnusedRot -= M_TAU;
 		}
 	}
 
@@ -947,7 +930,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		}
 	}
 
-	gdl = viSetFillColour(gdl, 0x00, 0x00, 0x00);
+	gdl = viSetFillColour(gdl, 0, 0, 0);
 	gdl = viFillBuffer(gdl);
 
 	if (g_PdLogoBlackTimer != 0) {
@@ -959,8 +942,8 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	gSPLookAt(gdl++, lookat);
 
 	{
-		f32 angle1;
-		f32 angle2;
+		float angle1;
+		float angle2;
 
 		angle1 = (g_PdLogoLightDirFrac + -1.0f);
 		angle2 = 0.0f - 0.15f * g_PdLogoLightDirFrac;
@@ -989,8 +972,8 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	// Inject a SetLights command into the displaylists for each of the four logo sides.
 	// The front face gets a different light which makes it remain lit when the other sides go dark.
 	
-	s32 numvertices = 0;
-	s32 numcolours = 0;
+	int numvertices = 0;
+	int numcolours = 0;
 
 	node = modelGetPart(model->definition, MODELPART_LOGO_FRONTSIDE);
 
@@ -1095,7 +1078,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 
 void titleInitNintendoLogo(void)
 {
-	u8 *nextaddr = g_TitleModelBuffer;
+	int8_t *nextaddr = g_TitleModelBuffer;
 
 	g_TitleFastForward = false;
 
@@ -1167,12 +1150,12 @@ void titleTickNintendoLogo(void)
 Gfx *titleRenderNintendoLogo(Gfx *gdl)
 {
 	struct modelrenderdata renderdata = { NULL, true, 3 };
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 	Mtxf sp108;
-	f32 fracdone = g_TitleTimer / (TICKS(240.0f));
+	float fracdone = g_TitleTimer / (TICKS(240.0f));
 	struct coord lightdir = {0, 0, 0};
-	s32 v0;
+	int v0;
 
 	gdl = titleClear(gdl);
 
@@ -1205,7 +1188,7 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 	{
 		Mtxf spa8;
 		struct coord sp9c;
-		s32 stack[2];
+		int stack[2];
 		Mtxf sp54;
 
 		sp9c.x = 0.0f;
@@ -1254,7 +1237,7 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 
 void titleInitRareLogo(void)
 {
-	u8 *nextaddr = g_TitleModelBuffer;
+	int8_t *nextaddr = g_TitleModelBuffer;
 
 	g_TitleTimer = -3;
 
@@ -1333,7 +1316,7 @@ void titleTickRareLogo(void)
 	}
 }
 
-f32 titleRotateClockwise(f32 arg0)
+float titleRotateClockwise(float arg0)
 {
 	return ((1.0f - arg0) + (1.0f - arg0)) * M_PI - DEG2RAD(90);
 }
@@ -1341,11 +1324,11 @@ f32 titleRotateClockwise(f32 arg0)
 Gfx *titleRenderRareLogo(Gfx *gdl)
 {
 	struct modelrenderdata renderdata = { NULL, true, 3 };
-	s32 i;
-	f32 fracdone = g_TitleTimer / TICKS(240.0f);
+	int i;
+	float fracdone = g_TitleTimer / TICKS(240.0f);
 	Mtxf sp118;
-	s32 j;
-	s32 s0;
+	int j;
+	int s0;
 
 	gdl = titleClear(gdl);
 
@@ -1355,7 +1338,7 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 
 	
 	struct coord lightdir = {0, 0, 0};
-	f32 tmp;
+	float tmp;
 	Mtxf spc0;
 	struct coord spb4;
 	struct modelrwdata_toggle *rwdata;
@@ -1381,9 +1364,9 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 
 	if (fracdone < 0.2f) {
 		titleSetLight(&g_TitleLightNintendoRare,
-				(s32)(255.0f * fracdone / 0.2f),
-				(s32)(255.0f * fracdone / 0.2f),
-				(s32)(255.0f * fracdone / 0.2f),
+				(int)(255.0f * fracdone / 0.2f),
+				(int)(255.0f * fracdone / 0.2f),
+				(int)(255.0f * fracdone / 0.2f),
 				0, &lightdir);
 	} else {
 		titleSetLight(&g_TitleLightNintendoRare, s0, s0, s0, 0, &lightdir);
@@ -1396,8 +1379,6 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 		lightdir.x = cosf(titleRotateClockwise(0.5f));
 		guNormalize(&lightdir.x, &lightdir.y, &lightdir.z);
 		titleSetLight(&g_TitleLightRareLogo, s0, s0, s0, 0, &lightdir);
-		debug_log("title set light \n", 0);
-		
 	} else {
 		titleSetLight(&g_TitleLightRareLogo, s0, s0, s0, 0, &lightdir);
 	}
@@ -1492,24 +1473,24 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 	return gdl;
 }
 
-s32 g_NumPlayers = 0;
+int g_NumPlayers = 0;
 
-s32 getNumPlayers(void)
+int getNumPlayers(void)
 {
 	return g_NumPlayers;
 }
 
-void setNumPlayers(s32 numplayers)
+void setNumPlayers(int numplayers)
 {
 	g_NumPlayers = numplayers;
 }
 
-s32 playerGetTeam(s32 playernum)
+int playerGetTeam(int playernum)
 {
 	return g_PlayerConfigsArray[g_Vars.playerstats[playernum].mpindex].base.team;
 }
 
-void playerSetTeam(s32 playernum, s32 team)
+void playerSetTeam(int playernum, int team)
 {
 	g_PlayerConfigsArray[g_Vars.playerstats[playernum].mpindex].base.team = team;
 }
@@ -1535,16 +1516,11 @@ void titleInitSkip(void)
 	viBlack(true);
 }
 
-void titleSetNextMode(s32 mode)
+void titleSetNextMode(int mode)
 {
 	if (g_TitleDelayedMode != mode) {
 		g_TitleNextMode = mode;
 	}
-}
-
-s32 titleGetMode(void)
-{
-	return g_TitleMode;
 }
 
 void titleTick(void)
@@ -1685,7 +1661,7 @@ void titleExit(void)
 	g_TitleMode = -1;
 }
 
-void titleInitFromAiCmd(u32 value)
+void titleInitFromAiCmd(unsigned int value)
 {
 	switch (value) {
 	case TITLEAIMODE_RARELOGO:

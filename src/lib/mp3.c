@@ -8,35 +8,11 @@
 #include "mp3/mp3.h"
 #include "types.h"
 #include "platform.h"
-
-/**
- * These two ABI commands are used in this file, but the format of the data
- * doesn't match the format used by n_audio's ABI.
- */
-#ifdef PLATFORM_N64
-
-#define	acmd07(pkt, a, b)                                    \
-{                                                            \
-	Acmd *_a = (Acmd *)pkt;                                  \
-	_a->words.w0 = _SHIFTL(0x07, 24, 8) | _SHIFTL(a, 0, 16); \
-	_a->words.w1 = b;                                        \
-}
-
-#define	acmd08(pkt, a)                   \
-{                                        \
-	Acmd *_a = (Acmd *)pkt;              \
-	_a->words.w0 = _SHIFTL(0x08, 24, 8); \
-	_a->words.w1 = a;                    \
-}
-
-#else
-
 #include "mixer.h"
 
 #define	acmd07(pkt, a, b, c, r) aPlayMP3(pkt, a, b, c, r)
 #define	acmd08(pkt, a) do { } while(0)
 
-#endif
 
 struct mp3vars g_Mp3Vars;
 struct asistream *g_AsiStream;
@@ -171,11 +147,6 @@ void func00037f5c(s32 arg0, bool arg1)
 	if (arg1) {
 		g_Mp3Vars.var8009c3ec = g_Mp3Vars.var8009c3ee;
 	}
-}
-
-void func00037fa8(s32 arg0, s32 arg1)
-{
-	// empty
 }
 
 s32 func00037fc0(s32 arg0, Acmd **cmd)

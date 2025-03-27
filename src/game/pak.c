@@ -359,11 +359,6 @@ void pak0f116bdc(s8 device, u8 *arg1, u8 *arg2)
 	*arg2 = g_Paks[device].unk2bb;
 }
 
-void pakSetTemporarilyPlugged(s8 index)
-{
-	joySetPfsTemporarilyPlugged(index);
-}
-
 u16 _pakGetSerial(s8 device)
 {
 	return g_Paks[device].serial;
@@ -971,10 +966,8 @@ s32 pakGetNumPagesRequired(void)
 
 bool pakResizeNote(s8 device, s32 numpages)
 {
-	s32 stack1[2];
 	s32 errnum;
 	struct pak *devicedata;
-	s32 stack2[2];
 	OSPfsState *note;
 	u32 numbytes;
 

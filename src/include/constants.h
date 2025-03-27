@@ -16,7 +16,7 @@
 
 #define DEFAULT_BASEDIR_NAME "data"
 
-#define MAX_ARTIFACTS          240 // Ben's comment: Doubled
+#define MAX_ARTIFACTS          480 // Ben's comment: Quadtrupled
 #define MAX_BOTS               8
 #define MAX_CHRSPERSQUADRON    16
 #define MAX_CHRSPERTEAM        32

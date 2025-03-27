@@ -12,9 +12,9 @@
 #include "data.h"
 #include "types.h"
 
-void bodiesReset(s32 stagenum)
+void bodiesReset(int stagenum)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; g_HeadsAndBodies[i].filenum != 0; i++) {
 		g_HeadsAndBodies[i].modeldef = NULL;

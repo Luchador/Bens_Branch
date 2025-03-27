@@ -6832,7 +6832,7 @@ bool bgunCheckForCloseWall()
 
 	spc8[0] = g_Vars.currentplayer->cam_room;
 	spc8[1] = -1;
-	portal00018148(&g_Vars.currentplayer->cam_pos, &checkpos, spc8, spb8, rooms, 30);
+	portalComputeReachableRooms(&g_Vars.currentplayer->cam_pos, &checkpos, spc8, spb8, rooms, 30);
 
 	roomsptr = rooms;
 
@@ -7681,7 +7681,7 @@ void bgunRender(Gfx **gdlptr)
 	}
 
 	gdl = viPrepareZbuf(gdl);
-	gdl = vi0000b1d0(gdl);
+	gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
@@ -7718,7 +7718,7 @@ void bgunRender(Gfx **gdlptr)
 				gSPLookAt(gdl++, camGetLookAt());
 			}
 
-			gSPPerspNormalize(gdl++, mtx00016dcc(0, 300));
+			//gSPPerspNormalize(gdl++, mtx00016dcc(0, 300));
 
 			// There is support for guns having a TV screen on them
 			// but no guns have this model part so it's not used.
@@ -7872,7 +7872,7 @@ void bgunRender(Gfx **gdlptr)
 			mtxF2LBulk(hand->gunmodel.matrices, hand->gunmodel.definition->nummatrices);
 			mtx00016784();
 
-			gSPPerspNormalize(gdl++, viGetPerspScale());
+			//gSPPerspNormalize(gdl++, viGetPerspScale());
 		}
 	}
 
@@ -7880,7 +7880,7 @@ void bgunRender(Gfx **gdlptr)
 	zbufSwap();
 
 	gdl = zbufConfigureRdp(gdl);
-	gdl = vi0000b1d0(gdl);
+	gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());

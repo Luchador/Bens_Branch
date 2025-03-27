@@ -1,17 +1,18 @@
 #ifndef IN_GAME_RACE_H
 #define IN_GAME_RACE_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
 void racesInit(void);
 
-u16 raceGetAnimSumAngleAsInt(s16 animnum, s32 frame, s32 endframe);
-s32 raceGetAnimSumForwardAsInt(s16 animnum, s32 startframe, s32 endframe);
-s32 raceInitAnimGroup(struct attackanimconfig *configs);
+uint16_t raceGetAnimSumAngleAsInt(int16_t animnum, int frame, int endframe);
+int raceGetAnimSumForwardAsInt(int16_t animnum, int startframe, int endframe);
+int raceInitAnimGroup(struct attackanimconfig *configs);
 void raceInitAnimGroups(struct attackanimgroup **groups);
-s32 raceCountAnims(struct animtablerow *rows);
-f32 race0f0005c0(s16 animnum);
+int raceCountAnims(struct animtablerow *rows);
+float race0f0005c0(int16_t animnum);
 void raceInitAnims(void);
 
 #endif

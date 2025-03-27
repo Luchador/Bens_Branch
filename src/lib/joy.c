@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/pak.h"
 #include "bss.h"
@@ -51,36 +52,34 @@ struct joydata {
 };
 
 struct joydata g_JoyData[NUM_DATA];
-s32 g_JoyDisableCooldown[NUM_PADS];
+int g_JoyDisableCooldown[NUM_PADS];
 OSContStatus g_JoyContStatuses[NUM_PADS];
-u8 g_JoyPfsStates[100];
+int8_t g_JoyPfsStates[100];
 
 struct joydata *g_JoyDataPtr = &g_JoyData[0];
 bool g_JoyBusy = false;
 
 // Number of times per pad that different inputs were attempted to be read
 // when controller was disconnected or not ready.
-u32 g_JoyBadReadsStickX[NUM_PADS] = {0};
-u32 g_JoyBadReadsStickY[NUM_PADS] = {0};
-u32 g_JoyBadReadsRStickX[NUM_PADS] = {0};
-u32 g_JoyBadReadsRStickY[NUM_PADS] = {0};
-u32 g_JoyBadReadsButtons[NUM_PADS] = {0};
-u32 g_JoyBadReadsButtonsPressed[NUM_PADS] = {0};
+unsigned int g_JoyBadReadsStickX[NUM_PADS] = {0};
+unsigned int g_JoyBadReadsStickY[NUM_PADS] = {0};
+unsigned int g_JoyBadReadsRStickX[NUM_PADS] = {0};
+unsigned int g_JoyBadReadsRStickY[NUM_PADS] = {0};
+unsigned int g_JoyBadReadsButtons[NUM_PADS] = {0};
+unsigned int g_JoyBadReadsButtonsPressed[NUM_PADS] = {0};
 
-u8 g_JoyConnectedControllers = 0;
+int8_t g_JoyConnectedControllers = 0;
 bool g_JoyQueuesCreated = false;
 bool g_JoyInitDone = false;
 bool g_JoyNeedsInit = true;
-u32 g_JoyCyclicPollDisableCount = 0;
-u32 var8005eec0 = 1;
-s32 (*var8005eec4)(struct contsample *samples, s32 samplenum) = NULL;
-void (*var8005eec8)(struct contsample *samples, s32 samplenum, s32 samplenum2) = NULL;
-s32 g_JoyNextPfsStateIndex = (VERSION >= VERSION_NTSC_1_0 ? 0 : 30);
+unsigned int g_JoyCyclicPollDisableCount = 0;
+bool g_JoyAllowTitleInput = true;
+int g_JoyNextPfsStateIndex = 0;
 
 bool g_JoyPfsPollMasterEnabled = true;
-s32 g_JoyPfsPollInterval = 0;
-s32 g_JoyPfsPollTimeRemaining = -1;
-u32 g_JoyPfsPollCount = 0;
+int g_JoyPfsPollInterval = 0;
+int g_JoyPfsPollTimeRemaining = -1;
+unsigned int g_JoyPfsPollCount = 0;
 bool g_JoyPfsPollEnabled = false;
 bool g_JoyCyclicPollingLocked = true;
 
@@ -110,7 +109,7 @@ bool joyIsPfsPollEnabled(void)
 	return g_JoyPfsPollEnabled;
 }
 
-void joySetPfsPollInterval(s32 value)
+void joySetPfsPollInterval(int value)
 {
 	g_JoyPfsPollTimeRemaining = g_JoyPfsPollInterval = value * 11000;
 }
@@ -124,10 +123,10 @@ void joySetDefaultPfsPollInterval(void)
  * Remove an item from the beginning of the g_JoyPfsStates array,
  * shift the rest of the array back and return the removed item.
  */
-s32 joyShiftPfsStates(void)
+int joyShiftPfsStates(void)
 {
-	s32 pfsstate = 0;
-	s32 i;
+	int pfsstate = 0;
+	int i;
 
 	if (g_JoyNextPfsStateIndex) {
 		pfsstate = g_JoyPfsStates[0];
@@ -144,7 +143,7 @@ s32 joyShiftPfsStates(void)
 	return pfsstate;
 }
 
-void joyRecordPfsState(u8 pfsstate)
+void joyRecordPfsState(int8_t pfsstate)
 {
 	if (g_JoyNextPfsStateIndex + 1 >= ARRAYCOUNT(g_JoyPfsStates)) {
 		joyShiftPfsStates();
@@ -163,13 +162,13 @@ void joyRecordPfsState(u8 pfsstate)
  * force 1 = poll based on the configured poll frequency even if disabled
  * force 2 = poll now
  */
-void joyPollPfs(s32 force)
+void joyPollPfs(int force)
 {
-	static u32 thiscount = 0;
-	static u32 prevcount = 0;
-	static u32 doingit = false;
-	u32 diffcount;
-	u32 value;
+	static unsigned int thiscount = 0;
+	static unsigned int prevcount = 0;
+	static bool doingit = false;
+	unsigned int diffcount;
+	unsigned int value;
 
 	if (g_JoyPfsPollMasterEnabled
 			&& (force == 2 || (g_JoyPfsPollInterval && (force || ((g_JoyCyclicPollDisableCount == 0 || !g_JoyCyclicPollingLocked) && g_JoyPfsPollEnabled))))
@@ -189,7 +188,7 @@ void joyPollPfs(s32 force)
 		if (g_JoyPfsPollTimeRemaining < 0
 				|| force == 2
 				|| (force == 1 && g_JoyPfsPollTimeRemaining < 0 && -g_JoyPfsPollTimeRemaining > g_JoyPfsPollInterval)) {
-			u8 bitpattern = 0;
+			uint8_t bitpattern = 0;
 
 			g_JoyPfsPollCount++;
 
@@ -203,7 +202,7 @@ void joyPollPfs(s32 force)
     		(inputRumbleSupported(2) << 2) |
     		(inputRumbleSupported(3) << 3);
 
-			s32 i = 0;
+			int i = 0;
 			for (i = 0; i < MAXCONTROLLERS; ++i) {
 				if (inputRumbleSupported(i)) {
 					bitpattern |= 1 << i;
@@ -225,20 +224,12 @@ void joyPollPfs(s32 force)
 	}
 }
 
-void joySetPfsTemporarilyPlugged(s8 index)
-{
-	joyRecordPfsState(0);
-}
-
 void joyInit(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	g_JoyQueuesCreated = true;
-
-	var8005eec4 = NULL;
-	var8005eec8 = NULL;
 
 	for (i = 0; i < NUM_DATA; i++) {
 		g_JoyData[i].curlast = 0;
@@ -270,7 +261,7 @@ void joyInit(void)
  */
 void joyDisableTemporarily(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < NUM_PADS; i++) {
 		g_JoyDisableCooldown[i] = TICKS(60);
@@ -282,21 +273,21 @@ void joyReset(void)
 
 	if (g_JoyQueuesCreated) {
 
-		joy00013e84();
+		joyUpdateConnectionStatus();
 
-		var8005eec0 = 1;
+		g_JoyAllowTitleInput = true;
 	}
 }
 
-void joy00013e84(void)
+void joyUpdateConnectionStatus(void)
 {
-	static u8 prevconnected = 0xff;
+	static int8_t prevconnected = 0xff;
 
 	// osContInit should be called only once. The first time this function is
 	// called it'll take the first branch here, and all subsequent calls will
 	// take the second branch.
 	if (g_JoyNeedsInit) {
-		s32 i;
+		int i;
 		g_JoyNeedsInit = false;
 		osContInit(&g_JoyConnectedControllers, g_JoyContStatuses);
 		g_JoyInitDone = true;
@@ -305,10 +296,10 @@ void joy00013e84(void)
 			joyStopRumble(i, false);
 		}
 	} else {
-		u32 slots = 0xf;
-		s32 i;
+		unsigned int slots = 0xf;
+		int i;
 
-		for (s32 i = 0; i < MAXCONTROLLERS; ++i) {
+		for (int i = 0; i < MAXCONTROLLERS; ++i) {
 			if (inputControllerConnected(i)) {
 				g_JoyContStatuses[i].errnum = 0;
 				g_JoyContStatuses[i].type = CONT_ABSOLUTE;
@@ -330,8 +321,8 @@ void joy00013e84(void)
 	}
 
 	if (prevconnected != g_JoyConnectedControllers) {
-		s32 i = 0;
-		s32 index = 0;
+		int i = 0;
+		int index = 0;
 
 		for (; i < NUM_PADS; i++) {
 			if (g_JoyConnectedControllers & (1 << i)) {
@@ -343,34 +334,17 @@ void joy00013e84(void)
 	}
 }
 
-s8 contGetFreeSlot(void)
-{
-	s32 i;
-
-	if (g_JoyDataPtr->unk200 >= 0) {
-		return g_JoyDataPtr->unk200;
-	}
-
-	for (i = 0; i < NUM_PADS; i++) {
-		if ((g_JoyConnectedControllers & (1 << i)) == 0) {
-			return i;
-		}
-	}
-
-	return NUM_PADS;
-}
-
-u32 joyGetConnectedControllers(void)
+unsigned int joyGetConnectedControllers(void)
 {
 	return g_JoyConnectedControllers;
 }
 
 void joyConsumeSamples(struct joydata *joydata)
 {
-	s8 i;
-	s32 samplenum;
-	u32 buttons1;
-	u32 buttons2;
+	int i;
+	int samplenum;
+	unsigned int buttons1;
+	unsigned int buttons2;
 
 	joydata->curstart = joydata->curlast;
 	joydata->curlast = joydata->nextlast;
@@ -419,10 +393,10 @@ void joyConsumeSamples(struct joydata *joydata)
  * The use of the static variable suggests that the function is able to be
  * called recursively, but its behaviour should not be run when recursing.
  */
-void joy00014238(void)
+void joyProcessPakState(void)
 {
 	static bool doingit = false;
-	s32 i;
+	int i;
 
 	if (!doingit) {
 		doingit = true;
@@ -433,9 +407,7 @@ void joy00014238(void)
 			}
 		}
 
-		if (var8005eec4 == NULL) {
-			joysTickRumble();
-		}
+		joysTickRumble();
 
 		doingit = false;
 	}
@@ -443,26 +415,15 @@ void joy00014238(void)
 
 void joyDebugJoy(void)
 {
-	static u32 var8005ef08 = 0;
-
 	if (g_Vars.paksneededformenu) {
 		joyPollPfs(1);
 	}
 
-	if (var8005eec4) {
-		g_JoyData[1].nextlast = var8005eec4(g_JoyData[1].samples, g_JoyData[1].curlast);
-		joyConsumeSamples(&g_JoyData[1]);
-	}
-
 	joyConsumeSamples(&g_JoyData[0]);
 
-	if (var8005eec8) {
-		var8005eec8(g_JoyData[0].samples, g_JoyData[0].curstart, g_JoyData[0].curlast);
-	}
-
-	if (joyIsCyclicPollingEnabled() && var8005eec0 && joyGetNumSamples() <= 0) {
+	if (joyIsCyclicPollingEnabled() && g_JoyAllowTitleInput && joyGetNumSamples() <= 0) {
 		joyDisableCyclicPolling();
-		joy00014238();
+		joyProcessPakState();
 		joyEnableCyclicPolling();
 		joyConsumeSamples(&g_JoyData[0]);
 	}
@@ -470,7 +431,7 @@ void joyDebugJoy(void)
 
 void joyReadData(void)
 {
-	s32 index = (g_JoyData[0].nextlast + 1) % NUM_SAMPLES;
+	int index = (g_JoyData[0].nextlast + 1) % NUM_SAMPLES;
 
 	if (index == g_JoyData[0].curstart) {
 		// If the sample queue is full, don't overwrite the oldest sample.
@@ -478,7 +439,7 @@ void joyReadData(void)
 		index = g_JoyData[0].nextlast;
 	}
 
-	for (s32 i = 0; i < MAXCONTROLLERS; ++i) {
+	for (int i = 0; i < MAXCONTROLLERS; ++i) {
 		g_JoyData[0].samples[index].pads[i].button = 0;
 		g_JoyData[0].samples[index].pads[i].stick_x = 0;
 		g_JoyData[0].samples[index].pads[i].stick_y = 0;
@@ -499,15 +460,15 @@ void joyReadData(void)
 
 void joySetAllowTitleInput(bool value)
 {
-	var8005eec0 = value;
+	g_JoyAllowTitleInput = value;
 }
 
-s32 joyGetNumSamples(void)
+int joyGetNumSamples(void)
 {
 	return (g_JoyDataPtr->curlast - g_JoyDataPtr->curstart + NUM_SAMPLES) % NUM_SAMPLES;
 }
 
-s32 joyGetRStickXOnSample(s32 samplenum, s8 contpadnum) {
+int joyGetRStickXOnSample(int samplenum, int8_t contpadnum) {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsRStickX[contpadnum]++;
 		return 0;
@@ -520,7 +481,7 @@ s32 joyGetRStickXOnSample(s32 samplenum, s8 contpadnum) {
 	return g_JoyDataPtr->samples[(g_JoyDataPtr->curstart + samplenum + 1) % NUM_SAMPLES].pads[contpadnum].rstick_x;
 }
 
-s32 joyGetRStickYOnSample(s32 samplenum, s8 contpadnum) {
+int joyGetRStickYOnSample(int samplenum, int8_t contpadnum) {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickY[contpadnum]++;
 		return 0;
@@ -533,7 +494,7 @@ s32 joyGetRStickYOnSample(s32 samplenum, s8 contpadnum) {
 	return g_JoyDataPtr->samples[(g_JoyDataPtr->curstart + samplenum + 1) % NUM_SAMPLES].pads[contpadnum].rstick_y;
 }
 
-s32 joyGetStickXOnSample(s32 samplenum, s8 contpadnum)
+int joyGetStickXOnSample(int samplenum, int8_t contpadnum)
 {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickX[contpadnum]++;
@@ -547,7 +508,7 @@ s32 joyGetStickXOnSample(s32 samplenum, s8 contpadnum)
 	return g_JoyDataPtr->samples[(g_JoyDataPtr->curstart + samplenum + 1) % NUM_SAMPLES].pads[contpadnum].stick_x;
 }
 
-s32 joyGetStickYOnSample(s32 samplenum, s8 contpadnum)
+int joyGetStickYOnSample(int samplenum, int8_t contpadnum)
 {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickY[contpadnum]++;
@@ -561,7 +522,7 @@ s32 joyGetStickYOnSample(s32 samplenum, s8 contpadnum)
 	return g_JoyDataPtr->samples[(g_JoyDataPtr->curstart + samplenum + 1) % NUM_SAMPLES].pads[contpadnum].stick_y;
 }
 
-s32 joyGetRStickYOnSampleIndex(s32 samplenum, s8 contpadnum)
+int joyGetRStickYOnSampleIndex(int samplenum, int8_t contpadnum)
 {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickY[contpadnum]++;
@@ -575,7 +536,7 @@ s32 joyGetRStickYOnSampleIndex(s32 samplenum, s8 contpadnum)
 	return g_JoyDataPtr->samples[(g_JoyDataPtr->curstart + samplenum) % NUM_SAMPLES].pads[contpadnum].rstick_y;
 }
 
-s32 joyGetStickYOnSampleIndex(s32 samplenum, s8 contpadnum)
+int joyGetStickYOnSampleIndex(int samplenum, int8_t contpadnum)
 {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickY[contpadnum]++;
@@ -589,9 +550,9 @@ s32 joyGetStickYOnSampleIndex(s32 samplenum, s8 contpadnum)
 	return g_JoyDataPtr->samples[(g_JoyDataPtr->curstart + samplenum) % NUM_SAMPLES].pads[contpadnum].stick_y;
 }
 
-u32 joyGetButtonsOnSample(s32 samplenum, s8 contpadnum, u32 mask)
+unsigned int joyGetButtonsOnSample(int samplenum, int8_t contpadnum, unsigned int mask)
 {
-	u32 button;
+	unsigned int button;
 
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsButtons[contpadnum]++;
@@ -607,10 +568,10 @@ u32 joyGetButtonsOnSample(s32 samplenum, s8 contpadnum, u32 mask)
 	return button & mask;
 }
 
-u32 joyGetButtonsPressedOnSample(s32 samplenum, s8 contpadnum, u32 mask)
+unsigned int joyGetButtonsPressedOnSample(int samplenum, int8_t contpadnum, unsigned int mask)
 {
-	u32 button1;
-	u32 button2;
+	unsigned int button1;
+	unsigned int button2;
 
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsButtonsPressed[contpadnum]++;
@@ -634,12 +595,12 @@ u32 joyGetButtonsPressedOnSample(s32 samplenum, s8 contpadnum, u32 mask)
  * For example, if checksamples[5] is nonzero and a button was pressed on
  * samplenum 5 which matches the mask, count is incremented.
  */
-s32 joyCountButtonsOnSpecificSamples(u32 *checksamples, s8 contpadnum, u32 mask)
+int joyCountButtonsOnSpecificSamples(unsigned int *checksamples, int8_t contpadnum, unsigned int mask)
 {
-	s32 count = 0;
-	s32 index = 0;
-	s32 i;
-	u32 button;
+	int count = 0;
+	int index = 0;
+	int i;
+	unsigned int button;
 
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsButtons[contpadnum]++;
@@ -672,7 +633,7 @@ s32 joyCountButtonsOnSpecificSamples(u32 *checksamples, s8 contpadnum, u32 mask)
 	return count;
 }
 
-s8 joyGetStickX(s8 contpadnum)
+int8_t joyGetStickX(int8_t contpadnum)
 {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickX[contpadnum]++;
@@ -686,7 +647,7 @@ s8 joyGetStickX(s8 contpadnum)
 	return g_JoyDataPtr->samples[g_JoyDataPtr->curlast].pads[contpadnum].stick_x;
 }
 
-s8 joyGetRStickX(s8 contpadnum) {
+int8_t joyGetRStickX(int8_t contpadnum) {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsRStickX[contpadnum]++;
 		return 0;
@@ -699,7 +660,7 @@ s8 joyGetRStickX(s8 contpadnum) {
 	return g_JoyDataPtr->samples[g_JoyDataPtr->curlast].pads[contpadnum].rstick_x;
 }
 
-s8 joyGetRStickY(s8 contpadnum) {
+int8_t joyGetRStickY(int8_t contpadnum) {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsRStickY[contpadnum]++;
 		return 0;
@@ -712,7 +673,7 @@ s8 joyGetRStickY(s8 contpadnum) {
 	return g_JoyDataPtr->samples[g_JoyDataPtr->curlast].pads[contpadnum].rstick_y;
 }
 
-s8 joyGetStickY(s8 contpadnum)
+int8_t joyGetStickY(int8_t contpadnum)
 {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickY[contpadnum]++;
@@ -726,7 +687,7 @@ s8 joyGetStickY(s8 contpadnum)
 	return g_JoyDataPtr->samples[g_JoyDataPtr->curlast].pads[contpadnum].stick_y;
 }
 
-u32 joyGetButtons(s8 contpadnum, u32 mask)
+unsigned int joyGetButtons(int8_t contpadnum, unsigned int mask)
 {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsButtons[contpadnum]++;
@@ -740,7 +701,7 @@ u32 joyGetButtons(s8 contpadnum, u32 mask)
 	return g_JoyDataPtr->samples[g_JoyDataPtr->curlast].pads[contpadnum].button & mask;
 }
 
-u32 joyGetButtonsPressedThisFrame(s8 contpadnum, u32 mask)
+unsigned int joyGetButtonsPressedThisFrame(int8_t contpadnum, unsigned int mask)
 {
 	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsButtonsPressed[contpadnum]++;
@@ -783,7 +744,7 @@ void joyEnableCyclicPolling(void)
 
 void joyDestroy(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < NUM_PADS; i++) {
 		if (osMotorProbe(PFS(i), i) == 0) {
@@ -794,7 +755,7 @@ void joyDestroy(void)
 	}
 }
 
-void joyGetContpadNumsForPlayer(s8 playernum, s32 *pad1, s32 *pad2)
+void joyGetContpadNumsForPlayer(int8_t playernum, int *pad1, int *pad2)
 {
 	if (g_Vars.normmplayerisrunning) {
 		*pad1 = g_Vars.playerstats[playernum].mpindex;
@@ -804,7 +765,7 @@ void joyGetContpadNumsForPlayer(s8 playernum, s32 *pad1, s32 *pad2)
 
 	*pad1 = playernum;
 
-	u8 controlmode = g_PlayerConfigsArray[g_Vars.playerstats[playernum].mpindex].controlmode;
+	uint8_t controlmode = g_PlayerConfigsArray[g_Vars.playerstats[playernum].mpindex].controlmode;
 	if (controlmode >= CONTROLMODE_21 && controlmode < CONTROLMODE_PC) {
 		*pad2 = PLAYERCOUNT() + playernum;
 		return;
@@ -813,10 +774,10 @@ void joyGetContpadNumsForPlayer(s8 playernum, s32 *pad1, s32 *pad2)
 	*pad2 = -1;
 }
 
-void joyStopRumble(s8 arg0, bool disablepolling)
+void joyStopRumble(int8_t arg0, bool disablepolling)
 {
 	if (arg0 != SAVEDEVICE_GAMEPAK) {
-		s32 device = arg0;
+		int device = arg0;
 
 		if (g_Paks[device].type != PAKTYPE_MEMORY && g_Paks[device].type != PAKTYPE_GAMEBOY) {
 			if (disablepolling) {
@@ -843,19 +804,19 @@ void joyStopRumble(s8 arg0, bool disablepolling)
 	}
 }
 
-s32 joyGetPakState(s8 device)
+int joyGetPakState(int8_t device)
 {
 	return g_Paks[device].state;
 }
 
-s32 joyGetPakState2(s8 device)
+int joyGetPakState2(int8_t device)
 {
 	return joyGetPakState(device);
 }
 
 void joysTickRumble(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < NUM_PADS; i++) {
 		if (g_Paks[i].state == PAKSTATE_READY && g_Paks[i].type == PAKTYPE_RUMBLE) {

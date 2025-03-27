@@ -26,9 +26,8 @@
 u8 g_IrScanlines[2][480];
 s32 g_NumActiveEffects = 0;
 u8 g_BlurChange = 0;
-u8 var8007f848 = 0;
+bool g_KeepUpdatingBlur = false;
 s32 g_IrBinocularRadius = 90;
-s32 var8007f850 = 3;
 
 Gfx *bviewDrawIrRect(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
 {
@@ -121,25 +120,18 @@ Gfx *bviewPrepareStaticI8(Gfx *gdl, u32 colour, u32 alpha)
 
 Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
 {
-	u16 *fb = viGetFrontBuffer();
 	s32 viewtop = viGetViewTop();
 	s32 viewheight = viGetViewHeight();
-	f32 fxxx;
-	f32 fyyy;
 	s32 viewwidth = viGetViewWidth();
 	s32 viewleft = viGetViewLeft();
-	f32 somefloat;
 	s32 newalpha;
 	s32 i;
 
-	static u32 sfyyy = 1000;
-	static u32 sfxxx = 1000;
-
-	if (var8007f848) {
+	if (g_KeepUpdatingBlur) {
 		return gdl;
 	}
 
-	var8007f848 = true;
+	g_KeepUpdatingBlur = true;
 
 	newalpha = alpha;
 	newalpha += g_BlurChange;
@@ -163,12 +155,8 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
 		return gdl;
 	}
 
-	fxxx = sfxxx / 1000.0f;
-	fyyy = sfyyy / 1000.0f;
-
 	gDPPipeSync(gdl++);
 
-	somefloat = (viewheight - viewheight / fyyy) * 0.5f;
 	gdl = bviewPrepareStaticRgba16(gdl, colour, newalpha);
 
 	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_BlurFb);
@@ -185,7 +173,6 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
  */
 Gfx *bviewDrawStatic(Gfx *gdl, u32 arg1, s32 arg2)
 {
-	u16 *fb = viGetFrontBuffer();
 	s32 viewtop = viGetViewTop();
 	s32 viewheight = viGetViewHeight();
 	s32 viewwidth = viGetViewWidth();
@@ -316,7 +303,6 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 	s32 viewheight = viGetViewHeight();
 	s32 viewwidth = viGetViewWidth();
 	s32 viewleft = viGetViewLeft();
-	f32 somefloat;
 	s32 i;
 
 	g_NumActiveEffects++;
@@ -338,8 +324,6 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 	}
 
 	gDPPipeSync(gdl++);
-
-	somefloat = (viewheight - viewheight / arg4) * 0.5f;
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
@@ -638,8 +622,6 @@ Gfx *bviewDrawEyespySideRect(Gfx *gdl, s32 *points, u8 r, u8 g, u8 b, u8 alpha)
 
 	gSPColor(gdl++, colours, 2);
 	gSPVertex(gdl++, vertices, 4, 0);
-
-	if (colours);
 
 	gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
 
@@ -1580,11 +1562,6 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	return gdl;
 }
 
-void bview0f1572f8(void)
-{
-	// empty
-}
-
 u8 var8007f878 = 0;
 
 Gfx *bviewDrawNvLens(Gfx *gdl)
@@ -1650,14 +1627,6 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 	return gdl;
 }
 
-/**
- * Night vision doesn't have binoculars.
- */
-Gfx *bviewDrawNvBinoculars(Gfx *gdl)
-{
-	return gdl;
-}
-
 Gfx *bviewDrawIrLens(Gfx *gdl)
 {
 	s32 i;
@@ -1689,7 +1658,7 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 	viewcentrex = (viewleft + viewright) / 2;
 
 	outerradius = g_IrBinocularRadius;
-	innerradius = g_IrBinocularRadius / var8007f850;
+	innerradius = g_IrBinocularRadius / 3;
 
 	g_NumActiveEffects++;
 
@@ -2116,7 +2085,7 @@ Gfx *bviewDrawIrBinoculars(Gfx *gdl)
 void bviewSetMotionBlur(u32 bluramount)
 {
 	g_NumActiveEffects = 0;
-	var8007f848 = 0;
+	g_KeepUpdatingBlur = false;
 	g_BlurChange = (bluramount << 1) / 3; // same as multiplying by 2/3
 }
 
