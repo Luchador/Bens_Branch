@@ -1,7 +1,6 @@
 #ifndef _IN_BSS_H
 #define _IN_BSS_H
 #include <ultra64.h>
-#include <stdint.h>
 #include "constants.h"
 #include "types.h"
 
@@ -36,9 +35,9 @@ extern f32 *var8009c6d8;
 extern f32 *var8009c6dc;
 extern u32 var8009ca84;
 extern u16 *g_FrameBuffers[NUM_FRAMEBUFFERS];
-extern u8 g_NVBRBrightness;
-extern u8 g_NVPropBrightness;
-extern u8 g_NVPropHighlight;
+extern u8 var8009caec;
+extern u8 var8009caed;
+extern u8 var8009caee;
 extern u8 g_NVChrHighlight;
 extern u8 g_NVChrBrightness;
 extern struct prop *g_DangerousProps[12];
@@ -58,9 +57,12 @@ extern s32 g_WallhitsGoalSpareLimit;
 extern f32 g_WallhitTargetBloodRatio;
 extern int8_t *g_TitleModelBuffer;
 extern int var8009ccc0[20];
-extern int g_NumChrs;
-extern int16_t *g_Chrnums;
-extern int16_t *g_ChrIndexes;
+extern s32 g_NumChrs;
+extern s16 *g_Chrnums;
+extern s16 *g_ChrIndexes;
+extern s32 g_NumActiveHeadsPerGender;
+extern s32 g_ActiveMaleHeads[8];
+extern s32 g_ActiveFemaleHeads[8];
 extern s16 *g_RoomPropListChunkIndexes;
 extern struct roomproplistchunk *g_RoomPropListChunks;
 extern struct prop *g_InteractProp;
@@ -107,15 +109,15 @@ extern struct anim *g_AnimSlots;
 extern s32 g_ModelNumObjs;
 extern s32 g_ModelNumChrs;
 extern struct modelrwdatabinding *g_ModelRwdataBindings[3];
-extern struct coord g_FrustumTopPlane;
-extern f32 g_FrustumTopOffset;
-extern struct coord g_FrustumBottomPlane;
-extern f32 g_FrustumBottomOffset;
-extern struct coord g_FrustumLeftPlane;
-extern f32 g_FrustumLeftOffset;
-extern struct coord g_FrustumRightPlane;
-extern f32 g_FrustumRightOffset;
-extern f32 g_FrustumNearOffset;
+extern struct coord var8009dd20;
+extern f32 var8009dd2c;
+extern struct coord var8009dd30;
+extern f32 var8009dd3c;
+extern struct coord var8009dd40;
+extern f32 var8009dd4c;
+extern struct coord var8009dd50;
+extern f32 var8009dd5c;
+extern f32 var8009dd6c;
 extern s32 g_DefaultWeapons[2];
 extern s32 g_CutsceneCurAnimFrame60;
 extern s16 g_CutsceneAnimNum;
@@ -131,7 +133,7 @@ extern s32 g_MenuProjectFromY;
 extern u8 g_MpSelectedPlayersForStats[MAX_PLAYERS];
 extern char g_CheatMarqueeString[];
 extern u8 *g_BlurBuffer;
-extern bool g_GameIsPaused;
+extern s32 var8009dfc0;
 extern struct briefing g_Briefing;
 extern struct missionconfig g_MissionConfig;
 extern struct menu g_Menus[MAX_PLAYERS];
@@ -184,7 +186,7 @@ extern u8 *g_BgLightsFileData;
 extern s16 *g_RoomPortals;
 extern struct bgsnake g_BgSnake;
 extern f32 var800a6470[16 * 3];
-extern struct hitbatch g_HitBatchCandidates[16];
+extern struct var800a6538 var800a6538[16];
 extern u32 g_BgRoomTestsDisabled;
 extern struct screenbox g_BgCmdScreenBox;
 extern struct screenbox g_PortalScreenBbox;

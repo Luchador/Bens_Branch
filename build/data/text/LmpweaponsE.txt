@@ -55,7 +55,7 @@ Power*
 Automatics*
 Pistols*
 Test*
-4mb Test*
+Dinner Party
 Nothing*
 Shield*
 Disabled*
@@ -72,41 +72,41 @@ Full Controller Pak*
 is too full to save*note - 1 note and 28*pages required to save.*
 Enter the Controller*Pak Menu to free some*space (hold START*while powering up.)*
 OK*
-----------*
-Hurricane Fists*
-Cloaking Device*
-Invincible*
-All Guns in Solo*
-Unlimited Ammo*
-Unlimited Ammo, No Reloads*
-Slo-mo Single Player*
-DK Mode*
-Trent's Magnum*
-FarSight*
-Small Jo*
-Small Characters*
-Enemy Shields*
-Jo Shield*
-Super Shield*
-Classic Sight*
-Team Heads Only*
-Play as Elvis*
-Enemy Rockets*
-Unlimited Ammo - Laptop Sentry Gun*
-Marquis of Queensbury Rules*
-Perfect Darkness*
-Pugilist*
-Hotshot*
-Hit and Run*
-Alien*
-R-Tracker/Weapon Cache Locations*
-Rocket Launcher*
-Sniper Rifle*
-X-Ray Scanner*
-SuperDragon*
-Laptop Gun*
-Phoenix*
-Psychosis Gun*
+----------
+Hurricane Fists
+Cloaking Device
+Invincible
+All Guns in Solo
+Unlimited Ammo
+Unlimited Ammo, No Reloads
+Slo-mo Single Player
+DK Mode
+Trent's Magnum
+FarSight
+Small Jo
+Small Characters
+Enemy Shields
+Jo Shield
+Super Shield
+Classic Sight
+Team Heads Only
+Play as Elvis
+Enemy Rockets
+Unlimited Ammo - Laptop Sentry Gun
+Marquis of Queensbury Rules
+Perfect Darkness
+Pugilist
+Hotshot
+Hit and Run
+Alien
+R-Tracker/Weapon Cache Locations
+Rocket Launcher
+Sniper Rifle
+X-Ray Scanner
+SuperDragon
+Laptop Gun
+Phoenix
+Psychosis Gun
 PP7
 DD44
 Klobb
@@ -259,3 +259,4 @@ The saved data has
 been erased due to
 corruption or damage.
 Cancel
+*

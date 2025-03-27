@@ -1,7 +1,6 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/chraction.h"
-#include "game/ceil.h"
 #include "game/bondgun.h"
 #include "game/weaponutils.h"
 #include "game/tex.h"

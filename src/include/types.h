@@ -226,7 +226,7 @@ struct g_vars {
 	/*0x458*/ u32 modifiedfiles;
 	/*0x45c*/ s32 speedpilltime; // in time60
 	/*0x460*/ s32 speedpillchange;
-	/*0x464*/ bool speedpillwant;
+	/*0x464*/ u32 speedpillwant;
 	/*0x468*/ bool speedpillon;
 	/*0x46c*/ s32 restartlevel;
 	/*0x470*/ s32 perfectbuddynum;
@@ -3697,6 +3697,10 @@ struct fireslotthing {
 
 struct fireslot {
 	/*0x00*/ s32 endlvframe;
+#if VERSION < VERSION_NTSC_1_0
+	struct sndstate *unk04nb;
+	struct sndstate *unk08nb;
+#endif
 	/*0x04*/ struct beam beam;
 };
 
@@ -5798,7 +5802,7 @@ struct portalthing2 {
 	bool behind;
 };
 
-struct hitbatch {
+struct var800a6538 {
 	s32 vtxbatchindex;
 	f32 unk04;
 };

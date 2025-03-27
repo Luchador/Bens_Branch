@@ -7,7 +7,6 @@
 u32 dprint();
 s32 debug_log(const char *message, s32 num);
 s32 debug_log_float(const char *message, f32 num);
-s32 debug_log_float3(const char *message, f32 num1, f32 num2, f32 num3);
 s32 debug_erase();
 
 #endif

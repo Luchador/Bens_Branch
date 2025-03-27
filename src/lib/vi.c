@@ -17,7 +17,6 @@
 #include "types.h"
 #include "video.h"
 #include "platform.h"
-#include "game/debug.h"
 
 #define TO_U16_A(x) ((u16)(x))
 #define TO_U16_B(x) ((x) & 0xffff)
@@ -60,39 +59,32 @@ struct rend_vidat g_ViDataArray[NUM_GFXTASKS] = {
 	},
 };
 
-//s32 g_ViTargetHStart = 0;
-//s32 g_ViTargetVStart = 0;
-//struct rend_vidat *g_ViFrontData = &g_ViDataArray[0];
+s32 g_ViTargetHStart = 0;
+s32 g_ViTargetVStart = 0;
+struct rend_vidat *g_ViFrontData = &g_ViDataArray[0];
 struct rend_vidat *g_ViBackData = &g_ViDataArray[0];
+bool g_ViIs16Bit = true;
 bool g_ViReconfigured = false;
-//s32 g_ViSlot = 0;
+s32 g_ViSlot = 0;
 
 void viConfigureForLogos(void)
 {
-	//g_ViFrontIndex = 0;
+	g_ViFrontIndex = 0;
 	g_ViBackIndex = 1;
 
-	//g_ViFrontData = g_ViDataArray + g_ViFrontIndex;
+	g_ViFrontData = g_ViDataArray + g_ViFrontIndex;
 	g_ViBackData = g_ViDataArray + g_ViBackIndex;
 
-	//g_ViTargetHStart = 0;
-	//g_ViTargetVStart = 0;
+	g_ViTargetHStart = 0;
+	g_ViTargetVStart = 0;
 
-	/*g_ViDataArray[0].y = FBALLOC_HEIGHT_LO;
+	g_ViDataArray[0].y = FBALLOC_HEIGHT_LO;
 	g_ViDataArray[0].bufy = FBALLOC_HEIGHT_LO;
 	g_ViDataArray[0].viewy = FBALLOC_HEIGHT_LO;
 
 	g_ViDataArray[1].y = FBALLOC_HEIGHT_LO;
 	g_ViDataArray[1].bufy = FBALLOC_HEIGHT_LO;
-	g_ViDataArray[1].viewy = FBALLOC_HEIGHT_LO;*/
-
-	g_ViDataArray[0].y = videoGetHeight();
-	g_ViDataArray[0].bufy = videoGetHeight();
-	g_ViDataArray[0].viewy = videoGetHeight();
-
-	g_ViDataArray[1].y = videoGetHeight();
-	g_ViDataArray[1].bufy = videoGetHeight();
-	g_ViDataArray[1].viewy = videoGetHeight();
+	g_ViDataArray[1].viewy = FBALLOC_HEIGHT_LO;
 }
 
 /**
@@ -104,21 +96,21 @@ void viConfigureForLogos(void)
  */
 void viConfigureForCopyright(u16 *texturedata)
 {
-	//s32 i;
+	s32 i;
 
-	/*for (i = 0; i < NUM_GFXTASKS; i++) {
+	for (i = 0; i < NUM_GFXTASKS; i++) {
 		g_FrameBuffers[i] = texturedata;
 
-		g_ViDataArray[i].x = videoGetWidth();
-		g_ViDataArray[i].bufx = videoGetWidth();
-		g_ViDataArray[i].viewx = videoGetWidth();*/
+		g_ViDataArray[i].x = 576;
+		g_ViDataArray[i].bufx = 576;
+		g_ViDataArray[i].viewx = (VERSION >= VERSION_NTSC_1_0 ? 576 : 480);
 
-		g_ViDataArray[1].y = videoGetHeight();
-		g_ViDataArray[1].bufy = videoGetHeight();
-		g_ViDataArray[1].viewy = videoGetHeight();
-	//}
+		g_ViDataArray[i].y = 48;
+		g_ViDataArray[i].bufy = 48;
+		g_ViDataArray[i].viewy = 48;
+	}
 
-	//g_ViFrontData->fb = g_FrameBuffers[g_ViFrontIndex];
+	g_ViFrontData->fb = g_FrameBuffers[g_ViFrontIndex];
 	g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
 
 	g_ViReconfigured = true;
@@ -132,21 +124,21 @@ void viConfigureForCopyright(u16 *texturedata)
  */
 void viConfigureForLegal(void)
 {
-	//s32 i;
+	s32 i;
 
-	//for (i = 0; i < NUM_GFXTASKS; i++) {
-		/*g_ViDataArray[i].x = videoGetWidth();
-		g_ViDataArray[i].bufx = videoGetWidth();
-		g_ViDataArray[i].viewx = videoGetWidth();*/
+	for (i = 0; i < NUM_GFXTASKS; i++) {
+		g_ViDataArray[i].x = FBALLOC_WIDTH_LO;
+		g_ViDataArray[i].bufx = FBALLOC_WIDTH_LO;
+		g_ViDataArray[i].viewx = FBALLOC_WIDTH_LO;
 
-		g_ViDataArray[1].y = videoGetHeight();
-		g_ViDataArray[1].bufy = videoGetHeight();
-		g_ViDataArray[1].viewy = videoGetHeight();
-	//}
+		g_ViDataArray[i].y = FBALLOC_HEIGHT_LO;
+		g_ViDataArray[i].bufy = FBALLOC_HEIGHT_LO;
+		g_ViDataArray[i].viewy = FBALLOC_HEIGHT_LO;
+	}
 }
 
 const s16 g_ViModeWidths[]  = {FBALLOC_WIDTH_LO,  FBALLOC_WIDTH_LO,  SCREEN_320 * 2};
-const s16 g_ViModeHeights[] = {FBALLOC_HEIGHT_LO, FBALLOC_HEIGHT_LO, (220) * 2};
+const s16 g_ViModeHeights[] = {FBALLOC_HEIGHT_LO, FBALLOC_HEIGHT_LO, (PAL ? 252 : 220) * 2};
 
 /**
  * Allocate the colour framebuffers for the given stage.
@@ -167,10 +159,10 @@ void viReset(s32 stagenum)
 	u8 *fb1;
 
 	if (stagenum == STAGE_TITLE) {
-			//viSetMode(VIMODE_HI);
+			viSetMode(VIMODE_HI);
 			fbsize = g_ViModeWidths[2] * g_ViModeHeights[2] * NUM_FRAMEBUFFERS;
 	} else {
-		//viSetMode(VIMODE_LO);
+		viSetMode(VIMODE_LO);
 
 		fbsize = FBALLOC_WIDTH_HI * FBALLOC_HEIGHT_HI * NUM_FRAMEBUFFERS;
 
@@ -193,7 +185,7 @@ void viReset(s32 stagenum)
 	g_FrameBuffers[0] = (u16 *) ptr;
 	g_FrameBuffers[1] = (u16 *) (fbsize + ptr);
 
-	//g_ViFrontData->fb = g_FrameBuffers[g_ViFrontIndex];
+	g_ViFrontData->fb = g_FrameBuffers[g_ViFrontIndex];
 	g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
 
 	fb0 = (u8 *) g_FrameBuffers[0];
@@ -244,63 +236,66 @@ void viHandleRetrace(void)
 
 void viUpdateMode(void)
 {
-	//struct rend_vidat *prevdata;
-	//f32 x;
-	//f32 y;
-	//s32 reg;
-	//s32 v1;
-	//s32 tmp;
-	s32 slot = 0;
+	struct rend_vidat *prevdata;
+	f32 x;
+	f32 y;
+	s32 reg;
+	s32 v1;
+	s32 tmp;
+	s32 slot;
+	s32 hstart;
+	s32 vstart;
 
-	videoClearScreen();
-
-	/*if (g_ViFrontData->mode != g_ViBackData->mode) {
+	if (g_ViFrontData->mode != g_ViBackData->mode) {
 		switch (g_ViBackData->mode) {
 		case VIMODE_NONE:
 			//osViSetYScale(1.0f);
-			//videoClearScreen();
-			//break;
+			videoClearScreen();
+			break;
 		case VIMODE_LO:
 			break;
 		case VIMODE_HI:
 			break;
 		}
-	}*/
+	}
 
-	/*x = (f32) g_ViBackData->x / (f32) g_ViBackData->bufx;
+	x = (f32) g_ViBackData->x / (f32) g_ViBackData->bufx;
 	y = (f32) g_ViBackData->y / (f32) g_ViBackData->bufy;
 
 	if (g_ViBackData->mode == VIMODE_NONE) {
 		y = 1.0f; \
-	} \*/
-	//slot = g_ViSlot;
+	} \
+	slot = g_ViSlot;
 
-	/*g_ViXScalesBySlot[slot] = x;
+	if (g_ViBackData->mode == 1);
+
+	g_ViXScalesBySlot[slot] = x;
 	g_ViYScalesBySlot[slot] = y;
-	g_SchedViModesPending[slot] = true;*/
 
 	if (g_ViBackData->mode == VIMODE_LO) {
+		g_SchedViModesPending[slot] = true;
+	} else if (g_ViBackData->mode == VIMODE_HI) {
 		g_SchedViModesPending[slot] = true;
 	} else {
 		g_SchedViModesPending[slot] = false;
 	}
 
-	//slot = (slot + 1) % NUM_GFXTASKS;
-	//g_ViSlot = slot;
+	slot = (slot + 1) % NUM_GFXTASKS;
+	g_ViSlot = slot;
 
 	//g_RdpCurTask->framebuffer = g_ViIs16Bit ? g_ViBackData->fb : g_FrameBuffers[0];
 
-	//prevdata = g_ViBackData;
+	prevdata = g_ViBackData;
 
-	/*g_ViFrontIndex = (g_ViFrontIndex + 1) % NUM_FRAMEBUFFERS;
+	g_ViFrontIndex = (g_ViFrontIndex + 1) % NUM_FRAMEBUFFERS;
 	g_ViBackIndex = (g_ViBackIndex + 1) % NUM_FRAMEBUFFERS;
 
 	g_ViFrontData = g_ViDataArray + g_ViFrontIndex;
-	g_ViBackData = g_ViDataArray + g_ViBackIndex;*/
+	g_ViBackData = g_ViDataArray + g_ViBackIndex;
 
-	//bcopy(g_ViBackData, g_ViBackData, sizeof(struct rend_vidat));
+	bcopy(prevdata, g_ViBackData, sizeof(struct rend_vidat));
 
-	//g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
+	g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
 
 	if (g_ViReconfigured) {
 		g_ViReconfigured = false;
@@ -330,9 +325,24 @@ void viSetMode(s32 mode)
 	g_ViBackData->y = g_ViBackData->bufy = g_ViModeHeights[mode];
 }
 
+void viSet16Bit(void)
+{
+	g_ViIs16Bit = true;
+}
+
+void viSet32Bit(void)
+{
+	g_ViIs16Bit = false;
+}
+
 u16 *viGetBackBuffer(void)
 {
 	return g_ViBackData->fb;
+}
+
+u16 *viGetFrontBuffer(void)
+{
+	return g_ViFrontData->fb;
 }
 
 void viSetBackBuffer(u16 *fb)
@@ -377,7 +387,7 @@ Gfx *vi0000ab78(Gfx *gdl)
 
 	gSPMatrix(gdl++, (uintptr_t)(sp4c), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	gSPMatrix(gdl++, (uintptr_t)(sp48), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-	//gSPPerspNormalize(gdl++, sp46);
+	gSPPerspNormalize(gdl++, sp46);
 
 	return gdl;
 }
@@ -392,12 +402,12 @@ Gfx *vi0000aca4(Gfx *gdl, f32 znear, f32 zfar)
 	guMtxF2L(tmp.m, mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-	//gSPPerspNormalize(gdl++, scale);
+	gSPPerspNormalize(gdl++, scale);
 
 	return gdl;
 }
 
-Gfx *viSetupViewportAndProjection(Gfx *gdl, Vp *vp)
+Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 {
 	vp[g_ViBackIndex].vp.vscale[0] = g_ViBackData->viewx * 2;
 	vp[g_ViBackIndex].vp.vtrans[0] = g_ViBackData->viewx * 2 + g_ViBackData->viewleft * 4;
@@ -412,7 +422,36 @@ Gfx *viSetupViewportAndProjection(Gfx *gdl, Vp *vp)
 	guMtxF2L(var80092830.m, var80092870);
 
 	gSPMatrix(gdl++, (uintptr_t)(var80092870), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-	//gSPPerspNormalize(gdl++, g_ViPerspScale);
+	gSPPerspNormalize(gdl++, g_ViPerspScale);
+
+	camSetPerspectiveMtxL(var80092870);
+	camSetMtxF1754(&var80092830);
+
+	return gdl;
+}
+
+Gfx *vi0000af00(Gfx *gdl, Vp *vp)
+{
+	vp[g_ViBackIndex].vp.vscale[0] = g_ViBackData->viewx * 2;
+	vp[g_ViBackIndex].vp.vtrans[0] = g_ViBackData->viewx * 2 + g_ViBackData->viewleft * 4;
+
+	vp[g_ViBackIndex].vp.vscale[1] = g_ViBackData->viewy * 2;
+	vp[g_ViBackIndex].vp.vtrans[1] = g_ViBackData->viewy * 2 + g_ViBackData->viewtop * 4;
+
+	vp[g_ViBackIndex].vp.vscale[2] = 511;
+	vp[g_ViBackIndex].vp.vtrans[2] = 511;
+
+	vp[g_ViBackIndex].vp.vscale[3] = 0;
+	vp[g_ViBackIndex].vp.vtrans[3] = 0;
+
+	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
+
+	var80092870 = gfxAllocateMatrix();
+	guPerspectiveF(var80092830.m, &g_ViPerspScale, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
+	guMtxF2L(var80092830.m, var80092870);
+
+	gSPMatrix(gdl++, (uintptr_t)(var80092870), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPPerspNormalize(gdl++, g_ViPerspScale);
 
 	camSetPerspectiveMtxL(var80092870);
 	camSetMtxF1754(&var80092830);
@@ -429,7 +468,25 @@ Gfx *vi0000b0e8(Gfx *gdl, f32 fovy, f32 aspect)
 	guMtxF2L(tmp.m, mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-	//gSPPerspNormalize(gdl++, g_ViPerspScale);
+	gSPPerspNormalize(gdl++, g_ViPerspScale);
+
+	return gdl;
+}
+
+Gfx *vi0000b1a8(Gfx *gdl)
+{
+	return vi0000ad5c(gdl, &g_Vars.currentplayer->viewport[0]);
+}
+
+Gfx *vi0000b1d0(Gfx *gdl)
+{
+	gdl = vi0000b1a8(gdl);
+
+	if (g_ViIs16Bit) {
+		gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_ViBackData->bufx, (uintptr_t)(g_ViBackData->fb));
+	} else {
+		gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_32b, g_ViBackData->bufx, (uintptr_t)(g_FrameBuffers[0]));
+	}
 
 	return gdl;
 }
@@ -545,14 +602,12 @@ void viSetBufSize(s16 width, s16 height)
 
 s16 viGetBufWidth(void)
 {
-	//return g_ViBackData->bufx;
-	return videoGetWidth();
+	return g_ViBackData->bufx;
 }
 
 s16 viGetBufHeight(void)
 {
-	//return g_ViBackData->bufy;
-	return videoGetHeight();
+	return g_ViBackData->bufy;
 }
 
 void viSetSize(s16 width, s16 height)
@@ -629,6 +684,11 @@ void viSetAspect(f32 aspect)
 	camSetScale();
 }
 
+f32 viGetAspect(void)
+{
+	return g_ViBackData->aspect;
+}
+
 void viSetFovAspectAndSize(f32 fovy, f32 aspect, s16 width, s16 height)
 {
 	g_ViBackData->fovy = fovy;
@@ -663,7 +723,11 @@ void viGetZRange(struct zrange *zrange)
 
 Gfx *viSetFillColour(Gfx *gdl, s32 r, s32 g, s32 b)
 {
-	gDPSetFillColor(gdl++, (GPACK_RGBA5551(r, g, b, 1) << 16) | GPACK_RGBA5551(r, g, b, 1));
+	if (g_ViIs16Bit) {
+		gDPSetFillColor(gdl++, (GPACK_RGBA5551(r, g, b, 1) << 16) | GPACK_RGBA5551(r, g, b, 1));
+	} else {
+		(gdl++, r << 24 | g << 16 | b << 8 | 0xff);
+	}
 
 	return gdl;
 }

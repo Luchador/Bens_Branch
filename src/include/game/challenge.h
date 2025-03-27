@@ -1,50 +1,51 @@
 #ifndef _IN_GAME_CHALLENGE_H
 #define _IN_GAME_CHALLENGE_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
-extern u32 g_MpChallengeIndex;
+extern uint32_t g_MpChallengeIndex;
 extern struct mpconfigfull *g_MpCurrentChallengeConfig;
 
 void challengesInit(void);
 
 void challengeDetermineUnlockedFeatures(void);
 void challengePerformSanityChecks(void);
-char *challengeGetNameBySlot(s32 slot);
-bool challengeIsCompletedByAnyChrWithNumPlayersBySlot(s32 slot, s32 numplayers);
-struct mpconfigfull *challengeLoadConfig(s32 confignum, u8 *buffer, s32 len);
-s32 challengeForceUnlockFeature(s32 featurenum, u8 *array, s32 tail, s32 len);
-s32 challengeForceUnlockSetupFeatures(struct mpsetup *mpsetup, u8 *array, s32 len);
-void challengeForceUnlockConfigFeatures(struct mpconfig *config, u8 *array, s32 len, s32 challengeindex);
+char *challengeGetNameBySlot(int slot);
+bool challengeIsCompletedByAnyChrWithNumPlayersBySlot(int slot, int numplayers);
+struct mpconfigfull *challengeLoadConfig(int confignum, uint8_t *buffer, int len);
+int challengeForceUnlockFeature(int featurenum, uint8_t *array, int tail, int len);
+int challengeForceUnlockSetupFeatures(struct mpsetup *mpsetup, uint8_t *array, int len);
+void challengeForceUnlockConfigFeatures(struct mpconfig *config, uint8_t *array, int len, int challengeindex);
 void challengeForceUnlockBotFeatures(void);
 void challengeApply(void);
 char *challengeGetCurrentDescription(void);
 char *challengeGetConfigDescription(struct mpconfigfull *mpconfig);
 bool challengeIsCompleteForEndscreen(void);
 bool aiMpInitSimulants(void);
-bool challengeIsAvailableToPlayer(s32 chrnum, s32 challengeindex);
-bool challengeIsAvailableToAnyPlayer(s32 challengeindex);
-s32 challengeGetNumAvailable(void);
-char *challengeGetName(s32 challengeindex);
-void challengeSetCurrentBySlot(s32 slotnum);
-s32 challengeGetCurrent(void);
-struct mpconfigfull *challengeLoad(s32 challengeindex, u8 *buffer, s32 len);
-struct mpconfigfull *challengeLoadBySlot(s32 n, u8 *buffer, s32 len);
-struct mpconfigfull *challengeLoadCurrent(u8 *buffer, s32 len);
+bool challengeIsAvailableToPlayer(int chrnum, int challengeindex);
+bool challengeIsAvailableToAnyPlayer(int challengeindex);
+int challengeGetNumAvailable(void);
+char *challengeGetName(int challengeindex);
+void challengeSetCurrentBySlot(int slotnum);
+int challengeGetCurrent(void);
+struct mpconfigfull *challengeLoad(int challengeindex, uint8_t *buffer, int len);
+struct mpconfigfull *challengeLoadBySlot(int n, uint8_t *buffer, int len);
+struct mpconfigfull *challengeLoadCurrent(uint8_t *buffer, int len);
 void challengeRemoveForceUnlocks(void);
-s32 challengeRemovePlayerLock(void);
-void challengeLoadAndStoreCurrent(u8 *buffer, s32 len);
+int challengeRemovePlayerLock(void);
+void challengeLoadAndStoreCurrent(uint8_t *buffer, int len);
 void challengeUnsetCurrent(void);
 bool challengeIsLoaded(void);
-s32 challengeGetAutoFocusedIndex(s32 mpchrnum);
-char *challengeGetName2(s32 playernum, s32 challengeindex);
-bool challengeIsCompletedByPlayerWithNumPlayers2(s32 mpchrnum, s32 index, s32 numplayers);
-bool challengeIsCompletedByAnyPlayerWithNumPlayers(s32 index, s32 numplayers);
-void challengeSetCompletedByAnyPlayerWithNumPlayers(s32 index, s32 numplayers, bool completed);
-bool challengeIsCompletedByPlayerWithNumPlayers(s32 mpchrnum, s32 index, s32 numplayers);
-void challengeSetCompletedByPlayerWithNumPlayers(u32 mpchrnum, s32 index, s32 numplayers, bool completed);
+int challengeGetAutoFocusedIndex(int mpchrnum);
+char *challengeGetName2(int playernum, int challengeindex);
+bool challengeIsCompletedByPlayerWithNumPlayers2(int mpchrnum, int index, int numplayers);
+bool challengeIsCompletedByAnyPlayerWithNumPlayers(int index, int numplayers);
+void challengeSetCompletedByAnyPlayerWithNumPlayers(int index, int numplayers, bool completed);
+bool challengeIsCompletedByPlayerWithNumPlayers(int mpchrnum, int index, int numplayers);
+void challengeSetCompletedByPlayerWithNumPlayers(uint32_t mpchrnum, int index, int numplayers, bool completed);
 void challengeConsiderMarkingComplete(void);
-bool challengeIsFeatureUnlocked(s32 feature);
+bool challengeIsFeatureUnlocked(int feature);
 
 #endif

@@ -9,8 +9,8 @@
 
 void bgunStop(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	for (i = 0; i < PLAYERCOUNT(); i++) {
 		for (j = 0; j < 2; j++) {

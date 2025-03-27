@@ -1,6 +1,7 @@
 #ifndef IN_GAME_CHEATS_H
 #define IN_GAME_CHEATS_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
@@ -12,21 +13,21 @@ extern struct menudialogdef g_CheatsClassicWeaponsMenuDialog;
 extern struct menudialogdef g_CheatsWeaponsMenuDialog;
 extern struct menudialogdef g_CheatsBuddiesMenuDialog;
 
-u32 cheatIsUnlocked(s32 cheat_id);
-bool cheatIsActive(s32 cheat_id);
-void cheatActivate(s32 cheat_id);
-void cheatDeactivate(s32 cheat_id);
+uint32_t cheatIsUnlocked(int cheat_id);
+bool cheatIsActive(int cheat_id);
+void cheatActivate(int cheat_id);
+void cheatDeactivate(int cheat_id);
 void cheatsInit(void);
 void cheatsReset(void);
 char *cheatGetNameIfUnlocked(struct menuitem *item);
 char *cheatGetMarquee(struct menuitem *item);
-s32 cheatGetByTimedStageIndex(s32 stage_index, s32 difficulty);
-s32 cheatGetByCompletedStageIndex(s32 stage_index);
-s32 cheatGetTime(s32 cheat_id);
-char *cheatGetName(s32 cheat_id);
-MenuDialogHandlerResult cheatMenuHandleDialog(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data);
-MenuItemHandlerResult cheatCheckboxMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data);
-MenuItemHandlerResult cheatMenuHandleBuddyCheckbox(s32 operation, struct menuitem *item, union handlerdata *data);
-MenuItemHandlerResult cheatMenuHandleTurnOffAllCheats(s32 operation, struct menuitem *item, union handlerdata *data);
+int cheatGetByTimedStageIndex(int stage_index, int difficulty);
+int cheatGetByCompletedStageIndex(int stage_index);
+int cheatGetTime(int cheat_id);
+char *cheatGetName(int cheat_id);
+MenuDialogHandlerResult cheatMenuHandleDialog(int operation, struct menudialogdef *dialogdef, union handlerdata *data);
+MenuItemHandlerResult cheatCheckboxMenuHandler(int operation, struct menuitem *item, union handlerdata *data);
+MenuItemHandlerResult cheatMenuHandleBuddyCheckbox(int operation, struct menuitem *item, union handlerdata *data);
+MenuItemHandlerResult cheatMenuHandleTurnOffAllCheats(int operation, struct menuitem *item, union handlerdata *data);
 
 #endif

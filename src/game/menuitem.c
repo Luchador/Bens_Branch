@@ -525,6 +525,7 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 
 						gDPPipeSync(gdl++);
 
+#if VERSION >= VERSION_NTSC_1_0
 						g_ScissorX1 = sp94left * g_ScaleX;
 						g_ScissorX2 = sp8cright * g_ScaleX;
 						g_ScissorY1 = sp90top;
@@ -571,6 +572,9 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 						}
 
 						gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+#else
+						gDPSetScissor(gdl++, G_SC_NON_INTERLACE, sp94left * g_ScaleX, sp90top, sp8cright * g_ScaleX, sp88bottom);
+#endif
 
 						spb8.type19.gdl = gdl;
 						spb8.type19.unk04 = optionindex;
@@ -4056,7 +4060,7 @@ Gfx *menuitemControllerRenderText(Gfx *gdl, s32 curmode, struct menurendercontex
 		if ((curmode < CONTROLMODE_21 || curmode == CONTROLMODE_PC) || (i >= 4 && i <= 7)) {
 			// Rendering a label such as "L/R BUTTONS:"
 			rx = context->x + padx + 76;
-			gdl = textRenderProjected(gdl, &rx, &ry, langRemoveNewline(langGet(labels[i])),
+			gdl = textRenderProjected(gdl, &rx, &ry, langGet(labels[i]),
 					g_CharsHandelGothicXs, g_FontHandelGothicXs, labelcolour, viGetWidth(), viGetHeight(), 0, 0);
 		}
 

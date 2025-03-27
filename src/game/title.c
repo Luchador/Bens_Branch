@@ -1188,7 +1188,6 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 	{
 		Mtxf spa8;
 		struct coord sp9c;
-		int stack[2];
 		Mtxf sp54;
 
 		sp9c.x = 0.0f;

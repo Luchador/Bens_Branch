@@ -77,8 +77,6 @@
 	build/ROMID/game/objectives.o (section); \
 	build/ROMID/game/game_096360.o (section); \
 	build/ROMID/game/quaternion.o (section); \
-	build/ROMID/game/floor.o (section); \
-	build/ROMID/game/ceil.o (section); \
 	build/ROMID/game/invitems.o (section); \
 	build/ROMID/game/bondgun.o (section); \
 	build/ROMID/game/gunfx.o (section); \

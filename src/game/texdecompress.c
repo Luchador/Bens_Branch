@@ -2276,9 +2276,9 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 				compptr = alignedcompbuffer;
 			} 
 			// try to load from the data/textures folder if present
-			//else if(createBMP(g_TexNumToLoad, 48, 31, alignedcompbuffer, 8192) > 0) {
-			//	compptr = alignedcompbuffer;
-			//}
+			else if(createBMP(g_TexNumToLoad, 48, 31, alignedcompbuffer, 8192) > 0) {
+				compptr = alignedcompbuffer;
+			}
 			else
 			{
 				// Copy the compressed texture to RAM

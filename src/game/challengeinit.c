@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/challenge.h"
 #include "game/mplayer/mplayer.h"
@@ -9,8 +10,8 @@
 void challengesInit(void)
 {
 	struct mpconfigfull *mpconfig;
-	u8 buffer[0x1ca];
-	s32 i;
+	uint8_t buffer[0x1ca];
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpChallenges); i++) {
 		g_MpChallenges[i].availability = 0;

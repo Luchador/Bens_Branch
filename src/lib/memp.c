@@ -156,8 +156,6 @@ void *mempAllocFromBank(struct memorypool *pool, u32 size, u8 poolnum)
 	pool->leftpos += size;
 	pool->prevallocation = allocation;
 
-	if (1);
-
 	return (void *)allocation;
 }
 
@@ -214,11 +212,6 @@ s32 mempRealloc(void *allocation, s32 newsize, u8 poolnum)
 	return 1;
 }
 
-void memp000124cc(void)
-{
-	// empty
-}
-
 /**
  * Return the amount of free space in the given pool and bank.
  */
@@ -234,28 +227,6 @@ u32 mempGetPoolFree(u8 poolnum, u32 bank)
 
 	return pool->rightpos - pool->leftpos;
 }
-
-#ifdef DEBUG
-u32 mempGetPoolSize(u8 poolnum, u32 bank)
-{
-	struct memorypool *pool;
-
-	if (bank == MEMBANK_ONBOARD) {
-		pool = &g_MempOnboardPools[poolnum];
-	} else {
-		pool = &g_MempExpansionPools[poolnum];
-	}
-
-	return pool->rightpos - pool->start;
-}
-#endif
-
-#if VERSION < VERSION_NTSC_1_0
-void *mempAllocFromPackedWord(u32 word)
-{
-	return mempAlloc(word >> 4, word & 0x0f);
-}
-#endif
 
 /**
  * Reset the pool's left side to its start address, effectively freeing the left

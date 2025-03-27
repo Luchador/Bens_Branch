@@ -1,31 +1,32 @@
 #ifndef IN_GAME_BONDWALK_H
 #define IN_GAME_BONDWALK_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
 void bwalkInit(void);
-void bwalkSetSwayTarget(s32 value);
-void bwalkSetSwayTargetf(f32 value);
-void bwalkAdjustCrouchPos(s32 value);
+void bwalkSetSwayTarget(int value);
+void bwalkSetSwayTargetf(float value);
+void bwalkAdjustCrouchPos(int value);
 void bwalk0f0c3b38(struct coord *param_1, struct defaultobj *obj);
-s32 bwalkTryMoveUpwards(f32 amount);
-bool bwalkCanMoveUpwards(f32 amount);
-bool bwalkCalculateNewPosition(struct coord *vel, f32 rotateamount, bool apply, f32 extrawidth, s32 arg4);
-bool bwalkCalculateNewPositionWithPush(struct coord *delta, f32 rotateamount, bool apply, f32 extrawidth, s32 types);
-s32 bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, s32 types);
-s32 bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c, struct coord *d, struct coord *e, s32 types);
-s32 bwalk0f0c494c(struct coord *a, struct coord *b, struct coord *c, s32 types);
-s32 bwalk0f0c4a5c(struct coord *a, struct coord *b, struct coord *c, s32 types);
-void bwalkUpdateSpeedSideways(f32 targetspeed, f32 accelspeed, s32 mult);
-void bwalkUpdateSpeedForwards(f32 targetspeed, f32 accelspeed);
+int bwalkTryMoveUpwards(float amount);
+bool bwalkCanMoveUpwards(float amount);
+bool bwalkCalculateNewPosition(struct coord *vel, float rotateamount, bool apply, float extrawidth, int arg4);
+bool bwalkCalculateNewPositionWithPush(struct coord *delta, float rotateamount, bool apply, float extrawidth, int types);
+int bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, int types);
+int bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c, struct coord *d, struct coord *e, int types);
+int bwalk0f0c494c(struct coord *a, struct coord *b, struct coord *c, int types);
+int bwalk0f0c4a5c(struct coord *a, struct coord *b, struct coord *c, int types);
+void bwalkUpdateSpeedSideways(float targetspeed, float accelspeed, int mult);
+void bwalkUpdateSpeedForwards(float targetspeed, float accelspeed);
 void bwalkUpdateVertical(void);
 void bwalkApplyCrouchSpeed(void);
 bool bwalkCanUncrouch(void);
 void bwalkUpdateCrouchOffsetReal(void);
 void bwalkUpdateCrouchOffset(void);
 void bwalkUpdateTheta(void);
-void bwalk0f0c63bc(struct coord *arg0, u32 arg1, s32 types);
+void bwalk0f0c63bc(struct coord *arg0, uint32_t arg1, int types);
 void bwalkUpdatePrevPos(void);
 void bwalkHandleActivate(void);
 void bwalkApplyMoveData(struct movedata *data);

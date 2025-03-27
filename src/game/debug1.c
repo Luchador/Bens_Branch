@@ -30,20 +30,6 @@ s32 debug_log_float(const char *message, f32 num)
 	return 1;
 }
 
-s32 debug_log_float3(const char *message, f32 num1, f32 num2, f32 num3)
-{
-	FILE *debug_file = fopen("debug.log", "a");
-    if (debug_file == NULL) {
-        perror("Error opening debug.log");
-        return 0;
-    }
-
-    fprintf(debug_file, message, num1, num2, num3);
-    fclose(debug_file);
-
-	return 1;
-}
-
 s32 debug_erase()
 {
 	FILE *file = fopen("debug.log", "w"); // Open in write mode, truncates the file

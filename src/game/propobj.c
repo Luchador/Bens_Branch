@@ -1,6 +1,6 @@
 #include <ultra64.h>
-#include <stdint.h>
 #include <math.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/bondmove.h"
 #include "game/bondwalk.h"
@@ -18,8 +18,6 @@
 #include "game/objectives.h"
 #include "game/mtxutils.h"
 #include "game/quaternion.h"
-#include "game/floor.h"
-#include "game/ceil.h"
 #include "game/bondgun.h"
 #include "game/gunfx.h"
 #include "game/weaponutils.h"
@@ -58,7 +56,6 @@
 #include "game/propobj.h"
 #include "game/wallhit.h"
 #include "game/shards.h"
-#include "video.h"
 #include "bss.h"
 #include "tvcmds.h"
 #include "lib/vi.h"
@@ -176,6 +173,9 @@ bool doorCallLift(struct prop *doorprop, bool allowclose)
 					doorsActivate(link->lift, allowclose);
 				} else if (type == OBJTYPE_LIFT) {
 					if (allowclose
+#if VERSION < VERSION_NTSC_1_0
+							&& g_Vars.currentplayer->lift == link->lift
+#endif
 							&& door->base.type == OBJTYPE_DOOR
 							&& !doorIsClosed(door)) {
 						handled = false;
@@ -925,7 +925,7 @@ void func0f06803c(struct coord *arg0, f32 *arg1, f32 *arg2, f32 *arg3, f32 *arg4
 	struct coord sp4c;
 	f32 sp44[2];
 
-	f32 aspect = videoGetAspect();
+	f32 aspect = viGetAspect();
 	f32 fovy = viGetFovY();
 
 	if (g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit & DEVICE_EYESPY) {
@@ -3230,7 +3230,7 @@ s32 func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 	if ((prop->pos.x != pos->x || prop->pos.y != pos->y || prop->pos.z != pos->z)
 			&& (obj->hidden & OBJHFLAG_PROJECTILE)
 			&& (obj->projectile->flags & PROJECTILEFLAG_STICKY)) {
-		portalComputeReachableRooms(&prop->pos, &sp1c4, prop->rooms, spb8, spcc, 20);
+		portal00018148(&prop->pos, &sp1c4, prop->rooms, spb8, spcc, 20);
 
 		ptr = spcc;
 
@@ -9050,7 +9050,7 @@ void autogunTickShoot(struct prop *autogunprop)
 				}
 
 				if (missed) {
-					portalComputeReachableRooms(&gunpos, &hitpos, gunrooms, hitrooms, NULL, 0);
+					portal00018148(&gunpos, &hitpos, gunrooms, hitrooms, NULL, 0);
 
 					if (chrIsUsingPaintball(ownerchr)) {
 						sparksCreate(hitrooms[0], NULL, &hitpos, 0, 0, SPARKTYPE_PAINT);
@@ -12534,10 +12534,10 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 	if (USINGDEVICE(DEVICE_NIGHTVISION)) {
 		if ((obj->flags & OBJFLAG_PATHBLOCKER) == 0) {
-			colour[0] = g_NVPropBrightness;
-			colour[1] = g_NVPropBrightness;
-			colour[2] = g_NVPropBrightness;
-			colour[3] = g_NVPropHighlight;
+			colour[0] = var8009caed;
+			colour[1] = var8009caed;
+			colour[2] = var8009caed;
+			colour[3] = var8009caee;
 		}
 	} else if (USINGDEVICE(DEVICE_IRSCANNER)) {
 		if ((obj->hidden & OBJHFLAG_CONDITIONALSCENERY) || (obj->flags3 & OBJFLAG3_INFRARED)) {
@@ -14775,7 +14775,7 @@ bool propobjInteract(struct prop *prop)
 			sndStart(var80095200, SFX_TYPING_8118, NULL, -1, -1, -1, -1, -1);
 		}
 
-		menuPointTunnelToPC(&prop->pos);
+		func0f0fd494(&prop->pos);
 	} else if (obj->type == OBJTYPE_ALARM) {
 		// Button press sound
 		sndStart(var80095200, SFX_PRESS_SWITCH, NULL, -1, -1, -1, -1, -1);

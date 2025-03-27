@@ -110,10 +110,6 @@ struct textureconfig g_TcBeamConfigs[] = {
 	/*4*/ { 0x085a, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Alien gun green beams
 };
 
-// struct textureconfig g_TcLaserConfigs[] = {
-// 	/*0*/ { 0x0009, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   },
-// };
-
 struct textureconfig g_TcLaserConfigs[] = {
 	/*0*/ { 0x0009, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   },
 };

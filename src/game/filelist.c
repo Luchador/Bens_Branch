@@ -19,7 +19,6 @@
 #include "lib/mema.h"
 #include "data.h"
 #include "types.h"
-#include "game/debug.h"
 
 s32 g_FilelistKnownPlugCounts[5];
 
@@ -52,11 +51,11 @@ void filelistCreate(s32 listnum, u8 filetype)
 	g_FileLists[listnum]->timeuntilupdate = 1;
 	g_FileLists[listnum]->filetype = filetype;
 
-	if (g_FileListIsOpen == 0) {
+	if (var80062944 == 0) {
 		joySetPfsPollInterval(3);
 	}
 
-	g_FileListIsOpen = 1;
+	var80062944 = 1;
 }
 
 s32 filelistFindOrCreate(u8 filetype)

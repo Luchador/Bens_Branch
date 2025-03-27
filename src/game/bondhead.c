@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/bondmove.h"
 #include "game/utils.h"
@@ -41,7 +42,7 @@ void bheadUpdateIdleRoll(void)
 
 void bheadUpdatePos(struct coord *vel)
 {
-	s32 i;
+	int i;
 
 	if (g_Vars.currentplayer->resetheadpos) {
 		g_Vars.currentplayer->headpossum.x = 0;
@@ -64,7 +65,7 @@ void bheadUpdatePos(struct coord *vel)
 
 void bheadUpdateRot(struct coord *lookvel, struct coord *upvel)
 {
-	s32 i;
+	int i;
 
 	if (g_Vars.currentplayer->resetheadrot) {
 		g_Vars.currentplayer->headlooksum.x = lookvel->x / (1.0f - g_Vars.currentplayer->headdamp);
@@ -94,10 +95,10 @@ void bheadUpdateRot(struct coord *lookvel, struct coord *upvel)
 	g_Vars.currentplayer->headup.z = g_Vars.currentplayer->headupsum.z * (1.0f - g_Vars.currentplayer->headdamp);
 }
 
-void bheadSetDamp(f32 headdamp)
+void bheadSetDamp(float headdamp)
 {
 	if (headdamp != g_Vars.currentplayer->headdamp) {
-		f32 divisor = 1.0f - headdamp;
+		float divisor = 1.0f - headdamp;
 		g_Vars.currentplayer->headlooksum.x = (g_Vars.currentplayer->headlooksum.x * (1.0f - g_Vars.currentplayer->headdamp)) / divisor;
 		g_Vars.currentplayer->headlooksum.y = (g_Vars.currentplayer->headlooksum.y * (1.0f - g_Vars.currentplayer->headdamp)) / divisor;
 		g_Vars.currentplayer->headlooksum.z = (g_Vars.currentplayer->headlooksum.z * (1.0f - g_Vars.currentplayer->headdamp)) / divisor;
@@ -108,12 +109,12 @@ void bheadSetDamp(f32 headdamp)
 	}
 }
 
-void bheadUpdate(f32 arg0, f32 arg1)
+void bheadUpdate(float arg0, float arg1)
 {
 	struct coord headpos = {0, 0, 0};
 	struct coord lookvel = {0, 0, 1};
 	struct coord upvel = {0, 1, 0};
-	f32 animspeed = 0;
+	float animspeed = 0;
 
 	if (animHasFrames(g_Vars.currentplayer->model.anim->animnum)) {
 		animspeed = modelGetAbsAnimSpeed(&g_Vars.currentplayer->model);
@@ -254,19 +255,19 @@ void bheadUpdate(f32 arg0, f32 arg1)
 	bheadUpdateRot(&lookvel, &upvel);
 }
 
-void bheadAdjustAnimation(f32 speed)
+void bheadAdjustAnimation(float speed)
 {
 	struct chrdata *chr = g_Vars.currentplayer->prop->chr;
-	s32 i;
+	int i;
 
 	speed *= g_HeadAnims[HEADANIM_MOVING].translateperframe;
 
 	for (i = 0; i < ARRAYCOUNT(g_HeadAnims); i++) {
 		if (g_HeadAnims[i].maxspeed * g_HeadAnims[i].translateperframe >= speed) {
-			s32 prevheadanim = g_Vars.currentplayer->headanim;
+			int prevheadanim = g_Vars.currentplayer->headanim;
 
 			if (i != prevheadanim) {
-				f32 startframe = 0.0f;
+				float startframe = 0.0f;
 
 				if (prevheadanim >= 0) {
 					startframe = (g_Vars.currentplayer->model.anim->frame - g_HeadAnims[prevheadanim].loopframe)
@@ -293,25 +294,25 @@ void bheadAdjustAnimation(f32 speed)
 	chr->oldframe = g_Vars.currentplayer->model.anim->frame;
 }
 
-void bheadStartDeathAnimation(s16 animnum, u32 flip, f32 fstarttime, f32 speed)
+void bheadStartDeathAnimation(int16_t animnum, uint32_t flip, float fstarttime, float speed)
 {
 	modelSetAnimation(&g_Vars.currentplayer->model, animnum, flip, fstarttime, speed * 0.5f, 12);
 	g_Vars.currentplayer->headanim = -1;
 }
 
-void bheadSetSpeed(f32 speed)
+void bheadSetSpeed(float speed)
 {
 	modelSetAnimSpeed(&g_Vars.currentplayer->model, speed * 0.5f, 0);
 }
 
-f32 bheadGetBreathingValue(void)
+float bheadGetBreathingValue(void)
 {
 	if (g_Vars.currentplayer->headanim >= 0) {
-		f32 a = g_Vars.currentplayer->bondbreathing * 0.012500001f + (1.0f / 240.0f);
-		f32 b = modelGetAbsAnimSpeed(&g_Vars.currentplayer->model);
+		float a = g_Vars.currentplayer->bondbreathing * 0.012500001f + (1.0f / 240.0f);
+		float b = modelGetAbsAnimSpeed(&g_Vars.currentplayer->model);
 
 		if (b > 0) {
-			f32 c = b / (g_HeadAnims[g_Vars.currentplayer->headanim].endframe - g_HeadAnims[g_Vars.currentplayer->headanim].loopframe);
+			float c = b / (g_HeadAnims[g_Vars.currentplayer->headanim].endframe - g_HeadAnims[g_Vars.currentplayer->headanim].loopframe);
 
 			if (c < a) {
 				c = a;

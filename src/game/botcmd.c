@@ -1,10 +1,10 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/activemenu.h"
 #include "game/chraction.h"
 #include "game/debug.h"
 #include "game/chr.h"
-#include "game/ceil.h"
 #include "game/weaponutils.h"
 #include "game/playermgr.h"
 #include "game/mplayer/setup.h"
@@ -26,7 +26,7 @@
  * The second value is the maximum attack distance.
  * The third value doesn't appear to have any purpose.
  */
-f32 g_BotDistConfigs[][3] = {
+float g_BotDistConfigs[][3] = {
 	{ 0,    120,  10000 }, // BOTDISTCFG_CLOSE
 	{ 300,  450,  4500  }, // BOTDISTCFG_PISTOL
 	{ 300,  600,  4500  }, // BOTDISTCFG_DEFAULT
@@ -39,18 +39,17 @@ f32 g_BotDistConfigs[][3] = {
 
 void botcmdTickDistMode(struct chrdata *chr)
 {
-	s32 confignum;
-	f32 *limits;
-	f32 distance;
-	u8 newmode;
+	int confignum;
+	float *limits;
+	float distance;
+	uint8_t newmode;
 	struct aibot *aibot = chr->aibot;
-	s32 prevmode = aibot->distmode;
+	int prevmode = aibot->distmode;
 	struct prop *targetprop = NULL;
 	bool insight = false;
-	f32 minattackdistance;
-	f32 maxattackdistance;
-	f32 limit3;
-	u32 stack;
+	float minattackdistance;
+	float maxattackdistance;
+	float limit3;
 
 	if (aibot->config->type == BOTTYPE_KAZE) {
 		confignum = BOTDISTCFG_KAZE;
@@ -65,9 +64,9 @@ void botcmdTickDistMode(struct chrdata *chr)
 
 		if (chr->target != -1 && (confignum == BOTDISTCFG_CLOSE || confignum == BOTDISTCFG_KAZE)) {
 			struct prop *target = chrGetTargetProp(chr);
-			f32 xdiff = targetprop->pos.x - target->pos.x;
-			f32 ydiff = targetprop->pos.y - target->pos.y;
-			f32 zdiff = targetprop->pos.z - target->pos.z;
+			float xdiff = targetprop->pos.x - target->pos.x;
+			float ydiff = targetprop->pos.y - target->pos.y;
+			float zdiff = targetprop->pos.z - target->pos.z;
 
 			if (xdiff * xdiff + ydiff * ydiff + zdiff * zdiff < 500 * 500) {
 				limits = g_BotDistConfigs[confignum];
@@ -126,7 +125,6 @@ void botcmdTickDistMode(struct chrdata *chr)
 		newmode = BOTDISTMODE_GOTO;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (newmode == BOTDISTMODE_BACKUP && insight && aibot->distoverrideprop == targetprop) {
 		// don't unset
 	} else {
@@ -160,11 +158,6 @@ void botcmdTickDistMode(struct chrdata *chr)
 			}
 		}
 	}
-#else
-	if (newmode == BOTDISTMODE_OK && !insight) {
-		newmode = BOTDISTMODE_ADVANCE;
-	}
-#endif
 
 	aibot->distmode = newmode;
 
@@ -193,9 +186,9 @@ void botcmdTickDistMode(struct chrdata *chr)
 	}
 }
 
-void botcmdApply(struct chrdata *chr, u32 command)
+void botcmdApply(struct chrdata *chr, unsigned int command)
 {
-	f32 value;
+	float value;
 
 	switch (command) {
 	case AIBOTCMD_ATTACK:

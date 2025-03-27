@@ -26,14 +26,12 @@
 #include "lib/collision.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
-extern f32 fabsf(f32);
-#endif
+extern float fabsf(float);
 
 void bwalkInit(void)
 {
-	u32 prevmode = g_Vars.currentplayer->bondmovemode;
-	s32 i;
+	uint32_t prevmode = g_Vars.currentplayer->bondmovemode;
+	int i;
 
 	g_Vars.currentplayer->bondmovemode = MOVEMODE_WALK;
 	g_Vars.currentplayer->bondonground = 0;
@@ -116,16 +114,16 @@ void bwalkInit(void)
 	}
 }
 
-void bwalkSetSwayTargetf(f32 value) {
+void bwalkSetSwayTargetf(float value) {
 	g_Vars.currentplayer->swaytarget = value * 75.f;
 }
 
-void bwalkSetSwayTarget(s32 value)
+void bwalkSetSwayTarget(int value)
 {
 	g_Vars.currentplayer->swaytarget = value * 75.0f;
 }
 
-void bwalkAdjustCrouchPos(s32 value)
+void bwalkAdjustCrouchPos(int value)
 {
 	g_Vars.currentplayer->crouchpos += value;
 
@@ -179,16 +177,15 @@ void bwalk0f0c3b38(struct coord *reltarget, struct defaultobj *obj)
  * The function is called with amount = 0 when attempting to stand up from a
  * crouch, after increasing the player's bbox to the standing size.
  */
-s32 bwalkTryMoveUpwards(f32 amount)
+int bwalkTryMoveUpwards(float amount)
 {
 	bool result;
 	struct coord newpos;
 	RoomNum rooms[8];
-	u32 stack;
-	u32 types;
-	f32 ymax;
-	f32 ymin;
-	f32 radius;
+	uint32_t types;
+	float ymax;
+	float ymin;
+	float radius;
 
 	if (g_Vars.currentplayer->floorflags & GEOFLAG_SLOPE) {
 		g_Vars.enableslopes = false;
@@ -226,16 +223,15 @@ s32 bwalkTryMoveUpwards(f32 amount)
 	return result;
 }
 
-bool bwalkCanMoveUpwards(f32 amount)
+bool bwalkCanMoveUpwards(float amount)
 {
 	bool result;
 	struct coord newpos;
 	RoomNum rooms[8];
-	u32 stack;
-	u32 types;
-	f32 ymax;
-	f32 ymin;
-	f32 radius;
+	uint32_t types;
+	float ymax;
+	float ymin;
+	float radius;
 
 	if (g_Vars.currentplayer->floorflags & GEOFLAG_SLOPE) {
 		g_Vars.enableslopes = false;
@@ -267,21 +263,21 @@ bool bwalkCanMoveUpwards(f32 amount)
 	return (result == CDRESULT_NOCOLLISION);
 }
 
-bool bwalkCalculateNewPosition(struct coord *vel, f32 rotateamount, bool apply, f32 extrawidth, s32 checktypes)
+bool bwalkCalculateNewPosition(struct coord *vel, float rotateamount, bool apply, float extrawidth, int checktypes)
 {
-	s32 result = CDRESULT_NOCOLLISION;
-	f32 halfradius;
+	int result = CDRESULT_NOCOLLISION;
+	float halfradius;
 	struct coord dstpos;
 	RoomNum dstrooms[8];
 	bool copyrooms = false;
 	RoomNum sp64[22];
-	s32 types;
-	f32 ymax;
-	f32 ymin;
-	f32 radius;
-	f32 xdiff;
-	f32 zdiff;
-	s32 i;
+	int types;
+	float ymax;
+	float ymin;
+	float radius;
+	float xdiff;
+	float zdiff;
+	int i;
 
 	if (g_Vars.currentplayer->floorflags & GEOFLAG_SLOPE) {
 		g_Vars.enableslopes = false;
@@ -351,7 +347,7 @@ bool bwalkCalculateNewPosition(struct coord *vel, f32 rotateamount, bool apply, 
 	}
 
 	if (result == CDRESULT_NOCOLLISION && apply) {
-		f32 angle = g_Vars.currentplayer->vv_theta + (rotateamount * 360) / M_TAU;
+		float angle = g_Vars.currentplayer->vv_theta + (rotateamount * 360) / M_TAU;
 
 		while (angle < 0) {
 			angle += 360;
@@ -378,9 +374,9 @@ bool bwalkCalculateNewPosition(struct coord *vel, f32 rotateamount, bool apply, 
 	return result;
 }
 
-bool bwalkCalculateNewPositionWithPush(struct coord *delta, f32 rotateamount, bool apply, f32 extrawidth, s32 types)
+bool bwalkCalculateNewPositionWithPush(struct coord *delta, float rotateamount, bool apply, float extrawidth, int types)
 {
-	s32 result = bwalkCalculateNewPosition(delta, rotateamount, apply, extrawidth, types);
+	int result = bwalkCalculateNewPosition(delta, rotateamount, apply, extrawidth, types);
 
 	if (result != CDRESULT_NOCOLLISION) {
 		struct prop *obstacle = cdGetObstacleProp();
@@ -415,10 +411,10 @@ bool bwalkCalculateNewPositionWithPush(struct coord *delta, f32 rotateamount, bo
 				struct chrdata *chr = obstacle->chr;
 				struct coord newpos;
 				RoomNum newrooms[8];
-				f32 movingdist;
-				f32 xdist;
-				f32 zdist;
-				f32 disttochr;
+				float movingdist;
+				float xdist;
+				float zdist;
+				float disttochr;
 				bool canpush = false;
 
 				if (g_Vars.normmplayerisrunning) {
@@ -521,9 +517,9 @@ bool bwalkCalculateNewPositionWithPush(struct coord *delta, f32 rotateamount, bo
 	return result;
 }
 
-s32 bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, s32 types)
+int bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, int types)
 {
-	s32 result = bwalkCalculateNewPositionWithPush(delta, 0, true, 0, types);
+	int result = bwalkCalculateNewPositionWithPush(delta, 0, true, 0, types);
 
 	if (result == CDRESULT_COLLISION) {
 		cdGetEdge(arg1, arg2, 607, "bondwalk.c");
@@ -532,14 +528,14 @@ s32 bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, s
 	return result;
 }
 
-s32 bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c,
-		struct coord *d, struct coord *e, s32 types)
+int bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c,
+		struct coord *d, struct coord *e, int types)
 {
 	struct coord quarter;
 	bool result;
 
 	if (cd00024ea4()) {
-		f32 mult = cd00024e98();
+		float mult = cd00024e98();
 		quarter.x = a->x * mult * 0.25f;
 		quarter.y = a->y * mult * 0.25f;
 		quarter.z = a->z * mult * 0.25f;
@@ -566,10 +562,10 @@ s32 bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c,
 	return CDRESULT_ERROR;
 }
 
-s32 bwalk0f0c494c(struct coord *a, struct coord *b, struct coord *c, s32 types)
+int bwalk0f0c494c(struct coord *a, struct coord *b, struct coord *c, int types)
 {
 	if (b->f[0] != c->f[0] || b->f[2] != c->f[2]) {
-		f32 tmp;
+		float tmp;
 		struct coord sp38;
 		struct coord sp2c;
 
@@ -594,14 +590,14 @@ s32 bwalk0f0c494c(struct coord *a, struct coord *b, struct coord *c, s32 types)
 	return -1;
 }
 
-s32 bwalk0f0c4a5c(struct coord *arg0, struct coord *arg1, struct coord *arg2, s32 types)
+int bwalk0f0c4a5c(struct coord *arg0, struct coord *arg1, struct coord *arg2, int types)
 {
 	struct coord sp34;
 	struct coord sp28;
-	f32 ymax;
-	f32 ymin;
-	f32 tmp;
-	f32 radius;
+	float ymax;
+	float ymin;
+	float tmp;
+	float radius;
 
 	playerGetBbox(g_Vars.currentplayer->prop, &radius, &ymax, &ymin);
 
@@ -666,7 +662,7 @@ s32 bwalk0f0c4a5c(struct coord *arg0, struct coord *arg1, struct coord *arg2, s3
 	return false;
 }
 
-void bwalkUpdateSpeedSideways(f32 targetspeed, f32 accelspeed, s32 mult)
+void bwalkUpdateSpeedSideways(float targetspeed, float accelspeed, int mult)
 {
 	if (g_Vars.normmplayerisrunning) {
 		targetspeed = (g_PlayerConfigsArray[g_Vars.currentplayerstats->mpindex].base.unk1c + 25.0f) / 100 * targetspeed;
@@ -689,7 +685,7 @@ void bwalkUpdateSpeedSideways(f32 targetspeed, f32 accelspeed, s32 mult)
 	g_Vars.currentplayer->speedsideways = g_Vars.currentplayer->speedstrafe;
 }
 
-void bwalkUpdateSpeedForwards(f32 targetspeed, f32 accelspeed)
+void bwalkUpdateSpeedForwards(float targetspeed, float accelspeed)
 {
 	if (g_Vars.normmplayerisrunning) {
 		targetspeed = (g_PlayerConfigsArray[g_Vars.currentplayerstats->mpindex].base.unk1c + 25.0f) / 100 * targetspeed;
@@ -714,38 +710,33 @@ void bwalkUpdateSpeedForwards(f32 targetspeed, f32 accelspeed)
 
 void bwalkUpdateVertical(void)
 {
-	s32 i;
-	f32 newfallspeed;
-	f32 radius;
-	f32 ymax;
-	f32 ymin;
-	f32 ground;
+	int i;
+	float newfallspeed;
+	float radius;
+	float ymax;
+	float ymin;
+	float ground;
 	bool onladder;
 	bool onladder2 = false;
 	RoomNum rooms[8];
 	struct coord testpos;
 	struct coord newpos;
 	RoomNum newrooms[8];
-	s32 newinlift;
+	int newinlift;
 	struct prop *lift = NULL;
-	f32 sumground;
-	f32 moveamount;
-#if VERSION >= VERSION_NTSC_1_0
-	f32 limit;
-	f32 amount;
+	float sumground;
+	float moveamount;
+	float limit;
+	float amount;
 	struct prop *prop;
-#endif
-	f32 newmanground;
-	f32 fallspeed;
-	f32 eyeheight;
-	f32 multiplier;
-#if VERSION >= VERSION_NTSC_1_0
+	float newmanground;
+	float fallspeed;
+	float eyeheight;
+	float multiplier;
 	struct defaultobj *obj;
-#endif
 
 	playerGetBbox(g_Vars.currentplayer->prop, &radius, &ymax, &ymin);
 
-#if VERSION >= VERSION_NTSC_1_0
 	// Maybe reset counter-op's radius - not sure why
 	// Maybe it gets set to 0 when they die?
 	if (g_Vars.antiplayernum >= 0
@@ -756,7 +747,6 @@ void bwalkUpdateVertical(void)
 		g_Vars.currentplayer->bond2.radius = 30;
 		radius = 30;
 	}
-#endif
 
 	// Determine if player is on a ladder
 	// If this comes up false, a second check is done... maybe checking if the
@@ -974,7 +964,7 @@ void bwalkUpdateVertical(void)
 						}
 					} else if (prop->type == PROPTYPE_PLAYER) {
 						// Landed on top of a player
-						u32 prevplayernum = g_Vars.currentplayernum;
+						uint32_t prevplayernum = g_Vars.currentplayernum;
 						setCurrentPlayerNum(playermgrGetPlayerNumByProp(prop));
 
 						if (g_Vars.currentplayer->inlift) {
@@ -1028,7 +1018,7 @@ void bwalkUpdateVertical(void)
 
 		if (g_Vars.currentplayer->bdeltapos.y < -6.0f) {
 			// Play footstep sounds
-			s32 sound;
+			int sound;
 			struct chrdata *chr = g_Vars.currentplayer->prop->chr;
 			chr->floortype = g_Vars.currentplayer->floortype;
 			chr->footstep = 1;
@@ -1054,7 +1044,7 @@ void bwalkUpdateVertical(void)
 					&& (chr->headnum == HEAD_DARK_COMBAT || chr->headnum == HEAD_DARK_FROCK)
 					&& g_Vars.lvframe60 - g_Vars.currentplayer->fallstart > TICKS(40)) {
 				// Play Jo landing grunt
-				s32 sounds[] = {
+				int sounds[] = {
 					SFX_JO_LANDING_046F,
 					SFX_JO_LANDING_05B6,
 					SFX_JO_LANDING_05B7
@@ -1158,7 +1148,7 @@ void bwalkUpdateCrouchOffsetReal(void)
 
 bool bwalkCanUncrouch(void)
 {
-	f32 targetoffset = 0;
+	float targetoffset = 0;
 
 	if (g_Vars.currentplayer->crouchpos == CROUCHPOS_SQUAT) {
 		targetoffset = -90;
@@ -1167,11 +1157,11 @@ bool bwalkCanUncrouch(void)
 	}
 
 	if (targetoffset != g_Vars.currentplayer->crouchoffset) {
-		f32 prevcrouchoffset = g_Vars.currentplayer->crouchoffset;
-		f32 prevcrouchoffsetreal = g_Vars.currentplayer->crouchoffsetreal;
-		f32 prevcrouchoffsetsmall = g_Vars.currentplayer->crouchoffsetsmall;
-		f32 prevcrouchoffsetrealsmall = g_Vars.currentplayer->crouchoffsetrealsmall;
-		f32 prevcrouchspeed = g_Vars.currentplayer->crouchspeed;
+		float prevcrouchoffset = g_Vars.currentplayer->crouchoffset;
+		float prevcrouchoffsetreal = g_Vars.currentplayer->crouchoffsetreal;
+		float prevcrouchoffsetsmall = g_Vars.currentplayer->crouchoffsetsmall;
+		float prevcrouchoffsetrealsmall = g_Vars.currentplayer->crouchoffsetrealsmall;
+		float prevcrouchspeed = g_Vars.currentplayer->crouchspeed;
 
 		g_Vars.currentplayer->crouchoffset = targetoffset;
 
@@ -1193,7 +1183,7 @@ bool bwalkCanUncrouch(void)
 
 void bwalkUpdateCrouchOffset(void)
 {
-	f32 targetoffset = 0;
+	float targetoffset = 0;
 
 	if (bmoveGetCrouchPos() == CROUCHPOS_SQUAT) {
 		targetoffset = -90;
@@ -1204,12 +1194,12 @@ void bwalkUpdateCrouchOffset(void)
 	}
 
 	if (targetoffset != g_Vars.currentplayer->crouchoffset) {
-		f32 prevcrouchoffset = g_Vars.currentplayer->crouchoffset;
-		f32 prevcrouchoffsetreal = g_Vars.currentplayer->crouchoffsetreal;
-		f32 prevcrouchoffsetsmall = g_Vars.currentplayer->crouchoffsetsmall;
-		f32 prevcrouchoffsetrealsmall = g_Vars.currentplayer->crouchoffsetrealsmall;
+		float prevcrouchoffset = g_Vars.currentplayer->crouchoffset;
+		float prevcrouchoffsetreal = g_Vars.currentplayer->crouchoffsetreal;
+		float prevcrouchoffsetsmall = g_Vars.currentplayer->crouchoffsetsmall;
+		float prevcrouchoffsetrealsmall = g_Vars.currentplayer->crouchoffsetrealsmall;
 
-		// f32 *frac, f32 maxfrac, f32 *fracspeed, f32 accel, f32 decel, f32 maxspeed
+		// float *frac, float maxfrac, float *fracspeed, float accel, float decel, float maxspeed
 		applySpeed(&g_Vars.currentplayer->crouchoffset, targetoffset,
 				&g_Vars.currentplayer->crouchspeed, PALUPF(0.5f), PALUPF(0.5f), PALUPF(5.0f));
 
@@ -1235,8 +1225,8 @@ void bwalkUpdateCrouchOffset(void)
 
 void bwalkUpdateTheta(void)
 {
-	f32 mult;
-	f32 rotateamount;
+	float mult;
+	float rotateamount;
 	struct coord delta = {0, 0, 0};
 
 	// Same turn speed for all heights
@@ -1248,7 +1238,7 @@ void bwalkUpdateTheta(void)
 	bwalkCalculateNewPositionWithPush(&delta, rotateamount, true, 0, CDTYPE_ALL);
 }
 
-void bwalk0f0c63bc(struct coord *arg0, u32 arg1, s32 types)
+void bwalk0f0c63bc(struct coord *arg0, uint32_t arg1, int types)
 {
 	struct coord sp100;
 	struct coord sp88;
@@ -1261,7 +1251,7 @@ void bwalk0f0c63bc(struct coord *arg0, u32 arg1, s32 types)
 		struct coord sp76;
 		struct coord sp64;
 
-		s32 result = bwalk0f0c47d0(arg0, &sp100, &sp88, &sp76, &sp64, types);
+		int result = bwalk0f0c47d0(arg0, &sp100, &sp88, &sp76, &sp64, types);
 
 		if (result >= CDRESULT_NOCOLLISION || result <= CDRESULT_ERROR) {
 			if (result >= CDRESULT_NOCOLLISION) {
@@ -1390,48 +1380,48 @@ void bwalkApplyMoveData(struct movedata *data)
 
 void bwalk0f0c69b8(void)
 {
-	s32 i;
-	f32 spe0;
-	f32 spdc;
-	f32 spd8;
+	int i;
+	float spe0;
+	float spdc;
+	float spd8;
 	struct coord spcc = {0, 0, 0};
-	f32 spc8;
-	f32 spc4;
-	f32 spc0;
-	f32 tmp1;
-	f32 tmp2;
-	f32 spb4;
-	f32 spb0;
-	f32 dist;
-	f32 spa8;
-	f32 mult;
-	f32 f0;
-	f32 lvupdate60f;
-	s32 lvupdate240;
-	s32 cdresult;
+	float spc8;
+	float spc4;
+	float spc0;
+	float tmp1;
+	float tmp2;
+	float spb4;
+	float spb0;
+	float dist;
+	float spa8;
+	float mult;
+	float f0;
+	float lvupdate60f;
+	int lvupdate240;
+	int cdresult;
 	struct escalatorobj *esc;
-	f32 sp8c;
-	f32 sp88;
-	f32 speedforwards;
-	f32 speedsideways;
-	f32 speedtheta;
-	f32 maxspeed;
-	f32 sp74;
-	f32 radius;
-	f32 ymax;
-	f32 ymin;
-	f32 xdiff;
-	f32 zdiff;
-	f32 xdelta;
-	f32 zdelta;
-	f32 sp54;
-	f32 sp50;
-	f32 sp4c;
-	f32 sp48;
-	f32 sp44;
-	f32 sp40;
-	f32 sp3c;
-	f32 breathing;
+	float sp8c;
+	float sp88;
+	float speedforwards;
+	float speedsideways;
+	float speedtheta;
+	float maxspeed;
+	float sp74;
+	float radius;
+	float ymax;
+	float ymin;
+	float xdiff;
+	float zdiff;
+	float xdelta;
+	float zdelta;
+	float sp54;
+	float sp50;
+	float sp4c;
+	float sp48;
+	float sp44;
+	float sp40;
+	float sp3c;
+	float breathing;
 
 	spc0 = g_Vars.currentplayer->vv_eyeheight - 159;
 
@@ -1758,7 +1748,7 @@ void bwalkTick(void)
 	bwalk0f0c69b8();
 	bwalkUpdateVertical();
 
-	s32 i;
+	int i;
 
 	for (i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {
 		if (g_Vars.currentplayer->floorroom == g_Vars.currentplayer->prop->rooms[i]) {

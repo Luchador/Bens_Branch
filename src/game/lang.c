@@ -15,9 +15,7 @@
 #include "types.h"
 #include "platform.h"
 #include "fs.h"
-#ifndef PLATFORM_N64
 #include "video.h"
-#endif
 
 u16 *g_FrameBuffers[NUM_FRAMEBUFFERS];
 

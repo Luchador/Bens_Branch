@@ -14,7 +14,7 @@
 
 void bgunReset(void)
 {
-	s32 i;
+	int i;
 
 	struct hand hand = {
 		0,

@@ -3442,7 +3442,7 @@ bool cdTestCylMove01(struct coord *pos, RoomNum *rooms, struct coord *targetpos,
 	RoomNum sp44[21];
 	RoomNum sp34[8];
 
-	portalComputeReachableRooms(pos, targetpos, rooms, sp34, sp44, 20);
+	portal00018148(pos, targetpos, rooms, sp34, sp44, 20);
 
 	return cdTestAToB(pos, targetpos, sp44, types, GEOFLAG_WALL, CHECKVERTICAL_NO, arg4, ymax, ymin);
 }
@@ -3469,7 +3469,7 @@ s32 cdExamCylMove03(struct coord *pos, RoomNum *rooms, struct coord *arg2, u32 t
 	RoomNum sp44[21];
 	RoomNum sp34[8];
 
-	portalComputeReachableRooms(pos, arg2, rooms, sp34, sp44, 20);
+	portal00018148(pos, arg2, rooms, sp34, sp44, 20);
 
 	return cdExamAToB(pos, arg2, sp44, types, GEOFLAG_WALL, CHECKVERTICAL_NO, arg4, ymax, ymin);
 }
@@ -3478,7 +3478,7 @@ s32 cdTestCylMove04(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomN
 {
 	RoomNum rooms[21];
 
-	portalComputeReachableRooms(arg0, arg2, arg1, arg3, rooms, 20);
+	portal00018148(arg0, arg2, arg1, arg3, rooms, 20);
 
 	return cdTestAToB(arg0, arg2, rooms, types, GEOFLAG_WALL, CHECKVERTICAL_NO, arg5, ymax, ymin);
 }
@@ -3530,7 +3530,7 @@ s32 cdExamCylMove07(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomN
 {
 	RoomNum rooms[21];
 
-	portalComputeReachableRooms(arg0, arg2, arg1, arg3, rooms, 20);
+	portal00018148(arg0, arg2, arg1, arg3, rooms, 20);
 
 	return cdExamAToB(arg0, arg2, rooms, types, GEOFLAG_WALL, CHECKVERTICAL_NO, arg5, ymax, ymin);
 }
@@ -3541,7 +3541,7 @@ s32 cdExamCylMove08(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomN
 	struct coord sp40;
 	s32 result;
 
-	portalComputeReachableRooms(arg0, arg2, arg1, arg3, rooms, 20);
+	portal00018148(arg0, arg2, arg1, arg3, rooms, 20);
 
 	result = cdExamAToB(arg0, arg2, rooms, types, GEOFLAG_WALL, CHECKVERTICAL_NO, arg6, ymax, ymin);
 
@@ -3561,7 +3561,7 @@ bool cdTestLos03(struct coord *viewpos, RoomNum *rooms, struct coord *targetpos,
 	RoomNum sp44[21];
 	RoomNum sp34[8];
 
-	portalComputeReachableRooms(viewpos, targetpos, rooms, sp34, sp44, 20);
+	portal00018148(viewpos, targetpos, rooms, sp34, sp44, 20);
 
 	return cdTestAToB(viewpos, targetpos, sp44, types, geoflags, CHECKVERTICAL_YES, 1, 0, 0);
 }
@@ -3614,7 +3614,7 @@ s32 cdExamLos08(struct coord *pos, RoomNum *rooms, struct coord *pos2, u32 types
 	RoomNum sp44[21];
 	RoomNum sp34[8];
 
-	portalComputeReachableRooms(pos, pos2, rooms, sp34, sp44, 20);
+	portal00018148(pos, pos2, rooms, sp34, sp44, 20);
 
 	return cdExamAToB(pos, pos2, sp44, types, geoflags, CHECKVERTICAL_YES, 1, 0, 0);
 }
@@ -3628,7 +3628,7 @@ s32 cdTestLos10(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomNum *
 {
 	RoomNum rooms[21];
 
-	portalComputeReachableRooms(arg0, arg2, arg1, arg3, rooms, 20);
+	portal00018148(arg0, arg2, arg1, arg3, rooms, 20);
 
 	return cdTestAToB(arg0, arg2, rooms, types, geoflags, CHECKVERTICAL_YES, 1, 0, 0);
 }

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/file.h"
 #include "bss.h"
@@ -12,9 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "game/debug.h"
-#ifndef PLATFORM_N64
 #include "system.h"
-#endif
 
 /**
  * This file contains functions relating to ROM asset files.
@@ -65,51 +64,46 @@ struct fileinfo g_FileInfo[NUM_FILES];
 
 uintptr_t g_FileTable[NUM_FILES + 1]; // TODO: this is only used to get the filenum, remove this
 
-romptr_t fileGetRomAddress(s32 filenum)
+romptr_t fileGetRomAddress(int filenum)
 {
 	return (romptr_t) romdataFileGetData(filenum);
 }
 
-u32 fileGetRomSizeByTableAddress(uintptr_t *filetableaddr)
+unsigned int fileGetRomSizeByTableAddress(uintptr_t *filetableaddr)
 {
-	const s32 size = romdataFileGetSize(filetableaddr - g_FileTable);
+	const int size = romdataFileGetSize(filetableaddr - g_FileTable);
 	return (size < 0) ? 0 : size;
 }
 
-s32 fileGetRomSize(s32 filenum)
+int fileGetRomSize(int filenum)
 {
 	return fileGetRomSizeByTableAddress((uintptr_t*)&g_FileTable[filenum]);
 }
 
-u32 file0f166ea8(uintptr_t *filetableaddr)
-{
-	return 0;
-}
-
-void fileLoad(u8 *dst, u32 allocationlen, romptr_t *romaddrptr, struct fileinfo *info)
+void fileLoad(uint8_t *dst, unsigned int allocationlen, romptr_t *romaddrptr, struct fileinfo *info)
 {
 	// load the file first
-	const s32 filenum = (uintptr_t *)romaddrptr - g_FileTable;
-	u32 romsize = 0;
-	u8 *filedata = romdataFileLoad(filenum, &romsize);
+	const int filenum = (uintptr_t *)romaddrptr - g_FileTable;
+	unsigned int romsize = 0;
+	uint8_t *filedata = romdataFileLoad(filenum, &romsize);
 	if (!filedata) {
 		return;
 	}
 	romaddrptr = (romptr_t *)&filedata;
 
-	u8 buffer[5 * 1024];
+	uint8_t buffer[5 * 1024];
 
 	if (allocationlen == 0) {
 		// DMA with no inflate
 		dmaExec(dst, *romaddrptr, romsize);
 	} else {
 		// DMA the compressed data to scratch space then inflate
-		u8 *scratch = (dst + allocationlen) - ((romsize + 7) & (uintptr_t)~7);
+		uint8_t *scratch = (dst + allocationlen) - ((romsize + 7) & (uintptr_t)~7);
 
 		if ((uintptr_t)scratch - (uintptr_t)dst < 8) {
 			info->loadedsize = 0;
 		} else {
-			s32 result;
+			int result;
 
 			dmaExec(scratch, *romaddrptr, romsize);
 			result = rzipInflate(scratch, dst, buffer);
@@ -121,15 +115,15 @@ void fileLoad(u8 *dst, u32 allocationlen, romptr_t *romaddrptr, struct fileinfo 
 	}
 
 	// byteswap/preprocess file according to g_LoadType right after inflating it
-	const u32 dstsize = allocationlen ? info->loadedsize : romsize; 
+	const unsigned int dstsize = allocationlen ? info->loadedsize : romsize; 
 	romdataFilePreprocess(filenum, g_LoadType, dst, dstsize, &info->loadedsize);
 	g_LoadType = LOADTYPE_NONE;
 }
 
 void filesInit(void)
 {
-	s32 i;
-	s32 j = 0;
+	int i;
+	int j = 0;
 
 	for (i = 1, j = 0; i < NUM_FILES; i++) {
 		struct fileinfo *info = g_FileInfo + i;
@@ -143,11 +137,11 @@ void filesInit(void)
 	}
 }
 
-void fileLoadPartToAddr(u16 filenum, void *memaddr, s32 offset, u32 len)
+void fileLoadPartToAddr(uint16_t filenum, void *memaddr, int offset, unsigned int len)
 {
 
 	if (fileGetRomSizeByTableAddress((uintptr_t*)&g_FileTable[filenum])) {
-		const u8 *src = romdataFileGetData(filenum);
+		const uint8_t *src = romdataFileGetData(filenum);
 		if (src) {
 			dmaExec(memaddr, (uintptr_t) src + offset, len);
 		}
@@ -156,17 +150,17 @@ void fileLoadPartToAddr(u16 filenum, void *memaddr, s32 offset, u32 len)
 	}
 }
 
-u32 fileGetInflatedSize(s32 filenum, u32 loadtype)
+unsigned int fileGetInflatedSize(int filenum, unsigned int loadtype)
 {
-	u8 *ptr;
-	u8 buffer[0x50];
+	uint8_t *ptr;
+	uint8_t buffer[0x50];
 	uintptr_t *romaddrptr;
 	uintptr_t romaddr;
 
 	romaddrptr = &g_FileTable[filenum];
 
 	romaddr = (uintptr_t)romdataFileGetData(filenum);
-	ptr = (u8 *) ((uintptr_t) &buffer[0x10] & ~0xf);
+	ptr = (uint8_t *) ((uintptr_t) &buffer[0x10] & ~0xf);
 
 	if (romaddr == 0) {
 	} else {
@@ -180,7 +174,7 @@ u32 fileGetInflatedSize(s32 filenum, u32 loadtype)
 	return 0;
 }
 
-void *fileLoadToNew(s32 filenum, u32 method, u32 loadtype)
+void *fileLoadToNew(int filenum, unsigned int method, unsigned int loadtype)
 {
 	struct fileinfo *info = &g_FileInfo[filenum];
 	void *ptr;
@@ -208,13 +202,13 @@ void *fileLoadToNew(s32 filenum, u32 method, u32 loadtype)
 	return ptr;
 }
 
-void fileRemove(s32 filenum)
+void fileRemove(int filenum)
 {
 	g_FileTable[filenum] = 0;
 	romdataFileFree(filenum);
 }
 
-void *fileLoadToAddr(s32 filenum, s32 method, u8 *ptr, u32 size)
+void *fileLoadToAddr(int filenum, int method, uint8_t *ptr, unsigned int size)
 {
 	struct fileinfo *info = &g_FileInfo[filenum];
 
@@ -228,17 +222,17 @@ void *fileLoadToAddr(s32 filenum, s32 method, u8 *ptr, u32 size)
 	return ptr;
 }
 
-u32 fileGetLoadedSize(s32 filenum)
+unsigned int fileGetLoadedSize(int filenum)
 {
 	return g_FileInfo[filenum].loadedsize;
 }
 
-u32 fileGetAllocationSize(s32 filenum)
+unsigned int fileGetAllocationSize(int filenum)
 {
 	return g_FileInfo[filenum].allocsize;
 }
 
-void fileSetSize(s32 filenum, void *ptr, u32 size, bool reallocate)
+void fileSetSize(int filenum, void *ptr, unsigned int size, bool reallocate)
 {
 	g_FileInfo[filenum].loadedsize = size;
 	g_FileInfo[filenum].allocsize = size;
@@ -248,9 +242,9 @@ void fileSetSize(s32 filenum, void *ptr, u32 size, bool reallocate)
 	}
 }
 
-void filesStop(u8 arg0)
+void filesStop(uint8_t arg0)
 {
-	s32 i;
+	int i;
 
 	// Minus 1 because the last entry in the file table is just a marker
 	for (i = 1; i < ARRAYCOUNT(g_FileTable) - 1; i++) {

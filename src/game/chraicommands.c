@@ -5796,7 +5796,7 @@ bool aiSetLights(void)
 {
 	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
 	u16 padnum = cmd[3] | (cmd[2] << 8);
-	s32 roomnum = chrGetPadRoom(g_Vars.chrdata, padnum);
+	int roomnum = chrGetPadRoom(g_Vars.chrdata, padnum);
 
 	if (roomnum >= 0) {
 		switch (cmd[4]) {

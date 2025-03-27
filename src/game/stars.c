@@ -5,7 +5,6 @@
 #include "game/stars.h"
 #include "game/textutils.h"
 #include "game/camera.h"
-#include "video.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/memp.h"
@@ -106,6 +105,7 @@ void starsReset(void)
 	s32 i;
 	f32 spc0;
 	f32 spbc;
+	f32 stack[1];
 	s32 count;
 	s32 spb0;
 	f32 f0;
@@ -118,7 +118,10 @@ void starsReset(void)
 	g_StarsBelowHorizon = false;
 	g_StarGridSize = 3;
 
-	if (g_Vars.stagenum == STAGE_ATTACKSHIP) {
+	if (g_Vars.stagenum == STAGE_DEFECTION || g_Vars.stagenum == STAGE_EXTRACTION) {
+		g_StarCount = 200;
+		g_StarGridSize = 2;
+	} else if (g_Vars.stagenum == STAGE_ATTACKSHIP) {
 		g_StarsBelowHorizon = true;
 		g_StarCount = 1200;
 	} else {
@@ -221,7 +224,7 @@ Gfx *starsRender(Gfx *gdl)
 
 	colours[i] = colourBlend(colours[i], colours[i] & 0xff, 0x5f);
 
-	sp154 = cosf(0.017453199252486f * (90.0f - viGetFovY() / videoGetAspect() * 0.5f));
+	sp154 = cosf(0.017453199252486f * (90.0f - viGetFovY() / viGetAspect() * 0.5f));
 
 	mtx4LoadIdentity(&mtx);
 	mtx00015be0(camGetWorldToScreenMtxf(), &mtx);

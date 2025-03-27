@@ -20,13 +20,13 @@
 #include "input.h"
 #include "mixer.h"
 
-struct artifact g_ArtifactLists[3][480];
+struct artifact g_ArtifactLists[3][240];
 u8 g_SchedSpecialArtifactIndexes[3];
 s32 g_SchedWriteArtifactsIndex;
 s32 g_SchedFrontArtifactsIndex;
 s32 g_SchedPendingArtifactsIndex;
 
-int g_ViBufferToggle = 0;
+s32 var8005ce74 = 0;
 f32 g_ViXScalesBySlot[NUM_GFXTASKS] = {1, 1};
 f32 g_ViYScalesBySlot[NUM_GFXTASKS] = {1, 1};
 bool g_SchedViModesPending[NUM_GFXTASKS] = {false, false};
@@ -48,13 +48,13 @@ void __scUpdateViMode(void)
 		g_SchedIsFirstTask = false;
 	}
 
-	g_ViBufferToggle = (g_ViBufferToggle + 1) % 2;
+	var8005ce74 = (var8005ce74 + 1) % 2;
 
-	if (g_SchedViModesPending[1 - g_ViBufferToggle]) {
+	if (g_SchedViModesPending[1 - var8005ce74]) {
 		// TODO: make this a little less awkward
 		extern struct rend_vidat *g_ViBackData;
 		videoUpdateNativeResolution(g_ViBackData->bufx, g_ViBackData->bufy);
-		g_SchedViModesPending[1 - g_ViBufferToggle] = false;
+		g_SchedViModesPending[1 - var8005ce74] = false;
 	}
 
 	if (g_ViUnblackTimer != 0 && g_ViUnblackTimer <= NUM_FRAMEBUFFERS) {
@@ -71,28 +71,28 @@ void __scUpdateViMode(void)
  * scheduler, adds the task to the linked list directly and attempts to execute
  * it. This is faster than the queue method because it avoids switching threads.
  */
-void schedSubmitTask(OSScTask *t)
+void schedSubmitTask(OSSched *sc, OSScTask *t)
 {
 	if (t->list.t.type == M_GFXTASK) {
 		videoSubmitCommands((Gfx *)t->list.t.data_ptr);
 	}
 }
 
-void schedStartFrame()
+void schedStartFrame(OSSched *sc)
 {
 	videoStartFrame();
 }
 
-void schedAudioFrame()
+void schedAudioFrame(OSSched *sc)
 {
-	//s32 i;
+	s32 i;
 
-	//if (!g_SndDisabled) {
-		//for (i = 0; i < g_Vars.diffframe60; i++) {
+	if (!g_SndDisabled) {
+		for (i = 0; i < g_Vars.diffframe60; i++) {
 			amgrFrame();
 			audioEndFrame();
-		//}
-	//}
+		}
+	}
 }
 
 /**
@@ -118,9 +118,9 @@ void schedEndFrame(OSSched *sc)
 	inputUpdate();
 
 	joyReadData();
-	joyProcessPakState();
+	joy00014238();
 
-	schedAudioFrame();
+	schedAudioFrame(sc);
 	videoEndFrame();
 
 	if (g_MainIsBooting == 0) {
@@ -133,8 +133,8 @@ void schedEndFrame(OSSched *sc)
 
 void schedInitArtifacts(void)
 {
-	int i;
-	int j;
+	s32 i;
+	s32 j;
 
 	for (i = 0; i < 3; i++) {
 		for (j = 0; j < MAX_ARTIFACTS; j++) {

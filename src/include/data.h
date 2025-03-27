@@ -1,6 +1,7 @@
 #ifndef _IN_DATA_H
 #define _IN_DATA_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "types.h"
 
@@ -13,6 +14,7 @@
 extern u8 *g_StackLeftAddrs[NUM_THREADS];
 extern u8 *g_StackRightAddrs[NUM_THREADS];
 extern u8 *g_StackAllocatedPos;
+extern s32 var8005ce74;
 extern f32 g_ViXScalesBySlot[NUM_GFXTASKS];
 extern f32 g_ViYScalesBySlot[NUM_GFXTASKS];
 extern bool g_SchedViModesPending[NUM_GFXTASKS];
@@ -53,44 +55,46 @@ extern N_ALSndPlayer *g_SndPlayer;
 extern s16 n_eqpower[];
 extern u8 *var8005f6f8;
 extern u8 *var8005f6fc;
-extern unsigned int g_Mp3InitCount;
+extern u32 var8005f704;
+extern u32 var80060890;
 extern char ldigs[];
 extern char udigs[];
-//extern Gfx var80061380[];
+extern Gfx var80061360[];
+extern Gfx var80061380[];
 extern Gfx var800613a0[];
-extern float g_20SecIntervalFrac;
-extern float g_Lv80SecIntervalFrac;
+extern f32 g_20SecIntervalFrac;
+extern f32 g_Lv80SecIntervalFrac;
 extern bool g_NbombsActive;
-extern bool g_WeatherActive;
+extern s32 g_WeatherActive;
 extern bool g_IsTitleDemo;
-extern unsigned int g_TitleIdleTime60;
-extern int g_TitleMode;
-extern int g_TitleNextMode;
-extern unsigned int g_TitleDelayedTimer;
-extern int g_TitleDelayedMode;
-extern int g_TitleTimer;
-extern int g_TitleNextStage;
+extern u32 g_TitleIdleTime60;
+extern s32 g_TitleMode;
+extern s32 g_TitleNextMode;
+extern u32 g_TitleDelayedTimer;
+extern s32 g_TitleDelayedMode;
+extern s32 g_TitleTimer;
+extern s32 g_TitleNextStage;
 extern u8 g_FileState;
-extern bool g_FileListIsOpen;
-extern bool g_MPMenuIsOpen;
-extern bool g_MenuIsOpen;
+extern u8 var80062944;
+extern u8 var80062948;
+extern u8 var8006294c;
 extern bool g_WeatherTickEnabled;
 extern struct var80062960 *var80062960;
-extern float g_ChrAnimSpeed;
+extern f32 g_ChrAnimSpeed;
 extern s32 g_SelectedAnimNum;
 extern s32 g_NextChrnum;
 extern struct chrdata *g_ChrSlots;
-extern int g_NumChrSlots;
+extern s32 g_NumChrSlots;
 extern struct shieldhit *g_ShieldHits;
 extern bool g_ShieldHitActive;
-extern int g_NumBondBodies;
-extern int g_NumMaleGuardHeads;
-extern int g_NumFemaleGuardHeads;
-extern int g_NumMaleGuardTeamHeads;
-extern int g_BondBodies[];
-extern int g_MaleGuardHeads[];
-extern int g_MaleGuardTeamHeads[];
-extern int g_FemaleGuardHeads[];
+extern s32 g_NumBondBodies;
+extern s32 g_NumMaleGuardHeads;
+extern s32 g_NumFemaleGuardHeads;
+extern s32 g_NumMaleGuardTeamHeads;
+extern s32 g_BondBodies[];
+extern s32 g_MaleGuardHeads[];
+extern s32 g_MaleGuardTeamHeads[];
+extern s32 g_FemaleGuardHeads[];
 extern int g_RandomBond;
 extern f32 g_EnemyAccuracyScale;
 extern f32 g_PlayerDamageRxScale;
@@ -174,7 +178,7 @@ extern u32 var8007073c;
 extern u32 var8007074c;
 extern bool g_PlayersWithControl[];
 extern bool g_PlayerInvincible;
-extern bool g_InCutscene;
+extern s32 g_InCutscene;
 extern s16 g_DeathAnimations[];
 extern s32 g_NumDeathAnimations;
 extern s32 g_ScissorX1;
@@ -318,14 +322,11 @@ extern struct font *g_FontHandelGothicMd;
 extern struct fontchar *g_CharsHandelGothicMd;
 extern struct font *g_FontHandelGothicLg;
 extern struct fontchar *g_CharsHandelGothicLg;
-extern struct font *g_FontHandelGothicHD;
-extern struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
-extern struct fontchar *g_CharToRender; // Character to render using the HD font
 extern bool g_DoRedrawEffect;
-extern int g_StageIndex;
+extern s32 g_StageIndex;
 extern s16 var8007fc0c;
 extern struct drawslot *g_BgSpecialDrawSlot;
-extern u16 g_BgFrameCount;
+extern uint16_t g_BgFrameCount;
 extern s32 g_BgNumPortalCameraCacheItems;
 extern f32 var8007fcb4;
 extern struct stagetableentry g_Stages[61];
@@ -433,11 +434,11 @@ extern s32 g_PrevFrameFb;
 extern s32 g_BlurFb;
 extern s32 g_BlurFbCapTimer;
 extern bool g_BlurFbDirty;
-extern s32 g_TickRateDiv;
-extern s32 g_TickExtraSleep;
+extern int g_TickRateDiv;
+extern int g_TickExtraSleep;
 extern s32 g_MusicDisableMpDeath;
 extern s32 g_BgunGeMuzzleFlashes;
-extern s32 g_FileAutoSelect;
+extern int g_FileAutoSelect;
 
 extern u8 g_MpWeaponSetRandomFilters[NUM_MPWEAPONS];
 extern s32 g_MpWeaponRandomFilterNum;
@@ -452,6 +453,9 @@ extern TextData *g_TextPropObjData;
 extern TextData *g_TextTitleData;
 
 extern s32 g_ReplacementTextureList[4000]; // There's 3502 textures in the ROM
+
+extern struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
+extern struct fontchar *g_CharToRender; // Character to render using the HD font
 
 #define PLAYER_EXTCFG() g_PlayerExtCfg[g_Vars.currentplayerstats->mpindex & 3]
 #define PLAYER_DEFAULT_FOV (PLAYER_EXTCFG().fovy)

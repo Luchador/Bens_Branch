@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "lib/sched.h"
 #include "string.h"
@@ -70,10 +71,10 @@ struct cheat g_Cheats[] = {
 	{ L_MPWEAPONS_115, WEAPON_AR53,       0,                             0,       CHEATFLAG_FIRINGRANGE                        }, // AR53
 	{ L_MPWEAPONS_116, WEAPON_RCP45,      0,                             0,       CHEATFLAG_FIRINGRANGE                        }, // RC-P45
 	{ L_MPWEAPONS_215, 0,                 SOLOSTAGEINDEX_EXTRACTION,     DIFF_A,  CHEATFLAG_COMPLETION                         }, // Dual wield all guns
-	{ L_MPWEAPONS_223, 0,                 SOLOSTAGEINDEX_DEFENSE,        DIFF_PA, CHEATFLAG_COMPLETION                         }, // Dinner Party
+	{ L_MPWEAPONS_057, 0,                 SOLOSTAGEINDEX_DEFENSE,        DIFF_PA, CHEATFLAG_COMPLETION                         }, // Dinner Party
 };
 
-u32 cheatIsUnlocked(s32 cheat_id)
+u32 cheatIsUnlocked(int cheat_id)
 {
 	struct cheat *cheat = &g_Cheats[cheat_id];
 	u32 unlocked = 0;
@@ -106,7 +107,7 @@ u32 cheatIsUnlocked(s32 cheat_id)
 	return unlocked;
 }
 
-bool cheatIsActive(s32 cheat_id)
+bool cheatIsActive(int cheat_id)
 {
 	if (cheat_id < 32) {
 		return g_CheatsActiveBank0 & (1 << cheat_id);
@@ -115,10 +116,10 @@ bool cheatIsActive(s32 cheat_id)
 	return g_CheatsActiveBank1 & (1 << (cheat_id - 32));
 }
 
-void cheatActivate(s32 cheat_id)
+void cheatActivate(int cheat_id)
 {
 	u32 prevplayernum;
-	s32 playernum;
+	int playernum;
 
 	switch (cheat_id) {
 	case CHEAT_INVINCIBLE:
@@ -154,10 +155,10 @@ void cheatActivate(s32 cheat_id)
 	}
 }
 
-void cheatDeactivate(s32 cheat_id)
+void cheatDeactivate(int cheat_id)
 {
 	u32 prevplayernum;
-	s32 playernum;
+	int playernum;
 
 	switch (cheat_id) {
 	case CHEAT_INVINCIBLE:
@@ -204,7 +205,7 @@ void cheatsInit(void)
  */
 void cheatsReset(void)
 {
-	s32 cheat_id;
+	int cheat_id;
 
 	// Copy enabled cheats to active cheats, unless in CI training
 	// or weapon cheats not in solo
@@ -265,7 +266,7 @@ void cheatsReset(void)
 	}
 }
 
-MenuItemHandlerResult cheatCheckboxMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult cheatCheckboxMenuHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -303,7 +304,6 @@ MenuItemHandlerResult cheatCheckboxMenuHandler(s32 operation, struct menuitem *i
 			} else {
 				// Bank 1
 				if (g_CheatsEnabledBank1 & (1 << item->param)) {
-					if (1);
 					g_CheatsEnabledBank1 = g_CheatsEnabledBank1 & ~(1 << item->param);
 				} else {
 					g_CheatsEnabledBank1 = g_CheatsEnabledBank1 | 1 << item->param;
@@ -316,7 +316,7 @@ MenuItemHandlerResult cheatCheckboxMenuHandler(s32 operation, struct menuitem *i
 	return 0;
 }
 
-MenuItemHandlerResult cheatMenuHandleBuddyCheckbox(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult cheatMenuHandleBuddyCheckbox(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -360,19 +360,13 @@ MenuItemHandlerResult cheatMenuHandleBuddyCheckbox(s32 operation, struct menuite
 char *cheatGetNameIfUnlocked(struct menuitem *item)
 {
 	if (cheatIsUnlocked(item->param)) {
-		if(item->param < 43 || item-> param > 43) {
-			return langGet(g_Cheats[item->param].nametextid);
-		}
-		else {
-			char *dp = "Dinner Party\n";
-			return dp;
-		}
+		return langGet(g_Cheats[item->param].nametextid);
 	}
 
 	return langGet(L_MPWEAPONS_074); // "----------"
 }
 
-MenuDialogHandlerResult cheatMenuHandleDialog(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult cheatMenuHandleDialog(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	if (operation == MENUOP_OPEN) {
 		if (gbpakIsAnyPerfectDark()) {
@@ -451,19 +445,11 @@ char *cheatGetMarquee(struct menuitem *arg0)
 			// Velvet
 			sprintf(g_CheatMarqueeString, "%s: %s", langGet(L_MPWEAPONS_143), langGet(L_MPWEAPONS_117)); // "Buddy Available", "Velvet Dark"
 		} else if (cheatIsUnlocked(cheat_id)) {
-			if(cheat_id < 43 || cheat_id > 43) {
-				// Show cheat name
-				sprintf(g_CheatMarqueeString, "%s: %s\n",
-						g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsBuddiesMenuDialog ? langGet(L_MPWEAPONS_143) : langGet(L_MPWEAPONS_136), // "Buddy Available", "Cheat available"
-						langGet(g_Cheats[cheat_id].nametextid)
-				);
-			}
-			else { // Special exception for Dinner Party
-				sprintf(g_CheatMarqueeString, "%s: %s\n",
+			// Show cheat name
+			sprintf(g_CheatMarqueeString, "%s: %s\n",
 					g_Menus[g_MpPlayerNum].curdialog->definition == &g_CheatsBuddiesMenuDialog ? langGet(L_MPWEAPONS_143) : langGet(L_MPWEAPONS_136), // "Buddy Available", "Cheat available"
-					"Dinner Party\n"
-				);
-			}
+					langGet(g_Cheats[cheat_id].nametextid)
+			);
 		} else {
 			// Locked
 			strcpy(cheatname, langGet(g_Cheats[cheat_id].nametextid));
@@ -478,21 +464,22 @@ char *cheatGetMarquee(struct menuitem *arg0)
 			if (g_Cheats[cheat_id].flags & CHEATFLAG_COMPLETION) {
 				if(cheat_id < 43 || cheat_id > 43) {
 				sprintf(g_CheatMarqueeString, "%s %s: %s %s %s",
-						langGet(L_MPWEAPONS_137), // "Complete"
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1),
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2),
-						langGet(L_MPWEAPONS_138), // "for cheat:"
+						langRemoveNewline(langGet(L_MPWEAPONS_137)), // "Complete"
+						langRemoveNewline(langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1)),
+						langRemoveNewline(langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2)),
+						langRemoveNewline(langGet(L_MPWEAPONS_138)), // "for cheat:"
 						&cheatname
 				);
 				}
+				// Exception for Dinner Party to add the condition of unlocking on Perfect Agent
 				else {
 					sprintf(g_CheatMarqueeString, "%s %s: %s %s %s %s",
-						langGet(L_MPWEAPONS_137), // "Complete"
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1),
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2),
-						"on Perfect Agent ",
-						langGet(L_MPWEAPONS_138), // "for cheat:"
-						"Dinner Party\n"
+						langRemoveNewline(langGet(L_MPWEAPONS_137)), // "Complete"
+						langRemoveNewline(langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1)),
+						langRemoveNewline(langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2)),
+						"on Perfect Agent",
+						langRemoveNewline(langGet(L_MPWEAPONS_138)), // "for cheat:"
+						langGet(L_MPWEAPONS_057) // Dinner Party
 				);
 				}
 			} else {
@@ -507,21 +494,21 @@ char *cheatGetMarquee(struct menuitem *arg0)
 				*ptr = '\0';
 
 				sprintf(g_CheatMarqueeString, "%s %s: %s %s %s %s %d:%02d %s %s",
-						langGet(L_MPWEAPONS_137), // "Complete"
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1),
-						langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2),
-						langGet(L_MPWEAPONS_139), // "on"
+						langRemoveNewline(langGet(L_MPWEAPONS_137)), // "Complete"
+						langRemoveNewline(langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name1)),
+						langRemoveNewline(langGet(g_SoloStages[g_Cheats[cheat_id].stage_index].name2)),
+						langRemoveNewline(langGet(L_MPWEAPONS_139)), // "on"
 						&difficultyname,
-						langGet(L_MPWEAPONS_140), // "in under"
+						langRemoveNewline(langGet(L_MPWEAPONS_140)), // "in under"
 						g_Cheats[cheat_id].time / 60,
 						g_Cheats[cheat_id].time % 60,
-						langGet(L_MPWEAPONS_138), // "for cheat:"
+						langRemoveNewline(langGet(L_MPWEAPONS_138)), // "for cheat:"
 						&cheatname
 				);
 			}
 
 			if (g_Cheats[cheat_id].flags & CHEATFLAG_TRANSFERPAK) {
-				strcat(g_CheatMarqueeString, langGet(L_MPWEAPONS_141)); // " or insert Game Boy ..."
+				strcat(g_CheatMarqueeString, langRemoveNewline(langGet(L_MPWEAPONS_141))); // " or insert Game Boy ..."
 			}
 
 			strcat(g_CheatMarqueeString, "\n");
@@ -534,7 +521,7 @@ char *cheatGetMarquee(struct menuitem *arg0)
 	return langGet(L_MPWEAPONS_142); // "Select cheat for information"
 }
 
-MenuItemHandlerResult cheatMenuHandleTurnOffAllCheats(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult cheatMenuHandleTurnOffAllCheats(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_CheatsEnabledBank0 = 0;
@@ -544,9 +531,9 @@ MenuItemHandlerResult cheatMenuHandleTurnOffAllCheats(s32 operation, struct menu
 	return false;
 }
 
-s32 cheatGetByTimedStageIndex(s32 stage_index, s32 difficulty)
+int cheatGetByTimedStageIndex(int stage_index, int difficulty)
 {
-	s32 cheat_id;
+	int cheat_id;
 
 	for (cheat_id = 0; cheat_id < ARRAYCOUNT(g_Cheats); cheat_id++) {
 		if (g_Cheats[cheat_id].stage_index == stage_index &&
@@ -560,9 +547,9 @@ s32 cheatGetByTimedStageIndex(s32 stage_index, s32 difficulty)
 	return -1;
 }
 
-s32 cheatGetByCompletedStageIndex(s32 stage_index)
+int cheatGetByCompletedStageIndex(int stage_index)
 {
-	s32 cheat_id;
+	int cheat_id;
 
 	for (cheat_id = 0; cheat_id < ARRAYCOUNT(g_Cheats); cheat_id++) {
 		if (g_Cheats[cheat_id].stage_index == stage_index && (g_Cheats[cheat_id].flags & CHEATFLAG_COMPLETION)) {
@@ -573,18 +560,18 @@ s32 cheatGetByCompletedStageIndex(s32 stage_index)
 	return -1;
 }
 
-s32 cheatGetTime(s32 cheat_id)
+int cheatGetTime(int cheat_id)
 {
 	return g_Cheats[cheat_id].time;
 }
 
-char *cheatGetName(s32 cheat_id)
+char *cheatGetName(int cheat_id)
 {
 	return langGet(g_Cheats[cheat_id].nametextid);
 }
 
 
-static MenuItemHandlerResult menuhandlerUnlockEverything(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerUnlockEverything(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		gamefileUnlockEverything();

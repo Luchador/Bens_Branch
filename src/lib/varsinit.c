@@ -42,7 +42,7 @@ void varsInit(void)
 	g_Vars.numaibuddies = 0;
 	g_Vars.bondvisible = true;
 	g_Vars.bondcollisions = true;
-	g_Vars.tickmode = TICKMODE_NORMAL;
+	g_Vars.tickmode = TICKMODE_GE_FADEIN;
 	g_Vars.roomcount = 350;
 	g_Vars.mplayerisrunning = 0;
 	g_Vars.normmplayerisrunning = 0;

@@ -12,16 +12,16 @@
 #include "data.h"
 #include "types.h"
 
-struct coord g_FrustumTopPlane;
-f32 g_FrustumTopOffset;
-struct coord g_FrustumBottomPlane;
-f32 g_FrustumBottomOffset;
-struct coord g_FrustumLeftPlane;
-f32 g_FrustumLeftOffset;
-struct coord g_FrustumRightPlane;
-f32 g_FrustumRightOffset;
-struct coord g_FrustumNearPlane;
-f32 g_FrustumNearOffset;
+struct coord var8009dd20;
+f32 var8009dd2c;
+struct coord var8009dd30;
+f32 var8009dd3c;
+struct coord var8009dd40;
+f32 var8009dd4c;
+struct coord var8009dd50;
+f32 var8009dd5c;
+struct coord var8009dd60;
+f32 var8009dd6c;
 
 void camSetScreenSize(f32 width, f32 height)
 {
@@ -50,7 +50,7 @@ void camSetPerspective(f32 near, f32 fovy, f32 aspect)
 	player->c_perspaspect = aspect;
 }
 
-f32 camCalculateVerticalAngularSize(f32 arg0)
+f32 cam0f0b49b8(f32 arg0)
 {
 	f32 result = atan2f(g_Vars.currentplayer->c_scalelod60 * arg0 * g_Vars.currentplayer->c_halfheight, 1.0f);
 	result *= 114.591552f;
@@ -397,93 +397,83 @@ f32 camGetPerspAspect(void)
 	return g_Vars.currentplayer->c_perspaspect;
 }
 
-void camComputeFrustumPlanes(void)
+void cam0f0b5838(void)
 {
-	f32 topNorm;
-	f32 topProj;
-	f32 leftNorm;
-	f32 leftProj;
-	struct player *player = g_Vars.currentplayer;
-	Mtxf *projMtx = player->projectionmtx;
+	f32 sp2c;
+	f32 sp28;
+	f32 sp24;
+	f32 sp20;
+	struct player *player;
+	Mtxf *mtx;
+	f32 sp14;
+	f32 sp10;
 
-	// Vertical (top and bottom) frustum planes
-	f32 halfHeight = player->c_halfheight * player->c_scaley;
-	f32 verticalInvLen = 1.0f / sqrtf(halfHeight * halfHeight + 1.0f);
-	halfHeight *= verticalInvLen;
+	player = g_Vars.currentplayer;
+	sp24 = player->c_halfheight * player->c_scaley;
+	mtx = player->projectionmtx;
 
-	f32 planeYFactor = -verticalInvLen;
+	sp2c = 1.0f / sqrtf(sp24 * sp24 + 1.0f);
+	sp24 *= sp2c;
+	sp20 = -sp2c;
 
-	// Top plane normal
-	g_FrustumTopPlane.x = -planeYFactor * projMtx->m[1][0] + halfHeight * projMtx->m[2][0];
-	g_FrustumTopPlane.y = -planeYFactor * projMtx->m[1][1] + halfHeight * projMtx->m[2][1];
-	g_FrustumTopPlane.z = -planeYFactor * projMtx->m[1][2] + halfHeight * projMtx->m[2][2];
-	g_FrustumTopOffset = g_FrustumTopPlane.x * projMtx->m[3][0] +
-	                     g_FrustumTopPlane.y * projMtx->m[3][1] +
-	                     g_FrustumTopPlane.z * projMtx->m[3][2];
+	var8009dd20.f[0] = -sp20 * mtx->m[1][0] + (sp24) * mtx->m[2][0];
+	var8009dd20.f[1] = -sp20 * mtx->m[1][1] + (sp24) * mtx->m[2][1];
+	var8009dd20.f[2] = -sp20 * mtx->m[1][2] + (sp24) * mtx->m[2][2];
 
-	// Bottom plane normal
-	g_FrustumBottomPlane.x = planeYFactor * projMtx->m[1][0] + halfHeight * projMtx->m[2][0];
-	g_FrustumBottomPlane.y = planeYFactor * projMtx->m[1][1] + halfHeight * projMtx->m[2][1];
-	g_FrustumBottomPlane.z = planeYFactor * projMtx->m[1][2] + halfHeight * projMtx->m[2][2];
-	g_FrustumBottomOffset = g_FrustumBottomPlane.x * projMtx->m[3][0] +
-	                        g_FrustumBottomPlane.y * projMtx->m[3][1] +
-	                        g_FrustumBottomPlane.z * projMtx->m[3][2];
+	var8009dd2c = var8009dd20.f[0] * mtx->m[3][0] + var8009dd20.f[1] * mtx->m[3][1] + var8009dd20.f[2] * mtx->m[3][2];
 
-	// Horizontal (left and right) frustum planes
-	f32 halfWidth = -player->c_halfwidth * player->c_scalex;
-	f32 horizontalInvLen = 1.0f / sqrtf(halfWidth * halfWidth + 1.0f);
-	halfWidth *= horizontalInvLen;
+	var8009dd30.f[0] = sp20 * mtx->m[1][0] + (sp24) * mtx->m[2][0];
+	var8009dd30.f[1] = sp20 * mtx->m[1][1] + (sp24) * mtx->m[2][1];
+	var8009dd30.f[2] = sp20 * mtx->m[1][2] + (sp24) * mtx->m[2][2];
 
-	f32 planeXFactor = -horizontalInvLen;
+	var8009dd3c = var8009dd30.f[0] * mtx->m[3][0] + var8009dd30.f[1] * mtx->m[3][1] + var8009dd30.f[2] * mtx->m[3][2];
 
-	// Left plane normal
-	g_FrustumLeftPlane.x = planeXFactor * projMtx->m[0][0] - halfWidth * projMtx->m[2][0];
-	g_FrustumLeftPlane.y = planeXFactor * projMtx->m[0][1] - halfWidth * projMtx->m[2][1];
-	g_FrustumLeftPlane.z = planeXFactor * projMtx->m[0][2] - halfWidth * projMtx->m[2][2];
-	g_FrustumLeftOffset = g_FrustumLeftPlane.x * projMtx->m[3][0] +
-	                      g_FrustumLeftPlane.y * projMtx->m[3][1] +
-	                      g_FrustumLeftPlane.z * projMtx->m[3][2];
+	sp28 = -player->c_halfwidth * player->c_scalex;
 
-	// Right plane normal
-	g_FrustumRightPlane.x = -planeXFactor * projMtx->m[0][0] - halfWidth * projMtx->m[2][0];
-	g_FrustumRightPlane.y = -planeXFactor * projMtx->m[0][1] - halfWidth * projMtx->m[2][1];
-	g_FrustumRightPlane.z = -planeXFactor * projMtx->m[0][2] - halfWidth * projMtx->m[2][2];
-	g_FrustumRightOffset = g_FrustumRightPlane.x * projMtx->m[3][0] +
-	                       g_FrustumRightPlane.y * projMtx->m[3][1] +
-	                       g_FrustumRightPlane.z * projMtx->m[3][2];
+	sp10 = 1.0f / sqrtf(sp28 * sp28 + 1.0f);
+	sp28 *= sp10;
+	sp14 = -sp10;
 
-	// Near plane direction
-	g_FrustumNearPlane.x = -projMtx->m[3][0];
-	g_FrustumNearPlane.y = -projMtx->m[3][1];
-	g_FrustumNearPlane.z = -projMtx->m[3][2];
+	var8009dd40.f[0] = sp14 * mtx->m[0][0] - sp28 * mtx->m[2][0];
+	var8009dd40.f[1] = sp14 * mtx->m[0][1] - sp28 * mtx->m[2][1];
+	var8009dd40.f[2] = sp14 * mtx->m[0][2] - sp28 * mtx->m[2][2];
 
-	// Near plane offset (dot product with forward direction)
-	g_FrustumNearOffset = projMtx->m[2][0] * projMtx->m[3][0] +
-	                      projMtx->m[2][1] * projMtx->m[3][1] +
-	                      projMtx->m[2][2] * projMtx->m[3][2];
+	var8009dd4c = var8009dd40.f[0] * mtx->m[3][0] + var8009dd40.f[1] * mtx->m[3][1] + var8009dd40.f[2] * mtx->m[3][2];
+
+	var8009dd50.f[0] = -sp14 * mtx->m[0][0] - sp28 * mtx->m[2][0];
+	var8009dd50.f[1] = -sp14 * mtx->m[0][1] - sp28 * mtx->m[2][1];
+	var8009dd50.f[2] = -sp14 * mtx->m[0][2] - sp28 * mtx->m[2][2];
+
+	var8009dd5c = var8009dd50.f[0] * mtx->m[3][0] + var8009dd50.f[1] * mtx->m[3][1] + var8009dd50.f[2] * mtx->m[3][2];
+
+	var8009dd60.f[0] = -mtx->m[3][0];
+	var8009dd60.f[1] = -mtx->m[3][1];
+	var8009dd60.f[2] = -mtx->m[3][2];
+
+	var8009dd6c = mtx->m[2][0] * mtx->m[3][0] + mtx->m[2][1] * mtx->m[3][1] + mtx->m[2][2] * mtx->m[3][2];
 }
 
-bool camIsPointInFrustum(struct coord *point, f32 radius)
+bool cam0f0b5b9c(struct coord *arg0, f32 arg1)
 {
 	Mtxf *mtx = g_Vars.currentplayer->projectionmtx;
 
-	if (g_FrustumNearOffset + radius < mtx->m[2][0] * point->f[0] + mtx->m[2][1] * point->f[1] + mtx->m[2][2] * point->f[2]) {
+	if (var8009dd6c + arg1 < mtx->m[2][0] * arg0->f[0] + mtx->m[2][1] * arg0->f[1] + mtx->m[2][2] * arg0->f[2]) {
 		return false;
 	}
 
-	if (g_FrustumLeftOffset + radius < g_FrustumLeftPlane.f[0] * point->f[0] + g_FrustumLeftPlane.f[1] * point->f[1] + g_FrustumLeftPlane.f[2] * point->f[2]) {
+	if (var8009dd4c + arg1 < var8009dd40.f[0] * arg0->f[0] + var8009dd40.f[1] * arg0->f[1] + var8009dd40.f[2] * arg0->f[2]) {
 		return false;
 	}
 
-	if (g_FrustumRightOffset + radius < g_FrustumRightPlane.f[0] * point->f[0] + g_FrustumRightPlane.f[1] * point->f[1] + g_FrustumRightPlane.f[2] * point->f[2]) {
+	if (var8009dd5c + arg1 < var8009dd50.f[0] * arg0->f[0] + var8009dd50.f[1] * arg0->f[1] + var8009dd50.f[2] * arg0->f[2]) {
 		return false;
 	}
 
-	if (g_FrustumTopOffset + radius < g_FrustumTopPlane.f[0] * point->f[0] + g_FrustumTopPlane.f[1] * point->f[1] + g_FrustumTopPlane.f[2] * point->f[2]) {
+	if (var8009dd2c + arg1 < var8009dd20.f[0] * arg0->f[0] + var8009dd20.f[1] * arg0->f[1] + var8009dd20.f[2] * arg0->f[2]) {
 		return false;
 	}
 
-	if (g_FrustumBottomOffset + radius < g_FrustumBottomPlane.f[0] * point->f[0] + g_FrustumBottomPlane.f[1] * point->f[1] + g_FrustumBottomPlane.f[2] * point->f[2]) {
+	if (var8009dd3c + arg1 < var8009dd30.f[0] * arg0->f[0] + var8009dd30.f[1] * arg0->f[1] + var8009dd30.f[2] * arg0->f[2]) {
 		return false;
 	}
 
@@ -511,7 +501,7 @@ bool camIsPosInScreenBox(struct coord *pos, f32 arg1, struct drawslot *drawslot)
 	f32 sp1c;
 	f32 sp18;
 
-	if (g_FrustumNearOffset + arg1 < g_Vars.currentplayer->projectionmtx->m[2][0] * pos->f[0] + g_Vars.currentplayer->projectionmtx->m[2][1] * pos->f[1] + g_Vars.currentplayer->projectionmtx->m[2][2] * pos->f[2]) {
+	if (var8009dd6c + arg1 < g_Vars.currentplayer->projectionmtx->m[2][0] * pos->f[0] + g_Vars.currentplayer->projectionmtx->m[2][1] * pos->f[1] + g_Vars.currentplayer->projectionmtx->m[2][2] * pos->f[2]) {
 		return false;
 	}
 
@@ -596,7 +586,9 @@ bool camIsPosInFovAndVisibleRoom(RoomNum *rooms, struct coord *pos, f32 arg2)
 	RoomNum room;
 	bool hasdata = false;
 	struct drawslot *thisthing;
+#ifdef AVOID_UB
 	static struct drawslot dslot;
+#endif
 	struct screenbox box;
 
 	for (i = 0, room = rooms[i]; room != -1; i++, room = rooms[i]) {
@@ -634,6 +626,10 @@ bool camIsPosInFovAndVisibleRoom(RoomNum *rooms, struct coord *pos, f32 arg2)
 		return false;
 	}
 
+#ifdef AVOID_UB
 	memcpy(&dslot.box, &box, sizeof(box));
 	return camIsPosInScreenBox(pos, arg2, &dslot);
+#else
+	return camIsPosInScreenBox(pos, arg2, (struct drawslot *) &(((u8 *) &box)[-((uintptr_t) &(((struct drawslot *)0)->box))]));
+#endif
 }

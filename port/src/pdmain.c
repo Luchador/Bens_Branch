@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include <stdint.h>
 #include <ultra64.h>
 #include <PR/ultrasched.h>
 #include "lib/sched.h"
@@ -15,7 +15,6 @@
 #include "game/tex.h"
 #include "game/challenge.h"
 #include "game/title.h"
-#include "game/pdmode.h"
 #include "game/objectives.h"
 #include "game/endscreen.h"
 #include "game/playermgr.h"
@@ -51,19 +50,19 @@
 #include "types.h"
 #include "system.h"
 
-extern u8 *g_MempHeap;
+extern uint8_t *g_MempHeap;
 extern u32 g_MempHeapSize;
 
 void rngSetSeed(u32 seed);
 
 bool g_AcceptCMDParams = false;
-s32 g_StageNum = STAGE_TITLE;
+int g_StageNum = STAGE_TITLE;
 u32 g_MainMemaHeapSize = 1024 * 300;
 bool g_MainGameLogicEnabled = true;
 u32 g_MainNumGfxTasks = 0;
 bool g_MainIsEndscreen = false;
-s32 g_DoBootPakMenu = 0;
-s32 g_MainChangeToStageNum = -1;
+int g_DoBootPakMenu = 0;
+int g_MainChangeToStageNum = -1;
 bool g_MainIsDebugMenuOpen = false;
 
 // Ben's comment: the change to allow all male guard heads means the memory limits need to be increased? Or does the PC port do this automatically?
@@ -110,7 +109,7 @@ struct stageallocation g_StageAllocations8Mb[] = {
 	{ 0,                   "-ml0 -me0 -mgfx120 -mvtx98 -ma300"             },
 };
 
-s32 g_MainIsBooting = 1;
+int g_MainIsBooting = 1;
 
 void mainInit(void)
 {
@@ -122,7 +121,7 @@ void mainInit(void)
 	g_AcceptCMDParams = true;
 
 	// no copyright screen
-	viSetMode(VIMODE_LO);
+	viSetMode(VIMODE_HI);
 	viConfigureForLegal();
 	viBlack(true);
 	viUpdateMode();
@@ -160,6 +159,7 @@ void mainInit(void)
 void mainProc(void)
 {
 	mainInit();
+	rdpInit();
 	sndInit();
 
 	while (true) {
@@ -179,9 +179,9 @@ void mainProc(void)
  */
 void mainLoop(void)
 {
-	s32 ending = false;
-	s32 index;
-	s32 numplayers;
+	int ending = false;
+	int index;
+	int numplayers;
 
 	filesStop(5);
 	mempResetPool(MEMPOOL_5);
@@ -324,9 +324,9 @@ void mainLoop(void)
 		frametimeCalculate();
 
 		while (g_MainChangeToStageNum < 0) {
-			const s32 cycles = osGetCount() - g_Vars.thisframestartt;
+			const int cycles = osGetCount() - g_Vars.thisframestartt;
 			if (!g_Vars.mininc60 || (cycles >= g_Vars.mininc60 * CYCLES_PER_FRAME - CYCLES_PER_FRAME / 2)) {
-				schedStartFrame();
+				schedStartFrame(&g_Sched);
 				mainTick();
 				schedEndFrame(&g_Sched);
 			}
@@ -351,7 +351,7 @@ void mainTick(void)
 {
 	Gfx *gdl = NULL;
 	Gfx *gdlstart = NULL;
-	s32 i;
+	int i;
 
 	if (g_MainChangeToStageNum < 0) {
 		frametimeCalculate();
@@ -407,8 +407,8 @@ void mainEndStage(void)
 		joyDisableTemporarily();
 
 		if (g_Vars.coopplayernum >= 0) {
-			s32 prevplayernum = g_Vars.currentplayernum;
-			s32 i;
+			int prevplayernum = g_Vars.currentplayernum;
+			int i;
 
 			for (i = 0; i < PLAYERCOUNT(); i++) {
 				setCurrentPlayerNum(i);
@@ -418,8 +418,8 @@ void mainEndStage(void)
 			setCurrentPlayerNum(prevplayernum);
 			musicStartMenu();
 		} else if (g_Vars.antiplayernum >= 0) {
-			s32 prevplayernum = g_Vars.currentplayernum;
-			s32 i;
+			int prevplayernum = g_Vars.currentplayernum;
+			int i;
 
 			for (i = 0; i < PLAYERCOUNT(); i++) {
 				setCurrentPlayerNum(i);
@@ -442,14 +442,14 @@ void mainEndStage(void)
 /**
  * Change to the given stage at the end of the current frame.
  */
-void mainChangeToStage(s32 stagenum)
+void mainChangeToStage(int stagenum)
 {
 	pak0f11c6d0();
 
 	g_MainChangeToStageNum = stagenum;
 }
 
-s32 mainGetStageNum(void)
+int mainGetStageNum(void)
 {
 	return g_StageNum;
 }

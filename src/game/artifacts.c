@@ -16,11 +16,13 @@
 #include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
 #include "lib/collision.h"
 #include "lib/lib_17ce0.h"
 #include "game/player.h"
 #include "game/prop.h"
 #include "game/debug.h"
+#endif
 
 u8 *var800a41a0;
 
@@ -83,19 +85,19 @@ u16 func0f13c574(f32 arg0)
 	return left << 13 | (right << 2);
 }
 
-s32 floatToSafeS32(float value)
+s32 func0f13c710(f32 arg0)
 {
-	if (value > 0.0f) {
-		if (value > 2147483520.0f) {
-			value = 2147483520;
+	if (arg0 > 0.0f) {
+		if (arg0 > 2147483520.0f) {
+			arg0 = 2147483520;
 		}
 	} else {
-		if (value < -2147483520) {
-			value = -2147483520;
+		if (arg0 < -2147483520) {
+			arg0 = -2147483520;
 		}
 	}
 
-	return value;
+	return arg0;
 }
 
 bool artifactTestLos(struct coord *spec, struct coord *roompos, s32 xi, s32 yi)
@@ -224,8 +226,8 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 
 					if (spdc[3] > 0.0001f) {
 						f20 = 1.0f / spdc[3];
-						x = floatToSafeS32(viewleft + (1.0f + spdc[0] * f20) * (viewwidth * 0.5f));
-						y = floatToSafeS32(viewtop + (1.0f - spdc[1] * f20) * (viewheight * 0.5f));
+						x = func0f13c710(viewleft + (1.0f + spdc[0] * f20) * (viewwidth * 0.5f));
+						y = func0f13c710(viewtop + (1.0f - spdc[1] * f20) * (viewheight * 0.5f));
 						f0 = (spdc[2] * f20 * 511.0f + 511.0f) * 32.0f;
 
 						if (f0 < 32576.0f) {
@@ -327,8 +329,8 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 								f20 = -9999.0f;
 							}
 
-							xi = floatToSafeS32(viewleft + (1.0f + spdc[0] * f20) * (viewwidth * 0.5f));
-							yi = floatToSafeS32(viewtop + (1.0f - spdc[1] * f20) * (viewheight * 0.5f));
+							xi = func0f13c710(viewleft + (1.0f + spdc[0] * f20) * (viewwidth * 0.5f));
+							yi = func0f13c710(viewtop + (1.0f - spdc[1] * f20) * (viewheight * 0.5f));
 							f0 = (spdc[2] * f20 * 511.0f + 511.0f) * 32.0f;
 
 							if (g_ZbufPtr1
@@ -365,17 +367,17 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 	}
 }
 
-u8 artifactClampU8Within7(u8 base, u8 target)
+u8 func0f13d3c4(u8 arg0, u8 arg1)
 {
-	if (target >= base + 7) {
-		return base + 7;
+	if (arg1 >= arg0 + 7) {
+		return arg0 + 7;
 	}
 
-	if (target <= base - 7) {
-		return base - 7;
+	if (arg1 <= arg0 - 7) {
+		return arg0 - 7;
 	}
 
-	return target;
+	return arg1;
 }
 
 Gfx *artifactsConfigureForGlares(Gfx *gdl)
@@ -485,7 +487,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 					artifacts[k].type = ARTIFACTTYPE_FREE;
 				}
 
-				s3[0] = artifactClampU8Within7(s3[0], t2 * 2);
+				s3[0] = func0f13d3c4(s3[0], t2 * 2);
 
 				if (t2 > 0) {
 					brightness = viGetFovY() * 0.017453292f;

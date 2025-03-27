@@ -7,8 +7,8 @@
 
 void bcutsceneInit(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	g_Vars.currentplayer->bondmovemode = MOVEMODE_CUTSCENE;
 

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/prop.h"
 #include "game/textutils.h"
@@ -18,40 +19,37 @@
 #define ANIM_HEADER_CACHE_SIZE 40
 #define ANIM_FRAME_CACHE_SIZE  32
 
-u8 *g_AnimFrameByteSlots;
-u8 **g_AnimFrameBytes;
-s16 *g_AnimFrameAnimNums;
-s16 *g_AnimFrameFrameNums;
-u8 *g_AnimFrameBirths;
-u8 *g_AnimHeaderByteSlots;
-u8 **g_AnimHeaderBytes;
-s16 *g_AnimHeaderAnimNums;
-s32 *g_AnimHeaderBirths;
-s16 g_NumRomAnimations;
+uint8_t *g_AnimFrameByteSlots;
+uint8_t **g_AnimFrameBytes;
+int16_t *g_AnimFrameAnimNums;
+int16_t *g_AnimFrameFrameNums;
+uint8_t *g_AnimFrameBirths;
+uint8_t *g_AnimHeaderByteSlots;
+uint8_t **g_AnimHeaderBytes;
+int16_t *g_AnimHeaderAnimNums;
+int *g_AnimHeaderBirths;
+int16_t g_NumRomAnimations;
 struct animtableentry *g_RomAnims;
 
-u32 g_NextAnimFrameIndex = 0;
-s32 g_NextAnimHeaderIndex = 0;
-s16 g_NumAnimations = 0;
+unsigned int g_NextAnimFrameIndex = 0;
+int g_NextAnimHeaderIndex = 0;
+int16_t g_NumAnimations = 0;
 struct animtableentry *g_Anims = NULL;
-u8 *g_AnimToHeaderSlot = NULL;
-s16 *var8005f014 = NULL;
-s32 g_AnimMaxBytesPerFrame = 176;
-s32 g_AnimMaxHeaderLength = 608;
-u8 *g_AnimHostSegment = NULL;
+uint8_t *g_AnimToHeaderSlot = NULL;
+int16_t *var8005f014 = NULL;
+int g_AnimMaxBytesPerFrame = 176;
+int g_AnimMaxHeaderLength = 608;
+uint8_t *g_AnimHostSegment = NULL;
+uint8_t **g_AnimReplacements;
 
-#ifndef PLATFORM_N64
-u8 **g_AnimReplacements;
-#endif
-
-extern u8 EXT_SEG _animationsTableRomStart;
-extern u8 EXT_SEG _animationsTableRomEnd;
+extern uint8_t EXT_SEG _animationsTableRomStart;
+extern uint8_t EXT_SEG _animationsTableRomEnd;
 
 void animsInit(void)
 {
-	s32 i;
-	u32 *ptr;
-	u32 tablelen = ALIGN64(REF_SEG _animationsTableRomEnd - REF_SEG _animationsTableRomStart);
+	int i;
+	unsigned int *ptr;
+	unsigned int tablelen = ALIGN64(REF_SEG _animationsTableRomEnd - REF_SEG _animationsTableRomStart);
 
 	ptr = mempAlloc(tablelen, MEMPOOL_PERMANENT);
 	dmaExec(ptr, (romptr_t) REF_SEG _animationsTableRomStart, tablelen);
@@ -86,10 +84,8 @@ void animsInit(void)
 	g_AnimHeaderBytes     = mempAlloc(ALIGN64(ANIM_HEADER_CACHE_SIZE * sizeof(*g_AnimHeaderBytes)), MEMPOOL_PERMANENT);
 	g_AnimHeaderAnimNums  = mempAlloc(ALIGN64(ANIM_HEADER_CACHE_SIZE * sizeof(*g_AnimHeaderAnimNums)), MEMPOOL_PERMANENT);
 	g_AnimHeaderBirths    = mempAlloc(ALIGN64(ANIM_HEADER_CACHE_SIZE * sizeof(*g_AnimHeaderBirths)), MEMPOOL_PERMANENT);
-#ifndef PLATFORM_N64
-	g_AnimReplacements    = mempAlloc(ALIGN64(g_NumAnimations * sizeof(u8 *)), MEMPOOL_PERMANENT);
-	bzero(g_AnimReplacements, g_NumAnimations * sizeof(u8 *));
-#endif
+	g_AnimReplacements    = mempAlloc(ALIGN64(g_NumAnimations * sizeof(uint8_t *)), MEMPOOL_PERMANENT);
+	bzero(g_AnimReplacements, g_NumAnimations * sizeof(uint8_t *));
 
 	animsInitTables();
 
@@ -98,7 +94,7 @@ void animsInit(void)
 
 void animsInitTables(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_NumAnimations; i++) {
 		g_AnimToHeaderSlot[i] = 0xff;
@@ -123,24 +119,24 @@ void animsReset(void)
 	g_Anims = g_RomAnims;
 }
 
-s32 animGetNumFrames(s16 animnum)
+int animGetNumFrames(int16_t animnum)
 {
 	return g_Anims[animnum].numframes;
 }
 
-bool animHasFrames(s16 animnum)
+bool animHasFrames(int16_t animnum)
 {
 	return animnum < g_NumAnimations && g_Anims[animnum].numframes > 0;
 }
 
-s32 animGetNumAnimations(void)
+int animGetNumAnimations(void)
 {
 	return g_NumAnimations;
 }
 
-extern u8 EXT_SEG _animationsSegmentRomStart;
+extern uint8_t EXT_SEG _animationsSegmentRomStart;
 
-u8 *animDma(u8 *dst, u32 segoffset, u32 len)
+uint8_t *animDma(uint8_t *dst, unsigned int segoffset, unsigned int len)
 {
 	/*if (g_AnimHostEnabled) {
 		bcopy(&g_AnimHostSegment[segoffset], dst, len);
@@ -169,14 +165,14 @@ u8 *animDma(u8 *dst, u32 segoffset, u32 len)
  * 56 -> 30
  * 57 -> 31
  */
-s32 animGetRemappedFrame(s16 animnum, s32 apparentframe)
+int animGetRemappedFrame(int16_t animnum, int apparentframe)
 {
-	u8 *ptr = (u8 *)(g_AnimHeaderBytes[g_AnimToHeaderSlot[animnum]] + g_Anims[animnum].headerlen - 2);
-	s32 realframe = apparentframe;
+	uint8_t *ptr = (uint8_t *)(g_AnimHeaderBytes[g_AnimToHeaderSlot[animnum]] + g_Anims[animnum].headerlen - 2);
+	int realframe = apparentframe;
 
 	while (true) {
-		s16 repeatfromframe = ptr[0] << 8 | ptr[1];
-		s16 repeattoframe;
+		int16_t repeatfromframe = ptr[0] << 8 | ptr[1];
+		int16_t repeattoframe;
 
 		if (repeatfromframe < 0) {
 			break;
@@ -204,15 +200,15 @@ s32 animGetRemappedFrame(s16 animnum, s32 apparentframe)
  * - If the apparent frame is a repeat, write the original frame rather than -1.
  * - Return true if the frame is original or false if it's a repeat.
  */
-bool animRemapFrameForLoad(s16 animnum, s32 apparentframe, s32 *frameptr)
+bool animRemapFrameForLoad(int16_t animnum, int apparentframe, int *frameptr)
 {
-	u8 *ptr = (u8 *)(g_AnimHeaderBytes[g_AnimToHeaderSlot[animnum]] + g_Anims[animnum].headerlen - 2);
-	s32 result = apparentframe;
+	uint8_t *ptr = (uint8_t *)(g_AnimHeaderBytes[g_AnimToHeaderSlot[animnum]] + g_Anims[animnum].headerlen - 2);
+	int result = apparentframe;
 	bool ret = true;
 
 	while (true) {
-		s16 repeatfromframe = ptr[0] << 8 | ptr[1];
-		s16 repeattoframe;
+		int16_t repeatfromframe = ptr[0] << 8 | ptr[1];
+		int16_t repeattoframe;
 
 		if (repeatfromframe < 0) {
 			break;
@@ -246,14 +242,14 @@ bool animRemapFrameForLoad(s16 animnum, s32 apparentframe, s32 *frameptr)
  * frame repeat data. The frame numbers are stored as a list of shorts.
  * The list is terminated on the left side with a negative value.
  */
-bool animIsFrameCutSkipped(s16 animnum, s32 frame)
+bool animIsFrameCutSkipped(int16_t animnum, int frame)
 {
-	u8 *ptr = (u8 *)(g_AnimHeaderBytes[g_AnimToHeaderSlot[animnum]] + g_Anims[animnum].headerlen - 2);
+	uint8_t *ptr = (uint8_t *)(g_AnimHeaderBytes[g_AnimToHeaderSlot[animnum]] + g_Anims[animnum].headerlen - 2);
 
 	// Iterate past the repeat list
 	if (g_Anims[animnum].flags & ANIMFLAG_HASREPEATFRAMES) {
 		while (true) {
-			s16 repeatfromframe = ptr[0] << 8 | ptr[1];
+			int16_t repeatfromframe = ptr[0] << 8 | ptr[1];
 
 			if (repeatfromframe < 0) {
 				break;
@@ -266,7 +262,7 @@ bool animIsFrameCutSkipped(s16 animnum, s32 frame)
 	}
 
 	while (true) {
-		s16 skipframe = ptr[0] << 8 | ptr[1];
+		int16_t skipframe = ptr[0] << 8 | ptr[1];
 
 		if (skipframe < 0) {
 			break;
@@ -282,13 +278,12 @@ bool animIsFrameCutSkipped(s16 animnum, s32 frame)
 	return false;
 }
 
-u8 animLoadFrame(s16 animnum, s32 framenum)
+uint8_t animLoadFrame(int16_t animnum, int framenum)
 {
-	s32 slot = -1;
-	s32 i;
-	s32 offset;
-	s32 stack;
-	s32 loadframenum = framenum;
+	int slot = -1;
+	int i;
+	int offset;
+	int loadframenum = framenum;
 
 	for (i = 0; i < ANIM_FRAME_CACHE_SIZE; i++) {
 		if (g_AnimFrameAnimNums[i] == animnum && g_AnimFrameFrameNums[i] == loadframenum) {
@@ -312,7 +307,6 @@ u8 animLoadFrame(s16 animnum, s32 framenum)
 
 		if (g_Anims[animnum].bytesperframe) {
 			offset = g_Anims[animnum].bytesperframe * loadframenum + (g_Anims[animnum].data + g_Anims[animnum].headerlen);
-#ifndef PLATFORM_N64
 			if (g_Anims[animnum].data == 0xffffffff) {
 				// load external replacement (this will fatal error if there's no data)
 				if (!g_AnimReplacements[animnum]) {
@@ -321,7 +315,6 @@ u8 animLoadFrame(s16 animnum, s32 framenum)
 				offset = g_Anims[animnum].bytesperframe * loadframenum + g_Anims[animnum].headerlen;
 				g_AnimFrameBytes[slot] = g_AnimReplacements[animnum] + offset;
 			} else
-#endif
 			g_AnimFrameBytes[slot] = animDma(&g_AnimFrameByteSlots[slot * g_AnimMaxBytesPerFrame], offset, g_Anims[animnum].bytesperframe);
 		} else {
 			g_AnimFrameBytes[slot] = &g_AnimFrameByteSlots[slot * g_AnimMaxBytesPerFrame];
@@ -338,24 +331,23 @@ u8 animLoadFrame(s16 animnum, s32 framenum)
 
 void animForgetFrameBirths(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ANIM_FRAME_CACHE_SIZE; i++) {
 		g_AnimFrameBirths[i] = 0;
 	}
 }
 
-void animLoadHeader(s16 animnum)
+void animLoadHeader(int16_t animnum)
 {
-	s32 i;
+	int i;
 
 	if (g_AnimToHeaderSlot[animnum] != 0xff) {
 		g_AnimHeaderBirths[g_AnimToHeaderSlot[animnum]] = g_Vars.thisframestart240;
 		g_NextAnimHeaderIndex = (g_AnimToHeaderSlot[animnum] + 1) % ANIM_HEADER_CACHE_SIZE;
 	} else {
-		s32 tmp;
-		s32 slot = g_NextAnimHeaderIndex;
-		s32 stack;
+		int tmp;
+		int slot = g_NextAnimHeaderIndex;
 
 		for (i = 0; i < ANIM_HEADER_CACHE_SIZE; i++) {
 			if (g_AnimHeaderBirths[i] < g_AnimHeaderBirths[slot]) {
@@ -395,11 +387,11 @@ void animLoadHeader(s16 animnum)
  * remainingbits in the number of bits to read.
  * bitoffset is the starting bit offset relative to ptr.
  */
-s32 animReadBits(u8 *ptr, u8 remainingbits, u32 bitoffset)
+int animReadBits(uint8_t *ptr, uint8_t remainingbits, unsigned int bitoffset)
 {
-	u32 result = 0;
-	u32 mask;
-	u8 numbitsthisbyte;
+	unsigned int result = 0;
+	unsigned int mask;
+	uint8_t numbitsthisbyte;
 
 	result *= bitoffset / 8;
 
@@ -428,9 +420,9 @@ s32 animReadBits(u8 *ptr, u8 remainingbits, u32 bitoffset)
 	return result;
 }
 
-s32 animReadSignedShort(u8 *ptr, u8 readbitlen, s32 bitoffset)
+int animReadSignedShort(uint8_t *ptr, uint8_t readbitlen, int bitoffset)
 {
-	u16 result = animReadBits(ptr, readbitlen, bitoffset);
+	uint16_t result = animReadBits(ptr, readbitlen, bitoffset);
 
 	if (readbitlen < 16 && (result & (1 << (readbitlen - 1)))) {
 		result |= ((1 << (16 - readbitlen)) - 1) << readbitlen;
@@ -445,17 +437,16 @@ s32 animReadSignedShort(u8 *ptr, u8 readbitlen, s32 bitoffset)
  *
  * Both the anim header and frame data must be loaded already.
  */
-void animGetRotTranslateScale(s32 part, bool flip, struct skeleton *skel, s16 animnum, u8 frameslot, struct coord *rot, struct coord *translate, struct coord *scale)
+void animGetRotTranslateScale(int part, bool flip, struct skeleton *skel, int16_t animnum, uint8_t frameslot, struct coord *rot, struct coord *translate, struct coord *scale)
 {
-	s32 i;
-	u16 introt[3];
-	u8 readbitlen;
-	u8 *framebytes = g_AnimFrameBytes[frameslot];
-	u8 framelen;
-	u8 *ptr;
-	u8 *end;
-	s32 bitoffset;
-	u32 stack;
+	int i;
+	uint16_t introt[3];
+	uint8_t readbitlen;
+	uint8_t *framebytes = g_AnimFrameBytes[frameslot];
+	uint8_t framelen;
+	uint8_t *ptr;
+	uint8_t *end;
+	int bitoffset;
 
 	if (flip) {
 		part = skel->things[part][1];
@@ -467,7 +458,7 @@ void animGetRotTranslateScale(s32 part, bool flip, struct skeleton *skel, s16 an
 	end = ptr + g_Anims[animnum].headerlen;
 
 	for (i = 0; i < part && ptr < end; i++) {
-		u8 flags = *ptr;
+		uint8_t flags = *ptr;
 		ptr++;
 
 		if (flags & ANIMFIELD_08) {
@@ -499,20 +490,20 @@ void animGetRotTranslateScale(s32 part, bool flip, struct skeleton *skel, s16 an
 	}
 
 	if (ptr < end) {
-		u8 flags = *ptr;
+		uint8_t flags = *ptr;
 		ptr++;
 
 		if (flags & ANIMFIELD_S16_TRANSLATE) {
 			readbitlen = ptr[2];
-			translate->x = (s16) (animReadSignedShort(framebytes, readbitlen, bitoffset) + (ptr[0] << 8) + ptr[1]);
+			translate->x = (int16_t) (animReadSignedShort(framebytes, readbitlen, bitoffset) + (ptr[0] << 8) + ptr[1]);
 			bitoffset += readbitlen;
 
 			readbitlen = ptr[5];
-			translate->y = (s16) (animReadSignedShort(framebytes, readbitlen, bitoffset) + (ptr[3] << 8) + ptr[4]);
+			translate->y = (int16_t) (animReadSignedShort(framebytes, readbitlen, bitoffset) + (ptr[3] << 8) + ptr[4]);
 			bitoffset += readbitlen;
 
 			readbitlen = ptr[8];
-			translate->z = (s16) (animReadSignedShort(framebytes, readbitlen, bitoffset) + (ptr[6] << 8) + ptr[7]);
+			translate->z = (int16_t) (animReadSignedShort(framebytes, readbitlen, bitoffset) + (ptr[6] << 8) + ptr[7]);
 			bitoffset += readbitlen;
 
 			ptr += 9;
@@ -577,18 +568,18 @@ void animGetRotTranslateScale(s32 part, bool flip, struct skeleton *skel, s16 an
 				rot->z = introt[2] * M_TAU / 65536.0f;
 			}
 		} else if (flags & ANIMFIELD_F32_ROTATE) {
-			s32 sp38;
+			int sp38;
 
 			sp38 = animReadBits(framebytes, 32, bitoffset);
-			rot->x = *(f32 *)&sp38;
+			rot->x = *(float *)&sp38;
 			bitoffset += 32;
 
 			sp38 = animReadBits(framebytes, 32, bitoffset);
-			rot->y = *(f32 *)&sp38;
+			rot->y = *(float *)&sp38;
 			bitoffset += 32;
 
 			sp38 = animReadBits(framebytes, 32, bitoffset);
-			rot->z = *(f32 *)&sp38;
+			rot->z = *(float *)&sp38;
 			bitoffset += 32;
 
 			if (flip) {
@@ -605,18 +596,18 @@ void animGetRotTranslateScale(s32 part, bool flip, struct skeleton *skel, s16 an
 		}
 
 		if (flags & ANIMFIELD_F32_SCALE) {
-			s32 word;
+			int word;
 
 			word = animReadBits(framebytes, 32, bitoffset);
-			scale->x = *(f32 *)&word;
+			scale->x = *(float *)&word;
 			bitoffset += 32;
 
 			word = animReadBits(framebytes, 32, bitoffset);
-			scale->y = *(f32 *)&word;
+			scale->y = *(float *)&word;
 			bitoffset += 32;
 
 			word = animReadBits(framebytes, 32, bitoffset);
-			scale->z = *(f32 *)&word;
+			scale->z = *(float *)&word;
 		} else {
 			scale->x = scale->y = scale->z = 1.0f;
 		}
@@ -636,15 +627,15 @@ void animGetRotTranslateScale(s32 part, bool flip, struct skeleton *skel, s16 an
  * No data needs to be loaded by the caller - the function will ensure the
  * header and frame are loaded.
  */
-u16 animGetPosAngleAsInt(s32 part, bool flip, struct skeleton *skel, s16 animnum, s32 framenum, s16 inttranslate[3], bool arg6)
+uint16_t animGetPosAngleAsInt(int part, bool flip, struct skeleton *skel, int16_t animnum, int framenum, int16_t inttranslate[3], bool arg6)
 {
-	u16 result = 0;
-	s32 bitoffset;
-	u8 readbitlen;
-	u8 slot;
-	u8 *framebytes;
-	u8 *ptr;
-	s32 i;
+	uint16_t result = 0;
+	int bitoffset;
+	uint8_t readbitlen;
+	uint8_t slot;
+	uint8_t *framebytes;
+	uint8_t *ptr;
+	int i;
 
 	if (arg6) {
 		inttranslate[0] = 0;
@@ -665,7 +656,7 @@ u16 animGetPosAngleAsInt(s32 part, bool flip, struct skeleton *skel, s16 animnum
 		ptr = g_AnimHeaderBytes[g_AnimToHeaderSlot[animnum]];
 
 		for (i = 0; i < part; i++) {
-			u8 flags = *ptr;
+			uint8_t flags = *ptr;
 			ptr++;
 
 			if (flags & ANIMFIELD_08) {
@@ -723,11 +714,11 @@ u16 animGetPosAngleAsInt(s32 part, bool flip, struct skeleton *skel, s16 animnum
 	return result;
 }
 
-f32 animGetTranslateAngle(s32 part, bool flip, struct skeleton *skel, s16 animnum, s32 framenum, struct coord *translate, bool arg6)
+float animGetTranslateAngle(int part, bool flip, struct skeleton *skel, int16_t animnum, int framenum, struct coord *translate, bool arg6)
 {
-	s16 inttranslate[3];
+	int16_t inttranslate[3];
 
-	f32 angle = animGetPosAngleAsInt(part, flip, skel, animnum, framenum, inttranslate, arg6);
+	float angle = animGetPosAngleAsInt(part, flip, skel, animnum, framenum, inttranslate, arg6);
 
 	translate->x = inttranslate[0];
 	translate->y = inttranslate[1];
@@ -745,18 +736,17 @@ f32 animGetTranslateAngle(s32 part, bool flip, struct skeleton *skel, s16 animnu
  * When part = 1, the returned value is the FOV Y.
  * When part = 2, the returned value is the blur frac.
  */
-f32 animGetCameraValue(s32 part, s16 animnum, u8 frameslot)
+float animGetCameraValue(int part, int16_t animnum, uint8_t frameslot)
 {
-	u32 stack[2];
-	u8 *framebytes = g_AnimFrameBytes[frameslot];
-	u8 *ptr = g_AnimHeaderBytes[g_AnimToHeaderSlot[animnum]];
-	f32 result = 0;
-	s32 bitoffset = 0;
-	s32 i;
-	u8 *end = ptr + g_Anims[animnum].headerlen;
+	uint8_t *framebytes = g_AnimFrameBytes[frameslot];
+	uint8_t *ptr = g_AnimHeaderBytes[g_AnimToHeaderSlot[animnum]];
+	float result = 0;
+	int bitoffset = 0;
+	int i;
+	uint8_t *end = ptr + g_Anims[animnum].headerlen;
 
 	for (i = 0; i < part && ptr < end; i++) {
-		u8 flags = ptr[0];
+		uint8_t flags = ptr[0];
 		ptr++;
 
 		if (flags & ANIMFIELD_08) {
@@ -788,7 +778,7 @@ f32 animGetCameraValue(s32 part, s16 animnum, u8 frameslot)
 	}
 
 	if (ptr < end) {
-		u8 flags = ptr[0];
+		uint8_t flags = ptr[0];
 		ptr++;
 
 		if (flags & ANIMFIELD_CAMERA) {
@@ -800,7 +790,7 @@ f32 animGetCameraValue(s32 part, s16 animnum, u8 frameslot)
 			 * The value in the frame data is an adjustment value that is added
 			 * to the base value.
 			 */
-			s32 framevalue = animReadBits(framebytes, ptr[0], bitoffset);
+			int framevalue = animReadBits(framebytes, ptr[0], bitoffset);
 			result = (framevalue + ptr[1] * 0x1000000 + ptr[2] * 0x10000 + ptr[3] * 0x100 + ptr[4]) * 0.001f;
 		}
 	}

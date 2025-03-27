@@ -1,7 +1,6 @@
 #ifndef _IN_GAME_CHR_CHR_H
 #define _IN_GAME_CHR_CHR_H
 #include <ultra64.h>
-#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
@@ -9,9 +8,14 @@ void chrSetChrnum(struct chrdata *chr, s16 chrnum);
 void chrDeregister(s32 chrnum);
 void chrCalculatePushPos(struct chrdata *chr, struct coord *pos, RoomNum *rooms, bool arg3);
 
-bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, float arg3, bool arg4);
+#if VERSION >= VERSION_NTSC_1_0
+bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 arg3, bool arg4);
+#else
+bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 arg3);
+#endif
+
 bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f32 *mangroundptr);
-int chrsGetNumFree(void);
+s32 chrsGetNumFree(void);
 s16 chrsGetNextUnusedChrnum(void);
 struct prop *chr0f020b14(struct prop *prop, struct model *model, struct coord *pos, RoomNum *rooms, f32 arg3, u8 *ailist);
 void chrRemove(struct prop *prop, bool free);
@@ -51,28 +55,28 @@ bool chr0f028e6c(s32 arg0, struct prop *prop, struct prop **propptr, struct mode
 void shieldhitCreate(struct prop *prop, f32 shield, struct prop *arg2, struct modelnode *node, struct model *model, s32 side, s16 *arg6);
 void shieldhitRemove(struct shieldhit *shieldhit);
 void shieldhitsRemoveByProp(struct prop *prop);
-int chr0f02932c(struct prop *prop, int arg1);
-int chr0f0293ec(struct prop *prop, int arg1);
-int chr0f0294cc(struct prop *prop, int arg1);
-void chrCalcShieldColor(float arg0, int *arg1, int *arg2, int *arg3);
-float propGetShieldThing(struct prop **propptr);
+s32 chr0f02932c(struct prop *prop, s32 arg1);
+s32 chr0f0293ec(struct prop *prop, s32 arg1);
+s32 chr0f0294cc(struct prop *prop, s32 arg1);
+void chrCalcShieldColor(f32 arg0, s32 *arg1, s32 *arg2, s32 *arg3);
+f32 propGetShieldThing(struct prop **propptr);
 Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop, struct model *model, struct modelnode *node, s32 side, s32 arg6, s32 arg7, s32 alpha);
 Gfx *shieldhitRender(Gfx *gdl, struct prop *prop1, struct prop *prop2, s32 alpha, bool arg4, s32 cmnum1, s32 cmnum2, s32 cmnum3, s32 cmnum4);
 Gfx *chrRenderCloak(Gfx *gdl, struct prop *chr1, struct prop *chr2);
-Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, unsigned int alpha);
+Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, u32 alpha);
 void shieldhitsTick(void);
-void chrSetDrCarollImages(struct chrdata *drcaroll, int imageleft, int imageright);
-int chrsGetNumSlots(void);
-void chrRegister(int chrnum, int chrindex);
-Vtx *chrAllocateVertices(int numvertices);
+void chrSetDrCarollImages(struct chrdata *drcaroll, s32 imageleft, s32 imageright);
+s32 chrsGetNumSlots(void);
+void chrRegister(s32 chrnum, s32 chrindex);
+Vtx *chrAllocateVertices(s32 numvertices);
 void chrSetPerimEnabled(struct chrdata *chr, bool enable);
-void chrSetMaxDamage(struct chrdata *chr, float maxdamage);
-float chrGetMaxDamage(struct chrdata *chr);
-void chrAddHealth(struct chrdata *chr, float health);
-float chrGetArmor(struct chrdata *chr);
+void chrSetMaxDamage(struct chrdata *chr, f32 maxdamage);
+f32 chrGetMaxDamage(struct chrdata *chr);
+void chrAddHealth(struct chrdata *chr, f32 health);
+f32 chrGetArmor(struct chrdata *chr);
 void chrInit(struct prop *prop, u8 *ailist);
 struct prop *chrAllocate(struct model *model, struct coord *pos, RoomNum *rooms, f32 faceangle, u8 *ailist);
-void chrClearReferences(int propnum);
+void chrClearReferences(s32 propnum);
 void chrFindEnteredRoomsWithRoomNum(struct chrdata *chr, RoomNum *room);
 void chrUpdateRooms(struct chrdata *chr);
 void chrCloak(struct chrdata *chr, bool arg1);

@@ -795,6 +795,10 @@ void setupCreateCctv(struct cctvobj *cctv, s32 cmdindex)
 		ydiff = lenspos.y - pad.pos.y;
 		zdiff = lenspos.z - pad.pos.z;
 
+		if (ydiff) {
+			// empty
+		}
+
 		mtx00016d58(&cctv->camrotm, 0.0f, 0.0f, 0.0f, xdiff, ydiff, zdiff, 0.0f, 1.0f, 0.0f);
 		mtx00015f04(obj->model->scale, &cctv->camrotm);
 
@@ -808,6 +812,10 @@ void setupCreateCctv(struct cctvobj *cctv, s32 cmdindex)
 
 		cctv->yzero = atan2f(xdiff, zdiff);
 		cctv->xzero = M_TAU - atan2f(ydiff, sqrtf(xdiff * xdiff + zdiff * zdiff));
+
+		if (xdiff || zdiff) {
+			// empty
+		}
 
 		cctv->seebondtime60 = 0;
 	}
@@ -1417,14 +1425,15 @@ void setupCreateProps(s32 stagenum)
 {
 	s32 withchrs = !argFindByPrefix(1, "-nochr") && !argFindByPrefix(1, "-noprop");
 	s32 withobjs = !argFindByPrefix(1, "-noobj") && !argFindByPrefix(1, "-noprop");
-	bool withhovercars = true;
+	s32 withhovercars;
 	s32 escstepx;
 	s32 escstepy;
 	struct defaultobj *obj;
 	s32 i;
 	s32 j;
 
-	withhovercars = !(stagenum == STAGE_EXTRACTION || stagenum == STAGE_DEFECTION || stagenum == STAGE_MBR);
+	withhovercars = !(stagenum == STAGE_EXTRACTION || stagenum == STAGE_DEFECTION || stagenum == STAGE_MBR)
+		|| !(g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0);
 
 	escstepx = 0;
 	escstepy = 0;

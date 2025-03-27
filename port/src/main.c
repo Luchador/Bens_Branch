@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <PR/ultratypes.h>
 #include <PR/ultrasched.h>
 
@@ -21,21 +22,21 @@ u32 g_OsMemSize = 0;
 s32 g_OsMemSizeMb = 32;
 OSSched g_Sched;
 
-u8 *g_MempHeap = NULL;
+uint8_t *g_MempHeap = NULL;
 u32 g_MempHeapSize = 0;
 
-s32 g_TickRateDiv = 1;
-s32 g_TickExtraSleep = true;
+int g_TickRateDiv = 1;
+int g_TickExtraSleep = true;
 
-s32 g_SkipIntro = false;
+bool g_SkipIntro = false;
 
-s32 g_FileAutoSelect = -1;
+int g_FileAutoSelect = -1;
 
-extern s32 g_StageNum;
+extern int g_StageNum;
 
 static void gameInit(void)
 {
-	for (s32 i = 0; i < MAX_PLAYERS; ++i) {
+	for (int i = 0; i < MAX_PLAYERS; ++i) {
 		struct extplayerconfig *cfg = g_PlayerExtCfg + i;
 		cfg->fovzoommult = cfg->fovzoom ? cfg->fovy / 60.0f : 1.0f;
 	}
@@ -137,8 +138,8 @@ PD_CONSTRUCTOR static void gameConfigInit(void)
 	configRegisterInt("Game.SkipIntro", &g_SkipIntro, 0, 1);
 	configRegisterInt("Game.DisableMpDeathMusic", &g_MusicDisableMpDeath, 0, 1);
 	configRegisterInt("Game.GEMuzzleFlashes", &g_BgunGeMuzzleFlashes, 0, 1);
-	for (s32 j = 0; j < MAX_PLAYERS; ++j) {
-		const s32 i = j + 1;
+	for (int j = 0; j < MAX_PLAYERS; ++j) {
+		const int i = j + 1;
 		configRegisterFloat(strFmt("Game.Player%d.FovY", i), &g_PlayerExtCfg[j].fovy, 5.f, 175.f);
 		configRegisterInt(strFmt("Game.Player%d.FovAffectsZoom", i), &g_PlayerExtCfg[j].fovzoom, 0, 1);
 		configRegisterInt(strFmt("Game.Player%d.MouseAimMode", i), &g_PlayerExtCfg[j].mouseaimmode, 0, 1);

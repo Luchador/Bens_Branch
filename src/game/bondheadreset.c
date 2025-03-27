@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/bondhead.h"
 #include "game/bg.h"
@@ -11,9 +10,9 @@
 #include "data.h"
 #include "types.h"
 
-void bheadResetAnims(int16_t animnum, int frame, int endframe, int totalinttranslate[3])
+void bheadResetAnims(s16 animnum, s32 frame, s32 endframe, s32 totalinttranslate[3])
 {
-	int16_t inttranslate[3];
+	s16 inttranslate[3];
 
 	totalinttranslate[0] = 0;
 	totalinttranslate[1] = 0;
@@ -32,7 +31,7 @@ void bheadResetAnims(int16_t animnum, int frame, int endframe, int totalinttrans
 
 void bheadReset(void)
 {
-	int i;
+	s32 i;
 
 	modelInit(&g_Vars.currentplayer->model, &g_PlayerModeldef, g_Vars.currentplayer->bondheadsave, false);
 	animInit(g_Vars.currentplayer->model.anim);
@@ -88,7 +87,7 @@ void bheadReset(void)
 	g_Vars.currentplayer->standcnt = 0;
 
 	for (i = 0; i < ARRAYCOUNT(g_HeadAnims); i++) {
-		int translate[3];
+		s32 translate[3];
 		bheadResetAnims(g_HeadAnims[i].animnum, g_HeadAnims[i].loopframe, g_HeadAnims[i].endframe, translate);
 		g_HeadAnims[i].translateperframe = (translate[2] * 0.1000000089407f) / (g_HeadAnims[i].endframe - g_HeadAnims[i].loopframe);
 	}

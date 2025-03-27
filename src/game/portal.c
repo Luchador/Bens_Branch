@@ -58,14 +58,6 @@
 #include "data.h"
 #include "types.h"
 
-const char var7f1ad160[] = "ACOUSTIC -> Allocating %d bytes for %d portal AV structures\n";
-const char var7f1ad1a0[] = "ACOUSTIC -> DGD WARNING: portalAVInit no portals!\n";
-const char var7f1ad1d4[] = "ACOUSTIC -> portalAVReset: checking propobj type %d\n";
-const char var7f1ad20c[] = "ACOUSTIC -> portalAVReset: found PROPDEF_WINDOWFADE for portal %d\n";
-const char var7f1ad250[] = "ACOUSTIC -> portalAVReset: found PROPDEF_WINDOW for portal %d\n";
-const char var7f1ad290[] = "ACOUSTIC -> Portal %3d - A=%.2f, V=%.2f\n";
-const char var7f1ad2bc[] = "ACOUSTIC -> DGD WARNING: portalAVReset no portals!\n";
-
 struct roomacousticdata *g_RoomAcousticData;
 struct var8009dd78 var8009dd78[10];
 u16 *g_PortalXluFracs;

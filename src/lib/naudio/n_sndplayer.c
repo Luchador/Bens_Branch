@@ -5,7 +5,6 @@
 #include "bss.h"
 #include "data.h"
 #include "types.h"
-#include "game/debug.h"
 
 u32 var8009c330;
 s16 *var8009c334;
@@ -425,7 +424,7 @@ void _n_handleEvent(N_ALSndpEvent *event)
 			break;
 		case AL_SNDP_0200_EVT:
 			if (state->flags & SNDSTATEFLAG_10) {
-				audioStartSoundEffect(event->msg.msg.generic.data2, event->msg.msg.generic.data, state->vol, state->pan,
+				func00033820(event->msg.msg.generic.data2, event->msg.msg.generic.data, state->vol, state->pan,
 						state->pitch, state->fxmix, state->fxbus, state->unk30);
 			}
 			break;
@@ -650,7 +649,7 @@ s32 sndGetState(struct sndstate *state)
 	}
 }
 
-struct sndstate *audioStartSoundEffect(s32 arg0, s16 soundnum, u16 vol, ALPan pan, f32 pitch, u8 fxmix, u8 fxbus, struct sndstate **handleptr)
+struct sndstate *func00033820(s32 arg0, s16 soundnum, u16 vol, ALPan pan, f32 pitch, u8 fxmix, u8 fxbus, struct sndstate **handleptr)
 {
 	struct sndstate *state;
 	struct sndstate *state2 = NULL;
@@ -768,16 +767,35 @@ void func00033bc0(struct sndstate *state)
 	}
 }
 
-void sndPostEventWithFlags(u8 flags, u8 eventType)
+void func00033c30(u8 flags)
 {
 	N_ALEvent evt;
 	struct sndstate *state = g_SndpAllocStatesHead;
 
 	while (state) {
+		evt.type = AL_SNDP_0400_EVT;
+		evt.msg.generic.sndstate = state;
+
 		if ((state->flags & flags) == flags) {
-			evt.type = eventType;
-			evt.msg.generic.sndstate = state;
-			state->flags &= ~SNDSTATEFLAG_10;
+			evt.msg.generic.sndstate->flags &= ~SNDSTATEFLAG_10;
+			n_alEvtqPostEvent(&g_SndPlayer->evtq, &evt, 0, 0);
+		}
+
+		state = (struct sndstate *)state->node.next;
+	}
+}
+
+void func00033cf0(u8 flags)
+{
+	N_ALEvent evt;
+	struct sndstate *state = g_SndpAllocStatesHead;
+
+	while (state) {
+		evt.type = AL_SNDP_END_EVT;
+		evt.msg.generic.sndstate = state;
+
+		if ((state->flags & flags) == flags) {
+			evt.msg.generic.sndstate->flags &= ~SNDSTATEFLAG_10;
 			n_alEvtqPostEvent(&g_SndPlayer->evtq, &evt, 0, 0);
 		}
 
@@ -787,22 +805,22 @@ void sndPostEventWithFlags(u8 flags, u8 eventType)
 
 void func00033db0(void)
 {
-	sndPostEventWithFlags(SNDSTATEFLAG_01, AL_SNDP_END_EVT);
+	func00033cf0(SNDSTATEFLAG_01);
 }
 
 void func00033dd8(void)
 {
-	sndPostEventWithFlags(SNDSTATEFLAG_01, AL_SNDP_0400_EVT);
+	func00033c30(SNDSTATEFLAG_01);
 }
 
 void func00033e00(void)
 {
-	sndPostEventWithFlags(SNDSTATEFLAG_01 | SNDSTATEFLAG_10, AL_SNDP_0400_EVT);
+	func00033c30(SNDSTATEFLAG_01 | SNDSTATEFLAG_10);
 }
 
 void func00033e28(void)
 {
-	sndPostEventWithFlags(SNDSTATEFLAG_01 | SNDSTATEFLAG_02, AL_SNDP_0400_EVT);
+	func00033c30(SNDSTATEFLAG_01 | SNDSTATEFLAG_02);
 }
 
 void audioPostEvent(struct sndstate *state, s16 type, s32 data)
@@ -815,6 +833,8 @@ void audioPostEvent(struct sndstate *state, s16 type, s32 data)
 
 	if (state) {
 		n_alEvtqPostEvent(&g_SndPlayer->evtq, &evt, 0, 0);
+	} else {
+		// empty
 	}
 }
 

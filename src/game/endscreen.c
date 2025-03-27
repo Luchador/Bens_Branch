@@ -685,7 +685,7 @@ MenuDialogHandlerResult endscreenHandle2PCompleted(s32 operation, struct menudia
 				}
 
 				if (g_Menus[g_MpPlayerNum].endscreen.unke1c) {
-					if (g_GameIsPaused) {
+					if (var8009dfc0) {
 						g_Menus[g_MpPlayerNum].endscreen.unke1c--;
 					}
 
@@ -719,7 +719,7 @@ MenuDialogHandlerResult endscreenHandle2PFailed(s32 operation, struct menudialog
 				}
 
 				if (g_Menus[g_MpPlayerNum].endscreen.unke1c) {
-					if (g_GameIsPaused) {
+					if (var8009dfc0) {
 						g_Menus[g_MpPlayerNum].endscreen.unke1c--;
 					}
 

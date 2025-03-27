@@ -20,14 +20,18 @@
 #include "data.h"
 #include "types.h"
 #include "gbiex.h"
+#ifndef PLATFORM_N64
 #include "game/player.h"
 #include "video.h"
+#endif
 
+char var800a41c0[26];
 u8 g_IrScanlines[2][480];
 s32 g_NumActiveEffects = 0;
 u8 g_BlurChange = 0;
-bool g_KeepUpdatingBlur = false;
+u8 var8007f848 = 0;
 s32 g_IrBinocularRadius = 90;
+s32 var8007f850 = 3;
 
 Gfx *bviewDrawIrRect(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
 {
@@ -120,18 +124,25 @@ Gfx *bviewPrepareStaticI8(Gfx *gdl, u32 colour, u32 alpha)
 
 Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
 {
+	u16 *fb = viGetFrontBuffer();
 	s32 viewtop = viGetViewTop();
 	s32 viewheight = viGetViewHeight();
+	f32 fxxx;
+	f32 fyyy;
 	s32 viewwidth = viGetViewWidth();
 	s32 viewleft = viGetViewLeft();
+	f32 somefloat;
 	s32 newalpha;
 	s32 i;
 
-	if (g_KeepUpdatingBlur) {
+	static u32 sfyyy = 1000;
+	static u32 sfxxx = 1000;
+
+	if (var8007f848) {
 		return gdl;
 	}
 
-	g_KeepUpdatingBlur = true;
+	var8007f848 = true;
 
 	newalpha = alpha;
 	newalpha += g_BlurChange;
@@ -155,8 +166,12 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
 		return gdl;
 	}
 
+	fxxx = sfxxx / 1000.0f;
+	fyyy = sfyyy / 1000.0f;
+
 	gDPPipeSync(gdl++);
 
+	somefloat = (viewheight - viewheight / fyyy) * 0.5f;
 	gdl = bviewPrepareStaticRgba16(gdl, colour, newalpha);
 
 	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_BlurFb);
@@ -173,6 +188,7 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
  */
 Gfx *bviewDrawStatic(Gfx *gdl, u32 arg1, s32 arg2)
 {
+	u16 *fb = viGetFrontBuffer();
 	s32 viewtop = viGetViewTop();
 	s32 viewheight = viGetViewHeight();
 	s32 viewwidth = viGetViewWidth();
@@ -212,6 +228,8 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, u32 colour, u32 alpha)
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
+
+	strcpy(var800a41c0, "interlaceGfx");
 
 	gDPPipeSync(gdl++);
 
@@ -261,6 +279,8 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, u32 colour, u32 alpha)
 		return gdl;
 	}
 
+	strcpy(var800a41c0, "BlueInterlaceGfx");
+
 	gDPPipeSync(gdl++);
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
@@ -303,6 +323,7 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 	s32 viewheight = viGetViewHeight();
 	s32 viewwidth = viGetViewWidth();
 	s32 viewleft = viGetViewLeft();
+	f32 somefloat;
 	s32 i;
 
 	g_NumActiveEffects++;
@@ -323,7 +344,11 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 		return gdl;
 	}
 
+	strcpy(var800a41c0, "stretchBlurGfx");
+
 	gDPPipeSync(gdl++);
+
+	somefloat = (viewheight - viewheight / arg4) * 0.5f;
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
@@ -435,6 +460,8 @@ Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 sta
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
+
+	strcpy(var800a41c0, "blurGfxFisheye");
 
 	s3 = 1;
 
@@ -622,6 +649,8 @@ Gfx *bviewDrawEyespySideRect(Gfx *gdl, s32 *points, u8 r, u8 g, u8 b, u8 alpha)
 
 	gSPColor(gdl++, colours, 2);
 	gSPVertex(gdl++, vertices, 4, 0);
+
+	if (colours);
 
 	gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
 
@@ -1562,6 +1591,11 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	return gdl;
 }
 
+void bview0f1572f8(void)
+{
+	// empty
+}
+
 u8 var8007f878 = 0;
 
 Gfx *bviewDrawNvLens(Gfx *gdl)
@@ -1582,11 +1616,13 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 		return gdl;
 	}
 
-	g_NVBRBrightness = 0xbc; // Brightness of the background when using NV
-	g_NVChrHighlight = 0xbe; // Character extra brightness when using NV
+	strcpy(var800a41c0, "Fullscreen_DrawFaultScope");
+
+	var8009caec = 0xbc;
+	g_NVChrHighlight = 0xbe; // Character brightness when using NV
 	g_NVChrBrightness = 0xde;
-	g_NVPropBrightness = 0x50;
-	g_NVPropHighlight = 0xc0;
+	var8009caed = 0x50;
+	var8009caee = 0xc0;
 
 	brightness = roomGetFinalBrightness(g_Vars.currentplayer->prop->rooms[0]);
 
@@ -1627,6 +1663,14 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 	return gdl;
 }
 
+/**
+ * Night vision doesn't have binoculars.
+ */
+Gfx *bviewDrawNvBinoculars(Gfx *gdl)
+{
+	return gdl;
+}
+
 Gfx *bviewDrawIrLens(Gfx *gdl)
 {
 	s32 i;
@@ -1658,13 +1702,15 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 	viewcentrex = (viewleft + viewright) / 2;
 
 	outerradius = g_IrBinocularRadius;
-	innerradius = g_IrBinocularRadius / 3;
+	innerradius = g_IrBinocularRadius / var8007f850;
 
 	g_NumActiveEffects++;
 
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
+
+	strcpy(var800a41c0, "Fullscreen_DrawFaultScope");
 
 	viewbottom = viewtop + viewheight;
 	viewcentrey = (viewtop + viewbottom) / 2;
@@ -1713,7 +1759,7 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 		g_Vars.currentplayer->fsscanline++;
 	}
 
-	g_NVBRBrightness = 0xff;
+	var8009caec = 0xff;
 	g_NVChrHighlight = 0xde;
 	g_NVChrBrightness = 0xde;
 
@@ -1777,6 +1823,59 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 }
 
 /**
+ * Draw a horizontal blur/sretch effect. Unused.
+ *
+ * The term "Intro" used in the string suggests that was made for an older
+ * version of the title screen, similar to bviewDrawIntroText.
+ */
+Gfx *bviewDrawIntroFaderBlur(Gfx *gdl, s32 arg1)
+{
+	u16 *fb = viGetBackBuffer();
+	s32 viewtop = viGetViewTop();
+	s32 viewheight = viGetViewHeight();
+	s32 viewwidth = viGetViewWidth();
+	s32 viewleft = viGetViewLeft();
+	f32 halfheight;
+	f32 extra;
+	s32 y;
+
+	g_NumActiveEffects++;
+
+	if (g_NumActiveEffects >= 2) {
+		return gdl;
+	}
+
+	strcpy(var800a41c0, "IntroFaderBlurGfx");
+
+	gDPPipeSync(gdl++);
+
+	gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 255);
+
+	halfheight = viewheight * 0.5f;
+
+	extra = 0.5f;
+	extra += 0.5f;
+
+	for (y = viewtop; y < viewtop + viewheight; y++) {
+		f32 frac = (y - viewtop - halfheight) / halfheight;
+
+		if (frac < 0.0f) {
+			frac = -frac;
+		}
+
+		frac += extra;
+
+		if (frac > 1.0f) {
+			frac = 1.0f;
+		}
+
+		gdl = bviewCopyPixels(gdl, fb, y, 5, y, RANDOMFRAC() * frac + 1.0f, viewleft, viewwidth);
+	}
+
+	return gdl;
+}
+
+/**
  * Called from the title screen's "Rare Presents" mode, which is unused.
  */
 Gfx *bviewDrawIntroText(Gfx *gdl)
@@ -1793,6 +1892,8 @@ Gfx *bviewDrawIntroText(Gfx *gdl)
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
+
+	strcpy(var800a41c0, "IntroTextInterfereGfx");
 
 	gDPPipeSync(gdl++);
 
@@ -1850,6 +1951,8 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
+
+	strcpy(var800a41c0, "BinocularViewGfx");
 
 	if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL && PLAYERCOUNT() >= 2) {
 		vsplit = true;
@@ -2085,7 +2188,7 @@ Gfx *bviewDrawIrBinoculars(Gfx *gdl)
 void bviewSetMotionBlur(u32 bluramount)
 {
 	g_NumActiveEffects = 0;
-	g_KeepUpdatingBlur = false;
+	var8007f848 = 0;
 	g_BlurChange = (bluramount << 1) / 3; // same as multiplying by 2/3
 }
 

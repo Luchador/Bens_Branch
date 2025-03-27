@@ -22,7 +22,6 @@
 #include "data.h"
 #include "gbiex.h"
 #include "types.h"
-#include "game/debug.h"
 
 struct menuitem g_MpCharacterMenuItems[];
 struct menudialogdef g_MpAddSimulantMenuDialog;
@@ -721,11 +720,19 @@ MenuItemHandlerResult mpChallengesListHandler(s32 operation, struct menuitem *it
 		gDPSetTextureFilter(gdl++, G_TF_POINT);
 
 		for (i = 0, loopx = 10; i < maxplayers; i++) {
+#if VERSION >= VERSION_NTSC_1_0
 			if (challengeIsCompletedByPlayerWithNumPlayers2(g_MpPlayerNum, challengeindex, i + 1)) {
 				gDPSetEnvColorViaWord(gdl++, 0xb2efff00 | (renderdata->colour & 0xff) * 255 / 256);
 			} else {
 				gDPSetEnvColorViaWord(gdl++, 0x30407000 | (renderdata->colour & 0xff) * 255 / 256);
 			}
+#else
+			if (challengeIsCompletedByPlayerWithNumPlayers2(g_MpPlayerNum, challengeindex, i + 1)) {
+				gDPSetEnvColorViaWord(gdl++, 0xb2efffff);
+			} else {
+				gDPSetEnvColorViaWord(gdl++, 0x304070ff);
+			}
+#endif
 
 			gDPSetCombineLERP(gdl++,
 					TEXEL0, 0, ENVIRONMENT, 0,
@@ -4740,11 +4747,19 @@ MenuItemHandlerResult mpChallengesListMenuHandler(s32 operation, struct menuitem
 		gDPSetTextureFilter(gdl++, G_TF_POINT);
 
 		for (i = 0; i < maxchrs; i++) {
+#if VERSION >= VERSION_NTSC_1_0
 			if (challengeIsCompletedByAnyChrWithNumPlayersBySlot(data->type19.unk04, i + 1)) {
 				gDPSetEnvColorViaWord(gdl++, (renderdata->colour & 0xff) * 0xff >> 8 | 0xffe56500);
 			} else {
 				gDPSetEnvColorViaWord(gdl++, (renderdata->colour & 0xff) * 0xff >> 8 | 0x43430000);
 			}
+#else
+			if (challengeIsCompletedByAnyChrWithNumPlayersBySlot(data->type19.unk04, i + 1)) {
+				gDPSetEnvColorViaWord(gdl++, 0xffe565ff);
+			} else {
+				gDPSetEnvColorViaWord(gdl++, 0x434300ff);
+			}
+#endif
 
 			gDPSetCombineLERP(gdl++,
 				TEXEL0, 0, ENVIRONMENT, 0,
@@ -4814,9 +4829,11 @@ MenuItemHandlerResult menuhandlerMpStartChallenge(s32 operation, struct menuitem
 
 char *mpMenuTextChallengeName(struct menuitem *item)
 {
+#if VERSION >= VERSION_NTSC_1_0
 	if (g_BossFile.locktype != MPLOCKTYPE_CHALLENGE) {
 		return langGet(L_MPMENU_050); // "Combat Challenges"
 	}
+#endif
 
 	sprintf(g_StringPointer, "%s:\n", challengeGetName(challengeGetCurrent()));
 	return g_StringPointer;
@@ -4956,7 +4973,10 @@ MenuItemHandlerResult menuhandlerMpSaveSettings(s32 operation, struct menuitem *
 		if (g_MpSetup.fileguid.fileid == 0) {
 			menuPushDialog(&g_MpSaveSetupNameMenuDialog);
 		} else {
+#if VERSION >= VERSION_NTSC_1_0
 			filemgrSetDevice1BySerial(g_MpSetup.fileguid.deviceserial);
+#endif
+
 			menuPushDialog(&g_MpSaveSetupExistsMenuDialog);
 		}
 	}
@@ -5139,7 +5159,11 @@ MenuItemHandlerResult menuhandlerPlayerTeam(s32 operation, struct menuitem *item
 {
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
+#if VERSION >= VERSION_JPN_FINAL
+		data->dropdown.value = scenarioGetMaxTeams();
+#else
 		data->dropdown.value = MAX_TEAMS;
+#endif
 		break;
 	case MENUOP_GETOPTIONTEXT:
 		return (uintptr_t) &g_BossFile.teamnames[data->dropdown.value];
@@ -5147,6 +5171,11 @@ MenuItemHandlerResult menuhandlerPlayerTeam(s32 operation, struct menuitem *item
 		g_Vars.mpplayerteams[item->param] = data->dropdown.value;
 		break;
 	case MENUOP_GETSELECTEDINDEX:
+#if VERSION >= VERSION_JPN_FINAL
+		if (g_Vars.mpplayerteams[item->param] >= scenarioGetMaxTeams()) {
+			g_Vars.mpplayerteams[item->param] %= scenarioGetMaxTeams();
+		}
+#endif
 		data->dropdown.value = g_Vars.mpplayerteams[item->param];
 		break;
 	case MENUOP_CHECKHIDDEN:
@@ -5399,6 +5428,16 @@ struct menuitem g_MpStuffMenuItems[] = {
 		0,
 		NULL,
 	},
+#ifdef PLATFORM_N64
+	{
+		MENUITEMTYPE_DROPDOWN,
+		0,
+		0,
+		L_OPTIONS_216, // "Ratio"
+		0,
+		menuhandlerScreenRatio,
+	},
+#endif
 	{
 		MENUITEMTYPE_DROPDOWN,
 		0,
@@ -6002,9 +6041,8 @@ struct menudialogdef g_CombatSimulatorMenuDialog = {
 	NULL,
 };
 
-void MpJoinGameAdvanced(s32 silent)
+void func0f17fcb0(s32 silent)
 {
-	debug_log("MpJoinGameAdvanced \n", 0);
 	g_Menus[g_MpPlayerNum].playernum = g_MpPlayerNum;
 
 	if (g_BossFile.locktype == MPLOCKTYPE_CHALLENGE) {

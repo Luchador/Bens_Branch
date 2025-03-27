@@ -17,7 +17,7 @@ f32 *var8009c6d8;
 f32 *var8009c6dc;
 
 u32 var8005f700 = 0;
-unsigned int g_Mp3InitCount = 0;
+u32 var8005f704 = 0;
 
 s32 mp3main00043dd0(struct asistream *stream)
 {
@@ -158,9 +158,9 @@ bool mp3main00043ef8(struct asistream *stream, s32 arg1)
 	return true;
 }
 
-unsigned int mp3mainInit(void)
+u32 mp3mainInit(void)
 {
-	if (g_Mp3InitCount++) {
+	if (var8005f704++) {
 		return 2;
 	}
 
@@ -168,7 +168,7 @@ unsigned int mp3mainInit(void)
 	return 0;
 }
 
-struct asistream *mp3main00044460(int arg0, void *arg1, int arg2)
+struct asistream *mp3main00044460(s32 arg0, void *arg1, s32 arg2)
 {
 	struct asistream *stream = g_AsiStream;
 
@@ -197,10 +197,10 @@ struct asistream *mp3main00044460(int arg0, void *arg1, int arg2)
 	return stream;
 }
 
-int mp3main0004453c(struct asistream *streamptr, struct mp3thing **arg1, int *arg2)
+s32 mp3main0004453c(struct asistream *streamptr, struct mp3thing **arg1, s32 *arg2)
 {
 	struct asistream *stream = streamptr;
-	int result;
+	s32 result;
 
 	stream->unk3ba0++;
 

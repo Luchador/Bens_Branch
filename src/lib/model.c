@@ -1,9 +1,8 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/quaternion.h"
 #include "game/camera.h"
-#include "game/floor.h"
-#include "game/ceil.h"
 #include "game/tex.h"
 #include "game/gfxmemory.h"
 #include "game/bg.h"
@@ -77,22 +76,12 @@
  * rwdata (such as the selected head).
  */
 
-#if VERSION >= VERSION_PAL_BETA
-u8 var8005efb0_2 = 0;
-#endif
-
 u32 var8005efb0 = 0;
-
 bool g_ModelDistanceDisabled = false;
 f32 g_ModelDistanceScale = 1;
 bool var8005efbc = false;
 f32 var8005efc0 = 0;
 bool (*var8005efc4)(struct model *model, struct modelnode *node) = NULL;
-
-#if VERSION >= VERSION_PAL_BETA
-bool var8005efd8_2 = false;
-#endif
-
 Vtx *(*g_ModelVtxAllocatorFunc)(s32 numvertices) = NULL;
 void (*g_ModelJointPositionedFunc)(s32 mtxindex, Mtxf *mtx) = NULL;
 
@@ -167,21 +156,6 @@ u16 acosx(s16 arg0)
 	return value;
 }
 
-s16 asinx(s16 arg0)
-{
-	s32 value = arg0 >= 0 ? arg0 : -arg0;
-
-	value = func0f096890(value);
-
-	if (arg0 >= 0) {
-		value = 0x7fff - value;
-	} else {
-		value -= 0x8000;
-	}
-
-	return value;
-}
-
 f32 acosf(f32 value)
 {
 	s16 intval;
@@ -196,66 +170,6 @@ f32 acosf(f32 value)
 
 	return acosx(intval) * M_PI / 65535.0f;
 }
-
-f32 asinf(f32 value)
-{
-	s16 intval;
-
-	if (value >= 1) {
-		intval = 32767;
-	} else if (value <= -1) {
-		intval = -32767;
-	} else {
-		intval = value * 32767.0f;
-	}
-
-	return asinx(intval) * M_PI / 65535.0f;
-}
-
-
-f32 atan2f(f32 x, f32 z)
-{
-	f32 result;
-
-	if (x == 0) {
-		if (z >= 0) {
-			result = 0;
-		} else {
-			result = M_PI;
-		}
-	} else if (z == 0) {
-		if (x > 0) {
-			result = 1.5707963705063f;
-		} else {
-			result = 1.5707963705063f * 3;
-		}
-	} else {
-		result = sqrtf(x * x + z * z);
-
-		if (z < x) {
-			result = acosf(z / result);
-
-			if (x < 0) {
-				result = M_TAU - result;
-			}
-		} else {
-			result = acosf(x / result);
-			result = 1.5707963705063f - result;
-
-			if (z < 0) {
-				result = M_PI - result;
-			}
-
-			if (result < 0) {
-				result = result + M_TAU;
-			}
-		}
-	}
-
-	return result;
-}
-
-
 
 void modelSetDistanceChecksDisabled(bool disabled)
 {
@@ -810,11 +724,7 @@ void modelUpdateChrInfo(struct model *model, struct modelnode *node)
 	rwdata->chrinfo.yrot = rwdata->chrinfo.unk30;
 
 	if (g_Vars.in_cutscene && anim->speed > 0.0f) {
-#if VERSION >= VERSION_PAL_BETA
-		frac = floorf(anim->frac / anim->speed + 0.01f) * anim->speed;
-#else
 		frac = floorf(anim->frac / anim->speed) * anim->speed;
-#endif
 	} else {
 		frac = anim->frac;
 	}
@@ -928,11 +838,7 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 	animGetRotTranslateScale(animpart, anim->flip, skel, anim->animnum, anim->frameslot1, &rot1, &translate1, &scale1);
 
 	if (g_Vars.in_cutscene && anim->speed > 0) {
-#if VERSION >= VERSION_PAL_BETA
-		sp154 = floorf(anim->frac / anim->speed + 0.01f) * anim->speed;
-#else
 		sp154 = floorf(anim->frac / anim->speed) * anim->speed;
-#endif
 	} else {
 		sp154 = anim->frac;
 	}
@@ -1246,11 +1152,7 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 			animGetRotTranslateScale(animpart, anim->flip, skel, anim->animnum, anim->frameslot1, &rot1, &translate1, &scale1);
 
 			if (g_Vars.in_cutscene && anim->speed > 0.0f) {
-#if VERSION >= VERSION_PAL_BETA
-				spe0 = floorf(anim->frac / anim->speed + 0.0099999997764826f) * anim->speed;
-#else
 				spe0 = floorf(anim->frac / anim->speed) * anim->speed;
-#endif
 			} else {
 				spe0 = anim->frac;
 			}
@@ -1259,11 +1161,7 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 				animGetRotTranslateScale(animpart, anim->flip, skel, anim->animnum, anim->frameslot2, &rot2, &translate2, &scale2);
 				modelTweenRot(&rot1, &rot2, spe0);
 
-#if VERSION >= VERSION_PAL_BETA
-				if (sp128 || var8005efd8_2)
-#else
 				if (sp128)
-#endif
 				{
 					modelTweenPos(&translate1, &translate2, spe0);
 				}
@@ -1877,7 +1775,7 @@ s32 modelConstrainOrWrapAnimFrame(s32 frame, s16 animnum, f32 endframe)
 			frame = 0;
 		}
 	} else if (endframe >= 0 && frame > (s32)endframe) {
-		frame = ceiltoint(endframe);
+		frame = (int)ceilf(endframe);
 	} else if (frame >= animGetNumFrames(animnum)) {
 		if (var8005efbc || (g_Anims[animnum].flags & ANIMFLAG_LOOP)) {
 			frame = frame % animGetNumFrames(animnum);
@@ -2250,7 +2148,7 @@ void modelSetAnimFrame(struct model *model, f32 frame)
 	struct anim *anim = model->anim;
 
 	if (anim) {
-		framea = floortoint(frame);
+		framea = (int)floorf(frame);
 		forwards = anim->speed >= 0;
 
 		frameb = (forwards ? framea + 1 : framea - 1);
@@ -2279,7 +2177,7 @@ void modelSetAnimFrame2(struct model *model, f32 frame1, f32 frame2)
 		modelSetAnimFrame(model, frame1);
 
 		if (anim->animnum2) {
-			s32 framea = floortoint(frame2);
+			s32 framea = (int)floorf(frame2);
 			s32 frameb;
 			bool forwards = anim->speed2 >= 0;
 
@@ -2384,11 +2282,11 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, f32 curframe, f32 endfr
 				}
 
 				if (forwards) {
-					floorcur = floortoint(curframe) + 1;
-					floorend = floortoint(endframe);
+					floorcur = (int)floorf(curframe) + 1;
+					floorend = (int)floorf(endframe);
 				} else {
-					floorcur = ceiltoint(curframe) - 1;
-					floorend = ceiltoint(endframe);
+					floorcur = (int)ceilf(curframe) - 1;
+					floorend = (int)ceilf(endframe);
 				}
 
 				if (g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) {
@@ -2623,8 +2521,8 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, f32 curframe, f32 endfr
 				}
 
 				if (anim->animnum2 && (g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) == 0) {
-					s32 floorcur2 = floortoint(curframe2);
-					s32 floorend2 = floortoint(endframe2);
+					s32 floorcur2 = (int)floorf(curframe2);
+					s32 floorend2 = (int)floorf(endframe2);
 
 					if ((forwards && floorcur2 < floorend2) || (!forwards && floorend2 < floorcur2)) {
 						if (rwdata->unk02 != 0) {

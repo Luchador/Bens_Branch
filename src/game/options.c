@@ -227,7 +227,7 @@ s32 optionsGetEffectiveScreenSize(void)
 	if (g_MenuData.root == MENUROOT_TRAINING) {
 		g_MpPlayerNum = 0;
 
-		if (g_Menus[g_MpPlayerNum].curdialog && g_GameIsPaused) {
+		if (g_Menus[g_MpPlayerNum].curdialog && var8009dfc0) {
 			return SCREENSIZE_FULL;
 		}
 	}

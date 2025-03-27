@@ -2079,7 +2079,7 @@ struct sndstate *sndStart(s32 arg0, s16 sound, struct sndstate **handle, s32 vol
 	}
 
 	if (sp40.id < (u32)g_NumSounds) {
-		return audioStartSoundEffect(arg0, sp40.id, volume, pan & 0x7f, pitch, fxmix, fxbus, handle);
+		return func00033820(arg0, sp40.id, volume, pan & 0x7f, pitch, fxmix, fxbus, handle);
 	}
 
 	return NULL;

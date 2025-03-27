@@ -492,7 +492,7 @@ f32 bmoveCalculateLookahead(void)
 	spf0.y = g_Vars.currentplayer->prop->pos.y - 30;
 	spf0.z = g_Vars.currentplayer->prop->pos.z;
 
-	portalComputeReachableRooms(&g_Vars.currentplayer->prop->pos, &spf0,
+	portal00018148(&g_Vars.currentplayer->prop->pos, &spf0,
 			g_Vars.currentplayer->prop->rooms, spe0, NULL, 0);
 
 	sp150.x = sp100.x * 400 + spf0.x;
@@ -519,13 +519,13 @@ f32 bmoveCalculateLookahead(void)
 			spbc.y = sp100.y * value + spf0.y;
 			spbc.z = sp100.z * value + spf0.z;
 
-			portalComputeReachableRooms(&spf0, &spbc, spe0, spa0, NULL, 0);
+			portal00018148(&spf0, &spbc, spe0, spa0, NULL, 0);
 
 			spb0.x = spbc.x;
 			spb0.y = spbc.y - 400;
 			spb0.z = spbc.z;
 
-			portalComputeReachableRooms(&spbc, &spb0, spa0, sp90, sp80, 7);
+			portal00018148(&spbc, &spb0, spa0, sp90, sp80, 7);
 
 			if (
 #if VERSION >= VERSION_NTSC_1_0
@@ -1872,7 +1872,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 				&& g_Vars.currentplayer->insightaimmode
 				&& (movedata.farsighttempautoseek || g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY)
 				&& g_Vars.currentplayer->autoeraserdist > 0) {
-			eraserfov = camCalculateVerticalAngularSize(500.0f / g_Vars.currentplayer->autoeraserdist);
+			eraserfov = cam0f0b49b8(500.0f / g_Vars.currentplayer->autoeraserdist);
 
 			if (eraserfov > PLAYER_DEFAULT_FOV) {
 				eraserfov = PLAYER_DEFAULT_FOV;

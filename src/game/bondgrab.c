@@ -29,7 +29,7 @@ bool var80070e80 = false;
 
 void bgrabInit(void)
 {
-	s32 prevmode = g_Vars.currentplayer->bondmovemode;
+	int prevmode = g_Vars.currentplayer->bondmovemode;
 	Mtxf matrix;
 	struct prop *prop = g_Vars.currentplayer->grabbedprop;
 
@@ -65,7 +65,7 @@ void bgrabInit(void)
 	if (prop->type == PROPTYPE_OBJ || prop->type == PROPTYPE_DOOR || prop->type == PROPTYPE_WEAPON) {
 		struct defaultobj *obj = prop->obj;
 		struct hov *hov = NULL;
-		s32 cdresult;
+		int cdresult;
 
 		if (obj->hidden & OBJHFLAG_PROJECTILE) {
 			struct projectile *projectile = obj->projectile;
@@ -113,7 +113,7 @@ void bgrabInit(void)
 	}
 
 	if (prevmode != MOVEMODE_GRAB && prevmode != MOVEMODE_WALK) {
-		s32 i;
+		int i;
 
 		for (i = 0; i != 3; i++) {
 			g_Vars.currentplayer->bondshotspeed.f[i] = 0;
@@ -139,7 +139,7 @@ void bgrabExit(void)
 {
 	struct coord moveamount;
 	struct defaultobj *obj;
-	f32 rotateamount;
+	float rotateamount;
 
 	if (g_Vars.currentplayer->grabbedprop) {
 		struct defaultobj *obj = g_Vars.currentplayer->grabbedprop->obj;
@@ -169,7 +169,7 @@ void bgrabExit(void)
 	}
 }
 
-void bgrab0f0ccbf0(struct coord *delta, f32 angle, struct defaultobj *obj)
+void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 {
 	struct coord spd4;
 	struct coord spc8;
@@ -251,11 +251,11 @@ void bgrab0f0ccbf0(struct coord *delta, f32 angle, struct defaultobj *obj)
 			func0f082e84(obj, &sp8c, &sp80, &sp74, false);
 
 			if (angle != 0.0f) {
-				f32 sp40 = sp8c.x - g_Vars.currentplayer->prop->pos.x;
-				f32 sp3c = sp8c.z - g_Vars.currentplayer->prop->pos.z;
-				f32 rotation = 0.0f;
+				float sp40 = sp8c.x - g_Vars.currentplayer->prop->pos.x;
+				float sp3c = sp8c.z - g_Vars.currentplayer->prop->pos.z;
+				float rotation = 0.0f;
 				struct coord sp2c = {0, 0, 0};
-				f32 mult = 1.0f / sqrtf(sp40 * sp40 + sp3c * sp3c);
+				float mult = 1.0f / sqrtf(sp40 * sp40 + sp3c * sp3c);
 
 				sp40 *= mult;
 				sp3c *= mult;
@@ -272,14 +272,14 @@ void bgrab0f0ccbf0(struct coord *delta, f32 angle, struct defaultobj *obj)
 	}
 }
 
-bool bgrabTryMoveUpwards(f32 y)
+bool bgrabTryMoveUpwards(float y)
 {
 	bool result;
 	struct coord newpos;
 	RoomNum rooms[8];
-	f32 ymax;
-	f32 ymin;
-	f32 radius;
+	float ymax;
+	float ymin;
+	float radius;
 
 	newpos.x = g_Vars.currentplayer->prop->pos.x;
 	newpos.y = g_Vars.currentplayer->prop->pos.y + y;
@@ -307,19 +307,19 @@ bool bgrabTryMoveUpwards(f32 y)
 	return result;
 }
 
-s32 bgrabCalculateNewPosition(struct coord *delta, f32 angle, bool arg2)
+int bgrabCalculateNewPosition(struct coord *delta, float angle, bool arg2)
 {
-	s32 cdresult = CDRESULT_NOCOLLISION;
-	s32 i;
+	int cdresult = CDRESULT_NOCOLLISION;
+	int i;
 	struct coord pos;
 	RoomNum rooms[8];
 	bool ismoving = false;
-	f32 ymax;
-	f32 ymin;
-	f32 radius;
-	f32 rotextrasum;
+	float ymax;
+	float ymin;
+	float radius;
+	float rotextrasum;
 	struct coord posextrasum;
-	f32 rotextra;
+	float rotextra;
 	struct coord posextra;
 	struct defaultobj *obj;
 	struct hov *hov;
@@ -367,16 +367,16 @@ s32 bgrabCalculateNewPosition(struct coord *delta, f32 angle, bool arg2)
 
 	if (cdresult == CDRESULT_NOCOLLISION) {
 		struct coord sp7c;
-		f32 sp78 = -angle;
-		f32 sp74;
-		f32 sp70;
-		f32 sp6c;
+		float sp78 = -angle;
+		float sp74;
+		float sp70;
+		float sp6c;
 
 		obj = g_Vars.currentplayer->grabbedprop->obj;
 		hov = NULL;
 
 		if (g_Vars.currentplayer->grabbeddoextra) {
-			f32 f0 = -g_Vars.currentplayer->speedtheta * 0.017450513f * 3.5f;
+			float f0 = -g_Vars.currentplayer->speedtheta * 0.017450513f * 3.5f;
 
 			if (f0 * 6.0f * 10.0f);
 
@@ -439,8 +439,8 @@ s32 bgrabCalculateNewPosition(struct coord *delta, f32 angle, bool arg2)
 		}
 
 		if (angle != 0.0f || g_Vars.currentplayer->grabbeddoextra) {
-			f32 f12;
-			f32 f18;
+			float f12;
+			float f18;
 
 			sp74 = M_TAU - g_Vars.currentplayer->vv_theta * M_TAU / 360.0f - angle;
 
@@ -479,7 +479,7 @@ s32 bgrabCalculateNewPosition(struct coord *delta, f32 angle, bool arg2)
 		var8009de70 = NULL;
 
 		if (arg2) {
-			f32 theta = g_Vars.currentplayer->vv_theta + angle * 360.0f / M_TAU;
+			float theta = g_Vars.currentplayer->vv_theta + angle * 360.0f / M_TAU;
 
 			while (theta < 0.0f) {
 				theta += 360.0f;
@@ -516,9 +516,9 @@ s32 bgrabCalculateNewPosition(struct coord *delta, f32 angle, bool arg2)
 	return cdresult;
 }
 
-bool bgrabCalculateNewPositiontWithPush(struct coord *delta, f32 angle, bool arg2)
+bool bgrabCalculateNewPositiontWithPush(struct coord *delta, float angle, bool arg2)
 {
-	s32 result = bgrabCalculateNewPosition(delta, angle, arg2);
+	int result = bgrabCalculateNewPosition(delta, angle, arg2);
 
 	if (result != CDRESULT_NOCOLLISION) {
 		struct prop *obstacle = cdGetObstacleProp();
@@ -549,7 +549,7 @@ bool bgrabCalculateNewPositiontWithPush(struct coord *delta, f32 angle, bool arg
 
 						if ((obj->hidden & OBJHFLAG_PROJECTILE)
 								&& (obj->projectile->flags & PROJECTILEFLAG_SLIDING)) {
-							s32 someint;
+							int someint;
 							bool embedded = false;
 							someint = projectileTick(obj, &embedded);
 
@@ -576,7 +576,7 @@ bool bgrabCalculateNewPositiontWithPush(struct coord *delta, f32 angle, bool arg
 	return result;
 }
 
-bool bgrab0f0cdb04(f32 angle, bool arg2)
+bool bgrab0f0cdb04(float angle, bool arg2)
 {
 	struct coord coord = {0, 0, 0};
 	bool result;
@@ -588,25 +588,25 @@ bool bgrab0f0cdb04(f32 angle, bool arg2)
 	return result;
 }
 
-bool bgrab0f0cdb68(f32 angle)
+bool bgrab0f0cdb68(float angle)
 {
 	struct coord spa4;
 	struct coord sp98;
 	struct coord sp8c;
 	struct coord sp80;
-	f32 sp7c;
-	f32 sp78;
-	f32 f2;
-	f32 f20;
-	f32 f22;
-	s32 i;
-	f32 f0;
-	f32 sp60 = -1.0f;
+	float sp7c;
+	float sp78;
+	float f2;
+	float f20;
+	float f22;
+	int i;
+	float f0;
+	float sp60 = -1.0f;
 	struct coord sp54;
-	f32 f12;
-	f32 radius;
-	f32 ymax;
-	f32 ymin;
+	float f12;
+	float radius;
+	float ymax;
+	float ymin;
 
 	cdGetEdge(&spa4, &sp98, 678, "bondgrab.c");
 
@@ -643,8 +643,8 @@ bool bgrab0f0cdb68(f32 angle)
 		}
 	} else {
 		if (cdGetSavedPos(&sp8c, &sp80)) {
-			f32 f0 = (sp8c.f[0] - spa4.f[0]) * f20 + f22 * (sp8c.f[2] - spa4.f[2]);
-			f32 f16 = (sp80.f[0] - spa4.f[0]) * f20 + f22 * (sp80.f[2] - spa4.f[2]);
+			float f0 = (sp8c.f[0] - spa4.f[0]) * f20 + f22 * (sp8c.f[2] - spa4.f[2]);
+			float f16 = (sp80.f[0] - spa4.f[0]) * f20 + f22 * (sp80.f[2] - spa4.f[2]);
 
 			if (f16 < f0) {
 				f0 = f16;
@@ -695,7 +695,7 @@ bool bgrab0f0cdb68(f32 angle)
 void bgrab0f0cdef0(void)
 {
 	if (g_Vars.lvupdate240 > 0) {
-		f32 angle = g_Vars.currentplayer->speedtheta * g_Vars.lvupdate60freal * 0.017450513318181f * 3.5f;
+		float angle = g_Vars.currentplayer->speedtheta * g_Vars.lvupdate60freal * 0.017450513318181f * 3.5f;
 
 		if (bgrab0f0cdb04(angle, true) == 0) {
 			bgrab0f0cdb68(angle);
@@ -714,10 +714,10 @@ bool bgrab0f0cdf64(struct coord *delta, struct coord *arg1, struct coord *arg2)
 	return result;
 }
 
-s32 bgrab0f0cdfbc(struct coord *delta, struct coord *arg1, struct coord *arg2)
+int bgrab0f0cdfbc(struct coord *delta, struct coord *arg1, struct coord *arg2)
 {
 	if (arg1->f[0] != arg2->f[0] || arg1->f[2] != arg2->f[2]) {
-		f32 tmp;
+		float tmp;
 		struct coord sp30;
 		struct coord sp24;
 
@@ -745,7 +745,7 @@ void bgrab0f0ce0bc(struct coord *arg0)
 {
 	struct coord a;
 	struct coord b;
-	s32 value = bgrab0f0cdf64(arg0, &a, &b);
+	int value = bgrab0f0cdf64(arg0, &a, &b);
 
 	if (value == 0) {
 		value = bgrab0f0cdfbc(arg0, &a, &b);
@@ -780,14 +780,14 @@ void bgrab0f0ce178(void)
 
 void bgrabUpdateVertical(void)
 {
-	s32 i;
-	f32 tmp;
-	s32 inlift;
+	int i;
+	float tmp;
+	int inlift;
 	struct prop *lift = NULL;
-	f32 dist;
-	f32 f14;
-	f32 fVar3;
-	f32 f0;
+	float dist;
+	float f14;
+	float fVar3;
+	float f0;
 
 	f14 = cdFindGroundInfoAtCyl(&g_Vars.currentplayer->prop->pos,
 			g_Vars.currentplayer->bond2.radius,
@@ -866,7 +866,7 @@ void bgrabHandleActivate(void)
 	}
 }
 
-void bgrabUpdateSpeedSideways(f32 targetspeed, f32 accelspeed, s32 mult)
+void bgrabUpdateSpeedSideways(float targetspeed, float accelspeed, int mult)
 {
 	if (targetspeed < g_Vars.currentplayer->speedstrafe) {
 		g_Vars.currentplayer->speedstrafe -= PALUPF(accelspeed * mult);
@@ -885,7 +885,7 @@ void bgrabUpdateSpeedSideways(f32 targetspeed, f32 accelspeed, s32 mult)
 	g_Vars.currentplayer->speedsideways = g_Vars.currentplayer->speedstrafe;
 }
 
-void bgrabUpdateSpeedForwards(f32 target, f32 speed)
+void bgrabUpdateSpeedForwards(float target, float speed)
 {
 	if (g_Vars.currentplayer->speedgo < target) {
 		g_Vars.currentplayer->speedgo += speed * g_Vars.lvupdate60freal;
@@ -965,9 +965,9 @@ void bgrabApplyMoveData(struct movedata *data)
 
 void bgrabUpdateSpeedTheta(void)
 {
-	f32 mult = 0.98470002412796f;
-	f32 speedtheta = g_Vars.currentplayer->speedtheta * 0.75f;
-	s32 i;
+	float mult = 0.98470002412796f;
+	float speedtheta = g_Vars.currentplayer->speedtheta * 0.75f;
+	int i;
 
 	for (i = 0; i < g_Vars.lvupdate240; i++) {
 		g_Vars.currentplayer->bondgrabthetaspeedsum = g_Vars.currentplayer->bondgrabthetaspeedsum * mult + speedtheta;
@@ -978,27 +978,27 @@ void bgrabUpdateSpeedTheta(void)
 
 void bgrab0f0ce924(void)
 {
-	f32 mult;
-	f32 sp88;
-	f32 sp84;
-	f32 sp80;
+	float mult;
+	float sp88;
+	float sp84;
+	float sp80;
 	struct coord sp74 = {0, 0, 0};
-	f32 sp70;
-	f32 sp6c;
-	f32 speedforwards;
-	f32 speedsideways;
-	f32 speedtheta;
-	f32 maxspeed;
-	f32 xdelta;
-	f32 zdelta;
-	f32 sp50;
-	f32 sp4c;
-	f32 sp48;
-	f32 sp44;
-	f32 sp40;
-	f32 sp3c;
-	f32 sp38;
-	f32 breathing;
+	float sp70;
+	float sp6c;
+	float speedforwards;
+	float speedsideways;
+	float speedtheta;
+	float maxspeed;
+	float xdelta;
+	float zdelta;
+	float sp50;
+	float sp4c;
+	float sp48;
+	float sp44;
+	float sp40;
+	float sp3c;
+	float sp38;
+	float breathing;
 
 	if (g_Vars.lvupdate240 > 0) {
 		bmove0f0cba88(&sp70, &sp6c, &g_Vars.currentplayer->bondshotspeed, g_Vars.currentplayer->vv_sintheta, g_Vars.currentplayer->vv_costheta);
@@ -1133,7 +1133,7 @@ void bgrabTick(void)
 	bgrab0f0ce178();
 	bgrabUpdateVertical();
 
-	s32 i;
+	int i;
 
 	for (i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {
 		if (g_Vars.currentplayer->prop->rooms[i] == g_Vars.currentplayer->floorroom) {
@@ -1167,7 +1167,7 @@ void bgrabTick(void)
 
 	if (g_Vars.currentplayer->grabbedprop) {
 		// Determine if the grabbed prop should be force released
-		f32 ydiff = g_Vars.currentplayer->grabbedprop->pos.y
+		float ydiff = g_Vars.currentplayer->grabbedprop->pos.y
 			- objGetHovBobOffsetY(g_Vars.currentplayer->grabbedprop->obj)
 			- g_Vars.currentplayer->vv_manground;
 

@@ -27,12 +27,11 @@
 #include "lib/snd.h"
 #include "data.h"
 #include "types.h"
-#include "game/debug.h"
 
 u8 g_FileState = 0;
-bool g_FileListIsOpen = 0;
-bool g_MPMenuIsOpen = 0;
-bool g_MenuIsOpen = false;
+u8 var80062944 = 0;
+u8 var80062948 = 0;
+u8 var8006294c = 0;
 
 void menuCountDialogs(void)
 {
@@ -76,7 +75,7 @@ void menuTick(void)
 		g_MenuData.nextbg = 0;
 	}
 
-	if (anyopen && g_MenuData.unk66e > 0 && g_GameIsPaused) {
+	if (anyopen && g_MenuData.unk66e > 0 && var8009dfc0) {
 		s32 bVar12 = 50;
 		s32 bVar11 = false;
 
@@ -128,7 +127,7 @@ void menuTick(void)
 			}
 
 			if (g_MenuData.nextbg == 0) {
-				g_GameIsPaused = false;
+				var8009dfc0 = false;
 
 				if (g_Vars.currentplayer->gunctrl.gunmemowner != GUNMEMOWNER_BONDGUN) {
 					g_Vars.currentplayer->gunctrl.loadall = true;
@@ -147,7 +146,7 @@ void menuTick(void)
 
 			if (g_MenuData.unk010 > 1) {
 				if (g_MenuData.nextbg) {
-					g_GameIsPaused = true;
+					var8009dfc0 = true;
 				}
 
 				g_MenuData.unk010 = 0;
@@ -176,10 +175,10 @@ void menuTick(void)
 			}
 
 			if (g_MenuData.nextbg == MENUBG_FAILURE) {
-				g_GameIsPaused = true;
+				var8009dfc0 = true;
 			}
 
-			if (g_GameIsPaused && g_Vars.currentplayer->gunmem2) {
+			if (var8009dfc0 && g_Vars.currentplayer->gunmem2) {
 				playerRemoveChrBody();
 
 				if (g_Vars.currentplayer->gunmem2);
@@ -187,7 +186,7 @@ void menuTick(void)
 		}
 	} else {
 		g_MenuData.unk010 = 0;
-		g_GameIsPaused = g_MenuData.bg == 0 ? false : true;
+		var8009dfc0 = g_MenuData.bg == 0 ? false : true;
 	}
 
 	// Check if returning from a multiplayer match
@@ -211,7 +210,7 @@ void menuTick(void)
 
 						if (g_Vars.mpsetupmenu == MPSETUPMENU_ADVSETUP) {
 							g_MpNumJoined++;
-							MpJoinGameAdvanced(true);
+							func0f17fcb0(true);
 						} else if (g_MpNumJoined == 0) {
 							g_MpNumJoined++;
 							menuPushRootDialog(&g_CombatSimulatorMenuDialog, MENUROOT_MPSETUP);
@@ -256,8 +255,7 @@ void menuTick(void)
 	g_Vars.unk000498 = 0;
 
 	if (g_MenuData.count > 0) {
-		
-		g_MenuIsOpen = true;
+		var8006294c = 1;
 
 		if (g_MenuData.root == MENUROOT_MPSETUP) {
 			if (g_MenuData.unk008 == -1) {
@@ -332,7 +330,7 @@ void menuTick(void)
 						} else {
 							// Joining from advanced setup
 							g_MpNumJoined++;
-							MpJoinGameAdvanced(false);
+							func0f17fcb0(false);
 						}
 					}
 
@@ -355,7 +353,7 @@ void menuTick(void)
 								// reached the adv setup layer - open the dialog
 								g_Vars.waitingtojoin[i] = false;
 								g_MpNumJoined++;
-								MpJoinGameAdvanced(false);
+								func0f17fcb0(false);
 							}
 						}
 					}
@@ -404,22 +402,22 @@ void menuTick(void)
 			func0f0f820c(NULL, -5);
 		}
 	} else {
-		g_MenuIsOpen = false;
+		var8006294c = 0;
 	}
 
-	if (g_MenuIsOpen) {
-		if (g_MPMenuIsOpen == 0 &&
+	if (var8006294c) {
+		if (var80062948 == 0 &&
 				(g_MenuData.root == MENUROOT_MPSETUP)) {
-			g_MPMenuIsOpen = 1;
+			var80062948 = 1;
 			filelistCreate(0, FILETYPE_MPPLAYER);
 			filelistCreate(1, FILETYPE_MPSETUP);
 		}
 
-		if (g_FileListIsOpen) {
+		if (var80062944) {
 			filelistsTick();
 		}
 	} else {
-		if (g_FileListIsOpen == 1) {
+		if (var80062944 == 1) {
 			menuStop();
 		}
 	}

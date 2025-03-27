@@ -55,11 +55,6 @@
 #include "lib/vi.h"
 #include "data.h"
 #include "types.h"
-#include "game/debug.h"
-
-// Adjust this to tune the arc curvature.
-#define ARC_BIAS_STRENGTH -0.3f
-#define POP_BIAS 0.5f   
 
 s32 g_RecentQuipsPlayed[5];
 u8 g_RecentQuipsIndex;
@@ -3435,10 +3430,6 @@ void chrYeetFromPos(struct chrdata *chr, struct coord *exppos, f32 force)
 	s32 subindex;
 	f32 angletoexplosion;
 
-	if (!chr || !chr->model || !chr->prop) {
-		return;
-	}
-
 	if (race != RACE_DRCAROLL && race != RACE_EYESPY && race != RACE_ROBOT) {
 		faceangle = chrGetInverseTheta(chr);
 		latangle = atan2f(prop->pos.x - exppos->x, prop->pos.z - exppos->z);
@@ -3447,14 +3438,11 @@ void chrYeetFromPos(struct chrdata *chr, struct coord *exppos, f32 force)
 		dist.y = prop->pos.y - exppos->y;
 		dist.z = prop->pos.z - exppos->z;
 
-		f32 magnitude = sqrtf(dist.x * dist.x + dist.y * dist.y + dist.z * dist.z); // Ben's comment: Rewrote this code to prevent division by 0
-		if (magnitude < 0.001f) 
-		{
-			magnitude = 0.001f;
+		if (dist.f[0] == 0 && dist.f[1] == 0 && dist.f[2] == 0) {
+			dist.z = 1;
 		}
 
-		speed = 0.625f * force / magnitude;
-
+		speed = 0.625f * force / sqrtf(dist.f[0] * dist.f[0] + dist.f[1] * dist.f[1] + dist.f[2] * dist.f[2]);
 		angletoexplosion = latangle - faceangle;
 
 		dist.x *= speed;
@@ -3471,30 +3459,24 @@ void chrYeetFromPos(struct chrdata *chr, struct coord *exppos, f32 force)
 
 		angleindex = angletoexplosion * 1.2734422683716f + 0.5f;
 
-		if (angleindex < 0 || angleindex >= 8) { // Original code didn't check for less than 0
+		if (angleindex >= 8) {
 			angleindex = 0;
 		}
 
-		u8 count = g_YeetAnimIndexesByRaceAngle[race][angleindex].count;
-		if (count == 0)  {
-			count = 1; // Prevent division by 0
-		}
-
-		subindex = rngRandom() % count;
+		subindex = rngRandom() % g_YeetAnimIndexesByRaceAngle[race][angleindex].count;
 
 		if (race == RACE_HUMAN) {
 			row = &g_YeetAnimsHuman[g_YeetAnimIndexesByRaceAngle[race][angleindex].indexes[subindex]];
 		} else if (race == RACE_SKEDAR) {
 			row = &g_YeetAnimsSkedar[g_YeetAnimIndexesByRaceAngle[race][angleindex].indexes[subindex]];
 		}
-		else { // Safety check
-			return; 
-		}
 
 		chrStopFiring(chr);
 		chrUncloak(chr, true);
 
+#if VERSION >= VERSION_NTSC_1_0
 		chr->chrflags &= ~CHRCFLAG_HIDDEN;
+#endif
 
 		chr->actiontype = ACT_DIE;
 
@@ -4157,6 +4139,7 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 		return;
 	}
 
+#ifndef PLATFORM_N64
 	// Don't damage if team multiplayer and friendly fire is off
 	if (g_Vars.mplayerisrunning
 			&& (g_MpSetup.options & MPOPTION_TEAMSENABLED)
@@ -4167,6 +4150,7 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 			&& chr->team == aprop->chr->team) {
 		return;
 	}
+#endif
 
 	if (gset == NULL) {
 		gset = &gset2;
@@ -4287,6 +4271,7 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 	if (vprop->type == PROPTYPE_PLAYER) {
 		s32 prevplayernum = g_Vars.currentplayernum;
 
+#if VERSION >= VERSION_NTSC_1_0
 		s32 contpad1;
 		s32 contpad2;
 
@@ -4301,6 +4286,16 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 		if (contpad2 >= 0) {
 			pakRumble(contpad2, 0.25f, -1, -1);
 		}
+#else
+		setCurrentPlayerNum(playermgrGetPlayerNumByProp(vprop));
+
+		pakRumble((s8)g_Vars.currentplayernum, 0.25f, -1, -1);
+
+		s32 controlmode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
+		if (controlmode >= CONTROLMODE_21 && controlmode < CONTROLMODE_PC) {
+			pakRumble((s8)(PLAYERCOUNT() + g_Vars.currentplayernum), 0.25f, -1, -1);
+		}
+#endif
 
 		setCurrentPlayerNum(prevplayernum);
 	}
@@ -4384,6 +4379,28 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 
 			showshield = true;
 			usedshield = true;
+		}
+	}
+
+	// Handle hat shots. This is left over from GE, as hats don't exist in PD
+	if (damage > 0 && hitpart == HITPART_HAT && chr->weapons_held[2]) {
+		s32 type = hatGetType(chr->weapons_held[2]);
+
+		if (type == HATTYPE_CLOTH) {
+			// Hat remains on head and damages the chr (eg. Moonraker Elite)
+			hitpart = HITPART_HEAD;
+		} else if (type != HATTYPE_METAL) {
+			// Normal hat
+			damage = 0;
+			objSetDropped(chr->weapons_held[2], DROPTYPE_HAT);
+			chr->hidden |= CHRHFLAG_DROPPINGITEM;
+		} else {
+			// Metal helmets don't fall off and make a metallic chink noise when shot
+			u16 sounds[] = { SFX_HIT_METAL_807B, SFX_HIT_METAL_8079, SFX_HATHIT_807C };
+			damage = 0;
+
+			psCreate(NULL, chr->prop, sounds[rngRandom() % 3], -1,
+					-1, 0, 0, PSTYPE_NONE, NULL, -1, NULL, -1, -1, -1, -1);
 		}
 	}
 
@@ -4639,6 +4656,11 @@ void chrDamage(struct chrdata *chr, f32 damage, struct coord *vector, struct gse
 			}
 
 			setCurrentPlayerNum(prevplayernum);
+			return;
+		}
+
+		// This check is pointless - a similar check and return exists earlier
+		if (chr->actiontype == ACT_DIE || chr->actiontype == ACT_DEAD) {
 			return;
 		}
 
@@ -5133,7 +5155,7 @@ bool chrIsRoomOffScreen(struct chrdata *chr, struct coord *waypos, RoomNum *wayr
 
 	if (offscreen) {
 		for (i = 0; i < PLAYERCOUNT(); i++) {
-			portalComputeReachableRooms(waypos, &g_Vars.players[i]->prop->pos, wayrooms, sp50, 0, 0);
+			portal00018148(waypos, &g_Vars.players[i]->prop->pos, wayrooms, sp50, 0, 0);
 
 			if (arrayIntersects(g_Vars.players[i]->prop->rooms, sp50)) {
 				offscreen = false;
@@ -9438,7 +9460,9 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 
 				if (bestvolume);
 
+#if VERSION >= VERSION_NTSC_1_0
 				if (bestnode != NULL)
+#endif
 				{
 					Mtxf sp48;
 					struct modelrodata_bbox *rodata = &bestnode->rodata->bbox;
@@ -9566,6 +9590,8 @@ void chrCalculateTrajectory(struct coord *frompos, f32 arg1, struct coord *aimpo
 	arg3->y = sp30;
 	arg3->z = zvel / latvel * sp28;
 }
+
+const char var7f1a8ae4[] = "aimadjust=%d";
 
 /**
  * Fire the chr's gun, check what was hit and do all the appropriate things
@@ -13591,14 +13617,14 @@ f32 coordGetSquaredDistanceToCoord(struct coord *a, struct coord *b)
 	return xdiff * xdiff + ydiff * ydiff + zdiff * zdiff;
 }
 
-s32 chrGetPadRoom(struct chrdata *chr, s32 pad_id)
+int chrGetPadRoom(struct chrdata *chr, int pad_id)
 {
-	s32 ret = -1;
-	s32 pad_id_backup = pad_id;
+	int ret = -1;
+	int pad_id_backup = pad_id;
 	struct pad pad;
 
 	if (pad_id >= 10000) {
-		s32 resolved_pad_id = chrResolvePadId(chr, pad_id - 10000);
+		int resolved_pad_id = chrResolvePadId(chr, pad_id - 10000);
 
 		if (resolved_pad_id >= 0)
 		{
@@ -13612,7 +13638,7 @@ s32 chrGetPadRoom(struct chrdata *chr, s32 pad_id)
 	return ret;
 }
 
-s32 chrResolvePadId(struct chrdata *chr, s32 pad_id)
+int chrResolvePadId(struct chrdata *chr, int pad_id)
 {
 	if (pad_id == 9000) {
 		pad_id = chr->padpreset1;
@@ -13627,11 +13653,11 @@ s32 chrResolvePadId(struct chrdata *chr, s32 pad_id)
  * This function is called when the given player has died. It causes all guards
  * to switch their focus to the remaining coop player.
  */
-void chrsClearRefsToPlayer(s32 playernum)
+void chrsClearRefsToPlayer(int playernum)
 {
-	s32 otherplayernum;
-	s32 playerpropnum;
-	s32 i;
+	int otherplayernum;
+	int playerpropnum;
+	int i;
 
 	if (g_Vars.coopplayernum >= 0) {
 		if (playernum == g_Vars.bondplayernum) {
@@ -15452,7 +15478,7 @@ Gfx *chrsRenderChrStats(Gfx *gdl, RoomNum *rooms)
 	s32 i;
 	s32 numchrs = chrsGetNumSlots();
 
-	gdl = textConfigureGfxPipeline(gdl);
+	gdl = text0f153628(gdl);
 
 	for (i = 0; i < numchrs; i++) {
 		struct chrdata *chr = &g_ChrSlots[i];

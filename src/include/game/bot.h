@@ -1,63 +1,58 @@
 #ifndef _IN_GAME_BOT_H
 #define _IN_GAME_BOT_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
-bool botroomFindPos(RoomNum room, struct coord *pos, f32 *angleptr, s32 *padnumptr, s32 *covernumptr);
+bool botroomFindPos(RoomNum room, struct coord *pos, float *angleptr, int *padnumptr, int *covernumptr);
 
 bool botIsDizzy(struct chrdata *chr);
-void botReset(struct chrdata *chr, u8 respawning);
-void botSpawn(struct chrdata *chr, u8 full);
+void botReset(struct chrdata *chr, uint8_t respawning);
+void botSpawn(struct chrdata *chr, uint8_t full);
 void botSpawnAll(void);
-u32 add87654321(u32 value);
-u32 botPickupProp(struct prop *prop, struct chrdata *chr);
+uint32_t add87654321(uint32_t value);
+uint32_t botPickupProp(struct prop *prop, struct chrdata *chr);
 bool botTestPropForPickup(struct prop *prop, struct chrdata *chr);
 void botCheckPickups(struct chrdata *chr);
-s32 botGuessCrouchPos(struct chrdata *chr);
+int botGuessCrouchPos(struct chrdata *chr);
 bool botApplyMovement(struct chrdata *chr);
 bool botIsAboutToAttack(struct chrdata *chr, bool arg1);
-s32 botTick(struct prop *prop);
-f32 botCalculateMaxSpeed(struct chrdata *chr);
-
-#if VERSION >= VERSION_NTSC_1_0
-void bot0f1921f8(struct chrdata *chr, f32 *move, s32 numupdates, f32 arg3);
-#else
-void bot0f1921f8(struct chrdata *chr, f32 *move);
-#endif
-
+int botTick(struct prop *prop);
+float botCalculateMaxSpeed(struct chrdata *chr);
+void bot0f1921f8(struct chrdata *chr, float *move, int numupdates, float arg3);
 void botDisarm(struct chrdata *chr, struct prop *attacker);
-void botSetTarget(struct chrdata *chr, s32 propnum);
+void botSetTarget(struct chrdata *chr, int propnum);
 bool botIsTargetInvisible(struct chrdata *botchr, struct chrdata *otherchr);
 bool botHasGround(struct chrdata *chr);
 void bot0f192a74(struct chrdata *chr);
 bool botPassesPeaceCheck(struct chrdata *botchr, struct chrdata *otherchr);
 bool botPassesCowardCheck(struct chrdata *botchr, struct chrdata *otherchr);
 void botChooseGeneralTarget(struct chrdata *chr);
-void botScheduleReload(struct chrdata *chr, s32 handnum);
-struct prop *botFindPickup(struct chrdata *chr, s32 criteria);
-s32 botGetNumOpponentsInHill(struct chrdata *chr);
+void botScheduleReload(struct chrdata *chr, int handnum);
+struct prop *botFindPickup(struct chrdata *chr, int criteria);
+int botGetNumOpponentsInHill(struct chrdata *chr);
 void botTickUnpaused(struct chrdata *chr);
-s32 botIsObjCollectable(struct defaultobj *obj);
-s32 botGetWeaponNum(struct chrdata *chr);
-u8 botGetTargetsWeaponNum(struct chrdata *chr);
-char *botGetCommandName(s32 command);
+int botIsObjCollectable(struct defaultobj *obj);
+int botGetWeaponNum(struct chrdata *chr);
+uint8_t botGetTargetsWeaponNum(struct chrdata *chr);
+char *botGetCommandName(int command);
 void botApplyAttack(struct chrdata *chr, struct prop *prop);
 void botApplyFollow(struct chrdata *chr, struct prop *prop);
 void botApplyProtect(struct chrdata *chr, struct prop *prop);
-void botApplyDefend(struct chrdata *chr, struct coord *pos, RoomNum *room, f32 angle);
-void botApplyHold(struct chrdata *chr, struct coord *pos, RoomNum *room, f32 angle);
-void botApplyScenarioCommand(struct chrdata *chr, u32 arg1);
+void botApplyDefend(struct chrdata *chr, struct coord *pos, RoomNum *room, float angle);
+void botApplyHold(struct chrdata *chr, struct coord *pos, RoomNum *room, float angle);
+void botApplyScenarioCommand(struct chrdata *chr, uint32_t arg1);
 bool botCanFollow(struct chrdata *leader, struct chrdata *follower);
-s32 botFindTeammateToFollow(struct chrdata *chr, f32 range);
+int botFindTeammateToFollow(struct chrdata *chr, float range);
 bool botCanDoCriticalPickup(struct chrdata *chr);
 struct prop *botFindDefaultPickup(struct chrdata *chr);
 struct prop *botFindAnyPickup(struct chrdata *chr);
-s32 botGetTeamSize(struct chrdata *chr);
-s32 botGetCountInTeamDoingCommand(struct chrdata *self, u32 command, bool includeself);
-s32 botIsChrsCtcTokenHeld(struct chrdata *chr);
+int botGetTeamSize(struct chrdata *chr);
+int botGetCountInTeamDoingCommand(struct chrdata *self, uint32_t command, bool includeself);
+int botIsChrsCtcTokenHeld(struct chrdata *chr);
 bool botShouldReturnCtcToken(struct chrdata *chr);
-s32 botGetNumTeammatesDefendingHill(struct chrdata *bot);
+int botGetNumTeammatesDefendingHill(struct chrdata *bot);
 void botCheckFetch(struct chrdata *chr);
 
 #endif

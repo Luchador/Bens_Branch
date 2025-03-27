@@ -4,9 +4,9 @@
 #include "data.h"
 #include "types.h"
 
-f32 pdmodeGetEnemyReactionSpeed(void);
-f32 pdmodeGetEnemyHealth(void);
-f32 pdmodeGetEnemyDamage(void);
-f32 pdmodeGetEnemyAccuracy(void);
+float pdmodeGetEnemyReactionSpeed(void);
+float pdmodeGetEnemyHealth(void);
+float pdmodeGetEnemyDamage(void);
+float pdmodeGetEnemyAccuracy(void);
 
 #endif

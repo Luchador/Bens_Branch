@@ -8,9 +8,9 @@
 #define PORTALINTERSECTION_BEHINDTOFRONT 1
 #define PORTALINTERSECTION_FRONTTOBEHIND 2
 
-void portalGetAvgVertexPos(int portalnum, struct coord *avg);
-void portalAppendRoom(RoomNum *rooms, RoomNum roomnum);
-int portalCalculateIntersection(int portalnum, struct coord *pos1, struct coord *pos2);
-void portalComputeReachableRooms(struct coord *pos, struct coord *pos2, RoomNum *rooms, RoomNum *arg3, RoomNum *arg4, int maxvisited);
+void portalGetAvgVertexPos(s32 portalnum, struct coord *avg);
+void portal00017dc4(RoomNum *rooms, RoomNum roomnum);
+s32 portalCalculateIntersection(s32 portalnum, struct coord *pos1, struct coord *pos2);
+void portal00018148(struct coord *pos, struct coord *pos2, RoomNum *rooms, RoomNum *arg3, RoomNum *arg4, s32 arg5);
 
 #endif

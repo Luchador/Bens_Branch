@@ -1,9 +1,10 @@
 #include <ultra64.h>
+#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/debug.h"
 #include "game/chr.h"
-#include "game/ceil.h"
 #include "game/weaponutils.h"
 #include "game/playermgr.h"
 #include "game/mplayer/setup.h"
@@ -132,7 +133,7 @@ struct aibotweaponpreference g_AibotWeaponPreferences[] = {
 void botinvClear(struct chrdata *chr)
 {
 	if (chr && chr->aibot) {
-		s32 i = 0;
+		int i = 0;
 
 		for (i = 0; i < chr->aibot->maxitems; i++) {
 			chr->aibot->items[i].type = -1;
@@ -149,7 +150,7 @@ void botinvClear(struct chrdata *chr)
  */
 struct invitem *botinvGetFreeSlot(struct chrdata *chr)
 {
-	s32 i;
+	int i;
 
 	if (!chr || !chr->aibot) {
 		return NULL;
@@ -167,9 +168,9 @@ struct invitem *botinvGetFreeSlot(struct chrdata *chr)
 /**
  * Retrieve an inventory item from the bot's inventory.
  */
-struct invitem *botinvGetItem(struct chrdata *chr, s32 weaponnum)
+struct invitem *botinvGetItem(struct chrdata *chr, int weaponnum)
 {
-	s32 i;
+	int i;
 
 	if (!chr || !chr->aibot) {
 		return NULL;
@@ -195,9 +196,9 @@ struct invitem *botinvGetItem(struct chrdata *chr, s32 weaponnum)
 /**
  * Remove a weapon from the bot's inventory.
  */
-void botinvRemoveItem(struct chrdata *chr, s32 weaponnum)
+void botinvRemoveItem(struct chrdata *chr, int weaponnum)
 {
-	s32 i;
+	int i;
 
 	if (!chr || !chr->aibot) {
 		return;
@@ -224,7 +225,7 @@ void botinvRemoveItem(struct chrdata *chr, s32 weaponnum)
  *
  * See the INVITEMTYPE constants.
  */
-u32 botinvGetItemType(struct chrdata *chr, u32 weaponnum)
+uint32_t botinvGetItemType(struct chrdata *chr, uint32_t weaponnum)
 {
 	struct invitem *item;
 
@@ -246,7 +247,7 @@ u32 botinvGetItemType(struct chrdata *chr, u32 weaponnum)
  *
  * There is no pickup pad, so this is likely for dropped items.
  */
-bool botinvGiveSingleWeapon(struct chrdata *chr, u32 weaponnum)
+bool botinvGiveSingleWeapon(struct chrdata *chr, uint32_t weaponnum)
 {
 	if (!chr || !chr->aibot) {
 		return false;
@@ -277,7 +278,7 @@ bool botinvGiveSingleWeapon(struct chrdata *chr, u32 weaponnum)
  * inventory items for both single and dual and the player can choose which one
  * they want to use.
  */
-void botinvGiveDualWeapon(struct chrdata *chr, u32 weaponnum)
+void botinvGiveDualWeapon(struct chrdata *chr, uint32_t weaponnum)
 {
 	struct invitem *item = botinvGetItem(chr, weaponnum);
 
@@ -293,7 +294,7 @@ void botinvGiveDualWeapon(struct chrdata *chr, u32 weaponnum)
  * this does not happen if the second weapon is from the same pad as the first
  * (ie. is the first weapon respawned).
  */
-s16 botinvGetWeaponPad(struct chrdata *chr, u32 weaponnum)
+int16_t botinvGetWeaponPad(struct chrdata *chr, uint32_t weaponnum)
 {
 	struct invitem *item = botinvGetItem(chr, weaponnum);
 
@@ -313,7 +314,7 @@ bool botinvGiveProp(struct chrdata *chr, struct prop *prop)
 {
 	bool result = false;
 	struct defaultobj *obj;
-	s32 i;
+	int i;
 
 	if (!chr || !chr->aibot) {
 		return false;
@@ -324,7 +325,7 @@ bool botinvGiveProp(struct chrdata *chr, struct prop *prop)
 	if (prop->type == PROPTYPE_WEAPON) {
 		if (obj->type == OBJTYPE_WEAPON) {
 			struct weaponobj *weapon = prop->weapon;
-			s32 weaponnum = weapon->weaponnum;
+			int weaponnum = weapon->weaponnum;
 			result = botinvGiveSingleWeapon(chr, weaponnum);
 
 			if (result) {
@@ -337,7 +338,7 @@ bool botinvGiveProp(struct chrdata *chr, struct prop *prop)
 
 		for (i = 0; i < 19; i++) {
 			if (multi->slots[i].quantity > 0) {
-				s32 weaponnum = botactGetWeaponByAmmoType(i + 1);
+				int weaponnum = botactGetWeaponByAmmoType(i + 1);
 
 				if (weaponnum > 0) {
 					botinvGiveSingleWeapon(chr, weaponnum);
@@ -349,27 +350,22 @@ bool botinvGiveProp(struct chrdata *chr, struct prop *prop)
 	return result;
 }
 
-void botinv0f198060(u32 arg0)
-{
-	// empty
-}
-
 /**
  * Score all weapons in the match's weaponset by themselves and write them to
  * the 3 array pointers, ordered by score1 descending.
  */
-void botinvScoreAllWeapons(struct chrdata *chr, s32 *weaponnums, s32 *scores1, s32 *scores2)
+void botinvScoreAllWeapons(struct chrdata *chr, int *weaponnums, int *scores1, int *scores2)
 {
-	s32 i;
-	s32 pri1;
-	s32 pri2;
-	s32 sec1;
-	s32 sec2;
+	int i;
+	int pri1;
+	int pri2;
+	int sec1;
+	int sec2;
 
 	// Gather scores for each weapon in the setup,
 	// taking the higher score out of both gun functions
 	for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
-		s32 weaponnum = g_MpWeapons[g_MpSetup.weapons[i]].weaponnum;
+		int weaponnum = g_MpWeapons[g_MpSetup.weapons[i]].weaponnum;
 		weaponnums[i] = weaponnum;
 
 		botinvScoreWeaponByItself(chr, weaponnum, FUNC_PRIMARY, -1, false, &pri1, &pri2);
@@ -381,9 +377,9 @@ void botinvScoreAllWeapons(struct chrdata *chr, s32 *weaponnums, s32 *scores1, s
 
 	// Sort all three arrays by score1 descending
 	for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
-		s32 swapindex = i;
-		s32 tmp;
-		s32 j;
+		int swapindex = i;
+		int tmp;
+		int j;
 
 		for (j = i + 1; j < ARRAYCOUNT(g_MpSetup.weapons); j++) {
 			if (scores1[j] > scores1[swapindex]) {
@@ -412,10 +408,10 @@ void botinvScoreAllWeapons(struct chrdata *chr, s32 *weaponnums, s32 *scores1, s
  */
 bool mpHasShield(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
-		s32 weaponnum = g_MpWeapons[g_MpSetup.weapons[i]].weaponnum;
+		int weaponnum = g_MpWeapons[g_MpSetup.weapons[i]].weaponnum;
 
 		if (weaponnum == WEAPON_MPSHIELD) {
 			return true;
@@ -428,10 +424,10 @@ bool mpHasShield(void)
 /**
  * Get the weapon slot (0 to 5) by weapon number.
  */
-s32 mpGetWeaponSlotByWeaponNum(s32 weaponnum)
+int mpGetWeaponSlotByWeaponNum(int weaponnum)
 {
-	s32 result = -1;
-	s32 i;
+	int result = -1;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
 		if (g_MpWeapons[g_MpSetup.weapons[i]].weaponnum == weaponnum && i < ARRAYCOUNT(g_MpSetup.weapons)) {
@@ -450,11 +446,11 @@ s32 mpGetWeaponSlotByWeaponNum(s32 weaponnum)
  * Weapon scoring is used to determine if a weapon is better than another,
  * which affects whether the bot engages in combat or seeks a better weapon.
  */
-void botinvScoreWeapon(struct chrdata *chr, s32 weaponnum, s32 funcnum, s32 arg3, bool arg4, s32 *dst1, s32 *dst2, bool comparewithtarget, bool arg8)
+void botinvScoreWeapon(struct chrdata *chr, int weaponnum, int funcnum, int arg3, bool arg4, int *dst1, int *dst2, bool comparewithtarget, bool arg8)
 {
-	s32 score1 = 0;
-	s32 score2 = 0;
-	s32 extra = 0;
+	int score1 = 0;
+	int score2 = 0;
+	int extra = 0;
 
 	// @dangerous: Array overflow can occur if more weapons are added to the
 	// game without extending the preferences table
@@ -695,7 +691,7 @@ void botinvScoreWeapon(struct chrdata *chr, s32 weaponnum, s32 funcnum, s32 arg3
 		break;
 	case WEAPON_TRANQUILIZER:
 		if (comparewithtarget) {
-			s32 bluramount = 0;
+			int bluramount = 0;
 
 			if (chr->target != -1) {
 				bluramount = chrGetTargetProp(chr)->chr->blurdrugamount;
@@ -724,7 +720,7 @@ void botinvScoreWeapon(struct chrdata *chr, s32 weaponnum, s32 funcnum, s32 arg3
 						score2 = 0;
 					}
 				} else if (bluramount > TICKS(3500)) {
-					u32 value = (-bluramount * 16 + (PAL ? 66656 : 80000)) / TICKS(1500);
+					uint32_t value = (-bluramount * 16 + 80000) / TICKS(1500);
 
 					if (value > 15) {
 						value = 15;
@@ -754,14 +750,14 @@ void botinvScoreWeapon(struct chrdata *chr, s32 weaponnum, s32 funcnum, s32 arg3
 	}
 
 	if (arg8) {
-		s32 weaponindex;
-		s32 extra = 0;
-		f32 float1;
-		f32 killrate = 1;
-		f32 float2;
+		int weaponindex;
+		int extra = 0;
+		float float1;
+		float killrate = 1;
+		float float2;
 
 		if (g_Vars.lvframe60 > 0) {
-			killrate = g_Vars.totalkills * TICKS(3600.0f) / (f32)(g_Vars.lvframe60 * g_MpNumChrs);
+			killrate = g_Vars.totalkills * TICKS(3600.0f) / (float)(g_Vars.lvframe60 * g_MpNumChrs);
 
 			if (killrate < 1) {
 				killrate = 1;
@@ -808,12 +804,12 @@ void botinvScoreWeapon(struct chrdata *chr, s32 weaponnum, s32 funcnum, s32 arg3
 	*dst2 = score2;
 }
 
-void botinvScoreWeaponAgainstTarget(struct chrdata *chr, s32 weaponnum, s32 funcnum, s32 arg3, bool arg4, s32 *dst1, s32 *dst2)
+void botinvScoreWeaponAgainstTarget(struct chrdata *chr, int weaponnum, int funcnum, int arg3, bool arg4, int *dst1, int *dst2)
 {
 	botinvScoreWeapon(chr, weaponnum, funcnum, arg3, arg4, dst1, dst2, true, true);
 }
 
-void botinvScoreWeaponByItself(struct chrdata *chr, s32 weaponnum, s32 funcnum, s32 arg3, bool arg4, s32 *dst1, s32 *dst2)
+void botinvScoreWeaponByItself(struct chrdata *chr, int weaponnum, int funcnum, int arg3, bool arg4, int *dst1, int *dst2)
 {
 	botinvScoreWeapon(chr, weaponnum, funcnum, arg3, arg4, dst1, dst2, false, true);
 }
@@ -822,7 +818,7 @@ void botinvScoreWeaponByItself(struct chrdata *chr, s32 weaponnum, s32 funcnum, 
  * Return the aibot's distance configuration index for the given weapon and
  * function.
  */
-s32 botinvGetDistConfig(s32 weaponnum, s32 funcnum)
+int botinvGetDistConfig(int weaponnum, int funcnum)
 {
 	if (funcnum != FUNC_PRIMARY) {
 		return g_AibotWeaponPreferences[weaponnum].secdistconfig;
@@ -835,7 +831,7 @@ s32 botinvGetDistConfig(s32 weaponnum, s32 funcnum)
  * Check if the bot's personality permits it to use the given weapon and
  * function.
  */
-bool botinvAllowsWeapon(struct chrdata *chr, s32 weaponnum, s32 funcnum)
+bool botinvAllowsWeapon(struct chrdata *chr, int weaponnum, int funcnum)
 {
 	bool allow = true;
 
@@ -861,12 +857,12 @@ bool botinvAllowsWeapon(struct chrdata *chr, s32 weaponnum, s32 funcnum)
  */
 void botinvTick(struct chrdata *chr)
 {
-	s32 newweaponnum = WEAPON_UNARMED;
-	s32 newfuncnum = FUNC_PRIMARY;
-	s32 weaponindex;
+	int newweaponnum = WEAPON_UNARMED;
+	int newfuncnum = FUNC_PRIMARY;
+	int weaponindex;
 	struct aibot *aibot;
 	bool keepcurrentweapon = false;
-	s32 i;
+	int i;
 
 	if (!chr || !chr->aibot) {
 		return;
@@ -936,14 +932,14 @@ void botinvTick(struct chrdata *chr)
 		}
 
 		if (!keepcurrentweapon) {
-			s32 bestscore = 0;
-			s32 score1;
-			s32 score2;
-			s32 canuse;
-			s32 j;
+			int bestscore = 0;
+			int score1;
+			int score2;
+			int canuse;
+			int j;
 
 			for (i = -1; i < aibot->maxitems; i++) {
-				s32 weaponnum = -1;
+				int weaponnum = -1;
 				struct invitem *item = NULL;
 
 				if (i < 0) {
@@ -1009,13 +1005,13 @@ void botinvTick(struct chrdata *chr)
  * The weapon must already exist in the bot's inventory,
  * otherwise unarmed will be equipped instead.
  */
-bool botinvSwitchToWeapon(struct chrdata *chr, s32 weaponnum, s32 funcnum)
+bool botinvSwitchToWeapon(struct chrdata *chr, int weaponnum, int funcnum)
 {
 	struct invitem *item;
 	struct weaponfunc *func;
 	struct aibot *aibot;
-	s32 i;
-	s32 modelnum;
+	int i;
+	int modelnum;
 	bool changinggun;
 	bool changingfunc;
 
@@ -1112,9 +1108,9 @@ bool botinvSwitchToWeapon(struct chrdata *chr, s32 weaponnum, s32 funcnum)
  *
  * dropall is used when the bot is killed.
  */
-void botinvDrop(struct chrdata *chr, s32 weaponnum, u8 dropall)
+void botinvDrop(struct chrdata *chr, int weaponnum, uint8_t dropall)
 {
-	s32 i;
+	int i;
 
 	if (!chr || !chr->aibot) {
 		return;
@@ -1133,7 +1129,7 @@ void botinvDrop(struct chrdata *chr, s32 weaponnum, u8 dropall)
 					|| (g_Vars.normmplayerisrunning
 						&& g_MpSetup.scenario == MPSCENARIO_HACKERCENTRAL
 						&& item->type_weap.weapon1 == WEAPON_DATAUPLINK)) {
-				s32 modelnum = playermgrGetModelOfWeapon(item->type_weap.weapon1);
+				int modelnum = playermgrGetModelOfWeapon(item->type_weap.weapon1);
 
 				if (modelnum > 0) {
 					struct prop *prop = weaponCreateForChr(chr, modelnum, item->type_weap.weapon1, OBJFLAG_WEAPON_AICANNOTUSE, NULL, NULL);
@@ -1163,12 +1159,12 @@ void botinvDrop(struct chrdata *chr, s32 weaponnum, u8 dropall)
 	}
 }
 
-void botinvDropAll(struct chrdata *chr, u32 weaponnum)
+void botinvDropAll(struct chrdata *chr, uint32_t weaponnum)
 {
 	botinvDrop(chr, weaponnum, true);
 }
 
-void botinvDropOne(struct chrdata *chr, u32 weaponnum)
+void botinvDropOne(struct chrdata *chr, uint32_t weaponnum)
 {
 	botinvDrop(chr, weaponnum, false);
 }

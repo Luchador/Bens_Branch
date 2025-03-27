@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/bondmove.h"
@@ -9,8 +10,6 @@
 #include "game/prop.h"
 #include "game/propsnd.h"
 #include "game/objectives.h"
-#include "game/floor.h"
-#include "game/ceil.h"
 #include "game/bondgun.h"
 #include "game/weaponutils.h"
 #include "game/tex.h"
@@ -41,14 +40,14 @@
 #include "data.h"
 #include "types.h"
 
-s16 *g_RoomPropListChunkIndexes;
+int16_t *g_RoomPropListChunkIndexes;
 struct roomproplistchunk *g_RoomPropListChunks;
 struct prop *g_InteractProp;
 
-s32 var8009cdac; // @Investigate what this is doing
-s32 var8009cdb0; // @Investigate what this is doing
+int var8009cdac; // @Investigate what this is doing
+int var8009cdb0; // @Investigate what this is doing
 
-f32 g_AutoAimScale = 1;
+float g_AutoAimScale = 1;
 
 /**
  * Populate g_Vars.onscreenprops. This is an array of prop pointers, filtered by
@@ -56,13 +55,13 @@ f32 g_AutoAimScale = 1;
  */
 void propsSort(void)
 {
-	s32 count = 0;
+	int count = 0;
 	struct prop *prop = g_Vars.activeprops;
-	s32 swapindex;
-	f32 depth;
-	s32 i;
-	s32 j;
-	f32 depths[201];
+	int swapindex;
+	float depth;
+	int i;
+	int j;
+	float depths[201];
 
 	// Populate onscreenprops with the list of props
 	while (prop != g_Vars.pausedprops) {
@@ -387,7 +386,7 @@ Gfx *propRender(Gfx *gdl, struct prop *prop, bool xlupass)
  * terminal in the pre-bg pass and the screen in the post-bg pass, likely to
  * avoid Z-fighting issues.
  */
-Gfx *propsRender(Gfx *gdl, RoomNum renderroomnum, s32 renderpass, RoomNum *roomnumsbyprop)
+Gfx *propsRender(Gfx *gdl, RoomNum renderroomnum, int renderpass, RoomNum *roomnumsbyprop)
 {
 	struct prop **ptr;
 	struct prop *prop;
@@ -443,10 +442,10 @@ Gfx *propsRender(Gfx *gdl, RoomNum renderroomnum, s32 renderpass, RoomNum *roomn
 	return gdl;
 }
 
-void weaponPlayWhooshSound(s32 weaponnum, struct prop *prop)
+void weaponPlayWhooshSound(int weaponnum, struct prop *prop)
 {
-	s32 soundnum = -1;
-	f32 speed = 1;
+	int soundnum = -1;
+	float speed = 1;
 
 	if (weaponnum == WEAPON_TRANQUILIZER) {
 		soundnum = SFX_RELOAD_04FB;
@@ -468,7 +467,7 @@ void weaponPlayWhooshSound(s32 weaponnum, struct prop *prop)
 			handle = sndStart(var80095200, soundnum, NULL, -1, -1, -1, -1, -1);
 
 			if (handle) {
-				audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
+				audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(int *)&speed);
 			}
 
 		} else {
@@ -485,10 +484,10 @@ void weaponPlayWhooshSound(s32 weaponnum, struct prop *prop)
 
 // Ben's comment: this is doing sound effects for when the player does a melee attack and hits the background or a non-character prop. It seems to work properly.
 // The confusion may be from some sounds in this bank using a different offset than most sounds.
-void weaponPlayMeleeHitSound(s32 weaponnum, struct prop *prop)
+void weaponPlayMeleeHitSound(int weaponnum, struct prop *prop)
 {
-	s32 soundnum = -1;
-	f32 speed = 1;
+	int soundnum = -1;
+	float speed = 1;
 	struct sndstate *handle;
 
 	if (weaponnum == WEAPON_UNARMED) { // Play one of two random punch sounds
@@ -511,7 +510,7 @@ void weaponPlayMeleeHitSound(s32 weaponnum, struct prop *prop)
 			handle = sndStart(var80095200, soundnum, 0, -1, -1, -1, -1, -1);
 
 			if (handle) {
-				audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
+				audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(int *)&speed);
 			}
 
 		} else {
@@ -528,32 +527,32 @@ void weaponPlayMeleeHitSound(s32 weaponnum, struct prop *prop)
  *
  * The return value is the final prop that was hit.
  */
-struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpos2d, struct coord *gundir2d, struct coord *gunpos3d, struct coord *gundir3d, u32 arg6, f32 distance, bool cheap)
+struct prop *shotCalculateHits(int handnum, bool isshooting, struct coord *gunpos2d, struct coord *gundir2d, struct coord *gunpos3d, struct coord *gundir3d, unsigned int arg6, float distance, bool cheap)
 {
-	u32 index;
+	unsigned int index;
 	struct prop **propptr;
 	struct prop *root;
 	bool explosiveshells = false;
 	bool blockedbyprop = false;
 	bool hitbg = false;
-	s32 room = 0;
+	int room = 0;
 	struct hitthing sp694;
 	struct hitthing sp664;
 	struct coord sp658;
 	struct prop *playerprop = g_Vars.currentplayer->prop;
 	struct coord hitpos;
 	struct shotdata shotdata;
-	s32 i;
-	s32 s1 = 0;
+	int i;
+	int s1 = 0;
 	struct weaponfunc *func;
 	bool laserstream = false;
 	bool ismelee = false;
-	f32 range = 200;
+	float range = 200;
 	struct prop *result = NULL;
-	s32 hitindex;
+	int hitindex;
 	struct surfacetype *surfacetype;
 	bool done;
-	s32 sparktype;
+	int sparktype;
 
 #ifdef AVOID_UB
 	RoomNum rooms[131];
@@ -563,7 +562,7 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 
 	RoomNum spc8[8];
 	RoomNum spb8[8];
-	s32 texnum;
+	int texnum;
 	RoomNum *roomsptr;
 	struct prop *prop;
 	struct coord spa0;
@@ -643,8 +642,8 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 		hitpos.z = shotdata.gunpos3d.z + shotdata.gundir3d.z * 65536;
 	}
 
-	portalComputeReachableRooms(&playerprop->pos, &shotdata.gunpos3d, playerprop->rooms, spc8, 0, 0);
-	portalComputeReachableRooms(&shotdata.gunpos3d, &hitpos, spc8, spb8, rooms, 30);
+	portal00018148(&playerprop->pos, &shotdata.gunpos3d, playerprop->rooms, spc8, 0, 0);
+	portal00018148(&shotdata.gunpos3d, &hitpos, spc8, spb8, rooms, 30);
 
 	if (shotdata.gset.weaponnum != WEAPON_FARSIGHT || g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
 		roomsptr = rooms;
@@ -881,7 +880,7 @@ struct prop *shotCalculateHits(s32 handnum, bool isshooting, struct coord *gunpo
 			bgunSetHitPos(&hitpos);
 		}
 	} else if (ismelee) {
-		s32 hitindex;
+		int hitindex;
 		bool hitaprop = false;
 
 		hitindex = 0;
@@ -959,7 +958,7 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 	struct hitthing sp664;
 	struct coord delta;
 	struct shotdata shotdata;
-	s32 i;
+	int i;
 	RoomNum rooms[131];
 	RoomNum spc8[8];
 	RoomNum spb8[8];
@@ -1000,7 +999,7 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 	rooms[0] = rooms[130] = -1;
 	spc8[0] = g_Vars.currentplayer->cam_room;
 	spc8[1] = -1;
-	portalComputeReachableRooms(&shotdata.gunpos3d, endpos3d, spc8, spb8, rooms, 30);
+	portal00018148(&shotdata.gunpos3d, endpos3d, spc8, spb8, rooms, 30);
 
 	roomsptr = rooms;
 
@@ -1057,7 +1056,7 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 
 #endif
 
-struct prop *propFindAimingAt(s32 handnum, bool isshooting, u32 context)
+struct prop *propFindAimingAt(int handnum, bool isshooting, unsigned int context)
 {
 	struct coord gundir2d;
 	struct coord gunpos2d;
@@ -1076,7 +1075,7 @@ struct prop *propFindAimingAt(s32 handnum, bool isshooting, u32 context)
 	return shotCalculateHits(handnum, isshooting, &gunpos2d, &gundir2d, &gunpos3d, &gundir3d, 0, 4294836224, PLAYERCOUNT() >= 2);
 }
 
-void shotCreate(s32 handnum, bool isshooting, bool dorandom, s32 numshots, bool cheap)
+void shotCreate(int handnum, bool isshooting, bool dorandom, int numshots, bool cheap)
 {
 	struct coord gundir3d;
 	struct coord gunpos3d;
@@ -1105,20 +1104,20 @@ void shotCreate(s32 handnum, bool isshooting, bool dorandom, s32 numshots, bool 
  * hits are added in the order of furtherest to closest. I'm unsure if this is
  * true though.
  */
-void hitCreate(struct shotdata *shotdata, struct prop *prop, f32 hitdistance, s32 hitpart,
-		struct modelnode *bboxnode, struct hitthing *hitthing, s32 mtxindex, struct modelnode *dlnode,
+void hitCreate(struct shotdata *shotdata, struct prop *prop, float hitdistance, int hitpart,
+		struct modelnode *bboxnode, struct hitthing *hitthing, int mtxindex, struct modelnode *dlnode,
 		struct model *model, bool slowsbullet, bool bulletproof, struct coord *arg11, struct coord *arg12)
 {
-	s32 i;
-	f32 fVar8;
+	int i;
+	float fVar8;
 
 	// If this prop "slows" the bullet, it means it contributes to the bullet's
 	// penetration total. Most props slow the bullet. Glass does not.
 	if (slowsbullet) {
-		s32 bestindex = 0;
-		s32 count = 0;
-		f32 mostdist = 0;
-		f32 prevmostdist = 0;
+		int bestindex = 0;
+		int count = 0;
+		float mostdist = 0;
+		float prevmostdist = 0;
 
 		// Count the number of existing hits that slow the bullet,
 		// and note which hit of these is the furtherest.
@@ -1209,9 +1208,9 @@ void hitCreate(struct shotdata *shotdata, struct prop *prop, f32 hitdistance, s3
 }
 
 // Ben's comment: also used for pistol whip
-void handInflictMeleeDamage(s32 handnum, struct gset *gset, bool arg2)
+void handInflictMeleeDamage(int handnum, struct gset *gset, bool arg2)
 {
-	s32 cdtypes;
+	int cdtypes;
 	struct prop **ptr;
 	struct prop *playerprop;
 	bool skipthething;
@@ -1269,14 +1268,14 @@ void handInflictMeleeDamage(s32 handnum, struct gset *gset, bool arg2)
 			if (prop->type == PROPTYPE_CHR
 					|| (prop->type == PROPTYPE_PLAYER && prop->chr && playermgrGetPlayerNumByProp(prop) != g_Vars.currentplayernum)
 					|| isglass) {
-				f32 rangelimit = 60;
-				f32 distance;
-				f32 sp110;
+				float rangelimit = 60;
+				float distance;
+				float sp110;
 				struct chrdata *chr = prop->chr;
-				f32 x;
-				f32 y;
-				f32 spfc[2];
-				f32 spf4[2];
+				float x;
+				float y;
+				float spfc[2];
+				float spf4[2];
 				struct model *model;
 				struct weaponfunc *func = gsetGetWeaponFunction(gset);
 
@@ -1322,7 +1321,7 @@ void handInflictMeleeDamage(s32 handnum, struct gset *gset, bool arg2)
 							bgunCalculatePlayerShotSpread(&gunpos2d, &gundir2d, handnum, true);
 
 							if (modelTestForHit(model, &gunpos2d, &gundir2d, &node) > 0) {
-								f32 damage = gsetGetDamage(gset) * 2.5f;
+								float damage = gsetGetDamage(gset) * 2.5f;
 								skipthething = true;
 								bgunPlayGlassHitSound(&playerprop->pos, playerprop->rooms, -1);
 								objTakeGunfire(obj, damage, &prop->pos, gset->weaponnum, g_Vars.currentplayernum);
@@ -1335,8 +1334,8 @@ void handInflictMeleeDamage(s32 handnum, struct gset *gset, bool arg2)
 							struct coord gundir2d;
 							struct modelnode *node = NULL;
 							struct model *model = NULL;
-							s32 side = -1;
-							s32 hitpart = HITPART_TORSO;
+							int side = -1;
+							int hitpart = HITPART_TORSO;
 
 							if (!chrIsAvoiding(chr)) {
 								bgunCalculatePlayerShotSpread(&gunpos2d, &gundir2d, handnum, true);
@@ -1373,10 +1372,10 @@ void handInflictMeleeDamage(s32 handnum, struct gset *gset, bool arg2)
 	}
 }
 
-void handTickAttack(s32 handnum)
+void handTickAttack(int handnum)
 {
 	if (g_Vars.currentplayer->hands[handnum].unk0d0f_02) {
-		s32 doit = true;
+		int doit = true;
 
 		if (bgunGetWeaponNum(handnum) == WEAPON_REAPER
 				&& (g_Vars.currentplayer->hands[handnum].burstbullets % 3) != 1) {
@@ -1391,8 +1390,8 @@ void handTickAttack(s32 handnum)
 	}
 
 	if (bgunIsFiring(handnum)) {
-		s32 type = bgunGetAttackType(handnum);
-		s32 weaponnum = bgunGetWeaponNum(handnum);
+		int type = bgunGetAttackType(handnum);
+		int weaponnum = bgunGetWeaponNum(handnum);
 		struct gset gset;
 		bool cloaked;
 
@@ -1478,7 +1477,7 @@ void handsTickAttack(void)
 	}
 }
 
-void propExecuteTickOperation(struct prop *prop, s32 op)
+void propExecuteTickOperation(struct prop *prop, int op)
 {
 	if (op == TICKOP_FREE) {
 		if ((prop->type == PROPTYPE_WEAPON || prop->type == PROPTYPE_OBJ)
@@ -1693,7 +1692,7 @@ void propUnpause(struct prop *prop)
 
 // 0 = will tick when backgrounded
 // 1 = will not tick when backgrounded
-u8 g_PausableObjs[] = {
+uint8_t g_PausableObjs[] = {
 	0, // dummy element because objects are 1-indexed
 	0, // OBJTYPE_DOOR
 	0, // OBJTYPE_DOORSCALE
@@ -1793,26 +1792,26 @@ void propsTickPlayer(bool islastplayer)
 {
 	struct prop *prop;
 	struct prop *end;
-	s32 savedlvupdate240;
-	s32 savedlvupdate60;
-	f32 savedlvupdate60f;
-	f32 savedlvupdate60freal;
-	s32 savedslotupdate240;
-	s32 savedslotupdate240_60;
-	f32 savedslotupdate240f;
+	int savedlvupdate240;
+	int savedlvupdate60;
+	float savedlvupdate60f;
+	float savedlvupdate60freal;
+	int savedslotupdate240;
+	int savedslotupdate240_60;
+	float savedslotupdate240f;
 	struct g_vars *vars = &g_Vars;
 	RoomNum *rooms;
-	u8 mostindex;
-	u8 leastindex;
-	u8 runstateindex;
-	u8 flags;
-	s32 op;
+	uint8_t mostindex;
+	uint8_t leastindex;
+	uint8_t runstateindex;
+	uint8_t flags;
+	int op;
 	struct prop *next;
 	struct prop *savednext;
 	struct defaultobj *obj;
-	u16 least;
-	u16 most;
-	s32 i;
+	uint16_t least;
+	uint16_t most;
+	int i;
 	bool done;
 	struct chrdata *chr1;
 	struct chrdata *chr2;
@@ -1826,7 +1825,7 @@ void propsTickPlayer(bool islastplayer)
 		g_Vars.prevupdateframe = g_Vars.updateframe;
 		g_Vars.updateframe++;
 
-		// This condition never passes because g_Vars.updateframe is a u16
+		// This condition never passes because g_Vars.updateframe is a uint16_t
 		if (g_Vars.updateframe == 0xffffffff) {
 			g_Vars.updateframe = 0;
 		}
@@ -2321,13 +2320,13 @@ void propsTickPlayer(bool islastplayer)
 
 void propsTickPadEffects(void)
 {
-	s32 i;
+	int i;
 	struct pad pad;
-	u32 stack;
+	unsigned int stack;
 	struct coord up;
 	RoomNum rooms[2];
 	RoomNum rooms2[2];
-	s32 type;
+	int type;
 
 	if (g_LastPadEffectIndex >= 0) {
 		for (i = 0; i <= g_LastPadEffectIndex; i++) {
@@ -2403,7 +2402,7 @@ void propsTickPadEffects(void)
 	}
 }
 
-void propSetPerimEnabled(struct prop *prop, s32 enable)
+void propSetPerimEnabled(struct prop *prop, int enable)
 {
 	if (prop->type == PROPTYPE_CHR) {
 		chrSetPerimEnabled(prop->chr, enable);
@@ -2416,9 +2415,9 @@ void propSetPerimEnabled(struct prop *prop, s32 enable)
 
 void propsTestForPickup(void)
 {
-	s16 *propnumptr;
-	s32 i;
-	s16 propnums[256];
+	int16_t *propnumptr;
+	int i;
+	int16_t propnums[256];
 	RoomNum allrooms[21];
 	RoomNum tmp[11];
 
@@ -2437,7 +2436,7 @@ void propsTestForPickup(void)
 
 		while (*propnumptr >= 0) {
 			struct prop *prop = &g_Vars.props[*propnumptr];
-			s32 op = TICKOP_NONE;
+			int op = TICKOP_NONE;
 
 			if (prop->timetoregen <= 0 && prop->obj)
 			{
@@ -2465,27 +2464,27 @@ void propsTestForPickup(void)
 	}
 }
 
-f32 func0f06438c(struct prop *prop, struct coord *arg1, f32 *arg2, f32 *arg3, f32 *arg4, bool throughobjects, bool cangangsta, s32 arg7)
+float func0f06438c(struct prop *prop, struct coord *arg1, float *arg2, float *arg3, float *arg4, bool throughobjects, bool cangangsta, int arg7)
 {
-	f32 spa0[2];
+	float spa0[2];
 	struct coord sp94;
-	f32 sp8c[2];
-	f32 sp84[2];
-	f32 sp7c[2];
-	f32 sp74[2];
-	f32 sp70;
-	f32 sp6c;
-	f32 top;
-	f32 bottom;
-	f32 left;
-	f32 right;
-	f32 result = -2;
+	float sp8c[2];
+	float sp84[2];
+	float sp7c[2];
+	float sp74[2];
+	float sp70;
+	float sp6c;
+	float top;
+	float bottom;
+	float left;
+	float right;
+	float result = -2;
 	struct weaponfunc *func = currentPlayerGetWeaponFunction(HAND_RIGHT);
 	bool sp50 = arg7;
 	bool sp4c;
-	f32 sp48;
+	float sp48;
 	struct prop *playerprop;
-	s32 ok;
+	int ok;
 
 	if (func && bgun0f0a27c8()) {
 		sp50 = true;
@@ -2564,7 +2563,7 @@ f32 func0f06438c(struct prop *prop, struct coord *arg1, f32 *arg2, f32 *arg3, f3
 			}
 
 			if (ok) {
-				f32 value = spa0[1];
+				float value = spa0[1];
 
 				if (value < top) {
 					value = top;
@@ -2575,7 +2574,7 @@ f32 func0f06438c(struct prop *prop, struct coord *arg1, f32 *arg2, f32 *arg3, f3
 				arg4[1] = value;
 
 				if (bmoveIsAutoAimXEnabledForCurrentWeapon() || cangangsta) {
-					f32 value = spa0[0];
+					float value = spa0[0];
 
 					if (value < left) {
 						value = left;
@@ -2606,13 +2605,13 @@ f32 func0f06438c(struct prop *prop, struct coord *arg1, f32 *arg2, f32 *arg3, f3
 void farsightChooseTarget(void)
 {
 	struct prop *besttarget = NULL;
-	f32 bestthing = 1;
-	f32 bestdist = -1;
-	s32 weaponnum = bgunGetWeaponNum(HAND_RIGHT);
-	s32 i;
+	float bestthing = 1;
+	float bestdist = -1;
+	int weaponnum = bgunGetWeaponNum(HAND_RIGHT);
+	int i;
 
 	if (weaponnum == WEAPON_FARSIGHT) {
-		s32 numchrs = chrsGetNumSlots();
+		int numchrs = chrsGetNumSlots();
 
 		for (i = numchrs - 1; i >= 0; i--) {
 			struct prop *prop = g_ChrSlots[i].prop;
@@ -2630,14 +2629,14 @@ void farsightChooseTarget(void)
 							&& chr->actiontype != ACT_DEAD
 							&& (chr->hidden & CHRHFLAG_CLOAKED) == 0
 							&& (prop->type != PROPTYPE_PLAYER || !g_Vars.players[playermgrGetPlayerNumByProp(prop)]->isdead)) {
-						f32 xdist = g_Vars.currentplayer->bond2.unk10.x - prop->pos.x;
-						f32 ydist = g_Vars.currentplayer->bond2.unk10.y - prop->pos.y;
-						f32 zdist = g_Vars.currentplayer->bond2.unk10.z - prop->pos.z;
+						float xdist = g_Vars.currentplayer->bond2.unk10.x - prop->pos.x;
+						float ydist = g_Vars.currentplayer->bond2.unk10.y - prop->pos.y;
+						float zdist = g_Vars.currentplayer->bond2.unk10.z - prop->pos.z;
 
-						f32 dist = sqrtf(xdist * xdist + ydist * ydist + zdist * zdist);
+						float dist = sqrtf(xdist * xdist + ydist * ydist + zdist * zdist);
 
 						if (dist > 0) {
-							f32 thing = (xdist * g_Vars.currentplayer->bond2.unk1c.f[0]
+							float thing = (xdist * g_Vars.currentplayer->bond2.unk1c.f[0]
 									+ ydist * g_Vars.currentplayer->bond2.unk1c.f[1]
 									+ zdist * g_Vars.currentplayer->bond2.unk1c.f[2]) / dist;
 
@@ -2660,12 +2659,12 @@ void farsightChooseTarget(void)
 void autoaimTick(void)
 {
 	struct prop *bestprop = NULL;
-	f32 aimpos[2] = {0, 0};
+	float aimpos[2] = {0, 0};
 	bool ismelee = false;
 	bool cangangsta = weaponHasFlag(bgunGetWeaponNum(HAND_RIGHT), WEAPONFLAG_GANGSTA);
 	bool iscmpsec = false;
 	struct weaponfunc *func = currentPlayerGetWeaponFunction(HAND_RIGHT);
-	s32 i;
+	int i;
 
 	if (func && (func->type & 0xff) == INVENTORYFUNCTYPE_MELEE) {
 		ismelee = true;
@@ -2693,10 +2692,10 @@ void autoaimTick(void)
 					&& (trackedprop->x1 >= 0 || trackedprop->x2 >= 0)
 					&& (trackedprop->y1 >= 0 || trackedprop->y2 >= 0)) {
 				// Define the aim limits
-				f32 top = camGetScreenTop() + camGetScreenHeight() * 0.125f;
-				f32 bottom = camGetScreenTop() + camGetScreenHeight() * 0.875f;
-				f32 left = camGetScreenLeft() + camGetScreenWidth() * 0.125f;
-				f32 right = camGetScreenLeft() + camGetScreenWidth() * 0.875f;
+				float top = camGetScreenTop() + camGetScreenHeight() * 0.125f;
+				float bottom = camGetScreenTop() + camGetScreenHeight() * 0.875f;
+				float left = camGetScreenLeft() + camGetScreenWidth() * 0.125f;
+				float right = camGetScreenLeft() + camGetScreenWidth() * 0.875f;
 				struct chrdata *chr = NULL;
 
 				bestprop = trackedprop->prop;
@@ -2776,13 +2775,13 @@ void autoaimTick(void)
 				|| bmoveIsAutoAimXEnabledForCurrentWeapon()
 				|| cangangsta) && !ismelee) {
 		// Standard auto aim
-		f32 bestthing = -1;
+		float bestthing = -1;
 		struct prop *prop;
 		struct coord sp94;
-		f32 sp8c[2];
-		f32 sp84[2];
+		float sp8c[2];
+		float sp84[2];
 		struct chrdata *chr;
-		f32 sp78[2];
+		float sp78[2];
 		struct prop **ptr = g_Vars.endonscreenprops - 1;
 
 		// Iterate onscreen props near to far
@@ -2800,7 +2799,7 @@ void autoaimTick(void)
 								|| (chr->chrflags & CHRCFLAG_FORCEAUTOAIM)
 								|| chr->gunprop)
 							&& chrCalculateAutoAim(prop, &sp94, sp8c, sp84)) {
-						f32 thing = func0f06438c(prop, &sp94, sp8c, sp84, sp78, false, cangangsta, 0);
+						float thing = func0f06438c(prop, &sp94, sp8c, sp84, sp78, false, cangangsta, 0);
 
 						if (thing > bestthing) {
 							bestthing = thing;
@@ -2830,10 +2829,10 @@ void autoaimTick(void)
 		}
 
 		if (cangangsta) {
-			f32 xdist = g_Vars.currentplayer->bond2.unk10.x - bestprop->pos.x;
-			f32 ydist = g_Vars.currentplayer->bond2.unk10.y - bestprop->pos.y;
-			f32 zdist = g_Vars.currentplayer->bond2.unk10.z - bestprop->pos.z;
-			f32 dist = sqrtf(xdist * xdist + ydist * ydist + zdist * zdist);
+			float xdist = g_Vars.currentplayer->bond2.unk10.x - bestprop->pos.x;
+			float ydist = g_Vars.currentplayer->bond2.unk10.y - bestprop->pos.y;
+			float zdist = g_Vars.currentplayer->bond2.unk10.z - bestprop->pos.z;
+			float dist = sqrtf(xdist * xdist + ydist * ydist + zdist * zdist);
 
 			if (dist < 200) {
 				g_Vars.currentplayer->gunctrl.gangsta = true;
@@ -2844,7 +2843,7 @@ void autoaimTick(void)
 			g_Vars.currentplayer->gunctrl.gangsta = false;
 		}
 	} else {
-		u32 stack;
+		unsigned int stack;
 		bmoveUpdateAutoAimYProp(NULL, 0);
 		bmoveUpdateAutoAimXProp(NULL, 0);
 
@@ -2852,10 +2851,10 @@ void autoaimTick(void)
 	}
 }
 
-u32 propDoorGetCdTypes(struct prop *prop)
+unsigned int propDoorGetCdTypes(struct prop *prop)
 {
 	struct doorobj *door = prop->door;
-	u32 types;
+	unsigned int types;
 
 	if (door->frac <= 0) {
 		types = CDTYPE_CLOSEDDOORS;
@@ -2872,7 +2871,7 @@ u32 propDoorGetCdTypes(struct prop *prop)
 	return types;
 }
 
-bool propIsOfCdType(struct prop *prop, u32 types)
+bool propIsOfCdType(struct prop *prop, unsigned int types)
 {
 	bool result = true;
 
@@ -2966,7 +2965,7 @@ void roomsCopy(RoomNum *src, RoomNum *dst)
 {
 	RoomNum *srcptr = src;
 	RoomNum *dstptr = dst;
-	s32 val;
+	int val;
 
 	while ((val = *srcptr) != -1) {
 		*dstptr = val;
@@ -2980,12 +2979,12 @@ void roomsCopy(RoomNum *src, RoomNum *dst)
 /**
  * Append newrooms to dstrooms without duplicates.
  */
-void roomsAppend(RoomNum *newrooms, RoomNum *dstrooms, s32 maxlen)
+void roomsAppend(RoomNum *newrooms, RoomNum *dstrooms, int maxlen)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; newrooms[i] != -1; i++) {
-		s32 j;
+		int j;
 
 		for (j = 0; dstrooms[j] != -1 && dstrooms[j] != newrooms[i]; j++);
 
@@ -3022,9 +3021,9 @@ bool arrayIntersects(RoomNum *a, RoomNum *b)
 	return false;
 }
 
-bool propTryAddToChunk(s16 propnum, s32 chunkindex)
+bool propTryAddToChunk(int16_t propnum, int chunkindex)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_RoomPropListChunks[chunkindex].propnums) - 1; i++) {
 		if (g_RoomPropListChunks[chunkindex].propnums[i] < 0) {
@@ -3036,10 +3035,10 @@ bool propTryAddToChunk(s16 propnum, s32 chunkindex)
 	return false;
 }
 
-s32 roomAllocatePropListChunk(s32 room, s32 prevchunkindex)
+int roomAllocatePropListChunk(int room, int prevchunkindex)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	for (i = 0; i < MAX_ROOMPROPLISTCHUNKS; i++) {
 		if (g_RoomPropListChunks[i].propnums[0] == -2) {
@@ -3062,13 +3061,13 @@ s32 roomAllocatePropListChunk(s32 room, s32 prevchunkindex)
 
 void propRegisterRoom(struct prop *prop, RoomNum room)
 {
-	s32 prev = -1;
-	s32 i;
+	int prev = -1;
+	int i;
 
 	if (room >= 0 && room < g_Vars.roomcount) {
 		// Find which chunk to start at
-		s32 chunkindex = g_RoomPropListChunkIndexes[room];
-		s16 propnum = prop - g_Vars.props;
+		int chunkindex = g_RoomPropListChunkIndexes[room];
+		int16_t propnum = prop - g_Vars.props;
 
 		for (i = 0; chunkindex >= 0; i++) {
 			if (propTryAddToChunk(propnum, chunkindex)) {
@@ -3091,16 +3090,16 @@ void propRegisterRoom(struct prop *prop, RoomNum room)
 void propDeregisterRoom(struct prop *prop, RoomNum room)
 {
 	bool removed = false;
-	s32 prev = -1;
+	int prev = -1;
 
 	if (room >= 0 && room < g_Vars.roomcount) {
 		// Find which chunk to start at
-		s32 chunkindex = g_RoomPropListChunkIndexes[room];
-		s16 propnum = prop - g_Vars.props;
+		int chunkindex = g_RoomPropListChunkIndexes[room];
+		int16_t propnum = prop - g_Vars.props;
 
 		while (chunkindex >= 0) {
 			bool populated = false;
-			s32 j;
+			int j;
 
 			// Iterate propnums in this chunk
 			for (j = 0; j < MAX_PROPSPERROOMCHUNK; j++) {
@@ -3169,13 +3168,13 @@ void propRegisterRooms(struct prop *prop)
 	}
 }
 
-void func0f065d1c(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms, RoomNum *morerooms, u32 arg5)
+void func0f065d1c(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms, RoomNum *morerooms, unsigned int arg5)
 {
 	RoomNum stackrooms[8];
-	s32 index;
-	s32 i;
+	int index;
+	int i;
 
-	portalComputeReachableRooms(pos, newpos, rooms, stackrooms, morerooms, arg5);
+	portal00018148(pos, newpos, rooms, stackrooms, morerooms, arg5);
 
 	index = 0;
 
@@ -3194,7 +3193,7 @@ void func0f065dd8(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomN
 	func0f065d1c(pos, rooms, newpos, newrooms, NULL, 0);
 }
 
-void func0f065dfc(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms, RoomNum *morerooms, u32 arg5)
+void func0f065dfc(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms, RoomNum *morerooms, unsigned int arg5)
 {
 	func0f065d1c(pos, rooms, newpos, newrooms, morerooms, arg5);
 
@@ -3217,7 +3216,7 @@ void func0f065e98(struct coord *pos, RoomNum *rooms, struct coord *pos2, RoomNum
 	RoomNum inrooms[21];
 	RoomNum aboverooms[21];
 	RoomNum *ptr = NULL;
-	s32 i;
+	int i;
 
 	bgFindRoomsByPos(pos2, inrooms, aboverooms, 20, NULL);
 
@@ -3228,7 +3227,7 @@ void func0f065e98(struct coord *pos, RoomNum *rooms, struct coord *pos2, RoomNum
 	}
 
 	if (ptr) {
-		s32 room = cdFindFloorRoomAtPos(pos2, ptr);
+		int room = cdFindFloorRoomAtPos(pos2, ptr);
 
 		if (room > 0) {
 			dstrooms[0] = room;
@@ -3257,29 +3256,29 @@ void func0f065e98(struct coord *pos, RoomNum *rooms, struct coord *pos2, RoomNum
  * to get 256 props in a small space without exhausing the memory of the
  * console, you could potentially achieve arbitrary code execution.
  */
-void roomGetProps(RoomNum *rooms, s16 *propnums, s32 len)
+void roomGetProps(RoomNum *rooms, int16_t *propnums, int len)
 {
-	s16 *writeptr = propnums;
+	int16_t *writeptr = propnums;
 	RoomNum room;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	room = *rooms;
 
 	// Iterate rooms
 	while (room != -1) {
 		// Find the chunk to start at
-		s32 chunkindex = g_RoomPropListChunkIndexes[room];
+		int chunkindex = g_RoomPropListChunkIndexes[room];
 
 		// Iterate the chunks
 		while (chunkindex >= 0) {
 			// Iterate the propnums within each chunk
 			for (i = 0; i < MAX_PROPSPERROOMCHUNK; i++) {
-				s16 propnum = g_RoomPropListChunks[chunkindex].propnums[i];
+				int16_t propnum = g_RoomPropListChunks[chunkindex].propnums[i];
 
 				if (propnum >= 0) {
 					// Check if it's in the list already
-					s16 *ptr = propnums;
+					int16_t *ptr = propnums;
 
 					while (ptr < writeptr) {
 						if (*ptr == propnum) {
@@ -3309,16 +3308,16 @@ void roomGetProps(RoomNum *rooms, s16 *propnums, s32 len)
 
 void propsDefragRoomProps(void)
 {
-	s32 i;
-	s32 j;
-	s32 k;
+	int i;
+	int j;
+	int k;
 
 	// Iterate rooms
 	for (i = 0; i < g_Vars.roomcount; i++) {
-		s32 previndex = g_RoomPropListChunkIndexes[i];
+		int previndex = g_RoomPropListChunkIndexes[i];
 
 		if (previndex >= 0) {
-			s32 nextindex = g_RoomPropListChunks[previndex].propnums[MAX_PROPSPERROOMCHUNK];
+			int nextindex = g_RoomPropListChunks[previndex].propnums[MAX_PROPSPERROOMCHUNK];
 
 			// Iterate this room's chunks but skip the first
 			while (nextindex >= 0) {
@@ -3366,7 +3365,7 @@ void propsDefragRoomProps(void)
 	}
 }
 
-void propGetBbox(struct prop *prop, f32 *radius, f32 *ymax, f32 *ymin)
+void propGetBbox(struct prop *prop, float *radius, float *ymax, float *ymin)
 {
 	if (prop->type == PROPTYPE_CHR) {
 		chrGetBbox(prop, radius, ymax, ymin);
@@ -3381,7 +3380,7 @@ void propGetBbox(struct prop *prop, f32 *radius, f32 *ymax, f32 *ymin)
 	}
 }
 
-bool propUpdateGeometry(struct prop *prop, u8 **start, u8 **end)
+bool propUpdateGeometry(struct prop *prop, uint8_t **start, uint8_t **end)
 {
 	bool result = false;
 

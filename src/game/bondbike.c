@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/bondbike.h"
 #include "game/bondmove.h"
@@ -75,7 +76,7 @@ void bbikeExit(void)
 	struct defaultobj *obj = g_Vars.currentplayer->hoverbike->obj;
 	struct hoverbikeobj *bikeobj = (struct hoverbikeobj *)g_Vars.currentplayer->hoverbike->obj;
 	struct coord speed;
-	f32 rotation;
+	float rotation;
 
 	obj->hidden &= ~OBJHFLAG_MOUNTED;
 
@@ -102,16 +103,16 @@ void bbikeUpdateVehicleOffset(void)
 	g_Vars.currentplayer->bondvehicleoffset.z = -50.0f / hoverbike->model->scale;
 }
 
-void bbikeTryDismountAngle(f32 relativeangle, f32 distance)
+void bbikeTryDismountAngle(float relativeangle, float distance)
 {
 	struct hoverbikeobj *bike;
-	f32 angle;
+	float angle;
 	struct coord pos;
 	RoomNum rooms[8];
-	s32 result;
-	f32 ymax;
-	f32 ymin;
-	f32 radius;
+	int result;
+	float ymax;
+	float ymin;
+	float radius;
 
 	if (g_Vars.currentplayer->walkinitmove == 0) {
 		bike = (struct hoverbikeobj *)g_Vars.currentplayer->hoverbike->obj;
@@ -173,9 +174,9 @@ void bbikeHandleActivate(void)
 		struct hoverbikeobj *bike = (struct hoverbikeobj *)g_Vars.currentplayer->hoverbike->obj;
 		struct modelrodata_bbox *bbox = objFindBboxRodata(&bike->base);
 
-		f32 sidedist = bbox->xmax * bike->base.model->scale;
-		f32 frontdist = bbox->zmax * bike->base.model->scale;
-		f32 diagdist = sqrtf(sidedist * sidedist + frontdist * frontdist);
+		float sidedist = bbox->xmax * bike->base.model->scale;
+		float frontdist = bbox->zmax * bike->base.model->scale;
+		float diagdist = sqrtf(sidedist * sidedist + frontdist * frontdist);
 
 		g_Vars.currentplayer->walkinitmove = false;
 
@@ -199,10 +200,10 @@ void bbikeHandleActivate(void)
 void bbikeApplyMoveData(struct movedata *data)
 {
 	struct hoverbikeobj *bike = (struct hoverbikeobj *)g_Vars.currentplayer->hoverbike->obj;
-	s8 contnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-	f32 value1;
-	f32 tmp;
-	s32 contmode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
+	int8_t contnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
+	float value1;
+	float tmp;
+	int contmode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
 
 	if ((contmode == CONTROLMODE_12
 				|| contmode == CONTROLMODE_14
@@ -210,7 +211,7 @@ void bbikeApplyMoveData(struct movedata *data)
 				|| contmode == CONTROLMODE_11
 				|| contmode == CONTROLMODE_PC)
 			&& !lvIsPaused()) {
-		u32 lmask, rmask;
+		uint32_t lmask, rmask;
 		if (contmode == CONTROLMODE_PC) {
 			lmask = L_CBUTTONS;
 			rmask = R_CBUTTONS;
@@ -253,8 +254,8 @@ void bbikeApplyMoveData(struct movedata *data)
 
 	// Sideways
 	if (data->digitalstepleft) {
-		f32 value2 = -1.0f - g_Vars.currentplayer->speedsideways;
-		f32 tmp = data->digitalstepleft * PALUPF(-0.1f);
+		float value2 = -1.0f - g_Vars.currentplayer->speedsideways;
+		float tmp = data->digitalstepleft * PALUPF(-0.1f);
 
 		if (value2 < tmp) {
 			value2 = tmp;
@@ -262,8 +263,8 @@ void bbikeApplyMoveData(struct movedata *data)
 
 		g_Vars.currentplayer->speedsideways += value2;
 	} else if (data->digitalstepright) {
-		f32 value2 = 1.0f - g_Vars.currentplayer->speedsideways;
-		f32 tmp = data->digitalstepright * PALUPF(0.1f);
+		float value2 = 1.0f - g_Vars.currentplayer->speedsideways;
+		float tmp = data->digitalstepright * PALUPF(0.1f);
 
 		if (value2 > tmp) {
 			value2 = tmp;
@@ -285,9 +286,9 @@ void bbikeApplyMoveData(struct movedata *data)
 	}
 
 	{
-		f32 sp3c;
+		float sp3c;
 		struct coord sp30;
-		f32 sp28[2];
+		float sp28[2];
 
 		sp3c = -bike->exreal;
 
@@ -313,7 +314,7 @@ void bbikeApplyMoveData(struct movedata *data)
 	}
 }
 
-void bbike0f0d2b40(struct defaultobj *bike, struct coord *arg1, f32 arg2, struct defaultobj *obstacle)
+void bbike0f0d2b40(struct defaultobj *bike, struct coord *arg1, float arg2, struct defaultobj *obstacle)
 {
 	struct coord sp9c;
 	struct coord sp90;
@@ -356,12 +357,12 @@ void bbike0f0d2b40(struct defaultobj *bike, struct coord *arg1, f32 arg2, struct
 	func0f082e84(obstacle, &sp9c, &sp90, &sp84, false);
 
 	if (arg2) {
-		f32 xdiff = sp9c.x - bike->prop->pos.x;
-		f32 zdiff = sp9c.z - bike->prop->pos.z;
-		f32 rotation = 0;
+		float xdiff = sp9c.x - bike->prop->pos.x;
+		float zdiff = sp9c.z - bike->prop->pos.z;
+		float rotation = 0;
 		struct coord speed = {0, 0, 0};
 
-		f32 tmp = 1 / sqrtf(xdiff * xdiff + zdiff * zdiff);
+		float tmp = 1 / sqrtf(xdiff * xdiff + zdiff * zdiff);
 
 		xdiff *= tmp;
 		zdiff *= tmp;
@@ -377,21 +378,21 @@ void bbike0f0d2b40(struct defaultobj *bike, struct coord *arg1, f32 arg2, struct
 	}
 }
 
-s32 bbikeCalculateNewPosition(struct coord *vel, f32 angledelta)
+int bbikeCalculateNewPosition(struct coord *vel, float angledelta)
 {
-	s32 result = CDRESULT_NOCOLLISION;
+	int result = CDRESULT_NOCOLLISION;
 	struct coord dstpos;
 	RoomNum dstrooms[8];
 	struct hov hov;
 	bool hasvel = false;
 	struct hoverbikeobj *bike = (struct hoverbikeobj *) g_Vars.currentplayer->hoverbike->obj;
 	RoomNum spa8[20];
-	f32 xdiff;
-	f32 zdiff;
-	f32 ymax;
-	f32 ymin;
-	f32 radius;
-	f32 halfradius;
+	float xdiff;
+	float zdiff;
+	float ymax;
+	float ymin;
+	float radius;
+	float halfradius;
 
 	dstpos.x = g_Vars.currentplayer->hoverbike->pos.x;
 	dstpos.y = g_Vars.currentplayer->hoverbike->pos.y;
@@ -448,7 +449,7 @@ s32 bbikeCalculateNewPosition(struct coord *vel, f32 angledelta)
 	}
 
 	if (angledelta) {
-		f32 newangle = hoverpropGetTurnAngle(&bike->base) - angledelta;
+		float newangle = hoverpropGetTurnAngle(&bike->base) - angledelta;
 		Mtxf sp44;
 
 		if (newangle >= M_TAU) {
@@ -477,9 +478,9 @@ s32 bbikeCalculateNewPosition(struct coord *vel, f32 angledelta)
 	return result;
 }
 
-s32 bbikeCalculateNewPositionWithPush(struct coord *arg0, f32 arg1)
+int bbikeCalculateNewPositionWithPush(struct coord *arg0, float arg1)
 {
-	s32 result = bbikeCalculateNewPosition(arg0, arg1);
+	int result = bbikeCalculateNewPosition(arg0, arg1);
 
 	if (result != CDRESULT_NOCOLLISION) {
 		struct prop *obstacle = cdGetObstacleProp();
@@ -508,7 +509,7 @@ s32 bbikeCalculateNewPositionWithPush(struct coord *arg0, f32 arg1)
 
 						if ((obj->hidden & OBJHFLAG_PROJECTILE)
 								&& (obj->projectile->flags & PROJECTILEFLAG_SLIDING)) {
-							s32 somevalue;
+							int somevalue;
 							bool embedded = false;
 							somevalue = projectileTick(obj, &embedded);
 
@@ -538,11 +539,11 @@ s32 bbikeCalculateNewPositionWithPush(struct coord *arg0, f32 arg1)
 void bbikeUpdateVertical(struct coord *pos)
 {
 	struct defaultobj *bike = g_Vars.currentplayer->hoverbike->obj;
-	f32 angle;
+	float angle;
 	RoomNum newrooms[8];
 	bool newinlift;
 	struct prop *lift = NULL;
-	f32 ground;
+	float ground;
 
 	angle = hoverpropGetTurnAngle(bike);
 
@@ -572,7 +573,7 @@ void bbikeUpdateVertical(struct coord *pos)
 	}
 
 	if (g_Vars.currentplayer->inlift && newinlift) {
-		f32 diff = ground - g_Vars.currentplayer->vv_ground;
+		float diff = ground - g_Vars.currentplayer->vv_ground;
 
 		// If getting on the bike
 		if (g_Vars.currentplayer->bondvehiclemode == VEHICLEMODE_OFF) {
@@ -600,34 +601,30 @@ void bbikeUpdateVertical(struct coord *pos)
 	bmoveUpdateVerta();
 }
 
-s32 bbike0f0d363c(f32 arg0)
+int bbike0f0d363c(float arg0)
 {
 	struct coord coord = {0, 0, 0};
 
 	return bbikeCalculateNewPositionWithPush(&coord, arg0);
 }
 
-s32 bbike0f0d3680(struct coord *arg0, struct coord *arg1, struct coord *arg2)
+int bbike0f0d3680(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 {
-	s32 result = bbikeCalculateNewPositionWithPush(arg0, 0);
+	int result = bbikeCalculateNewPositionWithPush(arg0, 0);
 
 	if (!result) {
-#if VERSION >= VERSION_NTSC_1_0
 		cdGetEdge(arg1, arg2, 659, "bondbike.c");
-#else
-		cdGetEdge(arg1, arg2, 656, "bondbike.c");
-#endif
 	}
 
 	return result;
 }
 
-s32 bbike0f0d36d4(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, struct coord *arg4)
+int bbike0f0d36d4(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, struct coord *arg4)
 {
 	if (cd00024ea4()) {
 		struct coord sp24;
-		f32 somefloat = cd00024e98();
-		s32 someint;
+		float somefloat = cd00024e98();
+		int someint;
 
 		sp24.x = arg0->x * somefloat * 0.25f;
 		sp24.y = arg0->y * somefloat * 0.25f;
@@ -640,11 +637,7 @@ s32 bbike0f0d36d4(struct coord *arg0, struct coord *arg1, struct coord *arg2, st
 		}
 
 		if (someint == 0) {
-#if VERSION >= VERSION_NTSC_1_0
 			cdGetEdge(arg3, arg4, 685, "bondbike.c");
-#else
-			cdGetEdge(arg3, arg4, 682, "bondbike.c");
-#endif
 
 			if (arg3->f[0] != arg1->f[0]
 					|| arg3->f[1] != arg1->f[1]
@@ -660,14 +653,14 @@ s32 bbike0f0d36d4(struct coord *arg0, struct coord *arg1, struct coord *arg2, st
 	return -1;
 }
 
-s32 bbike0f0d3840(struct coord *arg0, struct coord *arg1, struct coord *arg2)
+int bbike0f0d3840(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 {
-	s32 result;
+	int result;
 
 	if (arg1->f[0] != arg2->f[0] || arg1->f[2] != arg2->f[2]) {
 		struct coord sp30;
 		struct coord sp24;
-		f32 tmp;
+		float tmp;
 
 		sp30.x = arg2->x - arg1->x;
 		sp30.z = arg2->z - arg1->z;
@@ -691,14 +684,14 @@ s32 bbike0f0d3840(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 	return result;
 }
 
-s32 bbike0f0d3940(struct coord *arg0, struct coord *arg1, struct coord *arg2)
+int bbike0f0d3940(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 {
 	struct coord sp34;
 	struct coord sp28;
-	f32 ymax;
-	f32 ymin;
-	f32 tmp;
-	f32 radius;
+	float ymax;
+	float ymin;
+	float tmp;
+	float radius;
 
 	objGetBbox(g_Vars.currentplayer->hoverbike, &radius, &ymax, &ymin);
 
@@ -769,7 +762,7 @@ void bbike0f0d3c60(struct coord *arg0)
 	struct coord sp58;
 	struct coord sp4c;
 	struct coord sp40;
-	s32 value;
+	int value;
 	struct coord sp30;
 	struct coord sp24;
 
@@ -800,28 +793,28 @@ void bbikeTick(void)
 	struct hoverbikeobj *bike = (struct hoverbikeobj *) g_Vars.currentplayer->hoverbike->obj;
 	struct coord sp20c;
 	struct prop *prop;
-	s32 i;
-	f32 sp200;
-	f32 sp1f8;
-	f32 sp1f4;
+	int i;
+	float sp200;
+	float sp1f8;
+	float sp1f4;
 	struct coord sp1e8;
 	Mtxf sp1a8;
-	s32 j;
+	int j;
 	Mtxf sp164;
 	Mtxf sp124;
 	Mtxf spe4;
-	f32 spd4[4];
-	f32 spc4[4];
-	f32 spb4[4];
-	f32 spa4[4];
-	f32 sp94[4];
-	f32 sp84[4];
+	float spd4[4];
+	float spc4[4];
+	float spb4[4];
+	float spa4[4];
+	float sp94[4];
+	float sp84[4];
 	struct coord pos;
-	f32 breathing;
-	f32 sp70;
-	f32 sqdist;
+	float breathing;
+	float sp70;
+	float sqdist;
 
-	static f32 hovbikespeed = 0; // Ranges between 0 and 1
+	static float hovbikespeed = 0; // Ranges between 0 and 1
 
 	if (g_Vars.lvupdate240 > 0) {
 		g_Vars.currentplayer->bondprevpos.x = g_Vars.currentplayer->prop->pos.x;
@@ -892,7 +885,7 @@ void bbikeTick(void)
 		sp1f4 = (bike->base.prop->pos.z - bike->prevpos[1]) / g_Vars.lvupdate60freal;
 
 		if (sp1f8 != 0.0f || sp1f4 != 0.0f) {
-			f32 tmp = sp1f8 * sp1f8 + sp1f4 * sp1f4;
+			float tmp = sp1f8 * sp1f8 + sp1f4 * sp1f4;
 
 			if (tmp > 0.0f) {
 				tmp = sqrtf((bike->speed[0] * bike->speed[0] + bike->speed[1] * bike->speed[1]) / tmp);

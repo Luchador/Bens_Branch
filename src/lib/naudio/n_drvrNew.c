@@ -1,7 +1,6 @@
 #include "n_synthInternals.h"
-#include <os.h>
 #include <math.h>
-#include "game/debug.h"
+#include <os.h>
 
 /*
  * WARNING: THE FOLLOWING CONSTANT MUST BE KEPT IN SYNC
@@ -15,6 +14,9 @@
  */
 #define ms *(((s32)((f32)44.1))&~0x7)
 
+#ifdef AVOID_UB
+f32 atan2f(f32 x, f32 z);
+#endif
 
 s32 SMALLROOM_PARAMS_N[26] = {
 	/* sections	 length */
@@ -35,8 +37,7 @@ s32 BIGROOM_PARAMS_N[10] = {
 
 void func0003b710(f32 outputrate, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4)
 {
-	debug_log("fun003b710 \n", 0);
-	/*f32 sp24;
+	f32 sp24;
 	f32 sp20;
 	f32 sp1c;
 
@@ -59,7 +60,7 @@ void func0003b710(f32 outputrate, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4)
 	arg3[2] = arg3[0];
 
 	arg4[1] = ((sp20 - 1) * 2) / (1 + sp20 + sp1c);
-	arg4[2] = ((1 + sp20) - sp1c) / (1 + sp20 + sp1c);*/
+	arg4[2] = ((1 + sp20) - sp1c) / (1 + sp20 + sp1c);
 }
 
 void _init_lpfilter(ALLowPass *lp)

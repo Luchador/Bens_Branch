@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/pak.h"
 #include "bss.h"
@@ -42,19 +41,19 @@ struct contsample {
 
 struct joydata {
 	struct contsample samples[NUM_SAMPLES];
-	s32 curlast;
-	s32 curstart;
-	s32 nextlast;
-	s32 nextsecondlast;
-	u32 buttonspressed[NUM_PADS];
-	u32 buttonsreleased[NUM_PADS];
-	s32 unk200;
+	int curlast;
+	int curstart;
+	int nextlast;
+	int nextsecondlast;
+	unsigned int buttonspressed[NUM_PADS];
+	unsigned int buttonsreleased[NUM_PADS];
+	int unk200;
 };
 
 struct joydata g_JoyData[NUM_DATA];
 int g_JoyDisableCooldown[NUM_PADS];
 OSContStatus g_JoyContStatuses[NUM_PADS];
-int8_t g_JoyPfsStates[100];
+uint8_t g_JoyPfsStates[100];
 
 struct joydata *g_JoyDataPtr = &g_JoyData[0];
 bool g_JoyBusy = false;
@@ -68,12 +67,12 @@ unsigned int g_JoyBadReadsRStickY[NUM_PADS] = {0};
 unsigned int g_JoyBadReadsButtons[NUM_PADS] = {0};
 unsigned int g_JoyBadReadsButtonsPressed[NUM_PADS] = {0};
 
-int8_t g_JoyConnectedControllers = 0;
+uint8_t g_JoyConnectedControllers = 0;
 bool g_JoyQueuesCreated = false;
 bool g_JoyInitDone = false;
 bool g_JoyNeedsInit = true;
 unsigned int g_JoyCyclicPollDisableCount = 0;
-bool g_JoyAllowTitleInput = true;
+unsigned int var8005eec0 = 1;
 int g_JoyNextPfsStateIndex = 0;
 
 bool g_JoyPfsPollMasterEnabled = true;
@@ -143,7 +142,7 @@ int joyShiftPfsStates(void)
 	return pfsstate;
 }
 
-void joyRecordPfsState(int8_t pfsstate)
+void joyRecordPfsState(uint8_t pfsstate)
 {
 	if (g_JoyNextPfsStateIndex + 1 >= ARRAYCOUNT(g_JoyPfsStates)) {
 		joyShiftPfsStates();
@@ -166,7 +165,7 @@ void joyPollPfs(int force)
 {
 	static unsigned int thiscount = 0;
 	static unsigned int prevcount = 0;
-	static bool doingit = false;
+	static unsigned int doingit = false;
 	unsigned int diffcount;
 	unsigned int value;
 
@@ -224,6 +223,11 @@ void joyPollPfs(int force)
 	}
 }
 
+void joySetPfsTemporarilyPlugged(int8_t index)
+{
+	joyRecordPfsState(0);
+}
+
 void joyInit(void)
 {
 	int i;
@@ -273,15 +277,15 @@ void joyReset(void)
 
 	if (g_JoyQueuesCreated) {
 
-		joyUpdateConnectionStatus();
+		joyCheckStatus();
 
-		g_JoyAllowTitleInput = true;
+		var8005eec0 = 1;
 	}
 }
 
-void joyUpdateConnectionStatus(void)
+void joyCheckStatus(void)
 {
-	static int8_t prevconnected = 0xff;
+	static uint8_t prevconnected = 0xff;
 
 	// osContInit should be called only once. The first time this function is
 	// called it'll take the first branch here, and all subsequent calls will
@@ -334,6 +338,23 @@ void joyUpdateConnectionStatus(void)
 	}
 }
 
+int8_t contGetFreeSlot(void)
+{
+	int i;
+
+	if (g_JoyDataPtr->unk200 >= 0) {
+		return g_JoyDataPtr->unk200;
+	}
+
+	for (i = 0; i < NUM_PADS; i++) {
+		if ((g_JoyConnectedControllers & (1 << i)) == 0) {
+			return i;
+		}
+	}
+
+	return NUM_PADS;
+}
+
 unsigned int joyGetConnectedControllers(void)
 {
 	return g_JoyConnectedControllers;
@@ -341,7 +362,7 @@ unsigned int joyGetConnectedControllers(void)
 
 void joyConsumeSamples(struct joydata *joydata)
 {
-	int i;
+	int8_t i;
 	int samplenum;
 	unsigned int buttons1;
 	unsigned int buttons2;
@@ -393,7 +414,7 @@ void joyConsumeSamples(struct joydata *joydata)
  * The use of the static variable suggests that the function is able to be
  * called recursively, but its behaviour should not be run when recursing.
  */
-void joyProcessPakState(void)
+void joy00014238(void)
 {
 	static bool doingit = false;
 	int i;
@@ -415,15 +436,17 @@ void joyProcessPakState(void)
 
 void joyDebugJoy(void)
 {
+	static unsigned int var8005ef08 = 0;
+
 	if (g_Vars.paksneededformenu) {
 		joyPollPfs(1);
 	}
 
 	joyConsumeSamples(&g_JoyData[0]);
 
-	if (joyIsCyclicPollingEnabled() && g_JoyAllowTitleInput && joyGetNumSamples() <= 0) {
+	if (joyIsCyclicPollingEnabled() && var8005eec0 && joyGetNumSamples() <= 0) {
 		joyDisableCyclicPolling();
-		joyProcessPakState();
+		joy00014238();
 		joyEnableCyclicPolling();
 		joyConsumeSamples(&g_JoyData[0]);
 	}
@@ -460,7 +483,7 @@ void joyReadData(void)
 
 void joySetAllowTitleInput(bool value)
 {
-	g_JoyAllowTitleInput = value;
+	var8005eec0 = value;
 }
 
 int joyGetNumSamples(void)

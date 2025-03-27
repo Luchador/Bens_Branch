@@ -16,7 +16,7 @@
 
 #define DEFAULT_BASEDIR_NAME "data"
 
-#define MAX_ARTIFACTS          480 // Ben's comment: Quadtrupled
+#define MAX_ARTIFACTS          240 // Ben's comment: Doubled
 #define MAX_BOTS               8
 #define MAX_CHRSPERSQUADRON    16
 #define MAX_CHRSPERTEAM        32
@@ -4126,13 +4126,21 @@
 #define TIMEPRECISION_HUNDREDTHS 4
 
 #define TITLEMODE_LEGAL            0
-#define TITLEMODE_PDLOGO           1
-#define TITLEMODE_NINTENDOLOGO     2
-#define TITLEMODE_RARELOGO         3
-#define TITLEMODE_SKIP             4
+#define TITLEMODE_CHECKCONTROLLERS 1
+#define TITLEMODE_PDLOGO           2
+#define TITLEMODE_NINTENDOLOGO     3
+#define TITLEMODE_RARELOGO         4
+#define TITLEMODE_SKIP             5
+#define TITLEMODE_NOCONTROLLER     6
+#define TITLEMODE_RAREPRESENTS1    7
+#define TITLEMODE_RAREPRESENTS2    8
+#define TITLEMODE_9                9
+#define TITLEMODE_NOEXPANSION      10
 
+#define TITLEAIMODE_RAREPRESENTS1 1
 #define TITLEAIMODE_RARELOGO      2
 #define TITLEAIMODE_NINTENDOLOGO  3
+#define TITLEAIMODE_RAREPRESENTS2 4
 #define TITLEAIMODE_PDLOGO        5
 
 #define TRACKTYPE_NONE    0
@@ -4230,6 +4238,7 @@
 
 #define VIMODE_NONE 0
 #define VIMODE_LO   1
+#define VIMODE_HI   2
 
 #define VISIONMODE_NORMAL             0
 #define VISIONMODE_XRAY               1

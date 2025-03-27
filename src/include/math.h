@@ -1,14 +1,12 @@
 #ifndef IN_MATH_H
 #define IN_MATH_H
 
-#ifndef PLATFORM_N64
 #include_next <math.h>
 #undef M_PI
 #undef M_TAU
 // HACK: for some reason the #include_next above doesn't really do anything, so
 float fabsf(float x);
 float roundf(float x);
-#endif
 
 #define M_PI    3.141592741f
 

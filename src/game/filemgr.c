@@ -2101,13 +2101,14 @@ MenuItemHandlerResult pakSelectionMenuHandler(s32 operation, struct menuitem *it
  */
 MenuDialogHandlerResult pakChoosePakMenuDialog(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
+#if VERSION >= VERSION_NTSC_1_0
 	switch (operation) {
 	case MENUOP_OPEN:
 		joySetPfsPollInterval(3);
 		g_Menus[g_MpPlayerNum].fm.unke24 = 0;
 		break;
 	case MENUOP_TICK:
-		g_FileListIsOpen = 1;
+		var80062944 = 1;
 		break;
 	case MENUOP_CLOSE:
 		if (g_Vars.stagenum != STAGE_BOOTPAKMENU) {
@@ -2124,6 +2125,30 @@ MenuDialogHandlerResult pakChoosePakMenuDialog(s32 operation, struct menudialogd
 		joySetDefaultPfsPollInterval();
 		break;
 	}
+#else
+	switch (operation) {
+	case MENUOP_OPEN:
+		joySetPfsPollInterval(3);
+		joySetPfsPollInterval(-1);
+		g_Menus[g_MpPlayerNum].fm.unke24 = 0;
+		break;
+	case MENUOP_TICK:
+		var80062944 = 1;
+		break;
+	case MENUOP_CLOSE:
+		{
+			s32 i;
+
+			for (i = 0; i < MAX_PLAYERS; i++) {
+				if (g_Menus[g_MpPlayerNum].fm.unke24 & (1 << i)) {
+					pak0f1169c8(i, STAGE_BOOTPAKMENU == g_Vars.stagenum);
+				}
+			}
+		}
+		joySetDefaultPfsPollInterval();
+		break;
+	}
+#endif
 
 	return 0;
 }

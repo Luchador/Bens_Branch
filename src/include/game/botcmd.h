@@ -5,6 +5,6 @@
 #include "types.h"
 
 void botcmdTickDistMode(struct chrdata *chr);
-void botcmdApply(struct chrdata *chr, u32 command);
+void botcmdApply(struct chrdata *chr, unsigned int command);
 
 #endif

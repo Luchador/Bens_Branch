@@ -3248,7 +3248,7 @@ bool bgunChangeGunMem(s32 newowner)
 				unlock = true;
 			}
 
-			if (newowner == GUNMEMOWNER_INVMENU && g_GameIsPaused != 0) {
+			if (newowner == GUNMEMOWNER_INVMENU && var8009dfc0 != 0) {
 				unlock = true;
 				playerRemoveChrBody();
 			}
@@ -3897,7 +3897,7 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 	bool droppinggrenade = false;
 	struct hand *hand;
 	struct coord aimpos;
-	struct coord outvector;
+	struct coord sp140;
 	f32 frac;
 	f32 radians;
 	Mtxf spf8;
@@ -3972,14 +3972,14 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 			aimpos.y = hand->dotpos.y;
 			aimpos.z = hand->dotpos.z;
 
-			chrCalculateTrajectory(&spawnpos, 21.666666f, &aimpos, &outvector);
+			chrCalculateTrajectory(&spawnpos, 21.666666f, &aimpos, &sp140);
 
-			radians = acosf(gundir.f[0] * outvector.f[0] + gundir.f[1] * outvector.f[1] + gundir.f[2] * outvector.f[2]);
+			radians = acosf(gundir.f[0] * sp140.f[0] + gundir.f[1] * sp140.f[1] + gundir.f[2] * sp140.f[2]);
 
 			// Check within 20 degrees
 			if (radians > 0.34901026f || radians < -0.34901026f) {
 				mtx00016b58(&spf8, 0, 0, 0, gundir.x, gundir.y, gundir.z, 0, 1, 0);
-				mtx00016b58(&spb8, 0, 0, 0, outvector.x, outvector.y, outvector.z, 0, 1, 0);
+				mtx00016b58(&spb8, 0, 0, 0, sp140.x, sp140.y, sp140.z, 0, 1, 0);
 
 				quaternion0f097044(&spf8, sp68);
 				quaternion0f097044(&spb8, sp58);
@@ -3998,9 +3998,9 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 				gundir.y = -sp78.m[2][1];
 				gundir.z = -sp78.m[2][2];
 			} else {
-				gundir.x = outvector.x;
-				gundir.y = outvector.y;
-				gundir.z = outvector.z;
+				gundir.x = sp140.x;
+				gundir.y = sp140.y;
+				gundir.z = sp140.z;
 			}
 		}
 
@@ -4012,7 +4012,6 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 		velocity.x = gundir.x * 16.666666f;
 		velocity.y = gundir.y * 16.666666f;
 		velocity.z = gundir.z * 16.666666f;
-
 
 		if (gset->weaponnum == WEAPON_GRENADE || gset->weaponnum == WEAPON_NBOMB) {
 			velocity.y += 1.6666666f;
@@ -6832,7 +6831,7 @@ bool bgunCheckForCloseWall()
 
 	spc8[0] = g_Vars.currentplayer->cam_room;
 	spc8[1] = -1;
-	portalComputeReachableRooms(&g_Vars.currentplayer->cam_pos, &checkpos, spc8, spb8, rooms, 30);
+	portal00018148(&g_Vars.currentplayer->cam_pos, &checkpos, spc8, spb8, rooms, 30);
 
 	roomsptr = rooms;
 
@@ -7132,9 +7131,9 @@ void bgun0f0a5550(s32 handnum)
 		{
 			bool a0 = true;
 			struct modelrenderdata renderdata = {NULL, true, 3};
-#if VERSION >= VERSION_PAL_BETA
+//#if VERSION >= VERSION_PAL_BETA
 			bool a3 = false;
-#endif
+//#endif
 			s32 spcc;
 			Mtxf *spc8;
 			Mtxf *spc4;
@@ -7190,7 +7189,7 @@ void bgun0f0a5550(s32 handnum)
 				a0 = false;
 			}
 
-#if VERSION >= VERSION_PAL_BETA
+//#if VERSION >= VERSION_PAL_BETA
 			switch (modelGetAnimNum(&hand->gunmodel)) {
 			case ANIM_GUN_CROSSBOW_EQUIP:
 			case ANIM_GUN_LAPTOP_EQUIP:
@@ -7210,7 +7209,7 @@ void bgun0f0a5550(s32 handnum)
 				a3 = 1;
 				break;
 			}
-#endif
+//#endif
 
 			if (a0) {
 				if (player->hands[HAND_RIGHT].unk0dd4 == -1) {
@@ -7386,9 +7385,9 @@ void bgun0f0a5550(s32 handnum)
 
 	hand->animframeinc = 0;
 
-#if VERSION >= VERSION_PAL_BETA
+//#if VERSION >= VERSION_PAL_BETA
 	hand->animframeincfreal = 0;
-#endif
+//#endif
 }
 
 void bgunTickMaulerCharge(void)
@@ -7681,7 +7680,7 @@ void bgunRender(Gfx **gdlptr)
 	}
 
 	gdl = viPrepareZbuf(gdl);
-	gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
+	gdl = vi0000b1d0(gdl);
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
@@ -7702,9 +7701,9 @@ void bgunRender(Gfx **gdlptr)
 		struct hand *hand;
 		s32 j;
 		s32 alpha;
-		s32 weaponnum;
-		struct modelnode *node;
-		u32 colour;
+		s32 weaponnum; // ec
+		struct modelnode *node; // e8
+		u32 colour; // e4
 
 		hand = player->hands + i;
 
@@ -7718,7 +7717,7 @@ void bgunRender(Gfx **gdlptr)
 				gSPLookAt(gdl++, camGetLookAt());
 			}
 
-			//gSPPerspNormalize(gdl++, mtx00016dcc(0, 300));
+			gSPPerspNormalize(gdl++, mtx00016dcc(0, 300));
 
 			// There is support for guns having a TV screen on them
 			// but no guns have this model part so it's not used.
@@ -7872,7 +7871,7 @@ void bgunRender(Gfx **gdlptr)
 			mtxF2LBulk(hand->gunmodel.matrices, hand->gunmodel.definition->nummatrices);
 			mtx00016784();
 
-			//gSPPerspNormalize(gdl++, viGetPerspScale());
+			gSPPerspNormalize(gdl++, viGetPerspScale());
 		}
 	}
 
@@ -7880,7 +7879,7 @@ void bgunRender(Gfx **gdlptr)
 	zbufSwap();
 
 	gdl = zbufConfigureRdp(gdl);
-	gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
+	gdl = vi0000b1d0(gdl);
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());

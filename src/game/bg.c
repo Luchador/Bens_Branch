@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
 #include "game/debug.h"
@@ -8,7 +9,6 @@
 #include "game/room.h"
 #include "game/chr.h"
 #include "game/prop.h"
-#include "game/ceil.h"
 #include "game/bondgun.h"
 #include "game/tex.h"
 #include "game/camera.h"
@@ -84,52 +84,54 @@
 #define VTXBATCHTYPE_OPA 0x01
 #define VTXBATCHTYPE_XLU 0x02
 
-struct drawslot g_BgDrawSlots[301]; // 61
+struct drawslot g_BgDrawSlots[61];
 uint8_t *g_BgPrimaryData;
-unsigned int var800a4920;
-u32 g_BgSection3;
+uint32_t var800a4920;
+uint32_t g_BgSection3;
 struct room *g_Rooms;
-u8 *g_MpRoomVisibility;
+uint8_t *g_MpRoomVisibility;
 RoomNum g_BgForceOnscreenRooms[350];
 int g_BgNumForceOnscreenRooms;
-uint16_t g_BgUnloadDelay240;
-uint16_t g_BgUnloadDelay240_2;
-RoomNum g_GlareRooms[300]; // 100
+int16_t g_BgUnloadDelay240;
+int16_t g_BgUnloadDelay240_2;
+RoomNum g_GlareRooms[100];
 uintptr_t *g_BgPrimaryData2;
 struct bgroom *g_BgRooms;
 struct bgportal *g_BgPortals;
 struct portalmetric *g_PortalMetrics;
 struct bgcmd *g_BgCommands;
-u8 *g_BgLightsFileData;
-f32 *g_BgStanThings;
-s16 *g_RoomPortals;
-s16 g_BgMinDrawOrder;
-s16 g_BgMaxDrawOrder;
+uint8_t *g_BgLightsFileData;
+float *g_BgStanThings;
+int16_t *g_RoomPortals;
+int16_t g_BgMinDrawOrder;
+int16_t g_BgMaxDrawOrder;
 struct drawslotpointer *g_BgDrawSlotsByRoom;
 struct portalcamcacheitem *g_PortalCameraCache;
 struct bgsnake g_BgSnake;
 
 int g_StageIndex = 1;
-s16 var8007fc0c = 0;
-s16 var8007fc10 = 0;
+uint8_t *var8007fc08 = NULL;
+
+int16_t var8007fc0c = 0;
+int16_t var8007fc10 = 0;
 int g_NumRoomsWithGlares = 0;
 int g_CamRoom = 1;
-struct drawslot *g_BgSpecialDrawSlot = &g_BgDrawSlots[300]; // 60
+struct drawslot *g_BgSpecialDrawSlot = &g_BgDrawSlots[60];
 int g_BgLoadCandidateTimer240 = 0;
 int g_BgNumDrawSlots = 0;
 int g_BgNumAttemptedDrawSlots = 0;
 int g_BgMostAttemptedDrawSlots = 0;
 int g_BgNumRoomLoadCandidates = 0;
-u16 g_BgFrameCount = 0xfffe;
+uint16_t g_BgFrameCount = 0xfffe;
 int g_BgNumPortalCameraCacheItems = 0;
 
-void bgUnpausePropsInRoom(u32 roomnum, bool tintedglassonly)
+void bgUnpausePropsInRoom(uint32_t roomnum, bool tintedglassonly)
 {
 	struct prop *prop;
 	struct defaultobj *obj;
-	s16 *propnumptr;
+	int16_t *propnumptr;
 	RoomNum rooms[2];
-	s16 propnums[256];
+	int16_t propnums[256];
 
 	rooms[0] = roomnum;
 	rooms[1] = -1;
@@ -244,7 +246,7 @@ void bgGetRoomBrightnessRange(int roomnum, int8_t *min, int8_t *max)
 
 struct drawslot *bgGetRoomDrawSlot(int roomnum)
 {
-	int index = 300;
+	int index = 60;
 
 	if (g_BgFrameCount == g_BgDrawSlotsByRoom[roomnum].updatedframe) {
 		index = g_BgDrawSlotsByRoom[roomnum].slotnum;
@@ -309,11 +311,11 @@ Gfx *bgRenderXrayData(Gfx *gdl, struct xraydata *xraydata)
 	return gdl;
 }
 
-Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t vertices1[3], int16_t vertices2[3], int16_t vertices3[3], unsigned int colour1, unsigned int colour2, unsigned int colour3)
+Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t vertices1[3], int16_t vertices2[3], int16_t vertices3[3], uint32_t colour1, uint32_t colour2, uint32_t colour3)
 {
-	s16 sp30[3] = {-1, -1, -1};
+	int16_t sp30[3] = {-1, -1, -1};
 	int count = 0;
-	s16 i;
+	int16_t i;
 
 	if (xraydata->numtris >= 64) {
 		gdl = bgRenderXrayData(gdl, xraydata);
@@ -414,30 +416,30 @@ Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t vertices1[3], int
 	return gdl;
 }
 
-void bgChooseXrayVtxColour(bool *inrange, int16_t vertex[3], unsigned int *colour, struct xraydata *xraydata)
+void bgChooseXrayVtxColour(bool *inrange, int16_t vertex[3], uint32_t *colour, struct xraydata *xraydata)
 {
-	f32 sp2c[3];
-	f32 f12;
-	f32 alphafrac;
-	f32 anglefrac;
+	float sp2c[3];
+	float f12;
+	float alphafrac;
+	float anglefrac;
 	struct player *player = g_Vars.currentplayer;
-	f32 colfrac;
+	float colfrac;
 
 	*inrange = false;
 
-	sp2c[0] = (f32) vertex[0] - (f32) xraydata->unk000;
+	sp2c[0] = (float) vertex[0] - (float) xraydata->unk000;
 	sp2c[0] = sp2c[0] * sp2c[0];
 
 	if (sp2c[0] < xraydata->unk010) {
-		sp2c[2] = (f32) vertex[2] - (f32) xraydata->unk008;
+		sp2c[2] = (float) vertex[2] - (float) xraydata->unk008;
 		sp2c[2] = sp2c[2] * sp2c[2];
 
 		if (sp2c[2] < xraydata->unk010) {
-			sp2c[1] = (f32) vertex[1] - (f32) xraydata->unk004;
+			sp2c[1] = (float) vertex[1] - (float) xraydata->unk004;
 			sp2c[1] = sp2c[1] * sp2c[1];
 
 			if (sp2c[1] < xraydata->unk010) {
-				f32 dist = sqrtf(sp2c[0] + sp2c[1] + sp2c[2]);
+				float dist = sqrtf(sp2c[0] + sp2c[1] + sp2c[2]);
 
 				if (dist < xraydata->unk00c) {
 					*inrange = true;
@@ -455,17 +457,17 @@ void bgChooseXrayVtxColour(bool *inrange, int16_t vertex[3], unsigned int *colou
 						anglefrac = f12 / anglefrac;
 						colfrac = sinf((1.0f - anglefrac) * 1.5707964f);
 
-						*colour = (u32)(colfrac * 255.0f) << player->ecol_1
-							| (u32)((1.0f - colfrac) * 255.0f) << player->ecol_2
-							| (u32)(alphafrac * 128.0f);
+						*colour = (uint32_t)(colfrac * 255.0f) << player->ecol_1
+							| (uint32_t)((1.0f - colfrac) * 255.0f) << player->ecol_2
+							| (uint32_t)(alphafrac * 128.0f);
 					} else {
 						anglefrac = (f12 - xraydata->unk01c) / (1.0f - xraydata->unk01c);
 						anglefrac = 0.65f * anglefrac + 0.35f;
 						colfrac = sinf(anglefrac * 1.5707964f);
 
-						*colour = (u32)(colfrac * 255.0f) << player->ecol_3
+						*colour = (uint32_t)(colfrac * 255.0f) << player->ecol_3
 							| 0xff << player->ecol_2
-							| (u32)(alphafrac * 128.0f);
+							| (uint32_t)(alphafrac * 128.0f);
 					}
 				}
 			}
@@ -477,14 +479,14 @@ void bgChooseXrayVtxColour(bool *inrange, int16_t vertex[3], unsigned int *colou
 	}
 }
 
-Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, s16 arg2[3], s16 arg3[3], s16 arg4[3], int arg5, int arg6, int arg7, int arg8, int arg9, int arg10)
+Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t arg2[3], int16_t arg3[3], int16_t arg4[3], int arg5, int arg6, int arg7, int arg8, int arg9, int arg10)
 {
 	int spa4[3];
-	s16 sp9c[3] = {0, 0, 0};
+	int16_t sp9c[3] = {0, 0, 0};
 	int sum;
-	s16 sp84[3][3];
+	int16_t sp84[3][3];
 	bool inrange[3];
-	u32 colours[3];
+	uint32_t colours[3];
 	int sp68 = -1;
 	int sp64 = 0;
 
@@ -554,8 +556,8 @@ Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, s16 arg2[3], s16 arg3
 		if (arg8 || arg9 || arg10) {
 			render = true;
 		} else {
-			u32 mask1 = 0;
-			u32 mask2 = 0;
+			uint32_t mask1 = 0;
+			uint32_t mask2 = 0;
 
 			render = true;
 
@@ -644,19 +646,19 @@ Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, s16 arg2[3], s16 arg3
 	return gdl;
 }
 
-u32 var8007fc54 = 0;
+uint32_t var8007fc54 = 0;
 bool g_BgCmdStack[20] = {0};
 int g_BgCmdStackIndex = 0;
-u32 g_BgCmdResult = BGRESULT_TRUE;
+uint32_t g_BgCmdResult = BGRESULT_TRUE;
 
-Gfx *bgRenderGdlInXray(Gfx *gdl, s8 *readgdl, Vtx *vertices, s16 arg3[3])
+Gfx *bgRenderGdlInXray(Gfx *gdl, int8_t *readgdl, Vtx *vertices, int16_t arg3[3])
 {
 	int i;
-	u8 *verticesu8 = (u8 *) vertices;
+	uint8_t *verticesuint8_t = (uint8_t *) vertices;
 	struct xraydata xraydata;
 	struct stagetableentry *stage = stageGetCurrent();
-	s16 dmemvertices[16][3];
-	u32 dmemcolours[16];
+	int16_t dmemvertices[16][3];
+	uint32_t dmemcolours[16];
 	bool inrange[16];
 
 	xraydata.unk00c = g_Vars.currentplayer->eraserbgdist;
@@ -687,11 +689,11 @@ Gfx *bgRenderGdlInXray(Gfx *gdl, s8 *readgdl, Vtx *vertices, s16 arg3[3])
 		} else if (readgdl[GFX_W0_BYTE(0)] == G_VTX) {
 			Gfx *cmd = (Gfx *) readgdl;
 			int dmemindex = cmd->bytes[GFX_W0_BYTE(1)] & 0xf;
-			int numvertices = ((u32) cmd->bytes[GFX_W0_BYTE(1)] >> 4) + 1;
-			u32 offset = UNSEGADDR(cmd->words.w1) & 0xffffff;
+			int numvertices = ((uint32_t) cmd->bytes[GFX_W0_BYTE(1)] >> 4) + 1;
+			uint32_t offset = UNSEGADDR(cmd->words.w1) & 0xffffff;
 
 			for (i = 0; i < numvertices; i++) {
-				Vtx *vtx = (Vtx *) (verticesu8 + offset);
+				Vtx *vtx = (Vtx *) (verticesuint8_t + offset);
 
 				dmemvertices[dmemindex + i][0] = vtx->x;
 				dmemvertices[dmemindex + i][1] = vtx->y;
@@ -703,16 +705,16 @@ Gfx *bgRenderGdlInXray(Gfx *gdl, s8 *readgdl, Vtx *vertices, s16 arg3[3])
 			}
 		} else if (readgdl[GFX_W0_BYTE(0)] == G_TRI1) {
 			Gfx *cmd = (Gfx *) readgdl;
-			s16 x = cmd->tri.tri.v[GFX_TRI_VTX(0)] / 10;
-			s16 y = cmd->tri.tri.v[GFX_TRI_VTX(1)] / 10;
-			s16 z = cmd->tri.tri.v[GFX_TRI_VTX(2)] / 10;
+			int16_t x = cmd->tri.tri.v[GFX_TRI_VTX(0)] / 10;
+			int16_t y = cmd->tri.tri.v[GFX_TRI_VTX(1)] / 10;
+			int16_t z = cmd->tri.tri.v[GFX_TRI_VTX(2)] / 10;
 
 			gdl = bgProcessXrayTri(gdl, &xraydata, dmemvertices[x], dmemvertices[y], dmemvertices[z], dmemcolours[x], dmemcolours[y], dmemcolours[z], inrange[x], inrange[y], inrange[z]);
 		} else if (readgdl[GFX_W0_BYTE(0)] == G_TRI4) {
 			Gfx *cmd = (Gfx *) readgdl;
-			s16 x;
-			s16 y;
-			s16 z;
+			int16_t x;
+			int16_t y;
+			int16_t z;
 
 			x = cmd->tri4.x1;
 			y = cmd->tri4.y1;
@@ -747,7 +749,7 @@ Gfx *bgRenderGdlInXray(Gfx *gdl, s8 *readgdl, Vtx *vertices, s16 arg3[3])
 	return gdl;
 }
 
-Gfx *bgRenderRoomXrayPass(Gfx *gdl, int roomnum, struct roomblock *block, bool recurse, s16 arg4[3])
+Gfx *bgRenderRoomXrayPass(Gfx *gdl, int roomnum, struct roomblock *block, bool recurse, int16_t arg4[3])
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -757,7 +759,7 @@ Gfx *bgRenderRoomXrayPass(Gfx *gdl, int roomnum, struct roomblock *block, bool r
 
 	switch (block->type) {
 	case ROOMBLOCKTYPE_LEAF:
-		gdl = bgRenderGdlInXray(gdl, (s8 *) block->gdl, block->vertices, arg4);
+		gdl = bgRenderGdlInXray(gdl, (int8_t *) block->gdl, block->vertices, arg4);
 
 		if (recurse) {
 			gdl = bgRenderRoomXrayPass(gdl, roomnum, block->next, true, arg4);
@@ -770,7 +772,7 @@ Gfx *bgRenderRoomXrayPass(Gfx *gdl, int roomnum, struct roomblock *block, bool r
 			struct coord *coords = block->unk0c;
 			struct coord sp34;
 			struct coord sp28;
-			f32 sum;
+			float sum;
 
 			sp34.x = coords[1].x;
 			sp34.y = coords[1].y;
@@ -807,7 +809,7 @@ Gfx *bgRenderRoomInXray(Gfx *gdl, int roomnum)
 {
 	struct coord sp54;
 	struct coord globaldrawworldoffset;
-	s16 sp40[3];
+	int16_t sp40[3];
 	struct player *player = g_Vars.currentplayer;
 
 	if (roomnum == 0 || roomnum >= g_Vars.roomcount) {
@@ -852,7 +854,7 @@ Gfx *bgRenderSceneInXray(Gfx *gdl)
 {
 	RoomNum *roomnumptr;
 	RoomNum *room;
-	s16 i;
+	int16_t i;
 	int j;
 	RoomNum roomnumsbyprop[200];
 	struct prop *prop;
@@ -951,9 +953,9 @@ Gfx *bgRenderScene(Gfx *gdl)
 	struct drawslot *thing;
 	RoomNum *roomnumptr;
 	struct prop *prop;
-	s16 tmp;
+	int16_t tmp;
 	RoomNum *room;
-	s16 roomorder[250]; // 60 to 250
+	int16_t roomorder[250]; // 60 to 250
 	RoomNum roomnums[250]; // 60 to 250
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
@@ -1050,7 +1052,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 			gdl = bgRenderRoomOpaque(gdl, roomnum);
 		}
 
-		//gSPPerspNormalize(gdl++, viGetPerspScale());
+		gSPPerspNormalize(gdl++, viGetPerspScale());
 	}
 
 	gdl = skyRenderSuns(gdl, false);
@@ -1180,7 +1182,7 @@ Gfx *bgRenderArtifacts(Gfx *gdl)
 	return gdl;
 }
 
-void bgLoadFile(void *memaddr, u32 offset, u32 len)
+void bgLoadFile(void *memaddr, uint32_t offset, uint32_t len)
 {
 	fileLoadPartToAddr(g_Stages[g_StageIndex].bgfileid, memaddr, offset, len);
 }
@@ -1268,17 +1270,17 @@ float bgCalculatePortalSurfaceArea(int portalnum)
  */
 void bgReset(int stagenum)
 {
-	u8 *header;
-	u8 headerbuffer[0x50];
-	u32 numtextures;
-	u16 *section2;
+	uint8_t *header;
+	uint8_t headerbuffer[0x50];
+	uint32_t numtextures;
+	int16_t *section2;
 	int j;
 	int i;
-	u32 primcompsize;
-	u32 inflatedsize; // used for both primary and section 2
-	u32 section2compsize;
-	u32 section2start;
-	u32 section1compsize;
+	uint32_t primcompsize;
+	uint32_t inflatedsize; // used for both primary and section 2
+	uint32_t section2compsize;
+	uint32_t section2start;
+	uint32_t section1compsize;
 	uintptr_t scratch;
 
 	var8007fc0c = 8;
@@ -1291,12 +1293,12 @@ void bgReset(int stagenum)
 	}
 
 	// Copy section 1 header to stack and parse into variables
-	header = (u8 *)ALIGN16((uintptr_t)headerbuffer);
+	header = (uint8_t *)ALIGN16((uintptr_t)headerbuffer);
 	bgLoadFile(header, 0, 0x40);
 	preprocessBgSection1Header(header, 0x40);
-	inflatedsize = *(u32 *)&header[0];
-	section1compsize = *(u32 *)&header[4];
-	primcompsize = *(u32 *)&header[8];
+	inflatedsize = *(uint32_t *)&header[0];
+	section1compsize = *(uint32_t *)&header[4];
+	primcompsize = *(uint32_t *)&header[8];
 	var8007fc54 = inflatedsize - primcompsize;
 	var8007fc54 -= 0xc;
 
@@ -1317,11 +1319,11 @@ void bgReset(int stagenum)
 	g_LoadType = LOADTYPE_BG;
 
 	// Copy section 1 header + compressed primary to scratch space
-	bgLoadFile((u8 *) scratch, 0, ALIGN16(primcompsize + 15));
+	bgLoadFile((uint8_t *) scratch, 0, ALIGN16(primcompsize + 15));
 
 	// Inflate primary data to the start of the buffer
 	scratch += 0xc;
-	bgInflate((u8 *) scratch, g_BgPrimaryData, primcompsize);
+	bgInflate((uint8_t *) scratch, g_BgPrimaryData, primcompsize);
 
 	preprocessBgSection1(g_BgPrimaryData, inflatedsize, 0x0f000000);
 
@@ -1334,23 +1336,23 @@ void bgReset(int stagenum)
 	bgLoadFile(header, section2start, 0x40);
 	preprocessBgSection2Header(header, 0x40);
 
-	inflatedsize = (*(u16 *) &header[0] & 0x7fff) - 1;
-	section2compsize = *(u16 *) &header[2];
+	inflatedsize = (*(int16_t *) &header[0] & 0x7fff) - 1;
+	section2compsize = *(int16_t *) &header[2];
 	inflatedsize = (inflatedsize | 0xf) + 1;
 
 	section2 = mempAlloc(inflatedsize + section2compsize, MEMPOOL_STAGE);
 	scratch = (uintptr_t) section2 + inflatedsize;
 
 	// Load compressed data from ROM to scratch
-	bgLoadFile((u8 *) scratch, section2start + 4, ((section2compsize - 1) | 0xf) + 1);
+	bgLoadFile((uint8_t *) scratch, section2start + 4, ((section2compsize - 1) | 0xf) + 1);
 
 	// Inflate section 2 to the start of the buffer
-	bgInflate((u8 *) scratch, (u8 *) section2, section2compsize);
+	bgInflate((uint8_t *) scratch, (uint8_t *) section2, section2compsize);
 
 	// Iterate texture IDs and ensure they're loaded
-	inflatedsize = (*(u16 *) &header[0] & 0x7fff) >> 1;
+	inflatedsize = (*(int16_t *) &header[0] & 0x7fff) >> 1;
 
-	preprocessBgSection2((u8 *)section2, inflatedsize);
+	preprocessBgSection2((uint8_t *)section2, inflatedsize);
 
 	for (i = 0; i ^ inflatedsize; i++) {
 		texLoadFromTextureNum(section2[i] & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff, NULL);
@@ -1361,7 +1363,7 @@ void bgReset(int stagenum)
 
 	g_BgSection3 = section2start + section2compsize + 4;
 
-	var800a4920 = *(unsigned int *)g_BgPrimaryData;
+	var800a4920 = *(uint32_t *)g_BgPrimaryData;
 
 	if (var800a4920 == 0) {
 		g_BgPrimaryData2 = (uintptr_t*)g_BgPrimaryData;
@@ -1383,7 +1385,7 @@ void bgReset(int stagenum)
 		if (g_BgPrimaryData2[4] == 0) {
 			g_BgLightsFileData = NULL;
 		} else {
-			g_BgLightsFileData = (u8 *)(g_BgPrimaryData2[4] + g_BgPrimaryData - 0x0f000000);
+			g_BgLightsFileData = (uint8_t *)(g_BgPrimaryData2[4] + g_BgPrimaryData - 0x0f000000);
 		}
 
 		if (g_BgPrimaryData2[5] == 0) {
@@ -1399,12 +1401,12 @@ void bgBuildTables(int stagenum)
 	int i;
 	int j;
 	int k;
-	u32 r;
-	u8 *header;
+	uint32_t r;
+	uint8_t *header;
 	int numportals;
 	int index;
 	float divisor;
-	s16 lightindex;
+	int16_t lightindex;
 	int candportalnum;
 	int numportalsthisroom;
 	bool swap;
@@ -1412,16 +1414,16 @@ void bgBuildTables(int stagenum)
 	struct portalmetric *metric;
 	int numvertices;
 	struct portalmetric tmp;
-	u8 *scratch;
-	u8 headerbuffer[0x50];
+	uint8_t *scratch;
+	uint8_t headerbuffer[0x50];
 	int thisneighbournum;
 	int offset;
-	u32 inflatedsize;
-	u32 section3compsize;
-	s16 *bboxptr;
-	u8 *section3;
-	u16 *datalenptr;
-	u8 *numlightsptr;
+	uint32_t inflatedsize;
+	uint32_t section3compsize;
+	int16_t *bboxptr;
+	uint8_t *section3;
+	int16_t *datalenptr;
+	uint8_t *numlightsptr;
 
 	g_Rooms = mempAlloc(ALIGN16(g_Vars.roomcount * sizeof(struct room)), MEMPOOL_STAGE);
 	g_BgDrawSlotsByRoom = mempAlloc(ALIGN16(g_Vars.roomcount * sizeof(struct drawslotpointer)), MEMPOOL_STAGE);
@@ -1500,7 +1502,7 @@ void bgBuildTables(int stagenum)
 		// number ascending. Each room struct contains an index into this array
 		// where its portal numbers start.
 		index = 0;
-		g_RoomPortals = mempAlloc(ALIGN16((numportals == 0 ? 1 : numportals) * sizeof(s16 *)), MEMPOOL_STAGE);
+		g_RoomPortals = mempAlloc(ALIGN16((numportals == 0 ? 1 : numportals) * sizeof(int16_t *)), MEMPOOL_STAGE);
 
 		g_Vars.roomportalrecursionlimit = 0;
 
@@ -1662,11 +1664,11 @@ void bgBuildTables(int stagenum)
 		// the section 3 allocation is resized to 0, effectively freeing it.
 
 		// Load and read the header
-		header = (u8 *)ALIGN16((uintptr_t)headerbuffer);
+		header = (uint8_t *)ALIGN16((uintptr_t)headerbuffer);
 		bgLoadFile(header, g_BgSection3, 0x40);
 		preprocessBgSection3Header(header, 0x40);
-		inflatedsize = (*(u16 *)&header[0] & 0x7fff) - 1;
-		section3compsize = *(u16 *)&header[2];
+		inflatedsize = (*(uint16_t *)&header[0] & 0x7fff) - 1;
+		section3compsize = *(uint16_t *)&header[2];
 		inflatedsize = (inflatedsize | 0xf) + 1;
 
 		// Load and inflate section 3
@@ -1678,7 +1680,7 @@ void bgBuildTables(int stagenum)
 		preprocessBgSection3(section3, section3compsize);
 
 		// Section 3 starts with a table of room bounding boxes
-		bboxptr = (s16 *) section3;
+		bboxptr = (int16_t *) section3;
 
 		for (r = 1; r < g_Vars.roomcount; r++) {
 			// Calculate bounding box
@@ -1702,7 +1704,7 @@ void bgBuildTables(int stagenum)
 
 		// The next part of section 3 is a list of roomgfxdata sizes.
 		// There is one per room and the value needs to be multiplied by 0x10.
-		datalenptr = (u16 *) bboxptr;
+		datalenptr = (uint16_t *) bboxptr;
 
 		for (r = 1; r < g_Vars.roomcount; r++) {
 			g_Rooms[r].gfxdatalen = ALIGN16(*datalenptr * 0x10 + 0x100);
@@ -1714,7 +1716,7 @@ void bgBuildTables(int stagenum)
 		// lights start. The light data is already ordered by room, so it can do
 		// this easily by adding to the offset of the previous one.
 		lightindex = 0;
-		numlightsptr = (u8 *) datalenptr;
+		numlightsptr = (uint8_t *) datalenptr;
 
 		for (r = 1; r < g_Vars.roomcount; r++) {
 			g_Rooms[r].numlights = *numlightsptr;
@@ -1757,7 +1759,7 @@ void bgBuildTables(int stagenum)
 		}
 
 		for (i = 0; g_BgPortals[i].verticesoffset != 0; i++) {
-			bgInitPortal(i);
+			bgInitPortal(i); // Ben's comment: This plays a role in the laser sight bug
 		}
 
 		for (i = 1; i < g_Vars.roomcount; i++) {
@@ -1776,7 +1778,7 @@ void bgBuildTables(int stagenum)
 	var8007fc10 = 200;
 
 	wallhitReset();
-	dlightsReset();
+	func0f002a98();
 	func0f001c0c();
 }
 
@@ -1796,7 +1798,7 @@ float bgGetScaleBg2Gfx(void)
 	return g_Vars.currentplayerstats->scale_bg2gfx;
 }
 
-void bgSetScaleBg2Gfx(f32 scale)
+void bgSetScaleBg2Gfx(float scale)
 {
 	g_Vars.currentplayerstats->scale_bg2gfx = g_Stages[g_StageIndex].unk18 * scale;
 	mtx00016748(g_Vars.currentplayerstats->scale_bg2gfx);
@@ -1886,9 +1888,9 @@ Gfx *bgScissorToViewport(Gfx *gdl)
 			g_Vars.currentplayer->viewtop + g_Vars.currentplayer->viewheight);
 }
 
-Gfx *bgScissorWithinViewportF(Gfx *gdl, f32 viewleft, f32 viewtop, f32 viewright, f32 viewbottom)
+Gfx *bgScissorWithinViewportF(Gfx *gdl, float viewleft, float viewtop, float viewright, float viewbottom)
 {
-	gdl = bgScissorWithinViewport(gdl, viewleft, viewtop, ceiltoint(viewright), ceiltoint(viewbottom));
+	gdl = bgScissorWithinViewport(gdl, viewleft, viewtop, (int)ceilf(viewright), (int)ceilf(viewbottom));
 
 	return gdl;
 }
@@ -2052,8 +2054,8 @@ bool bgGetPortalScreenBbox(int portalnum, struct screenbox *box)
 	int len;
 	int start;
 	int numvalid;
-	f32 sp2e4[2];
-	f32 sp2d4[2][2];
+	float sp2e4[2];
+	float sp2d4[2][2];
 	struct portalthing2 *thing;
 	struct portalthing2 things[40];
 
@@ -2121,7 +2123,7 @@ bool bgGetPortalScreenBbox(int portalnum, struct screenbox *box)
 
 		for (i = 0; i < 2; i++) {
 			for (j = 0; j < 2; j++) {
-				f32 value = sp2d4[i][j];
+				float value = sp2d4[i][j];
 
 				if (value >= 0.0f) {
 					if (value > 32000.0f) {
@@ -2219,7 +2221,7 @@ bool bgRoomIsStandby(int room)
 	return g_Rooms[room].flags & ROOMFLAG_STANDBY;
 }
 
-bool bgRoomIsOnPlayerScreen(int room, u32 playernum)
+bool bgRoomIsOnPlayerScreen(int room, uint32_t playernum)
 {
 	if (g_Vars.mplayerisrunning) {
 		return (g_MpRoomVisibility[room] & (1 << playernum)) != 0;
@@ -2228,7 +2230,7 @@ bool bgRoomIsOnPlayerScreen(int room, u32 playernum)
 	}
 }
 
-bool bgRoomIsOnPlayerStandby(int room, u32 playernum)
+bool bgRoomIsOnPlayerStandby(int room, uint32_t playernum)
 {
 	if (g_Vars.mplayerisrunning) {
 		return (g_MpRoomVisibility[room] & (0x10 << playernum)) != 0;
@@ -2253,10 +2255,10 @@ int bgFindPortalByVertices(struct portalvertices *target)
 	return 0;
 }
 
-u32 bgInflate(u8 *src, u8 *dst, u32 len)
+uint32_t bgInflate(uint8_t *src, uint8_t *dst, uint32_t len)
 {
-	u32 result;
-	u8 scratch[5120];
+	uint32_t result;
+	uint8_t scratch[5120];
 
 	if (rzipIs1173(src)) {
 		result = rzipInflate(src, dst, &scratch);
@@ -2296,7 +2298,7 @@ Gfx *bgGetNextGdlInBlock(struct roomblock *block, Gfx *start, Gfx *end)
 	return end;
 }
 
-Gfx *bgGetNextGdlInLayer(int roomnum, Gfx *start, u32 types)
+Gfx *bgGetNextGdlInLayer(int roomnum, Gfx *start, uint32_t types)
 {
 	struct roomblock *opablocks = g_Rooms[roomnum].gfxdata->opablocks;
 	struct roomblock *xlublocks = g_Rooms[roomnum].gfxdata->xlublocks;
@@ -2375,17 +2377,17 @@ void bgLoadRoom(int roomnum)
 {
 	int alloclen;
 	int inflatedlen;
-	u8 *allocation;
+	uint8_t *allocation;
 	int readlen;
 	int fileoffset;
-	u8 *itergdl1;
-	u8 *itergdl2;
+	uint8_t *itergdl1;
+	uint8_t *itergdl2;
 	struct roomblock *block1;
 	struct roomblock *block2;
-	u8 *memaddr;
-	u8 *gfxblocks[50];
-	u8 *vtxblocks[50];
-	u8 *gdlpointers[50];
+	uint8_t *memaddr;
+	uint8_t *gfxblocks[50];
+	uint8_t *vtxblocks[50];
+	uint8_t *gdlpointers[50];
 	int numgdls;
 	uintptr_t end1;
 	int i;
@@ -2512,14 +2514,14 @@ void bgLoadRoom(int roomnum)
 
 		// Build arrays of pointers to gfx blocks and vtx blocks
 		numgdls = 0;
-		itergdl1 = (u8 *) bgGetNextGdlInLayer(roomnum, NULL, VTXBATCHTYPE_OPA | VTXBATCHTYPE_XLU);
+		itergdl1 = (uint8_t *) bgGetNextGdlInLayer(roomnum, NULL, VTXBATCHTYPE_OPA | VTXBATCHTYPE_XLU);
 
 		while (itergdl1) {
-			gfxblocks[numgdls] = (u8 *) itergdl1;
-			vtxblocks[numgdls] = (u8 *) bgFindVerticesForGdl(roomnum, (Gfx *) itergdl1);
+			gfxblocks[numgdls] = (uint8_t *) itergdl1;
+			vtxblocks[numgdls] = (uint8_t *) bgFindVerticesForGdl(roomnum, (Gfx *) itergdl1);
 			numgdls++;
 
-			itergdl1 = (u8 *) bgGetNextGdlInLayer(roomnum, (Gfx *) itergdl1, VTXBATCHTYPE_OPA | VTXBATCHTYPE_XLU);
+			itergdl1 = (uint8_t *) bgGetNextGdlInLayer(roomnum, (Gfx *) itergdl1, VTXBATCHTYPE_OPA | VTXBATCHTYPE_XLU);
 		}
 
 		gfxblocks[numgdls] = allocation + inflatedlen;
@@ -2547,7 +2549,7 @@ void bgLoadRoom(int roomnum)
 
 			if (len);
 
-			itergdl2 = (u8 *) ALIGN8((uintptr_t) (itergdl2 + byteswritten));
+			itergdl2 = (uint8_t *) ALIGN8((uintptr_t) (itergdl2 + byteswritten));
 		}
 
 		gdlpointers[numgdls] = itergdl2;
@@ -2568,7 +2570,7 @@ void bgLoadRoom(int roomnum)
 			case ROOMBLOCKTYPE_LEAF:
 				if (block2->gdl) {
 					for (i = 0; i < numgdls; i++) {
-						memaddr = (u8 *) block2->gdl; // reusing var
+						memaddr = (uint8_t *) block2->gdl; // reusing var
 
 						if (memaddr == gfxblocks[i]) {
 							block2->gdl = (Gfx *) gdlpointers[i];
@@ -2610,7 +2612,7 @@ void bgLoadRoom(int roomnum)
 
 void bgUnloadRoom(int roomnum)
 {
-	u32 size;
+	uint32_t size;
 
 	if (g_Rooms[roomnum].vtxbatches) {
 		sysMemFree(g_Rooms[roomnum].vtxbatches);
@@ -2707,9 +2709,9 @@ Gfx *bgRenderRoomPass(Gfx *gdl, int roomnum, struct roomblock *block, bool inclu
 			struct roomblock *sp58;
 			struct roomblock *sp54;
 			struct coord *coord;
-			f32 sum;
-			f32 sp40[3];
-			f32 sp34[3];
+			float sum;
+			float sp40[3];
+			float sp34[3];
 
 			sp58 = block->child;
 			sp54 = sp58->next;
@@ -2810,13 +2812,13 @@ int bgPopulateVtxBatchType(int roomnum, struct vtxbatch *batches, Gfx *gdl, int 
 				batches[batchindex].bbmax.f[j] = -32768.0f;
 			}
 
-			numvertices = (((u32)gdl[i].bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
+			numvertices = (((uint32_t)gdl[i].bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
 			batchvertices = (Vtx *)((uintptr_t)vertices + (UNSEGADDR(gdl[i].words.w1) & 0xffffff));
 
 			for (j = 0; j < numvertices; j++) {
-				f32 x = batchvertices[j].x;
-				f32 y = batchvertices[j].y;
-				f32 z = batchvertices[j].z;
+				float x = batchvertices[j].x;
+				float y = batchvertices[j].y;
+				float z = batchvertices[j].z;
 
 				if (x < batches[batchindex].bbmin.x) {
 					batches[batchindex].bbmin.x = x;
@@ -2933,7 +2935,7 @@ void bgFindRoomVtxBatches(int roomnum)
 					}
 				}
 
-				g_Rooms[roomnum].numvtxbatches = (s16)batchindex;
+				g_Rooms[roomnum].numvtxbatches = (int16_t)batchindex;
 			}
 		}
 	}
@@ -2957,22 +2959,22 @@ bool bgTestLineIntersectsIntBbox(struct coord *arg0, struct coord *arg1, int *ar
 
 bool bgTestLineIntersectsBbox(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3)
 {
-	f32 f0;
-	f32 f0_2;
-	f32 f2;
-	f32 f2_2;
-	f32 f6;
-	f32 f10;
-	f32 sp34;
-	f32 sp30;
-	f32 f16;
-	f32 f18;
-	f32 f18_2;
-	f32 sp20;
-	f32 f12;
-	f32 f12_2;
-	f32 f14;
-	f32 f14_2;
+	float f0;
+	float f0_2;
+	float f2;
+	float f2_2;
+	float f6;
+	float f10;
+	float sp34;
+	float sp30;
+	float f16;
+	float f18;
+	float f18_2;
+	float sp20;
+	float f12;
+	float f12_2;
+	float f14;
+	float f14_2;
 
 	// x
 	f18 = arg1->x;
@@ -2990,7 +2992,7 @@ bool bgTestLineIntersectsBbox(struct coord *arg0, struct coord *arg1, struct coo
 	}
 
 	if (f16 < f14) {
-		f32 tmp = f14;
+		float tmp = f14;
 		f14 = f16;
 		f16 = tmp;
 	}
@@ -3059,7 +3061,7 @@ bool bgTestLineIntersectsBbox(struct coord *arg0, struct coord *arg1, struct coo
 	}
 
 	if (f12_2 < f18_2) {
-		f32 tmp = f18_2;
+		float tmp = f18_2;
 		f18_2 = f12_2;
 		f12_2 = tmp;
 	}
@@ -3080,12 +3082,12 @@ bool bgTestLineIntersectsBbox(struct coord *arg0, struct coord *arg1, struct coo
 bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, Gfx *gdl,
 		Gfx *gdl2, Vtx *vertices, struct hitthing *hitthing)
 {
-	s16 triref = 0;
+	int16_t triref = 0;
 	int trisremaining = 0;
 	bool intersectsbbox;
-	f32 *ptr;
-	f32 tmp = 0.0f;
-	f32 sqdist = 0.0f;
+	float *ptr;
+	float tmp = 0.0f;
+	float sqdist = 0.0f;
 	bool hit = false;
 	struct coord *point1;
 	struct coord *point2;
@@ -3093,7 +3095,7 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 	Vtx *vtx;
 	Gfx *imggdl = NULL;
 	int texturenum;
-	f32 lowestsqdist = MAXFLOAT;
+	float lowestsqdist = MAXFLOAT;
 	uintptr_t offset;
 	int numvertices;
 	Gfx *tri4gdl = NULL;
@@ -3124,7 +3126,7 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 				// linear address
 				offset = gdl->words.w1 - (uintptr_t)vertices;
 			}
-			numvertices = (((u32) gdl->bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
+			numvertices = (((uint32_t) gdl->bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
 			vtx = (Vtx *)((uintptr_t)vertices + offset);
 			vtx -= count;
 
@@ -3212,7 +3214,7 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 			if (intersectsbbox) {
 				intersectsbbox = bgTestLineIntersectsBbox(arg0, arg2, &min, &max);
 			}
-		} else if (gdl->dma.cmd == (s8)G_SETTIMG) {
+		} else if (gdl->dma.cmd == (int8_t)G_SETTIMG) {
 			imggdl = gdl;
 		} else {
 			if (!intersectsbbox) {
@@ -3328,7 +3330,7 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 										texturenum = -1;
 									} else {
 										uintptr_t tmp = (k_ptr_t)(UNSEGADDR(imggdl->words.w1) - 8);
-										texturenum = *(s16 *) tmp;
+										texturenum = *(int16_t *) tmp;
 									}
 
 									lowestsqdist = sqdist;
@@ -3379,24 +3381,24 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 }
 
 bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2, struct coord *arg3,
-		Gfx *gdl, Gfx *gdl2, Vtx *vertices, f32 *sqdistptr, struct hitthing *hitthing)
+		Gfx *gdl, Gfx *gdl2, Vtx *vertices, float *sqdistptr, struct hitthing *hitthing)
 {
-	s16 triref = 0;
+	int16_t triref = 0;
 	int i = 0;
 	bool intersectsbbox;
 	int count;
 	int spdc;
 	int spd8;
 	int numvertices;
-	f32 *ptr;
+	float *ptr;
 	bool hit;
-	f32 tmp;
-	f32 sqdist;
+	float tmp;
+	float sqdist;
 	Vtx *vtx;
 	struct coord *point1;
 	struct coord *point2;
 	struct coord *point3;
-	u32 word;
+	uint32_t word;
 	Gfx *tri4gdl;
 	Mtxf *mtx;
 	struct coord min;
@@ -3424,7 +3426,7 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 		} else if (gdl->dma.cmd == G_VTX) {
 			count = (gdl->bytes[GFX_W0_BYTE(1)] & 0xf);
 			word = UNSEGADDR(gdl->words.w1) & 0xffffff;
-			numvertices = ((u32) gdl->bytes[GFX_W0_BYTE(1)] >> 4) + 1;
+			numvertices = ((uint32_t) gdl->bytes[GFX_W0_BYTE(1)] >> 4) + 1;
 			vtx = (Vtx *)((uintptr_t)vertices + word);
 
 			if (count < spdc) {
@@ -3656,14 +3658,14 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 
 bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct vtxbatch *batch, int roomnum, struct hitthing *hitthing)
 {
-	s16 triref = 0;
+	int16_t triref = 0;
 	int trisremaining = 0;
 	Gfx *gdl = batch->gdl;
 	bool hit;
 	int points[3];
 	int numvertices = 0;
-	f32 sqdist = 0.0f;
-	f32 lowestsqdist = 0.0f;
+	float sqdist = 0.0f;
+	float lowestsqdist = 0.0f;
 	int texturenum = 0;
 	int index = 0;
 	struct coord *point1;
@@ -3674,7 +3676,7 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 	struct coord min;
 	struct coord max;
 	Vtx *vtx;
-	f32 *ptr;
+	float *ptr;
 	Gfx *iter;
 	Gfx *tmpgdl;
 	Gfx *tri4gdl;
@@ -3682,7 +3684,7 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 	vtx = bgFindVerticesForGdl(roomnum, gdl);
 	iter = &gdl[batch->gbicmdindex];
 	vtx = (Vtx *)((UNSEGADDR(iter->words.w1) & 0xffffff) + (uintptr_t)vtx);
-	numvertices = (((u32) iter->bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
+	numvertices = (((uint32_t) iter->bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
 	ptr = var800a6470;
 
 	while (numvertices > 0) {
@@ -3798,7 +3800,7 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 								if (!(arg0->y > max.y && arg1->y > max.y)) {
 									if (bgTestLineIntersectsBbox(arg0, arg2, &min, &max)
 											&& func0002f560(point1, point2, point3, NULL, arg0, arg1, arg2, &spb0, &spa4)) {
-										f32 tmp;
+										float tmp;
 
 										tmp = spb0.x - arg0->x;
 										sqdist = tmp * tmp;
@@ -3821,7 +3823,7 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 												texturenum = -1;
 											} else {
 												uintptr_t tmp = UNSEGADDR(tmpgdl->words.w1) - 8;
-												texturenum = *(s16 *) (k_ptr_t)(tmp);
+												texturenum = *(int16_t *) (k_ptr_t)(tmp);
 											}
 
 											if (batch->type == VTXBATCHTYPE_XLU && texturenum >= 0 && g_Textures[texturenum].surfacetype == SURFACETYPE_DEFAULT) {
@@ -3883,11 +3885,11 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 int bg0f1612e4(struct coord *bbmin, struct coord *bbmax, struct coord *frompos, struct coord *dist, struct coord *arg4, struct coord *arg5)
 {
 	int i;
-	u8 bail = true;
-	s8 sp48[3];
+	uint8_t bail = true;
+	int8_t sp48[3];
 	int bestindex;
-	f32 sp38[3];
-	f32 sp2c[3];
+	float sp38[3];
+	float sp2c[3];
 
 	for (i = 0; i < 3; i++) {
 		if (frompos->f[i] < bbmin->f[i]) {
@@ -3958,13 +3960,13 @@ bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, st
 {
 	int i;
 	int count;
-	f32 f20;
+	float f20;
 	int a0;
 	int numbatches;
 	int j;
-	f32 f0;
-	f32 spc8;
-	f32 f2;
+	float f0;
+	float spc8;
+	float f2;
 	struct coord from;
 	struct coord to;
 	struct coord dist;
@@ -4023,30 +4025,30 @@ bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, st
 			f20 = -1.0f;
 		}
 
-		if (count < ARRAYCOUNT(g_HitBatchCandidates)) {
+		if (count < ARRAYCOUNT(var800a6538)) {
 			a0 = i;
 
 			for (j = 0; j < count; j++) {
-				f2 = g_HitBatchCandidates[j].unk04;
+				f2 = var800a6538[j].unk04;
 
 				if (f2 > f20) {
-					tmpindex = g_HitBatchCandidates[j].vtxbatchindex;
-					g_HitBatchCandidates[j].vtxbatchindex = a0;
+					tmpindex = var800a6538[j].vtxbatchindex;
+					var800a6538[j].vtxbatchindex = a0;
 					a0 = tmpindex;
 
-					g_HitBatchCandidates[j].unk04 = f20;
+					var800a6538[j].unk04 = f20;
 					f20 = f2;
 				}
 			}
 
-			g_HitBatchCandidates[j].vtxbatchindex = a0;
-			g_HitBatchCandidates[j].unk04 = f20;
+			var800a6538[j].vtxbatchindex = a0;
+			var800a6538[j].unk04 = f20;
 			count++;
 		} else {
 			count = 0;
 
-			for (j = 0; j < ARRAYCOUNT(g_HitBatchCandidates); j++) {
-				if (bgTestHitInVtxBatch(&from, &to, &dist, &g_Rooms[roomnum].vtxbatches[g_HitBatchCandidates[j].vtxbatchindex], roomnum, hitthing)) {
+			for (j = 0; j < ARRAYCOUNT(var800a6538); j++) {
+				if (bgTestHitInVtxBatch(&from, &to, &dist, &g_Rooms[roomnum].vtxbatches[var800a6538[j].vtxbatchindex], roomnum, hitthing)) {
 					f0 = from.x - hitthing->pos.x;
 					f2 = f0 * f0;
 
@@ -4057,32 +4059,32 @@ bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, st
 					f2 += f0 * f0;
 
 					if (count == 0) {
-						g_HitBatchCandidates[0].vtxbatchindex = g_HitBatchCandidates[j].vtxbatchindex;
-						g_HitBatchCandidates[0].unk04 = f2;
+						var800a6538[0].vtxbatchindex = var800a6538[j].vtxbatchindex;
+						var800a6538[0].unk04 = f2;
 						count = 1;
-					} else if (f2 < g_HitBatchCandidates[0].unk04) {
-						g_HitBatchCandidates[0].vtxbatchindex = g_HitBatchCandidates[j].vtxbatchindex;
-						g_HitBatchCandidates[0].unk04 = f2;
+					} else if (f2 < var800a6538[0].unk04) {
+						var800a6538[0].vtxbatchindex = var800a6538[j].vtxbatchindex;
+						var800a6538[0].unk04 = f2;
 						count = 1;
 					}
 				}
 			}
 
 			if (count != 0) {
-				if (f20 < g_HitBatchCandidates[0].unk04) {
-					g_HitBatchCandidates[1].unk04 = g_HitBatchCandidates[0].unk04;
-					g_HitBatchCandidates[0].unk04 = f20;
-					g_HitBatchCandidates[1].vtxbatchindex = g_HitBatchCandidates[0].vtxbatchindex;
-					g_HitBatchCandidates[0].vtxbatchindex = i;
+				if (f20 < var800a6538[0].unk04) {
+					var800a6538[1].unk04 = var800a6538[0].unk04;
+					var800a6538[0].unk04 = f20;
+					var800a6538[1].vtxbatchindex = var800a6538[0].vtxbatchindex;
+					var800a6538[0].vtxbatchindex = i;
 				} else {
-					g_HitBatchCandidates[1].vtxbatchindex = i;
-					g_HitBatchCandidates[1].unk04 = f20;
+					var800a6538[1].vtxbatchindex = i;
+					var800a6538[1].unk04 = f20;
 				}
 
 				count = 2;
 			} else {
-				g_HitBatchCandidates[0].vtxbatchindex = i;
-				g_HitBatchCandidates[0].unk04 = f20;
+				var800a6538[0].vtxbatchindex = i;
+				var800a6538[0].unk04 = f20;
 				count = 1;
 			}
 		}
@@ -4095,7 +4097,7 @@ bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, st
 	batch = g_Rooms[roomnum].vtxbatches;
 
 	for (i = 0; i < count; i++) {
-		if (bgTestHitInVtxBatch(&from, &to, &dist, &batch[g_HitBatchCandidates[i].vtxbatchindex], roomnum, hitthing)) {
+		if (bgTestHitInVtxBatch(&from, &to, &dist, &batch[var800a6538[i].vtxbatchindex], roomnum, hitthing)) {
 			i++;
 
 			if (i < count) {
@@ -4109,8 +4111,8 @@ bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, st
 				spc8 += f0 * f0;
 
 				for (; i < count; i++) {
-					if (g_HitBatchCandidates[i].unk04 <= spc8) {
-						if (bgTestHitInVtxBatch(&from, &to, &dist, &batch[g_HitBatchCandidates[i].vtxbatchindex], roomnum, &sp60)) {
+					if (var800a6538[i].unk04 <= spc8) {
+						if (bgTestHitInVtxBatch(&from, &to, &dist, &batch[var800a6538[i].vtxbatchindex], roomnum, &sp60)) {
 							f0 = from.f[0] - sp60.pos.f[0];
 							f20 = f0 * f0;
 
@@ -4189,7 +4191,7 @@ bool bgTestPosInRoomCheap(struct coord *pos, RoomNum roomnum)
 		int portalnum = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + i];
 		struct portalmetric *metric = &g_PortalMetrics[portalnum];
 
-		f32 value = metric->normal.f[0] * pos->f[0]
+		float value = metric->normal.f[0] * pos->f[0]
 			+ metric->normal.f[1] * pos->f[1]
 			+ metric->normal.f[2] * pos->f[2];
 
@@ -4215,17 +4217,17 @@ bool bgTestPosInRoomExpensive(struct coord *pos, RoomNum roomnum)
 	int portalnum;
 	struct portalmetric *metric;
 	int j;
-	f32 f0;
+	float f0;
 	struct portalvertices *pvertices;
 	struct coord sp74;
 	struct coord sp68;
 	struct coord sp5c;
-	f32 sp58[1];
+	float sp58[1];
 	struct coord sp4c;
 	struct coord *cur;
-	f32 f18;
+	float f18;
 	int i;
-	f32 sum;
+	float sum;
 
 	sp74.f[0] = g_Rooms[roomnum].centre.f[0];
 	sp74.f[1] = g_Rooms[roomnum].centre.f[1];
@@ -4233,7 +4235,7 @@ bool bgTestPosInRoomExpensive(struct coord *pos, RoomNum roomnum)
 
 	for (i = 0; i < g_Rooms[roomnum].numportals; i++) {
 		portalnum = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + i];
-		pvertices = (struct portalvertices *)((u8 *) g_BgPortals + g_BgPortals[portalnum].verticesoffset);
+		pvertices = (struct portalvertices *)((uint8_t *) g_BgPortals + g_BgPortals[portalnum].verticesoffset);
 		metric = &g_PortalMetrics[portalnum];
 
 		f0 = pos->f[0] * metric->normal.f[0] + pos->f[1] * metric->normal.f[1] + pos->f[2] * metric->normal.f[2];
@@ -4342,7 +4344,7 @@ bool bgTestPosInRoom(struct coord *pos, RoomNum roomnum)
  * If all of the above produces no results (ie. the pos is out of bounds) and
  * the bestroom pointer is not NULL, the function then finds the closest room
  * to pos and writes the room number to the bestroom pointer. The bestroom
- * pointer is a pointer to a single s16 rather than an array.
+ * pointer is a pointer to a single int16_t rather than an array.
  */
 void bgFindRoomsByPos(struct coord *posarg, RoomNum *inrooms, RoomNum *aboverooms, int max, RoomNum *bestroom)
 {
@@ -4350,7 +4352,7 @@ void bgFindRoomsByPos(struct coord *posarg, RoomNum *inrooms, RoomNum *aboveroom
 	int abovelen = 0;
 	int closestroomnum = -1;
 	struct coord pos;
-	f32 closestdist = 0.0f;
+	float closestdist = 0.0f;
 	int i;
 	int j;
 
@@ -4410,12 +4412,12 @@ void bgFindRoomsByPos(struct coord *posarg, RoomNum *inrooms, RoomNum *aboveroom
 	if (bestroom != NULL) {
 		if (inlen == 0 && abovelen == 0) {
 			for (i = 1; i < g_Vars.roomcount; i++) {
-				f32 dist = 0.0f;
+				float dist = 0.0f;
 
 				for (j = 0; j < 3; j++) {
 					if (pos.f[j] < g_Rooms[i].bbmin[j] || pos.f[j] > g_Rooms[i].bbmax[j]) {
-						f32 dist1 = pos.f[j] - g_Rooms[i].bbmin[j];
-						f32 dist2 = pos.f[j] - g_Rooms[i].bbmax[j];
+						float dist1 = pos.f[j] - g_Rooms[i].bbmin[j];
+						float dist2 = pos.f[j] - g_Rooms[i].bbmax[j];
 
 						if (dist1 < 0.0f) {
 							dist1 = -dist1;
@@ -4737,15 +4739,15 @@ void bgTickPortalsXray(void)
 	struct coord eraserpos;
 	struct coord vismid;
 	struct player *player = g_Vars.currentplayer;
-	s16 ymax;
-	s16 xmax;
-	s16 ymin;
-	s16 xmin;
+	int16_t ymax;
+	int16_t xmax;
+	int16_t ymin;
+	int16_t xmin;
 	struct stagetableentry *stage;
 	int i;
 	struct drawslot *thing;
 
-	static u32 edist = 400;
+	static uint32_t edist = 400;
 
 	bgCalculateScreenProperties();
 
@@ -4779,7 +4781,7 @@ void bgTickPortalsXray(void)
 	stage = stageGetCurrent();
 
 	player->eraserpropdist = stage->eraserpropdist;
-	player->eraserbgdist = (f32) stage->eraserpropdist + stage->unk30;
+	player->eraserbgdist = (float) stage->eraserpropdist + stage->unk30;
 
 	vismax.f[0] = eraserpos.f[0] + player->eraserbgdist;
 	vismax.f[1] = eraserpos.f[1] + player->eraserbgdist;
@@ -4816,9 +4818,9 @@ void bgTickPortalsXray(void)
 			if (g_Rooms[i].bbmax);
 
 			if (index < 60) {
-				f32 x;
-				f32 y;
-				f32 z;
+				float x;
+				float y;
+				float z;
 
 				g_Rooms[i].flags |= ROOMFLAG_ONSCREEN;
 
@@ -4858,7 +4860,7 @@ void bgTickPortalsXray(void)
 	bgChooseRoomsToLoad();
 }
 
-void bgAddToSnake(RoomNum fromroomnum, RoomNum roomnum, s16 depth, struct screenbox *box)
+void bgAddToSnake(RoomNum fromroomnum, RoomNum roomnum, int16_t depth, struct screenbox *box)
 {
 	struct bgsnakeitem *item;
 	int i;
@@ -4943,17 +4945,17 @@ void bgConsumeSnakeItem(struct bgsnakeitem *item)
 {
 	struct coord *campos;
 	int i;
-	s16 portalnum;
-	s16 prevvalidcount;
+	int16_t portalnum;
+	int16_t prevvalidcount;
 	RoomNum prevfoundroom;
 	RoomNum newfoundroom;
-	s16 side;
+	int16_t side;
 	RoomNum tmp;
 	bool pass;
 	struct portalmetric *metric;
 	struct screenbox prevbox;
 	struct screenbox newbox;
-	f32 sum;
+	float sum;
 
 	g_Rooms[item->roomnum].snakecount--;
 	g_BgSnake.count++;
@@ -4989,7 +4991,7 @@ void bgConsumeSnakeItem(struct bgsnakeitem *item)
 		tmp = g_BgPortals[portalnum].roomnum1;
 		side = g_PortalCameraCache[portalnum].side;
 
-		if ((u32)tmp == item->roomnum) {
+		if ((uint32_t)tmp == item->roomnum) {
 			if (side == 0) {
 				continue;
 			}
@@ -5179,8 +5181,8 @@ void bgChooseRoomsToLoad(void)
 
 	// Update visibility per player
 	if (g_Vars.mplayerisrunning) {
-		u8 flag1 = 0x01 << g_Vars.currentplayernum;
-		u8 flag2 = 0x10 << g_Vars.currentplayernum;
+		uint8_t flag1 = 0x01 << g_Vars.currentplayernum;
+		uint8_t flag2 = 0x10 << g_Vars.currentplayernum;
 
 		for (i = 0; i < g_Vars.roomcount; i++) {
 			if (g_Rooms[i].flags & ROOMFLAG_ONSCREEN) {
@@ -5291,11 +5293,11 @@ Gfx *bgRenderSceneAndLoadCandidate(Gfx *gdl)
 	if (g_BgLoadCandidateTimer240 == 0 && var8007fc10 == 4 && g_Vars.tickmode == TICKMODE_NORMAL) {
 		struct player *player = g_Vars.currentplayer;
 		int i;
-		f32 value;
+		float value;
 		struct coord dist;
-		f32 bestvalue = MAXFLOAT;
+		float bestvalue = MAXFLOAT;
 		int bestroomnum = 0;
-		f32 radius;
+		float radius;
 
 		if (g_BgNumRoomLoadCandidates) {
 			for (i = 1; i < g_Vars.roomcount; i++) {
@@ -5308,33 +5310,33 @@ Gfx *bgRenderSceneAndLoadCandidate(Gfx *gdl)
 
 					radius = g_Rooms[i].radius;
 
-					if (g_FrustumNearOffset + radius < player->projectionmtx->m[2][0] * g_Rooms[i].centre.f[0]
+					if (var8009dd6c + radius < player->projectionmtx->m[2][0] * g_Rooms[i].centre.f[0]
 							+ player->projectionmtx->m[2][1] * g_Rooms[i].centre.f[1]
 							+ player->projectionmtx->m[2][2] * g_Rooms[i].centre.f[2]) {
 						value *= 3.0f;
 					}
 
-					if (g_FrustumLeftOffset + radius < g_FrustumLeftPlane.f[0] * g_Rooms[i].centre.f[0]
-							+ g_FrustumLeftPlane.f[1] * g_Rooms[i].centre.f[1]
-							+ g_FrustumLeftPlane.f[2] * g_Rooms[i].centre.f[2]) {
+					if (var8009dd4c + radius < var8009dd40.f[0] * g_Rooms[i].centre.f[0]
+							+ var8009dd40.f[1] * g_Rooms[i].centre.f[1]
+							+ var8009dd40.f[2] * g_Rooms[i].centre.f[2]) {
 						value *= 1.5f;
 					}
 
-					if (g_FrustumRightOffset + radius < g_FrustumRightPlane.f[0] * g_Rooms[i].centre.f[0]
-							+ g_FrustumRightPlane.f[1] * g_Rooms[i].centre.f[1]
-							+ g_FrustumRightPlane.f[2] * g_Rooms[i].centre.f[2]) {
+					if (var8009dd5c + radius < var8009dd50.f[0] * g_Rooms[i].centre.f[0]
+							+ var8009dd50.f[1] * g_Rooms[i].centre.f[1]
+							+ var8009dd50.f[2] * g_Rooms[i].centre.f[2]) {
 						value *= 1.5f;
 					}
 
-					if (g_FrustumTopOffset + radius < g_FrustumTopPlane.f[0] * g_Rooms[i].centre.f[0]
-							+ g_FrustumTopPlane.f[1] * g_Rooms[i].centre.f[1]
-							+ g_FrustumTopPlane.f[2] * g_Rooms[i].centre.f[2]) {
+					if (var8009dd2c + radius < var8009dd20.f[0] * g_Rooms[i].centre.f[0]
+							+ var8009dd20.f[1] * g_Rooms[i].centre.f[1]
+							+ var8009dd20.f[2] * g_Rooms[i].centre.f[2]) {
 						value *= 2.0f;
 					}
 
-					if (g_FrustumBottomOffset + radius < g_FrustumBottomPlane.f[0] * g_Rooms[i].centre.f[0]
-							+ g_FrustumBottomPlane.f[1] * g_Rooms[i].centre.f[1]
-							+ g_FrustumBottomPlane.f[2] * g_Rooms[i].centre.f[2]) {
+					if (var8009dd3c + radius < var8009dd30.f[0] * g_Rooms[i].centre.f[0]
+							+ var8009dd30.f[1] * g_Rooms[i].centre.f[1]
+							+ var8009dd30.f[2] * g_Rooms[i].centre.f[2]) {
 						value *= 2.0f;
 					}
 
@@ -5371,8 +5373,10 @@ int bgGetForceOnscreenRooms(RoomNum *rooms, int len)
 int bgRoomGetNeighbours(int roomnum, RoomNum *dstrooms, int len)
 {
 	int count = 0;
+	int i;
+	int j;
 
-	for (int i = 0; i < g_Rooms[roomnum].numportals; i++) {
+	for (i = 0; i < g_Rooms[roomnum].numportals; i++) {
 		int portalnum = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + i];
 		int neighbournum = g_BgPortals[portalnum].roomnum1;
 
@@ -5380,22 +5384,21 @@ int bgRoomGetNeighbours(int roomnum, RoomNum *dstrooms, int len)
 			neighbournum = g_BgPortals[portalnum].roomnum2;
 		}
 
-		bool alreadyAdded = false;
-
-		for (int j = 0; j < count; j++) {
+		for (j = 0; j < count; j++) {
 			if (dstrooms[j] == neighbournum) {
-				alreadyAdded = true;
-				break;
+				goto end;
 			}
 		}
 
-		if (!alreadyAdded) {
-			dstrooms[count++] = neighbournum;
+		dstrooms[count] = neighbournum;
+		count++;
 
-			if (count >= len) {
-				break;
-			}
+		if (count >= len) {
+			break;
 		}
+
+end:
+		;
 	}
 
 	dstrooms[count] = -1;
@@ -5421,8 +5424,8 @@ bool bgRoomsAreNeighbours(int roomnum1, int roomnum2)
 void bgCalculateScreenProperties(void)
 {
 	struct player *player = g_Vars.currentplayer;
-	f32 width = viGetWidth();
-	f32 height = viGetHeight();
+	float width = viGetWidth();
+	float height = viGetHeight();
 	
 	player->screenxminf = viGetViewLeft();
 
@@ -5478,7 +5481,7 @@ void bgExpandRoomToPortals(int roomnum)
 
 		for (j = 0; j < pvertices->count; j++) {
 			for (k = 0; k < 3; k++) {
-				f32 value = pvertices->vertices[j].f[k];
+				float value = pvertices->vertices[j].f[k];
 
 				if (value < g_Rooms[roomnum].bbmin[k]) {
 					g_Rooms[roomnum].bbmin[k] = value;
@@ -5492,6 +5495,21 @@ void bgExpandRoomToPortals(int roomnum)
 			}
 		}
 	}
+
+	if (count);
+}
+
+bool bgPortalExists(int portalnum)
+{
+	int i;
+
+	for (i = 0; g_BgPortals[i].verticesoffset != 0; i++) {
+		if (i == portalnum) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void bgPortalSwapRooms(int portal)
@@ -5505,11 +5523,11 @@ void bgInitPortal(int portalnum)
 {
 	struct coord room1centre;
 	struct coord room2centre;
-	f32 tmp;
+	float tmp;
 	struct portalmetric sp28;
 	struct portalmetric *ptr;
-	f32 tmp1;
-	f32 tmp2;
+	float tmp1;
+	float tmp2;
 	bool sp18;
 	int roomnum1;
 	int roomnum2;
@@ -5575,9 +5593,9 @@ void bgInitRoom(int roomnum)
 	int j;
 	int k;
 	struct portalmetric metric;
-	s16 portalnum;
-	s16 portalnum2;
-	f32 tmp;
+	int16_t portalnum;
+	int16_t portalnum2;
+	float tmp;
 
 	for (i = 0; i < g_Rooms[roomnum].numportals; i++) {
 		portalnum = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + i];
@@ -5626,7 +5644,7 @@ void bgSetPortalOpenState(int portal, bool open)
 	g_BgPortals[portal].flags = (g_BgPortals[portal].flags | PORTALFLAG_CLOSED) ^ (open != false);
 }
 
-float var8007fcb4 = 0.0f;
+float var8007fcb4 = 0;
 
 int bgFindPortalBetweenPositions(struct coord *pos1, struct coord *pos2)
 {
@@ -5645,6 +5663,8 @@ int bgFindPortalBetweenPositions(struct coord *pos1, struct coord *pos2)
 			}
 
 			if (thisthing < bestthing) {
+				if (count);
+				if (i);
 				bestportalnum = i;
 				bestthing = thisthing;
 				count++;
@@ -5686,7 +5706,7 @@ void bgCalculatePortalBbox(int portalnum, struct coord *bbmin, struct coord *bbm
 
 	for (i = 0; i < pvertices->count; i++) {
 		for (j = 0; j < 3; j++) {
-			f32 value = pvertices->vertices[i].f[j];
+			float value = pvertices->vertices[i].f[j];
 
 			if (value < bbmin->f[j]) {
 				bbmin->f[j] = value;
@@ -5787,7 +5807,7 @@ void bgCalculateGlaresForVisibleRooms(void)
 		for (i = 1; i < g_Vars.roomcount; i++) {
 			if (g_Rooms[i].flags & ROOMFLAG_ONSCREEN) {
 				artifactsCalculateGlaresForRoom(i);
-				if (g_NumRoomsWithGlares < 400) { // was 100
+				if (g_NumRoomsWithGlares < 100) {
 					g_GlareRooms[g_NumRoomsWithGlares++] = i;
 				}
 			}

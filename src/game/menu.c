@@ -47,17 +47,22 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
 #include "video.h"
 #include "input.h"
 #include "platform.h"
-#include "game/debug.h"
 #define BLUR_OFS 10
+#else
+#define BLUR_OFS 30
+#endif
 
 char g_CheatMarqueeString[252];
 
 u8 *g_BlurBuffer;
-bool g_GameIsPaused;
+s32 var8009dfc0;
+u32 var8009dfc4;
 struct briefing g_Briefing;
+u32 var8009dfe4;
 struct missionconfig g_MissionConfig;
 struct menu g_Menus[MAX_PLAYERS];
 struct menudata g_MenuData;
@@ -103,7 +108,7 @@ const struct menucolourpalette g_MenuWave2Colours[] = {
 };
 
 char *g_StringPointer = g_CheatMarqueeString;
-char *g_StringPointer2 = &g_CheatMarqueeString[125];
+char *g_StringPointer2 = &g_CheatMarqueeString[VERSION >= VERSION_PAL_FINAL ? 150 : 125];
 
 s32 g_MpPlayerNum = 0;
 
@@ -1772,7 +1777,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 		// Types 2 and 3 are unused. Type 4 is the credits scrolling logo.
 		if (modeltype < MENUMODELTYPE_3 && g_MenuData.usezbuf) {
 			gdl = viPrepareZbuf(gdl);
-			gdl = viSetupViewportAndProjection(gdl, &g_Vars.currentplayer->viewport[0]);
+			gdl = vi0000b1d0(gdl);
 
 			g_MenuData.usezbuf = false;
 
@@ -1783,7 +1788,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 			gSPSetGeometryMode(gdl++, G_ZBUFFER);
 		}
 
-		//gSPDisplayList(gdl++, var80061380);
+		gSPDisplayList(gdl++, var80061380);
 		gSPDisplayList(gdl++, var800613a0);
 
 		haszoom = false;
@@ -2059,7 +2064,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 				viSetViewPosition(x1, g_MenuScissorY1);
 				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (x2 - x1), g_MenuScissorY2 - g_MenuScissorY1);
 
-				gdl = viSetupViewportAndProjection(gdl, var800a2048[g_MpPlayerNum]);
+				gdl = vi0000af00(gdl, var800a2048[g_MpPlayerNum]);
 				gdl = vi0000aca4(gdl, znear, zfar);
 			}
 		}
@@ -2342,7 +2347,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 			&& menuGetRoot() == MENUROOT_MPENDSCREEN
-			&& !g_GameIsPaused) {
+			&& !var8009dfc0) {
 		return gdl;
 	}
 
@@ -3475,7 +3480,7 @@ void menuReset(void)
 {
 	s32 i;
 
-	g_GameIsPaused = 0;
+	var8009dfc0 = 0;
 
 	g_BlurBuffer = mempAlloc(0x4b00, MEMPOOL_STAGE);
 
@@ -3819,7 +3824,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 				dialog->statefrac = 0.5f;
 			}
 		} else if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && menuGetRoot() == MENUROOT_MPENDSCREEN) {
-			if (g_GameIsPaused) {
+			if (var8009dfc0) {
 				dialog->statefrac += g_Vars.diffframe240 / 60.0f;
 
 				if (dialog->statefrac > 1.0f) {
@@ -5633,8 +5638,7 @@ void menuPushPakErrorDialog(s32 paknum, s32 pakerrordialog)
 	g_MpPlayerNum = prevplayernum;
 }
 
-// This makes the blue boxy tunnel in the background point to the computer terminal when you press use on it in Carrington Traning
-void menuPointTunnelToPC(struct coord *pos)
+void func0f0fd494(struct coord *pos)
 {
 	f32 xy[2];
 	struct coord coord;
@@ -5743,7 +5747,11 @@ struct menudialogdef g_PakDamagedMenuDialog = {
 	L_MPWEAPONS_064, // "Damaged Controller Pak"
 	g_PakDamagedMenuItems,
 	menudialog000fcd48,
+#if VERSION >= VERSION_NTSC_1_0
 	0x00000020,
+#else
+	0,
+#endif
 	NULL,
 };
 
@@ -5804,10 +5812,15 @@ struct menudialogdef g_PakFullMenuDialog = {
 	L_MPWEAPONS_070, // "Full Controller Pak"
 	g_PakFullMenuItems,
 	menudialog000fcd48,
+#if VERSION >= VERSION_NTSC_1_0
 	0x00000020,
+#else
+	0,
+#endif
 	NULL,
 };
 
+#if VERSION >= VERSION_NTSC_1_0
 struct menuitem g_PakCannotReadGameBoyMenuItems[] = {
 	{
 		MENUITEMTYPE_LABEL,
@@ -5905,3 +5918,4 @@ struct menudialogdef g_PakDataLostMenuDialog = {
 	MENUDIALOGFLAG_IGNOREBACK,
 	NULL,
 };
+#endif

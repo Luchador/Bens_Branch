@@ -1,12 +1,11 @@
 #include <ultra64.h>
-#include <math.h>
 #include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/bondeyespy.h"
 #include "game/bondmove.h"
 #include "game/cheats.h"
 #include "game/chraction.h"
-#include "game/floor.h"
 #include "game/inv.h"
 #include "game/nbomb.h"
 #include "game/title.h"
@@ -102,6 +101,7 @@ bool g_CutsceneSkipRequested;
 f32 g_CutsceneCurTotalFrame60f;
 s32 g_CutsceneTweenDuration60;
 f32 g_CutsceneTweenFrac; // 0 when bars across the top and bottom, 1 when fullscreen
+u32 var8009de34;
 s16 g_SpawnPoints[24];
 s32 g_NumSpawnPoints;
 
@@ -122,6 +122,8 @@ struct vimode g_ViModes[] = {
 	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.5,              VIMODE_LO, SCREEN_HEIGHT_HI, 0,  180, 20, 136, 42  }, // hi-res
 };
 
+u32 var80070730 = 0xffffffff;
+u32 var80070734 = 0xffffffff;
 u32 var8007073c = 0;
 u32 var8007074c = 0;
 
@@ -130,7 +132,7 @@ bool g_PlayersWithControl[] = {
 };
 
 bool g_PlayerInvincible = false;
-bool g_InCutscene = false;
+s32 g_InCutscene = 0x00000000;
 
 s16 g_DeathAnimations[] = {
 	ANIM_DEATH_001A,
@@ -1282,12 +1284,14 @@ void playerTickChrBody(void)
 		if (!g_Vars.mplayerisrunning) {
 			// 1 player
 			if (g_Vars.currentplayer->gunmem2 == NULL) {
-				if (!g_GameIsPaused && bgunChangeGunMem(GUNMEMOWNER_CHRBODY)) {
+				if (!var8009dfc0 && bgunChangeGunMem(GUNMEMOWNER_CHRBODY)) {
 					g_Vars.currentplayer->gunmem2 = bgunGetGunMem();
 				} else {
+					if (var8009dfc0);
+
 					g_Vars.currentplayer->haschrbody = false;
 
-					if (!g_GameIsPaused) {
+					if (!var8009dfc0) {
 						g_Vars.lockscreen = true;
 					}
 					return;
@@ -2139,10 +2143,10 @@ Gfx *player0f0baf84(Gfx *gdl)
 		u16 b;
 
 		guPerspective(a, &b, g_Vars.currentplayer->zoominfovy,
-				1.4545454978943f, 10, 300, 1);
+				PAL ? 1.7316017150879f : 1.4545454978943f, 10, 300, 1);
 
 		gSPMatrix(gdl++, (uintptr_t)(a), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-		//gSPPerspNormalize(gdl++, b);
+		gSPPerspNormalize(gdl++, b);
 	}
 
 	return gdl;
@@ -2653,7 +2657,7 @@ bool playerHasSharedViewport(void)
 {
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 			&& menuGetRoot() == MENUROOT_MPENDSCREEN
-			&& g_GameIsPaused == 0) {
+			&& var8009dfc0 == 0) {
 		return true;
 	}
 
@@ -2754,7 +2758,7 @@ s16 playerGetViewportHeight(void)
 			height = g_ViModes[0].wideheight;
 		} else if (optionsGetEffectiveScreenSize() == SCREENSIZE_CINEMA) {
 			height = g_ViModes[0].cinemaheight;
-		} else if (g_InCutscene && !g_GameIsPaused) {
+		} else if (g_InCutscene && !var8009dfc0) {
 			if (g_CutsceneTweenDuration60 >= 1) {
 				f32 a = g_ViModes[0].wideheight;
 				f32 b = g_ViModes[0].fullheight;
@@ -2809,7 +2813,7 @@ s16 playerGetViewportTop(void)
 		} else if (optionsGetEffectiveScreenSize() == SCREENSIZE_CINEMA) {
 			top = g_ViModes[0].cinematop;
 		} else {
-			if (g_InCutscene && !g_GameIsPaused
+			if (g_InCutscene && !var8009dfc0
 					&& (!optionsGetCutsceneSubtitles() || g_Vars.stagenum == STAGE_CITRAINING)) {
 				if (g_CutsceneTweenDuration60 >= 1) {
 					f32 a = g_ViModes[0].widetop;
@@ -2836,7 +2840,7 @@ f32 player0f0bd358(void)
 	s16 width = playerGetViewportWidth();
 
 	result = (f32)width / (f32)height;
-	//result = g_ViModes[0].yscale * result;
+	result = g_ViModes[0].yscale * result;
 
 	return result * (videoGetAspect() / ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO));
 }
@@ -2998,7 +3002,7 @@ void playerTick()
 	bgunSetGunAmmoVisible(GUNAMMOREASON_OPTION, optionsGetAmmoOnScreen(g_Vars.currentplayerstats->mpindex));
 	bgunSetSightVisible(GUNSIGHTREASON_1, true);
 
-	if ((g_Vars.tickmode == TICKMODE_NORMAL) && !g_InCutscene && !g_MainIsEndscreen) {
+	if ((g_Vars.tickmode == TICKMODE_GE_FADEIN || g_Vars.tickmode == TICKMODE_NORMAL) && !g_InCutscene && !g_MainIsEndscreen) {
 		g_Vars.currentplayer->bondviewlevtime60 += g_Vars.lvupdate60;
 	}
 
@@ -3743,7 +3747,7 @@ void playerTick()
 				g_Vars.aibuddies[i] = prop;
 			}
 		}
-	} /*else if (g_Vars.tickmode == TICKMODE_GE_FADEIN || g_Vars.tickmode == TICKMODE_GE_FADEOUT) {
+	} else if (g_Vars.tickmode == TICKMODE_GE_FADEIN || g_Vars.tickmode == TICKMODE_GE_FADEOUT) {
 		playerRemoveChrBody();
 		bmoveTick(1, 1, true, 0);
 		playerUpdateShake();
@@ -3753,7 +3757,7 @@ void playerTick()
 				&g_Vars.currentplayer->bond2.unk1c,
 				&g_Vars.currentplayer->prop->pos,
 				g_Vars.currentplayer->prop->rooms);
-	}*/ else if (g_Vars.tickmode == TICKMODE_MPSWIRL) {
+	} else if (g_Vars.tickmode == TICKMODE_MPSWIRL) {
 		// Start of an MP match where the camera circles around the player
 		playerTickChrBody();
 		bmoveTick(0, 0, 0, 1);
@@ -3872,7 +3876,7 @@ void playerTick()
 	g_Vars.currentplayer->bondwatchtime60 += g_Vars.diffframe60freal;
 
 	// Also a leftover from GE? Maybe cancelling fade in mission intros?
-	/*if (var8007074c) {
+	if (var8007074c) {
 		s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
 
 		if (!lvIsPaused() && joyGetButtonsPressedThisFrame(contpad1, A_BUTTON | B_BUTTON | Z_TRIG | START_BUTTON | R_TRIG)) {
@@ -3895,7 +3899,7 @@ void playerTick()
 				&& g_Vars.currentplayer->colourscreenfrac == 1) {
 			mainFinalObjectiveCheck();
 		}
-	}*/
+	}
 
 	// Handle mission exit on death
 	if (g_Vars.currentplayer->isdead) {
@@ -3921,9 +3925,9 @@ void playerTick()
 		}
 	}
 
-	/*if (g_Vars.tickmode == TICKMODE_GE_FADEOUT && playerIsFadeComplete()) {
+	if (g_Vars.tickmode == TICKMODE_GE_FADEOUT && playerIsFadeComplete()) {
 		mainEndStage();
-	}*/
+	}
 }
 
 #define WIELDMODE_PISTOL   0
@@ -4087,7 +4091,7 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	camSetWorldToScreenMtxf(g_Vars.currentplayer->mtxf0064);
 	camSetProjectionMtxF(g_Vars.currentplayer->mtxf0068);
 	camSetLookAt(lookat);
-	camComputeFrustumPlanes();
+	cam0f0b5838();
 	playerSetGlobalDrawCameraOffset();
 }
 
@@ -4266,21 +4270,20 @@ Gfx *playerRenderHud(Gfx *gdl)
 	}
 
 	if (g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY) {
-		bgunTickGameplay2();
 
+		bgunTickGameplay2();
 		gdl = lasersightRenderDot(gdl);
-		
+
 		if (g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
 			gdl = bgRenderArtifacts(gdl);
 		}
 
-		// Move gun rendering after artifact rendering to the gun draws on top
-		gdl = boltbeamsRender(gdl);
-		bgunRender(&gdl);
-
 		if (g_NbombsActive) {
 			gdl = nbombRenderOverlay(gdl);
 		}
+
+		gdl = boltbeamsRender(gdl);
+		bgunRender(&gdl);
 
 		if (g_Vars.stagenum == STAGE_ESCAPE) {
 			gdl = gasRender(gdl);
@@ -4312,6 +4315,7 @@ Gfx *playerRenderHud(Gfx *gdl)
 				&& (!g_Vars.currentplayer->eyespy || (g_Vars.currentplayer->eyespy && !g_Vars.currentplayer->eyespy->active))
 				&& ((g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit) & DEVICE_NIGHTVISION)) {
 			gdl = bviewDrawNvLens(gdl);
+			gdl = bviewDrawNvBinoculars(gdl);
 		} else if (g_Vars.currentplayer->isdead == false
 				&& g_InCutscene == 0
 				&& (!g_Vars.currentplayer->eyespy || (g_Vars.currentplayer->eyespy && !g_Vars.currentplayer->eyespy->active))
@@ -4522,8 +4526,8 @@ Gfx *playerRenderHud(Gfx *gdl)
 		gdl = bgRenderArtifacts(gdl);
 
 		if (g_Vars.currentplayer->eyespy) {
-			//bgunTickGameplay2(); // Dirty hack to stop unwanted shaders from rendering when using CamSpy
-			//bgunRender(&gdl);
+			bgunTickGameplay2(); // Dirty hack to stop unwanted shaders from rendering when using CamSpy
+			bgunRender(&gdl);
 			if (g_Vars.currentplayer->eyespy->startuptimer60 < TICKS(50)) {
 				gdl = bviewDrawFisheye(gdl, 0xffffffff, 255, 0, g_Vars.currentplayer->eyespy->startuptimer60, g_Vars.currentplayer->eyespy->hit);
 			} else {
@@ -4714,7 +4718,7 @@ void player0f0c1840(struct coord *pos, struct coord *up, struct coord *look, str
 	s32 room;
 
 	if (rooms2 != NULL && *rooms2 != -1) {
-		portalComputeReachableRooms(pos2, pos, rooms2, sp54, NULL, 0);
+		portal00018148(pos2, pos, rooms2, sp54, NULL, 0);
 
 		// Remove values from sp54 (room numbers) if that room doesn't contain
 		// the coord, and shuffle the array back when removing values.

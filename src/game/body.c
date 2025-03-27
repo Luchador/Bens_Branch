@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include <math.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/chraction.h"
@@ -26,12 +25,12 @@
 #include "data.h"
 #include "types.h"
 
-int g_NumBondBodies = 0;
-int g_NumMaleGuardHeads = 0;
-int g_NumFemaleGuardHeads = 0;
-int g_NumMaleGuardTeamHeads = 0;
+s32 g_NumBondBodies = 0;
+s32 g_NumMaleGuardHeads = 0;
+s32 g_NumFemaleGuardHeads = 0;
+s32 g_NumMaleGuardTeamHeads = 0;
 
-int g_BondBodies[] = { // Probably left over from GE
+s32 g_BondBodies[] = { // Probably left over from GE
 	BODY_DJBOND,
 	BODY_CONNERY,
 	BODY_DALTON,
@@ -39,7 +38,7 @@ int g_BondBodies[] = { // Probably left over from GE
 	-1,
 };
 
-int g_MaleGuardHeads[] = { // 42 heads
+s32 g_MaleGuardHeads[] = { // 42 heads
 	HEAD_BEAU1,
 	HEAD_CHRIST,
 	HEAD_DARLING,
@@ -85,7 +84,7 @@ int g_MaleGuardHeads[] = { // 42 heads
 	-1,
 };
 
-int g_MaleGuardTeamHeads[] = { // 16 heads
+s32 g_MaleGuardTeamHeads[] = { // 16 heads
 	HEAD_BEAU1,
 	HEAD_CHRIST,
 	HEAD_DARLING,
@@ -105,7 +104,7 @@ int g_MaleGuardTeamHeads[] = { // 16 heads
 	-1,
 };
 
-int g_FemaleGuardHeads[] = { // Ben's comment: Not actually used
+s32 g_FemaleGuardHeads[] = { // Ben's comment: Not actually used
 	HEAD_LESLIE_S,
 	HEAD_ANKA,
 	HEAD_EILEEN_T,
@@ -115,7 +114,7 @@ int g_FemaleGuardHeads[] = { // Ben's comment: Not actually used
 
 int g_RandomBond = 0;
 
-int g_FemGuardHeads[3] = { // dataDyne female guard heads
+s32 g_FemGuardHeads[3] = { // dataDyne female guard heads
 	HEAD_ALEX,
 	HEAD_JULIANNE,
 	HEAD_LAURA,
@@ -149,10 +148,10 @@ bool bodyLoad(int bodynum)
 	return false;
 }
 
-struct model *body0f02ce8c(int bodynum, int headnum, struct modeldef *bodymodeldef, struct modeldef *headmodeldef, bool sunglasses, struct model *model, bool isplayer, uint8_t varyheight)
+struct model *body0f02ce8c(s32 bodynum, s32 headnum, struct modeldef *bodymodeldef, struct modeldef *headmodeldef, bool sunglasses, struct model *model, bool isplayer, u8 varyheight)
 {
-	float scale = g_HeadsAndBodies[bodynum].scale * 0.10000001f;
-	float animscale = g_HeadsAndBodies[bodynum].animscale;
+	f32 scale = g_HeadsAndBodies[bodynum].scale * 0.10000001f;
+	f32 animscale = g_HeadsAndBodies[bodynum].animscale;
 	struct modelnode *node = NULL;
 
 	if (cheatIsActive(CHEAT_DKMODE)) {
@@ -199,7 +198,7 @@ struct model *body0f02ce8c(int bodynum, int headnum, struct modeldef *bodymodeld
 
 					if (g_HeadsAndBodies[bodynum].canvaryheight && varyheight) {
 						// Set height to between 95% and 115%
-						float frac = RANDOMFRAC() * 0.05f;
+						f32 frac = RANDOMFRAC() * 0.05f;
 						scale *= 2.0f * frac - 0.05f + 1.0f;
 					}
 				}
@@ -221,7 +220,7 @@ struct model *body0f02ce8c(int bodynum, int headnum, struct modeldef *bodymodeld
 		} else if (bodymodeldef->skel == &g_SkelSkedar) {
 			if (g_HeadsAndBodies[bodynum].canvaryheight && varyheight && bodynum == BODY_SKEDAR) {
 				// Set height to between 65% and 85%
-				float frac = RANDOMFRAC();
+				f32 frac = RANDOMFRAC();
 				scale *= 2.0f * (0.1f * frac) - 0.1f + 0.75f;
 			}
 		}
@@ -242,7 +241,7 @@ struct model *body0f02ce8c(int bodynum, int headnum, struct modeldef *bodymodeld
 
 			modelmgrAttachHead(model, node, headmodeldef);
 
-			if ((uint16_t)*(int *)&headmodeldef->skel == SKEL_HEAD) {
+			if ((s16)*(s32 *)&headmodeldef->skel == SKEL_HEAD) {
 				struct modelnode *node2;
 
 				if (!sunglasses) {
@@ -267,15 +266,15 @@ struct model *body0f02ce8c(int bodynum, int headnum, struct modeldef *bodymodeld
 	return model;
 }
 
-struct model *body0f02d338(int bodynum, int headnum, struct modeldef *bodymodeldef, struct modeldef *headmodeldef, bool sunglasses, uint8_t varyheight)
+struct model *body0f02d338(s32 bodynum, s32 headnum, struct modeldef *bodymodeldef, struct modeldef *headmodeldef, bool sunglasses, u8 varyheight)
 {
 	return body0f02ce8c(bodynum, headnum, bodymodeldef, headmodeldef, sunglasses, NULL, false, varyheight);
 }
 
-struct model *bodyAllocateModel(int bodynum, int headnum, unsigned int spawnflags)
+struct model *bodyAllocateModel(s32 bodynum, s32 headnum, u32 spawnflags)
 {
 	bool sunglasses = false;
-	uint8_t varyheight = true;
+	u8 varyheight = true;
 
 	if (spawnflags & SPAWNFLAG_FORCESUNGLASSES) {
 		sunglasses = true;
@@ -290,14 +289,14 @@ struct model *bodyAllocateModel(int bodynum, int headnum, unsigned int spawnflag
 	return body0f02d338(bodynum, headnum, NULL, NULL, sunglasses, varyheight);
 }
 
-int bodyGetRandomBond(void)
+s32 bodyGetRandomBond(void)
 {
 	return g_BondBodies[rngRandom() % g_NumBondBodies];
 }
 
-int bodyChooseHead(int bodynum)
+s32 bodyChooseHead(s32 bodynum)
 {
-	int head;
+	s32 head;
 
 	if (g_HeadsAndBodies[bodynum].ismale) {
 		if (cheatIsActive(CHEAT_TEAMHEADSONLY))
@@ -322,7 +321,7 @@ int bodyChooseHead(int bodynum)
  * Chr definitions are stored in a packed format in each stage's setup file.
  * The packed format is used for space saving reasons.
  */
-void bodyAllocateChr(int stagenum, struct packedchr *packed, int cmdindex)
+void bodyAllocateChr(s32 stagenum, struct packedchr *packed, s32 cmdindex)
 {
 	struct pad pad;
 	RoomNum rooms[2];
@@ -330,10 +329,10 @@ void bodyAllocateChr(int stagenum, struct packedchr *packed, int cmdindex)
 	struct modeldef *headmodeldef;
 	struct model *model;
 	struct prop *prop;
-	int bodynum;
-	int headnum;
-	float angle;
-	int index;
+	s32 bodynum;
+	s32 headnum;
+	f32 angle;
+	s32 index;
 
 	padUnpack(packed->padnum, PADFIELD_POS | PADFIELD_LOOK | PADFIELD_ROOM, &pad);
 
@@ -379,7 +378,7 @@ void bodyAllocateChr(int stagenum, struct packedchr *packed, int cmdindex)
 
 	// Dinner party cheat
 	if(cheatIsActive(CHEAT_DINNERPARTY)) {
-		unsigned int race = bodyGetRace(bodynum);
+		u32 race = bodyGetRace(bodynum);
 		if(race == RACE_HUMAN && bodynum != BODY_CARRINGTON && bodynum != BODY_CARREVENINGSUIT) {
 			bodynum = bodyGetRandomBond();
 		}
@@ -525,9 +524,9 @@ struct prop *bodyAllocateEyespy(struct pad *pad, RoomNum room)
 	struct prop *prop;
 	struct chrdata *chr;
 	struct model *model;
-	int inlift;
+	s32 inlift;
 	struct prop *lift;
-	float ground;
+	f32 ground;
 
 	rooms[0] = room;
 	rooms[1] = -1;
@@ -586,16 +585,16 @@ struct prop *bodyAllocateEyespy(struct pad *pad, RoomNum room)
  * any tweaking. This function is used in multiplayer where players can put any
  * heads on any bodies.
  */
-void bodyCalculateHeadOffset(struct modeldef *headmodeldef, int headnum, int bodynum)
+void bodyCalculateHeadOffset(struct modeldef *headmodeldef, s32 headnum, s32 bodynum)
 {
 	struct modelnode *node;
 	struct modelnode *prev;
 	Gfx *gdl;
-	int offset;
+	s32 offset;
 	struct modelrodata_bbox *bbox;
-	int i;
+	s32 i;
 
-	if ((int16_t)(*(int *)&headmodeldef->skel) == SKEL_HEAD) {
+	if ((s16)(*(s32 *)&headmodeldef->skel) == SKEL_HEAD) {
 		if (g_HeadsAndBodies[headnum].type == g_HeadsAndBodies[bodynum].type) {
 			return;
 		}

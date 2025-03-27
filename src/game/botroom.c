@@ -46,22 +46,22 @@
  * It's likely that these don't ever overflow, or they overflow minimally which
  * has no serious effect, but this should be investigated further.
  */
-bool botroomFindPos(RoomNum room, struct coord *pos, f32 *angleptr, s32 *padnumptr, s32 *covernumptr)
+bool botroomFindPos(RoomNum room, struct coord *pos, float *angleptr, int *padnumptr, int *covernumptr)
 {
-	s32 i;
+	int i;
 	struct waypoint *waypoint;
-	s32 waypointnum;
-	s32 covernums[40];
-	s32 covercount;
+	int waypointnum;
+	int covernums[40];
+	int covercount;
 	struct cover cover;
 	RoomNum rooms[2];
-	s32 padnums[40];
-	s32 padcount;
-	s32 totalcount;
+	int padnums[40];
+	int padcount;
+	int totalcount;
 	struct pad pad;
 	bool sp54;
 	bool sp50;
-	s32 count;
+	int count;
 
 	covercount = 0;
 	padcount = 0;
@@ -125,8 +125,6 @@ bool botroomFindPos(RoomNum room, struct coord *pos, f32 *angleptr, s32 *padnump
 				}
 			}
 		}
-
-		if (1);
 
 		sp50 = sp54;
 	} while (sp54 && !totalcount);

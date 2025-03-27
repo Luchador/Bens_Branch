@@ -1,8 +1,8 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
 #include "game/race.h"
-#include "game/floor.h"
 #include "bss.h"
 #include "lib/anim.h"
 #include "data.h"
@@ -41,7 +41,7 @@ int raceInitAnimGroup(struct attackanimconfig *configs)
 	struct attackanimconfig *config = configs;
 
 	while (config->animnum != 0) {
-		uint16_t angle = raceGetAnimSumAngleAsInt(config->animnum, 0, floortoint(config->unk04));
+		uint16_t angle = raceGetAnimSumAngleAsInt(config->animnum, 0, (int)floorf(config->unk04));
 
 		if (config->unk04 > 0) {
 			if (angle < 0x8000) {
@@ -82,7 +82,7 @@ int raceCountAnims(struct animtablerow *rows)
 
 float race0f0005c0(int16_t animnum)
 {
-	float avgforward = raceGetAnimSumForwardAsInt(animnum, 0, animGetNumFrames(animnum) - 1) / (f32) animGetNumFrames(animnum);
+	float avgforward = raceGetAnimSumForwardAsInt(animnum, 0, animGetNumFrames(animnum) - 1) / (float) animGetNumFrames(animnum);
 
 	var8005f014[animnum] = avgforward;
 

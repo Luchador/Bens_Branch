@@ -37,9 +37,12 @@ struct tilesize {
 };
 
 s32 g_TexLutMode;
+u32 var800ab5b4;
 struct tilestate g_TexTileStates[8];
 struct tilesize g_TexTileSizes[8];
+#ifndef PLATFORM_N64
 u32 g_TexFilter2D = G_TF_BILERP;
+#endif
 
 // Default
 u16 g_SurfaceTypeDefaultSounds[] = { SFX_HIT_STONE_8087, SFX_HIT_STONE_8088 };
@@ -174,6 +177,24 @@ struct surfacetype *g_SurfaceTypes[] = {
 	/*12*/ &g_SurfaceTypeGlassXlu,
 	/*13*/ &g_SurfaceTypeNone,
 	/*14*/ &g_SurfaceTypeDeepWater,
+};
+
+char *var80084494[] = {
+	"default",
+	"stone",
+	"wood",
+	"metal",
+	"glass",
+	"shallow water",
+	"snow",
+	"dirt",
+	"mud",
+	"tile",
+	"metalobj",
+	"chr",
+	"glass xlu",
+	"no hit",
+	"deep water",
 };
 
 bool g_TexPipeSynced = false;

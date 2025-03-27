@@ -12,14 +12,14 @@
 
 void casingTick(struct casing *casing)
 {
-	f32 tmp;
-	f32 tmp2;
-	f32 sp8c[3][3];
-	f32 sp68[3][3];
-	s32 i;
-	s32 j;
-	f32 lvupdate = g_Vars.lvupdate60freal;
-	f32 sp58;
+	float tmp;
+	float tmp2;
+	float sp8c[3][3];
+	float sp68[3][3];
+	int i;
+	int j;
+	float lvupdate = g_Vars.lvupdate60freal;
+	float sp58;
 
 	tmp2 = lvupdate * (1.0f / 3.6f);
 	tmp = casing->speed.y - tmp2;
@@ -48,7 +48,7 @@ void casingTick(struct casing *casing)
 			sndStart(var80095200, SFX_8051, &g_CasingAudioHandles[i], -1, -1, -1.0f, -1, -1);
 
 			if (g_CasingAudioHandles[i]) {
-				audioPostEvent(g_CasingAudioHandles[i], AL_SNDP_PITCH_EVT, *(s32 *)&sp58);
+				audioPostEvent(g_CasingAudioHandles[i], AL_SNDP_PITCH_EVT, *(int *)&sp58);
 			}
 		}
 
@@ -80,7 +80,7 @@ void casingTick(struct casing *casing)
 
 void casingsTick(void)
 {
-	s32 i;
+	int i;
 	struct casing *end;
 	struct casing *casing;
 

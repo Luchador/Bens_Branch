@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/bot.h"
 #include "game/challenge.h"
@@ -19,10 +20,10 @@
 #include "data.h"
 #include "types.h"
 
-u8 g_MpFeaturesForceUnlocked[40];
-u8 g_MpFeaturesUnlocked[80];
+uint8_t g_MpFeaturesForceUnlocked[40];
+uint8_t g_MpFeaturesUnlocked[80];
 
-u32 g_MpChallengeIndex = 0;
+uint32_t g_MpChallengeIndex = 0;
 struct mpconfigfull *g_MpCurrentChallengeConfig = NULL;
 
 struct challenge g_MpChallenges[] = {
@@ -58,12 +59,12 @@ struct challenge g_MpChallenges[] = {
 	{ L_OPTIONS_435, MPCONFIG_CHALLENGE30 }, // "Challenge 30"
 };
 
-bool challengeIsAvailable(s32 challengeindex)
+bool challengeIsAvailable(int challengeindex)
 {
 	return (g_MpChallenges[challengeindex].availability & 1) != 0;
 }
 
-bool challengeIsAvailableToPlayer(s32 chrnum, s32 challengeindex)
+bool challengeIsAvailableToPlayer(int chrnum, int challengeindex)
 {
 	if ((g_MpSetup.chrslots & (1 << chrnum)) == 0) {
 		return 0;
@@ -72,20 +73,20 @@ bool challengeIsAvailableToPlayer(s32 chrnum, s32 challengeindex)
 	return ((g_MpChallenges[challengeindex].availability & (2 << chrnum)) != 0);
 }
 
-bool challengeIsAvailableToAnyPlayer(s32 challengeindex)
+bool challengeIsAvailableToAnyPlayer(int challengeindex)
 {
 	return (g_MpChallenges[challengeindex].availability & (((g_MpSetup.chrslots & 0xf) << 1) | 1)) != 0;
 }
 
 void challengeDetermineUnlockedFeatures(void)
 {
-	s32 challengeindex;
-	s32 numgifted; // number of unlocked but not completed challenges
-	u8 flag;
-	s32 prev;
-	s32 i;
-	s32 j;
-	s32 k;
+	int challengeindex;
+	int numgifted; // number of unlocked but not completed challenges
+	uint8_t flag;
+	int prev;
+	int i;
+	int j;
+	int k;
 
 	// Clear all challenge availability
 	for (challengeindex = 0; challengeindex < ARRAYCOUNT(g_MpChallenges); challengeindex++) {
@@ -232,8 +233,8 @@ void challengeDetermineUnlockedFeatures(void)
 void challengePerformSanityChecks(void)
 {
 	if (g_BossFile.locktype == MPLOCKTYPE_CHALLENGE) {
-		s32 numplayers = 0;
-		s32 i;
+		int numplayers = 0;
+		int i;
 
 		// Reset player handicaps
 		for (i = 0; i < MAX_PLAYERS; i++) {
@@ -264,10 +265,10 @@ void challengePerformSanityChecks(void)
 	}
 }
 
-s32 challengeGetNumAvailable(void)
+int challengeGetNumAvailable(void)
 {
-	s32 challengeindex;
-	s32 count = 0;
+	int challengeindex;
+	int count = 0;
 
 	for (challengeindex = 0; challengeindex < ARRAYCOUNT(g_MpChallenges); challengeindex++) {
 		if (challengeIsAvailableToAnyPlayer(challengeindex)) {
@@ -278,15 +279,15 @@ s32 challengeGetNumAvailable(void)
 	return count;
 }
 
-char *challengeGetName(s32 challengeindex)
+char *challengeGetName(int challengeindex)
 {
 	return langGet(g_MpChallenges[challengeindex].name);
 }
 
-char *challengeGetNameBySlot(s32 slot)
+char *challengeGetNameBySlot(int slot)
 {
-	s32 index = 0;
-	s32 i;
+	int index = 0;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpChallenges); i++) {
 		if (challengeIsAvailableToAnyPlayer(i)) {
@@ -301,9 +302,9 @@ char *challengeGetNameBySlot(s32 slot)
 	return "";
 }
 
-void challengeSetCurrentBySlot(s32 slotnum)
+void challengeSetCurrentBySlot(int slotnum)
 {
-	s32 challengeindex;
+	int challengeindex;
 	g_MpChallengeIndex = 0;
 
 	for (challengeindex = 0; challengeindex < ARRAYCOUNT(g_MpChallenges); challengeindex++) {
@@ -320,15 +321,15 @@ void challengeSetCurrentBySlot(s32 slotnum)
 	challengeApply();
 }
 
-s32 challengeGetCurrent(void)
+int challengeGetCurrent(void)
 {
 	return g_MpChallengeIndex;
 }
 
-bool challengeIsCompletedByAnyChrWithNumPlayersBySlot(s32 slot, s32 numplayers)
+bool challengeIsCompletedByAnyChrWithNumPlayersBySlot(int slot, int numplayers)
 {
-	s32 availableindex = 0;
-	s32 i;
+	int availableindex = 0;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpChallenges); i++) {
 		if (challengeIsAvailableToAnyPlayer(i)) {
@@ -343,10 +344,10 @@ bool challengeIsCompletedByAnyChrWithNumPlayersBySlot(s32 slot, s32 numplayers)
 	return false;
 }
 
-bool challengeIsCompletedByChrWithNumPlayersBySlot(s32 mpchrnum, s32 slot, s32 numplayers)
+bool challengeIsCompletedByChrWithNumPlayersBySlot(int mpchrnum, int slot, int numplayers)
 {
-	s32 availableindex = 0;
-	s32 i;
+	int availableindex = 0;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpChallenges); i++) {
 		if (challengeIsAvailableToAnyPlayer(i)) {
@@ -363,15 +364,15 @@ bool challengeIsCompletedByChrWithNumPlayersBySlot(s32 mpchrnum, s32 slot, s32 n
 
 #define BTYPE uintptr_t
 
-struct mpconfigfull *challengeLoadConfig(s32 confignum, u8 *buffer, s32 len)
+struct mpconfigfull *challengeLoadConfig(int confignum, uint8_t *buffer, int len)
 {
 	struct mpconfigfull *mpconfig;
-	u8 buffer2[sizeof(struct mpstrings) + 40];
+	uint8_t buffer2[sizeof(struct mpstrings) + 40];
 	struct mpstrings *loadedstrings;
 	BTYPE bank;
-	u32 language_id = 0;
+	uint32_t language_id = 0;
 
-	extern u8 EXT_SEG _mpconfigsSegmentRomStart;
+	extern uint8_t EXT_SEG _mpconfigsSegmentRomStart;
 	extern struct mpstrings EXT_SEG _mpstringsESegmentRomStart;
 	extern struct mpstrings EXT_SEG _mpstringsJSegmentRomStart;
 	extern struct mpstrings EXT_SEG _mpstringsPSegmentRomStart;
@@ -409,15 +410,15 @@ struct mpconfigfull *challengeLoadConfig(s32 confignum, u8 *buffer, s32 len)
 	return mpconfig;
 }
 
-struct mpconfigfull *challengeLoad(s32 challengeindex, u8 *buffer, s32 len)
+struct mpconfigfull *challengeLoad(int challengeindex, uint8_t *buffer, int len)
 {
 	return challengeLoadConfig(g_MpChallenges[challengeindex].confignum, buffer, len);
 }
 
-struct mpconfigfull *challengeLoadBySlot(s32 n, u8 *buffer, s32 len)
+struct mpconfigfull *challengeLoadBySlot(int n, uint8_t *buffer, int len)
 {
-	s32 numavailable = 0;
-	s32 challengeindex;
+	int numavailable = 0;
+	int challengeindex;
 
 	for (challengeindex = 0; challengeindex < ARRAYCOUNT(g_MpChallenges); challengeindex++) {
 		if (challengeIsAvailableToAnyPlayer(challengeindex)) {
@@ -432,7 +433,7 @@ struct mpconfigfull *challengeLoadBySlot(s32 n, u8 *buffer, s32 len)
 	return 0;
 }
 
-struct mpconfigfull *challengeLoadCurrent(u8 *buffer, s32 len)
+struct mpconfigfull *challengeLoadCurrent(uint8_t *buffer, int len)
 {
 	return challengeLoad(g_MpChallengeIndex, buffer, len);
 }
@@ -440,9 +441,9 @@ struct mpconfigfull *challengeLoadCurrent(u8 *buffer, s32 len)
 /**
  * This is adding featurenum to the array, provided it's unique.
  */
-s32 challengeForceUnlockFeature(s32 featurenum, u8 *array, s32 tail, s32 len)
+int challengeForceUnlockFeature(int featurenum, uint8_t *array, int tail, int len)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < tail; i++) {
 		if (array[i] == featurenum) {
@@ -458,14 +459,14 @@ s32 challengeForceUnlockFeature(s32 featurenum, u8 *array, s32 tail, s32 len)
 	return tail;
 }
 
-s32 challengeForceUnlockSetupFeatures(struct mpsetup *setup, u8 *array, s32 len)
+int challengeForceUnlockSetupFeatures(struct mpsetup *setup, uint8_t *array, int len)
 {
-	s32 index = 0;
-	s32 i;
+	int index = 0;
+	int i;
 
 	// Force unlock the weapons (if never held before)
 	for (i = 0; i < ARRAYCOUNT(setup->weapons); i++) {
-		s32 featurenum = g_MpWeapons[setup->weapons[i]].unlockfeature;
+		int featurenum = g_MpWeapons[setup->weapons[i]].unlockfeature;
 
 		if (featurenum) {
 			index = challengeForceUnlockFeature(featurenum, array, index, len);
@@ -475,7 +476,7 @@ s32 challengeForceUnlockSetupFeatures(struct mpsetup *setup, u8 *array, s32 len)
 	// Force unlock the stage
 	for (i = 0; i < mpGetNumStages(); i++) {
 		if (g_MpArenas[i].stagenum == setup->stagenum) {
-			s32 featurenum = g_MpArenas[i].requirefeature;
+			int featurenum = g_MpArenas[i].requirefeature;
 
 			if (featurenum) {
 				index = challengeForceUnlockFeature(featurenum, array, index, len);
@@ -485,7 +486,7 @@ s32 challengeForceUnlockSetupFeatures(struct mpsetup *setup, u8 *array, s32 len)
 
 	// Force unlock the scenario
 	if (setup->scenario <= MPSCENARIO_CAPTURETHECASE) {
-		s32 featurenum = g_MpScenarioOverviews[setup->scenario].requirefeature;
+		int featurenum = g_MpScenarioOverviews[setup->scenario].requirefeature;
 
 		if (featurenum) {
 			index = challengeForceUnlockFeature(featurenum, array, index, len);
@@ -504,15 +505,15 @@ s32 challengeForceUnlockSetupFeatures(struct mpsetup *setup, u8 *array, s32 len)
 	return index;
 }
 
-void challengeForceUnlockConfigFeatures(struct mpconfig *config, u8 *array, s32 len, s32 challengeindex)
+void challengeForceUnlockConfigFeatures(struct mpconfig *config, uint8_t *array, int len, int challengeindex)
 {
-	s32 index = challengeForceUnlockSetupFeatures(&config->setup, array, len);
-	s32 featurenum;
-	s32 numplayers;
-	s32 i;
+	int index = challengeForceUnlockSetupFeatures(&config->setup, array, len);
+	int featurenum;
+	int numplayers;
+	int i;
 
 	for (i = 0; i < MAX_BOTS; i++) {
-		s32 simtype = mpFindBotProfile(config->simulants[i].type, BOTDIFF_NORMAL);
+		int simtype = mpFindBotProfile(config->simulants[i].type, BOTDIFF_NORMAL);
 
 		if (simtype >= 0) {
 			featurenum = g_BotProfiles[simtype].requirefeature;
@@ -571,16 +572,16 @@ void challengeForceUnlockConfigFeatures(struct mpconfig *config, u8 *array, s32 
 
 void challengeForceUnlockBotFeatures(void)
 {
-	s32 numsims = 0;
-	s32 index = challengeForceUnlockSetupFeatures(&g_MpSetup, g_MpFeaturesForceUnlocked, ARRAYCOUNT(g_MpFeaturesForceUnlocked));
-	s32 i;
+	int numsims = 0;
+	int index = challengeForceUnlockSetupFeatures(&g_MpSetup, g_MpFeaturesForceUnlocked, ARRAYCOUNT(g_MpFeaturesForceUnlocked));
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_BotConfigsArray); i++) {
 		// Force unlock the simulant type
-		s32 simtypeindex = mpFindBotProfile(g_BotConfigsArray[i].type, BOTDIFF_NORMAL);
+		int simtypeindex = mpFindBotProfile(g_BotConfigsArray[i].type, BOTDIFF_NORMAL);
 
 		if (simtypeindex >= 0) {
-			s32 featurenum = g_BotProfiles[simtypeindex].requirefeature;
+			int featurenum = g_BotProfiles[simtypeindex].requirefeature;
 
 			if (featurenum) {
 				index = challengeForceUnlockFeature(featurenum, g_MpFeaturesForceUnlocked, index, ARRAYCOUNT(g_MpFeaturesForceUnlocked));
@@ -591,7 +592,7 @@ void challengeForceUnlockBotFeatures(void)
 		simtypeindex = mpFindBotProfile(BOTTYPE_GENERAL, g_BotConfigsArray[i].difficulty);
 
 		if (simtypeindex >= 0) {
-			s32 featurenum = g_BotProfiles[simtypeindex].requirefeature;
+			int featurenum = g_BotProfiles[simtypeindex].requirefeature;
 
 			if (featurenum) {
 				index = challengeForceUnlockFeature(featurenum, g_MpFeaturesForceUnlocked, index, ARRAYCOUNT(g_MpFeaturesForceUnlocked));
@@ -604,7 +605,7 @@ void challengeForceUnlockBotFeatures(void)
 
 		// Force unlock the simulant's body
 		if (g_BotConfigsArray[i].base.mpbodynum < ARRAYCOUNT(g_MpBodies)) {
-			s32 featurenum = g_MpBodies[g_BotConfigsArray[i].base.mpbodynum].requirefeature;
+			int featurenum = g_MpBodies[g_BotConfigsArray[i].base.mpbodynum].requirefeature;
 
 			if (featurenum) {
 				index = challengeForceUnlockFeature(featurenum, g_MpFeaturesForceUnlocked, index, ARRAYCOUNT(g_MpFeaturesForceUnlocked));
@@ -613,7 +614,7 @@ void challengeForceUnlockBotFeatures(void)
 
 		// Force unlock the simulant's head
 		if (g_BotConfigsArray[i].base.mpheadnum < ARRAYCOUNT(g_MpHeads)) {
-			s32 featurenum = g_MpHeads[g_BotConfigsArray[i].base.mpheadnum].requirefeature;
+			int featurenum = g_MpHeads[g_BotConfigsArray[i].base.mpheadnum].requirefeature;
 
 			if (featurenum) {
 				index = challengeForceUnlockFeature(featurenum, g_MpFeaturesForceUnlocked, index, ARRAYCOUNT(g_MpFeaturesForceUnlocked));
@@ -636,7 +637,7 @@ void challengeForceUnlockBotFeatures(void)
 
 void challengeRemoveForceUnlocks(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpFeaturesForceUnlocked); i++) {
 		g_MpFeaturesForceUnlocked[i] = 0;
@@ -647,8 +648,8 @@ void challengeRemoveForceUnlocks(void)
 
 void challengeApply(void)
 {
-	s32 i;
-	u8 buffer[0x1ca];
+	int i;
+	uint8_t buffer[0x1ca];
 
 	mpApplyConfig(challengeLoadCurrent(buffer, 0x1ca));
 	mpSetLock(MPLOCKTYPE_CHALLENGE, 5);
@@ -657,19 +658,16 @@ void challengeApply(void)
 		g_PlayerConfigsArray[i].base.team = 0;
 	}
 
-#ifndef PLATFORM_N64
 	// Enable Friendly Fire option
 	g_MpSetup.options |= MPOPTION_FRIENDLYFIRE;
-#endif
-
 }
 
-s32 challengeRemovePlayerLock(void)
+int challengeRemovePlayerLock(void)
 {
 	return mpSetLock(MPLOCKTYPE_NONE, 0);
 }
 
-void challengeLoadAndStoreCurrent(u8 *buffer, s32 len)
+void challengeLoadAndStoreCurrent(uint8_t *buffer, int len)
 {
 	g_MpCurrentChallengeConfig = challengeLoadCurrent(buffer, len);
 }
@@ -706,10 +704,10 @@ char *challengeGetConfigDescription(struct mpconfigfull *mpconfig)
  * Return the index of the first incomplete challenge, but if it's in the first
  * 4 then return index 4 because the first 4 are always shown.
  */
-s32 challengeGetAutoFocusedIndex(s32 mpchrnum)
+int challengeGetAutoFocusedIndex(int mpchrnum)
 {
-	s32 challengeindex;
-	s32 index = 0;
+	int challengeindex;
+	int index = 0;
 
 	for (challengeindex = ARRAYCOUNT(g_MpChallenges) - 1; challengeindex >= 0; challengeindex--) {
 		if (challengeIsCompletedByPlayerWithNumPlayers(mpchrnum, challengeindex, 1) ||
@@ -728,22 +726,22 @@ s32 challengeGetAutoFocusedIndex(s32 mpchrnum)
 	return index;
 }
 
-char *challengeGetName2(s32 playernum, s32 challengeindex)
+char *challengeGetName2(int playernum, int challengeindex)
 {
 	return langGet(g_MpChallenges[challengeindex].name);
 }
 
-bool challengeIsCompletedByPlayerWithNumPlayers2(s32 mpchrnum, s32 index, s32 numplayers)
+bool challengeIsCompletedByPlayerWithNumPlayers2(int mpchrnum, int index, int numplayers)
 {
 	return challengeIsCompletedByPlayerWithNumPlayers(mpchrnum, index, numplayers);
 }
 
-bool challengeIsCompletedByAnyPlayerWithNumPlayers(s32 index, s32 numplayers)
+bool challengeIsCompletedByAnyPlayerWithNumPlayers(int index, int numplayers)
 {
 	return (g_MpChallenges[index].completions[numplayers - 1] & 1) != 0;
 }
 
-void challengeSetCompletedByAnyPlayerWithNumPlayers(s32 index, s32 numplayers, bool completed)
+void challengeSetCompletedByAnyPlayerWithNumPlayers(int index, int numplayers, bool completed)
 {
 	if (completed) {
 		g_MpChallenges[index].completions[numplayers - 1] |= 1;
@@ -753,12 +751,12 @@ void challengeSetCompletedByAnyPlayerWithNumPlayers(s32 index, s32 numplayers, b
 	g_MpChallenges[index].completions[numplayers - 1] &= ~1;
 }
 
-bool challengeIsCompletedByPlayerWithNumPlayers(s32 mpchrnum, s32 index, s32 numplayers)
+bool challengeIsCompletedByPlayerWithNumPlayers(int mpchrnum, int index, int numplayers)
 {
 	return (g_MpChallenges[index].completions[numplayers - 1] & (2 << mpchrnum)) != 0;
 }
 
-void challengeSetCompletedByPlayerWithNumPlayers(u32 mpchrnum, s32 index, s32 numplayers, bool completed)
+void challengeSetCompletedByPlayerWithNumPlayers(uint32_t mpchrnum, int index, int numplayers, bool completed)
 {
 	if (completed) {
 		g_MpChallenges[index].completions[numplayers - 1] |= 2 << mpchrnum;
@@ -770,10 +768,10 @@ void challengeSetCompletedByPlayerWithNumPlayers(u32 mpchrnum, s32 index, s32 nu
 
 bool challengeIsCompleteForEndscreen(void)
 {
-	s32 prevplayernum = g_Vars.currentplayernum;
-	s32 result = false;
-	s32 aborted = false;
-	s32 i;
+	int prevplayernum = g_Vars.currentplayernum;
+	int result = false;
+	int aborted = false;
+	int i;
 
 	for (i = 0; i < PLAYERCOUNT(); i++) {
 		setCurrentPlayerNum(i);
@@ -803,8 +801,8 @@ void challengeConsiderMarkingComplete(void)
 
 	if (g_CheatsActiveBank0 == 0 && g_CheatsActiveBank1 == 0 && result)
 	{
-		u32 prevplayernum;
-		s32 i;
+		uint32_t prevplayernum;
+		int i;
 
 		challengeSetCompletedByAnyPlayerWithNumPlayers(g_MpChallengeIndex, PLAYERCOUNT(), 1);
 		prevplayernum = g_Vars.currentplayernum;
@@ -819,29 +817,11 @@ void challengeConsiderMarkingComplete(void)
 	}
 }
 
-bool challengeIsFeatureUnlocked(s32 featurenum)
+bool challengeIsFeatureUnlocked(int featurenum)
 {
 	if (featurenum == 0) {
 		return true;
 	}
 
 	return (g_MpFeaturesUnlocked[featurenum] & 1) != 0;
-}
-
-bool challengeIsFeatureUnlockedByPlayer(u32 numplayers, s32 featurenum)
-{
-	if (featurenum == 0) {
-		return true;
-	}
-
-	return (g_MpFeaturesUnlocked[featurenum] & (2 << numplayers)) != 0;
-}
-
-bool challengeIsFeatureUnlockedByDefault(s32 featurenum)
-{
-	if (featurenum) {
-		return false;
-	}
-
-	return true;
 }

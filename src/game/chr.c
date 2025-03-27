@@ -56,30 +56,30 @@
 
 void rng2SetSeed(u32 seed);
 
-int var8009ccc0[20];
-int g_NumChrs;
-int16_t *g_Chrnums;
-int16_t *g_ChrIndexes;
+s32 var8009ccc0[20];
+s32 g_NumChrs;
+s16 *g_Chrnums;
+s16 *g_ChrIndexes;
 struct chrdata *g_CurModelChr;
 
 struct var80062960 *var80062960 = NULL;
 s32 var80062964 = 0;
-float g_ChrAnimSpeed = 0;
+f32 g_ChrAnimSpeed = 0;
 s32 g_SelectedAnimNum = 0;
 s32 g_NextChrnum = 5000;
 
 struct chrdata *g_ChrSlots = NULL;
 
-int g_NumChrSlots = 0;
+s32 g_NumChrSlots = 0;
 
-int chrsGetNumSlots(void)
+s32 chrsGetNumSlots(void)
 {
 	return g_NumChrSlots;
 }
 
 void chrSetChrnum(struct chrdata *chr, s16 chrnum)
 {
-	int i;
+	s32 i;
 	bool modified;
 	s16 tmp;
 
@@ -114,10 +114,10 @@ void chrSetChrnum(struct chrdata *chr, s16 chrnum)
 	} while (modified);
 }
 
-void chrRegister(int chrnum, int chrindex)
+void chrRegister(s32 chrnum, s32 chrindex)
 {
-	int i;
-	int16_t tmp;
+	s32 i;
+	s16 tmp;
 
 	for (i = 0; i < g_NumChrs; i++) {
 		if (g_Chrnums[i] > chrnum) {
@@ -157,7 +157,7 @@ void chrDeregister(s32 chrnum)
 	}
 }
 
-Vtx *chrAllocateVertices(int numvertices)
+Vtx *chrAllocateVertices(s32 numvertices)
 {
 	return (Vtx *) gfxAllocate(numvertices * sizeof(Vtx));
 }
@@ -180,14 +180,14 @@ void chrSetPerimEnabled(struct chrdata *chr, bool enable)
  */
 void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dstrooms, bool arg3)
 {
-	float ymax;
-	float ymin;
-	float radius;
+	f32 ymax;
+	f32 ymin;
+	f32 radius;
 	bool moveok = false;
-	float movex;
-	float movez;
+	f32 movex;
+	f32 movez;
 	struct prop *prop = chr->prop;
-	float halfradius;
+	f32 halfradius;
 	struct defaultobj *chair = NULL;
 	s32 cdresult;
 	RoomNum sp84[20];
@@ -195,7 +195,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 	struct coord sp6c;
 	struct coord sp60;
 	struct coord sp54;
-	float value;
+	f32 value;
 	struct coord sp44;
 
 	// The eyespy can't be pushed
@@ -401,14 +401,14 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 	}
 }
 
-bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, float arg3, bool arg4)
+bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 arg3, bool arg4)
 {
 	bool result;
 	struct coord newpos;
 	RoomNum newrooms[8];
-	float ymax;
-	float ymin;
-	float radius;
+	f32 ymax;
+	f32 ymin;
+	f32 radius;
 
 	newpos.x = pos->x;
 	newpos.y = pos->y + arg3;
@@ -895,10 +895,10 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 	return true;
 }
 
-int chrsGetNumFree(void)
+s32 chrsGetNumFree(void)
 {
-	int count = 0;
-	int i;
+	s32 count = 0;
+	s32 i;
 
 	for (i = 0; i < g_NumChrSlots; i++) {
 		if (g_ChrSlots[i].chrnum < 0) {
@@ -909,22 +909,22 @@ int chrsGetNumFree(void)
 	return count;
 }
 
-void chrSetMaxDamage(struct chrdata *chr, float maxdamage)
+void chrSetMaxDamage(struct chrdata *chr, f32 maxdamage)
 {
 	chr->maxdamage = maxdamage;
 }
 
-float chrGetMaxDamage(struct chrdata *chr)
+f32 chrGetMaxDamage(struct chrdata *chr)
 {
 	return chr->maxdamage;
 }
 
-void chrAddHealth(struct chrdata *chr, float health)
+void chrAddHealth(struct chrdata *chr, f32 health)
 {
 	chr->damage -= health;
 }
 
-float chrGetArmor(struct chrdata *chr)
+f32 chrGetArmor(struct chrdata *chr)
 {
 	if (chr->damage < 0) {
 		return -chr->damage;
@@ -1312,10 +1312,10 @@ void chrRemove(struct prop *prop, bool free)
 	}
 }
 
-void chrClearReferences(int propnum)
+void chrClearReferences(s32 propnum)
 {
-	int i;
-	int j;
+	s32 i;
+	s32 j;
 	struct prop *prop = &g_Vars.props[propnum];
 
 	for (i = 0; i < g_NumChrSlots; i++) {
@@ -1341,9 +1341,9 @@ void chrClearReferences(int propnum)
 	}
 }
 
-void chrSetAnimSpeed(float newspeed) // This function changes animation speed for NPCs. Could be useful for eventually implementing a fast or slow anims cheat. This function could be left over from GE for that reason.
+void chrSetAnimSpeed(f32 newspeed) // This function changes animation speed for NPCs. Could be useful for eventually implementing a fast or slow anims cheat. This function could be left over from GE for that reason.
 {
-	int i;
+	s32 i;
 
 	g_ChrAnimSpeed = newspeed;
 
@@ -1352,6 +1352,11 @@ void chrSetAnimSpeed(float newspeed) // This function changes animation speed fo
 			modelSetAnimPlaySpeed(g_ChrSlots[i].model, g_ChrAnimSpeed, 600);
 		}
 	}
+}
+
+f32 chrGetAnimSpeed(void) // Not used
+{
+	return g_ChrAnimSpeed;
 }
 
 void chrUpdateAimProperties(struct chrdata *chr)
@@ -4891,9 +4896,9 @@ void shieldhitsRemoveByProp(struct prop *prop)
 	}
 }
 
-int chr0f02932c(struct prop *prop, int arg1)
+s32 chr0f02932c(struct prop *prop, s32 arg1)
 {
-	int result = -1;
+	s32 result = -1;
 	struct modelnode *node2;
 	struct prop *prop2;
 	struct modelnode *node;
@@ -4912,9 +4917,9 @@ int chr0f02932c(struct prop *prop, int arg1)
 	return result;
 }
 
-int chr0f0293ec(struct prop *prop, int cmnum)
+s32 chr0f0293ec(struct prop *prop, s32 cmnum)
 {
-	int result = -1;
+	s32 result = -1;
 	struct modelnode *node2;
 	struct prop *prop2;
 	struct modelnode *node;
@@ -4946,9 +4951,9 @@ int chr0f0293ec(struct prop *prop, int cmnum)
 	return result;
 }
 
-int chr0f0294cc(struct prop *prop, int arg1)
+s32 chr0f0294cc(struct prop *prop, s32 arg1)
 {
-	int result = -1;
+	s32 result = -1;
 	struct prop *child;
 	struct prop *prop2;
 	struct modelnode *node2;
@@ -4988,32 +4993,32 @@ int chr0f0294cc(struct prop *prop, int arg1)
 	return result;
 }
 
-void chrCalcShieldColor(float shield, int *red, int *green, int *blue)
+void chrCalcShieldColor(f32 shield, s32 *red, s32 *green, s32 *blue)
 {
 	if (shield < 1.5f) {
-		*red = 57 - (int)((1.5f - shield) * 28.0f);
-		*green = 75 - (int)((1.5f - shield) * 20.0f);
+		*red = 57 - (s32)((1.5f - shield) * 28.0f);
+		*green = 75 - (s32)((1.5f - shield) * 20.0f);
 		*blue = 0;
 		return;
 	}
 
 	if (shield < 3.0f) {
-		*red = 102 - (int)((3.0f - shield) * 30.0f);
-		*green = 90 - (int)((3.0f - shield) * 10.0f);
+		*red = 102 - (s32)((3.0f - shield) * 30.0f);
+		*green = 90 - (s32)((3.0f - shield) * 10.0f);
 		*blue = 0;
 		return;
 	}
 
 	if (shield < 4.5f) {
-		*red = 174 - (int)((4.5f - shield) * 48.0f);
-		*green = 129 - (int)((4.5f - shield) * 26.0f);
+		*red = 174 - (s32)((4.5f - shield) * 48.0f);
+		*green = 129 - (s32)((4.5f - shield) * 26.0f);
 		*blue = 0;
 		return;
 	}
 
 	if (shield < 6.0f) {
-		*red = 162 - (int)((6.0f - shield) * -8.0f);
-		*green = 54 - (int)((6.0f - shield) * -50.0f);
+		*red = 162 - (s32)((6.0f - shield) * -8.0f);
+		*green = 54 - (s32)((6.0f - shield) * -50.0f);
 		*blue = 0;
 		return;
 	}
@@ -5023,7 +5028,7 @@ void chrCalcShieldColor(float shield, int *red, int *green, int *blue)
 	*blue = 0;
 }
 
-float propGetShieldThing(struct prop **propptr)
+f32 propGetShieldThing(struct prop **propptr)
 {
 	struct prop *prop = *propptr;
 
@@ -5840,17 +5845,21 @@ Gfx *shieldhitRender(Gfx *gdl, struct prop *prop1, struct prop *prop2, s32 alpha
 
 							gDPPipeSync(gdl++);
 							gDPSetTextureLUT(gdl++, G_TT_NONE);
+#ifndef PLATFORM_N64
 							gDPLoadTextureBlock(gdl++, var8009ccc0[index], G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
+#endif
 							gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 							gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
 							gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
 							gSPTexture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
 							gDPSetTextureFilter(gdl++, G_TF_BILERP);
 							gDPSetColorDither(gdl++, G_CD_BAYER);
+#ifndef PLATFORM_N64
 							gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, (((16 * G_IM_SIZ_16b_BYTES)+7)>>3), 0, 0, 0,
 								G_TX_MIRROR | G_TX_WRAP, 4, G_TX_NOLOD, G_TX_MIRROR | G_TX_WRAP, 4, G_TX_NOLOD);
 							gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 16 << G_TEXTURE_IMAGE_FRAC, 16 << G_TEXTURE_IMAGE_FRAC);
 							gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, var8009ccc0[index]);
+#endif
 
 							gdl = chrRenderShieldComponent(gdl, NULL, prop1, model, node, -7, -1, -1, 255);
 						} else {
@@ -5947,7 +5956,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 		while (node) {
 			if ((node->type & 0xff) == MODELNODETYPE_BBOX) {
 				if (bbox == NULL || node == bbox) {
-					int index = chr0f028e18(thisprop, node, model, chrprop);
+					s32 index = chr0f028e18(thisprop, node, model, chrprop);
 
 					if (bbox) {
 						index = 19;
@@ -5955,12 +5964,12 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 
 					if (index <= 19) {
 						Mtxf *mtx = modelFindNodeMtx(model, modelNodeFindMtxNode(node), 0);
-						int uls; // upper left s coordinate
-						int ult; // upper left t coordinate
+						s32 uls; // upper left s coordinate
+						s32 ult; // upper left t coordinate
 						struct coord coord;
-						float screenpos[2];
-						int lrs; // lower right s coordinate
-						int lrt; // lower right t coordinate
+						f32 screenpos[2];
+						s32 lrs; // lower right s coordinate
+						s32 lrt; // lower right t coordinate
 
 						coord.x = mtx->m[3][0];
 						coord.y = mtx->m[3][1];
@@ -5984,8 +5993,8 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 							screenpos[1] = viGetHeight();
 						}
 
-						uls = (int)screenpos[0] - 8;
-						ult = (int)screenpos[1] - 8;
+						uls = (s32)screenpos[0] - 8;
+						ult = (s32)screenpos[1] - 8;
 
 						if (uls < viGetViewLeft()) {
 							uls = viGetViewLeft();
@@ -6060,7 +6069,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 	return gdl;
 }
 
-Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, unsigned int alpha)
+Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, u32 alpha)
 {
 	if (chrGetShield(chr) > 0 && g_Vars.lvupdate240 > 0) {
 		chr->cmcount++;
@@ -6151,18 +6160,18 @@ Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, unsigned int alpha)
  */
 void shieldhitsTick(void)
 {
-	int index;
+	s32 index;
 	bool changed = false;
-	int time60;
-	int i;
-	int j;
+	s32 time60;
+	s32 i;
+	s32 j;
 
 	if (g_ShieldHitActive) {
 		for (i = 0; i < 20; i++) {
 			if (g_ShieldHits[i].prop) {
 				if (g_ShieldHits[i].lvframe60 >= g_Vars.lvframe60 - TICKS(80)) {
 					changed = true;
-					g_ShieldHits[i].shield += (propGetShieldThing(&g_ShieldHits[i].prop) - g_ShieldHits[i].shield) * g_Vars.lvupdate60f * 0.0125f;
+					g_ShieldHits[i].shield += (propGetShieldThing(&g_ShieldHits[i].prop) - g_ShieldHits[i].shield) * g_Vars.lvupdate60f * (PAL ? 0.0151515156f : 0.0125f);
 				}
 
 				for (j = 0; j < 32; j++) {
@@ -6216,7 +6225,7 @@ void shieldhitsTick(void)
 	}
 }
 
-void chrSetDrCarollImages(struct chrdata *drcaroll, int imageleft, int imageright)
+void chrSetDrCarollImages(struct chrdata *drcaroll, s32 imageleft, s32 imageright)
 {
 	if (drcaroll
 			&& imageleft >= DRCAROLLIMAGE_EYESDEFAULT && imageleft <= DRCAROLLIMAGE_BINARY
@@ -6224,8 +6233,8 @@ void chrSetDrCarollImages(struct chrdata *drcaroll, int imageleft, int imagerigh
 		struct model *model = drcaroll->model;
 		struct modelnode *nodes[2];
 		union modelrwdata *rwdata;
-		int i;
-		int j;
+		s32 i;
+		s32 j;
 
 		// Iterate model parts relating to images
 		// Parts 0-5 are the left image

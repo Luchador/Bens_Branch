@@ -6,7 +6,7 @@
 
 void casingsReset(void)
 {
-	s32 i;
+	int i;
 	struct casing *end;
 	struct casing *casing;
 
