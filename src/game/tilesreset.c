@@ -11,16 +11,16 @@ void stageParseTiles(void);
 
 void tilesReset(void)
 {
-	s32 index = bgGetStageIndex(g_Vars.stagenum);
+	int index = bgGetStageIndex(g_Vars.stagenum);
 
 	if (index < 0) {
 		index = 0;
 	}
 
 	g_LoadType = LOADTYPE_TILES;
-	g_TileFileData.u8 = fileLoadToNew(g_Stages[index].tilefileid, FILELOADMETHOD_DEFAULT, LOADTYPE_TILES);
-	g_TileNumRooms = *g_TileFileData.u32;
-	g_TileRooms = g_TileFileData.u32 + 1;
+	g_TileFileData.uint8_t = fileLoadToNew(g_Stages[index].tilefileid, FILELOADMETHOD_DEFAULT, LOADTYPE_TILES);
+	g_TileNumRooms = *g_TileFileData.uint32_t;
+	g_TileRooms = g_TileFileData.uint32_t + 1;
 
 	stageParseTiles();
 }
@@ -29,8 +29,8 @@ void tilesReset(void)
 
 void stageParseTiles(void)
 {
-	struct geo *geo = (struct geo *)(g_TileFileData.u8 + g_TileRooms[0]);
-	struct geo *end = (struct geo *)(g_TileFileData.u8 + g_TileRooms[g_TileNumRooms]);
+	struct geo *geo = (struct geo *)(g_TileFileData.uint8_t + g_TileRooms[0]);
+	struct geo *end = (struct geo *)(g_TileFileData.uint8_t + g_TileRooms[g_TileNumRooms]);
 
 	while (geo < end) {
 		if (geo->type == GEOTYPE_TILE_I) {
@@ -41,13 +41,13 @@ void stageParseTiles(void)
 			tile->ymax = mult6(tile->ymax) + 16;
 			tile->zmin = mult6(tile->zmin) + 18;
 			tile->zmax = mult6(tile->zmax) + 18;
-			geo = (struct geo *)((u8 *)geo + (uintptr_t)(geo->numvertices - 0x40) * 6 + 0x18e);
+			geo = (struct geo *)((uint8_t *)geo + (uintptr_t)(geo->numvertices - 0x40) * 6 + 0x18e);
 		} else if (geo->type == GEOTYPE_TILE_F) {
-			geo = (struct geo *)((u8 *)geo + (uintptr_t)(geo->numvertices - 0x40) * 12 + 0x310);
+			geo = (struct geo *)((uint8_t *)geo + (uintptr_t)(geo->numvertices - 0x40) * 12 + 0x310);
 		} else if (geo->type == GEOTYPE_BLOCK) {
-			geo = (struct geo *)((u8 *)geo + sizeof(struct geoblock));
+			geo = (struct geo *)((uint8_t *)geo + sizeof(struct geoblock));
 		} else if (geo->type == GEOTYPE_CYL) {
-			geo = (struct geo *)((u8 *)geo + sizeof(struct geocyl));
+			geo = (struct geo *)((uint8_t *)geo + sizeof(struct geocyl));
 		}
 	}
 }

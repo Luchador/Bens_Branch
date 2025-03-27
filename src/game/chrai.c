@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/chrai.h"
@@ -448,11 +449,7 @@ bool (*g_CommandPointers[])(void) = {
 	/*0x01b1*/ aiShuffleRuinsPillars,
 	/*0x01b2*/ aiSetWindSpeed,
 	/*0x01b3*/ aiToggleP1P2,
-#if VERSION >= VERSION_NTSC_1_0
 	/*0x01b4*/ ai01b4,
-#else
-	/*0x01b4*/ NULL,
-#endif
 	/*0x01b5*/ aiChrSetP1P2,
 	/*0x01b6*/ aiConfigureSnow,
 	/*0x01b7*/ aiChrSetCloaked,
@@ -495,10 +492,8 @@ bool (*g_CommandPointers[])(void) = {
 	/*0x01dc*/ aiRemoveWeaponFromInventory,
 	/*0x01dd*/ aiIfMusicEventQueueIsEmpty,
 	/*0x01de*/ aiIfCoopMode,
-#if VERSION >= VERSION_NTSC_1_0
 	/*0x01df*/ aiIfChrSameFloorDistanceToPadLessThan,
 	/*0x01e0*/ aiRemoveReferencesToChr,
-#endif
 };
 
 u16 g_CommandLengths[] = {
@@ -611,7 +606,7 @@ u16 g_CommandLengths[] = {
 	/*0x01a8*/ 1,  /*0x01a9*/ 1,  /*0x01aa*/ 3,  /*0x01ab*/ 5,
 	/*0x01ac*/ 1,  /*0x01ad*/ 3,  /*0x01ae*/ 3,  /*0x01af*/ 4,
 	/*0x01b0*/ 1,  /*0x01b1*/ 18, /*0x01b2*/ 3,  /*0x01b3*/ 3,
-	/*0x01b4*/ VERSION >= VERSION_NTSC_1_0 ? 3 : 1, /*0x01b5*/ 4, /*0x01b6*/ 3, /*0x01b7*/ 5,
+	/*0x01b4*/ 3,  /*0x01b5*/ 4,  /*0x01b6*/ 3,  /*0x01b7*/ 5,
 	/*0x01b8*/ 4,  /*0x01b9*/ 2,  /*0x01ba*/ 7,  /*0x01bb*/ 4,
 	/*0x01bc*/ 4,  /*0x01bd*/ 3,  /*0x01be*/ 5,  /*0x01bf*/ 5,
 	/*0x01c0*/ 4,  /*0x01c1*/ 4,  /*0x01c2*/ 4,  /*0x01c3*/ 4,
@@ -621,16 +616,13 @@ u16 g_CommandLengths[] = {
 	/*0x01d0*/ 5,  /*0x01d1*/ 5,  /*0x01d2*/ 3,  /*0x01d3*/ 5,
 	/*0x01d4*/ 6,  /*0x01d5*/ 3,  /*0x01d6*/ 6,  /*0x01d7*/ 5,
 	/*0x01d8*/ 5,  /*0x01d9*/ 11, /*0x01da*/ 3,  /*0x01db*/ 3,
-	/*0x01dc*/ 3,  /*0x01dd*/ 4,  /*0x01de*/ 3,
-#if VERSION >= VERSION_NTSC_1_0
-	/*0x01df*/ 8,
+	/*0x01dc*/ 3,  /*0x01dd*/ 4,  /*0x01de*/ 3,  /*0x01df*/ 8,
 	/*0x01e0*/ 2,
-#endif
 };
 
-s32 chraiGetListIdByList(u8 *ailist, bool *is_global)
+int chraiGetListIdByList(uint8_t *ailist, bool *is_global)
 {
-	s32 i;
+	int i;
 
 	if (g_StageSetup.ailists) {
 		for (i = 0; g_StageSetup.ailists[i].list != NULL; i++) {
@@ -651,11 +643,11 @@ s32 chraiGetListIdByList(u8 *ailist, bool *is_global)
 	return -1;
 }
 
-u32 chraiGoToLabel(u8 *ailist, u32 aioffset, u8 label)
+uint32_t chraiGoToLabel(uint8_t *ailist, uint32_t aioffset, uint8_t label)
 {
 	do {
-		u8 *cmd = aioffset + ailist;
-		u32 type = (cmd[0] << 8) + cmd[1];
+		uint8_t *cmd = aioffset + ailist;
+		uint32_t type = (cmd[0] << 8) + cmd[1];
 
 		if (type == CMD_LABEL) {
 			if (label == cmd[2]) {
@@ -669,7 +661,7 @@ u32 chraiGoToLabel(u8 *ailist, u32 aioffset, u8 label)
 	} while (true);
 }
 
-void chraiExecute(void *entity, s32 proptype)
+void chraiExecute(void *entity, int proptype)
 {
 	g_Vars.chrdata = NULL;
 	g_Vars.truck = NULL;
@@ -713,7 +705,7 @@ void chraiExecute(void *entity, s32 proptype)
 
 		// Check if the ailist should be switched to a different one
 		if (g_Vars.chrdata && (g_Vars.chrdata->chrflags & CHRCFLAG_TRIGGERSHOTLIST)) {
-			u32 animnum = modelGetAnimNum(g_Vars.chrdata->model);
+			uint32_t animnum = modelGetAnimNum(g_Vars.chrdata->model);
 			if (g_Vars.chrdata->aishotlist >= 0
 					&& g_Vars.chrdata->cshield <= 0
 					&& (0 <= g_Vars.chrdata->damage || g_Vars.chrdata->gunprop != NULL)
@@ -771,14 +763,12 @@ void chraiExecute(void *entity, s32 proptype)
 				g_Vars.ailist = ailistFindById(g_Vars.chrdata->aidarkroomlist);
 				g_Vars.aioffset = 0;
 			}
-		} else {
-			// empty
 		}
 
 		// Iterate and execute the ailist
 		while (g_Vars.ailist) {
-			u8 *cmd = g_Vars.aioffset + g_Vars.ailist;
-			s32 type = (cmd[0] << 8) + cmd[1];
+			uint8_t *cmd = g_Vars.aioffset + g_Vars.ailist;
+			int type = (cmd[0] << 8) + cmd[1];
 
 			if (type >= 0 && type < ARRAYCOUNT(g_CommandPointers)) {
 				if (g_CommandPointers[type]()) {
@@ -794,13 +784,13 @@ void chraiExecute(void *entity, s32 proptype)
 	}
 }
 
-u32 chraiGetCommandLength(u8 *ailist, u32 aioffset)
+uint32_t chraiGetCommandLength(uint8_t *ailist, uint32_t aioffset)
 {
-	u8 *cmd = aioffset + ailist;
-	s32 type = (cmd[0] << 8) + cmd[1];
+	uint8_t *cmd = aioffset + ailist;
+	int type = (cmd[0] << 8) + cmd[1];
 
 	if (type == CMD_PRINT) {
-		u32 prop = aioffset + 2;
+		uint32_t prop = aioffset + 2;
 
 		while (ailist[prop] != 0) {
 			++prop;
@@ -817,17 +807,17 @@ u32 chraiGetCommandLength(u8 *ailist, u32 aioffset)
 }
 
 // used by ext_setup
-u32 chraiGetAilistLength(u8* list)
+uint32_t chraiGetAilistLength(uint8_t* list)
 {
 	if (!list) return 0;
 
-	u8* cmd = list;
+	uint8_t* cmd = list;
 
 	while (true) {
-		u8 type = cmd[1];
+		uint8_t type = cmd[1];
 		cmd += chraiGetCommandLength(cmd, 0);
 		if (type == AICMD_END) break;
 	}
 
-	return (u32)(cmd - list);
+	return (uint32_t)(cmd - list);
 }

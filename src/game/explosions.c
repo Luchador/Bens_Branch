@@ -32,11 +32,11 @@
 #define SHAKE_TIME 12
 
 struct explosion *g_Explosions;
-s32 g_MaxExplosions;
+int g_MaxExplosions;
 
-s32 g_ExplosionShakeTotalTimer = 0;
-s32 g_ExplosionShakeIntensityTimer = 0;
-f32 g_ExplosionDamageTxScale = 1;
+int g_ExplosionShakeTotalTimer = 0;
+int g_ExplosionShakeIntensityTimer = 0;
+float g_ExplosionDamageTxScale = 1;
 
 struct explosiontype g_ExplosionTypes[] = {
 	//       rangeh
@@ -81,19 +81,19 @@ struct explosiontype g_ExplosionTypes[] = {
 	/*25*/ { 640, 480, 32,  11.2, 1600, 1000, 1000, 180, 2, 5, SMOKETYPE_NONE,         0x80a4, 4     },
 };
 
-bool explosionCreateSimple(struct prop *prop, struct coord *pos, RoomNum *rooms, s16 type, s32 playernum)
+bool explosionCreateSimple(struct prop *prop, struct coord *pos, RoomNum *rooms, int16_t type, int playernum)
 {
 	return explosionCreate(prop, pos, rooms, type, playernum, false, NULL, 0, NULL);
 }
 
-bool explosionCreateComplex(struct prop *prop, struct coord *pos, RoomNum *rooms, s16 type, s32 playernum)
+bool explosionCreateComplex(struct prop *prop, struct coord *pos, RoomNum *rooms, int16_t type, int playernum)
 {
 	struct coord sp100;
 	struct coord sp88;
 	struct explosiontype *etype;
 	bool makescorch = true;
 	RoomNum room;
-	f32 y;
+	float y;
 	struct prop *collisionprop;
 
 	if (type == EXPLOSIONTYPE_NONE) {
@@ -122,11 +122,11 @@ bool explosionCreateComplex(struct prop *prop, struct coord *pos, RoomNum *rooms
 	return explosionCreate(prop, pos, rooms, type, playernum, makescorch, &sp100, room, &sp88);
 }
 
-f32 explosionGetHorizontalRangeAtFrame(struct explosion *exp, s32 frame)
+float explosionGetHorizontalRangeAtFrame(struct explosion *exp, int frame)
 {
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
-	f32 changerate = PALUPF(type->changerateh);
-	f32 result;
+	float changerate = PALUPF(type->changerateh);
+	float result;
 
 	if (exp->type == EXPLOSIONTYPE_GASBARREL && frame > TICKS(32)) {
 		result = frame * PALUPF(3.0f) + 40.0f;
@@ -141,11 +141,11 @@ f32 explosionGetHorizontalRangeAtFrame(struct explosion *exp, s32 frame)
 	return result;
 }
 
-f32 explosionGetVerticalRangeAtFrame(struct explosion *exp, s32 frame)
+float explosionGetVerticalRangeAtFrame(struct explosion *exp, int frame)
 {
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
-	f32 changerate = PALUPF(type->changeratev);
-	f32 result;
+	float changerate = PALUPF(type->changeratev);
+	float result;
 
 	if (exp->type == EXPLOSIONTYPE_GASBARREL && frame > TICKS(32)) {
 		result = 20;
@@ -156,13 +156,13 @@ f32 explosionGetVerticalRangeAtFrame(struct explosion *exp, s32 frame)
 	return result;
 }
 
-void explosionGetBboxAtFrame(struct coord *lower, struct coord *upper, s32 frame, struct prop *prop)
+void explosionGetBboxAtFrame(struct coord *lower, struct coord *upper, int frame, struct prop *prop)
 {
 	struct explosion *exp = prop->explosion;
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
 
-	f32 rangeh = explosionGetHorizontalRangeAtFrame(exp, frame);
-	f32 rangev = explosionGetVerticalRangeAtFrame(exp, frame);
+	float rangeh = explosionGetHorizontalRangeAtFrame(exp, frame);
+	float rangev = explosionGetVerticalRangeAtFrame(exp, frame);
 
 	rangeh = rangeh * 0.5f + type->innersize * 1.5f;
 	rangev = rangev * 0.5f + type->innersize * 1.5f;
@@ -176,11 +176,10 @@ void explosionGetBboxAtFrame(struct coord *lower, struct coord *upper, s32 frame
 	upper->z = prop->pos.z + rangeh;
 }
 
-void explosionAlertChrs(f32 *radius, struct coord *noisepos)
+void explosionAlertChrs(float *radius, struct coord *noisepos)
 {
-	u32 stack[2];
-	s32 *end = (s32 *)&doorDestroyGlass;
-	s32 i;
+	int *end = (int *)&doorDestroyGlass;
+	int i;
 
 	for (i = 0; i < g_NumChrSlots; i++) {
 		if (g_ChrSlots[i].model
@@ -188,7 +187,7 @@ void explosionAlertChrs(f32 *radius, struct coord *noisepos)
 				&& g_ChrSlots[i].prop
 				&& g_ChrSlots[i].prop->type == PROPTYPE_CHR
 				&& (g_ChrSlots[i].prop->flags & PROPFLAG_ENABLED)) {
-			f32 distance = chrGetDistanceToCoord(&g_ChrSlots[i], noisepos);
+			float distance = chrGetDistanceToCoord(&g_ChrSlots[i], noisepos);
 
 			if (distance == 0) {
 				distance = 2;
@@ -204,10 +203,10 @@ void explosionAlertChrs(f32 *radius, struct coord *noisepos)
 }
 
 bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exprooms,
-		s16 type, s32 playernum, bool makescorch, struct coord *arg6, RoomNum room, struct coord *arg8)
+		int16_t type, int playernum, bool makescorch, struct coord *arg6, RoomNum room, struct coord *arg8)
 {
 	struct explosion *exp = NULL;
-	s32 i;
+	int i;
 
 	if (type == EXPLOSIONTYPE_NONE || exprooms[0] == -1) {
 		return false;
@@ -215,12 +214,12 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 
 	// Bullet holes: only create the flame (explosion) if within 4 metres
 	if (type == EXPLOSIONTYPE_BULLETHOLE) {
-		f32 lodscale = camGetLodScaleZ();
+		float lodscale = camGetLodScaleZ();
 		struct coord *campos = &g_Vars.currentplayer->cam_pos;
-		f32 xdist = exppos->x - campos->x;
-		f32 ydist = exppos->y - campos->y;
-		f32 zdist = exppos->z - campos->z;
-		f32 sum = xdist * xdist + ydist * ydist + zdist * zdist;
+		float xdist = exppos->x - campos->x;
+		float ydist = exppos->y - campos->y;
+		float zdist = exppos->z - campos->z;
+		float sum = xdist * xdist + ydist * ydist + zdist * zdist;
 
 		if (sum * lodscale * lodscale > 400 * 400) {
 			if (rngRandom() % 2 == 0) {
@@ -245,8 +244,8 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 
 	// If there's no unused slots, find the oldest bullethole flame and replace it
 	if (exp == NULL) {
-		s32 maxage = -1;
-		s32 index = -1;
+		int maxage = -1;
+		int index = -1;
 
 		for (i = 0; i < g_MaxExplosions; i++) {
 			if (g_Explosions[i].type == EXPLOSIONTYPE_BULLETHOLE && g_Explosions[i].age > maxage) {
@@ -270,14 +269,14 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 		}
 
 		if (expprop) {
-			s32 exproom;
-			f32 value1;
-			f32 value2;
-			s32 k;
-			s32 index;
-			s32 portalnum;
-			s32 indexplus1;
-			s32 indexplus2;
+			int exproom;
+			float value1;
+			float value2;
+			int k;
+			int index;
+			int portalnum;
+			int indexplus1;
+			int indexplus2;
 			struct coord portalbbmin;
 			struct coord portalbbmax;
 			struct coord portal2bbmin;
@@ -286,10 +285,10 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 			struct coord spc8;
 			RoomNum otherroom;
 			RoomNum otherroom2;
-			f32 mult = 1;
-			s32 portalnum2;
+			float mult = 1;
+			int portalnum2;
 			struct coord spac;
-			s32 j;
+			int j;
 
 			expprop->type = PROPTYPE_EXPLOSION;
 			expprop->explosion = exp;
@@ -516,11 +515,10 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 
 void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 {
-	u32 stack[4];
-	f32 sp54;
-	f32 sp50;
-	s32 i;
-	f32 intensity;
+	float sp54;
+	float sp50;
+	int i;
+	float intensity;
 
 	if (g_ExplosionShakeTotalTimer == 0) {
 		viShake(0);
@@ -536,12 +534,12 @@ void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord 
 		struct prop *prop = g_Explosions[i].prop;
 
 		if (prop) {
-			f32 xdiff = prop->pos.x - arg0->x;
-			f32 ydiff = prop->pos.y - arg0->y;
-			f32 zdiff = prop->pos.z - arg0->z;
+			float xdiff = prop->pos.x - arg0->x;
+			float ydiff = prop->pos.y - arg0->y;
+			float zdiff = prop->pos.z - arg0->z;
 
-			f32 dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
-			f32 mult;
+			float dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
+			float mult;
 
 			if (dist == 0.0f) {
 				dist = 0.0001f;
@@ -581,7 +579,7 @@ void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord 
 bool explosionOverlapsProp(struct explosion *exp, struct prop *prop, struct coord *minpos, struct coord *maxpos)
 {
 	bool result = false;
-	s32 i;
+	int i;
 	RoomNum rooms[8];
 
 	if (exp->type == EXPLOSIONTYPE_HUGE25) {
@@ -618,13 +616,13 @@ void explosionInflictDamage(struct prop *expprop)
 {
 	struct explosion *exp = expprop->explosion;
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
-	s16 *propnumptr;
-	s16 propnums[256];
+	int16_t *propnumptr;
+	int16_t propnums[256];
 	bool isfirstframe = exp->age <= 0;
-	s32 i;
-	f32 k;
-	s32 j;
-	f32 damageradius;
+	int i;
+	float k;
+	int j;
+	float damageradius;
 
 	if (g_Vars.lvupdate60 <= 0) {
 		return;
@@ -643,7 +641,7 @@ void explosionInflictDamage(struct prop *expprop)
 		}
 	}
 
-	if (exp->age > (s32)(type->duration + 7.0f * type->flarespeed)) {
+	if (exp->age > (int)(type->duration + 7.0f * type->flarespeed)) {
 		return;
 	}
 
@@ -656,13 +654,13 @@ void explosionInflictDamage(struct prop *expprop)
 
 	// Break lights
 	for (i = 0; expprop->rooms[i] != -1; i++) {
-		s32 roomnum = expprop->rooms[i];
+		int roomnum = expprop->rooms[i];
 
 		if (roomnum != 0) {
-			s32 numlights = g_Rooms[roomnum].numlights;
-			f32 xdist = expprop->pos.f[0];
-			f32 ydist = expprop->pos.f[1];
-			f32 zdist = expprop->pos.f[2];
+			int numlights = g_Rooms[roomnum].numlights;
+			float xdist = expprop->pos.f[0];
+			float ydist = expprop->pos.f[1];
+			float zdist = expprop->pos.f[2];
 			struct coord lightrelpos;
 
 			xdist -= g_BgRooms[roomnum].pos.f[0];
@@ -702,9 +700,9 @@ void explosionInflictDamage(struct prop *expprop)
 
 		if (prop != exp->source && prop->timetoregen == 0) {
 			if (prop->type == PROPTYPE_OBJ || prop->type == PROPTYPE_WEAPON || prop->type == PROPTYPE_DOOR) {
-				f32 xdist;
-				f32 ydist;
-				f32 zdist;
+				float xdist;
+				float ydist;
+				float zdist;
 				struct coord min;
 				struct coord max;
 				struct defaultobj *obj = prop->obj;
@@ -738,11 +736,11 @@ void explosionInflictDamage(struct prop *expprop)
 					}
 
 					if (candamage) {
-						f32 f0;
-						f32 xfrac;
-						f32 yfrac;
-						f32 zfrac;
-						f32 minfrac;
+						float f0;
+						float xfrac;
+						float yfrac;
+						float zfrac;
+						float minfrac;
 
 						xfrac = f0 = xdist / damageradius;
 
@@ -798,7 +796,7 @@ void explosionInflictDamage(struct prop *expprop)
 							if ((obj->hidden & OBJHFLAG_MOUNTED) == 0
 									&& (obj->hidden & OBJHFLAG_GRABBED) == 0
 									&& (obj->flags3 & OBJFLAG3_PUSHABLE)) {
-								f32 dist;
+								float dist;
 								struct coord spf4;
 								spf4.x = prop->pos.x - expprop->pos.x;
 								spf4.y = 0.0f;
@@ -808,7 +806,7 @@ void explosionInflictDamage(struct prop *expprop)
 									dist = sqrtf(spf4.f[0] * spf4.f[0] + spf4.f[2] * spf4.f[2]);
 
 									if (dist > 0.0f) {
-										f32 tmp = minfrac * 4.0f / dist;
+										float tmp = minfrac * 4.0f / dist;
 										spf4.x *= tmp;
 										spf4.z *= tmp;
 									}
@@ -829,12 +827,12 @@ void explosionInflictDamage(struct prop *expprop)
 					}
 				}
 			} else if (prop->type == PROPTYPE_CHR || prop->type == PROPTYPE_PLAYER) {
-				f32 xdist = prop->pos.f[0] - expprop->pos.f[0];
-				f32 ydist = prop->pos.f[1] - expprop->pos.f[1];
-				f32 zdist = prop->pos.f[2] - expprop->pos.f[2];
-				f32 radius;
-				f32 ymax;
-				f32 ymin;
+				float xdist = prop->pos.f[0] - expprop->pos.f[0];
+				float ydist = prop->pos.f[1] - expprop->pos.f[1];
+				float zdist = prop->pos.f[2] - expprop->pos.f[2];
+				float radius;
+				float ymax;
+				float ymin;
 				struct coord spcc;
 				struct coord spc0;
 
@@ -868,12 +866,12 @@ void explosionInflictDamage(struct prop *expprop)
 
 				if (candamage) {
 					struct prop *ownerprop = NULL;
-					f32 xfrac = xdist / damageradius;
-					f32 yfrac = ydist / damageradius;
-					f32 zfrac = zdist / damageradius;
+					float xfrac = xdist / damageradius;
+					float yfrac = ydist / damageradius;
+					float zfrac = zdist / damageradius;
 					struct coord spa0 = {0, 0, 0};
 					struct chrdata *chr = prop->chr;
-					f32 minfrac;
+					float minfrac;
 
 					if (xfrac < 0.0f) {
 						xfrac = -xfrac;
@@ -906,7 +904,7 @@ void explosionInflictDamage(struct prop *expprop)
 
 					if (isfirstframe) {
 						if (xdist != 0.0f || zdist != 0.0f) {
-							f32 dist = sqrtf(xdist * xdist + zdist * zdist);
+							float dist = sqrtf(xdist * xdist + zdist * zdist);
 
 							if (dist > 0.0f) {
 								xdist *= 1.0f / dist;
@@ -952,25 +950,24 @@ u32 explosionTick(struct prop *prop)
 {
 	struct explosion *exp = prop->explosion;
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
-	s32 i;
-	s32 j;
-	s32 k;
-	f32 hrange;
-	f32 vrange;
-	f32 lvupdate;
+	int i;
+	int j;
+	int k;
+	float hrange;
+	float vrange;
+	float lvupdate;
 	struct coord bbmin;
 	struct coord bbmax;
-	s16 maxage;
-	s32 numpartstocreate;
+	int16_t maxage;
+	int numpartstocreate;
 	struct coord sp11c;
 	struct coord sp110;
-	u32 stack[2];
 	struct coord spfc;
 	struct coord spf0;
-	s32 bb;
+	int bb;
 	bool xlu;
 	struct chrdata *chr;
-	f32 scorchsize;
+	float scorchsize;
 	struct hitthing hitthing;
 
 	maxage = TICKS(type->duration);
@@ -979,7 +976,7 @@ u32 explosionTick(struct prop *prop)
 		return TICKOP_NONE;
 	}
 
-	lvupdate = g_Vars.lvupdate60 < TICKS(15) ? g_Vars.lvupdate60 : (s32)TICKS(15);
+	lvupdate = g_Vars.lvupdate60 < TICKS(15) ? g_Vars.lvupdate60 : (int)TICKS(15);
 
 	if (exp->age >= 8 && exp->age < maxage)
 	{
@@ -1000,7 +997,7 @@ u32 explosionTick(struct prop *prop)
 		}
 
 		// Create new parts
-		numpartstocreate = (s32)((f32)type->propagationrate * exp->age / maxage) + 1;
+		numpartstocreate = (int)((float)type->propagationrate * exp->age / maxage) + 1;
 
 		for (i = 0; i < numpartstocreate; i++) {
 			for (j = 0; j < 40; j++) {
@@ -1109,7 +1106,7 @@ u32 explosionTick(struct prop *prop)
 		psCreate(NULL, NULL, type->sound, -1, -1, 0, 0, PSTYPE_NONE, &exp->prop->pos, -1.0f, exp->prop->rooms, -1, -1.0f, -1.0f, -1.0f);
 	}
 
-	for (k = 0; k < (s32)lvupdate; k++) {
+	for (k = 0; k < (int)lvupdate; k++) {
 		exp->age++;
 
 		for (j = 0; j < 40; j++) {
@@ -1165,7 +1162,7 @@ u32 explosionTick(struct prop *prop)
 	}
 
 	// Free explosion if finished
-	if (exp->age >= maxage + (s32)(16.0f * type->flarespeed))
+	if (exp->age >= maxage + (int)(16.0f * type->flarespeed))
 	{
 		if (exp->type != EXPLOSIONTYPE_BULLETHOLE) {
 			propUnsetDangerous(exp->prop);
@@ -1198,9 +1195,9 @@ u32 explosionTickPlayer(struct prop *prop)
 Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 {
 	struct explosion *exp = prop->explosion;
-	s32 roomnum;
-	s32 i;
-	s32 j;
+	int roomnum;
+	int i;
+	int j;
 
 	if (!xlupass) {
 		return gdl;
@@ -1222,7 +1219,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		struct screenbox screenbox;
 		struct coord *coord = roomGetPosPtr(roomnum);
 		Col *colours;
-		s32 tmp;
+		int tmp;
 
 		if (func0f08e5a8(prop->rooms, &screenbox) > 0) {
 			gdl = bgScissorWithinViewport(gdl, screenbox.xmin, screenbox.ymin, screenbox.xmax, screenbox.ymax);
@@ -1245,7 +1242,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 			u32 alpha = 0x80;
 			u32 red;
 			u32 green;
-			f32 expdist = sqrtf(ERASERSQDIST(prop->pos.f));
+			float expdist = sqrtf(ERASERSQDIST(prop->pos.f));
 
 			if (g_Vars.currentplayer->eraserpropdist < expdist) {
 				return gdl;
@@ -1286,7 +1283,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 			for (j = 0; j < ARRAYCOUNT(exp->parts); j++) {
 				if (exp->parts[j].frame > 0) {
-					if (i == (s32)((f32)(exp->parts[j].frame - 1) / (g_ExplosionTypes[exp->type].flarespeed * 0.83333331346512f))) {
+					if (i == (int)((float)(exp->parts[j].frame - 1) / (g_ExplosionTypes[exp->type].flarespeed * 0.83333331346512f))) {
 						gdl = explosionRenderPart(exp, &exp->parts[j], gdl, coord, i);
 					}
 				}
@@ -1307,7 +1304,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 	return gdl;
 }
 
-Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx *gdl, struct coord *coord, s32 arg4)
+Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx *gdl, struct coord *coord, int arg4)
 {
 	Vtx *vertices = gfxAllocateVertices(4);
 	Mtxf *mtx = camGetProjectionMtxF();
@@ -1315,19 +1312,19 @@ Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx 
 	struct coord spb0;
 	struct coord spa4;
 	struct coord sp98;
-	f32 x;
-	f32 y;
-	f32 z;
-	s32 i;
-	s32 j;
-	f32 size;
-	f32 cosine;
-	f32 max;
-	f32 size2;
+	float x;
+	float y;
+	float z;
+	int i;
+	int j;
+	float size;
+	float cosine;
+	float max;
+	float size2;
 	struct coord pos;
-	f32 sine;
-	s32 bbnum;
-	f32 value;
+	float sine;
+	int bbnum;
+	float value;
 
 	size = part->size;
 
@@ -1347,7 +1344,7 @@ Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx 
 			if (pos.f[0] >= exp->bbs[i].bbmin.f[0] && pos.f[0] <= exp->bbs[i].bbmax.f[0]
 					&& pos.f[1] >= exp->bbs[i].bbmin.f[1] && pos.f[1] <= exp->bbs[i].bbmax.f[1]
 					&& pos.f[2] >= exp->bbs[i].bbmin.f[2] && pos.f[2] <= exp->bbs[i].bbmax.f[2]) {
-				f32 min = 65536.0f;
+				float min = 65536.0f;
 
 				for (j = 0; j < 3; j++) {
 					value = pos.f[j] - exp->bbs[i].bbmin.f[j];

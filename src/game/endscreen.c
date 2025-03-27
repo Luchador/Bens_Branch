@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/bossfile.h"
 #include "game/cheats.h"
@@ -31,7 +32,7 @@
 #include "data.h"
 #include "types.h"
 
-MenuItemHandlerResult endscreenHandleDeclineMission(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult endscreenHandleDeclineMission(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		menuPopDialog();
@@ -41,7 +42,7 @@ MenuItemHandlerResult endscreenHandleDeclineMission(s32 operation, struct menuit
 	return 0;
 }
 
-MenuDialogHandlerResult endscreenHandleRetryMission(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult endscreenHandleRetryMission(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_TICK:
@@ -125,7 +126,7 @@ char *endscreenMenuTitleNextMission(struct menudialogdef *dialogdef)
 	return g_StringPointer;
 }
 
-MenuItemHandlerResult endscreenHandleReplayPreviousMission(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult endscreenHandleReplayPreviousMission(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_MissionConfig.stageindex--;
@@ -257,24 +258,24 @@ char *endscreenMenuTextNumLimbShots(struct menuitem *item)
 
 char *endscreenMenuTextNumOtherShots(struct menuitem *item)
 {
-	u32 total = mpstatsGetPlayerShotCountByRegion(SHOTREGION_GUN) + mpstatsGetPlayerShotCountByRegion(SHOTREGION_HAT);
+	uint32_t total = mpstatsGetPlayerShotCountByRegion(SHOTREGION_GUN) + mpstatsGetPlayerShotCountByRegion(SHOTREGION_HAT);
 	sprintf(g_StringPointer, "%d", total);
 	return g_StringPointer;
 }
 
 char *endscreenMenuTextAccuracy(struct menuitem *item)
 {
-	s32 total = mpstatsGetPlayerShotCountByRegion(SHOTREGION_TOTAL);
-	s32 numhead = mpstatsGetPlayerShotCountByRegion(SHOTREGION_HEAD);
-	s32 numbody = mpstatsGetPlayerShotCountByRegion(SHOTREGION_BODY);
-	s32 numlimb = mpstatsGetPlayerShotCountByRegion(SHOTREGION_LIMB);
-	s32 numgun = mpstatsGetPlayerShotCountByRegion(SHOTREGION_GUN);
-	s32 numhat = mpstatsGetPlayerShotCountByRegion(SHOTREGION_HAT);
-	s32 numobject = mpstatsGetPlayerShotCountByRegion(SHOTREGION_OBJECT);
-	f32 accuracy;
+	int total = mpstatsGetPlayerShotCountByRegion(SHOTREGION_TOTAL);
+	int numhead = mpstatsGetPlayerShotCountByRegion(SHOTREGION_HEAD);
+	int numbody = mpstatsGetPlayerShotCountByRegion(SHOTREGION_BODY);
+	int numlimb = mpstatsGetPlayerShotCountByRegion(SHOTREGION_LIMB);
+	int numgun = mpstatsGetPlayerShotCountByRegion(SHOTREGION_GUN);
+	int numhat = mpstatsGetPlayerShotCountByRegion(SHOTREGION_HAT);
+	int numobject = mpstatsGetPlayerShotCountByRegion(SHOTREGION_OBJECT);
+	float accuracy;
 
 	if (total > 0) {
-		s32 hits = numhead + numbody + numlimb + numgun + numhat + numobject;
+		int hits = numhead + numbody + numlimb + numgun + numhat + numobject;
 		accuracy = hits * 100.0f / total;
 	} else {
 		accuracy = 0;
@@ -423,7 +424,7 @@ void endscreenResetModels(void)
 	g_Menus[3].menumodel.allocstart = bgunGetGunMem() + menugfxGetParticleArraySize();
 }
 
-MenuItemHandlerResult endscreenHandleReplayLastLevel(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult endscreenHandleReplayLastLevel(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_MissionConfig.stagenum = g_SoloStages[g_MissionConfig.stageindex].stagenum;
@@ -528,7 +529,7 @@ struct menudialogdef g_2PMissionEndscreenObjectivesCompletedVMenuDialog = {
 /**
  * Displayed after Defense and Skedar Ruins completion screens.
  */
-MenuItemHandlerResult endscreenHandleContinueMission(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult endscreenHandleContinueMission(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		endscreenContinue(2);
@@ -573,7 +574,7 @@ struct menudialogdef g_MissionContinueOrReplyMenuDialog = {
  * 1 unsure - is invoked directly by menuTick
  * 2 when pressing continue
  */
-void endscreenContinue(s32 context)
+void endscreenContinue(int context)
 {
 	if (g_Vars.antiplayernum >= 0) {
 		menuPopDialog();
@@ -668,7 +669,7 @@ void endscreenContinue(s32 context)
 	}
 }
 
-MenuDialogHandlerResult endscreenHandle2PCompleted(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult endscreenHandle2PCompleted(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	if (operation == MENUOP_OPEN) {
 		g_Menus[g_MpPlayerNum].endscreen.unke1c = 0;
@@ -681,7 +682,7 @@ MenuDialogHandlerResult endscreenHandle2PCompleted(s32 operation, struct menudia
 				struct menuinputs *inputs = data->dialog2.inputs;
 
 				if (inputs->select || inputs->back || inputs->start) {
-					g_Menus[g_MpPlayerNum].endscreen.unke1c = VERSION >= VERSION_NTSC_1_0 ? 6 : 3;
+					g_Menus[g_MpPlayerNum].endscreen.unke1c = 6;
 				}
 
 				if (g_Menus[g_MpPlayerNum].endscreen.unke1c) {
@@ -702,7 +703,7 @@ MenuDialogHandlerResult endscreenHandle2PCompleted(s32 operation, struct menudia
 	return 0;
 }
 
-MenuDialogHandlerResult endscreenHandle2PFailed(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult endscreenHandle2PFailed(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	if (operation == MENUOP_OPEN) {
 		g_Menus[g_MpPlayerNum].endscreen.unke1c = 0;
@@ -936,14 +937,14 @@ struct menuitem g_2PMissionEndscreenVMenuItems[] = {
  * 5 = timed cheat name
  * 6 = limb shots
  */
-MenuItemHandlerResult endscreenHandleCheatInfo(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult endscreenHandleCheatInfo(int operation, struct menuitem *item, union handlerdata *data)
 {
-	static u32 cheatcolour = 0xff7f7fff;
+	static uint32_t cheatcolour = 0xff7f7fff;
 
 	if (operation == MENUOP_GETCOLOUR
 			&& ((g_Menus[g_MpPlayerNum].endscreen.cheatinfo & 0x200) || item->param == 5)) {
 		// Timed cheat just got unlocked, and this item is the timed cheat name
-		u32 weight = menuGetSinOscFrac(40) * 255;
+		uint32_t weight = menuGetSinOscFrac(40) * 255;
 
 		if (item->param == 0
 				&& cheatGetTime(g_Menus[g_MpPlayerNum].endscreen.cheatinfo & 0xff) == 0) {
@@ -963,7 +964,7 @@ MenuItemHandlerResult endscreenHandleCheatInfo(s32 operation, struct menuitem *i
 
 	if (operation == MENUOP_CHECKHIDDEN) {
 		if (item->param == 1) { // target time
-			u32 info = g_Menus[g_MpPlayerNum].endscreen.cheatinfo;
+			uint32_t info = g_Menus[g_MpPlayerNum].endscreen.cheatinfo;
 
 			if (info & 0x800) { // completion cheat just got unlocked
 				return true;
@@ -1190,8 +1191,8 @@ char *endscreenMenuTextCompletionCheatName(struct menuitem *item)
 
 char *endscreenMenuTextTargetTime(struct menuitem *item)
 {
-	s32 time;
-	s32 time2;
+	int time;
+	int time2;
 
 	if ((g_Menus[g_MpPlayerNum].endscreen.cheatinfo & 0x00000100) == 0) {
 		return NULL;
@@ -1247,13 +1248,13 @@ struct menudialogdef g_SoloMissionEndscreenFailedMenuDialog = {
  */
 void endscreenPrepare(void)
 {
-	s32 timedcheatid;
-	s32 complcheatid;
-	s32 d;
-	s32 s;
-	u32 secs;
-	s32 timedalreadyunlocked;
-	s32 complalreadyunlocked;
+	int timedcheatid;
+	int complcheatid;
+	int d;
+	int s;
+	uint32_t secs;
+	int timedalreadyunlocked;
+	int complalreadyunlocked;
 	u16 prevbest;
 	bool nowunlocked;
 
@@ -1281,11 +1282,7 @@ void endscreenPrepare(void)
 		}
 
 		// Push the endscreen
-#if VERSION >= VERSION_NTSC_1_0 && defined(DEBUG)
-		if ((g_Vars.currentplayer->isdead || g_Vars.currentplayer->aborted || !objectiveIsAllComplete()) && !debugIsSetCompleteEnabled())
-#else
 		if (g_Vars.currentplayer->isdead || g_Vars.currentplayer->aborted || !objectiveIsAllComplete())
-#endif
 		{
 			menuPushRootDialog(&g_SoloMissionEndscreenFailedMenuDialog, MENUROOT_ENDSCREEN);
 		} else {
@@ -1318,8 +1315,8 @@ void endscreenPrepare(void)
 			secs = playerGetMissionTime() / 60;
 
 			if (secs != 0) {
-				if (secs >= S32_MAX || S32_MAX - secs <= g_GameFile.totaltime) {
-					g_GameFile.totaltime = S32_MAX;
+				if (secs >= UINT32_MAX || UINT32_MAX - secs <= g_GameFile.totaltime) {
+					g_GameFile.totaltime = UINT32_MAX;
 				} else {
 					g_GameFile.totaltime += secs;
 				}
@@ -1328,28 +1325,12 @@ void endscreenPrepare(void)
 			g_GameFile.autostageindex = g_MissionConfig.stageindex;
 			g_GameFile.autodifficulty = g_MissionConfig.difficulty;
 
-#if VERSION >= VERSION_NTSC_1_0 && defined(DEBUG)
-			if (g_CheatsActiveBank0 == 0
-					&& g_CheatsActiveBank1 == 0
-					&& g_MissionConfig.pdmode == false
-					&& ((g_Vars.currentplayer->isdead == false
-							&& g_Vars.currentplayer->aborted == false
-							&& objectiveIsAllComplete())
-						|| debugIsSetCompleteEnabled()))
-#elif VERSION >= VERSION_NTSC_1_0
 			if (g_CheatsActiveBank0 == 0
 					&& g_CheatsActiveBank1 == 0
 					&& g_MissionConfig.pdmode == false
 					&& g_Vars.currentplayer->isdead == false
 					&& g_Vars.currentplayer->aborted == false
 					&& objectiveIsAllComplete())
-#else
-			if (g_Vars.currentplayer->isdead == false
-					&& g_Vars.currentplayer->aborted == false
-					&& objectiveIsAllComplete()
-					&& g_CheatsActiveBank0 == 0
-					&& g_CheatsActiveBank1 == 0)
-#endif
 			{
 				secs = playerGetMissionTime() / 60;
 
@@ -1467,7 +1448,7 @@ struct menudialogdef g_2PMissionEndscreenFailedVMenuDialog = {
 
 void endscreenPushCoop(void)
 {
-	u32 prevplayernum = g_MpPlayerNum;
+	uint32_t prevplayernum = g_MpPlayerNum;
 
 	lvSetPaused(true);
 
@@ -1479,17 +1460,10 @@ void endscreenPushCoop(void)
 
 	g_Menus[g_MpPlayerNum].playernum = g_Vars.currentplayernum;
 
-#if VERSION >= VERSION_NTSC_1_0 && defined(DEBUG)
-	if (((g_Vars.bond->isdead && g_Vars.coop->isdead)
-			|| g_Vars.bond->aborted
-			|| g_Vars.coop->aborted
-			|| !objectiveIsAllComplete()) && !debugIsSetCompleteEnabled())
-#else
 	if ((g_Vars.bond->isdead && g_Vars.coop->isdead)
 			|| g_Vars.bond->aborted
 			|| g_Vars.coop->aborted
 			|| !objectiveIsAllComplete())
-#endif
 	{
 		// Failed or aborted
 		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
@@ -1524,38 +1498,22 @@ void endscreenPushCoop(void)
  */
 void endscreenPushSolo(void)
 {
-	u32 prevplayernum = g_MpPlayerNum;
+	uint32_t prevplayernum = g_MpPlayerNum;
 
 	g_MpPlayerNum = 0;
 	g_Menus[g_MpPlayerNum].playernum = 0;
 
-#if VERSION >= VERSION_NTSC_1_0 && defined(DEBUG)
-	if (((g_Vars.bond->isdead && g_Vars.coop->isdead)
-			|| g_Vars.bond->aborted
-			|| g_Vars.coop->aborted
-			|| !objectiveIsAllComplete()) && !debugIsSetCompleteEnabled())
-#else
 	if ((g_Vars.bond->isdead && g_Vars.coop->isdead)
 			|| g_Vars.bond->aborted
 			|| g_Vars.coop->aborted
 			|| !objectiveIsAllComplete())
-#endif
 	{
 		// Failed or aborted
 		endscreenResetModels();
 		menuPushRootDialog(&g_RetryMissionMenuDialog, MENUROOT_COOPCONTINUE);
 	} else {
 		// Completed
-#if VERSION >= VERSION_NTSC_1_0
 		endscreenContinue(1);
-#else
-		struct menudialogdef *definition = endscreenAdvance();
-
-		if (definition) {
-			endscreenResetModels();
-			menuPushRootDialog(definition, MENUROOT_COOPCONTINUE);
-		}
-#endif
 	}
 
 	g_MpPlayerNum = prevplayernum;
@@ -1563,7 +1521,7 @@ void endscreenPushSolo(void)
 
 void endscreenPushAnti(void)
 {
-	u32 prevplayernum = g_MpPlayerNum;
+	uint32_t prevplayernum = g_MpPlayerNum;
 
 	lvSetPaused(true);
 
@@ -1576,11 +1534,7 @@ void endscreenPushAnti(void)
 	g_Menus[g_MpPlayerNum].playernum = g_Vars.currentplayernum;
 
 	if (g_Vars.currentplayer == g_Vars.bond) {
-#if VERSION >= VERSION_NTSC_1_0 && defined(DEBUG)
-		if (!g_Vars.anti->aborted && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()) && !debugIsSetCompleteEnabled())
-#else
 		if (!g_Vars.anti->aborted && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()))
-#endif
 		{
 			// Bond - failed or aborted
 			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
@@ -1599,11 +1553,7 @@ void endscreenPushAnti(void)
 
 		filemgrSaveOrLoad(&g_GameFileGuid, FILEOP_SAVE_GAME_000, 0);
 	} else {
-#if VERSION >= VERSION_NTSC_1_0 && defined(DEBUG)
-		if (!g_Vars.anti->aborted && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()) && !debugIsSetCompleteEnabled())
-#else
 		if (!g_Vars.anti->aborted && (g_Vars.bond->isdead || g_Vars.bond->aborted || !objectiveIsAllComplete()))
-#endif
 		{
 			// Anti - completed
 			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {

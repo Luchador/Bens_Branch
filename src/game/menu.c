@@ -2095,7 +2095,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 		// Tick the animation, if any
 		if (menumodel->curanimnum != 0) {
 			f32 frame;
-			u32 stack;
 
 			modelTickAnimQuarterSpeed(&menumodel->bodymodel, g_Vars.diffframe240, true);
 
@@ -2127,12 +2126,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 				s32 j;
 
 				for (i = 0; i < rodata->numvertices; i++) {
-#if VERSION >= VERSION_PAL_BETA
-					rodata->vertices[i].s -= (s32) (100.0f * g_Vars.diffframe60freal);
-#else
 					rodata->vertices[i].s -= 100 * g_Vars.diffframe60;
-#endif
-
 					if (rodata->vertices[i].s < -0x6000) {
 						for (j = 0; j < rodata->numvertices; j++) {
 							rodata->vertices[j].s += 0x2000;
@@ -2709,14 +2703,10 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 									|| item->type == MENUITEMTYPE_0A
 									|| item->type == MENUITEMTYPE_SLIDER
 									|| item->type == MENUITEMTYPE_DROPDOWN) {
-#if VERSION >= VERSION_NTSC_1_0
 								if (!(dialog->transitionfrac >= 0.0f && dialog->type2 == 0)
 										&& !(dialog->transitionfrac < 0.0f && dialog->type == 0)) {
 											textSetHasOutline(1);
 								}
-#else
-								textSetHasOutline(1);
-#endif
 							}
 
 							// Render the horizontal line behind the focused item
@@ -5204,20 +5194,6 @@ u32 menuChooseMusic(void)
 	return MUSIC_PAUSEMENU;
 }
 
-bool func0f0fcbcc(void)
-{
-	if (g_FileState == FILESTATE_UNSELECTED && g_Vars.stagenum == STAGE_CITRAINING) {
-		return true;
-	}
-
-	return false;
-}
-
-bool func0f0fcc04(void)
-{
-	return false;
-}
-
 u32 menuGetRoot(void)
 {
 	if (g_MenuData.count == 0) {
@@ -5227,7 +5203,6 @@ u32 menuGetRoot(void)
 	return g_MenuData.root;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 struct menudialogdef g_PakAttemptRepairMenuDialog;
 
 MenuItemHandlerResult menuhandler000fcc34(s32 operation, struct menuitem *item, union handlerdata *data)
@@ -5254,7 +5229,6 @@ MenuItemHandlerResult menuhandler000fcc34(s32 operation, struct menuitem *item, 
 
 	return 0;
 }
-#endif
 
 MenuDialogHandlerResult menudialog000fcd48(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
@@ -5269,7 +5243,6 @@ MenuDialogHandlerResult menudialog000fcd48(s32 operation, struct menudialogdef *
 	return 0;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 MenuItemHandlerResult func0f0fcdd0(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
@@ -5278,7 +5251,6 @@ MenuItemHandlerResult func0f0fcdd0(s32 operation, struct menuitem *item, union h
 
 	return 0;
 }
-#endif
 
 MenuItemHandlerResult menuhandlerRepairPak(s32 operation, struct menuitem *item, union handlerdata *data)
 {
@@ -5335,17 +5307,10 @@ struct menuitem g_PakRemovedMenuItems[] = {
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
-#if VERSION >= VERSION_NTSC_1_0
 		MENUITEMFLAG_SELECTABLE_CENTRE,
 		L_MPWEAPONS_073, // "OK"
 		0,
 		menuhandler000fcc34,
-#else
-		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG | MENUITEMFLAG_SELECTABLE_CENTRE,
-		L_MPWEAPONS_073, // "OK"
-		0,
-		NULL,
-#endif
 	},
 	{ MENUITEMTYPE_END },
 };
@@ -5379,17 +5344,10 @@ struct menuitem g_PakRepairSuccessMenuItems[] = {
 	{
 		MENUITEMTYPE_SELECTABLE,
 		0,
-#if VERSION >= VERSION_NTSC_1_0
 		MENUITEMFLAG_SELECTABLE_CENTRE,
 		L_MPWEAPONS_073, // "OK"
 		0,
 		menuhandler000fcc34,
-#else
-		MENUITEMFLAG_SELECTABLE_CLOSESDIALOG | MENUITEMFLAG_SELECTABLE_CENTRE,
-		L_MPWEAPONS_073, // "OK"
-		0,
-		NULL,
-#endif
 	},
 	{ MENUITEMTYPE_END },
 };
@@ -5500,9 +5458,7 @@ char *menuTextSaveDeviceName(struct menuitem *item)
 		L_OPTIONS_113, // "Controller Pak 2"
 		L_OPTIONS_114, // "Controller Pak 3"
 		L_OPTIONS_115, // "Controller Pak 4"
-#if VERSION >= VERSION_NTSC_1_0
 		L_OPTIONS_111, // "Game Pak"
-#endif
 	};
 
 	if ((u8)g_Menus[g_MpPlayerNum].fm.device3 < ARRAYCOUNT(devices)) {
@@ -5517,13 +5473,9 @@ MenuItemHandlerResult menuhandlerRetrySavePak(s32 operation, struct menuitem *it
 	if (operation == MENUOP_SET) {
 		menuPopDialog();
 
-#if VERSION >= VERSION_NTSC_1_0
 		g_Vars.pakstocheck &= 0xfff0;
 		g_Vars.pakstocheck |= 0x0008;
 		g_Vars.pakstocheck |= 1 << ((u8)g_Menus[g_MpPlayerNum].fm.device3 + 8);
-#else
-		pak0f1169c8(g_Menus[g_MpPlayerNum].fm.device3, false);
-#endif
 	}
 
 	return 0;
@@ -5532,11 +5484,7 @@ MenuItemHandlerResult menuhandlerRetrySavePak(s32 operation, struct menuitem *it
 MenuItemHandlerResult menuhandlerWarnRepairPak(s32 operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
-#if VERSION >= VERSION_NTSC_1_0
 		menuPushDialog(&g_PakAttemptRepairMenuDialog);
-#else
-		func0f0f3704(&g_PakAttemptRepairMenuDialog);
-#endif
 	}
 
 	return 0;
@@ -5580,10 +5528,8 @@ bool menuIsReadyForPakError(s32 paknum, s32 pakerrordialog)
 
 	if (g_Menus[playernum].curdialog) {
 		if (g_Menus[playernum].curdialog->definition == &g_PakDamagedMenuDialog
-#if VERSION >= VERSION_NTSC_1_0
 				|| g_Menus[playernum].curdialog->definition == &g_PakCannotReadGameBoyMenuDialog
 				|| g_Menus[playernum].curdialog->definition == &g_PakDataLostMenuDialog
-#endif
 				|| g_Menus[playernum].curdialog->definition == &g_PakFullMenuDialog
 				|| g_Menus[playernum].curdialog->definition == &g_PakAttemptRepairMenuDialog
 				|| g_Menus[playernum].curdialog->definition == &g_PakRemovedMenuDialog
@@ -5747,11 +5693,7 @@ struct menudialogdef g_PakDamagedMenuDialog = {
 	L_MPWEAPONS_064, // "Damaged Controller Pak"
 	g_PakDamagedMenuItems,
 	menudialog000fcd48,
-#if VERSION >= VERSION_NTSC_1_0
 	0x00000020,
-#else
-	0,
-#endif
 	NULL,
 };
 
@@ -5812,15 +5754,10 @@ struct menudialogdef g_PakFullMenuDialog = {
 	L_MPWEAPONS_070, // "Full Controller Pak"
 	g_PakFullMenuItems,
 	menudialog000fcd48,
-#if VERSION >= VERSION_NTSC_1_0
 	0x00000020,
-#else
-	0,
-#endif
 	NULL,
 };
 
-#if VERSION >= VERSION_NTSC_1_0
 struct menuitem g_PakCannotReadGameBoyMenuItems[] = {
 	{
 		MENUITEMTYPE_LABEL,
@@ -5918,4 +5855,3 @@ struct menudialogdef g_PakDataLostMenuDialog = {
 	MENUDIALOGFLAG_IGNOREBACK,
 	NULL,
 };
-#endif

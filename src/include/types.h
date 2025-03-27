@@ -1,6 +1,7 @@
 #ifndef _IN_TYPES_H
 #define _IN_TYPES_H
 #include <ultra64.h>
+#include <stdint.h>
 #include <PR/ultrasched.h>
 #include "n_libaudio.h"
 #include "constants.h"
@@ -349,8 +350,8 @@ struct pad {
 };
 
 union filedataptr {
-	u8 *u8;
-	u32 *u32;
+	uint8_t *uint8_t;
+	uint32_t *uint32_t;
 };
 
 struct attackanimconfig {

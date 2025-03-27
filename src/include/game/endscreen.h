@@ -4,14 +4,14 @@
 #include "data.h"
 #include "types.h"
 
-MenuDialogHandlerResult endscreenHandleRetryMission(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data);
-MenuDialogHandlerResult endscreenHandle2PCompleted(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data);
-MenuDialogHandlerResult endscreenHandle2PFailed(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data);
-MenuItemHandlerResult endscreenHandleDeclineMission(s32 operation, struct menuitem *item, union handlerdata *data);
-MenuItemHandlerResult endscreenHandleCheatInfo(s32 operation, struct menuitem *item, union handlerdata *data);
-MenuItemHandlerResult endscreenHandleContinueMission(s32 operation, struct menuitem *item, union handlerdata *data);
-MenuItemHandlerResult endscreenHandleReplayLastLevel(s32 operation, struct menuitem *item, union handlerdata *data);
-MenuItemHandlerResult endscreenHandleReplayPreviousMission(s32 operation, struct menuitem *item, union handlerdata *data);
+MenuDialogHandlerResult endscreenHandleRetryMission(int operation, struct menudialogdef *dialogdef, union handlerdata *data);
+MenuDialogHandlerResult endscreenHandle2PCompleted(int operation, struct menudialogdef *dialogdef, union handlerdata *data);
+MenuDialogHandlerResult endscreenHandle2PFailed(int operation, struct menudialogdef *dialogdef, union handlerdata *data);
+MenuItemHandlerResult endscreenHandleDeclineMission(int operation, struct menuitem *item, union handlerdata *data);
+MenuItemHandlerResult endscreenHandleCheatInfo(int operation, struct menuitem *item, union handlerdata *data);
+MenuItemHandlerResult endscreenHandleContinueMission(int operation, struct menuitem *item, union handlerdata *data);
+MenuItemHandlerResult endscreenHandleReplayLastLevel(int operation, struct menuitem *item, union handlerdata *data);
+MenuItemHandlerResult endscreenHandleReplayPreviousMission(int operation, struct menuitem *item, union handlerdata *data);
 char *endscreenMenuTitleRetryMission(struct menudialogdef *dialogdef);
 char *endscreenMenuTitleNextMission(struct menudialogdef *dialogdef);
 char *endscreenMenuTextNumKills(struct menuitem *item);
@@ -29,7 +29,7 @@ char *endscreenMenuTitleStageFailed(struct menuitem *item);
 char *endscreenMenuTextMissionTime(struct menuitem *item);
 struct menudialogdef *endscreenAdvance(void);
 void endscreenResetModels(void);
-void endscreenContinue(s32 context);
+void endscreenContinue(int context);
 char *endscreenMenuTextTimedCheatName(struct menuitem *item);
 char *endscreenMenuTextCompletionCheatName(struct menuitem *item);
 char *endscreenMenuTextTargetTime(struct menuitem *item);

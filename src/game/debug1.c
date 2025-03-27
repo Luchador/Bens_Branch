@@ -1,8 +1,9 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "game/debug.h"
 #include <stdio.h>
 
-s32 debug_log(const char *message, s32 num)
+int debug_log(const char *message, int num)
 {
 	FILE *debug_file = fopen("debug.log", "a");
     if (debug_file == NULL) {
@@ -16,7 +17,7 @@ s32 debug_log(const char *message, s32 num)
 	return 1;
 }
 
-s32 debug_log_float(const char *message, f32 num)
+int debug_log_float(const char *message, float num)
 {
 	FILE *debug_file = fopen("debug.log", "a");
     if (debug_file == NULL) {
@@ -30,7 +31,7 @@ s32 debug_log_float(const char *message, f32 num)
 	return 1;
 }
 
-s32 debug_erase()
+int debug_erase()
 {
 	FILE *file = fopen("debug.log", "w"); // Open in write mode, truncates the file
     if (file == NULL) {

@@ -191,7 +191,7 @@ void langInit()
 
 }
 
-char *langGet(s32 textid)
+char *langGet(int textid)
 {
 	if(textid == L_MPWEAPONS_129)
 	{

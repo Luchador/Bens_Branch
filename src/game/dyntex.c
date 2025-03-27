@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/dyntex.h"
@@ -39,45 +40,45 @@
  */
 
 struct dyntexroom {
-	u16 roomnum;
-	u16 typelistoffset;
-	u16 numtypes;
-	s32 updatedframe;
+	uint16_t roomnum;
+	uint16_t typelistoffset;
+	uint16_t numtypes;
+	int updatedframe;
 };
 
 struct dyntextype {
-	u16 type : 7;
-	u16 initialised : 1;
-	u8 numvertices;
-	u16 vertexlistoffset;
+	uint16_t type : 7;
+	uint16_t initialised : 1;
+	int8_t numvertices;
+	uint16_t vertexlistoffset;
 };
 
 struct dyntexvtx {
-	u16 offset;
-	s16 s;
-	s16 t;
+	uint16_t offset;
+	int16_t s;
+	int16_t t;
 };
 
-s32 g_DyntexVerticesMax;
-s32 g_DyntexTypesMax;
-s32 g_DyntexRoomsMax;
+int g_DyntexVerticesMax;
+int g_DyntexTypesMax;
+int g_DyntexRoomsMax;
 struct dyntexvtx *g_DyntexVertices;
 struct dyntextype *g_DyntexTypes;
 struct dyntexroom *g_DyntexRooms;
 
-s32 g_DyntexCurRoom = -1;
-s32 g_DyntexCurType = -1;
+int g_DyntexCurRoom = -1;
+int g_DyntexCurType = -1;
 bool g_DyntexRoomPopulated = false;
 bool g_DyntexTypePopulated = false;
-s32 g_DyntexRoomsCount = 0;
-s32 g_DyntexTypesCount = 0;
-s32 g_DyntexVerticesCount = 0;
+int g_DyntexRoomsCount = 0;
+int g_DyntexTypesCount = 0;
+int g_DyntexVerticesCount = 0;
 
 void dyntexUpdateLinear(Vtx *vertices, struct dyntextype *type)
 {
-	// Old: s16 tmp = (s32) (g_Lv80SecIntervalFrac * 10.0f * 4096.0f) % 4096;
-    s16 tmp = (s32) (g_Lv80SecIntervalFrac * (g_StageIndex == STAGEINDEX_AIRBASE ? 1.0f : 10.0f ) * 4096.0f) % 4096; //Make water in Air Base scroll more slowly
-	s32 i;
+	// Old: int16_t tmp = (int) (g_Lv80SecIntervalFrac * 10.0f * 4096.0f) % 4096;
+    int16_t tmp = (int) (g_Lv80SecIntervalFrac * (g_StageIndex == STAGEINDEX_AIRBASE ? 1.0f : 10.0f ) * 4096.0f) % 4096; //Make water in Air Base scroll more slowly
+	int i;
 
 	for (i = 0; i < type->numvertices; i++) {
 		Vtx *vertex = (Vtx *)((uintptr_t)vertices + g_DyntexVertices[type->vertexlistoffset + i].offset);
@@ -89,7 +90,7 @@ void dyntexUpdateLinear(Vtx *vertices, struct dyntextype *type)
 
 void dyntexUpdateReset(Vtx *vertices, struct dyntextype *type)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < type->numvertices; i++) {
 		Vtx *vertex = (Vtx *)((uintptr_t)vertices + g_DyntexVertices[type->vertexlistoffset + i].offset);
@@ -101,8 +102,8 @@ void dyntexUpdateReset(Vtx *vertices, struct dyntextype *type)
 
 void dyntexUpdateMonitor(Vtx *vertices, struct dyntextype *type)
 {
-	s16 tmp = (s32) (g_Lv80SecIntervalFrac * 4.0f * 4096.0f) % 4096;
-	s32 i;
+	int16_t tmp = (int) (g_Lv80SecIntervalFrac * 4.0f * 4096.0f) % 4096;
+	int i;
 
 	for (i = 0; i < type->numvertices; i++) {
 		Vtx *vertex = (Vtx *)((uintptr_t)vertices + g_DyntexVertices[type->vertexlistoffset + i].offset);
@@ -114,28 +115,28 @@ void dyntexUpdateMonitor(Vtx *vertices, struct dyntextype *type)
 
 void dyntexUpdateOcean(Vtx *vertices, struct dyntextype *type)
 {
-	f32 f24 = g_Lv80SecIntervalFrac * 5.0f;
-	f32 angle;
-	s32 i;
+	float f24 = g_Lv80SecIntervalFrac * 5.0f;
+	float angle;
+	int i;
 
-	static u32 ripsize = 65;
-	static u32 modula = 22;
+	static uint32_t ripsize = 65;
+	static uint32_t modula = 22;
 
 	for (i = 0; i < type->numvertices; i++) {
 		Vtx *vertex = (Vtx *)((uintptr_t)vertices + g_DyntexVertices[type->vertexlistoffset + i].offset);
 
-		angle = ((g_DyntexVertices[type->vertexlistoffset + i].t % modula) / (f32) modula + f24) * M_TAU;
-		vertex->t = g_DyntexVertices[type->vertexlistoffset + i].t + (s16) (sinf(angle) * ripsize);
+		angle = ((g_DyntexVertices[type->vertexlistoffset + i].t % modula) / (float) modula + f24) * M_TAU;
+		vertex->t = g_DyntexVertices[type->vertexlistoffset + i].t + (int16_t) (sinf(angle) * ripsize);
 
-		angle = (((g_DyntexVertices[type->vertexlistoffset + i].s + 22) % modula) / (f32) modula + f24) * M_TAU;
-		vertex->s = g_DyntexVertices[type->vertexlistoffset + i].s + (s16) (cosf(angle) * ripsize);
+		angle = (((g_DyntexVertices[type->vertexlistoffset + i].s + 22) % modula) / (float) modula + f24) * M_TAU;
+		vertex->s = g_DyntexVertices[type->vertexlistoffset + i].s + (int16_t) (cosf(angle) * ripsize);
 	}
 }
 
 void dyntexUpdateArrows(Vtx *vertices, struct dyntextype *type)
 {
-	s32 tmp = ((s32) ((1.0f - g_Lv80SecIntervalFrac) * 60.0f * 8.0f) % 8) * 256;
-	s32 i;
+	int tmp = ((int) ((1.0f - g_Lv80SecIntervalFrac) * 60.0f * 8.0f) % 8) * 256;
+	int i;
 
 	for (i = 0; i < type->numvertices; i++) {
 		Vtx *vertex = (Vtx *)((uintptr_t)vertices + g_DyntexVertices[type->vertexlistoffset + i].offset);
@@ -145,11 +146,11 @@ void dyntexUpdateArrows(Vtx *vertices, struct dyntextype *type)
 	}
 }
 
-void dyntexTickRoom(s32 roomnum, Vtx *vertices)
+void dyntexTickRoom(int roomnum, Vtx *vertices)
 {
-	s32 index = -1;
-	s32 i;
-	s32 j;
+	int index = -1;
+	int i;
+	int j;
 
 	for (i = 0; i < g_DyntexRoomsCount; i++) {
 		if (g_DyntexRooms[i].roomnum == roomnum) {
@@ -168,14 +169,14 @@ void dyntexTickRoom(s32 roomnum, Vtx *vertices)
 
 	for (i = 0; i < g_DyntexRooms[index].numtypes; i++) {
 		struct dyntextype *type = &g_DyntexTypes[g_DyntexRooms[index].typelistoffset + i];
-		s32 mins = 32767;
-		s32 maxs = -32766;
-		s32 mint = 32767;
-		s32 maxt = -32766;
+		int mins = 32767;
+		int maxs = -32766;
+		int mint = 32767;
+		int maxt = -32766;
 
 		if (!type->initialised) {
-			s32 adds = 0;
-			s32 addt = 0;
+			int adds = 0;
+			int addt = 0;
 
 			// @bug: Using i for both outer and inner loops
 			// Ben's change: fixing this bug, although I think in practice it happened to be harmless in the original PD.
@@ -310,19 +311,14 @@ void dyntexAddVertex(Vtx *vertex)
 		g_DyntexTypePopulated = true;
 	}
 
-	g_DyntexVertices[g_DyntexVerticesCount].offset = (u16)vertex;
+	g_DyntexVertices[g_DyntexVerticesCount].offset = (uint16_t)vertex;
 	g_DyntexVerticesCount++;
 
 	g_DyntexTypes[g_DyntexTypesCount - 1].numvertices++;
 }
 
-void dyntexSetCurrentType(s16 type)
+void dyntexSetCurrentType(int16_t type)
 {
-	// Air Base - don't animate anything (exterior water)
-	/*if (g_StageIndex == STAGEINDEX_AIRBASE) {
-		return;
-	}*/
-
 	// Investigation - don't animate the puddle of water behind the glass
 	if (g_StageIndex == STAGEINDEX_INVESTIGATION && type == DYNTEXTYPE_RIVER) {
 		return;
@@ -355,7 +351,7 @@ void dyntexSetCurrentType(s16 type)
 
 void dyntexSetCurrentRoom(RoomNum roomnum)
 {
-	s32 i;
+	int i;
 
 	if (roomnum >= 0) {
 		for (i = 0; i < g_DyntexRoomsCount; i++) {
@@ -375,9 +371,9 @@ void dyntexSetCurrentRoom(RoomNum roomnum)
 
 void dyntexReset(void)
 {
-	u32 size3;
-	u32 size2;
-	u32 size1;
+	uint32_t size3;
+	uint32_t size2;
+	uint32_t size1;
 
 	g_DyntexCurRoom = -1;
 	g_DyntexCurType = -1;

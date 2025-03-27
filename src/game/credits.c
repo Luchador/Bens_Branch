@@ -102,39 +102,39 @@
 #define NUM_CORE_TEAM 16
 
 struct particle {
-	f32 x;
-	f32 y;
-	f32 z;
-	f32 rotation;
-	u8 movetype;
-	u8 confignum;
-	u8 unk12;
-	u8 size;
-	u8 colourindex;
+	float x;
+	float y;
+	float z;
+	float rotation;
+	uint8_t movetype;
+	uint8_t confignum;
+	uint8_t unk12;
+	uint8_t size;
+	uint8_t colourindex;
 };
 
 struct creditsbglayer {
-	s32 type;
-	f32 rotspeed;
-	f32 panspeed;
-	s32 confignum;
+	int type;
+	float rotspeed;
+	float panspeed;
+	int confignum;
 };
 
 struct creditsdata {
-	/*0x0000*/ u32 unk0000;
-	/*0x0004*/ u32 unk0004;
-	/*0x0008*/ u32 unk0008;
+	/*0x0000*/ uint32_t unk0000;
+	/*0x0004*/ uint32_t unk0004;
+	/*0x0008*/ uint32_t unk0008;
 	/*0x000c*/ struct particle particles[500];
-	/*0x2eec*/ u8 unk2eec;
+	/*0x2eec*/ uint8_t unk2eec;
 	/*0x2ef0*/ struct menumodel menumodel;
-	/*0x34a8*/ u8 unk34a8[0xcac];
+	/*0x34a8*/ uint8_t unk34a8[0xcac];
 
 	/**
 	 * Credit indexes 1 through 16 are randomised. coreteammap stores the chosen
 	 * order. The index is the apparent credit index and the value is the real
 	 * credit index that it maps to.
 	 */
-	/*0x4154*/ u32 coreteammap[NUM_CORE_TEAM + 1];
+	/*0x4154*/ uint32_t coreteammap[NUM_CORE_TEAM + 1];
 
 	/**
 	 * creditnum is the credit index of the first credit being displayed on the
@@ -144,72 +144,54 @@ struct creditsdata {
 	 * through the coreteammap, so its value won't actually correspond with the
 	 * credit being displayed.
 	 */
-	/*0x4198*/ s32 creditnum;
+	/*0x4198*/ int creditnum;
 
-	/*0x419c*/ u8 numthisslide;
-	/*0x41a0*/ f32 slideage; // age in seconds
-	/*0x41a4*/ f32 slidelifetime; // in seconds
-	/*0x41a8*/ u8 unk41a8[8];
-	/*0x41b0*/ s8 unk41b0[2];
+	/*0x419c*/ uint8_t numthisslide;
+	/*0x41a0*/ float slideage; // age in seconds
+	/*0x41a4*/ float slidelifetime; // in seconds
+	/*0x41a8*/ uint8_t unk41a8[8];
+	/*0x41b0*/ int8_t unk41b0[2];
 	/*0x41b4*/ struct creditsbglayer bglayers[4];
-	/*0x41f4*/ u8 slidesenabled;
-	/*0x41f5*/ s8 particlecolourindex1;
-	/*0x41f6*/ s8 particlecolourindex2;
-	/*0x41f8*/ f32 particlecolourweight;
-	/*0x41fc*/ u8 particlemovetype;
-	/*0x41fd*/ u8 particleconfignum1;
-	/*0x41fe*/ u8 particleconfignum2;
-	/*0x41ff*/ u8 particlemaxsize;
-	/*0x4200*/ u8 particleminsize;
-	/*0x4204*/ u32 blacktimer60;
-	/*0x4208*/ u8 unk4208;
-	/*0x420c*/ u32 unk420c;
-	/*0x4210*/ u32 unk4210;
-	/*0x4214*/ u32 unk4214;
-	/*0x4218*/ u32 unk4218;
-	/*0x421c*/ u32 unk421c;
-	/*0x4220*/ u32 unk4220;
-	/*0x4224*/ u32 unk4224;
-	/*0x4228*/ u32 unk4228;
-	/*0x422c*/ u32 unk422c;
-	/*0x4230*/ u32 unk4230;
-	/*0x4234*/ u32 unk4234;
-	/*0x4238*/ u32 unk4238;
-	/*0x423c*/ u32 unk423c;
+	/*0x41f4*/ uint8_t slidesenabled;
+	/*0x41f5*/ int8_t particlecolourindex1;
+	/*0x41f6*/ int8_t particlecolourindex2;
+	/*0x41f8*/ float particlecolourweight;
+	/*0x41fc*/ uint8_t particlemovetype;
+	/*0x41fd*/ uint8_t particleconfignum1;
+	/*0x41fe*/ uint8_t particleconfignum2;
+	/*0x41ff*/ uint8_t particlemaxsize;
+	/*0x4200*/ uint8_t particleminsize;
+	/*0x4204*/ uint32_t blacktimer60;
+	/*0x4208*/ uint8_t unk4208;
+	/*0x420c*/ uint32_t unk420c;
+	/*0x4210*/ uint32_t unk4210;
+	/*0x4214*/ uint32_t unk4214;
+	/*0x4218*/ uint32_t unk4218;
+	/*0x421c*/ uint32_t unk421c;
+	/*0x4220*/ uint32_t unk4220;
+	/*0x4224*/ uint32_t unk4224;
+	/*0x4228*/ uint32_t unk4228;
+	/*0x422c*/ uint32_t unk422c;
+	/*0x4230*/ uint32_t unk4230;
+	/*0x4234*/ uint32_t unk4234;
+	/*0x4238*/ uint32_t unk4238;
+	/*0x423c*/ uint32_t unk423c;
 };
 
-f32 g_CreditsParticleRotationFrac;
-u32 g_CreditsCurFrame;
-u32 g_CreditsPrevFrame;
-u32 g_CreditsCurFrame2;
+float g_CreditsParticleRotationFrac;
+uint32_t g_CreditsCurFrame;
+uint32_t g_CreditsPrevFrame;
+uint32_t g_CreditsCurFrame2;
 struct creditsdata *g_CreditsData;
 
 bool g_CreditsScrollStarted = false;
 bool g_CreditsAltTitleRequested = false;
 bool g_CreditsUsingAltTitle = false;
 
-void creditsMap4BgVertices(Vtx *vertices, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6)
+void creditsMap9BgVertices(Vtx *vertices, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6)
 {
-	f32 a = arg2 * sinf(arg1) + arg3 * cosf(arg1);
-	f32 b = arg2 * cosf(arg1) - arg3 * sinf(arg1);
-
-	vertices[0].s = (sinf(arg4) + cosf(arg4)) * arg5 + a;
-	vertices[0].t = (cosf(arg4) - sinf(arg4)) * arg6 + b;
-
-	vertices[1].s = (sinf(arg4 + 1.5707963705063f) + cosf(arg4 + 1.5707963705063f)) * arg5 + a;
-	vertices[1].t = (cosf(arg4 + 1.5707963705063f) - sinf(arg4 + 1.5707963705063f)) * arg6 + b;
-
-	vertices[2].s = (sinf(arg4 + 3.1415927410126f) + cosf(arg4 + 3.1415927410126f)) * arg5 + a;
-	vertices[2].t = (cosf(arg4 + 3.1415927410126f) - sinf(arg4 + 3.1415927410126f)) * arg6 + b;
-
-	vertices[3].s = (sinf(arg4 + 4.7123889923096f) + cosf(arg4 + 4.7123889923096f)) * arg5 + a;
-	vertices[3].t = (cosf(arg4 + 4.7123889923096f) - sinf(arg4 + 4.7123889923096f)) * arg6 + b;
-}
-
-void creditsMap9BgVertices(Vtx *vertices, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6)
-{
-	f32 a = arg2 * sinf(arg1) + arg3 * cosf(arg1);
-	f32 b = arg2 * cosf(arg1) - arg3 * sinf(arg1);
+	float a = arg2 * sinf(arg1) + arg3 * cosf(arg1);
+	float b = arg2 * cosf(arg1) - arg3 * sinf(arg1);
 
 	vertices[0].s = (sinf(arg4) + cosf(arg4)) * arg5 + a;
 	vertices[0].t = (cosf(arg4) - sinf(arg4)) * arg6 + b;
@@ -252,9 +234,9 @@ void creditsMap9BgVertices(Vtx *vertices, f32 arg1, f32 arg2, f32 arg3, f32 arg4
  * 7:  0      1800
  * 8:  1800   1800
  */
-void creditsInitBgVertices(Vtx *vertices, s32 z)
+void creditsInitBgVertices(Vtx *vertices, int z)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < 9; i++) {
 		vertices[i].x = (i % 3) * 1800 - 1800;
@@ -264,9 +246,9 @@ void creditsInitBgVertices(Vtx *vertices, s32 z)
 }
 
 struct bgconfig {
-	/*0x00*/ f32 unk00;
-	/*0x04*/ u8 s[9];
-	/*0x10*/ u32 colours[3][3];
+	/*0x00*/ float unk00;
+	/*0x04*/ uint8_t s[9];
+	/*0x10*/ uint32_t colours[3][3];
 };
 
 struct bgconfig g_CreditsBgConfigs[] = {
@@ -280,18 +262,14 @@ struct bgconfig g_CreditsBgConfigs[] = {
 	{ 0.01, { 2, 1, 2, 1, 0, 1, 2, 1, 2 }, { { 0x00ffff, 0x0000ff, 0x000000 }, { 0xffffff, 0xffffff, 0xffffff }, { 0xffffff, 0xffffff, 0xffffff } } },
 };
 
-void creditsChooseBgColours(Vtx *vertices, Col *colours, s32 confignum, s32 alpha, s32 arg4)
+void creditsChooseBgColours(Vtx *vertices, Col *colours, int confignum, int alpha, int arg4)
 {
-#if PAL
-	s32 iVar1 = (s32)(g_CreditsBgConfigs[confignum].unk00 * g_CreditsCurFrame2 / (10.0f / 3.0f) + arg4) % 180;
-#else
-	s32 iVar1 = (s32)(g_CreditsBgConfigs[confignum].unk00 * g_CreditsCurFrame2 * 0.25f + arg4) % 180;
-#endif
-	s32 colour1index = iVar1 / 60;
-	s32 colour2index;
-	f32 weightfrac;
-	u32 weight;
-	s32 i;
+	int iVar1 = (int)(g_CreditsBgConfigs[confignum].unk00 * g_CreditsCurFrame2 * 0.25f + arg4) % 180;
+	int colour1index = iVar1 / 60;
+	int colour2index;
+	float weightfrac;
+	uint32_t weight;
+	int i;
 
 	if (colour1index > 2) {
 		colour1index = 0;
@@ -325,12 +303,12 @@ void creditsChooseBgColours(Vtx *vertices, Col *colours, s32 confignum, s32 alph
 }
 
 struct creditsbgtype {
-	s16 unk00;
-	s16 unk02;
-	s16 unk04;
-	s32 texturenum;
-	f32 unk0c;
-	f32 unk10;
+	int16_t unk00;
+	int16_t unk02;
+	int16_t unk04;
+	int texturenum;
+	float unk0c;
+	float unk10;
 };
 
 struct creditsbgtype g_CreditsBgTypes[] = {
@@ -348,15 +326,14 @@ struct creditsbgtype g_CreditsBgTypes[] = {
 	{ 10000, 1000,  -200, 0x2d, 220, 0 },
 };
 
-Gfx *creditsDrawBackgroundLayer(Gfx *gdl, u8 type, u8 layernum, f32 arg3, u32 alpha, s32 arg5)
+Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float arg3, uint32_t alpha, int arg5)
 {
 	Vtx *vertices;
 	Col *colours;
-	u32 stack;
-	f32 pan;
-	f32 b;
-	f32 c;
-	f32 rotation;
+	float pan;
+	float b;
+	float c;
+	float rotation;
 
 	gdl = menugfx0f0e2498(gdl);
 
@@ -373,15 +350,10 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, u8 type, u8 layernum, f32 arg3, u32 al
 	colours = gfxAllocateColours(3);
 	vertices = gfxAllocateVertices(9);
 
-	creditsInitBgVertices(vertices, (s32)((g_CreditsBgTypes[type].unk04 + 2000) * arg3) - 2000);
+	creditsInitBgVertices(vertices, (int)((g_CreditsBgTypes[type].unk04 + 2000) * arg3) - 2000);
 
-#if PAL
-	rotation = g_CreditsData->bglayers[layernum].rotspeed * g_CreditsCurFrame2 / (10.0f / 3.0f);
-	pan = g_CreditsData->bglayers[layernum].panspeed * g_CreditsCurFrame2 / (10.0f / 3.0f);
-#else
 	rotation = g_CreditsData->bglayers[layernum].rotspeed * g_CreditsCurFrame2 * 0.25f;
 	pan = g_CreditsData->bglayers[layernum].panspeed * g_CreditsCurFrame2 * 0.25f;
-#endif
 	b = g_CreditsBgTypes[type].unk0c * 32.0f;
 	c = g_CreditsBgTypes[type].unk10 * 32.0f;
 
@@ -406,7 +378,7 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, u8 type, u8 layernum, f32 arg3, u32 al
 	return gdl;
 }
 
-void creditsCopyBackgroundLayer(s32 srcindex, s32 dstindex, bool move)
+void creditsCopyBackgroundLayer(int srcindex, int dstindex, bool move)
 {
 	g_CreditsData->bglayers[dstindex].type = g_CreditsData->bglayers[srcindex].type;
 	g_CreditsData->bglayers[dstindex].rotspeed = g_CreditsData->bglayers[srcindex].rotspeed;
@@ -420,25 +392,24 @@ void creditsCopyBackgroundLayer(s32 srcindex, s32 dstindex, bool move)
 
 Gfx *creditsDrawBackground(Gfx *gdl)
 {
-	s32 s1[4] = {-1, -1, -1, -1};
-	u32 s5[4];
-	f32 s4[4];
-	s32 s2[4];
+	int s1[4] = {-1, -1, -1, -1};
+	uint32_t s5[4];
+	float s4[4];
+	int s2[4];
 
-	u32 stack;
-	f32 tmp = g_CreditsCurFrame2 / (PAL ? 1000.0f : 1200.0f);
-	f32 bestvalue;
-	s32 bestindex;
-	s32 len = 0;
-	s32 i;
+	float tmp = g_CreditsCurFrame2 / 1200.0f;
+	float bestvalue;
+	int bestindex;
+	int len = 0;
+	int i;
 
 	for (i = 0; i < 2; i++) {
-		f32 value = i * 0.5f + tmp;
-		value = value - (s32)value;
+		float value = i * 0.5f + tmp;
+		value = value - (int)value;
 
 		if (value > 0.8f) {
-			u32 uVar14;
-			s32 val = i;
+			uint32_t uVar14;
+			int val = i;
 
 			if (g_CreditsData->bglayers[i + 2].type != -1) {
 				val = i + 2;
@@ -455,7 +426,7 @@ Gfx *creditsDrawBackground(Gfx *gdl)
 			s5[len + 0] = i;
 
 			s1[len + 1] = i;
-			s2[len + 1] = 255 - (s32)uVar14;
+			s2[len + 1] = 255 - (int)uVar14;
 			s4[len + 1] = value;
 			s5[len + 1] = i;
 
@@ -498,21 +469,7 @@ Gfx *creditsDrawBackground(Gfx *gdl)
 	return gdl;
 }
 
-u32 var8007f3dc = 0x00000000;
-u32 var8007f3e0 = 0x00000000;
-u32 var8007f3e4 = 0x00000000;
-u32 var8007f3e8 = 0x00000001;
-u32 var8007f3ec = 0x00000000;
-u32 var8007f3f0 = 0x00000000;
-u32 var8007f3f4 = 0x010301f4;
-u32 var8007f3f8 = 0x008888ff;
-u32 var8007f3fc = 0x00ff88ff;
-u32 var8007f400 = 0x00ff8888;
-u32 var8007f404 = 0x006666ff;
-u32 var8007f408 = 0x41f00000;
-u32 var8007f40c = 0x41f00000;
-
-u32 g_CreditColourPalette[][4] = {
+uint32_t g_CreditColourPalette[][4] = {
 	{ 0x0000ffff, 0x0044ffff, 0x0088ffff, 0x00ffffff },
 	{ 0x8888ff7f, 0xff88ff7f, 0xff88887f, 0x6666ff7f },
 	{ 0xff00007f, 0xffffff7f, 0xff00004f, 0xffffff4f },
@@ -520,11 +477,11 @@ u32 g_CreditColourPalette[][4] = {
 };
 
 struct g_CreditParticleConfigs {
-	s32 texturenum;
-	s16 s1;
-	s16 t1;
-	s16 s2;
-	s16 t2;
+	int texturenum;
+	int16_t s1;
+	int16_t t1;
+	int16_t s2;
+	int16_t t2;
 };
 
 struct g_CreditParticleConfigs g_CreditParticleConfigs[] = {
@@ -538,9 +495,9 @@ struct g_CreditParticleConfigs g_CreditParticleConfigs[] = {
  *
  * This is only called with max = 0.00223f.
  */
-f32 creditsRandInRange(f32 range)
+float creditsRandInRange(float range)
 {
-	f32 value;
+	float value;
 
 	do {
 		value = RANDOMFRAC() * range;
@@ -550,26 +507,26 @@ f32 creditsRandInRange(f32 range)
 	return value;
 }
 
-void creditsCreatePendingBgLayers(u32 mask)
+void creditsCreatePendingBgLayers(uint32_t mask)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < 2; i++) {
-		s32 shift = i * 8;
+		int shift = i * 8;
 
 		if (g_CreditsData->unk41b0[i] == 0) {
 			g_CreditsData->bglayers[i + 2].type = rngRandom() % 12;
 			g_CreditsData->bglayers[i + 2].rotspeed = creditsRandInRange(0.00223f);
 			g_CreditsData->bglayers[i + 2].panspeed = creditsRandInRange(0.00223f);
 
-			if (((u8)(mask >> shift) & 2)) {
+			if (((uint8_t)(mask >> shift) & 2)) {
 				g_CreditsData->bglayers[i + 2].confignum = rngRandom() % 6;
 			}
 		}
 	}
 }
 
-Gfx *creditsFillFramebuffer(Gfx *gdl, u32 colour)
+Gfx *creditsFillFramebuffer(Gfx *gdl, uint32_t colour)
 {
 	gSPDisplayList(gdl++, &var800613a0);
 
@@ -582,54 +539,10 @@ Gfx *creditsFillFramebuffer(Gfx *gdl, u32 colour)
 	return gdl;
 }
 
-/**
- * An unused function. Renders a white line between two 3D coordinates.
- * The line would be 10 units high, though I'm not sure if that's big or not.
- */
-Gfx *creditsRenderLine(Gfx *gdl, struct coord *from, struct coord *to)
-{
-	Vtx *vertices;
-	Col *colours;
-
-	colours = gfxAllocateColours(2);
-	vertices = gfxAllocateVertices(4);
-
-	vertices[0].x = from->x;
-	vertices[0].y = from->y;
-	vertices[0].z = from->z;
-
-	vertices[1].x = from->x;
-	vertices[1].y = from->y + 10.0f;
-	vertices[1].z = from->z;
-
-	vertices[2].x = to->x;
-	vertices[2].y = to->y + 10.0f;
-	vertices[2].z = to->z;
-
-	vertices[3].x = to->x;
-	vertices[3].y = to->y;
-	vertices[3].z = to->z;
-
-	vertices[0].colour = 0;
-	vertices[1].colour = 4;
-	vertices[2].colour = 4;
-	vertices[3].colour = 0;
-
-	colours[0].word = 0xffffffff;
-	colours[1].word = 0xffffffff;
-
-	gSPColor(gdl++, (uintptr_t)(colours), 2);
-	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
-
-	gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
-
-	return gdl;
-}
-
 void creditsResetParticles(void)
 {
-	f32 tmp;
-	s32 i;
+	float tmp;
+	int i;
 
 	g_CreditsData->particlecolourindex1 = -1;
 	g_CreditsData->particlecolourindex2 = 0;
@@ -671,46 +584,27 @@ void creditsResetParticles(void)
 
 void creditsTickParticles(void)
 {
-	s32 i;
-	f32 amount;
-	f32 zspeed = 30.0f;
+	int i;
+	float amount;
+	float zspeed = 30.0f;
 
 	if (g_CreditsData->particlecolourindex1 >= 0) {
-#if VERSION >= VERSION_PAL_BETA
 		g_CreditsData->particlecolourweight += g_Vars.diffframe240freal / 720.0f;
-#else
-		g_CreditsData->particlecolourweight += g_Vars.diffframe240f / 720.0f;
-#endif
-
 		if (g_CreditsData->particlecolourweight > 1.0f) {
 			g_CreditsData->particlecolourindex2 = g_CreditsData->particlecolourindex1;
 			g_CreditsData->particlecolourindex1 = -1;
 		}
 	} else {
-#if VERSION >= VERSION_NTSC_1_0
 		if (RANDOMFRAC() < 0.007f && joyGetButtons(0, R_TRIG) == 0) {
 			g_CreditsData->particlecolourindex1 = rngRandom() % 4;
 			g_CreditsData->particlecolourweight = 0;
 		}
-#else
-		if (RANDOMFRAC() < 0.007f) {
-			g_CreditsData->particlecolourindex1 = rngRandom() % 4;
-			g_CreditsData->particlecolourweight = 0;
-		}
-#endif
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (RANDOMFRAC() < 0.002f && joyGetButtons(0, R_TRIG) == 0) {
 		g_CreditsData->particlemovetype = rngRandom() % 5;
 	}
-#else
-	if (RANDOMFRAC() < 0.002f) {
-		g_CreditsData->particlemovetype = rngRandom() % 5;
-	}
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (joyGetButtonsPressedThisFrame(0, R_TRIG)) {
 		g_CreditsData->particlemovetype = rngRandom() % 5;
 
@@ -719,7 +613,6 @@ void creditsTickParticles(void)
 			g_CreditsData->particlecolourweight = 0;
 		}
 	}
-#endif
 
 	if (RANDOMFRAC() < 0.007f) {
 		g_CreditsData->particleconfignum1 = rngRandom() % 2;
@@ -737,11 +630,7 @@ void creditsTickParticles(void)
 		g_CreditsData->particles[i].rotation += amount;
 
 		// Move the particle closer to the camera
-#if VERSION >= VERSION_PAL_BETA
-		amount = g_Vars.diffframe240freal * zspeed * 0.25f;
-#else
 		amount = g_Vars.diffframe240f * zspeed * 0.25f;
-#endif
 		g_CreditsData->particles[i].z += amount;
 
 		// If the particle has gone behind the camera, reset it
@@ -769,22 +658,20 @@ void creditsTickParticles(void)
 
 			g_CreditsData->particles[i].z += -8000;
 		}
-
-		if (zspeed);
 	}
 }
 
-void creditsGetParticlePos(struct coord *pos, struct particle *particle, s32 particlenum)
+void creditsGetParticlePos(struct coord *pos, struct particle *particle, int particlenum)
 {
-	f32 sp4c;
-	f32 sp48;
-	f32 sp44;
-	f32 sp40;
-	f32 sp3c;
-	f32 sp38;
-	f32 sp34;
-	f32 sp30;
-	f32 sp2c;
+	float sp4c;
+	float sp48;
+	float sp44;
+	float sp40;
+	float sp3c;
+	float sp38;
+	float sp34;
+	float sp30;
+	float sp2c;
 
 	switch (particle->movetype) {
 	case MOVETYPE_WAVE:
@@ -859,21 +746,21 @@ void creditsGetParticlePos(struct coord *pos, struct particle *particle, s32 par
 Gfx *creditsDrawParticles(Gfx *gdl)
 {
 	Col *colours;
-	u32 colour;
-	s32 i;
-	s32 j;
-	s32 confignum;
-	f32 invsine;
-	f32 invcosine;
+	uint32_t colour;
+	int i;
+	int j;
+	int confignum;
+	float invsine;
+	float invcosine;
 
-	static u32 tload = 0x25;
-	static u32 dump = 0;
+	static uint32_t tload = 0x25;
+	static uint32_t dump = 0;
 
 	colours = gfxAllocateColours(60);
 
 	for (i = 0; i < 4; i++) {
 		if (g_CreditsData->particlecolourindex1 >= 0) {
-			u32 weight = g_CreditsData->particlecolourweight * 255.0f;
+			uint32_t weight = g_CreditsData->particlecolourweight * 255.0f;
 			colour = colourBlend(g_CreditColourPalette[g_CreditsData->particlecolourindex1][i], g_CreditColourPalette[g_CreditsData->particlecolourindex2][i], weight);
 		} else {
 			colour = g_CreditColourPalette[g_CreditsData->particlecolourindex2][i];
@@ -895,14 +782,13 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 
 		for (i = 0; i < ARRAYCOUNT(g_CreditsData->particles); i++) {
 			if (g_CreditsData->particles[i].confignum == confignum) {
-				s32 offset;
-				u32 stack[3];
+				int offset;
 				struct coord pos;
 				Vtx *vertices;
-				f32 sine = sinf(g_CreditsData->particles[i].rotation);
-				f32 cosine = cosf(g_CreditsData->particles[i].rotation);
-				f32 radius = g_CreditsData->particles[i].size * 10.0f + 25.0f;
-				f32 frac;
+				float sine = sinf(g_CreditsData->particles[i].rotation);
+				float cosine = cosf(g_CreditsData->particles[i].rotation);
+				float radius = g_CreditsData->particles[i].size * 10.0f + 25.0f;
+				float frac;
 
 				if (!donetexture) {
 					texSelect(&gdl, &g_TexGeneralConfigs[g_CreditParticleConfigs[confignum].texturenum], 2, 1, 2, 1, 0);
@@ -964,8 +850,7 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 				vertices[3].s = g_CreditParticleConfigs[confignum].s2 * 32;
 				vertices[3].t = g_CreditParticleConfigs[confignum].t1 * 32;
 
-				if (1);
-				offset = (g_CreditsData->particles[i].colourindex + ((s32) (frac * 14.99f) * 4)) * 4;
+				offset = (g_CreditsData->particles[i].colourindex + ((int) (frac * 14.99f) * 4)) * 4;
 
 				vertices[0].colour = offset;
 				vertices[1].colour = offset;
@@ -982,13 +867,13 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *creditsDrawBackgroundText(Gfx *gdl, s32 x, s32 y, char *text, struct fontchar *chars, struct font *font, f32 opacity, f32 speed, f32 spread)
+Gfx *creditsDrawBackgroundText(Gfx *gdl, int x, int y, char *text, struct fontchar *chars, struct font *font, float opacity, float speed, float spread)
 {
-	f32 sp98;
-	u32 colour1;
-	u32 colour2;
-	u32 colour3;
-	s32 i;
+	float sp98;
+	uint32_t colour1;
+	uint32_t colour2;
+	uint32_t colour3;
+	int i;
 
 	sp98 = ((y / 2) % 100) * M_TAU / 100.0f;
 
@@ -996,20 +881,19 @@ Gfx *creditsDrawBackgroundText(Gfx *gdl, s32 x, s32 y, char *text, struct fontch
 	colour2 = colourBlend(0x0000af00, 0xffffff00, 255.0f * spread);
 
 	for (i = 4; i >= 0; i--) {
-		f32 f24 = i * 0.2f + g_CreditsParticleRotationFrac * 10.0f * M_TAU + sp98;
-		f32 f26 = i * 0.1f * (spread + 0.5f) + 1.0f;
+		float f24 = i * 0.2f + g_CreditsParticleRotationFrac * 10.0f * M_TAU + sp98;
+		float f26 = i * 0.1f * (spread + 0.5f) + 1.0f;
 
 		if ((rngRandom() % 256) == 1) {
 			f26 *= 10.0f;
 		}
 
 		colour3 = colourBlend(colour2, colour1, 63 * i);
-		colour3 |= (u32)((63.0f + ((4 - i) * 16)) * opacity);
+		colour3 |= (uint32_t)((63.0f + ((4 - i) * 16)) * opacity);
 
 		if (colour3 & 0x000000ff) {
-			f32 mult = (i + 1) * 4.4f * speed;
-			f32 value = (i * 0.3f * (spread + 0.5f)) + 1.0f;
-			u32 stack[2];
+			float mult = (i + 1) * 4.4f * speed;
+			float value = (i * 0.3f * (spread + 0.5f)) + 1.0f;
 
 			gdl = textRenderCredit(gdl, x + sinf(f24) * mult, y + cosf(f24) * mult, f26, value, text, chars, font, colour3, 0, 1);
 		}
@@ -1018,12 +902,12 @@ Gfx *creditsDrawBackgroundText(Gfx *gdl, s32 x, s32 y, char *text, struct fontch
 	return gdl;
 }
 
-Gfx *creditsDrawForegroundText(Gfx *gdl, s32 x, s32 y, char *text, struct fontchar *chars, struct font *font, f32 transfrac, s32 hdir, s32 vdir, s32 stretchtype)
+Gfx *creditsDrawForegroundText(Gfx *gdl, int x, int y, char *text, struct fontchar *chars, struct font *font, float transfrac, int hdir, int vdir, int stretchtype)
 {
-	f32 widthscale;
-	f32 heightscale;
-	f32 opacityfrac;
-	u32 colour;
+	float widthscale;
+	float heightscale;
+	float opacityfrac;
+	uint32_t colour;
 
 	opacityfrac = 2.0f - 2.0f * transfrac;
 
@@ -1058,7 +942,7 @@ Gfx *creditsDrawForegroundText(Gfx *gdl, s32 x, s32 y, char *text, struct fontch
 		opacityfrac = 1.0f;
 	}
 
-	colour = 0xffffff00 | (u32) (255.0f * opacityfrac);
+	colour = 0xffffff00 | (uint32_t) (255.0f * opacityfrac);
 
 	gdl = textRenderCredit(gdl, x, y, widthscale, heightscale, text, chars, font, colour, hdir, vdir);
 
@@ -1067,8 +951,8 @@ Gfx *creditsDrawForegroundText(Gfx *gdl, s32 x, s32 y, char *text, struct fontch
 
 void creditsResetSlides(void)
 {
-	u8 pool[NUM_CORE_TEAM];
-	s32 i;
+	uint8_t pool[NUM_CORE_TEAM];
+	int i;
 
 	// Shuffle the core team slides
 	for (i = 0; i < NUM_CORE_TEAM; i++) {
@@ -1076,16 +960,11 @@ void creditsResetSlides(void)
 	}
 
 	for (i = 0; i < NUM_CORE_TEAM; i++) {
-		s32 index = rngRandom() % (NUM_CORE_TEAM - i);
+		int index = rngRandom() % (NUM_CORE_TEAM - i);
 
 		g_CreditsData->coreteammap[i + 1] = pool[index];
 
-#ifdef AVOID_UB
-		// don't overflow `pool`
 		while (index < NUM_CORE_TEAM - i - 1) {
-#else
-		while (index < NUM_CORE_TEAM - i) {
-#endif
 			pool[index] = pool[index + 1];
 			index++;
 		}
@@ -1243,7 +1122,7 @@ struct credit g_Credits[] = {
  * core team and are in a random order. The rest are in the same order as
  * defined in the g_Credits array.
  */
-struct credit *creditGetByRow(s32 row)
+struct credit *creditGetByRow(int row)
 {
 	// If core team, use the mapping
 	if (g_CreditsData->creditnum > 0 && g_CreditsData->creditnum < ARRAYCOUNT(g_CreditsData->coreteammap)) {
@@ -1260,10 +1139,10 @@ struct credit *creditGetByRow(s32 row)
 void creditsTickSlide(void)
 {
 	struct credit *credit = creditGetByRow(0);
-	s32 i;
-	f32 durations[] = {4, 8, 12, 16}; // in seconds
-	f32 loadat = durations[credit->durationindex] + 2.0f + 0.142f * (g_CreditsData->numthisslide * 2 - 1);
-	f32 seconds;
+	int i;
+	float durations[] = {4, 8, 12, 16}; // in seconds
+	float loadat = durations[credit->durationindex] + 2.0f + 0.142f * (g_CreditsData->numthisslide * 2 - 1);
+	float seconds;
 
 	g_CreditsData->slidelifetime = durations[credit->durationindex] + 1.0f;
 	seconds = g_Vars.diffframe240f / 240.0f;
@@ -1309,25 +1188,25 @@ void creditsTickSlide(void)
 
 Gfx *creditsDrawSlide(Gfx *gdl)
 {
-	s32 i;
+	int i;
 	struct credit *credits[4];
 	char *texts[8];
 	struct fontchar *chars[8];
 	struct font *fonts[8];
-	s32 extray;
-	s32 x[8];
-	s32 y[8];
-	s32 textwidths[8];
-	s32 textheights[8];
-	s32 cury = 0;
-	s32 prevstyle = -1;
-	s32 index;
-	s32 hdir;
-	s32 vdir;
-	s32 stretchtype;
+	int extray;
+	int x[8];
+	int y[8];
+	int textwidths[8];
+	int textheights[8];
+	int cury = 0;
+	int prevstyle = -1;
+	int index;
+	int hdir;
+	int vdir;
+	int stretchtype;
 	bool settled;
-	f32 age;
-	f32 mult = 1.0f;
+	float age;
+	float mult = 1.0f;
 
 	// Iterate the credits on this slide and populate the arrays
 	for (i = 0; i < g_CreditsData->numthisslide; i++) {
@@ -1449,9 +1328,9 @@ Gfx *creditsDrawSlide(Gfx *gdl)
 
 	// Draw text repetitions
 	for (i = 0; i < g_CreditsData->numthisslide * 2; i++) {
-		f32 opacity = 0.0f;
-		f32 speed = 1.0f;
-		f32 spread = 1.0f;
+		float opacity = 0.0f;
+		float speed = 1.0f;
+		float spread = 1.0f;
 
 		age = g_CreditsData->slideage - i * 0.142f;
 
@@ -1506,13 +1385,13 @@ Gfx *creditsDrawSlide(Gfx *gdl)
 
 	// Draw text properly
 	for (i = 0; i < g_CreditsData->numthisslide * 2; i++) {
-		f32 transfrac = 0.0f;
+		float transfrac = 0.0f;
 
 		age = g_CreditsData->slideage - i * 0.142f;
 
 		if (age > 0.0f || (credits[i / 2]->retain & RETAIN_IN) == RETAIN_IN) {
 			if (age < g_CreditsData->slidelifetime + 1.0f || (credits[i / 2]->retain & RETAIN_OUT) == RETAIN_OUT) {
-				u32 a2 = g_CreditsData->creditnum;
+				uint32_t a2 = g_CreditsData->creditnum;
 				settled = false;
 				stretchtype = STRETCHTYPE_HORIZONTAL;
 				vdir = (g_CreditsData->unk41a8[i] >> 2) & 3;
@@ -1525,7 +1404,7 @@ Gfx *creditsDrawSlide(Gfx *gdl)
 					// This is a fake match. The asm sets vdir to 1 (VDIR_MID)
 					// unconditionally, but we need to load and discard
 					// g_CreditsData->creditnum, which we do here by putting it
-					// in a u32 then checking if it's >= 0, which always passes.
+					// in a uint32_t then checking if it's >= 0, which always passes.
 					vdir = a2 >= 0;
 				}
 
@@ -1601,9 +1480,9 @@ Gfx *creditsDrawSlide(Gfx *gdl)
 
 void creditsTick(void)
 {
-	s32 i;
+	int i;
 	static bool flick = false;
-	static u32 type = 0xffff;
+	static uint32_t type = 0xffff;
 
 	if (joyGetButtonsPressedThisFrame(0, R_TRIG)) {
 		creditsCreatePendingBgLayers(0xffffffff);
@@ -1653,7 +1532,7 @@ Gfx *creditsDraw(Gfx *gdl)
 	Mtxf sp68;
 	Mtxf *matrix = gfxAllocateMatrix();
 
-	static u32 scrolltimer240 = 0;
+	static uint32_t scrolltimer240 = 0;
 
 	g_ScaleX = 1;
 
@@ -1727,7 +1606,7 @@ Gfx *creditsDraw(Gfx *gdl)
 		}
 
 		if (!g_CreditsData->slidesenabled) {
-			u32 alpha = 0;
+			uint32_t alpha = 0;
 
 			// If fading from credits to black
 			if (g_CreditsData->blacktimer60 < TICKS(60)) {

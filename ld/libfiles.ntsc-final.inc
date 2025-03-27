@@ -208,10 +208,6 @@
 	build/ROMID/lib/ultra/io/pfsreadwritefile.o (section); \
 	build/ROMID/lib/ultra/io/pfsnumfiles.o (section); \
 	build/ROMID/lib/ultra/io/pfsfilestate.o (section); \
-	build/ROMID/lib/ultra/io/gbpakgetstatus.o (section); \
-	build/ROMID/lib/ultra/io/gbpakreadid.o (section); \
-	build/ROMID/lib/ultra/io/gbpakcheckconnector.o (section); \
-	build/ROMID/lib/ultra/io/gbpakreadwrite.o (section); \
 	build/ROMID/lib/ultra/io/pfsinitpak2.o (section); \
 	build/ROMID/lib/ultra/io/vimodepallan1.o (section); \
 	build/ROMID/lib/ultra/io/vimodempallan1.o (section); \

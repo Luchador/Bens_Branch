@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include "constants.h"
 #include "game/chr.h"
 #include "game/prop.h"
@@ -9,7 +8,7 @@
 
 void chrmgrStop(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_NumChrSlots; i++) {
 		if (g_ChrSlots[i].chrnum >= 0

@@ -1,5 +1,6 @@
 #include <PR/ultratypes.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <SDL.h>
 #include "platform.h"
 #include "config.h"
@@ -7,13 +8,13 @@
 #include "system.h"
 
 static SDL_AudioDeviceID dev;
-static const s16 *nextBuf;
-static u32 nextSize = 0;
+static const int16_t *nextBuf;
+static uint32_t nextSize = 0;
 
-static s32 bufferSize = 512;
-static s32 queueLimit = 8192;
+static int bufferSize = 512;
+static int queueLimit = 8192;
 
-s32 audioInit(void)
+int audioInit(void)
 {
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
 		sysLogPrintf(LOG_ERROR, "SDL audio init error: %s", SDL_GetError());
@@ -41,17 +42,17 @@ s32 audioInit(void)
 	return 0;
 }
 
-s32 audioGetBytesBuffered(void)
+int audioGetBytesBuffered(void)
 {
 	return SDL_GetQueuedAudioSize(dev);
 }
 
-s32 audioGetSamplesBuffered(void)
+int audioGetSamplesBuffered(void)
 {
 	return audioGetBytesBuffered() / 4;
 }
 
-void audioSetNextBuffer(const s16 *buf, u32 len)
+void audioSetNextBuffer(const int16_t *buf, uint32_t len)
 {
 	nextBuf = buf;
 	nextSize = len;

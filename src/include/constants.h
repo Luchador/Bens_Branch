@@ -3341,8 +3341,6 @@
 #define PAKSTATE_GB_PREPARE            9
 #define PAKSTATE_GB_POST_PREPARE1      10
 #define PAKSTATE_READY                 11
-#define PAKSTATE_12                    12
-#define PAKSTATE_13                    13
 #define PAKSTATE_MEM_ENTER_DEVICEERROR 14
 #define PAKSTATE_MEM_ENTER_CORRUPT     15
 #define PAKSTATE_MEM_ENTER_FULL        16

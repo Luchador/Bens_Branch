@@ -4,9 +4,8 @@
 #include "data.h"
 #include "types.h"
 
-void langReset(s32 stagenum);
 void langInit();
-char *langGet(s32 textid);
+char *langGet(int textid);
 char *langRemoveNewline(char *str);
 
 #define LANGBANK_AME       0x01

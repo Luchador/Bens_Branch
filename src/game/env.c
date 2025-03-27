@@ -15,14 +15,14 @@ struct distfadesettings *g_EnvDistFadeSettingsPtr;
 struct distfadesettings g_EnvDistFadeSettings;
 
 struct shadesettings g_EnvShadeSettings;
-f32 g_EnvFogMaxFrac;
-f32 g_EnvFogMinFrac;
+float g_EnvFogMaxFrac;
+float g_EnvFogMinFrac;
 struct fogenvironment *g_EnvOrigFogEnvironment;
 struct fogenvironment *g_EnvTransitionFrom;
 struct fogenvironment *g_EnvTransitionTo;
 
-f32 g_EnvFogMax = MAXFLOAT;
-f32 g_EnvFogMin = 0;
+float g_EnvFogMax = MAXFLOAT;
+float g_EnvFogMin = 0;
 struct environment g_Env = {900, 1000};
 
 #define RGB(col) col >> 16, (col >> 8) & 0xff, col & 0xff
@@ -101,12 +101,12 @@ struct environment *envGetCurrent(void)
 	return &g_Env;
 }
 
-f32 envGetFogMax(void)
+float envGetFogMax(void)
 {
 	return g_EnvFogMax;
 }
 
-f32 envGetSquaredFogMax(void)
+float envGetSquaredFogMax(void)
 {
 	return g_EnvFogMax * g_EnvFogMax;
 }
@@ -114,11 +114,11 @@ f32 envGetSquaredFogMax(void)
 void envTick(void)
 {
 	struct zrange zrange;
-	f32 scale;
-	f32 zfar;
-	f32 znear;
-	f32 sp28;
-	f32 sp24;
+	float scale;
+	float zfar;
+	float znear;
+	float sp28;
+	float sp24;
 
 	if (!g_FogEnabled) {
 		return;
@@ -256,7 +256,7 @@ void envDisableSky(void)
 	g_Env.skybluefrac = 0;
 }
 
-void envChooseAndApply(s32 stagenum)
+void envChooseAndApply(int stagenum)
 {
 	struct nofogenvironment *finalenv = NULL;
 	struct nofogenvironment *env2;
@@ -292,20 +292,20 @@ void envChooseAndApply(s32 stagenum)
 	g_EnvOrigFogEnvironment = NULL;
 }
 
-void envApplyTransitionFrac(f32 frac)
+void envApplyTransitionFrac(float frac)
 {
 	static struct fogenvironment tmp;
 
 	tmp = *g_EnvTransitionFrom;
 
-	tmp.near = g_EnvTransitionFrom->near + frac * ((f32)g_EnvTransitionTo->near - (f32)g_EnvTransitionFrom->near);
-	tmp.far = g_EnvTransitionFrom->far + frac * ((f32)g_EnvTransitionTo->far - (f32)g_EnvTransitionFrom->far);
-	tmp.fogmin = g_EnvTransitionFrom->fogmin + frac * ((f32)g_EnvTransitionTo->fogmin - (f32)g_EnvTransitionFrom->fogmin);
-	tmp.fogmax = g_EnvTransitionFrom->fogmax + frac * ((f32)g_EnvTransitionTo->fogmax - (f32)g_EnvTransitionFrom->fogmax);
+	tmp.near = g_EnvTransitionFrom->near + frac * ((float)g_EnvTransitionTo->near - (float)g_EnvTransitionFrom->near);
+	tmp.far = g_EnvTransitionFrom->far + frac * ((float)g_EnvTransitionTo->far - (float)g_EnvTransitionFrom->far);
+	tmp.fogmin = g_EnvTransitionFrom->fogmin + frac * ((float)g_EnvTransitionTo->fogmin - (float)g_EnvTransitionFrom->fogmin);
+	tmp.fogmax = g_EnvTransitionFrom->fogmax + frac * ((float)g_EnvTransitionTo->fogmax - (float)g_EnvTransitionFrom->fogmax);
 
-	tmp.sky_r = g_EnvTransitionFrom->sky_r + frac * ((f32)g_EnvTransitionTo->sky_r - (f32)g_EnvTransitionFrom->sky_r);
-	tmp.sky_g = g_EnvTransitionFrom->sky_g + frac * ((f32)g_EnvTransitionTo->sky_g - (f32)g_EnvTransitionFrom->sky_g);
-	tmp.sky_b = g_EnvTransitionFrom->sky_b + frac * ((f32)g_EnvTransitionTo->sky_b - (f32)g_EnvTransitionFrom->sky_b);
+	tmp.sky_r = g_EnvTransitionFrom->sky_r + frac * ((float)g_EnvTransitionTo->sky_r - (float)g_EnvTransitionFrom->sky_r);
+	tmp.sky_g = g_EnvTransitionFrom->sky_g + frac * ((float)g_EnvTransitionTo->sky_g - (float)g_EnvTransitionFrom->sky_g);
+	tmp.sky_b = g_EnvTransitionFrom->sky_b + frac * ((float)g_EnvTransitionTo->sky_b - (float)g_EnvTransitionFrom->sky_b);
 
 	tmp.sky_r &= 0xf8;
 	tmp.sky_g &= 0xf8;
@@ -345,12 +345,12 @@ Gfx *envStopFog(Gfx *gdl)
 	return gdl;
 }
 
-bool envIsPosInFogMaxDistance(struct coord *pos, f32 tolerance)
+bool envIsPosInFogMaxDistance(struct coord *pos, float tolerance)
 {
 	struct coord sp24;
 	Mtxf *mtx;
 	struct coord *campos;
-	f32 tmp;
+	float tmp;
 
 	if (!g_FogEnabled) {
 		return true;
@@ -382,7 +382,7 @@ struct distfadesettings *envGetDistFadeSettings(void)
 	return g_EnvDistFadeSettingsPtr;
 }
 
-s32 envGetObjShadeMode(struct prop *prop, f32 out[4])
+int envGetObjShadeMode(struct prop *prop, float out[4])
 {
 	if (!g_FogEnabled) {
 		return SHADEMODE_OPA;

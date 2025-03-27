@@ -1,6 +1,7 @@
 #ifndef _IN_BSS_H
 #define _IN_BSS_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "types.h"
 
@@ -21,7 +22,7 @@ extern u8 **g_AnimFrameBytes;
 extern u8 **g_AnimHeaderBytes;
 extern union filedataptr g_TileFileData;
 extern s32 g_TileNumRooms;
-extern u32 *g_TileRooms;
+extern int32_t *g_TileRooms;
 extern struct geoblock g_CdSavedBlock;
 extern u8 g_RdpDramStack[1024];
 extern N_ALSndPlayer var8009c2d0;

@@ -6261,9 +6261,7 @@ struct weapon *g_Weapons[] = {
 	&invitem_keycard,
 	&invitem_suitcase,
 	&invitem_briefcase,
-#if VERSION >= VERSION_NTSC_1_0
 	&invitem_shieldtechitem,
-#endif
 	&invitem_necklace,
 	&invitem_hammer,
 	&invitem_hammer,

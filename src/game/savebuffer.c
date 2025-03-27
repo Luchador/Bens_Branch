@@ -362,7 +362,6 @@ void savebufferOr(struct savebuffer *buffer, u32 value, s32 numbits)
 	}
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 /**
  * Write the specified amount of bits to the buffer, advancing the internal pointer.
  *
@@ -386,7 +385,6 @@ void savebufferWriteBits(struct savebuffer *buffer, u32 value, s32 numbits, u8 *
 		buffer->bitpos++;
 	}
 }
-#endif
 
 /**
  * Read the specified amount of bits from the buffer and return it as an
@@ -507,7 +505,6 @@ void func0f0d564c(u8 *data, char *dst, bool addlinebreak)
 	savebufferReadString(&buffer, dst, addlinebreak);
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 void func0f0d5690(u8 *dst, char *src)
 {
 	struct savebuffer buffer;
@@ -533,7 +530,6 @@ void func0f0d5690(u8 *dst, char *src)
 		}
 	}
 }
-#endif
 
 void savebufferWriteGuid(struct savebuffer *buffer, struct fileguid *guid)
 {

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/chrai.h"
@@ -16,7 +17,7 @@ struct prop *g_DangerousProps[12];
 
 void resetSomeStageThings(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_DangerousProps); i++) {
 		g_DangerousProps[i] = NULL;
@@ -36,7 +37,7 @@ void stageAllocateBgChrs(void)
 {
 	bool modified;
 	struct chrdata tmp;
-	s32 i;
+	int i;
 
 	g_BgChrs = NULL;
 	g_BgChrnums = 0;
@@ -61,7 +62,7 @@ void stageAllocateBgChrs(void)
 	g_NumBgChrs++;
 
 	if (g_NumBgChrs > 0) {
-		s32 count = 0;
+		int count = 0;
 		struct chrdata blankchr = {0};
 
 		// Allocate BG chrs
@@ -129,9 +130,9 @@ void stageAllocateBgChrs(void)
 
 void stageLoadAllAilistModels(void)
 {
-	u8 *cmd = g_StageSetup.ailists[0].list;
-	s32 i = 0;
-	u16 id;
+	uint8_t *cmd = g_StageSetup.ailists[0].list;
+	int i = 0;
+	uint16_t id;
 
 	if (!cmd) {
 		return;

@@ -10,7 +10,6 @@
 	build/ROMID/game/nbomb.o (section); \
 	build/ROMID/game/texinit.o (section); \
 	build/ROMID/game/challengeinit.o (section); \
-	build/ROMID/game/langreset.o (section); \
 	build/ROMID/game/titlereset.o (section); \
 	build/ROMID/game/chrmgr.o (section); \
 	build/ROMID/game/bodyreset.o (section); \

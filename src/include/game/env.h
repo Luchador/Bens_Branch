@@ -5,22 +5,22 @@
 #include "types.h"
 
 struct distfadesettings {
-    f32 opaperc;
-    f32 xluperc;
-    f32 refdist;
+    float opaperc;
+    float xluperc;
+    float refdist;
 };
 
 struct environment *envGetCurrent(void);
-f32 envGetSquaredFogMax(void);
+float envGetSquaredFogMax(void);
 void envTick(void);
 void envApplyFogEnvironment(struct fogenvironment *sky);
 void envApplyNoFogEnvironment(struct nofogenvironment *sky);
-void envChooseAndApply(s32 stagenum);
-void envApplyTransitionFrac(f32 arg0);
+void envChooseAndApply(int stagenum);
+void envApplyTransitionFrac(float arg0);
 Gfx *envStartFog(Gfx *gdl, bool xlupass);
 Gfx *envStopFog(Gfx *gdl);
-bool envIsPosInFogMaxDistance(struct coord *pos, f32 tolerance);
+bool envIsPosInFogMaxDistance(struct coord *pos, float tolerance);
 struct distfadesettings *envGetDistFadeSettings(void);
-s32 envGetObjShadeMode(struct prop *prop, f32 arg1[4]);
+int envGetObjShadeMode(struct prop *prop, float arg1[4]);
 
 #endif

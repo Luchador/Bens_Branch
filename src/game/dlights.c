@@ -31,38 +31,38 @@
 #include "types.h"
 #include "platform.h"
 
-s32 *var8009cad0;
-s32 *var8009cad8;
-s32 g_NumPortals;
-s32 var8009cae0;
-s32 var8009cae4;
-f32 (*var8009cae8)(s32 roomnum, f32 mult, s32 portalnum1, s32 portalnum2); // function pointer
-u8 var8009caec;
-u8 var8009caed;
-u8 var8009caee;
-u8 g_NVChrHighlight;
-u8 g_NVChrBrightness;
+int *var8009cad0;
+int *var8009cad8;
+int g_NumPortals;
+int var8009cae0;
+int var8009cae4;
+float (*var8009cae8)(int roomnum, float mult, int portalnum1, int portalnum2); // function pointer
+uint8_t var8009caec;
+uint8_t var8009caed;
+uint8_t var8009caee;
+uint8_t g_NVChrHighlight;
+uint8_t g_NVChrBrightness;
 
 struct var80061420 *var80061420 = NULL;
-u32 var80061424 = 0x00000000;
+uint32_t var80061424 = 0x00000000;
 struct coord *var80061428 = NULL;
 u16 **var8006142c = NULL;
 u16 **var80061430 = NULL;
-f32 *var80061434 = NULL;
+float *var80061434 = NULL;
 bool *g_IsPortalClosed = NULL;
-f32 var8006143c = 50;
-u32 var80061444 = 1;
-u32 var80061448 = 0x00000000;
+float var8006143c = 50;
+uint32_t var80061444 = 1;
+uint32_t var80061448 = 0x00000000;
 bool g_IsSwitchingGoggles = false;
-u32 var80061450 = 0x00000000;
-u32 var80061454 = 0xffffffff;
-s32 g_LightsPrevTickMode = 0;
+uint32_t var80061450 = 0x00000000;
+uint32_t var80061454 = 0xffffffff;
+int g_LightsPrevTickMode = 0;
 
-u32 func0f000920(s32 portalnum1, s32 portalnum2)
+uint32_t func0f000920(int portalnum1, int portalnum2)
 {
 	if (portalnum1 != portalnum2) {
-		s32 upper = (portalnum1 > portalnum2) ? portalnum1 : portalnum2;
-		s32 lower = (portalnum1 < portalnum2) ? portalnum1 : portalnum2;
+		int upper = (portalnum1 > portalnum2) ? portalnum1 : portalnum2;
+		int lower = (portalnum1 < portalnum2) ? portalnum1 : portalnum2;
 
 		return var80061430[upper][lower];
 	}
@@ -70,14 +70,14 @@ u32 func0f000920(s32 portalnum1, s32 portalnum2)
 	return 0;
 }
 
-struct light *roomGetLight(s32 roomnum, s32 lightnum)
+struct light *roomGetLight(int roomnum, int lightnum)
 {
 	return (struct light *)&g_BgLightsFileData[(g_Rooms[roomnum].lightindex + lightnum) * 0x22];
 }
 
-u8 roomGetFinalBrightness(s32 roomnum)
+uint8_t roomGetFinalBrightness(int roomnum)
 {
-	s32 brightness = g_Rooms[roomnum].br_flash + g_Rooms[roomnum].br_settled_regional;
+	int brightness = g_Rooms[roomnum].br_flash + g_Rooms[roomnum].br_settled_regional;
 
 	if (brightness > 255) {
 		brightness = 255;
@@ -90,9 +90,9 @@ u8 roomGetFinalBrightness(s32 roomnum)
 	return brightness;
 }
 
-u8 roomGetFinalBrightnessForPlayer(s32 roomnum)
+uint8_t roomGetFinalBrightnessForPlayer(int roomnum)
 {
-	s32 brightness = g_Rooms[roomnum].br_flash;
+	int brightness = g_Rooms[roomnum].br_flash;
 
 	if (USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) {
 		brightness += var8009caec;
@@ -111,14 +111,14 @@ u8 roomGetFinalBrightnessForPlayer(s32 roomnum)
 	return brightness;
 }
 
-u8 func0f000b18(u32 arg0)
+uint8_t func0f000b18(uint32_t arg0)
 {
 	return 255;
 }
 
-u8 roomGetSettledRegionalBrightnessForPlayer(s32 roomnum)
+uint8_t roomGetSettledRegionalBrightnessForPlayer(int roomnum)
 {
-	u32 brightness;
+	uint32_t brightness;
 
 	if (USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) {
 		return var8009caec;
@@ -133,12 +133,12 @@ u8 roomGetSettledRegionalBrightnessForPlayer(s32 roomnum)
 	return brightness;
 }
 
-u8 roomGetSettledLocalBrightness(s32 room)
+uint8_t roomGetSettledLocalBrightness(int room)
 {
 	return g_Rooms[room].br_settled_local & 0xff;
 }
 
-s32 roomGetFlashBrightness(s32 roomnum)
+int roomGetFlashBrightness(int roomnum)
 {
 	if (g_Rooms[roomnum].br_flash > 255) {
 		return 255;
@@ -151,14 +151,14 @@ s32 roomGetFlashBrightness(s32 roomnum)
 	return (g_Rooms[roomnum].flags & ROOMFLAG_BRIGHTNESS_CALCED) ? g_Rooms[roomnum].br_flash : 0;
 }
 
-f32 roomGetLightOpCurFrac(s32 roomnum)
+float roomGetLightOpCurFrac(int roomnum)
 {
 	return g_Rooms[roomnum].lightop_cur_frac;
 }
 
-f32 roomGetFinalBrightnessFrac(s32 roomnum)
+float roomGetFinalBrightnessFrac(int roomnum)
 {
-	f32 frac = (g_Rooms[roomnum].br_flash + g_Rooms[roomnum].br_settled_regional) / (1.0f / 255.0f);
+	float frac = (g_Rooms[roomnum].br_flash + g_Rooms[roomnum].br_settled_regional) / (1.0f / 255.0f);
 
 	if (frac > 1) {
 		frac = 1;
@@ -171,12 +171,12 @@ f32 roomGetFinalBrightnessFrac(s32 roomnum)
 	return frac;
 }
 
-f32 roomGetSettledRegionalBrightnessFrac(s32 roomnum)
+float roomGetSettledRegionalBrightnessFrac(int roomnum)
 {
 	return g_Rooms[roomnum].br_settled_regional / 255.0f;
 }
 
-f32 roomGetSettledLocalBrightnessFrac(s32 roomnum)
+float roomGetSettledLocalBrightnessFrac(int roomnum)
 {
 	return g_Rooms[roomnum].br_settled_local / 255.0f;
 }
@@ -184,10 +184,10 @@ f32 roomGetSettledLocalBrightnessFrac(s32 roomnum)
 /**
  * The resulting position is not a world position. It is relative to the room.
  */
-bool lightGetBboxCentre(s32 roomnum, u32 lightnum, struct coord *pos)
+bool lightGetBboxCentre(int roomnum, uint32_t lightnum, struct coord *pos)
 {
 	struct light *light = (struct light *)&g_BgLightsFileData[g_Rooms[roomnum].lightindex * 0x22];
-	s32 i;
+	int i;
 	light += lightnum;
 
 	pos->x = 0;
@@ -207,7 +207,7 @@ bool lightGetBboxCentre(s32 roomnum, u32 lightnum, struct coord *pos)
 	return true;
 }
 
-bool lightIsHealthy(s32 roomnum, s32 lightnum)
+bool lightIsHealthy(int roomnum, int lightnum)
 {
 	bool healthy;
 
@@ -220,14 +220,14 @@ bool lightIsHealthy(s32 roomnum, s32 lightnum)
 	return healthy;
 }
 
-bool lightIsVulnerable(s32 roomnum, s32 lightnum)
+bool lightIsVulnerable(int roomnum, int lightnum)
 {
 	struct light *light = roomGetLight(roomnum, lightnum);
 
 	return light->vulnerable;
 }
 
-bool lightIsOn(s32 roomnum, s32 lightnum)
+bool lightIsOn(int roomnum, int lightnum)
 {
 	bool on;
 
@@ -240,12 +240,12 @@ bool lightIsOn(s32 roomnum, s32 lightnum)
 	return on;
 }
 
-void roomSetFlashBrightness(s32 roomnum, s32 value)
+void roomSetFlashBrightness(int roomnum, int value)
 {
 	g_Rooms[roomnum].br_flash = value;
 }
 
-void lightGetDirection(s32 roomnum, u32 lightnum, struct coord *dir)
+void lightGetDirection(int roomnum, uint32_t lightnum, struct coord *dir)
 {
 	struct light *light = (struct light *)&g_BgLightsFileData[g_Rooms[roomnum].lightindex * 0x22];
 	light += lightnum;
@@ -253,15 +253,6 @@ void lightGetDirection(s32 roomnum, u32 lightnum, struct coord *dir)
 	dir->x = light->dirx;
 	dir->y = light->diry;
 	dir->z = light->dirz;
-}
-
-void func0f0010b4(void)
-{
-	if (var80061424) {
-		var80061424 = 0;
-	}
-
-	var80061424 = 1;
 }
 
 void roomSetDefaults(struct room *room)
@@ -286,8 +277,8 @@ Gfx *lightsSetForRoom(Gfx *gdl, RoomNum roomnum)
 {
 	Lights1 *lights = gfxAllocate(sizeof(Lights1));
 
-	u8 brightness = roomGetFinalBrightnessForPlayer(roomnum);
-	u8 a0 = (u32)(brightness * 0.5882353f);
+	uint8_t brightness = roomGetFinalBrightnessForPlayer(roomnum);
+	uint8_t a0 = (uint32_t)(brightness * 0.5882353f);
 
 	lights->a.l.col[0] = a0;
 	lights->a.l.col[1] = a0;
@@ -326,18 +317,18 @@ Gfx *lightsSetDefault(Gfx *gdl)
 	return gdl;
 }
 
-void roomInitLights(s32 roomnum)
+void roomInitLights(int roomnum)
 {
 	struct room *room = &g_Rooms[roomnum];
 	struct light *light;
-	s32 i;
+	int i;
 
 	bgGetRoomBrightnessRange(roomnum, &room->br_light_min, &room->br_light_max);
 
 	room->br_light_min = room->br_light_min / 4;
 
 	if (room->numlights) {
-		room->br_light_each = (f32)(room->br_light_max - room->br_light_min) / (f32)room->numlights;
+		room->br_light_each = (float)(room->br_light_max - room->br_light_min) / (float)room->numlights;
 	} else {
 		room->br_light_each = 0;
 	}
@@ -380,26 +371,9 @@ void roomInitLights(s32 roomnum)
 
 	room->flags |= ROOMFLAG_LIGHTS_DIRTY;
 
-#if VERSION < VERSION_NTSC_1_0
-	if (cheatIsActive(CHEAT_PERFECTDARKNESS) && (room->flags & ROOMFLAG_RENDERALWAYS) == 0) {
-		room->lightop = LIGHTOP_SET;
-		room->lightop_to_frac = 0.0f;
-	}
-#endif
-
-	light = (struct light *)&g_BgLightsFileData[(u32)g_Rooms[roomnum].lightindex * 0x22];
+	light = (struct light *)&g_BgLightsFileData[(uint32_t)g_Rooms[roomnum].lightindex * 0x22];
 
 	for (i = 0; i < room->numlights; i++) {
-#if VERSION < VERSION_NTSC_1_0
-		if (cheatIsActive(CHEAT_PERFECTDARKNESS)) {
-			light->brightness = 0;
-			light->sparkable = (rngRandom() % 2) ? true : false;
-			light->healthy = false;
-			light->on = false;
-			light->sparking = false;
-			light->vulnerable = false;
-		} else
-#endif
 		{
 			light->brightness = g_Rooms[roomnum].br_light_each;
 			light->sparkable = true;
@@ -428,10 +402,10 @@ void roomInitLights(s32 roomnum)
 	}
 }
 
-bool lightsHandleHit(struct coord *gunpos, struct coord *hitpos, s32 roomnum)
+bool lightsHandleHit(struct coord *gunpos, struct coord *hitpos, int roomnum)
 {
-	s32 i;
-	f32 f2;
+	int i;
+	float f2;
 	struct coord spa4;
 	struct coord sp98;
 	struct coord sp8c;
@@ -487,10 +461,10 @@ bool lightsHandleHit(struct coord *gunpos, struct coord *hitpos, s32 roomnum)
 	return false;
 }
 
-void roomSetLightsFaulty(s32 roomnum, s32 chance)
+void roomSetLightsFaulty(int roomnum, int chance)
 {
 	struct light *light = (struct light *)&g_BgLightsFileData[g_Rooms[roomnum].lightindex * 0x22];
-	s32 i;
+	int i;
 
 	if (g_Rooms[roomnum].numlights) {
 		for (i = 0; i < g_Rooms[roomnum].numlights; i++) {
@@ -507,7 +481,7 @@ void roomSetLightsFaulty(s32 roomnum, s32 chance)
 	g_Rooms[roomnum].flags |= ROOMFLAG_LIGHTS_DIRTY;
 }
 
-void roomSetLightBroken(s32 roomnum, s32 lightnum)
+void roomSetLightBroken(int roomnum, int lightnum)
 {
 	struct light *light = roomGetLight(roomnum, lightnum);
 	light->healthy = false;
@@ -525,18 +499,18 @@ void lightsReset(void)
 
 void func0f001c0c(void)
 {
-	s32 i;
-	s32 sp68;
-	s32 table1size;
-	s32 table2size;
-	s32 table3size;
-	s32 table4size;
-	s32 sp54;
-	u8 *ptr;
-	u8 *s5;
-	u8 *sp48;
-	s32 *sp44;
-	s32 j;
+	int i;
+	int sp68;
+	int table1size;
+	int table2size;
+	int table3size;
+	int table4size;
+	int sp54;
+	uint8_t *ptr;
+	uint8_t *s5;
+	uint8_t *sp48;
+	int *sp44;
+	int j;
 
 	osGetCount(); // This isn't used for anything?
 
@@ -551,7 +525,7 @@ void func0f001c0c(void)
 	table1size = align16(g_Vars.roomcount * 4);
 	table2size = align16(g_NumPortals * 4);
 	table3size = align16(g_Vars.roomcount * 4);
-	table4size = align16((u32)var8009cae0 * (u32)var8009cae0);
+	table4size = align16((uint32_t)var8009cae0 * (uint32_t)var8009cae0);
 #ifdef PLATFORM_64BIT
 	sp68 = align16(g_Vars.roomcount * 8 * 2);
 #else
@@ -574,19 +548,19 @@ void func0f001c0c(void)
 	 */
 	ptr = zbufGetAllocation();
 
-	var80061434 = (f32 *)ptr;
+	var80061434 = (float *)ptr;
 	ptr += table1size;
 
 	g_IsPortalClosed = (bool *)ptr;
 	ptr += table2size;
 
-	sp44 = (s32 *)(ptr);
+	sp44 = (int *)(ptr);
 	ptr += table3size;
 
-	sp48 = (u8 *)ptr;
+	sp48 = (uint8_t *)ptr;
 	ptr += table4size;
 
-	s5 = (u8 *)ptr;
+	s5 = (uint8_t *)ptr;
 
 	var80061420 = mempAlloc(sp68, MEMPOOL_STAGE);
 
@@ -617,7 +591,7 @@ void func0f001c0c(void)
 	sp54 = 0;
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
-		s32 size = align4(sp44[i]);
+		int size = align4(sp44[i]);
 
 		var80061420[i].unk00 = ptr;
 
@@ -664,12 +638,12 @@ void func0f001c0c(void)
 	osGetCount();
 }
 
-f32 func0f002334(s32 roomnum, f32 mult, s32 portalnum1, s32 portalnum2);
+float func0f002334(int roomnum, float mult, int portalnum1, int portalnum2);
 
-void func0f00215c(u8 *arg0)
+void func0f00215c(uint8_t *arg0)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	var8009cae8 = &func0f002334;
 
@@ -677,7 +651,7 @@ void func0f00215c(u8 *arg0)
 	var8009cae4 = 20;
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
-		u8 *ptr = &arg0[i * var8009cae0];
+		uint8_t *ptr = &arg0[i * var8009cae0];
 
 		func0f00259c(i);
 
@@ -695,10 +669,10 @@ void func0f00215c(u8 *arg0)
 	}
 }
 
-f32 func0f002334(s32 roomnum, f32 mult, s32 portalnum1, s32 portalnum2)
+float func0f002334(int roomnum, float mult, int portalnum1, int portalnum2)
 {
-	f32 surfacearea = 0;
-	f32 result;
+	float surfacearea = 0;
+	float result;
 
 	if (portalnum1 != -1) {
 		surfacearea = bgCalculatePortalSurfaceArea(portalnum1);
@@ -710,8 +684,8 @@ f32 func0f002334(s32 roomnum, f32 mult, s32 portalnum1, s32 portalnum2)
 
 void lightsCalculateRoomDimensions(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	for (i = 0; i < g_Vars.roomcount; i++) {
 		bool valid = true;
@@ -720,7 +694,7 @@ void lightsCalculateRoomDimensions(void)
 		g_Rooms[i].surfacearea = 1.0f;
 
 		for (j = 0; j < 3; j++) {
-			f32 diff = g_Rooms[i].bbmax[j] - g_Rooms[i].bbmin[j];
+			float diff = g_Rooms[i].bbmax[j] - g_Rooms[i].bbmin[j];
 
 			if (diff > 0.0f) {
 				g_Rooms[i].volume *= (g_Rooms[i].bbmax[j] - g_Rooms[i].bbmin[j]) / 100.0f;
@@ -736,9 +710,9 @@ void lightsCalculateRoomDimensions(void)
 		}
 
 		if (valid) {
-			f32 xdiff = g_Rooms[i].bbmax[0] - g_Rooms[i].bbmin[0];
-			f32 ydiff = g_Rooms[i].bbmax[1] - g_Rooms[i].bbmin[1];
-			f32 zdiff = g_Rooms[i].bbmax[2] - g_Rooms[i].bbmin[2];
+			float xdiff = g_Rooms[i].bbmax[0] - g_Rooms[i].bbmin[0];
+			float ydiff = g_Rooms[i].bbmax[1] - g_Rooms[i].bbmin[1];
+			float zdiff = g_Rooms[i].bbmax[2] - g_Rooms[i].bbmin[2];
 
 			if (!(xdiff > 0)) {
 				xdiff = -xdiff;
@@ -759,23 +733,20 @@ void lightsCalculateRoomDimensions(void)
 	}
 }
 
-void func0f00259c(s32 roomnum)
+void func0f00259c(int roomnum)
 {
-	s32 i;
-	f32 sp58;
-	f32 f20 = 0.0f;
+	int i;
+	float sp58;
+	float f20 = 0.0f;
 
 	for (i = 0; i < g_Vars.roomcount; i++) {
 		var80061434[i] = 0.0f;
 	}
 
 	var80061434[roomnum] = sqrtf(g_Rooms[roomnum].volume) * 255.0f;
-	if (1);
 
 	if (g_Rooms[roomnum].numportals != 0) {
 		func0f002844(roomnum, var80061434[roomnum], 0, -1);
-		if (1);
-		if (1);
 	}
 
 	for (i = 0; i < g_Rooms[roomnum].numportals; i++) {
@@ -798,22 +769,22 @@ void func0f00259c(s32 roomnum)
 	}
 }
 
-void func0f002844(s32 roomnum, f32 arg1, s32 arg2, s32 portalnum)
+void func0f002844(int roomnum, float arg1, int arg2, int portalnum)
 {
-	s32 i;
-	s32 otherroomnum = -1;
+	int i;
+	int otherroomnum = -1;
 
 	if (portalnum != -1) {
 		if (roomnum == g_BgPortals[portalnum].roomnum1) {
-			otherroomnum = (s32) g_BgPortals[portalnum].roomnum2;
+			otherroomnum = (int) g_BgPortals[portalnum].roomnum2;
 		} else {
-			otherroomnum = (s32) g_BgPortals[portalnum].roomnum1;
+			otherroomnum = (int) g_BgPortals[portalnum].roomnum1;
 		}
 	}
 
 	for (i = 0; i < g_Rooms[roomnum].numportals; i++) {
-		s32 iterportalnum = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + i];
-		s32 iterroomnum;
+		int iterportalnum = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + i];
+		int iterroomnum;
 
 		if (g_IsPortalClosed[iterportalnum]) {
 			if (roomnum == g_BgPortals[iterportalnum].roomnum1) {
@@ -823,7 +794,7 @@ void func0f002844(s32 roomnum, f32 arg1, s32 arg2, s32 portalnum)
 			}
 
 			if (iterroomnum != otherroomnum) {
-				f32 f0 = var8009cae8(roomnum, arg1, portalnum, iterportalnum);
+				float f0 = var8009cae8(roomnum, arg1, portalnum, iterportalnum);
 
 				if (f0 > var8006143c && arg2 < var8009cae4) { // f0 > 50.0 &&  arg2 < 20
 					var80061434[roomnum] -= f0;
@@ -880,12 +851,7 @@ void roomSetLightsOn(int roomnum, int enable)
 	g_Rooms[roomnum].flags |= ROOMFLAG_LIGHTS_DIRTY;
 }
 
-/**
- * @bug: The lightop_timer240 values are not set correctly.
- * They should be duration60 * 4. This only affects LIGHTOP_TRANSITION,
- * which makes it start the transition 3/4 of the way into it.
- */
-void roomSetLightOp(s32 roomnum, s32 operation, u8 br_to, u8 br_from, u8 duration60)
+void roomSetLightOp(int roomnum, int operation, uint8_t br_to, uint8_t br_from, uint8_t duration60)
 {
 	if (cheatIsActive(CHEAT_PERFECTDARKNESS) == false) {
 		g_Rooms[roomnum].lightop = operation;
@@ -904,7 +870,7 @@ void roomSetLightOp(s32 roomnum, s32 operation, u8 br_to, u8 br_from, u8 duratio
 			g_Rooms[roomnum].lightop_to_frac = br_to * 0.01f;
 			g_Rooms[roomnum].lightop_from_frac = br_from * 0.01f;
 			g_Rooms[roomnum].lightop_duration240 = duration60 * 4.0f;
-			g_Rooms[roomnum].lightop_timer240 = duration60 * 4; // Fix
+			g_Rooms[roomnum].lightop_timer240 = duration60 * 4;
 			break;
 		case LIGHTOP_SINELOOP:
 			g_Rooms[roomnum].lightop_to_frac = br_to * 0.01f;
@@ -918,7 +884,7 @@ void roomSetLightOp(s32 roomnum, s32 operation, u8 br_to, u8 br_from, u8 duratio
 	}
 }
 
-bool lightTickBroken(s32 roomnum, s32 lightnum)
+bool lightTickBroken(int roomnum, int lightnum)
 {
 	struct light *light = (struct light *)(g_BgLightsFileData + ((g_Rooms[roomnum].lightindex + lightnum) * 0x22));
 
@@ -938,9 +904,9 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 			struct coord sp8c;
 			struct coord sp80;
 			struct coord centre;
-			f32 rand1 = 2.0f * RANDOMFRAC() - 1.0f; // range -1 to 1
-			f32 rand2 = 2.0f * RANDOMFRAC() - 1.0f; // range -1 to 1
-			s32 sparktype = -1;
+			float rand1 = 2.0f * RANDOMFRAC() - 1.0f; // range -1 to 1
+			float rand2 = 2.0f * RANDOMFRAC() - 1.0f; // range -1 to 1
+			int sparktype = -1;
 			RoomNum smokerooms[2];
 			struct bgroom *room;
 
@@ -1001,7 +967,7 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 
 			lightGetBboxCentre(roomnum, lightnum, &centre);
 
-			room = (void *) ((u8 *) g_BgRooms + (uintptr_t) room);
+			room = (void *) ((uint8_t *) g_BgRooms + (uintptr_t) room);
 			centre.x += room->pos.x;
 			centre.y += room->pos.y;
 			centre.z += room->pos.z;
@@ -1030,7 +996,7 @@ bool lightTickBroken(s32 roomnum, s32 lightnum)
 
 void lightingTick(void)
 {
-	s32 i;
+	int i;
 
 	roomsTickLighting();
 
@@ -1047,8 +1013,8 @@ void lightingTick(void)
 
 void lightsConfigureForPerfectDarknessCutscene(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	for (i = 0; i < g_Vars.roomcount; i++) {
 		struct light *light = (struct light *)&g_BgLightsFileData[g_Rooms[i].lightindex * 0x22];
@@ -1070,8 +1036,8 @@ void lightsConfigureForPerfectDarknessCutscene(void)
 
 void lightsConfigureForPerfectDarknessGameplay(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	for (i = 0; i < g_Vars.roomcount; i++) {
 		struct light *light = (struct light *)&g_BgLightsFileData[g_Rooms[i].lightindex * 0x22];
@@ -1106,15 +1072,15 @@ void lightsTickPerfectDarkness(void)
 
 void roomsTickLighting(void)
 {
-	s32 i;
-	s32 numprocessed = 0;
-	s32 j;
+	int i;
+	int numprocessed = 0;
+	int j;
 	bool wasdirty = false;
 	struct light *light;
-	f32 amount;
-	s32 timer240;
-	f32 angle;
-	f32 average;
+	float amount;
+	int timer240;
+	float angle;
+	float average;
 
 	if (cheatIsActive(CHEAT_PERFECTDARKNESS)) {
 		lightsTickPerfectDarkness();
@@ -1176,7 +1142,7 @@ void roomsTickLighting(void)
 		case LIGHTOP_SINELOOP:
 			timer240 = g_Rooms[i].lightop_timer240 > 0 ? g_Rooms[i].lightop_timer240 : -g_Rooms[i].lightop_timer240;
 
-			angle = (timer240 % (s32) g_Rooms[i].lightop_duration240) * M_TAU / g_Rooms[i].lightop_duration240;
+			angle = (timer240 % (int) g_Rooms[i].lightop_duration240) * M_TAU / g_Rooms[i].lightop_duration240;
 			average = (g_Rooms[i].lightop_to_frac + g_Rooms[i].lightop_from_frac) * 0.5f;
 
 			g_Rooms[i].lightop_cur_frac = g_Rooms[i].lightop_to_frac + (cosf(angle) + 1.0f) * average;
@@ -1199,7 +1165,7 @@ void roomsTickLighting(void)
 		if (g_Rooms[i].flags & ROOMFLAG_LIGHTS_DIRTY) {
 			// Calculate the settled local brightness
 			if (g_Rooms[i].numlights != 0) {
-				s32 numlightson = 0;
+				int numlightson = 0;
 				struct light *light = (struct light *)&g_BgLightsFileData[g_Rooms[i].lightindex * 0x22];
 
 				for (j = 0; j < g_Rooms[i].numlights; j++) {
@@ -1215,7 +1181,7 @@ void roomsTickLighting(void)
 				} else if (numlightson != 0) {
 					amount = g_Rooms[i].br_base;
 				} else {
-					amount = (f32)g_Rooms[i].br_base / 2;
+					amount = (float)g_Rooms[i].br_base / 2;
 				}
 			} else {
 				if (g_Rooms[i].flags & ROOMFLAG_LIGHTSOFF) {
@@ -1234,7 +1200,7 @@ void roomsTickLighting(void)
 			for (j = 0; j < g_Rooms[i].numlights; j++) {
 				if (light->on) {
 					amount = g_Rooms[i].lightop_cur_frac * light->brightness;
-					g_Rooms[i].br_settled_local += (s32)amount;
+					g_Rooms[i].br_settled_local += (int)amount;
 				}
 
 				light++;
@@ -1251,13 +1217,13 @@ void roomsTickLighting(void)
 
 		// Tick any flash lighting
 		if (g_Rooms[i].br_flash != 0) {
-			s32 increment = g_Vars.lvupdate240 * 2;
+			int increment = g_Vars.lvupdate240 * 2;
 
 			if (var80061420 != NULL) {
-				s32 spa0 = 0;
-				s32 sp9c = 0;
+				int spa0 = 0;
+				int sp9c = 0;
 
-				s32 ret = func0f177c8c(var80061420[i].unk04, &spa0, &sp9c);
+				int ret = func0f177c8c(var80061420[i].unk04, &spa0, &sp9c);
 
 				while (ret != -1) {
 					if (ret != 0) {
@@ -1303,18 +1269,18 @@ void roomsTickLighting(void)
 		if (i != 0) {
 			if ((g_Rooms[i].flags & ROOMFLAG_RENDERALWAYS) || (g_Rooms[i].flags & (ROOMFLAG_ONSCREEN | ROOMFLAG_STANDBY))) {
 				if (g_Rooms[i].flags & (ROOMFLAG_BRIGHTNESS_DIRTY_PERM | ROOMFLAG_BRIGHTNESS_DIRTY_TEMP)) {
-					s32 sum = 0;
-					s32 sp90 = 0;
-					s32 sp8c = 0;
+					int sum = 0;
+					int sp90 = 0;
+					int sp8c = 0;
 
-					s32 ret = func0f177c8c(var80061420[i].unk00, &sp90, &sp8c);
+					int ret = func0f177c8c(var80061420[i].unk00, &sp90, &sp8c);
 
 					while (ret != -1) {
 						if (sp8c != 0) {
-							s32 add = 0;
+							int add = 0;
 
 							if (sp8c) {
-								add += (s32)((1.0f / 255.0f) * ret * g_Rooms[sp8c].br_settled_local);
+								add += (int)((1.0f / 255.0f) * ret * g_Rooms[sp8c].br_settled_local);
 							}
 
 							sum += add;
@@ -1333,9 +1299,9 @@ void roomsTickLighting(void)
 					g_Rooms[i].flags &= ~(ROOMFLAG_BRIGHTNESS_DIRTY_PERM | ROOMFLAG_BRIGHTNESS_DIRTY_TEMP);
 
 					if (g_Rooms[i].lightop == LIGHTOP_HIGHLIGHT) {
-						s32 r = roomGetFinalBrightnessForPlayer(i);
-						s32 g = r;
-						s32 b = r;
+						int r = roomGetFinalBrightnessForPlayer(i);
+						int g = r;
+						int b = r;
 
 						scenarioHighlightRoom(i, &r, &g, &b);
 
@@ -1400,17 +1366,17 @@ void lightsTick(void)
  *
  * The room must not have ROOMFLAG_OUTDOORS.
  */
-void roomFlashLighting(s32 roomnum, s32 start, s32 limit)
+void roomFlashLighting(int roomnum, int start, int limit)
 {
 	if (var80061420 && !(g_Rooms[roomnum].flags & ROOMFLAG_OUTDOORS ? 1 : 0)) {
-		s32 value;
-		s32 sp78 = 0;
-		s32 neighbournum = 0;
+		int value;
+		int sp78 = 0;
+		int neighbournum = 0;
 
 		value = func0f177c8c(var80061420[roomnum].unk04, &sp78, &neighbournum);
 
 		while (value != -1) {
-			f32 increment = value * (1.0f / 255.0f) * start * 5.0f;
+			float increment = value * (1.0f / 255.0f) * start * 5.0f;
 
 			if (start > 0) {
 				if (increment > start) {
@@ -1433,7 +1399,7 @@ void roomFlashLighting(s32 roomnum, s32 start, s32 limit)
 	}
 }
 
-void roomFlashLocalLighting(s32 roomnum, s32 increment, s32 limit)
+void roomFlashLocalLighting(int roomnum, int increment, int limit)
 {
 	if (roomnum) {
 		if (g_Rooms[roomnum].flags & ROOMFLAG_ONSCREEN) {
@@ -1460,24 +1426,23 @@ void roomFlashLocalLighting(s32 roomnum, s32 increment, s32 limit)
 	}
 }
 
-void roomHighlight(s32 roomnum)
+void roomHighlight(int roomnum)
 {
-	s32 i;
-	s32 tmpr;
-	s32 tmpg;
-	s32 tmpb;
-	s32 alpha;
-	s32 red;
-	s32 green;
-	s32 blue;
-	s32 extra;
-	s32 numcolours;
+	int i;
+	int tmpr;
+	int tmpg;
+	int tmpb;
+	int alpha;
+	int red;
+	int green;
+	int blue;
+	int extra;
+	int numcolours;
 	Col *src;
 	Col *dst;
-	u8 br_settled_regional;
-	s32 max;
-	f32 mult;
-	u32 stack;
+	uint8_t br_settled_regional;
+	int max;
+	float mult;
 
 	if (g_BgFrameCount != g_Rooms[roomnum].hlupdatedframe && g_Rooms[roomnum].loaded240 != 0) {
 		g_Rooms[roomnum].hlupdatedframe = g_BgFrameCount;
@@ -1531,7 +1496,7 @@ void roomHighlight(s32 roomnum)
 				}
 
 				if (max > br_settled_regional) {
-					mult = br_settled_regional / (f32)max;
+					mult = br_settled_regional / (float)max;
 				} else {
 					mult = 1.0f;
 				}
@@ -1595,16 +1560,16 @@ void roomHighlight(s32 roomnum)
 
 void func0f004c6c(void)
 {
-	s32 sp44;
-	s32 sp40;
-	s32 sp3c;
-	s32 sp38;
-	s32 sp34;
-	s32 i;
-	s32 j;
-	s32 s4;
-	u8 *ptr;
-	u8 *backupptr;
+	int sp44;
+	int sp40;
+	int sp3c;
+	int sp38;
+	int sp34;
+	int i;
+	int j;
+	int s4;
+	uint8_t *ptr;
+	uint8_t *backupptr;
 
 #ifdef PLATFORM_64BIT
 	sp44 = align16(0x2000 * 2);
@@ -1647,7 +1612,7 @@ void func0f004c6c(void)
 	s4 += sp38;
 	s4 += g_NumPortals * sp34;
 
-	align16((s32)s4);
+	align16((int)s4);
 
 	ptr = mempGetNextStageAllocation();
 	var8009cad0 = (void *)ptr;
@@ -1705,14 +1670,14 @@ void func0f004c6c(void)
 
 void func0f00505c(void)
 {
-	s32 j;
-	s32 sp78;
-	s32 i;
-	s32 k;
-	s32 portalnum;
-	s32 portalnum2;
-	s32 roomnum;
-	s32 l;
+	int j;
+	int sp78;
+	int i;
+	int k;
+	int portalnum;
+	int portalnum2;
+	int roomnum;
+	int l;
 	u16 dist;
 
 	for (i = 0; i < g_NumPortals; i++) {
@@ -1731,11 +1696,11 @@ void func0f00505c(void)
 
 					if (portalnum2 != portalnum && var8009cad8[portalnum2] != 0) {
 						if (var8006142c[portalnum][portalnum2] >= 0x8000) {
-							f32 xdiff = var80061428[portalnum].x - var80061428[portalnum2].x;
-							f32 ydiff = var80061428[portalnum].y - var80061428[portalnum2].y;
-							f32 zdiff = var80061428[portalnum].z - var80061428[portalnum2].z;
+							float xdiff = var80061428[portalnum].x - var80061428[portalnum2].x;
+							float ydiff = var80061428[portalnum].y - var80061428[portalnum2].y;
+							float zdiff = var80061428[portalnum].z - var80061428[portalnum2].z;
 
-							f32 dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
+							float dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 
 							var8006142c[portalnum][portalnum2] = dist;
 							var8006142c[portalnum2][portalnum] = dist;
@@ -1755,14 +1720,14 @@ void func0f00505c(void)
 	}
 }
 
-f32 func0f0053d0(s32 roomnum1, struct coord *pos1, s32 portalnum1, s32 roomnum2, struct coord *pos2, s32 portalnum2, f32 *arg6)
+float func0f0053d0(int roomnum1, struct coord *pos1, int portalnum1, int roomnum2, struct coord *pos2, int portalnum2, float *arg6)
 {
-	f32 sp6c;
-	f32 *sp68;
-	f32 sp64;
-	f32 xdiff;
-	f32 ydiff;
-	f32 zdiff;
+	float sp6c;
+	float *sp68;
+	float sp64;
+	float xdiff;
+	float ydiff;
+	float zdiff;
 
 	sp6c = 32767.0f;
 	sp68 = arg6 ? arg6 : &sp6c;
@@ -1780,7 +1745,7 @@ f32 func0f0053d0(s32 roomnum1, struct coord *pos1, s32 portalnum1, s32 roomnum2,
 			ydiff = ydiff > 0.0f ? ydiff : -ydiff;
 
 			if (ydiff < sp64) {
-				f32 dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
+				float dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 
 				if (dist < sp64) {
 					if (roomnum1 == roomnum2 || portalnum1 == portalnum2) {
@@ -1788,12 +1753,12 @@ f32 func0f0053d0(s32 roomnum1, struct coord *pos1, s32 portalnum1, s32 roomnum2,
 							*sp68 = dist;
 						}
 					} else {
-						f32 sp50 = func0f000920(portalnum1, portalnum2);
+						float sp50 = func0f000920(portalnum1, portalnum2);
 
 						if (sp50 < sp64) {
 							struct coord sp44;
-							f32 xdiff2;
-							f32 zdiff2;
+							float xdiff2;
+							float zdiff2;
 
 							portalGetAvgVertexPos(portalnum1, &sp44);
 							sp64 -= sp50;
@@ -1806,12 +1771,12 @@ f32 func0f0053d0(s32 roomnum1, struct coord *pos1, s32 portalnum1, s32 roomnum2,
 								zdiff2 = zdiff2 > 0.0f ? zdiff2 : -zdiff2;
 
 								if (zdiff2 < sp64) {
-									f32 sp38 = sqrtf(xdiff2 * xdiff2 + zdiff2 * zdiff2);
+									float sp38 = sqrtf(xdiff2 * xdiff2 + zdiff2 * zdiff2);
 
 									if (sp38 < sp64) {
 										struct coord sp2c;
-										f32 xdiff3;
-										f32 zdiff3;
+										float xdiff3;
+										float zdiff3;
 
 										portalGetAvgVertexPos(portalnum2, &sp2c);
 										sp64 -= sp38;
@@ -1824,7 +1789,7 @@ f32 func0f0053d0(s32 roomnum1, struct coord *pos1, s32 portalnum1, s32 roomnum2,
 											zdiff3 = zdiff3 > 0.0f ? zdiff3 : -zdiff3;
 
 											if (zdiff3 < sp64) {
-												f32 dist3 = sqrtf(xdiff3 * xdiff3 + zdiff3 * zdiff3);
+												float dist3 = sqrtf(xdiff3 * xdiff3 + zdiff3 * zdiff3);
 
 												if (dist3 < sp64) {
 													sp64 -= dist3;
@@ -1845,30 +1810,30 @@ f32 func0f0053d0(s32 roomnum1, struct coord *pos1, s32 portalnum1, s32 roomnum2,
 	return *sp68;
 }
 
-void func0f0056f4(s32 roomnum1, struct coord *pos1, s32 roomnum2, struct coord *pos2, s32 arg4, f32 *result, s32 arg6)
+void func0f0056f4(int roomnum1, struct coord *pos1, int roomnum2, struct coord *pos2, int arg4, float *result, int arg6)
 {
-	f32 dist;
+	float dist;
 
 	if (!var80061444
 			|| PLAYERCOUNT() >= 3
 			|| roomnum1 == roomnum2
 			|| roomnum1 == -1
 			|| roomnum2 == -1) {
-		f32 xdist = pos1->x - pos2->x;
+		float xdist = pos1->x - pos2->x;
 
 		if (!(xdist > 0.0f)) {
 			xdist = -xdist;
 		}
 
 		if (xdist < *result) {
-			f32 zdist = pos1->z - pos2->z;
+			float zdist = pos1->z - pos2->z;
 
 			if (!(zdist > 0.0f)) {
 				zdist = -zdist;
 			}
 
 			if (zdist < *result) {
-				f32 ydist = pos1->y - pos2->y;
+				float ydist = pos1->y - pos2->y;
 
 				if (!(ydist > 0.0f)) {
 					ydist = -ydist;
@@ -1884,10 +1849,10 @@ void func0f0056f4(s32 roomnum1, struct coord *pos1, s32 roomnum2, struct coord *
 			}
 		}
 	} else {
-		s32 portalnum1;
-		s32 portalnum2;
-		s32 i;
-		s32 j;
+		int portalnum1;
+		int portalnum2;
+		int i;
+		int j;
 
 		for (i = 0; i < g_Rooms[roomnum1].numportals; i++) {
 			portalnum1 = g_RoomPortals[g_Rooms[roomnum1].roomportallistoffset + i];
@@ -1905,13 +1870,13 @@ void func0f0056f4(s32 roomnum1, struct coord *pos1, s32 roomnum2, struct coord *
 	}
 }
 
-void func0f0059fc(s32 roomnum1, struct coord *pos1, s32 roomnum2, struct coord *pos2, s32 arg4, f32 *result)
+void func0f0059fc(int roomnum1, struct coord *pos1, int roomnum2, struct coord *pos2, int arg4, float *result)
 {
-	s32 portalnum1;
-	s32 portalnum2;
-	s32 i;
-	s32 j;
-	f32 dist;
+	int portalnum1;
+	int portalnum2;
+	int i;
+	int j;
+	float dist;
 
 	*result = 32767;
 
@@ -1946,7 +1911,7 @@ void func0f0059fc(s32 roomnum1, struct coord *pos1, s32 roomnum2, struct coord *
  */
 void func0f005bb0(void)
 {
-	s32 brightness = roomGetFinalBrightness(g_Vars.currentplayer->prop->rooms[0]);
+	int brightness = roomGetFinalBrightness(g_Vars.currentplayer->prop->rooms[0]);
 
 	if (((USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) && !g_Vars.currentplayer->usinggoggles)
 			|| ((!USINGDEVICE(DEVICE_NIGHTVISION) && !USINGDEVICE(DEVICE_IRSCANNER)) && g_Vars.currentplayer->usinggoggles)) {

@@ -1,53 +1,54 @@
 #ifndef IN_GAME_DLIGHTS_H
 #define IN_GAME_DLIGHTS_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
-u32 func0f000920(s32 portalnum1, s32 portalnum2);
-struct light *roomGetLight(s32 roomnum, s32 lightnum);
-u8 roomGetFinalBrightness(s32 roomnum);
-u8 roomGetFinalBrightnessForPlayer(s32 roomnum);
-u8 roomGetSettledRegionalBrightnessForPlayer(s32 roomnum);
-u8 roomGetSettledLocalBrightness(s32 room);
-s32 roomGetFlashBrightness(s32 roomnum);
-f32 roomGetLightOpCurFrac(s32 roomnum);
-f32 roomGetSettledLocalBrightnessFrac(s32 roomnum);
-bool lightGetBboxCentre(s32 roomnum, u32 lightnum, struct coord *pos);
-bool lightIsHealthy(s32 roomnum, s32 lightnum);
-bool lightIsVulnerable(s32 roomnum, s32 lightnum);
-bool lightIsOn(s32 roomnum, s32 lightnum);
-void roomSetFlashBrightness(s32 roomnum, s32 value);
+uint32_t func0f000920(int portalnum1, int portalnum2);
+struct light *roomGetLight(int roomnum, int lightnum);
+uint8_t roomGetFinalBrightness(int roomnum);
+uint8_t roomGetFinalBrightnessForPlayer(int roomnum);
+uint8_t roomGetSettledRegionalBrightnessForPlayer(int roomnum);
+uint8_t roomGetSettledLocalBrightness(int room);
+int roomGetFlashBrightness(int roomnum);
+float roomGetLightOpCurFrac(int roomnum);
+float roomGetSettledLocalBrightnessFrac(int roomnum);
+bool lightGetBboxCentre(int roomnum, uint32_t lightnum, struct coord *pos);
+bool lightIsHealthy(int roomnum, int lightnum);
+bool lightIsVulnerable(int roomnum, int lightnum);
+bool lightIsOn(int roomnum, int lightnum);
+void roomSetFlashBrightness(int roomnum, int value);
 void roomSetDefaults(struct room *room);
 Gfx *lightsSetForRoom(Gfx *gdl, RoomNum roomnum);
 Gfx *lightsSetDefault(Gfx *gdl);
-void roomInitLights(s32 roomnum);
-bool lightsHandleHit(struct coord *gunpos, struct coord *hitpos, s32 roomnum);
-void roomSetLightsFaulty(s32 roomnum, s32 chance);
-void roomSetLightBroken(s32 roomnum, s32 lightnum);
+void roomInitLights(int roomnum);
+bool lightsHandleHit(struct coord *gunpos, struct coord *hitpos, int roomnum);
+void roomSetLightsFaulty(int roomnum, int chance);
+void roomSetLightBroken(int roomnum, int lightnum);
 void lightsReset(void);
 void func0f001c0c(void);
-void func0f00215c(u8 *arg0);
+void func0f00215c(uint8_t *arg0);
 void lightsCalculateRoomDimensions(void);
-void func0f00259c(s32 roomnum);
-void func0f002844(s32 roomnum, f32 arg1, s32 arg2, s32 portalnum);
+void func0f00259c(int roomnum);
+void func0f002844(int roomnum, float arg1, int arg2, int portalnum);
 void func0f002a98(void);
 void roomSetLightsOn(int roomnum, int enable);
-void roomSetLightOp(int roomnum, int operation, u8 br_to, u8 br_from, u8 duration60);
-bool lightTickBroken(s32 roomnum, s32 lightnum);
+void roomSetLightOp(int roomnum, int operation, uint8_t br_to, uint8_t br_from, uint8_t duration60);
+bool lightTickBroken(int roomnum, int lightnum);
 void lightingTick(void);
 void lightsConfigureForPerfectDarknessCutscene(void);
 void lightsConfigureForPerfectDarknessGameplay(void);
 void lightsTickPerfectDarkness(void);
 void roomsTickLighting(void);
 void lightsTick(void);
-void roomFlashLighting(s32 roomnum, s32 start, s32 limit);
-void roomFlashLocalLighting(s32 roomnum, s32 increment, s32 limit);
-void roomHighlight(s32 roomnum);
+void roomFlashLighting(int roomnum, int start, int limit);
+void roomFlashLocalLighting(int roomnum, int increment, int limit);
+void roomHighlight(int roomnum);
 void func0f004c6c(void);
 void func0f00505c(void);
-f32 func0f0053d0(s32 room1, struct coord *arg1, s32 portal1, s32 room2, struct coord *arg4, s32 portal2, f32 *arg6);
-void func0f0056f4(s32 room1, struct coord *coord1, s32 room2, struct coord *coord2, s32 arg4, f32 *arg5, s32 arg6);
+float func0f0053d0(int room1, struct coord *arg1, int portal1, int room2, struct coord *arg4, int portal2, float *arg6);
+void func0f0056f4(int room1, struct coord *coord1, int room2, struct coord *coord2, int arg4, float *arg5, int arg6);
 void func0f005bb0(void);
 
 #endif

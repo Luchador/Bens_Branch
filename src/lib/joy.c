@@ -422,12 +422,6 @@ void joy00014238(void)
 	if (!doingit) {
 		doingit = true;
 
-		for (i = 0; i < NUM_PADS; i++) {
-			if (joyGetPakState2(i) == PAKSTATE_13) {
-				pakSetState(i, PAKSTATE_READY);
-			}
-		}
-
 		joysTickRumble();
 
 		doingit = false;

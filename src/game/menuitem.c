@@ -30,12 +30,10 @@
 
 u8 g_MpSelectedPlayersForStats[MAX_PLAYERS];
 
-#if VERSION >= VERSION_NTSC_1_0
 s32 g_ScissorX1 = 0;
 s32 g_ScissorX2 = 0;
 s32 g_ScissorY1 = 0;
 s32 g_ScissorY2 = 0;
-#endif
 
 s32 var800711a0 = 0;
 s32 var800711a4 = 0;
@@ -176,11 +174,7 @@ Gfx *menuitemListRenderHeader(Gfx *gdl, s16 x1, s16 y1, s16 width, s16 arg4, s16
 	}
 
 	gdl = text0f153780(gdl);
-#if VERSION >= VERSION_NTSC_1_0
 	gdl = menugfxDrawListGroupHeader(gdl, x1, y1, x1 + width, y1 + height, x1 + arg4, colour & 0xff);
-#else
-	gdl = menugfxDrawListGroupHeader(gdl, x1, y1, x1 + width, y1 + height, x1 + arg4);
-#endif
 	gdl = textConfigureGfxPipeline(gdl);
 
 	x = x1 + 3;
@@ -251,7 +245,6 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 		width = context->width;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	g_ScissorX1 = context->x * g_ScaleX;
 	g_ScissorX2 = (context->x + width) * g_ScaleX;
 	g_ScissorY1 = context->y;
@@ -298,11 +291,6 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 	}
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
-#else
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE,
-			context->x * g_ScaleX, context->y,
-			(context->x + width) * g_ScaleX, context->y + context->height);
-#endif
 
 	halfheight = context->height / 2;
 	halfheight /= g_LineHeight;
@@ -525,7 +513,6 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 
 						gDPPipeSync(gdl++);
 
-#if VERSION >= VERSION_NTSC_1_0
 						g_ScissorX1 = sp94left * g_ScaleX;
 						g_ScissorX2 = sp8cright * g_ScaleX;
 						g_ScissorY1 = sp90top;
@@ -572,9 +559,6 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 						}
 
 						gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
-#else
-						gDPSetScissor(gdl++, G_SC_NON_INTERLACE, sp94left * g_ScaleX, sp90top, sp8cright * g_ScaleX, sp88bottom);
-#endif
 
 						spb8.type19.gdl = gdl;
 						spb8.type19.unk04 = optionindex;
@@ -733,16 +717,9 @@ bool menuitemListTick(struct menuitem *item, struct menuinputs *inputs, u32 tick
 				data->list.index = last;
 				data->list.targetoffsety = menuitemListGetOffsetY(data->list.index, item);
 			}
-
-#ifdef PLATFORM_N64
-			if (inputs->updown) {
-				prev2 = data->list.index;
-				data->list.index += inputs->updown;
-#else
 			if (inputs->updown || inputs->mousescroll) {
 				prev2 = data->list.index;
 				data->list.index += inputs->updown + inputs->mousescroll;
-#endif
 
 				if (data->list.index < 0) {
 					data->list.index = handlerdata.list.value - 1;
@@ -981,7 +958,6 @@ Gfx *menuitemDropdownOverlay(Gfx *gdl, s16 x, s16 y, s16 x2, s16 y2, struct menu
 	char *text;
 	struct menurendercontext context;
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (dialog->unk6e) {
 		context.x = x + 78;
 	} else if (x2 < 0) {
@@ -989,13 +965,6 @@ Gfx *menuitemDropdownOverlay(Gfx *gdl, s16 x, s16 y, s16 x2, s16 y2, struct menu
 	} else {
 		context.x = x + x2 - 62;
 	}
-#else
-	if (dialog->unk6e) {
-		context.x = x + 78;
-	} else {
-		context.x = x + x2 - 62;
-	}
-#endif
 
 	if (item->flags & MENUITEMFLAG_DROPDOWN_BELOW) {
 		context.x = x + 30;
@@ -1036,13 +1005,9 @@ Gfx *menuitemDropdownOverlay(Gfx *gdl, s16 x, s16 y, s16 x2, s16 y2, struct menu
 			}
 		}
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (x2 > 0) {
 			context.x = x + x2 - context.width - 7;
 		}
-#else
-		context.x = x + x2 - context.width - 7;
-#endif
 
 		if (context.y + context.height > dialog->y + dialog->height + 2) {
 			if (context.height > dialog->height) {
@@ -1291,7 +1256,6 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 								g_MenuWave1Colours[context->dialog->type].item_disabled);
 					}
 
-#ifndef PLATFORM_N64
 					// Dim the Caps button if keyboard typing is enabled
 					if (index == 1 && g_MenuKeyboardPlayer == g_MpPlayerNum) {
 						textcolour = colourBlend(
@@ -1302,7 +1266,6 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 								g_MenuWave2Colours[context->dialog->type].item_disabled,
 								g_MenuWave1Colours[context->dialog->type].item_disabled);
 					}
-#endif
 
 					gdl = textRenderProjected(gdl, &x, &y, langGet(labels[index]), g_CharsHandelGothicXs, g_FontHandelGothicXs, textcolour, context->width, context->height, 0, 0);
 
@@ -1313,7 +1276,6 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 					}
 				}
 			} else if (row == 5) {
-#ifndef PLATFORM_N64
 				if (col == 0) {
 					char *kbtext;
 					// make the button yellow if it's active
@@ -1328,7 +1290,6 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 					x = context->x + (context->width - textwidth) / 2;
 					gdl = textRenderProjected(gdl, &x, &y, kbtext, g_CharsHandelGothicXs, g_FontHandelGothicXs, textcolour, context->width, context->height, 0, 0);
 				}
-#endif
 			} else {
 				// Alpha-numeric cell
 				label[0] = g_KeyboardKeys[row][col];
@@ -1407,7 +1368,6 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 		s16 prevcol = kb->col;
 		s16 prevrow = kb->row;
 
-#ifndef PLATFORM_N64
 		// handle mouse
 		struct menudialog *dialog = g_Menus[g_MpPlayerNum].curdialog;
 		if (dialog && g_MenuUsingMouse && !inputs->leftright && !inputs->updown) {
@@ -1435,7 +1395,6 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 				}
 			}
 		}
-#endif
 
 		// Handle left/right movement
 		// In most cases the loop only runs once, but on row 4 the buttons span
@@ -1514,7 +1473,6 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 			inputs->start = false;
 		}
 
-#ifndef PLATFORM_N64
 		if (g_MenuKeyboardPlayer == g_MpPlayerNum) {
 			// match caps state to keyboard shift/caps if typing with keyboard
 			const u32 kmod = inputGetKeyModState();
@@ -1543,7 +1501,6 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 				menuPlaySound(MENUSOUND_FOCUS);
 			}
 		}
-#endif
 
 		if (inputs->select) {
 			if (kb->row == 4) {
@@ -1583,7 +1540,6 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 					}
 				}
 			} else if (kb->row == 5) {
-#ifndef PLATFORM_N64
 				if (g_MenuKeyboardPlayer == -1) {
 					g_MenuKeyboardPlayer = g_MpPlayerNum;
 					inputClearLastTextChar();
@@ -1594,7 +1550,6 @@ bool menuitemKeyboardTick(struct menuitem *item, struct menuinputs *inputs, u32 
 					inputStopTextInput();
 					menuPlaySound(MENUSOUND_KEYBOARDCANCEL);
 				}
-#endif
 			} else {
 				// Pressed A on number or letter
 				s32 appended = false;
@@ -1733,16 +1688,13 @@ Gfx *menuitemObjectivesRenderOne(Gfx *gdl, struct menudialog *dialog, s32 index,
 	s32 spb0;
 	s32 spac;
 	s32 spa8;
-	u32 stack3[2];
 	s32 sp9c;
 	s32 sp98;
 	u32 s0;
-	s32 stack[4];
 	s32 sp80;
 	s32 sp7c;
 	s32 sp78;
 	s32 sp74;
-	s32 stack2;
 	s32 sp6c;
 	s32 sp58;
 	s32 sp54;
@@ -2189,7 +2141,6 @@ Gfx *menuitemMeterRender(Gfx *gdl, struct menurendercontext *context)
 	return gdl;
 }
 
-#ifndef PLATFORM_N64
 
 // Draws a colored box which fills the background of the menu item.
 Gfx* menuitemColorBoxRender(Gfx *gdl, struct menurendercontext *context)
@@ -2216,8 +2167,6 @@ Gfx* menuitemColorBoxRender(Gfx *gdl, struct menurendercontext *context)
 
 	return gdl;
 }
-
-#endif
 
 Gfx *menuitemSelectableRender(Gfx *gdl, struct menurendercontext *context)
 {
@@ -2507,7 +2456,6 @@ bool menuitemSliderTick(struct menuitem *item, struct menudialog *dialog, struct
 	f32 f14;
 
 	if ((tickflags & MENUTICKFLAG_ITEMISFOCUSED)) {
-#ifndef PLATFORM_N64
 		if (g_MenuUsingMouse && inputs->select) {
 			// handle mouse
 			struct menudialog *dialog = g_Menus[g_MpPlayerNum].curdialog;
@@ -2538,7 +2486,6 @@ bool menuitemSliderTick(struct menuitem *item, struct menudialog *dialog, struct
 				}
 			}
 		}
-#endif
 
 		if (tickflags & MENUTICKFLAG_DIALOGISDIMMED) {
 			if (item->handler) {
@@ -2563,11 +2510,7 @@ bool menuitemSliderTick(struct menuitem *item, struct menudialog *dialog, struct
 			} else {
 				f0 = data->slider.multiplier / 1000.0f;
 				f0 = f0 * 100.0f / item->param3;
-#if VERSION >= VERSION_PAL_BETA
-				f0 = f0 + inputs->leftrightheld * g_Vars.diffframe60freal;
-#else
 				f0 = f0 + inputs->leftrightheld * g_Vars.diffframe60;
-#endif
 				f0 = item->param3 * f0 / 100.0f;
 
 				tmp = f0;
@@ -2601,11 +2544,7 @@ bool menuitemSliderTick(struct menuitem *item, struct menudialog *dialog, struct
 
 				if (f2 > 20) {
 					f2 = (f2 - 20) / 16.0f;
-#if VERSION >= VERSION_PAL_BETA
-					f2 *= g_Vars.diffframe60freal;
-#else
 					f2 *= g_Vars.diffframe60f;
-#endif
 
 					if (inputs->xaxis < 0) {
 						f0 -= f2;
@@ -2684,11 +2623,7 @@ Gfx *menuitemCarouselRender(Gfx *gdl, struct menurendercontext *context)
 		colour = colourBlend(colourBlend(colour, 0x000000ff, 127), colour1, weight);
 	}
 
-#ifdef PLATFORM_N64
-	s16 chevronOffset = 0;
-#else
 	s16 chevronOffset = 3;
-#endif
 
 	// Left arrow
 	gdl = menugfxDrawCarouselChevron(gdl, context->x + chevronOffset, context->y + context->height / 2, 8, 1, -1, colour);
@@ -2755,9 +2690,7 @@ bool menuitemCarouselTick(struct menuitem *item, struct menuinputs *inputs, u32 
 				}
 
 				data.carousel.value = index;
-#if VERSION >= VERSION_NTSC_1_0
 				data.carousel.unk04 = inputs->shoulder;
-#endif
 
 				item->handler(MENUOP_SET, item, &data);
 			}
@@ -3058,13 +2991,7 @@ Gfx *menuitemScrollableRender(Gfx *gdl, struct menurendercontext *context)
 
 bool menuitemScrollableTick(struct menuitem *item, struct menudialog *dialog, struct menuinputs *inputs, u32 tickflags, union menuitemdata *data)
 {
-	u32 stack;
-
-#if VERSION >= VERSION_PAL_BETA
-	if ((s16)dialog->height != data->scrollable.dialogheight || data->scrollable.language != g_LanguageId) {
-#else
 	if ((s16)dialog->height != data->scrollable.dialogheight) {
-#endif
 		char wrapped[8000] = "";
 		char *rawtext;
 		s32 width;
@@ -3073,10 +3000,6 @@ bool menuitemScrollableTick(struct menuitem *item, struct menudialog *dialog, st
 		s32 colindex;
 		s16 colwidth;
 		s16 rowheight;
-
-#if VERSION >= VERSION_PAL_BETA
-		data->scrollable.language = g_LanguageId;
-#endif
 
 		dialogFindItem(dialog, item, &rowindex, &colindex);
 
@@ -3120,11 +3043,7 @@ bool menuitemScrollableTick(struct menuitem *item, struct menudialog *dialog, st
 
 		if (floatval > 20) {
 			floatval = (floatval - 20) / 5;
-#if VERSION >= VERSION_PAL_BETA
-			floatval *= g_Vars.diffframe60freal;
-#else
 			floatval *= g_Vars.diffframe60f;
-#endif
 
 			if (inputs->yaxis < 0) {
 				intval = floatval;
@@ -3133,11 +3052,7 @@ bool menuitemScrollableTick(struct menuitem *item, struct menudialog *dialog, st
 			}
 		}
 
-#if VERSION >= VERSION_PAL_BETA
-		intval = intval + (s32)(((f32)inputs->updownheld + (f32)inputs->updownheld) * g_Vars.diffframe60freal);
-#else
 		intval += inputs->updownheld * 2 * g_Vars.diffframe60;
-#endif
 		data->scrollable.scrolloffset += intval;
 
 		if (data->scrollable.scrolloffset < -10) {
@@ -4368,8 +4283,6 @@ Gfx *menuitemOverlay(Gfx *gdl, s16 x, s16 y, s16 x2, s16 y2, struct menuitem *it
 	return gdl;
 }
 
-#ifndef PLATFORM_N64
-
 s32 menuitemGetTop(struct menuitem *item, struct menudialog *dialog)
 {
 	struct menu *menu = &g_Menus[g_MpPlayerNum];
@@ -4390,5 +4303,3 @@ s32 menuitemGetTop(struct menuitem *item, struct menudialog *dialog)
 
 	return dtop;
 }
-
-#endif

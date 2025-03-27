@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include "constants.h"
 #include "game/chrutils.h"
 #include "game/title.h"
@@ -6,13 +5,11 @@
 #include "lib/memp.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "video.h"
-#endif
 
 void chrmgrReset(void)
 {
-	s32 i;
+	int i;
 
 	g_ChrAnimSpeed = 1;
 	g_SelectedAnimNum = 0;
@@ -41,9 +38,9 @@ void chrmgrReset(void)
 	resetSomeStageThings();
 }
 
-void chrmgrConfigure(s32 numchrs)
+void chrmgrConfigure(int numchrs)
 {
-	s32 i;
+	int i;
 
 	//g_NumChrSlots = PLAYERCOUNT() + numchrs + 10;
 	g_NumChrSlots = PLAYERCOUNT() + numchrs + 400; // Ben's comment: allow far more chars
