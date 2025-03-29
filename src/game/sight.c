@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/bondgun.h"
@@ -26,7 +27,7 @@
 #define SIGHT_COLOUR ((PLAYER_EXTCFG().crosshairhealth >= CROSSHAIR_HEALTH_ON_GREEN) ? sightGetCrosshairHealthColor(g_Vars.currentplayer->bondhealth, g_Vars.currentplayer->prop->chr->cshield * 0.125f) : PLAYER_EXTCFG().crosshaircolour)
 #define SIGHT_SCALE PLAYER_EXTCFG().crosshairsize
 
-static u32 sightGetCrosshairHealthColor(float health, float shield)
+static uint32_t sightGetCrosshairHealthColor(float health, float shield)
 {
 	const float ratio = MAX(0.0f, MIN(health + shield, 2.0f));
 
@@ -72,15 +73,15 @@ static u32 sightGetCrosshairHealthColor(float health, float shield)
 	return (red << 24) + (green << 16) + (blue << 8) + (PLAYER_EXTCFG().crosshaircolour & 0xff);
 }
 
-static inline f32 sightGetScaleX(void)
+static inline float sightGetScaleX(void)
 {
 	return (videoGetAspect() / SCREEN_ASPECT);
 }
 
-static inline s32 sightGetAdjustedX(const f32 x)
+static inline int sightGetAdjustedX(const float x)
 {
-	const f32 cx = (x - (f32)(SCREEN_WIDTH_LO / 2)) * sightGetScaleX();
-	return roundf((f32)(SCREEN_WIDTH_LO / 2) + cx);
+	const float cx = (x - (float)(SCREEN_WIDTH_LO / 2)) * sightGetScaleX();
+	return roundf((float)(SCREEN_WIDTH_LO / 2) + cx);
 }
 
 /**
@@ -120,9 +121,9 @@ bool sightIsPropFriendly(struct prop *prop)
 /**
  * Return true if the given prop can be added to the target list.
  */
-bool sightCanTargetProp(struct prop *prop, s32 max)
+bool sightCanTargetProp(struct prop *prop, int max)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < max; i++) {
 		if (prop == g_Vars.currentplayer->trackedprops[i].prop) {
@@ -185,9 +186,9 @@ bool sightIsReactiveToProp(struct prop *prop)
 	return true;
 }
 
-s32 sightFindFreeTargetIndex(s32 max)
+int sightFindFreeTargetIndex(int max)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < max; i++) {
 		if (g_Vars.currentplayer->trackedprops[i].prop == NULL) {
@@ -200,7 +201,7 @@ s32 sightFindFreeTargetIndex(s32 max)
 
 void func0f0d7364(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_Vars.currentplayer->trackedprops); i++) {
 		g_Vars.currentplayer->trackedprops[i].prop = NULL;
@@ -210,9 +211,9 @@ void func0f0d7364(void)
 void sightTick(bool sighton)
 {
 	struct trackedprop *trackedprop;
-	u8 newtracktype;
-	s32 i;
-	s32 index;
+	uint8_t newtracktype;
+	int i;
+	int index;
 	struct invaimsettings *gunsettings = gsetGetAimSettings(&g_Vars.currentplayer->hands[0].gset);
 	struct weaponfunc *func = weaponGetFunctionById(g_Vars.currentplayer->hands[0].gset.weaponnum,
 			g_Vars.currentplayer->hands[0].gset.weaponfunc);
@@ -370,9 +371,9 @@ void sightTick(bool sighton)
  * The arguments here are named for a left border,
  * but can be called for any of the four edges.
  */
-s32 sightCalculateBoxBound(s32 targetx, s32 viewleft, s32 timeelapsed, s32 timeend)
+int sightCalculateBoxBound(int targetx, int viewleft, int timeelapsed, int timeend)
 {
-	s32 value;
+	int value;
 
 	if (timeelapsed > timeend) {
 		timeelapsed = timeend;
@@ -394,19 +395,19 @@ s32 sightCalculateBoxBound(s32 targetx, s32 viewleft, s32 timeelapsed, s32 timee
  * 6 to label it as "5"
  * 7 or above to treat textid as a proper language text ID.
  */
-Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, s32 textid, s32 time)
+Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, int textid, int time)
 {
-	s32 viewleft = viGetViewLeft();
-	s32 viewtop = viGetViewTop();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewheight = viGetViewHeight();
-	s32 viewright = viewleft + viewwidth - 1;
-	s32 viewbottom = viewtop + viewheight - 1;
-	u32 colour;
-	s32 boxleft;
-	s32 boxright;
-	s32 boxtop;
-	s32 boxbottom;
+	int viewleft = viGetViewLeft();
+	int viewtop = viGetViewTop();
+	int viewwidth = viGetViewWidth();
+	int viewheight = viGetViewHeight();
+	int viewright = viewleft + viewwidth - 1;
+	int viewbottom = viewtop + viewheight - 1;
+	uint32_t colour;
+	int boxleft;
+	int boxright;
+	int boxtop;
+	int boxbottom;
 	bool textonscreen = true;
 
 	if (time > TICKS(512)) {
@@ -458,8 +459,8 @@ Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, s32 textid, s
 		gdl = textSetCCCustom02(gdl);
 
 		if (textid != 0 && textonscreen) {
-			s32 x = boxright + 3;
-			s32 y = boxtop + 3;
+			int x = boxright + 3;
+			int y = boxtop + 3;
 
 			if (textid < 7) {
 				char label[] = {'1', '\n', '\0'};
@@ -478,14 +479,14 @@ Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, s32 textid, s
 	return gdl;
 }
 
-Gfx *sightDrawAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colour)
+Gfx *sightDrawAimer(Gfx *gdl, int x, int y, int radius, int cornergap, uint32_t colour)
 {
-	s32 viewleft = viGetViewLeft();
-	s32 viewtop = viGetViewTop();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewheight = viGetViewHeight();
-	s32 viewright = viewleft + viewwidth - 1;
-	s32 viewbottom = viewtop + viewheight - 1;
+	int viewleft = viGetViewLeft();
+	int viewtop = viGetViewTop();
+	int viewwidth = viGetViewWidth();
+	int viewheight = viGetViewHeight();
+	int viewright = viewleft + viewwidth - 1;
+	int viewbottom = viewtop + viewheight - 1;
 
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
@@ -548,23 +549,21 @@ Gfx *sightDrawAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colou
  * checks. It's likely that this feature was just a concept and was dropped
  * pretty early.
  */
-Gfx *sightDrawDelayedAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u32 colour)
+Gfx *sightDrawDelayedAimer(Gfx *gdl, int x, int y, int radius, int cornergap, uint32_t colour)
 {
-	s32 boxx;
-	s32 boxy;
-	s32 i;
-	f32 dist;
-	f32 accel;
+	int boxx;
+	int boxy;
+	int i;
+	float dist;
+	float accel;
 
-	static f32 xpos = 160;
-	static f32 ypos = 120;
-	static f32 xspeed = 0;
-	static f32 yspeed = 0;
+	static float xpos = 160;
+	static float ypos = 120;
+	static float xspeed = 0;
+	static float yspeed = 0;
 
-#ifndef PLATFORM_N64
 	x = sightGetAdjustedX(x);
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-#endif
 
 	for (i = 0; i < g_Vars.lvupdate60; i++) {
 		dist = x - xpos;
@@ -680,18 +679,18 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, s32 x, s32 y, s32 radius, s32 cornergap, u3
 	return gdl;
 }
 
-Gfx *sightDrawDefault(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
+Gfx *sightDrawDefault(Gfx *gdl, bool sighton, float crossx, float crossy)
 {
-	s32 radius;
-	s32 cornergap;
-	u32 colour;
-	s32 x = (s32) crossx;
-	s32 y = crossy;
+	int radius;
+	int cornergap;
+	uint32_t colour;
+	int x = (int) crossx;
+	int y = crossy;
 	struct trackedprop *trackedprop;
-	s32 i;
+	int i;
 
-	static s32 sight = 0;
-	static s32 identifytimer = 0;
+	static int sight = 0;
+	static int identifytimer = 0;
 
 	gdl = textConfigureGfxPipeline(gdl);
 
@@ -733,8 +732,8 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 		// An unused sight target. When holding R, it flashes the text
 		// "Identify" and draws a red box around the targetted prop.
 		if (sighton) {
-			s32 textx;
-			s32 texty;
+			int textx;
+			int texty;
 
 			if (g_Vars.currentplayer->lookingatprop.prop == NULL) {
 				colour = SIGHT_COLOUR;
@@ -797,7 +796,7 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 				if (g_Vars.currentplayer->sighttracktype == SIGHTTRACKTYPE_THREATDETECTOR) {
 					struct defaultobj *obj = trackedprop->prop->obj;
 					struct weaponobj *weapon;
-					u32 textid = 0;
+					uint32_t textid = 0;
 
 					// @dangerous: There is no check here to see if the prop
 					// type is obj. However, it's likely that only objs can be
@@ -866,19 +865,19 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	return gdl;
 }
 
-Gfx *sightDrawClassic(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
+Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 {
 	struct textureconfig *tconfig = &g_TexGeCrosshairConfigs[0];
-	f32 spc4[2];
-	f32 spbc[2];
-	s32 x = crossx;
-	s32 y = crossy + 1; // Plus one, to align with the laser sight.
-	s32 x1;
-	s32 x2;
-	s32 y1;
-	s32 y2;
+	float spc4[2];
+	float spbc[2];
+	int x = crossx;
+	int y = crossy + 1; // Plus one, to align with the laser sight.
+	int x1;
+	int x2;
+	int y1;
+	int y2;
 
-	const s32 halfw = roundf((f32)(tconfig->width >> 1) * (SCREEN_ASPECT / videoGetAspect()));
+	const int halfw = roundf((float)(tconfig->width >> 1) * (SCREEN_ASPECT / videoGetAspect()));
 
 	if (!sighton) {
 		return gdl;
@@ -930,7 +929,7 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	return gdl;
 }
 
-Gfx *sightDrawType2(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
+Gfx *sightDrawType2(Gfx *gdl, bool sighton, float crossx, float crossy)
 {
 	return sightDrawClassic(gdl, sighton, crossx, crossy);
 }
@@ -945,9 +944,9 @@ Gfx *sightDrawType2(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 #define DIR_LEFT  2
 #define DIR_RIGHT 3
 
-Gfx *sightDrawSkedarTriangle(Gfx *gdl, s32 x, s32 y, s32 dir, u32 colour)
+Gfx *sightDrawSkedarTriangle(Gfx *gdl, int x, int y, int dir, uint32_t colour)
 {
-	s32 points[6];
+	int points[6];
 	Vtx *vertices = gfxAllocateVertices(3);
 	Col *colours = gfxAllocateColours(2);
 
@@ -1030,26 +1029,26 @@ Gfx *sightDrawSkedarTriangle(Gfx *gdl, s32 x, s32 y, s32 dir, u32 colour)
 	return gdl;
 }
 
-Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
+Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, float crossx, float crossy)
 {
-	s32 viewleft = viGetViewLeft();
-	s32 viewtop = viGetViewTop();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewheight = viGetViewHeight();
-	s32 viewright = viewleft + viewwidth - 1;
-	s32 viewbottom = viewtop + viewheight - 1;
-	s32 paddingy = viewheight / 4;
-	s32 paddingx = viewwidth / 4;
-	s32 x = (s32) (crossx);
-	s32 trix1;
-	s32 trix2;
-	s32 y = crossy;
-	s32 triy2;
-	s32 triy1;
-	u32 colour;
-	u8 dir;
+	int viewleft = viGetViewLeft();
+	int viewtop = viGetViewTop();
+	int viewwidth = viGetViewWidth();
+	int viewheight = viGetViewHeight();
+	int viewright = viewleft + viewwidth - 1;
+	int viewbottom = viewtop + viewheight - 1;
+	int paddingy = viewheight / 4;
+	int paddingx = viewwidth / 4;
+	int x = (int) (crossx);
+	int trix1;
+	int trix2;
+	int y = crossy;
+	int triy2;
+	int triy1;
+	uint32_t colour;
+	uint8_t dir;
 	bool hasprop = g_Vars.currentplayer->lookingatprop.prop != NULL;
-	f32 frac;
+	float frac;
 
 	if (!sighton) {
 		return gdl;
@@ -1223,29 +1222,29 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	return gdl;
 }
 
-Gfx *sightDrawZoom(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
+Gfx *sightDrawZoom(Gfx *gdl, bool sighton, float crossx, float crossy)
 {
-	s32 viewleft = viGetViewLeft();
-	s32 viewtop = viGetViewTop();
-	s32 viewhalfwidth = (viGetViewWidth()) >> 1;
-	s32 viewhalfheight = viGetViewHeight() >> 1;
-	s32 viewright = viewleft + viewhalfwidth * 2 - 1;
-	s32 viewbottom = viewtop + viewhalfheight * 2 - 1;
-	f32 maxfovy;
-	s32 availableabove;
-	s32 availablebelow;
-	s32 availableleft;
-	s32 availableright;
-	f32 zoominfovy;
-	f32 frac;
-	f32 marginright;
-	f32 margintop;
-	f32 marginbottom;
-	f32 marginleft;
-	s32 cornerwidth;
-	s32 cornerheight;
-	s32 weaponnum;
-	u8 showzoomrange;
+	int viewleft = viGetViewLeft();
+	int viewtop = viGetViewTop();
+	int viewhalfwidth = (viGetViewWidth()) >> 1;
+	int viewhalfheight = viGetViewHeight() >> 1;
+	int viewright = viewleft + viewhalfwidth * 2 - 1;
+	int viewbottom = viewtop + viewhalfheight * 2 - 1;
+	float maxfovy;
+	int availableabove;
+	int availablebelow;
+	int availableleft;
+	int availableright;
+	float zoominfovy;
+	float frac;
+	float marginright;
+	float margintop;
+	float marginbottom;
+	float marginleft;
+	int cornerwidth;
+	int cornerheight;
+	int weaponnum;
+	uint8_t showzoomrange;
 
 	// The 48, 49 and 10 numbers are padding values. When zoomed in, the left
 	// corner will be 48px from the viewport's left edge. The available values
@@ -1303,7 +1302,6 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 		marginbottom = viewhalfheight - availablebelow * frac;
 		margintop = viewhalfheight - availableabove * frac;
 
-#ifndef PLATFORM_N64
 		// Center-align the zoom range
 		if (frac != 1.0f) {
 			viewleft += 1;
@@ -1311,7 +1309,6 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 			viewbottom += 1;
 			viewtop += 1;
 		}
-#endif
 
 #define BOXLEFT   (viewleft + marginleft)
 #define BOXRIGHT  (viewright - marginright)
@@ -1326,10 +1323,8 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 			cornerheight = BOXBOTTOM - BOXTOP;
 		}
 
-#ifndef PLATFORM_N64
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 		gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
-#endif
 
 		// Top left
 		gDPHudRectangle(gdl++, BOXLEFT + 1, BOXTOP, BOXLEFT + cornerwidth - 1, BOXTOP);
@@ -1382,21 +1377,21 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	return gdl;
 }
 
-Gfx *sightDrawMaian(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
+Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 {
-	s32 viewleft = viGetViewLeft();
-	s32 viewtop = viGetViewTop();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewheight = viGetViewHeight();
-	s32 viewright = viewleft + viewwidth - 1;
-	s32 viewbottom = viewtop + viewheight - 1;
-	s32 x = (s32)crossx;
-	s32 y = crossy;
+	int viewleft = viGetViewLeft();
+	int viewtop = viGetViewTop();
+	int viewwidth = viGetViewWidth();
+	int viewheight = viGetViewHeight();
+	int viewright = viewleft + viewwidth - 1;
+	int viewbottom = viewtop + viewheight - 1;
+	int x = (int)crossx;
+	int y = crossy;
 	Vtx *vertices;
 	Col *colours;
-	s32 inner[4];
+	int inner[4];
 	bool hasprop = g_Vars.currentplayer->lookingatprop.prop != NULL;
-	u32 colour = 0xff000060;
+	uint32_t colour = 0xff000060;
 
 	if (!sighton) {
 		return gdl;
@@ -1406,11 +1401,9 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 		colour = 0x0000ff60;
 	}
 
-#ifndef PLATFORM_N64
 	x = sightGetAdjustedX(x);
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
-#endif
 
 	vertices = gfxAllocateVertices(8);
 	colours = gfxAllocateColours(2);
@@ -1454,13 +1447,11 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	vertices[7].y = inner[2] * 10;
 	vertices[7].z = -10;
 
-#ifndef PLATFORM_N64
 	// Center-align Maian tris
 	for (int i = 0; i < 8; ++i) {
 		vertices[i].x -= 2;
 		vertices[i].y += 2;
 	}
-#endif
 
 	colours[0].word = PD_BE32(0x00ff000f);
 	colours[1].word = PD_BE32(hasprop ? colour : 0x00ff0044);
@@ -1498,13 +1489,10 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, f32 crossx, f32 crossy)
 	return gdl;
 }
 
-Gfx *sightDrawTarget(Gfx *gdl, f32 crossx, f32 crossy)
+Gfx *sightDrawTarget(Gfx *gdl, float crossx, float crossy)
 {
-	s32 x = sightGetAdjustedX((s32)crossx);
-	s32 y = crossy;
-
-	static u32 var80070f9c = 0x00ff00ff;
-	static u32 var80070fa0 = 0x00ff0011;
+	int x = sightGetAdjustedX((int)crossx);
+	int y = crossy;
 
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
@@ -1533,7 +1521,7 @@ Gfx *sightDrawTarget(Gfx *gdl, f32 crossx, f32 crossy)
 	return gdl;
 }
 
-bool sightHasTargetWhileAiming(s32 sight)
+bool sightHasTargetWhileAiming(int sight)
 {
 	if (sight == SIGHT_DEFAULT || sight == SIGHT_ZOOM) {
 		return true;
@@ -1545,7 +1533,7 @@ bool sightHasTargetWhileAiming(s32 sight)
 /**
  * sighton is true if the player is using the aimer (ie. holding R).
  */
-Gfx *sightDraw(Gfx *gdl, bool sighton, s32 sight)
+Gfx *sightDraw(Gfx *gdl, bool sighton, int sight)
 {
 	if (sight);
 
@@ -1557,18 +1545,13 @@ Gfx *sightDraw(Gfx *gdl, bool sighton, s32 sight)
 		return gdl;
 	}
 
-#ifndef PLATFORM_N64
 	// Rounding the crosshair positions allow them to more accurately follow the
 	// gun's vector. Without this, the mantissa isn't factored in at all (cast
 	// to integer), which leads to some awkward behavior, such as the crosshair
 	// taking a long time to return to the center of the screen when coming from
 	// an up and/or left direction.
-	const f32 crossx = roundf(g_Vars.currentplayer->crosspos[0]);
-	const f32 crossy = roundf(g_Vars.currentplayer->crosspos[1]);
-#else
-	const f32 crossx = g_Vars.currentplayer->crosspos[0];
-	const f32 crossy = g_Vars.currentplayer->crosspos[1];
-#endif
+	const float crossx = roundf(g_Vars.currentplayer->crosspos[0]);
+	const float crossy = roundf(g_Vars.currentplayer->crosspos[1]);
 
 	if (PLAYERCOUNT() >= 2 && g_Vars.coopplayernum < 0 && g_Vars.antiplayernum < 0) {
 		sight = SIGHT_DEFAULT;

@@ -4,13 +4,14 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
 #include <time.h>
 #include <sys/time.h>
 #include <SDL.h>
-#include <PR/ultratypes.h>
+#include <stdint.h>
 #include "platform.h"
 #include "system.h"
 
@@ -27,8 +28,8 @@ static CREATEWAITABLETIMEREXAFN pfnCreateWaitableTimerExA;
 #define DO_YIELD() YieldProcessor()
 
 // ask system for high performance GPU, if any
-__attribute__((dllexport)) u32 NvOptimusEnablement = 1;
-__attribute__((dllexport)) u32 AmdPowerXpressRequestHighPerformance = 1;
+__attribute__((dllexport)) uint32_t NvOptimusEnablement = 1;
+__attribute__((dllexport)) uint32_t AmdPowerXpressRequestHighPerformance = 1;
 
 #else
 
@@ -54,10 +55,10 @@ __attribute__((dllexport)) u32 AmdPowerXpressRequestHighPerformance = 1;
 #define CRASHLOG_FNAME "pd.crash.log"
 #define USEC_IN_SEC 1000000ULL
 
-static u64 startTick = 0;
+static uint64_t startTick = 0;
 static char logPath[2048];
 
-static s32 sysArgc;
+static int sysArgc;
 static const char **sysArgv;
 
 static inline void sysLogSetPath(const char *fname)
@@ -78,7 +79,7 @@ static inline void sysLogSetPath(const char *fname)
 	}
 }
 
-void sysInitArgs(s32 argc, const char **argv)
+void sysInitArgs(int argc, const char **argv)
 {
 	sysArgc = argc;
 	sysArgv = argv;
@@ -111,14 +112,14 @@ void sysInit(void)
 	if (!timer) {
 		// no function or hires timers not supported, fallback to lower resolution timer
 		sysLogPrintf(LOG_WARNING, "SYS: hires waitable timers not available");
-		timer = CreateWaitableTimerA(NULL, FALSE, NULL);
+		timer = CreateWaitableTimerA(NULL, false, NULL);
 	}
 #endif
 }
 
-s32 sysArgCheck(const char *arg)
+int sysArgCheck(const char *arg)
 {
-	for (s32 i = 1; i < sysArgc; ++i) {
+	for (int i = 1; i < sysArgc; ++i) {
 		if (!strcasecmp(sysArgv[i], arg)) {
 			return 1;
 		}
@@ -128,7 +129,7 @@ s32 sysArgCheck(const char *arg)
 
 const char *sysArgGetString(const char *arg)
 {
-	for (s32 i = 1; i < sysArgc; ++i) {
+	for (int i = 1; i < sysArgc; ++i) {
 		if (!strcasecmp(sysArgv[i], arg)) {
 			if (i < sysArgc - 1) {
 				return sysArgv[i + 1];
@@ -138,9 +139,9 @@ const char *sysArgGetString(const char *arg)
 	return NULL;
 }
 
-s32 sysArgGetInt(const char *arg, s32 defval)
+int sysArgGetInt(const char *arg, int defval)
 {
-	for (s32 i = 1; i < sysArgc; ++i) {
+	for (int i = 1; i < sysArgc; ++i) {
 		if (!strcasecmp(sysArgv[i], arg)) {
 			if (i < sysArgc - 1) {
 				return strtol(sysArgv[i + 1], NULL, 0);
@@ -150,19 +151,19 @@ s32 sysArgGetInt(const char *arg, s32 defval)
 	return defval;
 }
 
-u64 sysGetMicroseconds(void)
+uint64_t sysGetMicroseconds(void)
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	return ((u64)tv.tv_sec * USEC_IN_SEC + (u64)tv.tv_usec) - startTick;
+	return ((uint64_t)tv.tv_sec * USEC_IN_SEC + (uint64_t)tv.tv_usec) - startTick;
 }
 
-s32 sysLogIsOpen(void)
+int sysLogIsOpen(void)
 {
 	return (logPath[0] != '\0');
 }
 
-void sysLogPrintf(s32 level, const char *fmt, ...)
+void sysLogPrintf(int level, const char *fmt, ...)
 {
 	static const char *prefix[3] = {
 		"", "WARNING: ", "ERROR: "
@@ -189,7 +190,7 @@ void sysLogPrintf(s32 level, const char *fmt, ...)
 
 void sysFatalError(const char *fmt, ...)
 {
-	static s32 alreadyCrashed = 0;
+	static int alreadyCrashed = 0;
 
 	if (alreadyCrashed) {
 		abort();
@@ -214,14 +215,14 @@ void sysFatalError(const char *fmt, ...)
 	exit(1);
 }
 
-void sysGetExecutablePath(char *outPath, const u32 outLen)
+void sysGetExecutablePath(char *outPath, const uint32_t outLen)
 {
 	// try asking SDL
 	char *sdlPath = SDL_GetBasePath();
 
 	if (sdlPath && *sdlPath) {
 		// -1 to trim trailing slash
-		const u32 len = strlen(sdlPath) - 1;
+		const uint32_t len = strlen(sdlPath) - 1;
 		if (len < outLen) {
 			memcpy(outPath, sdlPath, len);
 			outPath[len] = '\0';
@@ -238,7 +239,7 @@ void sysGetExecutablePath(char *outPath, const u32 outLen)
 
 #ifdef PLATFORM_WIN32
 	// replace all backslashes with forward slashes, windows supports both
-	for (u32 i = 0; i < outLen && outPath[i]; ++i) {
+	for (uint32_t i = 0; i < outLen && outPath[i]; ++i) {
 		if (outPath[i] == '\\') {
 			outPath[i] = '/';
 		}
@@ -248,14 +249,14 @@ void sysGetExecutablePath(char *outPath, const u32 outLen)
 	SDL_free(sdlPath);
 }
 
-void sysGetHomePath(char *outPath, const u32 outLen)
+void sysGetHomePath(char *outPath, const uint32_t outLen)
 {
 	// try asking SDL
 	char *sdlPath = SDL_GetPrefPath("", "perfectdark");
 
 	if (sdlPath && *sdlPath) {
 		// -1 to trim trailing slash
-		const u32 len = strlen(sdlPath) - 1;
+		const uint32_t len = strlen(sdlPath) - 1;
 		if (len < outLen) {
 			memcpy(outPath, sdlPath, len);
 			outPath[len] = '\0';
@@ -268,7 +269,7 @@ void sysGetHomePath(char *outPath, const u32 outLen)
 
 #ifdef PLATFORM_WIN32
 	// replace all backslashes with forward slashes, windows supports both
-	for (u32 i = 0; i < outLen && outPath[i]; ++i) {
+	for (uint32_t i = 0; i < outLen && outPath[i]; ++i) {
 		if (outPath[i] == '\\') {
 			outPath[i] = '/';
 		}
@@ -278,17 +279,17 @@ void sysGetHomePath(char *outPath, const u32 outLen)
 	SDL_free(sdlPath);
 }
 
-void *sysMemAlloc(const u32 size)
+void *sysMemAlloc(const uint32_t size)
 {
 	return malloc(size);
 }
 
-void *sysMemZeroAlloc(const u32 size)
+void *sysMemZeroAlloc(const uint32_t size)
 {
 	return calloc(1, size);
 }
 
-void *sysMemRealloc(void *ptr, const u32 newSize)
+void *sysMemRealloc(void *ptr, const uint32_t newSize)
 {
 	return realloc(ptr, newSize);
 }
@@ -298,12 +299,12 @@ void sysMemFree(void *ptr)
 	free(ptr);
 }
 
-void sysSleep(const s64 hns)
+void sysSleep(const int64_t hns)
 {
 #ifdef PLATFORM_WIN32
 	static LARGE_INTEGER li;
 	li.QuadPart = -hns;
-	SetWaitableTimer(timer, &li, 0, NULL, NULL, FALSE);
+	SetWaitableTimer(timer, &li, 0, NULL, NULL, false);
 	WaitForSingleObject(timer, INFINITE);
 #else
 	const struct timespec spec = { 0, hns * 100 };

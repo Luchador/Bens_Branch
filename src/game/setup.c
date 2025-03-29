@@ -37,7 +37,7 @@
 #include "data.h"
 #include "types.h"
 
-s32 g_SetupCurMpLocation;
+int g_SetupCurMpLocation;
 
 struct tvscreen var80061a80 = {
 	g_TvCmdlist00, // cmdlist
@@ -165,11 +165,11 @@ struct tvscreen var80061b68 = {
 	0,           // colinc
 };
 
-f32 g_DoorScale = 1;
+float g_DoorScale = 1.0f;
 
 void propsReset(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_Lifts); i++) {
 		g_Lifts[i] = NULL;
@@ -351,43 +351,43 @@ void setupResetTVScreens(void)
 
 void setupResetProxyMines(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_Proxies); i++) {
 		g_Proxies[i] = NULL;
 	}
 }
 
-s32 setupCountCommandType(u32 type)
+int setupCountCommandType(uint32_t type)
 {
 	struct defaultobj *obj = (struct defaultobj *)g_StageSetup.props;
-	s32 count = 0;
+	int count = 0;
 
 	if (obj) {
 		while (obj->type != OBJTYPE_END) {
-			if (obj->type == (u8)type) {
+			if (obj->type == (uint8_t)type) {
 				count++;
 			}
 
-			obj = (struct defaultobj *)((u32 *)obj + setupGetCmdLength((u32 *)obj));
+			obj = (struct defaultobj *)((uint32_t *)obj + setupGetCmdLength((uint32_t *)obj));
 		}
 	}
 
 	return count;
 }
 
-void setupCreateObject(struct defaultobj *obj, s32 cmdindex)
+void setupCreateObject(struct defaultobj *obj, int cmdindex)
 {
-	f32 f0;
-	s32 modelnum;
+	float f0;
+	int modelnum;
 	struct pad pad;
 	Mtxf mtx;
 	struct coord centre;
-	f32 scale;
+	float scale;
 	struct coord pos;
 	RoomNum rooms[8];
 	struct prop *prop2;
-	u32 flag40;
+	uint32_t flag40;
 	struct chrdata *chr;
 	struct prop *prop;
 
@@ -474,11 +474,11 @@ void setupCreateObject(struct defaultobj *obj, s32 cmdindex)
 				struct modelrodata_bbox *bbox = objFindBboxRodata(obj);
 
 				if (bbox != NULL) {
-					f32 xscale = 1.0f;
-					f32 yscale = 1.0f;
-					f32 zscale = 1.0f;
-					f32 minscale;
-					f32 maxscale;
+					float xscale = 1.0f;
+					float yscale = 1.0f;
+					float zscale = 1.0f;
+					float minscale;
+					float maxscale;
 
 					flag40 = OBJFLAG_YTOPADBOUNDS;
 
@@ -542,7 +542,7 @@ void setupCreateObject(struct defaultobj *obj, s32 cmdindex)
 						}
 					}
 
-					if ((u32)(obj->flags & flag40) == 0) {
+					if ((uint32_t)(obj->flags & flag40) == 0) {
 						if (obj->flags & OBJFLAG_00000002) {
 							if (bbox->ymax == bbox->ymin) {
 								zscale = maxscale;
@@ -610,7 +610,7 @@ void setupCreateObject(struct defaultobj *obj, s32 cmdindex)
  * The Marquis of Queensbury Rules (everyone unarmed) and Enemy Rockets cheats
  * are implemented here.
  */
-void setupPlaceWeapon(struct weaponobj *weapon, s32 cmdindex)
+void setupPlaceWeapon(struct weaponobj *weapon, int cmdindex)
 {
 	if (weapon->base.flags & OBJFLAG_ASSIGNEDTOCHR) {
 		struct chrdata *chr = chrFindByLiteralId(weapon->base.pad);
@@ -683,7 +683,7 @@ void setupPlaceWeapon(struct weaponobj *weapon, s32 cmdindex)
 
 		if (g_Vars.normmplayerisrunning || g_Vars.lvmpbotlevel) {
 			struct mpweapon *mpweapon;
-			s32 locationindex;
+			int locationindex;
 
 			g_SetupCurMpLocation = -1;
 
@@ -734,7 +734,7 @@ void setupPlaceWeapon(struct weaponobj *weapon, s32 cmdindex)
 	}
 }
 
-/*void setupCreateHat(struct hatobj *hat, s32 cmdindex)
+/*void setupCreateHat(struct hatobj *hat, int cmdindex)
 {
 	if (hat->base.flags & OBJFLAG_ASSIGNEDTOCHR) {
 		struct chrdata *chr = chrFindByLiteralId(hat->base.pad);
@@ -747,12 +747,12 @@ void setupPlaceWeapon(struct weaponobj *weapon, s32 cmdindex)
 	}
 }*/
 
-void setupCreateKey(struct keyobj *key, s32 cmdindex)
+void setupCreateKey(struct keyobj *key, int cmdindex)
 {
 	setupCreateObject(&key->base, cmdindex);
 }
 
-void setupCreateMine(struct mineobj *mine, s32 cmdindex)
+void setupCreateMine(struct mineobj *mine, int cmdindex)
 {
 	mine->base.type = OBJTYPE_WEAPON;
 
@@ -765,7 +765,7 @@ void setupCreateMine(struct mineobj *mine, s32 cmdindex)
 	mine->base.prop->forcetick = true;
 }
 
-void setupCreateCctv(struct cctvobj *cctv, s32 cmdindex)
+void setupCreateCctv(struct cctvobj *cctv, int cmdindex)
 {
 	struct defaultobj *obj = &cctv->base;
 
@@ -775,9 +775,9 @@ void setupCreateCctv(struct cctvobj *cctv, s32 cmdindex)
 		struct coord lenspos;
 		union modelrodata *lens = modelGetPartRodata(obj->model->definition, MODELPART_CCTV_CASING);
 		struct pad pad;
-		f32 xdiff;
-		f32 ydiff;
-		f32 zdiff;
+		float xdiff;
+		float ydiff;
+		float zdiff;
 
 		padUnpack(cctv->lookatpadnum, PADFIELD_POS, &pad);
 
@@ -803,11 +803,11 @@ void setupCreateCctv(struct cctvobj *cctv, s32 cmdindex)
 		mtx00015f04(obj->model->scale, &cctv->camrotm);
 
 		cctv->toleft = 0;
-		cctv->yleft = *(s32 *)&cctv->yleft * M_TAU / 65536.0f;
-		cctv->yright = *(s32 *)&cctv->yright * M_TAU / 65536.0f;
+		cctv->yleft = *(int *)&cctv->yleft * M_TAU / 65536.0f;
+		cctv->yright = *(int *)&cctv->yright * M_TAU / 65536.0f;
 		cctv->yspeed = 0.0f;
-		cctv->ymaxspeed = *(s32 *)&cctv->ymaxspeed * M_TAU / 65536.0f;
-		cctv->maxdist = *(s32 *)&cctv->maxdist;
+		cctv->ymaxspeed = *(int *)&cctv->ymaxspeed * M_TAU / 65536.0f;
+		cctv->maxdist = *(int *)&cctv->maxdist;
 		cctv->yrot = cctv->yleft;
 
 		cctv->yzero = atan2f(xdiff, zdiff);
@@ -821,14 +821,14 @@ void setupCreateCctv(struct cctvobj *cctv, s32 cmdindex)
 	}
 }
 
-void setupCreateAutogun(struct autogunobj *autogun, s32 cmdindex)
+void setupCreateAutogun(struct autogunobj *autogun, int cmdindex)
 {
 	setupCreateObject(&autogun->base, cmdindex);
 
-	autogun->maxspeed = *(s32 *)&autogun->maxspeed * PALUPF(M_TAU) / 65536.0f;
-	autogun->aimdist = *(s32 *)&autogun->aimdist * 100.0f / 65536.0f;
-	autogun->ymaxleft = *(s32 *)&autogun->ymaxleft * M_TAU / 65536.0f;
-	autogun->ymaxright = *(s32 *)&autogun->ymaxright * M_TAU / 65536.0f;
+	autogun->maxspeed = *(int *)&autogun->maxspeed * PALUPF(M_TAU) / 65536.0f;
+	autogun->aimdist = *(int *)&autogun->aimdist * 100.0f / 65536.0f;
+	autogun->ymaxleft = *(int *)&autogun->ymaxleft * M_TAU / 65536.0f;
+	autogun->ymaxright = *(int *)&autogun->ymaxright * M_TAU / 65536.0f;
 
 	autogun->firecount = 0;
 	autogun->lastseebond60 = -1;
@@ -849,9 +849,9 @@ void setupCreateAutogun(struct autogunobj *autogun, s32 cmdindex)
 	autogun->shotbondsum = 0;
 
 	if (autogun->targetpad >= 0) {
-		f32 xdiff;
-		f32 ydiff;
-		f32 zdiff;
+		float xdiff;
+		float ydiff;
+		float zdiff;
 		struct pad pad;
 
 		padUnpack(autogun->targetpad, PADFIELD_POS, &pad);
@@ -868,12 +868,12 @@ void setupCreateAutogun(struct autogunobj *autogun, s32 cmdindex)
 	}
 }
 
-void setupCreateHangingMonitors(struct hangingmonitorsobj *monitors, s32 cmdindex)
+void setupCreateHangingMonitors(struct hangingmonitorsobj *monitors, int cmdindex)
 {
 	setupCreateObject(&monitors->base, cmdindex);
 }
 
-void setupCreateSingleMonitor(struct singlemonitorobj *monitor, s32 cmdindex)
+void setupCreateSingleMonitor(struct singlemonitorobj *monitor, int cmdindex)
 {
 	monitor->screen = var8009ce98;
 	tvscreenSetImageByNum(&monitor->screen, monitor->imagenum);
@@ -882,10 +882,10 @@ void setupCreateSingleMonitor(struct singlemonitorobj *monitor, s32 cmdindex)
 	// hangingmonitors object, which is actually just the mount. In PD, hanging
 	// monitors do not exist in the setup files so this code is unused.
 	if (monitor->base.pad < 0 && (monitor->base.flags & OBJFLAG_INSIDEANOTHEROBJ) == 0) {
-		s32 modelnum = monitor->base.modelnum;
+		int modelnum = monitor->base.modelnum;
 		struct defaultobj *owner = (struct defaultobj *)setupGetCmdByIndex(cmdindex + monitor->owneroffset);
 		struct prop *prop;
-		f32 scale;
+		float scale;
 		struct coord spa4;
 		Mtxf sp64;
 		Mtxf sp24;
@@ -937,7 +937,7 @@ void setupCreateSingleMonitor(struct singlemonitorobj *monitor, s32 cmdindex)
 	}
 }
 
-void setupCreateMultiMonitor(struct multimonitorobj *monitor, s32 cmdindex)
+void setupCreateMultiMonitor(struct multimonitorobj *monitor, int cmdindex)
 {
 	monitor->screens[0] = var8009ce98;
 	tvscreenSetImageByNum(&monitor->screens[0], monitor->imagenums[0]);
@@ -954,9 +954,9 @@ void setupCreateMultiMonitor(struct multimonitorobj *monitor, s32 cmdindex)
 	setupCreateObject(&monitor->base, cmdindex);
 }
 
-s32 setupGetPortalByPad(s32 padnum)
+int setupGetPortalByPad(int padnum)
 {
-	f32 mult;
+	float mult;
 	struct coord centre;
 	struct coord coord;
 	struct pad pad;
@@ -977,9 +977,9 @@ s32 setupGetPortalByPad(s32 padnum)
 	return bgFindPortalBetweenPositions(&centre, &coord);
 }
 
-s32 setupGetPortalByDoorPad(s32 padnum)
+int setupGetPortalByDoorPad(int padnum)
 {
-	f32 mult;
+	float mult;
 	struct coord centre;
 	struct coord coord;
 	struct pad pad;
@@ -1000,11 +1000,11 @@ s32 setupGetPortalByDoorPad(s32 padnum)
 	return bgFindPortalBetweenPositions(&centre, &coord);
 }
 
-void setupCreateDoor(struct doorobj *door, s32 cmdindex)
+void setupCreateDoor(struct doorobj *door, int cmdindex)
 {
-	f32 scale;
-	s32 modelnum = door->base.modelnum;
-	s32 portalnum = -1;
+	float scale;
+	int modelnum = door->base.modelnum;
+	int portalnum = -1;
 	struct pad pad;
 
 	setupLoadModeldef(modelnum);
@@ -1026,8 +1026,8 @@ void setupCreateDoor(struct doorobj *door, s32 cmdindex)
 		// If the door has a portal, adjust the pad's bbox to match the portal's dimensions
 		if (portalnum >= 0) {
 			struct portalmetric *ptr = &g_PortalMetrics[portalnum];
-			f32 f0 = pad.pos.f[0] * ptr->normal.f[0] + pad.pos.f[1] * ptr->normal.f[1] + pad.pos.f[2] * ptr->normal.f[2];
-			f32 min = ptr->min;
+			float f0 = pad.pos.f[0] * ptr->normal.f[0] + pad.pos.f[1] * ptr->normal.f[1] + pad.pos.f[2] * ptr->normal.f[2];
+			float min = ptr->min;
 			struct coord sp150;
 			f0 = (f0 - min) * (g_DoorScale - 1);
 
@@ -1055,16 +1055,16 @@ void setupCreateDoor(struct doorobj *door, s32 cmdindex)
 	if (pad.room > 0) {
 		Mtxf sp110;
 		struct prop *prop;
-		s32 siblingcmdindex;
+		int siblingcmdindex;
 		struct coord pos;
 		RoomNum rooms[8];
 		Mtxf finalmtx;
 		struct coord centre;
 		Mtxf zrotmtx;
 		struct coord sp54;
-		f32 xscale;
-		f32 yscale;
-		f32 zscale;
+		float xscale;
+		float yscale;
+		float zscale;
 		struct modelrodata_bbox *bbox;
 
 		bbox = modeldefFindBboxRodata(g_ModelStates[modelnum].modeldef);
@@ -1111,16 +1111,16 @@ void setupCreateDoor(struct doorobj *door, s32 cmdindex)
 		// These values are stored in the setup files as integers, but at
 		// runtime they are floats. Hence reading a "float" as an integer,
 		// converting it to a float and writing it back to the same property.
-		door->maxfrac = *(s32 *) &door->maxfrac / 65536.0f;
-		door->perimfrac = *(s32 *) &door->perimfrac / 65536.0f;
-		door->accel = PALUPF(*(s32 *) &door->accel) / 65536000.0f;
-		door->decel = PALUPF(*(s32 *) &door->decel) / 65536000.0f;
-		door->maxspeed = PALUPF(*(s32 *) &door->maxspeed) / 65536.0f;
+		door->maxfrac = *(int *) &door->maxfrac / 65536.0f;
+		door->perimfrac = *(int *) &door->perimfrac / 65536.0f;
+		door->accel = PALUPF(*(int *) &door->accel) / 65536000.0f;
+		door->decel = PALUPF(*(int *) &door->decel) / 65536000.0f;
+		door->maxspeed = PALUPF(*(int *) &door->maxspeed) / 65536.0f;
 
 		// The sibling door is stored as a relative command number,
 		// but at runtime it's a pointer.
 		if (door->sibling) {
-			siblingcmdindex = *(s32 *) &door->sibling + cmdindex;
+			siblingcmdindex = *(int *) &door->sibling + cmdindex;
 			door->sibling = (struct doorobj *) setupGetCmdByIndex(siblingcmdindex);
 		}
 
@@ -1174,18 +1174,18 @@ void setupCreateHov(struct defaultobj *obj, struct hov *hov)
 	hov->prevgroundframe60 = -1;
 }
 
-void setupLoadBriefing(s32 stagenum, u8 *buffer, s32 bufferlen, struct briefing *briefing)
+void setupLoadBriefing(int stagenum, uint8_t *buffer, int bufferlen, struct briefing *briefing)
 {
 	if (stagenum < STAGE_TITLE) {
-		s32 stageindex = stageGetIndex(stagenum);
+		int stageindex = stageGetIndex(stagenum);
 		struct defaultobj *start;
-		u16 setupfilenum;
-		s32 setupfilesize;
+		uint16_t setupfilenum;
+		int setupfilesize;
 		struct objective *objective;
 		struct briefingobj *briefingobj;
-		s32 i;
-		u8 *langbuffer;
-		s32 langbufferlen;
+		int i;
+		uint8_t *langbuffer;
+		int langbufferlen;
 		struct stagesetup *setup;
 
 		if (stageindex < 0) {
@@ -1210,7 +1210,7 @@ void setupLoadBriefing(s32 stagenum, u8 *buffer, s32 bufferlen, struct briefing 
 
 		if (start != NULL) {
 			struct defaultobj *obj;
-			s32 wanttype = BRIEFINGTYPE_TEXT_PA;
+			int wanttype = BRIEFINGTYPE_TEXT_PA;
 
 			if (lvGetDifficulty() == DIFF_A) {
 				wanttype = BRIEFINGTYPE_TEXT_A;
@@ -1220,7 +1220,7 @@ void setupLoadBriefing(s32 stagenum, u8 *buffer, s32 bufferlen, struct briefing 
 				wanttype = BRIEFINGTYPE_TEXT_SA;
 			}
 
-			for (i = 0; (u32)(i < ARRAYCOUNT(briefing->objectivenames)); i++) {
+			for (i = 0; (uint32_t)(i < ARRAYCOUNT(briefing->objectivenames)); i++) {
 				briefing->objectivenames[i] = 0;
 			}
 
@@ -1251,22 +1251,22 @@ void setupLoadBriefing(s32 stagenum, u8 *buffer, s32 bufferlen, struct briefing 
 					break;
 				}
 
-				obj = (struct defaultobj *)((u32 *)obj + setupGetCmdLength((u32 *)obj));
+				obj = (struct defaultobj *)((uint32_t *)obj + setupGetCmdLength((uint32_t *)obj));
 			}
 		}
 	}
 }
 
-void setupLoadFiles(s32 stagenum)
+void setupLoadFiles(int stagenum)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 	struct ailist tmp;
-	s32 numchrs = 0;
-	s32 numobjs = 0;
-	s32 extra;
+	int numchrs = 0;
+	int numobjs = 0;
+	int extra;
 	struct stagesetup *setup;
-	u16 filenum;
+	uint16_t filenum;
 	bool modified;
 
 	g_PadEffects = NULL;
@@ -1287,11 +1287,11 @@ void setupLoadFiles(s32 stagenum)
 
 		g_LoadType = LOADTYPE_SETUP;
 
-		g_GeCreditsData = (u8 *)fileLoadToNew(filenum, FILELOADMETHOD_DEFAULT, LOADTYPE_SETUP);
+		g_GeCreditsData = (uint8_t *)fileLoadToNew(filenum, FILELOADMETHOD_DEFAULT, LOADTYPE_SETUP);
 		setup = (struct stagesetup *)g_GeCreditsData;
 
-		g_StageSetup.intro = (s32 *)((uintptr_t)setup + (uintptr_t)setup->intro);
-		g_StageSetup.props = (u32 *)((uintptr_t)setup + (uintptr_t)setup->props);
+		g_StageSetup.intro = (int *)((uintptr_t)setup + (uintptr_t)setup->intro);
+		g_StageSetup.props = (uint32_t *)((uintptr_t)setup + (uintptr_t)setup->props);
 		g_StageSetup.paths = (struct path *)((uintptr_t)setup + (uintptr_t)setup->paths);
 		g_StageSetup.ailists = (struct ailist *)((uintptr_t)setup + (uintptr_t)setup->ailists);
 
@@ -1306,7 +1306,7 @@ void setupLoadFiles(s32 stagenum)
 		// Convert ailist pointers from file-local to proper pointers
 		if (g_StageSetup.ailists) {
 			for (i = 0; g_StageSetup.ailists[i].list != NULL; i++) {
-				g_StageSetup.ailists[i].list = (u8 *)((uintptr_t)setup + (uintptr_t)g_StageSetup.ailists[i].list);
+				g_StageSetup.ailists[i].list = (uint8_t *)((uintptr_t)setup + (uintptr_t)g_StageSetup.ailists[i].list);
 			}
 		}
 
@@ -1350,7 +1350,7 @@ void setupLoadFiles(s32 stagenum)
 		// and calculate the path lengths
 		if (g_StageSetup.paths) {
 			for (i = 0; g_StageSetup.paths[i].pads != NULL; i++) {
-				g_StageSetup.paths[i].pads = (s32 *)((uintptr_t)g_StageSetup.paths[i].pads + (uintptr_t)setup);
+				g_StageSetup.paths[i].pads = (int *)((uintptr_t)g_StageSetup.paths[i].pads + (uintptr_t)setup);
 
 				for (j = 0; g_StageSetup.paths[i].pads[j] >= 0; j++);
 
@@ -1421,16 +1421,16 @@ void setupLoadFiles(s32 stagenum)
 	g_Vars.maxprops = numobjs + numchrs + extra + 40;
 }
 
-void setupCreateProps(s32 stagenum)
+void setupCreateProps(int stagenum)
 {
-	s32 withchrs = !argFindByPrefix(1, "-nochr") && !argFindByPrefix(1, "-noprop");
-	s32 withobjs = !argFindByPrefix(1, "-noobj") && !argFindByPrefix(1, "-noprop");
-	s32 withhovercars;
-	s32 escstepx;
-	s32 escstepy;
+	int withchrs = !argFindByPrefix(1, "-nochr") && !argFindByPrefix(1, "-noprop");
+	int withobjs = !argFindByPrefix(1, "-noobj") && !argFindByPrefix(1, "-noprop");
+	int withhovercars;
+	int escstepx;
+	int escstepy;
 	struct defaultobj *obj;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	withhovercars = !(stagenum == STAGE_EXTRACTION || stagenum == STAGE_DEFECTION || stagenum == STAGE_MBR)
 		|| !(g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0);
@@ -1454,7 +1454,7 @@ void setupCreateProps(s32 stagenum)
 		setupLoadWaypoints();
 
 		if (withchrs) {
-			s32 numchrs = 0;
+			int numchrs = 0;
 
 			numchrs += setupCountCommandType(OBJTYPE_CHR);
 
@@ -1475,8 +1475,8 @@ void setupCreateProps(s32 stagenum)
 		}
 
 		if (g_StageSetup.props) {
-			u32 diffflag = 0;
-			s32 index;
+			uint32_t diffflag = 0;
+			int index;
 
 			diffflag |= 1 << (lvGetDifficulty() + 4);
 
@@ -1500,7 +1500,7 @@ void setupCreateProps(s32 stagenum)
 				case OBJTYPE_GRENADEPROB:
 					{
 						struct grenadeprobobj *grenadeprob = (struct grenadeprobobj *)obj;
-						u8 probability = grenadeprob->probability;
+						uint8_t probability = grenadeprob->probability;
 						struct chrdata *chr = chrFindByLiteralId(grenadeprob->chrnum);
 
 						if (chr && chr->prop && chr->model) {
@@ -1569,7 +1569,7 @@ void setupCreateProps(s32 stagenum)
 						if ((obj->flags2 & diffflag) == 0)
 						{
 							struct shieldobj *shield = (struct shieldobj *)obj;
-							shield->initialamount = *(s32 *)&shield->initialamount / 65536.0f;
+							shield->initialamount = *(int *)&shield->initialamount / 65536.0f;
 							shield->amount = shield->initialamount;
 							setupCreateObject(obj, index);
 						}
@@ -1580,7 +1580,7 @@ void setupCreateProps(s32 stagenum)
 						if (obj->flags & OBJFLAG_GLASS_HASPORTAL) {
 							struct tintedglassobj *glass = (struct tintedglassobj *)obj;
 							glass->portalnum = setupGetPortalByPad(obj->pad);
-							glass->unk64 = *(s32 *)&glass->unk64 / 65536.0f;
+							glass->unk64 = *(int *)&glass->unk64 / 65536.0f;
 						}
 
 						setupCreateObject(obj, index);
@@ -1590,12 +1590,12 @@ void setupCreateProps(s32 stagenum)
 					if (withobjs && (obj->flags2 & diffflag) == 0) {
 						struct liftobj *lift = (struct liftobj *)obj;
 						struct modelstate *modelstate;
-						s32 modelnum = obj->modelnum;
+						int modelnum = obj->modelnum;
 						struct prop *prop;
-						s32 i;
+						int i;
 
-						lift->accel = PALUPF(*(s32 *)&lift->accel) / 65536.0f;
-						lift->maxspeed = PALUPF(*(s32 *)&lift->maxspeed) / 65536.0f;
+						lift->accel = PALUPF(*(int *)&lift->accel) / 65536.0f;
+						lift->maxspeed = PALUPF(*(int *)&lift->maxspeed) / 65536.0f;
 						lift->dist = 0;
 						lift->speed = 0;
 						lift->levelcur = 0;
@@ -1603,7 +1603,7 @@ void setupCreateProps(s32 stagenum)
 
 						for (i = 0; i < ARRAYCOUNT(lift->doors); i++) {
 							if (lift->doors[i]) {
-								lift->doors[i] = (struct doorobj *)setupGetCmdByIndex(index + *(s32*)&lift->doors[i]);
+								lift->doors[i] = (struct doorobj *)setupGetCmdByIndex(index + *(int*)&lift->doors[i]);
 							}
 						}
 
@@ -1681,8 +1681,8 @@ void setupCreateProps(s32 stagenum)
 						struct fanobj *fan = (struct fanobj *)obj;
 
 						fan->yrot = 0;
-						fan->ymaxspeed = PALUPF(*(s32 *)&fan->ymaxspeed) / 65536.0f;
-						fan->yaccel = PALUPF(*(s32 *)&fan->yaccel) / 65536.0f;
+						fan->ymaxspeed = PALUPF(*(int *)&fan->ymaxspeed) / 65536.0f;
+						fan->yaccel = PALUPF(*(int *)&fan->yaccel) / 65536.0f;
 
 						setupCreateObject(obj, index);
 					}
@@ -1708,9 +1708,9 @@ void setupCreateProps(s32 stagenum)
 						// TODO: There is a stack problem here that should be
 						// resolved. sp1a8 is really an Mtxf which doesn't fit
 						// in its current location in the stack.
-						f32 sp1a8[12];
+						float sp1a8[12];
 #endif
-						f32 sp184[3][3];
+						float sp184[3][3];
 
 						setupCreateObject(obj, index);
 
@@ -1751,8 +1751,8 @@ void setupCreateProps(s32 stagenum)
 				case OBJTYPE_MULTIAMMOCRATE:
 					{
 						struct multiammocrateobj *crate = (struct multiammocrateobj *)obj;
-						s32 ammoqty = 1;
-						s32 i;
+						int ammoqty = 1;
+						int i;
 
 						if (g_Vars.normmplayerisrunning && g_SetupCurMpLocation >= 0) {
 							struct mpweapon *mpweapon = mpGetMpWeaponByLocation(g_SetupCurMpLocation);
@@ -1935,7 +1935,7 @@ void setupCreateProps(s32 stagenum)
 				case OBJTYPE_BRIEFING:
 					{
 						struct briefingobj *briefing = (struct briefingobj *)obj;
-						s32 wanttype = BRIEFINGTYPE_TEXT_PA;
+						int wanttype = BRIEFINGTYPE_TEXT_PA;
 
 						briefingInsert(briefing);
 
@@ -1955,11 +1955,11 @@ void setupCreateProps(s32 stagenum)
 				case OBJTYPE_CAMERAPOS:
 					{
 						struct cameraposobj *camera = (struct cameraposobj *)obj;
-						camera->x = *(s32 *)&camera->x / 100.0f;
-						camera->y = *(s32 *)&camera->y / 100.0f;
-						camera->z = *(s32 *)&camera->z / 100.0f;
-						camera->theta = *(s32 *)&camera->theta / 65536.0f;
-						camera->verta = *(s32 *)&camera->verta / 65536.0f;
+						camera->x = *(int *)&camera->x / 100.0f;
+						camera->y = *(int *)&camera->y / 100.0f;
+						camera->z = *(int *)&camera->z / 100.0f;
+						camera->theta = *(int *)&camera->theta / 65536.0f;
+						camera->verta = *(int *)&camera->verta / 65536.0f;
 					}
 					break;
 				case OBJTYPE_BEGINOBJECTIVE:
@@ -1968,7 +1968,7 @@ void setupCreateProps(s32 stagenum)
 
 						objectiveInsert(objective);
 
-						if ((u32)objective->index < 7) {
+						if ((uint32_t)objective->index < 7) {
 							g_Briefing.objectivenames[objective->index] = objective->text;
 							g_Briefing.objectivedifficulties[objective->index] = objective->difficulties;
 						}
@@ -1999,18 +1999,18 @@ void setupCreateProps(s32 stagenum)
 					break;
 				}
 
-				obj = (struct defaultobj *)((u32 *)obj + setupGetCmdLength((u32 *)obj));
+				obj = (struct defaultobj *)((uint32_t *)obj + setupGetCmdLength((uint32_t *)obj));
 				index++;
 			}
 
 			index = 0;
 
 			if (g_Vars.normmplayerisrunning && mpHasSimulants()) {
-				s32 i;
-				s32 slotsdone[MAX_BOTS];
-				s32 chrnum = 0;
-				s32 maxsimulants;
-				s32 slotnum;
+				int i;
+				int slotsdone[MAX_BOTS];
+				int chrnum = 0;
+				int maxsimulants;
+				int slotnum;
 
 				if (challengeIsFeatureUnlocked(MPFEATURE_8BOTS)) {
 					maxsimulants = MAX_BOTS;
@@ -2061,7 +2061,7 @@ void setupCreateProps(s32 stagenum)
 				case OBJTYPE_SAFE:
 				case OBJTYPE_TINTEDGLASS:
 					if (obj->prop && (obj->flags & OBJFLAG_INSIDEANOTHEROBJ)) {
-						s32 offset = obj->pad;
+						int offset = obj->pad;
 						struct defaultobj *owner = setupGetObjByCmdIndex(index + offset);
 
 						if (owner && owner->prop) {
@@ -2154,7 +2154,7 @@ void setupCreateProps(s32 stagenum)
 						struct defaultobj *trigger = setupGetObjByCmdIndex(index + triggeroffset);
 						struct defaultobj *unexp = NULL;
 						struct defaultobj *exp = NULL;
-						s32 alwayszero = 0;
+						int alwayszero = 0;
 
 						if (unexpoffset) {
 							unexp = setupGetObjByCmdIndex(index + unexpoffset);
@@ -2218,7 +2218,7 @@ void setupCreateProps(s32 stagenum)
 					break;
 				}
 
-				obj = (struct defaultobj *)((u32 *)obj + setupGetCmdLength((u32 *)obj));
+				obj = (struct defaultobj *)((uint32_t *)obj + setupGetCmdLength((uint32_t *)obj));
 				index++;
 			}
 		}

@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include "constants.h"
 #include "game/chrai.h"
 #include "game/bot.h"
@@ -21,7 +20,7 @@ bool aiMpInitSimulants(void)
  */
 bool aiIfBotRespawning(void)
 {
-	u8 *cmd = g_Vars.ailist + g_Vars.aioffset;
+	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	struct aibot *aibot;
 
 	/**

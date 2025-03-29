@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/prop.h"
 #include "game/bg.h"
@@ -49,9 +50,9 @@
 
 #define WPSEG_GET_ID(seg) (seg & (0xffff & ~(WPSEGFLAG_OUTWARDSONLY | WPSEGFLAG_INWARDSONLY)))
 
-u32 g_NavSeed[2] = {0};
+uint32_t g_NavSeed[2] = {0};
 
-void navSetSeed(u32 upper, u32 lower)
+void navSetSeed(uint32_t upper, uint32_t lower)
 {
 	g_NavSeed[0] = upper;
 	g_NavSeed[1] = lower;
@@ -83,11 +84,11 @@ struct waypoint *waypointFindClosestToPos(struct coord *pos, RoomNum *rooms)
 	RoomNum allrooms[30];
 	RoomNum neighbours[10];
 #endif
-	s32 candlen = 0;
-	s32 i;
-	s32 j;
+	int candlen = 0;
+	int i;
+	int j;
 	struct waypoint *candwaypoints[10];
-	f32 candsqdists[10];
+	float candsqdists[10];
 	bool checkmore[10];
 	struct coord sp250[10];
 	struct coord sp1d8[10];
@@ -108,11 +109,10 @@ struct waypoint *waypointFindClosestToPos(struct coord *pos, RoomNum *rooms)
 		for (i = 0; allrooms[i] != -1; i++) {
 			if (g_Rooms[allrooms[i]].numwaypoints != 0) {
 				for (j = 0; j < g_Rooms[allrooms[i]].numwaypoints; j++) {
-					s32 index = g_Vars.waypointnums[g_Rooms[allrooms[i]].firstwaypoint + j];
+					int index = g_Vars.waypointnums[g_Rooms[allrooms[i]].firstwaypoint + j];
 					struct waypoint *waypoint = g_StageSetup.waypoints + index;
-					f32 sqdist;
-					s32 k;
-					u32 stack;
+					float sqdist;
+					int k;
 					struct pad pad;
 
 					padUnpack(waypoint->padnum, PADFIELD_POS, &pad);
@@ -165,7 +165,7 @@ struct waypoint *waypointFindClosestToPos(struct coord *pos, RoomNum *rooms)
 			padrooms[1] = -1;
 
 			if (cdTestLos05(pos, rooms, &pad.pos, padrooms, CDTYPE_BG, GEOFLAG_FLOOR1 | GEOFLAG_FLOOR2) != CDRESULT_COLLISION) {
-				s32 cdresult = cdExamCylMove05(pos, rooms, &pad.pos, padrooms, CDTYPE_BG | CDTYPE_PATHBLOCKER, true, 0.0f, 0.0f);
+				int cdresult = cdExamCylMove05(pos, rooms, &pad.pos, padrooms, CDTYPE_BG | CDTYPE_PATHBLOCKER, true, 0.0f, 0.0f);
 
 				if (cdresult == CDRESULT_ERROR) {
 					checkmore[i] = false;
@@ -194,7 +194,7 @@ struct waypoint *waypointFindClosestToPos(struct coord *pos, RoomNum *rooms)
 					struct coord sp98;
 					struct coord tmppos;
 					RoomNum tmprooms[8];
-					f32 mult;
+					float mult;
 
 					padUnpack(candwaypoints[i]->padnum, PADFIELD_POS | PADFIELD_ROOM, &pad);
 
@@ -254,7 +254,7 @@ struct waypoint *waypointFindClosestToPos(struct coord *pos, RoomNum *rooms)
  *
  * padrandomroutes is always true.
  */
-struct waygroup *waygroupChooseNeighbour(s32 *groupnums, s32 step, u32 ignoremask)
+struct waygroup *waygroupChooseNeighbour(int *groupnums, int step, uint32_t ignoremask)
 {
 	struct waygroup *groups = g_StageSetup.waygroups;
 	struct waygroup *best = NULL;
@@ -275,7 +275,7 @@ struct waygroup *waygroupChooseNeighbour(s32 *groupnums, s32 step, u32 ignoremas
 						break;
 					}
 				} else {
-					u64 seed = ((u64)g_NavSeed[0] << 32) | g_NavSeed[1];
+					uint64_t seed = ((uint64_t)g_NavSeed[0] << 32) | g_NavSeed[1];
 
 					if (rngRotateSeed(&seed) % 2 == 0) {
 						break;
@@ -293,7 +293,7 @@ struct waygroup *waygroupChooseNeighbour(s32 *groupnums, s32 step, u32 ignoremas
 /**
  * Iterate the given groupnums and set their step if they don't already have one.
  */
-void waygroupSetStepIfUndiscovered(s32 *groupnums, s32 step, u32 ignoremask)
+void waygroupSetStepIfUndiscovered(int *groupnums, int step, uint32_t ignoremask)
 {
 	struct waygroup *groups = g_StageSetup.waygroups;
 
@@ -314,7 +314,7 @@ void waygroupSetStepIfUndiscovered(s32 *groupnums, s32 step, u32 ignoremask)
  * Do one scan of all waygroups, finding ones at the given step.
  * Set their neighbours to step + 1 if they haven't been discovered yet.
  */
-bool waygroupDiscoverOneStep(struct waygroup *group, s32 step, u32 ignoremask)
+bool waygroupDiscoverOneStep(struct waygroup *group, int step, uint32_t ignoremask)
 {
 	bool discovered = false;
 
@@ -340,11 +340,11 @@ bool waygroupDiscoverOneStep(struct waygroup *group, s32 step, u32 ignoremask)
  * If discoverall is false, the discovery stops once the to group is discovered.
  * If discoverall is true, groups beyond the to group are also discovered.
  */
-bool waygroupDiscoverSteps(struct waygroup *from, struct waygroup *to, struct waygroup *groups, bool discoverall, u32 ignoremask)
+bool waygroupDiscoverSteps(struct waygroup *from, struct waygroup *to, struct waygroup *groups, bool discoverall, uint32_t ignoremask)
 {
 	bool result = true;
 	struct waygroup *group;
-	s32 step;
+	int step;
 
 	for (group = groups; group->neighbours; group++) {
 		group->step = -1;
@@ -366,12 +366,11 @@ bool waygroupDiscoverSteps(struct waygroup *from, struct waygroup *to, struct wa
  */
 bool waygroupFindRoute(struct waygroup *from, struct waygroup *to, struct waygroup *groups)
 {
-	u32 stack[2];
 	bool result = waygroupDiscoverSteps(from, to, groups, false, IGNORE_INWARDS);
 
 	if (result) {
 		struct waygroup *curto = to;
-		s32 step = curto->step - 1;
+		int step = curto->step - 1;
 
 		while (step >= 0) {
 			curto->step += 10000;
@@ -398,7 +397,7 @@ bool waygroupFindRoute(struct waygroup *from, struct waygroup *to, struct waygro
  *
  * padrandomroutes is always true.
  */
-struct waypoint *waypointChooseNeighbour(s32 *pointnums, s32 step, s32 groupnum, u32 ignoremask)
+struct waypoint *waypointChooseNeighbour(int *pointnums, int step, int groupnum, uint32_t ignoremask)
 {
 	struct waypoint *points = g_StageSetup.waypoints;
 	struct waypoint *best = NULL;
@@ -419,7 +418,7 @@ struct waypoint *waypointChooseNeighbour(s32 *pointnums, s32 step, s32 groupnum,
 						break;
 					}
 				} else {
-					u64 seed = ((u64)g_NavSeed[0] << 32) | g_NavSeed[1];
+					uint64_t seed = ((uint64_t)g_NavSeed[0] << 32) | g_NavSeed[1];
 
 					if (rngRotateSeed(&seed) % 2 == 0) {
 						break;
@@ -437,7 +436,7 @@ struct waypoint *waypointChooseNeighbour(s32 *pointnums, s32 step, s32 groupnum,
 /**
  * Iterate the given pointnums and set their step if they don't already have one.
  */
-void waypointSetStepIfUndiscovered(s32 *pointnums, s32 value, s32 groupnum, u32 ignoremask)
+void waypointSetStepIfUndiscovered(int *pointnums, int value, int groupnum, uint32_t ignoremask)
 {
 	struct waypoint *waypoints = g_StageSetup.waypoints;
 
@@ -458,7 +457,7 @@ void waypointSetStepIfUndiscovered(s32 *pointnums, s32 value, s32 groupnum, u32 
  * Scan the waypoints in the given list, finding ones at the given step.
  * Set their neighbours to step + 1 if they haven't been discovered yet.
  */
-bool waypointDiscoverOneStep(s32 *pointnums, s32 step, s32 groupnum, u32 ignoremask)
+bool waypointDiscoverOneStep(int *pointnums, int step, int groupnum, uint32_t ignoremask)
 {
 	bool result = false;
 	struct waypoint *points = g_StageSetup.waypoints;
@@ -489,13 +488,13 @@ bool waypointDiscoverOneStep(s32 *pointnums, s32 step, s32 groupnum, u32 ignorem
  * If discoverall is false, the discovery stops once the to point is discovered.
  * If discoverall is true, points beyond the to point are also discovered.
  */
-void waypointDiscoverSteps(struct waypoint *from, struct waypoint *to, bool discoverall, u32 ignoremask)
+void waypointDiscoverSteps(struct waypoint *from, struct waypoint *to, bool discoverall, uint32_t ignoremask)
 {
 	struct waygroup *groups = g_StageSetup.waygroups;
 	struct waypoint *points = g_StageSetup.waypoints;
 	struct waypoint *point;
-	s32 *pointnums = groups[from->groupnum].waypoints;
-	s32 i;
+	int *pointnums = groups[from->groupnum].waypoints;
+	int i;
 	bool more;
 
 	while (*pointnums >= 0) {
@@ -523,7 +522,7 @@ void waypointDiscoverSteps(struct waypoint *from, struct waypoint *to, bool disc
 void waypointFindRoute(struct waypoint *from, struct waypoint *to)
 {
 	struct waypoint *curto;
-	s32 value;
+	int value;
 
 	waypointDiscoverSteps(from, to, false, IGNORE_INWARDS);
 
@@ -546,11 +545,11 @@ void waypointFindRoute(struct waypoint *from, struct waypoint *to)
  *
  * The from and to points should be in the same waygroup.
  */
-s32 waypointCollectLocal(struct waypoint *from, struct waypoint *to, struct waypoint **arr, s32 arrlen)
+int waypointCollectLocal(struct waypoint *from, struct waypoint *to, struct waypoint **arr, int arrlen)
 {
 	struct waypoint **arrptr = arr;
 	struct waypoint *curfrom;
-	s32 step;
+	int step;
 
 	if (arrlen >= 2) {
 		waypointFindRoute(from, to);
@@ -586,15 +585,14 @@ void waypointFindSegmentIntoGroup(struct waygroup *fromgroup, struct waygroup *t
 {
 	struct waypoint *points = g_StageSetup.waypoints;
 	struct waygroup *groups = g_StageSetup.waygroups;
-	s32 *fromwpptr = fromgroup->waypoints;
-	s32 stack;
+	int *fromwpptr = fromgroup->waypoints;
 
 	*topoint = NULL;
 	*frompoint = NULL;
 
 	while (*fromwpptr >= 0) {
 		struct waypoint *fromwp = &points[*fromwpptr];
-		s32 *neighbournums = fromwp->neighbours;
+		int *neighbournums = fromwp->neighbours;
 
 		while (*neighbournums >= 0) {
 			if ((*neighbournums & IGNORE_INWARDS) == 0) {
@@ -613,7 +611,7 @@ void waypointFindSegmentIntoGroup(struct waygroup *fromgroup, struct waygroup *t
 							break;
 						}
 					} else {
-						u64 seed = ((u64)g_NavSeed[0] << 32) | g_NavSeed[1];
+						uint64_t seed = ((uint64_t)g_NavSeed[0] << 32) | g_NavSeed[1];
 
 						if ((rngRotateSeed(&seed) % 2) == 0) {
 							break;
@@ -636,7 +634,7 @@ void waypointFindSegmentIntoGroup(struct waygroup *fromgroup, struct waygroup *t
  *
  * The return value is the number of elements populated into the array.
  */
-s32 navFindRoute(struct waypoint *frompoint, struct waypoint *topoint, struct waypoint **arr, s32 arrlen)
+int navFindRoute(struct waypoint *frompoint, struct waypoint *topoint, struct waypoint **arr, int arrlen)
 {
 	struct waypoint **arrptr = arr;
 	struct waygroup *groups = g_StageSetup.waygroups;
@@ -648,10 +646,10 @@ s32 navFindRoute(struct waypoint *frompoint, struct waypoint *topoint, struct wa
 		if (waygroupFindRoute(fromgroup, togroup, groups)) {
 			struct waypoint *curfrompoint = frompoint;
 			struct waygroup *curfromgroup = fromgroup;
-			s32 step;
+			int step;
 
 			for (step = fromgroup->step + 1; step <= togroup->step && arrlen >= 2; step++) {
-				s32 numwritten;
+				int numwritten;
 				struct waygroup *nextfromgroup = waygroupChooseNeighbour(curfromgroup->neighbours, step, IGNORE_INWARDS);
 				struct waypoint *curgrouplastwp;
 				struct waypoint *nextgroupfirstwp;
@@ -686,11 +684,11 @@ void waypointResetAllSteps(void)
 	}
 }
 
-struct waypoint *waypointFindRandomAtStep(s32 *pointnums, s32 step)
+struct waypoint *waypointFindRandomAtStep(int *pointnums, int step)
 {
-	s32 len = 0;
-	s32 randomindex;
-	s32 i;
+	int len = 0;
+	int randomindex;
+	int i;
 
 	while (pointnums[len] >= 0) {
 		len++;
@@ -717,11 +715,11 @@ struct waypoint *waypointFindRandomAtStep(s32 *pointnums, s32 step)
 	return NULL;
 }
 
-struct waygroup *waygroupFindRandomAtStep(s32 *groupnums, s32 step)
+struct waygroup *waygroupFindRandomAtStep(int *groupnums, int step)
 {
-	s32 len = 0;
-	s32 randomindex;
-	s32 i;
+	int len = 0;
+	int randomindex;
+	int i;
 
 	while (groupnums[len] >= 0) {
 		len++;
@@ -757,7 +755,7 @@ struct waypoint *navChooseRetreatPoint(struct waypoint *chrpoint, struct waypoin
 		struct waygroup *chrgroup = &g_StageSetup.waygroups[chrpoint->groupnum];
 		struct waygroup *targroup = &g_StageSetup.waygroups[tarpoint->groupnum];
 		struct waypoint *result;
-		s32 stack;
+		int stack;
 
 		if (chrgroup == targroup) {
 			waypointResetAllSteps();
@@ -844,12 +842,12 @@ struct waypoint *navChooseRetreatPoint(struct waypoint *chrpoint, struct waypoin
 void navDisableSegmentInDirection(struct waypoint *a, struct waypoint *b)
 {
 	struct waygroup *agroup = &g_StageSetup.waygroups[a->groupnum];
-	s32 bindex = b - g_StageSetup.waypoints;
-	s32 bgroupnum = b->groupnum;
+	int bindex = b - g_StageSetup.waypoints;
+	int bgroupnum = b->groupnum;
 	bool foundlink = false;
-	s32 i;
-	s32 j;
-	s32 tmp;
+	int i;
+	int j;
+	int tmp;
 
 	// Find index of the neighbour point to remove, or index of end if not found
 	for (i = 0; (tmp = a->neighbours[i]) >= 0 && WPSEG_GET_ID(tmp) != bindex; i++);
@@ -900,10 +898,10 @@ void navDisableSegmentInDirection(struct waypoint *a, struct waypoint *b)
 void navEnableSegmentInDirection(struct waypoint *a, struct waypoint *b)
 {
 	struct waygroup *agroup = &g_StageSetup.waygroups[a->groupnum];
-	s32 bpointnum = b - g_StageSetup.waypoints;
-	s32 bgroupnum = b->groupnum;
-	s32 neighbournum;
-	s32 i;
+	int bpointnum = b - g_StageSetup.waypoints;
+	int bgroupnum = b->groupnum;
+	int neighbournum;
+	int i;
 
 	// Find index in A's neighbour list where B can be added.
 	// This will either be at the -1 terminator, or if B already exists in the

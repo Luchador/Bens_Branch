@@ -6,7 +6,7 @@
 #include "lib/memp.h"
 #include "types.h"
 
-void botinvInit(struct chrdata *chr, s32 maxitems)
+void botinvInit(struct chrdata *chr, int maxitems)
 {
 	if (chr && chr->aibot && maxitems > 0) {
 		if (maxitems > 255) {

@@ -7,9 +7,9 @@
 #include "data.h"
 #include "types.h"
 
-u32 g_ArgBuffer[30];
+uint32_t g_ArgBuffer[30];
 
-s32 argc = 1;
+int argc = 1;
 
 char *argv[17] = {
 	NULL,
@@ -63,9 +63,8 @@ void argSetString(char *string)
 
 bool argsParseDebugArgs(void)
 {
-	u32 devaddr;
-	u32 stack;
-	s32 i;
+	uint32_t devaddr;
+	int i;
 	bool ret = false;
 
 	devaddr = 0x1ffff00;
@@ -94,10 +93,10 @@ bool argsParseDebugArgs(void)
  * Typically called with arguments such as 1, "-hard". In this example, if the
  * argument "-hard2" exists then it would return a pointer to "2".
  */
-char *argFindByPrefix(s32 occurrence, char *str)
+char *argFindByPrefix(int occurrence, char *str)
 {
-	s32 len = strlen(str);
-	s32 i;
+	int len = strlen(str);
+	int i;
 
 	for (i = 1; i < argc; i++) {
 		if (strncmp(str, argv[i], len) == 0) {
@@ -112,7 +111,7 @@ char *argFindByPrefix(s32 occurrence, char *str)
 	return NULL;
 }
 
-void argGetLevel(s32 *stagenum)
+void argGetLevel(int *stagenum)
 {
 	char *ptr = argFindByPrefix(1, "-level_");
 

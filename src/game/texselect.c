@@ -9,7 +9,7 @@
 #include "data.h"
 #include "types.h"
 
-s32 texGetMask(s32 value)
+int texGetMask(int value)
 {
 	if (value < 2) {
 		return 0;
@@ -46,9 +46,9 @@ s32 texGetMask(s32 value)
 	return 8;
 }
 
-s32 tex0f0b33f8(s32 width, s32 height, s32 lod)
+int tex0f0b33f8(int width, int height, int lod)
 {
-	s32 sum = 0;
+	int sum = 0;
 
 	if (lod <= 0) {
 		lod = 1;
@@ -71,9 +71,9 @@ s32 tex0f0b33f8(s32 width, s32 height, s32 lod)
 	return sum;
 }
 
-s32 tex0f0b3468(s32 width, s32 height, s32 lod)
+int tex0f0b3468(int width, int height, int lod)
 {
-	s32 sum = 0;
+	int sum = 0;
 
 	if (lod <= 0) {
 		lod = 1;
@@ -96,9 +96,9 @@ s32 tex0f0b3468(s32 width, s32 height, s32 lod)
 	return sum;
 }
 
-s32 tex0f0b34d8(s32 width, s32 height, s32 lod)
+int tex0f0b34d8(int width, int height, int lod)
 {
-	s32 sum = 0;
+	int sum = 0;
 
 	if (lod <= 0) {
 		lod = 1;
@@ -121,9 +121,9 @@ s32 tex0f0b34d8(s32 width, s32 height, s32 lod)
 	return sum;
 }
 
-s32 tex0f0b3548(s32 width, s32 height, s32 lod)
+int tex0f0b3548(int width, int height, int lod)
 {
-	s32 sum = 0;
+	int sum = 0;
 
 	if (lod <= 0) {
 		lod = 1;
@@ -146,7 +146,7 @@ s32 tex0f0b3548(s32 width, s32 height, s32 lod)
 	return sum;
 }
 
-void texSetRenderMode(Gfx **gdlptr, s32 rendermode, s32 numcycles, s32 arg3)
+void texSetRenderMode(Gfx **gdlptr, int rendermode, int numcycles, int arg3)
 {
 	Gfx *gdl = *gdlptr;
 
@@ -243,16 +243,16 @@ void texSetRenderMode(Gfx **gdlptr, s32 rendermode, s32 numcycles, s32 arg3)
 
 void texLoadFromConfig(struct textureconfig *config)
 {
-	if ((u32)config->texturenum < NUM_TEXTURES) {
+	if ((uint32_t)config->texturenum < NUM_TEXTURES) {
 		texLoadFromConfigs(config, 1, NULL, 0);
 	}
 }
 
-void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, u32 rendermode, s32 arg3, u32 ulst, bool arg5, struct texpool *pool)
+void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode, int arg3, uint32_t ulst, bool arg5, struct texpool *pool)
 {
 	struct tex *tex;
 	Gfx *gdl;
-	s32 tile;
+	int tile;
 
 	gdl = *gdlptr;
 
@@ -267,27 +267,27 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, u32 rendermode, s32 
 
 		gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
 	} else {
-		s32 width = tconfig->width;
-		s32 height = tconfig->height;
-		u16 *ptr;
-		s32 index;
-		u8 format;
-		u8 depth;
-		s32 lutmode;
-		s32 depth2;
-		s32 lrs;
-		s32 line;
-		u16 texturenum;
+		int width = tconfig->width;
+		int height = tconfig->height;
+		uint16_t *ptr;
+		int index;
+		uint8_t format;
+		uint8_t depth;
+		int lutmode;
+		int depth2;
+		int lrs;
+		int line;
+		uint16_t texturenum;
 
 		tex = NULL;
 
-		if ((u32)tconfig->texturenum < NUM_TEXTURES) {
+		if ((uint32_t)tconfig->texturenum < NUM_TEXTURES) {
 			texLoadFromConfigs(tconfig, 1, pool, 0);
 		}
 
 		if (tconfig->unk0b == 1) {
-			ptr = (u16 *)tconfig->textureptr;
-			texturenum = ((u16 *)(k_ptr_t)(ptr))[-4];
+			ptr = (uint16_t *)tconfig->textureptr;
+			texturenum = ((uint16_t *)(k_ptr_t)(ptr))[-4];
 
 			// GCC has problems with this area because it seems to think that
 			// registers are 64 bits wide. To do the index < g_TexNumConfigs
@@ -400,8 +400,8 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, u32 rendermode, s32 
 			gDPPipeSync(gdl++);
 
 			if (format == G_IM_FMT_CI) {
-				u32 a3 = lrs + 1;
-				u32 t0 = (0x3ff - tex->unk0a) < a3 ? (0x3ff - tex->unk0a) : 0;
+				uint32_t a3 = lrs + 1;
+				uint32_t t0 = (0x3ff - tex->unk0a) < a3 ? (0x3ff - tex->unk0a) : 0;
 
 				a3 -= t0;
 
@@ -426,13 +426,13 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, u32 rendermode, s32 
 				gDPSetTileSize(gdl++, G_TX_RENDERTILE, ulst, ulst, ((width - 1) << 2) + ulst, ((height - 1) << 2) + ulst);
 			}
 		} else {
-			s32 tmem = 0;
-			s32 lod = tconfig->level;
-			u8 format;
-			u8 depth;
-			s32 lutmode;
-			s32 depth2;
-			s32 lrs;
+			int tmem = 0;
+			int lod = tconfig->level;
+			uint8_t format;
+			uint8_t depth;
+			int lutmode;
+			int depth2;
+			int lrs;
 
 			if (lod > 6) {
 				lod = 6;
@@ -518,8 +518,8 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, u32 rendermode, s32 
 			gDPPipeSync(gdl++);
 
 			if (format == G_IM_FMT_CI) {
-				u32 a2 = lrs + 1;
-				u32 a3 = (0x3ff - tex->unk0a) < a2 ? (0x3ff - tex->unk0a) : 0;
+				uint32_t a2 = lrs + 1;
+				uint32_t a3 = (0x3ff - tex->unk0a) < a2 ? (0x3ff - tex->unk0a) : 0;
 
 				a2 -= a3;
 
@@ -537,7 +537,7 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, u32 rendermode, s32 
 			}
 
 			for (tile = 0; tile < lod; tile++) {
-				s32 line;
+				int line;
 
 				if (tile > 0) {
 					if (tex && tex->hasloddata) {

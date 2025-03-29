@@ -1,6 +1,6 @@
 #include <ultra64.h>
 
-void guMtxF2L(f32 mf[4][4], Mtx *m)
+void guMtxF2L(float mf[4][4], Mtx *m)
 {
 #ifdef GBI_FLOATS
 	if ((Mtx *)mf != m) {

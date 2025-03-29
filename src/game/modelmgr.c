@@ -11,18 +11,18 @@
 
 struct model *g_ModelSlots;
 struct anim *g_AnimSlots;
-s32 g_ModelNumObjs;
-s32 g_ModelNumChrs;
+int g_ModelNumObjs;
+int g_ModelNumChrs;
 struct modelrwdatabinding *g_ModelRwdataBindings[3];
 
-s32 g_MaxModels = 0;
-s32 g_MaxAnims = 0;
+int g_MaxModels = 0;
+int g_MaxAnims = 0;
 bool g_ModelIsLvResetting = false;
-s32 g_ModelMostType1 = 0;
-s32 g_ModelMostType2 = 0;
-s32 g_ModelMostType3 = 0;
-s32 g_ModelMostModels = 0;
-s32 g_ModelMostAnims = 0;
+int g_ModelMostType1 = 0;
+int g_ModelMostType2 = 0;
+int g_ModelMostType3 = 0;
+int g_ModelMostModels = 0;
+int g_ModelMostAnims = 0;
 
 #define NUMTYPE1() 35
 #define NUMTYPE2() 25
@@ -36,12 +36,12 @@ bool modelmgrCanSlotFitRwdata(struct model *modelslot, struct modeldef *modeldef
 
 void modelmgrPrintCounts(void)
 {
-	s32 i;
-	s32 numtype1 = 0;
-	s32 numtype2 = 0;
-	s32 numtype3 = 0;
-	s32 nummodels = 0;
-	s32 numanims = 0;
+	int i;
+	int numtype1 = 0;
+	int numtype2 = 0;
+	int numtype3 = 0;
+	int nummodels = 0;
+	int numanims = 0;
 
 	for (i = 0; i < NUMTYPE1(); i++) {
 		if (g_ModelRwdataBindings[0][i].model) {
@@ -97,13 +97,13 @@ void modelmgrPrintCounts(void)
 struct model *modelmgrInstantiateModel(struct modeldef *modeldef, bool withanim)
 {
 	struct model *model = NULL;
-	u32 *rwdatas = NULL;
-	s16 datalen = -1;
-	s16 extra = 0;
+	uint32_t *rwdatas = NULL;
+	int16_t datalen = -1;
+	int16_t extra = 0;
 #ifdef PLATFORM_64BIT
 	extra = 128;
 #endif
-	s32 i;
+	int i;
 
 	if (!g_ModelIsLvResetting) {
 		// If it's being allocated mid-gameplay, look through all slots
@@ -143,7 +143,6 @@ struct model *modelmgrInstantiateModel(struct modeldef *modeldef, bool withanim)
 			// been found or allocated, but rwdata needs to be allocated.
 			if (modeldef->rwdatalen < 256+extra) {
 				bool done = false;
-				u32 stack;
 
 				// 4 words (0x10 bytes) or less -> try type 1
 				if (modeldef->rwdatalen <= 4) {
@@ -242,7 +241,7 @@ struct model *modelmgrInstantiateModelWithoutAnim(struct modeldef *modeldef)
 void modelmgrFreeModel(struct model *model)
 {
 	bool done = false;
-	s32 i;
+	int i;
 
 	for (i = 0; i < NUMTYPE1(); i++) {
 		if (g_ModelRwdataBindings[0][i].model == model) {
@@ -305,7 +304,7 @@ void modelmgrAttachHead(struct model *model, struct modelnode *node, struct mode
 
 struct anim *modelmgrInstantiateAnim(void)
 {
-	s32 i;
+	int i;
 	struct anim *anim = NULL;
 
 	for (i = 0; i < g_MaxAnims; i++) {

@@ -7,7 +7,7 @@
 
 void smokeStop(void)
 {
-	s32 i;
+	int i;
 
 	if (g_Smokes) {
 		for (i = 0; i < g_MaxSmokes; i++) {

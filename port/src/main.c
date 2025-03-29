@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <PR/ultratypes.h>
 #include <PR/ultrasched.h>
 
 #include "lib/main.h"
@@ -18,12 +17,12 @@
 #include "system.h"
 #include "utils.h"
 
-u32 g_OsMemSize = 0;
-s32 g_OsMemSizeMb = 32;
+uint32_t g_OsMemSize = 0;
+int g_OsMemSizeMb = 32;
 OSSched g_Sched;
 
 uint8_t *g_MempHeap = NULL;
-u32 g_MempHeapSize = 0;
+uint32_t g_MempHeapSize = 0;
 
 int g_TickRateDiv = 1;
 int g_TickExtraSleep = true;

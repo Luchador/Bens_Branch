@@ -1,28 +1,28 @@
 #ifndef _IN_ROMDATA_H
 #define _IN_ROMDATA_H
 
-#include <PR/ultratypes.h>
+#include <stdint.h>
 
-extern u8 *g_RomFile;
-extern u32 g_RomFileSize;
+extern uint8_t *g_RomFile;
+extern uint32_t g_RomFileSize;
 
-s32 romdataInit(void);
+int romdataInit(void);
 
-u8 *romdataFileLoad(s32 fileNum, u32 *outSize);
-void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size, u32 *outSize);
-void romdataFileFree(s32 fileNum);
-const char *romdataFileGetName(s32 fileNum);
+uint8_t *romdataFileLoad(int fileNum, uint32_t *outSize);
+void romdataFilePreprocess(int fileNum, int loadType, uint8_t *data, uint32_t size, uint32_t *outSize);
+void romdataFileFree(int fileNum);
+const char *romdataFileGetName(int fileNum);
 
-u8 *romdataFileGetData(s32 fileNum);
-s32 romdataFileGetSize(s32 fileNum);
+uint8_t *romdataFileGetData(int fileNum);
+int romdataFileGetSize(int fileNum);
 
-s32 romdataFileGetNumForName(const char *name);
+int romdataFileGetNumForName(const char *name);
 
-u8 *romdataSegGetData(const char *segName);
-u8 *romdataSegGetDataEnd(const char *segName);
-u32 romdataSegGetSize(const char *segName);
-u32 romdataFileGetEstimatedSize(const u32 size, const u32 loadtype);
+uint8_t *romdataSegGetData(const char *segName);
+uint8_t *romdataSegGetDataEnd(const char *segName);
+uint32_t romdataSegGetSize(const char *segName);
+uint32_t romdataFileGetEstimatedSize(const uint32_t size, const uint32_t loadtype);
 
-s32 romdataCheckGbcRom(void);
+int romdataCheckGbcRom(void);
 
 #endif

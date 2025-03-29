@@ -6,16 +6,15 @@
 #include "data.h"
 #include "types.h"
 
-u32 var8009c330;
-s16 *var8009c334;
+int16_t *var8009c334;
 
 struct sndstate *g_SndpAllocStatesHead = NULL;
 struct sndstate *g_SndpAllocStatesTail = NULL;
 struct sndstate *g_SndpFreeStatesHead = NULL;
 N_ALSndPlayer *g_SndPlayer = &var8009c2d0;
-s16 var8005f130 = 0;
-s32 var8005f134 = 0;
-s32 var8005f138 = 0;
+int16_t var8005f130 = 0;
+int var8005f134 = 0;
+int var8005f138 = 0;
 void (*g_SndpAddRefCallback)(ALSound *) = NULL;
 void (*g_SndpRemoveRefCallback)(ALSound *) = NULL;
 
@@ -26,7 +25,7 @@ void func00033bc0(struct sndstate *state);
 
 void n_alSndpNew(ALSndpConfig *config)
 {
-	u32 i;
+	uint32_t i;
 	void *ptr;
 	N_ALEvent evt;
 
@@ -52,7 +51,7 @@ void n_alSndpNew(ALSndpConfig *config)
 	sndpSetAddRefCallback(NULL);
 	sndpSetRemoveRefCallback(NULL);
 
-	var8009c334 = alHeapAlloc(config->heap, sizeof(s16), config->unk10);
+	var8009c334 = alHeapAlloc(config->heap, sizeof(int16_t), config->unk10);
 
 	for (i = 0; i < config->unk10; i++) {
 		var8009c334[i] = 0x7fff;
@@ -110,17 +109,17 @@ void _n_handleEvent(N_ALSndpEvent *event)
 	N_ALSndpEvent sp94;
 	N_ALSndpEvent sp84;
 	ALMicroTime delta;
-	s32 fxmix;
-	s32 vol;
-	s32 tmppan;
-	s32 sp70;
-	s32 isspecial;
+	int fxmix;
+	int vol;
+	int tmppan;
+	int sp70;
+	int isspecial;
 	bool done = true;
 	bool hasvoice = false;
 	struct sndstate *state = NULL;
 	struct sndstate *nextstate = NULL;
-	s16 numfree;
-	s16 numalloced;
+	int16_t numfree;
+	int16_t numalloced;
 	struct sndstate *iterstate;
 	N_ALSndpEvent sp44;
 	ALMicroTime sp40;
@@ -350,7 +349,7 @@ void _n_handleEvent(N_ALSndpEvent *event)
 			}
 			break;
 		case AL_SNDP_4000_EVT:
-			state->fxmix = (u8)(state->fxmix & 0x7f) | (u8)(event->common.unk08 & 0x80);
+			state->fxmix = (uint8_t)(state->fxmix & 0x7f) | (uint8_t)(event->common.unk08 & 0x80);
 
 			if (state->state == AL_PLAYING) {
 				fxmix = (state->fxmix & 0x7f) + (keymap->keyMax & 0xf) * 8;
@@ -460,16 +459,16 @@ void func00033090(struct sndstate *state)
 void func00033100(struct sndstate *state)
 {
 	N_ALSndpEvent evt;
-	f32 pitch = alCents2Ratio(state->sound->keyMap->detune) * state->pitch;
+	float pitch = alCents2Ratio(state->sound->keyMap->detune) * state->pitch;
 
 	evt.common.type = AL_SNDP_PITCH_EVT;
 	evt.common.state = (N_ALSoundState *)state;
-	evt.common.unk08 = *(u32 *)&pitch;
+	evt.common.unk08 = *(uint32_t *)&pitch;
 
 	n_alEvtqPostEvent(&g_SndPlayer->evtq, &evt.msg, 33333, 0);
 }
 
-void _removeEvents(ALEventQueue *evtq, N_ALSoundState *state, u16 typemask)
+void _removeEvents(ALEventQueue *evtq, N_ALSoundState *state, uint16_t typemask)
 {
 	ALLink            *thisNode;
 	ALLink            *nextNode;
@@ -498,11 +497,11 @@ void _removeEvents(ALEventQueue *evtq, N_ALSoundState *state, u16 typemask)
 	}
 }
 
-u16 sndpCountStates(s16 *numfreeptr, s16 *numallocedptr)
+uint16_t sndpCountStates(int16_t *numfreeptr, int16_t *numallocedptr)
 {
-	u16 numalloced;
-	u16 numfree;
-	u16 numalloced2;
+	uint16_t numalloced;
+	uint16_t numfree;
+	uint16_t numalloced2;
 	struct sndstate *state1 = g_SndpAllocStatesHead;
 	struct sndstate *state2 = g_SndpFreeStatesHead;
 	struct sndstate *state3 = g_SndpAllocStatesTail;
@@ -522,11 +521,11 @@ void sndpSetAddRefCallback(void *fn)
 	g_SndpAddRefCallback = fn;
 }
 
-struct sndstate *func00033390(s32 arg0, ALSound *sound)
+struct sndstate *func00033390(int arg0, ALSound *sound)
 {
 	struct sndstate *state;
 	ALKeyMap *keymap;
-	s32 sp18;
+	int sp18;
 
 	keymap = sound->keyMap;
 
@@ -633,14 +632,14 @@ void sndpFreeState(struct sndstate *state)
 	}
 }
 
-void sndSetPriority(struct sndstate *state, u8 priority)
+void sndSetPriority(struct sndstate *state, uint8_t priority)
 {
 	if (state) {
-		state->priority = (s16)priority;
+		state->priority = (int16_t)priority;
 	}
 }
 
-s32 sndGetState(struct sndstate *state)
+int sndGetState(struct sndstate *state)
 {
 	if (state) {
 		return state->state;
@@ -649,17 +648,17 @@ s32 sndGetState(struct sndstate *state)
 	}
 }
 
-struct sndstate *func00033820(s32 arg0, s16 soundnum, u16 vol, ALPan pan, f32 pitch, u8 fxmix, u8 fxbus, struct sndstate **handleptr)
+struct sndstate *func00033820(int arg0, int16_t soundnum, uint16_t vol, ALPan pan, float pitch, uint8_t fxmix, uint8_t fxbus, struct sndstate **handleptr)
 {
 	struct sndstate *state;
 	struct sndstate *state2 = NULL;
 	ALKeyMap *keymap;
 	ALSound *sound;
-	s16 sp4e = 0;
-	s32 sp48;
-	s32 sp44;
-	s32 sp40 = 0;
-	s32 abspan;
+	int16_t sp4e = 0;
+	int sp48;
+	int sp44;
+	int sp40 = 0;
+	int abspan;
 	N_ALEvent evt;
 	N_ALEvent evt2;
 
@@ -685,7 +684,7 @@ struct sndstate *func00033820(s32 arg0, s16 soundnum, u16 vol, ALPan pan, f32 pi
 				}
 
 				state->pan = abspan;
-				state->vol = (u32)(vol * state->vol) >> 15;
+				state->vol = (uint32_t)(vol * state->vol) >> 15;
 				state->pitch *= pitch;
 				state->fxmix = fxmix;
 				state->fxbus = fxbus;
@@ -767,7 +766,7 @@ void func00033bc0(struct sndstate *state)
 	}
 }
 
-void func00033c30(u8 flags)
+void func00033c30(uint8_t flags)
 {
 	N_ALEvent evt;
 	struct sndstate *state = g_SndpAllocStatesHead;
@@ -785,7 +784,7 @@ void func00033c30(u8 flags)
 	}
 }
 
-void func00033cf0(u8 flags)
+void func00033cf0(uint8_t flags)
 {
 	N_ALEvent evt;
 	struct sndstate *state = g_SndpAllocStatesHead;
@@ -823,7 +822,7 @@ void func00033e28(void)
 	func00033c30(SNDSTATEFLAG_01 | SNDSTATEFLAG_02);
 }
 
-void audioPostEvent(struct sndstate *state, s16 type, s32 data)
+void audioPostEvent(struct sndstate *state, int16_t type, int data)
 {
 	N_ALEvent evt;
 
@@ -833,12 +832,10 @@ void audioPostEvent(struct sndstate *state, s16 type, s32 data)
 
 	if (state) {
 		n_alEvtqPostEvent(&g_SndPlayer->evtq, &evt, 0, 0);
-	} else {
-		// empty
 	}
 }
 
-u16 func00033ec4(u8 index)
+uint16_t func00033ec4(uint8_t index)
 {
 	return var8009c334 ? var8009c334[index] : 0;
 }
@@ -853,11 +850,11 @@ ALMicroTime sndpGetCurTime(void)
 	return g_SndPlayer->curTime;
 }
 
-void func00033f44(u8 index, u16 volume)
+void func00033f44(uint8_t index, uint16_t volume)
 {
 	if (var8009c334) {
 		struct sndstate *state = g_SndpAllocStatesHead;
-		s32 i;
+		int i;
 		N_ALEvent evt;
 
 		var8009c334[index] = volume;

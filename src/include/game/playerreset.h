@@ -6,8 +6,8 @@
 
 void modelmgrReset(void);
 void modelmgrSetLvResetting(bool value);
-void modelmgrAllocateSlots(s32 numobjs, s32 numchrs);
-bool modelmgrLoadProjectileModeldefs(s32 weaponnum);
+void modelmgrAllocateSlots(int numobjs, int numchrs);
+bool modelmgrLoadProjectileModeldefs(int weaponnum);
 void playerInitEyespy(void);
 void playerReset(void);
 

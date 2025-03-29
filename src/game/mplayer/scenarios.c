@@ -56,19 +56,19 @@
 struct mpscenario {
 	struct menudialogdef *optionsdialog;
 	void (*initfunc)(void);
-	s32 (*numpropsfunc)(void);
+	int (*numpropsfunc)(void);
 	void (*initpropsfunc)(void);
 	void (*tickfunc)(void);
 	void (*tickchrfunc)(struct chrdata *chr);
 	Gfx *(*hudfunc)(Gfx *gdl);
-	void (*calcscorefunc)(struct mpchrconfig *mpchr, s32 chrnum, s32 *score, s32 *deaths);
+	void (*calcscorefunc)(struct mpchrconfig *mpchr, int chrnum, int *score, int *deaths);
 	Gfx *(*radarextrafunc)(Gfx *gdl);
 	bool (*radarchrfunc)(Gfx **gdl, struct prop *prop);
-	bool (*highlightpropfunc)(struct prop *prop, s32 *colour);
-	bool (*spawnfunc)(f32 arg0, struct coord *pos, RoomNum *rooms, struct prop *prop, f32 *arg4);
-	s32 (*maxteamsfunc)(void);
+	bool (*highlightpropfunc)(struct prop *prop, int *colour);
+	bool (*spawnfunc)(float arg0, struct coord *pos, RoomNum *rooms, struct prop *prop, float *arg4);
+	int (*maxteamsfunc)(void);
 	bool (*isroomhighlightedfunc)(RoomNum room);
-	void (*highlightroomfunc)(RoomNum room, s32 *arg1, s32 *arg2, s32 *arg3);
+	void (*highlightroomfunc)(RoomNum room, int *arg1, int *arg2, int *arg3);
 	void *unk3c; // never hooked into nor fired
 	void (*readsavefunc)(struct savebuffer *buffer);
 	void (*writesavefunc)(struct savebuffer *buffer);
@@ -76,7 +76,7 @@ struct mpscenario {
 
 struct scenariodata g_ScenarioData;
 
-MenuItemHandlerResult menuhandlerMpDisplayTeam(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMpDisplayTeam(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_CHECKDISABLED) {
 		if (g_MpSetup.options & MPOPTION_TEAMSENABLED) {
@@ -89,7 +89,7 @@ MenuItemHandlerResult menuhandlerMpDisplayTeam(s32 operation, struct menuitem *i
 	return menuhandlerMpCheckboxOption(operation, item, data);
 }
 
-MenuItemHandlerResult menuhandlerMpOneHitKills(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMpOneHitKills(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_CHECKDISABLED || operation == MENUOP_CHECKHIDDEN) {
 		if (challengeIsFeatureUnlocked(MPFEATURE_ONEHITKILLS)) {
@@ -102,9 +102,9 @@ MenuItemHandlerResult menuhandlerMpOneHitKills(s32 operation, struct menuitem *i
 	return menuhandlerMpCheckboxOption(operation, item, data);
 }
 
-MenuItemHandlerResult menuhandlerMpSlowMotion(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMpSlowMotion(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u16 labels[] = {
+	uint16_t labels[] = {
 		L_MPMENU_240, // "Off"
 		L_MPMENU_241, // "On"
 		L_MPMENU_242, // "Smart"
@@ -245,12 +245,12 @@ struct mpscenariooverview g_MpScenarioOverviews[] = {
  * While the options dialog is open, check if another player has changed the
  * scenario to a different one. If so, replace this dialog with the new one.
  */
-MenuDialogHandlerResult mpOptionsMenuDialog(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult mpOptionsMenuDialog(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	if (operation == MENUOP_TICK) {
 		if (g_Menus[g_MpPlayerNum].curdialog->definition != g_MpScenarios[g_MpSetup.scenario].optionsdialog) {
-			s32 i;
-			s32 end = ARRAYCOUNT(g_MpScenarios);
+			int i;
+			int end = ARRAYCOUNT(g_MpScenarios);
 
 			for (i = 0; i < end; i++) {
 				if (g_Menus[g_MpPlayerNum].curdialog->definition == g_MpScenarios[i].optionsdialog) {
@@ -281,19 +281,19 @@ char *mpMenuTextScenarioName(struct menuitem *item)
 }
 
 struct scenariogroup {
-	s32 startindex;
-	u16 textid;
+	int startindex;
+	uint16_t textid;
 };
 
-MenuItemHandlerResult scenarioScenarioMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult scenarioScenarioMenuHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
 	struct scenariogroup groups[] = {
 		{ 0, L_MPMENU_244 }, // "Free for All!"
 		{ 4, L_MPMENU_245 }, // "-Teamwork-"
 	};
 
-	s32 i;
-	s32 count = 0;
+	int i;
+	int count = 0;
 	bool teamgame = true;
 
 	if (item->param) {
@@ -379,7 +379,7 @@ MenuItemHandlerResult scenarioScenarioMenuHandler(s32 operation, struct menuitem
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerMpOpenOptions(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMpOpenOptions(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		menuPushDialog(g_MpScenarios[g_MpSetup.scenario].optionsdialog);
@@ -438,9 +438,9 @@ void scenarioInit(void)
  * Return the number of additional props that will be created, such as
  * briefcases and uplinks.
  */
-s32 scenarioNumProps(void)
+int scenarioNumProps(void)
 {
-	s32 result = 0;
+	int result = 0;
 
 	if (g_MpScenarios[g_MpSetup.scenario].numpropsfunc) {
 		result = g_MpScenarios[g_MpSetup.scenario].numpropsfunc();
@@ -465,8 +465,8 @@ void scenarioInitProps(void)
  */
 void scenarioCreateMatchStartHudmsgs(void)
 {
-	s32 i;
-	s32 prevplayernum = g_Vars.currentplayernum;
+	int i;
+	int prevplayernum = g_Vars.currentplayernum;
 	char challengename[60];
 	char scenarioname[60];
 
@@ -524,14 +524,14 @@ void scenarioTickChr(struct chrdata *chr)
  */
 Gfx *scenarioRenderHud(Gfx *gdl)
 {
-	s32 viewleft;
-	s32 viewright;
-	s32 viewtop;
-	s32 viewheight;
-	s32 cplayernum;
-	s32 playercount;
+	int viewleft;
+	int viewright;
+	int viewtop;
+	int viewheight;
+	int cplayernum;
+	int playercount;
 	struct chrdata *chr;
-	u32 colour;
+	uint32_t colour;
 
 	if (g_Vars.normmplayerisrunning) {
 		if (g_MpScenarios[g_MpSetup.scenario].hudfunc) {
@@ -606,10 +606,10 @@ Gfx *scenarioRenderHud(Gfx *gdl)
  *
  * If no callback is registered, the default calculation below will apply.
  */
-void scenarioCalculatePlayerScore(struct mpchrconfig *mpchr, s32 chrnum, s32 *score, s32 *deaths)
+void scenarioCalculatePlayerScore(struct mpchrconfig *mpchr, int chrnum, int *score, int *deaths)
 {
 	struct mpchrconfig *othermpchr;
-	s32 i;
+	int i;
 
 	if (g_MpScenarios[g_MpSetup.scenario].calcscorefunc) {
 		g_MpScenarios[g_MpSetup.scenario].calcscorefunc(mpchr, chrnum, score, deaths);
@@ -667,7 +667,7 @@ bool scenarioRadarChr(Gfx **gdl, struct prop *prop)
  *
  * The prop may be a chr, weapon or object.
  */
-bool scenarioHighlightProp(struct prop *prop, s32 *colour)
+bool scenarioHighlightProp(struct prop *prop, int *colour)
 {
 	if (g_MpScenarios[g_MpSetup.scenario].highlightpropfunc) {
 		if (g_MpScenarios[g_MpSetup.scenario].highlightpropfunc(prop, colour)) {
@@ -723,12 +723,12 @@ bool scenarioHighlightProp(struct prop *prop, s32 *colour)
 		}
 
 		if (useteamcolour) {
-			u32 tmp = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
+			uint32_t tmp = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
 
 			colour[0] = tmp >> 24 & 0xff;
 			colour[1] = tmp >> 16 & 0xff;
 			colour[2] = tmp >> 8 & 0xff;
-			colour[3] = pulse ? (s32)(menuGetSinOscFrac(20) * 128) : 75;
+			colour[3] = pulse ? (int)(menuGetSinOscFrac(20) * 128) : 75;
 			return true;
 		}
 
@@ -749,9 +749,9 @@ bool scenarioHighlightProp(struct prop *prop, s32 *colour)
  *
  * CTC uses this to ensure the chrs spawn near their base.
  */
-f32 scenarioChooseSpawnLocation(f32 chrradius, struct coord *pos, RoomNum *rooms, struct prop *prop)
+float scenarioChooseSpawnLocation(float chrradius, struct coord *pos, RoomNum *rooms, struct prop *prop)
 {
-	f32 result;
+	float result;
 
 	if (g_Vars.normmplayerisrunning && g_MpScenarios[g_MpSetup.scenario].spawnfunc &&
 			g_MpScenarios[g_MpSetup.scenario].spawnfunc(chrradius, pos, rooms, prop, &result)) {
@@ -770,9 +770,9 @@ f32 scenarioChooseSpawnLocation(f32 chrradius, struct coord *pos, RoomNum *rooms
  */
 void scenarioReset(void)
 {
-	s32 i;
-	s32 j;
-	s32 *cmd = g_StageSetup.intro;
+	int i;
+	int j;
+	int *cmd = g_StageSetup.intro;
 
 	switch (g_MpSetup.scenario) {
 	case MPSCENARIO_KINGOFTHEHILL:
@@ -863,7 +863,7 @@ void scenarioReset(void)
  *
  * CTC sets this to 4, while the others use the default limit of 8.
  */
-s32 scenarioGetMaxTeams(void)
+int scenarioGetMaxTeams(void)
 {
 	if (g_MpScenarios[g_MpSetup.scenario].maxteamsfunc) {
 		return g_MpScenarios[g_MpSetup.scenario].maxteamsfunc();
@@ -889,7 +889,7 @@ bool scenarioIsRoomHighlighted(RoomNum room)
  *
  * Used in CTC for the team bases and in KOH for the hill.
  */
-void scenarioHighlightRoom(RoomNum room, s32 *arg1, s32 *arg2, s32 *arg3)
+void scenarioHighlightRoom(RoomNum room, int *arg1, int *arg2, int *arg3)
 {
 	if (g_MpScenarios[g_MpSetup.scenario].highlightroomfunc) {
 		g_MpScenarios[g_MpSetup.scenario].highlightroomfunc(room, arg1, arg2, arg3);
@@ -943,7 +943,7 @@ struct menudialogdef g_MpQuickTeamScenarioMenuDialog = {
  *
  * This is a helper function used by HTM to create the terminal.
  */
-struct prop *scenarioCreateObj(s32 modelnum, s16 padnum, f32 arg2, u32 flags, u32 flags2, u32 flags3)
+struct prop *scenarioCreateObj(int modelnum, int16_t padnum, float arg2, uint32_t flags, uint32_t flags2, uint32_t flags3)
 {
 	struct defaultobj template = {
 		256,                    // extrascale
@@ -993,10 +993,10 @@ struct prop *scenarioCreateObj(s32 modelnum, s16 padnum, f32 arg2, u32 flags, u3
  *
  * This is a helper function used by PAC.
  */
-void scenarioCreateHudmsg(s32 playernum, char *message)
+void scenarioCreateHudmsg(int playernum, char *message)
 {
 	if (playernum >= 0 && playernum < PLAYERCOUNT()) {
-		s32 prevplayernum = g_Vars.currentplayernum;
+		int prevplayernum = g_Vars.currentplayernum;
 
 		setCurrentPlayerNum(playernum);
 		hudmsgCreateWithFlags(message, HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE);
@@ -1009,14 +1009,14 @@ void scenarioCreateHudmsg(s32 playernum, char *message)
  *
  * This is a helper function used by PAC.
  */
-bool scenarioChrsAreSameTeam(s32 playernum1, s32 playernum2)
+bool scenarioChrsAreSameTeam(int playernum1, int playernum2)
 {
 	struct mpchrconfig *achr;
 	struct mpchrconfig *bchr;
 
 	if ((g_MpSetup.options & MPOPTION_TEAMSENABLED) && playernum1 >= 0 && playernum2 >= 0) {
-		s32 a = func0f18d074(playernum1);
-		s32 b = func0f18d074(playernum2);
+		int a = func0f18d074(playernum1);
+		int b = func0f18d074(playernum2);
 
 		if (a >= 0 && b >= 0) {
 			achr = MPCHR(a);
@@ -1035,13 +1035,13 @@ bool scenarioChrsAreSameTeam(s32 playernum1, s32 playernum2)
  *
  * The return value is a TICKOP constant.
  */
-s32 scenarioPickUpBriefcase(struct chrdata *chr, struct prop *prop)
+int scenarioPickUpBriefcase(struct chrdata *chr, struct prop *prop)
 {
 	struct defaultobj *obj = prop->obj;
 	struct weaponobj *weapon = prop->weapon;
-	s32 i;
-	s32 prevplayernum;
-	s32 caseteam;
+	int i;
+	int prevplayernum;
+	int caseteam;
 	char text1[64];
 	char text2[64];
 	char text3[64];
@@ -1219,7 +1219,7 @@ s32 scenarioPickUpBriefcase(struct chrdata *chr, struct prop *prop)
  */
 void scenarioHandleDroppedToken(struct chrdata *chr, struct prop *prop)
 {
-	s32 i;
+	int i;
 	struct weaponobj *weapon = prop->weapon;
 	struct defaultobj *obj;
 	struct pad pad;
@@ -1258,12 +1258,12 @@ void scenarioHandleDroppedToken(struct chrdata *chr, struct prop *prop)
  *
  * The return value is a TICKOP constant.
  */
-s32 scenarioPickUpUplink(struct chrdata *chr, struct prop *prop)
+int scenarioPickUpUplink(struct chrdata *chr, struct prop *prop)
 {
-	s32 i;
+	int i;
 	char message[64];
 	struct mpchrconfig *mpchr;
-	u32 playernum;
+	uint32_t playernum;
 
 	if (g_MpSetup.scenario == MPSCENARIO_HACKERCENTRAL) {
 		struct defaultobj *obj = prop->obj;
@@ -1320,7 +1320,7 @@ void scenarioHandleActivatedProp(struct chrdata *chr, struct prop *prop)
 		struct defaultobj *obj = prop->obj;
 
 		if (obj->flags3 & OBJFLAG3_HTMTERMINAL) {
-			u32 mpindex = mpPlayerGetIndex(chr);
+			uint32_t mpindex = mpPlayerGetIndex(chr);
 
 			if ((obj->hidden & OBJHFLAG_ACTIVATED_BY_BOND) == 0) {
 				obj->hidden &= 0x0fffffff;

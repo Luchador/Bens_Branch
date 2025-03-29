@@ -13,13 +13,13 @@
 #include "types.h"
 
 struct N_SpeakerType N_SpeakerType;
-u8 var8009c344[2];
-u8 var8009c346[2];
-u8 var8009c348[4];
+uint8_t var8009c344[2];
+uint8_t var8009c346[2];
+uint8_t var8009c348[4];
 
-void speakersSetMode(u8 mode)
+void speakersSetMode(uint8_t mode)
 {
-	s32 i;
+	int i;
 
 	N_SpeakerType.surround = 0;
 	N_SpeakerType.mono = 0;
@@ -42,7 +42,7 @@ void speakersSetMode(u8 mode)
 	}
 }
 
-void speaker00034104(s32 index, s32 arg1)
+void speaker00034104(int index, int arg1)
 {
 	if (arg1 == 0) {
 		arg1 = var8009c348[index];

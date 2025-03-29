@@ -6,24 +6,24 @@
 #define ADPCMFBYTES      9
 #define LFSAMPLES        4
 
-Acmd *_decodeChunk(Acmd *ptr, N_PVoice *f, s32 tsam, s32 nbytes, s16 outp, s16 inp, u32 flags);
+Acmd *_decodeChunk(Acmd *ptr, N_PVoice *f, int tsam, int nbytes, int16_t outp, int16_t inp, uint32_t flags);
 
-Acmd *n_alAdpcmPull(N_PVoice *filter, s16 *outp, s32 outCount, Acmd *p)
+Acmd *n_alAdpcmPull(N_PVoice *filter, int16_t *outp, int outCount, Acmd *p)
 {
 	Acmd *ptr = p;
-	s16 inp;
-	s32 tsam;
-	s32 nframes;
-	s32 nbytes;
-	s32 overFlow;
-	s32 startZero;
-	s32 nOver;
-	s32 nSam;
-	s32 op;
-	s32 nLeft;
-	s32 bEnd;
-	s32 decoded = 0;
-	s32 looped = 0;
+	int16_t inp;
+	int tsam;
+	int nframes;
+	int nbytes;
+	int overFlow;
+	int startZero;
+	int nOver;
+	int nSam;
+	int op;
+	int nLeft;
+	int bEnd;
+	int decoded = 0;
+	int looped = 0;
 
 	N_PVoice *f = filter;
 
@@ -75,7 +75,7 @@ Acmd *n_alAdpcmPull(N_PVoice *filter, s16 *outp, s32 outCount, Acmd *p)
 		 * Now fix up state info to reflect the loop start point
 		 */
 		f->dc_lastsam = f->dc_loop.start &0xf;
-		f->dc_memin = (intptr_t) f->dc_table->base + ADPCMFBYTES * ((s32) (f->dc_loop.start>>LFSAMPLES) + 1);
+		f->dc_memin = (intptr_t) f->dc_table->base + ADPCMFBYTES * ((int) (f->dc_loop.start>>LFSAMPLES) + 1);
 		f->dc_sample = f->dc_loop.start;
 
 		bEnd = *outp;
@@ -189,7 +189,7 @@ Acmd *n_alAdpcmPull(N_PVoice *filter, s16 *outp, s32 outCount, Acmd *p)
 	return ptr;
 }
 
-s32 n_alLoadParam(N_PVoice *filter, s32 paramID, void *param)
+int n_alLoadParam(N_PVoice *filter, int paramID, void *param)
 {
 	N_PVoice *a = filter;
 
@@ -201,7 +201,7 @@ s32 n_alLoadParam(N_PVoice *filter, s32 paramID, void *param)
 
 		switch (a->dc_table->type) {
 		case (AL_ADPCM_WAVE):
-			a->dc_table->len = ADPCMFBYTES * ((s32) (a->dc_table->len/ADPCMFBYTES));
+			a->dc_table->len = ADPCMFBYTES * ((int) (a->dc_table->len/ADPCMFBYTES));
 
 			a->dc_bookSize = 2*a->dc_table->waveInfo.adpcmWave.book->order*
 				a->dc_table->waveInfo.adpcmWave.book->npredictors*ADPCMVSIZE;
@@ -257,7 +257,7 @@ s32 n_alLoadParam(N_PVoice *filter, s32 paramID, void *param)
 	return 0;
 }
 
-Acmd *_decodeChunk(Acmd *ptr, N_PVoice *f, s32 tsam, s32 nbytes, s16 outp, s16 inp, u32 flags)
+Acmd *_decodeChunk(Acmd *ptr, N_PVoice *f, int tsam, int nbytes, int16_t outp, int16_t inp, uint32_t flags)
 {
 	intptr_t dramAlign, dramLoc;
 

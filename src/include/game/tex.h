@@ -1,6 +1,5 @@
 #ifndef IN_GAME_TEX_H
 #define IN_GAME_TEX_H
-#include <ultra64.h>
 #include "data.h"
 #include "types.h"
 
@@ -8,25 +7,25 @@ void texInit(void);
 
 void surfaceReset(void);
 
-void texSetBitstring(u8 *arg0);
-s32 texReadBits(s32 arg0);
+void texSetBitstring(uint8_t *arg0);
+int texReadBits(int arg0);
 void texReset(void);
 
-s32 texGetMask(s32 value);
-s32 tex0f0b33f8(s32 width, s32 height, s32 lod);
-s32 tex0f0b3468(s32 width, s32 height, s32 lod);
-s32 tex0f0b34d8(s32 width, s32 height, s32 lod);
-s32 tex0f0b3548(s32 width, s32 height, s32 lod);
-void texSetRenderMode(Gfx **gdlptr, s32 rendermode, s32 numcycles, s32 arg3);
+int texGetMask(int value);
+int tex0f0b33f8(int width, int height, int lod);
+int tex0f0b3468(int width, int height, int lod);
+int tex0f0b34d8(int width, int height, int lod);
+int tex0f0b3548(int width, int height, int lod);
+void texSetRenderMode(Gfx **gdlptr, int rendermode, int numcycles, int arg3);
 void texLoadFromConfig(struct textureconfig *config);
-void texSelect(Gfx **gdl, struct textureconfig *tconfig, u32 arg2, s32 arg3, u32 ulst, bool arg5, struct texpool *pool);
+void texSelect(Gfx **gdl, struct textureconfig *tconfig, uint32_t arg2, int arg3, uint32_t ulst, bool arg5, struct texpool *pool);
 
-s32 texGetWidthAtLod(struct tex *tex, s32 lod);
-s32 texGetHeightAtLod(struct tex *tex, s32 lod);
-s32 texGetLineSizeInBytes(struct tex *tex, s32 lod);
-s32 texGetSizeInBytes(struct tex *tex, s32 lod);
-void texGetDepthAndSize(struct tex *tex, s32 *arg1, s32 *arg2);
-s32 texLoadFromGdl(Gfx *instart, s32 gdlsizeinbytes, Gfx *outstart, struct texpool *pool, u8 *vtxstart);
-void texCopyGdls(Gfx *src, Gfx *dst, s32 numbytes);
+int texGetWidthAtLod(struct tex *tex, int lod);
+int texGetHeightAtLod(struct tex *tex, int lod);
+int texGetLineSizeInBytes(struct tex *tex, int lod);
+int texGetSizeInBytes(struct tex *tex, int lod);
+void texGetDepthAndSize(struct tex *tex, int *arg1, int *arg2);
+int texLoadFromGdl(Gfx *instart, int gdlsizeinbytes, Gfx *outstart, struct texpool *pool, uint8_t *vtxstart);
+void texCopyGdls(Gfx *src, Gfx *dst, int numbytes);
 
 #endif

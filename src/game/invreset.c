@@ -10,7 +10,7 @@
 
 void invReset(void)
 {
-	s32 i;
+	int i;
 
 	if (PLAYERCOUNT() == 1 && g_Vars.normmplayerisrunning == false) {
 		g_Vars.currentplayer->equipallguns = cheatIsActive(CHEAT_ALLGUNS);
@@ -23,7 +23,7 @@ void invReset(void)
 	}
 }
 
-void invInit(s32 numdoubles)
+void invInit(int numdoubles)
 {
 	//g_Vars.currentplayer->equipmaxitems = numdoubles + 30;
 	g_Vars.currentplayer->equipmaxitems = numdoubles + 31;

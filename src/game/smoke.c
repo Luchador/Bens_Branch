@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/dlights.h"
 #include "game/gfxmemory.h"
@@ -18,7 +18,7 @@
 #include "types.h"
 
 struct smoke *g_Smokes;
-s32 g_MaxSmokes;
+int g_MaxSmokes;
 Mtx var800a3448;
 Mtx var800a3488;
 
@@ -59,7 +59,7 @@ struct smoketype g_SmokeTypes[] = {
 	/*22*/ { 220, 5,  8,   60,  0.03,              0xaf, 0x8f, 0x6f, 0.3,             30,  1.5,              0.3,               1 }, // SMOKETYPE_UFO
 };
 
-Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, struct coord *coord, f32 size)
+Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, struct coord *coord, float size)
 {
 	Vtx *vertices = gfxAllocateVertices(4);
 	Col *colours = (Col *)gfxAllocateColours(1);
@@ -68,27 +68,26 @@ Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, stru
 	struct coord sp94;
 	struct coord sp88;
 	struct coord sp7c;
-	f32 sp78;
-	f32 sp74;
-	f32 sp70;
-	f32 sp6c;
-	f32 sp68;
-	u8 alpha;
+	float sp78;
+	float sp74;
+	float sp70;
+	float sp6c;
+	float sp68;
+	uint8_t alpha;
 	struct coord *campos = &g_Vars.currentplayer->cam_pos;
-	f32 sp5c;
-	f32 sp58;
-	f32 sp54;
-	f32 distance;
-	f32 range;
-	f32 mult;
-	f32 sp44;
-	f32 sp40;
-	f32 sp3c;
-	f32 frac;
-	u32 stack;
+	float sp5c;
+	float sp58;
+	float sp54;
+	float distance;
+	float range;
+	float mult;
+	float sp44;
+	float sp40;
+	float sp3c;
+	float frac;
 
 	if (g_SmokeTypes[smoke->type].fadespeed >= part->count) {
-		alpha = part->alpha / (f32) g_SmokeTypes[smoke->type].fadespeed * part->count;
+		alpha = part->alpha / (float) g_SmokeTypes[smoke->type].fadespeed * part->count;
 	} else {
 		alpha = part->alpha;
 	}
@@ -153,8 +152,8 @@ Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, stru
 	}
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
-		f32 alphamult = 0.5f;
-		f32 value;
+		float alphamult = 0.5f;
+		float value;
 
 		distance = sqrtf((sp70 - g_Vars.currentplayer->eraserpos.f[0]) * (sp70 - g_Vars.currentplayer->eraserpos.f[0])
 				+ (sp6c - g_Vars.currentplayer->eraserpos.f[1]) * (sp6c - g_Vars.currentplayer->eraserpos.f[1])
@@ -188,9 +187,9 @@ Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, stru
 				frac = 1;
 			}
 
-			colours[0].r = (u32)(g_SmokeTypes[smoke->type].r * frac) & 0xff;
-			colours[0].g = (u32)(g_SmokeTypes[smoke->type].g * frac) & 0xff;
-			colours[0].b = (u32)(g_SmokeTypes[smoke->type].b * frac) & 0xff;
+			colours[0].r = (uint32_t)(g_SmokeTypes[smoke->type].r * frac) & 0xff;
+			colours[0].g = (uint32_t)(g_SmokeTypes[smoke->type].g * frac) & 0xff;
+			colours[0].b = (uint32_t)(g_SmokeTypes[smoke->type].b * frac) & 0xff;
 		} else {
 			colours[0].r = g_SmokeTypes[smoke->type].r;
 			colours[0].g = g_SmokeTypes[smoke->type].g;
@@ -236,12 +235,12 @@ Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, stru
 	return gdl;
 }
 
-struct smoke *smokeCreate(struct coord *pos, RoomNum *rooms, s16 type)
+struct smoke *smokeCreate(struct coord *pos, RoomNum *rooms, int16_t type)
 {
 	struct smoke *smoke = NULL;
-	s32 playercount = PLAYERCOUNT();
-	s32 count = 0;
-	s32 i;
+	int playercount = PLAYERCOUNT();
+	int count = 0;
+	int i;
 
 	for (i = 0; i < g_MaxSmokes; i++) {
 		if (g_Smokes[i].prop == NULL) {
@@ -301,11 +300,11 @@ struct smoke *smokeCreate(struct coord *pos, RoomNum *rooms, s16 type)
 	return smoke;
 }
 
-bool smokeCreateForHand(struct coord *pos, RoomNum *rooms, s16 type, s32 handnum)
+bool smokeCreateForHand(struct coord *pos, RoomNum *rooms, int16_t type, int handnum)
 {
 	struct smoke *smoke;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	for (i = 0; i < g_MaxSmokes; i++) {
 		if (g_Smokes[i].prop
@@ -343,11 +342,11 @@ bool smokeCreateForHand(struct coord *pos, RoomNum *rooms, s16 type, s32 handnum
  * smoke parts have a size of zero. Perhaps the caller is supposed to check if
  * this function returns false and reuse the zero-sized smoke parts if so?
  */
-bool smokeCreateWithSource(void *source, struct coord *pos, RoomNum *rooms, s16 type, bool srcispadeffect)
+bool smokeCreateWithSource(void *source, struct coord *pos, RoomNum *rooms, int16_t type, bool srcispadeffect)
 {
 	struct smoke *smoke;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 	bool checksmokes = true;
 
 	if (type == SMOKETYPE_UFO) {
@@ -385,19 +384,19 @@ bool smokeCreateWithSource(void *source, struct coord *pos, RoomNum *rooms, s16 
 	return false;
 }
 
-void smokeCreateAtProp(struct prop *prop, s16 type)
+void smokeCreateAtProp(struct prop *prop, int16_t type)
 {
 	smokeCreateWithSource(prop, &prop->pos, prop->rooms, type, false);
 }
 
-void smokeCreateAtPadEffect(struct padeffectobj *effect, struct coord *pos, RoomNum *rooms, s16 type)
+void smokeCreateAtPadEffect(struct padeffectobj *effect, struct coord *pos, RoomNum *rooms, int16_t type)
 {
 	smokeCreateWithSource(effect, pos, rooms, type, true);
 }
 
 void smokeClearForProp(struct prop *prop)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_MaxSmokes; i++) {
 		if (g_Smokes[i].prop && g_Smokes[i].source == prop && g_Smokes[i].option == 0) {
@@ -407,17 +406,17 @@ void smokeClearForProp(struct prop *prop)
 	}
 }
 
-struct smoke *smokeCreateSimple(struct coord *pos, RoomNum *rooms, s16 type)
+struct smoke *smokeCreateSimple(struct coord *pos, RoomNum *rooms, int16_t type)
 {
 	return smokeCreate(pos, rooms, type);
 }
 
-u32 smokeTick(struct prop *prop)
+uint32_t smokeTick(struct prop *prop)
 {
-	s32 i;
-	s32 j;
-	s32 k;
-	s32 lvupdate;
+	int i;
+	int j;
+	int k;
+	int lvupdate;
 	struct smoke *smoke;
 	struct smokepart *part;
 	struct coord bbmin;
@@ -432,7 +431,7 @@ u32 smokeTick(struct prop *prop)
 
 	// These tick values aren't adjusted for PAL,
 	// so smoke will hang around for longer in PAL versions
-	lvupdate = g_Vars.lvupdate60 < 15 ? (f32)g_Vars.lvupdate60 : 15.0f;
+	lvupdate = g_Vars.lvupdate60 < 15 ? (float)g_Vars.lvupdate60 : 15.0f;
 
 	for (i = 0; i < lvupdate; i++) {
 		smoke->age++;
@@ -505,7 +504,7 @@ u32 smokeTick(struct prop *prop)
 						part->offset2 = RANDOMFRAC() * 0.5f;
 
 						if (smoke->age > g_SmokeTypes[smoke->type].duration - g_SmokeTypes[smoke->type].numclouds) {
-							part->alpha *= (g_SmokeTypes[smoke->type].duration - smoke->age) / (f32)g_SmokeTypes[smoke->type].numclouds;
+							part->alpha *= (g_SmokeTypes[smoke->type].duration - smoke->age) / (float)g_SmokeTypes[smoke->type].numclouds;
 						}
 						break;
 					}
@@ -561,7 +560,7 @@ u32 smokeTick(struct prop *prop)
 	return TICKOP_NONE;
 }
 
-u32 smokeTickPlayer(struct prop *prop)
+uint32_t smokeTickPlayer(struct prop *prop)
 {
 	Mtxf *matrix = camGetWorldToScreenMtxf();
 
@@ -581,11 +580,11 @@ u32 smokeTickPlayer(struct prop *prop)
 Gfx *smokeRender(struct prop *prop, Gfx *gdl, bool xlupass)
 {
 	struct smoke *smoke = prop->smoke;
-	s32 roomnum;
+	int roomnum;
 	struct screenbox screenbox;
 	struct coord sp8c;
-	f32 sp88;
-	s32 i;
+	float sp88;
+	int i;
 	struct coord *coord;
 	struct coord worldoffset;
 	bool near = true;
@@ -612,9 +611,9 @@ Gfx *smokeRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		roomGetPos(roomnum, &worldoffset);
 
 		if (smoke->parts[0].size > 0) {
-			f32 x = smoke->parts[0].pos.x - worldoffset.x;
-			f32 y = smoke->parts[0].pos.y - worldoffset.y;
-			f32 z = smoke->parts[0].pos.z - worldoffset.z;
+			float x = smoke->parts[0].pos.x - worldoffset.x;
+			float y = smoke->parts[0].pos.y - worldoffset.y;
+			float z = smoke->parts[0].pos.z - worldoffset.z;
 
 			if (x < -2000 || x > 2000 || y < -2000 || y > 2000 || z < -2000 || z > 2000) {
 				near = false;
@@ -670,7 +669,7 @@ Gfx *smokeRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 void smokeClearSomeTypes(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_MaxSmokes; i++) {
 		if (g_Smokes[i].prop) {

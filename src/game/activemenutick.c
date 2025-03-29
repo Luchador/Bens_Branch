@@ -12,15 +12,13 @@
 #include "string.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "game/player.h"
 #include "input.h"
-#endif
 
 void amTick(void)
 {
-	s32 prevplayernum = g_Vars.currentplayernum;
-	s32 i;
+	int prevplayernum = g_Vars.currentplayernum;
+	int i;
 
 	for (i = 0; i < PLAYERCOUNT(); i++) {
 		setCurrentPlayerNum(i);
@@ -38,11 +36,11 @@ void amTick(void)
 		}
 
 		if (g_Vars.currentplayer->activemenumode != AMMODE_CLOSED) {
-			s32 controlmode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
-			s8 contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-			s32 numsamples = joyGetNumSamples();
-			s32 j;
-			u32 amask, lrtmask, umask, dmask, lmask, rmask;
+			int controlmode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
+			int8_t contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
+			int numsamples = joyGetNumSamples();
+			int j;
+			uint32_t amask, lrtmask, umask, dmask, lmask, rmask;
 
 			if (controlmode == CONTROLMODE_PC) {
 				amask = D_JPAD;
@@ -61,21 +59,21 @@ void amTick(void)
 			}
 
 			for (j = 0; j < numsamples; j++) {
-				s8 gotonextscreen = false;
-				s8 cstickx = joyGetStickXOnSample(j, contpadnum);
-				s8 csticky = joyGetStickYOnSample(j, contpadnum);
+				int8_t gotonextscreen = false;
+				int8_t cstickx = joyGetStickXOnSample(j, contpadnum);
+				int8_t csticky = joyGetStickYOnSample(j, contpadnum);
 
 				// if cstickx is -128, it will get negated and stored into absstickx, negating it again if it's 8 bit
-				s32 absstickx;
-				s32 abssticky;
-				u32 buttonsstate = joyGetButtonsOnSample(j, contpadnum, 0xffffffff);
-				u32 buttonspressed = joyGetButtonsPressedOnSample(j, contpadnum, 0xffffffff);
+				int absstickx;
+				int abssticky;
+				uint32_t buttonsstate = joyGetButtonsOnSample(j, contpadnum, 0xffffffff);
+				uint32_t buttonspressed = joyGetButtonsPressedOnSample(j, contpadnum, 0xffffffff);
 				bool stickpushed = false;
-				s32 slotnum;
+				int slotnum;
 				bool stayopen;
 				bool toggle;
-				s32 row;
-				s32 column;
+				int row;
+				int column;
 
 				column = 1;
 				row = 1;
@@ -84,10 +82,10 @@ void amTick(void)
 
 				g_AmMenus[g_AmIndex].allbots = false;
 
-				s32 newstickx = (s32)cstickx;
-				s32 newsticky = (s32)csticky;
+				int newstickx = (int)cstickx;
+				int newsticky = (int)csticky;
 				if (j == 0 && g_Vars.currentplayernum == 0 && inputMouseIsLocked()) {
-					f32 mdx, mdy;
+					float mdx, mdy;
 					struct activemenu *am = &g_AmMenus[g_AmIndex];
 					inputMouseGetAbsScaledDelta(&mdx, &mdy);
 					if (mdx || mdy) {
@@ -96,8 +94,8 @@ void amTick(void)
 						am->mousex = (am->mousex > 127.f) ? 127.f : (am->mousex < -128.f) ? -128.f : am->mousex;
 						am->mousey = (am->mousey > 127.f) ? 127.f : (am->mousey < -128.f) ? -128.f : am->mousey;
 					}
-					newstickx += (s32)am->mousex;
-					newsticky -= (s32)am->mousey;
+					newstickx += (int)am->mousex;
+					newsticky -= (int)am->mousey;
 				}
 				cstickx = (newstickx < -128) ? -128 : (newstickx > 127) ? 127 : newstickx;
 				csticky = (newsticky < -128) ? -128 : (newsticky > 127) ? 127 : newsticky;
@@ -168,11 +166,11 @@ void amTick(void)
 						|| controlmode == CONTROLMODE_24
 						|| controlmode == CONTROLMODE_22
 						|| controlmode == CONTROLMODE_21) {
-					s8 contpadnum2 = optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
-					s8 cstickx2 = joyGetStickXOnSample(j, contpadnum2);
-					s8 csticky2 = joyGetStickYOnSample(j, contpadnum2);
-					u32 buttonsstate2 = joyGetButtonsOnSample(j, contpadnum2, 0xffffffff);
-					u32 buttonspressed2 = joyGetButtonsPressedOnSample(j, contpadnum2, 0xffffffff);
+					int8_t contpadnum2 = optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
+					int8_t cstickx2 = joyGetStickXOnSample(j, contpadnum2);
+					int8_t csticky2 = joyGetStickYOnSample(j, contpadnum2);
+					uint32_t buttonsstate2 = joyGetButtonsOnSample(j, contpadnum2, 0xffffffff);
+					uint32_t buttonspressed2 = joyGetButtonsPressedOnSample(j, contpadnum2, 0xffffffff);
 
 					if (g_Vars.currentplayer->activemenumode == AMMODE_EDIT) {
 						buttonsstate2 = buttonsstate2 & A_BUTTON;
@@ -209,10 +207,10 @@ void amTick(void)
 					abssticky = csticky2 < 0 ? -csticky2 : csticky2;
 
 					if (absstickx > 20 || abssticky > 20) {
-						if ((f32)abssticky / (f32)absstickx < 0.268f) {
+						if ((float)abssticky / (float)absstickx < 0.268f) {
 							row = 1;
 							column = cstickx2 < 0 ? 0 : 2;
-						} else if ((f32)absstickx / (f32)abssticky < 0.268f) {
+						} else if ((float)absstickx / (float)abssticky < 0.268f) {
 							column = 1;
 							row = csticky2 < 0 ? 2 : 0;
 						} else {
@@ -230,10 +228,10 @@ void amTick(void)
 				if (absstickx > 20 || abssticky > 20) {
 					stickpushed = true;
 
-					if ((f32)abssticky / (f32)absstickx < 0.268f) {
+					if ((float)abssticky / (float)absstickx < 0.268f) {
 						column = cstickx < 0 ? 0 : 2;
 						row = 1;
-					} else if ((f32)absstickx / (f32)abssticky < 0.268f) {
+					} else if ((float)absstickx / (float)abssticky < 0.268f) {
 						column = 1;
 						row = csticky < 0 ? 2 : 0;
 					} else {
@@ -314,7 +312,7 @@ void amTick(void)
 					} else {
 						bool gotoslot = true;
 						char text[28];
-						u32 flags;
+						uint32_t flags;
 
 						amGetSlotDetails(slotnum, &flags, text);
 
@@ -360,11 +358,11 @@ void amTick(void)
 		}
 
 		if (g_Vars.currentplayer->activemenumode != AMMODE_EDIT) {
-			s16 dist;
-			s16 dstradius;
+			int16_t dist;
+			int16_t dstradius;
 
 			if (g_AmMenus[g_AmIndex].dstx != -123) {
-				s16 dist;
+				int16_t dist;
 
 				// Update selection x/y values
 				g_AmMenus[g_AmIndex].selx = (g_AmMenus[g_AmIndex].selx + g_AmMenus[g_AmIndex].dstx) / 2;
@@ -396,7 +394,7 @@ void amTick(void)
 
 			// Update alpha of slots so they fade in
 			if (g_AmMenus[g_AmIndex].alphafrac < 1) {
-				g_AmMenus[g_AmIndex].alphafrac += (f32)g_Vars.lvupdate240 / (4.f * 30.0f);
+				g_AmMenus[g_AmIndex].alphafrac += (float)g_Vars.lvupdate240 / (4.f * 30.0f);
 			}
 
 			if (g_AmMenus[g_AmIndex].alphafrac > 1) {
@@ -404,7 +402,7 @@ void amTick(void)
 			}
 
 			// Make selection border pulsate
-			g_AmMenus[g_AmIndex].selpulse += (f32)g_Vars.lvupdate240 / (4.f * 5.0f);
+			g_AmMenus[g_AmIndex].selpulse += (float)g_Vars.lvupdate240 / (4.f * 5.0f);
 
 			if (g_AmMenus[g_AmIndex].selpulse > 18.849555969238f) {
 				g_AmMenus[g_AmIndex].selpulse -= 18.849555969238f;

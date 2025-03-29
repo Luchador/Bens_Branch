@@ -20,16 +20,16 @@
 #include "data.h"
 #include "types.h"
 
-s32 g_FilelistKnownPlugCounts[5];
+int g_FilelistKnownPlugCounts[5];
 
 struct filelist *g_FileLists[MAX_PLAYERS] = { NULL };
 bool var80075bd0[] = { true, true, true, true };
 bool var80075be0[] = { false, false, false, false };
-u32 var80075bf0 = false;
+uint32_t var80075bf0 = false;
 
 void func0f110bf8(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_FileLists); i++) {
 		if (g_FileLists[i] != NULL) {
@@ -42,7 +42,7 @@ void func0f110bf8(void)
 /**
  * Allocate and build a file list.
  */
-void filelistCreate(s32 listnum, u8 filetype)
+void filelistCreate(int listnum, uint8_t filetype)
 {
 	if (g_FileLists[listnum] == NULL) {
 		g_FileLists[listnum] = memaAlloc(align16(sizeof(struct filelist)));
@@ -51,17 +51,17 @@ void filelistCreate(s32 listnum, u8 filetype)
 	g_FileLists[listnum]->timeuntilupdate = 1;
 	g_FileLists[listnum]->filetype = filetype;
 
-	if (var80062944 == 0) {
+	if (var80062944 == false) {
 		joySetPfsPollInterval(3);
 	}
 
-	var80062944 = 1;
+	var80062944 = true;
 }
 
-s32 filelistFindOrCreate(u8 filetype)
+int filelistFindOrCreate(uint8_t filetype)
 {
-	s32 bestindex = -1;
-	s32 i;
+	int bestindex = -1;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_FileLists); i++) {
 		if (g_FileLists[i]) {
@@ -83,16 +83,16 @@ s32 filelistFindOrCreate(u8 filetype)
 	return -1;
 }
 
-void filelistInvalidatePak(s32 device)
+void filelistInvalidatePak(int device)
 {
 	g_FilelistKnownPlugCounts[device] = -1;
 }
 
 void filelistsTick(void)
 {
-	u32 updateall;
-	u32 update;
-	s32 i;
+	uint32_t updateall;
+	uint32_t update;
+	int i;
 	static bool doneinit = false;
 
 	if (!doneinit) {
@@ -142,26 +142,26 @@ void filelistsTick(void)
 
 void filelistUpdate(struct filelist *list)
 {
-	const u32 sp3a88[] = {
+	const uint32_t sp3a88[] = {
 		PAKFILETYPE_GAME,
 		PAKFILETYPE_MPSETUP,
 		PAKFILETYPE_MPPLAYER,
 		PAKFILETYPE_CAMERA,
 	};
 
-	s32 sp1288[2560];
-	u32 spa88[512];
-	s8 filedevices[2560];
-	s32 i;
-	s32 j;
-	s32 ret;
-	s32 len;
+	int sp1288[2560];
+	uint32_t spa88[512];
+	int8_t filedevices[2560];
+	int i;
+	int j;
+	int ret;
+	int len;
 
 	// Display order means game pak then controller paks
 	// Device order means controller paks then game pak (ie. SAVEDEVICE constant order)
 
 	// Mapping of display order to device order
-	const s8 dis2dev[] = {
+	const int8_t dis2dev[] = {
 		SAVEDEVICE_GAMEPAK,
 		SAVEDEVICE_CONTROLLERPAK1,
 		SAVEDEVICE_CONTROLLERPAK2,
@@ -170,7 +170,7 @@ void filelistUpdate(struct filelist *list)
 	};
 
 	// Mapping of device order to display order
-	const s8 dev2dis[] = { 1, 2, 3, 4, /* game pak */ 0 };
+	const int8_t dev2dis[] = { 1, 2, 3, 4, /* game pak */ 0 };
 
 	list->numdevices = 0;
 
@@ -214,7 +214,7 @@ void filelistUpdate(struct filelist *list)
 	// Iterating files
 	for (i = 0; i < len; i++) {
 		struct filelistfile *file = &list->files[list->numfiles];
-		s32 ret = pakReadBodyAtGuid(filedevices[i], sp1288[i], file->name, sizeof(file->name));
+		int ret = pakReadBodyAtGuid(filedevices[i], sp1288[i], file->name, sizeof(file->name));
 
 		if (ret);
 

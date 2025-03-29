@@ -50,7 +50,6 @@
 #define alSeqpGetTempo		n_alSeqpGetTempo
 #define alSeqpGetVol		n_alSeqpGetVol
 #define alSeqpPlay		n_alSeqpPlay
-#define alSeqpSendMidi		n_alSeqpSendMidi
 #define alSeqpSetBank		n_alSeqpSetBank
 #define alSeqpSetChlVol		n_alSeqpSetChlVol
 #define alSeqpSetChlFXMix	n_alSeqpSetChlFXMix
@@ -83,9 +82,7 @@
 #define alCSPSetChlPriority	n_alCSPSetChlPriority
 #define alCSPSetChlProgram	n_alCSPSetChlProgram
 #define alCSPSetSeq		n_alCSPSetSeq
-#define alCSPSetTempo		n_alCSPSetTempo
 #define alCSPSetVol		n_alCSPSetVol
-#define alCSPStop		n_alCSPStop
 
 #define ALSoundState            N_ALSoundState
 #define ALSndpEvent             N_ALSndpEvent

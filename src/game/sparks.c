@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
 #include "game/dlights.h"
@@ -16,9 +17,9 @@
 #include "types.h"
 
 struct spark g_Sparks[100];
-s32 g_NextSparkIndex;
+int g_NextSparkIndex;
 struct sparkgroup g_SparkGroups[10];
-s32 g_NextSparkGroupIndex;
+int g_NextSparkGroupIndex;
 
 struct sparktype g_SparkTypes[] = {
 	//         velocity x/z                weight
@@ -58,9 +59,9 @@ bool g_SparksAreActive = false;
 
 void sparkCreate(struct coord *pos, struct sparktype *type)
 {
-	f32 tmp;
-	f32 maxspeed = 0.0f;
-	s32 i;
+	float tmp;
+	float maxspeed = 0.0f;
+	int i;
 	struct spark *spark;
 
 	spark = &g_Sparks[g_NextSparkIndex];
@@ -70,9 +71,9 @@ void sparkCreate(struct coord *pos, struct sparktype *type)
 	spark->pos.y = 0.0f;
 	spark->pos.z = 0.0f;
 
-	spark->speed.x = (s32)(rngRandom() % (type->unk00 * 2 + 1)) - type->unk00;
-	spark->speed.y = (s32)(rngRandom() % (type->unk00 * 2 + 1)) - type->unk00;
-	spark->speed.z = (s32)(rngRandom() % (type->unk00 * 2 + 1)) - type->unk00;
+	spark->speed.x = (int)(rngRandom() % (type->unk00 * 2 + 1)) - type->unk00;
+	spark->speed.y = (int)(rngRandom() % (type->unk00 * 2 + 1)) - type->unk00;
+	spark->speed.z = (int)(rngRandom() % (type->unk00 * 2 + 1)) - type->unk00;
 
 	if (spark->speed.y == 0.0f) {
 		spark->speed.y = -0.0001f;
@@ -117,7 +118,7 @@ void sparkCreate(struct coord *pos, struct sparktype *type)
  */
 void sparkgroupEnsureFreeSparkSlot(struct sparkgroup *group)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_SparkGroups); i++) {
 		if (&g_SparkGroups[i] != group && g_SparkGroups[i].startindex == g_NextSparkIndex) {
@@ -131,16 +132,16 @@ void sparkgroupEnsureFreeSparkSlot(struct sparkgroup *group)
 	}
 }
 
-void sparksCreate(s32 room, struct prop *prop, struct coord *pos, struct coord *arg3, struct coord *arg4, s32 typenum)
+void sparksCreate(int room, struct prop *prop, struct coord *pos, struct coord *arg3, struct coord *arg4, int typenum)
 {
 	struct sparkgroup *group = &g_SparkGroups[g_NextSparkGroupIndex];
 	struct sparktype *type = &g_SparkTypes[typenum];
 	struct coord grouppos;
-	s32 i;
+	int i;
 
 	if ((typenum == SPARKTYPE_BLOOD || typenum == SPARKTYPE_FLESH) && prop && prop->type == PROPTYPE_CHR) {
 		struct chrdata *chr = prop->chr;
-		u32 colours[3];
+		uint32_t colours[3];
 
 		chrGetBloodColour(chr->bodynum, NULL, colours);
 
@@ -168,7 +169,7 @@ void sparksCreate(s32 room, struct prop *prop, struct coord *pos, struct coord *
 
 	if (typenum == SPARKTYPE_SHALLOWWATER) {
 		if (group->age != 0) {
-			s32 newindex = -1;
+			int newindex = -1;
 
 			for (i = 0; i < ARRAYCOUNT(g_SparkGroups) && newindex < 0; i++) {
 				if (g_SparkGroups[i].age == 0) {
@@ -185,7 +186,7 @@ void sparksCreate(s32 room, struct prop *prop, struct coord *pos, struct coord *
 	}
 
 	if (arg3 != NULL && arg4 != NULL) {
-		f32 f0 = sqrtf(arg4->f[0] * arg4->f[0] + arg4->f[1] * arg4->f[1] + arg4->f[2] * arg4->f[2]);
+		float f0 = sqrtf(arg4->f[0] * arg4->f[0] + arg4->f[1] * arg4->f[1] + arg4->f[2] * arg4->f[2]);
 
 		arg4->x /= f0;
 		arg4->y /= f0;
@@ -258,33 +259,33 @@ void sparksCreate(s32 room, struct prop *prop, struct coord *pos, struct coord *
 Gfx *sparksRender(Gfx *gdl)
 {
 	struct sparkgroup *group;
-	s32 axis;
+	int axis;
 	bool render;
-	f32 f0;
-	f32 f12;
-	s32 i;
-	s32 j;
-	s32 k;
+	float f0;
+	float f12;
+	int i;
+	int j;
+	int k;
 	struct coord *campos;
 	struct sparktype *type;
 	Col *colours;
-	s32 index;
-	f32 sp13c;
-	f32 sp138;
+	int index;
+	float sp13c;
+	float sp138;
 	Mtxf *mtx;
-	s32 v1;
+	int v1;
 	struct coord sp124;
-	f32 sp120;
-	s32 diff1;
-	s32 diff2;
-	f32 frac;
+	float sp120;
+	int diff1;
+	int diff2;
+	float frac;
 	Mtxf spd4;
 
 	if (g_SparksAreActive) {
-		if (ABS(g_Vars.currentplayer->cam_look.y) > ABS(g_Vars.currentplayer->cam_look.x)) {
-			axis = ABS(g_Vars.currentplayer->cam_look.z) > ABS(g_Vars.currentplayer->cam_look.y) ? 2 : 1;
+		if (fabsf(g_Vars.currentplayer->cam_look.y) > fabsf(g_Vars.currentplayer->cam_look.x)) {
+			axis = fabsf(g_Vars.currentplayer->cam_look.z) > fabsf(g_Vars.currentplayer->cam_look.y) ? 2 : 1;
 		} else {
-			axis = ABS(g_Vars.currentplayer->cam_look.z) > ABS(g_Vars.currentplayer->cam_look.x) ? 2 : 0;
+			axis = fabsf(g_Vars.currentplayer->cam_look.z) > fabsf(g_Vars.currentplayer->cam_look.x) ? 2 : 0;
 		}
 
 		texSelect(&gdl, &g_TexSparkConfigs[0], 4, 0, 2, 1, NULL);
@@ -358,11 +359,11 @@ Gfx *sparksRender(Gfx *gdl)
 						colours[0].word = PD_BE32(type->unk1c);
 						colours[1].word = PD_BE32(type->unk20);
 					} else if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
-						v1 = ((u32) (sp13c * 255.0f) << 24) | ((u32) ((1.0f - sp13c) * 255.0f) << 16);
+						v1 = ((uint32_t) (sp13c * 255.0f) << 24) | ((uint32_t) ((1.0f - sp13c) * 255.0f) << 16);
 
 						// @bug? Second part also reads from type->unk1c
-						colours[0].word = PD_BE32(v1 | (u32) (sp138 * (f32) (type->unk1c & 0xff)) | 0x3f00);
-						colours[1].word = PD_BE32(v1 | (u32) (sp138 * (f32) (type->unk1c & 0xff)) | 0x3f00);
+						colours[0].word = PD_BE32(v1 | (uint32_t) (sp138 * (float) (type->unk1c & 0xff)) | 0x3f00);
+						colours[1].word = PD_BE32(v1 | (uint32_t) (sp138 * (float) (type->unk1c & 0xff)) | 0x3f00);
 					} else {
 						colours[0].word = PD_BE32(type->unk1c);
 						colours[1].word = PD_BE32(type->unk20);
@@ -371,7 +372,7 @@ Gfx *sparksRender(Gfx *gdl)
 					if (type->unk12 < type->maxage && type->unk12 < group->age) {
 						diff1 = (type->maxage - type->unk12);
 						diff2 = group->age - type->unk12;
-						frac = (f32)(diff1 - diff2) / diff1;
+						frac = (float)(diff1 - diff2) / diff1;
 
 						colours[0].a *= frac;
 						colours[1].a *= frac;
@@ -405,7 +406,7 @@ Gfx *sparksRender(Gfx *gdl)
 
 						if (spark->ttl != 0) {
 							Vtx *vertices = gfxAllocateVertices(3);
-							f32 f2;
+							float f2;
 
 							for (k = 0; k < 3; k++) {
 								vertices[k].s = 0;
@@ -439,30 +440,30 @@ Gfx *sparksRender(Gfx *gdl)
 
 							switch (axis) {
 							case 0:
-								if (ABS(spark->speed.z) > ABS(spark->speed.y)) {
-									vertices[1].y = vertices[1].y - type->unk06 - group->age * type->unk0a - (s32)sp120;
-									vertices[2].y = vertices[2].y + type->unk06 + group->age * type->unk0a + (s32)sp120;
+								if (fabsf(spark->speed.z) > fabsf(spark->speed.y)) {
+									vertices[1].y = vertices[1].y - type->unk06 - group->age * type->unk0a - (int)sp120;
+									vertices[2].y = vertices[2].y + type->unk06 + group->age * type->unk0a + (int)sp120;
 								} else {
-									vertices[1].z = vertices[1].z - type->unk06 - group->age * type->unk0a - (s32)sp120;
-									vertices[2].z = vertices[2].z + type->unk06 + group->age * type->unk0a + (s32)sp120;
+									vertices[1].z = vertices[1].z - type->unk06 - group->age * type->unk0a - (int)sp120;
+									vertices[2].z = vertices[2].z + type->unk06 + group->age * type->unk0a + (int)sp120;
 								}
 								break;
 							case 1:
-								if (ABS(spark->speed.x) > ABS(spark->speed.z)) {
-									vertices[1].z = vertices[1].z - type->unk06 - group->age * type->unk0a - (s32)sp120;
-									vertices[2].z = vertices[2].z + type->unk06 + group->age * type->unk0a + (s32)sp120;
+								if (fabsf(spark->speed.x) > fabsf(spark->speed.z)) {
+									vertices[1].z = vertices[1].z - type->unk06 - group->age * type->unk0a - (int)sp120;
+									vertices[2].z = vertices[2].z + type->unk06 + group->age * type->unk0a + (int)sp120;
 								} else {
-									vertices[1].x = vertices[1].x - type->unk06 - group->age * type->unk0a - (s32)sp120;
-									vertices[2].x = vertices[2].x + type->unk06 + group->age * type->unk0a + (s32)sp120;
+									vertices[1].x = vertices[1].x - type->unk06 - group->age * type->unk0a - (int)sp120;
+									vertices[2].x = vertices[2].x + type->unk06 + group->age * type->unk0a + (int)sp120;
 								}
 								break;
 							case 2:
-								if (ABS(spark->speed.x) > ABS(spark->speed.y)) {
-									vertices[1].y = vertices[1].y - type->unk06 - group->age * type->unk0a - (s32)sp120;
-									vertices[2].y = vertices[2].y + type->unk06 + group->age * type->unk0a + (s32)sp120;
+								if (fabsf(spark->speed.x) > fabsf(spark->speed.y)) {
+									vertices[1].y = vertices[1].y - type->unk06 - group->age * type->unk0a - (int)sp120;
+									vertices[2].y = vertices[2].y + type->unk06 + group->age * type->unk0a + (int)sp120;
 								} else {
-									vertices[1].x = vertices[1].x - type->unk06 - group->age * type->unk0a - (s32)sp120;
-									vertices[2].x = vertices[2].x + type->unk06 + group->age * type->unk0a + (s32)sp120;
+									vertices[1].x = vertices[1].x - type->unk06 - group->age * type->unk0a - (int)sp120;
+									vertices[2].x = vertices[2].x + type->unk06 + group->age * type->unk0a + (int)sp120;
 								}
 								break;
 							}

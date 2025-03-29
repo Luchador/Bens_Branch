@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/bondgun.h"
@@ -18,10 +18,8 @@
 #include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "video.h"
 #include "game/bondview.h"
-#endif
 
 #define NUM_SUCCESS_PARTICLES 280
 
@@ -31,11 +29,9 @@
 #define SAMPLE_HEIGHT 8
 #define PXTOBYTES(val) ((val) * 2)
 
-#ifndef PLATFORM_N64
-static s32 g_MenuBlurFb = -1;
-static s32 g_MenuScreenFb = -1;
+static int g_MenuBlurFb = -1;
+static int g_MenuScreenFb = -1;
 static bool g_MenuBlurDone = false;
-#endif
 
 /**
  * Blur the gameplay background for the pause menu.
@@ -65,13 +61,13 @@ void menugfxCreateBlur(void)
 	g_MenuBlurDone = false;
 }
 
-Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
+Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 {
 	Col *colours;
 	Vtx *vertices;
 #if !defined(PLATFORM_N64)
-	s32 width;
-	s32 height;
+	int width;
+	int height;
 #endif
 
 	width = viGetWidth();
@@ -112,17 +108,17 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
 	width = SCREEN_320 * 10;
 	height = viGetHeight() * 10;
 
-	*(u16 *)&vertices[0].x = arg2;
-	*(u16 *)&vertices[0].y = arg3;
+	*(uint16_t *)&vertices[0].x = arg2;
+	*(uint16_t *)&vertices[0].y = arg3;
 	vertices[0].z = -10;
-	*(u16 *)&vertices[1].x = (s32)width + arg2 + 40;
-	*(u16 *)&vertices[1].y = arg3;
+	*(uint16_t *)&vertices[1].x = (int)width + arg2 + 40;
+	*(uint16_t *)&vertices[1].y = arg3;
 	vertices[1].z = -10;
-	*(u16 *)&vertices[2].x = (s32)width + arg2 + 40;
-	*(u16 *)&vertices[2].y = (s32)height + arg3 + 50;
+	*(uint16_t *)&vertices[2].x = (int)width + arg2 + 40;
+	*(uint16_t *)&vertices[2].y = (int)height + arg3 + 50;
 	vertices[2].z = -10;
-	*(u16 *)&vertices[3].x = arg2;
-	*(u16 *)&vertices[3].y = (s32)height + arg3 + 50;
+	*(uint16_t *)&vertices[3].x = arg2;
+	*(uint16_t *)&vertices[3].y = (int)height + arg3 + 50;
 	vertices[3].z = -10;
 
 	vertices[0].s = 0;
@@ -151,7 +147,7 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, u32 colour, s16 arg2, s16 arg3)
 	return gdl;
 }
 
-void func0f0e0cbc(s32 arg0, s32 arg1, s16 arg2, s16 arg3, Vtx *vertex, Mtxf *arg5)
+void func0f0e0cbc(int arg0, int arg1, int16_t arg2, int16_t arg3, Vtx *vertex, Mtxf *arg5)
 {
 	struct coord sp24;
 
@@ -171,11 +167,10 @@ void func0f0e0cbc(s32 arg0, s32 arg1, s16 arg2, s16 arg3, Vtx *vertex, Mtxf *arg
 	vertex->t = sp24.y * 32;
 }
 
-Gfx *menugfxRenderDialogBackground(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct menudialog *dialog, u32 colour1, u32 colour2, f32 arg8)
+Gfx *menugfxRenderDialogBackground(Gfx *gdl, int x1, int y1, int x2, int y2, struct menudialog *dialog, uint32_t colour1, uint32_t colour2, float arg8)
 {
-	u32 stack[1];
-	u32 leftcolour;
-	u32 rightcolour;
+	uint32_t leftcolour;
+	uint32_t rightcolour;
 
 	// Render the dialog's background fill
 	gdl = textSetPrimColour(gdl, colour1);
@@ -210,23 +205,22 @@ Gfx *menugfxRenderDialogBackground(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, str
  * The background consists of two layers of a green hazy texture.
  * Both layers spin slowly in opposite directions.
  */
-Gfx *menugfxRenderBgGreenHaze(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
+Gfx *menugfxRenderBgGreenHaze(Gfx *gdl, int x1, int y1, int x2, int y2)
 {
-	s32 i;
+	int i;
 	Col *colours;
 	Vtx *vertices;
-	u32 alphas[2];
-	s16 t5;
-	s16 s0;
-	s16 s2;
-	s16 s3;
-	f32 f20;
-	f32 f22;
-	f32 f24;
-	f32 f26;
-	f32 f0;
-	f32 f2;
-	u32 stack;
+	uint32_t alphas[2];
+	int16_t t5;
+	int16_t s0;
+	int16_t s2;
+	int16_t s3;
+	float f20;
+	float f22;
+	float f24;
+	float f26;
+	float f0;
+	float f2;
 
 	colours = gfxAllocateColours(4);
 	vertices = gfxAllocateVertices(8);
@@ -256,7 +250,7 @@ Gfx *menugfxRenderBgGreenHaze(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
 	vertices[7].z = vertices[3].z = -10;
 
 	for (i = 0; i < 2; i++) {
-		s16 tmp = i * 256;
+		int16_t tmp = i * 256;
 		f0 = g_20SecIntervalFrac;
 		f26 = M_TAU * g_20SecIntervalFrac;
 
@@ -327,12 +321,12 @@ Gfx *menugfxRenderBgGreenHaze(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
 	return gdl;
 }
 
-Gfx *menugfxDrawDropdownBackground(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
+Gfx *menugfxDrawDropdownBackground(Gfx *gdl, int x1, int y1, int x2, int y2)
 {
 	Col *colours = gfxAllocateColours(3);
 	Vtx *vertices = gfxAllocateVertices(6);
-	u32 colour1;
-	u32 colour2;
+	uint32_t colour1;
+	uint32_t colour2;
 
 	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
@@ -391,16 +385,12 @@ Gfx *menugfxDrawDropdownBackground(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
 	return gdl;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
-Gfx *menugfxDrawListGroupHeader(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3, u8 alpha)
-#else
-Gfx *menugfxDrawListGroupHeader(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3)
-#endif
+Gfx *menugfxDrawListGroupHeader(Gfx *gdl, int x1, int y1, int x2, int y2, int x3, uint8_t alpha)
 {
 	Col *colours = gfxAllocateColours(7);
 	Vtx *vertices = gfxAllocateVertices(9);
-	u32 alpha1;
-	u32 alpha2;
+	uint32_t alpha1;
+	uint32_t alpha2;
 
 	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
@@ -484,11 +474,11 @@ Gfx *menugfxDrawListGroupHeader(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, s32 x3
 }
 
 	// Mismatch: Goal has the if statement with empty contents
-Gfx *menugfxRenderGradient(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colourstart, u32 colourmid, u32 colourend)
+Gfx *menugfxRenderGradient(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colourstart, uint32_t colourmid, uint32_t colourend)
 {
 	Col *colours = gfxAllocateColours(3);
 	Vtx *vertices = gfxAllocateVertices(6);
-	s32 ymid;
+	int ymid;
 
 	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
@@ -556,7 +546,7 @@ Gfx *menugfxRenderGradient(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colours
 	return gdl;
 }
 
-Gfx *menugfxRenderSlider(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, s32 markerx, u32 colour)
+Gfx *menugfxRenderSlider(Gfx *gdl, int x1, int y1, int x2, int y2, int markerx, uint32_t colour)
 {
 	Col *colours = gfxAllocateColours(3);
 	Vtx *vertices = gfxAllocateVertices(6);
@@ -592,7 +582,7 @@ Gfx *menugfxRenderSlider(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, s32 markerx, 
 	vertices[3].x = x1 * 10;
 	vertices[3].y = y2 * 10;
 	vertices[3].z = -10;
-	vertices[4].x = (s16)(x2 * 10) - 40;
+	vertices[4].x = (int16_t)(x2 * 10) - 40;
 	vertices[4].y = y1 * 10;
 	vertices[4].z = -10;
 	vertices[5].x = x2 * 10;
@@ -665,7 +655,7 @@ Gfx *menugfx0f0e2498(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *menugfxDrawTri2(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32 colour2, bool arg7)
+Gfx *menugfxDrawTri2(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1, uint32_t colour2, bool arg7)
 {
 	Vtx *vertices;
 	Col *colours;
@@ -711,7 +701,7 @@ Gfx *menugfxDrawTri2(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32 
 	return gdl;
 }
 
-Gfx *menugfxDrawLine(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32 colour2)
+Gfx *menugfxDrawLine(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1, uint32_t colour2)
 {
 	gdl = menugfx0f0e2498(gdl);
 	gdl = menugfxDrawTri2(gdl, x1, y1, x2, y2, colour1, colour2, false);
@@ -719,15 +709,14 @@ Gfx *menugfxDrawLine(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32 
 	return gdl;
 }
 
-Gfx *menugfxDrawProjectedLine(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32 colour2)
+Gfx *menugfxDrawProjectedLine(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1, uint32_t colour2)
 {
-	s32 numfullblocks;
-	s32 i;
-	u32 partcolourtop;
-	u32 partcolourbottom;
-	s32 partbottom;
-	s32 parttop;
-	u32 stack[2];
+	int numfullblocks;
+	int i;
+	uint32_t partcolourtop;
+	uint32_t partcolourbottom;
+	int partbottom;
+	int parttop;
 
 	if (textHasDiagonalBlend()) {
 		if (x2 - x1 < y2 - y1) {
@@ -758,13 +747,12 @@ Gfx *menugfxDrawProjectedLine(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colo
 			gdl = menugfxDrawTri2(gdl, x1, parttop, x2, y2, partcolourtop, partcolourbottom, false);
 		} else {
 			// Landscape
-			s32 numfullblocks;
-			s32 i;
-			u32 partcolourleft;
-			u32 partcolourright;
-			s32 partright;
-			s32 partleft;
-			u32 stack[2];
+			int numfullblocks;
+			int i;
+			uint32_t partcolourleft;
+			uint32_t partcolourright;
+			int partright;
+			int partleft;
 
 			numfullblocks = (x2 - x1) / 15;
 			partleft = x1;
@@ -811,16 +799,16 @@ Gfx *menugfxDrawProjectedLine(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colo
  * The shimmer will go right to left or bottom to top unless the reverse
  * argument is set to true.
  */
-Gfx *menugfxDrawShimmer(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour, bool arg6, s32 arg7, bool reverse)
+Gfx *menugfxDrawShimmer(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour, bool arg6, int arg7, bool reverse)
 {
-	s32 shimmerleft;
-	s32 shimmertop;
-	s32 shimmerright;
-	s32 shimmerbottom;
-	s32 v0;
-	s32 alpha;
-	s32 minalpha;
-	u32 tailcolour;
+	int shimmerleft;
+	int shimmertop;
+	int shimmerright;
+	int shimmerbottom;
+	int v0;
+	int alpha;
+	int minalpha;
+	uint32_t tailcolour;
 
 	alpha = 0;
 	minalpha = 0;
@@ -833,7 +821,7 @@ Gfx *menugfxDrawShimmer(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour, bo
 
 	if (y2 - y1 < x2 - x1) {
 		// Horizontal
-		v0 += (u32)(y1 + x1);
+		v0 += (uint32_t)(y1 + x1);
 		v0 %= 600;
 		shimmerleft = x1 + v0 - arg7;
 		shimmerright = shimmerleft + arg7;
@@ -875,7 +863,7 @@ Gfx *menugfxDrawShimmer(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour, bo
 		}
 	} else {
 		// Vertical
-		v0 += (u32)(y1 + x1);
+		v0 += (uint32_t)(y1 + x1);
 		v0 %= 600;
 		shimmertop = y1 + v0 - arg7;
 		shimmerbottom = shimmertop + arg7;
@@ -920,7 +908,7 @@ Gfx *menugfxDrawShimmer(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour, bo
 	return gdl;
 }
 
-Gfx *menugfxDrawDialogBorderLine(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32 colour2)
+Gfx *menugfxDrawDialogBorderLine(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1, uint32_t colour2)
 {
 	gdl = menugfxDrawLine(gdl, x1, y1, x2, y2, colour1, colour2);
 	gdl = menugfxDrawShimmer(gdl, x1, y1, x2, y2, colour1, 0, 10, false);
@@ -928,7 +916,7 @@ Gfx *menugfxDrawDialogBorderLine(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 c
 	return gdl;
 }
 
-Gfx *menugfxDrawFilledRect(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32 colour2)
+Gfx *menugfxDrawFilledRect(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1, uint32_t colour2)
 {
 	gdl = menugfx0f0e2498(gdl);
 	gdl = menugfxDrawProjectedLine(gdl, x1, y1, x2, y2, colour1, colour2);
@@ -945,14 +933,14 @@ Gfx *menugfxDrawFilledRect(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1
  * The x and y arguments refer to the apex of the chevron. Size is the distance
  * from the apex to the opposite side.
  */
-Gfx *menugfxDrawCarouselChevron(Gfx *gdl, s32 x, s32 y, s32 size, s32 direction, u32 colour1, u32 colour2)
+Gfx *menugfxDrawCarouselChevron(Gfx *gdl, int x, int y, int size, int direction, uint32_t colour1, uint32_t colour2)
 {
 	Vtx *vertices;
 	Col *colours;
-	s16 halfwidth;
-	s16 halfheight;
-	s16 relx;
-	s16 rely;
+	int16_t halfwidth;
+	int16_t halfheight;
+	int16_t relx;
+	int16_t rely;
 
 	relx = 0;
 	rely = 0;
@@ -1028,15 +1016,14 @@ Gfx *menugfxDrawCarouselChevron(Gfx *gdl, s32 x, s32 y, s32 size, s32 direction,
  * The x and y arguments refer to the apex of the chevron. Size is the distance
  * from the apex to the opposite side.
  */
-Gfx *menugfxDrawDialogChevron(Gfx *gdl, s32 x, s32 y, s32 size, s32 direction, u32 colour1, u32 colour2, f32 arg7)
+Gfx *menugfxDrawDialogChevron(Gfx *gdl, int x, int y, int size, int direction, uint32_t colour1, uint32_t colour2, float arg7)
 {
-	u32 stack;
 	Col *colours;
 	Vtx *vertices;
-	s16 halfwidth;
-	s16 halfheight;
-	s16 relx;
-	s16 rely;
+	int16_t halfwidth;
+	int16_t halfheight;
+	int16_t relx;
+	int16_t rely;
 
 	relx = 0;
 	rely = 0;
@@ -1048,19 +1035,19 @@ Gfx *menugfxDrawDialogChevron(Gfx *gdl, s32 x, s32 y, s32 size, s32 direction, u
 	switch (direction) {
 	case 0: // Down
 		rely = -size;
-		halfwidth = -((s32)(size * arg7 * 0.5f) + size) / 2;
+		halfwidth = -((int)(size * arg7 * 0.5f) + size) / 2;
 		break;
 	case 1: // Left
 		relx = size;
-		halfheight = -((s32)(size * arg7 * 0.5f) + size) / 2;
+		halfheight = -((int)(size * arg7 * 0.5f) + size) / 2;
 		break;
 	case 2: // Up
 		rely = size;
-		halfwidth = ((s32)(size * arg7 * 0.5f) + size) / 2;
+		halfwidth = ((int)(size * arg7 * 0.5f) + size) / 2;
 		break;
 	case 3: // Right
 		relx = -size;
-		halfheight = ((s32)(size * arg7 * 0.5f) + size) / 2;
+		halfheight = ((int)(size * arg7 * 0.5f) + size) / 2;
 		break;
 	}
 
@@ -1113,7 +1100,7 @@ Gfx *menugfxDrawDialogChevron(Gfx *gdl, s32 x, s32 y, s32 size, s32 direction, u
 	return gdl;
 }
 
-Gfx *menugfxDrawCheckbox(Gfx *gdl, s32 x, s32 y, s32 size, bool fill, u32 bordercolour, u32 fillcolour)
+Gfx *menugfxDrawCheckbox(Gfx *gdl, int x, int y, int size, bool fill, uint32_t bordercolour, uint32_t fillcolour)
 {
 	if (fill) {
 		gdl = textSetPrimColour(gdl, fillcolour);
@@ -1135,17 +1122,17 @@ Gfx *menugfxDrawCheckbox(Gfx *gdl, s32 x, s32 y, s32 size, bool fill, u32 border
 
 Gfx *menugfxRenderBgFailure(Gfx *gdl)
 {
-	f32 spb4;
-	s32 i;
-	f32 angle;
-	s32 s0;
-	s32 s1;
-	s32 s2;
-	s32 s3;
-	s32 s6;
-	s32 s7;
-	u32 alpha1;
-	u32 alpha2;
+	float spb4;
+	int i;
+	float angle;
+	int s0;
+	int s1;
+	int s2;
+	int s3;
+	int s6;
+	int s7;
+	uint32_t alpha1;
+	uint32_t alpha2;
 
 	spb4 = M_TAU * g_20SecIntervalFrac;
 
@@ -1246,19 +1233,19 @@ Gfx *menugfxRenderBgFailure(Gfx *gdl)
  */
 Gfx *menugfxRenderBgCone(Gfx *gdl)
 {
-	f32 baseangle;
-	f32 angle;
-	s32 x1;
-	s32 y1;
-	s32 x2;
-	s32 y2;
-	s32 i;
-	u32 colourupper;
-	u32 colour;
+	float baseangle;
+	float angle;
+	int x1;
+	int y1;
+	int x2;
+	int y2;
+	int i;
+	uint32_t colourupper;
+	uint32_t colour;
 
 	// Cone 1
 	baseangle = M_TAU * g_20SecIntervalFrac * 2.0f;
-	colourupper = (u32) (menuGetSinOscFrac(1.0f) * 255.0f) << 16;
+	colourupper = (uint32_t) (menuGetSinOscFrac(1.0f) * 255.0f) << 16;
 
 	gdl = func0f0d4a3c(gdl, 0);
 
@@ -1286,7 +1273,7 @@ Gfx *menugfxRenderBgCone(Gfx *gdl)
 	}
 
 	// Cone 2
-	colourupper = (u32) (255.0f - menuGetCosOscFrac(1.0f) * 255.0f) << 16;
+	colourupper = (uint32_t) (255.0f - menuGetCosOscFrac(1.0f) * 255.0f) << 16;
 
 	baseangle = M_TAU * g_20SecIntervalFrac;
 
@@ -1343,10 +1330,10 @@ Gfx *func0f0e458c(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *func0f0e46b0(Gfx *gdl, f32 arg1)
+Gfx *func0f0e46b0(Gfx *gdl, float arg1)
 {
-	s32 y1 = (g_MenuProjectFromY + 120) + arg1 * (0.0f - (g_MenuProjectFromY + 120));
-	s32 y2 = (g_MenuProjectFromY + 120) + arg1 * (240.0f - (g_MenuProjectFromY + 120));
+	int y1 = (g_MenuProjectFromY + 120) + arg1 * (0.0f - (g_MenuProjectFromY + 120));
+	int y2 = (g_MenuProjectFromY + 120) + arg1 * (240.0f - (g_MenuProjectFromY + 120));
 
 	gdl = func0f0d4a3c(gdl, 0);
 
@@ -1368,17 +1355,17 @@ Gfx *func0f0e46b0(Gfx *gdl, f32 arg1)
  */
 Gfx *menugfxRenderBgFailureCopy(Gfx *gdl)
 {
-	f32 spb4;
-	s32 i;
-	f32 angle;
-	s32 s0;
-	s32 s1;
-	s32 s2;
-	s32 s3;
-	s32 s6;
-	s32 s7;
-	u32 alpha1;
-	u32 alpha2;
+	float spb4;
+	int i;
+	float angle;
+	int s0;
+	int s1;
+	int s2;
+	int s3;
+	int s6;
+	int s7;
+	uint32_t alpha1;
+	uint32_t alpha2;
 
 	spb4 = M_TAU * g_20SecIntervalFrac;
 
@@ -1483,7 +1470,7 @@ void menugfxFreeParticles(void)
 	g_MenuParticles = NULL;
 }
 
-u32 menugfxGetParticleArraySize(void)
+uint32_t menugfxGetParticleArraySize(void)
 {
 	return align16(NUM_SUCCESS_PARTICLES * sizeof(struct coord));
 }
@@ -1503,10 +1490,10 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 	Mtxf *modelmtx;
 	Col *colours;
 	Col *ptr;
-	s32 i;
-	s32 j;
-	f32 f0;
-	f32 speed = 5.0f;
+	int i;
+	int j;
+	float f0;
+	float speed = 5.0f;
 	bool gray = false;
 
 	if (g_StageIndex == STAGEINDEX_DEFENSE) {
@@ -1535,7 +1522,7 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 
 	// Move the particles closer, and reset the ones which have gone behind the camera
 	for (i = 0; i < NUM_SUCCESS_PARTICLES; i++) {
-		s32 mult = (i % 5) + 1;
+		int mult = (i % 5) + 1;
 
 #if VERSION >= VERSION_PAL_BETA
 		g_MenuParticles[i].z += mult * g_Vars.diffframe240freal * speed;
@@ -1652,15 +1639,14 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 
 	{
 		struct coord pos;
-		u32 stack[5];
 
 		gSPColor(gdl++, (uintptr_t)(colours), 20);
 
 		// Draw the particles
 		for (i = NUM_SUCCESS_PARTICLES - 1; i >= 0; i--) {
-			s32 s3 = 0;
-			f32 sine = sinf(f0 * M_TAU + M_TAU * (i / 15.0f));
-			f32 cosine = cosf(f0 * M_TAU + M_TAU * (i / 15.0f));
+			int s3 = 0;
+			float sine = sinf(f0 * M_TAU + M_TAU * (i / 15.0f));
+			float cosine = cosf(f0 * M_TAU + M_TAU * (i / 15.0f));
 
 			pos.x = g_MenuParticles[i].x;
 			pos.y = g_MenuParticles[i].y;
@@ -1673,9 +1659,9 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 			if (pos.z);
 
 			if (pos.z < 0.0f && s3 < 6) {
-				f32 invsine2 = -sine;
-				f32 invsine = -sine;
-				f32 invcosine = -cosine;
+				float invsine2 = -sine;
+				float invsine = -sine;
+				float invcosine = -cosine;
 				Vtx *vertices = gfxAllocateVertices(5);
 
 				vertices[0].x = pos.f[0];

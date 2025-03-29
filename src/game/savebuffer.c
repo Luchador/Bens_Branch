@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/camera.h"
@@ -17,10 +16,10 @@
 
 Vp *g_Viewport = NULL;
 
-s32 var8009de90;
-s32 var8009de94;
-s32 g_MenuProjectFromX;
-s32 g_MenuProjectFromY;
+int var8009de90;
+int var8009de94;
+int g_MenuProjectFromX;
+int g_MenuProjectFromY;
 
 void func0f0d4690(Mtxf *mtx)
 {
@@ -38,10 +37,6 @@ void func0f0d4690(Mtxf *mtx)
 
 	mtx4SetTranslation(&pos, mtx);
 	mtx00015e4c(-1, mtx);
-
-	if (g_ScaleX == 2) {
-		mtx00015df0(2, mtx);
-	}
 }
 
 void func0f0d475c(Mtxf *mtx)
@@ -66,8 +61,8 @@ Gfx *func0f0d479c(Gfx *gdl)
 	mtx4LoadIdentity(&mtx);
 
 	guFrustumF(mtx.m,
-			-(f32) viGetWidth() * 0.5f, viGetWidth() * 0.5f,
-			-(f32) viGetHeight() * 0.5f, viGetHeight() * 0.5f,
+			-(float) viGetWidth() * 0.5f, viGetWidth() * 0.5f,
+			-(float) viGetHeight() * 0.5f, viGetHeight() * 0.5f,
 			10, 10000, 1);
 
 	mtxF2L(&mtx, mtx1);
@@ -77,7 +72,7 @@ Gfx *func0f0d479c(Gfx *gdl)
 	gSPMatrix(gdl++, (uintptr_t)(mtx1), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	if (g_Viewport == NULL) {
-		u32 size = align16(sizeof(Vp));
+		uint32_t size = align16(sizeof(Vp));
 		g_Viewport = gfxAllocate(size);
 
 		if (g_Viewport != NULL) {
@@ -108,7 +103,7 @@ Gfx *func0f0d49c8(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *func0f0d4a3c(Gfx *gdl, s32 arg1)
+Gfx *func0f0d4a3c(Gfx *gdl, int arg1)
 {
 	Mtxf mtx;
 	Mtxf *mtxptr = gfxAllocateMatrix();
@@ -156,26 +151,26 @@ Gfx *func0f0d4c80(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *menugfxDrawPlane(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32 colour2, s32 type)
+Gfx *menugfxDrawPlane(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1, uint32_t colour2, int type)
 {
 	Col *colours;
 	Vtx *vertices;
-	f32 tmp1;
-	s16 a1;
-	s16 t1;
-	f32 sp34;
-	f32 sp30;
-	s16 sp2e;
-	s16 sp2c;
-	s16 sp2a;
-	s16 sp28;
-	s16 a1_2;
-	s16 scale = 10;
-	f32 tmp2;
+	float tmp1;
+	int16_t a1;
+	int16_t t1;
+	float sp34;
+	float sp30;
+	int16_t sp2e;
+	int16_t sp2c;
+	int16_t sp2a;
+	int16_t sp28;
+	int16_t a1_2;
+	int16_t scale = 10;
+	float tmp2;
 
-	static u32 depthsub = 1000;
-	static u32 txmul = 20;
-	static u32 rsub = 5;
+	static uint32_t depthsub = 1000;
+	static uint32_t txmul = 20;
+	static uint32_t rsub = 5;
 
 	colours = gfxAllocateColours(2);
 	vertices = gfxAllocateVertices(4);
@@ -284,15 +279,15 @@ Gfx *menugfxDrawPlane(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32
 	vertices[1].y = y2;
 	vertices[1].z = -10;
 
-	tmp1 = (f32) g_MenuProjectFromX * a1 / scale;
-	tmp2 = (f32) g_MenuProjectFromY * a1 / scale;
+	tmp1 = (float) g_MenuProjectFromX * a1 / scale;
+	tmp2 = (float) g_MenuProjectFromY * a1 / scale;
 
-	vertices[2].x = vertices[0].v[0] + (s16) tmp1;
-	vertices[2].y = vertices[0].v[1] + (s16) tmp2;
+	vertices[2].x = vertices[0].v[0] + (int16_t) tmp1;
+	vertices[2].y = vertices[0].v[1] + (int16_t) tmp2;
 	vertices[2].z = -10 - a1;
 
-	vertices[3].x = vertices[1].v[0] + (s16) tmp1;
-	vertices[3].y = vertices[1].v[1] + (s16) tmp2;
+	vertices[3].x = vertices[1].v[0] + (int16_t) tmp1;
+	vertices[3].y = vertices[1].v[1] + (int16_t) tmp2;
 	vertices[3].z = -10 - a1;
 
 	if (type == MENUPLANE_10) {
@@ -345,15 +340,15 @@ Gfx *menugfxDrawPlane(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour1, u32
  *
  * This function only sets bits to on and does not unset them.
  */
-void savebufferOr(struct savebuffer *buffer, u32 value, s32 numbits)
+void savebufferOr(struct savebuffer *buffer, uint32_t value, int numbits)
 {
-	u32 bit = 1 << (numbits - 1);
+	uint32_t bit = 1 << (numbits - 1);
 
 	for (; bit; bit >>= 1) {
 		if (bit & value) {
-			s32 bitindex = buffer->bitpos % 8;
-			u8 mask = 1 << (7 - bitindex);
-			s32 byteindex = buffer->bitpos / 8;
+			int bitindex = buffer->bitpos % 8;
+			uint8_t mask = 1 << (7 - bitindex);
+			int byteindex = buffer->bitpos / 8;
 
 			buffer->bytes[byteindex] |= mask;
 		}
@@ -367,14 +362,14 @@ void savebufferOr(struct savebuffer *buffer, u32 value, s32 numbits)
  *
  * numbits is expected to be 32 or less.
  */
-void savebufferWriteBits(struct savebuffer *buffer, u32 value, s32 numbits, u8 *dst)
+void savebufferWriteBits(struct savebuffer *buffer, uint32_t value, int numbits, uint8_t *dst)
 {
-	u32 bit = 1 << (numbits - 1);
+	uint32_t bit = 1 << (numbits - 1);
 
 	for (; bit; bit >>= 1) {
-		s32 bitindex = buffer->bitpos % 8;
-		u8 mask = 1 << (7 - bitindex);
-		s32 byteindex = buffer->bitpos / 8;
+		int bitindex = buffer->bitpos % 8;
+		uint8_t mask = 1 << (7 - bitindex);
+		int byteindex = buffer->bitpos / 8;
 
 		if (bit & value) {
 			dst[byteindex] |= mask;
@@ -392,15 +387,15 @@ void savebufferWriteBits(struct savebuffer *buffer, u32 value, s32 numbits, u8 *
  *
  * numbits is expected to be 32 or less.
  */
-u32 savebufferReadBits(struct savebuffer *buffer, s32 numbits)
+uint32_t savebufferReadBits(struct savebuffer *buffer, int numbits)
 {
-	u32 bit = 1 << (numbits - 1);
-	u32 value = 0;
+	uint32_t bit = 1 << (numbits - 1);
+	uint32_t value = 0;
 
 	for (; bit; bit >>= 1) {
-		s32 bitindex = buffer->bitpos % 8;
-		u8 mask = 1 << (7 - bitindex);
-		s32 byteindex = buffer->bitpos / 8;
+		int bitindex = buffer->bitpos % 8;
+		uint8_t mask = 1 << (7 - bitindex);
+		int byteindex = buffer->bitpos / 8;
 
 		if (buffer->bytes[byteindex] & mask) {
 			value |= bit;
@@ -414,7 +409,7 @@ u32 savebufferReadBits(struct savebuffer *buffer, s32 numbits)
 
 void savebufferClear(struct savebuffer *buffer)
 {
-	s32 i;
+	int i;
 
 	buffer->bitpos = 0;
 
@@ -424,9 +419,9 @@ void savebufferClear(struct savebuffer *buffer)
 	}
 }
 
-void savebufferWriteData(struct savebuffer *buffer, u8 *data, u8 len)
+void savebufferWriteData(struct savebuffer *buffer, uint8_t *data, uint8_t len)
 {
-	s32 i;
+	int i;
 
 	buffer->bitpos = 0;
 
@@ -437,7 +432,7 @@ void savebufferWriteData(struct savebuffer *buffer, u8 *data, u8 len)
 
 void func0f0d54c4(struct savebuffer *buffer)
 {
-	s32 tmp = buffer->bitpos;
+	int tmp = buffer->bitpos;
 
 	if (tmp / 8 && buffer->bitpos);
 }
@@ -449,11 +444,11 @@ void func0f0d54c4(struct savebuffer *buffer)
 void savebufferReadString(struct savebuffer *buffer, char *dst, bool addlinebreak)
 {
 	bool foundnull = false;
-	s32 index = 0;
-	s32 i;
+	int index = 0;
+	int i;
 
 	for (i = 0; i < 10; i++) {
-		s32 byte = savebufferReadBits(buffer, 8);
+		int byte = savebufferReadBits(buffer, 8);
 
 		if (!foundnull) {
 			if (byte == '\0') {
@@ -477,7 +472,7 @@ void savebufferReadString(struct savebuffer *buffer, char *dst, bool addlinebrea
 void func0f0d55a4(struct savebuffer *buffer, char *src)
 {
 	bool done = false;
-	s32 i;
+	int i;
 
 	for (i = 0; i < 10; i++) {
 		if (!done) {
@@ -486,7 +481,7 @@ void func0f0d55a4(struct savebuffer *buffer, char *src)
 			} else if (src[i] == '\n') {
 				done = true;
 			} else {
-				u32 c = src[i];
+				uint32_t c = src[i];
 				savebufferOr(buffer, c, 8);
 			}
 		}
@@ -497,7 +492,7 @@ void func0f0d55a4(struct savebuffer *buffer, char *src)
 	}
 }
 
-void func0f0d564c(u8 *data, char *dst, bool addlinebreak)
+void func0f0d564c(uint8_t *data, char *dst, bool addlinebreak)
 {
 	struct savebuffer buffer;
 
@@ -505,11 +500,11 @@ void func0f0d564c(u8 *data, char *dst, bool addlinebreak)
 	savebufferReadString(&buffer, dst, addlinebreak);
 }
 
-void func0f0d5690(u8 *dst, char *src)
+void func0f0d5690(uint8_t *dst, char *src)
 {
 	struct savebuffer buffer;
 	bool done = false;
-	s32 i;
+	int i;
 
 	savebufferWriteData(&buffer, dst, 10);
 
@@ -520,7 +515,7 @@ void func0f0d5690(u8 *dst, char *src)
 			} else if (src[i] == '\n') {
 				done = true;
 			} else {
-				u32 c = src[i];
+				uint32_t c = src[i];
 				savebufferWriteBits(&buffer, c, 8, dst);
 			}
 		}
@@ -543,12 +538,12 @@ void savebufferReadGuid(struct savebuffer *buffer, struct fileguid *guid)
 	guid->deviceserial = savebufferReadBits(buffer, 13);
 }
 
-void formatTime(char *dst, s32 time60, s32 precision)
+void formatTime(char *dst, int time60, int precision)
 {
-	s32 parts[5];
+	int parts[5];
 	bool donefirst = false;
-	s32 len = 0;
-	s32 i;
+	int len = 0;
+	int i;
 
 	parts[4] = time60 % 60 * 100 / 60; // hundredths
 	parts[3] = time60 / 60; // seconds

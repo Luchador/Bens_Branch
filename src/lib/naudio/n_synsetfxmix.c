@@ -1,6 +1,6 @@
 #include "n_synthInternals.h"
 
-void n_alSynSetFXMix(N_ALVoice *v, u8 fxmix)
+void n_alSynSetFXMix(N_ALVoice *v, uint8_t fxmix)
 {
 	ALParam *update;
 

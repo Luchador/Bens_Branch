@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include <PR/ultratypes.h>
+#include <stdint.h>
 #include "platform.h"
 #include "system.h"
 #include "fs.h"
@@ -53,14 +53,14 @@ extern struct stageallocation g_StageAllocations8Mb[];
 		return ret; \
 	}
 
-static inline char *modConfigParseFileValue(char *p, char *token, s32 *filenum)
+static inline char *modConfigParseFileValue(char *p, char *token, int *filenum)
 {
 	p = strParseToken(p, token, NULL);
 	if (!token[0]) {
 		return NULL; // empty 
 	}
 	// check if it is a number already
-	s32 num = strtol(token, NULL, 0);
+	int num = strtol(token, NULL, 0);
 	if (num > 0 && romdataFileGetName(num)) {
 		*filenum = num;
 		return p;
@@ -75,14 +75,14 @@ static inline char *modConfigParseFileValue(char *p, char *token, s32 *filenum)
 	return NULL;
 }
 
-static inline char *modConfigParseIntValue(char *p, char *token, s32 *out)
+static inline char *modConfigParseIntValue(char *p, char *token, int *out)
 {
 	p = strParseToken(p, token, NULL);
 	if (!token[0]) {
 		return NULL; // empty 
 	}
 	char *endp = token;
-	const s32 num = strtol(token, &endp, 0);
+	const int num = strtol(token, &endp, 0);
 	if (num == 0 && (endp == token || *endp != '\0')) {
 		return NULL;
 	}
@@ -90,14 +90,14 @@ static inline char *modConfigParseIntValue(char *p, char *token, s32 *out)
 	return p;
 }
 
-static inline char *modConfigParseFloatValue(char *p, char *token, f32 *out)
+static inline char *modConfigParseFloatValue(char *p, char *token, float *out)
 {
 	p = strParseToken(p, token, NULL);
 	if (!token[0]) {
 		return NULL; // empty 
 	}
 	char *endp = token;
-	const f32 num = strtof(token, &endp);
+	const float num = strtof(token, &endp);
 	if (num == 0.f && (endp == token || *endp != '\0')) {
 		return NULL;
 	}
@@ -105,7 +105,7 @@ static inline char *modConfigParseFloatValue(char *p, char *token, f32 *out)
 	return p;
 }
 
-static char *modConfigParseStageMusic(char *p, char *token, s32 stagenum)
+static char *modConfigParseStageMusic(char *p, char *token, int stagenum)
 {
 	struct stagemusic *smus = NULL;
 	for (struct stagemusic *p = g_StageTracks; p->stagenum; ++p) {
@@ -127,7 +127,7 @@ static char *modConfigParseStageMusic(char *p, char *token, s32 stagenum)
 	}
 
 	// parse keyvalues until } is reached
-	s32 tmp = 0;
+	int tmp = 0;
 	p = strParseToken(p, token, NULL);
 	while (p && token[0] && strcmp(token, "}") != 0) {
 		if (!strcmp(token, "primarytrack")) {
@@ -154,10 +154,10 @@ static char *modConfigParseStageMusic(char *p, char *token, s32 stagenum)
 	return p;
 }
 
-static char *modConfigParseStageWeatherRooms(char *p, char *token, s32 stagenum, struct weathercfg *wcfg)
+static char *modConfigParseStageWeatherRooms(char *p, char *token, int stagenum, struct weathercfg *wcfg)
 {
 	// determine where we can start adding rooms
-	s32 idx;
+	int idx;
 	for (idx = 0; idx < WEATHERCFG_MAX_SKIPROOMS && wcfg->skiprooms[idx]; ++idx);
 
 	// eat opening bracket
@@ -174,7 +174,7 @@ static char *modConfigParseStageWeatherRooms(char *p, char *token, s32 stagenum,
 		p = strParseToken(p, token, NULL);
 	}
 
-	s32 tmp = 0;
+	int tmp = 0;
 	while (p && token[0] && strcmp(token, "}") != 0) {
 		if (token[0] == ',' && !token[1]) {
 			p = strParseToken(p, token, NULL);
@@ -202,9 +202,9 @@ static char *modConfigParseStageWeatherRooms(char *p, char *token, s32 stagenum,
 	return p;
 }
 
-static char *modConfigParseStageWeather(char *p, char *token, s32 stagenum)
+static char *modConfigParseStageWeather(char *p, char *token, int stagenum)
 {
-	s32 wi;
+	int wi;
 	struct weathercfg *wcfg = NULL;
 	for (wi = 0; wi < ARRAYCOUNT(g_WeatherConfig) && g_WeatherConfig[wi].stagenum; ++wi) {
 		if (g_WeatherConfig[wi].stagenum == stagenum) {
@@ -235,13 +235,13 @@ static char *modConfigParseStageWeather(char *p, char *token, s32 stagenum)
 	}
 
 	// parse keyvalues until } is reached
-	s32 tmpi = 0;
-	f32 tmpf = 0.f;
+	int tmpi = 0;
+	float tmpf = 0.f;
 	p = strParseToken(p, token, NULL);
 	while (p && token[0] && strcmp(token, "}") != 0) {
 		if (!strcmp(token, "include_rooms") || !strcmp(token, "exclude_rooms")) {
 			// include_rooms | exclude_rooms { ROOM_NUMBERS... }
-			const s32 include = (token[0] == 'i');
+			const int include = (token[0] == 'i');
 			p = modConfigParseStageWeatherRooms(p, token, stagenum, wcfg);
 			if (!p) {
 				return NULL;
@@ -287,7 +287,7 @@ static char *modConfigParseStage(char *p, char *token)
 {
 	// stage number
 	p = strParseToken(p, token, NULL);
-	const s32 stagenum = strtol(token, NULL, 0);
+	const int stagenum = strtol(token, NULL, 0);
 	if (stagenum <= 0x01 || stagenum > 0x50) {
 		return NULL;
 	}
@@ -301,7 +301,7 @@ static char *modConfigParseStage(char *p, char *token)
 	// find the stage table pointers this corresponds to
 	struct stagetableentry *stab = NULL;
 	struct stageallocation *salloc = NULL;
-	const s32 sidx = stageGetIndex(stagenum);
+	const int sidx = stageGetIndex(stagenum);
 	if (sidx >= 0) {
 		stab = &g_Stages[sidx];
 	} else {
@@ -316,7 +316,7 @@ static char *modConfigParseStage(char *p, char *token)
 	}
 
 	// parse keyvalues until } is reached
-	s32 tmp = 0;
+	int tmp = 0;
 	char *tmps = NULL;
 	p = strParseToken(p, token, NULL);
 	while (p && token[0] && strcmp(token, "}") != 0) {
@@ -381,15 +381,15 @@ static char *modConfigParseStage(char *p, char *token)
 	return p;
 }
 
-s32 modConfigLoad(const char *fname)
+int modConfigLoad(const char *fname)
 {
-	u32 dataLen = 0;
+	uint32_t dataLen = 0;
 	char *data = fsFileLoad(fname, &dataLen);
 	if (!data) {
 		return false;
 	}
 
-	s32 success = true;
+	int success = true;
 	char token[UTIL_MAX_TOKEN + 1] = { 0 };
 	char *end = data + dataLen;
 	char *p = strParseToken(data, token, NULL);
@@ -416,9 +416,9 @@ s32 modConfigLoad(const char *fname)
 	return success;
 }
 
-s32 modTextureLoad(u16 num, void *dst, u32 dstSize)
+int modTextureLoad(uint16_t num, void *dst, uint32_t dstSize)
 {
-	static s32 dirExists = -1;
+	static int dirExists = -1;
 	if (dirExists < 0) {
 		dirExists = (fsFileSize(MOD_TEXTURES_DIR "/") >= 0);
 	}
@@ -430,7 +430,7 @@ s32 modTextureLoad(u16 num, void *dst, u32 dstSize)
 	char path[FS_MAXPATH + 1];
 	snprintf(path, sizeof(path), MOD_TEXTURES_DIR "/%04x.bin", num);
 
-	const s32 ret = fsFileLoadTo(path, dst, dstSize);
+	const int ret = fsFileLoadTo(path, dst, dstSize);
 	if (ret > 0) {
 		sysLogPrintf(LOG_NOTE, "mod: loaded external texture %04x", num);
 	}
@@ -438,9 +438,9 @@ s32 modTextureLoad(u16 num, void *dst, u32 dstSize)
 	return ret;
 }
 
-void *modSequenceLoad(u16 num, u32 *outSize)
+void *modSequenceLoad(uint16_t num, uint32_t *outSize)
 {
-	static s32 dirExists = -1;
+	static int dirExists = -1;
 	if (dirExists < 0) {
 		dirExists = (fsFileSize(MOD_SEQUENCES_DIR "/") >= 0);
 	}
@@ -462,7 +462,7 @@ void *modSequenceLoad(u16 num, u32 *outSize)
 	return NULL;
 }
 
-void *modAnimationLoadData(u16 num)
+void *modAnimationLoadData(uint16_t num)
 {
 	char path[FS_MAXPATH + 1];
 	// load the animation data
@@ -474,9 +474,9 @@ void *modAnimationLoadData(u16 num)
 	return data;
 }
 
-s32 modAnimationLoadDescriptor(u16 num, struct animtableentry *anim)
+int modAnimationLoadDescriptor(uint16_t num, struct animtableentry *anim)
 {
-	static s32 dirExists = -1;
+	static int dirExists = -1;
 	if (dirExists < 0) {
 		dirExists = (fsFileSize(MOD_ANIMATIONS_DIR "/") >= 0);
 	}
@@ -501,7 +501,7 @@ s32 modAnimationLoadDescriptor(u16 num, struct animtableentry *anim)
 	// parse the descriptor
 	char token[UTIL_MAX_TOKEN + 1] = { 0 };
 	char *p = strParseToken(desc, token, NULL);
-	s32 tmp = 0;
+	int tmp = 0;
 	while (p && token[0]) {
 		if (!strcmp(token, "numframes")) {
 			PARSE_INT(path, "numframes", tmp, 0, 0xFFFF, false);

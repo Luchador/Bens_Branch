@@ -686,7 +686,7 @@ MenuDialogHandlerResult endscreenHandle2PCompleted(int operation, struct menudia
 				}
 
 				if (g_Menus[g_MpPlayerNum].endscreen.unke1c) {
-					if (var8009dfc0) {
+					if (g_GamePaused) {
 						g_Menus[g_MpPlayerNum].endscreen.unke1c--;
 					}
 
@@ -720,7 +720,7 @@ MenuDialogHandlerResult endscreenHandle2PFailed(int operation, struct menudialog
 				}
 
 				if (g_Menus[g_MpPlayerNum].endscreen.unke1c) {
-					if (var8009dfc0) {
+					if (g_GamePaused) {
 						g_Menus[g_MpPlayerNum].endscreen.unke1c--;
 					}
 
@@ -1255,7 +1255,7 @@ void endscreenPrepare(void)
 	uint32_t secs;
 	int timedalreadyunlocked;
 	int complalreadyunlocked;
-	u16 prevbest;
+	uint16_t prevbest;
 	bool nowunlocked;
 
 	g_Menus[g_MpPlayerNum].endscreen.stageindex = g_MissionConfig.stageindex;
@@ -1395,7 +1395,7 @@ void endscreenPrepare(void)
 
 				if (g_MissionConfig.stagenum == STAGE_SKEDARRUINS && g_AltTitleUnlocked == false) {
 					g_AltTitleUnlocked = true;
-					*(s8 *)&g_AltTitleEnabled = true;
+					*(int8_t *)&g_AltTitleEnabled = true;
 					bossfileSave();
 				}
 			}

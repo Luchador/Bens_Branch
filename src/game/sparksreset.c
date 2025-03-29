@@ -6,7 +6,7 @@
 
 void sparksReset(void)
 {
-	s32 i;
+	int i;
 	g_NextSparkIndex = 0;
 
 	for (i = 0; i < ARRAYCOUNT(g_SparkGroups); i++) {

@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/title.h"
 #include "game/bondgun.h"
@@ -14,12 +14,14 @@
 #include "game/textutils.h"
 #include "game/file.h"
 #include "game/lv.h"
+#include "game/mtxutils.h"
 #include "game/music.h"
 #include "game/training.h"
 #include "game/modeldef.h"
 #include "game/lang.h"
 #include "game/propobj.h"
 #include "game/savebuffer.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/joy.h"
 #include "lib/vi.h"
@@ -192,7 +194,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 		end = &g_LegalElements[ARRAYCOUNT(g_LegalElements)];
 
 		for (; elem < end; elem++) {
-			u32 colour = 0x7f7fffff;
+			uint32_t colour = 0x7f7fffff;
 
 			switch (elem->type) {
 			case LEGALELEMENTTYPE_BLUETEXTSM:
@@ -572,7 +574,7 @@ Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3
 				spc0[2] = spcc[2];
 
 				if (spc0[0] != 0.0f || spc0[1] != 0.0f || spc0[2] != 0.0f) {
-					guNormalize(&spc0[0], &spc0[1], &spc0[2]);
+					utilsNormalizeF(&spc0[0], &spc0[1], &spc0[2]);
 				}
 
 				spfc[j].r = (int) (spc0[0] * 127.0f);
@@ -582,7 +584,7 @@ Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3
 			}
 
 			sp100 = (void *)ALIGN8(s5rodata->numvertices * sizeof(Vtx) + (uintptr_t)sp100);
-			spfc = (void *)ALIGN8(s5rodata->numcolours * sizeof(u32) + (uintptr_t)spfc);
+			spfc = (void *)ALIGN8(s5rodata->numcolours * sizeof(uint32_t) + (uintptr_t)spfc);
 		}
 	}
 
@@ -938,7 +940,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	}
 
 	lookat = gfxAllocateLookAt(2);
-	guLookAtReflect(&spf0, lookat, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+	mtxLookAtReflect(&spf0, lookat, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 	gSPLookAt(gdl++, lookat);
 
 	{
@@ -1164,7 +1166,7 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 	lightdir.z = sinf((1 - fracdone) * 1.5f * M_PI);
 	lightdir.x = cosf((1 - fracdone) * 1.5f * M_PI);
 
-	guNormalize(&lightdir.x, &lightdir.y, &lightdir.z);
+	utilsNormalizeF(&lightdir.x, &lightdir.y, &lightdir.z);
 
 	v0 = 255;
 
@@ -1345,7 +1347,7 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 	lightdir.z = sinf(titleRotateClockwise(fracdone));
 	lightdir.x = cosf(titleRotateClockwise(fracdone));
 
-	guNormalize(&lightdir.x, &lightdir.y, &lightdir.z);
+	utilsNormalizeF(&lightdir.x, &lightdir.y, &lightdir.z);
 
 	s0 = 255;
 
@@ -1376,7 +1378,7 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 	if (fracdone < 0.5f) {
 		lightdir.z = sinf(titleRotateClockwise(0.5f));
 		lightdir.x = cosf(titleRotateClockwise(0.5f));
-		guNormalize(&lightdir.x, &lightdir.y, &lightdir.z);
+		utilsNormalizeF(&lightdir.x, &lightdir.y, &lightdir.z);
 		titleSetLight(&g_TitleLightRareLogo, s0, s0, s0, 0, &lightdir);
 	} else {
 		titleSetLight(&g_TitleLightRareLogo, s0, s0, s0, 0, &lightdir);

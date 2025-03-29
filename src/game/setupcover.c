@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "game/bg.h"
 #include "game/pad.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/collision.h"
 #include "lib/memp.h"
@@ -9,9 +10,9 @@
 #include "data.h"
 #include "types.h"
 
-void coverAllocateSpecial(u16 *specialcovernums)
+void coverAllocateSpecial(uint16_t *specialcovernums)
 {
-	s32 i;
+	int i;
 
 	g_SpecialCoverNums = mempAlloc(ALIGN16(g_NumSpecialCovers * sizeof(g_SpecialCoverNums[0])), MEMPOOL_STAGE);
 
@@ -24,13 +25,13 @@ void coverAllocateSpecial(u16 *specialcovernums)
 
 void setupPrepareCover(void)
 {
-	s32 i;
-	s32 numcovers = g_PadsFile->numcovers;
+	int i;
+	int numcovers = g_PadsFile->numcovers;
 	RoomNum *roomsptr;
-	f32 scale = 1;
+	float scale = 1;
 	struct coord aimpos;
 	struct cover cover;
-	u16 specialcovernums[1024];
+	uint16_t specialcovernums[1024];
 	RoomNum inrooms[21];
 	RoomNum aboverooms[21];
 
@@ -62,7 +63,7 @@ void setupPrepareCover(void)
 				} else if (!coverIsSpecial(&cover)) {
 					struct coord *look = cover.look;
 					look->y = 0;
-					guNormalize(&look->x, &look->y, &look->z);
+					utilsNormalizeF(&look->x, &look->y, &look->z);
 				}
 
 				// Find room
@@ -77,7 +78,7 @@ void setupPrepareCover(void)
 				g_CoverRooms[i] = -1;
 
 				if (roomsptr != NULL) {
-					s32 room = cdFindFloorRoomAtPos(cover.pos, roomsptr);
+					int room = cdFindFloorRoomAtPos(cover.pos, roomsptr);
 
 					if (room > 0) {
 						g_CoverRooms[i] = (RoomNum)room;
@@ -103,7 +104,7 @@ void setupPrepareCover(void)
 					}
 
 					if (roomsptr) {
-						s32 aimroom = cdFindFloorRoomAtPos(&aimpos, roomsptr);
+						int aimroom = cdFindFloorRoomAtPos(&aimpos, roomsptr);
 
 						if (aimroom > 0) {
 							g_CoverFlags[i] |= (g_CoverRooms[i] == (RoomNum)aimroom) ? COVERFLAG_AIMSAMEROOM : COVERFLAG_AIMDIFFROOM;

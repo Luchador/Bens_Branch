@@ -17,7 +17,7 @@
 #include "fs.h"
 #include "video.h"
 
-u16 *g_FrameBuffers[NUM_FRAMEBUFFERS];
+uint16_t *g_FrameBuffers[NUM_FRAMEBUFFERS];
 
 TextData *g_TextGunData;
 TextData *g_TextTitleData;

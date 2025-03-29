@@ -1,4 +1,4 @@
-#include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/pad.h"
 #include "bss.h"
@@ -9,16 +9,16 @@
 void setupLoadWaypoints(void)
 {
 	struct waypoint *waypoints;
-	s32 numwaypoints;
+	int numwaypoints;
 	struct waypoint *waypoint;
 	struct waypoint *waypoint2;
-	s32 numinserted;
-	s32 j;
-	s32 k;
+	int numinserted;
+	int j;
+	int k;
 	struct pad pad;
 	struct pad pad2;
-	s32 i;
-	s32 currentroom;
+	int i;
+	int currentroom;
 
 	// Count the number of waypoints. The "waypoints" pointer is mostly used in
 	// this function to point to the head of the waypoints array, but is being
@@ -32,7 +32,7 @@ void setupLoadWaypoints(void)
 	waypoints = g_StageSetup.waypoints;
 
 	// Allocate memory for the waypoint numbers array
-	g_Vars.waypointnums = mempAlloc(ALIGN16(numwaypoints * sizeof(s16)), MEMPOOL_STAGE);
+	g_Vars.waypointnums = mempAlloc(ALIGN16(numwaypoints * sizeof(int16_t)), MEMPOOL_STAGE);
 
 	numinserted = 0;
 

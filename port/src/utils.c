@@ -4,12 +4,11 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
-#include <PR/ultratypes.h>
 #include "platform.h"
 #include "system.h"
 #include "utils.h"
 
-static inline bool isSingleCharToken(const s32 ch)
+static inline bool isSingleCharToken(const int ch)
 {
 	switch (ch) {
 		case '{':
@@ -45,8 +44,8 @@ char *strRightTrim(char *str)
 		return NULL;
 	}
 
-	const s32 len = strlen(str);
-	for (s32 i = len - 1; i >= 0 && isspace(str[i]); --i) {
+	const int len = strlen(str);
+	for (int i = len - 1; i >= 0 && isspace(str[i]); --i) {
 		str[i] = '\0';
 	}
 
@@ -60,13 +59,13 @@ char *strTrim(char *str)
 	}
 
 	// left trim
-	while (*str && (u8)*str < ' ') {
+	while (*str && (uint8_t)*str < ' ') {
 		++str;
 	}
 
 	// right trim
-	const s32 len = strlen(str);
-	for (s32 i = len - 1; i > 0 && isspace(str[i]); --i) {
+	const int len = strlen(str);
+	for (int i = len - 1; i > 0 && isspace(str[i]); --i) {
 		str[i] = '\0';
 	}
 
@@ -91,7 +90,7 @@ char *strUnquote(char *str)
 	return str;
 }
 
-char *strParseToken(char *str, char *out, s32 *outCount)
+char *strParseToken(char *str, char *out, int *outCount)
 {
 	if (outCount) {
 		*outCount = 0;
@@ -107,10 +106,10 @@ char *strParseToken(char *str, char *out, s32 *outCount)
 		return NULL;
 	}
 
-	s32 cnt = 0;
+	int cnt = 0;
 	while (*str) {
 		// skip whitespace and other garbage
-		while (*str && (u8)*str <= ' ') {
+		while (*str && (uint8_t)*str <= ' ') {
 			++str;
 		}
 		if (!*str) {
@@ -145,7 +144,7 @@ char *strParseToken(char *str, char *out, s32 *outCount)
 				}
 
 				// add char to token
-				const s32 ch = (u8)*str++;
+				const int ch = (uint8_t)*str++;
 				if (cnt + 1 < UTIL_MAX_TOKEN) {
 					out[cnt++] = ch;
 				}
@@ -172,7 +171,7 @@ char *strParseToken(char *str, char *out, s32 *outCount)
 			if (isSingleCharToken(*str)) {
 				break;
 			}
-		} while ((u8)*str > ' ');
+		} while ((uint8_t)*str > ' ');
 		break;
 	}
 
@@ -189,7 +188,7 @@ char *strDuplicate(const char *str)
 	if (!str) {
 		return NULL;
 	}
-	const u32 len = strlen(str);
+	const uint32_t len = strlen(str);
 	char *out = sysMemAlloc(len + 1);
 	if (out) {
 		memcpy(out, str, len + 1);

@@ -1,4 +1,3 @@
-#include <PR/ultratypes.h>
 #include <PR/ultrasched.h>
 #include "lib/sched.h"
 #include "constants.h"
@@ -21,25 +20,23 @@
 #include "mixer.h"
 
 struct artifact g_ArtifactLists[3][240];
-u8 g_SchedSpecialArtifactIndexes[3];
-s32 g_SchedWriteArtifactsIndex;
-s32 g_SchedFrontArtifactsIndex;
-s32 g_SchedPendingArtifactsIndex;
+uint8_t g_SchedSpecialArtifactIndexes[3];
+int g_SchedWriteArtifactsIndex;
+int g_SchedFrontArtifactsIndex;
+int g_SchedPendingArtifactsIndex;
 
-s32 var8005ce74 = 0;
-f32 g_ViXScalesBySlot[NUM_GFXTASKS] = {1, 1};
-f32 g_ViYScalesBySlot[NUM_GFXTASKS] = {1, 1};
+int var8005ce74 = 0;
 bool g_SchedViModesPending[NUM_GFXTASKS] = {false, false};
-s32 g_ViUnblackTimer = NUM_FRAMEBUFFERS + 1;
-s32 g_ViShakeDirection = 1;
-s32 g_ViShakeIntensity = 0;
-f32 g_ViShakeIntensityMult = 1.f;
-s32 g_ViShakeTimer = 0;
+int g_ViUnblackTimer = NUM_FRAMEBUFFERS + 1;
+int g_ViShakeDirection = 1;
+int g_ViShakeIntensity = 0;
+float g_ViShakeIntensityMult = 1.f;
+int g_ViShakeTimer = 0;
 bool g_SchedIsFirstTask = true;
 
-s32 g_PrevFrameFb = -1;
-s32 g_BlurFb = -1;
-s32 g_BlurFbCapTimer = -1;
+int g_PrevFrameFb = -1;
+int g_BlurFb = -1;
+int g_BlurFbCapTimer = -1;
 bool g_BlurFbDirty = true;
 
 void __scUpdateViMode(void)
@@ -62,30 +59,9 @@ void __scUpdateViMode(void)
 	}
 }
 
-/**
- * Nintendo's sheduler accepts tasks on a "command" message queue.
- * This isn't used here.
- *
- * In PD, the main and audio threads submit tasks by calling this function
- * instead. It temporarily increases the calling thread's priority above the
- * scheduler, adds the task to the linked list directly and attempts to execute
- * it. This is faster than the queue method because it avoids switching threads.
- */
-void schedSubmitTask(OSSched *sc, OSScTask *t)
+void schedAudioFrame()
 {
-	if (t->list.t.type == M_GFXTASK) {
-		videoSubmitCommands((Gfx *)t->list.t.data_ptr);
-	}
-}
-
-void schedStartFrame(OSSched *sc)
-{
-	videoStartFrame();
-}
-
-void schedAudioFrame(OSSched *sc)
-{
-	s32 i;
+	int i;
 
 	if (!g_SndDisabled) {
 		for (i = 0; i < g_Vars.diffframe60; i++) {
@@ -109,10 +85,8 @@ void schedAudioFrame(OSSched *sc)
  * rendered periodically (once every 16 retraces). I guess this makes it render
  * if the RDP has hung.
  */
-void schedEndFrame(OSSched *sc)
+void schedEndFrame()
 {
-	sc->frameCount++;
-
 	viHandleRetrace();
 
 	inputUpdate();
@@ -120,10 +94,10 @@ void schedEndFrame(OSSched *sc)
 	joyReadData();
 	joy00014238();
 
-	schedAudioFrame(sc);
+	schedAudioFrame();
 	videoEndFrame();
 
-	if (g_MainIsBooting == 0) {
+	if (!g_MainIsBooting) {
 		schedConsiderScreenshot();
 	}
 
@@ -133,8 +107,8 @@ void schedEndFrame(OSSched *sc)
 
 void schedInitArtifacts(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	for (i = 0; i < 3; i++) {
 		for (j = 0; j < MAX_ARTIFACTS; j++) {
@@ -218,7 +192,7 @@ void schedConsiderScreenshot(void)
 		--g_BlurFbCapTimer;
 	} else if (g_BlurFbCapTimer < 0) {
 		// no blur requested this frame, mark blur fb dirty
-		g_BlurFbDirty = true;
+		//g_BlurFbDirty = true;
 	}
 
 	if (g_MenuData.screenshottimer >= 2) {

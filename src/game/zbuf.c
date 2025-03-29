@@ -11,25 +11,24 @@
 #include "lib/memp.h"
 #include "data.h"
 #include "types.h"
+#include "video.h"
 
-u32 g_ZbufWidth;
-u32 g_ZbufHeight;
-u16 g_ArtifactsCfb0[0x180];
-u16 g_ArtifactsCfb1[0x180];
-u16 g_ArtifactsCfb2[0x180];
+uint32_t g_ZbufWidth;
+uint32_t g_ZbufHeight;
+uint16_t g_ArtifactsCfb0[0x180]; // 0x180 = 384
+uint16_t g_ArtifactsCfb1[0x180];
+uint16_t g_ArtifactsCfb2[0x180];
 
-u16 *g_ZbufPtr1 = NULL;
-u16 *g_ZbufPtr2 = NULL;
+uint16_t *g_ZbufPtr1 = NULL;
 
 void *zbufGetAllocation(void)
 {
 	return g_ZbufPtr1;
 }
 
-void zbufReset(s32 stagenum)
+void zbufReset(int stagenum)
 {
 	g_ZbufPtr1 = NULL;
-	g_ZbufPtr2 = NULL;
 
 	if (stagenum != STAGE_TITLE) {
 		zbufAllocate();
@@ -59,22 +58,8 @@ void zbufAllocate(void)
 		g_ZbufHeight = MAX(220, FBALLOC_HEIGHT_HI);
 	}
 
-	g_ZbufPtr1 = mempAlloc(g_ZbufWidth * g_ZbufHeight * sizeof(u16) + 0x40, MEMPOOL_STAGE);
+	g_ZbufPtr1 = mempAlloc(g_ZbufWidth * g_ZbufHeight * sizeof(uint16_t) + 0x40, MEMPOOL_STAGE);
 	g_ZbufPtr1 = (void *) (((uintptr_t) g_ZbufPtr1 + 0x3f) & ~0x3f);
-	g_ZbufPtr2 = g_ZbufPtr1;
-}
-
-/**
- * Note: There is only one z-buffer, so there is nothing to swap.
- * Both of these pointers always have the same value.
- *
- * We assume this is a swap function due to the context in which it's called.
- * Perhaps the developers implemented two buffers with swapping before realising
- * they only needed one.
- */
-void zbufSwap(void)
-{
-	g_ZbufPtr2 = g_ZbufPtr1;
 }
 
 /**
@@ -88,8 +73,7 @@ void zbufSwap(void)
  */
 Gfx *zbufConfigureRdp(Gfx *gdl)
 {
-	u32 subamount;
-	uintptr_t addr;
+	uint32_t subamount;
 
 	if (g_Vars.normmplayerisrunning
 			&& (g_Vars.currentplayernum >= 2 || (PLAYERCOUNT() == 2 && g_Vars.currentplayernum == 1))) {
@@ -102,11 +86,7 @@ Gfx *zbufConfigureRdp(Gfx *gdl)
 		subamount = 0;
 	}
 
-	addr = (uintptr_t) g_ZbufPtr2 - subamount;
-	addr &= ~0x3f;
-
 	gDPPipeSync(gdl++);
-	gDPSetDepthImage(gdl++, addr);
 
 	return gdl;
 }
@@ -116,40 +96,14 @@ Gfx *zbufConfigureRdp(Gfx *gdl)
  */
 Gfx *zbufClear(Gfx *gdl)
 {
-#ifdef PLATFORM_N64
-	s32 left;
-	s32 right;
-
-	gDPPipeSync(gdl++);
-	gDPSetRenderMode(gdl++, G_RM_NOOP, G_RM_NOOP2);
-	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetWidth(), (uintptr_t)(g_ZbufPtr2));
-	gDPSetCycleType(gdl++, G_CYC_FILL);
-	gDPSetFillColor(gdl++, 0xfffcfffc);
-	gDPSetScissorFrac(gdl++, G_SC_NON_INTERLACE, 0, 0, playerGetFbWidth() * 4.0f, playerGetFbHeight() * 4.0f);
-
-	if (PLAYERCOUNT() <= 2) {
-		left = 0;
-		right = playerGetFbWidth() - 1;
-	} else if (g_Vars.currentplayernum == 0 || g_Vars.currentplayernum == 2) {
-		left = 0;
-		right = playerGetFbWidth() / 2 - 1;
-	} else {
-		left = playerGetFbWidth() / 2;
-		right = playerGetFbWidth() - 1;
-	}
-
-	gDPFillRectangle(gdl++, left, 0, right, playerGetFbHeight() - 1);
-	gDPPipeSync(gdl++);
-#else
 	gDPClearDepthEXT(gdl++);
-#endif
 
 	return gdl;
 }
 
-u16 *zbufGetArtifactsCfb(s32 index)
+uint16_t *zbufGetArtifactsCfb(int index)
 {
-	u16 *addr;
+	uint16_t *addr;
 
 	if (index == 0) {
 		addr = g_ArtifactsCfb0;
@@ -163,7 +117,7 @@ u16 *zbufGetArtifactsCfb(s32 index)
 		addr = g_ArtifactsCfb2;
 	}
 
-	addr = (u16 *) (((uintptr_t) addr + 0x3f) & ~0x3f);
+	addr = (uint16_t *) (((uintptr_t) addr + 0x3f) & ~0x3f);
 
 	return addr;
 }
@@ -171,13 +125,12 @@ u16 *zbufGetArtifactsCfb(s32 index)
 Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 {
 	struct artifact *artifacts = schedGetWriteArtifacts();
-	u32 stack;
-	u16 *sp4c = g_ZbufPtr1;
-	u32 s4 = 0;
-	u16 *sp44;
-	u16 *s2;
-	u16 *image;
-	s32 i;
+	uint16_t *sp4c = g_ZbufPtr1;
+	uint32_t s4 = 0;
+	uint16_t *sp44;
+	uint16_t *s2;
+	uint16_t *image;
+	int i;
 
 	viGetBackBuffer();
 	sp44 = zbufGetArtifactsCfb(g_SchedWriteArtifactsIndex);
@@ -185,7 +138,7 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 
 	gDPPipeSync(gdl++);
 	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(sp44));
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, 0, 0, SCREEN_320, SCREEN_240);
+	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, 0, 0, videoGetWidth(), videoGetHeight());
 	gDPSetCycleType(gdl++, G_CYC_COPY);
 	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0080, 4, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -213,7 +166,7 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 			image = &sp4c[artifacts[i].unk0c.u16_1 * viGetWidth()];
 
 			gDPPipeSync(gdl++);
-			gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_320, image);
+			gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, videoGetWidth(), image);
 			gDPLoadSync(gdl++);
 			gDPLoadBlock(gdl++, 5, 0, 0, viGetWidth() - 1, 0);
 			gDPPipeSync(gdl++);
@@ -237,8 +190,6 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);
 	gDPSetColorDither(gdl++, G_CD_BAYER);
-
-	if (sp44);
 
 	return gdl;
 }

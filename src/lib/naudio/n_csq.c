@@ -1,14 +1,15 @@
 #include <libaudio.h>
+#include <stdint.h>
 #include "n_libaudio.h"
 #include "types.h"
 
-u32 __n_alCSeqGetTrackEvent(ALCSeq *seq, u32 track, N_ALEvent *event, s32 arg3);
-u8 __getTrackByte(ALCSeq *seq, u32 track);
-u32 __readVarLen(ALCSeq *seq,u32 track);
+uint32_t __n_alCSeqGetTrackEvent(ALCSeq *seq, uint32_t track, N_ALEvent *event, int arg3);
+uint8_t __getTrackByte(ALCSeq *seq, uint32_t track);
+uint32_t __readVarLen(ALCSeq *seq,uint32_t track);
 
-void n_alCSeqNew(ALCSeq *seq, u8 *ptr)
+void n_alCSeqNew(ALCSeq *seq, uint8_t *ptr)
 {
-	u32 i, tmpOff, flagTmp;
+	uint32_t i, tmpOff, flagTmp;
 
 	/* load the seqence pointed to by ptr   */
 	seq->base = (ALCMidiHdr*)ptr;
@@ -26,22 +27,22 @@ void n_alCSeqNew(ALCSeq *seq, u8 *ptr)
 		if (tmpOff) {
 			flagTmp = 1 << i;
 			seq->validTracks |= flagTmp;
-			seq->curLoc[i] = (u8*)((uintptr_t)ptr + tmpOff);
+			seq->curLoc[i] = (uint8_t*)((uintptr_t)ptr + tmpOff);
 			seq->evtDeltaTicks[i] = __readVarLen(seq,i);
 		} else {
 			seq->curLoc[i] = 0;
 		}
 	}
 
-	seq->qnpt = 1.0f / (f32)seq->base->division;
+	seq->qnpt = 1.0f / (float)seq->base->division;
 }
 
-void n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt, s32 arg2)
+void n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt, int arg2)
 {
-	u32 i;
-	u32 firstTime = 0xffffffff;
-	u32 firstTrack;
-	u32 lastTicks = seq->lastDeltaTicks;
+	uint32_t i;
+	uint32_t firstTime = 0xffffffff;
+	uint32_t firstTrack;
+	uint32_t lastTicks = seq->lastDeltaTicks;
 
 	for (i = 0; i < 16; i++) {
 		if ((seq->validTracks >> i) & 1) {
@@ -69,15 +70,15 @@ void n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt, s32 arg2)
 	seq->deltaFlag = 1;
 }
 
-u32 __n_alCSeqGetTrackEvent(ALCSeq *seq, u32 track, N_ALEvent *event, s32 arg3)
+uint32_t __n_alCSeqGetTrackEvent(ALCSeq *seq, uint32_t track, N_ALEvent *event, int arg3)
 {
-	u32 offset;
-	u8 status, loopCt, curLpCt, *tmpPtr;
+	uint32_t offset;
+	uint8_t status, loopCt, curLpCt, *tmpPtr;
 
 	status = __getTrackByte(seq, track);
 
 	if (status == AL_MIDI_Meta) {
-		u8 type = __getTrackByte(seq, track);
+		uint8_t type = __getTrackByte(seq, track);
 
 		if (type == AL_MIDI_META_TEMPO) {
 			event->type = AL_TEMPO_EVT;
@@ -88,7 +89,7 @@ u32 __n_alCSeqGetTrackEvent(ALCSeq *seq, u32 track, N_ALEvent *event, s32 arg3)
 			event->msg.tempo.byte3 = __getTrackByte(seq, track);
 			seq->lastStatus[track] = 0;  /* lastStatus not supported after meta */
 		} else if (type == AL_MIDI_META_EOT) {
-			u32 flagMask;
+			uint32_t flagMask;
 
 			flagMask = 1 << track;
 			seq->validTracks = seq->validTracks ^ flagMask;
@@ -158,14 +159,14 @@ u32 __n_alCSeqGetTrackEvent(ALCSeq *seq, u32 track, N_ALEvent *event, s32 arg3)
 	return TRUE;
 }
 
-s32 alCSeqGetTicks(ALCSeq *seq)
+int alCSeqGetTicks(ALCSeq *seq)
 {
 	return seq->lastTicks;
 }
 
 void alCSeqSetLoc(ALCSeq *seq, ALCSeqMarker *m)
 {
-	s32 i;
+	int i;
 
 	seq->validTracks    = m->validTracks;
 	seq->lastTicks      = m->lastTicks;
@@ -182,7 +183,7 @@ void alCSeqSetLoc(ALCSeq *seq, ALCSeqMarker *m)
 
 void alCSeqGetLoc(ALCSeq *seq, ALCSeqMarker *m)
 {
-	s32 i;
+	int i;
 
 	m->validTracks    = seq->validTracks;
 	m->lastTicks      = seq->lastTicks;
@@ -197,13 +198,13 @@ void alCSeqGetLoc(ALCSeq *seq, ALCSeqMarker *m)
 	}
 }
 
-void n_alCSeqNewMarker(ALCSeq *seq, ALCSeqMarker *m, u32 ticks)
+void n_alCSeqNewMarker(ALCSeq *seq, ALCSeqMarker *m, uint32_t ticks)
 {
 	N_ALEvent evt;
 	ALCSeq tempSeq;
-	s32 i;
+	int i;
 
-	n_alCSeqNew(&tempSeq, (u8*)seq->base);
+	n_alCSeqNew(&tempSeq, (uint8_t*)seq->base);
 
 	do {
 		m->validTracks    = tempSeq.validTracks;
@@ -226,15 +227,15 @@ void n_alCSeqNewMarker(ALCSeq *seq, ALCSeqMarker *m, u32 ticks)
 	} while (tempSeq.lastTicks < ticks);
 }
 
-void func00039718(ALCSeq *seq, ALCSeqMarker *m, u32 ticks, u32 arg3)
+void func00039718(ALCSeq *seq, ALCSeqMarker *m, uint32_t ticks, uint32_t arg3)
 {
 	N_ALEvent evt;
 	ALCSeq tempSeq;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 	ALCSeqMarker m2;
 
-	n_alCSeqNew(&tempSeq, (u8*)seq->base);
+	n_alCSeqNew(&tempSeq, (uint8_t*)seq->base);
 
 	for (j = 0; j < ticks; j++) {
 		m[j].lastTicks = 0;
@@ -269,9 +270,9 @@ void func00039718(ALCSeq *seq, ALCSeqMarker *m, u32 ticks, u32 arg3)
 	} while (evt.type != AL_SEQ_END_EVT);
 }
 
-u8 __getTrackByte(ALCSeq *seq, u32 track)
+uint8_t __getTrackByte(ALCSeq *seq, uint32_t track)
 {
-	u8 theByte;
+	uint8_t theByte;
 
 	if (seq->curBULen[track]) {
 		theByte = *seq->curBUPtr[track];
@@ -282,8 +283,8 @@ u8 __getTrackByte(ALCSeq *seq, u32 track)
 		seq->curLoc[track]++;
 
 		if (theByte == AL_CMIDI_BLOCK_CODE) {
-			u8 loBackUp, hiBackUp, theLen, nextByte;
-			u32 backup;
+			uint8_t loBackUp, hiBackUp, theLen, nextByte;
+			uint32_t backup;
 
 			nextByte = *seq->curLoc[track];
 			seq->curLoc[track]++;
@@ -300,11 +301,11 @@ u8 __getTrackByte(ALCSeq *seq, u32 track)
 				seq->curLoc[track]++;
 				theLen = *seq->curLoc[track];
 				seq->curLoc[track]++;
-				backup = (u32)hiBackUp;
+				backup = (uint32_t)hiBackUp;
 				backup = backup << 8;
 				backup += loBackUp;
 				seq->curBUPtr[track] = seq->curLoc[track] - (backup + 4);
-				seq->curBULen[track] = (u32)theLen;
+				seq->curBULen[track] = (uint32_t)theLen;
 
 				/* now get the byte */
 				theByte = *seq->curBUPtr[track];
@@ -317,18 +318,18 @@ u8 __getTrackByte(ALCSeq *seq, u32 track)
 	return theByte;
 }
 
-u32 __readVarLen(ALCSeq *seq, u32 track)
+uint32_t __readVarLen(ALCSeq *seq, uint32_t track)
 {
-	u32 value;
-	u32 c;
+	uint32_t value;
+	uint32_t c;
 
-	value = (u32)__getTrackByte(seq, track);
+	value = (uint32_t)__getTrackByte(seq, track);
 
 	if (value & 0x80) {
 		value &= 0x7f;
 
 		do {
-			c = (u32)__getTrackByte(seq, track);
+			c = (uint32_t)__getTrackByte(seq, track);
 			value = (value << 7) + (c & 0x7f);
 		} while (c & 0x80);
 	}

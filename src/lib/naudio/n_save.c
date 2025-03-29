@@ -1,7 +1,7 @@
 #include "n_synthInternals.h"
 #include <os.h>
 
-Acmd *n_alSavePull(s32 sampleOffset, Acmd *p)
+Acmd *n_alSavePull(int sampleOffset, Acmd *p)
 {
 	Acmd *ptr = p;
 

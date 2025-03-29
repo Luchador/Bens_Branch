@@ -1,7 +1,7 @@
 #include "n_synthInternals.h"
 
-void n_alSynStartVoiceParams(N_ALVoice *v, ALWaveTable *w, f32 pitch, s16 vol,
-		ALPan pan, u8 fxmix, u8 arg6, f32 arg7, u8 arg8, ALMicroTime t)
+void n_alSynStartVoiceParams(N_ALVoice *v, ALWaveTable *w, float pitch, int16_t vol,
+		ALPan pan, uint8_t fxmix, uint8_t arg6, float arg7, uint8_t arg8, ALMicroTime t)
 {
 	ALStartParamAlt *update;
 

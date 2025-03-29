@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "constants.h"
 #include "game/propsnd.h"
@@ -24,11 +25,11 @@
 #include "types.h"
 #include "string.h"
 
-u32 g_NextHudMessageId;
+uint32_t g_NextHudMessageId;
 
-u8 g_HudmsgsActive = 0;
+uint8_t g_HudmsgsActive = 0;
 
-u32 g_HudmsgColours[] = {
+uint32_t g_HudmsgColours[] = {
 	/* 0*/ 0x00ff0000, // green
 	/* 1*/ 0x9999ff00, // pastel blue
 	/* 2*/ 0xffffff00, // white
@@ -42,9 +43,9 @@ u32 g_HudmsgColours[] = {
 	/*10*/ 0xaa55ff00, // purple
 };
 
-s32 g_HudPaddingY = 10;
-s32 g_HudPaddingX = 24;
-s32 g_NumHudMessages = 0;
+int g_HudPaddingY = 10;
+int g_HudPaddingX = 24;
+int g_NumHudMessages = 0;
 struct hudmessage *g_HudMessages = NULL;
 
 struct hudmsgtype g_HudmsgTypes[] = {
@@ -62,12 +63,12 @@ struct hudmsgtype g_HudmsgTypes[] = {
 	/*11*/ { 0, 0, 0, &g_CharsHandelGothicSm, &g_FontHandelGothicSm, 0x00ff0000, 0x000000a0, HUDMSGALIGN_XMIDDLE, HUDMSGALIGN_BELOWVIEWPORT, 0, 0, 120 },
 };
 
-u8 hudmsgsAreActive(void)
+uint8_t hudmsgsAreActive(void)
 {
 	return g_HudmsgsActive;
 }
 
-s32 hudmsgIsZoomRangeVisible(void)
+int hudmsgIsZoomRangeVisible(void)
 {
 	return optionsGetShowZoomRange(g_Vars.currentplayerstats->mpindex)
 		&& (PLAYERCOUNT() == 1
@@ -79,22 +80,22 @@ s32 hudmsgIsZoomRangeVisible(void)
 		&& g_Vars.currentplayer->cameramode != CAMERAMODE_THIRDPERSON;
 }
 
-Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha)
+Gfx *hudmsgRenderMissionTimer(Gfx *gdl, uint32_t alpha)
 {
-	s32 x;
-	s32 y;
-	s32 viewleft;
-	s32 timery;
+	int x;
+	int y;
+	int viewleft;
+	int timery;
 	char buffer[24];
-	u32 textcolour;
-	s32 playercount;
-	s32 playernum;
-	s16 viewtop;
-	s16 viewheight;
+	uint32_t textcolour;
+	int playercount;
+	int playernum;
+	int16_t viewtop;
+	int16_t viewheight;
 
 	textcolour = alpha;
 
-	viewleft = viGetViewLeft() / g_ScaleX;
+	viewleft = viGetViewLeft();
 	viewtop = viGetViewTop();
 	viewheight = viGetViewHeight();
 	playercount = PLAYERCOUNT();
@@ -163,32 +164,32 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha)
 	return gdl;
 }
 
-Gfx *hudmsgRenderZoomRange(Gfx *gdl, u32 alpha)
+Gfx *hudmsgRenderZoomRange(Gfx *gdl, uint32_t alpha)
 {
-	s32 viewtop;
-	s32 viewleft;
-	s32 viewhalfwidth;
-	s32 viewheight;
-	f32 zoominfovy;
-	f32 zoomfov;
-	s32 playercount;
-	f32 curzoom;
-	f32 maxzoom;
+	int viewtop;
+	int viewleft;
+	int viewhalfwidth;
+	int viewheight;
+	float zoominfovy;
+	float zoomfov;
+	int playercount;
+	float curzoom;
+	float maxzoom;
 	char text[24];
-	s32 weaponnum;
-	s32 texty;
-	s32 x;
-	s32 y;
-	s32 textwidth;
-	s32 textheight;
-	s32 x2;
-	s32 y2;
-	u32 colour;
+	int weaponnum;
+	int texty;
+	int x;
+	int y;
+	int textwidth;
+	int textheight;
+	int x2;
+	int y2;
+	uint32_t colour;
 
 	colour = (alpha * 0xa0 / 255) | 0x00ff0000;
 	viewtop = viGetViewTop();
-	viewleft = viGetViewLeft() / g_ScaleX;
-	viewhalfwidth = (viGetViewWidth() / g_ScaleX) >> 1;
+	viewleft = viGetViewLeft();
+	viewhalfwidth = (viGetViewWidth()) >> 1;
 	viewheight = viGetViewHeight();
 	texty = viewheight + viewtop - 1;
 	maxzoom = 1.0f;
@@ -276,13 +277,11 @@ Gfx *hudmsgRenderZoomRange(Gfx *gdl, u32 alpha)
 	return gdl;
 }
 
-Gfx *hudmsgRenderBox(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, f32 bgopacity, u32 bordercolour, f32 textopacity)
+Gfx *hudmsgRenderBox(Gfx *gdl, int x1, int y1, int x2, int y2, float bgopacity, uint32_t bordercolour, float textopacity)
 {
-	f32 f0;
-	f32 f20;
-	f32 f22;
-
-	if (x1);
+	float f0;
+	float f20;
+	float f22;
 
 	g_HudmsgsActive = true;
 
@@ -307,13 +306,13 @@ Gfx *hudmsgRenderBox(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, f32 bgopacity, u3
 	gdl = func0f0d49c8(gdl);
 
 	if (textopacity > 0.0f) {
-		f32 width = (x1 + x2) * 0.5f;
-		f32 height = (y1 + y2) * 0.5f;
+		float width = (x1 + x2) * 0.5f;
+		float height = (y1 + y2) * 0.5f;
 
 		gdl = text0f153a34(gdl,
-				(s32)((width - f22) + 1.0f) * g_ScaleX,
+				(int)((width - f22) + 1.0f),
 				(height - f20) + 1.0f,
-				(s32)(width + f22) * g_ScaleX,
+				(int)(width + f22),
 				height + f20,
 				128.0f * textopacity);
 	}
@@ -321,10 +320,10 @@ Gfx *hudmsgRenderBox(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, f32 bgopacity, u3
 	return gdl;
 }
 
-s32 hudmsg0f0ddb1c(s32 *arg0, s32 arg1)
+int hudmsgCalcXMargin(int *arg0, int arg1)
 {
-	s32 viewwidth = g_Vars.currentplayer->viewwidth / g_ScaleX;
-	s32 result = 0;
+	int viewwidth = g_Vars.currentplayer->viewwidth;
+	int result = 0;
 
 	*arg0 = 24;
 
@@ -347,9 +346,9 @@ s32 hudmsg0f0ddb1c(s32 *arg0, s32 arg1)
 	return result;
 }
 
-void hudmsgsHideByChannel(s32 channelnum)
+void hudmsgsHideByChannel(int channelnum)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_NumHudMessages; i++) {
 		if (g_HudMessages[i].state != HUDMSGSTATE_FREE && g_HudMessages[i].channelnum == channelnum) {
@@ -361,7 +360,7 @@ void hudmsgsHideByChannel(s32 channelnum)
 
 void hudmsgsReset(void)
 {
-	s32 i;
+	int i;
 
 	g_NumHudMessages = g_Vars.mplayerisrunning ? 20 : 8;
 	g_HudMessages = mempAlloc(ALIGN64(sizeof(struct hudmessage) * g_NumHudMessages), MEMPOOL_STAGE);
@@ -375,18 +374,18 @@ void hudmsgsReset(void)
 
 void hudmsgRemoveAll(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_NumHudMessages; i++) {
 		g_HudMessages[i].state = HUDMSGSTATE_FREE;
 	}
 }
 
-s32 hudmsgGetNext(s32 refid)
+int hudmsgGetNext(int refid)
 {
-	s32 bestid = -1;
-	s32 bestindex = -1;
-	s32 i;
+	int bestid = -1;
+	int bestindex = -1;
+	int i;
 
 	// Finding the smallest ID that is greater than refid
 	for (i = 0; i < g_NumHudMessages; i++) {
@@ -401,7 +400,7 @@ s32 hudmsgGetNext(s32 refid)
 	return bestindex;
 }
 
-void hudmsgCreate(char *text, s32 type)
+void hudmsgCreate(char *text, int type)
 {
 	hudmsgCreateFromArgs(text, type,
 			g_HudmsgTypes[type].unk00,
@@ -418,7 +417,7 @@ void hudmsgCreate(char *text, s32 type)
 			-1, 0);
 }
 
-void hudmsgCreateWithFlags(char *text, s32 type, u32 flags)
+void hudmsgCreateWithFlags(char *text, int type, uint32_t flags)
 {
 	hudmsgCreateFromArgs(text, type,
 			g_HudmsgTypes[type].unk00,
@@ -435,7 +434,7 @@ void hudmsgCreateWithFlags(char *text, s32 type, u32 flags)
 			-1, flags);
 }
 
-void hudmsgCreateWithColour(char *text, s32 type, u8 colournum)
+void hudmsgCreateWithColour(char *text, int type, uint8_t colournum)
 {
 	g_HudmsgTypes[type].colour = g_HudmsgColours[colournum];
 
@@ -454,7 +453,7 @@ void hudmsgCreateWithColour(char *text, s32 type, u8 colournum)
 			-1, 0);
 }
 
-void hudmsgCreateWithDuration(char *text, s32 type, struct hudmsgtype *config, s32 duration60)
+void hudmsgCreateWithDuration(char *text, int type, struct hudmsgtype *config, int duration60)
 {
 	hudmsgCreateFromArgs(text, type,
 			config->unk00,
@@ -494,9 +493,9 @@ void hudmsgCreateWithDuration(char *text, s32 type, struct hudmsgtype *config, s
  * Each hudmsg is assigned a duration according to its character length relative
  * to the entire string and the audio duration.
  */
-void hudmsgCreateAsSubtitle(char *srctext, s32 type, u8 colourindex, s32 audiochannelnum)
+void hudmsgCreateAsSubtitle(char *srctext, int type, uint8_t colourindex, int audiochannelnum)
 {
-	s32 audioduration60;
+	int audioduration60;
 	struct hudmsgtype *config;
 
 	audioduration60 = psGetDuration60(audiochannelnum);
@@ -518,29 +517,29 @@ void hudmsgCreateAsSubtitle(char *srctext, s32 type, u8 colourindex, s32 audioch
 
 	if (g_Vars.tickmode == TICKMODE_CUTSCENE && audioduration60 >= 0) {
 		char puncchars[] = { '.', ';', '!', '?', ',' };
-		u16 srclen;
-		s32 sp4a8;
-		s32 wrapwidth;
+		uint16_t srclen;
+		int sp4a8;
+		int wrapwidth;
 		char accum[250];
 		char prewrap[250];
 		char postwrap[250];
 		char msg[250];
-		s32 msglen;
+		int msglen;
 		bool split;
-		s32 accumlen;
-		s32 linecount;
-		f32 time60perchar;
-		s32 i;
-		s32 j;
+		int accumlen;
+		int linecount;
+		float time60perchar;
+		int i;
+		int j;
 		bool append;
 		bool foundpunctuation;
 
 		srclen = strlen(srctext);
-		wrapwidth = hudmsg0f0ddb1c(&sp4a8, config->unk16);
+		wrapwidth = hudmsgCalcXMargin(&sp4a8, config->unk16);
 
 		accumlen = 0;
 		i = 0;
-		time60perchar = (f32)audioduration60 / srclen;
+		time60perchar = (float)audioduration60 / srclen;
 
 		// These two loops both work with the i iterator.
 		// The inner loop increments i and is looking for places to split the
@@ -712,7 +711,7 @@ void hudmsgCreateAsSubtitle(char *srctext, s32 type, u8 colourindex, s32 audioch
 	}
 }
 
-void hudmsgCreateFromArgsWithoutFlags(char *text, s32 type, s32 conf00, s32 conf01, s32 conf02, struct fontchar **conf04, struct font **conf08, u32 textcolour, u32 shadowcolour, u32 alignh, s32 conf16, u32 alignv, s32 conf18, s32 arg14)
+void hudmsgCreateFromArgsWithoutFlags(char *text, int type, int conf00, int conf01, int conf02, struct fontchar **conf04, struct font **conf08, uint32_t textcolour, uint32_t shadowcolour, uint32_t alignh, int conf16, uint32_t alignv, int conf18, int arg14)
 {
 	hudmsgCreateFromArgs(text, type,
 			conf00,
@@ -731,15 +730,15 @@ void hudmsgCreateFromArgsWithoutFlags(char *text, s32 type, s32 conf00, s32 conf
 
 void hudmsgCalculatePosition(struct hudmessage *msg)
 {
-	s32 x;
-	s32 y;
-	s32 viewleft = g_Vars.players[msg->playernum]->viewleft / g_ScaleX;
-	s32 viewtop = g_Vars.players[msg->playernum]->viewtop;
-	s32 viewwidth = g_Vars.players[msg->playernum]->viewwidth / g_ScaleX;
-	s32 viewheight = g_Vars.players[msg->playernum]->viewheight;
-	s32 v0;
+	int x;
+	int y;
+	int viewleft = g_Vars.players[msg->playernum]->viewleft;
+	int viewtop = g_Vars.players[msg->playernum]->viewtop;
+	int viewwidth = g_Vars.players[msg->playernum]->viewwidth;
+	int viewheight = g_Vars.players[msg->playernum]->viewheight;
+	int v0;
 
-	s32 offset = (msg->alignh == HUDMSGALIGN_XMIDDLE) ? 10 : 0;
+	int offset = (msg->alignh == HUDMSGALIGN_XMIDDLE) ? 10 : 0;
 
 	if (PLAYERCOUNT() >= 3) {
 		viewwidth -= offset;
@@ -839,22 +838,22 @@ void hudmsgCalculatePosition(struct hudmessage *msg)
 	msg->y = y;
 }
 
-void hudmsgCreateFromArgs(char *text, s32 type, s32 conf00, s32 conf01, s32 conf02,
+void hudmsgCreateFromArgs(char *text, int type, int conf00, int conf01, int conf02,
 		struct fontchar **conf04, struct font **conf08,
-		u32 textcolour, u32 glowcolour,
-		u32 alignh, s32 conf16, u32 alignv, s32 conf18, s32 arg14, u32 flags)
+		uint32_t textcolour, uint32_t glowcolour,
+		uint32_t alignh, int conf16, uint32_t alignv, int conf18, int arg14, uint32_t flags)
 {
-	s32 j;
+	int j;
 	struct hudmessage *msg;
-	s32 hash = 0;
-	s32 i;
-	s32 index;
-	s32 textwidth;
-	s32 textheight;
-	s32 xmarginaextra;
-	s32 wrapwidth;
+	int hash = 0;
+	int i;
+	int index;
+	int textwidth;
+	int textheight;
+	int xmarginaextra;
+	int wrapwidth;
 	char stacktext[400];
-	s32 writeindex;
+	int writeindex;
 
 	if (type == HUDMSGTYPE_INGAMESUBTITLE && !optionsGetInGameSubtitles()) {
 		return;
@@ -867,7 +866,7 @@ void hudmsgCreateFromArgs(char *text, s32 type, s32 conf00, s32 conf01, s32 conf
 	if ((flags & HUDMSGFLAG_ONLYIFALIVE) == 0 || !g_Vars.currentplayer->isdead) {
 		if ((flags & HUDMSGFLAG_ALLOWDUPES) == 0) {
 			// Check for duplicate messages
-			s32 dupeofindex = -1;
+			int dupeofindex = -1;
 
 			for (index = 0; index < g_NumHudMessages; index++) {
 				if (g_HudMessages[index].state != HUDMSGSTATE_FREE
@@ -882,8 +881,6 @@ void hudmsgCreateFromArgs(char *text, s32 type, s32 conf00, s32 conf01, s32 conf
 				return;
 			}
 		}
-
-		g_ScaleX = 1;
 
 		// Find an unused index for the new message
 		for (index = 0; index < g_NumHudMessages; index++) {
@@ -917,7 +914,7 @@ void hudmsgCreateFromArgs(char *text, s32 type, s32 conf00, s32 conf01, s32 conf
 		if (index >= 0 && index < g_NumHudMessages) {
 			xmarginaextra = 0;
 			msg = &g_HudMessages[index];
-			wrapwidth = hudmsg0f0ddb1c(&xmarginaextra, conf16);
+			wrapwidth = hudmsgCalcXMargin(&xmarginaextra, conf16);
 			textMeasure(&textheight, &textwidth, text, *conf04, *conf08, 0);
 			if (textwidth > wrapwidth)
 			{
@@ -974,28 +971,24 @@ void hudmsgCreateFromArgs(char *text, s32 type, s32 conf00, s32 conf01, s32 conf
 				msg->channelnum = arg14;
 			}
 		}
-
-		g_ScaleX = 1;
 	}
 }
 
 void hudmsgsTick(void)
 {
-	s32 k;
-	s32 previd;
+	int k;
+	int previd;
 	bool show;
 	struct hudmessage *msg;
-	s32 prevplayernum;
-	s32 i;
-	s32 j;
-	s32 index;
+	int prevplayernum;
+	int i;
+	int j;
+	int index;
 	bool hide;
-	f32 fadeintime;
-	f32 fadeouttime;
+	float fadeintime;
+	float fadeouttime;
 
 	g_HudmsgsActive = false;
-
-	g_ScaleX = 1;
 
 	prevplayernum = g_Vars.currentplayernum;
 
@@ -1133,7 +1126,7 @@ void hudmsgsTick(void)
 
 				msg->timer += g_Vars.lvupdate60;
 
-				if (msg->timer >= (s32)fadeintime || msg->type == HUDMSGTYPE_CUTSCENESUBTITLE) {
+				if (msg->timer >= (int)fadeintime || msg->type == HUDMSGTYPE_CUTSCENESUBTITLE) {
 					msg->state = HUDMSGSTATE_ONSCREEN;
 					msg->timer = 0;
 				}
@@ -1171,7 +1164,7 @@ void hudmsgsTick(void)
 
 			msg->timer += g_Vars.lvupdate60;
 
-			if (msg->timer >= (s32)fadeouttime) {
+			if (msg->timer >= (int)fadeouttime) {
 				msg->state = HUDMSGSTATE_FREE;
 				msg->timer = 0;
 			}
@@ -1180,23 +1173,21 @@ void hudmsgsTick(void)
 			break;
 		}
 	}
-
-	g_ScaleX = 1;
 }
 
-void hudmsgsSetOn(u32 reason)
+void hudmsgsSetOn(uint32_t reason)
 {
 	g_Vars.currentplayer->hudmessoff &= ~reason;
 }
 
-void hudmsgsSetOff(u32 reason)
+void hudmsgsSetOff(uint32_t reason)
 {
 	g_Vars.currentplayer->hudmessoff |= reason;
 }
 
-void hudmsgsRemoveForDeadPlayer(s32 playernum)
+void hudmsgsRemoveForDeadPlayer(int playernum)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_NumHudMessages; i++) {
 		if (g_HudMessages[i].state
@@ -1211,23 +1202,21 @@ void hudmsgsRemoveForDeadPlayer(s32 playernum)
 Gfx *hudmsgsRender(Gfx *gdl)
 {
 	struct hudmessage *msg;
-	s32 i;
-	u32 textcolour;
-	u32 glowcolour;
-	f32 sin;
-	s32 x;
-	s32 y;
-	s32 timerthing = 255;
-	s32 spdc = true;
-	const s32 playercount = PLAYERCOUNT();
-
-	g_ScaleX = 1;
+	int i;
+	uint32_t textcolour;
+	uint32_t glowcolour;
+	float sin;
+	int x;
+	int y;
+	int timerthing = 255;
+	int spdc = true;
+	const int playercount = PLAYERCOUNT();
 
 	gdl = textConfigureGfxPipeline(gdl);
 
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 			&& g_InCutscene
-			&& g_MainIsEndscreen == 0
+			&& g_MainIsEndscreen == false
 			&& g_Vars.currentplayernum == 0) {
 		spdc = false;
 	}
@@ -1246,7 +1235,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 		}
 
 		if (msg->flash) {
-			s32 alpha;
+			int alpha;
 			sin = sinf((msg->timer * M_PI) / 60.0f);
 
 			if (sin < 0.0f) {
@@ -1263,8 +1252,8 @@ Gfx *hudmsgsRender(Gfx *gdl)
 		}
 
 		if (msg->opacity != 255) {
-			u32 textalpha = textcolour & 0xff;
-			u32 glowalpha = glowcolour & 0xff;
+			uint32_t textalpha = textcolour & 0xff;
+			uint32_t glowalpha = glowcolour & 0xff;
 
 			textalpha = (msg->opacity * textalpha) / 255;
 			glowalpha = (msg->opacity * glowalpha) / 255;
@@ -1277,7 +1266,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 		y = msg->y;
 
 		if (msg->type == HUDMSGTYPE_INGAMESUBTITLE && playerIsHealthVisible()) {
-			y += (s32)(16.0f * playerGetHealthBarHeightFrac());
+			y += (int)(16.0f * playerGetHealthBarHeightFrac());
 		}
 
 		const bool doaspectfix = (playercount < 2) || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL);
@@ -1293,8 +1282,8 @@ Gfx *hudmsgsRender(Gfx *gdl)
 
 		if (msg->type == HUDMSGTYPE_CUTSCENESUBTITLE) {
 			gDPSetScissor(gdl++, 0,
-					(x - 4) * g_ScaleX, 0,
-					(x + msg->width + 3) * g_ScaleX, viGetBufHeight());
+					(x - 4), 0,
+					(x + msg->width + 3), viGetBufHeight());
 		}
 
 		switch (msg->state) {
@@ -1303,12 +1292,12 @@ Gfx *hudmsgsRender(Gfx *gdl)
 			break;
 		case HUDMSGSTATE_FADINGIN:
 			{
-				u32 bordercolour = msg->textcolour | 0x40;
-				f32 tmp;
-				f32 spc0;
+				uint32_t bordercolour = msg->textcolour | 0x40;
+				float tmp;
+				float spc0;
 
 				if (msg->opacity != 255) {
-					u32 alpha = (msg->opacity * (bordercolour & 0xff)) / 255;
+					uint32_t alpha = (msg->opacity * (bordercolour & 0xff)) / 255;
 					bordercolour = (bordercolour & 0xffffff00) + (alpha & 0xff);
 				}
 
@@ -1352,10 +1341,10 @@ Gfx *hudmsgsRender(Gfx *gdl)
 			break;
 		case HUDMSGSTATE_ONSCREEN:
 			if (msg->boxed) {
-				u32 bordercolour = msg->textcolour | 0x40;
+				uint32_t bordercolour = msg->textcolour | 0x40;
 
 				if (msg->opacity != 255) {
-					u32 alpha = (msg->opacity * (bordercolour & 0xff)) / 255;
+					uint32_t alpha = (msg->opacity * (bordercolour & 0xff)) / 255;
 					bordercolour = (bordercolour & 0xffffff00) + (alpha & 0xff);
 				}
 
@@ -1373,15 +1362,15 @@ Gfx *hudmsgsRender(Gfx *gdl)
 			break;
 		case HUDMSGSTATE_FADINGOUT:
 			{
-				u32 bordercolour;
-				u32 stack;
-				f32 spa8 = (sqrtf(msg->width * msg->width + msg->height * msg->height) + 92.0f) / PALUPF(7.0f);
-				f32 tmp;
+				uint32_t bordercolour;
+				uint32_t stack;
+				float spa8 = (sqrtf(msg->width * msg->width + msg->height * msg->height) + 92.0f) / PALUPF(7.0f);
+				float tmp;
 
 				bordercolour = msg->textcolour | 0x40;
 
 				if (msg->opacity != 255) {
-					u32 alpha = (msg->opacity * (bordercolour & 0xff)) / 255;
+					uint32_t alpha = (msg->opacity * (bordercolour & 0xff)) / 255;
 					bordercolour = (bordercolour & 0xffffff00) + (alpha & 0xff);
 				}
 
@@ -1447,14 +1436,12 @@ Gfx *hudmsgsRender(Gfx *gdl)
 
 	gdl = text0f153780(gdl);
 
-	g_ScaleX = 1;
-
 	return gdl;
 }
 
 void hudmsgsStop(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_NumHudMessages; i++) {
 		g_HudMessages[i].state = HUDMSGSTATE_FREE;

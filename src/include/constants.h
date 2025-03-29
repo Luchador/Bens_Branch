@@ -48,18 +48,16 @@
 #define MINFLOAT ((float)-3.40282346638528860e+38)
 #define MAXFLOAT ((float)3.40282346638528860e+38)
 
-#define ABS(val)            ((val) > 0 ? (val) : -(val))
-#define ABSF(val)           ((val) > 0.0f ? (val) : -(val))
 #define ALIGN2(val)         (((val) | 1) ^ 0x1)
 #define ALIGN4(val)         (((val) | 3) ^ 0x3)
 #define ALIGN8(val)         ((((val) + 0x7) | 0x7) ^ 0x7)
 #define ALIGN16(val)        ((((val) + 0xf) | 0xf) ^ 0xf)
 #define ALIGN64(val)        (((((uintptr_t)(val)) + 0x3f) | 0x3f) ^ 0x3f)
-#define ARRAYCOUNT(a)       (s32)(sizeof(a) / sizeof(a[0]))
+#define ARRAYCOUNT(a)       (int)(sizeof(a) / sizeof(a[0]))
 #define CHRNAVSEED(chr)     ((g_Vars.lvframe60 >> 9) * 128 + chr->chrnum * 8)
 #define CHRRACE(chr)        (chr ? chr->race : RACE_HUMAN)
-#define CRASH()             *(u8 *)0 = 69
-#define CYCLES_PER_FRAME    ((s32) 62500000LL*3/4 / 60)
+#define CRASH()             *(uint8_t *)0 = 69
+#define CYCLES_PER_FRAME    ((int) 781250)
 #define LINEHEIGHT          (11)
 #define MIXCOLOUR(dialog, property) dialog->transitionfrac < 0.0f ? g_MenuColours[dialog->type].property : colourBlend(g_MenuColours[dialog->type2].property, g_MenuColours[dialog->type].property, dialog->colourweight)
 #define MPCHR(index)        ((index) < MAX_PLAYERS ? &g_PlayerConfigsArray[index].base : &g_BotConfigsArray[(index) - MAX_PLAYERS].base)
@@ -108,11 +106,7 @@
 
 #define PORTAL_IS_CLOSED(portalnum) ((g_BgPortals[portalnum].flags & PORTALFLAG_CLOSED) && (g_BgPortals[portalnum].flags & PORTALFLAG_FORCEOPEN) == 0)
 
-#ifdef __sgi
-#define ALIGNED16
-#else
 #define ALIGNED16 __attribute__ ((aligned (16)))
-#endif
 
 #define ROM_COMPANYCODE 0x3459
 #define ROM_GAMECODE    'NPDE'
@@ -3633,7 +3627,7 @@
 #define SCREEN_WIDTH_HI  640
 #define SCREEN_HEIGHT_HI 220
 
-#define SCREEN_ASPECT ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO)
+#define SCREEN_ASPECT ((float)SCREEN_WIDTH_LO / (float)SCREEN_HEIGHT_LO)
 
 #define SCREENRATIO_NORMAL 0
 #define SCREENRATIO_16_9   1
@@ -4236,7 +4230,6 @@
 
 #define VIMODE_NONE 0
 #define VIMODE_LO   1
-#define VIMODE_HI   2
 
 #define VISIONMODE_NORMAL             0
 #define VISIONMODE_XRAY               1

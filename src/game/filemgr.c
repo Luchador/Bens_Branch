@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/filelist.h"
 #include "game/tex.h"
@@ -432,7 +431,7 @@ void filemgrHandleSuccess(void)
 		g_Vars.bossfileid = g_Menus[g_MpPlayerNum].fm.fileid;
 		g_Vars.bossdeviceserial = g_Menus[g_MpPlayerNum].fm.deviceserial;
 		bossfileSave();
-		func0f0f820c(&g_CiMenuViaPcMenuDialog, MENUROOT_MAINMENU);
+		menuResetAllDialogsAndSetNewRoot(&g_CiMenuViaPcMenuDialog, MENUROOT_MAINMENU);
 		break;
 	case FILEOP_READ_GAME:
 	case FILEOP_READ_MPSETUP:
@@ -800,7 +799,7 @@ bool filemgrSaveOrLoad(struct fileguid *guid, int fileop, uintptr_t playernum)
 void filemgrDeleteCurrentFile(void)
 {
 	bool error = false;
-	s8 device = pakFindBySerial(g_FilemgrFileToDelete.deviceserial);
+	int8_t device = pakFindBySerial(g_FilemgrFileToDelete.deviceserial);
 	int i;
 
 	if (device >= 0) {
@@ -1529,11 +1528,6 @@ char *filemgrMenuTextFileInUseDescription(struct menuitem *item)
 	return langGet(L_MPWEAPONS_160); // "Cannot delete file as it is being used."
 }
 
-Gfx *filemgrRenderPerfectHeadThumbnail(Gfx *gdl, struct menuitemrenderdata *renderdata, int fileid, int deviceserial)
-{
-	return gdl;
-}
-
 bool filemgrIsFileInUse(struct filelistfile *file)
 {
 	int i;
@@ -1600,7 +1594,7 @@ MenuItemHandlerResult filemgrFileToCopyOrDeleteListMenuHandler(int operation, st
 			struct filelistfile *file = &list->files[data->list.unk04];
 
 			if (g_Menus[g_MpPlayerNum].fm.filetypeplusone == 4) {
-				gdl = filemgrRenderPerfectHeadThumbnail(gdl, renderdata, file->fileid, file->deviceserial);
+				// empty
 			} else {
 				uint32_t colour = renderdata->colour;
 				char text[32];
@@ -1888,8 +1882,8 @@ char *pakMenuTextPagesUsed(struct menuitem *item)
 
 char *pakMenuTextStatusMessage(struct menuitem *item)
 {
-	ubool haspdnote = false;
-	ubool hasemptynote = false;
+	bool haspdnote = false;
+	bool hasemptynote = false;
 	int i;
 
 	if (g_EditingPak == NULL) {
@@ -1934,7 +1928,7 @@ char *pakMenuTextEditingPakName(struct menuitem *item)
 MenuItemHandlerResult pakSelectionMenuHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_CHECKDISABLED) {
-		if (!mempakIsOkay((s8)item->param)) {
+		if (!mempakIsOkay((int8_t)item->param)) {
 			return true;
 		}
 	}
@@ -1960,7 +1954,7 @@ MenuDialogHandlerResult pakChoosePakMenuDialog(int operation, struct menudialogd
 		g_Menus[g_MpPlayerNum].fm.unke24 = 0;
 		break;
 	case MENUOP_TICK:
-		var80062944 = 1;
+		var80062944 = true;
 		break;
 	case MENUOP_CLOSE:
 		if (g_Vars.stagenum != STAGE_BOOTPAKMENU) {
@@ -2163,11 +2157,11 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(int operation, struct me
 				TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
 
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 4) << 2) * g_ScaleX,
+				((renderdata->x + 4) << 2),
 				(renderdata->y + 2) << 2,
-				((renderdata->x + 60) << 2) * g_ScaleX,
+				((renderdata->x + 60) << 2),
 				(renderdata->y + 38) << 2,
-				G_TX_RENDERTILE, 0, 1152, 1024 / g_ScaleX, -1024);
+				G_TX_RENDERTILE, 0, 1152, 1024, -1024);
 
 		x = renderdata->x + 62;
 		y = renderdata->y + 4;

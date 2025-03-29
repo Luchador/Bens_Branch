@@ -30,21 +30,21 @@ void setupPreparePads(void)
 {
 	struct packedpad *packedpad;
 	RoomNum *roomsptr;
-	s32 padnum;
-	s32 numpads;
-	s32 roomnum;
+	int padnum;
+	int numpads;
+	int roomnum;
 	struct pad pad;
 	struct waypoint *waypoint;
 	struct waygroup *waygroup;
 	RoomNum inrooms[24];
 	RoomNum aboverooms[22];
-	s32 offset;
+	int offset;
 
 	g_PadsFile = (struct padsfileheader *)g_StageSetup.padfiledata;
 #ifdef PLATFORM_64BIT
-	g_PadOffsets = (u16 *)(g_StageSetup.padfiledata + 0x20);
+	g_PadOffsets = (uint16_t *)(g_StageSetup.padfiledata + 0x20);
 #else
-	g_PadOffsets = (u16 *)(g_StageSetup.padfiledata + 0x14);
+	g_PadOffsets = (uint16_t *)(g_StageSetup.padfiledata + 0x14);
 #endif
 	padnum = 0;
 	numpads = g_PadsFile->numpads;
@@ -78,8 +78,8 @@ void setupPreparePads(void)
 
 		// Scale the bbox by 1 and save it back into the packed pad data.
 		// Yeah, this is effectively doing nothing.
-		if ((*(u32 *) packedpad >> 14) & PADFLAG_HASBBOXDATA) {
-			f32 scale = 1;
+		if ((*(uint32_t *) packedpad >> 14) & PADFLAG_HASBBOXDATA) {
+			float scale = 1;
 
 			pad.bbox.xmin *= scale;
 			pad.bbox.xmax *= scale;
@@ -104,7 +104,7 @@ void setupPreparePads(void)
 	waypoint = g_StageSetup.waypoints;
 
 	while (waypoint->padnum >= 0) {
-		waypoint->neighbours = (s32 *)((uintptr_t)g_StageSetup.padfiledata + (uintptr_t)waypoint->neighbours);
+		waypoint->neighbours = (int *)((uintptr_t)g_StageSetup.padfiledata + (uintptr_t)waypoint->neighbours);
 		waypoint++;
 	}
 
@@ -112,8 +112,8 @@ void setupPreparePads(void)
 	waygroup = g_StageSetup.waygroups;
 
 	while (waygroup->neighbours != NULL) {
-		waygroup->neighbours = (s32 *)((uintptr_t)g_StageSetup.padfiledata + (uintptr_t)waygroup->neighbours);
-		waygroup->waypoints = (s32 *)((uintptr_t)g_StageSetup.padfiledata + (uintptr_t)waygroup->waypoints);
+		waygroup->neighbours = (int *)((uintptr_t)g_StageSetup.padfiledata + (uintptr_t)waygroup->neighbours);
+		waygroup->waypoints = (int *)((uintptr_t)g_StageSetup.padfiledata + (uintptr_t)waygroup->waypoints);
 		waygroup++;
 	}
 }

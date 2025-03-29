@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/chrai.h"
@@ -496,7 +495,7 @@ bool (*g_CommandPointers[])(void) = {
 	/*0x01e0*/ aiRemoveReferencesToChr,
 };
 
-u16 g_CommandLengths[] = {
+uint16_t g_CommandLengths[] = {
 	/*0x0000*/ 3,  /*0x0001*/ 3,  /*0x0002*/ 3,  /*0x0003*/ 2,
 	/*0x0004*/ 2,  /*0x0005*/ 5,  /*0x0006*/ 5,  /*0x0007*/ 4,
 	/*0x0008*/ 2,  /*0x0009*/ 2,  /*0x000a*/ 2,  /*0x000b*/ 12,

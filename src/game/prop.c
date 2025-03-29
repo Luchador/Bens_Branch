@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdint.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/bondmove.h"

@@ -5,12 +5,12 @@
 #include "data.h"
 #include "types.h"
 
-u64 g_Rng2Seed = 0xab8d9f7781280783;
+uint64_t g_Rng2Seed = 0xab8d9f7781280783;
 
 /**
  * Generate a random number between 0 and 4294967295.
  */
-u32 random2(void)
+uint32_t random2(void)
 {
 	g_Rng2Seed = ((g_Rng2Seed << 63) >> 31 | (g_Rng2Seed << 31) >> 32) ^ (g_Rng2Seed << 44) >> 32;
 	g_Rng2Seed = ((g_Rng2Seed >> 20) & 0xfff) ^ g_Rng2Seed;
@@ -21,7 +21,7 @@ u32 random2(void)
 /**
  * Set the given seed as the RNG seed. Add 1 to make sure it isn't 0.
  */
-void rng2SetSeed(u64 seed)
+void rng2SetSeed(uint64_t seed)
 {
 	g_Rng2Seed = seed + 1;
 }

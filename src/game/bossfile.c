@@ -19,9 +19,9 @@
 #include "data.h"
 #include "types.h"
 
-u8 var800a22d0[0x5b];
-u8 g_AltTitleUnlocked;
-u8 g_AltTitleEnabled;
+uint8_t var800a22d0[0x5b];
+uint8_t g_AltTitleUnlocked;
+uint8_t g_AltTitleEnabled;
 
 void bossfileSetDefaults2(void)
 {
@@ -41,12 +41,12 @@ bool bossfileLoadFull(void)
 	return true;
 }
 
-u32 bossfileFindFileId(void)
+uint32_t bossfileFindFileId(void)
 {
 	struct pakfileheader header;
-	u32 fileids[513];
-	u32 candidate = 0;
-	s32 i;
+	uint32_t fileids[513];
+	uint32_t candidate = 0;
+	int i;
 
 	if (pakGetFileIdsByType(SAVEDEVICE_GAMEPAK, PAKFILETYPE_BOSS, fileids) == 0) {
 		for (i = 0; fileids[i] != 0; i++) {
@@ -75,8 +75,8 @@ void bossfileLoad(void)
 {
 	bool failed = false;
 	struct savebuffer buffer;
-	s32 i;
-	s32 fileid;
+	int i;
+	int fileid;
 	struct fileguid guid;
 
 	fileid = bossfileFindFileId();
@@ -92,7 +92,7 @@ void bossfileLoad(void)
 	}
 
 	if (!failed) {
-		u8 tracknum;
+		uint8_t tracknum;
 
 		savebufferReadGuid(&buffer, &guid);
 
@@ -137,9 +137,8 @@ void bossfileSave(void)
 	volatile bool sp12c = false;
 	struct savebuffer buffer;
 	struct fileguid guid;
-	u32 stack;
-	s32 i;
-	s32 fileid;
+	int i;
+	int fileid;
 
 	savebufferClear(&buffer);
 

@@ -24,6 +24,7 @@
 #define __audioInternals__
 
 #include <libaudio.h>
+#include <stdint.h>
 
 /*
  * filter message ids
@@ -87,75 +88,75 @@ enum {
 
 typedef struct ALParam_s {
 	struct ALParam_s    *next;
-	s32                 delta;
-	s16                 type;
+	int                 delta;
+	int16_t                 type;
 	union {
-		f32             f;
-		s32             i;
+		float             f;
+		int             i;
 	} data;
 	union {
-		f32             f;
-		s32             i;
+		float             f;
+		int             i;
 	} moredata;
 	union {
-		f32             f;
-		s32             i;
+		float             f;
+		int             i;
 	} stillmoredata;
 	union {
-		f32             f;
-		s32             i;
+		float             f;
+		int             i;
 	} yetstillmoredata;
-	s32 unk1c;
-	s32 unk20;
+	int unk1c;
+	int unk20;
 #ifdef PLATFORM_64BIT
-	u8 _pad_[8];
+	uint8_t _pad_[8];
 #endif
 } ALParam;
 
 typedef struct {
 	struct ALParam_s            *next;
-	s32                         delta;
-	s16                         type;
-	s16                         unity;  /* disable resampler */
-	f32                         pitch;
-	s16                         volume;
+	int                         delta;
+	int16_t                         type;
+	int16_t                         unity;  /* disable resampler */
+	float                         pitch;
+	int16_t                         volume;
 	ALPan                       pan;
-	u8                          fxMix;
-	u8                          unk14;
-	u8                          unk15;
-	f32                         unk18;
-	s32                         samples;
+	uint8_t                          fxMix;
+	uint8_t                          unk14;
+	uint8_t                          unk15;
+	float                         unk18;
+	int                         samples;
 	struct ALWaveTable_s        *wave;
 } ALStartParamAlt;
 
 typedef struct {
 	struct ALParam_s            *next;
-	s32                         delta;
-	s16                         type;
-	s16                         unity;  /* disable resampler */
+	int                         delta;
+	int16_t                         type;
+	int16_t                         unity;  /* disable resampler */
 	struct ALWaveTable_s        *wave;
 } ALStartParam;
 
 typedef struct {
 	struct ALParam_s    *next;
-	s32                 delta;
-	s16                 type;
+	int                 delta;
+	int16_t                 type;
 	struct PVoice_s     *pvoice;
 } ALFreeParam;
 
-typedef Acmd *(*ALCmdHandler)(void *, s16 *, s32, s32, Acmd *);
-typedef s32   (*ALSetParam)(void *, s32, void *);
+typedef Acmd *(*ALCmdHandler)(void *, int16_t *, int, int, Acmd *);
+typedef int   (*ALSetParam)(void *, int, void *);
 
 typedef struct ALFilter_s {
 	struct ALFilter_s   *source;
 	ALCmdHandler        handler;
 	ALSetParam          setParam;
-	s16                 inp;
-	s16                 outp;
-	s32                 type;
+	int16_t                 inp;
+	int16_t                 outp;
+	int                 type;
 } ALFilter;
 
-void    alFilterNew(ALFilter *f, ALCmdHandler h, ALSetParam s, s32 type);
+void    alFilterNew(ALFilter *f, ALCmdHandler h, ALSetParam s, int type);
 
 #define AL_MAX_ADPCM_STATES     3
 
@@ -165,154 +166,154 @@ typedef struct {
 	ADPCM_STATE                 *lstate;
 	ALRawLoop                   loop;
 	struct ALWaveTable_s        *table;
-	s32                         bookSize;
+	int                         bookSize;
 	ALDMAproc                   dma;
 	void                        *dmaState;
-	s32                         sample;
-	s32                         lastsam;
-	s32                         first;
-	s32                         memin;
+	int                         sample;
+	int                         lastsam;
+	int                         first;
+	int                         memin;
 } ALLoadFilter;
 
 void    alLoadNew(ALLoadFilter *f, ALDMANew dma, ALHeap *hp);
-Acmd    *alAdpcmPull(void *f, s16 *outp, s32 byteCount, s32 sampleOffset, Acmd *p);
-Acmd    *alRaw16Pull(void *f, s16 *outp, s32 byteCount, s32 sampleOffset, Acmd *p);
-s32     alLoadParam(void *filter, s32 paramID, void *param);
+Acmd    *alAdpcmPull(void *f, int16_t *outp, int byteCount, int sampleOffset, Acmd *p);
+Acmd    *alRaw16Pull(void *f, int16_t *outp, int byteCount, int sampleOffset, Acmd *p);
+int     alLoadParam(void *filter, int paramID, void *param);
 
 typedef struct ALResampler_s {
 	ALFilter            filter;
 	RESAMPLE_STATE      *state[2];
-	f32                 ratio;
-	s32			upitch;
-	f32		        delta;
-	s32			first;
+	float                 ratio;
+	int			upitch;
+	float		        delta;
+	int			first;
 	ALParam		*ctrlList;
 	ALParam		*ctrlTail;
-	s32                 motion;
+	int                 motion;
 } ALResampler;
 
 typedef struct {
-	s16		        fc;
-	s16		        fgain;
+	int16_t		        fc;
+	int16_t		        fgain;
 	union {
-		s16		fccoef[16];
-		s64             force_aligned;
+		int16_t		fccoef[16];
+		int64_t             force_aligned;
 	} fcvec;
-	s32			first;
+	int			first;
 	POLEF_STATE *fstate[2];
-	s32 unk34;
+	int unk34;
 } ALLowPass;
 
 typedef struct {
-	u32		input;
-	u32		output;
-	s16		ffcoef;
-	s16		fbcoef;
-	s16		gain;
-	f32		rsinc;
-	f32		rsval;
-	s32		rsdelta;
-	f32		rsgain;
+	uint32_t		input;
+	uint32_t		output;
+	int16_t		ffcoef;
+	int16_t		fbcoef;
+	int16_t		gain;
+	float		rsinc;
+	float		rsval;
+	int		rsdelta;
+	float		rsgain;
 	ALLowPass	*lp;
 	ALResampler	*rs;
 } ALDelay;
 
-typedef s32   (*ALSetFXParam)(void *, s32, void *);
+typedef int   (*ALSetFXParam)(void *, int, void *);
 typedef struct {
-	u32			length; // 0
+	uint32_t			length; // 0
 	ALDelay		*delay; // 4
-	u8			section_count; // 8
+	uint8_t			section_count; // 8
 	struct ALFilter_s   filter;
-	s16			*base[2]; // 20
-	s16			*input[2]; // 28
+	int16_t			*base[2]; // 20
+	int16_t			*input[2]; // 28
 } ALFx;
 
 void    alFxNew(ALFx *r, ALSynConfig *c, ALHeap *hp);
-Acmd    *alFxPull(void *f, s16 *outp, s32 out, s32 sampleOffset, Acmd *p);
-s32     alFxParam(void *filter, s32 paramID, void *param);
-s32     alFxParamHdl(void *filter, s32 paramID, void *param);
+Acmd    *alFxPull(void *f, int16_t *outp, int out, int sampleOffset, Acmd *p);
+int     alFxParam(void *filter, int paramID, void *param);
+int     alFxParamHdl(void *filter, int paramID, void *param);
 
 #define AL_MAX_MAIN_BUS_SOURCES       1
 typedef struct ALMainBus_s {
 	ALFilter            filter;
-	s32                 sourceCount;
-	s32                 maxSources;
+	int                 sourceCount;
+	int                 maxSources;
 	ALFilter            **sources;
 } ALMainBus;
 
-void    alMainBusNew(ALMainBus *m, void *ptr, s32 len);
-Acmd    *alMainBusPull(void *f, s16 *outp, s32 outCount, s32 sampleOffset, Acmd *p);
-s32     alMainBusParam(void *filter, s32 paramID, void *param);
+void    alMainBusNew(ALMainBus *m, void *ptr, int len);
+Acmd    *alMainBusPull(void *f, int16_t *outp, int outCount, int sampleOffset, Acmd *p);
+int     alMainBusParam(void *filter, int paramID, void *param);
 
 #define AL_MAX_AUX_BUS_SOURCES       8
 #define AL_MAX_AUX_BUS_FX	     1
 typedef struct ALAuxBus_s {
 	ALFilter            filter;
-	s32                 sourceCount;
-	s32                 maxSources;
+	int                 sourceCount;
+	int                 maxSources;
 	ALFilter            **sources;
 	ALFx		fx[AL_MAX_AUX_BUS_FX];
 } ALAuxBus;
 
-void    alAuxBusNew(ALAuxBus *m, void *ptr, s32 len);
-Acmd    *alAuxBusPull(void *f, s16 *outp, s32 outCount, s32 sampleOffset, Acmd *p);
-s32     alAuxBusParam(void *filter, s32 paramID, void *param);
+void    alAuxBusNew(ALAuxBus *m, void *ptr, int len);
+Acmd    *alAuxBusPull(void *f, int16_t *outp, int outCount, int sampleOffset, Acmd *p);
+int     alAuxBusParam(void *filter, int paramID, void *param);
 
 void    alResampleNew(ALResampler *r, ALHeap *hp);
-Acmd    *alResamplePull(void *f, s16 *outp, s32 out, s32 sampleOffset, Acmd *p);
-s32     alResampleParam(void *f, s32 paramID, void *param);
+Acmd    *alResamplePull(void *f, int16_t *outp, int out, int sampleOffset, Acmd *p);
+int     alResampleParam(void *f, int paramID, void *param);
 
 typedef struct ALSave_s {
 	ALFilter            filter;
-	s32	       		dramout;
-	s32                 first;
+	int	       		dramout;
+	int                 first;
 } ALSave;
 
 void    alSaveNew(ALSave *r);
-Acmd    *alSavePull(void *f, s16 *outp, s32 outCount, s32 sampleOffset, Acmd *p);
-s32     alSaveParam(void *f, s32 paramID, void *param);
+Acmd    *alSavePull(void *f, int16_t *outp, int outCount, int sampleOffset, Acmd *p);
+int     alSaveParam(void *f, int paramID, void *param);
 
 typedef struct ALEnvMixer_s {
 	ALFilter            filter;
 	ENVMIX_STATE	*state;
-	s16		        pan;
-	s16		        volume;
-	s16		        cvolL;
-	s16		        cvolR;
-	s16		        dryamt;
-	s16		        wetamt;
-	u16                 lratl;
-	s16                 lratm;
-	s16                 ltgt;
-	u16                 rratl;
-	s16                 rratm;
-	s16                 rtgt;
-	s32                 delta;
-	s32                 segEnd;
-	s32			first;
+	int16_t		        pan;
+	int16_t		        volume;
+	int16_t		        cvolL;
+	int16_t		        cvolR;
+	int16_t		        dryamt;
+	int16_t		        wetamt;
+	uint16_t                 lratl;
+	int16_t                 lratm;
+	int16_t                 ltgt;
+	uint16_t                 rratl;
+	int16_t                 rratm;
+	int16_t                 rtgt;
+	int                 delta;
+	int                 segEnd;
+	int			first;
 	ALParam		*ctrlList;
 	ALParam		*ctrlTail;
 	ALFilter            **sources;
-	s32                 motion;
+	int                 motion;
 } ALEnvMixer;
 
 void    alEnvmixerNew(ALEnvMixer *e, ALHeap *hp);
-Acmd    *alEnvmixerPull(void *f, s16 *outp, s32 out, s32 sampleOffset, Acmd *p);
-s32     alEnvmixerParam(void *filter, s32 paramID, void *param);
+Acmd    *alEnvmixerPull(void *f, int16_t *outp, int out, int sampleOffset, Acmd *p);
+int     alEnvmixerParam(void *filter, int paramID, void *param);
 
 
 /*
  * heap stuff
  */
 typedef struct {
-	s32         magic;  /* check structure integrety                    */
-	s32         size;   /* size of this allocated block                 */
-	u8          *file;  /* file that this alloc was called from         */
-	s32         line;   /* line that it was called from                 */
-	s32         count;  /* heap call number                             */
-	s32         pad0;
-	s32         pad1;
-	s32         pad2;   /* Make it 32 bytes                             */
+	int         magic;  /* check structure integrety                    */
+	int         size;   /* size of this allocated block                 */
+	uint8_t          *file;  /* file that this alloc was called from         */
+	int         line;   /* line that it was called from                 */
+	int         count;  /* heap call number                             */
+	int         pad0;
+	int         pad1;
+	int         pad2;   /* Make it 32 bytes                             */
 } HeapInfo;
 
 #define AL_CACHE_ALIGN  15
@@ -328,7 +329,7 @@ typedef struct PVoice_s {
 	ALLoadFilter        decoder;
 	ALResampler         resampler;
 	ALEnvMixer		envmixer;
-	s32                 offset;
+	int                 offset;
 } PVoice;
 
 /*
@@ -339,8 +340,8 @@ void            __freeParam(ALParam *param);
 void            _freePVoice(ALSynth *drvr, PVoice *pvoice);
 void            _collectPVoices(ALSynth *drvr);
 
-s32             _timeToSamples(ALSynth *ALSynth, s32 micros);
-ALMicroTime     _samplesToTime(ALSynth *synth, s32 samples);
+int             _timeToSamples(ALSynth *ALSynth, int micros);
+ALMicroTime     _samplesToTime(ALSynth *synth, int samples);
 
 void            _init_lpfilter(ALLowPass *lp);
 

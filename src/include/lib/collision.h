@@ -1,7 +1,6 @@
 #ifndef _IN_LIB_COLLISION_H
 #define _IN_LIB_COLLISION_H
 #include <ultra64.h>
-#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
@@ -22,13 +21,13 @@ bool cdGetSavedPos(struct coord *arg0, struct coord *arg1);
 void cdGetGeoNormal(struct geo *geo, struct coord *normal);
 void cdGetFloorCol(struct geo *tile, int16_t *floorcol);
 void cdGetFloorType(struct geo *tile, uint8_t *floortype);
-bool cd000266a4(float x, float z, struct geo *tile);
+bool cdIs2dPointInGeo(float x, float z, struct geo *tile);
 void cdGetPropsOnPlatform(struct prop *platform, int16_t *propnums, int len);
 int cd000274e0Block(struct geoblock *tile, float x, float z, float width, struct prop *prop, struct collision *collision);
 bool cd000276c8Cyl(struct geocyl *tile, float x, float z, float width, struct prop *prop, struct collision *collision);
 bool cdFindLadder(struct coord *pos, float width, float ymax, float ymin, RoomNum *rooms, int16_t geoflags, struct coord *laddernormal);
 bool cd0002a13c(struct coord *pos, float radius, float arg2, float arg3, RoomNum *rooms, int16_t geoflags);
-float cdFindGroundInfoAtCyl(struct coord *pos, float radius, RoomNum *rooms, int16_t *floorcol, uint8_t *floortype, int16_t *floorflags, RoomNum *floorroom, int *inlift, struct prop **lift);
+float cdFindGroundInfoAtCyl(struct coord *pos, float radius, RoomNum *rooms, int16_t *floorcol, uint8_t *floortype, int16_t *floorflags, RoomNum *floorroom, bool *inlift, struct prop **lift);
 float cdFindGroundAtCyl(struct coord *pos, float radius, RoomNum *rooms, int16_t *floorcol, uint8_t *floortype);
 float cdFindFloorYColourTypeAtPos(struct coord *pos, RoomNum *rooms, int16_t *floorcol, uint8_t *floortype);
 int cdFindFloorRoomAtPos(struct coord *pos, RoomNum *nearrooms);

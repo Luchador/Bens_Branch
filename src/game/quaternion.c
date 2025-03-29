@@ -7,19 +7,19 @@
 #include "data.h"
 #include "types.h"
 
-void quaternionEulerToQuat(struct coord *angle, f32 quat[4])
+void quaternionEulerToQuat(struct coord *angle, float quat[4])
 {
-	f32 cosx = cosf(angle->f[0] * 0.5f);
-	f32 sinx = sinf(angle->f[0] * 0.5f);
-	f32 cosy = cosf(angle->f[1] * 0.5f);
-	f32 siny = sinf(angle->f[1] * 0.5f);
-	f32 cosz = cosf(angle->f[2] * 0.5f);
-	f32 sinz = sinf(angle->f[2] * 0.5f);
+	float cosx = cosf(angle->f[0] * 0.5f);
+	float sinx = sinf(angle->f[0] * 0.5f);
+	float cosy = cosf(angle->f[1] * 0.5f);
+	float siny = sinf(angle->f[1] * 0.5f);
+	float cosz = cosf(angle->f[2] * 0.5f);
+	float sinz = sinf(angle->f[2] * 0.5f);
 
-	f32 cosx_cosy = cosx * cosy;
-	f32 cosx_siny = cosx * siny;
-	f32 sinx_cosy = sinx * cosy;
-	f32 sinx_siny = sinx * siny;
+	float cosx_cosy = cosx * cosy;
+	float cosx_siny = cosx * siny;
+	float sinx_cosy = sinx * cosy;
+	float sinx_siny = sinx * siny;
 
 	quat[0] = cosx_cosy * cosz + sinx_siny * sinz;
 	quat[1] = sinx_cosy * cosz - cosx_siny * sinz;
@@ -27,7 +27,7 @@ void quaternionEulerToQuat(struct coord *angle, f32 quat[4])
 	quat[3] = cosx_cosy * sinz - sinx_siny * cosz;
 }
 
-void quaternionSetRotationAroundX(f32 angle, f32 quat[4])
+void quaternionSetRotationAroundX(float angle, float quat[4])
 {
 	quat[0] = cosf(angle * 0.5f);
 	quat[1] = sinf(angle * 0.5f);
@@ -35,7 +35,7 @@ void quaternionSetRotationAroundX(f32 angle, f32 quat[4])
 	quat[3] = 0.0f;
 }
 
-void quaternionSetRotationAroundY(f32 angle, f32 quat[4])
+void quaternionSetRotationAroundY(float angle, float quat[4])
 {
 	quat[0] = cosf(angle * 0.5f);
 	quat[1] = 0.0f;
@@ -43,7 +43,7 @@ void quaternionSetRotationAroundY(f32 angle, f32 quat[4])
 	quat[3] = 0.0f;
 }
 
-void quaternionSetRotationAroundZ(f32 angle, f32 quat[4])
+void quaternionSetRotationAroundZ(float angle, float quat[4])
 {
 	quat[0] = cosf(angle * 0.5f);
 	quat[1] = 0.0f;
@@ -51,22 +51,22 @@ void quaternionSetRotationAroundZ(f32 angle, f32 quat[4])
 	quat[3] = sinf(angle * 0.5f);
 }
 
-void quaternionToMtx(f32 quat[4], Mtxf *mtx)
+void quaternionToMtx(float quat[4], Mtxf *mtx)
 {
-	f32 mult = 2.0f / (quat[0] * quat[0] + quat[1] * quat[1] + quat[2] * quat[2] + quat[3] * quat[3]);
-	f32 a = quat[1] * mult;
-	f32 b = quat[2] * mult;
-	f32 c = quat[3] * mult;
+	float mult = 2.0f / (quat[0] * quat[0] + quat[1] * quat[1] + quat[2] * quat[2] + quat[3] * quat[3]);
+	float a = quat[1] * mult;
+	float b = quat[2] * mult;
+	float c = quat[3] * mult;
 
-	f32 sp34 = quat[0] * a;
-	f32 sp30 = quat[0] * b;
-	f32 sp2c = quat[0] * c;
-	f32 sp28 = quat[1] * a;
-	f32 sp24 = quat[1] * b;
-	f32 sp20 = quat[1] * c;
-	f32 sp1c = quat[2] * b;
-	f32 sp18 = quat[2] * c;
-	f32 sp14 = quat[3] * c;
+	float sp34 = quat[0] * a;
+	float sp30 = quat[0] * b;
+	float sp2c = quat[0] * c;
+	float sp28 = quat[1] * a;
+	float sp24 = quat[1] * b;
+	float sp20 = quat[1] * c;
+	float sp1c = quat[2] * b;
+	float sp18 = quat[2] * c;
+	float sp14 = quat[3] * c;
 
 	mtx->m[0][0] = 1.0f - (sp1c + sp14);
 	mtx->m[0][1] = sp24 + sp2c;
@@ -90,11 +90,11 @@ void quaternionToMtx(f32 quat[4], Mtxf *mtx)
 	mtx->m[3][3] = 1.0f;
 }
 
-void quaternion0f097044(Mtxf *mtx, f32 arg1[4])
+void quaternion0f097044(Mtxf *mtx, float arg1[4])
 {
-	f32 var1;
-	f32 var2;
-	f32 trace = mtx->m[0][0] + mtx->m[1][1] + mtx->m[2][2] + 1.0f;
+	float var1;
+	float var2;
+	float trace = mtx->m[0][0] + mtx->m[1][1] + mtx->m[2][2] + 1.0f;
 
 	if (trace > 0.01f) {
 		var1 = sqrtf(trace);
@@ -105,10 +105,10 @@ void quaternion0f097044(Mtxf *mtx, f32 arg1[4])
 		arg1[2] = (mtx->m[2][0] - mtx->m[0][2]) * var2;
 		arg1[3] = (mtx->m[0][1] - mtx->m[1][0]) * var2;
 	} else {
-		s32 i;
-		s32 j;
-		s32 indices[3] = {1, 2, 0};
-		s32 k;
+		int i;
+		int j;
+		int indices[3] = {1, 2, 0};
+		int k;
 
 		i = 0;
 
@@ -133,7 +133,7 @@ void quaternion0f097044(Mtxf *mtx, f32 arg1[4])
 	}
 }
 
-void quaternionToTransformMtx(struct coord *pos, f32 rot[4], Mtxf *mtx)
+void quaternionToTransformMtx(struct coord *pos, float rot[4], Mtxf *mtx)
 {
 	quaternionToMtx(rot, mtx);
 
@@ -144,15 +144,15 @@ void quaternionToTransformMtx(struct coord *pos, f32 rot[4], Mtxf *mtx)
 
 #define EPSILON 0.00001001f
 
-void quaternionSlerp(f32 q1[4], f32 q2[4], f32 t, f32 result[4])
+void quaternionSlerp(float q1[4], float q2[4], float t, float result[4])
 {
-	f32 dot = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
-	f32 theta;
-	f32 theta_q1;
-	f32 theta_q2;
-	f32 sine;
-	f32 coeff_q1;
-	f32 coeff_q2;
+	float dot = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
+	float theta;
+	float theta_q1;
+	float theta_q2;
+	float sine;
+	float coeff_q1;
+	float coeff_q2;
 
 	if (dot < -1.0f + EPSILON) {
 		result[0] = (1.0f - t) * q1[0] - q2[0] * t;
@@ -178,16 +178,16 @@ void quaternionSlerp(f32 q1[4], f32 q2[4], f32 t, f32 result[4])
 	}
 }
 
-void quaternion0f097518(f32 q[4], f32 t, f32 result[4])
+void quaternion0f097518(float q[4], float t, float result[4])
 {
-	f32 sp34 = q[0];
-	f32 sp30 = 1.0f;
-	f32 sp2c;
-	f32 sp28;
-	f32 sp24;
-	f32 sp20;
-	f32 sp1c;
-	f32 sp18;
+	float sp34 = q[0];
+	float sp30 = 1.0f;
+	float sp2c;
+	float sp28;
+	float sp24;
+	float sp20;
+	float sp1c;
+	float sp18;
 
 	if (q[0] < 0.0f) {
 		sp34 = -sp34;
@@ -219,10 +219,10 @@ void quaternion0f097518(f32 q[4], f32 t, f32 result[4])
 	}
 }
 
-// Ben's comment: Prevents the camera from suddenly flipping such as when using the Hoverbike.
-void quaternionAvoidFlips(f32 q1[4], f32 q2[4])
+//Prevents the camera from suddenly flipping such as when using the Hoverbike.
+void quaternionAvoidFlips(float q1[4], float q2[4])
 {
-	f32 dot = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
+	float dot = q1[0] * q2[0] + q1[1] * q2[1] + q1[2] * q2[2] + q1[3] * q2[3];
 
 	if (dot < 0.0f) {
 		q2[0] = -q2[0];
@@ -232,7 +232,7 @@ void quaternionAvoidFlips(f32 q1[4], f32 q2[4])
 	}
 }
 
-void quaternionMultQuaternion(f32 a[4], f32 b[4], f32 result[4])
+void quaternionMultQuaternion(float a[4], float b[4], float result[4])
 {
 	result[0] = a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3];
 	result[1] = a[0] * b[1] + b[0] * a[1] + a[2] * b[3] - a[3] * b[2];
@@ -240,9 +240,9 @@ void quaternionMultQuaternion(f32 a[4], f32 b[4], f32 result[4])
 	result[3] = a[0] * b[3] + b[0] * a[3] + a[1] * b[2] - a[2] * b[1];
 }
 
-void quaternionMultQuaternionInPlace(f32 a[4], f32 dst[4])
+void quaternionMultQuaternionInPlace(float a[4], float dst[4])
 {
-	f32 tmp[4];
+	float tmp[4];
 
 	quaternionMultQuaternion(a, dst, tmp);
 

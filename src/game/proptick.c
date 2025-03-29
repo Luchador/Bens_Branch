@@ -46,12 +46,12 @@
 
 void propsTick(void)
 {
-	s32 i;
+	int i;
 	struct prop *prop;
 	struct prop *next;
 	struct prop *next2;
-	s32 done;
-	s32 tickop;
+	int done;
+	int tickop;
 
 	for (i = 0; i < PLAYERCOUNT(); i++) {
 		g_Vars.players[i]->bondextrapos.x = 0;

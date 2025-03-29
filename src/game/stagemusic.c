@@ -38,9 +38,9 @@ struct stagemusic g_StageTracks[] = {
 	{ 0,                   0,                    0,                       0  },
 };
 
-s32 stageGetPrimaryTrack(s32 stagenum)
+int stageGetPrimaryTrack(int stagenum)
 {
-	s32 i;
+	int i;
 
 	if (g_Vars.normmplayerisrunning) {
 		return mpChooseTrack();
@@ -63,9 +63,9 @@ s32 stageGetPrimaryTrack(s32 stagenum)
 	return mpChooseTrack();
 }
 
-s32 stageGetAmbientTrack(s32 stagenum)
+int stageGetAmbientTrack(int stagenum)
 {
-	s32 i = 0;
+	int i = 0;
 
 	while (g_StageTracks[i].stagenum) {
 		if (g_StageTracks[i].stagenum == stagenum) {
@@ -78,9 +78,9 @@ s32 stageGetAmbientTrack(s32 stagenum)
 	return -1;
 }
 
-s32 stageGetNrgTrack(s32 stagenum)
+int stageGetNrgTrack(int stagenum)
 {
-	s32 i = 0;
+	int i = 0;
 
 	while (g_StageTracks[i].stagenum) {
 		if (g_StageTracks[i].stagenum == stagenum) {

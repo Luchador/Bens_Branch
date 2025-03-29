@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include <math.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/debug.h"
@@ -587,8 +586,8 @@ int botIsObjCollectable(struct defaultobj *obj)
 void botCheckPickups(struct chrdata *chr)
 {
 	int i;
-	s16 *propnumptr;
-	s16 propnums[260];
+	int16_t *propnumptr;
+	int16_t propnums[260];
 	RoomNum allrooms[22];
 	RoomNum neighbours[12];
 

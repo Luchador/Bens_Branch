@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/debug.h"
 #include "game/tex.h"
@@ -17,20 +16,19 @@
 #include "platform.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
 
 struct texture *g_Textures;
 struct texpool g_TexSharedPool;
 struct texcacheitem g_TexCacheItems[150];
-s32 g_TexCacheCount;
-s32 g_TexNumToLoad;
-u8 *g_TexBitstring;
-u32 g_TexAccumValue;
-s32 g_TexAccumNumBits;
-u32 g_TexBase;
-u8 *g_TextureConfigSegment;
-s32 g_TexNumConfigs;
+int g_TexCacheCount;
+int g_TexNumToLoad;
+uint8_t *g_TexBitstring;
+uint32_t g_TexAccumValue;
+int g_TexAccumNumBits;
+uint32_t g_TexBase;
+uint8_t *g_TextureConfigSegment;
+int g_TexNumConfigs;
 struct tex **g_TexWords;
 struct textureconfig *g_TexWallhitConfigs;
 Gfx *g_TexGdl1;
@@ -55,7 +53,7 @@ struct textureconfig *g_TexRadarConfigs;
 struct textureconfig *g_TexStarsConfigs;
 
 // The number of channels, excluding 1-bit alpha channels.
-s32 g_TexFormatNumChannels[] = { 
+int g_TexFormatNumChannels[] = { 
 	4, 	 // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
 	3, 	 // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
 	3, 	 // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
@@ -71,7 +69,7 @@ s32 g_TexFormatNumChannels[] = {
 	1 }; // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 
 // Whether each format supports a 1-bit alpha channel.
-s32 g_TexFormatHas1BitAlpha[] = { 
+int g_TexFormatHas1BitAlpha[] = { 
 	0,    // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
 	1,    // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
 	0,    // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
@@ -89,7 +87,7 @@ s32 g_TexFormatHas1BitAlpha[] = {
 // For non-paletted images, size in decimal of each colour channel.
 // Eg. 32 means each channel can store up to 32 values (5-bits per channel).
 // For paletted images, same thing but for the palette indices instead.
-s32 g_TexFormatChannelSizes[] = { 
+int g_TexFormatChannelSizes[] = { 
 	256,   // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
 	32,    // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
 	256,   // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
@@ -104,7 +102,7 @@ s32 g_TexFormatChannelSizes[] = {
 	256,   // TEXFORMAT_IA16_CI8 16-bit 88 paletted greyscale+alpha with 8-bit palette indexes
 	16 };  // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 
-s32 g_TexFormatBitsPerPixel[] = { 
+int g_TexFormatBitsPerPixel[] = { 
 	32,   // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
 	16,   // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
 	24,   // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
@@ -120,7 +118,7 @@ s32 g_TexFormatBitsPerPixel[] = {
 	16 }; // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 
 // Mapping to GBI format
-s32 g_TexFormatGbiMappings[] = {
+int g_TexFormatGbiMappings[] = {
 	G_IM_FMT_RGBA,   // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
 	G_IM_FMT_RGBA,   // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
 	G_IM_FMT_RGBA,   // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
@@ -136,7 +134,7 @@ s32 g_TexFormatGbiMappings[] = {
 	G_IM_FMT_CI,     // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 };
 
-s32 g_TexFormatDepths[] = {
+int g_TexFormatDepths[] = {
 	G_IM_SIZ_32b,  // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
 	G_IM_SIZ_16b,  // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
 	G_IM_SIZ_32b,  // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
@@ -152,7 +150,7 @@ s32 g_TexFormatDepths[] = {
 	G_IM_SIZ_4b,   // TEXFORMAT_IA16_CI4 16-bit 88 paletted greyscale+alpha with 4-bit palette indexes
 };
 
-s32 g_TexFormatLutModes[] = {
+int g_TexFormatLutModes[] = {
 	G_TT_NONE,    // TEXFORMAT_RGBA32 32-bit RGBA (8/8/8/8)
 	G_TT_NONE,    // TEXFORMAT_RGBA16 16-bit RGBA (5/5/5/1)
 	G_TT_NONE,    // TEXFORMAT_RGB24 24-bit RGB (8/8/8)
@@ -193,24 +191,24 @@ s32 g_TexFormatLutModes[] = {
  *
  * The zlib data is prefixed with the standard 5-byte rarezip header.
  */
-s32 texInflateZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct texpool *pool)
+int texInflateZlib(uint8_t *src, uint8_t *dst, bool hasloddata, int numlods, struct texpool *pool)
 {
-	s32 i;
-	s32 imagebytesout;
-	s32 numimages;
+	int i;
+	int imagebytesout;
+	int numimages;
 	bool writetocache;
-	s32 format;
+	int format;
 	bool foundthething;
-	s32 totalbytesout;
-	s32 width;
-	s32 height;
-	s32 numcolours;
-	u8 *loddst;
-	u8 *lodsrc;
-	s32 lod;
-	u8 scratch2[0x800];
-	u16 palette[256];
-	u8 scratch[5120];
+	int totalbytesout;
+	int width;
+	int height;
+	int numcolours;
+	uint8_t *loddst;
+	uint8_t *lodsrc;
+	int lod;
+	uint8_t scratch2[0x800];
+	uint16_t palette[256];
+	uint8_t scratch[5120];
 
 	writetocache = false;
 	totalbytesout = 0;
@@ -297,8 +295,8 @@ s32 texInflateZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct texpoo
 	// generate the other LODs by shrinking the image.
 	if (!hasloddata) {
 		if (numlods >= 2) {
-			s32 tmpwidth = width;
-			s32 tmpheight = height;
+			int tmpwidth = width;
+			int tmpheight = height;
 
 			lodsrc = dst;
 			loddst = &dst[totalbytesout];
@@ -352,12 +350,12 @@ s32 texInflateZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct texpoo
  *
  * Return the number of output bytes.
  */
-s32 texAlignIndices(u8 *src, s32 width, s32 height, s32 format, u8 *dst)
+int texAlignIndices(uint8_t *src, int width, int height, int format, uint8_t *dst)
 {
-	u8 *outptr = dst;
-	s32 x;
-	s32 y;
-	s32 indicesperbyte;
+	uint8_t *outptr = dst;
+	int x;
+	int y;
+	int indicesperbyte;
 
 	if (format == TEXFORMAT_RGBA16_CI8 || format == TEXFORMAT_IA16_CI8) {
 		indicesperbyte = 1;
@@ -372,15 +370,15 @@ s32 texAlignIndices(u8 *src, s32 width, s32 height, s32 format, u8 *dst)
 			src++;
 		}
 
-		outptr = (u8 *)(((uintptr_t)outptr + 7) & ~7);
+		outptr = (uint8_t *)(((uintptr_t)outptr + 7) & ~7);
 	}
 
 	return outptr - dst;
 }
 
-s32 texGetAverageRed(u16 colour1, u16 colour2, u16 colour3, u16 colour4)
+int texGetAverageRed(uint16_t colour1, uint16_t colour2, uint16_t colour3, uint16_t colour4)
 {
-	s32 value = 0;
+	int value = 0;
 
 	value += (((colour1 >> 11) & 0x1f) << 3) | ((colour1 >> 13) & 7);
 	value += (((colour2 >> 11) & 0x1f) << 3) | ((colour2 >> 13) & 7);
@@ -400,9 +398,9 @@ s32 texGetAverageRed(u16 colour1, u16 colour2, u16 colour3, u16 colour4)
 	return value;
 }
 
-s32 texGetAverageGreen(u16 colour1, u16 colour2, u16 colour3, u16 colour4)
+int texGetAverageGreen(uint16_t colour1, uint16_t colour2, uint16_t colour3, uint16_t colour4)
 {
-	s32 value = 0;
+	int value = 0;
 
 	value += (((colour1 >> 6) & 0x1f) << 3) | ((colour1 >> 8) & 7);
 	value += (((colour2 >> 6) & 0x1f) << 3) | ((colour2 >> 8) & 7);
@@ -422,9 +420,9 @@ s32 texGetAverageGreen(u16 colour1, u16 colour2, u16 colour3, u16 colour4)
 	return value;
 }
 
-s32 texGetAverageBlue(u16 colour1, u16 colour2, u16 colour3, u16 colour4)
+int texGetAverageBlue(uint16_t colour1, uint16_t colour2, uint16_t colour3, uint16_t colour4)
 {
-	s32 value = 0;
+	int value = 0;
 
 	value += (((colour1 >> 1) & 0x1f) << 3) | ((colour1 >> 3) & 7);
 	value += (((colour2 >> 1) & 0x1f) << 3) | ((colour2 >> 3) & 7);
@@ -444,9 +442,9 @@ s32 texGetAverageBlue(u16 colour1, u16 colour2, u16 colour3, u16 colour4)
 	return value;
 }
 
-s32 texGetAverageAlpha(u16 colour1, u16 colour2, u16 colour3, u16 colour4)
+int texGetAverageAlpha(uint16_t colour1, uint16_t colour2, uint16_t colour3, uint16_t colour4)
 {
-	s32 value = 0
+	int value = 0
 		+ (colour1 & 1 ? 0xff : 0)
 		+ (colour2 & 1 ? 0xff : 0)
 		+ (colour3 & 1 ? 0xff : 0)
@@ -471,27 +469,27 @@ s32 texGetAverageAlpha(u16 colour1, u16 colour2, u16 colour3, u16 colour4)
  *
  * Return the number of bytes written.
  */
-s32 texShrinkPaletted(u8 *src, u8 *dst, s32 srcwidth, s32 srcheight, s32 format, u16 *palette, s32 numcolours)
+int texShrinkPaletted(uint8_t *src, uint8_t *dst, int srcwidth, int srcheight, int format, uint16_t *palette, int numcolours)
 {
-	s32 j;
-	s32 i;
-	s32 alignedsrcwidth;
-	s32 aligneddstwidth;
-	s32 dstheight = (srcheight + 1) >> 1;
-	u16 colour1;
-	u16 colour2;
-	u16 colour3;
-	u16 colour4;
-	s32 r;
-	s32 g;
-	s32 b;
-	s32 a;
-	s32 nextrow;
-	s32 nextcol;
-	s32 c;
-	u8 *dst8;
-	u8 *src8;
-	u8 palette32[1024];
+	int j;
+	int i;
+	int alignedsrcwidth;
+	int aligneddstwidth;
+	int dstheight = (srcheight + 1) >> 1;
+	uint16_t colour1;
+	uint16_t colour2;
+	uint16_t colour3;
+	uint16_t colour4;
+	int r;
+	int g;
+	int b;
+	int a;
+	int nextrow;
+	int nextcol;
+	int c;
+	uint8_t *dst8;
+	uint8_t *src8;
+	uint8_t palette32[1024];
 
 	switch (format) {
 	case TEXFORMAT_RGBA16_CI8:
@@ -644,13 +642,13 @@ s32 texShrinkPaletted(u8 *src, u8 *dst, s32 srcwidth, s32 srcheight, s32 format,
 	return 0;
 }
 
-s32 texFindClosestColourIndexRGBA(u8 *palette, s32 numcolours, s32 r, s32 g, s32 b, s32 a)
+int texFindClosestColourIndexRGBA(uint8_t *palette, int numcolours, int r, int g, int b, int a)
 {
-	s32 minindex = 0;
-	s32 minvalue = 99999999;
-	s32 curvalue;
-	s32 tmp;
-	s32 i;
+	int minindex = 0;
+	int minvalue = 99999999;
+	int curvalue;
+	int tmp;
+	int i;
 
 	for (i = 0; i < numcolours; i++) {
 		tmp = palette[i * 4 + 0] - r;
@@ -674,17 +672,17 @@ s32 texFindClosestColourIndexRGBA(u8 *palette, s32 numcolours, s32 r, s32 g, s32
 	return minindex;
 }
 
-s32 texFindClosestColourIndexIA(u16 *palette, s32 numcolours, s32 intensity, s32 alpha)
+int texFindClosestColourIndexIA(uint16_t *palette, int numcolours, int intensity, int alpha)
 {
-	s32 bestindex = 0;
-	s32 bestvalue = 99999999;
-	s32 i;
+	int bestindex = 0;
+	int bestvalue = 99999999;
+	int i;
 
 	for (i = 0; i < numcolours; i++) {
-		s32 value = palette[i];
-		s32 a = ((value >> 8) & 0xff) - intensity;
-		s32 b = (value & 0xff) - alpha;
-		s32 sum = a * a + b * b;
+		int value = palette[i];
+		int a = ((value >> 8) & 0xff) - intensity;
+		int b = (value & 0xff) - alpha;
+		int sum = a * a + b * b;
 
 		if (sum < bestvalue) {
 			bestindex = i;
@@ -708,22 +706,22 @@ s32 texFindClosestColourIndexIA(u16 *palette, s32 numcolours, s32 intensity, s32
  * h = height in pixels
  * c = compression method (see TEXCOMPMETHOD constants)
  */
-s32 texInflateNonZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct texpool *pool)
+int texInflateNonZlib(uint8_t *src, uint8_t *dst, bool hasloddata, int numlods, struct texpool *pool)
 {
-	u8 scratch[0x2000];
-	u8 lookup[0x1000];
-	s32 i;
-	s32 numimages;
-	s32 width;
-	s32 height;
-	s32 compmethod;
-	s32 j;
-	s32 totalbytesout = 0;
-	s32 imagebytesout;
-	s32 format;
-	s32 value;
-	u8 *lodsrc;
-	u8 *loddst;
+	uint8_t scratch[0x2000];
+	uint8_t lookup[0x1000];
+	int i;
+	int numimages;
+	int width;
+	int height;
+	int compmethod;
+	int j;
+	int totalbytesout = 0;
+	int imagebytesout;
+	int format;
+	int value;
+	uint8_t *lodsrc;
+	uint8_t *loddst;
 	bool writetocache = false;
 
 	texSetBitstring(src);
@@ -871,8 +869,8 @@ s32 texInflateNonZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct tex
 	// generate the other LODs by shrinking the image.
 	if (!hasloddata) {
 		if (numlods >= 2) {
-			s32 tmpwidth = width;
-			s32 tmpheight = height;
+			int tmpwidth = width;
+			int tmpheight = height;
 
 			lodsrc = dst;
 			if (1);
@@ -910,38 +908,38 @@ s32 texInflateNonZlib(u8 *src, u8 *dst, bool hasloddata, s32 numlods, struct tex
  * If the source width is an odd number, the destination's final column is
  * calculated by sampling the final source column twice. Likewise for the height.
  */
-s32 texShrinkNonPaletted(u8 *src, u8 *dst, s32 srcwidth, s32 srcheight, s32 format)
+int texShrinkNonPaletted(uint8_t *src, uint8_t *dst, int srcwidth, int srcheight, int format)
 {
-	s32 i;
-	s32 j;
-	s32 alignedsrcwidth;
-	s32 aligneddstwidth;
-	u32 *dst32 = (u32 *) dst;
-	u16 *dst16 = (u16 *) dst;
-	u8 *dst8 = dst;
-	u32 *src32 = (u32 *) src;
-	u16 *src16 = (u16 *) src;
-	u8 *src8 = src;
-	s32 dstheight = (srcheight + 1) >> 1;
-	s32 r;
-	s32 g;
-	s32 b;
-	s32 a;
-	s32 c;
-	u32 tl32;
-	u32 tr32;
-	u32 bl32;
-	u32 br32;
-	u16 tl16;
-	u16 tr16;
-	u16 bl16;
-	u16 br16;
-	u8 tl8;
-	u8 tr8;
-	u8 bl8;
-	u8 br8;
-	s32 nextrow;
-	s32 nextcol;
+	int i;
+	int j;
+	int alignedsrcwidth;
+	int aligneddstwidth;
+	uint32_t *dst32 = (uint32_t *) dst;
+	uint16_t *dst16 = (uint16_t *) dst;
+	uint8_t *dst8 = dst;
+	uint32_t *src32 = (uint32_t *) src;
+	uint16_t *src16 = (uint16_t *) src;
+	uint8_t *src8 = src;
+	int dstheight = (srcheight + 1) >> 1;
+	int r;
+	int g;
+	int b;
+	int a;
+	int c;
+	uint32_t tl32;
+	uint32_t tr32;
+	uint32_t bl32;
+	uint32_t br32;
+	uint16_t tl16;
+	uint16_t tr16;
+	uint16_t bl16;
+	uint16_t br16;
+	uint8_t tl8;
+	uint8_t tr8;
+	uint8_t bl8;
+	uint8_t br8;
+	int nextrow;
+	int nextcol;
 
 	switch (format) {
 	case TEXFORMAT_RGBA32:
@@ -1200,17 +1198,17 @@ s32 texShrinkNonPaletted(u8 *src, u8 *dst, s32 srcwidth, s32 srcheight, s32 form
  * implementation only stores a list of frequencies. It uses the chansize
  * to know how many values there are.
  */
-void texInflateHuffman(u8 *dst, s32 numiterations, s32 chansize)
+void texInflateHuffman(uint8_t *dst, int numiterations, int chansize)
 {
-	u16 frequencies[2048];
-	s16 nodes[2048][2];
-	s32 i;
-	s32 rootindex;
-	s32 sum;
-	u16 minfreq1;
-	u16 minfreq2;
-	s32 minindex1;
-	s32 minindex2;
+	uint16_t frequencies[2048];
+	int16_t nodes[2048][2];
+	int i;
+	int rootindex;
+	int sum;
+	uint16_t minfreq1;
+	uint16_t minfreq2;
+	int minindex1;
+	int minindex2;
 	bool done = false;
 
 	// Read the frequencies list
@@ -1313,7 +1311,7 @@ void texInflateHuffman(u8 *dst, s32 numiterations, s32 chansize)
 	// Read bits off the bitstring, traverse the tree
 	// and write the channel values to dst
 	for (i = 0; i < numiterations; i++) {
-		s32 indexorvalue = rootindex;
+		int indexorvalue = rootindex;
 
 		while (indexorvalue < 10000) {
 			indexorvalue = nodes[indexorvalue][texReadBits(1)];
@@ -1322,7 +1320,7 @@ void texInflateHuffman(u8 *dst, s32 numiterations, s32 chansize)
 		if (chansize <= 256) {
 			dst[i] = indexorvalue - 10000;
 		} else {
-			u16 *tmp = (u16 *)dst;
+			uint16_t *tmp = (uint16_t *)dst;
 			tmp[i] = indexorvalue - 10000;
 		}
 	}
@@ -1358,15 +1356,15 @@ void texInflateHuffman(u8 *dst, s32 numiterations, s32 chansize)
  * Every run must be followed by a literal block without the 1-bit marker.
  * The algorithm does not support back to back runs.
  */
-void texInflateRle(u8 *dst, s32 blockstotal)
+void texInflateRle(uint8_t *dst, int blockstotal)
 {
-	s32 btfieldsize = texReadBits(3);
-	s32 rlfieldsize = texReadBits(3);
-	s32 blocksize = texReadBits(4);
-	s32 cost;
-	s32 fudge;
-	s32 blocksdone;
-	s32 i;
+	int btfieldsize = texReadBits(3);
+	int rlfieldsize = texReadBits(3);
+	int blocksize = texReadBits(4);
+	int cost;
+	int fudge;
+	int blocksdone;
+	int i;
 
 	// Calculate the fudge value
 	cost = btfieldsize + rlfieldsize + blocksize + 1;
@@ -1386,14 +1384,14 @@ void texInflateRle(u8 *dst, s32 blockstotal)
 				dst[blocksdone] = texReadBits(blocksize);
 				blocksdone++;
 			} else {
-				u16 *tmp = (u16 *)dst;
+				uint16_t *tmp = (uint16_t *)dst;
 				tmp[blocksdone] = texReadBits(blocksize);
 				blocksdone++;
 			}
 		} else {
 			// Found a run directive
-			s32 startblockindex = blocksdone - texReadBits(btfieldsize) - 1;
-			s32 runnumblocks = texReadBits(rlfieldsize) + fudge;
+			int startblockindex = blocksdone - texReadBits(btfieldsize) - 1;
+			int runnumblocks = texReadBits(rlfieldsize) + fudge;
 
 			if (blocksize <= 8) {
 				for (i = startblockindex; i < startblockindex + runnumblocks; i++) {
@@ -1405,7 +1403,7 @@ void texInflateRle(u8 *dst, s32 blockstotal)
 				dst[blocksdone] = texReadBits(blocksize);
 				blocksdone++;
 			} else {
-				u16 *tmp = (u16 *)dst;
+				uint16_t *tmp = (uint16_t *)dst;
 
 				for (i = startblockindex; i < startblockindex + runnumblocks; i++) {
 					tmp[blocksdone] = tmp[i];
@@ -1429,25 +1427,25 @@ void texInflateRle(u8 *dst, s32 blockstotal)
  *
  * This function does NOT work with pixel formats of 8 bits or less.
  */
-s32 texBuildLookup(u8 *lookup, s32 bitsperpixel)
+int texBuildLookup(uint8_t *lookup, int bitsperpixel)
 {
-	s32 numcolours = texReadBits(11);
-	s32 i;
+	int numcolours = texReadBits(11);
+	int i;
 
 	if (bitsperpixel <= 16) {
-		u16 *dst = (u16 *)lookup;
+		uint16_t *dst = (uint16_t *)lookup;
 
 		for (i = 0; i < numcolours; i++) {
 			dst[i] = texReadBits(bitsperpixel);
 		}
 	} else if (bitsperpixel <= 24) {
-		u32 *dst = (u32 *)lookup;
+		uint32_t *dst = (uint32_t *)lookup;
 
 		for (i = 0; i < numcolours; i++) {
 			dst[i] = texReadBits(bitsperpixel);
 		}
 	} else {
-		u32 *dst = (u32 *)lookup;
+		uint32_t *dst = (uint32_t *)lookup;
 
 		for (i = 0; i < numcolours; i++) {
 			dst[i] = texReadBits(24) << 8 | texReadBits(bitsperpixel - 24);
@@ -1457,9 +1455,9 @@ s32 texBuildLookup(u8 *lookup, s32 bitsperpixel)
 	return numcolours;
 }
 
-s32 texGetBitSize(s32 decimal)
+int texGetBitSize(int decimal)
 {
-	s32 count = 0;
+	int count = 0;
 
 	decimal--;
 
@@ -1471,9 +1469,9 @@ s32 texGetBitSize(s32 decimal)
 	return count;
 }
 
-void texReadAlphaBits(u8 *dst, s32 count)
+void texReadAlphaBits(uint8_t *dst, int count)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < count; i++) {
 		dst[i] = texReadBits(1);
@@ -1486,13 +1484,13 @@ void texReadAlphaBits(u8 *dst, s32 count)
  *
  * Return the number of output bytes.
  */
-s32 texReadUncompressed(u8 *dst, s32 width, s32 height, s32 format)
+int texReadUncompressed(uint8_t *dst, int width, int height, int format)
 {
-	u32 *dst32 = (u32 *)(((uintptr_t)dst + 0xf) & ~0xf);
-	u16 *dst16 = (u16 *)(((uintptr_t)dst + 7) & ~7);
-	u8 *dst8 = (u8 *)(((uintptr_t)dst + 7) & ~7);
-	s32 x;
-	s32 y;
+	uint32_t *dst32 = (uint32_t *)(((uintptr_t)dst + 0xf) & ~0xf);
+	uint16_t *dst16 = (uint16_t *)(((uintptr_t)dst + 7) & ~7);
+	uint8_t *dst8 = (uint8_t *)(((uintptr_t)dst + 7) & ~7);
+	int x;
+	int y;
 
 	switch (format) {
 	case TEXFORMAT_RGBA32:
@@ -1572,15 +1570,15 @@ s32 texReadUncompressed(u8 *dst, s32 width, s32 height, s32 format)
  *
  * The existence and size of the channels depends on the pixel format.
  */
-s32 texChannelsToPixels(u8 *src, s32 width, s32 height, u8 *dst, s32 format)
+int texChannelsToPixels(uint8_t *src, int width, int height, uint8_t *dst, int format)
 {
-	u32 *dst32 = (u32 *)dst;
-	u16 *dst16 = (u16 *)dst;
-	u8 *dst8 = (u8 *)dst;
-	s32 x;
-	s32 y;
-	s32 pos = 0;
-	s32 mult = width * height;
+	uint32_t *dst32 = (uint32_t *)dst;
+	uint16_t *dst16 = (uint16_t *)dst;
+	uint8_t *dst8 = (uint8_t *)dst;
+	int x;
+	int y;
+	int pos = 0;
+	int mult = width * height;
 
 	switch (format) {
 	case TEXFORMAT_RGBA32:
@@ -1714,16 +1712,16 @@ s32 texChannelsToPixels(u8 *src, s32 width, s32 height, u8 *dst, s32 format)
  *
  * Return the number of bytes written to dst.
  */
-s32 texInflateLookup(s32 width, s32 height, u8 *dst, u8 *lookup, s32 numcolours, s32 format)
+int texInflateLookup(int width, int height, uint8_t *dst, uint8_t *lookup, int numcolours, int format)
 {
-	u32 *lookup32 = (u32 *)lookup;
-	u16 *lookup16 = (u16 *)lookup;
-	u32 *dst32 = (u32 *)dst;
-	u16 *dst16 = (u16 *)dst;
-	u8 *dst8 = (u8 *)dst;
-	s32 x;
-	s32 y;
-	s32 bitspercolour = texGetBitSize(numcolours);
+	uint32_t *lookup32 = (uint32_t *)lookup;
+	uint16_t *lookup16 = (uint16_t *)lookup;
+	uint32_t *dst32 = (uint32_t *)dst;
+	uint16_t *dst16 = (uint16_t *)dst;
+	uint8_t *dst8 = (uint8_t *)dst;
+	int x;
+	int y;
+	int bitspercolour = texGetBitSize(numcolours);
 
 	switch (format) {
 	case TEXFORMAT_RGBA32:
@@ -1800,29 +1798,29 @@ s32 texInflateLookup(s32 width, s32 height, u8 *dst, u8 *lookup, s32 numcolours,
 
 /**
  * Like texInflateLookup, but the indices are provided in the src argument
- * as u8s or u16s rather than read from the global bitstring as tightly packed
+ * as uint8_ts or uint16_ts rather than read from the global bitstring as tightly packed
  * bits.
  *
- * Whether u8s or u16s are expected depends on whether the number of colours
+ * Whether uint8_ts or uint16_ts are expected depends on whether the number of colours
  * in the lookup table. If there are more than 256 colours then it must use
- * u16s, otherwise it expects u8s.
+ * uint16_ts, otherwise it expects uint8_ts.
  */
-s32 texInflateLookupFromBuffer(u8 *src, s32 width, s32 height, u8 *dst, u8 *lookup, s32 numcolours, s32 format)
+int texInflateLookupFromBuffer(uint8_t *src, int width, int height, uint8_t *dst, uint8_t *lookup, int numcolours, int format)
 {
-	s32 x;
-	s32 y;
-	u32 *lookup32 = (u32 *)lookup;
-	u16 *lookup16 = (u16 *)lookup;
-	u8 *src8;
-	u16 *src16;
-	u32 *dst32 = (u32 *)dst;
-	u16 *dst16 = (u16 *)dst;
-	u8 *dst8 = (u8 *)dst;
+	int x;
+	int y;
+	uint32_t *lookup32 = (uint32_t *)lookup;
+	uint16_t *lookup16 = (uint16_t *)lookup;
+	uint8_t *src8;
+	uint16_t *src16;
+	uint32_t *dst32 = (uint32_t *)dst;
+	uint16_t *dst16 = (uint16_t *)dst;
+	uint8_t *dst8 = (uint8_t *)dst;
 
 	if (numcolours <= 256) {
-		src8 = (u8 *)src;
+		src8 = (uint8_t *)src;
 	} else {
-		src16 = (u16 *)src;
+		src16 = (uint16_t *)src;
 	}
 
 	switch (format) {
@@ -1935,7 +1933,7 @@ s32 texInflateLookupFromBuffer(u8 *src, s32 width, s32 height, u8 *dst, u8 *look
 /**
  * For every second row, swap every pair of words within that row.
  */
-s32 texConfigToFormat(const struct textureconfig *tex)
+int texConfigToFormat(const struct textureconfig *tex)
 {
 	switch (tex->format) {
 		case G_IM_FMT_I:
@@ -1991,7 +1989,7 @@ s32 texConfigToFormat(const struct textureconfig *tex)
 	return TEXFORMAT_I8;
 }
 
-void texSwizzle(u8 *dst, s32 width, s32 height, s32 format)
+void texSwizzle(uint8_t *dst, int width, int height, int format)
 {
 	/**
 	 * The N64 GPU wants swizzled textures, we don't.
@@ -2000,14 +1998,14 @@ void texSwizzle(u8 *dst, s32 width, s32 height, s32 format)
 	 */
 }
 
-void texSwizzleInternal(u8 *dst, s32 width, s32 height, s32 format, u32 dstlen)
+void texSwizzleInternal(uint8_t *dst, int width, int height, int format, uint32_t dstlen)
 {
-	s32 x;
-	s32 y;
-	s32 wordsperrow;
-	u32 *row = (u32 *)dst;
-	u32 *end = (u32 *)(dst + dstlen);
-	s32 tmp;
+	int x;
+	int y;
+	int wordsperrow;
+	uint32_t *row = (uint32_t *)dst;
+	uint32_t *end = (uint32_t *)(dst + dstlen);
+	int tmp;
 
 	switch (format) {
 	case TEXFORMAT_RGBA32:
@@ -2065,17 +2063,17 @@ void texSwizzleInternal(u8 *dst, s32 width, s32 height, s32 format, u32 dstlen)
 /**
  * Blur the pixels in the image with the surrounding pixels.
  */
-void texBlur(u8 *pixels, s32 width, s32 height, s32 method, s32 chansize)
+void texBlur(uint8_t *pixels, int width, int height, int method, int chansize)
 {
-	s32 x;
-	s32 y;
+	int x;
+	int y;
 
 	for (y = 0; y < height; y++) {
 		for (x = 0; x < width; x++) {
-			s32 cur = pixels[y * width + x] + chansize * 2;
-			s32 left = x > 0 ? pixels[y * width + x - 1] : 0;
-			s32 above = y > 0 ? pixels[(y - 1) * width + x] : 0;
-			s32 aboveleft = x > 0 && y > 0 ? pixels[(y - 1) * width + x - 1] : 0;
+			int cur = pixels[y * width + x] + chansize * 2;
+			int left = x > 0 ? pixels[y * width + x - 1] : 0;
+			int above = y > 0 ? pixels[(y - 1) * width + x] : 0;
+			int aboveleft = x > 0 && y > 0 ? pixels[(y - 1) * width + x - 1] : 0;
 
 			switch (method) {
 			case 0:
@@ -2104,7 +2102,7 @@ void texBlur(u8 *pixels, s32 width, s32 height, s32 method, s32 chansize)
 	}
 }
 
-void texInitPool(struct texpool *pool, u8 *start, s32 len)
+void texInitPool(struct texpool *pool, uint8_t *start, int len)
 {
 	pool->start = start;
 	pool->end = (struct tex *)(start + len);
@@ -2112,11 +2110,11 @@ void texInitPool(struct texpool *pool, u8 *start, s32 len)
 	pool->rightpos = (struct tex *)((uintptr_t)start + len);
 }
 
-struct tex *texFindInPool(s32 texturenum, struct texpool *pool)
+struct tex *texFindInPool(int texturenum, struct texpool *pool)
 {
 	struct tex *end;
 	struct tex *cur;
-	s32 i;
+	int i;
 
 	if (pool == NULL) {
 		pool = &g_TexSharedPool;
@@ -2154,26 +2152,26 @@ struct tex *texFindInPool(s32 texturenum, struct texpool *pool)
 	return NULL;
 }
 
-s32 texGetPoolFreeBytes(struct texpool *pool)
+int texGetPoolFreeBytes(struct texpool *pool)
 {
 	return (uintptr_t) pool->rightpos - (uintptr_t) pool->leftpos;
 }
 
-u8 *texGetPoolLeftPos(struct texpool *pool)
+uint8_t *texGetPoolLeftPos(struct texpool *pool)
 {
 	return pool->leftpos;
 }
 
-void texLoadFromDisplayList(Gfx *gdl, struct texpool *pool, s32 arg2)
+void texLoadFromDisplayList(Gfx *gdl, struct texpool *pool, int arg2)
 {
-	u8 *bytes = (u8 *)gdl;
-	u8 ofs = 4;
+	uint8_t *bytes = (uint8_t *)gdl;
+	uint8_t ofs = 4;
 #ifdef PLATFORM_64BIT
 	ofs = 8;
 #endif
 
 
-	while (bytes[GFX_W0_BYTE(0)] != (u8)G_ENDDL) {
+	while (bytes[GFX_W0_BYTE(0)] != (uint8_t)G_ENDDL) {
 		// Look for GBI sequence: fd...... abcd....
 		if (bytes[GFX_W0_BYTE(0)] == G_SETTIMG && bytes[GFX_W1_BYTE(0)] == 0xab && bytes[GFX_W1_BYTE(1)] == 0xcd) {
 			texLoad((texnum_t *)((uintptr_t)bytes + ofs), pool);
@@ -2183,7 +2181,7 @@ void texLoadFromDisplayList(Gfx *gdl, struct texpool *pool, s32 arg2)
 	}
 }
 
-extern u8 EXT_SEG _texturesdataSegmentRomStart;
+extern uint8_t EXT_SEG _texturesdataSegmentRomStart;
 
 /**
  * Load and decompress a texture from ROM.
@@ -2222,23 +2220,23 @@ extern u8 EXT_SEG _texturesdataSegmentRomStart;
  */
 void texLoad(texnum_t *updateword, struct texpool *pool)
 {
-	//u8 compbuffer[4 * 1024 + 0x40];
-	u8 compbuffer[4 * 1024 * 2 + 0x40];
-	u8 *compptr;
-	s32 hasloddata;
-	s32 iszlib;
-	s32 numlods;
+	//uint8_t compbuffer[4 * 1024 + 0x40];
+	uint8_t compbuffer[4 * 1024 * 2 + 0x40];
+	uint8_t *compptr;
+	int hasloddata;
+	int iszlib;
+	int numlods;
 	struct tex *tex;
-	u8 *alignedcompbuffer;
+	uint8_t *alignedcompbuffer;
 	struct tex *tail;
-	u32 freebytes;
-	u8 usingsharedpool = 0;
-	//s8 buffer5kb[5 * 1024 + 0x40];
-	s8 buffer5kb[5 * 1024 * 2 + 0x40];
-	s32 thisoffset;
-	s32 nextoffset;
-	s16 *texnumptr;
-	s32 bytesout;
+	uint32_t freebytes;
+	uint8_t usingsharedpool = 0;
+	//int8_t buffer5kb[5 * 1024 + 0x40];
+	int8_t buffer5kb[5 * 1024 * 2 + 0x40];
+	int thisoffset;
+	int nextoffset;
+	int16_t *texnumptr;
+	int bytesout;
 
 	usingsharedpool = 0;
 
@@ -2261,7 +2259,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 				return;
 			}
 
-			alignedcompbuffer = (u8 *) (((uintptr_t)compbuffer + 0xf) >> 4 << 4);
+			alignedcompbuffer = (uint8_t *) (((uintptr_t)compbuffer + 0xf) >> 4 << 4);
 
 			thisoffset = g_Textures[g_TexNumToLoad].dataoffset;
 			nextoffset = g_Textures[g_TexNumToLoad + 1].dataoffset;
@@ -2285,7 +2283,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 				dmaExec(alignedcompbuffer,
 						(romptr_t) REF_SEG _texturesdataSegmentRomStart + (thisoffset & 0xfffffff8),
 						((uintptr_t) (nextoffset - thisoffset) + 0x1f) >> 4 << 4);
-				compptr = (u8 *) alignedcompbuffer + (thisoffset & 7);
+				compptr = (uint8_t *) alignedcompbuffer + (thisoffset & 7);
 			}
 			thisoffset = 0;
 			hasloddata = (*compptr & 0x80) >> 7;
@@ -2320,7 +2318,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 			if (usingsharedpool) {
 				tail = pool->rightpos;
 				pool->rightpos = (struct tex *) ((((uintptr_t) buffer5kb + 0xf) >> 4 << 4) + sizeof(struct tex));
-				pool->leftpos = ((u8 *) pool->rightpos + sizeof(struct tex));
+				pool->leftpos = ((uint8_t *) pool->rightpos + sizeof(struct tex));
 
 				while (tail) {
 					if (tail->next == 0) {
@@ -2332,7 +2330,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 			}
 
 			// Write the texturenum into the allocation
-			texnumptr = (s16 *) pool->leftpos;
+			texnumptr = (int16_t *) pool->leftpos;
 			*texnumptr = g_TexNumToLoad;
 			pool->leftpos += 8;
 
@@ -2352,7 +2350,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 			// If we're using the shared pool, the data must be copied out of
 			// the stack and into the heap.
 			if (usingsharedpool) {
-				u8 *ptr = mempAllocFromRight(ALIGN16(bytesout + 2 * sizeof(struct tex)), MEMPOOL_STAGE);
+				uint8_t *ptr = mempAllocFromRight(ALIGN16(bytesout + 2 * sizeof(struct tex)), MEMPOOL_STAGE);
 				pool->rightpos = (struct tex *) ptr;
 
 				bcopy(tex, ptr, sizeof(struct tex));
@@ -2371,7 +2369,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 					pool->head = pool->rightpos;
 				}
 
-				pool->start = (u8 *) pool->rightpos;
+				pool->start = (uint8_t *) pool->rightpos;
 			}
 
 			pool->leftpos += bytesout;
@@ -2385,9 +2383,9 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 	}
 }
 
-void texLoadFromConfigs(struct textureconfig *configs, s32 numconfigs, struct texpool *pool, uintptr_t arg3)
+void texLoadFromConfigs(struct textureconfig *configs, int numconfigs, struct texpool *pool, uintptr_t arg3)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < numconfigs; i++) {
 		if ((uintptr_t)configs[i].texturenum < NUM_TEXTURES) {
@@ -2399,7 +2397,7 @@ void texLoadFromConfigs(struct textureconfig *configs, s32 numconfigs, struct te
 	}
 }
 
-void texLoadFromTextureNum(u32 texturenum, struct texpool *pool)
+void texLoadFromTextureNum(uint32_t texturenum, struct texpool *pool)
 {
 	texnum_t texturenumcopy = texturenum;
 
@@ -2462,7 +2460,7 @@ unsigned char *texLoadBMP(const char *filename, int width, int height) {
 //	int width, height;
 //	unsigned char *imageData = createBMP("0255.bmp", &width, &height);
 
-s32 createBMP(u16 num, int width, int height, void *dst, u32 dstSize)
+int createBMP(uint16_t num, int width, int height, void *dst, uint32_t dstSize)
 {
 	char *fullpath = "./" DEFAULT_BASEDIR_NAME "/textures"; // ./data/textures
 	char buffer[20];
@@ -2476,7 +2474,7 @@ s32 createBMP(u16 num, int width, int height, void *dst, u32 dstSize)
 
 	snprintf(filename, len, "/%s.bmp", buffer);
 
-	static s32 dirExists = -1;
+	static int dirExists = -1;
 	if (dirExists < 0) {
 		dirExists = (fsFileSize(fullpath) >= 0);
 	}
@@ -2487,10 +2485,10 @@ s32 createBMP(u16 num, int width, int height, void *dst, u32 dstSize)
 
 	unsigned char *imageData = texLoadBMP(buildDynamicPath(fullpath, filename), width, height);
 
-	const s32 ret = fsFileLoadTo(buildDynamicPath(fullpath, filename), dst, dstSize);
+	const int ret = fsFileLoadTo(buildDynamicPath(fullpath, filename), dst, dstSize);
 
 	if (ret > 0) {
-		s32 i = 0;
+		int i = 0;
 		for(i = 0; i < ARRAYCOUNT(g_ReplacementTextureList); i++) {
 			if(g_ReplacementTextureList[i] == -1) {
 				g_ReplacementTextureList[i] = num;

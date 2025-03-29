@@ -14,80 +14,80 @@
 #include "platform.h"
 
 struct stagesetup g_StageSetup;
-u8 *g_GeCreditsData;
+uint8_t *g_GeCreditsData;
 
-u32 setupGetCmdLength(u32 *cmd)
+uint32_t setupGetCmdLength(uint32_t *cmd)
 {
-	switch ((u8)PD_BE32(cmd[0])) {
-	case OBJTYPE_CHR:                return sizeof(struct packedchr) / sizeof(u32);
-	case OBJTYPE_DOOR:               return sizeof(struct doorobj) / sizeof(u32);
-	case OBJTYPE_DOORSCALE:          return sizeof(struct doorscaleobj) / sizeof(u32);
-	case OBJTYPE_BASIC:              return sizeof(struct defaultobj) / sizeof(u32);
-	case OBJTYPE_DEBRIS:             return sizeof(struct debrisobj) / sizeof(u32);
-	case OBJTYPE_GLASS:              return sizeof(struct glassobj) / sizeof(u32);
-	case OBJTYPE_TINTEDGLASS:        return sizeof(struct tintedglassobj) / sizeof(u32);
-	case OBJTYPE_SAFE:               return sizeof(struct safeobj) / sizeof(u32);
-	case OBJTYPE_GASBOTTLE:          return sizeof(struct gasbottleobj) / sizeof(u32);
-	case OBJTYPE_KEY:                return sizeof(struct keyobj) / sizeof(u32);
-	case OBJTYPE_ALARM:              return sizeof(struct alarmobj) / sizeof(u32);
-	case OBJTYPE_CCTV:               return sizeof(struct cctvobj) / sizeof(u32);
-	case OBJTYPE_AMMOCRATE:          return sizeof(struct ammocrateobj) / sizeof(u32);
-	case OBJTYPE_WEAPON:             return sizeof(struct weaponobj) / sizeof(u32);
-	case OBJTYPE_SINGLEMONITOR:      return sizeof(struct singlemonitorobj) / sizeof(u32);
-	case OBJTYPE_MULTIMONITOR:       return sizeof(struct multimonitorobj) / sizeof(u32);
-	case OBJTYPE_HANGINGMONITORS:    return sizeof(struct hangingmonitorsobj) / sizeof(u32);
-	case OBJTYPE_AUTOGUN:            return sizeof(struct autogunobj) / sizeof(u32);
-	case OBJTYPE_LINKGUNS:           return sizeof(struct linkgunsobj) / sizeof(u32);
-	case OBJTYPE_HAT:                return sizeof(struct hatobj) / sizeof(u32);
-	case OBJTYPE_GRENADEPROB:        return sizeof(struct grenadeprobobj) / sizeof(u32);
-	case OBJTYPE_LINKLIFTDOOR:       return sizeof(struct linkliftdoorobj) / sizeof(u32);
-	case OBJTYPE_SAFEITEM:           return sizeof(struct safeitemobj) / sizeof(u32);
-	case OBJTYPE_MULTIAMMOCRATE:     return sizeof(struct multiammocrateobj) / sizeof(u32);
-	case OBJTYPE_SHIELD:             return sizeof(struct shieldobj) / sizeof(u32);
-	case OBJTYPE_TAG:                return sizeof(struct tag) / sizeof(u32);
-	case OBJTYPE_RENAMEOBJ:          return sizeof(struct textoverride) / sizeof(u32);
-	case OBJTYPE_BEGINOBJECTIVE:     return sizeof(struct objective) / sizeof(u32);
+	switch ((uint8_t)PD_BE32(cmd[0])) {
+	case OBJTYPE_CHR:                return sizeof(struct packedchr) / sizeof(uint32_t);
+	case OBJTYPE_DOOR:               return sizeof(struct doorobj) / sizeof(uint32_t);
+	case OBJTYPE_DOORSCALE:          return sizeof(struct doorscaleobj) / sizeof(uint32_t);
+	case OBJTYPE_BASIC:              return sizeof(struct defaultobj) / sizeof(uint32_t);
+	case OBJTYPE_DEBRIS:             return sizeof(struct debrisobj) / sizeof(uint32_t);
+	case OBJTYPE_GLASS:              return sizeof(struct glassobj) / sizeof(uint32_t);
+	case OBJTYPE_TINTEDGLASS:        return sizeof(struct tintedglassobj) / sizeof(uint32_t);
+	case OBJTYPE_SAFE:               return sizeof(struct safeobj) / sizeof(uint32_t);
+	case OBJTYPE_GASBOTTLE:          return sizeof(struct gasbottleobj) / sizeof(uint32_t);
+	case OBJTYPE_KEY:                return sizeof(struct keyobj) / sizeof(uint32_t);
+	case OBJTYPE_ALARM:              return sizeof(struct alarmobj) / sizeof(uint32_t);
+	case OBJTYPE_CCTV:               return sizeof(struct cctvobj) / sizeof(uint32_t);
+	case OBJTYPE_AMMOCRATE:          return sizeof(struct ammocrateobj) / sizeof(uint32_t);
+	case OBJTYPE_WEAPON:             return sizeof(struct weaponobj) / sizeof(uint32_t);
+	case OBJTYPE_SINGLEMONITOR:      return sizeof(struct singlemonitorobj) / sizeof(uint32_t);
+	case OBJTYPE_MULTIMONITOR:       return sizeof(struct multimonitorobj) / sizeof(uint32_t);
+	case OBJTYPE_HANGINGMONITORS:    return sizeof(struct hangingmonitorsobj) / sizeof(uint32_t);
+	case OBJTYPE_AUTOGUN:            return sizeof(struct autogunobj) / sizeof(uint32_t);
+	case OBJTYPE_LINKGUNS:           return sizeof(struct linkgunsobj) / sizeof(uint32_t);
+	case OBJTYPE_HAT:                return sizeof(struct hatobj) / sizeof(uint32_t);
+	case OBJTYPE_GRENADEPROB:        return sizeof(struct grenadeprobobj) / sizeof(uint32_t);
+	case OBJTYPE_LINKLIFTDOOR:       return sizeof(struct linkliftdoorobj) / sizeof(uint32_t);
+	case OBJTYPE_SAFEITEM:           return sizeof(struct safeitemobj) / sizeof(uint32_t);
+	case OBJTYPE_MULTIAMMOCRATE:     return sizeof(struct multiammocrateobj) / sizeof(uint32_t);
+	case OBJTYPE_SHIELD:             return sizeof(struct shieldobj) / sizeof(uint32_t);
+	case OBJTYPE_TAG:                return sizeof(struct tag) / sizeof(uint32_t);
+	case OBJTYPE_RENAMEOBJ:          return sizeof(struct textoverride) / sizeof(uint32_t);
+	case OBJTYPE_BEGINOBJECTIVE:     return sizeof(struct objective) / sizeof(uint32_t);
 	case OBJTYPE_ENDOBJECTIVE:       return 1;
 	case OBJECTIVETYPE_DESTROYOBJ:   return 2;
 	case OBJECTIVETYPE_COMPFLAGS:    return 2;
 	case OBJECTIVETYPE_FAILFLAGS:    return 2;
 	case OBJECTIVETYPE_COLLECTOBJ:   return 2;
 	case OBJECTIVETYPE_THROWOBJ:     return 2;
-	case OBJECTIVETYPE_HOLOGRAPH:    return sizeof(struct criteria_holograph) / sizeof(u32);
+	case OBJECTIVETYPE_HOLOGRAPH:    return sizeof(struct criteria_holograph) / sizeof(uint32_t);
 	case OBJECTIVETYPE_1F:           return 1;
-	case OBJECTIVETYPE_ENTERROOM:    return sizeof(struct criteria_roomentered) / sizeof(u32);
-	case OBJECTIVETYPE_THROWINROOM:  return sizeof(struct criteria_throwinroom) / sizeof(u32);
+	case OBJECTIVETYPE_ENTERROOM:    return sizeof(struct criteria_roomentered) / sizeof(uint32_t);
+	case OBJECTIVETYPE_THROWINROOM:  return sizeof(struct criteria_throwinroom) / sizeof(uint32_t);
 	case OBJTYPE_22:                 return 1;
-	case OBJTYPE_BRIEFING:           return sizeof(struct briefingobj) / sizeof(u32);
-	case OBJTYPE_PADLOCKEDDOOR:      return sizeof(struct padlockeddoorobj) / sizeof(u32);
-	case OBJTYPE_TRUCK:              return sizeof(struct truckobj) / sizeof(u32);
-	case OBJTYPE_HELI:               return sizeof(struct heliobj) / sizeof(u32);
+	case OBJTYPE_BRIEFING:           return sizeof(struct briefingobj) / sizeof(uint32_t);
+	case OBJTYPE_PADLOCKEDDOOR:      return sizeof(struct padlockeddoorobj) / sizeof(uint32_t);
+	case OBJTYPE_TRUCK:              return sizeof(struct truckobj) / sizeof(uint32_t);
+	case OBJTYPE_HELI:               return sizeof(struct heliobj) / sizeof(uint32_t);
 	case OBJTYPE_TANK:               return 32;
-	case OBJTYPE_CAMERAPOS:          return sizeof(struct cameraposobj) / sizeof(u32);
-	case OBJTYPE_LIFT:               return sizeof(struct liftobj) / sizeof(u32);
-	case OBJTYPE_CONDITIONALSCENERY: return sizeof(struct linksceneryobj) / sizeof(u32);
-	case OBJTYPE_BLOCKEDPATH:        return sizeof(struct blockedpathobj) / sizeof(u32);
-	case OBJTYPE_HOVERBIKE:          return sizeof(struct hoverbikeobj) / sizeof(u32);
-	case OBJTYPE_HOVERPROP:          return sizeof(struct hoverpropobj) / sizeof(u32);
-	case OBJTYPE_FAN:                return sizeof(struct fanobj) / sizeof(u32);
-	case OBJTYPE_HOVERCAR:           return sizeof(struct hovercarobj) / sizeof(u32);
-	case OBJTYPE_CHOPPER:            return sizeof(struct chopperobj) / sizeof(u32);
-	case OBJTYPE_PADEFFECT:          return sizeof(struct padeffectobj) / sizeof(u32);
-	case OBJTYPE_MINE:               return sizeof(struct weaponobj) / sizeof(u32);
-	case OBJTYPE_ESCASTEP:           return sizeof(struct escalatorobj) / sizeof(u32);
+	case OBJTYPE_CAMERAPOS:          return sizeof(struct cameraposobj) / sizeof(uint32_t);
+	case OBJTYPE_LIFT:               return sizeof(struct liftobj) / sizeof(uint32_t);
+	case OBJTYPE_CONDITIONALSCENERY: return sizeof(struct linksceneryobj) / sizeof(uint32_t);
+	case OBJTYPE_BLOCKEDPATH:        return sizeof(struct blockedpathobj) / sizeof(uint32_t);
+	case OBJTYPE_HOVERBIKE:          return sizeof(struct hoverbikeobj) / sizeof(uint32_t);
+	case OBJTYPE_HOVERPROP:          return sizeof(struct hoverpropobj) / sizeof(uint32_t);
+	case OBJTYPE_FAN:                return sizeof(struct fanobj) / sizeof(uint32_t);
+	case OBJTYPE_HOVERCAR:           return sizeof(struct hovercarobj) / sizeof(uint32_t);
+	case OBJTYPE_CHOPPER:            return sizeof(struct chopperobj) / sizeof(uint32_t);
+	case OBJTYPE_PADEFFECT:          return sizeof(struct padeffectobj) / sizeof(uint32_t);
+	case OBJTYPE_MINE:               return sizeof(struct weaponobj) / sizeof(uint32_t);
+	case OBJTYPE_ESCASTEP:           return sizeof(struct escalatorobj) / sizeof(uint32_t);
 	}
 
 	return 1;
 }
 
-u32 *setupGetCmdByIndex(s32 wantindex)
+uint32_t *setupGetCmdByIndex(int wantindex)
 {
-	u32 *cmd = g_StageSetup.props;
+	uint32_t *cmd = g_StageSetup.props;
 
 	if (wantindex >= 0 && cmd) {
-		s32 cmdindex = 0;
+		int cmdindex = 0;
 
-		while ((u8)PD_BE32(cmd[0]) != OBJTYPE_END) {
+		while ((uint8_t)PD_BE32(cmd[0]) != OBJTYPE_END) {
 			if (cmdindex == wantindex) {
 				return cmd;
 			}
@@ -100,14 +100,14 @@ u32 *setupGetCmdByIndex(s32 wantindex)
 	return NULL;
 }
 
-s32 setupGetCmdIndexByTag(struct tag *tag)
+int setupGetCmdIndexByTag(struct tag *tag)
 {
-	u32 *cmd = g_StageSetup.props;
+	uint32_t *cmd = g_StageSetup.props;
 
 	if (cmd) {
-		s32 cmdindex = 0;
+		int cmdindex = 0;
 
-		while ((u8)PD_BE32(cmd[0]) != OBJTYPE_END) {
+		while ((uint8_t)PD_BE32(cmd[0]) != OBJTYPE_END) {
 			if ((struct tag *)cmd == tag) {
 				return cmdindex;
 			}
@@ -120,14 +120,14 @@ s32 setupGetCmdIndexByTag(struct tag *tag)
 	return -1;
 }
 
-u32 setupGetCmdIndexByProp(struct prop *prop)
+uint32_t setupGetCmdIndexByProp(struct prop *prop)
 {
-	u32 *cmd = g_StageSetup.props;
+	uint32_t *cmd = g_StageSetup.props;
 
 	if (cmd) {
-		s32 cmdindex = 0;
+		int cmdindex = 0;
 
-		while ((u8)PD_BE32(cmd[0]) != OBJTYPE_END) {
+		while ((uint8_t)PD_BE32(cmd[0]) != OBJTYPE_END) {
 			if ((struct prop *)cmd[5] == prop) {
 				return cmdindex;
 			}
@@ -140,7 +140,7 @@ u32 setupGetCmdIndexByProp(struct prop *prop)
 	return -1;
 }
 
-bool setupLoadModeldef(s32 modelnum)
+bool setupLoadModeldef(int modelnum)
 {
 	if (g_ModelStates[modelnum].modeldef == NULL) {
 		g_ModelStates[modelnum].modeldef = modeldefLoadToNew(g_ModelStates[modelnum].fileid);
@@ -151,7 +151,7 @@ bool setupLoadModeldef(s32 modelnum)
 	return false;
 }
 
-bool setupGetObjBbox(struct defaultobj *obj, struct coord *pos, f32 realrot[3][3], struct coord *arg3, struct coord *arg4)
+bool setupGetObjBbox(struct defaultobj *obj, struct coord *pos, float realrot[3][3], struct coord *arg3, struct coord *arg4)
 {
 	struct modelrodata_bbox *bbox = objFindBboxRodata(obj);
 
@@ -175,7 +175,7 @@ bool setupGetObjBboxFromMinMax(struct defaultobj *obj, struct coord *min, struct
 	return setupGetObjBbox(obj, &obj->prop->pos, obj->realrot, min, max);
 }
 
-void setupGetObjOverlappedRooms(struct defaultobj *obj, struct coord *pos, f32 realrot[3][3], RoomNum *rooms)
+void setupGetObjOverlappedRooms(struct defaultobj *obj, struct coord *pos, float realrot[3][3], RoomNum *rooms)
 {
 	struct coord a;
 	struct coord b;
@@ -199,12 +199,12 @@ void setup0f0923d4(struct defaultobj *obj)
 	propRegisterRooms(obj->prop);
 }
 
-struct defaultobj *setupGetObjByCmdIndex(u32 cmdindex)
+struct defaultobj *setupGetObjByCmdIndex(uint32_t cmdindex)
 {
-	u32 *cmd = setupGetCmdByIndex(cmdindex);
+	uint32_t *cmd = setupGetCmdByIndex(cmdindex);
 
 	if (cmd) {
-		switch ((u8)PD_BE32(cmd[0])) {
+		switch ((uint8_t)PD_BE32(cmd[0])) {
 		case OBJTYPE_DOOR:
 		case OBJTYPE_BASIC:
 		case OBJTYPE_KEY:
@@ -289,16 +289,16 @@ struct defaultobj *setupGetObjByCmdIndex(u32 cmdindex)
  * hat caller is unreachable because hats don't exist in PD. So it's only used
  * for weapons which means the candidate logic isn't used.
  */
-struct defaultobj *setupFindObjForReuse(s32 wanttype, struct defaultobj **offscreenobjptr, struct defaultobj **anyobjptr, bool musthaveprop, bool musthavemodel, struct modeldef *modeldef)
+struct defaultobj *setupFindObjForReuse(int wanttype, struct defaultobj **offscreenobjptr, struct defaultobj **anyobjptr, bool musthaveprop, bool musthavemodel, struct modeldef *modeldef)
 {
 	struct defaultobj *offscreenobj = NULL;
 	struct defaultobj *anyobj = NULL;
 
-	u32 *cmd = g_StageSetup.props;
+	uint32_t *cmd = g_StageSetup.props;
 
 	if (cmd) {
-		while ((u8)PD_BE32(cmd[0]) != OBJTYPE_END) {
-			if ((wanttype & 0xff) == (u8)PD_BE32(cmd[0])) {
+		while ((uint8_t)PD_BE32(cmd[0]) != OBJTYPE_END) {
+			if ((wanttype & 0xff) == (uint8_t)PD_BE32(cmd[0])) {
 				struct defaultobj *obj = (struct defaultobj *)cmd;
 
 				if (obj->prop == NULL) {

@@ -1,6 +1,5 @@
 #include "versions.h"
 #include <ultra64.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/bossfile.h"
 #include "game/filelist.h"
@@ -217,7 +216,7 @@ uint32_t pakGenerateSerial(int8_t device)
 
 	value = g_Paks[device].unk2c8;
 	rand = (rngRandom() % 496) + 16; // range 16-511
-	count = osGetCount();
+	count = utilsGetCount();
 
 	return value ^ rand ^ count;
 }
@@ -255,41 +254,50 @@ int pakReadBodyAtGuid(int8_t device, int fileid, uint8_t *body, int arg3)
 	return _pakReadBodyAtGuid(device, fileid, body, arg3);
 }
 
-int pakSaveAtGuid(int8_t device, int fileid, int filetype, uint8_t *body, int *outfileid, uint8_t *olddata)
-{
-	return _pakSaveAtGuid(device, fileid, filetype, body, outfileid, olddata);
-}
-
-bool pakDeleteFile(int8_t device, int fileid)
-{
-	return _pakDeleteFile(device, fileid);
-}
-
 PakErr1 pakDeleteGameNote(int8_t device, uint16_t company_code, uint32_t game_code, char *game_name, char *ext_name)
 {
-	return _pakDeleteGameNote(device, company_code, game_code, game_name, ext_name);
+	int result;
+
+	if (mempakIsReadyOrFull(device)) {
+		joyDisableCyclicPolling(JOYARGS(738));
+		result = pakDeleteGameNote3(PFS(device), company_code, game_code, game_name, ext_name);
+		joyEnableCyclicPolling(JOYARGS(740));
+
+		if (pakHandleResult(result, device, true, LINE_825)) {
+			g_Paks[device].unk2b8_02 = 1;
+			return PAK_ERR1_OK;
+		}
+
+		return PAK_ERR1_NEWPAK;
+	}
+
+	return PAK_ERR1_NOPAK;
 }
 
-PakErr1 pak0f1168c4(int8_t device, struct pakdata **arg1)
+PakErr1 pak0f1168c4(int8_t device, struct pakdata **pakdata)
 {
-	return pak0f116df0(device, arg1);
+	*pakdata = NULL;
+
+	if (mempakIsReadyOrFull(device)) {
+		if (pakQueryTotalUsage(device)) {
+			*pakdata = &g_Paks[device].pakdata;
+			return PAK_ERR1_OK;
+		}
+
+		return PAK_ERR1_NEWPAK;
+	}
+
+	return PAK_ERR1_NOPAK;
 }
 
 int pakGetType(int8_t device)
 {
-	return _pakGetType(device);
+	return g_Paks[device].type;
 }
 
 int pakGetSerial(int8_t device)
 {
-	return _pakGetSerial(device);
-}
-
-void pak0f116994(void)
-{
-	if (g_Vars.stagenum == STAGE_BOOTPAKMENU) {
-		g_Vars.pakstocheck = 0xf8;
-	}
+	return g_Paks[device].serial;
 }
 
 void pak0f1169c8(int8_t device, bool tick)
@@ -343,58 +351,12 @@ bool mempakIsReadyOrFull(int8_t device)
 	return false;
 }
 
-uint16_t _pakGetSerial(int8_t device)
-{
-	return g_Paks[device].serial;
-}
-
-uint32_t _pakGetType(int8_t device)
-{
-	return g_Paks[device].type;
-}
-
 void pakSetState(int8_t device, int state)
 {
 	g_Paks[device].state = state;
 }
 
-PakErr1 pak0f116df0(int8_t device, struct pakdata **pakdata)
-{
-	*pakdata = NULL;
-
-	if (mempakIsReadyOrFull(device)) {
-		if (pakQueryTotalUsage(device)) {
-			*pakdata = &g_Paks[device].pakdata;
-			return PAK_ERR1_OK;
-		}
-
-		return PAK_ERR1_NEWPAK;
-	}
-
-	return PAK_ERR1_NOPAK;
-}
-
-PakErr1 _pakDeleteGameNote(int8_t device, uint16_t company_code, uint32_t game_code, char *game_name, char *ext_name)
-{
-	int result;
-
-	if (mempakIsReadyOrFull(device)) {
-		joyDisableCyclicPolling(JOYARGS(738));
-		result = pakDeleteGameNote3(PFS(device), company_code, game_code, game_name, ext_name);
-		joyEnableCyclicPolling(JOYARGS(740));
-
-		if (pakHandleResult(result, device, true, LINE_825)) {
-			g_Paks[device].unk2b8_02 = 1;
-			return PAK_ERR1_OK;
-		}
-
-		return PAK_ERR1_NEWPAK;
-	}
-
-	return PAK_ERR1_NOPAK;
-}
-
-int _pakDeleteFile(int8_t device, int fileid)
+int pakDeleteFile(int8_t device, int fileid)
 {
 	struct pakfileheader header;
 	int result = pakFindFile(device, fileid, &header);
@@ -543,7 +505,7 @@ PakErr2 pakReadHeaderAtOffset(int8_t device, uint32_t offset, struct pakfilehead
  * a swap file reserved for atomic writes. The new file is written into the
  * swap file, then the old file is marked as swap.
  */
-int _pakSaveAtGuid(int8_t device, int fileid, int filetype, uint8_t *newdata, int *outfileid, uint8_t *olddataptr)
+int pakSaveAtGuid(int8_t device, int fileid, int filetype, uint8_t *newdata, int *outfileid, uint8_t *olddataptr)
 {
 	struct pakfileheader header;
 	struct pakfileheader swapheader;
@@ -2797,7 +2759,7 @@ void gbpakHandleError(uint32_t err)
 	}
 }
 
-void pakRumble(int device, f32 numsecs, int onduration, int offduration)
+void pakRumble(int device, float numsecs, int onduration, int offduration)
 {
 	if (g_Paks[device].state == PAKSTATE_READY
 			&& g_Paks[device].type == PAKTYPE_RUMBLE

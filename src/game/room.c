@@ -46,32 +46,32 @@
  * room or stop looking at each other's rooms.
  */
 
-u8 *g_RoomMtxAges;
+uint8_t *g_RoomMtxAges;
 RoomNum *g_RoomMtxLinkedRooms;
 RoomNum *g_RoomMtxBaseRooms;
-f32 *g_RoomMtxScales;
+float *g_RoomMtxScales;
 Mtxf *g_RoomMtxMatrices;
 
-s32 g_RoomMtxNumSlots = 0;
+int g_RoomMtxNumSlots = 0;
 
-void roomSetLastForOffset(s32 room)
+void roomSetLastForOffset(int room)
 {
 	g_Vars.currentplayer->lastroomforoffset = room;
 }
 
-void roomLinkMtx(s32 index, s32 roomnum)
+void roomLinkMtx(int index, int roomnum)
 {
 	g_Rooms[roomnum].roommtxindex = index;
 	g_RoomMtxLinkedRooms[index] = roomnum;
 }
 
-void roomUnlinkMtx(s32 index, s32 roomnum)
+void roomUnlinkMtx(int index, int roomnum)
 {
 	g_Rooms[roomnum].roommtxindex = -1;
 	g_RoomMtxLinkedRooms[index] = -1;
 }
 
-void roomFreeMtx(s32 index)
+void roomFreeMtx(int index)
 {
 	if (g_RoomMtxLinkedRooms[index] != -1) {
 		roomUnlinkMtx(index, g_RoomMtxLinkedRooms[index]);
@@ -82,9 +82,9 @@ void roomFreeMtx(s32 index)
 	g_RoomMtxScales[index] = 1;
 }
 
-s32 roomAllocateMtx(void)
+int roomAllocateMtx(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_RoomMtxNumSlots; i++) {
 		if (g_RoomMtxAges[i] >= NUM_GFXTASKS && g_RoomMtxBaseRooms[i] == -1) {
@@ -95,9 +95,9 @@ s32 roomAllocateMtx(void)
 	return 0;
 }
 
-void roomPopulateMtx(Mtxf *mtx, s32 roomnum)
+void roomPopulateMtx(Mtxf *mtx, int roomnum)
 {
-	s32 stagenum = g_Vars.stagenum;
+	int stagenum = g_Vars.stagenum;
 
 	mtx4LoadIdentity(mtx);
 
@@ -135,9 +135,9 @@ void roomPopulateMtx(Mtxf *mtx, s32 roomnum)
  * missing and updates the modification time. The function creates the cache
  * entry if missing and resets the cache entry's age to 0.
  */
-s32 roomTouchMtx(s32 roomnum)
+int roomTouchMtx(int roomnum)
 {
-	s32 index = g_Rooms[roomnum].roommtxindex;
+	int index = g_Rooms[roomnum].roommtxindex;
 	Mtxf mtx;
 
 	if (index == -1
@@ -172,21 +172,21 @@ s32 roomTouchMtx(s32 roomnum)
  * Retrieve a room's modelview matrix from cache, or create a new one and cache
  * it, and apply it to the displaylist.
  */
-Gfx *roomApplyMtx(Gfx *gdl, s32 roomnum)
+Gfx *roomApplyMtx(Gfx *gdl, int roomnum)
 {
-	s32 index = roomTouchMtx(roomnum);
+	int index = roomTouchMtx(roomnum);
 
 	gSPMatrix(gdl++, &g_RoomMtxMatrices[index], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	return gdl;
 }
 
-struct coord *roomGetPosPtr(s32 room)
+struct coord *roomGetPosPtr(int room)
 {
 	return &g_BgRooms[room].pos;
 }
 
-void roomGetPos(s32 room, struct coord *pos)
+void roomGetPos(int room, struct coord *pos)
 {
 	pos->x = g_BgRooms[room].pos.x;
 	pos->y = g_BgRooms[room].pos.y;

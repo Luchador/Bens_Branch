@@ -12,13 +12,13 @@
  * the following arrays contain default parameters for
  * a few hopefully useful effects.
  */
-#define ms *(((s32)((f32)44.1))&~0x7)
+#define ms *(((int)((float)44.1))&~0x7)
 
 #ifdef AVOID_UB
-f32 atan2f(f32 x, f32 z);
+float atan2f(float x, float z);
 #endif
 
-s32 SMALLROOM_PARAMS_N[26] = {
+int SMALLROOM_PARAMS_N[26] = {
 	/* sections	 length */
 	3,           55 ms,
 	/*                                        chorus  chorus  filter
@@ -28,18 +28,18 @@ s32 SMALLROOM_PARAMS_N[26] = {
 	0    ms, 33   ms, 5000,   0,      0,      0,      0,      0x5000,
 };
 
-s32 BIGROOM_PARAMS_N[10] = {
+int BIGROOM_PARAMS_N[10] = {
 	0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0,
 };
 
 #define M_PI    3.141592741f
 
-void func0003b710(f32 outputrate, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4)
+void func0003b710(float outputrate, float arg1, float arg2, float *arg3, float *arg4)
 {
-	f32 sp24;
-	f32 sp20;
-	f32 sp1c;
+	float sp24;
+	float sp20;
+	float sp1c;
 
 	if (arg1 >= outputrate - 200) {
 		arg1 = outputrate - 200;
@@ -65,10 +65,10 @@ void func0003b710(f32 outputrate, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4)
 
 void _init_lpfilter(ALLowPass *lp)
 {
-	s32 i, temp;
-	s16 fc;
-	f32 ffc, fcoef;
-	f32 scale;
+	int i, temp;
+	int16_t fc;
+	float ffc, fcoef;
+	float scale;
 
 	temp = lp->fc * SCALE;
 	fc = temp >> 15;
@@ -86,14 +86,14 @@ void _init_lpfilter(ALLowPass *lp)
 
 	for (; i < 16; i++) {
 		fcoef *= ffc;
-		lp->fcvec.fccoef[i] = (s16)(fcoef * scale);
+		lp->fcvec.fccoef[i] = (int16_t)(fcoef * scale);
 	}
 }
 
-f32 func0003b9d4(s32 arg0)
+float func0003b9d4(int arg0)
 {
-	f32 mult;
-	f32 value;
+	float mult;
+	float value;
 
 	value = 1.0f;
 
@@ -116,11 +116,11 @@ f32 func0003b9d4(s32 arg0)
 	return value;
 }
 
-void func0003ba64(struct fx *fx, f32 outputrate)
+void func0003ba64(struct fx *fx, float outputrate)
 {
-	s32 i;
-	f32 sp30[3];
-	f32 sp24[3];
+	int i;
+	float sp30[3];
+	float sp24[3];
 
 	if (fx->unk02 == 0) {
 		return;
@@ -147,10 +147,10 @@ void func0003ba64(struct fx *fx, f32 outputrate)
 	}
 }
 
-void n_alFxNew(ALFx **fx_ar, ALSynConfig *c, s16 bus, ALHeap *hp)
+void n_alFxNew(ALFx **fx_ar, ALSynConfig *c, int16_t bus, ALHeap *hp)
 {
-	u16 i, j, k;
-	s32 *param = 0;
+	uint16_t i, j, k;
+	int *param = 0;
 	ALDelay	*d;
 	ALFx *r;
 
@@ -171,9 +171,9 @@ void n_alFxNew(ALFx **fx_ar, ALSynConfig *c, s16 bus, ALHeap *hp)
 	r->length = param[j++];
 
 	r->delay = alHeapAlloc(hp, r->section_count, sizeof(ALDelay));
-	r->base[0] = alHeapAlloc(hp, r->length, sizeof(s16));
+	r->base[0] = alHeapAlloc(hp, r->length, sizeof(int16_t));
 	r->input[0] = r->base[0];
-	r->base[1] = alHeapAlloc(hp, r->length, sizeof(s16));
+	r->base[1] = alHeapAlloc(hp, r->length, sizeof(int16_t));
 	r->input[1] = r->base[1];
 
 	for (k = 0; k < r->length; k++) {
@@ -190,8 +190,8 @@ void n_alFxNew(ALFx **fx_ar, ALSynConfig *c, s16 bus, ALHeap *hp)
 
 		if (param[j]) {
 #define RANGE 2.0f
-			/*	    d->rsinc     = ((f32) param[j++])/0xffffff; */
-			d->rsinc = ((((f32)param[j++])/1000) * RANGE)/c->outputRate;
+			/*	    d->rsinc     = ((float) param[j++])/0xffffff; */
+			d->rsinc = ((((float)param[j++])/1000) * RANGE)/c->outputRate;
 
 			/*
 			 * the following constant is derived from:
@@ -207,7 +207,7 @@ void n_alFxNew(ALFx **fx_ar, ALSynConfig *c, s16 bus, ALHeap *hp)
 			 */
 #define CONVERT 173123.404906676f
 #define LENGTH	(d->output - d->input)
-			d->rsgain 	 = (((f32) param[j++])/CONVERT) * LENGTH;
+			d->rsgain 	 = (((float) param[j++])/CONVERT) * LENGTH;
 			d->rsval	 = 1.0f;
 			d->rsdelta	 = 0.0f;
 			d->rs 	 = alHeapAlloc(hp, 1, sizeof(ALResampler));

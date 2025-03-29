@@ -7,7 +7,7 @@
 
 void psReset(void)
 {
-	s32 i;
+	int i;
 
 	g_PsChannels = mempAlloc(ALIGN16(40 * sizeof(struct pschannel)), MEMPOOL_STAGE);
 

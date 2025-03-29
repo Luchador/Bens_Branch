@@ -4,21 +4,21 @@
 
 #define RANGE 2.0f
 
-Acmd *_n_loadOutputBuffer(ALFx *r, ALDelay *d, s32 arg2, s32 buff, Acmd *p);
-Acmd *_n_loadBuffer(ALFx *r, s32 arg1, s16 *curr_ptr, s32 buff,s32 count, Acmd *p);
-Acmd *_n_saveBuffer(ALFx *r, s32 arg1, s16 *curr_ptr, s32 buff, Acmd *p);
-Acmd *_n_filterBuffer(ALLowPass *lp, s32 buff, s32 count, Acmd *p);
-f32 _doModFunc(ALDelay *d, s32 count);
+Acmd *_n_loadOutputBuffer(ALFx *r, ALDelay *d, int arg2, int buff, Acmd *p);
+Acmd *_n_loadBuffer(ALFx *r, int arg1, int16_t *curr_ptr, int buff,int count, Acmd *p);
+Acmd *_n_saveBuffer(ALFx *r, int arg1, int16_t *curr_ptr, int buff, Acmd *p);
+Acmd *_n_filterBuffer(ALLowPass *lp, int buff, int count, Acmd *p);
+float _doModFunc(ALDelay *d, int count);
 
-Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 arg2)
+Acmd *n_alFxPull(int sampleOffset, Acmd *p, int arg2)
 {
 	Acmd *ptr = p;
 	ALFx *r = (ALFx *)n_syn->auxBus[arg2].fx;
-	s16 i, buff1, buff2, input, output;
-	s16 *in_ptr, *out_ptr, *prev_out_ptr = 0;
+	int16_t i, buff1, buff2, input, output;
+	int16_t *in_ptr, *out_ptr, *prev_out_ptr = 0;
 	ALDelay *d;
-	s32 sp58 = 1;
-	u32 j;
+	int sp58 = 1;
+	uint32_t j;
 
 	/*
 	 * pull channels going into this effect first
@@ -30,7 +30,7 @@ Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 arg2)
 	buff1  = N_AL_TEMP_0;
 	buff2  = N_AL_TEMP_1;
 
-	if (var8009c344[arg2] == 0) {
+	if (var8009c344[arg2] == false) {
 		aMix(ptr++, 0, 0xc000, N_AL_AUX_L_OUT, input);
 		aMix(ptr++, 0, 0x4000, N_AL_AUX_R_OUT, input);
 	}
@@ -47,8 +47,8 @@ Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 arg2)
 
 		for (i = 0; i < r->section_count; i++) {
 			d = &r->delay[i];  /* get the ALDelay structure */
-			in_ptr = &r->input[j][(s32)-d->input];
-			out_ptr = &r->input[j][(s32)-d->output];
+			in_ptr = &r->input[j][(int)-d->input];
+			out_ptr = &r->input[j][(int)-d->output];
 
 			if (var8009c346[arg2] && var8009c344[arg2]) {
 				d->ffcoef = -d->ffcoef;
@@ -56,7 +56,7 @@ Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 arg2)
 			}
 
 			if (in_ptr == prev_out_ptr) {
-				s16 t = buff2;
+				int16_t t = buff2;
 				buff2 = buff1;
 				buff1 = t;
 			} else {  /* load data at in_ptr into buff1 */
@@ -66,7 +66,7 @@ Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 arg2)
 			ptr = _n_loadOutputBuffer(r, d, j, buff2, ptr);
 
 			if (d->ffcoef) {
-				aMix(ptr++, 0, (u16)d->ffcoef, buff1, buff2);
+				aMix(ptr++, 0, (uint16_t)d->ffcoef, buff1, buff2);
 
 				if (!d->rs && !d->lp) {
 					ptr = _n_saveBuffer(r, j, out_ptr, buff2, ptr);
@@ -74,7 +74,7 @@ Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 arg2)
 			}
 
 			if (d->fbcoef) {
-				aMix(ptr++, 0, (u16)d->fbcoef, buff2, buff1);
+				aMix(ptr++, 0, (uint16_t)d->fbcoef, buff2, buff1);
 				ptr = _n_saveBuffer(r, j, in_ptr, buff1, ptr);
 			}
 
@@ -88,15 +88,15 @@ Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 arg2)
 
 			if (d->gain) {
 				if (var8009c344[arg2]) {
-					aMix(ptr++, 0, (u16)d->gain, buff2, output);
+					aMix(ptr++, 0, (uint16_t)d->gain, buff2, output);
 				} else {
-					u32 sp34 = d->gain * 1.4141999483109f;
+					uint32_t sp34 = d->gain * 1.4141999483109f;
 
 					if (sp34 > 0x7fff) {
 						sp34 = 0x7fff;
 					}
 
-					aMix(ptr++, 0, (u16)sp34, buff2, output);
+					aMix(ptr++, 0, (uint16_t)sp34, buff2, output);
 				}
 			}
 
@@ -111,8 +111,6 @@ Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 arg2)
 			} else {
 				aMix(ptr++, 0, 0x5a82, output, 0x4e0);
 			}
-		} else {
-			// empty
 		}
 
 		/*
@@ -140,13 +138,13 @@ Acmd *n_alFxPull(s32 sampleOffset, Acmd *p, s32 arg2)
  * verify the validity of the paramID or the param value. input and output
  * values must be 8 byte aligned, so round down any param passed.
  */
-s32 n_alFxParamHdl(void *filter, s32 paramID, void *param)
+int n_alFxParamHdl(void *filter, int paramID, void *param)
 {
 	ALFx *f = (ALFx *) filter;
-	s32 p = paramID & 7;
-	s32 s = paramID >> 3;
-	s32 val = *(s32*)param;
-	f32 rsgain;
+	int p = paramID & 7;
+	int s = paramID >> 3;
+	int val = *(int*)param;
+	float rsgain;
 
 	if (s >= f->section_count) {
 		return 0;
@@ -163,29 +161,29 @@ s32 n_alFxParamHdl(void *filter, s32 paramID, void *param)
 
 	switch (p) {
 	case INPUT_PARAM:
-		f->delay[s].input = ((s32)val * n_syn->outputRate / 1000) & 0xfffffff8;
+		f->delay[s].input = ((int)val * n_syn->outputRate / 1000) & 0xfffffff8;
 		break;
 	case OUTPUT_PARAM:
-		f->delay[s].output = ((s32)val * n_syn->outputRate / 1000) & 0xfffffff8;
+		f->delay[s].output = ((int)val * n_syn->outputRate / 1000) & 0xfffffff8;
 		break;
 	case FBCOEF_PARAM:
-		f->delay[s].fbcoef = (s16)val;
+		f->delay[s].fbcoef = (int16_t)val;
 		break;
 	case FFCOEF_PARAM:
-		f->delay[s].ffcoef = (s16)val;
+		f->delay[s].ffcoef = (int16_t)val;
 		break;
 	case GAIN_PARAM:
-		f->delay[s].gain = (s16)val;
+		f->delay[s].gain = (int16_t)val;
 		break;
 	case CHORUSRATE_PARAM:
-		f->delay[s].rsinc = ((((f32)val)/1000) * RANGE)/n_syn->outputRate;
+		f->delay[s].rsinc = ((((float)val)/1000) * RANGE)/n_syn->outputRate;
 		break;
 	case CHORUSDEPTH_PARAM:
 		rsgain = val;
 		break;
 	case LPFILT_PARAM:
 		if (f->delay[s].lp) {
-			f->delay[s].lp->fc = (s16)val;
+			f->delay[s].lp->fc = (int16_t)val;
 			_init_lpfilter(f->delay[s].lp);
 		}
 		break;
@@ -221,7 +219,7 @@ s32 n_alFxParamHdl(void *filter, s32 paramID, void *param)
 	if (f->delay[s].rs) {
 		if (p != 6) {
 			if (LENGTH != 0) {
-				rsgain = (f32)f->delay[s].rsgain / (f->delay[s].output - f->delay[s].input) * CONVERT;
+				rsgain = (float)f->delay[s].rsgain / (f->delay[s].output - f->delay[s].input) * CONVERT;
 			} else {
 				rsgain = 0;
 			}
@@ -233,31 +231,31 @@ s32 n_alFxParamHdl(void *filter, s32 paramID, void *param)
 	return 0;
 }
 
-Acmd *_n_loadOutputBuffer(ALFx *r, ALDelay *d, s32 arg2, s32 buff, Acmd *p)
+Acmd *_n_loadOutputBuffer(ALFx *r, ALDelay *d, int arg2, int buff, Acmd *p)
 {
 	Acmd *ptr = p;
-	s32 ratio, count, rbuff = N_AL_TEMP_2;
-	s16 *out_ptr;
-	f32 fincount, fratio, delta;
-	s32 ramalign = 0, length;
-	s32 incount = FIXED_SAMPLE;
-	s16 tmp;
+	int ratio, count, rbuff = N_AL_TEMP_2;
+	int16_t *out_ptr;
+	float fincount, fratio, delta;
+	int ramalign = 0, length;
+	int incount = FIXED_SAMPLE;
+	int16_t tmp;
 
 	if (d->rs) {
 		length = d->output - d->input;
 		delta = _doModFunc(d, incount);
 		delta /= length;
-		delta = (s32)(delta * UNITY_PITCH);
+		delta = (int)(delta * UNITY_PITCH);
 		delta = delta / UNITY_PITCH;
 		fratio = 1.0f - delta;
-		fincount = d->rs->delta + (fratio * (f32)incount);
-		count = (s32) fincount;
-		d->rs->delta = fincount - (f32)count;
-		out_ptr = &r->input[arg2][(s32)-(d->output - d->rsdelta)];
+		fincount = d->rs->delta + (fratio * (float)incount);
+		count = (int) fincount;
+		d->rs->delta = fincount - (float)count;
+		out_ptr = &r->input[arg2][(int)-(d->output - d->rsdelta)];
 		ramalign = ((intptr_t)out_ptr & 0x7) >> 1;
 		ptr = _n_loadBuffer(r, arg2, out_ptr - ramalign, rbuff, count + ramalign, ptr);
 
-		ratio = (s32)(fratio * UNITY_PITCH);
+		ratio = (int)(fratio * UNITY_PITCH);
 
 		tmp = buff >> 8;
 		n_aResample(ptr++, (uintptr_t)(d->rs->state[arg2]), d->rs->first, ratio, rbuff + (ramalign << 1), tmp);
@@ -265,18 +263,18 @@ Acmd *_n_loadOutputBuffer(ALFx *r, ALDelay *d, s32 arg2, s32 buff, Acmd *p)
 		d->rs->first = 0;
 		d->rsdelta += count - incount;
 	} else {
-		out_ptr = &r->input[arg2][(s32)-d->output];
+		out_ptr = &r->input[arg2][(int)-d->output];
 		ptr = _n_loadBuffer(r, arg2, out_ptr, buff, FIXED_SAMPLE, ptr);
 	}
 
 	return ptr;
 }
 
-Acmd *_n_loadBuffer(ALFx *r, s32 arg1, s16 *curr_ptr, s32 buff,s32 count, Acmd *p)
+Acmd *_n_loadBuffer(ALFx *r, int arg1, int16_t *curr_ptr, int buff,int count, Acmd *p)
 {
 	Acmd *ptr = p;
-	s32 after_end, before_end;
-	s16 *updated_ptr, *delay_end;
+	int after_end, before_end;
+	int16_t *updated_ptr, *delay_end;
 
 	delay_end = &r->base[arg1][r->length];
 
@@ -299,11 +297,11 @@ Acmd *_n_loadBuffer(ALFx *r, s32 arg1, s16 *curr_ptr, s32 buff,s32 count, Acmd *
 	return ptr;
 }
 
-Acmd *_n_saveBuffer(ALFx *r, s32 arg1, s16 *curr_ptr, s32 buff, Acmd *p)
+Acmd *_n_saveBuffer(ALFx *r, int arg1, int16_t *curr_ptr, int buff, Acmd *p)
 {
 	Acmd *ptr = p;
-	s32 after_end, before_end;
-	s16 *updated_ptr, *delay_end;
+	int after_end, before_end;
+	int16_t *updated_ptr, *delay_end;
 
 	delay_end = &r->base[arg1][r->length];
 
@@ -326,10 +324,10 @@ Acmd *_n_saveBuffer(ALFx *r, s32 arg1, s16 *curr_ptr, s32 buff, Acmd *p)
 	return ptr;
 }
 
-Acmd *_n_filterBuffer(ALLowPass *lp, s32 buff, s32 count, Acmd *p)
+Acmd *_n_filterBuffer(ALLowPass *lp, int buff, int count, Acmd *p)
 {
 	Acmd *ptr = p;
-	s16 tmp = count >> 8;
+	int16_t tmp = count >> 8;
 
 	n_aLoadADPCM(ptr++, 32, (uintptr_t)(lp->fcvec.fccoef));
 	n_aPoleFilter(ptr++, lp->first, lp->fgain, tmp, (uintptr_t)(lp->fstate[buff]));
@@ -346,9 +344,9 @@ Acmd *_n_filterBuffer(ALLowPass *lp, s32 buff, s32 count, Acmd *p)
  * should go at it's full chorus. In otherwords, this function returns a number
  * of samples the output pointer should modulate backwards.
  */
-f32 _doModFunc(ALDelay *d, s32 count)
+float _doModFunc(ALDelay *d, int count)
 {
-	f32 val;
+	float val;
 
 	/*
 	 * generate bipolar sawtooth

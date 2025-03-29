@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "lib/sched.h"
 #include "constants.h"
 #include "game/camera.h"
@@ -16,20 +17,18 @@
 #include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "lib/collision.h"
 #include "lib/lib_17ce0.h"
 #include "game/player.h"
 #include "game/prop.h"
 #include "game/debug.h"
-#endif
 
-u8 *var800a41a0;
+uint8_t *var800a41a0;
 
 void artifactsClear(void)
 {
 	struct artifact *artifacts = schedGetWriteArtifacts();
-	s32 i;
+	int i;
 
 	for (i = 0; i < MAX_ARTIFACTS; i++) {
 		artifacts[i].type = ARTIFACTTYPE_FREE;
@@ -42,11 +41,11 @@ void artifactsTick(void)
 	schedIncrementFrontArtifacts();
 }
 
-u16 func0f13c574(f32 arg0)
+uint16_t func0f13c574(float arg0)
 {
-	u32 value = arg0 * 8.0f;
-	u32 left;
-	u32 right = value;
+	uint32_t value = arg0 * 8.0f;
+	uint32_t left;
+	uint32_t right = value;
 
 	if (value > 0x3f800) {
 		right = value & 0x7ff;
@@ -85,7 +84,7 @@ u16 func0f13c574(f32 arg0)
 	return left << 13 | (right << 2);
 }
 
-s32 func0f13c710(f32 arg0)
+int func0f13c710(float arg0)
 {
 	if (arg0 > 0.0f) {
 		if (arg0 > 2147483520.0f) {
@@ -100,9 +99,9 @@ s32 func0f13c710(f32 arg0)
 	return arg0;
 }
 
-bool artifactTestLos(struct coord *spec, struct coord *roompos, s32 xi, s32 yi)
+bool artifactTestLos(struct coord *spec, struct coord *roompos, int xi, int yi)
 {
-	s32 i = 0;
+	int i = 0;
 
 	if (!g_Vars.currentplayer) {
 		return false;
@@ -117,47 +116,47 @@ bool artifactTestLos(struct coord *spec, struct coord *roompos, s32 xi, s32 yi)
 	struct coord gunpos2d = {{ 0.f, 0.f, 0.f }};
 	struct coord gundir3d;
 	struct coord gunpos3d = g_Vars.currentplayer->cam_pos;
-	f32 crosspos[2] = { (f32)xi, (f32)yi };
+	float crosspos[2] = { (float)xi, (float)yi };
 	cam0f0b4c3c(crosspos, &gundir2d, 1.f);
 	mtx4RotateVec(camGetProjectionMtxF(), &gundir2d, &gundir3d);
 
 	return shotTestLos(&gunpos2d, &gundir2d, &gunpos3d, &gundir3d, &endpos);
 }
 
-void artifactsCalculateGlaresForRoom(s32 roomnum)
+void artifactsCalculateGlaresForRoom(int roomnum)
 {
-	s32 i;
-	s32 j;
-	s32 k;
-	s32 l;
-	f32 f0;
-	s32 numlights;
-	f32 viewwidth;
-	f32 viewheight;
-	f32 viewleft;
-	f32 viewtop;
-	u8 *s1;
-	f32 x;
-	f32 y;
-	f32 f16;
-	f32 f20;
-	s32 xi;
-	s32 yi;
-	f32 sp190;
-	f32 brightnessfrac;
-	f32 thisfrac;
-	f32 tmp;
-	f32 tmp2;
-	f32 tmp3;
-	f32 sp178;
+	int i;
+	int j;
+	int k;
+	int l;
+	float f0;
+	int numlights;
+	float viewwidth;
+	float viewheight;
+	float viewleft;
+	float viewtop;
+	uint8_t *s1;
+	float x;
+	float y;
+	float f16;
+	float f20;
+	int xi;
+	int yi;
+	float sp190;
+	float brightnessfrac;
+	float thisfrac;
+	float tmp;
+	float tmp2;
+	float tmp3;
+	float sp178;
 	Mtxf sp138;
 	Mtxf spf8;
 	struct coord spec;
-	f32 spdc[4];
+	float spdc[4];
 	struct coord origin;
 	struct coord spc4;
 	struct light *roomlights;
-	s32 index;
+	int index;
 	struct artifact *artifacts = schedGetWriteArtifacts();
 	struct coord *campos = &g_Vars.currentplayer->cam_pos;
 	struct artifact *artifact;
@@ -334,10 +333,10 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 							f0 = (spdc[2] * f20 * 511.0f + 511.0f) * 32.0f;
 
 							if (g_ZbufPtr1
-									&& xi >= (s32)viewleft
-									&& xi < (s32)(viewleft + viewwidth)
-									&& yi >= (s32)viewtop
-									&& yi < (s32)(viewtop + viewheight)
+									&& xi >= (int)viewleft
+									&& xi < (int)(viewleft + viewwidth)
+									&& yi >= (int)viewtop
+									&& yi < (int)(viewtop + viewheight)
 									&& f0 < 32576.0f) {
 								index = envGetCurrent()->numsuns;
 								index *= 8;
@@ -367,7 +366,7 @@ void artifactsCalculateGlaresForRoom(s32 roomnum)
 	}
 }
 
-u8 func0f13d3c4(u8 arg0, u8 arg1)
+uint8_t func0f13d3c4(uint8_t arg0, uint8_t arg1)
 {
 	if (arg1 >= arg0 + 7) {
 		return arg0 + 7;
@@ -406,39 +405,39 @@ Gfx *artifactsUnconfigureForGlares(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
+Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 {
-	s32 i;
-	s32 j;
-	s32 lightindex;
+	int i;
+	int j;
+	int lightindex;
 	struct artifact *artifacts;
-	u16 min;
-	u16 max;
-	f32 lightop_cur_frac;
-	s32 t2;
+	uint16_t min;
+	uint16_t max;
+	float lightop_cur_frac;
+	int t2;
 	struct light *light;
-	u8 *s3;
-	s32 k;
-	s32 count;
-	u16 t4;
-	f32 add;
-	s32 l;
-	f32 brightness; // The closer you get to an artifact, the higher this becomes.
-	s32 avg;
-	f32 f0;
-	s32 v1;
-	s32 r;
-	s32 g;
-	s32 b;
-	u8 colour[4];
-	s16 lightroompos[3];
+	uint8_t *s3;
+	int k;
+	int count;
+	uint16_t t4;
+	float add;
+	int l;
+	float brightness; // The closer you get to an artifact, the higher this becomes.
+	int avg;
+	float f0;
+	int v1;
+	int r;
+	int g;
+	int b;
+	uint8_t colour[4];
+	int16_t lightroompos[3];
 	struct coord lightworldpos;
 	struct coord lightscreenpos;
-	f32 spdc[2];
-	f32 spd4[2];
-	f32 f24;
+	float spdc[2];
+	float spd4[2];
+	float f24;
 	bool extra;
-	f32 f26;
+	float f26;
 
 	artifacts = schedGetFrontArtifacts();
 	lightop_cur_frac = roomGetLightOpCurFrac(roomnum);
@@ -517,12 +516,12 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 					}
 
 					if (USINGDEVICE(DEVICE_NIGHTVISION)) {
-						s3[2] *= (s32) (lightop_cur_frac * 7.0f);
+						s3[2] *= (int) (lightop_cur_frac * 7.0f);
 					}
 
 					f0 = s3[2] * (1.0f / 255.0f);
 
-					skySetOverexposure((s32) ((f32)f0 * r), (s32) ((f32)f0 * g), (s32) ((f32)f0 * b));
+					skySetOverexposure((int) ((float)f0 * r), (int) ((float)f0 * g), (int) ((float)f0 * b));
 
 					for (l = 0; l < 3; l++) {
 						lightroompos[l] = (light->bbox[0].s[l] + light->bbox[1].s[l] + light->bbox[2].s[l] + light->bbox[3].s[l]) / 4;
@@ -560,7 +559,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, s32 roomnum)
 					f26 *= viGetViewHeight() * (1.0f / 240.0f);
 
 					if (brightness > 3.0f) {
-						f32 alpha = (light->colour & 0xf) * 17;
+						float alpha = (light->colour & 0xf) * 17;
 
 						colour[0] = r;
 						colour[1] = g;

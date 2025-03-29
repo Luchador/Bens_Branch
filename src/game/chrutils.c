@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/chrai.h"
@@ -67,7 +66,7 @@ void stageAllocateBgChrs(void)
 
 		// Allocate BG chrs
 		g_BgChrs = mempAlloc(ALIGN16(g_NumBgChrs * sizeof(struct chrdata)), MEMPOOL_STAGE);
-		g_BgChrnums = mempAlloc(ALIGN16(g_NumBgChrs * sizeof(s16)), MEMPOOL_STAGE);
+		g_BgChrnums = mempAlloc(ALIGN16(g_NumBgChrs * sizeof(int16_t)), MEMPOOL_STAGE);
 
 		// Initialise BG chrs
 		i = 0;
@@ -124,8 +123,8 @@ void stageAllocateBgChrs(void)
 		}
 	}
 
-	g_TeamList = mempAlloc((MAX_CHRSPERTEAM + 1) * MAX_TEAMS * sizeof(s16), MEMPOOL_STAGE);
-	g_SquadronList = mempAlloc((MAX_CHRSPERSQUADRON + 1) * MAX_SQUADRONS * sizeof(s16), MEMPOOL_STAGE);
+	g_TeamList = mempAlloc((MAX_CHRSPERTEAM + 1) * MAX_TEAMS * sizeof(int16_t), MEMPOOL_STAGE);
+	g_SquadronList = mempAlloc((MAX_CHRSPERSQUADRON + 1) * MAX_SQUADRONS * sizeof(int16_t), MEMPOOL_STAGE);
 }
 
 void stageLoadAllAilistModels(void)
@@ -151,11 +150,11 @@ void stageLoadAllAilistModels(void)
 				break;
 			case AICMD_SPAWNCHRATPAD:
 				bodyLoad(cmd[2]);
-				if ((s8)cmd[3] >= 0 && bodyLoad((s8)cmd[3]));
+				if ((int8_t)cmd[3] >= 0 && bodyLoad((int8_t)cmd[3]));
 				break;
 			case AICMD_SPAWNCHRATCHR:
 				bodyLoad(cmd[2]);
-				if ((s8)cmd[3] >= 0 && bodyLoad((s8)cmd[3]));
+				if ((int8_t)cmd[3] >= 0 && bodyLoad((int8_t)cmd[3]));
 				break;
 			case AICMD_EQUIPWEAPON:
 				setupLoadModeldef(cmd[3] | (cmd[2] << 8));

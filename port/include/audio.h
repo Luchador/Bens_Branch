@@ -1,12 +1,12 @@
 #ifndef _IN_AUDIO_H
 #define _IN_AUDIO_H
 
-#include <PR/ultratypes.h>
+#include <stdint.h>
 
-s32 audioInit(void);
-s32 audioGetBytesBuffered(void);
-s32 audioGetSamplesBuffered(void);
-void audioSetNextBuffer(const s16 *buf, u32 len);
+int audioInit(void);
+int audioGetBytesBuffered(void);
+int audioGetSamplesBuffered(void);
+void audioSetNextBuffer(const int16_t *buf, uint32_t len);
 void audioEndFrame(void);
 
 #endif

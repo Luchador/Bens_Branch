@@ -12,29 +12,6 @@
 #include "data.h"
 #include "types.h"
 
-const char var7f1b5230[] = "VTXSTORE : vtxfixrefs -> Start - p1=%x, p2=%x\n";
-const char var7f1b5260[] = "vtxfixrefs : Part=%x -- Mapping ptr %x -> %x\n";
-const char var7f1b5290[] = "VTXSTORE : vtxfixrefs -> End - Done=%d\n";
-const char var7f1b52b8[] = "vtxstorecheck : memaFree -> %u bytes at Ptr=%x(%x)\n";
-const char var7f1b52ec[] = "vtxstorecheck : At block 1 %d -> Ref1=%x, Ref2=%x\n";
-const char var7f1b5320[] = "vtxstorecheck : At block 2 %d -> Ref1=%x, Ref2=%x\n";
-const char var7f1b5354[] = "vtx buffer low, need to delete objects\n";
-const char var7f1b537c[] = "getfreevertices : %d of type %d -> ref1=%x, ref2=%x\n";
-const char var7f1b53b4[] = "vtxstore: 1st mema alloc of %u bytes\n";
-
-#if VERSION < VERSION_NTSC_1_0
-const char var7f1af8ecnb[] = "vtxstore: Trying to free %d from mema (bgRooms)\n";
-#endif
-
-const char var7f1b53dc[] = "getfreevertices : Return ptr = %x\n";
-const char var7f1b5400[] = "vtxstore: Out of mema (returning NULL)\n";
-const char var7f1b5428[] = "vtxstore: GROSS! CorspeCount > MAX_CORPSES corpses! Freeing corpse %x\n";
-const char var7f1b5470[] = "vtxstore:  CorpseCount %d, Trying to free %d\n";
-const char var7f1b54a0[] = "vtxstore: Freeing corpse %x\n";
-const char var7f1b54c0[] = "vtxstore: Out of vertices type %d wanted %d free %d (returning NULL)\n";
-const char var7f1b5508[] = "vtxstore: freevertices type %d, list %x\n";
-const char var7f1b5534[] = "freevertices: address not found in array %x\n";
-
 struct vtxstoretype g_VtxstoreTypes[] = {
 	{ 3000, 120, 3000, 80, 0, 0, 500,  20, 12, 0, 0, 0, 0 },
 	{ 1500, 40,  500,  20, 0, 0, 500,  20, 12, 0, 0, 0, 0 },
@@ -48,7 +25,6 @@ struct vtxstoretype g_VtxstoreTypes[] = {
  */
 void vtxstoreFixRefs(void *find, void *replacement)
 {
-	u32 stack;
 	struct prop *prop = g_Vars.activeprops;
 
 	while (prop) {
@@ -100,8 +76,8 @@ void vtxstoreFixRefs(void *find, void *replacement)
 
 void vtxstoreTick(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	if (g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].val2 < g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].val1 >> 2) {
 		for (i = 0; i < g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].numallocated - 1; i++) {
@@ -110,7 +86,7 @@ void vtxstoreTick(void)
 					if (g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].unk0e > 0
 							&& g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[i].node == g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].node
 							&& g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[i].level == g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].level) {
-						s32 size = ALIGN16(g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].count * 0x0c);
+						int size = ALIGN16(g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].count * 0x0c);
 						vtxstoreFixRefs(g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].unk00, g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[i].unk00);
 						g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[i].unk0e += g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].unk0e;
 						memaFree(g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].unk00, size);
@@ -127,13 +103,13 @@ void vtxstoreTick(void)
 	}
 }
 
-void *vtxstoreAllocate(s32 count, s32 index, struct modelnode *node, s32 level)
+void *vtxstoreAllocate(int count, int index, struct modelnode *node, int level)
 {
-	s32 i;
-	s32 numchrs;
-	s32 tally;
-	s32 rand;
-	u32 size;
+	int i;
+	int numchrs;
+	int tally;
+	int rand;
+	uint32_t size;
 	//struct chrdata *chrs[6];
 	struct chrdata *chrs[600]; // Increase by factor of 100
 
@@ -203,9 +179,9 @@ void *vtxstoreAllocate(s32 count, s32 index, struct modelnode *node, s32 level)
 	return NULL;
 }
 
-void vtxstoreFree(s32 type, void *arg1)
+void vtxstoreFree(int type, void *arg1)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_VtxstoreTypes[type].numallocated; i++) {
 		if (g_VtxstoreTypes[type].unk24[i].unk0e > 0 && arg1 == g_VtxstoreTypes[type].unk24[i].unk00) {

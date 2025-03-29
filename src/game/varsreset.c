@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include "constants.h"
 #include "game/prop.h"
 #include "bss.h"
@@ -11,7 +10,7 @@ void varsResetRoomProps(void);
 
 void varsReset(void)
 {
-	s32 i;
+	int i;
 
 	g_Vars.props = mempAlloc(ALIGN64(g_Vars.maxprops * sizeof(struct prop)), MEMPOOL_STAGE);
 	g_Vars.onscreenprops = mempAlloc(ALIGN64(200 * sizeof(void *)), MEMPOOL_STAGE);
@@ -60,10 +59,10 @@ void varsReset(void)
 
 void varsResetRoomProps(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
-	g_RoomPropListChunkIndexes = mempAlloc(ALIGN16(g_Vars.roomcount * sizeof(s16)), MEMPOOL_STAGE);
+	g_RoomPropListChunkIndexes = mempAlloc(ALIGN16(g_Vars.roomcount * sizeof(int16_t)), MEMPOOL_STAGE);
 	g_RoomPropListChunks = mempAlloc(MAX_ROOMPROPLISTCHUNKS * sizeof(struct roomproplistchunk), MEMPOOL_STAGE);
 
 	for (i = 0; i < g_Vars.roomcount; i++) {

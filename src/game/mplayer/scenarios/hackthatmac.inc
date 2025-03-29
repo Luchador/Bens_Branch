@@ -162,18 +162,16 @@ void htmInit(void)
 /**
  * Add one for the data uplink.
  */
-s32 htmNumProps(void)
+int htmNumProps(void)
 {
 	return HTM_NUM_TERMINALS + 1;
 }
 
-void htmAddPad(s16 padnum)
+void htmAddPad(int16_t padnum)
 {
 	struct scenariodata_htm *data = &g_ScenarioData.htm;
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (data->numpads < ARRAYCOUNT(g_ScenarioData.htm.padnums))
-#endif
 	{
 
 		data->padnums[data->numpads] = padnum;
@@ -183,7 +181,7 @@ void htmAddPad(s16 padnum)
 
 void htmReset(void)
 {
-	s32 i;
+	int i;
 
 	g_ScenarioData.htm.numpads = 0;
 	g_ScenarioData.htm.numterminals = 0;
@@ -248,8 +246,8 @@ void htbCreateUplink(void)
 
 	struct prop *prop = g_Vars.activeprops;
 	struct defaultobj *obj;
-	s32 padnum;
-	s32 count = 0;
+	int padnum;
+	int count = 0;
 	struct defaultobj *candidates[20];
 
 	while (prop && count < 20) {
@@ -298,8 +296,8 @@ void htmInitProps(void)
 {
 	struct scenariodata_htm *data = &g_ScenarioData.htm;
 	struct prop *prop = g_Vars.activeprops;
-	s32 i = 0;
-	s32 rand;
+	int i = 0;
+	int rand;
 
 	while (prop) {
 		if (prop->type == PROPTYPE_OBJ) {
@@ -322,7 +320,7 @@ void htmInitProps(void)
 	// or just < HTM_NUM_TERMINALS. If HTM_NUM_TERMINALS is set to 7 then it
 	// will overflow the array.
 	while (data->numterminals < htmNumProps()) {
-		s32 padnum;
+		int padnum;
 
 		do {
 			rand = rngRandom() % data->numpads;
@@ -349,9 +347,8 @@ void htmInitProps(void)
 
 void htmTick(void)
 {
-	u8 stack[8];
-	s32 i;
-	u32 prevplayernum = g_Vars.currentplayernum;
+	int i;
+	uint32_t prevplayernum = g_Vars.currentplayernum;
 	struct prop *prop;
 
 	if (var800869ec && var800869ec->prop) {
@@ -412,9 +409,9 @@ void htmTickChr(struct chrdata *chr)
 {
 	struct scenariodata_htm *data = &g_ScenarioData.htm;
 	bool hasuplink;
-	s32 playernum;
-	s32 i;
-	s32 *time;
+	int playernum;
+	int i;
+	int *time;
 
 	if (chr) {
 		hasuplink = chr->aibot->hasuplink;
@@ -430,7 +427,7 @@ void htmTickChr(struct chrdata *chr)
 		if (data->terminals[i].prop) {
 			struct prop *prop = data->terminals[i].prop;
 			struct defaultobj *obj = prop->obj;
-			s32 activatedbyplayernum = -1;
+			int activatedbyplayernum = -1;
 
 			if (chr) {
 				if (hasuplink) {
@@ -479,10 +476,10 @@ void htmTickChr(struct chrdata *chr)
 
 	if (playernum == data->dlplayernum && data->dlterminalnum != -1) {
 		struct coord *terminalpos = &data->terminals[data->dlterminalnum].prop->pos;
-		f32 angle;
-		f32 relangle;
-		f32 rangexz;
-		f32 rangey;
+		float angle;
+		float relangle;
+		float rangexz;
+		float rangey;
 		struct coord *chrpos;
 		struct coord dist;
 		bool holdinguplink;
@@ -503,7 +500,7 @@ void htmTickChr(struct chrdata *chr)
 
 		rangexz = sqrtf(dist.x * dist.x + dist.z * dist.z);
 
-		rangey = ABS(dist.y);
+		rangey = fabsf(dist.y);
 
 		relangle = atan2f(dist.x, dist.z) * 57.295776367188f + angle;
 
@@ -571,18 +568,18 @@ void htmTickChr(struct chrdata *chr)
 Gfx *htmRenderHud(Gfx *gdl)
 {
 	struct scenariodata_htm *data = &g_ScenarioData.htm;
-	s32 dltime;
-	s32 viewleft;
-	s32 viewright;
-	s32 viewtop;
-	s32 a0;
-	s32 a1;
-	s32 barleft;
-	s32 barright;
-	s32 t1;
-	s32 t6;
-	s32 v1;
-	s32 s1;
+	int dltime;
+	int viewleft;
+	int viewright;
+	int viewtop;
+	int a0;
+	int a1;
+	int barleft;
+	int barright;
+	int t1;
+	int t6;
+	int v1;
+	int s1;
 
 	dltime = data->dltime240[g_Vars.currentplayernum];
 
@@ -594,7 +591,7 @@ Gfx *htmRenderHud(Gfx *gdl)
 		a1 = viGetViewWidth() / 3;
 		barleft = t6 - a1 / 2;
 		barright = t6 + a1 / 2;
-		s1 = barleft + (s32) (a1 * (dltime / TICKS(4800.0f)));
+		s1 = barleft + (int) (a1 * (dltime / TICKS(4800.0f)));
 
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textSetPrimColour(gdl, 0x60000060);
@@ -620,11 +617,11 @@ Gfx *htmRenderHud(Gfx *gdl)
 	return gdl;
 }
 
-void htmCalculatePlayerScore(struct mpchrconfig *mpchr, s32 mpchrnum, s32 *score, s32 *deaths)
+void htmCalculatePlayerScore(struct mpchrconfig *mpchr, int mpchrnum, int *score, int *deaths)
 {
 	struct mpchrconfig *loopmpchr;
-	s32 i;
-	s32 index;
+	int i;
+	int index;
 
 	*score = 0;
 	index = func0f18d0e8(mpchrnum);
@@ -658,19 +655,19 @@ Gfx *htmRadarExtra(Gfx *gdl)
 {
 	struct scenariodata_htm *data = &g_ScenarioData.htm;
 	struct coord dist;
-	s32 i;
+	int i;
 	struct coord sp88;
 
 	// Red/green/blue/alpha as float and integer
-	f32 rf;
-	f32 gf;
-	f32 bf;
-	f32 af;
+	float rf;
+	float gf;
+	float bf;
+	float af;
 
-	u32 ri;
-	u32 gi;
-	u32 bi;
-	u32 ai;
+	uint32_t ri;
+	uint32_t gi;
+	uint32_t bi;
+	uint32_t ai;
 
 	if (g_MpSetup.options & MPOPTION_HTM_SHOWONRADAR) {
 		// Show the uplink
@@ -695,7 +692,7 @@ Gfx *htmRadarExtra(Gfx *gdl)
 					bf = 0;
 					af = 0;
 				} else if (g_MpSetup.options & MPOPTION_TEAMSENABLED) {
-					u32 colour = g_TeamColours[radarGetTeamIndex(data->terminals[i].team)];
+					uint32_t colour = g_TeamColours[radarGetTeamIndex(data->terminals[i].team)];
 					rf = (colour >> 24) & 0xff;
 					gf = ((colour >> 16) & 0xff);
 					bf = ((colour >> 8) & 0xff);
@@ -749,7 +746,7 @@ bool htmRadarChr(Gfx **gdl, struct prop *prop)
 			dist.z = prop->pos.z - g_Vars.currentplayer->prop->pos.z;
 
 			if (g_MpSetup.options & MPOPTION_TEAMSENABLED) {
-				u32 colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
+				uint32_t colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
 				*gdl = radarDrawDot(*gdl, g_ScenarioData.htm.uplink, &dist, colour, 0, 1);
 			} else {
 				*gdl = radarDrawDot(*gdl, g_ScenarioData.htm.uplink, &dist, 0x00ff0000, 0, 1);
@@ -762,7 +759,7 @@ bool htmRadarChr(Gfx **gdl, struct prop *prop)
 	return false;
 }
 
-bool htmHighlightProp(struct prop *prop, s32 *colour)
+bool htmHighlightProp(struct prop *prop, int *colour)
 {
 	if (g_MpSetup.options & MPOPTION_HTM_HIGHLIGHTTERMINAL) {
 		bool highlight = false;
@@ -770,7 +767,7 @@ bool htmHighlightProp(struct prop *prop, s32 *colour)
 		if (prop == g_ScenarioData.htm.uplink) {
 			highlight = true;
 		} else {
-			s32 i;
+			int i;
 
 			for (i = 0; i < HTM_NUM_TERMINALS; i++) {
 				if (g_ScenarioData.htm.terminals[i].prop == prop) {

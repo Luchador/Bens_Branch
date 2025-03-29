@@ -1,12 +1,12 @@
 #include "n_synthInternals.h"
 
-s32 _allocatePVoice(N_PVoice **pvoice, s16 priority);
+int _allocatePVoice(N_PVoice **pvoice, int16_t priority);
 
-s32 n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
+int n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
 {
 	N_PVoice *pvoice = 0;
 	ALParam *update;
-	s32 stolen;
+	int stolen;
 
 	voice->priority   = vc->priority;
 	voice->unityPitch = vc->unityPitch;
@@ -36,8 +36,6 @@ s32 n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
 				update->moredata.i = 368; /* pvoice->offset - 184 */
 
 				n_alEnvmixerParam(voice->pvoice, AL_FILTER_ADD_UPDATE, update);
-			} else {
-				// empty
 			}
 
 			/*
@@ -50,8 +48,6 @@ s32 n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
 				update->type = AL_FILTER_STOP_VOICE;
 				update->next = 0;
 				n_alEnvmixerParam(voice->pvoice, AL_FILTER_ADD_UPDATE, update);
-			} else {
-				// empty
 			}
 		} else {
 			pvoice->offset = 0;
@@ -63,11 +59,11 @@ s32 n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
 	return (pvoice != 0);
 }
 
-s32 _allocatePVoice(N_PVoice **pvoice, s16 priority)
+int _allocatePVoice(N_PVoice **pvoice, int16_t priority)
 {
 	ALLink *dl;
 	N_PVoice *pv;
-	s32 stolen = 0;
+	int stolen = 0;
 
 	if ((dl = n_syn->pLameList.next) != 0) { /* check the lame list first */
 		*pvoice = (N_PVoice *)dl;

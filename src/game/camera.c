@@ -13,17 +13,17 @@
 #include "types.h"
 
 struct coord var8009dd20;
-f32 var8009dd2c;
+float var8009dd2c;
 struct coord var8009dd30;
-f32 var8009dd3c;
+float var8009dd3c;
 struct coord var8009dd40;
-f32 var8009dd4c;
+float var8009dd4c;
 struct coord var8009dd50;
-f32 var8009dd5c;
+float var8009dd5c;
 struct coord var8009dd60;
-f32 var8009dd6c;
+float var8009dd6c;
 
-void camSetScreenSize(f32 width, f32 height)
+void camSetScreenSize(float width, float height)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -33,7 +33,7 @@ void camSetScreenSize(f32 width, f32 height)
 	player->c_halfheight = height * 0.5f;
 }
 
-void camSetScreenPosition(f32 left, f32 top)
+void camSetScreenPosition(float left, float top)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -41,7 +41,7 @@ void camSetScreenPosition(f32 left, f32 top)
 	player->c_screentop = top;
 }
 
-void camSetPerspective(f32 near, f32 fovy, f32 aspect)
+void camSetPerspective(float near, float fovy, float aspect)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -50,9 +50,9 @@ void camSetPerspective(f32 near, f32 fovy, f32 aspect)
 	player->c_perspaspect = aspect;
 }
 
-f32 cam0f0b49b8(f32 arg0)
+float cam0f0b49b8(float arg0)
 {
-	f32 result = atan2f(g_Vars.currentplayer->c_scalelod60 * arg0 * g_Vars.currentplayer->c_halfheight, 1.0f);
+	float result = atan2f(g_Vars.currentplayer->c_scalelod60 * arg0 * g_Vars.currentplayer->c_halfheight, 1.0f);
 	result *= 114.591552f;
 
 	if (result < 0) {
@@ -65,10 +65,10 @@ f32 cam0f0b49b8(f32 arg0)
 void camSetScale(void)
 {
 	struct player *player = g_Vars.currentplayer;
-	f32 fVar4;
-	f32 tmp;
-	f32 fVar5;
-	f32 fVar2;
+	float fVar4;
+	float tmp;
+	float fVar5;
+	float fVar2;
 
 	player->c_scaley = sinf(player->c_perspfovy * (M_PI / 360.0f)) / (cosf(player->c_perspfovy * (M_PI / 360.0f)) * player->c_halfheight);
 	player->c_scalelod = player->c_scaley;
@@ -101,13 +101,13 @@ void camSetScale(void)
 	player->c_cameraleftnorm.z = -fVar5 * fVar4;
 }
 
-void cam0f0b4c3c(f32 pos2d[2], struct coord *dir2d, f32 arg2)
+void cam0f0b4c3c(float pos2d[2], struct coord *dir2d, float arg2)
 {
 	struct player *player = g_Vars.currentplayer;
-	f32 sp20;
-	f32 sp1c;
-	f32 sp18 = -1.0f;
-	f32 f2;
+	float sp20;
+	float sp1c;
+	float sp18 = -1.0f;
+	float f2;
 
 	sp1c = (player->c_halfheight - (pos2d[1] - player->c_screentop)) * player->c_scaley;
 	sp20 = (pos2d[0] - player->c_screenleft - player->c_halfwidth) * player->c_scalex;
@@ -119,19 +119,19 @@ void cam0f0b4c3c(f32 pos2d[2], struct coord *dir2d, f32 arg2)
 	dir2d->z = sp18 * f2;
 }
 
-void cam0f0b4d04(struct coord *in, f32 *out)
+void cam0f0b4d04(struct coord *in, float *out)
 {
 	struct player *player = g_Vars.currentplayer;
-	f32 value = 1.0f / in->z;
+	float value = 1.0f / in->z;
 
 	out[1] = in->y * value * player->c_recipscaley + (player->c_screentop + player->c_halfheight);
 	out[0] = (player->c_screenleft + player->c_halfwidth) - in->x * value * player->c_recipscalex;
 }
 
-void cam0f0b4d68(struct coord *in, f32 out[2])
+void cam0f0b4d68(struct coord *in, float out[2])
 {
 	struct player *player = g_Vars.currentplayer;
-	f32 value;
+	float value;
 
 	if (in->z == 0.0f) {
 		value = -100000000000000000000.0f;
@@ -143,10 +143,10 @@ void cam0f0b4d68(struct coord *in, f32 out[2])
 	out[0] = (player->c_screenleft + player->c_halfwidth) - in->x * value * player->c_recipscalex;
 }
 
-void cam0f0b4dec(struct coord *in, f32 out[2])
+void cam0f0b4dec(struct coord *in, float out[2])
 {
 	struct player *player = g_Vars.currentplayer;
-	f32 value = 1.0f / in->z;
+	float value = 1.0f / in->z;
 
 	if (value < 0) {
 		value = -value;
@@ -156,16 +156,16 @@ void cam0f0b4dec(struct coord *in, f32 out[2])
 	out[0] = (player->c_screenleft + player->c_halfwidth) - in->x * value * player->c_recipscalex;
 }
 
-void cam0f0b4e68(f32 in[2], f32 divisor, f32 out[2])
+void cam0f0b4e68(float in[2], float divisor, float out[2])
 {
 	out[1] = in[1] * (1.0f / divisor) * g_Vars.currentplayer->c_recipscaley;
 	out[0] = in[0] * (1.0f / divisor) * g_Vars.currentplayer->c_recipscalex;
 }
 
-void cam0f0b4eb8(struct coord *arg0, f32 arg1[2], f32 zoom, f32 aspect)
+void cam0f0b4eb8(struct coord *arg0, float arg1[2], float zoom, float aspect)
 {
-	f32 f12;
-	f32 f14;
+	float f12;
+	float f14;
 	struct player *player = g_Vars.currentplayer;
 
 	f12 = cosf(zoom * 0.008726646f) * player->c_halfheight / (sinf(zoom * 0.008726646f) * arg0->f[2]);
@@ -236,16 +236,16 @@ void camSetWorldToScreenMtxf(Mtxf *mtx)
 	player->unk0484 = g_GfxMemPos;
 }
 
-Mtxf *cam0f0b5050(u8 *arg0)
+Mtxf *cam0f0b5050(uint8_t *arg0)
 {
 	Mtxf *result = NULL;
-	s32 i;
+	int i;
 
 	if (arg0 >= g_VtxBuffers[g_GfxActiveBufferIndex] && arg0 < g_VtxBuffers[g_GfxActiveBufferIndex + 1]) {
 		for (i = 0; i < PLAYERCOUNT(); i++) {
 			if (g_Vars.currentplayerindex >= playermgrGetOrderOfPlayer(i)) {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_viewfmdynticknum) {
-					if (arg0 >= g_Vars.players[i]->unk0484 && (u8 *)result < g_Vars.players[i]->unk0484) {
+					if (arg0 >= g_Vars.players[i]->unk0484 && (uint8_t *)result < g_Vars.players[i]->unk0484) {
 						result = g_Vars.players[i]->worldtoscreenmtx;
 					}
 				}
@@ -255,13 +255,13 @@ Mtxf *cam0f0b5050(u8 *arg0)
 		for (i = 0; i < PLAYERCOUNT(); i++) {
 			if (g_Vars.currentplayerindex >= playermgrGetOrderOfPlayer(i)) {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_prevviewfmdynticknum + 1) {
-					if (arg0 >= g_Vars.players[i]->unk0488 && (u8 *)result < g_Vars.players[i]->unk0488) {
+					if (arg0 >= g_Vars.players[i]->unk0488 && (uint8_t *)result < g_Vars.players[i]->unk0488) {
 						result = g_Vars.players[i]->prevworldtoscreenmtx;
 					}
 				}
 			} else {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_viewfmdynticknum + 1) {
-					if (arg0 >= g_Vars.players[i]->unk0484 && (u8 *)result < g_Vars.players[i]->unk0484) {
+					if (arg0 >= g_Vars.players[i]->unk0484 && (uint8_t *)result < g_Vars.players[i]->unk0484) {
 						result = g_Vars.players[i]->worldtoscreenmtx;
 					}
 				}
@@ -272,16 +272,16 @@ Mtxf *cam0f0b5050(u8 *arg0)
 	return result;
 }
 
-Mtxf *cam0f0b53a4(u8 *arg0)
+Mtxf *cam0f0b53a4(uint8_t *arg0)
 {
 	Mtxf *result = NULL;
-	s32 i;
+	int i;
 
 	if (arg0 >= g_VtxBuffers[g_GfxActiveBufferIndex] && arg0 < g_VtxBuffers[g_GfxActiveBufferIndex + 1]) {
 		for (i = 0; i < PLAYERCOUNT(); i++) {
 			if (g_Vars.currentplayerindex >= playermgrGetOrderOfPlayer(i)) {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_viewfmdynticknum) {
-					if (arg0 >= g_Vars.players[i]->unk0484 && (u8 *)result < g_Vars.players[i]->unk0484) {
+					if (arg0 >= g_Vars.players[i]->unk0484 && (uint8_t *)result < g_Vars.players[i]->unk0484) {
 						result = g_Vars.players[i]->projectionmtx;
 					}
 				}
@@ -291,13 +291,13 @@ Mtxf *cam0f0b53a4(u8 *arg0)
 		for (i = 0; i < PLAYERCOUNT(); i++) {
 			if (g_Vars.currentplayerindex >= playermgrGetOrderOfPlayer(i)) {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_prevviewfmdynticknum + 1) {
-					if (arg0 >= g_Vars.players[i]->unk0488 && (u8 *)result < g_Vars.players[i]->unk0488) {
+					if (arg0 >= g_Vars.players[i]->unk0488 && (uint8_t *)result < g_Vars.players[i]->unk0488) {
 						result = g_Vars.players[i]->prevprojectionmtx;
 					}
 				}
 			} else {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_viewfmdynticknum + 1) {
-					if (arg0 >= g_Vars.players[i]->unk0484 && (u8 *)result < g_Vars.players[i]->unk0484) {
+					if (arg0 >= g_Vars.players[i]->unk0484 && (uint8_t *)result < g_Vars.players[i]->unk0484) {
 						result = g_Vars.players[i]->projectionmtx;
 					}
 				}
@@ -357,56 +357,56 @@ LookAt *camGetLookAt(void)
 	return g_Vars.currentplayer->lookat;
 }
 
-f32 camGetLodScaleZ(void)
+float camGetLodScaleZ(void)
 {
 	return g_Vars.currentplayer->c_lodscalez;
 }
 
-u32 camGetLodScaleZU32(void)
+uint32_t camGetLodScaleZU32(void)
 {
 	return g_Vars.currentplayer->c_lodscalezu32;
 }
 
-f32 camGetScreenWidth(void)
+float camGetScreenWidth(void)
 {
 	return g_Vars.currentplayer->c_screenwidth;
 }
 
-f32 camGetScreenHeight(void)
+float camGetScreenHeight(void)
 {
 	return g_Vars.currentplayer->c_screenheight;
 }
 
-f32 camGetScreenLeft(void)
+float camGetScreenLeft(void)
 {
 	return g_Vars.currentplayer->c_screenleft;
 }
 
-f32 camGetScreenTop(void)
+float camGetScreenTop(void)
 {
 	return g_Vars.currentplayer->c_screentop;
 }
 
-f32 camGetPerspFovY(void)
+float camGetPerspFovY(void)
 {
 	return g_Vars.currentplayer->c_perspfovy;
 }
 
-f32 camGetPerspAspect(void)
+float camGetPerspAspect(void)
 {
 	return g_Vars.currentplayer->c_perspaspect;
 }
 
 void cam0f0b5838(void)
 {
-	f32 sp2c;
-	f32 sp28;
-	f32 sp24;
-	f32 sp20;
+	float sp2c;
+	float sp28;
+	float sp24;
+	float sp20;
 	struct player *player;
 	Mtxf *mtx;
-	f32 sp14;
-	f32 sp10;
+	float sp14;
+	float sp10;
 
 	player = g_Vars.currentplayer;
 	sp24 = player->c_halfheight * player->c_scaley;
@@ -453,7 +453,7 @@ void cam0f0b5838(void)
 	var8009dd6c = mtx->m[2][0] * mtx->m[3][0] + mtx->m[2][1] * mtx->m[3][1] + mtx->m[2][2] * mtx->m[3][2];
 }
 
-bool cam0f0b5b9c(struct coord *arg0, f32 arg1)
+bool cam0f0b5b9c(struct coord *arg0, float arg1)
 {
 	Mtxf *mtx = g_Vars.currentplayer->projectionmtx;
 
@@ -480,26 +480,26 @@ bool cam0f0b5b9c(struct coord *arg0, f32 arg1)
 	return true;
 }
 
-bool camIsPosInScreenBox(struct coord *pos, f32 arg1, struct drawslot *drawslot)
+bool camIsPosInScreenBox(struct coord *pos, float arg1, struct drawslot *drawslot)
 {
 	struct coord sp74;
-	f32 sp70;
+	float sp70;
 	struct coord sp64;
-	f32 sp60;
+	float sp60;
 	struct coord sp54;
-	f32 sp50;
+	float sp50;
 	struct coord sp44;
-	f32 sp40;
-	f32 sp3c;
-	f32 sp38;
-	f32 sp34;
-	f32 sp30;
-	f32 sp2c;
-	f32 sp28;
-	f32 sp24;
-	f32 sp20;
-	f32 sp1c;
-	f32 sp18;
+	float sp40;
+	float sp3c;
+	float sp38;
+	float sp34;
+	float sp30;
+	float sp2c;
+	float sp28;
+	float sp24;
+	float sp20;
+	float sp1c;
+	float sp18;
 
 	if (var8009dd6c + arg1 < g_Vars.currentplayer->projectionmtx->m[2][0] * pos->f[0] + g_Vars.currentplayer->projectionmtx->m[2][1] * pos->f[1] + g_Vars.currentplayer->projectionmtx->m[2][2] * pos->f[2]) {
 		return false;
@@ -580,15 +580,13 @@ bool camIsPosInScreenBox(struct coord *pos, f32 arg1, struct drawslot *drawslot)
  * correct address to camIsPosInScreenBox so it can interpret the pointer as a
  * drawslot.
  */
-bool camIsPosInFovAndVisibleRoom(RoomNum *rooms, struct coord *pos, f32 arg2)
+bool camIsPosInFovAndVisibleRoom(RoomNum *rooms, struct coord *pos, float arg2)
 {
-	s32 i;
+	int i;
 	RoomNum room;
 	bool hasdata = false;
 	struct drawslot *thisthing;
-#ifdef AVOID_UB
 	static struct drawslot dslot;
-#endif
 	struct screenbox box;
 
 	for (i = 0, room = rooms[i]; room != -1; i++, room = rooms[i]) {
@@ -626,10 +624,6 @@ bool camIsPosInFovAndVisibleRoom(RoomNum *rooms, struct coord *pos, f32 arg2)
 		return false;
 	}
 
-#ifdef AVOID_UB
 	memcpy(&dslot.box, &box, sizeof(box));
 	return camIsPosInScreenBox(pos, arg2, &dslot);
-#else
-	return camIsPosInScreenBox(pos, arg2, (struct drawslot *) &(((u8 *) &box)[-((uintptr_t) &(((struct drawslot *)0)->box))]));
-#endif
 }

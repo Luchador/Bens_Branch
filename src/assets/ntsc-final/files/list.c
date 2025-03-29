@@ -1,6 +1,6 @@
-#include <ultra64.h>
+#include <stdint.h>
 
-u32 nothing = 0;
+uint32_t nothing = 0;
 
 char *filenames[] = {
 	/*0x001*/ "bgdata/bg_sev.seg",

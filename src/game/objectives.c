@@ -25,21 +25,21 @@
 #include "platform.h"
 
 struct objective *g_Objectives[MAX_OBJECTIVES];
-u32 g_ObjectiveStatuses[MAX_OBJECTIVES];
+uint32_t g_ObjectiveStatuses[MAX_OBJECTIVES];
 struct tag *g_TagsLinkedList;
 struct briefingobj *g_BriefingObjs;
 struct criteria_roomentered *g_RoomEnteredCriterias;
 struct criteria_throwinroom *g_ThrowInRoomCriterias;
 struct criteria_holograph *g_HolographCriterias;
-s32 g_NumTags;
+int g_NumTags;
 struct tag **g_TagPtrs;
 
-s32 g_ObjectiveLastIndex = -1;
+int g_ObjectiveLastIndex = -1;
 bool g_ObjectiveChecksDisabled = false;
 
 void tagsReset(void)
 {
-	s32 index = 0;
+	int index = 0;
 	struct tag *tag = g_TagsLinkedList;
 
 	while (tag) {
@@ -53,7 +53,7 @@ void tagsReset(void)
 	g_NumTags = index;
 
 	if (g_NumTags) {
-		u32 size = index * sizeof(uintptr_t);
+		uint32_t size = index * sizeof(uintptr_t);
 		g_TagPtrs = mempAlloc(ALIGN16(size), MEMPOOL_STAGE);
 
 		for (index = 0; index < g_NumTags; index++) {
@@ -69,7 +69,7 @@ void tagsReset(void)
 	}
 }
 
-struct tag *tagFindById(s32 tag_id)
+struct tag *tagFindById(int tag_id)
 {
 	struct tag *tag = NULL;
 
@@ -80,7 +80,7 @@ struct tag *tagFindById(s32 tag_id)
 	return tag;
 }
 
-s32 objGetTagNum(struct defaultobj *obj)
+int objGetTagNum(struct defaultobj *obj)
 {
 	struct tag *tag = g_TagsLinkedList;
 
@@ -97,7 +97,7 @@ s32 objGetTagNum(struct defaultobj *obj)
 	return -1;
 }
 
-struct defaultobj *objFindByTagId(s32 tag_id)
+struct defaultobj *objFindByTagId(int tag_id)
 {
 	struct tag *tag = tagFindById(tag_id);
 	struct defaultobj *obj = NULL;
@@ -113,12 +113,12 @@ struct defaultobj *objFindByTagId(s32 tag_id)
 	return obj;
 }
 
-s32 objectiveGetCount(void)
+int objectiveGetCount(void)
 {
 	return g_ObjectiveLastIndex + 1;
 }
 
-char *objectiveGetText(s32 index)
+char *objectiveGetText(int index)
 {
 	if (index < 10 && g_Objectives[index]) {
 		return langGet(g_Objectives[index]->text);
@@ -127,7 +127,7 @@ char *objectiveGetText(s32 index)
 	return NULL;
 }
 
-u32 objectiveGetDifficultyBits(s32 index)
+uint32_t objectiveGetDifficultyBits(int index)
 {
 	if (index < 10 && g_Objectives[index]) {
 		return g_Objectives[index]->difficulties;
@@ -143,9 +143,9 @@ u32 objectiveGetDifficultyBits(s32 index)
  * requirement in the objective to decide whether to change it to incomplete or
  * failed.
  */
-s32 objectiveCheck(s32 index)
+int objectiveCheck(int index)
 {
-	s32 objstatus = OBJECTIVE_COMPLETE;
+	int objstatus = OBJECTIVE_COMPLETE;
 
 	if (index < ARRAYCOUNT(g_Objectives)) {
 		if (g_Objectives[index] == NULL) {
@@ -154,13 +154,13 @@ s32 objectiveCheck(s32 index)
 			// Note: This is setting the cmd pointer to the start of the
 			// beginobjective macro in the stage's setup file. The first
 			// iteration of the while loop below will skip past it.
-			u32 *cmd = (u32 *)g_Objectives[index];
+			uint32_t *cmd = (uint32_t *)g_Objectives[index];
 
-			while ((u8)PD_BE32(cmd[0]) != OBJTYPE_ENDOBJECTIVE) {
+			while ((uint8_t)PD_BE32(cmd[0]) != OBJTYPE_ENDOBJECTIVE) {
 				// The status of this requirement
-				s32 reqstatus = OBJECTIVE_COMPLETE;
+				int reqstatus = OBJECTIVE_COMPLETE;
 
-				switch ((u8)PD_BE32(cmd[0])) {
+				switch ((uint8_t)PD_BE32(cmd[0])) {
 				case OBJECTIVETYPE_DESTROYOBJ:
 					{
 						struct defaultobj *obj = objFindByTagId(cmd[1]);
@@ -182,9 +182,9 @@ s32 objectiveCheck(s32 index)
 				case OBJECTIVETYPE_COLLECTOBJ:
 					{
 						struct defaultobj *obj = objFindByTagId(cmd[1]);
-						s32 prevplayernum;
-						s32 collected = false;
-						s32 i;
+						int prevplayernum;
+						int collected = false;
+						int i;
 
 						if (!obj || !obj->prop || !objIsHealthy(obj)) {
 							reqstatus = OBJECTIVE_FAILED;
@@ -215,8 +215,8 @@ s32 objectiveCheck(s32 index)
 						struct defaultobj *obj = objFindByTagId(cmd[1]);
 
 						if (obj && obj->prop) {
-							s32 i;
-							s32 prevplayernum = g_Vars.currentplayernum;
+							int i;
+							int prevplayernum = g_Vars.currentplayernum;
 
 							for (i = 0; i < PLAYERCOUNT(); i++) {
 								if (g_Vars.players[i] == g_Vars.bond || g_Vars.players[i] == g_Vars.coop) {
@@ -285,10 +285,10 @@ s32 objectiveCheck(s32 index)
 
 bool objectiveIsAllComplete(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < objectiveGetCount(); i++) {
-		u32 diffbits = objectiveGetDifficultyBits(i);
+		uint32_t diffbits = objectiveGetDifficultyBits(i);
 
 		if ((1 << lvGetDifficulty() & diffbits) &&
 				objectiveCheck(i) != OBJECTIVE_COMPLETE) {
@@ -304,10 +304,10 @@ void objectivesDisableChecking(void)
 	g_ObjectiveChecksDisabled = true;
 }
 
-void objectivesShowHudmsg(char *buffer, s32 hudmsgtype)
+void objectivesShowHudmsg(char *buffer, int hudmsgtype)
 {
-	s32 prevplayernum = g_Vars.currentplayernum;
-	s32 i;
+	int prevplayernum = g_Vars.currentplayernum;
+	int i;
 
 	for (i = 0; i < PLAYERCOUNT(); i++) {
 		setCurrentPlayerNum(i);
@@ -322,13 +322,13 @@ void objectivesShowHudmsg(char *buffer, s32 hudmsgtype)
 
 void objectivesCheckAll(void)
 {
-	s32 availableindex = 0;
-	s32 i;
+	int availableindex = 0;
+	int i;
 	char buffer[50] = "";
 
 	if (!g_ObjectiveChecksDisabled) {
 		for (i = 0; i <= g_ObjectiveLastIndex; i++) {
-			s32 status = objectiveCheck(i);
+			int status = objectiveCheck(i);
 
 			if (g_ObjectiveStatuses[i] != status) {
 				g_ObjectiveStatuses[i] = status;
@@ -358,13 +358,13 @@ void objectivesCheckAll(void)
 	}
 }
 
-void objectiveCheckRoomEntered(s32 currentroom)
+void objectiveCheckRoomEntered(int currentroom)
 {
 	struct criteria_roomentered *criteria = g_RoomEnteredCriterias;
 
 	while (criteria) {
 		if (criteria->status == OBJECTIVE_INCOMPLETE) {
-			s32 room = chrGetPadRoom(NULL, criteria->pad);
+			int room = chrGetPadRoom(NULL, criteria->pad);
 
 			if (room >= 0 && room == currentroom) {
 				criteria->status = OBJECTIVE_COMPLETE;
@@ -375,13 +375,13 @@ void objectiveCheckRoomEntered(s32 currentroom)
 	}
 }
 
-void objectiveCheckThrowInRoom(s32 arg0, RoomNum *inrooms)
+void objectiveCheckThrowInRoom(int arg0, RoomNum *inrooms)
 {
 	struct criteria_throwinroom *criteria = g_ThrowInRoomCriterias;
 
 	while (criteria) {
 		if (criteria->status == OBJECTIVE_INCOMPLETE && criteria->unk04 == arg0) {
-			s32 room = chrGetPadRoom(NULL, criteria->pad);
+			int room = chrGetPadRoom(NULL, criteria->pad);
 
 			if (room >= 0) {
 				RoomNum requirerooms[2];
@@ -398,7 +398,7 @@ void objectiveCheckThrowInRoom(s32 arg0, RoomNum *inrooms)
 	}
 }
 
-void objectiveCheckHolograph(f32 maxdist)
+void objectiveCheckHolograph(float maxdist)
 {
 	struct criteria_holograph *criteria = g_HolographCriterias;
 
@@ -415,20 +415,20 @@ void objectiveCheckHolograph(f32 maxdist)
 					&& obj->prop->z >= 0
 					&& objIsHealthy(obj)) {
 				struct coord sp9c;
-				f32 sp94[2];
-				f32 sp8c[2];
-				f32 dist = -1;
+				float sp94[2];
+				float sp8c[2];
+				float dist = -1;
 
 				if (maxdist != 0.0f) {
-					f32 xdiff = obj->prop->pos.x - g_Vars.currentplayer->cam_pos.x;
-					f32 zdiff = obj->prop->pos.z - g_Vars.currentplayer->cam_pos.z;
+					float xdiff = obj->prop->pos.x - g_Vars.currentplayer->cam_pos.x;
+					float zdiff = obj->prop->pos.z - g_Vars.currentplayer->cam_pos.z;
 					dist = xdiff * xdiff + zdiff * zdiff;
 					maxdist = maxdist * maxdist;
 				}
 
 				if (dist < maxdist && func0f0899dc(obj->prop, &sp9c, sp94, sp8c)) {
-					f32 sp78[2];
-					f32 sp70[2];
+					float sp78[2];
+					float sp70[2];
 					func0f06803c(&sp9c, sp94, sp8c, sp78, sp70);
 
 					if (sp78[0] > camGetScreenLeft()

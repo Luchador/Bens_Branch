@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/pak.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/main.h"
 #include "lib/joy.h"
@@ -174,7 +175,7 @@ void joyPollPfs(int force)
 			&& !doingit) {
 		doingit = true;
 		prevcount = thiscount;
-		thiscount = osGetCount();
+		thiscount = utilsGetCount();
 		diffcount = (thiscount - prevcount) / 256;
 		value = g_JoyPfsPollInterval * 2;
 

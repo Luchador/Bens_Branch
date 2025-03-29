@@ -7,8 +7,8 @@
 
 void smokeReset(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	g_MaxSmokes = 40; // Double the max smokes
 

@@ -57,22 +57,22 @@ void modelmgrSetLvResetting(bool value)
  * (eg. for thrown weapons), and a further 20 model and 20 anim slots are
  * allocated for animated objects.
  */
-void modelmgrAllocateSlots(s32 numobjs, s32 numchrs)
+void modelmgrAllocateSlots(int numobjs, int numchrs)
 {
-	s32 rwdata2sizetotal;
-	s32 rwdata1sizetotal;
-	s32 rwdata3sizetotal;
-	s32 bindingssize;
-	u8 *ptr;
-	s32 i;
-	s32 totalsize;
-	s32 modelssize;
-	s32 animssize;
-	s32 rwdata1sizeeach = 0x10;
-	s32 rwdata2sizeeach = 0xd0;
-	s32 rwdata3sizeeach = 0;
-	s32 maxanimatedobjs = 20;
-	s32 numspare;
+	int rwdata2sizetotal;
+	int rwdata1sizetotal;
+	int rwdata3sizetotal;
+	int bindingssize;
+	uint8_t *ptr;
+	int i;
+	int totalsize;
+	int modelssize;
+	int animssize;
+	int rwdata1sizeeach = 0x10;
+	int rwdata2sizeeach = 0xd0;
+	int rwdata3sizeeach = 0;
+	int maxanimatedobjs = 20;
+	int numspare;
 
 	g_ModelNumObjs = numobjs;
 	g_ModelNumChrs = numchrs;
@@ -156,11 +156,11 @@ void modelmgrAllocateSlots(s32 numobjs, s32 numchrs)
 	g_ModelMostAnims = 0;
 }
 
-bool modelmgrLoadProjectileModeldefs(s32 weaponnum)
+bool modelmgrLoadProjectileModeldefs(int weaponnum)
 {
 	bool result = false;
 	struct weapon *weapon = g_Weapons[weaponnum];
-	s32 i;
+	int i;
 
 	for (i = 0; i != 2; i++) {
 		if (weapon->functions[i]) {

@@ -1,15 +1,17 @@
 #include <ultra64.h>
+#include <math.h>
+#include <stdint.h>
 #include "n_synthInternals.h"
 
-Acmd *n_alAuxBusPull(s32 sampleOffset, Acmd *cmdptr, s32 fxBus, s32 *numpulls)
+Acmd *n_alAuxBusPull(int sampleOffset, Acmd *cmdptr, int fxBus, int *numpulls)
 {
 	Acmd *cmd = cmdptr;
 	struct N_ALAuxBus_s *bus = &n_syn->auxBus[fxBus];
 	N_PVoice **sources = bus->sources;
-	u32 i;
-	s32 sp34 = 0;
-	u32 sp30 = 1;
-	u32 sp2c;
+	uint32_t i;
+	int sp34 = 0;
+	uint32_t sp30 = 1;
+	uint32_t sp2c;
 
 	aClearBuffer(cmd++, 1984, 736);
 

@@ -66,7 +66,7 @@ MenuItemHandlerResult frDetailsOkMenuHandler(int operation, struct menuitem *ite
 			frBeginSession(weapon);
 		}
 
-		func0f0f8120();
+		menuFinalizePlayerDataAndPopDialogs();
 		break;
 	}
 
@@ -92,7 +92,7 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 	int score;
 	Gfx *gdl;
 	struct menuitemrenderdata *renderdata;
-	u32 colour;
+	uint32_t colour;
 	int weaponnum2;
 	int score2;
 	int i;
@@ -200,9 +200,9 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 					TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
 
 			gSPTextureRectangle(gdl++,
-					(((renderdata->x + i * 13) + 125) << 2) * g_ScaleX, (renderdata->y) << 2,
-					(((renderdata->x + i * 13) + 136) << 2) * g_ScaleX, (renderdata->y + 11) << 2,
-					G_TX_RENDERTILE, 0, 0x0160, 1024 / g_ScaleX, -1024);
+					(((renderdata->x + i * 13) + 125) << 2), (renderdata->y) << 2,
+					(((renderdata->x + i * 13) + 136) << 2), (renderdata->y + 11) << 2,
+					G_TX_RENDERTILE, 0, 0x0160, 1024, -1024);
 		}
 
 		return (uintptr_t)gdl;
@@ -213,7 +213,6 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 
 MenuDialogHandlerResult frTrainingInfoMenuDialog(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
-	u32 stack;
 	int weaponnum;
 
 	switch (operation) {
@@ -260,7 +259,7 @@ MenuDialogHandlerResult frTrainingStatsMenuDialog(int operation, struct menudial
  */
 MenuItemHandlerResult frDifficultyDropdownMenuHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u16 names[] = {
+	uint16_t names[] = {
 		L_MPMENU_439, // "Bronze"
 		L_MPMENU_440, // "Silver"
 		L_MPMENU_441, // "Gold"
@@ -334,7 +333,7 @@ char *frSecondaryFunctionMenuText(struct menuitem *item)
 
 char *frMenuTextFailReason(struct menuitem *item)
 {
-	u16 reasons[] = {
+	uint16_t reasons[] = {
 		L_MPMENU_456, // "Not Failed"
 		L_MPMENU_457, // "Out of Ammo"
 		L_MPMENU_458, // "Time Over"
@@ -349,7 +348,7 @@ char *frMenuTextFailReason(struct menuitem *item)
 
 char *frMenuTextDifficultyName(struct menuitem *item)
 {
-	u16 names[] = {
+	uint16_t names[] = {
 		L_MPMENU_439, // "Bronze"
 		L_MPMENU_440, // "Silver"
 		L_MPMENU_441, // "Gold"
@@ -363,7 +362,7 @@ char *frMenuTextDifficultyName(struct menuitem *item)
 char *frMenuTextTimeTakenValue(struct menuitem *item)
 {
 	struct frdata *frdata = frGetData();
-	f32 secs = frdata->timetaken / (PAL ? 50.0f : 60.0f);
+	float secs = frdata->timetaken / 60.0f;
 
 	if (secs > frdata->timelimit) {
 		secs = frdata->timelimit;
@@ -417,8 +416,8 @@ char *frMenuTextTargetsDestroyedValue(struct menuitem *item)
 char *frMenuTextAccuracyValue(struct menuitem *item)
 {
 	struct frdata *frdata = frGetData();
-	f32 totalhits = (frdata->numhitsring3 + frdata->numhitsbullseye + frdata->numhitsring1 + frdata->numhitsring2) * 100.0f;
-	f32 accuracy = 0;
+	float totalhits = (frdata->numhitsring3 + frdata->numhitsbullseye + frdata->numhitsring1 + frdata->numhitsring2) * 100.0f;
+	float accuracy = 0;
 
 	if (frdata->numshots) {
 		accuracy = totalhits / frdata->numshots;
@@ -581,20 +580,20 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 		char text[128];
 		bool failed = frdata->menutype == FRMENUTYPE_FAILED;
 		
-		u32 linecolourmid = failed ? 0xff000077 : 0x00ff0077; // line gradient colour in middle
-		u32 linecolourfig = failed ? 0xff000000 : 0x00ff0000; // line gradient colour at figures
-		u32 linecolourtex = failed ? 0xff000033 : 0x00ff0033; // line gradient colour at target texture
+		uint32_t linecolourmid = failed ? 0xff000077 : 0x00ff0077; // line gradient colour in middle
+		uint32_t linecolourfig = failed ? 0xff000000 : 0x00ff0000; // line gradient colour at figures
+		uint32_t linecolourtex = failed ? 0xff000033 : 0x00ff0033; // line gradient colour at target texture
 
-		u32 colour;
+		uint32_t colour;
 
-		static u32 x1 = 0;
-		static u32 x2 = 0;
-		static u32 y1 = 0;
-		static u32 y2 = 0;
-		static u32 x3 = 0;
-		static u32 x4 = 0;
-		static u32 y3 = 0;
-		static u32 y4 = 0;
+		static uint32_t x1 = 0;
+		static uint32_t x2 = 0;
+		static uint32_t y1 = 0;
+		static uint32_t y2 = 0;
+		static uint32_t x3 = 0;
+		static uint32_t x4 = 0;
+		static uint32_t y3 = 0;
+		static uint32_t y4 = 0;
 
 		linecolourmid = (linecolourmid & 0xffffff00) | ((linecolourmid & 0xff) * (renderdata->colour & 0xff) >> 8);
 		linecolourfig = (linecolourfig & 0xffffff00) | ((linecolourfig & 0xff) * (renderdata->colour & 0xff) >> 8);
@@ -622,27 +621,27 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 
 		// Top left quarter of target
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 10) << 2) * g_ScaleX, (renderdata->y + 5) << 2,
-				((renderdata->x + 42) << 2) * g_ScaleX, (renderdata->y + 37) << 2,
-				G_TX_RENDERTILE, 16, 1024, 1024 / g_ScaleX, -1024);
+				((renderdata->x + 10) << 2), (renderdata->y + 5) << 2,
+				((renderdata->x + 42) << 2), (renderdata->y + 37) << 2,
+				G_TX_RENDERTILE, 16, 1024, 1024, -1024);
 
 		// Top right quarter of target
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 41) << 2) * g_ScaleX, (renderdata->y + 5) << 2,
-				((renderdata->x + 73) << 2) * g_ScaleX, (renderdata->y + 37) << 2,
-				G_TX_RENDERTILE, 16, 1024, -1024 / g_ScaleX, -1024);
+				((renderdata->x + 41) << 2), (renderdata->y + 5) << 2,
+				((renderdata->x + 73) << 2), (renderdata->y + 37) << 2,
+				G_TX_RENDERTILE, 16, 1024, -1024, -1024);
 
 		// Bottom left quarter of target
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 10) << 2) * g_ScaleX, (renderdata->y + 36) << 2,
-				((renderdata->x + 42) << 2) * g_ScaleX, (renderdata->y + 68) << 2,
-				G_TX_RENDERTILE, 16, 1024, 1024 / g_ScaleX, 1024);
+				((renderdata->x + 10) << 2), (renderdata->y + 36) << 2,
+				((renderdata->x + 42) << 2), (renderdata->y + 68) << 2,
+				G_TX_RENDERTILE, 16, 1024, 1024, 1024);
 
 		// Bottom right quarter of target
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 41) << 2) * g_ScaleX, (renderdata->y + 36) << 2,
-				((renderdata->x + 73) << 2) * g_ScaleX, (renderdata->y + 68) << 2,
-				G_TX_RENDERTILE, 16, 1024, -1024 / g_ScaleX, 1024);
+				((renderdata->x + 41) << 2), (renderdata->y + 36) << 2,
+				((renderdata->x + 73) << 2), (renderdata->y + 68) << 2,
+				G_TX_RENDERTILE, 16, 1024, -1024, 1024);
 
 		gdl = textSetPrimColour(gdl, ((failed ? 0xff000055 : 0x00ff0055) & 0xffffff00) | (((failed ? 0xff000055 : 0x00ff0055) & 0xff) * (renderdata->colour & 0xff) >> 8));
 		colour = ((failed ? 0xff6969aa : renderdata->colour) & 0xffffff00) | ((((failed ? 0xff6969aa : renderdata->colour) & 0xff) * (renderdata->colour & 0xff)) >> 8);
@@ -1443,12 +1442,12 @@ struct menudialogdef g_NowSafeMenuDialog = {
 
 MenuDialogHandlerResult ciCharacterProfileMenuDialog(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
-	u32 bodynum = ciGetChrBioBodynumBySlot(g_ChrBioSlot);
-	u32 mpbodynum = mpGetMpbodynumByBodynum(bodynum);
-	u32 mpheadnum = mpGetMpheadnumByMpbodynum(mpbodynum);
-	f32 x;
-	f32 y;
-	f32 scale;
+	uint32_t bodynum = ciGetChrBioBodynumBySlot(g_ChrBioSlot);
+	uint32_t mpbodynum = mpGetMpbodynumByBodynum(bodynum);
+	uint32_t mpheadnum = mpGetMpheadnumByMpbodynum(mpbodynum);
+	float x;
+	float y;
+	float scale;
 
 	x = -130;
 
@@ -1479,7 +1478,7 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(int operation, struct menud
 			scale = 0.8f;
 		}
 
-		x = (float)x * ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO) / videoGetAspect();
+		x = (float)x * ((float)SCREEN_WIDTH_LO / (float)SCREEN_HEIGHT_LO) / videoGetAspect();
 
 		menuConfigureModel(&g_Menus[g_MpPlayerNum].menumodel, x, y, 0, 0, 0, 0, scale,
 				MENUMODELFLAG_HASSCALE | MENUMODELFLAG_HASPOSITION | MENUMODELFLAG_HASROTATION, 1.0f);
@@ -1494,7 +1493,7 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(int operation, struct menud
 	case MENUOP_CLOSE:
 		break;
 	case MENUOP_TICK:
-		x = (float)x * ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO) / videoGetAspect();
+		x = (float)x * ((float)SCREEN_WIDTH_LO / (float)SCREEN_HEIGHT_LO) / videoGetAspect();
 		g_Menus[g_MpPlayerNum].menumodel.newposx = x;
 
 		if (bodynum == BODY_DRCAROLL) {
@@ -1532,7 +1531,7 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(int operation, struct menud
 		if (g_Menus[g_MpPlayerNum].menumodel.rottimer60 > 0) {
 			g_Menus[g_MpPlayerNum].menumodel.rottimer60 -= g_Vars.diffframe60;
 		} else {
-			f32 roty = g_Menus[g_MpPlayerNum].menumodel.curroty + 0.01f * g_Vars.diffframe60f;
+			float roty = g_Menus[g_MpPlayerNum].menumodel.curroty + 0.01f * g_Vars.diffframe60f;
 			g_Menus[g_MpPlayerNum].menumodel.newroty = roty;
 			g_Menus[g_MpPlayerNum].menumodel.curroty = roty;
 		}
@@ -1606,7 +1605,7 @@ MenuItemHandlerResult dtDeviceListMenuHandler(int operation, struct menuitem *it
 
 char *dtMenuTextName(struct menuitem *item)
 {
-	u32 weaponnum = dtGetWeaponByDeviceIndex(dtGetIndexBySlot(g_DtSlot));
+	uint32_t weaponnum = dtGetWeaponByDeviceIndex(dtGetIndexBySlot(g_DtSlot));
 
 	return bgunGetName(weaponnum);
 }
@@ -1617,7 +1616,7 @@ MenuItemHandlerResult menuhandlerDtOkOrResume(int operation, struct menuitem *it
 		// @bug: dtBegin() should not be called if training is already in
 		// progress. Doing this resets the training timer.
 		dtBegin();
-		func0f0f8120();
+		menuFinalizePlayerDataAndPopDialogs();
 	}
 
 	return 0;
@@ -1773,7 +1772,7 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(int operation, struct menudi
 	case MENUOP_OPEN:
 		{
 			int weaponnum = dtGetWeaponByDeviceIndex(dtGetIndexBySlot(g_DtSlot));
-			u16 unused[] = {64250, 38500, 25650, 25700, 12950};
+			uint16_t unused[] = {64250, 38500, 25650, 25700, 12950};
 			dtInit();
 			g_Menus[g_MpPlayerNum].training.weaponnum = weaponnum;
 			invMenuGetGunConfigs(weaponnum);
@@ -1791,7 +1790,7 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(int operation, struct menudi
 			g_Menus[g_MpPlayerNum].menumodel.curposx = 90;
 		}
 
-		g_Menus[g_MpPlayerNum].menumodel.newposx *= ((f32)SCREEN_WIDTH_LO / (f32)SCREEN_HEIGHT_LO) / videoGetAspect();
+		g_Menus[g_MpPlayerNum].menumodel.newposx *= ((float)SCREEN_WIDTH_LO / (float)SCREEN_HEIGHT_LO) / videoGetAspect();
 		g_Menus[g_MpPlayerNum].menumodel.curposx = g_Menus[g_MpPlayerNum].menumodel.newposx;
 
 		if (g_Menus[g_MpPlayerNum].curdialog && g_Menus[g_MpPlayerNum].curdialog->definition == dialogdef) {
@@ -1835,7 +1834,7 @@ char *dtMenuTextCancelOrAbort(struct menuitem *item)
 char *dtMenuTextTimeTakenValue(struct menuitem *item)
 {
 	struct trainingdata *data = dtGetData();
-	f32 secs = data->timetaken / 60.0f;
+	float secs = data->timetaken / 60.0f;
 
 	if (secs >= 60.0f) {
 		int mins = 0;
@@ -1900,7 +1899,7 @@ MenuItemHandlerResult menuhandler001a6a34(int operation, struct menuitem *item, 
 {
 	if (operation == MENUOP_SET) {
 		htBegin();
-		func0f0f8120();
+		menuFinalizePlayerDataAndPopDialogs();
 	}
 
 	return 0;
@@ -1953,7 +1952,7 @@ char *htMenuTextCancelOrAbort(struct menuitem *item)
 char *htMenuTextTimeTakenValue(struct menuitem *item)
 {
 	struct trainingdata *data = getHoloTrainingData();
-	f32 secs = data->timetaken / (PAL ? 50.0f : 60.0f);
+	float secs = data->timetaken / (PAL ? 50.0f : 60.0f);
 
 	if (secs >= 60.0f) {
 		int mins = 0;
@@ -2409,7 +2408,7 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 
 		if (index < NUM_BIO_LOCATIONS) {
 			// Location bio - render texture
-			u8 texturenums[] = { 0x1b, 0x0d, 0x0e, 0x10, 0x11, 0x12, 0x13, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1c, 0x1d };
+			uint8_t texturenums[] = { 0x1b, 0x0d, 0x0e, 0x10, 0x11, 0x12, 0x13, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1c, 0x1d };
 			int texturenum = texturenums[index];
 
 			gDPPipeSync(gdl++);
@@ -2425,9 +2424,9 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 			gDPSetTextureFilter(gdl++, G_TF_POINT);
 			gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 255) >> 8);
 			gSPTextureRectangle(gdl++,
-					((renderdata->x + 6) << 2) * g_ScaleX, (renderdata->y + 3) << 2,
-					((renderdata->x + 60) << 2) * g_ScaleX, (renderdata->y + 39) << 2,
-					G_TX_RENDERTILE, 0, 0x0480, 1024 / g_ScaleX, -1024);
+					((renderdata->x + 6) << 2), (renderdata->y + 3) << 2,
+					((renderdata->x + 60) << 2), (renderdata->y + 39) << 2,
+					G_TX_RENDERTILE, 0, 0x0480, 1024, -1024);
 
 			leftmargin = -1;
 		} else {
@@ -2472,9 +2471,9 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 }
 
 struct biovehicleitem {
-	u32 fileid;
+	uint32_t fileid;
 	int y_offset;
-	u16 size;
+	uint16_t size;
 };
 
 struct modelpartvisibility g_BioPartVisibility[] = {
@@ -2515,8 +2514,8 @@ MenuDialogHandlerResult ciHangarHolographMenuDialog(int operation, struct menudi
 		case MENUOP_TICK:
 			if (g_Menus[g_MpPlayerNum].curdialog) {
 				if (g_Menus[g_MpPlayerNum].curdialog->definition == dialogdef) {
-					f32 offset;
-					f32 size;
+					float offset;
+					float size;
 
 					index -= NUM_BIO_LOCATIONS;
 

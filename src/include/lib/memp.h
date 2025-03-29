@@ -4,14 +4,14 @@
 #include "data.h"
 #include "types.h"
 
-void mempSetHeap(u8 *heapstart, u32 heaplen);
-u32 mempGetStageFree(void);
+void mempSetHeap(uint8_t *heapstart, uint32_t heaplen);
+uint32_t mempGetStageFree(void);
 void *mempGetNextStageAllocation(void);
-void *mempAlloc(u32 len, u8 pool);
-s32 mempRealloc(void *allocation, s32 newsize, u8 poolnum);
-u32 mempGetPoolFree(u8 poolnum, u32 bank);
-void mempResetPool(u8 pool);
-void mempDisablePool(u8 pool);
-void *mempAllocFromRight(u32 len, u8 pool);
+void *mempAlloc(uint32_t len, uint8_t pool);
+int mempRealloc(void *allocation, int newsize, uint8_t poolnum);
+uint32_t mempGetPoolFree(uint8_t poolnum, uint32_t bank);
+void mempResetPool(uint8_t pool);
+void mempDisablePool(uint8_t pool);
+void *mempAllocFromRight(uint32_t len, uint8_t pool);
 
 #endif

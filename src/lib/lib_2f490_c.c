@@ -6,32 +6,32 @@
 #include "types.h"
 
 static bool implementation(
-		f32 f0, f32 f1, f32 f2,
-		f32 f12, f32 f13, f32 f14,
-		f32 f15, f32 f16, f32 f17,
+		float f0, float f1, float f2,
+		float f12, float f13, float f14,
+		float f15, float f16, float f17,
 		struct coord *arg3, struct coord *t0, struct coord *t1,
 		struct coord *t2, struct coord *t3, struct coord *t4)
 {
-	f32 f3;
-	f32 f4;
-	f32 f5;
-	f32 f6;
-	f32 f7;
-	f32 f8;
-	f32 f9;
-	f32 f10;
-	f32 f11;
-	f32 f18;
-	f32 f19;
-	f32 f20;
-	f32 f21;
-	f32 f22;
-	f32 f23;
-	f32 f24;
-	f32 f25;
-	f32 f26;
-	f32 f27;
-	f32 f28;
+	float f3;
+	float f4;
+	float f5;
+	float f6;
+	float f7;
+	float f8;
+	float f9;
+	float f10;
+	float f11;
+	float f18;
+	float f19;
+	float f20;
+	float f21;
+	float f22;
+	float f23;
+	float f24;
+	float f25;
+	float f26;
+	float f27;
+	float f28;
 
 	f3 = f12 - f0;
 	f4 = f13 - f1;

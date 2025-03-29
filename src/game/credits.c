@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/camera.h"
 #include "game/menuutils.h"
@@ -1533,8 +1533,6 @@ Gfx *creditsDraw(Gfx *gdl)
 	Mtxf *matrix = gfxAllocateMatrix();
 
 	static uint32_t scrolltimer240 = 0;
-
-	g_ScaleX = 1;
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 

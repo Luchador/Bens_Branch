@@ -43,7 +43,7 @@
 #include "input.h"
 #include "video.h"
 
-static void bgunProcessQuickDetonate(struct movedata *data, u32 c1buttons, u32 c1buttonsthisframe, u32 buttons1, u32 buttons2) {
+static void bgunProcessQuickDetonate(struct movedata *data, uint32_t c1buttons, uint32_t c1buttonsthisframe, uint32_t buttons1, uint32_t buttons2) {
 	if ((((c1buttons & (buttons1)) && (c1buttonsthisframe & (buttons2)))
 			|| ((c1buttons & (buttons2)) && (c1buttonsthisframe & (buttons1))))
 			&& bgunGetWeaponNum(HAND_RIGHT) == WEAPON_REMOTEMINE) {
@@ -60,9 +60,9 @@ static void bgunProcessQuickDetonate(struct movedata *data, u32 c1buttons, u32 c
 	}
 }
 
-static void bgunProcessInputAltButton(struct movedata *data, s8 contpad, s32 i)
+static void bgunProcessInputAltButton(struct movedata *data, int8_t contpad, int i)
 {
-	s32 buttons = joyGetButtonsOnSample(i, contpad, 0xffffffff);
+	int buttons = joyGetButtonsOnSample(i, contpad, 0xffffffff);
 	if (buttons & (BUTTON_ALTMODE)) {
 		if (g_Vars.currentplayer->altdowntime >= -1) {
 			if (buttons & (Z_TRIG)
@@ -93,7 +93,7 @@ static void bgunProcessInputAltButton(struct movedata *data, s8 contpad, s32 i)
 		// Released L
 		if (g_Vars.currentplayer->altdowntime != 0) {
 			const bool trigpressed = (g_Vars.currentplayer->altdowntime == -3);
-			s32 result = bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, trigpressed, false, true);
+			int result = bgunConsiderToggleGunFunction(g_Vars.currentplayer->altdowntime, trigpressed, false, true);
 			if (result == USETIMER_STOP) {
 				g_Vars.currentplayer->altdowntime = -1;
 			} else if (result == USETIMER_REPEAT) {
@@ -107,7 +107,7 @@ static void bgunProcessInputAltButton(struct movedata *data, s8 contpad, s32 i)
 
 #endif // PLATFORM_N64
 
-void bmoveSetControlDef(u32 controldef)
+void bmoveSetControlDef(uint32_t controldef)
 {
 	g_Vars.currentplayer->controldef = controldef;
 }
@@ -162,7 +162,7 @@ bool bmoveIsInSightAimMode(void)
 	return g_Vars.currentplayer->insightaimmode;
 }
 
-void bmoveUpdateAutoAimYProp(struct prop *prop, f32 autoaimy)
+void bmoveUpdateAutoAimYProp(struct prop *prop, float autoaimy)
 {
 	if (g_Vars.currentplayer->autoyaimtime60 >= 0) {
 		g_Vars.currentplayer->autoyaimtime60 -= g_Vars.lvupdate60;
@@ -215,7 +215,7 @@ bool bmoveIsAutoAimXEnabledForCurrentWeapon(void)
 	return bmoveIsAutoAimXEnabled();
 }
 
-void bmoveUpdateAutoAimXProp(struct prop *prop, f32 autoaimx)
+void bmoveUpdateAutoAimXProp(struct prop *prop, float autoaimx)
 {
 	if (g_Vars.currentplayer->autoxaimtime60 >= 0) {
 		g_Vars.currentplayer->autoxaimtime60 -= g_Vars.lvupdate60;
@@ -261,7 +261,7 @@ void bmoveGrabProp(struct prop *prop)
 	}
 }
 
-void bmoveSetMode(u32 movemode)
+void bmoveSetMode(uint32_t movemode)
 {
 	if (g_Vars.currentplayer->bondmovemode == MOVEMODE_GRAB) {
 		bgrabExit();
@@ -280,10 +280,10 @@ void bmoveSetMode(u32 movemode)
 	}
 }
 
-void bmoveSetModeForAllPlayers(u32 movemode)
+void bmoveSetModeForAllPlayers(uint32_t movemode)
 {
-	u32 prevplayernum = g_Vars.currentplayernum;
-	s32 i;
+	uint32_t prevplayernum = g_Vars.currentplayernum;
+	int i;
 
 	for (i = 0; i < PLAYERCOUNT(); i++) {
 		setCurrentPlayerNum(i);
@@ -325,7 +325,7 @@ void bmoveUpdateSpeedTheta(void)
 	}
 }
 
-f32 bmoveGetSpeedVertaLimit(f32 value)
+float bmoveGetSpeedVertaLimit(float value)
 {
 	if (value > 0) {
 		return (viGetFovY() * value * -0.7f) / 60.0f;
@@ -338,10 +338,10 @@ f32 bmoveGetSpeedVertaLimit(f32 value)
 	return 0;
 }
 
-void bmoveUpdateSpeedVerta(f32 value)
+void bmoveUpdateSpeedVerta(float value)
 {
-	f32 mult = viGetFovY() / 60.0f;
-	f32 limit = bmoveGetSpeedVertaLimit(value);
+	float mult = viGetFovY() / 60.0f;
+	float limit = bmoveGetSpeedVertaLimit(value);
 
 	if (value > 0) {
 		if (g_Vars.currentplayer->speedverta > 0) {
@@ -380,7 +380,7 @@ void bmoveUpdateSpeedVerta(f32 value)
 	}
 }
 
-f32 bmoveGetSpeedThetaControlLimit(f32 value)
+float bmoveGetSpeedThetaControlLimit(float value)
 {
 	if (value > 0) {
 		return (viGetFovY() * value * -0.7f) / 60.0f;
@@ -393,10 +393,10 @@ f32 bmoveGetSpeedThetaControlLimit(f32 value)
 	return 0;
 }
 
-void bmoveUpdateSpeedThetaControl(f32 value)
+void bmoveUpdateSpeedThetaControl(float value)
 {
-	f32 mult = viGetFovY() / 60.0f;
-	f32 limit = bmoveGetSpeedThetaControlLimit(value);
+	float mult = viGetFovY() / 60.0f;
+	float limit = bmoveGetSpeedThetaControlLimit(value);
 
 	if (value > 0) {
 		if (g_Vars.currentplayer->speedthetacontrol > 0) {
@@ -443,40 +443,34 @@ void bmoveUpdateSpeedThetaControl(f32 value)
  * 0 = horizontal
  * -90 = straight down
  */
-f32 bmoveCalculateLookahead(void)
+float bmoveCalculateLookahead(void)
 {
-	f32 result = -4.0f;
-	f32 sp160 = 400.0f;
-	f32 ground = g_Vars.currentplayer->vv_ground;
+	float result = -4.0f;
+	float sp160 = 400.0f;
+	float ground = g_Vars.currentplayer->vv_ground;
 	struct coord sp150;
-	f32 ymax;
-	f32 ymin;
-	f32 radius;
-	u32 stack2;
-	f32 angles[5];
+	float ymax;
+	float ymin;
+	float radius;
+	float angles[5];
 	bool populated[5];
-	s32 numpopulated = 0;
-	u16 flags = 0;
-	u32 stack3;
+	int numpopulated = 0;
+	uint16_t flags = 0;
 	struct coord sp100;
-	u32 stack;
 	struct coord spf0;
 	RoomNum spe0[8];
-	s32 i;
-	f32 angle;
-	f32 value;
-	u32 stack4;
-	u32 stack5;
-	u32 stack6;
+	int i;
+	float angle;
+	float value;
 	struct coord spbc;
 	struct coord spb0;
 	RoomNum spa0[8];
 	RoomNum sp90[8];
 	RoomNum sp80[8];
-	s32 j;
-	f32 sp78;
-	s32 indextoremove;
-	f32 angletoremove;
+	int j;
+	float sp78;
+	int indextoremove;
+	float angletoremove;
 
 	if (g_Vars.currentplayer->inlift) {
 		return result;
@@ -662,56 +656,55 @@ void bmoveResetMoveData(struct movedata *data)
 void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool ignorec2)
 {
 	struct movedata movedata;
-	s32 controlmode;
-	s32 weaponnum;
+	int controlmode;
+	int weaponnum;
 	bool canmanualzoom;
-	s32 result;
-	u32 c1buttons;
-	u32 c1buttonsthisframe;
-	u32 c1allowedbuttons;
-	u32 c1inhibitedbuttons;
-	u32 aimonhist[20];
-	u32 aimoffhist[20];
-	s32 numsamples;
-	f32 tmp;
-	f32 fVar25;
-	s8 shootpad;
-	s8 aimpad;
-	u32 aimallowedbuttons;
-	u32 shootallowedbuttons;
-	s8 c2stickx;
-	u32 c2buttons;
-	u32 c2buttonsthisframe;
-	s32 i;
-	s32 tmpc2sticky;
-	u32 c2allowedbuttons;
-	s32 tmpc2stickx;
-	s32 c2sticky;
-	u32 shootbuttons;
-	u32 aimbuttons;
-	u32 invbuttons;
+	int result;
+	uint32_t c1buttons;
+	uint32_t c1buttonsthisframe;
+	uint32_t c1allowedbuttons;
+	uint32_t c1inhibitedbuttons;
+	uint32_t aimonhist[20];
+	uint32_t aimoffhist[20];
+	int numsamples;
+	float tmp;
+	float fVar25;
+	int8_t shootpad;
+	int8_t aimpad;
+	uint32_t aimallowedbuttons;
+	uint32_t shootallowedbuttons;
+	int8_t c2stickx;
+	uint32_t c2buttons;
+	uint32_t c2buttonsthisframe;
+	int i;
+	int tmpc2sticky;
+	uint32_t c2allowedbuttons;
+	int tmpc2stickx;
+	int c2sticky;
+	uint32_t shootbuttons;
+	uint32_t aimbuttons;
+	uint32_t invbuttons;
 	bool zoomout;
 	bool zoomin;
-	f32 increment;
-	f32 savedverta;
-	f32 noiseradius;
-	f32 zoomfov;
-	f32 eraserfov;
+	float increment;
+	float savedverta;
+	float noiseradius;
+	float zoomfov;
+	float eraserfov;
 	struct coord spa0;
-	f32 crosspos[2];
-	f32 lookahead;
-	s8 contpad1;
-	s8 contpad2;
-	s8 c1stickx;
-	s8 c1sticky;
-	u32 inhibitedbuttons;
+	float crosspos[2];
+	float lookahead;
+	int8_t contpad1;
+	int8_t contpad2;
+	int8_t c1stickx;
+	int8_t c1sticky;
+	uint32_t inhibitedbuttons;
 	bool offbike;
 	bool cancycleweapons;
-	u32 stack;
-	f32 increment2;
-	f32 newverta;
+	float increment2;
+	float newverta;
 #ifndef PLATFORM_N64
-	const f32 mlookscale = g_Vars.lvupdate240 ? (4.f / (f32)g_Vars.lvupdate240) : 4.f;
+	const float mlookscale = g_Vars.lvupdate240 ? (4.f / (float)g_Vars.lvupdate240) : 4.f;
 	const bool allowmlook = (g_Vars.currentplayernum == 0) && (allowc1x || allowc1y);
 	bool allowmcross = false;
 #endif
@@ -724,8 +717,8 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 	c1stickx = allowc1x ? joyGetStickX(contpad1) : 0;
 	c1sticky = allowc1y ? joyGetStickY(contpad1) : 0;
 #ifndef PLATFORM_N64
-	c2stickx = allowc1x ? (s8) joyGetRStickX(contpad1) : 0;
-	c2sticky = allowc1y ? (s8) joyGetRStickY(contpad1) : 0;
+	c2stickx = allowc1x ? (int8_t) joyGetRStickX(contpad1) : 0;
+	c2sticky = allowc1y ? (int8_t) joyGetRStickY(contpad1) : 0;
 #endif
 
 	c1buttons = allowc1buttons ? joyGetButtons(contpad1, 0xffffffff) : 0;
@@ -819,8 +812,8 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 				// 2.2: ctrl1 stick = look,      z = fire, ctrl2 stick = walk/strafe, z = aim
 				// 2.3: ctrl1 stick = walk/turn, z = aim,  ctrl2 stick = look/strafe, z = fire
 				// 2.4: ctrl1 stick = look,      z = aim,  ctrl2 stick = walk/strafe, z = fire
-				contpad2 = (s8) optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
-				c2stickx = (s8) joyGetStickX(contpad2);
+				contpad2 = (int8_t) optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
+				c2stickx = (int8_t) joyGetStickX(contpad2);
 				c2sticky = (joyGetStickY(contpad2) << 24) >> 24;
 				c2buttons = joyGetButtons(contpad2, 0xffffffff);
 				c2buttonsthisframe = joyGetButtonsPressedThisFrame(contpad2, 0xffffffff);
@@ -1266,7 +1259,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 					movedata.canautoaim = !g_Vars.currentplayer->insightaimmode;
 
 					// On N64 control schemes the d-pad does the same thing as the C buttons
-					u32 slmask, srmask, sumask, sdmask;
+					uint32_t slmask, srmask, sumask, sdmask;
 					if (controlmode == CONTROLMODE_PC) {
 						sumask = U_CBUTTONS;
 						sdmask = D_CBUTTONS;
@@ -1420,7 +1413,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							movedata.aimturnleftspeed = (g_Vars.currentplayer->swivelpos[0] - -0.9f) / -0.1f;
 							movedata.aimturnrightspeed = 0.f;
 						}
-						f32 vertaup = 0.f, vertadown = 0.f;
+						float vertaup = 0.f, vertadown = 0.f;
 						if (g_Vars.currentplayer->swivelpos[1] > 0.9f) {
 							vertaup = (g_Vars.currentplayer->swivelpos[1] - 0.9f) / 0.1f;
 						} else if (g_Vars.currentplayer->swivelpos[1] < -0.9f) {
@@ -1495,7 +1488,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 					}
 
 					// Handle B and use-like button
-					const u32 usemask = (controlmode == CONTROLMODE_PC) ?
+					const uint32_t usemask = (controlmode == CONTROLMODE_PC) ?
 						(B_BUTTON | BUTTON_CANCEL_USE | BUTTON_ACCEPT_USE) :
 						B_BUTTON;
 					if (allowc1buttons) {
@@ -1512,7 +1505,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 									if (g_Vars.currentplayer->usedowntime >= 0) {
 										if (g_Vars.currentplayer->usedowntime > TICKS(25)) {
-											s32 result = (controlmode == CONTROLMODE_PC) ?
+											int result = (controlmode == CONTROLMODE_PC) ?
 												USETIMER_CONTINUE :
 												bgunConsiderToggleGunFunction(g_Vars.currentplayer->usedowntime, false, false, 0);
 											if (result == USETIMER_STOP) {
@@ -1582,10 +1575,10 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						}
 
 						// Handle xbla-style crouch cycling
-						const s32 oldcrouchpos = g_Vars.currentplayer->crouchpos;
+						const int oldcrouchpos = g_Vars.currentplayer->crouchpos;
 						for (i = 0; i < numsamples; i++) {
 							// handle 1964GEPD style crouch setting
-							s32 crouchsample;
+							int crouchsample;
 							if (PLAYER_EXTCFG().crouchmode & CROUCHMODE_TOGGLE) {
 								// press to toggle crouch position
 								crouchsample = joyGetButtonsPressedOnSample(i, contpad1, 0xffffffff) & BUTTON_CROUCH_CYCLE;
@@ -1810,7 +1803,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 	g_Vars.currentplayer->bondactivateorreload = 0;
 
-	s32 usereloads = (controlmode != CONTROLMODE_PC);
+	int usereloads = (controlmode != CONTROLMODE_PC);
 #ifndef PLATFORM_N64
 	usereloads = usereloads || PLAYER_EXTCFG().usereloads;
 	if (controlmode == CONTROLMODE_PC && movedata.alt1tapcount) {
@@ -2130,8 +2123,8 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 	if (g_Vars.currentplayer->unk1c64) {
 		g_Vars.currentplayer->unk1c64 = 0;
 	} else if (movedata.canswivelgun) {
-		f32 x;
-		f32 y;
+		float x;
+		float y;
 
 		bgunSetAimType(0);
 
@@ -2145,7 +2138,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 				)
 				|| (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_CMP150 && g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY)) {
 			// Auto aim - move crosshair towards target
-			s32 followlockon = false;
+			int followlockon = false;
 
 			if (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_CMP150
 					&& g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY) {
@@ -2183,7 +2176,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 			x = g_Vars.currentplayer->speedtheta * 0.3f + g_Vars.currentplayer->gunextraaimx;
 			y = -g_Vars.currentplayer->speedverta * 0.1f + g_Vars.currentplayer->gunextraaimy;
 #else
-			f32 xscale, yscale;
+			float xscale, yscale;
 			if (movedata.freelookdx || movedata.freelookdy) {
 				xscale = PLAYER_EXTCFG().crosshairsway * 0.20f;
 				yscale = PLAYER_EXTCFG().crosshairsway * 0.30f;
@@ -2203,12 +2196,12 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 #ifndef PLATFORM_N64
 		if (allowmcross) {
 			// joystick is inactive, move crosshair using the mouse
-			const f32 xcoeff = 320.f / 1080.f;
-			const f32 ycoeff = 240.f / 1080.f;
-			const f32 xscale = (PLAYER_EXTCFG().mouseaimspeedx * xcoeff) / g_Vars.currentplayer->aspect;
-			const f32 yscale = PLAYER_EXTCFG().mouseaimspeedy * ycoeff;
-			f32 x = g_Vars.currentplayer->swivelpos[0] + movedata.freelookdx * xscale;
-			f32 y = g_Vars.currentplayer->swivelpos[1] + movedata.freelookdy * yscale;
+			const float xcoeff = 320.f / 1080.f;
+			const float ycoeff = 240.f / 1080.f;
+			const float xscale = (PLAYER_EXTCFG().mouseaimspeedx * xcoeff) / g_Vars.currentplayer->aspect;
+			const float yscale = PLAYER_EXTCFG().mouseaimspeedy * ycoeff;
+			float x = g_Vars.currentplayer->swivelpos[0] + movedata.freelookdx * xscale;
+			float y = g_Vars.currentplayer->swivelpos[1] + movedata.freelookdy * yscale;
 			x = (x < -1.f) ? -1.f : ((x > 1.f) ? 1.f : x);
 			y = (y < -1.f) ? -1.f : ((y > 1.f) ? 1.f : y);
 			g_Vars.currentplayer->swivelpos[0] = x;
@@ -2225,8 +2218,8 @@ void bmoveFindEnteredRoomsByPos(struct player *player, struct coord *mid, RoomNu
 {
 	struct coord bbmin;
 	struct coord bbmax;
-	f32 eyeheight = g_Vars.players[playermgrGetPlayerNumByProp(player->prop)]->vv_eyeheight;
-	f32 headheight = g_Vars.players[playermgrGetPlayerNumByProp(player->prop)]->vv_headheight;
+	float eyeheight = g_Vars.players[playermgrGetPlayerNumByProp(player->prop)]->vv_eyeheight;
+	float headheight = g_Vars.players[playermgrGetPlayerNumByProp(player->prop)]->vv_headheight;
 
 	bbmin.x = mid->x - 50;
 	bbmin.y = mid->y - player->crouchheight - eyeheight - 10;
@@ -2254,8 +2247,8 @@ void bmoveUpdateRooms(struct player *player)
 void bmove0f0cb904(struct coord *arg0)
 {
 	if (arg0->f[0] || arg0->f[2]) {
-		f32 hypotenuse = sqrtf(arg0->f[0] * arg0->f[0] + arg0->f[2] * arg0->f[2]);
-		s32 i;
+		float hypotenuse = sqrtf(arg0->f[0] * arg0->f[0] + arg0->f[2] * arg0->f[2]);
+		int i;
 
 		if (hypotenuse > 1.5f) {
 			arg0->x *= 1.5f / hypotenuse;
@@ -2287,7 +2280,7 @@ void bmove0f0cb904(struct coord *arg0)
 	}
 }
 
-void bmove0f0cba88(f32 *a, f32 *b, struct coord *c, f32 mult1, f32 mult2)
+void bmove0f0cba88(float *a, float *b, struct coord *c, float mult1, float mult2)
 {
 	if (c->x != 0 || c->z != 0) {
 		bmove0f0cb904(c);
@@ -2323,12 +2316,12 @@ void bmoveUpdateMoveInitSpeed(struct coord *newpos)
 void bmoveTick(bool allowc1x, bool allowc1y, bool allowc1buttons, bool ignorec2)
 {
 	struct chrdata *chr;
-	u8 foot;
-	s32 sound;
-	f32 xdiff;
-	f32 ydiff;
-	f32 zdiff;
-	f32 distance;
+	uint8_t foot;
+	int sound;
+	float xdiff;
+	float ydiff;
+	float zdiff;
+	float distance;
 
 	bmoveProcessInput(allowc1x, allowc1y, allowc1buttons, ignorec2);
 
@@ -2426,8 +2419,8 @@ void bmoveUpdateVerta(void)
 
 void bmove0f0cc19c(struct coord *arg)
 {
-	f32 min;
-	f32 mult;
+	float min;
+	float mult;
 
 	g_Vars.currentplayer->bond2.unk10.x = arg->x;
 	g_Vars.currentplayer->bond2.unk10.y = arg->y;
@@ -2478,14 +2471,14 @@ void bmove0f0cc19c(struct coord *arg)
 #endif
 }
 
-void bmoveUpdateHead(f32 arg0, f32 arg1, f32 arg2, Mtxf *arg3, f32 arg4)
+void bmoveUpdateHead(float arg0, float arg1, float arg2, Mtxf *arg3, float arg4)
 {
-	f32 sp244 = 0;
+	float sp244 = 0;
 	Mtxf sp180;
 	Mtxf sp116;
-	f32 sp100[4];
-	f32 sp84[4];
-	f32 sp68[4];
+	float sp100[4];
+	float sp84[4];
+	float sp68[4];
 
 	if (g_Vars.currentplayer->isdead == false) {
 		bheadAdjustAnimation(arg0);
@@ -2535,19 +2528,19 @@ void bmoveUpdateHead(f32 arg0, f32 arg1, f32 arg2, Mtxf *arg3, f32 arg4)
 	g_Vars.currentplayer->bond2.unk28.z = sp180.m[1][2];
 }
 
-void bmove0f0cc654(f32 arg0, f32 arg1, f32 arg2)
+void bmove0f0cc654(float arg0, float arg1, float arg2)
 {
 	bmoveUpdateHead(arg0, arg1, arg2, NULL, 0);
 }
 
-s32 bmoveGetCrouchPos(void)
+int bmoveGetCrouchPos(void)
 {
 	return (g_Vars.currentplayer->crouchpos < g_Vars.currentplayer->autocrouchpos)
 		? g_Vars.currentplayer->crouchpos
 		: g_Vars.currentplayer->autocrouchpos;
 }
 
-s32 bmoveGetCrouchPosByPlayer(s32 playernum)
+int bmoveGetCrouchPosByPlayer(int playernum)
 {
 	return (g_Vars.players[playernum]->crouchpos < g_Vars.players[playernum]->autocrouchpos)
 		? g_Vars.players[playernum]->crouchpos

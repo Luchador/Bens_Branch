@@ -1,19 +1,19 @@
 #ifndef _IN_MOD_H
 #define _IN_MOD_H
 
-#include <PR/ultratypes.h>
+#include <stdint.h>
 
 #define MOD_CONFIG_FNAME "modconfig.txt"
 
 struct animtableentry;
 
-s32 modConfigLoad(const char *path);
+int modConfigLoad(const char *path);
 
-s32 modTextureLoad(u16 num, void *dst, u32 dstSize);
+int modTextureLoad(uint16_t num, void *dst, uint32_t dstSize);
 
-s32 modAnimationLoadDescriptor(u16 num, struct animtableentry *anim);
-void *modAnimationLoadData(u16 num);
+int modAnimationLoadDescriptor(uint16_t num, struct animtableentry *anim);
+void *modAnimationLoadData(uint16_t num);
 
-void *modSequenceLoad(u16 num, u32 *outSize);
+void *modSequenceLoad(uint16_t num, uint32_t *outSize);
 
 #endif

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/bondgrab.h"
 #include "game/bondmove.h"
@@ -11,6 +12,7 @@
 #include "game/player.h"
 #include "game/bondhead.h"
 #include "game/propobj.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/mtx.h"
 #include "lib/anim.h"
@@ -19,11 +21,7 @@
 #include "types.h"
 
 struct prop *var8009de70;
-u32 var8009de74;
 struct coord var8009de78;
-u32 var8009de84;
-u32 var8009de88;
-u32 var8009de8c;
 
 bool var80070e80 = false;
 
@@ -191,7 +189,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 			spc8.z = spb0.x - spa4.x;
 
 			if (spc8.f[0] != 0.0f || spc8.f[2] != 0.0f) {
-				guNormalize(&spc8.x, &spc8.y, &spc8.z);
+				utilsNormalizeF(&spc8.x, &spc8.y, &spc8.z);
 			} else {
 				spc8.z = 1.0f;
 			}
@@ -235,7 +233,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 			sp80.z = delta->z;
 
 			if (sp80.f[0] != 0.0f || sp80.f[2] != 0.0f) {
-				guNormalize(&sp80.x, &sp80.y, &sp80.z);
+				utilsNormalizeF(&sp80.x, &sp80.y, &sp80.z);
 			} else {
 				sp80.z = 1.0f;
 			}
@@ -325,7 +323,7 @@ int bgrabCalculateNewPosition(struct coord *delta, float angle, bool arg2)
 	struct hov *hov;
 	struct coord sp88;
 
-	var80070e80 = 0;
+	var80070e80 = false;
 
 	playerGetBbox(g_Vars.currentplayer->prop, &radius, &ymax, &ymin);
 
@@ -653,7 +651,7 @@ bool bgrab0f0cdb68(float angle)
 			if (f0 < 0.0f) {
 				sp60 = -f0;
 			}
-		} else if (var80070e80 != 0) {
+		} else if (var80070e80) {
 			if (g_Vars.currentplayer->grabbedprop->type == PROPTYPE_OBJ) {
 				if (g_Vars.currentplayer->grabbedprop->obj->flags3 & OBJFLAG3_GEOCYL) {
 					objGetBbox(g_Vars.currentplayer->grabbedprop, &radius, &ymax, &ymin);

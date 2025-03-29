@@ -5,7 +5,7 @@
 
 #define N_EQPOWER_LENGTH 128
 
-s16 n_eqpower[] = {
+int16_t n_eqpower[] = {
 	0x7fff, 0x7ffc, 0x7ff5, 0x7fe8, 0x7fd7, 0x7fc0, 0x7fa5, 0x7f84,
 	0x7f5f, 0x7f34, 0x7f05, 0x7ed0, 0x7e97, 0x7e58, 0x7e15, 0x7dcd,
 	0x7d7f, 0x7d2d, 0x7cd6, 0x7c7a, 0x7c1a, 0x7bb4, 0x7b49, 0x7ada,
@@ -24,20 +24,20 @@ s16 n_eqpower[] = {
 	0x0b11, 0x097d, 0x07e9, 0x0654, 0x04c0, 0x032a, 0x0195, 0x0000,
 };
 
-Acmd *_pullSubFrame(N_PVoice *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p);
+Acmd *_pullSubFrame(N_PVoice *filter, int16_t *inp, int16_t *outp, int outCount, Acmd *p);
 
-Acmd *n_alEnvmixerPull(N_PVoice *filter, s32 sampleOffset, Acmd *p)
+Acmd *n_alEnvmixerPull(N_PVoice *filter, int sampleOffset, Acmd *p)
 {
 	Acmd     *ptr = p;
 	N_PVoice *e = (N_PVoice *)filter;
-	s16      inp;
-	s32      lastOffset;
-	s32      thisOffset = sampleOffset;
-	s32      samples;
-	s16      loutp = 0;
-	s32      fVol;
+	int16_t      inp;
+	int      lastOffset;
+	int      thisOffset = sampleOffset;
+	int      samples;
+	int16_t      loutp = 0;
+	int      fVol;
 	ALParam  *thisParam;
-	s32      outCount = FIXED_SAMPLE;
+	int      outCount = FIXED_SAMPLE;
 
 	/*
 	 * Force the input to be the resampler output
@@ -62,7 +62,7 @@ Acmd *n_alEnvmixerPull(N_PVoice *filter, s32 sampleOffset, Acmd *p)
 		case (AL_FILTER_START_VOICE_ALT):
 			{
 				ALStartParamAlt *param = (ALStartParamAlt *)e->em_ctrlList;
-				s32 tmp;
+				int tmp;
 
 				if (param->unity) {
 					e->rs_upitch = 1;
@@ -154,11 +154,11 @@ Acmd *n_alEnvmixerPull(N_PVoice *filter, s32 sampleOffset, Acmd *p)
 				 * segment rate and target
 				 */
 				if (N_SpeakerType.headphone) {
-					e->em_pan = ((s16)e->em_ctrlList->data.i >> 1) + 32;
+					e->em_pan = ((int16_t)e->em_ctrlList->data.i >> 1) + 32;
 				} else if (N_SpeakerType.mono) {
 					e->em_pan = 64;
 				} else {
-					e->em_pan = (s16) e->em_ctrlList->data.i;
+					e->em_pan = (int16_t) e->em_ctrlList->data.i;
 				}
 			}
 
@@ -175,7 +175,7 @@ Acmd *n_alEnvmixerPull(N_PVoice *filter, s32 sampleOffset, Acmd *p)
 				fVol = (e->em_ctrlList->data.i);
 				fVol = (fVol + fVol) / 2;
 
-				e->em_volume = (s16) fVol;
+				e->em_volume = (int16_t) fVol;
 				e->em_segEnd = SAMPLE184(e->em_ctrlList->moredata.i);
 			}
 
@@ -284,7 +284,7 @@ Acmd *n_alEnvmixerPull(N_PVoice *filter, s32 sampleOffset, Acmd *p)
 	return ptr;
 }
 
-s32 n_alEnvmixerParam(N_PVoice *filter, s32 paramID, void *param)
+int n_alEnvmixerParam(N_PVoice *filter, int paramID, void *param)
 {
 	N_PVoice *e = filter;
 
@@ -320,7 +320,7 @@ s32 n_alEnvmixerParam(N_PVoice *filter, s32 paramID, void *param)
 	return 0;
 }
 
-Acmd *_pullSubFrame(N_PVoice *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p)
+Acmd *_pullSubFrame(N_PVoice *filter, int16_t *inp, int16_t *outp, int outCount, Acmd *p)
 {
 	Acmd *ptr = p;
 	N_PVoice *e = filter;
@@ -368,13 +368,13 @@ Acmd *_pullSubFrame(N_PVoice *filter, s16 *inp, s16 *outp, s32 outCount, Acmd *p
 	return ptr;
 }
 
-s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel)
+int16_t _getRate(float vol, float tgt, int count, uint16_t *ratel)
 {
-	s16 s;
-	s16 tmp;
-	f32 invn;
-	f32 a;
-	f32 f;
+	int16_t s;
+	int16_t tmp;
+	float invn;
+	float a;
+	float f;
 
 	if (count == 0) {
 		if (tgt >= vol) {
@@ -386,7 +386,7 @@ s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel)
 		}
 	}
 
-	invn = 1 / (f32) count;
+	invn = 1 / (float) count;
 
 	if (tgt < 1) {
 		tgt = 1;
@@ -412,9 +412,9 @@ s16 _getRate(f32 vol, f32 tgt, s32 count, u16 *ratel)
 	return s;
 }
 
-s16 _getVol(s16 ivol, s32 samples, s16 ratem, u16 ratel)
+int16_t _getVol(int16_t ivol, int samples, int16_t ratem, uint16_t ratel)
 {
-	s32 sp4;
+	int sp4;
 
 	/*
 	 * Rate values are actually rate^8

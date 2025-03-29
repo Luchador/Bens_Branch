@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "bss.h"
 #include "data.h"
@@ -89,33 +90,33 @@
 #include "video.h"
 
 struct sndstate *g_MiscSfxAudioHandles[3];
-s32 g_MiscSfxActiveTypes[3];
+int g_MiscSfxActiveTypes[3];
 
-u32 g_LvlIsPausedMP = 0;
+uint32_t g_LvlIsPausedMP = 0;
 bool g_IsLvlPaused = false;
 
-s32 g_Difficulty = DIFF_A;
+int g_Difficulty = DIFF_A;
 
-s32 g_StageTimeElapsed60 = 0;
-s32 g_MpTimeLimit60 = SECSTOTIME60(60 * 10); // 10 minutes
-s32 g_MpScoreLimit = 10;
-s32 g_MpTeamScoreLimit = 20;
+int g_StageTimeElapsed60 = 0;
+int g_MpTimeLimit60 = SECSTOTIME60(60 * 10); // 10 minutes
+int g_MpScoreLimit = 10;
+int g_MpTeamScoreLimit = 20;
 struct sndstate *g_MiscAudioHandle = NULL;
-s32 g_NumReasonsToEndMpMatch = 0;
-f32 g_StageTimeElapsed1f = 0;
+int g_NumReasonsToEndMpMatch = 0;
+float g_StageTimeElapsed1f = 0;
 
-u32 g_MiscSfxSounds[] = {
+uint32_t g_MiscSfxSounds[] = {
 	SFX_HEARTBEAT,
 	SFX_SLAYER_WHIR,
 	SFX_SLAYER_BEEP,
 };
 
-s32 g_LockScreenTimer = 0;
-s16 g_FadeNumFrames = 0;
-f32 g_FadeFrac = -1;
-u32 g_FadePrevColour = 0;
-u32 g_FadeColour = 0;
-s16 g_FadeDelay = 0;
+int g_LockScreenTimer = 0;
+int16_t g_FadeNumFrames = 0;
+float g_FadeFrac = -1;
+uint32_t g_FadePrevColour = 0;
+uint32_t g_FadeColour = 0;
+int16_t g_FadeDelay = 0;
 
 void lvInit(void)
 {
@@ -125,7 +126,7 @@ void lvInit(void)
 
 void lvResetMiscSfx(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i != ARRAYCOUNT(g_MiscSfxAudioHandles); i++) {
 		g_MiscSfxAudioHandles[i] = NULL;
@@ -133,9 +134,9 @@ void lvResetMiscSfx(void)
 	}
 }
 
-s32 lvGetMiscSfxIndex(u32 type)
+int lvGetMiscSfxIndex(uint32_t type)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i != ARRAYCOUNT(g_MiscSfxActiveTypes); i++) {
 		if (g_MiscSfxActiveTypes[i] == type) {
@@ -146,11 +147,11 @@ s32 lvGetMiscSfxIndex(u32 type)
 	return -1;
 }
 
-void lvSetMiscSfxState(u32 type, bool play)
+void lvSetMiscSfxState(uint32_t type, bool play)
 {
 	if (play) {
 		if (lvGetMiscSfxIndex(type) == -1) {
-			s32 index = lvGetMiscSfxIndex(-1);
+			int index = lvGetMiscSfxIndex(-1);
 
 			if (index != -1 && g_MiscSfxAudioHandles[index] == NULL)
 			{
@@ -159,7 +160,7 @@ void lvSetMiscSfxState(u32 type, bool play)
 			}
 		}
 	} else {
-		s32 index = lvGetMiscSfxIndex(type);
+		int index = lvGetMiscSfxIndex(type);
 
 		if (index != -1) {
 			audioStop(g_MiscSfxAudioHandles[index]);
@@ -170,7 +171,7 @@ void lvSetMiscSfxState(u32 type, bool play)
 
 void lvUpdateMiscSfx(void)
 {
-	s32 i;
+	int i;
 
 	if (g_Vars.lvupdate240 == 0) {
 		for (i = 0; i != ARRAYCOUNT(g_MiscSfxActiveTypes); i++) {
@@ -201,7 +202,7 @@ void lvUpdateMiscSfx(void)
 	}
 }
 
-void lvReset(s32 stagenum)
+void lvReset(int stagenum)
 {
 	lvFadeReset();
 	
@@ -259,8 +260,8 @@ void lvReset(s32 stagenum)
 	if (stagenum == STAGE_TITLE) {
 		titleReset();
 	} else {
-		s32 i;
-		s32 j;
+		int i;
+		int j;
 
 		tilesReset();
 		bgReset(g_Vars.stagenum);
@@ -350,7 +351,7 @@ void lvReset(s32 stagenum)
 	} else if (stagenum == STAGE_CREDITS) {
 		creditsReset();
 	} else {
-		s32 i;
+		int i;
 
 		casingsReset();
 
@@ -394,7 +395,7 @@ void lvReset(s32 stagenum)
 	lvSetPaused(0);
 }
 
-void lvConfigureFade(u32 color, s16 num_frames)
+void lvConfigureFade(uint32_t color, int16_t num_frames)
 {
 	g_FadeNumFrames = num_frames;
 	g_FadePrevColour = g_FadeColour;
@@ -412,8 +413,8 @@ void lvConfigureFade(u32 color, s16 num_frames)
 
 Gfx *lvRenderFade(Gfx *gdl)
 {
-	u32 colour = g_FadeColour;
-	u32 inset = 0;
+	uint32_t colour = g_FadeColour;
+	uint32_t inset = 0;
 
 	if (g_FadeFrac >= 0) {
 		if (g_FadeDelay > 0) {
@@ -467,12 +468,12 @@ void lvFadeReset(void)
 	g_FadeDelay = 0;
 }
 
-bool lvUpdateTrackedProp(struct trackedprop *trackedprop, s32 index)
+bool lvUpdateTrackedProp(struct trackedprop *trackedprop, int index)
 {
-	f32 y1;
-	f32 x1;
-	f32 y2;
-	f32 x2;
+	float y1;
+	float x1;
+	float y2;
+	float x2;
 	struct prop *prop = trackedprop->prop;
 	struct chrdata *chr;
 
@@ -551,16 +552,16 @@ bool lvUpdateTrackedProp(struct trackedprop *trackedprop, s32 index)
 	return true;
 }
 
-void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerpos, bool *activeslots, f32 *distances)
+void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerpos, bool *activeslots, float *distances)
 {
 	bool condition = true;
 	struct defaultobj *obj;
 	bool pass;
-	f32 sp88;
-	f32 sp84;
-	f32 sp80;
-	f32 sp76;
-	s32 i;
+	float sp88;
+	float sp84;
+	float sp80;
+	float sp76;
+	int i;
 	struct model *model;
 	struct weaponobj *weapon;
 
@@ -598,7 +599,7 @@ void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerp
 				pass = true;
 				break;
 			case WEAPON_DRAGON:
-				if (weapon->gunfunc == (u32)FUNC_SECONDARY) {
+				if (weapon->gunfunc == (uint32_t)FUNC_SECONDARY) {
 					pass = true;
 				}
 				break;
@@ -629,10 +630,10 @@ void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerp
 		}
 
 		if (pass) {
-			f32 furtherestdist = 0;
-			s32 index = -1;
+			float furtherestdist = 0;
+			int index = -1;
 
-			f32 sqdist =
+			float sqdist =
 				(prop->pos.f[0] - playerpos->f[0]) * (prop->pos.f[0] - playerpos->f[0]) +
 				(prop->pos.f[1] - playerpos->f[1]) * (prop->pos.f[1] - playerpos->f[1]) +
 				(prop->pos.f[2] - playerpos->f[2]) * (prop->pos.f[2] - playerpos->f[2]);
@@ -680,13 +681,13 @@ void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerp
 }
 
 // This function positions the four corners of the threat box on the screen
-void lvPositionThreatBox(struct prop *prop, bool inchild, struct coord *playerpos, s32 *activeslots, f32 *distances)
+void lvPositionThreatBox(struct prop *prop, bool inchild, struct coord *playerpos, int *activeslots, float *distances)
 {
-	s32 i;
-	f32 sp128;
-	f32 sp124;
-	f32 sp120;
-	f32 sp116;
+	int i;
+	float sp128;
+	float sp124;
+	float sp120;
+	float sp116;
 	struct model *model;
 
 	for (i = 0; i != 4; i++) {
@@ -739,10 +740,10 @@ void lvPositionThreatBox(struct prop *prop, bool inchild, struct coord *playerpo
 
 void lvFindThreats(void)
 {
-	s32 i;
+	int i;
 	struct prop *prop;
-	f32 distances[ARRAYCOUNT(g_Vars.currentplayer->trackedprops)] = {0};
-	s32 activeslots[ARRAYCOUNT(g_Vars.currentplayer->trackedprops)] = {false};
+	float distances[ARRAYCOUNT(g_Vars.currentplayer->trackedprops)] = {0};
+	int activeslots[ARRAYCOUNT(g_Vars.currentplayer->trackedprops)] = {false};
 	struct prop **propptr = g_Vars.endonscreenprops - 1;
 	struct coord campos;
 
@@ -783,21 +784,21 @@ void lvFindThreats(void)
 
 Gfx *lvRenderFPS(Gfx *gdl)
 {
-	const f32 fps = videoGetAverageFPS();
-	const u8 a = 160;
-	s32 x = 27, y = 13;
-	u32 color;
+	const float fps = videoGetAverageFPS();
+	const uint8_t a = 160;
+	int x = 27, y = 13;
+	uint32_t color;
 	char buffer[16];
 
 	if (fps <= 30.f) {
 		// red -> yellow
-		color = 0xff000000 | a | ((u32)((fps / 30.f) * 255.f) << 16);
+		color = 0xff000000 | a | ((uint32_t)((fps / 30.f) * 255.f) << 16);
 	} else if (fps <= 60.f) {
 		// yellow -> green
-		color = 0x00ff0000 | a | ((u32)((1.f - (fps - 30.f) / 30.f) * 255.f) << 24);
+		color = 0x00ff0000 | a | ((uint32_t)((1.f - (fps - 30.f) / 30.f) * 255.f) << 24);
 	} else if (fps <= 90.f) {
 		// green -> cyan
-		color = 0x00ff0000 | a | ((u32)(((fps - 60.f) / 30.f) * 255.f) << 8);
+		color = 0x00ff0000 | a | ((uint32_t)(((fps - 60.f) / 30.f) * 255.f) << 8);
 	} else {
 		// cyan
 		color = 0x00ffff00 | a;
@@ -898,8 +899,8 @@ Gfx *lvRender(Gfx *gdl)
 		gdl = creditsDraw(gdl);
 	} else {
 		// Normal stages
-		s32 i;
-		s32 playercount;
+		int i;
+		int playercount;
 		Gfx *savedgdl;
 		bool forcesingleplayer = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 			&& playerHasSharedViewport();
@@ -912,7 +913,7 @@ Gfx *lvRender(Gfx *gdl)
 
 		for (i = 0; i < playercount; i++) {
 			bool islastplayer;
-			u32 bluramount = 0;
+			uint32_t bluramount = 0;
 
 			savedgdl = gdl;
 
@@ -921,7 +922,7 @@ Gfx *lvRender(Gfx *gdl)
 				g_Vars.currentplayerindex = 0;
 				islastplayer = true;
 			} else {
-				s32 nextplayernum = i + 1;
+				int nextplayernum = i + 1;
 				setCurrentPlayerNum(playermgrGetPlayerAtOrder(i));
 				islastplayer = playercount == nextplayernum;
 			}
@@ -968,7 +969,6 @@ Gfx *lvRender(Gfx *gdl)
 					g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
 			mtx00016748(g_Vars.currentplayerstats->scale_bg2gfx);
 			envTick();
-			zbufSwap();
 			gdl = viPrepareZbuf(gdl);
 			gdl = vi0000b1d0(gdl);
 			gdl = bgScissorToViewport(gdl);
@@ -986,14 +986,14 @@ Gfx *lvRender(Gfx *gdl)
 			} else if (g_Vars.currentplayer->gunctrl.loadall
 					&& g_Vars.currentplayer->cameramode != CAMERAMODE_THIRDPERSON
 					&& g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY
-					&& var8009dfc0 == 0) {
+					&& !g_GamePaused) {
 				g_Vars.currentplayer->gunctrl.loadall = bgunLoadAll();
 			}
 
 			if (g_Vars.lockscreen) {
 				gdl = bviewDrawMotionBlur(gdl, 0xffffffff, 255);
 				g_Vars.lockscreen--;
-			} else if (var8009dfc0) {
+			} else if (g_GamePaused) {
 				gdl = viRenderViewportEdges(gdl);
 				gdl = bgScissorToViewport(gdl);
 				mtx00016748(1);
@@ -1055,7 +1055,7 @@ Gfx *lvRender(Gfx *gdl)
 				if (gsetHasFunctionFlags(&g_Vars.currentplayer->hands[0].gset, FUNCFLAG_THREATDETECTOR)) {
 					lvFindThreats();
 				} else if (weaponHasFlag(bgunGetWeaponNum(HAND_RIGHT), WEAPONFLAG_AIMTRACK)) {
-					s32 j;
+					int j;
 
 					if (frIsInTraining()
 							&& g_Vars.currentplayer->lookingatprop.prop
@@ -1149,10 +1149,10 @@ Gfx *lvRender(Gfx *gdl)
 				gdl = playerRenderHud(gdl);
 
 				static struct sndstate *g_CutsceneStaticAudioHandle = NULL;
-				static s32 g_CutsceneStaticTimer = 100;
-				static u8 g_CutsceneStaticActive = false;
+				static int g_CutsceneStaticTimer = 100;
+				static uint8_t g_CutsceneStaticActive = false;
 				bool cutscenehasstatic = false;
-				u32 alpha;
+				uint32_t alpha;
 
 				if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
 					// Handle visual effects in cutscenes
@@ -1168,7 +1168,7 @@ Gfx *lvRender(Gfx *gdl)
 					case ANIM_CUT_LUE_INTRO_CAM_03:
 						{
 							// Show static randomly in Infiltration intro
-							s32 cutscenestatic = 0;
+							int cutscenestatic = 0;
 							cutscenehasstatic = true;
 
 							if (g_CutsceneStaticAudioHandle == NULL) {
@@ -1218,7 +1218,7 @@ Gfx *lvRender(Gfx *gdl)
 						gdl = bviewDrawSlayerRocketInterlace(gdl, 0xffffffff, 0xffffffff);
 
 						if (g_Vars.currentplayer->badrockettime > 0) {
-							u32 slayerstatic = g_Vars.currentplayer->badrockettime * 255 / TICKS(90);
+							uint32_t slayerstatic = g_Vars.currentplayer->badrockettime * 255 / TICKS(90);
 
 							if (slayerstatic > 255) {
 								slayerstatic = 255;
@@ -1235,7 +1235,7 @@ Gfx *lvRender(Gfx *gdl)
 
 					if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY
 							&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
-						s32 xraything = 99;
+						int xraything = 99;
 
 						if (g_Vars.currentplayer->erasertime < TICKS(200)) {
 							xraything = 249 - (g_Vars.currentplayer->erasertime * 3 >> 2);
@@ -1255,15 +1255,15 @@ Gfx *lvRender(Gfx *gdl)
 						if (g_Vars.speedpillchange < 15) {
 							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
 									g_Vars.speedpillchange * 180 / 15,
-									(f32)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f,
-									(f32)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f);
+									(float)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f,
+									(float)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f);
 							gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
 									g_Vars.speedpillchange * 0.0066666668280959f);
 						} else {
 							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
 									(30 - g_Vars.speedpillchange) * 180 / 15,
-									(f32)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f,
-									(f32)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f);
+									(float)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f,
+									(float)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f);
 							gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
 									(30.0f - g_Vars.speedpillchange) * 0.0066666668280959f);
 						}
@@ -1296,7 +1296,7 @@ Gfx *lvRender(Gfx *gdl)
 
 					// Handle blur effect in cutscenes (Extraction intro?)
 					if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
-						f32 cutsceneblurfrac = playerGetCutsceneBlurFrac();
+						float cutsceneblurfrac = playerGetCutsceneBlurFrac();
 
 						if (cutsceneblurfrac > 0) {
 							gdl = bviewDrawMotionBlur(gdl, 0xffffff00, cutsceneblurfrac * 255);
@@ -1424,7 +1424,7 @@ Gfx *lvRender(Gfx *gdl)
 	return gdl;
 }
 
-u32 g_CutsceneTime240_60 = 0;
+uint32_t g_CutsceneTime240_60 = 0;
 
 void lvUpdateSoloHandicaps(void)
 {
@@ -1512,8 +1512,8 @@ void lvUpdateSoloHandicaps(void)
 		}
 	} else {
 		if (g_Difficulty == DIFF_A) {
-			f32 totalhealth;
-			f32 frac = 1;
+			float totalhealth;
+			float frac = 1;
 
 			if (g_Vars.coopplayernum < 0 && g_Vars.antiplayernum < 0) {
 				totalhealth = playerGetHealthFrac() + playerGetShieldFrac();
@@ -1590,7 +1590,7 @@ void lvUpdateCutsceneTime(void)
 	g_CutsceneTime240_60 = 0;
 }
 
-s32 lvGetSlowMotionType(void)
+int lvGetSlowMotionType(void)
 {
 	if (g_Vars.normmplayerisrunning) {
 		if (g_MpSetup.options & MPOPTION_SLOWMOTION_ON) {
@@ -1610,8 +1610,8 @@ s32 lvGetSlowMotionType(void)
 
 void lvTick(void)
 {
-	s32 j;
-	s32 i;
+	int j;
+	int i;
 
 	lvCheckPauseStateChanged();
 
@@ -1650,7 +1650,7 @@ void lvTick(void)
 			g_Vars.players[j]->joybutinhibit = 0xffffefff;
 		}
 	} else {
-		s32 slowmo = lvGetSlowMotionType();
+		int slowmo = lvGetSlowMotionType();
 		g_Vars.lvupdate240 = g_Vars.diffframe240;
 
 		if (slowmo == SLOWMOTION_ON) {
@@ -1664,16 +1664,16 @@ void lvTick(void)
 			if (g_Vars.speedpillon == false || g_Vars.in_cutscene) {
 				if (g_Vars.mplayerisrunning) {
 					bool foundnearbychr = false;
-					s32 playernum;
+					int playernum;
 
 					// Check if another player is in a nearby room
 					for (playernum = 0; playernum < PLAYERCOUNT() && !foundnearbychr; playernum++) {
 						if (g_Vars.players[playernum]->isdead == false) {
 							RoomNum *rooms = g_Vars.players[playernum]->prop->rooms;
-							s32 r;
+							int r;
 
 							for (r = 0; rooms[r] != -1 && !foundnearbychr; r++) {
-								s32 otherplayernum;
+								int otherplayernum;
 								for (otherplayernum = 0; otherplayernum < PLAYERCOUNT(); otherplayernum++) {
 									if (playernum != otherplayernum
 											&& g_Vars.players[otherplayernum]->isdead == false
@@ -1789,13 +1789,13 @@ void lvTick(void)
 	// Handle MP match ending
 	if (g_Vars.normmplayerisrunning && g_Vars.stagenum < STAGE_TITLE) {
 		if (g_MpTimeLimit60 > 0) {
-			s32 elapsed = g_StageTimeElapsed60;
-			s32 nexttime = g_Vars.lvupdate60 + g_StageTimeElapsed60;
-			s32 warntime = TICKS(g_MpTimeLimit60) - TICKS(3600);
+			int elapsed = g_StageTimeElapsed60;
+			int nexttime = g_Vars.lvupdate60 + g_StageTimeElapsed60;
+			int warntime = TICKS(g_MpTimeLimit60) - TICKS(3600);
 
 			// Show HUD message at one minute remaining
 			if (elapsed < warntime && nexttime >= warntime) {
-				s32 i;
+				int i;
 
 				for (i = 0; i < PLAYERCOUNT(); i++) {
 					setCurrentPlayerNum(i);
@@ -1818,7 +1818,7 @@ void lvTick(void)
 		}
 
 		if (g_Vars.lvupdate240 != 0) {
-			s32 numdying = 0;
+			int numdying = 0;
 
 			for (i = 0; i < PLAYERCOUNT(); i++) {
 				if (g_Vars.players[i]->isdead) {
@@ -1838,7 +1838,7 @@ void lvTick(void)
 
 			if (g_MpScoreLimit > 0) {
 				struct ranking rankings[MAX_MPCHRS];
-				s32 count = mpGetPlayerRankings(rankings);
+				int count = mpGetPlayerRankings(rankings);
 
 				for (i = 0; i < count; i++) {
 					if (rankings[i].score >= g_MpScoreLimit) {
@@ -1849,7 +1849,7 @@ void lvTick(void)
 
 			if (g_MpTeamScoreLimit > 0) {
 				struct ranking rankings[MAX_MPCHRS];
-				s32 count = mpGetTeamRankings(rankings);
+				int count = mpGetTeamRankings(rankings);
 
 				for (i = 0; i < count; i++) {
 					if (rankings[i].score >= g_MpTeamScoreLimit) {
@@ -1936,8 +1936,8 @@ void lvTick(void)
 
 void lvTickPlayer(void)
 {
-	f32 xdiff;
-	f32 zdiff;
+	float xdiff;
+	float zdiff;
 
 	playerTick();
 
@@ -1985,7 +1985,7 @@ void lvStop(void)
 
 void lvCheckPauseStateChanged(void)
 {
-	u32 paused = mpIsPaused();
+	uint32_t paused = mpIsPaused();
 
 	if (paused != g_LvlIsPausedMP) {
 		if (paused) {
@@ -2016,12 +2016,12 @@ bool lvIsPaused(void)
 	return g_IsLvlPaused;
 }
 
-s32 lvGetDifficulty(void)
+int lvGetDifficulty(void)
 {
 	return g_Difficulty;
 }
 
-void lvSetDifficulty(s32 difficulty)
+void lvSetDifficulty(int difficulty)
 {
 	if (difficulty < DIFF_A || difficulty > DIFF_PD) {
 		difficulty = DIFF_A;
@@ -2030,27 +2030,27 @@ void lvSetDifficulty(s32 difficulty)
 	g_Difficulty = difficulty;
 }
 
-void lvSetMpTimeLimit60(u32 limit)
+void lvSetMpTimeLimit60(uint32_t limit)
 {
 	g_MpTimeLimit60 = limit;
 }
 
-void lvSetMpScoreLimit(u32 limit)
+void lvSetMpScoreLimit(uint32_t limit)
 {
 	g_MpScoreLimit = limit;
 }
 
-void lvSetMpTeamScoreLimit(u32 limit)
+void lvSetMpTeamScoreLimit(uint32_t limit)
 {
 	g_MpTeamScoreLimit = limit;
 }
 
-f32 lvGetStageTimeInSeconds(void)
+float lvGetStageTimeInSeconds(void)
 {
 	return g_StageTimeElapsed1f;
 }
 
-s32 lvGetStageTime60(void)
+int lvGetStageTime60(void)
 {
 	return g_StageTimeElapsed60;
 }

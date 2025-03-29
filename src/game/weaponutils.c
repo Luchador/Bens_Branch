@@ -17,7 +17,7 @@
 #include "data.h"
 #include "types.h"
 
-struct weapon *weaponFindById(s32 itemid)
+struct weapon *weaponFindById(int itemid)
 {
 	if (itemid < 0) {
 		return NULL;
@@ -30,7 +30,7 @@ struct weapon *weaponFindById(s32 itemid)
 	return g_Weapons[itemid];
 }
 
-struct weaponfunc *weaponGetFunctionById(u32 weaponnum, u32 which)
+struct weaponfunc *weaponGetFunctionById(uint32_t weaponnum, uint32_t which)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
 
@@ -67,7 +67,7 @@ struct weaponfunc *gsetGetWeaponFunction(struct gset *gset)
 	return NULL;
 }
 
-struct weaponfunc *weaponGetFunction(struct gset *gset, s32 which)
+struct weaponfunc *weaponGetFunction(struct gset *gset, int which)
 {
 	struct weapon *weapon = g_Weapons[gset->weaponnum];
 
@@ -78,7 +78,7 @@ struct weaponfunc *weaponGetFunction(struct gset *gset, s32 which)
 	return NULL;
 }
 
-struct weaponfunc *currentPlayerGetWeaponFunction(u32 hand)
+struct weaponfunc *currentPlayerGetWeaponFunction(uint32_t hand)
 {
 	struct weapon *weapon = weaponFindById(g_Vars.currentplayer->hands[hand].gset.weaponnum);
 
@@ -89,10 +89,10 @@ struct weaponfunc *currentPlayerGetWeaponFunction(u32 hand)
 	return NULL;
 }
 
-u32 weaponGetNumFunctions(u32 weaponnum)
+uint32_t weaponGetNumFunctions(uint32_t weaponnum)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
-	s32 i;
+	int i;
 
 	if (!weapon) {
 		return 0;
@@ -118,7 +118,7 @@ struct invaimsettings *gsetGetAimSettings(struct gset *gset)
 	return &invaimsettings_default;
 }
 
-struct inventory_ammo *weaponGetAmmoByFunction(u32 weaponnum, u32 funcnum)
+struct inventory_ammo *weaponGetAmmoByFunction(uint32_t weaponnum, uint32_t funcnum)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
 	struct weaponfunc *func = weaponGetFunctionById(weaponnum, funcnum);
@@ -152,14 +152,14 @@ void currentPlayerSetWeaponPos(struct coord *pos)
 	}
 }
 
-f32 handGetXShift(s32 handnum)
+float handGetXShift(int handnum)
 {
 	return g_Vars.currentplayer->hands[handnum].xshift;
 }
 
-f32 func0f0b131c(s32 hand)
+float func0f0b131c(int hand)
 {
-	f32 x;
+	float x;
 	struct weapon *weapon;
 
 	if (hand == 0) {
@@ -189,9 +189,9 @@ f32 func0f0b131c(s32 hand)
 	return x;
 }
 
-f32 currentPlayerGetGunZoomFov(void)
+float currentPlayerGetGunZoomFov(void)
 {
-	s32 index = -1;
+	int index = -1;
 	struct weapon *weapon;
 
 	switch (bgunGetWeaponNum2(0)) {
@@ -213,16 +213,16 @@ f32 currentPlayerGetGunZoomFov(void)
 	weapon = weaponFindById(bgunGetWeaponNum2(0));
 
 	if (weapon) {
-		f32 fov = weapon->aimsettings->zoomfov;
+		float fov = weapon->aimsettings->zoomfov;
 		return ADJUST_ZOOM_FOV(fov);
 	}
 
 	return 0;
 }
 
-void currentPlayerZoomOut(f32 fovpersec)
+void currentPlayerZoomOut(float fovpersec)
 {
-	s32 index = -1;
+	int index = -1;
 
 	switch (bgunGetWeaponNum2(0)) {
 	case WEAPON_SNIPERRIFLE:
@@ -237,7 +237,7 @@ void currentPlayerZoomOut(f32 fovpersec)
 	}
 
 	if (index >= 0) {
-		f32 amount = fovpersec * 0.25f * LVUPDATE60FREAL();
+		float amount = fovpersec * 0.25f * LVUPDATE60FREAL();
 
 		if (bgunGetWeaponNum2(0) == WEAPON_FARSIGHT) {
 			amount *= 0.5f;
@@ -251,9 +251,9 @@ void currentPlayerZoomOut(f32 fovpersec)
 	}
 }
 
-void currentPlayerZoomIn(f32 fovpersec)
+void currentPlayerZoomIn(float fovpersec)
 {
-	s32 index = -1;
+	int index = -1;
 
 	switch (bgunGetWeaponNum2(0)) {
 	case WEAPON_SNIPERRIFLE:
@@ -268,7 +268,7 @@ void currentPlayerZoomIn(f32 fovpersec)
 	}
 
 	if (index >= 0) {
-		f32 amount = fovpersec * 0.25f * LVUPDATE60FREAL();
+		float amount = fovpersec * 0.25f * LVUPDATE60FREAL();
 
 		if (bgunGetWeaponNum2(0) == WEAPON_FARSIGHT) {
 			amount *= 0.5f;
@@ -282,7 +282,7 @@ void currentPlayerZoomIn(f32 fovpersec)
 	}
 }
 
-bool weaponHasFlag(s32 itemid, u32 flag)
+bool weaponHasFlag(int itemid, uint32_t flag)
 {
 	struct weapon *weapon = weaponFindById(itemid);
 
@@ -290,17 +290,15 @@ bool weaponHasFlag(s32 itemid, u32 flag)
 		return false;
 	}
 
-#ifndef PLATFORM_N64
 	// always dual-wieldable if cheat is enabled
 	if (cheatIsActive(CHEAT_DUALWIELDALLGUNS) && (flag == WEAPONFLAG_DUALWIELD)) {
 		return true;
 	}
-#endif
 
 	return (weapon->flags & flag) != 0;
 }
 
-bool weaponHasAimFlag(s32 weaponnum, u32 flag)
+bool weaponHasAimFlag(int weaponnum, uint32_t flag)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
 
@@ -311,7 +309,7 @@ bool weaponHasAimFlag(s32 weaponnum, u32 flag)
 	return (weapon->aimsettings->flags & flag) != 0;
 }
 
-bool weaponHasAmmoFlag(s32 weaponnum, s32 funcnum, u32 flag)
+bool weaponHasAmmoFlag(int weaponnum, int funcnum, uint32_t flag)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
 	struct inventory_ammo *ammo;
@@ -329,10 +327,10 @@ bool weaponHasAmmoFlag(s32 weaponnum, s32 funcnum, u32 flag)
 	return false;
 }
 
-s32 currentPlayerGetDeviceState(s32 weaponnum)
+int currentPlayerGetDeviceState(int weaponnum)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
-	s32 i;
+	int i;
 
 	if (!weapon) {
 		return DEVICESTATE_UNEQUIPPED;
@@ -355,10 +353,10 @@ s32 currentPlayerGetDeviceState(s32 weaponnum)
 	return DEVICESTATE_UNEQUIPPED;
 }
 
-void currentPlayerSetDeviceActive(s32 weaponnum, bool active)
+void currentPlayerSetDeviceActive(int weaponnum, bool active)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
-	s32 i;
+	int i;
 
 	if (!weapon) {
 		return;
@@ -385,7 +383,7 @@ void currentPlayerSetDeviceActive(s32 weaponnum, bool active)
 	}
 }
 
-u16 weaponGetFileNum(s32 weaponnum)
+uint16_t weaponGetFileNum(int weaponnum)
 {
 	struct weapon *weapon = NULL;
 
@@ -400,12 +398,12 @@ u16 weaponGetFileNum(s32 weaponnum)
 	return 0;
 }
 
-u16 weaponGetFileNum2(s32 weaponnum)
+uint16_t weaponGetFileNum2(int weaponnum)
 {
 	return weaponGetFileNum(weaponnum);
 }
 
-void gsetPopulateFromCurrentPlayer(s32 handnum, struct gset *gset)
+void gsetPopulateFromCurrentPlayer(int handnum, struct gset *gset)
 {
 	gset->weaponnum = g_Vars.currentplayer->gunctrl.weaponnum;
 	gset->weaponfunc = g_Vars.currentplayer->hands[handnum].gset.weaponfunc;
@@ -433,7 +431,7 @@ struct inventory_ammo *gsetGetAmmoDefinition(struct gset *gset)
 	return NULL;
 }
 
-u8 gsetGetSinglePenetration(struct gset *gset)
+uint8_t gsetGetSinglePenetration(struct gset *gset)
 {
 	struct weaponfunc *func = gsetGetWeaponFunction(gset);
 
@@ -445,9 +443,9 @@ u8 gsetGetSinglePenetration(struct gset *gset)
 	return 0;
 }
 
-s32 handGetCasingEject(struct gset *gset)
+int handGetCasingEject(struct gset *gset)
 {
-	s32 result = 0;
+	int result = 0;
 	struct inventory_ammo *ammo = gsetGetAmmoDefinition(gset);
 
 	if (ammo) {
@@ -457,10 +455,10 @@ s32 handGetCasingEject(struct gset *gset)
 	return result;
 }
 
-f32 gsetGetImpactForce(struct gset *gset)
+float gsetGetImpactForce(struct gset *gset)
 {
 	struct weaponfunc *func = gsetGetWeaponFunction(gset);
-	f32 result = 0;
+	float result = 0;
 
 	if (func && (func->type & 0xff) == INVENTORYFUNCTYPE_SHOOT) {
 		struct weaponfunc_shoot *funcshoot = (struct weaponfunc_shoot *)func;
@@ -470,22 +468,22 @@ f32 gsetGetImpactForce(struct gset *gset)
 	return result;
 }
 
-void Lerp2D(f32 *a, f32 *b, f32 scale, f32 *dst)
+void Lerp2D(float *a, float *b, float scale, float *dst)
 {
 	dst[0] = (b[0] - a[0]) * scale + a[0];
 	dst[1] = (b[1] - a[1]) * scale + a[1];
 }
 
-void ScaleVector2D(f32 *a, f32 *b, f32 *dst)
+void ScaleVector2D(float *a, float *b, float *dst)
 {
 	dst[0] = b[0] * a[0];
 	dst[1] = b[1] * a[1];
 }
 
-f32 gsetGetDamage(struct gset *gset)
+float gsetGetDamage(struct gset *gset)
 {
 	struct weaponfunc *func = gsetGetWeaponFunction(gset);
-	f32 damage = 0;
+	float damage = 0;
 
 	if (func) {
 		if ((func->type & 0xff) == INVENTORYFUNCTYPE_SHOOT) {
@@ -519,11 +517,11 @@ f32 gsetGetDamage(struct gset *gset)
 	return damage;
 }
 
-u8 gsetGetFireslotDuration(struct gset *gset)
+uint8_t gsetGetFireslotDuration(struct gset *gset)
 {
 /*#if VERSION >= VERSION_PAL_FINAL
 	struct weaponfunc *func = gsetGetWeaponFunction(gset);
-	u8 result = 0;
+	uint8_t result = 0;
 
 	if (func && (func->type & 0xff) == INVENTORYFUNCTYPE_SHOOT) {
 		struct weaponfunc_shoot *funcshoot = (struct weaponfunc_shoot *)func;
@@ -547,7 +545,7 @@ u8 gsetGetFireslotDuration(struct gset *gset)
 //#endif
 }
 
-u16 gsetGetSingleShootSound(struct gset *gset)
+uint16_t gsetGetSingleShootSound(struct gset *gset)
 {
 	struct weaponfunc *func = gsetGetWeaponFunction(gset);
 
@@ -559,7 +557,7 @@ u16 gsetGetSingleShootSound(struct gset *gset)
 	return 0;
 }
 
-bool gsetHasFunctionFlags(struct gset *gset, u32 flags)
+bool gsetHasFunctionFlags(struct gset *gset, uint32_t flags)
 {
 	struct weaponfunc *func = gsetGetWeaponFunction(gset);
 
@@ -570,10 +568,9 @@ bool gsetHasFunctionFlags(struct gset *gset, u32 flags)
 	return false;
 }
 
-s8 weaponGetNumTicksPerShot(u32 weaponnum, u32 funcindex)
+int8_t weaponGetNumTicksPerShot(uint32_t weaponnum, uint32_t funcindex)
 {
-	u32 stack[2];
-	s32 result = 0;
+	int result = 0;
 	struct weapon *weapon = weaponFindById(weaponnum);
 	struct weaponfunc *func = weapon->functions[funcindex];
 
@@ -590,7 +587,7 @@ s8 weaponGetNumTicksPerShot(u32 weaponnum, u32 funcindex)
 	return result;
 }
 
-u32 currentPlayerGetSight(void)
+uint32_t currentPlayerGetSight(void)
 {
 	struct weaponfunc *func = weaponGetFunctionById(
 			g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponnum,

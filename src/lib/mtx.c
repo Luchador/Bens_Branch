@@ -2,23 +2,24 @@
 #include <math.h>
 #include "constants.h"
 #include "game/padhalllv.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 
-void mtx00016110(f32 mtx1[3][3], f32 mtx2[3][3])
+void mtx00016110(float mtx1[3][3], float mtx2[3][3])
 {
-	f32 mtx3[3][3];
+	float mtx3[3][3];
 
 	mtx00016140(mtx1, mtx2, mtx3);
 	mtx3Copy(mtx3, mtx2);
 }
 
-void mtx00016140(f32 mtx1[3][3], f32 mtx2[3][3], f32 dst[3][3])
+void mtx00016140(float mtx1[3][3], float mtx2[3][3], float dst[3][3])
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	for (i = 0; i < 3; i++) {
 		for (j = 0; j < 3; j++) {
@@ -27,30 +28,30 @@ void mtx00016140(f32 mtx1[3][3], f32 mtx2[3][3], f32 dst[3][3])
 	}
 }
 
-void mtx3LinearTransform(f32 mtx[3][3], f32 src[3], f32 dest[3])
+void mtx3LinearTransform(float mtx[3][3], float src[3], float dest[3])
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < 3; i++) {
 		dest[i] = mtx[0][i] * src[0] + mtx[1][i] * src[1] + mtx[2][i] * src[2];
 	}
 }
 
-void mtx00016208(f32 mtx[3][3], struct coord *coord)
+void mtx00016208(float mtx[3][3], struct coord *coord)
 {
-	f32 tmp[3];
+	float tmp[3];
 
-	mtx3LinearTransform(mtx, (f32 *)coord, tmp);
+	mtx3LinearTransform(mtx, (float *)coord, tmp);
 
 	coord->x = tmp[0];
 	coord->y = tmp[1];
 	coord->z = tmp[2];
 }
 
-void mtx4LoadYRotationWithTranslation(struct coord *coord, f32 angle, Mtxf *mtx)
+void mtx4LoadYRotationWithTranslation(struct coord *coord, float angle, Mtxf *mtx)
 {
-	f32 cos = cosf(angle);
-	f32 sin = sinf(angle);
+	float cos = cosf(angle);
+	float sin = sinf(angle);
 
 	mtx->m[0][0] = cos;
 	mtx->m[0][1] = 0;
@@ -73,10 +74,10 @@ void mtx4LoadYRotationWithTranslation(struct coord *coord, f32 angle, Mtxf *mtx)
 	mtx->m[3][3] = 1;
 }
 
-void mtx4LoadXRotation(f32 angle, Mtxf *mtx)
+void mtx4LoadXRotation(float angle, Mtxf *mtx)
 {
-	f32 cos = cosf(angle);
-	f32 sin = sinf(angle);
+	float cos = cosf(angle);
+	float sin = sinf(angle);
 
 	mtx->m[0][0] = 1;
 	mtx->m[0][1] = 0;
@@ -99,10 +100,10 @@ void mtx4LoadXRotation(f32 angle, Mtxf *mtx)
 	mtx->m[3][3] = 1;
 }
 
-void mtx4LoadYRotation(f32 angle, Mtxf *mtx)
+void mtx4LoadYRotation(float angle, Mtxf *mtx)
 {
-	f32 cos = cosf(angle);
-	f32 sin = sinf(angle);
+	float cos = cosf(angle);
+	float sin = sinf(angle);
 
 	mtx->m[0][0] = cos;
 	mtx->m[0][1] = 0;
@@ -125,10 +126,10 @@ void mtx4LoadYRotation(f32 angle, Mtxf *mtx)
 	mtx->m[3][3] = 1;
 }
 
-void mtx4LoadZRotation(f32 angle, Mtxf *mtx)
+void mtx4LoadZRotation(float angle, Mtxf *mtx)
 {
-	f32 cos = cosf(angle);
-	f32 sin = sinf(angle);
+	float cos = cosf(angle);
+	float sin = sinf(angle);
 
 	mtx->m[0][0] = cos;
 	mtx->m[0][1] = sin;
@@ -153,16 +154,16 @@ void mtx4LoadZRotation(f32 angle, Mtxf *mtx)
 
 void mtx4LoadRotation(struct coord *src, Mtxf *dest)
 {
-	f32 xcos = cosf(src->x);
-	f32 xsin = sinf(src->x);
-	f32 ycos = cosf(src->y);
-	f32 ysin = sinf(src->y);
-	f32 zcos = cosf(src->z);
-	f32 zsin = sinf(src->z);
-	f32 a = xsin * zsin;
-	f32 b = xcos * zsin;
-	f32 c = xsin * zcos;
-	f32 d = xcos * zcos;
+	float xcos = cosf(src->x);
+	float xsin = sinf(src->x);
+	float ycos = cosf(src->y);
+	float ysin = sinf(src->y);
+	float zcos = cosf(src->z);
+	float zsin = sinf(src->z);
+	float a = xsin * zsin;
+	float b = xcos * zsin;
+	float c = xsin * zcos;
+	float d = xcos * zcos;
 
 	dest->m[0][0] = ycos * zcos;
 	dest->m[0][1] = ycos * zsin;
@@ -187,11 +188,11 @@ void mtx4LoadRotation(struct coord *src, Mtxf *dest)
 
 #define EPSILON 0.0000019073486f
 
-void mtx4GetRotation(f32 mtx[4][4], struct coord *dst)
+void mtx4GetRotation(float mtx[4][4], struct coord *dst)
 {
-	f32 norm;
-	f32 sin_x_cos_y = mtx[1][2];
-	f32 cos_x_cos_y = mtx[2][2];
+	float norm;
+	float sin_x_cos_y = mtx[1][2];
+	float cos_x_cos_y = mtx[2][2];
 
 	norm = sqrtf(sin_x_cos_y * sin_x_cos_y + cos_x_cos_y * cos_x_cos_y);
 
@@ -218,7 +219,7 @@ void mtx4LoadTranslation(struct coord *pos, Mtxf *mtx)
 	mtx4SetTranslation(pos, mtx);
 }
 
-void mtx00016710(f32 mult, f32 mtx[4][4])
+void mtx00016710(float mult, float mtx[4][4])
 {
 	mtx[0][2] *= mult;
 	mtx[1][2] *= mult;
@@ -226,7 +227,7 @@ void mtx00016710(f32 mult, f32 mtx[4][4])
 	mtx[3][2] *= mult;
 }
 
-void mtx00016748(f32 arg0)
+void mtx00016748(float arg0)
 {
 	var8005ef10[0] = 65536 * arg0;
 }
@@ -250,40 +251,40 @@ void mtx00016784(void)
  */
 void mtx00016798(Mtxf *src, Mtxf *dst)
 {
-	u32 *srcwords = (u32 *) src;
-	f32 *dstfloats = (f32 *) dst;
-	s32 i;
+	uint32_t *srcwords = (uint32_t *) src;
+	float *dstfloats = (float *) dst;
+	int i;
 
 	for (i = 0; i < 8; i++) {
-		u32 word1 = srcwords[i + 0];
-		u32 word2 = srcwords[i + 8];
+		uint32_t word1 = srcwords[i + 0];
+		uint32_t word2 = srcwords[i + 8];
 
-		dstfloats[(i << 1) + 0] = (s32) ((word1 & 0xffff0000) | (word2 >> 16)) / var8005ef10[0];
-		dstfloats[(i << 1) + 1] = (s32) ((word1 << 16) | (word2 & 0xffff)) / var8005ef10[i & 1];
+		dstfloats[(i << 1) + 0] = (int) ((word1 & 0xffff0000) | (word2 >> 16)) / var8005ef10[0];
+		dstfloats[(i << 1) + 1] = (int) ((word1 << 16) | (word2 & 0xffff)) / var8005ef10[i & 1];
 	}
 }
 
 void mtx00016820(Mtx *src, Mtx *dst)
 {
-	u32 *srcwords = (u32 *) src;
-	u32 *dstwords = (u32 *) dst;
-	s32 i;
+	uint32_t *srcwords = (uint32_t *) src;
+	uint32_t *dstwords = (uint32_t *) dst;
+	int i;
 
 	for (i = 0; i < 8; i++) {
-		u32 word1 = srcwords[i + 0];
-		u32 word2 = srcwords[i + 8];
+		uint32_t word1 = srcwords[i + 0];
+		uint32_t word2 = srcwords[i + 8];
 
 		dstwords[(i << 1) + 0] = (word1 & 0xffff0000) | (word2 >> 16);
 		dstwords[(i << 1) + 1] = (word1 << 16) | (word2 & 0xffff);
 	}
 }
 
-void mtx00016874(Mtxf *mtx, f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz)
+void mtx00016874(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
 {
-	f32 a;
-	f32 b;
-	f32 c;
-	f32 tmp;
+	float a;
+	float b;
+	float c;
+	float tmp;
 
 	tmp = -1 / sqrtf(lookx * lookx + looky * looky + lookz * lookz);
 	lookx *= tmp;
@@ -329,17 +330,17 @@ void mtx00016874(Mtxf *mtx, f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, 
 	mtx->m[3][3] = 1;
 }
 
-void mtx00016ae4(Mtxf *mtx, f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz)
+void mtx00016ae4(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
 {
 	mtx00016874(mtx, posx, posy, posz, lookx - posx, looky - posy, lookz - posz, upx, upy, upz);
 }
 
-void mtx00016b58(Mtxf *mtx, f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz)
+void mtx00016b58(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
 {
-	f32 a;
-	f32 b;
-	f32 c;
-	f32 tmp;
+	float a;
+	float b;
+	float c;
+	float tmp;
 
 	tmp = -1 / sqrtf(lookx * lookx + looky * looky + lookz * lookz);
 	lookx *= tmp;
@@ -385,15 +386,15 @@ void mtx00016b58(Mtxf *mtx, f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, 
 	mtx->m[3][3] = 1;
 }
 
-void mtx00016d58(Mtxf *mtx, f32 posx, f32 posy, f32 posz, f32 lookx, f32 looky, f32 lookz, f32 upx, f32 upy, f32 upz)
+void mtx00016d58(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
 {
 	mtx00016b58(mtx, posx, posy, posz, lookx - posx, looky - posy, lookz - posz, upx, upy, upz);
 }
 
-u32 mtx00016dcc(f32 arg0, f32 arg1)
+uint32_t mtx00016dcc(float arg0, float arg1)
 {
-	f32 sum = arg0 + arg1;
-	u16 result;
+	float sum = arg0 + arg1;
+	uint16_t result;
 
 	if (sum <= 2) {
 		result = 0xffff;
@@ -408,18 +409,18 @@ u32 mtx00016dcc(f32 arg0, f32 arg1)
 	return result;
 }
 
-void mtx00016e98(f32 mtx[4][4], f32 angle, f32 x, f32 y, f32 z)
+void mtx00016e98(float mtx[4][4], float angle, float x, float y, float z)
 {
-	f32 sine;
-	f32 cosine;
-	f32 norm;
-	f32 invnorm;
-	f32 cos_x;
-	f32 sin_x;
-	f32 cos_z;
-	f32 sin_z;
+	float sine;
+	float cosine;
+	float norm;
+	float invnorm;
+	float cos_x;
+	float sin_x;
+	float cos_z;
+	float sin_z;
 
-	guNormalize(&x, &y, &z);
+	utilsNormalizeF(&x, &y, &z);
 	sine = sinf(angle);
 	cosine = cosf(angle);
 	norm = sqrtf(x * x + z * z);
@@ -454,13 +455,13 @@ void mtx00016e98(f32 mtx[4][4], f32 angle, f32 x, f32 y, f32 z)
 	mtx4LoadIdentity((Mtxf *)mtx);
 }
 
-void mtx4Align(f32 mtx[4][4], f32 angle, f32 x, f32 y, f32 z)
+void mtx4Align(float mtx[4][4], float angle, float x, float y, float z)
 {
 	angle = RAD2DEG(angle);
 	guAlignF(mtx, angle, x, y, z);
 }
 
-void mtx4LoadRotationFrom(f32 src[4][4], f32 dst[4][4])
+void mtx4LoadRotationFrom(float src[4][4], float dst[4][4])
 {
 	dst[0][0] = src[0][0];
 	dst[0][1] = src[1][0];
@@ -484,9 +485,9 @@ void mtx4LoadRotationFrom(f32 src[4][4], f32 dst[4][4])
 	dst[3][3] = 1;
 }
 
-void mtx000170e4(f32 src[4][4], f32 dst[4][4])
+void mtx000170e4(float src[4][4], float dst[4][4])
 {
-	f32 tmp = (src[0][0] * src[0][0] + src[1][0] * src[1][0] + src[2][0] * src[2][0]);
+	float tmp = (src[0][0] * src[0][0] + src[1][0] * src[1][0] + src[2][0] * src[2][0]);
 	tmp = 1 / tmp;
 
 	dst[0][0] = src[0][0] * tmp;
@@ -511,9 +512,9 @@ void mtx000170e4(f32 src[4][4], f32 dst[4][4])
 	dst[3][3] = 1;
 }
 
-void mtx0001719c(f32 arg0[4][4], f32 arg1[4][4])
+void mtx0001719c(float arg0[4][4], float arg1[4][4])
 {
-	f32 tmp = arg0[0][0] * arg0[0][0] + arg0[1][0] * arg0[1][0] + arg0[2][0] * arg0[2][0];
+	float tmp = arg0[0][0] * arg0[0][0] + arg0[1][0] * arg0[1][0] + arg0[2][0] * arg0[2][0];
 	tmp = 1 / tmp;
 
 	arg1[0][0] = arg0[0][0] * tmp;
@@ -534,9 +535,9 @@ void mtx0001719c(f32 arg0[4][4], f32 arg1[4][4])
 	arg1[3][3] = 1;
 }
 
-void mtx000172f0(f32 arg0[4][4], f32 arg1[4][4])
+void mtxInvertAffineMatrix(float arg0[4][4], float arg1[4][4])
 {
-	f32 f0 = 0.0f;
+	float f0 = 0.0f;
 	f0 += arg0[0][0] * arg0[1][1] * arg0[2][2];
 	f0 += arg0[0][1] * arg0[1][2] * arg0[2][0];
 	f0 += arg0[0][2] * arg0[1][0] * arg0[2][1];
@@ -563,13 +564,13 @@ void mtx000172f0(f32 arg0[4][4], f32 arg1[4][4])
 	arg1[3][3] = 1.0f;
 }
 
-void mtx00017588(f32 arg0[4][4], f32 arg1[4][4])
+void mtxFullInverse4x4(float arg0[4][4], float arg1[4][4])
 {
-	s32 i;
-	s32 j;
-	f32 tmp;
+	int i;
+	int j;
+	float tmp;
 
-	mtx00017614(arg0, arg1);
+	mtxInvert4x4Matrix(arg0, arg1);
 
 	tmp = 1.0f / mtx00017a78(arg0);
 
@@ -580,12 +581,12 @@ void mtx00017588(f32 arg0[4][4], f32 arg1[4][4])
 	}
 }
 
-void mtx00017614(f32 arg0[4][4], f32 arg1[4][4])
+void mtxInvert4x4Matrix(float arg0[4][4], float arg1[4][4])
 {
-	f32 mtx00, mtx10, mtx20, mtx30;
-	f32 mtx04, mtx14, mtx24, mtx34;
-	f32 mtx08, mtx18, mtx28, mtx38;
-	f32 mtx0c, mtx1c, mtx2c, mtx3c;
+	float mtx00, mtx10, mtx20, mtx30;
+	float mtx04, mtx14, mtx24, mtx34;
+	float mtx08, mtx18, mtx28, mtx38;
+	float mtx0c, mtx1c, mtx2c, mtx3c;
 
 	mtx00 = arg0[0][0]; mtx04 = arg0[0][1];
 	mtx08 = arg0[0][2]; mtx0c = arg0[0][3];
@@ -596,34 +597,34 @@ void mtx00017614(f32 arg0[4][4], f32 arg1[4][4])
 	mtx30 = arg0[3][0]; mtx34 = arg0[3][1];
 	mtx38 = arg0[3][2]; mtx3c = arg0[3][3];
 
-	arg1[0][0] =  mtx00017c2c(mtx14, mtx24, mtx34, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
-	arg1[1][0] = -mtx00017c2c(mtx10, mtx20, mtx30, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
-	arg1[2][0] =  mtx00017c2c(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx1c, mtx2c, mtx3c);
-	arg1[3][0] = -mtx00017c2c(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx18, mtx28, mtx38);
-	arg1[0][1] = -mtx00017c2c(mtx04, mtx24, mtx34, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
-	arg1[1][1] =  mtx00017c2c(mtx00, mtx20, mtx30, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
-	arg1[2][1] = -mtx00017c2c(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx0c, mtx2c, mtx3c);
-	arg1[3][1] =  mtx00017c2c(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx08, mtx28, mtx38);
-	arg1[0][2] =  mtx00017c2c(mtx04, mtx14, mtx34, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
-	arg1[1][2] = -mtx00017c2c(mtx00, mtx10, mtx30, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
-	arg1[2][2] =  mtx00017c2c(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx0c, mtx1c, mtx3c);
-	arg1[3][2] = -mtx00017c2c(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx08, mtx18, mtx38);
-	arg1[0][3] = -mtx00017c2c(mtx04, mtx14, mtx24, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
-	arg1[1][3] =  mtx00017c2c(mtx00, mtx10, mtx20, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
-	arg1[2][3] = -mtx00017c2c(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx0c, mtx1c, mtx2c);
-	arg1[3][3] =  mtx00017c2c(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx08, mtx18, mtx28);
+	arg1[0][0] =  mtxDeterminant3x3(mtx14, mtx24, mtx34, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
+	arg1[1][0] = -mtxDeterminant3x3(mtx10, mtx20, mtx30, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
+	arg1[2][0] =  mtxDeterminant3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx1c, mtx2c, mtx3c);
+	arg1[3][0] = -mtxDeterminant3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx18, mtx28, mtx38);
+	arg1[0][1] = -mtxDeterminant3x3(mtx04, mtx24, mtx34, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
+	arg1[1][1] =  mtxDeterminant3x3(mtx00, mtx20, mtx30, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
+	arg1[2][1] = -mtxDeterminant3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx0c, mtx2c, mtx3c);
+	arg1[3][1] =  mtxDeterminant3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx08, mtx28, mtx38);
+	arg1[0][2] =  mtxDeterminant3x3(mtx04, mtx14, mtx34, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
+	arg1[1][2] = -mtxDeterminant3x3(mtx00, mtx10, mtx30, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
+	arg1[2][2] =  mtxDeterminant3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx0c, mtx1c, mtx3c);
+	arg1[3][2] = -mtxDeterminant3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx08, mtx18, mtx38);
+	arg1[0][3] = -mtxDeterminant3x3(mtx04, mtx14, mtx24, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
+	arg1[1][3] =  mtxDeterminant3x3(mtx00, mtx10, mtx20, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
+	arg1[2][3] = -mtxDeterminant3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx0c, mtx1c, mtx2c);
+	arg1[3][3] =  mtxDeterminant3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx08, mtx18, mtx28);
 }
 
-f32 mtx00017a78(f32 arg0[4][4])
+float mtx00017a78(float arg0[4][4])
 {
-	f32 tmp;
-	f32 sp78, sp74, sp70, sp6c;
-	f32 sp68, sp64, sp60, sp5c;
-	f32 sp58, sp54, sp50, sp4c;
-	f32 sp48, sp44, sp40, sp3c;
-	f32 sp38;
-	f32 sp34;
-	f32 sp30;
+	float tmp;
+	float sp78, sp74, sp70, sp6c;
+	float sp68, sp64, sp60, sp5c;
+	float sp58, sp54, sp50, sp4c;
+	float sp48, sp44, sp40, sp3c;
+	float sp38;
+	float sp34;
+	float sp30;
 
 	sp78 = arg0[0][0]; sp68 = arg0[0][1];
 	sp58 = arg0[0][2]; sp48 = arg0[0][3];
@@ -634,29 +635,29 @@ f32 mtx00017a78(f32 arg0[4][4])
 	sp6c = arg0[3][0]; sp5c = arg0[3][1];
 	sp4c = arg0[3][2]; sp3c = arg0[3][3];
 
-	sp30 = mtx00017c2c(sp74, sp70, sp6c, sp64, sp60, sp5c, sp44, sp40, sp3c);
-	sp34 = mtx00017c2c(sp74, sp70, sp6c, sp54, sp50, sp4c, sp44, sp40, sp3c);
-	sp38 = mtx00017c2c(sp64, sp60, sp5c, sp54, sp50, sp4c, sp44, sp40, sp3c);
+	sp30 = mtxDeterminant3x3(sp74, sp70, sp6c, sp64, sp60, sp5c, sp44, sp40, sp3c);
+	sp34 = mtxDeterminant3x3(sp74, sp70, sp6c, sp54, sp50, sp4c, sp44, sp40, sp3c);
+	sp38 = mtxDeterminant3x3(sp64, sp60, sp5c, sp54, sp50, sp4c, sp44, sp40, sp3c);
 
-	tmp = mtx00017c2c(sp74, sp70, sp6c, sp64, sp60, sp5c, sp54, sp50, sp4c);
+	tmp = mtxDeterminant3x3(sp74, sp70, sp6c, sp64, sp60, sp5c, sp54, sp50, sp4c);
 
 	return (sp78 * sp38 - sp68 * sp34 + sp58 * sp30) - tmp * sp48;
 }
 
-f32 mtx00017c2c(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8)
+float mtxDeterminant3x3(float arg0, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8)
 {
-	f32 sp24;
-	f32 sp20;
-	f32 sp1c;
+	float sp24;
+	float sp20;
+	float sp1c;
 
-	sp1c = mtx00017cbc(arg1, arg2, arg7, arg8);
-	sp20 = mtx00017cbc(arg4, arg5, arg7, arg8);
-	sp24 = mtx00017cbc(arg1, arg2, arg4, arg5);
+	sp1c = mtxDeterminant2x2(arg1, arg2, arg7, arg8);
+	sp20 = mtxDeterminant2x2(arg4, arg5, arg7, arg8);
+	sp24 = mtxDeterminant2x2(arg1, arg2, arg4, arg5);
 
 	return sp24 * arg6 + (arg0 * sp20 - arg3 * sp1c);
 }
 
-f32 mtx00017cbc(f32 arg0, f32 arg1, f32 arg2, f32 arg3)
+float mtxDeterminant2x2(float arg0, float arg1, float arg2, float arg3)
 {
 	return arg0 * arg3 - arg1 * arg2;
 }

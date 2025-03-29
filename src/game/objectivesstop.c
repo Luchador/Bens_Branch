@@ -6,7 +6,7 @@
 
 void objectivesStop(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_Objectives); i++) {
 		if (g_Objectives[i]

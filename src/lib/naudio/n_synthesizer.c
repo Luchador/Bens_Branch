@@ -1,9 +1,10 @@
 #include "n_synthInternals.h"
+#include <stdint.h>
 
 void n_alSynNew(ALSynConfig *c)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 	N_PVoice *pv;
 	N_PVoice *pvoices;
 	ALHeap *hp = c->heap;
@@ -89,16 +90,16 @@ void n_alSynNew(ALSynConfig *c)
 	n_syn->heap = hp;
 }
 
-s32 __n_nextSampleTime(ALPlayer **client);
-s32 _n_timeToSamplesNoRound(s32 micros);
+int __n_nextSampleTime(ALPlayer **client);
+int _n_timeToSamplesNoRound(int micros);
 
-Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen)
+Acmd *n_alAudioFrame(Acmd *cmdList, int *cmdLen, int16_t *outBuf, int outLen)
 {
 	ALPlayer    *client;
 	Acmd        *cmdlEnd = cmdList;
 	Acmd        *cmdPtr;
-	s32         nOut;
-	s16         *lOutBuf = outBuf;
+	int         nOut;
+	int16_t         *lOutBuf = outBuf;
 
 	if (n_syn->head == 0) {
 		*cmdLen = 0;
@@ -152,7 +153,7 @@ Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen)
 		n_syn->curSamples += nOut;
 	}
 
-	*cmdLen = (s32) (cmdlEnd - cmdList);
+	*cmdLen = (int) (cmdlEnd - cmdList);
 
 	_n_collectPVoices(); /* collect free physical voices */
 
@@ -197,21 +198,21 @@ void _n_freePVoice(N_PVoice *pvoice)
 	alLink((ALLink *)pvoice, &n_syn->pLameList);
 }
 
-s32 _n_timeToSamplesNoRound(s32 micros)
+int _n_timeToSamplesNoRound(int micros)
 {
-	f32 tmp = ((f32)micros) * n_syn->outputRate / 1000000.0f + 0.5f;
+	float tmp = ((float)micros) * n_syn->outputRate / 1000000.0f + 0.5f;
 
-	return (s32)tmp;
+	return (int)tmp;
 }
 
-s32 _n_timeToSamples(s32 micros)
+int _n_timeToSamples(int micros)
 {
 	return _n_timeToSamplesNoRound(micros) & ~0xf;
 }
 
-s32 __n_nextSampleTime(ALPlayer **client)
+int __n_nextSampleTime(ALPlayer **client)
 {
-	ALMicroTime delta = 0x7fffffff;     /* max delta for s32 */
+	ALMicroTime delta = 0x7fffffff;     /* max delta for int */
 	ALPlayer *cl;
 
 	*client = 0;

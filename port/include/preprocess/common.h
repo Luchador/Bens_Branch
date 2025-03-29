@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <PR/ultratypes.h>
 #include "types.h"
 #include "constants.h"
 
@@ -19,40 +18,38 @@
 
 #define PD_ALIGN(val, size) (((val) + ((size) - 1)) & ~((size) - 1))
 
-#define PD_PTR_BASE(x, b) (void *)((u8 *)b + (uintptr_t)x)
-#define PD_PTR_BASEOFS(x, b, d) (void *)((u8 *)b - d + (uintptr_t)x)
+#define PD_PTR_BASE(x, b) (void *)((uint8_t *)b + (uintptr_t)x)
+#define PD_PTR_BASEOFS(x, b, d) (void *)((uint8_t *)b - d + (uintptr_t)x)
 
-static inline f32 swapF32(f32 x) { *(u32*)&x = PD_BE32(*(u32*)&x); return x; }
-static inline u32 swapU32(u32 x) { return PD_BE32(x); }
-static inline s32 swapS32(s32 x) { return PD_BE32(x); }
-static inline u16 swapU16(u16 x) { return PD_BE16(x); }
-static inline s16 swapS16(s16 x) { return PD_BE16(x); }
+static inline float swapF32(float x) { *(uint32_t*)&x = PD_BE32(*(uint32_t*)&x); return x; }
+static inline uint32_t swapU32(uint32_t x) { return PD_BE32(x); }
+static inline int swapS32(int x) { return PD_BE32(x); }
+static inline uint16_t swapU16(uint16_t x) { return PD_BE16(x); }
+static inline int16_t swapS16(int16_t x) { return PD_BE16(x); }
 static inline void* swapPtr(void** x) { return (void*)PD_BEPTR((uintptr_t)x); }
 static inline struct coord swapCrd(struct coord crd) { crd.x = swapF32(crd.x); crd.y = swapF32(crd.y); crd.z = swapF32(crd.z); return crd; }
-static inline u32 swapUnk(u32 x) { assert(0 && "unknown type"); return x; }
+static inline uint32_t swapUnk(uint32_t x) { assert(0 && "unknown type"); return x; }
 
 #define PD_SWAPPED_VAL(x) _Generic((x), \
-	f32: swapF32, \
-	u32: swapU32, \
-	s32: swapS32, \
-	u16: swapU16, \
-	s16: swapS16, \
+	float: swapF32, \
+	uint32_t: swapU32, \
+	int: swapS32, \
+	uint16_t: swapU16, \
+	int16_t: swapS16, \
 	struct coord: swapCrd, \
 	default: swapUnk	\
 )(x)
 
 #define PD_SWAP_VAL(x) x = PD_SWAPPED_VAL(x)
 
-#define PD_SWAP_PTR(x) x = swapPtr((void *)(x))
-
 // ptr marker functions
 
 struct ptrmarker {
-	u32 ptr_src;
+	uint32_t ptr_src;
 	uintptr_t ptr_host;
 };
 
-void ptrAdd(u32 ptr_src, uintptr_t ptr_host);
+void ptrAdd(uint32_t ptr_src, uintptr_t ptr_host);
 struct ptrmarker* ptrFind(uintptr_t ptr_src);
 void ptrReset(void);
 

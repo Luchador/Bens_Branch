@@ -1,6 +1,6 @@
 #include "n_synthInternals.h"
 
-void n_alSynSetPitch(N_ALVoice *v, f32 pitch)
+void n_alSynSetPitch(N_ALVoice *v, float pitch)
 {
 	ALParam *update;
 

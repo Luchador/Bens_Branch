@@ -36,9 +36,9 @@ enum contenttype {
 };
 
 struct marker {
-	u32 src_offset;
-	u32 dst_offset;
-	u32 parent_src_offset;
+	uint32_t src_offset;
+	uint32_t dst_offset;
+	uint32_t parent_src_offset;
 	enum contenttype type;
 };
 
@@ -79,40 +79,40 @@ static int numContentMarkers;
 // TODO: get rid of the host_ structs here when I figure out why the ones from types.h won't work
 
 struct n64_modeldef {
-	u32 ptr_rootnode;
-	u32 ptr_skel;
-	u32 ptr_parts;
-	s16 numparts;
-	s16 nummatrices;
-	u32 scale;
-	u16 rwdatalen;
-	u16 numtexconfigs;
-	u32 ptr_texconfigs;
+	uint32_t ptr_rootnode;
+	uint32_t ptr_skel;
+	uint32_t ptr_parts;
+	int16_t numparts;
+	int16_t nummatrices;
+	uint32_t scale;
+	uint16_t rwdatalen;
+	uint16_t numtexconfigs;
+	uint32_t ptr_texconfigs;
 };
 
 struct host_modeldef {
 	uintptr_t ptr_rootnode;
 	uintptr_t ptr_skel;
 	uintptr_t ptr_parts;
-	s16 numparts;
-	s16 nummatrices;
-	u32 scale;
-	u16 rwdatalen;
-	u16 numtexconfigs;
+	int16_t numparts;
+	int16_t nummatrices;
+	uint32_t scale;
+	uint16_t rwdatalen;
+	uint16_t numtexconfigs;
 	uintptr_t ptr_texconfigs;
 };
 
 struct n64_modelnode {
-	u16 type;
-	u32 ptr_rodata;
-	u32 ptr_parent;
-	u32 ptr_next;
-	u32 ptr_prev;
-	u32 ptr_child;
+	uint16_t type;
+	uint32_t ptr_rodata;
+	uint32_t ptr_parent;
+	uint32_t ptr_next;
+	uint32_t ptr_prev;
+	uint32_t ptr_child;
 };
 
 struct host_modelnode {
-	u16 type;
+	uint16_t type;
 	uintptr_t ptr_rodata;
 	uintptr_t ptr_parent;
 	uintptr_t ptr_next;
@@ -121,26 +121,26 @@ struct host_modelnode {
 };
 
 struct generic_rodata_chrinfo {
-	u16 animpart;
-	s16 mtxindex;
-	u32 unk04;
-	u16 rwdataindex;
+	uint16_t animpart;
+	int16_t mtxindex;
+	uint32_t unk04;
+	uint16_t rwdataindex;
 };
 
 struct generic_rodata_position {
-	u32 pos[3];
-	u16 part;
-	s16 mtxindexes[3];
-	u32 drawdist;
+	uint32_t pos[3];
+	uint16_t part;
+	int16_t mtxindexes[3];
+	uint32_t drawdist;
 };
 
 struct n64_rodata_gundl {
-	u32 ptr_opagdl;
-	u32 ptr_xlugdl;
-	u32 ptr_baseaddr;
-	u32 ptr_vertices;
-	s16 numvertices;
-	s16 unk12;
+	uint32_t ptr_opagdl;
+	uint32_t ptr_xlugdl;
+	uint32_t ptr_baseaddr;
+	uint32_t ptr_vertices;
+	int16_t numvertices;
+	int16_t unk12;
 };
 
 struct host_rodata_gundl {
@@ -148,134 +148,134 @@ struct host_rodata_gundl {
 	uintptr_t ptr_xlugdl;
 	uintptr_t ptr_baseaddr;
 	uintptr_t ptr_vertices;
-	s16 numvertices;
-	s16 unk12;
+	int16_t numvertices;
+	int16_t unk12;
 };
 
 struct n64_rodata_distance {
-	u32 near;
-	u32 far;
-	u32 ptr_target;
-	u16 rwdataindex;
+	uint32_t near;
+	uint32_t far;
+	uint32_t ptr_target;
+	uint16_t rwdataindex;
 };
 
 struct host_rodata_distance {
-	u32 near;
-	u32 far;
+	uint32_t near;
+	uint32_t far;
 	uintptr_t ptr_target;
-	u16 rwdataindex;
+	uint16_t rwdataindex;
 };
 
 struct n64_rodata_reorder {
-	u32 unk00;
-	u32 unk04;
-	u32 unk08;
-	u32 unk0c[3];
-	u32 ptr_node_unk18;
-	u32 ptr_node_unk1c;
-	s16 side;
-	u16 rwdataindex;
+	uint32_t unk00;
+	uint32_t unk04;
+	uint32_t unk08;
+	uint32_t unk0c[3];
+	uint32_t ptr_node_unk18;
+	uint32_t ptr_node_unk1c;
+	int16_t side;
+	uint16_t rwdataindex;
 };
 
 struct host_rodata_reorder {
-	u32 unk00;
-	u32 unk04;
-	u32 unk08;
-	u32 unk0c[3];
+	uint32_t unk00;
+	uint32_t unk04;
+	uint32_t unk08;
+	uint32_t unk0c[3];
 	uintptr_t ptr_node_unk18;
 	uintptr_t ptr_node_unk1c;
-	s16 side;
-	u16 rwdataindex;
+	int16_t side;
+	uint16_t rwdataindex;
 };
 
 struct generic_rodata_bbox {
-	s32 hitpart;
-	u32 bbox[6];
+	int hitpart;
+	uint32_t bbox[6];
 };
 
 struct n64_rodata_chrgunfire {
-	u32 pos[3];
-	u32 dim[3];
-	u32 ptr_texture;
-	u32 unk1c;
-	u16 rwdataindex;
-	u32 ptr_baseaddr;
+	uint32_t pos[3];
+	uint32_t dim[3];
+	uint32_t ptr_texture;
+	uint32_t unk1c;
+	uint16_t rwdataindex;
+	uint32_t ptr_baseaddr;
 };
 
 struct host_rodata_chrgunfire {
-	u32 pos[3];
-	u32 dim[3];
+	uint32_t pos[3];
+	uint32_t dim[3];
 	uintptr_t ptr_texture;
-	u32 unk1c;
-	u16 rwdataindex;
+	uint32_t unk1c;
+	uint16_t rwdataindex;
 	uintptr_t ptr_baseaddr;
 };
 
 struct n64_rodata_type11 {
-	u32 unk00;
-	u32 unk04;
-	u32 unk08;
-	u32 unk0c;
-	u32 unk10;
-	u32 ptr_unk14; // not used
-	u32 extra1;
-	u32 extra2;
+	uint32_t unk00;
+	uint32_t unk04;
+	uint32_t unk08;
+	uint32_t unk0c;
+	uint32_t unk10;
+	uint32_t ptr_unk14; // not used
+	uint32_t extra1;
+	uint32_t extra2;
 };
 
 struct host_rodata_type11 {
-	u32 unk00;
-	u32 unk04;
-	u32 unk08;
-	u32 unk0c;
-	u32 unk10;
-	u32 unk14;
-	u32 extra1;
-	u32 extra2;
+	uint32_t unk00;
+	uint32_t unk04;
+	uint32_t unk08;
+	uint32_t unk0c;
+	uint32_t unk10;
+	uint32_t unk14;
+	uint32_t extra1;
+	uint32_t extra2;
 };
 
 struct n64_rodata_toggle {
-	u32 ptr_target;
-	u16 rwdataindex;
+	uint32_t ptr_target;
+	uint16_t rwdataindex;
 };
 
 struct host_rodata_toggle {
 	uintptr_t ptr_target;
-	u16 rwdataindex;
+	uint16_t rwdataindex;
 };
 
 struct generic_rodata_positionheld {
-	u32 pos[3];
-	s16 mtxindex;
-	u32 unk10;
+	uint32_t pos[3];
+	int16_t mtxindex;
+	uint32_t unk10;
 };
 
 struct n64_rodata_stargunfire {
-	u32 unk00;
-	u32 ptr_vertices;
-	u32 ptr_gdl;
-	u32 ptr_baseaddr;
+	uint32_t unk00;
+	uint32_t ptr_vertices;
+	uint32_t ptr_gdl;
+	uint32_t ptr_baseaddr;
 };
 
 struct host_rodata_stargunfire {
-	u32 unk00;
+	uint32_t unk00;
 	uintptr_t ptr_vertices;
 	uintptr_t ptr_gdl;
 	uintptr_t ptr_baseaddr;
 };
 
 struct generic_rodata_headspot {
-	u16 rwdataindex;
+	uint16_t rwdataindex;
 };
 
 struct n64_rodata_dl {
-	u32 ptr_opagdl;
-	u32 ptr_xlugdl;
-	u32 ptr_colours;
-	u32 ptr_vertices; // colours follow this array
-	s16 numvertices;
-	s16 mcount;
-	u16 rwdataindex;
-	u16 numcolours;
+	uint32_t ptr_opagdl;
+	uint32_t ptr_xlugdl;
+	uint32_t ptr_colours;
+	uint32_t ptr_vertices; // colours follow this array
+	int16_t numvertices;
+	int16_t mcount;
+	uint16_t rwdataindex;
+	uint16_t numcolours;
 };
 
 struct host_rodata_dl {
@@ -283,39 +283,39 @@ struct host_rodata_dl {
 	uintptr_t ptr_xlugdl;
 	uintptr_t ptr_colours;
 	uintptr_t ptr_vertices; // colours follow this array
-	s16 numvertices;
-	s16 mcount;
-	u16 rwdataindex;
-	u16 numcolours;
+	int16_t numvertices;
+	int16_t mcount;
+	uint16_t rwdataindex;
+	uint16_t numcolours;
 };
 
 struct generic_rodata_type19 {
-	u32 numvertices;
-	u32 vertices[3];
+	uint32_t numvertices;
+	uint32_t vertices[3];
 };
 
 struct n64_textureconfig {
-	u32 ptr;
-	u8 width;
-	u8 height;
-	u8 level;
-	u8 format;
-	u8 depth;
-	u8 s;
-	u8 t;
-	u8 unk0b;
+	uint32_t ptr;
+	uint8_t width;
+	uint8_t height;
+	uint8_t level;
+	uint8_t format;
+	uint8_t depth;
+	uint8_t s;
+	uint8_t t;
+	uint8_t unk0b;
 };
 
 struct host_textureconfig {
 	uintptr_t ptr;
-	u8 width;
-	u8 height;
-	u8 level;
-	u8 format;
-	u8 depth;
-	u8 s;
-	u8 t;
-	u8 unk0b;
+	uint8_t width;
+	uint8_t height;
+	uint8_t level;
+	uint8_t format;
+	uint8_t depth;
+	uint8_t s;
+	uint8_t t;
+	uint8_t unk0b;
 };
 
 static inline uintptr_t minPtr(uintptr_t a, uintptr_t b) {
@@ -326,7 +326,7 @@ static inline uintptr_t minPtr3(uintptr_t a, uintptr_t b, uintptr_t c) {
 	return minPtr(minPtr(a, b), c);
 }
 
-static struct marker *findMarker(u32 src_offset)
+static struct marker *findMarker(uint32_t src_offset)
 {
 	for (int i = 0; i < numContentMarkers; i++) {
 		if (contentMarkers[i].src_offset == src_offset) {
@@ -337,7 +337,7 @@ static struct marker *findMarker(u32 src_offset)
 	return NULL;
 }
 
-static void setMarker(u32 src_offset, enum contenttype type, u32 parent_src_offset)
+static void setMarker(uint32_t src_offset, enum contenttype type, uint32_t parent_src_offset)
 {
 	if (src_offset == 0) {
 		return;
@@ -388,7 +388,7 @@ static const enum contenttype nodeTypeToContentType[] = {
 	/*0x19*/ CT_RODATA_19,
 };
 
-static void populateMarkers(u8 *src)
+static void populateMarkers(uint8_t *src)
 {
 	numContentMarkers = 0;
 
@@ -398,14 +398,14 @@ static void populateMarkers(u8 *src)
 		struct marker *marker = &contentMarkers[i];
 		void *src_thing = &src[marker->src_offset];
 		int numvtx = 0;
-		u32 colstart = 0;
+		uint32_t colstart = 0;
 
 		switch (marker->type) {
 		case CT_MODELDEF:
 			{
 				struct n64_modeldef *src_modeldef = src_thing;
 				int num_texconfigs = PD_BE16(src_modeldef->numtexconfigs);
-				u32 texconfigpos = PD_BE32(src_modeldef->ptr_texconfigs);
+				uint32_t texconfigpos = PD_BE32(src_modeldef->ptr_texconfigs);
 				setMarker(PD_BE32(src_modeldef->ptr_rootnode), CT_NODE, marker->src_offset);
 				setMarker(PD_BE32(src_modeldef->ptr_parts), CT_PARTS, marker->src_offset);
 
@@ -417,7 +417,7 @@ static void populateMarkers(u8 *src)
 		case CT_NODE:
 			{
 				struct n64_modelnode *src_node = src_thing;
-				u32 node_type = PD_BE16(src_node->type) & 0xff;
+				uint32_t node_type = PD_BE16(src_node->type) & 0xff;
 				setMarker(PD_BE32(src_node->ptr_rodata), nodeTypeToContentType[node_type], marker->src_offset);
 				setMarker(PD_BE32(src_node->ptr_parent), CT_NODE, marker->src_offset);
 				setMarker(PD_BE32(src_node->ptr_next), CT_NODE, marker->src_offset);
@@ -436,7 +436,7 @@ static void populateMarkers(u8 *src)
 		case CT_PARTS:
 			{
 				struct n64_modeldef *src_modeldef2 = (struct n64_modeldef *) src;
-				u32 *src_parts = (u32 *) src_thing;
+				uint32_t *src_parts = (uint32_t *) src_thing;
 				int num_parts = PD_BE16(src_modeldef2->numparts);
 
 				for (int i = 0; i < num_parts; i++) {
@@ -484,9 +484,9 @@ static void populateMarkers(u8 *src)
 		case CT_RODATA_STARGUNFIRE:
 			{
 				struct n64_rodata_stargunfire *src_stargunfire = src_thing;
-				colstart = PD_BE32(src_stargunfire->unk00)*4*(sizeof(s16) * 6);
-				u32 vtxstart = PD_BE32(src_stargunfire->ptr_vertices);
-				u32 vtxend = vtxstart + colstart;
+				colstart = PD_BE32(src_stargunfire->unk00)*4*(sizeof(int16_t) * 6);
+				uint32_t vtxstart = PD_BE32(src_stargunfire->ptr_vertices);
+				uint32_t vtxend = vtxstart + colstart;
 				colstart = ALIGN8(vtxstart + colstart);
 				setMarker(vtxstart, CT_VTXCOL4, marker->src_offset);
 				if (vtxend != colstart) { 
@@ -522,7 +522,7 @@ static void populateMarkers(u8 *src)
 static void sortMarkers(void)
 {
 	for (int i = 0; i < numContentMarkers - 1; i++) {
-		u32 min_offset = 0xffffffff;
+		uint32_t min_offset = 0xffffffff;
 		int min_index = -1;
 
 		for (int j = i + 1; j < numContentMarkers; j++) {
@@ -540,15 +540,15 @@ static void sortMarkers(void)
 	}
 }
 
-static u32 convertContent(u8 *dst, u8 *src, u32 src_file_len)
+static uint32_t convertContent(uint8_t *dst, uint8_t *src, uint32_t src_file_len)
 {
-	u32 dstpos = 0;
+	uint32_t dstpos = 0;
 
 	for (int i = 0; i < numContentMarkers; i++) {
 		struct marker *marker = &contentMarkers[i];
 		void *src_thing = &src[marker->src_offset];
-		u32 src_end = i < numContentMarkers - 1 ? contentMarkers[i + 1].src_offset : src_file_len;
-		u32 src_len = src_end - marker->src_offset;
+		uint32_t src_end = i < numContentMarkers - 1 ? contentMarkers[i + 1].src_offset : src_file_len;
+		uint32_t src_len = src_end - marker->src_offset;
 
 		dstpos = PD_ALIGN(dstpos, alignConfigs[marker->type].before);
 
@@ -612,16 +612,16 @@ static u32 convertContent(u8 *dst, u8 *src, u32 src_file_len)
 		case CT_PARTS:
 			{
 				struct n64_modeldef *src_modeldef2 = (struct n64_modeldef *) src;
-				u32 *src_parts = (u32 *) src_thing;
+				uint32_t *src_parts = (uint32_t *) src_thing;
 				uintptr_t *dst_parts = (uintptr_t *) dst_thing;
 				int num_parts = PD_BE16(src_modeldef2->numparts);
-				u16 *src_nums = (u16 *) &src_parts[num_parts];
-				u16 *dst_nums = (u16 *) &dst_parts[num_parts];
+				uint16_t *src_nums = (uint16_t *) &src_parts[num_parts];
+				uint16_t *dst_nums = (uint16_t *) &dst_parts[num_parts];
 
 				for (int i = 0; i < num_parts; i++) {
 					dst_nums[i] = PD_BE16(src_nums[i]);
 				}
-				dstpos += num_parts * sizeof(uintptr_t) + num_parts * sizeof(u16);
+				dstpos += num_parts * sizeof(uintptr_t) + num_parts * sizeof(uint16_t);
 				if (num_parts) {
 					dstpos = ALIGN8(dstpos);
 				}
@@ -637,8 +637,8 @@ static u32 convertContent(u8 *dst, u8 *src, u32 src_file_len)
 		case CT_GDL:
 			{
 				struct marker *parent = findMarker(marker->parent_src_offset);
-				u32 src_vtx;
-				u32 dst_vtx;
+				uint32_t src_vtx;
+				uint32_t dst_vtx;
 
 				if (parent->type == CT_RODATA_GUNDL) {
 					struct n64_rodata_gundl *src_rodata = (struct n64_rodata_gundl *) &src[parent->src_offset];
@@ -816,18 +816,18 @@ static u32 convertContent(u8 *dst, u8 *src, u32 src_file_len)
 			{
 				struct generic_rodata_type19 *src_type19 = src_thing;
 				struct generic_rodata_type19 *dst_type19 = dst_thing;
-				u32 *src_vertices = src_thing + sizeof(u32);
-				u32 *dst_vertices = dst_thing + sizeof(u32);
+				uint32_t *src_vertices = src_thing + sizeof(uint32_t);
+				uint32_t *dst_vertices = dst_thing + sizeof(uint32_t);
 				int num_vertices = PD_BE32(src_type19->numvertices);
 
 				dst_type19->numvertices = (num_vertices);
-				dstpos += sizeof(u32);
+				dstpos += sizeof(uint32_t);
 
 				for (int i = 0; i < num_vertices; i++) {
 					dst_vertices[i * 3 + 0] = PD_BE32(src_vertices[i * 3 + 0]);
 					dst_vertices[i * 3 + 1] = PD_BE32(src_vertices[i * 3 + 1]);
 					dst_vertices[i * 3 + 2] = PD_BE32(src_vertices[i * 3 + 2]);
-					dstpos += sizeof(u32) * 3;
+					dstpos += sizeof(uint32_t) * 3;
 				}
 				break;
 			}
@@ -841,7 +841,7 @@ static u32 convertContent(u8 *dst, u8 *src, u32 src_file_len)
 	return dstpos;
 }
 
-static u32 resolvePointer(u32 src_offset)
+static uint32_t resolvePointer(uint32_t src_offset)
 {
 	if (src_offset == 0) {
 		return 0;
@@ -851,7 +851,7 @@ static u32 resolvePointer(u32 src_offset)
 	return marker ? (0x05000000 | marker->dst_offset) : 0;
 }
 
-static u8 *relinkPointers(u8 *dst, u8 *src)
+static uint8_t *relinkPointers(uint8_t *dst, uint8_t *src)
 {
 	uintptr_t textures_end = 0;
 
@@ -898,7 +898,7 @@ static u8 *relinkPointers(u8 *dst, u8 *src)
 		case CT_PARTS:
 			{
 				struct n64_modeldef *src_modeldef2 = (struct n64_modeldef *) src;
-				u32 *src_parts = (u32 *) src_thing;
+				uint32_t *src_parts = (uint32_t *) src_thing;
 				uintptr_t *dst_parts = (uintptr_t *) dst_thing;
 				int num_parts = PD_BE16(src_modeldef2->numparts);
 
@@ -1020,65 +1020,65 @@ static u8 *relinkPointers(u8 *dst, u8 *src)
 		textures_end = minPtr(textures_end, lowestptr);
 	}
 
-	return (u8*)textures_end;
+	return (uint8_t*)textures_end;
 }
 
-static void preprocessTextureRGBA32Embedded(u32* dest, u32 size_bytes)
+static void preprocessTextureRGBA32Embedded(uint32_t* dest, uint32_t size_bytes)
 {
 	for (uint32_t i = 0; i < size_bytes; i += 4, ++dest) {
 		*dest = PD_BE32(*dest);
 	}
 }
 
-static void preprocessModelTextures(u8 *base, u8 *textures_end)
+static void preprocessModelTextures(uint8_t *base, uint8_t *textures_end)
 {
 	struct modeldef* mdl = (struct modeldef*)base;
 	if (!mdl->texconfigs) return;
 
-	u32 ofs = 0x5000000;
+	uint32_t ofs = 0x5000000;
 	struct textureconfig* texconfigs = PD_PTR_BASEOFS(mdl->texconfigs, base, ofs);
-	for (s16 i = 0; i < mdl->numtexconfigs; ++i) {
+	for (int16_t i = 0; i < mdl->numtexconfigs; ++i) {
 		if ((texconfigs[i].texturenum & 0xf000000) == 0x5000000) {
 			// embedded texture; we need to unswizzle this
-			u8* texdata = PD_PTR_BASEOFS(texconfigs[i].textureptr, base, ofs);
+			uint8_t* texdata = PD_PTR_BASEOFS(texconfigs[i].textureptr, base, ofs);
 			// figure out the max possible size the texture can have, because sometimes the texconfig is wrong
-			const u32 maxSize = (textures_end > texconfigs[i].textureptr) ? (textures_end - texconfigs[i].textureptr) : 0;
+			const uint32_t maxSize = (textures_end > texconfigs[i].textureptr) ? (textures_end - texconfigs[i].textureptr) : 0;
 			// figure out the format and unswizzle
-			const s32 format = texConfigToFormat(&texconfigs[i]);
+			const int format = texConfigToFormat(&texconfigs[i]);
 			texSwizzleInternal(texdata, texconfigs[i].width, texconfigs[i].height, format, maxSize);
 
 			if (format == TEXFORMAT_RGBA32) {
 				// for some reason, RGBA32 embedded textures don't need to be byte-swapped,
 				// so we byte-swap them here, which will be undone when the renderer imports it
-				u32 size_bytes = texconfigs[i].width * texconfigs[i].height * 4;
-				preprocessTextureRGBA32Embedded((u32*)texdata, size_bytes);
+				uint32_t size_bytes = texconfigs[i].width * texconfigs[i].height * 4;
+				preprocessTextureRGBA32Embedded((uint32_t*)texdata, size_bytes);
 			}
 		}
 	}
 }
 
-static int convertModel(u8* dst, u8* src, u32 srclen)
+static int convertModel(uint8_t* dst, uint8_t* src, uint32_t srclen)
 {
-	u32 dstpos;
+	uint32_t dstpos;
 
 	populateMarkers(src);
 	sortMarkers();
 
 	dstpos = convertContent(dst, src, srclen);
-	u8* tex_end = relinkPointers(dst, src);
+	uint8_t* tex_end = relinkPointers(dst, src);
 	preprocessModelTextures(dst, tex_end);
 
 	return dstpos;
 }
 
-u8 *preprocessModelFile(u8 *data, u32 size, u32 *outSize)
+uint8_t *preprocessModelFile(uint8_t *data, uint32_t size, uint32_t *outSize)
 {
 	gbiReset();
 
-	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_MODEL);
-	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
+	uint32_t newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_MODEL);
+	uint8_t *dst = sysMemZeroAlloc(newSizeEstimated);
 
-	u32 newSize = convertModel(dst, data, size);
+	uint32_t newSize = convertModel(dst, data, size);
 
 	if (newSize > newSizeEstimated) {
 		sysFatalError("overflow when trying to preprocess model, size %d newsize %d", size, newSize);
@@ -1092,14 +1092,14 @@ u8 *preprocessModelFile(u8 *data, u32 size, u32 *outSize)
 	return 0;
 }
 
-u8 *preprocessGunFile(u8 *data, u32 size, u32 *outSize)
+uint8_t *preprocessGunFile(uint8_t *data, uint32_t size, uint32_t *outSize)
 {
 	gbiReset();
 
-	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_MODEL);
-	u8 *dst = sysMemZeroAlloc(newSizeEstimated+128);
+	uint32_t newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_MODEL);
+	uint8_t *dst = sysMemZeroAlloc(newSizeEstimated+128);
 
-	u32 newSize = convertModel(dst, data, size);
+	uint32_t newSize = convertModel(dst, data, size);
 
 	if (newSize > newSizeEstimated) {
 		sysFatalError("overflow when trying to preprocess model, size %d newsize %d", size, newSize);

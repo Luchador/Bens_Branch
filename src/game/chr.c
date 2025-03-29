@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "lib/sched.h"
 #include "constants.h"
 #include "game/bondmove.h"
@@ -54,34 +54,34 @@
 #include "video.h"
 #endif
 
-void rng2SetSeed(u32 seed);
+void rng2SetSeed(uint32_t seed);
 
-s32 var8009ccc0[20];
-s32 g_NumChrs;
-s16 *g_Chrnums;
-s16 *g_ChrIndexes;
+int var8009ccc0[20];
+int g_NumChrs;
+int16_t *g_Chrnums;
+int16_t *g_ChrIndexes;
 struct chrdata *g_CurModelChr;
 
 struct var80062960 *var80062960 = NULL;
-s32 var80062964 = 0;
-f32 g_ChrAnimSpeed = 0;
-s32 g_SelectedAnimNum = 0;
-s32 g_NextChrnum = 5000;
+int var80062964 = 0;
+float g_ChrAnimSpeed = 0;
+int g_SelectedAnimNum = 0;
+int g_NextChrnum = 5000;
 
 struct chrdata *g_ChrSlots = NULL;
 
-s32 g_NumChrSlots = 0;
+int g_NumChrSlots = 0;
 
-s32 chrsGetNumSlots(void)
+int chrsGetNumSlots(void)
 {
 	return g_NumChrSlots;
 }
 
-void chrSetChrnum(struct chrdata *chr, s16 chrnum)
+void chrSetChrnum(struct chrdata *chr, int16_t chrnum)
 {
-	s32 i;
+	int i;
 	bool modified;
-	s16 tmp;
+	int16_t tmp;
 
 	// Set the new chrnum
 	for (i = 0; i < g_NumChrs; i++) {
@@ -114,10 +114,10 @@ void chrSetChrnum(struct chrdata *chr, s16 chrnum)
 	} while (modified);
 }
 
-void chrRegister(s32 chrnum, s32 chrindex)
+void chrRegister(int chrnum, int chrindex)
 {
-	s32 i;
-	s16 tmp;
+	int i;
+	int16_t tmp;
 
 	for (i = 0; i < g_NumChrs; i++) {
 		if (g_Chrnums[i] > chrnum) {
@@ -136,13 +136,13 @@ void chrRegister(s32 chrnum, s32 chrindex)
 	g_NumChrs++;
 }
 
-void chrDeregister(s32 chrnum)
+void chrDeregister(int chrnum)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_NumChrs; i++) {
 		if (g_Chrnums[i] == chrnum) {
-			s32 j = i + 1;
+			int j = i + 1;
 
 			while (j < g_NumChrs) {
 				g_Chrnums[i] = g_Chrnums[j];
@@ -157,7 +157,7 @@ void chrDeregister(s32 chrnum)
 	}
 }
 
-Vtx *chrAllocateVertices(s32 numvertices)
+Vtx *chrAllocateVertices(int numvertices)
 {
 	return (Vtx *) gfxAllocate(numvertices * sizeof(Vtx));
 }
@@ -180,22 +180,22 @@ void chrSetPerimEnabled(struct chrdata *chr, bool enable)
  */
 void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dstrooms, bool arg3)
 {
-	f32 ymax;
-	f32 ymin;
-	f32 radius;
+	float ymax;
+	float ymin;
+	float radius;
 	bool moveok = false;
-	f32 movex;
-	f32 movez;
+	float movex;
+	float movez;
 	struct prop *prop = chr->prop;
-	f32 halfradius;
+	float halfradius;
 	struct defaultobj *chair = NULL;
-	s32 cdresult;
+	int cdresult;
 	RoomNum sp84[20];
 	struct coord sp78;
 	struct coord sp6c;
 	struct coord sp60;
 	struct coord sp54;
-	f32 value;
+	float value;
 	struct coord sp44;
 
 	// The eyespy can't be pushed
@@ -401,14 +401,14 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 	}
 }
 
-bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 arg3, bool arg4)
+bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, float arg3, bool arg4)
 {
 	bool result;
 	struct coord newpos;
 	RoomNum newrooms[8];
-	f32 ymax;
-	f32 ymin;
-	f32 radius;
+	float ymax;
+	float ymin;
+	float radius;
 
 	newpos.x = pos->x;
 	newpos.y = pos->y + arg3;
@@ -431,22 +431,22 @@ bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, f32 arg
 	return result == CDRESULT_NOCOLLISION;
 }
 
-bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f32 *mangroundptr)
+bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, float *mangroundptr)
 {
 	struct chrdata *chr = model->chr;
 	struct prop *prop = chr->prop;
 	struct prop *lift;
-	s32 i;
-	f32 ground;
+	int i;
+	float ground;
 	RoomNum spfc[8];
-	f32 manground = chr->manground;
-	s32 race = CHRRACE(chr);
-	f32 yincrement = 0.0f;
+	float manground = chr->manground;
+	int race = CHRRACE(chr);
+	float yincrement = 0.0f;
 	bool inlift;
-	u16 floorflags = 0;
-	s32 lvupdate240;
-	f32 lvupdate60f;
-	f32 lvupdate60freal;
+	uint16_t floorflags = 0;
+	int lvupdate240;
+	float lvupdate60f;
+	float lvupdate60freal;
 	struct coord spd0;
 	RoomNum spc0[8];
 
@@ -484,7 +484,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 		arg2->y += manground;
 
 		if (chr->aibot) {
-			f32 move[2] = {0, 0};
+			float move[2] = {0, 0};
 
 			if (VAR(lvupdate240) > 0) {
 				if (chr->aibot->forceslowupdates != 0) {
@@ -553,7 +553,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 		}
 
 		if (chr->actiontype == ACT_DIE && chr->act_die.timeextra > 0.0f) {
-			f32 speed = model->anim->playspeed * VAR(lvupdate60f) * (chr->act_die.timeextra - chr->act_die.elapseextra) / chr->act_die.timeextra;
+			float speed = model->anim->playspeed * VAR(lvupdate60f) * (chr->act_die.timeextra - chr->act_die.elapseextra) / chr->act_die.timeextra;
 
 			arg2->x += chr->act_die.extraspeed.x * speed;
 			arg2->z += chr->act_die.extraspeed.z * speed;
@@ -566,7 +566,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 				chr->act_die.timeextra = 0.0f;
 			}
 		} else if (chr->timeextra > 0.0f) {
-			f32 speed = model->anim->playspeed * VAR(lvupdate60f) * (chr->timeextra - chr->elapseextra) / chr->timeextra;
+			float speed = model->anim->playspeed * VAR(lvupdate60f) * (chr->timeextra - chr->elapseextra) / chr->timeextra;
 
 			arg2->x += chr->extraspeed.x * speed;
 			arg2->z += chr->extraspeed.z * speed;
@@ -588,7 +588,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 			chr->pushspeed[1] *= 0.9f;
 
 			if (chr->pushspeed[0] != 0.0f || chr->pushspeed[1] != 0.0f) {
-				f32 pushdist = sqrtf(chr->pushspeed[0] * chr->pushspeed[0] + chr->pushspeed[1] * chr->pushspeed[1]);
+				float pushdist = sqrtf(chr->pushspeed[0] * chr->pushspeed[0] + chr->pushspeed[1] * chr->pushspeed[1]);
 
 				if (pushdist > 0.0f) {
 					pushdist = 0.1f * VAR(lvupdate60freal) / pushdist;
@@ -626,9 +626,9 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 			yincrement = chr->act_skjump.pos.y;
 			arg2->z = chr->act_skjump.pos.z;
 		} else if (chr->onladder) {
-			f32 dist;
-			f32 xdiff = arg2->x - arg1->x;
-			f32 zdiff = arg2->z - arg1->z;
+			float dist;
+			float xdiff = arg2->x - arg1->x;
+			float zdiff = arg2->z - arg1->z;
 
 			arg2->x = arg1->x;
 			arg2->z = arg1->z;
@@ -677,11 +677,11 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 			RoomNum *sp94;
 			struct coord sp88;
 			RoomNum sp78[8];
-			f32 ground;
+			float ground;
 			struct modelnode *node;
-			u16 nodetype;
-			f32 sp68;
-			u8 die;
+			uint16_t nodetype;
+			float sp68;
+			uint8_t die;
 
 			if (chr->onladder) {
 				if (chr0f01f264(chr, arg2, spfc, yincrement, true)) {
@@ -758,7 +758,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 
 				if (chr->chrflags & CHRCFLAG_FORCETOGROUND) {
 					node = model->definition->rootnode;
-					nodetype = (u8)node->type;
+					nodetype = (uint8_t)node->type;
 
 					arg2->y += yincrement + chr->ground - manground;
 
@@ -802,7 +802,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 
 						if (die) {
 							if (chr->aibot) {
-								s32 shooter;
+								int shooter;
 
 								if (chr->lastshooter >= 0 && chr->timeshooter > 0) {
 									shooter = chr->lastshooter;
@@ -864,7 +864,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 	prop->pos.z = arg2->z;
 
 	if (chr->actiontype == ACT_SKJUMP) {
-		f32 ground;
+		float ground;
 
 		ground = chr->act_skjump.ground;
 
@@ -895,10 +895,10 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, f3
 	return true;
 }
 
-s32 chrsGetNumFree(void)
+int chrsGetNumFree(void)
 {
-	s32 count = 0;
-	s32 i;
+	int count = 0;
+	int i;
 
 	for (i = 0; i < g_NumChrSlots; i++) {
 		if (g_ChrSlots[i].chrnum < 0) {
@@ -909,22 +909,22 @@ s32 chrsGetNumFree(void)
 	return count;
 }
 
-void chrSetMaxDamage(struct chrdata *chr, f32 maxdamage)
+void chrSetMaxDamage(struct chrdata *chr, float maxdamage)
 {
 	chr->maxdamage = maxdamage;
 }
 
-f32 chrGetMaxDamage(struct chrdata *chr)
+float chrGetMaxDamage(struct chrdata *chr)
 {
 	return chr->maxdamage;
 }
 
-void chrAddHealth(struct chrdata *chr, f32 health)
+void chrAddHealth(struct chrdata *chr, float health)
 {
 	chr->damage -= health;
 }
 
-f32 chrGetArmor(struct chrdata *chr)
+float chrGetArmor(struct chrdata *chr)
 {
 	if (chr->damage < 0) {
 		return -chr->damage;
@@ -933,9 +933,9 @@ f32 chrGetArmor(struct chrdata *chr)
 	return 0;
 }
 
-s16 chrsGetNextUnusedChrnum(void)
+int16_t chrsGetNextUnusedChrnum(void)
 {
-	s32 chrnum;
+	int chrnum;
 	struct chrdata *chr;
 
 	do {
@@ -945,15 +945,15 @@ s16 chrsGetNextUnusedChrnum(void)
 			chrnum = g_NextChrnum = 5000;
 		}
 
-		chr = chrFindByLiteralId((s16)chrnum);
+		chr = chrFindByLiteralId((int16_t)chrnum);
 	} while (chr);
 
 	return chrnum;
 }
 
-void chrInit(struct prop *prop, u8 *ailist)
+void chrInit(struct prop *prop, uint8_t *ailist)
 {
-	s32 i;
+	int i;
 	struct chrdata *chr = NULL;
 
 	for (i = 0; i < g_NumChrSlots; i++) {
@@ -1166,12 +1166,12 @@ void chrInit(struct prop *prop, u8 *ailist)
 }
 
 struct prop *chr0f020b14(struct prop *prop, struct model *model,
-		struct coord *pos, RoomNum *rooms, f32 faceangle, u8 *ailist)
+		struct coord *pos, RoomNum *rooms, float faceangle, uint8_t *ailist)
 {
 	struct chrdata *chr;
 	struct coord testpos;
-	f32 ground;
-	u32 nodetype;
+	float ground;
+	uint32_t nodetype;
 
 	prop->type = PROPTYPE_CHR;
 
@@ -1221,7 +1221,7 @@ struct prop *chr0f020b14(struct prop *prop, struct model *model,
 	return prop;
 }
 
-struct prop *chrAllocate(struct model *model, struct coord *pos, RoomNum *rooms, f32 faceangle, u8 *ailist)
+struct prop *chrAllocate(struct model *model, struct coord *pos, RoomNum *rooms, float faceangle, uint8_t *ailist)
 {
 	struct prop *prop = propAllocate();
 
@@ -1296,7 +1296,7 @@ void chrRemove(struct prop *prop, bool free)
 		projectilesUnrefOwner(prop);
 
 		if (g_Vars.normmplayerisrunning == false && g_MissionConfig.iscoop) {
-			s32 i;
+			int i;
 
 			for (i = 0; i < g_Vars.numaibuddies && i < ARRAYCOUNT(g_Vars.aibuddies); i++) {
 				if (g_Vars.aibuddies[i] == prop) {
@@ -1312,10 +1312,10 @@ void chrRemove(struct prop *prop, bool free)
 	}
 }
 
-void chrClearReferences(s32 propnum)
+void chrClearReferences(int propnum)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 	struct prop *prop = &g_Vars.props[propnum];
 
 	for (i = 0; i < g_NumChrSlots; i++) {
@@ -1341,9 +1341,9 @@ void chrClearReferences(s32 propnum)
 	}
 }
 
-void chrSetAnimSpeed(f32 newspeed) // This function changes animation speed for NPCs. Could be useful for eventually implementing a fast or slow anims cheat. This function could be left over from GE for that reason.
+void chrSetAnimSpeed(float newspeed) // This function changes animation speed for NPCs. Could be useful for eventually implementing a fast or slow anims cheat. This function could be left over from GE for that reason.
 {
-	s32 i;
+	int i;
 
 	g_ChrAnimSpeed = newspeed;
 
@@ -1354,7 +1354,7 @@ void chrSetAnimSpeed(f32 newspeed) // This function changes animation speed for 
 	}
 }
 
-f32 chrGetAnimSpeed(void) // Not used
+float chrGetAnimSpeed(void) // Not used
 {
 	return g_ChrAnimSpeed;
 }
@@ -1362,7 +1362,7 @@ f32 chrGetAnimSpeed(void) // Not used
 void chrUpdateAimProperties(struct chrdata *chr)
 {
 	if (chr->aimendcount >= 2) {
-		f32 mult = g_Vars.lvupdate60f / chr->aimendcount;
+		float mult = g_Vars.lvupdate60f / chr->aimendcount;
 
 		if (mult > 1) {
 			mult = 1;
@@ -1387,13 +1387,13 @@ void chrFlinchBody(struct chrdata *chr)
 	if (chr->actiontype != ACT_DEAD && chr->flinchcnt < 0) {
 		chr->flinchcnt = 1;
 		chr->hidden2 &= 0x0fff;
-		chr->hidden2 |= (u16)(rngRandom() << 13);
+		chr->hidden2 |= (uint16_t)(rngRandom() << 13);
 	}
 }
 
-void chrFlinchHead(struct chrdata *chr, f32 arg1)
+void chrFlinchHead(struct chrdata *chr, float arg1)
 {
-	s32 value;
+	int value;
 
 	if (chr->flinchcnt < 0) {
 		chr->flinchcnt = 1;
@@ -1416,9 +1416,9 @@ void chrFlinchHead(struct chrdata *chr, f32 arg1)
 	chr->hidden2 |= value << 13;
 }
 
-f32 chrGetFlinchAmount(struct chrdata *chr)
+float chrGetFlinchAmount(struct chrdata *chr)
 {
-	f32 value = chr->flinchcnt;
+	float value = chr->flinchcnt;
 
 	if (chr->hidden2 & CHRH2FLAG_HEADSHOTTED) {
 		if (value < 4) {
@@ -1452,25 +1452,25 @@ f32 chrGetFlinchAmount(struct chrdata *chr)
  * - Body flinching when shot
  * - Chrs aiming up, down, left and right
  */
-void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
+void chrHandleJointPositioned(int joint, Mtxf *mtx)
 {
-	f32 scale = 1.0f;
-	s32 lshoulderjoint;
-	s32 rshoulderjoint;
-	s32 waistjoint;
-	s32 neckjoint;
+	float scale = 1.0f;
+	int lshoulderjoint;
+	int rshoulderjoint;
+	int waistjoint;
+	int neckjoint;
 	struct coord sp138;
 	Mtxf spf8;
 	Mtxf spb8;
-	f32 gunroty;
-	f32 gunrotx;
-	f32 theta;
-	f32 gunrot;
+	float gunroty;
+	float gunrotx;
+	float theta;
+	float gunrot;
 
 	// chr is facing into the Z axis
-	f32 xrot; // eg. bending over or nodding head
-	f32 yrot; // eg. twist left/right or shaking head
-	f32 zrot; // eg. cartwheeling
+	float xrot; // eg. bending over or nodding head
+	float yrot; // eg. twist left/right or shaking head
+	float zrot; // eg. cartwheeling
 
 	if (g_CurModelChr->model->definition->skel == &g_SkelRobot) {
 		// Handle Chicago robot guns
@@ -1613,7 +1613,8 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 						&& g_CurModelChr->actiontype != ACT_DEAD
 						&& g_CurModelChr->actiontype != ACT_DIE) {
 					zrot = g_CurModelChr->drugheadsway / 360.0f * M_TAU;
-					xrot -= (28.0f - ABS(g_CurModelChr->drugheadsway)) / 250.0f * M_TAU;
+					//xrot -= (28.0f - ABS(g_CurModelChr->drugheadsway)) / 250.0f * M_TAU;
+					xrot -= (28.0f - fabsf(g_CurModelChr->drugheadsway)) / 250.0f * M_TAU;
 				}
 			}
 
@@ -1624,9 +1625,9 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 
 				if (g_CurModelChr->hidden2 & CHRH2FLAG_HEADSHOTTED) {
 					if (joint == neckjoint) {
-						f32 flinchamount = chrGetFlinchAmount(g_CurModelChr);
-						s32 flinchtype = (g_CurModelChr->hidden2 >> 13) & 7;
-						f32 mult = isskedar ? 25.0f : 60.0f;
+						float flinchamount = chrGetFlinchAmount(g_CurModelChr);
+						int flinchtype = (g_CurModelChr->hidden2 >> 13) & 7;
+						float mult = isskedar ? 25.0f : 60.0f;
 
 						if ((flinchtype & 1) == 0) {
 							mult = isskedar ? 37.5f : 85.0f;
@@ -1645,8 +1646,8 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 						}
 					}
 				} else if (joint == rshoulderjoint || joint == lshoulderjoint) {
-					s32 flinchtype = (g_CurModelChr->hidden2 >> 13) & 7;
-					f32 flinchamount = chrGetFlinchAmount(g_CurModelChr) * 0.26175770163536f;
+					int flinchtype = (g_CurModelChr->hidden2 >> 13) & 7;
+					float flinchamount = chrGetFlinchAmount(g_CurModelChr) * 0.26175770163536f;
 
 					xrot -= flinchamount;
 
@@ -1656,8 +1657,8 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 						yrot += flinchamount;
 					}
 				} else if (joint == waistjoint) {
-					f32 flinchamount;
-					s32 flinchtype;
+					float flinchamount;
+					int flinchtype;
 
 					flinchamount = chrGetFlinchAmount(g_CurModelChr);
 					flinchtype = (g_CurModelChr->hidden2 >> 13) & 7;
@@ -1680,7 +1681,7 @@ void chrHandleJointPositioned(s32 joint, Mtxf *mtx)
 
 			if (xrot != 0.0f || yrot != 0.0f || zrot != 0.0f || scale != 1.0f) {
 				struct coord sp70;
-				f32 aimangle;
+				float aimangle;
 				Mtxf tmpmtx;
 
 				aimangle = chrGetAimAngle(g_CurModelChr);
@@ -1750,7 +1751,7 @@ void chrFindEnteredRooms(struct chrdata *chr, struct coord *pos, RoomNum *rooms)
 {
 	struct coord lower;
 	struct coord upper;
-	f32 height = 110;
+	float height = 110;
 
 	if (chr && chr->race == RACE_EYESPY) {
 		struct eyespy *eyespy = chrToEyespy(chr);
@@ -1785,7 +1786,7 @@ void chrUpdateRooms(struct chrdata *chr)
 	propRegisterRooms(chr->prop);
 }
 
-void chrAdvanceAnims(struct chrdata *chr, s32 lvupdate240, bool arg2)
+void chrAdvanceAnims(struct chrdata *chr, int lvupdate240, bool arg2)
 {
 	struct model *model = chr->model;
 
@@ -1916,11 +1917,11 @@ void chrUncloakTemporarily(struct chrdata *chr)
 
 void chrUpdateCloak(struct chrdata *chr)
 {
-	s32 qty;
-	s32 ammotype;
-	u32 prevplayernum;
-	f32 fVar14;
-	s32 fadefrac;
+	int qty;
+	int ammotype;
+	uint32_t prevplayernum;
+	float fVar14;
+	int fadefrac;
 
 	// Decrement cloakpause
 	if (chr->cloakpause > 0) {
@@ -1999,7 +2000,7 @@ void chrUpdateCloak(struct chrdata *chr)
 
 		if (g_Vars.currentplayer->devicesactive & DEVICE_CLOAKDEVICE) {
 			// Cloak is active - but may or may not be in effect due to recent shooting
-			s32 qty = bgunGetReservedAmmoCount(AMMOTYPE_CLOAK);
+			int qty = bgunGetReservedAmmoCount(AMMOTYPE_CLOAK);
 
 			if (qty > 0) {
 				if (chr->hidden & CHRHFLAG_CLOAKED) {
@@ -2047,7 +2048,7 @@ void chrUpdateCloak(struct chrdata *chr)
 				chr->cloakfadefrac = fadefrac;
 			}
 		} else {
-			s32 tmp = chr->cloakfadefrac + g_Vars.lvupdate60;
+			int tmp = chr->cloakfadefrac + g_Vars.lvupdate60;
 			chr->cloakfadefrac = tmp % 127;
 		}
 	} else {
@@ -2055,7 +2056,7 @@ void chrUpdateCloak(struct chrdata *chr)
 			chr->cloakfadefinished = false;
 
 			fVar14 = 1.0f - cosf((chr->cloakfadefrac / 127.0f + chr->cloakfadefrac / 127.0f) * M_PI);
-			chr->cloakfadefrac = (254 - (s32)(fVar14 * 20.0f * 0.5f)) / 2;
+			chr->cloakfadefrac = (254 - (int)(fVar14 * 20.0f * 0.5f)) / 2;
 		}
 
 		if (chr->cloakfadefrac > 0) {
@@ -2070,15 +2071,15 @@ void chrUpdateCloak(struct chrdata *chr)
 	}
 }
 
-s32 chrGetCloakAlpha(struct chrdata *chr)
+int chrGetCloakAlpha(struct chrdata *chr)
 {
-	s32 alpha = 255;
+	int alpha = 255;
 
 	if (chr->cloakfadefrac > 0 || chr->cloakfadefinished == true) {
 		if (!chr->cloakfadefinished) {
 			alpha = 255 - chr->cloakfadefrac * 2;
 		} else {
-			f32 fVar3 = (f32)cosf((chr->cloakfadefrac / 127.0f + chr->cloakfadefrac / 127.0f) * M_PI);
+			float fVar3 = (float)cosf((chr->cloakfadefrac / 127.0f + chr->cloakfadefrac / 127.0f) * M_PI);
 			alpha = (1.0f - fVar3) * 20.0f * 0.5f;
 		}
 
@@ -2195,28 +2196,28 @@ bool chrTickBeams(struct prop *prop)
  * much of the logic is skipped, and only the logic specific to the current
  * player is executed.
  */
-s32 chrTick(struct prop *prop)
+int chrTick(struct prop *prop)
 {
 	struct modelrenderdata sp210 = {0, 1, 3};
 	struct chrdata *chr = prop->chr;
 	struct model *model = chr->model;
 	bool needsupdate;
 	bool hatvisible = true;
-	s32 lvupdate240 = g_Vars.lvupdate240;
+	int lvupdate240 = g_Vars.lvupdate240;
 	struct prop *child;
 	struct prop *next;
 	bool fulltick = false;
-	s32 race = CHRRACE(chr);
-	s32 sp1e8;
+	int race = CHRRACE(chr);
+	int sp1e8;
 	Mtxf sp1a8;
-	s32 sp1a4;
+	int sp1a4;
 	bool isrepeatframe;
 	bool isrepeatframe2;
 	struct coord sp190;
-	f32 angle;
+	float angle;
 	struct player *player;
 	struct coord sp17c;
-	f32 sp178;
+	float sp178;
 	struct hoverbikeobj *bike;
 
 
@@ -2492,7 +2493,7 @@ s32 chrTick(struct prop *prop)
 			mtx4MultMtx4InPlace(camGetWorldToScreenMtxf(), &sp1a8);
 			sp210.unk00 = &sp1a8;
 		} else if (prop->type == PROPTYPE_PLAYER) {
-			f32 sp130;
+			float sp130;
 			player = g_Vars.players[playermgrGetPlayerNumByProp(prop)];
 
 			if (player->bondmovemode == MOVEMODE_BIKE) {
@@ -2501,7 +2502,7 @@ s32 chrTick(struct prop *prop)
 				sp130 = bike->w * 1000;
 
 				sp17c.x = cosf(sp178) * sp130;
-				sp17c.y = ABS(bike->w) * 200 + 25;
+				sp17c.y = fabsf(bike->w) * 200 + 25;
 				sp17c.z = sinf(-sp178) * sp130;
 
 				mtx4LoadTranslation(&sp17c, &sp1a8);
@@ -2525,18 +2526,18 @@ s32 chrTick(struct prop *prop)
 		}
 
 		{
-			f32 limit;
+			float limit;
 			struct anim *anim;
 			struct coord *campos = &g_Vars.currentplayer->cam_pos;
-			f32 xdiff;
-			f32 ydiff;
-			f32 zdiff;
-			f32 sp114 = camGetLodScaleZ();
+			float xdiff;
+			float ydiff;
+			float zdiff;
+			float sp114 = camGetLodScaleZ();
 			bool restore = false;
-			f32 prevfrac;
-			s32 prevframea;
-			f32 prevfrac2;
-			s32 prevframe2a;
+			float prevfrac;
+			int prevframea;
+			float prevfrac2;
+			int prevframe2a;
 			anim = model->anim;
 			modelSetMatricesWithAnim(&sp210, model);
 
@@ -2675,9 +2676,9 @@ void chrDropItemsForOwnerReap(struct chrdata *chr)
 	chr->hidden |= CHRHFLAG_DROPPINGITEM;
 }
 
-u8 chrbloodstaincolour[] = { 64, 10, 10 }; //Default blood color
+uint8_t chrbloodstaincolour[] = { 64, 10, 10 }; //Default blood color
 
-void chrSetBloodColour(u8 *arg0)
+void chrSetBloodColour(uint8_t *arg0)
 {
 	chrbloodstaincolour[0] = arg0[0];
 	chrbloodstaincolour[1] = arg0[1];
@@ -2691,9 +2692,9 @@ void chr0f02472c(void)
 
 bool chr0f024738(struct chrdata *chr)
 {
-	s16 *propnumptr;
-	s16 propnums[256];
-	s32 i;
+	int16_t *propnumptr;
+	int16_t propnums[256];
+	int i;
 	struct var80062960 *thing;
 	struct coord *campos;
 	bool result = false;
@@ -2750,7 +2751,7 @@ bool chr0f024738(struct chrdata *chr)
 
 						mtx3ToMtx4(obj->realrot, &thing->unk02c);
 						mtx4SetTranslation(&obj->prop->pos, &thing->unk02c);
-						mtx000172f0(thing->unk02c.m, thing->unk06c.m);
+						mtxInvertAffineMatrix(thing->unk02c.m, thing->unk06c.m);
 
 						campos = &g_Vars.currentplayer->cam_pos;
 
@@ -2790,20 +2791,20 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 {
 	struct model *rootmodel;
 	struct modelnode *bboxnode;
-	f32 value;
+	float value;
 	struct doorobj *door;
 	struct modelrodata_bbox *bbox;
 	struct var80062960 *thing;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 	bool done;
 	Mtxf spb4;
-	s32 spb0;
+	int spb0;
 	struct chrdata *chr;
 	struct coord spa0;
 	struct coord sp94;
 	struct coord sp88;
-	f32 sp80[2];
+	float sp80[2];
 	Mtxf *mtx;
 	struct coord sp70;
 	struct coord sp64;
@@ -2997,7 +2998,7 @@ void chrRenderAttachedObject(struct prop *prop, struct modelrenderdata *renderda
 	}
 }
 
-void chrGetBloodColour(s16 bodynum, u8 *colour1, u32 *colour2)
+void chrGetBloodColour(int16_t bodynum, uint8_t *colour1, uint32_t *colour2)
 {
 	switch (bodynum) {
 	case BODY_ELVIS1:
@@ -3062,15 +3063,15 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 {
 	struct chrdata *chr = prop->chr;
 	struct model *model = chr->model;
-	f32 shadecolourfracs[4];
-	s32 shademode;
-	s32 sp100;
-	s32 alpha;
+	float shadecolourfracs[4];
+	int shademode;
+	int sp100;
+	int alpha;
 	struct eyespy *eyespy;
 	struct prop *child;
-	f32 xrayalphafrac;
-	u8 bloodcolour[4];
-	u8 highlightcolour = 0; // Used to highlight characters in Combat Simulator
+	float xrayalphafrac;
+	uint8_t bloodcolour[4];
+	uint8_t highlightcolour = 0; // Used to highlight characters in Combat Simulator
 
 	// Don't render the eyespy if we're the one controlling it
 	if (CHRRACE(chr) == RACE_EYESPY) {
@@ -3094,7 +3095,7 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 	}
 
 	if (chr->aibot && chr->aibot->fadeintimer60 > 0) {
-		alpha = (f32)alpha * (TICKS(120) - chr->aibot->fadeintimer60) * (1.0f / TICKS(120));
+		alpha = (float)alpha * (TICKS(120) - chr->aibot->fadeintimer60) * (1.0f / TICKS(120));
 	}
 
 	chrGetBloodColour(chr->bodynum, bloodcolour, NULL);
@@ -3102,8 +3103,8 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 	alpha *= objCalculateFadeDistOpacityFrac(prop, modelGetEffectiveScale(model));
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
-		f32 fadedist;
-		f32 chrdist = sqrtf(ERASERSQDIST(prop->pos.f));
+		float fadedist;
+		float chrdist = sqrtf(ERASERSQDIST(prop->pos.f));
 
 		if (chrdist > g_Vars.currentplayer->eraserpropdist) {
 			return gdl;
@@ -3151,7 +3152,7 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 	if (shademode != SHADEMODE_XLU && alpha > 0) {
 		struct modelrenderdata renderdata = {0, 1, 3};
 		struct screenbox screenbox;
-		s32 colour[4]; // rgba levels, but allowing > 256 temporarily
+		int colour[4]; // rgba levels, but allowing > 256 temporarily
 
 		if (xlupass && chr->cloakfadefrac > 0 && !chr->cloakfadefinished) {
 			gdl = chrRenderCloak(gdl, chr->prop, chr->prop);
@@ -3219,7 +3220,7 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 		if (alpha < 0xff) {
 			renderdata.unk30 = 8;
-			renderdata.envcolour |= (u8)alpha;
+			renderdata.envcolour |= (uint8_t)alpha;
 		} else {
 			renderdata.unk30 = 7;
 		}
@@ -3293,7 +3294,7 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		// Render shadow
 		if (xlupass) {
 			if (!chr->onladder && chr->actiontype != ACT_SKJUMP) {
-				s32 shadowalpha = 0;
+				int shadowalpha = 0;
 
 				if (chr->ground == 0) {
 					shadowalpha = 1;
@@ -3309,8 +3310,8 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 				// not being in an active room and also being out of the draw
 				// distance.
 				if (shadowalpha > -65536.0f && chr->ground < 65536.0f) {
-					f32 gaptoground = prop->pos.y - chr->ground;
-					f32 radius;
+					float gaptoground = prop->pos.y - chr->ground;
+					float radius;
 
 					if (gaptoground <= 400 && g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
 						if (chr->bodynum == BODY_SKEDAR || chr->bodynum == BODY_SKEDARKING) {
@@ -3326,7 +3327,7 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 						} else if (shademode == SHADEMODE_FRAC) {
 							shadowalpha = (1.0f - shadecolourfracs[3]) * ((alpha * 100) >> 8);
 						} else {
-							shadowalpha = (s32)(alpha * 100) >> 8;
+							shadowalpha = (int)(alpha * 100) >> 8;
 						}
 
 						if (gaptoground >= 150.0f) {
@@ -3357,10 +3358,10 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 struct shieldhit *g_ShieldHits = NULL;
 
-void chrEmitSparks(struct chrdata *chr, struct prop *prop, s32 hitpart, struct coord *coord, struct coord *coord2, struct chrdata *chr2)
+void chrEmitSparks(struct chrdata *chr, struct prop *prop, int hitpart, struct coord *coord, struct coord *coord2, struct chrdata *chr2)
 {
 	struct prop *chrprop = chr->prop;
-	s32 race;
+	int race;
 
 	if (chrIsUsingPaintball(chr2)) {
 		sparksCreate(chrprop->rooms[0], chrprop, coord, coord2, 0, SPARKTYPE_PAINT);
@@ -3405,11 +3406,11 @@ void chrEmitSparks(struct chrdata *chr, struct prop *prop, s32 hitpart, struct c
 	sparksCreate(chrprop->rooms[0], chrprop, coord, coord2, 0, SPARKTYPE_FLESH);
 }
 
-void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struct coord *arg3)
+void chr0f0260c4(struct model *model, int hitpart, struct modelnode *node, struct coord *arg3)
 {
 	struct modelnode *bestnode = NULL;
-	s32 mindist = 0x7fffffff;
-	s32 bestcoords[3];
+	int mindist = 0x7fffffff;
+	int bestcoords[3];
 	struct modelnode *curnode;
 	Gfx *gdlptr;
 	Gfx *gdlptr2;
@@ -3418,13 +3419,13 @@ void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struc
 	struct coord relpos;
 	struct coord spd4;
 	struct coord spc8;
-	s32 spbc[3];
-	s32 alpha = 20 + (rngRandom() % 50);
+	int spbc[3];
+	int alpha = 20 + (rngRandom() % 50);
 	struct modelrodata_dl *rodata;
 	struct modelrwdata_dl *rwdata;
-	s32 spac = 0;
-	s32 op;
-	s32 nodetype;
+	int spac = 0;
+	int op;
+	int nodetype;
 
 	modelNodeGetModelRelativePosition(model, modelNodeFindMtxNode(node), &relpos);
 
@@ -3436,7 +3437,7 @@ void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struc
 	curnode = node;
 
 	while (curnode) {
-		s32 nodetype = curnode->type & 0xff;
+		int nodetype = curnode->type & 0xff;
 
 		switch (nodetype) {
 		case MODELNODETYPE_DL:
@@ -3466,11 +3467,7 @@ void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struc
 			// Iterate the primary DL, and once the end is reached
 			// iterate the secondary DL if we have one.
 			while (true) {
-#ifdef PLATFORM_N64
-				op = *(s8 *)&gdlptr->words.w0;
-#else
-				op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
-#endif
+				op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 				if (op == G_ENDDL) {
 					if (gdlptr2) {
@@ -3485,32 +3482,32 @@ void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struc
 				} else {
 					// Note: We should have found an MTX op before VTX.
 					if (op == G_VTX) {
-						u8 *ptr = (u8 *)&gdlptr->words.w0;
-						u32 word = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
-						s32 numverts;
-						s32 i;
+						uint8_t *ptr = (uint8_t *)&gdlptr->words.w0;
+						uint32_t word = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
+						int numverts;
+						int i;
 
 						vertices = (Vtx *)((uintptr_t)rodata->vertices + word);
-						numverts = (u32)ptr[GFX_W0_BYTE(1)] / 16 + 1;
+						numverts = (uint32_t)ptr[GFX_W0_BYTE(1)] / 16 + 1;
 
 						if (posnode) {
 							for (i = 0; i < numverts; i++) {
-								s32 x = spbc[0] - vertices[i].x;
-								s32 y = spbc[1] - vertices[i].y;
-								s32 z = spbc[2] - vertices[i].z;
-								s32 dist = x * x + y * y + z * z;
+								int x = spbc[0] - vertices[i].x;
+								int y = spbc[1] - vertices[i].y;
+								int z = spbc[2] - vertices[i].z;
+								int dist = x * x + y * y + z * z;
 
 								if (dist < mindist) {
 									mindist = dist;
 									bestnode = curnode;
-									bestcoords[0] = vertices[i].x + (s32)spd4.f[0];
-									bestcoords[1] = vertices[i].y + (s32)spd4.f[1];
-									bestcoords[2] = vertices[i].z + (s32)spd4.f[2];
+									bestcoords[0] = vertices[i].x + (int)spd4.f[0];
+									bestcoords[1] = vertices[i].y + (int)spd4.f[1];
+									bestcoords[2] = vertices[i].z + (int)spd4.f[2];
 								}
 							}
 						}
 					} else if (op == G_MTX) {
-						u32 addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
+						uint32_t addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
 						posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtxf));
 						modelNodeGetModelRelativePosition(model, posnode, &spd4);
 
@@ -3587,7 +3584,7 @@ void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struc
 			}
 
 			while (true) {
-				s32 op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
+				int op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 				if (op == G_ENDDL) {
 					if (gdlptr2) {
@@ -3602,22 +3599,22 @@ void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struc
 				} else {
 					// Note: We should have found an MTX op before VTX.
 					if (op == G_VTX) {
-						u8 *ptr = (u8 *)&gdlptr->words.w0;
-						u32 word = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
+						uint8_t *ptr = (uint8_t *)&gdlptr->words.w0;
+						uint32_t word = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
 						Vtx *vertices = (Vtx *)((uintptr_t)rodata->vertices + word);
-						s32 numverts = (u32)ptr[GFX_W0_BYTE(1)] / 16 + 1;
-						s32 i;
+						int numverts = (uint32_t)ptr[GFX_W0_BYTE(1)] / 16 + 1;
+						int i;
 
 						if (posnode) {
 							for (i = 0; i < numverts; i++) {
-								s32 x = vertices[i].x + (s32)spd4.f[0];
-								s32 y = vertices[i].y + (s32)spd4.f[1];
-								s32 z = vertices[i].z + (s32)spd4.f[2];
+								int x = vertices[i].x + (int)spd4.f[0];
+								int y = vertices[i].y + (int)spd4.f[1];
+								int z = vertices[i].z + (int)spd4.f[2];
 
 								if (x == bestcoords[0] && y == bestcoords[1] && z == bestcoords[2]) {
 									if ((uintptr_t)rwdata->colours == ALIGN8((uintptr_t)rodata->vertices + rodata->numvertices * sizeof(Vtx))) {
 										Col *colours = vtxstoreAllocate(rodata->numcolours, VTXSTORETYPE_CHRCOL, 0, 0);
-										s32 j;
+										int j;
 
 										if (colours) {
 											for (j = 0; j < rodata->numcolours; j++) {
@@ -3631,7 +3628,7 @@ void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struc
 									}
 
 									if ((uintptr_t)rwdata->colours != ALIGN8((uintptr_t)rodata->vertices + rodata->numvertices * sizeof(Vtx))) {
-										s32 offset = rwdata->vertices[word / sizeof(Vtx) + i].colour >> 2;
+										int offset = rwdata->vertices[word / sizeof(Vtx) + i].colour >> 2;
 										Col *colours = (Col *) ((uintptr_t)rwdata->colours + spac);
 
 										colours[offset].a = alpha;
@@ -3640,7 +3637,7 @@ void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struc
 							}
 						}
 					} else if (op == G_MTX) {
-						u32 addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
+						uint32_t addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
 						posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtxf));
 						modelNodeGetModelRelativePosition(model, posnode, &spd4);
 					} else if (op == G_COL) {
@@ -3683,27 +3680,27 @@ void chr0f0260c4(struct model *model, s32 hitpart, struct modelnode *node, struc
  * This happens when the chr is shot, which creates the illusion of blood
  * soaking through their clothing.
  */
-void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct coord *arg3)
+void chrBruise(struct model *model, int hitpart, struct modelnode *node, struct coord *arg3)
 {
 	struct modelnode *bestnode = NULL;
 	bool ok;
-	s32 nodetype;
-	s32 mindist = 0x7fffffff;
+	int nodetype;
+	int mindist = 0x7fffffff;
 	Vtx *vertices;
-	s32 bestcoords[3];
+	int bestcoords[3];
 	struct modelnode *curnode;
 	Gfx *gdlptr;
 	Gfx *gdlptr2;
-	s32 op;
+	int op;
 	struct modelnode *posnode = NULL;
 	struct coord relpos;
 	struct coord spd4;
 	struct coord spc8;
-	s32 spbc[3];
-	s32 alpha = 20 + (rngRandom() % 50);
+	int spbc[3];
+	int alpha = 20 + (rngRandom() % 50);
 	struct modelrodata_dl *rodata;
 	struct modelrwdata_dl *rwdata;
-	s32 spac = 0;
+	int spac = 0;
 
 	modelNodeGetModelRelativePosition(model, modelNodeFindMtxNode(node), &relpos);
 
@@ -3745,11 +3742,7 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
 			// Iterate the primary DL, and once the end is reached
 			// iterate the secondary DL if we have one.
 			while (true) {
-#ifdef PLATFORM_N64
-				op = *(s8 *)&gdlptr->words.w0;
-#else
-				op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
-#endif
+				op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 				if (op == G_ENDDL) {
 					if (gdlptr2) {
@@ -3764,32 +3757,32 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
 				} else {
 					// Note: We should have found an MTX op before VTX.
 					if (op == G_VTX) {
-						u8 *ptr = (u8 *)&gdlptr->words.w0;
-						u32 word = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
-						s32 numverts;
-						s32 i;
+						uint8_t *ptr = (uint8_t *)&gdlptr->words.w0;
+						uint32_t word = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
+						int numverts;
+						int i;
 
 						vertices = (Vtx *)((uintptr_t)rodata->vertices + word);
-						numverts = (u32)ptr[GFX_W0_BYTE(1)] / 16 + 1;
+						numverts = (uint32_t)ptr[GFX_W0_BYTE(1)] / 16 + 1;
 
 						if (posnode) {
 							for (i = 0; i < numverts; i++) {
-								s32 x = spbc[0] - vertices[i].x;
-								s32 y = spbc[1] - vertices[i].y;
-								s32 z = spbc[2] - vertices[i].z;
-								s32 dist = x * x + y * y + z * z;
+								int x = spbc[0] - vertices[i].x;
+								int y = spbc[1] - vertices[i].y;
+								int z = spbc[2] - vertices[i].z;
+								int dist = x * x + y * y + z * z;
 
 								if (dist < mindist) {
 									mindist = dist;
 									bestnode = curnode;
-									bestcoords[0] = vertices[i].x + (s32)spd4.f[0];
-									bestcoords[1] = vertices[i].y + (s32)spd4.f[1];
-									bestcoords[2] = vertices[i].z + (s32)spd4.f[2];
+									bestcoords[0] = vertices[i].x + (int)spd4.f[0];
+									bestcoords[1] = vertices[i].y + (int)spd4.f[1];
+									bestcoords[2] = vertices[i].z + (int)spd4.f[2];
 								}
 							}
 						}
 					} else if (op == G_MTX) {
-						u32 addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
+						uint32_t addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
 						posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtxf));
 						modelNodeGetModelRelativePosition(model, posnode, &spd4);
 
@@ -3849,7 +3842,7 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
 		switch (nodetype) {
 		case MODELNODETYPE_BBOX:
 			if (g_Vars.hitboundscount) {
-				s32 i;
+				int i;
 
 				ok = false;
 
@@ -3885,7 +3878,7 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
 				}
 
 				while (true) {
-				s32 op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
+				int op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 					if (op == G_ENDDL) {
 						if (gdlptr2) {
@@ -3900,26 +3893,26 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
 					} else {
 						// Note: We should have found an MTX op before VTX.
 						if (op == G_VTX) {
-							u8 *ptr = (u8 *)&gdlptr->words.w0;
-							u32 word = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
+							uint8_t *ptr = (uint8_t *)&gdlptr->words.w0;
+							uint32_t word = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
 							Vtx *vertices = (Vtx *)((uintptr_t)rodata->vertices + word);
-							s32 numverts = (u32)ptr[GFX_W0_BYTE(1)] / 16 + 1;
-							s32 i;
+							int numverts = (uint32_t)ptr[GFX_W0_BYTE(1)] / 16 + 1;
+							int i;
 
 							if (posnode) {
 								for (i = 0; i < numverts; i++) {
-									s32 coordinate = vertices[i].x + (s32)spd4.f[0];
+									int coordinate = vertices[i].x + (int)spd4.f[0];
 
 									if (coordinate == bestcoords[0]) {
-										coordinate = vertices[i].y + (s32)spd4.f[1];
+										coordinate = vertices[i].y + (int)spd4.f[1];
 
 										if (coordinate == bestcoords[1]) {
-											coordinate = vertices[i].z + (s32)spd4.f[2];
+											coordinate = vertices[i].z + (int)spd4.f[2];
 
 											if (coordinate == bestcoords[2]) {
 												if ((uintptr_t)rwdata->colours == ALIGN8((uintptr_t)rodata->vertices + rodata->numvertices * sizeof(Vtx))) {
 													Col *colours = vtxstoreAllocate(rodata->numcolours, VTXSTORETYPE_CHRCOL, 0, 0);
-													s32 j;
+													int j;
 
 													if (colours) {
 														for (j = 0; j < rodata->numcolours; j++) {
@@ -3931,7 +3924,7 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
 												}
 
 												if ((uintptr_t)rwdata->colours != ALIGN8((uintptr_t)rodata->vertices + rodata->numvertices * sizeof(Vtx))) {
-													s32 offset = rwdata->vertices[word / sizeof(Vtx) + i].colour >> 2;
+													int offset = rwdata->vertices[word / sizeof(Vtx) + i].colour >> 2;
 													Col *colours = (Col *) ((uintptr_t)rwdata->colours + spac);
 
 													colours[offset].a = alpha;
@@ -3942,7 +3935,7 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
 								}
 							}
 						} else if (op == G_MTX) {
-							u32 addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
+							uint32_t addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
 							posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtxf));
 							modelNodeGetModelRelativePosition(model, posnode, &spd4);
 						} else if (op == G_COL) {
@@ -3995,7 +3988,7 @@ void chrBruise(struct model *model, s32 hitpart, struct modelnode *node, struct 
  * each pointer found, the vertices at that offset in the table are adjusted
  * randomly. Lastly, every colour in the node's colour table is darkened.
  */
-void chrDisfigure(struct chrdata *chr, struct coord *exppos, f32 damageradius)
+void chrDisfigure(struct chrdata *chr, struct coord *exppos, float damageradius)
 {
 	struct modelnode *node;
 	struct modelrodata_dl *rodata;
@@ -4007,10 +4000,10 @@ void chrDisfigure(struct chrdata *chr, struct coord *exppos, f32 damageradius)
 	Gfx *gdlptr2;
 	struct modelnode *posnode = NULL;
 	struct coord pos;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
-	u32 rand = rngRandom();
+	uint32_t rand = rngRandom();
 
 	if (g_Vars.mplayerisrunning || !chrIsDead(chr)) {
 		return;
@@ -4075,7 +4068,7 @@ void chrDisfigure(struct chrdata *chr, struct coord *exppos, f32 damageradius)
 					}
 
 					while (true) {
-						s32 op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
+						int op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 						if (op == G_ENDDL) {
 							if (gdlptr2 == NULL) {
@@ -4092,40 +4085,40 @@ void chrDisfigure(struct chrdata *chr, struct coord *exppos, f32 damageradius)
 							// MTX sets posnode.
 							if (op == G_VTX) {
 								// Iterate the vertex table and fudge them
-								u8 *ptr = (u8 *)&gdlptr->words.w0;
-								s32 word = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
-								s32 numverts;
+								uint8_t *ptr = (uint8_t *)&gdlptr->words.w0;
+								int word = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
+								int numverts;
 
 								vertices = (Vtx *)((uintptr_t)rwdata->vertices + word);
-								numverts = (u32)ptr[GFX_W0_BYTE(1)] / 16 + 1;
+								numverts = (uint32_t)ptr[GFX_W0_BYTE(1)] / 16 + 1;
 
 								if (posnode) {
 									for (i = 0; i < numverts; i++) {
-										rng2SetSeed(rand + vertices[i].x + vertices[i].y + vertices[i].z + (u32)pos.f[0] + (u32)pos.f[1] + (u32)pos.f[2]);
+										rng2SetSeed(rand + vertices[i].x + vertices[i].y + vertices[i].z + (uint32_t)pos.f[0] + (uint32_t)pos.f[1] + (uint32_t)pos.f[2]);
 
 										if (vertices[i].x > 0) {
-											vertices[i].x -= (s16)(random2() % 20);
+											vertices[i].x -= (int16_t)(random2() % 20);
 										} else if (vertices[i].x < 0) {
-											vertices[i].x += (s16)(random2() % 20);
+											vertices[i].x += (int16_t)(random2() % 20);
 										}
 
 										if (vertices[i].y > 0) {
-											vertices[i].y -= (s16)(random2() % 20);
+											vertices[i].y -= (int16_t)(random2() % 20);
 										} else if (vertices[i].y < 0) {
-											vertices[i].y += (s16)(random2() % 20);
+											vertices[i].y += (int16_t)(random2() % 20);
 										}
 
 										if (vertices[i].z > 0) {
-											vertices[i].z -= (s16)(random2() % 20);
+											vertices[i].z -= (int16_t)(random2() % 20);
 										} else if (vertices[i].z < 0) {
 											// @bug: should be z instead of y
-											vertices[i].y += (s16)(random2() % 20);
+											vertices[i].y += (int16_t)(random2() % 20);
 										}
 									}
 								}
 							} else if (op == G_MTX) {
 								// Get the position of the node relative to the model
-								u32 addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
+								uint32_t addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
 								posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtxf));
 								modelNodeGetModelRelativePosition(model, posnode, &pos);
 							}
@@ -4137,7 +4130,7 @@ void chrDisfigure(struct chrdata *chr, struct coord *exppos, f32 damageradius)
 					// Darken colours
 					for (i = 0; i < rodata->numcolours; i++) {
 						for (j = 0; j < 3; j++) {
-							s32 tmp = rwdata->colours[i].bytes[j];
+							int tmp = rwdata->colours[i].bytes[j];
 							tmp = tmp * 5 / 16;
 
 							if (tmp < 0) {
@@ -4177,11 +4170,11 @@ void chrDisfigure(struct chrdata *chr, struct coord *exppos, f32 damageradius)
 	}
 }
 
-f32 chrGetHitRadius(struct chrdata *chr)
+float chrGetHitRadius(struct chrdata *chr)
 {
-	s32 i;
-	f32 result;
-	f32 highest = 0;
+	int i;
+	float result;
+	float highest = 0;
 
 	if (chr->model) {
 		result = modelGetEffectiveScale(chr->model);
@@ -4189,7 +4182,7 @@ f32 chrGetHitRadius(struct chrdata *chr)
 		for (i = 0; i < 2; i++) {
 			if (chr->weapons_held[i]) {
 				struct defaultobj *obj = chr->weapons_held[i]->obj;
-				f32 value = modelGetEffectiveScale(obj->model) * chr->model->scale;
+				float value = modelGetEffectiveScale(obj->model) * chr->model->scale;
 
 				if (value > highest) {
 					highest = value;
@@ -4216,22 +4209,22 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 	struct chrdata *chr = prop->chr;
 
 	if ((chr->chrflags & CHRCFLAG_HIDDEN) == 0 && (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK)) {
-		f32 radius = chrGetHitRadius(chr);
+		float radius = chrGetHitRadius(chr);
 
 		if (prop->z - radius < shotdata->distance) {
 			struct model *model = chr->model;
-			s32 hitpart = 0;
+			int hitpart = 0;
 			struct modelnode *node = NULL;
-			s32 spb8 = 0;
+			int spb8 = 0;
 			struct hitthing sp88;
-			s32 sp84 = 0;
+			int sp84 = 0;
 			struct modelnode *sp80 = NULL;
 			Mtxf *rootmtx = modelGetRootMtx(model);
 			struct prop *next;
 			struct prop *child;
-			f32 sp70;
+			float sp70;
 			Mtxf *mtx;
-			f32 sp68;
+			float sp68;
 
 			if (func0f06b39c(&shotdata->gunpos2d, &shotdata->gundir2d, (struct coord *)rootmtx->m[3], radius)) {
 				spb8 = 1;
@@ -4255,7 +4248,7 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 					hitpart = modelTestForHit(model, &shotdata->gunpos2d, &shotdata->gundir2d, &node);
 
 					while (hitpart > 0) {
-						if (func0f084594(model, node, &shotdata->gunpos2d, &shotdata->gundir2d, &sp88, &sp84, &sp80)) {
+						if (objTestShieldHit(model, node, &shotdata->gunpos2d, &shotdata->gundir2d, &sp88, &sp84, &sp80)) {
 							mtx4TransformVec(&model->matrices[sp84], &sp88.pos, &spdc);
 							mtx4TransformVecInPlace(camGetProjectionMtxF(), &spdc);
 							mtx4RotateVec(&model->matrices[sp84], &sp88.unk0c, &spd0);
@@ -4315,10 +4308,10 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 	Mtxf spb0;
 	struct coord hitpos;
 	struct coord sp98;
-	s16 sp90[3];
-	u8 ismelee = false;
+	int16_t sp90[3];
+	uint8_t ismelee = false;
 	struct weaponfunc *func = gsetGetWeaponFunction(&shotdata->gset);
-	f32 shield;
+	float shield;
 
 	if (func && (func->type & 0xff) == INVENTORYFUNCTYPE_MELEE) {
 		ismelee = true;
@@ -4376,8 +4369,8 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				// Shot a chr's weapon
 				struct weaponobj *weapon = hit->prop->weapon;
 				struct surfacetype *type;
-				s32 surfacetype;
-				s32 index;
+				int surfacetype;
+				int index;
 
 				// Shooting an explosive in a chr's hand causes it to explode
 				if (weapon->weaponnum == WEAPON_GRENADE
@@ -4432,7 +4425,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				} 
 				 else {
 				// Shot a chr in the flesh
-				s32 race = CHRRACE(chr);
+				int race = CHRRACE(chr);
 				struct coord sp5c;
 				Mtxf *sp58 = modelFindNodeMtx(hit->model, hit->bboxnode, 0);
 
@@ -4446,7 +4439,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 						&& race != RACE_EYESPY
 						&& !ismelee
 						&& shotdata->gset.weaponnum != WEAPON_TRANQUILIZER) {
-					u8 darker;
+					uint8_t darker;
 
 					if (chr->bodynum == BODY_MRBLONDE || race == RACE_SKEDAR) {
 						darker = true;
@@ -4466,7 +4459,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 }
 
 //Not used. Probably debug for devs to preview different animations
-/*void chr0f0284ac(s32 arg0)
+/*void chr0f0284ac(int arg0)
 {
 	g_SelectedAnimNum -= arg0;
 
@@ -4476,7 +4469,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 }*/
 
 //Not used. Same as above
-/*void chr0f0284f4(s32 arg0)
+/*void chr0f0284f4(int arg0)
 {
 	g_SelectedAnimNum += arg0;
 
@@ -4485,10 +4478,10 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 	}
 }*/
 
-void chrsCheckForNoise(f32 noiseradius)
+void chrsCheckForNoise(float noiseradius)
 {
-	s32 i;
-	f32 add = 0.075f;
+	int i;
+	float add = 0.075f;
 
 	for (i = 0; i < g_NumChrSlots; i++) {
 		if (g_ChrSlots[i].model) {
@@ -4497,7 +4490,7 @@ void chrsCheckForNoise(f32 noiseradius)
 			if (prop && prop->type == PROPTYPE_CHR &&
 					chrGetTargetProp(&g_ChrSlots[i]) == g_Vars.currentplayer->prop) {
 
-				f32 distance = chrGetDistanceToCurrentPlayer(&g_ChrSlots[i]);
+				float distance = chrGetDistanceToCurrentPlayer(&g_ChrSlots[i]);
 
 				if (distance == 0) {
 					distance = 2;
@@ -4513,11 +4506,11 @@ void chrsCheckForNoise(f32 noiseradius)
 	}
 }
 
-struct chrdata *chrFindByLiteralId(s32 chrnum)
+struct chrdata *chrFindByLiteralId(int chrnum)
 {
-	s32 lower = 0;
-	s32 upper = g_NumChrs;
-	s32 i;
+	int lower = 0;
+	int upper = g_NumChrs;
+	int i;
 
 	while (upper >= lower) {
 		i = (lower + upper) / 2;
@@ -4536,12 +4529,12 @@ struct chrdata *chrFindByLiteralId(s32 chrnum)
 	return NULL;
 }
 
-struct prop *chrGetHeldProp(struct chrdata *chr, s32 hand)
+struct prop *chrGetHeldProp(struct chrdata *chr, int hand)
 {
 	return chr->weapons_held[hand];
 }
 
-struct prop *chrGetHeldUsableProp(struct chrdata *chr, s32 hand)
+struct prop *chrGetHeldUsableProp(struct chrdata *chr, int hand)
 {
 	struct prop *prop = chr->weapons_held[hand];
 
@@ -4569,7 +4562,7 @@ struct prop *chrGetTargetProp(struct chrdata *chr)
 	return ret;
 }
 
-bool chrUpdateGeometry(struct prop *prop, u8 **start, u8 **end)
+bool chrUpdateGeometry(struct prop *prop, uint8_t **start, uint8_t **end)
 {
 	struct chrdata *chr = prop->chr;
 
@@ -4614,7 +4607,7 @@ bool chrUpdateGeometry(struct prop *prop, u8 **start, u8 **end)
 	return false;
 }
 
-void chrGetBbox(struct prop *prop, f32 *radius, f32 *ymax, f32 *ymin)
+void chrGetBbox(struct prop *prop, float *radius, float *ymax, float *ymin)
 {
 	struct chrdata *chr = prop->chr;
 
@@ -4627,13 +4620,13 @@ void chrGetBbox(struct prop *prop, f32 *radius, f32 *ymax, f32 *ymin)
 	}
 }
 
-f32 chrGetGround(struct prop *prop)
+float chrGetGround(struct prop *prop)
 {
 	struct chrdata *chr = prop->chr;
 	return chr->ground;
 }
 
-bool chrCalculateAutoAim(struct prop *prop, struct coord *arg1, f32 *arg2, f32 *arg3)
+bool chrCalculateAutoAim(struct prop *prop, struct coord *arg1, float *arg2, float *arg3)
 {
 	struct chrdata *chr = prop->chr;
 
@@ -4692,7 +4685,7 @@ bool chrCalculateAutoAim(struct prop *prop, struct coord *arg1, f32 *arg2, f32 *
 	return false;
 }
 
-bool chr0f028d50(struct prop *arg0, struct prop *arg1, struct modelnode *node, struct model *model, s32 *total)
+bool chr0f028d50(struct prop *arg0, struct prop *arg1, struct modelnode *node, struct model *model, int *total)
 {
 	if (arg1 == arg0) {
 		*total += modelFindNodeMtxIndex(node, 0);
@@ -4712,9 +4705,9 @@ bool chr0f028d50(struct prop *arg0, struct prop *arg1, struct modelnode *node, s
 	return false;
 }
 
-s32 chr0f028e18(struct prop *arg0, struct modelnode *node, struct model *model, struct prop *arg3)
+int chr0f028e18(struct prop *arg0, struct modelnode *node, struct model *model, struct prop *arg3)
 {
-	s32 result = 0;
+	int result = 0;
 
 	if (chr0f028d50(arg3, arg0, node, model, &result)) {
 		return result;
@@ -4723,7 +4716,7 @@ s32 chr0f028e18(struct prop *arg0, struct modelnode *node, struct model *model, 
 	return -1;
 }
 
-bool chr0f028e6c(s32 arg0, struct prop *prop, struct prop **propptr, struct modelnode **nodeptr, struct model **modelptr)
+bool chr0f028e6c(int arg0, struct prop *prop, struct prop **propptr, struct modelnode **nodeptr, struct model **modelptr)
 { \
 	while (true) {
 		bool result = false;
@@ -4757,11 +4750,11 @@ bool chr0f028e6c(s32 arg0, struct prop *prop, struct prop **propptr, struct mode
 	}
 }
 
-void shieldhitCreate(struct prop *prop, f32 shield, struct prop *arg2, struct modelnode *node, struct model *model, s32 side, s16 *arg6)
+void shieldhitCreate(struct prop *prop, float shield, struct prop *arg2, struct modelnode *node, struct model *model, int side, int16_t *arg6)
 {
 	struct shieldhit *shieldhit = NULL;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	// Find any slot that isn't in use (ie. prop is NULL)
 	for (i = 0; i < 20; i++) {
@@ -4774,7 +4767,7 @@ void shieldhitCreate(struct prop *prop, f32 shield, struct prop *arg2, struct mo
 	// If all slots are in use, take the oldest one
 	if (shieldhit == NULL) {
 		struct shieldhit *oldesthit = NULL;
-		s32 oldestframe = g_Vars.lvframe60;
+		int oldestframe = g_Vars.lvframe60;
 
 		for (i = 0; i < 20; i++) {
 			if (g_ShieldHits[i].lvframe60 < oldestframe) {
@@ -4827,7 +4820,7 @@ void shieldhitCreate(struct prop *prop, f32 shield, struct prop *arg2, struct mo
 			}
 
 			if (pass) {
-				s32 index = chr0f028e18(arg2, node, model, prop);
+				int index = chr0f028e18(arg2, node, model, prop);
 
 				if (index < 32) {
 					shieldhit->unk018[index] = 0;
@@ -4848,8 +4841,8 @@ void shieldhitCreate(struct prop *prop, f32 shield, struct prop *arg2, struct mo
 
 void shieldhitRemove(struct shieldhit *shieldhit)
 {
-	s32 exists = false;
-	s32 i;
+	int exists = false;
+	int i;
 	struct prop *prop = shieldhit->prop;
 	shieldhit->prop = NULL;
 
@@ -4887,7 +4880,7 @@ void shieldhitRemove(struct shieldhit *shieldhit)
 
 void shieldhitsRemoveByProp(struct prop *prop)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < 20; i++) {
 		if (prop == g_ShieldHits[i].prop) {
@@ -4896,9 +4889,9 @@ void shieldhitsRemoveByProp(struct prop *prop)
 	}
 }
 
-s32 chr0f02932c(struct prop *prop, s32 arg1)
+int chr0f02932c(struct prop *prop, int arg1)
 {
-	s32 result = -1;
+	int result = -1;
 	struct modelnode *node2;
 	struct prop *prop2;
 	struct modelnode *node;
@@ -4917,9 +4910,9 @@ s32 chr0f02932c(struct prop *prop, s32 arg1)
 	return result;
 }
 
-s32 chr0f0293ec(struct prop *prop, s32 cmnum)
+int chr0f0293ec(struct prop *prop, int cmnum)
 {
-	s32 result = -1;
+	int result = -1;
 	struct modelnode *node2;
 	struct prop *prop2;
 	struct modelnode *node;
@@ -4951,9 +4944,9 @@ s32 chr0f0293ec(struct prop *prop, s32 cmnum)
 	return result;
 }
 
-s32 chr0f0294cc(struct prop *prop, s32 arg1)
+int chr0f0294cc(struct prop *prop, int arg1)
 {
-	s32 result = -1;
+	int result = -1;
 	struct prop *child;
 	struct prop *prop2;
 	struct modelnode *node2;
@@ -4993,32 +4986,32 @@ s32 chr0f0294cc(struct prop *prop, s32 arg1)
 	return result;
 }
 
-void chrCalcShieldColor(f32 shield, s32 *red, s32 *green, s32 *blue)
+void chrCalcShieldColor(float shield, int *red, int *green, int *blue)
 {
 	if (shield < 1.5f) {
-		*red = 57 - (s32)((1.5f - shield) * 28.0f);
-		*green = 75 - (s32)((1.5f - shield) * 20.0f);
+		*red = 57 - (int)((1.5f - shield) * 28.0f);
+		*green = 75 - (int)((1.5f - shield) * 20.0f);
 		*blue = 0;
 		return;
 	}
 
 	if (shield < 3.0f) {
-		*red = 102 - (s32)((3.0f - shield) * 30.0f);
-		*green = 90 - (s32)((3.0f - shield) * 10.0f);
+		*red = 102 - (int)((3.0f - shield) * 30.0f);
+		*green = 90 - (int)((3.0f - shield) * 10.0f);
 		*blue = 0;
 		return;
 	}
 
 	if (shield < 4.5f) {
-		*red = 174 - (s32)((4.5f - shield) * 48.0f);
-		*green = 129 - (s32)((4.5f - shield) * 26.0f);
+		*red = 174 - (int)((4.5f - shield) * 48.0f);
+		*green = 129 - (int)((4.5f - shield) * 26.0f);
 		*blue = 0;
 		return;
 	}
 
 	if (shield < 6.0f) {
-		*red = 162 - (s32)((6.0f - shield) * -8.0f);
-		*green = 54 - (s32)((6.0f - shield) * -50.0f);
+		*red = 162 - (int)((6.0f - shield) * -8.0f);
+		*green = 54 - (int)((6.0f - shield) * -50.0f);
 		*blue = 0;
 		return;
 	}
@@ -5028,7 +5021,7 @@ void chrCalcShieldColor(f32 shield, s32 *red, s32 *green, s32 *blue)
 	*blue = 0;
 }
 
-f32 propGetShieldThing(struct prop **propptr)
+float propGetShieldThing(struct prop **propptr)
 {
 	struct prop *prop = *propptr;
 
@@ -5054,34 +5047,34 @@ f32 propGetShieldThing(struct prop **propptr)
 bool g_ShieldHitActive = false;
 
 Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop, struct model *model,
-		struct modelnode *node, s32 side, s32 arg6, s32 arg7, s32 alpha)
+		struct modelnode *node, int side, int arg6, int arg7, int alpha)
 {
 	struct modelrodata_bbox *bbox = &node->rodata->bbox;
 	Vtx vtxtemplate = {0};
 	Vtx *vertices;
 	Col *colours;
 	Mtxf *modelmtx;
-	s32 i;
-	s32 xmin;
-	s32 xmax;
-	s32 ymin;
-	s32 ymax;
-	s32 zmin;
-	s32 zmax;
-	s32 j;
-	s16 sp180[8][3];
-	u8 alpha1;
-	u8 alpha2;
-	s16 st1;
-	s16 st2;
-	s16 st4;
-	s16 st3;
-	f32 gap;
-	f32 shieldamount;
-	s32 cloakfade;
-	s32 cmcount;
+	int i;
+	int xmin;
+	int xmax;
+	int ymin;
+	int ymax;
+	int zmin;
+	int zmax;
+	int j;
+	int16_t sp180[8][3];
+	uint8_t alpha1;
+	uint8_t alpha2;
+	int16_t st1;
+	int16_t st2;
+	int16_t st4;
+	int16_t st3;
+	float gap;
+	float shieldamount;
+	int cloakfade;
+	int cmcount;
 
-	s32 sp104[6][4] = {
+	int sp104[6][4] = {
 		{ 0, 1, 3, 2 },
 		{ 7, 5, 4, 6 },
 		{ 5, 1, 0, 4 },
@@ -5090,16 +5083,16 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 		{ 7, 3, 1, 5 },
 	};
 
-	s32 red1;
-	s32 green1;
-	s32 blue1;
-	s32 red2;
-	s32 green2;
-	s32 blue2;
-	s32 red3;
-	s32 green3;
-	s32 blue3;
-	s32 mtxindex;
+	int red1;
+	int green1;
+	int blue1;
+	int red2;
+	int green2;
+	int blue2;
+	int red3;
+	int green3;
+	int blue3;
+	int mtxindex;
 
 	if (prop->type == PROPTYPE_CHR || prop->type == PROPTYPE_PLAYER) {
 		struct chrdata *chr = prop->chr;
@@ -5169,9 +5162,9 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 		colours[0].b = 0xff;
 
 		if (cloakfade < 64) {
-			colours[0].a = (s32) (cloakfade * (f32) alpha * (1.0f / 85.0f));
+			colours[0].a = (int) (cloakfade * (float) alpha * (1.0f / 85.0f));
 		} else {
-			colours[0].a = (s32) ((127 - cloakfade) * (f32) alpha * (1.0f / 85.0f));
+			colours[0].a = (int) ((127 - cloakfade) * (float) alpha * (1.0f / 85.0f));
 		}
 
 		vertices = gfxAllocateVertices(24);
@@ -5201,7 +5194,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices += 4;
 		}
 	} else {
-		f32 shield;
+		float shield;
 
 		texSelect(&gdl, &g_TexShieldConfigs[0], 4, 1, 2, true, NULL);
 
@@ -5267,7 +5260,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				colours[0].r = red2;
 				colours[0].g = green2;
 				colours[0].b = blue2;
-				colours[0].a = (cmcount < 10) ? (s32) (alpha * 0.5882353f) : 0;
+				colours[0].a = (cmcount < 10) ? (int) (alpha * 0.5882353f) : 0;
 			} else {
 				colours[0].r = red3;
 				colours[0].g = green3;
@@ -5275,11 +5268,11 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 				if (cmcount < 10) {
 					if (side == -4) {
-						colours[0].a = (s32) (alpha * 0.3137255f);
+						colours[0].a = (int) (alpha * 0.3137255f);
 					} else if (side == -5) {
-						colours[0].a = (s32) (alpha * 0.23529412f);
+						colours[0].a = (int) (alpha * 0.23529412f);
 					} else if (side == -6) {
-						colours[0].a = (s32) (alpha * 0.15686275f);
+						colours[0].a = (int) (alpha * 0.15686275f);
 					}
 				} else {
 					colours[0].a = 0;
@@ -5290,12 +5283,12 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			if ((prop->type == PROPTYPE_OBJ || prop->type == PROPTYPE_WEAPON || prop->type == PROPTYPE_DOOR)
 					&& (prop->obj->flags3 & OBJFLAG3_SHOWSHIELD)) {
-				f32 mult = (sinf((g_Vars.thisframestart240 % TICKS(350)) * (PAL ? 0.021588264033198f : 0.0179491f)) + 1.0f) * 0.5f;
+				float mult = (sinf((g_Vars.thisframestart240 % TICKS(350)) * (PAL ? 0.021588264033198f : 0.0179491f)) + 1.0f) * 0.5f;
 
-				colours->a = 50 + (u8) (s32) (120.0f * mult);
-				colours->r = (u8) red2 + 50.0f * mult;
-				colours->g = (u8) green2 + 50.0f * mult;
-				colours->b = (u8) blue2 + 50.0f * mult;
+				colours->a = 50 + (uint8_t) (int) (120.0f * mult);
+				colours->r = (uint8_t) red2 + 50.0f * mult;
+				colours->g = (uint8_t) green2 + 50.0f * mult;
+				colours->b = (uint8_t) blue2 + 50.0f * mult;
 			} else {
 				st3 = 512;
 				st1 = 0;
@@ -5328,12 +5321,12 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				vertices += 4;
 			}
 		} else if (side == -2) {
-			f32 alpha3;
+			float alpha3;
 
 			if (hit->unk011 < arg7) {
 				alpha3 = 0.0f;
 			} else {
-				alpha3 = ((TICKS(30.0f) - arg6) * 5.3333335f + 40.0f) * ((hit->unk011 - (f32) arg7 + 1.0f) / hit->unk011);
+				alpha3 = ((TICKS(30.0f) - arg6) * 5.3333335f + 40.0f) * ((hit->unk011 - (float) arg7 + 1.0f) / hit->unk011);
 				alpha3 *= alpha * (1.0f / 255.0f);
 			}
 
@@ -5353,7 +5346,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			colours[1].g = green3;
 			colours[0].b = blue3;
 			colours[1].b = blue3;
-			colours[0].a = (s32) alpha3;
+			colours[0].a = (int) alpha3;
 			colours[1].a = 0;
 
 			vertices = gfxAllocateVertices(30);
@@ -5395,10 +5388,10 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			if (side == -1) {
 				if (g_Vars.lvframe60 - hit->lvframe60 <= TICKS(80)) {
-					f32 tmp = (hit->lvframe60 - g_Vars.lvframe60 + TICKS(80)) * 3.1875f;
+					float tmp = (hit->lvframe60 - g_Vars.lvframe60 + TICKS(80)) * 3.1875f;
 					tmp *= alpha * (1.0f / 255.0f);
 
-					alpha1 = (s32) tmp;
+					alpha1 = (int) tmp;
 				} else {
 					alpha1 = 0;
 				}
@@ -5412,13 +5405,13 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				colours[0].b = blue1;
 				colours[0].a = alpha1;
 			} else if (side == -2) {
-				f32 alpha4;
+				float alpha4;
 
 				if (hit->unk011 < arg7) {
 					alpha4 = 0.0f;
 				} else {
-					alpha4 = (((TICKS(30.0f) - (f32) arg6) * 4.0f) + 40.0f)
-						* (((hit->unk011 - (f32) arg7) + 1.0f) / hit->unk011);
+					alpha4 = (((TICKS(30.0f) - (float) arg6) * 4.0f) + 40.0f)
+						* (((hit->unk011 - (float) arg7) + 1.0f) / hit->unk011);
 					alpha4 *= alpha * (1.0f / 255.0f);
 				}
 
@@ -5435,7 +5428,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				colours[0].r = red3;
 				colours[0].g = green3;
 				colours[0].b = blue3;
-				colours[0].a = (s32) alpha4;
+				colours[0].a = (int) alpha4;
 			}
 
 			for (j = 0; j < ARRAYCOUNT(sp180); j++) {
@@ -5512,15 +5505,15 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				alpha1 = 0xff;
 				alpha2 = 0xff;
 			} else if (g_Vars.lvframe60 - hit->lvframe60 <= TICKS(80)) {
-				f32 value;
+				float value;
 
 				value = (hit->lvframe60 - g_Vars.lvframe60 + TICKS(80)) * (PAL ? 3.8636362552643f : 3.1875f);
 				value *= alpha * (1.0f / 255.0f);
-				alpha1 = (s32) value;
+				alpha1 = (int) value;
 
 				value = (hit->lvframe60 - g_Vars.lvframe60 + TICKS(80)) * (PAL ? 3.8636362552643f : 3.1875f);
 				value *= alpha * (1.0f / 255.0f);
-				alpha2 = (s32) value;
+				alpha2 = (int) value;
 			} else {
 				alpha1 = 0;
 				alpha2 = 0;
@@ -5639,7 +5632,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices += 5;
 
 			for (j = 0; j < ARRAYCOUNT(sp104[side]); j++) {
-				s32 next = (j + 1) % 4;
+				int next = (j + 1) % 4;
 
 				vertices[0] = vtxtemplate;
 				vertices[0].x = sp180[sp104[side][next]][0];
@@ -5775,8 +5768,8 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
  * Objects can have a specific model part for the shield area (eg. hoverbed).
  * If not specified, every bbox node in the object will be used.
  */
-Gfx *shieldhitRender(Gfx *gdl, struct prop *prop1, struct prop *prop2, s32 alpha,
-		bool arg4, s32 cmnum1, s32 cmnum2, s32 cmnum3, s32 cmnum4)
+Gfx *shieldhitRender(Gfx *gdl, struct prop *prop1, struct prop *prop2, int alpha,
+		bool arg4, int cmnum1, int cmnum2, int cmnum3, int cmnum4)
 {
 	struct model *model;
 	struct modelnode *specificnode = NULL;
@@ -5800,8 +5793,8 @@ Gfx *shieldhitRender(Gfx *gdl, struct prop *prop1, struct prop *prop2, s32 alpha
 					struct shieldhit *s0 = NULL;
 					struct shieldhit *s1 = NULL;
 					struct shieldhit *s2 = NULL;
-					s32 index = chr0f028e18(prop2, node, model, prop1);
-					s32 i;
+					int index = chr0f028e18(prop2, node, model, prop1);
+					int i;
 
 					for (i = 0; i < 20; i++) {
 						struct shieldhit *iter = &g_ShieldHits[i];
@@ -5956,7 +5949,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 		while (node) {
 			if ((node->type & 0xff) == MODELNODETYPE_BBOX) {
 				if (bbox == NULL || node == bbox) {
-					s32 index = chr0f028e18(thisprop, node, model, chrprop);
+					int index = chr0f028e18(thisprop, node, model, chrprop);
 
 					if (bbox) {
 						index = 19;
@@ -5964,12 +5957,12 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 
 					if (index <= 19) {
 						Mtxf *mtx = modelFindNodeMtx(model, modelNodeFindMtxNode(node), 0);
-						s32 uls; // upper left s coordinate
-						s32 ult; // upper left t coordinate
+						int uls; // upper left s coordinate
+						int ult; // upper left t coordinate
 						struct coord coord;
-						f32 screenpos[2];
-						s32 lrs; // lower right s coordinate
-						s32 lrt; // lower right t coordinate
+						float screenpos[2];
+						int lrs; // lower right s coordinate
+						int lrt; // lower right t coordinate
 
 						coord.x = mtx->m[3][0];
 						coord.y = mtx->m[3][1];
@@ -5993,8 +5986,8 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 							screenpos[1] = viGetHeight();
 						}
 
-						uls = (s32)screenpos[0] - 8;
-						ult = (s32)screenpos[1] - 8;
+						uls = (int)screenpos[0] - 8;
+						ult = (int)screenpos[1] - 8;
 
 						if (uls < viGetViewLeft()) {
 							uls = viGetViewLeft();
@@ -6069,7 +6062,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 	return gdl;
 }
 
-Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, u32 alpha)
+Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, uint32_t alpha)
 {
 	if (chrGetShield(chr) > 0 && g_Vars.lvupdate240 > 0) {
 		chr->cmcount++;
@@ -6083,12 +6076,12 @@ Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, u32 alpha)
 			|| (chrGetShield(chr) > 0 && chr->cmcount < 10)
 			|| (chr->cloakfadefrac > 0 && !chr->cloakfadefinished)) {
 		if (chrGetShield(chr) > 0 && g_Vars.lvupdate240 > 0) {
-			s32 numiterations = (rngRandom() % 4) + 1;
-			s32 newcmnum = chr->cmnum2;
-			s32 candidate;
-			s8 operation = 0;
-			s8 again = true;
-			s32 i;
+			int numiterations = (rngRandom() % 4) + 1;
+			int newcmnum = chr->cmnum2;
+			int candidate;
+			int8_t operation = 0;
+			int8_t again = true;
+			int i;
 
 			for (i = 0; i <= numiterations; ) {
 				if (operation == 0) {
@@ -6160,11 +6153,11 @@ Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, u32 alpha)
  */
 void shieldhitsTick(void)
 {
-	s32 index;
+	int index;
 	bool changed = false;
-	s32 time60;
-	s32 i;
-	s32 j;
+	int time60;
+	int i;
+	int j;
 
 	if (g_ShieldHitActive) {
 		for (i = 0; i < 20; i++) {
@@ -6225,7 +6218,7 @@ void shieldhitsTick(void)
 	}
 }
 
-void chrSetDrCarollImages(struct chrdata *drcaroll, s32 imageleft, s32 imageright)
+void chrSetDrCarollImages(struct chrdata *drcaroll, int imageleft, int imageright)
 {
 	if (drcaroll
 			&& imageleft >= DRCAROLLIMAGE_EYESDEFAULT && imageleft <= DRCAROLLIMAGE_BINARY
@@ -6233,8 +6226,8 @@ void chrSetDrCarollImages(struct chrdata *drcaroll, s32 imageleft, s32 imagerigh
 		struct model *model = drcaroll->model;
 		struct modelnode *nodes[2];
 		union modelrwdata *rwdata;
-		s32 i;
-		s32 j;
+		int i;
+		int j;
 
 		// Iterate model parts relating to images
 		// Parts 0-5 are the left image

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/pad.h"
 #include "bss.h"
@@ -6,30 +7,30 @@
 #include "types.h"
 
 struct padsfileheader *g_PadsFile;
-u16 *g_PadOffsets;
-u16 *g_CoverFlags;
-s32 *g_CoverRooms;
+uint16_t *g_PadOffsets;
+uint16_t *g_CoverFlags;
+int *g_CoverRooms;
 struct covercandidate *g_CoverCandidates;
-u16 g_NumSpecialCovers;
-u16 *g_SpecialCoverNums;
+uint16_t g_NumSpecialCovers;
+uint16_t *g_SpecialCoverNums;
 
-void padUnpack(s32 padnum, u32 fields, struct pad *pad)
+void padUnpack(int padnum, uint32_t fields, struct pad *pad)
 {
-	s32 offset;
-	u32 *header;
-	f32 *fbuffer;
-	u8 *ptr;
+	int offset;
+	uint32_t *header;
+	float *fbuffer;
+	uint8_t *ptr;
 
 	offset = g_PadOffsets[padnum];
-	ptr = (u8 *) &g_StageSetup.padfiledata[offset];
-	header = (u32 *) ptr;
+	ptr = (uint8_t *) &g_StageSetup.padfiledata[offset];
+	header = (uint32_t *) ptr;
 
 	// Header format:
 	// flags, room and liftnum
 	// ffffffff ffffffff ffrrrrrr rrrrllll
 
 	if (fields & PADFIELD_ROOM) {
-		pad->room = (s32)(*header << 18) >> 22;
+		pad->room = (int)(*header << 18) >> 22;
 	}
 
 	if (fields & PADFIELD_LIFT) {
@@ -40,7 +41,7 @@ void padUnpack(s32 padnum, u32 fields, struct pad *pad)
 
 	if ((*header >> 14) & PADFLAG_INTPOS) {
 		if (fields & PADFIELD_POS) {
-			s16 *sbuffer = (s16 *) ptr;
+			int16_t *sbuffer = (int16_t *) ptr;
 			pad->pos.x = sbuffer[0];
 			pad->pos.y = sbuffer[1];
 			pad->pos.z = sbuffer[2];
@@ -48,7 +49,7 @@ void padUnpack(s32 padnum, u32 fields, struct pad *pad)
 		ptr += 8;
 	} else {
 		if (fields & PADFIELD_POS) {
-			fbuffer = (f32 *) ptr;
+			fbuffer = (float *) ptr;
 			pad->pos.x = fbuffer[0];
 			pad->pos.y = fbuffer[1];
 			pad->pos.z = fbuffer[2];
@@ -74,7 +75,7 @@ void padUnpack(s32 padnum, u32 fields, struct pad *pad)
 		}
 	} else {
 		if (fields & (PADFIELD_UP | PADFIELD_NORMAL)) {
-			fbuffer = (f32 *) ptr;
+			fbuffer = (float *) ptr;
 			pad->up.x = fbuffer[0];
 			pad->up.y = fbuffer[1];
 			pad->up.z = fbuffer[2];
@@ -100,7 +101,7 @@ void padUnpack(s32 padnum, u32 fields, struct pad *pad)
 		}
 	} else {
 		if (fields & (PADFIELD_LOOK | PADFIELD_NORMAL)) {
-			fbuffer = (f32 *) ptr;
+			fbuffer = (float *) ptr;
 			pad->look.x = fbuffer[0];
 			pad->look.y = fbuffer[1];
 			pad->look.z = fbuffer[2];
@@ -116,7 +117,7 @@ void padUnpack(s32 padnum, u32 fields, struct pad *pad)
 
 	if ((*header >> 14) & PADFLAG_HASBBOXDATA) {
 		if (fields & PADFIELD_BBOX) {
-			fbuffer = (f32 *) ptr;
+			fbuffer = (float *) ptr;
 			pad->bbox.xmin = fbuffer[0];
 			pad->bbox.xmax = fbuffer[1];
 			pad->bbox.ymin = fbuffer[2];
@@ -141,15 +142,15 @@ void padUnpack(s32 padnum, u32 fields, struct pad *pad)
 	}
 }
 
-bool padHasBboxData(s32 padnum)
+bool padHasBboxData(int padnum)
 {
-	u32 offset = g_PadOffsets[padnum];
-	u32 *header = (u32 *)&g_StageSetup.padfiledata[offset];
+	uint32_t offset = g_PadOffsets[padnum];
+	uint32_t *header = (uint32_t *)&g_StageSetup.padfiledata[offset];
 
 	return ((*header >> 14) & PADFLAG_HASBBOXDATA) != 0;
 }
 
-void padGetCentre(s32 padnum, struct coord *coord)
+void padGetCentre(int padnum, struct coord *coord)
 {
 	struct pad pad;
 
@@ -179,18 +180,18 @@ void padGetCentre(s32 padnum, struct coord *coord)
  * When such a door is placed on a pad, this function is called. It adjusts the
  * pad's orientation to compensate for the model.
  */
-void padRotateForDoor(s32 padnum)
+void padRotateForDoor(int padnum)
 {
-	u32 stack;
-	u32 *ptr;
-	u32 *header;
+	uint32_t stack;
+	uint32_t *ptr;
+	uint32_t *header;
 	struct coord *look;
 	struct coord *up;
-	f32 scale;
-	s32 offset;
+	float scale;
+	int offset;
 
 	offset = g_PadOffsets[padnum];
-	ptr = (u32 *) &g_StageSetup.padfiledata[offset];
+	ptr = (uint32_t *) &g_StageSetup.padfiledata[offset];
 	header = ptr;
 
 	ptr++;
@@ -226,11 +227,11 @@ void padRotateForDoor(s32 padnum)
 	}
 }
 
-void padCopyBboxFromPad(s32 padnum, struct pad *src)
+void padCopyBboxFromPad(int padnum, struct pad *src)
 {
-	u32 offset = g_PadOffsets[padnum];
-	f32 *fbuffer = (f32 *)&g_StageSetup.padfiledata[offset];
-	u32 *header = (u32 *)fbuffer;
+	uint32_t offset = g_PadOffsets[padnum];
+	float *fbuffer = (float *)&g_StageSetup.padfiledata[offset];
+	uint32_t *header = (uint32_t *)fbuffer;
 
 	if ((*header >> 14) & PADFLAG_HASBBOXDATA) {
 		fbuffer++;
@@ -258,28 +259,28 @@ void padCopyBboxFromPad(s32 padnum, struct pad *src)
 	}
 }
 
-void padSetFlag(s32 padnum, u32 flag)
+void padSetFlag(int padnum, uint32_t flag)
 {
-	u32 offset = g_PadOffsets[padnum];
-	u32 *header = (u32 *)&g_StageSetup.padfiledata[offset];
+	uint32_t offset = g_PadOffsets[padnum];
+	uint32_t *header = (uint32_t *)&g_StageSetup.padfiledata[offset];
 
 	*header = *header ^ ((*header >> 14) ^ ((*header >> 14) | flag)) << 14;
 }
 
-void padUnsetFlag(s32 padnum, u32 flag)
+void padUnsetFlag(int padnum, uint32_t flag)
 {
-	u32 offset = g_PadOffsets[padnum];
-	u32 *header = (u32 *)&g_StageSetup.padfiledata[offset];
+	uint32_t offset = g_PadOffsets[padnum];
+	uint32_t *header = (uint32_t *)&g_StageSetup.padfiledata[offset];
 
 	*header = *header ^ ((*header >> 14) ^ ((*header >> 14) & ~flag)) << 14;
 }
 
-s32 coverGetCount(void)
+int coverGetCount(void)
 {
 	return g_PadsFile->numcovers;
 }
 
-bool coverUnpack(s32 covernum, struct cover *cover)
+bool coverUnpack(int covernum, struct cover *cover)
 {
 	struct coverdefinition *def;
 
@@ -287,10 +288,10 @@ bool coverUnpack(s32 covernum, struct cover *cover)
 		return false;
 	}
 
-	// @bug: Cast to u8 means it loads the pos, look and flags
+	// @bug: Cast to uint8_t means it loads the pos, look and flags
 	// from an incorrect cover if covernum is greater than 255.
 	def = g_StageSetup.cover;
-	def += (u8)covernum;
+	def += (uint8_t)covernum;
 
 	cover->pos = &def->pos;
 	cover->look = &def->look;
@@ -304,12 +305,12 @@ bool coverUnpack(s32 covernum, struct cover *cover)
 	return true;
 }
 
-u16 getNumSpecialCovers(void)
+uint16_t getNumSpecialCovers(void)
 {
 	return g_NumSpecialCovers;
 }
 
-bool coverUnpackBySpecialNum(s32 index, struct cover *cover)
+bool coverUnpackBySpecialNum(int index, struct cover *cover)
 {
 	// Probable @bug: last check should be index >= g_NumSpecialCovers
 	// This function is never called though.
@@ -324,7 +325,7 @@ bool coverUnpackBySpecialNum(s32 index, struct cover *cover)
 	return false;
 }
 
-s32 coverGetNumBySpecialNum(s32 index)
+int coverGetNumBySpecialNum(int index)
 {
 	// Probable @bug: last check should be index >= g_NumSpecialCovers
 	// This function is never called though.
@@ -335,7 +336,7 @@ s32 coverGetNumBySpecialNum(s32 index)
 	return g_SpecialCoverNums[index];
 }
 
-bool coverIsInUse(s32 covernum)
+bool coverIsInUse(int covernum)
 {
 	// @bug: Second condition should be >=
 	if (covernum < 0 || covernum > g_PadsFile->numcovers) {
@@ -345,7 +346,7 @@ bool coverIsInUse(s32 covernum)
 	return g_CoverFlags[covernum] & COVERFLAG_INUSE;
 }
 
-void coverSetInUse(s32 covernum, bool enable)
+void coverSetInUse(int covernum, bool enable)
 {
 	if (covernum >= 0 && covernum < g_PadsFile->numcovers) {
 		if (enable) {
@@ -356,17 +357,17 @@ void coverSetInUse(s32 covernum, bool enable)
 	}
 }
 
-void coverSetFlag(s32 covernum, u32 flag)
+void coverSetFlag(int covernum, uint32_t flag)
 {
 	g_CoverFlags[covernum] |= flag;
 }
 
-void coverUnsetFlag(s32 covernum, u32 flag)
+void coverUnsetFlag(int covernum, uint32_t flag)
 {
 	g_CoverFlags[covernum] &= ~flag;
 }
 
-void coverSetOutOfSight(s32 covernum, bool enable)
+void coverSetOutOfSight(int covernum, bool enable)
 {
 	if (covernum >= 0 && covernum < g_PadsFile->numcovers) {
 		if (enable) {

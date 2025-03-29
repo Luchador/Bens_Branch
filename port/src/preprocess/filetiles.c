@@ -1,41 +1,42 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "preprocess/common.h"
 
 struct tile {
-	u8 type;
-	u8 numvertices;
-	u16 flags;
-	u16 floortype;
-	u8 xmin;
-	u8 ymin;
-	u8 zmin;
-	u8 xmax;
-	u8 ymax;
-	u8 zmax;
-	u16 floorcol;
+	uint8_t type;
+	uint8_t numvertices;
+	uint16_t flags;
+	uint16_t floortype;
+	uint8_t xmin;
+	uint8_t ymin;
+	uint8_t zmin;
+	uint8_t xmax;
+	uint8_t ymax;
+	uint8_t zmax;
+	uint16_t floorcol;
 };
 
-static u32 convertTiles(u8 *dst, u8 *src, size_t srclen)
+static uint32_t convertTiles(uint8_t *dst, uint8_t *src, size_t srclen)
 {
-	int num_rooms = PD_BE32(*(u32 *) src);
+	int num_rooms = PD_BE32(*(uint32_t *) src);
 
 	size_t src_ptr_table_len = (num_rooms + 1) * 4;
-	size_t dst_ptr_table_len = (num_rooms + 1) * sizeof(u32);
+	size_t dst_ptr_table_len = (num_rooms + 1) * sizeof(uint32_t);
 
-	u32 *src_offsets = (u32 *) &src[4];
+	uint32_t *src_offsets = (uint32_t *) &src[4];
 
 	size_t data_len = srclen - src_ptr_table_len - 4;
 
-	*(u32 *) dst = (num_rooms);
+	*(uint32_t *) dst = (num_rooms);
 
-	u32 *dst_offsets = (u32 *) (dst + sizeof(u32));
-	u32 cur_dst_offset = dst_ptr_table_len + sizeof(u32);
+	uint32_t *dst_offsets = (uint32_t *) (dst + sizeof(uint32_t));
+	uint32_t cur_dst_offset = dst_ptr_table_len + sizeof(uint32_t);
 
-	u32 cur_src_offset = PD_BE32(src_offsets[0]);
-	u32 end_src_offset = PD_BE32(src_offsets[num_rooms]);
+	uint32_t cur_src_offset = PD_BE32(src_offsets[0]);
+	uint32_t end_src_offset = PD_BE32(src_offsets[num_rooms]);
 	int room = 0;
 
 	while (1) {
@@ -72,9 +73,9 @@ static u32 convertTiles(u8 *dst, u8 *src, size_t srclen)
 
 		// Write tile vertices
 		for (int i = 0; i < hosttile.numvertices; i++) {
-			*(s16 *) &dst[cur_dst_offset + 0] = PD_BE16(*(s16 *) &src[cur_src_offset + 0]);
-			*(s16 *) &dst[cur_dst_offset + 2] = PD_BE16(*(s16 *) &src[cur_src_offset + 2]);
-			*(s16 *) &dst[cur_dst_offset + 4] = PD_BE16(*(s16 *) &src[cur_src_offset + 4]);
+			*(int16_t *) &dst[cur_dst_offset + 0] = PD_BE16(*(int16_t *) &src[cur_src_offset + 0]);
+			*(int16_t *) &dst[cur_dst_offset + 2] = PD_BE16(*(int16_t *) &src[cur_src_offset + 2]);
+			*(int16_t *) &dst[cur_dst_offset + 4] = PD_BE16(*(int16_t *) &src[cur_src_offset + 4]);
 			cur_dst_offset += 6;
 			cur_src_offset += 6;
 		}
@@ -83,12 +84,12 @@ static u32 convertTiles(u8 *dst, u8 *src, size_t srclen)
 	return ALIGN16(cur_dst_offset);
 }
 
-u8 *preprocessTilesFile(u8 *data, u32 size, u32 *outSize)
+uint8_t *preprocessTilesFile(uint8_t *data, uint32_t size, uint32_t *outSize)
 {
-	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_TILES);
-	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
+	uint32_t newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_TILES);
+	uint8_t *dst = sysMemZeroAlloc(newSizeEstimated);
 
-	u32 newSize = convertTiles(dst, data, size);
+	uint32_t newSize = convertTiles(dst, data, size);
 
 	if (newSize > newSizeEstimated) {
 		sysFatalError("overflow when trying to preprocess a tiles file, size %d newsize %d", size, newSize);

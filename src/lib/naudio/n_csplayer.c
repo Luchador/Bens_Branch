@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "versions.h"
 #include <libaudio.h>
 #include "n_libaudio.h"
@@ -6,14 +7,14 @@
 #include "n_cseqp.h"
 
 void __n_CSPRepostEvent(ALEventQueue *evtq, N_ALEventListItem *item);
-void __n_setUsptFromTempo(N_ALCSPlayer *seqp, f32 tempo);
+void __n_setUsptFromTempo(N_ALCSPlayer *seqp, float tempo);
 void __n_CSPHandleMetaMsg(N_ALCSPlayer *seqp, N_ALEvent *event);
 ALMicroTime __n_vsDelta(N_ALVoiceState *vs, ALMicroTime t);
 
-u32 var8009c350[16];
+uint32_t var8009c350[16];
 
 // 110000 occurs twice in this table...
-s32 var8005f150[] = {
+int var8005f150[] = {
 	0,         10000,     20000,     30000,
 	40000,     50000,     60000,     70000,
 	80000,     90000,     100000,    110000,
@@ -48,7 +49,7 @@ s32 var8005f150[] = {
 	170000000, 175000000, 180000000,
 };
 
-f32 var8005f34c[100] = {
+float var8005f34c[100] = {
 	0.05,  0.05, 0.06,  0.06, 0.06,  0.07, 0.07,  0.08, 0.08,  0.09,
 	0.10,  0.11, 0.13,  0.14, 0.17,  0.20, 0.25,  0.33, 0.5,   1,
 	1.25,  1.5,  1.75,  2,    2.25,  2.5,  2.75,  3,    3.25,  3.5,
@@ -61,14 +62,14 @@ f32 var8005f34c[100] = {
 	18.75, 19,   19.25, 19.5, 19.75, 20,   20.25, 20.5, 20.75, 21,
 };
 
-u32 var8005f4dc = 0x00000000;
+uint32_t var8005f4dc = 0x00000000;
 
 void func00039cd0(N_ALCSPlayer *seqp);
 ALMicroTime __n_CSPVoiceHandler(void *node);
 
 void n_alCSPNew(N_ALCSPlayer *seqp, ALSeqpConfig *c)
 {
-	s32                 i;
+	int                 i;
 	N_ALEventListItem     *items;
 	N_ALVoiceState        *vs;
 	N_ALVoiceState        *voices;
@@ -145,12 +146,12 @@ void n_alCSPNew(N_ALCSPlayer *seqp, ALSeqpConfig *c)
 void __n_CSPHandleNextSeqEvent(N_ALCSPlayer *seqp);
 void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event);
 
-void n_alSynFilter13(N_ALVoice *v, f32 arg1);
-u8 func0003d9cc(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
-ALFxRef func0003e540(u8 arg0);
-ALFxRef func0003e5b8(u8 arg0);
-void func0003e674(struct fx *fx, u8 arg1, void *param);
-f32 func0003b9d4(s32 arg0);
+void n_alSynFilter13(N_ALVoice *v, float arg1);
+uint8_t func0003d9cc(N_ALVoiceState *vs, N_ALCSPlayer *seqp);
+ALFxRef func0003e540(uint8_t arg0);
+ALFxRef func0003e5b8(uint8_t arg0);
+void func0003e674(struct fx *fx, uint8_t arg1, void *param);
+float func0003b9d4(int arg0);
 
 ALMicroTime __n_CSPVoiceHandler(void *node)
 {
@@ -160,8 +161,8 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
 	ALMicroTime      delta;
 	N_ALVoiceState  *vs;
 	void            *oscState;
-	f32              oscValue;
-	u8               chan;
+	float              oscValue;
+	uint8_t               chan;
 
 	do {
 		switch (seqp->nextEvent.type) {
@@ -206,7 +207,7 @@ ALMicroTime __n_CSPVoiceHandler(void *node)
 			vs = seqp->nextEvent.msg.osc.vs;
 			oscState = seqp->nextEvent.msg.osc.oscState;
 			delta = (*seqp->updateOsc)(oscState,&oscValue);
-			vs->tremelo = (u8)oscValue;
+			vs->tremelo = (uint8_t)oscValue;
 			n_alSynSetVol(&vs->voice, __n_vsVol(vs,(N_ALSeqPlayer*)seqp), __n_vsDelta(vs,seqp->curTime));
 			evt.type = AL_TREM_OSC_EVT;
 			evt.msg.osc.vs = vs;
@@ -452,25 +453,25 @@ void __n_CSPHandleNextSeqEvent(N_ALCSPlayer *seqp)
 	}
 }
 
-void func00034f0c(N_ALCSPlayer *seqp, u8 channel)
+void func00034f0c(N_ALCSPlayer *seqp, uint8_t channel)
 {
 	N_ALVoiceState *vs;
 
 	for (vs = seqp->vAllocHead; vs != NULL; vs = vs->next) {
 		if (vs->channel == channel && vs->envPhase != AL_PHASE_RELEASE) {
-			s16 volume = __n_vsVol(vs, (N_ALSeqPlayer *) seqp);
+			int16_t volume = __n_vsVol(vs, (N_ALSeqPlayer *) seqp);
 
 			n_alSynSetVol(&vs->voice, volume, __n_vsDelta(vs, seqp->curTime));
 		}
 	}
 }
 
-void func00034fb8(N_ALCSPlayer *seqp, u8 channel)
+void func00034fb8(N_ALCSPlayer *seqp, uint8_t channel)
 {
 	N_ALVoiceState *vs;
-	s16 sp2a;
-	s8 sp29 = (s8)seqp->chanState[channel].unk12 - 64;
-	f32 sp24 = seqp->chanState[channel].pitchBend;
+	int16_t sp2a;
+	int8_t sp29 = (int8_t)seqp->chanState[channel].unk12 - 64;
+	float sp24 = seqp->chanState[channel].pitchBend;
 
 	for (vs = seqp->vAllocHead; vs != 0; vs = vs->next) {
 		if (vs->channel == channel) {
@@ -485,39 +486,39 @@ void func00034fb8(N_ALCSPlayer *seqp, u8 channel)
 	}
 }
 
-void sndStartMp3ByFilenum(u8 arg0);
-f32 _depth2Cents(u8 arg0);
+void sndStartMp3ByFilenum(uint8_t arg0);
+float _depth2Cents(uint8_t arg0);
 
 void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 {
 	N_ALVoice          *voice;
 	N_ALVoiceState     *vs;
-	s32                 status;
-	u8                  chan;
-	u8                  key;
-	u8                  vel;
-	u8                  byte1;
-	u8                  byte2;
+	int                 status;
+	uint8_t                  chan;
+	uint8_t                  key;
+	uint8_t                  vel;
+	uint8_t                  byte1;
+	uint8_t                  byte2;
 	ALMIDIEvent         *midi = &event->msg.midi;
-	s16                 vol;
+	int16_t                 vol;
 	N_ALEvent           evt;
 	ALMicroTime         deltaTime;
 	N_ALVoiceState     *vstate;
 	ALPan   		    pan;
 	ALChanState        *chanstate;
-	s32                 sp90;
+	int                 sp90;
 	ALVoiceConfig       config;
 	ALSound            *sound;
-	s16                 cents;
-	f32                 pitch,oscValue;
-	u8                  fxmix;
-	u8                  sp76;
-	f32                 sp70;
+	int16_t                 cents;
+	float                 pitch,oscValue;
+	uint8_t                  fxmix;
+	uint8_t                  sp76;
+	float                 sp70;
 	void               *oscState;
 	ALInstrument       *inst;
-	u8                  sp67;
-	u8                  sp66;
-	s32                 sp60;
+	uint8_t                  sp67;
+	uint8_t                  sp66;
+	int                 sp60;
 
 	status = midi->status & AL_MIDI_StatusMask;
 	chan = midi->status & AL_MIDI_ChannelMask;
@@ -605,7 +606,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 				sp90 = inst->tremType;
 			}
 
-			oscValue = (f32)_AL_VOL_FULL; /* set this as a default */
+			oscValue = (float)_AL_VOL_FULL; /* set this as a default */
 
 			if (sp90) {
 				if (seqp->initOsc) {
@@ -628,7 +629,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 				}
 			}
 
-			vstate->tremelo = (u8)oscValue;
+			vstate->tremelo = (uint8_t)oscValue;
 
 			/* will default if not changed by initOsc */
 
@@ -921,18 +922,14 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 						} else if (vs->phase == AL_PHASE_SUSTREL) {
 							vs->phase = AL_PHASE_RELEASE;
 
-#ifdef AVOID_UB
 							chanstate = &seqp->chanState[chan];
-#endif
 							// @bug: chanstate is uninitialised
 							if (chanstate->unk24) {
 								__n_seqpReleaseVoice((N_ALSeqPlayer*)seqp,
 										&vs->voice,
 										(seqp->chanState[chan].releaseTime < AL_USEC_PER_FRAME ? AL_USEC_PER_FRAME : seqp->chanState[chan].releaseTime));
 							} else {
-#ifdef AVOID_UB
 								vstate = __n_lookupVoice((N_ALSeqPlayer*)seqp, key, chan);
-#endif
 								__n_seqpReleaseVoice((N_ALSeqPlayer*)seqp,
 										&vs->voice,
 										vstate->sound->envelope->releaseTime < AL_USEC_PER_FRAME ? AL_USEC_PER_FRAME : vstate->sound->envelope->releaseTime);
@@ -1086,9 +1083,9 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 		break;
 	case (AL_MIDI_PitchBendChange):
 		{
-			s32 bendVal;
-			f32 bendRatio;
-			s32 cents;
+			int bendVal;
+			float bendRatio;
+			int cents;
 
 			/* get 14-bit unsigned midi value */
 			bendVal = ((byte2 << 7) + byte1) - 8192;
@@ -1121,9 +1118,9 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 void __n_CSPHandleMetaMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 {
 	ALTempoEvent *tevt = &event->msg.tempo;
-	s32 tempo;
-	s32 oldUspt;
-	u32 ticks;
+	int tempo;
+	int oldUspt;
+	uint32_t ticks;
 	ALMicroTime tempDelta, curDelta = 0;
 	N_ALEventListItem *thisNode, *nextNode, *firstTemp = 0;
 
@@ -1131,7 +1128,7 @@ void __n_CSPHandleMetaMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 		if (event->msg.tempo.type == AL_MIDI_META_TEMPO) {
 			oldUspt = seqp->uspt;
 			tempo = (tevt->byte1 << 16) | (tevt->byte2 <<  8) | (tevt->byte3 <<  0);
-			__n_setUsptFromTempo(seqp, (f32)tempo);
+			__n_setUsptFromTempo(seqp, (float)tempo);
 
 			thisNode = (N_ALEventListItem*)seqp->evtq.allocList.next;
 
@@ -1199,10 +1196,10 @@ void __n_CSPRepostEvent(ALEventQueue *evtq, N_ALEventListItem *item)
 	}
 }
 
-void __n_setUsptFromTempo(N_ALCSPlayer *seqp, f32 tempo)
+void __n_setUsptFromTempo(N_ALCSPlayer *seqp, float tempo)
 {
 	if (seqp->target) {
-		seqp->uspt = (s32)((f32)tempo * seqp->target->qnpt);
+		seqp->uspt = (int)((float)tempo * seqp->target->qnpt);
 	} else {
 		seqp->uspt = 488;
 	}
@@ -1211,7 +1208,7 @@ void __n_setUsptFromTempo(N_ALCSPlayer *seqp, f32 tempo)
 void __n_CSPPostNextSeqEvent(N_ALCSPlayer *seqp)
 {
 	N_ALEvent evt;
-	s32 deltaTicks;
+	int deltaTicks;
 
 	if (seqp->state != AL_PLAYING || seqp->target == NULL) {
 		return;

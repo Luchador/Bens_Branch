@@ -22,7 +22,7 @@
  **************************************************************************/
 
 #include <PR/mbi.h>
-#include <PR/ultratypes.h>
+#include <stdint.h>
 #include <PR/sptask.h>
 
 #ifndef MAX
@@ -48,17 +48,6 @@ extern void guFrustum(Mtx *m, float l, float r, float b, float t,
 		      float n, float f, float scale);
 extern void guFrustumF(float mf[4][4], float l, float r, float b, float t,
 		       float n, float f, float scale);
-extern void guPerspective(Mtx *m, u16 *perspNorm, float fovy,
-			  float aspect, float near, float far, float scale);
-extern void guPerspectiveF(float mf[4][4], u16 *perspNorm, float fovy,
-			   float aspect, float near, float far, float scale);
-extern void guLookAt(Mtx *m,
-			float xEye, float yEye, float zEye,
-			float xAt,  float yAt,  float zAt,
-			float xUp,  float yUp,  float zUp);
-extern void guLookAtF(float mf[4][4], float xEye, float yEye, float zEye,
-		      float xAt,  float yAt,  float zAt,
-		      float xUp,  float yUp,  float zUp);
 extern void guLookAtReflect(Mtx *m, LookAt *l,
 			float xEye, float yEye, float zEye,
 			float xAt,  float yAt,  float zAt,
@@ -95,7 +84,6 @@ extern void guRotate(Mtx *m, float a, float x, float y, float z);
 extern void guRotateF(float mf[4][4], float a, float x, float y, float z);
 extern void guRotateRPY(Mtx *m, float r, float p, float y);
 extern void guRotateRPYF(float mf[4][4], float r, float p, float h);
-extern void guAlign(Mtx *m, float a, float x, float y, float z);
 extern void guAlignF(float mf[4][4], float a, float x, float y, float z);
 extern void guScale(Mtx *m, float x, float y, float z);
 extern void guScaleF(float mf[4][4], float x, float y, float z);
@@ -111,16 +99,11 @@ extern void guMtxXFMF(float mf[4][4], float x, float y, float z,
 extern void guMtxXFML(Mtx *m, float x, float y, float z,
 		      float *ox, float *oy, float *oz);
 
-/* vector utility: */
-extern void guNormalize(float *x, float *y, float *z);
-
 /*
  *  Math functions
  */
-extern float sinf(float angle);
-extern float cosf(float angle);
+
 extern signed short sins (unsigned short angle);
 extern signed short coss (unsigned short angle);
-extern float sqrtf(float value);
 
 #endif /* !_GU_H_ */

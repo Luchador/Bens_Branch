@@ -7,46 +7,46 @@
 #include "constants.h"
 
 struct n64_header {
-	s32 num_pads;
-	s32 num_covers;
-	u32 ptr_waypoints;
-	u32 ptr_waygroups;
-	u32 ptr_cover;
+	int num_pads;
+	int num_covers;
+	uint32_t ptr_waypoints;
+	uint32_t ptr_waygroups;
+	uint32_t ptr_cover;
 };
 
 struct host_header {
-	s32 num_pads;
-	s32 num_covers;
+	int num_pads;
+	int num_covers;
 	uintptr_t ptr_waypoints;
 	uintptr_t ptr_waygroups;
 	uintptr_t ptr_cover;
 };
 
 struct padheader {
-	u32 flags : 18;
-	u32 room : 10;
-	u32 liftnum : 4;
+	uint32_t flags : 18;
+	uint32_t room : 10;
+	uint32_t liftnum : 4;
 };
 
 struct n64_waypoint {
-	s32 padnum;
-	u32 ptr_neighbours;
-	s32 groupnum;
-	s32 step;
+	int padnum;
+	uint32_t ptr_neighbours;
+	int groupnum;
+	int step;
 };
 
 struct n64_waygroup {
-	u32 ptr_neighbours;
-	u32 ptr_waypoints;
-	s32 step;
+	uint32_t ptr_neighbours;
+	uint32_t ptr_waypoints;
+	int step;
 };
 
-static u32 convertPads(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_pads)
+static uint32_t convertPads(uint8_t *dst, uint32_t dstpos, uint8_t *src, uint32_t srcpos, int num_pads)
 {
-	u16 *src_offsets = (u16 *) &src[srcpos];
-	u16 *dst_offsets = (u16 *) &dst[dstpos];
+	uint16_t *src_offsets = (uint16_t *) &src[srcpos];
+	uint16_t *dst_offsets = (uint16_t *) &dst[dstpos];
 
-	dstpos += num_pads * sizeof(u16);
+	dstpos += num_pads * sizeof(uint16_t);
 
 	for (int i = 0; i < num_pads; i++) {
 		srcpos = PD_BE16(src_offsets[i]);
@@ -54,19 +54,19 @@ static u32 convertPads(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_pads)
 		dst_offsets[i] = (dstpos);
 
 		// Header
-		u32 n64_padheader = PD_BE32(*(u32 *) &src[srcpos]);
+		uint32_t n64_padheader = PD_BE32(*(uint32_t *) &src[srcpos]);
 		struct padheader *host_padheader = (struct padheader *) &dst[dstpos];
-		u32 flags = (n64_padheader >> 14) & 0x3ffff;
+		uint32_t flags = (n64_padheader >> 14) & 0x3ffff;
 
-		*(u32*)host_padheader = (n64_padheader);
+		*(uint32_t*)host_padheader = (n64_padheader);
 
 		srcpos += sizeof(struct padheader);
 		dstpos += sizeof(struct padheader);
 
 		// Position
 		if (flags & PADFLAG_INTPOS) {
-			s16 *srcptr = (s16 *) &src[srcpos];
-			s16 *dstptr = (s16 *) &dst[dstpos];
+			int16_t *srcptr = (int16_t *) &src[srcpos];
+			int16_t *dstptr = (int16_t *) &dst[dstpos];
 
 			dstptr[0] = PD_BE16(srcptr[0]);
 			dstptr[1] = PD_BE16(srcptr[1]);
@@ -75,8 +75,8 @@ static u32 convertPads(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_pads)
 			srcpos += 8;
 			dstpos += 8;
 		} else {
-			u32 *srcptr = (u32 *) &src[srcpos];
-			u32 *dstptr = (u32 *) &dst[dstpos];
+			uint32_t *srcptr = (uint32_t *) &src[srcpos];
+			uint32_t *dstptr = (uint32_t *) &dst[dstpos];
 
 			dstptr[0] = PD_BE32(srcptr[0]);
 			dstptr[1] = PD_BE32(srcptr[1]);
@@ -88,8 +88,8 @@ static u32 convertPads(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_pads)
 
 		// Up
 		if ((flags & (PADFLAG_UPALIGNTOX | PADFLAG_UPALIGNTOY | PADFLAG_UPALIGNTOZ)) == 0) {
-			u32 *srcptr = (u32 *) &src[srcpos];
-			u32 *dstptr = (u32 *) &dst[dstpos];
+			uint32_t *srcptr = (uint32_t *) &src[srcpos];
+			uint32_t *dstptr = (uint32_t *) &dst[dstpos];
 
 			dstptr[0] = PD_BE32(srcptr[0]);
 			dstptr[1] = PD_BE32(srcptr[1]);
@@ -101,8 +101,8 @@ static u32 convertPads(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_pads)
 
 		// Look
 		if ((flags & (PADFLAG_LOOKALIGNTOX | PADFLAG_LOOKALIGNTOY | PADFLAG_LOOKALIGNTOZ)) == 0) {
-			u32 *srcptr = (u32 *) &src[srcpos];
-			u32 *dstptr = (u32 *) &dst[dstpos];
+			uint32_t *srcptr = (uint32_t *) &src[srcpos];
+			uint32_t *dstptr = (uint32_t *) &dst[dstpos];
 
 			dstptr[0] = PD_BE32(srcptr[0]);
 			dstptr[1] = PD_BE32(srcptr[1]);
@@ -114,8 +114,8 @@ static u32 convertPads(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_pads)
 
 		// Bbox
 		if (flags & PADFLAG_HASBBOXDATA) {
-			u32 *srcptr = (u32 *) &src[srcpos];
-			u32 *dstptr = (u32 *) &dst[dstpos];
+			uint32_t *srcptr = (uint32_t *) &src[srcpos];
+			uint32_t *dstptr = (uint32_t *) &dst[dstpos];
 
 			dstptr[0] = PD_BE32(srcptr[0]);
 			dstptr[1] = PD_BE32(srcptr[1]);
@@ -132,7 +132,7 @@ static u32 convertPads(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_pads)
 	return dstpos;
 }
 
-static u32 convertWayPoints(u8 *dst, u32 dstpos, u8 *src, u32 srcpos)
+static uint32_t convertWayPoints(uint8_t *dst, uint32_t dstpos, uint8_t *src, uint32_t srcpos)
 {
 	struct n64_waypoint *n64_waypoints = (struct n64_waypoint *) &src[srcpos];
 	struct waypoint *host_waypoints = (struct waypoint *) &dst[dstpos];
@@ -142,7 +142,7 @@ static u32 convertWayPoints(u8 *dst, u32 dstpos, u8 *src, u32 srcpos)
 
 	dstpos += (num_waypoints + 1) * sizeof(struct waypoint);
 
-	u32 *host_neighbours = (u32 *) &dst[dstpos];
+	uint32_t *host_neighbours = (uint32_t *) &dst[dstpos];
 	int n = 0;
 
 	for (int i = 0; i < num_waypoints; i++) {
@@ -151,7 +151,7 @@ static u32 convertWayPoints(u8 *dst, u32 dstpos, u8 *src, u32 srcpos)
 		host_waypoints[i].groupnum = PD_BE32(n64_waypoints[i].groupnum);
 		host_waypoints[i].step = 0;
 
-		u32 *n64_neighbours = (u32 *) &src[PD_BE32(n64_waypoints[i].ptr_neighbours)];
+		uint32_t *n64_neighbours = (uint32_t *) &src[PD_BE32(n64_waypoints[i].ptr_neighbours)];
 
 		for (int j = 0; n64_neighbours[j] != 0xffffffff; j++) {
 			host_neighbours[n++] = PD_BE32(n64_neighbours[j]);
@@ -171,7 +171,7 @@ static u32 convertWayPoints(u8 *dst, u32 dstpos, u8 *src, u32 srcpos)
 	return dstpos;
 }
 
-static u32 convertWayGroups(u8 *dst, u32 dstpos, u8 *src, u32 srcpos)
+static uint32_t convertWayGroups(uint8_t *dst, uint32_t dstpos, uint8_t *src, uint32_t srcpos)
 {
 	struct n64_waygroup *n64_waygroups = (struct n64_waygroup *) &src[srcpos];
 	struct waygroup *host_waygroups = (struct waygroup *) &dst[dstpos];
@@ -182,14 +182,14 @@ static u32 convertWayGroups(u8 *dst, u32 dstpos, u8 *src, u32 srcpos)
 	dstpos += (num_waygroups + 1) * sizeof(struct waygroup);
 
 	// Waygroups and child waypoints
-	u32 *host_waypoints = (u32 *) &dst[dstpos];
+	uint32_t *host_waypoints = (uint32_t *) &dst[dstpos];
 	int n = 0;
 
 	for (int i = 0; i < num_waygroups; i++) {
 		host_waygroups[i].waypoints = (void *)(uintptr_t)dstpos;
 		host_waygroups[i].step = 0;
 
-		u32 *n64_waypoints = (u32 *) &src[PD_BE32(n64_waygroups[i].ptr_waypoints)];
+		uint32_t *n64_waypoints = (uint32_t *) &src[PD_BE32(n64_waygroups[i].ptr_waypoints)];
 
 		for (int j = 0; n64_waypoints[j] != 0xffffffff; j++) {
 			host_waypoints[n++] = PD_BE32(n64_waypoints[j]);
@@ -206,13 +206,13 @@ static u32 convertWayGroups(u8 *dst, u32 dstpos, u8 *src, u32 srcpos)
 	host_waygroups[num_waygroups].step = 0;
 
 	// Waygroup neighbours
-	u32 *host_neighbours = (u32 *) &dst[dstpos];
+	uint32_t *host_neighbours = (uint32_t *) &dst[dstpos];
 	n = 0;
 
 	for (int i = 0; i < num_waygroups; i++) {
 		host_waygroups[i].neighbours = (void *)(uintptr_t)dstpos;
 
-		u32 *n64_neighbours = (u32 *) &src[PD_BE32(n64_waygroups[i].ptr_neighbours)];
+		uint32_t *n64_neighbours = (uint32_t *) &src[PD_BE32(n64_waygroups[i].ptr_neighbours)];
 
 		for (int j = 0; n64_neighbours[j] != 0xffffffff; j++) {
 			host_neighbours[n++] = PD_BE32(n64_neighbours[j]);
@@ -226,7 +226,7 @@ static u32 convertWayGroups(u8 *dst, u32 dstpos, u8 *src, u32 srcpos)
 	return dstpos;
 }
 
-static u32 convertCover(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_covers)
+static uint32_t convertCover(uint8_t *dst, uint32_t dstpos, uint8_t *src, uint32_t srcpos, int num_covers)
 {
 	struct coverdefinition *n64_covers = (struct coverdefinition *) &src[srcpos];
 	struct coverdefinition *host_covers = (struct coverdefinition *) &dst[dstpos];
@@ -242,9 +242,9 @@ static u32 convertCover(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int num_covers
 	return dstpos;
 }
 
-static u32 convertPadsFile(u8 *dst, u8 *src)
+static uint32_t convertPadsFile(uint8_t *dst, uint8_t *src)
 {
-	u32 dstpos = 0;
+	uint32_t dstpos = 0;
 	struct n64_header *n64_header = (struct n64_header *) src;
 	struct host_header *host_header = (struct host_header *) dst;
 
@@ -273,11 +273,11 @@ static u32 convertPadsFile(u8 *dst, u8 *src)
 	return dstpos;
 }
 
-u8* preprocessPadsFile(u8 *data, u32 size, u32 *outSize) {
-	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_PADS);
-	u8* dst = sysMemZeroAlloc(newSizeEstimated);
+uint8_t* preprocessPadsFile(uint8_t *data, uint32_t size, uint32_t *outSize) {
+	uint32_t newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_PADS);
+	uint8_t* dst = sysMemZeroAlloc(newSizeEstimated);
 
-	u32 newSize = convertPadsFile(dst, data);
+	uint32_t newSize = convertPadsFile(dst, data);
 
 	if (newSize > newSizeEstimated) {
 		sysFatalError("overflow when trying to preprocess a pads file, size %d newsize %d", size, newSize);

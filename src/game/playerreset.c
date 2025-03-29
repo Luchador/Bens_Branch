@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "constants.h"
 #include "game/bondmove.h"
@@ -31,7 +32,7 @@ void playerInitEyespy(void)
 	struct pad pad;
 	struct chrdata *propchr;
 	struct chrdata *playerchr;
-	static u8 nextpad = 0;
+	static uint8_t nextpad = 0;
 
 	if (g_Vars.currentplayer->eyespy == NULL) {
 		/**
@@ -102,27 +103,27 @@ void playerInitEyespy(void)
 }
 
 struct cmd32 {
-	s32 type;
-	s32 param1;
-	s32 param2;
-	s32 param3;
+	int type;
+	int param1;
+	int param2;
+	int param3;
 };
 
 void playerReset(void)
 {
 	struct coord pos = {0, 0, 0};
 	RoomNum rooms[8];
-	f32 turnanglerad = 0;
-	f32 groundy;
+	float turnanglerad = 0;
+	float groundy;
 	bool hasdefaultweapon = false;
 	struct cmd32 *cmd = (struct cmd32 *)g_StageSetup.intro;
-	u8 haseyespy = false;
-	s32 i;
-	s32 numchrs;
+	uint8_t haseyespy = false;
+	int i;
+	int numchrs;
 	struct gecreditsdata *thing;
 	struct chrdata *chr;
-	s32 bodynum;
-	s32 headnum;
+	int bodynum;
+	int headnum;
 
 	mpResetHeads();
 

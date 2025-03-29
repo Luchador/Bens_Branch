@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/bondbike.h"
 #include "game/bondmove.h"
@@ -18,6 +18,7 @@
 #include "game/objectives.h"
 #include "game/options.h"
 #include "game/propobj.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/mtx.h"
 #include "lib/anim.h"
@@ -341,7 +342,7 @@ void bbike0f0d2b40(struct defaultobj *bike, struct coord *arg1, float arg2, stru
 	sp90.z = arg1->f[2];
 
 	if (sp90.f[0] || sp90.f[2]) {
-		guNormalize(&sp90.x, &sp90.y, &sp90.z);
+		utilsNormalizeF(&sp90.x, &sp90.y, &sp90.z);
 	} else {
 		sp90.z = 1;
 	}

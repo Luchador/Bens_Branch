@@ -270,7 +270,6 @@ set(SRC_LIB
   src/lib/args.c
   src/lib/audiodma.c
   src/lib/audiomgr.c
-  src/lib/base.c
   src/lib/collision.c
   src/lib/dma.c
   src/lib/joy.c

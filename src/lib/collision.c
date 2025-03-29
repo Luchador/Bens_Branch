@@ -1,9 +1,11 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
 #include "game/prop.h"
 #include "game/textutils.h"
 #include "game/bg.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/dma.h"
 #include "lib/memp.h"
@@ -396,7 +398,7 @@ bool cdIsPointBetweenXZ(float x1, float z1, float x2, float z2, float x3, float 
 	return (squaredmagnitude < dot && dot < 0) || (dot > 0 && dot < squaredmagnitude);
 }
 
-void cd00025848(float tilex, float tilez, float tilewidth, float posx, float posz, float *x1, float *z1, float *x2, float *z2)
+void cdGetTileEdgePointsTowardPosition(float tilex, float tilez, float tilewidth, float posx, float posz, float *x1, float *z1, float *x2, float *z2)
 {
 	posx -= tilex;
 	posz -= tilez;
@@ -540,10 +542,10 @@ float cdFindGroundInIntTileAtVertex(struct geotilei *tile, float x, float z, int
 {
 	struct coord sp7c;
 	struct coord sp70;
-	s64 sp68;
-	s64 sp60;
-	s64 sp58;
-	s64 tmp;
+	int64_t sp68;
+	int64_t sp60;
+	int64_t sp58;
+	int64_t tmp;
 	float ground;
 	int next;
 
@@ -577,7 +579,7 @@ float cdFindGroundInIntTileAtVertex(struct geotilei *tile, float x, float z, int
 		return *(int16_t *)(tile->ymax + (uintptr_t)tile);
 	}
 
-	ground = (tmp - (f64)x * sp58 - (f64)z * sp68) / sp60;
+	ground = (tmp - (double)x * sp58 - (double)z * sp68) / sp60;
 
 	if (ground > *(int16_t *)(tile->ymax + (uintptr_t)tile)) {
 		ground = *(int16_t *)(tile->ymax + (uintptr_t)tile);
@@ -587,13 +589,6 @@ float cdFindGroundInIntTileAtVertex(struct geotilei *tile, float x, float z, int
 
 	return ground;
 }
-
-#if VERSION < VERSION_NTSC_1_0
-float cdFindGroundInTileType0AtVertex1(struct geotilei *tile, float x, float z)
-{
-	return cdFindGroundInIntTileAtVertex(tile, x, z, 1);
-}
-#endif
 
 float cdFindGroundInIntTile(struct geotilei *tile, float x, float z)
 {
@@ -656,7 +651,7 @@ float cdFindGroundInFltTile(struct geotilef *tile, float x, float z)
 		return tile->vertices[tile->ymax].y;
 	}
 
-	ground = (tmp - (f64)x * (f64)sp0c.f[0] - (f64)z * (f64)sp0c.f[2]) / (f64)sp0c.f[1];
+	ground = (tmp - (double)x * (double)sp0c.f[0] - (double)z * (double)sp0c.f[2]) / (double)sp0c.f[1];
 
 	if (ground > tile->vertices[tile->ymax].y) {
 		ground = tile->vertices[tile->ymax].y;
@@ -777,7 +772,7 @@ bool cdIs2dPointInCyl(struct geocyl *cyl, float x, float z)
 	return xdiff * xdiff + zdiff * zdiff <= cyl->radius * cyl->radius;
 }
 
-bool cd000266a4(float x, float z, struct geo *geo)
+bool cdIs2dPointInGeo(float x, float z, struct geo *geo)
 {
 	if (geo == NULL) {
 		return false;
@@ -1315,7 +1310,8 @@ end:
 	collisions[numcollisions].geo = NULL;
 }
 
-void cd00027f78(struct geotilei *tile, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
+// Ben's comment: with this function stubbed you can walk straight through walls
+void cdTestWall(struct geotilei *tile, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
 {
 	int i;
 	int numvertices = tile->header.numvertices;
@@ -1441,7 +1437,8 @@ int cdTestRampWall(struct geotilei *tile, struct coord *pos, float width, float 
 	return count;
 }
 
-void cd0002840c(struct geotilef *tile, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
+// Ben's comment: very similar to cdTestWall but I'm not sure what exactly it's used for
+void cdTestWallF(struct geotilef *tile, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
 {
 	int i;
 	int numvertices = tile->header.numvertices;
@@ -1473,7 +1470,8 @@ void cd0002840c(struct geotilef *tile, float arg1, float arg2, float arg3, struc
 	}
 }
 
-void cd00028638(struct geoblock *block, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
+// Ben's comment: Test collision on props with bounding boxes. With this disabled the player can walk through doors and other props.
+void cdTestBlock(struct geoblock *block, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
 {
 	int i;
 	int numvertices = block->header.numvertices;
@@ -1505,7 +1503,7 @@ void cd00028638(struct geoblock *block, float arg1, float arg2, float arg3, stru
 	}
 }
 
-void cd0002885c(struct geocyl *cyl, float x, float z, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
+void cdTestCylinder(struct geocyl *cyl, float x, float z, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
 {
 	float xdiff = x - cyl->x;
 	float zdiff = z - cyl->z;
@@ -1547,7 +1545,7 @@ void cdCollectGeoForCylMoveFromList(uint8_t *start, uint8_t *end, struct coord *
 					}
 
 					if (pass) {
-						cd00027f78(tile, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
+						cdTestWall(tile, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
 					}
 				}
 			}
@@ -1563,7 +1561,7 @@ void cdCollectGeoForCylMoveFromList(uint8_t *start, uint8_t *end, struct coord *
 					&& pos->z <= tile->vertices[tile->zmax].z + radius
 					&& (!checkvertical || (pos->y + arg6 >= tile->vertices[tile->ymin].y
 							&& pos->y + arg7 <= tile->vertices[tile->ymax].y))) {
-				cd0002840c(tile, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
+				cdTestWallF(tile, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
 			}
 
 			geo = (struct geo *)((uintptr_t)geo + (uintptr_t)(tile->header.numvertices - 0x40) * 0xc + 0x310);
@@ -1572,7 +1570,7 @@ void cdCollectGeoForCylMoveFromList(uint8_t *start, uint8_t *end, struct coord *
 
 			if ((geoflags & (GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT | GEOFLAG_BLOCK_SHOOT))
 					&& (!checkvertical || (pos->y + arg6 >= block->ymin && pos->y + arg7 <= block->ymax))) {
-				cd00028638(block, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
+				cdTestBlock(block, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
 			}
 
 			geo = (struct geo *)((uintptr_t)geo + sizeof(struct geoblock));
@@ -1581,7 +1579,7 @@ void cdCollectGeoForCylMoveFromList(uint8_t *start, uint8_t *end, struct coord *
 
 			if ((geoflags & geo->flags)
 					&& (!checkvertical || (pos->y + arg6 >= cyl->ymin && pos->y + arg7 <= cyl->ymax))) {
-				cd0002885c(cyl, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
+				cdTestCylinder(cyl, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
 			}
 
 			geo = (struct geo *)((uintptr_t)geo + sizeof(struct geocyl));
@@ -1792,7 +1790,7 @@ void cd0002901c(struct coord *pos, struct coord *dist, float width, struct colli
 	} else if (collisions[bestindex].geo->type == GEOTYPE_CYL) {
 		struct geocyl *cyl = (struct geocyl *) collisions[bestindex].geo;
 
-		cd00025848(cyl->x, cyl->z, cyl->radius, pos->x, pos->z, &vtx1.x, &vtx1.z, &vtx2.x, &vtx2.z);
+		cdGetTileEdgePointsTowardPosition(cyl->x, cyl->z, cyl->radius, pos->x, pos->z, &vtx1.x, &vtx1.z, &vtx2.x, &vtx2.z);
 
 		vtx1.y = pos->y;
 		vtx2.y = pos->y;
@@ -1809,13 +1807,9 @@ float cdFindGroundFromList(struct collision *collisions, struct coord *pos, stru
 	bool hasground = false;
 	bool anyintile = false;
 	bool hasflag0100 = false;
-#if VERSION >= VERSION_NTSC_1_0
 	bool hasdie = false;
 	bool hasgroundfromearlier;
 	bool isdie;
-#else
-	int32_t unused1;
-#endif
 	float nextvalue;
 	float spe4;
 	float f30;
@@ -1825,23 +1819,15 @@ float cdFindGroundFromList(struct collision *collisions, struct coord *pos, stru
 	float f14;
 	float spb4;
 	float thisvalue;
-	int32_t unused2;
 	int next;
 	int numvertices;
 	float spb8;
-#if VERSION >= VERSION_NTSC_1_0
-	int32_t unused3[8];
-#else
-	int32_t unused3[7];
-#endif
 	float sp94;
-	int32_t unused4[6];
 	float sp78;
 	float sp74;
 	float nextx;
 	float nextz;
 	float ground;
-	int32_t unused5[5];
 	float thisx;
 	float thisz;
 
@@ -1923,32 +1909,21 @@ float cdFindGroundFromList(struct collision *collisions, struct coord *pos, stru
 		}
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	hasgroundfromearlier = hasground;
-#endif
 
 	if (!hasground || hasflag0100) {
 		spe4 = 4294967296.0f;
 
 		for (collision = collisions; collision->geo != NULL; collision++) {
-#if VERSION >= VERSION_NTSC_1_0
 			if (collision->intile == false
 					&& (!hasgroundfromearlier || (collision->geo->type == GEOTYPE_TILE_I && (collision->geo->flags & GEOFLAG_SLOPE))))
-#else
-			if (collision->intile == false
-					&& (!hasground || (collision->geo->type == GEOTYPE_TILE_I && (collision->geo->flags & GEOFLAG_SLOPE))))
-#endif
 			{
 				if (collision->geo->type == GEOTYPE_TILE_I) {
 					struct geotilei *tile = (struct geotilei *) collision->geo;
 					numvertices = tile->header.numvertices;
-#if VERSION >= VERSION_NTSC_1_0
 					isdie = (tile->header.flags & GEOFLAG_DIE) != 0;
-#endif
 
-#if VERSION >= VERSION_NTSC_1_0
 					if (!isdie || !hasground)
-#endif
 					{
 						for (i = 0; i < numvertices; i++) {
 							thisx = tile->vertices[i][0];
@@ -1966,11 +1941,7 @@ float cdFindGroundFromList(struct collision *collisions, struct coord *pos, stru
 								f30 = -f30;
 							}
 
-#if VERSION >= VERSION_NTSC_1_0
 							if (f30 < spe4 || hasdie)
-#else
-							if (f30 < spe4)
-#endif
 							{
 								if (cdIsPointBetweenXZ(thisx, thisz, nextx, nextz, pos->x, pos->z)) {
 									spb8 = nextx - thisx;
@@ -1985,21 +1956,15 @@ float cdFindGroundFromList(struct collision *collisions, struct coord *pos, stru
 										curground = ground;
 										*collisionptr = collision;
 										spe4 = f30;
-#if VERSION >= VERSION_NTSC_1_0
 										hasground = true;
 										hasdie = isdie;
-#endif
 									}
 								} else {
 									thisvalue = cdGetDistanceXZ(thisx, thisz, pos->x, pos->z);
 									nextvalue = cdGetDistanceXZ(nextx, nextz, pos->x, pos->z);
 
 									if (thisvalue < nextvalue) {
-#if VERSION >= VERSION_NTSC_1_0
 										if (thisvalue < spe4 || hasdie)
-#else
-										if (thisvalue < spe4)
-#endif
 										{
 											x = tile->vertices[i][0];
 											z = tile->vertices[i][2];
@@ -2009,18 +1974,12 @@ float cdFindGroundFromList(struct collision *collisions, struct coord *pos, stru
 												curground = ground;
 												*collisionptr = collision;
 												spe4 = thisvalue;
-#if VERSION >= VERSION_NTSC_1_0
 												hasground = true;
 												hasdie = isdie;
-#endif
 											}
 										}
 									} else {
-#if VERSION >= VERSION_NTSC_1_0
 										if (nextvalue < spe4 || hasdie)
-#else
-										if (nextvalue < spe4)
-#endif
 										{
 											x = tile->vertices[next][0];
 											z = tile->vertices[next][2];
@@ -2030,10 +1989,8 @@ float cdFindGroundFromList(struct collision *collisions, struct coord *pos, stru
 												curground = ground;
 												*collisionptr = collision;
 												spe4 = nextvalue;
-#if VERSION >= VERSION_NTSC_1_0
 												hasground = true;
 												hasdie = isdie;
-#endif
 											}
 										}
 									}
@@ -2076,10 +2033,8 @@ float cdFindGroundFromList(struct collision *collisions, struct coord *pos, stru
 									curground = ground;
 									*collisionptr = collision;
 									spe4 = f30;
-#if VERSION >= VERSION_NTSC_1_0
 									hasground = true;
 									hasdie = false;
-#endif
 								}
 							} else {
 								thisvalue = cdGetDistanceXZ(thisx, thisz, pos->x, pos->z);
@@ -2095,10 +2050,8 @@ float cdFindGroundFromList(struct collision *collisions, struct coord *pos, stru
 											curground = ground;
 											*collisionptr = collision;
 											spe4 = thisvalue;
-#if VERSION >= VERSION_NTSC_1_0
 											hasground = true;
 											hasdie = false;
-#endif
 										}
 									}
 								} else {
@@ -2111,12 +2064,8 @@ float cdFindGroundFromList(struct collision *collisions, struct coord *pos, stru
 											curground = ground;
 											*collisionptr = collision;
 											spe4 = nextvalue;
-#if VERSION >= VERSION_NTSC_1_0
 											hasground = true;
 											hasdie = false;
-#else
-											if (numvertices);
-#endif
 										}
 									}
 								}
@@ -2180,7 +2129,7 @@ bool cd0002a13c(struct coord *pos, float radius, float ymax, float ymin, RoomNum
 }
 
 float cdFindGroundInfoAtCyl(struct coord *pos, float radius, RoomNum *rooms, int16_t *floorcol,
-		uint8_t *floortype, int16_t *floorflags, RoomNum *floorroom, int *inlift, struct prop **lift)
+		uint8_t *floortype, int16_t *floorflags, RoomNum *floorroom, bool *inlift, struct prop **lift)
 {
 	struct collision collisions[21];
 	struct collision *sp72 = NULL;
@@ -2271,11 +2220,7 @@ int cdFindFloorRoomAtPos(struct coord *pos, RoomNum *nearrooms)
 	return room;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 RoomNum cdFindFloorRoomYColourFlagsAtPos(struct coord *pos, RoomNum *rooms, float *arg2, int16_t *floorcolptr, int16_t *flagsptr)
-#else
-RoomNum cdFindFloorRoomYColourFlagsAtPos(struct coord *pos, RoomNum *rooms, float *arg2, int16_t *floorcolptr)
-#endif
 {
 	struct geo *geo;
 	RoomNum room;
@@ -2291,20 +2236,14 @@ RoomNum cdFindFloorRoomYColourFlagsAtPos(struct coord *pos, RoomNum *rooms, floa
 		cdGetFloorCol(geo, floorcolptr);
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (flagsptr != NULL && geo != NULL) {
 		*flagsptr = geo->flags;
 	}
-#endif
 
 	return room;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 RoomNum cdFindCeilingRoomYColourFlagsAtPos(struct coord *pos, RoomNum *rooms, float *arg2, int16_t *floorcolptr, int16_t *flagsptr)
-#else
-RoomNum cdFindCeilingRoomYColourFlagsAtPos(struct coord *pos, RoomNum *rooms, float *arg2, int16_t *floorcolptr)
-#endif
 {
 	struct geo *geo;
 	RoomNum sp32;
@@ -2320,11 +2259,9 @@ RoomNum cdFindCeilingRoomYColourFlagsAtPos(struct coord *pos, RoomNum *rooms, fl
 		cdGetFloorCol(geo, floorcolptr);
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (flagsptr != NULL && geo != NULL) {
 		*flagsptr = geo->flags;
 	}
-#endif
 
 	return sp32;
 }
@@ -2444,7 +2381,7 @@ int cdExamCylMove01(struct coord *pos, struct coord *pos2, float radius, RoomNum
 		} else if (collisions[0].geo->type == GEOTYPE_CYL) {
 			struct geocyl *cyl = (struct geocyl *) collisions[0].geo;
 
-			cd00025848(cyl->x, cyl->z, cyl->radius, pos->x, pos->z, &sp70.x, &sp70.z, &sp64.x, &sp64.z);
+			cdGetTileEdgePointsTowardPosition(cyl->x, cyl->z, cyl->radius, pos->x, pos->z, &sp70.x, &sp70.z, &sp64.x, &sp64.z);
 
 			sp70.y = pos->y;
 			sp64.y = pos->y;
@@ -2842,7 +2779,7 @@ bool cd0002b954Cyl(struct coord *arg0, struct coord *arg1, struct coord *arg2, s
 					arg4->z = arg0->z + arg2->f[2] * mult;
 
 					if (arg5 != NULL && arg6 != NULL) {
-						cd00025848(x, z, radius, arg0->x, arg0->z, &arg5->x, &arg5->z, &arg6->x, &arg6->z);
+						cdGetTileEdgePointsTowardPosition(x, z, radius, arg0->x, arg0->z, &arg5->x, &arg5->z, &arg6->x, &arg6->z);
 
 						arg5->y = arg4->y;
 						arg6->y = arg4->y;
@@ -2964,7 +2901,6 @@ bool cdTestAToBGeolist(uint8_t *start, uint8_t *end, struct coord *arg2, struct 
 void cd0002c328IntTile(struct geotilei *tile, struct coord *arg1, struct coord *arg2, struct coord *arg3, struct coord *arg4)
 {
 	struct coord sp3c;
-	int32_t stack[2];
 	uint8_t numvertices;
 	float max = 0.0f;
 	float min = 0.0f;
@@ -3679,28 +3615,24 @@ bool cdBlockExcludesBlockLaterally(struct geoblock *block1, struct geoblock *blo
 
 	for (i = 0; i < numvertices0; i++) {
 		int next = (i + 1) % numvertices0;
-		f64 diff1;
-		f64 diff2;
+		double diff1;
+		double diff2;
 
-		diff1 = block1->vertices[next][1] - (f64)block1->vertices[i][1];
-		diff2 = block1->vertices[i][0] - (f64)block1->vertices[next][0];
+		diff1 = block1->vertices[next][1] - (double)block1->vertices[i][1];
+		diff2 = block1->vertices[i][0] - (double)block1->vertices[next][0];
 
 		if (diff1 == zero && diff2 == zero) {
 			if (cdIs2dPointInBlock(block2, block1->vertices[i][0], block1->vertices[i][1])) {
 				return false;
 			}
 		} else {
-			f64 sum1 = block1->vertices[i][0] * diff1 + block1->vertices[i][1] * diff2;
-			f64 sum2;
+			double sum1 = block1->vertices[i][0] * diff1 + block1->vertices[i][1] * diff2;
+			double sum2;
 			int j = (next + 1) % numvertices0;
 			int k;
 
 			while (j != i) {
 				sum2 = block1->vertices[j][0] * diff1 + block1->vertices[j][1] * diff2;
-
-				if (1);
-				if (1);
-				if (1);
 
 				if (sum2 != sum1) {
 					break;
@@ -3710,7 +3642,7 @@ bool cdBlockExcludesBlockLaterally(struct geoblock *block1, struct geoblock *blo
 			}
 
 			for (k = 0; k < numvertices1; k++) {
-				f64 sum3 = block2->vertices[k][0] * diff1 + block2->vertices[k][1] * diff2;
+				double sum3 = block2->vertices[k][0] * diff1 + block2->vertices[k][1] * diff2;
 
 				if (sum2 == sum1) {
 					sum2 = sum1 - sum3 + sum1;
@@ -4102,100 +4034,6 @@ bool cd0002f02c(struct geoblock *block, RoomNum *rooms, int types)
 	return result;
 }
 
-#if VERSION < VERSION_NTSC_1_0
-struct debugtri *cdReadIntTileVertices(struct debugtri *ptr, int *remaining, struct geotilei *tile)
-{
-	if (tile->header.flags & (GEOFLAG_FLOOR1 | GEOFLAG_WALL)) {
-		int i;
-		int numvertices = tile->header.numvertices;
-		int16_t vertices[16][3];
-
-		if (numvertices > 16) {
-			numvertices = 16;
-		}
-
-		for (i = 0; i < numvertices; i++) {
-			vertices[i][0] = tile->vertices[i][0] - g_Vars.currentplayer->globaldrawworldoffset.x;
-			vertices[i][1] = tile->vertices[i][1] - g_Vars.currentplayer->globaldrawworldoffset.y;
-			vertices[i][2] = tile->vertices[i][2] - g_Vars.currentplayer->globaldrawworldoffset.z;
-		}
-
-		for (i = 2; i < numvertices; i++) {
-			if (*remaining > 0) {
-				ptr->vertices[0][0] = vertices[0][0];
-				ptr->vertices[0][1] = vertices[0][1];
-				ptr->vertices[0][2] = vertices[0][2];
-				ptr->vertices[1][0] = vertices[i - 1][0];
-				ptr->vertices[1][1] = vertices[i - 1][1];
-				ptr->vertices[1][2] = vertices[i - 1][2];
-				ptr->vertices[2][0] = vertices[i][0];
-				ptr->vertices[2][1] = vertices[i][1];
-				ptr->vertices[2][2] = vertices[i][2];
-				ptr->unk12 = 0;
-
-				ptr++;
-			}
-
-			*remaining -= 1;
-		}
-	}
-
-	return ptr;
-}
-#endif
-
-#if VERSION < VERSION_NTSC_1_0
-struct debugtri *cdReadFltTileVertices(struct debugtri *ptr, int *remaining, struct geotilef *tile)
-{
-	if (tile->header.flags & (GEOFLAG_FLOOR1 | GEOFLAG_WALL)) {
-		int i;
-		int numvertices = tile->header.numvertices;
-		int16_t vertices[16][3];
-
-		if (numvertices > 16) {
-			numvertices = 16;
-		}
-
-		for (i = 0; i < numvertices; i++) {
-			vertices[i][0] = tile->vertices[i].x - g_Vars.currentplayer->globaldrawworldoffset.x;
-			vertices[i][1] = tile->vertices[i].y - g_Vars.currentplayer->globaldrawworldoffset.y;
-			vertices[i][2] = tile->vertices[i].z - g_Vars.currentplayer->globaldrawworldoffset.z;
-		}
-
-		for (i = 2; i < numvertices; i++) {
-			if (*remaining > 0) {
-				ptr->vertices[0][0] = vertices[0][0];
-				ptr->vertices[0][1] = vertices[0][1];
-				ptr->vertices[0][2] = vertices[0][2];
-				ptr->vertices[1][0] = vertices[i - 1][0];
-				ptr->vertices[1][1] = vertices[i - 1][1];
-				ptr->vertices[1][2] = vertices[i - 1][2];
-				ptr->vertices[2][0] = vertices[i][0];
-				ptr->vertices[2][1] = vertices[i][1];
-				ptr->vertices[2][2] = vertices[i][2];
-				ptr->unk12 = 0;
-
-				ptr++;
-			}
-
-			*remaining -= 1;
-		}
-	}
-
-	return ptr;
-}
-#endif
-
-Gfx *cdRender(Gfx *gdl, int32_t arg1, int32_t arg2, int32_t arg3)
-{
-	return gdl;
-}
-
-void cd0002f2fc(int32_t arg0, int32_t arg1)
-{
-	// empty
-}
-
 bool cdIsNearlyInSightWithFlags(struct coord *viewpos, RoomNum *rooms, struct coord *targetpos, float distance, int types, int16_t geoflags)
 {
 	struct coord diff;
@@ -4211,7 +4049,7 @@ bool cdIsNearlyInSightWithFlags(struct coord *viewpos, RoomNum *rooms, struct co
 	vector.y = 0;
 	vector.z = targetpos->z - viewpos->z;
 
-	guNormalize(&vector.x, &vector.y, &vector.z);
+	utilsNormalizeF(&vector.x, &vector.y, &vector.z);
 
 	x = vector.f[0] * distance;
 	z = vector.f[2] * distance;

@@ -12,7 +12,7 @@ void guScaleF(float mf[4][4], float x, float y, float z)
 
 void guScale(Mtx *m, float x, float y, float z)
 {
-	f32 mf[4][4];
+	float mf[4][4];
 
 	guScaleF(mf, x, y, z);
 

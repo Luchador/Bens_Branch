@@ -25,33 +25,32 @@
 #include "video.h"
 #endif
 
-char var800a41c0[26];
-u8 g_IrScanlines[2][480];
-s32 g_NumActiveEffects = 0;
-u8 g_BlurChange = 0;
-u8 var8007f848 = 0;
-s32 g_IrBinocularRadius = 90;
-s32 var8007f850 = 3;
+uint8_t g_IrScanlines[2][480];
+int g_NumActiveEffects = 0;
+uint8_t g_BlurChange = 0;
+uint8_t var8007f848 = 0;
+int g_IrBinocularRadius = 90;
+int var8007f850 = 3;
 
-Gfx *bviewDrawIrRect(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2)
+Gfx *bviewDrawIrRect(Gfx *gdl, int x1, int y1, int x2, int y2)
 {
 	gDPFillRectangle(gdl++, x1, y1, x2, y2);
 
 	return gdl;
 }
 
-Gfx *bviewCopyPixels(Gfx *gdl, u16 *fb, s32 top, u32 tile, s32 arg4, f32 arg5, s32 left, s32 width)
+Gfx *bviewCopyPixels(Gfx *gdl, uint16_t *fb, int top, uint32_t tile, int arg4, float arg5, int left, int width)
 {
 	// TODO: add an extended GBI opcode for this
 	return gdl;
 }
 
-Gfx *bviewDrawFisheyeRect(Gfx *gdl, s32 arg1, f32 arg2, s32 arg3, s32 arg4)
+Gfx *bviewDrawFisheyeRect(Gfx *gdl, int arg1, float arg2, int arg3, int arg4)
 {
 	if (arg2 < 1) {
-		f32 tmp = arg4 * 0.5f;
-		f32 fVar4 = arg3 + tmp;
-		f32 fVar7 = (s32)(arg2 * tmp);
+		float tmp = arg4 * 0.5f;
+		float fVar4 = arg3 + tmp;
+		float fVar7 = (int)(arg2 * tmp);
 
 		gDPFillRectangle(gdl++, arg3, arg1, fVar4 - fVar7, arg1 + 1);
 		gDPFillRectangle(gdl++, fVar4 + fVar7, arg1, arg3 + arg4, arg1 + 1);
@@ -60,10 +59,10 @@ Gfx *bviewDrawFisheyeRect(Gfx *gdl, s32 arg1, f32 arg2, s32 arg3, s32 arg4)
 	return gdl;
 }
 
-Gfx *bviewPrepareStaticRgba16(Gfx *gdl, u32 colour, u32 alpha)
+Gfx *bviewPrepareStaticRgba16(Gfx *gdl, uint32_t colour, uint32_t alpha)
 {
-	static u32 envcol = 0xffffffff;
-	static u32 primcol = 0x7f7f7fff;
+	static uint32_t envcol = 0xffffffff;
+	static uint32_t primcol = 0x7f7f7fff;
 
 	gDPPipeSync(gdl++);
 	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0,
@@ -91,10 +90,10 @@ Gfx *bviewPrepareStaticRgba16(Gfx *gdl, u32 colour, u32 alpha)
 	return gdl;
 }
 
-Gfx *bviewPrepareStaticI8(Gfx *gdl, u32 colour, u32 alpha)
+Gfx *bviewPrepareStaticI8(Gfx *gdl, uint32_t colour, uint32_t alpha)
 {
-	static u32 envcol = 0xffffffff;
-	static u32 primcol = 0x7f7f7fff;
+	static uint32_t envcol = 0xffffffff;
+	static uint32_t primcol = 0x7f7f7fff;
 
 	gDPPipeSync(gdl++);
 	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_8b, 0, 0x0000, 5, 0,
@@ -122,21 +121,15 @@ Gfx *bviewPrepareStaticI8(Gfx *gdl, u32 colour, u32 alpha)
 	return gdl;
 }
 
-Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
+Gfx *bviewDrawMotionBlur(Gfx *gdl, uint32_t colour, uint32_t alpha)
 {
-	u16 *fb = viGetFrontBuffer();
-	s32 viewtop = viGetViewTop();
-	s32 viewheight = viGetViewHeight();
-	f32 fxxx;
-	f32 fyyy;
-	s32 viewwidth = viGetViewWidth();
-	s32 viewleft = viGetViewLeft();
-	f32 somefloat;
-	s32 newalpha;
-	s32 i;
-
-	static u32 sfyyy = 1000;
-	static u32 sfxxx = 1000;
+	int viewtop = viGetViewTop();
+	int viewheight = viGetViewHeight();
+	int viewwidth = viGetViewWidth();
+	int viewleft = viGetViewLeft();
+	float somefloat;
+	int newalpha;
+	int i;
 
 	if (var8007f848) {
 		return gdl;
@@ -166,12 +159,8 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
 		return gdl;
 	}
 
-	fxxx = sfxxx / 1000.0f;
-	fyyy = sfyyy / 1000.0f;
-
 	gDPPipeSync(gdl++);
 
-	somefloat = (viewheight - viewheight / fyyy) * 0.5f;
 	gdl = bviewPrepareStaticRgba16(gdl, colour, newalpha);
 
 	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_BlurFb);
@@ -186,15 +175,14 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, u32 colour, u32 alpha)
 /**
  * Draw static for the Infiltration intro cutscene and Slayer rockets.
  */
-Gfx *bviewDrawStatic(Gfx *gdl, u32 arg1, s32 arg2)
+Gfx *bviewDrawStatic(Gfx *gdl, uint32_t arg1, int arg2)
 {
-	u16 *fb = viGetFrontBuffer();
-	s32 viewtop = viGetViewTop();
-	s32 viewheight = viGetViewHeight();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewleft = viGetViewLeft();
-	u16 *fb2 = (u16 *) (k_ptr_t)(rngRandom() & 0xfff00);
-	s32 y;
+	int viewtop = viGetViewTop();
+	int viewheight = viGetViewHeight();
+	int viewwidth = viGetViewWidth();
+	int viewleft = viGetViewLeft();
+	uint16_t *fb2 = (uint16_t *) (k_ptr_t)(rngRandom() & 0xfff00);
+	int y;
 
 	gDPPipeSync(gdl++);
 
@@ -211,25 +199,23 @@ Gfx *bviewDrawStatic(Gfx *gdl, u32 arg1, s32 arg2)
 /**
  * Draw the yellow interlace effect for Slayer rockets.
  */
-Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, u32 colour, u32 alpha)
+Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 {
-	u16 *fb = viGetBackBuffer();
-	s32 viewtop = viGetViewTop();
-	s32 viewheight = viGetViewHeight();
-	s32 viewwidth = viGetViewWidth();
-	s32 y;
-	s32 viewleft = viGetViewLeft();
-	f32 angle = 0.52359879016876f;
-	s32 offset = (s32)(g_20SecIntervalFrac * 600.0f) % 12;
-	f32 increment;
+	uint16_t *fb = viGetBackBuffer();
+	int viewtop = viGetViewTop();
+	int viewheight = viGetViewHeight();
+	int viewwidth = viGetViewWidth();
+	int y;
+	int viewleft = viGetViewLeft();
+	float angle = 0.52359879016876f;
+	int offset = (int)(g_20SecIntervalFrac * 600.0f) % 12;
+	float increment;
 
 	g_NumActiveEffects++;
 
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "interlaceGfx");
 
 	gDPPipeSync(gdl++);
 
@@ -241,7 +227,7 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, u32 colour, u32 alpha)
 	gSPSetExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
 
 	for (y = viewtop; y < viewtop + viewheight; y++) {
-		s32 offsety = y - offset;
+		int offsety = y - offset;
 
 		if (offsety % 8 == 0 || y == viewtop) {
 			if (offsety % 16 < 8) {
@@ -262,24 +248,21 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, u32 colour, u32 alpha)
 /**
  * Draw the blue film interlace effect for the Infiltration intro cutscene.
  */
-Gfx *bviewDrawFilmInterlace(Gfx *gdl, u32 colour, u32 alpha)
+Gfx *bviewDrawFilmInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 {
-	u16 *fb = viGetBackBuffer();
-	s32 viewtop = viGetViewTop();
-	s32 viewheight = viGetViewHeight();
-	s32 y;
-	s32 viewwidth = viGetViewWidth();
-	s32 viewleft = viGetViewLeft();
-	s32 offset = (s32)(g_20SecIntervalFrac * 600.0f) % 12;
-	u32 stack;
+	uint16_t *fb = viGetBackBuffer();
+	int viewtop = viGetViewTop();
+	int viewheight = viGetViewHeight();
+	int y;
+	int viewwidth = viGetViewWidth();
+	int viewleft = viGetViewLeft();
+	int offset = (int)(g_20SecIntervalFrac * 600.0f) % 12;
 
 	g_NumActiveEffects++;
 
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "BlueInterlaceGfx");
 
 	gDPPipeSync(gdl++);
 
@@ -289,8 +272,8 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, u32 colour, u32 alpha)
 	gSPSetExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
 
 	for (y = viewtop; y < viewtop + viewheight; y++) {
-		s32 offsety = y - offset;
-		s32 tmpy = y;
+		int offsety = y - offset;
+		int tmpy = y;
 
 		if (offsety % 6 == 0 || y == viewtop) {
 			if (offsety % 12 < 6) {
@@ -317,14 +300,14 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, u32 colour, u32 alpha)
  *
  * Used when entering/exiting combat boosts and when entering/exiting xray mode.
  */
-Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
+Gfx *bviewDrawZoomBlur(Gfx *gdl, uint32_t colour, int alpha, float arg3, float arg4)
 {
-	s32 viewtop = viGetViewTop();
-	s32 viewheight = viGetViewHeight();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewleft = viGetViewLeft();
-	f32 somefloat;
-	s32 i;
+	int viewtop = viGetViewTop();
+	int viewheight = viGetViewHeight();
+	int viewwidth = viGetViewWidth();
+	int viewleft = viGetViewLeft();
+	float somefloat;
+	int i;
 
 	g_NumActiveEffects++;
 
@@ -344,22 +327,20 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 		return gdl;
 	}
 
-	strcpy(var800a41c0, "stretchBlurGfx");
-
 	gDPPipeSync(gdl++);
 
 	somefloat = (viewheight - viewheight / arg4) * 0.5f;
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
-	const f32 xcenter = viewleft + viewwidth * 0.5f;
-	const f32 ycenter = viewtop + viewheight * 0.5f;
-	const f32 halfw = viewwidth * 0.5f * arg3;
-	const f32 halfh = viewheight * 0.5f * arg4;
-	const s32 left = xcenter - halfw;
-	const s32 top = ycenter - halfh;
-	const s32 right = xcenter + halfw;
-	const s32 bottom = ycenter + halfh;
+	const float xcenter = viewleft + viewwidth * 0.5f;
+	const float ycenter = viewtop + viewheight * 0.5f;
+	const float halfw = viewwidth * 0.5f * arg3;
+	const float halfh = viewheight * 0.5f * arg4;
+	const int left = xcenter - halfw;
+	const int top = ycenter - halfh;
+	const int right = xcenter + halfw;
+	const int bottom = ycenter + halfh;
 	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_BlurFb);
 	gSPImageRectangleEXT(gdl++,
 		left << 2, top << 2, viewleft, viewtop,
@@ -369,10 +350,10 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, u32 colour, s32 alpha, f32 arg3, f32 arg4)
 	return gdl;
 }
 
-f32 bview0f142d74(s32 arg0, f32 arg1, f32 arg2, f32 arg3)
+float bview0f142d74(int arg0, float arg1, float arg2, float arg3)
 {
-	f32 result;
-	f32 value = arg2;
+	float result;
+	float value = arg2;
 
 	if (arg0 < 0 || arg0 >= 0x80) {
 		return 0.01f;
@@ -389,17 +370,17 @@ f32 bview0f142d74(s32 arg0, f32 arg1, f32 arg2, f32 arg3)
 	return result;
 }
 
-static inline Gfx *bviewDrawFisheyeLine(Gfx *gdl, s32 viewleft, s32 viewwidth, s32 y, f32 scale)
+static inline Gfx *bviewDrawFisheyeLine(Gfx *gdl, int viewleft, int viewwidth, int y, float scale)
 {
 	if (!videoFramebuffersSupported()) {
 		return gdl;
 	}
 
-	const f32 orighalfw = viewwidth * 0.5f;
-	const f32 xcenter = viewleft + orighalfw;
-	const f32 halfw = orighalfw * scale;
-	const s32 left = xcenter - halfw;
-	const s32 right = xcenter + halfw;
+	const float orighalfw = viewwidth * 0.5f;
+	const float xcenter = viewleft + orighalfw;
+	const float halfw = orighalfw * scale;
+	const int left = xcenter - halfw;
+	const int right = xcenter + halfw;
 
 	gSPImageRectangleEXT(gdl++,
 		left << 2, y << 2, viewleft, y,
@@ -421,27 +402,27 @@ static inline Gfx *bviewDrawFisheyeLine(Gfx *gdl, s32 viewleft, s32 viewwidth, s
  * no check for a vertical split being used, and as a result the fisheye radius
  * is smaller than it should be when using a horizontal split. @bug
  */
-Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 startuptimer60, u8 hit)
+Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime60, int8_t startuptimer60, uint8_t hit)
 {
-	u16 *fb = viGetBackBuffer();
-	s32 viewtop;
-	s32 viewheight;
-	f32 f26;
-	f32 halfheight;
-	f32 sqhalfheight;
-	s32 viewwidth;
-	s32 viewleft;
-	s32 s2;
-	s32 i;
-	s32 s3;
-	u8 starting;
-	s32 curradius;
-	f32 startupfrac;
-	f32 fullradius;
-	s32 one = 1;
-	s32 spec;
-	u8 alpha2;
-	f32 tmp;
+	uint16_t *fb = viGetBackBuffer();
+	int viewtop;
+	int viewheight;
+	float f26;
+	float halfheight;
+	float sqhalfheight;
+	int viewwidth;
+	int viewleft;
+	int s2;
+	int i;
+	int s3;
+	uint8_t starting;
+	int curradius;
+	float startupfrac;
+	float fullradius;
+	int one = 1;
+	int spec;
+	uint8_t alpha2;
+	float tmp;
 
 	viewtop = viGetViewTop();
 	viewheight = viGetViewHeight();
@@ -460,8 +441,6 @@ Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 sta
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "blurGfxFisheye");
 
 	s3 = 1;
 
@@ -504,13 +483,13 @@ Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 sta
 			}
 		}
 	} else {
-		f32 f22 = 1.0f;
+		float f22 = 1.0f;
 
 		for (i = viewtop; i < viewtop + viewheight; i++) {
 			if (hit == EYESPYHIT_DAMAGE) {
 				alpha2 = (rngRandom() % 120) + 120;
 				colour = 0xff333300 | (alpha2 & 0xff);
-				f22 = ((rngRandom() % 32) + (f32) FBALLOC_HEIGHT) * (1.0f / 256.0f);
+				f22 = ((rngRandom() % 32) + (float) FBALLOC_HEIGHT) * (1.0f / 256.0f);
 
 				gDPSetEnvColorViaWord(gdl++, colour);
 			} else {
@@ -550,9 +529,9 @@ Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 sta
 	s3 = 1;
 
 	if (shuttertime60 != 0 || starting) {
-		s32 s7;
-		s32 spa8 = viewheight * 0.5f;
-		f32 f20;
+		int s7;
+		int spa8 = viewheight * 0.5f;
+		float f20;
 
 		if (!starting) {
 			shuttertime60 -= TICKS(12);
@@ -573,11 +552,11 @@ Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 sta
 
 		gDPSetPrimColorViaWord(gdl++, 0, 0, 0x000000ff);
 
-		tmp = (f32) one * halfheight;
+		tmp = (float) one * halfheight;
 		f20 = halfheight;
 
 		for (i = viewtop + spa8 - s7; i <= viewtop + spa8; i++) {
-			f32 f2;
+			float f2;
 
 			if (sqhalfheight > f20 * f20) {
 				f2 = sqrtf(sqhalfheight - f20 * f20) * (1.0f / 160.0f);
@@ -618,7 +597,7 @@ Gfx *bviewDrawFisheye(Gfx *gdl, u32 colour, u32 alpha, s32 shuttertime60, s8 sta
  * These are each 1px high, and go from the edge of the circle to the edge of
  * the screen. There is one drawn on every row on both sides.
  */
-Gfx *bviewDrawEyespySideRect(Gfx *gdl, s32 *points, u8 r, u8 g, u8 b, u8 alpha)
+Gfx *bviewDrawEyespySideRect(Gfx *gdl, int *points, uint8_t r, uint8_t g, uint8_t b, uint8_t alpha)
 {
 	Vtx *vertices = gfxAllocateVertices(4);
 	Col *colours = gfxAllocateColours(2);
@@ -677,31 +656,31 @@ Gfx *bviewDrawEyespySideRect(Gfx *gdl, s32 *points, u8 r, u8 g, u8 b, u8 alpha)
 Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 {
 	char text[256];
-	s32 viewleft = viGetViewLeft();
-	s32 viewtop = viGetViewTop();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewheight = viGetViewHeight();
-	s32 viewright = viewleft + viewwidth - 1;
-	s32 viewbottom = viewtop + viewheight - 1;
-	s32 x;
-	s32 y;
-	s32 textwidth;
-	s32 textheight;
-	s32 x2;
-	s32 y2;
+	int viewleft = viGetViewLeft();
+	int viewtop = viGetViewTop();
+	int viewwidth = viGetViewWidth();
+	int viewheight = viGetViewHeight();
+	int viewright = viewleft + viewwidth - 1;
+	int viewbottom = viewtop + viewheight - 1;
+	int x;
+	int y;
+	int textwidth;
+	int textheight;
+	int x2;
+	int y2;
 	struct chrdata *chr;
-	s32 savedy;
-	s32 movex;
-	s32 movey;
-	s32 movez;
-	f32 movedist;
-	f32 sqmovedist = 0.0f;
-	u32 colourtextbright;
-	u32 colourtextdull;
-	u32 colourglow;
-	s32 scale = viewwidth > SCREEN_WIDTH_LO ? 2 : 1;
+	int savedy;
+	int movex;
+	int movey;
+	int movez;
+	float movedist;
+	float sqmovedist = 0.0f;
+	uint32_t colourtextbright;
+	uint32_t colourtextdull;
+	uint32_t colourglow;
+	int scale = viewwidth > SCREEN_WIDTH_LO ? 2 : 1;
 	bool vsplit = false;
-	u32 umask, dmask, lmask, rmask;
+	uint32_t umask, dmask, lmask, rmask;
 
 	if (g_Vars.currentplayer->eyespy == NULL
 			|| g_Vars.currentplayer->eyespy->prop == NULL
@@ -766,8 +745,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 
 	if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 		// Render crosshair
-		s32 x = viewleft + (viewwidth >> 1);
-		s32 y = viewtop + (viewheight >> 1);
+		int x = viewleft + (viewwidth >> 1);
+		int y = viewtop + (viewheight >> 1);
 
 		gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
 
@@ -822,7 +801,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
 
 	// "Y/D"
-	sprintf(text, "%s %d", langRemoveNewline(langGet(L_MISC_075)), (s32)g_Vars.currentplayer->eyespy->theta);
+	sprintf(text, "%s %d", langRemoveNewline(langGet(L_MISC_075)), (int)g_Vars.currentplayer->eyespy->theta);
 	savedy += 9;
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 	x = viewleft + 25 * scale;
@@ -834,7 +813,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			colourtextbright, colourglow, viGetWidth(), viGetHeight(), 0, 0);
 
 	// "P/D"
-	sprintf(text, "%s %d", langRemoveNewline(langGet(L_MISC_076)), (s32)g_Vars.currentplayer->eyespy->verta);
+	sprintf(text, "%s %d", langRemoveNewline(langGet(L_MISC_076)), (int)g_Vars.currentplayer->eyespy->verta);
 	savedy += 9;
 	textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
 	x = viewleft + 25 * scale;
@@ -953,19 +932,19 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	gdl = textSetCCCustom02(gdl);
 
 	{
-		s8 contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-		u32 buttonsdown = joyGetButtons(contpadnum, 0xffffffff); \
-		u32 buttonsthisframe = joyGetButtonsPressedThisFrame(contpadnum, 0xffffffff);
-		s8 cstickx = joyGetStickX(contpadnum); \
-		s8 csticky = joyGetStickY(contpadnum);
-		s32 xpos;
-		s32 tmpval;
-		u8 brightness;
-		u8 brightness2;
-		s32 points[8];
-		s32 r;
-		s32 g;
-		s32 b;
+		int8_t contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
+		uint32_t buttonsdown = joyGetButtons(contpadnum, 0xffffffff); \
+		uint32_t buttonsthisframe = joyGetButtonsPressedThisFrame(contpadnum, 0xffffffff);
+		int8_t cstickx = joyGetStickX(contpadnum); \
+		int8_t csticky = joyGetStickY(contpadnum);
+		int xpos;
+		int tmpval;
+		uint8_t brightness;
+		uint8_t brightness2;
+		int points[8];
+		int r;
+		int g;
+		int b;
 
 		gDPPipeSync(gdl++); \
 		gDPSetCycleType(gdl++, G_CYC_1CYCLE); \
@@ -1428,8 +1407,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			}
 		} else {
 			// Drugspy ammo
-			s32 i;
-			s32 width;
+			int i;
+			int width;
 
 			brightness2 = 255;
 			width = scale * 30;
@@ -1461,16 +1440,14 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		gDPSetTextureLOD(gdl++, G_TL_LOD);
 
 		if (g_Vars.coopplayernum < 0 && g_Vars.antiplayernum < 0) {
-			s32 barheight = (viewbottom - viewtop - 103) / 17.0f - 1;
-			s32 centrey = viewheight / 2.0f;
-			s32 sqcentrey = centrey * centrey;
-			s32 ypos;
-			u8 alpha;
-			u32 stack;
-			u32 stack2;
-			s8 yoffset;
-			s32 value;
-			s32 i;
+			int barheight = (viewbottom - viewtop - 103) / 17.0f - 1;
+			int centrey = viewheight / 2.0f;
+			int sqcentrey = centrey * centrey;
+			int ypos;
+			uint8_t alpha;
+			int8_t yoffset;
+			int value;
+			int i;
 
 			value = 17.0f * movedist / 25.0f;
 
@@ -1596,27 +1573,25 @@ void bview0f1572f8(void)
 	// empty
 }
 
-u8 var8007f878 = 0;
+uint8_t var8007f878 = 0;
 
 Gfx *bviewDrawNvLens(Gfx *gdl)
 {
-	u16 *fb = viGetBackBuffer();
-	s32 viewheight = viGetViewHeight();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewtop = viGetViewTop();
-	s32 viewleft = viGetViewLeft();
-	s32 viewbottom = viewtop + viewheight;
-	s32 brightness;
-	s32 y;
-	u32 mpindex = g_Vars.currentplayerstats->mpindex % MAX_PLAYERS;
+	uint16_t *fb = viGetBackBuffer();
+	int viewheight = viGetViewHeight();
+	int viewwidth = viGetViewWidth();
+	int viewtop = viGetViewTop();
+	int viewleft = viGetViewLeft();
+	int viewbottom = viewtop + viewheight;
+	int brightness;
+	int y;
+	uint32_t mpindex = g_Vars.currentplayerstats->mpindex % MAX_PLAYERS;
 
 	g_NumActiveEffects++;
 
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "Fullscreen_DrawFaultScope");
 
 	var8009caec = 0xbc;
 	g_NVChrHighlight = 0xbe; // Character brightness when using NV
@@ -1644,10 +1619,10 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 	gSPSetExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
 
 	for (y = viewtop; y < viewbottom; y++) {
-		u8 green;
+		uint8_t green;
 
 		if (((var8007f878 & 1) != (y & 1)) != 0) {
-			u8 tmp = rngRandom() % 12;
+			uint8_t tmp = rngRandom() % 12;
 			green = 0xff - tmp;
 		} else {
 			green = 0x94;
@@ -1673,30 +1648,29 @@ Gfx *bviewDrawNvBinoculars(Gfx *gdl)
 
 Gfx *bviewDrawIrLens(Gfx *gdl)
 {
-	s32 i;
-	s32 fadeincrement;
-	u16 *fb = viGetBackBuffer();
-	s32 viewheight = viGetViewHeight();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewtop = viGetViewTop();
-	s32 viewleft = viGetViewLeft();
-	s32 viewright;
-	s32 viewbottom;
-	s32 viewcentrex;
-	s32 sqinnerradius;
-	s32 stack[3];
-	s32 scanincrement;
-	s32 scantop;
-	s32 scanbottom;
-	s32 scanrate = 4;
-	s32 faderate = 2;
-	u32 red;
-	s32 outerradius;
-	s32 innerradius;
-	s32 viewcentrey;
-	f32 viewheightf;
-	s32 a0;
-	u32 mpindex = g_Vars.currentplayerstats->mpindex % MAX_PLAYERS;
+	int i;
+	int fadeincrement;
+	uint16_t *fb = viGetBackBuffer();
+	int viewheight = viGetViewHeight();
+	int viewwidth = viGetViewWidth();
+	int viewtop = viGetViewTop();
+	int viewleft = viGetViewLeft();
+	int viewright;
+	int viewbottom;
+	int viewcentrex;
+	int sqinnerradius;
+	int scanincrement;
+	int scantop;
+	int scanbottom;
+	int scanrate = 4;
+	int faderate = 2;
+	uint32_t red;
+	int outerradius;
+	int innerradius;
+	int viewcentrey;
+	float viewheightf;
+	int a0;
+	uint32_t mpindex = g_Vars.currentplayerstats->mpindex % MAX_PLAYERS;
 
 	viewright = viewleft + viewwidth;
 	viewcentrex = (viewleft + viewright) / 2;
@@ -1709,8 +1683,6 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "Fullscreen_DrawFaultScope");
 
 	viewbottom = viewtop + viewheight;
 	viewcentrey = (viewtop + viewbottom) / 2;
@@ -1734,8 +1706,8 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 		scanbottom = viewtop;
 	}
 
-	scanincrement = (f32) scanrate * i / 240.0f;
-	fadeincrement = (f32) faderate * i / 240.0f;
+	scanincrement = (float) scanrate * i / 240.0f;
+	fadeincrement = (float) faderate * i / 240.0f;
 
 	// This code runs on the first frame of IR use (90 != 0),
 	// and in debug versions developers could change the radius at runtime.
@@ -1792,10 +1764,10 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 		if (a0 * a0 < sqinnerradius) {
 			// Rendering a line that overlaps the semicircle
 			// in the middle of the screen
-			f32 f0 = a0;
-			s32 semicirclewidth = sqrtf(sqinnerradius - (s32) (f0 * f0)) * (viewwidth / (f32) SCREEN_WIDTH_LO);
-			s32 semicircleright = viewcentrex + semicirclewidth;
-			s32 rightsidewidth = viewwidth - semicircleright;
+			float f0 = a0;
+			int semicirclewidth = sqrtf(sqinnerradius - (int) (f0 * f0)) * (viewwidth / (float) SCREEN_WIDTH_LO);
+			int semicircleright = viewcentrex + semicirclewidth;
+			int rightsidewidth = viewwidth - semicircleright;
 
 			// Left and right of semicircle
 			gDPFillRectangle(gdl++, viewleft, i, viewcentrex, i + 1);
@@ -1828,24 +1800,22 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
  * The term "Intro" used in the string suggests that was made for an older
  * version of the title screen, similar to bviewDrawIntroText.
  */
-Gfx *bviewDrawIntroFaderBlur(Gfx *gdl, s32 arg1)
+Gfx *bviewDrawIntroFaderBlur(Gfx *gdl, int arg1)
 {
-	u16 *fb = viGetBackBuffer();
-	s32 viewtop = viGetViewTop();
-	s32 viewheight = viGetViewHeight();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewleft = viGetViewLeft();
-	f32 halfheight;
-	f32 extra;
-	s32 y;
+	uint16_t *fb = viGetBackBuffer();
+	int viewtop = viGetViewTop();
+	int viewheight = viGetViewHeight();
+	int viewwidth = viGetViewWidth();
+	int viewleft = viGetViewLeft();
+	float halfheight;
+	float extra;
+	int y;
 
 	g_NumActiveEffects++;
 
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "IntroFaderBlurGfx");
 
 	gDPPipeSync(gdl++);
 
@@ -1857,7 +1827,7 @@ Gfx *bviewDrawIntroFaderBlur(Gfx *gdl, s32 arg1)
 	extra += 0.5f;
 
 	for (y = viewtop; y < viewtop + viewheight; y++) {
-		f32 frac = (y - viewtop - halfheight) / halfheight;
+		float frac = (y - viewtop - halfheight) / halfheight;
 
 		if (frac < 0.0f) {
 			frac = -frac;
@@ -1880,20 +1850,18 @@ Gfx *bviewDrawIntroFaderBlur(Gfx *gdl, s32 arg1)
  */
 Gfx *bviewDrawIntroText(Gfx *gdl)
 {
-	u16 *fb = viGetBackBuffer();
-	s32 viewtop = viGetViewTop();
-	s32 viewheight = viGetViewHeight();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewleft = viGetViewLeft();
-	s32 y;
+	uint16_t *fb = viGetBackBuffer();
+	int viewtop = viGetViewTop();
+	int viewheight = viGetViewHeight();
+	int viewwidth = viGetViewWidth();
+	int viewleft = viGetViewLeft();
+	int y;
 
 	g_NumActiveEffects++;
 
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "IntroTextInterfereGfx");
 
 	gDPPipeSync(gdl++);
 
@@ -1908,19 +1876,19 @@ Gfx *bviewDrawIntroText(Gfx *gdl)
 
 Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 {
-	u16 *fb = viGetBackBuffer();
-	s32 viewtop = viGetViewTop();
-	s32 viewheight = viGetViewHeight();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewleft = viGetViewLeft();
+	uint16_t *fb = viGetBackBuffer();
+	int viewtop = viGetViewTop();
+	int viewheight = viGetViewHeight();
+	int viewwidth = viGetViewWidth();
+	int viewleft = viGetViewLeft();
 	char directiontext[32];
 	char hertztext[24];
 	char zoomtext[24];
 	char nametext[52];
-	f32 lookx = g_Vars.currentplayer->cam_look.x;
-	f32 lookz = g_Vars.currentplayer->cam_look.z;
-	s32 x;
-	s32 y;
+	float lookx = g_Vars.currentplayer->cam_look.x;
+	float lookz = g_Vars.currentplayer->cam_look.z;
+	int x;
+	int y;
 
 	char directions[][3] = {
 		{'n', '\0', '\0'},
@@ -1934,25 +1902,23 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 		{'n', '\0', '\0'},
 	};
 
-	s32 turnangle = atan2f(-lookx, lookz) * 180.0f / M_PI;
-	f32 fovy;
+	int turnangle = atan2f(-lookx, lookz) * 180.0f / M_PI;
+	float fovy;
 	char arrows[12];
-	s32 tmplensheight = 130;
-	s32 lenstop;
-	s32 lensheight;
-	s32 liney;
-	s32 scale = 1;
-	s32 vsplit = false;
-	u32 colour;
-	f32 range;
+	int tmplensheight = 130;
+	int lenstop;
+	int lensheight;
+	int liney;
+	int scale = 1;
+	int vsplit = false;
+	uint32_t colour;
+	float range;
 
 	g_NumActiveEffects++;
 
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	strcpy(var800a41c0, "BinocularViewGfx");
 
 	if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL && PLAYERCOUNT() >= 2) {
 		vsplit = true;
@@ -1962,7 +1928,7 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 		tmplensheight = viewheight - 30;
 	}
 
-	if (((s32)(g_20SecIntervalFrac * 30.0f) & 1) == 1) {
+	if (((int)(g_20SecIntervalFrac * 30.0f) & 1) == 1) {
 		sprintf(arrows, ">> ");
 	} else {
 		sprintf(arrows, " >>");
@@ -2112,10 +2078,10 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 
 		gDPSetColor(gdl++, G_SETENVCOLOR, colour);
 
-		const f32 xscale = RANDOMFRAC() * range + 1;
-		const f32 halfwidth = viewwidth / 2.f;
-		const s32 left = viewleft + halfwidth * (1.f - xscale);
-		const s32 right = viewleft + halfwidth * (1.f + xscale);
+		const float xscale = RANDOMFRAC() * range + 1;
+		const float halfwidth = viewwidth / 2.f;
+		const int left = viewleft + halfwidth * (1.f - xscale);
+		const int right = viewleft + halfwidth * (1.f + xscale);
 		gSPImageRectangleEXT(gdl++,
 			left << 2, liney << 2, viewleft, liney,
 			right << 2, (liney + 1) << 2, viewleft + viewwidth, liney + 1,
@@ -2135,19 +2101,18 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
  */
 Gfx *bviewDrawIrBinoculars(Gfx *gdl)
 {
-	s32 viewheight = viGetViewHeight();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewtop = viGetViewTop();
-	s32 viewleft = viGetViewLeft();
-	s32 viewright = viewleft + viewwidth;
-	s32 viewbottom = viewtop + viewheight;
-	s32 leftx = viewleft + viewwidth / 3;
-	s32 rightx = viewleft + (viewwidth * 2) / 3;
-	s32 centrey = (viewtop + viewbottom) / 2;
-	s32 radius = g_IrBinocularRadius;
-	s32 sqradius = radius * radius;
-	s32 y;
-	u32 stack[2];
+	int viewheight = viGetViewHeight();
+	int viewwidth = viGetViewWidth();
+	int viewtop = viGetViewTop();
+	int viewleft = viGetViewLeft();
+	int viewright = viewleft + viewwidth;
+	int viewbottom = viewtop + viewheight;
+	int leftx = viewleft + viewwidth / 3;
+	int rightx = viewleft + (viewwidth * 2) / 3;
+	int centrey = (viewtop + viewbottom) / 2;
+	int radius = g_IrBinocularRadius;
+	int sqradius = radius * radius;
+	int y;
 
 	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
@@ -2156,11 +2121,11 @@ Gfx *bviewDrawIrBinoculars(Gfx *gdl)
 	gDPSetPrimColor(gdl++, 0, 0, 0x00, 0x00, 0x00, 0xff);
 
 	for (y = viewtop; y < viewbottom; y++) {
-		s32 ytocentre = centrey - y;
-		s32 sqytocentre = ytocentre * ytocentre;
+		int ytocentre = centrey - y;
+		int sqytocentre = ytocentre * ytocentre;
 
 		if (sqytocentre < sqradius) {
-			s32 xoffset = (viewwidth / (f32) SCREEN_WIDTH_LO) * sqrtf(sqradius - sqytocentre);
+			int xoffset = (viewwidth / (float) SCREEN_WIDTH_LO) * sqrtf(sqradius - sqytocentre);
 
 			// Left side
 			if (leftx - xoffset > viewleft) {
@@ -2185,7 +2150,7 @@ Gfx *bviewDrawIrBinoculars(Gfx *gdl)
 	return gdl;
 }
 
-void bviewSetMotionBlur(u32 bluramount)
+void bviewSetMotionBlur(uint32_t bluramount)
 {
 	g_NumActiveEffects = 0;
 	var8007f848 = 0;

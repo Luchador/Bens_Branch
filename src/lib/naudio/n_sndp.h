@@ -22,6 +22,7 @@
 
 #include <libaudio.h>
 #include "n_libaudio.h"
+#include <stdint.h>
 
 #ifndef MIN
 #define MIN(a,b) (((a)<(b))?(a):(b))
@@ -54,12 +55,12 @@ typedef enum {
 typedef struct {
 	N_ALVoice     voice;
 	ALSound     *sound;         /* sound referenced here */
-	s16         priority;
-	f32         pitch;          /* current playback pitch                    */
-	s32         state;          /* play state for this sound                 */
-	s16         vol;            /* volume - combined with volume from bank   */
+	int16_t         priority;
+	float         pitch;          /* current playback pitch                    */
+	int         state;          /* play state for this sound                 */
+	int16_t         vol;            /* volume - combined with volume from bank   */
 	ALPan       pan;            /* pan - 0 = left, 127 = right               */
-	u8          fxMix;          /* wet/dry mix - 0 = dry, 127 = wet          */
+	uint8_t          fxMix;          /* wet/dry mix - 0 = dry, 127 = wet          */
 } N_ALSoundState;
 
 typedef union {
@@ -67,40 +68,40 @@ typedef union {
 	N_ALEvent             msg;
 
 	struct {
-		u16              type;
+		uint16_t              type;
 		N_ALSoundState  *state;
-		u32 unk08;
+		uint32_t unk08;
 	} common;
 
 	struct {
-		s16             type;
+		int16_t             type;
 		N_ALSoundState *state;
-		s16             vol;
+		int16_t             vol;
 	} vol;
 
 	struct {
-		s16             type;
+		int16_t             type;
 		N_ALSoundState *state;
-		f32             pitch;
+		float             pitch;
 	} pitch;
 
 	struct {
-		s16             type;
+		int16_t             type;
 		N_ALSoundState *state;
 		ALPan           pan;
 	} pan;
 
 	struct {
-		s16             type;
+		int16_t             type;
 		N_ALSoundState *state;
-		u8              mix;
+		uint8_t              mix;
 	} fx;
 
 } N_ALSndpEvent;
 
 ALMicroTime     _n_sndpVoiceHandler(void *node);
 void            _n_handleEvent(N_ALSndpEvent *event);
-void		_removeEvents(ALEventQueue *evtq, N_ALSoundState *state, u16 typemask);
-s32		_DivS32ByF32 (s32 i, f32 f);
+void		_removeEvents(ALEventQueue *evtq, N_ALSoundState *state, uint16_t typemask);
+int		_DivintByfloat (int i, float f);
 
 #endif /* __N_SNDP__ */

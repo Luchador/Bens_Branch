@@ -5,14 +5,14 @@
 #include "data.h"
 #include "types.h"
 
-s32 g_NumGlobalAilists = 0;
-s32 g_NumLvAilists = 0;
+int g_NumGlobalAilists = 0;
+int g_NumLvAilists = 0;
 
-u8 *ailistFindById(s32 ailistid)
+uint8_t *ailistFindById(int ailistid)
 {
-	s32 lower;
-	s32 upper;
-	s32 index;
+	int lower;
+	int upper;
+	int index;
 
 	if (ailistid >= 0x401) {
 		if (g_StageSetup.ailists) {

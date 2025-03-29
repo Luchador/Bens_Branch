@@ -1,32 +1,33 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "types.h"
 
 struct typea {
-	u8 unk28;
-	u8 unk29;
+	uint8_t unk28;
+	uint8_t unk29;
 };
 
 struct typeb {
-	f32 unk28;
+	float unk28;
 };
 
 typedef struct oscData_s {
 	struct oscData_s *next;
-	u8 type;
-	u8 stateFlags;
-	u16 maxCount;
-	s32 curCount;
-	f32 unk0c;
-	f32 unk10;
-	u16 unk14;
-	u16 unk16;
-	f32 unk18;
-	f32 unk1c;
-	u16 unk20;
-	u16 unk22;
-	u16 unk24;
-	u16 unk26;
+	uint8_t type;
+	uint8_t stateFlags;
+	uint16_t maxCount;
+	int curCount;
+	float unk0c;
+	float unk10;
+	uint16_t unk14;
+	uint16_t unk16;
+	float unk18;
+	float unk1c;
+	uint16_t unk20;
+	uint16_t unk22;
+	uint16_t unk24;
+	uint16_t unk26;
 	union {
 		struct typea a;
 		struct typeb b;
@@ -34,21 +35,18 @@ typedef struct oscData_s {
 } oscData;
 
 oscData *freeOscStateList;
-u32 var8009b874;
 oscData oscStates[60];
-u32 var8009c2c8;
-u32 var8009c2cc;
 N_ALSndPlayer var8009c2d0;
 
-ALMicroTime updateOsc(void *oscState, f32 *updateVal);
-ALMicroTime updateOscMain(oscData *statePtr, f32 *updateVal);
+ALMicroTime updateOsc(void *oscState, float *updateVal);
+ALMicroTime updateOscMain(oscData *statePtr, float *updateVal);
 void func00030bd8(void *oscState);
-ALMicroTime initOscMain(void **oscState, f32 *initVal, u8 oscType, u8 arg3, u8 oscDepth, u8 arg5, u8 arg6);
+ALMicroTime initOscMain(void **oscState, float *initVal, uint8_t oscType, uint8_t arg3, uint8_t oscDepth, uint8_t arg5, uint8_t arg6);
 
-f32 _depth2Cents(u8 depth)
+float _depth2Cents(uint8_t depth)
 {
-	f32 x = 1.0309929847717f;
-	f32 cents = 1.0f;
+	float x = 1.0309929847717f;
+	float cents = 1.0f;
 
 	while (depth) {
 		if (depth & 1) {
@@ -62,7 +60,7 @@ f32 _depth2Cents(u8 depth)
 	return cents;
 }
 
-ALMicroTime initOsc(void **oscState, f32 *initVal, u8 oscType, u8 oscRate, u8 oscDepth, u8 oscDelay, u8 arg6)
+ALMicroTime initOsc(void **oscState, float *initVal, uint8_t oscType, uint8_t oscRate, uint8_t oscDepth, uint8_t oscDelay, uint8_t arg6)
 {
 	oscData *state;
 	ALMicroTime result = 0;
@@ -104,9 +102,9 @@ ALMicroTime initOsc(void **oscState, f32 *initVal, u8 oscType, u8 oscRate, u8 os
 	return result;
 }
 
-ALMicroTime updateOsc(void *oscState, f32 *updateVal)
+ALMicroTime updateOsc(void *oscState, float *updateVal)
 {
-	f32 sp2c;
+	float sp2c;
 	oscData *state = oscState;
 	ALMicroTime result = AL_USEC_PER_FRAME;
 
@@ -122,7 +120,7 @@ ALMicroTime updateOsc(void *oscState, f32 *updateVal)
 			state->unk24 = 0;
 		}
 
-		sp2c = (f32)state->unk24 / (f32)state->unk22;
+		sp2c = (float)state->unk24 / (float)state->unk22;
 		sp2c = sinf(sp2c * M_TAU);
 		sp2c = sp2c * state->data.a.unk28;
 		*updateVal = state->data.a.unk29 + sp2c;
@@ -134,7 +132,7 @@ ALMicroTime updateOsc(void *oscState, f32 *updateVal)
 			state->unk24 = 0;
 		}
 
-		sp2c = (f32)state->unk24 / (f32)state->unk22;
+		sp2c = (float)state->unk24 / (float)state->unk22;
 		sp2c = sinf(sp2c * M_TAU) * state->data.b.unk28;
 		*updateVal = alCents2Ratio(sp2c);
 		break;
@@ -157,19 +155,19 @@ void stopOsc(void *oscState)
 	freeOscStateList = (oscData*)oscState;
 }
 
-f32 func000301a4(f32 value)
+float func000301a4(float value)
 {
 	// Almost value / (32768 / M_PI), but has a precision mismatch
 	return sinf(value / 10430.379882812f);
 }
 
-extern s32 var8005f150[];
-extern f32 var8005f34c[100];
+extern int var8005f150[];
+extern float var8005f34c[100];
 
-ALMicroTime initOscMain(void **oscState, f32 *initVal, u8 oscType, u8 arg3, u8 oscDepth, u8 arg5, u8 arg6)
+ALMicroTime initOscMain(void **oscState, float *initVal, uint8_t oscType, uint8_t arg3, uint8_t oscDepth, uint8_t arg5, uint8_t arg6)
 {
 	oscData *state;
-	f32 oscDepthf;
+	float oscDepthf;
 
 	if (arg3 > 99) {
 		arg3 = 99;
@@ -194,12 +192,12 @@ ALMicroTime initOscMain(void **oscState, f32 *initVal, u8 oscType, u8 arg3, u8 o
 		state->unk1c = 0;
 	} else {
 		state->unk18 = 0;
-		state->unk1c = 1.0f / ((f32)var8005f150[arg6] / AL_USEC_PER_FRAME);
+		state->unk1c = 1.0f / ((float)var8005f150[arg6] / AL_USEC_PER_FRAME);
 	}
 
 	state->type = oscType;
 	state->unk14 = 0;
-	state->unk16 = 1000000.0f / (f32)var8005f34c[arg3] / AL_USEC_PER_FRAME;
+	state->unk16 = 1000000.0f / (float)var8005f34c[arg3] / AL_USEC_PER_FRAME;
 	state->curCount = AL_USEC_PER_FRAME;
 
 	oscDepthf = oscDepth;
@@ -223,7 +221,7 @@ ALMicroTime initOscMain(void **oscState, f32 *initVal, u8 oscType, u8 arg3, u8 o
 			state->unk10 = 0;
 		}
 
-		state->curCount = 500000.0f / (f32)var8005f34c[arg3];
+		state->curCount = 500000.0f / (float)var8005f34c[arg3];
 		break;
 	case 6:
 	case 8:
@@ -263,11 +261,11 @@ ALMicroTime initOscMain(void **oscState, f32 *initVal, u8 oscType, u8 arg3, u8 o
 	return AL_USEC_PER_FRAME;
 }
 
-ALMicroTime updateOscMain(oscData *statePtr, f32 *updateVal)
+ALMicroTime updateOscMain(oscData *statePtr, float *updateVal)
 {
-	f32 sp24;
-	f32 sp20;
-	f32 sp1c;
+	float sp24;
+	float sp20;
+	float sp1c;
 
 	if ((statePtr->type & ~0x80) >= 6) {
 		statePtr->unk14++;
@@ -276,7 +274,7 @@ ALMicroTime updateOscMain(oscData *statePtr, f32 *updateVal)
 			statePtr->unk14 = 0;
 		}
 
-		sp20 = (f32)statePtr->unk14 / (f32)statePtr->unk16;
+		sp20 = (float)statePtr->unk14 / (float)statePtr->unk16;
 	}
 
 	if (statePtr->unk1c != 0.0f) {
@@ -345,7 +343,7 @@ ALMicroTime updateOscMain(oscData *statePtr, f32 *updateVal)
 		}
 
 		sp1c = statePtr->unk10 + sp20;
-		sp20 = (f32)statePtr->unk14 / (f32)statePtr->unk16;
+		sp20 = (float)statePtr->unk14 / (float)statePtr->unk16;
 		sp20 = func000301a4(sp20 * 65536.0f) * sp24 + statePtr->unk10;
 		sp20 += sp1c;
 		sp20 /= 2.0f;
@@ -367,10 +365,10 @@ void func00030bd8(void *oscState)
 	freeOscStateList = (oscData*)oscState;
 }
 
-void func00030bfc(s32 arg0, s32 count)
+void func00030bfc(int arg0, int count)
 {
 	oscData *item;
-	s32 i;
+	int i;
 
 	freeOscStateList = &oscStates[0];
 	item = &oscStates[0];

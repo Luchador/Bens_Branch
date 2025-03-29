@@ -4,6 +4,6 @@
 #include "data.h"
 #include "types.h"
 
-void botinvInit(struct chrdata *chr, s32 maxitems);
+void botinvInit(struct chrdata *chr, int maxitems);
 
 #endif

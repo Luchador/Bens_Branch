@@ -1,14 +1,13 @@
 #ifndef _IN_GAME_PORTAL_H
 #define _IN_GAME_PORTAL_H
-#include <ultra64.h>
 #include "data.h"
 #include "types.h"
 
-void portalSetXluFrac2(s32 portalnum, f32 frac);
-void portalSetXluFrac(s32 portalnum, f32 frac);
-f32 portalGetXluFrac2(s32 arg0);
-f32 portalGetXluFrac(s32 arg0);
-void portal0f0b65a8(s32 numportals);
+void portalSetXluFrac2(int portalnum, float frac);
+void portalSetXluFrac(int portalnum, float frac);
+float portalGetXluFrac2(int arg0);
+float portalGetXluFrac(int arg0);
+void portal0f0b65a8(int numportals);
 void portalsReset(void);
 void acousticReset(void);
 

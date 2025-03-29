@@ -1,23 +1,15 @@
-#include <ultra64.h>
+#include <math.h>
 #include "internal.h"
 
-f32 fabsf(f32 value);
-
-#ifdef __sgi
-#pragma intrinsic (fabsf)
-#else
-#define fabsf(f) __builtin_fabsf((f32)(f))
-#endif
-
-f32 func00047d20(f32 arg0)
+float func00047d20(float arg0)
 {
-	f32 sp1c;
-	f32 sp18;
-	f32 sp14;
-	f32 sp10;
-	f32 sp0c;
-	s32 sp08;
-	s32 sp04;
+	float sp1c;
+	float sp18;
+	float sp14;
+	float sp10;
+	float sp0c;
+	int sp08;
+	int sp04;
 
 	sp0c = fabsf(arg0);
 
@@ -25,7 +17,7 @@ f32 func00047d20(f32 arg0)
 		return 1;
 	}
 
-	sp04 = (s32) (sp0c / 0.6931471824646f);
+	sp04 = (int) (sp0c / 0.6931471824646f);
 
 	if (sp04 > 1024) {
 		if (arg0 >= 0) {

@@ -2,20 +2,20 @@
 #define _IN_FS_H
 
 #include <stdio.h>
-#include <PR/ultratypes.h>
+#include <stdint.h>
 
 #define FS_MAXPATH 1024
 
-s32 fsInit(void);
+int fsInit(void);
 
 const char *fsFullPath(const char *relPath);
 
-s32 fsPathIsAbsolute(const char *path);
-s32 fsPathIsCwdRelative(const char *path);
+int fsPathIsAbsolute(const char *path);
+int fsPathIsCwdRelative(const char *path);
 
-void *fsFileLoad(const char *name, u32 *outSize);
-s32 fsFileLoadTo(const char *name, void *dst, u32 dstSize);
-s32 fsFileSize(const char *name);
+void *fsFileLoad(const char *name, uint32_t *outSize);
+int fsFileLoadTo(const char *name, void *dst, uint32_t dstSize);
+int fsFileSize(const char *name);
 
 FILE *fsFileOpenWrite(const char *name);
 FILE *fsFileOpenRead(const char *name);

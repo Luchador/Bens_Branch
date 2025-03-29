@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include <math.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/bg.h"
 #include "game/body.h"
@@ -42,6 +41,7 @@
 #include "game/stagetable.h"
 #include "game/tex.h"
 #include "game/wallhit.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/joy.h"
 #include "lib/lib_17ce0.h"
@@ -4386,7 +4386,7 @@ void chrDamage(struct chrdata *chr, float damage, struct coord *vector, struct g
 			chr->hidden |= CHRHFLAG_DROPPINGITEM;
 		} else {
 			// Metal helmets don't fall off and make a metallic chink noise when shot
-			u16 sounds[] = { SFX_HIT_METAL_807B, SFX_HIT_METAL_8079, SFX_HATHIT_807C };
+			uint16_t sounds[] = { SFX_HIT_METAL_807B, SFX_HIT_METAL_8079, SFX_HATHIT_807C };
 			damage = 0;
 
 			psCreate(NULL, chr->prop, sounds[rngRandom() % 3], -1,
@@ -4880,7 +4880,7 @@ void chrDamage(struct chrdata *chr, float damage, struct coord *vector, struct g
 					chr->extraspeed.y = prop2->pos.y - aprop->pos.y;
 					chr->extraspeed.z = prop2->pos.z - aprop->pos.z;
 
-					guNormalize(&chr->extraspeed.x, &chr->extraspeed.y, &chr->extraspeed.z);
+					utilsNormalizeF(&chr->extraspeed.x, &chr->extraspeed.y, &chr->extraspeed.z);
 
 					chr->extraspeed.x *= sp80;
 					chr->extraspeed.y *= sp80;
@@ -5282,14 +5282,14 @@ void chrGoPosConsiderRestart(struct chrdata *chr)
 			}
 
 			chr->act_gopos.restartttl = value;
-		} else if (chr->act_gopos.restartttl <= (u16)g_Vars.lvupdate60) {
+		} else if (chr->act_gopos.restartttl <= (uint16_t)g_Vars.lvupdate60) {
 			if (chr->aibot) {
 				botCheckFetch(chr);
 			} else {
 				chrGoToRoomPos(chr, &chr->act_gopos.endpos, chr->act_gopos.endrooms, chr->act_gopos.flags);
 			}
 		} else {
-			chr->act_gopos.restartttl -= (u16)g_Vars.lvupdate60;
+			chr->act_gopos.restartttl -= (uint16_t)g_Vars.lvupdate60;
 		}
 	}
 }
@@ -5462,7 +5462,7 @@ void chrNavTickMagic(struct chrdata *chr, struct waydata *waydata, float speed, 
 	float ymin;
 	float radius;
 	float ground;
-	u16 floorcol;
+	uint16_t floorcol;
 	uint8_t floortype;
 	RoomNum floorroom;
 	struct coord spf4;
@@ -7465,7 +7465,7 @@ void chrPunchInflictDamage(struct chrdata *chr, int damage, int range, uint8_t r
 		vector.y = 0;
 		vector.z = targetprop->pos.z - chr->prop->pos.z;
 
-		guNormalize(&vector.x, &vector.y, &vector.z);
+		utilsNormalizeF(&vector.x, &vector.y, &vector.z);
 
 		bgunPlayPropHitSound(&gset, targetprop, -1);
 
@@ -7595,9 +7595,9 @@ bool chrTryPunch(struct chrdata *chr, uint8_t reverse)
 		if (g_Vars.normmplayerisrunning) {
 			chr->act_anim.hitdamage = 1;
 		} else if (chrHasFlag(chr, CHRFLAG1_ADJUSTPUNCHSPEED, BANK_1) && chrHasFlag(chr, CHRFLAG0_CHUCKNORRIS, BANK_0)) {
-			chr->act_anim.hitdamage = (u16)anims[animindex].damage * (float)chr->morale + (u16)anims[animindex].damage * (float)chr->morale;
+			chr->act_anim.hitdamage = (uint16_t)anims[animindex].damage * (float)chr->morale + (uint16_t)anims[animindex].damage * (float)chr->morale;
 		} else if (chrHasFlag(chr, CHRFLAG1_PUNCHHARDER, BANK_1)) {
-			chr->act_anim.hitdamage = (u16)anims[animindex].damage * 6;
+			chr->act_anim.hitdamage = (uint16_t)anims[animindex].damage * 6;
 		} else {
 			chr->act_anim.hitdamage = anims[animindex].damage;
 		}
@@ -8055,7 +8055,7 @@ void chrTickDie(struct chrdata *chr)
 	struct model *model = chr->model;
 	uint32_t race = CHRRACE(chr);
 
-	u16 thuds[] = {
+	uint16_t thuds[] = {
 		SFX_THUD_808D,
 		SFX_THUD_808E,
 		SFX_THUD_808F,
@@ -8069,7 +8069,7 @@ void chrTickDie(struct chrdata *chr)
 		SFX_THUD_8097,
 	};
 
-	u16 specialdiesounds[] = {
+	uint16_t specialdiesounds[] = {
 		SFX_M1_NOOO, // "Noooo!"
 		SFX_M1_SCREAM, // Death scream
 		SFX_M2_NOOO, // "Noooo!"
@@ -8102,7 +8102,7 @@ void chrTickDie(struct chrdata *chr)
 
 		if (g_DrCarollDyingTimer > TICKS(120) && chr->voicebox) {
 			// Play speech
-			u16 phrases[] = {
+			uint16_t phrases[] = {
 				SFX_DRCAROLL_SYSTEMS_FAILURE,
 				SFX_DRCAROLL_YOU_GO_ON,
 				SFX_DRCAROLL_I_CANT_MAKE_IT,
@@ -8197,7 +8197,7 @@ void chrTickDie(struct chrdata *chr)
 
 void chrTickDruggedComingUp(struct chrdata *chr)
 {
-	u16 thuds[] = {
+	uint16_t thuds[] = {
 		SFX_THUD_808D,
 		SFX_THUD_808E,
 		SFX_THUD_808F,
@@ -8275,7 +8275,7 @@ void chrTickDruggedDrop(struct chrdata *chr)
 {
 	struct model *model = chr->model;
 
-	u16 thuds[] = {
+	uint16_t thuds[] = {
 		SFX_THUD_808D,
 		SFX_THUD_808E,
 		SFX_THUD_808F,
@@ -8511,7 +8511,7 @@ void chrUpdateFireslot(struct chrdata *chr, int handnum, bool withsound, bool wi
 	int weaponnum;
 	bool playsound = false;
 	uint8_t duration;
-	u16 soundnum;
+	uint16_t soundnum;
 
 	weaponprop = chrGetHeldProp(chr, handnum);
 
@@ -9729,7 +9729,7 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 					vector.y = targetprop->pos.y - gunpos.y;
 					vector.z = targetprop->pos.z - gunpos.z;
 
-					guNormalize(&vector.x, &vector.y, &vector.z);
+					utilsNormalizeF(&vector.x, &vector.y, &vector.z);
 					propSetPerimEnabled(targetprop, true);
 				} else {
 					vector.x = cosf(rotx) * sinf(roty);
@@ -9879,7 +9879,7 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 										vector.y = aimpos.y - gunpos.y;
 										vector.z = aimpos.z - gunpos.z;
 
-										guNormalize(&vector.x, &vector.y, &vector.z);
+										utilsNormalizeF(&vector.x, &vector.y, &vector.z);
 										hasaimpos = true;
 									}
 								} else if ((gset.weaponnum == WEAPON_DEVASTATOR && gset.weaponfunc == FUNC_PRIMARY)
@@ -10628,10 +10628,10 @@ void chrTickRobotAttack(struct chrdata *chr)
 		if (act->numshots[0] <= 0 && act->numshots[1] <= 0) {
 			empty = true;
 
-			if (ABS(chr->gunroty[0]) < 0.03f
-					&& ABS(chr->gunrotx[0]) < 0.03f
-					&& ABS(chr->gunroty[1]) < 0.03f
-					&& ABS(chr->gunrotx[1]) < 0.03f) {
+			if (fabsf(chr->gunroty[0]) < 0.03f
+					&& fabsf(chr->gunrotx[0]) < 0.03f
+					&& fabsf(chr->gunroty[1]) < 0.03f
+					&& fabsf(chr->gunrotx[1]) < 0.03f) {
 				act->finished = true;
 			}
 		}
@@ -11156,7 +11156,7 @@ bool func0f043f2c(struct chrdata *chr, struct coord *runpos, uint32_t arg2, floa
 
 		applyRotation(&finalangle, angle1, turnspeed, accel, accel + accel, maxspeed);
 
-		if (ABS(finalangle - angle1) < 0.01f) {
+		if (fabsf(finalangle - angle1) < 0.01f) {
 			*turnspeed = 0;
 			result = true;
 		}
@@ -12793,7 +12793,7 @@ void chrTickSkJump(struct chrdata *chr)
 			modelSetAnimSpeed(chr->model, 2.5, 0);
 			break;
 		case SKJUMPSTATE_AIRBORNE: {
-				u16 sounds[] = {
+				uint16_t sounds[] = {
 					SFX_SKEDAR_ROAR_0532,
 					SFX_SKEDAR_ROAR_0533,
 					SFX_SKEDAR_ROAR_0534,
@@ -14812,7 +14812,7 @@ bool chrCheckCoverOutOfSight(struct chrdata *chr, int covernum, bool soft)
 	return false;
 }
 
-int chrAssignCoverByCriteria(struct chrdata *chr, u16 criteria, int refdist)
+int chrAssignCoverByCriteria(struct chrdata *chr, uint16_t criteria, int refdist)
 {
 	RoomNum rooms[8];
 	struct cover cover;
@@ -15019,7 +15019,7 @@ int chrAssignCoverAwayFromDanger(struct chrdata *chr, int mindist, int maxdist)
 	vecfromdanger[0] = chr->prop->pos.x - chr->runfrompos.x;
 	vecfromdanger[1] = chr->prop->pos.z - chr->runfrompos.z;
 
-	guNormalize(&vecfromdanger[0], &y, &vecfromdanger[1]);
+	utilsNormalizeF(&vecfromdanger[0], &y, &vecfromdanger[1]);
 
 	for (i = 0; i < numcovers; i++) {
 		if (coverUnpack(i, &cover) && !coverIsInUse(i) && !(cover.pos->y > ymax) && !coverIsSpecial(&cover)) {
@@ -15029,7 +15029,7 @@ int chrAssignCoverAwayFromDanger(struct chrdata *chr, int mindist, int maxdist)
 				vectocover[0] = cover.pos->x - chr->prop->pos.x;
 				vectocover[1] = cover.pos->z - chr->prop->pos.z;
 
-				guNormalize(&vectocover[0], &y, &vectocover[1]);
+				utilsNormalizeF(&vectocover[0], &y, &vectocover[1]);
 
 				sqdist = vecfromdanger[0] * vectocover[0] + vecfromdanger[1] * vectocover[1];
 

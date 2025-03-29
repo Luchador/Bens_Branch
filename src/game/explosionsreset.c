@@ -7,8 +7,8 @@
 
 void explosionsReset(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	g_ExplosionShakeTotalTimer = 0;
 	g_ExplosionShakeIntensityTimer = 0;

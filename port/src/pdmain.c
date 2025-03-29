@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <time.h>
 #include <ultra64.h>
 #include <PR/ultrasched.h>
 #include "lib/sched.h"
@@ -49,17 +50,16 @@
 #include "data.h"
 #include "types.h"
 #include "system.h"
+#include "video.h"
 
 extern uint8_t *g_MempHeap;
-extern u32 g_MempHeapSize;
+extern uint32_t g_MempHeapSize;
 
-void rngSetSeed(u32 seed);
+void rngSetSeed(uint32_t seed);
 
 bool g_AcceptCMDParams = false;
 int g_StageNum = STAGE_TITLE;
-u32 g_MainMemaHeapSize = 1024 * 300;
-bool g_MainGameLogicEnabled = true;
-u32 g_MainNumGfxTasks = 0;
+uint32_t g_MainMemaHeapSize = 1024 * 300;
 bool g_MainIsEndscreen = false;
 int g_DoBootPakMenu = 0;
 int g_MainChangeToStageNum = -1;
@@ -109,7 +109,7 @@ struct stageallocation g_StageAllocations8Mb[] = {
 	{ 0,                   "-ml0 -me0 -mgfx120 -mvtx98 -ma300"             },
 };
 
-int g_MainIsBooting = 1;
+bool g_MainIsBooting = true;
 
 void mainInit(void)
 {
@@ -121,7 +121,6 @@ void mainInit(void)
 	g_AcceptCMDParams = true;
 
 	// no copyright screen
-	viSetMode(VIMODE_HI);
 	viConfigureForLegal();
 	viBlack(true);
 	viUpdateMode();
@@ -153,13 +152,12 @@ void mainInit(void)
 
 	modelSetDistanceChecksDisabled(true); // don't use LODs
 
-	g_MainIsBooting = 0;
+	g_MainIsBooting = false;
 }
 
 void mainProc(void)
 {
 	mainInit();
-	rdpInit();
 	sndInit();
 
 	while (true) {
@@ -179,7 +177,7 @@ void mainProc(void)
  */
 void mainLoop(void)
 {
-	int ending = false;
+	bool ending = false;
 	int index;
 	int numplayers;
 
@@ -204,12 +202,10 @@ void mainLoop(void)
 		}
 	}
 
-	rngSetSeed(osGetCount());
+	rngSetSeed(utilsGetCount());
 
 	// Outer loop - this is infinite because ending is never changed
 	while (!ending) {
-		g_MainNumGfxTasks = 0;
-		g_MainGameLogicEnabled = true;
 		g_MainIsEndscreen = false;
 
 		if (g_AcceptCMDParams) {
@@ -324,11 +320,11 @@ void mainLoop(void)
 		frametimeCalculate();
 
 		while (g_MainChangeToStageNum < 0) {
-			const int cycles = osGetCount() - g_Vars.thisframestartt;
+			const int cycles = utilsGetCount() - g_Vars.thisframestartt;
 			if (!g_Vars.mininc60 || (cycles >= g_Vars.mininc60 * CYCLES_PER_FRAME - CYCLES_PER_FRAME / 2)) {
-				schedStartFrame(&g_Sched);
+				videoStartFrame();
 				mainTick();
-				schedEndFrame(&g_Sched);
+				schedEndFrame();
 			}
 			if (g_TickExtraSleep) {
 				sysSleep(EXTRA_SLEEP_TIME);
@@ -340,7 +336,10 @@ void mainLoop(void)
 		mempDisablePool(MEMPOOL_7);
 		filesStop(4);
 		viBlack(true);
-		pak0f116994();
+		
+		if (g_Vars.stagenum == STAGE_BOOTPAKMENU) {
+			g_Vars.pakstocheck = 0xf8;
+		}
 
 		g_StageNum = g_MainChangeToStageNum;
 		g_MainChangeToStageNum = -1;
@@ -357,43 +356,39 @@ void mainTick(void)
 		frametimeCalculate();
 		joyDebugJoy();
 
-		if (g_MainGameLogicEnabled) {
-			gdl = gdlstart = gfxGetMasterDisplayList();
+		gdl = gdlstart = gfxGetMasterDisplayList();
 
-			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 0x0100, 6, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+		gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+		gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 0x0100, 6, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 
-			lvTick();
-			playermgrShuffle();
+		lvTick();
+		playermgrShuffle();
 
-			if (g_StageNum < STAGE_TITLE) {
-				for (i = 0; i < PLAYERCOUNT(); i++) {
-					setCurrentPlayerNum(playermgrGetPlayerAtOrder(i));
+		if (g_StageNum < STAGE_TITLE) {
+			for (i = 0; i < PLAYERCOUNT(); i++) {
+				setCurrentPlayerNum(playermgrGetPlayerAtOrder(i));
 
-					if (!titleIsKeepingMode()) {
-						viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
-						viSetFovAspectAndSize(
-								g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
-								g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
-					}
-
-					lvTickPlayer();
+				if (!titleIsKeepingMode()) {
+					viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
+					viSetFovAspectAndSize(
+							g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
+							g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
 				}
+
+				lvTickPlayer();
 			}
-
-			gdl = lvRender(gdl);
-
-			gDPFullSync(gdl++);
-			gSPEndDisplayList(gdl++);
 		}
 
-		if (g_MainGameLogicEnabled) {
-			gfxSwapBuffers();
-			viUpdateMode();
-		}
+		gdl = lvRender(gdl);
+
+		gDPFullSync(gdl++);
+		gSPEndDisplayList(gdl++);
+
+		gfxSwapBuffers();
+		viUpdateMode();
 
 		// Used in PC port
-		rdpCreateTask(gdlstart, gdl, 0);
+		rdpCreateTask(gdlstart, gdl);
 		memaPrint();
 	}
 }

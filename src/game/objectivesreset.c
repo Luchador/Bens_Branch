@@ -8,7 +8,7 @@
 
 void objectivesReset(void)
 {
-	s32 i;
+	int i;
 
 	if (mainGetStageNum() < STAGE_TITLE) {
 		g_ObjectiveLastIndex = -1;

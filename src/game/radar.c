@@ -16,12 +16,12 @@
 #include "gbiex.h"
 #include "types.h"
 
-u32 g_RadarX;
-u32 g_RadarY;
+uint32_t g_RadarX;
+uint32_t g_RadarY;
 
 bool g_RadarYIndicatorsEnabled = true;
 
-u32 g_TeamColours[] = {
+uint32_t g_TeamColours[] = {
 	0xff000000, // Red
 	0xffff0000, // Yellow
 	0x0000ff00, // Blue
@@ -32,7 +32,7 @@ u32 g_TeamColours[] = {
 	0x88445500, // Brown
 };
 
-u32 var80087ce4[] = {
+uint32_t var80087ce4[] = {
 	0xf801f801,
 	0xffc1ffc1,
 	0x003f003f,
@@ -48,10 +48,10 @@ void radarSetYIndicatorsEnabled(bool enable)
 	g_RadarYIndicatorsEnabled = enable;
 }
 
-Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, s32 arg2, s32 arg3, s32 arg4)
+Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, int arg2, int arg3, int arg4)
 {
-	f32 spb0[2];
-	f32 spa8[2];
+	float spb0[2];
+	float spa8[2];
 
 	gDPSetColorDither(gdl++, G_CD_DISABLE);
 	gDPSetTexturePersp(gdl++, G_TP_NONE);
@@ -95,9 +95,9 @@ Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, s32 arg2, s3
 	return gdl;
 }
 
-s32 radarGetTeamIndex(s32 team)
+int radarGetTeamIndex(int team)
 {
-	s32 index = 0;
+	int index = 0;
 
 	if (team & 1) {
 		index = 0;
@@ -120,13 +120,13 @@ s32 radarGetTeamIndex(s32 team)
 	return index;
 }
 
-Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, u32 colour1, u32 colour2, bool swapcolours)
+Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, uint32_t colour1, uint32_t colour2, bool swapcolours)
 {
-	s32 x;
-	s32 y;
-	u32 shiftamount;
-	f32 sqdist;
-	f32 spcc;
+	int x;
+	int y;
+	uint32_t shiftamount;
+	float sqdist;
+	float spcc;
 
 	spcc = (atan2f(dist->x, dist->z) * 180.0f) / M_PI + g_Vars.currentplayer->vv_theta + 180.0f;
 	sqdist = sqrtf(dist->z * dist->z + dist->x * dist->x) * (1.0f / 250.0f);
@@ -138,8 +138,8 @@ Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, u32 colour1, 
 		shiftamount = 1;
 	}
 
-	x = g_RadarX + (s32)(sinf(spcc * 0.017453292384744f) * sqdist);
-	y = g_RadarY + (s32)PALUPF(cosf(spcc * 0.017453292384744f) * sqdist);
+	x = g_RadarX + (int)(sinf(spcc * 0.017453292384744f) * sqdist);
+	y = g_RadarY + (int)PALUPF(cosf(spcc * 0.017453292384744f) * sqdist);
 
 	if (swapcolours) {
 		if (prop == g_Vars.currentplayer->prop) {
@@ -240,12 +240,12 @@ Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, u32 colour1, 
 
 Gfx *radarRender(Gfx *gdl)
 {
-	s32 playercount;
-	s32 playernum;
+	int playercount;
+	int playernum;
 	struct textureconfig *tconfig;
 	struct coord pos;
-	u32 colour;
-	s32 i;
+	uint32_t colour;
+	int i;
 
 	tconfig = g_TexRadarConfigs;
 	playernum = g_Vars.currentplayernum;
@@ -330,7 +330,7 @@ Gfx *radarRender(Gfx *gdl)
 				pos.z = g_Vars.players[i]->prop->pos.z - g_Vars.currentplayer->prop->pos.z;
 
 				if (g_Vars.normmplayerisrunning && (g_MpSetup.options & MPOPTION_TEAMSENABLED)) {
-					s32 index = g_PlayerConfigsArray[g_Vars.playerstats[i].mpindex].base.team;
+					int index = g_PlayerConfigsArray[g_Vars.playerstats[i].mpindex].base.team;
 					colour = g_TeamColours[index];
 				} else {
 					colour = 0x00ff0000;
@@ -396,7 +396,7 @@ Gfx *radarRender(Gfx *gdl)
 		pos.z = 0;
 
 		if (g_Vars.normmplayerisrunning && (g_MpSetup.options & MPOPTION_TEAMSENABLED)) {
-			s32 index = g_PlayerConfigsArray[g_Vars.playerstats[playernum].mpindex].base.team;
+			int index = g_PlayerConfigsArray[g_Vars.playerstats[playernum].mpindex].base.team;
 			colour = g_TeamColours[index];
 		} else {
 			colour = 0x00ff0000;

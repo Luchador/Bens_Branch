@@ -4,18 +4,18 @@
 #include "types.h"
 #include <stdint.h>
 
-void func0003ba64(struct fx *fx, f32 outputrate);
+void func0003ba64(struct fx *fx, float outputrate);
 
-Acmd *n_alResamplePull2(N_PVoice *e, s16 *outp, s32 outCount, Acmd *p)
+Acmd *n_alResamplePull2(N_PVoice *e, int16_t *outp, int outCount, Acmd *p)
 {
 	Acmd *ptr = p;
-	f32 sp28;
+	float sp28;
 
 	ptr = n_alResamplePull(e, outp, p);
 
 	if (e->unk8c != 0 && e->unk8c < 64) {
 		if (e->unk8c >= 6) {
-			sp28 = 26755 / sqrtf(e->unk8c + 1.0f);
+			sp28 = 26755 / (e->unk8c + 1.0f);
 		} else {
 			sp28 = 65536 / (e->unk8c + 1.0f);
 		}
@@ -46,9 +46,9 @@ Acmd *n_alResamplePull2(N_PVoice *e, s16 *outp, s32 outCount, Acmd *p)
 	return ptr;
 }
 
-s32 n_alResampleParam2(N_PVoice *filter, s32 paramID, void *param)
+int n_alResampleParam2(N_PVoice *filter, int paramID, void *param)
 {
-	f32 *f = (f32 *) &param;
+	float *f = (float *) &param;
 
 	switch (paramID) {
 	case (AL_FILTER_RESET):
@@ -56,7 +56,7 @@ s32 n_alResampleParam2(N_PVoice *filter, s32 paramID, void *param)
 		n_alLoadParam(filter, AL_FILTER_RESET, param);
 		break;
 	case (AL_FILTER_12):
-		filter->fx.unk02 = (s32) param;
+		filter->fx.unk02 = (int) param;
 		filter->unkb8 |= 2;
 		break;
 	case (AL_FILTER_13):
@@ -64,7 +64,7 @@ s32 n_alResampleParam2(N_PVoice *filter, s32 paramID, void *param)
 		filter->unkb8 |= 2;
 		break;
 	case (AL_FILTER_11):
-		filter->unk8c = (u8)param;
+		filter->unk8c = (uint8_t)param;
 		break;
 	default:
 		n_alLoadParam(filter, paramID, param);

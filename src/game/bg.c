@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include <math.h>
-#include <stdint.h>
 #include "constants.h"
 #include "game/debug.h"
 #include "game/dlights.h"
@@ -84,7 +83,7 @@
 #define VTXBATCHTYPE_OPA 0x01
 #define VTXBATCHTYPE_XLU 0x02
 
-struct drawslot g_BgDrawSlots[61];
+struct drawslot g_BgDrawSlots[301]; // 61
 uint8_t *g_BgPrimaryData;
 uint32_t var800a4920;
 uint32_t g_BgSection3;
@@ -94,7 +93,7 @@ RoomNum g_BgForceOnscreenRooms[350];
 int g_BgNumForceOnscreenRooms;
 int16_t g_BgUnloadDelay240;
 int16_t g_BgUnloadDelay240_2;
-RoomNum g_GlareRooms[100];
+RoomNum g_GlareRooms[300]; // 100
 uintptr_t *g_BgPrimaryData2;
 struct bgroom *g_BgRooms;
 struct bgportal *g_BgPortals;
@@ -197,8 +196,8 @@ void bgSetRoomOnscreen(int roomnum, int draworder, struct screenbox *box)
 		} else {
 			index = g_BgNumDrawSlots;
 
-			if (index > 59) {
-				index = 59;
+			if (index > 299) { // 59
+				index = 299;
 			}
 
 			g_BgDrawSlots[index].roomnum = roomnum;
@@ -222,7 +221,7 @@ void bgSetRoomOnscreen(int roomnum, int draworder, struct screenbox *box)
 
 			g_BgNumAttemptedDrawSlots++;
 
-			if (g_BgNumAttemptedDrawSlots < 60) {
+			if (g_BgNumAttemptedDrawSlots < 300) { // 60
 				g_BgNumDrawSlots = g_BgNumAttemptedDrawSlots;
 			}
 
@@ -246,7 +245,7 @@ void bgGetRoomBrightnessRange(int roomnum, int8_t *min, int8_t *max)
 
 struct drawslot *bgGetRoomDrawSlot(int roomnum)
 {
-	int index = 60;
+	int index = 300; // 60
 
 	if (g_BgFrameCount == g_BgDrawSlotsByRoom[roomnum].updatedframe) {
 		index = g_BgDrawSlotsByRoom[roomnum].slotnum;
@@ -286,15 +285,9 @@ Gfx *bgRenderXrayData(Gfx *gdl, struct xraydata *xraydata)
 		// @bug: The original code overflows the tris array and unintentionally writes zero
 		// into the xraydata->numtris property. IDO reloads the xraydata->numtris value
 		// on each loop iteration so it reads the 0 value and ends the loop.
-#ifdef AVOID_UB
 		for (i = xraydata->numtris; i < numgroups * 4; i++) {
 			xraydata->tris[i][0] = xraydata->tris[i][1] = xraydata->tris[i][2] = 0;
 		}
-#else
-		for (i = xraydata->numtris; i < xraydata->numtris * 4; i++) {
-			xraydata->tris[i][0] = xraydata->tris[i][1] = xraydata->tris[i][2] = 0;
-		}
-#endif
 
 		for (i = 0; i < numgroups; i++) {
 			gSPTri4(gdl++,
@@ -955,8 +948,8 @@ Gfx *bgRenderScene(Gfx *gdl)
 	struct prop *prop;
 	int16_t tmp;
 	RoomNum *room;
-	int16_t roomorder[250]; // 60 to 250
-	RoomNum roomnums[250]; // 60 to 250
+	int16_t roomorder[300]; // 60 to 300
+	RoomNum roomnums[300]; // 60 to 300
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 		gdl = bgRenderSceneInXray(gdl);
@@ -1051,8 +1044,6 @@ Gfx *bgRenderScene(Gfx *gdl)
 
 			gdl = bgRenderRoomOpaque(gdl, roomnum);
 		}
-
-		gSPPerspNormalize(gdl++, viGetPerspScale());
 	}
 
 	gdl = skyRenderSuns(gdl, false);
@@ -5495,8 +5486,6 @@ void bgExpandRoomToPortals(int roomnum)
 			}
 		}
 	}
-
-	if (count);
 }
 
 bool bgPortalExists(int portalnum)

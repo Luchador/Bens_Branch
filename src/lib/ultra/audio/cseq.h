@@ -5,7 +5,7 @@
 #define __cseq__
 
 
-char __alCSeqNextDelta(ALCSeq *seq, s32 *pDeltaTicks);
+char __alCSeqNextDelta(ALCSeq *seq, int *pDeltaTicks);
 
 
 #endif /* __cseq__ */

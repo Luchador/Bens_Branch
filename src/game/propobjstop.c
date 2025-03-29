@@ -8,11 +8,11 @@
 
 void objsStop(void)
 {
-	u32 *ptr = g_StageSetup.props;
+	uint32_t *ptr = g_StageSetup.props;
 
 	if (ptr) {
-		while ((u8)PD_BE32(ptr[0]) != OBJTYPE_END) {
-			switch ((u8)PD_BE32(ptr[0])) {
+		while ((uint8_t)PD_BE32(ptr[0]) != OBJTYPE_END) {
+			switch ((uint8_t)PD_BE32(ptr[0])) {
 			case OBJTYPE_DOOR:
 			case OBJTYPE_BASIC:
 			case OBJTYPE_KEY:

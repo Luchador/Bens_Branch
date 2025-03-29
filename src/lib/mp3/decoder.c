@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "internal.h"
 #include "mp3.h"
 
@@ -11,19 +12,19 @@
 #define VERSION_1 0x1
 
 struct mp3decthing {
-	u8 unk00;
-	u8 unk01;
-	u8 unk02;
-	u8 unk03;
-	u32 unk04;
+	uint8_t unk00;
+	uint8_t unk01;
+	uint8_t unk02;
+	uint8_t unk03;
+	uint32_t unk04;
 };
 
 extern const struct mp3decthing var70054b40[];
 
-f32 sine_block[4][36];
+float sine_block[4][36];
 struct mp3decfourbytes *var8009c640;
-f32 *var8009c644;
-f32 *var8009c648;
+float *var8009c644;
+float *var8009c648;
 
 const struct mp3decthing var70054b40[] = {
 	{ 0,   0,   1,   0, 1 },
@@ -1540,17 +1541,17 @@ struct mp3decthing *var8005f670[] = {
 	(struct mp3decthing *)var70057750,
 };
 
-u8 *var8005f6f8 = NULL;
-u8 *var8005f6fc = NULL;
+uint8_t *var8005f6f8 = NULL;
+uint8_t *var8005f6fc = NULL;
 
-const s32 var700577d8[34] = {
+const int var700577d8[34] = {
 	0,  0,  0,  0,  0, 0, 0, 0, 0, 0,
 	0,  0,  0,  0,  0, 0, 1, 2, 3, 4,
 	6,  8,  10, 13, 4, 5, 6, 7, 8, 9,
 	11, 13, -1, -1,
 };
 
-const s16 var70057860[2][3][22] = {
+const int16_t var70057860[2][3][22] = {
 	{
 		{ 5, 11, 17, 23, 29, 35, 43, 53, 65, 79, 95, 115, 139, 167, 199, 237, 283, 335, 395, 463, 521, 575 },
 		{ 5, 11, 17, 23, 29, 35, 43, 53, 65, 79, 95, 113, 135, 161, 193, 231, 277, 331, 393, 463, 539, 575 },
@@ -1562,7 +1563,7 @@ const s16 var70057860[2][3][22] = {
 	},
 };
 
-const u8 var70057968[2][3][13] = {
+const uint8_t var70057968[2][3][13] = {
 	{
 		{ 3, 7, 11, 17, 23, 31, 41, 55, 73, 99,  131, 173, 191 },
 		{ 3, 7, 11, 17, 25, 35, 47, 61, 79, 103, 135, 179, 191 },
@@ -1575,8 +1576,8 @@ const u8 var70057968[2][3][13] = {
 };
 
 struct mp3decthing2 {
-	s16 unk00[23];
-	s16 unk2e[14];
+	int16_t unk00[23];
+	int16_t unk2e[14];
 };
 
 const struct mp3decthing2 var700579b8[6] = {
@@ -1588,14 +1589,14 @@ const struct mp3decthing2 var700579b8[6] = {
 	{ { 0, 4, 8,  12, 16, 20, 24, 30, 36, 44, 54, 66, 82,  102, 126, 156, 194, 240, 296, 364, 448, 550, 576 }, { 0, 4, 8, 12, 16, 22, 30, 42, 58, 78, 104, 138, 180, 192 } },
 };
 
-const u8 var70057b74[] = { 0, 6, 11, 16, 21, 0, 6, 12 };
+const uint8_t var70057b74[] = { 0, 6, 11, 16, 21, 0, 6, 12 };
 
-const u8 var70057b7c[2][16] = {
+const uint8_t var70057b7c[2][16] = {
 	{ 0, 0, 0, 0, 3, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4 },
 	{ 0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 1, 2, 3, 2, 3 },
 };
 
-const s16 var70057b9c[2][3][576] = {
+const int16_t var70057b9c[2][3][576] = {
 	{
 		{
 			0,   1,   2,   3,   6,   7,   8,   9,   12,  13,  14,  15,  4,   5,   18,  19,
@@ -1825,7 +1826,7 @@ const s16 var70057b9c[2][3][576] = {
 	},
 };
 
-const f32 var7005969c[] = {
+const float var7005969c[] = {
 	-0.51449573040009,
 	-0.47173196077347,
 	-0.31337743997574,
@@ -1836,7 +1837,7 @@ const f32 var7005969c[] = {
 	-0.0036999746225774,
 };
 
-const f32 var700596bc[] = {
+const float var700596bc[] = {
 	0.85749292373657,
 	0.88174200057983,
 	0.94962865114212,
@@ -1847,258 +1848,41 @@ const f32 var700596bc[] = {
 	0.99999314546585,
 };
 
-const u32 var700596dc[2][15] = {
+const uint32_t var700596dc[2][15] = {
 	{ 0, 8000,  16000, 24000, 32000, 40000, 48000, 56000, 64000,  80000,  96000,  112000, 128000, 144000, 160000 },
 	{ 0, 32000, 40000, 48000, 56000, 64000, 80000, 96000, 112000, 128000, 160000, 192000, 224000, 256000, 320000 },
 };
 
-const u32 var70059754[2][4] = {
+const uint32_t var70059754[2][4] = {
 	{ 22050, 24000, 16000, 22050 },
 	{ 44100, 48000, 32000, 44100 },
 };
 
-const u32 var70059774[] = {0xbd03ba34};
-const u32 var70059778[] = {0x3dd41398};
-const u32 var7005977c[] = {0xbe3aec8d};
-const u32 var70059780[] = {0x3e8890b4};
-const u32 var70059784[] = {0xbeb50508};
-const u32 var70059788[] = {0x3ee17918};
-const u32 var7005978c[] = {0xbf0649c3};
-const u32 var70059790[] = {0x3f1a8273};
-const u32 var70059794[] = {0xbf2cc954};
-const u32 var70059798[] = {0x3f3c902e};
-const u32 var7005979c[] = {0xbf495c64};
-const u32 var700597a0[] = {0x3f52ca58};
-const u32 var700597a4[] = {0xbf5890a3};
-const u32 var700597a8[] = {0x3f5a8284};
-const u32 var700597ac[] = {0xbf5890a3};
-const u32 var700597b0[] = {0x3f52ca47};
-const u32 var700597b4[] = {0xbf495c64};
-const u32 var700597b8[] = {0x3f3c902e};
-const u32 var700597bc[] = {0xbf2cc954};
-const u32 var700597c0[] = {0x3f1a8273};
-const u32 var700597c4[] = {0xbf0649d4};
-const u32 var700597c8[] = {0x3ee1793a};
-const u32 var700597cc[] = {0xbeb504e6};
-const u32 var700597d0[] = {0x3e8890b4};
-const u32 var700597d4[] = {0xbe3aecd0};
-const u32 var700597d8[] = {0x3dd41398};
-const u32 var700597dc[] = {0xbd03ba34};
-const u32 var700597e0[] = {0xbcf168f9};
-const u32 var700597e4[] = {0x3da2bb66};
-const u32 var700597e8[] = {0xbdee2b06};
-const u32 var700597ec[] = {0x3e0e2ef5};
-const u32 var700597f0[] = {0xbe15f5f1};
-const u32 var700597f4[] = {0x3e0e2ef5};
-const u32 var700597f8[] = {0xbdee2b06};
-const u32 var700597fc[] = {0x3da2bb66};
-const u32 var70059800[] = {0xbcf168f9};
-const u32 var70059804[] = {0xbd03ba34};
-const u32 var70059808[] = {0x3dd41398};
-const u32 var7005980c[] = {0xbe3aec8d};
-const u32 var70059810[] = {0x3e8890b4};
-const u32 var70059814[] = {0xbeb50508};
-const u32 var70059818[] = {0x3ee17918};
-const u32 var7005981c[] = {0xbf0649c3};
-const u32 var70059820[] = {0x3f1a8273};
-const u32 var70059824[] = {0xbf2cc954};
-const u32 var70059828[] = {0x3f3c902e};
-const u32 var7005982c[] = {0xbf495c64};
-const u32 var70059830[] = {0x3f52ca58};
-const u32 var70059834[] = {0xbf5890a3};
-const u32 var70059838[] = {0x3f5a8284};
-const u32 var7005983c[] = {0xbf5890a3};
-const u32 var70059840[] = {0x3f52ca47};
-const u32 var70059844[] = {0xbf495c64};
-const u32 var70059848[] = {0x3f3c902e};
-const u32 var7005984c[] = {0xbf2cf377};
-const u32 var70059850[] = {0x3f1bd7c3};
-const u32 var70059854[] = {0xbf098c7e};
-const u32 var70059858[] = {0x3eec6a5d};
-const u32 var7005985c[] = {0xbec3ef07};
-const u32 var70059860[] = {0x3e99f623};
-const u32 var70059864[] = {0xbe5bbcf5};
-const u32 var70059868[] = {0x3df6f7e4};
-const u32 var7005986c[] = {0xbd0dbf05};
-const u32 var70059870[] = {0xbcd987c6};
-const u32 var70059874[] = {0x3d4c985f};
-const u32 var70059878[] = {0xbce76ea4};
-const u32 var7005987c[] = {0x00000000};
-const u32 var70059880[] = {0x00000000};
-const u32 var70059884[] = {0x00000000};
-const u32 var70059888[] = {0x00000000};
-const u32 var7005988c[] = {0x00000000};
-const u32 var70059890[] = {0x00000000};
-const u32 var70059894[] = {0xbdd41398};
-const u32 var70059898[] = {0x3eb50508};
-const u32 var7005989c[] = {0xbf1a8273};
-const u32 var700598a0[] = {0x3f495c64};
-const u32 var700598a4[] = {0xbf5a8284};
-const u32 var700598a8[] = {0x3f495c64};
-const u32 var700598ac[] = {0xbf1a8273};
-const u32 var700598b0[] = {0x3eb504e6};
-const u32 var700598b4[] = {0xbdd41398};
-const u32 var700598b8[] = {0xbda2bb66};
-const u32 var700598bc[] = {0x3e15f5f1};
-const u32 var700598c0[] = {0xbda2bb66};
-const u32 var700598c4[] = {0x00000000};
-const u32 var700598c8[] = {0x00000000};
-const u32 var700598cc[] = {0x00000000};
-const u32 var700598d0[] = {0x00000000};
-const u32 var700598d4[] = {0x00000000};
-const u32 var700598d8[] = {0x00000000};
-const u32 var700598dc[] = {0x00000000};
-const u32 var700598e0[] = {0x00000000};
-const u32 var700598e4[] = {0x00000000};
-const u32 var700598e8[] = {0x00000000};
-const u32 var700598ec[] = {0x00000000};
-const u32 var700598f0[] = {0x00000000};
-const u32 var700598f4[] = {0x00000000};
-const u32 var700598f8[] = {0x00000000};
-const u32 var700598fc[] = {0x00000000};
-const u32 var70059900[] = {0x00000000};
-const u32 var70059904[] = {0x00000000};
-const u32 var70059908[] = {0x00000000};
-const u32 var7005990c[] = {0x00000000};
-const u32 var70059910[] = {0x00000000};
-const u32 var70059914[] = {0x00000000};
-const u32 var70059918[] = {0x00000000};
-const u32 var7005991c[] = {0x00000000};
-const u32 var70059920[] = {0x00000000};
-const u32 var70059924[] = {0x00000000};
-const u32 var70059928[] = {0x00000000};
-const u32 var7005992c[] = {0x00000000};
-const u32 var70059930[] = {0x00000000};
-const u32 var70059934[] = {0x00000000};
-const u32 var70059938[] = {0x00000000};
-const u32 var7005993c[] = {0xbe027d89};
-const u32 var70059940[] = {0x3ec24207};
-const u32 var70059944[] = {0xbf1bb1d1};
-const u32 var70059948[] = {0x3f4ae7b4};
-const u32 var7005994c[] = {0xbf6a7d67};
-const u32 var70059950[] = {0x3f77cb2e};
-const u32 var70059954[] = {0xbf7426cc};
-const u32 var70059958[] = {0x3f6c8366};
-const u32 var7005995c[] = {0xbf631327};
-const u32 var70059960[] = {0x3f57e879};
-const u32 var70059964[] = {0xbf4b192f};
-const u32 var70059968[] = {0x3f3cbe2f};
-const u32 var7005996c[] = {0xbf2cc954};
-const u32 var70059970[] = {0x3f1a8273};
-const u32 var70059974[] = {0xbf0649d4};
-const u32 var70059978[] = {0x3ee1793a};
-const u32 var7005997c[] = {0xbeb504e6};
-const u32 var70059980[] = {0x3e8890b4};
-const u32 var70059984[] = {0xbe3aecd0};
-const u32 var70059988[] = {0x3dd41398};
-const u32 var7005998c[] = {0xbd03ba34};
-const u32 var70059990[] = {0xbcf168f9};
-const u32 var70059994[] = {0x3da2bb66};
-const u32 var70059998[] = {0xbdee2b06};
-const u32 var7005999c[] = {0x3e0e2ef5};
-const u32 var700599a0[] = {0xbe15f5f1};
-const u32 var700599a4[] = {0x3e0e2ef5};
-const u32 var700599a8[] = {0xbdee2b06};
-const u32 var700599ac[] = {0x3da2bb66};
-const u32 var700599b0[] = {0xbcf168f9};
-const u32 var700599b4[] = {0xbe327e95};
-const u32 var700599b8[] = {0xbf0483ed};
-const u32 var700599bc[] = {0xbf586174};
-const u32 var700599c0[] = {0xbf92d5e9};
-const u32 var700599c4[] = {0xbfb504f7};
-const u32 var700599c8[] = {0xbfd1b3f2};
-const u32 var700599cc[] = {0xbfe803cd};
-const u32 var700599d0[] = {0xbff746ed};
-const u32 var700599d4[] = {0xbfff069a};
-const u32 var700599d8[] = {0x3e327e95};
-const u32 var700599dc[] = {0x3f0483ed};
-const u32 var700599e0[] = {0x3f586174};
-const u32 var700599e4[] = {0x3f92d5e9};
-const u32 var700599e8[] = {0x3fb504f7};
-const u32 var700599ec[] = {0x3fd1b3f2};
-const u32 var700599f0[] = {0x3fe803cd};
-const u32 var700599f4[] = {0x3ff746ed};
-const u32 var700599f8[] = {0x3fff069a};
-const u32 var700599fc[] = {0xbe327e95};
-const u32 var70059a00[] = {0xbf0483ed};
-const u32 var70059a04[] = {0xbf586174};
-const u32 var70059a08[] = {0xbf92d5e9};
-const u32 var70059a0c[] = {0xbfb504f7};
-const u32 var70059a10[] = {0xbfd1b3f2};
-const u32 var70059a14[] = {0xbfe803cd};
-const u32 var70059a18[] = {0xbff746ed};
-const u32 var70059a1c[] = {0xbfff069a};
-const u32 var70059a20[] = {0x3e327e95};
-const u32 var70059a24[] = {0x3f0483ed};
-const u32 var70059a28[] = {0x3f586174};
-const u32 var70059a2c[] = {0x3f92d5e9};
-const u32 var70059a30[] = {0x3fb504f7};
-const u32 var70059a34[] = {0x3fd1b3f2};
-const u32 var70059a38[] = {0x3fe803cd};
-const u32 var70059a3c[] = {0x3ff746ed};
-const u32 var70059a40[] = {0x3fff069a};
-const u32 var70059a44[] = {0xbf0483ed};
-const u32 var70059a48[] = {0xbfb504d5};
-const u32 var70059a4c[] = {0xbff746dc};
-const u32 var70059a50[] = {0x3f0483ed};
-const u32 var70059a54[] = {0x3fb504d5};
-const u32 var70059a58[] = {0x3ff746dc};
-const u32 var70059a5c[] = {0x00000000};
-const u32 var70059a60[] = {0x00000000};
-const u32 var70059a64[] = {0x00000000};
-const u32 var70059a68[] = {0x00000000};
-const u32 var70059a6c[] = {0x00000000};
-const u32 var70059a70[] = {0x00000000};
-const u32 var70059a74[] = {0x00000000};
-const u32 var70059a78[] = {0x00000000};
-const u32 var70059a7c[] = {0x00000000};
-const u32 var70059a80[] = {0x00000000};
-const u32 var70059a84[] = {0x00000000};
-const u32 var70059a88[] = {0x00000000};
-const u32 var70059a8c[] = {0xbe327e95};
-const u32 var70059a90[] = {0xbf0483ed};
-const u32 var70059a94[] = {0xbf586174};
-const u32 var70059a98[] = {0xbf92d5e9};
-const u32 var70059a9c[] = {0xbfb504f7};
-const u32 var70059aa0[] = {0xbfd1b3f2};
-const u32 var70059aa4[] = {0xbfe803cd};
-const u32 var70059aa8[] = {0xbff746ed};
-const u32 var70059aac[] = {0xbfff069a};
-const u32 var70059ab0[] = {0x3e327e95};
-const u32 var70059ab4[] = {0x3f0483ed};
-const u32 var70059ab8[] = {0x3f586174};
-const u32 var70059abc[] = {0x3f92d5e9};
-const u32 var70059ac0[] = {0x3fb504f7};
-const u32 var70059ac4[] = {0x3fd1b3f2};
-const u32 var70059ac8[] = {0x3fe803cd};
-const u32 var70059acc[] = {0x3ff746ed};
-const u32 var70059ad0[] = {0x3fff069a};
-
 extern struct mp3decfourbytes *var8009c650[];
-extern f32 *var8009c6d8;
-extern f32 *var8009c6dc;
+extern float *var8009c6d8;
+extern float *var8009c6dc;
 
 bool mp3decInit(void)
 {
-	s32 i;
-	s32 sp268;
-	s32 sp264;
-	s32 sp260 = 1;
-	s32 sp25c;
-	u8 *sp258;
+	int i;
+	int sp268;
+	int sp264;
+	int sp260 = 1;
+	int sp25c;
+	uint8_t *sp258;
 	struct mp3decthing *sp254;
 	struct mp3decfourbytes *sp250;
-	const u8 sp248[] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
-	s32 sp244;
-	u8 sp243;
-	s32 sp23c;
-	s32 sp238;
-	s32 sp234;
-	s32 sp230;
-	s32 sp22c;
-	s32 sp228;
-	s16 sp28[256];
-	s32 sp24;
+	const uint8_t sp248[] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
+	int sp244;
+	uint8_t sp243;
+	int sp23c;
+	int sp238;
+	int sp234;
+	int sp230;
+	int sp22c;
+	int sp228;
+	int16_t sp28[256];
+	int sp24;
 
 	sp234 = 0;
 
@@ -2242,36 +2026,36 @@ bool mp3decInit(void)
 	return true;
 }
 
-bool mp3dec00040164(struct asistream *stream, u32 gr, u32 ch)
+bool mp3dec00040164(struct asistream *stream, uint32_t gr, uint32_t ch)
 {
-	s32 sp1bc;
-	s32 sp1b8;
-	s32 sp1b4;
-	s32 sp1b0;
+	int sp1bc;
+	int sp1b8;
+	int sp1b4;
+	int sp1b0;
 
-	const s32 sp158[] = {
+	const int sp158[] = {
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		1, 1, 1, 1, 2, 2, 3, 3, 3, 2, 0,
 	};
 
-	f32 sp100[22];
-	f32 sp64[3][13];
-	f32 sp60;
-	s32 sfb;
-	s32 sp58;
-	s32 scale;
-	s32 sp50;
-	s32 sp4c;
-	s32 sp48;
-	s32 sp44;
-	f32 *sp40;
-	s16 *sp3c;
-	u8 *sp38;
-	s32 sp34;
-	s32 sp30;
-	s32 window_switching;
-	s32 sp28;
-	f32 *sp24;
+	float sp100[22];
+	float sp64[3][13];
+	float sp60;
+	int sfb;
+	int sp58;
+	int scale;
+	int sp50;
+	int sp4c;
+	int sp48;
+	int sp44;
+	float *sp40;
+	int16_t *sp3c;
+	uint8_t *sp38;
+	int sp34;
+	int sp30;
+	int window_switching;
+	int sp28 = 0;
+	float *sp24;
 
 	sp1bc = stream->samplerateindex + stream->version * 3;
 
@@ -2388,11 +2172,11 @@ bool mp3dec00040164(struct asistream *stream, u32 gr, u32 ch)
 	return true;
 }
 
-bool mp3decUnpackScaleFac(struct asistream *stream, u32 gr, u32 ch)
+bool mp3decUnpackScaleFac(struct asistream *stream, uint32_t gr, uint32_t ch)
 {
-	s32 i;
-	s32 sfb;
-	s32 window;
+	int i;
+	int sfb;
+	int window;
 
 	if (stream->window_switching[gr][ch] != 0 && stream->block_type[gr][ch] == 2) {
 		if (stream->mixed_block_flag[gr][ch] != 0) {
@@ -2458,9 +2242,9 @@ bool mp3decUnpackScaleFac(struct asistream *stream, u32 gr, u32 ch)
 	return true;
 }
 
-bool mp3dec00041600(struct asistream *stream, u32 gr, u32 ch)
+bool mp3dec00041600(struct asistream *stream, uint32_t gr, uint32_t ch)
 {
-	const s32 sp70[2][3][3][4] = {
+	const int sp70[2][3][3][4] = {
 		{
 			{ { 6,  5,  5,  5 }, { 9,  9,  9,  9 }, { 6,  9,  9,  9 } },
 			{ { 6,  5,  7,  3 }, { 9,  9,  12, 6 }, { 6,  9,  12, 6 } },
@@ -2472,21 +2256,21 @@ bool mp3dec00041600(struct asistream *stream, u32 gr, u32 ch)
 		},
 	};
 
-	s32 sp60[4];
-	s32 compress;
-	u32 *preflag;
-	s32 mixed;
-	s32 block_type;
-	s32 window_switching;
-	s32 sp48;
-	s32 sp44;
-	s32 i;
-	s32 j;
-	s32 sp38;
-	s32 sp28[4];
-	s32 sfb;
-	s32 sp20;
-	s32 sp1c;
+	int sp60[4];
+	int compress;
+	uint32_t *preflag;
+	int mixed;
+	int block_type;
+	int window_switching;
+	int sp48;
+	int sp44;
+	int i;
+	int j;
+	int sp38;
+	int sp28[4];
+	int sfb;
+	int sp20;
+	int sp1c;
 
 	compress = stream->scalefac_compress[0][ch];
 	preflag = &stream->preflag[0][ch];
@@ -2632,22 +2416,22 @@ bool mp3dec00041600(struct asistream *stream, u32 gr, u32 ch)
 	return true;
 }
 
-bool mp3dec00042238(struct asistream *stream, u32 gr, u32 ch)
+bool mp3dec00042238(struct asistream *stream, uint32_t gr, uint32_t ch)
 {
-	s32 sp64 = stream->unk2020;
-	s32 sp60;
-	s32 sp54[3];
-	const s16 *sp50;
-	const u8 *sp4c;
-	s32 sp48;
-	s16 *sp44;
-	u8 *sp40;
-	s32 i;
-	u32 sp38;
-	s32 sp34;
-	s32 sp30;
-	s32 sp2c;
-	s32 sp28;
+	int sp64 = stream->unk2020;
+	int sp60;
+	int sp54[3];
+	const int16_t *sp50;
+	const uint8_t *sp4c;
+	int sp48;
+	int16_t *sp44;
+	uint8_t *sp40;
+	int i;
+	uint32_t sp38;
+	int sp34;
+	int sp30;
+	int sp2c;
+	int sp28;
 
 	if (stream->version != VERSION_2) {
 		mp3decUnpackScaleFac(stream, gr, ch);
@@ -2729,12 +2513,12 @@ bool mp3dec00042238(struct asistream *stream, u32 gr, u32 ch)
 	return true;
 }
 
-bool mp3dec000427d8(struct asistream *stream, u32 gr)
+bool mp3dec000427d8(struct asistream *stream, uint32_t gr)
 {
-	const s16 *sp14 = var70057b9c[stream->version][stream->samplerateindex];
-	f32 *sp10 = stream->unk4f64[0][0].unk00;
-	f32 *sp0c = stream->unk4664[0][0].unk00;
-	s32 i = 0;
+	const int16_t *sp14 = var70057b9c[stream->version][stream->samplerateindex];
+	float *sp10 = stream->unk4f64[0][0].unk00;
+	float *sp0c = stream->unk4664[0][0].unk00;
+	int i = 0;
 
 	if (stream->window_switching[gr][0] && stream->block_type[gr][0] == 2) {
 		if (stream->mixed_block_flag[gr][0]) {
@@ -2755,9 +2539,9 @@ bool mp3dec000427d8(struct asistream *stream, u32 gr)
 	return true;
 }
 
-bool mp3decReduceAliases(struct asistream *stream, u32 gr, u32 ch)
+bool mp3decReduceAliases(struct asistream *stream, uint32_t gr, uint32_t ch)
 {
-	s32 i;
+	int i;
 
 	if (stream->window_switching[gr][ch] && stream->block_type[gr][ch] == 2) {
 		return true;
@@ -2765,8 +2549,8 @@ bool mp3decReduceAliases(struct asistream *stream, u32 gr, u32 ch)
 
 	for (i = 1; i < 32; i++) {
 		struct asistream_4f64 *sp08 = &stream->unk4f64[ch][i];
-		f32 sp04;
-		f32 sp00;
+		float sp04;
+		float sp00;
 
 		sp04 = sp08->unk00[0];
 		sp00 = sp08->unk00[-1];
@@ -2814,13 +2598,13 @@ bool mp3decReduceAliases(struct asistream *stream, u32 gr, u32 ch)
 
 bool mp3decSetSideInfo(struct asistream *stream)
 {
-	s32 sp34;
-	s32 ch;
-	s32 scfsi_band;
-	s32 sp28;
-	s32 gr;
-	s32 region;
-	s32 window;
+	int sp34;
+	int ch;
+	int scfsi_band;
+	int sp28;
+	int gr;
+	int region;
+	int window;
 
 	if (stream->version != VERSION_2) {
 		stream->unk206c = stream->channelmode == CHANNELMODE_SINGLEMONO ? 17 : 32;
@@ -2926,21 +2710,21 @@ bool mp3decSetSideInfo(struct asistream *stream)
 
 bool mp3decDecodeFrame(struct asistream *stream)
 {
-	s32 sp954;
-	s32 gr = 0;
-	s32 ch;
-	s32 sp948;
-	s32 sp944;
-	s32 sp940;
-	s32 i;
-	s32 j;
-	u16 *sp934;
+	int sp954;
+	int gr = 0;
+	int ch;
+	int sp948;
+	int sp944;
+	int sp940;
+	int i;
+	int j;
+	uint16_t *sp934;
 	struct asistream_4f64 sp34[32];
-	f32 sp30;
-	f32 sp2c;
-	f32 sp28;
-	s32 sp24;
-	s32 sp20;
+	float sp30;
+	float sp2c;
+	float sp28;
+	int sp24;
+	int sp20;
 
 	sp934 = stream->unk2070[stream->unk3ba0].unk00;
 	sp954 = mp3main00043dd0(stream);

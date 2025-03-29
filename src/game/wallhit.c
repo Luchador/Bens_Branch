@@ -1,5 +1,4 @@
-#include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/dlights.h"
 #include "game/chr.h"
@@ -27,24 +26,20 @@
 
 #define IS_BLOOD_DROP(texnum) (texnum >= WALLHITTEX_BLOOD4 && texnum <= WALLHITTEX_BLOOD4)
 
-const char var7f1b5a10[] = "WallHit_MakeSpaceRoom : ERROR - Couldn't find any space in room %d\n";
-
 struct wallhit *g_Wallhits;
 struct wallhit *g_FreeWallhits;
 struct wallhit *g_ActiveWallhits;
 
-s32 var8007f740 = 0;
-u8 g_WallhitBloodColour[4] = {0x40, 0x0a, 0x0a, 0x00};
-f32 var8007f748 = 1;
-f32 var8007f74c = 1;
-u32 var8007f750 = 0;
-f32 var8007f754 = 0;
-f32 var8007f758 = 0;
+uint8_t g_WallhitBloodColour[4] = {0x40, 0x0a, 0x0a, 0x00};
+float var8007f748 = 1;
+uint32_t var8007f750 = 0;
+float var8007f754 = 0;
+float var8007f758 = 0;
 
 struct wallhittex {
-	f32 width;
-	f32 height;
-	u8 type;
+	float width;
+	float height;
+	uint8_t type;
 };
 
 struct wallhittex g_WallhitTexes[] = {
@@ -68,7 +63,7 @@ struct wallhittex g_WallhitTexes[] = {
 	/*0x11*/ { 6,   6,   WALLHITTYPE_BULLET }, // WALLHITTEX_METAL
 };
 
-s16 wallhitFinaliseAxis(f32 value)
+int16_t wallhitFinaliseAxis(float value)
 {
 	if (value > var8007f754) {
 		var8007f754 = value;
@@ -94,7 +89,7 @@ s16 wallhitFinaliseAxis(f32 value)
 void wallhitFree(struct wallhit *wallhit)
 {
 	struct wallhit *iter;
-	s32 i;
+	int i;
 
 	wallhit->timermax = 0;
 	wallhit->timercur = 0;
@@ -193,7 +188,7 @@ void wallhitFree(struct wallhit *wallhit)
 	}
 }
 
-void wallhitsFreeByProp(struct prop *prop, s8 layer)
+void wallhitsFreeByProp(struct prop *prop, int8_t layer)
 {
 	struct prop *copy = prop;
 
@@ -212,7 +207,7 @@ void wallhitsFreeByProp(struct prop *prop, s8 layer)
 
 bool chrIsUsingPaintball(struct chrdata *chr)
 {
-	s32 prevplayernum = g_Vars.currentplayernum;
+	int prevplayernum = g_Vars.currentplayernum;
 	bool paintball;
 
 	if (chr && chr->prop && chr->prop->type == PROPTYPE_PLAYER) {
@@ -240,7 +235,7 @@ void wallhitChooseBloodColour(struct prop *prop)
 	}
 }
 
-void wallhitFade(struct wallhit *wallhit, u32 arg1)
+void wallhitFade(struct wallhit *wallhit, uint32_t arg1)
 {
 	if (!wallhit->fading) {
 		if (wallhit->objprop) {
@@ -280,20 +275,20 @@ void wallhitFade(struct wallhit *wallhit, u32 arg1)
  * be favoured over a blood puddle. The actual wallhit to be removed will
  * be the oldest one that meets that criteria.
  */
-bool wallhitRemoveOneInRoom(s32 room)
+bool wallhitRemoveOneInRoom(int room)
 {
 	if (room == -1 || g_WallhitCountsPerRoom[room]) {
-		f32 ratio = 0.0f;
-		u32 blooddropframe = U32_MAX;
-		u32 bloodpuddleframe = U32_MAX;
-		u32 otherframe = U32_MAX;
-		s32 blooddropindex = -1;
-		s32 bloodpuddleindex = -1;
-		s32 otherindex = -1;
-		s32 numblood;
-		s32 numother;
-		s32 numtotal;
-		s32 i;
+		float ratio = 0.0f;
+		uint32_t blooddropframe = U32_MAX;
+		uint32_t bloodpuddleframe = U32_MAX;
+		uint32_t otherframe = U32_MAX;
+		int blooddropindex = -1;
+		int bloodpuddleindex = -1;
+		int otherindex = -1;
+		int numblood;
+		int numother;
+		int numtotal;
+		int i;
 
 		for (i = 0, numblood = 0, numother = 0; i < g_WallhitsMax; i++) {
 			if (g_Wallhits[i].inuse
@@ -329,7 +324,7 @@ bool wallhitRemoveOneInRoom(s32 room)
 		numtotal = numblood + numother;
 
 		if (numtotal > 0) {
-			ratio = (f32) numblood / (f32) numtotal;
+			ratio = (float) numblood / (float) numtotal;
 		}
 
 		if (ratio > g_WallhitTargetBloodRatio && (blooddropindex != -1 || bloodpuddleindex != -1)) {
@@ -363,17 +358,17 @@ bool wallhitRemoveOneInRoom(s32 room)
  */
 void wallhitRemoveOne(void)
 {
-	s32 room;
-	u32 i;
+	int room;
+	uint32_t i;
 	bool done = false;
 
 	for (i = 0; !done && i < 3; i++) {
-		s32 bestroom = -1;
-		s32 bestvalue = -1;
+		int bestroom = -1;
+		int bestvalue = -1;
 
 		for (room = 0; room < g_Vars.roomcount; room++) {
-			s32 onscreen = room == 0 ? 1 : (g_Rooms[room].flags & ROOMFLAG_ONSCREEN);
-			s32 standby = room == 0 ? 1 : (g_Rooms[room].flags & ROOMFLAG_STANDBY);
+			int onscreen = room == 0 ? 1 : (g_Rooms[room].flags & ROOMFLAG_ONSCREEN);
+			int standby = room == 0 ? 1 : (g_Rooms[room].flags & ROOMFLAG_STANDBY);
 			bool consider;
 
 			if (i == 0) {
@@ -396,7 +391,7 @@ void wallhitRemoveOne(void)
 		if (1);
 
 		if (bestroom != -1) {
-			s32 min = bestroom == 0 ? g_MinPropWallhits : g_MinBgWallhitsPerRoom;
+			int min = bestroom == 0 ? g_MinPropWallhits : g_MinBgWallhitsPerRoom;
 
 			if (g_WallhitCountsPerRoom[bestroom] > min) {
 				if (wallhitRemoveOneInRoom(bestroom)) {
@@ -409,42 +404,26 @@ void wallhitRemoveOne(void)
 	if (!done) {
 		wallhitRemoveOneInRoom(-1);
 	}
-
-	if (1);
 }
 
 void wallhitsTick(void)
 {
-	f32 sp12c;
-	f32 fov;
-	s32 numallocated;
-	s32 i;
-	s32 j;
-	u32 stack[3];
-	f32 midx;
-	f32 midy;
-	f32 midz;
-	f32 f22;
-	f32 f24;
+	float sp12c;
+	float fov;
+	int numallocated;
+	int i;
+	int j;
+	float midx;
+	float midy;
+	float midz;
+	float f22;
+	float f24;
 	struct wallhit *wallhit;
 	struct coord spc8[4];
-	u32 stack2[4];
 
-	static s32 var8007f834 = 0;
+	static int var8007f834 = 0;
 
 	sp12c = (g_Vars.lvupdate240 + 2.0f) * 0.25f;
-	fov = currentPlayerGetGunZoomFov();
-
-	var8007f740 = 0;
-
-	if (fov == 0.0f || fov == 60.0f) {
-		var8007f748 = 1;
-	} else {
-		f32 tmp = fov / g_Vars.currentplayer->zoominfovy;
-		var8007f748 = 60.0f / fov - 1.00f / tmp + 1;
-	}
-
-	var8007f74c = 1.0f / var8007f748;
 
 	numallocated = g_WallhitsNumFree + g_WallhitsNumUsed;
 
@@ -462,7 +441,7 @@ void wallhitsTick(void)
 	wallhit = g_Wallhits;
 
 	for (i = 0; i < g_WallhitsMax; i++, wallhit++) {
-		f32 f0 = sp12c;
+		float f0 = sp12c;
 
 		if (!wallhit->inuse) {
 			continue;
@@ -473,7 +452,7 @@ void wallhitsTick(void)
 		}
 
 		if (wallhit->timermax) {
-			u32 amount = (u32)(f0 + 0.5f);
+			uint32_t amount = (uint32_t)(f0 + 0.5f);
 
 			if (wallhit->expanding) {
 				if (wallhit->timercur > wallhit->timermax) {
@@ -492,7 +471,7 @@ void wallhitsTick(void)
 			}
 
 			if (wallhit->timermax) {
-				f24 = (f32) wallhit->timercur / wallhit->timermax;
+				f24 = (float) wallhit->timercur / wallhit->timermax;
 
 				if (f24 > 1.0f) {
 					f24 = 1.0f;
@@ -501,11 +480,11 @@ void wallhitsTick(void)
 				f22 = f24;
 
 				if (wallhit->expanding) {
-					f32 frac = 0.2f;
-					f32 f30;
-					s32 minindex;
-					f32 tmp;
-					s32 j;
+					float frac = 0.2f;
+					float f30;
+					int minindex;
+					float tmp;
+					int j;
 
 					tmp = 1.5707964f * f24;
 					f30 = (1.0f - frac) * sinf(tmp);
@@ -545,10 +524,10 @@ void wallhitsTick(void)
 
 					// Calculate and apply the new size
 					for (j = 0; j < ARRAYCOUNT(spc8); j++) {
-						s32 j2;
-						f32 xradius = spc8[j].x - midx;
-						f32 yradius = spc8[j].y - midy;
-						f32 zradius = spc8[j].z - midz;
+						int j2;
+						float xradius = spc8[j].x - midx;
+						float yradius = spc8[j].y - midy;
+						float zradius = spc8[j].z - midz;
 
 						wallhit->vertices2[j].x = midx + xradius * (0.2f + f30);
 						goto foo; foo:;
@@ -570,7 +549,7 @@ void wallhitsTick(void)
 				}
 
 				for (j = 0; j < ARRAYCOUNT(wallhit->basecolours); j++) {
-					u32 alpha;
+					uint32_t alpha;
 
 					if (f22 > 1.0f) {
 						f22 = 1.0f;
@@ -601,43 +580,13 @@ void wallhitsTick(void)
 	}
 }
 
-const char var7f1b5a5c[] = "g_MaxRound = %s%s%f";
-const char var7f1b5a70[] = "";
-const char var7f1b5a74[] = "";
-const char var7f1b5a78[] = "g_MinRound = %s%s%f";
-const char var7f1b5a8c[] = "";
-const char var7f1b5a90[] = "";
-const char var7f1b5a94[] = "Done %d Z buffer calcs";
-const char var7f1b5aac[] = "ZOOM : g_ZoomFactor=%s%s%f";
-const char var7f1b5ac8[] = "";
-const char var7f1b5acc[] = "";
-const char var7f1b5ad0[] = "ZOOM : g_ZoomScalar=%s%s%f";
-const char var7f1b5aec[] = "";
-const char var7f1b5af0[] = "";
-const char var7f1b5af4[] = "ZOOM : scale=%s%s%f";
-const char var7f1b5b08[] = "";
-const char var7f1b5b0c[] = "";
-const char var7f1b5b10[] = "WallHit_Tick : Status - RED";
-const char var7f1b5b2c[] = "WallHit_Tick : Status - YELLOW (%u)";
-const char var7f1b5b50[] = "WallHit_Tick : Status - GREEN";
-const char var7f1b5b70[] = "WallHit_Tick : %d Used";
-const char var7f1b5b88[] = "WallHit_Tick : %d Free";
-const char var7f1b5ba0[] = "WallHit_Tick : %d Pending";
-const char var7f1b5bbc[] = "WallHit_Tick : %d Blood";
-const char var7f1b5bd4[] = "WallHit_Tick : %d Other";
-const char var7f1b5bec[] = "WallHit_Tick : %d Ratio";
-const char var7f1b5c04[] = "WallHit_Tick : %d(%d) Prop Hits";
-const char var7f1b5c24[] = "tLifeTime=%s%s%f, tScalarGbl=%f";
-const char var7f1b5c44[] = "";
-const char var7f1b5c48[] = "";
-
-void wallhitCreate(struct coord *relpos, struct coord *arg1, struct coord *arg2, s16 arg3[3],
-		s16 arg4[3], s16 texnum, RoomNum room, struct prop *objprop,
-		s8 mtxindex, s8 arg9, struct chrdata *chr, bool xlu)
+void wallhitCreate(struct coord *relpos, struct coord *arg1, struct coord *arg2, int16_t arg3[3],
+		int16_t arg4[3], int16_t texnum, RoomNum room, struct prop *objprop,
+		int8_t mtxindex, int8_t arg9, struct chrdata *chr, bool xlu)
 {
-	f32 scale = RANDOMFRAC() * 0.1f + 0.6f;
-	f32 width = g_WallhitTexes[texnum].width * scale;
-	f32 height = g_WallhitTexes[texnum].height * scale;
+	float scale = RANDOMFRAC() * 0.1f + 0.6f;
+	float width = g_WallhitTexes[texnum].width * scale;
+	float height = g_WallhitTexes[texnum].height * scale;
 
 	wallhitCreateWith20Args(relpos, arg1, arg2, arg3,
 			arg4, texnum, room, objprop,
@@ -646,11 +595,11 @@ void wallhitCreate(struct coord *relpos, struct coord *arg1, struct coord *arg2,
 			0, 0, 0, xlu);
 }
 
-void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct coord *arg2, s16 arg3[3],
-		s16 arg4[3], s16 texnum, RoomNum room, struct prop *objprop,
-		struct prop *chrprop, s8 mtxindex, s8 arg10, struct chrdata *chr,
-		f32 width, f32 height, u8 minalpha, u8 maxalpha,
-		s32 rotdeg, u32 timermax, u32 timerspeed, bool xlu)
+void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct coord *arg2, int16_t arg3[3],
+		int16_t arg4[3], int16_t texnum, RoomNum room, struct prop *objprop,
+		struct prop *chrprop, int8_t mtxindex, int8_t arg10, struct chrdata *chr,
+		float width, float height, uint8_t minalpha, uint8_t maxalpha,
+		int rotdeg, uint32_t timermax, uint32_t timerspeed, bool xlu)
 {
 	struct coord sp1f4;
 	struct coord sp1e8;
@@ -662,23 +611,19 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 	struct coord sp1b8;
 	struct coord sp1ac;
 	struct coord sp17c[4];
-	s32 type;
-	f32 f0;
-	u8 alpha;
+	int type;
+	float f0;
+	uint8_t alpha;
 	struct wallhit *wallhit;
-	f32 mult = 1.0f;
-	f32 brightnessfrac;
-#if VERSION >= VERSION_NTSC_1_0
+	float mult = 1.0f;
+	float brightnessfrac;
 	bool paintball;
-#endif
-	u32 stack[6];
 	struct coord sp13c;
 	struct coord sp130;
-	u32 stack2[3];
 	struct coord sp118;
-	s32 i;
-	s32 room2;
-	u32 range;
+	int i;
+	int room2;
+	uint32_t range;
 
 	sp1b8.x = arg1->x;
 	sp1b8.y = arg1->y;
@@ -721,8 +666,8 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 
 	if (g_FreeWallhits != NULL) {
 		// Check if we are at a limit and need to free some old wallhits
-		s32 room2 = objprop ? 0 : room;
-		s32 max;
+		int room2 = objprop ? 0 : room;
+		int max;
 
 		if (objprop) {
 			max = g_MaxPropWallhits - 1;
@@ -787,9 +732,9 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 		sp1ac.f[1] = relpos->y;
 		sp1ac.f[2] = relpos->z;
 
-		xiszero = ABS(arg1->x) < g_AlmostZero ? true : false;
-		yiszero = ABS(arg1->y) < g_AlmostZero ? true : false;
-		ziszero = ABS(arg1->z) < g_AlmostZero ? true : false;
+		xiszero = fabsf(arg1->x) < g_AlmostZero ? true : false;
+		yiszero = fabsf(arg1->y) < g_AlmostZero ? true : false;
+		ziszero = fabsf(arg1->z) < g_AlmostZero ? true : false;
 
 		if (xiszero && ziszero) {
 			sp1f4.x = -1.0f;
@@ -844,9 +789,9 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 			sp1e8.y = sp118.y;
 			sp1e8.z = sp118.z;
 		} else {
-			f32 f0 = sqrtf(sp1b8.x * sp1b8.x + sp1b8.z * sp1b8.z);
-			f32 xvalue = sp1b8.x / f0;
-			f32 zvalue = sp1b8.z / f0;
+			float f0 = sqrtf(sp1b8.x * sp1b8.x + sp1b8.z * sp1b8.z);
+			float xvalue = sp1b8.x / f0;
+			float zvalue = sp1b8.z / f0;
 
 			sp1f4.x = zvalue;
 			sp1f4.y = 0.0f;
@@ -858,10 +803,8 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 		}
 
 		if (rotdeg != 0) {
-			u32 stack[6];
-			f32 spd0 = sinf(rotdeg * 0.017453292f);
-			f32 spcc = cosf(rotdeg * 0.017453292f);
-			u32 stack2[12];
+			float spd0 = sinf(rotdeg * 0.017453292f);
+			float spcc = cosf(rotdeg * 0.017453292f);
 
 			sp1dc.x = spcc * sp1f4.x + spd0 * sp1e8.x;
 			sp1dc.y = spcc * sp1f4.y + spd0 * sp1e8.y;
@@ -916,10 +859,10 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 			struct coord *roompos = roomGetPosPtr(room);
 
 			if (arg2 != NULL) {
-				f32 xdist = arg2->x - relpos->x;
-				f32 ydist = arg2->y - relpos->y;
-				f32 zdist = arg2->z - relpos->z;
-				f32 sum = xdist * sp1b8.x + ydist * sp1b8.y + zdist * sp1b8.z;
+				float xdist = arg2->x - relpos->x;
+				float ydist = arg2->y - relpos->y;
+				float zdist = arg2->z - relpos->z;
+				float sum = xdist * sp1b8.x + ydist * sp1b8.y + zdist * sp1b8.z;
 
 				if (sum < 0.0f) {
 					sp1d0.x = -1.0f * sp1d0.x;
@@ -986,9 +929,9 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 
 		for (i = 0; i < ARRAYCOUNT(sp17c); i++) {
 			struct coord sp58;
-			s16 x;
-			s16 y;
-			s16 z;
+			int16_t x;
+			int16_t y;
+			int16_t z;
 
 			sp58.x = sp17c[i].x + sp1ac.x;
 			sp58.y = sp17c[i].y + sp1ac.y;
@@ -1026,14 +969,14 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 		}
 
 		{
-			u8 r;
-			u8 g;
-			u8 b;
-			u8 a;
+			uint8_t r;
+			uint8_t g;
+			uint8_t b;
+			uint8_t a;
 
 			brightnessfrac = roomGetFinalBrightnessForPlayer(room2) * (1.0f / 255.0f);
 
-			range = maxalpha - (u32)minalpha;
+			range = maxalpha - (uint32_t)minalpha;
 
 			if (range) {
 				alpha = minalpha + (rngRandom() % range);
@@ -1087,79 +1030,16 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 	}
 }
 
-/**
- * Maybe a LOD calculation?
- */
-s32 wallhit0f140750(struct coord *coord)
-{
-	f32 x;
-	f32 y;
-	f32 z;
-	f32 tmp;
-
-	x = g_Vars.currentplayer->projectionmtx->m[3][0] - coord->f[0];
-	y = g_Vars.currentplayer->projectionmtx->m[3][1] - coord->f[1];
-	z = g_Vars.currentplayer->projectionmtx->m[3][2] - coord->f[2];
-
-	var8007f740++;
-
-	if (x < 0) {
-		x = -x;
-	}
-
-	if (y < 0) {
-		y = -y;
-	}
-
-	if (z < 0) {
-		z = -z;
-	}
-
-	if (y > x) {
-		x = y;
-	}
-
-	if (z > x) {
-		x = z;
-	}
-
-	tmp = x * var8007f74c;
-
-	if (tmp > 1600) {
-		return 4;
-	}
-
-	if (tmp > 400) {
-		return 8;
-	}
-
-	if (tmp > 300) {
-		return 16;
-	}
-
-	if (tmp > 200) {
-		return 32;
-	}
-
-	if (tmp > 100) {
-		return 64;
-	}
-
-	return 128;
-}
-
-Gfx *wallhitRenderOpaBgHits(s32 roomnum, Gfx *gdl)
+Gfx *wallhitRenderOpaBgHits(int roomnum, Gfx *gdl)
 {
 	struct wallhit *wallhit;
 	Col *colours;
-	s32 prevtexturenum;
-	s32 prev6b;
+	int prevtexturenum;
+	int prev6b;
 
 	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
 	gSPSetGeometryMode(gdl++, G_CULL_BACK);
-#if VERSION >= VERSION_NTSC_1_0
 	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-#endif
 	gDPSetColorDither(gdl++, G_CD_NOISE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 
@@ -1175,7 +1055,7 @@ Gfx *wallhitRenderOpaBgHits(s32 roomnum, Gfx *gdl)
 			if (wallhit->xlu) {
 				wallhit->unk6b = 1;
 			} else {
-				wallhit->unk6b = wallhit0f140750(&wallhit->relpos);
+				wallhit->unk6b = 64;
 			}
 
 			if (wallhit->texturenum != prevtexturenum || wallhit->unk6b != prev6b) {
@@ -1211,12 +1091,12 @@ Gfx *wallhitRenderOpaBgHits(s32 roomnum, Gfx *gdl)
 	return gdl;
 }
 
-Gfx *wallhitRenderXluBgHits(s32 roomnum, Gfx *gdl)
+Gfx *wallhitRenderXluBgHits(int roomnum, Gfx *gdl)
 {
 	struct wallhit *wallhit;
 	Col *colours;
-	s32 prevtexturenum;
-	s32 prev6b;
+	int prevtexturenum;
+	int prev6b;
 
 	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
 #if VERSION >= VERSION_NTSC_1_0
@@ -1275,9 +1155,9 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 	struct defaultobj *obj = prop->obj;
 	bool hasany = false;
 	struct wallhit *wallhit;
-	s16 prevmtxindex = -1;
-	s32 prevtexturenum = -1;
-	s32 prev6b = -1;
+	int16_t prevmtxindex = -1;
+	int prevtexturenum = -1;
+	int prev6b = -1;
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 		return gdl;
@@ -1317,7 +1197,7 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 					sp74.y = wallhit->relpos.y + prop->pos.y;
 					sp74.z = wallhit->relpos.z + prop->pos.z;
 
-					wallhit->unk6b = wallhit0f140750(&sp74);
+					wallhit->unk6b = 64;
 				}
 			} else {
 				wallhit->unk6b = 1;
@@ -1360,7 +1240,7 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 	return gdl;
 }
 
-Gfx *wallhitRenderBgHits(s32 roomnum, Gfx *gdl)
+Gfx *wallhitRenderBgHits(int roomnum, Gfx *gdl)
 {
 	if (g_Rooms[roomnum].opawallhits != NULL) {
 		gdl = wallhitRenderOpaBgHits(roomnum, gdl);
@@ -1375,17 +1255,16 @@ Gfx *wallhitRenderBgHits(s32 roomnum, Gfx *gdl)
 
 void wallhitsRecolour(void)
 {
-	s32 i;
-	s32 j;
-	u32 stack;
+	int i;
+	int j;
 	struct wallhit *wallhit;
-	f32 r;
-	f32 g;
-	f32 b;
+	float r;
+	float g;
+	float b;
 
 	for (i = 0, wallhit = g_Wallhits; i < g_WallhitsMax; i++) {
 		if (wallhit->roomnum > 0) {
-			s32 room = -1;
+			int room = -1;
 
 			if (wallhit->objprop != NULL) {
 				struct prop *prop = wallhit->objprop;
@@ -1429,7 +1308,7 @@ void wallhitsRecolour(void)
 
 void wallhitFadeSplatsForRemovedChr(struct prop *chrprop)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_WallhitsMax; i++) {
 		struct wallhit *wallhit = &g_Wallhits[i];
@@ -1449,9 +1328,9 @@ void wallhitFadeSplatsForRemovedChr(struct prop *chrprop)
 
 void wallhitRemoveOldestWoundedSplatByChr(struct prop *chrprop)
 {
-	s32 oldestframe = 0x0fffffff;
-	s32 oldestindex = -1;
-	s32 i;
+	int oldestframe = 0x0fffffff;
+	int oldestindex = -1;
+	int i;
 
 	for (i = 0; i < g_WallhitsMax; i++) {
 		struct wallhit *wallhit = &g_Wallhits[i];
@@ -1473,7 +1352,7 @@ void wallhitRemoveOldestWoundedSplatByChr(struct prop *chrprop)
 	}
 }
 
-Gfx *wallhit0f141814(Gfx *gdl, s32 arg1)
+Gfx *wallhit0f141814(Gfx *gdl, int arg1)
 {
 	return gdl;
 }

@@ -101,18 +101,16 @@ struct skeleton *g_Skeletons[] = {
 	&g_SkelWireFence,
 	&g_SkelRemoteMine,
 	&g_SkelBB,
-#ifdef AVOID_UB
 	NULL // terminate list for sure
-#endif
 };
 
-void modeldef0f1a7560(struct modeldef *modeldef, u16 filenum, u32 arg2, struct modeldef *modeldef2, struct texpool *texpool, bool arg5)
+void modeldef0f1a7560(struct modeldef *modeldef, uint16_t filenum, uint32_t arg2, struct modeldef *modeldef2, struct texpool *texpool, bool arg5)
 {
-	s32 allocsize;
-	s32 loadedsize;
-	s32 sp84;
-	u32 s0;
-	u32 s4;
+	int allocsize;
+	int loadedsize;
+	int sp84;
+	uint32_t s0;
+	uint32_t s4;
 	uintptr_t s5;
 	struct modelnode *node;
 	struct modelnode *prevnode;
@@ -128,7 +126,7 @@ void modeldef0f1a7560(struct modeldef *modeldef, u16 filenum, u32 arg2, struct m
 	s5 = gdl;
 
 	if (gdl) {
-		s32 v1 = allocsize - (loadedsize - (uintptr_t)(((uintptr_t)modeldef + (UNSEGADDR(gdl) & 0xffffff)) - (uintptr_t)modeldef));
+		int v1 = allocsize - (loadedsize - (uintptr_t)(((uintptr_t)modeldef + (UNSEGADDR(gdl) & 0xffffff)) - (uintptr_t)modeldef));
 		sp84 = (uintptr_t)v1 + (uintptr_t)((uintptr_t)modeldef - ((uintptr_t)modeldef + (UNSEGADDR(gdl) & 0xffffff)));
 
 		texCopyGdls((Gfx *)((uintptr_t)modeldef + (UNSEGADDR(gdl) & 0xffffff)),
@@ -157,7 +155,7 @@ void modeldef0f1a7560(struct modeldef *modeldef, u16 filenum, u32 arg2, struct m
 				vertices = NULL;
 			}
 
-			s5 += texLoadFromGdl((Gfx *)((uintptr_t)modeldef + (UNSEGADDR(s0) & 0xffffff) + sp84), s4, (Gfx *)((uintptr_t)modeldef + (UNSEGADDR(s5) & 0xffffff)), texpool, (u8 *) vertices);
+			s5 += texLoadFromGdl((Gfx *)((uintptr_t)modeldef + (UNSEGADDR(s0) & 0xffffff) + sp84), s4, (Gfx *)((uintptr_t)modeldef + (UNSEGADDR(s5) & 0xffffff)), texpool, (uint8_t *) vertices);
 		}
 
 		fileSetSize(filenum, modeldef, (((uintptr_t)modeldef + (UNSEGADDR(s5) & 0xffffff)) - (uintptr_t)modeldef + 0xf) & ~0xf, arg5);
@@ -166,11 +164,11 @@ void modeldef0f1a7560(struct modeldef *modeldef, u16 filenum, u32 arg2, struct m
 
 void modelPromoteTypeToPointer(struct modeldef *modeldef)
 {
-	s32 i;
+	int i;
 
-	if ((u32)modeldef->skel < 0x10000) {
+	if ((uint32_t)modeldef->skel < 0x10000) {
 		for (i = 0; g_Skeletons[i] != NULL; i++) {
-			if ((s16)modeldef->skel == g_Skeletons[i]->skel) {
+			if ((int16_t)modeldef->skel == g_Skeletons[i]->skel) {
 				modeldef->skel = g_Skeletons[i];
 				return;
 			}
@@ -178,7 +176,7 @@ void modelPromoteTypeToPointer(struct modeldef *modeldef)
 	}
 }
 
-struct modeldef *modeldefLoad(u16 fileid, u8 *dst, s32 size, struct texpool *arg3)
+struct modeldef *modeldefLoad(uint16_t fileid, uint8_t *dst, int size, struct texpool *arg3)
 {
 	struct modeldef *modeldef;
 
@@ -197,12 +195,12 @@ struct modeldef *modeldefLoad(u16 fileid, u8 *dst, s32 size, struct texpool *arg
 	return modeldef;
 }
 
-struct modeldef *modeldefLoadToNew(u16 fileid)
+struct modeldef *modeldefLoadToNew(uint16_t fileid)
 {
 	return modeldefLoad(fileid, NULL, 0, NULL);
 }
 
-struct modeldef *modeldefLoadToAddr(u16 fileid, u8 *dst, s32 size)
+struct modeldef *modeldefLoadToAddr(uint16_t fileid, uint8_t *dst, int size)
 {
 	return modeldefLoad(fileid, dst, size, NULL);
 }

@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
-#include <PR/ultratypes.h>
+#include <stdint.h>
 #include "lib/rzip.h"
 #include "romdata.h"
 #include "fs.h"
@@ -41,11 +41,11 @@
 #define GBC_ROM_NAME "pd.gbc"
 #define GBC_ROM_SIZE 4194304
 
-u8 *g_RomFile;
-u32 g_RomFileSize;
+uint8_t *g_RomFile;
+uint32_t g_RomFileSize;
 
-static u8 *romDataSeg;
-static u32 romDataSegSize;
+static uint8_t *romDataSeg;
+static uint32_t romDataSegSize;
 static const char *romName = ROMDATA_ROM_NAME;
 
 enum loadsource {
@@ -55,23 +55,23 @@ enum loadsource {
 };
 
 struct romfilepatch {
-	u32 ofs;
-	u32 len;
+	uint32_t ofs;
+	uint32_t len;
 	const char *src;
 	const char *dst;
 };
 
 struct romfile {
-	u8 **segstart;
-	u8 **segend;
+	uint8_t **segstart;
+	uint8_t **segend;
 	const char *name;
-	u8 *data;
-	u32 size;
+	uint8_t *data;
+	uint32_t size;
 	preprocessfunc preprocess;
-	s32 source; // enum loadsource
-	s32 preprocessed;
+	int source; // enum loadsource
+	int preprocessed;
 	const struct romfilepatch *patches;
-	u32 numpatches;
+	uint32_t numpatches;
 };
 
 /* patches for individual files; applied on file load, before preprocFuncs, but */
@@ -124,19 +124,19 @@ static struct romfile fileSlots[ROMDATA_MAX_FILES] = {
 // declare the vars first
 
 #undef ROMSEG_DECL_SEG
-#define ROMSEG_DECL_SEG(name, ofs_ntsc, ofs_pal, ofs_jpn, size, preproc) u8 *ROMSEG_START(name), *ROMSEG_END(name);
+#define ROMSEG_DECL_SEG(name, ofs_ntsc, ofs_pal, ofs_jpn, size, preproc) uint8_t *ROMSEG_START(name), *ROMSEG_END(name);
 ROMSEG_LIST()
 
 // this is part of the animations seg and as such does not follow the naming convention
 // these are set in preprocessAnimations
-u8 *_animationsTableRomStart;
-u8 *_animationsTableRomEnd;
+uint8_t *_animationsTableRomStart;
+uint8_t *_animationsTableRomEnd;
 
 // then build the table
 
 #undef ROMSEG_DECL_SEG
 
-#define ROMSEG_DECL_SEG(name, ofs_ntsc, ofs_pal, ofs_jpn, size, preproc) { &ROMSEG_START(name), &ROMSEG_END(name), #name, (u8 *)ofs_ntsc, size, preproc },
+#define ROMSEG_DECL_SEG(name, ofs_ntsc, ofs_pal, ofs_jpn, size, preproc) { &ROMSEG_START(name), &ROMSEG_END(name), #name, (uint8_t *)ofs_ntsc, size, preproc },
 
 static struct romfile romSegs[] = {
 	ROMSEG_LIST()
@@ -194,22 +194,22 @@ static inline void romdataLoadRom(void)
 
 	// inflate the compressed data segment since that's where some useful stuff is
 
-	u8 *zipped = g_RomFile + ROMDATA_DATA_OFS;
+	uint8_t *zipped = g_RomFile + ROMDATA_DATA_OFS;
 	if (!rzipIs1173(zipped)) {
 		romdataWrongRomError("Data segment is not 1173-compressed.");
 	}
 
-	const u32 dataSegLen = ((u32)zipped[2] << 16) | ((u32)zipped[3] << 8) | (u32)zipped[4];
+	const uint32_t dataSegLen = ((uint32_t)zipped[2] << 16) | ((uint32_t)zipped[3] << 8) | (uint32_t)zipped[4];
 	if (dataSegLen < ROMDATA_FILES_OFS) {
 		romdataWrongRomError("Data segment too small (%u), need at least %u.", dataSegLen, ROMDATA_FILES_OFS);
 	}
 
-	u8 *dataSeg = sysMemAlloc(dataSegLen);
+	uint8_t *dataSeg = sysMemAlloc(dataSegLen);
 	if (!dataSeg) {
 		sysFatalError("Could not allocate %u bytes for data segment.", dataSegLen);
 	}
 
-	u8 scratch[5 * 1024];
+	uint8_t scratch[5 * 1024];
 	if (rzipInflate(zipped, dataSeg, scratch) < 0) {
 		free(dataSeg);
 		sysFatalError("Could not inflate data segment.");
@@ -252,8 +252,8 @@ static inline void romdataInitSegment(struct romfile *seg)
 	// check if we have an external replacement and load it if so
 	char tmp[FS_MAXPATH];
 	snprintf(tmp, sizeof(tmp), ROMDATA_SEGDIR "/%s", seg->name);
-	u8 *newData = NULL;
-	const s32 extFileSize = fsFileSize(tmp);
+	uint8_t *newData = NULL;
+	const int extFileSize = fsFileSize(tmp);
 	if (extFileSize > 0) {
 		newData = fsFileLoad(tmp, &seg->size);
 	}
@@ -292,14 +292,14 @@ static inline void romdataInitSegment(struct romfile *seg)
 	}
 }
 
-static inline s32 romdataLoadExternalFileList(void)
+static inline int romdataLoadExternalFileList(void)
 {
 	romDataSeg = fsFileLoad("filenames.lst", &romDataSegSize); // this null terminates the file by itself
 	if (!romDataSeg || !romDataSegSize) {
 		return 0;
 	}
 
-	s32 n = 1;
+	int n = 1;
 	char *p = (char *)romDataSeg;
 	while (*p && n < ROMDATA_MAX_FILES) {
 		// skip whitespace
@@ -330,12 +330,12 @@ static inline void romdataInitFiles(void)
 	}
 
 	// the file offset table is in the data seg
-	const u32 *offsets = (u32 *)(romDataSeg + ROMDATA_FILES_OFS);
-	u32 i;
+	const uint32_t *offsets = (uint32_t *)(romDataSeg + ROMDATA_FILES_OFS);
+	uint32_t i;
 	for (i = 1; offsets[i]; ++i) {
-		if (offsets + i + 1 < (u32 *)(romDataSeg + romDataSegSize)) {
-			const u32 nextofs = PD_BE32(offsets[i + 1]);
-			const u32 ofs = PD_BE32(offsets[i]);
+		if (offsets + i + 1 < (uint32_t *)(romDataSeg + romDataSegSize)) {
+			const uint32_t nextofs = PD_BE32(offsets[i + 1]);
+			const uint32_t ofs = PD_BE32(offsets[i]);
 			fileSlots[i].data = g_RomFile + ofs;
 			fileSlots[i].size = nextofs - ofs;
 			fileSlots[i].source = SRC_UNLOADED;
@@ -344,9 +344,9 @@ static inline void romdataInitFiles(void)
 	}
 
 	// last offset is to the name table
-	const u32 *nameOffsets = (u32 *)(g_RomFile + PD_BE32(offsets[i - 1]));
+	const uint32_t *nameOffsets = (uint32_t *)(g_RomFile + PD_BE32(offsets[i - 1]));
 	for (i = 1; nameOffsets[i]; ++i) {
-		const u32 ofs = PD_BE32(nameOffsets[i]);
+		const uint32_t ofs = PD_BE32(nameOffsets[i]);
 		fileSlots[i].name = (const char *)nameOffsets + ofs; // ofs is relative to the start of the name table
 	}
 }
@@ -360,7 +360,7 @@ static inline struct romfile *romdataGetSeg(const char *name)
 	return seg;
 }
 
-s32 romdataInit(void)
+int romdataInit(void)
 {
 	const char *altRomName = sysArgGetString("--rom-file");
 	if (altRomName) {
@@ -382,7 +382,7 @@ s32 romdataInit(void)
 	return 0;
 }
 
-static inline bool romdataCheckGbcRomContents(const u8 *gbcRomFile, const u32 gbcRomSize)
+static inline bool romdataCheckGbcRomContents(const uint8_t *gbcRomFile, const uint32_t gbcRomSize)
 {
 	if (gbcRomSize != GBC_ROM_SIZE) {
 		return false;
@@ -406,15 +406,15 @@ static inline bool romdataCheckGbcRomContents(const u8 *gbcRomFile, const u32 gb
 	return true;
 }
 
-s32 romdataCheckGbcRom(void)
+int romdataCheckGbcRom(void)
 {
 	if (fsFileSize(GBC_ROM_NAME) < 0) {
 		// bail early if it doesn't exist to avoid generating error messages
 		return false;
 	}
 
-	u32 gbcRomSize = 0;
-	u8 *gbcRomFile = fsFileLoad(GBC_ROM_NAME, &gbcRomSize);
+	uint32_t gbcRomSize = 0;
+	uint8_t *gbcRomFile = fsFileLoad(GBC_ROM_NAME, &gbcRomSize);
 	if (!gbcRomFile) {
 		return false;
 	}
@@ -429,7 +429,7 @@ s32 romdataCheckGbcRom(void)
 	return ret;
 }
 
-s32 romdataFileGetSize(s32 fileNum)
+int romdataFileGetSize(int fileNum)
 {
 	if (fileNum < 1 || fileNum >= ROMDATA_MAX_FILES) {
 		sysLogPrintf(LOG_ERROR, "romdataFileGetSize: invalid file num %d", fileNum);
@@ -445,26 +445,26 @@ s32 romdataFileGetSize(s32 fileNum)
 	return -1;
 }
 
-u8 *romdataFileGetData(s32 fileNum)
+uint8_t *romdataFileGetData(int fileNum)
 {
 	return romdataFileLoad(fileNum, NULL);
 }
 
-u8 *romdataFileLoad(s32 fileNum, u32 *outSize)
+uint8_t *romdataFileLoad(int fileNum, uint32_t *outSize)
 {
 	if (fileNum < 1 || fileNum >= ROMDATA_MAX_FILES) {
 		sysLogPrintf(LOG_ERROR, "romdataFileLoad: invalid file num %d", fileNum);
 		return NULL;
 	}
 
-	u8 *out = NULL;
+	uint8_t *out = NULL;
 
 	// try to load external file
 	if (fileSlots[fileNum].source == SRC_UNLOADED) {
 		char tmp[FS_MAXPATH] = { 0 };
 		snprintf(tmp, sizeof(tmp), ROMDATA_FILEDIR "/%s", fileSlots[fileNum].name);
 		if (fsFileSize(tmp) > 0) {
-			u32 size = 0;
+			uint32_t size = 0;
 			out = fsFileLoad(tmp, &size);
 			if (out && size) {
 				sysLogPrintf(LOG_NOTE, "file %d (%s) loaded externally", fileNum, fileSlots[fileNum].name);
@@ -490,7 +490,7 @@ u8 *romdataFileLoad(s32 fileNum, u32 *outSize)
 	return out;
 }
 
-void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size, u32 *outSize)
+void romdataFilePreprocess(int fileNum, int loadType, uint8_t *data, uint32_t size, uint32_t *outSize)
 {
 	if (fileNum < 1 || fileNum >= ROMDATA_MAX_FILES) {
 		sysLogPrintf(LOG_ERROR, "romdataFilePreprocess: invalid file num %d", fileNum);
@@ -498,9 +498,9 @@ void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size, u32 *o
 	}
 
 	if (data && size /* && !fileSlots[fileNum].preprocessed*/) {
-		if (loadType && loadType < (u32)ARRAYCOUNT(filePreprocFuncs) && filePreprocFuncs[loadType]) {
+		if (loadType && loadType < (uint32_t)ARRAYCOUNT(filePreprocFuncs) && filePreprocFuncs[loadType]) {
 			// apply patches
-			for (u32 i = 0; i < fileSlots[fileNum].numpatches; ++i) {
+			for (uint32_t i = 0; i < fileSlots[fileNum].numpatches; ++i) {
 				const struct romfilepatch *p = &fileSlots[fileNum].patches[i];
 				if (!memcmp(data + p->ofs, p->src, p->len)) {
 					memcpy(data + p->ofs, p->dst, p->len);
@@ -514,7 +514,7 @@ void romdataFilePreprocess(s32 fileNum, s32 loadType, u8 *data, u32 size, u32 *o
 	}
 }
 
-void romdataFileFree(s32 fileNum)
+void romdataFileFree(int fileNum)
 {
 	if (fileNum < 1 || fileNum >= ROMDATA_MAX_FILES) {
 		sysLogPrintf(LOG_ERROR, "fsFileFree: invalid file num %d", fileNum);
@@ -529,7 +529,7 @@ void romdataFileFree(s32 fileNum)
 	fileSlots[fileNum].source = SRC_UNLOADED;
 }
 
-const char *romdataFileGetName(s32 fileNum)
+const char *romdataFileGetName(int fileNum)
 {
 	if (fileNum < 1 || fileNum >= ROMDATA_MAX_FILES) {
 		return NULL;
@@ -537,13 +537,13 @@ const char *romdataFileGetName(s32 fileNum)
 	return fileSlots[fileNum].name;
 }
 
-s32 romdataFileGetNumForName(const char *name)
+int romdataFileGetNumForName(const char *name)
 {
 	if (!name || !name[0]) {
 		return -1;
 	}
 
-	for (s32 i = 0; i < ROMDATA_MAX_FILES; ++i) {
+	for (int i = 0; i < ROMDATA_MAX_FILES; ++i) {
 		if (fileSlots[i].name && !strcmp(fileSlots[i].name, name)) {
 			return i;
 		}
@@ -552,33 +552,33 @@ s32 romdataFileGetNumForName(const char *name)
 	return -1;
 }
 
-u8 *romdataSegGetData(const char *segName)
+uint8_t *romdataSegGetData(const char *segName)
 {
 	return romdataGetSeg(segName)->data;
 }
 
-u8 *romdataSegGetDataEnd(const char *segName)
+uint8_t *romdataSegGetDataEnd(const char *segName)
 {
 	struct romfile *seg = romdataGetSeg(segName);
 	return seg->data + seg->size;
 }
 
-u32 romdataSegGetSize(const char *segName)
+uint32_t romdataSegGetSize(const char *segName)
 {
 	return romdataGetSeg(segName)->size;
 }
 
-u32 romdataFileGetEstimatedSize(const u32 size, const u32 loadtype)
+uint32_t romdataFileGetEstimatedSize(const uint32_t size, const uint32_t loadtype)
 {
 #ifdef PLATFORM_64BIT
 	switch (loadtype) {
-	case LOADTYPE_BG:	   return (u32)(size * 1.1f);
-	case LOADTYPE_TILES: return (u32)(size * 1.1f);
-	case LOADTYPE_LANG:  return (u32)(size * 1.3f);
-	case LOADTYPE_SETUP: return (u32)(size * 1.5f);
-	case LOADTYPE_PADS:  return (u32)(size * 1.7f);
-	case LOADTYPE_MODEL: return (u32)(size * 1.7f);
-	case LOADTYPE_GUN: return (u32)(size * 1.7f);
+	case LOADTYPE_BG:	   return (uint32_t)(size * 1.1f);
+	case LOADTYPE_TILES: return (uint32_t)(size * 1.1f);
+	case LOADTYPE_LANG:  return (uint32_t)(size * 1.3f);
+	case LOADTYPE_SETUP: return (uint32_t)(size * 1.5f);
+	case LOADTYPE_PADS:  return (uint32_t)(size * 1.7f);
+	case LOADTYPE_MODEL: return (uint32_t)(size * 1.7f);
+	case LOADTYPE_GUN: return (uint32_t)(size * 1.7f);
 	default:
 		sysLogPrintf(LOG_WARNING, "romdataFileGetEstimatedSize: wrong loadtype %d", loadtype);
 	}

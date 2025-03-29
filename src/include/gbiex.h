@@ -96,9 +96,9 @@
  *
  * g_ScaleX is normally 1, but 2 when using hi-res.
  */
-#define gDPFillRectangleScaled(pkt, x1, y1, x2, y2) gDPFillRectangle(pkt, (x1) * g_ScaleX, y1, (x2) * g_ScaleX, y2)
+#define gDPFillRectangleScaled(pkt, x1, y1, x2, y2) gDPFillRectangle(pkt, (x1), y1, (x2), y2)
 
-#define gDPHudRectangle(pkt, x1, y1, x2, y2) gDPFillRectangle(pkt, (x1) * g_ScaleX, y1, ((x2 + 1)) * g_ScaleX, (y2) + 1)
+#define gDPHudRectangle(pkt, x1, y1, x2, y2) gDPFillRectangle(pkt, (x1), y1, ((x2 + 1)), (y2) + 1)
 
 /**
  * Custom combiner modes.
@@ -289,16 +289,16 @@
 {                                                                                       \
     Gfx* _g = (Gfx*)(pkt);                                                              \
                                                                                         \
-    _g->words.w0 = _SHIFTL(G_EXTRAGEOMETRYMODE_EXT, 24, 8) | _SHIFTL(~(u32)(c), 0, 24); \
-    _g->words.w1 = (u32)(s);                                                            \
+    _g->words.w0 = _SHIFTL(G_EXTRAGEOMETRYMODE_EXT, 24, 8) | _SHIFTL(~(uint32_t)(c), 0, 24); \
+    _g->words.w1 = (uint32_t)(s);                                                            \
 }
 
 #define gDPSetSubpixelOffsetEXT(pkt, x, y)                                             \
 {                                                                                      \
     Gfx *_g = (Gfx*)(pkt);                                                             \
                                                                                        \
-    _g->words.w0 = _SHIFTL(G_SETSUBPIXELOFFSET_EXT, 24, 8) | _SHIFTL((s16)(x), 0, 16); \
-    _g->words.w1 = _SHIFTL((s16)(y), 0, 16);                                           \
+    _g->words.w0 = _SHIFTL(G_SETSUBPIXELOFFSET_EXT, 24, 8) | _SHIFTL((int16_t)(x), 0, 16); \
+    _g->words.w1 = _SHIFTL((int16_t)(y), 0, 16);                                           \
 }
 
 #define gSPSetExtraGeometryModeEXT(pkt, word) gSPExtraGeometryModeEXT((pkt), 0, word)
@@ -313,10 +313,10 @@
 #define gDPClearDepthEXT(pkt) gDPNoParam(pkt, G_CLEAR_DEPTH_EXT)
 
 #undef gDPFillRectangleScaled
-#define gDPFillRectangleScaled(pkt, x1, y1, x2, y2) gDPFillRectangleEXT(pkt, (x1) * g_ScaleX, y1, (x2) * g_ScaleX, y2)
+#define gDPFillRectangleScaled(pkt, x1, y1, x2, y2) gDPFillRectangleEXT(pkt, (x1), y1, (x2), y2)
 
 #undef gDPHudRectangle
-#define gDPHudRectangle(pkt, x1, y1, x2, y2) gDPFillRectangleEXT(pkt, (x1) * g_ScaleX, y1, ((x2 + 1)) * g_ScaleX, (y2) + 1)
+#define gDPHudRectangle(pkt, x1, y1, x2, y2) gDPFillRectangleEXT(pkt, (x1), y1, ((x2 + 1)), (y2) + 1)
 
 #else // PLATFORM_N64
 

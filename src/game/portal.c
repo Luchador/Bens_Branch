@@ -60,41 +60,41 @@
 
 struct roomacousticdata *g_RoomAcousticData;
 struct var8009dd78 var8009dd78[10];
-u16 *g_PortalXluFracs;
-s32 g_NumPortalXluFracs;
+uint16_t *g_PortalXluFracs;
+int g_NumPortalXluFracs;
 
-void portalSetXluFrac2(s32 portalnum, f32 frac)
+void portalSetXluFrac2(int portalnum, float frac)
 {
 	if (portalnum >= 0) {
-		u8 value = (u32)(255 * frac);
+		uint8_t value = (uint32_t)(255 * frac);
 		value <<= 0;
 		g_PortalXluFracs[portalnum] = (g_PortalXluFracs[portalnum] & 0xff00) | value;
 	}
 }
 
-void portalSetXluFrac(s32 portalnum, f32 frac)
+void portalSetXluFrac(int portalnum, float frac)
 {
 	if (portalnum >= 0) {
-		u8 value = (u32)(15 * frac) & 0xf;
+		uint8_t value = (uint32_t)(15 * frac) & 0xf;
 		g_PortalXluFracs[portalnum] = (g_PortalXluFracs[portalnum] & 0xf0ff) | (value << 8);
 	}
 }
 
-f32 portalGetXluFrac2(s32 arg0)
+float portalGetXluFrac2(int arg0)
 {
-	f32 value = (g_PortalXluFracs[arg0] & 0xff) * 0.0039215688593686f;
+	float value = (g_PortalXluFracs[arg0] & 0xff) * 0.0039215688593686f;
 
 	return value;
 }
 
-f32 portalGetXluFrac(s32 arg0)
+float portalGetXluFrac(int arg0)
 {
-	f32 value = ((g_PortalXluFracs[arg0] & 0xf00) >> 8) * 0.06666667f;
+	float value = ((g_PortalXluFracs[arg0] & 0xf00) >> 8) * 0.06666667f;
 
 	return value;
 }
 
-void portal0f0b65a8(s32 numportals)
+void portal0f0b65a8(int numportals)
 {
 	if (numportals > 0) {
 		g_NumPortalXluFracs = numportals;
@@ -108,7 +108,7 @@ void portalsReset(void)
 {
 	if (g_PortalXluFracs) {
 		struct prop *prop;
-		s32 i;
+		int i;
 
 		for (i = 0; i < g_NumPortalXluFracs; i++) {
 			portalSetXluFrac(i, 1);
@@ -150,14 +150,14 @@ void portalsReset(void)
 
 void acousticReset(void)
 {
-	s32 i;
-	s32 j;
-	u32 size = ALIGN16(g_Vars.roomcount * sizeof(struct roomacousticdata));
-	f32 range;
-	f32 width;
-	f32 height;
-	f32 depth;
-	f32 halfsurfacearea;
+	int i;
+	int j;
+	uint32_t size = ALIGN16(g_Vars.roomcount * sizeof(struct roomacousticdata));
+	float range;
+	float width;
+	float height;
+	float depth;
+	float halfsurfacearea;
 
 	g_RoomAcousticData = mempAlloc(size, MEMPOOL_STAGE);
 

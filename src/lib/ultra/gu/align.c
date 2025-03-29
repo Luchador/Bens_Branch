@@ -1,11 +1,12 @@
-#include "guint.h"
+#include <math.h>
+#include "game/utils.h"
 
 void guAlignF(float mf[4][4], float a, float x, float y, float z)
 {
 	static float dtor = 3.1415926f / 180.0f;
 	float s, c, h, hinv;
 
-	guNormalize(&x, &y, &z);
+	utilsNormalizeF(&x, &y, &z);
 
 	a *= dtor;
 	s = sinf(a);
@@ -37,13 +38,4 @@ void guAlignF(float mf[4][4], float a, float x, float y, float z)
 		mf[2][3] = 0;
 		mf[3][3] = 1;
 	}
-}
-
-void guAlign(Mtx *m, float a, float x, float y, float z)
-{
-	f32 mf[4][4];
-
-	guAlignF(mf, a, x, y, z);
-
-	guMtxF2L(mf, m);
 }

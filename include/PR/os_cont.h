@@ -34,10 +34,7 @@
 extern "C" {
 #endif
 
-#include <PR/ultratypes.h>
-
-
-#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
+#include <stdint.h>
 
 /**************************************************************************
  *
@@ -50,24 +47,22 @@ extern "C" {
  */
 
 typedef struct {
-	u16     type;                   /* Controller Type */
-	u8      status;                 /* Controller status */
-	u8	errnum;
+	uint16_t     type;                   /* Controller Type */
+	uint8_t      status;                 /* Controller status */
+	uint8_t	errnum;
 }OSContStatus;
 
 typedef struct {
-	u32     button;
-	s8      stick_x;		/* -80 <= stick_x <= 80 */
-	s8      stick_y;		/* -80 <= stick_y <= 80 */
-	u8	errnum;
+	uint32_t     button;
+	int8_t      stick_x;		/* -80 <= stick_x <= 80 */
+	int8_t      stick_y;		/* -80 <= stick_y <= 80 */
+	uint8_t	errnum;
 #ifndef PLATFORM_N64
-	s8      rstick_x;
-	s8      rstick_y;
+	int8_t      rstick_x;
+	int8_t      rstick_y;
 #endif
 } OSContPad;
 
-
-#endif /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
 
 /**************************************************************************
  *
@@ -141,31 +136,29 @@ typedef struct {
 
 /* Nintendo's official button names */
 
-#define A_BUTTON	CONT_A
-#define B_BUTTON	CONT_B
-#define L_TRIG		CONT_L
-#define R_TRIG		CONT_R
-#define Z_TRIG		CONT_G
+#define A_BUTTON		CONT_A
+#define B_BUTTON		CONT_B
+#define L_TRIG			CONT_L
+#define R_TRIG			CONT_R
+#define Z_TRIG			CONT_G
 #define START_BUTTON	CONT_START
-#define U_JPAD		CONT_UP
-#define L_JPAD		CONT_LEFT
-#define R_JPAD		CONT_RIGHT
-#define D_JPAD		CONT_DOWN
-#define U_CBUTTONS	CONT_E
-#define L_CBUTTONS	CONT_C
-#define R_CBUTTONS	CONT_F
-#define D_CBUTTONS	CONT_D
+#define U_JPAD			CONT_UP
+#define L_JPAD			CONT_LEFT
+#define R_JPAD			CONT_RIGHT
+#define D_JPAD			CONT_DOWN
+#define U_CBUTTONS		CONT_E
+#define L_CBUTTONS		CONT_C
+#define R_CBUTTONS		CONT_F
+#define D_CBUTTONS		CONT_D
 #define X_BUTTON		CONT_EXTRA0
 #define Y_BUTTON		CONT_EXTRA1
 #define G_BUTTON        CONT_GKEY
 
-#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 
 /* Controller interface */
 
-extern s32		osContInit(u8 *, OSContStatus *);
+extern int		osContInit(uint8_t *, OSContStatus *);
 
-#endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
 
 #ifdef _LANGUAGE_C_PLUS_PLUS
 }

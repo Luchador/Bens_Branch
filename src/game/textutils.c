@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/debug.h"
@@ -19,7 +19,6 @@
 #include "platform.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
 
 #define SPACE_WIDTH 5
@@ -35,43 +34,42 @@
 #define TOTAL_CHARS (ASCII_END - ASCII_START)
 
 struct blendsettings {
-	/*0x00*/ u8 types;
-	/*0x04*/ u32 colour04;
-	/*0x08*/ u32 colour08;
-	/*0x0c*/ s32 diagrefx;
-	/*0x10*/ s32 diagrefy;
-	/*0x14*/ f32 diagtimer;
-	/*0x18*/ u8 diagmode;
-	/*0x1c*/ s32 backupdiagrefx;
-	/*0x20*/ s32 backupdiagrefy;
-	/*0x24*/ f32 backupdiagtimer;
-	/*0x28*/ u8 backupdiagmode;
-	/*0x29*/ u8 backupdiagtypes;
-	/*0x2a*/ u8 backuptypes;
-	/*0x2c*/ s32 vertrefy1;
-	/*0x30*/ s32 vertrefy2;
-	/*0x34*/ s32 vert34;
-	/*0x38*/ s32 horizrefx1;
-	/*0x3c*/ s32 horizrefx2;
-	/*0x40*/ s32 horiz40;
-	/*0x44*/ u32 colour44;
-	/*0x48*/ u32 colour48;
-	/*0x4c*/ s32 wave4c;
-	/*0x50*/ s32 wave50;
-	/*0x54*/ s32 wave54;
-	/*0x58*/ u32 wavecolour1;
-	/*0x5c*/ u32 wavecolour2;
-	/*0x60*/ u32 menuweight;
+	/*0x00*/ uint8_t types;
+	/*0x04*/ uint32_t colour04;
+	/*0x08*/ uint32_t colour08;
+	/*0x0c*/ int diagrefx;
+	/*0x10*/ int diagrefy;
+	/*0x14*/ float diagtimer;
+	/*0x18*/ uint8_t diagmode;
+	/*0x1c*/ int backupdiagrefx;
+	/*0x20*/ int backupdiagrefy;
+	/*0x24*/ float backupdiagtimer;
+	/*0x28*/ uint8_t backupdiagmode;
+	/*0x29*/ uint8_t backupdiagtypes;
+	/*0x2a*/ uint8_t backuptypes;
+	/*0x2c*/ int vertrefy1;
+	/*0x30*/ int vertrefy2;
+	/*0x34*/ int vert34;
+	/*0x38*/ int horizrefx1;
+	/*0x3c*/ int horizrefx2;
+	/*0x40*/ int horiz40;
+	/*0x44*/ uint32_t colour44;
+	/*0x48*/ uint32_t colour48;
+	/*0x4c*/ int wave4c;
+	/*0x50*/ int wave50;
+	/*0x54*/ int wave54;
+	/*0x58*/ uint32_t wavecolour1;
+	/*0x5c*/ uint32_t wavecolour2;
+	/*0x60*/ uint32_t menuweight;
 };
 
 struct blendsettings g_Blend;
 Gfx *var800a4634;
-u32 g_TextOutlineColor;
-u32 g_TextHasOutline = 0;
+uint32_t g_TextOutlineColor;
+uint32_t g_TextHasOutline = 0;
 
-s32 g_ScaleX = 1;
 bool g_TextRotated90 = false;
-s32 g_WrapIndentCount = 0;
+int g_WrapIndentCount = 0;
 
 struct font *g_FontNumeric = NULL;
 struct fontchar *g_CharsNumeric = NULL;
@@ -88,12 +86,12 @@ struct fontchar *g_CharToRender;
 
 struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
 
-u16 var8007fb3c[] = {
+uint16_t var8007fb3c[] = {
 	0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00,
 	0xff00, 0xff24, 0xff48, 0xff6c, 0xff90, 0xffb4, 0xffd8, 0xffff,
 };
 
-u16 var8007fb5c[] = {
+uint16_t var8007fb5c[] = {
 	0xff00, 0xff58, 0xff74, 0xff90, 0xffac, 0xffc8, 0xffe4, 0xffff,
 	0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
 	0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00,
@@ -101,36 +99,36 @@ u16 var8007fb5c[] = {
 };
 
 bool g_DoRedrawEffect = false;
-s32 var8007fba0 = 0;
-s32 var8007fba4 = -1;
-u32 var8007fbac = 0x00000001;
-u32 var8007fbb0 = 0x00000064;
-u32 var8007fbb4 = 0x0000002c;
-u32 var8007fbb8 = 0x00000080;
+int var8007fba0 = 0;
+int var8007fba4 = -1;
+uint32_t var8007fbac = 0x00000001;
+uint32_t var8007fbb0 = 0x00000064;
+uint32_t var8007fbb4 = 0x0000002c;
+uint32_t var8007fbb8 = 0x00000080;
 
-s32 g_HudCenter = HUDCENTER_NONE;
-u32 g_HudAlignModeL = G_ASPECT_LEFT_EXT;
-u32 g_HudAlignModeR = G_ASPECT_RIGHT_EXT;
+int g_HudCenter = HUDCENTER_NONE;
+uint32_t g_HudAlignModeL = G_ASPECT_LEFT_EXT;
+uint32_t g_HudAlignModeR = G_ASPECT_RIGHT_EXT;
 
 void textSetRotation90(bool rotated)
 {
 	g_TextRotated90 = rotated;
 }
 
-void textSetWrapIndent(s32 count)
+void textSetWrapIndent(int count)
 {
 	g_WrapIndentCount = count;
 }
 
-void textLoadFont(u8 *romstart, u8 *romend, struct font **fontptr, struct fontchar **charsptr, bool monospace)
+void textLoadFont(uint8_t *romstart, uint8_t *romend, struct font **fontptr, struct fontchar **charsptr, bool monospace)
 {
-	extern u8 EXT_SEG _fonthandelgothicsmSegmentRomStart;
-	extern u8 EXT_SEG _fonthandelgothicxsSegmentRomStart;
-	extern u8 EXT_SEG _fonthandelgothicmdSegmentRomStart;
+	extern uint8_t EXT_SEG _fonthandelgothicsmSegmentRomStart;
+	extern uint8_t EXT_SEG _fonthandelgothicxsSegmentRomStart;
+	extern uint8_t EXT_SEG _fonthandelgothicmdSegmentRomStart;
 
-	u32 len;
-	s32 maxwidth;
-	s32 i;
+	uint32_t len;
+	int maxwidth;
+	int i;
 	struct font *font;
 	struct fontchar *chars;
 
@@ -169,15 +167,15 @@ void textLoadFont(u8 *romstart, u8 *romend, struct font **fontptr, struct fontch
 
 void textReset(void)
 {
-	extern u8 EXT_SEG _fontbankgothicSegmentRomStart,     EXT_SEG _fontbankgothicSegmentRomEnd;
-	extern u8 EXT_SEG _fontzurichSegmentRomStart,         EXT_SEG _fontzurichSegmentRomEnd;
-	extern u8 EXT_SEG _fontnumericSegmentRomStart,        EXT_SEG _fontnumericSegmentRomEnd;
-	extern u8 EXT_SEG _fonthandelgothicsmSegmentRomStart, EXT_SEG _fonthandelgothicsmSegmentRomEnd;
-	extern u8 EXT_SEG _fonthandelgothicxsSegmentRomStart, EXT_SEG _fonthandelgothicxsSegmentRomEnd;
-	extern u8 EXT_SEG _fonthandelgothicmdSegmentRomStart, EXT_SEG _fonthandelgothicmdSegmentRomEnd;
-	extern u8 EXT_SEG _fonthandelgothiclgSegmentRomStart, EXT_SEG _fonthandelgothiclgSegmentRomEnd;
-	extern u8 EXT_SEG _fontocramdSegmentRomStart,         EXT_SEG _fontocramdSegmentRomEnd;
-	extern u8 EXT_SEG _fontocralgSegmentRomStart,         EXT_SEG _fontocralgSegmentRomEnd;
+	extern uint8_t EXT_SEG _fontbankgothicSegmentRomStart,     EXT_SEG _fontbankgothicSegmentRomEnd;
+	extern uint8_t EXT_SEG _fontzurichSegmentRomStart,         EXT_SEG _fontzurichSegmentRomEnd;
+	extern uint8_t EXT_SEG _fontnumericSegmentRomStart,        EXT_SEG _fontnumericSegmentRomEnd;
+	extern uint8_t EXT_SEG _fonthandelgothicsmSegmentRomStart, EXT_SEG _fonthandelgothicsmSegmentRomEnd;
+	extern uint8_t EXT_SEG _fonthandelgothicxsSegmentRomStart, EXT_SEG _fonthandelgothicxsSegmentRomEnd;
+	extern uint8_t EXT_SEG _fonthandelgothicmdSegmentRomStart, EXT_SEG _fonthandelgothicmdSegmentRomEnd;
+	extern uint8_t EXT_SEG _fonthandelgothiclgSegmentRomStart, EXT_SEG _fonthandelgothiclgSegmentRomEnd;
+	extern uint8_t EXT_SEG _fontocramdSegmentRomStart,         EXT_SEG _fontocramdSegmentRomEnd;
+	extern uint8_t EXT_SEG _fontocralgSegmentRomStart,         EXT_SEG _fontocralgSegmentRomEnd;
 
 	g_FontNumeric = NULL;
 	g_FontHandelGothicXs = NULL;
@@ -245,7 +243,7 @@ Gfx *text0f153780(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *textSetPrimColour(Gfx *gdl, u32 colour)
+Gfx *textSetPrimColour(Gfx *gdl, uint32_t colour)
 {
 	gDPPipeSync(gdl++);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
@@ -263,7 +261,7 @@ Gfx *textSetCCCustom02(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *text0f153858(Gfx *gdl, s32 *x1, s32 *y1, s32 *x2, s32 *y2)
+Gfx *text0f153858(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
@@ -274,7 +272,7 @@ Gfx *text0f153858(Gfx *gdl, s32 *x1, s32 *y1, s32 *x2, s32 *y2)
 	return gdl;
 }
 
-Gfx *text0f1538e4(Gfx *gdl, s32 *x1, s32 *y1, s32 *x2, s32 *y2)
+Gfx *text0f1538e4(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
@@ -285,7 +283,7 @@ Gfx *text0f1538e4(Gfx *gdl, s32 *x1, s32 *y1, s32 *x2, s32 *y2)
 	return gdl;
 }
 
-Gfx *text0f153990(Gfx *gdl, s32 left, s32 top, s32 width, s32 height)
+Gfx *text0f153990(Gfx *gdl, int left, int top, int width, int height)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
@@ -296,7 +294,7 @@ Gfx *text0f153990(Gfx *gdl, s32 left, s32 top, s32 width, s32 height)
 	return gdl;
 }
 
-Gfx *text0f153a34(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour)
+Gfx *text0f153a34(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour)
 {
 	gdl = textSetPrimColour(gdl, colour);
 
@@ -328,17 +326,17 @@ Gfx *text0f153ab0(Gfx *gdl)
 	return gdl;
 }
 
-void text0f153b40(void)
+void textStopRedrawEffect(void)
 {
 	g_DoRedrawEffect = false;
 
 	gSPEndDisplayList(var800a4634++);
 }
 
-void text0f153b6c(s32 arg0)
+void text0f153b6c(int arg0)
 {
 	if (arg0 != var8007fba4) {
-		f32 tmp = g_Blend.diagtimer * g_Blend.diagtimer - (f32)((arg0 - g_Blend.diagrefy) * (arg0 - g_Blend.diagrefy));
+		float tmp = g_Blend.diagtimer * g_Blend.diagtimer - (float)((arg0 - g_Blend.diagrefy) * (arg0 - g_Blend.diagrefy));
 
 		if (tmp > 0.0f) {
 			var8007fba0 = sqrtf(tmp) + g_Blend.diagrefx;
@@ -350,7 +348,7 @@ void text0f153b6c(s32 arg0)
 	}
 }
 
-void textSetDiagonalBlend(s32 x, s32 y, f32 timer, u8 mode)
+void textSetDiagonalBlend(int x, int y, float timer, uint8_t mode)
 {
 	g_Blend.types |= BLENDTYPE_DIAGONAL;
 	g_Blend.diagrefx = x;
@@ -377,7 +375,7 @@ void textRestoreDiagonalBlendSettings(void)
 	g_Blend.types |= g_Blend.backupdiagtypes;
 }
 
-void textSetVerticalBlend(s32 y1, s32 y2, u32 arg2)
+void textSetVerticalBlend(int y1, int y2, uint32_t arg2)
 {
 	g_Blend.types |= BLENDTYPE_VERTICAL;
 	g_Blend.vertrefy1 = y1;
@@ -385,7 +383,7 @@ void textSetVerticalBlend(s32 y1, s32 y2, u32 arg2)
 	g_Blend.vert34 = arg2;
 }
 
-void textSetHorizontalBlend(s32 x1, s32 x2, u32 arg2)
+void textSetHorizontalBlend(int x1, int x2, uint32_t arg2)
 {
 	g_Blend.types |= BLENDTYPE_HORIZONTAL;
 	g_Blend.horizrefx1 = x1;
@@ -414,7 +412,7 @@ void textRestoreBlends(void)
 	g_Blend.types = g_Blend.backuptypes;
 }
 
-void textSetWaveBlend(s32 arg0, s32 arg1, s32 cthresh)
+void textSetWaveBlend(int arg0, int arg1, int cthresh)
 {
 	g_Blend.types |= BLENDTYPE_WAVE;
 	g_Blend.wave4c = arg0;
@@ -424,13 +422,13 @@ void textSetWaveBlend(s32 arg0, s32 arg1, s32 cthresh)
 	g_Blend.wavecolour2 = 0xffffff00;
 }
 
-void textSetMenuBlend(f32 arg0)
+void textSetMenuBlend(float arg0)
 {
 	g_Blend.types |= BLENDTYPE_MENU;
 	g_Blend.menuweight = arg0 * arg0 * 110.0f;
 }
 
-void textSetWaveColours(u32 colour1, u32 colour2)
+void textSetWaveColours(uint32_t colour1, uint32_t colour2)
 {
 	g_Blend.wavecolour1 = colour1;
 	g_Blend.wavecolour2 = colour2;
@@ -447,16 +445,16 @@ bool textHasDiagonalBlend(void)
 		&& (g_Blend.diagmode == DIAGMODE_FADEIN || g_Blend.diagmode == DIAGMODE_FADEOUT);
 }
 
-u32 textApplyProjectionColour(s32 x, s32 y, u32 colour)
+uint32_t textApplyProjectionColour(int x, int y, uint32_t colour)
 {
-	u32 result = colour;
+	uint32_t result = colour;
 
 	if (g_Blend.types & BLENDTYPE_DIAGONAL) {
-		f32 weightf;
-		f32 f12;
-		f32 f14;
-		f32 f16;
-		f32 f18;
+		float weightf;
+		float f12;
+		float f14;
+		float f16;
+		float f18;
 
 		if (x - g_Blend.diagrefx > -3000 && x - g_Blend.diagrefx < 3000
 				&& y - g_Blend.diagrefy > -3000 && y - g_Blend.diagrefy < 3000) {
@@ -473,16 +471,16 @@ u32 textApplyProjectionColour(s32 x, s32 y, u32 colour)
 			if (g_Blend.diagtimer < f12) {
 				result = 0;
 			} else if (g_Blend.diagtimer - f14 < f12) {
-				u32 intensity;
+				uint32_t intensity;
 				weightf = (f12 - (g_Blend.diagtimer - f14)) / f14 * 255.0f;
-				intensity = 255 - (u32) weightf;
+				intensity = 255 - (uint32_t) weightf;
 				result = intensity << 8 | intensity | intensity << 16 | intensity << 24;
 			} else if (g_Blend.diagtimer - (f14 + f16) < f12) {
 				result = (((colour & 0xff) + 0xff) >> 1) | (colour & 0xffffff00);
 			} else if ((g_Blend.diagtimer - (f14 + f18 + f16)) < f12) {
-				u32 colour2 = (((colour & 0xff) + 0xff) / 2) | (colour & 0xffffff00);
+				uint32_t colour2 = (((colour & 0xff) + 0xff) / 2) | (colour & 0xffffff00);
 				weightf = (f12 - (g_Blend.diagtimer - (f14 + f18 + f16))) / f18 * 255.0f;
-				result = colourBlend(colour, colour2, 0xff - (u32) weightf);
+				result = colourBlend(colour, colour2, 0xff - (uint32_t) weightf);
 			}
 		} else if (g_Blend.diagmode == 2) {
 			f16 = 0.0f;
@@ -504,20 +502,20 @@ u32 textApplyProjectionColour(s32 x, s32 y, u32 colour)
 	return result;
 }
 
-u32 textHighlightSweep(s32 x, s32 y, u32 colourarg)
+uint32_t textHighlightSweep(int x, int y, uint32_t colourarg)
 {
-	f32 f14;
-	f32 f18;
-	f32 f16;
-	u32 colour = colourarg;
+	float f14;
+	float f18;
+	float f16;
+	uint32_t colour = colourarg;
 
 	if (g_Blend.types & BLENDTYPE_MENU) {
 		colour = (colourBlend(0x00000000, colour, g_Blend.menuweight) & 0xffffff00) | (colour & 0xff);
 	}
 
 	if (g_Blend.types & BLENDTYPE_VERTICAL) {
-		s32 v0 = y - g_Blend.vertrefy1;
-		s32 v1 = y - g_Blend.vertrefy2;
+		int v0 = y - g_Blend.vertrefy1;
+		int v1 = y - g_Blend.vertrefy2;
 
 		if (v0 < 0) {
 			v0 = -v0;
@@ -537,8 +535,8 @@ u32 textHighlightSweep(s32 x, s32 y, u32 colourarg)
 	}
 
 	if (g_Blend.types & BLENDTYPE_HORIZONTAL) {
-		s32 v0 = x - g_Blend.horizrefx1;
-		s32 v1 = x - g_Blend.horizrefx2;
+		int v0 = x - g_Blend.horizrefx1;
+		int v1 = x - g_Blend.horizrefx2;
 
 		if (v0 < 0) {
 			v0 = 0;
@@ -558,9 +556,9 @@ u32 textHighlightSweep(s32 x, s32 y, u32 colourarg)
 	}
 
 	if (g_Blend.types & BLENDTYPE_DIAGONAL) {
-		f32 f12;
-		u32 stack[3];
-		f32 weightf;
+		float f12;
+		uint32_t stack[3];
+		float weightf;
 
 		if (x - g_Blend.diagrefx > -3000 && x - g_Blend.diagrefx < 3000
 				&& y - g_Blend.diagrefy > -3000 && y - g_Blend.diagrefy < 3000) {
@@ -577,19 +575,19 @@ u32 textHighlightSweep(s32 x, s32 y, u32 colourarg)
 			if (g_Blend.diagtimer < f12) {
 				colour = 0;
 			} else if (g_Blend.diagtimer - f14 < f12) {
-				u32 intensity;
+				uint32_t intensity;
 				weightf = (f12 - (g_Blend.diagtimer - f14)) / f14 * 255.0f;
-				intensity = 255 - (u32) weightf;
+				intensity = 255 - (uint32_t) weightf;
 				colour = intensity << 8 | intensity | intensity << 16 | intensity << 24;
 			} else if (g_Blend.diagtimer - (f14 + f16) < f12) {
 				colour = 0xffffffff;
 			} else if (g_Blend.diagtimer - (f14 + f18 + f16) < f12) {
-				u32 add;
-				u32 mult;
+				uint32_t add;
+				uint32_t mult;
 
 				weightf = (f12 - (g_Blend.diagtimer - (f14 + f18 + f16))) / f18 * 255.0f;
-				add = (u32) weightf * 255;
-				mult = 255 - (u32) weightf;
+				add = (uint32_t) weightf * 255;
+				mult = 255 - (uint32_t) weightf;
 
 				colour = ((((colour >> 24) & 0xff) * mult + add) >> 8) << 24
 					| ((((colour >> 16) & 0xff) * mult + add) >> 8) << 16
@@ -604,18 +602,18 @@ u32 textHighlightSweep(s32 x, s32 y, u32 colourarg)
 			if (g_Blend.diagtimer < f12) {
 				colour = 0x00000000;
 			} else if (g_Blend.diagtimer - f14 < f12) {
-				f32 weightf = (f12 - (g_Blend.diagtimer - f14)) / f14 * 255.0f;
+				float weightf = (f12 - (g_Blend.diagtimer - f14)) / f14 * 255.0f;
 				colour = colourBlend(0x00000000, colour & 0xff, weightf);
 			} else if (g_Blend.diagtimer - (f14 + f16) < f12) {
 				colour &= 0xff;
 			} else if (g_Blend.diagtimer - (f14 + f18 + f16) < f12) {
-				f32 weightf = (f12 - (g_Blend.diagtimer - (f14 + f18 + f16))) / f18 * 255.0f;
+				float weightf = (f12 - (g_Blend.diagtimer - (f14 + f18 + f16))) / f18 * 255.0f;
 				colour = colourBlend(0x00000000, colour, weightf);
 			}
 		} else {
-			u32 alpha[4];
+			uint32_t alpha[4];
 
-			static s32 burncol = 0xffffff00;
+			static int burncol = 0xffffff00;
 
 			alpha[0] = colour & 0xff;
 			f18 = 50.0f;
@@ -624,29 +622,29 @@ u32 textHighlightSweep(s32 x, s32 y, u32 colourarg)
 			if (g_Blend.diagtimer < f12) {
 				colour = colourBlend(alpha[0], colour, 110);
 			} else if (g_Blend.diagtimer - f14 < f12) {
-				f32 weightf = (f12 - (g_Blend.diagtimer - f14)) / f14 * 255.0f;
+				float weightf = (f12 - (g_Blend.diagtimer - f14)) / f14 * 255.0f;
 				colour = colourBlend(
 						colourBlend(burncol | (colour & 0xff), colour, 0xc0),
 						colourBlend(alpha[0], colour, 110),
-						255 - (u32) weightf);
+						255 - (uint32_t) weightf);
 			} else if (g_Blend.diagtimer - (f14 + f16) < f12) {
-				u32 stack;
+				uint32_t stack;
 				colour = colourBlend(burncol | (colour & 0xff), colour, 0xc0);
 			} else if (g_Blend.diagtimer - (f14 + f18 + f16) < f12) {
-				f32 weightf = (f12 - (g_Blend.diagtimer - (f14 + f18 + f16))) / f18 * 255.0f;
+				float weightf = (f12 - (g_Blend.diagtimer - (f14 + f18 + f16))) / f18 * 255.0f;
 				colour = colourBlend(
 						colour,
 						colourBlend(burncol | (colour & 0xff), colour, 0xc0),
-						255 - (u32) weightf);
+						255 - (uint32_t) weightf);
 			}
 		}
 	}
 
 	if (g_Blend.types & BLENDTYPE_WAVE) {
-		u32 stack[2];
-		f32 f0 = (s32)(g_Blend.wave4c - x + g_Blend.wave50 - y + 800);
+		uint32_t stack[2];
+		float f0 = (int)(g_Blend.wave4c - x + g_Blend.wave50 - y + 800);
 		f0 = 4.0f * f0 / g_Blend.wave54;
-		f0 -= (s32) (f0 * 0.25f) * 4.0f;
+		f0 -= (int) (f0 * 0.25f) * 4.0f;
 		f0 -= 1.0f;
 
 		if (f0 > 1.0f) { \
@@ -654,10 +652,10 @@ u32 textHighlightSweep(s32 x, s32 y, u32 colourarg)
 		}
 
 		if (f0 < 0.0f) {
-			s32 weight = 60 * (0 - f0);
+			int weight = 60 * (0 - f0);
 			colour = colourBlend(g_Blend.wavecolour1 | (colour & 0xff), colour, weight);
 		} else {
-			s32 weight = var8007fbb8 * f0;
+			int weight = var8007fbb8 * f0;
 			colour = colourBlend(g_Blend.wavecolour2 | (colour & 0xff), colour, weight);
 		}
 	}
@@ -665,9 +663,9 @@ u32 textHighlightSweep(s32 x, s32 y, u32 colourarg)
 	return colour;
 }
 
-Gfx *text0f154ecc(Gfx *gdl, u32 arg1, u32 arg2)
+Gfx *text0f154ecc(Gfx *gdl, uint32_t arg1, uint32_t arg2)
 {
-	u32 colour = textHighlightSweep(arg1, arg2, g_Blend.colour04);
+	uint32_t colour = textHighlightSweep(arg1, arg2, g_Blend.colour04);
 
 	if (colour != g_Blend.colour44) {
 		gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
@@ -678,19 +676,19 @@ Gfx *text0f154ecc(Gfx *gdl, u32 arg1, u32 arg2)
 	return gdl;
 }
 
-Gfx *textMakeCreditVerts(Gfx *gdl, s32 *arg1, struct fontchar *curchar, struct fontchar *prevchar,
-		struct font *font, f32 widthscale, f32 heightscale, f32 x, f32 y)
+Gfx *textMakeCreditVerts(Gfx *gdl, int *arg1, struct fontchar *curchar, struct fontchar *prevchar,
+		struct font *font, float widthscale, float heightscale, float x, float y)
 {
-	s32 tmp1;
-	s32 tmp2;
-	s16 sp3e;
-	s16 sp3c;
-	s16 sp3a;
-	s16 sp38;
-	s16 sp36;
-	s16 sp34;
-	s16 sp32;
-	s16 sp30;
+	int tmp1;
+	int tmp2;
+	int16_t sp3e;
+	int16_t sp3c;
+	int16_t sp3a;
+	int16_t sp38;
+	int16_t sp36;
+	int16_t sp34;
+	int16_t sp32;
+	int16_t sp30;
 	Vtx *vertices;
 	Col *colours;
 
@@ -759,18 +757,18 @@ Gfx *textMakeCreditVerts(Gfx *gdl, s32 *arg1, struct fontchar *curchar, struct f
 	return gdl;
 }
 
-Gfx *textRenderCredit(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
-		char *text, struct fontchar *chars, struct font *font, u32 colour, s32 hdir, s32 vdir)
+Gfx *textRenderCredit(Gfx *gdl, float x, float y, float widthscale, float heightscale,
+		char *text, struct fontchar *chars, struct font *font, uint32_t colour, int hdir, int vdir)
 {
-	s32 totalheight;
-	u8 prevchar;
-	s32 textwidth;
-	s32 textheight;
-	s32 lineheight;
-	s32 relx;
-	f32 *ptr;
-	f32 fx;
-	f32 fy;
+	int totalheight;
+	uint8_t prevchar;
+	int textwidth;
+	int textheight;
+	int lineheight;
+	int relx;
+	float *ptr;
+	float fx;
+	float fy;
 
 	totalheight = 0;
 	prevchar = 'H';
@@ -824,11 +822,11 @@ Gfx *textRenderCredit(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale,
 }
 
 // Render the text in menus. Doesn't do the highlight effect for the focused menu option.
-Gfx *textRenderUnhighlighted(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct fontchar *prevchar,
-		struct font *font, s32 savedx, s32 savedy, s32 width, s32 height, s32 arg10)
+Gfx *textRenderUnhighlighted(Gfx *gdl, int *x, int *y, struct fontchar *curchar, struct fontchar *prevchar,
+		struct font *font, int savedx, int savedy, int width, int height, int arg10)
 {
-	s32 tmp;
-	s32 sp90;
+	int tmp;
+	int sp90;
 
 	sp90 = *y + arg10;
 	tmp = font->kerning[prevchar->kerningindex * 13 + curchar->kerningindex];
@@ -848,7 +846,7 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar,
 			gDPPipeSync(gdl++);
 
 			if (g_Blend.types) {
-				gdl = text0f154ecc(gdl, *x / g_ScaleX, *y + arg10);
+				gdl = text0f154ecc(gdl, *x, *y + arg10);
 			}
 
 			if (*x + 1 * curchar->width <= savedx + width) {
@@ -881,7 +879,7 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar,
 							if (g_DoRedrawEffect) {
 								text0f153b6c(*y + arg10);
 
-								if (var8007fba0 >= *x / g_ScaleX && *x / g_ScaleX + curchar->width >= var8007fba0) {
+								if (var8007fba0 >= *x && *x + curchar->width >= var8007fba0) {
 									var800a4634 = menugfxDrawPlane(var800a4634,
 											var8007fba0,
 											curchar->baseline + sp90,
@@ -892,7 +890,7 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar,
 											MENUPLANE_00);
 								}
 
-								if (var8007fba0 - 3 >= *x / g_ScaleX && *x / g_ScaleX + curchar->width >= var8007fba0 - 3) {
+								if (var8007fba0 - 3 >= *x && *x + curchar->width >= var8007fba0 - 3) {
 									var800a4634 = menugfxDrawPlane(var800a4634,
 											var8007fba0,
 											curchar->baseline + sp90,
@@ -939,46 +937,43 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar,
 	return gdl;
 }
 
-void textSetHasOutline(s32 arg0)
+void textSetHasOutline(int arg0)
 {
 	g_TextHasOutline = arg0;
 }
 
-void textSetOutlineColor(u32 colour)
+void textSetOutlineColor(uint32_t colour)
 {
 	g_TextOutlineColor = colour;
 }
 
-Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *chars, struct font *font,
-		s32 colour, s32 width, s32 height, s32 arg9, s32 lineheight)
+Gfx *textRenderProjected(Gfx *gdl, int *x, int *y, char *text, struct fontchar *chars, struct font *font,
+		int colour, int width, int height, int arg9, int lineheight)
 {
-	s32 savedx;
-	s32 savedy;
-	u8 prevchar;
-	s32 spb0;
-	u32 colour2;
-	u32 tmpcolour;
-	s32 newx;
-	s32 newy;
-	f32 alpha;
+	int savedx;
+	int savedy;
+	uint8_t prevchar;
+	int spb0;
+	uint32_t colour2;
+	uint32_t tmpcolour;
+	int newx;
+	int newy;
+	float alpha;
 
-	static u32 sbrd = 0x00000000;
+	static uint32_t sbrd = 0x00000000;
 
 	spb0 = 1;
 
 	if (g_TextRotated90) {
-		*y *= g_ScaleX;
 		spb0 = 1;
-	} else {
-		*x *= g_ScaleX;
 	}
 
 	if (g_TextHasOutline) {
 		alpha = (1.0f - menuGetSinOscFrac(40.0f)) * 100.0f + 150.0f;
-		newx = *x / g_ScaleX;
+		newx = *x;
 		newy = *y;
 		tmpcolour = g_TextOutlineColor;
-		colour2 = (colour & 0xffffff00) | (u32) alpha;
+		colour2 = (colour & 0xffffff00) | (uint32_t) alpha;
 
 		if (sbrd) {
 			tmpcolour = sbrd;
@@ -1032,18 +1027,12 @@ Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *
 		}
 	}
 
-	if (g_TextRotated90) {
-		*y = *y / g_ScaleX;
-	} else {
-		*x = *x / g_ScaleX;
-	}
-
 	return gdl;
 }
 
-Gfx *text0f1566cc(Gfx *gdl, u32 arg1, u32 arg2)
+Gfx *text0f1566cc(Gfx *gdl, uint32_t arg1, uint32_t arg2)
 {
-	u32 colour = textHighlightSweep(arg1, arg2, g_Blend.colour04);
+	uint32_t colour = textHighlightSweep(arg1, arg2, g_Blend.colour04);
 
 	if (colour != g_Blend.colour44) {
 		gDPSetColor(gdl++, G_SETENVCOLOR, colour);
@@ -1062,11 +1051,11 @@ Gfx *text0f1566cc(Gfx *gdl, u32 arg1, u32 arg2)
 	return gdl;
 }
 
-Gfx *textRenderChar(Gfx *gdl, s32 *x, s32 *y, struct fontchar *char1, struct fontchar *char2,
-		struct font *font, s32 arg6, s32 arg7, s32 arg8, s32 arg9, s32 arg10)
+Gfx *textRenderChar(Gfx *gdl, int *x, int *y, struct fontchar *char1, struct fontchar *char2,
+		struct font *font, int arg6, int arg7, int arg8, int arg9, int arg10)
 {
-	s32 tmp;
-	s32 sp38;
+	int tmp;
+	int sp38;
 
 	sp38 = *y + arg10;
 
@@ -1081,7 +1070,7 @@ Gfx *textRenderChar(Gfx *gdl, s32 *x, s32 *y, struct fontchar *char1, struct fon
 			&& *x >= arg6
 			&& sp38 + char1->baseline + char1->height >= arg7) {
 		if (g_Blend.types) {
-			gdl = text0f1566cc(gdl, *x / g_ScaleX, *y + arg10);
+			gdl = text0f1566cc(gdl, *x, *y + arg10);
 		}
 
 		gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, char1->pixeldata);
@@ -1097,7 +1086,7 @@ Gfx *textRenderChar(Gfx *gdl, s32 *x, s32 *y, struct fontchar *char1, struct fon
 	return gdl;
 }
 
-Gfx *textRenderOutline(Gfx *gdl, s32 x, s32 y, struct fontchar *char1, s32 arg4, s32 arg5, s32 arg6, s32 arg7)
+Gfx *textRenderOutline(Gfx *gdl, int x, int y, struct fontchar *char1, int arg4, int arg5, int arg6, int arg7)
 {
 	if (arg4 + arg6 >= char1->width + x + 2) {
 		if (y + char1->baseline >= arg5) {
@@ -1158,14 +1147,13 @@ Gfx *textRenderOutline(Gfx *gdl, s32 x, s32 y, struct fontchar *char1, s32 arg4,
 	return gdl;
 }
 
-Gfx *textRender(Gfx *gdl, s32 *x, s32 *y, char *text,
-		struct fontchar *chars, struct font *font, u32 arg6, u32 colour,
-		s32 width, s32 height, u32 arg10, s32 lineheight)
+Gfx *textRender(Gfx *gdl, int *x, int *y, char *text,
+		struct fontchar *chars, struct font *font, uint32_t arg6, uint32_t colour,
+		int width, int height, uint32_t arg10, int lineheight)
 {
-	s32 savedx;
-	s32 savedy;
-	s32 prevchar;
-	*x *= g_ScaleX;
+	int savedx;
+	int savedy;
+	int prevchar;
 
 	savedx = *x;
 	savedy = *y;
@@ -1224,18 +1212,16 @@ Gfx *textRender(Gfx *gdl, s32 *x, s32 *y, char *text,
 			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0,
 			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
 
-	*x = *x / g_ScaleX;
-
 	return gdl;
 }
 
 // Mismatch: Regalloc
-void textMeasure(s32 *textheight, s32 *textwidth, char *text, struct fontchar *font1, struct font *font2, s32 lineheight)
+void textMeasure(int *textheight, int *textwidth, char *text, struct fontchar *font1, struct font *font2, int lineheight)
 {
 	char prevchar;
 	char thischar;
-	s32 longest;
-	s32 tmp;
+	int longest;
+	int tmp;
 
 	prevchar = 'H';
 	thischar = '\0';
@@ -1295,17 +1281,17 @@ void textMeasure(s32 *textheight, s32 *textwidth, char *text, struct fontchar *f
 	}
 }
 
-void textWrap(s32 wrapwidth, char *src, char *dst, struct fontchar *chars, struct font *font)
+void textWrap(int wrapwidth, char *src, char *dst, struct fontchar *chars, struct font *font)
 {
-	s32 curlinewidth = 0;
+	int curlinewidth = 0;
 	bool itfits;
-	s32 wordlen;
-	s32 wordwidth;
-	s32 wordheight = 0;
+	int wordlen;
+	int wordwidth;
+	int wordheight = 0;
 	bool more = true;
-	s32 v1;
-	s32 i;
-	u32 stack;
+	int v1;
+	int i;
+	uint32_t stack;
 	char curword[32];
 
 	while (more == true) {
@@ -1418,7 +1404,7 @@ void textWrap(s32 wrapwidth, char *src, char *dst, struct fontchar *chars, struc
 	}
 }
 
-u8 *textLoadBMP(const char *filename, u16 *width, u16 *height) {
+uint8_t *textLoadBMP(const char *filename, uint16_t *width, uint16_t *height) {
     FILE *file = fopen(filename, "rb");  // Open in binary mode
     if (!file) {
         printf("Error: Could not open BMP file.\n");
@@ -1452,7 +1438,7 @@ u8 *textLoadBMP(const char *filename, u16 *width, u16 *height) {
 
     // Allocate memory for pixel data (3 bytes per pixel: R, G, B)
     int row_padded = (*width * 3 + 3) & (~3);  // Align rows to 4 bytes
-    u8 *data = (u8 *)malloc(row_padded * (*height));
+    uint8_t *data = (uint8_t *)malloc(row_padded * (*height));
     if (!data) {
         printf("Error: Memory allocation failed.\n");
         fclose(file);
@@ -1460,7 +1446,7 @@ u8 *textLoadBMP(const char *filename, u16 *width, u16 *height) {
     }
 
     // Temporary buffer for flipped data
-    u8 *flipped_data = (u8 *)malloc(row_padded * (*height));
+    uint8_t *flipped_data = (uint8_t *)malloc(row_padded * (*height));
     if (!flipped_data) {
         printf("Error: Memory allocation for flipping failed.\n");
         free(data);
@@ -1487,19 +1473,19 @@ u8 *textLoadBMP(const char *filename, u16 *width, u16 *height) {
     return flipped_data;  // Return the flipped image
 }
 
-struct fontchar *createChar(char *filename, u16 index)
+struct fontchar *createChar(char *filename, uint16_t index)
 {
 	struct fontchar *newchar = malloc(sizeof(struct fontchar));
 	newchar->index = index;
 
-	u16 width;
-	u16 height;
+	uint16_t width;
+	uint16_t height;
 
 	if (!newchar) return NULL;  // Handle memory allocation failure
 
 	char *fullpath = "./" DEFAULT_BASEDIR_NAME "/fonts/handelgothic/"; // ./data/fonts/handelgothic
 
-	static s32 dirExists = -1;
+	static int dirExists = -1;
 	if (dirExists < 0) {
 		dirExists = (fsFileSize(fullpath) >= 0);
 	}
@@ -1516,7 +1502,7 @@ struct fontchar *createChar(char *filename, u16 index)
 // Load the characters in the HD Handel Gothic font. The bmp's are named hg_0.bmp, hg_1.bmp, etc...with the images in ASCII order
 void textLoadCustomFont()
 {
-	u16 i = 0;
+	uint16_t i = 0;
 	for (i = 0; i < TOTAL_CHARS; i++) {
 		char filename[20];
 		snprintf(filename, sizeof(filename), "hg_%d.bmp", ASCII_START + i);
@@ -1539,7 +1525,7 @@ void textFreeFontCharacters() {
 
     int width = charData->width;
     int height = charData->height;
-    u8 *pixelData = charData->pixeldata;
+    uint8_t *pixelData = charData->pixeldata;
 
     // Calculate required string size (each pixel = 1 char, each row = width + newline)
     int totalSize = (width + 1) * height + 1;  // +1 for null terminator

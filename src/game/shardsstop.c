@@ -6,7 +6,7 @@
 
 void shardsStop(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_MaxShards; i++) {
 		g_Shards[i].age60 = 0;

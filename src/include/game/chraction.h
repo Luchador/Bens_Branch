@@ -199,7 +199,7 @@ struct prop *chrSpawnAtCoord(int body, int head, struct coord *pos, RoomNum *roo
 bool chrIsPropPresetBlockingSightToTarget(struct chrdata *chr);
 bool chrMoveToPos(struct chrdata *chr, struct coord *pos, RoomNum *room, float angle, bool ignorebg);
 bool chrCheckCoverOutOfSight(struct chrdata *chr, int covernum, bool soft);
-int chrAssignCoverByCriteria(struct chrdata *chr, u16 arg1, int arg2);
+int chrAssignCoverByCriteria(struct chrdata *chr, uint16_t arg1, int arg2);
 int chrAssignCoverAwayFromDanger(struct chrdata *chr, int mindist, int maxdist);
 bool chrRunFromPos(struct chrdata *chr, uint32_t goposflags, float distance, struct coord *frompos);
 float func0f04c784(struct chrdata *chr);

@@ -2,7 +2,6 @@
 #define GFX_CC_H
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #ifdef __cplusplus
 #include <compare>

@@ -45,20 +45,20 @@
 #define GFX_SIZE_MULTIPLIER 1
 #endif
 
-u8 *g_GfxBuffers[NUM_GFXTASKS + 1];
-u32 var800aa58c;
-u8 *g_VtxBuffers[NUM_GFXTASKS + 1];
-u8 *g_GfxMemPos;
-u8 g_GfxActiveBufferIndex;
-u32 g_GfxRequestedDisplayList;
+uint8_t *g_GfxBuffers[NUM_GFXTASKS + 1];
+uint32_t var800aa58c;
+uint8_t *g_VtxBuffers[NUM_GFXTASKS + 1];
+uint8_t *g_GfxMemPos;
+uint8_t g_GfxActiveBufferIndex;
+uint32_t g_GfxRequestedDisplayList;
 
 // Ben's comment: originally there was an array that changed this based on player count. I'm just using a constant value, the one used for 4 players.
-u32 g_GfxSize = 0x00028000 * GFX_SIZE_MULTIPLIER;
+uint32_t g_GfxSize = 0x00028000 * GFX_SIZE_MULTIPLIER;
 
-u32 g_VtxSize = 0x00028000;
+uint32_t g_VtxSize = 0x00028000;
 
-s32 g_GfxNumSwapsPerBuffer[NUM_GFXTASKS] = {0, 1};
-u32 g_GfxNumSwaps = 2;
+int g_GfxNumSwapsPerBuffer[NUM_GFXTASKS] = {0, 1};
+uint32_t g_GfxNumSwaps = 2;
 
 /**
  * Allocate graphics memory from the heap. Presumably called on stage load.
@@ -70,8 +70,8 @@ void gfxReset(void)
 {
 	if (argFindByPrefix(1, "-mgfx")) {
 		// Argument specified master_dl_size\n
-		s32 gfx;
-		s32 gfxtra = 0;
+		int gfx;
+		int gfxtra = 0;
 
 		gfx = strtol(argFindByPrefix(1, "-mgfx"), NULL, 0) * 1024;
 
@@ -122,11 +122,11 @@ Gfx *gfxGetMasterDisplayList(void)
 	return (Gfx *)g_GfxBuffers[g_GfxActiveBufferIndex];
 }
 
-Vtx *gfxAllocateVertices(u32 count)
+Vtx *gfxAllocateVertices(uint32_t count)
 {
 	void *ptr = g_GfxMemPos;
 	g_GfxMemPos += count * sizeof(Vtx);
-	g_GfxMemPos = (u8 *)ALIGN16((uintptr_t)g_GfxMemPos);
+	g_GfxMemPos = (uint8_t *)ALIGN16((uintptr_t)g_GfxMemPos);
 
 	return ptr;
 }
@@ -144,7 +144,7 @@ void *gfxAllocateMatrix(void)
  * The function allocates 0x8 for every count, so it could be allocating lights
  * instead, however it's only used for LookAts so it's named as LookAt.
  */
-LookAt *gfxAllocateLookAt(s32 count)
+LookAt *gfxAllocateLookAt(int count)
 {
 	void *ptr = g_GfxMemPos;
 #ifdef PLATFORM_64BIT
@@ -156,7 +156,7 @@ LookAt *gfxAllocateLookAt(s32 count)
 	return ptr;
 }
 
-Col *gfxAllocateColours(s32 count)
+Col *gfxAllocateColours(int count)
 {
 	void *ptr = g_GfxMemPos;
 	count = ALIGN16(count * sizeof(Col));
@@ -165,7 +165,7 @@ Col *gfxAllocateColours(s32 count)
 	return ptr;
 }
 
-void *gfxAllocate(u32 size)
+void *gfxAllocate(uint32_t size)
 {
 	void *ptr = g_GfxMemPos;
 	size = ALIGN16(size);
@@ -185,14 +185,4 @@ void gfxSwapBuffers(void)
 	if (g_GfxNumSwaps == -1) {
 		g_GfxNumSwaps = 2;
 	}
-}
-
-s32 gfxGetFreeGfx(Gfx *gdl)
-{
-	return (Gfx *)g_GfxBuffers[g_GfxActiveBufferIndex + 1] - gdl;
-}
-
-u32 gfxGetFreeVtx(void)
-{
-	return g_VtxBuffers[g_GfxActiveBufferIndex + 1] - g_GfxMemPos;
 }

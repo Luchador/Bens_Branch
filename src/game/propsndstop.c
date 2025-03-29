@@ -9,7 +9,7 @@
 void psStop(void)
 {
 	if (g_SndDisabled) return;
-	s32 i;
+	int i;
 
 	for (i = 0; i < 40; i++) {
 		if (g_PsChannels[i].flags & PSFLAG_ISMP3) {

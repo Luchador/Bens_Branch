@@ -290,7 +290,7 @@ Gfx g_GfxGroup10[] = {
 	0,
 };
 
-void gfxReplaceGbiCommands(Gfx *startgdl, Gfx *endgdl, s32 type)
+void gfxReplaceGbiCommands(Gfx *startgdl, Gfx *endgdl, int type)
 {
 	static Gfx *groups[] = {
 		g_GfxGroup00,
@@ -308,7 +308,7 @@ void gfxReplaceGbiCommands(Gfx *startgdl, Gfx *endgdl, s32 type)
 
 	Gfx *gdl = startgdl;
 
-	while ((endgdl && gdl < endgdl) || (!endgdl && (s8)gdl->bytes[GFX_W0_BYTE(0)] != G_ENDDL)) {
+	while ((endgdl && gdl < endgdl) || (!endgdl && (int8_t)gdl->bytes[GFX_W0_BYTE(0)] != G_ENDDL)) {
 		Gfx *src = groups[type];
 
 		while (src->words.w0 != 0) {
@@ -323,7 +323,7 @@ void gfxReplaceGbiCommands(Gfx *startgdl, Gfx *endgdl, s32 type)
 	}
 }
 
-void gfxReplaceGbiCommandsRecursively(struct roomblock *block, s32 type)
+void gfxReplaceGbiCommandsRecursively(struct roomblock *block, int type)
 {
 #ifndef AVOID_UB
 	// Sometimes block is NULL when this is called.

@@ -316,21 +316,6 @@ static const char* acmux_to_string(uint32_t acmux) {
     return tbl[acmux];
 }
 
-s32 debug_log(const char *message, s32 num)
-{
-	FILE *debug_file = fopen("debug.log", "a");
-    if (debug_file == NULL) {
-        perror("Error opening debug.log");
-        return 0;
-    }
-
-    fprintf(debug_file, message, num);
-    fclose(debug_file);
-
-	return 1;
-}
-
-
 static void gfx_generate_cc(struct ColorCombiner* comb, const ColorCombinerKey& key) {
     bool is_2cyc = (key.options & (uint64_t)SHADER_OPT_2CYC) != 0;
 

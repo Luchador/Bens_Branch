@@ -4,8 +4,8 @@
 #include "data.h"
 #include "types.h"
 
-f32 _depth2Cents(u8 arg0);
-void func00030bfc(s32 arg0, s32 arg1);
+float _depth2Cents(uint8_t arg0);
+void func00030bfc(int arg0, int arg1);
 void func00030c98(ALSeqpConfig *config);
 
 #endif

@@ -19,24 +19,22 @@
 
 struct pschannel *g_PsChannels = NULL;
 
-u32 g_AudioPrevUuid = 0;
+uint32_t g_AudioPrevUuid = 0;
 
-u32 var8006ae2c = 0;
-u32 var8006ae30 = 0;
-u32 var8006ae34 = 0;
-u32 var8006ae38 = 0;
+uint32_t var8006ae2c = 0;
+uint32_t var8006ae34 = 0;
 bool g_PsPrintAll = false;
 
 bool g_PsPrintFlagged = false;
-s16 var8006ae50 = -1;
+int16_t var8006ae50 = -1;
 
 #define CHANNELCOUNT()         (40)
 #define CHANNEL_IS_AI(channel) (channel >= 0 && channel <= 7)
 #define CHANNEL_HEAP_FIRST     CHANNEL_8
 
-bool psPropHasSoundWithContext(struct prop *prop, s32 type)
+bool psPropHasSoundWithContext(struct prop *prop, int type)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < CHANNELCOUNT(); i++) {
 		if ((g_PsChannels[i].flags & PSFLAG_FREE) == 0
@@ -49,9 +47,9 @@ bool psPropHasSoundWithContext(struct prop *prop, s32 type)
 	return false;
 }
 
-void psStopSound(struct prop *prop, s32 type, u16 flags)
+void psStopSound(struct prop *prop, int type, uint16_t flags)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < CHANNELCOUNT(); i++) {
 		struct pschannel *channel = &g_PsChannels[i];
@@ -66,9 +64,9 @@ void psStopSound(struct prop *prop, s32 type, u16 flags)
 	}
 }
 
-s32 psCalculateVolumeFromDistance(f32 playerdist, f32 dist1, f32 dist2, f32 dist3, s32 fullvolume)
+int psCalculateVolumeFromDistance(float playerdist, float dist1, float dist2, float dist3, int fullvolume)
 {
-	s32 result = 0;
+	int result = 0;
 
 	if (playerdist < dist3) {
 		if (dist1 > 5501) {
@@ -88,7 +86,7 @@ s32 psCalculateVolumeFromDistance(f32 playerdist, f32 dist1, f32 dist2, f32 dist
 			result = fullvolume;
 		} else if (playerdist < dist2) {
 			// Range dist1 to dist2 -> scale down using curve
-			result = fullvolume - (s32) (sqrtf((playerdist - dist1) / (dist2 - dist1)) * (fullvolume - 1000.0f));
+			result = fullvolume - (int) (sqrtf((playerdist - dist1) / (dist2 - dist1)) * (fullvolume - 1000.0f));
 		} else {
 			// Range dist2 to dist3 -> scale to zero linearly
 			result = (dist3 - playerdist) * 1000.0f / (dist3 - dist2);
@@ -99,16 +97,14 @@ s32 psCalculateVolumeFromDistance(f32 playerdist, f32 dist1, f32 dist2, f32 dist
 		result = AL_VOL_FULL;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (result < 40) {
 		result = 0;
 	}
-#endif
 
 	return result;
 }
 
-s32 psGetVolume(s32 channelnum)
+int psGetVolume(int channelnum)
 {
 	return CHANNEL_IS_AI(channelnum) ? g_PsChannels[channelnum].currentvol : 0;
 }
@@ -117,9 +113,9 @@ s32 psGetVolume(s32 channelnum)
  * Play the given soundnum for the prop, provided the prop doesn't already have
  * a sound playing with this type.
  */
-void psCreateIfNotDupe(struct prop *prop, s16 soundnum, s32 type)
+void psCreateIfNotDupe(struct prop *prop, int16_t soundnum, int type)
 {
-	s32 i;
+	int i;
 
 	if (psCalculateVol(&prop->pos, 400, 2500, 3000, prop->rooms, soundnum, AL_VOL_FULL, 0) != 0) {
 		for (i = CHANNEL_HEAP_FIRST; i < CHANNELCOUNT(); i++) {
@@ -138,7 +134,7 @@ void psCreateIfNotDupe(struct prop *prop, s16 soundnum, s32 type)
  * Stop the sound that's playing in the given channel.
  * The channel remains allocated and configured.
  */
-void psStopChannel(s32 channelnum)
+void psStopChannel(int channelnum)
 {
 	struct pschannel *channel = &g_PsChannels[channelnum];
 
@@ -159,27 +155,18 @@ void psStopChannel(s32 channelnum)
 	}
 }
 
-void psPrintChannel(struct pschannel *channel)
-{
-	s32 i;
-
-	for (i = 0; channel->rooms[i] != -1; i++) {
-		// empty
-	}
-}
-
-s32 psGetSubtitleOpacity(s32 channelnum)
+int psGetSubtitleOpacity(int channelnum)
 {
 	if (channelnum == -1) {
 		return 1;
 	}
 
 	if ((g_PsChannels[channelnum].flags & PSFLAG_FREE) == 0) {
-		s32 value = g_PsChannels[channelnum].currentvol;
+		int value = g_PsChannels[channelnum].currentvol;
 
 		if (value == -1 || value > 200) {
-			s32 tmp = g_PsChannels[channelnum].currentvol - 200;
-			s32 opacity = tmp * 255 / 15800;
+			int tmp = g_PsChannels[channelnum].currentvol - 200;
+			int opacity = tmp * 255 / 15800;
 
 			if (opacity > 255) {
 				opacity = 255;
@@ -192,30 +179,23 @@ s32 psGetSubtitleOpacity(s32 channelnum)
 	return 0;
 }
 
-void psTickChannel(s32 channelnum)
+void psTickChannel(int channelnum)
 {
 	struct pschannel *channel = &g_PsChannels[channelnum];
 
-#if VERSION >= VERSION_NTSC_1_0
 	if ((channel->flags2 & PSFLAG2_STOPPED) == 0
 			&& channel->type != PSTYPE_MARKER
 			&& ((channel->audiohandle != NULL && sndGetState(channel->audiohandle) != AL_STOPPED)
 				|| (channel->flags & PSFLAG_REPEATING)
 				|| (channel->flags & PSFLAG_FIRSTTICK)
 				|| ((channel->flags & PSFLAG_ISMP3) && sndIsPlayingMp3())))
-#else
-	if ((channel->audiohandle != NULL && sndGetState(channel->audiohandle) != AL_STOPPED)
-			|| (channel->flags & PSFLAG_REPEATING)
-			|| (channel->flags & PSFLAG_FIRSTTICK)
-			|| ((channel->flags & PSFLAG_ISMP3) && sndIsPlayingMp3()))
-#endif
 	{
 		struct coord *pos = NULL;
 		RoomNum *rooms = NULL;
-		s32 newvol;
-		s32 newpan;
-		s32 newfx;
-		f32 newpitch;
+		int newvol;
+		int newpan;
+		int newfx;
+		float newpitch;
 
 		if (channel->prop) {
 			pos = &channel->prop->pos;
@@ -293,16 +273,16 @@ void psTickChannel(s32 channelnum)
 
 			channel->volchangetimer60 -= g_Vars.lvupdate60;
 		} else if (channel->volchangespeed && channel->currentvol != channel->targetvol) {
-			f32 f12 = channel->targetvol - channel->currentvol;
-			f32 f14 = (1.0f / 6000.0f) * g_Vars.lvupdate60 * channel->volchangespeed;
+			float f12 = channel->targetvol - channel->currentvol;
+			float f14 = (1.0f / 6000.0f) * g_Vars.lvupdate60 * channel->volchangespeed;
 
-			if (ABS(f12) > 1.0f) {
+			if (fabsf(f12) > 1.0f) {
 				if (f14 > 1.0f) {
 					f14 = 1.0f;
 				}
 
-				if (ABS(f14 * f12) > 1.0f) {
-					newvol = channel->currentvol + (s32) (f14 * f12);
+				if (fabsf(f14 * f12) > 1.0f) {
+					newvol = channel->currentvol + (int) (f14 * f12);
 				}
 			}
 		} else {
@@ -327,11 +307,11 @@ void psTickChannel(s32 channelnum)
 				channel->currentpan = channel->targetpan;
 				newpan = channel->currentpan;
 			} else {
-				s32 diff = channel->targetpan - channel->currentpan;
-				s32 lvupdate = g_Vars.lvupdate240 * 512 / 240;
-				s32 dir = diff < 0 ? -1 : 1;
-				s32 absdiff = ABS(diff);
-				s32 amount = absdiff < lvupdate ? absdiff : lvupdate;
+				int diff = channel->targetpan - channel->currentpan;
+				int lvupdate = g_Vars.lvupdate240 * 512 / 240;
+				int dir = diff < 0 ? -1 : 1;
+				int absdiff = abs(diff);
+				int amount = absdiff < lvupdate ? absdiff : lvupdate;
 
 				channel->currentpan += amount * dir;
 				newpan = channel->currentpan;
@@ -348,7 +328,7 @@ void psTickChannel(s32 channelnum)
 			newfx = -1;
 		}
 
-		if (newpitch > 0.0f && ABS(newpitch - channel->currentpitch) > 0.01f) {
+		if (newpitch > 0.0f && fabsf(newpitch - channel->currentpitch) > 0.01f) {
 			channel->currentpitch = newpitch;
 		} else {
 			newpitch = -1.0f;
@@ -431,19 +411,15 @@ void psTickChannel(s32 channelnum)
 		}
 	}
 
-	if (g_PsPrintFlagged && (channel->flags2 & PSFLAG2_PRINTABLE)) {
-		psPrintChannel(channel);
-	}
-
 	channel->flags &= ~PSFLAG_FIRSTTICK;
 	channel->flags &= ~PSFLAG_CHANGINGPAN;
 }
 
 void psTick(void)
 {
-	static s32 peakcount = 0;
-	s32 count = 0;
-	s32 i;
+	static int peakcount = 0;
+	int count = 0;
+	int i;
 
 	for (i = 0; i < CHANNELCOUNT(); i++) {
 		struct pschannel *channel = &g_PsChannels[i];
@@ -451,9 +427,6 @@ void psTick(void)
 		if ((channel->flags & PSFLAG_FREE) == 0) {
 			psTickChannel(i);
 			count++;
-			if (g_PsPrintAll) {
-				psPrintChannel(&g_PsChannels[i]);
-			}
 		}
 	}
 
@@ -466,9 +439,9 @@ void psTick(void)
 	}
 }
 
-void psSetPitch(struct prop *prop, f32 targetpitch, s32 changespeed)
+void psSetPitch(struct prop *prop, float targetpitch, int changespeed)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < CHANNELCOUNT(); i++) {
 		if ((g_PsChannels[i].flags & PSFLAG_FREE) == 0 && g_PsChannels[i].prop == prop) {
@@ -485,9 +458,9 @@ void psSetPitch(struct prop *prop, f32 targetpitch, s32 changespeed)
 	}
 }
 
-void psSetVolume(struct prop *prop, s32 volpercentage)
+void psSetVolume(struct prop *prop, int volpercentage)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < CHANNELCOUNT(); i++) {
 		if ((g_PsChannels[i].flags & PSFLAG_FREE) == 0 && prop == g_PsChannels[i].prop) {
@@ -503,10 +476,10 @@ void psSetVolume(struct prop *prop, s32 volpercentage)
 
 void psStopOneShootChannel(struct prop *prop)
 {
-	s32 lowestuuid = -1;
-	s32 count = 0;
-	s32 bestindex = -1;
-	s32 i;
+	int lowestuuid = -1;
+	int count = 0;
+	int bestindex = -1;
+	int i;
 
 	for (i = 0; i < CHANNELCOUNT(); i++) {
 		struct pschannel *channel = &g_PsChannels[i];
@@ -531,17 +504,17 @@ void psStopOneShootChannel(struct prop *prop)
 	}
 }
 
-s16 psCreate(struct pschannel *channel, struct prop *prop, s16 soundnum, s16 padnum,
-		s32 vol, u16 flags, u16 flags2, s32 type,
-		struct coord *pos, f32 pitch, RoomNum *rooms, s32 room,
-		f32 dist1, f32 dist2, f32 dist3)
+int16_t psCreate(struct pschannel *channel, struct prop *prop, int16_t soundnum, int16_t padnum,
+		int vol, uint16_t flags, uint16_t flags2, int type,
+		struct coord *pos, float pitch, RoomNum *rooms, int room,
+		float dist1, float dist2, float dist3)
 {
 	union soundnumhack spac;
-	s32 pan;
+	int pan;
 
 	struct pad pad;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	if (type == PSTYPE_CHRSHOOT) {
 		psStopOneShootChannel(prop);
@@ -607,9 +580,9 @@ s16 psCreate(struct pschannel *channel, struct prop *prop, s16 soundnum, s16 pad
 	channel->uuid = g_AudioPrevUuid;
 
 	if (spac.hasconfig) {
-		s32 id = spac.confignum;
-		s32 confignum = g_AudioRussMappings[id].audioconfig_index;
-		s32 newid = g_AudioRussMappings[id].soundnum;
+		int id = spac.confignum;
+		int confignum = g_AudioRussMappings[id].audioconfig_index;
+		int newid = g_AudioRussMappings[id].soundnum;
 
 		channel->dist1 = g_AudioConfigs[confignum].dist1;
 		channel->dist2 = g_AudioConfigs[confignum].dist2;
@@ -731,9 +704,9 @@ s16 psCreate(struct pschannel *channel, struct prop *prop, s16 soundnum, s16 pad
 	return channel->channelnum;
 }
 
-s32 psPlayFromProp(s32 channelnum, s16 soundnum, s32 vol, struct prop *prop, s16 type, u16 flags)
+int psPlayFromProp(int channelnum, int16_t soundnum, int vol, struct prop *prop, int16_t type, uint16_t flags)
 {
-	s32 retchannelnum = -1;
+	int retchannelnum = -1;
 
 	if (type == PSTYPE_MARKER) {
 		if (CHANNEL_IS_AI(channelnum)) {
@@ -793,10 +766,10 @@ s32 psPlayFromProp(s32 channelnum, s16 soundnum, s32 vol, struct prop *prop, s16
 	return retchannelnum;
 }
 
-void psMuteChannel(s32 channelnum)
+void psMuteChannel(int channelnum)
 {
 	if (channelnum == CHANNEL_CUTSCENE) {
-		s32 i;
+		int i;
 
 		for (i = CHANNEL_HEAP_FIRST; i < CHANNELCOUNT(); i++) {
 			if ((g_PsChannels[i].flags & PSFLAG_FREE) == 0
@@ -809,14 +782,14 @@ void psMuteChannel(s32 channelnum)
 	}
 }
 
-bool psIsChannelFree(s32 channelnum)
+bool psIsChannelFree(int channelnum)
 {
 	if (CHANNEL_IS_AI(channelnum)) {
 		return (g_PsChannels[channelnum].flags & PSFLAG_FREE) ? true : false;
 	}
 
 	if (channelnum == CHANNEL_CUTSCENE) {
-		s32 i;
+		int i;
 
 		for (i = CHANNEL_HEAP_FIRST; i < CHANNELCOUNT(); i++) {
 			if (g_PsChannels[i].flags & PSFLAG_CUTSCENE) {
@@ -828,7 +801,7 @@ bool psIsChannelFree(s32 channelnum)
 	return true;
 }
 
-void psModify(s32 channelnum, s32 volume, s16 padnum, struct prop *prop, s32 volchangetimer60, s32 dist2, s32 dist3, u16 flags)
+void psModify(int channelnum, int volume, int16_t padnum, struct prop *prop, int volchangetimer60, int dist2, int dist3, uint16_t flags)
 {
 	struct pschannel *channel = &g_PsChannels[channelnum];
 	bool hastimer = (volchangetimer60 >= 6) ? true : false;
@@ -836,7 +809,7 @@ void psModify(s32 channelnum, s32 volume, s16 padnum, struct prop *prop, s32 vol
 
 	if (CHANNEL_IS_AI(channelnum)) {
 		if (channel->type == PSTYPE_MARKER) {
-			g_PsChannels[channelnum].channelnum = (u16)channelnum;
+			g_PsChannels[channelnum].channelnum = (uint16_t)channelnum;
 
 			psCreate(&g_PsChannels[channelnum], prop, channel->soundnum26, -1,
 					-1, flags, 0, PSTYPE_NONE, 0, -1, 0, -1, 400, dist2, dist3);
@@ -875,14 +848,14 @@ void psModify(s32 channelnum, s32 volume, s16 padnum, struct prop *prop, s32 vol
 	}
 }
 
-s32 psCalculateVol(struct coord *pos, f32 dist1, f32 dist2, f32 dist3, RoomNum *rooms, s16 soundnum, s32 arg6, f32 *playerdistptr)
+int psCalculateVol(struct coord *pos, float dist1, float dist2, float dist3, RoomNum *rooms, int16_t soundnum, int arg6, float *playerdistptr)
 {
 	union soundnumhack sp6c;
 	union soundnumhack sp68;
-	f32 playerdist;
+	float playerdist;
 	RoomNum roomnum;
-	s32 s0;
-	s32 i;
+	int s0;
+	int i;
 
 	playerdist = dist3 + 10.0f;
 
@@ -896,8 +869,8 @@ s32 psCalculateVol(struct coord *pos, f32 dist1, f32 dist2, f32 dist3, RoomNum *
 	sp6c.packed = soundnum;
 
 	if (sp68.hasconfig) {
-		s32 confignum = sp68.confignum;
-		s32 index = g_AudioRussMappings[confignum].audioconfig_index;
+		int confignum = sp68.confignum;
+		int index = g_AudioRussMappings[confignum].audioconfig_index;
 
 		sp6c.packed = g_AudioRussMappings[confignum].soundnum;
 
@@ -919,7 +892,7 @@ s32 psCalculateVol(struct coord *pos, f32 dist1, f32 dist2, f32 dist3, RoomNum *
 	// Figure out which player is closest and store their distance in playerdist
 	for (i = 0; i < PLAYERCOUNT(); i++) {
 		struct player *player = g_Vars.players[i];
-		s32 camroom;
+		int camroom;
 
 		if (sp6c.unk02 == 0) {
 			camroom = player->cam_room;
@@ -937,9 +910,9 @@ s32 psCalculateVol(struct coord *pos, f32 dist1, f32 dist2, f32 dist3, RoomNum *
 	return psCalculateVolumeFromDistance(playerdist, dist1, dist2, dist3, arg6);
 }
 
-s32 psCalculatePan3(s32 degrees, f32 arg1, struct pschannel *channel)
+int psCalculatePan3(int degrees, float arg1, struct pschannel *channel)
 {
-	s32 result;
+	int result;
 
 	while (degrees >= 180) {
 		degrees -= 360;
@@ -952,9 +925,9 @@ s32 psCalculatePan3(s32 degrees, f32 arg1, struct pschannel *channel)
 	switch (g_SoundMode) {
 	default:
 		{
-			s32 absdegrees = degrees > 0 ? degrees : -degrees;
-			s32 dir;
-			s32 v1;
+			int absdegrees = degrees > 0 ? degrees : -degrees;
+			int dir;
+			int v1;
 
 			if (absdegrees > 90) {
 				absdegrees = 180 - absdegrees;
@@ -972,10 +945,10 @@ s32 psCalculatePan3(s32 degrees, f32 arg1, struct pschannel *channel)
 		if (degrees > -45 && degrees < 45) {
 			degrees *= 2;
 		} else {
-			s32 dir = degrees > 0 ? 1 : -1;
-			s32 v1 = dir && dir;
-			s32 absdegrees = degrees > 0 ? degrees : -degrees;
-			s32 t4 = (180 - absdegrees) * 0.6666667f;
+			int dir = degrees > 0 ? 1 : -1;
+			int v1 = dir && dir;
+			int absdegrees = degrees > 0 ? degrees : -degrees;
+			int t4 = (180 - absdegrees) * 0.6666667f;
 
 			if (v1);
 
@@ -1007,11 +980,11 @@ s32 psCalculatePan3(s32 degrees, f32 arg1, struct pschannel *channel)
 	if (degrees >= -90 && degrees <= 90) {
 		result = AL_PAN_CENTER + degrees * 0.7f;
 	} else {
-		s32 v0;
-		s32 dir = degrees > 0 ? 1 : -1;
-		s32 absdegrees = ABS(degrees);
+		int v0;
+		int dir = degrees > 0 ? 1 : -1;
+		int absdegrees = abs(degrees);
 
-		result = 128 + (s32) (AL_PAN_CENTER + (180 - absdegrees) * dir * 0.7f);
+		result = 128 + (int) (AL_PAN_CENTER + (180 - absdegrees) * dir * 0.7f);
 	}
 
 	if (channel != NULL) {
@@ -1022,17 +995,17 @@ s32 psCalculatePan3(s32 degrees, f32 arg1, struct pschannel *channel)
 	return result;
 }
 
-s32 psCalculatePan2(struct coord *pos, s32 arg1, f32 arg2, struct pschannel *channel)
+int psCalculatePan2(struct coord *pos, int arg1, float arg2, struct pschannel *channel)
 {
-	s32 result = AL_PAN_CENTER;
-	u32 stack[4];
-	s32 degrees;
-	f32 f2;
+	int result = AL_PAN_CENTER;
+	uint32_t stack[4];
+	int degrees;
+	float f2;
 
 	if (PLAYERCOUNT() < 2) {
 		struct coord *campos = &g_Vars.currentplayer->cam_pos;
-		f32 sp3c;
-		f32 sp38;
+		float sp3c;
+		float sp38;
 
 		f2 = -(atan2f(pos->x - campos->x, pos->z - campos->z) * 180.0f / M_PI + g_Vars.currentplayer->vv_theta);
 
@@ -1042,7 +1015,7 @@ s32 psCalculatePan2(struct coord *pos, s32 arg1, f32 arg2, struct pschannel *cha
 
 			sp3c *= arg2;
 
-			f2 = atan2f(ABSF(sp3c), ABSF(sp38));
+			f2 = atan2f(fabsf(sp3c), fabsf(sp38));
 
 			if (sp3c >= 0.0f && sp38 >= 0.0f) {
 				// empty
@@ -1070,9 +1043,9 @@ s32 psCalculatePan2(struct coord *pos, s32 arg1, f32 arg2, struct pschannel *cha
 	return result;
 }
 
-s32 psCalculatePan(struct coord *pos, f32 dist1, f32 dist2, f32 dist3, f32 playerdist, bool arg5, struct pschannel *channel)
+int psCalculatePan(struct coord *pos, float dist1, float dist2, float dist3, float playerdist, bool arg5, struct pschannel *channel)
 {
-	s32 result = AL_PAN_CENTER;
+	int result = AL_PAN_CENTER;
 
 	if (pos != NULL && playerdist > 0) {
 		if (dist1 < 0) {
@@ -1100,7 +1073,7 @@ s32 psCalculatePan(struct coord *pos, f32 dist1, f32 dist2, f32 dist3, f32 playe
 				if (playerdist < dist1) {
 					// empty
 				} else if (playerdist < dist2) {
-					f32 frac = (playerdist - dist1) / (dist2 - dist1);
+					float frac = (playerdist - dist1) / (dist2 - dist1);
 
 					if (frac < 0) {
 						frac = 0;
@@ -1127,20 +1100,20 @@ s32 psCalculatePan(struct coord *pos, f32 dist1, f32 dist2, f32 dist3, f32 playe
  * If the given soundnum were to play at the given world position, calculate the
  * final volume and pan and write them to the vol and pan pointers.
  */
-void psGetTheoreticalVolPan(struct coord *pos, RoomNum *rooms, s16 soundnum, s32 *vol, s32 *pan)
+void psGetTheoreticalVolPan(struct coord *pos, RoomNum *rooms, int16_t soundnum, int *vol, int *pan)
 {
-	f32 dist1;
-	f32 dist2;
-	f32 dist3;
+	float dist1;
+	float dist2;
+	float dist3;
 	struct audiorussmapping *russ;
 	struct audioconfig *config;
 	union soundnumhack sp48;
 	union soundnumhack sp44;
-	f32 distance;
+	float distance;
 	bool sp3c;
-	s32 index;
-	s32 confignum;
-	f32 *distanceptr = &distance;
+	int index;
+	int confignum;
+	float *distanceptr = &distance;
 
 	dist1 = 400;
 	dist2 = 2500;
@@ -1178,14 +1151,14 @@ void psGetTheoreticalVolPan(struct coord *pos, RoomNum *rooms, s16 soundnum, s32
 	*pan = psCalculatePan(pos, dist1, dist2, dist3, *distanceptr, sp3c, 0);
 }
 
-void psApplyVolPan(struct sndstate *handle, struct coord *pos, f32 dist1, f32 dist2, f32 dist3, RoomNum *rooms, s16 soundnum, s32 arg7, f32 *distanceptr)
+void psApplyVolPan(struct sndstate *handle, struct coord *pos, float dist1, float dist2, float dist3, RoomNum *rooms, int16_t soundnum, int arg7, float *distanceptr)
 {
 	union soundnumhack sp5c;
 	union soundnumhack sp58;
-	f32 distance;
+	float distance;
 	bool sp50;
-	s32 vol;
-	s32 pan;
+	int vol;
+	int pan;
 
 	sp50 = false;
 	distance = 9999999;
@@ -1196,8 +1169,8 @@ void psApplyVolPan(struct sndstate *handle, struct coord *pos, f32 dist1, f32 di
 	}
 
 	if (sp58.hasconfig) {
-		s32 confignum = sp58.confignum;
-		s32 index = g_AudioRussMappings[confignum].audioconfig_index;
+		int confignum = sp58.confignum;
+		int index = g_AudioRussMappings[confignum].audioconfig_index;
 
 		dist1 = g_AudioConfigs[index].dist1;
 		dist2 = g_AudioConfigs[index].dist2;
@@ -1223,11 +1196,11 @@ void psApplyVolPan(struct sndstate *handle, struct coord *pos, f32 dist1, f32 di
 	sndAdjust(&handle, sndIsMp3(soundnum), vol, pan, soundnum, 1.0f, 1, -1, 1);
 }
 
-s32 psGetRandomSparkSound(void)
+int psGetRandomSparkSound(void)
 {
-	s32 index = rngRandom() % 6;
+	int index = rngRandom() % 6;
 
-	s16 sounds[] = {
+	int16_t sounds[] = {
 		SFX_80B0,
 		SFX_80B1,
 		SFX_80B2,
@@ -1245,7 +1218,7 @@ s32 psGetRandomSparkSound(void)
  * All MP3 files are 24 kilobits per second
  * so this is just math based on the filesize.
  */
-s32 psGetDuration60(s32 channelnum)
+int psGetDuration60(int channelnum)
 {
 	struct pschannel *channel = &g_PsChannels[channelnum];
 

@@ -8,103 +8,103 @@
 #include "data.h"
 #include "types.h"
 
-u8 g_InGameSubtitles = 1;
-u8 g_CutsceneSubtitles = 0;
-s32 g_ScreenSize = SCREENSIZE_FULL;
-s32 g_ScreenRatio = SCREENRATIO_NORMAL;
-u8 g_ScreenSplit = SCREENSPLIT_HORIZONTAL;
+uint8_t g_InGameSubtitles = 1;
+uint8_t g_CutsceneSubtitles = 0;
+int g_ScreenSize = SCREENSIZE_FULL;
+int g_ScreenRatio = SCREENRATIO_NORMAL;
+uint8_t g_ScreenSplit = SCREENSPLIT_HORIZONTAL;
 
-s32 optionsGetControlMode(s32 mpchrnum)
+int optionsGetControlMode(int mpchrnum)
 {
 	return g_PlayerConfigsArray[mpchrnum].controlmode;
 }
 
-void optionsSetControlMode(s32 mpchrnum, s32 mode)
+void optionsSetControlMode(int mpchrnum, int mode)
 {
 	g_PlayerConfigsArray[mpchrnum].controlmode = mode;
 }
 
-s32 optionsGetContpadNum1(s32 mpchrnum)
+int optionsGetContpadNum1(int mpchrnum)
 {
 	return g_PlayerConfigsArray[mpchrnum].contpad1;
 }
 
-s32 optionsGetContpadNum2(s32 mpchrnum)
+int optionsGetContpadNum2(int mpchrnum)
 {
 	return g_PlayerConfigsArray[mpchrnum].contpad2;
 }
 
-s32 optionsGetForwardPitch(s32 mpchrnum)
+int optionsGetForwardPitch(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_FORWARDPITCH) != 0;
 }
 
-s32 optionsGetAutoAim(s32 mpchrnum)
+int optionsGetAutoAim(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_AUTOAIM) != 0;
 }
 
-s32 optionsGetLookAhead(s32 mpchrnum)
+int optionsGetLookAhead(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_LOOKAHEAD) != 0;
 }
 
-s32 optionsGetAimControl(s32 mpchrnum)
+int optionsGetAimControl(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_AIMCONTROL) != 0;
 }
 
-s32 optionsGetSightOnScreen(s32 mpchrnum)
+int optionsGetSightOnScreen(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_SIGHTONSCREEN) != 0;
 }
 
-s32 optionsGetAmmoOnScreen(s32 mpchrnum)
+int optionsGetAmmoOnScreen(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_AMMOONSCREEN) != 0;
 }
 
-s32 optionsGetShowGunFunction(s32 mpchrnum)
+int optionsGetShowGunFunction(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_SHOWGUNFUNCTION) != 0;
 }
 
-s32 optionsGetAlwaysShowTarget(s32 mpchrnum)
+int optionsGetAlwaysShowTarget(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_ALWAYSSHOWTARGET) != 0;
 }
 
-s32 optionsGetShowZoomRange(s32 mpchrnum)
+int optionsGetShowZoomRange(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_SHOWZOOMRANGE) != 0;
 }
 
-s32 optionsGetPaintball(s32 mpchrnum)
+int optionsGetPaintball(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_PAINTBALL) != 0;
 }
 
-s32 optionsGetShowMissionTime(s32 mpchrnum)
+int optionsGetShowMissionTime(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_SHOWMISSIONTIME) != 0;
 }
 
-u8 optionsGetInGameSubtitles(void)
+uint8_t optionsGetInGameSubtitles(void)
 {
 	return g_InGameSubtitles;
 }
 
-u8 optionsGetCutsceneSubtitles(void)
+uint8_t optionsGetCutsceneSubtitles(void)
 {
 	return g_CutsceneSubtitles;
 }
 
-s32 optionsGetHeadRoll(s32 mpchrnum)
+int optionsGetHeadRoll(int mpchrnum)
 {
 	return (g_PlayerConfigsArray[mpchrnum].options & OPTION_HEADROLL) != 0;
 }
 
-void optionsSetForwardPitch(s32 mpchrnum, bool enable)
+void optionsSetForwardPitch(int mpchrnum, bool enable)
 {
 	if (enable) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_FORWARDPITCH;
@@ -113,7 +113,7 @@ void optionsSetForwardPitch(s32 mpchrnum, bool enable)
 	}
 }
 
-void optionsSetAutoAim(s32 mpchrnum, bool enable)
+void optionsSetAutoAim(int mpchrnum, bool enable)
 {
 	if (enable) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_AUTOAIM;
@@ -122,7 +122,7 @@ void optionsSetAutoAim(s32 mpchrnum, bool enable)
 	}
 }
 
-void optionsSetLookAhead(s32 mpchrnum, bool enable)
+void optionsSetLookAhead(int mpchrnum, bool enable)
 {
 	if (enable) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_LOOKAHEAD;
@@ -131,7 +131,7 @@ void optionsSetLookAhead(s32 mpchrnum, bool enable)
 	}
 }
 
-void optionsSetAimControl(s32 mpchrnum, s32 index)
+void optionsSetAimControl(int mpchrnum, int index)
 {
 	if (index) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_AIMCONTROL;
@@ -140,7 +140,7 @@ void optionsSetAimControl(s32 mpchrnum, s32 index)
 	}
 }
 
-void optionsSetSightOnScreen(s32 mpchrnum, bool enable)
+void optionsSetSightOnScreen(int mpchrnum, bool enable)
 {
 	if (enable) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_SIGHTONSCREEN;
@@ -149,7 +149,7 @@ void optionsSetSightOnScreen(s32 mpchrnum, bool enable)
 	}
 }
 
-void optionsSetAmmoOnScreen(s32 mpchrnum, bool enable)
+void optionsSetAmmoOnScreen(int mpchrnum, bool enable)
 {
 	if (enable) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_AMMOONSCREEN;
@@ -158,7 +158,7 @@ void optionsSetAmmoOnScreen(s32 mpchrnum, bool enable)
 	}
 }
 
-void optionsSetShowGunFunction(s32 mpchrnum, bool enable)
+void optionsSetShowGunFunction(int mpchrnum, bool enable)
 {
 	if (enable) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_SHOWGUNFUNCTION;
@@ -167,7 +167,7 @@ void optionsSetShowGunFunction(s32 mpchrnum, bool enable)
 	}
 }
 
-void optionsSetAlwaysShowTarget(s32 mpchrnum, bool enable)
+void optionsSetAlwaysShowTarget(int mpchrnum, bool enable)
 {
 	if (enable) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_ALWAYSSHOWTARGET;
@@ -176,7 +176,7 @@ void optionsSetAlwaysShowTarget(s32 mpchrnum, bool enable)
 	}
 }
 
-void optionsSetShowZoomRange(s32 mpchrnum, bool enable)
+void optionsSetShowZoomRange(int mpchrnum, bool enable)
 {
 	if (enable) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_SHOWZOOMRANGE;
@@ -185,7 +185,7 @@ void optionsSetShowZoomRange(s32 mpchrnum, bool enable)
 	}
 }
 
-void optionsSetPaintball(s32 mpchrnum, bool enable)
+void optionsSetPaintball(int mpchrnum, bool enable)
 {
 	if (enable) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_PAINTBALL;
@@ -194,7 +194,7 @@ void optionsSetPaintball(s32 mpchrnum, bool enable)
 	}
 }
 
-void optionsSetShowMissionTime(s32 mpchrnum, bool enable)
+void optionsSetShowMissionTime(int mpchrnum, bool enable)
 {
 	if (enable) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_SHOWMISSIONTIME;
@@ -203,17 +203,17 @@ void optionsSetShowMissionTime(s32 mpchrnum, bool enable)
 	}
 }
 
-void optionsSetInGameSubtitles(s32 enable)
+void optionsSetInGameSubtitles(int enable)
 {
 	g_InGameSubtitles = enable;
 }
 
-void optionsSetCutsceneSubtitles(s32 enable)
+void optionsSetCutsceneSubtitles(int enable)
 {
 	g_CutsceneSubtitles = enable;
 }
 
-void optionsSetHeadRoll(s32 mpchrnum, bool enable)
+void optionsSetHeadRoll(int mpchrnum, bool enable)
 {
 	if (enable) {
 		g_PlayerConfigsArray[mpchrnum].options |= OPTION_HEADROLL;
@@ -222,12 +222,12 @@ void optionsSetHeadRoll(s32 mpchrnum, bool enable)
 	}
 }
 
-s32 optionsGetEffectiveScreenSize(void)
+int optionsGetEffectiveScreenSize(void)
 {
 	if (g_MenuData.root == MENUROOT_TRAINING) {
 		g_MpPlayerNum = 0;
 
-		if (g_Menus[g_MpPlayerNum].curdialog && var8009dfc0) {
+		if (g_Menus[g_MpPlayerNum].curdialog && g_GamePaused) {
 			return SCREENSIZE_FULL;
 		}
 	}
@@ -247,42 +247,42 @@ s32 optionsGetEffectiveScreenSize(void)
 	return g_ScreenSize;
 }
 
-s32 optionsGetScreenSize(void)
+int optionsGetScreenSize(void)
 {
 	return g_ScreenSize;
 }
 
-void optionsSetScreenSize(s32 size)
+void optionsSetScreenSize(int size)
 {
 	g_ScreenSize = size;
 }
 
-s32 optionsGetScreenRatio(void)
+int optionsGetScreenRatio(void)
 {
 	return g_ScreenRatio;
 }
 
-void optionsSetScreenRatio(s32 ratio)
+void optionsSetScreenRatio(int ratio)
 {
 	g_ScreenRatio = SCREENRATIO_NORMAL;
 }
 
-u8 optionsGetScreenSplit(void)
+uint8_t optionsGetScreenSplit(void)
 {
 	return g_ScreenSplit;
 }
 
-void optionsSetScreenSplit(u8 split)
+void optionsSetScreenSplit(uint8_t split)
 {
 	g_ScreenSplit = split;
 }
 
-u16 optionsGetMusicVolume(void)
+uint16_t optionsGetMusicVolume(void)
 {
 	return musicGetVolume();
 }
 
-void optionsSetMusicVolume(u16 volume)
+void optionsSetMusicVolume(uint16_t volume)
 {
 	musicSetVolume(volume);
 }

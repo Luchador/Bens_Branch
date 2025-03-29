@@ -7,24 +7,24 @@
 void amTick(void);
 
 void amOpenPickTarget(void);
-MenuDialogHandlerResult menudialog000fcd48(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data);
-MenuDialogHandlerResult amPickTargetMenuDialog(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data);
+MenuDialogHandlerResult menudialog000fcd48(int operation, struct menudialogdef *dialogdef, union handlerdata *data);
+MenuDialogHandlerResult amPickTargetMenuDialog(int operation, struct menudialogdef *dialogdef, union handlerdata *data);
 void amSetAiBuddyTemperament(bool aggressive);
 void amSetAiBuddyStealth(void);
-s32 amGetFirstBuddyIndex(void);
-void amApply(s32 slot);
-void amGetSlotDetails(s32 slot, u32 *flags, char *label);
+int amGetFirstBuddyIndex(void);
+void amApply(int slot);
+void amGetSlotDetails(int slot, int32_t *flags, char *label);
 void amReset(void);
-s16 amCalculateSlotWidth(void);
-void amChangeScreen(s32 step);
+int16_t amCalculateSlotWidth(void);
+void amChangeScreen(int step);
 void amAssignWeaponSlots(void);
 void amOpen(void);
 void amClose(void);
 bool amIsCramped(void);
-void amCalculateSlotPosition(s16 column, s16 row, s16 *x, s16 *y);
-Gfx *amRenderText(Gfx *gdl, char *text, u32 colour, s16 left, s16 top);
-Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum);
-Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags);
+void amCalculateSlotPosition(int16_t column, int16_t row, int16_t *x, int16_t *y);
+Gfx *amRenderText(Gfx *gdl, char *text, int32_t colour, int16_t left, int16_t top);
+Gfx *amRenderAibotInfo(Gfx *gdl, int buddynum);
+Gfx *amRenderSlot(Gfx *gdl, char *text, int16_t x, int16_t y, int mode, int flags);
 Gfx *amRender(Gfx *gdl);
 
 #endif

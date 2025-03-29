@@ -1,10 +1,9 @@
-#include <ultra64.h>
 #include "internal.h"
 
-f32 func00045ed0(f32 arg0, f32 arg1)
+float func00045ed0(float arg0, float arg1)
 {
-	s32 arg1int = arg1;
-	f32 sp30;
+	int arg1int = arg1;
+	float sp30;
 	register bool s0;
 
 	if (arg0 != 0 && arg1 == 0) {

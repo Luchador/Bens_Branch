@@ -76,17 +76,17 @@
  * rwdata (such as the selected head).
  */
 
-u32 var8005efb0 = 0;
+uint32_t var8005efb0 = 0;
 bool g_ModelDistanceDisabled = false;
-f32 g_ModelDistanceScale = 1;
+float g_ModelDistanceScale = 1;
 bool var8005efbc = false;
-f32 var8005efc0 = 0;
+float var8005efc0 = 0;
 bool (*var8005efc4)(struct model *model, struct modelnode *node) = NULL;
-Vtx *(*g_ModelVtxAllocatorFunc)(s32 numvertices) = NULL;
-void (*g_ModelJointPositionedFunc)(s32 mtxindex, Mtxf *mtx) = NULL;
+Vtx *(*g_ModelVtxAllocatorFunc)(int numvertices) = NULL;
+void (*g_ModelJointPositionedFunc)(int mtxindex, Mtxf *mtx) = NULL;
 
 // Ben's comment: this is ancient trigonometric code using lookup tables. I'd like to replace it but it causes occasional graphical bugs. For now I'll just let it be.
-u16 var8006ae90[] = {
+uint16_t var8006ae90[] = {
 	0x8000, 0x7eba, 0x7d74, 0x7c2d, 0x7ae7, 0x79a0, 0x7859, 0x7711,
 	0x75c9, 0x7480, 0x7337, 0x71ec, 0x70a1, 0x6f55, 0x6e07, 0x6cb8,
 	0x6b68, 0x6a17, 0x68c4, 0x6770, 0x661a, 0x64c1, 0x6367, 0x620b,
@@ -106,14 +106,14 @@ u16 var8006ae90[] = {
 	0x028c, 0x01cd, 0x0000,
 };
 
-s32 func0f096890(s32 arg0)
+int func0f096890(int arg0)
 {
-	u16 *array;
-	s32 shiftamount;
-	s32 mask;
-	s32 index;
-	s32 value;
-	s32 nextvalue;
+	uint16_t *array;
+	int shiftamount;
+	int mask;
+	int index;
+	int value;
+	int nextvalue;
 
 	if (arg0 >= 32736) {
 		mask = 0x07;
@@ -138,14 +138,14 @@ s32 func0f096890(s32 arg0)
 	return value - (((value - nextvalue) * (arg0 & mask)) >> shiftamount);
 }
 
-f32 func0f096700(f32 value)
+float func0f096700(float value)
 {
 	return sqrtf(sinf(value) / cosf(value) + 1);
 }
 
-u16 acosx(s16 arg0)
+uint16_t acosx(int16_t arg0)
 {
-	s32 value = arg0 >= 0 ? arg0 : -arg0;
+	int value = arg0 >= 0 ? arg0 : -arg0;
 
 	value = func0f096890(value);
 
@@ -156,9 +156,9 @@ u16 acosx(s16 arg0)
 	return value;
 }
 
-f32 acosf(f32 value)
+float acosf(float value)
 {
-	s16 intval;
+	int16_t intval;
 
 	if (value >= 1) {
 		intval = 32767;
@@ -176,12 +176,12 @@ void modelSetDistanceChecksDisabled(bool disabled)
 	g_ModelDistanceDisabled = disabled;
 }
 
-void modelSetDistanceScale(f32 scale)
+void modelSetDistanceScale(float scale)
 {
 	g_ModelDistanceScale = scale;
 }
 
-void modelSetVtxAllocatorFunc(Vtx *(*fn)(s32 numvertices))
+void modelSetVtxAllocatorFunc(Vtx *(*fn)(int numvertices))
 {
 	g_ModelVtxAllocatorFunc = fn;
 }
@@ -193,9 +193,9 @@ void modelSetVtxAllocatorFunc(Vtx *(*fn)(s32 numvertices))
  * Position nodes support up to 3 matrices. In this case the desired one can be
  * specified with arg1.
  */
-s32 modelFindNodeMtxIndex(struct modelnode *node, s32 arg1)
+int modelFindNodeMtxIndex(struct modelnode *node, int arg1)
 {
-	s32 index;
+	int index;
 	union modelrodata *rodata1;
 	union modelrodata *rodata2;
 	union modelrodata *rodata3;
@@ -219,9 +219,9 @@ s32 modelFindNodeMtxIndex(struct modelnode *node, s32 arg1)
 	return -1;
 }
 
-Mtxf *modelFindNodeMtx(struct model *model, struct modelnode *node, s32 arg2)
+Mtxf *modelFindNodeMtx(struct model *model, struct modelnode *node, int arg2)
 {
-	s32 index = modelFindNodeMtxIndex(node, arg2);
+	int index = modelFindNodeMtxIndex(node, arg2);
 
 	if (index >= 0) {
 		return &model->matrices[index];
@@ -235,7 +235,7 @@ Mtxf *modelGetRootMtx(struct model *model)
 	return modelFindNodeMtx(model, model->definition->rootnode, 0);
 }
 
-struct modelnode *modelFindNodeByMtxIndex(struct model *model, s32 mtxindex)
+struct modelnode *modelFindNodeByMtxIndex(struct model *model, int mtxindex)
 {
 	struct modelnode *node = model->definition->rootnode;
 	union modelrodata *rodata1;
@@ -286,7 +286,7 @@ struct modelnode *modelFindNodeByMtxIndex(struct model *model, s32 mtxindex)
 struct modelnode *modelNodeFindMtxNode(struct modelnode *node)
 {
 	while (node) {
-		u32 type = node->type & 0xff;
+		uint32_t type = node->type & 0xff;
 
 		if (type == MODELNODETYPE_CHRINFO
 				|| type == MODELNODETYPE_POSITION
@@ -303,7 +303,7 @@ struct modelnode *modelNodeFindMtxNode(struct modelnode *node)
 struct modelnode *modelNodeFindParentMtxNode(struct modelnode *node)
 {
 	while ((node = node->parent)) {
-		u32 type = node->type & 0xff;
+		uint32_t type = node->type & 0xff;
 
 		if (type == MODELNODETYPE_CHRINFO
 				|| type == MODELNODETYPE_POSITION
@@ -320,7 +320,7 @@ struct modelnode *modelNodeFindChildMtxNode(struct modelnode *basenode)
 	struct modelnode *node = basenode->child;
 
 	while (node) {
-		u32 type = node->type & 0xff;
+		uint32_t type = node->type & 0xff;
 
 		if (type == MODELNODETYPE_CHRINFO
 				|| type == MODELNODETYPE_POSITION
@@ -354,7 +354,7 @@ struct modelnode *modelNodeFindChildOrParentMtxNode(struct modelnode *basenode)
 {
 	struct modelnode *node = basenode;
 	struct modelnode *next;
-	u32 type;
+	uint32_t type;
 
 	while (node) {
 		if (node != basenode && node->child) {
@@ -397,18 +397,18 @@ struct modelnode *modelNodeFindChildOrParentMtxNode(struct modelnode *basenode)
 	return node;
 }
 
-struct modelnode *modelGetPart(struct modeldef *modeldef, s32 partnum)
+struct modelnode *modelGetPart(struct modeldef *modeldef, int partnum)
 {
-	s32 upper;
-	s32 lower;
-	u32 i;
-	s16 *partnums;
+	int upper;
+	int lower;
+	uint32_t i;
+	int16_t *partnums;
 
 	if (modeldef->numparts == 0) {
 		return NULL;
 	}
 
-	partnums = (s16 *)&modeldef->parts[modeldef->numparts];
+	partnums = (int16_t *)&modeldef->parts[modeldef->numparts];
 	lower = 0;
 	upper = modeldef->numparts;
 
@@ -429,7 +429,7 @@ struct modelnode *modelGetPart(struct modeldef *modeldef, s32 partnum)
 	return NULL;
 }
 
-void *modelGetPartRodata(struct modeldef *modeldef, s32 partnum)
+void *modelGetPartRodata(struct modeldef *modeldef, int partnum)
 {
 	struct modelnode *node = modelGetPart(modeldef, partnum);
 
@@ -440,7 +440,7 @@ void *modelGetPartRodata(struct modeldef *modeldef, s32 partnum)
 	return NULL;
 }
 
-f32 modelGetScreenDistance(struct model *model)
+float modelGetScreenDistance(struct model *model)
 {
 	Mtxf *mtx = modelGetRootMtx(model);
 
@@ -455,8 +455,8 @@ f32 modelGetScreenDistance(struct model *model)
 // ntsc-beta has this function in another file
 void *modelGetNodeRwData(struct model *model, struct modelnode *node)
 {
-	u32 index = 0;
-	u32 *rwdatas = model->rwdatas;
+	uint32_t index = 0;
+	uint32_t *rwdatas = model->rwdatas;
 
 	switch (node->type & 0xff) {
 	case MODELNODETYPE_CHRINFO:
@@ -592,7 +592,7 @@ void modelNodeGetModelRelativePosition(struct model *model, struct modelnode *no
 
 	while (node) {
 		struct coord nodepos;
-		u32 type = node->type & 0xff;
+		uint32_t type = node->type & 0xff;
 
 		if (type == MODELNODETYPE_CHRINFO
 				|| type == MODELNODETYPE_POSITION
@@ -607,7 +607,7 @@ void modelNodeGetModelRelativePosition(struct model *model, struct modelnode *no
 	}
 }
 
-f32 modelGetChrRotY(struct model *model)
+float modelGetChrRotY(struct model *model)
 {
 	if ((model->definition->rootnode->type & 0xff) == MODELNODETYPE_CHRINFO) {
 		union modelrwdata *rwdata = modelGetNodeRwData(model, model->definition->rootnode);
@@ -617,11 +617,11 @@ f32 modelGetChrRotY(struct model *model)
 	return 0;
 }
 
-void modelSetChrRotY(struct model *model, f32 angle)
+void modelSetChrRotY(struct model *model, float angle)
 {
 	if ((model->definition->rootnode->type & 0xff) == MODELNODETYPE_CHRINFO) {
 		struct modelrwdata_chrinfo *rwdata = modelGetNodeRwData(model, model->definition->rootnode);
-		f32 diff = angle - rwdata->yrot;
+		float diff = angle - rwdata->yrot;
 
 		if (diff < 0) {
 			diff += M_TAU;
@@ -643,33 +643,33 @@ void modelSetChrRotY(struct model *model, f32 angle)
 	}
 }
 
-void modelSetScale(struct model *model, f32 scale)
+void modelSetScale(struct model *model, float scale)
 {
 	model->scale = scale;
 }
 
-void modelSetAnimScale(struct model *model, f32 scale)
+void modelSetAnimScale(struct model *model, float scale)
 {
 	if (model->anim) {
 		model->anim->animscale = scale;
 	}
 }
 
-f32 modelGetEffectiveScale(struct model *model)
+float modelGetEffectiveScale(struct model *model)
 {
 	return model->definition->scale * model->scale;
 }
 
-void modelTweenPos(struct coord *curpos, struct coord *goalpos, f32 frac)
+void modelTweenPos(struct coord *curpos, struct coord *goalpos, float frac)
 {
 	curpos->x += (goalpos->x - curpos->x) * frac;
 	curpos->y += (goalpos->y - curpos->y) * frac;
 	curpos->z += (goalpos->z - curpos->z) * frac;
 }
 
-f32 modelTweenRotAxis(f32 curangle, f32 goalangle, f32 mult)
+float modelTweenRotAxis(float curangle, float goalangle, float mult)
 {
-	f32 diff = goalangle - curangle;
+	float diff = goalangle - curangle;
 
 	if (goalangle < curangle) {
 		diff += M_TAU;
@@ -692,7 +692,7 @@ f32 modelTweenRotAxis(f32 curangle, f32 goalangle, f32 mult)
 	return curangle;
 }
 
-void modelTweenRot(struct coord *currot, struct coord *goalrot, f32 mult)
+void modelTweenRot(struct coord *currot, struct coord *goalrot, float mult)
 {
 	currot->x = modelTweenRotAxis(currot->x, goalrot->x, mult);
 	currot->y = modelTweenRotAxis(currot->y, goalrot->y, mult);
@@ -705,7 +705,7 @@ void modelUpdateChrInfo(struct model *model, struct modelnode *node)
 	struct anim *anim = model->anim;
 	struct coord sp34;
 	struct coord sp28;
-	f32 frac;
+	float frac;
 
 	if (!anim) {
 		return;
@@ -737,7 +737,7 @@ void modelUpdateChrInfo(struct model *model, struct modelnode *node)
 
 	if (anim->animnum2 || anim->fracmerge) {
 		if (rwdata->chrinfo.unk02) {
-			f32 y = rwdata->chrinfo.unk4c.y;
+			float y = rwdata->chrinfo.unk4c.y;
 
 			if (anim->frac2 != 0.0f) {
 				y += (rwdata->chrinfo.unk40.y - y) * anim->frac2;
@@ -797,13 +797,12 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 	struct anim *anim = model->anim;
 	union modelrodata *rodata = node->rodata;
 	union modelrwdata *rwdata = modelGetNodeRwData(model, node);
-	f32 scale = model->scale;
+	float scale = model->scale;
 	struct coord *sp254 = &rwdata->chrinfo.pos;
-	f32 sp250 = rwdata->chrinfo.yrot;
+	float sp250 = rwdata->chrinfo.yrot;
 	Mtxf *sp24c;
-	u32 stack1;
 	Mtxf *mtx = &model->matrices[rodata->chrinfo.mtxindex];
-	s32 animpart = rodata->chrinfo.animpart;
+	int animpart = rodata->chrinfo.animpart;
 	struct skeleton *skel = model->definition->skel;
 	struct coord rot1;
 	struct coord translate1;
@@ -811,16 +810,16 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 	Mtxf sp1d8;
 	Mtxf sp198;
 	Mtxf sp158;
-	f32 sp154;
+	float sp154;
 	struct coord rot2;
 	struct coord translate2;
 	struct coord scale2;
 	struct coord rot3;
 	struct coord translate3;
 	struct coord scale3;
-	f32 spfc[4];
-	f32 spec[4];
-	f32 spdc[4];
+	float spfc[4];
+	float spec[4];
+	float spdc[4];
 	struct coord rot4;
 	struct coord translate4;
 	struct coord scale4;
@@ -898,14 +897,13 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 
 void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct model *model, struct modelnode *node, struct coord *rot, struct coord *pos, bool allowscale, struct coord *arg6)
 {
-	s32 nodetype = node->type;
+	int nodetype = node->type;
 	struct modelrodata_position *rodata = &node->rodata->position;
 	Mtxf *rendermtx;
-	u32 stack;
 	Mtxf mtx68;
-	s32 mtxindex0 = rodata->mtxindex0;
-	s32 mtxindex1 = rodata->mtxindex1;
-	s32 mtxindex2 = rodata->mtxindex2;
+	int mtxindex0 = rodata->mtxindex0;
+	int mtxindex1 = rodata->mtxindex1;
+	int mtxindex2 = rodata->mtxindex2;
 	Mtxf *matrices = model->matrices;
 
 	if (node->parent != NULL) {
@@ -964,8 +962,8 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 
 	if (nodetype & MODELNODETYPE_0100) {
 		Mtxf *nodemtx = &matrices[mtxindex1];
-		f32 sp3c[4];
-		f32 sp2c[4];
+		float sp3c[4];
+		float sp2c[4];
 
 		quaternionEulerToQuat(rot, sp3c);
 		quaternion0f097518(sp3c, 0.5f, sp2c);
@@ -980,7 +978,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 
 	if (nodetype & MODELNODETYPE_0200) {
 		Mtxf *finalmtx = rendermtx ? &mtx68 : &matrices[mtxindex2];
-		f32 roty = rot->y;
+		float roty = rot->y;
 
 		if (roty < M_PI) {
 			roty *= 0.5f;
@@ -1010,16 +1008,15 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 	}
 }
 
-void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct model *model, struct modelnode *node, f32 rot[4], struct coord *pos, struct coord *arg5)
+void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct model *model, struct modelnode *node, float rot[4], struct coord *pos, struct coord *arg5)
 {
-	s32 nodetype = node->type;
+	int nodetype = node->type;
 	struct modelrodata_position *rodata = &node->rodata->position;
 	Mtxf *rendermtx;
-	u32 stack;
 	Mtxf mtx58;
-	s32 mtxindex0 = rodata->mtxindex0;
-	s32 mtxindex1 = rodata->mtxindex1;
-	s32 mtxindex2 = rodata->mtxindex2;
+	int mtxindex0 = rodata->mtxindex0;
+	int mtxindex1 = rodata->mtxindex1;
+	int mtxindex2 = rodata->mtxindex2;
 	Mtxf *matrices = model->matrices;
 
 	if (node->parent != NULL) {
@@ -1070,7 +1067,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 
 	if (nodetype & MODELNODETYPE_0100) {
 		Mtxf *nodemtx = &matrices[mtxindex1];
-		f32 sp2c[4];
+		float sp2c[4];
 
 		quaternion0f097518(rot, 0.5f, sp2c);
 
@@ -1084,7 +1081,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 
 	if (nodetype & MODELNODETYPE_0200) {
 		Mtxf *finalmtx = rendermtx ? &mtx58 : &matrices[mtxindex2];
-		f32 roty = 2.0f * acosf(rot[0]);
+		float roty = 2.0f * acosf(rot[0]);
 
 		if (roty < M_PI) {
 			roty *= 0.5f;
@@ -1118,7 +1115,7 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 {
 	struct anim *anim;
 	struct modelrodata_position *rodata = &node->rodata->position;
-	s32 animpart;
+	int animpart;
 	struct skeleton *skel;
 	struct coord rot1;
 	struct coord translate1;
@@ -1126,16 +1123,16 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 	bool sp128;
 	Mtxf spe8;
 	Mtxf *mtx;
-	f32 spe0;
+	float spe0;
 	struct coord rot2;
 	struct coord translate2;
 	struct coord scale2;
 	struct coord rot3;
 	struct coord translate3;
 	struct coord scale3;
-	f32 sp88[4];
-	f32 sp78[4];
-	f32 sp68[4];
+	float sp88[4];
+	float sp78[4];
+	float sp68[4];
 	struct coord rot4;
 	struct coord translate4;
 	struct coord scale4;
@@ -1205,7 +1202,7 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 				modelPositionJointUsingQuatRot(renderdata, model, node, sp68, &translate1, &scale1);
 			}
 		} else if (sp128) {
-			f32 mult = bgGetStageTranslationThing();
+			float mult = bgGetStageTranslationThing();
 
 			translate1.x *= mult;
 			translate1.y *= mult;
@@ -1250,7 +1247,7 @@ void modelUpdatePositionHeldNodeMtx(struct modelrenderdata *arg0, struct model *
 	union modelrodata *rodata = node->rodata;
 	Mtxf *sp68;
 	Mtxf sp28;
-	s32 mtxindex = rodata->positionheld.mtxindex;
+	int mtxindex = rodata->positionheld.mtxindex;
 	Mtxf *matrices = model->matrices;
 
 	if (node->parent) {
@@ -1275,7 +1272,7 @@ void modelUpdateDistanceRelations(struct model *model, struct modelnode *node)
 	union modelrodata *rodata = node->rodata;
 	union modelrwdata *rwdata = modelGetNodeRwData(model, node);
 	Mtxf *mtx = modelFindNodeMtx(model, node, 0);
-	f32 distance;
+	float distance;
 
 	if (g_ModelDistanceDisabled || !mtx) {
 		distance = 0;
@@ -1412,7 +1409,7 @@ void modelUpdateReorderRelations(struct model *model, struct modelnode *node)
 	Mtxf *mtx = modelFindNodeMtx(model, node, 0);
 	struct coord sp38;
 	struct coord sp2c;
-	f32 tmp;
+	float tmp;
 
 	if (rodata->reorder.side == 0) {
 		sp38.x = rodata->reorder.unk0c[0];
@@ -1464,7 +1461,7 @@ void modelUpdateRelationsQuick(struct model *model, struct modelnode *parent)
 	if (parent);
 
 	while (node) {
-		s32 type = node->type & 0xff;
+		int type = node->type & 0xff;
 		bool dochildren = true;
 
 		switch (type) {
@@ -1520,7 +1517,7 @@ void modelUpdateRelations(struct model *model)
 	struct modelnode *node = model->definition->rootnode;
 
 	while (node) {
-		u32 type = node->type & 0xff;
+		uint32_t type = node->type & 0xff;
 
 		switch (type) {
 		case MODELNODETYPE_DISTANCE:
@@ -1561,7 +1558,7 @@ void modelUpdateMatrices(struct modelrenderdata *arg0, struct model *model)
 	struct modelnode *node = model->definition->rootnode;
 
 	while (node) {
-		u32 type = node->type & 0xff;
+		uint32_t type = node->type & 0xff;
 
 		switch (type) {
 		case MODELNODETYPE_CHRINFO:
@@ -1625,9 +1622,9 @@ void modelSetMatrices(struct modelrenderdata *renderdata, struct model *model)
 void modelSetMatricesWithAnim(struct modelrenderdata *renderdata, struct model *model)
 {
 	struct anim *anim = model->anim;
-	f32 speed;
-	f32 frac;
-	f32 frac2;
+	float speed;
+	float frac;
+	float frac2;
 
 	if (anim && anim->animnum) {
 		if (PLAYERCOUNT() >= 2) {
@@ -1672,7 +1669,7 @@ void modelSetMatricesWithAnim(struct modelrenderdata *renderdata, struct model *
 	}
 }
 
-s16 modelGetAnimNum(struct model *model)
+int16_t modelGetAnimNum(struct model *model)
 {
 	if (model->anim) {
 		return model->anim->animnum;
@@ -1690,7 +1687,7 @@ bool modelIsFlipped(struct model *model)
 	return false;
 }
 
-f32 modelGetCurAnimFrame(struct model *model)
+float modelGetCurAnimFrame(struct model *model)
 {
 	if (model->anim) {
 		return model->anim->frame;
@@ -1699,7 +1696,7 @@ f32 modelGetCurAnimFrame(struct model *model)
 	return 0;
 }
 
-f32 modelGetAnimEndFrame(struct model *model)
+float modelGetAnimEndFrame(struct model *model)
 {
 	struct anim *anim = model->anim;
 
@@ -1718,7 +1715,7 @@ f32 modelGetAnimEndFrame(struct model *model)
 	return 0;
 }
 
-s32 modelGetNumAnimFrames(struct model *model)
+int modelGetNumAnimFrames(struct model *model)
 {
 	if (model->anim) {
 		return animGetNumFrames(modelGetAnimNum(model));
@@ -1727,7 +1724,7 @@ s32 modelGetNumAnimFrames(struct model *model)
 	return 0;
 }
 
-f32 modelGetAnimSpeed(struct model *model)
+float modelGetAnimSpeed(struct model *model)
 {
 	if (model->anim) {
 		return model->anim->speed;
@@ -1736,9 +1733,9 @@ f32 modelGetAnimSpeed(struct model *model)
 	return 1;
 }
 
-f32 modelGetAbsAnimSpeed(struct model *model)
+float modelGetAbsAnimSpeed(struct model *model)
 {
-	f32 speed;
+	float speed;
 
 	if (model->anim) {
 		speed = model->anim->speed;
@@ -1753,7 +1750,7 @@ f32 modelGetAbsAnimSpeed(struct model *model)
 	return 1;
 }
 
-f32 modelGetEffectiveAnimSpeed(struct model *model)
+float modelGetEffectiveAnimSpeed(struct model *model)
 {
 	if (model->anim) {
 		return modelGetAnimSpeed(model) * model->anim->playspeed;
@@ -1766,7 +1763,7 @@ f32 modelGetEffectiveAnimSpeed(struct model *model)
  * Constrain the given frame number to the bounds of the animation, unless the
  * animation is looping in which case wrap it to the other side.
  */
-s32 modelConstrainOrWrapAnimFrame(s32 frame, s16 animnum, f32 endframe)
+int modelConstrainOrWrapAnimFrame(int frame, int16_t animnum, float endframe)
 {
 	if (frame < 0) {
 		if (var8005efbc || (g_Anims[animnum].flags & ANIMFLAG_LOOP)) {
@@ -1774,7 +1771,7 @@ s32 modelConstrainOrWrapAnimFrame(s32 frame, s16 animnum, f32 endframe)
 		} else {
 			frame = 0;
 		}
-	} else if (endframe >= 0 && frame > (s32)endframe) {
+	} else if (endframe >= 0 && frame > (int)endframe) {
 		frame = (int)ceilf(endframe);
 	} else if (frame >= animGetNumFrames(animnum)) {
 		if (var8005efbc || (g_Anims[animnum].flags & ANIMFLAG_LOOP)) {
@@ -1787,11 +1784,11 @@ s32 modelConstrainOrWrapAnimFrame(s32 frame, s16 animnum, f32 endframe)
 	return frame;
 }
 
-void modelCopyAnimForMerge(struct model *model, f32 merge)
+void modelCopyAnimForMerge(struct model *model, float merge)
 {
 	struct anim *anim = model->anim;
 	struct modelnode *node;
-	u32 nodetype;
+	uint32_t nodetype;
 
 	if (anim) {
 		if (merge > 0 && anim->animnum) {
@@ -1831,13 +1828,13 @@ void modelCopyAnimForMerge(struct model *model, f32 merge)
 	}
 }
 
-void modelSetAnimation2(struct model *model, s16 animnum, s32 flip, f32 fstartframe, f32 speed, f32 merge)
+void modelSetAnimation2(struct model *model, int16_t animnum, int flip, float fstartframe, float speed, float merge)
 {
 	struct anim *anim = model->anim;
 
 	if (anim) {
-		s32 isfirstanim = !anim->animnum;
-		s32 type;
+		int isfirstanim = !anim->animnum;
+		int type;
 
 		if (anim->animnum2) {
 			anim->timemerge = merge;
@@ -1861,26 +1858,25 @@ void modelSetAnimation2(struct model *model, s16 animnum, s32 flip, f32 fstartfr
 		type = model->definition->rootnode->type & 0xff;
 
 		if (type == MODELNODETYPE_CHRINFO) {
-			u32 stack;
 			struct modelrodata_chrinfo *rodata = &model->definition->rootnode->rodata->chrinfo;
 			struct modelrwdata_chrinfo *rwdata = (struct modelrwdata_chrinfo *) modelGetNodeRwData(model, model->definition->rootnode);
-			s32 animpart = rodata->animpart;
+			int animpart = rodata->animpart;
 			struct skeleton *skel = model->definition->skel;
-			f32 scale;
-			f32 sp98;
-			f32 sp94;
+			float scale;
+			float sp98;
+			float sp94;
 			struct coord translate = {0, 0, 0};
-			f32 sp84;
-			u8 frameslot;
+			float sp84;
+			uint8_t frameslot;
 			struct coord rot1;
 			struct coord scale1;
-			f32 sp64;
+			float sp64;
 			struct coord sp58;
 			struct coord sp4c;
-			f32 angle;
-			f32 y;
-			f32 x;
-			f32 z;
+			float angle;
+			float y;
+			float x;
+			float z;
 
 			if (g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) {
 				sp64 = bgGetStageTranslationThing();
@@ -2004,7 +2000,7 @@ bool modelIsAnimMerging(struct model *model)
 	return false;
 }
 
-void modelSetAnimationWithMerge(struct model *model, s16 animnum, u32 flip, f32 startframe, f32 speed, f32 timemerge, bool domerge)
+void modelSetAnimationWithMerge(struct model *model, int16_t animnum, uint32_t flip, float startframe, float speed, float timemerge, bool domerge)
 {
 	if (model) {
 		if (model->anim && model->anim->animnum
@@ -2021,7 +2017,7 @@ void modelSetAnimationWithMerge(struct model *model, s16 animnum, u32 flip, f32 
 	}
 }
 
-void modelSetAnimation(struct model *model, s16 animnum, s32 flip, f32 startframe, f32 speed, f32 merge)
+void modelSetAnimation(struct model *model, int16_t animnum, int flip, float startframe, float speed, float merge)
 {
 	if (model) {
 		if (model->anim && model->anim->animnum
@@ -2042,7 +2038,7 @@ void modelCopyAnimData(struct model *src, struct model *dst)
 	}
 }
 
-void modelSetAnimLooping(struct model *model, f32 loopframe, f32 loopmerge)
+void modelSetAnimLooping(struct model *model, float loopframe, float loopmerge)
 {
 	if (model->anim) {
 		model->anim->looping = true;
@@ -2051,7 +2047,7 @@ void modelSetAnimLooping(struct model *model, f32 loopframe, f32 loopmerge)
 	}
 }
 
-void modelSetAnimEndFrame(struct model *model, f32 endframe)
+void modelSetAnimEndFrame(struct model *model, float endframe)
 {
 	struct anim *anim = model->anim;
 
@@ -2072,7 +2068,7 @@ void modelSetAnimFlipFunction(struct model *model, void *callback)
 }
 
 #if VERSION < VERSION_NTSC_1_0
-void modelSetAnimUnk6c(struct model *model, s32 value)
+void modelSetAnimUnk6c(struct model *model, int value)
 {
 	if (model->anim) {
 		model->anim->unk6c = value;
@@ -2080,7 +2076,7 @@ void modelSetAnimUnk6c(struct model *model, s32 value)
 }
 #endif
 
-void modelSetAnimSpeed(struct model *model, f32 speed, f32 startframe)
+void modelSetAnimSpeed(struct model *model, float speed, float startframe)
 {
 	struct anim *anim = model->anim;
 
@@ -2097,11 +2093,11 @@ void modelSetAnimSpeed(struct model *model, f32 speed, f32 startframe)
 	}
 }
 
-void modelSetAnimSpeedAuto(struct model *model, f32 arg1, f32 startframe)
+void modelSetAnimSpeedAuto(struct model *model, float arg1, float startframe)
 {
 	struct anim *anim = model->anim;
-	f32 tmp;
-	f32 speed;
+	float tmp;
+	float speed;
 
 	if (anim) {
 		if (anim->frame <= arg1) {
@@ -2116,7 +2112,7 @@ void modelSetAnimSpeedAuto(struct model *model, f32 arg1, f32 startframe)
 	}
 }
 
-void modelSetAnimPlaySpeed(struct model *model, f32 speed, f32 startframe)
+void modelSetAnimPlaySpeed(struct model *model, float speed, float startframe)
 {
 	struct anim *anim = model->anim;
 
@@ -2140,10 +2136,10 @@ void modelSetAnim70(struct model *model, void *callback)
 	}
 }
 
-void modelSetAnimFrame(struct model *model, f32 frame)
+void modelSetAnimFrame(struct model *model, float frame)
 {
-	s32 framea;
-	s32 frameb;
+	int framea;
+	int frameb;
 	bool forwards;
 	struct anim *anim = model->anim;
 
@@ -2169,7 +2165,7 @@ void modelSetAnimFrame(struct model *model, f32 frame)
 	}
 }
 
-void modelSetAnimFrame2(struct model *model, f32 frame1, f32 frame2)
+void modelSetAnimFrame2(struct model *model, float frame1, float frame2)
 {
 	struct anim *anim = model->anim;
 
@@ -2177,8 +2173,8 @@ void modelSetAnimFrame2(struct model *model, f32 frame1, f32 frame2)
 		modelSetAnimFrame(model, frame1);
 
 		if (anim->animnum2) {
-			s32 framea = (int)floorf(frame2);
-			s32 frameb;
+			int framea = (int)floorf(frame2);
+			int frameb;
 			bool forwards = anim->speed2 >= 0;
 
 			frameb = (forwards ? framea + 1 : framea - 1);
@@ -2212,43 +2208,42 @@ bool modelIsAnimMergingEnabled(void)
 	return g_ModelAnimMergingEnabled;
 }
 
-void modelSetAnimFrame2WithChrStuff(struct model *model, f32 curframe, f32 endframe, f32 curframe2, f32 endframe2)
+void modelSetAnimFrame2WithChrStuff(struct model *model, float curframe, float endframe, float curframe2, float endframe2)
 {
 	struct anim *anim = model->anim;
 
 	if (anim != NULL) {
 		struct modelnode *rootnode = model->definition->rootnode;
-		u16 nodetype = rootnode->type;
+		uint16_t nodetype = rootnode->type;
 
 		if ((nodetype & 0xff) == MODELNODETYPE_CHRINFO) {
 			struct modelrodata_chrinfo *rodata = &rootnode->rodata->chrinfo;
 			struct modelrwdata_chrinfo *rwdata = modelGetNodeRwData(model, rootnode);
 
 			if (rwdata->unk00 == 0) {
-				s32 animpart = rodata->animpart;
+				int animpart = rodata->animpart;
 				struct skeleton *skel = model->definition->skel;
-				f32 scale = model->scale * anim->animscale;
-				f32 sine;
-				f32 cosine;
+				float scale = model->scale * anim->animscale;
+				float sine;
+				float cosine;
 				struct coord translate = {0, 0, 0};
-				u8 frameslot;
-				f32 f20;
-				s32 floorcur;
-				s32 floorend;
+				uint8_t frameslot;
+				float f20;
+				int floorcur;
+				int floorend;
 				struct coord spe0;
-				f32 f30;
+				float f30;
 				struct coord spd0;
-				f32 spcc;
-				s32 spc8;
+				float spcc;
+				int spc8;
 				bool forwards;
-				f32 absspeed;
-				f32 absspeed2;
-				f32 f22;
-				s32 s0frame;
+				float absspeed;
+				float absspeed2;
+				float f22;
+				int s0frame;
 				struct coord rot1;
 				struct coord scale1;
 				struct coord sp90;
-				u32 stack;
 
 				spe0.x = rwdata->unk34.x;
 				spe0.y = rwdata->unk34.y;
@@ -2438,7 +2433,7 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, f32 curframe, f32 endfr
 								spd0.z = -translate.x * sine + translate.f[2] * cosine;
 
 								if (absspeed > 0.0f) {
-									f32 f0 = anim->fracmerge - anim->playspeed / (absspeed * anim->timemerge);
+									float f0 = anim->fracmerge - anim->playspeed / (absspeed * anim->timemerge);
 
 									if (f0 < 0.0f) {
 										f0 = 0.0f;
@@ -2467,7 +2462,7 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, f32 curframe, f32 endfr
 							}
 
 							if (rwdata->unk5c > 0.0f && absspeed > 0.0f) {
-								f32 increment = 1.0f / absspeed;
+								float increment = 1.0f / absspeed;
 
 								if (increment > rwdata->unk5c) {
 									increment = rwdata->unk5c;
@@ -2521,8 +2516,8 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, f32 curframe, f32 endfr
 				}
 
 				if (anim->animnum2 && (g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) == 0) {
-					s32 floorcur2 = (int)floorf(curframe2);
-					s32 floorend2 = (int)floorf(endframe2);
+					int floorcur2 = (int)floorf(curframe2);
+					int floorend2 = (int)floorf(endframe2);
 
 					if ((forwards && floorcur2 < floorend2) || (!forwards && floorend2 < floorcur2)) {
 						if (rwdata->unk02 != 0) {
@@ -2569,15 +2564,15 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, f32 curframe, f32 endfr
 	}
 }
 
-void modelTickAnimQuarterSpeed(struct model *model, s32 lvupdate240, bool arg2)
+void modelTickAnimQuarterSpeed(struct model *model, int lvupdate240, bool arg2)
 {
-	f32 frame;
-	f32 frame2;
-	f32 speed;
-	f32 speed2;
-	f32 startframe;
-	f32 endframe;
-	f32 realendframe;
+	float frame;
+	float frame2;
+	float speed;
+	float speed2;
+	float startframe;
+	float endframe;
+	float realendframe;
 	struct anim *anim = model->anim;
 
 	if (anim && lvupdate240 > 0) {
@@ -2662,10 +2657,10 @@ void modelTickAnimQuarterSpeed(struct model *model, s32 lvupdate240, bool arg2)
 				}
 
 				if ((speed >= 0 && frame >= endframe) || (speed < 0 && frame <= endframe)) {
-					f32 prevnewspeed = anim->newspeed;
-					f32 prevoldspeed = anim->oldspeed;
-					f32 prevtimespeed = anim->timespeed;
-					f32 prevelapsespeed = anim->elapsespeed;
+					float prevnewspeed = anim->newspeed;
+					float prevoldspeed = anim->oldspeed;
+					float prevtimespeed = anim->timespeed;
+					float prevelapsespeed = anim->elapsespeed;
 
 					if (arg2) {
 						modelSetAnimFrame2WithChrStuff(model, anim->frame, endframe, 0, 0);
@@ -2713,15 +2708,15 @@ void modelTickAnimQuarterSpeed(struct model *model, s32 lvupdate240, bool arg2)
 /**
  * This is identical to the above function but removes the 0.25f multipliers.
  */
-void modelTickAnim(struct model *model, s32 lvupdate240, bool arg2)
+void modelTickAnim(struct model *model, int lvupdate240, bool arg2)
 {
-	f32 frame;
-	f32 frame2;
-	f32 speed;
-	f32 speed2;
-	f32 startframe;
-	f32 endframe;
-	f32 realendframe;
+	float frame;
+	float frame2;
+	float speed;
+	float speed2;
+	float startframe;
+	float endframe;
+	float realendframe;
 	struct anim *anim = model->anim;
 
 	if (anim && lvupdate240 > 0) {
@@ -2806,10 +2801,10 @@ void modelTickAnim(struct model *model, s32 lvupdate240, bool arg2)
 				}
 
 				if ((speed >= 0 && frame >= endframe) || (speed < 0 && frame <= endframe)) {
-					f32 prevnewspeed = anim->newspeed;
-					f32 prevoldspeed = anim->oldspeed;
-					f32 prevtimespeed = anim->timespeed;
-					f32 prevelapsespeed = anim->elapsespeed;
+					float prevnewspeed = anim->newspeed;
+					float prevoldspeed = anim->oldspeed;
+					float prevtimespeed = anim->timespeed;
+					float prevelapsespeed = anim->elapsespeed;
 
 					if (arg2) {
 						modelSetAnimFrame2WithChrStuff(model, anim->frame, endframe, 0, 0);
@@ -2970,7 +2965,7 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 			}
 		}
 	} else if (renderdata->unk30 == 5) {
-		u8 alpha;
+		uint8_t alpha;
 
 		if (arg1) {
 			gDPPipeSync(renderdata->gdl++);
@@ -3130,7 +3125,7 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 			}
 		}
 	} else if (renderdata->unk30 == 5) {
-		u8 alpha;
+		uint8_t alpha;
 
 		gDPPipeSync(renderdata->gdl++);
 		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
@@ -3339,7 +3334,7 @@ void modelRenderNodeStarGunfire(struct modelrenderdata *renderdata, struct model
 {
 	if (renderdata->flags & MODELRENDERFLAG_XLU) {
 		struct modelrodata_stargunfire *rodata = &node->rodata->stargunfire;
-		s32 i;
+		int i;
 
 		if (rodata->gdl) {
 			Vtx *src = (Vtx *) rodata->vertices;
@@ -3353,15 +3348,15 @@ void modelRenderNodeStarGunfire(struct modelrenderdata *renderdata, struct model
 			gSPDisplayList(renderdata->gdl++, rodata->gdl);
 
 			for (i = 0; i < rodata->unk00; i++) {
-				u16 rand1 = (rngRandom() << 10) & 0xffff;
-				s32 s4 = ((coss(rand1) << 5) * 181) >> 18;
-				s32 s3 = ((sins(rand1) << 5) * 181) >> 18;
-				s32 s1 = rngRandom() >> 31;
-				s32 mult = 0x10000 - (rngRandom() & 0x3fff);
-				s32 corner1 = 0x200 + s3;
-				s32 corner2 = 0x200 - s3;
-				s32 corner3 = 0x200 - s4;
-				s32 corner4 = 0x200 + s4;
+				uint16_t rand1 = (rngRandom() << 10) & 0xffff;
+				int s4 = ((coss(rand1) << 5) * 181) >> 18;
+				int s3 = ((sins(rand1) << 5) * 181) >> 18;
+				int s1 = rngRandom() >> 31;
+				int mult = 0x10000 - (rngRandom() & 0x3fff);
+				int corner1 = 0x200 + s3;
+				int corner2 = 0x200 - s3;
+				int corner3 = 0x200 - s4;
+				int corner4 = 0x200 + s4;
 
 				dst[0] = src[0];
 				dst[1] = src[1];
@@ -3399,45 +3394,44 @@ void modelRenderNodeStarGunfire(struct modelrenderdata *renderdata, struct model
 	}
 }
 
-void modelSelectTexture(struct modelrenderdata *renderdata, struct textureconfig *tconfig, s32 arg2)
+void modelSelectTexture(struct modelrenderdata *renderdata, struct textureconfig *tconfig, int arg2)
 {
 	texSelect(&renderdata->gdl, tconfig, arg2, renderdata->zbufferenabled, 2, 1, NULL);
 }
 
 void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model *model, struct modelnode *node)
 {
-	u32 stack[3];
-	f32 negspc0;
+	float negspc0;
 	struct modelrodata_chrgunfire *rodata = &node->rodata->chrgunfire;
 	union modelrwdata *rwdata = modelGetNodeRwData(model, node);
 	Vtx *vertices;
-	f32 spf0;
-	f32 spec;
+	float spf0;
+	float spec;
 	struct coord spe0;
-	f32 spdc;
-	f32 spd8;
-	f32 rot2;
-	f32 spd0;
-	f32 spcc;
-	f32 spc8;
-	f32 spc4;
-	f32 spc0;
-	f32 spbc;
-	f32 negspcc;
-	f32 negspc8;
-	f32 scale;
+	float spdc;
+	float spd8;
+	float rot2;
+	float spd0;
+	float spcc;
+	float spc8;
+	float spc4;
+	float spc0;
+	float spbc;
+	float negspcc;
+	float negspc8;
+	float scale;
 	Mtxf *mtx;
-	f32 tmp;
+	float tmp;
 	struct coord sp9c;
 	struct coord sp90;
 	Vtx vtxtemplate = {0};
 	Col colourtemplate = {0xffffffff};
 	struct textureconfig *tconfig;
 	Col *colours;
-	f32 distance;
+	float distance;
 
 	if ((renderdata->flags & MODELRENDERFLAG_XLU) && rwdata->chrgunfire.visible) {
-		s32 index = modelFindNodeMtxIndex(node, 0);
+		int index = modelFindNodeMtxIndex(node, 0);
 		mtx = &model->matrices[index];
 
 		spe0.x = -(rodata->pos.f[0] * mtx->m[0][0] + rodata->pos.f[1] * mtx->m[1][0] + rodata->pos.f[2] * mtx->m[2][0] + mtx->m[3][0]);
@@ -3447,7 +3441,7 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 		distance = sqrtf(spe0.f[0] * spe0.f[0] + spe0.f[1] * spe0.f[1] + spe0.f[2] * spe0.f[2]);
 
 		if (distance > 0) {
-			f32 tmp = 1 / (model->scale * distance);
+			float tmp = 1 / (model->scale * distance);
 			spe0.f[0] *= tmp;
 			spe0.f[1] *= tmp;
 			spe0.f[2] *= tmp;
@@ -3519,10 +3513,10 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
 
 		if (rodata->texture) {
-			s32 centre;
-			u16 sp62;
-			s32 sp5c;
-			s32 sp58;
+			int centre;
+			uint16_t sp62;
+			int sp5c;
+			int sp58;
 
 			tconfig = rodata->texture;
 
@@ -3558,7 +3552,7 @@ void modelRender(struct modelrenderdata *renderdata, struct model *model)
 {
 	union modelrodata *rodata;
 	union modelrwdata *rwdata;
-	u32 type;
+	uint32_t type;
 	struct modelnode *node = model->definition->rootnode;
 
 	gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_MTX, model->matrices);
@@ -3631,50 +3625,44 @@ void modelRender(struct modelrenderdata *renderdata, struct model *model)
 
 bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct coord *arg2, struct coord *arg3)
 {
-	f32 xthingx;
-	f32 xthingy;
-	f32 xthingz;
-	u32 stack1[3];
-	f32 xsum1;
-	f32 xsum2;
-	f32 xsum3;
+	float xthingx;
+	float xthingy;
+	float xthingz;
+	float xsum1;
+	float xsum2;
+	float xsum3;
+	float f0;
+	float ythingx;
+	float ythingy;
+	float ythingz;
+	float ysum1;
+	float ysum2;
+	float ysum3;
 
-	f32 f0;
-	u32 stack;
+	float mult1;
+	float mult2;
 
-	f32 ythingx;
-	f32 ythingy;
-	f32 ythingz;
-	u32 stack2[3];
-	f32 ysum1;
-	f32 ysum2;
-	f32 ysum3;
+	float bestsum2;
+	float bestsum1;
+	float anotherbestsum3;
+	float anotherbestsum1;
 
-	f32 mult1;
-	f32 mult2;
+	float xmin = bbox->xmin;
+	float xmax = bbox->xmax;
+	float ymin = bbox->ymin;
+	float ymax = bbox->ymax;
+	float zmin = bbox->zmin;
+	float zmax = bbox->zmax;
 
-	f32 bestsum2;
-	f32 bestsum1;
-	f32 anotherbestsum3;
-	f32 anotherbestsum1;
+	float mult3;
+	float mult4;
 
-	f32 xmin = bbox->xmin;
-	f32 xmax = bbox->xmax;
-	f32 ymin = bbox->ymin;
-	f32 ymax = bbox->ymax;
-	f32 zmin = bbox->zmin;
-	f32 zmax = bbox->zmax;
-
-	f32 mult3;
-	f32 mult4;
-
-	f32 zthingx;
-	f32 zthingy;
-	f32 zthingz;
-	u32 stack3[3];
-	f32 zsum1;
-	f32 zsum2;
-	f32 zsum3;
+	float zthingx;
+	float zthingy;
+	float zthingz;
+	float zsum1;
+	float zsum2;
+	float zsum3;
 
 	if (var8005efc0 != 0.0f) {
 		xmin -= var8005efc0;
@@ -3709,7 +3697,7 @@ bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct co
 	}
 
 	if (xsum3 < xsum2) {
-		f32 tmp = xsum2;
+		float tmp = xsum2;
 		xsum2 = xsum3;
 		xsum3 = tmp;
 	}
@@ -3738,7 +3726,7 @@ bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct co
 	}
 
 	if (ysum3 < ysum2) {
-		f32 tmp = ysum2;
+		float tmp = ysum2;
 		ysum2 = ysum3;
 		ysum3 = tmp;
 	}
@@ -3797,7 +3785,7 @@ bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct co
 	}
 
 	if (zsum3 < zsum2) {
-		f32 tmp = zsum2;
+		float tmp = zsum2;
 		zsum2 = zsum3;
 		zsum3 = tmp;
 	}
@@ -3821,14 +3809,14 @@ bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct co
  * This is okay for most objects as well as shielded chrs.
  * For non-shielded chrs, an accurate polygon test is done elsewhere.
  */
-s32 modelTestForHit(struct model *model, struct coord *arg1, struct coord *arg2, struct modelnode **startnode)
+int modelTestForHit(struct model *model, struct coord *arg1, struct coord *arg2, struct modelnode **startnode)
 {
 	struct modelnode *node;
 	bool dochildren = true;
 	Mtxf *mtx;
 	union modelrodata *rodata;
 	union modelrwdata *rwdata;
-	u32 type;
+	uint32_t type;
 
 	if (model);
 
@@ -3910,13 +3898,13 @@ s32 modelTestForHit(struct model *model, struct coord *arg1, struct coord *arg2,
 	if (var) \
 		var = (void *)((uintptr_t)var + diff)
 
-void modelPromoteNodeOffsetsToPointers(struct modelnode *node, u32 vma, uintptr_t fileramaddr)
+void modelPromoteNodeOffsetsToPointers(struct modelnode *node, uint32_t vma, uintptr_t fileramaddr)
 {
 	union modelrodata *rodata;
     uintptr_t diff = fileramaddr - vma;
 
 	while (node) {
-		u32 type = node->type & 0xff;
+		uint32_t type = node->type & 0xff;
 
 		PROMOTE(node->rodata);
 		PROMOTE(node->parent);
@@ -4004,11 +3992,11 @@ void modelPromoteNodeOffsetsToPointers(struct modelnode *node, u32 vma, uintptr_
  * Offsets in model files are based from virtual memory address 0x0f000000.
  * This vma address is specified as an argument to the function.
  */
-void modelPromoteOffsetsToPointers(struct modeldef *modeldef, u32 vma, uintptr_t fileramaddr)
+void modelPromoteOffsetsToPointers(struct modeldef *modeldef, uint32_t vma, uintptr_t fileramaddr)
 {
 	uintptr_t diff = fileramaddr - vma;
-	s32 i;
-	s16 *partnums;
+	int i;
+	int16_t *partnums;
 
 	PROMOTE(modeldef->rootnode);
 	PROMOTE(modeldef->parts);
@@ -4021,11 +4009,11 @@ void modelPromoteOffsetsToPointers(struct modeldef *modeldef, u32 vma, uintptr_t
 	modelPromoteNodeOffsetsToPointers(modeldef->rootnode, vma, fileramaddr);
 
 	// Sort parts by part number so they can be bisected during lookup
-	partnums = (s16 *)&modeldef->parts[modeldef->numparts];
+	partnums = (int16_t *)&modeldef->parts[modeldef->numparts];
 
 	if (modeldef->numparts) {
 		struct modelnode *tmpnode;
-		s16 tmpnum;
+		int16_t tmpnum;
 		bool changed;
 
 		do {
@@ -4048,14 +4036,14 @@ void modelPromoteOffsetsToPointers(struct modeldef *modeldef, u32 vma, uintptr_t
 	}
 }
 
-s32 modelCalculateRwDataIndexes(struct modelnode *basenode)
+int modelCalculateRwDataIndexes(struct modelnode *basenode)
 {
-	u16 len = 0;
+	uint16_t len = 0;
 	struct modelnode *node = basenode;
 	union modelrodata *rodata;
 
 	while (node) {
-		u32 type = node->type & 0xff;
+		uint32_t type = node->type & 0xff;
 
 		switch (type) {
 		case MODELNODETYPE_CHRINFO:
@@ -4140,7 +4128,7 @@ void modelInitRwData(struct model *model, struct modelnode *startnode)
 	union modelrwdata *rwdata;
 
 	while (node) {
-		u32 type = node->type & 0xff;
+		uint32_t type = node->type & 0xff;
 
 		switch (type) {
 		case MODELNODETYPE_CHRINFO:
@@ -4238,7 +4226,7 @@ void modelInitRwData(struct model *model, struct modelnode *startnode)
 	}
 }
 
-void modelInit(struct model *model, struct modeldef *modeldef, u32 *rwdatas, bool resetanim)
+void modelInit(struct model *model, struct modeldef *modeldef, uint32_t *rwdatas, bool resetanim)
 {
 	struct modelnode *node;
 
@@ -4253,7 +4241,7 @@ void modelInit(struct model *model, struct modeldef *modeldef, u32 *rwdatas, boo
 	node = modeldef->rootnode;
 
 	while (node) {
-		u32 type = node->type & 0xff;
+		uint32_t type = node->type & 0xff;
 
 		if (type == MODELNODETYPE_HEADSPOT) {
 			model->unk00 |= 1;
@@ -4354,7 +4342,7 @@ void modelIterateDisplayLists(struct modeldef *modeldef, struct modelnode **node
 	}
 
 	while (node) {
-		u32 type = node->type & 0xff;
+		uint32_t type = node->type & 0xff;
 
 		switch (type) {
 		case MODELNODETYPE_GUNDL:
@@ -4420,7 +4408,7 @@ void modelIterateDisplayLists(struct modeldef *modeldef, struct modelnode **node
 void modelNodeReplaceGdl(struct modeldef *modeldef, struct modelnode *node, Gfx *find, Gfx *replacement)
 {
 	union modelrodata *rodata;
-	u32 type = node->type & 0xff;
+	uint32_t type = node->type & 0xff;
 
 	switch (type) {
 	case MODELNODETYPE_GUNDL:

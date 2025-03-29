@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <stdint.h>
 #include "constants.h"
 #include "lib/sched.h"
 #include "string.h"
@@ -15,10 +14,10 @@
 #include "string.h"
 #include "types.h"
 
-u32 g_CheatsActiveBank0;
-u32 g_CheatsActiveBank1;
-u32 g_CheatsEnabledBank0;
-u32 g_CheatsEnabledBank1;
+uint32_t g_CheatsActiveBank0;
+uint32_t g_CheatsActiveBank1;
+uint32_t g_CheatsEnabledBank0;
+uint32_t g_CheatsEnabledBank1;
 
 struct menuitem g_CheatsBuddiesMenuItems[];
 struct menudialogdef g_CheatsBuddiesMenuDialog;
@@ -74,10 +73,10 @@ struct cheat g_Cheats[] = {
 	{ L_MPWEAPONS_057, 0,                 SOLOSTAGEINDEX_DEFENSE,        DIFF_PA, CHEATFLAG_COMPLETION                         }, // Dinner Party
 };
 
-u32 cheatIsUnlocked(int cheat_id)
+uint32_t cheatIsUnlocked(int cheat_id)
 {
 	struct cheat *cheat = &g_Cheats[cheat_id];
-	u32 unlocked = 0;
+	uint32_t unlocked = 0;
 
 	if (cheat->flags & CHEATFLAG_FIRINGRANGE) {
 		if (frIsClassicWeaponUnlocked(cheat->time)) {
@@ -118,7 +117,7 @@ bool cheatIsActive(int cheat_id)
 
 void cheatActivate(int cheat_id)
 {
-	u32 prevplayernum;
+	uint32_t prevplayernum;
 	int playernum;
 
 	switch (cheat_id) {
@@ -157,7 +156,7 @@ void cheatActivate(int cheat_id)
 
 void cheatDeactivate(int cheat_id)
 {
-	u32 prevplayernum;
+	uint32_t prevplayernum;
 	int playernum;
 
 	switch (cheat_id) {
@@ -430,7 +429,7 @@ struct menudialogdef g_CheatsWarningMenuDialog = {
  */
 char *cheatGetMarquee(struct menuitem *arg0)
 {
-	u32 cheat_id;
+	uint32_t cheat_id;
 	char *ptr;
 	char difficultyname[256];
 	char cheatname[256];

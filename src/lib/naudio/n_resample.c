@@ -1,14 +1,15 @@
 #include "n_synthInternals.h"
+#include <math.h>
 #include <os.h>
 #include <stdint.h>
 
-Acmd *n_alResamplePull(N_PVoice *e, s16 *outp, Acmd *p)
+Acmd *n_alResamplePull(N_PVoice *e, int16_t *outp, Acmd *p)
 {
 	Acmd *ptr = p;
-	s16 inp;
-	s32 inCount;
-	s32	incr;
-	f32 finCount;
+	int16_t inp;
+	int inCount;
+	int	incr;
+	float finCount;
 
 	inp = N_AL_DECODER_OUT;
 
@@ -30,15 +31,15 @@ Acmd *n_alResamplePull(N_PVoice *e, s16 *outp, Acmd *p)
 		/*
 		 * quantize the pitch
 		 */
-		e->rs_ratio = (s32)(e->rs_ratio * UNITY_PITCH);
+		e->rs_ratio = (int)(e->rs_ratio * UNITY_PITCH);
 		e->rs_ratio = e->rs_ratio / UNITY_PITCH;
 
 		/*
 		 * determine how many samples to generate
 		 */
-		finCount = e->rs_delta + (e->rs_ratio * (f32)FIXED_SAMPLE);
-		inCount = (s32) finCount;
-		e->rs_delta = finCount - (f32)inCount;
+		finCount = e->rs_delta + (e->rs_ratio * (float)FIXED_SAMPLE);
+		inCount = (int) finCount;
+		e->rs_delta = finCount - (float)inCount;
 
 		/*
 		 * ask all filters upstream from us to build their command
@@ -49,7 +50,7 @@ Acmd *n_alResamplePull(N_PVoice *e, s16 *outp, Acmd *p)
 		/*
 		 * construct our portion of the command list
 		 */
-		incr = (s32)(e->rs_ratio * UNITY_PITCH);
+		incr = (int)(e->rs_ratio * UNITY_PITCH);
 		n_aResample(ptr++, (uintptr_t)(e->rs_state), e->rs_first, incr, inp, 0);
 		e->rs_first = 0;
 	}
@@ -57,7 +58,7 @@ Acmd *n_alResamplePull(N_PVoice *e, s16 *outp, Acmd *p)
 	return ptr;
 }
 
-s32 n_alResampleParam(N_PVoice *filter, s32 paramID, void *param)
+int n_alResampleParam(N_PVoice *filter, int paramID, void *param)
 {
 	n_alLoadParam(filter,  paramID, param);
 	return 0;

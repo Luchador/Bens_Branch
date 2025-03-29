@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/menuutils.h"
@@ -47,29 +47,24 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "video.h"
 #include "input.h"
 #include "platform.h"
 #define BLUR_OFS 10
-#else
-#define BLUR_OFS 30
-#endif
+#include <game/debug.h>
 
 char g_CheatMarqueeString[252];
 
-u8 *g_BlurBuffer;
-s32 var8009dfc0;
-u32 var8009dfc4;
+uint8_t *g_BlurBuffer;
+bool g_GamePaused;
 struct briefing g_Briefing;
-u32 var8009dfe4;
 struct missionconfig g_MissionConfig;
 struct menu g_Menus[MAX_PLAYERS];
 struct menudata g_MenuData;
-s32 g_MenuScissorX1;
-s32 g_MenuScissorX2;
-s32 g_MenuScissorY1;
-s32 g_MenuScissorY2;
+int g_MenuScissorX1;
+int g_MenuScissorX2;
+int g_MenuScissorY1;
+int g_MenuScissorY2;
 Vp var800a2048[MAX_PLAYERS][2];
 
 struct menudialogdef g_PakCannotReadGameBoyMenuDialog;
@@ -108,20 +103,20 @@ const struct menucolourpalette g_MenuWave2Colours[] = {
 };
 
 char *g_StringPointer = g_CheatMarqueeString;
-char *g_StringPointer2 = &g_CheatMarqueeString[VERSION >= VERSION_PAL_FINAL ? 150 : 125];
+char *g_StringPointer2 = &g_CheatMarqueeString[125];
 
-s32 g_MpPlayerNum = 0;
+int g_MpPlayerNum = 0;
 
-s32 g_MenuMouseControl = true;
-s32 g_MenuUsingMouse = false;
-s32 g_MenuKeyboardPlayer = -1;
+int g_MenuMouseControl = true;
+int g_MenuUsingMouse = false;
+int g_MenuKeyboardPlayer = -1;
 
-void menuPlaySound(s32 menusound)
+void menuPlaySound(int menusound)
 {
-	s32 sound = -1;
-	s32 setpitch = false;
-	s32 setvol = false;
-	f32 pitch = 1;
+	int sound = -1;
+	int setpitch = false;
+	int setvol = false;
+	float pitch = 1;
 
 	switch (menusound) {
 	case MENUSOUND_SWIPE:
@@ -172,7 +167,7 @@ void menuPlaySound(s32 menusound)
 		handle = sndStart(var80095200, sound, NULL, -1, -1, -1, -1, -1);
 
 		if (handle && setpitch) {
-			audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *)&pitch);
+			audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(int *)&pitch);
 		}
 
 		if (handle && setvol) {
@@ -200,7 +195,7 @@ bool menuIsSoloMissionOrMp(void)
 
 bool currentPlayerIsMenuOpenInSoloOrMp(void)
 {
-	s32 mpindex = g_Vars.currentplayerstats->mpindex;
+	int mpindex = g_Vars.currentplayerstats->mpindex;
 
 	if (menuIsSoloMissionOrMp()) {
 		if (mpindex >= 4) {
@@ -224,7 +219,7 @@ bool func0f0f0c68(void)
 	return true;
 }
 
-void menuSetBanner(s32 bannernum, bool allplayers)
+void menuSetBanner(int bannernum, bool allplayers)
 {
 	if (allplayers) {
 		g_MenuData.bannernum = bannernum;
@@ -234,22 +229,22 @@ void menuSetBanner(s32 bannernum, bool allplayers)
 	g_Menus[g_MpPlayerNum].bannernum = bannernum;
 }
 
-Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 msgnum, s32 arg7, s32 arg8)
+Gfx *menuRenderBanner(Gfx *gdl, int x1, int y1, int x2, int y2, bool big, int msgnum, int arg7, int arg8)
 {
-	s32 midx;
-	s32 x;
-	s32 y;
-	s32 texttop;
-	s32 textheight;
-	s32 textwidth;
-	s32 waitheight;
-	s32 waitwidth;
-	s32 bannertop;
-	s32 bannerbottom;
+	int midx;
+	int x;
+	int y;
+	int texttop;
+	int textheight;
+	int textwidth;
+	int waitheight;
+	int waitwidth;
+	int bannertop;
+	int bannerbottom;
 	struct fontchar *chars;
 	struct font *font;
 
-	static u16 msgs[] = {
+	static uint16_t msgs[] = {
 		L_MPMENU_484, // "Searching for Camera!"
 		L_MPMENU_485, // "Calibrating Camera"
 		L_MPMENU_486, // "Downloading Image"
@@ -349,7 +344,7 @@ Gfx *menuRenderBanner(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, bool big, s32 ms
 
 struct menudfc *func0f0f1338(struct menuitem *item)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_Menus[0].unkdfc); i++) {
 		if (g_Menus[g_MpPlayerNum].unkdfc[i].item == item) {
@@ -360,7 +355,7 @@ struct menudfc *func0f0f1338(struct menuitem *item)
 	return NULL;
 }
 
-void func0f0f139c(struct menuitem *item, f32 arg1)
+void func0f0f139c(struct menuitem *item, float arg1)
 {
 	struct menudfc *thing = func0f0f1338(item);
 
@@ -388,7 +383,7 @@ void func0f0f13ec(struct menuitem *item)
 
 void func0f0f1418(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_Menus[0].unkdfc); i++) {
 		if (g_Menus[g_MpPlayerNum].unkdfc[i].item) {
@@ -399,7 +394,7 @@ void func0f0f1418(void)
 
 void func0f0f1494(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_Menus[0].unkdfc); i++) {
 		g_Menus[g_MpPlayerNum].unkdfc[i].item = NULL;
@@ -448,7 +443,7 @@ char *menuResolveDialogTitle(struct menudialogdef *dialogdef)
 	return menuResolveText(dialogdef->title, dialogdef);
 }
 
-void menuGetItemBlocksRequired(struct menuitem *item, s32 *numwords)
+void menuGetItemBlocksRequired(struct menuitem *item, int *numwords)
 {
 	switch (item->type) {
 	case MENUITEMTYPE_SLIDER:
@@ -485,18 +480,18 @@ void menuGetItemBlocksRequired(struct menuitem *item, s32 *numwords)
 	}
 }
 
-void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struct menudialog *dialog)
+void menuCalculateItemSize(struct menuitem *item, int16_t *width, int16_t *height, struct menudialog *dialog)
 {
 	char *text;
-	s32 textwidth;
-	s32 textheight;
+	int textwidth;
+	int textheight;
 	struct fontchar *chars = g_CharsHandelGothicSm;
 	struct font *font = g_FontHandelGothicSm;
-	s32 i;
+	int i;
 	union handlerdata handlerdata;
 	union handlerdata handlerdata2;
 	char *text2;
-	s32 numobjectives;
+	int numobjectives;
 
 	// Check if item's handler handles MENUOP_CHECKHIDDEN
 	if (item->handler && (item->flags & MENUITEMFLAG_SELECTABLE_OPENSDIALOG) == 0) {
@@ -605,7 +600,7 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 			*height = 0;
 		} else {
 			textMeasure(&textheight, &textwidth, text, chars, font, 0);
-			*width = (s16)textwidth + 34;
+			*width = (int16_t)textwidth + 34;
 		}
 		*height = 12;
 		break;
@@ -653,7 +648,7 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 			*width = *height;
 		} else {
 			textMeasure(&textheight, &textwidth, text, chars, font, 0);
-			*width = (s16)textwidth + 8;
+			*width = (int16_t)textwidth + 8;
 
 			if ((item->flags & (MENUITEMFLAG_LESSLEFTPADDING | MENUITEMFLAG_ADJUSTWIDTH)) == 0) {
 				*width += 20;
@@ -748,15 +743,15 @@ void menuCalculateItemSize(struct menuitem *item, s16 *width, s16 *height, struc
 
 void func0f0f1d6c(struct menudialogdef *dialogdef, struct menudialog *dialog, struct menu *menu)
 {
-	s32 colindex = menu->colend - 1;
-	s32 rowindex = menu->rowend;
-	s32 itemindex = 0;
-	s32 numblocksthisitem;
+	int colindex = menu->colend - 1;
+	int rowindex = menu->rowend;
+	int itemindex = 0;
+	int numblocksthisitem;
 	struct menuitem *item = dialogdef->items;
-	s16 blockindex = menu->blockend;
+	int16_t blockindex = menu->blockend;
 
 	dialog->numcols = 0;
-	dialog->colstart = (u16) colindex + 1;
+	dialog->colstart = (uint16_t) colindex + 1;
 	dialog->blockstart = blockindex;
 
 	if (item) {
@@ -785,7 +780,7 @@ void func0f0f1d6c(struct menudialogdef *dialogdef, struct menudialog *dialog, st
 
 			if (numblocksthisitem != -1) {
 				menu->rows[rowindex].blockindex = blockindex;
-				blockindex += (s16)numblocksthisitem;
+				blockindex += (int16_t)numblocksthisitem;
 			} else {
 				menu->rows[rowindex].blockindex = -1;
 			}
@@ -805,23 +800,23 @@ void func0f0f1d6c(struct menudialogdef *dialogdef, struct menudialog *dialog, st
 
 void dialog0f0f1ef4(struct menudialog *dialog)
 {
-	s32 bodyheight = dialog->height - LINEHEIGHT - 1;
-	s32 itemheight;
-	s32 i;
-	s32 j;
+	int bodyheight = dialog->height - LINEHEIGHT - 1;
+	int itemheight;
+	int i;
+	int j;
 
 	if ((dialog->definition->flags & MENUDIALOGFLAG_SMOOTHSCROLLABLE) == 0
 			&& g_MenuData.root != MENUROOT_TRAINING
 			&& bodyheight < dialog->contentheight) {
 		for (i = 0; i < dialog->numcols; i++) {
-			s32 colindex = dialog->colstart + i;
-			s32 remaining = g_Menus[g_MpPlayerNum].cols[colindex].height - bodyheight;
+			int colindex = dialog->colstart + i;
+			int remaining = g_Menus[g_MpPlayerNum].cols[colindex].height - bodyheight;
 
 			if (remaining > 0) {
 				for (j = 0; j < g_Menus[g_MpPlayerNum].cols[colindex].numrows; j++) {
 					if (remaining > 0) {
-						s32 itemheight = 0;
-						s32 rowindex = g_Menus[g_MpPlayerNum].cols[colindex].rowstart + j;
+						int itemheight = 0;
+						int rowindex = g_Menus[g_MpPlayerNum].cols[colindex].rowstart + j;
 						struct menuitem *item = &dialog->definition->items[g_Menus[g_MpPlayerNum].rows[rowindex].itemindex];
 
 						switch (item->type) {
@@ -858,22 +853,22 @@ void dialog0f0f1ef4(struct menudialog *dialog)
 
 void dialogCalculateContentSize(struct menudialogdef *dialogdef, struct menudialog *dialog, struct menu *menu)
 {
-	s32 contentheight;
-	s32 rowindex;
-	s32 contentwidth;
-	s32 titleextra;
-	s32 i;
-	s32 textwidth;
-	s32 textheight;
-	u32 stack;
+	int contentheight;
+	int rowindex;
+	int contentwidth;
+	int titleextra;
+	int i;
+	int textwidth;
+	int textheight;
+	uint32_t stack;
 	struct menuitem *item = dialogdef->items;
-	s32 colindex = dialog->colstart - 1;
+	int colindex = dialog->colstart - 1;
 
 	// Iterate items and calculate their dimensions
 	if (item != NULL) {
 		bool newcolumn = true;
-		s16 width;
-		s16 height;
+		int16_t width;
+		int16_t height;
 
 		while (item->type != MENUITEMTYPE_END) {
 			if (item->flags & MENUITEMFLAG_NEWCOLUMN) {
@@ -906,7 +901,7 @@ void dialogCalculateContentSize(struct menudialogdef *dialogdef, struct menudial
 	contentwidth = 0;
 
 	for (i = 0; i < dialog->numcols; i++) {
-		s32 columnheight = menu->cols[dialog->colstart + i].height;
+		int columnheight = menu->cols[dialog->colstart + i].height;
 
 		contentwidth += menu->cols[dialog->colstart + i].width;
 
@@ -944,10 +939,10 @@ void dialogCalculateContentSize(struct menudialogdef *dialogdef, struct menudial
  * Find the given item in the given dialog, and write its column and row indices
  * to the given pointers. Return the y value of the item relative to the dialog.
  */
-s32 dialogFindItem(struct menudialog *dialog, struct menuitem *item, s32 *rowindex, s32 *colindex)
+int dialogFindItem(struct menudialog *dialog, struct menuitem *item, int *rowindex, int *colindex)
 {
 	for (*colindex = dialog->colstart; *colindex < dialog->colstart + dialog->numcols; *colindex += 1) {
-		s32 y = 0;
+		int y = 0;
 		*rowindex = g_Menus[g_MpPlayerNum].cols[*colindex].rowstart;
 
 		while (*rowindex < g_Menus[g_MpPlayerNum].cols[*colindex].rowstart + g_Menus[g_MpPlayerNum].cols[*colindex].numrows) {
@@ -990,9 +985,9 @@ bool menuIsScrollableUnscrollable(struct menuitem *item)
 bool menuIsItemDisabled(struct menuitem *item, struct menudialog *dialog)
 {
 	union handlerdata sp30;
-	s16 width;
-	s16 height;
-	u32 stack[2];
+	int16_t width;
+	int16_t height;
+	uint32_t stack[2];
 
 	if (item->flags & MENUITEMFLAG_ALWAYSDISABLED) {
 		return true;
@@ -1021,10 +1016,10 @@ bool menuIsItemDisabled(struct menuitem *item, struct menudialog *dialog)
 	return false;
 }
 
-bool menuIsItemFocusable(struct menuitem *item, struct menudialog *dialog, s32 arg2)
+bool menuIsItemFocusable(struct menuitem *item, struct menudialog *dialog, int arg2)
 {
-	s32 rowindex;
-	s32 colindex;
+	int rowindex;
+	int colindex;
 
 	switch (item->type) {
 	case MENUITEMTYPE_LABEL:
@@ -1054,13 +1049,13 @@ bool menuIsItemFocusable(struct menuitem *item, struct menudialog *dialog, s32 a
 	return true;
 }
 
-struct menuitem *dialogFindItemAtColY(s32 targety, s32 colindex, struct menudialogdef *dialogdef, s32 *rowindexptr, struct menudialog *dialog)
+struct menuitem *dialogFindItemAtColY(int targety, int colindex, struct menudialogdef *dialogdef, int *rowindexptr, struct menudialog *dialog)
 {
 	struct menuitem *result = NULL;
 	bool done = false;
-	s32 rowindex = g_Menus[g_MpPlayerNum].cols[colindex].rowstart;
-	s32 y;
-	s32 i;
+	int rowindex = g_Menus[g_MpPlayerNum].cols[colindex].rowstart;
+	int y;
+	int i;
 
 	for (i = 0, y = 0; !done && i < g_Menus[g_MpPlayerNum].cols[colindex].numrows; rowindex++, i++) {
 		struct menuitem *item = &dialogdef->items[g_Menus[g_MpPlayerNum].rows[rowindex].itemindex];
@@ -1083,9 +1078,9 @@ struct menuitem *dialogFindItemAtColY(s32 targety, s32 colindex, struct menudial
 
 struct menuitem *dialogFindFirstItem(struct menudialog *dialog)
 {
-	s32 i;
-	s32 colindex = dialog->colstart;
-	s32 rowindex;
+	int i;
+	int colindex = dialog->colstart;
+	int rowindex;
 
 	for (i = 0; i < dialog->numcols; i++) {
 		struct menuitem *item = dialogFindItemAtColY(0, colindex, dialog->definition, &rowindex, dialog);
@@ -1104,9 +1099,9 @@ struct menuitem *dialogFindFirstItem(struct menudialog *dialog)
 
 struct menuitem *dialogFindFirstItemRight(struct menudialog *dialog)
 {
-	s32 i;
-	s32 colindex = dialog->colstart + dialog->numcols - 1;
-	s32 rowindex;
+	int i;
+	int colindex = dialog->colstart + dialog->numcols - 1;
+	int rowindex;
 
 	for (i = 0; i < dialog->numcols; i++) {
 		struct menuitem *item = dialogFindItemAtColY(0, colindex, dialog->definition, &rowindex, dialog);
@@ -1123,15 +1118,15 @@ struct menuitem *dialogFindFirstItemRight(struct menudialog *dialog)
 	return dialog->definition->items;
 }
 
-void dialogChangeItemFocusVertically(struct menudialog *dialog, s32 updown)
+void dialogChangeItemFocusVertically(struct menudialog *dialog, int updown)
 {
-	s32 rowindex;
-	s32 colindex;
+	int rowindex;
+	int colindex;
 	bool done = false;
-	s32 startrowindex;
+	int startrowindex;
 	struct menuitem *item;
-	s32 start;
-	s32 end;
+	int start;
+	int end;
 
 	dialogFindItem(dialog, dialog->focuseditem, &rowindex, &colindex);
 
@@ -1164,14 +1159,14 @@ void dialogChangeItemFocusVertically(struct menudialog *dialog, s32 updown)
 	dialog->focuseditem = item;
 }
 
-s32 dialogChangeItemFocusHorizontally(struct menudialog *dialog, s32 leftright)
+int dialogChangeItemFocusHorizontally(struct menudialog *dialog, int leftright)
 {
-	s32 rowindex;
-	s32 colindex;
+	int rowindex;
+	int colindex;
 	bool done = false;
-	s32 swipedir = 0;
-	s32 y = dialogFindItem(dialog, dialog->focuseditem, &rowindex, &colindex);
-	s32 startcolindex = colindex;
+	int swipedir = 0;
+	int y = dialogFindItem(dialog, dialog->focuseditem, &rowindex, &colindex);
+	int startcolindex = colindex;
 	struct menuitem *item;
 
 	while (!done) {
@@ -1207,12 +1202,12 @@ s32 dialogChangeItemFocusHorizontally(struct menudialog *dialog, s32 leftright)
 
 #ifndef PLATFORM_N64
 
-bool dialogChangeItemFocusWithMouse(struct menudialog *dialog, s32 mx, s32 my)
+bool dialogChangeItemFocusWithMouse(struct menudialog *dialog, int mx, int my)
 {
 	struct menu *menu = &g_Menus[g_MpPlayerNum];
-	s32 col, row;
-	s32 curx, cury;
-	s32 colwidth = 0;
+	int col, row;
+	int curx, cury;
+	int colwidth = 0;
 
 	// only allow mouse control of player 1 menus; ignore mouse if navigating with keyboard
 	if (menu->playernum != 0 || !g_MenuUsingMouse) {
@@ -1222,7 +1217,7 @@ bool dialogChangeItemFocusWithMouse(struct menudialog *dialog, s32 mx, s32 my)
 	curx = dialog->x;
 
 	for (col = 0; col < dialog->numcols; col++, curx += colwidth) {
-		s32 colindex = dialog->colstart + col;
+		int colindex = dialog->colstart + col;
 		colwidth = menu->cols[colindex].width;
 		if (mx <= curx || mx >= curx + colwidth) {
 			continue;
@@ -1230,8 +1225,8 @@ bool dialogChangeItemFocusWithMouse(struct menudialog *dialog, s32 mx, s32 my)
 
 		cury = dialog->y + LINEHEIGHT + 1 + dialog->scroll;
 		for (row = 0; row < menu->cols[colindex].numrows; row++) {
-			s32 rowindex = menu->cols[colindex].rowstart + row;
-			s32 rowheight = menu->rows[rowindex].height;
+			int rowindex = menu->cols[colindex].rowstart + row;
+			int rowheight = menu->rows[rowindex].height;
 			struct menuitem *item = &dialog->definition->items[menu->rows[rowindex].itemindex];
 			if (my > cury && my < cury + rowheight &&
 					item != dialog->focuseditem && menuIsItemFocusable(item, dialog, 0)) {
@@ -1247,9 +1242,9 @@ bool dialogChangeItemFocusWithMouse(struct menudialog *dialog, s32 mx, s32 my)
 
 #endif
 
-s32 dialogChangeItemFocus(struct menudialog *dialog, struct menuinputs *inputs)
+int dialogChangeItemFocus(struct menudialog *dialog, struct menuinputs *inputs)
 {
-	s32 swipedir = 0;
+	int swipedir = 0;
 
 	if (inputs->leftright == 0 && inputs->updown == 0) {
 #ifndef PLATFORM_N64
@@ -1422,13 +1417,13 @@ void menuPushDialog(struct menudialogdef *dialogdef)
 	}
 }
 
-bool func0f0f3220(s32 arg0)
+bool menuTrySavePlayerData(int index)
 {
 	bool save = true;
-	s32 i;
+	int i;
 
-	if (g_MenuData.unk669[arg0] == 4) {
-		s32 prevplayernum = g_MpPlayerNum;
+	if (g_MenuData.unk669[index] == 4) {
+		int prevplayernum = g_MpPlayerNum;
 
 		for (i = ARRAYCOUNT(g_Menus) - 1; i >= 0; i--) {
 			if (g_Menus[i].curdialog) {
@@ -1455,9 +1450,9 @@ bool func0f0f3220(s32 arg0)
 		}
 
 		g_MpPlayerNum = prevplayernum;
-	} else if (g_MenuData.unk669[arg0] < 4) {
-		s32 prevplayernum = g_MpPlayerNum;
-		g_MpPlayerNum = g_MenuData.unk669[arg0];
+	} else if (g_MenuData.unk669[index] < 4) {
+		int prevplayernum = g_MpPlayerNum;
+		g_MpPlayerNum = g_MenuData.unk669[index];
 		filemgrSaveOrLoad(&g_PlayerConfigsArray[g_MpPlayerNum].fileguid, FILEOP_SAVE_MPPLAYER, g_MpPlayerNum);
 		save = true;
 		g_MpPlayerNum = prevplayernum;
@@ -1475,8 +1470,8 @@ void menuCloseDialog(void)
 	if (g_Menus[g_MpPlayerNum].depth > 0) {
 		union handlerdata data;
 		struct menulayer *layer = &g_Menus[g_MpPlayerNum].layers[g_Menus[g_MpPlayerNum].depth - 1];
-		u32 value_prevent = 1; // constant value, but required for match
-		s32 i;
+		uint32_t value_prevent = 1; // constant value, but required for match
+		int i;
 
 		for (i = 0; i < layer->numsiblings; i++) {
 			data.dialog1.preventclose = false;
@@ -1504,10 +1499,10 @@ void menuCloseDialog(void)
 
 	if (g_MenuData.unk66e > 0 && g_Menus[g_MpPlayerNum].depth == 0)
 	{
-		s32 value = g_MenuData.unk66e;
+		int value = g_MenuData.unk66e;
 
 		while (value >= 0) {
-			func0f0f3220(value);
+			menuTrySavePlayerData(value);
 			value--;
 		}
 	}
@@ -1522,7 +1517,7 @@ void menuCloseDialog(void)
 
 void menuUpdateCurFrame(void)
 {
-	s32 depth = g_Menus[g_MpPlayerNum].depth;
+	int depth = g_Menus[g_MpPlayerNum].depth;
 
 	if (depth == 0) {
 		// No more parent menus - return control to the player
@@ -1548,7 +1543,7 @@ void func0f0f3704(struct menudialogdef *dialogdef)
 	menuPushDialog(dialogdef);
 }
 
-void menuConfigureModel(struct menumodel *menumodel, f32 x, f32 y, f32 z, f32 rotx, f32 roty, f32 rotz, f32 scale, u8 flags, f32 frac) // Added a frac argument for making the zoom insant if needed
+void menuConfigureModel(struct menumodel *menumodel, float x, float y, float z, float rotx, float roty, float rotz, float scale, uint8_t flags, float frac) // Added a frac argument for making the zoom insant if needed
 {
 	menumodel->configuring = true;
 
@@ -1608,22 +1603,22 @@ Lights1 var80071468 = gdSPDefLights1(0x96, 0x96, 0x96, 0xff, 0xff, 0xff, 0xb2, 0
 /**
  * Render the hudpiece as well as any models within dialogs.
  */
-Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
+Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 {
-	f32 rotx;
-	f32 roty;
-	f32 rotz;
-	f32 posx;
-	f32 posy;
-	f32 posz;
-	f32 scale;
-	s32 totalfilelen;
+	float rotx;
+	float roty;
+	float rotz;
+	float posx;
+	float posy;
+	float posz;
+	float scale;
+	int totalfilelen;
 	struct texpool texpool;
-	s32 bodyfilelen2;
-	u16 bodyfilenum;
-	u16 headfilenum;
-	s32 bodynum;
-	s32 headnum;
+	int bodyfilelen2;
+	uint16_t bodyfilenum;
+	uint16_t headfilenum;
+	int bodynum;
+	int headnum;
 
 	if (g_Vars.stagenum != STAGE_CITRAINING && g_Vars.stagenum != STAGE_CREDITS) {
 		if (g_MenuData.unk5d5_01 && modeltype != MENUMODELTYPE_HUDPIECE && modeltype < MENUMODELTYPE_3) {
@@ -1667,8 +1662,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 						headnum = MENUMODELPARAMS_GET_MASTER_HEADNUM(menumodel->newparams);
 						bodynum = MENUMODELPARAMS_GET_MASTER_BODYNUM(menumodel->newparams);
 					} else {
-						s32 mpheadnum = MENUMODELPARAMS_GET_MP_HEADNUM(menumodel->newparams);
-						s32 mpbodynum = MENUMODELPARAMS_GET_MP_BODYNUM(menumodel->newparams);
+						int mpheadnum = MENUMODELPARAMS_GET_MP_HEADNUM(menumodel->newparams);
+						int mpbodynum = MENUMODELPARAMS_GET_MP_BODYNUM(menumodel->newparams);
 						bodynum = mpGetBodyId(mpbodynum);
 
 						if (mpheadnum < mpGetNumHeads2()) {
@@ -1730,7 +1725,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 				} else {
 					totalfilelen = ALIGN64(fileGetInflatedSize(menumodel->newparams, LOADTYPE_MODEL)) + 0x4000;
 
-					texInitPool(&texpool, &menumodel->allocstart[(u32)totalfilelen], menumodel->alloclen - totalfilelen);
+					texInitPool(&texpool, &menumodel->allocstart[(uint32_t)totalfilelen], menumodel->alloclen - totalfilelen);
 
 					menumodel->headnum = -1;
 					menumodel->bodynum = -1;
@@ -1761,16 +1756,16 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 	if (menumodel->bodymodeldef != NULL) {
 		struct modelrenderdata renderdata = {NULL, true, 3};
 		Mtxf *matrices;
-		s32 i;
-		u32 stack[3];
+		int i;
+		uint32_t stack[3];
 		struct coord tmpcoord;
-		f32 screenpos[2];
+		float screenpos[2];
 		Mtxf rotmtx;
 		Mtxf posmtx;
-		f32 screenz[1];
+		float screenz[1];
 		bool haszoom;
 		struct coord zoompos;
-		f32 zoomy;
+		float zoomy;
 		bool dodefaultzoom;
 
 		// Most models use the z-buffer and a scissor.
@@ -1802,7 +1797,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 				if (node) {
 					struct modelrodata_position *rodata = &node->rodata->position;
-					f32 frac = menuGetLinearOscPauseFrac(menumodel->zoomtimer60 / TICKS(480.0f));
+					float frac = menuGetLinearOscPauseFrac(menumodel->zoomtimer60 / TICKS(480.0f));
 
 					zoompos.f[0] = 0.0f;
 					zoompos.f[1] = 0.0f - (rodata->pos.f[1] / 7.6f * (1.0f - frac * frac));
@@ -1835,7 +1830,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 		// For the hudpiece, tween the position and scale to the new values and apply rotation.
 		if (modeltype == MENUMODELTYPE_HUDPIECE) {
-			s32 i;
+			int i;
 
 			if (menumodel->curposx != menumodel->newposx) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
@@ -1888,8 +1883,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 					menumodel->curposz = menumodel->newposz;
 					menumodel->curscale = menumodel->newscale;
 				} else {
-					f32 fracnew = (-cosf(menumodel->configurefrac * M_PI) * 0.5f) + 0.5f;
-					f32 fraccur = 1.0f - fracnew;
+					float fracnew = (-cosf(menumodel->configurefrac * M_PI) * 0.5f) + 0.5f;
+					float fraccur = 1.0f - fracnew;
 
 					if (menumodel->flags & MENUMODELFLAG_HASPOSITION) {
 						posx = (menumodel->curposx * fraccur) + (fracnew * menumodel->newposx);
@@ -1909,9 +1904,9 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 					}
 
 					if (menumodel->flags & MENUMODELFLAG_HASROTATION) {
-						f32 sp2bc[4];
-						f32 sp2ac[4];
-						f32 sp29c[4];
+						float sp2bc[4];
+						float sp2ac[4];
+						float sp29c[4];
 						struct coord tmprot;
 
 						tmprot.x = menumodel->currotx;
@@ -2045,19 +2040,19 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 				gdl = func0f0d49c8(gdl);
 				gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 			} else {
-				s32 halfScreenWidth = SCREEN_WIDTH_LO >> 1;
-				f32 scale = SCREEN_ASPECT / videoGetAspect();
-				f32 width = (g_MenuScissorX2 - g_MenuScissorX1) * scale;
-				f32 center = (g_MenuScissorX1 + g_MenuScissorX2) * 0.5f;
+				int halfScreenWidth = SCREEN_WIDTH_LO >> 1;
+				float scale = SCREEN_ASPECT / videoGetAspect();
+				float width = (g_MenuScissorX2 - g_MenuScissorX1) * scale;
+				float center = (g_MenuScissorX1 + g_MenuScissorX2) * 0.5f;
 				center = ((center - halfScreenWidth) * scale) + halfScreenWidth;
 
-				s32 x1 = (s32)(center - width * 0.5f);
-				s32 x2 = (s32)(center + width * 0.5f);
+				int x1 = (int)(center - width * 0.5f);
+				int x2 = (int)(center + width * 0.5f);
 
-				f32 aspect = (f32) (x2 - x1) / (f32) (g_MenuScissorY2 - g_MenuScissorY1);
+				float aspect = (float) (x2 - x1) / (float) (g_MenuScissorY2 - g_MenuScissorY1);
 
-				static u32 znear = 10;
-				static u32 zfar = 300;
+				static uint32_t znear = 10;
+				static uint32_t zfar = 300;
 
 				gdl = func0f0d49c8(gdl);
 
@@ -2094,7 +2089,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 		// Tick the animation, if any
 		if (menumodel->curanimnum != 0) {
-			f32 frame;
+			float frame;
 
 			modelTickAnimQuarterSpeed(&menumodel->bodymodel, g_Vars.diffframe240, true);
 
@@ -2122,8 +2117,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 			if (node) {
 				struct modelrodata_gundl *rodata = &node->rodata->gundl;
-				s32 i;
-				s32 j;
+				int i;
+				int j;
 
 				for (i = 0; i < rodata->numvertices; i++) {
 					rodata->vertices[i].s -= 100 * g_Vars.diffframe60;
@@ -2139,7 +2134,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 			node = modelGetPart(menumodel->bodymodeldef, MODELPART_HUDPIECE_0002);
 
 			if (node) {
-				s32 mtxindex = modelFindNodeMtxIndex(node, 0);
+				int mtxindex = modelFindNodeMtxIndex(node, 0);
 				Mtxf sp120;
 				Mtxf spe0;
 
@@ -2157,9 +2152,9 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 						|| g_MenuData.root == MENUROOT_FILEMGR
 						|| g_MenuData.root == MENUROOT_MPSETUP
 						|| g_MenuData.root == MENUROOT_TRAINING) {
-					s32 mtxindex = modelFindNodeMtxIndex(node, 0);
+					int mtxindex = modelFindNodeMtxIndex(node, 0);
 					struct coord pos;
-					f32 screenpos[2];
+					float screenpos[2];
 
 					pos.x = matrices[mtxindex].m[3][0];
 					pos.y = matrices[mtxindex].m[3][1];
@@ -2167,8 +2162,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 
 					cam0f0b4d04(&pos, screenpos);
 
-					g_MenuProjectFromX = ((s32)screenpos[0] - viGetWidth() / 2);
-					g_MenuProjectFromY = (s32)screenpos[1] - viGetHeight() / 2;
+					g_MenuProjectFromX = ((int)screenpos[0] - viGetWidth() / 2);
+					g_MenuProjectFromY = (int)screenpos[1] - viGetHeight() / 2;
 				}
 			}
 		}
@@ -2227,9 +2222,9 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, s32 modeltype)
 	return gdl;
 }
 
-void menuGetTeamTitlebarColours(u32 *top, u32 *middle, u32 *bottom)
+void menuGetTeamTitlebarColours(uint32_t *top, uint32_t *middle, uint32_t *bottom)
 {
-	const u32 colours[][3] = {
+	const uint32_t colours[][3] = {
 		// top, middle, bottom
 		{ 0xbf000000, 0x50000000, 0xff000000 },
 		{ 0xbfbf0000, 0x50500000, 0xffff0000 },
@@ -2309,30 +2304,30 @@ Gfx *menuApplyScissor(Gfx *gdl)
  */
 Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 {
-	s32 i;
-	s32 dialogleft;
-	s32 dialogtop;
-	s32 dialogright;
-	s32 dialogbottom;
-	s32 x;
-	s32 y;
-	s16 dialogwidth;
+	int i;
+	int dialogleft;
+	int dialogtop;
+	int dialogright;
+	int dialogbottom;
+	int x;
+	int y;
+	int16_t dialogwidth;
 	union menuitemdata *itemdata;
-	s32 j;
-	u32 colour1;
-	u32 colour2;
-	u32 colour3;
+	int j;
+	uint32_t colour1;
+	uint32_t colour2;
+	uint32_t colour3;
 	struct menurendercontext context;
-	s32 curx;
-	s32 bgx1;
-	s32 bgy1;
-	s32 bgx2;
-	s32 bgy2;
-	s16 dialogheight;
+	int curx;
+	int bgx1;
+	int bgy1;
+	int bgx2;
+	int bgy2;
+	int16_t dialogheight;
 	char *title;
-	u32 colour4;
-	u32 colour5;
-	f32 sp170;
+	uint32_t colour4;
+	uint32_t colour5;
+	float sp170;
 
 	bgx1 = dialog->x;
 	bgy1 = dialog->y;
@@ -2341,7 +2336,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 
 	if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 			&& menuGetRoot() == MENUROOT_MPENDSCREEN
-			&& !var8009dfc0) {
+			&& !g_GamePaused) {
 		return gdl;
 	}
 
@@ -2527,10 +2522,10 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 
 	{
 		struct menulayer *layer;
-		s32 viewleft = viGetViewLeft();
-		s32 viewtop = viGetViewTop();
-		s32 viewright = (viGetViewLeft() + viGetViewWidth());
-		s32 viewbottom = viGetViewTop() + viGetViewHeight();
+		int viewleft = viGetViewLeft();
+		int viewtop = viGetViewTop();
+		int viewright = (viGetViewLeft() + viGetViewWidth());
+		int viewbottom = viGetViewTop() + viGetViewHeight();
 
 		g_MenuScissorX1 = dialogleft + 2;
 		g_MenuScissorX2 = dialogright - 2;
@@ -2593,17 +2588,17 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 
 		// Render menu items
 		if (dialog->type != 0 || dialog->transitionfrac >= 0.0f) {
-			u32 stack;
-			s32 sumwidth;
-			s32 cury;
+			uint32_t stack;
+			int sumwidth;
+			int cury;
 			bool prevwaslist;
-			s32 colwidth;
-			u32 sp120;
+			int colwidth;
+			uint32_t sp120;
 			bool offscreen;
 			struct menuitem *item;
-			s32 focused;
-			s32 colindex;
-			s32 rowindex;
+			int focused;
+			int colindex;
+			int rowindex;
 
 			sumwidth = 0;
 			curx = dialogleft;
@@ -2625,7 +2620,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 				sumwidth += colwidth;
 
 				if (i == dialog->numcols - 1) {
-					s32 v0 = (dialogright - dialogleft) - 2;
+					int v0 = (dialogright - dialogleft) - 2;
 
 					if (sumwidth < v0) {
 						colwidth = (colwidth + v0) - sumwidth;
@@ -2681,12 +2676,12 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 
 						if ((item->flags & MENUITEMFLAG_DARKERBG)) {
 							// Render a darker background behind the item
-							s32 x1 = context.x;
-							s32 y1 = context.y;
-							s32 x2 = x1 + context.width;
-							s32 y2 = y1 + context.height;
-							u32 colour;
-							u32 colour2;
+							int x1 = context.x;
+							int y1 = context.y;
+							int x2 = x1 + context.width;
+							int y2 = y1 + context.height;
+							uint32_t colour;
+							uint32_t colour2;
 
 							colour2 = MIXCOLOUR(dialog, item_focused_outer);
 							colour = colourBlend(colour2, colour2 & 0xffffff00, 127);
@@ -2714,11 +2709,11 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 									|| item->type == MENUITEMTYPE_CHECKBOX
 									|| item->type == MENUITEMTYPE_0A
 									|| item->type == MENUITEMTYPE_DROPDOWN) {
-								s32 liney = context.y + context.height / 2 - 1;
-								s32 x1 = context.x;
-								s32 x3 = context.x + 8;
-								s32 x4 = context.x + context.width / 3;
-								u32 colour = (sp120 & 0xffffff00) | 0x2f;
+								int liney = context.y + context.height / 2 - 1;
+								int x1 = context.x;
+								int x3 = context.x + 8;
+								int x4 = context.x + context.width / 3;
+								uint32_t colour = (sp120 & 0xffffff00) | 0x2f;
 
 								// Left side
 								gdl = menugfx0f0e2498(gdl);
@@ -2766,7 +2761,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 			curx = dialogleft;
 
 			for (i = 0; i < dialog->numcols; i++) {
-				s32 cury = dialogtop + LINEHEIGHT + 1 + dialog->scroll;
+				int cury = dialogtop + LINEHEIGHT + 1 + dialog->scroll;
 				colindex = dialog->colstart + i;
 
 				for (j = 0; j < menu->cols[colindex].numrows; j++) {
@@ -2806,9 +2801,9 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 				&& layer->siblings[layer->cursibling] == dialog
 				&& layer->numsiblings >= 2) {
 			// Draw chevrons
-			u32 colour1;
-			u32 colour;
-			u32 weight = menuGetSinOscFrac(10) * 255.0f;
+			uint32_t colour1;
+			uint32_t colour;
+			uint32_t weight = menuGetSinOscFrac(10) * 255.0f;
 
 			colour1 = MIXCOLOUR(dialog, dialog_border1);
 			colour = colourBlend(0xffffffff, colour1, weight);
@@ -2820,10 +2815,10 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 					|| g_MenuData.root == MENUROOT_TRAINING
 					|| g_MenuData.root == MENUROOT_FILEMGR) {
 				char *title;
-				s32 textheight;
-				s32 textwidth;
-				s32 previndex;
-				s32 nextindex;
+				int textheight;
+				int textwidth;
+				int previndex;
+				int nextindex;
 
 				textResetBlends();
 				textSetRotation90(true);
@@ -2881,7 +2876,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 	return gdl;
 }
 
-void menuGetContPads(s8 *contpadnum1, s8 *contpadnum2)
+void menuGetContPads(int8_t *contpadnum1, int8_t *contpadnum2)
 {
 	switch (g_MenuData.root) {
 	case MENUROOT_MPSETUP:
@@ -2895,7 +2890,7 @@ void menuGetContPads(s8 *contpadnum1, s8 *contpadnum2)
 		*contpadnum2 = -1;
 
 		if (!g_Vars.normmplayerisrunning) {
-			s32 mode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
+			int mode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
 
 			if (mode == CONTROLMODE_23 || mode == CONTROLMODE_24 || mode == CONTROLMODE_22 || mode == CONTROLMODE_21) {
 				*contpadnum2 = optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
@@ -2905,16 +2900,16 @@ void menuGetContPads(s8 *contpadnum1, s8 *contpadnum2)
 	}
 }
 
-u32 g_MpNumJoined = 1;
+uint32_t g_MpNumJoined = 1;
 
 /**
  * Choose which direction a new dialog should swipe from in the combat simulator
  * menus.
  */
-void func0f0f7594(s32 arg0, s32 *vdir, s32 *hdir)
+void func0f0f7594(int arg0, int *vdir, int *hdir)
 {
 	if (g_MenuData.root == MENUROOT_MPSETUP) {
-		s32 playernum = g_Menus[g_MpPlayerNum].playernum;
+		int playernum = g_Menus[g_MpPlayerNum].playernum;
 
 		*vdir = 0;
 		*hdir = 0;
@@ -2984,13 +2979,13 @@ void func0f0f7594(s32 arg0, s32 *vdir, s32 *hdir)
  * padding. There are some trickier calculations for MP setup where the players
  * are sharing a viewport.
  */
-void menuFindAvailableSize(s32 *leftptr, s32 *topptr, s32 *rightptr, s32 *bottomptr)
+void menuFindAvailableSize(int *leftptr, int *topptr, int *rightptr, int *bottomptr)
 {
-	s32 left = viGetViewLeft() + 20;
-	s32 top = viGetViewTop() + 4;
-	s32 right = (viGetViewLeft() + viGetViewWidth()) - 20;
-	s32 bottom = viGetViewTop() + viGetViewHeight() - 4;
-	s32 playernum;
+	int left = viGetViewLeft() + 20;
+	int top = viGetViewTop() + 4;
+	int right = (viGetViewLeft() + viGetViewWidth()) - 20;
+	int bottom = viGetViewTop() + viGetViewHeight() - 4;
+	int playernum;
 
 	if (currentPlayerIsMenuOpenInSoloOrMp()) {
 		// Make room for health bar
@@ -3111,14 +3106,14 @@ void menuFindAvailableSize(s32 *leftptr, s32 *topptr, s32 *rightptr, s32 *bottom
 
 void dialogCalculatePosition(struct menudialog *dialog)
 {
-	s32 xmin;
-	s32 xmax;
-	s32 ymin;
-	s32 ymax;
-	s32 width;
-	s32 height;
-	s32 vdir;
-	s32 hdir;
+	int xmin;
+	int xmax;
+	int ymin;
+	int ymax;
+	int width;
+	int height;
+	int vdir;
+	int hdir;
 
 	menuFindAvailableSize(&xmin, &ymin, &xmax, &ymax);
 
@@ -3186,15 +3181,15 @@ void menuClose(void)
 	}
 }
 
-void func0f0f8120(void)
+void menuFinalizePlayerDataAndPopDialogs(void)
 {
-	u32 mpindex = g_MpPlayerNum % MAX_PLAYERS;
+	uint32_t mpindex = g_MpPlayerNum % MAX_PLAYERS;
 	struct menudialog *prev = g_Menus[mpindex].curdialog;
-	s32 i;
+	int i;
 
 	if (g_MenuData.unk66e > 0) {
 		for (i = g_MenuData.unk66e; i >= 0; i--) {
-			func0f0f3220(i);
+			menuTrySavePlayerData(i);
 		}
 	}
 
@@ -3208,15 +3203,15 @@ void func0f0f8120(void)
 	}
 }
 
-void func0f0f820c(struct menudialogdef *dialogdef, s32 root)
+void menuResetAllDialogsAndSetNewRoot(struct menudialogdef *dialogdef, int root)
 {
-	s32 i;
-	s32 prevplayernum = g_MpPlayerNum;
+	int i;
+	int prevplayernum = g_MpPlayerNum;
 
 	for (i = 0; i < ARRAYCOUNT(g_Menus); i++) {
 		if (g_Menus[i].curdialog) {
 			g_MpPlayerNum = i;
-			func0f0f8120();
+			menuFinalizePlayerDataAndPopDialogs();
 		}
 	}
 
@@ -3226,7 +3221,7 @@ void func0f0f820c(struct menudialogdef *dialogdef, s32 root)
 	g_MenuData.unk00c = dialogdef;
 }
 
-void menuSetBackground(s32 bg)
+void menuSetBackground(int bg)
 {
 	// Can only screenshot if there is no background already,
 	// because we want a clean screenshot
@@ -3249,7 +3244,7 @@ void menuSetBackground(s32 bg)
 
 void func0f0f8300(void)
 {
-	s32 i;
+	int i;
 
 	if (g_MenuData.count == 0) {
 		for (i = 0; i < ARRAYCOUNT(g_MenuData.playerjoinalpha); i++) {
@@ -3258,7 +3253,7 @@ void func0f0f8300(void)
 	}
 }
 
-void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
+void menuPushRootDialog(struct menudialogdef *dialogdef, int root)
 {
 	g_Menus[g_MpPlayerNum].numdialogs = 0;
 	g_Menus[g_MpPlayerNum].depth = 0;
@@ -3339,7 +3334,7 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, s32 root)
 	}
 }
 
-void func0f0f85e0(struct menudialogdef *dialogdef, s32 root)
+void func0f0f85e0(struct menudialogdef *dialogdef, int root)
 {
 	if (dialogdef == &g_CiMenuViaPcMenuDialog) {
 		musicStartMenu();
@@ -3350,7 +3345,7 @@ void func0f0f85e0(struct menudialogdef *dialogdef, s32 root)
 	g_Vars.currentplayer->pausemode = PAUSEMODE_PAUSED;
 }
 
-u32 g_MenuCThresh = 120;
+uint32_t g_MenuCThresh = 120;
 
 Gfx *menuRenderDialog(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 {
@@ -3381,8 +3376,8 @@ Gfx *menuRenderDialogs(Gfx *gdl)
 
 			gdl = menuRenderDialog(gdl, g_Menus[g_MpPlayerNum].curdialog, &g_Menus[g_MpPlayerNum]);
 		} else {
-			s32 i;
-			s32 j;
+			int i;
+			int j;
 
 			// NTSC 1.0 and newer renders one "other" dialog plus the current
 			// dialog. The other dialog is only rendered if on-screen, and it
@@ -3416,19 +3411,19 @@ Gfx *menuRenderDialogs(Gfx *gdl)
 		if (g_Menus[g_MpPlayerNum].bannernum != -1
 				&& (g_Menus[g_MpPlayerNum].curdialog->definition->flags & MENUDIALOGFLAG_DISABLEBANNER) == 0) {
 			if (g_MenuData.count >= 2) {
-				s32 xmin;
-				s32 ymin;
-				s32 xmax;
-				s32 ymax;
+				int xmin;
+				int ymin;
+				int xmax;
+				int ymax;
 
 				menuFindAvailableSize(&xmin, &ymin, &xmax, &ymax);
 
 				gdl = menuRenderBanner(gdl, xmin, ymin, xmax, ymax, false, g_Menus[g_MpPlayerNum].bannernum, 0, 0);
 			} else {
-				s32 xmin = viGetViewLeft();
-				s32 ymin = viGetViewTop();
-				s32 xmax = (viGetViewLeft() + viGetViewWidth());
-				s32 ymax = viGetViewTop() + viGetViewHeight();
+				int xmin = viGetViewLeft();
+				int ymin = viGetViewTop();
+				int xmax = (viGetViewLeft() + viGetViewWidth());
+				int ymax = viGetViewTop() + viGetViewHeight();
 
 				gdl = menuRenderBanner(gdl, xmin, ymin, xmax, ymax, true, g_Menus[g_MpPlayerNum].bannernum, 0, 0);
 			}
@@ -3438,7 +3433,7 @@ Gfx *menuRenderDialogs(Gfx *gdl)
 	return gdl;
 }
 
-void menuResetModel(struct menumodel *menumodel, u32 allocationlen, bool allocate)
+void menuResetModel(struct menumodel *menumodel, uint32_t allocationlen, bool allocate)
 {
 	menumodel->alloclen = allocationlen;
 	menumodel->allocstart = allocate ? mempAlloc(allocationlen, MEMPOOL_STAGE) : NULL;
@@ -3468,9 +3463,9 @@ void menuResetModel(struct menumodel *menumodel, u32 allocationlen, bool allocat
 
 void menuReset(void)
 {
-	s32 i;
+	int i;
 
-	var8009dfc0 = 0;
+	g_GamePaused = false;
 
 	g_BlurBuffer = mempAlloc(0x4b00, MEMPOOL_STAGE);
 
@@ -3511,7 +3506,7 @@ void menuReset(void)
 	}
 
 	if (!g_Vars.mplayerisrunning) {
-		s32 max = 0;
+		int max = 0;
 
 		if (g_Vars.stagenum == STAGE_CITRAINING) {
 			max = 4;
@@ -3579,7 +3574,7 @@ void menuReset(void)
 	g_MenuData.unk66f = 0;
 }
 
-void menuSwipe(s32 direction)
+void menuSwipe(int direction)
 {
 	struct menulayer *layer = &g_Menus[g_MpPlayerNum].layers[g_Menus[g_MpPlayerNum].depth - 1];
 	struct menuitem *item;
@@ -3589,7 +3584,7 @@ void menuSwipe(s32 direction)
 	if (layer->numsiblings >= 2) {
 		g_Menus[g_MpPlayerNum].curdialog->swipedir = -direction;
 
-		layer->cursibling += (s8)direction;
+		layer->cursibling += (int8_t)direction;
 
 		if (layer->cursibling < 0) {
 			layer->cursibling = layer->numsiblings - 1;
@@ -3641,25 +3636,25 @@ void menuSwipe(s32 direction)
 	}
 }
 
-void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickflags)
+void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, uint32_t tickflags)
 {
 	bool usedefaultbehaviour;
 	struct menudialogdef *definition;
 	struct menu *menu;
-	u8 transitiontotype;
-	s32 oldfracint;
-	s32 oldx;
-	s32 col;
-	f32 newx;
+	uint8_t transitiontotype;
+	int oldfracint;
+	int oldx;
+	int col;
+	float newx;
 	union handlerdata data;
 	struct menuinputs spd8;
-	s32 oldy;
-	f32 newy;
-	s32 oldwidth;
-	f32 newwidth;
-	s32 oldheight;
-	f32 newheight;
-	s32 i;
+	int oldy;
+	float newy;
+	int oldwidth;
+	float newwidth;
+	int oldheight;
+	float newheight;
+	int i;
 
 	usedefaultbehaviour = false;
 	definition = dialog->definition;
@@ -3794,7 +3789,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 			}
 		}
 
-		if ((s32)dialog->statefrac == oldfracint) {
+		if ((int)dialog->statefrac == oldfracint) {
 			dialog->statefrac = oldfracint + 1.0f;
 		}
 
@@ -3814,7 +3809,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 				dialog->statefrac = 0.5f;
 			}
 		} else if ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) && menuGetRoot() == MENUROOT_MPENDSCREEN) {
-			if (var8009dfc0) {
+			if (g_GamePaused) {
 				dialog->statefrac += g_Vars.diffframe240 / 60.0f;
 
 				if (dialog->statefrac > 1.0f) {
@@ -3926,7 +3921,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 
 	// Tween the height
 	if (dialog->height != dialog->dstheight) {
-		s32 i;
+		int i;
 		oldheight = dialog->height;
 		newheight = dialog->height;
 
@@ -3960,13 +3955,13 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 
 	// Tick each item in the dialog
 	{
-		s32 j;
+		int j;
 
 		for (col = 0; col < dialog->numcols; col++) {
-			s32 colindex = dialog->colstart + col;
+			int colindex = dialog->colstart + col;
 
 			for (j = 0; j < menu->cols[colindex].numrows; j++) {
-				s32 rowindex = menu->cols[colindex].rowstart + j;
+				int rowindex = menu->cols[colindex].rowstart + j;
 				struct menuitem *item = &dialog->definition->items[menu->rows[rowindex].itemindex];
 				union menuitemdata *handlerdata = NULL;
 				struct menuinputs *inputsptr = inputs;
@@ -3987,7 +3982,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 
 				if (g_Menus[g_MpPlayerNum].fm.unke40_00 == 0 && !g_MainIsDebugMenuOpen) {
 					if ((tickflags & MENUTICKFLAG_DIALOGISCURRENT) && item == dialog->focuseditem) {
-						u32 itemtickflags = tickflags | MENUTICKFLAG_ITEMISFOCUSED;
+						uint32_t itemtickflags = tickflags | MENUTICKFLAG_ITEMISFOCUSED;
 
 						if (dialog->dimmed) {
 							usedefaultbehaviour = menuitemTick(item, dialog, inputsptr, itemtickflags | MENUTICKFLAG_DIALOGISDIMMED, handlerdata);
@@ -4025,7 +4020,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 			}
 		} else {
 			struct menuitem *prevfocuseditem = dialog->focuseditem;
-			s32 swipedir = dialogChangeItemFocus(dialog, inputs);
+			int swipedir = dialogChangeItemFocus(dialog, inputs);
 
 			if (swipedir != 0) {
 				menuSwipe(swipedir);
@@ -4051,12 +4046,12 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 
 	// Scrolling related (when the dialog is too big vertically)
 	if (dialog->focuseditem && (dialog->definition->flags & MENUDIALOGFLAG_DISABLEITEMSCROLL) == 0) {
-		s32 dstscroll;
-		s32 itemy;
-		s32 rowindex;
-		s32 colindex;
+		int dstscroll;
+		int itemy;
+		int rowindex;
+		int colindex;
 
-		s32 y = dialogFindItem(dialog, dialog->focuseditem, &rowindex, &colindex);
+		int y = dialogFindItem(dialog, dialog->focuseditem, &rowindex, &colindex);
 
 		if ((dialog->focuseditem->flags & MENUITEMFLAG_00010000) == 0) {
 			if (g_MenuUsingMouse && !dialog->dimmed) {
@@ -4080,7 +4075,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 			dialog->dstscroll = 0;
 		}
 	} else if (dialog->definition->flags & MENUDIALOGFLAG_SMOOTHSCROLLABLE) {
-		s32 adjustment = inputs->yaxis * g_Vars.diffframe60 / 20 - inputs->updownheld * g_Vars.diffframe60;
+		int adjustment = inputs->yaxis * g_Vars.diffframe60 / 20 - inputs->updownheld * g_Vars.diffframe60;
 		dialog->dstscroll += adjustment;
 
 		if (dialog->dstscroll > 0) {
@@ -4096,9 +4091,9 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 
 	{
 		if (dialog->scroll != dialog->dstscroll) {
-			s32 oldscroll = dialog->scroll;
-			f32 newscroll = dialog->scroll;
-			s32 i;
+			int oldscroll = dialog->scroll;
+			float newscroll = dialog->scroll;
+			int i;
 
 			for (i = 0; i < g_Vars.diffframe60; i++) {
 				newscroll = (dialog->dstscroll * 0.2f) + (0.8f * newscroll);
@@ -4125,14 +4120,14 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, u32 tickfl
 void dialogInitItems(struct menudialog *dialog)
 {
 	struct menu *menu = &g_Menus[g_MpPlayerNum];
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	for (i = 0; i < dialog->numcols; i++) {
-		s32 colindex = dialog->colstart + i;
+		int colindex = dialog->colstart + i;
 
 		for (j = 0; j < menu->cols[colindex].numrows; j++) {
-			s32 rowindex = menu->cols[colindex].rowstart + j;
+			int rowindex = menu->cols[colindex].rowstart + j;
 			struct menuitem *item = &dialog->definition->items[menu->rows[rowindex].itemindex];
 			union menuitemdata *data = NULL;
 
@@ -4159,30 +4154,30 @@ void func0f0fa6ac(void)
 
 void menuProcessInput(void)
 {
-	s32 yhelddir;
-	s32 xhelddir;
-	s32 ytapdir;
-	s32 xtapdir;
+	int yhelddir;
+	int xhelddir;
+	int ytapdir;
+	int xtapdir;
 	bool starttoselect;
 	struct menuinputs inputs;
 	struct menudialog *dialog;
 	struct menu *menu;
 	bool starttap;
-	s32 stickx;
-	s32 sticky;
-	s32 numcontpads;
-	s32 i;
-	s32 contpadnums[4];
-	s8 contpadnum1;
-	s8 contpadnum2;
+	int stickx;
+	int sticky;
+	int numcontpads;
+	int i;
+	int contpadnums[4];
+	int8_t contpadnum1;
+	int8_t contpadnum2;
 	struct fileguid guid;
-	s32 xdeadzone;
-	s32 ydeadzone;
-	s32 digitalrepeatinterval;
-	s32 xstickintervalmult;
-	s32 stickintervalbase;
-	s32 ystickintervalmult;
-	s32 allowdiagonal;
+	int xdeadzone;
+	int ydeadzone;
+	int digitalrepeatinterval;
+	int xstickintervalmult;
+	int stickintervalbase;
+	int ystickintervalmult;
+	int allowdiagonal;
 
 	yhelddir = 0;
 	xhelddir = 0;
@@ -4216,8 +4211,8 @@ void menuProcessInput(void)
 			inputs.mousemoved = inputMouseGetPosition(&inputs.mousex, &inputs.mousey);
 			inputs.mousescroll = inputKeyPressed(VK_MOUSE_WHEEL_DN) - inputKeyPressed(VK_MOUSE_WHEEL_UP);
 			// aspect correct the X
-			const f32 cx = ((f32)inputs.mousex - (f32)(SCREEN_WIDTH_LO / 2)) * (videoGetAspect() / SCREEN_ASPECT);
-			inputs.mousex = (f32)(SCREEN_WIDTH_LO / 2) + cx;
+			const float cx = ((float)inputs.mousex - (float)(SCREEN_WIDTH_LO / 2)) * (videoGetAspect() / SCREEN_ASPECT);
+			inputs.mousex = (float)(SCREEN_WIDTH_LO / 2) + cx;
 		}
 		if (dialog && inputs.mousemoved) {
 			g_MenuUsingMouse = true;
@@ -4276,12 +4271,12 @@ void menuProcessInput(void)
 		// Iterate controllers and figure out which buttons are being pressed.
 		// For the control stick input, take whichever stick is pressed the most.
 		for (i = 0; i < numcontpads; i++) {
-			s8 thisstickx = joyGetStickX(contpadnums[i]);
-			s8 thissticky = joyGetStickY(contpadnums[i]);
-			s8 thisrstickx = joyGetRStickX(contpadnums[i]);
-			s8 thisrsticky = joyGetRStickY(contpadnums[i]);
-			u32 buttons = joyGetButtons(contpadnums[i], 0xffffffff);
-			u32 buttonsnow = joyGetButtonsPressedThisFrame(contpadnums[i], 0xffffffff);
+			int8_t thisstickx = joyGetStickX(contpadnums[i]);
+			int8_t thissticky = joyGetStickY(contpadnums[i]);
+			int8_t thisrstickx = joyGetRStickX(contpadnums[i]);
+			int8_t thisrsticky = joyGetRStickY(contpadnums[i]);
+			uint32_t buttons = joyGetButtons(contpadnums[i], 0xffffffff);
+			uint32_t buttonsnow = joyGetButtonsPressedThisFrame(contpadnums[i], 0xffffffff);
 
 			if (buttonsnow & A_BUTTON) {
 				inputs.select = 1;
@@ -4409,11 +4404,11 @@ void menuProcessInput(void)
 
 		// Handle left/right repeat
 		{
-			s32 absstickx;
-			s32 abssticky;
-			s32 oldslot;
-			s32 newslot;
-			s32 interval;
+			int absstickx;
+			int abssticky;
+			int oldslot;
+			int newslot;
+			int interval;
 			bool apply = false;
 
 			// This check doesn't exist in the up/down code later on...
@@ -4513,11 +4508,11 @@ void menuProcessInput(void)
 
 		// Handle up/down repeat
 		{
-			s32 absstickx;
-			s32 abssticky;
-			s32 oldslot;
-			s32 newslot;
-			s32 interval;
+			int absstickx;
+			int abssticky;
+			int oldslot;
+			int newslot;
+			int interval;
 			bool apply = false;
 
 			if (ytapdir != 0) {
@@ -4658,14 +4653,14 @@ void menuProcessInput(void)
 		// Iterate all dialogs and give them the input for processing
 		{
 			bool foundcurrent = false;
-			s32 i;
-			s32 j;
+			int i;
+			int j;
 
 			for (i = 0; i < g_Menus[g_MpPlayerNum].depth; i++) {
 				struct menulayer *layer = &g_Menus[g_MpPlayerNum].layers[i];
 
 				for (j = 0; j < layer->numsiblings; j++) {
-					u32 tickflags = 0;
+					uint32_t tickflags = 0;
 
 					if (i == g_Menus[g_MpPlayerNum].depth - 1 && j == layer->cursibling && !foundcurrent) {
 						tickflags |= MENUTICKFLAG_DIALOGISCURRENT;
@@ -4694,7 +4689,7 @@ void menuProcessInput(void)
 			break;
 		case MENUROOT_MPPAUSE:
 			if (g_InCutscene) {
-				func0f0f8120();
+				menuFinalizePlayerDataAndPopDialogs();
 			}
 			g_Menus[g_MpPlayerNum].openinhibit = 10;
 			// fall-through
@@ -4704,7 +4699,7 @@ void menuProcessInput(void)
 		case MENUROOT_TRAINING:
 			if (inputs.start && !starttoselect && g_Menus[g_MpPlayerNum].curdialog
 					&& (dialog->definition->flags & MENUDIALOGFLAG_IGNOREBACK) == 0) {
-				func0f0f8120();
+				menuFinalizePlayerDataAndPopDialogs();
 			}
 			break;
 		}
@@ -4721,14 +4716,14 @@ Gfx *menugfxRenderBgFailureAlt(Gfx *gdl);
  * frac is used when transitioning between two backgrounds.
  * A value of 1 means draw this background with full alpha.
  */
-Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
+Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 {
-	static u32 bblur = 1;
+	static uint32_t bblur = 1;
 
 	switch (bg) {
 	case MENUBG_BLUR:
 		{
-			u32 alpha = 255 * frac;
+			uint32_t alpha = 255 * frac;
 
 			// Render the blurred background texture with full alpha
 			gdl = menugfxRenderBgBlur(gdl, 0xffffff00 | alpha, 0, 0);
@@ -4741,7 +4736,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
 	case MENUBG_BLACK:
 	case MENUBG_8:
 		{
-			u32 colour = 255 * frac;
+			uint32_t colour = 255 * frac;
 			gSPDisplayList(gdl++, var800613a0);
 			gdl = textSetPrimColour(gdl, colour);
 			gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
@@ -4761,7 +4756,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
 
 			// Render alpha black if fading in
 			{
-				u32 alpha = (1.0f - frac) * 255;
+				uint32_t alpha = (1.0f - frac) * 255;
 
 				if (alpha) {
 					gSPDisplayList(gdl++, var800613a0);
@@ -4775,8 +4770,8 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
 	case MENUBG_FAILURE:
 		{
 			// Fill with white -> black while fading in
-			u32 stack;
-			u32 channel = (1.0f - frac) * 255;
+			uint32_t stack;
+			uint32_t channel = (1.0f - frac) * 255;
 			gSPDisplayList(gdl++, var800613a0);
 			gdl = textSetPrimColour(gdl, channel << 24 | channel << 16 | channel << 8 | 0xff);
 			gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
@@ -4797,8 +4792,8 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
 
 			// While fading, render red
 			if (frac < 1.0f) {
-				u32 alpha;
-				u32 stack;
+				uint32_t alpha;
+				uint32_t stack;
 
 				gSPDisplayList(gdl++, var800613a0);
 				alpha = (1.0f - frac) * 255;
@@ -4821,9 +4816,9 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, u8 bg, f32 frac)
 	return gdl;
 }
 
-u32 var800714f0 = 1;
+uint32_t var800714f0 = 1;
 
-Gfx *menuRenderBackgroundLayer2(Gfx *gdl, u8 bg, f32 frac)
+Gfx *menuRenderBackgroundLayer2(Gfx *gdl, uint8_t bg, float frac)
 {
 	if (bg == MENUBG_CONEALPHA || bg == MENUBG_CONEOPAQUE) {
 		if (var800714f0
@@ -4837,7 +4832,7 @@ Gfx *menuRenderBackgroundLayer2(Gfx *gdl, u8 bg, f32 frac)
 
 Gfx *menuRender(Gfx *gdl)
 {
-	static u32 usepiece = 1;
+	static uint32_t usepiece = 1;
 
 	g_MpPlayerNum = 0;
 
@@ -4972,7 +4967,7 @@ Gfx *menuRender(Gfx *gdl)
 			g_MpPlayerNum = g_Vars.currentplayerstats->mpindex;
 			gdl = menuRenderDialogs(gdl);
 		} else {
-			s32 i;
+			int i;
 
 			for (i = 0; i < MAX_PLAYERS; i++) {
 				g_MpPlayerNum = i;
@@ -4985,25 +4980,26 @@ Gfx *menuRender(Gfx *gdl)
 		gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 		gSPDisplayList(gdl++, var800613a0);
 
-		text0f153b40();
+		// Don't do the redraw effect on the "Press Start" dialogs
+		textStopRedrawEffect();
 
 		// Render corner texts in combat simulator
 		if (g_MenuData.root == MENUROOT_MPSETUP) {
-			s32 i;
-			s32 j;
-			s32 viewleft = viGetViewLeft() / 20;
-			s32 viewtop = viGetViewTop() + 4;
-			s32 viewright = (viGetViewLeft() + viGetViewWidth()) / -20;
-			s32 viewbottom = viGetViewTop() + viGetViewHeight() - 4;
-			s32 textheight;
-			s32 textwidth;
+			int i;
+			int j;
+			int viewleft = videoGetNativeWidth() / 20;
+			int viewtop = videoGetNativeHeight() / 20;
+			int viewright = videoGetNativeWidth() - (videoGetNativeWidth() / 20);
+			int viewbottom = videoGetNativeHeight() - (videoGetNativeHeight() / 20);
+			int textheight;
+			int textwidth;
 			bool renderit;
 			char text[32];
-			s32 tmp1;
-			s32 tmp2;
-			s32 x;
-			s32 y;
-			s32 colour;
+			int tmp1;
+			int tmp2;
+			int x;
+			int y;
+			int colour;
 
 			gdl = textConfigureGfxPipeline(gdl);
 
@@ -5053,7 +5049,7 @@ Gfx *menuRender(Gfx *gdl)
 					}
 
 					if (g_MenuData.playerjoinalpha[i] > 0) {
-						u32 weight = menuGetSinOscFrac(20) * 255.0f;
+						uint32_t weight = menuGetSinOscFrac(20) * 255.0f;
 
 						// "Player %d: "
 						sprintf(text, langGet(L_MPMENU_482), i + 1);
@@ -5096,13 +5092,13 @@ Gfx *menuRender(Gfx *gdl)
 	// Render banner messages, such as "Please Wait...",
 	// "Checking Controller Pak" and some unused game boy camera texts.
 	if (g_MenuData.bannernum != -1) {
-		s32 x1 = viGetViewLeft();
-		s32 y1 = viGetViewTop();
-		s32 x2 = (viGetViewLeft() + viGetViewWidth());
-		s32 y2 = viGetViewTop() + viGetViewHeight();
+		int x1 = viGetViewLeft();
+		int y1 = viGetViewTop();
+		int x2 = (viGetViewLeft() + viGetViewWidth());
+		int y2 = viGetViewTop() + viGetViewHeight();
 
-		s32 left = 0;
-		s32 right = 0;
+		int left = 0;
+		int right = 0;
 
 		if (PLAYERCOUNT() >= 3) {
 			if (g_Vars.currentplayernum == 1 || g_Vars.currentplayernum == 3) {
@@ -5130,9 +5126,9 @@ Gfx *menuRender(Gfx *gdl)
 	return gdl;
 }
 
-u32 menuChooseMusic(void)
+uint32_t menuChooseMusic(void)
 {
-	s32 missionsuccess = MUSIC_MISSION_SUCCESS;
+	int missionsuccess = MUSIC_MISSION_SUCCESS;
 
 	if (g_StageIndex == STAGEINDEX_DEFENSE) {
 		missionsuccess = MUSIC_MISSION_UNKNOWN;
@@ -5194,7 +5190,7 @@ u32 menuChooseMusic(void)
 	return MUSIC_PAUSEMENU;
 }
 
-u32 menuGetRoot(void)
+uint32_t menuGetRoot(void)
 {
 	if (g_MenuData.count == 0) {
 		return 0;
@@ -5205,7 +5201,7 @@ u32 menuGetRoot(void)
 
 struct menudialogdef g_PakAttemptRepairMenuDialog;
 
-MenuItemHandlerResult menuhandler000fcc34(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandler000fcc34(int operation, struct menuitem *item, union handlerdata *data)
 {
 	bool done = false;
 
@@ -5230,7 +5226,7 @@ MenuItemHandlerResult menuhandler000fcc34(s32 operation, struct menuitem *item, 
 	return 0;
 }
 
-MenuDialogHandlerResult menudialog000fcd48(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult menudialog000fcd48(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	if (operation == MENUOP_TICK) {
 		if (g_Menus[g_MpPlayerNum].curdialog
@@ -5243,16 +5239,7 @@ MenuDialogHandlerResult menudialog000fcd48(s32 operation, struct menudialogdef *
 	return 0;
 }
 
-MenuItemHandlerResult func0f0fcdd0(s32 operation, struct menuitem *item, union handlerdata *data)
-{
-	if (operation == MENUOP_SET) {
-		func0f0f3704(&g_PakDamagedMenuDialog);
-	}
-
-	return 0;
-}
-
-MenuItemHandlerResult menuhandlerRepairPak(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerRepairPak(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		if (pakRepair(g_Menus[g_MpPlayerNum].fm.device3)) {
@@ -5265,9 +5252,9 @@ MenuItemHandlerResult menuhandlerRepairPak(s32 operation, struct menuitem *item,
 	return 0;
 }
 
-void menuPushPakDialogForPlayer(struct menudialogdef *dialogdef, s32 playernum, s32 paknum)
+void menuPushPakDialogForPlayer(struct menudialogdef *dialogdef, int playernum, int paknum)
 {
-	s32 prevplayernum = g_MpPlayerNum;
+	int prevplayernum = g_MpPlayerNum;
 
 	g_MpPlayerNum = playernum;
 	g_Menus[g_MpPlayerNum].fm.device3 = paknum;
@@ -5453,7 +5440,7 @@ struct menudialogdef g_PakAttemptRepairMenuDialog = {
 
 char *menuTextSaveDeviceName(struct menuitem *item)
 {
-	u16 devices[] = {
+	uint16_t devices[] = {
 		L_OPTIONS_112, // "Controller Pak 1"
 		L_OPTIONS_113, // "Controller Pak 2"
 		L_OPTIONS_114, // "Controller Pak 3"
@@ -5461,27 +5448,27 @@ char *menuTextSaveDeviceName(struct menuitem *item)
 		L_OPTIONS_111, // "Game Pak"
 	};
 
-	if ((u8)g_Menus[g_MpPlayerNum].fm.device3 < ARRAYCOUNT(devices)) {
-		return langGet(devices[(u8)g_Menus[g_MpPlayerNum].fm.device3]);
+	if ((uint8_t)g_Menus[g_MpPlayerNum].fm.device3 < ARRAYCOUNT(devices)) {
+		return langGet(devices[(uint8_t)g_Menus[g_MpPlayerNum].fm.device3]);
 	}
 
 	return NULL;
 }
 
-MenuItemHandlerResult menuhandlerRetrySavePak(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerRetrySavePak(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		menuPopDialog();
 
 		g_Vars.pakstocheck &= 0xfff0;
 		g_Vars.pakstocheck |= 0x0008;
-		g_Vars.pakstocheck |= 1 << ((u8)g_Menus[g_MpPlayerNum].fm.device3 + 8);
+		g_Vars.pakstocheck |= 1 << ((uint8_t)g_Menus[g_MpPlayerNum].fm.device3 + 8);
 	}
 
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerWarnRepairPak(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerWarnRepairPak(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		menuPushDialog(&g_PakAttemptRepairMenuDialog);
@@ -5490,9 +5477,9 @@ MenuItemHandlerResult menuhandlerWarnRepairPak(s32 operation, struct menuitem *i
 	return 0;
 }
 
-s32 menuPakNumToPlayerNum(s32 paknum)
+int menuPakNumToPlayerNum(int paknum)
 {
-	u32 result = 0;
+	uint32_t result = 0;
 
 	if (g_Vars.normmplayerisrunning) {
 		if (g_MpSetup.chrslots & (1 << paknum)) {
@@ -5509,9 +5496,9 @@ s32 menuPakNumToPlayerNum(s32 paknum)
 	return result;
 }
 
-bool menuIsReadyForPakError(s32 paknum, s32 pakerrordialog)
+bool menuIsReadyForPakError(int paknum, int pakerrordialog)
 {
-	s32 playernum = menuPakNumToPlayerNum(paknum);
+	int playernum = menuPakNumToPlayerNum(paknum);
 	bool result = true;
 
 	if (g_Vars.lvframenum < 20) {
@@ -5544,12 +5531,12 @@ bool menuIsReadyForPakError(s32 paknum, s32 pakerrordialog)
 	return result;
 }
 
-void menuPushPakErrorDialog(s32 paknum, s32 pakerrordialog)
+void menuPushPakErrorDialog(int paknum, int pakerrordialog)
 {
-	s32 prevplayernum = g_MpPlayerNum;
-	s32 playernum = menuPakNumToPlayerNum(paknum);
+	int prevplayernum = g_MpPlayerNum;
+	int playernum = menuPakNumToPlayerNum(paknum);
 	bool found;
-	s32 i;
+	int i;
 
 	g_MpPlayerNum = playernum;
 
@@ -5586,7 +5573,7 @@ void menuPushPakErrorDialog(s32 paknum, s32 pakerrordialog)
 
 void func0f0fd494(struct coord *pos)
 {
-	f32 xy[2];
+	float xy[2];
 	struct coord coord;
 	Mtxf *matrix;
 
@@ -5597,13 +5584,13 @@ void func0f0fd494(struct coord *pos)
 	mtx4TransformVec(matrix, pos, &coord);
 	cam0f0b4d04(&coord, xy);
 
-	g_MenuData.unk670 = (s32)xy[0] - viGetWidth() / 2;
-	g_MenuData.unk674 = (s32)xy[1] - viGetHeight() / 2;
+	g_MenuData.unk670 = (int)xy[0] - viGetWidth() / 2;
+	g_MenuData.unk674 = (int)xy[1] - viGetHeight() / 2;
 
 	g_MenuData.unk5d5_05 = false;
 }
 
-void func0f0fd548(s32 arg0)
+void func0f0fd548(int arg0)
 {
 	g_MenuData.unk669[g_MenuData.unk66e++] = arg0;
 	g_MenuData.unk66f = 0;
@@ -5611,8 +5598,8 @@ void func0f0fd548(s32 arg0)
 
 struct menudialog *menuIsDialogOpen(struct menudialogdef *dialogdef)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	if (g_Menus[g_MpPlayerNum].curdialog) {
 		for (i = 0; i < g_Menus[g_MpPlayerNum].depth; i++) {

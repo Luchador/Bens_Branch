@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 
 void guLookAtF(float mf[4][4], float xEye, float yEye, float zEye,
 		float xAt,  float yAt,  float zAt,

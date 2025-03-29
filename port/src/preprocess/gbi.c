@@ -13,23 +13,23 @@
 #endif
 
 struct vtx {
-	s16 x;
-	s16 y;
-	s16 z;
-	u8 flags;
-	u8 colour;
-	s16 s;
-	s16 t;
+	int16_t x;
+	int16_t y;
+	int16_t z;
+	uint8_t flags;
+	uint8_t colour;
+	int16_t s;
+	int16_t t;
 };
 
 struct texaddr {
-	u32 src;
-	u32 dst;
+	uint32_t src;
+	uint32_t dst;
 };
 
-static u32 gbiSegments[16];
-static u32 srcVtxOffset;
-static u32 dstVtxOffset;
+static uint32_t gbiSegments[16];
+static uint32_t srcVtxOffset;
+static uint32_t dstVtxOffset;
 
 static struct texaddr texAddrs[64];
 static int numTexAddrs;
@@ -45,24 +45,24 @@ void gbiReset(void)
 	numTexAddrs = 0;
 }
 
-void gbiSetSegment(int segment, u32 offset)
+void gbiSetSegment(int segment, uint32_t offset)
 {
 	gbiSegments[segment] = offset & 0x00ffffff;
 }
 
-void gbiSetVtx(u32 src_offset, u32 dst_offset)
+void gbiSetVtx(uint32_t src_offset, uint32_t dst_offset)
 {
 	srcVtxOffset = src_offset & 0x00ffffff;
 	dstVtxOffset = dst_offset & 0x00ffffff;
 }
 
-void gbiAddTexAddr(u32 src_offset, u32 dst_offset)
+void gbiAddTexAddr(uint32_t src_offset, uint32_t dst_offset)
 {
 	texAddrs[numTexAddrs].src   = src_offset & 0x00ffffff;
 	texAddrs[numTexAddrs++].dst = dst_offset & 0x00ffffff;
 }
 
-u32 gbiFindTexAddr(u32 src_offset)
+uint32_t gbiFindTexAddr(uint32_t src_offset)
 {
 	for (int i = 0; i < numTexAddrs; i++) {
 		if (texAddrs[i].src == src_offset)
@@ -72,7 +72,7 @@ u32 gbiFindTexAddr(u32 src_offset)
 	return 0;
 }
 
-void gbiConvertVtx(u8 *dst, u32 offset, int count)
+void gbiConvertVtx(uint8_t *dst, uint32_t offset, int count)
 {
 	if (!offset) return;
 	struct vtx* vtxs = (struct vtx*)(dst + offset);
@@ -118,10 +118,10 @@ void gbiConvertVtx(u8 *dst, u32 offset, int count)
  * Segment 5 is the start of the model file. The data in these files shifts
  * depending on the pointer size, so this function adjusts the offset accordingly.
  */
-static u64 gbiRewriteAddr(u64 cmd, u8 opcode)
+static uint64_t gbiRewriteAddr(uint64_t cmd, uint8_t opcode)
 {
-	u8 segment = (cmd & 0x0f000000) >> 24;
-	u32 offset = cmd & 0x00ffffff;
+	uint8_t segment = (cmd & 0x0f000000) >> 24;
+	uint32_t offset = cmd & 0x00ffffff;
 
 	if (segment == 5) {
 		if (opcode == 0xfd) {
@@ -139,26 +139,26 @@ static u64 gbiRewriteAddr(u64 cmd, u8 opcode)
 	return (cmd & 0xffffffffff000000) | offset;
 }
 
-void gbiGdlRewriteAddrs(u8 *dst, u32 offset)
+void gbiGdlRewriteAddrs(uint8_t *dst, uint32_t offset)
 {
 	if (!offset) return;
 
-	u64 *cmds = (u64 *)(dst + (offset & 0x00ffffff));
+	uint64_t *cmds = (uint64_t *)(dst + (offset & 0x00ffffff));
 	if (!cmds) return;
 
-	u64 cmd;
+	uint64_t cmd;
 
 	do {
 		cmd = *cmds;
 		Gfx* gfxcmd = (Gfx *)cmds;
 		int idx = 0;
-		u8 opcode = (cmd >> 24) & 0xff;
+		uint8_t opcode = (cmd >> 24) & 0xff;
 
 #if HOST_DWORDS_PER_CMD == 2
 		idx = 1;
 		opcode = (cmd >> 24) & 0xff;
 #endif
-		cmd = (u64)opcode << 56;
+		cmd = (uint64_t)opcode << 56;
 
 		if (CMD_HAS_ADDR(cmd)) {
 			cmds[idx] = gbiRewriteAddr(cmds[idx], opcode);
@@ -172,13 +172,13 @@ void gbiGdlRewriteAddrs(u8 *dst, u32 offset)
 	} while (!CMD_IS_ENDDL(cmd));
 }
 
-u32 gbiConvertGdl(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int segment_cmds)
+uint32_t gbiConvertGdl(uint8_t *dst, uint32_t dstpos, uint8_t *src, uint32_t srcpos, int segment_cmds)
 {
 	dstpos = ALIGN8(dstpos);
 
-	u64 *n64_cmd = (u64*)&src[srcpos];
-	u64 *host_cmd = (u64*)&dst[dstpos];
-	u64 cmd;
+	uint64_t *n64_cmd = (uint64_t*)&src[srcpos];
+	uint64_t *host_cmd = (uint64_t*)&dst[dstpos];
+	uint64_t cmd;
 
 	do {
 		cmd = PD_BE64(*n64_cmd);

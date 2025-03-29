@@ -21,20 +21,18 @@
 #include "lib/speaker.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "system.h"
 #include "preprocess.h"
 #include "mod.h"
-#endif
 
 #define MAX_SEQ_SIZE_8MB 1024 * 18
 #define NUM_CACHE_SLOTS 45
 #define NUM_KEYTHINGS 9
 
 struct sndcache {
-	/*0x0000*/ u16 *indexes; // indexed by sfxnum, value is cache index (0-44) or 0xffff
-	/*0x0004*/ u8 refcounts[NUM_CACHE_SLOTS];
-	/*0x0032*/ u16 ages[NUM_CACHE_SLOTS];
+	/*0x0000*/ uint16_t *indexes; // indexed by sfxnum, value is cache index (0-44) or 0xffff
+	/*0x0004*/ uint8_t refcounts[NUM_CACHE_SLOTS];
+	/*0x0032*/ uint16_t ages[NUM_CACHE_SLOTS];
 	/*0x008c*/ ALEnvelope envelopes[NUM_CACHE_SLOTS];
 	/*0x035c*/ ALKeyMap keymaps[NUM_CACHE_SLOTS];
 	/*0x046c*/ ALWaveTable wavetables[NUM_CACHE_SLOTS];
@@ -45,62 +43,53 @@ struct sndcache {
 
 struct curmp3 {
 	union soundnumhack sfxref;
-	u32 playing;
-	u32 unk08;
-	s32 responsetimer240;
-	s32 prevwhisper;
-	s32 prevacknowledge;
-	s32 prevgreeting;
-#ifdef PLATFORM_N64
-	u32 romaddr;
-#else
+	uint32_t playing;
+	uint32_t unk08;
+	int responsetimer240;
+	int prevwhisper;
+	int prevacknowledge;
+	int prevgreeting;
 	uintptr_t romaddr;
-#endif
-	u32 romsize;
-	s32 responsetype;
+	uint32_t romsize;
+	int responsetype;
 };
 
-s32 g_NumSounds;
+int g_NumSounds;
 uintptr_t *g_ALSoundRomOffsets;
-s32 g_SndMaxFxBusses;
-u32 var80094eac;
+int g_SndMaxFxBusses;
+uint32_t var80094eac;
 struct curmp3 g_SndCurMp3;
 struct seqinstance g_SeqInstances[3];
 ALHeap g_SndHeap;
-u32 var80095200;
+uint32_t var80095200;
 ALBank *var80095204;
 struct seqtable *g_SeqTable;
-u32 g_SeqBufferSize;
+uint32_t g_SeqBufferSize;
 ALIGNED16 struct sndcache g_SndCache;
 
 const char g_SndGuardString[] = "RUSSES SOUND GUARD STRING";
-const char var70053b3c[] = "Snd: SoundHeaderCacheInit\n";
 
 bool g_SndDisabled = false;
-u32 var8005dda4 = 0x00000000;
 
-s32 g_SndNosediveVolume = 0;
-s32 g_SndNosediveAge240 = -1;
-s32 g_SndNosediveDuration240 = 0;
+int g_SndNosediveVolume = 0;
+int g_SndNosediveAge240 = -1;
+int g_SndNosediveDuration240 = 0;
 
-s32 g_SndUfoVolume = 0;
-s32 g_SndUfoAge240 = -1;
-s32 g_SndUfoDuration240 = 0;
+int g_SndUfoVolume = 0;
+int g_SndUfoAge240 = -1;
+int g_SndUfoDuration240 = 0;
 
 struct sndstate *g_SndNosediveHandle = NULL;
 struct sndstate *g_SndUfoHandle = NULL;
 
-u16 g_SfxVolume = AL_VOL_FULL;
-s32 g_SoundMode = (VERSION >= VERSION_NTSC_1_0 ? SOUNDMODE_STEREO : SOUNDMODE_SURROUND);
+uint16_t g_SfxVolume = AL_VOL_FULL;
+int g_SoundMode = (VERSION >= VERSION_NTSC_1_0 ? SOUNDMODE_STEREO : SOUNDMODE_SURROUND);
 bool g_SndMp3Enabled = false;
 
-#if VERSION >= VERSION_NTSC_1_0
-s32 g_SndNumPlaying = 0;
-s32 g_SndMostEverPlaying = 0;
-s32 var8005dddc = 0;
-#endif
+int g_SndNumPlaying = 0;
+int g_SndMostEverPlaying = 0;
 
-u8 *g_SndGuardStringPtr = NULL;
+uint8_t *g_SndGuardStringPtr = NULL;
 
 uintptr_t* g_SeqRomAddrs;
 
@@ -159,22 +148,16 @@ enum audioconfig_e {
 	AUDIOCONFIG_51,
 	AUDIOCONFIG_52,
 	AUDIOCONFIG_53,
-#if VERSION >= VERSION_NTSC_1_0
 	AUDIOCONFIG_54,
-#endif
 	AUDIOCONFIG_55,
 	AUDIOCONFIG_56,
 	AUDIOCONFIG_57,
 	AUDIOCONFIG_58,
 	AUDIOCONFIG_59,
-#if VERSION >= VERSION_NTSC_1_0
 	AUDIOCONFIG_60,
 	AUDIOCONFIG_61,
 	AUDIOCONFIG_62,
 	AUDIOCONFIG_63
-#else
-	AUDIOCONFIG_60
-#endif
 };
 
 struct audiorussmapping g_AudioRussMappings[] = {
@@ -343,7 +326,7 @@ struct audiorussmapping g_AudioRussMappings[] = {
 	/*0x00a2*/ { 0x80b2, AUDIOCONFIG_18 },
 	/*0x00a3*/ { 0x80b3, AUDIOCONFIG_18 },
 	/*0x00a4*/ { 0x818a, AUDIOCONFIG_19 },
-	/*0x00a5*/ { VERSION >= VERSION_NTSC_1_0 ? 0xefdd : 0x8190, AUDIOCONFIG_19 },
+	/*0x00a5*/ { 0xefdd, AUDIOCONFIG_19 },
 	/*0x00a6*/ { 0x805f, AUDIOCONFIG_32 },
 	/*0x00a7*/ { 0x8060, AUDIOCONFIG_32 },
 	/*0x00a8*/ { 0x8061, AUDIOCONFIG_32 },
@@ -424,9 +407,7 @@ struct audiorussmapping g_AudioRussMappings[] = {
 	/*0x00f3*/ { 0x8605, AUDIOCONFIG_04 },
 	/*0x00f4*/ { 0x8606, AUDIOCONFIG_04 },
 	/*0x00f5*/ { 0x8606, AUDIOCONFIG_04 },
-#if VERSION >= VERSION_NTSC_1_0
 	/*0x00f6*/ { 0x81d9, AUDIOCONFIG_61 },
-#endif
 	/*0x00f7*/ { 0x8267, AUDIOCONFIG_02 },
 	/*0x00f8*/ { 0x8268, AUDIOCONFIG_02 },
 	/*0x00f9*/ { 0x8286, AUDIOCONFIG_02 },
@@ -434,15 +415,9 @@ struct audiorussmapping g_AudioRussMappings[] = {
 	/*0x00fb*/ { 0x8291, AUDIOCONFIG_02 },
 	/*0x00fc*/ { 0x829f, AUDIOCONFIG_02 },
 	/*0x00fd*/ { 0x82a1, AUDIOCONFIG_02 },
-#if VERSION >= VERSION_NTSC_1_0
 	/*0x00fe*/ { 0x8af9, AUDIOCONFIG_47 }, // Cass: "You've become quite an annoyance"
 	/*0x00ff*/ { 0x8afa, AUDIOCONFIG_47 }, // Cass: "We meet again, girl"
 	/*0x0100*/ { 0x8afb, AUDIOCONFIG_47 }, // Cass: "Good night, Miss Dark"
-#else
-	/*0x00fe*/ { 0x92f9, AUDIOCONFIG_47 }, // Cass: "You've become quite an annoyance"
-	/*0x00ff*/ { 0x92fa, AUDIOCONFIG_47 }, // Cass: "We meet again, girl"
-	/*0x0100*/ { 0x92fb, AUDIOCONFIG_47 }, // Cass: "Good night, Miss Dark"
-#endif
 	/*0x0101*/ { 0x92fc, AUDIOCONFIG_47 }, // Cass: "Get her!"
 	/*0x0102*/ { 0x92fd, AUDIOCONFIG_47 }, // Cass: (laughing)
 	/*0x0103*/ { 0x9285, AUDIOCONFIG_02 }, // Scientist: "Who the hell are you?"
@@ -470,11 +445,7 @@ struct audiorussmapping g_AudioRussMappings[] = {
 	/*0x0119*/ { 0x81cb, AUDIOCONFIG_36 },
 	/*0x011a*/ { 0x81cb, AUDIOCONFIG_37 },
 	/*0x011b*/ { 0x81cb, AUDIOCONFIG_38 },
-#if VERSION >= VERSION_NTSC_1_0
 	/*0x011c*/ { 0x81c6, AUDIOCONFIG_55 },
-#else
-	/*0x011c*/ { 0x81c6, AUDIOCONFIG_55 },
-#endif
 	/*0x011d*/ { 0x9278, AUDIOCONFIG_47 }, // "That's not how it goes"
 	/*0x011e*/ { 0x9279, AUDIOCONFIG_47 }, // "Give it to me. You're doing it wrong"
 	/*0x011f*/ { 0x927a, AUDIOCONFIG_47 }, // "Oh no, we're too late"
@@ -487,17 +458,13 @@ struct audiorussmapping g_AudioRussMappings[] = {
 	/*0x0126*/ { 0x8300, AUDIOCONFIG_02 }, // "Oh my god"
 	/*0x0127*/ { 0x8303, AUDIOCONFIG_02 }, // "Oh god I'm hit"
 	/*0x0128*/ { 0x830a, AUDIOCONFIG_02 }, // "Oh my god"
-#if VERSION >= VERSION_NTSC_1_0
 	/*0x0129*/ { 0x8313, AUDIOCONFIG_62 }, // "Noooo!"
-#endif
 	/*0x012a*/ { 0x8314, AUDIOCONFIG_02 }, // "Oh god he's dead!"
 	/*0x012b*/ { 0x832e, AUDIOCONFIG_02 }, // "Bloody stupid gun"
 	/*0x012c*/ { 0x8330, AUDIOCONFIG_02 }, // "Damn it"
 	/*0x012d*/ { 0x8333, AUDIOCONFIG_02 }, // "Damn, she's good"
 	/*0x012e*/ { 0x8334, AUDIOCONFIG_02 }, // "Cover my ass"
-#if VERSION >= VERSION_NTSC_1_0
 	/*0x012f*/ { 0x834c, AUDIOCONFIG_62 }, // Death scream
-#endif
 	/*0x0130*/ { 0x83a3, AUDIOCONFIG_02 }, // Female: "Damn she's good"
 	/*0x0131*/ { 0x83b9, AUDIOCONFIG_02 }, // Female: "My god"
 	/*0x0132*/ { 0x83c7, AUDIOCONFIG_02 }, // "Geez, that hurt"
@@ -508,9 +475,7 @@ struct audiorussmapping g_AudioRussMappings[] = {
 	/*0x0137*/ { 0x83f5, AUDIOCONFIG_02 }, // "Damn"
 	/*0x0138*/ { 0x83f6, AUDIOCONFIG_02 }, // "Hell, she's good"
 	/*0x0139*/ { 0x8400, AUDIOCONFIG_02 }, // "Let's get the hell out of here"
-#if VERSION >= VERSION_NTSC_1_0
 	/*0x013a*/ { 0x8411, AUDIOCONFIG_62 }, // "Noooo!"
-#endif
 	/*0x013b*/ { 0x8413, AUDIOCONFIG_02 }, // "Shoot, damn it"
 	/*0x013c*/ { 0x8414, AUDIOCONFIG_02 }, // "Oh god, I'm dying"
 	/*0x013d*/ { 0x8422, AUDIOCONFIG_02 }, // "God, run!"
@@ -522,24 +487,15 @@ struct audiorussmapping g_AudioRussMappings[] = {
 	/*0x0143*/ { 0x81b7, AUDIOCONFIG_58 },
 	/*0x0144*/ { 0x8477, AUDIOCONFIG_57 },
 	/*0x0145*/ { 0x8478, AUDIOCONFIG_57 },
-#if VERSION >= VERSION_NTSC_1_0
 	/*0x0146*/ { 0x81c2, AUDIOCONFIG_54 },
 	/*0x0147*/ { 0x8479, AUDIOCONFIG_54 },
 	/*0x0148*/ { 0x81c3, AUDIOCONFIG_54 },
 	/*0x0149*/ { 0x81c4, AUDIOCONFIG_54 },
-#else
-	/*0x0146*/ { 0x81c2, AUDIOCONFIG_55 },
-	/*0x0147*/ { 0x8479, AUDIOCONFIG_55 },
-	/*0x0148*/ { 0x81c3, AUDIOCONFIG_55 },
-	/*0x0149*/ { 0x81c4, AUDIOCONFIG_55 },
-#endif
 	/*0x014a*/ { 0x8443, AUDIOCONFIG_02 }, // Civilian: "Oh my god"
 	/*0x014b*/ { 0x844e, AUDIOCONFIG_02 }, // "What the hell was that?"
-#if VERSION >= VERSION_NTSC_1_0
 	/*0x014c*/ { 0x843c, AUDIOCONFIG_63 },
 	/*0x014d*/ { 0x847c, AUDIOCONFIG_63 },
 	/*0x014e*/ { 0x843d, AUDIOCONFIG_63 },
-#endif
 	/*0x014f*/ { 0xf2ad, AUDIOCONFIG_01 }, // "Joanna, this is Jonathan. You're in grave danger"
 	/*0x0150*/ { 0xf2ae, AUDIOCONFIG_01 }, // "They've flooded the area with nerge gas"
 	/*0x0151*/ { 0xf2af, AUDIOCONFIG_01 }, // "Get our friend to the containment lab. There's a hiding place there"
@@ -624,7 +580,7 @@ struct audiorussmapping g_AudioRussMappings[] = {
 	/*0x01a0*/ { 0xf2df, AUDIOCONFIG_01 }, // Elvis: "We're outside, Joanna. Get the shields down and we can help you"
 	/*0x01a1*/ { 0xf2e0, AUDIOCONFIG_01 }, // Elvis: "You've got to open the hanger doors so we can dock"
 	/*0x01a2*/ { 0xd4ea, AUDIOCONFIG_01 }, // Carrington: "Stand back Joanna. We'll create your escape route"
-	/*0x01a3*/ { VERSION >= VERSION_NTSC_1_0 ? 0x8d24 : 0x9524, AUDIOCONFIG_02 }, // Cass: "Get the hell out of my office"
+	/*0x01a3*/ { 0x8d24, AUDIOCONFIG_02 }, // Cass: "Get the hell out of my office"
 	/*0x01a4*/ { 0x9d62, AUDIOCONFIG_47 }, // Elvis: "Joanna, what took you so long? Follow me. Let's get off this old tub"
 	/*0x01a5*/ { 0x84aa, AUDIOCONFIG_43 },
 	/*0x01a6*/ { 0x81cf, AUDIOCONFIG_41 },
@@ -707,32 +663,19 @@ struct audioconfig g_AudioConfigs[] = {
 	{ /*51*/  400, 2500, 3000, -1,  75, -1,   0, 0 },
 	{ /*52*/  200,  500,  800, -1, 100, -1, 100, 0 },
 	{ /*53*/ 1000, 1100, 1600, -1, 100, -1,   0, 0 },
-#if VERSION >= VERSION_NTSC_1_0
 	{ /*54*/  300, 1300, 1500, -1, 100, -1,   0, AUDIOCONFIGFLAG_01 },
-#endif
 	{ /*55*/  300, 1300, 1500, -1, 100, -1, 200, AUDIOCONFIGFLAG_01 },
 	{ /*56*/  250,  600,  900, -1, 100, -1, 200, AUDIOCONFIGFLAG_01 },
 	{ /*57*/   50,  180,  250, -1, 100, -1, 200, AUDIOCONFIGFLAG_01 },
 	{ /*58*/  100,  400,  600, -1, 100, -1, 200, AUDIOCONFIGFLAG_01 },
 	{ /*59*/  700, 1100, 1400, -1, 100, -1, 200, AUDIOCONFIGFLAG_01 },
 	{ /*60*/  400, 2500, 3000, -1, 100, -1,   0, AUDIOCONFIGFLAG_RESPONDHELLO },
-#if VERSION >= VERSION_NTSC_1_0
 	{ /*61*/  300,  900, 1100, -1, 100, -1,   0, 0 },
 	{ /*62*/ 1000, 2500, 3000, -1, 100, -1,   0, AUDIOCONFIGFLAG_08 },
 	{ /*63*/  400, 1000, 1200, -1, 100, -1,   0, 0 },
-#endif
 };
 
-u32 var8005ecd8 = 0x00000000;
-u32 var8005ecdc = 0x00000000;
-u32 var8005ece0 = 0x00000000;
-u32 var8005ece4 = 0x00000000;
-u32 var8005ece8 = 0x00000000;
-u32 var8005ecec = 0x00000000;
-u32 var8005ecf0 = 0x00000000;
-u32 var8005ecf4 = 0x00000000;
-
-s16 var8005ecf8[] = {
+int16_t var8005ecf8[] = {
 	0x6665,
 	0x5998,
 	0x5fff,
@@ -869,22 +812,22 @@ s16 var8005ecf8[] = {
 	-1,
 };
 
-extern u8 EXT_SEG _sfxctlSegmentRomStart;
-extern u8 EXT_SEG _sfxtblSegmentRomStart;
-extern u8 EXT_SEG _seqctlSegmentRomStart;
-extern u8 EXT_SEG _seqctlSegmentRomEnd;
-extern u8 EXT_SEG _seqtblSegmentRomStart;
-extern u8 EXT_SEG _sequencesSegmentRomStart;
+extern uint8_t EXT_SEG _sfxctlSegmentRomStart;
+extern uint8_t EXT_SEG _sfxtblSegmentRomStart;
+extern uint8_t EXT_SEG _seqctlSegmentRomStart;
+extern uint8_t EXT_SEG _seqctlSegmentRomEnd;
+extern uint8_t EXT_SEG _seqtblSegmentRomStart;
+extern uint8_t EXT_SEG _sequencesSegmentRomStart;
 
 bool sndIsPlayingMp3(void)
 {
 	return g_SndCurMp3.playing;
 }
 
-u16 snd0000e9dc(void)
+uint16_t snd0000e9dc(void)
 {
 #if VERSION >= VERSION_NTSC_1_0
-	s32 result;
+	int result;
 
 	if (func00033ec4(0) < 0x5000) {
 		result = func00033ec4(0);
@@ -898,9 +841,9 @@ u16 snd0000e9dc(void)
 #endif
 }
 
-void sndSetSfxVolume(u16 volume)
+void sndSetSfxVolume(uint16_t volume)
 {
-	u8 i;
+	uint8_t i;
 
 #if VERSION >= VERSION_NTSC_1_0
 	if (volume > 0x5000) {
@@ -915,9 +858,9 @@ void sndSetSfxVolume(u16 volume)
 	g_SfxVolume = volume;
 }
 
-void snd0000ea80(u16 volume)
+void snd0000ea80(uint16_t volume)
 {
-	u8 i;
+	uint8_t i;
 
 #if VERSION >= VERSION_NTSC_1_0
 	if (volume > 0x5000) {
@@ -946,16 +889,16 @@ void sndResetCurMp3(void)
 
 void sndLoadSfxCtl(void)
 {
-	s32 i;
-	u8 unalignedbuffer[256 + 16];
-	u8 *buffer;
+	int i;
+	uint8_t unalignedbuffer[256 + 16];
+	uint8_t *buffer;
 	ALBankFile *file;
 	ALBank *bank;
 	romptr_t romaddr;
-	u32 size;
+	uint32_t size;
 
 	g_ALSoundRomOffsets = NULL;
-	buffer = (u8 *) ALIGN16((uintptr_t)unalignedbuffer);
+	buffer = (uint8_t *) ALIGN16((uintptr_t)unalignedbuffer);
 
 	// Load the first 256 bytes of the ctl file.
 	size = 256;
@@ -996,9 +939,9 @@ void sndLoadSfxCtl(void)
 	}
 
 	// Allocate and initialise cache
-	g_SndCache.indexes = alHeapAlloc(&g_SndHeap, sizeof(u16), g_NumSounds);
+	g_SndCache.indexes = alHeapAlloc(&g_SndHeap, sizeof(uint16_t), g_NumSounds);
 
-	for (i = 0; i < (u32)g_NumSounds; i++) {
+	for (i = 0; i < (uint32_t)g_NumSounds; i++) {
 		g_SndCache.indexes[i] = -1;
 	}
 
@@ -1016,7 +959,7 @@ void sndLoadSfxCtl(void)
 #if VERSION >= VERSION_NTSC_1_0
 void sndIncrementAges(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < NUM_CACHE_SLOTS; i++) {
 		if (g_SndCache.refcounts[i] == 0 && g_SndCache.ages[i] < 32000) {
@@ -1026,16 +969,16 @@ void sndIncrementAges(void)
 }
 #endif
 
-ALEnvelope *sndLoadEnvelope(uintptr_t offset, u16 cacheindex)
+ALEnvelope *sndLoadEnvelope(uintptr_t offset, uint16_t cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
-	u8 spaf[0x90];
-	u8 sp5f[0x90];
+	uint8_t spaf[0x90];
+	uint8_t sp5f[0x90];
 	ALEnvelope *s2 = (ALEnvelope *)ALIGN16((uintptr_t)spaf);
 	ALEnvelope *s1 = (ALEnvelope *)ALIGN16((uintptr_t)sp5f);
-	s32 i;
-	s32 sum1;
-	s32 sum2;
+	int i;
+	int sum1;
+	int sum2;
 
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
@@ -1044,20 +987,20 @@ ALEnvelope *sndLoadEnvelope(uintptr_t offset, u16 cacheindex)
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
-			sum1 += ((u32 *)s2)[i];
+			sum1 += ((uint32_t *)s2)[i];
 		}
 
 		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
-			sum2 += ((u32 *)s1)[i];
+			sum2 += ((uint32_t *)s1)[i];
 		}
 
 		if (1);
 	} while (sum1 != sum2);
 #else
-	u8 sp5f[0x50];
+	uint8_t sp5f[0x50];
 	ALEnvelope *s1 = (ALEnvelope *)ALIGN16((uintptr_t)sp5f);
 
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
@@ -1073,16 +1016,16 @@ ALEnvelope *sndLoadEnvelope(uintptr_t offset, u16 cacheindex)
 	return s1;
 }
 
-ALKeyMap *sndLoadKeymap(uintptr_t offset, u16 cacheindex)
+ALKeyMap *sndLoadKeymap(uintptr_t offset, uint16_t cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
-	u8 spaf[0x90];
-	u8 sp5f[0x90];
+	uint8_t spaf[0x90];
+	uint8_t sp5f[0x90];
 	ALKeyMap *s2 = (ALKeyMap *)ALIGN16((uintptr_t)spaf);
 	ALKeyMap *s1 = (ALKeyMap *)ALIGN16((uintptr_t)sp5f);
-	s32 i;
-	s32 sum1;
-	s32 sum2;
+	int i;
+	int sum1;
+	int sum2;
 
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
@@ -1091,20 +1034,20 @@ ALKeyMap *sndLoadKeymap(uintptr_t offset, u16 cacheindex)
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
-			sum1 += ((u32 *)s2)[i];
+			sum1 += ((uint32_t *)s2)[i];
 		}
 
 		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
-			sum2 += ((u32 *)s1)[i];
+			sum2 += ((uint32_t *)s1)[i];
 		}
 
 		if (1);
 	} while (sum1 != sum2);
 #else
-	u8 sp5f[0x50];
+	uint8_t sp5f[0x50];
 	ALKeyMap *s1 = (ALKeyMap *)ALIGN16((uintptr_t)sp5f);
 
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
@@ -1120,16 +1063,16 @@ ALKeyMap *sndLoadKeymap(uintptr_t offset, u16 cacheindex)
 	return s1;
 }
 
-ALADPCMBook *sndLoadAdpcmBook(uintptr_t offset, u16 cacheindex)
+ALADPCMBook *sndLoadAdpcmBook(uintptr_t offset, uint16_t cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
-	u8 spaf[0x150];
-	u8 sp5f[0x150];
+	uint8_t spaf[0x150];
+	uint8_t sp5f[0x150];
 	ALADPCMBook *s2 = (ALADPCMBook *)ALIGN16((uintptr_t)spaf);
 	ALADPCMBook *s1 = (ALADPCMBook *)ALIGN16((uintptr_t)sp5f);
-	s32 i;
-	s32 sum1;
-	s32 sum2;
+	int i;
+	int sum1;
+	int sum2;
 
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
@@ -1138,20 +1081,20 @@ ALADPCMBook *sndLoadAdpcmBook(uintptr_t offset, u16 cacheindex)
 		sum1 = 0;
 
 		for (i = 0; i < 80U; i++) {
-			sum1 += ((u32 *)s2)[i];
+			sum1 += ((uint32_t *)s2)[i];
 		}
 
 		dmaExecHighPriority(s1, offset, 0x140);
 		sum2 = 0;
 
 		for (i = 0; i < 80U; i++) {
-			sum2 += ((u32 *)s1)[i];
+			sum2 += ((uint32_t *)s1)[i];
 		}
 
 		if (1);
 	} while (sum1 != sum2);
 #else
-	u8 sp5f[0x150];
+	uint8_t sp5f[0x150];
 	ALADPCMBook *s1 = (ALADPCMBook *)ALIGN16((uintptr_t)sp5f);
 
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
@@ -1167,16 +1110,16 @@ ALADPCMBook *sndLoadAdpcmBook(uintptr_t offset, u16 cacheindex)
 	return s1;
 }
 
-ALADPCMloop *sndLoadAdpcmLoop(uintptr_t offset, u16 cacheindex)
+ALADPCMloop *sndLoadAdpcmLoop(uintptr_t offset, uint16_t cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
-	u8 spaf[0x90];
-	u8 sp5f[0x90];
+	uint8_t spaf[0x90];
+	uint8_t sp5f[0x90];
 	ALADPCMloop *s2 = (ALADPCMloop *)ALIGN16((uintptr_t)spaf);
 	ALADPCMloop *s1 = (ALADPCMloop *)ALIGN16((uintptr_t)sp5f);
-	s32 i;
-	s32 sum1;
-	s32 sum2;
+	int i;
+	int sum1;
+	int sum2;
 
 	if (offset == 0) {
 		return NULL;
@@ -1189,20 +1132,20 @@ ALADPCMloop *sndLoadAdpcmLoop(uintptr_t offset, u16 cacheindex)
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
-			sum1 += ((u32 *)s2)[i];
+			sum1 += ((uint32_t *)s2)[i];
 		}
 
 		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
-			sum2 += ((u32 *)s1)[i];
+			sum2 += ((uint32_t *)s1)[i];
 		}
 
 		if (1);
 	} while (sum1 != sum2);
 #else
-	u8 sp5f[0x50];
+	uint8_t sp5f[0x50];
 	ALADPCMloop *s1 = (ALADPCMloop *)ALIGN16((uintptr_t)sp5f);
 
 	if (offset == 0) {
@@ -1222,16 +1165,16 @@ ALADPCMloop *sndLoadAdpcmLoop(uintptr_t offset, u16 cacheindex)
 	return s1;
 }
 
-ALWaveTable *sndLoadWavetable(uintptr_t offset, u16 cacheindex)
+ALWaveTable *sndLoadWavetable(uintptr_t offset, uint16_t cacheindex)
 {
 #if VERSION >= VERSION_NTSC_1_0
-	u8 spaf[0x90];
-	u8 sp5f[0x90];
+	uint8_t spaf[0x90];
+	uint8_t sp5f[0x90];
 	ALWaveTable *s2 = (ALWaveTable *)ALIGN16((uintptr_t)spaf);
 	ALWaveTable *s1 = (ALWaveTable *)ALIGN16((uintptr_t)sp5f);
-	s32 i;
-	s32 sum1;
-	s32 sum2;
+	int i;
+	int sum1;
+	int sum2;
 	ALWaveTable *tmp;
 
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
@@ -1241,20 +1184,20 @@ ALWaveTable *sndLoadWavetable(uintptr_t offset, u16 cacheindex)
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
-			sum1 += ((u32 *)s2)[i];
+			sum1 += ((uint32_t *)s2)[i];
 		}
 
 		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
-			sum2 += ((u32 *)s1)[i];
+			sum2 += ((uint32_t *)s1)[i];
 		}
 
 		if (1);
 	} while (sum1 != sum2);
 #else
-	u8 sp5f[0x50];
+	uint8_t sp5f[0x50];
 	ALWaveTable *s1 = (ALWaveTable *)ALIGN16((uintptr_t)sp5f);
 	ALWaveTable *tmp;
 
@@ -1277,9 +1220,9 @@ ALWaveTable *sndLoadWavetable(uintptr_t offset, u16 cacheindex)
 	return tmp;
 }
 
-void sndSetSoundMode(s32 mode)
+void sndSetSoundMode(int mode)
 {
-	s32 i;
+	int i;
 
 	g_SoundMode = mode;
 
@@ -1311,17 +1254,17 @@ void sndSetSoundMode(s32 mode)
 	}
 }
 
-ALSound *sndLoadSound(s16 soundnum)
+ALSound *sndLoadSound(int16_t soundnum)
 {
 	union soundnumhack tmp;
-	u16 cacheindex;
-	u16 *ptr;
+	uint16_t cacheindex;
+	uint16_t *ptr;
 	ALSound *sound;
-	s32 oldestindex;
-	u32 oldestage;
-	s32 i;
-	s16 sfxnum;
-	u8 sp47[0x58];
+	int oldestindex;
+	uint32_t oldestage;
+	int i;
+	int16_t sfxnum;
+	uint8_t sp47[0x58];
 
 	sound = (ALSound *)ALIGN16((uintptr_t)sp47);
 
@@ -1348,7 +1291,7 @@ ALSound *sndLoadSound(s16 soundnum)
 					oldestindex = i;
 				}
 #else
-				s32 age = g_Vars.updateframe - g_SndCache.ages[i] + 1;
+				int age = g_Vars.updateframe - g_SndCache.ages[i] + 1;
 
 				if (age > oldestage) {
 					oldestage = age;
@@ -1363,7 +1306,7 @@ ALSound *sndLoadSound(s16 soundnum)
 		// Remove the old sound from the cacheindexes list
 		ptr = g_SndCache.indexes;
 
-		for (i = 0; i < (u32)g_NumSounds; i++) {
+		for (i = 0; i < (uint32_t)g_NumSounds; i++) {
 			if (*ptr == cacheindex) {
 				*ptr = 0xffff;
 			}
@@ -1397,7 +1340,7 @@ ALSound *sndLoadSound(s16 soundnum)
 
 void seqInit(struct seqinstance *seq)
 {
-	u32 stack;
+	uint32_t stack;
 	ALSeqpConfig config;
 
 	config.maxVoices = 44;
@@ -1421,7 +1364,7 @@ void seqInit(struct seqinstance *seq)
 void sndAddRef(ALSound *sound)
 {
 	if (sound >= &g_SndCache.sounds[0] && sound <= &g_SndCache.sounds[NUM_CACHE_SLOTS - 1]) {
-		s32 cacheindex = sound - g_SndCache.sounds;
+		int cacheindex = sound - g_SndCache.sounds;
 		g_SndCache.refcounts[cacheindex]++;
 	}
 }
@@ -1429,7 +1372,7 @@ void sndAddRef(ALSound *sound)
 void sndRemoveRef(ALSound *sound)
 {
 	if (sound >= &g_SndCache.sounds[0] && sound <= &g_SndCache.sounds[NUM_CACHE_SLOTS - 1]) {
-		s32 cacheindex = sound - g_SndCache.sounds;
+		int cacheindex = sound - g_SndCache.sounds;
 		g_SndCache.refcounts[cacheindex]--;
 	}
 }
@@ -1439,7 +1382,7 @@ void sndInit(void)
 	ALSndpConfig sndpconfig;
 	ALSynConfig synconfig;
 
-	u32 heaplen = 1024 * 528;
+	uint32_t heaplen = 1024 * 528;
 
 #ifdef PLATFORM_64BIT
 	heaplen = 1024 * 745;
@@ -1456,11 +1399,11 @@ void sndInit(void)
 	if (!g_SndDisabled) {
 		// Allocate memory for the audio heap,
 		// clear it and give it to the audio library
-		u32 len = REF_SEG _seqctlSegmentRomEnd - REF_SEG _seqctlSegmentRomStart;
-		u8 *ptr = mempAlloc(heaplen, MEMPOOL_PERMANENT);
-		s32 i;
-		u8 *heapstart = ptr;
-		u8 *end = heapstart + heaplen;
+		uint32_t len = REF_SEG _seqctlSegmentRomEnd - REF_SEG _seqctlSegmentRomStart;
+		uint8_t *ptr = mempAlloc(heaplen, MEMPOOL_PERMANENT);
+		int i;
+		uint8_t *heapstart = ptr;
+		uint8_t *end = heapstart + heaplen;
 		ALBankFile *bankfile;
 
 		while (ptr < end) {
@@ -1539,13 +1482,11 @@ void sndInit(void)
 		sndpSetAddRefCallback(sndAddRef);
 		sndpSetRemoveRefCallback(sndRemoveRef);
 
-		amgrStartThread();
-
 		sndSetSoundMode(g_SoundMode);
 	}
 }
 
-bool sndIsMp3(s16 soundnum)
+bool sndIsMp3(int16_t soundnum)
 {
 	union soundnumhack tmp;
 	tmp.packed = soundnum;
@@ -1553,7 +1494,7 @@ bool sndIsMp3(s16 soundnum)
 	return tmp.mp3priority != 0;
 }
 
-bool sndStopMp3(s16 arg0)
+bool sndStopMp3(int16_t arg0)
 {
 	if (!g_SndDisabled && g_SndMp3Enabled) {
 		if (func00037ea4() && g_SndCurMp3.unk08 != 0) {
@@ -1569,21 +1510,21 @@ bool sndStopMp3(s16 arg0)
 	return true;
 }
 
-void snd0000fc40(s32 arg0)
+void snd0000fc40(int arg0)
 {
 	// empty
 }
 
-bool seqPlay(struct seqinstance *seq, s32 tracknum)
+bool seqPlay(struct seqinstance *seq, int tracknum)
 {
-	u32 stack;
-	s32 binlen;
-	u8 *binstart;
-	u8 *zipstart;
-	s32 ziplen;
-	u8 scratch[1024 * 5];
+	uint32_t stack;
+	int binlen;
+	uint8_t *binstart;
+	uint8_t *zipstart;
+	int ziplen;
+	uint8_t scratch[1024 * 5];
 
-	s32 state = n_alCSPGetState(seq->seqp);
+	int state = n_alCSPGetState(seq->seqp);
 
 	if (g_SndDisabled) {
 		return false;
@@ -1602,12 +1543,12 @@ bool seqPlay(struct seqinstance *seq, s32 tracknum)
 	}
 
 	// try to load external replacement, which can be either compressed or not
-	u32 extlen = 0;
-	u8 *extseq = modSequenceLoad(seq->tracknum, &extlen);
+	uint32_t extlen = 0;
+	uint8_t *extseq = modSequenceLoad(seq->tracknum, &extlen);
 	if (extseq) {
 		if (extlen > 2 && rzipIs1173(extseq)) {
 			// sequence is compressed; uncompress
-			binlen = ((u32)extseq[2] << 16) | ((u32)extseq[3] << 8) | (u32)extseq[4];
+			binlen = ((uint32_t)extseq[2] << 16) | ((uint32_t)extseq[3] << 8) | (uint32_t)extseq[4];
 			binlen = ALIGN16(binlen) + 0x40;
 			if (binlen >= g_SeqBufferSize) {
 				return false;
@@ -1666,15 +1607,15 @@ bool seqPlay(struct seqinstance *seq, s32 tracknum)
 	return true;
 }
 
-u16 seqGetVolume(struct seqinstance *seq)
+uint16_t seqGetVolume(struct seqinstance *seq)
 {
 	return g_SndDisabled ? AL_VOL_FULL : seq->volume;
 }
 
-void seqSetVolume(struct seqinstance *seq, u16 volume)
+void seqSetVolume(struct seqinstance *seq, uint16_t volume)
 {
 	if (!g_SndDisabled) {
-		u32 tmp = var8005ecf8[seq->tracknum] * volume;
+		uint32_t tmp = var8005ecf8[seq->tracknum] * volume;
 		tmp >>=	15;
 
 		seq->volume = volume;
@@ -1705,15 +1646,15 @@ void sndTick(void)
 {
 	struct sndstate *stateptrs[64];
 	struct sndstate states[64];
-	s32 i;
-	s32 curtime;
+	int i;
+	int curtime;
 	struct sndstate *state;
-	s32 s0;
+	int s0;
 	union soundnumhack sp50;
-	s32 index;
-	s32 stack;
+	int index;
+	int stack;
 
-	static s32 g_SndMostEverPlaying2 = -1;
+	static int g_SndMostEverPlaying2 = -1;
 
 	sndIncrementAges();
 
@@ -1841,7 +1782,7 @@ void sndTick(void)
 	}
 }
 
-s16 snd0001034c(s16 sfxnum)
+int16_t snd0001034c(int16_t sfxnum)
 {
 	union soundnumhack sfxref;
 
@@ -1858,7 +1799,7 @@ bool sndIsDisabled(void)
 	return g_SndDisabled;
 }
 
-void sndStartMp3ByFilenum(u32 filenum)
+void sndStartMp3ByFilenum(uint32_t filenum)
 {
 	union soundnumhack sfxref;
 
@@ -1876,7 +1817,7 @@ void sndStartMp3ByFilenum(u32 filenum)
  * Return true if the player has the language filter enabled
  * and the given audio ID is one that should be filtered out.
  */
-bool sndIsFiltered(s32 audio_id)
+bool sndIsFiltered(int audio_id)
 {
 	if (g_Vars.langfilteron) {
 		union soundnumhack sfxref;
@@ -1906,9 +1847,9 @@ bool sndIsFiltered(s32 audio_id)
 	return false;
 }
 
-void sndAdjust(struct sndstate **handle, bool ismp3, s32 vol, s32 pan, s32 soundnum, f32 pitch, s32 fxbus, s32 fxmixarg, bool forcefxmix)
+void sndAdjust(struct sndstate **handle, bool ismp3, int vol, int pan, int soundnum, float pitch, int fxbus, int fxmixarg, bool forcefxmix)
 {
-	s32 fxmix = -1;
+	int fxmix = -1;
 	union soundnumhack sp20;
 	union soundnumhack sp1c;
 	struct audioconfig *config;
@@ -1935,7 +1876,7 @@ void sndAdjust(struct sndstate **handle, bool ismp3, s32 vol, s32 pan, s32 sound
 		sp20.packed = soundnum;
 
 		if (sp20.hasconfig) {
-			s32 index = g_AudioRussMappings[sp20.confignum].audioconfig_index;
+			int index = g_AudioRussMappings[sp20.confignum].audioconfig_index;
 
 			sp1c.packed = g_AudioRussMappings[sp20.confignum].soundnum;
 			sp1c.hasconfig = false;
@@ -1979,7 +1920,7 @@ void sndAdjust(struct sndstate **handle, bool ismp3, s32 vol, s32 pan, s32 sound
 		}
 
 		if (pitch != -1.0f) {
-			audioPostEvent(*handle, AL_SNDP_PITCH_EVT, *(s32 *)&pitch);
+			audioPostEvent(*handle, AL_SNDP_PITCH_EVT, *(int *)&pitch);
 		}
 
 		if (fxmix != -1) {
@@ -1988,9 +1929,9 @@ void sndAdjust(struct sndstate **handle, bool ismp3, s32 vol, s32 pan, s32 sound
 	}
 }
 
-struct sndstate *snd00010718(struct sndstate **handle, s32 flags, s32 volume, s32 pan, s32 soundnum, f32 pitch, s32 fxbus, s32 fxmixarg, bool forcefxmix)
+struct sndstate *snd00010718(struct sndstate **handle, int flags, int volume, int pan, int soundnum, float pitch, int fxbus, int fxmixarg, bool forcefxmix)
 {
-	s32 fxmix = -1;
+	int fxmix = -1;
 	struct sndstate *state;
 	union soundnumhack sp30;
 	union soundnumhack sp2c;
@@ -2012,7 +1953,7 @@ struct sndstate *snd00010718(struct sndstate **handle, s32 flags, s32 volume, s3
 		sp30.packed = soundnum;
 
 		if (sp30.hasconfig) {
-			s32 index = g_AudioRussMappings[sp30.confignum].audioconfig_index;
+			int index = g_AudioRussMappings[sp30.confignum].audioconfig_index;
 
 			sp2c.packed = g_AudioRussMappings[sp30.confignum].soundnum;
 			sp2c.hasconfig = false;
@@ -2040,15 +1981,15 @@ struct sndstate *snd00010718(struct sndstate **handle, s32 flags, s32 volume, s3
 	return state;
 }
 
-struct sndstate *sndStart(s32 arg0, s16 sound, struct sndstate **handle, s32 volumearg, s32 panarg, f32 pitcharg, s32 fxbusarg, s32 fxmixarg)
+struct sndstate *sndStart(int arg0, int16_t sound, struct sndstate **handle, int volumearg, int panarg, float pitcharg, int fxbusarg, int fxmixarg)
 {
 	union soundnumhack sp44;
 	union soundnumhack sp40;
-	u8 fxmix;
-	u8 fxbus;
-	u8 pan;
-	u16 volume;
-	f32 pitch;
+	uint8_t fxmix;
+	uint8_t fxbus;
+	uint8_t pan;
+	uint16_t volume;
+	float pitch;
 
 	fxmix = fxmixarg != -1 ? fxmixarg : 0;
 	fxbus = fxbusarg != -1 ? fxbusarg : 1;
@@ -2078,19 +2019,14 @@ struct sndstate *sndStart(s32 arg0, s16 sound, struct sndstate **handle, s32 vol
 		return NULL;
 	}
 
-	if (sp40.id < (u32)g_NumSounds) {
+	if (sp40.id < (uint32_t)g_NumSounds) {
 		return func00033820(arg0, sp40.id, volume, pan & 0x7f, pitch, fxmix, fxbus, handle);
 	}
 
 	return NULL;
 }
 
-const char var70053be0[] = "Snd_Play_Universal : Overriding -> Link = %d\n";
-const char var70053c10[] = "Snd_Play_Mpeg : SYSTEM IS DISABLED\n";
-const char var70053c34[] = "Snd_Play_Mpeg  : Lib called -> Adr=%x\n";
-const char var70053c5c[] = "Snd_Play_Mpeg  : Chunk size -> Adr=%x\n";
-
-void sndStartMp3(s16 soundnum, s32 volume, s32 pan, s32 responseflags)
+void sndStartMp3(int16_t soundnum, int volume, int pan, int responseflags)
 {
 	union soundnumhack sp24;
 	union soundnumhack sp20;
@@ -2158,7 +2094,7 @@ void sndStartMp3(s16 soundnum, s32 volume, s32 pan, s32 responseflags)
 	}
 }
 
-void sndPlayNosedive(s32 seconds)
+void sndPlayNosedive(int seconds)
 {
 	g_SndNosediveDuration240 = seconds * TICKS(240);
 	g_SndNosediveAge240 = 0;
@@ -2175,12 +2111,12 @@ void sndStopNosedive(void)
 
 void sndTickNosedive(void)
 {
-	f32 percentage;
+	float percentage;
 
 	if (g_SndNosediveAge240 != -1) {
 		g_SndNosediveAge240 += g_Vars.lvupdate240;
 
-		percentage = (f32)g_SndNosediveAge240 / (f32)g_SndNosediveDuration240;
+		percentage = (float)g_SndNosediveAge240 / (float)g_SndNosediveDuration240;
 
 		if (percentage < 1.0f) { // less than 100% complete
 			percentage += 0.44f;
@@ -2238,7 +2174,7 @@ void sndTickNosedive(void)
 	}
 }
 
-void sndPlayUfo(s32 seconds)
+void sndPlayUfo(int seconds)
 {
 	g_SndUfoDuration240 = seconds * TICKS(240);
 	g_SndUfoAge240 = 0;
@@ -2255,12 +2191,12 @@ void sndStopUfo(void)
 
 void sndTickUfo(void)
 {
-	f32 percentage;
+	float percentage;
 
 	if (g_SndUfoAge240 != -1) {
 		g_SndUfoAge240 += g_Vars.lvupdate240;
 
-		percentage = (f32)g_SndUfoAge240 / (f32)g_SndUfoDuration240;
+		percentage = (float)g_SndUfoAge240 / (float)g_SndUfoDuration240;
 
 		if (percentage < 1.0f) { // less than 100% complete
 			if (percentage < 0.65f) {

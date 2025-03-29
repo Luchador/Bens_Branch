@@ -14,21 +14,21 @@ struct admaitem {
 	ALLink node;
 	uintptr_t startaddr;
 
-	s32 lastframe;
-	u8 *ptr;
+	int lastframe;
+	uint8_t *ptr;
 };
 
 struct admastate {
-	u8 initialised;
+	uint8_t initialised;
 	struct admaitem *firstused;
 	struct admaitem *firstfree;
 };
 
-s32 g_AdmaNumItemsThisFrame = 0;
+int g_AdmaNumItemsThisFrame = 0;
 
 struct admastate g_AdmaState;
 struct admaitem g_AdmaItems[ADMA_MAX_ITEMS];
-u32 g_AdmaCurFrame;
+uint32_t g_AdmaCurFrame;
 
 /**
  * This routine handles the DMA'ing of samples from ROM to RAM. First it checks
@@ -41,10 +41,10 @@ u32 g_AdmaCurFrame;
  * that this buffer was last used in this frame. This is important for the
  * admaBeginFrame routine.
  */
-uintptr_t admaExec(uintptr_t offset, s32 len, void *state)
+uintptr_t admaExec(uintptr_t offset, int len, void *state)
 {
 	void *foundbuffer;
-	s32 delta;
+	int delta;
 	struct admaitem *item = g_AdmaState.firstused;
 	struct admaitem *lastitem = NULL;
 
@@ -123,8 +123,8 @@ uintptr_t admaExec(uintptr_t offset, s32 len, void *state)
  */
 void *admaNew(struct admastate **state)
 {
-	s32 max = ADMA_MAX_ITEMS;
-	s32 i;
+	int max = ADMA_MAX_ITEMS;
+	int i;
 
 	if (!g_AdmaState.initialised) {
 		g_AdmaState.firstfree = g_AdmaItems;

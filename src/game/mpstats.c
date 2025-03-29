@@ -19,14 +19,14 @@
 
 bool g_mpstatsShotShouldCount = false;
 
-void mpstatsIncrementPlayerShotCount(struct gset *gset, s32 region)
+void mpstatsIncrementPlayerShotCount(struct gset *gset, int region)
 {
 	if (!weaponHasFlag(gset->weaponnum, WEAPONFLAG_DONTCOUNTSHOTS)) {
 		g_Vars.currentplayerstats->shotcount[region]++;
 	}
 }
 
-void mpstatsIncrementPlayerShotCount2(struct gset *gset, s32 region)
+void mpstatsIncrementPlayerShotCount2(struct gset *gset, int region)
 {
 	if (region == 0) {
 		if (!weaponHasFlag(gset->weaponnum, WEAPONFLAG_DONTCOUNTSHOTS)) {
@@ -49,7 +49,7 @@ void mpstatsResetShotsShouldCount(void)
 	g_mpstatsShotShouldCount = false;
 }
 
-s32 mpstatsGetPlayerShotCountByRegion(u32 type)
+int mpstatsGetPlayerShotCountByRegion(uint32_t type)
 {
 	return g_Vars.currentplayerstats->shotcount[type];
 }
@@ -69,12 +69,12 @@ void mpstatsDecrementTotalKnockoutCount(void)
 	g_Vars.knockoutcount--;
 }
 
-u8 mpstatsGetTotalKnockoutCount(void)
+uint8_t mpstatsGetTotalKnockoutCount(void)
 {
 	return g_Vars.knockoutcount;
 }
 
-u32 mpstatsGetTotalKillCount(void)
+uint32_t mpstatsGetTotalKillCount(void)
 {
 	return g_Vars.killcount;
 }
@@ -82,9 +82,9 @@ u32 mpstatsGetTotalKillCount(void)
 void mpstatsRecordPlayerKill(void)
 {
 	char text[256];
-	s32 simulkills;
-	s32 duration;
-	s32 time;
+	int simulkills;
+	int duration;
+	int time;
 
 	g_Vars.currentplayerstats->killcount++;
 	g_Vars.currentplayer->killsthislife++;
@@ -136,7 +136,7 @@ void mpstatsRecordPlayerKill(void)
 	}
 }
 
-s32 mpstatsGetPlayerKillCount(void)
+int mpstatsGetPlayerKillCount(void)
 {
 	return g_Vars.currentplayerstats->killcount;
 }
@@ -169,10 +169,10 @@ void mpstatsRecordPlayerDeath(void)
 void mpstatsRecordPlayerSuicide(void)
 {
 	char text[256];
-	s32 simulkills;
-	s32 duration;
-	s32 time;
-	s32 mpindex;
+	int simulkills;
+	int duration;
+	int time;
+	int mpindex;
 	struct mpchrconfig *mpchr;
 
 	if (g_Vars.normmplayerisrunning) {
@@ -225,13 +225,13 @@ void mpstatsRecordPlayerSuicide(void)
 	}
 }
 
-void mpstatsRecordDeath(s32 aplayernum, s32 vplayernum)
+void mpstatsRecordDeath(int aplayernum, int vplayernum)
 {
-	s32 vmpindex = -1;
+	int vmpindex = -1;
 	struct mpchrconfig *vmpchr = NULL;
-	s32 ampindex;
+	int ampindex;
 	struct mpchrconfig *ampchr = NULL;
-	s32 prevplayernum;
+	int prevplayernum;
 	char text[256];
 
 	if (g_Vars.normmplayerisrunning && g_MpSetup.scenario == MPSCENARIO_POPACAP) {
@@ -320,7 +320,7 @@ void mpstatsRecordDeath(s32 aplayernum, s32 vplayernum)
 	}
 
 	if (g_Vars.normmplayerisrunning && aplayernum >= 0 && g_MpAllChrPtrs[aplayernum]->aibot) {
-		s32 index = mpGetWeaponSlotByWeaponNum(g_MpAllChrPtrs[aplayernum]->aibot->weaponnum);
+		int index = mpGetWeaponSlotByWeaponNum(g_MpAllChrPtrs[aplayernum]->aibot->weaponnum);
 
 		if (index >= 0) {
 			if (aplayernum == vplayernum) {

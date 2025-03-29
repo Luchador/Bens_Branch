@@ -31,24 +31,24 @@
 // bss
 struct chrdata *g_MpAllChrPtrs[MAX_MPCHRS];
 struct mpchrconfig *g_MpAllChrConfigPtrs[MAX_MPCHRS];
-s32 g_MpNumChrs;
-u32 var800ac534;
+int g_MpNumChrs;
+uint32_t var800ac534;
 struct mpbotconfig g_BotConfigsArray[MAX_BOTS];
-u8 g_MpSimulantDifficultiesPerNumPlayers[MAX_BOTS][MAX_PLAYERS];
+uint8_t g_MpSimulantDifficultiesPerNumPlayers[MAX_BOTS][MAX_PLAYERS];
 struct mpplayerconfig g_PlayerConfigsArray[MAX_MPPLAYERCONFIGS];
-u8 g_AmBotCommands[9];
+uint8_t g_AmBotCommands[9];
 struct mpsetup g_MpSetup;
 struct bossfile g_BossFile;
-u32 var800acc1c;
+uint32_t var800acc1c;
 struct mplockinfo g_MpLockInfo;
 struct modeldef *var800acc28[18];
 
 // Forward declaractions
 struct mpweaponset g_MpWeaponSets[12];
-s32 g_MpWeaponSetNum;
+int g_MpWeaponSetNum;
 
-u8 g_MpWeaponSetRandomFilters[NUM_MPWEAPONS];
-s32 g_MpWeaponRandomFilterNum;
+uint8_t g_MpWeaponSetRandomFilters[NUM_MPWEAPONS];
+int g_MpWeaponRandomFilterNum;
 
 bool g_MpMatchHasEnded = false;
 bool g_MpEnableMusicSwitching = false;
@@ -138,9 +138,9 @@ struct extplayerconfig g_PlayerExtCfg[MAX_PLAYERS] = {
  * value 127 will return 1
  * value 255 will return 10
  */
-f32 mpHandicapToDamageScale(u8 value)
+float mpHandicapToDamageScale(uint8_t value)
 {
-	f32 tmp;
+	float tmp;
 
 	if (value < 127) {
 		return (value / 127.0f) * (value / 127.0f) * 0.9f + 0.1f;
@@ -157,7 +157,7 @@ f32 mpHandicapToDamageScale(u8 value)
 
 void func0f187838(struct mpchrconfig *mpchr)
 {
-	s32 i = 0;
+	int i = 0;
 
 	while (i < ARRAYCOUNT(mpchr->killcounts)) {
 		mpchr->killcounts[i++] = 0;
@@ -170,9 +170,9 @@ void func0f187838(struct mpchrconfig *mpchr)
 
 void mpStartMatch(void)
 {
-	s32 i;
-	s32 numplayers = 0;
-	s32 stagenum;
+	int i;
+	int numplayers = 0;
+	int stagenum;
 
 #ifndef PLATFORM_N64
 	if (g_MpSetup.options & MPOPTION_AUTORANDOMWEAPON_START) {
@@ -215,8 +215,8 @@ void mpStartMatch(void)
 
 void mpReset(void)
 {
-	s32 i;
-	s32 mpindex = 0;
+	int i;
+	int mpindex = 0;
 
 	g_MpNumChrs = 0;
 	g_Vars.mplayerisrunning = true;
@@ -302,9 +302,9 @@ void mpReset(void)
 
 	if (g_Vars.normmplayerisrunning) {
 		if (mpGetUsingMultipleTunes()) {
-			s32 i = 0;
-			s32 count = 0;
-			s32 numtracks = mpGetNumUnlockedTracks();
+			int i = 0;
+			int count = 0;
+			int numtracks = mpGetNumUnlockedTracks();
 
 			for (i; i < numtracks && count < 2; i++) {
 				if (mpIsMultiTrackSlotEnabled(i)) {
@@ -366,9 +366,9 @@ void mpReset(void)
 
 void mpCalculateTeamIsOnlyAi(void)
 {
-	s32 playercount = PLAYERCOUNT();
-	s32 i;
-	s32 j;
+	int playercount = PLAYERCOUNT();
+	int i;
+	int j;
 
 	// Iterate simulants, which go after players in the g_MpAllChrPtrs array
 	for (i = playercount; i < g_MpNumChrs; i++) {
@@ -390,7 +390,7 @@ void mpCalculateTeamIsOnlyAi(void)
 	}
 }
 
-void func0f187fbc(s32 playernum)
+void func0f187fbc(int playernum)
 {
 	g_PlayerConfigsArray[playernum].base.unk18 = 80;
 	g_PlayerConfigsArray[playernum].base.unk1a = 80;
@@ -404,27 +404,21 @@ void mpSetScoringDefaults(void)
 	g_MpSetup.teamscorelimit = 19;
 }
 
-void mpPlayerSetDefaults(s32 playernum, bool autonames)
+void mpPlayerSetDefaults(int playernum, bool autonames)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	func0f187fbc(playernum);
 
 	g_PlayerConfigsArray[playernum].controlmode = CONTROLMODE_11;
 
-#ifndef PLATFORM_N64
 	if (g_PlayerExtCfg[playernum % MAX_PLAYERS].extcontrols) {
 		g_PlayerConfigsArray[playernum].controlmode = CONTROLMODE_PC;
 	}
-#endif
 
 	g_PlayerConfigsArray[playernum].options =
-#ifdef PLATFORM_N64
-		  OPTION_LOOKAHEAD
-#else
 		  OPTION_FORWARDPITCH
-#endif
 		| OPTION_SIGHTONSCREEN
 		| OPTION_AUTOAIM
 		| OPTION_AMMOONSCREEN
@@ -503,7 +497,7 @@ void mpPlayerSetDefaults(s32 playernum, bool autonames)
 #endif
 }
 
-void func0f1881d4(s32 index)
+void func0f1881d4(int index)
 {
 	g_BotConfigsArray[index].base.name[0] = '\0';
 	g_BotConfigsArray[index].base.mpheadnum = MPHEAD_DARK_COMBAT;
@@ -514,8 +508,8 @@ void func0f1881d4(s32 index)
 
 void mpInit(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	g_MpSetup.scenario = MPSCENARIO_COMBAT;
 	g_MpSetup.stagenum = STAGE_MP_SKEDAR;
@@ -583,7 +577,7 @@ void mpInit(void)
 
 void mpSetDefaultNamesIfEmpty(void)
 {
-	s32 i;
+	int i;
 
 	// Setup file name
 	if (g_MpSetup.name[0] == '\0') {
@@ -605,15 +599,15 @@ void mpSetDefaultNamesIfEmpty(void)
 	}
 }
 
-s32 mpCalculateTeamScoreLimit(void)
+int mpCalculateTeamScoreLimit(void)
 {
-	s32 limit = g_MpSetup.teamscorelimit;
-	s32 i;
+	int limit = g_MpSetup.teamscorelimit;
+	int i;
 
 	if (g_BossFile.locktype == MPLOCKTYPE_CHALLENGE
 			&& g_MpSetup.teamscorelimit != 400
 			&& (g_MpSetup.scenario == MPSCENARIO_COMBAT || g_MpSetup.scenario == MPSCENARIO_KINGOFTHEHILL)) {
-		s32 numchrs = 0;
+		int numchrs = 0;
 
 		for (i = 0; i < MAX_PLAYERS; i++) {
 			if (g_MpSetup.chrslots & (1 << i)) {
@@ -667,25 +661,25 @@ void mpApplyLimits(void)
  * The function also populates the placement an rankablescore values in the
  * mpchr structs and calculates the last winner and loser for the lock settings.
  */
-s32 mpGetPlayerRankings(struct ranking *rankings)
+int mpGetPlayerRankings(struct ranking *rankings)
 {
-	s32 i;
-	s32 scores[MAX_MPCHRS];
-	u32 rankablescores[MAX_MPCHRS];
+	int i;
+	int scores[MAX_MPCHRS];
+	uint32_t rankablescores[MAX_MPCHRS];
 	struct mpchrconfig *mpchrs[MAX_MPCHRS];
-	s32 chrnums[MAX_MPCHRS];
-	s32 count = 0;
-	s32 numteams;
+	int chrnums[MAX_MPCHRS];
+	int count = 0;
+	int numteams;
 	struct ranking teamrankings[MAX_MPCHRS];
-	s32 winner;
-	s32 loser;
-	s32 score;
-	s32 deaths;
+	int winner;
+	int loser;
+	int score;
+	int deaths;
 	struct mpchrconfig *mpchr;
-	s32 dstindex;
+	int dstindex;
 	bool found;
-	u32 rankablescore;
-	s32 j;
+	uint32_t rankablescore;
+	int j;
 
 	if (g_MpSetup.options & MPOPTION_TEAMSENABLED) {
 		numteams = mpGetTeamRankings(teamrankings);
@@ -747,8 +741,8 @@ s32 mpGetPlayerRankings(struct ranking *rankings)
 		// For a team game, the mpchr's placement has to be the team's placement
 		// and not the placement of the individual player.
 		if (g_MpSetup.options & MPOPTION_TEAMSENABLED) {
-			s32 placement = numteams - 1;
-			s32 i;
+			int placement = numteams - 1;
+			int i;
 
 			for (i = 0; i < numteams; i++) {
 				if (teamrankings[i].teamnum == mpchrs[j]->team) {
@@ -793,16 +787,15 @@ s32 mpGetPlayerRankings(struct ranking *rankings)
  * - The rankable score, which is the returned value. The rankable score is
  *   similar to the team score but uses the number of deaths as a tie breaker.
  */
-s32 mpCalculateTeamScore(s32 teamnum, s32 *result)
+int mpCalculateTeamScore(int teamnum, int *result)
 {
 	struct mpchrconfig *mpchr;
-	s32 teamscore = 0;
-	s32 teamdeaths = 0;
+	int teamscore = 0;
+	int teamdeaths = 0;
 	bool teamexists = false;
-	s32 i;
-	u32 stack;
-	s32 score;
-	s32 deaths;
+	int i;
+	int score;
+	int deaths;
 
 	for (i = 0; i < MAX_MPCHRS; i++) {
 		if (g_MpSetup.chrslots & (1 << i)) {
@@ -830,14 +823,14 @@ s32 mpCalculateTeamScore(s32 teamnum, s32 *result)
  * with the winning team first, losing team last. Return the number of rows
  * (teams).
  */
-s32 mpGetTeamRankings(struct ranking *rankings)
+int mpGetTeamRankings(struct ranking *rankings)
 {
-	s32 i;
-	s32 count;
-	s32 apparentscores[MAX_TEAMS];
-	u32 rankablescores[MAX_TEAMS];
-	u32 bestrankablescore;
-	s32 thisteamnum;
+	int i;
+	int count;
+	int apparentscores[MAX_TEAMS];
+	uint32_t rankablescores[MAX_TEAMS];
+	uint32_t bestrankablescore;
+	int thisteamnum;
 
 	count = 0;
 
@@ -879,15 +872,15 @@ s32 mpGetTeamRankings(struct ranking *rankings)
 	return count;
 }
 
-s32 func0f188bcc(void)
+int func0f188bcc(void)
 {
 	return NUM_MPWEAPONS;
 }
 
-s32 mpGetNumWeaponOptions(void)
+int mpGetNumWeaponOptions(void)
 {
-	s32 count = 0;
-	s32 i;
+	int count = 0;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpWeapons); i++) {
 		if (challengeIsFeatureUnlocked(g_MpWeapons[i].unlockfeature)) {
@@ -898,9 +891,9 @@ s32 mpGetNumWeaponOptions(void)
 	return count;
 }
 
-char *mpGetWeaponLabel(s32 weaponnum)
+char *mpGetWeaponLabel(int weaponnum)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpWeapons); i++) {
 		if (challengeIsFeatureUnlocked(g_MpWeapons[i].unlockfeature)) {
@@ -927,10 +920,10 @@ char *mpGetWeaponLabel(s32 weaponnum)
 	return "";
 }
 
-void mpSetWeaponSlot(s32 slot, s32 mpweaponnum)
+void mpSetWeaponSlot(int slot, int mpweaponnum)
 {
-	s32 optionindex = mpweaponnum;
-	s32 i;
+	int optionindex = mpweaponnum;
+	int i;
 
 	for (i = 0; i <= mpweaponnum; i++) {
 		if (challengeIsFeatureUnlocked(g_MpWeapons[i].unlockfeature) == 0) {
@@ -943,10 +936,10 @@ void mpSetWeaponSlot(s32 slot, s32 mpweaponnum)
 	g_MpSetup.weapons[slot] = optionindex;
 }
 
-s32 mpGetWeaponSlot(s32 slot)
+int mpGetWeaponSlot(int slot)
 {
-	s32 count = 0;
-	s32 i;
+	int count = 0;
+	int i;
 
 	for (i = 0; i < g_MpSetup.weapons[slot]; i++) {
 		if (challengeIsFeatureUnlocked(g_MpWeapons[i].unlockfeature)) {
@@ -957,12 +950,12 @@ s32 mpGetWeaponSlot(s32 slot)
 	return count;
 }
 
-struct mpweapon *mpGetMpWeaponByLocation(s32 locationindex)
+struct mpweapon *mpGetMpWeaponByLocation(int locationindex)
 {
-	s32 v0 = locationindex + 1;
-	s32 slot = 0;
-	s32 a2 = v0;
-	u8 mpweaponnum;
+	int v0 = locationindex + 1;
+	int slot = 0;
+	int a2 = v0;
+	uint8_t mpweaponnum;
 
 	while (v0 > 0) {
 		mpweaponnum = g_MpSetup.weapons[slot];
@@ -990,10 +983,10 @@ struct mpweapon *mpGetMpWeaponByLocation(s32 locationindex)
 	return &g_MpWeapons[mpweaponnum];
 }
 
-s32 mpCountWeaponSetThing(s32 weaponsetindex)
+int mpCountWeaponSetThing(int weaponsetindex)
 {
-	s32 i;
-	s32 count = 0;
+	int i;
+	int count = 0;
 
 	if (weaponsetindex >= ARRAYCOUNT(g_MpWeaponSets)) {
 		count = weaponsetindex - ARRAYCOUNT(g_MpWeaponSets);
@@ -1012,9 +1005,9 @@ s32 mpCountWeaponSetThing(s32 weaponsetindex)
 	return count;
 }
 
-s32 func0f188f9c(s32 arg0)
+int func0f188f9c(int arg0)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpWeaponSets); i++) {
 		// @bug? Shouldn't the disabled check be == WEAPON_DISABLED?
@@ -1034,17 +1027,17 @@ s32 func0f188f9c(s32 arg0)
 	return i + arg0;
 }
 
-s32 func0f189058(bool full)
+int func0f189058(bool full)
 {
 	return mpCountWeaponSetThing(full ? ARRAYCOUNT(g_MpWeaponSets) + 3 : ARRAYCOUNT(g_MpWeaponSets));
 }
 
-s32 func0f189088(void)
+int func0f189088(void)
 {
 	return mpCountWeaponSetThing(ARRAYCOUNT(g_MpWeaponSets) + 2);
 }
 
-char *mpGetWeaponSetName(s32 index)
+char *mpGetWeaponSetName(int index)
 {
 	index = func0f188f9c(index);
 
@@ -1065,10 +1058,10 @@ char *mpGetWeaponSetName(s32 index)
 
 void func0f18913c(void)
 {
-	s32 i;
+	int i;
 	bool done = false;
-	u8 *ptr;
-	s32 j;
+	uint8_t *ptr;
+	int j;
 
 	for (i = 0; !done && i < ARRAYCOUNT(g_MpWeaponSets); i++) {
 		if (challengeIsFeatureUnlocked(g_MpWeaponSets[i].requirefeatures[0])
@@ -1086,7 +1079,7 @@ void func0f18913c(void)
 			bool ok = true;
 
 			for (j = 0; j < ARRAYCOUNT(g_MpWeaponSets[j].slots); j++) {
-				s32 weaponnum = ptr[j];
+				int weaponnum = ptr[j];
 
 				if (weaponnum == WEAPON_MPSHIELD) {
 					if (!challengeIsFeatureUnlocked(MPFEATURE_WEAPON_SHIELD)) {
@@ -1112,11 +1105,11 @@ void func0f18913c(void)
 }
 
 #ifndef PLATFORM_N64
-void mpSetRandomWeapons(u8 weapons[])
+void mpSetRandomWeapons(uint8_t weapons[])
 {
-	s32 lockcount = 0;
-	s32 index = 0;
-	s32 i;
+	int lockcount = 0;
+	int index = 0;
+	int i;
 
 	for (i = 0; i < NUM_MPWEAPONS; i++) {
 		if (challengeIsFeatureUnlocked(g_MpWeapons[i].unlockfeature)) {
@@ -1140,10 +1133,10 @@ void mpSetRandomWeapons(u8 weapons[])
 
 void mpApplyWeaponSet(void)
 {
-	s32 i;
-	u8 *ptr;
+	int i;
+	uint8_t *ptr;
 #ifndef PLATFORM_N64
-	u8 randomweapons[NUM_MPWEAPONS];
+	uint8_t randomweapons[NUM_MPWEAPONS];
 #endif
 
 	if (g_MpWeaponSetNum >= 0 && g_MpWeaponSetNum < ARRAYCOUNT(g_MpWeaponSets)) {
@@ -1160,10 +1153,10 @@ void mpApplyWeaponSet(void)
 
 		if (ptr != NULL) {
 			for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
-				u32 j;
+				uint32_t j;
 				bool done = false;
-				s32 mpweaponnum = MPWEAPON_NONE;
-				s32 weaponnum = ptr[i];
+				int mpweaponnum = MPWEAPON_NONE;
+				int weaponnum = ptr[i];
 
 				if (weaponnum == WEAPON_MPSHIELD && !challengeIsFeatureUnlocked(MPFEATURE_WEAPON_SHIELD)) {
 					weaponnum = 0;
@@ -1183,7 +1176,7 @@ void mpApplyWeaponSet(void)
 		}
 	} else if (g_MpWeaponSetNum == WEAPONSET_RANDOM) {
 #ifdef PLATFORM_N64
-		s32 numoptions = mpGetNumWeaponOptions();
+		int numoptions = mpGetNumWeaponOptions();
 
 		for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
 			mpSetWeaponSlot(i, rngRandom() % numoptions);
@@ -1196,7 +1189,7 @@ void mpApplyWeaponSet(void)
 #endif
 	} else if (g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
 #ifdef PLATFORM_N64
-		s32 numoptions = mpGetNumWeaponOptions() - 2;
+		int numoptions = mpGetNumWeaponOptions() - 2;
 
 		for (i = 0; i < 5; i++) {
 			mpSetWeaponSlot(i, rngRandom() % numoptions + 1);
@@ -1212,7 +1205,7 @@ void mpApplyWeaponSet(void)
 	}
 }
 
-void mpSetWeaponSet(s32 weaponsetnum)
+void mpSetWeaponSet(int weaponsetnum)
 {
 	g_MpWeaponSetNum = func0f188f9c(weaponsetnum);
 	mpApplyWeaponSet();
@@ -1225,7 +1218,7 @@ void mpApplyWeaponSetIfValid(void)
 	}
 }
 
-s32 mpGetWeaponSet(void)
+int mpGetWeaponSet(void)
 {
 	return mpCountWeaponSetThing(g_MpWeaponSetNum);
 }
@@ -1245,7 +1238,7 @@ bool mpIsPaused(void)
 	return true;
 }
 
-void mpSetPaused(u8 mode)
+void mpSetPaused(uint8_t mode)
 {
 	g_MpSetup.paused = mode;
 }
@@ -1261,16 +1254,14 @@ void mpSetPaused(u8 mode)
  */
 Gfx *mpRenderModalText(Gfx *gdl)
 {
-	s32 textwidth;
-	s32 textheight;
-	s32 x;
-	s32 y;
+	int textwidth;
+	int textheight;
+	int x;
+	int y;
 	char text[50];
-	s32 stack1;
 
 	if (g_MpSetup.paused == MPPAUSEMODE_PAUSED) {
-		s32 red = (s32) ((1.0f - g_20SecIntervalFrac) * 20.0f * 255.0f) % 255;
-		s32 stack2;
+		int red = (int) ((1.0f - g_20SecIntervalFrac) * 20.0f * 255.0f) % 255;
 
 		gdl = textConfigureGfxPipeline(gdl);
 
@@ -1314,8 +1305,8 @@ Gfx *mpRenderModalText(Gfx *gdl)
 
 		if (g_Vars.currentplayer->deadtimer > 0) {
 			// Render countdown timer
-			s32 countdowny = viGetViewTop() + viGetViewHeight() / 2 + textheight + 2;
-			s32 countdownx = viGetViewLeft() + viGetViewWidth() / 2;
+			int countdowny = viGetViewTop() + viGetViewHeight() / 2 + textheight + 2;
+			int countdownx = viGetViewLeft() + viGetViewWidth() / 2;
 
 			sprintf(text, "%d\n", (g_Vars.currentplayer->deadtimer + TICKS(60) - 1) / TICKS(60));
 
@@ -1334,10 +1325,10 @@ Gfx *mpRenderModalText(Gfx *gdl)
 	return gdl;
 }
 
-s32 mpFindMaxInt(s32 numplayers, s32 val0, s32 val1, s32 val2, s32 val3)
+int mpFindMaxInt(int numplayers, int val0, int val1, int val2, int val3)
 {
-	s32 bestvalue = val0;
-	s32 bestplayer = 0;
+	int bestvalue = val0;
+	int bestplayer = 0;
 
 	if (numplayers >= 2) {
 		if (val1 > bestvalue || (val1 == bestvalue && (rngRandom() % 2))) {
@@ -1365,10 +1356,10 @@ s32 mpFindMaxInt(s32 numplayers, s32 val0, s32 val1, s32 val2, s32 val3)
 	return bestplayer;
 }
 
-s32 mpFindMinInt(s32 numplayers, s32 val0, s32 val1, s32 val2, s32 val3)
+int mpFindMinInt(int numplayers, int val0, int val1, int val2, int val3)
 {
-	s32 bestvalue = val0;
-	s32 bestplayer = 0;
+	int bestvalue = val0;
+	int bestplayer = 0;
 
 	if (numplayers >= 2) {
 		if (val1 < bestvalue || (val1 == bestvalue && (rngRandom() % 2))) {
@@ -1396,12 +1387,12 @@ s32 mpFindMinInt(s32 numplayers, s32 val0, s32 val1, s32 val2, s32 val3)
 	return bestplayer;
 }
 
-s32 mpFindMaxFloat(s32 numplayers, f32 val0, f32 val1, f32 val2, f32 val3)
+int mpFindMaxFloat(int numplayers, float val0, float val1, float val2, float val3)
 {
-	// @bug: bestvalue should be an f32. Any value saved into here will be
+	// @bug: bestvalue should be an float. Any value saved into here will be
 	// rounded down which may cause the function to return an incorrect result.
-	s32 bestvalue;
-	s32 bestplayer = 0;
+	int bestvalue;
+	int bestplayer = 0;
 
 	if (numplayers >= 2) {
 		if (val1 > val0 || (val1 == val0 && (rngRandom() % 2))) {
@@ -1429,12 +1420,12 @@ s32 mpFindMaxFloat(s32 numplayers, f32 val0, f32 val1, f32 val2, f32 val3)
 	return bestplayer;
 }
 
-s32 mpFindMinFloat(s32 numplayers, f32 val0, f32 val1, f32 val2, f32 val3)
+int mpFindMinFloat(int numplayers, float val0, float val1, float val2, float val3)
 {
-	// @bug: bestvalue should be an f32. Any value saved into here will be
+	// @bug: bestvalue should be an float. Any value saved into here will be
 	// rounded down which may cause the function to return an incorrect result.
-	s32 bestvalue;
-	s32 bestplayer = 0;
+	int bestvalue;
+	int bestplayer = 0;
 
 	if (numplayers >= 2) {
 		if (val0);
@@ -1479,9 +1470,9 @@ struct mpweaponset g_MpWeaponSets[12] = {
 	{ /*0x0b*/ L_MPWEAPONS_044, { WEAPON_COMBATKNIFE,      WEAPON_COMBATKNIFE, WEAPON_TIMEDMINE,   WEAPON_CROSSBOW,       WEAPON_MPSHIELD, WEAPON_DISABLED }, { MPFEATURE_WEAPON_CROSSBOW,        0,                           0,                              0                       }, WEAPON_COMBATKNIFE, WEAPON_COMBATKNIFE, WEAPON_TIMEDMINE, WEAPON_TIMEDMINE,      WEAPON_MPSHIELD, WEAPON_DISABLED }, // Close Combat
 };
 
-s32 g_MpWeaponSetNum = 0x00000000;
+int g_MpWeaponSetNum = 0x00000000;
 
-u16 g_AwardNames[] = {
+uint16_t g_AwardNames[] = {
 	L_MPMENU_000, // "Most Suicidal"
 	L_MPMENU_001, // "Who Needs Ammo?"
 	L_MPMENU_002, // "Least Shielded"
@@ -1503,11 +1494,11 @@ u16 g_AwardNames[] = {
 
 void mpCalculatePlayerTitle(struct mpplayerconfig *mpplayer)
 {
-	const u32 tiers[] = { 2, 4, 8, 16, 28, 60, 100, 150, 210, 300 };
-	s32 tallies[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	s32 sum;
-	s32 max;
-	s32 i;
+	const uint32_t tiers[] = { 2, 4, 8, 16, 28, 60, 100, 150, 210, 300 };
+	int tallies[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	int sum;
+	int max;
+	int i;
 
 #define MULT(val) (val * 3)
 
@@ -1698,7 +1689,7 @@ struct mphead g_MpHeads[] = {
 	{ /*0x4a*/ HEAD_WINNER,       0                          },
 };
 
-u32 g_BotHeads[] = {
+uint32_t g_BotHeads[] = {
 	MPHEAD_JON,
 	MPHEAD_BEAU1,
 	MPHEAD_ROSS,
@@ -1841,7 +1832,7 @@ struct mpbody g_MpBodies[] = {
 	/*0x3c*/ { BODY_DJBOND,           L_OPTIONS_070,   1000,             MPFEATURE_8BOTS            },
 };
 
-u32 g_MpMaleHeads[] = {
+uint32_t g_MpMaleHeads[] = {
 	HEAD_JON,
 	HEAD_BEAU1,
 	HEAD_ROSS,
@@ -1888,7 +1879,7 @@ u32 g_MpMaleHeads[] = {
 	HEAD_MOTO,
 };
 
-u32 g_MpFemaleHeads[] = {
+uint32_t g_MpFemaleHeads[] = {
 	HEAD_ALEX,
 	HEAD_JULIANNE,
 	HEAD_LAURA,
@@ -1903,11 +1894,11 @@ u32 g_MpFemaleHeads[] = {
  */
 void mpCalculateAwards(void)
 {
-	s32 playercount;
-	s32 i;
-	s32 j;
-	s32 prevplayernum;
-	s32 duration60;
+	int playercount;
+	int i;
+	int j;
+	int prevplayernum;
+	int duration60;
 	struct awardmetrics metrics[MAX_PLAYERS];
 
 	// @bug: playerrankings should have 12 elements. Because it's too small,
@@ -1916,8 +1907,8 @@ void mpCalculateAwards(void)
 	// no effect on IDO.
 	struct ranking playerrankings[MAX_MPCHRS];
 
-	s32 numchrs;
-	s32 numteams;
+	int numchrs;
+	int numteams;
 	struct ranking teamrankings[MAX_MPCHRS];
 
 	playercount = PLAYERCOUNT();
@@ -1937,8 +1928,8 @@ void mpCalculateAwards(void)
 	for (i = 0; i < playercount; i++) {
 		struct mpchrconfig *mpchr = mpGetChrConfigBySlotNum(i);
 		struct mpplayerconfig *mpplayer = (struct mpplayerconfig *)mpchr;
-		s32 chrnum = mpGetChrIndexBySlotNum(i);
-		s32 sum;
+		int chrnum = mpGetChrIndexBySlotNum(i);
+		int sum;
 
 		setCurrentPlayerNum(i);
 
@@ -1983,7 +1974,7 @@ void mpCalculateAwards(void)
 			+ mpstatsGetPlayerShotCountByRegion(SHOTREGION_OBJECT);
 
 		if (metrics[i].numshots > 0) {
-			metrics[i].accuracyfrac = sum / (f32)metrics[i].numshots;
+			metrics[i].accuracyfrac = sum / (float)metrics[i].numshots;
 		} else {
 			metrics[i].accuracyfrac = 0.0f;
 		}
@@ -1999,7 +1990,7 @@ void mpCalculateAwards(void)
 			mpplayer->deaths += metrics[i].numdeaths;
 			mpplayer->gamesplayed++;
 			mpplayer->time += duration60 / 60;
-			mpplayer->distance += (u32)(g_Vars.playerstats[i].distance / 10000.0f);
+			mpplayer->distance += (uint32_t)(g_Vars.playerstats[i].distance / 10000.0f);
 
 			if (metrics[i].numshots > 0) {
 				if (mpplayer->gamesplayed < 2) {
@@ -2009,8 +2000,8 @@ void mpCalculateAwards(void)
 				}
 			}
 
-			mpplayer->damagedealt += (u32)(g_Vars.playerstats[i].damtransmitted / 0.1f);
-			mpplayer->painreceived += (u32)(g_Vars.playerstats[i].damreceived / 0.1f);
+			mpplayer->damagedealt += (uint32_t)(g_Vars.playerstats[i].damtransmitted / 0.1f);
+			mpplayer->painreceived += (uint32_t)(g_Vars.playerstats[i].damreceived / 0.1f);
 			mpplayer->headshots += metrics[i].numheadshots;
 			mpplayer->ammoused += metrics[i].numshots;
 
@@ -2173,8 +2164,8 @@ void mpCalculateAwards(void)
 	// it on the endscreen, but this is not the case for triple kill or any
 	// other awards.
 	for (i = 0; i < playercount; i++) {
-		s32 numdone = 0;
-		s32 awardindex = 16;
+		int numdone = 0;
+		int awardindex = 16;
 
 		if (playercount == 1) {
 			// In a single player game, only allow the following awards
@@ -2220,15 +2211,15 @@ void mpCalculateAwards(void)
 
 	// Calculate KillMaster and Survivor medals
 	if (numchrs >= 2) {
-		s32 mostkillsvalue = 0;
-		s32 mostkillsplayer = -1;
-		s32 leastdeathsvalue = 0xffffff;
-		s32 leastdeathsplayer = -1;
-		s32 k;
+		int mostkillsvalue = 0;
+		int mostkillsplayer = -1;
+		int leastdeathsvalue = 0xffffff;
+		int leastdeathsplayer = -1;
+		int k;
 
 		for (k = 0; k < MAX_MPCHRS; k++) {
 			if (g_MpSetup.chrslots & (1 << k)) {
-				s32 totalkills = 0;
+				int totalkills = 0;
 				struct mpchrconfig *mpchr = MPCHR(k);
 
 				for (j = 0; j < MAX_MPCHRS; j++) {
@@ -2283,10 +2274,10 @@ void mpCalculateAwards(void)
 
 	// Calculate Headshot and Accuracy medals
 	if (!g_CheatsActiveBank0 && !g_CheatsActiveBank1 && playercount >= 2) {
-		s32 mostheadshotvalue = 0;
-		f32 mostaccuratevalue = 0.5f;
-		s32 mostheadshotplayer = -1;
-		s32 mostaccurateplayer = -1;
+		int mostheadshotvalue = 0;
+		float mostaccuratevalue = 0.5f;
+		int mostheadshotplayer = -1;
+		int mostaccurateplayer = -1;
 
 		for (i = 0; i < playercount; i++) {
 			if (mostheadshotvalue == metrics[i].numheadshots) {
@@ -2326,10 +2317,9 @@ void mpCalculateAwards(void)
 
 void mpEndMatch(void)
 {
-	s32 stack;
-	s32 playercount = PLAYERCOUNT();
-	s32 prevplayernum;
-	s32 i;
+	int playercount = PLAYERCOUNT();
+	int prevplayernum;
+	int i;
 
 	musicStartMenu();
 	mpSetPaused(MPPAUSEMODE_GAMEOVER);
@@ -2363,46 +2353,46 @@ void mpEndMatch(void)
 	}
 #endif
 
-	func0f0f820c(NULL, -6);
+	menuResetAllDialogsAndSetNewRoot(NULL, -6);
 }
 
 // Ben's comment: I suspect this would have returned g_MpHeads + custom PerfectHeads before that feature was pulled. Now it's the same as mpGetNumHeads.
-s32 mpGetNumHeads2(void)
+int mpGetNumHeads2(void)
 {
 	return ARRAYCOUNT(g_MpHeads);
 }
 
-s32 mpGetNumHeads(void)
+int mpGetNumHeads(void)
 {
 	return ARRAYCOUNT(g_MpHeads);
 }
 
-s32 mpGetHeadId(u8 headnum)
+int mpGetHeadId(uint8_t headnum)
 {
 	return g_MpHeads[headnum].headnum;
 }
 
-s32 mpGetHeadRequiredFeature(u8 headnum)
+int mpGetHeadRequiredFeature(uint8_t headnum)
 {
 	return g_MpHeads[headnum].requirefeature;
 }
 
-s32 mpGetBeauHeadId(u8 headnum)
+int mpGetBeauHeadId(uint8_t headnum)
 {
 	return g_MpBeauHeads[headnum].headnum;
 }
 
-s32 mpGetNumBeauHeads(void)
+int mpGetNumBeauHeads(void)
 {
 	return ARRAYCOUNT(g_MpBeauHeads);
 }
 
-u32 mpGetNumBodies(void)
+uint32_t mpGetNumBodies(void)
 {
 	return ARRAYCOUNT(g_MpBodies);
 }
 
-s32 mpGetBodyId(u8 bodynum)
+int mpGetBodyId(uint8_t bodynum)
 {
 	/**
 	 * @bug: bodynum 61 (0x3d) would cause an array overflow.
@@ -2419,9 +2409,9 @@ s32 mpGetBodyId(u8 bodynum)
 	return g_MpBodies[bodynum].bodynum;
 }
 
-s32 mpGetMpbodynumByBodynum(u16 bodynum)
+int mpGetMpbodynumByBodynum(uint16_t bodynum)
 {
-	s32 i;
+	int i;
 
 	if (bodynum == BODY_DRCAROLL) {
 		return ARRAYCOUNT(g_MpBodies) + 1;
@@ -2436,7 +2426,7 @@ s32 mpGetMpbodynumByBodynum(u16 bodynum)
 	return g_MpBodies[0].bodynum;
 }
 
-char *mpGetBodyName(u8 mpbodynum)
+char *mpGetBodyName(uint8_t mpbodynum)
 {
 	// @bug: This should be >=
 	if (mpbodynum > ARRAYCOUNT(g_MpBodies)) {
@@ -2446,7 +2436,7 @@ char *mpGetBodyName(u8 mpbodynum)
 	return langGet(g_MpBodies[mpbodynum].name);
 }
 
-u8 mpGetBodyRequiredFeature(u8 mpbodynum)
+uint8_t mpGetBodyRequiredFeature(uint8_t mpbodynum)
 {
 	// @bug: This should be >=
 	if (mpbodynum > ARRAYCOUNT(g_MpBodies)) {
@@ -2456,11 +2446,11 @@ u8 mpGetBodyRequiredFeature(u8 mpbodynum)
 	return g_MpBodies[mpbodynum].requirefeature;
 }
 
-s32 mpGetMpheadnumByMpbodynum(s32 mpbodynum)
+int mpGetMpheadnumByMpbodynum(int mpbodynum)
 {
-	s32 headnum;
-	s32 index = 0;
-	s32 i;
+	int headnum;
+	int index = 0;
+	int i;
 
 	if (mpbodynum >= HEAD_VD) {
 		mpbodynum = 0;
@@ -2485,13 +2475,13 @@ s32 mpGetMpheadnumByMpbodynum(s32 mpbodynum)
 	return index;
 }
 
-void mpFindUnusedHeadAndBody(u8 *mpheadnum, u8 *mpbodynum)
+void mpFindUnusedHeadAndBody(uint8_t *mpheadnum, uint8_t *mpbodynum)
 {
 	struct mpchrconfig *mpchr;
 	bool available;
-	u8 trympheadnum;
-	u8 trympbodynum;
-	s32 i;
+	uint8_t trympheadnum;
+	uint8_t trympbodynum;
+	int i;
 
 	do {
 		available = true;
@@ -2519,10 +2509,10 @@ void mpFindUnusedHeadAndBody(u8 *mpheadnum, u8 *mpbodynum)
 	*mpbodynum = trympbodynum;
 }
 
-s32 mpChooseRandomLockPlayer(void)
+int mpChooseRandomLockPlayer(void)
 {
-	s32 start = rngRandom() % 4;
-	s32 i;
+	int start = rngRandom() % 4;
+	int i;
 
 	for (i = (start + 1) % 4;; i = (i + 1) % 4) {
 		if ((g_MpSetup.chrslots & (1 << i)) || i == start) {
@@ -2533,7 +2523,7 @@ s32 mpChooseRandomLockPlayer(void)
 	return i;
 }
 
-bool mpSetLock(s32 locktype, s32 playernum)
+bool mpSetLock(int locktype, int playernum)
 {
 	g_BossFile.locktype = locktype;
 
@@ -2546,17 +2536,17 @@ bool mpSetLock(s32 locktype, s32 playernum)
 	return true;
 }
 
-s32 mpGetLockType(void)
+int mpGetLockType(void)
 {
 	return g_BossFile.locktype;
 }
 
-u32 mpGetLockPlayerNum(void)
+uint32_t mpGetLockPlayerNum(void)
 {
 	return g_MpLockInfo.lockedplayernum;
 }
 
-bool mpIsPlayerLockedOut(s32 playernum)
+bool mpIsPlayerLockedOut(int playernum)
 {
 	if (g_BossFile.locktype == MPLOCKTYPE_NONE) {
 		return false;
@@ -2634,11 +2624,11 @@ struct mptrack g_MpTracks[] = {
 	/*0x2a*/ { MUSIC_SKEDARRUINS_KING,120, L_MISC_261, SOLOSTAGEINDEX_SKEDARRUINS }, // "Skedar Warrior" (Skedar Leader)
 };
 
-bool mpIsTrackUnlocked(s32 tracknum)
+bool mpIsTrackUnlocked(int tracknum)
 {
-	s16 stageindex = g_MpTracks[tracknum].unlockstage;
+	int16_t stageindex = g_MpTracks[tracknum].unlockstage;
 	bool unlocked = false;
-	u32 i;
+	uint32_t i;
 
 	if (stageindex < 0 || stageindex > SOLOSTAGEINDEX_SKEDARRUINS) {
 		unlocked = true;
@@ -2654,10 +2644,10 @@ bool mpIsTrackUnlocked(s32 tracknum)
 	return unlocked;
 }
 
-s32 mpGetTrackSlotIndex(s32 tracknum)
+int mpGetTrackSlotIndex(int tracknum)
 {
-	s32 i;
-	s32 slotindex = 0;
+	int i;
+	int slotindex = 0;
 
 	for (i = 0; i < tracknum; i++) {
 		if (mpIsTrackUnlocked(i)) {
@@ -2668,10 +2658,10 @@ s32 mpGetTrackSlotIndex(s32 tracknum)
 	return slotindex;
 }
 
-s32 mpGetTrackNumAtSlotIndex(s32 slotindex)
+int mpGetTrackNumAtSlotIndex(int slotindex)
 {
-	s32 i;
-	s32 numunlocked = 0;
+	int i;
+	int numunlocked = 0;
 
 	for (i = 0; i != ARRAYCOUNT(g_MpTracks); i++) {
 		if (mpIsTrackUnlocked(i)) {
@@ -2686,21 +2676,21 @@ s32 mpGetTrackNumAtSlotIndex(s32 slotindex)
 	return i;
 }
 
-s32 mpGetNumUnlockedTracks(void)
+int mpGetNumUnlockedTracks(void)
 {
 	return mpGetTrackSlotIndex(ARRAYCOUNT(g_MpTracks));
 }
 
-s32 mpGetTrackMusicNum(s32 slotindex)
+int mpGetTrackMusicNum(int slotindex)
 {
-	s32 tracknum = mpGetTrackNumAtSlotIndex(slotindex);
+	int tracknum = mpGetTrackNumAtSlotIndex(slotindex);
 
 	return g_MpTracks[tracknum].musicnum;
 }
 
-char *mpGetTrackName(s32 slotindex)
+char *mpGetTrackName(int slotindex)
 {
-	s32 tracknum = mpGetTrackNumAtSlotIndex(slotindex);
+	int tracknum = mpGetTrackNumAtSlotIndex(slotindex);
 
 	return langGet(g_MpTracks[tracknum].name);
 }
@@ -2715,11 +2705,11 @@ bool mpGetUsingMultipleTunes(void)
 	return g_BossFile.usingmultipletunes;
 }
 
-bool mpIsMultiTrackSlotEnabled(s32 slot)
+bool mpIsMultiTrackSlotEnabled(int slot)
 {
-	s32 tracknum = mpGetTrackNumAtSlotIndex(slot);
-	u8 index = tracknum >> 3;
-	u8 value = 1 << (tracknum & 7);
+	int tracknum = mpGetTrackNumAtSlotIndex(slot);
+	uint8_t index = tracknum >> 3;
+	uint8_t value = 1 << (tracknum & 7);
 
 	if ((g_BossFile.multipletracknums[index] & value) == 0) {
 		return false;
@@ -2728,11 +2718,11 @@ bool mpIsMultiTrackSlotEnabled(s32 slot)
 	return true;
 }
 
-void mpSetMultiTrackSlotEnabled(s32 slot, bool enable)
+void mpSetMultiTrackSlotEnabled(int slot, bool enable)
 {
-	s32 tracknum = mpGetTrackNumAtSlotIndex(slot);
-	u8 value = 1 << (tracknum & 7);
-	u8 index = tracknum >> 3;
+	int tracknum = mpGetTrackNumAtSlotIndex(slot);
+	uint8_t value = 1 << (tracknum & 7);
+	uint8_t index = tracknum >> 3;
 
 	if (enable) {
 		g_BossFile.multipletracknums[index] |= value;
@@ -2741,7 +2731,7 @@ void mpSetMultiTrackSlotEnabled(s32 slot, bool enable)
 	}
 }
 
-void mpSetTrackSlotEnabled(s32 slot)
+void mpSetTrackSlotEnabled(int slot)
 {
 	if (mpGetUsingMultipleTunes()) {
 		mpSetMultiTrackSlotEnabled(slot, 1 - mpIsMultiTrackSlotEnabled(slot));
@@ -2752,7 +2742,7 @@ void mpSetTrackSlotEnabled(s32 slot)
 
 void mpEnableAllMultiTracks(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i != ARRAYCOUNT(g_BossFile.multipletracknums); i++) {
 		g_BossFile.multipletracknums[i] = 0xff;
@@ -2761,7 +2751,7 @@ void mpEnableAllMultiTracks(void)
 
 void mpDisableAllMultiTracks(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i != ARRAYCOUNT(g_BossFile.multipletracknums); i++) {
 		g_BossFile.multipletracknums[i] = 0;
@@ -2770,7 +2760,7 @@ void mpDisableAllMultiTracks(void)
 
 void mpRandomiseMultiTracks(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i != ARRAYCOUNT(g_BossFile.multipletracknums); i++) {
 		g_BossFile.multipletracknums[i] = rngRandom();
@@ -2782,7 +2772,7 @@ void mpSetTrackToRandom(void)
 	g_BossFile.tracknum = -1;
 }
 
-s32 mpGetCurrentTrackSlotNum(void)
+int mpGetCurrentTrackSlotNum(void)
 {
 	if (g_BossFile.tracknum < 0) {
 		return g_BossFile.tracknum;
@@ -2791,14 +2781,14 @@ s32 mpGetCurrentTrackSlotNum(void)
 	return mpGetTrackSlotIndex(g_BossFile.tracknum);
 }
 
-s32 mpChooseTrack(void)
+int mpChooseTrack(void)
 {
-	s32 i;
-	s32 tracknum;
+	int i;
+	int tracknum;
 
 	if (mpGetUsingMultipleTunes()) {
-		s32 numunlocked = mpGetNumUnlockedTracks();
-		s32 numselected = 0;
+		int numunlocked = mpGetNumUnlockedTracks();
+		int numselected = 0;
 
 		for (i = 0; i < numunlocked; i++) {
 			if (mpIsMultiTrackSlotEnabled(i)) {
@@ -2818,8 +2808,8 @@ s32 mpChooseTrack(void)
 		}
 
 		do {
-			s32 selectionindex = rngRandom() % numselected;
-			s32 selectioncount = 0;
+			int selectionindex = rngRandom() % numselected;
+			int selectioncount = 0;
 			tracknum = -1;
 
 			for (i = 0; i < numunlocked; i++) {
@@ -2849,7 +2839,7 @@ s32 mpChooseTrack(void)
 	tracknum = mpGetCurrentTrackSlotNum();
 
 	if (tracknum < 0) {
-		s32 numunlocked = mpGetNumUnlockedTracks();
+		int numunlocked = mpGetNumUnlockedTracks();
 
 		do {
 			tracknum = mpGetTrackNumAtSlotIndex(rngRandom() % numunlocked);
@@ -2867,11 +2857,11 @@ s32 mpChooseTrack(void)
 	return g_MpTracks[tracknum].musicnum;
 }
 
-struct mpchrconfig *mpGetChrConfigBySlotNum(s32 slot)
+struct mpchrconfig *mpGetChrConfigBySlotNum(int slot)
 {
-	s32 count = 0;
+	int count = 0;
 	struct mpchrconfig *result = NULL;
-	s32 i;
+	int i;
 
 	for (i = 0; i < MAX_MPCHRS; i++) {
 		if (g_MpSetup.chrslots & (1 << i)) {
@@ -2887,11 +2877,11 @@ struct mpchrconfig *mpGetChrConfigBySlotNum(s32 slot)
 	return result;
 }
 
-s32 mpGetChrIndexBySlotNum(s32 slot)
+int mpGetChrIndexBySlotNum(int slot)
 {
-	s32 count = 0;
-	s32 result = 0;
-	s32 i;
+	int count = 0;
+	int result = 0;
+	int i;
 
 	for (i = 0; i < MAX_MPCHRS; i++) {
 		if (g_MpSetup.chrslots & (1 << i)) {
@@ -2907,10 +2897,10 @@ s32 mpGetChrIndexBySlotNum(s32 slot)
 	return result;
 }
 
-s32 mpGetNumChrs(void)
+int mpGetNumChrs(void)
 {
-	s32 count = 0;
-	s32 i;
+	int count = 0;
+	int i;
 
 	for (i = 0; i != MAX_MPCHRS; i++) {
 		if (g_MpSetup.chrslots & (1 << i)) {
@@ -2921,11 +2911,11 @@ s32 mpGetNumChrs(void)
 	return count;
 }
 
-u8 mpFindUnusedTeamNum(void)
+uint8_t mpFindUnusedTeamNum(void)
 {
-	u8 teamnum = 0;
+	uint8_t teamnum = 0;
 	bool available = false;
-	s32 i;
+	int i;
 
 	while (teamnum < 7 && !available) {
 		available = true;
@@ -2952,12 +2942,12 @@ u8 mpFindUnusedTeamNum(void)
 	return teamnum;
 }
 
-void mpCreateBotFromProfile(s32 botnum, u8 profilenum)
+void mpCreateBotFromProfile(int botnum, uint8_t profilenum)
 {
-	s32 headnum = 0;
-	u8 team = mpFindUnusedTeamNum();
+	int headnum = 0;
+	uint8_t team = mpFindUnusedTeamNum();
 	bool available = false;
-	s32 i;
+	int i;
 
 	g_BotConfigsArray[botnum].type = g_BotProfiles[profilenum].type;
 	g_BotConfigsArray[botnum].difficulty = g_BotProfiles[profilenum].difficulty;
@@ -2989,9 +2979,9 @@ void mpCreateBotFromProfile(s32 botnum, u8 profilenum)
 	g_BotConfigsArray[botnum].base.mpbodynum = g_BotProfiles[profilenum].body;
 }
 
-void mpSetBotDifficulty(s32 botnum, s32 difficulty)
+void mpSetBotDifficulty(int botnum, int difficulty)
 {
-	s32 i;
+	int i;
 
 	g_BotConfigsArray[botnum].difficulty = difficulty;
 
@@ -3005,9 +2995,9 @@ void mpSetBotDifficulty(s32 botnum, s32 difficulty)
  *
  * This is used for the quick team feature.
  */
-s32 mpGetSlotForNewBot(void)
+int mpGetSlotForNewBot(void)
 {
-	s32 i = 0;
+	int i = 0;
 
 	while (i < MAX_BOTS - 1 && g_MpSetup.chrslots & (1 << (i + 4))) {
 		i++;
@@ -3016,7 +3006,7 @@ s32 mpGetSlotForNewBot(void)
 	return i;
 }
 
-void mpRemoveSimulant(s32 index)
+void mpRemoveSimulant(int index)
 {
 	g_MpSetup.chrslots &= ~(1 << (index + 4));
 	g_BotConfigsArray[index].base.name[0] = '\0';
@@ -3024,9 +3014,9 @@ void mpRemoveSimulant(s32 index)
 	mpGenerateBotNames();
 }
 
-void mpCopySimulant(s32 index)
+void mpCopySimulant(int index)
 {
-	s32 dest = mpGetSlotForNewBot();
+	int dest = mpGetSlotForNewBot();
 
 	g_MpSetup.chrslots |= 1 << (dest + 4);
 	g_BotConfigsArray[dest].base.name[0] = g_BotConfigsArray[index].base.name[0];
@@ -3048,8 +3038,8 @@ bool mpHasSimulants(void)
 
 bool mpHasUnusedBotSlots(void)
 {
-	s32 numvacant = challengeIsFeatureUnlocked(MPFEATURE_8BOTS) ? MAX_BOTS : 4;
-	s32 i;
+	int numvacant = challengeIsFeatureUnlocked(MPFEATURE_8BOTS) ? MAX_BOTS : 4;
+	int i;
 
 	for (i = 4; i < MAX_MPCHRS; i++) {
 		if (g_MpSetup.chrslots & (1 << i)) {
@@ -3064,10 +3054,10 @@ bool mpHasUnusedBotSlots(void)
 	return false;
 }
 
-bool mpIsSimSlotEnabled(s32 slot)
+bool mpIsSimSlotEnabled(int slot)
 {
-	s32 numfree = MAX_BOTS;
-	s32 i;
+	int numfree = MAX_BOTS;
+	int i;
 
 	if ((g_MpSetup.chrslots & (1 << (slot + 4))) == 0) {
 		for (i = 0; i < MAX_BOTS; i++) {
@@ -3086,9 +3076,9 @@ bool mpIsSimSlotEnabled(s32 slot)
 	return true;
 }
 
-s32 mpFindBotProfile(s32 type, s32 difficulty)
+int mpFindBotProfile(int type, int difficulty)
 {
-	s32 i;
+	int i;
 
 	if (type == BOTTYPE_GENERAL) {
 		for (i = 0; i < ARRAYCOUNT(g_BotProfiles); i++) {
@@ -3113,9 +3103,9 @@ s32 mpFindBotProfile(s32 type, s32 difficulty)
 
 void mpGenerateBotNames(void)
 {
-	s32 counts[ARRAYCOUNT(g_BotProfiles)];
-	s32 profilenum;
-	s32 i;
+	int counts[ARRAYCOUNT(g_BotProfiles)];
+	int profilenum;
+	int i;
 	char name[16];
 
 	for (i = 0; i < ARRAYCOUNT(g_BotProfiles); i++) {
@@ -3164,9 +3154,9 @@ void mpGenerateBotNames(void)
 	}
 }
 
-s32 mpPlayerGetIndex(struct chrdata *chr)
+int mpPlayerGetIndex(struct chrdata *chr)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_MpNumChrs; i++) {
 		if (g_MpAllChrPtrs[i] == chr) {
@@ -3177,7 +3167,7 @@ s32 mpPlayerGetIndex(struct chrdata *chr)
 	return -1;
 }
 
-struct chrdata *mpGetChrFromPlayerIndex(s32 index)
+struct chrdata *mpGetChrFromPlayerIndex(int index)
 {
 	if (index >= 0 && index < g_MpNumChrs) {
 		return g_MpAllChrPtrs[index];
@@ -3186,9 +3176,9 @@ struct chrdata *mpGetChrFromPlayerIndex(s32 index)
 	return NULL;
 }
 
-s32 func0f18d074(s32 index)
+int func0f18d074(int index)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		if (&g_PlayerConfigsArray[i].base == g_MpAllChrConfigPtrs[index]) {
@@ -3205,9 +3195,9 @@ s32 func0f18d074(s32 index)
 	return -1;
 }
 
-s32 func0f18d0e8(s32 arg0)
+int func0f18d0e8(int arg0)
 {
-	s32 i;
+	int i;
 
 	if (arg0 < 4) {
 		for (i = 0; i < g_MpNumChrs; i++) {
@@ -3226,13 +3216,13 @@ s32 func0f18d0e8(s32 arg0)
 	return -1;
 }
 
-void mpplayerfileLoadGunFuncs(struct savebuffer *buffer, s32 playernum)
+void mpplayerfileLoadGunFuncs(struct savebuffer *buffer, int playernum)
 {
-	s32 bitsremaining = 35;
-	s32 i = 0;
+	int bitsremaining = 35;
+	int i = 0;
 
 	while (bitsremaining > 0) {
-		s32 numbits = bitsremaining;
+		int numbits = bitsremaining;
 
 		if (numbits > 8) {
 			numbits = 8;
@@ -3245,13 +3235,13 @@ void mpplayerfileLoadGunFuncs(struct savebuffer *buffer, s32 playernum)
 	}
 }
 
-void mpplayerfileSaveGunFuncs(struct savebuffer *buffer, s32 playernum)
+void mpplayerfileSaveGunFuncs(struct savebuffer *buffer, int playernum)
 {
-	s32 bitsremaining = 35;
-	s32 i = 0;
+	int bitsremaining = 35;
+	int i = 0;
 
 	while (bitsremaining > 0) {
-		s32 numbits = bitsremaining;
+		int numbits = bitsremaining;
 
 		if (numbits > 8) {
 			numbits = 8;
@@ -3264,12 +3254,11 @@ void mpplayerfileSaveGunFuncs(struct savebuffer *buffer, s32 playernum)
 	}
 }
 
-void mpplayerfileLoadWad(s32 playernum, struct savebuffer *buffer, s32 arg2)
+void mpplayerfileLoadWad(int playernum, struct savebuffer *buffer, int arg2)
 {
 	struct fileguid guid;
-	u32 stack;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	savebufferReadString(buffer, g_PlayerConfigsArray[playernum].base.name, 1);
 	g_PlayerConfigsArray[playernum].time = savebufferReadBits(buffer, 28);
@@ -3334,11 +3323,10 @@ void mpplayerfileLoadWad(s32 playernum, struct savebuffer *buffer, s32 arg2)
 	mpplayerfileLoadGunFuncs(buffer, playernum);
 }
 
-void mpplayerfileSaveWad(s32 playernum, struct savebuffer *buffer)
+void mpplayerfileSaveWad(int playernum, struct savebuffer *buffer)
 {
-	s32 i;
-	s32 j;
-	u32 stack;
+	int i;
+	int j;
 
 	func0f0d55a4(buffer, g_PlayerConfigsArray[playernum].base.name);
 
@@ -3454,7 +3442,7 @@ void mpplayerfileSaveWad(s32 playernum, struct savebuffer *buffer)
 	savebufferOr(buffer, g_PlayerConfigsArray[playernum].survivormedals, 16);
 
 	// PC control mode is enabled in the .ini to avoid changing the save structure
-	const u32 controlmode = g_PlayerConfigsArray[playernum].controlmode;
+	const uint32_t controlmode = g_PlayerConfigsArray[playernum].controlmode;
 	savebufferOr(buffer, ((controlmode == CONTROLMODE_PC) ? CONTROLMODE_11 : controlmode), 2);
 
 	savebufferOr(buffer, g_PlayerConfigsArray[playernum].options, 12);
@@ -3468,7 +3456,7 @@ void mpplayerfileSaveWad(s32 playernum, struct savebuffer *buffer)
 	mpplayerfileSaveGunFuncs(buffer, playernum);
 }
 
-void mpplayerfileGetOverview(char *arg0, char *name, u32 *playtime)
+void mpplayerfileGetOverview(char *arg0, char *name, uint32_t *playtime)
 {
 	struct savebuffer buffer;
 
@@ -3478,10 +3466,10 @@ void mpplayerfileGetOverview(char *arg0, char *name, u32 *playtime)
 	*playtime = savebufferReadBits(&buffer, 28);
 }
 
-s32 mpplayerfileSave(s32 playernum, s32 device, s32 fileid, u16 deviceserial)
+int mpplayerfileSave(int playernum, int device, int fileid, uint16_t deviceserial)
 {
-	s32 ret;
-	s32 newfileid;
+	int ret;
+	int newfileid;
 	struct savebuffer buffer;
 
 	if (device >= 0) {
@@ -3506,9 +3494,9 @@ s32 mpplayerfileSave(s32 playernum, s32 device, s32 fileid, u16 deviceserial)
 	return -1;
 }
 
-s32 mpplayerfileLoad(s32 playernum, s32 device, s32 fileid, u16 deviceserial)
+int mpplayerfileLoad(int playernum, int device, int fileid, uint16_t deviceserial)
 {
-	s32 ret;
+	int ret;
 	struct savebuffer buffer;
 
 	if (device >= 0) {
@@ -3551,14 +3539,14 @@ struct mppreset g_MpPresets[] = {
 	{ L_MPWEAPONS_038, MPCONFIG_SLOWMO     }, // "Slow Motion"
 };
 
-s32 mpGetNumPresets(void)
+int mpGetNumPresets(void)
 {
 	return ARRAYCOUNT(g_MpPresets);
 }
 
-bool mpIsPresetUnlocked(s32 presetnum)
+bool mpIsPresetUnlocked(int presetnum)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpPresets[presetnum].requirefeatures); i++) {
 		if (!challengeIsFeatureUnlocked(g_MpPresets[presetnum].requirefeatures[i]) &&
@@ -3570,10 +3558,10 @@ bool mpIsPresetUnlocked(s32 presetnum)
 	return true;
 }
 
-s32 mpGetNumUnlockedPresets(void)
+int mpGetNumUnlockedPresets(void)
 {
-	s32 numunlocked = 0;
-	s32 i;
+	int numunlocked = 0;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpPresets); i++) {
 		if (mpIsPresetUnlocked(i)) {
@@ -3584,9 +3572,9 @@ s32 mpGetNumUnlockedPresets(void)
 	return numunlocked;
 }
 
-char *mpGetPresetNameBySlot(s32 slot)
+char *mpGetPresetNameBySlot(int slot)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpPresets); i++) {
 		if (mpIsPresetUnlocked(i)) {
@@ -3603,9 +3591,9 @@ char *mpGetPresetNameBySlot(s32 slot)
 
 void mpApplyConfig(struct mpconfigfull *config)
 {
-	s32 i;
-	s32 j;
-	u16 chrslots;
+	int i;
+	int j;
+	uint16_t chrslots;
 
 	g_MpSetup.scenario = config->config.setup.scenario;
 
@@ -3641,12 +3629,12 @@ void mpApplyConfig(struct mpconfigfull *config)
 	challengeRemoveForceUnlocks();
 }
 
-void mp0f18dec4(s32 slot)
+void mp0f18dec4(int slot)
 {
 	struct mpconfigfull *config;
-	u8 buffer[0x1ca];
-	s32 confignum = 0;
-	u32 i;
+	uint8_t buffer[0x1ca];
+	int confignum = 0;
+	uint32_t i;
 
 	for (i = 0; i < ARRAYCOUNT(g_MpPresets); i++) {
 		if (mpIsPresetUnlocked(i)) {
@@ -3676,8 +3664,8 @@ void mp0f18dec4(s32 slot)
 
 void mpsetupfileLoadWad(struct savebuffer *buffer)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	savebufferReadString(buffer, g_MpSetup.name, false);
 	savebufferReadBits(buffer, 4);
@@ -3730,9 +3718,9 @@ void mpsetupfileLoadWad(struct savebuffer *buffer)
 
 void mpsetupfileSaveWad(struct savebuffer *buffer)
 {
-	s32 numsims = 0;
-	s32 mpbodynum;
-	s32 i;
+	int numsims = 0;
+	int mpbodynum;
+	int i;
 
 	func0f0d55a4(buffer, g_MpSetup.name);
 
@@ -3762,7 +3750,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 		savebufferOr(buffer, g_BotConfigsArray[i].base.mpheadnum, 7);
 
 		if (g_BotConfigsArray[i].base.mpbodynum == 0xff) {
-			s32 profilenum = mpFindBotProfile(g_BotConfigsArray[i].type, g_BotConfigsArray[i].difficulty);
+			int profilenum = mpFindBotProfile(g_BotConfigsArray[i].type, g_BotConfigsArray[i].difficulty);
 
 			if (profilenum < 0 || profilenum >= ARRAYCOUNT(g_BotProfiles)) {
 				profilenum = 0;
@@ -3790,7 +3778,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 	}
 }
 
-void mpsetupfileGetOverview(char *arg0, char *filename, u16 *numsims, u16 *stagenum, u16 *scenarionum)
+void mpsetupfileGetOverview(char *arg0, char *filename, uint16_t *numsims, uint16_t *stagenum, uint16_t *scenarionum)
 {
 	struct savebuffer buffer;
 
@@ -3803,10 +3791,10 @@ void mpsetupfileGetOverview(char *arg0, char *filename, u16 *numsims, u16 *stage
 	*scenarionum = savebufferReadBits(&buffer, 3);
 }
 
-s32 mpsetupfileSave(s32 device, s32 fileid, u16 deviceserial)
+int mpsetupfileSave(int device, int fileid, uint16_t deviceserial)
 {
-	s32 ret;
-	s32 newfileid;
+	int ret;
+	int newfileid;
 	struct savebuffer buffer;
 
 	if (device >= 0) {
@@ -3830,9 +3818,9 @@ s32 mpsetupfileSave(s32 device, s32 fileid, u16 deviceserial)
 	return -1;
 }
 
-s32 mpsetupfileLoad(s32 device, s32 fileid, u16 deviceserial)
+int mpsetupfileLoad(int device, int fileid, uint16_t deviceserial)
 {
-	s32 ret;
+	int ret;
 	struct savebuffer buffer;
 
 	if (device >= 0) {
@@ -3859,14 +3847,14 @@ s32 mpsetupfileLoad(s32 device, s32 fileid, u16 deviceserial)
 
 void mpResetHeads(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(var800acc28); i++) {
 		var800acc28[i] = NULL;
 	}
 }
 
-struct modeldef *mpClearHeads(s32 index, s32 *headnum)
+struct modeldef *mpClearHeads(int index, int *headnum)
 {
 	return var800acc28[index];
 }

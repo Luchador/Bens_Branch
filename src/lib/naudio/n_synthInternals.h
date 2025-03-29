@@ -49,8 +49,8 @@
 
 typedef struct {
 	struct ALParam_s    *next;
-	s32                 delta;
-	s16                 type;
+	int                 delta;
+	int16_t                 type;
 	struct N_PVoice_s     *pvoice;
 } N_ALFreeParam;
 
@@ -62,57 +62,57 @@ typedef struct N_PVoice_s {
 	ADPCM_STATE                 *dc_lstate;
 	ALRawLoop                   dc_loop;
 	struct ALWaveTable_s        *dc_table;
-	s32                         dc_bookSize;
+	int                         dc_bookSize;
 	ALDMAproc                   dc_dma;
 	void                        *dc_dmaState;
-	s32                         dc_sample;
-	s32                         dc_lastsam;
-	s32                         dc_first;
+	int                         dc_sample;
+	int                         dc_lastsam;
+	int                         dc_first;
 	intptr_t                    dc_memin;
 	/** ALResampler *********************************/
 	RESAMPLE_STATE      *rs_state;
-	f32                 rs_ratio;
-	s32			rs_upitch;
-	f32		        rs_delta;
-	s32			rs_first;
+	float                 rs_ratio;
+	int			rs_upitch;
+	float		        rs_delta;
+	int			rs_first;
 	/** ALEnvMixer *********************************/
 	ENVMIX_STATE	*em_state;
-	s16		        em_pan;
-	s16		        em_volume;
-	s16		        em_cvolL;
-	s16		        em_cvolR;
-	s16		        em_dryamt;
-	s16		        em_wetamt;
-	u16                 em_lratl;
-	s16                 em_lratm;
-	s16                 em_ltgt;
-	u16                 em_rratl;
-	s16                 em_rratm;
-	s16                 em_rtgt;
-	s32                 em_delta;
-	s32                 em_segEnd;
-	s32			em_first;
+	int16_t		        em_pan;
+	int16_t		        em_volume;
+	int16_t		        em_cvolL;
+	int16_t		        em_cvolR;
+	int16_t		        em_dryamt;
+	int16_t		        em_wetamt;
+	uint16_t                 em_lratl;
+	int16_t                 em_lratm;
+	int16_t                 em_ltgt;
+	uint16_t                 em_rratl;
+	int16_t                 em_rratm;
+	int16_t                 em_rtgt;
+	int                 em_delta;
+	int                 em_segEnd;
+	int			em_first;
 	ALParam		*em_ctrlList;
 	ALParam		*em_ctrlTail;
-	s32                 em_motion;
-	s32                 offset;
-	u8 unk8c;
-	u16 unk8e;
+	int                 em_motion;
+	int                 offset;
+	uint8_t unk8c;
+	uint16_t unk8e;
 	struct fx fx;
-	s32 unkb8;
+	int unkb8;
 	void *unkbc; // size 8
 } N_PVoice;
 
 
-typedef Acmd *(*N_ALCmdHandler)(s32, Acmd *, s32 bus);
+typedef Acmd *(*N_ALCmdHandler)(int, Acmd *, int bus);
 
 typedef struct N_ALFilter_s {
 	struct N_ALFilter_s   *source;
 	N_ALCmdHandler        handler;
 	ALSetParam          setParam;
-	s16                 inp;
-	s16                 outp;
-	s32                 type;
+	int16_t                 inp;
+	int16_t                 outp;
+	int                 type;
 } N_ALFilter;
 
 typedef struct N_ALMainBus_s {
@@ -121,16 +121,16 @@ typedef struct N_ALMainBus_s {
 
 struct auxbus44 {
 	struct fx fx;
-	u32 unk28;
+	uint32_t unk28;
 	POLEF_STATE *unk2c;
 	POLEF_STATE *unk30;
-	u32 unk34;
+	uint32_t unk34;
 };
 
 typedef struct N_ALAuxBus_s {
 	ALFilter            filter;
-	s32                 sourceCount;
-	s32                 maxSources;
+	int                 sourceCount;
+	int                 maxSources;
 	N_PVoice           **sources;
 	ALFx                *fx;
 	ALFx		*fx_array[AL_MAX_AUX_BUS_SOURCES];
@@ -143,33 +143,33 @@ ALParam         *__n_allocParam(void);
 void            _n_freeParam(ALParam *param);
 void            _n_freePVoice(N_PVoice *pvoice);
 void            _n_collectPVoices(void);
-s32             _n_timeToSamples(s32 micros);
-ALMicroTime     _n_samplesToTime(s32 samples);
+int             _n_timeToSamples(int micros);
+ALMicroTime     _n_samplesToTime(int samples);
 
 
-Acmd    *n_alAdpcmPull(N_PVoice *f,s16 *outp, s32 byteCount, Acmd *p);
-s32     n_alLoadParam(N_PVoice *filter, s32 paramID, void *param);
+Acmd    *n_alAdpcmPull(N_PVoice *f,int16_t *outp, int byteCount, Acmd *p);
+int     n_alLoadParam(N_PVoice *filter, int paramID, void *param);
 
-Acmd    *n_alResamplePull(N_PVoice *f, s16 *outp, Acmd *p);
-Acmd    *n_alResamplePull2(N_PVoice *f, s16 *outp, s32 outCount, Acmd *p);
-s32     n_alResampleParam(N_PVoice *f, s32 paramID, void *param);
-s32     n_alResampleParam2(N_PVoice *f, s32 paramID, void *param);
+Acmd    *n_alResamplePull(N_PVoice *f, int16_t *outp, Acmd *p);
+Acmd    *n_alResamplePull2(N_PVoice *f, int16_t *outp, int outCount, Acmd *p);
+int     n_alResampleParam(N_PVoice *f, int paramID, void *param);
+int     n_alResampleParam2(N_PVoice *f, int paramID, void *param);
 
-Acmd    *n_alEnvmixerPull(N_PVoice *f, s32 sampleOffset, Acmd *p);
-s32     n_alEnvmixerParam(N_PVoice *p, s32 paramID, void *param);
+Acmd    *n_alEnvmixerPull(N_PVoice *f, int sampleOffset, Acmd *p);
+int     n_alEnvmixerParam(N_PVoice *p, int paramID, void *param);
 
-s32 n_alAuxBusParam( s32 paramID, void *param);
-Acmd *n_alAuxBusPull(s32 sampleOffset, Acmd *cmdptr, s32 fxBus, s32 *numpulls);
+int n_alAuxBusParam( int paramID, void *param);
+Acmd *n_alAuxBusPull(int sampleOffset, Acmd *cmdptr, int fxBus, int *numpulls);
 
-Acmd *n_alFxPull( s32 sampleOffset, Acmd *p, s32 arg2);
-s32 n_alFxParamHdl(void *filter, s32 paramID, void *param);
-void n_alFxNew(ALFx **r, ALSynConfig *c, s16 bus, ALHeap *hp);
+Acmd *n_alFxPull( int sampleOffset, Acmd *p, int arg2);
+int n_alFxParamHdl(void *filter, int paramID, void *param);
+void n_alFxNew(ALFx **r, ALSynConfig *c, int16_t bus, ALHeap *hp);
 
-Acmd *n_alMainBusPull( s32 sampleOffset, Acmd *p);
-s32 n_alMainBusParam( s32 paramID, void *param);
+Acmd *n_alMainBusPull( int sampleOffset, Acmd *p);
+int n_alMainBusParam( int paramID, void *param);
 
-Acmd *n_alSavePull(s32 sampleOffset, Acmd *p);
-s32 n_alSaveParam( s32 paramID, void *param);
+Acmd *n_alSavePull(int sampleOffset, Acmd *p);
+int n_alSaveParam( int paramID, void *param);
 
 void n_alSaveNew(void);
 

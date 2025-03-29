@@ -4,8 +4,8 @@
 #include "data.h"
 #include "types.h"
 
-s32 rzipInflate(void *src, void *dst, void *scratch);
-u32 rzipInit(void);
+int rzipInflate(void *src, void *dst, void *scratch);
+uint32_t rzipInit(void);
 bool rzipIs1173(void *buffer);
 void *rzipGetSomething(void);
 

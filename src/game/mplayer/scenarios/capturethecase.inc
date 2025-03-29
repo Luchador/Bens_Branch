@@ -153,11 +153,11 @@ struct weaponobj g_CtcTokenObj3;
 
 void ctcInit(void)
 {
-	s32 i, j, k;
+	int i, j, k;
 	g_MpSetup.options |= MPOPTION_TEAMSENABLED;
 
 	for (i = 0; i < ARRAYCOUNT(g_ScenarioData.ctc.spawnpadsperteam); i++) {
-		s32 j;
+		int j;
 		g_ScenarioData.ctc.spawnpadsperteam[i].homepad = i;
 		g_ScenarioData.ctc.spawnpadsperteam[i].numspawnpads = 0;
 
@@ -182,7 +182,7 @@ void ctcInit(void)
 	}
 }
 
-s32 ctcNumProps(void)
+int ctcNumProps(void)
 {
 	return 4;
 }
@@ -201,8 +201,7 @@ void ctcInitProps(void)
 {
 	struct mpchrconfig *mpchr;
 	struct weaponobj *tmp;
-	s32 mpindex;
-	u32 stack;
+	int mpindex;
 	bool teamsdone[ARRAYCOUNT(g_ScenarioData.ctc.playercountsperteam)];
 
 	struct weaponobj template = {
@@ -238,9 +237,9 @@ void ctcInitProps(void)
 		NULL,                   // dualweapon
 	};
 
-	s32 i;
-	s32 j;
-	s32 k;
+	int i;
+	int j;
+	int k;
 
 	for (i = 0; i < ARRAYCOUNT(g_ScenarioData.ctc.spawnpadsperteam); i++) {
 		for (j = 0; j < ARRAYCOUNT(g_ScenarioData.ctc.spawnpadsperteam[i].spawnpads); j++) {
@@ -377,10 +376,10 @@ void ctcInitProps(void)
 	}
 }
 
-void ctcCalculatePlayerScore(struct mpchrconfig *mpchr, s32 mpchrnum, s32 *score, s32 *deaths)
+void ctcCalculatePlayerScore(struct mpchrconfig *mpchr, int mpchrnum, int *score, int *deaths)
 {
 	struct mpchrconfig *loopmpchr;
-	s32 i;
+	int i;
 
 	*score = 0;
 	*score += mpchr->numpoints * 3;
@@ -407,7 +406,7 @@ void ctcCalculatePlayerScore(struct mpchrconfig *mpchr, s32 mpchrnum, s32 *score
 Gfx *ctcRadarExtra(Gfx *gdl)
 {
 	if (g_MpSetup.options & MPOPTION_CTC_SHOWONRADAR) {
-		s32 i;
+		int i;
 
 		for (i = 0; i < scenarioGetMaxTeams(); i++) {
 			if (g_ScenarioData.ctc.tokens[i] &&
@@ -427,14 +426,14 @@ Gfx *ctcRadarExtra(Gfx *gdl)
 
 bool ctcRadarChr(Gfx **gdl, struct prop *prop)
 {
-	s32 i;
+	int i;
 
 	if (g_MpSetup.options & MPOPTION_CTC_SHOWONRADAR) {
 		for (i = 0; i < scenarioGetMaxTeams(); i++) {
 			if (prop == g_ScenarioData.ctc.tokens[i] &&
 					(g_ScenarioData.ctc.tokens[i]->type == PROPTYPE_CHR || g_ScenarioData.ctc.tokens[i]->type == PROPTYPE_PLAYER)) {
 				struct coord dist;
-				s32 colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
+				int colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
 				dist.x = g_ScenarioData.ctc.tokens[i]->pos.x - g_Vars.currentplayer->prop->pos.x;
 				dist.y = g_ScenarioData.ctc.tokens[i]->pos.y - g_Vars.currentplayer->prop->pos.y;
 				dist.z = g_ScenarioData.ctc.tokens[i]->pos.z - g_Vars.currentplayer->prop->pos.z;
@@ -448,7 +447,7 @@ bool ctcRadarChr(Gfx **gdl, struct prop *prop)
 	return false;
 }
 
-bool ctcHighlightProp(struct prop *prop, s32 *colour)
+bool ctcHighlightProp(struct prop *prop, int *colour)
 {
 	struct defaultobj *obj = prop->obj;
 
@@ -457,7 +456,7 @@ bool ctcHighlightProp(struct prop *prop, s32 *colour)
 			struct weaponobj *weapon = prop->weapon;
 
 			if (weapon->weaponnum == WEAPON_BRIEFCASE2) {
-				u32 teamcolour = g_TeamColours[weapon->team];
+				uint32_t teamcolour = g_TeamColours[weapon->team];
 
 				colour[0] = teamcolour >> 24 & 0xff;
 				colour[1] = teamcolour >> 16 & 0xff;
@@ -472,9 +471,9 @@ bool ctcHighlightProp(struct prop *prop, s32 *colour)
 	return false;
 }
 
-void ctcAddPad(s32 *cmd)
+void ctcAddPad(int *cmd)
 {
-	s32 i;
+	int i;
 
 	if (cmd[0] == INTROCMD_CASE) {
 		g_ScenarioData.ctc.spawnpadsperteam[cmd[1]].homepad = cmd[2];
@@ -491,10 +490,10 @@ void ctcAddPad(s32 *cmd)
 	}
 }
 
-bool ctcChooseSpawnLocation(f32 arg0, struct coord *pos, RoomNum *rooms, struct prop *prop, f32 *arg4)
+bool ctcChooseSpawnLocation(float arg0, struct coord *pos, RoomNum *rooms, struct prop *prop, float *arg4)
 {
 	struct chrdata *chr = prop->chr;
-	s32 index = radarGetTeamIndex(chr->team);
+	int index = radarGetTeamIndex(chr->team);
 
 	if (g_ScenarioData.ctc.spawnpadsperteam[g_ScenarioData.ctc.teamindexes[index]].numspawnpads > 0) {
 		*arg4 = playerChooseSpawnLocation(arg0, pos, rooms, prop,
@@ -506,14 +505,14 @@ bool ctcChooseSpawnLocation(f32 arg0, struct coord *pos, RoomNum *rooms, struct 
 	return false;
 }
 
-s32 ctcGetMaxTeams(void)
+int ctcGetMaxTeams(void)
 {
 	return 4;
 }
 
 bool ctcIsRoomHighlighted(RoomNum room)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_ScenarioData.ctc.teamindexes); i++) {
 		if (g_ScenarioData.ctc.baserooms[i] == room && g_ScenarioData.ctc.teamindexes[i] != -1) {
@@ -524,20 +523,20 @@ bool ctcIsRoomHighlighted(RoomNum room)
 	return false;
 }
 
-void ctcHighlightRoom(RoomNum roomnum, s32 *arg1, s32 *arg2, s32 *arg3)
+void ctcHighlightRoom(RoomNum roomnum, int *arg1, int *arg2, int *arg3)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_ScenarioData.ctc.baserooms); i++) {
 		if (g_ScenarioData.ctc.baserooms[i] == roomnum) {
-			u32 colour = g_TeamColours[i];
-			f32 a = *arg1;
-			f32 b = *arg2;
-			f32 c = *arg3;
+			uint32_t colour = g_TeamColours[i];
+			float a = *arg1;
+			float b = *arg2;
+			float c = *arg3;
 
-			a *= (s32)((colour >> 24 & 0xff) + 0xff) * (1.0f / 512.0f);
-			b *= (s32)((colour >> 16 & 0xff) + 0xff) * (1.0f / 512.0f);
-			c *= (s32)((colour >> 8 & 0xff) + 0xff) * (1.0f / 512.0f);
+			a *= (int)((colour >> 24 & 0xff) + 0xff) * (1.0f / 512.0f);
+			b *= (int)((colour >> 16 & 0xff) + 0xff) * (1.0f / 512.0f);
+			c *= (int)((colour >> 8 & 0xff) + 0xff) * (1.0f / 512.0f);
 
 			*arg1 = a;
 			*arg2 = b;

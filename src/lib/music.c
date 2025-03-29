@@ -15,16 +15,16 @@
 #define RESULT_OK_NEXT  1
 #define RESULT_OK_BREAK 2
 
-const u8 var70053ca0[] = {0, 0, 0, 0, 0, 5};
+const uint8_t var70053ca0[] = {0, 0, 0, 0, 0, 5};
 
-s32 g_MusicNextAmbientTick240 = -1;
+int g_MusicNextAmbientTick240 = -1;
 
-s32 musicHandlePlayEvent(struct musicevent *event, s32 result)
+int musicHandlePlayEvent(struct musicevent *event, int result)
 {
-	s32 i;
-	u8 value;
-	s32 j;
-	s32 index;
+	int i;
+	uint8_t value;
+	int j;
+	int index;
 
 	// Check if this tracktype is currently in use. If it is then that's
 	// an error - the caller should have stopped the existing track first.
@@ -121,9 +121,9 @@ s32 musicHandlePlayEvent(struct musicevent *event, s32 result)
 	return result;
 }
 
-s32 musicHandleStopEvent(struct musicevent *event, s32 result)
+int musicHandleStopEvent(struct musicevent *event, int result)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < 3; i++) {
 		if (event->tracktype == g_SeqChannels[i].tracktype) {
@@ -141,10 +141,10 @@ s32 musicHandleStopEvent(struct musicevent *event, s32 result)
 	return RESULT_OK_NEXT;
 }
 
-s32 musicHandleFadeEvent(struct musicevent *event, s32 result)
+int musicHandleFadeEvent(struct musicevent *event, int result)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	for (i = 0; i < 3; i++) {
 		if (event->tracktype == g_SeqChannels[i].tracktype && g_SeqChannels[i].inuse) {
@@ -161,9 +161,9 @@ s32 musicHandleFadeEvent(struct musicevent *event, s32 result)
 	return RESULT_OK_NEXT;
 }
 
-s32 musicHandleStopAllEvent(s32 result)
+int musicHandleStopAllEvent(int result)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < 3; i++) {
 		n_alSeqpStop((N_ALSeqPlayer *)g_SeqInstances[i].seqp);
@@ -177,13 +177,11 @@ s32 musicHandleStopAllEvent(s32 result)
 	return RESULT_OK_NEXT;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
-s32 musicHandleSetIntervalEvent(struct musicevent *event, s32 result)
+int musicHandleSetIntervalEvent(struct musicevent *event, int result)
 {
 	g_MusicInterval240 = event->timer240;
 	return RESULT_OK_NEXT;
 }
-#endif
 
 #if MATCHING
 #if VERSION >= VERSION_NTSC_1_0
@@ -846,9 +844,9 @@ glabel musicTickEvents
 // The code below uses += 0 to get the mismatch down to one instruction,
 void musicTickEvents(void)
 {
-	s32 i;
-	s32 j;
-	s32 result;
+	int i;
+	int j;
+	int result;
 	struct musicevent *event;
 
 	if (!g_SndDisabled) {
@@ -881,11 +879,9 @@ void musicTickEvents(void)
 		for (i = g_MusicEventQueueLength - 1; i >= 0; i--) {
 			event = &g_MusicEventQueue[i];
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (event->eventtype == MUSICEVENTTYPE_SETINTERVAL) {
 				continue;
 			}
-#endif
 
 			if (event->tracktype == TRACKTYPE_NONE) {
 				continue;
@@ -899,11 +895,9 @@ void musicTickEvents(void)
 					continue;
 				}
 
-#if VERSION >= VERSION_NTSC_1_0
 				if (earlier->eventtype == MUSICEVENTTYPE_SETINTERVAL) {
 					continue;
 				}
-#endif
 
 				if (earlier->tracktype == TRACKTYPE_NONE) {
 					continue;
@@ -970,11 +964,9 @@ void musicTickEvents(void)
 				case MUSICEVENTTYPE_STOPALL:
 					result = musicHandleStopAllEvent(result);
 					break;
-#if VERSION >= VERSION_NTSC_1_0
 				case MUSICEVENTTYPE_SETINTERVAL:
 					result = musicHandleSetIntervalEvent(event, result);
 					break;
-#endif
 				}
 
 				if (result);
@@ -1009,7 +1001,7 @@ void musicTickEvents(void)
 
 void musicTick(void)
 {
-	s32 i;
+	int i;
 	bool playnrg = false;
 
 	if (!g_SndDisabled) {
@@ -1086,7 +1078,6 @@ void musicTick(void)
 			}
 		}
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (g_Vars.lvupdate240 != 0) {
 			if (g_MusicNrgIsActive) {
 				if (!playnrg) {
@@ -1098,19 +1089,6 @@ void musicTick(void)
 				}
 			}
 		}
-#else
-		if (g_Vars.lvupdate240 != 0) {
-			if (musicIsTrackState(TRACKTYPE_NRG, AL_PLAYING)) {
-				if (!playnrg) {
-					musicDeactivateNrg();
-				}
-			} else {
-				if (playnrg && !g_Vars.dontplaynrg) {
-					musicActivateNrg();
-				}
-			}
-		}
-#endif
 
 		// Check if the player is in an ambient room every 0.25 seconds
 		if (g_Vars.lvupdate240 > g_MusicNextAmbientTick240) {
@@ -1124,9 +1102,9 @@ void musicTick(void)
 	}
 }
 
-bool musicIsTrackTypePlaying(s32 tracktype)
+bool musicIsTrackTypePlaying(int tracktype)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < 3; i++) {
 		if (tracktype == g_SeqChannels[i].tracktype && n_alCSPGetState(g_SeqInstances[i].seqp) == AL_PLAYING) {
@@ -1136,30 +1114,3 @@ bool musicIsTrackTypePlaying(s32 tracktype)
 
 	return false;
 }
-
-#if VERSION < VERSION_NTSC_1_0
-bool musicAreTracksPlaying(u8 bits)
-{
-	if ((bits & 0x01) && !musicIsTrackTypePlaying(TRACKTYPE_PRIMARY)) {
-		return false;
-	}
-
-	if ((bits & 0x02) && !musicIsTrackTypePlaying(TRACKTYPE_NRG)) {
-		return false;
-	}
-
-	if ((bits & 0x04) && !musicIsTrackTypePlaying(TRACKTYPE_MENU)) {
-		return false;
-	}
-
-	if ((bits & 0x08) && !musicIsTrackTypePlaying(TRACKTYPE_DEATH)) {
-		return false;
-	}
-
-	if ((bits & 0x10) && !musicIsTrackTypePlaying(TRACKTYPE_AMBIENT)) {
-		return false;
-	}
-
-	return true;
-}
-#endif

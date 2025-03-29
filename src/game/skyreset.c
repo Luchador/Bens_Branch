@@ -4,7 +4,7 @@
 #include "data.h"
 #include "types.h"
 
-void skyReset(u32 stagenum)
+void skyReset(int stagenum)
 {
 	g_SkyStageNum = stagenum;
 	g_SkyLightningActive = false;

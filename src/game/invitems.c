@@ -63,12 +63,12 @@ struct recoilsettings invrecoilsettings_reaper      = { 0.6, 0.6, 2.6, 0.2, 1 };
 /**
  * Aim settings
  *
- * f32 zoomfov
- * f32 guntransup
- * f32 guntransdown
- * f32 guntransside
- * f32 aimdamppal
- * f32 aimdamp
+ * float zoomfov
+ * float guntransup
+ * float guntransdown
+ * float guntransside
+ * float aimdamppal
+ * float aimdamp
  * u32 tracktype
  * u32 unused
  * u32 flags
@@ -2570,19 +2570,15 @@ struct weapon invitem_shotgun = {
 	1, // sway
 	gunviscmds_shotgun, // gunviscmds
 	invpartvisibility_shotgun, // part visibility
-#if VERSION >= VERSION_PAL_FINAL
-	L_GUN_253, // short name
-#else
 	L_GUN_025, // short name
-#endif
 	L_GUN_025, // name
 	L_GUN_149, // manufacturer
 	L_GUN_173, // description
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_00004000 | WEAPONFLAG_HASHANDS,
 };
 
-f32 vibrationstart_reaper[] = {0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
-f32 vibrationmax_reaper[] = {1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
+float vibrationstart_reaper[] = {0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
+float vibrationmax_reaper[] = {1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0};
 
 struct modelpartvisibility invpartvisibility_reaper[] = {
 	{ MODELPART_GUN_MUZZLEFLASH1, false },

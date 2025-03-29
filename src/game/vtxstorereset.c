@@ -7,10 +7,10 @@
 
 void vtxstoreReset(void)
 {
-	s32 i;
-	s32 j;
-	s32 num;
-	s32 val;
+	int i;
+	int j;
+	int num;
+	int val;
 
 	for (i = 0; i < ARRAYCOUNT(g_VtxstoreTypes); i++) {
 		if (PLAYERCOUNT() >= 2) {

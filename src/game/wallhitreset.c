@@ -1,24 +1,23 @@
-#include <ultra64.h>
 #include "constants.h"
 #include "bss.h"
 #include "lib/memp.h"
 #include "data.h"
 #include "types.h"
 
-u16 *g_WallhitCountsPerRoom;
-s32 g_WallhitsMax;
-u32 g_WallhitsNumSettled;
-u32 g_WallhitsNumFree;
-u32 g_WallhitsNumUsed;
-u32 g_WallhitsNumBloodSettled;
-u32 g_WallhitsNumNonbloodSettled;
-s32 g_MinPropWallhits;
-u32 g_MaxPropWallhits;
-s32 g_MinBgWallhitsPerRoom;
-s32 g_MaxBgWallhitsPerRoom;
-s32 g_WallhitsCriticalSpareLimit;
-s32 g_WallhitsGoalSpareLimit;
-f32 g_WallhitTargetBloodRatio;
+uint16_t *g_WallhitCountsPerRoom;
+int g_WallhitsMax;
+uint32_t g_WallhitsNumSettled;
+uint32_t g_WallhitsNumFree;
+uint32_t g_WallhitsNumUsed;
+uint32_t g_WallhitsNumBloodSettled;
+uint32_t g_WallhitsNumNonbloodSettled;
+int g_MinPropWallhits;
+uint32_t g_MaxPropWallhits;
+int g_MinBgWallhitsPerRoom;
+int g_MaxBgWallhitsPerRoom;
+int g_WallhitsCriticalSpareLimit;
+int g_WallhitsGoalSpareLimit;
+float g_WallhitTargetBloodRatio;
 
 /**
  * Initialises an array of room numbers and a linked list of structs.
@@ -28,8 +27,8 @@ f32 g_WallhitTargetBloodRatio;
  */
 void wallhitReset(void)
 {
-	s32 type = 2;
-	s32 i;
+	int type = 2;
+	int i;
 
 	g_WallhitsMax = 10000;
 	g_MinPropWallhits = 50;
@@ -54,8 +53,8 @@ void wallhitReset(void)
 		g_Wallhits = NULL;
 	} else {
 		// Allocate an array of s16 room numbers followed by a bunch of structs
-		u32 numberssize;
-		u32 structssize;
+		uint32_t numberssize;
+		uint32_t structssize;
 		void *ptr;
 
 		structssize = g_WallhitsMax * sizeof(struct wallhit);

@@ -1,8 +1,9 @@
 #include <ultra64.h>
 #include <n_libaudio.h>
 #include "naudio/n_synthInternals.h"
+#include "types.h"
 
-ALFxRef func0003e540(s16 index)
+ALFxRef func0003e540(int16_t index)
 {
 	struct N_ALMainBus_s *mainbus = n_syn->mainBus;
 
@@ -13,7 +14,7 @@ ALFxRef func0003e540(s16 index)
 	}
 }
 
-ALFxRef func0003e5b8(s16 index)
+ALFxRef func0003e5b8(int16_t index)
 {
 	struct N_ALMainBus_s *mainbus = n_syn->mainBus;
 

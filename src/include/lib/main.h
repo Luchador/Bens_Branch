@@ -1,11 +1,10 @@
 #ifndef _IN_LIB_MAIN_H
 #define _IN_LIB_MAIN_H
 #include <ultra64.h>
-#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
-extern int g_MainIsBooting;
+extern bool g_MainIsBooting;
 
 void mainInit(void);
 void mainProc(void);

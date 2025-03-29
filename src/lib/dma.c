@@ -1,18 +1,17 @@
-#include <ultra64.h>
 #include "constants.h"
 #include "bss.h"
 #include "lib/dma.h"
 #include "data.h"
 #include "types.h"
 
-volatile u32 g_DmaNumSlotsBusy;
-volatile u8 g_DmaSlotsBusy[32];
+volatile uint32_t g_DmaNumSlotsBusy;
+volatile uint8_t g_DmaSlotsBusy[32];
 
-u8 g_LoadType = 0;
+uint8_t g_LoadType = 0;
 
 void dmaInit(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_DmaSlotsBusy); i++) {
 		g_DmaSlotsBusy[i] = 0;
@@ -21,17 +20,17 @@ void dmaInit(void)
 	g_DmaNumSlotsBusy = 0;
 }
 
-void dmaStart(void *memaddr, romptr_t romaddr, u32 len, bool priority)
+void dmaStart(void *memaddr, romptr_t romaddr, uint32_t len, bool priority)
 {
 	bcopy((const void *)romaddr, memaddr, len);
 }
 
-void dmaExec(void *memaddr, romptr_t romaddr, u32 len)
+void dmaExec(void *memaddr, romptr_t romaddr, uint32_t len)
 {
 	dmaStart(memaddr, romaddr, len, false);
 }
 
-void dmaExecHighPriority(void *memaddr, romptr_t romaddr, u32 len)
+void dmaExecHighPriority(void *memaddr, romptr_t romaddr, uint32_t len)
 {
 	dmaStart(memaddr, romaddr, len, true);
 }
@@ -51,12 +50,12 @@ void dmaExecHighPriority(void *memaddr, romptr_t romaddr, u32 len)
  * If a length of zero is passed, no DMA is done. This can be used to retrieve
  * the memory address that would have been returned.
  */
-void *dmaExecWithAutoAlign(void *memaddr, romptr_t romaddr, u32 len)
+void *dmaExecWithAutoAlign(void *memaddr, romptr_t romaddr, uint32_t len)
 {
 	uintptr_t alignedrom = ALIGN2(romaddr);
 	uintptr_t alignedmem = ALIGN16((uintptr_t) memaddr);
-	u32 offset = romaddr - alignedrom; // 0 or 1
-	u32 alignedlen = ALIGN16(offset + len);
+	uint32_t offset = romaddr - alignedrom; // 0 or 1
+	uint32_t alignedlen = ALIGN16(offset + len);
 
 	if (len == 0) {
 		return (void *)(alignedmem + offset);

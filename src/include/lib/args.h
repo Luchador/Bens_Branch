@@ -6,8 +6,8 @@
 
 char *argParseString(char *str);
 void argSetString(char *string);
-s32 argsParseDebugArgs(void);
-char *argFindByPrefix(s32 occurrence, char *string);
-void argGetLevel(s32 *stagenum);
+int argsParseDebugArgs(void);
+char *argFindByPrefix(int occurrence, char *string);
+void argGetLevel(int *stagenum);
 
 #endif

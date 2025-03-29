@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/quaternion.h"
 #include "game/utils.h"
@@ -14,14 +14,10 @@
 #include "lib/sched.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "video.h"
 #include "game/gfxmemory.h"
 #include "game/artifacts.h"
 #include "game/player.h"
-#endif
-
-#define SKYABS(val) (val >= 0.0f ? (val) : -(val))
 
 #define CORNERSTATE_NONE     0x0
 #define CORNERSTATE_BR       0x1
@@ -38,23 +34,35 @@
 #define CORNERSTATE_TL_TR_BL 0xe
 #define CORNERSTATE_FULL     0xf
 
-u32 g_SkyStageNum;
+uint32_t g_SkyStageNum;
 bool g_SkyLightningActive;
 Mtxf g_SkyMtx;
 struct coord g_SunPositions[3]; // relative to centre screen, with a huge scale
-u32 var800a340c;
-f32 g_SunScreenXPositions[4];
-f32 g_SunScreenYPositions[4];
+float g_SunScreenXPositions[4];
+float g_SunScreenYPositions[4];
 
-f32 g_SkyCloudOffset = 0;
-f32 g_SkyWindSpeed = 1;
-f32 g_SunAlphaFracs[3] = {0};
-s32 g_SunFlareTimers240[3] = {0};
+float g_SkyCloudOffset = 0;
+float g_SkyWindSpeed = 1;
+float g_SunAlphaFracs[3] = {0};
+int g_SunFlareTimers240[3] = {0};
 
-void skyGetWorldPosFromScreenPos(f32 left, f32 top, struct coord *dst)
+uint32_t FloatToUInt32(float arg0)
+{
+	if (arg0 > 32767.9f) {
+		arg0 = 32767.9f;
+	}
+
+	if (arg0 < -32767.9f) {
+		arg0 = -32767.9f;
+	}
+
+	return (uint32_t)(arg0 * 65536);
+}
+
+void skyGetWorldPosFromScreenPos(float left, float top, struct coord *dst)
 {
 	Mtxf *mtx = camGetProjectionMtxF();
-	f32 pos[2];
+	float pos[2];
 
 	pos[0] = left + camGetScreenLeft();
 	pos[1] = top + camGetScreenTop() + envGetCurrent()->clouds_height;
@@ -63,13 +71,13 @@ void skyGetWorldPosFromScreenPos(f32 left, f32 top, struct coord *dst)
 	mtx4RotateVecInPlace(mtx, dst);
 }
 
-bool skyIsScreenCornerInSky(struct coord *corner3dpos, struct coord *dstpos, f32 *dstfrac)
+bool skyIsScreenCornerInSky(struct coord *corner3dpos, struct coord *dstpos, float *dstfrac)
 {
 	struct coord *campos = &g_Vars.currentplayer->cam_pos;
-	f32 f12 = 2.0f * corner3dpos->y / sqrtf(corner3dpos->f[0] * corner3dpos->f[0] + corner3dpos->f[2] * corner3dpos->f[2] + 0.0001f);
-	f32 sp2c;
-	f32 f12_2;
-	f32 sp24;
+	float f12 = 2.0f * corner3dpos->y / sqrtf(corner3dpos->f[0] * corner3dpos->f[0] + corner3dpos->f[2] * corner3dpos->f[2] + 0.0001f);
+	float sp2c;
+	float f12_2;
+	float sp24;
 
 	if (f12 > 1.0f) {
 		f12 = 1.0f;
@@ -101,13 +109,13 @@ bool skyIsScreenCornerInSky(struct coord *corner3dpos, struct coord *dstpos, f32
 	return false;
 }
 
-bool skyIsCornerInWater(struct coord *corner3dpos, struct coord *dstpos, f32 *dstfrac)
+bool skyIsCornerInWater(struct coord *corner3dpos, struct coord *dstpos, float *dstfrac)
 {
 	struct coord *campos = &g_Vars.currentplayer->cam_pos;
-	f32 f12 = -2.0f * corner3dpos->y / sqrtf(corner3dpos->f[0] * corner3dpos->f[0] + corner3dpos->f[2] * corner3dpos->f[2] + 0.0001f);
-	f32 sp2c;
-	f32 f12_2;
-	f32 sp24;
+	float f12 = -2.0f * corner3dpos->y / sqrtf(corner3dpos->f[0] * corner3dpos->f[0] + corner3dpos->f[2] * corner3dpos->f[2] + 0.0001f);
+	float sp2c;
+	float f12_2;
+	float sp24;
 
 	if (f12 > 1.0f) {
 		f12 = 1.0f;
@@ -145,14 +153,14 @@ bool skyIsCornerInWater(struct coord *corner3dpos, struct coord *dstpos, f32 *ds
  */
 void skyCalculateEdgeVertex(struct coord *base, struct coord *ref, struct coord *out)
 {
-	f32 mult = base->y / (base->y - ref->y);
+	float mult = base->y / (base->y - ref->y);
 
 	out->x = (ref->x - base->x) * mult + base->x;
 	out->y = 0;
 	out->z = (ref->z - base->z) * mult + base->z;
 }
 
-f32 skyClamp(f32 value, f32 min, f32 max)
+float skyClamp(float value, float min, float max)
 {
 	if (value < min) {
 		return min;
@@ -165,18 +173,18 @@ f32 skyClamp(f32 value, f32 min, f32 max)
 	return value;
 }
 
-f32 skyRound(f32 value)
+float skyRound(float value)
 {
-	return (s32)(value + 0.5f);
+	return (int)(value + 0.5f);
 }
 
-void skyChooseCloudVtxColour(struct skyvtx3d *arg0, f32 arg1)
+void skyChooseCloudVtxColour(struct skyvtx3d *arg0, float arg1)
 {
 	struct environment *env = envGetCurrent();
-	f32 scale = 1.0f - arg1;
-	f32 r = env->sky_r;
-	f32 g = env->sky_g;
-	f32 b = env->sky_b;
+	float scale = 1.0f - arg1;
+	float r = env->sky_r;
+	float g = env->sky_g;
+	float b = env->sky_b;
 
 	arg0->r = r + env->clouds_r * (1.0f - r * (1.0f / 255.0f)) * scale;
 	arg0->g = g + env->clouds_g * (1.0f - g * (1.0f / 255.0f)) * scale;
@@ -189,13 +197,13 @@ void skyChooseCloudVtxColour(struct skyvtx3d *arg0, f32 arg1)
 	arg0->a = 0xff;
 }
 
-void skyChooseWaterVtxColour(struct skyvtx3d *arg0, f32 arg1)
+void skyChooseWaterVtxColour(struct skyvtx3d *arg0, float arg1)
 {
 	struct environment *env = envGetCurrent();
-	f32 scale = 1.0f - arg1;
-	f32 r = env->sky_r;
-	f32 g = env->sky_g;
-	f32 b = env->sky_b;
+	float scale = 1.0f - arg1;
+	float r = env->sky_r;
+	float g = env->sky_g;
+	float b = env->sky_b;
 
 	arg0->r = r + env->water_r * (1.0f - r * (1.0f / 255.0f)) * scale;
 	arg0->g = g + env->water_g * (1.0f - g * (1.0f / 255.0f)) * scale;
@@ -229,35 +237,35 @@ Gfx *skyRender(Gfx *gdl)
 	struct coord sp5a8;
 	struct coord sp59c;
 	struct coord sp590;
-	f32 sp58c;
-	f32 sp588;
-	f32 sp584;
-	f32 sp580;
-	f32 sp57c;
-	f32 sp578;
-	f32 sp574;
-	f32 sp570;
-	f32 sp56c;
-	f32 sp568;
-	f32 sp564;
-	f32 sp560;
-	f32 sp55c;
-	f32 sp558;
-	f32 sp554;
-	f32 sp550;
-	f32 sp54c;
-	f32 sp548;
-	s32 numvertices;
-	s32 j;
-	s32 cornerstate;
-	s32 tlcornerissky;
-	s32 trcornerissky;
-	s32 blcornerissky;
-	s32 brcornerissky;
+	float sp58c;
+	float sp588;
+	float sp584;
+	float sp580;
+	float sp57c;
+	float sp578;
+	float sp574;
+	float sp570;
+	float sp56c;
+	float sp568;
+	float sp564;
+	float sp560;
+	float sp55c;
+	float sp558;
+	float sp554;
+	float sp550;
+	float sp54c;
+	float sp548;
+	int numvertices;
+	int j;
+	int cornerstate;
+	int tlcornerissky;
+	int trcornerissky;
+	int blcornerissky;
+	int brcornerissky;
 	struct skyvtx3d skyvertices3d[5];
 	struct skyvtx3d watervertices3d[5];
-	f32 tmp;
-	f32 scale;
+	float tmp;
+	float scale;
 	bool sp430;
 	struct environment *env;
 
@@ -306,17 +314,10 @@ Gfx *skyRender(Gfx *gdl)
 
 	if (&tl3dpos);
 
-#ifdef PLATFORM_N64
-	skyGetWorldPosFromScreenPos(0.0f, 0.0f, &tl3dpos);
-	skyGetWorldPosFromScreenPos(camGetScreenWidth() - 0.1f, 0.0f, &tr3dpos);
-	skyGetWorldPosFromScreenPos(0.0f, camGetScreenHeight() - 0.1f, &bl3dpos);
-	skyGetWorldPosFromScreenPos(camGetScreenWidth() - 0.1f, camGetScreenHeight() - 0.1f, &br3dpos);
-#else
 	skyGetWorldPosFromScreenPos(-4.0f, -4.0f, &tl3dpos);
 	skyGetWorldPosFromScreenPos(camGetScreenWidth() + 4.0f, -4.0f, &tr3dpos);
 	skyGetWorldPosFromScreenPos(-4.0f, camGetScreenHeight() + 4.0f, &bl3dpos);
 	skyGetWorldPosFromScreenPos(camGetScreenWidth() + 4.0f, camGetScreenHeight() + 4.0f, &br3dpos);
-#endif
 
 	tlcornerissky = skyIsScreenCornerInSky(&tl3dpos, &sp644, &sp58c);
 	trcornerissky = skyIsScreenCornerInSky(&tr3dpos, &sp638, &sp588);
@@ -777,7 +778,7 @@ Gfx *skyRender(Gfx *gdl)
 		Mtxf sp3cc;
 		Mtxf sp38c;
 		struct skyvtx2d watervertices2d[5];
-		s32 i;
+		int i;
 
 		mtx4MultMtx4(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp3cc);
 		guScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
@@ -796,10 +797,10 @@ Gfx *skyRender(Gfx *gdl)
 		}
 
 		if (!env->water_enabled) {
-			f32 x1 = 1279.0f;
-			f32 y1 = 959.0f;
-			f32 x2 = 0.0f;
-			f32 y2 = 0.0f;
+			float x1 = 1279.0f;
+			float y1 = 959.0f;
+			float x2 = 0.0f;
+			float y2 = 0.0f;
 
 			for (j = 0; j < numvertices; j++) {
 				if (watervertices2d[j].x < x1) {
@@ -823,7 +824,7 @@ Gfx *skyRender(Gfx *gdl)
 			gDPSetCycleType(gdl++, G_CYC_FILL);
 			gDPSetRenderMode(gdl++, G_RM_NOOP, G_RM_NOOP2);
 			gDPSetTexturePersp(gdl++, G_TP_NONE);
-			gDPFillRectangle(gdl++, (s32)(x1 * 0.25f), (s32)(y1 * 0.25f), (s32)(x2 * 0.25f), (s32)(y2 * 0.25f));
+			gDPFillRectangle(gdl++, (int)(x1 * 0.25f), (int)(y1 * 0.25f), (int)(x2 * 0.25f), (int)(y2 * 0.25f));
 			gDPPipeSync(gdl++);
 			gDPSetTexturePersp(gdl++, G_TP_PERSP);
 		} else {
@@ -833,28 +834,6 @@ Gfx *skyRender(Gfx *gdl)
 
 			gDPSetRenderMode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 
-#ifdef PLATFORM_N64
-			if (numvertices == 4) {
-				gdl = skyRenderTri(gdl, &watervertices2d[0], &watervertices2d[1], &watervertices2d[3], 130.0f, true);
-
-				if (sp430) {
-					watervertices2d[0].y++;
-					watervertices2d[1].y++;
-					watervertices2d[2].y++;
-					watervertices2d[3].y++;
-				}
-
-				gdl = skyRenderTri(gdl, &watervertices2d[3], &watervertices2d[2], &watervertices2d[0], 130.0f, true);
-			} else if (numvertices == 5) {
-				// 3 corners are on the ground
-				gdl = skyRenderTri(gdl, &watervertices2d[0], &watervertices2d[1], &watervertices2d[2], 130.0f, true);
-				gdl = skyRenderTri(gdl, &watervertices2d[0], &watervertices2d[2], &watervertices2d[3], 130.0f, true);
-				gdl = skyRenderTri(gdl, &watervertices2d[0], &watervertices2d[3], &watervertices2d[4], 130.0f, true);
-			} else if (numvertices == 3) {
-				// 1 corner is on the ground
-				gdl = skyRenderTri(gdl, &watervertices2d[0], &watervertices2d[1], &watervertices2d[2], 130.0f, true);
-			}
-#else
 			Vtx *verts = gfxAllocateVertices(numvertices);
 			Col *cols = gfxAllocateColours(numvertices);
 			Mtxf *mtx = gfxAllocateMatrix();
@@ -866,7 +845,7 @@ Gfx *skyRender(Gfx *gdl)
 			gSPColor(gdl++, (uintptr_t)(cols), numvertices);
 			gSPVertex(gdl++, (uintptr_t)(verts), numvertices, 0);
 
-			for (s32 i = 0; i < numvertices; ++i) {
+			for (int i = 0; i < numvertices; ++i) {
 				verts[i].x = watervertices3d[i].x;
 				verts[i].y = watervertices3d[i].y;
 				verts[i].z = watervertices3d[i].z;
@@ -889,7 +868,6 @@ Gfx *skyRender(Gfx *gdl)
 
 			gSPPopMatrix(gdl++, G_MTX_MODELVIEW);
 			gSPClearExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
-#endif
 		}
 	}
 
@@ -1281,7 +1259,7 @@ Gfx *skyRender(Gfx *gdl)
 	Mtxf sp1ec;
 	Mtxf sp1ac;
 	struct skyvtx2d skyvertices2d[5];
-	s32 i;
+	int i;
 
 	mtx4MultMtx4(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp1ec);
 	guScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
@@ -1305,7 +1283,7 @@ Gfx *skyRender(Gfx *gdl)
 	gSPColor(gdl++, (uintptr_t)(cols), numvertices);
 	gSPVertex(gdl++, (uintptr_t)(verts), numvertices, 0);
 
-	for (s32 i = 0; i < numvertices; ++i) {
+	for (int i = 0; i < numvertices; ++i) {
 		verts[i].x = skyvertices3d[i].x;
 		verts[i].y = skyvertices3d[i].y;
 		verts[i].z = skyvertices3d[i].z;
@@ -1335,18 +1313,18 @@ Gfx *skyRender(Gfx *gdl)
 /**
  * Convert a 3D vertex to 2D.
  */
-void skyConvertVertex(struct skyvtx3d *srcvtx, Mtxf *mtx, u16 arg2, f32 arg3, f32 arg4, struct skyvtx2d *dstvtx)
+void skyConvertVertex(struct skyvtx3d *srcvtx, Mtxf *mtx, uint16_t arg2, float arg3, float arg4, struct skyvtx2d *dstvtx)
 {
-	f32 sp68[4];
-	f32 t;
-	f32 s;
-	f32 f22;
-	f32 f0;
-	f32 sp48[4];
-	f32 sp38[4];
-	f32 sp34;
-	f32 sp30;
-	f32 mult;
+	float sp68[4];
+	float t;
+	float s;
+	float f22;
+	float f0;
+	float sp48[4];
+	float sp38[4];
+	float sp34;
+	float sp30;
+	float mult;
 
 	mult = arg2 / 65536.0f;
 
@@ -1415,129 +1393,129 @@ void skyConvertVertex(struct skyvtx3d *srcvtx, Mtxf *mtx, u16 arg2, f32 arg3, f3
 
 bool skyVerticesAreSame(struct skyvtx2d *vtx0, struct skyvtx2d *vtx1)
 {
-	f32 xdiff = vtx0->x - vtx1->x;
-	f32 ydiff = vtx0->y - vtx1->y;
+	float xdiff = vtx0->x - vtx1->x;
+	float ydiff = vtx0->y - vtx1->y;
 
 	return sqrtf(xdiff * xdiff + ydiff * ydiff) < 1.0f ? true : false;
 }
 
-Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct skyvtx2d *vtx2, f32 arg4, bool textured)
+Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct skyvtx2d *vtx2, float arg4, bool textured)
 {
 	struct skyvtx2d *svtx0;
 	struct skyvtx2d *svtx1;
 	struct skyvtx2d *svtx2;
-	s32 i;
-	f32 xdiff1;
-	f32 ydiff1;
-	f32 xdiff2;
-	f32 ydiff2;
-	f32 xdiff3;
-	f32 ydiff3;
+	int i;
+	float xdiff1;
+	float ydiff1;
+	float xdiff2;
+	float ydiff2;
+	float xdiff3;
+	float ydiff3;
 
-	f32 svtx0y[1];
-	f32 svtx0x[1];
-	f32 svtx1y[1];
-	f32 svtx1x[1];
-	f32 svtx2y[1];
-	f32 svtx2x[1];
+	float svtx0y[1];
+	float svtx0x[1];
+	float svtx1y[1];
+	float svtx1x[1];
+	float svtx2y[1];
+	float svtx2x[1];
 
-	f32 sp444;
-	f32 sp440;
+	float sp444;
+	float sp440;
 
-	f32 sp43c[1];
-	f32 sp438[1];
-	f32 sp434[1];
-	f32 sp430[1];
-	f32 sp42c[1];
-	f32 sp428[1];
-	f32 sp424[1];
-	f32 sp420[1];
+	float sp43c[1];
+	float sp438[1];
+	float sp434[1];
+	float sp430[1];
+	float sp42c[1];
+	float sp428[1];
+	float sp424[1];
+	float sp420[1];
 
-	f32 sp41c;
-	f32 sp418;
-	f32 sp414;
-	f32 sp410;
-	f32 sp40c;
-	f32 sp408;
-	f32 sp404;
-	f32 sp400;
+	float sp41c;
+	float sp418;
+	float sp414;
+	float sp410;
+	float sp40c;
+	float sp408;
+	float sp404;
+	float sp400;
 
-	f32 sp3fc[1];
-	f32 sp3f8[1];
-	f32 sp3f4[1];
-	f32 sp3f0[1];
-	f32 sp3ec[1];
-	f32 sp3e8[1];
-	f32 sp3e4[1];
-	f32 sp3e0[1];
+	float sp3fc[1];
+	float sp3f8[1];
+	float sp3f4[1];
+	float sp3f0[1];
+	float sp3ec[1];
+	float sp3e8[1];
+	float sp3e4[1];
+	float sp3e0[1];
 
-	f32 sp3dc[1];
-	f32 sp3d8[1];
-	f32 sp3d4[1];
-	f32 sp3d0[1];
-	f32 sp3cc[1];
-	f32 sp3c8[1];
-	f32 sp3c4[1];
-	f32 sp3c0[1];
+	float sp3dc[1];
+	float sp3d8[1];
+	float sp3d4[1];
+	float sp3d0[1];
+	float sp3cc[1];
+	float sp3c8[1];
+	float sp3c4[1];
+	float sp3c0[1];
 
-	f32 sp3bc[1];
-	f32 sp3b8[1];
-	f32 sp3b4[1];
-	f32 sp3b0[1];
-	f32 sp3ac[1];
-	f32 sp3a8[1];
-	f32 sp3a4[1];
-	f32 sp3a0[1];
-	f32 sp39c[1];
-	f32 sp398[1];
-	f32 sp394[1];
-	f32 sp390[1];
-	f32 sp38c[1];
-	f32 sp388[1];
-	f32 sp384[1];
-	f32 sp380[1];
-	f32 sp37c;
-	f32 sp378;
-	f32 sp374[1];
-	f32 sp370[1];
-	f32 sp36c[1];
-	f32 sp368;
-	f32 sp364[1];
-	f32 sp360[1];
-	f32 sp35c[1];
-	f32 sp358[1];
-	f32 sp354[1];
-	f32 sp350[1];
-	f32 sp34c[1];
-	f32 sp348[1];
-	f32 sp344[1];
-	f32 sp340[1];
-	f32 sp33c[1];
-	f32 sp338[1];
-	f32 sp334[1];
-	f32 sp330[1];
-	f32 sp310[8];
-	f32 sp2f0[8];
-	f32 sp2d0[8];
-	f32 sp2b0[8];
-	f32 sp290[8];
-	f32 sp270[8];
-	f32 sp250[8];
-	f32 sp230[8];
-	f32 sp210[8];
-	f32 f2;
-	f32 sp208[1];
-	f32 sp204[1];
-	f32 sp200[1];
-	f32 sp1d0[8];
-	f32 sp1b0[8];
-	f32 sp1a8[1];
-	f32 sp1a4[1];
-	f32 sp1a0[1];
+	float sp3bc[1];
+	float sp3b8[1];
+	float sp3b4[1];
+	float sp3b0[1];
+	float sp3ac[1];
+	float sp3a8[1];
+	float sp3a4[1];
+	float sp3a0[1];
+	float sp39c[1];
+	float sp398[1];
+	float sp394[1];
+	float sp390[1];
+	float sp38c[1];
+	float sp388[1];
+	float sp384[1];
+	float sp380[1];
+	float sp37c;
+	float sp378;
+	float sp374[1];
+	float sp370[1];
+	float sp36c[1];
+	float sp368;
+	float sp364[1];
+	float sp360[1];
+	float sp35c[1];
+	float sp358[1];
+	float sp354[1];
+	float sp350[1];
+	float sp34c[1];
+	float sp348[1];
+	float sp344[1];
+	float sp340[1];
+	float sp33c[1];
+	float sp338[1];
+	float sp334[1];
+	float sp330[1];
+	float sp310[8];
+	float sp2f0[8];
+	float sp2d0[8];
+	float sp2b0[8];
+	float sp290[8];
+	float sp270[8];
+	float sp250[8];
+	float sp230[8];
+	float sp210[8];
+	float f2;
+	float sp208[1];
+	float sp204[1];
+	float sp200[1];
+	float sp1d0[8];
+	float sp1b0[8];
+	float sp1a8[1];
+	float sp1a4[1];
+	float sp1a0[1];
 	struct skyvtx2d *swap1;
 	struct skyvtx2d *swap2;
 	struct skyvtx2d *swap3;
-	f32 sp190[1];
+	float sp190[1];
 
 	if (skyVerticesAreSame(vtx0, vtx1) || skyVerticesAreSame(vtx1, vtx2) || skyVerticesAreSame(vtx2, vtx0)) {
 		return gdl;
@@ -1655,14 +1633,14 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 	sp394[0] = skyClamp(sp394[0], -1878.0f, 1877.0f);
 
 	f2 = (svtx0->y * 0.25f);
-	sp37c = f2 - (s32) f2;
+	sp37c = f2 - (int) f2;
 	sp408 = sp428[0] - skyRound(sp38c[0] * 8192.0f) * (1.0f / 8192.0f) * sp37c;
 	sp410 = sp430[0] - skyRound(sp394[0] * 8192.0f) * (1.0f / 8192.0f) * sp37c;
 
 	gImmp1(gdl++, G_RDPHALF_1, (textured ? (G_TRI_SHADE_TXTR << 24) : (G_TRI_FILL << 24))
 			| (sp444 < 0.0f ? 0x00800000 : 0)
-			| (u32) svtx2->y);
-	gImmp1(gdl++, G_RDPHALF_CONT, (s32) svtx1->y << 16 | (s32) svtx0->y);
+			| (uint32_t) svtx2->y);
+	gImmp1(gdl++, G_RDPHALF_CONT, (int) svtx1->y << 16 | (int) svtx0->y);
 
 	gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(svtx1->x * 0.25f));
 	gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(sp384[0]));
@@ -1707,23 +1685,23 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 	sp354[0] = sp364[0] * svtx2->t;
 	sp358[0] = sp364[0] * 32767.0f;
 
-	sp330[0] = SKYABS(sp338[0]);
-	sp334[0] = SKYABS(sp33c[0]);
+	sp330[0] = fabsf(sp338[0]);
+	sp334[0] = fabsf(sp33c[0]);
 
-	if (sp330[0] < SKYABS(sp344[0])) {
-		sp330[0] = SKYABS(sp344[0]);
+	if (sp330[0] < fabsf(sp344[0])) {
+		sp330[0] = fabsf(sp344[0]);
 	}
 
-	if (sp334[0] < SKYABS(sp348[0])) {
-		sp334[0] = SKYABS(sp348[0]);
+	if (sp334[0] < fabsf(sp348[0])) {
+		sp334[0] = fabsf(sp348[0]);
 	}
 
-	if (sp330[0] < SKYABS(sp350[0])) {
-		sp330[0] = SKYABS(sp350[0]);
+	if (sp330[0] < fabsf(sp350[0])) {
+		sp330[0] = fabsf(sp350[0]);
 	}
 
-	if (sp334[0] < SKYABS(sp354[0])) {
-		sp334[0] = SKYABS(sp354[0]);
+	if (sp334[0] < fabsf(sp354[0])) {
+		sp334[0] = fabsf(sp354[0]);
 	}
 
 	sp310[0] = svtx0->r + 0.5f;
@@ -1764,22 +1742,22 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 	}
 
 	{
-		u32 sp168;
-		u32 sp164;
-		u32 sp160;
-		u32 sp15c;
-		u32 sp158;
-		u32 sp154;
-		u32 sp150;
-		u32 sp14c;
-		u32 sp148;
-		u32 sp144;
-		u32 sp140;
-		u32 sp13c;
-		u32 sp138;
-		u32 sp134;
-		u32 sp130;
-		u32 sp12c;
+		uint32_t sp168;
+		uint32_t sp164;
+		uint32_t sp160;
+		uint32_t sp15c;
+		uint32_t sp158;
+		uint32_t sp154;
+		uint32_t sp150;
+		uint32_t sp14c;
+		uint32_t sp148;
+		uint32_t sp144;
+		uint32_t sp140;
+		uint32_t sp13c;
+		uint32_t sp138;
+		uint32_t sp134;
+		uint32_t sp130;
+		uint32_t sp12c;
 
 		sp168 = FloatToUInt32(sp210[0]);
 		sp164 = FloatToUInt32(sp210[1]);
@@ -1831,8 +1809,8 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 	sp208[0] = sp368 * (1.0f / 32.0f);
 
 	for (i = 0; i < 8; i++) {
-		sp1d0[i] = SKYABS(sp290[i]) * (1.0f / 32.0f);
-		sp1b0[i] = SKYABS(sp2b0[i]) * (1.0f / 32.0f);
+		sp1d0[i] = fabsf(sp290[i]) * (1.0f / 32.0f);
+		sp1b0[i] = fabsf(sp2b0[i]) * (1.0f / 32.0f);
 	}
 
 	sp1a0[0] = sp200[0] + (2.0f * sp1d0[4]) + sp1b0[4];
@@ -1856,22 +1834,22 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 	}
 
 	{
-		u32 spe8;
-		u32 spe4;
-		u32 spe0;
-		u32 spdc;
-		u32 spd8;
-		u32 spd4;
-		u32 spd0;
-		u32 spcc;
-		u32 spc8;
-		u32 spc4;
-		u32 spc0;
-		u32 spbc;
-		u32 spb8;
-		u32 spb4;
-		u32 spb0;
-		u32 spac;
+		uint32_t spe8;
+		uint32_t spe4;
+		uint32_t spe0;
+		uint32_t spdc;
+		uint32_t spd8;
+		uint32_t spd4;
+		uint32_t spd0;
+		uint32_t spcc;
+		uint32_t spc8;
+		uint32_t spc4;
+		uint32_t spc0;
+		uint32_t spbc;
+		uint32_t spb8;
+		uint32_t spb4;
+		uint32_t spb0;
+		uint32_t spac;
 
 		spe8 = FloatToUInt32(sp210[4] * sp190[0]);
 		spe4 = FloatToUInt32(sp210[5] * sp190[0]);
@@ -1925,113 +1903,113 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
  * Render the sky when all four corners of the viewport are above the horizon.
  * ie. The sky takes up the full screen.
  */
-Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct skyvtx2d *vtx2, struct skyvtx2d *vtx3, f32 arg5)
+Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct skyvtx2d *vtx2, struct skyvtx2d *vtx3, float arg5)
 {
 	struct skyvtx2d *sp4cc;
 	struct skyvtx2d *sp4c8;
 	struct skyvtx2d *sp4c4;
-	s32 i;
-	f32 sp4b8;
-	f32 sp4b4;
-	f32 sp4b0;
-	f32 sp4ac;
-	f32 sp4a8;
-	f32 sp4a4;
-	f32 sp4a0[1];
-	f32 sp49c[1];
-	f32 sp498[1];
-	f32 sp494[1];
-	f32 sp490[1];
-	f32 sp48c[1];
-	f32 sp488;
-	f32 sp484;
-	f32 sp480[1];
-	f32 sp47c[1];
-	f32 sp478[1];
-	f32 sp474[1];
-	f32 sp470[1];
-	f32 sp46c[1];
-	f32 sp468[1];
-	f32 sp464[1];
+	int i;
+	float sp4b8;
+	float sp4b4;
+	float sp4b0;
+	float sp4ac;
+	float sp4a8;
+	float sp4a4;
+	float sp4a0[1];
+	float sp49c[1];
+	float sp498[1];
+	float sp494[1];
+	float sp490[1];
+	float sp48c[1];
+	float sp488;
+	float sp484;
+	float sp480[1];
+	float sp47c[1];
+	float sp478[1];
+	float sp474[1];
+	float sp470[1];
+	float sp46c[1];
+	float sp468[1];
+	float sp464[1];
 	struct skyvtx2d *swap1;
 	struct skyvtx2d *swap2;
 	struct skyvtx2d *swap3;
-	f32 sp454[1];
-	f32 svtx2y[1];
-	f32 sp440[1];
-	f32 sp43c[1];
-	f32 sp438[1];
-	f32 sp434[1];
-	f32 sp430[1];
-	f32 sp42c[1];
-	f32 sp428[1];
-	f32 sp424[1];
-	f32 sp420[1];
-	f32 sp41c[1];
-	f32 sp418[1];
-	f32 sp414[1];
-	f32 sp410[1];
-	f32 sp40c[1];
-	f32 sp408[1];
-	f32 sp404[1];
-	f32 sp400[1];
-	f32 sp3fc[1];
-	f32 sp3f8[1];
-	f32 sp3f4[1];
-	f32 sp3f0[1];
-	f32 sp3ec[1];
-	f32 sp3e8[1];
-	f32 sp3e4[1];
-	f32 sp3e0[1];
-	f32 sp3dc[1];
-	f32 sp3d8[1];
-	f32 sp3d4[1];
-	f32 sp3d0[1];
-	f32 sp3cc[1];
-	f32 sp3c8[1];
-	f32 sp3c4[1];
-	f32 sp3c0;
-	f32 sp3bc[1];
-	f32 sp3b8[1];
-	f32 sp3b4[1];
-	f32 sp3b0[1];
-	f32 sp3ac;
-	f32 sp3a8[1];
-	f32 sp3a4[1];
-	f32 sp3a0[1];
-	f32 sp39c[1];
-	f32 sp398[1];
-	f32 sp394[1];
-	f32 sp390[1];
-	f32 sp38c[1];
-	f32 sp388[1];
-	f32 sp384[1];
-	f32 sp380[1];
-	f32 sp37c[1];
-	f32 sp378[1];
-	f32 sp374[1];
-	f32 sp370[1];
-	f32 sp36c[1];
-	f32 sp368[1];
-	f32 sp364[1];
-	f32 sp354[4];
-	f32 sp334[8];
-	f32 sp314[8];
-	f32 sp2f4[8];
-	f32 sp2d4[8];
-	f32 sp2b4[8];
-	f32 sp294[8];
-	f32 sp274[8];
-	f32 sp254[8];
-	f32 sp23c[1];
-	f32 sp238[1];
-	f32 sp234[1];
-	f32 sp214[8];
-	f32 sp1f4[8];
-	f32 sp1dc[1];
-	f32 sp1d8[1];
-	f32 sp1d4[1];
-	f32 sp1c4[1];
+	float sp454[1];
+	float svtx2y[1];
+	float sp440[1];
+	float sp43c[1];
+	float sp438[1];
+	float sp434[1];
+	float sp430[1];
+	float sp42c[1];
+	float sp428[1];
+	float sp424[1];
+	float sp420[1];
+	float sp41c[1];
+	float sp418[1];
+	float sp414[1];
+	float sp410[1];
+	float sp40c[1];
+	float sp408[1];
+	float sp404[1];
+	float sp400[1];
+	float sp3fc[1];
+	float sp3f8[1];
+	float sp3f4[1];
+	float sp3f0[1];
+	float sp3ec[1];
+	float sp3e8[1];
+	float sp3e4[1];
+	float sp3e0[1];
+	float sp3dc[1];
+	float sp3d8[1];
+	float sp3d4[1];
+	float sp3d0[1];
+	float sp3cc[1];
+	float sp3c8[1];
+	float sp3c4[1];
+	float sp3c0;
+	float sp3bc[1];
+	float sp3b8[1];
+	float sp3b4[1];
+	float sp3b0[1];
+	float sp3ac;
+	float sp3a8[1];
+	float sp3a4[1];
+	float sp3a0[1];
+	float sp39c[1];
+	float sp398[1];
+	float sp394[1];
+	float sp390[1];
+	float sp38c[1];
+	float sp388[1];
+	float sp384[1];
+	float sp380[1];
+	float sp37c[1];
+	float sp378[1];
+	float sp374[1];
+	float sp370[1];
+	float sp36c[1];
+	float sp368[1];
+	float sp364[1];
+	float sp354[4];
+	float sp334[8];
+	float sp314[8];
+	float sp2f4[8];
+	float sp2d4[8];
+	float sp2b4[8];
+	float sp294[8];
+	float sp274[8];
+	float sp254[8];
+	float sp23c[1];
+	float sp238[1];
+	float sp234[1];
+	float sp214[8];
+	float sp1f4[8];
+	float sp1dc[1];
+	float sp1d8[1];
+	float sp1d4[1];
+	float sp1c4[1];
 
 	if (skyVerticesAreSame(vtx0, vtx1)
 			|| skyVerticesAreSame(vtx1, vtx2)
@@ -2152,7 +2130,7 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 	sp454[0] = sp474[0];
 
 	if (vtx0->x < vtx1->x) {
-		f32 sp1bc;
+		float sp1bc;
 
 		if (vtx2->y - vtx3->y < 1.0f) {
 			sp1bc = -1878.0f;
@@ -2160,8 +2138,8 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 			sp1bc = -(camGetScreenWidth() - 0.25f) / ((vtx2->y - vtx3->y) / 4.0f);
 		}
 
-		gImmp1(gdl++, G_RDPHALF_1, (G_TRI_SHADE_TXTR << 24) | 0x00800000 | (u32) vtx2->y);
-		gImmp1(gdl++, G_RDPHALF_CONT, (s32) vtx3->y << 16 | (s32) vtx0->y);
+		gImmp1(gdl++, G_RDPHALF_1, (G_TRI_SHADE_TXTR << 24) | 0x00800000 | (uint32_t) vtx2->y);
+		gImmp1(gdl++, G_RDPHALF_CONT, (int) vtx3->y << 16 | (int) vtx0->y);
 
 		gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(camGetScreenLeft() + camGetScreenWidth() - 0.25f));
 		gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(sp1bc));
@@ -2172,7 +2150,7 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 		gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(camGetScreenLeft() + camGetScreenWidth() - 0.25f));
 		gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(0.0f));
 	} else {
-		f32 sp198;
+		float sp198;
 
 		if (vtx2->y - vtx3->y < 1.0f) {
 			sp198 = 1877.0f;
@@ -2180,8 +2158,8 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 			sp198 = (camGetScreenWidth() - 0.25f) / ((vtx2->y - vtx3->y) / 4.0f);
 		}
 
-		gImmp1(gdl++, G_RDPHALF_1, 0xce000000 | (u32) vtx2->y);
-		gImmp1(gdl++, G_RDPHALF_CONT, (s32) vtx3->y << 16 | (s32) vtx0->y);
+		gImmp1(gdl++, G_RDPHALF_1, 0xce000000 | (uint32_t) vtx2->y);
+		gImmp1(gdl++, G_RDPHALF_CONT, (int) vtx3->y << 16 | (int) vtx0->y);
 
 		gImmp1(gdl++, G_RDPHALF_1, FloatToUInt32(camGetScreenLeft()));
 		gImmp1(gdl++, G_RDPHALF_CONT, FloatToUInt32(sp198));
@@ -2232,31 +2210,31 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 	sp394[0] = sp3a8[0] * vtx3->t;
 	sp398[0] = sp3a8[0] * 32767.0f;
 
-	sp364[0] = SKYABS(sp36c[0]);
-	sp368[0] = SKYABS(sp370[0]);
+	sp364[0] = fabsf(sp36c[0]);
+	sp368[0] = fabsf(sp370[0]);
 
-	if (sp364[0] < SKYABS(sp378[0])) {
-		sp364[0] = SKYABS(sp378[0]);
+	if (sp364[0] < fabsf(sp378[0])) {
+		sp364[0] = fabsf(sp378[0]);
 	}
 
-	if (sp368[0] < SKYABS(sp37c[0])) {
-		sp368[0] = SKYABS(sp37c[0]);
+	if (sp368[0] < fabsf(sp37c[0])) {
+		sp368[0] = fabsf(sp37c[0]);
 	}
 
-	if (sp364[0] < SKYABS(sp384[0])) {
-		sp364[0] = SKYABS(sp384[0]);
+	if (sp364[0] < fabsf(sp384[0])) {
+		sp364[0] = fabsf(sp384[0]);
 	}
 
-	if (sp368[0] < SKYABS(sp388[0])) {
-		sp368[0] = SKYABS(sp388[0]);
+	if (sp368[0] < fabsf(sp388[0])) {
+		sp368[0] = fabsf(sp388[0]);
 	}
 
-	if (sp364[0] < SKYABS(sp390[0])) {
-		sp364[0] = SKYABS(sp390[0]);
+	if (sp364[0] < fabsf(sp390[0])) {
+		sp364[0] = fabsf(sp390[0]);
 	}
 
-	if (sp368[0] < SKYABS(sp394[0])) {
-		sp368[0] = SKYABS(sp394[0]);
+	if (sp368[0] < fabsf(sp394[0])) {
+		sp368[0] = fabsf(sp394[0]);
 	}
 
 	sp354[0] = sp36c[0]; sp354[1] = sp370[0]; sp354[2] = sp374[0];
@@ -2282,31 +2260,31 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 	}
 
 	{
-		f32 mult = vtx3->y / vtx2->y;
+		float mult = vtx3->y / vtx2->y;
 
-		f32 sp170 = vtx3->r + ((vtx0->r - vtx2->r) * mult);
-		f32 sp16c = vtx3->g + ((vtx0->g - vtx2->g) * mult);
-		f32 sp168 = vtx3->b + ((vtx0->b - vtx2->b) * mult);
-		f32 sp164 = vtx3->a + ((vtx0->a - vtx2->a) * mult);
+		float sp170 = vtx3->r + ((vtx0->r - vtx2->r) * mult);
+		float sp16c = vtx3->g + ((vtx0->g - vtx2->g) * mult);
+		float sp168 = vtx3->b + ((vtx0->b - vtx2->b) * mult);
+		float sp164 = vtx3->a + ((vtx0->a - vtx2->a) * mult);
 
-		u32 sp160 = vtx0->r * 65536.0f;
-		u32 sp15c = vtx0->g * 65536.0f;
-		u32 sp158 = vtx0->b * 65536.0f;
-		u32 sp154 = vtx0->a * 65536.0f;
+		uint32_t sp160 = vtx0->r * 65536.0f;
+		uint32_t sp15c = vtx0->g * 65536.0f;
+		uint32_t sp158 = vtx0->b * 65536.0f;
+		uint32_t sp154 = vtx0->a * 65536.0f;
 
-		u32 sp150 = FloatToUInt32((sp170 - vtx0->r) / ((vtx1->x - vtx0->x) * 0.25f));
-		u32 sp14c = FloatToUInt32((sp16c - vtx0->g) / ((vtx1->x - vtx0->x) * 0.25f));
-		u32 sp148 = FloatToUInt32((sp168 - vtx0->b) / ((vtx1->x - vtx0->x) * 0.25f));
-		u32 sp144 = FloatToUInt32((sp164 - vtx0->a) / ((vtx1->x - vtx0->x) * 0.25f));
+		uint32_t sp150 = FloatToUInt32((sp170 - vtx0->r) / ((vtx1->x - vtx0->x) * 0.25f));
+		uint32_t sp14c = FloatToUInt32((sp16c - vtx0->g) / ((vtx1->x - vtx0->x) * 0.25f));
+		uint32_t sp148 = FloatToUInt32((sp168 - vtx0->b) / ((vtx1->x - vtx0->x) * 0.25f));
+		uint32_t sp144 = FloatToUInt32((sp164 - vtx0->a) / ((vtx1->x - vtx0->x) * 0.25f));
 
-		u32 sp140;
-		u32 sp13c;
-		u32 sp138;
-		u32 sp134;
-		u32 sp130;
-		u32 sp12c;
-		u32 sp128;
-		u32 sp124;
+		uint32_t sp140;
+		uint32_t sp13c;
+		uint32_t sp138;
+		uint32_t sp134;
+		uint32_t sp130;
+		uint32_t sp12c;
+		uint32_t sp128;
+		uint32_t sp124;
 
 		sp140 = sp130 = FloatToUInt32((vtx2->r - vtx0->r) / ((vtx2->y - vtx0->y) * 0.25f));
 		sp13c = sp12c = FloatToUInt32((vtx2->g - vtx0->g) / ((vtx2->y - vtx0->y) * 0.25f));
@@ -2343,8 +2321,8 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 	sp23c[0] = sp3ac * (1.0f / 32.0f);
 
 	for (i = 0; i < 4; i++) {
-		sp214[i] = SKYABS(sp2d4[i]) * (1.0f / 32.0f);
-		sp1f4[i] = SKYABS(sp2f4[i]) * (1.0f / 32.0f);
+		sp214[i] = fabsf(sp2d4[i]) * (1.0f / 32.0f);
+		sp1f4[i] = fabsf(sp2f4[i]) * (1.0f / 32.0f);
 	}
 
 	sp1d4[0] = sp234[0] + (2.0f * sp214[0]) + sp1f4[0];
@@ -2368,22 +2346,22 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 	}
 
 	{
-		u32 spe0;
-		u32 spdc;
-		u32 spd8;
-		u32 spd4;
-		u32 spd0;
-		u32 spcc;
-		u32 spc8;
-		u32 spc4;
-		u32 spc0;
-		u32 spbc;
-		u32 spb8;
-		u32 spb4;
-		u32 spb0;
-		u32 spac;
-		u32 spa8;
-		u32 spa4;
+		uint32_t spe0;
+		uint32_t spdc;
+		uint32_t spd8;
+		uint32_t spd4;
+		uint32_t spd0;
+		uint32_t spcc;
+		uint32_t spc8;
+		uint32_t spc4;
+		uint32_t spc0;
+		uint32_t spbc;
+		uint32_t spb8;
+		uint32_t spb4;
+		uint32_t spb0;
+		uint32_t spac;
+		uint32_t spa8;
+		uint32_t spa4;
 
 		spe0 = FloatToUInt32(sp254[0] * sp1c4[0]);
 		spdc = FloatToUInt32(sp254[1] * sp1c4[0]);
@@ -2433,16 +2411,16 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 	return gdl;
 }
 
-void skyCreateSunArtifact(struct artifact *artifact, s32 x, s32 y)
+void skyCreateSunArtifact(struct artifact *artifact, int x, int y)
 {
-	s32 viewleft = viGetViewLeft();
-	s32 viewtop = viGetViewTop();
-	s32 viewwidth = viGetViewWidth();
-	s32 viewheight = viGetViewHeight();
+	int viewleft = viGetViewLeft();
+	int viewtop = viGetViewTop();
+	int viewwidth = viGetViewWidth();
+	int viewheight = viGetViewHeight();
 
 	if (x >= viewleft && x < viewleft + viewwidth && y >= viewtop && y < viewtop + viewheight) {
 #ifndef PLATFORM_N64
-		const s32 i = (artifact - schedGetWriteArtifacts()) >> 3;
+		const int i = (artifact - schedGetWriteArtifacts()) >> 3;
 		struct coord zero = { 0.f };
 		struct environment *env = envGetCurrent();
 		struct coord sunpos;
@@ -2451,17 +2429,17 @@ void skyCreateSunArtifact(struct artifact *artifact, s32 x, s32 y)
 		sunpos.z = env->suns[i].pos[2];
 		artifact->unk02 = artifactTestLos(&sunpos, &zero, x, y) * 0xfffc;
 #endif
-		artifact->unk08 = &g_ZbufPtr1[(s32)camGetScreenWidth() * y + x];
+		artifact->unk08 = &g_ZbufPtr1[(int)camGetScreenWidth() * y + x];
 		artifact->unk0c.u16_2 = x;
 		artifact->unk0c.u16_1 = y;
 		artifact->type = ARTIFACTTYPE_CIRCLE;
 	}
 }
 
-f32 skyGetArtifactGroupIntensityFrac(struct artifact *artifacts)
+float skyGetArtifactGroupIntensityFrac(struct artifact *artifacts)
 {
-	f32 sum = 0;
-	s32 i;
+	float sum = 0;
+	int i;
 
 	for (i = 0; i < 8; i++) {
 		if (artifacts[i].type == ARTIFACTTYPE_CIRCLE && artifacts[i].unk02 == 0xfffc) {
@@ -2476,24 +2454,24 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 {
 	Mtxf *sp16c;
 	Mtxf *sp168;
-	s16 viewleft;
-	s16 viewtop;
-	s16 viewwidth;
-	s16 viewheight;
-	f32 viewleftf;
-	f32 viewtopf;
-	f32 viewwidthf;
-	f32 viewheightf;
+	int16_t viewleft;
+	int16_t viewtop;
+	int16_t viewwidth;
+	int16_t viewheight;
+	float viewleftf;
+	float viewtopf;
+	float viewwidthf;
+	float viewheightf;
 	struct artifact *artifacts;
-	u8 colour[3];
+	uint8_t colour[3];
 	struct environment *env;
 	struct sun *sun;
-	s32 i;
-	f32 sp134[2];
-	f32 sp12c[2];
-	f32 sp124;
+	int i;
+	float sp134[2];
+	float sp12c[2];
+	float sp124;
 	bool onscreen;
-	f32 radius;
+	float radius;
 
 	sp16c = camGetWorldToScreenMtxf();
 	sp168 = camGetMtxF1754();
@@ -2544,13 +2522,13 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 							&& g_SunScreenYPositions[i] >= viewtopf
 							&& g_SunScreenYPositions[i] < viewtopf + viewheightf) {
 						// Sun's centre point is on-screen
-						f32 distfromedge;
-						f32 mindistfromedge;
+						float distfromedge;
+						float mindistfromedge;
 						artifacts = schedGetWriteArtifacts();
 						onscreen = true;
 						mindistfromedge = 1000;
 
-						if ((s32)g_SunScreenXPositions[i] < viewleft + 15) {
+						if ((int)g_SunScreenXPositions[i] < viewleft + 15) {
 							distfromedge = g_SunScreenXPositions[i];
 
 							if (distfromedge < mindistfromedge) {
@@ -2558,9 +2536,7 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 							}
 						}
 
-						if (1);
-
-						if ((s32)g_SunScreenYPositions[i] < viewtop + 15) {
+						if ((int)g_SunScreenYPositions[i] < viewtop + 15) {
 							distfromedge = g_SunScreenYPositions[i];
 
 							if (distfromedge < mindistfromedge) {
@@ -2568,7 +2544,7 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 							}
 						}
 
-						if ((s32)g_SunScreenXPositions[i] > viewleft + viewwidth - 16) {
+						if ((int)g_SunScreenXPositions[i] > viewleft + viewwidth - 16) {
 							distfromedge = viewleft + viewwidth - 1 - g_SunScreenXPositions[i];
 
 							if (distfromedge < mindistfromedge) {
@@ -2576,7 +2552,7 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 							}
 						}
 
-						if ((s32)g_SunScreenYPositions[i] > viewtop + viewheight - 16) {
+						if ((int)g_SunScreenYPositions[i] > viewtop + viewheight - 16) {
 							distfromedge = viewtop + viewheight - 1 - g_SunScreenYPositions[i];
 
 							if (distfromedge < mindistfromedge) {
@@ -2596,26 +2572,20 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 							g_SunAlphaFracs[i] = 1.0f;
 						}
 
-#ifndef PLATFORM_N64
 						const bool prevperim = g_Vars.currentplayer->bondperimenabled;
 						playerSetPerimEnabled(g_Vars.currentplayer->prop, false);
-#endif
 
-						skyCreateSunArtifact(&artifacts[i * 8 + 0], (s32)g_SunScreenXPositions[i] - 7, (s32)g_SunScreenYPositions[i] + 1);
-						skyCreateSunArtifact(&artifacts[i * 8 + 1], (s32)g_SunScreenXPositions[i] - 5, (s32)g_SunScreenYPositions[i] - 3);
-						skyCreateSunArtifact(&artifacts[i * 8 + 2], (s32)g_SunScreenXPositions[i] - 3, (s32)g_SunScreenYPositions[i] + 5);
-						skyCreateSunArtifact(&artifacts[i * 8 + 3], (s32)g_SunScreenXPositions[i] - 1, (s32)g_SunScreenYPositions[i] - 7);
-						skyCreateSunArtifact(&artifacts[i * 8 + 4], (s32)g_SunScreenXPositions[i] + 1, (s32)g_SunScreenYPositions[i] + 7);
-						skyCreateSunArtifact(&artifacts[i * 8 + 5], (s32)g_SunScreenXPositions[i] + 3, (s32)g_SunScreenYPositions[i] - 5);
-						skyCreateSunArtifact(&artifacts[i * 8 + 6], (s32)g_SunScreenXPositions[i] + 5, (s32)g_SunScreenYPositions[i] + 3);
-						skyCreateSunArtifact(&artifacts[i * 8 + 7], (s32)g_SunScreenXPositions[i] + 7, (s32)g_SunScreenYPositions[i] - 1);
+						skyCreateSunArtifact(&artifacts[i * 8 + 0], (int)g_SunScreenXPositions[i] - 7, (int)g_SunScreenYPositions[i] + 1);
+						skyCreateSunArtifact(&artifacts[i * 8 + 1], (int)g_SunScreenXPositions[i] - 5, (int)g_SunScreenYPositions[i] - 3);
+						skyCreateSunArtifact(&artifacts[i * 8 + 2], (int)g_SunScreenXPositions[i] - 3, (int)g_SunScreenYPositions[i] + 5);
+						skyCreateSunArtifact(&artifacts[i * 8 + 3], (int)g_SunScreenXPositions[i] - 1, (int)g_SunScreenYPositions[i] - 7);
+						skyCreateSunArtifact(&artifacts[i * 8 + 4], (int)g_SunScreenXPositions[i] + 1, (int)g_SunScreenYPositions[i] + 7);
+						skyCreateSunArtifact(&artifacts[i * 8 + 5], (int)g_SunScreenXPositions[i] + 3, (int)g_SunScreenYPositions[i] - 5);
+						skyCreateSunArtifact(&artifacts[i * 8 + 6], (int)g_SunScreenXPositions[i] + 5, (int)g_SunScreenYPositions[i] + 3);
+						skyCreateSunArtifact(&artifacts[i * 8 + 7], (int)g_SunScreenXPositions[i] + 7, (int)g_SunScreenYPositions[i] - 1);
 
-#ifndef PLATFORM_N64
 						playerSetPerimEnabled(g_Vars.currentplayer->prop, prevperim);
-#endif
 					}
-
-					if (1);
 
 					g_SunFlareTimers240[i] += g_Vars.lvupdate240;
 
@@ -2633,7 +2603,7 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 					gDPSetCombineLERP(gdl++,
 							ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0,
 							ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0);
-					gDPSetEnvColor(gdl++, colour[0], colour[1], colour[2], (s32)(g_SunAlphaFracs[i] * 255.0f));
+					gDPSetEnvColor(gdl++, colour[0], colour[1], colour[2], (int)(g_SunAlphaFracs[i] * 255.0f));
 
 					sp134[0] = g_SunScreenXPositions[i];
 					sp134[1] = g_SunScreenYPositions[i];
@@ -2670,17 +2640,17 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
  *
  * Used for the sun and the Deep Sea teleports.
  */
-Gfx *skyRenderFlare(Gfx *gdl, f32 x, f32 y, f32 intensityfrac, f32 size, s32 flaretimer240, f32 alphafrac)
+Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size, int flaretimer240, float alphafrac)
 {
-	s32 i;
-	f32 f2;
-	f32 f12;
-	f32 sp17c[2];
-	f32 sp174[2];
-	s32 sp15c[] = { 16, 32, 12, 32, 24, 64 }; // diameters?
-	s32 sp144[] = { 60, 80, 225, 275, 470, 570 }; // distances from the source?
+	int i;
+	float f2;
+	float f12;
+	float sp17c[2];
+	float sp174[2];
+	int sp15c[] = { 16, 32, 12, 32, 24, 64 }; // diameters?
+	int sp144[] = { 60, 80, 225, 275, 470, 570 }; // distances from the source?
 
-	u32 colours[] = {
+	uint32_t colours[] = {
 		0xff99ffff, // pinkish/purple
 		0x9999ffff, // blue
 		0x99ffffff, // very light blue
@@ -2689,9 +2659,9 @@ Gfx *skyRenderFlare(Gfx *gdl, f32 x, f32 y, f32 intensityfrac, f32 size, s32 fla
 		0xff9999ff, // red
 	};
 
-	f32 xdist;
-	f32 ydist;
-	f32 fovy;
+	float xdist;
+	float ydist;
+	float fovy;
 
 	xdist = (x - viGetViewWidth() / 2.0f) * 0.01f;
 	ydist = (y - viGetViewHeight() / 2.0f) * 0.01f;
@@ -2715,17 +2685,15 @@ Gfx *skyRenderFlare(Gfx *gdl, f32 x, f32 y, f32 intensityfrac, f32 size, s32 fla
 
 	fovy = viGetFovY();
 
-	gDPSetEnvColor(gdl++, 0xff, 0xff, 0xff, (s32) (alphafrac * intensityfrac * 255.0f));
-	f2 = ((s32) ((60.0f / fovy) * (size * (0.5f + (0.5f * intensityfrac)))));
+	gDPSetEnvColor(gdl++, 0xff, 0xff, 0xff, (int) (alphafrac * intensityfrac * 255.0f));
+	f2 = ((int) ((60.0f / fovy) * (size * (0.5f + (0.5f * intensityfrac)))));
 
 	sp17c[0] = x;
 	sp17c[1] = y;
 	sp174[1] = f2 * 0.5f;
 	sp174[0] = f2 * 0.5f;
 
-#ifndef PLATFORM_N64
 	sp174[0] *=  SCREEN_ASPECT / videoGetAspect();
-#endif
 
 	textureCalcScreenCoords(&gdl, sp17c, sp174, g_TexLightGlareConfigs[6].width, g_TexLightGlareConfigs[6].height, 0, 1, 1, 1);
 
@@ -2747,9 +2715,9 @@ Gfx *skyRenderFlare(Gfx *gdl, f32 x, f32 y, f32 intensityfrac, f32 size, s32 fla
 			0, 0, 0, ENVIRONMENT, TEXEL0, 0, ENVIRONMENT, 0);
 
 	for (i = 0; i < 6; i++) {
-		f32 f12;
-		f32 f14;
-		f32 tmp;
+		float f12;
+		float f14;
+		float tmp;
 
 		if (flaretimer240 < TICKS(90)) {
 			if (flaretimer240 < TICKS(30)) {
@@ -2776,7 +2744,7 @@ Gfx *skyRenderFlare(Gfx *gdl, f32 x, f32 y, f32 intensityfrac, f32 size, s32 fla
 				(colours[i] >> 24) & 0xff,
 				(colours[i] >> 16) & 0xff,
 				(colours[i] >> 8) & 0xff,
-				(s32) ((colours[i] & 0xff) * (alphafrac * f2)));
+				(int) ((colours[i] & 0xff) * (alphafrac * f2)));
 
 		sp17c[0] = f12;
 		sp17c[1] = f14;
@@ -2821,7 +2789,7 @@ struct coord g_TeleportToPos = {0, 0, 0};
 struct coord g_TeleportToUp = {0, 0, 1};
 struct coord g_TeleportToLook = {0, 1, 0};
 
-Gfx *skyRenderTeleportFlare(Gfx *gdl, f32 x, f32 y, f32 z, f32 size, f32 intensityfrac)
+Gfx *skyRenderTeleportFlare(Gfx *gdl, float x, float y, float z, float size, float intensityfrac)
 {
 	struct coord sp64;
 
@@ -2833,16 +2801,16 @@ Gfx *skyRenderTeleportFlare(Gfx *gdl, f32 x, f32 y, f32 z, f32 size, f32 intensi
 	mtx4TransformVecInPlace(camGetMtxF1754(), &sp64);
 
 	if (sp64.z > 1.0f) {
-		f32 xpos;
-		f32 ypos;
-		s16 viewlefti = viGetViewLeft();
-		s16 viewtopi = viGetViewTop();
-		s16 viewwidthi = viGetViewWidth();
-		s16 viewheighti = viGetViewHeight();
-		f32 viewleft = viewlefti;
-		f32 viewwidth = viewwidthi;
-		f32 viewtop = viewtopi;
-		f32 viewheight = viewheighti;
+		float xpos;
+		float ypos;
+		int16_t viewlefti = viGetViewLeft();
+		int16_t viewtopi = viGetViewTop();
+		int16_t viewwidthi = viGetViewWidth();
+		int16_t viewheighti = viGetViewHeight();
+		float viewleft = viewlefti;
+		float viewwidth = viewwidthi;
+		float viewtop = viewtopi;
+		float viewheight = viewheighti;
 
 		xpos = viewleft + (sp64.f[0] / sp64.f[2] + 1.0f) * 0.5f * viewwidth;
 		ypos = viewtop + (-sp64.f[1] / sp64.f[2] + 1.0f) * 0.5f * viewheight;
@@ -2861,18 +2829,18 @@ Gfx *skyRenderTeleportFlare(Gfx *gdl, f32 x, f32 y, f32 z, f32 size, f32 intensi
  */
 Gfx *skyRenderTeleportFlares(Gfx *gdl)
 {
-	f32 sp154 = g_20SecIntervalFrac * M_TAU;
-	s32 i;
-	f32 sizefrac = 0.0f;
-	f32 f20_2;
-	f32 f22;
-	f32 f22_3;
+	float sp154 = g_20SecIntervalFrac * M_TAU;
+	int i;
+	float sizefrac = 0.0f;
+	float f20_2;
+	float f22;
+	float f22_3;
 	struct pad pad;
 	struct coord spe0;
-	f32 spd0[4];
+	float spd0[4];
 	Mtxf mtx;
-	f32 f24;
-	f32 intensityfrac;
+	float f24;
+	float intensityfrac;
 
 	if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_PREENTER) {
 		sizefrac = g_Vars.currentplayer->teleporttime / 24.0f * 0.33f;
@@ -2945,7 +2913,7 @@ Gfx *skyRenderArtifacts(Gfx *gdl)
 {
 	struct environment *env = envGetCurrent();
 	struct sun *sun;
-	s32 i;
+	int i;
 
 	if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_PREENTER
 			|| g_Vars.currentplayer->teleportstate == TELEPORTSTATE_ENTERING) {
@@ -2961,7 +2929,7 @@ Gfx *skyRenderArtifacts(Gfx *gdl)
 	for (i = 0; i < env->numsuns; i++) {
 		if (sun->lens_flare && g_SunPositions[i].z > 1) {
 			struct artifact *artifacts = schedGetFrontArtifacts() + i * 8;
-			f32 intensityfrac = skyGetArtifactGroupIntensityFrac(artifacts);
+			float intensityfrac = skyGetArtifactGroupIntensityFrac(artifacts);
 
 			if (intensityfrac > 0.0f) {
 				gdl = skyRenderFlare(gdl, g_SunScreenXPositions[i], g_SunScreenYPositions[i], intensityfrac, sun->orb_size, g_SunFlareTimers240[i], g_SunAlphaFracs[i]);
@@ -2974,7 +2942,7 @@ Gfx *skyRenderArtifacts(Gfx *gdl)
 	return gdl;
 }
 
-void skySetOverexposure(s32 r, s32 g, s32 b)
+void skySetOverexposure(int r, int g, int b)
 {
 	g_Vars.currentplayer->overexposurered = sqrtf(g_Vars.currentplayer->overexposurered * g_Vars.currentplayer->overexposurered + r * r);
 	g_Vars.currentplayer->overexposuregreen = sqrtf(g_Vars.currentplayer->overexposuregreen * g_Vars.currentplayer->overexposuregreen + g * g);
@@ -2993,7 +2961,7 @@ void skySetOverexposure(s32 r, s32 g, s32 b)
 	}
 }
 
-s32 skyCalculateOverexposureComponent(s32 old, s32 new)
+int skyCalculateOverexposureComponent(int old, int new)
 {
 	if (new >= old) {
 		if (new - old > 8) {
@@ -3016,7 +2984,7 @@ s32 skyCalculateOverexposureComponent(s32 old, s32 new)
  */
 Gfx *skyRenderOverexposure(Gfx *gdl)
 {
-	s32 value;
+	int value;
 
 	g_Vars.currentplayer->overexposurered = skyCalculateOverexposureComponent(g_Vars.currentplayer->prevoverexposurered, g_Vars.currentplayer->overexposurered);
 	g_Vars.currentplayer->overexposuregreen = skyCalculateOverexposureComponent(g_Vars.currentplayer->prevoverexposuregreen, g_Vars.currentplayer->overexposuregreen);
@@ -3029,11 +2997,11 @@ Gfx *skyRenderOverexposure(Gfx *gdl)
 		: g_Vars.currentplayer->overexposureblue;
 
 	if (!g_InCutscene && EYESPYINACTIVE() && value > 0) {
-		f32 r = g_Vars.currentplayer->overexposurered * (255.0f / value);
-		f32 g = g_Vars.currentplayer->overexposuregreen * (255.0f / value);
-		f32 b = g_Vars.currentplayer->overexposureblue * (255.0f / value);
+		float r = g_Vars.currentplayer->overexposurered * (255.0f / value);
+		float g = g_Vars.currentplayer->overexposuregreen * (255.0f / value);
+		float b = g_Vars.currentplayer->overexposureblue * (255.0f / value);
 
-		f32 a = (g_Vars.currentplayer->overexposurered
+		float a = (g_Vars.currentplayer->overexposurered
 			+ g_Vars.currentplayer->overexposuregreen
 			+ g_Vars.currentplayer->overexposureblue) * (1.0f / 3.0f);
 
@@ -3052,7 +3020,7 @@ Gfx *skyRenderOverexposure(Gfx *gdl)
 			b *= 0.5f;
 		}
 
-		gDPSetPrimColor(gdl++, 0, 0, (s32)r, (s32)g, (s32)b, (s32)a);
+		gDPSetPrimColor(gdl++, 0, 0, (int)r, (int)g, (int)b, (int)a);
 
 		gDPFillRectangle(gdl++,
 				viGetViewLeft(),

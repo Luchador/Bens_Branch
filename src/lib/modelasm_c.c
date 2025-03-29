@@ -9,57 +9,57 @@
 #include "platform.h"
 
 struct t0slot {
-	u16 unk00;
-	u16 unk02;
-	u16 unk04;
-	u16 unk06;
+	uint16_t unk00;
+	uint16_t unk02;
+	uint16_t unk04;
+	uint16_t unk06;
 };
 
 struct t0slot *t0slot;
-u8 *t2ptr8;
-s32 t3;
-u8 *t3ptr8;
-s32 t4;
-u8 *t6ptr8;
-s32 v1;
-s32 s0;
-s32 s1;
-s32 s2;
-s32 s3;
-s32 s4;
-s32 sr8;
-s32 f0int;
-f32 f0;
-f32 f1;
-f32 f2;
-f32 f3;
-f32 f4;
-f32 f5;
+uint8_t *t2ptr8;
+int t3;
+uint8_t *t3ptr8;
+int t4;
+uint8_t *t6ptr8;
+int v1;
+int s0;
+int s1;
+int s2;
+int s3;
+int s4;
+int sr8;
+int f0int;
+float f0;
+float f1;
+float f2;
+float f3;
+float f4;
+float f5;
 
 // f12-f23 are used as rotation matrix
-f32 f12;
-f32 f13;
-f32 f14;
-f32 f15;
-f32 f16;
-f32 f17;
-f32 f18;
-f32 f19;
-f32 f20;
-f32 f21;
-f32 f22;
-f32 f23;
+float f12;
+float f13;
+float f14;
+float f15;
+float f16;
+float f17;
+float f18;
+float f19;
+float f20;
+float f21;
+float f22;
+float f23;
 
-s32 gp;
+int gp;
 
 static bool modelasmIterateThings1(void);
 static bool modelasmIterateThings2(void);
-static u32 modelasmReadFrameData(void);
+static uint32_t modelasmReadFrameData(void);
 static union modelrwdata *modelasmGetNodeRwData(struct model *model, struct modelnode *node, bool is_head);
-static void modelasmMathPain1(f32 f30);
+static void modelasmMathPain1(float f30);
 static void modelasmMathPain2(void);
-static void modelasmPrepareRotMtx180(s32 t2, s32 t3, s32 t4);
-static void modelasmPrepareRotMtx360(s32 t2, s32 t3, s32 t4);
+static void modelasmPrepareRotMtx180(int t2, int t3, int t4);
+static void modelasmPrepareRotMtx360(int t2, int t3, int t4);
 static void modelasmMathPain3(void);
 static void modelasmMathPain4(void);
 static void modelasmMtxMultiply(Mtxf *src, Mtxf *dst);
@@ -78,11 +78,11 @@ static Mtxf *modelasmFindNodeMtx(struct model *model, struct modelnode *node);
 bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 {
 	bool sp7f8 = false;
-	f32 sp7e8f32;
+	float sp7e8float;
 	struct t0slot *sp7e8slot;
-	f32 sp7f4;
-	f32 sp7f0;
-	f32 sp7ec;
+	float sp7f4;
+	float sp7f0;
+	float sp7ec;
 	bool sp7e4;
 	struct t0slot sp00[240];
 	struct modelnode *node;
@@ -90,19 +90,19 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 	struct skeleton *skeleton;
 	struct modeldef *modeldef;
 	union modelrwdata *rwdata;
-	f32 f6;
-	f32 f7;
-	f32 f8;
-	f32 f9;
-	f32 f10;
-	f32 f30;
+	float f6;
+	float f7;
+	float f8;
+	float f9;
+	float f10;
+	float f30;
 	Mtxf *t0mtx;
 	Mtxf *t1mtx;
-	s32 t1;
-	s32 t2;
-	u8 *s0ptr8;
-	s32 i;
-	f32 yrot;
+	int t1;
+	int t2;
+	uint8_t *s0ptr8;
+	int i;
+	float yrot;
 
 	for (i = 0; i < model->definition->nummatrices; i++) {
 		sp00[i].unk00 = 0;
@@ -262,7 +262,7 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 						sp7e4 = true;
 						t0slot = sp7e8slot;
 
-						sp7e8f32 = f0;
+						sp7e8float = f0;
 						sp7ec = f1;
 						sp7f0 = f2;
 						sp7f4 = f3;
@@ -335,9 +335,9 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 				}
 
 				if (sr8 & 2) {
-					t2 = *(s16 *) &t0slot[60].unk00;
-					t3 = *(s16 *) &t0slot[60].unk02;
-					t4 = *(s16 *) &t0slot[60].unk04;
+					t2 = *(int16_t *) &t0slot[60].unk00;
+					t3 = *(int16_t *) &t0slot[60].unk02;
+					t4 = *(int16_t *) &t0slot[60].unk04;
 
 					if (node == modeldef->rootnode) {
 						f21 = t2 * anim->animscale;
@@ -375,7 +375,7 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 
 				if (node->type & MODELNODETYPE_0100) {
 					if (sp7e4) {
-						f0 = sp7e8f32;
+						f0 = sp7e8float;
 						f1 = sp7ec;
 						f2 = sp7f0;
 						f3 = sp7f4;
@@ -744,9 +744,9 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
  */
 static bool modelasmIterateThings1(void)
 {
-	s32 t7;
-	s32 t8;
-	u32 v0;
+	int t7;
+	int t8;
+	uint32_t v0;
 
 	gp = 0;
 
@@ -912,10 +912,10 @@ static bool modelasmIterateThings1(void)
  */
 static bool modelasmIterateThings2(void)
 {
-	s32 t7;
-	s32 t8;
-	s32 s5;
-	u32 v0;
+	int t7;
+	int t8;
+	int s5;
+	uint32_t v0;
 
 	gp = 0;
 
@@ -1095,10 +1095,10 @@ static bool modelasmIterateThings2(void)
 /**
  * Expects: t3 t6 v1 gp s8
  */
-static u32 modelasmReadFrameData(void)
+static uint32_t modelasmReadFrameData(void)
 {
-	u32 v0 = 0;
-	s32 s6;
+	uint32_t v0 = 0;
+	int s6;
 
 	if (!v1) {
 		return 0;
@@ -1161,7 +1161,7 @@ static u32 modelasmReadFrameData(void)
  */
 
 #ifdef PLATFORM_64BIT
-u8 var8005ef90[] = {
+uint8_t var8005ef90[] = {
 		 0xff, 0x08, 0xff, 0xff,
 		 0xff, 0xff, 0xff, 0xff,
 		 0x10, 0x2a, 0xff, 0x48,
@@ -1171,7 +1171,7 @@ u8 var8005ef90[] = {
 		 0x24, 0x00,
 };
 #else
-u8 var8005ef90[] = {
+uint8_t var8005ef90[] = {
 	0xff, 0x08, 0xff, 0xff,
 	0xff, 0xff, 0xff, 0xff,
 	0x0c, 0x22, 0xff, 0x44,
@@ -1184,13 +1184,13 @@ u8 var8005ef90[] = {
 
 static union modelrwdata *modelasmGetNodeRwData(struct model *model, struct modelnode *node, bool is_head)
 {
-	u32 index = 0;
-	u32 *rwdatas = model->rwdatas;
-	u8 type = node->type & 0xff;
+	uint32_t index = 0;
+	uint32_t *rwdatas = model->rwdatas;
+	uint8_t type = node->type & 0xff;
 
 	if (type < ARRAYCOUNT(var8005ef90)) {
 		if (var8005ef90[type] != 0xff) {
-			index = *(u16 *) ((uintptr_t) node->rodata + var8005ef90[type]);
+			index = *(uint16_t *) ((uintptr_t) node->rodata + var8005ef90[type]);
 		}
 	}
 
@@ -1212,12 +1212,12 @@ static union modelrwdata *modelasmGetNodeRwData(struct model *model, struct mode
 /**
  * Expects: f0-f3, f16-f22
  */
-static void modelasmMathPain1(f32 f30)
+static void modelasmMathPain1(float f30)
 {
-	f32 f6;
-	f32 f7;
-	f32 f8;
-	f32 f9;
+	float f6;
+	float f7;
+	float f8;
+	float f9;
 
 	f4 = 0;
 
@@ -1290,13 +1290,13 @@ static void modelasmMathPain1(f32 f30)
  */
 static void modelasmMathPain2(void)
 {
-	f32 f6;
-	f32 f7;
-	f32 f8;
-	f32 f9;
-	f32 f10;
-	f32 f11;
-	f32 f26;
+	float f6;
+	float f7;
+	float f8;
+	float f9;
+	float f10;
+	float f11;
+	float f26;
 
 	f6 = f0 * f2;
 	f7 = f0 * f3;
@@ -1317,12 +1317,12 @@ static void modelasmMathPain2(void)
 	f3 = f26 - f10;
 }
 
-static void modelasmPrepareRotMtx180(s32 t2, s32 t3, s32 t4)
+static void modelasmPrepareRotMtx180(int t2, int t3, int t4)
 {
 	// Very close to: 1.0f / (180 * 180 / M_PI)
-	f32 f8 = t4 * 0.000095873801910784f;
-	f32 f7 = t3 * 0.000095873801910784f;
-	f32 f6 = t2 * 0.000095873801910784f;
+	float f8 = t4 * 0.000095873801910784f;
+	float f7 = t3 * 0.000095873801910784f;
+	float f6 = t2 * 0.000095873801910784f;
 
 	f5 = sinf(f8);
 	f4 = sinf(f8 + 1.570796251297f);
@@ -1332,12 +1332,12 @@ static void modelasmPrepareRotMtx180(s32 t2, s32 t3, s32 t4)
 	f0 = sinf(f6 + 1.570796251297f);
 }
 
-static void modelasmPrepareRotMtx360(s32 t2, s32 t3, s32 t4)
+static void modelasmPrepareRotMtx360(int t2, int t3, int t4)
 {
 	// Very close to: 1.0f / (360 * 180 / M_PI)
-	f32 f8 = t4 * 0.000047936900955392f;
-	f32 f7 = t3 * 0.000047936900955392f;
-	f32 f6 = t2 * 0.000047936900955392f;
+	float f8 = t4 * 0.000047936900955392f;
+	float f7 = t3 * 0.000047936900955392f;
+	float f6 = t2 * 0.000047936900955392f;
 
 	f5 = sinf(f8);
 	f4 = sinf(f8 + 1.5707963705063f);
@@ -1352,10 +1352,10 @@ static void modelasmPrepareRotMtx360(s32 t2, s32 t3, s32 t4)
  */
 static void modelasmMathPain3(void)
 {
-	f32 f6 = f1 * f5;
-	f32 f7 = f0 * f5;
-	f32 f8 = f1 * f4;
-	f32 f9 = f0 * f4;
+	float f6 = f1 * f5;
+	float f7 = f0 * f5;
+	float f8 = f1 * f4;
+	float f9 = f0 * f4;
 
 	f12 = f2 * f4;
 	f13 = f2 * f5;
@@ -1375,17 +1375,17 @@ static void modelasmMathPain3(void)
  */
 static void modelasmMathPain4(void)
 {
-	f32 f6;
-	f32 f7;
-	f32 f8;
-	f32 f9;
-	f32 f10;
-	f32 f11;
-	f32 f24;
-	f32 f25;
-	f32 f26;
-	f32 f27;
-	f32 f28;
+	float f6;
+	float f7;
+	float f8;
+	float f9;
+	float f10;
+	float f11;
+	float f24;
+	float f25;
+	float f26;
+	float f27;
+	float f28;
 
 	f4 = f0 * f0;
 	f5 = f1 * f1;
@@ -1426,18 +1426,18 @@ static void modelasmMathPain4(void)
  */
 static void modelasmMtxMultiply(Mtxf *src, Mtxf *dst)
 {
-	f32 f0;
-	f32 f1;
-	f32 f2;
-	f32 f3;
-	f32 f4;
-	f32 f5;
-	f32 f6;
-	f32 f7;
-	f32 f8;
-	f32 f9;
-	f32 f10;
-	s32 i;
+	float f0;
+	float f1;
+	float f2;
+	float f3;
+	float f4;
+	float f5;
+	float f6;
+	float f7;
+	float f8;
+	float f9;
+	float f10;
+	int i;
 
 	for (i = 0; i < 3; i++) {
 		f0 = src->m[0][i];
@@ -1479,7 +1479,7 @@ static void modelasmMtxMultiply(Mtxf *src, Mtxf *dst)
 static Mtxf *modelasmFindNodeMtx(struct model *model, struct modelnode *node)
 {
 	do {
-		u8 type = node->type & 0xff;
+		uint8_t type = node->type & 0xff;
 
 		if (type == MODELNODETYPE_CHRINFO) {
 			return &model->matrices[node->rodata->chrinfo.mtxindex];

@@ -100,11 +100,10 @@ struct textureconfig g_TcWallhitConfigs[] = {
 // 	/*4*/ { 0x085a, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
 // };
 
-// Ben's comment: levels exported from the Setup Editor break beams for some reason. This can be solved by setting the beam level (4th parameter) to 0.
-// I also found it necessary to re-export the Cyclone's beam (texture 0007) with no mipmaps
+// Ben's comment: levels exported from the Setup Editor break beams for some reason. This can be solved by setting the beam level (4th parameter) to 0. Except for the Cyclone, which breaks if set to 0.
 struct textureconfig g_TcBeamConfigs[] = {
 	/*0*/ { 0x0006, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Most guns
-	/*1*/ { 0x0007, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Cyclone
+	/*1*/ { 0x0007, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Cyclone
 	/*2*/ { 0x0008, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Unused red beam
 	/*3*/ { 0x0859, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Tranquilizer
 	/*4*/ { 0x085a, 16,  32,  0, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,   G_TX_CLAMP   }, // Alien gun green beams

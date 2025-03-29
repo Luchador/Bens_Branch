@@ -22,33 +22,33 @@ struct splatdata {
 	struct coord unk0c;
 	struct coord unk18;
 	struct coord gunpos;
-	s32 splattype;
+	int splattype;
 	struct prop *objprop;
 	struct prop *chrprop;
 	struct chrdata *chr;
-	s32 mtxindex;
-	s32 room;
-	s32 isskedar;
-	s32 translucent;
-	f32 unk50;
-	s32 timermax;
-	s32 timerspeed;
+	int mtxindex;
+	int room;
+	int isskedar;
+	int translucent;
+	float unk50;
+	int timermax;
+	int timerspeed;
 };
 
-f32 g_SplatDistanceScaleFactor = 0.15;
-f32 g_SplatRandomOffsetMax = 12; // When a splat is made there's some randomness from where the hit is calculated to where it's actually placed, with 12 being the max possible distance.
-f32 g_SplatMaxDistance = 180;
-f32 g_SplatMinSize = 5;
-f32 g_SplatMaxSize = 50;
+float g_SplatDistanceScaleFactor = 0.15;
+float g_SplatRandomOffsetMax = 12; // When a splat is made there's some randomness from where the hit is calculated to where it's actually placed, with 12 being the max possible distance.
+float g_SplatMaxDistance = 180;
+float g_SplatMinSize = 5;
+float g_SplatMaxSize = 50;
 
-bool splat0f149274(f32 arg0, struct prop *prop, struct shotdata *shotdata, f32 arg3, bool isskedar, s32 arg5, s32 arg6, struct chrdata *chr, s32 arg8);
+bool splat0f149274(float arg0, struct prop *prop, struct shotdata *shotdata, float arg3, bool isskedar, int arg5, int arg6, struct chrdata *chr, int arg8);
 void splat0f14986c(struct splatdata *splatdata);
 
 void splatTickChr(struct prop *prop)
 {
 	struct chrdata *chr = prop->chr;
 	struct chrdata *attacker = chr->lastattacker;
-	s32 race;
+	int race;
 
 	if (chr->noblood || (chr->chrflags & CHRCFLAG_HIDDEN) || chr->bulletstaken == 0) {
 		return;
@@ -57,14 +57,14 @@ void splatTickChr(struct prop *prop)
 	race = CHRRACE(chr);
 
 	if (race != RACE_DRCAROLL && race != RACE_ROBOT) {
-		u8 isskedar = false;
+		uint8_t isskedar = false;
 
 		if (race == RACE_SKEDAR || chr->bodynum == BODY_MRBLONDE) {
 			isskedar = true;
 		}
 
 		if (chr->actiontype == ACT_DEAD || chr->actiontype == ACT_DIE) {
-			f32 thudframe = -1.0f;
+			float thudframe = -1.0f;
 
 			if (chr->actiontype == ACT_DIE) {
 				if (chr->act_die.thudframe2 != -1) {
@@ -80,11 +80,11 @@ void splatTickChr(struct prop *prop)
 			}
 		} else {
 			// Consider creating a wounded drop
-			u32 value = chr->bulletstaken * chr->tickssincesplat;
+			uint32_t value = chr->bulletstaken * chr->tickssincesplat;
 
 			if (value > TICKS(240)) {
-				f32 dist = coordsGetDistance(&chr->lastdroppos, &prop->pos);
-				s32 addmore = false;
+				float dist = coordsGetDistance(&chr->lastdroppos, &prop->pos);
+				int addmore = false;
 
 				if (dist > 40) {
 					addmore = true;
@@ -111,7 +111,7 @@ void splatTickChr(struct prop *prop)
 	chr->tickssincesplat += g_Vars.lvupdate60;
 }
 
-void splatsCreateForChrHit(struct prop *prop, struct shotdata *shotdata, struct coord *arg2, struct coord *arg3, bool isskedar, s32 splattype, struct chrdata *chr2)
+void splatsCreateForChrHit(struct prop *prop, struct shotdata *shotdata, struct coord *arg2, struct coord *arg3, bool isskedar, int splattype, struct chrdata *chr2)
 {
 	struct chrdata *chr = prop->chr;
 
@@ -120,7 +120,7 @@ void splatsCreateForChrHit(struct prop *prop, struct shotdata *shotdata, struct 
 	}
 
 	if (splattype == 0) {
-		u32 qty = rngRandom() % 3;
+		uint32_t qty = rngRandom() % 3;
 
 		if (qty) {
 			chr->stdsplatsadded += splatsCreate(qty, 0.8f, prop, shotdata, arg2, arg3, isskedar, splattype, TICKS(50), chr2, 0);
@@ -128,9 +128,9 @@ void splatsCreateForChrHit(struct prop *prop, struct shotdata *shotdata, struct 
 	}
 }
 
-s32 splatsCreate(s32 qty, f32 arg1, struct prop *prop, struct shotdata *shotdataarg,
-		struct coord *arg4, struct coord *arg5, bool isskedar, s32 splattype,
-		s32 timermax, struct chrdata *chr, s32 timerspeed)
+int splatsCreate(int qty, float arg1, struct prop *prop, struct shotdata *shotdataarg,
+		struct coord *arg4, struct coord *arg5, bool isskedar, int splattype,
+		int timermax, struct chrdata *chr, int timerspeed)
 {
 	struct shotdata stackshotdata;
 	struct shotdata *shotdata = splattype == 0 ? shotdataarg : &stackshotdata;
@@ -138,10 +138,10 @@ s32 splatsCreate(s32 qty, f32 arg1, struct prop *prop, struct shotdata *shotdata
 	struct coord spf0;
 	struct coord spe4;
 	Mtxf spa4;
-	s32 numdropped = 0;
-	f32 dist;
-	s32 i;
-	s32 j;
+	int numdropped = 0;
+	float dist;
+	int i;
+	int j;
 
 	if (splattype == 0) {
 		dist = coordsGetDistance(&shotdata->gunpos3d, arg5);
@@ -153,7 +153,7 @@ s32 splatsCreate(s32 qty, f32 arg1, struct prop *prop, struct shotdata *shotdata
 			shotdata->gunpos2d.f[i] = arg4->f[i];
 		}
 	} else {
-		f32 extraheight;
+		float extraheight;
 
 		if (prop->type == PROPTYPE_CHR) {
 			extraheight = 50;
@@ -209,7 +209,7 @@ s32 splatsCreate(s32 qty, f32 arg1, struct prop *prop, struct shotdata *shotdata
 	return numdropped;
 }
 
-bool splat0f149274(f32 arg0, struct prop *chrprop, struct shotdata *shotdata, f32 arg3, bool isskedar, s32 splattype, s32 timermax, struct chrdata *chr, s32 timerspeed)
+bool splat0f149274(float arg0, struct prop *chrprop, struct shotdata *shotdata, float arg3, bool isskedar, int splattype, int timermax, struct chrdata *chr, int timerspeed)
 {
 	struct prop **propptr;
 	struct prop *objprop;
@@ -219,14 +219,14 @@ bool splat0f149274(f32 arg0, struct prop *chrprop, struct shotdata *shotdata, f3
 	RoomNum gunrooms[8];
 	RoomNum endrooms[8];
 	struct coord endpos;
-	s32 i;
+	int i;
 	struct coord *sp50c;
 	struct coord *hitpos;
 	struct coord *sp504;
-	s32 bestroom = 0;
-	s32 mtxindex;
-	s32 room;
-	f32 spraydistance;
+	int bestroom = 0;
+	int mtxindex;
+	int room;
+	float spraydistance;
 	bool translucent;
 	bool hasresult = false;
 	struct shotdata stackshotdata;
@@ -318,7 +318,7 @@ bool splat0f149274(f32 arg0, struct prop *chrprop, struct shotdata *shotdata, f3
 				hitpos = &hit->pos;
 				sp504 = &hit->hitthing.unk0c;
 				objprop = hit->prop;
-				mtxindex = (s8)hit->mtxindex;
+				mtxindex = (int8_t)hit->mtxindex;
 				room = 1;
 				translucent = false;
 				hasresult = true;
@@ -363,19 +363,19 @@ bool splat0f149274(f32 arg0, struct prop *chrprop, struct shotdata *shotdata, f3
 
 void splat0f14986c(struct splatdata *splat)
 {
-	f32 splatscalex; // Splat width before randomness is applied
-	f32 splatscaley; // Splat height before randomness is applied
+	float splatscalex; // Splat width before randomness is applied
+	float splatscaley; // Splat height before randomness is applied
 	struct defaultobj *obj;
-	f32 splatscaledbydistance; // Splats get bigger the farther behind a character it's made
-	f32 splatsizetype = 0; // Splats can be little, medium, or big
-	f32 height;
-	f32 width;
-	u8 maxalpha = 0xff;
-	u8 minalpha = 0xc0;
-	s32 texnum;
+	float splatscaledbydistance; // Splats get bigger the farther behind a character it's made
+	float splatsizetype = 0; // Splats can be little, medium, or big
+	float height;
+	float width;
+	uint8_t maxalpha = 0xff;
+	uint8_t minalpha = 0xc0;
+	int texnum;
 	bool isskedarblood = splat->isskedar & 1;
 	bool translucent = splat->translucent;
-	f32 distance;
+	float distance;
 	RoomNum smokerooms[2];
 
 	texnum = WALLHITTEX_BLOOD1 + (rngRandom() % 3);
@@ -455,7 +455,7 @@ void splat0f14986c(struct splatdata *splat)
 			NULL, texnum, splat->room, splat->objprop,
 			splat->chrprop, splat->mtxindex, 0, splat->chr,
 			width, height, minalpha, maxalpha,
-			rngRandom() % 360, (u16)splat->timermax, splat->timerspeed, translucent);
+			rngRandom() % 360, (uint16_t)splat->timermax, splat->timerspeed, translucent);
 
 	if (isskedarblood) {
 		smokerooms[0] = splat->room;

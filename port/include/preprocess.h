@@ -1,30 +1,30 @@
 #ifndef _IN_PREPROCESS_H
 #define _IN_PREPROCESS_H
 
-#include <PR/ultratypes.h>
+#include <stdint.h>
 
-typedef u8 *(*preprocessfunc)(u8 *data, u32 size, u32 *outSize);
+typedef uint8_t *(*preprocessfunc)(uint8_t *data, uint32_t size, uint32_t *outSize);
 
-u8* preprocessAnimations(u8 *data, u32 size, u32 *outSize);
-u8* preprocessMpConfigs(u8 *data, u32 size, u32 *outSize);
-u8* preprocessFont(u8 *data, u32 size, u32 *outSize);
-u8* preprocessALBankFile(u8 *data, u32 size, u32 *outSize);
-u8 *preprocessALCMidiHdr(u8 *data, u32 size, u32 *outSize);
-u8* preprocessSequences(u8 *data, u32 size, u32 *outSize);
-u8* preprocessTexturesList(u8 *data, u32 size, u32 *outSize);
+uint8_t* preprocessAnimations(uint8_t *data, uint32_t size, uint32_t *outSize);
+uint8_t* preprocessMpConfigs(uint8_t *data, uint32_t size, uint32_t *outSize);
+uint8_t* preprocessFont(uint8_t *data, uint32_t size, uint32_t *outSize);
+uint8_t* preprocessALBankFile(uint8_t *data, uint32_t size, uint32_t *outSize);
+uint8_t *preprocessALCMidiHdr(uint8_t *data, uint32_t size, uint32_t *outSize);
+uint8_t* preprocessSequences(uint8_t *data, uint32_t size, uint32_t *outSize);
+uint8_t* preprocessTexturesList(uint8_t *data, uint32_t size, uint32_t *outSize);
 
-void preprocessBgSection1(u8* data, u32 size, u32 ofs);
-void preprocessBgSection2(u8 *data, u32 size);
-void preprocessBgSection3(u8* data, u32 size);
-void preprocessBgSection1Header(u8 *data, u32 size);
-void preprocessBgSection2Header(u8 *data, u32 size);
-void preprocessBgSection3Header(u8 *data, u32 size);
-u32 preprocessBgRoom(u8* data, u32 size, u32 room_ofs);
+void preprocessBgSection1(uint8_t* data, uint32_t size, uint32_t ofs);
+void preprocessBgSection2(uint8_t *data, uint32_t size);
+void preprocessBgSection3(uint8_t* data, uint32_t size);
+void preprocessBgSection1Header(uint8_t *data, uint32_t size);
+void preprocessBgSection2Header(uint8_t *data, uint32_t size);
+void preprocessBgSection3Header(uint8_t *data, uint32_t size);
+uint32_t preprocessBgRoom(uint8_t* data, uint32_t size, uint32_t room_ofs);
 
-u8 *preprocessPadsFile(u8 *data, u32 size, u32 *outSize);
-u8 *preprocessTilesFile(u8 *data, u32 size, u32 *outSize);
-u8 *preprocessSetupFile(u8 *data, u32 size, u32 *outSize);
-u8 *preprocessModelFile(u8 *data, u32 size, u32 *outSize);
-u8 *preprocessGunFile(u8 *data, u32 size, u32 *outSize);
+uint8_t *preprocessPadsFile(uint8_t *data, uint32_t size, uint32_t *outSize);
+uint8_t *preprocessTilesFile(uint8_t *data, uint32_t size, uint32_t *outSize);
+uint8_t *preprocessSetupFile(uint8_t *data, uint32_t size, uint32_t *outSize);
+uint8_t *preprocessModelFile(uint8_t *data, uint32_t size, uint32_t *outSize);
+uint8_t *preprocessGunFile(uint8_t *data, uint32_t size, uint32_t *outSize);
 
 #endif

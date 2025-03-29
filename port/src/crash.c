@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <SDL.h>
-#include <PR/ultratypes.h>
+#include <stdbool.h>
 #include "system.h"
 #include "platform.h"
 
@@ -23,6 +23,8 @@
 #include <dbghelp.h>
 #include <inttypes.h>
 #include <excpt.h>
+
+bool g_CrashEnabled = false;
 
 // NOTE: game builds with gcc, which means we have no PDBs for the windows version
 // this means that you generally won't get any symbol names in the main executable
@@ -89,7 +91,7 @@ static void crashStackTrace(char *msg, PEXCEPTION_POINTERS exinfo)
 	sym->SizeOfStruct = sizeof(*sym);
 	sym->MaxNameLen = CRASH_MAX_SYM;
 
-	s32 i;
+	int i;
 	for (i = 0; i < CRASH_MAX_FRAMES; ++i) {
 		const BOOL res = StackWalk64(image, process, thread, &stackframe, &context, NULL, SymFunctionTableAccess64, SymGetModuleBase64, NULL);
 		if (!res) {
@@ -166,9 +168,9 @@ static long __stdcall crashHandler(PEXCEPTION_POINTERS exinfo)
 
 static struct sigaction prevSigAction;
 
-static s32 crashIsDebuggerPresent(void)
+static int crashIsDebuggerPresent(void)
 {
-	static s32 result = -1;
+	static int result = -1;
 
 	if (result >= 0) {
 		return result;
@@ -220,12 +222,12 @@ static void *crashGetModuleBase(const void *addr)
 	return NULL;
 }
 
-static void crashStackTrace(char *msg, s32 sig, void *pc)
+static void crashStackTrace(char *msg, int sig, void *pc)
 {
-	u32 msglen = 0;
+	uint32_t msglen = 0;
 	void *frames[CRASH_MAX_FRAMES] = { NULL };
 
-	const s32 nframes = backtrace(frames, CRASH_MAX_FRAMES);
+	const int nframes = backtrace(frames, CRASH_MAX_FRAMES);
 	if (nframes <= 0) {
 		CRASH_MSG("no information\n");
 		return;
@@ -247,7 +249,7 @@ static void crashStackTrace(char *msg, s32 sig, void *pc)
 	CRASH_MSG("MAIN MODULE: %p\n", crashGetModuleBase(crashInit));
 	CRASH_MSG("\nBACKTRACE:\n");
 
-	s32 i;
+	int i;
 	for (i = 0; i < nframes; ++i) {
 		CRASH_MSG("#%02d: ", i);
 		if (strings && strings[i]) {
@@ -266,7 +268,7 @@ static void crashStackTrace(char *msg, s32 sig, void *pc)
 	free(strings);
 }
 
-static void crashHandler(s32 sig, siginfo_t *siginfo, void *ctx)
+static void crashHandler(int sig, siginfo_t *siginfo, void *ctx)
 {
 	char msg[CRASH_MAX_MSG + 1] = { 0 };
 
@@ -300,7 +302,6 @@ static void crashHandler(s32 sig, siginfo_t *siginfo, void *ctx)
 
 #endif
 
-s32 g_CrashEnabled = 0;
 
 static char crashMsg[1024];
 
@@ -309,7 +310,7 @@ void crashInit(void)
 #ifdef PLATFORM_WIN32
 	SetErrorMode(SEM_FAILCRITICALERRORS);
 	prevExFilter = SetUnhandledExceptionFilter(crashHandler);
-	g_CrashEnabled = 1;
+	g_CrashEnabled = true;
 #elif defined(PLATFORM_LINUX)
 	struct sigaction sigact = { 0 };
 	sigact.sa_flags = SA_SIGINFO | SA_ONSTACK;
@@ -318,7 +319,7 @@ void crashInit(void)
 	sigaction(SIGABRT, &sigact, &prevSigAction);
 	sigaction(SIGBUS,  &sigact, &prevSigAction);
 	sigaction(SIGILL,  &sigact, &prevSigAction);
-	g_CrashEnabled = 1;
+	g_CrashEnabled = true;
 #endif
 }
 
@@ -337,10 +338,5 @@ void crashShutdown(void)
 	sigaction(SIGBUS,  &prevSigAction, NULL);
 	sigaction(SIGILL,  &prevSigAction, NULL);
 #endif
-	g_CrashEnabled = 0;
-}
-
-void crashAppendChar(char c)
-{
-
+	g_CrashEnabled = false;
 }

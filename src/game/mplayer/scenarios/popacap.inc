@@ -152,8 +152,8 @@ struct menudialogdef g_PacOptionsMenuDialog = {
 
 void pacReset(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 	struct scenariodata_pac *data = &g_ScenarioData.pac;
 
 	data->victimindex = -1;
@@ -168,7 +168,7 @@ void pacReset(void)
 
 	while (i < g_MpNumChrs) {
 		bool isnew;
-		s32 victimplayernum = rngRandom() % g_MpNumChrs;
+		int victimplayernum = rngRandom() % g_MpNumChrs;
 
 		for (j = 0, isnew = true; j < i; j++) {
 			if (data->victims[j] == victimplayernum) {
@@ -194,7 +194,7 @@ void pacInitProps(void)
 	pacReset();
 }
 
-bool pacHighlightProp(struct prop *prop, s32 *colour)
+bool pacHighlightProp(struct prop *prop, int *colour)
 {
 	struct scenariodata_pac *data = &g_ScenarioData.pac;
 
@@ -215,9 +215,9 @@ bool pacHighlightProp(struct prop *prop, s32 *colour)
 void pacApplyNextVictim(void)
 {
 	struct scenariodata_pac *data = &g_ScenarioData.pac;
-	s32 vplayernum;
+	int vplayernum;
 	char text[64];
-	s32 i;
+	int i;
 
 	data->victimindex++;
 
@@ -233,24 +233,16 @@ void pacApplyNextVictim(void)
 		if (vplayernum == i) {
 			sprintf(text, langGet(L_MPWEAPONS_013)); // "You are the victim!"
 		} else if (scenarioChrsAreSameTeam(vplayernum, i)) {
-#if VERSION >= VERSION_JPN_FINAL
-			sprintf(text, langGet(L_MPWEAPONS_014), scenarioRemoveLineBreaks(g_MpAllChrConfigPtrs[vplayernum]->name, 0)); // "Protect %s!"
-#else
 			sprintf(text, langGet(L_MPWEAPONS_014), g_MpAllChrConfigPtrs[vplayernum]->name); // "Protect %s!"
-#endif
 		} else {
-#if VERSION >= VERSION_JPN_FINAL
-			sprintf(text, langGet(L_MPWEAPONS_015), scenarioRemoveLineBreaks(g_MpAllChrConfigPtrs[vplayernum]->name, 0)); // "Get %s!"
-#else
 			sprintf(text, langGet(L_MPWEAPONS_015), g_MpAllChrConfigPtrs[vplayernum]->name); // "Get %s!"
-#endif
 		}
 
 		scenarioCreateHudmsg(i, text);
 	}
 }
 
-void pacHandleDeath(s32 aplayernum, s32 vplayernum)
+void pacHandleDeath(int aplayernum, int vplayernum)
 {
 	struct scenariodata_pac *data = &g_ScenarioData.pac;
 
@@ -270,9 +262,7 @@ void pacHandleDeath(s32 aplayernum, s32 vplayernum)
 
 			pacApplyNextVictim();
 		} else {
-#if VERSION >= VERSION_NTSC_1_0
 			data->age240 = 0;
-#endif
 		}
 	}
 }
@@ -286,14 +276,12 @@ void pacTick(void)
 	}
 
 	if (data->victimindex >= 0) {
-#if VERSION >= VERSION_NTSC_1_0
 		if (data->victims[data->victimindex] >= PLAYERCOUNT() ||
 				g_Vars.players[data->victims[data->victimindex]]->isdead == false)
-#endif
 		{
 			data->age240 += g_Vars.lvupdate240;
 
-			if (data->age240 > (u32)TICKS(240 * 60)) {
+			if (data->age240 > (uint32_t)TICKS(240 * 60)) {
 				data->age240 = 0;
 				data->survivalcounts[data->victims[data->victimindex]]++;
 				scenarioCreateHudmsg(data->victims[data->victimindex], langGet(L_MPWEAPONS_007)); // "Have a point for living!"
@@ -305,20 +293,16 @@ void pacTick(void)
 Gfx *pacRenderHud(Gfx *gdl)
 {
 	struct scenariodata_pac *data = &g_ScenarioData.pac;
-	s32 time240;
-	s32 mins;
-	s32 secs;
-	s32 textwidth;
-	s32 textheight;
-	s32 x;
-	s32 y;
+	int time240;
+	int mins;
+	int secs;
+	int textwidth;
+	int textheight;
+	int x;
+	int y;
 	char text[64];
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (g_Vars.currentplayernum == data->victims[data->victimindex] && !g_Vars.currentplayer->isdead)
-#else
-	if (g_Vars.currentplayernum == data->victims[data->victimindex])
-#endif
 	{
 		time240 = TICKS(60 * 240) - data->age240;
 		x = viGetViewLeft() + viGetViewWidth() / 2;
@@ -333,12 +317,10 @@ Gfx *pacRenderHud(Gfx *gdl)
 		secs = (time240 + (TICKS(240) - 1)) / TICKS(240);
 		sprintf(text, "%d:%02d", mins, secs);
 
-#ifndef PLATFORM_N64
-		const s32 playercount = PLAYERCOUNT();
+		const int playercount = PLAYERCOUNT();
 		if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 			gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 		}
-#endif
 
 		gdl = textConfigureGfxPipeline(gdl);
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
@@ -347,28 +329,21 @@ Gfx *pacRenderHud(Gfx *gdl)
 		textwidth += x;
 		textheight += y;
 
-#if VERSION >= VERSION_NTSC_1_0
 		gdl = text0f153990(gdl, x, y, textwidth, textheight);
 		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0xa0, viGetWidth(), viGetHeight(), 0, 0);
-#else
-		gdl = text0f153858(gdl, &x, &y, &textwidth, &textheight);
-		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0x88, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 		gdl = text0f153780(gdl);
 
-#ifndef PLATFORM_N64
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
-#endif
 	}
 
 	return gdl;
 }
 
-void pacCalculatePlayerScore(struct mpchrconfig *mpchr, s32 mpchrnum, s32 *score, s32 *arg3)
+void pacCalculatePlayerScore(struct mpchrconfig *mpchr, int mpchrnum, int *score, int *arg3)
 {
 	struct mpchrconfig *loopmpchr;
-	s32 i;
-	s32 index;
+	int i;
+	int index;
 
 	*score = 0;
 	index = func0f18d0e8(mpchrnum);
@@ -418,7 +393,7 @@ bool pacRadarChr(Gfx **gdl, struct prop *prop)
 			dist.z = prop->pos.z - g_Vars.currentplayer->prop->pos.z;
 
 			if (g_MpSetup.options & MPOPTION_TEAMSENABLED) {
-				u32 colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
+				uint32_t colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
 				*gdl = radarDrawDot(*gdl, vprop, &dist, colour, 0, 1);
 			} else {
 				*gdl = radarDrawDot(*gdl, vprop, &dist, 0x00ff0000, 0, 1);

@@ -10,7 +10,7 @@
 
 void roomsReset(void)
 {
-	s32 i;
+	int i;
 
 	g_RoomMtxNumSlots = PLAYERCOUNT() >= 2 ? 200 : 120;
 

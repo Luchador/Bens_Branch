@@ -14,7 +14,6 @@
 extern "C" {
 #endif
 
-#include <PR/ultratypes.h>
 #include "os_pfs.h"
 
 
@@ -61,8 +60,8 @@ extern "C" {
 /* Rumble PAK interface */
 #define	osMotorStart(x)		__osMotorAccess((x), 1)
 #define	osMotorStop(x)		__osMotorAccess((x), 0)
-extern s32 __osMotorAccess(OSPfs *, s32);
-s32 osMotorProbe(OSPfs* pfs, s32 channel);
+extern int __osMotorAccess(OSPfs *, int);
+int osMotorProbe(OSPfs* pfs, int channel);
 
 
 #endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */

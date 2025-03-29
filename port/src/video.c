@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-#include <PR/ultratypes.h>
+#include <stdint.h>
 #include <PR/gbi.h>
 #include "platform.h"
 #include "config.h"
@@ -30,44 +30,44 @@ static struct GfxRenderingAPI *renderingAPI;
 
 static bool initDone = false;
 
-static s32 vidWidth = DEFAULT_VID_WIDTH;
-static s32 vidHeight = DEFAULT_VID_HEIGHT;
-static s32 vidFramebuffers = true;
-static s32 vidFullscreen = DEFAULT_VID_FULLSCREEN;
-static s32 vidFullscreenExclusive = DEFAULT_VID_FULLSCREEN_EXCLUSIVE;
-static s32 vidMaximize = false;
-static s32 vidCenter = false;
-static s32 vidAllowHiDpi = false;
-static s32 vidVsync = 1;
-static s32 vidMSAA = 1;
-static s32 vidFramerateLimit = 0;
+static int vidWidth = DEFAULT_VID_WIDTH;
+static int vidHeight = DEFAULT_VID_HEIGHT;
+static int vidFramebuffers = true;
+static int vidFullscreen = DEFAULT_VID_FULLSCREEN;
+static int vidFullscreenExclusive = DEFAULT_VID_FULLSCREEN_EXCLUSIVE;
+static int vidMaximize = false;
+static int vidCenter = false;
+static int vidAllowHiDpi = false;
+static int vidVsync = 1;
+static int vidMSAA = 1;
+static int vidFramerateLimit = 0;
 
-static s32 vidDisplayFPS = 0;
-static f32 vidDisplayFPSInterval = 1.f;
-static f32 vidAvgFPS = 0;
-static f64 vidLastRenderTime;
+static int vidDisplayFPS = 0;
+static float vidDisplayFPSInterval = 1.f;
+static float vidAvgFPS = 0;
+static double vidLastRenderTime;
 
-static s32 vidNumModes = 1;
+static int vidNumModes = 1;
 static displaymode vidModeDefault;
 static displaymode *vidModes = &vidModeDefault;
 
-static s32 texFilter = FILTER_LINEAR;
-static s32 texFilter2D = true;
-static s32 texDetail = false;
+static int texFilter = FILTER_LINEAR;
+static int texFilter2D = true;
+static int texDetail = false;
 
-static u32 dlcount = 0;
-static u32 frames = 0;
-static f64 startTime, endTime;
-static f64 accumDelta = 0.0;
-static f64 fpsTime = 0.0;
-static s32 fpsNumFrames = 0;
+static uint32_t dlcount = 0;
+static uint32_t frames = 0;
+static double startTime, endTime;
+static double accumDelta = 0.0;
+static double fpsTime = 0.0;
+static int fpsNumFrames = 0;
 
 static bool framebuffers_enabled;
 static bool detail_textures;
 
-static s32 videoInitDisplayModes(void);
+static int videoInitDisplayModes(void);
 
-s32 videoInit(void)
+int videoInit(void)
 {
 	wmAPI = &gfx_sdl;
 	renderingAPI = &gfx_opengl_api;
@@ -139,14 +139,14 @@ void videoEndFrame(void)
 	++frames;
 	++fpsNumFrames;
 
-	const f64 flipTime = wmAPI->get_time();
+	const double flipTime = wmAPI->get_time();
 	accumDelta += flipTime - endTime;
 	endTime = flipTime;
 	vidLastRenderTime = endTime - startTime;
 
 	if (endTime >= fpsTime) {
 		char tmp[128];
-		vidAvgFPS = fpsNumFrames ? ((f64)fpsNumFrames / accumDelta) : 0.f;
+		vidAvgFPS = fpsNumFrames ? ((double)fpsNumFrames / accumDelta) : 0.f;
 		fpsNumFrames = 0;
 		accumDelta = 0.0;
 		snprintf(tmp, sizeof(tmp), "fps %4.1f frt %lf frm %u", vidAvgFPS, vidLastRenderTime, frames);
@@ -155,12 +155,12 @@ void videoEndFrame(void)
 	}
 }
 
-f64 videoGetLastRenderTime(void)
+double videoGetLastRenderTime(void)
 {
 	return vidLastRenderTime;
 }
 
-f32 videoGetAverageFPS(void)
+float videoGetAverageFPS(void)
 {
 	return vidAvgFPS;
 }
@@ -180,64 +180,64 @@ void *videoGetWindowHandle(void)
 	return NULL;
 }
 
-void videoUpdateNativeResolution(s32 w, s32 h)
+void videoUpdateNativeResolution(int w, int h)
 {
 	gfx_current_native_viewport.width = w;
 	gfx_current_native_viewport.height = h;
 	gfx_current_native_aspect = (float)w / (float)h;
 }
 
-s32 videoGetNativeWidth(void)
+int videoGetNativeWidth(void)
 {
 	return gfx_current_native_viewport.width;
 }
 
-s32 videoGetNativeHeight(void)
+int videoGetNativeHeight(void)
 {
 	return gfx_current_native_viewport.height;
 }
 
-s32 videoGetWidth(void)
+int videoGetWidth(void)
 {
 	return gfx_current_dimensions.width;
 }
 
-s32 videoGetHeight(void)
+int videoGetHeight(void)
 {
 	return gfx_current_dimensions.height;
 }
 
-s32 videoGetFullscreen(void)
+int videoGetFullscreen(void)
 {
 	vidFullscreen = wmAPI->get_fullscreen_state();
 	return vidFullscreen;
 }
 
-s32 videoGetFullscreenMode(void)
+int videoGetFullscreenMode(void)
 {
 	vidFullscreenExclusive = wmAPI->get_fullscreen_flag_mode();
 	return vidFullscreenExclusive;
 }
 
-s32 videoGetMaximizeWindow(void)
+int videoGetMaximizeWindow(void)
 {
 	vidMaximize = wmAPI->get_maximized_state();
 	return vidMaximize;
 }
 
-s32 videoGetCenterWindow(void)
+int videoGetCenterWindow(void)
 {
 	return vidCenter;
 }
 
-f32 videoGetAspect(void)
+float videoGetAspect(void)
 {
 	return gfx_current_dimensions.aspect_ratio;
 }
 
-s32 videoGetDisplayModeIndex(void)
+int videoGetDisplayModeIndex(void)
 {
-	for (s32 i = 1; i < vidNumModes; ++i) {
+	for (int i = 1; i < vidNumModes; ++i) {
 		if (vidModes[i].width == gfx_current_dimensions.width &&
 		    vidModes[i].height == gfx_current_dimensions.height) {
 			return i;
@@ -247,30 +247,30 @@ s32 videoGetDisplayModeIndex(void)
 	return 0;
 }
 
-s32 videoGetMSAA(void)
+int videoGetMSAA(void)
 {
-	vidMSAA = (s32)gfx_msaa_level;
+	vidMSAA = (int)gfx_msaa_level;
 	return vidMSAA;
 }
 
-s32 videoGetVsync(void)
+int videoGetVsync(void)
 {
 	vidVsync = wmAPI->get_swap_interval();
 	return vidVsync;
 }
 
-s32 videoGetFramerateLimit(void)
+int videoGetFramerateLimit(void)
 {
 	vidFramerateLimit = wmAPI->get_target_fps();
 	return vidFramerateLimit;
 }
 
-s32 videoGetDisplayFPS(void)
+int videoGetDisplayFPS(void)
 {
 	return vidDisplayFPS;
 }
 
-static s32 videoInitDisplayModes(void)
+static int videoInitDisplayModes(void)
 {
 	if (!wmAPI->get_current_display_mode(&vidModeDefault.width, &vidModeDefault.height)) {
 		vidModeDefault.width = 640;
@@ -278,12 +278,12 @@ static s32 videoInitDisplayModes(void)
 		return false;
 	}
 
-	const s32 numBaseModes = wmAPI->get_num_display_modes();
+	const int numBaseModes = wmAPI->get_num_display_modes();
 	if (!numBaseModes) {
 		return false;
 	}
 
-	const s32 numCustomModes = 1;
+	const int numCustomModes = 1;
 	displaymode *modeList = sysMemZeroAlloc((numBaseModes + numCustomModes) * sizeof(displaymode));
 	if (!modeList) {
 		return false;
@@ -292,11 +292,11 @@ static s32 videoInitDisplayModes(void)
 	modeList[0].width = 0;
 	modeList[0].height = 0;
 
-	s32 numModes = 1;
-	s32 w = -1, h = w, neww = w, newh = w;
+	int numModes = 1;
+	int w = -1, h = w, neww = w, newh = w;
 
 	// SDL modes are guaranteed to be sorted high to low
-	for (s32 i = 0; i < numBaseModes; ++i) {
+	for (int i = 0; i < numBaseModes; ++i) {
 		wmAPI->get_display_mode(i, &neww, &newh);
 
 		if (neww != w || newh != h) {
@@ -319,7 +319,7 @@ static s32 videoInitDisplayModes(void)
 	return true;
 }
 
-s32 videoGetDisplayMode(displaymode *out, const s32 index)
+int videoGetDisplayMode(displaymode *out, const int index)
 {
 	if (index >= 0 && index < vidNumModes) {
 		*out = vidModes[index];
@@ -328,12 +328,12 @@ s32 videoGetDisplayMode(displaymode *out, const s32 index)
 	return false;
 }
 
-s32 videoGetNumDisplayModes(void)
+int videoGetNumDisplayModes(void)
 {
 	return vidNumModes;
 }
 
-void videoSetDisplayMode(const s32 index)
+void videoSetDisplayMode(const int index)
 {
 	const displaymode dm = vidModes[index];
 
@@ -345,8 +345,8 @@ void videoSetDisplayMode(const s32 index)
 	vidWidth = dm.width;
 	vidHeight = dm.height;
 
-	s32 posX = 100;
-	s32 posY = 100;
+	int posX = 100;
+	int posY = 100;
 	if (vidCenter) {
 		wmAPI->get_centered_positions(vidWidth, vidHeight, &posX, &posY);
 	}
@@ -362,28 +362,28 @@ void videoSetDisplayMode(const s32 index)
 	}
 }
 
-s32 videoGetTextureFilter2D(void)
+int videoGetTextureFilter2D(void)
 {
 	return texFilter2D;
 }
 
-u32 videoGetTextureFilter(void)
+uint32_t videoGetTextureFilter(void)
 {
 	return texFilter;
 }
 
-s32 videoGetDetailTextures(void)
+int videoGetDetailTextures(void)
 {
 	return texDetail;
 }
 
-void videoSetWindowOffset(s32 x, s32 y)
+void videoSetWindowOffset(int x, int y)
 {
 	gfx_current_game_window_viewport.x = x;
 	gfx_current_game_window_viewport.y = y;
 }
 
-void videoSetFullscreen(s32 fs)
+void videoSetFullscreen(int fs)
 {
 	if (fs != vidFullscreen) {
 		vidFullscreen = !!fs;
@@ -396,7 +396,7 @@ void videoSetFullscreen(s32 fs)
 	}
 }
 
-void videoSetFullscreenMode(s32 mode)
+void videoSetFullscreenMode(int mode)
 {
 	vidFullscreenExclusive = mode;
 	wmAPI->set_fullscreen_flag(mode);
@@ -406,32 +406,32 @@ void videoSetFullscreenMode(s32 mode)
 	}
 }
 
-void videoSetMaximizeWindow(s32 fs)
+void videoSetMaximizeWindow(int fs)
 {
 	if (fs != vidMaximize) {
 		vidMaximize = !!fs;
 		wmAPI->set_maximize(vidMaximize);
 		if (vidCenter && !vidMaximize) {
-			s32 posX = 0;
-			s32 posY = 0;
+			int posX = 0;
+			int posY = 0;
 			wmAPI->get_centered_positions(vidWidth, vidHeight, &posX, &posY);
 			wmAPI->set_dimensions(vidWidth, vidHeight, posX, posY);
 		}
 	}
 }
 
-void videoSetCenterWindow(s32 center)
+void videoSetCenterWindow(int center)
 {
 	vidCenter = center;
 	if (vidCenter && !vidMaximize) {
-		s32 posX = 0;
-		s32 posY = 0;
+		int posX = 0;
+		int posY = 0;
 		wmAPI->get_centered_positions(vidWidth, vidHeight, &posX, &posY);
 		wmAPI->set_dimensions(vidWidth, vidHeight, posX, posY);
 	}
 }
 
-void videoSetTextureFilter(u32 filter)
+void videoSetTextureFilter(uint32_t filter)
 {
 	if (filter > FILTER_THREE_POINT) filter = FILTER_THREE_POINT;
 	if (texFilter == filter) return;
@@ -439,29 +439,29 @@ void videoSetTextureFilter(u32 filter)
 	gfx_set_texture_filter((enum FilteringMode)filter);
 }
 
-void videoSetTextureFilter2D(s32 filter)
+void videoSetTextureFilter2D(int filter)
 {
 	texFilter2D = !!filter;
 }
 
-void videoSetDetailTextures(s32 detail)
+void videoSetDetailTextures(int detail)
 {
 	texDetail = !!detail;
 	detail_textures = (bool)texDetail;
 }
 
-s32 videoCreateFramebuffer(u32 w, u32 h, s32 upscale, s32 autoresize)
+int videoCreateFramebuffer(uint32_t w, uint32_t h, int upscale, int autoresize)
 {
 	return gfx_create_framebuffer(w, h, upscale, autoresize);
 }
 
-void videoSetMSAA(const s32 msaa)
+void videoSetMSAA(const int msaa)
 {
 	vidMSAA = msaa;
-	gfx_msaa_level = (u32)vidMSAA;
+	gfx_msaa_level = (uint32_t)vidMSAA;
 }
 
-void videoSetVsync(const s32 vsync)
+void videoSetVsync(const int vsync)
 {
 	vidVsync = wmAPI->set_swap_interval(vsync) ? vsync : 0;
 
@@ -471,18 +471,18 @@ void videoSetVsync(const s32 vsync)
 	}
 }
 
-void videoSetFramerateLimit(const s32 limit)
+void videoSetFramerateLimit(const int limit)
 {
 	vidFramerateLimit = (vidVsync == 0 && limit == 0) ? VIDEO_MAX_FPS : limit;
 	wmAPI->set_target_fps(vidFramerateLimit);
 }
 
-void videoSetDisplayFPS(const s32 displayfps)
+void videoSetDisplayFPS(const int displayfps)
 {
 	vidDisplayFPS = displayfps;
 }
 
-void videoSetFramebuffer(s32 target)
+void videoSetFramebuffer(int target)
 {
 	return gfx_set_framebuffer(target, 1.f);
 }
@@ -492,17 +492,17 @@ void videoResetFramebuffer(void)
 	return gfx_reset_framebuffer();
 }
 
-s32 videoFramebuffersSupported(void)
+int videoFramebuffersSupported(void)
 {
 	return framebuffers_enabled;
 }
 
-void videoResizeFramebuffer(s32 target, u32 w, u32 h, s32 upscale, s32 autoresize)
+void videoResizeFramebuffer(int target, uint32_t w, uint32_t h, int upscale, int autoresize)
 {
 	gfx_resize_framebuffer(target, w, h, upscale, autoresize);
 }
 
-void videoCopyFramebuffer(s32 dst, s32 src, s32 left, s32 top)
+void videoCopyFramebuffer(int dst, int src, int left, int top)
 {
 	// assume immediate copies always read the front buffer
 	gfx_copy_framebuffer(dst, src, left, top, false);

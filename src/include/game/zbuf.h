@@ -5,9 +5,8 @@
 #include "types.h"
 
 void *zbufGetAllocation(void);
-void zbufReset(s32 stagenum);
+void zbufReset(int stagenum);
 void zbufAllocate(void);
-void zbufSwap(void);
 Gfx *zbufConfigureRdp(Gfx *gdl);
 Gfx *zbufClear(Gfx *gdl);
 Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl);

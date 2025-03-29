@@ -25,12 +25,12 @@ struct menudialogdef g_MpEndscreenIndGameOverMenuDialog;
 struct menudialogdef g_MpEndscreenTeamGameOverMenuDialog;
 struct menudialogdef g_MpEndscreenSavePlayerMenuDialog;
 
-MenuItemHandlerResult mpStatsForPlayerDropdownHandler(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult mpStatsForPlayerDropdownHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
 	struct mpchrconfig *mpchr;
-	s32 v0;
-	s32 v1;
-	s32 a1;
+	int v0;
+	int v1;
+	int a1;
 
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
@@ -95,7 +95,7 @@ MenuItemHandlerResult mpStatsForPlayerDropdownHandler(s32 operation, struct menu
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerMpEndGame(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMpEndGame(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_Vars.currentplayer->aborted = true;
@@ -108,7 +108,7 @@ MenuItemHandlerResult menuhandlerMpEndGame(s32 operation, struct menuitem *item,
 /**
  * This is something near the top of the "End Game" dialog during gameplay.
  */
-MenuItemHandlerResult menuhandler00178018(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandler00178018(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_CHECKHIDDEN) {
 		if (g_BossFile.locktype != MPLOCKTYPE_CHALLENGE) {
@@ -138,7 +138,7 @@ char *mpMenuTextInGameLimit(struct menuitem *item)
 	return g_StringPointer;
 }
 
-MenuItemHandlerResult menuhandlerMpInGameLimitLabel(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMpInGameLimitLabel(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_CHECKHIDDEN) {
 		switch (item->param) {
@@ -151,7 +151,7 @@ MenuItemHandlerResult menuhandlerMpInGameLimitLabel(s32 operation, struct menuit
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerMpPause(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMpPause(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		if (mpIsPaused()) {
@@ -176,7 +176,7 @@ MenuItemHandlerResult menuhandlerMpPause(s32 operation, struct menuitem *item, u
 	return 0;
 }
 
-char *menutextPauseOrUnpause(s32 arg0)
+char *menutextPauseOrUnpause(int arg0)
 {
 	if (mpIsPaused()) {
 		return langGet(L_MPMENU_289); // "Unpause"
@@ -185,7 +185,7 @@ char *menutextPauseOrUnpause(s32 arg0)
 	return langGet(L_MPMENU_288); // "Pause"
 }
 
-char *menutextMatchTime(s32 arg0)
+char *menutextMatchTime(int arg0)
 {
 	formatTime(g_StringPointer, lvGetStageTime60(), TIMEPRECISION_SECONDS);
 
@@ -342,7 +342,7 @@ char *mpMenuTitleStatsFor(struct menudialogdef *dialogdef)
 	return g_StringPointer;
 }
 
-MenuItemHandlerResult func0f178440(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult func0f178440(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation);
 
@@ -503,7 +503,7 @@ struct menudialogdef g_MpEndscreenTeamRankingMenuDialog = {
 
 char *mpMenuTextPlacementWithSuffix(struct menuitem *item)
 {
-	u16 suffixes[] = {
+	uint16_t suffixes[] = {
 		L_MPMENU_264, // "1st"
 		L_MPMENU_265, // "2nd"
 		L_MPMENU_266, // "3rd"
@@ -521,7 +521,7 @@ char *mpMenuTextPlacementWithSuffix(struct menuitem *item)
 	return langRemoveNewline(langGet(suffixes[g_PlayerConfigsArray[g_MpPlayerNum].base.placement]));
 }
 
-MenuItemHandlerResult mpPlacementMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult mpPlacementMenuHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_GETCOLOUR) {
 		if (g_PlayerConfigsArray[g_MpPlayerNum].base.placement == 0) { // winner
@@ -532,15 +532,15 @@ MenuItemHandlerResult mpPlacementMenuHandler(s32 operation, struct menuitem *ite
 	return 0;
 }
 
-MenuItemHandlerResult mpAwardsMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult mpAwardsMenuHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_RENDER) {
 		Gfx *gdl = data->type19.gdl;
 		struct menuitemrenderdata *renderdata = data->type19.renderdata2;
 		bool configured = false;
-		s32 x = renderdata->x + renderdata->width - 15;
-		s32 i;
-		u32 colour;
+		int x = renderdata->x + renderdata->width - 15;
+		int i;
+		uint32_t colour;
 
 		for (i = 0; i < MAX_PLAYERS; i++) {
 			if (g_PlayerConfigsArray[g_MpPlayerNum].medals & (1 << i)) {
@@ -577,11 +577,11 @@ MenuItemHandlerResult mpAwardsMenuHandler(s32 operation, struct menuitem *item, 
 				gDPSetEnvColorViaWord(gdl++, colour);
 
 				gSPTextureRectangle(gdl++,
-						(x << 2) * g_ScaleX,
+						(x << 2),
 						(renderdata->y - 2) << 2,
-						((x + 11) << 2) * g_ScaleX,
+						((x + 11) << 2),
 						(renderdata->y + 9) << 2,
-						G_TX_RENDERTILE, 0x0010, 0x0150, 1024 / g_ScaleX, -1024);
+						G_TX_RENDERTILE, 0x0010, 0x0150, 1024, -1024);
 
 				x -= 14;
 			}
@@ -593,7 +593,7 @@ MenuItemHandlerResult mpAwardsMenuHandler(s32 operation, struct menuitem *item, 
 	return 0;
 }
 
-MenuItemHandlerResult mpPlayerTitleMenuHandler(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult mpPlayerTitleMenuHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_GETCOLOUR) {
 		if (g_PlayerConfigsArray[g_MpPlayerNum].title != g_PlayerConfigsArray[g_MpPlayerNum].newtitle) {
@@ -604,15 +604,15 @@ MenuItemHandlerResult mpPlayerTitleMenuHandler(s32 operation, struct menuitem *i
 	return 0;
 }
 
-char *mpMenuTextPlayerTitle(s32 arg0)
+char *mpMenuTextPlayerTitle(int arg0)
 {
 	return (langGet(L_MISC_185 + g_PlayerConfigsArray[g_MpPlayerNum].title));
 }
 
-MenuItemHandlerResult mpConfirmPlayerNameHandler(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult mpConfirmPlayerNameHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
 	char *name = data->keyboard.string;
-	s32 i;
+	int i;
 
 	switch (operation) {
 	case MENUOP_GETTEXT:
@@ -656,7 +656,7 @@ MenuItemHandlerResult mpConfirmPlayerNameHandler(s32 operation, struct menuitem 
 
 void mpPushPauseDialog(void)
 {
-	u32 prevplayernum = g_MpPlayerNum;
+	uint32_t prevplayernum = g_MpPlayerNum;
 
 	if (g_MpSetup.paused != MPPAUSEMODE_GAMEOVER && g_MainIsEndscreen == 0)
 	{
@@ -684,9 +684,9 @@ void mpPushPauseDialog(void)
 	}
 }
 
-void mpPushEndscreenDialog(u32 arg0, u32 playernum)
+void mpPushEndscreenDialog(uint32_t arg0, uint32_t playernum)
 {
-	u32 prevplayernum = g_MpPlayerNum;
+	uint32_t prevplayernum = g_MpPlayerNum;
 	g_MpPlayerNum = playernum;
 
 	g_Menus[g_MpPlayerNum].playernum = arg0;

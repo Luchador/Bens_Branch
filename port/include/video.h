@@ -1,18 +1,18 @@
 #ifndef _IN_VIDEO_H
 #define _IN_VIDEO_H
 
-#include <PR/ultratypes.h>
+#include <stdint.h>
 #include <PR/gbi.h>
 
 // maximum framerate; if the game runs faster than this, things will break
 #define VIDEO_MAX_FPS 240
 
 typedef struct {
-	s32 width;
-	s32 height;
+	int width;
+	int height;
 } displaymode;
 
-s32 videoInit(void);
+int videoInit(void);
 void videoStartFrame(void);
 void videoSubmitCommands(Gfx *cmds);
 void videoClearScreen(void);
@@ -20,51 +20,51 @@ void videoEndFrame(void);
 
 void *videoGetWindowHandle(void);
 
-void videoUpdateNativeResolution(s32 w, s32 h);
-s32 videoGetNativeWidth(void);
-s32 videoGetNativeHeight(void);
+void videoUpdateNativeResolution(int w, int h);
+int videoGetNativeWidth(void);
+int videoGetNativeHeight(void);
 
-s32 videoGetWidth(void);
-s32 videoGetHeight(void);
-f32 videoGetAspect(void);
-s32 videoGetFullscreen(void);
-s32 videoGetFullscreenMode(void);
-s32 videoGetMaximizeWindow(void);
-void videoSetMaximizeWindow(s32 fs);
-s32 videoGetCenterWindow(void);
-void videoSetCenterWindow(s32 center);
-u32 videoGetTextureFilter(void);
-s32 videoGetTextureFilter2D(void);
-s32 videoGetDetailTextures(void);
-s32 videoGetDisplayModeIndex(void);
-s32 videoGetDisplayMode(displaymode *out, const s32 index);
-s32 videoGetNumDisplayModes(void);
-s32 videoGetVsync(void);
-s32 videoGetFramerateLimit(void);
-s32 videoGetDisplayFPS(void);
-s32 videoGetMSAA(void);
+int videoGetWidth(void);
+int videoGetHeight(void);
+float videoGetAspect(void);
+int videoGetFullscreen(void);
+int videoGetFullscreenMode(void);
+int videoGetMaximizeWindow(void);
+void videoSetMaximizeWindow(int fs);
+int videoGetCenterWindow(void);
+void videoSetCenterWindow(int center);
+uint32_t videoGetTextureFilter(void);
+int videoGetTextureFilter2D(void);
+int videoGetDetailTextures(void);
+int videoGetDisplayModeIndex(void);
+int videoGetDisplayMode(displaymode *out, const int index);
+int videoGetNumDisplayModes(void);
+int videoGetVsync(void);
+int videoGetFramerateLimit(void);
+int videoGetDisplayFPS(void);
+int videoGetMSAA(void);
 
-f32 videoGetAverageFPS(void);
-f64 videoGetLastRenderTime(void);
+float videoGetAverageFPS(void);
+double videoGetLastRenderTime(void);
 
-void videoSetWindowOffset(s32 x, s32 y);
-void videoSetFullscreen(s32 fs);
-void videoSetFullscreenMode(s32 mode);
-void videoSetTextureFilter(u32 filter);
-void videoSetTextureFilter2D(s32 filter);
-void videoSetDetailTextures(s32 detail);
-void videoSetDisplayMode(const s32 index);
-void videoSetVsync(const s32 vsync);
-void videoSetFramerateLimit(const s32 limit);
-void videoSetDisplayFPS(const s32 displayfps);
-void videoSetMSAA(const s32 msaa);
+void videoSetWindowOffset(int x, int y);
+void videoSetFullscreen(int fs);
+void videoSetFullscreenMode(int mode);
+void videoSetTextureFilter(uint32_t filter);
+void videoSetTextureFilter2D(int filter);
+void videoSetDetailTextures(int detail);
+void videoSetDisplayMode(const int index);
+void videoSetVsync(const int vsync);
+void videoSetFramerateLimit(const int limit);
+void videoSetDisplayFPS(const int displayfps);
+void videoSetMSAA(const int msaa);
 
-s32 videoCreateFramebuffer(u32 w, u32 h, s32 upscale, s32 autoresize);
-void videoSetFramebuffer(s32 target);
+int videoCreateFramebuffer(uint32_t w, uint32_t h, int upscale, int autoresize);
+void videoSetFramebuffer(int target);
 void videoResetFramebuffer(void);
-void videoCopyFramebuffer(s32 dst, s32 src, s32 left, s32 top);
-void videoResizeFramebuffer(s32 target, u32 w, u32 h, s32 upscale, s32 autoresize);
-s32 videoFramebuffersSupported(void);
+void videoCopyFramebuffer(int dst, int src, int left, int top);
+void videoResizeFramebuffer(int target, uint32_t w, uint32_t h, int upscale, int autoresize);
+int videoFramebuffersSupported(void);
 
 void videoResetTextureCache(void);
 void videoFreeCachedTexture(const void *texptr);

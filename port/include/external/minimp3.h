@@ -1430,9 +1430,9 @@ static void mp3d_DCT_II(float *grbuf, int n)
 static int16_t mp3d_scale_pcm(float sample)
 {
 #if HAVE_ARMV6
-    int32_t s32 = (int32_t)(sample + .5f);
-    s32 -= (s32 < 0);
-    int16_t s = (int16_t)minimp3_clip_int16_arm(s32);
+    int32_t int = (int32_t)(sample + .5f);
+    int -= (int < 0);
+    int16_t s = (int16_t)minimp3_clip_int16_arm(int);
 #else
     if (sample >=  32766.5) return (int16_t) 32767;
     if (sample <= -32767.5) return (int16_t)-32768;
@@ -1552,8 +1552,8 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
             int16x4_t pcma, pcmb;
             a = VADD(a, VSET(0.5f));
             b = VADD(b, VSET(0.5f));
-            pcma = vqmovn_s32(vqaddq_s32(vcvtq_s32_f32(a), vreinterpretq_s32_u32(vcltq_f32(a, VSET(0)))));
-            pcmb = vqmovn_s32(vqaddq_s32(vcvtq_s32_f32(b), vreinterpretq_s32_u32(vcltq_f32(b, VSET(0)))));
+            pcma = vqmovn_int(vqaddq_int(vcvtq_int_f32(a), vreinterpretq_int_u32(vcltq_f32(a, VSET(0)))));
+            pcmb = vqmovn_int(vqaddq_int(vcvtq_int_f32(b), vreinterpretq_int_u32(vcltq_f32(b, VSET(0)))));
             vst1_lane_s16(dstr + (15 - i)*nch, pcma, 1);
             vst1_lane_s16(dstr + (17 + i)*nch, pcmb, 1);
             vst1_lane_s16(dstl + (15 - i)*nch, pcma, 0);
@@ -1833,8 +1833,8 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
         int16x4_t pcma, pcmb;
         a = VADD(a, VSET(0.5f));
         b = VADD(b, VSET(0.5f));
-        pcma = vqmovn_s32(vqaddq_s32(vcvtq_s32_f32(a), vreinterpretq_s32_u32(vcltq_f32(a, VSET(0)))));
-        pcmb = vqmovn_s32(vqaddq_s32(vcvtq_s32_f32(b), vreinterpretq_s32_u32(vcltq_f32(b, VSET(0)))));
+        pcma = vqmovn_int(vqaddq_int(vcvtq_int_f32(a), vreinterpretq_int_u32(vcltq_f32(a, VSET(0)))));
+        pcmb = vqmovn_int(vqaddq_int(vcvtq_int_f32(b), vreinterpretq_int_u32(vcltq_f32(b, VSET(0)))));
         vst1_lane_s16(out+i  , pcma, 0);
         vst1_lane_s16(out+i+1, pcma, 1);
         vst1_lane_s16(out+i+2, pcma, 2);

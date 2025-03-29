@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/bondeyespy.h"
 #include "game/chraction.h"
@@ -24,31 +25,29 @@
 #include "lib/collision.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "input.h"
-#endif
 
-u8 g_EyespyPickup = false;
-u8 g_EyespyHit = EYESPYHIT_NONE;
-u8 g_EyespyPrevHit = EYESPYHIT_NONE;
-f32 g_EyespyMaxHeight = 160;
-f32 g_EyespyMinHeight = 80;
-u32 g_EyespyFallAccel = 100;
-u32 g_EyespyMaxFallSpeed = 3000;
+uint8_t g_EyespyPickup = false;
+uint8_t g_EyespyHit = EYESPYHIT_NONE;
+uint8_t g_EyespyPrevHit = EYESPYHIT_NONE;
+float g_EyespyMaxHeight = 160;
+float g_EyespyMinHeight = 80;
+uint32_t g_EyespyFallAccel = 100;
+uint32_t g_EyespyMaxFallSpeed = 3000;
 
 /**
  * Determines the eyespy's ground Y value by doing a collision check for a
  * position 50 units above the current position, or less if the eyespy is near
  * the top of its height range.
  */
-f32 eyespyFindGround(RoomNum *floorroom)
+float eyespyFindGround(RoomNum *floorroom)
 {
 	struct prop *prop = g_Vars.currentplayer->eyespy->prop;
-	s32 inlift;
+	int inlift;
 	struct prop *lift;
 	struct coord pos;
-	f32 yoffset = 50;
-	f32 ground;
+	float yoffset = 50;
+	float ground;
 
 	if (g_EyespyMaxHeight - g_Vars.currentplayer->eyespy->height < 50) {
 		yoffset = g_EyespyMaxHeight - g_Vars.currentplayer->eyespy->height;
@@ -71,15 +70,15 @@ f32 eyespyFindGround(RoomNum *floorroom)
 	return ground;
 }
 
-s32 eyespyTryMoveUpwards(f32 yvel)
+int eyespyTryMoveUpwards(float yvel)
 {
-	s32 result;
+	int result;
 	struct prop *prop = g_Vars.currentplayer->eyespy->prop;
 	struct chrdata *chr = prop->chr;
 	struct coord dstpos;
 	RoomNum dstrooms[8];
-	s32 types;
-	f32 f0;
+	int types;
+	float f0;
 
 	dstpos.x = prop->pos.x;
 	dstpos.y = prop->pos.y + yvel;
@@ -112,7 +111,7 @@ s32 eyespyTryMoveUpwards(f32 yvel)
 	return result;
 }
 
-s32 eyespyCalculateNewPosition(struct coord *vel)
+int eyespyCalculateNewPosition(struct coord *vel)
 {
 	bool result = true;
 	struct prop *eyespyprop = g_Vars.currentplayer->eyespy->prop;
@@ -121,15 +120,15 @@ s32 eyespyCalculateNewPosition(struct coord *vel)
 	RoomNum dstrooms[8];
 	RoomNum floorroom;
 	RoomNum sp74[24];
-	s32 types;
-	s32 i;
-	f32 ymin;
-	f32 xdiff;
-	f32 zdiff;
-	f32 radius;
-	f32 halfradius;
+	int types;
+	int i;
+	float ymin;
+	float xdiff;
+	float zdiff;
+	float radius;
+	float halfradius;
 	struct prop *prop;
-	s32 playernum;
+	int playernum;
 
 	eyespyFindGround(&floorroom);
 
@@ -214,7 +213,7 @@ s32 eyespyCalculateNewPosition(struct coord *vel)
 
 bool eyespyCalculateNewPositionWithPush(struct coord *vel)
 {
-	s32 result = eyespyCalculateNewPosition(vel);
+	int result = eyespyCalculateNewPosition(vel);
 	struct prop *prop;
 
 	if (result != CDRESULT_NOCOLLISION) {
@@ -246,12 +245,12 @@ bool eyespyCalculateNewPositionWithPush(struct coord *vel)
 	return result;
 }
 
-s32 eyespy0f0cf890(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, struct coord *arg4)
+int eyespy0f0cf890(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, struct coord *arg4)
 {
 	if (cd00024ea4()) {
 		struct coord sp24;
-		s32 someint;
-		f32 somefloat = cd00024e98();
+		int someint;
+		float somefloat = cd00024e98();
 		sp24.x = arg0->x * somefloat * 0.25f;
 		sp24.y = arg0->y * somefloat * 0.25f;
 		sp24.z = arg0->z * somefloat * 0.25f;
@@ -279,12 +278,12 @@ s32 eyespy0f0cf890(struct coord *arg0, struct coord *arg1, struct coord *arg2, s
 	return -1;
 }
 
-s32 eyespy0f0cf9f8(struct coord *arg0, struct coord *arg1, struct coord *arg2)
+int eyespy0f0cf9f8(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 {
-	f32 tmp;
+	float tmp;
 	struct coord sp30;
 	struct coord sp24;
-	f32 dist;
+	float dist;
 
 	if (arg1->f[0] != arg2->f[0] || arg1->f[2] != arg2->f[2]) {
 		sp30.x = arg2->x - arg1->x;
@@ -308,13 +307,13 @@ s32 eyespy0f0cf9f8(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 	return -1;
 }
 
-s32 eyespy0f0cfafc(struct coord *arg0, struct coord *arg1, struct coord *arg2)
+int eyespy0f0cfafc(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 {
 	struct coord sp34;
 	struct coord sp28;
-	f32 width = 26;
+	float width = 26;
 	struct prop *prop = g_Vars.currentplayer->eyespy->prop;
-	f32 tmp;
+	float tmp;
 
 	sp34.x = arg1->x - (prop->pos.x + arg0->f[0]);
 	sp34.z = arg1->z - (prop->pos.z + arg0->f[2]);
@@ -377,7 +376,7 @@ s32 eyespy0f0cfafc(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 	return false;
 }
 
-s32 eyespy0f0cfdd0(struct coord *vel, struct coord *arg1, struct coord *arg2)
+int eyespy0f0cfdd0(struct coord *vel, struct coord *arg1, struct coord *arg2)
 {
 	bool result = eyespyCalculateNewPositionWithPush(vel);
 
@@ -394,13 +393,13 @@ void eyespyUpdateVertical(void)
 	struct coord spa0;
 	struct prop *prop = g_Vars.currentplayer->eyespy->prop;
 	struct coord dist;
-	f32 newground;
+	float newground;
 	struct chrdata *chr = prop->chr;
 	struct coord origpos;
-	f32 accel;
-	f32 maxfallspeed;
-	u8 hit = EYESPYHIT_NONE;
-	f32 newy;
+	float accel;
+	float maxfallspeed;
+	uint8_t hit = EYESPYHIT_NONE;
+	float newy;
 	struct coord sp60;
 	struct coord sp54;
 	struct coord sp44;
@@ -485,7 +484,7 @@ void eyespyUpdateVertical(void)
 
 	// Handle rebound if hitting the min or max height
 	if (g_Vars.currentplayer->eyespy->vel.y != 0) {
-		f32 newheight = g_Vars.currentplayer->eyespy->vel.y + g_Vars.currentplayer->eyespy->height;
+		float newheight = g_Vars.currentplayer->eyespy->vel.y + g_Vars.currentplayer->eyespy->height;
 		bool rebound = false;
 
 		if (newheight < g_EyespyMinHeight) {
@@ -653,38 +652,38 @@ bool eyespyTryLaunch(void)
 void eyespyProcessInput(bool allowbuttons)
 {
 	struct chrdata *chr = g_Vars.currentplayer->eyespy->prop->chr;
-	f32 spe0 = 0.96f;
-	f32 f;
-	s32 i;
-	f32 sidewaysdelta2;
-	f32 sidewaysdelta1;
-	f32 forwarddelta2;
-	f32 forwarddelta1;
-	f32 yacceleration;
-	s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-	s8 c1stickx = joyGetStickX(contpad1);
-	s8 c2stickx;
-	s8 c1sticky = joyGetStickY(contpad1);
-	s8 c2sticky;
-	u32 c1buttons = allowbuttons ? joyGetButtons(contpad1, 0xffffffff) : 0;
-	u32 c2buttons;
+	float spe0 = 0.96f;
+	float f;
+	int i;
+	float sidewaysdelta2;
+	float sidewaysdelta1;
+	float forwarddelta2;
+	float forwarddelta1;
+	float yacceleration;
+	int8_t contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
+	int8_t c1stickx = joyGetStickX(contpad1);
+	int8_t c2stickx;
+	int8_t c1sticky = joyGetStickY(contpad1);
+	int8_t c2sticky;
+	uint32_t c1buttons = allowbuttons ? joyGetButtons(contpad1, 0xffffffff) : 0;
+	uint32_t c2buttons;
 	bool domovecentre = true;
-	s32 controlmode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
+	int controlmode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
 
 	bool aimpressed;
 	bool shootpressed;
 	bool exitpressed;
 	bool activatepressed;
-	f32 forwardspeed = 0.0f;
-	f32 pitchspeed = 0.0f;
-	f32 sidespeed = 0.0f;
-	f32 angle;
-	f32 ascendspeed = 0.0f;
-	f32 prevverta = g_Vars.currentplayer->eyespy->verta;
+	float forwardspeed = 0.0f;
+	float pitchspeed = 0.0f;
+	float sidespeed = 0.0f;
+	float angle;
+	float ascendspeed = 0.0f;
+	float prevverta = g_Vars.currentplayer->eyespy->verta;
 	RoomNum prevrooms[8];
-	s32 contpad2;
-	f32 tmp;
-	u32 umask, dmask, lmask, rmask;
+	int contpad2;
+	float tmp;
+	uint32_t umask, dmask, lmask, rmask;
 
 	if (controlmode == CONTROLMODE_PC) {
 		umask = U_CBUTTONS;
@@ -699,7 +698,7 @@ void eyespyProcessInput(bool allowbuttons)
 	}
 
 	if (controlmode >= CONTROLMODE_21 && controlmode < CONTROLMODE_PC) {
-		contpad2 = (s8) optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
+		contpad2 = (int8_t) optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
 		c2stickx = joyGetStickX(contpad2);
 		c2sticky = joyGetStickY(contpad2);
 
@@ -813,17 +812,13 @@ void eyespyProcessInput(bool allowbuttons)
 		} else {
 			ascendspeed = c1sticky * 0.25f;
 			forwardspeed = (c1buttons & umask ? 24.0f : 0) - (c1buttons & dmask ? 24.0f : 0);
-#ifndef PLATFORM_N64
 			if (controlmode == CONTROLMODE_PC) {
 				forwardspeed += c2sticky;
 			}
-#endif
 		}
 
 		sidespeed = (c1buttons & rmask ? 1 : 0) - (c1buttons & lmask ? 1 : 0);
-#ifndef PLATFORM_N64
 		if (!sidespeed && controlmode == CONTROLMODE_PC) sidespeed = c2stickx * 0.0125f;
-#endif
 	} else if (controlmode == CONTROLMODE_21 || controlmode == CONTROLMODE_23) {
 		forwardspeed = c1sticky;
 
@@ -877,7 +872,7 @@ void eyespyProcessInput(bool allowbuttons)
 		g_Vars.currentplayer->joybutinhibit = 0xffffffff;
 
 		if (g_Vars.currentplayernum == 0) {
-			f32 mdx, mdy;
+			float mdx, mdy;
 			inputMouseGetScaledDelta(&mdx, &mdy);
 			if (mdx || mdy) {
 				if (g_Vars.currentplayerstats && !optionsGetForwardPitch(g_Vars.currentplayerstats->mpindex)) {
@@ -1027,11 +1022,11 @@ void eyespyProcessInput(bool allowbuttons)
 
 	// Update bob
 	if (yacceleration == 0.0f) {
-		if (g_Vars.currentplayer->eyespy->bobactive || ABS(g_Vars.currentplayer->eyespy->vel.y) < 0.1f) {
+		if (g_Vars.currentplayer->eyespy->bobactive || fabsf(g_Vars.currentplayer->eyespy->vel.y) < 0.1f) {
 			g_Vars.currentplayer->eyespy->bobactive = true;
 			g_Vars.currentplayer->eyespy->bobtimer += g_Vars.lvupdate60;
 			// HACK: how do I scale this properly?
-			const f32 scale = (g_Vars.lvupdate60freal <= 1.1f) ? 0.0055f : 0.0125f;
+			const float scale = (g_Vars.lvupdate60freal <= 1.1f) ? 0.0055f : 0.0125f;
 			g_Vars.currentplayer->eyespy->vel.y += scale * g_Vars.lvupdate60freal * g_Vars.currentplayer->eyespy->bobdir;
 
 			if (g_Vars.currentplayer->eyespy->bobtimer > TICKS(120)) {
@@ -1147,10 +1142,10 @@ void eyespyProcessInput(bool allowbuttons)
 
 	// Check if the eyespy is inactive and coasting into the player's pickup range
 	if (g_Vars.currentplayer->eyespy->active == false && !g_EyespyPickup) {
-		s32 cdresult;
+		int cdresult;
 
-		f32 xdiff = g_Vars.currentplayer->eyespy->prop->pos.x - g_Vars.currentplayer->prop->pos.x;
-		f32 zdiff = g_Vars.currentplayer->eyespy->prop->pos.z - g_Vars.currentplayer->prop->pos.z;
+		float xdiff = g_Vars.currentplayer->eyespy->prop->pos.x - g_Vars.currentplayer->prop->pos.x;
+		float zdiff = g_Vars.currentplayer->eyespy->prop->pos.z - g_Vars.currentplayer->prop->pos.z;
 
 		g_EyespyPickup = true;
 

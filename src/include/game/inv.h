@@ -1,6 +1,7 @@
 #ifndef IN_GAME_INV_H
 #define IN_GAME_INV_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
@@ -9,7 +10,7 @@ extern struct invaimsettings invaimsettings_default;
 extern struct weapon *g_Weapons[WEAPON_SUICIDEPILL + 1];
 
 void invReset(void);
-void invInit(s32 numdoubles);
+void invInit(int numdoubles);
 
 void invClear(void);
 void invSortItem(struct invitem *item);
@@ -17,40 +18,40 @@ void invInsertItem(struct invitem *item);
 void invRemoveItem(struct invitem *item);
 struct invitem *invFindUnusedSlot(void);
 void invSetAllGuns(bool enable);
-struct invitem *invFindSingleWeapon(s32 weaponnum);
-bool invHasSingleWeaponExcAllGuns(s32 weaponnum);
-struct invitem *invFindDoubleWeapon(s32 weapon1, s32 weapon2);
-bool invHasDoubleWeaponExcAllGuns(s32 weapon1, s32 weapon2);
-bool invHasSingleWeaponOrProp(s32 weaponnum);
-bool invHasSingleWeaponIncAllGuns(s32 weaponnum);
-bool invHasDoubleWeaponIncAllGuns(s32 weapon1, s32 weapon2);
-bool invGiveSingleWeapon(s32 weaponnum);
-bool invGiveDoubleWeapon(s32 weapon1, s32 weapon2);
-void invRemoveItemByNum(s32 weaponnum);
+struct invitem *invFindSingleWeapon(int weaponnum);
+bool invHasSingleWeaponExcAllGuns(int weaponnum);
+struct invitem *invFindDoubleWeapon(int weapon1, int weapon2);
+bool invHasDoubleWeaponExcAllGuns(int weapon1, int weapon2);
+bool invHasSingleWeaponOrProp(int weaponnum);
+bool invHasSingleWeaponIncAllGuns(int weaponnum);
+bool invHasDoubleWeaponIncAllGuns(int weapon1, int weapon2);
+bool invGiveSingleWeapon(int weaponnum);
+bool invGiveDoubleWeapon(int weapon1, int weapon2);
+void invRemoveItemByNum(int weaponnum);
 bool invGiveProp(struct prop *prop);
 void invRemoveProp(struct prop *prop);
-s32 invGiveWeaponsByProp(struct prop *prop);
-void invChooseCycleForwardWeapon(s32 *weaponnum1, s32 *weaponnum2, bool arg2);
-void invChooseCycleBackWeapon(s32 *weaponnum1, s32 *weaponnum2, bool arg2);
-bool invHasKeyFlags(u32 wantkeyflags);
+int invGiveWeaponsByProp(struct prop *prop);
+void invChooseCycleForwardWeapon(int *weaponnum1, int *weaponnum2, bool arg2);
+void invChooseCycleBackWeapon(int *weaponnum1, int *weaponnum2, bool arg2);
+bool invHasKeyFlags(uint32_t wantkeyflags);
 bool invHasBriefcase(void);
 bool invHasDataUplink(void);
 bool invHasProp(struct prop *prop);
-s32 invGetCount(void);
-struct invitem *invGetItemByIndex(s32 index);
+int invGetCount(void);
+struct invitem *invGetItemByIndex(int index);
 struct textoverride *invGetTextOverrideForObj(struct defaultobj *obj);
-struct textoverride *invGetTextOverrideForWeapon(s32 weaponnum);
-s32 invGetWeaponNumByIndex(s32 index);
-u16 invGetNameIdByIndex(s32 index);
-char *invGetNameByIndex(s32 index);
-char *invGetShortNameByIndex(s32 index);
+struct textoverride *invGetTextOverrideForWeapon(int weaponnum);
+int invGetWeaponNumByIndex(int index);
+uint16_t invGetNameIdByIndex(int index);
+char *invGetNameByIndex(int index);
+char *invGetShortNameByIndex(int index);
 void invInsertTextOverride(struct textoverride *override);
-u32 invGetCurrentIndex(void);
-void invSetCurrentIndex(u32 item);
+uint32_t invGetCurrentIndex(void);
+void invSetCurrentIndex(uint32_t item);
 void invCalculateCurrentIndex(void);
 char *invGetPickupTextByObj(struct defaultobj *obj);
-char *invGetPickupTextByWeaponNum(s32 weaponnum);
-void invIncrementHeldTime(s32 param_1, s32 param_2);
-void invGetWeaponOfChoice(s32 *weapon1, s32 *weapon2);
+char *invGetPickupTextByWeaponNum(int weaponnum);
+void invIncrementHeldTime(int param_1, int param_2);
+void invGetWeaponOfChoice(int *weapon1, int *weapon2);
 
 #endif

@@ -1,20 +1,19 @@
-#include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/timing.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "system.h"
-#endif
 
 void frametimeInit(void)
 {
-	g_Vars.thisframestartt = osGetCount();
+	g_Vars.thisframestartt = utilsGetCount();
 	g_Vars.prevframestartt = g_Vars.thisframestartt;
 }
 
-void frametimeApply(s32 diffframe60, s32 diffframe240, s32 frametime)
+void frametimeApply(int diffframe60, int diffframe240, int frametime)
 {
 	g_Vars.prevframestartt = g_Vars.thisframestartt;
 	g_Vars.thisframestartt = frametime;
@@ -32,44 +31,27 @@ void frametimeApply(s32 diffframe60, s32 diffframe240, s32 frametime)
 
 void frametimeCalculate(void)
 {
-	u32 count;
-	u32 diffframet;
-	u32 diffframe60;
-	u32 diffframe240;
+	uint32_t count;
+	uint32_t diffframet;
+	uint32_t diffframe60;
+	uint32_t diffframe240;
 
 	do {
-		count = osGetCount();
+		count = utilsGetCount();
 		diffframet = count - g_Vars.thisframestartt;
 		g_Vars.diffframet = diffframet;
 
 		diffframe60 = (g_Vars.lostframetime60t + diffframet + CYCLES_PER_FRAME / 2) / CYCLES_PER_FRAME;
 		diffframe240 = (g_Vars.lostframetime240t + diffframet + CYCLES_PER_FRAME / 2 / 4) / (CYCLES_PER_FRAME / 4);
 
-#ifndef PLATFORM_N64
 		if (g_TickExtraSleep) {
 			sysSleep(EXTRA_SLEEP_TIME);
 		}
-#endif
 	} while (g_Vars.mininc60 && diffframe60 < g_Vars.mininc60);
 
 	g_Vars.lostframetime60t = g_Vars.lostframetime60t + diffframet - diffframe60 * CYCLES_PER_FRAME;
 	g_Vars.lostframetime240t = g_Vars.lostframetime240t + diffframet - diffframe240 * (CYCLES_PER_FRAME / 4);
-
-#ifdef PLATFORM_N64
-	g_Vars.mininc60 = 1;
-#else
 	g_Vars.mininc60 = g_TickRateDiv;
-#endif
 
 	frametimeApply(diffframe60, diffframe240, count);
-}
-
-void func0f16cf8c(s32 arg0)
-{
-	// empty
-}
-
-void func0f16cf94(void)
-{
-	// empty
 }

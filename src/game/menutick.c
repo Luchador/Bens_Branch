@@ -28,14 +28,14 @@
 #include "data.h"
 #include "types.h"
 
-u8 g_FileState = 0;
-u8 var80062944 = 0;
-u8 var80062948 = 0;
-u8 var8006294c = 0;
+uint8_t g_FileState = 0;
+bool var80062944 = false;
+bool var80062948 = false;
+bool var8006294c = false;
 
 void menuCountDialogs(void)
 {
-	s32 i;
+	int i;
 	g_MenuData.count = 0;
 
 	for (i = 0; i < ARRAYCOUNT(g_Menus); i++) {
@@ -47,21 +47,17 @@ void menuCountDialogs(void)
 
 void menuTick(void)
 {
-	s32 i;
-	s32 j;
-	s32 k;
-	s32 sp344;
-	s32 sp340 = true;
-	s32 anyopen = false;
-
-	g_ScaleX = 1;
+	int i;
+	int j;
+	int k;
+	int sp344;
+	int sp340 = true;
+	int anyopen = false;
 
 	menuTickTimers();
 	menuCountDialogs();
 
 	for (i = 0; i < ARRAYCOUNT(g_Menus); i++) {
-		if (i);
-
 		if (g_Menus[i].openinhibit > 0) {
 			g_Menus[i].openinhibit--;
 		}
@@ -75,9 +71,9 @@ void menuTick(void)
 		g_MenuData.nextbg = 0;
 	}
 
-	if (anyopen && g_MenuData.unk66e > 0 && var8009dfc0) {
-		s32 bVar12 = 50;
-		s32 bVar11 = false;
+	if (anyopen && g_MenuData.unk66e > 0 && g_GamePaused) {
+		int bVar12 = 50;
+		int bVar11 = false;
 
 		for (j = 0; j < ARRAYCOUNT(g_Menus); j++) {
 			if (g_Menus[j].curdialog) {
@@ -94,7 +90,7 @@ void menuTick(void)
 		}
 
 		if (g_MenuData.unk66f > bVar12 || !bVar11) {
-			func0f0f3220(g_MenuData.unk66e - 1);
+			menuTrySavePlayerData(g_MenuData.unk66e - 1);
 		} else {
 			g_MenuData.unk66f++;
 		}
@@ -104,7 +100,7 @@ void menuTick(void)
 		if (g_MenuData.nextbg == g_MenuData.bg) {
 			g_MenuData.nextbg = 255;
 		} else {
-			f32 mult = 0.02f;
+			float mult = 0.02f;
 
 			if (g_MenuData.bg == 0) {
 				mult = mult + mult;
@@ -127,7 +123,7 @@ void menuTick(void)
 			}
 
 			if (g_MenuData.nextbg == 0) {
-				var8009dfc0 = false;
+				g_GamePaused = false;
 
 				if (g_Vars.currentplayer->gunctrl.gunmemowner != GUNMEMOWNER_BONDGUN) {
 					g_Vars.currentplayer->gunctrl.loadall = true;
@@ -135,7 +131,7 @@ void menuTick(void)
 			}
 
 			if (g_MenuData.screenshottimer == 0 || g_MenuData.bg != 0) {
-				f32 diffframe = g_Vars.diffframe60f;
+				float diffframe = g_Vars.diffframe60f;
 
 				if (diffframe > 4) {
 					diffframe = 4;
@@ -146,7 +142,7 @@ void menuTick(void)
 
 			if (g_MenuData.unk010 > 1) {
 				if (g_MenuData.nextbg) {
-					var8009dfc0 = true;
+					g_GamePaused = true;
 				}
 
 				g_MenuData.unk010 = 0;
@@ -175,10 +171,10 @@ void menuTick(void)
 			}
 
 			if (g_MenuData.nextbg == MENUBG_FAILURE) {
-				var8009dfc0 = true;
+				g_GamePaused = true;
 			}
 
-			if (var8009dfc0 && g_Vars.currentplayer->gunmem2) {
+			if (g_GamePaused && g_Vars.currentplayer->gunmem2) {
 				playerRemoveChrBody();
 
 				if (g_Vars.currentplayer->gunmem2);
@@ -186,7 +182,7 @@ void menuTick(void)
 		}
 	} else {
 		g_MenuData.unk010 = 0;
-		var8009dfc0 = g_MenuData.bg == 0 ? false : true;
+		g_GamePaused = g_MenuData.bg == 0 ? false : true;
 	}
 
 	// Check if returning from a multiplayer match
@@ -255,7 +251,7 @@ void menuTick(void)
 	g_Vars.unk000498 = 0;
 
 	if (g_MenuData.count > 0) {
-		var8006294c = 1;
+		var8006294c = true;
 
 		if (g_MenuData.root == MENUROOT_MPSETUP) {
 			if (g_MenuData.unk008 == -1) {
@@ -295,7 +291,7 @@ void menuTick(void)
 
 			if (g_Menus[g_MpPlayerNum].curdialog) {
 				// Player has a dialog open - tick it
-				s32 prevplayernum = g_Vars.currentplayernum;
+				int prevplayernum = g_Vars.currentplayernum;
 
 				if (g_Menus[g_MpPlayerNum].playernum < PLAYERCOUNT()) {
 					setCurrentPlayerNum(g_Menus[g_MpPlayerNum].playernum);
@@ -307,7 +303,7 @@ void menuTick(void)
 				if (g_MenuData.root == MENUROOT_MPSETUP) {
 					// Check if player is joining the game
 					bool canjoin;
-					u32 buttons = joyGetButtonsPressedThisFrame(i, 0xffffffff);
+					uint32_t buttons = joyGetButtonsPressedThisFrame(i, 0xffffffff);
 					canjoin = true;
 
 					if (g_BossFile.locktype == MPLOCKTYPE_CHALLENGE) {
@@ -365,11 +361,11 @@ void menuTick(void)
 				// Note that MPENDSCREEN also refers to coop and anti modes.
 				// Handle re-opening the endscreen by pressing B.
 				if (g_MenuData.root == MENUROOT_MPENDSCREEN) {
-					u32 buttons2 = joyGetButtonsPressedThisFrame(g_PlayerConfigsArray[i].contpad1, 0xffffffff);
+					uint32_t buttons2 = joyGetButtonsPressedThisFrame(g_PlayerConfigsArray[i].contpad1, 0xffffffff);
 
 					if (buttons2 & B_BUTTON) {
-						s32 playernum = -1;
-						s32 k;
+						int playernum = -1;
+						int k;
 
 						for (k = 0; k < PLAYERCOUNT(); k++) {
 							if (g_Vars.playerstats[k].mpindex == i) {
@@ -379,12 +375,12 @@ void menuTick(void)
 
 						if (playernum >= 0) {
 							if (g_Vars.coopplayernum >= 0) {
-								s32 prevplayernum = g_Vars.currentplayernum;
+								int prevplayernum = g_Vars.currentplayernum;
 								setCurrentPlayerNum(playernum);
 								endscreenPushCoop();
 								setCurrentPlayerNum(prevplayernum);
 							} else if (g_Vars.antiplayernum >= 0) {
-								s32 prevplayernum = g_Vars.currentplayernum;
+								int prevplayernum = g_Vars.currentplayernum;
 								setCurrentPlayerNum(playernum);
 								endscreenPushAnti();
 								setCurrentPlayerNum(prevplayernum);
@@ -399,16 +395,16 @@ void menuTick(void)
 
 		if (sp340 &&
 				(g_MenuData.root == MENUROOT_MPSETUP)) {
-			func0f0f820c(NULL, -5);
+			menuResetAllDialogsAndSetNewRoot(NULL, -5);
 		}
 	} else {
-		var8006294c = 0;
+		var8006294c = false;
 	}
 
 	if (var8006294c) {
-		if (var80062948 == 0 &&
+		if (!var80062948 &&
 				(g_MenuData.root == MENUROOT_MPSETUP)) {
-			var80062948 = 1;
+			var80062948 = true;
 			filelistCreate(0, FILETYPE_MPPLAYER);
 			filelistCreate(1, FILETYPE_MPSETUP);
 		}
@@ -417,7 +413,7 @@ void menuTick(void)
 			filelistsTick();
 		}
 	} else {
-		if (var80062944 == 1) {
+		if (var80062944 == true) {
 			menuStop();
 		}
 	}
@@ -455,7 +451,7 @@ void menuTick(void)
 				}
 			} else if (g_MenuData.unk008 == -6) {
 				// Match is ending
-				s32 playernum = 0;
+				int playernum = 0;
 
 				if (g_Vars.normmplayerisrunning) {
 					func0f0fd548(4);
@@ -472,14 +468,14 @@ void menuTick(void)
 								titleSetNextMode(TITLEMODE_SKIP);
 								mainChangeToStage(g_MissionConfig.stagenum);
 							} else {
-								s32 prevplayernum = g_Vars.currentplayernum;
+								int prevplayernum = g_Vars.currentplayernum;
 								setCurrentPlayerNum(playernum);
 								endscreenPushCoop();
 								setCurrentPlayerNum(prevplayernum);
 								sp344 = true;
 							}
 						} else if (g_Vars.antiplayernum >= 0) {
-							s32 prevplayernum = g_Vars.currentplayernum;
+							int prevplayernum = g_Vars.currentplayernum;
 							setCurrentPlayerNum(playernum);
 							endscreenPushAnti();
 							setCurrentPlayerNum(prevplayernum);
@@ -627,7 +623,7 @@ void menuTick(void)
 	g_Vars.paksneededformenu = 0;
 
 	for (i = 0; i < PLAYERCOUNT(); i++) {
-		s32 mpindex = -1;
+		int mpindex = -1;
 
 		if (g_Vars.mplayerisrunning) {
 			mpindex = g_Vars.playerstats[i].mpindex;
@@ -674,7 +670,6 @@ void menuTick(void)
 			}
 		}
 	}
-
-	g_ScaleX = 1;
+	
 	g_MenuData.unk5d5_06 = sp344 ? true : false;
 }

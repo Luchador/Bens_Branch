@@ -4,8 +4,8 @@
 #include "data.h"
 #include "types.h"
 
-s32 stageGetPrimaryTrack(s32 stagenum);
-s32 stageGetAmbientTrack(s32 stagenum);
-s32 stageGetNrgTrack(s32 stagenum);
+int stageGetPrimaryTrack(int stagenum);
+int stageGetAmbientTrack(int stagenum);
+int stageGetNrgTrack(int stagenum);
 
 #endif

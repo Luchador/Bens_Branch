@@ -32,11 +32,12 @@
 #define __sched__
 
 #include <ultra64.h>
+#include <stdint.h>
 
 typedef struct OSScTask_s {
     struct OSScTask_s   *next;          /* note: this must be first */
-    u32                 state;
-    u32			flags;
+    uint32_t                 state;
+    uint32_t			flags;
     void		*framebuffer;	/* used by graphics tasks */
 
     OSTask              list;
@@ -58,7 +59,7 @@ typedef struct {
     //OSScTask    *gfxListTail;
     //OSScTask    *curRSPTask;
     //OSScTask    *curRDPTask;
-    u32         frameCount;
+    uint32_t         frameCount;
     //s32         doAudio;
 } OSSched;
 

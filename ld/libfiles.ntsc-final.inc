@@ -9,9 +9,6 @@
 	build/ROMID/lib/ultra/os/exceptasm.o (section); \
 	build/ROMID/lib/ultra/os/createthread.o (section); \
 	build/ROMID/lib/ultra/gu/lookat.o (section); \
-	build/ROMID/lib/ultra/gu/lookatref.o (section); \
-	build/ROMID/lib/ultra/gu/normalize.o (section); \
-	build/ROMID/lib/ultra/gu/perspective.o (section); \
 	build/ROMID/lib/ultra/gu/rotate.o (section); \
 	build/ROMID/lib/ultra/libc/xldtob.o (section); \
 	build/ROMID/lib/ultra/io/pfsisplug.o (section); \
@@ -39,7 +36,6 @@
 	build/ROMID/lib/args.o (section); \
 	build/ROMID/lib/str.o (section); \
 	build/ROMID/lib/ultra/libc/sprintf.o (section); \
-	build/ROMID/lib/base.o (section); \
 	build/ROMID/lib/joy.o (section); \
 	build/ROMID/lib/varsinit.o (section); \
 	build/ROMID/lib/mtxasm.o (section); \

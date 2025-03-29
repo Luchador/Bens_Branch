@@ -1,13 +1,12 @@
-#include <ultra64.h>
 #include "internal.h"
 
-f32 func00047ef0(f32 arg0)
+float func00047ef0(float arg0)
 {
-	s32 sp14;
-	f32 sp10;
-	f32 sp0c;
-	f32 sp08;
-	f32 sp04;
+	int sp14;
+	float sp10;
+	float sp0c;
+	float sp08;
+	float sp04;
 
 	if (arg0 < 0) {
 		return 0;

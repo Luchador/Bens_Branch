@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-#include <PR/ultratypes.h>
+#include <stdint.h>
 
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
@@ -56,15 +56,11 @@ extern "C" {
 
 
 
-#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 
 /* EEPROM interface */
 
-extern s32 osEepromLongRead(u8, u8 *, int);
-extern s32 osEepromLongWrite(u8, u8 *, int);
-
-
-#endif  /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
+extern int osEepromLongRead(uint8_t, uint8_t *, int);
+extern int osEepromLongWrite(uint8_t, uint8_t *, int);
 
 #ifdef _LANGUAGE_C_PLUS_PLUS
 }

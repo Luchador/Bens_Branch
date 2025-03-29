@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <stdint.h>
 #include <math.h>
 #include "constants.h"
 #include "game/bondgun.h"
@@ -11,6 +10,7 @@
 #include "game/debug.h"
 #include "game/gfxmemory.h"
 #include "game/file.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/main.h"
 #include "lib/model.h"
@@ -22,13 +22,13 @@
 #define BOLTBEAMTICKMODE_MANUAL    0
 #define BOLTBEAMTICKMODE_AUTOMATIC 1
 
-struct casing g_Casings[20];
+struct casing g_Casings[40]; // 20 to 40
 struct boltbeam g_BoltBeams[8];
 struct lasersight g_LaserSights[MAX_PLAYERS];
 
-void beamCreate(struct beam *beam, s32 weaponnum, struct coord *from, struct coord *to)
+void beamCreate(struct beam *beam, int weaponnum, struct coord *from, struct coord *to)
 {
-	f32 distance;
+	float distance;
 
 	beam->from.x = from->x;
 	beam->from.y = from->y;
@@ -86,7 +86,7 @@ void beamCreate(struct beam *beam, s32 weaponnum, struct coord *from, struct coo
 
 		beam->dist = 0;
 	} else {
-		f32 tmp;
+		float tmp;
 		beam->speed = 0.2f * distance;
 		beam->mindist = 0.2f * distance;
 
@@ -103,12 +103,12 @@ void beamCreate(struct beam *beam, s32 weaponnum, struct coord *from, struct coo
 	}
 }
 
-void beamCreateForHand(s32 handnum)
+void beamCreateForHand(int handnum)
 {
 	struct player *player = g_Vars.currentplayer;
 	struct hand *hand = player->hands + handnum;
 	Mtxf *mtx = camGetWorldToScreenMtxf();
-	f32 tmp;
+	float tmp;
 
 	tmp = hand->hitpos.f[0] * mtx->m[0][2] + hand->hitpos.f[1] * mtx->m[1][2] + hand->hitpos.f[2] * mtx->m[2][2] + mtx->m[3][2];
 	tmp = -tmp;
@@ -117,7 +117,7 @@ void beamCreateForHand(s32 handnum)
 		// empty
 	} else {
 		struct beam *beam;
-		s32 weaponnum = bgunGetWeaponNum(handnum);
+		int weaponnum = bgunGetWeaponNum(handnum);
 
 		if (hand->gset.weaponnum == WEAPON_LASER && hand->gset.weaponfunc == FUNC_SECONDARY) {
 			weaponnum = -2;
@@ -127,14 +127,14 @@ void beamCreateForHand(s32 handnum)
 		beamCreate(beam, weaponnum, &hand->muzzlepos, &hand->hitpos);
 
 		if (beam->weaponnum == WEAPON_MAULER) {
-			beam->weaponnum = -3 - (s32)player->hands[handnum].matmot1;
+			beam->weaponnum = -3 - (int)player->hands[handnum].matmot1;
 		}
 
 		if (player->prop->chr && PLAYERCOUNT() >= 2) {
 			struct chrdata *chr = player->prop->chr;
 			struct coord disttolast;
 			struct coord disttocur;
-			f32 radians;
+			float radians;
 
 			if (chr->fireslots[handnum] == -1) {
 				chr->fireslots[handnum] = bgunAllocateFireslot();
@@ -145,13 +145,13 @@ void beamCreateForHand(s32 handnum)
 				disttolast.y = hand->hitpos.y - player->chrmuzzlelastpos[handnum].y;
 				disttolast.z = hand->hitpos.z - player->chrmuzzlelastpos[handnum].z;
 
-				guNormalize(&disttolast.x, &disttolast.y, &disttolast.z);
+				utilsNormalizeF(&disttolast.x, &disttolast.y, &disttolast.z);
 
 				disttocur.x = hand->hitpos.x - hand->muzzlepos.x;
 				disttocur.y = hand->hitpos.y - hand->muzzlepos.y;
 				disttocur.z = hand->hitpos.z - hand->muzzlepos.z;
 
-				guNormalize(&disttocur.x, &disttocur.y, &disttocur.z);
+				utilsNormalizeF(&disttocur.x, &disttocur.y, &disttocur.z);
 
 				radians = acosf(disttolast.f[0] * disttocur.f[0] + disttolast.f[1] * disttocur.f[1] + disttolast.f[2] * disttocur.f[2]);
 
@@ -159,7 +159,7 @@ void beamCreateForHand(s32 handnum)
 					beamCreate(&g_Fireslots[chr->fireslots[handnum]].beam, weaponnum, &player->chrmuzzlelastpos[handnum], &hand->hitpos);
 
 					if (g_Fireslots[chr->fireslots[handnum]].beam.weaponnum == WEAPON_MAULER) {
-						g_Fireslots[chr->fireslots[handnum]].beam.weaponnum = -3 - (s32)player->hands[handnum].matmot1;
+						g_Fireslots[chr->fireslots[handnum]].beam.weaponnum = -3 - (int)player->hands[handnum].matmot1;
 					}
 				}
 			}
@@ -168,11 +168,11 @@ void beamCreateForHand(s32 handnum)
 }
 
 Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
-		f32 arg2, struct coord *headpos, u32 headcolour,
-		f32 arg5, struct coord *tailpos, u32 tailcolour)
+		float arg2, struct coord *headpos, uint32_t headcolour,
+		float arg5, struct coord *tailpos, uint32_t tailcolour)
 {
 	struct coord spe4;
-	f32 length;
+	float length;
 	Vtx *vertices;
 	struct coord spd0;
 	struct coord *campos = &g_Vars.currentplayer->cam_pos;
@@ -181,8 +181,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	Mtxf sp84;
 	Mtxf *worldtoscreenmtx = camGetWorldToScreenMtxf();
 	struct coord sp74 = {0, 0, 0};
-	f32 mult;
-	u32 stack[2];
+	float mult;
 	struct coord sp5c;
 
 	spe4.f[0] = tailpos->f[0] - headpos->f[0];
@@ -235,7 +234,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	spd0.f[2] = (spe4.f[0] * (campos->f[1] - (headpos->f[1] + length * spe4.f[1]))) - (spe4.f[1] * (campos->f[0] - (headpos->f[0] + length * spe4.f[0])));
 
 	if (spd0.f[0] != 0.0f || spd0.f[1] != 0.0f || spd0.f[2] != 0.0f) {
-		guNormalize(&spd0.f[0], &spd0.f[1], &spd0.f[2]);
+		utilsNormalizeF(&spd0.f[0], &spd0.f[1], &spd0.f[2]);
 	} else {
 		spd0.f[0] = 0.0f;
 		spd0.f[1] = 1.0f;
@@ -297,9 +296,8 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	return gdl;
 }
 
-Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
+Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 {
-	u32 stack;
 	Mtxf *sp188;
 	Mtxf sp148;
 
@@ -307,29 +305,29 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 		Col *colours = gfxAllocateColours(1);
 		struct coord sp138;
 		struct coord *campos = &g_Vars.currentplayer->cam_pos;
-		f32 sp130;
-		f32 sp12c = beam->mindist;
+		float sp130;
+		float sp12c = beam->mindist;
 		Vtx *vertices;
-		f32 sp124 = beam->dist;
+		float sp124 = beam->dist;
 		struct coord sp118;
 		struct coord sp10c;
 		struct coord sp100 = {0, 0, 0};
 		struct coord spf4 = {0, 0, 0};
-		f32 spf0 = 1.4142f;
+		float spf0 = 1.4142f;
 		struct textureconfig *texconfig = &g_TexBeamConfigs[arg3];
-		s32 i;
+		int i;
 		Mtxf *worldtoscreenmtx = camGetWorldToScreenMtxf();
-		s32 j;
-		s32 spd8;
+		int j;
+		int spd8;
 		struct coord spcc;
-		f32 tmp;
-		f32 spc0[2];
-		f32 spb8[2];
-		f32 f14;
-		f32 f16;
-		f32 f18;
-		f32 spa8;
-		f32 spa4;
+		float tmp;
+		float spc0[2];
+		float spb8[2];
+		float f14;
+		float f16;
+		float f18;
+		float spa8;
+		float spa4;
 
 		switch (beam->weaponnum) {
 		case WEAPON_CYCLONE:
@@ -399,7 +397,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 		sp10c.f[2] = (beam->dir.f[0] * (campos->f[1] - (sp138.f[1] + sp12c * beam->dir.f[1]))) - (beam->dir.f[1] * (campos->f[0] - (sp138.f[0] + sp12c * beam->dir.f[0])));
 
 		if (sp10c.f[0] != 0.0f || sp10c.f[1] != 0.0f || sp10c.f[2] != 0.0f) {
-			guNormalize(&sp10c.f[0], &sp10c.f[1], &sp10c.f[2]);
+			utilsNormalizeF(&sp10c.f[0], &sp10c.f[1], &sp10c.f[2]);
 
 			sp10c.f[0] *= sp130;
 			sp10c.f[1] *= sp130;
@@ -414,7 +412,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, u8 arg3)
 		sp118.f[1] = beam->dir.f[2] * sp10c.f[0] - beam->dir.f[0] * sp10c.f[2];
 		sp118.f[2] = beam->dir.f[0] * sp10c.f[1] - beam->dir.f[1] * sp10c.f[0];
 
-		guNormalize(&sp118.f[0], &sp118.f[1], &sp118.f[2]);
+		utilsNormalizeF(&sp118.f[0], &sp118.f[1], &sp118.f[2]);
 
 		sp118.f[0] *= sp130;
 		sp118.f[1] *= sp130;
@@ -627,9 +625,9 @@ bool g_CasingsActive = false;
 
 struct casing *casingCreate(struct modeldef *modeldef, Mtxf *mtx)
 {
-	s32 i;
-	s32 j;
-	f32 rot[3][3];
+	int i;
+	int j;
+	float rot[3][3];
 	struct casing *casing = g_Casings;
 	struct casing *end = g_Casings + ARRAYCOUNT(g_Casings);
 
@@ -659,17 +657,17 @@ struct casing *casingCreate(struct modeldef *modeldef, Mtxf *mtx)
 	return NULL;
 }
 
-void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
+void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 {
-	f32 oldyspeed;
+	float oldyspeed;
 	struct casing *casing = NULL;
 	struct player *player = g_Vars.currentplayer;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 	Mtxf spec;
-	f32 spc8[3][3];
-	s32 weaponnum = bgunGetWeaponNum(handnum);
-	s32 casingtype = -1;
+	float spc8[3][3];
+	int weaponnum = bgunGetWeaponNum(handnum);
+	int casingtype = -1;
 	struct weaponfunc *func = gsetGetWeaponFunction2(&player->hands[handnum].gset);
 	struct weapon *weapondef = weaponFindById(player->gunctrl.weaponnum);
 	struct weaponfunc_shoot *shootfunc = NULL;
@@ -704,11 +702,11 @@ void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
 	if (casing != NULL) {
 		struct coord spa4 = {0, 0, 0};
 		Mtxf sp64;
-		u32 magic = 0x15aca6;
-		u32 sp5c;
-		u32 sp4c;
-		f32 newyspeed;
-		f32 f0;
+		uint32_t magic = 0x15aca6;
+		uint32_t sp5c;
+		uint32_t sp4c;
+		float newyspeed;
+		float f0;
 
 		casing->ground = ground;
 
@@ -733,7 +731,7 @@ void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
 				}
 			}
 
-			sp5c = ((s32)((rngRandom() >> 24) * magic) >> 10) + magic;
+			sp5c = ((int)((rngRandom() >> 24) * magic) >> 10) + magic;
 			f0 = (rngRandom() % sp5c) / 781250;
 
 			newyspeed = casing->speed.y - f0 * 0.2777778f;
@@ -790,7 +788,7 @@ void casingCreateForHand(s32 handnum, f32 ground, Mtxf *mtx)
 				}
 			}
 
-			sp4c = ((s32) ((rngRandom() >> 24) * magic) >> 10) + magic;
+			sp4c = ((int) ((rngRandom() >> 24) * magic) >> 10) + magic;
 			f0 = (rngRandom() % sp4c) / 781250;
 
 			newyspeed = casing->speed.y - f0 * 0.2777778f;
@@ -818,8 +816,8 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 	struct model model;
 	struct modelrenderdata renderdata = { NULL, true, 3 };
 	Mtxf mtx;
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 	bool render = true;
 
 	modelAllocateRwData(modeldef);
@@ -889,10 +887,10 @@ void casingsRender(Gfx **gdlptr)
 	}
 }
 
-s32 boltbeamFindByProp(struct prop *prop)
+int boltbeamFindByProp(struct prop *prop)
 {
-	s32 result = -1;
-	s32 i = 0;
+	int result = -1;
+	int i = 0;
 
 	for (; i < 8 && result == -1; i++) {
 		if (g_BoltBeams[i].unk00_prop == prop) {
@@ -903,9 +901,9 @@ s32 boltbeamFindByProp(struct prop *prop)
 	return result;
 }
 
-s32 boltbeamCreate(struct prop *prop)
+int boltbeamCreate(struct prop *prop)
 {
-	s32 beamnum = boltbeamFindByProp((struct prop *) -1);
+	int beamnum = boltbeamFindByProp((struct prop *) -1);
 
 	if (beamnum >= 0) {
 		g_BoltBeams[beamnum].tickmode = BOLTBEAMTICKMODE_MANUAL;
@@ -917,30 +915,30 @@ s32 boltbeamCreate(struct prop *prop)
 
 void boltbeamFree(struct prop *prop)
 {
-	s32 beamnum = boltbeamFindByProp(prop);
+	int beamnum = boltbeamFindByProp(prop);
 
 	if (beamnum != -1) {
 		g_BoltBeams[beamnum].unk00 = -1;
 	}
 }
 
-void boltbeamSetHeadPos(s32 beamnum, struct coord *pos)
+void boltbeamSetHeadPos(int beamnum, struct coord *pos)
 {
 	g_BoltBeams[beamnum].headpos.x = pos->x;
 	g_BoltBeams[beamnum].headpos.y = pos->y;
 	g_BoltBeams[beamnum].headpos.z = pos->z;
 }
 
-void boltbeamSetTailPos(s32 beamnum, struct coord *pos)
+void boltbeamSetTailPos(int beamnum, struct coord *pos)
 {
 	g_BoltBeams[beamnum].tailpos.x = pos->x;
 	g_BoltBeams[beamnum].tailpos.y = pos->y;
 	g_BoltBeams[beamnum].tailpos.z = pos->z;
 }
 
-void boltbeamIncrementHeadPos(s32 beamnum, f32 arg1, bool arg2)
+void boltbeamIncrementHeadPos(int beamnum, float arg1, bool arg2)
 {
-	f32 dist;
+	float dist;
 
 #define DIFF(i) (g_BoltBeams[beamnum].tailpos.f[i] - g_BoltBeams[beamnum].headpos.f[i])
 #define SQDIFF(i) (DIFF(i) * DIFF(i))
@@ -948,7 +946,7 @@ void boltbeamIncrementHeadPos(s32 beamnum, f32 arg1, bool arg2)
 	dist = sqrtf(SQDIFF(0) + SQDIFF(1) + SQDIFF(2));
 
 	if (dist > arg1 && !arg2) {
-		f32 tmp[3];
+		float tmp[3];
 
 		if (1);
 
@@ -962,7 +960,7 @@ void boltbeamIncrementHeadPos(s32 beamnum, f32 arg1, bool arg2)
 	}
 }
 
-void boltbeamSetAutomatic(s32 beamnum, f32 speed)
+void boltbeamSetAutomatic(int beamnum, float speed)
 {
 	g_BoltBeams[beamnum].tickmode = BOLTBEAMTICKMODE_AUTOMATIC;
 	g_BoltBeams[beamnum].unk00 = 0;
@@ -971,7 +969,7 @@ void boltbeamSetAutomatic(s32 beamnum, f32 speed)
 
 Gfx *boltbeamsRender(Gfx *gdl)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_BoltBeams); i++) {
 		if (g_BoltBeams[i].unk00 != -1) {
@@ -984,11 +982,11 @@ Gfx *boltbeamsRender(Gfx *gdl)
 
 void boltbeamsTick(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_BoltBeams); i++) {
 		if (g_BoltBeams[i].unk00 != -1 && g_BoltBeams[i].tickmode == BOLTBEAMTICKMODE_AUTOMATIC) {
-			f32 length = sqrtf(
+			float length = sqrtf(
 					(g_BoltBeams[i].tailpos.f[0] - g_BoltBeams[i].headpos.f[0]) * (g_BoltBeams[i].tailpos.f[0] - g_BoltBeams[i].headpos.f[0]) +
 					(g_BoltBeams[i].tailpos.f[1] - g_BoltBeams[i].headpos.f[1]) * (g_BoltBeams[i].tailpos.f[1] - g_BoltBeams[i].headpos.f[1]) +
 					(g_BoltBeams[i].tailpos.f[2] - g_BoltBeams[i].headpos.f[2]) * (g_BoltBeams[i].tailpos.f[2] - g_BoltBeams[i].headpos.f[2]));
@@ -1010,11 +1008,11 @@ void boltbeamsTick(void)
  * Additionally, populate the index pointer with the index of the lasersight
  * if it exists, or any free slot if it doesn't.
  */
-bool lasersightExists(s32 id, s32 *index)
+bool lasersightExists(int id, int *index)
 {
-	s32 fallback = -1;
-	s32 exact = -1;
-	s32 i = 0;
+	int fallback = -1;
+	int exact = -1;
+	int i = 0;
 
 	for (; i < 4 && exact == -1; i++) {
 		if (g_LaserSights[i].id == id) {
@@ -1038,26 +1036,21 @@ bool lasersightExists(s32 id, s32 *index)
 Gfx *lasersightRenderDot(Gfx *gdl)
 {
 	Mtxf *mtx;
-	f32 f0;
-	f32 f20;
+	float f0;
+	float f20;
 	struct player *player = g_Vars.currentplayer;
 	Mtxf sp1b0;
 	struct coord campos;
 	Mtxf sp164;
 	Mtxf sp124;
-	s32 i;
+	int i;
 
-	static u32 sp1 = 800;
-#ifndef PLATFORM_N64
+	static uint32_t sp1 = 800;
 	// laser fades out farther away
-	static u32 sp2 = 7000 * 3;
-	static u32 sp3 = 9000 * 3;
-#else
-	static u32 sp2 = 7000;
-	static u32 sp3 = 9000;
-#endif
-	static u32 spb = 24;
-	static u32 spi = 6;
+	static uint32_t sp2 = 7000 * 3;
+	static uint32_t sp3 = 9000 * 3;
+	static uint32_t spb = 24;
+	static uint32_t spi = 6;
 
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
@@ -1121,16 +1114,16 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 				if (!(g_LaserSights[i].dotpos.f[0] < 0.0000001f) || !(g_LaserSights[i].dotpos.f[0] > -0.000001f)
 						|| !(g_LaserSights[i].dotpos.f[1] < 0.0000001f) || !(g_LaserSights[i].dotpos.f[1] > -0.000001f)
 						|| !(g_LaserSights[i].dotpos.f[2] < 0.0000001f) || !(g_LaserSights[i].dotpos.f[2] > -0.000001f)) {
-					f32 spcc;
-					f32 spc8;
-					f32 spc4;
-					f32 f22;
-					f32 f24;
-					f32 f26;
-					f32 f28;
-					f32 f30;
-					f32 f2;
-					f32 f00;
+					float spcc;
+					float spc8;
+					float spc4;
+					float f22;
+					float f24;
+					float f26;
+					float f28;
+					float f30;
+					float f2;
+					float f00;
 
 					f20 = spi;
 
@@ -1151,8 +1144,8 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 							if (f0 > spc4) {
 								f20 = 0.1f;
 							} else {
-								f32 tmp1 = spb + f20;
-								f32 tmp2 = (f0 - spc8) / (spc4 - spc8);
+								float tmp1 = spb + f20;
+								float tmp2 = (f0 - spc8) / (spc4 - spc8);
 								f20 = tmp1 - tmp1 * tmp2;
 							}
 						} else {
@@ -1170,7 +1163,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 						f24 = 0.0f;
 						f00 = 0;
 					} else {
-						f32 f0 = sqrtf(rot.f[0] * rot.f[0] + rot.f[1] * rot.f[1] + rot.f[2] * rot.f[2]);
+						float f0 = sqrtf(rot.f[0] * rot.f[0] + rot.f[1] * rot.f[1] + rot.f[2] * rot.f[2]);
 
 						f26 = rot.f[0] / f0;
 						f30 = rot.f[1] / f0;
@@ -1232,10 +1225,9 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 
 Gfx *lasersightRenderBeam(Gfx *gdl)
 {
-	u32 stack;
 	struct player *player = g_Vars.currentplayer;
 	Mtxf *mtx;
-	s32 i;
+	int i;
 	Mtxf sp198;
 	struct coord campos;
 	Mtxf sp14c;
@@ -1301,7 +1293,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 			spa8.y = 2.0f;
 			spa8.z = 0.0f;
 
-			guNormalize(&spa8.x, &spa8.y, &spa8.z);
+			utilsNormalizeF(&spa8.x, &spa8.y, &spa8.z);
 
 			mtx4RotateVecInPlace(&sp10c, &spa8);
 
@@ -1325,7 +1317,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 			spb4.y = spc0.f[1] - spcc.y;
 			spb4.z = spc0.f[2] - spcc.z;
 
-			guNormalize(&spb4.x, &spb4.y, &spb4.z);
+			utilsNormalizeF(&spb4.x, &spb4.y, &spb4.z);
 
 			colours = gfxAllocateColours(2);
 
@@ -1389,9 +1381,9 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	return gdl;
 }
 
-void lasersightSetBeam(s32 id, s32 arg1, struct coord *near, struct coord *far)
+void lasersightSetBeam(int id, int arg1, struct coord *near, struct coord *far)
 {
-	s32 i;
+	int i;
 
 	if (!lasersightExists(id, &i)) {
 		if (i == -1) {
@@ -1413,9 +1405,9 @@ void lasersightSetBeam(s32 id, s32 arg1, struct coord *near, struct coord *far)
 	g_LaserSights[i].unk28 = 0;
 }
 
-void lasersightSetDot(s32 arg0, struct coord *pos, struct coord *rot)
+void lasersightSetDot(int arg0, struct coord *pos, struct coord *rot)
 {
-	s32 i;
+	int i;
 
 	if (lasersightExists(arg0, &i)) {
 		g_LaserSights[i].unk28 += 1.0f;
@@ -1430,9 +1422,9 @@ void lasersightSetDot(s32 arg0, struct coord *pos, struct coord *rot)
 	}
 }
 
-void lasersightFree(s32 arg0)
+void lasersightFree(int arg0)
 {
-	s32 i;
+	int i;
 
 	if (lasersightExists(arg0, &i)) {
 		g_LaserSights[i].id = -1;

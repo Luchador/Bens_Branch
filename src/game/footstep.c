@@ -12,7 +12,7 @@
 #include "data.h"
 #include "types.h"
 
-s32 g_FootstepSounds[] = {
+int g_FootstepSounds[] = {
 	/* none   */ -1,                -1,                -1,                -1,                -1,                -1,                -1,                -1,
 	/* wood   */ SFX_FOOTSTEP_80DC, SFX_FOOTSTEP_80DD, SFX_FOOTSTEP_80E0, SFX_FOOTSTEP_80E1, SFX_FOOTSTEP_80DE, SFX_FOOTSTEP_80DF, SFX_FOOTSTEP_80E2, SFX_FOOTSTEP_80E3,
 	/* stone  */ SFX_FOOTSTEP_80C4, SFX_FOOTSTEP_80C5, SFX_FOOTSTEP_80C8, SFX_FOOTSTEP_80C9, SFX_FOOTSTEP_80C6, SFX_FOOTSTEP_80C7, SFX_FOOTSTEP_80CA, SFX_FOOTSTEP_80CB,
@@ -25,9 +25,9 @@ s32 g_FootstepSounds[] = {
 };
 
 struct footstepframe {
-	u16 animnum;
-	u8 frame1;
-	u8 frame2;
+	uint16_t animnum;
+	uint8_t frame1;
+	uint8_t frame2;
 };
 
 struct footstepframe g_FootstepAnims[] = {
@@ -68,7 +68,7 @@ struct footstepframe g_FootstepAnims[] = {
 	{ ANIM_SKEDAR_RUNNING,                           0x00, 0x00 },
 };
 
-bool footstepIsRunning(s32 animnum)
+bool footstepIsRunning(int animnum)
 {
 	switch (animnum) {
 	case ANIM_RUN_FWD_001D:
@@ -98,12 +98,12 @@ bool footstepIsRunning(s32 animnum)
 	return false;
 }
 
-s32 footstepChooseSound(struct chrdata *chr, s32 footstepindex)
+int footstepChooseSound(struct chrdata *chr, int footstepindex)
 {
-	s32 floortype;
-	s32 running;
-	s32 rand;
-	s32 index;
+	int floortype;
+	int running;
+	int rand;
+	int index;
 
 	if (chr->footstep == 0) {
 		return 0;
@@ -116,7 +116,7 @@ s32 footstepChooseSound(struct chrdata *chr, s32 footstepindex)
 	}
 
 	if (CHRRACE(chr) == RACE_SKEDAR && chr->bodynum != BODY_MINISKEDAR) {
-		u32 result;
+		uint32_t result;
 		chr->lastfootsample ^= 1;
 
 		if (floortype == FLOORTYPE_METAL) {
@@ -157,14 +157,14 @@ s32 footstepChooseSound(struct chrdata *chr, s32 footstepindex)
  */
 void footstepCheckMagic(struct chrdata *chr)
 {
-	s32 index;
-	f32 frame;
-	f32 prevframe;
+	int index;
+	float frame;
+	float prevframe;
 	struct prop *playerprop = g_Vars.currentplayer->prop;
-	f32 xdiff;
-	f32 ydiff;
-	f32 zdiff;
-	s32 soundnum;
+	float xdiff;
+	float ydiff;
+	float zdiff;
+	int soundnum;
 
 	if (PLAYERCOUNT() == 1 && chr->magicanim >= 0) {
 		chr->magicframe += g_Vars.lvupdate240 * chr->magicspeed;

@@ -7,7 +7,7 @@
 
 void shardsReset(void)
 {
-	s32 i;
+	int i;
 
 	g_MaxShards = 200;
 

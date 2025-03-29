@@ -2,100 +2,101 @@
 #define _IN_SETUP_DECL
 
 #include "preprocess/common.h"
+#include <stdint.h>
 
 struct n64_stagesetup {
-	u32 ptr_waypoints;
-	u32 ptr_waygroups;
-	u32 ptr_cover;
-	u32 ptr_intro;
-	u32 ptr_props;
-	u32 ptr_paths;
-	u32 ptr_ailists;
-	u32 ptr_padfiledata;
+	uint32_t ptr_waypoints;
+	uint32_t ptr_waygroups;
+	uint32_t ptr_cover;
+	uint32_t ptr_intro;
+	uint32_t ptr_props;
+	uint32_t ptr_paths;
+	uint32_t ptr_ailists;
+	uint32_t ptr_padfiledata;
 };
 
 struct n64_coord {
-	f32 x;
-	f32 y;
-	f32 z;
+	float x;
+	float y;
+	float z;
 };
 
 struct n64_defaultobj {
-	u16 extrascale;
-	u8 hidden2;
-	u8 type;
-	s16 modelnum;
-	s16 pad;
-	u32 flags;
-	u32 flags2;
-	u32 flags3;
-	u32 ptr_prop;
-	u32 ptr_model;
-	f32 realrot[3][3];
-	u32 hidden;
+	uint16_t extrascale;
+	uint8_t hidden2;
+	uint8_t type;
+	int16_t modelnum;
+	int16_t pad;
+	uint32_t flags;
+	uint32_t flags2;
+	uint32_t flags3;
+	uint32_t ptr_prop;
+	uint32_t ptr_model;
+	float realrot[3][3];
+	uint32_t hidden;
 	union {
-		u32 ptr_geotilef;
-		u32 ptr_geoblock;
-		u32 ptr_geocyl;
-		u32 ptr_unkgeo;
+		uint32_t ptr_geotilef;
+		uint32_t ptr_geoblock;
+		uint32_t ptr_geocyl;
+		uint32_t ptr_unkgeo;
 	};
 	union {
-		u32 ptr_projectile;
-		u32 ptr_embedment;
+		uint32_t ptr_projectile;
+		uint32_t ptr_embedment;
 	};
-	s16 damage;
-	s16 maxdamage;
-	u8 shadecol[4];
-	u8 nextcol[4];
-	u16 floorcol;
-	s8 geocount;
-	s8 _pad_;
+	int16_t damage;
+	int16_t maxdamage;
+	uint8_t shadecol[4];
+	uint8_t nextcol[4];
+	uint16_t floorcol;
+	int8_t geocount;
+	int8_t _pad_;
 };
 
 struct n64_doorobj {
 	struct n64_defaultobj base;
-	f32 maxfrac;
-	f32 perimfrac;
-	f32 accel;
-	f32 decel;
-	f32 maxspeed;
-	u16 doorflags;
-	u16 doortype;
-	u32 keyflags;
-	s32 autoclosetime;
-	f32 frac;
-	f32 fracspeed;
-	s8 mode;
-	s8 glasshits;
-	s16 fadealpha;
-	s16 xludist;
-	s16 opadist;
+	float maxfrac;
+	float perimfrac;
+	float accel;
+	float decel;
+	float maxspeed;
+	uint16_t doorflags;
+	uint16_t doortype;
+	uint32_t keyflags;
+	int autoclosetime;
+	float frac;
+	float fracspeed;
+	int8_t mode;
+	int8_t glasshits;
+	int16_t fadealpha;
+	int16_t xludist;
+	int16_t opadist;
 	struct n64_coord startpos;
-	f32 mtx98[3][3];
-	u32 ptr_sibling;
-	s32 lastopen60;
-	s16 portalnum;
-	s8 soundtype;
-	s8 fadetime60;
-	s32 lastcalc60;
-	u8 laserfade;
-	u8 unusedmaybe[3];
-	u8 shadeinfo1[4];
-	u8 shadeinfo2[4];
-	u8 actual1;
-	u8 actual2;
-	u8 extra1;
-	u8 extra2;
+	float mtx98[3][3];
+	uint32_t ptr_sibling;
+	int lastopen60;
+	int16_t portalnum;
+	int8_t soundtype;
+	int8_t fadetime60;
+	int lastcalc60;
+	uint8_t laserfade;
+	uint8_t unusedmaybe[3];
+	uint8_t shadeinfo1[4];
+	uint8_t shadeinfo2[4];
+	uint8_t actual1;
+	uint8_t actual2;
+	uint8_t extra1;
+	uint8_t extra2;
 };
 
 struct n64_doorscaleobj {
-	u32 unk00;
-	s32 scale;
+	uint32_t unk00;
+	int scale;
 };
 
 struct n64_keyobj {
 	struct n64_defaultobj base;
-	u32 keyflags;
+	uint32_t keyflags;
 };
 
 struct n64_alarmobj {
@@ -105,31 +106,31 @@ struct n64_alarmobj {
 struct n64_cctvobj {
 	struct n64_defaultobj base;
 
-	s16 lookatpadnum;
-	s16 toleft;
+	int16_t lookatpadnum;
+	int16_t toleft;
 	//Mtxf camrotm;
-	f32 m[4][4];
-	f32 yzero;
-	f32 yrot;
-	f32 yleft;
-	f32 yright;
-	f32 yspeed;
-	f32 ymaxspeed;
-	s32 seebondtime60;
-	f32 maxdist;
-	f32 xzero;
+	float m[4][4];
+	float yzero;
+	float yrot;
+	float yleft;
+	float yright;
+	float yspeed;
+	float ymaxspeed;
+	int seebondtime60;
+	float maxdist;
+	float xzero;
 };
 
 struct n64_ammocrateobj {
 	struct n64_defaultobj base;
-	s32 ammotype;
+	int ammotype;
 };
 
 struct n64_gset {
-	u8 weaponnum;
-	u8 unk0639;
-	u8 unk063a;
-	u8 weaponfunc;
+	uint8_t weaponnum;
+	uint8_t unk0639;
+	uint8_t unk063a;
+	uint8_t weaponfunc;
 };
 
 struct n64_weaponobj {
@@ -138,104 +139,104 @@ struct n64_weaponobj {
 	union {
 		struct n64_gset gset;
 		struct {
-			u8 weaponnum;
-			s8 unk5d;
-			s8 unk5e;
-			u8 gunfunc;
+			uint8_t weaponnum;
+			int8_t unk5d;
+			int8_t unk5e;
+			uint8_t gunfunc;
 		};
 	};
 
-	s8 fadeouttimer60;
-	s8 dualweaponnum;
+	int8_t fadeouttimer60;
+	int8_t dualweaponnum;
 
 	union {
-		s16 timer240;
-		s16 team;
+		int16_t timer240;
+		int16_t team;
 	};
 
-	u32 ptr_dualweapon;
+	uint32_t ptr_dualweapon;
 };
 
 struct n64_packedchr {
-	s16 chrindex;
-	s8 unk02;
-	s8 typenum;
-	u32 spawnflags;
-	s16 chrnum;
-	u16 padnum;
-	u8 bodynum;
-	s8 headnum;
-	u16 ailistnum;
-	u16 padpreset;
-	u16 chrpreset;
-	u16 hearscale;
-	u16 viewdist;
-	u32 flags;
-	u32 flags2;
-	u8 team;
-	u8 squadron;
-	s16 chair;
-	u32 convtalk;
-	u8 tude;
-	u8 naturalanim;
-	u8 yvisang;
-	u8 teamscandist;
+	int16_t chrindex;
+	int8_t unk02;
+	int8_t typenum;
+	uint32_t spawnflags;
+	int16_t chrnum;
+	uint16_t padnum;
+	uint8_t bodynum;
+	int8_t headnum;
+	uint16_t ailistnum;
+	uint16_t padpreset;
+	uint16_t chrpreset;
+	uint16_t hearscale;
+	uint16_t viewdist;
+	uint32_t flags;
+	uint32_t flags2;
+	uint8_t team;
+	uint8_t squadron;
+	int16_t chair;
+	uint32_t convtalk;
+	uint8_t tude;
+	uint8_t naturalanim;
+	uint8_t yvisang;
+	uint8_t teamscandist;
 };
 
 struct n64_tvscreen {
-	u32 ptr_cmdlist;
-	u16 offset;
-	s16 pause60;
-	u32 ptr_tconfig;
-	f32 rot;
-	f32 xscale;
-	f32 xscalefrac;
-	f32 xscaleinc;
-	f32 xscaleold;
-	f32 xscalenew;
-	f32 yscale;
-	f32 yscalefrac;
-	f32 yscaleinc;
-	f32 yscaleold;
-	f32 yscalenew;
-	f32 xmid;
-	f32 xmidfrac;
-	f32 xmidinc;
-	f32 xmidold;
-	f32 xmidnew;
-	f32 ymid;
-	f32 ymidfrac;
-	f32 ymidinc;
-	f32 ymidold;
-	f32 ymidnew;
-	u8 red;
-	u8 redold;
-	u8 rednew;
-	u8 green;
-	u8 greenold;
-	u8 greennew;
-	u8 blue;
-	u8 blueold;
-	u8 bluenew;
-	u8 alpha;
-	u8 alphaold;
-	u8 alphanew;
-	f32 colfrac;
-	f32 colinc;
+	uint32_t ptr_cmdlist;
+	uint16_t offset;
+	int16_t pause60;
+	uint32_t ptr_tconfig;
+	float rot;
+	float xscale;
+	float xscalefrac;
+	float xscaleinc;
+	float xscaleold;
+	float xscalenew;
+	float yscale;
+	float yscalefrac;
+	float yscaleinc;
+	float yscaleold;
+	float yscalenew;
+	float xmid;
+	float xmidfrac;
+	float xmidinc;
+	float xmidold;
+	float xmidnew;
+	float ymid;
+	float ymidfrac;
+	float ymidinc;
+	float ymidold;
+	float ymidnew;
+	uint8_t red;
+	uint8_t redold;
+	uint8_t rednew;
+	uint8_t green;
+	uint8_t greenold;
+	uint8_t greennew;
+	uint8_t blue;
+	uint8_t blueold;
+	uint8_t bluenew;
+	uint8_t alpha;
+	uint8_t alphaold;
+	uint8_t alphanew;
+	float colfrac;
+	float colinc;
 };
 
 struct n64_singlemonitorobj {
 	struct n64_defaultobj base;
 	struct n64_tvscreen screen;
-	s16 owneroffset;
-	s8 ownerpart;
-	u8 imagenum;
+	int16_t owneroffset;
+	int8_t ownerpart;
+	uint8_t imagenum;
 };
 
 struct n64_multimonitorobj {
 	struct n64_defaultobj base;
 	struct n64_tvscreen screens[4];
-	u8 imagenums[4];
+	uint8_t imagenums[4];
 };
 
 struct n64_hangingmonitorsobj {
@@ -244,36 +245,36 @@ struct n64_hangingmonitorsobj {
 
 struct n64_autogunobj {
 	struct n64_defaultobj base;
-	s16 targetpad;
-	s8 firing;
-	u8 firecount;
-	f32 yzero;
-	f32 ymaxleft;
-	f32 ymaxright;
-	f32 yrot;
-	f32 yspeed;
-	f32 xzero;
-	f32 xrot;
-	f32 xspeed;
-	f32 maxspeed;
-	f32 aimdist;
-	f32 barrelspeed;
-	f32 barrelrot;
-	s32 lastseebond60;
-	s32 lastaimbond60;
-	s32 allowsoundframe;
-	u32 ptr_beam;
-	f32 shotbondsum;
-	u32 ptr_target;
-	u8 targetteam;
-	u8 ammoquantity;
-	s16 nextchrtest;
+	int16_t targetpad;
+	int8_t firing;
+	uint8_t firecount;
+	float yzero;
+	float ymaxleft;
+	float ymaxright;
+	float yrot;
+	float yspeed;
+	float xzero;
+	float xrot;
+	float xspeed;
+	float maxspeed;
+	float aimdist;
+	float barrelspeed;
+	float barrelrot;
+	int lastseebond60;
+	int lastaimbond60;
+	int allowsoundframe;
+	uint32_t ptr_beam;
+	float shotbondsum;
+	uint32_t ptr_target;
+	uint8_t targetteam;
+	uint8_t ammoquantity;
+	int16_t nextchrtest;
 };
 
 struct n64_linkgunsobj {
-	u32 unk00;
-	s16 offset1;
-	s16 offset2;
+	uint32_t unk00;
+	int16_t offset1;
+	int16_t offset2;
 };
 
 struct n64_debrisobj {
@@ -285,22 +286,22 @@ struct n64_hatobj {
 };
 
 struct n64_grenadeprobobj { // objtype 0x12
-	u32 unk00;
-	s16 chrnum;
-	u16 probability;
+	uint32_t unk00;
+	int16_t chrnum;
+	uint16_t probability;
 };
 
 struct n64_linkliftdoorobj {
-	u32 unk00;
-	u32 ptr_door;
-	u32 ptr_lift;
-	u32 ptr_next;
-	s32 stopnum;
+	uint32_t unk00;
+	uint32_t ptr_door;
+	uint32_t ptr_lift;
+	uint32_t ptr_next;
+	int stopnum;
 };
 
 struct n64_multiammocrateslot {
-	u16 modelnum;
-	u16 quantity;
+	uint16_t modelnum;
+	uint16_t quantity;
 };
 
 struct n64_multiammocrateobj {
@@ -310,92 +311,92 @@ struct n64_multiammocrateobj {
 
 struct n64_shieldobj {
 	struct n64_defaultobj base;
-	f32 initialamount;
-	f32 amount;
-	u32 unk64;
+	float initialamount;
+	float amount;
+	uint32_t unk64;
 };
 
 struct n64_tag {
-	u32 identifier;
-	u16 tagnum;
-	s16 cmdoffset;
-	u32 ptr_next;
-	u32 ptr_obj;
+	uint32_t identifier;
+	uint16_t tagnum;
+	int16_t cmdoffset;
+	uint32_t ptr_next;
+	uint32_t ptr_obj;
 };
 
 struct n64_objective {
-	u32 unk00;
-	s32 index;
-	u32 text;
-	u16 unk0c;
-	u8 flags;
-	s8 difficulties;
+	uint32_t unk00;
+	int index;
+	uint32_t text;
+	uint16_t unk0c;
+	uint8_t flags;
+	int8_t difficulties;
 };
 
 struct n64_stdobjective {
-	u32 cmd;
+	uint32_t cmd;
 };
 
 struct n64_objectivecmd {
-	u8 cmd0[4];
-	u32 cmd1;
+	uint8_t cmd0[4];
+	uint32_t cmd1;
 };
 
 struct n64_briefingobj {
-	u32 unk00;
-	u32 type;
-	u32 text;
-	u32 ptr_next;
+	uint32_t unk00;
+	uint32_t type;
+	uint32_t text;
+	uint32_t ptr_next;
 };
 
 struct n64_padlockeddoorobj {
-	u32 unk00;
-	u32 ptr_door;
-	u32 ptr_lock;
-	u32 ptr_next;
+	uint32_t unk00;
+	uint32_t ptr_door;
+	uint32_t ptr_lock;
+	uint32_t ptr_next;
 };
 
 struct n64_truckobj {
 	struct n64_defaultobj base;
-	u32 ptr_ailist;
-	u16 aioffset;
-	s16 aireturnlist;
-	f32 speed;
-	f32 wheelxrot;
-	f32 wheelyrot;
-	f32 speedaim;
-	f32 speedtime60;
-	f32 turnrot60;
-	f32 roty;
-	u32 ptr_path;
-	s32 nextstep;
+	uint32_t ptr_ailist;
+	uint16_t aioffset;
+	int16_t aireturnlist;
+	float speed;
+	float wheelxrot;
+	float wheelyrot;
+	float speedaim;
+	float speedtime60;
+	float turnrot60;
+	float roty;
+	uint32_t ptr_path;
+	int nextstep;
 };
 
 struct n64_tankobj {
-	u8 _pad_[128];
+	uint8_t _pad_[128];
 };
 
 struct n64_heliobj {
 	struct n64_defaultobj base;
-	u32 ptr_ailist;
-	u16 aioffset;
-	s16 aireturnlist;
-	f32 rotoryrot;
-	f32 rotoryspeed;
-	f32 rotoryspeedaim;
-	f32 rotoryspeedtime;
-	f32 speed;
-	f32 speedaim;
-	f32 speedtime60;
-	f32 yrot;
-	u32 ptr_path;
-	s32 nextstep;
+	uint32_t ptr_ailist;
+	uint16_t aioffset;
+	int16_t aireturnlist;
+	float rotoryrot;
+	float rotoryspeed;
+	float rotoryspeedaim;
+	float rotoryspeedtime;
+	float speed;
+	float speedaim;
+	float speedtime60;
+	float yrot;
+	uint32_t ptr_path;
+	int nextstep;
 };
 
 struct n64_glassobj {
 	struct n64_defaultobj base;
-	s16 portalnum;
-	s16 _pad_;
+	int16_t portalnum;
+	int16_t _pad_;
 };
 
 struct n64_safeobj {
@@ -403,99 +404,99 @@ struct n64_safeobj {
 };
 
 struct n64_safeitemobj {
-	u32 unk00;
-	u32 ptr_item;
-	u32 ptr_safe;
-	u32 ptr_door;
-	u32 ptr_next;
+	uint32_t unk00;
+	uint32_t ptr_item;
+	uint32_t ptr_safe;
+	uint32_t ptr_door;
+	uint32_t ptr_next;
 };
 
 struct n64_cameraposobj {
-	s32 type;
-	f32 x;
-	f32 y;
-	f32 z;
-	f32 theta;
-	f32 verta;
-	s32 pad;
+	int type;
+	float x;
+	float y;
+	float z;
+	float theta;
+	float verta;
+	int pad;
 };
 
 struct n64_tintedglassobj {
 	struct n64_defaultobj base;
-	s16 xludist;
-	s16 opadist;
-	s16 opacity;
-	s16 portalnum;
-	f32 unk64;
+	int16_t xludist;
+	int16_t opadist;
+	int16_t opacity;
+	int16_t portalnum;
+	float unk64;
 };
 
 struct n64_liftobj {
 	struct n64_defaultobj base;
-	s16 pads[4];
-	u32 ptr_doors[4];
-	f32 dist;
-	f32 speed;
-	f32 accel;
-	f32 maxspeed;
-	s8 soundtype;
-	s8 levelcur;
-	s8 levelaim;
-	s8 _pad_;
+	int16_t pads[4];
+	uint32_t ptr_doors[4];
+	float dist;
+	float speed;
+	float accel;
+	float maxspeed;
+	int8_t soundtype;
+	int8_t levelcur;
+	int8_t levelaim;
+	int8_t _pad_;
 	struct n64_coord prevpos;
 };
 
 struct n64_linksceneryobj {
-	u32 unk00;
-	u32 ptr_trigger;
-	u32 ptr_unexp;
-	u32 ptr_exp;
-	u32 ptr_next;
+	uint32_t unk00;
+	uint32_t ptr_trigger;
+	uint32_t ptr_unexp;
+	uint32_t ptr_exp;
+	uint32_t ptr_next;
 };
 
 struct n64_blockedpathobj {
-	u32 unk00;
-	u32 ptr_blocker;
-	s16 waypoint1;
-	s16 waypoint2;
-	u32 ptr_next;
+	uint32_t unk00;
+	uint32_t ptr_blocker;
+	int16_t waypoint1;
+	int16_t waypoint2;
+	uint32_t ptr_next;
 };
 
 struct n64_hov {
-	u8 type;
-	u8 flags;
-	s16 _pad_;
-	f32 bobycur;
-	f32 bobytarget;
-	f32 bobyspeed;
-	f32 yrot;
-	f32 bobpitchcur;
-	f32 bobpitchtarget;
-	f32 bobpitchspeed;
-	f32 bobrollcur;
-	f32 bobrolltarget;
-	f32 bobrollspeed;
-	f32 groundpitch;
-	f32 y;
-	f32 ground;
-	s32 prevframe60;
-	s32 prevgroundframe60;
+	uint8_t type;
+	uint8_t flags;
+	int16_t _pad_;
+	float bobycur;
+	float bobytarget;
+	float bobyspeed;
+	float yrot;
+	float bobpitchcur;
+	float bobpitchtarget;
+	float bobpitchspeed;
+	float bobrollcur;
+	float bobrolltarget;
+	float bobrollspeed;
+	float groundpitch;
+	float y;
+	float ground;
+	int prevframe60;
+	int prevgroundframe60;
 };
 
 struct n64_hoverbikeobj {
 	struct n64_defaultobj base;
 	struct n64_hov hov;
-	f32 speed[2];
-	f32 prevpos[2];
-	f32 w;
-	f32 rels[2];
-	f32 exreal;
-	f32 ezreal;
-	f32 ezreal2;
-	f32 leanspeed;
-	f32 leandiff;
-	s32 maxspeedtime240;
-	f32 speedabs[2];
-	f32 speedrel[2];
+	float speed[2];
+	float prevpos[2];
+	float w;
+	float rels[2];
+	float exreal;
+	float ezreal;
+	float ezreal2;
+	float leanspeed;
+	float leandiff;
+	int maxspeedtime240;
+	float speedabs[2];
+	float speedrel[2];
 };
 
 struct n64_hoverpropobj {
@@ -505,136 +506,136 @@ struct n64_hoverpropobj {
 
 struct n64_fanobj {
 	struct n64_defaultobj base;
-	f32 yrot;
-	f32 yrotprev;
-	f32 ymaxspeed;
-	f32 yspeed;
-	f32 yaccel;
-	s8 on;
-	u8 _pad_[3];
+	float yrot;
+	float yrotprev;
+	float ymaxspeed;
+	float yspeed;
+	float yaccel;
+	int8_t on;
+	uint8_t _pad_[3];
 };
 
 struct n64_hovercarobj {
 	struct n64_defaultobj base;
-	u32 ptr_ailist;
-	u16 aioffset;
-	s16 aireturnlist;
-	f32 speed;
-	f32 speedaim;
-	f32 speedtime60;
-	f32 turnyspeed60;
-	f32 turnxspeed60;
-	f32 turnrot60;
-	f32 roty;
-	f32 rotx;
-	f32 rotz;
-	u32 ptr_path;
-	s32 nextstep;
-	s16 status;
-	s16 dead;
-	s16 deadtimer60;
-	s16 sparkstimer60;
+	uint32_t ptr_ailist;
+	uint16_t aioffset;
+	int16_t aireturnlist;
+	float speed;
+	float speedaim;
+	float speedtime60;
+	float turnyspeed60;
+	float turnxspeed60;
+	float turnrot60;
+	float roty;
+	float rotx;
+	float rotz;
+	uint32_t ptr_path;
+	int nextstep;
+	int16_t status;
+	int16_t dead;
+	int16_t deadtimer60;
+	int16_t sparkstimer60;
 };
 
 struct n64_chopperobj {
 	struct n64_defaultobj base;
-	u32 ptr_ailist;
-	u16 aioffset;
-	s16 aireturnlist;
+	uint32_t ptr_ailist;
+	uint16_t aioffset;
+	int16_t aireturnlist;
 	union {
 		struct {
-			f32 speed;
-			f32 speedaim;
-			f32 speedtime60;
+			float speed;
+			float speedaim;
+			float speedtime60;
 		};
 		struct n64_coord fall;
 	};
-	f32 turnyspeed60;
-	f32 turnxspeed60;
-	f32 turnrot60;
-	f32 roty;
-	f32 rotx;
-	f32 rotz;
-	u32 ptr_path;
-	s32 nextstep;//
-	s16 weaponsarmed;
-	s16 ontarget;
-	s16 target;
-	u8 attackmode;
-	u8 cw;
-	f32 vx;
-	f32 vy;
-	f32 vz;
-	f32 power;
-	f32 otx;
-	f32 oty;
-	f32 otz;
-	f32 bob;
-	f32 bobstrength;
-	s32 targetvisible;
-	s32 timer60;
-	s32 patroltimer60;
-	f32 gunturnyspeed60;
-	f32 gunturnxspeed60;
-	f32 gunroty;
-	f32 gunrotx;
-	f32 barrelrotspeed;
-	f32 barrelrot;
-	u32 ptr_fireslotthing;
-	s32 dead;
+	float turnyspeed60;
+	float turnxspeed60;
+	float turnrot60;
+	float roty;
+	float rotx;
+	float rotz;
+	uint32_t ptr_path;
+	int nextstep;//
+	int16_t weaponsarmed;
+	int16_t ontarget;
+	int16_t target;
+	uint8_t attackmode;
+	uint8_t cw;
+	float vx;
+	float vy;
+	float vz;
+	float power;
+	float otx;
+	float oty;
+	float otz;
+	float bob;
+	float bobstrength;
+	int targetvisible;
+	int timer60;
+	int patroltimer60;
+	float gunturnyspeed60;
+	float gunturnxspeed60;
+	float gunroty;
+	float gunrotx;
+	float barrelrotspeed;
+	float barrelrot;
+	uint32_t ptr_fireslotthing;
+	int dead;
 };
 
 struct n64_escalatorobj {
 	struct n64_defaultobj base;
-	s32 frame;
+	int frame;
 	struct n64_coord prevpos;
 };
 
 struct n64_textoverride {
-	u32 unk00;
-	s32 objoffset;
-	s32 weapon;
-	u32 obtaintext;
-	u32 ownertext;
-	u32 inventorytext;
-	u32 inventory2text;
-	u32 pickuptext;
-	u32 ptr_next;
-	u32 ptr_obj;
+	uint32_t unk00;
+	int objoffset;
+	int weapon;
+	uint32_t obtaintext;
+	uint32_t ownertext;
+	uint32_t inventorytext;
+	uint32_t inventory2text;
+	uint32_t pickuptext;
+	uint32_t ptr_next;
+	uint32_t ptr_obj;
 };
 
 struct n64_criteria_roomentered {
-	u32 unk00;
-	u32 pad;
-	u32 status;
-	u32 ptr_next;
+	uint32_t unk00;
+	uint32_t pad;
+	uint32_t status;
+	uint32_t ptr_next;
 };
 
 struct n64_criteria_throwinroom {
-	u32 unk00;
-	u32 unk04;
-	u32 pad;
-	u32 status;
-	u32 ptr_next;
+	uint32_t unk00;
+	uint32_t unk04;
+	uint32_t pad;
+	uint32_t status;
+	uint32_t ptr_next;
 };
 
 struct n64_criteria_holograph {
-	u32 unk00;
-	u32 obj;
-	u32 status;
-	u32 ptr_next;
+	uint32_t unk00;
+	uint32_t obj;
+	uint32_t status;
+	uint32_t ptr_next;
 };
 
 struct n64_ailist {
-	u32 ptr_list;
-	s32 id;
+	uint32_t ptr_list;
+	int id;
 };
 
 struct n64_path {
-	u32 ptr_pads;
-	u8 id;
-	u8 flags;
-	u16 len;
+	uint32_t ptr_pads;
+	uint8_t id;
+	uint8_t flags;
+	uint16_t len;
 };
 
 #endif

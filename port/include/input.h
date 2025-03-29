@@ -1,7 +1,7 @@
 #ifndef _IN_INPUT_H
 #define _IN_INPUT_H
 
-#include <PR/ultratypes.h>
+#include <stdint.h>
 #include <PR/os_cont.h>
 
 #define INPUT_MAX_CONTROLLERS MAXCONTROLLERS
@@ -133,115 +133,115 @@ enum mouselockmode {
 };
 
 // returns bitmask of connected controllers or -1 if failed
-s32 inputInit(void);
+int inputInit(void);
 
 // read the specified player's inputs into the N64 pad struct
 // returns 0 if read, non-0 if failed
-s32 inputReadController(s32 idx, OSContPad *npad);
+int inputReadController(int idx, OSContPad *npad);
 
 // returns 1 if rumble is supported for specified player's controller
-s32 inputRumbleSupported(s32 idx);
+int inputRumbleSupported(int idx);
 
 // returns 1 if specified player has a live controller assigned
-s32 inputControllerConnected(s32 idx);
+int inputControllerConnected(int idx);
 
 // returns bitmask of players with assigned controllers
-s32 inputControllerMask(void);
+int inputControllerMask(void);
 
 // get/set Input.Player%d.SwapSticks
-s32 inputControllerGetSticksSwapped(s32 cidx);
-void inputControllerSetSticksSwapped(s32 cidx, s32 swapped);
+int inputControllerGetSticksSwapped(int cidx);
+void inputControllerSetSticksSwapped(int cidx, int swapped);
 
 // get/set Input.Player%d.StickCButtons (DualAnalog is 1 if StickCButtons is 0)
-s32 inputControllerGetDualAnalog(s32 cidx);
-void inputControllerSetDualAnalog(s32 cidx, s32 enable);
+int inputControllerGetDualAnalog(int cidx);
+void inputControllerSetDualAnalog(int cidx, int enable);
 
 // get/set Input.Player%d.CancelCButtons
-s32 inputControllerGetCancelCButtons(s32 cidx);
-void inputControllerSetCancelCButtons(s32 cidx, s32 cancel);
+int inputControllerGetCancelCButtons(int cidx);
+void inputControllerSetCancelCButtons(int cidx, int cancel);
 
 // get/set sensitivity for a given player
-f32 inputControllerGetAxisScale(s32 cidx, s32 stick, s32 axis);
-void inputControllerSetAxisScale(s32 cidx, s32 stick, s32 axis, f32 value);
+float inputControllerGetAxisScale(int cidx, int stick, int axis);
+void inputControllerSetAxisScale(int cidx, int stick, int axis, float value);
 
 // get/set deadzone for a given player
-f32 inputControllerGetAxisDeadzone(s32 cidx, s32 stick, s32 axis);
-void inputControllerSetAxisDeadzone(s32 cidx, s32 stick, s32 axis, f32 value);
+float inputControllerGetAxisDeadzone(int cidx, int stick, int axis);
+void inputControllerSetAxisDeadzone(int cidx, int stick, int axis, float value);
 
 // writes array of up to INPUT_MAX_CONNECTED_CONTROLLERS controller IDs
 // for all the controllers available on this machine into out if it's not NULL
 // returns number of IDs that would've been written (or were written if out is not NULL)
-s32 inputGetConnectedControllers(s32 *out);
+int inputGetConnectedControllers(int *out);
 
 // get name of connected controller id
 // returns "Invalid" on failure
-const char *inputGetConnectedControllerName(s32 id);
+const char *inputGetConnectedControllerName(int id);
 
 // get id of the controller currently assigned to player cidx or -1 if none
-s32 inputGetAssignedControllerId(s32 cidx);
+int inputGetAssignedControllerId(int cidx);
 
 // assign connected controller id to player cidx
 // if id is -1, unassigns controller from player, if any
 // returns true on success, false on failure
-s32 inputAssignController(s32 cidx, s32 id);
+int inputAssignController(int cidx, int id);
 
 // vk is a value from the virtkey enum above
-s32 inputKeyPressed(u32 vk);
-s32 inputKeyJustPressed(u32 vk);
+int inputKeyPressed(uint32_t vk);
+int inputKeyJustPressed(uint32_t vk);
 
 // idx is controller index, contbtn is one of the CONT_ constants
-s32 inputButtonPressed(s32 idx, u32 contbtn);
+int inputButtonPressed(int idx, uint32_t contbtn);
 
 // bind virtkey vk to n64 pad #idx's button/axis ck as represented by its contkey value
 // if bind is -1, picks a bind slot automatically
-void inputKeyBind(s32 idx, u32 ck, s32 bind, u32 vk);
+void inputKeyBind(int idx, uint32_t ck, int bind, uint32_t vk);
 
-const u32 *inputKeyGetBinds(s32 idx, u32 ck);
+const uint32_t *inputKeyGetBinds(int idx, uint32_t ck);
 
 // get VK_ value from human-readable name
-s32 inputGetKeyByName(const char *name);
+int inputGetKeyByName(const char *name);
 
 // get human-readable name from VK_ value
-const char *inputGetKeyName(s32 vk);
+const char *inputGetKeyName(int vk);
 
 // get CK_ value from human-readable name
-s32 inputGetContKeyByName(const char *name);
+int inputGetContKeyByName(const char *name);
 
 // get human-readable name from CK_ value
-const char *inputGetContKeyName(u32 ck);
+const char *inputGetContKeyName(uint32_t ck);
 
 // strength is 0 .. 1; 0 strength turns it off
-void inputRumble(s32 idx, f32 strength, f32 time);
+void inputRumble(int idx, float strength, float time);
 
-f32 inputRumbleGetStrength(s32 cidx);
-void inputRumbleSetStrength(s32 cidx, f32 val);
+float inputRumbleGetStrength(int cidx);
+void inputRumbleSetStrength(int cidx, float val);
 
 // locks the mouse cursor in the window and makes it invisible if argument is true
-void inputLockMouse(s32 lock);
+void inputLockMouse(int lock);
 
 // returns the current state of the above
-s32 inputMouseIsLocked(void);
+int inputMouseIsLocked(void);
 
 // sets x, y to mouse position in native viewport coordinates (ie, 320x240 most of the time)
 // returns true if mouse has moved this input frame
-s32 inputMouseGetPosition(s32 *x, s32 *y);
+int inputMouseGetPosition(int *x, int *y);
 
 // returns changes in mouse position since last frame, in window coordinates
-void inputMouseGetRawDelta(s32 *dx, s32 *dy);
+void inputMouseGetRawDelta(int *dx, int *dy);
 
 // returns changes in mouse position since last frame, scaled by sensitivity
 // returns 0, 0 when the mouse is not locked into the window
-void inputMouseGetScaledDelta(f32 *dx, f32 *dy);
+void inputMouseGetScaledDelta(float *dx, float *dy);
 
 // returns changes in mouse position since last frame, scaled by absolute sensitivity
 // returns 0, 0 when the mouse is not locked into the window
-void inputMouseGetAbsScaledDelta(f32 *dx, f32 *dy);
+void inputMouseGetAbsScaledDelta(float *dx, float *dy);
 
-void inputMouseGetSpeed(f32 *x, f32 *y);
-void inputMouseSetSpeed(f32 x, f32 y);
+void inputMouseGetSpeed(float *x, float *y);
+void inputMouseSetSpeed(float x, float y);
 
-s32 inputMouseIsEnabled(void);
-void inputMouseEnable(s32 enabled);
+int inputMouseIsEnabled(void);
+void inputMouseEnable(int enabled);
 
 // call this every frame
 void inputUpdate(void);
@@ -250,35 +250,35 @@ void inputUpdate(void);
 void inputSaveBinds(void);
 
 // reset given player's binds to either PC or N64 defaults
-void inputSetDefaultKeyBinds(s32 cidx, s32 n64mode);
+void inputSetDefaultKeyBinds(int cidx, int n64mode);
 
 // clear or get the last pressed button
 void inputClearLastKey(void);
-s32 inputGetLastKey(void);
+int inputGetLastKey(void);
 
 // get/set Input.MouseLockMode
-s32 inputGetMouseLockMode(void);
-void inputSetMouseLockMode(s32 lockmode);
+int inputGetMouseLockMode(void);
+void inputSetMouseLockMode(int lockmode);
 
 // same as inputLockMouse but works only if mouse is enabled and lockmode == MLOCK_AUTO
-s32 inputAutoLockMouse(s32 wantlock);
+int inputAutoLockMouse(int wantlock);
 
 // show/hide mouse cursor; if mouse lock is on the cursor is always hidden
-void inputMouseShowCursor(s32 show);
+void inputMouseShowCursor(int show);
 
 void inputStartTextInput(void);
 void inputStopTextInput(void);
-s32 inputIsTextInputActive(void);
+int inputIsTextInputActive(void);
 
 void inputClearLastTextChar(void);
 char inputGetLastTextChar(void);
 
-s32 inputTextHandler(char *out, const u32 outSize, s32 *curCol, s32 oskCharsOnly);
+int inputTextHandler(char *out, const uint32_t outSize, int *curCol, int oskCharsOnly);
 
 void inputClearClipboard(void);
 const char *inputGetClipboard(void);
 
 // returns keymod values
-u32 inputGetKeyModState(void);
+uint32_t inputGetKeyModState(void);
 
 #endif

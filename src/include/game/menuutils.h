@@ -1,14 +1,15 @@
 #ifndef IN_GAME_MENUUTILS_H
 #define IN_GAME_MENUUTILS_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
-u32 colourBlend(u32 a, u32 b, u32 weight);
+uint32_t colourBlend(uint32_t a, uint32_t b, uint32_t weight);
 void menuTickTimers(void);
-f32 menuGetSinOscFrac(f32 freq);
-f32 menuGetCosOscFrac(f32 freq);
-f32 menuGetLinearIntervalFrac(f32 freq);
-f32 menuGetLinearOscPauseFrac(f32 frac);
+float menuGetSinOscFrac(float freq);
+float menuGetCosOscFrac(float freq);
+float menuGetLinearIntervalFrac(float freq);
+float menuGetLinearOscPauseFrac(float frac);
 
 #endif

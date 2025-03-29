@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/dlights.h"
@@ -46,8 +47,8 @@ uint8_t g_NVChrBrightness;
 struct var80061420 *var80061420 = NULL;
 uint32_t var80061424 = 0x00000000;
 struct coord *var80061428 = NULL;
-u16 **var8006142c = NULL;
-u16 **var80061430 = NULL;
+uint16_t **var8006142c = NULL;
+uint16_t **var80061430 = NULL;
 float *var80061434 = NULL;
 bool *g_IsPortalClosed = NULL;
 float var8006143c = 50;
@@ -512,8 +513,6 @@ void func0f001c0c(void)
 	int *sp44;
 	int j;
 
-	osGetCount(); // This isn't used for anything?
-
 	lightsCalculateRoomDimensions();
 
 	for (g_NumPortals = 0; g_BgPortals[g_NumPortals].verticesoffset != 0; g_NumPortals++);
@@ -580,7 +579,7 @@ void func0f001c0c(void)
 	func0f00215c(sp48);
 
 	for (i = 1, table3size = 0; i < g_Vars.roomcount; i++) {
-		sp44[i] = func0f177a54((void *)(i * var8009cae0 + sp48), g_Vars.roomcount, (void *)(&s5[i * var8009cae0]), 1);
+		sp44[i] = utilCompressZeroRuns((void *)(i * var8009cae0 + sp48), g_Vars.roomcount, (void *)(&s5[i * var8009cae0]), 1);
 		table3size += align4(sp44[i]);
 	}
 
@@ -606,7 +605,7 @@ void func0f001c0c(void)
 	table3size = 0;
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
-		sp44[i] = func0f177a54((void *)(sp48 + i), g_Vars.roomcount, (void *)(&s5[i * var8009cae0]), var8009cae0);
+		sp44[i] = utilCompressZeroRuns((void *)(sp48 + i), g_Vars.roomcount, (void *)(&s5[i * var8009cae0]), var8009cae0);
 
 		table3size += align4(sp44[i]);
 	}
@@ -634,8 +633,6 @@ void func0f001c0c(void)
 	for (i = 1; i < g_Vars.roomcount; i++) {
 		g_Rooms[i].flags &= ~ROOMFLAG_ONSCREEN;
 	}
-
-	osGetCount();
 }
 
 float func0f002334(int roomnum, float mult, int portalnum1, int portalnum2);
@@ -1223,14 +1220,14 @@ void roomsTickLighting(void)
 				int spa0 = 0;
 				int sp9c = 0;
 
-				int ret = func0f177c8c(var80061420[i].unk04, &spa0, &sp9c);
+				int ret = untilCompressRoomData(var80061420[i].unk04, &spa0, &sp9c);
 
 				while (ret != -1) {
 					if (ret != 0) {
 						g_Rooms[sp9c].flags |= ROOMFLAG_BRIGHTNESS_DIRTY_TEMP;
 					}
 
-					ret = func0f177c8c(var80061420[i].unk04, &spa0, &sp9c);
+					ret = untilCompressRoomData(var80061420[i].unk04, &spa0, &sp9c);
 				}
 			}
 
@@ -1273,7 +1270,7 @@ void roomsTickLighting(void)
 					int sp90 = 0;
 					int sp8c = 0;
 
-					int ret = func0f177c8c(var80061420[i].unk00, &sp90, &sp8c);
+					int ret = untilCompressRoomData(var80061420[i].unk00, &sp90, &sp8c);
 
 					while (ret != -1) {
 						if (sp8c != 0) {
@@ -1286,7 +1283,7 @@ void roomsTickLighting(void)
 							sum += add;
 						}
 
-						ret = func0f177c8c(var80061420[i].unk00, &sp90, &sp8c);
+						ret = untilCompressRoomData(var80061420[i].unk00, &sp90, &sp8c);
 					}
 
 					if (sum > 255) {
@@ -1373,7 +1370,7 @@ void roomFlashLighting(int roomnum, int start, int limit)
 		int sp78 = 0;
 		int neighbournum = 0;
 
-		value = func0f177c8c(var80061420[roomnum].unk04, &sp78, &neighbournum);
+		value = untilCompressRoomData(var80061420[roomnum].unk04, &sp78, &neighbournum);
 
 		while (value != -1) {
 			float increment = value * (1.0f / 255.0f) * start * 5.0f;
@@ -1394,7 +1391,7 @@ void roomFlashLighting(int roomnum, int start, int limit)
 				roomFlashLocalLighting(neighbournum, increment, limit);
 			}
 
-			value = func0f177c8c(var80061420[roomnum].unk04, &sp78, &neighbournum);
+			value = untilCompressRoomData(var80061420[roomnum].unk04, &sp78, &neighbournum);
 		}
 	}
 }
@@ -1660,8 +1657,8 @@ void func0f004c6c(void)
 
 	for (i = 0; i < g_NumPortals; i++) {
 		for (j = 0; j < i; j++) {
-			u16 a = var8006142c[i][j];
-			u16 b = var8006142c[j][i];
+			uint16_t a = var8006142c[i][j];
+			uint16_t b = var8006142c[j][i];
 
 			var80061430[i][j] = a < b ? a : b;
 		}
@@ -1678,7 +1675,7 @@ void func0f00505c(void)
 	int portalnum2;
 	int roomnum;
 	int l;
-	u16 dist;
+	uint16_t dist;
 
 	for (i = 0; i < g_NumPortals; i++) {
 		for (j = 0, var8009cad0[0] = i, sp78 = 1; j != sp78; j = (j + 1) & 0x7ff) {

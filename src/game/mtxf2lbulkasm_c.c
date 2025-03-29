@@ -5,26 +5,26 @@
 #include "data.h"
 #include "types.h"
 
-void mtxF2LBulk(Mtxf *mtx, s32 count)
+void mtxF2LBulk(Mtxf *mtx, int count)
 {
 #ifndef GBI_FLOATS
 	do {
-		u32 m00 = (s32) (mtx->m[0][0] * var8005ef10[0]);
-		u32 m01 = (s32) (mtx->m[0][1] * var8005ef10[0]);
-		u32 m02 = (s32) (mtx->m[0][2] * var8005ef10[0]);
-		u32 m03 = (s32) (mtx->m[0][3] * var8005ef10[1]);
-		u32 m10 = (s32) (mtx->m[1][0] * var8005ef10[0]);
-		u32 m11 = (s32) (mtx->m[1][1] * var8005ef10[0]);
-		u32 m12 = (s32) (mtx->m[1][2] * var8005ef10[0]);
-		u32 m13 = (s32) (mtx->m[1][3] * var8005ef10[1]);
-		u32 m20 = (s32) (mtx->m[2][0] * var8005ef10[0]);
-		u32 m21 = (s32) (mtx->m[2][1] * var8005ef10[0]);
-		u32 m22 = (s32) (mtx->m[2][2] * var8005ef10[0]);
-		u32 m23 = (s32) (mtx->m[2][3] * var8005ef10[1]);
-		u32 m30 = (s32) (mtx->m[3][0] * var8005ef10[0]);
-		u32 m31 = (s32) (mtx->m[3][1] * var8005ef10[0]);
-		u32 m32 = (s32) (mtx->m[3][2] * var8005ef10[0]);
-		u32 m33 = (s32) (mtx->m[3][3] * var8005ef10[1]);
+		uint32_t m00 = (int) (mtx->m[0][0] * var8005ef10[0]);
+		uint32_t m01 = (int) (mtx->m[0][1] * var8005ef10[0]);
+		uint32_t m02 = (int) (mtx->m[0][2] * var8005ef10[0]);
+		uint32_t m03 = (int) (mtx->m[0][3] * var8005ef10[1]);
+		uint32_t m10 = (int) (mtx->m[1][0] * var8005ef10[0]);
+		uint32_t m11 = (int) (mtx->m[1][1] * var8005ef10[0]);
+		uint32_t m12 = (int) (mtx->m[1][2] * var8005ef10[0]);
+		uint32_t m13 = (int) (mtx->m[1][3] * var8005ef10[1]);
+		uint32_t m20 = (int) (mtx->m[2][0] * var8005ef10[0]);
+		uint32_t m21 = (int) (mtx->m[2][1] * var8005ef10[0]);
+		uint32_t m22 = (int) (mtx->m[2][2] * var8005ef10[0]);
+		uint32_t m23 = (int) (mtx->m[2][3] * var8005ef10[1]);
+		uint32_t m30 = (int) (mtx->m[3][0] * var8005ef10[0]);
+		uint32_t m31 = (int) (mtx->m[3][1] * var8005ef10[0]);
+		uint32_t m32 = (int) (mtx->m[3][2] * var8005ef10[0]);
+		uint32_t m33 = (int) (mtx->m[3][3] * var8005ef10[1]);
 
 		mtx->l[0][0] = (m00 & 0xffff0000) | m01 >> 16;
 		mtx->l[0][1] = (m02 & 0xffff0000) | m03 >> 16;

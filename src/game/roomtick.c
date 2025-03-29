@@ -7,7 +7,7 @@
 
 void roomsTick(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_RoomMtxNumSlots; i++) {
 		if (g_RoomMtxBaseRooms[i] >= 0) {

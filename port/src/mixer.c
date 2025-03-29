@@ -681,10 +681,10 @@ void aSetVolumeImpl(uint8_t flags, int16_t v, int16_t t, int16_t r) {
     }
 }
 
-void aPlayMP3Impl(const void *mp3file, u32 mp3size, void *out, int reset) {
+void aPlayMP3Impl(const void *mp3file, uint32_t mp3size, void *out, int reset) {
     static mp3dec_t mp3d;
-    static const u8 *curdata = NULL; // pointer to the mp3 we're currently processing
-    static s32 dataptr = 0; // byte index into curdata
+    static const uint8_t *curdata = NULL; // pointer to the mp3 we're currently processing
+    static int dataptr = 0; // byte index into curdata
 
     if (mp3file != curdata || reset) {
         // new mp3, reinit decoder
@@ -698,11 +698,11 @@ void aPlayMP3Impl(const void *mp3file, u32 mp3size, void *out, int reset) {
     if (dataptr < mp3size) {
         // FIXME: decoding straight to out might bite us in the ass because it's only 1160 bytes
         mp3dec_frame_info_t info;
-        const s32 samples = mp3dec_decode_frame(&mp3d, curdata + dataptr, mp3size - dataptr, out, &info);
+        const int samples = mp3dec_decode_frame(&mp3d, curdata + dataptr, mp3size - dataptr, out, &info);
         // fill in the rest of the buffer if frame is smaller
-        const s32 diff = 580 - samples;
+        const int diff = 580 - samples;
         if (diff > 0) {
-            memset((s16 *)out + samples, 0, diff * 2);
+            memset((int16_t *)out + samples, 0, diff * 2);
         } else {
             assert(diff == 0);
         }

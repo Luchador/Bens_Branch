@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include <math.h>
-#include <stdint.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/chraction.h"
@@ -27,14 +26,14 @@
 #include "types.h"
 #include "platform.h"
 
-s16 g_TCoordOffset; // Animates the textures going around the sphere
-s32 var8009cb04;
+int16_t g_TCoordOffset; // Animates the textures going around the sphere
+bool firsthalf;
 struct nbomb g_Nbombs[6];
 
 bool g_NbombsActive = false;
-f32 sphereradius = 100;
+float sphereradius = 100;
 
-// Ben's comment: if (var8009cb04 && vertices[i].t == 0) fixes texture seam when atan2f(src.x, src.z) returns 0
+// Ben's comment: if (firsthalf && vertices[i].t == 0) fixes texture seam when atan2f(src.x, src.z) returns 0
 #define MAKEVERTEX(i, src) \
 	vertices[i].x = src.x * sphereradius; \
 	vertices[i].y = src.y * sphereradius; \
@@ -43,17 +42,17 @@ f32 sphereradius = 100;
 	vertices[i].t = atan2f(src.x, src.z) / M_TAU * 256.0f * 32.0f; \
 	vertices[i].colour = 0; \
 \
-	if (var8009cb04 && vertices[i].t == 0) { \
+	if (firsthalf && vertices[i].t == 0) { \
 	} \
 \
 	vertices[i].t += g_TCoordOffset; // Ben's comment: scrolls the T coord around the sphere but honestly I can't see much difference when this is commented out
 
-Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, s8 depth)
+Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord *arg3, uint8_t arg4, uint8_t arg5, uint8_t arg6, uint8_t arg7, int8_t depth)
 {
 	struct coord sp7c;
 	struct coord sp70;
 	struct coord sp64;
-	f32 dist;
+	float dist;
 	Vtx *vertices;
 
 	sp7c.x = arg2->x + arg1->x;
@@ -110,7 +109,7 @@ Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, 
 	return gdl;
 }
 
-Gfx *nbombCreateSphere(Gfx *gdl, s32 depth)
+Gfx *nbombCreateSphere(Gfx *gdl, int depth)
 {
 	Vtx *vertices;
 	struct coord sp5c[] = {
@@ -122,7 +121,7 @@ Gfx *nbombCreateSphere(Gfx *gdl, s32 depth)
 		{ 0,  -1, 0  },
 	};
 
-	var8009cb04 = 0;
+	firsthalf = false;
 
 	vertices = gfxAllocateVertices(6);
 
@@ -141,7 +140,7 @@ Gfx *nbombCreateSphere(Gfx *gdl, s32 depth)
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[1], &sp5c[5], &sp5c[0], 1, 5, 0, 6, depth);
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[2], &sp5c[5], &sp5c[1], 2, 5, 1, 6, depth);
 
-	var8009cb04 = 1;
+	firsthalf = true;
 
 	vertices = gfxAllocateVertices(6);
 
@@ -175,9 +174,9 @@ void nbombReset(struct nbomb *nbomb)
  * If nbomb->age240 is 311 to 349, return a scaled number between 127 and 0
  * If nbomb->age240 is 350+, return 0
  */
-s32 nbombCalculateAlpha(struct nbomb *nbomb)
+int nbombCalculateAlpha(struct nbomb *nbomb)
 {
-	s32 alpha = 127;
+	int alpha = 127;
 
 	if (nbomb->age240 > TICKS(310)) {
 		if (nbomb->age240 < TICKS(350)) {
@@ -199,19 +198,19 @@ Gfx *nbombCreateGdl(void)
 {
 	Vtx *vertices;
 #ifdef PLATFORM_64BIT
-	u32 gdlsizes[] = { 0x0a30*2, 0x0330*2 }; // 1 player, 2+ players
+	uint32_t gdlsizes[] = { 0x0a30*2, 0x0330*2 }; // 1 player, 2+ players
 #else
-	u32 gdlsizes[] = { 0x0a30, 0x0330 }; // 1 player, 2+ players
+	uint32_t gdlsizes[] = { 0x0a30, 0x0330 }; // 1 player, 2+ players
 #endif
 	Gfx *gdlstart;
 	Gfx *gdl;
-	s32 index = 0;
+	int index = 0;
 
 	if (PLAYERCOUNT() >= 2) {
 		index = 1;
 	}
 
-	g_TCoordOffset = (s32)(g_20SecIntervalFrac * 64.0f * 32.0f * 16.0f) % 0x800; //0x800 = 2048. g_TCoordOffset goes from 0 to 16 over a period of 20 seconds
+	g_TCoordOffset = (int)(g_20SecIntervalFrac * 64.0f * 32.0f * 16.0f) % 0x800; //0x800 = 2048. g_TCoordOffset goes from 0 to 16 over a period of 20 seconds
 
 	gdl = gdlstart = gfxAllocate(gdlsizes[index]);
 
@@ -253,13 +252,13 @@ struct sndstate *g_NbombAudioHandle = NULL;
 
 Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 {
-	f32 divider = 2048;
+	float divider = 2048;
 	Mtxf *mtx;
 	Mtxf spc8;
 	Mtxf sp88;
 	Mtxf sp48;
 	struct coord sp3c;
-	u32 colour;
+	uint32_t colour;
 	Col *colours;
 
 	mtx = gfxAllocateMatrix();
@@ -299,7 +298,7 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 
 void nbombClearAllNBombs(void)
 {
-	s32 i;
+	int i;
 
 	g_NbombsActive = false;
 	g_NbombAudioHandle = NULL;
@@ -314,13 +313,13 @@ void nbombClearAllNBombs(void)
 
 void nbombInflictDamage(struct nbomb *nbomb)
 {
-	s32 index = 0;
-	s16 propnums[256];
+	int index = 0;
+	int16_t propnums[256];
 	struct coord bbmin;
 	struct coord bbmax;
 	RoomNum roomnums[54];
-	s16 *propnumptr;
-	s32 i;
+	int16_t *propnumptr;
+	int i;
 	struct gset gset;
 
 	gset.weaponnum = WEAPON_NBOMB;
@@ -366,18 +365,18 @@ void nbombInflictDamage(struct nbomb *nbomb)
 
 		if (prop->timetoregen == 0) {
 			if (prop->type == PROPTYPE_CHR || prop->type == PROPTYPE_PLAYER) {
-				f32 xdiff = prop->pos.f[0] - nbomb->pos.f[0];
-				f32 ydiff = prop->pos.f[1] - nbomb->pos.f[1];
-				f32 zdiff = prop->pos.f[2] - nbomb->pos.f[2];
+				float xdiff = prop->pos.f[0] - nbomb->pos.f[0];
+				float ydiff = prop->pos.f[1] - nbomb->pos.f[1];
+				float zdiff = prop->pos.f[2] - nbomb->pos.f[2];
 
-				f32 dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
+				float dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 
 				if (dist < nbomb->radius) {
 					struct chrdata *chr = prop->chr;
 					if (chr)
 					{
 						struct coord vector = {0, 0, 0};
-						f32 damage = 0.01f * g_Vars.lvupdate60freal;
+						float damage = 0.01f * g_Vars.lvupdate60freal;
 
 						chrDamageByMisc(chr, damage, &vector, &gset, nbomb->ownerprop);
 						chr->chrflags |= CHRCFLAG_TRIGGERSHOTLIST;
@@ -397,10 +396,10 @@ void nbombInflictDamage(struct nbomb *nbomb)
 void nbombTick(struct nbomb *nbomb)
 {
 	if (nbomb->age240 >= 0) {
-		s32 age60;
-		s32 oldage240 = nbomb->age240;
+		int age60;
+		int oldage240 = nbomb->age240;
 		nbomb->age240 = (g_Vars.lvframe240 - nbomb->spawnframe240) >> 2;
-		s32 increment = nbomb->age240 - oldage240;
+		int increment = nbomb->age240 - oldage240;
 
 		if (nbomb->age240 < TICKS(80)) {
 			nbomb->radius = nbomb->age240 / 80.0f;
@@ -433,9 +432,9 @@ void nbombTick(struct nbomb *nbomb)
 
 void nbombsTick(void)
 {
-	s32 i;
-	s32 youngest240 = 20000;
-	s32 volume;
+	int i;
+	int youngest240 = 20000;
+	int volume;
 
 	if (g_Vars.lvupdate240 != 0) {
 		g_NbombsActive = false;
@@ -464,10 +463,10 @@ void nbombsTick(void)
 			volume = AL_VOL_FULL;
 
 			if (g_NbombAudioHandle) {
-				f32 speed = menuGetSinOscFrac(20) * 0.02f + 0.4f;
+				float speed = menuGetSinOscFrac(20) * 0.02f + 0.4f;
 
 				if (youngest240 > TICKS(300)) {
-					volume = (1.0f - (f32)(youngest240 - TICKS(300)) / 50.0f) * AL_VOL_FULL;
+					volume = (1.0f - (float)(youngest240 - TICKS(300)) / 50.0f) * AL_VOL_FULL;
 				}
 
 				if (youngest240 >= TICKS(350)) {
@@ -475,7 +474,7 @@ void nbombsTick(void)
 				}
 
 				audioPostEvent(g_NbombAudioHandle, AL_SNDP_VOL_EVT, volume);
-				audioPostEvent(g_NbombAudioHandle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
+				audioPostEvent(g_NbombAudioHandle, AL_SNDP_PITCH_EVT, *(int *)&speed);
 			}
 		} else {
 			if (g_NbombAudioHandle && sndGetState(g_NbombAudioHandle) != AL_STOPPED) {
@@ -505,7 +504,7 @@ void nbombsTick(void)
 
 Gfx *nbombsRender(Gfx *gdl)
 {
-	s32 i;
+	int i;
 	Gfx *subgdl = NULL;
 
 	for (i = 0; i < ARRAYCOUNT(g_Nbombs); i++) {
@@ -523,9 +522,9 @@ Gfx *nbombsRender(Gfx *gdl)
 
 void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)
 {
-	s32 oldest240;
-	s32 index;
-	s32 i;
+	int oldest240;
+	int index;
+	int i;
 
 	oldest240 = -1;
 	index = 0;
@@ -562,8 +561,8 @@ void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)
 
 		if (g_Nbombs[index].audiohandle20) {
 			union audioparam param;
-			param.f32 = 0.4f;
-			audioPostEvent(g_Nbombs[index].audiohandle20, AL_SNDP_PITCH_EVT, param.s32);
+			param.floatparam = 0.4f;
+			audioPostEvent(g_Nbombs[index].audiohandle20, AL_SNDP_PITCH_EVT, param.intparam);
 		}
 	}
 
@@ -572,38 +571,13 @@ void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)
 
 		if (g_Nbombs[index].audiohandle24) {
 			union audioparam param;
-			param.f32 = 0.4f;
-			audioPostEvent(g_Nbombs[index].audiohandle24, AL_SNDP_PITCH_EVT, param.s32);
+			param.floatparam = 0.4f;
+			audioPostEvent(g_Nbombs[index].audiohandle24, AL_SNDP_PITCH_EVT, param.intparam);
 		}
 	}
 }
 
-//Nothing ever calls this
-/*bool doorIsOpenOrOpening(s32 tagnum)
-{
-	struct defaultobj *obj = objFindByTagId(tagnum);
-
-	if (obj && obj->prop && obj->type == OBJTYPE_DOOR) {
-		struct doorobj *door = (struct doorobj *)obj;
-
-		if (door->mode == DOORMODE_IDLE) {
-			if (door->frac <= 0) {
-				return false;
-			}
-			return true;
-		} else if (door->mode == DOORMODE_OPENING) {
-			return true;
-		} else if (door->mode == DOORMODE_CLOSING) {
-			return false;
-		} else {
-			return false;
-		}
-	}
-
-	return false;
-}*/
-
-f32 gasGetDoorFrac(s32 tagnum)
+float gasGetDoorFrac(int tagnum)
 {
 	struct defaultobj *obj = objFindByTagId(tagnum);
 
@@ -623,17 +597,17 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 {
 	bool inside = false;
 	struct coord campos;
-	s32 finalalpha = 0;
-	s32 i;
-	s16 t;
-	s16 s;
+	int finalalpha = 0;
+	int i;
+	int16_t t;
+	int16_t s;
 	bool drawn = false;
 	Col *colours;
 	Vtx *vertices;
-	s16 viewleft;
-	s16 viewtop;
-	s16 viewright;
-	s16 viewbottom;
+	int16_t viewleft;
+	int16_t viewtop;
+	int16_t viewright;
+	int16_t viewbottom;
 
 	campos.x = g_Vars.currentplayer->cam_pos.x;
 	campos.y = g_Vars.currentplayer->cam_pos.y;
@@ -641,12 +615,12 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 
 	for (i = 0; i < ARRAYCOUNT(g_Nbombs); i++) {
 		if (g_Nbombs[i].age240 >= 0 && g_Nbombs[i].age240 <= TICKS(350)) {
-			f32 xdiff = campos.f[0] - g_Nbombs[i].pos.f[0];
-			f32 ydiff = campos.f[1] - g_Nbombs[i].pos.f[1];
-			f32 zdiff = campos.f[2] - g_Nbombs[i].pos.f[2];
+			float xdiff = campos.f[0] - g_Nbombs[i].pos.f[0];
+			float ydiff = campos.f[1] - g_Nbombs[i].pos.f[1];
+			float zdiff = campos.f[2] - g_Nbombs[i].pos.f[2];
 
 			if (sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff) < g_Nbombs[i].radius) {
-				u32 alpha = nbombCalculateAlpha(&g_Nbombs[i]);
+				uint32_t alpha = nbombCalculateAlpha(&g_Nbombs[i]);
 
 				inside = true;
 
@@ -663,11 +637,11 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 
 		viewleft = viGetViewLeft() * 10;
 		viewtop = viGetViewTop() * 10;
-		viewright = (s16) (viGetViewLeft() + viGetViewWidth()) * 10;
-		viewbottom = (s16) (viGetViewTop() + viGetViewHeight()) * 10;
+		viewright = (int16_t) (viGetViewLeft() + viGetViewWidth()) * 10;
+		viewbottom = (int16_t) (viGetViewTop() + viGetViewHeight()) * 10;
 
-		s = (s32) (8.0f * g_20SecIntervalFrac * 128.0f * 32.0f) % 2048;
-		t = (s16) ((s32) (campos.f[1] * 8.0f) % 2048) + (s16) (2.0f * g_20SecIntervalFrac * 128.0f * 32.0f);
+		s = (int) (8.0f * g_20SecIntervalFrac * 128.0f * 32.0f) % 2048;
+		t = (int16_t) ((int) (campos.f[1] * 8.0f) % 2048) + (int16_t) (2.0f * g_20SecIntervalFrac * 128.0f * 32.0f);
 
 		drawn = true;
 
@@ -734,14 +708,14 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 Gfx *gasRender(Gfx *gdl)
 {
 	bool show = false;
-	f32 alphafrac = 1.0f;
+	float alphafrac = 1.0f;
 	struct coord campos;
-	s16 layer2t;
-	u32 alpha;
-	s32 i;
+	int16_t layer2t;
+	uint32_t alpha;
+	int i;
 	bool drawn = false;
 
-	const s32 gasrooms[] = {
+	const int gasrooms[] = {
 		ROOM_LUE_0092,
 		ROOM_LUE_0093,
 		ROOM_LUE_0094,
@@ -757,7 +731,7 @@ Gfx *gasRender(Gfx *gdl)
 	};
 
 	if (g_Vars.stagenum == STAGE_ESCAPE) {
-		f32 intensityfrac = 1.0f;
+		float intensityfrac = 1.0f;
 
 		campos.x = g_Vars.currentplayer->cam_pos.x;
 		campos.y = g_Vars.currentplayer->cam_pos.y;
@@ -771,7 +745,7 @@ Gfx *gasRender(Gfx *gdl)
 
 		if (!show) {
 			// Outside of the gas rooms list - check distance to abitrary point
-			f32 distance = sqrtf(
+			float distance = sqrtf(
 					(campos.f[0] - -1473.0f) * (campos.f[0] - -1473.0f) +
 					(campos.f[1] - -308.0f) * (campos.f[1] - -308.0f) +
 					(campos.f[2] - -13660.0f) * (campos.f[2] - -13660.0f));
@@ -784,8 +758,8 @@ Gfx *gasRender(Gfx *gdl)
 		} else {
 			if (bgRoomContainsCoord(&campos, 0x91)) {
 				// In the small room between the first two doors
-				f32 frac1 = gasGetDoorFrac(0x30);
-				f32 frac2 = gasGetDoorFrac(0x31);
+				float frac1 = gasGetDoorFrac(0x30);
+				float frac2 = gasGetDoorFrac(0x31);
 
 				if (frac2 > frac1) {
 					intensityfrac = frac2;
@@ -803,7 +777,7 @@ Gfx *gasRender(Gfx *gdl)
 			if (g_CutsceneCurAnimFrame60 < 2180) {
 				show = false;
 			} else if (g_CutsceneCurAnimFrame60 < 2600) {
-				f32 tmp = (g_CutsceneCurAnimFrame60 - 2180) / 420.0f;
+				float tmp = (g_CutsceneCurAnimFrame60 - 2180) / 420.0f;
 				alphafrac *= tmp;
 			}
 		}
@@ -811,31 +785,31 @@ Gfx *gasRender(Gfx *gdl)
 		if (show) {
 			Col *colours = gfxAllocateColours(1);
 			Vtx *vertices = gfxAllocateVertices(8);
-			s16 viewleft = viGetViewLeft() * 10;
-			s16 viewtop = viGetViewTop() * 10;
-			s16 viewright = (s16) (viGetViewLeft() + viGetViewWidth()) * 10;
-			s16 viewbottom = (s16) (viGetViewTop() + viGetViewHeight()) * 10;
-			f32 lookx = g_Vars.currentplayer->cam_look.x;
-			f32 lookz = g_Vars.currentplayer->cam_look.z;
-			f32 camposx = g_Vars.currentplayer->cam_pos.x;
-			f32 camposz = g_Vars.currentplayer->cam_pos.z;
-			f32 f2;
-			f32 f16;
-			f32 sp78;
-			s16 layer2s;
-			s16 layer1s;
-			s16 layer1t;
+			int16_t viewleft = viGetViewLeft() * 10;
+			int16_t viewtop = viGetViewTop() * 10;
+			int16_t viewright = (int16_t) (viGetViewLeft() + viGetViewWidth()) * 10;
+			int16_t viewbottom = (int16_t) (viGetViewTop() + viGetViewHeight()) * 10;
+			float lookx = g_Vars.currentplayer->cam_look.x;
+			float lookz = g_Vars.currentplayer->cam_look.z;
+			float camposx = g_Vars.currentplayer->cam_pos.x;
+			float camposz = g_Vars.currentplayer->cam_pos.z;
+			float f2;
+			float f16;
+			float sp78;
+			int16_t layer2s;
+			int16_t layer1s;
+			int16_t layer1t;
 
 			f2 = (camposx + camposz) / 3000.0f;
-			f16 = (f2 - (s32) f2);
+			f16 = (f2 - (int) f2);
 
 			sp78 = atan2f(-lookx, lookz) / M_TAU;
 
-			layer2s = ((s32) (2.0f * ((menuGetSinOscFrac(4.0f) - 0.5f) / 6.0f + sp78 + f16 * 1.5f) * 128.0f * 32.0f) % 2048);
-			layer1s = ((s32) (2.0f * ((menuGetCosOscFrac(4.0f) - 0.5f) / -9.0f + sp78 + f16) * 128.0f * 32.0f) % 2048);
+			layer2s = ((int) (2.0f * ((menuGetSinOscFrac(4.0f) - 0.5f) / 6.0f + sp78 + f16 * 1.5f) * 128.0f * 32.0f) % 2048);
+			layer1s = ((int) (2.0f * ((menuGetCosOscFrac(4.0f) - 0.5f) / -9.0f + sp78 + f16) * 128.0f * 32.0f) % 2048);
 
-			layer2t = (s16) ((s32) (campos.y * 8.0f) % 2048) + (s16) (2.0f * g_20SecIntervalFrac * 128.0f * 32.0f);
-			layer1t = (s16) ((s32) (campos.y * 8.0f) % 2048) + (s16) (2.0f * g_20SecIntervalFrac * 64.0f * 32.0f);
+			layer2t = (int16_t) ((int) (campos.y * 8.0f) % 2048) + (int16_t) (2.0f * g_20SecIntervalFrac * 128.0f * 32.0f);
+			layer1t = (int16_t) ((int) (campos.y * 8.0f) % 2048) + (int16_t) (2.0f * g_20SecIntervalFrac * 64.0f * 32.0f);
 
 			drawn = true;
 

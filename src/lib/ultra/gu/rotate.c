@@ -1,4 +1,6 @@
 #include <ultra64.h>
+#include <math.h>
+#include "game/utils.h"
 #include "lib/mtx.h"
 
 void guRotateF(float mf[4][4], float a, float x, float y, float z)
@@ -7,7 +9,7 @@ void guRotateF(float mf[4][4], float a, float x, float y, float z)
 	float cosine;
 	float ab, bc, ca, t;
 
-	guNormalize(&x, &y, &z);
+	utilsNormalizeF(&x, &y, &z);
 	a *= 3.1415926f / 180.0f;
 	sine = sinf(a);
 	cosine = cosf(a);
@@ -36,7 +38,7 @@ void guRotateF(float mf[4][4], float a, float x, float y, float z)
 
 void guRotate(Mtx *m, float a, float x, float y, float z)
 {
-	f32 mf[4][4];
+	float mf[4][4];
 
 	guRotateF(mf, a, x, y, z);
 

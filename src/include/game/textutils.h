@@ -1,6 +1,5 @@
 #ifndef _IN_GAME_GAME_TEXTUTILS_H
 #define _IN_GAME_GAME_TEXTUTILS_H
-#include <ultra64.h>
 #include "data.h"
 #include "types.h"
 
@@ -9,47 +8,47 @@
 #define DIAGMODE_FADEOUT 2
 
 void textSetRotation90(bool rotated);
-void textSetWrapIndent(s32 count);
-void textLoadFont(u8 *romstart, u8 *romend, struct font **fontptr, struct fontchar **charsptr, bool monospace);
+void textSetWrapIndent(int count);
+void textLoadFont(uint8_t *romstart, uint8_t *romend, struct font **fontptr, struct fontchar **charsptr, bool monospace);
 void textReset(void);
 Gfx *textConfigureGfxPipeline(Gfx *gdl);
 Gfx *text0f153780(Gfx *gdl);
-Gfx *textSetPrimColour(Gfx *gdl, u32 colour);
+Gfx *textSetPrimColour(Gfx *gdl, uint32_t colour);
 Gfx *textSetCCCustom02(Gfx *gdl);
-Gfx *text0f153858(Gfx *gdl, s32 *x1, s32 *y1, s32 *x2, s32 *y2);
-Gfx *text0f1538e4(Gfx *gdl, s32 *x1, s32 *y1, s32 *x2, s32 *y2);
-Gfx *text0f153990(Gfx *gdl, s32 left, s32 top, s32 width, s32 height);
-Gfx *text0f153a34(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, u32 colour);
+Gfx *text0f153858(Gfx *gdl, int *x1, int *y1, int *x2, int *y2);
+Gfx *text0f1538e4(Gfx *gdl, int *x1, int *y1, int *x2, int *y2);
+Gfx *text0f153990(Gfx *gdl, int left, int top, int width, int height);
+Gfx *text0f153a34(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour);
 Gfx *text0f153ab0(Gfx *gdl);
-void text0f153b40(void);
-void text0f153b6c(s32 arg0);
-void textSetDiagonalBlend(s32 x, s32 y, f32 redrawtimer, u8 populated);
+void textStopRedrawEffect(void);
+void text0f153b6c(int arg0);
+void textSetDiagonalBlend(int x, int y, float redrawtimer, uint8_t populated);
 void textBackupDiagonalBlendSettings(void);
 void textRestoreDiagonalBlendSettings(void);
-void textSetHorizontalBlend(s32 x1, s32 x2, u32 arg2);
+void textSetHorizontalBlend(int x1, int x2, uint32_t arg2);
 void textBackupAndResetBlends(void);
 void textRestoreBlends(void);
-void textSetWaveBlend(s32 arg0, s32 arg1, s32 cthresh);
-void textSetMenuBlend(f32 arg0);
-void textSetWaveColours(u32 colour1, u32 colour2);
+void textSetWaveBlend(int arg0, int arg1, int cthresh);
+void textSetMenuBlend(float arg0);
+void textSetWaveColours(uint32_t colour1, uint32_t colour2);
 void textResetBlends(void);
 bool textHasDiagonalBlend(void);
-u32 textApplyProjectionColour(s32 x, s32 y, u32 colour);
-u32 textHighlightSweep(s32 x, s32 y, u32 colour);
-Gfx *text0f154ecc(Gfx *gdl, u32 arg1, u32 arg2);
-Gfx *textMakeCreditVerts(Gfx *gdl, s32 *arg1, struct fontchar *curchar, struct fontchar *prevchar, struct font *font, f32 widthscale, f32 heightscale, f32 x, f32 y);
-Gfx *textRenderCredit(Gfx *gdl, f32 x, f32 y, f32 widthscale, f32 heightscale, char *text, struct fontchar *chars, struct font *font, u32 colour, s32 hdir, s32 vdir);
-Gfx *textRenderUnhighlighted(Gfx *gdl, s32 *x, s32 *y, struct fontchar *curchar, struct fontchar *prevchar, struct font *font, s32 savedx, s32 savedy, s32 width, s32 height, s32 arg10);
-void textSetHasOutline(s32 arg0);
-void textSetOutlineColor(u32 colour);
-Gfx *textRenderProjected(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *chars, struct font *font, s32 colour, s32 width, s32 height, s32 arg9, s32 lineheight);
-Gfx *text0f1566cc(Gfx *gdl, u32 arg1, u32 arg2);
-Gfx *textRenderOutline(Gfx *gdl, s32 x, s32 y, struct fontchar *char1, s32 arg4, s32 arg5, s32 arg6, s32 arg7);
-Gfx *textRender(Gfx *gdl, s32 *x, s32 *y, char *text, struct fontchar *font1, struct font *font2, u32 arg6, u32 colour, s32 width, s32 height, u32 arg10, s32 arg11);
-void textMeasure(s32 *textheight, s32 *textwidth, char *text, struct fontchar *font1, struct font *font2, s32 lineheight);
-void textWrap(s32 width, char *in, char *out, struct fontchar *font1, struct font *font2);
-struct fontchar *createChar(char* filename, u16 index);
-unsigned char *textLoadBMP(const char *filename, u16 *width, u16 *height);
+uint32_t textApplyProjectionColour(int x, int y, uint32_t colour);
+uint32_t textHighlightSweep(int x, int y, uint32_t colour);
+Gfx *text0f154ecc(Gfx *gdl, uint32_t arg1, uint32_t arg2);
+Gfx *textMakeCreditVerts(Gfx *gdl, int *arg1, struct fontchar *curchar, struct fontchar *prevchar, struct font *font, float widthscale, float heightscale, float x, float y);
+Gfx *textRenderCredit(Gfx *gdl, float x, float y, float widthscale, float heightscale, char *text, struct fontchar *chars, struct font *font, uint32_t colour, int hdir, int vdir);
+Gfx *textRenderUnhighlighted(Gfx *gdl, int *x, int *y, struct fontchar *curchar, struct fontchar *prevchar, struct font *font, int savedx, int savedy, int width, int height, int arg10);
+void textSetHasOutline(int arg0);
+void textSetOutlineColor(uint32_t colour);
+Gfx *textRenderProjected(Gfx *gdl, int *x, int *y, char *text, struct fontchar *chars, struct font *font, int colour, int width, int height, int arg9, int lineheight);
+Gfx *text0f1566cc(Gfx *gdl, uint32_t arg1, uint32_t arg2);
+Gfx *textRenderOutline(Gfx *gdl, int x, int y, struct fontchar *char1, int arg4, int arg5, int arg6, int arg7);
+Gfx *textRender(Gfx *gdl, int *x, int *y, char *text, struct fontchar *font1, struct font *font2, uint32_t arg6, uint32_t colour, int width, int height, uint32_t arg10, int arg11);
+void textMeasure(int *textheight, int *textwidth, char *text, struct fontchar *font1, struct font *font2, int lineheight);
+void textWrap(int width, char *in, char *out, struct fontchar *font1, struct font *font2);
+struct fontchar *createChar(char* filename, uint16_t index);
+unsigned char *textLoadBMP(const char *filename, uint16_t *width, uint16_t *height);
 void textLoadCustomFont();
 void textFreeFontCharacters();
 //char *generateBitmapASCII(struct fontchar *charData);

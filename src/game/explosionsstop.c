@@ -8,7 +8,7 @@
 
 void explosionsStop(void)
 {
-	s32 i;
+	int i;
 
 	g_ExplosionShakeTotalTimer = 0;
 	viShake(0);

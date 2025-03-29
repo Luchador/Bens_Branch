@@ -5,14 +5,14 @@
  * reached the end of their data stream), then return FALSE
  * to indicate that there is no next event.
  */
-char __alCSeqNextDelta(ALCSeq *seq, s32 *pDeltaTicks)
+char __alCSeqNextDelta(ALCSeq *seq, int *pDeltaTicks)
 {
-	u32 i;
-	u32	firstTime = 0xffffffff;
-	u32 lastTicks = seq->lastDeltaTicks;
+	uint32_t i;
+	uint32_t	firstTime = 0xffffffff;
+	uint32_t lastTicks = seq->lastDeltaTicks;
 
 	if (!seq->validTracks) {
-		return FALSE;
+		return 0;
 	}
 
 	for (i = 0; i < 16; i++) {
@@ -30,5 +30,5 @@ char __alCSeqNextDelta(ALCSeq *seq, s32 *pDeltaTicks)
 	seq->deltaFlag = 0;
 	*pDeltaTicks = firstTime;
 
-	return TRUE;
+	return 1;
 }

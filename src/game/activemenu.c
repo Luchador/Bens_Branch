@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/menuutils.h"
@@ -27,11 +27,12 @@
 #include "string.h"
 #include "data.h"
 #include "types.h"
+#include "video.h"
 
 struct activemenu g_AmMenus[MAX_PLAYERS];
 struct fontchar *g_AmFont1;
 struct font *g_AmFont2;
-s32 g_AmIndex;
+int g_AmIndex;
 
 struct menudialogdef g_AmPickTargetMenuDialog;
 
@@ -47,7 +48,7 @@ struct menudialogdef g_AmPickTargetMenuDialog;
  * For example, the value at index 2 is 6 which means weapon #2 from the
  * weapon set will go into slot 6 which is the bottom slot.
  */
-const u8 g_AmMapping[] = {
+const uint8_t g_AmMapping[] = {
 	0, // unarmed
 	1, // weapon #1
 	6, // weapon #2
@@ -65,7 +66,7 @@ struct chrdata *currentPlayerGetCommandingAibot(void)
 
 void amOpenPickTarget(void)
 {
-	u32 prevplayernum = g_MpPlayerNum;
+	uint32_t prevplayernum = g_MpPlayerNum;
 
 	if (!mpIsPaused()) {
 		g_AmMenus[g_AmIndex].prevallbots = g_AmMenus[g_AmIndex].allbots;
@@ -76,9 +77,9 @@ void amOpenPickTarget(void)
 	}
 }
 
-MenuItemHandlerResult amPickTargetMenuList(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult amPickTargetMenuList(int operation, struct menuitem *item, union handlerdata *data)
 {
-	static u32 teamcolours[] = {
+	static uint32_t teamcolours[] = {
 		0xff666600,
 		0xffff0000,
 		0x4444ff00,
@@ -101,11 +102,11 @@ MenuItemHandlerResult amPickTargetMenuList(s32 operation, struct menuitem *item,
 		break;
 	case MENUOP_SET:
 		{
-			s32 numremaining;
-			s32 chrindex;
+			int numremaining;
+			int chrindex;
 			struct chrdata *botchr;
 			struct chrdata *playerchr;
-			s32 i;
+			int i;
 
 			chrindex = -1;
 			numremaining = data->list.value;
@@ -146,11 +147,11 @@ MenuItemHandlerResult amPickTargetMenuList(s32 operation, struct menuitem *item,
 		{
 			Gfx *gdl = data->type19.gdl;
 			struct menuitemrenderdata *renderdata = data->type19.renderdata2;
-			s32 x;
-			s32 y;
-			u32 colour;
-			s32 numremaining = (s32)data->type19.unk04;
-			s32 chrindex = -1;
+			int x;
+			int y;
+			uint32_t colour;
+			int numremaining = (int)data->type19.unk04;
+			int chrindex = -1;
 			struct chrdata *botchr = g_MpAllChrPtrs[g_Vars.currentplayer->aibuddynums[g_AmMenus[g_AmIndex].screenindex - 2]];
 			struct chrdata *playerchr = g_Vars.currentplayer->prop->chr;
 
@@ -169,7 +170,7 @@ MenuItemHandlerResult amPickTargetMenuList(s32 operation, struct menuitem *item,
 			colour = teamcolours[g_MpAllChrConfigPtrs[chrindex]->team] | (renderdata->colour & 0xff);
 
 			if (renderdata->unk10) {
-				u32 weight = menuGetSinOscFrac(40) * 255;
+				uint32_t weight = menuGetSinOscFrac(40) * 255;
 				colour = colourBlend(renderdata->colour | 0xffffff00, colourBlend(colour, colour & 0xff, 0x7f), weight);
 			}
 
@@ -189,7 +190,7 @@ MenuItemHandlerResult amPickTargetMenuList(s32 operation, struct menuitem *item,
 	return 0;
 }
 
-MenuDialogHandlerResult amPickTargetMenuDialog(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult amPickTargetMenuDialog(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_OPEN:
@@ -229,7 +230,7 @@ struct menudialogdef g_AmPickTargetMenuDialog = {
 
 void amSetAiBuddyTemperament(bool aggressive)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_Vars.numaibuddies; i++) {
 		if (g_Vars.aibuddies[i]) {
@@ -246,10 +247,9 @@ void amSetAiBuddyTemperament(bool aggressive)
 	}
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 void amSetAiBuddyStealth(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_Vars.numaibuddies; i++) {
 		if (g_Vars.aibuddies[i]) {
@@ -268,11 +268,10 @@ void amSetAiBuddyStealth(void)
 		}
 	}
 }
-#endif
 
-s32 amGetFirstBuddyIndex(void)
+int amGetFirstBuddyIndex(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_Vars.numaibuddies; i++) {
 		if (g_Vars.aibuddies[i]) {
@@ -290,14 +289,14 @@ s32 amGetFirstBuddyIndex(void)
 	return -1;
 }
 
-void amApply(s32 slot)
+void amApply(int slot)
 {
-	s32 numinvitems;
-	s32 invindex;
+	int numinvitems;
+	int invindex;
 	bool pass;
-	s32 state;
-	s32 weaponnum;
-	s32 i;
+	int state;
+	int weaponnum;
+	int i;
 
 	switch (g_AmMenus[g_AmIndex].screenindex) {
 	case 0: // Weapon
@@ -330,7 +329,7 @@ void amApply(s32 slot)
 				pass = true;
 
 				if (g_FrIsValidWeapon) {
-					s32 weaponnum = frGetWeaponBySlot(frGetSlot());
+					int weaponnum = frGetWeaponBySlot(frGetSlot());
 
 					if (g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponnum == weaponnum) {
 						pass = false;
@@ -403,12 +402,12 @@ void amApply(s32 slot)
 	}
 }
 
-void amGetSlotDetails(s32 slot, u32 *flags, char *label)
+void amGetSlotDetails(int slot, uint32_t *flags, char *label)
 {
-	u32 weaponnum;
-	s32 qty;
-	s32 secs;
-	s32 modulo;
+	uint32_t weaponnum;
+	int qty;
+	int secs;
+	int modulo;
 	struct weaponfunc *prifunc;
 	struct weaponfunc *secfunc;
 
@@ -507,8 +506,8 @@ void amGetSlotDetails(s32 slot, u32 *flags, char *label)
 
 void amReset(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	// @bug? Should this be set for each player?
 	g_Vars.currentplayer->activemenumode = AMMODE_CLOSED;
@@ -521,13 +520,13 @@ void amReset(void)
 		}
 
 		if (g_Vars.normmplayerisrunning) {
-			s32 index = 0;
+			int index = 0;
 
 			g_AmMenus[i].favourites[g_AmMapping[index]] = WEAPON_UNARMED;
 			index++;
 
 			for (j = 0; j < MIN(ARRAYCOUNT(g_AmMapping), ARRAYCOUNT(g_MpSetup.weapons)); j++) {
-				s32 weaponnum = g_MpWeapons[g_MpSetup.weapons[j]].weaponnum;
+				int weaponnum = g_MpWeapons[g_MpSetup.weapons[j]].weaponnum;
 
 				switch (weaponnum) {
 				case WEAPON_NONE:
@@ -554,13 +553,13 @@ void amReset(void)
 	g_AmIndex = 0;
 }
 
-s16 amCalculateSlotWidth(void)
+int16_t amCalculateSlotWidth(void)
 {
-	s32 textheight;
-	s32 textwidth;
-	s32 max = 0;
-	s32 i;
-	u32 flags;
+	int textheight;
+	int textwidth;
+	int max = 0;
+	int i;
+	uint32_t flags;
 	char text[32];
 
 	for (i = 0; i < ARRAYCOUNT(g_AmBotCommands); i++) {
@@ -581,9 +580,9 @@ s16 amCalculateSlotWidth(void)
 	return max;
 }
 
-void amChangeScreen(s32 step)
+void amChangeScreen(int step)
 {
-	s32 maxscreenindex;
+	int maxscreenindex;
 
 	g_AmMenus[g_AmIndex].screenindex += step;
 
@@ -634,10 +633,10 @@ void amChangeScreen(s32 step)
 
 void amAssignWeaponSlots(void)
 {
-	s32 numitems = invGetCount();
-	u8 weaponnum;
-	s32 i;
-	s32 j;
+	int numitems = invGetCount();
+	uint8_t weaponnum;
+	int i;
+	int j;
 
 	g_AmMenus[g_AmIndex].numitems = numitems;
 
@@ -685,8 +684,8 @@ void amAssignWeaponSlots(void)
 			if ((weaponnum >= WEAPON_UNARMED && weaponnum <= WEAPON_DISGUISE41)
 					|| weaponnum == WEAPON_SUICIDEPILL
 					|| weaponnum == WEAPON_SUITCASE) {
-				s32 useindex = -1;
-				s32 j;
+				int useindex = -1;
+				int j;
 
 				// Try to find any mapping which is not yet used.
 				// While it could just iterate the invitems or weaponnums arrays
@@ -756,9 +755,9 @@ bool amIsCramped(void)
 		|| (PLAYERCOUNT() == 2 && optionsGetScreenSplit() == SCREENSPLIT_VERTICAL);
 }
 
-void amCalculateSlotPosition(s16 column, s16 row, s16 *x, s16 *y)
+void amCalculateSlotPosition(int16_t column, int16_t row, int16_t *x, int16_t *y)
 {
-	s32 playercount = PLAYERCOUNT();
+	int playercount = PLAYERCOUNT();
 
 	*x = g_AmMenus[g_AmIndex].xradius * (column - 1);
 	*y = (row - 1) * 50;
@@ -769,7 +768,7 @@ void amCalculateSlotPosition(s16 column, s16 row, s16 *x, s16 *y)
 	}
 
 	if (amIsCramped()) {
-		s32 offset = 1;
+		int offset = 1;
 
 		if (row == 1) {
 			offset = 3;
@@ -798,7 +797,7 @@ void amCalculateSlotPosition(s16 column, s16 row, s16 *x, s16 *y)
 		*y = (*y * 3) / 5;
 	}
 
-	*x += viGetViewLeft() / g_ScaleX + viGetViewWidth() / (g_ScaleX * 2);
+	*x += viGetViewLeft() + viGetViewWidth() / 2;
 	*y += viGetViewTop() + viGetViewHeight() / 2;
 
 	if ((playercount == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL))
@@ -811,32 +810,32 @@ void amCalculateSlotPosition(s16 column, s16 row, s16 *x, s16 *y)
 	}
 }
 
-Gfx *amRenderText(Gfx *gdl, char *text, u32 colour, s16 left, s16 top)
+Gfx *amRenderText(Gfx *gdl, char *text, uint32_t colour, int16_t left, int16_t top)
 {
-	s32 x;
-	s32 y;
-	s32 textwidth;
-	s32 textheight;
+	int x;
+	int y;
+	int textwidth;
+	int textheight;
 
 	textMeasure(&textheight, &textwidth, text, g_AmFont1, g_AmFont2, 0);
 
 	x = left - (textwidth / 2);
 	y = top - 4;
-	gdl = textRenderProjected(gdl, &x, &y, text, g_AmFont1, g_AmFont2, colour, SCREEN_320, SCREEN_240, 0, 0);
+	gdl = textRenderProjected(gdl, &x, &y, text, g_AmFont1, g_AmFont2, colour, videoGetNativeWidth(), videoGetNativeHeight(), 0, 0);
 
 	return gdl;
 }
 
-Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
+Gfx *amRenderAibotInfo(Gfx *gdl, int buddynum)
 {
-	s32 x;
-	s32 y;
-	s32 textwidth;
-	s32 textheight;
-	s32 weaponnum;
+	int x;
+	int y;
+	int textwidth;
+	int textheight;
+	int weaponnum;
 	char *weaponname;
 	char *aibotname;
-	s32 offset = 0;
+	int offset = 0;
 	bool wide = false;
 
 	if (PLAYERCOUNT() == 1 && optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
@@ -870,9 +869,9 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 
 		textMeasure(&textheight, &textwidth, aibotname, g_AmFont1, g_AmFont2, 0);
 
-		x = viGetViewLeft() / g_ScaleX
-			+ (s32)(viGetViewWidth() / g_ScaleX * 0.5f)
-			- (s32)(textwidth * 0.5f)
+		x = viGetViewLeft()
+			+ (int)(viGetViewWidth() * 0.5f)
+			- (int)(textwidth * 0.5f)
 			+ offset;
 
 		if (PLAYERCOUNT() >= 2) {
@@ -881,12 +880,12 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 			y = viGetViewTop() + 10;
 		}
 		if (wide) {
-			x = viGetViewLeft() / g_ScaleX + 32;
+			x = viGetViewLeft() + 32;
 		}
 
-		gdl = textRenderProjected(gdl, &x, &y, aibotname, g_AmFont1, g_AmFont2, -1, SCREEN_320, SCREEN_240, 0, 0);
+		gdl = textRenderProjected(gdl, &x, &y, aibotname, g_AmFont1, g_AmFont2, -1, videoGetWidth(), videoGetHeight(), 0, 0);
 
-		y += (PLAYERCOUNT() >= 2) ? 0 : (s32)(textheight * 1.1f);
+		y += (PLAYERCOUNT() >= 2) ? 0 : (int)(textheight * 1.1f);
 
 		g_Vars.currentplayer->commandingaibot = g_MpAllChrPtrs[buddynum];
 	} else {
@@ -894,9 +893,9 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 
 		textMeasure(&textheight, &textwidth, title, g_AmFont1, g_AmFont2, 0);
 
-		x = viGetViewLeft() / g_ScaleX
-			+ (s32)(viGetViewWidth() / g_ScaleX * 0.5f)
-			- (s32)(textwidth * 0.5f)
+		x = viGetViewLeft()
+			+ (int)(viGetViewWidth() * 0.5f)
+			- (int)(textwidth * 0.5f)
 			+ offset;
 
 		if (PLAYERCOUNT() >= 2) {
@@ -906,27 +905,27 @@ Gfx *amRenderAibotInfo(Gfx *gdl, s32 buddynum)
 		}
 
 		if (wide) {
-			x = viGetViewLeft() / g_ScaleX + 32;
+			x = viGetViewLeft() + 32;
 		}
 
 		gdl = textRender(gdl, &x, &y, title, g_AmFont1, g_AmFont2, -1,
-				0x000000ff, SCREEN_320, SCREEN_240, 0, 0);
+				0x000000ff, videoGetWidth(), videoGetHeight(), 0, 0);
 	}
 
 	return gdl;
 }
 
-u8 var800719a0[][3] = { {0, 1, 2}, {3, 4, 5}, {6, 7, 8} };
+uint8_t var800719a0[][3] = { {0, 1, 2}, {3, 4, 5}, {6, 7, 8} };
 
-Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
+Gfx *amRenderSlot(Gfx *gdl, char *text, int16_t x, int16_t y, int mode, int flags)
 {
-	static u32 obcol = 0xff00004f; // outer border
-	static u32 ibcol = 0x3f00008f; // inner background
-	static u32 defcol = 0xff4f00ff; // text
+	static uint32_t obcol = 0xff00004f; // outer border
+	static uint32_t ibcol = 0x3f00008f; // inner background
+	static uint32_t defcol = 0xff4f00ff; // text
 
-	u32 colour;
-	s32 paddingtop;
-	s32 paddingbottom;
+	uint32_t colour;
+	int paddingtop;
+	int paddingbottom;
 
 	paddingtop = 6;
 	paddingbottom = 6;
@@ -941,7 +940,7 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
 	}
 
 	// Render background colour
-	colour = (u32)(g_AmMenus[g_AmIndex].alphafrac * (ibcol & 0xff)) | (ibcol & 0xffffff00);
+	colour = (uint32_t)(g_AmMenus[g_AmIndex].alphafrac * (ibcol & 0xff)) | (ibcol & 0xffffff00);
 
 	if (mode == AMSLOTMODE_FOCUSED) {
 		colour &= 0x000000ff;
@@ -980,7 +979,7 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
 		colour = 0xffffff8f;
 	}
 
-	colour = (u32)(g_AmMenus[g_AmIndex].alphafrac * (colour & 0xff)) | (colour & 0xffffff00);
+	colour = (uint32_t)(g_AmMenus[g_AmIndex].alphafrac * (colour & 0xff)) | (colour & 0xffffff00);
 
 	if (g_Vars.currentplayer->activemenumode == AMMODE_EDIT) {
 		colour = 0x4f4f4f7f;
@@ -1029,7 +1028,7 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
 		colour = colourBlend(0xffaf8fff, colour, menuGetCosOscFrac(10) * 255.0f);
 	}
 
-	colour = (u32)(g_AmMenus[g_AmIndex].alphafrac * (colour & 0xff)) | (colour & 0xffffff00);
+	colour = (uint32_t)(g_AmMenus[g_AmIndex].alphafrac * (colour & 0xff)) | (colour & 0xffffff00);
 
 	if (g_Vars.currentplayer->activemenumode == AMMODE_EDIT) {
 		colour = 0x4f4f4f7f;
@@ -1043,20 +1042,19 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, s16 x, s16 y, s32 mode, s32 flags)
 Gfx *amRender(Gfx *gdl)
 {
 	struct chrdata *chr;
-	u32 flags;
+	uint32_t flags;
 	Col *colours;
 	Vtx *vertices;
-	s32 mpchrnum;
-	s16 column;
-	s16 row;
-	u32 colour;
-	s16 slotx;
-	s16 sloty;
-	s16 tmp1;
-	s16 tmp2;
-	g_ScaleX = 1;
+	int mpchrnum;
+	int16_t column;
+	int16_t row;
+	uint32_t colour;
+	int16_t slotx;
+	int16_t sloty;
+	int16_t tmp1;
+	int16_t tmp2;
 
-	const s32 playercount = PLAYERCOUNT();
+	const int playercount = PLAYERCOUNT();
 	if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	}
@@ -1174,11 +1172,11 @@ Gfx *amRender(Gfx *gdl)
 		// Draw slots
 		for (column = 0; column < 3; column++) {
 			for (row = 0; row < 3; row++) {
-				s16 slotx;
-				s16 sloty;
-				u32 mode;
+				int16_t slotx;
+				int16_t sloty;
+				uint32_t mode;
 				char text[32];
-				s32 buddynum;
+				int buddynum;
 
 				mode = AMSLOTMODE_DEFAULT;
 				amCalculateSlotPosition(column, row, &slotx, &sloty);
@@ -1206,8 +1204,8 @@ Gfx *amRender(Gfx *gdl)
 					if (g_Vars.normmplayerisrunning
 							&& mode == AMSLOTMODE_DEFAULT
 							&& g_AmMenus[g_AmIndex].screenindex >= 2) {
-						s32 slotcmd = g_AmBotCommands[var800719a0[row][column]];
-						s32 botcmd = g_MpAllChrPtrs[mpchrnum]->aibot->command;
+						int slotcmd = g_AmBotCommands[var800719a0[row][column]];
+						int botcmd = g_MpAllChrPtrs[mpchrnum]->aibot->command;
 
 						if (slotcmd == botcmd) {
 							mode = AMSLOTMODE_CURRENT;
@@ -1249,9 +1247,9 @@ Gfx *amRender(Gfx *gdl)
 		// selection box on the simulants screen if the middle box was selected.
 		if (g_AmMenus[g_AmIndex].screenindex < 2 || column != 1 || row != 1) {
 			// Render selection
-			s32 halfwidth;
-			s16 above;
-			s16 below;
+			int halfwidth;
+			int16_t above;
+			int16_t below;
 
 			above = 6;
 			below = 6;
@@ -1278,10 +1276,10 @@ Gfx *amRender(Gfx *gdl)
 					above = 2;
 					below = 0;
 				} else if (PLAYERCOUNT() >= 2) {
-					s32 textheight;
-					s32 textwidth;
+					int textheight;
+					int textwidth;
 					char text[32];
-					u32 flags;
+					uint32_t flags;
 
 					amGetSlotDetails(4, &flags, text);
 					textMeasure(&textheight, &textwidth, text, g_AmFont1, g_AmFont2, 0);
@@ -1328,17 +1326,17 @@ Gfx *amRender(Gfx *gdl)
 
 	if (chr) {
 		// Render health bar
-		f32 healthfrac = (chr->maxdamage - chr->damage) / chr->maxdamage;
-		f32 shieldfrac = chr->cshield * 0.125f;
+		float healthfrac = (chr->maxdamage - chr->damage) / chr->maxdamage;
+		float shieldfrac = chr->cshield * 0.125f;
 		bool redhealth = false;
-		s32 xoffset;
-		s32 barwidth;
-		s32 barheight;
-		s32 part1width;
-		s32 part1left;
-		s32 part2left;
-		s32 y;
-		s32 a2;
+		int xoffset;
+		int barwidth;
+		int barheight;
+		int part1width;
+		int part1left;
+		int part2left;
+		int y;
+		int a2;
 
 		if (healthfrac < 0.25f) {
 			redhealth = true;
@@ -1353,15 +1351,15 @@ Gfx *amRender(Gfx *gdl)
 		}
 
 		if (PLAYERCOUNT() == 1 && optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
-			part1left = viGetViewLeft() / g_ScaleX + 32;
+			part1left = viGetViewLeft() + 32;
 		} else {
-			part1left = (s32) ((viGetViewWidth() / g_ScaleX) * 0.5f)
-				+ (s32) (viGetViewLeft() / g_ScaleX)
-				- (s32) (barwidth * 0.5f)
+			part1left = (int) ((viGetViewWidth()) * 0.5f)
+				+ (int) (viGetViewLeft())
+				- (int) (barwidth * 0.5f)
 				+ xoffset;
 		}
 
-		part1width = (s32) (barwidth * 0.25f) - 1;
+		part1width = (int) (barwidth * 0.25f) - 1;
 
 		if (part1width);
 		part2left = part1left + part1width + 2;
@@ -1383,7 +1381,7 @@ Gfx *amRender(Gfx *gdl)
 #define PART2LEFT() part2left
 
 		if (redhealth) {
-			a2 = part1left + part1width - (s32) (part1width * (0.25f - healthfrac) * 4.0f);
+			a2 = part1left + part1width - (int) (part1width * (0.25f - healthfrac) * 4.0f);
 
 			gDPSetPrimColorViaWord(gdl++, 0, 0, 0xff000060);
 
@@ -1404,7 +1402,7 @@ Gfx *amRender(Gfx *gdl)
 			RECT(gdl++, part1left, y, part1left + part1width, y + barheight);
 
 			// Part 2 green
-			a2 = part1left + (s32) (barwidth * healthfrac);
+			a2 = part1left + (int) (barwidth * healthfrac);
 
 			RECT(gdl++, PART2LEFT(), y, a2, y + barheight);
 
@@ -1420,7 +1418,7 @@ Gfx *amRender(Gfx *gdl)
 
 		gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00c00060);
 
-		a2 = part1left + (s32) (barwidth * shieldfrac);
+		a2 = part1left + (int) (barwidth * shieldfrac);
 
 		RECT(gdl++, part1left, y, a2, y + barheight);
 
@@ -1430,8 +1428,6 @@ Gfx *amRender(Gfx *gdl)
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-
-	g_ScaleX = 1;
 
 	return gdl;
 }

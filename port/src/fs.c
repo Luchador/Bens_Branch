@@ -3,10 +3,8 @@
 #include <string.h>
 #include <limits.h>
 #include <ctype.h>
-#include <unistd.h>
 #include <constants.h>
 #include <sys/stat.h>
-#include <PR/ultratypes.h>
 #include "config.h"
 #include "system.h"
 #include "platform.h"
@@ -19,7 +17,7 @@ static char saveDir[FS_MAXPATH + 1]; // replaces $S
 static char homeDir[FS_MAXPATH + 1]; // replaces $H
 static char exeDir[FS_MAXPATH + 1];  // replaces $E
 
-static s32 fsPathIsWritable(const char *path)
+static int fsPathIsWritable(const char *path)
 {
 #ifdef PLATFORM_WIN32
 	// on windows access() on directories will only check if the directory exists, so
@@ -37,12 +35,12 @@ static s32 fsPathIsWritable(const char *path)
 #endif
 }
 
-s32 fsPathIsAbsolute(const char *path)
+int fsPathIsAbsolute(const char *path)
 {
  return (path[0] == '/' || (isalpha(path[0]) && path[1] == ':'));
 }
 
-s32 fsPathIsCwdRelative(const char *path)
+int fsPathIsCwdRelative(const char *path)
 {
 	// ., .., ./, ../
 	return (path[0] == '.' && (path[1] == '.' || path[1] == '/' || path[1] == '\\' || path[1] == '\0'));
@@ -64,7 +62,7 @@ const char *fsFullPath(const char *relPath)
 			default: break;
 		}
 		if (expStr) {
-			const u32 len = strlen(expStr);
+			const uint32_t len = strlen(expStr);
 			if (len > 0) {
 				memcpy(pathBuf, expStr, len);
 				strncpy(pathBuf + len, relPath + 2, FS_MAXPATH - len);
@@ -90,12 +88,12 @@ const char *fsFullPath(const char *relPath)
 	return pathBuf;
 }
 
-s32 fsInit(void)
+int fsInit(void)
 {
 	sysGetExecutablePath(exeDir, FS_MAXPATH);
 
 	// if this is set, default to exe path for everything
-	const s32 portable = sysArgCheck("--portable");
+	const int portable = sysArgCheck("--portable");
 	if (portable) {
 		strcpy(homeDir, exeDir);
 	} else {
@@ -129,7 +127,7 @@ s32 fsInit(void)
 		} else {
 			// path is relative to workdir; try to find it
 			const char *priority[] = { ".", "$E", "$H" };
-			for (s32 i = 0; i < 2 + (portable != 0); ++i) {
+			for (int i = 0; i < 2 + (portable != 0); ++i) {
 				char *tmp = strFmt("%s/%s", priority[i], path);
 				if (fsFileSize(tmp) >= 0) {
 					strncpy(modDir, fsFullPath(tmp), FS_MAXPATH);
@@ -183,7 +181,7 @@ const char *fsGetModDir(void)
 	return modDir[0] ? modDir : NULL;
 }
 
-s32 fsFileLoadTo(const char *name, void *dst, u32 dstSize)
+int fsFileLoadTo(const char *name, void *dst, uint32_t dstSize)
 {
 	const char *fullName = fsFullPath(name);
 
@@ -193,7 +191,7 @@ s32 fsFileLoadTo(const char *name, void *dst, u32 dstSize)
 	}
 
 	fseek(f, 0, SEEK_END);
-	const s32 size = ftell(f);
+	const int size = ftell(f);
 	fseek(f, 0, SEEK_SET);
 
 	if (size < 0) {
@@ -202,7 +200,7 @@ s32 fsFileLoadTo(const char *name, void *dst, u32 dstSize)
 		return -1;
 	}
 
-	if ((u32)size > dstSize) {
+	if ((uint32_t)size > dstSize) {
 		sysLogPrintf(LOG_ERROR, "fsFileLoadTo: file too big for buffer (%u > %u): %s", size, dstSize, fullName);
 		fclose(f);
 		return -1;
@@ -214,7 +212,7 @@ s32 fsFileLoadTo(const char *name, void *dst, u32 dstSize)
 	return size;
 }
 
-void *fsFileLoad(const char *name, u32 *outSize)
+void *fsFileLoad(const char *name, uint32_t *outSize)
 {
 	const char *fullName = fsFullPath(name);
 
@@ -225,7 +223,7 @@ void *fsFileLoad(const char *name, u32 *outSize)
 	}
 
 	fseek(f, 0, SEEK_END);
-	const s32 size = ftell(f);
+	const int size = ftell(f);
 	fseek(f, 0, SEEK_SET);
 
 	if (size < 0) {
@@ -254,7 +252,7 @@ void *fsFileLoad(const char *name, u32 *outSize)
 	return buf;
 }
 
-s32 fsFileSize(const char *name)
+int fsFileSize(const char *name)
 {
 	const char *fullName = fsFullPath(name);
 	struct stat st;

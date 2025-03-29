@@ -1,10 +1,11 @@
 #ifndef _IN_LIB_RNG_H
 #define _IN_LIB_RNG_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
-u32 rngRandom(void);
-u32 rngRotateSeed(u64 *value);
+uint32_t rngRandom(void);
+uint32_t rngRotateSeed(uint64_t *value);
 
 #endif

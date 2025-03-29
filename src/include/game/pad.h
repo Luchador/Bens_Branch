@@ -1,23 +1,24 @@
 #ifndef IN_GAME_PAD_H
 #define IN_GAME_PAD_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
-void padUnpack(s32 padnum, u32 fields, struct pad *pad);
-bool padHasBboxData(s32 padnum);
-void padGetCentre(s32 padnum, struct coord *coord);
-void padRotateForDoor(s32 padnum);
-void padCopyBboxFromPad(s32 padnum, struct pad *src);
-void padSetFlag(s32 padnum, u32 flag);
-void padUnsetFlag(s32 padnum, u32 flag);
-s32 coverGetCount(void);
-bool coverUnpack(s32 covernum, struct cover *cover);
-bool coverIsInUse(s32 covernum);
-void coverSetInUse(s32 covernum, bool enable);
-void coverSetFlag(s32 covernum, u32 flag);
-void coverUnsetFlag(s32 covernum, u32 flag);
-void coverSetOutOfSight(s32 covernum, bool enable);
+void padUnpack(int padnum, uint32_t fields, struct pad *pad);
+bool padHasBboxData(int padnum);
+void padGetCentre(int padnum, struct coord *coord);
+void padRotateForDoor(int padnum);
+void padCopyBboxFromPad(int padnum, struct pad *src);
+void padSetFlag(int padnum, uint32_t flag);
+void padUnsetFlag(int padnum, uint32_t flag);
+int coverGetCount(void);
+bool coverUnpack(int covernum, struct cover *cover);
+bool coverIsInUse(int covernum);
+void coverSetInUse(int covernum, bool enable);
+void coverSetFlag(int covernum, uint32_t flag);
+void coverUnsetFlag(int covernum, uint32_t flag);
+void coverSetOutOfSight(int covernum, bool enable);
 bool coverIsSpecial(struct cover *cover);
 
 #endif

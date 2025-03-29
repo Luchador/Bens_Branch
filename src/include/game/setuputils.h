@@ -1,19 +1,18 @@
 #ifndef IN_GAME_SETUPUTILS_H
 #define IN_GAME_SETUPUTILS_H
-#include <ultra64.h>
 #include "data.h"
 #include "types.h"
 
-u32 setupGetCmdLength(u32 *cmd);
-u32 *setupGetCmdByIndex(s32 cmdindex);
-s32 setupGetCmdIndexByTag(struct tag *tag);
-u32 setupGetCmdIndexByProp(struct prop *prop);
-bool setupLoadModeldef(s32 modelnum);
-bool setupGetObjBbox(struct defaultobj *obj, struct coord *pos, f32 realrot[3][3], struct coord *arg3, struct coord *arg4);
+uint32_t setupGetCmdLength(uint32_t *cmd);
+uint32_t *setupGetCmdByIndex(int cmdindex);
+int setupGetCmdIndexByTag(struct tag *tag);
+uint32_t setupGetCmdIndexByProp(struct prop *prop);
+bool setupLoadModeldef(int modelnum);
+bool setupGetObjBbox(struct defaultobj *obj, struct coord *pos, float realrot[3][3], struct coord *arg3, struct coord *arg4);
 bool setupGetObjBboxFromMinMax(struct defaultobj *obj, struct coord *min, struct coord *max);
-void setupGetObjOverlappedRooms(struct defaultobj *obj, struct coord *pos, f32 realrot[3][3], RoomNum *rooms);
+void setupGetObjOverlappedRooms(struct defaultobj *obj, struct coord *pos, float realrot[3][3], RoomNum *rooms);
 void setup0f0923d4(struct defaultobj *obj);
-struct defaultobj *setupGetObjByCmdIndex(u32 cmdindex);
-struct defaultobj *setupFindObjForReuse(s32 type, struct defaultobj **arg1, struct defaultobj **arg2, bool musthaveprop, bool musthavemodel, struct modeldef *modeldef);
+struct defaultobj *setupGetObjByCmdIndex(uint32_t cmdindex);
+struct defaultobj *setupFindObjForReuse(int type, struct defaultobj **arg1, struct defaultobj **arg2, bool musthaveprop, bool musthavemodel, struct modeldef *modeldef);
 
 #endif

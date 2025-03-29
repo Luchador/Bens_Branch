@@ -54,12 +54,10 @@
 #include "lib/lib_17ce0.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "game/stagetable.h"
 #include "video.h"
 #include "platform.h"
 #include "game/debug.h"
-#endif
 
 #define GUNLOADSTATE_FLUX     0
 #define GUNLOADSTATE_MODEL    1
@@ -76,45 +74,45 @@
 // Max downwards pitch when changing guns or reloading a classic gun
 #define MAX_PITCH 0.87252569198608f
 
-s32 var8009d0dc;
-s32 var8009d0f0[3];
-f32 var8009d140;
+int var8009d0dc;
+int var8009d0f0[3];
+float var8009d140;
 struct hand *var8009d144;
-s32 var8009d148;
+int var8009d148;
 struct sndstate *g_CasingAudioHandles[2];
-s32 g_TimeToNextCasingSound;
+int g_TimeToNextCasingSound;
 struct sndstate *g_BgunAudioHandles[MAX_PLAYERS];
 struct fireslot g_Fireslots[20];
-u32 fill2[1];
+uint32_t fill2[1];
 bool g_CloseToWall = 0;
-s32 g_CloseToWallTimer = 0;
+int g_CloseToWallTimer = 0;
 
 Lights1 g_GunLight = gdSPDefLights1(0x96, 0x96, 0x96, 0xff, 0xff, 0xff, 0xb2, 0x4d, 0x2e);
 
 #ifdef PLATFORM_64BIT
-u32 g_BgunGunMemBaseSizeDefault = 150 * 1024 * 2; // #TODO adjust these values properly
+uint32_t g_BgunGunMemBaseSizeDefault = 150 * 1024 * 2; // #TODO adjust these values properly
 #else
-u32 g_BgunGunMemBaseSizeDefault = 150 * 1024;
+uint32_t g_BgunGunMemBaseSizeDefault = 150 * 1024;
 #endif
 
-u16 g_CartFileNums[] = {
+uint16_t g_CartFileNums[] = {
 	FILE_GCARTRIDGE,
 	FILE_GCARTRIFLE,
 	FILE_GCARTBLUE,
 	FILE_GCARTSHELL,
 };
 
-s32 g_BgunGeMuzzleFlashes = false;
+int g_BgunGeMuzzleFlashes = false;
 
-void bgunRumble(s32 handnum, s32 weaponnum)
+void bgunRumble(int handnum, int weaponnum)
 {
-	s32 contpadtouse1;
-	s32 contpadtouse2;
+	int contpadtouse1;
+	int contpadtouse2;
 	bool singlewield = false;
-	s32 contpad1;
-	s32 contpad2;
-	s32 contpad1hasrumble;
-	s32 contpad2hasrumble;
+	int contpad1;
+	int contpad2;
+	int contpad1hasrumble;
+	int contpad2hasrumble;
 
 	joyGetContpadNumsForPlayer(g_Vars.currentplayernum, &contpad1, &contpad2);
 
@@ -132,7 +130,7 @@ void bgunRumble(s32 handnum, s32 weaponnum)
 				pakRumble(contpad1, 0.2f, 2, 4);
 				pakRumble(contpad2, 0.2f, 2, 4);
 			} else {
-				s32 contpadtouse1 = contpad1;
+				int contpadtouse1 = contpad1;
 
 				if (handnum == HAND_LEFT) {
 					contpadtouse1 = contpad2;
@@ -141,7 +139,7 @@ void bgunRumble(s32 handnum, s32 weaponnum)
 				pakRumble(contpadtouse1, 0.2f, 2, 4);
 			}
 		} else {
-			s32 contpadtouse2 = contpad1;
+			int contpadtouse2 = contpad1;
 
 			if (contpad2hasrumble) {
 				contpadtouse2 = contpad2;
@@ -156,7 +154,7 @@ void bgunRumble(s32 handnum, s32 weaponnum)
 	}
 }
 
-s32 bgunGetUnequippedReloadIndex(s32 weaponnum)
+int bgunGetUnequippedReloadIndex(int weaponnum)
 {
 	if (weaponnum == WEAPON_CROSSBOW) {
 		return 0;
@@ -188,12 +186,12 @@ s32 bgunGetUnequippedReloadIndex(s32 weaponnum)
  */
 void bgunTickUnequippedReload(void)
 {
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	for (i = 0; i < 2; i++) {
 		for (j = 0; j < ARRAYCOUNT(g_Vars.currentplayer->hands[i].gunroundsspent); j++) {
-			u16 spent = g_Vars.currentplayer->hands[i].gunroundsspent[j];
+			uint16_t spent = g_Vars.currentplayer->hands[i].gunroundsspent[j];
 
 			if (spent > g_Vars.lvupdate60) {
 				spent -= g_Vars.lvupdate60;
@@ -231,7 +229,7 @@ bool bgunTestGunVisCommand(struct gunviscmd *cmd, struct hand *hand)
 	return result;
 }
 
-void bgunSetPartVisible(s16 partnum, bool visible, struct hand *hand, struct modeldef *modeldef)
+void bgunSetPartVisible(int16_t partnum, bool visible, struct hand *hand, struct modeldef *modeldef)
 {
 	struct modelnode *node;
 
@@ -241,7 +239,7 @@ void bgunSetPartVisible(s16 partnum, bool visible, struct hand *hand, struct mod
 
 			if (node) {
 				struct modelrodata_toggle *rodata = &node->rodata->toggle;
-				u32 *ptr = &hand->handsavedata[rodata->rwdataindex];
+				uint32_t *ptr = &hand->handsavedata[rodata->rwdataindex];
 				*ptr = visible;
 			}
 		}
@@ -250,7 +248,7 @@ void bgunSetPartVisible(s16 partnum, bool visible, struct hand *hand, struct mod
 
 		if (node) {
 			struct modelrodata_toggle *rodata = &node->rodata->toggle;
-			u32 *ptr = &hand->unk0a6c[rodata->rwdataindex];
+			uint32_t *ptr = &hand->unk0a6c[rodata->rwdataindex];
 			*ptr = visible;
 		}
 	}
@@ -295,8 +293,8 @@ void bgunExecuteGunVisCommands(struct hand *hand, struct modeldef *modeldef, str
 void bgun0f098030(struct hand *hand, struct modeldef *modeldef)
 {
 	struct weapon *weapon = weaponFindById(hand->gset.weaponnum);
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 
 	bgunExecuteGunVisCommands(hand, modeldef, weapon->gunviscmds);
 	bgunSetPartVisible(MODELPART_0042, false, hand, modeldef);
@@ -314,7 +312,7 @@ void bgun0f098030(struct hand *hand, struct modeldef *modeldef)
 	}
 }
 
-f32 bgun0f09815c(struct hand *hand)
+float bgun0f09815c(struct hand *hand)
 {
 	if (hand->animmode == HANDANIMMODE_BUSY && hand->unk0ce8 != NULL) {
 		if (hand->unk0ce8->unk04 < 0) {
@@ -329,17 +327,17 @@ f32 bgun0f09815c(struct hand *hand)
 
 void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 {
-	s32 s2;
-	s32 s4;
+	int s2;
+	int s4;
 	struct guncmd *cmd;
-	f32 animspeed;
+	float animspeed;
 	bool done;
-	f32 animspeedmult;
-	s32 partnums[15];
+	float animspeedmult;
+	int partnums[15];
 	bool partsvisible[15];
-	s32 partframes[15];
-	s32 s0;
-	s32 index;
+	int partframes[15];
+	int s0;
+	int index;
 
 	hand->unk0cc8_04 = false;
 
@@ -349,7 +347,7 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 
 	// This condition looks like a bug (using | instead of ||), but it happens
 	// to make no difference anyway. Brackets added for clarity.
-	if ((hand->animmode == (u32)HANDANIMMODE_BUSY) || (hand->animload >= 0)) { // Ben's comment: fixing it anyway
+	if ((hand->animmode == (uint32_t)HANDANIMMODE_BUSY) || (hand->animload >= 0)) { // Ben's comment: fixing it anyway
 		if (hand->gangstarot > 0.0f) {
 			hand->animframeinc = 0;
 		}
@@ -396,7 +394,7 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 						done = true;
 					} else if (cmd->type == GUNCMD_SHOWPART || cmd->type == GUNCMD_HIDEPART) {
 						if (s2 >= cmd->unk02) {
-							s32 i;
+							int i;
 							index = -1;
 
 							for (i = 0; i < s0; i++) {
@@ -423,7 +421,7 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 						case GUNCMD_WAITFORZRELEASED:
 							if (hand->unk0cc8_01) {
 								if (s2 >= cmd->unk02 && s4 < cmd->unk02 && s4 < s2) {
-									s32 tmp = cmd->unk02 - (s32) bgun0f09815c(hand);
+									int tmp = cmd->unk02 - (int) bgun0f09815c(hand);
 									tmp /= 2;
 
 									if (hand->animframeinc > tmp) {
@@ -436,7 +434,7 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 							break;
 						case GUNCMD_REPEATUNTILFULL:
 							if (hand->incrementalreloading && s2 >= cmd->unk02 && s4 < cmd->unk02 && s4 < s2) {
-								s32 sp78 = cmd->unk04 + (((s32)s2 - cmd->unk02) % ((cmd->unk02 - cmd->unk04) + 1));
+								int sp78 = cmd->unk04 + (((int)s2 - cmd->unk02) % ((cmd->unk02 - cmd->unk04) + 1));
 								s4 = sp78;
 								hand->animframeinc = 0;
 								modelSetAnimFrame(&hand->gunmodel, sp78);
@@ -451,7 +449,7 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 				} while (!done);
 
 				if (s0 > 0) {
-					s32 i;
+					int i;
 
 					for (i = 0; i < s0; i++) {
 						bgunSetPartVisible(partnums[i], partsvisible[i], hand, modeldef);
@@ -466,7 +464,7 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 		if (hand->unk0ce8) {
 			bool done = false;
 			struct guncmd *cmd = hand->unk0ce8;
-			f32 speed = 1.0f;
+			float speed = 1.0f;
 			bool hasspeed = false;
 
 			if (cmd) {
@@ -504,7 +502,7 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 
 bool bgun0f098884(struct guncmd *cmd, struct gset *gset)
 {
-	s32 result = false;
+	int result = false;
 
 	if (cmd->unk01 == 0) {
 		return true;
@@ -521,12 +519,12 @@ bool bgun0f098884(struct guncmd *cmd, struct gset *gset)
 	return result;
 }
 
-void bgunStartAnimation(struct guncmd *cmd, s32 handnum, struct hand *hand)
+void bgunStartAnimation(struct guncmd *cmd, int handnum, struct hand *hand)
 {
 	if (cmd->type != GUNCMD_PLAYANIMATION) {
 		struct guncmd *loopcmd = cmd;
-		s32 done = false;
-		u32 rand = rngRandom() % 100;
+		int done = false;
+		uint32_t rand = rngRandom() % 100;
 
 		while (loopcmd->type != GUNCMD_END) {
 			if (bgun0f098884(loopcmd, &hand->gset) && !done) {
@@ -556,11 +554,11 @@ void bgunStartAnimation(struct guncmd *cmd, s32 handnum, struct hand *hand)
 	}
 }
 
-bool bgun0f098a44(struct hand *hand, s32 time)
+bool bgun0f098a44(struct hand *hand, int time)
 {
 	struct guncmd *cmd = hand->unk0ce8;
-	s32 waittimekeyframe = -1;
-	s32 zreleasekeyframe = -1;
+	int waittimekeyframe = -1;
+	int zreleasekeyframe = -1;
 
 	if (hand->animmode == HANDANIMMODE_IDLE) {
 		return (hand->animload == -1);
@@ -579,7 +577,7 @@ bool bgun0f098a44(struct hand *hand, s32 time)
 	}
 
 	if (waittimekeyframe >= 0) {
-		if (hand->unk0cc8_01 && (s32)bgun0f09815c(hand) <= zreleasekeyframe) {
+		if (hand->unk0cc8_01 && (int)bgun0f09815c(hand) <= zreleasekeyframe) {
 			return false;
 		}
 
@@ -589,10 +587,10 @@ bool bgun0f098a44(struct hand *hand, s32 time)
 	return true;
 }
 
-s32 bgun0f098b80(struct hand *hand, s32 arg1)
+int bgun0f098b80(struct hand *hand, int arg1)
 {
 	struct guncmd *cmd = hand->unk0ce8;
-	s32 keyframe = -1;
+	int keyframe = -1;
 
 	if (hand->animmode == HANDANIMMODE_IDLE) {
 		return 0;
@@ -632,9 +630,9 @@ void bgunResetAnim(struct hand *hand)
 	hand->unk0d0e_07 = false;
 }
 
-void bgunGetWeaponInfo(struct handweaponinfo *info, s32 handnum)
+void bgunGetWeaponInfo(struct handweaponinfo *info, int handnum)
 {
-	s32 weaponnum = bgunGetWeaponNum2(handnum);
+	int weaponnum = bgunGetWeaponNum2(handnum);
 
 	info->weaponnum = weaponnum;
 	info->definition = g_Weapons[weaponnum];
@@ -649,9 +647,9 @@ void bgunGetWeaponInfo(struct handweaponinfo *info, s32 handnum)
  * 2 = has ammo in clip but none in reserve
  * 3 = gun doesn't use ammo or clip is full
  */
-s32 bgunDetermineReloadType(s32 funcnum, struct handweaponinfo *info, struct hand *hand)
+int bgunDetermineReloadType(int funcnum, struct handweaponinfo *info, struct hand *hand)
 {
-	s32 result = 3;
+	int result = 3;
 	struct weaponfunc *func = weaponGetFunction(&hand->gset, funcnum);
 
 	if (!func) {
@@ -659,11 +657,11 @@ s32 bgunDetermineReloadType(s32 funcnum, struct handweaponinfo *info, struct han
 	}
 
 	if (func->ammoindex != -1) {
-		s32 ammoindex = func->ammoindex;
+		int ammoindex = func->ammoindex;
 
 		if (info->gunctrl->ammotypes[ammoindex] >= 0
 				&& hand->loadedammo[ammoindex] < hand->clipsizes[ammoindex]) {
-			s32 minqty = 1;
+			int minqty = 1;
 
 			if (info->weaponnum == WEAPON_SHOTGUN && funcnum == FUNC_SECONDARY) {
 				minqty = 2;
@@ -692,17 +690,17 @@ s32 bgunDetermineReloadType(s32 funcnum, struct handweaponinfo *info, struct han
 	return result;
 }
 
-void bgunRefillMagazine(s32 weaponfunc, struct handweaponinfo *info, struct hand *hand, u8 onebullet, u8 checkunequipped)
+void bgunRefillMagazine(int weaponfunc, struct handweaponinfo *info, struct hand *hand, uint8_t onebullet, uint8_t checkunequipped)
 {
 	struct weaponfunc *func = weaponGetFunction(&hand->gset, weaponfunc);
 
 	if (func && func->ammoindex != -1) {
-		s32 ammoindex = func->ammoindex;
+		int ammoindex = func->ammoindex;
 
 		if (info->gunctrl->ammotypes[ammoindex] >= 0) {
-			s32 amount = hand->clipsizes[ammoindex] - hand->loadedammo[ammoindex];
+			int amount = hand->clipsizes[ammoindex] - hand->loadedammo[ammoindex];
 
-			s32 reloadindex = bgunGetUnequippedReloadIndex(info->weaponnum);
+			int reloadindex = bgunGetUnequippedReloadIndex(info->weaponnum);
 
 			if (g_FrIsValidWeapon) {
 				reloadindex = -1;
@@ -741,7 +739,7 @@ void bgunRefillMagazine(s32 weaponfunc, struct handweaponinfo *info, struct hand
 // Fill magazine when the weapon is drawn
 void bgunFillMagazine(struct handweaponinfo *info, struct hand *hand)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < 2; i++) {
 		if (weaponGetFunction(&hand->gset, i)) {
@@ -750,7 +748,7 @@ void bgunFillMagazine(struct handweaponinfo *info, struct hand *hand)
 	}
 }
 
-bool bgunDetermineReloadTypeByHand(s32 handnum)
+bool bgunDetermineReloadTypeByHand(int handnum)
 {
 	struct handweaponinfo info;
 
@@ -806,7 +804,7 @@ bool bgun0f0990b0(struct weaponfunc *basefunc, struct weapon *weapon)
 	return false;
 }
 
-bool bgun0f099188(struct hand *hand, s32 gunfunc)
+bool bgun0f099188(struct hand *hand, int gunfunc)
 {
 	struct weaponfunc *func = weaponGetFunction(&hand->gset, gunfunc);
 	struct weapon *weapon = weaponFindById(hand->gset.weaponnum);
@@ -818,14 +816,14 @@ bool bgun0f099188(struct hand *hand, s32 gunfunc)
 	return bgun0f0990b0(func, weapon);
 }
 
-s32 bgunTickIncIdle(struct handweaponinfo *info, s32 handnum, struct hand *hand, s32 lvupdate)
+int bgunTickIncIdle(struct handweaponinfo *info, int handnum, struct hand *hand, int lvupdate)
 {
 	bool usesec;
-	s32 gunfunc = bgunIsUsingSecondaryFunction();
-	s32 reloadtype;
-	s32 sp30;
+	int gunfunc = bgunIsUsingSecondaryFunction();
+	int reloadtype;
+	int sp30;
 	bool changefunc;
-	s32 next;
+	int next;
 	struct hand *lhand;
 	struct weaponfunc *func;
 
@@ -997,7 +995,7 @@ s32 bgunTickIncIdle(struct handweaponinfo *info, s32 handnum, struct hand *hand,
 	return 0;
 }
 
-void bgunSetArmPitch(struct hand *hand, f32 angle)
+void bgunSetArmPitch(struct hand *hand, float angle)
 {
 	hand->useposrot = true;
 
@@ -1008,18 +1006,17 @@ void bgunSetArmPitch(struct hand *hand, f32 angle)
 	hand->posrotmtx.m[3][2] = sinf(angle) * 15.0f;
 }
 
-s32 bgunTickIncAutoSwitch(struct handweaponinfo *info, s32 handnum, struct hand *hand, s32 lvupdate)
+int bgunTickIncAutoSwitch(struct handweaponinfo *info, int handnum, struct hand *hand, int lvupdate)
 {
-	u32 stack;
-	s32 reloadtype;
-	s32 gunfunc = bgunIsUsingSecondaryFunction();
+	int reloadtype;
+	int gunfunc = bgunIsUsingSecondaryFunction();
 
 	if (!hand->inuse && bgunSetState(handnum, HANDSTATE_IDLE)) {
 		return lvupdate;
 	}
 
 	if (hand->stateminor == HANDSTATEMINOR_AUTOSWITCH_UNEQUIP) {
-		s32 delay = TICKS(16);
+		int delay = TICKS(16);
 
 		if (g_Vars.normmplayerisrunning) {
 			delay = TICKS(12);
@@ -1138,9 +1135,8 @@ bool bgunIsReloading(struct hand *hand)
 	return false;
 }
 
-s32 bgunTickIncReload(struct handweaponinfo *info, s32 handnum, struct hand *hand, s32 lvupdate)
+int bgunTickIncReload(struct handweaponinfo *info, int handnum, struct hand *hand, int lvupdate)
 {
-	u32 stack;
 	struct weaponfunc *func = gsetGetWeaponFunction(&hand->gset);
 
 	if (g_Vars.currentplayer->isdead) {
@@ -1204,7 +1200,7 @@ s32 bgunTickIncReload(struct handweaponinfo *info, s32 handnum, struct hand *han
 			if (info->definition->ammos[func->ammoindex]->flags & AMMOFLAG_INCREMENTALRELOAD) {
 				if (bgun0f098a44(hand, 1)) {
 					if ((hand->stateflags & HANDSTATEFLAG_00000010) == 0) {
-						s32 value;
+						int value;
 
 						bgunRefillMagazine(hand->gset.weaponfunc, info, hand, 1, 0);
 						hand->stateflags |= HANDSTATEFLAG_00000010;
@@ -1337,7 +1333,7 @@ s32 bgunTickIncReload(struct handweaponinfo *info, s32 handnum, struct hand *han
 	return 0;
 }
 
-s32 bgunTickIncChangeFunc(struct handweaponinfo *info, s32 handnum, struct hand *hand, s32 lvupdate)
+int bgunTickIncChangeFunc(struct handweaponinfo *info, int handnum, struct hand *hand, int lvupdate)
 {
 	struct guncmd *cmd;
 	bool more = false;
@@ -1376,7 +1372,7 @@ s32 bgunTickIncChangeFunc(struct handweaponinfo *info, s32 handnum, struct hand 
 // 0  = can't fire yet
 // 1  = fire a single shot
 // 2  = fire a burst
-s32 bgunAttemptFire(struct hand *hand, struct weaponfunc *func)
+int bgunAttemptFire(struct hand *hand, struct weaponfunc *func)
 {
 	bool burst = false;
 	bool smallburst = false;
@@ -1437,7 +1433,7 @@ s32 bgunAttemptFire(struct hand *hand, struct weaponfunc *func)
 
 		if (smallburst) {
 			if (hand->burstbullets > 0) {
-				s32 delay = 3;
+				int delay = 3;
 
 				if (hand->gset.weaponnum == WEAPON_SHOTGUN) {
 					delay = TICKS(13);
@@ -1494,19 +1490,19 @@ s32 bgunAttemptFire(struct hand *hand, struct weaponfunc *func)
 	return -1;
 }
 
-void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, struct weaponfunc *func)
+void bgun0f09a6f8(struct handweaponinfo *info, int handnum, struct hand *hand, struct weaponfunc *func)
 {
 	bool usesammo = true;
 
-	static u32 rontime = 2;
-	static u32 rofftime = 4;
+	static uint32_t rontime = 2;
+	static uint32_t rofftime = 4;
 
 	hand->firing = true;
 
 	if ((func->type & 0xff00) == 0x100) {
 		struct weaponfunc_shootauto *autofunc = (struct weaponfunc_shootauto *) func;
-		f32 tmp;
-		f32 tmp2;
+		float tmp;
+		float tmp2;
 
 		tmp = autofunc->initialrpm + (autofunc->maxrpm - autofunc->initialrpm) * hand->gs_float1;
 		tmp2 = tmp / 60.0f * (LVUPDATE60FREAL() / 60.0f) + hand->shotremainder;
@@ -1611,9 +1607,9 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 				hand->lastshootframe60 = g_Vars.lvframe60;
 
 				if (hand->gset.weaponnum == WEAPON_MAULER && handle) {
-					s32 matmot = hand->matmot1;
-					f32 tmp;
-					f32 frac = matmot / 3.0f;
+					int matmot = hand->matmot1;
+					float tmp;
+					float frac = matmot / 3.0f;
 
 					if (frac > 1.0f) {
 						frac = 1.0f;
@@ -1621,7 +1617,7 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 
 					tmp = 1.0f - frac * 0.4f;
 
-					audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *) &tmp);
+					audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(int *) &tmp);
 				}
 
 			}
@@ -1629,20 +1625,20 @@ void bgun0f09a6f8(struct handweaponinfo *info, s32 handnum, struct hand *hand, s
 	}
 }
 
-bool bgun0f09aba4(struct hand *hand, struct handweaponinfo *info, s32 handnum, struct weaponfunc_shoot *func)
+bool bgun0f09aba4(struct hand *hand, struct handweaponinfo *info, int handnum, struct weaponfunc_shoot *func)
 {
-	s32 unk24;
-	s32 unk25;
-	s32 sum;
-	s32 unk26;
-	s32 unk27;
-	s32 recoverytime60;
-	s32 frames;
+	int unk24;
+	int unk25;
+	int sum;
+	int unk26;
+	int unk27;
+	int recoverytime60;
+	int frames;
 	struct weapon *weapondef;
-	f32 mult1;
-	f32 recoildist;
-	f32 recoilangle;
-	f32 mult2;
+	float mult1;
+	float recoildist;
+	float recoilangle;
+	float mult2;
 
 	unk24 = func->unk24;
 	unk25 = func->unk25;
@@ -1681,7 +1677,7 @@ bool bgun0f09aba4(struct hand *hand, struct handweaponinfo *info, s32 handnum, s
 
 		if (hand->stateflags & HANDSTATEFLAG_00000040) {
 			if (unk27 > frames - hand->statevar1) {
-				mult1 = cosf((f32)(unk27 - frames + hand->statevar1) * 1.5707963705063f / (f32)unk27) * 0.5f + 0.5f;
+				mult1 = cosf((float)(unk27 - frames + hand->statevar1) * 1.5707963705063f / (float)unk27) * 0.5f + 0.5f;
 
 				hand->rotxoffset = modelTweenRotAxis(hand->rotxstart, hand->rotxend, mult1);
 				hand->useposrot = true;
@@ -1718,9 +1714,9 @@ bool bgun0f09aba4(struct hand *hand, struct handweaponinfo *info, s32 handnum, s
 			hand->posend.z = (weapondef->posz - hand->aimpos.z) * recoildist / 1000.0f;
 
 			if (frames < unk24) {
-				mult2 = sinf(frames * 1.5707963705063f / (f32)unk24);
+				mult2 = sinf(frames * 1.5707963705063f / (float)unk24);
 			} else {
-				mult2 = cosf((f32)(frames - unk24) * M_PI / (f32)unk25) * 0.5f + 0.5f;
+				mult2 = cosf((float)(frames - unk24) * M_PI / (float)unk25) * 0.5f + 0.5f;
 			}
 
 			hand->rotxoffset = modelTweenRotAxis(hand->rotxstart, hand->rotxend, mult2);
@@ -1746,14 +1742,14 @@ bool bgun0f09aba4(struct hand *hand, struct handweaponinfo *info, s32 handnum, s
 	return false;
 }
 
-bool bgunTickIncAttackingShoot(struct handweaponinfo *info, s32 handnum, struct hand *hand)
+bool bgunTickIncAttackingShoot(struct handweaponinfo *info, int handnum, struct hand *hand)
 {
-	static u32 var80070128 = 99;
+	static uint32_t var80070128 = 99;
 
 	struct weaponfunc *func = gsetGetWeaponFunction(&hand->gset);
 	bool sp68;
-	s32 sp64;
-	s32 attemptfireresult;
+	int sp64;
+	int attemptfireresult;
 
 	if (func == NULL) {
 		return true;
@@ -1789,7 +1785,7 @@ bool bgunTickIncAttackingShoot(struct handweaponinfo *info, s32 handnum, struct 
 
 		if ((func->type & 0xff00) == 0x100) {
 			struct weaponfunc_shootauto *autofunc = (struct weaponfunc_shootauto *) func;
-			f32 floats[12];
+			float floats[12];
 
 			if (autofunc->vibrationstart != NULL && autofunc->vibrationmax != NULL) {
 				Lerp2D(autofunc->vibrationstart, autofunc->vibrationmax, hand->gs_float1, floats);
@@ -1847,7 +1843,7 @@ bool bgunTickIncAttackingShoot(struct handweaponinfo *info, s32 handnum, struct 
 	return false;
 }
 
-bool bgunTickIncAttackingThrow(s32 handnum, struct hand *hand)
+bool bgunTickIncAttackingThrow(int handnum, struct hand *hand)
 {
 	struct weaponfunc_throw *func = (struct weaponfunc_throw *) gsetGetWeaponFunction(&hand->gset);
 
@@ -1938,7 +1934,7 @@ bool bgunTickIncAttackingThrow(s32 handnum, struct hand *hand)
 	return false;
 }
 
-s32 bgunGetMinClipQty(s32 weaponnum, s32 funcnum)
+int bgunGetMinClipQty(int weaponnum, int funcnum)
 {
 	if (weaponnum == WEAPON_TRANQUILIZER && funcnum == FUNC_SECONDARY) {
 		return 4;
@@ -1947,7 +1943,7 @@ s32 bgunGetMinClipQty(s32 weaponnum, s32 funcnum)
 	return 1;
 }
 
-bool bgunTickIncAttackingMelee(s32 handnum, struct hand *hand)
+bool bgunTickIncAttackingMelee(int handnum, struct hand *hand)
 {
 	struct weaponfunc *func = gsetGetWeaponFunction(&hand->gset);
 
@@ -2090,9 +2086,8 @@ bool bgunTickIncAttackingSpecial(struct hand *hand)
 	return false;
 }
 
-s32 bgunTickIncAttackEmpty(struct handweaponinfo *info, s32 handnum, struct hand *hand, s32 lvupdate)
+int bgunTickIncAttackEmpty(struct handweaponinfo *info, int handnum, struct hand *hand, int lvupdate)
 {
-	u32 stack;
 	bool playsound = false;
 
 	switch (info->weaponnum) {
@@ -2171,13 +2166,13 @@ s32 bgunTickIncAttackEmpty(struct handweaponinfo *info, s32 handnum, struct hand
 		case WEAPON_FARSIGHT:
 			{
 				// Maian weapons have a wet sounding click effect
-				f32 speed = 2.07f;
+				float speed = 2.07f;
 				struct sndstate *handle;
 
 				handle = sndStart(var80095200, SFX_HIT_WATER, NULL, -1, -1, -1, -1, -1);
 
 				if (handle) {
-					audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
+					audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(int *)&speed);
 				}
 			}
 			// fall-through - unsure if intentional
@@ -2186,12 +2181,12 @@ s32 bgunTickIncAttackEmpty(struct handweaponinfo *info, s32 handnum, struct hand
 			{
 				// The tranquliser and psychosis gun use the standard click
 				// effect but slightly faster.
-				f32 speed = 1.5f;
+				float speed = 1.5f;
 				struct sndstate *handle;
 				handle = sndStart(var80095200, SFX_FIREEMPTY, NULL, -1, -1, -1, -1, -1);
 
 				if (handle) {
-					audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
+					audioPostEvent(handle, AL_SNDP_PITCH_EVT, *(int *)&speed);
 				}
 			}
 			break;
@@ -2228,7 +2223,7 @@ s32 bgunTickIncAttackEmpty(struct handweaponinfo *info, s32 handnum, struct hand
 	return 0;
 }
 
-s32 bgunTickIncAttack(struct handweaponinfo *info, s32 handnum, struct hand *hand, s32 lvupdate)
+int bgunTickIncAttack(struct handweaponinfo *info, int handnum, struct hand *hand, int lvupdate)
 {
 	struct weaponfunc *func = NULL;
 	bool finished = true;
@@ -2268,7 +2263,7 @@ s32 bgunTickIncAttack(struct handweaponinfo *info, s32 handnum, struct hand *han
 	return 0;
 }
 
-bool bgunIsReadyToSwitch(s32 handnum)
+bool bgunIsReadyToSwitch(int handnum)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -2318,7 +2313,7 @@ bool bgunIsReadyToSwitch(s32 handnum)
 	return false;
 }
 
-bool bgunCanFreeWeapon(s32 handnum)
+bool bgunCanFreeWeapon(int handnum)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -2332,7 +2327,7 @@ bool bgunCanFreeWeapon(s32 handnum)
 	return false;
 }
 
-bool bgun0f09bf44(s32 handnum)
+bool bgun0f09bf44(int handnum)
 {
 	bool result = true;
 	struct player *player = g_Vars.currentplayer;
@@ -2360,7 +2355,7 @@ bool bgun0f09bf44(s32 handnum)
 	return result;
 }
 
-s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *hand, s32 lvupdate)
+int bgunTickIncChangeGun(struct handweaponinfo *info, int handnum, struct hand *hand, int lvupdate)
 {
 	struct weapon *weapon = info->definition;
 
@@ -2415,7 +2410,7 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 	// For classic guns, handle lowering it to offscreen.
 	// Throw the gun if that's what the player is doing.
 	if (hand->stateminor == HANDSTATEMINOR_CHANGEGUN_LOWER) {
-		s32 delay = TICKS(16);
+		int delay = TICKS(16);
 		bool throwing = false;
 
 		hand->count = 0;
@@ -2500,7 +2495,7 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 
 	// Handle raising the new gun and playing the equipped sound effect.
 	if (hand->stateminor == HANDSTATEMINOR_CHANGEGUN_RAISE) {
-		s32 delay = TICKS(23);
+		int delay = TICKS(23);
 
 		if (g_Vars.normmplayerisrunning) {
 			delay = TICKS(12);
@@ -2535,11 +2530,11 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 					&& !g_PlayerInvincible
 					&& !g_Vars.currentplayer->isdead) {
 				struct sndstate *handle1;
-				f32 speed1;
+				float speed1;
 				struct sndstate *handle2;
-				f32 speed2;
+				float speed2;
 				struct sndstate *handle3;
-				f32 speed3;
+				float speed3;
 
 				switch (info->weaponnum) {
 				case WEAPON_HORIZONSCANNER:
@@ -2547,7 +2542,7 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 					handle1 = sndStart(var80095200, SFX_EQUIP_HORIZONSCANNER, 0, -1, -1, -1, -1, -1);
 
 					if (handle1) {
-						audioPostEvent(handle1, AL_SNDP_PITCH_EVT, *(s32 *)&speed1);
+						audioPostEvent(handle1, AL_SNDP_PITCH_EVT, *(int *)&speed1);
 					}
 
 					break;
@@ -2581,7 +2576,7 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 					handle2 = sndStart(var80095200, SFX_PICKUP_GUN, 0, -1, -1, -1, -1, -1);
 
 					if (handle2) {
-						audioPostEvent(handle2, AL_SNDP_PITCH_EVT, *(s32 *)&speed2);
+						audioPostEvent(handle2, AL_SNDP_PITCH_EVT, *(int *)&speed2);
 					}
 
 					break;
@@ -2590,7 +2585,7 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 					handle3 = sndStart(var80095200, SFX_PICKUP_GUN, 0, -1, -1, -1, -1, -1);
 
 					if (handle3) {
-						audioPostEvent(handle3, AL_SNDP_PITCH_EVT, *(s32 *)&speed3);
+						audioPostEvent(handle3, AL_SNDP_PITCH_EVT, *(int *)&speed3);
 					}
 
 					break;
@@ -2666,9 +2661,9 @@ s32 bgunTickIncChangeGun(struct handweaponinfo *info, s32 handnum, struct hand *
 	return 0;
 }
 
-void bgunUpdateHandState2(struct hand *hand, s32 handnum, struct coord *viewmodelpos, struct weaponfunc *funcdef, Mtxf *arg4, Mtxf *arg5)
+void bgunUpdateHandState2(struct hand *hand, int handnum, struct coord *viewmodelpos, struct weaponfunc *funcdef, Mtxf *arg4, Mtxf *arg5)
 {
-	f32 tmp;
+	float tmp;
 	struct coord sp38 = {0, 0, 0};
 	
 	// Go into turn up mode if the player has been looking at a wall for more than half a second OR the player is moving quickly on a hoverbike
@@ -2684,8 +2679,8 @@ void bgunUpdateHandState2(struct hand *hand, s32 handnum, struct coord *viewmode
 	} else {
 		// At this point we don't want the gun to be in the turned up position.
 		// However we don't want it to revert immediately, so a timer is used.
-		//f32 inversespeed = 30.0f;
-		f32 inversespeed = 20.0f;
+		//float inversespeed = 30.0f;
+		float inversespeed = 20.0f;
 
 		if (hand->animmode == HANDANIMMODE_BUSY) {
 			// Revert faster
@@ -2738,16 +2733,16 @@ void bgunUpdateHandState2(struct hand *hand, s32 handnum, struct coord *viewmode
  * be held at the side of the screen, pointed upwards. The feature was shown in
  * a demo video but doesn't exist in any public version of the game.
  */
-s32 bgunTickIncState2(struct handweaponinfo *info, s32 handnum, struct hand *hand, s32 lvupdate)
+int bgunTickIncState2(struct handweaponinfo *info, int handnum, struct hand *hand, int lvupdate)
 {
 	return 0;
 }
 
-s32 bgunTickInc(struct handweaponinfo *info, s32 handnum, s32 lvupdate)
+int bgunTickInc(struct handweaponinfo *info, int handnum, int lvupdate)
 {
-	s32 result = 0;
+	int result = 0;
 	struct hand *hand = &g_Vars.currentplayer->hands[handnum];
-	s32 prevstate = hand->state;
+	int prevstate = hand->state;
 
 	hand->firing = false;
 	hand->flashon = false;
@@ -2799,7 +2794,7 @@ s32 bgunTickInc(struct handweaponinfo *info, s32 handnum, s32 lvupdate)
 	return result;
 }
 
-bool bgunSetState(s32 handnum, s32 state)
+bool bgunSetState(int handnum, int state)
 {
 	bool valid = true;
 	struct hand *hand = &g_Vars.currentplayer->hands[handnum];
@@ -2821,12 +2816,12 @@ bool bgunSetState(s32 handnum, s32 state)
 	return valid;
 }
 
-void bgunTickHand(s32 handnum)
+void bgunTickHand(int handnum)
 {
 	struct hand *hand = &g_Vars.currentplayer->hands[handnum];
 	struct handweaponinfo info;
-	s32 lvupdate;
-	s32 i = 20;
+	int lvupdate;
+	int i = 20;
 	bgunGetWeaponInfo(&info, handnum);
 
 	lvupdate = g_Vars.lvupdate60;
@@ -2852,7 +2847,7 @@ void bgunTickSwitch(void)
 void bgunInitHandAnims(void)
 {
 	struct hand *hand;
-	s32 i;
+	int i;
 
 	for (i = 0; i < 2; i++) {
 		if (i == 0) {
@@ -2873,7 +2868,7 @@ void bgunInitHandAnims(void)
 	}
 }
 
-f32 bgunGetNoiseRadius(s32 handnum)
+float bgunGetNoiseRadius(int handnum)
 {
 	return g_Vars.currentplayer->hands[handnum].noiseradius;
 }
@@ -2881,12 +2876,12 @@ f32 bgunGetNoiseRadius(s32 handnum)
 void bgunDecreaseNoiseRadius(void)
 {
 	struct player *player = g_Vars.currentplayer;
-	f32 consideramount;
+	float consideramount;
 	struct gset gsetleft;
 	struct gset gsetright;
 	struct noisesettings noisesettingsleft;
 	struct noisesettings noisesettingsright;
-	f32 subamount;
+	float subamount;
 
 	gsetPopulateFromCurrentPlayer(HAND_LEFT, &gsetleft);
 	gsetPopulateFromCurrentPlayer(HAND_RIGHT, &gsetright);
@@ -2939,12 +2934,12 @@ void bgunDecreaseNoiseRadius(void)
 	}
 }
 
-void bgunCalculateBlend(s32 handnum)
+void bgunCalculateBlend(int handnum)
 {
-	s32 sp60[2];
-	s32 sp58[2];
+	int sp60[2];
+	int sp58[2];
 	struct weapon *weapon = weaponFindById(bgunGetWeaponNum(handnum));
-	f32 sway = weapon->sway;
+	float sway = weapon->sway;
 	struct player *player = g_Vars.currentplayer;
 
 	sp60[handnum] = (player->hands[handnum].curblendpos + 2) % 4;
@@ -2982,13 +2977,13 @@ void bgunCalculateBlend(s32 handnum)
 	player->hands[handnum].blendscale1 = -player->hands[handnum].blendscale1;
 }
 
-void bgunUpdateBlend(struct hand *hand, s32 handnum)
+void bgunUpdateBlend(struct hand *hand, int handnum)
 {
-	s32 i;
+	int i;
 	struct coord sp5c = {0, 0, 0};
 	struct coord sp50 = {0, 0, -1};
 	struct coord sp44 = {0, 1, 0};
-	s32 pos = hand->curblendpos;
+	int pos = hand->curblendpos;
 	struct player *player = g_Vars.currentplayer;
 
 	CatmullRomSplineInterp(&hand->blendpos[(pos + 3) % 4], &hand->blendpos[pos], &hand->blendpos[(pos + 1) % 4], &hand->blendpos[(pos + 2) % 4], hand->dampt, &sp5c);
@@ -3031,13 +3026,13 @@ void bgunUpdateBlend(struct hand *hand, s32 handnum)
 	hand->dampup.z = hand->dampupsum.z * (PAL ? 0.01529997587204f : 0.012799978f);
 }
 
-void bgun0f09d8dc(f32 breathing, f32 arg1, f32 arg2, f32 arg3, f32 arg4)
+void bgun0f09d8dc(float breathing, float arg1, float arg2, float arg3, float arg4)
 {
-	f32 dampt[2];
+	float dampt[2];
 	struct player *player = g_Vars.currentplayer;
-	s32 i;
-	f32 sp50 = arg2;
-	f32 sp4c;
+	int i;
+	float sp50 = arg2;
+	float sp4c;
 
 	if (sp50 < 0.0f) {
 		sp50 = -sp50;
@@ -3047,7 +3042,7 @@ void bgun0f09d8dc(f32 breathing, f32 arg1, f32 arg2, f32 arg3, f32 arg4)
 		player->gunposamplitude = 1.0f;
 	} else {
 		if (arg1 > 0.1f) {
-			f32 tmp = 1.0f - cosf((arg1 - 0.1f) * M_TAU / 2.8f);
+			float tmp = 1.0f - cosf((arg1 - 0.1f) * M_TAU / 2.8f);
 			player->gunposamplitude = 0.8f * tmp + 0.2f;
 		} else {
 			player->gunposamplitude = 0.1f;
@@ -3137,7 +3132,7 @@ bool bgunIsLoaded(void)
 				&& g_Vars.currentplayer->gunctrl.masterloadstate == MASTERLOADSTATE_LOADED);
 }
 
-u32 bgunGetGunMemType(void)
+uint32_t bgunGetGunMemType(void)
 {
 	return g_Vars.currentplayer->gunctrl.gunmemtype;
 }
@@ -3147,12 +3142,12 @@ struct modeldef *bgunGetGunModeldef(void)
 	return g_Vars.currentplayer->gunctrl.gunmodeldef;
 }
 
-u8 *bgunGetGunMem(void)
+uint8_t *bgunGetGunMem(void)
 {
 	return g_Vars.currentplayer->gunctrl.gunmem;
 }
 
-u32 bgunCalculateGunMemCapacity(void)
+uint32_t bgunCalculateGunMemCapacity(void)
 {
 	if (PLAYERCOUNT() == 1) {
 		return g_BgunGunMemBaseSizeDefault + stageGetCurrent()->extragunmem;
@@ -3171,7 +3166,7 @@ void bgunFreeGunMem(void)
 #endif
 }
 
-void bgunSetGunMemWeapon(s32 weaponnum)
+void bgunSetGunMemWeapon(int weaponnum)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -3187,7 +3182,7 @@ void bgunSetGunMemWeapon(s32 weaponnum)
 
 void bgunEnterFlux(void)
 {
-	s32 i;
+	int i;
 	struct casing *end;
 	struct casing *casing;
 
@@ -3209,7 +3204,7 @@ void bgunEnterFlux(void)
 	g_CasingsActive = false;
 }
 
-bool bgunChangeGunMem(s32 newowner)
+bool bgunChangeGunMem(int newowner)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -3248,7 +3243,7 @@ bool bgunChangeGunMem(s32 newowner)
 				unlock = true;
 			}
 
-			if (newowner == GUNMEMOWNER_INVMENU && var8009dfc0 != 0) {
+			if (newowner == GUNMEMOWNER_INVMENU && g_GamePaused != 0) {
 				unlock = true;
 				playerRemoveChrBody();
 			}
@@ -3292,12 +3287,12 @@ bool bgunChangeGunMem(s32 newowner)
  */
 void bgunTickGunLoad(void)
 {
-	s32 i;
-	s32 numthistick;
-	u64 remaining;
-	s32 padding;
-	u64 allocsize;
-	u64 loadsize;
+	int i;
+	int numthistick;
+	uint64_t remaining;
+	int padding;
+	uint64_t allocsize;
+	uint64_t loadsize;
 	uintptr_t ptr;
 	struct player *player = g_Vars.currentplayer;
 	struct modeldef *modeldef;
@@ -3329,7 +3324,7 @@ void bgunTickGunLoad(void)
 		// Load the model file to ptr
 		g_LoadType = LOADTYPE_GUN;
 
-		modeldef = fileLoadToAddr(player->gunctrl.loadfilenum, FILELOADMETHOD_EXTRAMEM, (u8 *)ptr, loadsize);
+		modeldef = fileLoadToAddr(player->gunctrl.loadfilenum, FILELOADMETHOD_EXTRAMEM, (uint8_t *)ptr, loadsize);
 
 		// Reserve some space for textures
 		allocsize = fileGetLoadedSize(player->gunctrl.loadfilenum) + 0xe00;
@@ -3345,7 +3340,7 @@ void bgunTickGunLoad(void)
 		allocsize = end - ptr;
 		remaining -= allocsize;
 
-		texInitPool(&player->gunctrl.texpool, (u8 *)end, remaining);
+		texInitPool(&player->gunctrl.texpool, (uint8_t *)end, remaining);
 
 		// Tidy up the model
 		modelPromoteTypeToPointer(modeldef);
@@ -3419,23 +3414,23 @@ void bgunTickGunLoad(void)
 
 void bgunTickMasterLoad(void)
 {
-	s32 newweaponnum;
+	int newweaponnum;
 	struct player *player = g_Vars.currentplayer;
 	bool hashands;
-	u16 handfilenum;
-	s32 sum;
-	u16 filenum;
-	s32 i;
+	uint16_t handfilenum;
+	int sum;
+	uint16_t filenum;
+	int i;
 	struct casing *casing;
 	struct hand *hand;
 	struct weaponfunc *func;
 	struct weaponfunc *shootfunc;
 	struct weapon *weapondef;
-	s32 casingindex;
+	int casingindex;
 	struct inventory_ammo *ammodef;
-	s32 value;
-	s32 bodynum;
-	s32 headnum;
+	int value;
+	int bodynum;
+	int headnum;
 
 	if ((player->gunctrl.gunmemowner == GUNMEMOWNER_BONDGUN || bgunChangeGunMem(GUNMEMOWNER_BONDGUN)) && player->gunctrl.gunmemnew >= 0) {
 		if (player->gunctrl.gunlocktimer == 0) {
@@ -3519,7 +3514,7 @@ void bgunTickMasterLoad(void)
 						player->gunctrl.gunloadstate = GUNLOADSTATE_FLUX;
 					} else if (player->gunctrl.masterloadstate == MASTERLOADSTATE_GUN) {
 						if (player->gunctrl.gunloadstate == GUNLOADSTATE_FLUX) {
-							player->gunctrl.memloadptr = (u8 *) player->gunctrl.handmemloadptr;
+							player->gunctrl.memloadptr = (uint8_t *) player->gunctrl.handmemloadptr;
 							player->gunctrl.memloadremaining = player->gunctrl.handmemloadremaining;
 							player->gunctrl.gunloadstate = GUNLOADSTATE_MODEL;
 							player->gunctrl.loadfilenum = filenum;
@@ -3648,7 +3643,7 @@ void bgunTickMasterLoad(void)
 
 void bgunTickLoad(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < g_Vars.lvupdate240; i += 8) {
 		bgunTickMasterLoad();
@@ -3727,7 +3722,7 @@ void bgunCreateXBowBolt(struct defaultobj *obj, struct coord *coord, RoomNum *ro
 		func0f06a580(obj, coord, matrix1, rooms);
 
 		if (obj->type == OBJTYPE_WEAPON && ((struct weaponobj *) obj)->weaponnum == WEAPON_BOLT) {
-			s32 beamnum = boltbeamFindByProp(objprop);
+			int beamnum = boltbeamFindByProp(objprop);
 
 			if (beamnum == -1) {
 				beamnum = boltbeamCreate(objprop);
@@ -3739,7 +3734,7 @@ void bgunCreateXBowBolt(struct defaultobj *obj, struct coord *coord, RoomNum *ro
 			}
 		}
 
-		func0f0685e4(objprop);
+		ensurePropHasProjectile(objprop);
 
 		if (obj->hidden & OBJHFLAG_PROJECTILE) {
 			obj->projectile->flags |= PROJECTILEFLAG_AIRBORNE;
@@ -3793,7 +3788,7 @@ struct defaultobj *bgunCreateThrownProjectile2(struct chrdata *chr, struct gset 
 	struct weaponobj *weaponobj;
 	struct autogunobj *autogun;
 	Mtxf mtx;
-	s32 playernum;
+	int playernum;
 
 	if (weapon == NULL) {
 		return false;
@@ -3879,7 +3874,7 @@ struct defaultobj *bgunCreateThrownProjectile2(struct chrdata *chr, struct gset 
  * 2 = fumbling grenade from right hand (due to nbomb)
  * 3 = fumbling grenade from left hand (actually not possible)
  */
-void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
+void bgunCreateThrownProjectile(int handnum, struct gset *gset)
 {
 	struct coord velocity = {0, 0, 0};
 	Mtxf sp1f4;
@@ -3898,14 +3893,14 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 	struct hand *hand;
 	struct coord aimpos;
 	struct coord sp140;
-	f32 frac;
-	f32 radians;
+	float frac;
+	float radians;
 	Mtxf spf8;
 	Mtxf spb8;
 	Mtxf sp78;
-	f32 sp68[4];
-	f32 sp58[4];
-	f32 sp48[4];
+	float sp68[4];
+	float sp58[4];
+	float sp48[4];
 	struct trainingdata *data;
 
 	if (handnum >= 2) {
@@ -3929,9 +3924,9 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 
 	mtx4Copy(&g_Vars.currentplayer->hands[handnum].muzzlemat, &sp190);
 
-	guNormalize(&sp190.m[0][0], &sp190.m[0][1], &sp190.m[0][2]);
-	guNormalize(&sp190.m[1][0], &sp190.m[1][1], &sp190.m[1][2]);
-	guNormalize(&sp190.m[2][0], &sp190.m[2][1], &sp190.m[2][2]);
+	utilsNormalizeF(&sp190.m[0][0], &sp190.m[0][1], &sp190.m[0][2]);
+	utilsNormalizeF(&sp190.m[1][0], &sp190.m[1][1], &sp190.m[1][2]);
+	utilsNormalizeF(&sp190.m[2][0], &sp190.m[2][1], &sp190.m[2][2]);
 
 	sp190.m[3][0] = 0.0f;
 	sp190.m[3][1] = 0.0f;
@@ -4079,7 +4074,7 @@ void bgunCreateThrownProjectile(s32 handnum, struct gset *gset)
 	}
 }
 
-void bgunUpdateHeldRocket(s32 handnum)
+void bgunUpdateHeldRocket(int handnum)
 {
 	struct hand *hand = &g_Vars.currentplayer->hands[handnum];
 	struct defaultobj *obj = &hand->rocket->base;
@@ -4115,7 +4110,7 @@ void bgunUpdateHeldRocket(s32 handnum)
 	}
 }
 
-void bgunCreateHeldRocket(s32 handnum, struct weaponfunc_shootprojectile *func)
+void bgunCreateHeldRocket(int handnum, struct weaponfunc_shootprojectile *func)
 {
 	struct hand *hand = &g_Vars.currentplayer->hands[handnum];
 	struct weaponobj *obj;
@@ -4136,7 +4131,7 @@ void bgunCreateHeldRocket(s32 handnum, struct weaponfunc_shootprojectile *func)
 	}
 }
 
-void bgunFreeHeldRocket(s32 handnum)
+void bgunFreeHeldRocket(int handnum)
 {
 	struct hand *hand = &g_Vars.currentplayer->hands[handnum];
 
@@ -4146,14 +4141,14 @@ void bgunFreeHeldRocket(s32 handnum)
 	}
 }
 
-void bgunCreateFiredProjectile(s32 handnum)
+void bgunCreateFiredProjectile(int handnum)
 {
 	struct weapon *weapondef;
 	struct hand *hand;
 	Mtxf sp270;
 	struct coord sp264;
-	f32 sp260;
-	f32 sp25c;
+	float sp260;
+	float sp25c;
 	struct coord sp250;
 	Mtxf sp210;
 	struct coord gunpos;
@@ -4167,14 +4162,14 @@ void bgunCreateFiredProjectile(s32 handnum)
 	struct weaponfunc_shootprojectile *funcdef;
 	struct coord aimpos;
 	struct coord sp1bc;
-	f32 frac;
-	f32 radians;
+	float frac;
+	float radians;
 	Mtxf sp174;
 	Mtxf sp134;
 	Mtxf spf4;
-	f32 spe4[4];
-	f32 spd4[4];
-	f32 spc4[4];
+	float spe4[4];
+	float spd4[4];
+	float spc4[4];
 
 	hand = g_Vars.currentplayer->hands + handnum;
 
@@ -4278,8 +4273,7 @@ void bgunCreateFiredProjectile(s32 handnum)
 					weapon->weaponnum = WEAPON_HOMINGROCKET;
 				}
 			} else if (hand->gset.weaponnum == WEAPON_ROCKETLAUNCHER || hand->gset.weaponnum == WEAPON_SLAYER) {
-				u32 stack;
-				s32 weaponnum = WEAPON_ROCKET;
+				int weaponnum = WEAPON_ROCKET;
 
 				if (funcdef->base.base.flags & FUNCFLAG_HOMINGROCKET) {
 					weaponnum = WEAPON_HOMINGROCKET;
@@ -4390,21 +4384,21 @@ void bgunCreateFiredProjectile(s32 handnum)
 	}
 }
 
-void bgunSwivel(f32 screenx, f32 screeny, f32 crossdamp, f32 aimdamp)
+void bgunSwivel(float screenx, float screeny, float crossdamp, float aimdamp)
 {
-	f32 screenwidth = camGetScreenWidth();
-	f32 screenheight = camGetScreenHeight();
+	float screenwidth = camGetScreenWidth();
+	float screenheight = camGetScreenHeight();
 	struct player *player = g_Vars.currentplayer;
 	struct coord aimpos;
-	s32 l;
-	s32 h;
-	f32 x[2];
-	f32 y[2];
+	int l;
+	int h;
+	float x[2];
+	float y[2];
 	bool ignore[2] = {false, false};
-	s32 numframes;
+	int numframes;
 	struct hand *hand;
 	struct coord sp94;
-	f32 sp8c[2];
+	float sp8c[2];
 
 	x[HAND_RIGHT] = x[HAND_LEFT] = screenx;
 	y[HAND_RIGHT] = y[HAND_LEFT] = screeny;
@@ -4423,7 +4417,7 @@ void bgunSwivel(f32 screenx, f32 screeny, f32 crossdamp, f32 aimdamp)
 			numframes = 5;
 		}
 
-		if ((s32)bgun0f09815c(&player->hands[HAND_RIGHT]) < modelGetNumAnimFrames(&player->hands[HAND_RIGHT].gunmodel) - numframes) {
+		if ((int)bgun0f09815c(&player->hands[HAND_RIGHT]) < modelGetNumAnimFrames(&player->hands[HAND_RIGHT].gunmodel) - numframes) {
 			x[HAND_RIGHT] = 0.0f;
 			y[HAND_RIGHT] = 0.0f;
 			ignore[HAND_RIGHT] = true;
@@ -4558,10 +4552,10 @@ void bgunSwivel(f32 screenx, f32 screeny, f32 crossdamp, f32 aimdamp)
  *
  * This is used for auto aim, the CMP's follow lock-on, and general turning.
  */
-void bgunSwivelWithDamp(f32 screenx, f32 screeny, f32 crossdamp)
+void bgunSwivelWithDamp(float screenx, float screeny, float crossdamp)
 {
 	struct weapon *weapon = weaponFindById(bgunGetWeaponNum(HAND_RIGHT));
-	f32 aimdamp = PAL ? weapon->aimsettings->aimdamppal : weapon->aimsettings->aimdamp;
+	float aimdamp = PAL ? weapon->aimsettings->aimdamppal : weapon->aimsettings->aimdamp;
 
 	if (aimdamp < crossdamp) {
 		aimdamp = crossdamp;
@@ -4576,15 +4570,15 @@ void bgunSwivelWithDamp(f32 screenx, f32 screeny, f32 crossdamp)
  *
  * This is used when manual aiming.
  */
-void bgunSwivelWithoutDamp(f32 screenx, f32 screeny)
+void bgunSwivelWithoutDamp(float screenx, float screeny)
 {
 	struct weapon *weapon = weaponFindById(bgunGetWeaponNum(HAND_RIGHT));
-	f32 aimdamp = PAL ? weapon->aimsettings->aimdamppal : weapon->aimsettings->aimdamp;
+	float aimdamp = PAL ? weapon->aimsettings->aimdamppal : weapon->aimsettings->aimdamp;
 
 	bgunSwivel(screenx, screeny, PAL ? 0.935f : 0.945f, aimdamp);
 }
 
-void bgunGetCrossPos(f32 *x, f32 *y)
+void bgunGetCrossPos(float *x, float *y)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -4601,7 +4595,7 @@ void bgun0f0a0c08(struct coord *arg0, struct coord *arg1)
 	cam0f0b4c3c(g_Vars.currentplayer->crosspos, arg1, 1);
 }
 
-void bgun0f0a0c44(s32 handnum, struct coord *arg1, struct coord *arg2)
+void bgun0f0a0c44(int handnum, struct coord *arg1, struct coord *arg2)
 {
 	arg1->x = 0;
 	arg1->y = 0;
@@ -4610,12 +4604,12 @@ void bgun0f0a0c44(s32 handnum, struct coord *arg1, struct coord *arg2)
 	cam0f0b4c3c(g_Vars.currentplayer->hands[handnum].crosspos, arg2, 1);
 }
 
-void bgunCalculatePlayerShotSpread(struct coord *gunpos2d, struct coord *gundir2d, s32 handnum, bool dorandom)
+void bgunCalculatePlayerShotSpread(struct coord *gunpos2d, struct coord *gundir2d, int handnum, bool dorandom)
 {
-	f32 crosspos[2];
-	f32 spread = 0;
-	f32 scaledspread;
-	f32 randfactor;
+	float crosspos[2];
+	float spread = 0;
+	float scaledspread;
+	float randfactor;
 	struct weaponfunc *func = currentPlayerGetWeaponFunction(handnum);
 	struct player *player = g_Vars.currentplayer;
 
@@ -4666,16 +4660,15 @@ void bgunCalculatePlayerShotSpread(struct coord *gunpos2d, struct coord *gundir2
 	cam0f0b4c3c(crosspos, gundir2d, 1);
 }
 
-void bgunCalculateBotShotSpread(struct coord *arg0, s32 weaponnum, s32 funcnum, bool arg3, s32 crouchpos, bool dual)
+void bgunCalculateBotShotSpread(struct coord *arg0, int weaponnum, int funcnum, bool arg3, int crouchpos, bool dual)
 {
-	f32 spread = 0.0f;
-	f32 radius;
+	float spread = 0.0f;
+	float radius;
 	struct weapon *weapondef = weaponFindById(weaponnum);
-	f32 x;
-	f32 y;
+	float x;
+	float y;
 	Mtxf mtx;
 	struct coord sp48;
-	u32 stack;
 
 	if (weapondef) {
 		struct weaponfunc *funcdef = weapondef->functions[funcnum];
@@ -4706,12 +4699,12 @@ void bgunCalculateBotShotSpread(struct coord *arg0, s32 weaponnum, s32 funcnum, 
 	sp48.y = g_Vars.currentplayer->c_scaley * y;
 	sp48.z = -1.0f;
 
-	guNormalize(&sp48.x, &sp48.y, &sp48.z);
+	utilsNormalizeF(&sp48.x, &sp48.y, &sp48.z);
 	mtx00016b58(&mtx, 0.0f, 0.0f, 0.0f, arg0->x, arg0->y, arg0->z, 0.0f, -1.0f, 0.0f);
 	mtx4RotateVec(&mtx, &sp48, arg0);
 }
 
-bool bgunGetLastShootInfo(struct coord *pos, struct coord *dir, s32 handnum)
+bool bgunGetLastShootInfo(struct coord *pos, struct coord *dir, int handnum)
 {
 	struct hand *hand = &g_Vars.currentplayer->hands[handnum];
 
@@ -4730,7 +4723,7 @@ bool bgunGetLastShootInfo(struct coord *pos, struct coord *dir, s32 handnum)
 	return true;
 }
 
-void bgunSetLastShootInfo(struct coord *pos, struct coord *dir, s32 handnum)
+void bgunSetLastShootInfo(struct coord *pos, struct coord *dir, int handnum)
 {
 	struct hand *hand = &g_Vars.currentplayer->hands[handnum];
 
@@ -4745,23 +4738,23 @@ void bgunSetLastShootInfo(struct coord *pos, struct coord *dir, s32 handnum)
 	hand->lastshootdir.z = dir->z;
 }
 
-s32 bgunGetShotsToTake(s32 handnum)
+int bgunGetShotsToTake(int handnum)
 {
 	struct hand *hand = &g_Vars.currentplayer->hands[handnum];
 
 	return hand->shotstotake;
 }
 
-void bgunFreeWeapon(s32 handnum)
+void bgunFreeWeapon(int handnum)
 {
 	struct player *player = g_Vars.currentplayer;
-	s32 i;
+	int i;
 
 	if (player->hands[handnum].inuse) {
 		for (i = 0; i < 2; i++) {
 			if (player->gunctrl.ammotypes[i] >= 0) {
-				s32 spaceinclip = player->hands[handnum].clipsizes[i] - player->hands[handnum].loadedammo[i];
-				s32 index = bgunGetUnequippedReloadIndex(player->gunctrl.weaponnum);
+				int spaceinclip = player->hands[handnum].clipsizes[i] - player->hands[handnum].loadedammo[i];
+				int index = bgunGetUnequippedReloadIndex(player->gunctrl.weaponnum);
 
 				if (index != -1) {
 					player->hands[handnum].gunroundsspent[index] = (spaceinclip << 8) | 0xff;
@@ -4787,12 +4780,12 @@ void bgunTickSwitch2(void)
 {
 	struct player *player = g_Vars.currentplayer;
 	struct gunctrl *ctrl = &g_Vars.currentplayer->gunctrl;
-	s32 i;
+	int i;
 
 	if (ctrl->switchtoweaponnum >= 0) {
 		if (bgunCanFreeWeapon(HAND_RIGHT) && bgunCanFreeWeapon(HAND_LEFT)) {
-			s32 weaponnum = player->gunctrl.weaponnum;
-			s32 previnuse = player->hands[HAND_LEFT].inuse;
+			int weaponnum = player->gunctrl.weaponnum;
+			int previnuse = player->hands[HAND_LEFT].inuse;
 			struct hand *lefthand;
 			struct hand *righthand;
 
@@ -4804,8 +4797,7 @@ void bgunTickSwitch2(void)
 				ctrl->dualwielding = false;
 			}
 
-			func0f0d7364();
-
+			//func0f0d7364(); Ben's comment: I'm not sure if this does anything in practice?
 			bgunFreeWeapon(HAND_LEFT);
 			bgunFreeWeapon(HAND_RIGHT);
 
@@ -4814,7 +4806,7 @@ void bgunTickSwitch2(void)
 			}
 
 			if (weaponnum == WEAPON_RCP120) {
-				s32 amount = player->hands[HAND_RIGHT].matmot1;
+				int amount = player->hands[HAND_RIGHT].matmot1;
 
 				if (amount > player->ammoheldarr[ctrl->ammotypes[0]]) {
 					amount = player->ammoheldarr[ctrl->ammotypes[0]];
@@ -4930,7 +4922,7 @@ void bgunTickSwitch2(void)
 	}
 }
 
-void bgunEquipWeapon(s32 weaponnum)
+void bgunEquipWeapon(int weaponnum)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -4942,7 +4934,7 @@ void bgunEquipWeapon(s32 weaponnum)
 	player->gunctrl.wantammo = false;
 }
 
-s32 bgunGetWeaponNum(s32 handnum)
+int bgunGetWeaponNum(int handnum)
 {
 	if (!g_Vars.currentplayer->hands[handnum].inuse) {
 		return WEAPON_NONE;
@@ -4951,12 +4943,12 @@ s32 bgunGetWeaponNum(s32 handnum)
 	return g_Vars.currentplayer->gunctrl.weaponnum;
 }
 
-s32 bgunGetWeaponNum2(s32 handnum)
+int bgunGetWeaponNum2(int handnum)
 {
 	return bgunGetWeaponNum(handnum);
 }
 
-bool bgun0f0a1a10(s32 weaponnum)
+bool bgun0f0a1a10(int weaponnum)
 {
 	if (weaponHasFlag(weaponnum, WEAPONFLAG_00000400)
 			&& (bgunGetAmmoTypeForWeapon(weaponnum, FUNC_PRIMARY) == 0 || bgunGetAmmoQtyForWeapon(weaponnum, FUNC_PRIMARY) > 0)) {
@@ -4966,9 +4958,9 @@ bool bgun0f0a1a10(s32 weaponnum)
 	return false;
 }
 
-s32 bgunGetSwitchToWeapon(s32 handnum)
+int bgunGetSwitchToWeapon(int handnum)
 {
-	s32 weaponnum;
+	int weaponnum;
 
 	if (g_Vars.currentplayer->gunctrl.switchtoweaponnum >= 0) {
 		weaponnum = g_Vars.currentplayer->gunctrl.switchtoweaponnum;
@@ -4987,7 +4979,7 @@ void bgunSwitchToPrevious(void)
 {
 	if (g_Vars.tickmode != TICKMODE_CUTSCENE) {
 		struct player *player = g_Vars.currentplayer;
-		s32 dualweaponnum;
+		int dualweaponnum;
 
 		if (invHasSingleWeaponIncAllGuns(player->gunctrl.prevweaponnum)) {
 			bgunEquipWeapon2(HAND_RIGHT, player->gunctrl.prevweaponnum);
@@ -5003,8 +4995,8 @@ void bgunSwitchToPrevious(void)
 
 void bgunCycleForward(void)
 {
-	s32 weaponnum1;
-	s32 weaponnum2;
+	int weaponnum1;
+	int weaponnum2;
 	struct player *player = g_Vars.currentplayer;
 
 	if (g_Vars.tickmode != TICKMODE_CUTSCENE) {
@@ -5030,8 +5022,8 @@ void bgunCycleForward(void)
 
 void bgunCycleBack(void)
 {
-	s32 weaponnum1;
-	s32 weaponnum2;
+	int weaponnum1;
+	int weaponnum2;
 	struct player *player = g_Vars.currentplayer;
 
 	if (g_Vars.tickmode != TICKMODE_CUTSCENE) {
@@ -5065,12 +5057,12 @@ void bgunCycleBack(void)
  *
  * Used by the active menu to colour the slots.
  */
-bool bgunHasAmmoForWeapon(s32 weaponnum)
+bool bgunHasAmmoForWeapon(int weaponnum)
 {
 	bool ammodefexists = false;
 	bool hasammo = false;
 	struct weapon *weapon = weaponFindById(weaponnum);
-	s32 i;
+	int i;
 
 	if (weapon == NULL) {
 		return true;
@@ -5103,7 +5095,7 @@ bool bgunHasAmmoForWeapon(s32 weaponnum)
 	return false;
 }
 
-u8 g_AutoSwitchWeaponsPrimary[] = {
+uint8_t g_AutoSwitchWeaponsPrimary[] = {
 	WEAPON_RCP120,
 	WEAPON_RCP45,
 	WEAPON_SUPERDRAGON, // primary function
@@ -5150,7 +5142,7 @@ u8 g_AutoSwitchWeaponsPrimary[] = {
 	WEAPON_UNARMED,
 };
 
-u8 g_AutoSwitchWeaponsSecondary[] = {
+uint8_t g_AutoSwitchWeaponsSecondary[] = {
 	WEAPON_REAPER,
 	WEAPON_DY357LX,
 	WEAPON_DY357MAGNUM,
@@ -5188,15 +5180,15 @@ u8 g_AutoSwitchWeaponsSecondary[] = {
  */
 void bgunAutoSwitchWeapon(void)
 {
-	s32 i;
+	int i;
 	struct weapon *weapon;
 	struct weaponfunc *func;
-	s32 weaponnum;
-	s32 newweaponnum = -1;
-	s32 firstweaponnum = -1;
-	s32 foundsuperdragon = 0;
+	int weaponnum;
+	int newweaponnum = -1;
+	int firstweaponnum = -1;
+	int foundsuperdragon = 0;
 	bool foundcurrent = false;
-	s32 curweaponnum = g_Vars.currentplayer->gunctrl.weaponnum;
+	int curweaponnum = g_Vars.currentplayer->gunctrl.weaponnum;
 	bool wantammo = false;
 
 	if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
@@ -5257,8 +5249,8 @@ void bgunAutoSwitchWeapon(void)
 
 	if (newweaponnum == WEAPON_UNARMED) {
 		bool foundcurrent = false;
-		s32 firstweaponnum = -1;
-		s32 weaponnum;
+		int firstweaponnum = -1;
+		int weaponnum;
 
 		// No usable weapon was found in the primary array,
 		// so search the secondary array.
@@ -5305,7 +5297,7 @@ void bgunAutoSwitchWeapon(void)
 	}
 }
 
-void bgunEquipWeapon2(s32 handnum, s32 weaponnum)
+void bgunEquipWeapon2(int handnum, int weaponnum)
 {
 	if (handnum == HAND_LEFT) {
 		if (weaponnum == WEAPON_NONE) {
@@ -5322,17 +5314,17 @@ void bgunEquipWeapon2(s32 handnum, s32 weaponnum)
 	}
 }
 
-s32 bgunIsFiring(s32 handnum)
+int bgunIsFiring(int handnum)
 {
 	return g_Vars.currentplayer->hands[handnum].firing;
 }
 
-s32 bgunGetAttackType(s32 handnum)
+int bgunGetAttackType(int handnum)
 {
 	return g_Vars.currentplayer->hands[handnum].attacktype;
 }
 
-char *bgunGetName(s32 weaponnum)
+char *bgunGetName(int weaponnum)
 {
 	struct weapon *weapon = g_Weapons[weaponnum];
 
@@ -5343,7 +5335,7 @@ char *bgunGetName(s32 weaponnum)
 	return "** error\n";
 }
 
-u16 bgunGetNameId(s32 weaponnum)
+uint16_t bgunGetNameId(int weaponnum)
 {
 	struct weapon *weapon = g_Weapons[weaponnum];
 
@@ -5354,7 +5346,7 @@ u16 bgunGetNameId(s32 weaponnum)
 	return 0;
 }
 
-char *bgunGetShortName(s32 weaponnum)
+char *bgunGetShortName(int weaponnum)
 {
 	struct weapon *weapon = g_Weapons[weaponnum];
 
@@ -5365,7 +5357,7 @@ char *bgunGetShortName(s32 weaponnum)
 	return "** error\n";
 }
 
-void bgunReloadIfPossible(s32 handnum)
+void bgunReloadIfPossible(int handnum)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -5375,7 +5367,7 @@ void bgunReloadIfPossible(s32 handnum)
 	}
 }
 
-void bgunSetAdjustPos(f32 angle)
+void bgunSetAdjustPos(float angle)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -5383,7 +5375,7 @@ void bgunSetAdjustPos(f32 angle)
 	player->hands[1].adjustpos.z = (1 - cosf(angle)) * 5;
 }
 
-void bgunStartSlide(s32 handnum)
+void bgunStartSlide(int handnum)
 {
 	g_Vars.currentplayer->hands[handnum].slideinc = true;
 }
@@ -5394,9 +5386,9 @@ void bgunStartSlide(s32 handnum)
  * The slide moves back and then forward when firing. If the gun no longer has
  * any ammo loaded in it, the slide moves back and remains in the back position.
  */
-void bgunUpdateSlide(s32 handnum)
+void bgunUpdateSlide(int handnum)
 {
-	f32 slidemax = 0.0f;
+	float slidemax = 0.0f;
 	struct weaponfunc *funcdef = currentPlayerGetWeaponFunction(handnum);
 	struct player *player = g_Vars.currentplayer;
 
@@ -5429,14 +5421,14 @@ void bgunUpdateSlide(s32 handnum)
 	}
 }
 
-f32 bgun0f0a2498(f32 arg0, f32 arg1, f32 arg2, f32 arg3)
+float bgun0f0a2498(float arg0, float arg1, float arg2, float arg3)
 {
-	f32 a = arg0 - arg2;
+	float a = arg0 - arg2;
 
 	return asinf(a / sqrtf(a * a + (arg1 - arg3) * (arg1 - arg3)));
 }
 
-void bgun0f0a24f0(struct coord *arg0, s32 handnum)
+void bgun0f0a24f0(struct coord *arg0, int handnum)
 {
 	struct coord b;
 	struct coord a;
@@ -5455,7 +5447,7 @@ void bgun0f0a24f0(struct coord *arg0, s32 handnum)
 /**
  * This function is a callback that is passed to model code.
  */
-void bgun0f0a256c(s32 mtxindex, Mtxf *mtx)
+void bgun0f0a256c(int mtxindex, Mtxf *mtx)
 {
 	Mtxf sp78;
 	Mtxf sp38;
@@ -5554,7 +5546,7 @@ bool bgun0f0a27c8(void)
 void bgunHandlePlayerDead(void)
 {
 	struct player *player = g_Vars.currentplayer;
-	s32 i;
+	int i;
 
 	if (player->gunctrl.weaponnum != WEAPON_NONE && player->gunctrl.switchtoweaponnum != WEAPON_NONE) {
 		// Eject held weapons
@@ -5581,7 +5573,7 @@ void bgunHandlePlayerDead(void)
 	}
 }
 
-bool bgunIsMissionCritical(s32 weaponnum)
+bool bgunIsMissionCritical(int weaponnum)
 {
 	if (weaponnum == WEAPON_TIMEDMINE
 			|| weaponnum == WEAPON_REMOTEMINE
@@ -5597,10 +5589,10 @@ bool bgunIsMissionCritical(s32 weaponnum)
 void bgunDisarm(struct prop *attackerprop)
 {
 	struct player *player = g_Vars.currentplayer;
-	s32 weaponnum = player->hands[0].gset.weaponnum;
+	int weaponnum = player->hands[0].gset.weaponnum;
 	struct chrdata *chr;
-	s32 modelnum;
-	s32 i;
+	int modelnum;
+	int i;
 	bool drop;
 
 	if (!weaponHasFlag(weaponnum, WEAPONFLAG_UNDROPPABLE) && weaponnum <= WEAPON_RCP45) {
@@ -5759,17 +5751,17 @@ void bgunExecuteModelCmdList(uintptr_t *ptr)
  * iterate the command list to update part visibility rather than iterate the
  * full model tree.
  */
-s32 bgunCreateModelCmdList(struct model *model, struct modelnode *nodearg, uintptr_t *ptr)
+int bgunCreateModelCmdList(struct model *model, struct modelnode *nodearg, uintptr_t *ptr)
 {
-	s32 len = 0;
+	int len = 0;
 	struct modelnode *node = nodearg;
 	union modelrodata *rodata;
 	union modelrwdata *rwdata;
 
 	while (node) {
-		u32 type = node->type;
+		uint32_t type = node->type;
 
-		switch ((u8)type) {
+		switch ((uint8_t)type) {
 		case MODELNODETYPE_DISTANCE:
 			rodata = node->rodata;
 			rwdata = modelGetNodeRwData(model, node);
@@ -5865,9 +5857,9 @@ struct guncmd var80070200[2] = {
 	{ GUNCMD_END },
 };
 
-void bgunStartDetonateAnimation(s32 playernum)
+void bgunStartDetonateAnimation(int playernum)
 {
-	s32 prevplayernum = g_Vars.currentplayernum;
+	int prevplayernum = g_Vars.currentplayernum;
 	setCurrentPlayerNum(playernum);
 
 	if (g_Vars.currentplayer->hands[HAND_LEFT].gset.weaponnum == WEAPON_REMOTEMINE) {
@@ -5892,9 +5884,9 @@ void bgunStartDetonateAnimation(s32 playernum)
  */
 
 // Ben's comment: in this version, it also checks if the player wants their gun to go into gangsta mode.
-void bgunUpdateGangsta(struct hand *hand, s32 handnum, struct coord *viewmodelpos, struct weaponfunc *funcdef, Mtxf *arg4, Mtxf *arg5)
+void bgunUpdateGangsta(struct hand *hand, int handnum, struct coord *viewmodelpos, struct weaponfunc *funcdef, Mtxf *arg4, Mtxf *arg5)
 {
-	f32 tmp;
+	float tmp;
 	struct coord sp38 = {0, 0, 0};
 
 	if ((g_Vars.currentplayer->gunctrl.gangsta || g_Vars.currentplayer->wantsgangsta) // Change it so gangsta happens either within min range OR when the player wants it
@@ -5922,8 +5914,8 @@ void bgunUpdateGangsta(struct hand *hand, s32 handnum, struct coord *viewmodelpo
 	} else {
 		// At this point we don't want the gun to be in the gangsta position.
 		// However we don't want it to revert immediately, so a timer is used.
-		//f32 inversespeed = 30.0f;
-		f32 inversespeed = 20.0f;
+		//float inversespeed = 30.0f;
+		float inversespeed = 20.0f;
 
 		if (hand->animmode == HANDANIMMODE_BUSY) {
 			// Revert faster
@@ -5991,7 +5983,7 @@ void bgunUpdateGangsta(struct hand *hand, s32 handnum, struct coord *viewmodelpo
  * forcecreatesmoke controls whether smoke should be created while the gun is
  * still firing.
  */
-void bgunUpdateSmoke(struct hand *hand, s32 handnum, s32 weaponnum, struct weaponfunc *funcdef)
+void bgunUpdateSmoke(struct hand *hand, int handnum, int weaponnum, struct weaponfunc *funcdef)
 {
 	if (hand->firing) {
 		if (weaponnum == WEAPON_DY357MAGNUM || weaponnum == WEAPON_DY357LX) {
@@ -6010,7 +6002,7 @@ void bgunUpdateSmoke(struct hand *hand, s32 handnum, s32 weaponnum, struct weapo
 	}
 
 	if (funcdef && (funcdef->type & 0xff) == INVENTORYFUNCTYPE_SHOOT) {
-		f32 mult = 1.0f;
+		float mult = 1.0f;
 
 		if (g_Vars.currentplayer->hands[HAND_LEFT].inuse) {
 			mult = 1.5f;
@@ -6077,7 +6069,7 @@ void bgunUpdateSmoke(struct hand *hand, s32 handnum, s32 weaponnum, struct weapo
 	if (hand->createsmoke && (hand->state != HANDSTATE_ATTACK || hand->forcecreatesmoke)) {
 		struct coord smokepos;
 		RoomNum smokerooms[2];
-		s32 smoketype = SMOKETYPE_MUZZLE_AUTOMATIC;
+		int smoketype = SMOKETYPE_MUZZLE_AUTOMATIC;
 
 		switch (weaponnum) {
 		case WEAPON_FALCON2:
@@ -6114,14 +6106,14 @@ void bgunUpdateSmoke(struct hand *hand, s32 handnum, s32 weaponnum, struct weapo
 /**
  * Update the red beam and dot (used by the Falcon 2 and its variants).
  */
-void bgunUpdateLasersight(struct hand *hand, struct modeldef *modeldef, s32 handnum, u8 *allocation)
+void bgunUpdateLasersight(struct hand *hand, struct modeldef *modeldef, int handnum, uint8_t *allocation)
 {
 	struct modelnode *node;
 	struct coord beamfar;
 	struct coord dotpos;
 	struct coord dotrot;
 	struct coord beamnear;
-	s32 mtxindex;
+	int mtxindex;
 	struct coord sp54;
 	struct coord sp48;
 	struct coord sp3c;
@@ -6217,9 +6209,9 @@ void bgunUpdateLasersight(struct hand *hand, struct modeldef *modeldef, s32 hand
 void bgunUpdateReaper(struct hand *hand, struct modeldef *modeldef)
 {
 	struct modelnode *node;
-	f32 f2;
-	f32 f12;
-	s32 tmp;
+	float f2;
+	float f12;
+	int tmp;
 
 	node = modelGetPart(modeldef, MODELPART_REAPER_002C);
 
@@ -6268,8 +6260,8 @@ void bgunUpdateReaper(struct hand *hand, struct modeldef *modeldef)
 	}
 
 	if (hand->audiohandle != NULL) {
-		f32 sp34 = hand->matmot3 / 0.50f + 0.4f;
-		s32 volume = AL_VOL_FULL;
+		float sp34 = hand->matmot3 / 0.50f + 0.4f;
+		int volume = AL_VOL_FULL;
 
 		if (hand->matmot3 < 0.1f) {
 			audioStop(hand->audiohandle);
@@ -6279,7 +6271,7 @@ void bgunUpdateReaper(struct hand *hand, struct modeldef *modeldef)
 			}
 
 			audioPostEvent(hand->audiohandle, AL_SNDP_VOL_EVT, volume);
-			audioPostEvent(hand->audiohandle, AL_SNDP_PITCH_EVT, *(s32 *)&sp34);
+			audioPostEvent(hand->audiohandle, AL_SNDP_PITCH_EVT, *(int *)&sp34);
 		}
 	}
 
@@ -6311,13 +6303,13 @@ void bgunUpdateReaper(struct hand *hand, struct modeldef *modeldef)
 /**
  * Move/extend the scope on the gun model when the zoom function is used.
  */
-void bgunUpdateSniperRifle(struct modeldef *modeldef, u8 *allocation)
+void bgunUpdateSniperRifle(struct modeldef *modeldef, uint8_t *allocation)
 {
 	struct modelnode *nodes[4];
-	f32 sp88[4] = {0, 0, 0, 0};
-	s32 i;
-	f32 f26;
-	s32 mtxindex;
+	float sp88[4] = {0, 0, 0, 0};
+	int i;
+	float f26;
+	int mtxindex;
 	struct coord sp70;
 
 	f26 = 1.0f - (currentPlayerGetGunZoomFov() - 2.0f) / 58.0f;
@@ -6329,7 +6321,7 @@ void bgunUpdateSniperRifle(struct modeldef *modeldef, u8 *allocation)
 
 	for (i = 0; i < ARRAYCOUNT(nodes); i++) {
 		if (nodes[i]) {
-			f32 f20 = f26 * 4.0f;
+			float f20 = f26 * 4.0f;
 			mtxindex = modelFindNodeMtxIndex(nodes[i], 0);
 			sp88[i] = f20 - i;
 
@@ -6355,12 +6347,12 @@ void bgunUpdateSniperRifle(struct modeldef *modeldef, u8 *allocation)
 /**
  * Animate the cartridge slider thing in the Devastator model.
  */
-void bgunUpdateDevastator(struct hand *hand, u8 *allocation, struct modeldef *modeldef)
+void bgunUpdateDevastator(struct hand *hand, uint8_t *allocation, struct modeldef *modeldef)
 {
 	struct modelnode *node = modelGetPart(modeldef, MODELPART_DEVASTATOR_0028);
 
 	if (node) {
-		s32 mtxindex = modelFindNodeMtxIndex(node, 0);
+		int mtxindex = modelFindNodeMtxIndex(node, 0);
 		struct coord sp24;
 
 		hand->loadslide += 0.01f * LVUPDATE60FREAL();
@@ -6388,7 +6380,7 @@ void bgunUpdateDevastator(struct hand *hand, u8 *allocation, struct modeldef *mo
  * starburst when the trigger is pressed while the shotgun has the double blast
  * function.
  */
-void bgunUpdateShotgun(struct hand *hand, u8 *allocation, bool *arg2, struct modeldef *modeldef)
+void bgunUpdateShotgun(struct hand *hand, uint8_t *allocation, bool *arg2, struct modeldef *modeldef)
 {
 	if (hand->flashon) {
 		hand->matmot1 = 1.0f;
@@ -6403,8 +6395,8 @@ void bgunUpdateShotgun(struct hand *hand, u8 *allocation, bool *arg2, struct mod
 	}
 
 	if (hand->matmot1 > 0.0f) {
-		s32 sp34;
-		s32 sp28[3] = {0, 0, 0};
+		int sp34;
+		int sp28[3] = {0, 0, 0};
 		struct modelnode *node = modelGetPart(modeldef, MODELPART_SHOTGUN_0050);
 
 		*arg2 = true;
@@ -6440,17 +6432,17 @@ void bgunUpdateLaser(struct hand *hand)
 /**
  * Create ammo casing so they can be ejected during reload.
  */
-void bgunUpdateMagnum(struct hand *hand, s32 handnum, struct modeldef *modeldef, Mtxf *mtx)
+void bgunUpdateMagnum(struct hand *hand, int handnum, struct modeldef *modeldef, Mtxf *mtx)
 {
-	f32 ground = g_Vars.currentplayer->vv_ground;
-	s32 i;
+	float ground = g_Vars.currentplayer->vv_ground;
+	int i;
 
 	if (modeldef != NULL) {
 		for (i = 0; i < hand->unk0cc8_04; i++) {
 			struct modelnode *node = modelGetPart(modeldef, 0x0a + rngRandom() % 6);
 
 			if (node) {
-				s32 index = modelFindNodeMtxIndex(node, 0);
+				int index = modelFindNodeMtxIndex(node, 0);
 				Mtxf *tmp = mtx;
 				Mtxf sp4c;
 
@@ -6469,7 +6461,7 @@ void bgunUpdateMagnum(struct hand *hand, s32 handnum, struct modeldef *modeldef,
 /**
  * Create and/or update the rocket prop that sits inside the rocket launcher.
  */
-void bgunUpdateRocketLauncher(struct hand *hand, s32 handnum, struct weaponfunc_shootprojectile *func)
+void bgunUpdateRocketLauncher(struct hand *hand, int handnum, struct weaponfunc_shootprojectile *func)
 {
 	if (hand->rocket == NULL && hand->loadedammo[0] > 0) {
 		bgunCreateHeldRocket(handnum, func);
@@ -6515,14 +6507,14 @@ void bgun0f0a45d0(struct hand *hand, struct modeldef *modeldef, bool isdetonator
  */
 void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonator)
 {
-	f32 lvupdate;
+	float lvupdate;
 	struct coord spd0;
 	Mtxf sp90;
 	struct coord sp84;
 	Mtxf sp44;
-	s32 i;
-	f32 newval;
-	f32 mult = 3;
+	int i;
+	float newval;
+	float mult = 3;
 
 	switch (hand->ejectstate) {
 	case EJECTSTATE_INIT:
@@ -6563,7 +6555,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			sp84.f[1] = (hand->posmtx.m[3][1] - hand->prevmtx.m[3][1]) / g_Vars.lvupdate60freal;
 			sp84.f[2] = (hand->posmtx.m[3][2] - hand->prevmtx.m[3][2]) / g_Vars.lvupdate60freal;
 
-			mtx00017588(hand->posmtx.m, sp44.m);
+			mtxFullInverse4x4(hand->posmtx.m, sp44.m);
 			mtx4RotateVecInPlace(&sp44, &sp84);
 
 			hand->unk0d20.f[0] += sp84.f[0] * 0.3f;
@@ -6602,18 +6594,18 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 }
 
 void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *modeldef,
-		struct weaponfunc *funcdef, s32 maxburst, u8 *allocation, s32 weaponnum,
-		bool **arg7, s32 mtxindex, Mtxf *arg9, Mtxf *arg10)
+		struct weaponfunc *funcdef, int maxburst, uint8_t *allocation, int weaponnum,
+		bool **arg7, int mtxindex, Mtxf *arg9, Mtxf *arg10)
 {
 	Mtxf spd8;
-	s32 index;
-	s32 shotstotake;
+	int index;
+	int shotstotake;
 	bool spc4[3] = {false, false, false};
 	Mtxf *mtx;
-	s32 i;
-	s32 partnum;
-	f32 spb4;
-	f32 muzzlez;
+	int i;
+	int partnum;
+	float spb4;
+	float muzzlez;
 	Mtxf sp70;
 
 	index = hand->burstbullets % maxburst;
@@ -6663,7 +6655,7 @@ void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *
 
 		if (node && weaponnum != WEAPON_REAPER && weaponnum != WEAPON_SHOTGUN) {
 			struct modelrodata_position *rodata = &node->rodata->position;
-			s32 mtxindex = modelFindNodeMtxIndex(node, 0);
+			int mtxindex = modelFindNodeMtxIndex(node, 0);
 
 			sp60.x = rodata->pos.x * spd8.m[0][0] + rodata->pos.y * spd8.m[1][0] + rodata->pos.z * spd8.m[2][0] + spd8.m[3][0];
 			sp60.y = rodata->pos.x * spd8.m[0][1] + rodata->pos.y * spd8.m[1][1] + rodata->pos.z * spd8.m[2][1] + spd8.m[3][1];
@@ -6693,9 +6685,9 @@ void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *
  * Create casing and beam for a fired weapon,
  * and uncloak if the weapon is a throwable or fired projectile.
  */
-void bgunCreateFx(struct hand *hand, s32 handnum, struct weaponfunc *funcdef, s32 weaponnum, struct modeldef *modeldef, u8 *allocation)
+void bgunCreateFx(struct hand *hand, int handnum, struct weaponfunc *funcdef, int weaponnum, struct modeldef *modeldef, uint8_t *allocation)
 {
-	f32 ground;
+	float ground;
 	bool createbeam = true;
 
 	g_Vars.currentplayer->gunctrl.throwing = false;
@@ -6704,7 +6696,7 @@ void bgunCreateFx(struct hand *hand, s32 handnum, struct weaponfunc *funcdef, s3
 		ground = g_Vars.currentplayer->vv_ground;
 
 		if (modeldef && weaponnum != WEAPON_DY357MAGNUM && weaponnum != WEAPON_DY357LX) {
-			s32 partnum = MODELPART_GUN_CARTEJECTPOS;
+			int partnum = MODELPART_GUN_CARTEJECTPOS;
 			struct modelnode *node;
 
 			if (weaponnum == WEAPON_REAPER) {
@@ -6798,12 +6790,12 @@ void bgunCreateFx(struct hand *hand, s32 handnum, struct weaponfunc *funcdef, s3
 
 // offset calculation from NeonNyan/perfect-dark
 
-static inline f32 bgunGetFovOffsetZ(void)
+static inline float bgunGetFovOffsetZ(void)
 {
 	return (PLAYER_DEFAULT_FOV - 60.f) / 3.f;
 }
 
-static inline f32 bgunGetFovOffsetY(void)
+static inline float bgunGetFovOffsetY(void)
 {
 	return (PLAYER_DEFAULT_FOV - 60.f) / (2.75f * 4.f);
 }
@@ -6851,9 +6843,9 @@ bool bgunCheckForCloseWall()
 	return false;
 }
 
-void bgun0f0a5550(s32 handnum)
+void bgun0f0a5550(int handnum)
 {
-	u8 *mtxallocation;
+	uint8_t *mtxallocation;
 	Mtxf sp2c4;
 	Mtxf sp284;
 	struct modeldef *modeldef = NULL;
@@ -6862,24 +6854,24 @@ void bgun0f0a5550(s32 handnum)
 	Mtxf sp1f4;
 	union modelrodata *rodata;
 	bool *sp1e4[3] = {NULL, NULL, NULL};
-	s32 sp1e0 = 0;
+	int sp1e0 = 0;
 	struct modelnode *node;
 	struct player *player = g_Vars.currentplayer;
 	struct hand *hand = player->hands + handnum;
 	struct weaponfunc *funcdef;
 	struct weaponfunc_shoot *shootfunc = NULL;
-	s32 i;
-	s32 weaponnum = bgunGetWeaponNum2(handnum);
+	int i;
+	int weaponnum = bgunGetWeaponNum2(handnum);
 	struct weapon *weapondef;
 	Mtxf *mtx;
 	bool isdetonator = false;
-	f32 fspare1;
-	f32 fspare2;
+	float fspare1;
+	float fspare2;
 	struct coord sp1a4;
 	Mtxf sp164;
 	Mtxf sp124;
 	struct coord sp118;
-	s32 j;
+	int j;
 
 	weapondef = weaponFindById(weaponnum);
 
@@ -7134,14 +7126,13 @@ void bgun0f0a5550(s32 handnum)
 //#if VERSION >= VERSION_PAL_BETA
 			bool a3 = false;
 //#endif
-			s32 spcc;
+			int spcc;
 			Mtxf *spc8;
 			Mtxf *spc4;
 			Mtxf sp84;
-			u32 sp80;
+			uint32_t sp80;
 			struct coord sp74;
-			s32 stack;
-			s32 sp6c;
+			int sp6c;
 
 			renderdata.unk00 = &sp2c4;
 			renderdata.unk10 = hand->gunmodel.matrices;
@@ -7393,11 +7384,11 @@ void bgun0f0a5550(s32 handnum)
 void bgunTickMaulerCharge(void)
 {
 	struct player *player = g_Vars.currentplayer;
-	s32 i;
+	int i;
 
 	for (i = 0; i < 2; i++) {
 		struct hand *hand = &player->hands[i];
-		u32 charging = false;
+		uint32_t charging = false;
 
 		if (hand->inuse) {
 			if (bgunIsReloading(hand)) {
@@ -7405,8 +7396,8 @@ void bgunTickMaulerCharge(void)
 				hand->matmot1 = 0;
 			} else if (hand->gset.weaponfunc == FUNC_SECONDARY) {
 				// Charging or fully charged
-				s32 oldvalue = hand->matmot1;
-				s32 newvalue;
+				int oldvalue = hand->matmot1;
+				int newvalue;
 
 				if (hand->loadedammo[0] >= 2 && hand->matmot1 < 5) {
 					charging = true;
@@ -7455,12 +7446,12 @@ void bgunTickMaulerCharge(void)
 			}
 
 			if (hand->audiohandle) {
-				f32 speed = 0.5f + hand->matmot1 / 3.0f + sinf(g_20SecIntervalFrac * M_PI * 32.0f) * 0.03f;
+				float speed = 0.5f + hand->matmot1 / 3.0f + sinf(g_20SecIntervalFrac * M_PI * 32.0f) * 0.03f;
 
 				if (hand->matmot1 < 0.1f || !charging) {
 					audioStop(hand->audiohandle);
 				} else {
-					audioPostEvent(hand->audiohandle, AL_SNDP_PITCH_EVT, *(s32 *)&speed);
+					audioPostEvent(hand->audiohandle, AL_SNDP_PITCH_EVT, *(int *)&speed);
 				}
 			}
 		}
@@ -7471,7 +7462,7 @@ void bgunTickGameplay2(void)
 {
 	struct player *player = g_Vars.currentplayer;
 	struct hand *hand;
-	s32 i;
+	int i;
 
 	if (player->gunctrl.loadall) {
 		// empty
@@ -7557,7 +7548,7 @@ void bgunTickGameplay2(void)
 				hand->matmot1 += LVUPDATE60FREAL() * 0.4f;
 
 				if (hand->matmot1 > 1.0f) {
-					s32 usedqty = hand->matmot1;
+					int usedqty = hand->matmot1;
 
 					if (usedqty > hand->loadedammo[0]) {
 						usedqty = hand->loadedammo[0];
@@ -7568,7 +7559,7 @@ void bgunTickGameplay2(void)
 
 					// If out of ammo, turn off cloak
 					if (hand->loadedammo[0] == 0 && hand->state != HANDSTATE_RELOAD) {
-						s32 stilltogo = hand->matmot1;
+						int stilltogo = hand->matmot1;
 
 						if (stilltogo > player->ammoheldarr[player->gunctrl.ammotypes[0]]) {
 							g_Vars.currentplayer->devicesactive &= ~DEVICE_CLOAKRCP120;
@@ -7587,7 +7578,7 @@ void bgunTickGameplay2(void)
 		// RCP120 cloak but there's still a bit of ammo to be subtracted on
 		// this tick.
 		if (hand->matmot1 > 1.0f) {
-			s32 usedqty = hand->matmot1;
+			int usedqty = hand->matmot1;
 
 			if (usedqty > hand->loadedammo[0]) {
 				usedqty = hand->loadedammo[0];
@@ -7597,7 +7588,7 @@ void bgunTickGameplay2(void)
 			hand->loadedammo[0] -= usedqty;
 
 			if (hand->matmot1 > 1.0f) {
-				s32 usedqty = hand->matmot1;
+				int usedqty = hand->matmot1;
 
 				if (usedqty > player->ammoheldarr[player->gunctrl.ammotypes[0]]) {
 					usedqty = player->ammoheldarr[player->gunctrl.ammotypes[0]];
@@ -7621,12 +7612,12 @@ void bgunTickGameplay2(void)
 	bgunIsUsingSecondaryFunction();
 }
 
-s8 bgunFreeFireslotWrapper(s32 slotnum)
+int8_t bgunFreeFireslotWrapper(int slotnum)
 {
 	return bgunFreeFireslot(slotnum);
 }
 
-s8 bgunFreeFireslot(s32 fireslot_id)
+int8_t bgunFreeFireslot(int fireslot_id)
 {
 	if (fireslot_id >= 0 && fireslot_id < ARRAYCOUNT(g_Fireslots)) {
 		g_Fireslots[fireslot_id].endlvframe = -1;
@@ -7635,10 +7626,10 @@ s8 bgunFreeFireslot(s32 fireslot_id)
 	return -1;
 }
 
-s32 bgunAllocateFireslot(void)
+int bgunAllocateFireslot(void)
 {
-	s32 index = -1;
-	s32 i;
+	int index = -1;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_Fireslots); i++) {
 		if (g_Fireslots[i].endlvframe < 0) {
@@ -7664,7 +7655,7 @@ void bgunRender(Gfx **gdlptr)
 	Gfx *gdl = *gdlptr;
 	struct modelrenderdata renderdata = {NULL, true, 3}; // 10c
 	struct player *player;
-	s32 i;
+	int i;
 
 	static bool renderhand = true;
 
@@ -7688,7 +7679,7 @@ void bgunRender(Gfx **gdlptr)
 	gdl = vi0000aca4(gdl, 1.5, 1000);
 
 	if (g_Vars.currentplayer->teleportstate != TELEPORTSTATE_INACTIVE) {
-		f32 f2;
+		float f2;
 
 		f2 = player0f0bd358();
 
@@ -7699,11 +7690,11 @@ void bgunRender(Gfx **gdlptr)
 
 	for (i = 0; i < 2; i++) {
 		struct hand *hand;
-		s32 j;
-		s32 alpha;
-		s32 weaponnum; // ec
+		int j;
+		int alpha;
+		int weaponnum; // ec
 		struct modelnode *node; // e8
-		u32 colour; // e4
+		uint32_t colour; // e4
 
 		hand = player->hands + i;
 
@@ -7716,8 +7707,6 @@ void bgunRender(Gfx **gdlptr)
 				gSPSetLights1(gdl++, g_GunLight);
 				gSPLookAt(gdl++, camGetLookAt());
 			}
-
-			gSPPerspNormalize(gdl++, mtx00016dcc(0, 300));
 
 			// There is support for guns having a TV screen on them
 			// but no guns have this model part so it's not used.
@@ -7737,10 +7726,10 @@ void bgunRender(Gfx **gdlptr)
 			renderdata.unk30 = 4;
 
 			if (USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) {
-				u8 *col = player->gunshadecol;
-				u32 shade;
-				s32 nvcol[4];
-				s32 ircol[4];
+				uint8_t *col = player->gunshadecol;
+				uint32_t shade;
+				int nvcol[4];
+				int ircol[4];
 
 				if (col[0] > col[1] && col[0] > col[2]) {
 					shade = col[0];
@@ -7777,7 +7766,7 @@ void bgunRender(Gfx **gdlptr)
 
 				// 838
 				if (hand->gset.weaponnum == WEAPON_MAULER) {
-					u32 weight = hand->matmot1 * 50.0f;
+					uint32_t weight = hand->matmot1 * 50.0f;
 					renderdata.envcolour = colourBlend(0xff00007f, renderdata.envcolour, weight);
 				}
 			}
@@ -7786,7 +7775,7 @@ void bgunRender(Gfx **gdlptr)
 			alpha = chrGetCloakAlpha(player->prop->chr);
 
 			if (alpha < 255) {
-				colour = (s32) (alpha * 0.74509805f) + 0x41;
+				colour = (int) (alpha * 0.74509805f) + 0x41;
 				renderdata.unk30 = 5;
 				renderdata.fogcolour = renderdata.envcolour;
 				renderdata.envcolour = colour;
@@ -7824,15 +7813,12 @@ void bgunRender(Gfx **gdlptr)
 			if (PLAYERCOUNT() == 1) {
 				node = modelGetPart(hand->gunmodel.definition, MODELPART_GUN_LASERLIQUID);
 
-				// a5c
 				if (node) {
 					struct modelrodata_gundl *rodata;
 					rodata = &node->rodata->gundl;
 
 					for (j = 0; j < rodata->numvertices; j++) {
-						// a7c
-						s32 stack[2];
-						s32 k;
+						int k;
 
 						(rodata->vertices + j)->t -= g_Vars.lvupdate240 * PALUP(25);
 
@@ -7850,7 +7836,7 @@ void bgunRender(Gfx **gdlptr)
 
 			// Render the hand
 			if (player->gunctrl.handmodeldef && renderhand) {
-				s32 prevcolour = renderdata.envcolour; // 7c
+				int prevcolour = renderdata.envcolour; // 7c
 
 				hand->handmodel.matrices = hand->gunmodel.matrices;
 
@@ -7870,13 +7856,10 @@ void bgunRender(Gfx **gdlptr)
 
 			mtxF2LBulk(hand->gunmodel.matrices, hand->gunmodel.definition->nummatrices);
 			mtx00016784();
-
-			gSPPerspNormalize(gdl++, viGetPerspScale());
 		}
 	}
 
 	casingsRender(&gdl);
-	zbufSwap();
 
 	gdl = zbufConfigureRdp(gdl);
 	gdl = vi0000b1d0(gdl);
@@ -7892,7 +7875,7 @@ void bgunRender(Gfx **gdlptr)
  */
 struct sndstate **bgunAllocateAudioHandle(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_BgunAudioHandles); i++) {
 		if (g_BgunAudioHandles[i] == NULL) {
@@ -7903,10 +7886,10 @@ struct sndstate **bgunAllocateAudioHandle(void)
 	return NULL;
 }
 
-void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
+void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, int texturenum)
 {
-	u32 rand1 = rngRandom();
-	u32 rand2 = rngRandom();
+	uint32_t rand1 = rngRandom();
+	uint32_t rand2 = rngRandom();
 	struct sndstate **handle;
 
 	if (g_Vars.lvupdate240 <= 0) {
@@ -7934,10 +7917,10 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 	if (handle) {
 		if (prop->type == PROPTYPE_CHR || prop->type == PROPTYPE_PLAYER) {
 			struct chrdata *chr = prop->chr;
-			s16 soundnum = -1;
+			int16_t soundnum = -1;
 			bool overridden = false;
-			s32 vol;
-			s32 pan;
+			int vol;
+			int pan;
 
 			if (chrGetShield(chr) > 0) {
 				soundnum = SFX_SHIELD_DAMAGE;
@@ -7954,10 +7937,10 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 							//|| gset->weaponnum == WEAPON_FALCON2_SANDS
 							|| gset->weaponnum == WEAPON_DY357MAGNUM
 							|| gset->weaponnum == WEAPON_DY357LX))) {
-				s16 sounds[] = { SFX_002F, SFX_0030, SFX_0031 };
+				int16_t sounds[] = { SFX_002F, SFX_0030, SFX_0031 };
 				soundnum = sounds[rand1 % ARRAYCOUNT(sounds)];
 			} else {
-				s16 sounds[] = { SFX_HIT_CHR, SFX_HIT_CHR };
+				int16_t sounds[] = { SFX_HIT_CHR, SFX_HIT_CHR };
 				soundnum = sounds[rand1 % ARRAYCOUNT(sounds)];
 			}
 
@@ -7977,11 +7960,10 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 				return;
 			}
 		} else {
-			s16 soundnum = -1;
+			int16_t soundnum = -1;
 			bool overridden = false;
-			s32 vol;
-			s32 pan;
-			u32 stack;
+			int vol;
+			int pan;
 
 			if (texturenum == 10000) {
 				soundnum = SFX_SHIELD_DAMAGE;
@@ -8000,7 +7982,7 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 					soundnum = SFX_HIT_METAL_8079;
 					overridden = true;
 				} else {
-					s16 sounds[] = {
+					int16_t sounds[] = {
 						SFX_001B, SFX_001C, SFX_001D, SFX_001E,
 						SFX_001B, SFX_001C, SFX_001D, SFX_001E,
 						SFX_001B, SFX_001C, SFX_001D, SFX_001E,
@@ -8031,13 +8013,13 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 	}
 
 	if (texturenum >= 0 && texturenum < NUM_TEXTURES && g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]) {
-		s16 soundnum = -1;
+		int16_t soundnum = -1;
 
 		handle = bgunAllocateAudioHandle();
 
 		if (handle) {
 			if (g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]->numsounds > 0) {
-				s32 index = rand2 % g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]->numsounds;
+				int index = rand2 % g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]->numsounds;
 				soundnum = g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype]->sounds[index];
 
 				if (soundnum != -1) {
@@ -8052,7 +8034,7 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, s32 texturenum)
 	}
 }
 
-void bgunPlayGlassHitSound(struct coord *pos, RoomNum *rooms, s32 texturenum)
+void bgunPlayGlassHitSound(struct coord *pos, RoomNum *rooms, int texturenum)
 {
 	if (g_Vars.lvupdate240 > 0) {
 		struct sndstate **handle = bgunAllocateAudioHandle();
@@ -8067,13 +8049,13 @@ void bgunPlayGlassHitSound(struct coord *pos, RoomNum *rooms, s32 texturenum)
 	}
 }
 
-void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum, RoomNum *rooms)
+void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, int texturenum, RoomNum *rooms)
 {
 	struct sndstate **handle;
-	u32 rand1 = rngRandom();
-	u32 rand2 = rngRandom();
+	uint32_t rand1 = rngRandom();
+	uint32_t rand2 = rngRandom();
 	bool playdefault;
-	s16 soundnum;
+	int16_t soundnum;
 	bool overridden;
 
 	if (g_Vars.lvupdate240 <= 0) {
@@ -8096,7 +8078,7 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 
 			if (gset->weaponfunc == FUNC_PRIMARY || ((gset->unk063a % 4) == 0 && (rngRandom() % 2))) {
 				// Laser sounds
-				s16 sounds[] = {SFX_CLOAK_ON, SFX_CLOAK_OFF};
+				int16_t sounds[] = {SFX_CLOAK_ON, SFX_CLOAK_OFF};
 				soundnum = sounds[rand1 % ARRAYCOUNT(sounds)];
 				sndStart(var80095200, soundnum, handle, -1, -1, -1, -1, -1);
 				overridden = true;
@@ -8119,7 +8101,7 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 			overridden = true;
 		} else {
 			// Ricochet sounds
-			s16 sounds[] = {
+			int16_t sounds[] = {
 				SFX_0013, SFX_0014, SFX_0015, SFX_0016,
 				SFX_0017, SFX_0018, SFX_0019, SFX_001A,
 				SFX_0017, SFX_0018, SFX_0019, SFX_001A,
@@ -8149,14 +8131,14 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 		handle = bgunAllocateAudioHandle();
 
 		if (handle != NULL && texturenum >= 0 && texturenum < NUM_TEXTURES) {
-			s16 soundnum;
+			int16_t soundnum;
 			struct surfacetype *type = g_SurfaceTypes[g_Textures[texturenum].soundsurfacetype];
 
 			if (type->numsounds > 0) {
 				soundnum = -1;
 
 				if (type != NULL) {
-					s32 index = rand2 % type->numsounds;
+					int index = rand2 % type->numsounds;
 					soundnum = type->sounds[index];
 					sndStart(var80095200, soundnum, handle, -1, -1, -1, -1, -1);
 				}
@@ -8169,7 +8151,7 @@ void bgunPlayBgHitSound(struct gset *gset, struct coord *hitpos, s32 texturenum,
 	}
 }
 
-void bgunSetTriggerOn(s32 handnum, bool on)
+void bgunSetTriggerOn(int handnum, bool on)
 {
 	struct hand *hand = &g_Vars.currentplayer->hands[handnum];
 
@@ -8195,49 +8177,11 @@ void bgunSetTriggerOn(s32 handnum, bool on)
  * - USETIMER_STOP if the B button timer should stop (ie. the B press is consumed)
  * - USETIMER_REPEAT if this function should be called again on each frame until B is released.
  */
-s32 bgunConsiderToggleGunFunction(s32 usedowntime, bool trigpressed, bool fromactivemenu, bool fromdedicatedbutton)
+int bgunConsiderToggleGunFunction(int usedowntime, bool trigpressed, bool fromactivemenu, bool fromdedicatedbutton)
 {
 	const bool extcontrols = PLAYER_EXTCFG().extcontrols;
 	bool docontinue;
 	switch (bgunGetWeaponNum(HAND_RIGHT)) {
-	/*case WEAPON_SNIPERRIFLE:
-		if (extcontrols && usedowntime < 0) {
-			return USETIMER_CONTINUE;
-		}
-
-		// At 25 ticks (or B+Z), start showing the new function
-		g_Vars.currentplayer->gunctrl.invertgunfunc = true;
-
-		// B+Z immediately triggers crouch or stand
-		if (trigpressed) {
-			if (extcontrols) {
-				g_Vars.currentplayer->hands[HAND_RIGHT].activatesecondary = true;
-			}
-			return USETIMER_STOP;
-		}
-
-		if (fromdedicatedbutton) {
-			g_Vars.currentplayer->hands[HAND_RIGHT].activatesecondary = true;
-			return USETIMER_CONTINUE;
-		}
-
-		if (extcontrols) {
-			docontinue = (ABS(usedowntime) < 0);
-		} else {
-			// Don't do anything if B hasn't been held for 50/60ths of a second
-			docontinue = (usedowntime < TICKS(50));
-		}
-		if (docontinue) {
-			return USETIMER_CONTINUE;
-		}
-
-		if (g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc != FUNC_SECONDARY) {
-			return USETIMER_CONTINUE;
-		}
-
-		// Do crouch or stand
-		g_Vars.currentplayer->hands[HAND_RIGHT].activatesecondary = true;
-		return (extcontrols ? USETIMER_STOP : USETIMER_REPEAT);*/
 	case WEAPON_RCP120:
 		// very special alt-button handling for RCP-120's cloaking
 		if (!trigpressed && extcontrols && fromdedicatedbutton) {
@@ -8320,7 +8264,7 @@ void bgunDisallowInvertFunc(void)
 bool bgunIsUsingSecondaryFunction(void)
 {
 	struct player *player = g_Vars.currentplayer;
-	s32 weaponnum = player->gunctrl.weaponnum;
+	int weaponnum = player->gunctrl.weaponnum;
 
 	if(weaponnum == WEAPON_RCP120)
 	{
@@ -8333,8 +8277,8 @@ bool bgunIsUsingSecondaryFunction(void)
 	}
 
 	if (weaponnum >= WEAPON_UNARMED && weaponnum <= WEAPON_COMBATBOOST) {
-		s32 index = (weaponnum - 1) >> 3;
-		s32 value = 1 << ((weaponnum - 1) & 7);
+		int index = (weaponnum - 1) >> 3;
+		int value = 1 << ((weaponnum - 1) & 7);
 
 		if (g_PlayerConfigsArray[g_Vars.currentplayerstats->mpindex].gunfuncs[index] & value) {
 			if (player->gunctrl.invertgunfunc == true) {
@@ -8359,9 +8303,9 @@ bool bgunIsUsingSecondaryFunction(void)
  */
 void bgunTickGameplay(bool triggeron)
 {
-	s32 gunsfiring[2] = {false, false};
+	int gunsfiring[2] = {false, false};
 	struct player *player = g_Vars.currentplayer;
-	s32 i;
+	int i;
 
 	// Remove weapons if in passive mode
 	if (g_Vars.currentplayer->gunctrl.passivemode) {
@@ -8390,8 +8334,8 @@ void bgunTickGameplay(bool triggeron)
 	// Remove throwable items from inventory if there's no more left
 	for (i = 0; i < invGetCount(); i++) {
 		struct weapon *weapon;
-		s32 weaponnum = invGetWeaponNumByIndex(i);
-		s32 equippedweaponnum;
+		int weaponnum = invGetWeaponNumByIndex(i);
+		int equippedweaponnum;
 
 		switch (weaponnum) {
 		case WEAPON_COMBATKNIFE:
@@ -8482,7 +8426,7 @@ void bgunTickGameplay(bool triggeron)
 		bgunTickSwitch();
 
 		if (cheatIsActive(CHEAT_UNLIMITEDAMMONORELOADS)) {
-			s32 i;
+			int i;
 			struct weapon *weapon;
 			struct hand *lhand = &g_Vars.currentplayer->hands[HAND_LEFT];
 			struct hand *rhand = &g_Vars.currentplayer->hands[HAND_RIGHT];
@@ -8509,7 +8453,7 @@ void bgunTickGameplay(bool triggeron)
 		propCalculateShadeColour(g_Vars.currentplayer->prop, player->gunshadecol, player->floorcol);
 		player->resetshadecol = 0;
 	} else {
-		u8 shadecol[4];
+		uint8_t shadecol[4];
 		propCalculateShadeColour(g_Vars.currentplayer->prop, shadecol, player->floorcol);
 		colourTween(player->gunshadecol, shadecol);
 	}
@@ -8519,14 +8463,14 @@ void bgunTickGameplay(bool triggeron)
 
 void bgunSetPassiveMode(bool enable)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < PLAYERCOUNT(); i++) {
 		g_Vars.players[i]->gunctrl.passivemode = enable;
 	}
 }
 
-void bgunSetAimType(u32 aimtype)
+void bgunSetAimType(uint32_t aimtype)
 {
 	g_Vars.currentplayer->aimtype = aimtype;
 }
@@ -8553,7 +8497,7 @@ void bgunSetHitPos(struct coord *coord)
 	player->hands[HAND_LEFT].hitpos.z = player->hands[HAND_RIGHT].hitpos.z = coord->z;
 }
 
-void bgun0f0a9494(u32 operation)
+void bgun0f0a9494(uint32_t operation)
 {
 	switch (operation) {
 	case 0:
@@ -8564,7 +8508,7 @@ void bgun0f0a9494(u32 operation)
 	}
 }
 
-void bgun0f0a94d0(u32 operation, struct coord *pos, struct coord *rot)
+void bgun0f0a94d0(uint32_t operation, struct coord *pos, struct coord *rot)
 {
 	struct player *player = g_Vars.currentplayer;
 
@@ -8592,7 +8536,7 @@ void bgun0f0a94d0(u32 operation, struct coord *pos, struct coord *rot)
 	}
 }
 
-void bgunSetGunAmmoVisible(u32 reason, bool enable)
+void bgunSetGunAmmoVisible(uint32_t reason, bool enable)
 {
 	if (enable) {
 		g_Vars.currentplayer->gunammooff &= ~reason;
@@ -8637,12 +8581,12 @@ struct ammotype g_AmmoTypes[] = {
 	{ 10,           0, 0  }, // AMMOTYPE_ECM_MINE
 };
 
-void bgunSetAmmoQuantity(s32 ammotype, s32 quantity)
+void bgunSetAmmoQuantity(int ammotype, int quantity)
 {
 	struct player *player = g_Vars.currentplayer;
-	s32 weaponnum = bgunGetWeaponNum(HAND_RIGHT);
-	s32 funcnum = -1;
-	s32 magamount;
+	int weaponnum = bgunGetWeaponNum(HAND_RIGHT);
+	int funcnum = -1;
+	int magamount;
 
 	// Check if this ammo type applies to the player's equipped weapon
 	if (bgunGetAmmoTypeForWeapon(weaponnum, FUNC_PRIMARY) == ammotype) {
@@ -8680,11 +8624,11 @@ void bgunSetAmmoQuantity(s32 ammotype, s32 quantity)
 	}
 }
 
-s32 bgunGetReservedAmmoCount(s32 ammotype)
+int bgunGetReservedAmmoCount(int ammotype)
 {
-	s32 i;
-	s32 j;
-	s32 total = g_Vars.currentplayer->ammoheldarr[ammotype];
+	int i;
+	int j;
+	int total = g_Vars.currentplayer->ammoheldarr[ammotype];
 	struct player *player = g_Vars.currentplayer;
 
 	for (i = 0; i < 2; i++) {
@@ -8700,11 +8644,11 @@ s32 bgunGetReservedAmmoCount(s32 ammotype)
 	return total;
 }
 
-s32 bgunGetAmmoCount(s32 ammotype)
+int bgunGetAmmoCount(int ammotype)
 {
-	s32 i;
-	s32 j;
-	s32 total = g_Vars.currentplayer->ammoheldarr[ammotype];
+	int i;
+	int j;
+	int total = g_Vars.currentplayer->ammoheldarr[ammotype];
 	struct player *player = g_Vars.currentplayer;
 
 	for (i = 0; i < 2; i++) {
@@ -8720,12 +8664,12 @@ s32 bgunGetAmmoCount(s32 ammotype)
 	return total;
 }
 
-s32 bgunGetCapacityByAmmotype(s32 ammotype)
+int bgunGetCapacityByAmmotype(int ammotype)
 {
 	return g_AmmoTypes[ammotype].capacity;
 }
 
-bool bgunAmmotypeAllowsUnlimitedAmmo(u32 ammotype)
+bool bgunAmmotypeAllowsUnlimitedAmmo(uint32_t ammotype)
 {
 	switch (ammotype) {
 	case AMMOTYPE_REMOTE_MINE:
@@ -8757,7 +8701,7 @@ bool bgunAmmotypeAllowsUnlimitedAmmo(u32 ammotype)
 
 void bgunGiveMaxAmmo(bool force)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_AmmoTypes); i++) {
 		bool give = true;
@@ -8772,7 +8716,7 @@ void bgunGiveMaxAmmo(bool force)
 	}
 }
 
-u32 bgunGetAmmoTypeForWeapon(u32 weaponnum, u32 func)
+uint32_t bgunGetAmmoTypeForWeapon(uint32_t weaponnum, uint32_t func)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
 
@@ -8787,7 +8731,7 @@ u32 bgunGetAmmoTypeForWeapon(u32 weaponnum, u32 func)
 	return weapon->ammos[func]->type;
 }
 
-s32 bgunGetAmmoQtyForWeapon(u32 weaponnum, u32 func)
+int bgunGetAmmoQtyForWeapon(uint32_t weaponnum, uint32_t func)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
 
@@ -8802,7 +8746,7 @@ s32 bgunGetAmmoQtyForWeapon(u32 weaponnum, u32 func)
 	return 0;
 }
 
-void bgunSetAmmoQtyForWeapon(u32 weaponnum, u32 func, u32 quantity)
+void bgunSetAmmoQtyForWeapon(uint32_t weaponnum, uint32_t func, uint32_t quantity)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
 
@@ -8815,7 +8759,7 @@ void bgunSetAmmoQtyForWeapon(u32 weaponnum, u32 func, u32 quantity)
 	}
 }
 
-s32 bgunGetAmmoCapacityForWeapon(s32 weaponnum, s32 func)
+int bgunGetAmmoCapacityForWeapon(int weaponnum, int func)
 {
 	struct weapon *weapon = weaponFindById(weaponnum);
 	struct inventory_ammo *ammo = weapon->ammos[func];
@@ -8827,14 +8771,14 @@ s32 bgunGetAmmoCapacityForWeapon(s32 weaponnum, s32 func)
 	return 0;
 }
 
-Gfx *bgunDrawHudString(Gfx *gdl, char *text, s32 x, bool halign, s32 y, s32 valign, u32 colour)
+Gfx *bgunDrawHudString(Gfx *gdl, char *text, int x, bool halign, int y, int valign, uint32_t colour)
 {
-	s32 x1 = 0;
-	s32 y1 = 0;
-	s32 x2 = 0;
-	s32 y2 = 0;
-	s32 textheight;
-	s32 textwidth;
+	int x1 = 0;
+	int y1 = 0;
+	int x2 = 0;
+	int y2 = 0;
+	int textheight;
+	int textwidth;
 
 	textwidth = 0;
 	textheight = 0;
@@ -8869,7 +8813,7 @@ Gfx *bgunDrawHudString(Gfx *gdl, char *text, s32 x, bool halign, s32 y, s32 vali
 	return gdl;
 }
 
-Gfx *bgunDrawHudInteger(Gfx *gdl, s32 value, s32 x, bool halign, s32 y, s32 valign, u32 colour)
+Gfx *bgunDrawHudInteger(Gfx *gdl, int value, int x, bool halign, int y, int valign, uint32_t colour)
 {
 	char buffer[12];
 
@@ -8887,12 +8831,12 @@ void bgunResetAbmag(struct abmag *abmag)
 	abmag->timer60 = 0;
 }
 
-void bgun0f0a9da8(struct abmag *mag, s32 remaining, s32 capacity, s32 height)
+void bgun0f0a9da8(struct abmag *mag, int remaining, int capacity, int height)
 {
-	s32 newchange;
+	int newchange;
 
 	if (capacity > 20) {
-		s32 newremaining = height * remaining / capacity;
+		int newremaining = height * remaining / capacity;
 
 		if (remaining > 0 && newremaining < 1) {
 			newremaining = 1;
@@ -8941,7 +8885,7 @@ void bgun0f0a9da8(struct abmag *mag, s32 remaining, s32 capacity, s32 height)
 	}
 
 	if (mag->change != 0) {
-		mag->timer60 += (s16)g_Vars.lvupdate60 * height;
+		mag->timer60 += (int16_t)g_Vars.lvupdate60 * height;
 
 		if (mag->timer60 > TICKS(255)) {
 			if (mag->change > 0) {
@@ -8974,16 +8918,16 @@ void bgun0f0a9da8(struct abmag *mag, s32 remaining, s32 capacity, s32 height)
  * For the separated mode, a unit refers to a single bullet/block.
  * For the merged mode, a unit refers to a single 1px high line in the gauge.
  */
-Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *abmag, s32 remaining, s32 capacity, u32 emptycolour, u32 filledcolour, bool flip)
+Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *abmag, int remaining, int capacity, uint32_t emptycolour, uint32_t filledcolour, bool flip)
 {
-	s32 gaugeheight = y2 - y1;
-	s32 unitheight;
-	s32 remainder1;
-	s32 remainder2;
-	s32 gaugetop;
-	f32 ref;
-	s32 numunits = capacity;
-	s32 i;
+	int gaugeheight = y2 - y1;
+	int unitheight;
+	int remainder1;
+	int remainder2;
+	int gaugetop;
+	float ref;
+	int numunits = capacity;
+	int i;
 
 	bgun0f0a9da8(abmag, remaining, numunits, gaugeheight);
 
@@ -9031,8 +8975,8 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 		 * clearly an early revision of the code, as it is visually misleading
 		 * and also lacks the transition effect.
 		 */
-		s32 partitiony;
-		s32 tmp;
+		int partitiony;
+		int tmp;
 
 		gaugeheight = y2 - gaugetop;
 		partitiony = y2 - gaugeheight * ref / numunits;
@@ -9060,9 +9004,9 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 			gDPFillRectangleScaled(gdl++, x1, partitiony, x2, y2);
 		}
 	} else {
-		u32 colour;
-		s32 unittop;
-		s32 unitbottom;
+		uint32_t colour;
+		int unittop;
+		int unitbottom;
 
 		gdl = textSetPrimColour(gdl, emptycolour);
 
@@ -9071,13 +9015,13 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 
 		for (i = 0; i < numunits; i++) {
 			bool newstate = false;
-			u32 weight;
+			uint32_t weight;
 
 			if (abmag->change > 0) {
 				// Loading or reloading
-				if (i >= numunits - (s32)ref - abmag->change && i < numunits - (s32)ref) {
+				if (i >= numunits - (int)ref - abmag->change && i < numunits - (int)ref) {
 					// Unit is potentially unsettled
-					s32 fadeamount = abmag->timer60 - (numunits - (s32)ref - i - 1) * TICKS(64);
+					int fadeamount = abmag->timer60 - (numunits - (int)ref - i - 1) * TICKS(64);
 
 					if (fadeamount >= 0) {
 						if (fadeamount >= TICKS(64)) {
@@ -9102,8 +9046,8 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 				}
 			} else if (abmag->change < 0) {
 				// Firing
-				if (i < numunits - (s32)ref - abmag->change && i >= numunits - (s32) ref) {
-					s32 fadeamount = abmag->timer60 - (i - numunits + (s32) ref) * TICKS(64);
+				if (i < numunits - (int)ref - abmag->change && i >= numunits - (int) ref) {
+					int fadeamount = abmag->timer60 - (i - numunits + (int) ref) * TICKS(64);
 
 					if (fadeamount >= 0) {
 						weight = PALUP(fadeamount);
@@ -9125,12 +9069,12 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 			// above and this is resetting them to the normal filled colour.
 			if (abmag->change < 0) {
 				// Firing
-				if (i == numunits - (s32) ref - abmag->change) {
+				if (i == numunits - (int) ref - abmag->change) {
 					colour = filledcolour;
 					newstate = true;
 				}
 			} else {
-				if (i == numunits - (s32) ref) {
+				if (i == numunits - (int) ref) {
 					colour = filledcolour;
 					newstate = true;
 				}
@@ -9181,8 +9125,6 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 
 		// For merged gauges, render the final partition
 		if (unitheight <= 2) {
-			s32 stack;
-
 			if (flip) {
 				gDPFillRectangleScaled(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
 			} else {
@@ -9201,33 +9143,33 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, struct abmag *ab
 Gfx *bgunDrawHud(Gfx *gdl)
 {
 	struct player *player = g_Vars.currentplayer;
-	s32 bottom = viGetViewTop() + viGetViewHeight() - 13;
-	s32 playercount = PLAYERCOUNT();
-	s32 playernum = g_Vars.currentplayernum;
+	int bottom = viGetViewTop() + viGetViewHeight() - 13;
+	int playercount = PLAYERCOUNT();
+	int playernum = g_Vars.currentplayernum;
 	struct gunctrl *ctrl;
-	s32 secs60;
-	s32 speedpilltime;
-	s32 ammoindex = 0;
-	s32 barwidth = 9;
-	s32 reserveheight = 36;
-	s32 clipheight = 57;
-	s32 xpos;
+	int secs60;
+	int speedpilltime;
+	int ammoindex = 0;
+	int barwidth = 9;
+	int reserveheight = 36;
+	int clipheight = 57;
+	int xpos;
 	struct weapon *weapon = weaponFindById(player->gunctrl.weaponnum);
-	u32 alpha;
-	u32 fncolour;
-	s32 funcnum;
-	s32 fnfaderinc;
-	s32 tmpfuncnum;
+	uint32_t alpha;
+	uint32_t fncolour;
+	int funcnum;
+	int fnfaderinc;
+	int tmpfuncnum;
 	struct handweaponinfo info;
 	struct hand *hand = &player->hands[HAND_RIGHT];
 	char *str;
-	u32 colour;
-	s32 x;
-	s32 y;
-	s32 textheight;
-	s32 textwidth;
+	uint32_t colour;
+	int x;
+	int y;
+	int textheight;
+	int textwidth;
 	struct weaponfunc *func;
-	u16 nameid;
+	uint16_t nameid;
 	struct hand *lefthand = &player->hands[HAND_LEFT];
 
 	ctrl = &player->gunctrl;
@@ -9340,7 +9282,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 			if (ctrl->guntypetimer + g_Vars.lvupdate60 > 255) {
 				ctrl->guntypetimer = 255;
 			} else {
-				ctrl->guntypetimer += (u16) g_Vars.lvupdate60;
+				ctrl->guntypetimer += (uint16_t) g_Vars.lvupdate60;
 			}
 
 			textMeasure(&textheight, &textwidth, str, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
@@ -9388,7 +9330,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 			str = langGet(ctrl->curfnstr);
 
 			struct player *player = g_Vars.currentplayer;
-			s32 weaponnum = player->gunctrl.weaponnum;
+			int weaponnum = player->gunctrl.weaponnum;
 
 			if(weaponnum == WEAPON_RCP120) {
 				if(g_Vars.currentplayer->devicesactive & DEVICE_CLOAKRCP120) {
@@ -9403,7 +9345,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 				if (ctrl->fnstrtimer + g_Vars.lvupdate60 > 255) {
 					ctrl->fnstrtimer = 255;
 				} else {
-					ctrl->fnstrtimer += (u16) g_Vars.lvupdate60;
+					ctrl->fnstrtimer += (uint16_t) g_Vars.lvupdate60;
 				}
 
 				if ((funcnum == FUNC_SECONDARY || g_Vars.currentplayer->devicesactive & DEVICE_CLOAKRCP120) && func->name == ctrl->curfnstr) {
@@ -9503,9 +9445,9 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 	// Right hand - mag, reserve and combat boost timer
 	if (hand->inuse && ctrl->ammotypes[ammoindex] >= 0) {
-		s32 ammotype;
-		s32 ammoheld;
-		s32 ammototal;
+		int ammotype;
+		int ammoheld;
+		int ammototal;
 
 		ammotype = player->gunctrl.ammotypes[ammoindex];
 
@@ -9557,7 +9499,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 		// Combat boost timer
 		if (hand->gset.weaponnum == WEAPON_COMBATBOOST) {
-			s32 mins;
+			int mins;
 			char text[32];
 
 			speedpilltime = g_Vars.speedpilltime;
@@ -9581,7 +9523,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 	return gdl;
 }
 
-void bgunAddBoost(s32 amount)
+void bgunAddBoost(int amount)
 {
 	g_Vars.speedpilltime += amount;
 
@@ -9590,7 +9532,7 @@ void bgunAddBoost(s32 amount)
 	}
 
 	if (!g_Vars.speedpillwant) {
-		u32 sound = lvGetSlowMotionType() ? SFX_ARGH_JO_02AD : SFX_JO_BOOST_ACTIVATE;
+		uint32_t sound = lvGetSlowMotionType() ? SFX_ARGH_JO_02AD : SFX_JO_BOOST_ACTIVATE;
 
 		sndStart(var80095200, sound, 0, -1, -1, -1, -1, -1);
 	}
@@ -9598,7 +9540,7 @@ void bgunAddBoost(s32 amount)
 	g_Vars.speedpillwant = true;
 }
 
-void bgunSubtractBoost(s32 amount)
+void bgunSubtractBoost(int amount)
 {
 	g_Vars.speedpilltime -= amount;
 
@@ -9654,7 +9596,7 @@ void bgunTickBoost(void)
  * If the visible argument is true, it removes the reason from the field, thus
  * making the sight visible if there are no other reasons.
  */
-void bgunSetSightVisible(u32 reason, bool visible)
+void bgunSetSightVisible(uint32_t reason, bool visible)
 {
 	if (visible) {
 		g_Vars.currentplayer->gunsightoff &= ~reason;
@@ -9676,13 +9618,13 @@ Gfx *bgunDrawSight(Gfx *gdl)
 	return gdl;
 }
 
-void bgun0f0abd30(s32 handnum)
+void bgun0f0abd30(int handnum)
 {
 	struct player *player = g_Vars.currentplayer;
 	struct hand *hand = &player->hands[handnum];
 	struct gunctrl *gunctrl = &player->gunctrl;
 	struct weapon *weapon = weaponFindById(hand->gset.weaponnum);
-	s32 i;
+	int i;
 
 	for (i = 0; i < 2; i++) {
 		if (handnum == HAND_RIGHT) {

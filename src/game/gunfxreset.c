@@ -14,7 +14,7 @@
 
 void boltbeamsReset(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_BoltBeams); i++) {
 		g_BoltBeams[i].unk00 = -1;
@@ -23,7 +23,7 @@ void boltbeamsReset(void)
 
 void lasersightsReset(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_LaserSights); i++) {
 		g_LaserSights[i].id = -1;

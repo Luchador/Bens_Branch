@@ -7,36 +7,36 @@
 #include "preprocess/common.h"
 
 struct n64_fontchar {
-	u8 index;
-	s8 baseline;
-	u8 height;
-	u8 width;
-	s32 kerningindex;
-	u32 pixeldata;
+	uint8_t index;
+	int8_t baseline;
+	uint8_t height;
+	uint8_t width;
+	int kerningindex;
+	uint32_t pixeldata;
 };
 
-u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
+uint8_t *preprocessFont(uint8_t *src, uint32_t srclen, uint32_t *outSize)
 {
 	int num_chars = 94;
 
 	size_t dstlen = srclen - (num_chars * sizeof(struct n64_fontchar)) + (num_chars * sizeof(struct fontchar)) + 0x20;
-	u8* dst = sysMemZeroAlloc(dstlen);
+	uint8_t* dst = sysMemZeroAlloc(dstlen);
 
 	// Kerning table
-	s32 *src_kerning_table = (s32 *)src;
-	s32 *dst_kerning_table = (s32 *)dst;
+	int *src_kerning_table = (int *)src;
+	int *dst_kerning_table = (int *)dst;
 
 	for (int i = 0; i < 13 * 13; i++) {
 		dst_kerning_table[i] = PD_BE32(src_kerning_table[i]);
 	}
 
-	u32 src_offset = PD_ALIGN(13 * 13 * 4, sizeof(u32));
-	u32 dst_offset = PD_ALIGN(13 * 13 * 4, sizeof(uintptr_t));
+	uint32_t src_offset = PD_ALIGN(13 * 13 * 4, sizeof(uint32_t));
+	uint32_t dst_offset = PD_ALIGN(13 * 13 * 4, sizeof(uintptr_t));
 
 	// Character table
 		struct n64_fontchar *src_char_table = (struct n64_fontchar *) &src[src_offset];
 		struct fontchar *dst_char_table = (struct fontchar *) &dst[dst_offset];
-		u32 diff = (dst_offset + num_chars * sizeof(struct fontchar)) - (src_offset + num_chars * sizeof(struct n64_fontchar));
+		uint32_t diff = (dst_offset + num_chars * sizeof(struct fontchar)) - (src_offset + num_chars * sizeof(struct n64_fontchar));
 
 		for (int i = 0; i < num_chars; i++) {
 			dst_char_table[i].index = src_char_table[i].index;
@@ -51,7 +51,7 @@ u8 *preprocessFont(u8 *src, u32 srclen, u32 *outSize)
 		dst_offset += num_chars * sizeof(struct fontchar);
 
 	// Pixel data
-	u32 len = srclen - src_offset;
+	uint32_t len = srclen - src_offset;
 	memcpy(&dst[dst_offset], &src[src_offset], len);
 
 	if (outSize) *outSize = ALIGN16(dst_offset + len);

@@ -3,7 +3,7 @@
 #include "data.h"
 #include "types.h"
 
-u8 g_SkelJoypadJoints[][2] = {
+uint8_t g_SkelJoypadJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -23,7 +23,7 @@ struct skeleton g_SkelJoypad = {
 	SKEL_JOYPAD, ARRAYCOUNT(g_SkelJoypadJoints), g_SkelJoypadJoints,
 };
 
-u8 g_Skel21Joints[][2] = {
+uint8_t g_Skel21Joints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -77,7 +77,7 @@ struct skeleton g_Skel21 = {
 	SKEL_21, ARRAYCOUNT(g_Skel21Joints), g_Skel21Joints,
 };
 
-u8 g_SkelLaptopGunJoints[][2] = {
+uint8_t g_SkelLaptopGunJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -130,7 +130,7 @@ struct skeleton g_SkelLaptopGun = {
 	SKEL_LAPTOPGUN, ARRAYCOUNT(g_SkelLaptopGunJoints), g_SkelLaptopGunJoints,
 };
 
-u8 g_SkelK7AvengerJoints[][2] = {
+uint8_t g_SkelK7AvengerJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -178,7 +178,7 @@ struct skeleton g_SkelK7Avenger = {
 	SKEL_K7AVENGER, ARRAYCOUNT(g_SkelK7AvengerJoints), g_SkelK7AvengerJoints,
 };
 
-u8 g_SkelFalcon2Joints[][2] = {
+uint8_t g_SkelFalcon2Joints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -228,7 +228,7 @@ struct skeleton g_SkelFalcon2 = {
 	SKEL_FALCON2, ARRAYCOUNT(g_SkelFalcon2Joints), g_SkelFalcon2Joints,
 };
 
-u8 g_SkelKnifeJoints[][2] = {
+uint8_t g_SkelKnifeJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -270,7 +270,7 @@ struct skeleton g_SkelKnife = {
 	SKEL_KNIFE, ARRAYCOUNT(g_SkelKnifeJoints), g_SkelKnifeJoints,
 };
 
-u8 g_SkelCmp150Joints[][2] = {
+uint8_t g_SkelCmp150Joints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -317,7 +317,7 @@ struct skeleton g_SkelCmp150 = {
 	SKEL_CMP150, ARRAYCOUNT(g_SkelCmp150Joints), g_SkelCmp150Joints,
 };
 
-u8 g_SkelDragonJoints[][2] = {
+uint8_t g_SkelDragonJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -365,7 +365,7 @@ struct skeleton g_SkelDragon = {
 	SKEL_DRAGON, ARRAYCOUNT(g_SkelDragonJoints), g_SkelDragonJoints,
 };
 
-u8 g_SkelSuperDragonJoints[][2] = {
+uint8_t g_SkelSuperDragonJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -415,7 +415,7 @@ struct skeleton g_SkelSuperDragon = {
 	SKEL_SUPERDRAGON, ARRAYCOUNT(g_SkelSuperDragonJoints), g_SkelSuperDragonJoints,
 };
 
-u8 g_SkelRocketJoints[][2] = {
+uint8_t g_SkelRocketJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -460,7 +460,7 @@ struct skeleton g_SkelRocket = {
 	SKEL_ROCKET, ARRAYCOUNT(g_SkelRocketJoints), g_SkelRocketJoints,
 };
 
-u8 g_Skel4AJoints[][2] = {
+uint8_t g_Skel4AJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -500,7 +500,7 @@ struct skeleton g_Skel4A = {
 	SKEL_4A, ARRAYCOUNT(g_Skel4AJoints), g_Skel4AJoints,
 };
 
-u8 g_SkelShotgunJoints[][2] = {
+uint8_t g_SkelShotgunJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -546,7 +546,7 @@ struct skeleton g_SkelShotgun = {
 	SKEL_SHOTGUN, ARRAYCOUNT(g_SkelShotgunJoints), g_SkelShotgunJoints,
 };
 
-u8 g_SkelFarsightJoints[][2] = {
+uint8_t g_SkelFarsightJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -601,7 +601,7 @@ struct skeleton g_SkelFarsight = {
 	SKEL_FARSIGHT, ARRAYCOUNT(g_SkelFarsightJoints), g_SkelFarsightJoints,
 };
 
-u8 g_Skel4DJoints[][2] = {
+uint8_t g_Skel4DJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -643,7 +643,7 @@ struct skeleton g_Skel4D = {
 	SKEL_4D, ARRAYCOUNT(g_Skel4DJoints), g_Skel4DJoints,
 };
 
-u8 g_SkelReaperJoints[][2] = {
+uint8_t g_SkelReaperJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -700,7 +700,7 @@ struct skeleton g_SkelReaper = {
 	SKEL_REAPER, ARRAYCOUNT(g_SkelReaperJoints), g_SkelReaperJoints,
 };
 
-u8 g_SkelMaulerJoints[][2] = {
+uint8_t g_SkelMaulerJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -746,7 +746,7 @@ struct skeleton g_SkelMauler = {
 	SKEL_MAULER, ARRAYCOUNT(g_SkelMaulerJoints), g_SkelMaulerJoints,
 };
 
-u8 g_SkelDevastatorJoints[][2] = {
+uint8_t g_SkelDevastatorJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -793,7 +793,7 @@ struct skeleton g_SkelDevastator = {
 	SKEL_DEVASTATOR, ARRAYCOUNT(g_SkelDevastatorJoints), g_SkelDevastatorJoints,
 };
 
-u8 g_SkelPistolJoints[][2] = {
+uint8_t g_SkelPistolJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -840,7 +840,7 @@ struct skeleton g_SkelPistol = {
 	SKEL_PISTOL, ARRAYCOUNT(g_SkelPistolJoints), g_SkelPistolJoints,
 };
 
-u8 g_SkelAr34Joints[][2] = {
+uint8_t g_SkelAr34Joints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -887,7 +887,7 @@ struct skeleton g_SkelAr34 = {
 	SKEL_AR34, ARRAYCOUNT(g_SkelAr34Joints), g_SkelAr34Joints,
 };
 
-u8 g_SkelMagnumJoints[][2] = {
+uint8_t g_SkelMagnumJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -941,7 +941,7 @@ struct skeleton g_SkelMagnum = {
 	SKEL_MAGNUM, ARRAYCOUNT(g_SkelMagnumJoints), g_SkelMagnumJoints,
 };
 
-u8 g_SkelSlayerRocketJoints[][2] = {
+uint8_t g_SkelSlayerRocketJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -985,7 +985,7 @@ struct skeleton g_SkelSlayerRocket = {
 	SKEL_SLAYERROCKET, ARRAYCOUNT(g_SkelSlayerRocketJoints), g_SkelSlayerRocketJoints,
 };
 
-u8 g_SkelCycloneJoints[][2] = {
+uint8_t g_SkelCycloneJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1030,7 +1030,7 @@ struct skeleton g_SkelCyclone = {
 	SKEL_CYCLONE, ARRAYCOUNT(g_SkelCycloneJoints), g_SkelCycloneJoints,
 };
 
-u8 g_SkelSniperRifleJoints[][2] = {
+uint8_t g_SkelSniperRifleJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1079,7 +1079,7 @@ struct skeleton g_SkelSniperRifle = {
 	SKEL_SNIPERRIFLE, ARRAYCOUNT(g_SkelSniperRifleJoints), g_SkelSniperRifleJoints,
 };
 
-u8 g_SkelTranquilizerJoints[][2] = {
+uint8_t g_SkelTranquilizerJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1125,7 +1125,7 @@ struct skeleton g_SkelTranquilizer = {
 	SKEL_TRANQUILIZER, ARRAYCOUNT(g_SkelTranquilizerJoints), g_SkelTranquilizerJoints,
 };
 
-u8 g_SkelCrossbowJoints[][2] = {
+uint8_t g_SkelCrossbowJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1178,7 +1178,7 @@ struct skeleton g_SkelCrossbow = {
 	SKEL_CROSSBOW, ARRAYCOUNT(g_SkelCrossbowJoints), g_SkelCrossbowJoints,
 };
 
-u8 g_SkelTimedProxyMineJoints[][2] = {
+uint8_t g_SkelTimedProxyMineJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1219,7 +1219,7 @@ struct skeleton g_SkelTimedProxyMine = {
 	SKEL_TIMEDPROXYMINE, ARRAYCOUNT(g_SkelTimedProxyMineJoints), g_SkelTimedProxyMineJoints,
 };
 
-u8 g_SkelPhoenixJoints[][2] = {
+uint8_t g_SkelPhoenixJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1266,7 +1266,7 @@ struct skeleton g_SkelPhoenix = {
 	SKEL_PHOENIX, ARRAYCOUNT(g_SkelPhoenixJoints), g_SkelPhoenixJoints,
 };
 
-u8 g_SkelCallistoJoints[][2] = {
+uint8_t g_SkelCallistoJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1316,7 +1316,7 @@ struct skeleton g_SkelCallisto = {
 	SKEL_CALLISTO, ARRAYCOUNT(g_SkelCallistoJoints), g_SkelCallistoJoints,
 };
 
-u8 g_SkelRcp120Joints[][2] = {
+uint8_t g_SkelRcp120Joints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1364,7 +1364,7 @@ struct skeleton g_SkelRcp120 = {
 	SKEL_RCP120, ARRAYCOUNT(g_SkelRcp120Joints), g_SkelRcp120Joints,
 };
 
-u8 g_SkelHudPieceJoints[][2] = {
+uint8_t g_SkelHudPieceJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -1378,7 +1378,7 @@ struct skeleton g_SkelHudPiece = {
 	SKEL_HUDPIECE, ARRAYCOUNT(g_SkelHudPieceJoints), g_SkelHudPieceJoints,
 };
 
-u8 g_SkelHandJoints[][2] = {
+uint8_t g_SkelHandJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1418,7 +1418,7 @@ struct skeleton g_SkelHand = {
 	SKEL_HAND, ARRAYCOUNT(g_SkelHandJoints), g_SkelHandJoints,
 };
 
-u8 g_SkelLaserJoints[][2] = {
+uint8_t g_SkelLaserJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1460,7 +1460,7 @@ struct skeleton g_SkelLaser = {
 	SKEL_LASER, ARRAYCOUNT(g_SkelLaserJoints), g_SkelLaserJoints,
 };
 
-u8 g_SkelGrenadeJoints[][2] = {
+uint8_t g_SkelGrenadeJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1502,7 +1502,7 @@ struct skeleton g_SkelGrenade = {
 	SKEL_GRENADE, ARRAYCOUNT(g_SkelGrenadeJoints), g_SkelGrenadeJoints,
 };
 
-u8 g_SkelEcmMineJoints[][2] = {
+uint8_t g_SkelEcmMineJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1544,7 +1544,7 @@ struct skeleton g_SkelEcmMine = {
 	SKEL_ECMMINE, ARRAYCOUNT(g_SkelEcmMineJoints), g_SkelEcmMineJoints,
 };
 
-u8 g_SkelUplinkJoints[][2] = {
+uint8_t g_SkelUplinkJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -1586,7 +1586,7 @@ struct skeleton g_SkelUplink = {
 	SKEL_UPLINK, ARRAYCOUNT(g_SkelUplinkJoints), g_SkelUplinkJoints,
 };
 
-u8 g_SkelRemoteMineJoints[][2] = {
+uint8_t g_SkelRemoteMineJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/debug.h"
@@ -19,7 +20,7 @@
 #include "data.h"
 #include "types.h"
 
-s32 botactGetAmmoTypeByFunction(s32 weaponnum, s32 funcnum)
+int botactGetAmmoTypeByFunction(int weaponnum, int funcnum)
 {
 	if (weaponnum >= WEAPON_FALCON2 && weaponnum <= WEAPON_SUICIDEPILL) {
 		struct inventory_ammo *ammo = weaponGetAmmoByFunction(weaponnum, funcnum);
@@ -32,7 +33,7 @@ s32 botactGetAmmoTypeByFunction(s32 weaponnum, s32 funcnum)
 	return 0;
 }
 
-s32 botactGetClipCapacityByFunction(s32 weaponnum, u32 funcnum)
+int botactGetClipCapacityByFunction(int weaponnum, uint32_t funcnum)
 {
 	if (weaponnum >= WEAPON_FALCON2 && weaponnum <= WEAPON_SUICIDEPILL) {
 		struct inventory_ammo *ammo = weaponGetAmmoByFunction(weaponnum, funcnum);
@@ -45,7 +46,7 @@ s32 botactGetClipCapacityByFunction(s32 weaponnum, u32 funcnum)
 	return 0;
 }
 
-void botactReload(struct chrdata *chr, s32 handnum, bool withsound)
+void botactReload(struct chrdata *chr, int handnum, bool withsound)
 {
 	struct aibot *aibot = chr->aibot;
 
@@ -53,11 +54,11 @@ void botactReload(struct chrdata *chr, s32 handnum, bool withsound)
 	aibot->maulercharge[handnum] = 0;
 
 	if (chr->weapons_held[handnum] && !botactIsWeaponThrowable(aibot->weaponnum, aibot->gunfunc)) {
-		s32 capacity = botactGetClipCapacityByFunction(aibot->weaponnum, aibot->gunfunc);
+		int capacity = botactGetClipCapacityByFunction(aibot->weaponnum, aibot->gunfunc);
 
 		if (capacity > 0) {
-			s32 tryamount = capacity - aibot->loadedammo[handnum];
-			s32 actualamount = botactTryRemoveAmmoFromReserve(aibot, aibot->weaponnum, aibot->gunfunc, tryamount);
+			int tryamount = capacity - aibot->loadedammo[handnum];
+			int actualamount = botactTryRemoveAmmoFromReserve(aibot, aibot->weaponnum, aibot->gunfunc, tryamount);
 
 			if (actualamount > 0) {
 				aibot->loadedammo[handnum] += actualamount;
@@ -76,11 +77,11 @@ void botactReload(struct chrdata *chr, s32 handnum, bool withsound)
 	}
 }
 
-s32 botactGetAmmoQuantityByWeapon(struct aibot *aibot, s32 weaponnum, s32 funcnum, bool include_equipped)
+int botactGetAmmoQuantityByWeapon(struct aibot *aibot, int weaponnum, int funcnum, bool include_equipped)
 {
-	s32 qty = 0;
-	s32 ammotype;
-	s32 equippedammotype;
+	int qty = 0;
+	int ammotype;
+	int equippedammotype;
 
 	if (aibot) {
 		if (aibot->flags & BOTFLAG_UNLIMITEDAMMO) {
@@ -104,9 +105,9 @@ s32 botactGetAmmoQuantityByWeapon(struct aibot *aibot, s32 weaponnum, s32 funcnu
 	return qty;
 }
 
-s32 botactGetAmmoQuantityByType(struct aibot *aibot, s32 ammotype, bool include_equipped)
+int botactGetAmmoQuantityByType(struct aibot *aibot, int ammotype, bool include_equipped)
 {
-	s32 qty = 0;
+	int qty = 0;
 
 	if (aibot) {
 		if (aibot->flags & BOTFLAG_UNLIMITEDAMMO) {
@@ -131,10 +132,10 @@ s32 botactGetAmmoQuantityByType(struct aibot *aibot, s32 ammotype, bool include_
  * The amount removed will be less than the attempted amount if the aibot
  * doesn't have enough ammo in reserve.
  */
-s32 botactTryRemoveAmmoFromReserve(struct aibot *aibot, s32 weaponnum, s32 funcnum, s32 tryqty)
+int botactTryRemoveAmmoFromReserve(struct aibot *aibot, int weaponnum, int funcnum, int tryqty)
 {
-	s32 amountremoved;
-	s32 *ammoheld = &aibot->ammoheld[botactGetAmmoTypeByFunction(weaponnum, funcnum)];
+	int amountremoved;
+	int *ammoheld = &aibot->ammoheld[botactGetAmmoTypeByFunction(weaponnum, funcnum)];
 
 	if (!aibot || *ammoheld <= 0 || tryqty <= 0) {
 		return 0;
@@ -156,10 +157,10 @@ s32 botactTryRemoveAmmoFromReserve(struct aibot *aibot, s32 weaponnum, s32 funcn
 	return amountremoved;
 }
 
-void botactGiveAmmoByWeapon(struct aibot *aibot, s32 weaponnum, s32 funcnum, s32 qty)
+void botactGiveAmmoByWeapon(struct aibot *aibot, int weaponnum, int funcnum, int qty)
 {
-	s32 max;
-	s32 *heldquantity = &aibot->ammoheld[botactGetAmmoTypeByFunction(weaponnum, funcnum)];
+	int max;
+	int *heldquantity = &aibot->ammoheld[botactGetAmmoTypeByFunction(weaponnum, funcnum)];
 
 	if (aibot && (aibot->flags & BOTFLAG_UNLIMITEDAMMO) == 0 && qty > 0) {
 		*heldquantity += qty;
@@ -174,10 +175,10 @@ void botactGiveAmmoByWeapon(struct aibot *aibot, s32 weaponnum, s32 funcnum, s32
 	}
 }
 
-void botactGiveAmmoByType(struct aibot *aibot, u32 ammotype, s32 quantity)
+void botactGiveAmmoByType(struct aibot *aibot, uint32_t ammotype, int quantity)
 {
-	s32 max;
-	s32 *heldquantity = &aibot->ammoheld[ammotype];
+	int max;
+	int *heldquantity = &aibot->ammoheld[ammotype];
 
 	if (!aibot || (aibot->flags & BOTFLAG_UNLIMITEDAMMO) || quantity <= 0) {
 		return;
@@ -194,14 +195,14 @@ void botactGiveAmmoByType(struct aibot *aibot, u32 ammotype, s32 quantity)
 	}
 }
 
-bool botactShootFarsight(struct chrdata *chr, s32 arg1, struct coord *vector, struct coord *arg3)
+bool botactShootFarsight(struct chrdata *chr, int arg1, struct coord *vector, struct coord *arg3)
 {
 	struct aibot *aibot;
 	struct chrdata *oppchr;
 	struct prop *oppprop;
-	s32 i;
-	s32 rand;
-	f32 speed;
+	int i;
+	int rand;
+	float speed;
 
 	if (!chr || !chr->aibot) {
 		return false;
@@ -216,12 +217,12 @@ bool botactShootFarsight(struct chrdata *chr, s32 arg1, struct coord *vector, st
 		if (rand < 30) {
 			struct modelnode *node = NULL;
 			struct model *model = NULL;
-			s32 side = -1;
-			s32 hitpart = HITPART_GENERAL;
+			int side = -1;
+			int hitpart = HITPART_GENERAL;
 			struct gset gset = {WEAPON_FARSIGHT, 0, 0, FUNC_PRIMARY};
-			f32 damage = gsetGetDamage(&gset);
-			s32 fallback = 30;
-			s32 value = fallback;
+			float damage = gsetGetDamage(&gset);
+			int fallback = 30;
+			int value = fallback;
 
 			for (i = 0; i < g_MpNumChrs; i++) {
 				oppchr = g_MpAllChrPtrs[i];
@@ -267,12 +268,12 @@ bool botactShootFarsight(struct chrdata *chr, s32 arg1, struct coord *vector, st
 	return true;
 }
 
-s32 botactGetWeaponModel(s32 weapon)
+int botactGetWeaponModel(int weapon)
 {
 	return playermgrGetModelOfWeapon(weapon);
 }
 
-bool botactIsWeaponThrowable(s32 weaponnum, bool is_secondary)
+bool botactIsWeaponThrowable(int weaponnum, bool is_secondary)
 {
 	switch (weaponnum) {
 	case WEAPON_LAPTOPGUN:
@@ -290,7 +291,7 @@ bool botactIsWeaponThrowable(s32 weaponnum, bool is_secondary)
 	return false;
 }
 
-u32 botactGetProjectileThrowInterval(u32 weapon)
+uint32_t botactGetProjectileThrowInterval(uint32_t weapon)
 {
 	switch (weapon) {
 	case WEAPON_COMBATKNIFE:
@@ -309,7 +310,7 @@ u32 botactGetProjectileThrowInterval(u32 weapon)
 	}
 }
 
-s32 botactGetWeaponByAmmoType(s32 ammotype)
+int botactGetWeaponByAmmoType(int ammotype)
 {
 	switch (ammotype) {
 	case AMMOTYPE_NBOMB:       return WEAPON_NBOMB;
@@ -330,12 +331,11 @@ void botactThrow(struct chrdata *chr)
 	struct coord sp152;
 	struct prop *prop = chr->prop;
 	Mtxf sp84;
-	f32 sp80 = chrGetAimAngle(chr);
-	u32 stack;
+	float sp80 = chrGetAimAngle(chr);
 	struct gset gset = {0};
 	struct prop *target = chrGetTargetProp(chr);
 	struct coord sp56;
-	f32 mult;
+	float mult;
 
 	gset.weaponnum = chr->aibot->weaponnum;
 	gset.weaponfunc = chr->aibot->gunfunc;
@@ -390,10 +390,10 @@ void botactThrow(struct chrdata *chr)
 /**
  * Get the shoot interval of the given weapon, in time60.
  */
-s32 botactGetShootInterval60(s32 weaponnum, s32 funcnum)
+int botactGetShootInterval60(int weaponnum, int funcnum)
 {
-	s32 stack[2];
-	s32 result = 1;
+	int stack[2];
+	int result = 1;
 	struct weapon *weapon = weaponFindById(weaponnum);
 
 	if (weapon) {
@@ -429,7 +429,7 @@ bool botactFindRocketRoute(struct chrdata *chr, struct coord *frompos, struct co
 	struct waypoint *from = waypointFindClosestToPos(frompos, fromrooms);
 	struct waypoint *to = waypointFindClosestToPos(topos, torooms);
 	struct waypoint *waypoints[MAX_CHRWAYPOINTS];
-	s32 numwaypoints;
+	int numwaypoints;
 
 	if (from && to) {
 		navSetSeed(CHRNAVSEED(chr), CHRNAVSEED(chr));
@@ -437,7 +437,7 @@ bool botactFindRocketRoute(struct chrdata *chr, struct coord *frompos, struct co
 		navSetSeed(0, 0);
 
 		if (numwaypoints > 1) {
-			s32 i = 0;
+			int i = 0;
 
 			while (waypoints[i]) {
 				projectile->waypads[i] = waypoints[i]->padnum;
@@ -460,7 +460,7 @@ bool botactFindRocketRoute(struct chrdata *chr, struct coord *frompos, struct co
  *
  * It's the ground position of the pad plus 1.5 metres.
  */
-void botactGetRocketNextStepPos(u16 padnum, struct coord *pos)
+void botactGetRocketNextStepPos(uint16_t padnum, struct coord *pos)
 {
 	struct pad pad;
 	RoomNum rooms[2];
@@ -487,8 +487,8 @@ void botactCreateSlayerRocket(struct chrdata *chr)
 		Mtxf sp196;
 		Mtxf sp132;
 		struct coord sp120 = {0, 0, 0};
-		f32 yrot;
-		f32 xrot;
+		float yrot;
+		float xrot;
 		struct coord sp100;
 
 		yrot = chrGetAimAngle(chr);

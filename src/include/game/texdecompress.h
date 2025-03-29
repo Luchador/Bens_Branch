@@ -1,42 +1,41 @@
 #ifndef IN_GAME_TEXDECOMPRESS_H
 #define IN_GAME_TEXDECOMPRESS_H
-#include <ultra64.h>
 #include "data.h"
 #include "types.h"
 
-s32 texInflateZlib(u8 *src, u8 *dst, bool arg2, s32 forcenumimages, struct texpool *pool);
-s32 texAlignIndices(u8 *arg0, s32 width, s32 height, s32 format, u8 *dst);
-s32 texGetAverageRed(u16 colour1, u16 colour2, u16 colour3, u16 colour4);
-s32 texGetAverageGreen(u16 colour1, u16 colour2, u16 colour3, u16 colour4);
-s32 texGetAverageBlue(u16 colour1, u16 colour2, u16 colour3, u16 colour4);
-s32 texGetAverageAlpha(u16 colour1, u16 colour2, u16 colour3, u16 colour4);
-s32 texShrinkPaletted(u8 *src, u8 *dst, s32 srcwidth, s32 srcheight, s32 format, u16 *palette, s32 numcolours);
-s32 texFindClosestColourIndexRGBA(u8 *palette, s32 numcolours, s32 r, s32 g, s32 b, s32 a);
-s32 texFindClosestColourIndexIA(u16 *palette, s32 numcolours, s32 intensity, s32 alpha);
-s32 texInflateNonZlib(u8 *src, u8 *dst, s32 arg2, s32 forcenumimages, struct texpool *pool);
-s32 texShrinkNonPaletted(u8 *src, u8 *dst, s32 srcwidth, s32 srcheight, s32 format);
-void texInflateHuffman(u8 *dst, s32 numiterations, s32 chansize);
-void texInflateRle(u8 *arg0, s32 arg1);
-s32 texBuildLookup(u8 *arg0, s32 bpp);
-s32 texGetBitSize(s32 arg0);
-void texReadAlphaBits(u8 *dst, s32 count);
-s32 texReadUncompressed(u8 *dst, s32 width, s32 height, s32 format);
-s32 texChannelsToPixels(u8 *src, s32 width, s32 height, u8 *dst, s32 format);
-s32 texInflateLookup(s32 width, s32 height, u8 *dst, u8 *lookup, s32 numcolours, s32 format);
-s32 texInflateLookupFromBuffer(u8 *src, s32 width, s32 height, u8 *dst, u8 *lookup, s32 numcolours, s32 format);
-void texSwizzle(u8 *arg0, s32 width, s32 height, s32 format);
-void texBlur(u8 *pixels, s32 width, s32 height, s32 method, s32 chansize);
-void texInitPool(struct texpool *pool, u8 *start, s32 len);
-struct tex *texFindInPool(s32 texturenum, struct texpool *pool);
-s32 texGetPoolFreeBytes(struct texpool *pool);
-u8 *texGetPoolLeftPos(struct texpool *pool);
-void texLoadFromDisplayList(Gfx *gdl, struct texpool *pool, s32 arg2);
+int texInflateZlib(uint8_t *src, uint8_t *dst, bool arg2, int forcenumimages, struct texpool *pool);
+int texAlignIndices(uint8_t *arg0, int width, int height, int format, uint8_t *dst);
+int texGetAverageRed(uint16_t colour1, uint16_t colour2, uint16_t colour3, uint16_t colour4);
+int texGetAverageGreen(uint16_t colour1, uint16_t colour2, uint16_t colour3, uint16_t colour4);
+int texGetAverageBlue(uint16_t colour1, uint16_t colour2, uint16_t colour3, uint16_t colour4);
+int texGetAverageAlpha(uint16_t colour1, uint16_t colour2, uint16_t colour3, uint16_t colour4);
+int texShrinkPaletted(uint8_t *src, uint8_t *dst, int srcwidth, int srcheight, int format, uint16_t *palette, int numcolours);
+int texFindClosestColourIndexRGBA(uint8_t *palette, int numcolours, int r, int g, int b, int a);
+int texFindClosestColourIndexIA(uint16_t *palette, int numcolours, int intensity, int alpha);
+int texInflateNonZlib(uint8_t *src, uint8_t *dst, int arg2, int forcenumimages, struct texpool *pool);
+int texShrinkNonPaletted(uint8_t *src, uint8_t *dst, int srcwidth, int srcheight, int format);
+void texInflateHuffman(uint8_t *dst, int numiterations, int chansize);
+void texInflateRle(uint8_t *arg0, int arg1);
+int texBuildLookup(uint8_t *arg0, int bpp);
+int texGetBitSize(int arg0);
+void texReadAlphaBits(uint8_t *dst, int count);
+int texReadUncompressed(uint8_t *dst, int width, int height, int format);
+int texChannelsToPixels(uint8_t *src, int width, int height, uint8_t *dst, int format);
+int texInflateLookup(int width, int height, uint8_t *dst, uint8_t *lookup, int numcolours, int format);
+int texInflateLookupFromBuffer(uint8_t *src, int width, int height, uint8_t *dst, uint8_t *lookup, int numcolours, int format);
+void texSwizzle(uint8_t *arg0, int width, int height, int format);
+void texBlur(uint8_t *pixels, int width, int height, int method, int chansize);
+void texInitPool(struct texpool *pool, uint8_t *start, int len);
+struct tex *texFindInPool(int texturenum, struct texpool *pool);
+int texGetPoolFreeBytes(struct texpool *pool);
+uint8_t *texGetPoolLeftPos(struct texpool *pool);
+void texLoadFromDisplayList(Gfx *gdl, struct texpool *pool, int arg2);
 void texLoad(texnum_t *updateword, struct texpool *pool);
-void texLoadFromConfigs(struct textureconfig *configs, s32 numconfigs, struct texpool *pool, uintptr_t arg3);
-void texLoadFromTextureNum(u32 arg0, struct texpool *pool);
-void texSwizzleInternal(u8 *dst, s32 width, s32 height, s32 format, u32 dstlen);
-s32 texConfigToFormat(const struct textureconfig *tex);
+void texLoadFromConfigs(struct textureconfig *configs, int numconfigs, struct texpool *pool, uintptr_t arg3);
+void texLoadFromTextureNum(uint32_t arg0, struct texpool *pool);
+void texSwizzleInternal(uint8_t *dst, int width, int height, int format, uint32_t dstlen);
+int texConfigToFormat(const struct textureconfig *tex);
 unsigned char *texLoadBMP(const char *filename, int width, int height);
-s32 createBMP(u16 num, int width, int height, void *dst, u32 dstSize);
+int createBMP(uint16_t num, int width, int height, void *dst, uint32_t dstSize);
 
 #endif

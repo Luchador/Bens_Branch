@@ -9,44 +9,21 @@
 #include "types.h"
 #include "platform.h"
 
-/**
- * These two ABI commands are used in this file, but the format of the data
- * doesn't match the format used by n_audio's ABI.
- */
-#ifdef PLATFORM_N64
-
-#define	acmd07(pkt, a, b)                                    \
-{                                                            \
-	Acmd *_a = (Acmd *)pkt;                                  \
-	_a->words.w0 = _SHIFTL(0x07, 24, 8) | _SHIFTL(a, 0, 16); \
-	_a->words.w1 = b;                                        \
-}
-
-#define	acmd08(pkt, a)                   \
-{                                        \
-	Acmd *_a = (Acmd *)pkt;              \
-	_a->words.w0 = _SHIFTL(0x08, 24, 8); \
-	_a->words.w1 = a;                    \
-}
-
-#else
-
 #include "mixer.h"
 
 #define	acmd07(pkt, a, b, c, r) aPlayMP3(pkt, a, b, c, r)
 #define	acmd08(pkt, a) do { } while(0)
 
-#endif
 
 struct mp3vars g_Mp3Vars;
 struct asistream *g_AsiStream;
 
-s32 func00038ba8(s32 arg0, u8 *arg1, s32 arg2, s32 arg3);
+int func00038ba8(int arg0, uint8_t *arg1, int arg2, int arg3);
 
-extern f32 *var8009c6d8;
-extern f32 *var8009c6dc;
+extern float *var8009c6d8;
+extern float *var8009c6dc;
 extern struct mp3decfourbytes *var8009c640;
-extern f32 *var8009c644;
+extern float *var8009c644;
 
 void mp3Init(ALHeap *heap)
 {
@@ -90,7 +67,7 @@ void mp3Init(ALHeap *heap)
 	func00038b90(func00038ba8);
 }
 
-void mp3PlayFile(uintptr_t romaddr, s32 filesize)
+void mp3PlayFile(uintptr_t romaddr, int filesize)
 {
 	if (g_Mp3Vars.var8009c3dc == NULL) {
 		return;
@@ -102,9 +79,7 @@ void mp3PlayFile(uintptr_t romaddr, s32 filesize)
 	g_Mp3Vars.var8009c3e8 = 0;
 	g_Mp3Vars.var8009c3e4 = 0x7fff;
 	g_Mp3Vars.var8009c3f0 = 5;
-#ifndef PLATFORM_N64
 	g_Mp3Vars.reset = 1;
-#endif
 
 	mp3Dma();
 
@@ -131,7 +106,7 @@ void func00037e68(void)
 	}
 }
 
-s32 func00037ea4(void)
+int func00037ea4(void)
 {
 	if (g_Mp3Vars.var8009c3e0 == 1
 			|| g_Mp3Vars.var8009c3e0 == 4
@@ -143,7 +118,7 @@ s32 func00037ea4(void)
 	}
 }
 
-void func00037f08(s32 arg0, bool arg1)
+void func00037f08(int arg0, bool arg1)
 {
 	if (arg0 < 0) {
 		g_Mp3Vars.var8009c3e4 = 0;
@@ -156,7 +131,7 @@ void func00037f08(s32 arg0, bool arg1)
 	g_Mp3Vars.var8009c3e8 = arg1;
 }
 
-void func00037f5c(s32 arg0, bool arg1)
+void func00037f5c(int arg0, bool arg1)
 {
 	if (arg0 > 255) {
 		arg0 = 255;
@@ -173,21 +148,16 @@ void func00037f5c(s32 arg0, bool arg1)
 	}
 }
 
-void func00037fa8(s32 arg0, s32 arg1)
+int func00037fc0(int arg0, Acmd **cmd)
 {
-	// empty
-}
-
-s32 func00037fc0(s32 arg0, Acmd **cmd)
-{
-	s32 i;
-	s32 sp60;
-	s32 sp5c = 0;
+	int i;
+	int sp60;
+	int sp5c = 0;
 	struct mp3thing *sp58;
 	struct mp3thing *sp54 = NULL;
-	s32 sp50;
-	s32 sp4c = N_AL_MAIN_L_OUT;
-	s32 sp48 = N_AL_MAIN_R_OUT;
+	int sp50;
+	int sp4c = N_AL_MAIN_L_OUT;
+	int sp48 = N_AL_MAIN_R_OUT;
 
 	if (g_Mp3Vars.var8009c3ec != g_Mp3Vars.var8009c3ee) {
 		sp60 = g_Mp3Vars.var8009c3ee - g_Mp3Vars.var8009c3ec;
@@ -252,13 +222,9 @@ s32 func00037fc0(s32 arg0, Acmd **cmd)
 
 				for (i = 0; i < sp5c; i++) {
 					acmd08((*cmd)++, (uintptr_t)(g_Mp3Vars.var8009c3d4[i]));
-#ifdef PLATFORM_N64
-					acmd07((*cmd)++, g_Mp3Vars.var8009c3d8, (uintptr_t)(sp58));
-#else
 					// hijack the command to pass the entirety of the mp3 data to the mixer
 					acmd07((*cmd)++, g_Mp3Vars.romaddr, g_Mp3Vars.filesize, (uintptr_t)(sp58), g_Mp3Vars.reset);
 					g_Mp3Vars.reset = 0;
-#endif
 
 					sp58++;
 				}
@@ -266,8 +232,6 @@ s32 func00037fc0(s32 arg0, Acmd **cmd)
 				g_Mp3Vars.var8009c3d8 = (g_Mp3Vars.var8009c3d8 - 0x24) & 0x1e;
 				g_Mp3Vars.var8009c3cc = 0x240;
 				g_Mp3Vars.var8009c3f1 = sp5c == 2;
-			} else {
-				// empty
 			}
 		}
 
@@ -364,7 +328,7 @@ void func00038924(struct mp3vars *vars)
 
 		if (vars->var8009c39c != vars->var8009c3ec) {
 			if (N_SpeakerType.headphone) {
-				vars->var8009c39c = ((s16)(vars->var8009c3ec & 0x7f) >> 1) + 32;
+				vars->var8009c39c = ((int16_t)(vars->var8009c3ec & 0x7f) >> 1) + 32;
 			} else {
 				if (N_SpeakerType.mono) {
 					vars->var8009c39c = 64;
@@ -389,7 +353,7 @@ void func00038b90(void *fn)
 	g_Mp3Vars.var8009c3dc = fn;
 }
 
-s32 func00038ba8(s32 arg0, u8 *arg1, s32 arg2, s32 arg3)
+int func00038ba8(int arg0, uint8_t *arg1, int arg2, int arg3)
 {
 	uintptr_t sp1c;
 	ALDMAproc proc;
@@ -405,7 +369,7 @@ s32 func00038ba8(s32 arg0, u8 *arg1, s32 arg2, s32 arg3)
 	proc = n_syn->dma(&sp1c);
 	sp1c = (uintptr_t)(proc(g_Mp3Vars.romaddr + g_Mp3Vars.var8009c3c4, arg2, 0));
 
-	bcopy((u8 *)sp1c, arg1, arg2);
+	bcopy((uint8_t *)sp1c, arg1, arg2);
 
 	g_Mp3Vars.var8009c3c4 += arg2;
 

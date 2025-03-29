@@ -1,25 +1,24 @@
 #ifndef IN_GAME_BOTACT_H
 #define IN_GAME_BOTACT_H
-#include <ultra64.h>
 #include "data.h"
 #include "types.h"
 
-s32 botactGetAmmoTypeByFunction(s32 weaponnum, s32 funcnum);
-s32 botactGetClipCapacityByFunction(s32 weaponnum, u32 funcnum);
-void botactReload(struct chrdata *chr, s32 handnum, bool withsound);
-s32 botactGetAmmoQuantityByWeapon(struct aibot *aibot, s32 weaponnum, s32 funcnum, bool include_equipped);
-s32 botactGetAmmoQuantityByType(struct aibot *aibot, s32 ammotype, bool include_equipped);
-s32 botactTryRemoveAmmoFromReserve(struct aibot *aibot, s32 weaponnum, s32 funcnum, s32 qty);
-void botactGiveAmmoByWeapon(struct aibot *aibot, s32 weaponnum, s32 funcnum, s32 qty);
-void botactGiveAmmoByType(struct aibot *aibot, u32 ammotype, s32 quantity);
-bool botactShootFarsight(struct chrdata *chr, s32 arg1, struct coord *arg2, struct coord *arg3);
-bool botactIsWeaponThrowable(s32 weaponnum, bool is_secondary);
-u32 botactGetProjectileThrowInterval(u32 weapon);
-s32 botactGetWeaponByAmmoType(s32 ammotype);
+int botactGetAmmoTypeByFunction(int weaponnum, int funcnum);
+int botactGetClipCapacityByFunction(int weaponnum, uint32_t funcnum);
+void botactReload(struct chrdata *chr, int handnum, bool withsound);
+int botactGetAmmoQuantityByWeapon(struct aibot *aibot, int weaponnum, int funcnum, bool include_equipped);
+int botactGetAmmoQuantityByType(struct aibot *aibot, int ammotype, bool include_equipped);
+int botactTryRemoveAmmoFromReserve(struct aibot *aibot, int weaponnum, int funcnum, int qty);
+void botactGiveAmmoByWeapon(struct aibot *aibot, int weaponnum, int funcnum, int qty);
+void botactGiveAmmoByType(struct aibot *aibot, uint32_t ammotype, int quantity);
+bool botactShootFarsight(struct chrdata *chr, int arg1, struct coord *arg2, struct coord *arg3);
+bool botactIsWeaponThrowable(int weaponnum, bool is_secondary);
+uint32_t botactGetProjectileThrowInterval(uint32_t weapon);
+int botactGetWeaponByAmmoType(int ammotype);
 void botactThrow(struct chrdata *chr);
-s32 botactGetShootInterval60(s32 weaponnum, s32 funcnum);
+int botactGetShootInterval60(int weaponnum, int funcnum);
 bool botactFindRocketRoute(struct chrdata *chr, struct coord *frompos, struct coord *topos, RoomNum *fromrooms, RoomNum *torooms, struct projectile *projectile);
-void botactGetRocketNextStepPos(u16 padnum, struct coord *pos);
+void botactGetRocketNextStepPos(uint16_t padnum, struct coord *pos);
 void botactCreateSlayerRocket(struct chrdata *chr);
 
 #endif

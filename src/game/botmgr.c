@@ -17,7 +17,7 @@
 
 void botmgrRemoveAll(void)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < MAX_BOTS; i++) {
 		g_MpBotChrPtrs[i] = NULL;
@@ -26,16 +26,16 @@ void botmgrRemoveAll(void)
 	g_BotCount = 0;
 }
 
-void botmgrAllocateBot(s32 chrnum, s32 aibotnum)
+void botmgrAllocateBot(int chrnum, int aibotnum)
 {
 	RoomNum rooms[1];
 	struct prop *prop;
 	struct chrdata *chr;
 	struct aibot *aibot;
 	struct model *model;
-	s32 i;
-	s32 bodynum;
-	s32 headnum;
+	int i;
+	int bodynum;
+	int headnum;
 
 	rooms[0] = -1;
 
@@ -97,7 +97,7 @@ void botmgrAllocateBot(s32 chrnum, s32 aibotnum)
 					g_MpAllChrConfigPtrs[g_MpNumChrs] = &g_BotConfigsArray[aibotnum].base;
 					g_MpNumChrs++;
 
-					aibot->ammoheld = mempAlloc(36 * sizeof(s32), MEMPOOL_STAGE);
+					aibot->ammoheld = mempAlloc(36 * sizeof(int), MEMPOOL_STAGE);
 
 					for (i = 0; i < 33; i++) {
 						aibot->ammoheld[i] = 0;
@@ -140,9 +140,7 @@ void botmgrAllocateBot(s32 chrnum, s32 aibotnum)
 					aibot->respawning = false;
 					aibot->nextbullettimer60[0] = 0;
 					aibot->nextbullettimer60[1] = 0;
-#if VERSION < VERSION_PAL_BETA
 					aibot->unk030 = 301;
-#endif
 					aibot->unk038 = 0;
 					aibot->punchtimer60[HAND_LEFT] = -1;
 					aibot->punchtimer60[HAND_RIGHT] = 0;
@@ -255,11 +253,9 @@ void botmgrAllocateBot(s32 chrnum, s32 aibotnum)
 					aibot->random2 = rngRandom();
 					aibot->randomfrac = RANDOMFRAC();
 					aibot->cheap = false;
-#if VERSION >= VERSION_NTSC_1_0
 					aibot->forceslowupdates = 0;
 					aibot->distoverrideprop = NULL;
 					aibot->distoverridetimer60 = 0;
-#endif
 				} else {
 					g_MpBotChrPtrs[--g_BotCount] = NULL;
 					return;

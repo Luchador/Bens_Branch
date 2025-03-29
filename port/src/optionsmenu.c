@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <PR/ultratypes.h>
+#include <stdint.h>
 #include "platform.h"
 #include "data.h"
 #include "types.h"
@@ -15,13 +15,13 @@
 #include "input.h"
 #include "config.h"
 
-static s32 g_ExtMenuPlayer = 0;
+static int g_ExtMenuPlayer = 0;
 static struct menudialogdef *g_ExtNextDialog = NULL;
 
-static s32 g_BindIndex = 0;
-static u32 g_BindContKey = 0;
+static int g_BindIndex = 0;
+static uint32_t g_BindContKey = 0;
 
-static MenuItemHandlerResult menuhandlerSelectPlayer(s32 operation, struct menuitem *item, union handlerdata *data);
+static MenuItemHandlerResult menuhandlerSelectPlayer(int operation, struct menuitem *item, union handlerdata *data);
 
 struct menuitem g_ExtendedSelectPlayerMenuItems[] = {
 	{
@@ -84,7 +84,7 @@ struct menudialogdef g_ExtendedSelectPlayerMenuDialog = {
 	NULL,
 };
 
-static MenuItemHandlerResult menuhandlerSelectPlayer(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerSelectPlayer(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_ExtMenuPlayer = item - g_ExtendedSelectPlayerMenuItems;
@@ -95,7 +95,7 @@ static MenuItemHandlerResult menuhandlerSelectPlayer(s32 operation, struct menui
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerMouseEnabled(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerMouseEnabled(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -108,7 +108,7 @@ static MenuItemHandlerResult menuhandlerMouseEnabled(s32 operation, struct menui
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerMouseAimLock(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerMouseAimLock(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -121,7 +121,7 @@ static MenuItemHandlerResult menuhandlerMouseAimLock(s32 operation, struct menui
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerMouseLockMode(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerMouseLockMode(int operation, struct menuitem *item, union handlerdata *data)
 {
 	static const char *opts[] = {
 		"Always Off",
@@ -145,7 +145,7 @@ static MenuItemHandlerResult menuhandlerMouseLockMode(s32 operation, struct menu
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerMenuMouseControl(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerMenuMouseControl(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -161,9 +161,9 @@ static MenuItemHandlerResult menuhandlerMenuMouseControl(s32 operation, struct m
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerMouseSpeedX(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerMouseSpeedX(int operation, struct menuitem *item, union handlerdata *data)
 {
-	f32 x, y;
+	float x, y;
 
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -178,18 +178,18 @@ static MenuItemHandlerResult menuhandlerMouseSpeedX(s32 operation, struct menuit
 		break;
 	case MENUOP_SET:
 		inputMouseGetSpeed(&x, &y);
-		inputMouseSetSpeed((f32)data->slider.value / 100.f, y);
+		inputMouseSetSpeed((float)data->slider.value / 100.f, y);
 		break;
 	case MENUOP_GETSLIDERLABEL:
-		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
+		sprintf(data->slider.label, "%.2f", (float)data->slider.value / 100.f);
 	}
 
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerMouseSpeedY(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerMouseSpeedY(int operation, struct menuitem *item, union handlerdata *data)
 {
-	f32 x, y;
+	float x, y;
 
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -204,16 +204,16 @@ static MenuItemHandlerResult menuhandlerMouseSpeedY(s32 operation, struct menuit
 		break;
 	case MENUOP_SET:
 		inputMouseGetSpeed(&x, &y);
-		inputMouseSetSpeed(x, (f32)data->slider.value / 100.f);
+		inputMouseSetSpeed(x, (float)data->slider.value / 100.f);
 		break;
 	case MENUOP_GETSLIDERLABEL:
-		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
+		sprintf(data->slider.label, "%.2f", (float)data->slider.value / 100.f);
 	}
 
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerMouseAimSpeedX(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerMouseAimSpeedX(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -226,16 +226,16 @@ static MenuItemHandlerResult menuhandlerMouseAimSpeedX(s32 operation, struct men
 		}
 		break;
 	case MENUOP_SET:
-		g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx = (f32)data->slider.value / 100.f;
+		g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedx = (float)data->slider.value / 100.f;
 		break;
 	case MENUOP_GETSLIDERLABEL:
-		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
+		sprintf(data->slider.label, "%.2f", (float)data->slider.value / 100.f);
 	}
 
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerMouseAimSpeedY(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerMouseAimSpeedY(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -248,16 +248,16 @@ static MenuItemHandlerResult menuhandlerMouseAimSpeedY(s32 operation, struct men
 		}
 		break;
 	case MENUOP_SET:
-		g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy = (f32)data->slider.value / 100.f;
+		g_PlayerExtCfg[g_ExtMenuPlayer].mouseaimspeedy = (float)data->slider.value / 100.f;
 		break;
 	case MENUOP_GETSLIDERLABEL:
-		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
+		sprintf(data->slider.label, "%.2f", (float)data->slider.value / 100.f);
 	}
 
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerRadialMenuSpeed(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerRadialMenuSpeed(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -270,10 +270,10 @@ static MenuItemHandlerResult menuhandlerRadialMenuSpeed(s32 operation, struct me
 		}
 		break;
 	case MENUOP_SET:
-		g_PlayerExtCfg[0].radialmenuspeed = (f32)data->slider.value / 100.f;
+		g_PlayerExtCfg[0].radialmenuspeed = (float)data->slider.value / 100.f;
 		break;
 	case MENUOP_GETSLIDERLABEL:
-		sprintf(data->slider.label, "%.2f", (f32)data->slider.value / 100.f);
+		sprintf(data->slider.label, "%.2f", (float)data->slider.value / 100.f);
 	}
 
 	return 0;
@@ -388,8 +388,8 @@ struct menudialogdef g_ExtendedMouseMenuDialog = {
 	NULL,
 };
 
-static MenuItemHandlerResult menuhandlerStickSpeed(s32 operation, struct menuitem *item, union handlerdata *data);
-static MenuItemHandlerResult menuhandlerStickDeadzone(s32 operation, struct menuitem *item, union handlerdata *data);
+static MenuItemHandlerResult menuhandlerStickSpeed(int operation, struct menuitem *item, union handlerdata *data);
+static MenuItemHandlerResult menuhandlerStickDeadzone(int operation, struct menuitem *item, union handlerdata *data);
 
 struct menuitem g_ExtendedStickMenuItems[] = {
 	{
@@ -483,36 +483,36 @@ struct menuitem g_ExtendedStickMenuItems[] = {
 	{ MENUITEMTYPE_END },
 };
 
-static MenuItemHandlerResult menuhandlerStickSpeed(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerStickSpeed(int operation, struct menuitem *item, union handlerdata *data)
 {
-	const s32 idx = item - g_ExtendedStickMenuItems;
-	const s32 stick = idx / 2;
-	const s32 axis = idx % 2;
+	const int idx = item - g_ExtendedStickMenuItems;
+	const int stick = idx / 2;
+	const int axis = idx % 2;
 
 	switch (operation) {
 	case MENUOP_GETSLIDER:
 		data->slider.value = inputControllerGetAxisScale(g_ExtMenuPlayer, stick, axis) * 10.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		inputControllerSetAxisScale(g_ExtMenuPlayer, stick, axis, (f32)data->slider.value / 10.f);
+		inputControllerSetAxisScale(g_ExtMenuPlayer, stick, axis, (float)data->slider.value / 10.f);
 		break;
 	}
 
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerStickDeadzone(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerStickDeadzone(int operation, struct menuitem *item, union handlerdata *data)
 {
-	const s32 idx = item - (g_ExtendedStickMenuItems + 5);
-	const s32 stick = idx / 2;
-	const s32 axis = idx % 2;
+	const int idx = item - (g_ExtendedStickMenuItems + 5);
+	const int stick = idx / 2;
+	const int axis = idx % 2;
 
 	switch (operation) {
 	case MENUOP_GETSLIDER:
 		data->slider.value = inputControllerGetAxisDeadzone(g_ExtMenuPlayer, stick, axis) * 32.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		inputControllerSetAxisDeadzone(g_ExtMenuPlayer, stick, axis, (f32)data->slider.value / 32.f);
+		inputControllerSetAxisDeadzone(g_ExtMenuPlayer, stick, axis, (float)data->slider.value / 32.f);
 		break;
 	}
 
@@ -528,14 +528,14 @@ struct menudialogdef g_ExtendedStickMenuDialog = {
 	NULL,
 };
 
-static MenuItemHandlerResult menuhandlerVibration(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerVibration(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
 		data->slider.value = inputRumbleGetStrength(g_ExtMenuPlayer) * 10.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		inputRumbleSetStrength(g_ExtMenuPlayer, (f32)data->slider.value / 10.f);
+		inputRumbleSetStrength(g_ExtMenuPlayer, (float)data->slider.value / 10.f);
 		break;
 	case MENUOP_CHECKHIDDEN:
 	case MENUOP_CHECKDISABLED:
@@ -548,7 +548,7 @@ static MenuItemHandlerResult menuhandlerVibration(s32 operation, struct menuitem
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerAnalogMovement(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerAnalogMovement(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -561,7 +561,7 @@ static MenuItemHandlerResult menuhandlerAnalogMovement(s32 operation, struct men
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerSwapSticks(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerSwapSticks(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -574,12 +574,12 @@ static MenuItemHandlerResult menuhandlerSwapSticks(s32 operation, struct menuite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerController(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerController(int operation, struct menuitem *item, union handlerdata *data)
 {
 	static char ctrlname[35];
-	s32 ctrls[INPUT_MAX_CONNECTED_CONTROLLERS];
-	const s32 numCtrls = inputGetConnectedControllers(ctrls);
-	const s32 curCtrl = inputGetAssignedControllerId(g_ExtMenuPlayer);
+	int ctrls[INPUT_MAX_CONNECTED_CONTROLLERS];
+	const int numCtrls = inputGetConnectedControllers(ctrls);
+	const int curCtrl = inputGetAssignedControllerId(g_ExtMenuPlayer);
 
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
@@ -587,7 +587,7 @@ static MenuItemHandlerResult menuhandlerController(s32 operation, struct menuite
 		break;
 	case MENUOP_GETOPTIONTEXT:
 		if (data->dropdown.value) {
-			const s32 jid = ctrls[data->dropdown.value - 1];
+			const int jid = ctrls[data->dropdown.value - 1];
 			const char *name = inputGetConnectedControllerName(jid);
 			strncpy(ctrlname, name, sizeof(ctrlname) - 1);
 			return (intptr_t)ctrlname;
@@ -603,7 +603,7 @@ static MenuItemHandlerResult menuhandlerController(s32 operation, struct menuite
 		}
 		break;
 	case MENUOP_GETSELECTEDINDEX:
-		for (s32 i = 0; i < numCtrls; ++i) {
+		for (int i = 0; i < numCtrls; ++i) {
 			if (curCtrl == ctrls[i]) {
 				data->dropdown.value = i + 1;
 				return 0;
@@ -686,7 +686,7 @@ struct menudialogdef g_ExtendedControllerMenuDialog = {
 	NULL,
 };
 
-static MenuItemHandlerResult menuhandlerFullScreen(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerFullScreen(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -699,7 +699,7 @@ static MenuItemHandlerResult menuhandlerFullScreen(s32 operation, struct menuite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerFullScreenMode(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerFullScreenMode(int operation, struct menuitem *item, union handlerdata *data)
 {
 	static const char *opts[] = {
 		"Borderless",
@@ -722,7 +722,7 @@ static MenuItemHandlerResult menuhandlerFullScreenMode(s32 operation, struct men
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCenterWindow(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerCenterWindow(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -735,16 +735,16 @@ static MenuItemHandlerResult menuhandlerCenterWindow(s32 operation, struct menui
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerVsync(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerVsync(int operation, struct menuitem *item, union handlerdata *data)
 {
-	static const s32 numOpts = 10;
+	static const int numOpts = 10;
 	static const char *constOpts[] = {
 		"Adaptive",
 		"Off",
 		"On"
 	};
 	static char dynOpt[20];
-	s32 vblanks;
+	int vblanks;
 
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
@@ -753,7 +753,7 @@ static MenuItemHandlerResult menuhandlerVsync(s32 operation, struct menuitem *it
 	case MENUOP_GETOPTIONTEXT:
 		if (data->dropdown.value < ARRAYCOUNT(constOpts))
 			return (intptr_t)constOpts[data->dropdown.value];
-		vblanks = (s32)data->dropdown.value - 1;
+		vblanks = (int)data->dropdown.value - 1;
 		snprintf(dynOpt, sizeof(dynOpt), "On (%d frames)", vblanks);
 		return (intptr_t)dynOpt;
 	case MENUOP_SET:
@@ -765,7 +765,7 @@ static MenuItemHandlerResult menuhandlerVsync(s32 operation, struct menuitem *it
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerFramerateLimit(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerFramerateLimit(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -786,9 +786,9 @@ static MenuItemHandlerResult menuhandlerFramerateLimit(s32 operation, struct men
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerMSAA(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerMSAA(int operation, struct menuitem *item, union handlerdata *data)
 {
-	s32 msaa;
+	int msaa;
 	static const char *opts[] = {
 		"Off",
 		"2x (MSAA)",
@@ -824,7 +824,7 @@ static MenuItemHandlerResult menuhandlerMSAA(s32 operation, struct menuitem *ite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerResolution(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerResolution(int operation, struct menuitem *item, union handlerdata *data)
 {
 	static char resstring[32];
 	static const char *rescustom = "Custom";
@@ -857,7 +857,7 @@ static MenuItemHandlerResult menuhandlerResolution(s32 operation, struct menuite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerTexFilter(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerTexFilter(int operation, struct menuitem *item, union handlerdata *data)
 {
 	static const char *opts[] = {
 		"Nearest",
@@ -881,7 +881,7 @@ static MenuItemHandlerResult menuhandlerTexFilter(s32 operation, struct menuitem
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerTexDetail(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerTexDetail(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -894,7 +894,7 @@ static MenuItemHandlerResult menuhandlerTexDetail(s32 operation, struct menuitem
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerTexFilter2D(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerTexFilter2D(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -908,7 +908,7 @@ static MenuItemHandlerResult menuhandlerTexFilter2D(s32 operation, struct menuit
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerDisplayFPS(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerDisplayFPS(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -920,7 +920,7 @@ static MenuItemHandlerResult menuhandlerDisplayFPS(s32 operation, struct menuite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerGeMuzzleFlashes(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerGeMuzzleFlashes(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -933,7 +933,7 @@ static MenuItemHandlerResult menuhandlerGeMuzzleFlashes(s32 operation, struct me
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerUncapTickrate(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerUncapTickrate(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -946,7 +946,7 @@ static MenuItemHandlerResult menuhandlerUncapTickrate(s32 operation, struct menu
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCenterHUD(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerCenterHUD(int operation, struct menuitem *item, union handlerdata *data)
 {
 	static const char *opts[] = {
 		"None",
@@ -980,14 +980,14 @@ static MenuItemHandlerResult menuhandlerCenterHUD(s32 operation, struct menuitem
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerScreenShake(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerScreenShake(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
 		data->slider.value = g_ViShakeIntensityMult * 10.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		g_ViShakeIntensityMult = (f32)data->slider.value / 10.f;
+		g_ViShakeIntensityMult = (float)data->slider.value / 10.f;
 		break;
 	}
 
@@ -1167,7 +1167,7 @@ struct menudialogdef g_ExtendedVideoMenuDialog = {
 	NULL,
 };
 
-static MenuItemHandlerResult menuhandlerDisableMpDeathMusic(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerDisableMpDeathMusic(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -1217,7 +1217,7 @@ struct menudialogdef g_ExtendedAudioMenuDialog = {
 	NULL,
 };
 
-static MenuItemHandlerResult menuhandlerUseKeyReloads(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerUseKeyReloads(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_CHECKDISABLED:
@@ -1232,7 +1232,7 @@ static MenuItemHandlerResult menuhandlerUseKeyReloads(s32 operation, struct menu
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrouchMode(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerCrouchMode(int operation, struct menuitem *item, union handlerdata *data)
 {
 	static const char *opts[] = {
 		"Hold",
@@ -1257,7 +1257,7 @@ static MenuItemHandlerResult menuhandlerCrouchMode(s32 operation, struct menuite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerFieldOfView(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerFieldOfView(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -1277,23 +1277,23 @@ static MenuItemHandlerResult menuhandlerFieldOfView(s32 operation, struct menuit
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshairSway(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerCrosshairSway(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
 		data->slider.value = g_PlayerExtCfg[g_ExtMenuPlayer].crosshairsway * 10.f + 0.5f;
 		break;
 	case MENUOP_SET:
-		g_PlayerExtCfg[g_ExtMenuPlayer].crosshairsway = (f32)data->slider.value / 10.f;
+		g_PlayerExtCfg[g_ExtMenuPlayer].crosshairsway = (float)data->slider.value / 10.f;
 		break;
 	}
 
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshairR(s32 operation, struct menuitem* item, union handlerdata* data)
+static MenuItemHandlerResult menuhandlerCrosshairR(int operation, struct menuitem* item, union handlerdata* data)
 {
-	u32 newColor;
+	uint32_t newColor;
 
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -1309,9 +1309,9 @@ static MenuItemHandlerResult menuhandlerCrosshairR(s32 operation, struct menuite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshairG(s32 operation, struct menuitem* item, union handlerdata* data)
+static MenuItemHandlerResult menuhandlerCrosshairG(int operation, struct menuitem* item, union handlerdata* data)
 {
-	u32 newColor;
+	uint32_t newColor;
 
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -1327,9 +1327,9 @@ static MenuItemHandlerResult menuhandlerCrosshairG(s32 operation, struct menuite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshairB(s32 operation, struct menuitem* item, union handlerdata* data)
+static MenuItemHandlerResult menuhandlerCrosshairB(int operation, struct menuitem* item, union handlerdata* data)
 {
-	u32 newColor;
+	uint32_t newColor;
 
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -1345,9 +1345,9 @@ static MenuItemHandlerResult menuhandlerCrosshairB(s32 operation, struct menuite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshairA(s32 operation, struct menuitem* item, union handlerdata* data)
+static MenuItemHandlerResult menuhandlerCrosshairA(int operation, struct menuitem* item, union handlerdata* data)
 {
-	u32 newColor;
+	uint32_t newColor;
 
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -1363,7 +1363,7 @@ static MenuItemHandlerResult menuhandlerCrosshairA(s32 operation, struct menuite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshairColorPreview(s32 operation, struct menuitem* item, union handlerdata* data)
+static MenuItemHandlerResult menuhandlerCrosshairColorPreview(int operation, struct menuitem* item, union handlerdata* data)
 {
 	if (operation == MENUOP_GETCOLOUR) {
 		data->label.colour1 = g_PlayerExtCfg[g_ExtMenuPlayer].crosshaircolour;
@@ -1372,7 +1372,7 @@ static MenuItemHandlerResult menuhandlerCrosshairColorPreview(s32 operation, str
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshairSize(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerCrosshairSize(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -1386,7 +1386,7 @@ static MenuItemHandlerResult menuhandlerCrosshairSize(s32 operation, struct menu
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerCrosshairHealth(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerCrosshairHealth(int operation, struct menuitem *item, union handlerdata *data)
 {
 	static const char *opts[] = {
 		"Off",
@@ -1573,7 +1573,7 @@ struct menudialogdef g_ExtendedGameMenuDialog = {
 	NULL,
 };
 
-static MenuItemHandlerResult menuhandlerDoBind(s32 operation, struct menuitem *item, union handlerdata *data);
+static MenuItemHandlerResult menuhandlerDoBind(int operation, struct menuitem *item, union handlerdata *data);
 
 struct menuitem g_ExtendedBindKeyMenuItems[] = {
 	{
@@ -1621,7 +1621,7 @@ struct menudialogdef g_ExtendedBindKeyMenuDialog = {
 };
 
 struct menubind {
-	u32 ck;
+	uint32_t ck;
 	const char *name;
 	const char *n64name;
 };
@@ -1652,9 +1652,9 @@ static const struct menubind menuBinds[] = {
 };
 
 static const char *menutextBind(struct menuitem *item);
-static MenuItemHandlerResult menuhandlerBind(s32 operation, struct menuitem *item, union handlerdata *data);
-static MenuItemHandlerResult menuhandlerResetBindsPC(s32 operation, struct menuitem *item, union handlerdata *data);
-static MenuItemHandlerResult menuhandlerResetBindsN64(s32 operation, struct menuitem *item, union handlerdata *data);
+static MenuItemHandlerResult menuhandlerBind(int operation, struct menuitem *item, union handlerdata *data);
+static MenuItemHandlerResult menuhandlerResetBindsPC(int operation, struct menuitem *item, union handlerdata *data);
+static MenuItemHandlerResult menuhandlerResetBindsN64(int operation, struct menuitem *item, union handlerdata *data);
 
 #define DEFINE_MENU_BIND() \
 	{ \
@@ -1732,7 +1732,7 @@ struct menuitem g_ExtendedBindsMenuItems[] = {
 	{ MENUITEMTYPE_END },
 };
 
-static MenuItemHandlerResult menuhandlerDoBind(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerDoBind(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (!menuIsDialogOpen(&g_ExtendedBindKeyMenuDialog)) {
 		return 0;
@@ -1743,7 +1743,7 @@ static MenuItemHandlerResult menuhandlerDoBind(s32 operation, struct menuitem *i
 		return 0;
 	}
 
-	const s32 key = inputGetLastKey();
+	const int key = inputGetLastKey();
 	if (key && key != VK_ESCAPE) {
 		inputKeyBind(g_ExtMenuPlayer, g_BindContKey, g_BindIndex, (key == VK_DELETE ? 0 : key));
 		menuPopDialog();
@@ -1759,10 +1759,10 @@ static const char *menutextBind(struct menuitem *item)
 		menuBinds[item - g_ExtendedBindsMenuItems].n64name;
 }
 
-static MenuItemHandlerResult menuhandlerBind(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerBind(int operation, struct menuitem *item, union handlerdata *data)
 {
-	const s32 idx = item - g_ExtendedBindsMenuItems;
-	const u32 *binds;
+	const int idx = item - g_ExtendedBindsMenuItems;
+	const uint32_t *binds;
 
 	static char keyname[128];
 
@@ -1794,7 +1794,7 @@ static MenuItemHandlerResult menuhandlerBind(s32 operation, struct menuitem *ite
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerResetBindsPC(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerResetBindsPC(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		inputSetDefaultKeyBinds(g_ExtMenuPlayer, false);
@@ -1803,7 +1803,7 @@ static MenuItemHandlerResult menuhandlerResetBindsPC(s32 operation, struct menui
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerResetBindsN64(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerResetBindsN64(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		inputSetDefaultKeyBinds(g_ExtMenuPlayer, true);
@@ -1822,7 +1822,7 @@ struct menudialogdef g_ExtendedBindsMenuDialog = {
 	NULL,
 };
 
-static MenuItemHandlerResult menuhandlerOpenControllerMenu(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerOpenControllerMenu(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_ExtNextDialog = &g_ExtendedControllerMenuDialog;
@@ -1831,7 +1831,7 @@ static MenuItemHandlerResult menuhandlerOpenControllerMenu(s32 operation, struct
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerOpenGameMenu(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerOpenGameMenu(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_ExtNextDialog = &g_ExtendedGameMenuDialog;
@@ -1840,7 +1840,7 @@ static MenuItemHandlerResult menuhandlerOpenGameMenu(s32 operation, struct menui
 	return 0;
 }
 
-static MenuItemHandlerResult menuhandlerOpenBindsMenu(s32 operation, struct menuitem *item, union handlerdata *data)
+static MenuItemHandlerResult menuhandlerOpenBindsMenu(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_ExtNextDialog = &g_ExtendedBindsMenuDialog;

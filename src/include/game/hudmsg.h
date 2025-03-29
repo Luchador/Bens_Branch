@@ -1,33 +1,34 @@
 #ifndef IN_GAME_HUDMSG_H
 #define IN_GAME_HUDMSG_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
-u8 hudmsgsAreActive(void);
-s32 hudmsgIsZoomRangeVisible(void);
-Gfx *hudmsgRenderMissionTimer(Gfx *gdl, u32 alpha);
-Gfx *hudmsgRenderZoomRange(Gfx *gdl, u32 alpha);
-Gfx *hudmsgRenderBox(Gfx *gdl, s32 x1, s32 y1, s32 x2, s32 y2, f32 bgopacity, u32 bordercolour, f32 textopacity);
-s32 hudmsg0f0ddb1c(s32 *arg0, s32 arg1);
-void hudmsgsHideByChannel(s32 value);
+uint8_t hudmsgsAreActive(void);
+int hudmsgIsZoomRangeVisible(void);
+Gfx *hudmsgRenderMissionTimer(Gfx *gdl, uint32_t alpha);
+Gfx *hudmsgRenderZoomRange(Gfx *gdl, uint32_t alpha);
+Gfx *hudmsgRenderBox(Gfx *gdl, int x1, int y1, int x2, int y2, float bgopacity, uint32_t bordercolour, float textopacity);
+int hudmsgCalcXPos(int *arg0, int arg1);
+void hudmsgsHideByChannel(int value);
 void hudmsgsReset(void);
 void hudmsgRemoveAll(void);
-s32 hudmsgGetNext(s32 refid);
-void hudmsgCreate(char *text, s32 type);
-void hudmsgCreateWithFlags(char *text, s32 type, u32 flags);
-void hudmsgCreateWithColour(char *text, s32 type, u8 colour);
-void hudmsgCreateWithDuration(char *text, s32 type, struct hudmsgtype *config, s32 duration60);
-void hudmsgCreateAsSubtitle(char *text, s32 type, u8 colourindex, s32 audiochannelnum);
+int hudmsgGetNext(int refid);
+void hudmsgCreate(char *text, int type);
+void hudmsgCreateWithFlags(char *text, int type, uint32_t flags);
+void hudmsgCreateWithColour(char *text, int type, uint8_t colour);
+void hudmsgCreateWithDuration(char *text, int type, struct hudmsgtype *config, int duration60);
+void hudmsgCreateAsSubtitle(char *text, int type, uint8_t colourindex, int audiochannelnum);
 void hudmsgCalculatePosition(struct hudmessage *msg);
-void hudmsgCreateFromArgs(char *text, s32 type, s32 conf00, s32 conf01, s32 conf02,
+void hudmsgCreateFromArgs(char *text, int type, int conf00, int conf01, int conf02,
 		struct fontchar **conf04, struct font **conf08,
-		u32 textcolour, u32 shadowcolour,
-		u32 alignh, s32 conf16, u32 alignv, s32 conf18, s32 arg14, u32 flags);
+		uint32_t textcolour, uint32_t shadowcolour,
+		uint32_t alignh, int conf16, uint32_t alignv, int conf18, int arg14, uint32_t flags);
 void hudmsgsTick(void);
-void hudmsgsSetOn(u32 reason);
-void hudmsgsSetOff(u32 reason);
-void hudmsgsRemoveForDeadPlayer(s32 playernum);
+void hudmsgsSetOn(uint32_t reason);
+void hudmsgsSetOff(uint32_t reason);
+void hudmsgsRemoveForDeadPlayer(int playernum);
 Gfx *hudmsgsRender(Gfx *gdl);
 void hudmsgsStop(void);
 

@@ -49,11 +49,11 @@
 #endif
 
 struct memorypool {
-	/*0x00*/ u8 *start;
-	/*0x04*/ u8 *leftpos;
-	/*0x08*/ u8 *rightpos;
-	/*0x0c*/ u8 *end;
-	/*0x10*/ u8 *prevallocation;
+	/*0x00*/ uint8_t *start;
+	/*0x04*/ uint8_t *leftpos;
+	/*0x08*/ uint8_t *rightpos;
+	/*0x0c*/ uint8_t *end;
+	/*0x10*/ uint8_t *prevallocation;
 };
 
 struct memorypool g_MempOnboardPools[9];
@@ -65,10 +65,10 @@ struct memorypool g_MempExpansionPools[9];
  * The arguments passed are the onboard start and length that can be used.
  * If the expansion pak is present, the entire pak is used for the second bank.
  */
-void mempSetHeap(u8 *heapstart, u32 heaplen)
+void mempSetHeap(uint8_t *heapstart, uint32_t heaplen)
 {
-	s32 i;
-	u8 *extraend;
+	int i;
+	uint8_t *extraend;
 
 	for (i = 0; i < ARRAYCOUNT(g_MempOnboardPools); i++) {
 		g_MempOnboardPools[i].start = 0;
@@ -83,7 +83,7 @@ void mempSetHeap(u8 *heapstart, u32 heaplen)
 	}
 
 	// separate the heap space into onboard and expansion
-	u32 expansionlen = 0;
+	uint32_t expansionlen = 0;
 	if (heaplen > MEMP_EXPANSION_POOL_SIZE) {
 		heaplen -= MEMP_EXPANSION_POOL_SIZE;
 		expansionlen = MEMP_EXPANSION_POOL_SIZE;
@@ -113,9 +113,9 @@ void mempSetHeap(u8 *heapstart, u32 heaplen)
  * If using the expansion pak, it's assumed that the onboard pool is full
  * so only the expansion pool is checked.
  */
-u32 mempGetStageFree(void)
+uint32_t mempGetStageFree(void)
 {
-	u32 free;
+	uint32_t free;
 
 	free = g_MempExpansionPools[MEMPOOL_STAGE].rightpos - g_MempExpansionPools[MEMPOOL_STAGE].leftpos;
 
@@ -131,9 +131,9 @@ void *mempGetNextStageAllocation(void)
 	return next;
 }
 
-void *mempAllocFromBank(struct memorypool *pool, u32 size, u8 poolnum)
+void *mempAllocFromBank(struct memorypool *pool, uint32_t size, uint8_t poolnum)
 {
-	u8 *allocation;
+	uint8_t *allocation;
 
 	pool += poolnum;
 
@@ -159,7 +159,7 @@ void *mempAllocFromBank(struct memorypool *pool, u32 size, u8 poolnum)
 	return (void *)allocation;
 }
 
-void *mempAlloc(u32 len, u8 pool)
+void *mempAlloc(uint32_t len, uint8_t pool)
 {
 	void *allocation = mempAllocFromBank(g_MempOnboardPools, len, pool);
 
@@ -185,11 +185,11 @@ void *mempAlloc(u32 len, u8 pool)
  * @dangerous: This function does not check the limits of the memory pool.
  * If it allocates past the rightpos of the pool it could lead to memory corruption.
  */
-s32 mempRealloc(void *allocation, s32 newsize, u8 poolnum)
+int mempRealloc(void *allocation, int newsize, uint8_t poolnum)
 {
 	struct memorypool *pool = &g_MempOnboardPools[poolnum];
-	s32 origsize;
-	s32 growsize;
+	int origsize;
+	int growsize;
 
 	if (pool->prevallocation != allocation) {
 		pool = &g_MempExpansionPools[poolnum];
@@ -204,7 +204,7 @@ s32 mempRealloc(void *allocation, s32 newsize, u8 poolnum)
 
 	if (growsize <= 0) {
 		pool->leftpos += growsize;
-		pool->leftpos = (u8 *)ALIGN16((uintptr_t) pool->leftpos);
+		pool->leftpos = (uint8_t *)ALIGN16((uintptr_t) pool->leftpos);
 		return 1;
 	}
 
@@ -215,7 +215,7 @@ s32 mempRealloc(void *allocation, s32 newsize, u8 poolnum)
 /**
  * Return the amount of free space in the given pool and bank.
  */
-u32 mempGetPoolFree(u8 poolnum, u32 bank)
+uint32_t mempGetPoolFree(uint8_t poolnum, uint32_t bank)
 {
 	struct memorypool *pool;
 
@@ -237,7 +237,7 @@ u32 mempGetPoolFree(u8 poolnum, u32 bank)
  *
  * Note the right side is not reset here.
  */
-void mempResetPool(u8 pool)
+void mempResetPool(uint8_t pool)
 {
 	if (pool == MEMPOOL_STAGE) {
 		g_MempOnboardPools[MEMPOOL_STAGE].start = g_MempOnboardPools[MEMPOOL_PERMANENT].leftpos;
@@ -259,7 +259,7 @@ void mempResetPool(u8 pool)
  * that available for allocations. It would have made more sense to do this in
  * mempResetPool instead.
  */
-void mempDisablePool(u8 pool)
+void mempDisablePool(uint8_t pool)
 {
 	g_MempOnboardPools[pool].leftpos = 0;
 	g_MempExpansionPools[pool].leftpos = 0;
@@ -267,9 +267,9 @@ void mempDisablePool(u8 pool)
 	g_MempExpansionPools[pool].rightpos = g_MempExpansionPools[pool].end;
 }
 
-void *mempAllocFromBankRight(struct memorypool *pool, u32 size, u8 poolnum)
+void *mempAllocFromBankRight(struct memorypool *pool, uint32_t size, uint8_t poolnum)
 {
-	u8 *allocation;
+	uint8_t *allocation;
 
 	pool += poolnum;
 
@@ -292,7 +292,7 @@ void *mempAllocFromBankRight(struct memorypool *pool, u32 size, u8 poolnum)
 	return (void *)pool->rightpos;
 }
 
-void *mempAllocFromRight(u32 len, u8 pool)
+void *mempAllocFromRight(uint32_t len, uint8_t pool)
 {
 	void *allocation = mempAllocFromBankRight(g_MempOnboardPools, len, pool);
 

@@ -4379,10 +4379,10 @@
 	do_gun_command(1, label)
 
 #define if_within_targets_fovx_by_angle(angle, label) \
-	if_fov_check_with_target(angle, TRUE, FALSE, label)
+	if_fov_check_with_target(angle, 1, 0, label)
 
 #define if_y_angle_to_target_lt(angle, label) \
-	if_fov_check_with_target(angle, FALSE, FALSE, label)
+	if_fov_check_with_target(angle, 0, 0, label)
 
 #define if_target_outside_my_yvisang(label) \
-	if_fov_check_with_target(0, FALSE, TRUE, label)
+	if_fov_check_with_target(0, 0, 1, label)

@@ -9,9 +9,9 @@
 #include "data.h"
 #include "types.h"
 
-u8 var8005ef20 = 254;
+uint8_t var8005ef20 = 254;
 
-u8 var8009a4e0[456][2];
+uint8_t var8009a4e0[456][2];
 
 void portalGetAvgVertexPos(int portalnum, struct coord *avg)
 {
@@ -78,7 +78,7 @@ int portalCalculateIntersection(int portalnum, struct coord *pos1, struct coord 
 	struct coord *curr;
 	struct coord *next;
 	struct coord sp48;
-	u8 lastside;
+	uint8_t lastside;
 	float sp40[1];
 	struct coord sp34;
 	float value1;
@@ -158,7 +158,7 @@ void portal00018148(struct coord *pos1, struct coord *pos2, RoomNum *rooms1, Roo
 	int j;
 	int roomnum;
 	int numportals;
-	s16 *portalnums;
+	int16_t *portalnums;
 	RoomNum rooms9c[16];
 	RoomNum rooms7c[16];
 	RoomNum rooms5c[16];
@@ -191,7 +191,7 @@ void portal00018148(struct coord *pos1, struct coord *pos2, RoomNum *rooms1, Roo
 
 			for (i = 0; i < numportals; i++) {
 				int portalnum = *portalnums;
-				u8 *s1 = var8009a4e0[portalnum];
+				uint8_t *s1 = var8009a4e0[portalnum];
 
 				if (s1[0] != var8005ef20) {
 					s1[0] = var8005ef20;

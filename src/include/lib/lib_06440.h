@@ -4,6 +4,6 @@
 #include "data.h"
 #include "types.h"
 
-s32 osEepromLongWrite(u8 address, u8 *buffer, int nbytes);
+int osEepromLongWrite(uint8_t address, uint8_t *buffer, int nbytes);
 
 #endif

@@ -1,53 +1,51 @@
 #ifndef _IN_LIB_VI_H
 #define _IN_LIB_VI_H
 #include <ultra64.h>
+#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
 void viConfigureForLogos(void);
-void viConfigureForCopyright(u16 *fb);
+void viConfigureForCopyright(uint16_t *fb);
 void viConfigureForLegal(void);
-void viReset(s32 stagenum);
+void viReset(int stagenum);
 void viBlack(bool black);
 void viHandleRetrace(void);
 void viUpdateMode(void);
-void viShake(f32 intensity);
-void viSetMode(s32 mode);
-void viSet16Bit(void);
-u16 *viGetBackBuffer(void);
-u16 *viGetFrontBuffer(void);
+void viShake(float intensity);
+void viSetMode(int mode);
+uint16_t *viGetBackBuffer(void);
 Vp *viGetCurrentPlayerViewport(void);
-u16 viGetPerspScale(void);
 Gfx *vi0000ab78(Gfx *gdl);
-Gfx *vi0000aca4(Gfx *gdl, f32 znear, f32 zfar);
+Gfx *vi0000aca4(Gfx *gdl, float znear, float zfar);
 Gfx *vi0000ad5c(Gfx *gdl, Vp *vp);
 Gfx *vi0000af00(Gfx *gdl, Vp *vp);
-Gfx *vi0000b0e8(Gfx *gdl, f32 fovy, f32 aspect);
+Gfx *vi0000b0e8(Gfx *gdl, float fovy, float aspect);
 Gfx *vi0000b1a8(Gfx *gdl);
 Gfx *vi0000b1d0(Gfx *gdl);
 Gfx *viPrepareZbuf(Gfx *gdl);
 Gfx *viFillBuffer(Gfx *gdl);
 Gfx *viRenderViewportEdges(Gfx *gdl);
-void viSetBufSize(s16 width, s16 height);
-s16 viGetBufWidth(void);
-s16 viGetBufHeight(void);
-void viSetSize(s16 width, s16 height);
-s16 viGetWidth(void);
-s16 viGetHeight(void);
-void viSetViewSize(s16 width, s16 height);
-s16 viGetViewWidth(void);
-s16 viGetViewHeight(void);
-void viSetViewPosition(s16 left, s16 top);
-s16 viGetViewLeft(void);
-s16 viGetViewTop(void);
+void viSetBufSize(int16_t width, int16_t height);
+int16_t viGetBufWidth(void);
+int16_t viGetBufHeight(void);
+void viSetSize(int16_t width, int16_t height);
+int16_t viGetWidth(void);
+int16_t viGetHeight(void);
+void viSetViewSize(int16_t width, int16_t height);
+int16_t viGetViewWidth(void);
+int16_t viGetViewHeight(void);
+void viSetViewPosition(int16_t left, int16_t top);
+int16_t viGetViewLeft(void);
+int16_t viGetViewTop(void);
 void viSetUseZBuf(bool use);
-void viSetFovY(f32 fovy);
-void viSetAspect(f32 aspect);
-f32 viGetAspect(void);
-void viSetFovAspectAndSize(f32 fovy, f32 aspect, s16 width, s16 height);
-f32 viGetFovY(void);
-void viSetZRange(f32 arg0, f32 arg1);
+void viSetFovY(float fovy);
+void viSetAspect(float aspect);
+float viGetAspect(void);
+void viSetFovAspectAndSize(float fovy, float aspect, int16_t width, int16_t height);
+float viGetFovY(void);
+void viSetZRange(float arg0, float arg1);
 void viGetZRange(struct zrange *zrange);
-Gfx *viSetFillColour(Gfx *gdl, s32 r, s32 g, s32 b);
+Gfx *viSetFillColour(Gfx *gdl, int r, int g, int b);
 
 #endif

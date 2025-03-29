@@ -34,7 +34,7 @@
 #include "data.h"
 #include "types.h"
 
-u8 g_InventoryWeapon;
+uint8_t g_InventoryWeapon;
 
 struct menudialogdef g_2PMissionControlStyleMenuDialog;
 struct menudialogdef g_CiControlPlayer2MenuDialog;
@@ -66,7 +66,7 @@ char *soloMenuTextDifficulty(struct menuitem *item)
 	}
 }
 
-u16 g_ControlStyleOptions[] = {
+uint16_t g_ControlStyleOptions[] = {
 	L_OPTIONS_239, // "1.1"
 	L_OPTIONS_240, // "1.2"
 	L_OPTIONS_241, // "1.3"
@@ -77,9 +77,9 @@ u16 g_ControlStyleOptions[] = {
 	L_OPTIONS_246, // "2.4"
 };
 
-MenuItemHandlerResult menuhandlerControlStyleImpl(s32 operation, struct menuitem *item, union handlerdata *data, s32 mpindex)
+MenuItemHandlerResult menuhandlerControlStyleImpl(int operation, struct menuitem *item, union handlerdata *data, int mpindex)
 {
-	u16 categories[] = {
+	uint16_t categories[] = {
 		L_OPTIONS_237, // "Single"
 		L_OPTIONS_238, // "Double"
 	};
@@ -131,19 +131,19 @@ MenuItemHandlerResult menuhandlerControlStyleImpl(s32 operation, struct menuitem
 	return 0;
 }
 
-MenuItemHandlerResult menuhandler001024dc(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandler001024dc(int operation, struct menuitem *item, union handlerdata *data)
 {
 	return menuhandlerControlStyleImpl(operation, item, data, 4);
 }
 
-MenuItemHandlerResult menuhandler001024fc(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandler001024fc(int operation, struct menuitem *item, union handlerdata *data)
 {
 	return menuhandlerControlStyleImpl(operation, item, data, 5);
 }
 
-MenuItemHandlerResult menuhandlerReversePitch(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerReversePitch(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 mpchrnum;
+	uint32_t mpchrnum;
 
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 		mpchrnum = g_Vars.currentplayerstats->mpindex;
@@ -162,12 +162,12 @@ MenuItemHandlerResult menuhandlerReversePitch(s32 operation, struct menuitem *it
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerAimControl(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerAimControl(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 playernum = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
+	uint32_t playernum = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
 		? g_Vars.currentplayerstats->mpindex : item->param3;
 
-	u16 options[] = {
+	uint16_t options[] = {
 		L_OPTIONS_201, // "Hold"
 		L_OPTIONS_202, // "Toggle"
 	};
@@ -189,9 +189,9 @@ MenuItemHandlerResult menuhandlerAimControl(s32 operation, struct menuitem *item
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerSoundMode(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerSoundMode(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u16 options[] = {
+	uint16_t options[] = {
 		L_OPTIONS_232, // "Mono"
 		L_OPTIONS_233, // "Stereo"
 		L_OPTIONS_234, // "Headphone"
@@ -215,9 +215,9 @@ MenuItemHandlerResult menuhandlerSoundMode(s32 operation, struct menuitem *item,
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerScreenSize(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerScreenSize(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u16 options[] = {
+	uint16_t options[] = {
 		L_OPTIONS_220, // "Full"
 		L_OPTIONS_221, // "Wide"
 		L_OPTIONS_222, // "Cinema"
@@ -240,9 +240,9 @@ MenuItemHandlerResult menuhandlerScreenSize(s32 operation, struct menuitem *item
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerScreenRatio(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerScreenRatio(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u16 options[] = {
+	uint16_t options[] = {
 		L_OPTIONS_223, // "Normal"
 		L_OPTIONS_224, // "16:9"
 	};
@@ -264,9 +264,9 @@ MenuItemHandlerResult menuhandlerScreenRatio(s32 operation, struct menuitem *ite
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerScreenSplit(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerScreenSplit(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u16 options[] = {
+	uint16_t options[] = {
 		L_OPTIONS_225, // "Horizontal"
 		L_OPTIONS_226, // "Vertical"
 	};
@@ -278,17 +278,17 @@ MenuItemHandlerResult menuhandlerScreenSplit(s32 operation, struct menuitem *ite
 	case MENUOP_GETOPTIONTEXT:
 		return (uintptr_t) langGet(options[data->dropdown.value]);
 	case MENUOP_SET:
-		if (data->dropdown.value != (u32)optionsGetScreenSplit()) {
+		if (data->dropdown.value != (uint32_t)optionsGetScreenSplit()) {
 			optionsSetScreenSplit(data->dropdown.value);
 
 			g_Vars.modifiedfiles |= MODFILE_GAME;
 
 			if (PLAYERCOUNT() > 1) {
-				u32 prevplayernum = g_MpPlayerNum;
+				uint32_t prevplayernum = g_MpPlayerNum;
 				g_MpPlayerNum = 0;
-				func0f0f8120();
+				menuFinalizePlayerDataAndPopDialogs();
 				g_MpPlayerNum = 1;
-				func0f0f8120();
+				menuFinalizePlayerDataAndPopDialogs();
 				g_MpPlayerNum = prevplayernum;
 			}
 		}
@@ -301,9 +301,9 @@ MenuItemHandlerResult menuhandlerScreenSplit(s32 operation, struct menuitem *ite
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerLookAhead(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerLookAhead(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 mpchrnum;
+	uint32_t mpchrnum;
 
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 		mpchrnum = g_Vars.currentplayerstats->mpindex;
@@ -322,9 +322,9 @@ MenuItemHandlerResult menuhandlerLookAhead(s32 operation, struct menuitem *item,
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerHeadRoll(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerHeadRoll(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 mpchrnum;
+	uint32_t mpchrnum;
 
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 		mpchrnum = g_Vars.currentplayerstats->mpindex;
@@ -343,7 +343,7 @@ MenuItemHandlerResult menuhandlerHeadRoll(s32 operation, struct menuitem *item, 
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerInGameSubtitles(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerInGameSubtitles(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -356,7 +356,7 @@ MenuItemHandlerResult menuhandlerInGameSubtitles(s32 operation, struct menuitem 
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerCutsceneSubtitles(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerCutsceneSubtitles(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -369,11 +369,11 @@ MenuItemHandlerResult menuhandlerCutsceneSubtitles(s32 operation, struct menuite
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerAlternativeTitle(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerAlternativeTitle(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_CHECKHIDDEN:
-		if (g_Vars.stagenum != STAGE_CITRAINING || (u8)g_AltTitleUnlocked == false) {
+		if (g_Vars.stagenum != STAGE_CITRAINING || (uint8_t)g_AltTitleUnlocked == false) {
 			return true;
 		}
 		break;
@@ -387,9 +387,9 @@ MenuItemHandlerResult menuhandlerAlternativeTitle(s32 operation, struct menuitem
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerAmmoOnScreen(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerAmmoOnScreen(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 mpchrnum;
+	uint32_t mpchrnum;
 
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 		mpchrnum = g_Vars.currentplayerstats->mpindex;
@@ -408,9 +408,9 @@ MenuItemHandlerResult menuhandlerAmmoOnScreen(s32 operation, struct menuitem *it
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerShowGunFunction(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerShowGunFunction(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 mpchrnum;
+	uint32_t mpchrnum;
 
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 		mpchrnum = g_Vars.currentplayerstats->mpindex;
@@ -434,9 +434,9 @@ MenuItemHandlerResult menuhandlerShowGunFunction(s32 operation, struct menuitem 
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerShowMissionTime(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerShowMissionTime(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 mpchrnum;
+	uint32_t mpchrnum;
 
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 		mpchrnum = g_Vars.currentplayerstats->mpindex;
@@ -455,9 +455,9 @@ MenuItemHandlerResult menuhandlerShowMissionTime(s32 operation, struct menuitem 
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerAlwaysShowTarget(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerAlwaysShowTarget(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 mpchrnum;
+	uint32_t mpchrnum;
 
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 		mpchrnum = g_Vars.currentplayerstats->mpindex;
@@ -481,9 +481,9 @@ MenuItemHandlerResult menuhandlerAlwaysShowTarget(s32 operation, struct menuitem
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerShowZoomRange(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerShowZoomRange(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 mpchrnum;
+	uint32_t mpchrnum;
 
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 		mpchrnum = g_Vars.currentplayerstats->mpindex;
@@ -507,9 +507,9 @@ MenuItemHandlerResult menuhandlerShowZoomRange(s32 operation, struct menuitem *i
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerPaintball(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerPaintball(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 mpchrnum;
+	uint32_t mpchrnum;
 
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 		mpchrnum = g_Vars.currentplayerstats->mpindex;
@@ -528,9 +528,9 @@ MenuItemHandlerResult menuhandlerPaintball(s32 operation, struct menuitem *item,
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerSightOnScreen(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerSightOnScreen(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 mpchrnum;
+	uint32_t mpchrnum;
 
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 		mpchrnum = g_Vars.currentplayerstats->mpindex;
@@ -549,9 +549,9 @@ MenuItemHandlerResult menuhandlerSightOnScreen(s32 operation, struct menuitem *i
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerAutoAim(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerAutoAim(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u32 mpchrnum;
+	uint32_t mpchrnum;
 
 	if (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) {
 		mpchrnum = g_Vars.currentplayerstats->mpindex;
@@ -570,7 +570,7 @@ MenuItemHandlerResult menuhandlerAutoAim(s32 operation, struct menuitem *item, u
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerMusicVolume(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMusicVolume(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -584,7 +584,7 @@ MenuItemHandlerResult menuhandlerMusicVolume(s32 operation, struct menuitem *ite
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerSfxVolume(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerSfxVolume(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETSLIDER:
@@ -598,7 +598,7 @@ MenuItemHandlerResult menuhandlerSfxVolume(s32 operation, struct menuitem *item,
 	return 0;
 }
 
-MenuDialogHandlerResult menudialogBriefing(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult menudialogBriefing(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	if (operation == MENUOP_TICK) {
 		if (g_Menus[g_MpPlayerNum].curdialog
@@ -637,7 +637,7 @@ struct menudialogdef g_PreAndPostMissionBriefingMenuDialog = {
 	NULL,
 };
 
-MenuItemHandlerResult menuhandlerAcceptMission(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerAcceptMission(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		menuStop();
@@ -704,7 +704,7 @@ char *soloMenuTitleStageOverview(struct menudialogdef *dialogdef)
 	return g_StringPointer;
 }
 
-MenuDialogHandlerResult menudialog00103608(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult menudialog00103608(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_OPEN:
@@ -758,7 +758,7 @@ struct menudialogdef g_AcceptMissionMenuDialog = {
 	&g_PreAndPostMissionBriefingMenuDialog,
 };
 
-f32 func0f1036ac(u8 value, s32 prop)
+float func0f1036ac(uint8_t value, int prop)
 {
 	if (prop == PDMODEPROP_REACTION) {
 		return value / 255.0f;
@@ -767,10 +767,10 @@ f32 func0f1036ac(u8 value, s32 prop)
 	return mpHandicapToDamageScale(value);
 }
 
-MenuItemHandlerResult menuhandlerPdModeSetting(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerPdModeSetting(int operation, struct menuitem *item, union handlerdata *data)
 {
-	u8 *property;
-	f32 fvalue;
+	uint8_t *property;
+	float fvalue;
 
 	switch (item->param) {
 	case PDMODEPROP_REACTION: property = &g_MissionConfig.pdmodereaction; break;
@@ -785,7 +785,7 @@ MenuItemHandlerResult menuhandlerPdModeSetting(s32 operation, struct menuitem *i
 		data->slider.value = *property;
 		break;
 	case MENUOP_SET:
-		*property = (u16)data->slider.value;
+		*property = (uint16_t)data->slider.value;
 		break;
 	case MENUOP_GETSLIDERLABEL:
 		fvalue = func0f1036ac(*property, item->param);
@@ -799,7 +799,7 @@ MenuItemHandlerResult menuhandlerPdModeSetting(s32 operation, struct menuitem *i
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerAcceptPdModeSettings(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerAcceptPdModeSettings(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_MissionConfig.pdmode = true;
@@ -891,10 +891,10 @@ struct menudialogdef g_PdModeSettingsMenuDialog = {
  *
  * This function does not test for PD mode being unlocked.
  */
-bool isStageDifficultyUnlocked(s32 stageindex, s32 difficulty)
+bool isStageDifficultyUnlocked(int stageindex, int difficulty)
 {
-	s32 s;
-	s32 d;
+	int s;
+	int d;
 
 	// Handle special missions
 	if (stageindex > SOLOSTAGEINDEX_SKEDARRUINS) {
@@ -902,7 +902,7 @@ bool isStageDifficultyUnlocked(s32 stageindex, s32 difficulty)
 		// the one that's being queried, then they have access to this
 		// difficulty for all special missions. Agent is gifted here, so if the
 		// bonus mission is available at all then Agent is also available.
-		s32 maxcompleteddiff = DIFF_A;
+		int maxcompleteddiff = DIFF_A;
 
 		for (d = DIFF_A; d <= DIFF_PA; d++) {
 			if (g_GameFile.besttimes[SOLOSTAGEINDEX_SKEDARRUINS][d] != 0) {
@@ -1030,7 +1030,7 @@ bool isStageDifficultyUnlocked(s32 stageindex, s32 difficulty)
 	return false;
 }
 
-MenuItemHandlerResult menuhandlerSoloDifficulty(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerSoloDifficulty(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_CHECKPREFOCUSED:
@@ -1038,7 +1038,7 @@ MenuItemHandlerResult menuhandlerSoloDifficulty(s32 operation, struct menuitem *
 			if (item->param3 == 0) {
 				return true;
 			}
-			if (item->param <= (u32)g_GameFile.autodifficulty) {
+			if (item->param <= (uint32_t)g_GameFile.autodifficulty) {
 				return true;
 			}
 		}
@@ -1059,7 +1059,7 @@ MenuItemHandlerResult menuhandlerSoloDifficulty(s32 operation, struct menuitem *
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerPdMode(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerPdMode(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_SET:
@@ -1076,8 +1076,8 @@ MenuItemHandlerResult menuhandlerPdMode(s32 operation, struct menuitem *item, un
 
 char *soloMenuTextBestTime(struct menuitem *item)
 {
-	u16 time = g_GameFile.besttimes[g_MissionConfig.stageindex][item->param];
-	s32 hours = time / 3600;
+	uint16_t time = g_GameFile.besttimes[g_MissionConfig.stageindex][item->param];
+	int hours = time / 3600;
 
 	if (time == 0) {
 		return "--:--\n";
@@ -1088,10 +1088,10 @@ char *soloMenuTextBestTime(struct menuitem *item)
 	}
 
 	if (hours == 0) {
-		s32 mins = time / 60;
+		int mins = time / 60;
 		sprintf(g_StringPointer, "%dm:%02ds", mins % 60, time % 60);
 	} else {
-		s32 mins = time / 60;
+		int mins = time / 60;
 		sprintf(g_StringPointer, "%dh:%02dm:%02ds", hours, mins % 60, time % 60);
 	}
 
@@ -1167,7 +1167,7 @@ struct menudialogdef g_SoloMissionDifficultyMenuDialog = {
 	NULL,
 };
 
-MenuItemHandlerResult menuhandlerBuddyOptionsContinue(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerBuddyOptionsContinue(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		menuPopDialog();
@@ -1181,12 +1181,11 @@ MenuItemHandlerResult menuhandlerBuddyOptionsContinue(s32 operation, struct menu
 	return 0;
 }
 
-s32 getMaxAiBuddies(void)
+int getMaxAiBuddies(void)
 {
-	u32 stack;
-	s32 extra = 0;
-	s32 max = 1 - g_MissionConfig.difficulty;
-	s32 d;
+	int extra = 0;
+	int max = 1 - g_MissionConfig.difficulty;
+	int d;
 
 	for (d = 0; d != 3; d++) {
 		if ((g_GameFile.coopcompletions[d] | 0xfffe0000) == 0xffffffff) {
@@ -1207,10 +1206,10 @@ s32 getMaxAiBuddies(void)
 	return max;
 }
 
-MenuDialogHandlerResult menudialogCoopAntiOptions(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult menudialogCoopAntiOptions(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	if (operation == MENUOP_OPEN) {
-		s32 max = getMaxAiBuddies();
+		int max = getMaxAiBuddies();
 
 		if (g_Vars.numaibuddies > max) {
 			g_Vars.numaibuddies = max;
@@ -1232,7 +1231,7 @@ MenuDialogHandlerResult menudialogCoopAntiOptions(s32 operation, struct menudial
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerCoopRadar(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerCoopRadar(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -1245,7 +1244,7 @@ MenuItemHandlerResult menuhandlerCoopRadar(s32 operation, struct menuitem *item,
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerCoopFriendlyFire(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerCoopFriendlyFire(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -1258,9 +1257,9 @@ MenuItemHandlerResult menuhandlerCoopFriendlyFire(s32 operation, struct menuitem
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerCoopBuddy(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerCoopBuddy(int operation, struct menuitem *item, union handlerdata *data)
 {
-	const u16 labels[] = {
+	const uint16_t labels[] = {
 		L_OPTIONS_261, // "Human"
 		L_OPTIONS_262, // "1 Simulant"
 		L_OPTIONS_263, // "2 Simulants"
@@ -1270,10 +1269,9 @@ MenuItemHandlerResult menuhandlerCoopBuddy(s32 operation, struct menuitem *item,
 
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
-#if VERSION >= VERSION_NTSC_1_0
 		{
-			s32 maxaibuddies = getMaxAiBuddies();
-			s32 human = 0;
+			int maxaibuddies = getMaxAiBuddies();
+			int human = 0;
 
 			if (joyGetConnectedControllers() & 2) {
 				human = 1;
@@ -1281,40 +1279,10 @@ MenuItemHandlerResult menuhandlerCoopBuddy(s32 operation, struct menuitem *item,
 
 			data->dropdown.value = human + maxaibuddies;
 		}
-#else
-		{
-			s32 extrabuddies = 0;
-			s32 i;
-			s32 maxbuddies = 1 - g_MissionConfig.difficulty;
-			s32 human = 0;
-
-			if (joyGetConnectedControllers() & 2) {
-				human = 1;
-			}
-
-			for (i = 0; i < 3; i++) {
-				if ((g_GameFile.coopcompletions[i] | 0xfffe0000) == 0xffffffff) {
-					extrabuddies = i + 1;
-				}
-			}
-
-			maxbuddies += extrabuddies;
-
-			if (maxbuddies > 4) {
-				maxbuddies = 4;
-			}
-
-			if (maxbuddies < 1) {
-				maxbuddies = 1;
-			}
-
-			data->dropdown.value = human + maxbuddies;
-		}
-#endif
 		break;
 	case MENUOP_GETOPTIONTEXT:
 		{
-			s32 extra = 1;
+			int extra = 1;
 
 			if (joyGetConnectedControllers() & 2) {
 				extra = 0;
@@ -1324,7 +1292,7 @@ MenuItemHandlerResult menuhandlerCoopBuddy(s32 operation, struct menuitem *item,
 		}
 	case MENUOP_SET:
 		{
-			s32 extra = 1;
+			int extra = 1;
 
 			if (joyGetConnectedControllers() & 2) {
 				extra = 0;
@@ -1336,7 +1304,7 @@ MenuItemHandlerResult menuhandlerCoopBuddy(s32 operation, struct menuitem *item,
 		break;
 	case MENUOP_GETSELECTEDINDEX:
 		{
-			s32 extra = 1;
+			int extra = 1;
 
 			if (joyGetConnectedControllers() & 2) {
 				extra = 0;
@@ -1415,7 +1383,7 @@ struct menudialogdef g_CoopOptionsMenuDialog = {
 	NULL,
 };
 
-MenuItemHandlerResult menuhandlerAntiRadar(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerAntiRadar(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -1428,9 +1396,9 @@ MenuItemHandlerResult menuhandlerAntiRadar(s32 operation, struct menuitem *item,
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerAntiPlayer(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerAntiPlayer(int operation, struct menuitem *item, union handlerdata *data)
 {
-	const u16 labels[] = {L_OPTIONS_271, L_OPTIONS_272};
+	const uint16_t labels[] = {L_OPTIONS_271, L_OPTIONS_272};
 
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
@@ -1503,7 +1471,7 @@ struct menudialogdef g_AntiOptionsMenuDialog = {
 	NULL,
 };
 
-MenuItemHandlerResult menuhandlerCoopDifficulty(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerCoopDifficulty(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_SET:
@@ -1575,7 +1543,7 @@ struct menudialogdef g_CoopMissionDifficultyMenuDialog = {
 	NULL,
 };
 
-MenuItemHandlerResult menuhandlerAntiDifficulty(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerAntiDifficulty(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_SET:
@@ -1667,11 +1635,11 @@ struct solostage g_SoloStages[NUM_SOLOSTAGES] = {
 	{ STAGE_DUEL,          0x1c, L_OPTIONS_171, L_OPTIONS_003, L_OPTIONS_171   },
 };
 
-s32 getNumUnlockedSpecialStages(void)
+int getNumUnlockedSpecialStages(void)
 {
-	s32 count = 0;
-	s32 offsetforduel = 1;
-	s32 i;
+	int count = 0;
+	int offsetforduel = 1;
+	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_GameFile.besttimes[0]); i++) {
 		if (g_GameFile.besttimes[SOLOSTAGEINDEX_SKEDARRUINS][i]) {
@@ -1692,10 +1660,10 @@ s32 getNumUnlockedSpecialStages(void)
 	return count + offsetforduel;
 }
 
-s32 func0f104720(s32 value)
+int func0f104720(int value)
 {
-	s32 next = 0;
-	s32 d;
+	int next = 0;
+	int d;
 
 	for (d = 0; d < ARRAYCOUNT(g_GameFile.besttimes[0]); d++) {
 		if (g_GameFile.besttimes[SOLOSTAGEINDEX_SKEDARRUINS][d]) {
@@ -1710,7 +1678,7 @@ s32 func0f104720(s32 value)
 	return 20;
 }
 
-MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *item, union handlerdata *data)
 {
 	struct optiongroup groups[] = {
 		{  0, L_OPTIONS_123 }, // "Mission 1"
@@ -1725,26 +1693,26 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 		{ 99, L_OPTIONS_132 }, // "Special Assignments"
 	};
 
-	s32 i;
-	s32 j;
+	int i;
+	int j;
 	bool stageiscomplete;
 	union handlerdata sp18c;
-	u32 sp188;
+	uint32_t sp188;
 	union handlerdata sp178;
 	union handlerdata sp168;
-	s32 sp164;
-	s32 sp160;
+	int sp164;
+	int sp160;
 	union handlerdata sp150;
-	s32 k;
+	int k;
 	union handlerdata sp13c;
 	Gfx *gdl;
 	struct menuitemrenderdata *renderdata;
-	s32 x;
-	s32 y;
-	s32 stack;
-	s32 incompleteindex;
+	int x;
+	int y;
+	int stack;
+	int incompleteindex;
 	char text[50];
-	s32 stageindex;
+	int stageindex;
 	union handlerdata spdc;
 
 	switch (operation) {
@@ -1890,9 +1858,9 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 		gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 255 / 256));
 
 		gSPTextureRectangle(gdl++,
-				((renderdata->x + 4) << 2) * g_ScaleX, (renderdata->y + 3) << 2,
-				((renderdata->x + 60) << 2) * g_ScaleX, (renderdata->y + 39) << 2,
-				G_TX_RENDERTILE, 0, 0x0480, 1024 / g_ScaleX, -1024);
+				((renderdata->x + 4) << 2), (renderdata->y + 3) << 2,
+				((renderdata->x + 60) << 2), (renderdata->y + 39) << 2,
+				G_TX_RENDERTILE, 0, 0x0480, 1024, -1024);
 
 		if (g_MissionConfig.isanti) {
 			// No stars
@@ -1903,7 +1871,7 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 			gDPSetTextureFilter(gdl++, G_TF_POINT);
 
 			for (k = 0; k < 3; k++) {
-				s32 relx = 63 + k * 17;
+				int relx = 63 + k * 17;
 
 				if ((g_GameFile.coopcompletions[k] & (1 << stageindex)) == 0) {
 					gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 63 / 256));
@@ -1916,9 +1884,9 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 				}
 
 				gSPTextureRectangle(gdl++,
-						((renderdata->x + relx) << 2) * g_ScaleX, (renderdata->y + 25) << 2,
-						((renderdata->x + relx + 14) << 2) * g_ScaleX, (renderdata->y + 39) << 2,
-						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024 / g_ScaleX, -1024);
+						((renderdata->x + relx) << 2), (renderdata->y + 25) << 2,
+						((renderdata->x + relx + 14) << 2), (renderdata->y + 39) << 2,
+						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024);
 			}
 		} else {
 			texSelect(&gdl, &g_TexGeneralConfigs[34], 2, 0, 2, true, NULL);
@@ -1935,7 +1903,7 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 			}
 
 			for (k = 0; k < 3; k++) {
-				s32 relx = 63 + k * 17;
+				int relx = 63 + k * 17;
 
 				if (k == incompleteindex) {
 					// Set transparency
@@ -1946,9 +1914,9 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 				}
 
 				gSPTextureRectangle(gdl++,
-						((renderdata->x + relx) << 2) * g_ScaleX, (renderdata->y + 25) << 2,
-						((renderdata->x + relx + 14) << 2) * g_ScaleX, (renderdata->y + 39) << 2,
-						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024 / g_ScaleX, -1024);
+						((renderdata->x + relx) << 2), (renderdata->y + 25) << 2,
+						((renderdata->x + relx + 14) << 2), (renderdata->y + 39) << 2,
+						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024);
 			}
 		}
 
@@ -1981,7 +1949,7 @@ MenuItemHandlerResult menuhandlerMissionList(s32 operation, struct menuitem *ite
 	return 0;
 }
 
-MenuDialogHandlerResult menudialog0010559c(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult menudialog0010559c(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_OPEN:
@@ -2074,7 +2042,7 @@ char *func0f1056a0(struct menuitem *item)
 	return (char *)menuhandler001024fc(MENUOP_GETOPTIONTEXT, item, &data);
 }
 
-MenuItemHandlerResult menuhandlerLangFilter(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerLangFilter(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GET:
@@ -2087,7 +2055,7 @@ MenuItemHandlerResult menuhandlerLangFilter(s32 operation, struct menuitem *item
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerControlStyle(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerControlStyle(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		if (PLAYERCOUNT() >= 2) {
@@ -2100,7 +2068,7 @@ MenuItemHandlerResult menuhandlerControlStyle(s32 operation, struct menuitem *it
 	return 0;
 }
 
-MenuItemHandlerResult menuhandler001057ec(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandler001057ec(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		filemgrSaveOrLoad(&g_GameFileGuid, FILEOP_SAVE_GAME_002, 0);
@@ -2109,16 +2077,16 @@ MenuItemHandlerResult menuhandler001057ec(s32 operation, struct menuitem *item, 
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerChangeAgent(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerChangeAgent(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
-		func0f0f820c(NULL, -7);
+		menuResetAllDialogsAndSetNewRoot(NULL, -7);
 	}
 
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerExitGame(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerExitGame(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		debug_erase(); // Ben: erase my debug log
@@ -3444,7 +3412,7 @@ struct menudialogdef g_2PMissionOptionsVMenuDialog = {
 	&g_2PMissionBriefingVMenuDialog,
 };
 
-u8 var80072d88 = 255;
+uint8_t var80072d88 = 255;
 
 char *invMenuTextPrimaryFunction(struct menuitem *item)
 {
@@ -3475,10 +3443,10 @@ char *invMenuTextSecondaryFunction(struct menuitem *item)
 }
 
 // How weapons display on the pause menu and the firing range menu
-void invMenuGetGunConfigs(s32 weaponnum)
+void invMenuGetGunConfigs(int weaponnum)
 {
 	                                                                  //PITCH           //SCALE
-	f32 gunconfig[][5] = {
+	float gunconfig[][5] = {
 		{ 23.299999237061f,   -16.799999237061f,  -153.39999389648f,  6.4140100479126f, 0.48769000172615f }, // Falcon 2
 		{ 22.299999237061f,   -13.5f,             -216.60000610352f,  6.443009853363f,  0.34057000279427f }, // Falcon 2 Silenced
 		{ 19.5f,              -31.89999961853f,   -154.89999389648f,  6.3730101585388f, 0.41813001036644f }, // Falcon 2 Scoped
@@ -3562,15 +3530,15 @@ void invMenuGetGunConfigs(s32 weaponnum)
 	};
 
 	struct weapon *weapon;
-	s32 wantindex;
+	int wantindex;
 
 	wantindex = weaponnum - 2;
 
-	if ((u32)wantindex < 0 || wantindex >= ARRAYCOUNT(gunconfig)) {
+	if ((uint32_t)wantindex < 0 || wantindex >= ARRAYCOUNT(gunconfig)) {
 		wantindex = 0;
 	}
 
-	if (weaponHasFlag(weaponnum, WEAPONFLAG_HIDEMENUMODEL) == false && (u32)wantindex >= 0) {
+	if (weaponHasFlag(weaponnum, WEAPONFLAG_HIDEMENUMODEL) == false && (uint32_t)wantindex >= 0) {
 		weapon = weaponFindById(weaponnum);
 
 		g_Menus[g_MpPlayerNum].menumodel.loaddelay = 8;
@@ -3598,7 +3566,7 @@ void invMenuGetGunConfigs(s32 weaponnum)
 
 		// These indexes correspond to WEAPON_DISGUISE40 and WEAPON_DISGUISE41
 		if (wantindex == 0x3e || wantindex == 0x3f) {
-			if ((u32)wantindex == 0x3e) {
+			if ((uint32_t)wantindex == 0x3e) {
 				g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_MP_HEADBODY(MPHEAD_DARK_FROCK, MPBODY_DARKLAB);
 			} else {
 				g_Menus[g_MpPlayerNum].menumodel.newparams = MENUMODELPARAMS_SET_MP_HEADBODY(MPHEAD_DARK_COMBAT, MPBODY_DARK_AF1);
@@ -3621,7 +3589,7 @@ void invMenuGetGunConfigs(s32 weaponnum)
 }
 
 // Handles the 3D model in the inventory menu
-MenuDialogHandlerResult inventoryMenuDialog(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult inventoryMenuDialog(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	if (operation == MENUOP_TICK) {
 		if (g_Menus[g_MpPlayerNum].curdialog && g_Menus[g_MpPlayerNum].curdialog->definition == dialogdef) {
@@ -3674,7 +3642,7 @@ char *invMenuTextWeaponName(struct menuitem *item)
 char *invMenuTextWeaponManufacturer(struct menuitem *item)
 {
 	struct weapon *weapon = weaponFindById(g_InventoryWeapon);
-	u32 textid = L_GUN_000; // "\n"
+	uint32_t textid = L_GUN_000; // "\n"
 
 	if (weapon) {
 		textid = weapon->manufacturer;
@@ -3715,7 +3683,7 @@ char *invMenuTextWeaponDescription(struct menuitem *item)
 			// CDV780322
 			// I8MOZYM8NDI85
 
-			u8 username[] = {
+			uint8_t username[] = {
 				'C' + 9 * 1,
 				'D' + 9 * 2,
 				'V' + 9 * 3,
@@ -3728,7 +3696,7 @@ char *invMenuTextWeaponDescription(struct menuitem *item)
 				'\0' + 9 * 10,
 			};
 
-			u8 password[] = {
+			uint8_t password[] = {
 				'I' + 4 * 1,
 				'8' + 4 * 2,
 				'M' + 4 * 3,
@@ -3745,7 +3713,7 @@ char *invMenuTextWeaponDescription(struct menuitem *item)
 				'\0' + 4 * 14,
 			};
 
-			s32 i;
+			int i;
 
 			for (i = 0; i < ARRAYCOUNT(username); i++) {
 				username[i] -= i * 9 + 9;
@@ -3904,9 +3872,9 @@ struct menudialogdef g_FrWeaponsAvailableMenuDialog = {
 	NULL,
 };
 
-MenuItemHandlerResult menuhandlerFrInventoryList(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerFrInventoryList(int operation, struct menuitem *item, union handlerdata *data)
 {
-	static u8 g_FrFocusedSlotIndex = 0;
+	static uint8_t g_FrFocusedSlotIndex = 0;
 
 	switch (operation) {
 	case MENUOP_GETOPTGROUPCOUNT:
@@ -3945,7 +3913,7 @@ MenuItemHandlerResult menuhandlerFrInventoryList(s32 operation, struct menuitem 
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerInventoryList(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerInventoryList(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_GETOPTIONCOUNT:
@@ -3955,11 +3923,11 @@ MenuItemHandlerResult menuhandlerInventoryList(s32 operation, struct menuitem *i
 		return (uintptr_t)invGetNameByIndex(data->list.value);
 	case MENUOP_SET:
 		{
-			s32 weaponnum = invGetWeaponNumByIndex(data->list.value);
+			int weaponnum = invGetWeaponNumByIndex(data->list.value);
 			bool equippable = true;
 
 			if (weaponnum != WEAPON_NONE) {
-				s32 state = currentPlayerGetDeviceState(weaponnum);
+				int state = currentPlayerGetDeviceState(weaponnum);
 
 				if (state != DEVICESTATE_UNEQUIPPED) {
 					equippable = false;
@@ -3998,10 +3966,10 @@ MenuItemHandlerResult menuhandlerInventoryList(s32 operation, struct menuitem *i
 		break;
 	case MENUOP_GETLISTITEMCHECKBOX:
 		{
-			s32 weaponnum = invGetWeaponNumByIndex(data->list.value);
+			int weaponnum = invGetWeaponNumByIndex(data->list.value);
 
 			if (weaponnum != WEAPON_NONE) {
-				s32 state = currentPlayerGetDeviceState(weaponnum);
+				int state = currentPlayerGetDeviceState(weaponnum);
 
 				if (state != DEVICESTATE_UNEQUIPPED) {
 					data->list.unk04 = state;
@@ -4023,7 +3991,7 @@ MenuItemHandlerResult menuhandlerInventoryList(s32 operation, struct menuitem *i
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerAbortMission(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerAbortMission(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_Vars.currentplayer->aborted = true;
@@ -4033,7 +4001,7 @@ MenuItemHandlerResult menuhandlerAbortMission(s32 operation, struct menuitem *it
 	return 0;
 }
 
-MenuDialogHandlerResult menudialogAbortMission(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult menudialogAbortMission(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	if (operation == MENUOP_TICK) {
 		// empty
@@ -4116,13 +4084,13 @@ struct menudialogdef g_2PMissionAbortVMenuDialog = {
 	NULL,
 };
 
-MenuDialogHandlerResult soloMenuDialogPauseStatus(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult soloMenuDialogPauseStatus(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	if (operation == MENUOP_OPEN) {
 		struct briefingobj *briefing = g_BriefingObjs;
 		struct objective *objective;
-		s32 wanttype = BRIEFINGTYPE_TEXT_PA;
-		s32 i;
+		int wanttype = BRIEFINGTYPE_TEXT_PA;
+		int i;
 
 		if (lvGetDifficulty() == DIFF_A) {
 			wanttype = BRIEFINGTYPE_TEXT_A;
@@ -4280,7 +4248,7 @@ struct cutscene g_Cutscenes[] = {
 	{ /*37*/ STAGE_SKEDARRUINS,   16, 1, L_OPTIONS_488 },
 };
 
-u32 g_CutsceneCountsByMission[] = {
+uint32_t g_CutsceneCountsByMission[] = {
 	/* 0*/ 1,  // 0 missions completed => 1 cutscene available (Def intro)
 	/* 1*/ 3,  // 1 mission completed => 3 cutscenes available (Def intro, outro, Invest intro)
 	/* 2*/ 5,
@@ -4303,11 +4271,11 @@ u32 g_CutsceneCountsByMission[] = {
 	/*17*/ 38,
 };
 
-s32 getNumCompletedMissions(void)
+int getNumCompletedMissions(void)
 {
-	s32 s;
-	s32 d;
-	s32 count = 0;
+	int s;
+	int d;
+	int count = 0;
 
 	for (s = 0; s != 17; s++) {
 		bool done = false;
@@ -4329,11 +4297,11 @@ s32 getNumCompletedMissions(void)
 }
 
 struct cutscenegroup {
-	u32 first_cutscene_index;
-	u16 name;
+	uint32_t first_cutscene_index;
+	uint16_t name;
 };
 
-MenuItemHandlerResult menuhandlerCinema(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerCinema(int operation, struct menuitem *item, union handlerdata *data)
 {
 	struct cutscenegroup groups[] = {
 		{ /* 0*/  0, L_OPTIONS_436 }, // "Special"
@@ -4363,7 +4331,7 @@ MenuItemHandlerResult menuhandlerCinema(s32 operation, struct menuitem *item, un
 	case MENUOP_SET:
 		if (data->list.value == 0) {
 			// Play all
-			s32 index = getNumCompletedMissions();
+			int index = getNumCompletedMissions();
 			g_Vars.autocutgroupcur = 0;
 			g_Vars.autocutgroupleft = g_CutsceneCountsByMission[index];
 			menuPopDialog();
@@ -4434,7 +4402,7 @@ struct menudialogdef g_SelectMissionMenuDialog = {
 	NULL,
 };
 
-MenuItemHandlerResult menuhandlerMainMenuSoloMissions(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMainMenuSoloMissions(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_MissionConfig.iscoop = false;
@@ -4451,7 +4419,7 @@ MenuItemHandlerResult menuhandlerMainMenuSoloMissions(s32 operation, struct menu
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerMainMenuCombatSimulator(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMainMenuCombatSimulator(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_Vars.bondplayernum = 0;
@@ -4459,14 +4427,14 @@ MenuItemHandlerResult menuhandlerMainMenuCombatSimulator(s32 operation, struct m
 		g_Vars.antiplayernum = -1;
 		challengeDetermineUnlockedFeatures();
 		g_Vars.mpsetupmenu = MPSETUPMENU_GENERAL;
-		func0f0f820c(&g_CombatSimulatorMenuDialog, MENUROOT_MPSETUP);
+		menuResetAllDialogsAndSetNewRoot(&g_CombatSimulatorMenuDialog, MENUROOT_MPSETUP);
 		func0f0f8300();
 	}
 
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerMainMenuCooperative(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMainMenuCooperative(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
 		g_MissionConfig.iscoop = true;
@@ -4477,7 +4445,7 @@ MenuItemHandlerResult menuhandlerMainMenuCooperative(s32 operation, struct menui
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerMainMenuCounterOperative(s32 operation, struct menuitem *item, union handlerdata *data)
+MenuItemHandlerResult menuhandlerMainMenuCounterOperative(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_CHECKDISABLED) {
 		if ((joyGetConnectedControllers() & 2) == 0) {
@@ -4494,7 +4462,7 @@ MenuItemHandlerResult menuhandlerMainMenuCounterOperative(s32 operation, struct 
 	return 0;
 }
 
-MenuDialogHandlerResult menudialogMainMenu(s32 operation, struct menudialogdef *dialogdef, union handlerdata *data)
+MenuDialogHandlerResult menudialogMainMenu(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
 	switch (operation) {
 	case MENUOP_OPEN:
@@ -4514,14 +4482,14 @@ MenuDialogHandlerResult menudialogMainMenu(s32 operation, struct menudialogdef *
 
 char *mainMenuTextLabel(struct menuitem *item)
 {
-	u16 nocheats[] = {
+	uint16_t nocheats[] = {
 		L_OPTIONS_117, // "Solo Missions"
 		L_OPTIONS_118, // "Combat Simulator"
 		L_OPTIONS_119, // "Co-Operative"
 		L_OPTIONS_120, // "Counter-Operative"
 	};
 
-	u16 withcheats[] = {
+	uint16_t withcheats[] = {
 		L_MPWEAPONS_130, // "Cheat Solo Missions"
 		L_MPWEAPONS_131, // "Cheat Combat Simulator"
 		L_MPWEAPONS_132, // "Cheat Co-Operative"
@@ -4625,7 +4593,7 @@ bool soloChoosePauseDialog(void)
 
 			if (ciIsTourDone()) {
 				struct trainingdata *dtdata = dtGetData();
-				s32 room = g_Vars.currentplayer->prop->rooms[0];
+				int room = g_Vars.currentplayer->prop->rooms[0];
 
 				if (room >= ROOM_DISH_HOLO1 && room <= ROOM_DISH_HOLO4) {
 					struct trainingdata *htdata = getHoloTrainingData();

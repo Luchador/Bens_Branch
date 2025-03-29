@@ -47,7 +47,7 @@ struct memaspace {
  * using loop counters (eg. a typical i < numspaces loop).
  */
 struct memaheap {
-	u32 unk000;
+	uint32_t unk000;
 	struct memaspace start;
 	struct memaspace spaces[MAX_SPACES];
 	struct memaspace end1;
@@ -58,14 +58,10 @@ uintptr_t g_MemaHeapStart;
 uintptr_t g_MemaHeapSize;
 struct memaheap g_MemaHeap;
 
-#if VERSION == VERSION_PAL_BETA
-u32 g_MemaLeastEverFree = 1000000;
-#endif
-
 void memaSwap(struct memaspace *a, struct memaspace *b)
 {
 	uintptr_t tempaddr = a->addr;
-	u64 tempsize = a->size;
+	uint64_t tempsize = a->size;
 	a->addr = b->addr;
 	a->size = b->size;
 	b->addr = tempaddr;
@@ -125,7 +121,7 @@ struct memaspace *memaMakeSlot(struct memaheap *heap)
 	struct memaspace *curr = &heap->spaces[0];
 	struct memaspace *best;
 	uintptr_t min;
-	s32 i;
+	int i;
 
 	// Do 124 passes over the list. This ensures the list is in order by the
 	// end. Though in most cases it's roughly in order anyway, and the excessive
@@ -176,14 +172,14 @@ struct memaspace *memaMakeSlot(struct memaheap *heap)
 	return best;
 }
 
-void _memaFree(uintptr_t addr, u64 size)
+void _memaFree(uintptr_t addr, uint64_t size)
 {
 	// Choose an index in the spaces array which we'll mark a space as free,
 	// based on how far into the heap the allocation is. This is a rough
 	// estimate and doesn't need to be any particular index, but the defrag
 	// function tries to order the spaces by address so the closer we get to it
 	// the less work the defrag function will have to do should it be called.
-	s32 index = (addr - g_MemaHeapStart) * MAX_SPACES / g_MemaHeapSize;
+	int index = (addr - g_MemaHeapStart) * MAX_SPACES / g_MemaHeapSize;
 	struct memaspace *curr = &g_MemaHeap.spaces[index];
 
 	// If the entry is taken, keep moving forward until a zero is found.
@@ -209,20 +205,9 @@ void _memaFree(uintptr_t addr, u64 size)
 	curr->size = size;
 }
 
-void memaReset(void *heapaddr, u64 heapsize)
+void memaReset(void *heapaddr, uint64_t heapsize)
 {
 	struct memaspace *space;
-
-#ifdef PLATFORM_N64
-#ifndef DEBUG
-	// Adding an amount to the heap size here means that mema can allocate past
-	// the end of its heap. This would overflow into the gun names language
-	// file. Maybe the developers had an ifndef directive like we do, but they
-	// meant for it to be ifdef instead?
-	// @bug @dangerous
-	heapsize += 0x8e0;
-#endif
-#endif
 
 	g_MemaHeap.unk000 = 0;
 
@@ -273,26 +258,24 @@ void memaReset(void *heapaddr, u64 heapsize)
  */
 void memaPrint(void)
 {
-	s32 onboard;
-	s32 expansion;
-	s32 line = 1;
-	s32 over;
+	int onboard;
+	int expansion;
+	int line = 1;
+	int over;
 	char buffer[124];
 
 	memaDefragPass(&g_MemaHeap);
 }
 
-void *memaAlloc(u64 size)
+void *memaAlloc(uint64_t size)
 {
 	uintptr_t addr;
 	uintptr_t diff;
-	s32 i;
+	int i;
 
 	struct memaspace *curr;
 	uintptr_t bestdiff;
 	struct memaspace *best;
-
-	if (1);
 
 	curr = &g_MemaHeap.spaces[0];
 	bestdiff = (uintptr_t)-1;
@@ -367,7 +350,7 @@ void *memaAlloc(u64 size)
 /**
  * Grow the allocation which currently *ends at* the given address.
  */
-uintptr_t memaGrow(uintptr_t addr, u64 amount)
+uintptr_t memaGrow(uintptr_t addr, uint64_t amount)
 {
 	struct memaspace *curr = &g_MemaHeap.spaces[0];
 
@@ -392,24 +375,19 @@ found:
 	return addr;
 }
 
-void memaFree(void *addr, u64 size)
+void memaFree(void *addr, uint64_t size)
 {
 	_memaFree((uintptr_t) addr, size);
-}
-
-void mema00012cd4(void)
-{
-	// empty
 }
 
 /**
  * Find and return the largest amount of contiguous free space in the pool.
  * ie. the biggest allocation that mema can currently make.
  */
-u64 memaGetLongestFree(void)
+uint64_t memaGetLongestFree(void)
 {
 	struct memaspace *curr;
-	s32 biggest = 0;
+	int biggest = 0;
 
 	memaDefrag();
 
@@ -430,7 +408,7 @@ u64 memaGetLongestFree(void)
 	return 0;
 }
 
-bool memaRealloc(uintptr_t addr, u64 oldsize, u64 newsize)
+bool memaRealloc(uintptr_t addr, uint64_t oldsize, uint64_t newsize)
 {
 	if (newsize > oldsize) {
 		if (!memaGrow(addr + oldsize, newsize - oldsize)) {
@@ -441,9 +419,4 @@ bool memaRealloc(uintptr_t addr, u64 oldsize, u64 newsize)
 	}
 
 	return true;
-}
-
-u32 memaGetSize(void)
-{
-	return g_MemaHeapSize;
 }

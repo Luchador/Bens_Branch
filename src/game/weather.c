@@ -1,5 +1,5 @@
 #include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/dlights.h"
@@ -7,6 +7,7 @@
 #include "game/camera.h"
 #include "game/gfxmemory.h"
 #include "game/sparks.h"
+#include "game/utils.h"
 #include "game/weather.h"
 #include "game/bg.h"
 #include "game/file.h"
@@ -20,8 +21,6 @@
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
-
-#define ABSF(val) ((val) > 0.0f ? (val) : -(val))
 
 struct weatherdata *g_WeatherData = NULL;
 
@@ -243,17 +242,17 @@ Gfx *weatherRender(Gfx *gdl)
 	return gdl;
 }
 
-void weatherSetBoundaries(struct weatherparticledata *data, s32 index, f32 min, f32 max)
+void weatherSetBoundaries(struct weatherparticledata *data, int index, float min, float max)
 {
-	((f32 *)(&data->boundarymin))[index] = min;
-	((f32 *)(&data->boundarymax))[index] = max;
-	((f32 *)(&data->boundaryrange))[index] = ABS(min) + ABS(max);
+	((float *)(&data->boundarymin))[index] = min;
+	((float *)(&data->boundarymax))[index] = max;
+	((float *)(&data->boundaryrange))[index] = fabsf(min) + fabsf(max);
 }
 
 struct weatherparticledata *weatherAllocateParticles(void)
 {
 	struct weatherparticledata *data = mempAlloc(sizeof(struct weatherparticledata), MEMPOOL_STAGE);
-	u32 i;
+	uint32_t i;
 
 	data->unk3e80.x = 0;
 	data->unk3e80.y = 0;
@@ -269,7 +268,7 @@ struct weatherparticledata *weatherAllocateParticles(void)
 		data->unk3ec8[i++] = 0;
 	}
 
-	for (i = 0; i != (s32)ARRAYCOUNT(g_WeatherData->particledata[0]->particles); i++) {
+	for (i = 0; i != (int)ARRAYCOUNT(g_WeatherData->particledata[0]->particles); i++) {
 		struct weatherparticle *particle = &data->particles[i];
 		particle->pos.x = RANDOMFRAC() * 1600 - 800;
 		particle->pos.y = RANDOMFRAC() * 1600 - 800;
@@ -296,9 +295,9 @@ void weatherRollLightning(struct weatherdata *weather)
 	weather->unka4 = (rngRandom() & 0xf) + 10;
 }
 
-void func0f131678(s32 arg0)
+void func0f131678(int arg0)
 {
-	s32 i;
+	int i;
 
 	for (i = 0; i < arg0 + 1; i++) {
 		if ((g_WeatherData->unk58[i].unk08 > 0 && g_WeatherData->unk58[i].unk04 > 0.0f)
@@ -313,11 +312,11 @@ void func0f131678(s32 arg0)
 	}
 }
 
-void weatherSetIntensity(s32 intensity)
+void weatherSetIntensity(int intensity)
 {
-	s32 dotheloop = -1;
-	s32 special = -1;
-	s32 i;
+	int dotheloop = -1;
+	int special = -1;
+	int i;
 
 	if (intensity == g_WeatherData->intensity) {
 		return;
@@ -424,19 +423,19 @@ void weatherSetIntensity(s32 intensity)
 	g_WeatherData->intensity = intensity;
 }
 
-u32 g_RainSpeedExtra;
-u32 g_SnowSpeed;
-u32 g_SnowSpeedExtra;
+uint32_t g_RainSpeedExtra;
+uint32_t g_SnowSpeed;
+uint32_t g_SnowSpeedExtra;
 
 void weatherTickRain(struct weatherdata *weather)
 {
-	s32 lVar6 = 0;
-	s32 relativetotal = 0; // eg. -10 if deleted 10 particles, +10 if created 10
+	int lVar6 = 0;
+	int relativetotal = 0; // eg. -10 if deleted 10 particles, +10 if created 10
 	struct weatherparticledata *data;
-	s32 i;
-	s32 iVar10;
-	f32 rand;
-	s32 lvupdate;
+	int i;
+	int iVar10;
+	float rand;
+	int lvupdate;
 
 	if (weather->sndtransitiontime > 0) {
 		weather->sndcurrentvolume += (weather->snddesiredvolume - weather->sndcurrentvolume) / weather->sndtransitiontime;
@@ -461,7 +460,7 @@ void weatherTickRain(struct weatherdata *weather)
 
 	// Rain noise
 	for (i = 0; i != 4; i++) {
-		s32 sounds[] = {
+		int sounds[] = {
 			0x80b7,
 			0x80b6,
 			0x80b8,
@@ -513,7 +512,7 @@ void weatherTickRain(struct weatherdata *weather)
 		weather->windspeedx = g_CurWeatherConfig->windspeedx;
 	}
 	else if (weather->windangletransitiontime > 0) {
-		s32 lvupdate = g_Vars.lvupdate60;
+		int lvupdate = g_Vars.lvupdate60;
 
 		if (weather->windangletransitiontime < lvupdate) {
 			weather->windanglerad = weather->newwindangle;
@@ -553,14 +552,14 @@ void weatherTickRain(struct weatherdata *weather)
 			lVar6 = 2;
 
 			// Reset particle
-			particle->pos.x = data->boundarymin.x + RANDOMFRAC() * (ABS(data->boundarymin.x) + ABS(data->boundarymax.x));
-			particle->pos.z = data->boundarymin.z + RANDOMFRAC() * (ABS(data->boundarymin.z) + ABS(data->boundarymax.z));
+			particle->pos.x = data->boundarymin.x + RANDOMFRAC() * (fabsf(data->boundarymin.x) + fabsf(data->boundarymax.x));
+			particle->pos.z = data->boundarymin.z + RANDOMFRAC() * (fabsf(data->boundarymin.z) + fabsf(data->boundarymax.z));
 
 			particle->horizspeed = RANDOMFRAC() + 0.7f;
 
 			particle->inc.y = -(RANDOMFRAC() * g_RainSpeedExtra + weather->raindropfallspeed);
 
-			if (ABS(relativetotal) < 2 && weather->numcurrentsnowflakes != weather->numdesiredparticles) {
+			if (abs(relativetotal) < 2 && weather->numcurrentsnowflakes != weather->numdesiredparticles) {
 				if (weather->numcurrentsnowflakes < weather->numdesiredparticles) {
 					if ((particle->active & 3) == 0) {
 						particle->active = true;
@@ -588,17 +587,17 @@ void weatherTickRain(struct weatherdata *weather)
 	}
 }
 
-u32 g_RainSpeedExtra = 20;
-u32 g_SnowSpeed = 15;
-u32 g_SnowSpeedExtra = 10;
+uint32_t g_RainSpeedExtra = 20;
+uint32_t g_SnowSpeed = 15;
+uint32_t g_SnowSpeedExtra = 10;
 
 void weatherTickSnow(struct weatherdata *weather)
 {
-	s32 lVar7 = 0;
-	s32 relativetotal = 0; // eg. -10 if deleted 10 particles, +10 if created 10
-	f32 rand;
-	s32 lvupdate;
-	s32 i;
+	int lVar7 = 0;
+	int relativetotal = 0; // eg. -10 if deleted 10 particles, +10 if created 10
+	float rand;
+	int lvupdate;
+	int i;
 	struct weatherparticledata *data;
 
 	if (g_CurWeatherConfig->flags & WEATHERFLAG_FORCE_WINDDIR) {
@@ -609,7 +608,7 @@ void weatherTickSnow(struct weatherdata *weather)
 	}
 
 	else if (weather->windangletransitiontime > 0) {
-		s32 lvupdate = g_Vars.lvupdate60;
+		int lvupdate = g_Vars.lvupdate60;
 
 		if (weather->windangletransitiontime < lvupdate) {
 			weather->windanglerad = weather->newwindangle;
@@ -736,8 +735,8 @@ void weatherTickSnow(struct weatherdata *weather)
 		if (particle->pos.y < data->boundarymin.y) {
 			lVar7 = 2;
 
-			particle->pos.x = data->boundarymin.f[0] + RANDOMFRAC() * (ABS(data->boundarymin.f[0]) + ABS(data->boundarymax.f[0]));
-			particle->pos.z = data->boundarymin.f[2] + RANDOMFRAC() * (ABS(data->boundarymin.f[2]) + ABS(data->boundarymax.f[2]));
+			particle->pos.x = data->boundarymin.f[0] + RANDOMFRAC() * (fabsf(data->boundarymin.f[0]) + fabsf(data->boundarymax.f[0]));
+			particle->pos.z = data->boundarymin.f[2] + RANDOMFRAC() * (fabsf(data->boundarymin.f[2]) + fabsf(data->boundarymax.f[2]));
 
 			particle->horizspeed = RANDOMFRAC() + 0.7f;
 
@@ -745,7 +744,7 @@ void weatherTickSnow(struct weatherdata *weather)
 			particle->inc.x = weather->windspeedx * particle->horizspeed;
 			particle->inc.z = weather->windspeedz * particle->horizspeed;
 
-			if (ABS(relativetotal) < 20 && weather->numcurrentsnowflakes != weather->numdesiredparticles) {
+			if (abs(relativetotal) < 20 && weather->numcurrentsnowflakes != weather->numdesiredparticles) {
 				if (weather->numcurrentsnowflakes < weather->numdesiredparticles) {
 					if ((particle->active & 3) == 0) {
 						particle->active = true;
@@ -767,7 +766,7 @@ void weatherTickSnow(struct weatherdata *weather)
 	}
 }
 
-void weatherConfigureRain(u32 intensity)
+void weatherConfigureRain(uint32_t intensity)
 {
 	if (g_WeatherData) {
 		g_WeatherData->type = WEATHERTYPE_RAIN;
@@ -775,7 +774,7 @@ void weatherConfigureRain(u32 intensity)
 	}
 }
 
-void weatherConfigureSnow(u32 intensity)
+void weatherConfigureSnow(uint32_t intensity)
 {
 	if (g_WeatherData) {
 		g_WeatherData->type = WEATHERTYPE_SNOW;
@@ -783,7 +782,7 @@ void weatherConfigureSnow(u32 intensity)
 	}
 }
 
-bool weatherIsRoomWeatherProof(s32 room)
+bool weatherIsRoomWeatherProof(int room)
 {
 	if (room >= 0 && room < g_Vars.roomcount) {
 		// check room's extra_flags
@@ -796,39 +795,39 @@ bool weatherIsRoomWeatherProof(s32 room)
 	return false;
 }
 
-Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
+Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 {
-	s32 numtestrooms;
-	s32 p;
-	s32 i;
-	s32 timings1[10];
+	int numtestrooms;
+	int p;
+	int i;
+	int timings1[10];
 	struct weatherparticledata *particledata;
 	Mtxf *mtx;
 	struct weatherparticle *particle;
-	s32 timings2[8];
-	s32 numsparksavailable;
-	s32 testrooms[50];
-	f32 f0;
+	int timings2[8];
+	int numsparksavailable;
+	int testrooms[50];
+	float f0;
 	struct coord spca8;
 	struct coord spc9c;
 	struct coord spc90;
-	s32 brightness;
-	s32 soundnum;
-	f32 scale;
-	s32 badrooms[50];
+	int brightness;
+	int soundnum;
+	float scale;
+	int badrooms[50];
 	struct coord badbbmin[50];
 	struct coord badbbmax[50];
-	s32 numbadrooms;
-	s32 bboxes[50][6];
+	int numbadrooms;
+	int bboxes[50][6];
 
-	static u32 rainwidth = 1;
-	static u32 raincol1 = 0xaaaaaa1f;
-	static u32 raincol2 = 0x11111844;
-	static u32 rainout = 50;
-	static u32 cddiv = 2500;
-	static u32 wetclip = 1;
-	static u32 bounder = 1;
-	static u32 trypitch = 22000;
+	static uint32_t rainwidth = 1;
+	static uint32_t raincol1 = 0xaaaaaa1f;
+	static uint32_t raincol2 = 0x11111844;
+	static uint32_t rainout = 50;
+	static uint32_t cddiv = 2500;
+	static uint32_t wetclip = 1;
+	static uint32_t bounder = 1;
+	static uint32_t trypitch = 22000;
 
 	numsparksavailable = 1;
 	numtestrooms = 0;
@@ -837,8 +836,6 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 	if (g_Vars.lvupdate240 <= 0) {
 		numsparksavailable = 0;
 	}
-
-	osGetCount();
 
 	for (i = 0; i < ARRAYCOUNT(timings1); i++) {
 		timings1[i] = 0;
@@ -859,25 +856,25 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 	{
 		struct coord campos;
 		struct coord sp224;
-		s32 numneighbours;
-		f32 sp218[2];
-		f32 sp214;
+		int numneighbours;
+		float sp218[2];
+		float sp214;
 		Vtx *vertices;
-		s32 n;
+		int n;
 		bool ok;
 		Mtxf worldtoscreenmtx;
 		struct coord positions[4];
-		s32 numtris;
-		f32 cddiv2;
-		f32 rainout2;
-		f32 f2;
-		f32 frac;
-		s32 volume;
-		s32 t;
-		s32 j;
-		f32 pitch;
+		int numtris;
+		float cddiv2;
+		float rainout2;
+		float f2;
+		float frac;
+		int volume;
+		int t;
+		int j;
+		float pitch;
 		Col *colours;
-		f32 tmp;
+		float tmp;
 		struct coord distcamtobbmax;
 		struct coord distcamtobbmin;
 #ifdef AVOID_UB
@@ -910,9 +907,9 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 		sp224.f[1] = campos.f[1] - particledata->unk3e80.f[1];
 		sp224.f[2] = campos.f[2] - particledata->unk3e80.f[2];
 
-		if (ABSF(sp224.f[0]) > ABSF(particledata->boundarymin.f[0]) + ABSF(particledata->boundarymax.f[0])
-				|| ABSF(sp224.f[1]) > ABSF(particledata->boundarymin.f[1]) + ABSF(particledata->boundarymax.f[1])
-				|| ABSF(sp224.f[2]) > ABSF(particledata->boundarymin.f[2]) + ABSF(particledata->boundarymax.f[2])) {
+		if (fabsf(sp224.f[0]) > fabsf(particledata->boundarymin.f[0]) + fabsf(particledata->boundarymax.f[0])
+				|| fabsf(sp224.f[1]) > fabsf(particledata->boundarymin.f[1]) + fabsf(particledata->boundarymax.f[1])
+				|| fabsf(sp224.f[2]) > fabsf(particledata->boundarymin.f[2]) + fabsf(particledata->boundarymax.f[2])) {
 			sp224.f[0] = particledata->boundaryrange.f[0] / 2.0f;
 			sp224.f[1] = particledata->boundaryrange.f[1] / 2.0f;
 			sp224.f[2] = particledata->boundaryrange.f[2] / 2.0f;
@@ -1064,7 +1061,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 							}
 
 							sndAdjust(&weather->audiohandles[3], 0, volume, -1, weather->rainsfxindex, 1.00f, 1, -1, 1);
-							audioPostEvent(weather->audiohandles[3], AL_SNDP_PITCH_EVT, *(s32 *)&pitch);
+							audioPostEvent(weather->audiohandles[3], AL_SNDP_PITCH_EVT, *(int *)&pitch);
 						}
 					}
 				}
@@ -1162,26 +1159,26 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 
 		gSPColor(gdl++, (uintptr_t)(colours), 2);
 
-		timings2[0] = osGetCount();
+		timings2[0] = utilsGetCount();
 
 		for (p = 0; p < ARRAYCOUNT(particledata->particles); p++) {
 			struct coord sp108;
 			struct coord spfc;
 			struct weatherparticle *particle2 = &particledata->particles[p];
-			s32 vtxindex = numtris * 3;
+			int vtxindex = numtris * 3;
 			struct coord spe4;
 			bool draw = true;
 			struct coord spd4;
 
 			if (particle2->active & 3) {
-				timings2[7] = osGetCount();
+				timings2[7] = utilsGetCount();
 
 				sp108.f[0] = particle2->pos.f[0] + particledata->unk3e80.f[0];
 				sp108.f[1] = particle2->pos.f[1] + particledata->unk3e80.f[1];
 				sp108.f[2] = particle2->pos.f[2] + particledata->unk3e80.f[2];
 
 				if (cam0f0b5b9c(&sp108, 150)) {
-					timings1[7] = timings1[7] + osGetCount() - timings2[7];
+					timings1[7] = timings1[7] + utilsGetCount() - timings2[7];
 
 					sp218[0] = particle2->pos.f[0];
 					sp218[1] = particle2->pos.f[2];
@@ -1207,8 +1204,8 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 							positions[i].f[2] = particle2->pos.f[2];
 						}
 
-						timings2[1] = osGetCount();
-						timings2[2] = osGetCount();
+						timings2[1] = utilsGetCount();
+						timings2[2] = utilsGetCount();
 
 						if (wetclip && numbadrooms > 0) {
 							spca8.f[0] = spc90.f[0] = (particle2->pos.f[0] + particledata->unk3e80.f[0]) * scale;
@@ -1241,7 +1238,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 								spc9c.f[2] = tmp;
 							}
 
-							timings2[3] = osGetCount();
+							timings2[3] = utilsGetCount();
 
 							for (i = 0; i < numbadrooms; i++) {
 								if (spc9c.f[0] <= g_Rooms[badrooms[i]].bbmax[0]
@@ -1256,13 +1253,13 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 								}
 							}
 
-							timings1[3] = timings1[3] + osGetCount() - timings2[3];
+							timings1[3] = timings1[3] + utilsGetCount() - timings2[3];
 						}
 
-						timings1[2] = timings1[2] + osGetCount() - timings2[2];
+						timings1[2] = timings1[2] + utilsGetCount() - timings2[2];
 
 						if (draw) {
-							timings2[4] = osGetCount();
+							timings2[4] = utilsGetCount();
 
 							cddiv2 = cddiv / 10.0f;
 							rainout2 = rainout / 10.0f;
@@ -1317,8 +1314,8 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 								}
 							}
 
-							timings1[4] = timings1[4] + osGetCount() - timings2[4];
-							timings2[5] = osGetCount();
+							timings1[4] = timings1[4] + utilsGetCount() - timings2[4];
+							timings2[5] = utilsGetCount();
 
 							vertices[vtxindex + 0].t = 256;
 							vertices[vtxindex + 1].s = 256;
@@ -1329,8 +1326,8 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 							vertices[vtxindex + 2].t = 0;
 							vertices[vtxindex + 0].s = 0;
 
-							timings1[5] = timings1[5] + osGetCount() - timings2[5];
-							timings2[6] = osGetCount();
+							timings1[5] = timings1[5] + utilsGetCount() - timings2[5];
+							timings2[6] = utilsGetCount();
 
 							vertices[vtxindex + 0].x = positions[0].f[0];
 							vertices[vtxindex + 0].y = positions[0].f[1];
@@ -1352,8 +1349,8 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 								numtris++;
 							}
 
-							timings1[6] = timings1[6] + osGetCount() - timings2[6];
-							timings1[1] = timings1[1] + osGetCount() - timings2[1];
+							timings1[6] = timings1[6] + utilsGetCount() - timings2[6];
+							timings1[1] = timings1[1] + utilsGetCount() - timings2[1];
 						}
 					}
 
@@ -1379,56 +1376,54 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 		}
 	}
 
-	osGetCount();
-
 	return gdl;
 }
 
-Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
+Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 {
 	struct weatherparticledata *particledata;
 	struct weatherparticle *particle;
-	s32 j;
-	s32 k;
-	s32 p;
-	u32 sp137c[1];
-	u32 sp1354[1];
+	int j;
+	int k;
+	int p;
+	uint32_t sp137c[1];
+	uint32_t sp1354[1];
 	bool a0;
 	bool s1;
-	f32 f22 = 0.0f;
-	s32 sp126c[50];
-	s32 sp1268;
-	f32 sp1168[8][4][2];
+	float f22 = 0.0f;
+	int sp126c[50];
+	int sp1268;
+	float sp1168[8][4][2];
 	struct coord sp115c;
 	struct coord sp1150;
-	f32 sp114c;
-	f32 sp1148;
-	f32 sp1144;
-	s32 j2;
-	s32 sp1078[50];
+	float sp114c;
+	float sp1148;
+	float sp1144;
+	int j2;
+	int sp1078[50];
 	struct coord spe20[50];
 	struct coord spbc8[50];
-	f32 sp264[50][12];
-	f32 sp260;
-	s32 s7;
+	float sp264[50][12];
+	float sp260;
+	int s7;
 	Col *colours;
-	f32 f0;
-	s32 numneighbours;
-	f32 f20;
-	f32 f2;
-	f32 f0_3;
+	float f0;
+	int numneighbours;
+	float f20;
+	float f2;
+	float f0_3;
 	struct coord sp234;
 	struct coord sp228;
-	f32 sp220;
-	f32 sp21c;
+	float sp220;
+	float sp21c;
 	Mtxf *mtx;
 	Vtx *vertices; // 214
 	Vtx *vtxbatch;
 	Mtxf sp1cc;
 	struct coord sp19c[4];
-	s32 sp198;
-	f32 f24;
-	s32 i; // 184
+	int sp198;
+	float f24;
+	int i; // 184
 	struct coord sp178;
 	struct coord sp16c;
 #ifdef AVOID_UB
@@ -1438,17 +1433,17 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 #endif
 	struct coord sp124;
 	struct coord sp118;
-	f32 f26;
-	f32 sp108;
-	f32 f16;
-	s32 numcolours = 16;
-	f32 range = 150.0f;
+	float f26;
+	float sp108;
+	float f16;
+	int numcolours = 16;
+	float range = 150.0f;
 
-	static u32 var8007f100 = 50;
-	static u32 snowwidth = 5;
-	static u32 snowheight = 10;
-	static u32 snowcol1 = 0x8888aaff;
-	static u32 snowcol2 = 0xffffff7f;
+	static uint32_t var8007f100 = 50;
+	static uint32_t snowwidth = 5;
+	static uint32_t snowheight = 10;
+	static uint32_t snowcol1 = 0x8888aaff;
+	static uint32_t snowcol2 = 0xffffff7f;
 
 	s7 = 0;
 	sp1268 = 0;
@@ -1489,9 +1484,9 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 	sp228.f[1] = sp234.f[1] - particledata->unk3e80.f[1];
 	sp228.f[2] = sp234.f[2] - particledata->unk3e80.f[2];
 
-	if (ABSF(sp228.f[0]) > ABSF(particledata->boundarymin.f[0]) + ABSF(particledata->boundarymax.f[0])
-			|| ABSF(sp228.f[1]) > ABSF(particledata->boundarymin.f[1]) + ABSF(particledata->boundarymax.f[1])
-			|| ABSF(sp228.f[2]) > ABSF(particledata->boundarymin.f[2]) + ABSF(particledata->boundarymax.f[2])) {
+	if (fabsf(sp228.f[0]) > fabsf(particledata->boundarymin.f[0]) + fabsf(particledata->boundarymax.f[0])
+			|| fabsf(sp228.f[1]) > fabsf(particledata->boundarymin.f[1]) + fabsf(particledata->boundarymax.f[1])
+			|| fabsf(sp228.f[2]) > fabsf(particledata->boundarymin.f[2]) + fabsf(particledata->boundarymax.f[2])) {
 		sp228.f[0] = particledata->boundaryrange.f[0] / 2.0f;
 		sp228.f[1] = particledata->boundaryrange.f[1] / 2.0f;
 		sp228.f[2] = particledata->boundaryrange.f[2] / 2.0f;
@@ -1589,8 +1584,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 				if (a0 && sp1268 < 50) {
 					sp126c[sp1268] = sp144[j2];
 					sp1268++;
-				} else {
-					// empty
 				}
 			}
 		}
@@ -1610,8 +1603,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 			if (s7 < 50) {
 				sp1078[s7] = sp126c[i];
 				s7++;
-			} else {
-				// empty
 			}
 		}
 
@@ -1652,7 +1643,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 	colours = gfxAllocateColours(numcolours);
 
 	for (j = 0; j < numcolours; j++) {
-		u32 alpha = ((numcolours + 1) * 255 - j * 255) / (numcolours + 1);
+		uint32_t alpha = ((numcolours + 1) * 255 - j * 255) / (numcolours + 1);
 		colours[j].word = PD_BE32((snowcol1 & 0xffffff00) | alpha);
 	}
 
@@ -1661,18 +1652,18 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 	// 51f8
 	for (p = 0; p < 500; p++) {
 		struct weatherparticle *particle = &particledata->particles[p];
-		s32 tmp2;
+		int tmp2;
 		s1 = true;
 
 		if (particle->active & 3) {
-			sp1354[0] = osGetCount();
+			sp1354[0] = utilsGetCount();
 
 			sp124.f[0] = particle->pos.f[0] + particledata->unk3e80.f[0];
 			sp124.f[1] = particle->pos.f[1] + particledata->unk3e80.f[1];
 			sp124.f[2] = particle->pos.f[2] + particledata->unk3e80.f[2];
 
 			if (cam0f0b5b9c(&sp124, 5)) {
-				sp137c[0] = sp137c[0] + osGetCount() - sp1354[0];
+				sp137c[0] = sp137c[0] + utilsGetCount() - sp1354[0];
 
 				sp21c = particle->pos.f[0];
 				sp220 = particle->pos.f[2];
@@ -1737,7 +1728,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 									}
 
 									// 5500
-									f2 = ABSF(f2) / var8007f100;
+									f2 = fabsf(f2) / var8007f100;
 
 									// 5524
 									if (f2 > sp260) {
@@ -1752,7 +1743,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 										f2 = sp118.f[2] - sp264[j][11];
 									}
 
-									f2 = ABSF(f2) / var8007f100;
+									f2 = fabsf(f2) / var8007f100;
 
 									if (f2 > sp260) {
 										sp260 = f2;
@@ -1764,10 +1755,10 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 
 					// 559c
 					if (s1) {
-						s32 j;
-						f32 val1;
-						f32 val2;
-						f32 val3;
+						int j;
+						float val1;
+						float val2;
+						float val3;
 
 						tmp2 = sp198 * 4;
 
@@ -1815,7 +1806,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 							f16 = particle->pos.f[0] - particledata->boundarymax.f[0] + range;
 						}
 
-						f16 = ABSF(f16) / range;
+						f16 = fabsf(f16) / range;
 
 						if (f16 > sp260) {
 							sp260 = f16;
@@ -1833,7 +1824,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 							f16 = particle->pos.f[1] - particledata->boundarymax.f[1] + range;
 						}
 
-						f16 = ABSF(f16) / range;
+						f16 = fabsf(f16) / range;
 
 						if (f16 > sp260) {
 							sp260 = f16;
@@ -1851,25 +1842,25 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, s32 arg2)
 							f16 = particle->pos.f[2] - particledata->boundarymax.f[2] + range;
 						}
 
-						f16 = ABSF(f16) / range;
+						f16 = fabsf(f16) / range;
 
 						if (f16 > sp260) {
 							sp260 = f16;
 						}
 
 						// 5978
-						vertices[tmp2 + 0].colour = (s32) (sp260 * 16.0f) * 4;
-						vertices[tmp2 + 1].colour = (s32) (sp260 * 16.0f) * 4;
-						vertices[tmp2 + 2].colour = (s32) (sp260 * 16.0f) * 4;
-						vertices[tmp2 + 3].colour = (s32) (sp260 * 16.0f) * 4;
+						vertices[tmp2 + 0].colour = (int) (sp260 * 16.0f) * 4;
+						vertices[tmp2 + 1].colour = (int) (sp260 * 16.0f) * 4;
+						vertices[tmp2 + 2].colour = (int) (sp260 * 16.0f) * 4;
+						vertices[tmp2 + 3].colour = (int) (sp260 * 16.0f) * 4;
 
 						// Note: Goal writes all the S's first then T's. XBLA uses ST pairs.
 						// And the rain function uses a different order too.
 						{
-							u16 x1;
-							u16 y1;
-							u16 x2;
-							u16 y2;
+							uint16_t x1;
+							uint16_t y1;
+							uint16_t x2;
+							uint16_t y2;
 
 							y2 += 0;
 							x1 = ((p & 1) >> 0) * 8;

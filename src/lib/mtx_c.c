@@ -5,7 +5,7 @@
 #include "lib/mtx.h"
 #include "types.h"
 
-f32 var8005ef10[] = {65536, 65536};
+float var8005ef10[] = {65536, 65536};
 
 void mtx4LoadIdentity(Mtxf *mtx)
 {
@@ -37,23 +37,23 @@ void mtx4MultMtx4InPlace(Mtxf *multmtx, Mtxf *subject)
 
 void mtx4MultMtx4(Mtxf *mtx1, Mtxf *mtx2, Mtxf *dst)
 {
-	s32 i;
-	f32 m00 = mtx2->m[0][0];
-	f32 m01 = mtx2->m[0][1];
-	f32 m02 = mtx2->m[0][2];
-	f32 m03 = mtx2->m[0][3];
-	f32 m10 = mtx2->m[1][0];
-	f32 m11 = mtx2->m[1][1];
-	f32 m12 = mtx2->m[1][2];
-	f32 m13 = mtx2->m[1][3];
-	f32 m20 = mtx2->m[2][0];
-	f32 m21 = mtx2->m[2][1];
-	f32 m22 = mtx2->m[2][2];
-	f32 m23 = mtx2->m[2][3];
-	f32 m30 = mtx2->m[3][0];
-	f32 m31 = mtx2->m[3][1];
-	f32 m32 = mtx2->m[3][2];
-	f32 m33 = mtx2->m[3][3];
+	int i;
+	float m00 = mtx2->m[0][0];
+	float m01 = mtx2->m[0][1];
+	float m02 = mtx2->m[0][2];
+	float m03 = mtx2->m[0][3];
+	float m10 = mtx2->m[1][0];
+	float m11 = mtx2->m[1][1];
+	float m12 = mtx2->m[1][2];
+	float m13 = mtx2->m[1][3];
+	float m20 = mtx2->m[2][0];
+	float m21 = mtx2->m[2][1];
+	float m22 = mtx2->m[2][2];
+	float m23 = mtx2->m[2][3];
+	float m30 = mtx2->m[3][0];
+	float m31 = mtx2->m[3][1];
+	float m32 = mtx2->m[3][2];
+	float m33 = mtx2->m[3][3];
 
 	for (i = 0; i < 4; i++) {
 		dst->m[0][i] = mtx1->m[0][i] * m00 + mtx1->m[1][i] * m01 + mtx1->m[2][i] * m02 + mtx1->m[3][i] * m03;
@@ -70,9 +70,9 @@ void mtx4RotateVecInPlace(Mtxf *mtx, struct coord *vec)
 
 void mtx4RotateVec(Mtxf *mtx, struct coord *vec, struct coord *dst)
 {
-	f32 x = vec->x;
-	f32 y = vec->y;
-	f32 z = vec->z;
+	float x = vec->x;
+	float y = vec->y;
+	float z = vec->z;
 
 	dst->x = mtx->m[0][0] * x + mtx->m[1][0] * y + mtx->m[2][0] * z;
 	dst->y = mtx->m[0][1] * x + mtx->m[1][1] * y + mtx->m[2][1] * z;
@@ -86,9 +86,9 @@ void mtx4TransformVecInPlace(Mtxf *mtx, struct coord *vec)
 
 void mtx4TransformVec(Mtxf *mtx, struct coord *vec, struct coord *dst)
 {
-	f32 x = vec->x;
-	f32 y = vec->y;
-	f32 z = vec->z;
+	float x = vec->x;
+	float y = vec->y;
+	float z = vec->z;
 
 	dst->x = mtx->m[0][0] * x + mtx->m[1][0] * y + mtx->m[2][0] * z;
 	dst->y = mtx->m[0][1] * x + mtx->m[1][1] * y + mtx->m[2][1] * z;
@@ -106,22 +106,22 @@ void mtx00015be0(Mtxf *matrix1, Mtxf *matrix2)
 
 void mtxApplyAffineTransform(Mtxf *arg0, Mtxf *arg1, Mtxf *dst)
 {
-	f32 m00 = arg1->m[0][0];
-	f32 m01 = arg1->m[0][1];
-	f32 m02 = arg1->m[0][2];
-	f32 m03 = arg1->m[0][3];
-	f32 m10 = arg1->m[1][0];
-	f32 m11 = arg1->m[1][1];
-	f32 m12 = arg1->m[1][2];
-	f32 m13 = arg1->m[1][3];
-	f32 m20 = arg1->m[2][0];
-	f32 m21 = arg1->m[2][1];
-	f32 m22 = arg1->m[2][2];
-	f32 m23 = arg1->m[2][3];
-	f32 m30 = arg1->m[3][0];
-	f32 m31 = arg1->m[3][1];
-	f32 m32 = arg1->m[3][2];
-	f32 m33 = arg1->m[3][3];
+	float m00 = arg1->m[0][0];
+	float m01 = arg1->m[0][1];
+	float m02 = arg1->m[0][2];
+	float m03 = arg1->m[0][3];
+	float m10 = arg1->m[1][0];
+	float m11 = arg1->m[1][1];
+	float m12 = arg1->m[1][2];
+	float m13 = arg1->m[1][3];
+	float m20 = arg1->m[2][0];
+	float m21 = arg1->m[2][1];
+	float m22 = arg1->m[2][2];
+	float m23 = arg1->m[2][3];
+	float m30 = arg1->m[3][0];
+	float m31 = arg1->m[3][1];
+	float m32 = arg1->m[3][2];
+	float m33 = arg1->m[3][3];
 
 	dst->m[0][0] = arg0->m[0][0] * m00 + arg0->m[1][0] * m01 + arg0->m[2][0] * m02;
 	dst->m[0][1] = arg0->m[0][1] * m00 + arg0->m[1][1] * m01 + arg0->m[2][1] * m02;
@@ -144,7 +144,7 @@ void mtxApplyAffineTransform(Mtxf *arg0, Mtxf *arg1, Mtxf *dst)
 	dst->m[3][3] = 1;
 }
 
-void mtx3Copy(f32 src[3][3], f32 dst[3][3])
+void mtx3Copy(float src[3][3], float dst[3][3])
 {
 	dst[0][0] = src[0][0];
 	dst[0][1] = src[0][1];
@@ -164,7 +164,7 @@ void mtx4Copy(Mtxf *src, Mtxf *dst)
 	*dst = *src;
 }
 
-void mtx3ToMtx4(f32 src[3][3], Mtxf *dst)
+void mtx3ToMtx4(float src[3][3], Mtxf *dst)
 {
 	dst->m[0][0] = src[0][0];
 	dst->m[0][1] = src[0][1];
@@ -187,7 +187,7 @@ void mtx3ToMtx4(f32 src[3][3], Mtxf *dst)
 	dst->m[3][3] = 1;
 }
 
-void mtx4ToMtx3(Mtxf *src, f32 dst[3][3])
+void mtx4ToMtx3(Mtxf *src, float dst[3][3])
 {
 	dst[0][0] = src->m[0][0];
 	dst[0][1] = src->m[0][1];
@@ -209,7 +209,7 @@ void mtx4SetTranslation(struct coord *pos, Mtxf *mtx)
 	mtx->m[3][2] = pos->z;
 }
 
-void mtx00015df0(f32 mult, Mtxf *mtx)
+void mtx00015df0(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -217,14 +217,14 @@ void mtx00015df0(f32 mult, Mtxf *mtx)
 	mtx->m[0][3] *= mult;
 }
 
-void mtx00015e24(f32 mult, Mtxf *mtx)
+void mtx00015e24(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
 	mtx->m[0][2] *= mult;
 }
 
-void mtx00015e4c(f32 mult, Mtxf *mtx)
+void mtx00015e4c(float mult, Mtxf *mtx)
 {
 	mtx->m[1][0] *= mult;
 	mtx->m[1][1] *= mult;
@@ -232,14 +232,14 @@ void mtx00015e4c(f32 mult, Mtxf *mtx)
 	mtx->m[1][3] *= mult;
 }
 
-void mtx00015e80(f32 mult, Mtxf *mtx)
+void mtx00015e80(float mult, Mtxf *mtx)
 {
 	mtx->m[1][0] *= mult;
 	mtx->m[1][1] *= mult;
 	mtx->m[1][2] *= mult;
 }
 
-void mtx00015ea8(f32 mult, Mtxf *mtx)
+void mtx00015ea8(float mult, Mtxf *mtx)
 {
 	mtx->m[2][0] *= mult;
 	mtx->m[2][1] *= mult;
@@ -247,14 +247,14 @@ void mtx00015ea8(f32 mult, Mtxf *mtx)
 	mtx->m[2][3] *= mult;
 }
 
-void mtx00015edc(f32 mult, Mtxf *mtx)
+void mtx00015edc(float mult, Mtxf *mtx)
 {
 	mtx->m[2][0] *= mult;
 	mtx->m[2][1] *= mult;
 	mtx->m[2][2] *= mult;
 }
 
-void mtx00015f04(f32 mult, Mtxf *mtx)
+void mtx00015f04(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -272,7 +272,7 @@ void mtx00015f04(f32 mult, Mtxf *mtx)
 	mtx->m[2][3] *= mult;
 }
 
-void mtx00015f4c(f32 mult, Mtxf *mtx)
+void mtx00015f4c(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -287,7 +287,7 @@ void mtx00015f4c(f32 mult, Mtxf *mtx)
 	mtx->m[2][2] *= mult;
 }
 
-void mtx00015f88(f32 mult, Mtxf *mtx)
+void mtx00015f88(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -309,22 +309,22 @@ void mtx00015f88(f32 mult, Mtxf *mtx)
 void mtxF2L(Mtxf *src, Mtxf *dst)
 {
 #ifndef GBI_FLOATS
-	u32 src00 = (s32) (src->m[0][0] * var8005ef10[0]);
-	u32 src01 = (s32) (src->m[0][1] * var8005ef10[0]);
-	u32 src02 = (s32) (src->m[0][2] * var8005ef10[0]);
-	u32 src03 = (s32) (src->m[0][3] * var8005ef10[1]);
-	u32 src10 = (s32) (src->m[1][0] * var8005ef10[0]);
-	u32 src11 = (s32) (src->m[1][1] * var8005ef10[0]);
-	u32 src12 = (s32) (src->m[1][2] * var8005ef10[0]);
-	u32 src13 = (s32) (src->m[1][3] * var8005ef10[1]);
-	u32 src20 = (s32) (src->m[2][0] * var8005ef10[0]);
-	u32 src21 = (s32) (src->m[2][1] * var8005ef10[0]);
-	u32 src22 = (s32) (src->m[2][2] * var8005ef10[0]);
-	u32 src23 = (s32) (src->m[2][3] * var8005ef10[1]);
-	u32 src30 = (s32) (src->m[3][0] * var8005ef10[0]);
-	u32 src31 = (s32) (src->m[3][1] * var8005ef10[0]);
-	u32 src32 = (s32) (src->m[3][2] * var8005ef10[0]);
-	u32 src33 = (s32) (src->m[3][3] * var8005ef10[1]);
+	uint32_t src00 = (int) (src->m[0][0] * var8005ef10[0]);
+	uint32_t src01 = (int) (src->m[0][1] * var8005ef10[0]);
+	uint32_t src02 = (int) (src->m[0][2] * var8005ef10[0]);
+	uint32_t src03 = (int) (src->m[0][3] * var8005ef10[1]);
+	uint32_t src10 = (int) (src->m[1][0] * var8005ef10[0]);
+	uint32_t src11 = (int) (src->m[1][1] * var8005ef10[0]);
+	uint32_t src12 = (int) (src->m[1][2] * var8005ef10[0]);
+	uint32_t src13 = (int) (src->m[1][3] * var8005ef10[1]);
+	uint32_t src20 = (int) (src->m[2][0] * var8005ef10[0]);
+	uint32_t src21 = (int) (src->m[2][1] * var8005ef10[0]);
+	uint32_t src22 = (int) (src->m[2][2] * var8005ef10[0]);
+	uint32_t src23 = (int) (src->m[2][3] * var8005ef10[1]);
+	uint32_t src30 = (int) (src->m[3][0] * var8005ef10[0]);
+	uint32_t src31 = (int) (src->m[3][1] * var8005ef10[0]);
+	uint32_t src32 = (int) (src->m[3][2] * var8005ef10[0]);
+	uint32_t src33 = (int) (src->m[3][3] * var8005ef10[1]);
 
 	dst->l[0][0] = (src00 & 0xffff0000) | src01 >> 16;
 	dst->l[0][1] = (src02 & 0xffff0000) | src03 >> 16;

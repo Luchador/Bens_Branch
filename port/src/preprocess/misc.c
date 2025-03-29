@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include <assert.h>
-#include <PR/ultratypes.h>
 #include <PR/gbi.h>
 
 #include "data.h"
@@ -13,22 +13,22 @@
 
 #include "preprocess/common.h"
 
-u8 *preprocessAnimations(u8* data, u32 size, u32* outSize)
+uint8_t *preprocessAnimations(uint8_t* data, uint32_t size, uint32_t* outSize)
 {
 	// set the anim table pointers as well
-	extern u8 *_animationsTableRomStart;
-	extern u8 *_animationsTableRomEnd;
+	extern uint8_t *_animationsTableRomStart;
+	extern uint8_t *_animationsTableRomEnd;
 
 	// the animation table is at the end of the segment
-	u32 *animtbl = (void *)(data + size - 0x38a0);
-	_animationsTableRomStart = (u8 *)animtbl;
+	uint32_t *animtbl = (void *)(data + size - 0x38a0);
+	_animationsTableRomStart = (uint8_t *)animtbl;
 	_animationsTableRomEnd = data + size;
 
 	PD_SWAP_VAL(*animtbl);
-	const u32 count = *animtbl++;
+	const uint32_t count = *animtbl++;
 
 	struct animtableentry *anim = (struct animtableentry *)animtbl;
-	for (u32 i = 0; i < count; ++i, ++anim) {
+	for (uint32_t i = 0; i < count; ++i, ++anim) {
 		PD_SWAP_VAL(anim->numframes);
 		PD_SWAP_VAL(anim->bytesperframe);
 		PD_SWAP_VAL(anim->headerlen);
@@ -42,11 +42,11 @@ u8 *preprocessAnimations(u8* data, u32 size, u32* outSize)
 	return NULL;
 }
 
-u8 *preprocessMpConfigs(u8* data, u32 size, u32* outSize)
+uint8_t *preprocessMpConfigs(uint8_t* data, uint32_t size, uint32_t* outSize)
 {
-	const u32 count = size / sizeof(struct mpconfig);
+	const uint32_t count = size / sizeof(struct mpconfig);
 	struct mpconfig *cfg = (struct mpconfig *)data;
-	for (u32 i = 0; i < count; ++i, ++cfg) {
+	for (uint32_t i = 0; i < count; ++i, ++cfg) {
 		PD_SWAP_VAL(cfg->setup.options);
 		PD_SWAP_VAL(cfg->setup.teamscorelimit);
 		PD_SWAP_VAL(cfg->setup.chrslots);
@@ -54,7 +54,7 @@ u8 *preprocessMpConfigs(u8* data, u32 size, u32* outSize)
 		PD_SWAP_VAL(cfg->setup.fileguid.deviceserial);
 		PD_SWAP_VAL(cfg->setup.fileguid.fileid);
 		// convert MPWEAPON_ to take classic weapons and JPN weapons into account
-		for (s32 j = 0; j < ARRAYCOUNT(cfg->setup.weapons); ++j) {
+		for (int j = 0; j < ARRAYCOUNT(cfg->setup.weapons); ++j) {
 			// in other versions we only care about the shield and above
 			if (cfg->setup.weapons[j] >= 0x25) {
 				cfg->setup.weapons[j] += (MPWEAPON_SHIELD - MPWEAPON_PP9I);
@@ -65,17 +65,17 @@ u8 *preprocessMpConfigs(u8* data, u32 size, u32* outSize)
 	return NULL;
 }
 
-u8 *preprocessTexturesList(u8* data, u32 size, u32* outSize)
+uint8_t *preprocessTexturesList(uint8_t* data, uint32_t size, uint32_t* outSize)
 {
 	struct texture *tex = (struct texture *)data;
-	const u32 count = size / sizeof(*tex);
-	for (u32 i = 0; i < count; ++i, ++tex) {
+	const uint32_t count = size / sizeof(*tex);
+	for (uint32_t i = 0; i < count; ++i, ++tex) {
 		// TODO: it sure looks like none of the fields except soundsurfacetype, surfacetype and dataoffset are set
 		// just swap the last 3 bytes of the first word...
-		const u32 dofs = (u32)tex->dataoffset << 8;
+		const uint32_t dofs = (uint32_t)tex->dataoffset << 8;
 		tex->dataoffset = PD_BE32(dofs);
 		// ...and the surface types in the first byte
-		const u8 tmp = tex->soundsurfacetype;
+		const uint8_t tmp = tex->soundsurfacetype;
 		tex->soundsurfacetype = tex->surfacetype;
 		tex->surfacetype = tmp;
 	}

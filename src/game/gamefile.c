@@ -19,30 +19,30 @@
 #include "data.h"
 #include "types.h"
 
-u8 *gamefileGetFlags(void)
+uint8_t *gamefileGetFlags(void)
 {
 	return g_GameFile.flags;
 }
 
-void gamefileSetFlag(u32 value)
+void gamefileSetFlag(uint32_t value)
 {
 	pakSetBitflag(value, g_GameFile.flags, true);
 }
 
-void gamefileUnsetFlag(u32 value)
+void gamefileUnsetFlag(uint32_t value)
 {
 	pakSetBitflag(value, g_GameFile.flags, false);
 }
 
-u32 gamefileHasFlag(u32 value)
+uint32_t gamefileHasFlag(uint32_t value)
 {
 	return pakHasBitflag(value, g_GameFile.flags);
 }
 
 void gamefileApplyOptions(struct gamefile *file)
 {
-	s32 player1 = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) ? 0 : 4;
-	s32 player2 = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) ? 1 : 5;
+	int player1 = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) ? 0 : 4;
+	int player2 = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) ? 1 : 5;
 
 	optionsSetForwardPitch(player1, pakHasBitflag(GAMEFILEFLAG_P1_FORWARDPITCH, file->flags));
 	optionsSetAutoAim(player1, pakHasBitflag(GAMEFILEFLAG_P1_AUTOAIM, file->flags));
@@ -94,10 +94,10 @@ void gamefileApplyOptions(struct gamefile *file)
 
 void gamefileLoadDefaults(struct gamefile *file)
 {
-	s32 player1 = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) ? 0 : 4;
-	s32 player2 = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) ? 1 : 5;
-	s32 i;
-	s32 j;
+	int player1 = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) ? 0 : 4;
+	int player2 = (g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0) ? 1 : 5;
+	int i;
+	int j;
 
 	strcpy(file->name, "Dark");
 	file->thumbnail = 0;
@@ -158,12 +158,6 @@ void gamefileLoadDefaults(struct gamefile *file)
 	pakSetBitflag(GAMEFILEFLAG_ANTIRADARON, file->flags, true);
 	pakSetBitflag(GAMEFILEFLAG_ANTIPLAYERNUM, file->flags, true);
 
-/*#if VERSION >= VERSION_PAL_BETA
-	pakSetBitflag(GAMEFILEFLAG_LANGBIT1, g_GameFile.flags, ((g_Vars.language & 0x01) == 0x01));
-	pakSetBitflag(GAMEFILEFLAG_LANGBIT2, g_GameFile.flags, ((g_Vars.language & 0x02) == 0x02));
-	pakSetBitflag(GAMEFILEFLAG_LANGBIT3, g_GameFile.flags, ((g_Vars.language & 0x04) == 0x04));
-#endif*/
-
 	file->unk1e = 0;
 
 	for (i = 0; i < ARRAYCOUNT(file->besttimes); i++) {
@@ -196,15 +190,15 @@ void gamefileLoadDefaults(struct gamefile *file)
 	gamefileApplyOptions(file);
 }
 
-s32 gamefileLoad(s32 device)
+int gamefileLoad(int device)
 {
-	s32 p1index;
-	s32 p2index;
-	u32 volume;
-	s32 i;
-	s32 j;
+	int p1index;
+	int p2index;
+	uint32_t volume;
+	int i;
+	int j;
 	struct savebuffer buffer;
-	s32 ret;
+	int ret;
 
 	p1index = g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0 ? 0 : 4;
 	p2index = g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0 ? 1 : 5;
@@ -275,7 +269,7 @@ s32 gamefileLoad(s32 device)
 			}
 
 			for (i = 0; i < ARRAYCOUNT(g_GameFile.firingrangescores); i++) {
-				s32 numbits = i == ARRAYCOUNT(g_GameFile.firingrangescores) - 1 ? 2 : 8;
+				int numbits = i == ARRAYCOUNT(g_GameFile.firingrangescores) - 1 ? 2 : 8;
 				g_GameFile.firingrangescores[i] = savebufferReadBits(&buffer, numbits);
 			}
 
@@ -307,15 +301,15 @@ s32 gamefileLoad(s32 device)
 	return -1;
 }
 
-s32 gamefileSave(s32 device, s32 fileid, u16 deviceserial)
+int gamefileSave(int device, int fileid, uint16_t deviceserial)
 {
-	u32 value;
-	s32 newfileid;
-	s32 ret;
-	s32 i;
-	s32 j;
-	s32 p1index;
-	s32 p2index;
+	uint32_t value;
+	int newfileid;
+	int ret;
+	int i;
+	int j;
+	int p1index;
+	int p2index;
 	struct savebuffer buffer;
 
 	p1index = g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0 ? 0 : 4;
@@ -392,7 +386,7 @@ s32 gamefileSave(s32 device, s32 fileid, u16 deviceserial)
 		savebufferOr(&buffer, value, 2);
 
 		// PC control mode is enabled in the .ini to avoid changing the save structure
-		s32 controlmode = optionsGetControlMode(p1index);
+		int controlmode = optionsGetControlMode(p1index);
 		savebufferOr(&buffer, ((controlmode == CONTROLMODE_PC) ? CONTROLMODE_11 : controlmode), 3);
 		controlmode = optionsGetControlMode(p2index);
 		savebufferOr(&buffer, ((controlmode == CONTROLMODE_PC) ? CONTROLMODE_11 : controlmode), 3);
@@ -445,7 +439,7 @@ s32 gamefileSave(s32 device, s32 fileid, u16 deviceserial)
 	return -1;
 }
 
-void gamefileGetOverview(char *arg0, char *name, u8 *stage, u8 *difficulty, u32 *time)
+void gamefileGetOverview(char *arg0, char *name, uint8_t *stage, uint8_t *difficulty, uint32_t *time)
 {
 	struct savebuffer buffer;
 
@@ -463,7 +457,7 @@ void gamefileGetOverview(char *arg0, char *name, u8 *stage, u8 *difficulty, u32 
 // These hacks are taken from the original debug mode.
 void gamefileUnlockEverything(void)
 {
-	s32 i, j;
+	int i, j;
 
 	// unlock all challenges
 	for (i = 0; i < ARRAYCOUNT(g_MpChallenges); ++i) {

@@ -1,10 +1,12 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/tex.h"
 #include "game/stars.h"
 #include "game/textutils.h"
 #include "game/camera.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/memp.h"
@@ -14,11 +16,11 @@
 #include "types.h"
 
 
-s32 g_StarCount;
-s8 *g_StarPositions = NULL;
-f32 *g_StarData3;
-s32 g_StarGridSize;
-s32 *g_StarPosIndexes;
+int g_StarCount;
+int8_t *g_StarPositions = NULL;
+float *g_StarData3;
+int g_StarGridSize;
+int *g_StarPosIndexes;
 
 bool g_StarsBelowHorizon = false;
 
@@ -27,16 +29,16 @@ struct textureconfig *g_StarConfig;
 void stars0f135c70(void)
 {
 	struct coord coord;
-	f32 mult;
-	s32 i;
-	s32 j;
-	s32 k;
-	f32 tmp = g_StarGridSize * 0.5f;
+	float mult;
+	int i;
+	int j;
+	int k;
+	float tmp = g_StarGridSize * 0.5f;
 
 	for (i = 0; i < 6; i++) {
 		for (j = 0; j <= g_StarGridSize; j++) {
 			for (k = 0; k <= g_StarGridSize; k++) {
-				s32 index = ((i * (g_StarGridSize + 1) * (g_StarGridSize + 1)) + k + (j * (g_StarGridSize + 1))) * 3;
+				int index = ((i * (g_StarGridSize + 1) * (g_StarGridSize + 1)) + k + (j * (g_StarGridSize + 1))) * 3;
 
 				switch (i) {
 				case 0:
@@ -72,9 +74,9 @@ void stars0f135c70(void)
 /**
  * Insert a star position *after* the given index.
  */
-void starInsert(s32 index, struct coord *arg1)
+void starInsert(int index, struct coord *arg1)
 {
-	s32 i;
+	int i;
 
 	// Shuffle g_StarPositions forward after the insertion point
 	for (i = g_StarPosIndexes[g_StarGridSize * 6 * g_StarGridSize] - 1; i >= g_StarPosIndexes[index + 1]; i--) {
@@ -94,24 +96,21 @@ void starInsert(s32 index, struct coord *arg1)
 	}
 }
 
-#define ABS2(value) ((value) < 0 ? -(value) : (value))
-
 void starsReset(void)
 {
-	s32 v0;
-	s32 v1;
+	int v0 = 0;
+	int v1 = 0;
 	struct coord spd4;
 	struct coord spc8;
-	s32 i;
-	f32 spc0;
-	f32 spbc;
-	f32 stack[1];
-	s32 count;
-	s32 spb0;
-	f32 f0;
-	s32 tmp;
-	s32 tmp1;
-	s32 tmp2;
+	int i = 0;
+	float spc0 = 0.0f;
+	float spbc = 0.0f;
+	int count = 0;
+	int spb0 = 0;
+	float f0 = 0.0f;
+	int tmp = 0;
+	int tmp1 = 0;
+	int tmp2 = 0;
 
 	g_StarPositions = NULL;
 
@@ -133,14 +132,14 @@ void starsReset(void)
 	g_StarPositions = mempAlloc(ALIGN64(g_StarCount * 3U + tmp * 72 * tmp + 6 * g_StarGridSize * g_StarGridSize * 4U + 4), MEMPOOL_STAGE);
 
 	if (g_StarPositions != NULL) {
-		g_StarPosIndexes = (s32 *)(g_StarPositions + g_StarCount * 3);
+		g_StarPosIndexes = (int *)(g_StarPositions + g_StarCount * 3);
 
 		for (i = 0; i < (6 * g_StarGridSize * g_StarGridSize + 1); i++) {
 			g_StarPosIndexes[i] = 0;
 		}
 
 		count = 6 * g_StarGridSize * g_StarGridSize + 1;
-		g_StarData3 = (f32 *)(count * sizeof(f32) + (uintptr_t)g_StarPosIndexes);
+		g_StarData3 = (float *)(count * sizeof(float) + (uintptr_t)g_StarPosIndexes);
 
 		stars0f135c70();
 
@@ -149,9 +148,9 @@ void starsReset(void)
 			spd4.f[1] = g_StarsBelowHorizon ? 2.0f * RANDOMFRAC() - 1.0f : RANDOMFRAC();
 			spd4.f[2] = 2.0f * RANDOMFRAC() - 1.0f;
 
-			guNormalize(&spd4.f[0], &spd4.f[1], &spd4.f[2]);
+			utilsNormalizeF(&spd4.f[0], &spd4.f[1], &spd4.f[2]);
 
-			f0 = (ABS2(spd4.f[0]) > ABS2(spd4.f[1])) ? (ABS2(spd4.f[0]) > ABS2(spd4.f[2]) ? ABS2(spd4.f[0]) : ABS2(spd4.f[2])) : (ABS2(spd4.f[1]) > ABS2(spd4.f[2]) ? ABS2(spd4.f[1]) : ABS2(spd4.f[2]));
+			f0 = (fabsf(spd4.f[0]) > fabsf(spd4.f[1])) ? (fabsf(spd4.f[0]) > fabsf(spd4.f[2]) ? fabsf(spd4.f[0]) : fabsf(spd4.f[2])) : (fabsf(spd4.f[1]) > fabsf(spd4.f[2]) ? fabsf(spd4.f[1]) : fabsf(spd4.f[2]));
 
 			spc8.f[0] = spd4.f[0] / f0;
 			spc8.f[1] = spd4.f[1] / f0;
@@ -196,21 +195,20 @@ void starsReset(void)
 Gfx *starsRender(Gfx *gdl)
 {
 	Mtxf mtx;
-	f32 viewleft = viGetViewLeft();
-	f32 viewright = viewleft + viGetViewWidth();
-	f32 viewtop = viGetViewTop();
-	f32 viewbottom = viewtop + viGetViewHeight();
-	s32 i;
-	f32 sp154;
+	float viewleft = viGetViewLeft();
+	float viewright = viewleft + viGetViewWidth();
+	float viewtop = viGetViewTop();
+	float viewbottom = viewtop + viGetViewHeight();
+	int i = 0;
+	float sp154;
 	struct coord sp148;
-	f32 screenmidx = g_Vars.currentplayer->c_screenleft + g_Vars.currentplayer->c_halfwidth;
-	f32 screenmidy = g_Vars.currentplayer->c_screentop + g_Vars.currentplayer->c_halfheight;
-	s32 j;
-	s32 k;
-	s32 l;
-	u32 stack;
-	s32 tmp;
-	u32 colours[4];
+	float screenmidx = g_Vars.currentplayer->c_screenleft + g_Vars.currentplayer->c_halfwidth;
+	float screenmidy = g_Vars.currentplayer->c_screentop + g_Vars.currentplayer->c_halfheight;
+	int j;
+	int k;
+	int l;
+	int tmp;
+	uint32_t colours[4];
 
 	if (g_StarPositions == NULL) {
 		return gdl;
@@ -254,8 +252,8 @@ Gfx *starsRender(Gfx *gdl)
 
 	for (i = 0; i < 6; i++) {
 		if (g_StarsBelowHorizon || i != 2) {
-			f32 f0;
-			f32 f0_2;
+			float f0;
+			float f0_2;
 			bool spd0[4][4];
 			struct coord spc4;
 
@@ -275,13 +273,13 @@ Gfx *starsRender(Gfx *gdl)
 			for (j = 0; j < g_StarGridSize; j++) {
 				for (k = 0; k < g_StarGridSize; k++) {
 					if (spd0[k][j] == 0 || spd0[k + 1][j] == 0 || spd0[k][j + 1] == 0 || spd0[k + 1][j + 1] == 0) {
-						s32 tmp = g_StarGridSize * g_StarGridSize * i + k + j * g_StarGridSize;
-						s32 colourindex = 0;
-						f32 screenpos[2];
-						s32 drawpos[2];
-						s32 nextgroupstart = g_StarPosIndexes[tmp];
-						s32 groupsize = (g_StarPosIndexes[tmp + 1] - g_StarPosIndexes[tmp]) / 4 + 1;
-						s8 *pos = &g_StarPositions[g_StarPosIndexes[tmp] * 3];
+						int tmp = g_StarGridSize * g_StarGridSize * i + k + j * g_StarGridSize;
+						int colourindex = 0;
+						float screenpos[2];
+						int drawpos[2];
+						int nextgroupstart = g_StarPosIndexes[tmp];
+						int groupsize = (g_StarPosIndexes[tmp + 1] - g_StarPosIndexes[tmp]) / 4 + 1;
+						int8_t *pos = &g_StarPositions[g_StarPosIndexes[tmp] * 3];
 
 						for (l = g_StarPosIndexes[tmp]; l < g_StarPosIndexes[tmp + 1]; l++) {
 							if (nextgroupstart == l) {

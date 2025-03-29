@@ -58,7 +58,6 @@ struct menuitem g_HtbOptionsMenuItems[] = {
 		MPOPTION_NOAUTOAIM,
 		menuhandlerMpCheckboxOption,
 	},
-#ifndef PLATFORM_N64
 	{
 		MENUITEMTYPE_CHECKBOX,
 		0,
@@ -91,7 +90,6 @@ struct menuitem g_HtbOptionsMenuItems[] = {
 		MPOPTION_NOPLAYERONRADAR,
 		menuhandlerMpCheckboxOption,
 	},
-#endif
 	{
 		MENUITEMTYPE_CHECKBOX,
 		0,
@@ -161,7 +159,7 @@ void htbInit(void)
 	g_ScenarioData.htb.token = NULL;
 }
 
-void htbAddPad(s16 padnum)
+void htbAddPad(int16_t padnum)
 {
 	struct scenariodata_htb *data = &g_ScenarioData.htb;
 
@@ -173,12 +171,12 @@ void htbAddPad(s16 padnum)
 	}
 }
 
-s32 htbNumProps(void)
+int htbNumProps(void)
 {
 	return 1;
 }
 
-void htbRemoveAmmoCrateAtPad(s16 padnum)
+void htbRemoveAmmoCrateAtPad(int16_t padnum)
 {
 	struct prop *prop = g_Vars.activeprops;
 
@@ -201,7 +199,7 @@ void htbRemoveAmmoCrateAtPad(s16 padnum)
 
 void htbReset(void)
 {
-	s32 i;
+	int i;
 
 	g_ScenarioData.htb.nextindex = 0;
 
@@ -247,7 +245,7 @@ void htbCreateToken(void)
 
 	struct prop *prop = g_Vars.activeprops;
 	struct defaultobj *obj;
-	s32 count = 0;
+	int count = 0;
 	struct defaultobj *candidates[20];
 
 	// Build a list of candidate objects to replace. Consider only ammocrates.
@@ -305,8 +303,8 @@ void htbInitProps(void)
 
 void htbTick(void)
 {
-	s32 i;
-	u32 prevplayernum = g_Vars.currentplayernum;
+	int i;
+	uint32_t prevplayernum = g_Vars.currentplayernum;
 	struct prop *prop;
 
 	if (var800869ec && var800869ec->prop) {
@@ -351,11 +349,7 @@ void htbTick(void)
 	// Check if a simulant is holding it
 	if (g_ScenarioData.htb.token == NULL) {
 		for (i = PLAYERCOUNT(); i < g_MpNumChrs; i++) {
-#if VERSION >= VERSION_NTSC_1_0
 			if (g_MpAllChrPtrs[i]->prop && g_MpAllChrPtrs[i]->aibot->hasbriefcase)
-#else
-			if (g_MpAllChrPtrs[i]->aibot->hasbriefcase)
-#endif
 			{
 				g_ScenarioData.htb.token = g_MpAllChrPtrs[i]->prop;
 				break;
@@ -400,11 +394,7 @@ void htbTickChr(struct chrdata *chr)
 			if (g_Vars.currentplayerstats->tokenheldtime >= TICKS(7200)) {
 				sndStart(var80095200, SFX_MP_SCOREPOINT, NULL, -1, -1, -1, -1, -1);
 				g_MpAllChrConfigPtrs[g_Vars.currentplayernum]->numpoints++;
-#if VERSION >= VERSION_JPN_FINAL
-				hudmsgCreateWithFlags(langGet(L_MPWEAPONS_024), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE | HUDMSGFLAG_NOWRAP); // "1 Point!"
-#else
 				hudmsgCreateWithFlags(langGet(L_MPWEAPONS_024), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE); // "1 Point!"
-#endif
 				g_Vars.currentplayerstats->tokenheldtime = 0;
 			}
 		} else {
@@ -422,13 +412,13 @@ void htbTickChr(struct chrdata *chr)
  */
 Gfx *htbRenderHud(Gfx *gdl)
 {
-	s32 time240;
-	s32 mins;
-	s32 secs;
-	s32 textwidth;
-	s32 textheight;
-	s32 x;
-	s32 y;
+	int time240;
+	int mins;
+	int secs;
+	int textwidth;
+	int textheight;
+	int x;
+	int y;
 	char text[64];
 
 	if (invHasBriefcase()) {
@@ -448,7 +438,7 @@ Gfx *htbRenderHud(Gfx *gdl)
 #endif
 
 #ifndef PLATFORM_N64
-		const s32 playercount = PLAYERCOUNT();
+		const int playercount = PLAYERCOUNT();
 		if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 			gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 		}
@@ -479,10 +469,10 @@ Gfx *htbRenderHud(Gfx *gdl)
 	return gdl;
 }
 
-void htbCalculatePlayerScore(struct mpchrconfig *mpchr, s32 mpchrnum, s32 *score, s32 *deaths)
+void htbCalculatePlayerScore(struct mpchrconfig *mpchr, int mpchrnum, int *score, int *deaths)
 {
 	struct mpchrconfig *loopmpchr;
-	s32 i;
+	int i;
 
 	*score = 0;
 	*score += mpchr->numpoints;
@@ -536,7 +526,7 @@ bool htbRadarChr(Gfx **gdl, struct prop *prop)
 			dist.z = prop->pos.z - g_Vars.currentplayer->prop->pos.z;
 
 			if (g_MpSetup.options & MPOPTION_TEAMSENABLED) {
-				u32 colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
+				uint32_t colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
 				*gdl = radarDrawDot(*gdl, g_ScenarioData.htb.token, &dist, colour, 0, 1);
 			} else {
 				*gdl = radarDrawDot(*gdl, g_ScenarioData.htb.token, &dist, 0x00ff0000, 0, 1);
@@ -549,7 +539,7 @@ bool htbRadarChr(Gfx **gdl, struct prop *prop)
 	return false;
 }
 
-bool htbHighlightProp(struct prop *prop, s32 *colour)
+bool htbHighlightProp(struct prop *prop, int *colour)
 {
 	if ((g_MpSetup.options & MPOPTION_HTB_HIGHLIGHTBRIEFCASE) && prop == g_ScenarioData.htb.token) {
 		colour[0] = 0;

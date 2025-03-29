@@ -6,26 +6,27 @@
 
 #include "preprocess/common.h"
 #include "preprocess/setup.h"
+#include <stdint.h>
 
-extern u32 chraiGetAilistLength(u8 *list);
+extern uint32_t chraiGetAilistLength(uint8_t *list);
 
-static inline void convF32(f32 *dst, f32 src) { *(u32*)dst = PD_BE32(*(u32*)&src); }
-static inline void convU32(u32 *dst, u32 src) { *dst = PD_BE32(src); }
-static inline void convS32(s32 *dst, s32 src) { *dst = PD_BE32(src); }
-static inline void convU16(u16 *dst, u32 src) { *dst = PD_BE16(src); }
-static inline void convS16(s16 *dst, s32 src) { *dst = PD_BE16(src); }
-static inline void cpyByte(u8 *dst, u8 src) { *dst = src; }
+static inline void convF32(float *dst, float src) { *(uint32_t*)dst = PD_BE32(*(uint32_t*)&src); }
+static inline void convuint32_t(uint32_t *dst, uint32_t src) { *dst = PD_BE32(src); }
+static inline void convS32(int *dst, int src) { *dst = PD_BE32(src); }
+static inline void convU16(uint16_t *dst, uint32_t src) { *dst = PD_BE16(src); }
+static inline void convS16(int16_t *dst, int src) { *dst = PD_BE16(src); }
+static inline void cpyByte(uint8_t *dst, uint8_t src) { *dst = src; }
 static inline void convCoord(struct coord* dst, struct n64_coord src) { convF32(&dst->x, src.x); convF32(&dst->y, src.y); convF32(&dst->z, src.z); }
-static inline void convUnk(u32 x) { assert(0 && "unknown type"); }
+static inline void convUnk(uint32_t x) { assert(0 && "unknown type"); }
 
 #define PD_CONV_VAL(dst, src) _Generic((dst), \
-	f32: convF32, \
-	u32: convU32, \
-	s32: convS32, \
-	u16: convU16, \
-	s16: convS16, \
-	u8: cpyByte, \
-	s8: cpyByte, \
+	float: convF32, \
+	uint32_t: convuint32_t, \
+	int: convS32, \
+	uint16_t: convU16, \
+	int16_t: convS16, \
+	uint8_t: cpyByte, \
+	int8_t: cpyByte, \
 	struct coord: convCoord, \
 	default: convUnk	\
 )(&dst, src)
@@ -38,65 +39,65 @@ static inline void convUnk(u32 x) { assert(0 && "unknown type"); }
 
 #define PD_CONV_PTR(dst, src, type) dst = (type)(uintptr_t)PD_BE32(src)
 
-static inline u32 objSizeN64(struct n64_defaultobj *obj)
+static inline uint32_t objSizeN64(struct n64_defaultobj *obj)
 {
 	switch (obj->type) {
-	case OBJTYPE_CHR:                return sizeof(struct n64_packedchr) / sizeof(u32);
-	case OBJTYPE_DOOR:               return sizeof(struct n64_doorobj) / sizeof(u32);
-	case OBJTYPE_DOORSCALE:          return sizeof(struct n64_doorscaleobj) / sizeof(u32);
-	case OBJTYPE_BASIC:              return sizeof(struct n64_defaultobj) / sizeof(u32);
-	case OBJTYPE_DEBRIS:             return sizeof(struct n64_debrisobj) / sizeof(u32);
-	case OBJTYPE_GLASS:              return sizeof(struct n64_glassobj) / sizeof(u32);
-	case OBJTYPE_TINTEDGLASS:        return sizeof(struct n64_tintedglassobj) / sizeof(u32);
-	case OBJTYPE_SAFE:               return sizeof(struct n64_safeobj) / sizeof(u32);
-	case OBJTYPE_GASBOTTLE:          return sizeof(struct gasbottleobj) / sizeof(u32);
-	case OBJTYPE_KEY:                return sizeof(struct n64_keyobj) / sizeof(u32);
-	case OBJTYPE_ALARM:              return sizeof(struct n64_alarmobj) / sizeof(u32);
-	case OBJTYPE_CCTV:               return sizeof(struct n64_cctvobj) / sizeof(u32);
-	case OBJTYPE_AMMOCRATE:          return sizeof(struct n64_ammocrateobj) / sizeof(u32);
-	case OBJTYPE_WEAPON:             return sizeof(struct n64_weaponobj) / sizeof(u32);
-	case OBJTYPE_SINGLEMONITOR:      return sizeof(struct n64_singlemonitorobj) / sizeof(u32);
-	case OBJTYPE_MULTIMONITOR:       return sizeof(struct n64_multimonitorobj) / sizeof(u32);
-	case OBJTYPE_HANGINGMONITORS:    return sizeof(struct n64_hangingmonitorsobj) / sizeof(u32);
-	case OBJTYPE_AUTOGUN:            return sizeof(struct n64_autogunobj) / sizeof(u32);
-	case OBJTYPE_LINKGUNS:           return sizeof(struct linkgunsobj) / sizeof(u32);
-	case OBJTYPE_HAT:                return sizeof(struct n64_hatobj) / sizeof(u32);
-	case OBJTYPE_GRENADEPROB:        return sizeof(struct grenadeprobobj) / sizeof(u32);
-	case OBJTYPE_LINKLIFTDOOR:       return sizeof(struct n64_linkliftdoorobj) / sizeof(u32);
-	case OBJTYPE_SAFEITEM:           return sizeof(struct n64_safeitemobj) / sizeof(u32);
-	case OBJTYPE_MULTIAMMOCRATE:     return sizeof(struct n64_multiammocrateobj) / sizeof(u32);
-	case OBJTYPE_SHIELD:             return sizeof(struct n64_shieldobj) / sizeof(u32);
-	case OBJTYPE_TAG:                return sizeof(struct n64_tag) / sizeof(u32);
-	case OBJTYPE_RENAMEOBJ:          return sizeof(struct n64_textoverride) / sizeof(u32);
-	case OBJTYPE_BEGINOBJECTIVE:     return sizeof(struct n64_objective) / sizeof(u32);
+	case OBJTYPE_CHR:                return sizeof(struct n64_packedchr) / sizeof(uint32_t);
+	case OBJTYPE_DOOR:               return sizeof(struct n64_doorobj) / sizeof(uint32_t);
+	case OBJTYPE_DOORSCALE:          return sizeof(struct n64_doorscaleobj) / sizeof(uint32_t);
+	case OBJTYPE_BASIC:              return sizeof(struct n64_defaultobj) / sizeof(uint32_t);
+	case OBJTYPE_DEBRIS:             return sizeof(struct n64_debrisobj) / sizeof(uint32_t);
+	case OBJTYPE_GLASS:              return sizeof(struct n64_glassobj) / sizeof(uint32_t);
+	case OBJTYPE_TINTEDGLASS:        return sizeof(struct n64_tintedglassobj) / sizeof(uint32_t);
+	case OBJTYPE_SAFE:               return sizeof(struct n64_safeobj) / sizeof(uint32_t);
+	case OBJTYPE_GASBOTTLE:          return sizeof(struct gasbottleobj) / sizeof(uint32_t);
+	case OBJTYPE_KEY:                return sizeof(struct n64_keyobj) / sizeof(uint32_t);
+	case OBJTYPE_ALARM:              return sizeof(struct n64_alarmobj) / sizeof(uint32_t);
+	case OBJTYPE_CCTV:               return sizeof(struct n64_cctvobj) / sizeof(uint32_t);
+	case OBJTYPE_AMMOCRATE:          return sizeof(struct n64_ammocrateobj) / sizeof(uint32_t);
+	case OBJTYPE_WEAPON:             return sizeof(struct n64_weaponobj) / sizeof(uint32_t);
+	case OBJTYPE_SINGLEMONITOR:      return sizeof(struct n64_singlemonitorobj) / sizeof(uint32_t);
+	case OBJTYPE_MULTIMONITOR:       return sizeof(struct n64_multimonitorobj) / sizeof(uint32_t);
+	case OBJTYPE_HANGINGMONITORS:    return sizeof(struct n64_hangingmonitorsobj) / sizeof(uint32_t);
+	case OBJTYPE_AUTOGUN:            return sizeof(struct n64_autogunobj) / sizeof(uint32_t);
+	case OBJTYPE_LINKGUNS:           return sizeof(struct linkgunsobj) / sizeof(uint32_t);
+	case OBJTYPE_HAT:                return sizeof(struct n64_hatobj) / sizeof(uint32_t);
+	case OBJTYPE_GRENADEPROB:        return sizeof(struct grenadeprobobj) / sizeof(uint32_t);
+	case OBJTYPE_LINKLIFTDOOR:       return sizeof(struct n64_linkliftdoorobj) / sizeof(uint32_t);
+	case OBJTYPE_SAFEITEM:           return sizeof(struct n64_safeitemobj) / sizeof(uint32_t);
+	case OBJTYPE_MULTIAMMOCRATE:     return sizeof(struct n64_multiammocrateobj) / sizeof(uint32_t);
+	case OBJTYPE_SHIELD:             return sizeof(struct n64_shieldobj) / sizeof(uint32_t);
+	case OBJTYPE_TAG:                return sizeof(struct n64_tag) / sizeof(uint32_t);
+	case OBJTYPE_RENAMEOBJ:          return sizeof(struct n64_textoverride) / sizeof(uint32_t);
+	case OBJTYPE_BEGINOBJECTIVE:     return sizeof(struct n64_objective) / sizeof(uint32_t);
 	case OBJTYPE_ENDOBJECTIVE:       return 1;
 	case OBJECTIVETYPE_DESTROYOBJ:   return 2;
 	case OBJECTIVETYPE_COMPFLAGS:    return 2;
 	case OBJECTIVETYPE_FAILFLAGS:    return 2;
 	case OBJECTIVETYPE_COLLECTOBJ:   return 2;
 	case OBJECTIVETYPE_THROWOBJ:     return 2;
-	case OBJECTIVETYPE_HOLOGRAPH:    return sizeof(struct n64_criteria_holograph) / sizeof(u32);
+	case OBJECTIVETYPE_HOLOGRAPH:    return sizeof(struct n64_criteria_holograph) / sizeof(uint32_t);
 	case OBJECTIVETYPE_1F:           return 1;
-	case OBJECTIVETYPE_ENTERROOM:    return sizeof(struct n64_criteria_roomentered) / sizeof(u32);
-	case OBJECTIVETYPE_THROWINROOM:  return sizeof(struct n64_criteria_throwinroom) / sizeof(u32);
+	case OBJECTIVETYPE_ENTERROOM:    return sizeof(struct n64_criteria_roomentered) / sizeof(uint32_t);
+	case OBJECTIVETYPE_THROWINROOM:  return sizeof(struct n64_criteria_throwinroom) / sizeof(uint32_t);
 	case OBJTYPE_22:                 return 1;
-	case OBJTYPE_BRIEFING:           return sizeof(struct n64_briefingobj) / sizeof(u32);
-	case OBJTYPE_PADLOCKEDDOOR:      return sizeof(struct n64_padlockeddoorobj) / sizeof(u32);
-	case OBJTYPE_TRUCK:              return sizeof(struct n64_truckobj) / sizeof(u32);
-	case OBJTYPE_HELI:               return sizeof(struct n64_heliobj) / sizeof(u32);
+	case OBJTYPE_BRIEFING:           return sizeof(struct n64_briefingobj) / sizeof(uint32_t);
+	case OBJTYPE_PADLOCKEDDOOR:      return sizeof(struct n64_padlockeddoorobj) / sizeof(uint32_t);
+	case OBJTYPE_TRUCK:              return sizeof(struct n64_truckobj) / sizeof(uint32_t);
+	case OBJTYPE_HELI:               return sizeof(struct n64_heliobj) / sizeof(uint32_t);
 	case OBJTYPE_TANK:               return 32;
-	case OBJTYPE_CAMERAPOS:          return sizeof(struct n64_cameraposobj) / sizeof(u32);
-	case OBJTYPE_LIFT:               return sizeof(struct n64_liftobj) / sizeof(u32);
-	case OBJTYPE_CONDITIONALSCENERY: return sizeof(struct n64_linksceneryobj) / sizeof(u32);
-	case OBJTYPE_BLOCKEDPATH:        return sizeof(struct n64_blockedpathobj) / sizeof(u32);
-	case OBJTYPE_HOVERBIKE:          return sizeof(struct n64_hoverbikeobj) / sizeof(u32);
-	case OBJTYPE_HOVERPROP:          return sizeof(struct n64_hoverpropobj) / sizeof(u32);
-	case OBJTYPE_FAN:                return sizeof(struct n64_fanobj) / sizeof(u32);
-	case OBJTYPE_HOVERCAR:           return sizeof(struct n64_hovercarobj) / sizeof(u32);
-	case OBJTYPE_CHOPPER:            return sizeof(struct n64_chopperobj) / sizeof(u32);
-	case OBJTYPE_PADEFFECT:          return sizeof(struct padeffectobj) / sizeof(u32);
-	case OBJTYPE_MINE:               return sizeof(struct n64_weaponobj) / sizeof(u32);
-	case OBJTYPE_ESCASTEP:           return sizeof(struct n64_escalatorobj) / sizeof(u32);
+	case OBJTYPE_CAMERAPOS:          return sizeof(struct n64_cameraposobj) / sizeof(uint32_t);
+	case OBJTYPE_LIFT:               return sizeof(struct n64_liftobj) / sizeof(uint32_t);
+	case OBJTYPE_CONDITIONALSCENERY: return sizeof(struct n64_linksceneryobj) / sizeof(uint32_t);
+	case OBJTYPE_BLOCKEDPATH:        return sizeof(struct n64_blockedpathobj) / sizeof(uint32_t);
+	case OBJTYPE_HOVERBIKE:          return sizeof(struct n64_hoverbikeobj) / sizeof(uint32_t);
+	case OBJTYPE_HOVERPROP:          return sizeof(struct n64_hoverpropobj) / sizeof(uint32_t);
+	case OBJTYPE_FAN:                return sizeof(struct n64_fanobj) / sizeof(uint32_t);
+	case OBJTYPE_HOVERCAR:           return sizeof(struct n64_hovercarobj) / sizeof(uint32_t);
+	case OBJTYPE_CHOPPER:            return sizeof(struct n64_chopperobj) / sizeof(uint32_t);
+	case OBJTYPE_PADEFFECT:          return sizeof(struct padeffectobj) / sizeof(uint32_t);
+	case OBJTYPE_MINE:               return sizeof(struct n64_weaponobj) / sizeof(uint32_t);
+	case OBJTYPE_ESCASTEP:           return sizeof(struct n64_escalatorobj) / sizeof(uint32_t);
 	}
 
 	return 1;
@@ -104,7 +105,7 @@ static inline u32 objSizeN64(struct n64_defaultobj *obj)
 
 static void convTvScreen(struct tvscreen* dstobj, struct n64_tvscreen* srcobj)
 {
-	PD_CONV_PTR(dstobj->cmdlist, srcobj->ptr_cmdlist, u32*);
+	PD_CONV_PTR(dstobj->cmdlist, srcobj->ptr_cmdlist, uint32_t*);
 	PD_CONV_VAL(dstobj->offset, srcobj->offset);
 	PD_CONV_VAL(dstobj->pause60, srcobj->pause60);
 	PD_CONV_PTR(dstobj->tconfig, srcobj->ptr_tconfig, struct textureconfig*);
@@ -149,16 +150,16 @@ static void convertDefaultObjHdr(struct defaultobj* dstobj, struct n64_defaultob
 {
 	PD_CONV_VAL(dstobj->extrascale, srcobj->extrascale);
 	
-	/* 'header' is like this inside a u32:
-		u16 unk00_1,
-		u8 unk00_2,
-		u8 type,
+	/* 'header' is like this inside a uint32_t:
+		uint16_t unk00_1,
+		uint8_t unk00_2,
+		uint8_t type,
 	*/
-	u16 *dst_unk00_1 = (u16*)&dstobj->extrascale;
-	u8  *dst_unk00_2 = (u8*)(dst_unk00_1 + 1);
+	uint16_t *dst_unk00_1 = (uint16_t*)&dstobj->extrascale;
+	uint8_t  *dst_unk00_2 = (uint8_t*)(dst_unk00_1 + 1);
 
-	u16 *src_unk00_1 = (u16*)&srcobj->extrascale;
-	u8  *src_unk00_2 = (u8*)(src_unk00_1 + 1);
+	uint16_t *src_unk00_1 = (uint16_t*)&srcobj->extrascale;
+	uint8_t  *src_unk00_2 = (uint8_t*)(src_unk00_1 + 1);
 
 	*dst_unk00_1 = PD_BE16(*src_unk00_1);
 	dst_unk00_2[0] = src_unk00_2[0];
@@ -188,13 +189,13 @@ static void convertDefaultObj(struct defaultobj* dstobj, struct n64_defaultobj* 
 	PD_CONV_VAL(dstobj->geocount, srcobj->geocount);
 }
 
-static u32 convertProps(u8* dst, u8* src)
+static uint32_t convertProps(uint8_t* dst, uint8_t* src)
 {
-	u8* start = dst;
+	uint8_t* start = dst;
 	struct n64_defaultobj* cmd = (struct n64_defaultobj*)src;
 
 	int i = 0;
-	u8 type = cmd->type;
+	uint8_t type = cmd->type;
 
 	while (type != OBJTYPE_END) {
 		//sysLogPrintf(LOG_NOTE, "#%03d obj 0x%02x (%s)", ++i, type, objName(cmd));
@@ -649,7 +650,7 @@ static u32 convertProps(u8* dst, u8* src)
 
 				convertDefaultObj(&dstobj->base, cmd);
 
-				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, u8*);
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, uint8_t*);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->speed, srcobj->speed);
@@ -672,7 +673,7 @@ static u32 convertProps(u8* dst, u8* src)
 
 				convertDefaultObj(&dstobj->base, cmd);
 
-				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, u8*);
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, uint8_t*);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->rotoryrot, srcobj->rotoryrot);
@@ -892,7 +893,7 @@ static u32 convertProps(u8* dst, u8* src)
 
 				convertDefaultObj(&dstobj->base, cmd);
 
-				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, u8*);
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, uint8_t*);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->speed, srcobj->speed);
@@ -933,7 +934,7 @@ static u32 convertProps(u8* dst, u8* src)
 
 				convertDefaultObj(&dstobj->base, cmd);
 
-				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, u8*);
+				PD_CONV_PTR(dstobj->ailist, srcobj->ptr_ailist, uint8_t*);
 				PD_CONV_VAL(dstobj->aioffset, srcobj->aioffset);
 				PD_CONV_VAL(dstobj->aireturnlist, srcobj->aireturnlist);
 				PD_CONV_VAL(dstobj->speed, srcobj->speed);
@@ -991,19 +992,19 @@ static u32 convertProps(u8* dst, u8* src)
 			}
 		}
 
-		cmd = (struct n64_defaultobj*)((u32*)cmd + objSizeN64(cmd));
+		cmd = (struct n64_defaultobj*)((uint32_t*)cmd + objSizeN64(cmd));
 		type = cmd->type;
 	}
 
-	*(u32*)(dst) = PD_BE32(OBJTYPE_END);
-	dst += sizeof(u32);
+	*(uint32_t*)(dst) = PD_BE32(OBJTYPE_END);
+	dst += sizeof(uint32_t);
 
-	return (u32)(dst - start);
+	return (uint32_t)(dst - start);
 }
 
-static uintptr_t convertIntro(u8 *dst, u8 *src)
+static uintptr_t convertIntro(uint8_t *dst, uint8_t *src)
 {
-	static const u8 cmd_size[] = {
+	static const uint8_t cmd_size[] = {
 		3, // INTROCMD_SPAWN
 		4, // INTROCMD_WEAPON
 		4, // INTROCMD_AMMO
@@ -1019,12 +1020,12 @@ static uintptr_t convertIntro(u8 *dst, u8 *src)
 		1, // the INTROCMD_END constant itself
 	};
 
-	s32* dstintro = (s32*)dst;
-	s32* srcintro = (s32*)src;
+	int* dstintro = (int*)dst;
+	int* srcintro = (int*)src;
 
 	while (true) {
-		s32 cmd = dstintro[0] = PD_BE32(srcintro[0]);
-		u8 size = cmd_size[*dstintro];
+		int cmd = dstintro[0] = PD_BE32(srcintro[0]);
+		uint8_t size = cmd_size[*dstintro];
 		for (int i = 1; i < size; i++) {
 			dstintro[i] = PD_BE32(srcintro[i]);
 		}
@@ -1035,16 +1036,16 @@ static uintptr_t convertIntro(u8 *dst, u8 *src)
 		if (cmd == INTROCMD_END) break;
 	}
 
-	return (u32)((u8*)dstintro - dst);
+	return (uint32_t)((uint8_t*)dstintro - dst);
 }
 
-static u32 convertPaths(u8 *dst, u8 *src)
+static uint32_t convertPaths(uint8_t *dst, uint8_t *src)
 {
 	struct n64_path* srcpath = (struct n64_path*)src;
 	struct path* dstpath = (struct path*)dst;
 
 	while (true) {
-		PD_CONV_PTR(dstpath->pads, srcpath->ptr_pads, s32*);
+		PD_CONV_PTR(dstpath->pads, srcpath->ptr_pads, int*);
 		PD_CONV_VAL(dstpath->id, srcpath->id);
 		PD_CONV_VAL(dstpath->flags, srcpath->flags);
 		PD_CONV_VAL(dstpath->len, srcpath->len);
@@ -1056,21 +1057,21 @@ static u32 convertPaths(u8 *dst, u8 *src)
 	}
 
 	// extra pointer for the end marker
-	return (u32)((u8*)dstpath - dst + sizeof(uintptr_t));
+	return (uint32_t)((uint8_t*)dstpath - dst + sizeof(uintptr_t));
 }
 
-static u32 convertPads(struct path *dstpaths, u8 *dst, u8 *src, u32 dstpos)
+static uint32_t convertPads(struct path *dstpaths, uint8_t *dst, uint8_t *src, uint32_t dstpos)
 {
-	u32 start = dstpos;
-	s32 *dstpads = (s32 *)&dst[dstpos];
+	uint32_t start = dstpos;
+	int *dstpads = (int *)&dst[dstpos];
 	while (dstpaths->pads) {
-		s32 *pads = (s32 *)&src[(uintptr_t)dstpaths->pads];
-		dstpaths->pads = (s32 *)(uintptr_t)dstpos;
+		int *pads = (int *)&src[(uintptr_t)dstpaths->pads];
+		dstpaths->pads = (int *)(uintptr_t)dstpos;
 
 		while (*pads) {
-			s32 p = PD_BE32(*pads++);
+			int p = PD_BE32(*pads++);
 			*dstpads++ = p;
-			dstpos += sizeof(s32);
+			dstpos += sizeof(int);
 			if (p == -1) break;
 		}
 		
@@ -1080,14 +1081,14 @@ static u32 convertPads(struct path *dstpaths, u8 *dst, u8 *src, u32 dstpos)
 	return dstpos - start;
 }
 
-static u32 convertAiLists(u8* dst, u8* src)
+static uint32_t convertAiLists(uint8_t* dst, uint8_t* src)
 {
 	struct n64_ailist* srcailist = (struct n64_ailist *)src;
 	struct ailist* dstailist = (struct ailist *)dst;
 
 	while (true) {
 		// at this point these fields are already converted, so we just assign
-		dstailist->list = (u8 *)(uintptr_t)srcailist->ptr_list;
+		dstailist->list = (uint8_t *)(uintptr_t)srcailist->ptr_list;
 		dstailist->id = srcailist->id;
 
 
@@ -1097,10 +1098,10 @@ static u32 convertAiLists(u8* dst, u8* src)
 		srcailist++;
 	}
 
-	return (u32)((u8 *)dstailist - dst + sizeof(uintptr_t));
+	return (uint32_t)((uint8_t *)dstailist - dst + sizeof(uintptr_t));
 }
 
-static u32 convertLists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
+static uint32_t convertLists(uint8_t *dst, uint8_t *src, uint32_t dstpos, uint32_t src_ofs)
 {
 	ptrReset();
 	struct n64_ailist *src_ailists = (struct n64_ailist*)&src[src_ofs];
@@ -1126,8 +1127,8 @@ static u32 convertLists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
 
 		ptrAdd(src_ptr_list, dstpos);
 
-		u8 *list = &src[src_ptr_list];
-		u32 listsize = chraiGetAilistLength(list);
+		uint8_t *list = &src[src_ptr_list];
+		uint32_t listsize = chraiGetAilistLength(list);
 		memcpy(dst + dstpos, list, listsize);
 
 		dstpos += PD_ALIGN(listsize, 4);
@@ -1136,7 +1137,7 @@ static u32 convertLists(u8 *dst, u8 *src, u32 dstpos, u32 src_ofs)
 	return dstpos;
 }
 
-static u32 convertSetup(u8 *dst, u8 *src, u32 srclen)
+static uint32_t convertSetup(uint8_t *dst, uint8_t *src, uint32_t srclen)
 {
 	struct n64_stagesetup *src_header = (struct n64_stagesetup*)src;
 	struct stagesetup *dst_header = (struct stagesetup*)dst;
@@ -1146,15 +1147,15 @@ static u32 convertSetup(u8 *dst, u8 *src, u32 srclen)
 	src_header->ptr_ailists = PD_BE32(src_header->ptr_ailists);
 	src_header->ptr_paths = PD_BE32(src_header->ptr_paths);
 
-	u32 srcpos = sizeof(*src_header);
-	u32 dstpos = sizeof(*dst_header);
+	uint32_t srcpos = sizeof(*src_header);
+	uint32_t dstpos = sizeof(*dst_header);
 
 	srcpos = src_header->ptr_props;
-	dst_header->props = (u32 *)(uintptr_t)dstpos;
+	dst_header->props = (uint32_t *)(uintptr_t)dstpos;
 	dstpos += convertProps(&dst[dstpos], &src[srcpos]);
 
 	srcpos = src_header->ptr_intro;
-	dst_header->intro = (s32 *)(uintptr_t)dstpos;
+	dst_header->intro = (int *)(uintptr_t)dstpos;
 	dstpos += convertIntro(&dst[dstpos], &src[srcpos]);
 	
 	// write the lists bytecodes before the ailists entries
@@ -1173,11 +1174,11 @@ static u32 convertSetup(u8 *dst, u8 *src, u32 srclen)
 	return dstpos;
 }
 
-u8 *preprocessSetupFile(u8 *data, u32 size, u32 *outSize) {
-	u32 newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_SETUP);
-	u8 *dst = sysMemZeroAlloc(newSizeEstimated);
+uint8_t *preprocessSetupFile(uint8_t *data, uint32_t size, uint32_t *outSize) {
+	uint32_t newSizeEstimated = romdataFileGetEstimatedSize(size, LOADTYPE_SETUP);
+	uint8_t *dst = sysMemZeroAlloc(newSizeEstimated);
 
-	u32 newSize = convertSetup(dst, data, size);
+	uint32_t newSize = convertSetup(dst, data, size);
 
 	if (newSize > newSizeEstimated) {
 		sysFatalError("overflow when trying to preprocess a model file, size %d newsize %d", size, newSize);

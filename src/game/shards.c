@@ -14,31 +14,31 @@
 #include "lib/rng.h"
 #include "types.h"
 
-s32 g_MaxShards;
+int g_MaxShards;
 struct shard *g_Shards;
 
-s32 g_NextShardNum = 0;
+int g_NextShardNum = 0;
 bool g_ShardsActive = false;
 
-void shardCreate(RoomNum room, struct coord *pos, f32 rotx, f32 size, s32 type);
+void shardCreate(RoomNum room, struct coord *pos, float rotx, float size, int type);
 
-void shardsCreate(struct coord *pos, f32 *rotx, f32 *roty, f32 *rotz, f32 relxmin, f32 relxmax, f32 relymin, f32 relymax, s32 type, struct prop *prop)
+void shardsCreate(struct coord *pos, float *rotx, float *roty, float *rotz, float relxmin, float relxmax, float relymin, float relymax, int type, struct prop *prop)
 {
-	s32 y;
-	s32 x;
-	s32 speci;
-	s32 speci2;
+	int y;
+	int x;
+	int speci;
+	int speci2;
 	struct coord thispos;
-	f32 f0;
-	f32 f20;
-	f32 f30;
-	f32 spec;
-	s32 ymax;
-	s32 xmax;
+	float f0;
+	float f20;
+	float f30;
+	float spec;
+	int ymax;
+	int xmax;
 	struct coord basepos;
-	f32 spcc[3];
-	f32 spc0[3];
-	f32 spac;
+	float spcc[3];
+	float spc0[3];
+	float spac;
 
 	spcc[0] = rotx[0];
 	spcc[1] = rotx[1];
@@ -71,7 +71,7 @@ void shardsCreate(struct coord *pos, f32 *rotx, f32 *roty, f32 *rotz, f32 relxmi
 	f20 = relxmax - relxmin;
 	spac = relymax - relymin;
 
-	spec = sqrtf(f20 * spac / (f32) (g_MaxShards / 2));
+	spec = sqrtf(f20 * spac / (float) (g_MaxShards / 2));
 	speci = spec;
 	speci2 = speci;
 
@@ -100,24 +100,24 @@ void shardsCreate(struct coord *pos, f32 *rotx, f32 *roty, f32 *rotz, f32 relxmi
 	ymax = spac / speci2;
 
 	for (y = 0; y < ymax; y++) {
-		f32 f20 = y * (f32) speci2;
+		float f20 = y * (float) speci2;
 
 		for (x = 0; x < xmax; x++) {
-			thispos.x = basepos.f[0] + x * (f32) speci * spcc[0] + spc0[0] * f20;
-			thispos.y = basepos.f[1] + x * (f32) speci * spcc[1] + spc0[1] * f20;
-			thispos.z = basepos.f[2] + x * (f32) speci * spcc[2] + spc0[2] * f20;
+			thispos.x = basepos.f[0] + x * (float) speci * spcc[0] + spc0[0] * f20;
+			thispos.y = basepos.f[1] + x * (float) speci * spcc[1] + spc0[1] * f20;
+			thispos.z = basepos.f[2] + x * (float) speci * spcc[2] + spc0[2] * f20;
 
 			shardCreate(prop->rooms[0], &thispos, f30, (RANDOMFRAC() * 0.7f + 0.1f) * spec, type);
 		}
 	}
 }
 
-void shardCreate(RoomNum room, struct coord *pos, f32 rotx, f32 size, s32 type)
+void shardCreate(RoomNum room, struct coord *pos, float rotx, float size, int type)
 {
-	f32 velx = RANDOMFRAC() * 2.0f - 1.0f;
-	f32 vely = RANDOMFRAC() * 1.12f - 0.12f;
-	f32 velz = RANDOMFRAC() * 2.0f - 1.0f;
-	s32 i;
+	float velx = RANDOMFRAC() * 2.0f - 1.0f;
+	float vely = RANDOMFRAC() * 1.12f - 0.12f;
+	float velz = RANDOMFRAC() * 2.0f - 1.0f;
+	int i;
 
 	g_Shards[g_NextShardNum].type = type;
 	g_Shards[g_NextShardNum].room = room;
@@ -146,7 +146,7 @@ void shardCreate(RoomNum room, struct coord *pos, f32 rotx, f32 size, s32 type)
 	}
 
 	if (type == SHARDTYPE_WOOD) {
-		s32 rand = rngRandom() % 100;
+		int rand = rngRandom() % 100;
 
 		if (rand < 20) {
 			g_Shards[g_NextShardNum].colours[0].word = PD_BE32(0xbbbbbbf0);
@@ -166,8 +166,8 @@ void shardCreate(RoomNum room, struct coord *pos, f32 rotx, f32 size, s32 type)
 			g_Shards[g_NextShardNum].colours[2].word = PD_BE32(0xddaa88f0);
 		}
 	} else {
-		s32 i;
-		s32 j;
+		int i;
+		int j;
 
 		g_Shards[g_NextShardNum].colours[0].r = 0x05;
 		g_Shards[g_NextShardNum].colours[0].g = 0x05;
@@ -213,9 +213,9 @@ Gfx *shardsRenderWood(Gfx *gdl)
 {
 	if (g_ShardsActive) {
 		RoomNum prevroom = 0;
-		s32 i;
+		int i;
 		Mtxf shardmtx;
-		s32 j;
+		int j;
 
 		if (g_Vars.currentplayer->visionmode);
 
@@ -230,10 +230,9 @@ Gfx *shardsRenderWood(Gfx *gdl)
 		for (i = 0; i < g_MaxShards; i++) {
 			if (g_Shards[i].age60 > 0 && g_Shards[i].type == SHARDTYPE_WOOD) {
 				bool render = true;
-				f32 alphamult = 1.0f;
-				f32 xraydist;
+				float alphamult = 1.0f;
+				float xraydist;
 				Mtxf *mtx = gfxAllocateMatrix();
-				u32 stack;
 
 				if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 					xraydist = sqrtf(ERASERSQDIST(g_Shards[i].pos.f));
@@ -254,7 +253,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 				}
 
 				if (render) {
-					struct shard *shard = (struct shard *) ((u8 *)g_Shards + i * sizeof(struct shard));
+					struct shard *shard = (struct shard *) ((uint8_t *)g_Shards + i * sizeof(struct shard));
 
 					mtx4LoadRotationAndTranslation(&shard->pos, &shard->rot, &shardmtx);
 
@@ -262,11 +261,9 @@ Gfx *shardsRenderWood(Gfx *gdl)
 					shardmtx.m[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;
 					shardmtx.m[3][2] -= g_Vars.currentplayer->globaldrawworldoffset.z;
 
-#if VERSION >= VERSION_NTSC_1_0
 					if (shardmtx.m[3][0] < 10000 && shardmtx.m[3][0] > -10000
 							&& shardmtx.m[3][1] < 10000 && shardmtx.m[3][1] > -10000
 							&& shardmtx.m[3][2] < 10000 && shardmtx.m[3][2] > -10000)
-#endif
 					{
 						mtxF2L(&shardmtx, mtx);
 
@@ -276,7 +273,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 							Col *colours = gfxAllocateColours(3);
 
 							if (g_Shards[i].age60 >= TICKS(100)) {
-								f32 frac = g_Shards[i].age60 / (PAL ? 41.666664123535f : 50.0f);
+								float frac = g_Shards[i].age60 / 50.0f;
 
 								if (frac > 1) {
 									frac = 1;
@@ -327,9 +324,9 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 {
 	if (g_ShardsActive) {
 		RoomNum prevroom = 0;
-		s32 i;
+		int i;
 		Mtxf shardmtx;
-		s32 j;
+		int j;
 
 		if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 			texSelect(&gdl, NULL, 2, 1, 2, 1, NULL);
@@ -352,10 +349,9 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 		for (i = 0; i < g_MaxShards; i++) {
 			if (g_Shards[i].age60 > 0 && g_Shards[i].type != SHARDTYPE_WOOD) {
 				bool render = true;
-				f32 alphamult = 1.0f;
-				f32 xraydist;
+				float alphamult = 1.0f;
+				float xraydist;
 				Mtxf *mtx = gfxAllocateMatrix();
-				u32 stack;
 
 				if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 					xraydist = sqrtf(ERASERSQDIST(g_Shards[i].pos.f));
@@ -376,7 +372,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 				}
 
 				if (render) {
-					struct shard *shard = (struct shard *) ((u8 *)g_Shards + i * sizeof(struct shard));
+					struct shard *shard = (struct shard *) ((uint8_t *)g_Shards + i * sizeof(struct shard));
 
 					mtx4LoadRotationAndTranslation(&shard->pos, &shard->rot, &shardmtx);
 
@@ -384,11 +380,9 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 					shardmtx.m[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;
 					shardmtx.m[3][2] -= g_Vars.currentplayer->globaldrawworldoffset.z;
 
-#if VERSION >= VERSION_NTSC_1_0
 					if (shardmtx.m[3][0] < 10000 && shardmtx.m[3][0] > -10000
 							&& shardmtx.m[3][1] < 10000 && shardmtx.m[3][1] > -10000
 							&& shardmtx.m[3][2] < 10000 && shardmtx.m[3][2] > -10000)
-#endif
 					{
 						mtxF2L(&shardmtx, mtx);
 
@@ -398,7 +392,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 							Col *colours = gfxAllocateColours(3);
 
 							if (g_Shards[i].age60 >= TICKS(100)) {
-								f32 frac = g_Shards[i].age60 / (PAL ? 41.666664123535f : 50.0f);
+								float frac = g_Shards[i].age60 / (50.0f);
 
 								if (frac > 1) {
 									frac = 1;

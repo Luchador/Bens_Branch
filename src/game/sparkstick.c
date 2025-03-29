@@ -9,10 +9,10 @@ void sparksTick(void)
 	struct sparkgroup *group;
 	struct sparktype *type;
 	struct spark *spark;
-	s32 next;
-	s32 i;
-	s32 j;
-	s32 k;
+	int next;
+	int i;
+	int j;
+	int k;
 
 	if (g_SparksAreActive) {
 		g_SparksAreActive = false;

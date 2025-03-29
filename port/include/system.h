@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <PR/ultratypes.h>
+#include <stdint.h>
 
 enum LogLevel {
   LOG_NOTE,
@@ -13,30 +13,30 @@ enum LogLevel {
   LOG_ERROR,
 };
 
-void sysInitArgs(s32 argc, const char **argv);
+void sysInitArgs(int argc, const char **argv);
 void sysInit(void);
 
-s32 sysArgCheck(const char *arg);
+int sysArgCheck(const char *arg);
 const char *sysArgGetString(const char *arg);
-s32 sysArgGetInt(const char *arg, s32 defval);
+int sysArgGetInt(const char *arg, int defval);
 
-u64 sysGetMicroseconds(void);
+uint64_t sysGetMicroseconds(void);
 
 void sysFatalError(const char *fmt, ...) __attribute__((noreturn));
 
-s32 sysLogIsOpen(void);
-void sysLogPrintf(s32 level, const char *fmt, ...);
+int sysLogIsOpen(void);
+void sysLogPrintf(int level, const char *fmt, ...);
 
-void sysGetExecutablePath(char *outPath, const u32 outLen);
-void sysGetHomePath(char *outPath, const u32 outLen);
+void sysGetExecutablePath(char *outPath, const uint32_t outLen);
+void sysGetHomePath(char *outPath, const uint32_t outLen);
 
-void *sysMemAlloc(const u32 size);
-void *sysMemZeroAlloc(const u32 size);
-void *sysMemRealloc(void *ptr, const u32 newSize);
+void *sysMemAlloc(const uint32_t size);
+void *sysMemZeroAlloc(const uint32_t size);
+void *sysMemRealloc(void *ptr, const uint32_t newSize);
 void sysMemFree(void *ptr);
 
 // hns is specified in 100ns units
-void sysSleep(const s64 hns);
+void sysSleep(const int64_t hns);
 
 // yield CPU if supported (e.g. during a busy loop)
 void sysCpuRelax(void);
