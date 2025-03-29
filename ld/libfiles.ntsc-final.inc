@@ -8,7 +8,6 @@
 	build/ROMID/lib/ultra/os/exceptvars.o (section); \
 	build/ROMID/lib/ultra/os/exceptasm.o (section); \
 	build/ROMID/lib/ultra/os/createthread.o (section); \
-	build/ROMID/lib/ultra/gu/lookat.o (section); \
 	build/ROMID/lib/ultra/gu/rotate.o (section); \
 	build/ROMID/lib/ultra/libc/xldtob.o (section); \
 	build/ROMID/lib/ultra/io/pfsisplug.o (section); \
