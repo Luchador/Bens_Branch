@@ -328,6 +328,7 @@ int	n_alSeqpGetState(N_ALSeqPlayer *seqp);
 int     n_alSeqpGetTempo(N_ALSeqPlayer *seqp);
 int16_t     n_alSeqpGetVol(N_ALSeqPlayer *seqp);		/* Master volume control */
 void    n_alSeqpPlay(N_ALSeqPlayer *seqp);
+void    n_alSeqpSendMidi(N_ALSeqPlayer *seqp, int ticks, uint8_t status, uint8_t byte1, uint8_t byte2);
 void    n_alSeqpSetBank(N_ALSeqPlayer *seqp, ALBank *b);
 void	n_alSeqpSetChlVol(N_ALSeqPlayer *seqp, uint8_t chan, uint8_t vol);
 void    n_alSeqpSetChlFXMix(N_ALSeqPlayer *seqp, uint8_t chan, uint8_t fxmix);
@@ -365,6 +366,7 @@ void    n_alCSPSetChlPan(N_ALCSPlayer *seqp, uint8_t chan, ALPan pan);
 void    n_alCSPSetChlPriority(N_ALCSPlayer *seqp, uint8_t chan, uint8_t priority);
 void    n_alCSPSetChlProgram(N_ALCSPlayer *seqp, uint8_t chan, uint8_t prog);
 void    n_alCSPSetSeq(N_ALCSPlayer *seqp, ALCSeq *seq);
+void    n_alCSPSetTempo(N_ALCSPlayer *seqp, int tempo);
 void    n_alCSPSetVol(N_ALCSPlayer *seqp, int16_t vol);
 
 

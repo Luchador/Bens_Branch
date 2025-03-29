@@ -2054,7 +2054,7 @@ bool mp3dec00040164(struct asistream *stream, uint32_t gr, uint32_t ch)
 	int sp34;
 	int sp30;
 	int window_switching;
-	int sp28 = 0;
+	int sp28;
 	float *sp24;
 
 	sp1bc = stream->samplerateindex + stream->version * 3;

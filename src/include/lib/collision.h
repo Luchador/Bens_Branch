@@ -21,7 +21,7 @@ bool cdGetSavedPos(struct coord *arg0, struct coord *arg1);
 void cdGetGeoNormal(struct geo *geo, struct coord *normal);
 void cdGetFloorCol(struct geo *tile, int16_t *floorcol);
 void cdGetFloorType(struct geo *tile, uint8_t *floortype);
-bool cdIs2dPointInGeo(float x, float z, struct geo *tile);
+bool cd000266a4(float x, float z, struct geo *tile);
 void cdGetPropsOnPlatform(struct prop *platform, int16_t *propnums, int len);
 int cd000274e0Block(struct geoblock *tile, float x, float z, float width, struct prop *prop, struct collision *collision);
 bool cd000276c8Cyl(struct geocyl *tile, float x, float z, float width, struct prop *prop, struct collision *collision);

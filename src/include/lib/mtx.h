@@ -56,11 +56,11 @@ void mtx4Align(float mtx[4][4], float radians, float x, float y, float z);
 void mtx4LoadRotationFrom(float src[4][4], float dst[4][4]);
 void mtx000170e4(float src[4][4], float dst[4][4]);
 void mtx0001719c(float arg0[4][4], float arg1[4][4]);
-void mtxInvertAffineMatrix(float arg0[4][4], float arg1[4][4]);
-void mtxFullInverse4x4(float arg0[4][4], float arg1[4][4]);
-void mtxInvert4x4Matrix(float arg0[4][4], float arg1[4][4]);
+void mtx000172f0(float arg0[4][4], float arg1[4][4]);
+void mtx00017588(float arg0[4][4], float arg1[4][4]);
+void mtx00017614(float arg0[4][4], float arg1[4][4]);
 float mtx00017a78(float arg0[4][4]);
-float mtxDeterminant3x3(float arg0, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8);
-float mtxDeterminant2x2(float arg0, float arg1, float arg2, float arg3);
+float mtx00017c2c(float arg0, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8);
+float mtx00017cbc(float arg0, float arg1, float arg2, float arg3);
 
 #endif

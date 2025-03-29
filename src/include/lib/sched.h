@@ -1,7 +1,5 @@
 #ifndef _IN_BOOT_SCHED_H
 #define _IN_BOOT_SCHED_H
-#include <ultra64.h>
-#include <PR/ultrasched.h>
 #include "types.h"
 
 void schedInitArtifacts(void);

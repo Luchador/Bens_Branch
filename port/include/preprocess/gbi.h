@@ -1,6 +1,8 @@
 #ifndef _IN_PREPROCESS_GBI_H
 #define _IN_PREPROCESS_GBI_H
 
+#include "preprocess/common.h"
+
 // gbi related functions
 void gbiReset(void);
 void gbiSetSegment(int segment, uint32_t offset);

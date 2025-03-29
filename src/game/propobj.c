@@ -26,7 +26,6 @@
 #include "game/camera.h"
 #include "game/portal.h"
 #include "game/player.h"
-#include "game/mtxf2lbulk.h"
 #include "game/hudmsg.h"
 #include "game/menu.h"
 #include "game/inv.h"
@@ -993,7 +992,7 @@ struct defaultobj *objFindByPos(struct coord *pos, RoomNum *rooms)
 		if (prop->type == PROPTYPE_OBJ
 				&& arrayIntersects(prop->rooms, rooms)
 				&& propUpdateGeometry(prop, &sp38, &sp34)
-				&& cdIs2dPointInGeo(pos->x, pos->z, (struct geo *)sp38)) {
+				&& cd000266a4(pos->x, pos->z, (struct geo *)sp38)) {
 			return prop->obj;
 		}
 
@@ -4056,7 +4055,7 @@ bool objEmbed(struct prop *prop, struct prop *parent, struct model *model, struc
 			mtx4SetTranslation(&prop->pos, &sp34);
 			mtxApplyAffineTransform(&sp34, &sp74, &sp134);
 			mtxApplyAffineTransform(camGetProjectionMtxF(), sp24, &spf4);
-			mtxInvertAffineMatrix(spf4.m, spb4.m);
+			mtx000172f0(spf4.m, spb4.m);
 			mtxApplyAffineTransform(&spb4, &sp134, &obj->embedment->matrix);
 
 			return true;
@@ -5876,7 +5875,7 @@ void platformDisplaceProps2(struct prop *platform, Mtxf *arg1)
 
 				if (prop->pos.y > platform->pos.y
 						&& (obj->hidden & OBJHFLAG_00008000)
-						&& cdIs2dPointInGeo(prop->pos.x, prop->pos.z, (struct geo *)sp9c)) {
+						&& cd000266a4(prop->pos.x, prop->pos.z, (struct geo *)sp9c)) {
 					mtx3ToMtx4(obj->realrot, &sp58);
 					mtx4SetTranslation(&prop->pos, &sp58);
 					mtx4MultMtx4InPlace(arg1, &sp58);
@@ -6546,7 +6545,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 				func0f069c70(obj, false, true);
 				mtx3ToMtx4(obj->realrot, &sp484);
 				mtx4SetTranslation(&prop->pos, &sp484);
-				mtxInvertAffineMatrix(sp504.m, sp4c4.m);
+				mtx000172f0(sp504.m, sp4c4.m);
 				mtx4MultMtx4(&sp484, &sp4c4, &sp544);
 				platformDisplaceProps2(prop, &sp544);
 				result = true;
@@ -13348,7 +13347,7 @@ void objDestroySupportedObjects(struct prop *tableprop, int playernum)
 				{
 					if (prop->pos.y > tableprop->pos.y
 							&& (obj->hidden & OBJHFLAG_00008000)
-							&& cdIs2dPointInGeo(prop->pos.x, prop->pos.z, (struct geo *)start)) {
+							&& cd000266a4(prop->pos.x, prop->pos.z, (struct geo *)start)) {
 						objFall(obj, playernum);
 					}
 				}
@@ -13491,7 +13490,7 @@ bool objTestShieldHit(struct model *model, struct modelnode *node, struct coord 
 	rodata = &node->rodata->bbox;
 
 	mtxindex = modelFindNodeMtxIndex(node, 0);
-	mtxInvertAffineMatrix(model->matrices[mtxindex].m, mtx.m);
+	mtx000172f0(model->matrices[mtxindex].m, mtx.m);
 
 	spb8.x = arg2->x;
 	spb8.y = arg2->y;
@@ -13685,7 +13684,7 @@ bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *
 			if (mtx && mtx != spd0) {
 				spd0 = mtx;
 
-				mtxInvertAffineMatrix(mtx->m, sp64.m);
+				mtx000172f0(mtx->m, sp64.m);
 
 				spec.x = arg2->x;
 				spec.y = arg2->y;
@@ -17136,9 +17135,9 @@ void doorUpdateTiles(struct doorobj *door)
 			}
 		} else if (door->doortype == DOORTYPE_HULL) {
 			if (door->base.flags & OBJFLAG_DOOR_OPENTOFRONT) {
-				guRotateF(sp98.m, 360 - door->frac, pad.normal.x, pad.normal.y, pad.normal.z);
+				mtxRotateF(sp98.m, 360 - door->frac, pad.normal.x, pad.normal.y, pad.normal.z);
 			} else {
-				guRotateF(sp98.m, door->frac, pad.normal.x, pad.normal.y, pad.normal.z);
+				mtxRotateF(sp98.m, door->frac, pad.normal.x, pad.normal.y, pad.normal.z);
 			}
 		} else {
 			if (door->base.flags & OBJFLAG_DOOR_OPENTOFRONT) {

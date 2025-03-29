@@ -3,8 +3,8 @@
 #include "data.h"
 #include "types.h"
 
-void func0f176d70(int arg0);
 uint64_t utilsGetCount(void);
+void func0f176d70(int arg0);
 uint32_t align4(uint32_t arg0);
 uint32_t align16(uint32_t arg0);
 uintptr_t align32(uintptr_t arg0);

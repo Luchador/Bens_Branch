@@ -99,10 +99,19 @@ typedef struct {
     int         count;
 } ALHeap;
 
+#define AL_HEAP_DEBUG   1
+#define AL_HEAP_MAGIC   0x20736a73
+#define AL_HEAP_INIT    0
+
 void    alHeapInit(ALHeap *hp, uint8_t *base, int len);
 void    *alHeapDBAlloc(uint8_t *file, int line, ALHeap *hp, int num, int size);
+int     alHeapCheck(ALHeap *hp);
 
+#ifdef _DEBUG
+#define alHeapAlloc(hp, elem ,size) alHeapDBAlloc((uint8_t *) __FILE__,__LINE__,(hp),(elem),(size))
+#else
 #define alHeapAlloc(hp, elem ,size) alHeapDBAlloc(0, 0,(hp),(elem),(size))
+#endif
 
 /***********************************************************************
  * FX Stuff
@@ -823,6 +832,7 @@ void    alSeqpSetChlPan(ALSeqPlayer *seqp, uint8_t chan, ALPan pan);
 ALPan   alSeqpGetChlPan(ALSeqPlayer *seqp, uint8_t chan);
 void    alSeqpSetChlPriority(ALSeqPlayer *seqp, uint8_t chan, uint8_t priority);
 uint8_t      alSeqpGetChlPriority(ALSeqPlayer *seqp, uint8_t chan);
+void    alSeqpSendMidi(ALSeqPlayer *seqp, int ticks, uint8_t status, uint8_t byte1, uint8_t byte2);
 
 
 /* Maintain backwards compatibility with old routine names. */
@@ -848,6 +858,7 @@ void    alCSPPlay(ALCSPlayer *seqp);
 void    alCSPStop(ALCSPlayer *seqp);
 int	alCSPGetState(ALCSPlayer *seqp);
 void    alCSPSetBank(ALCSPlayer *seqp, ALBank *b);
+void    alCSPSetTempo(ALCSPlayer *seqp, int tempo);
 int     alCSPGetTempo(ALCSPlayer *seqp);
 int16_t     alCSPGetVol(ALCSPlayer *seqp);
 void    alCSPSetVol(ALCSPlayer *seqp, int16_t vol);

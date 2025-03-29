@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/debug.h"
@@ -19,6 +18,7 @@
 #include "platform.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 #define SPACE_WIDTH 5

@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/savebuffer.h"

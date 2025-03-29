@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdint.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/camera.h"
@@ -6,8 +7,8 @@
 #include "game/file.h"
 #include "game/zbuf.h"
 #include "game/gfxmemory.h"
-#include "game/mtxutils.h"
 #include "game/menu.h"
+#include "game/mtxutils.h"
 #include "game/options.h"
 #include "bss.h"
 #include "lib/vi.h"
@@ -24,7 +25,7 @@
 
 Mtxf var80092830;
 Mtx *var80092870;
-//uint16_t g_ViPerspScale;
+uint16_t g_ViPerspScale;
 uint8_t g_ViFrontIndex;
 uint8_t g_ViBackIndex;
 
@@ -309,7 +310,7 @@ Gfx *vi0000ab78(Gfx *gdl)
 	Mtx *sp48;
 	uint16_t sp46;
 
-	mtxPerspectiveF(sp110.m, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar + g_ViBackData->zfar);
+	mtxPerspectiveF(sp110.m, &sp46, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar + g_ViBackData->zfar, 1);
 	mtx4Copy(camGetWorldToScreenMtxf(), &sp90);
 
 	sp90.m[3][0] = 0;
@@ -318,27 +319,30 @@ Gfx *vi0000ab78(Gfx *gdl)
 
 	mtx4MultMtx4(&sp110, &sp90, &spd0);
 	sp4c = gfxAllocateMatrix();
-	guMtxF2L(spd0.m, sp4c);
+	mtxF2L2(spd0.m, sp4c);
 
 	mtx4LoadIdentity(&sp50);
 	sp48 = gfxAllocateMatrix();
-	guMtxF2L(sp50.m, sp48);
+	mtxF2L2(sp50.m, sp48);
 
 	gSPMatrix(gdl++, (uintptr_t)(sp4c), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	gSPMatrix(gdl++, (uintptr_t)(sp48), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	//gSPPerspNormalize(gdl++, sp46);
 
 	return gdl;
 }
 
 Gfx *vi0000aca4(Gfx *gdl, float znear, float zfar)
 {
+	uint16_t scale;
 	Mtxf tmp;
 	Mtx *mtx = gfxAllocateMatrix();
 
-	mtxPerspectiveF(tmp.m, g_ViBackData->fovy, g_ViBackData->aspect, znear, zfar);
-	guMtxF2L(tmp.m, mtx);
+	mtxPerspectiveF(tmp.m, &scale, g_ViBackData->fovy, g_ViBackData->aspect, znear, zfar, 1);
+	mtxF2L2(tmp.m, mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	//gSPPerspNormalize(gdl++, scale);
 
 	return gdl;
 }
@@ -354,10 +358,11 @@ Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
 	var80092870 = gfxAllocateMatrix();
-	mtxPerspectiveF(var80092830.m, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar);
-	guMtxF2L(var80092830.m, var80092870);
+	mtxPerspectiveF(var80092830.m, &g_ViPerspScale, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
+	mtxF2L2(var80092830.m, var80092870);
 
 	gSPMatrix(gdl++, (uintptr_t)(var80092870), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	//gSPPerspNormalize(gdl++, g_ViPerspScale);
 
 	camSetPerspectiveMtxL(var80092870);
 	camSetMtxF1754(&var80092830);
@@ -382,10 +387,11 @@ Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
 	var80092870 = gfxAllocateMatrix();
-	mtxPerspectiveF(var80092830.m, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar);
-	guMtxF2L(var80092830.m, var80092870);
+	mtxPerspectiveF(var80092830.m, &g_ViPerspScale, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
+	mtxF2L2(var80092830.m, var80092870);
 
 	gSPMatrix(gdl++, (uintptr_t)(var80092870), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	//gSPPerspNormalize(gdl++, g_ViPerspScale);
 
 	camSetPerspectiveMtxL(var80092870);
 	camSetMtxF1754(&var80092830);
@@ -398,10 +404,11 @@ Gfx *vi0000b0e8(Gfx *gdl, float fovy, float aspect)
 	Mtxf tmp;
 	Mtx *mtx = gfxAllocateMatrix();
 
-	mtxPerspectiveF(tmp.m, fovy, aspect, g_ViBackData->znear, g_ViBackData->zfar);
-	guMtxF2L(tmp.m, mtx);
+	mtxPerspectiveF(tmp.m, &g_ViPerspScale, fovy, aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
+	mtxF2L2(tmp.m, mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	//gSPPerspNormalize(gdl++, g_ViPerspScale);
 
 	return gdl;
 }

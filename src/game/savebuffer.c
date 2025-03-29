@@ -5,6 +5,7 @@
 #include "game/savebuffer.h"
 #include "game/gfxmemory.h"
 #include "game/file.h"
+#include "game/mtxutils.h"
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/vi.h"
@@ -60,7 +61,7 @@ Gfx *func0f0d479c(Gfx *gdl)
 	mtxF2L(&mtx, mtx2);
 	mtx4LoadIdentity(&mtx);
 
-	guFrustumF(mtx.m,
+	mtxFrustumF(mtx.m,
 			-(float) viGetWidth() * 0.5f, viGetWidth() * 0.5f,
 			-(float) viGetHeight() * 0.5f, viGetHeight() * 0.5f,
 			10, 10000, 1);

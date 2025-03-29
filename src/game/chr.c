@@ -19,7 +19,6 @@
 #include "game/tex.h"
 #include "game/camera.h"
 #include "game/player.h"
-#include "game/mtxf2lbulk.h"
 #include "game/playermgr.h"
 #include "game/rng2.h"
 #include "game/vtxstore.h"
@@ -1613,7 +1612,6 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 						&& g_CurModelChr->actiontype != ACT_DEAD
 						&& g_CurModelChr->actiontype != ACT_DIE) {
 					zrot = g_CurModelChr->drugheadsway / 360.0f * M_TAU;
-					//xrot -= (28.0f - ABS(g_CurModelChr->drugheadsway)) / 250.0f * M_TAU;
 					xrot -= (28.0f - fabsf(g_CurModelChr->drugheadsway)) / 250.0f * M_TAU;
 				}
 			}
@@ -2751,7 +2749,7 @@ bool chr0f024738(struct chrdata *chr)
 
 						mtx3ToMtx4(obj->realrot, &thing->unk02c);
 						mtx4SetTranslation(&obj->prop->pos, &thing->unk02c);
-						mtxInvertAffineMatrix(thing->unk02c.m, thing->unk06c.m);
+						mtx000172f0(thing->unk02c.m, thing->unk06c.m);
 
 						campos = &g_Vars.currentplayer->cam_pos;
 

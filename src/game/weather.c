@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdint.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/dlights.h"
@@ -836,6 +837,8 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 	if (g_Vars.lvupdate240 <= 0) {
 		numsparksavailable = 0;
 	}
+
+	utilsGetCount();
 
 	for (i = 0; i < ARRAYCOUNT(timings1); i++) {
 		timings1[i] = 0;

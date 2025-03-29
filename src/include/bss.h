@@ -101,7 +101,7 @@ extern struct sndstate *g_CasingAudioHandles[2];
 extern int g_TimeToNextCasingSound; //Time until next casing audio sound is allowed to be made
 extern struct sndstate *g_BgunAudioHandles[MAX_PLAYERS];
 extern struct fireslot g_Fireslots[20];
-extern struct casing g_Casings[40];
+extern struct casing g_Casings[20];
 extern struct boltbeam g_BoltBeams[8];
 extern struct lasersight g_LaserSights[MAX_PLAYERS];
 extern struct model *g_ModelSlots;

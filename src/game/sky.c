@@ -4,6 +4,7 @@
 #include "game/quaternion.h"
 #include "game/utils.h"
 #include "game/camera.h"
+#include "game/mtxutils.h"
 #include "game/sky.h"
 #include "game/env.h"
 #include "game/pad.h"
@@ -781,7 +782,7 @@ Gfx *skyRender(Gfx *gdl)
 		int i;
 
 		mtx4MultMtx4(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp3cc);
-		guScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
+		mtxScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
 		mtx4MultMtx4(&sp3cc, &g_SkyMtx, &sp38c);
 
 		for (i = 0; i < numvertices; i++) {
@@ -1262,7 +1263,7 @@ Gfx *skyRender(Gfx *gdl)
 	int i;
 
 	mtx4MultMtx4(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp1ec);
-	guScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
+	mtxScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
 	mtx4MultMtx4(&sp1ec, &g_SkyMtx, &sp1ac);
 
 	for (i = 0; i < numvertices; i++) {

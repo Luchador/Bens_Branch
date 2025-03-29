@@ -13,5 +13,6 @@ LookAt *gfxAllocateLookAt(int count);
 Col *gfxAllocateColours(int count);
 void *gfxAllocate(uint32_t size);
 void gfxSwapBuffers(void);
+int gfxGetFreeGfx(Gfx *gdl);
 
 #endif

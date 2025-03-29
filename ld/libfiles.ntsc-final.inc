@@ -8,7 +8,6 @@
 	build/ROMID/lib/ultra/os/exceptvars.o (section); \
 	build/ROMID/lib/ultra/os/exceptasm.o (section); \
 	build/ROMID/lib/ultra/os/createthread.o (section); \
-	build/ROMID/lib/ultra/gu/rotate.o (section); \
 	build/ROMID/lib/ultra/libc/xldtob.o (section); \
 	build/ROMID/lib/ultra/io/pfsisplug.o (section); \
 	build/ROMID/lib/ultra/libc/llcvt.o (section); \
@@ -147,7 +146,6 @@
 	build/ROMID/lib/ultra/io/devmgr.o (section); \
 	build/ROMID/lib/ultra/os/thread.o (section); \
 	build/ROMID/lib/ultra/os/destroythread.o (section); \
-	build/ROMID/lib/ultra/gu/mtxutil.o (section); \
 	build/ROMID/lib/ultra/gu/sqrtf.o (section); \
 	build/ROMID/lib/ultra/libc/string.o (section); \
 	build/ROMID/lib/ultra/libc/ldiv.o (section); \
@@ -192,11 +190,8 @@
 	build/ROMID/lib/ultra/io/contquery.o (section); \
 	build/ROMID/lib/ultra/io/contreaddata.o (section); \
 	build/ROMID/lib/ultra/io/motor.o (section); \
-	build/ROMID/lib/ultra/gu/align.o (section); \
 	build/ROMID/lib/ultra/gu/coss.o (section); \
 	build/ROMID/lib/ultra/gu/sins.o (section); \
-	build/ROMID/lib/ultra/gu/frustum.o (section); \
-	build/ROMID/lib/ultra/gu/scale.o (section); \
 	build/ROMID/lib/ultra/io/conteepprobe.o (section); \
 	build/ROMID/lib/ultra/io/conteepread.o (section); \
 	build/ROMID/lib/ultra/io/conteeplongread.o (section); \

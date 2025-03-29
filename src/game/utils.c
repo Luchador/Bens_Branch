@@ -1,6 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
-#include <stdlib.h>
 #include "constants.h"
 #include "game/utils.h"
 #include "bss.h"
@@ -8,13 +6,8 @@
 #include "lib/vi.h"
 #include "data.h"
 #include "types.h"
-#include "system.h"
 #include "game/debug.h"
-
-#define COUNTER_NUM (46875ULL)
-#define COUNTER_DEN (1000ULL)
-
-/* Time */
+#include "system.h"
 
 void *var800ac0d0;
 uint8_t *var800ac0e8[4];
@@ -27,9 +20,13 @@ uint8_t *var80084610 = NULL;
 uint8_t *var80084614 = NULL;
 uint8_t *var80084618 = NULL;
 
+#define COUNTER_NUM (46875ULL)
+#define COUNTER_DEN (1000ULL)
+
 uint64_t utilsGetCount(void)
 {
 	return (sysGetMicroseconds() * COUNTER_NUM) / COUNTER_DEN;
+	debug_log("choose anim \n", 0);
 }
 
 uint32_t align4(uint32_t arg0)

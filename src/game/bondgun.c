@@ -22,7 +22,6 @@
 #include "game/tex.h"
 #include "game/camera.h"
 #include "game/player.h"
-#include "game/mtxf2lbulk.h"
 #include "game/gfxmemory.h"
 #include "game/sight.h"
 #include "game/inv.h"
@@ -3802,7 +3801,7 @@ struct defaultobj *bgunCreateThrownProjectile2(struct chrdata *chr, struct gset 
 	}
 
 	if (gset->weaponnum == WEAPON_COMBATKNIFE) {
-		guRotateF(mtx.m, 90.0f / (RANDOMFRAC() + 12.1f),
+		mtxRotateF(mtx.m, 90.0f / (RANDOMFRAC() + 12.1f),
 				arg4->m[1][0], arg4->m[1][1], arg4->m[1][2]);
 	} else {
 		mtxLoadRandomRotation(&mtx);
@@ -6555,7 +6554,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			sp84.f[1] = (hand->posmtx.m[3][1] - hand->prevmtx.m[3][1]) / g_Vars.lvupdate60freal;
 			sp84.f[2] = (hand->posmtx.m[3][2] - hand->prevmtx.m[3][2]) / g_Vars.lvupdate60freal;
 
-			mtxFullInverse4x4(hand->posmtx.m, sp44.m);
+			mtx00017588(hand->posmtx.m, sp44.m);
 			mtx4RotateVecInPlace(&sp44, &sp84);
 
 			hand->unk0d20.f[0] += sp84.f[0] * 0.3f;
@@ -7707,6 +7706,8 @@ void bgunRender(Gfx **gdlptr)
 				gSPSetLights1(gdl++, g_GunLight);
 				gSPLookAt(gdl++, camGetLookAt());
 			}
+
+			//gSPPerspNormalize(gdl++, mtx00016dcc(0, 300));
 
 			// There is support for guns having a TV screen on them
 			// but no guns have this model part so it's not used.

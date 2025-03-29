@@ -6,7 +6,7 @@
 #include "game/weaponutils.h"
 #include "game/tex.h"
 #include "game/camera.h"
-#include "game/mtxf2lbulk.h"
+#include "game/mtxutils.h"
 #include "game/debug.h"
 #include "game/gfxmemory.h"
 #include "game/file.h"
@@ -22,7 +22,7 @@
 #define BOLTBEAMTICKMODE_MANUAL    0
 #define BOLTBEAMTICKMODE_AUTOMATIC 1
 
-struct casing g_Casings[40]; // 20 to 40
+struct casing g_Casings[20];
 struct boltbeam g_BoltBeams[8];
 struct lasersight g_LaserSights[MAX_PLAYERS];
 

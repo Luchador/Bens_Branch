@@ -2,11 +2,11 @@
 #include <stdint.h>
 #include "lib/sched.h"
 #include "naudio/n_synthInternals.h"
+#include "game/utils.h"
 #include "constants.h"
 #include "bss.h"
 #include "lib/audiodma.h"
 #include "lib/lib_2fc60.h"
-#include "game/utils.h"
 #include "data.h"
 #include "types.h"
 #include "audio.h"

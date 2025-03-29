@@ -24,7 +24,6 @@
 #include "game/camera.h"
 #include "game/player.h"
 #include "game/modeldef.h"
-#include "game/mtxutils.h"
 #include "game/healthbar.h"
 #include "game/hudmsg.h"
 #include "game/menu.h"
@@ -33,6 +32,7 @@
 #include "game/filemgr.h"
 #include "game/inv.h"
 #include "game/playermgr.h"
+#include "game/mtxutils.h"
 #include "game/explosions.h"
 #include "game/bondview.h"
 #include "game/textutils.h"
@@ -2134,10 +2134,13 @@ Gfx *player0f0baf84(Gfx *gdl)
 {
 	if (g_Vars.currentplayer->pausemode != PAUSEMODE_UNPAUSED) {
 		Mtx *a = gfxAllocateMatrix();
+		uint16_t b;
 
-		mtxPerspective(a, g_Vars.currentplayer->zoominfovy, videoGetAspect(), 10, 300);
+		mtxPerspective(a, &b, g_Vars.currentplayer->zoominfovy,
+				PAL ? 1.7316017150879f : 1.4545454978943f, 10, 300, 1);
 
 		gSPMatrix(gdl++, (uintptr_t)(a), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		//gSPPerspNormalize(gdl++, b);
 	}
 
 	return gdl;
@@ -4042,6 +4045,11 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
+	mtxLookAtReflect(&spd0, lookat,
+			sp74.x, sp74.y, sp74.z,
+			sp80.x, sp80.y, sp80.z,
+			cam_up->x, cam_up->y, cam_up->z);
+
 	mtx00016874(g_Vars.currentplayer->mtxf0064,
 			cam_pos->x, cam_pos->y, cam_pos->z,
 			cam_look->x, cam_look->y, cam_look->z,
@@ -4067,10 +4075,10 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	}
 
 	camSetMtxF006c(s0);
-	guMtxF2L(s0->m, s1);
+	mtxF2L2(s0->m, s1);
 	camSetOrthogonalMtxL(s1);
 	mtx00015f04(scale, &sp8c);
-	guMtxF2L(sp8c.m, g_Vars.currentplayer->mtxl005c);
+	mtxF2L2(sp8c.m, g_Vars.currentplayer->mtxl005c);
 	mtx00016820(g_Vars.currentplayer->mtxl005c, g_Vars.currentplayer->mtxl0060);
 	camSetMtxL173c(g_Vars.currentplayer->mtxl005c);
 	camSetMtxL1738(g_Vars.currentplayer->mtxl0060);

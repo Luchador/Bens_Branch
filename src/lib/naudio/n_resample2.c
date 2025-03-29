@@ -15,7 +15,7 @@ Acmd *n_alResamplePull2(N_PVoice *e, int16_t *outp, int outCount, Acmd *p)
 
 	if (e->unk8c != 0 && e->unk8c < 64) {
 		if (e->unk8c >= 6) {
-			sp28 = 26755 / (e->unk8c + 1.0f);
+			sp28 = 26755 / sqrtf(e->unk8c + 1.0f);
 		} else {
 			sp28 = 65536 / (e->unk8c + 1.0f);
 		}

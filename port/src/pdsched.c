@@ -192,7 +192,7 @@ void schedConsiderScreenshot(void)
 		--g_BlurFbCapTimer;
 	} else if (g_BlurFbCapTimer < 0) {
 		// no blur requested this frame, mark blur fb dirty
-		//g_BlurFbDirty = true;
+		g_BlurFbDirty = true;
 	}
 
 	if (g_MenuData.screenshottimer >= 2) {

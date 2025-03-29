@@ -1528,6 +1528,11 @@ char *filemgrMenuTextFileInUseDescription(struct menuitem *item)
 	return langGet(L_MPWEAPONS_160); // "Cannot delete file as it is being used."
 }
 
+Gfx *filemgrRenderPerfectHeadThumbnail(Gfx *gdl, struct menuitemrenderdata *renderdata, int fileid, int deviceserial)
+{
+	return gdl;
+}
+
 bool filemgrIsFileInUse(struct filelistfile *file)
 {
 	int i;
@@ -1594,7 +1599,7 @@ MenuItemHandlerResult filemgrFileToCopyOrDeleteListMenuHandler(int operation, st
 			struct filelistfile *file = &list->files[data->list.unk04];
 
 			if (g_Menus[g_MpPlayerNum].fm.filetypeplusone == 4) {
-				// empty
+				gdl = filemgrRenderPerfectHeadThumbnail(gdl, renderdata, file->fileid, file->deviceserial);
 			} else {
 				uint32_t colour = renderdata->colour;
 				char text[32];

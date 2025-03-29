@@ -254,50 +254,41 @@ int pakReadBodyAtGuid(int8_t device, int fileid, uint8_t *body, int arg3)
 	return _pakReadBodyAtGuid(device, fileid, body, arg3);
 }
 
-PakErr1 pakDeleteGameNote(int8_t device, uint16_t company_code, uint32_t game_code, char *game_name, char *ext_name)
+int pakSaveAtGuid(int8_t device, int fileid, int filetype, uint8_t *body, int *outfileid, uint8_t *olddata)
 {
-	int result;
-
-	if (mempakIsReadyOrFull(device)) {
-		joyDisableCyclicPolling(JOYARGS(738));
-		result = pakDeleteGameNote3(PFS(device), company_code, game_code, game_name, ext_name);
-		joyEnableCyclicPolling(JOYARGS(740));
-
-		if (pakHandleResult(result, device, true, LINE_825)) {
-			g_Paks[device].unk2b8_02 = 1;
-			return PAK_ERR1_OK;
-		}
-
-		return PAK_ERR1_NEWPAK;
-	}
-
-	return PAK_ERR1_NOPAK;
+	return _pakSaveAtGuid(device, fileid, filetype, body, outfileid, olddata);
 }
 
-PakErr1 pak0f1168c4(int8_t device, struct pakdata **pakdata)
+bool pakDeleteFile(int8_t device, int fileid)
 {
-	*pakdata = NULL;
+	return _pakDeleteFile(device, fileid);
+}
 
-	if (mempakIsReadyOrFull(device)) {
-		if (pakQueryTotalUsage(device)) {
-			*pakdata = &g_Paks[device].pakdata;
-			return PAK_ERR1_OK;
-		}
+PakErr1 pakDeleteGameNote(int8_t device, uint16_t company_code, uint32_t game_code, char *game_name, char *ext_name)
+{
+	return _pakDeleteGameNote(device, company_code, game_code, game_name, ext_name);
+}
 
-		return PAK_ERR1_NEWPAK;
-	}
-
-	return PAK_ERR1_NOPAK;
+PakErr1 pak0f1168c4(int8_t device, struct pakdata **arg1)
+{
+	return pak0f116df0(device, arg1);
 }
 
 int pakGetType(int8_t device)
 {
-	return g_Paks[device].type;
+	return _pakGetType(device);
 }
 
 int pakGetSerial(int8_t device)
 {
-	return g_Paks[device].serial;
+	return _pakGetSerial(device);
+}
+
+void pak0f116994(void)
+{
+	if (g_Vars.stagenum == STAGE_BOOTPAKMENU) {
+		g_Vars.pakstocheck = 0xf8;
+	}
 }
 
 void pak0f1169c8(int8_t device, bool tick)
@@ -351,12 +342,58 @@ bool mempakIsReadyOrFull(int8_t device)
 	return false;
 }
 
+uint16_t _pakGetSerial(int8_t device)
+{
+	return g_Paks[device].serial;
+}
+
+uint32_t _pakGetType(int8_t device)
+{
+	return g_Paks[device].type;
+}
+
 void pakSetState(int8_t device, int state)
 {
 	g_Paks[device].state = state;
 }
 
-int pakDeleteFile(int8_t device, int fileid)
+PakErr1 pak0f116df0(int8_t device, struct pakdata **pakdata)
+{
+	*pakdata = NULL;
+
+	if (mempakIsReadyOrFull(device)) {
+		if (pakQueryTotalUsage(device)) {
+			*pakdata = &g_Paks[device].pakdata;
+			return PAK_ERR1_OK;
+		}
+
+		return PAK_ERR1_NEWPAK;
+	}
+
+	return PAK_ERR1_NOPAK;
+}
+
+PakErr1 _pakDeleteGameNote(int8_t device, uint16_t company_code, uint32_t game_code, char *game_name, char *ext_name)
+{
+	int result;
+
+	if (mempakIsReadyOrFull(device)) {
+		joyDisableCyclicPolling(JOYARGS(738));
+		result = pakDeleteGameNote3(PFS(device), company_code, game_code, game_name, ext_name);
+		joyEnableCyclicPolling(JOYARGS(740));
+
+		if (pakHandleResult(result, device, true, LINE_825)) {
+			g_Paks[device].unk2b8_02 = 1;
+			return PAK_ERR1_OK;
+		}
+
+		return PAK_ERR1_NEWPAK;
+	}
+
+	return PAK_ERR1_NOPAK;
+}
+
+int _pakDeleteFile(int8_t device, int fileid)
 {
 	struct pakfileheader header;
 	int result = pakFindFile(device, fileid, &header);
@@ -505,7 +542,7 @@ PakErr2 pakReadHeaderAtOffset(int8_t device, uint32_t offset, struct pakfilehead
  * a swap file reserved for atomic writes. The new file is written into the
  * swap file, then the old file is marked as swap.
  */
-int pakSaveAtGuid(int8_t device, int fileid, int filetype, uint8_t *newdata, int *outfileid, uint8_t *olddataptr)
+int _pakSaveAtGuid(int8_t device, int fileid, int filetype, uint8_t *newdata, int *outfileid, uint8_t *olddataptr)
 {
 	struct pakfileheader header;
 	struct pakfileheader swapheader;

@@ -18,7 +18,6 @@
 #include "utils.h"
 
 uint32_t g_OsMemSize = 0;
-int g_OsMemSizeMb = 32;
 OSSched g_Sched;
 
 uint8_t *g_MempHeap = NULL;
@@ -128,7 +127,6 @@ int main(int argc, const char **argv)
 
 PD_CONSTRUCTOR static void gameConfigInit(void)
 {
-	configRegisterInt("Game.MemorySize", &g_OsMemSizeMb, 4, 2048);
 	configRegisterInt("Game.CenterHUD", &g_HudCenter, 0, 2);
 	configRegisterInt("Game.MenuMouseControl", &g_MenuMouseControl, 0, 1);
 	configRegisterFloat("Game.ScreenShakeIntensity", &g_ViShakeIntensityMult, 0.f, 10.f);

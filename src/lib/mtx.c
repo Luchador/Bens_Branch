@@ -2,6 +2,7 @@
 #include <math.h>
 #include "constants.h"
 #include "game/padhalllv.h"
+#include "game/mtxutils.h"
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/mtx.h"
@@ -458,7 +459,7 @@ void mtx00016e98(float mtx[4][4], float angle, float x, float y, float z)
 void mtx4Align(float mtx[4][4], float angle, float x, float y, float z)
 {
 	angle = RAD2DEG(angle);
-	guAlignF(mtx, angle, x, y, z);
+	mtxAlignF(mtx, angle, x, y, z);
 }
 
 void mtx4LoadRotationFrom(float src[4][4], float dst[4][4])
@@ -535,7 +536,7 @@ void mtx0001719c(float arg0[4][4], float arg1[4][4])
 	arg1[3][3] = 1;
 }
 
-void mtxInvertAffineMatrix(float arg0[4][4], float arg1[4][4])
+void mtx000172f0(float arg0[4][4], float arg1[4][4])
 {
 	float f0 = 0.0f;
 	f0 += arg0[0][0] * arg0[1][1] * arg0[2][2];
@@ -564,13 +565,13 @@ void mtxInvertAffineMatrix(float arg0[4][4], float arg1[4][4])
 	arg1[3][3] = 1.0f;
 }
 
-void mtxFullInverse4x4(float arg0[4][4], float arg1[4][4])
+void mtx00017588(float arg0[4][4], float arg1[4][4])
 {
 	int i;
 	int j;
 	float tmp;
 
-	mtxInvert4x4Matrix(arg0, arg1);
+	mtx00017614(arg0, arg1);
 
 	tmp = 1.0f / mtx00017a78(arg0);
 
@@ -581,7 +582,7 @@ void mtxFullInverse4x4(float arg0[4][4], float arg1[4][4])
 	}
 }
 
-void mtxInvert4x4Matrix(float arg0[4][4], float arg1[4][4])
+void mtx00017614(float arg0[4][4], float arg1[4][4])
 {
 	float mtx00, mtx10, mtx20, mtx30;
 	float mtx04, mtx14, mtx24, mtx34;
@@ -597,22 +598,22 @@ void mtxInvert4x4Matrix(float arg0[4][4], float arg1[4][4])
 	mtx30 = arg0[3][0]; mtx34 = arg0[3][1];
 	mtx38 = arg0[3][2]; mtx3c = arg0[3][3];
 
-	arg1[0][0] =  mtxDeterminant3x3(mtx14, mtx24, mtx34, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
-	arg1[1][0] = -mtxDeterminant3x3(mtx10, mtx20, mtx30, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
-	arg1[2][0] =  mtxDeterminant3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx1c, mtx2c, mtx3c);
-	arg1[3][0] = -mtxDeterminant3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx18, mtx28, mtx38);
-	arg1[0][1] = -mtxDeterminant3x3(mtx04, mtx24, mtx34, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
-	arg1[1][1] =  mtxDeterminant3x3(mtx00, mtx20, mtx30, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
-	arg1[2][1] = -mtxDeterminant3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx0c, mtx2c, mtx3c);
-	arg1[3][1] =  mtxDeterminant3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx08, mtx28, mtx38);
-	arg1[0][2] =  mtxDeterminant3x3(mtx04, mtx14, mtx34, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
-	arg1[1][2] = -mtxDeterminant3x3(mtx00, mtx10, mtx30, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
-	arg1[2][2] =  mtxDeterminant3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx0c, mtx1c, mtx3c);
-	arg1[3][2] = -mtxDeterminant3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx08, mtx18, mtx38);
-	arg1[0][3] = -mtxDeterminant3x3(mtx04, mtx14, mtx24, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
-	arg1[1][3] =  mtxDeterminant3x3(mtx00, mtx10, mtx20, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
-	arg1[2][3] = -mtxDeterminant3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx0c, mtx1c, mtx2c);
-	arg1[3][3] =  mtxDeterminant3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx08, mtx18, mtx28);
+	arg1[0][0] =  mtx00017c2c(mtx14, mtx24, mtx34, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
+	arg1[1][0] = -mtx00017c2c(mtx10, mtx20, mtx30, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
+	arg1[2][0] =  mtx00017c2c(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx1c, mtx2c, mtx3c);
+	arg1[3][0] = -mtx00017c2c(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx18, mtx28, mtx38);
+	arg1[0][1] = -mtx00017c2c(mtx04, mtx24, mtx34, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
+	arg1[1][1] =  mtx00017c2c(mtx00, mtx20, mtx30, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
+	arg1[2][1] = -mtx00017c2c(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx0c, mtx2c, mtx3c);
+	arg1[3][1] =  mtx00017c2c(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx08, mtx28, mtx38);
+	arg1[0][2] =  mtx00017c2c(mtx04, mtx14, mtx34, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
+	arg1[1][2] = -mtx00017c2c(mtx00, mtx10, mtx30, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
+	arg1[2][2] =  mtx00017c2c(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx0c, mtx1c, mtx3c);
+	arg1[3][2] = -mtx00017c2c(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx08, mtx18, mtx38);
+	arg1[0][3] = -mtx00017c2c(mtx04, mtx14, mtx24, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
+	arg1[1][3] =  mtx00017c2c(mtx00, mtx10, mtx20, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
+	arg1[2][3] = -mtx00017c2c(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx0c, mtx1c, mtx2c);
+	arg1[3][3] =  mtx00017c2c(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx08, mtx18, mtx28);
 }
 
 float mtx00017a78(float arg0[4][4])
@@ -635,29 +636,29 @@ float mtx00017a78(float arg0[4][4])
 	sp6c = arg0[3][0]; sp5c = arg0[3][1];
 	sp4c = arg0[3][2]; sp3c = arg0[3][3];
 
-	sp30 = mtxDeterminant3x3(sp74, sp70, sp6c, sp64, sp60, sp5c, sp44, sp40, sp3c);
-	sp34 = mtxDeterminant3x3(sp74, sp70, sp6c, sp54, sp50, sp4c, sp44, sp40, sp3c);
-	sp38 = mtxDeterminant3x3(sp64, sp60, sp5c, sp54, sp50, sp4c, sp44, sp40, sp3c);
+	sp30 = mtx00017c2c(sp74, sp70, sp6c, sp64, sp60, sp5c, sp44, sp40, sp3c);
+	sp34 = mtx00017c2c(sp74, sp70, sp6c, sp54, sp50, sp4c, sp44, sp40, sp3c);
+	sp38 = mtx00017c2c(sp64, sp60, sp5c, sp54, sp50, sp4c, sp44, sp40, sp3c);
 
-	tmp = mtxDeterminant3x3(sp74, sp70, sp6c, sp64, sp60, sp5c, sp54, sp50, sp4c);
+	tmp = mtx00017c2c(sp74, sp70, sp6c, sp64, sp60, sp5c, sp54, sp50, sp4c);
 
 	return (sp78 * sp38 - sp68 * sp34 + sp58 * sp30) - tmp * sp48;
 }
 
-float mtxDeterminant3x3(float arg0, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8)
+float mtx00017c2c(float arg0, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8)
 {
 	float sp24;
 	float sp20;
 	float sp1c;
 
-	sp1c = mtxDeterminant2x2(arg1, arg2, arg7, arg8);
-	sp20 = mtxDeterminant2x2(arg4, arg5, arg7, arg8);
-	sp24 = mtxDeterminant2x2(arg1, arg2, arg4, arg5);
+	sp1c = mtx00017cbc(arg1, arg2, arg7, arg8);
+	sp20 = mtx00017cbc(arg4, arg5, arg7, arg8);
+	sp24 = mtx00017cbc(arg1, arg2, arg4, arg5);
 
 	return sp24 * arg6 + (arg0 * sp20 - arg3 * sp1c);
 }
 
-float mtxDeterminant2x2(float arg0, float arg1, float arg2, float arg3)
+float mtx00017cbc(float arg0, float arg1, float arg2, float arg3)
 {
 	return arg0 * arg3 - arg1 * arg2;
 }
