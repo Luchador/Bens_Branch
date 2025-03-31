@@ -1394,15 +1394,13 @@ void menuPushDialog(struct menudialogdef *dialogdef)
 
 					menuOpenDialog(sibling, dialog, &g_Menus[g_MpPlayerNum]);
 
-					dialog->dstx = dialog->x = -SCREEN_320;
+					dialog->dstx = dialog->x = -videoGetWidth();
 					dialog->dsty = dialog->y = (viGetHeight() - dialog->height) / 2;
 					dialog->type = 0;
 
 					sibling = sibling->nextsibling;
 				}
 			}
-
-			if (sibling);
 
 			menuPlaySound(MENUSOUND_OPENDIALOG);
 
@@ -1757,7 +1755,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		struct modelrenderdata renderdata = {NULL, true, 3};
 		Mtxf *matrices;
 		int i;
-		uint32_t stack[3];
 		struct coord tmpcoord;
 		float screenpos[2];
 		Mtxf rotmtx;
@@ -1772,7 +1769,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		// Types 2 and 3 are unused. Type 4 is the credits scrolling logo.
 		if (modeltype < MENUMODELTYPE_3 && g_MenuData.usezbuf) {
 			gdl = viPrepareZbuf(gdl);
-			gdl = vi0000b1d0(gdl);
+			gdl = viPrepareHudDraw(gdl);
 
 			g_MenuData.usezbuf = false;
 
@@ -2059,8 +2056,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				viSetViewPosition(x1, g_MenuScissorY1);
 				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (x2 - x1), g_MenuScissorY2 - g_MenuScissorY1);
 
-				gdl = vi0000af00(gdl, var800a2048[g_MpPlayerNum]);
-				gdl = vi0000aca4(gdl, znear, zfar);
+				gdl = viSetupFixedZPerspective(gdl, var800a2048[g_MpPlayerNum]);
+				gdl = viSetupProjectionWithZRange(gdl, znear, zfar);
 			}
 		}
 

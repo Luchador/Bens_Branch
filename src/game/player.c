@@ -99,7 +99,6 @@ bool g_CutsceneSkipRequested;
 float g_CutsceneCurTotalFrame60f;
 int g_CutsceneTweenDuration60;
 float g_CutsceneTweenFrac; // 0 when bars across the top and bottom, 1 when fullscreen
-uint32_t var8009de34;
 int16_t g_SpawnPoints[24];
 int g_NumSpawnPoints;
 
@@ -117,11 +116,8 @@ struct vimode g_ViModes[] = {
 	// |               |                 |                |                 |          |                 |     |  |     |  cinematop
 	// |               |                 |                |                 |          |                 |     |  |     |  |
 	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                VIMODE_LO, SCREEN_HEIGHT_LO, 0,  180, 20, 136, 42  }, // default
-	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.5,              VIMODE_LO, SCREEN_HEIGHT_HI, 0,  180, 20, 136, 42  }, // hi-res
 };
 
-uint32_t var80070730 = 0xffffffff;
-uint32_t var80070734 = 0xffffffff;
 uint32_t var8007073c = 0;
 uint32_t var8007074c = 0;
 
@@ -183,11 +179,7 @@ float playerChooseSpawnLocation(float chrradius, struct coord *dstpos, RoomNum *
 	struct pad pad;
 	RoomNum tmppadrooms[2];
 	float bestsqdist;
-#ifdef AVOID_UB
 	RoomNum neighbours[21]; // prevent bgRoomGetNeighbours from writing out of bounds
-#else
-	RoomNum neighbours[20];
-#endif
 
 	// Iterate all spawn pads and populate the category arrays
 	for (p = 0; p < numpads; p++) {
@@ -2943,20 +2935,18 @@ void playerTickTeleport(float *aspectratio)
 
 void playerConfigureVi(void)
 {
-	float ratio = player0f0bd358();
-
 	playermgrSetFovY(PLAYER_DEFAULT_FOV);
-	playermgrSetAspectRatio(ratio);
-	playermgrSetViewSize(playerGetViewportWidth(), playerGetViewportHeight());
-	playermgrSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
+	playermgrSetAspectRatio(videoGetAspect());
+	playermgrSetViewSize(videoGetWidth(), videoGetHeight());
+	playermgrSetViewPosition(-360 * 4, -240 * 2);
 
 	viSetMode(g_ViModes[0].xscale);
 
-	viSetFovAspectAndSize(PLAYER_DEFAULT_FOV, ratio, playerGetViewportWidth(), playerGetViewportHeight());
+	viSetFovAspectAndSize(PLAYER_DEFAULT_FOV, videoGetAspect(), videoGetWidth(), videoGetHeight());
 
 	viSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
-	viSetSize(playerGetFbWidth(), playerGetFbHeight());
-	viSetBufSize(playerGetFbWidth(), playerGetFbHeight());
+	viSetSize(videoGetWidth(), videoGetHeight());
+	viSetBufSize(videoGetWidth(), videoGetHeight());
 }
 
 void playerTick()

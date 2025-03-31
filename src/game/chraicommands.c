@@ -7293,7 +7293,7 @@ bool ai0139(void)
 	uint32_t angle = (cmd[3] << 16) | (cmd[4] << 8) | cmd[5] | (cmd[2] << 24);
 	struct coord pos;
 
-	chr0f04c874(g_Vars.chrdata, angle, &pos, cmd[7], cmd[6]);
+	chrTryOrbitTarget(g_Vars.chrdata, angle, &pos, cmd[7], cmd[6]);
 
 	g_Vars.aioffset += 8;
 

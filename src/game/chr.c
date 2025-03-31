@@ -2749,7 +2749,7 @@ bool chr0f024738(struct chrdata *chr)
 
 						mtx3ToMtx4(obj->realrot, &thing->unk02c);
 						mtx4SetTranslation(&obj->prop->pos, &thing->unk02c);
-						mtx000172f0(thing->unk02c.m, thing->unk06c.m);
+						mtxInvertAffineMatrix(thing->unk02c.m, thing->unk06c.m);
 
 						campos = &g_Vars.currentplayer->cam_pos;
 

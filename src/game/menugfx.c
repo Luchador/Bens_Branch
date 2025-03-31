@@ -23,6 +23,7 @@
 
 #define NUM_SUCCESS_PARTICLES 280
 
+#define MENU_BLUR_SCALE 80
 #define BLURIMG_WIDTH  40
 #define BLURIMG_HEIGHT 30
 #define SAMPLE_WIDTH  8
@@ -33,26 +34,22 @@ static int g_MenuBlurFb = -1;
 static int g_MenuScreenFb = -1;
 static bool g_MenuBlurDone = false;
 
+int g_MenuBlurWidth;
+int g_MenuBlurHeight;
+
 /**
+ * 
  * Blur the gameplay background for the pause menu.
  *
- * The blurred image is 30x40 pixels at 16 bits per pixel. At standard
- * resolution this is 1/8th the size of the framebuffer.
- *
- * This function reads the framebuffer in blocks of 8x8 pixels. Each block's
- * R/G/B components are averaged and used to set a pixel in the blurred buffer.
- *
- * If hi-res is being used, every second horizontal pixel on the framebuffer is
- * read instead. The blurred image is the same size regardless of hi-res.
- *
- * The transition effect when pausing and unpausing is implemented elsewhere.
- * It's a simple fade between the source framebuffer and the blurred image.
- * Only one blurred image is made.
- */
+**/
+
 void menugfxCreateBlur(void)
 {
+	g_MenuBlurWidth = videoGetWidth() / MENU_BLUR_SCALE;
+	g_MenuBlurHeight = videoGetHeight() / MENU_BLUR_SCALE;
+
 	if (g_MenuBlurFb < 0) {
-		g_MenuBlurFb = videoCreateFramebuffer(BLURIMG_WIDTH, BLURIMG_HEIGHT, true, false);
+		g_MenuBlurFb = videoCreateFramebuffer(g_MenuBlurWidth, g_MenuBlurHeight, true, false);
 		g_MenuScreenFb = videoCreateFramebuffer(0, 0, false, true);
 	}
 	// copy full viewport and downscale to 40x30
@@ -61,27 +58,27 @@ void menugfxCreateBlur(void)
 	g_MenuBlurDone = false;
 }
 
-Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
+Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t offsetx, int16_t offsety)
 {
 	Col *colours;
 	Vtx *vertices;
-#if !defined(PLATFORM_N64)
-	int width;
-	int height;
-#endif
 
-	width = viGetWidth();
-	height = viGetHeight();
+	int width = viGetWidth();
+	int height = viGetHeight();
+
+	int screenWidth = videoGetWidth();
+	int screenHeight = videoGetHeight();
+
 	if (g_MenuBlurFb >= 0 && !g_MenuBlurDone) {
 		// blit the small blur texture onto a screen-sized framebuffer while blurring it
 		g_MenuBlurDone = true;
 		gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 0xff);
 		gDPSetTextureFilter(gdl++, G_TF_BLUR_EXT);
-		gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, g_MenuBlurFb);
-		gDPSetFramebufferTargetEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, g_MenuScreenFb);
-		gSPImageRectangleEXT(gdl++, 0, 0, 0, 0, width << 2, height << 2, BLURIMG_WIDTH, BLURIMG_HEIGHT, 0, BLURIMG_WIDTH, BLURIMG_HEIGHT);
-		gDPSetFramebufferTargetEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, 0);
-		gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, 0);
+		gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_MenuBlurWidth, g_MenuBlurFb);
+		gDPSetFramebufferTargetEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_MenuBlurWidth, g_MenuScreenFb);
+		gSPImageRectangleEXT(gdl++, 0, 0, 0, 0, width << 2, height << 2, g_MenuBlurWidth, g_MenuBlurHeight, 0, g_MenuBlurWidth, g_MenuBlurHeight);
+		gDPSetFramebufferTargetEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_MenuBlurWidth, 0);
+		gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_MenuBlurWidth, 0);
 	}
 
 	colours = gfxAllocateColours(1);
@@ -95,7 +92,7 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 			G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
 
 	// LoadTextureBlock will set up the sizes, but we'll use the framebuffer instead of g_BlurBuffer
-	gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, g_MenuScreenFb);
+	gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_MenuBlurWidth, g_MenuScreenFb);
 
 	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
@@ -105,30 +102,33 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
-	width = SCREEN_320 * 10;
-	height = viGetHeight() * 10;
+	int width10 = videoGetWidth() * 10;
+	int height10 = videoGetHeight() * 10;
 
-	*(uint16_t *)&vertices[0].x = arg2;
-	*(uint16_t *)&vertices[0].y = arg3;
+	int blurS = g_MenuBlurWidth * 32;
+	int blurT = g_MenuBlurHeight * 32;
+
+	vertices[0].x = offsetx;
+	vertices[0].y = offsety;
 	vertices[0].z = -10;
-	*(uint16_t *)&vertices[1].x = (int)width + arg2 + 40;
-	*(uint16_t *)&vertices[1].y = arg3;
+	vertices[1].x = 3200 + offsetx + 50;
+	vertices[1].y = offsety;
 	vertices[1].z = -10;
-	*(uint16_t *)&vertices[2].x = (int)width + arg2 + 40;
-	*(uint16_t *)&vertices[2].y = (int)height + arg3 + 50;
+	vertices[2].x = 3200 + offsetx + 50;
+	vertices[2].y = 2200 + offsety + 40;
 	vertices[2].z = -10;
-	*(uint16_t *)&vertices[3].x = arg2;
-	*(uint16_t *)&vertices[3].y = (int)height + arg3 + 50;
+	vertices[3].x = offsetx;
+	vertices[3].y = 2200 + offsety + 40;
 	vertices[3].z = -10;
 
 	vertices[0].s = 0;
 	vertices[0].t = 0;
-	vertices[1].s = SCREEN_320 * 4;
+	vertices[1].s = 1280;
 	vertices[1].t = 0;
-	vertices[2].s = SCREEN_320 * 4;
-	vertices[2].t = SCREEN_320 * 3;
+	vertices[2].s = 1280;
+	vertices[2].t = 960;
 	vertices[3].s = 0;
-	vertices[3].t = SCREEN_320 * 3;
+	vertices[3].t = 960;
 
 	vertices[0].colour = 0;
 	vertices[1].colour = 0;
@@ -145,26 +145,6 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 
 	return gdl;
-}
-
-void func0f0e0cbc(int arg0, int arg1, int16_t arg2, int16_t arg3, Vtx *vertex, Mtxf *arg5)
-{
-	struct coord sp24;
-
-	sp24.x = (arg2 - arg0 + 100) * 0.25f;
-	sp24.y = (arg3 - arg1 + 100) * 0.25f;
-	sp24.z = 0;
-
-	vertex->x = arg2 * 10;
-	vertex->y = arg3 * 10;
-	vertex->z = -10;
-
-	vertex->colour = 0;
-
-	mtx4TransformVecInPlace(arg5, &sp24);
-
-	vertex->s = sp24.x * 32;
-	vertex->t = sp24.y * 32;
 }
 
 Gfx *menugfxRenderDialogBackground(Gfx *gdl, int x1, int y1, int x2, int y2, struct menudialog *dialog, uint32_t colour1, uint32_t colour2, float arg8)
@@ -195,128 +175,6 @@ Gfx *menugfxRenderDialogBackground(Gfx *gdl, int x1, int y1, int x2, int y2, str
 	gdl = menugfxDrawDialogBorderLine(gdl, x2 - 1, y1, x2, y2, rightcolour, rightcolour);
 	gdl = menugfxDrawDialogBorderLine(gdl, x1, y1, x1 + 1, y2, leftcolour, leftcolour);
 	gdl = menugfxDrawDialogBorderLine(gdl, x1, y2 - 1, x2, y2, leftcolour, rightcolour);
-
-	return gdl;
-}
-
-/**
- * This unused function renders an experimental menu background.
- *
- * The background consists of two layers of a green hazy texture.
- * Both layers spin slowly in opposite directions.
- */
-Gfx *menugfxRenderBgGreenHaze(Gfx *gdl, int x1, int y1, int x2, int y2)
-{
-	int i;
-	Col *colours;
-	Vtx *vertices;
-	uint32_t alphas[2];
-	int16_t t5;
-	int16_t s0;
-	int16_t s2;
-	int16_t s3;
-	float f20;
-	float f22;
-	float f24;
-	float f26;
-	float f0;
-	float f2;
-
-	colours = gfxAllocateColours(4);
-	vertices = gfxAllocateVertices(8);
-
-	gDPPipeSync(gdl++);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-
-	texSelect(&gdl, &g_TexGeneralConfigs[6], 2, 0, 2, 1, NULL);
-
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-
-	vertices[4].x = vertices[0].x = x1 * 10;
-	vertices[4].y = vertices[0].y = y1 * 10;
-	vertices[4].z = vertices[0].z = -10;
-	vertices[5].x = vertices[1].x = x2 * 10;
-	vertices[5].y = vertices[1].y = y1 * 10;
-	vertices[5].z = vertices[1].z = -10;
-	vertices[6].x = vertices[2].x = x2 * 10;
-	vertices[6].y = vertices[2].y = y2 * 10;
-	vertices[6].z = vertices[2].z = -10;
-	vertices[7].x = vertices[3].x = x1 * 10;
-	vertices[7].y = vertices[3].y = y2 * 10;
-	vertices[7].z = vertices[3].z = -10;
-
-	for (i = 0; i < 2; i++) {
-		int16_t tmp = i * 256;
-		f0 = g_20SecIntervalFrac;
-		f26 = M_TAU * g_20SecIntervalFrac;
-
-		if (i == 1) {
-			f26 = -f26;
-		}
-
-		if (i == 1) {
-			f0 += 0.5f;
-		}
-
-		if (f0 > 1.0f) {
-			f0 -= 1.0f;
-		}
-
-		f2 = 1.0f - f0;
-
-		if (f0 < 0.2f) {
-			alphas[i] = f0 / 0.2f * 127.0f;
-		} else if (f0 > 0.9f) {
-			alphas[i] = f2 / 0.1f * 127.0f;
-		} else {
-			alphas[i] = 0x7f;
-		}
-
-		f20 = (f2 + 0.1f) * 15.0f;
-		f22 = (x2 - x1) / 2 * f20;
-		f24 = (y2 - y1) / 2 * f20;
-
-		s2 = sinf(f26) * f22;
-		s3 = cosf(f26) * f24;
-		s0 = cosf(f26) * f22;
-		t5 = -sinf(f26) * f24;
-
-		vertices[i * 4 + 0].s = tmp - s2 - s0;
-		vertices[i * 4 + 0].t = tmp - s3 - t5;
-		vertices[i * 4 + 1].s = tmp + s2 - s0;
-		vertices[i * 4 + 1].t = tmp + s3 - t5;
-		vertices[i * 4 + 2].s = tmp + s2 + s0;
-		vertices[i * 4 + 2].t = tmp + s3 + t5;
-		vertices[i * 4 + 3].s = tmp - s2 + s0;
-		vertices[i * 4 + 3].t = tmp - s3 + t5;
-	}
-
-	vertices[0].colour = 0;
-	vertices[1].colour = 0;
-	vertices[2].colour = 4;
-	vertices[3].colour = 4;
-	vertices[4].colour = 12;
-	vertices[5].colour = 12;
-	vertices[6].colour = 8;
-	vertices[7].colour = 8;
-
-	colours[0].word = PD_BE32(0x00af0000 | alphas[0]);
-	colours[1].word = PD_BE32(0xffff0000 | alphas[0]);
-	colours[2].word = PD_BE32(0x00af0000 | alphas[1]);
-	colours[3].word = PD_BE32(0xffff0000 | alphas[1]);
-
-	gSPColor(gdl++, (uintptr_t)(colours), 4);
-	gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
-
-	if (g_20SecIntervalFrac > 0.5f) {
-		gSPTri4(gdl++, 4, 5, 6, 6, 7, 4, 0, 1, 2, 2, 3, 0);
-	} else {
-		gSPTri4(gdl++, 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4);
-	}
 
 	return gdl;
 }

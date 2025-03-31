@@ -9,16 +9,12 @@
 #include "game/debug.h"
 #include "system.h"
 
-void *var800ac0d0;
 uint8_t *var800ac0e8[4];
 
 float var800845d0 = 999999;
 float g_AlmostZero = 0.00001f;
 struct coord g_ZeroVector = {0, 0, 0};
 struct coord g_RightVector = {0, 0, 1};
-uint8_t *var80084610 = NULL;
-uint8_t *var80084614 = NULL;
-uint8_t *var80084618 = NULL;
 
 #define COUNTER_NUM (46875ULL)
 #define COUNTER_DEN (1000ULL)
@@ -26,7 +22,6 @@ uint8_t *var80084618 = NULL;
 uint64_t utilsGetCount(void)
 {
 	return (sysGetMicroseconds() * COUNTER_NUM) / COUNTER_DEN;
-	debug_log("choose anim \n", 0);
 }
 
 uint32_t align4(uint32_t arg0)
@@ -54,32 +49,6 @@ uintptr_t align32(uintptr_t arg0)
 	}
 
 	return arg0;
-}
-
-void utilsInit(void)
-{
-	int i;
-	uint32_t slotssize = 0x1900;
-	uint32_t allocsize;
-
-	var800ac0d0 = mempAlloc(10000, MEMPOOL_8);
-
-	allocsize = align16(0x3900);
-	var800ac0e8[0] = mempAlloc(allocsize, MEMPOOL_8);
-
-	if (var800ac0e8[0] != NULL) {
-		for (i = 0; i < ARRAYCOUNT(var800ac0e8); i++) {
-			var800ac0e8[i] = var800ac0e8[0] + ((i * 100) << 4);
-		}
-	} else {
-		for (i = 0; i < ARRAYCOUNT(var800ac0e8); i++) {
-			var800ac0e8[i] = NULL;
-		}
-	}
-
-	var80084610 = var800ac0e8[0] + slotssize;
-	var80084618 = var800ac0e8[0] + allocsize - 1;
-	var80084614 = var80084610;
 }
 
 bool normalizeVector(struct coord *invec, struct coord *normalizedvec, uint32_t line, char *file)

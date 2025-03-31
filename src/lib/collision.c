@@ -397,7 +397,7 @@ bool cdIsPointBetweenXZ(float x1, float z1, float x2, float z2, float x3, float 
 	return (squaredmagnitude < dot && dot < 0) || (dot > 0 && dot < squaredmagnitude);
 }
 
-void cd00025848(float tilex, float tilez, float tilewidth, float posx, float posz, float *x1, float *z1, float *x2, float *z2)
+void cdGetTileWedgeEndpoints(float tilex, float tilez, float tilewidth, float posx, float posz, float *x1, float *z1, float *x2, float *z2)
 {
 	posx -= tilex;
 	posz -= tilez;
@@ -1309,7 +1309,8 @@ end:
 	collisions[numcollisions].geo = NULL;
 }
 
-void cd00027f78(struct geotilei *tile, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
+// With this function stubbed you can walk through walls
+void cdTestWall(struct geotilei *tile, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
 {
 	int i;
 	int numvertices = tile->header.numvertices;
@@ -1435,7 +1436,8 @@ int cdTestRampWall(struct geotilei *tile, struct coord *pos, float width, float 
 	return count;
 }
 
-void cd0002840c(struct geotilef *tile, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
+// Quite similar to cdTestWall but for GEOTYPE_TILE_F
+void cdTestWallF(struct geotilef *tile, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
 {
 	int i;
 	int numvertices = tile->header.numvertices;
@@ -1467,7 +1469,8 @@ void cd0002840c(struct geotilef *tile, float arg1, float arg2, float arg3, struc
 	}
 }
 
-void cd00028638(struct geoblock *block, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
+// With this stubbed the player can walk through props including doors
+void cdTestBBox(struct geoblock *block, float arg1, float arg2, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
 {
 	int i;
 	int numvertices = block->header.numvertices;
@@ -1499,7 +1502,8 @@ void cd00028638(struct geoblock *block, float arg1, float arg2, float arg3, stru
 	}
 }
 
-void cd0002885c(struct geocyl *cyl, float x, float z, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
+// With this stubbed the player can walk through characters
+void cdTestCylinder(struct geocyl *cyl, float x, float z, float arg3, struct prop *prop, struct collision *collisions, int maxcollisions, int *numcollisions)
 {
 	float xdiff = x - cyl->x;
 	float zdiff = z - cyl->z;
@@ -1541,7 +1545,7 @@ void cdCollectGeoForCylMoveFromList(uint8_t *start, uint8_t *end, struct coord *
 					}
 
 					if (pass) {
-						cd00027f78(tile, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
+						cdTestWall(tile, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
 					}
 				}
 			}
@@ -1557,7 +1561,7 @@ void cdCollectGeoForCylMoveFromList(uint8_t *start, uint8_t *end, struct coord *
 					&& pos->z <= tile->vertices[tile->zmax].z + radius
 					&& (!checkvertical || (pos->y + arg6 >= tile->vertices[tile->ymin].y
 							&& pos->y + arg7 <= tile->vertices[tile->ymax].y))) {
-				cd0002840c(tile, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
+				cdTestWallF(tile, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
 			}
 
 			geo = (struct geo *)((uintptr_t)geo + (uintptr_t)(tile->header.numvertices - 0x40) * 0xc + 0x310);
@@ -1566,7 +1570,7 @@ void cdCollectGeoForCylMoveFromList(uint8_t *start, uint8_t *end, struct coord *
 
 			if ((geoflags & (GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT | GEOFLAG_BLOCK_SHOOT))
 					&& (!checkvertical || (pos->y + arg6 >= block->ymin && pos->y + arg7 <= block->ymax))) {
-				cd00028638(block, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
+				cdTestBBox(block, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
 			}
 
 			geo = (struct geo *)((uintptr_t)geo + sizeof(struct geoblock));
@@ -1575,7 +1579,7 @@ void cdCollectGeoForCylMoveFromList(uint8_t *start, uint8_t *end, struct coord *
 
 			if ((geoflags & geo->flags)
 					&& (!checkvertical || (pos->y + arg6 >= cyl->ymin && pos->y + arg7 <= cyl->ymax))) {
-				cd0002885c(cyl, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
+				cdTestCylinder(cyl, pos->x, pos->z, radius, prop, collisions, maxcollisions, numcollisions);
 			}
 
 			geo = (struct geo *)((uintptr_t)geo + sizeof(struct geocyl));
@@ -1786,7 +1790,7 @@ void cd0002901c(struct coord *pos, struct coord *dist, float width, struct colli
 	} else if (collisions[bestindex].geo->type == GEOTYPE_CYL) {
 		struct geocyl *cyl = (struct geocyl *) collisions[bestindex].geo;
 
-		cd00025848(cyl->x, cyl->z, cyl->radius, pos->x, pos->z, &vtx1.x, &vtx1.z, &vtx2.x, &vtx2.z);
+		cdGetTileWedgeEndpoints(cyl->x, cyl->z, cyl->radius, pos->x, pos->z, &vtx1.x, &vtx1.z, &vtx2.x, &vtx2.z);
 
 		vtx1.y = pos->y;
 		vtx2.y = pos->y;
@@ -2438,7 +2442,7 @@ int cdExamCylMove01(struct coord *pos, struct coord *pos2, float radius, RoomNum
 		} else if (collisions[0].geo->type == GEOTYPE_CYL) {
 			struct geocyl *cyl = (struct geocyl *) collisions[0].geo;
 
-			cd00025848(cyl->x, cyl->z, cyl->radius, pos->x, pos->z, &sp70.x, &sp70.z, &sp64.x, &sp64.z);
+			cdGetTileWedgeEndpoints(cyl->x, cyl->z, cyl->radius, pos->x, pos->z, &sp70.x, &sp70.z, &sp64.x, &sp64.z);
 
 			sp70.y = pos->y;
 			sp64.y = pos->y;
@@ -2836,7 +2840,7 @@ bool cd0002b954Cyl(struct coord *arg0, struct coord *arg1, struct coord *arg2, s
 					arg4->z = arg0->z + arg2->f[2] * mult;
 
 					if (arg5 != NULL && arg6 != NULL) {
-						cd00025848(x, z, radius, arg0->x, arg0->z, &arg5->x, &arg5->z, &arg6->x, &arg6->z);
+						cdGetTileWedgeEndpoints(x, z, radius, arg0->x, arg0->z, &arg5->x, &arg5->z, &arg6->x, &arg6->z);
 
 						arg5->y = arg4->y;
 						arg6->y = arg4->y;

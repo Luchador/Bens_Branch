@@ -194,7 +194,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 				spc8.z = 1.0f;
 			}
 
-			func0f02e3dc(&spb0, &spa4, &sp98, &spc8, &spd4);
+			rayIntersectLineXZ(&spb0, &spa4, &sp98, &spc8, &spd4);
 
 			spbc.x = (sp98.x - g_Vars.currentplayer->prop->pos.x) / g_Vars.lvupdate60freal;
 			spbc.y = 0.0f;
@@ -226,7 +226,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 				sp44.z = obj->prop->pos.z - var8009de70->pos.z;
 			}
 
-			func0f02e3dc(&sp68, &sp5c, &sp50, &sp44, &sp8c);
+			rayIntersectLineXZ(&sp68, &sp5c, &sp50, &sp44, &sp8c);
 
 			sp80.x = delta->x;
 			sp80.y = 0.0f;

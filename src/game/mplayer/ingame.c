@@ -1,14 +1,18 @@
 #include <ultra64.h>
+#include <string.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/title.h"
+#include "game/bondgun.h"
 #include "game/weaponutils.h"
 #include "game/tex.h"
 #include "game/savebuffer.h"
 #include "game/menu.h"
 #include "game/mainmenu.h"
+#include "game/playermgr.h"
 #include "game/filemgr.h"
 #include "game/lv.h"
+#include "game/inv.h"
 #include "game/mplayer/ingame.h"
 #include "game/challenge.h"
 #include "game/lang.h"
@@ -352,6 +356,26 @@ MenuItemHandlerResult func0f178440(int operation, struct menuitem *item, union h
 char *mpMenuTextWeaponOfChoiceName(struct menuitem *item)
 {
 	return mpPlayerGetWeaponOfChoiceName(g_Menus[g_MpPlayerNum].playernum, 0);
+}
+
+char *mpPlayerGetWeaponOfChoiceName(unsigned int playernum, unsigned int slot)
+{
+	char *name;
+	int weapon1;
+	int weapon2;
+	unsigned int prevplayernum = g_Vars.currentplayernum;
+	int weapon;
+
+	setCurrentPlayerNum(playernum);
+
+	invGetWeaponOfChoice(&weapon1, &weapon2);
+
+	weapon = slot == 1 ? weapon2 : weapon1;
+
+	name = bgunGetName(weapon);
+	setCurrentPlayerNum(prevplayernum);
+
+	return strcat(langRemoveNewline(name), "\n");
 }
 
 char *mpMenuTextAward1(struct menuitem *item)

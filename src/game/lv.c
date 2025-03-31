@@ -857,7 +857,7 @@ Gfx *lvRender(Gfx *gdl)
 		gSPDisplayList(gdl++, &var80061380);
 
 		gdl = viPrepareZbuf(gdl);
-		gdl = vi0000b1d0(gdl);
+		gdl = viPrepareHudDraw(gdl);
 
 		gDPSetScissorFrac(gdl++, 0,
 				viGetViewLeft() * 4.0f, viGetViewTop() * 4.0f,
@@ -877,7 +877,7 @@ Gfx *lvRender(Gfx *gdl)
 				g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
 		mtx00016748(1);
 
-		gdl = vi0000b1d0(gdl);
+		gdl = viPrepareHudDraw(gdl);
 		gdl = viRenderViewportEdges(gdl);
 		gdl = bgScissorToViewport(gdl);
 		gdl = menuRender(gdl);
@@ -892,8 +892,8 @@ Gfx *lvRender(Gfx *gdl)
 				g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
 		mtx00016748(1);
 
-		gdl = vi0000b1a8(gdl);
-		gdl = vi0000b1d0(gdl);
+		gdl = viSetupViewportAndPerspective(gdl, &g_Vars.currentplayer->viewport[0]);
+		gdl = viPrepareHudDraw(gdl);
 		gdl = viRenderViewportEdges(gdl);
 		gdl = creditsDraw(gdl);
 	} else {
@@ -969,7 +969,7 @@ Gfx *lvRender(Gfx *gdl)
 			mtx00016748(g_Vars.currentplayerstats->scale_bg2gfx);
 			envTick();
 			gdl = viPrepareZbuf(gdl);
-			gdl = vi0000b1d0(gdl);
+			gdl = viPrepareHudDraw(gdl);
 			gdl = bgScissorToViewport(gdl);
 			artifactsClear();
 

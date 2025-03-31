@@ -4055,7 +4055,7 @@ bool objEmbed(struct prop *prop, struct prop *parent, struct model *model, struc
 			mtx4SetTranslation(&prop->pos, &sp34);
 			mtxApplyAffineTransform(&sp34, &sp74, &sp134);
 			mtxApplyAffineTransform(camGetProjectionMtxF(), sp24, &spf4);
-			mtx000172f0(spf4.m, spb4.m);
+			mtxInvertAffineMatrix(spf4.m, spb4.m);
 			mtxApplyAffineTransform(&spb4, &sp134, &obj->embedment->matrix);
 
 			return true;
@@ -5641,7 +5641,7 @@ float objCollide(struct defaultobj *movingobj, struct coord *movingvel, float ro
 					sp4c.z = obstacle->pos.z - movingobj->prop->pos.z;
 				}
 
-				func0f02e3dc(&sp70, &sp64, &sp58, &sp4c, &sp88);
+				rayIntersectLineXZ(&sp70, &sp64, &sp58, &sp4c, &sp88);
 
 				force = 0.5f;
 
@@ -6545,7 +6545,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 				func0f069c70(obj, false, true);
 				mtx3ToMtx4(obj->realrot, &sp484);
 				mtx4SetTranslation(&prop->pos, &sp484);
-				mtx000172f0(sp504.m, sp4c4.m);
+				mtxInvertAffineMatrix(sp504.m, sp4c4.m);
 				mtx4MultMtx4(&sp484, &sp4c4, &sp544);
 				platformDisplaceProps2(prop, &sp544);
 				result = true;
@@ -13490,7 +13490,7 @@ bool objTestShieldHit(struct model *model, struct modelnode *node, struct coord 
 	rodata = &node->rodata->bbox;
 
 	mtxindex = modelFindNodeMtxIndex(node, 0);
-	mtx000172f0(model->matrices[mtxindex].m, mtx.m);
+	mtxInvertAffineMatrix(model->matrices[mtxindex].m, mtx.m);
 
 	spb8.x = arg2->x;
 	spb8.y = arg2->y;
@@ -13684,7 +13684,7 @@ bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *
 			if (mtx && mtx != spd0) {
 				spd0 = mtx;
 
-				mtx000172f0(mtx->m, sp64.m);
+				mtxInvertAffineMatrix(mtx->m, sp64.m);
 
 				spec.x = arg2->x;
 				spec.y = arg2->y;

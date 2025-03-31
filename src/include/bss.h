@@ -11,7 +11,7 @@ extern uint8_t *g_VmMarker;
 extern uint32_t g_VmRamEnd;
 extern uint32_t g_VmVirtualToPhysicalTableEnd;
 extern AMAudioMgr g_AudioManager;
-extern Mtx *var80092870;
+extern Mtx *g_CameraPerspectiveMtxF;
 extern int g_SndMaxFxBusses;
 extern struct seqinstance g_SeqInstances[3];
 extern ALHeap g_SndHeap;

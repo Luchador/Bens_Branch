@@ -15,9 +15,6 @@
 #define gSPColor(pkt, v, n)                           \
     gDma1p(pkt, G_COL, v, sizeof(Col)*(n),((n)-1)<<2)
 
-#define gsSPColor(v, n, v0)                        \
-    gsDma1p(G_COL, v, sizeof(Col)*(n), ((n)-1)<<2)
-
 /**
  * B1	rsp_tri4
  * Draws up to four triangles at a time.
@@ -239,16 +236,6 @@
     _g->words.w1 = (uintptr_t)(addr);                  \
 }
 
-#define gDPGrayscaleEXT(pkt, state)                    \
-{                                                      \
-    Gfx* _g = (Gfx*)(pkt);                             \
-                                                       \
-    _g->words.w0 = _SHIFTL(G_SETGRAYSCALE_EXT, 24, 8); \
-    _g->words.w1 = state;                              \
-}
-
-#define gDPSetGrayscaleColorEXT(pkt, r, g, b, lerp) DPRGBColor(pkt, G_SETINTENSITY_EXT, r, g, b, lerp)
-
 // NOTE: these will function correctly only if you pass `gdl++` as `pkt`
 
 #define gDPFillRectangleWideEXT(pkt, ulx, uly, lrx, lry)                         \
@@ -305,8 +292,6 @@
 #define gSPClearExtraGeometryModeEXT(pkt, word) gSPExtraGeometryModeEXT((pkt), word, 0)
 
 #define gDPFillRectangleEXT gDPFillRectangleWideEXT
-#define gSPTextureRectangleEXT(p, xl, yl, xh, yh, tile, s, t, ds, dt) gSPTextureRectangleWideEXT(p, xl, yl, xh, yh, tile, s, t, ds, dt, G_OFF)
-#define gSPTextureRectangleFlipEXT(p, xl, yl, xh, yh, tile, s, t, ds, dt) gSPTextureRectangleWideEXT(p, xl, yl, xh, yh, tile, s, t, ds, dt, G_ON)
 
 #define gDPFlushEXT(pkt) gDPNoParam(pkt, G_RDPFLUSH_EXT)
 
@@ -321,7 +306,6 @@
 #else // PLATFORM_N64
 
 #define gDPFillRectangleEXT gDPFillRectangle
-#define gSPTextureRectangleEXT gSPTextureRectangle
 
 #endif // PLATFORM_N64
 

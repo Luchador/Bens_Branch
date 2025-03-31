@@ -1006,7 +1006,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 				|| stagenum == g_Stages[STAGEINDEX_MBR].id
 				|| stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id)) {
 		gdl = envStopFog(gdl);
-		gdl = vi0000ab78(gdl);
+		gdl = viSetupSkyProjection(gdl);
 
 		roomnum = -1;
 
@@ -1040,7 +1040,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 			gdl = envStopFog(gdl);
 			gdl = starsRender(gdl);
 			gdl = text0f153780(gdl);
-			gdl = vi0000ab78(gdl);
+			gdl = viSetupSkyProjection(gdl);
 		}
 
 		if (roomnum != -1) {
@@ -1869,7 +1869,7 @@ Gfx *bgRender(Gfx *gdl)
 	gdl = bgScissorToViewport(gdl);
 	gdl = envStopFog(gdl);
 
-	gSPMatrix(gdl++, var80092870, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, g_CameraPerspectiveMtxF, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	gdl = playerLoadMatrix(gdl);
 

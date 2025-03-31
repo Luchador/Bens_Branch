@@ -161,7 +161,7 @@ void bwalk0f0c3b38(struct coord *reltarget, struct defaultobj *obj)
 		vector.z = 1;
 	}
 
-	func0f02e3dc(&globalthinga, &globalthingb, &abstarget, &vector, &posunk);
+	rayIntersectLineXZ(&globalthinga, &globalthingb, &abstarget, &vector, &posunk);
 
 	tween.x = (abstarget.x - g_Vars.currentplayer->prop->pos.x) / g_Vars.lvupdate60freal;
 	tween.y = 0;

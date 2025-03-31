@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include <math.h>
 #include "constants.h"
 #include "game/camera.h"
@@ -25,9 +24,8 @@
 #include "lib/vi.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "input.h"
-#endif
+#include "video.h"
 
 /**
  * Credits
@@ -108,7 +106,6 @@ struct particle {
 	float rotation;
 	uint8_t movetype;
 	uint8_t confignum;
-	uint8_t unk12;
 	uint8_t size;
 	uint8_t colourindex;
 };
@@ -121,11 +118,7 @@ struct creditsbglayer {
 };
 
 struct creditsdata {
-	/*0x0000*/ uint32_t unk0000;
-	/*0x0004*/ uint32_t unk0004;
-	/*0x0008*/ uint32_t unk0008;
 	/*0x000c*/ struct particle particles[500];
-	/*0x2eec*/ uint8_t unk2eec;
 	/*0x2ef0*/ struct menumodel menumodel;
 	/*0x34a8*/ uint8_t unk34a8[0xcac];
 
@@ -159,23 +152,9 @@ struct creditsdata {
 	/*0x41fc*/ uint8_t particlemovetype;
 	/*0x41fd*/ uint8_t particleconfignum1;
 	/*0x41fe*/ uint8_t particleconfignum2;
-	/*0x41ff*/ uint8_t particlemaxsize;
-	/*0x4200*/ uint8_t particleminsize;
+	/*0x41ff*/ float particlemaxsize;
+	/*0x4200*/ float particleminsize;
 	/*0x4204*/ uint32_t blacktimer60;
-	/*0x4208*/ uint8_t unk4208;
-	/*0x420c*/ uint32_t unk420c;
-	/*0x4210*/ uint32_t unk4210;
-	/*0x4214*/ uint32_t unk4214;
-	/*0x4218*/ uint32_t unk4218;
-	/*0x421c*/ uint32_t unk421c;
-	/*0x4220*/ uint32_t unk4220;
-	/*0x4224*/ uint32_t unk4224;
-	/*0x4228*/ uint32_t unk4228;
-	/*0x422c*/ uint32_t unk422c;
-	/*0x4230*/ uint32_t unk4230;
-	/*0x4234*/ uint32_t unk4234;
-	/*0x4238*/ uint32_t unk4238;
-	/*0x423c*/ uint32_t unk423c;
 };
 
 float g_CreditsParticleRotationFrac;
@@ -183,6 +162,7 @@ uint32_t g_CreditsCurFrame;
 uint32_t g_CreditsPrevFrame;
 uint32_t g_CreditsCurFrame2;
 struct creditsdata *g_CreditsData;
+int g_BackgroundPlaneSize = 300;
 
 bool g_CreditsScrollStarted = false;
 bool g_CreditsAltTitleRequested = false;
@@ -221,26 +201,14 @@ void creditsMap9BgVertices(Vtx *vertices, float arg1, float arg2, float arg3, fl
 	vertices[4].t = (vertices[3].t + vertices[5].t) / 2;
 }
 
-/**
- * Initialises the vertices coordinates. The generated x and y coordinates are:
- *
- * 0:  -1800  -1800
- * 1:  0      -1800
- * 2:  1800   -1800
- * 3:  -1800  0
- * 4:  0      0
- * 5:  1800   0
- * 6:  -1800  1800
- * 7:  0      1800
- * 8:  1800   1800
- */
+// Creates a 4 quad plane centered at 0,0 with the corners at +/-g_BackgroundPlaneSize
 void creditsInitBgVertices(Vtx *vertices, int z)
 {
 	int i;
 
 	for (i = 0; i < 9; i++) {
-		vertices[i].x = (i % 3) * 1800 - 1800;
-		vertices[i].y = (i / 3) * 1800 - 1800;
+		vertices[i].x = (i % 3) * g_BackgroundPlaneSize - g_BackgroundPlaneSize;
+		vertices[i].y = (i / 3) * g_BackgroundPlaneSize - g_BackgroundPlaneSize;
 		vertices[i].z = z;
 	}
 }
@@ -532,7 +500,7 @@ Gfx *creditsFillFramebuffer(Gfx *gdl, uint32_t colour)
 
 	gdl = textSetPrimColour(gdl, colour);
 
-	gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+	gDPFillRectangle(gdl++, 0, 0, videoGetWidth(), videoGetHeight());
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -550,22 +518,21 @@ void creditsResetParticles(void)
 	g_CreditsData->particleconfignum1 = 0;
 	g_CreditsData->particleconfignum2 = 0;
 	g_CreditsData->particleminsize = 0;
-	g_CreditsData->particlemaxsize = 7;
+	g_CreditsData->particlemaxsize = 0.1f;
 
 	for (i = 0; i < ARRAYCOUNT(g_CreditsData->particles); i++) {
 		tmp = RANDOMFRAC();
-		g_CreditsData->particles[i].x = (tmp + tmp) * 3000.0f - 3000.0f;
+		g_CreditsData->particles[i].x = (tmp + tmp) * 200.0f - 200.0f;
 
 		tmp = RANDOMFRAC();
-		g_CreditsData->particles[i].y = (tmp + tmp) * 3000.0f - 3000.0f;
+		g_CreditsData->particles[i].y = (tmp + tmp) * 200.0f - 200.0f;
 
-		g_CreditsData->particles[i].unk12 = rngRandom() % 4;
 		g_CreditsData->particles[i].colourindex = rngRandom() % 4;
 		g_CreditsData->particles[i].rotation = RANDOMFRAC() * M_TAU;
 
 		if (g_CreditsData->particleminsize < g_CreditsData->particlemaxsize) {
 			g_CreditsData->particles[i].size = g_CreditsData->particleminsize
-				+ (rngRandom() % (g_CreditsData->particlemaxsize - g_CreditsData->particleminsize));
+				+ (RANDOMFRAC() * (g_CreditsData->particlemaxsize / 10.0f));
 		} else {
 			g_CreditsData->particles[i].size = g_CreditsData->particleminsize;
 		}
@@ -635,15 +602,14 @@ void creditsTickParticles(void)
 
 		// If the particle has gone behind the camera, reset it
 		if (g_CreditsData->particles[i].z > 0.0f) {
-			g_CreditsData->particles[i].x = RANDOMFRAC() * 2.0f * 3000.0f - 3000.0f;
-			g_CreditsData->particles[i].y = RANDOMFRAC() * 2.0f * 3000.0f - 3000.0f;
-			g_CreditsData->particles[i].unk12 = rngRandom() % 4;
+			g_CreditsData->particles[i].x = RANDOMFRAC() * 2.0f * 200.0f - 200.0f;
+			g_CreditsData->particles[i].y = RANDOMFRAC() * 2.0f * 200.0f - 200.0f;
 			g_CreditsData->particles[i].colourindex = rngRandom() % 4;
 			g_CreditsData->particles[i].rotation = RANDOMFRAC() * M_TAU;
 
 			if (g_CreditsData->particleminsize < g_CreditsData->particlemaxsize) {
 				g_CreditsData->particles[i].size = g_CreditsData->particleminsize
-					+ rngRandom() % (g_CreditsData->particlemaxsize - g_CreditsData->particleminsize);
+					+ RANDOMFRAC() * (g_CreditsData->particlemaxsize / 10.0f);
 			} else {
 				g_CreditsData->particles[i].size = g_CreditsData->particleminsize;
 			}
@@ -1171,7 +1137,6 @@ void creditsTickSlide(void)
 				g_CreditsData->slideage = 0;
 				g_CreditsData->slidesenabled = false;
 				g_CreditsData->blacktimer60 = 0;
-				g_CreditsData->unk4208 = 0;
 
 				musicEndMenu();
 				musicStartPrimary(0);
@@ -1522,7 +1487,7 @@ void creditsTick(void)
 		creditsCreatePendingBgLayers(0xffffffff);
 	}
 
-	if (!g_CreditsData->slidesenabled && g_CreditsData->blacktimer60 < (PAL ? 1150 : 1360)) {
+	if (!g_CreditsData->slidesenabled && g_CreditsData->blacktimer60 < 1360) {
 		g_CreditsData->blacktimer60 += g_Vars.diffframe60;
 	}
 }
@@ -1536,9 +1501,10 @@ Gfx *creditsDraw(Gfx *gdl)
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
+	viSetUseZBuf(true);
 	gdl = viPrepareZbuf(gdl);
-	gdl = vi0000b1d0(gdl);
-	gdl = creditsFillFramebuffer(gdl, 0x000000ff);
+	gdl = viPrepareHudDraw(gdl);
+	//gdl = creditsFillFramebuffer(gdl, 0x000000ff);
 
 	gDPSetScissorFrac(gdl++, G_SC_NON_INTERLACE, 0, 120, viGetWidth() * 4.0f, (viGetHeight() - 30) * 4.0f);
 
@@ -1574,11 +1540,11 @@ Gfx *creditsDraw(Gfx *gdl)
 			g_CreditsData->menumodel.currotx = g_CreditsData->menumodel.newrotx = -0.26175770163536;
 			g_CreditsData->menumodel.currotz = g_CreditsData->menumodel.newrotz = 0;
 
-			g_CreditsData->menumodel.newposx = 833.0f - (scrolltimer240 / TICKS(14400.0f)) * 2413.0f;
-			g_CreditsData->menumodel.newposy = VERSION == VERSION_PAL_FINAL ? 65.86 : 70.86;
+			g_CreditsData->menumodel.newposx = 1400.0f - (scrolltimer240 / TICKS(14400.0f)) * 3300.0f;
+			g_CreditsData->menumodel.newposy = 240;
 			g_CreditsData->menumodel.newposz = -2050;
 
-			g_CreditsData->menumodel.newscale = 1.467;
+			g_CreditsData->menumodel.newscale = 0.3;
 			g_CreditsData->menumodel.newparams = MENUMODELPARAMS_SET_FILENUM(FILE_PPDMENU);
 			g_CreditsData->menumodel.drawbehinddialog = true;
 			g_CreditsData->menumodel.partvisibility = NULL;
@@ -1587,7 +1553,7 @@ Gfx *creditsDraw(Gfx *gdl)
 
 			gSPMatrix(gdl++, (uintptr_t)(matrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-			gdl = creditsFillFramebuffer(gdl, 0x000000d8);
+			//gdl = creditsFillFramebuffer(gdl, 0x000000d8);
 		}
 
 		mtx4LoadIdentity(&sp68);
@@ -1617,7 +1583,7 @@ Gfx *creditsDraw(Gfx *gdl)
 			}
 
 			if (alpha) {
-				gdl = creditsFillFramebuffer(gdl, alpha);
+				//gdl = creditsFillFramebuffer(gdl, alpha);
 			}
 		}
 	}
@@ -1653,7 +1619,6 @@ void creditsReset(void)
 
 	g_CreditsData = mempAlloc(sizeof(struct creditsdata), MEMPOOL_STAGE);
 
-	g_CreditsData->unk2eec = 0;
 	g_CreditsData->unk41b0[0] = 0;
 	g_CreditsData->unk41b0[1] = 0;
 

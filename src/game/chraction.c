@@ -1409,24 +1409,26 @@ float chrGetAttackEntityDistance(struct chrdata *chr, uint32_t attackflags, int 
 	return 0;
 }
 
-void func0f02e3dc(struct coord *a, struct coord *b,struct coord *c, struct coord *d, struct coord *dst)
+void rayIntersectLineXZ(struct coord *lineStart, struct coord *lineEnd, struct coord *rayOrigin, struct coord *rayDir, struct coord *outIntersection) 
 {
-	float value = d->z * (b->x - a->x) - (b->z - a->z) * d->x;
+    float denominator = rayDir->z * (lineEnd->x - lineStart->x)
+                      - (lineEnd->z - lineStart->z) * rayDir->x;
 
-	if (value != 0) {
-		float tmp = ((b->z - a->z) * (c->x - a->x) + (a->z - c->z) * (b->x - a->x)) / value;
-		dst->x = d->x * tmp + c->x;
-		dst->y = d->y * tmp + c->y;
-		dst->z = d->z * tmp + c->z;
-	} else if (d->x == 0 && d->z == 0) {
-		dst->x = c->x;
-		dst->y = c->y;
-		dst->z = c->z;
-	} else {
-		dst->x = a->x;
-		dst->y = a->y;
-		dst->z = a->z;
-	}
+    if (denominator != 0.0f) {
+        float t = ((lineEnd->z - lineStart->z) * (rayOrigin->x - lineStart->x)
+                 + (lineStart->z - rayOrigin->z) * (lineEnd->x - lineStart->x))
+                / denominator;
+
+        outIntersection->x = rayDir->x * t + rayOrigin->x;
+        outIntersection->y = rayDir->y * t + rayOrigin->y;
+        outIntersection->z = rayDir->z * t + rayOrigin->z;
+    } else if (rayDir->x == 0.0f && rayDir->z == 0.0f) {
+        // Ray has no direction (it's a point)
+        *outIntersection = *rayOrigin;
+    } else {
+        // Ray is parallel to line; fall back to line start
+        *outIntersection = *lineStart;
+    }
 }
 
 void func0f02e4f8(struct coord *arg0, struct coord *arg1, struct coord *dst)
@@ -1435,7 +1437,7 @@ void func0f02e4f8(struct coord *arg0, struct coord *arg1, struct coord *dst)
 	struct coord sp20;
 
 	cdGetEdge(&sp2c, &sp20, 2298, "chraction.c");
-	func0f02e3dc(&sp2c, &sp20, arg0, arg1, dst);
+	rayIntersectLineXZ(&sp2c, &sp20, arg0, arg1, dst);
 }
 
 float func0f02e550(struct prop *prop, float arg1, float arg2, uint32_t cdtypes, float ymax, float ymin)
@@ -1461,13 +1463,7 @@ float func0f02e550(struct prop *prop, float arg1, float arg2, uint32_t cdtypes, 
 	if (cdExamCylMove03(&prop->pos, prop->rooms, &sp50, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) != CDRESULT_COLLISION) {
 		result = arg2;
 	} else {
-#if VERSION >= VERSION_PAL_FINAL
-		cdGetPos(&sp3c, 2377, "chr/chraction.c");
-#elif VERSION >= VERSION_NTSC_1_0
 		cdGetPos(&sp3c, 2377, "chraction.c");
-#else
-		cdGetPos(&sp3c, 2417, "chraction.c");
-#endif
 
 		xdiff = sp3c.x - prop->pos.x;
 		zdiff = sp3c.z - prop->pos.z;
@@ -1545,7 +1541,7 @@ void func0f02e9a0(struct chrdata *chr, float mergetime)
 	chr->act_stand.reaim = 0;
 	chr->act_stand.turning = TURNSTATE_OFF;
 	chr->act_stand.checkfacingwall = false;
-	chr->act_stand.wallcount = rngRandom() % 120 + 180; // 180 to 299
+	chr->act_stand.wallcount = rngRandom() % 120 + 180;
 	chr->act_stand.mergetime = mergetime;
 	chr->act_stand.playwalkanim = false;
 
@@ -2289,12 +2285,7 @@ void chrAttackWalk(struct chrdata *chr, bool run)
 	chr->actiontype = ACT_ATTACKWALK;
 
 	chr->act_attackwalk.frame60count = 0;
-#if PAL
-	// This is really TICKS(400.0f), but off by one bit :(
-	chr->act_attackwalk.frame60max = rngRandom() % (int)(333.33331298828f * g_AttackWalkDurationScale) + TICKS(120);
-#else
 	chr->act_attackwalk.frame60max = rngRandom() % (int)(400 * g_AttackWalkDurationScale) + TICKS(120);
-#endif
 	chr->act_attackwalk.facedtarget = false;
 	chr->act_attackwalk.animcfg = animcfg;
 	chr->act_attackwalk.nextshot60 = 0;
@@ -3339,13 +3330,7 @@ void chrReactToDamage(struct chrdata *chr, struct coord *vector, float angle, in
 	bool knockedout = false;
 	int animnum = modelGetAnimNum(chr->model);
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (chr->actiontype == ACT_DRUGGEDKO)
-#else
-	if (chr->actiontype == ACT_DRUGGEDCOMINGUP
-			|| chr->actiontype == ACT_DRUGGEDDROP
-			|| chr->actiontype == ACT_DRUGGEDKO)
-#endif
 	{
 		knockedout = true;
 	}
@@ -3463,12 +3448,8 @@ void chrYeetFromPos(struct chrdata *chr, struct coord *exppos, float force)
 		chrStopFiring(chr);
 		chrUncloak(chr, true);
 
-#if VERSION >= VERSION_NTSC_1_0
 		chr->chrflags &= ~CHRCFLAG_HIDDEN;
-#endif
-
 		chr->actiontype = ACT_DIE;
-
 		chr->act_die.notifychrindex = 0;
 		chr->act_die.thudframe1 = row->thudframe;
 		chr->act_die.thudframe2 = -1;
@@ -3923,31 +3904,6 @@ void func0f0341dc(struct chrdata *chr, float damage, struct coord *vector, struc
 			model,     // model
 			side,      // side
 			arg10,     // arg11
-			false,     // explosion
-			NULL);     // explosionpos
-}
-
-/**
- * Unused, and same as chrDamageByImpact but sets hitpart to HITPART_GENERAL instead of argument.
- */
-void func0f034248(struct chrdata *chr, float damage, struct coord *vector, struct gset *gset, struct prop *prop)
-{
-	struct modelnode *node = NULL;
-	struct model *model = NULL;
-	int side = 0;
-	int hitpart = HITPART_GENERAL;
-
-	if (chrGetShield(chr) >= 0 && chr->model) {
-		chrCalculateShieldHit(chr, &chr->prop->pos, vector, &node, &hitpart, &model, &side);
-	}
-
-	chrDamage(chr, damage, vector, gset, prop, HITPART_GENERAL,
-			true,      // damageshield
-			chr->prop, // prop2
-			node,      // node
-			model,     // model
-			side,      // side
-			NULL,      // arg11
 			false,     // explosion
 			NULL);     // explosionpos
 }
@@ -4899,13 +4855,11 @@ void chrDie(struct chrdata *chr, int aplayernum)
 		mpstatsRecordDeath(aplayernum, mpPlayerGetIndex(chr));
 		botinvDropAll(chr, chr->aibot->weaponnum);
 
-#if VERSION >= VERSION_NTSC_1_0
 		chr->aibot->hasbriefcase = false;
 		chr->aibot->hascase = false;
 		chr->aibot->unk04c_04 = false;
 		chr->aibot->unk04c_03 = false;
 		chr->aibot->hasuplink = false;
-#endif
 	}
 }
 
@@ -5259,11 +5213,7 @@ void chrGoPosConsiderRestart(struct chrdata *chr)
 			&& chr->liftaction != LIFTACTION_WAITINGONLIFT
 			&& chr->liftaction != LIFTACTION_WAITINGFORLIFT) {
 		if (chr->act_gopos.restartttl == 0) {
-#if PAL
-			int value = (chrGoPosCalculateBaseTtl(chr) * 100 + 15000) / 60;
-#else
 			int value = chrGoPosCalculateBaseTtl(chr) * 2 + 300;
-#endif
 
 			if (value > 0xffff) {
 				value = 0xffff;
@@ -5774,6 +5724,7 @@ void chrGoPosChooseAnimation(struct chrdata *chr)
 						startframe = 48;
 					}
 				} else if (gospeed == GOPOSFLAG_JOG) {
+
 					// Human, light weapon, jogging
 					if (chr->hitpart == HITPART_LFOOT
 							|| chr->hitpart == HITPART_LSHIN
@@ -5941,9 +5892,7 @@ bool chrGoToRoomPos(struct chrdata *chr, struct coord *pos, RoomNum *room, uint3
 		}
 
 		chrGoPosInitExpensive(chr);
-#if VERSION >= VERSION_NTSC_1_0
 		chr->goposforce = -1;
-#endif
 		chr->sleep = 0;
 		chr->liftaction = 0;
 		chr->act_gopos.flags &= ~(GOPOSFLAG_DUCK | GOPOSFLAG_CROUCH | GOPOSFLAG_WAITING);
@@ -6490,7 +6439,6 @@ bool chrIsReadyForOrders(struct chrdata *chr)
 	}
 
 	switch ((int) chr->actiontype) {
-#if VERSION >= VERSION_NTSC_1_0
 	case ACT_DIE:
 	case ACT_DEAD:
 	case ACT_PREARGH:
@@ -6503,17 +6451,6 @@ bool chrIsReadyForOrders(struct chrdata *chr)
 			return false;
 		}
 		break;
-#else
-	case ACT_DIE:
-	case ACT_DEAD:
-	case ACT_PREARGH:
-	case ACT_DRUGGEDDROP:
-	case ACT_DRUGGEDKO:
-	case ACT_DRUGGEDCOMINGUP:
-	case ACT_ARGH:
-	case 0x200:
-		return false;
-#endif
 	case ACT_ROBOTATTACK:
 		if (!chr->act_robotattack.finished) {
 			return false;
@@ -6852,13 +6789,11 @@ bool chrTryModifyAttack(struct chrdata *chr, uint32_t attackflags, int entityid)
 			&& (chr->act_attack.flags & (ATTACKFLAG_AIMONLY | ATTACKFLAG_DONTTURN))) {
 		chr->act_attack.flags = attackflags;
 		chr->act_attack.entityid = entityid;
-#ifndef PLATFORM_N64
 		// infinitely shooting guard fix from 1964GEPD
 		struct anim *anim = chr->model->anim;
 		if (anim && anim->framea == anim->frameb) {
 				anim->frameb++;
 		}
-#endif
 		func0f031254(chr);
 		return true;
 	}
@@ -6895,19 +6830,13 @@ bool chrGoToPad(struct chrdata *chr, int padnum, uint32_t goposflags)
 {
 	if (padnum >= 0
 			&& chrIsReadyForOrders(chr)
-#if VERSION >= VERSION_NTSC_1_0
 			&& (g_NumChrsSeenPlayerRecently2 <= 8
 				|| (chr->hidden & CHRHFLAG_BASICGUARD) == 0
 				|| (chr->flags & CHRFLAG0_ACTIVATEALARM))
-#else
-			&& g_NumChrsSeenPlayerRecently2 <= 9
-#endif
 				) {
 		padnum = chrResolvePadId(chr, padnum);
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (padnum >= 0)
-#endif
 		{
 			RoomNum rooms[2];
 			struct pad pad;
@@ -7017,13 +6946,9 @@ bool chrGoToPos(struct chrdata *chr, struct coord *pos, uint32_t goposflags)
 	RoomNum aboverooms[21];
 
 	if (chrIsReadyForOrders(chr)) {
-#if VERSION >= VERSION_NTSC_1_0
 		if (g_NumChrsSeenPlayerRecently2 < 9
 				|| (chr->hidden & CHRHFLAG_BASICGUARD) == 0
 				|| (chr->flags & CHRCFLAG_NEVERSLEEP))
-#else
-		if (g_NumChrsSeenPlayerRecently2 < 10)
-#endif
 		{
 			RoomNum *rooms = NULL;
 
@@ -7318,9 +7243,7 @@ bool chrTryStartAlarm(struct chrdata *chr, int pad_id)
 	if (CHRRACE(chr) == RACE_HUMAN && chrIsReadyForOrders(chr)) {
 		pad_id = chrResolvePadId(chr, pad_id);
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (pad_id >= 0)
-#endif
 		{
 			struct defaultobj *obj = objFindByPadNum(pad_id);
 
@@ -8518,11 +8441,7 @@ void chrUpdateFireslot(struct chrdata *chr, int handnum, bool withsound, bool wi
 
 			if (withsound) {
 				if (duration > 0) {
-#if VERSION >= VERSION_NTSC_1_0
 					if (chr->hidden2 & CHRH2FLAG_FIRESOUNDDONE)
-#else
-					if (chr->hidden & CHRHFLAG_FIRESOUNDDONE)
-#endif
 					{
 						playsound = false;
 					} else {
@@ -8538,19 +8457,10 @@ void chrUpdateFireslot(struct chrdata *chr, int handnum, bool withsound, bool wi
 			}
 
 			if (playsound) {
-#if VERSION >= VERSION_NTSC_1_0
 				psCreate(NULL, chr->prop, soundnum, -1, -1,
 						PSFLAG_0400, PSFLAG2_PRINTABLE, PSTYPE_CHRSHOOT, NULL, -1, NULL, -1, -1, -1, -1);
 				fireslot->endlvframe = (uint32_t)g_Vars.lvframe60 + duration;
 				chr->hidden2 |= CHRH2FLAG_FIRESOUNDDONE;
-#else
-				psCreate(NULL, chr->prop, soundnum, -1, -1,
-						PSFLAG_0400, PSFLAG2_PRINTABLE, PSTYPE_NONE, NULL, -1, NULL, -1, -1, -1, -1);
-				fireslot->endlvframe = (uint32_t)g_Vars.lvframe60 + duration;
-				chr->hidden |= CHRHFLAG_FIRESOUNDDONE;
-
-				if (chr);
-#endif
 			}
 
 			if (withbeam) {
@@ -8929,7 +8839,7 @@ bool func0f03e9f4(struct chrdata *chr, struct attackanimconfig *animcfg, bool fi
 						sp48.y = chrprop->pos.y;
 						sp48.z = chrprop->pos.z + sp178;
 
-						func0f02e3dc(&chrprop->pos, &sp48, &sp118, &sp54, &sp60);
+						rayIntersectLineXZ(&chrprop->pos, &sp48, &sp118, &sp54, &sp60);
 
 						sp178 = targetpos.x - sp60.x;
 						sp170 = targetpos.z - sp60.z;
@@ -8962,7 +8872,6 @@ bool func0f03e9f4(struct chrdata *chr, struct attackanimconfig *animcfg, bool fi
 					&& (flags & ATTACKFLAG_AIMATTARGET)
 					&& ((flags & (ATTACKFLAG_AIMONLY | ATTACKFLAG_DONTTURN)) == 0)
 					&& targetprop->type == PROPTYPE_PLAYER) {
-				if (1);
 				aimendsideback += chrGetAimLimitAngle(sqdist) * 0.5f * sinf((((int) (g_Vars.lvframe60 * chr->model->anim->playspeed) + chr->chrnum) % 60) * 0.10470308f);
 
 				if (aimendsideback < 0.0f) {
@@ -9436,11 +9345,7 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 					}
 				}
 
-				if (bestvolume);
-
-#if VERSION >= VERSION_NTSC_1_0
 				if (bestnode != NULL)
-#endif
 				{
 					Mtxf sp48;
 					struct modelrodata_bbox *rodata = &bestnode->rodata->bbox;
@@ -9568,8 +9473,6 @@ void chrCalculateTrajectory(struct coord *frompos, float arg1, struct coord *aim
 	arg3->y = sp30;
 	arg3->z = zvel / latvel * sp28;
 }
-
-const char var7f1a8ae4[] = "aimadjust=%d";
 
 /**
  * Fire the chr's gun, check what was hit and do all the appropriate things
@@ -9926,11 +9829,7 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 							projectileobj->timer240 = func->timer60;
 
 							if (projectileobj->timer240 != -1) {
-#if PAL
-								projectileobj->timer240 = projectileobj->timer240 * 200 / 60;
-#else
 								projectileobj->timer240 *= 4;
-#endif
 							}
 
 							bgunCreateXBowBolt(&projectileobj->base, &gunpos, gunrooms, &projectilemtx, &sp16c, &identmtx, chrprop, &gunpos);
@@ -9974,9 +9873,7 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 						if ((attackflags & ATTACKFLAG_AIMATTARGET)
 								&& targetprop->type == PROPTYPE_PLAYER
 								&& chrHasLosToAttackTarget(chr, &gunpos, gunrooms, false)
-#if VERSION >= VERSION_NTSC_1_0
 								&& chrCompareTeams(targetprop->chr, chr, COMPARE_ENEMIES)
-#endif
 								) {
 							// Solo chr shooting at a player
 							xdiff = targetprop->pos.x - gunpos.x - vector.x * 15.0f;
@@ -10192,11 +10089,7 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 
 void func0f041a74(struct chrdata *chr)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	chr->hidden2 &= ~CHRH2FLAG_FIRESOUNDDONE;
-#else
-	chr->hidden &= ~CHRHFLAG_FIRESOUNDDONE;
-#endif
 
 	if (chr->actiontype == ACT_ROBOTATTACK) {
 		if (chr->act_robotattack.firing[0]) {
@@ -11063,11 +10956,6 @@ bool chrDetectDangerousObject(struct chrdata *chr, uint8_t flags)
 	}
 
 	return false;
-}
-
-void chrTickBondDie(struct chrdata *chr)
-{
-	// empty
 }
 
 bool func0f043f2c(struct chrdata *chr, struct coord *runpos, uint32_t arg2, float *turnspeed)
@@ -12176,7 +12064,7 @@ void chrNavTickMain(struct chrdata *chr, struct coord *nextpos, struct waydata *
 			if ((chr->act_gopos.flags & GOPOSMASK_SPEED) == GOPOSFLAG_RUN) {
 				if (chr->act_gopos.turnspeed) {
 					if (!chr->unk32c_21) {
-						modelSetAnimSpeed(chr->model, 0.25f, 8);
+						modelSetAnimSpeed(chr->model, 0.5f, 8);
 					}
 				} else {
 					if (chr->unk32c_21) {
@@ -12869,11 +12757,9 @@ void chraTick(struct chrdata *chr)
 	chr->soundtimer += g_Vars.lvupdate60;
 	chr->talktimer += g_Vars.lvupdate60;
 
-#if VERSION < VERSION_PAL_BETA
 	if (chr->aibot) {
 		chr->aibot->unk030 += g_Vars.lvupdate60;
 	}
-#endif
 
 	if (chr->hidden & CHRHFLAG_TIMER_RUNNING) {
 		chr->timer60 += g_Vars.lvupdate60;
@@ -12972,7 +12858,7 @@ void chraTick(struct chrdata *chr)
 				case ACT_SURPRISED:       chrTickSurprised(chr);       break;
 				case ACT_STARTALARM:      chrTickStartAlarm(chr);      break;
 				case ACT_THROWGRENADE:    chrTickThrowGrenade(chr);    break;
-				case ACT_BONDDIE:         chrTickBondDie(chr);         break;
+				case ACT_BONDDIE:                                      break;
 				case ACT_DRUGGEDCOMINGUP: chrTickDruggedComingUp(chr); break;
 				case ACT_DRUGGEDDROP:     chrTickDruggedDrop(chr);     break;
 				case ACT_DRUGGEDKO:       chrTickDruggedKo(chr);       break;
@@ -15174,7 +15060,7 @@ float func0f04c784(struct chrdata *chr)
 	return result;
 }
 
-bool chr0f04c874(struct chrdata *chr, uint32_t angle360, struct coord *pos, uint8_t arg3, uint8_t arg4)
+bool chrTryOrbitTarget(struct chrdata *chr, uint32_t angle360, struct coord *pos, uint8_t arg3, uint8_t arg4)
 {
 	struct prop *target = chrGetTargetProp(chr);
 	float sqdist = 0;

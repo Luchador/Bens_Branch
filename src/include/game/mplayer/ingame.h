@@ -4,6 +4,7 @@
 #include "data.h"
 #include "types.h"
 
+char *mpPlayerGetWeaponOfChoiceName(unsigned int playernum, unsigned int slot);
 MenuItemHandlerResult mpStatsForPlayerDropdownHandler(int operation, struct menuitem *item, union handlerdata *data);
 char *mpMenuTextInGameLimit(struct menuitem *item);
 char *menutextPauseOrUnpause(int arg0);

@@ -6,7 +6,6 @@
 void menugfxCreateBlur(void);
 Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3);
 Gfx *menugfxRenderDialogBackground(Gfx *gdl, int x1, int y1, int x2, int y2, struct menudialog *dialog, uint32_t colour1, uint32_t colour2, float arg8);
-Gfx *menugfxRenderBgGreenHaze(Gfx *gdl, int x1, int y1, int x2, int y2);
 Gfx *menugfxDrawDropdownBackground(Gfx *gdl, int x1, int y1, int x2, int y2);
 Gfx *menugfxDrawListGroupHeader(Gfx *gdl, int x1, int y1, int x2, int y2, int x3, uint8_t alpha);
 Gfx *menugfxRenderGradient(Gfx *gdl, int x, int y, int width, int height, uint32_t colour1, uint32_t colour2, uint32_t colour3);

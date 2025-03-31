@@ -1,12 +1,8 @@
 #ifndef _IN_LIB_VI_H
 #define _IN_LIB_VI_H
-#include <ultra64.h>
-#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
-void viConfigureForLogos(void);
-void viConfigureForCopyright(uint16_t *fb);
 void viConfigureForLegal(void);
 void viReset(int stagenum);
 void viBlack(bool black);
@@ -16,13 +12,12 @@ void viShake(float intensity);
 void viSetMode(int mode);
 uint16_t *viGetBackBuffer(void);
 Vp *viGetCurrentPlayerViewport(void);
-Gfx *vi0000ab78(Gfx *gdl);
-Gfx *vi0000aca4(Gfx *gdl, float znear, float zfar);
-Gfx *vi0000ad5c(Gfx *gdl, Vp *vp);
-Gfx *vi0000af00(Gfx *gdl, Vp *vp);
-Gfx *vi0000b0e8(Gfx *gdl, float fovy, float aspect);
-Gfx *vi0000b1a8(Gfx *gdl);
-Gfx *vi0000b1d0(Gfx *gdl);
+Gfx *viSetupSkyProjection(Gfx *gdl);
+Gfx *viSetupProjectionWithZRange(Gfx *gdl, float znear, float zfar);
+Gfx *viSetupViewportAndPerspective(Gfx *gdl, Vp *vp);
+Gfx *viSetupFixedZPerspective(Gfx *gdl, Vp *vp);
+Gfx *viSetupWeaponProjection(Gfx *gdl, float fovy, float aspect);
+Gfx *viPrepareHudDraw(Gfx *gdl);
 Gfx *viPrepareZbuf(Gfx *gdl);
 Gfx *viFillBuffer(Gfx *gdl);
 Gfx *viRenderViewportEdges(Gfx *gdl);

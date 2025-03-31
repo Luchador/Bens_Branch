@@ -31,8 +31,6 @@ int g_ScissorX2 = 0;
 int g_ScissorY1 = 0;
 int g_ScissorY2 = 0;
 
-int var800711a0 = 0;
-int var800711a4 = 0;
 int g_LineHeight = LINEHEIGHT;
 
 int8_t g_KeyboardKeys[5][10] = {

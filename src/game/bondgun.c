@@ -3158,11 +3158,10 @@ uint32_t bgunCalculateGunMemCapacity(void)
 void bgunFreeGunMem(void)
 {
 	g_Vars.currentplayer->gunctrl.gunmemowner = GUNMEMOWNER_FREE;
-#ifndef PLATFORM_N64
+	
 	// gunmem is stale and so are the textures in it
 	// TODO: figure out how to purge only those textures
 	videoResetTextureCache();
-#endif
 }
 
 void bgunSetGunMemWeapon(int weaponnum)
@@ -6554,7 +6553,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			sp84.f[1] = (hand->posmtx.m[3][1] - hand->prevmtx.m[3][1]) / g_Vars.lvupdate60freal;
 			sp84.f[2] = (hand->posmtx.m[3][2] - hand->prevmtx.m[3][2]) / g_Vars.lvupdate60freal;
 
-			mtx00017588(hand->posmtx.m, sp44.m);
+			mtxFullInverse4x4(hand->posmtx.m, sp44.m);
 			mtx4RotateVecInPlace(&sp44, &sp84);
 
 			hand->unk0d20.f[0] += sp84.f[0] * 0.3f;
@@ -7670,19 +7669,19 @@ void bgunRender(Gfx **gdlptr)
 	}
 
 	gdl = viPrepareZbuf(gdl);
-	gdl = vi0000b1d0(gdl);
+	gdl = viPrepareHudDraw(gdl);
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 
-	gdl = vi0000aca4(gdl, 1.5, 1000);
+	gdl = viSetupProjectionWithZRange(gdl, 1.5, 1000);
 
 	if (g_Vars.currentplayer->teleportstate != TELEPORTSTATE_INACTIVE) {
 		float f2;
 
 		f2 = player0f0bd358();
 
-		gdl = vi0000b0e8(gdl, 60, f2);
+		gdl = viSetupWeaponProjection(gdl, 60, f2);
 	}
 
 	gdl = lasersightRenderBeam(gdl);
@@ -7863,7 +7862,7 @@ void bgunRender(Gfx **gdlptr)
 	casingsRender(&gdl);
 
 	gdl = zbufConfigureRdp(gdl);
-	gdl = vi0000b1d0(gdl);
+	gdl = viPrepareHudDraw(gdl);
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
@@ -9319,7 +9318,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		}
 
 		if (func) {
-			langGet(func->name);
+			langRemoveNewline(langGet(func->name));
 
 			colour = 0xff5555ff;
 
@@ -9328,7 +9327,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 				ctrl->curfnstr = func->name;
 			}
 
-			str = langGet(ctrl->curfnstr);
+			str = langRemoveNewline(langGet(ctrl->curfnstr));
 
 			struct player *player = g_Vars.currentplayer;
 			int weaponnum = player->gunctrl.weaponnum;
@@ -9366,7 +9365,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 				x = xpos - textwidth - 13;
 				//y = bottom - textheight + 3;
-				y = bottom - textheight;
+				y = bottom - textheight - 7;
 
 				if (ctrl->fnstrtimer > 192) {
 					alpha = 255 - (ctrl->fnstrtimer - 192) * 255 / 63U;

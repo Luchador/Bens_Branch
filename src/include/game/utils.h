@@ -4,11 +4,9 @@
 #include "types.h"
 
 uint64_t utilsGetCount(void);
-void func0f176d70(int arg0);
 uint32_t align4(uint32_t arg0);
 uint32_t align16(uint32_t arg0);
 uintptr_t align32(uintptr_t arg0);
-void utilsInit(void);
 void textureCalcScreenCoords(Gfx **gdl, float *arg1, float *arg2, int width, int height, bool arg5, bool arg6, bool arg7, bool arg8);
 bool normalizeVector(struct coord *arg0, struct coord *arg1, uint32_t line, char *file);
 void utilsNormalizeF(float *x, float *y, float *z);
