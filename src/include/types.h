@@ -5611,7 +5611,6 @@ struct mp3vars {
 struct rdptask {
 	OSScTask sctask;
 	uint16_t *framebuffer;
-	uint32_t unk5c;
 };
 
 struct warpparams {

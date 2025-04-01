@@ -825,7 +825,7 @@ void setupCreateAutogun(struct autogunobj *autogun, int cmdindex)
 {
 	setupCreateObject(&autogun->base, cmdindex);
 
-	autogun->maxspeed = *(int *)&autogun->maxspeed * PALUPF(M_TAU) / 65536.0f;
+	autogun->maxspeed = *(int *)&autogun->maxspeed * M_TAU / 65536.0f;
 	autogun->aimdist = *(int *)&autogun->aimdist * 100.0f / 65536.0f;
 	autogun->ymaxleft = *(int *)&autogun->ymaxleft * M_TAU / 65536.0f;
 	autogun->ymaxright = *(int *)&autogun->ymaxright * M_TAU / 65536.0f;
@@ -1113,9 +1113,9 @@ void setupCreateDoor(struct doorobj *door, int cmdindex)
 		// converting it to a float and writing it back to the same property.
 		door->maxfrac = *(int *) &door->maxfrac / 65536.0f;
 		door->perimfrac = *(int *) &door->perimfrac / 65536.0f;
-		door->accel = PALUPF(*(int *) &door->accel) / 65536000.0f;
-		door->decel = PALUPF(*(int *) &door->decel) / 65536000.0f;
-		door->maxspeed = PALUPF(*(int *) &door->maxspeed) / 65536.0f;
+		door->accel = *(int *) &door->accel / 65536000.0f;
+		door->decel = *(int *) &door->decel / 65536000.0f;
+		door->maxspeed = *(int *) &door->maxspeed / 65536.0f;
 
 		// The sibling door is stored as a relative command number,
 		// but at runtime it's a pointer.
@@ -1594,8 +1594,8 @@ void setupCreateProps(int stagenum)
 						struct prop *prop;
 						int i;
 
-						lift->accel = PALUPF(*(int *)&lift->accel) / 65536.0f;
-						lift->maxspeed = PALUPF(*(int *)&lift->maxspeed) / 65536.0f;
+						lift->accel = *(int *)&lift->accel / 65536.0f;
+						lift->maxspeed = *(int *)&lift->maxspeed / 65536.0f;
 						lift->dist = 0;
 						lift->speed = 0;
 						lift->levelcur = 0;
@@ -1681,8 +1681,8 @@ void setupCreateProps(int stagenum)
 						struct fanobj *fan = (struct fanobj *)obj;
 
 						fan->yrot = 0;
-						fan->ymaxspeed = PALUPF(*(int *)&fan->ymaxspeed) / 65536.0f;
-						fan->yaccel = PALUPF(*(int *)&fan->yaccel) / 65536.0f;
+						fan->ymaxspeed = *(int *)&fan->ymaxspeed / 65536.0f;
+						fan->yaccel = *(int *)&fan->yaccel / 65536.0f;
 
 						setupCreateObject(obj, index);
 					}

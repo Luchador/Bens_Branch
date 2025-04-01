@@ -14,6 +14,7 @@
 #include "lib/model.h"
 #include "data.h"
 #include "types.h"
+#include "game/debug.h"
 
 /**
  * -- Model Definitions --
@@ -3336,61 +3337,51 @@ void modelRenderNodeStarGunfire(struct modelrenderdata *renderdata, struct model
 		struct modelrodata_stargunfire *rodata = &node->rodata->stargunfire;
 		int i;
 
-		if (rodata->gdl) {
-			Vtx *src = (Vtx *) rodata->vertices;
-			Vtx *dst = g_ModelVtxAllocatorFunc(rodata->unk00 * 4);
-
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, dst);
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2]));
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
-
-			gDPSetFogColor(renderdata->gdl++, 0x00, 0x00, 0x00, 0x00);
-			gSPDisplayList(renderdata->gdl++, rodata->gdl);
-
-			for (i = 0; i < rodata->unk00; i++) {
-				uint16_t rand1 = (rngRandom() << 10) & 0xffff;
-				int s4 = ((coss(rand1) << 5) * 181) >> 18;
-				int s3 = ((sins(rand1) << 5) * 181) >> 18;
-				int s1 = rngRandom() >> 31;
-				int mult = 0x10000 - (rngRandom() & 0x3fff);
-				int corner1 = 0x200 + s3;
-				int corner2 = 0x200 - s3;
-				int corner3 = 0x200 - s4;
-				int corner4 = 0x200 + s4;
-
-				dst[0] = src[0];
-				dst[1] = src[1];
-				dst[2] = src[2];
-				dst[3] = src[3];
-
-				dst[0].s = corner3;
-				dst[0].t = corner2;
-				dst[0].x = (src[(s1 + 0) % 4].x * mult) >> 16;
-				dst[0].y = (src[(s1 + 0) % 4].y * mult) >> 16;
-				dst[0].z = (src[(s1 + 0) % 4].z * mult) >> 16;
-
-				dst[1].s = corner1;
-				dst[1].t = corner3;
-				dst[1].x = (src[(s1 + 1) % 4].x * mult) >> 16;
-				dst[1].y = (src[(s1 + 1) % 4].y * mult) >> 16;
-				dst[1].z = (src[(s1 + 1) % 4].z * mult) >> 16;
-
-				dst[2].s = corner4;
-				dst[2].t = corner1;
-				dst[2].x = (src[(s1 + 2) % 4].x * mult) >> 16;
-				dst[2].y = (src[(s1 + 2) % 4].y * mult) >> 16;
-				dst[2].z = (src[(s1 + 2) % 4].z * mult) >> 16;
-
-				dst[3].s = corner2;
-				dst[3].t = corner4;
-				dst[3].x = (src[(s1 + 3) % 4].x * mult) >> 16;
-				dst[3].y = (src[(s1 + 3) % 4].y * mult) >> 16;
-				dst[3].z = (src[(s1 + 3) % 4].z * mult) >> 16;
-
-				src += 4;
-				dst += 4;
-			}
+		if (!rodata->gdl)
+		{
+			return;
 		}
+
+		Vtx *src = (Vtx *) rodata->vertices;
+		Vtx *dst = g_ModelVtxAllocatorFunc(rodata->unk00 * 4);
+
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, dst);
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2]));
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
+
+		gDPSetFogColor(renderdata->gdl++, 0, 0, 0, 0);
+		gSPDisplayList(renderdata->gdl++, rodata->gdl);
+
+		for (i = 0; i < rodata->unk00; i++) 
+		{
+			float s4 = 724;
+			float s3 = 0;
+			int mult = 65535 - (rngRandom() & 16383);
+
+			int texRight = 512 + s3;
+			int texLeft = 512 - s3;
+			int texTop = 512 - s4;
+			int texBottom = 512 + s4;
+
+			for(int corner = 0; corner < 4; corner++)
+			{
+				dst[corner] = src[corner];
+				dst[corner].x = (src[corner].x * mult) / 65536;
+				dst[corner].y = (src[corner].y * mult) / 65536;
+				dst[corner].z = (src[corner].z * mult) / 65536;
+
+				switch (corner) {
+					case 0: dst[corner].s = texTop;     dst[corner].t = texLeft;   break;
+					case 1: dst[corner].s = texRight;   dst[corner].t = texTop;    break;
+					case 2: dst[corner].s = texBottom;  dst[corner].t = texRight; break;
+					case 3: dst[corner].s = texLeft;    dst[corner].t = texBottom;;  break;
+				}
+			}
+
+			src += 4;
+			dst += 4;
+		}
+		
 	}
 }
 
@@ -3520,9 +3511,9 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 
 			tconfig = rodata->texture;
 
-			sp62 = (rngRandom() * 1024) & 0xffff;
-			sp5c = (coss(sp62) * tconfig->width * 0xb5) >> 18;
-			sp58 = (sins(sp62) * tconfig->width * 0xb5) >> 18;
+			sp62 = (rngRandom() * 1024) & 65535;
+			sp5c = ((int)(cosf(RANDOMFRAC()) * 32768.0f) * tconfig->width * 181) / 262144;
+			sp58 = ((int)(sinf(RANDOMFRAC()) * 32768.0f) * tconfig->width * 181) / 262144;
 
 			centre = tconfig->width << 4;
 

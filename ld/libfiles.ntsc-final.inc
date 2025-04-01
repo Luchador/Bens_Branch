@@ -96,13 +96,10 @@
 	build/ROMID/lib/naudio/n_synsetpriority.o (section); \
 	build/ROMID/lib/naudio/n_load.o (section); \
 	build/ROMID/lib/naudio/n_resample2.o (section); \
-	build/ROMID/lib/mp3/lib_45ed0.o (section); \
 	build/ROMID/lib/mp3/util.o (section); \
 	build/ROMID/lib/mp3/lib_46650.o (section); \
 	build/ROMID/lib/mp3/lib_47550.o (section); \
 	build/ROMID/lib/naudio/n_resample.o (section); \
-	build/ROMID/lib/mp3/lib_47d20.o (section); \
-	build/ROMID/lib/mp3/lib_47ef0.o (section); \
 	build/ROMID/lib/ultra/os/writebackdcacheall.o (section); \
 	build/ROMID/lib/ultra/os/invalicache.o (section); \
 	build/ROMID/lib/ultra/os/getfpccsr.o (section); \
@@ -186,8 +183,6 @@
 	build/ROMID/lib/ultra/io/contquery.o (section); \
 	build/ROMID/lib/ultra/io/contreaddata.o (section); \
 	build/ROMID/lib/ultra/io/motor.o (section); \
-	build/ROMID/lib/ultra/gu/coss.o (section); \
-	build/ROMID/lib/ultra/gu/sins.o (section); \
 	build/ROMID/lib/ultra/io/conteepprobe.o (section); \
 	build/ROMID/lib/ultra/io/conteepread.o (section); \
 	build/ROMID/lib/ultra/io/conteeplongread.o (section); \

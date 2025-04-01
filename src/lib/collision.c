@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
 #include "game/prop.h"
@@ -56,7 +57,7 @@ float cd00024e40(void)
 	return var8009a8f0;
 }
 
-void cdGetEdge(struct coord *vtx1, struct coord *vtx2, int32_t line, char *file)
+void cdGetEdge(struct coord *vtx1, struct coord *vtx2)
 {
 	vtx1->x = g_CdEdgeVtx1.x;
 	vtx1->y = g_CdEdgeVtx1.y;
@@ -82,7 +83,7 @@ struct prop *cdGetObstacleProp(void)
 	return g_CdObstacleProp;
 }
 
-void cdGetPos(struct coord *pos, int32_t line, char *file)
+void cdGetPos(struct coord *pos)
 {
 	pos->x = g_CdObstaclePos.x;
 	pos->y = g_CdObstaclePos.y;

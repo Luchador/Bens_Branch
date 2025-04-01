@@ -96,8 +96,6 @@
 		(p[2] - g_Vars.currentplayer->eraserpos.f[2]) * (p[2] - g_Vars.currentplayer->eraserpos.f[2]))
 
 #define TICKS(val)    (val)
-#define PALUP(val)    (val)
-#define PALUPF(val)   (val)
 #define FRAMEDURATION (1 / 60.0f)
 
 // Macro to convert an ASCII character to N64 font code.

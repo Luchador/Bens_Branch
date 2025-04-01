@@ -125,11 +125,11 @@ bool explosionCreateComplex(struct prop *prop, struct coord *pos, RoomNum *rooms
 float explosionGetHorizontalRangeAtFrame(struct explosion *exp, int frame)
 {
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
-	float changerate = PALUPF(type->changerateh);
+	float changerate = type->changerateh;
 	float result;
 
 	if (exp->type == EXPLOSIONTYPE_GASBARREL && frame > TICKS(32)) {
-		result = frame * PALUPF(3.0f) + 40.0f;
+		result = frame * 3.0f + 40.0f;
 
 		if (result > 300) {
 			result = 300;
@@ -144,7 +144,7 @@ float explosionGetHorizontalRangeAtFrame(struct explosion *exp, int frame)
 float explosionGetVerticalRangeAtFrame(struct explosion *exp, int frame)
 {
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
-	float changerate = PALUPF(type->changeratev);
+	float changerate = type->changeratev;
 	float result;
 
 	if (exp->type == EXPLOSIONTYPE_GASBARREL && frame > TICKS(32)) {

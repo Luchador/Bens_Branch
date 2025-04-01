@@ -62,9 +62,9 @@ void mtxLoadRandomRotation(Mtxf *mtx)
 {
 	struct coord coord = {0, 0, 0};
 
-	coord.x = RANDOMFRAC() * PALUPF(M_TAU) * 0.0078125f - PALUPF(0.024539785459638f);
-	coord.y = RANDOMFRAC() * PALUPF(M_TAU) * 0.0078125f - PALUPF(0.024539785459638f);
-	coord.z = RANDOMFRAC() * PALUPF(M_TAU) * 0.0078125f - PALUPF(0.024539785459638f);
+	coord.x = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
+	coord.y = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
+	coord.z = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
 
 	mtx4LoadRotation(&coord, mtx);
 }

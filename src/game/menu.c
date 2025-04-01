@@ -1832,25 +1832,25 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 			if (menumodel->curposx != menumodel->newposx) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curposx = (menumodel->newposx * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposx);
+					menumodel->curposx = (menumodel->newposx * 0.002f) + ((1.0f - 0.002f) * menumodel->curposx);
 				}
 			}
 
 			if (menumodel->curposy != menumodel->newposy) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curposy = (menumodel->newposy * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposy);
+					menumodel->curposy = (menumodel->newposy * 0.002f) + ((1.0f - 0.002f) * menumodel->curposy);
 				}
 			}
 
 			if (menumodel->curposz != menumodel->newposz) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curposz = (menumodel->newposz * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposz);
+					menumodel->curposz = (menumodel->newposz * 0.002f) + ((1.0f - 0.002f) * menumodel->curposz);
 				}
 			}
 
 			if (menumodel->curscale != menumodel->newscale) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curscale = (menumodel->newscale * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curscale);
+					menumodel->curscale = (menumodel->newscale * 0.002f) + ((1.0f - 0.002f) * menumodel->curscale);
 				}
 			}
 
@@ -2074,10 +2074,10 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		// Set new animation if requested
 		if (menumodel->newanimnum && menumodel->curanimnum != menumodel->newanimnum) {
 			if (menumodel->reverseanim) {
-				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, PALUPF(-0.5f), 0.0f);
+				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, -0.5f, 0.0f);
 				modelSetAnimFrame(&menumodel->bodymodel, modelGetNumAnimFrames(&menumodel->bodymodel));
 			} else {
-				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, PALUPF(0.5f), 0.0f);
+				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, 0.5f, 0.0f);
 			}
 
 			menumodel->curanimnum = menumodel->newanimnum;

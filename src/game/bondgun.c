@@ -2827,7 +2827,7 @@ void bgunTickHand(int handnum)
 	lvupdate = g_Vars.lvupdate60;
 
 	hand->animframeinc = g_Vars.lvupdate60;
-	hand->animframeincfreal += PALUPF(g_Vars.lvupdate60);
+	hand->animframeincfreal += g_Vars.lvupdate60;
 
 	while (i >= 0) {
 		lvupdate = bgunTickInc(&info, handnum, lvupdate);
@@ -6530,7 +6530,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			hand->unk0d20.f[0] = -((RANDOMFRAC() - 0.5f) * 0.5333333f * 0.0625f + mult * 0.5333333f);
 			hand->unk0d20.f[1] = RANDOMFRAC() * 2.5f * 0.125f + 2.5f;
 			hand->unk0d20.f[2] = -(RANDOMFRAC() + 1.0f);
-			spd0.f[0] = (RANDOMFRAC() + 3.0f) * PALUPF(M_TAU) / 208.0f;
+			spd0.f[0] = (RANDOMFRAC() + 3.0f) * M_TAU / 208.0f;
 			spd0.f[1] = RANDOMFRAC() * 2.0f * M_TAU / 544.0f - 0.0115481345f;
 			spd0.f[2] = RANDOMFRAC() * 2.0f * M_TAU / 544.0f - 0.0115481345f;
 			break;
@@ -6538,7 +6538,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			hand->unk0d20.f[0] = 0.0f;
 			hand->unk0d20.f[1] = RANDOMFRAC() * 2.5f * 0.125f + 2.5f;
 			hand->unk0d20.f[2] = (RANDOMFRAC() + 1.0f) * 0.25f;
-			spd0.f[0] = (RANDOMFRAC() + 3.0f) * PALUPF(M_TAU) / 368.0f;
+			spd0.f[0] = (RANDOMFRAC() + 3.0f) * M_TAU / 368.0f;
 			spd0.f[1] = RANDOMFRAC() * 2.0f * M_TAU / 944.0f - 0.006654857f;
 			spd0.f[2] = RANDOMFRAC() * 2.0f * M_TAU / 944.0f - 0.006654857f;
 			break;
@@ -7821,7 +7821,7 @@ void bgunRender(Gfx **gdlptr)
 					for (j = 0; j < rodata->numvertices; j++) {
 						int k;
 
-						(rodata->vertices + j)->t -= g_Vars.lvupdate240 * PALUP(25);
+						(rodata->vertices + j)->t -= g_Vars.lvupdate240 * 25;
 
 						if ((rodata->vertices + j)->t < -0x6000) {
 							for (k = 0; k < rodata->numvertices; k++) {
@@ -9028,7 +9028,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 						if (fadeamount >= TICKS(64)) {
 							// Unit is transitioning to filled
 							weight = (fadeamount * 4 - TICKS(252)) / 3;
-							weight = PALUP(weight);
+							weight = weight;
 
 							if (weight > 255) {
 								weight = 255;
@@ -9038,7 +9038,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 						} else {
 							// Unit is bright and has not started transitioning to filled yet
 							weight = fadeamount * 4;
-							weight = PALUP(weight);
+							weight = weight;
 							colour = colourBlend(0xffffffbf, emptycolour, weight);
 						}
 
@@ -9051,7 +9051,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 					int fadeamount = abmag->timer60 - (i - numunits + (int) ref) * TICKS(64);
 
 					if (fadeamount >= 0) {
-						weight = PALUP(fadeamount);
+						weight = fadeamount;
 
 						if (weight > 255) {
 							colour = emptycolour;
@@ -9217,7 +9217,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 	fncolour = 0xff000040;
 	funcnum = hand->gset.weaponfunc;
-	fnfaderinc = PALUP(g_Vars.lvupdate240 * 2);
+	fnfaderinc = g_Vars.lvupdate240 * 2;
 
 	bgunGetWeaponInfo(&info, HAND_RIGHT);
 	tmpfuncnum = bgunIsUsingSecondaryFunction();

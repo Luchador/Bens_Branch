@@ -15,7 +15,6 @@ Gfx *sightDrawAimer(Gfx *gdl, int x, int y, int radius, int cornergap, uint32_t 
 Gfx *sightDrawDelayedAimer(Gfx *gdl, int x, int y, int radius, int cornergap, uint32_t colour);
 Gfx *sightDrawDefault(Gfx *gdl, bool sighton, float crossx, float crossy);
 Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy);
-Gfx *sightDrawType2(Gfx *gdl, bool sighton, float crossx, float crossy);
 Gfx *sightDrawSkedarTriangle(Gfx *gdl, int x, int y, int dir, uint32_t colour);
 Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, float crossx, float crossy);
 Gfx *sightDrawZoom(Gfx *gdl, bool sighton, float crossx, float crossy);

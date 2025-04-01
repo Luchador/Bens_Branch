@@ -1990,7 +1990,7 @@ void propsTickPlayer(bool islastplayer)
 				prop->propupdate60err = g_Vars.lvupdate60 & 3;
 				g_Vars.lvupdate60 >>= 2;
 				g_Vars.lvupdate60f = g_Vars.lvupdate240 / 4.0f;
-				g_Vars.lvupdate60freal = PALUPF(g_Vars.lvupdate60f);
+				g_Vars.lvupdate60freal = g_Vars.lvupdate60f;
 			} else {
 				g_Vars.lvupdate240 = savedlvupdate240;
 				g_Vars.lvupdate60 = savedlvupdate60;
@@ -2054,12 +2054,12 @@ void propsTickPlayer(bool islastplayer)
 					prop->propupdate60err = g_Vars.lvupdate60 & 3;
 					g_Vars.lvupdate60 >>= 2;
 					g_Vars.lvupdate60f = g_Vars.lvupdate240 / 4.0f;
-					g_Vars.lvupdate60freal = PALUPF(g_Vars.lvupdate60f);
+					g_Vars.lvupdate60freal = g_Vars.lvupdate60f;
 				} else {
 					g_Vars.lvupdate240 = savedslotupdate240;
 					g_Vars.lvupdate60 = savedslotupdate240_60;
 					g_Vars.lvupdate60f = savedslotupdate240f;
-					vars->lvupdate60freal = PALUPF(savedslotupdate240f);
+					vars->lvupdate60freal = savedslotupdate240f;
 				}
 
 				// Tick the prop
@@ -2102,7 +2102,7 @@ void propsTickPlayer(bool islastplayer)
 					g_Vars.lvupdate240 = savedslotupdate240;
 					g_Vars.lvupdate60 = savedslotupdate240_60;
 					g_Vars.lvupdate60f = savedslotupdate240f;
-					vars->lvupdate60freal = PALUPF(savedslotupdate240f);
+					vars->lvupdate60freal = savedslotupdate240f;
 				}
 
 				prop->lastupdateframe = g_Vars.updateframe;

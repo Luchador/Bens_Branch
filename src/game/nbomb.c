@@ -504,20 +504,23 @@ void nbombsTick(void)
 
 Gfx *nbombsRender(Gfx *gdl)
 {
-	int i;
-	Gfx *subgdl = NULL;
+	if (g_NbombsActive) 
+	{
+		int i;
+		Gfx *subgdl = NULL;
 
-	for (i = 0; i < ARRAYCOUNT(g_Nbombs); i++) {
-		if (g_Nbombs[i].age240 >= 0) {
-			if (!subgdl) {
-				subgdl = nbombCreateGdl();
+		for (i = 0; i < ARRAYCOUNT(g_Nbombs); i++) {
+			if (g_Nbombs[i].age240 >= 0) {
+				if (!subgdl) {
+					subgdl = nbombCreateGdl();
+				}
+
+				gdl = nbombRender(gdl, &g_Nbombs[i], subgdl);
 			}
-
-			gdl = nbombRender(gdl, &g_Nbombs[i], subgdl);
 		}
-	}
 
-	return gdl;
+		return gdl;
+	}
 }
 
 void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)

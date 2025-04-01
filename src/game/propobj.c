@@ -2579,19 +2579,8 @@ bool func0f06b488(struct prop *prop, struct coord *arg1, struct coord *arg2, str
 	struct coord sp20;
 
 	if (!cd0002ded8(arg1, arg2, prop)) {
-#if VERSION >= VERSION_PAL_FINAL
-		cdGetEdge(&sp3c, &sp30, 2910, "prop/propobj.c");
-		cdGetPos(&sp20, 2911, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-		cdGetEdge(&sp3c, &sp30, 2910, "propobj.c");
-		cdGetPos(&sp20, 2911, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-		cdGetEdge(&sp3c, &sp30, 2909, "propobj.c");
-		cdGetPos(&sp20, 2910, "propobj.c");
-#else
-		cdGetEdge(&sp3c, &sp30, 2898, "propobj.c");
-		cdGetPos(&sp20, 2899, "propobj.c");
-#endif
+		cdGetEdge(&sp3c, &sp30);
+		cdGetPos(&sp20);
 
 		f0 = (sp20.f[0] - arg1->f[0]) * arg3->f[0]
 			+ (sp20.f[1] - arg1->f[1]) * arg3->f[1]
@@ -3268,15 +3257,7 @@ int func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 
 				if (cdExamLos09(&prop->pos, spa0, &sp1c4, CDTYPE_BG) == CDRESULT_COLLISION) {
 					s0 = true;
-#if VERSION >= VERSION_PAL_FINAL
-					cdGetPos(&hitthing.pos, 4258, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-					cdGetPos(&hitthing.pos, 4258, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-					cdGetPos(&hitthing.pos, 4257, "propobj.c");
-#else
-					cdGetPos(&hitthing.pos, 4246, "propobj.c");
-#endif
+					cdGetPos(&hitthing.pos);
 					cdGetObstacleNormal(&hitthing.unk0c);
 				}
 			}
@@ -3385,15 +3366,7 @@ bool func0f06d37c(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 			}
 
 			if (!result) {
-#if VERSION >= VERSION_PAL_FINAL
-				cdGetEdge(&sp64, &sp58, 4386, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-				cdGetEdge(&sp64, &sp58, 4386, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-				cdGetEdge(&sp64, &sp58, 4385, "propobj.c");
-#else
-				cdGetEdge(&sp64, &sp58, 4374, "propobj.c");
-#endif
+				cdGetEdge(&sp64, &sp58);
 
 				arg3->x = sp58.z - sp64.z;
 				arg3->y = 0.0f;
@@ -4763,7 +4736,7 @@ int glassCalculateOpacity(struct coord *pos, float opadist, float maxopacity, fl
 struct prop *g_Lifts[10] = {NULL};
 
 #define BOB(minamount, randamount, accel, maxspeed) \
-	minamount, randamount, PALUPF(accel), PALUPF(maxspeed)
+	minamount, randamount, accel, maxspeed
 
 struct hovtype g_HovTypes[] = {
 	/* HOVTYPE_BED   */ { 90,  BOB(1, 2, 0.0010, 1.0), BOB(0.0062821852043271, 0.0062821852043271, 0.000010470308552613, 0.00031410926021636), BOB(0.0062821852043271, 0.0062821852043271, 0.000010470308552613, 0.00031410926021636) },
@@ -5287,8 +5260,8 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 				f12 *= 1.0f + (f2 - 10.0f) * 0.2f;
 			}
 
-			if (f12 > PALUPF(0.5f)) {
-				f12 = PALUPF(0.5f);
+			if (f12 > 0.5f) {
+				f12 = 0.5f;
 			}
 
 			f0 *= f12;
@@ -5625,15 +5598,7 @@ float objCollide(struct defaultobj *movingobj, struct coord *movingvel, float ro
 
 				objApplyMomentum(obstacleobj, &obstaclevel, 0.0f, true, true);
 
-#if VERSION >= VERSION_PAL_FINAL
-				cdGetEdge(&sp70, &sp64, 7356, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-				cdGetEdge(&sp70, &sp64, 7356, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-				cdGetEdge(&sp70, &sp64, 7355, "propobj.c");
-#else
-				cdGetEdge(&sp70, &sp64, 7308, "propobj.c");
-#endif
+				cdGetEdge(&sp70, &sp64);
 
 				if (cdGetSavedPos(&sp58, &sp4c)) {
 					sp4c.x -= sp58.x;
@@ -5778,18 +5743,18 @@ void hoverbikeUpdateMovement(struct hoverbikeobj *bike, float speedforwards, flo
 	sp68 += speedsideways * 0.2512874007225f;
 
 	for (i = 0; i < g_Vars.lvupdate60; i++) {
-		bike->speedabs[1] *= PAL ? 0.964f : 0.97f;
-		bike->speedabs[0] *= PAL ? 0.964f : 0.97f;
-		bike->speedabs[1] += bike->rels[1] * cosangle * PALUPF(1.08f);
-		bike->speedabs[0] += bike->rels[1] * sinangle * PALUPF(1.08f);
-		bike->speedabs[1] += bike->rels[0] * sinangle * PALUPF(0.72f);
-		bike->speedabs[0] += -bike->rels[0] * cosangle * PALUPF(0.72f);
+		bike->speedabs[1] *= 0.97f;
+		bike->speedabs[0] *= 0.97f;
+		bike->speedabs[1] += bike->rels[1] * cosangle * 1.08f;
+		bike->speedabs[0] += bike->rels[1] * sinangle * 1.08f;
+		bike->speedabs[1] += bike->rels[0] * sinangle * 0.72f;
+		bike->speedabs[0] += -bike->rels[0] * cosangle * 0.72f;
 	}
 
 	for (i = 0; i < g_Vars.lvupdate60; i++) {
-		bike->exreal += (sp70 - bike->exreal) * (PAL ? 0.0478f : 0.04f);
-		bike->ezreal += (sp6c - bike->ezreal) * (PAL ? 0.177f : 0.15f);
-		bike->ezreal2 += (sp68 - bike->ezreal2) * (PAL ? 0.0478f : 0.04f);
+		bike->exreal += (sp70 - bike->exreal) * 0.04f;
+		bike->ezreal += (sp6c - bike->ezreal) * 0.15f;
+		bike->ezreal2 += (sp68 - bike->ezreal2) * 0.04f;
 	}
 
 	if (speedforwards >= 0.99f) {
@@ -6350,7 +6315,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 							sp3c4.y -= sp3d0.y;
 							sp3c4.z -= sp3d0.z;
 						} else {
-							cdGetEdge(&sp3d0, &sp3c4, 8339, "propobj.c");
+							cdGetEdge(&sp3d0, &sp3c4);
 
 							sp3d0.x -= sp3c4.x;
 							sp3d0.y -= sp3c4.y;
@@ -6384,7 +6349,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 
 						projectile->unk0dc += f0;
 
-						cdGetEdge(&sp3e8, &sp3dc, 8377, "propobj.c");
+						cdGetEdge(&sp3e8, &sp3dc);
 
 						sp3f4.x = sp3dc.z - sp3e8.z;
 						sp3f4.y = 0.0f;
@@ -7324,8 +7289,8 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 					stop = false;
 
 					for (i = 0; i < g_Vars.lvupdate60; i++) {
-						sp5dc.x += PALUPF(projectile->speed.x);
-						sp5dc.z += PALUPF(projectile->speed.z);
+						sp5dc.x += projectile->speed.x;
+						sp5dc.z += projectile->speed.z;
 
 						if (projectile->unk060 >= 1.0f) {
 							if (projectile->unk098 > 0.0f) {
@@ -8313,8 +8278,8 @@ void autogunTick(struct prop *prop)
 			autogun->yzero = RANDOMFRAC() * M_TAU;
 		}
 
-		applyRotation(&autogun->yrot, autogun->yzero, &autogun->yspeed, PALUPF(0.00001163367596746f), PALUPF(0.00001163367596746f), PALUPF(0.00069802056532353f));
-		applyRotation(&autogun->xrot, autogun->xzero, &autogun->xspeed, PALUPF(0.0000058168379837298f), PALUPF(0.0000058168379837298f), PALUPF(0.00034901028266177f));
+		applyRotation(&autogun->yrot, autogun->yzero, &autogun->yspeed, 0.00001163367596746f, 0.00001163367596746f, 0.00069802056532353f);
+		applyRotation(&autogun->xrot, autogun->xzero, &autogun->xspeed, 0.0000058168379837298f, 0.0000058168379837298f, 0.00034901028266177f);
 		return;
 	}
 
@@ -8330,8 +8295,8 @@ void autogunTick(struct prop *prop)
 			autogun->yzero = RANDOMFRAC() * M_TAU;
 		}
 
-		applyRotation(&autogun->yrot, autogun->yzero, &autogun->yspeed, PALUPF(0.00001163367596746f), PALUPF(0.00001163367596746f), PALUPF(0.00069802056532353f));
-		applyRotation(&autogun->xrot, autogun->xzero, &autogun->xspeed, PALUPF(0.0000058168379837298f), PALUPF(0.0000058168379837298f), PALUPF(0.00034901028266177f));
+		applyRotation(&autogun->yrot, autogun->yzero, &autogun->yspeed, 0.00001163367596746f, 0.00001163367596746f, 0.00069802056532353f);
+		applyRotation(&autogun->xrot, autogun->xzero, &autogun->xspeed, 0.0000058168379837298f, 0.0000058168379837298f, 0.00034901028266177f);
 
 		maxspeed = cosf(autogun->yrot);
 
@@ -8603,7 +8568,7 @@ void autogunTick(struct prop *prop)
 
 	// The turret swivels left and right while firing
 	if (autogun->firing) {
-		goalyrot += limitangle * 0.8f * sinf((g_Vars.lvframe60 % TICKS(120)) * PALUPF(0.05235154f));
+		goalyrot += limitangle * 0.8f * sinf((g_Vars.lvframe60 % TICKS(120)) * 0.05235154f);
 
 		if (goalyrot < 0.0f) {
 			goalyrot += M_TAU;
@@ -8636,8 +8601,8 @@ void autogunTick(struct prop *prop)
 		goalyrot -= M_TAU;
 	}
 
-	applyRotation(&autogun->yrot, goalyrot, &autogun->yspeed, PALUPF(0.00087252567755058f), PALUPF(0.00087252567755058f), autogun->maxspeed);
-	applyRotation(&autogun->xrot, goalxrot, &autogun->xspeed, PALUPF(0.00087252567755058f), PALUPF(0.00087252567755058f), autogun->maxspeed);
+	applyRotation(&autogun->yrot, goalyrot, &autogun->yspeed, 0.00087252567755058f, 0.00087252567755058f, autogun->maxspeed);
+	applyRotation(&autogun->xrot, goalxrot, &autogun->xspeed, 0.00087252567755058f, 0.00087252567755058f, autogun->maxspeed);
 
 	f12 = goalyrot - autogun->yrot;
 
@@ -8906,7 +8871,7 @@ void autogunTickShoot(struct prop *autogunprop)
 						|| (targetprop && (targetprop->type == PROPTYPE_CHR))
 						|| (g_Vars.antiplayernum >= 0 && targetprop && targetprop == g_Vars.anti->prop)) {
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos, CDTYPE_ALL, GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-						cdGetPos(&hitpos, 11458, "propobj.c");
+						cdGetPos(&hitpos);
 
 						hitprop = cdGetObstacleProp();
 
@@ -8955,7 +8920,7 @@ void autogunTickShoot(struct prop *autogunprop)
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos,
 								CDTYPE_ALL & ~CDTYPE_PLAYERS,
 								GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-						cdGetPos(&hitpos, 11513, "propobj.c");
+						cdGetPos(&hitpos);
 
 						hitprop = cdGetObstacleProp();
 						missed = true;
@@ -8985,7 +8950,7 @@ void autogunTickShoot(struct prop *autogunprop)
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos,
 								CDTYPE_DOORS | CDTYPE_BG,
 								GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-						cdGetPos(&hitpos, 11539, "propobj.c");
+						cdGetPos(&hitpos);
 
 						missed = true;
 					}
@@ -9787,12 +9752,12 @@ void chopperTickFall(struct prop *chopperprop)
 	} else {
 		// Area 51 interceptors do collision checks
 		// and explode once they hit the ground.
-		float mult = 1.0f - PALUPF(0.02f);
+		float mult = 1.0f - 0.02f;
 		float bob;
 		int i;
 
 		for (i = 1; i < g_Vars.lvupdate60; i++) {
-			mult *= 1.0f - PALUPF(0.02f);
+			mult *= 1.0f - 0.02f;
 		}
 
 		bob = chopper->bob + 0.052358999848366f;
@@ -9828,7 +9793,7 @@ void chopperTickFall(struct prop *chopperprop)
 			ground = cdFindGroundAtCyl(&chopperprop->pos, 5, chopperprop->rooms, NULL, NULL);
 			chopperprop->pos.y -= 100;
 
-			cdGetPos(&sp64, 12449, "propobj.c");
+			cdGetPos(&sp64);
 
 			newpos.x = sp64.x;
 			newpos.y = ground + 20;
@@ -10103,8 +10068,8 @@ void chopperTickCombat(struct prop *chopperprop)
 	}
 }
 
-#define HOVVALUE1() ((ishoverbot ? 15.0f : 5.0f) * PALUPF(0.00021813141938765f))
-#define HOVVALUE2() ((ishoverbot ? 15.0f : 5.0f) * PALUPF(0.013087885454297f))
+#define HOVVALUE1() ((ishoverbot ? 15.0f : 5.0f) * 0.00021813141938765f)
+#define HOVVALUE2() ((ishoverbot ? 15.0f : 5.0f) * 0.013087885454297f)
 
 void hovercarTick(struct prop *prop)
 {
@@ -13146,9 +13111,9 @@ bool objDrop(struct prop *prop, bool lazy)
 				projectile->speed.y = -RANDOMFRAC() * 0.83333331346512f;
 				projectile->speed.z = cosf(angle) * 1.6666666269302f;
 
-				rot.x = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
-				rot.y = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
-				rot.z = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
+				rot.x = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
+				rot.y = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
+				rot.z = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 
 				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
 			} else if (projectile->droptype == DROPTYPE_THROWGRENADE && parent->type == PROPTYPE_CHR) {
@@ -13171,9 +13136,9 @@ bool objDrop(struct prop *prop, bool lazy)
 				projectile->speed.y = (((dist >= 1200) * ((dist - 1200) / 1200)) + 1) * 6.6666665077209f;
 				projectile->speed.z = cosf(angle) * 13.333333015442f * (dist / 1000);
 
-				rot.x = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
-				rot.y = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
-				rot.z = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
+				rot.x = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
+				rot.y = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
+				rot.z = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 
 				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
 				projectileSetSticky(prop);
@@ -13188,9 +13153,9 @@ bool objDrop(struct prop *prop, bool lazy)
 				projectile->speed.y = RANDOMFRAC() * 3.3333332538605f;
 				projectile->speed.z = (RANDOMFRAC() * 3.3333332538605f + 3.3333332538605f) * cosf(angle);
 
-				rot.x = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
-				rot.y = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
-				rot.z = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
+				rot.x = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
+				rot.y = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
+				rot.z = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 
 				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
 			} else if (projectile->droptype == DROPTYPE_OWNERREAP) {
@@ -13200,9 +13165,9 @@ bool objDrop(struct prop *prop, bool lazy)
 				projectile->speed.y = 0.0f;
 				projectile->speed.z = (0.5f - RANDOMFRAC()) * 1.6666666269302f;
 
-				rot.x = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
-				rot.y = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
-				rot.z = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
+				rot.x = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
+				rot.y = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
+				rot.z = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 
 				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
 			} else {
@@ -16524,7 +16489,7 @@ struct autogunobj *laptopDeploy(int modelnum, struct gset *gset, struct chrdata 
 			laptop->xrot = 0;
 			laptop->ymaxleft = 12.56f;
 			laptop->ymaxright = -12.56f;
-			laptop->maxspeed = PALUPF(0.0697f);
+			laptop->maxspeed = 0.0697f;
 
 			prop->forcetick = true;
 
@@ -19171,7 +19136,7 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 						CDTYPE_OBJS | CDTYPE_DOORS | CDTYPE_CHRS | CDTYPE_PATHBLOCKER| CDTYPE_BG,
 						GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
 				blocked = true;
-				cdGetPos(&endpos, 24482, "propobj.c");
+				cdGetPos(&endpos);
 				obstacle = cdGetObstacleProp();
 			}
 

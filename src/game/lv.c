@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdio.h>
 #include "constants.h"
 #include "bss.h"
@@ -1141,11 +1142,7 @@ Gfx *lvRender(Gfx *gdl)
 				gdl = shardsRender(gdl);
 				gdl = sparksRender(gdl);
 				gdl = weatherRender(gdl);
-
-				if (g_NbombsActive) {
-					gdl = nbombsRender(gdl);
-				}
-
+				gdl = nbombsRender(gdl);
 				gdl = playerRenderHud(gdl);
 
 				static struct sndstate *g_CutsceneStaticAudioHandle = NULL;
@@ -1190,7 +1187,7 @@ Gfx *lvRender(Gfx *gdl)
 									sndStart(var80095200, SFX_INFIL_STATIC_MEDIUM, NULL, -1, -1, -1, -1, -1);
 								}
 
-								cutscenestatic = 225 - g_CutsceneStaticTimer * PALUP(10);
+								cutscenestatic = 225 - g_CutsceneStaticTimer * 10;
 							}
 
 							// Consider a single frame of static, separate
@@ -1722,7 +1719,7 @@ void lvTick(void)
 	g_Vars.lvframe60 += g_Vars.lvupdate60;
 	g_Vars.lvframe240 += g_Vars.lvupdate240;
 	g_Vars.lvupdate60frealprev = g_Vars.lvupdate60freal;
-	g_Vars.lvupdate60freal = PALUPF(g_Vars.lvupdate60f);
+	g_Vars.lvupdate60freal = g_Vars.lvupdate60f;
 
 	bgunTickBoost();
 	hudmsgsTick();

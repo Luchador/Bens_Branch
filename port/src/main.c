@@ -19,7 +19,6 @@
 #include "game/debug.h"
 
 uint32_t g_OsMemSize = 0;
-OSSched g_Sched;
 
 uint8_t *g_MempHeap = NULL;
 uint32_t g_MempHeapSize = 0;

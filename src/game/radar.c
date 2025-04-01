@@ -139,7 +139,7 @@ Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, uint32_t colo
 	}
 
 	x = g_RadarX + (int)(sinf(spcc * 0.017453292384744f) * sqdist);
-	y = g_RadarY + (int)PALUPF(cosf(spcc * 0.017453292384744f) * sqdist);
+	y = g_RadarY + (int)(cosf(spcc * 0.017453292384744f) * sqdist);
 
 	if (swapcolours) {
 		if (prop == g_Vars.currentplayer->prop) {

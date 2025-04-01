@@ -20,13 +20,13 @@ void frametimeApply(int diffframe60, int diffframe240, int frametime)
 
 	g_Vars.diffframe60 = diffframe60;
 	g_Vars.diffframe60f = diffframe60;
-	g_Vars.diffframe60freal = PALUPF(g_Vars.diffframe60f);
+	g_Vars.diffframe60freal = g_Vars.diffframe60f;
 
 	g_Vars.prevframestart240 = g_Vars.thisframestart240;
 	g_Vars.thisframestart240 += diffframe240;
 	g_Vars.diffframe240 = diffframe240;
 	g_Vars.diffframe240f = diffframe240;
-	g_Vars.diffframe240freal = PALUPF(g_Vars.diffframe240f);
+	g_Vars.diffframe240freal = g_Vars.diffframe240f;
 }
 
 void frametimeCalculate(void)

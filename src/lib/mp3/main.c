@@ -19,7 +19,7 @@ float *var8009c6dc;
 
 uint32_t g_MP3Init = 0;
 
-int mp3main00043dd0(struct asistream *stream)
+int mp3FillBitstreamBuffer(struct asistream *stream)
 {
 	int sp1c = 0x1000;
 	int sp18;

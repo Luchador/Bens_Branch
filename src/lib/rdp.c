@@ -57,11 +57,9 @@ struct rdptask *g_RdpCurTask = &g_RdpTaskA;
 
 void rdpCreateTask(Gfx *gdlstart, Gfx *gdlend, uint32_t arg2)
 {
-	OSScTask *sctask;
 	OSTask *task;
 
-	sctask = &g_RdpCurTask->sctask;
-	task = &sctask->list;
+	task = &g_RdpCurTask->sctask.list;
 
 	task->t.data_ptr = (uint64_t *) gdlstart;
 	task->t.data_size = (gdlend - gdlstart) * sizeof(Gfx);

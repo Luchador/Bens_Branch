@@ -855,7 +855,7 @@ int botTick(struct prop *prop)
 			}
 
 			if (chr->blurdrugamount > 0 && !chrIsDead(chr) && aibot->skrocket == NULL) {
-				targetangle += chr->blurdrugamount * PALUPF(0.00031410926021636f) * sinf((g_Vars.lvframe60 % TICKS(120)) * PALUPF(0.052351541817188f));
+				targetangle += chr->blurdrugamount * 0.00031410926021636f * sinf((g_Vars.lvframe60 % TICKS(120)) * 0.052351541817188f);
 
 				if (targetangle >= M_TAU) {
 					targetangle -= M_TAU;

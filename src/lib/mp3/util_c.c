@@ -189,13 +189,3 @@ int mp3util000464a8(uint8_t *arg0, int *arg1, int arg2, int arg3, int arg4, int1
 
 	return arg4;
 }
-
-void func00046650(struct asistream_4f64 *arg0, int arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3, void *arg4)
-{
-
-}
-
-void func00047550(struct asistream_4f64 *arg0, int arg1, struct asistream_4f64 *arg2, struct asistream_4f64 *arg3)
-{
-
-}

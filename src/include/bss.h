@@ -4,7 +4,6 @@
 #include "constants.h"
 #include "types.h"
 
-extern OSSched g_Sched;
 extern uint8_t g_SchedSpecialArtifactIndexes[3];
 extern int g_SchedWriteArtifactsIndex;
 extern uint8_t *g_VmMarker;

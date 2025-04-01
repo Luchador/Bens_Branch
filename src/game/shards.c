@@ -127,9 +127,9 @@ void shardCreate(RoomNum room, struct coord *pos, float rotx, float size, int ty
 	g_Shards[g_NextShardNum].pos.y = pos->y;
 	g_Shards[g_NextShardNum].pos.z = pos->z;
 
-	g_Shards[g_NextShardNum].vel.x = velx * PALUPF(1.5f);
-	g_Shards[g_NextShardNum].vel.y = vely * PALUPF(3.0f);
-	g_Shards[g_NextShardNum].vel.z = velz * PALUPF(1.5f);
+	g_Shards[g_NextShardNum].vel.x = velx * 1.5f;
+	g_Shards[g_NextShardNum].vel.y = vely * 3.0f;
+	g_Shards[g_NextShardNum].vel.z = velz * 1.5f;
 
 	g_Shards[g_NextShardNum].vertices[0].x = (RANDOMFRAC() * 0.5f + 1.0f) * size;
 	g_Shards[g_NextShardNum].vertices[0].y = (RANDOMFRAC() * 0.5f + 1.0f) * size;
@@ -194,9 +194,9 @@ void shardCreate(RoomNum room, struct coord *pos, float rotx, float size, int ty
 	g_Shards[g_NextShardNum].rot.y = 0;
 	g_Shards[g_NextShardNum].rot.z = RANDOMFRAC() * M_TAU;
 
-	g_Shards[g_NextShardNum].rotspeed.x = RANDOMFRAC() * PALUPF(0.1f);
-	g_Shards[g_NextShardNum].rotspeed.y = RANDOMFRAC() * PALUPF(0.1f);
-	g_Shards[g_NextShardNum].rotspeed.z = RANDOMFRAC() * PALUPF(0.1f);
+	g_Shards[g_NextShardNum].rotspeed.x = RANDOMFRAC() * 0.1f;
+	g_Shards[g_NextShardNum].rotspeed.y = RANDOMFRAC() * 0.1f;
+	g_Shards[g_NextShardNum].rotspeed.z = RANDOMFRAC() * 0.1f;
 
 	g_NextShardNum++;
 

@@ -9,11 +9,11 @@ float rayIntersectCircleXZ(struct widthxz *arg0, struct xz *arg1, struct xz *arg
 float getSlideTimeToEdgeXZ(struct widthxz *circle, struct xz *edgeStart, struct xz *edgeEnd, struct xz *movement);
 
 float cd00024e40(void);
-void cdGetEdge(struct coord *pos1, struct coord *pos2, int32_t line, char *file);
+void cdGetEdge(struct coord *pos1, struct coord *pos2);
 float cd00024e98(void);
 int cd00024ea4(void);
 struct prop *cdGetObstacleProp(void);
-void cdGetPos(struct coord *pos, int32_t line, char *file);
+void cdGetPos(struct coord *pos);
 void cdGetObstacleNormal(struct coord *normal);
 int32_t cdGetGeoFlags(void);
 void cdSetSavedPos(struct coord *pos1, struct coord *pos2);

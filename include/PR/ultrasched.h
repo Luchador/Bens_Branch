@@ -44,24 +44,5 @@ typedef struct OSScTask_s {
     //OSMesg              msg;
 } OSScTask;
 
-typedef struct {
-    //OSScMsg     retraceMsg;
-    //OSScMsg     prenmiMsg;
-    //OSMesgQueue interruptQ;
-    //OSMesg      intBuf[OS_SC_MAX_MESGS];
-    //OSMesgQueue cmdQ;
-    //OSMesg      cmdMsgBuf[OS_SC_MAX_MESGS];
-    //OSThread    *thread;
-    //OSScClient  *clientList;
-    //OSScTask    *audioListHead;
-    //OSScTask    *gfxListHead;
-    //OSScTask    *audioListTail;
-    //OSScTask    *gfxListTail;
-    //OSScTask    *curRSPTask;
-    //OSScTask    *curRDPTask;
-    uint32_t         frameCount;
-    //s32         doAudio;
-} OSSched;
-
 #endif
 

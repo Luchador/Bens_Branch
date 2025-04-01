@@ -244,7 +244,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 
 			moveok = true;
 		} else {
-			cdGetEdge(&sp78, &sp6c, 453, "chr/chr.c");
+			cdGetEdge(&sp78, &sp6c);
 
 			// Attempt to find a valid position - method #1
 			sp60.x = dstpos->x - prop->pos.x;
@@ -498,7 +498,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 
 						if (lvupdate240 >= 25) {
 							lvupdate60f = 4.0f;
-							lvupdate60freal = PALUPF(4.0f);
+							lvupdate60freal = 4.0f;
 							lvupdate240 = 16;
 						}
 					}
@@ -506,7 +506,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 						&& ((chr->prop->flags & (PROPFLAG_ONANYSCREENTHISTICK | PROPFLAG_ONANYSCREENPREVTICK)) == 0)
 						&& lvupdate240 >= 25) {
 					lvupdate60f = 4.0f;
-					lvupdate60freal = PALUPF(4.0f);
+					lvupdate60freal = 4.0f;
 					lvupdate240 = 16;
 				}
 

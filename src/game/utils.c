@@ -1,3 +1,4 @@
+#include <math.h>
 #include "constants.h"
 #include "game/utils.h"
 #include "bss.h"

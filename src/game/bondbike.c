@@ -256,7 +256,7 @@ void bbikeApplyMoveData(struct movedata *data)
 	// Sideways
 	if (data->digitalstepleft) {
 		float value2 = -1.0f - g_Vars.currentplayer->speedsideways;
-		float tmp = data->digitalstepleft * PALUPF(-0.1f);
+		float tmp = data->digitalstepleft * -0.1f;
 
 		if (value2 < tmp) {
 			value2 = tmp;
@@ -265,7 +265,7 @@ void bbikeApplyMoveData(struct movedata *data)
 		g_Vars.currentplayer->speedsideways += value2;
 	} else if (data->digitalstepright) {
 		float value2 = 1.0f - g_Vars.currentplayer->speedsideways;
-		float tmp = data->digitalstepright * PALUPF(0.1f);
+		float tmp = data->digitalstepright * 0.1f;
 
 		if (value2 > tmp) {
 			value2 = tmp;
@@ -325,7 +325,7 @@ void bbike0f0d2b40(struct defaultobj *bike, struct coord *arg1, float arg2, stru
 	struct coord sp60;
 	struct coord sp54;
 
-	cdGetEdge(&sp78, &sp6c, 333, "bondbike.c");
+	cdGetEdge(&sp78, &sp6c);
 
 	sp60.x = bike->prop->pos.x;
 	sp60.y = bike->prop->pos.y;
@@ -614,7 +614,7 @@ int bbike0f0d3680(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 	int result = bbikeCalculateNewPositionWithPush(arg0, 0);
 
 	if (!result) {
-		cdGetEdge(arg1, arg2, 659, "bondbike.c");
+		cdGetEdge(arg1, arg2);
 	}
 
 	return result;
@@ -638,7 +638,7 @@ int bbike0f0d36d4(struct coord *arg0, struct coord *arg1, struct coord *arg2, st
 		}
 
 		if (someint == 0) {
-			cdGetEdge(arg3, arg4, 685, "bondbike.c");
+			cdGetEdge(arg3, arg4);
 
 			if (arg3->f[0] != arg1->f[0]
 					|| arg3->f[1] != arg1->f[1]

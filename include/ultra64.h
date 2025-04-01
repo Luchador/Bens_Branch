@@ -27,6 +27,5 @@
 #include <PR/sptask.h>
 #include <PR/mbi.h>
 #include <PR/libaudio.h>
-#include <PR/gu.h>
 
 #endif
