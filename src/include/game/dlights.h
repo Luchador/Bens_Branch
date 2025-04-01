@@ -5,7 +5,7 @@
 #include "data.h"
 #include "types.h"
 
-uint32_t roomGetUpperAndLowerPortals(int portalnum1, int portalnum2);
+uint32_t func0f000920(int portalnum1, int portalnum2);
 struct light *roomGetLight(int roomnum, int lightnum);
 uint8_t roomGetFinalBrightness(int roomnum);
 uint8_t roomGetFinalBrightnessForPlayer(int roomnum);

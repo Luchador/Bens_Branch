@@ -338,7 +338,7 @@ Gfx *menuRenderBanner(Gfx *gdl, int x1, int y1, int x2, int y2, bool big, int ms
 				g_CharsHandelGothicXs, g_FontHandelGothicXs, 0xbfbfffff, viGetWidth(), viGetWidth(), 0, 0);
 	}
 
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	return gdl;
 }
@@ -2000,9 +2000,9 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		mtx4LoadTranslation(&tmpcoord, &posmtx);
 
 		if (haszoom) {
-			mtxScaleRotationAndTranslation(scale * zoomy, &posmtx);
+			mtx00015f04(scale * zoomy, &posmtx);
 		} else {
-			mtxScaleRotationAndTranslation(scale, &posmtx);
+			mtx00015f04(scale, &posmtx);
 		}
 
 		{
@@ -2470,7 +2470,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 			}
 		}
 
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 	}
 
 	// Configure things for the redraw effect
@@ -2864,7 +2864,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 				}
 
 				gdl = textRenderProjected(gdl, &y, &x, title, g_CharsHandelGothicXs, g_FontHandelGothicXs, -1, dialogwidth, viGetHeight(), 0, 0);
-				gdl = utilsSetTexturesToPerspective(gdl);
+				gdl = text0f153780(gdl);
 
 				textSetRotation90(false);
 			}
@@ -3658,7 +3658,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, uint32_t t
 	definition = dialog->definition;
 	menu = &g_Menus[g_MpPlayerNum];
 
-	if (g_Menus[g_MpPlayerNum].fm.unke40_00) {
+	if (g_Menus[g_MpPlayerNum].fm.unke40_00 || g_MainIsDebugMenuOpen) {
 		inputs->leftright = inputs->updown = inputs->select = inputs->back = inputs->xaxis = inputs->yaxis = inputs->shoulder = inputs->back2 = inputs->unk14 = 0;
 		g_Menus[g_MpPlayerNum].fm.unke40_00 = false;
 	}
@@ -3978,7 +3978,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, uint32_t t
 					handlerdata = (union menuitemdata *)&menu->blocks[menu->rows[rowindex].blockindex];
 				}
 
-				if (g_Menus[g_MpPlayerNum].fm.unke40_00 == 0) {
+				if (g_Menus[g_MpPlayerNum].fm.unke40_00 == 0 && !g_MainIsDebugMenuOpen) {
 					if ((tickflags & MENUTICKFLAG_DIALOGISCURRENT) && item == dialog->focuseditem) {
 						uint32_t itemtickflags = tickflags | MENUTICKFLAG_ITEMISFOCUSED;
 
@@ -4109,7 +4109,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, uint32_t t
 		}
 	}
 
-	if (g_Menus[g_MpPlayerNum].fm.unke40_00) {
+	if (g_Menus[g_MpPlayerNum].fm.unke40_00 || g_MainIsDebugMenuOpen) {
 		inputs->leftright = inputs->updown = inputs->select = inputs->back = inputs->xaxis = inputs->yaxis = inputs->shoulder = inputs->back2 = inputs->unk14 = 0;
 		g_Menus[g_MpPlayerNum].fm.unke40_00 = false;
 	}
@@ -5081,7 +5081,7 @@ Gfx *menuRender(Gfx *gdl)
 				}
 			}
 
-			gdl = utilsSetTexturesToPerspective(gdl);
+			gdl = text0f153780(gdl);
 		}
 
 		gSPSetGeometryMode(gdl++, G_ZBUFFER);

@@ -247,7 +247,7 @@ bool botactShootFarsight(struct chrdata *chr, int arg1, struct coord *vector, st
 				// chance of passing.
 				if (oppchr != chr
 						&& value > rand
-						&& isPointInViewCone(arg3, vector, &oppprop->pos, chrGetHitRadius(oppchr))) {
+						&& func0f06b39c(arg3, vector, &oppprop->pos, chrGetHitRadius(oppchr))) {
 					bgunPlayPropHitSound(&gset, oppprop, -1);
 
 					if (oppchr->model && chrGetShield(oppchr) > 0) {
@@ -376,9 +376,9 @@ void botactThrow(struct chrdata *chr)
 	}
 
 	mtx4LoadXRotation(0.34901028871536f, &sp84);
-	mtxApplyAffineInPlace(&sp84, &sp164);
+	mtx00015be0(&sp84, &sp164);
 	mtx4LoadYRotation(sp80, &sp84);
-	mtxApplyAffineInPlace(&sp84, &sp164);
+	mtx00015be0(&sp84, &sp164);
 
 	bgunCreateThrownProjectile2(chr, &gset, &prop->pos, prop->rooms, &sp164, &sp228);
 
@@ -500,7 +500,7 @@ void botactCreateSlayerRocket(struct chrdata *chr)
 
 		mtx4LoadXRotation(xrot, &sp196);
 		mtx4LoadYRotation(yrot, &sp132);
-		mtxApplyAffineInPlace(&sp132, &sp196);
+		mtx00015be0(&sp132, &sp196);
 		mtx4LoadIdentity(&sp260);
 
 		bgunCreateXBowBolt(&rocket->base, &chr->prop->pos, chr->prop->rooms, &sp196, &sp100, &sp260, chr->prop, &chr->prop->pos);

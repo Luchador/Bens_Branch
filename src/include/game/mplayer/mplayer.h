@@ -21,6 +21,7 @@ void mpApplyLimits(void);
 int mpGetPlayerRankings(struct ranking *rankings);
 int mpCalculateTeamScore(int arg0, int *arg1);
 int mpGetTeamRankings(struct ranking *rankings);
+int func0f188bcc(void);
 int mpGetNumWeaponOptions(void);
 char *mpGetWeaponLabel(int weaponnum);
 void mpSetWeaponSlot(int slot, int mpweaponnum);

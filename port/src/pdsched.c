@@ -26,6 +26,7 @@ int g_SchedFrontArtifactsIndex;
 int g_SchedPendingArtifactsIndex;
 
 bool g_SchedViModesPending = false;
+//int g_ViUnblackTimer = NUM_FRAMEBUFFERS + 1;
 int g_ViShakeDirection = 1;
 int g_ViShakeIntensity = 0;
 float g_ViShakeIntensityMult = 1.f;
@@ -44,6 +45,10 @@ void __scUpdateViMode(void)
 		videoUpdateNativeResolution(g_ViBackData->bufx, g_ViBackData->bufy);
 		g_SchedViModesPending = false;
 	}
+
+	/*if (g_ViUnblackTimer != 0 && g_ViUnblackTimer <= NUM_FRAMEBUFFERS) {
+		g_ViUnblackTimer--;
+	}*/
 }
 
 void schedAudioFrame()

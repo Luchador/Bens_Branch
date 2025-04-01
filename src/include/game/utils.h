@@ -6,7 +6,6 @@
 uint64_t utilsGetCount(void);
 float utilsClampF(float f, float min, float max);
 int utilsClamp(int d, int min, int max);
-Gfx *utilsSetTexturesToPerspective(Gfx *gdl);
 uint32_t align4(uint32_t arg0);
 uint32_t align16(uint32_t arg0);
 uintptr_t align32(uintptr_t arg0);

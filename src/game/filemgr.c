@@ -1622,7 +1622,7 @@ MenuItemHandlerResult filemgrFileToCopyOrDeleteListMenuHandler(int operation, st
 					x = renderdata->x + 2;
 				}
 
-				gdl = utilsSetTexturesToPerspective(gdl);
+				gdl = text0f153780(gdl);
 			}
 
 			return (uintptr_t) gdl;
@@ -2223,7 +2223,7 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(int operation, struct me
 			gdl = textRenderProjected(gdl, &x, &y, buffer,
 					g_CharsHandelGothicXs, g_FontHandelGothicXs, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 		}
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 		return (uintptr_t) gdl;
 	case MENUOP_GETOPTIONHEIGHT:
 		data->list.value = 40;

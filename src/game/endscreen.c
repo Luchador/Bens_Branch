@@ -618,6 +618,7 @@ void endscreenContinue(int context)
 						lvSetDifficulty(g_MissionConfig.difficulty);
 						titleSetNextMode(TITLEMODE_SKIP);
 						mainChangeToStage(g_MissionConfig.stagenum);
+						viBlack(true);
 					}
 				} else if (g_Vars.stagenum == STAGE_SKEDARRUINS) {
 					// Commit to starting credits
@@ -626,6 +627,7 @@ void endscreenContinue(int context)
 					lvSetDifficulty(g_MissionConfig.difficulty);
 					titleSetNextMode(TITLEMODE_SKIP);
 					mainChangeToStage(g_MissionConfig.stagenum);
+					viBlack(true);
 				}
 			} else {
 				if (context == 1) {

@@ -1431,7 +1431,7 @@ Gfx *creditsDrawSlide(Gfx *gdl)
 		}
 	}
 
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	return gdl;
 }
@@ -1595,6 +1595,7 @@ Gfx *creditsDraw(Gfx *gdl)
 		g_Vars.antiplayernum = -1;
 
 		lvSetDifficulty(DIFF_A);
+		viBlack(true);
 	}
 
 	return gdl;

@@ -91,7 +91,7 @@ void mtxApplyRotation(Mtxf *arg0, Mtxf *arg1, int count)
 	int i;
 
 	for (i = 0; i < count; i++) {
-		mtxApplyAffineInPlace(arg1, arg0);
+		mtx00015be0(arg1, arg0);
 	}
 }
 

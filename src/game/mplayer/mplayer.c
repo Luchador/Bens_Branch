@@ -175,12 +175,14 @@ void mpStartMatch(void)
 	int numplayers = 0;
 	int stagenum;
 
+#ifndef PLATFORM_N64
 	if (g_MpSetup.options & MPOPTION_AUTORANDOMWEAPON_START) {
 		if (g_MpWeaponSetNum == WEAPONSET_RANDOM
 				|| g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
 			mpApplyWeaponSet();
 		}
 	}
+#endif
 
 	mpConfigureQuickTeamSimulants();
 
@@ -525,7 +527,9 @@ void mpInit(void)
 		| MPOPTION_PAC_HIGHLIGHTTARGET
 		| MPOPTION_PAC_SHOWONRADAR;
 
+#ifndef PLATFORM_N64
 	g_MpSetup.options |= MPOPTION_FRIENDLYFIRE;
+#endif
 
 	g_Vars.mphilltime = 10;
 
@@ -869,6 +873,11 @@ int mpGetTeamRankings(struct ranking *rankings)
 	return count;
 }
 
+int func0f188bcc(void)
+{
+	return NUM_MPWEAPONS;
+}
+
 int mpGetNumWeaponOptions(void)
 {
 	int count = 0;
@@ -1096,6 +1105,7 @@ void func0f18913c(void)
 	}
 }
 
+#ifndef PLATFORM_N64
 void mpSetRandomWeapons(uint8_t weapons[])
 {
 	int lockcount = 0;
@@ -1120,12 +1130,15 @@ void mpSetRandomWeapons(uint8_t weapons[])
 		g_MpWeaponRandomFilterNum = index;
 	}
 }
+#endif
 
 void mpApplyWeaponSet(void)
 {
 	int i;
 	uint8_t *ptr;
+#ifndef PLATFORM_N64
 	uint8_t randomweapons[NUM_MPWEAPONS];
+#endif
 
 	if (g_MpWeaponSetNum >= 0 && g_MpWeaponSetNum < ARRAYCOUNT(g_MpWeaponSets)) {
 		if (challengeIsFeatureUnlocked(g_MpWeaponSets[g_MpWeaponSetNum].requirefeatures[0])
@@ -1163,15 +1176,31 @@ void mpApplyWeaponSet(void)
 			}
 		}
 	} else if (g_MpWeaponSetNum == WEAPONSET_RANDOM) {
+#ifdef PLATFORM_N64
+		int numoptions = mpGetNumWeaponOptions();
+
+		for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
+			mpSetWeaponSlot(i, rngRandom() % numoptions);
+		}
+#else
 		mpSetRandomWeapons(randomweapons);
 		for (i = 0; i < ARRAYCOUNT(g_MpSetup.weapons); i++) {
 			mpSetWeaponSlot(i, randomweapons[rngRandom() % g_MpWeaponRandomFilterNum]);
 		}
+#endif
 	} else if (g_MpWeaponSetNum == WEAPONSET_RANDOMFIVE) {
+#ifdef PLATFORM_N64
+		int numoptions = mpGetNumWeaponOptions() - 2;
+
+		for (i = 0; i < 5; i++) {
+			mpSetWeaponSlot(i, rngRandom() % numoptions + 1);
+		}
+#else
 		mpSetRandomWeapons(randomweapons);
 		for (i = 0; i < 5; i++) {
 			mpSetWeaponSlot(i, randomweapons[rngRandom() % g_MpWeaponRandomFilterNum]);
 		}
+#endif
 
 		mpSetWeaponSlot(i, mpGetNumWeaponOptions() - 1);
 	}
@@ -1252,7 +1281,7 @@ Gfx *mpRenderModalText(Gfx *gdl)
 		x -= textwidth / 2;
 		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicMd, g_FontHandelGothicMd, (red << 24) | 0x00ff00ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
 
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 	} else if (!g_MainIsEndscreen
 			&& g_MpSetup.paused == MPPAUSEMODE_UNPAUSED
 			&& g_Vars.currentplayer->isdead
@@ -1289,7 +1318,7 @@ Gfx *mpRenderModalText(Gfx *gdl)
 			gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xff0000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
 		}
 
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 
 		g_Menus[g_Vars.currentplayerstats->mpindex].openinhibit = 10;
 	}

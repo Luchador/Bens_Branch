@@ -58,7 +58,7 @@ uint32_t var80061450 = 0x00000000;
 uint32_t var80061454 = 0xffffffff;
 int g_LightsPrevTickMode = 0;
 
-uint32_t roomGetUpperAndLowerPortals(int portalnum1, int portalnum2)
+uint32_t func0f000920(int portalnum1, int portalnum2)
 {
 	if (portalnum1 != portalnum2) {
 		int upper = (portalnum1 > portalnum2) ? portalnum1 : portalnum2;
@@ -1749,7 +1749,7 @@ float func0f0053d0(int roomnum1, struct coord *pos1, int portalnum1, int roomnum
 							*sp68 = dist;
 						}
 					} else {
-						float sp50 = roomGetUpperAndLowerPortals(portalnum1, portalnum2);
+						float sp50 = func0f000920(portalnum1, portalnum2);
 
 						if (sp50 < sp64) {
 							struct coord sp44;

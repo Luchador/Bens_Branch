@@ -1040,7 +1040,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 			gdl = playerLoadMatrix(gdl);
 			gdl = envStopFog(gdl);
 			gdl = starsRender(gdl);
-			gdl = utilsSetTexturesToPerspective(gdl);
+			gdl = text0f153780(gdl);
 			gdl = viSetupSkyProjection(gdl);
 		}
 

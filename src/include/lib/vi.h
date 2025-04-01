@@ -5,9 +5,11 @@
 
 void viConfigureForLegal(void);
 void viReset(int stagenum);
+void viBlack(bool black);
 void viHandleShake(void);
 void viUpdateMode(void);
 void viShake(float intensity);
+void viSetMode();
 uint16_t *viGetBackBuffer(void);
 Vp *viGetCurrentPlayerViewport(void);
 Gfx *viSetupSkyProjection(Gfx *gdl);

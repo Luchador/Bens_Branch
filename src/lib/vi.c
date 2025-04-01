@@ -1,3 +1,4 @@
+#include <ultra64.h>
 #include <stdint.h>
 #include <string.h>
 #include "constants.h"
@@ -10,7 +11,6 @@
 #include "game/menu.h"
 #include "game/mtxutils.h"
 #include "game/options.h"
-#include "game/utils.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/memp.h"
@@ -22,6 +22,7 @@
 
 Mtxf g_ActiveProjectionMtx;
 Mtx *g_CameraPerspectiveMtxF;
+uint16_t g_ViPerspScale;
 uint8_t g_ViBackIndex;
 
 struct rend_vidat g_ViDataArray[NUM_GFXTASKS] = {
@@ -73,8 +74,6 @@ void viConfigureForLegal(void)
 		g_ViDataArray[i].y = videoGetHeight();
 		g_ViDataArray[i].bufy = videoGetHeight();
 		g_ViDataArray[i].viewy = videoGetHeight();
-
-		g_ViDataArray[i].aspect = videoGetAspect();
 	}
 
 	g_ViBackData = &g_ViDataArray[0];
@@ -98,8 +97,7 @@ void viReset(int stagenum)
 	uint8_t *fb0;
 	uint8_t *fb1;
 
-	g_ViBackData->x = g_ViBackData->bufx = videoGetNativeWidth();
-	g_ViBackData->y = g_ViBackData->bufy = videoGetNativeHeight();
+	viSetMode();
 
 	fbsize = FBALLOC_WIDTH_HI * FBALLOC_HEIGHT_HI * NUM_FRAMEBUFFERS;
 
@@ -127,36 +125,17 @@ void viReset(int stagenum)
 	g_ViReconfigured = true;
 }
 
-void viUpdateMode(void)
+/**
+ * If black is true, set the video output to black indefinitely.
+ * If black is false, unblack once all the framebuffers have been cycled through.
+ *
+ * The g_ViUnblackTimer value only ticks down when it's 2 or less,
+ * so passing true to this function makes it not tick.
+ */
+void viBlack(bool black)
 {
-	struct rend_vidat *prevdata;
-
-	videoClearScreen();
-	
-	g_SchedViModesPending = true;
-
-	prevdata = g_ViBackData;
-
-	// Rotate to the next framebuffer index
-	g_ViBackIndex = (g_ViBackIndex + 1) % NUM_FRAMEBUFFERS;
-
-	g_ViBackData = &g_ViDataArray[g_ViBackIndex];
-
-	memcpy(g_ViBackData, prevdata, sizeof(struct rend_vidat));
-
-	g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
-
-	if (g_ViReconfigured) {
-		g_ViReconfigured = false;
-	}
-}
-
-void viShake(float intensity)
-{
-	intensity = utilsClamp(intensity, 0, 14);
-
-	g_ViShakeIntensity = intensity * g_ViShakeIntensityMult;
-	g_ViShakeTimer = 20;
+	//black += NUM_FRAMEBUFFERS;
+	//g_ViUnblackTimer = black;
 }
 
 // Offets the window during explosions to create a shaking effect
@@ -180,6 +159,53 @@ void viHandleShake(void)
 	/*if(g_ViUnblackTimer) {
 		videoClearScreen();
 	}*/
+}
+
+void viUpdateMode(void)
+{
+	struct rend_vidat *prevdata;
+
+	videoClearScreen();
+	
+	g_SchedViModesPending = true;
+
+	prevdata = g_ViBackData;
+
+	// Rotate to the next framebuffer index
+	g_ViBackIndex = (g_ViBackIndex + 1) % NUM_FRAMEBUFFERS;
+
+	g_ViBackData = &g_ViDataArray[g_ViBackIndex];
+
+	memcpy(g_ViBackData, prevdata, sizeof(struct rend_vidat));
+
+	g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
+
+	if (g_ViReconfigured) {
+		g_ViReconfigured = false;
+		viBlack(false);
+	}
+}
+
+void viShake(float intensity)
+{
+	if (intensity > 14) {
+		intensity = 14;
+	}
+
+	if (intensity < 0) {
+		intensity = 0;
+	}
+
+	g_ViShakeIntensity = intensity * g_ViShakeIntensityMult;
+	g_ViShakeTimer = 20;
+}
+
+void viSetMode()
+{
+	g_ViBackData->mode = 1;
+
+	g_ViBackData->x = g_ViBackData->bufx = videoGetNativeWidth();
+	g_ViBackData->y = g_ViBackData->bufy = videoGetNativeHeight();
 }
 
 uint16_t *viGetBackBuffer(void)

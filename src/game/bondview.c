@@ -24,6 +24,7 @@
 #include "gbiex.h"
 #include "game/player.h"
 #include "video.h"
+#include "game/debug.h"
 
 uint8_t g_IrScanlines[2][480];
 int g_NumActiveEffects = 0;
@@ -2008,7 +2009,7 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 
 	gdl = textRenderProjected(gdl, &x, &y, directiontext,
 			g_CharsHandelGothicXs, g_FontHandelGothicXs, 0xffffff7f, viGetWidth(), viGetHeight(), 0, 0);
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	gDPPipeSync(gdl++);
 

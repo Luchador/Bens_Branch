@@ -246,8 +246,8 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 
 	mtx4LoadTranslation(headpos, &sp84);
 
-	mtxScaleRotationAndTranslation(1.0f / arg2, &sp84);
-	mtxApplyAffineInPlace(worldtoscreenmtx, &sp84);
+	mtx00015f04(1.0f / arg2, &sp84);
+	mtx00015be0(worldtoscreenmtx, &sp84);
 	mtxF2L(&sp84, spc8);
 
 	mult = arg5 * arg2;
@@ -432,8 +432,8 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 				&& sp138.f[2] > -32000.0f && sp138.f[2] < 32000.0f) {
 			spd8 = true;
 			mtx4LoadTranslation(&sp138, &sp148);
-			mtxScaleRotationAndTranslation(0.1f, &sp148);
-			mtxApplyAffineInPlace(worldtoscreenmtx, &sp148);
+			mtx00015f04(0.1f, &sp148);
+			mtx00015be0(worldtoscreenmtx, &sp148);
 
 			for (i = 0; i < 4; i++) {
 				for (j = 0; j < 4; j++) {
@@ -840,7 +840,7 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 	mtx.m[2][3] = 0.0f;
 	mtx.m[3][3] = 1.0f;
 
-	mtxScaleRotationAndTranslation(0.1000000089407f, &mtx);
+	mtx00015f04(0.1000000089407f, &mtx);
 	mtx4SetTranslation(&casing->pos, &mtx);
 	mtxApplyAffineTransform(camGetWorldToScreenMtxf(), &mtx, model.matrices);
 
@@ -1064,14 +1064,14 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
 
 	mtx4LoadIdentity(&sp164);
-	mtxApplyAffineInPlace(camGetWorldToScreenMtxf(), &sp164);
+	mtx00015be0(camGetWorldToScreenMtxf(), &sp164);
 	mtx4LoadIdentity(&sp124);
-	mtxApplyAffineInPlace(camGetProjectionMtxF(), &sp124);
+	mtx00015be0(camGetProjectionMtxF(), &sp124);
 
 	sp124.m[3][0] = sp124.m[3][1] = sp124.m[3][2] = 0.0f;
 
 	mtx4LoadIdentity(&sp1b0);
-	mtxApplyAffineInPlace(camGetWorldToScreenMtxf(), &sp1b0);
+	mtx00015be0(camGetWorldToScreenMtxf(), &sp1b0);
 
 	campos.x = player->cam_pos.x;
 	campos.y = player->cam_pos.y;
@@ -1081,7 +1081,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	sp1b0.m[3][1] = 0.0f;
 	sp1b0.m[3][2] = 0.0f;
 
-	mtxScaleTransform(0.2f, &sp1b0);
+	mtx00015f88(0.2f, &sp1b0);
 
 	mtx = gfxAllocateMatrix();
 	mtxF2L(&sp1b0, mtx);
@@ -1248,16 +1248,16 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	texSelect(&gdl, &g_TexGeneralConfigs[3], 4, 0, 2, 1, NULL);
 	mtx4LoadIdentity(&sp14c);
 
-	mtxApplyAffineInPlace(camGetWorldToScreenMtxf(), &sp14c);
+	mtx00015be0(camGetWorldToScreenMtxf(), &sp14c);
 	mtx4LoadIdentity(&sp10c);
-	mtxApplyAffineInPlace(camGetProjectionMtxF(), &sp10c);
+	mtx00015be0(camGetProjectionMtxF(), &sp10c);
 
 	sp10c.m[3][1] = 0;
 	sp10c.m[3][0] = 0;
 	sp10c.m[3][2] = 0;
 
 	mtx4LoadIdentity(&sp198);
-	mtxApplyAffineInPlace(camGetWorldToScreenMtxf(), &sp198);
+	mtx00015be0(camGetWorldToScreenMtxf(), &sp198);
 
 	campos.x = player->cam_pos.x;
 	campos.y = player->cam_pos.y;
@@ -1267,7 +1267,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	sp198.m[3][1] = 0;
 	sp198.m[3][2] = 0;
 
-	mtxScaleTransform(0.2f, &sp198);
+	mtx00015f88(0.2f, &sp198);
 	mtx = gfxAllocateMatrix();
 	mtxF2L(&sp198, mtx);
 

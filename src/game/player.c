@@ -912,7 +912,7 @@ void playerSpawn(void)
 
 					if (g_Vars.lvframenum > 0
 							&& (g_ChrSlots[i].hidden & CHRHFLAG_ONBONDSSCREEN)
-							&& isPointInViewCone(&sp78, &sp90, &g_ChrSlots[i].prop->pos, modelGetEffectiveScale(g_ChrSlots[i].model))
+							&& func0f06b39c(&sp78, &sp90, &g_ChrSlots[i].prop->pos, modelGetEffectiveScale(g_ChrSlots[i].model))
 							&& (rngRandom() % 8)) {
 						sqdist += 1000 * 1000;
 					}
@@ -2940,6 +2940,8 @@ void playerConfigureViForCredits(void)
 	playermgrSetViewSize(videoGetWidth(), videoGetHeight());
 	playermgrSetViewPosition(-360 * 4, -240 * 2);
 
+	viSetMode();
+
 	viSetFovAspectAndSize(PLAYER_DEFAULT_FOV, videoGetAspect(), videoGetWidth(), videoGetHeight());
 
 	viSetViewPosition(0, 0);
@@ -2969,6 +2971,7 @@ void playerTick()
 	playermgrSetViewSize(playerGetViewportWidth(), playerGetViewportHeight());
 	playermgrSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
 
+	viSetMode();
 	viSetFovAspectAndSize(PLAYER_DEFAULT_FOV, aspectratio, playerGetViewportWidth(), playerGetViewportHeight());
 	viSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
 	viSetSize(playerGetFbWidth(), playerGetFbHeight());
@@ -4066,7 +4069,7 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	camSetMtxF006c(s0);
 	mtxF2L2(s0->m, s1);
 	camSetOrthogonalMtxL(s1);
-	mtxScaleRotationAndTranslation(scale, &sp8c);
+	mtx00015f04(scale, &sp8c);
 	mtxF2L2(sp8c.m, g_Vars.currentplayer->mtxl005c);
 	mtx00016820(g_Vars.currentplayer->mtxl005c, g_Vars.currentplayer->mtxl0060);
 	camSetMtxL173c(g_Vars.currentplayer->mtxl005c);
@@ -4321,8 +4324,8 @@ Gfx *playerRenderHud(Gfx *gdl)
 		int d = viGetViewTop() + viGetViewHeight();
 
 		gdl = textConfigureGfxPipeline(gdl);
-		gdl = textDrawColoredRect(gdl, a, b, c, d, 0x000000a0);
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153a34(gdl, a, b, c, d, 0x000000a0);
+		gdl = text0f153780(gdl);
 	}
 
 	if (g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY
@@ -4538,8 +4541,8 @@ Gfx *playerRenderHud(Gfx *gdl)
 			int d = viGetViewTop() + viGetViewHeight();
 
 			gdl = textConfigureGfxPipeline(gdl);
-			gdl = textDrawColoredRect(gdl, a, b, c, d, 0x000000a0);
-			gdl = utilsSetTexturesToPerspective(gdl);
+			gdl = text0f153a34(gdl, a, b, c, d, 0x000000a0);
+			gdl = text0f153780(gdl);
 		}
 
 		gdl = hudmsgsRender(gdl);

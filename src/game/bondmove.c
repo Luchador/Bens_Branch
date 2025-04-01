@@ -496,7 +496,7 @@ float bmoveCalculateLookahead(void)
 	if (cdExamLos08(&spf0, spe0, &sp150,
 				CDTYPE_BG | CDTYPE_CLOSEDDOORS,
 				GEOFLAG_FLOOR1 | GEOFLAG_FLOOR2 | GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT) == CDRESULT_COLLISION) {
-		cdGetPos(&sp150);
+		cdGetPos(&sp150, 455, "bondmove.c");
 		flags = cdGetGeoFlags();
 
 		sp160 = sqrtf((sp150.x - spf0.x) * (sp150.x - spf0.x)

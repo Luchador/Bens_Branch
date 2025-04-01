@@ -1,5 +1,6 @@
 #ifndef _IN_DATA_H
 #define _IN_DATA_H
+#include <ultra64.h>
 #include <stdint.h>
 #include "constants.h"
 #include "types.h"
@@ -8,12 +9,14 @@
 #define REF_SEG
 
 extern bool g_SchedViModesPending;
+//extern int g_ViUnblackTimer;
 extern int g_ViShakeDirection;
 extern int g_ViShakeIntensity;
 extern int g_ViShakeTimer;
 extern uint8_t g_LoadType;
 extern bool g_MainIsEndscreen;
 extern bool g_MainIsBooting;
+extern bool g_MainIsDebugMenuOpen;
 extern bool g_SndDisabled;
 extern uint16_t g_SfxVolume;
 extern int g_SoundMode;
@@ -26,7 +29,7 @@ extern int g_NumGlobalAilists;
 extern int g_NumLvAilists;
 extern bool g_ModelDistanceDisabled;
 extern float g_ModelDistanceScale;
-extern float g_ShieldHitExpansion;
+extern float var8005efc0;
 extern bool g_ModelAnimMergingEnabled;
 extern uint32_t g_NextAnimFrameIndex;
 extern int16_t g_NumAnimations;
@@ -36,6 +39,7 @@ extern int16_t *var8005f014;
 extern int g_AnimMaxBytesPerFrame;
 extern int g_AnimMaxHeaderLength;
 extern int g_CdHasSavedBlock;
+extern int var8005f038;
 extern struct rdptask *g_RdpCurTask;
 extern N_ALSndPlayer *g_SndPlayer;
 extern int16_t n_eqpower[];

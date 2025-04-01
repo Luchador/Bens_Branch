@@ -100,7 +100,7 @@ void mtx4TransformVec(Mtxf *mtx, struct coord *vec, struct coord *dst)
 	dst->z += mtx->m[3][2];
 }
 
-void mtxApplyAffineInPlace(Mtxf *matrix1, Mtxf *matrix2)
+void mtx00015be0(Mtxf *matrix1, Mtxf *matrix2)
 {
 	mtxApplyAffineTransform(matrix1, matrix2, matrix2);
 }
@@ -210,7 +210,7 @@ void mtx4SetTranslation(struct coord *pos, Mtxf *mtx)
 	mtx->m[3][2] = pos->z;
 }
 
-void mtxScaleRowX(float mult, Mtxf *mtx)
+void mtx00015df0(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -218,14 +218,14 @@ void mtxScaleRowX(float mult, Mtxf *mtx)
 	mtx->m[0][3] *= mult;
 }
 
-void mtxScaleXAxis(float mult, Mtxf *mtx)
+void mtx00015e24(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
 	mtx->m[0][2] *= mult;
 }
 
-void mtxScaleRowY(float mult, Mtxf *mtx)
+void mtx00015e4c(float mult, Mtxf *mtx)
 {
 	mtx->m[1][0] *= mult;
 	mtx->m[1][1] *= mult;
@@ -233,14 +233,14 @@ void mtxScaleRowY(float mult, Mtxf *mtx)
 	mtx->m[1][3] *= mult;
 }
 
-void mtxScaleYAxis(float mult, Mtxf *mtx)
+void mtx00015e80(float mult, Mtxf *mtx)
 {
 	mtx->m[1][0] *= mult;
 	mtx->m[1][1] *= mult;
 	mtx->m[1][2] *= mult;
 }
 
-void mtxScaleRowZ(float mult, Mtxf *mtx)
+void mtx00015ea8(float mult, Mtxf *mtx)
 {
 	mtx->m[2][0] *= mult;
 	mtx->m[2][1] *= mult;
@@ -248,14 +248,14 @@ void mtxScaleRowZ(float mult, Mtxf *mtx)
 	mtx->m[2][3] *= mult;
 }
 
-void mtxScaleZAxis(float mult, Mtxf *mtx)
+void mtx00015edc(float mult, Mtxf *mtx)
 {
 	mtx->m[2][0] *= mult;
 	mtx->m[2][1] *= mult;
 	mtx->m[2][2] *= mult;
 }
 
-void mtxScaleRotationAndTranslation(float mult, Mtxf *mtx)
+void mtx00015f04(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -273,7 +273,7 @@ void mtxScaleRotationAndTranslation(float mult, Mtxf *mtx)
 	mtx->m[2][3] *= mult;
 }
 
-void mtxScaleRotationOnly(float mult, Mtxf *mtx)
+void mtx00015f4c(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -288,7 +288,7 @@ void mtxScaleRotationOnly(float mult, Mtxf *mtx)
 	mtx->m[2][2] *= mult;
 }
 
-void mtxScaleTransform(float mult, Mtxf *mtx)
+void mtx00015f88(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;

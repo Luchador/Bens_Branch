@@ -149,7 +149,7 @@ void bwalk0f0c3b38(struct coord *reltarget, struct defaultobj *obj)
 	abstarget.y = g_Vars.currentplayer->prop->pos.y;
 	abstarget.z = reltarget->z + g_Vars.currentplayer->prop->pos.z;
 
-	cdGetEdge(&globalthinga, &globalthingb);
+	cdGetEdge(&globalthinga, &globalthingb, 223, "bondwalk.c");
 
 	vector.x = globalthingb.z - globalthinga.z;
 	vector.y = 0;
@@ -392,7 +392,7 @@ bool bwalkCalculateNewPositionWithPush(struct coord *delta, float rotateamount, 
 
 				if (door->doorflags & DOORFLAG_DAMAGEONCONTACT) {
 					if (!g_Vars.currentplayer->isdead) {
-						cdGetEdge(&sp84, &sp78);
+						cdGetEdge(&sp84, &sp78, 465, "bondwalk.c");
 						sp90.x = sp78.f[2] - sp84.f[2];
 						sp90.y = 0;
 						sp90.z = sp84.f[0] - sp78.f[0];
@@ -524,7 +524,7 @@ int bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, i
 	int result = bwalkCalculateNewPositionWithPush(delta, 0, true, 0, types);
 
 	if (result == CDRESULT_COLLISION) {
-		cdGetEdge(arg1, arg2);
+		cdGetEdge(arg1, arg2, 607, "bondwalk.c");
 	}
 
 	return result;
@@ -548,7 +548,7 @@ int bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c,
 		}
 
 		if (result == CDRESULT_COLLISION) {
-			cdGetEdge(d, e);
+			cdGetEdge(d, e, 635, "bondwalk.c");
 
 			if (b->x != d->x
 					|| b->y != d->y

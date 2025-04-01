@@ -154,7 +154,7 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRenderProjected(gdl, &x, &y, bgunGetName(weaponnum2), g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 
 		// Prepare the star texture for the difficulties
 		gDPPipeSync(gdl++);
@@ -2459,7 +2459,7 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 		textheight = renderdata->y + 25;
 		gdl = textRenderProjected(gdl, &textwidth, &textheight, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 
 		return (uintptr_t)gdl;
 	}

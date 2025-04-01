@@ -283,10 +283,10 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 	sp3c.z = 0;
 
 	mtx4LoadRotation(&sp3c, &sp88);
-	mtxScaleRotationAndTranslation(nbomb->radius / 2000.0f, &sp88);
+	mtx00015f04(nbomb->radius / 2000.0f, &sp88);
 	mtx4MultMtx4(&sp48, &sp88, &spc8);
 
-	mtxApplyAffineInPlace(camGetWorldToScreenMtxf(), &spc8);
+	mtx00015be0(camGetWorldToScreenMtxf(), &spc8);
 	mtxF2L(&spc8, mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

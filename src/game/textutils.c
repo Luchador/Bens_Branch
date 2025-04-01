@@ -223,6 +223,16 @@ Gfx *textConfigureGfxPipeline(Gfx *gdl)
 	return gdl;
 }
 
+Gfx *text0f153780(Gfx *gdl)
+{
+	gDPPipeSync(gdl++);
+	gDPSetColorDither(gdl++, G_CD_BAYER);
+	gDPSetTexturePersp(gdl++, G_TP_PERSP);
+	gDPSetTextureLOD(gdl++, G_TL_LOD);
+
+	return gdl;
+}
+
 Gfx *textSetPrimColour(Gfx *gdl, uint32_t colour)
 {
 	gDPPipeSync(gdl++);
@@ -252,7 +262,7 @@ Gfx *text0f153858(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 	return gdl;
 }
 
-Gfx *textDrawBlackRectScaled(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
+Gfx *text0f1538e4(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
@@ -263,7 +273,7 @@ Gfx *textDrawBlackRectScaled(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 	return gdl;
 }
 
-Gfx *textDrawBlackRectBordered(Gfx *gdl, int left, int top, int width, int height)
+Gfx *text0f153990(Gfx *gdl, int left, int top, int width, int height)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
@@ -274,7 +284,7 @@ Gfx *textDrawBlackRectBordered(Gfx *gdl, int left, int top, int width, int heigh
 	return gdl;
 }
 
-Gfx *textDrawColoredRect(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour)
+Gfx *text0f153a34(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour)
 {
 	gdl = textSetPrimColour(gdl, colour);
 

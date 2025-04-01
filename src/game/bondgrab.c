@@ -182,7 +182,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 			sp98.y = g_Vars.currentplayer->prop->pos.y;
 			sp98.z = delta->z + g_Vars.currentplayer->prop->pos.z;
 
-			cdGetEdge(&spb0, &spa4);
+			cdGetEdge(&spb0, &spa4, 201, "bondgrab.c");
 
 			spc8.x = spa4.z - spb0.z;
 			spc8.y = 0.0f;
@@ -210,7 +210,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 			struct coord sp50;
 			struct coord sp44;
 
-			cdGetEdge(&sp68, &sp5c);
+			cdGetEdge(&sp68, &sp5c, 228, "bondgrab.c");
 
 			if (cdGetSavedPos(&sp50, &sp44)) {
 				sp44.x -= sp50.x;
@@ -606,7 +606,7 @@ bool bgrabTryPushObject(float angle)
 	float ymax;
 	float ymin;
 
-	cdGetEdge(&edgeStart, &edgeEnd);
+	cdGetEdge(&edgeStart, &edgeEnd, 678, "bondgrab.c");
 
 	edgeDirX = edgeEnd.f[0] - edgeStart.f[0]; // x direction
 	edgeDirZ = edgeEnd.f[2] - edgeStart.f[2]; // z direction
@@ -702,7 +702,7 @@ bool bgrab0f0cdf64(struct coord *delta, struct coord *arg1, struct coord *arg2)
 	bool result = bgrabCalculateNewPositiontWithPush(delta, 0, true);
 
 	if (!result) {
-		cdGetEdge(arg1, arg2);
+		cdGetEdge(arg1, arg2, 815, "bondgrab.c");
 	}
 
 	return result;

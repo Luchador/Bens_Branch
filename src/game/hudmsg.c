@@ -245,7 +245,7 @@ Gfx *hudmsgRenderZoomRange(Gfx *gdl, uint32_t alpha)
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	}
 
-	gdl = textDrawBlackRectScaled(gdl, &x, &y, &x2, &y2);
+	gdl = text0f1538e4(gdl, &x, &y, &x2, &y2);
 	gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, colour, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
 
 	// Divider
@@ -257,7 +257,7 @@ Gfx *hudmsgRenderZoomRange(Gfx *gdl, uint32_t alpha)
 	x2 = x + textwidth;
 	y2 = y + textheight;
 
-	gdl = textDrawBlackRectScaled(gdl, &x, &y, &x2, &y2);
+	gdl = text0f1538e4(gdl, &x, &y, &x2, &y2);
 	gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, colour, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
 
 	// Right side - max zoom level
@@ -269,7 +269,7 @@ Gfx *hudmsgRenderZoomRange(Gfx *gdl, uint32_t alpha)
 	x2 = x + textwidth;
 	y2 = y + textheight;
 
-	gdl = textDrawBlackRectScaled(gdl, &x, &y, &x2, &y2);
+	gdl = text0f1538e4(gdl, &x, &y, &x2, &y2);
 	gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, colour, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
@@ -309,7 +309,7 @@ Gfx *hudmsgRenderBox(Gfx *gdl, int x1, int y1, int x2, int y2, float bgopacity, 
 		float width = (x1 + x2) * 0.5f;
 		float height = (y1 + y2) * 0.5f;
 
-		gdl = textDrawColoredRect(gdl,
+		gdl = text0f153a34(gdl,
 				(int)((width - f22) + 1.0f),
 				(height - f20) + 1.0f,
 				(int)(width + f22),
@@ -1328,7 +1328,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 						gdl = textRenderProjected(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, viGetWidth(), viGetHeight(), 0, 0);
 					}
 				} else {
-					gdl = textDrawColoredRect(gdl, x, y, x + msg->width, y + msg->height, 0);
+					gdl = text0f153a34(gdl, x, y, x + msg->width, y + msg->height, 0);
 					gdl = textRender(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, glowcolour, viGetWidth(), viGetHeight(), 0, 0);
 				}
 
@@ -1352,7 +1352,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 
 				gdl = textRenderProjected(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, viGetWidth(), viGetHeight(), 0, 0);
 			} else {
-				gdl = textDrawColoredRect(gdl, x, y, x + msg->width, y + msg->height, 0);
+				gdl = text0f153a34(gdl, x, y, x + msg->width, y + msg->height, 0);
 
 				gdl = textRender(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, glowcolour, viGetWidth(), viGetHeight(), 0, 0);
 			}
@@ -1395,7 +1395,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 						gdl = textRenderProjected(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, viGetWidth(), viGetHeight(), 0, 0);
 					}
 				} else {
-					gdl = textDrawColoredRect(gdl, x, y, x + msg->width, y + msg->height, 0);
+					gdl = text0f153a34(gdl, x, y, x + msg->width, y + msg->height, 0);
 
 					gdl = textRender(gdl, &x, &y, msg->text, msg->font1, msg->font2, textcolour, glowcolour, viGetWidth(), viGetHeight(), 0, 0);
 				}
@@ -1434,7 +1434,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 		gdl = countdownTimerRender(gdl);
 	}
 
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	return gdl;
 }

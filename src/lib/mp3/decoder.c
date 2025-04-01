@@ -2016,12 +2016,12 @@ bool mp3decInit(void)
 	}
 
 	for (i = 0; i < 8192; i++) {
-		var8009c648[i] = powf(i, 1.3333333730698f);
+		var8009c648[i] = func00045ed0(i, 1.3333333730698f);
 	}
 
 	for (i = 0; i < 256; i++) {
-		var8009c6d8[i] = powf(2.0f, i * -0.5f);
-		var8009c6dc[i] = powf(2.0f, i * -2.0f);
+		var8009c6d8[i] = func00045ed0(2.0f, i * -0.5f);
+		var8009c6dc[i] = func00045ed0(2.0f, i * -2.0f);
 	}
 
 	return true;
@@ -2072,7 +2072,7 @@ bool mp3dec00040164(struct asistream *stream, uint32_t gr, uint32_t ch)
 		sp1b8 = var700579b8[sp1bc].unk00[1];
 	}
 
-	sp60 = powf(2, (stream->global_gain[gr][ch] - 210.0f) * 0.25f);
+	sp60 = func00045ed0(2, (stream->global_gain[gr][ch] - 210.0f) * 0.25f);
 	scale = stream->scalefac_scale[gr][ch];
 
 	for (sfb = 0; sfb < 22; sfb++) {
@@ -2767,10 +2767,30 @@ bool mp3decDecodeFrame(struct asistream *stream)
 			sp940 = stream->block_type[gr][ch];
 		}
 
+		if (sp940 == 2) {
+			for (i = 0; i < 2; i++) {
+				func00047550(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i]);
+			}
+		} else {
+			for (i = 0; i < 2; i++) {
+				func00046650(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i], sine_block[sp940]);
+			}
+		}
+
 		if (stream->window_switching[gr][ch]
 					&& stream->block_type[gr][ch] == 2
 					&& stream->mixed_block_flag[gr][ch]) {
 			sp940 = 2;
+		}
+
+		if (sp940 == 2) {
+			for (i = 2; i < sp948; i++) {
+				func00047550(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i]);
+			}
+		} else {
+			for (i = 2; i < sp948; i++) {
+				func00046650(&stream->unk4f64[ch][i], i, &sp34[i], &stream->unk6a64[ch][i], sine_block[sp940]);
+			}
 		}
 
 		while (i < 32) {

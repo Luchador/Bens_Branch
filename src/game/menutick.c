@@ -189,6 +189,7 @@ void menuTick(void)
 	if (g_MpMatchHasEnded) {
 		if (g_Vars.lvframenum >= 4) {
 			if (g_Vars.stagenum == STAGE_CITRAINING) {
+				viBlack(false);
 				g_MpNumJoined = 0;
 
 				if (g_Vars.usingadvsetup) {
@@ -226,6 +227,7 @@ void menuTick(void)
 
 			g_MpMatchHasEnded = false;
 		} else {
+			viBlack(true);
 			g_PlayersWithControl[0] = false;
 		}
 	}

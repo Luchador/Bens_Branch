@@ -46,16 +46,6 @@ uintptr_t align32(uintptr_t arg0)
 	return arg0;
 }
 
-Gfx *utilsSetTexturesToPerspective(Gfx *gdl)
-{
-	gDPPipeSync(gdl++);
-	gDPSetColorDither(gdl++, G_CD_BAYER);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
-	gDPSetTextureLOD(gdl++, G_TL_LOD);
-
-	return gdl;
-}
-
 bool utilsNormalizeVector(struct coord *invec, struct coord *normalizedvec, uint32_t line, char *file)
 {
 	float sqdist = invec->x * invec->x + invec->y * invec->y + invec->z * invec->z;

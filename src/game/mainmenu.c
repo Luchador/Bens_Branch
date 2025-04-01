@@ -685,6 +685,8 @@ MenuItemHandlerResult menuhandlerAcceptMission(int operation, struct menuitem *i
 		lvSetDifficulty(g_MissionConfig.difficulty);
 		titleSetNextMode(TITLEMODE_SKIP);
 		mainChangeToStage(g_MissionConfig.stagenum);
+
+		viBlack(true);
 	}
 
 	return 0;
@@ -1937,7 +1939,7 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm,
 				renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 
 		return (uintptr_t) gdl;
 	case MENUOP_GETOPTIONHEIGHT:

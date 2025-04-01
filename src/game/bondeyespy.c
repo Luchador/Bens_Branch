@@ -264,7 +264,7 @@ int eyespy0f0cf890(struct coord *arg0, struct coord *arg1, struct coord *arg2, s
 		}
 
 		if (someint == 0) {
-			cdGetEdge(arg3, arg4);
+			cdGetEdge(arg3, arg4, 350, "bondeyespy.c");
 
 			if (arg3->f[0] != arg1->f[0]
 					|| arg3->f[1] != arg1->f[1]
@@ -383,7 +383,7 @@ int eyespy0f0cfdd0(struct coord *vel, struct coord *arg1, struct coord *arg2)
 	bool result = eyespyCalculateNewPositionWithPush(vel);
 
 	if (result != CDRESULT_NOCOLLISION) {
-		cdGetEdge(arg1, arg2);
+		cdGetEdge(arg1, arg2, 473, "bondeyespy.c");
 	}
 
 	return result;

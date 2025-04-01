@@ -860,7 +860,7 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, float crossx, float crossy)
 		break;
 	}
 
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	return gdl;
 }
@@ -1369,7 +1369,7 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, float crossx, float crossy)
 #endif
 
 		gdl = textSetCCCustom02(gdl);
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 	}
 
 	gdl = sightDrawDefault(gdl, sighton, crossx, crossy);

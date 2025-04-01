@@ -153,7 +153,7 @@ Gfx *menuitemListRenderHeader(Gfx *gdl, int16_t x1, int16_t y1, int16_t width, i
 		colour = (colourBlend(colour, 0, 0x2c) & 0xffffff00) | (colour & 0xff);
 	}
 
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 	gdl = menugfxDrawListGroupHeader(gdl, x1, y1, x1 + width, y1 + height, x1 + arg4, colour & 0xff);
 	gdl = textConfigureGfxPipeline(gdl);
 
@@ -619,7 +619,7 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 		gdl = textRenderProjected(gdl, &x, &y, langGet(L_OPTIONS_313), chars, font, colour, context->width - left + context->x, viGetHeight(), sp128, 0);
 	}
 
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	return gdl;
 }
@@ -882,7 +882,7 @@ Gfx *menuitemDropdownRender(Gfx *gdl, struct menurendercontext *context)
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, context->width, context->height, 0, 0);
 	}
 
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	return gdl;
 }
@@ -1087,7 +1087,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 
 	gdl = textConfigureGfxPipeline(gdl);
 	gdl = textRenderProjected(gdl, &x, &y, data->string, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xffffffff, context->width, context->height, 0, 0);
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	// Render cursor
 	alpha = menuGetSinOscFrac(40) * 255;
@@ -1285,7 +1285,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 		}
 	}
 
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	// Highlight border of focused button
 	{
@@ -1750,7 +1750,7 @@ Gfx *menuitemObjectivesRenderOne(Gfx *gdl, struct menudialog *dialog, int index,
 		x = objx + width - textwidth - 13;
 		y = objy + 9;
 
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 
 		spb4 = objx + 22;
 		spb0 = objy - 2;
@@ -1795,7 +1795,7 @@ Gfx *menuitemObjectivesRenderOne(Gfx *gdl, struct menudialog *dialog, int index,
 		sp6c = objx + textwidth + 25;
 		sp58 = (objx * 3 + objx + 66) / 4 - 1;
 
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 		gdl = menugfx0f0e2498(gdl);
 
 		gdl = menugfxDrawProjectedLine(gdl, objx, sp7c, sp80, sp7c + 1, sp12c & 0xffffff00, (sp12c & 0xffffff00) | 0x3f);
@@ -2029,7 +2029,7 @@ Gfx *menuitemLabelRender(Gfx *gdl, struct menurendercontext *context)
 		}
 	}
 
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	if (menudfc) {
 		if (context->width + 200 < menudfc->unk04 * 300 && context->dialog->redrawtimer < 0) {
@@ -2114,7 +2114,7 @@ Gfx *menuitemMeterRender(Gfx *gdl, struct menurendercontext *context)
 		y = context->y - 1;
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 				colour2 & 0xffffff7f, context->width, context->height, 0, 0);
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 	}
 
 	return gdl;
@@ -2266,7 +2266,7 @@ Gfx *menuitemSelectableRender(Gfx *gdl, struct menurendercontext *context)
 		}
 	}
 
-	return utilsSetTexturesToPerspective(gdl);
+	return text0f153780(gdl);
 }
 
 bool menuitemSelectableTick(struct menuitem *item, struct menuinputs *inputs, uint32_t tickflags)
@@ -2420,7 +2420,7 @@ Gfx *menuitemSliderRender(Gfx *gdl, struct menurendercontext *context)
 		gdl = textRenderProjected(gdl, &x, &y, buffer, g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, context->width, context->height, 0, 0);
 	}
 
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	return gdl;
 }
@@ -2796,7 +2796,7 @@ Gfx *menuitemCheckboxRender(Gfx *gdl, struct menurendercontext *context)
 	gdl = textRenderProjected(gdl, &x, &y, text, font1, font2,
 			maincolour, context->width, context->height, 0, 0);
 
-	return utilsSetTexturesToPerspective(gdl);
+	return text0f153780(gdl);
 }
 
 bool menuitemCheckboxTick(struct menuitem *item, struct menuinputs *inputs, uint32_t tickflags)
@@ -2964,7 +2964,7 @@ Gfx *menuitemScrollableRender(Gfx *gdl, struct menurendercontext *context)
 	gdl = textRenderProjected(gdl, &x, &y, bodytext, g_CharsHandelGothicSm, g_FontHandelGothicSm,
 			colour, context->width - 4, context->height - 1, -data->scrolloffset, 0);
 
-	return utilsSetTexturesToPerspective(gdl);
+	return text0f153780(gdl);
 }
 
 bool menuitemScrollableTick(struct menuitem *item, struct menudialog *dialog, struct menuinputs *inputs, uint32_t tickflags, union menuitemdata *data)
@@ -3175,7 +3175,7 @@ Gfx *menuitemMarqueeRender(Gfx *gdl, struct menurendercontext *context)
 	gdl = textConfigureGfxPipeline(gdl);
 	gdl = textRenderProjected(gdl, &x, &y, &text[i], font1, font2, colour,
 			context->width + context->x - x, context->height, 0, 0);
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 	gdl = menuApplyScissor(gdl);
 
 	textRestoreBlends();
@@ -3315,7 +3315,7 @@ Gfx *menuitemRankingRender(Gfx *gdl, struct menurendercontext *context)
 	y = context->y + 1;
 	gdl = textRenderProjected(gdl, &x, &y, langGet(L_MPMENU_278), g_CharsHandelGothicXs, g_FontHandelGothicXs,
 			textcolour, context->width, context->height, 0, 0);
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	dialog = context->dialog;
 
@@ -3444,7 +3444,7 @@ Gfx *menuitemRankingRender(Gfx *gdl, struct menurendercontext *context)
 				textcolour, context->width, context->height, 0, 0);
 	}
 
-	return utilsSetTexturesToPerspective(gdl);
+	return text0f153780(gdl);
 }
 
 bool menuitemRankingTick(struct menuinputs *inputs, uint32_t tickflags, union menuitemdata *data)
@@ -3685,7 +3685,7 @@ Gfx *menuitemPlayerStatsRender(Gfx *gdl, struct menurendercontext *context)
 		}
 	}
 
-	return utilsSetTexturesToPerspective(gdl);
+	return text0f153780(gdl);
 }
 
 bool menuitemPlayerStatsTick(struct menuitem *item, struct menudialog *dialog, struct menuinputs *inputs, uint32_t tickflags, union menuitemdata *data)
@@ -3992,7 +3992,7 @@ Gfx *menuitemControllerRenderText(Gfx *gdl, int curmode, struct menurendercontex
 				g_CharsHandelGothicXs, g_FontHandelGothicXs, colour, viGetWidth(), viGetHeight(), 0, 0);
 	}
 
-	return utilsSetTexturesToPerspective(gdl);
+	return text0f153780(gdl);
 }
 
 Gfx *menuitemControllerRenderPad(Gfx *gdl, struct menurendercontext *context, int padx, int pady, int curmode, uint32_t alpha, uint32_t colour1, uint32_t colour2, int8_t prevmode)
@@ -4112,7 +4112,7 @@ Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context)
 	y = context->y + 2;
 	gdl = textRenderProjected(gdl, &x, &y, text,
 			g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);
-	gdl = utilsSetTexturesToPerspective(gdl);
+	gdl = text0f153780(gdl);
 
 	textcolour = colourBlend(colour, colour & 0xffffff00, textalpha);
 	colour = colourBlend(colour, colour & 0xffffff00, contalpha);
@@ -4130,7 +4130,7 @@ Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context)
 				"if you want to use original N64 controls.\n\n"
 				"See Extended Key Bindings for more info.",
 				g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 	} else if (g_Menus[g_MpPlayerNum].main.controlmode >= CONTROLMODE_21) {
 		gdl = menuitemControllerRenderPad(gdl, context, 0, 12,
 				g_Menus[g_MpPlayerNum].main.controlmode,
@@ -4149,7 +4149,7 @@ Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context)
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRenderProjected(gdl, &x, &y, langGet(L_MPWEAPONS_216), // "Hold weapon button for ..."
 				g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);
-		gdl = utilsSetTexturesToPerspective(gdl);
+		gdl = text0f153780(gdl);
 	}
 
 	textRestoreBlends();

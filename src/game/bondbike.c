@@ -325,7 +325,7 @@ void bbike0f0d2b40(struct defaultobj *bike, struct coord *arg1, float arg2, stru
 	struct coord sp60;
 	struct coord sp54;
 
-	cdGetEdge(&sp78, &sp6c);
+	cdGetEdge(&sp78, &sp6c, 333, "bondbike.c");
 
 	sp60.x = bike->prop->pos.x;
 	sp60.y = bike->prop->pos.y;
@@ -462,7 +462,7 @@ int bbikeCalculateNewPosition(struct coord *vel, float angledelta)
 		hoverpropSetTurnAngle(&bike->base, newangle);
 
 		mtx4LoadYRotation(newangle, &sp44);
-		mtxScaleRotationAndTranslation(bike->base.model->scale, &sp44);
+		mtx00015f04(bike->base.model->scale, &sp44);
 		mtx4ToMtx3(&sp44, bike->base.realrot);
 	}
 
@@ -614,7 +614,7 @@ int bbike0f0d3680(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 	int result = bbikeCalculateNewPositionWithPush(arg0, 0);
 
 	if (!result) {
-		cdGetEdge(arg1, arg2);
+		cdGetEdge(arg1, arg2, 659, "bondbike.c");
 	}
 
 	return result;
@@ -638,7 +638,7 @@ int bbike0f0d36d4(struct coord *arg0, struct coord *arg1, struct coord *arg2, st
 		}
 
 		if (someint == 0) {
-			cdGetEdge(arg3, arg4);
+			cdGetEdge(arg3, arg4, 685, "bondbike.c");
 
 			if (arg3->f[0] != arg1->f[0]
 					|| arg3->f[1] != arg1->f[1]
@@ -933,7 +933,7 @@ void bbikeTick(void)
 
 	mtx4MultMtx4InPlace(&sp124, &sp164);
 	mtx3ToMtx4(obj->realrot, &sp124);
-	mtxScaleRotationAndTranslation(1.0f / obj->model->scale, &sp124);
+	mtx00015f04(1.0f / obj->model->scale, &sp124);
 	mtx4LoadYRotation(hoverpropGetTurnAngle(obj), &spe4);
 	quaternion0f097044(&spe4, spd4);
 	quaternion0f097044(&sp124, spc4);
