@@ -273,7 +273,6 @@ set(SRC_LIB
   src/lib/collision.c
   src/lib/dma.c
   src/lib/joy.c
-  src/lib/lib_2f490_c.c
   src/lib/lib_2fc60.c
   src/lib/lib_3e3e0.c
   src/lib/lib_17ce0.c

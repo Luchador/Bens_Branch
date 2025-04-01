@@ -27,6 +27,7 @@ Bug fixes:
 * Fixed Jonathan being unable to shoot the player in The Duel
 * Fixed the bug where wine bottles don't play their shatter sound half the time when destroyed
 * Fixed the function indicator not turning yellow during RC-P120 secondary mode
+* Fixed a bug from the original game where zooming in with the Horizon Scanner then switching to the DrugSpy would cause the DrugSpy to also be zoomed in
 * Fixed a very minor bug where using a light switch would change a room's lighting faster than intended
 
 Stage changes:

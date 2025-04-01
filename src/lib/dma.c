@@ -1,3 +1,4 @@
+#include <string.h>
 #include "constants.h"
 #include "bss.h"
 #include "lib/dma.h"
@@ -22,7 +23,7 @@ void dmaInit(void)
 
 void dmaStart(void *memaddr, romptr_t romaddr, uint32_t len, bool priority)
 {
-	bcopy((const void *)romaddr, memaddr, len);
+	memcpy(memaddr, (const void *)romaddr, len);
 }
 
 void dmaExec(void *memaddr, romptr_t romaddr, uint32_t len)

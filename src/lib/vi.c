@@ -1,5 +1,5 @@
-#include <ultra64.h>
 #include <stdint.h>
+#include <string.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/camera.h"
@@ -10,6 +10,7 @@
 #include "game/menu.h"
 #include "game/mtxutils.h"
 #include "game/options.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/memp.h"
@@ -21,8 +22,6 @@
 
 Mtxf g_ActiveProjectionMtx;
 Mtx *g_CameraPerspectiveMtxF;
-uint16_t g_ViPerspScale;
-uint8_t g_ViFrontIndex;
 uint8_t g_ViBackIndex;
 
 struct rend_vidat g_ViDataArray[NUM_GFXTASKS] = {
@@ -55,7 +54,6 @@ struct rend_vidat g_ViDataArray[NUM_GFXTASKS] = {
 
 struct rend_vidat *g_ViBackData = &g_ViDataArray[0];
 bool g_ViReconfigured = false;
-int g_ViSlot = 0;
 
 /**
  * Configure the VI to display the legal screen.
@@ -68,18 +66,19 @@ void viConfigureForLegal(void)
 	int i;
 
 	for (i = 0; i < NUM_GFXTASKS; i++) {
-		g_ViDataArray[i].x = FBALLOC_WIDTH_LO;
-		g_ViDataArray[i].bufx = FBALLOC_WIDTH_LO;
-		g_ViDataArray[i].viewx = FBALLOC_WIDTH_LO;
+		g_ViDataArray[i].x = videoGetWidth();
+		g_ViDataArray[i].bufx = videoGetWidth();
+		g_ViDataArray[i].viewx = videoGetWidth();
 
-		g_ViDataArray[i].y = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[i].bufy = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[i].viewy = FBALLOC_HEIGHT_LO;
+		g_ViDataArray[i].y = videoGetHeight();
+		g_ViDataArray[i].bufy = videoGetHeight();
+		g_ViDataArray[i].viewy = videoGetHeight();
+
+		g_ViDataArray[i].aspect = videoGetAspect();
 	}
-}
 
-const int16_t g_ViModeWidths[]  = {FBALLOC_WIDTH_LO,  FBALLOC_WIDTH_LO,  SCREEN_320 * 2};
-const int16_t g_ViModeHeights[] = {FBALLOC_HEIGHT_LO, FBALLOC_HEIGHT_LO, 220 * 2};
+	g_ViBackData = &g_ViDataArray[0];
+}
 
 /**
  * Allocate the colour framebuffers for the given stage.
@@ -99,7 +98,8 @@ void viReset(int stagenum)
 	uint8_t *fb0;
 	uint8_t *fb1;
 
-	viSetMode(VIMODE_LO);
+	g_ViBackData->x = g_ViBackData->bufx = videoGetNativeWidth();
+	g_ViBackData->y = g_ViBackData->bufy = videoGetNativeHeight();
 
 	fbsize = FBALLOC_WIDTH_HI * FBALLOC_HEIGHT_HI * NUM_FRAMEBUFFERS;
 
@@ -127,21 +127,40 @@ void viReset(int stagenum)
 	g_ViReconfigured = true;
 }
 
-/**
- * If black is true, set the video output to black indefinitely.
- * If black is false, unblack once all the framebuffers have been cycled through.
- *
- * The g_ViUnblackTimer value only ticks down when it's 2 or less,
- * so passing true to this function makes it not tick.
- */
-void viBlack(bool black)
+void viUpdateMode(void)
 {
-	black += NUM_FRAMEBUFFERS;
-	g_ViUnblackTimer = black;
+	struct rend_vidat *prevdata;
+
+	videoClearScreen();
+	
+	g_SchedViModesPending = true;
+
+	prevdata = g_ViBackData;
+
+	// Rotate to the next framebuffer index
+	g_ViBackIndex = (g_ViBackIndex + 1) % NUM_FRAMEBUFFERS;
+
+	g_ViBackData = &g_ViDataArray[g_ViBackIndex];
+
+	memcpy(g_ViBackData, prevdata, sizeof(struct rend_vidat));
+
+	g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
+
+	if (g_ViReconfigured) {
+		g_ViReconfigured = false;
+	}
+}
+
+void viShake(float intensity)
+{
+	intensity = utilsClamp(intensity, 0, 14);
+
+	g_ViShakeIntensity = intensity * g_ViShakeIntensityMult;
+	g_ViShakeTimer = 20;
 }
 
 // Offets the window during explosions to create a shaking effect
-void viHandleRetrace(void)
+void viHandleShake(void)
 {
 	int offset;
 
@@ -158,83 +177,9 @@ void viHandleRetrace(void)
 
 	videoSetWindowOffset(0, offset);
 
-	if(g_ViUnblackTimer) {
+	/*if(g_ViUnblackTimer) {
 		videoClearScreen();
-	}
-}
-
-void viUpdateMode(void)
-{
-	struct rend_vidat *prevdata;
-	float x;
-	float y;
-	int reg;
-	int v1;
-	int tmp;
-	int slot;
-
-	switch (g_ViBackData->mode) {
-	case VIMODE_NONE:
-		videoClearScreen();
-		break;
-	case VIMODE_LO:
-		break;
-	}
-
-	x = (float) g_ViBackData->x / (float) g_ViBackData->bufx;
-	y = (float) g_ViBackData->y / (float) g_ViBackData->bufy;
-
-	if (g_ViBackData->mode == VIMODE_NONE) {
-		y = 1.0f; \
-	} \
-	slot = g_ViSlot;
-
-	if (g_ViBackData->mode == VIMODE_LO) {
-		g_SchedViModesPending[slot] = true;
-	} else {
-		g_SchedViModesPending[slot] = false;
-	}
-
-	slot = (slot + 1) % NUM_GFXTASKS;
-	g_ViSlot = slot;
-
-	prevdata = g_ViBackData;
-
-	g_ViFrontIndex = (g_ViFrontIndex + 1) % NUM_FRAMEBUFFERS;
-	g_ViBackIndex = (g_ViBackIndex + 1) % NUM_FRAMEBUFFERS;
-
-	g_ViBackData = g_ViDataArray + g_ViBackIndex;
-
-	bcopy(prevdata, g_ViBackData, sizeof(struct rend_vidat));
-
-	g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
-
-	if (g_ViReconfigured) {
-		g_ViReconfigured = false;
-		viBlack(false);
-	}
-}
-
-void viShake(float intensity)
-{
-	if (intensity > 14) {
-		intensity = 14;
-	}
-
-	if (intensity < 0) {
-		intensity = 0;
-	}
-
-	g_ViShakeIntensity = intensity * g_ViShakeIntensityMult;
-	g_ViShakeTimer = 20;
-}
-
-void viSetMode(int mode)
-{
-	g_ViBackData->mode = mode;
-
-	g_ViBackData->x = g_ViBackData->bufx = videoGetNativeWidth();
-	g_ViBackData->y = g_ViBackData->bufy = videoGetNativeHeight();
+	}*/
 }
 
 uint16_t *viGetBackBuffer(void)
@@ -260,7 +205,6 @@ Gfx *viSetupSkyProjection(Gfx *gdl)
 	// Create a perspective matrix with extended z-far for sky objects
 	mtxPerspectiveF(
 		perspectiveMtxF.m,
-		&perspNorm,
 		g_ViBackData->fovy,
 		g_ViBackData->aspect,
 		g_ViBackData->znear,
@@ -295,11 +239,10 @@ Gfx *viSetupSkyProjection(Gfx *gdl)
 
 Gfx *viSetupProjectionWithZRange(Gfx *gdl, float znear, float zfar)
 {
-	uint16_t scale;
 	Mtxf tmp;
 	Mtx *mtx = gfxAllocateMatrix();
 
-	mtxPerspectiveF(tmp.m, &scale, g_ViBackData->fovy, g_ViBackData->aspect, znear, zfar, 1);
+	mtxPerspectiveF(tmp.m, g_ViBackData->fovy, g_ViBackData->aspect, znear, zfar, 1);
 	mtxF2L2(tmp.m, mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
@@ -318,7 +261,7 @@ Gfx *viSetupViewportAndPerspective(Gfx *gdl, Vp *vp)
 	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
 	g_CameraPerspectiveMtxF = gfxAllocateMatrix();
-	mtxPerspectiveF(g_ActiveProjectionMtx.m, &g_ViPerspScale, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
+	mtxPerspectiveF(g_ActiveProjectionMtx.m, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
 	mtxF2L2(g_ActiveProjectionMtx.m, g_CameraPerspectiveMtxF);
 
 	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtxF), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
@@ -346,7 +289,7 @@ Gfx *viSetupFixedZPerspective(Gfx *gdl, Vp *vp)
 	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
 	g_CameraPerspectiveMtxF = gfxAllocateMatrix();
-	mtxPerspectiveF(g_ActiveProjectionMtx.m, &g_ViPerspScale, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
+	mtxPerspectiveF(g_ActiveProjectionMtx.m, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
 	mtxF2L2(g_ActiveProjectionMtx.m, g_CameraPerspectiveMtxF);
 
 	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtxF), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
@@ -362,7 +305,7 @@ Gfx *viSetupWeaponProjection(Gfx *gdl, float fovy, float aspect)
 	Mtxf tmp;
 	Mtx *mtx = gfxAllocateMatrix();
 
-	mtxPerspectiveF(tmp.m, &g_ViPerspScale, fovy, aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
+	mtxPerspectiveF(tmp.m, fovy, aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
 	mtxF2L2(tmp.m, mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);

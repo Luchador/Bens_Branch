@@ -189,8 +189,8 @@ int splatsCreate(int qty, float arg1, struct prop *prop, struct shotdata *shotda
 		mtx4RotateVec(&spa4, &spfc, &shotdata->gundir3d);
 		mtx4RotateVec(&spa4, &spf0, &shotdata->gundir2d);
 
-		normalizeVector(&shotdata->gundir3d, &shotdata->gundir3d, 403, "splat.c");
-		normalizeVector(&shotdata->gundir2d, &shotdata->gundir2d, 404, "splat.c");
+		utilsNormalizeVector(&shotdata->gundir3d, &shotdata->gundir3d, 403, "splat.c");
+		utilsNormalizeVector(&shotdata->gundir2d, &shotdata->gundir2d, 404, "splat.c");
 
 		if (splat0f149274(arg1, prop, shotdata, /*reused var*/ dist, isskedar, splattype, timermax, chr, timerspeed)) {
 			numdropped++;

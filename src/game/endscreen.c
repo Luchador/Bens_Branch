@@ -1,5 +1,7 @@
 #include <ultra64.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include "constants.h"
 #include "game/bossfile.h"
 #include "game/cheats.h"
@@ -28,7 +30,6 @@
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/main.h"
-#include "string.h"
 #include "data.h"
 #include "types.h"
 
@@ -617,7 +618,6 @@ void endscreenContinue(int context)
 						lvSetDifficulty(g_MissionConfig.difficulty);
 						titleSetNextMode(TITLEMODE_SKIP);
 						mainChangeToStage(g_MissionConfig.stagenum);
-						viBlack(true);
 					}
 				} else if (g_Vars.stagenum == STAGE_SKEDARRUINS) {
 					// Commit to starting credits
@@ -626,7 +626,6 @@ void endscreenContinue(int context)
 					lvSetDifficulty(g_MissionConfig.difficulty);
 					titleSetNextMode(TITLEMODE_SKIP);
 					mainChangeToStage(g_MissionConfig.stagenum);
-					viBlack(true);
 				}
 			} else {
 				if (context == 1) {

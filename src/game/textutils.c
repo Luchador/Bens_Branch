@@ -192,21 +192,11 @@ void textReset(void)
 	g_TextRotated90 = false;
 	g_WrapIndentCount = 0;
 
-	if (g_Vars.stagenum == STAGE_TITLE) {
-		textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
-		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
-		textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
-	} else if (g_Vars.stagenum == STAGE_CREDITS) {
-		textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
-		textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
-		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
-		textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
-	} else {
-		textLoadFont(REF_SEG _fontnumericSegmentRomStart, REF_SEG _fontnumericSegmentRomEnd, &g_FontNumeric, &g_CharsNumeric, false);
-		textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
-		textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
-		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
-	}
+	textLoadFont(REF_SEG _fontnumericSegmentRomStart, REF_SEG _fontnumericSegmentRomEnd, &g_FontNumeric, &g_CharsNumeric, false);
+	textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
+	textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
+	textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
+	textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
 
 	// Fonts are loaded again every time a stage is loaded so free the memory allocated for the previous fonts
 	textFreeFontCharacters();
@@ -233,16 +223,6 @@ Gfx *textConfigureGfxPipeline(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *text0f153780(Gfx *gdl)
-{
-	gDPPipeSync(gdl++);
-	gDPSetColorDither(gdl++, G_CD_BAYER);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
-	gDPSetTextureLOD(gdl++, G_TL_LOD);
-
-	return gdl;
-}
-
 Gfx *textSetPrimColour(Gfx *gdl, uint32_t colour)
 {
 	gDPPipeSync(gdl++);
@@ -263,16 +243,16 @@ Gfx *textSetCCCustom02(Gfx *gdl)
 
 Gfx *text0f153858(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 {
-	gdl = textSetPrimColour(gdl, 0x00000000);
+	/*gdl = textSetPrimColour(gdl, 0x00000000);
 
 	gDPFillRectangle(gdl++, *x1, *y1, *x2, *y2);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCCustom02(gdl);*/
 
 	return gdl;
 }
 
-Gfx *text0f1538e4(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
+Gfx *textDrawBlackRectScaled(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
@@ -283,7 +263,7 @@ Gfx *text0f1538e4(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 	return gdl;
 }
 
-Gfx *text0f153990(Gfx *gdl, int left, int top, int width, int height)
+Gfx *textDrawBlackRectBordered(Gfx *gdl, int left, int top, int width, int height)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
@@ -294,7 +274,7 @@ Gfx *text0f153990(Gfx *gdl, int left, int top, int width, int height)
 	return gdl;
 }
 
-Gfx *text0f153a34(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour)
+Gfx *textDrawColoredRect(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour)
 {
 	gdl = textSetPrimColour(gdl, colour);
 

@@ -1,4 +1,6 @@
 #include <ultra64.h>
+#include <stdio.h>
+#include <string.h>
 #include "constants.h"
 #include "game/filelist.h"
 #include "game/tex.h"
@@ -16,7 +18,6 @@
 #include "lib/vi.h"
 #include "lib/joy.h"
 #include "lib/mema.h"
-#include "string.h"
 #include "data.h"
 #include "types.h"
 
@@ -1621,7 +1622,7 @@ MenuItemHandlerResult filemgrFileToCopyOrDeleteListMenuHandler(int operation, st
 					x = renderdata->x + 2;
 				}
 
-				gdl = text0f153780(gdl);
+				gdl = utilsSetTexturesToPerspective(gdl);
 			}
 
 			return (uintptr_t) gdl;
@@ -2222,7 +2223,7 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(int operation, struct me
 			gdl = textRenderProjected(gdl, &x, &y, buffer,
 					g_CharsHandelGothicXs, g_FontHandelGothicXs, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 		}
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 		return (uintptr_t) gdl;
 	case MENUOP_GETOPTIONHEIGHT:
 		data->list.value = 40;

@@ -1,4 +1,6 @@
 #include <ultra64.h>
+#include <stdio.h>
+#include <string.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/savebuffer.h"
@@ -18,7 +20,6 @@
 #include "lib/snd.h"
 #include "lib/vi.h"
 #include "lib/rng.h"
-#include "string.h"
 #include "data.h"
 #include "gbiex.h"
 #include "types.h"
@@ -686,7 +687,7 @@ MenuItemHandlerResult mpChallengesListHandler(int operation, struct menuitem *it
 				g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour,
 				viGetWidth(), viGetHeight(), 0, 0);
 
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 
 		gDPPipeSync(gdl++);
 		gDPSetTexturePersp(gdl++, G_TP_NONE);
@@ -4518,7 +4519,7 @@ MenuItemHandlerResult mpChallengesListMenuHandler(int operation, struct menuitem
 
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRenderProjected(gdl, &x, &y, challengeGetNameBySlot(data->type19.unk04), g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 
 		gDPPipeSync(gdl++);
 		gDPSetTexturePersp(gdl++, G_TP_NONE);

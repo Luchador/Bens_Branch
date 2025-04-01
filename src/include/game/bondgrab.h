@@ -11,7 +11,7 @@ bool bgrabTryMoveUpwards(float y);
 int bgrabCalculateNewPosition(struct coord *delta, float angle, bool arg2);
 bool bgrabCalculateNewPositiontWithPush(struct coord *delta, float angle, bool arg2);
 bool bgrab0f0cdb04(float angle, bool arg2);
-bool bgrab0f0cdb68(float angle);
+bool bgrabTryPushObject(float angle);
 void bgrab0f0cdef0(void);
 bool bgrab0f0cdf64(struct coord *delta, struct coord *arg1, struct coord *arg2);
 int bgrab0f0cdfbc(struct coord *delta, struct coord *arg1, struct coord *arg2);
@@ -24,7 +24,7 @@ void bgrabUpdateSpeedSideways(float targetspeed, float accelspeed, int mult);
 void bgrabUpdateSpeedForwards(float target, float speed);
 void bgrabApplyMoveData(struct movedata *data);
 void bgrabUpdateSpeedTheta(void);
-void bgrab0f0ce924(void);
+void bgrabUpdatePlayerMovement(void);
 void bgrabTick(void);
 
 #endif

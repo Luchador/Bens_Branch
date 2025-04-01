@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/menuutils.h"
@@ -179,7 +180,7 @@ MenuItemHandlerResult amPickTargetMenuList(int operation, struct menuitem *item,
 
 			gdl = textConfigureGfxPipeline(gdl);
 			gdl = textRenderProjected(gdl, &x, &y, g_MpAllChrConfigPtrs[chrindex]->name, g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);
-			gdl = text0f153780(gdl);
+			gdl = utilsSetTexturesToPerspective(gdl);
 			return (uintptr_t)gdl;
 		}
 	case MENUOP_GETOPTIONHEIGHT:
@@ -1319,7 +1320,7 @@ Gfx *amRender(Gfx *gdl)
 			gdl = textSetCCCustom02(gdl);
 		}
 
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 	}
 
 	chr = g_Vars.currentplayer->commandingaibot;

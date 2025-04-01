@@ -2612,7 +2612,7 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 					sp12c[1] = radius * 0.50f;
 					sp12c[0] *=  SCREEN_ASPECT / videoGetAspect();
 
-					textureCalcScreenCoords(&gdl, sp134, sp12c, g_TexLightGlareConfigs[5].width, g_TexLightGlareConfigs[5].height, 0, 1, 1, 1);
+					utilsCalcScreenCoords(&gdl, sp134, sp12c, g_TexLightGlareConfigs[5].width, g_TexLightGlareConfigs[5].height, 0, 1, 1, 1);
 
 					gDPPipeSync(gdl++);
 					gDPSetColorDither(gdl++, G_CD_BAYER);
@@ -2696,7 +2696,7 @@ Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size,
 
 	sp174[0] *=  SCREEN_ASPECT / videoGetAspect();
 
-	textureCalcScreenCoords(&gdl, sp17c, sp174, g_TexLightGlareConfigs[6].width, g_TexLightGlareConfigs[6].height, 0, 1, 1, 1);
+	utilsCalcScreenCoords(&gdl, sp17c, sp174, g_TexLightGlareConfigs[6].width, g_TexLightGlareConfigs[6].height, 0, 1, 1, 1);
 
 	// Render the other artifacts
 	texSelect(&gdl, &g_TexLightGlareConfigs[1], 4, 0, 2, 1, NULL);
@@ -2755,7 +2755,7 @@ Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size,
 
 		sp174[0] *=  SCREEN_ASPECT / videoGetAspect();
 
-		textureCalcScreenCoords(&gdl, sp17c, sp174, g_TexLightGlareConfigs[1].width, g_TexLightGlareConfigs[1].height, 0, 0, 0, 0);
+		utilsCalcScreenCoords(&gdl, sp17c, sp174, g_TexLightGlareConfigs[1].width, g_TexLightGlareConfigs[1].height, 0, 0, 0, 0);
 	}
 
 	// Check if the source is close to the center of the screen and create the bloom effect if so

@@ -492,9 +492,9 @@ void wallhitsTick(void)
 
 					wallhit->vertices2 = gfxAllocateVertices(4);
 
-					midx = g_ZeroVector.x; \
-					midy = g_ZeroVector.y; \
-					midz = g_ZeroVector.z;
+					midx = 0;
+					midy = 0;
+					midz = 0;
 
 					// Copy the vertices into a float array
 					for (j = 0; j < ARRAYCOUNT(wallhit->vertices); j++) {
@@ -629,7 +629,7 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 	sp1b8.y = arg1->y;
 	sp1b8.z = arg1->z;
 
-	normalizeVector(&sp1b8, &sp1b8, 956, "wallhit.c");
+	utilsNormalizeVector(&sp1b8, &sp1b8, 956, "wallhit.c");
 
 	paintball = chrIsUsingPaintball(chr);
 
@@ -769,8 +769,8 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 			sp130.y = arg4[1];
 			sp130.z = arg4[2];
 
-			normalizeVector(&sp13c, &sp13c, 1151, "wallhit.c");
-			normalizeVector(&sp130, &sp130, 1152, "wallhit.c");
+			utilsNormalizeVector(&sp13c, &sp13c, 1151, "wallhit.c");
+			utilsNormalizeVector(&sp130, &sp130, 1152, "wallhit.c");
 
 			f0 = (sp13c.x * sp130.x + sp13c.y * sp130.y + sp13c.z * sp130.z) * -1.0f;
 

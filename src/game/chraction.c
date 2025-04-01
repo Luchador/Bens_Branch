@@ -1436,7 +1436,7 @@ void func0f02e4f8(struct coord *arg0, struct coord *arg1, struct coord *dst)
 	struct coord sp2c;
 	struct coord sp20;
 
-	cdGetEdge(&sp2c, &sp20, 2298, "chraction.c");
+	cdGetEdge(&sp2c, &sp20);
 	rayIntersectLineXZ(&sp2c, &sp20, arg0, arg1, dst);
 }
 
@@ -1463,7 +1463,7 @@ float func0f02e550(struct prop *prop, float arg1, float arg2, uint32_t cdtypes, 
 	if (cdExamCylMove03(&prop->pos, prop->rooms, &sp50, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) != CDRESULT_COLLISION) {
 		result = arg2;
 	} else {
-		cdGetPos(&sp3c, 2377, "chraction.c");
+		cdGetPos(&sp3c);
 
 		xdiff = sp3c.x - prop->pos.x;
 		zdiff = sp3c.z - prop->pos.z;
@@ -3387,86 +3387,101 @@ void chrReactToDamage(struct chrdata *chr, struct coord *vector, float angle, in
 	}
 }
 
-/**
+/*
  * Launch a chr away from the given pos (for explosions).
  */
 void chrYeetFromPos(struct chrdata *chr, struct coord *exppos, float force)
 {
+	if (!chr || !chr->model || !chr->prop || !exppos) {
+		return;
+	}
+
 	struct model *model = chr->model;
 	struct prop *prop = chr->prop;
-	float faceangle;
-	float latangle;
-	int angleindex;
-	struct yeetanim *row;
-	struct coord dist;
 	int race = CHRRACE(chr);
-	float speed;
-	int subindex;
-	float angletoexplosion;
 
-	if (race != RACE_DRCAROLL && race != RACE_EYESPY && race != RACE_ROBOT) {
-		faceangle = chrGetInverseTheta(chr);
-		latangle = atan2f(prop->pos.x - exppos->x, prop->pos.z - exppos->z);
+	// Skip characters that shouldn't be yeeted
+	if (race == RACE_DRCAROLL || race == RACE_EYESPY || race == RACE_ROBOT) {
+		return;
+	}
 
-		dist.x = prop->pos.x - exppos->x;
-		dist.y = prop->pos.y - exppos->y;
-		dist.z = prop->pos.z - exppos->z;
+	float faceangle = chrGetInverseTheta(chr);
+	float latangle = atan2f(prop->pos.x - exppos->x, prop->pos.z - exppos->z);
 
-		if (dist.f[0] == 0 && dist.f[1] == 0 && dist.f[2] == 0) {
-			dist.z = 1;
-		}
+	struct coord delta = {
+		prop->pos.x - exppos->x,
+		prop->pos.y - exppos->y,
+		prop->pos.z - exppos->z
+	};
 
-		speed = 0.625f * force / sqrtf(dist.f[0] * dist.f[0] + dist.f[1] * dist.f[1] + dist.f[2] * dist.f[2]);
-		angletoexplosion = latangle - faceangle;
+	// Avoid divide-by-zero
+	if (delta.x == 0.0f && delta.y == 0.0f && delta.z == 0.0f) {
+		delta.z = 1.0f;
+	}
 
-		dist.x *= speed;
-		dist.y *= speed;
-		dist.z *= speed;
+	float distSq = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+	float speed = 0.625f * force / sqrtf(distSq);
 
-		chr->fallspeed.x = dist.x;
-		chr->fallspeed.y = dist.y;
-		chr->fallspeed.z = dist.z;
+	delta.x *= speed;
+	delta.y *= speed;
+	delta.z *= speed;
 
-		if (latangle < faceangle) {
-			angletoexplosion += M_TAU;
-		}
+	chr->fallspeed = delta;
 
-		angleindex = angletoexplosion * 1.2734422683716f + 0.5f;
+	float angletoexplosion = latangle - faceangle;
 
-		if (angleindex >= 8) {
-			angleindex = 0;
-		}
+	if (latangle < faceangle) {
+		angletoexplosion += M_TAU;
+	}
 
-		subindex = rngRandom() % g_YeetAnimIndexesByRaceAngle[race][angleindex].count;
+	int angleindex = angletoexplosion * 1.2734422683716f + 0.5f;
 
-		if (race == RACE_HUMAN) {
-			row = &g_YeetAnimsHuman[g_YeetAnimIndexesByRaceAngle[race][angleindex].indexes[subindex]];
-		} else if (race == RACE_SKEDAR) {
-			row = &g_YeetAnimsSkedar[g_YeetAnimIndexesByRaceAngle[race][angleindex].indexes[subindex]];
-		}
+	if (angleindex >= 8) {
+		angleindex = 0;
+	}
 
-		chrStopFiring(chr);
-		chrUncloak(chr, true);
+	int count = g_YeetAnimIndexesByRaceAngle[race][angleindex].count;
+	if (count == 0) {
+		return;
+	}
 
-		chr->chrflags &= ~CHRCFLAG_HIDDEN;
-		chr->actiontype = ACT_DIE;
-		chr->act_die.notifychrindex = 0;
-		chr->act_die.thudframe1 = row->thudframe;
-		chr->act_die.thudframe2 = -1;
-		chr->act_die.timeextra = 0;
-		chr->act_die.drcarollimagedelay = TICKS(45);
+	int subindex = rngRandom() % count;
+	int animindex = g_YeetAnimIndexesByRaceAngle[race][angleindex].indexes[subindex];
 
-		if (chr->race == RACE_DRCAROLL) {
-			chr->drcarollimage_left = 1 + (int)((rngRandom() % 400) * 0.01f);
-			chr->drcarollimage_right = 1 + (int)((rngRandom() % 400) * 0.01f);
-		}
+	struct yeetanim *row = NULL;
 
-		chr->sleep = 0;
-		modelSetAnimation(model, row->animnum, row->flip, row->startframe, row->speed, 8);
+	if (race == RACE_HUMAN) {
+		row = &g_YeetAnimsHuman[animindex];
+	} else if (race == RACE_SKEDAR) {
+		row = &g_YeetAnimsSkedar[animindex];
+	} else {
+		// Unknown race
+		return;
+	}
 
-		if (row->endframe >= 0.0f) {
-			modelSetAnimEndFrame(model, row->endframe);
-		}
+	// Set death animation and state
+	chrStopFiring(chr);
+	chrUncloak(chr, true);
+
+	chr->chrflags &= ~CHRCFLAG_HIDDEN;
+	chr->actiontype = ACT_DIE;
+	chr->act_die.notifychrindex = 0;
+	chr->act_die.thudframe1 = row->thudframe;
+	chr->act_die.thudframe2 = -1;
+	chr->act_die.timeextra = 0;
+	chr->act_die.drcarollimagedelay = TICKS(45);
+
+	if (chr->race == RACE_DRCAROLL) {
+		chr->drcarollimage_left = 1 + (int)((rngRandom() % 400) * 0.01f);
+		chr->drcarollimage_right = 1 + (int)((rngRandom() % 400) * 0.01f);
+	}
+
+	chr->sleep = 0;
+
+	modelSetAnimation(model, row->animnum, row->flip, row->startframe, row->speed, 8);
+
+	if (row->endframe >= 0.0f) {
+		modelSetAnimEndFrame(model, row->endframe);
 	}
 }
 
@@ -7106,7 +7121,7 @@ bool chrTryRunFromTarget(struct chrdata *chr)
 		if (cdExamCylMove03(&prop->pos, prop->rooms, &dst,
 					CDTYPE_OBJS | CDTYPE_DOORS | CDTYPE_PATHBLOCKER | CDTYPE_BG,
 					1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION) {
-			cdGetPos(&dst, 8788, "chraction.c");
+			cdGetPos(&dst);
 		}
 
 		// Adjust dst to be two chr widths closer to avoid collision with wall
@@ -8798,7 +8813,7 @@ bool func0f03e9f4(struct chrdata *chr, struct attackanimconfig *animcfg, bool fi
 
 						if (spb4) {
 							mtx00016798(sp108, &spc8);
-							mtx00015be0(spb4, &spc8);
+							mtxApplyAffineInPlace(spb4, &spc8);
 
 							spb8.x = burstrodata->pos.x;
 							spb8.y = burstrodata->pos.y;
@@ -8820,7 +8835,7 @@ bool func0f03e9f4(struct chrdata *chr, struct attackanimconfig *animcfg, bool fi
 
 							if (sp6c) {
 								mtx00016798(spb0, &sp70);
-								mtx00015be0(sp6c, &sp70);
+								mtxApplyAffineInPlace(sp6c, &sp70);
 
 								sp114 = 1;
 								sp118.x = sp70.m[3][0];
@@ -9659,7 +9674,7 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 
 				if (cdExamLos08(&gunpos, gunrooms, &hitpos, cdtypes, GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
 					hitsomething = true;
-					cdGetPos(&hitpos, 12072, "chraction.c");
+					cdGetPos(&hitpos);
 					hitprop = cdGetObstacleProp();
 				}
 
@@ -9816,7 +9831,7 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 							mtx4LoadIdentity(&identmtx);
 							mtx4LoadXRotation(rotx, &projectilemtx);
 							mtx4LoadYRotation(roty, &yrotmtx);
-							mtx00015be0(&yrotmtx, &projectilemtx);
+							mtxApplyAffineInPlace(&yrotmtx, &projectilemtx);
 
 							sp15c.x = vector.x * sp168;
 							sp15c.y = vector.y * sp168;
@@ -11401,7 +11416,7 @@ bool chrNavCanSeeNextPos(struct chrdata *chr, struct coord *chrpos, RoomNum *chr
 	if (cdExamCylMove07(chrpos, chrrooms, &sp6c, sp50, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION
 			|| cdExamCylMove03(&sp6c, sp50, &sp60, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION) {
 		spbc = true;
-		cdGetEdge(&spac, &spa0, 14145, "chraction.c");
+		cdGetEdge(&spac, &spa0);
 		func0f044b68(&spac, &spa0, &spd4);
 	}
 
@@ -11416,7 +11431,7 @@ bool chrNavCanSeeNextPos(struct chrdata *chr, struct coord *chrpos, RoomNum *chr
 	if (cdExamCylMove07(chrpos, chrrooms, &sp6c, sp50, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION
 			|| cdExamCylMove03(&sp6c, chrrooms, &sp60, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION) {
 		spb8 = true;
-		cdGetEdge(&sp94, &sp88, 14160, "chraction.c");
+		cdGetEdge(&sp94, &sp88);
 		func0f044b68(&sp94, &sp88, &spd4);
 	}
 
@@ -11451,7 +11466,7 @@ bool chrNavCanSeeNextPos(struct chrdata *chr, struct coord *chrpos, RoomNum *chr
 			&& (!arg9 || cdExamCylMove01(chrpos, aimpos, chrradius, sp40, cdtypes, CHECKVERTICAL_YES, ymax - prop->pos.y, ymin - prop->pos.y) != CDRESULT_COLLISION)) {
 		result = true;
 	} else {
-		cdGetEdge(leftpos, rightpos, 14230, "chraction.c");
+		cdGetEdge(leftpos, rightpos);
 		func0f044b68(leftpos, rightpos, &spd4);
 	}
 
@@ -11530,7 +11545,7 @@ bool chrNavCheckForObstacle(struct chrdata *chr, struct coord *chrpos, RoomNum *
 	if (cdExamCylMove07(chrpos, chrrooms, &sp6c, sp50, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION
 			|| cdExamCylMove03(&sp6c, sp50, &sp60, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION) {
 		spbc = true;
-		cdGetEdge(&spac, &spa0, 14310, "chraction.c");
+		cdGetEdge(&spac, &spa0);
 		func0f044b68(&spac, &spa0, &spd4);
 		value1 = cd00024e40();
 	}
@@ -11546,7 +11561,7 @@ bool chrNavCheckForObstacle(struct chrdata *chr, struct coord *chrpos, RoomNum *
 	if (cdExamCylMove07(chrpos, chrrooms, &sp6c, sp50, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION
 			|| cdExamCylMove03(&sp6c, chrrooms, &sp60, cdtypes, 1, ymax - prop->pos.y, ymin - prop->pos.y) == CDRESULT_COLLISION) {
 		spb8 = true;
-		cdGetEdge(&sp94, &sp88, 14325, "chraction.c");
+		cdGetEdge(&sp94, &sp88);
 		func0f044b68(&sp94, &sp88, &spd4);
 		value2 = cd00024e40();
 	}
@@ -11589,7 +11604,7 @@ bool chrNavCheckForObstacle(struct chrdata *chr, struct coord *chrpos, RoomNum *
 			&& (!hasobstacle || cdExamCylMove01(chrpos, aimpos, chrradius, sp40, cdtypes, CHECKVERTICAL_YES, ymax - prop->pos.y, ymin - prop->pos.y) != CDRESULT_COLLISION)) {
 		result = true;
 	} else {
-		cdGetEdge(leftpos, rightpos, 14395, "chraction.c");
+		cdGetEdge(leftpos, rightpos);
 		func0f044b68(leftpos, rightpos, &spd4);
 	}
 
@@ -13857,7 +13872,7 @@ bool chrIsTargetAimingAtMe(struct chrdata *chr)
 				modelGetRootPosition(model, &sp44);
 				mtx4TransformVecInPlace(camGetWorldToScreenMtxf(), &sp44);
 
-				if (func0f06b39c(&sp68, &sp56, &sp44, somefloat)) {
+				if (isPointInViewCone(&sp68, &sp56, &sp44, somefloat)) {
 					return true;
 				}
 			}
@@ -14973,7 +14988,7 @@ bool chrRunFromPos(struct chrdata *chr, uint32_t goposflags, float rundist, stru
 		chrSetPerimEnabled(chr, false);
 
 		if (cdExamLos08(&chr->prop->pos, chr->prop->rooms, &delta, CDTYPE_ALL, GEOFLAG_WALL) == CDRESULT_COLLISION) {
-			cdGetPos(&delta, 18547, "chraction.c");
+			cdGetPos(&delta);
 		}
 
 		chrSetPerimEnabled(chr, true);
@@ -15114,7 +15129,7 @@ bool chrTryOrbitTarget(struct chrdata *chr, uint32_t angle360, struct coord *pos
 			float zdiff;
 			float tmp;
 
-			cdGetPos(pos, 18686, "chraction.c");
+			cdGetPos(pos);
 
 			xdiff = pos->x - chrpos.x;
 			zdiff = pos->z - chrpos.z;

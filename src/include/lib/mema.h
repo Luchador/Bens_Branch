@@ -11,7 +11,5 @@ void *memaAlloc(uint64_t size);
 uintptr_t memaGrow(uintptr_t addr, uint64_t amount);
 void _memaFree(uintptr_t addr, uint64_t size);
 void memaFree(void *addr, uint64_t size);
-uint64_t memaGetLongestFree(void);
-bool memaRealloc(uintptr_t addr, uint64_t oldsize, uint64_t newsize);
 
 #endif

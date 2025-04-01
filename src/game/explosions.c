@@ -513,10 +513,10 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 	return exp != NULL;
 }
 
-void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord *arg2)
+void explosionsUpdateShake(struct coord *cameraPos, struct coord *cameraForward)
 {
-	float sp54;
-	float sp50;
+	float rotatedX;
+	float rotatedZ;
 	int i;
 	float intensity;
 
@@ -525,18 +525,20 @@ void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord 
 		return;
 	}
 
-	sp54 = cosf(0.8f) * arg1->f[0] - sinf(0.8f) * arg1->f[2];
-	sp50 = sinf(0.8f) * arg1->f[0] + cosf(0.8f) * arg1->f[2];
+	// Rotate the camera forward vector by 0.8 radians
+	rotatedX = cosf(0.8f) * cameraForward->f[0] - sinf(0.8f) * cameraForward->f[2];
+	rotatedZ = sinf(0.8f) * cameraForward->f[0] + cosf(0.8f) * cameraForward->f[2];
 
 	intensity = 0.0f;
 
+	// Loop through explosions to compute total shake intensity
 	for (i = 0; i < g_MaxExplosions; i++) {
 		struct prop *prop = g_Explosions[i].prop;
 
 		if (prop) {
-			float xdiff = prop->pos.x - arg0->x;
-			float ydiff = prop->pos.y - arg0->y;
-			float zdiff = prop->pos.z - arg0->z;
+			float xdiff = prop->pos.x - cameraPos->x;
+			float ydiff = prop->pos.y - cameraPos->y;
+			float zdiff = prop->pos.z - cameraPos->z;
 
 			float dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 			float mult;
@@ -551,6 +553,7 @@ void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord 
 		}
 	}
 
+	// Add extra shake intensity if needed
 	if (g_ExplosionShakeIntensityTimer > 0) {
 		g_ExplosionShakeIntensityTimer--;
 		intensity++;
@@ -558,15 +561,10 @@ void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord 
 
 	g_ExplosionShakeTotalTimer--;
 
+	// Alternate Y-axis shake direction every other frame
 	if (g_ExplosionShakeTotalTimer & 2) {
-		arg2->y = intensity;
 		intensity = -intensity;
-	} else {
-		arg2->y = -intensity;
 	}
-
-	arg2->x = intensity * sp54;
-	arg2->z = intensity * sp50;
 
 	viShake(g_ExplosionShakeTotalTimer * intensity);
 }

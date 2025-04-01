@@ -38,6 +38,5 @@
 #include <PR/os_pfs.h>
 #include <PR/os_eeprom.h>
 #include <PR/os_motor.h>
-#include <PR/os_libc.h>
 
 #endif /* !_OS_H */

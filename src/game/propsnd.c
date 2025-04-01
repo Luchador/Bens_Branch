@@ -998,7 +998,6 @@ int psCalculatePan3(int degrees, float arg1, struct pschannel *channel)
 int psCalculatePan2(struct coord *pos, int arg1, float arg2, struct pschannel *channel)
 {
 	int result = AL_PAN_CENTER;
-	uint32_t stack[4];
 	int degrees;
 	float f2;
 

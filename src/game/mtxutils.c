@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <string.h>
 #include "constants.h"
 #include "game/mtxutils.h"
 #include "game/utils.h"
@@ -90,7 +91,7 @@ void mtxApplyRotation(Mtxf *arg0, Mtxf *arg1, int count)
 	int i;
 
 	for (i = 0; i < count; i++) {
-		mtx00015be0(arg1, arg0);
+		mtxApplyAffineInPlace(arg1, arg0);
 	}
 }
 
@@ -98,7 +99,7 @@ void mtxF2L2(float mf[4][4], Mtx *m)
 {
 #ifdef GBI_FLOATS
 	if ((Mtx *)mf != m) {
-		bcopy(mf, m, sizeof(*m));
+		memcpy(m, mf, sizeof(*m));
 	}
 #else
 	int	i, j;
@@ -262,7 +263,7 @@ void mtxFrustum(Mtx *m, float l, float r, float b, float t, float n, float f, fl
 //
 //--------------------------------------------//
 
-void mtxPerspectiveF(float mf[4][4], uint16_t *perspNorm, float fovy, float aspect, float near, float far, float scale)
+void mtxPerspectiveF(float mf[4][4], float fovy, float aspect, float near, float far, float scale)
 {
 	float cot;
 	int	i, j;
@@ -284,25 +285,13 @@ void mtxPerspectiveF(float mf[4][4], uint16_t *perspNorm, float fovy, float aspe
 			mf[i][j] *= scale;
 		}
 	}
-
-	if (perspNorm != (uint16_t *) NULL) {
-		if (near + far <= 2.0f) {
-			*perspNorm = (uint16_t) 0xFFFF;
-		} else {
-			*perspNorm = (uint16_t) ((2.0f * 65536.0f) / (near + far));
-
-			if (*perspNorm <= 0) {
-				*perspNorm = (uint16_t) 0x0001;
-			}
-		}
-	}
 }
 
-void mtxPerspective(Mtx *m, uint16_t *perspNorm, float fovy, float aspect, float near, float far, float scale)
+void mtxPerspective(Mtx *m, float fovy, float aspect, float near, float far, float scale)
 {
 	float mf[4][4];
 
-	mtxPerspectiveF(mf, perspNorm, fovy, aspect, near, far, scale);
+	mtxPerspectiveF(mf, fovy, aspect, near, far, scale);
 
 	mtxF2L2(mf, m);
 }

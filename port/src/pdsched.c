@@ -25,14 +25,11 @@ int g_SchedWriteArtifactsIndex;
 int g_SchedFrontArtifactsIndex;
 int g_SchedPendingArtifactsIndex;
 
-int var8005ce74 = 0;
-bool g_SchedViModesPending[NUM_GFXTASKS] = {false, false};
-int g_ViUnblackTimer = NUM_FRAMEBUFFERS + 1;
+bool g_SchedViModesPending = false;
 int g_ViShakeDirection = 1;
 int g_ViShakeIntensity = 0;
 float g_ViShakeIntensityMult = 1.f;
 int g_ViShakeTimer = 0;
-bool g_SchedIsFirstTask = true;
 
 int g_PrevFrameFb = -1;
 int g_BlurFb = -1;
@@ -41,21 +38,11 @@ bool g_BlurFbDirty = true;
 
 void __scUpdateViMode(void)
 {
-	if (g_SchedIsFirstTask) {
-		g_SchedIsFirstTask = false;
-	}
-
-	var8005ce74 = (var8005ce74 + 1) % 2;
-
-	if (g_SchedViModesPending[1 - var8005ce74]) {
+	if (g_SchedViModesPending) {
 		// TODO: make this a little less awkward
 		extern struct rend_vidat *g_ViBackData;
 		videoUpdateNativeResolution(g_ViBackData->bufx, g_ViBackData->bufy);
-		g_SchedViModesPending[1 - var8005ce74] = false;
-	}
-
-	if (g_ViUnblackTimer != 0 && g_ViUnblackTimer <= NUM_FRAMEBUFFERS) {
-		g_ViUnblackTimer--;
+		g_SchedViModesPending = false;
 	}
 }
 
@@ -87,7 +74,7 @@ void schedAudioFrame()
  */
 void schedEndFrame()
 {
-	viHandleRetrace();
+	viHandleShake();
 
 	inputUpdate();
 

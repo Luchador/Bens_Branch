@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/bondgun.h"
@@ -151,13 +152,9 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 		x = renderdata->x + 10;
 		y = renderdata->y;
 
-#if VERSION == VERSION_JPN_FINAL
-		y++;
-#endif
-
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRenderProjected(gdl, &x, &y, bgunGetName(weaponnum2), g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 
 		// Prepare the star texture for the difficulties
 		gDPPipeSync(gdl++);
@@ -2462,7 +2459,7 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 		textheight = renderdata->y + 25;
 		gdl = textRenderProjected(gdl, &textwidth, &textheight, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 
 		return (uintptr_t)gdl;
 	}

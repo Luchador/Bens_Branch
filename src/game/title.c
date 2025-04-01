@@ -1,5 +1,6 @@
-#include <ultra64.h>
 #include <math.h>
+#include <string.h>
+#include <stdbool.h>
 #include "constants.h"
 #include "game/title.h"
 #include "game/modelmgr.h"
@@ -27,11 +28,8 @@
 #include "lib/model.h"
 #include "lib/snd.h"
 #include "lib/mtx.h"
-#include "string.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
-#include "types.h"
-#include "string.h"
 #include "video.h"
 
 #define TITLE_ASPECT (videoGetAspect())
@@ -208,11 +206,11 @@ Gfx *titleRenderLegal(Gfx *gdl)
 			}
 
 			if (elem->type == LEGALELEMENTTYPE_LINE) {
-				gdl = text0f153780(gdl);
-				gdl = text0f153a34(gdl, elem->x, elem->y, viGetWidth(), elem->y + 2, 0x7f7fff7f);
+				gdl = utilsSetTexturesToPerspective(gdl);
+				gdl = textDrawColoredRect(gdl, elem->x, elem->y, viGetWidth(), elem->y + 2, 0x7f7fff7f);
 				gdl = textConfigureGfxPipeline(gdl);
 			} else if (elem->type == LEGALELEMENTTYPE_DOLBYLOGO) {
-				gdl = text0f153780(gdl);
+				gdl = utilsSetTexturesToPerspective(gdl);
 
 				gDPPipeSync(gdl++);
 				gDPSetTexturePersp(gdl++, G_TP_NONE);
@@ -235,7 +233,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 
 				gdl = textConfigureGfxPipeline(gdl);
 			} else if (elem->type == LEGALELEMENTTYPE_RARELOGO) {
-				gdl = text0f153780(gdl);
+				gdl = utilsSetTexturesToPerspective(gdl);
 
 				gDPPipeSync(gdl++);
 				gDPSetTexturePersp(gdl++, G_TP_NONE);
@@ -267,7 +265,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 	}
 
 	return gdl;
@@ -404,7 +402,6 @@ void titleTickPdLogo(void)
 			g_Vars.antiplayernum = -1;
 
 			lvSetDifficulty(DIFF_A);
-			viBlack(true);
 		} else {
 			titleSetNextMode(TITLEMODE_SKIP);
 		}
@@ -945,7 +942,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	mtx4LoadXRotation(g_PdLogoXRotCur, &sp1a8);
 	mtx4MultMtx4InPlace(&sp1a8, &sp1e8);
 	mtx4MultMtx4(&sp2b0, &sp1e8, &sp270);
-	mtx00015f04(g_PdLogoScale, &sp270);
+	mtxScaleRotationAndTranslation(g_PdLogoScale, &sp270);
 
 	g_TitleLightPdLogoNotFront.a.l.col[0] = g_TitleLightPdLogoNotFront.a.l.col[1] = g_TitleLightPdLogoNotFront.a.l.col[2] = g_TitleLightPdLogoNotFront.a.l.colc[0] = g_TitleLightPdLogoNotFront.a.l.colc[1] = g_TitleLightPdLogoNotFront.a.l.colc[2] = 255.0f * g_PdLogoAmbientLightFrac;
 
@@ -1027,9 +1024,9 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		mtx4LoadTranslation(&sp64, &sp1e8);
 	}
 
-	mtx00015f88(1.0f + sp13c, &sp1e8);
+	mtxScaleTransform(1.0f + sp13c, &sp1e8);
 	mtx4MultMtx4(&sp2b0, &sp1e8, &sp230);
-	mtx00015f04(0.308f, &sp230);
+	mtxScaleRotationAndTranslation(0.308f, &sp230);
 
 	// Render the "PERFECT DARK" model
 	if (g_PdLogoTitleStep >= 0) {
@@ -1180,7 +1177,7 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 		sp9c.z = 0.0f;
 
 		mtx4LoadRotation(&sp9c, &spa8);
-		mtx00015f88(fracdone * 0.2f + 1.0f, &spa8);
+		mtxScaleTransform(fracdone * 0.2f + 1.0f, &spa8);
 
 		mtx00016ae4(&sp108,
 				/* pos  */ 0.0f, 0.0f, 4000,
@@ -1369,7 +1366,7 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 	spb4.z = 0;
 
 	mtx4LoadRotation(&spb4, &spc0);
-	mtx00015f88(1 + fracdone * 0.25f, &spc0);
+	mtxScaleTransform(1 + fracdone * 0.25f, &spc0);
 
 	mtx00016ae4(&sp118,
 			/* pos  */ 0, 0, 4000,
@@ -1492,7 +1489,6 @@ void titleInitSkip(void)
 	g_Vars.antiplayernum = -1;
 
 	lvSetDifficulty(DIFF_A);
-	viBlack(true);
 }
 
 void titleSetNextMode(int mode)
@@ -1533,8 +1529,6 @@ void titleTick(void)
 			break;
 		}
 
-		viBlack(true);
-
 		g_TitleNextMode = -1;
 	}
 
@@ -1574,10 +1568,6 @@ void titleTick(void)
 		case TITLEMODE_SKIP:
 			titleInitSkip();
 			break;
-		}
-
-		if (g_TitleMode != TITLEMODE_SKIP) {
-			viBlack(false);
 		}
 	}
 

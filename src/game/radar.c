@@ -81,7 +81,7 @@ Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, int arg2, in
 
 	gDPSetEnvColor(gdl++, 0, 0xff, 0, 40);
 	gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
-	textureCalcScreenCoords(&gdl, spb0, spa8, tconfig->width, tconfig->height, 0, 0, 0, false);
+	utilsCalcScreenCoords(&gdl, spb0, spa8, tconfig->width, tconfig->height, 0, 0, 0, false);
 
 	gDPPipeSync(gdl++);
 	gDPSetColorDither(gdl++, G_CD_BAYER);

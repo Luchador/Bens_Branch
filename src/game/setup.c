@@ -570,16 +570,16 @@ void setupCreateObject(struct defaultobj *obj, int cmdindex)
 						xscale = yscale = zscale = 1;
 					}
 
-					mtx00015e24(xscale, &mtx);
-					mtx00015e80(yscale, &mtx);
-					mtx00015edc(zscale, &mtx);
+					mtxScaleXAxis(xscale, &mtx);
+					mtxScaleYAxis(yscale, &mtx);
+					mtxScaleZAxis(zscale, &mtx);
 
 					modelSetScale(obj->model, obj->model->scale * maxscale);
 				}
 			}
 
 			modelSetScale(obj->model, obj->model->scale * scale);
-			mtx00015f04(obj->model->scale, &mtx);
+			mtxScaleRotationAndTranslation(obj->model->scale, &mtx);
 
 			if (obj->flags2 & OBJFLAG2_DONTPAUSE) {
 				prop2->flags |= PROPFLAG_DONTPAUSE;
@@ -800,7 +800,7 @@ void setupCreateCctv(struct cctvobj *cctv, int cmdindex)
 		}
 
 		mtx00016d58(&cctv->camrotm, 0.0f, 0.0f, 0.0f, xdiff, ydiff, zdiff, 0.0f, 1.0f, 0.0f);
-		mtx00015f04(obj->model->scale, &cctv->camrotm);
+		mtxScaleRotationAndTranslation(obj->model->scale, &cctv->camrotm);
 
 		cctv->toleft = 0;
 		cctv->yleft = *(int *)&cctv->yleft * M_TAU / 65536.0f;
@@ -918,7 +918,7 @@ void setupCreateSingleMonitor(struct singlemonitorobj *monitor, int cmdindex)
 
 			propReparent(prop, owner->prop);
 			mtx4LoadXRotation(0.3664608001709f, &sp64);
-			mtx00015f04(monitor->base.model->scale / owner->model->scale, &sp64);
+			mtxScaleRotationAndTranslation(monitor->base.model->scale / owner->model->scale, &sp64);
 			modelGetRootPosition(monitor->base.model, &spa4);
 
 			spa4.x = -spa4.x;
@@ -1087,9 +1087,9 @@ void setupCreateDoor(struct doorobj *door, int cmdindex)
 			xscale = yscale = zscale = 1;
 		}
 
-		mtx00015e24(xscale, &finalmtx);
-		mtx00015e80(yscale, &finalmtx);
-		mtx00015edc(zscale, &finalmtx);
+		mtxScaleXAxis(xscale, &finalmtx);
+		mtxScaleYAxis(yscale, &finalmtx);
+		mtxScaleZAxis(zscale, &finalmtx);
 
 		pos.x = pad.pos.x;
 		pos.y = pad.pos.y;

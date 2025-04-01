@@ -45,7 +45,6 @@
 	build/ROMID/lib/model.o (section); \
 	build/ROMID/lib/anim.o (section); \
 	build/ROMID/lib/collision.o (section); \
-	build/ROMID/lib/lib_2f490.o (section); \
 	build/ROMID/lib/rdp.o (section); \
 	build/ROMID/lib/ultra/audio/heap.o (section); \
 	build/ROMID/lib/naudio/n_sl.o (section); \
@@ -97,13 +96,8 @@
 	build/ROMID/lib/naudio/n_synsetpriority.o (section); \
 	build/ROMID/lib/naudio/n_load.o (section); \
 	build/ROMID/lib/naudio/n_resample2.o (section); \
-	build/ROMID/lib/mp3/lib_45ed0.o (section); \
 	build/ROMID/lib/mp3/util.o (section); \
-	build/ROMID/lib/mp3/lib_46650.o (section); \
-	build/ROMID/lib/mp3/lib_47550.o (section); \
 	build/ROMID/lib/naudio/n_resample.o (section); \
-	build/ROMID/lib/mp3/lib_47d20.o (section); \
-	build/ROMID/lib/mp3/lib_47ef0.o (section); \
 	build/ROMID/lib/ultra/os/writebackdcacheall.o (section); \
 	build/ROMID/lib/ultra/os/invalicache.o (section); \
 	build/ROMID/lib/ultra/os/getfpccsr.o (section); \
@@ -127,8 +121,6 @@
 	build/ROMID/lib/ultra/io/sptaskyielded.o (section); \
 	build/ROMID/lib/ultra/io/dpctr.o (section); \
 	build/ROMID/lib/ultra/io/dpgetstat.o (section); \
-	build/ROMID/lib/ultra/io/viblack.o (section); \
-	build/ROMID/lib/ultra/io/visetmode.o (section); \
 	build/ROMID/lib/ultra/io/visetxscale.o (section); \
 	build/ROMID/lib/ultra/io/visetyscale.o (section); \
 	build/ROMID/lib/ultra/io/visetspecial.o (section); \
@@ -158,9 +150,7 @@
 	build/ROMID/lib/ultra/io/sirawwrite.o (section); \
 	build/ROMID/lib/ultra/os/writebackdcache.o (section); \
 	build/ROMID/lib/ultra/libc/ll.o (section); \
-	build/ROMID/lib/ultra/libc/bzero.o (section); \
 	build/ROMID/lib/ultra/os/getcause.o (section); \
-	build/ROMID/lib/ultra/libc/bcopy.o (section); \
 	build/ROMID/lib/ultra/os/virtualtophysical.o (section); \
 	build/ROMID/lib/ultra/io/spsetstat.o (section); \
 	build/ROMID/lib/ultra/io/spsetpc.o (section); \
@@ -177,7 +167,6 @@
 	build/ROMID/lib/ultra/io/pfsallocatefile.o (section); \
 	build/ROMID/lib/ultra/io/pfsdeletefile.o (section); \
 	build/ROMID/lib/ultra/io/pfschecker.o (section); \
-	build/ROMID/lib/ultra/libc/bcmp.o (section); \
 	build/ROMID/lib/ultra/os/maptlb.o (section); \
 	build/ROMID/lib/ultra/io/aisetfreq.o (section); \
 	build/ROMID/lib/ultra/io/aisetnextbuf.o (section); \

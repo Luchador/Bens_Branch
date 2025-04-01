@@ -12,7 +12,6 @@
 #include "lib/lib_17ce0.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
-#include "lib/lib_2f490.h"
 #include "data.h"
 #include "types.h"
 
@@ -34,30 +33,21 @@ struct coord g_CdEdgeVtx1;
 int var8009a8c4;
 struct coord g_CdEdgeVtx2;
 struct prop *g_CdObstacleProp;
-int var8009a8d8;
-int var8009a8dc;
 struct coord g_CdObstaclePos;
-int var8009a8ec;
 float var8009a8f0;
 bool g_CdHasSavedPos;
 struct coord g_CdPos1;
-int var8009a904;
 struct coord g_CdPos2;
-int var8009a914;
 struct geoblock g_CdSavedBlock;
 struct geo *g_CdObstacleGeo;
-int var8009a968;
-int var8009a96c;
-
 bool g_CdHasSavedBlock = false;
-int var8005f038 = 0;
 
 float cd00024e40(void)
 {
 	return var8009a8f0;
 }
 
-void cdGetEdge(struct coord *vtx1, struct coord *vtx2, int32_t line, char *file)
+void cdGetEdge(struct coord *vtx1, struct coord *vtx2)
 {
 	vtx1->x = g_CdEdgeVtx1.x;
 	vtx1->y = g_CdEdgeVtx1.y;
@@ -83,7 +73,7 @@ struct prop *cdGetObstacleProp(void)
 	return g_CdObstacleProp;
 }
 
-void cdGetPos(struct coord *pos, int32_t line, char *file)
+void cdGetPos(struct coord *pos)
 {
 	pos->x = g_CdObstaclePos.x;
 	pos->y = g_CdObstaclePos.y;
@@ -122,11 +112,8 @@ void cdClearResults(void)
 	var8009a8b4 = 0;
 	var8009a8ac = 0;
 	g_CdObstacleProp = NULL;
-	var8009a8d8 = 0;
-	var8009a8ec = 0;
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
-	var8005f038 = 0;
 }
 
 void cdSetObstacleVtxProp(struct coord *vtx1, struct coord *vtx2, struct prop *prop)
@@ -142,11 +129,8 @@ void cdSetObstacleVtxProp(struct coord *vtx1, struct coord *vtx2, struct prop *p
 	var8009a8b4 = 1;
 	var8009a8ac = 0;
 	g_CdObstacleProp = prop;
-	var8009a8d8 = 0;
-	var8009a8ec = 0;
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
-	var8005f038 = 0;
 }
 
 void cdSetObstacleVtxPropFlt(struct coord *vtx1, struct coord *vtx2, struct prop *prop, float arg3)
@@ -164,34 +148,44 @@ void cdSetObstacleVtxPropFlt(struct coord *vtx1, struct coord *vtx2, struct prop
 	var8009a8b4 = 1;
 	var8009a8ac = 1;
 	g_CdObstacleProp = prop;
-	var8009a8d8 = 0;
-	var8009a8ec = 0;
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
-	var8005f038 = 0;
 }
 
-void cd000250cc(struct coord *arg0, struct coord *arg1, float width)
+/*
+ * Calculate the fraction of movement allowed before a circle collides with an edge in the XZ plane.
+ * 
+ * @param start       The starting position of the circle (in world coords)
+ * @param movement    The movement vector to test (not a destination position)
+ * @param radius      The circle's radius
+ */
+void cdCheckSlideAgainstEdgeXZ(struct coord *start, struct coord *movement, float radius)
 {
-	struct widthxz sp34;
-	struct xz sp2c;
-	struct xz sp24;
-	struct xz sp1c;
+	struct widthxz movingCircle;
+	struct xz edgeA;
+	struct xz edgeB;
+	struct xz moveVector;
 
-	sp34.width = width;
-	sp34.x = arg0->x;
-	sp34.z = arg0->z;
+	// Populate the circle structure
+	movingCircle.width = radius;
+	movingCircle.x = start->x;
+	movingCircle.z = start->z;
 
-	sp1c.x = arg1->x;
-	sp1c.z = arg1->z;
+	// Movement vector in 2D (XZ)
+	moveVector.x = movement->x;
+	moveVector.z = movement->z;
 
-	sp2c.x = g_CdEdgeVtx1.x;
-	sp2c.z = g_CdEdgeVtx1.z;
+	// Retrieve the edge endpoints from globals (likely set by collision system)
+	edgeA.x = g_CdEdgeVtx1.x;
+	edgeA.z = g_CdEdgeVtx1.z;
 
-	sp24.x = g_CdEdgeVtx2.x;
-	sp24.z = g_CdEdgeVtx2.z;
+	edgeB.x = g_CdEdgeVtx2.x;
+	edgeB.z = g_CdEdgeVtx2.z;
 
-	var8009a8b0 = getSlideTimeToEdgeXZ(&sp34, &sp2c, &sp24, &sp1c);
+	// Compute how far the circle can move before colliding with the edge
+	var8009a8b0 = getSlideTimeToEdgeXZ(&movingCircle, &edgeA, &edgeB, &moveVector);
+
+	// Mark that a collision test was performed
 	var8009a8ac = 1;
 }
 
@@ -200,11 +194,8 @@ void cdSetObstacleProp(struct prop *prop)
 	var8009a8b4 = 0;
 	var8009a8ac = 0;
 	g_CdObstacleProp = prop;
-	var8009a8d8 = 0;
-	var8009a8ec = 0;
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
-	var8005f038 = 0;
 }
 
 void cdSetObstacleVtxColProp(struct coord *vtxpos1, struct coord *vtxpos2, struct coord *collisionpos, struct prop *prop)
@@ -224,11 +215,8 @@ void cdSetObstacleVtxColProp(struct coord *vtxpos1, struct coord *vtxpos2, struc
 	var8009a8b4 = 1;
 	var8009a8ac = 0;
 	g_CdObstacleProp = prop;
-	var8009a8d8 = 1;
-	var8009a8ec = 0;
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
-	var8005f038 = 0;
 }
 
 void cdSetObstacleVtxColPropFltGeo(struct coord *vtxpos1, struct coord *vtxpos2, struct coord *collisionpos, struct prop *prop, float arg4, struct geo *geo)
@@ -248,13 +236,10 @@ void cdSetObstacleVtxColPropFltGeo(struct coord *vtxpos1, struct coord *vtxpos2,
 	var8009a8b4 = 1;
 	var8009a8ac = 0;
 	g_CdObstacleProp = prop;
-	var8009a8d8 = 1;
 	var8009a8f0 = arg4;
-	var8009a8ec = 1;
 	g_CdHasSavedPos = false;
 	g_CdHasSavedBlock = false;
 	g_CdObstacleGeo = geo;
-	var8005f038 = 1;
 }
 
 void cdSetSavedPos(struct coord *pos1, struct coord *pos2)
@@ -855,46 +840,12 @@ void cdGetPropsOnPlatform(struct prop *platform, int16_t *propnums, int maxlen)
 	propnums[len] = -1;
 }
 
-#if VERSION < VERSION_NTSC_1_0
-void cdSetPropYBounds(struct prop *prop, float ymax, float ymin)
-{
-	uint8_t *start;
-	uint8_t *end;
-
-	if (propUpdateGeometry(prop, &start, &end)) {
-		struct geo *geo = (struct geo *) start;
-
-		while (geo < (struct geo *) end) {
-			if (geo->type == GEOTYPE_TILE_I) {
-				struct geotilei *tile = (struct geotilei *) geo;
-				geo = (struct geo *)((uintptr_t)geo + sizeof(struct geotilei) + sizeof(tile->vertices[0]) * (tile->header.numvertices - ARRAYCOUNT(tile->vertices)));
-			} else if (geo->type == GEOTYPE_TILE_F) {
-				struct geotilef *tile = (struct geotilef *) geo;
-				geo = (struct geo *)((uintptr_t)geo + sizeof(struct geotilef) + sizeof(struct coord) * (tile->header.numvertices - ARRAYCOUNT(tile->vertices)));
-			} else if (geo->type == GEOTYPE_BLOCK) {
-				struct geoblock *block = (struct geoblock *) geo;
-				block->ymax = ymax;
-				block->ymin = ymin;
-				geo = (struct geo *)((uintptr_t)geo + sizeof(struct geoblock));
-			} else if (geo->type == GEOTYPE_CYL) {
-				struct geocyl *cyl = (struct geocyl *) geo;
-				cyl->ymax = ymax;
-				cyl->ymin = ymin;
-				geo = (struct geo *)((uintptr_t)geo + sizeof(struct geocyl));
-			}
-		}
-	}
-}
-#endif
-
-bool cd00026a04(struct coord *pos, uint8_t *start, uint8_t *end, int16_t geoflags, int room, struct geo **tileptr, int *roomptr, float *groundptr, bool ceiling)
+bool cdFindFloorOrCeilingAtPos(struct coord *pos, uint8_t *geoStart, uint8_t *geoEnd, int16_t geoflags, int room, struct geo **outTile, int *outRoom, float *outHeight, bool checkCeiling)
 {
 	bool result = false;
-	struct geo *geo = (struct geo *) start;
+	struct geo *geo = (struct geo *) geoStart;
 
-	if (room);
-
-	while (geo < (struct geo *) end) {
+	while (geo < (struct geo *) geoEnd) {
 		if (geo->type == GEOTYPE_TILE_I) {
 			struct geotilei *tile = (struct geotilei *) geo;
 
@@ -903,16 +854,16 @@ bool cd00026a04(struct coord *pos, uint8_t *start, uint8_t *end, int16_t geoflag
 					&& pos->x <= *(int16_t *)(tile->xmax + (uintptr_t)tile)
 					&& pos->z >= *(int16_t *)(tile->zmin + (uintptr_t)tile)
 					&& pos->z <= *(int16_t *)(tile->zmax + (uintptr_t)tile)) {
-				if ((!ceiling && pos->y >= *(int16_t *)(tile->ymin + (uintptr_t)tile))
-						|| (ceiling && pos->y <= *(int16_t *)(tile->ymax + (uintptr_t)tile))) {
+				if ((!checkCeiling && pos->y >= *(int16_t *)(tile->ymin + (uintptr_t)tile))
+						|| (checkCeiling && pos->y <= *(int16_t *)(tile->ymax + (uintptr_t)tile))) {
 					if (cdIs2dPointInIntTile(tile, pos->x, pos->z)) {
 						float ground = cdFindGroundInIntTile(tile, pos->x, pos->z);
 
-						if ((!ceiling && ground <= pos->y && ground > *groundptr)
-								|| (ceiling && ground >= pos->y && ground < *groundptr)) {
-							*groundptr = ground;
-							*tileptr = geo;
-							*roomptr = room;
+						if ((!checkCeiling && ground <= pos->y && ground > *outHeight)
+								|| (checkCeiling && ground >= pos->y && ground < *outHeight)) {
+							*outHeight = ground;
+							*outTile = geo;
+							*outRoom = room;
 							result = true;
 						}
 					}
@@ -928,16 +879,16 @@ bool cd00026a04(struct coord *pos, uint8_t *start, uint8_t *end, int16_t geoflag
 					&& pos->x <= tile->vertices[tile->xmax].x
 					&& pos->z >= tile->vertices[tile->zmin].z
 					&& pos->z <= tile->vertices[tile->zmax].z) {
-				if ((!ceiling && pos->y >= tile->vertices[tile->ymin].y)
-						|| (ceiling && pos->y <= tile->vertices[tile->ymax].y)) {
+				if ((!checkCeiling && pos->y >= tile->vertices[tile->ymin].y)
+						|| (checkCeiling && pos->y <= tile->vertices[tile->ymax].y)) {
 					if (cdIs2dPointInFltTile(tile, pos->x, pos->z)) {
 						float ground = cdFindGroundInFltTile(tile, pos->x, pos->z);
 
-						if ((!ceiling && pos->y >= ground && ground > *groundptr)
-								|| (ceiling && pos->y <= ground && ground < *groundptr)) {
-							*groundptr = ground;
-							*tileptr = geo;
-							*roomptr = room;
+						if ((!checkCeiling && pos->y >= ground && ground > *outHeight)
+								|| (checkCeiling && pos->y <= ground && ground < *outHeight)) {
+							*outHeight = ground;
+							*outTile = geo;
+							*outRoom = room;
 							result = true;
 						}
 					}
@@ -982,7 +933,7 @@ void cdFindClosestVertical(struct coord *pos, RoomNum *rooms, int16_t geoflags, 
 			start = g_TileFileData.uint8_t + g_TileRooms[roomnum];
 			end = g_TileFileData.uint8_t + g_TileRooms[roomnum + 1];
 
-			cd00026a04(pos, start, end, geoflags, roomnum, &geo, &room, &closesty, ceiling);
+			cdFindFloorOrCeilingAtPos(pos, start, end, geoflags, roomnum, &geo, &room, &closesty, ceiling);
 		}
 
 		roomptr2++;
@@ -996,7 +947,7 @@ void cdFindClosestVertical(struct coord *pos, RoomNum *rooms, int16_t geoflags, 
 		struct prop *prop = &g_Vars.props[*propnumptr];
 
 		if (propUpdateGeometry(prop, &start, &end)
-				&& cd00026a04(pos, start, end, geoflags, prop->rooms[0], &geo, &room, &closesty, ceiling)) {
+				&& cdFindFloorOrCeilingAtPos(pos, start, end, geoflags, prop->rooms[0], &geo, &room, &closesty, ceiling)) {
 			bestprop = prop;
 		}
 
@@ -2481,7 +2432,7 @@ bool cd0002aac0IntTile(struct coord *arg0, struct coord *arg1, struct coord *arg
 	uint8_t numvertices = tile->header.numvertices;
 
 	for (i = 2; i < numvertices; i++) {
-		if (func0002f490((struct vec3s16 *)&tile->vertices[0][0],
+		if (utilsRayIntersectsTriangleS16((struct vec3s16 *)&tile->vertices[0][0],
 					(struct vec3s16 *)&tile->vertices[i - 1][0],
 					(struct vec3s16 *)&tile->vertices[i][0],
 					NULL, arg0, arg1, arg2, arg4, arg5)) {
@@ -2498,7 +2449,7 @@ bool cd0002ab98FltTile(struct coord *arg0, struct coord *arg1, struct coord *arg
 	uint8_t numvertices = tile->header.numvertices;
 
 	for (i = 2; i < numvertices; i++) {
-		if (func0002f560(&tile->vertices[0], &tile->vertices[i - 1], &tile->vertices[i],
+		if (utilsRayIntersectsTriangleF(&tile->vertices[0], &tile->vertices[i - 1], &tile->vertices[i],
 					NULL, arg0, arg1, arg2, arg4, arg5)) {
 			return true;
 		}
@@ -3067,6 +3018,14 @@ void cd0002c528FltTile(struct geotilef *tile, struct coord *arg1, struct coord *
 	arg4->z = arg1->z + sp3c.f[2] * min;
 }
 
+/*
+ * Perform a raycast or sweep test against a list of geo tiles/shapes.
+ *
+ * Checks if a line from `arg2` to `arg3` intersects any geometry (tiles, blocks, cylinders)
+ * in the geolist [start, end), and if so, returns the closest intersection point and related data.
+ *
+ * return false if an intersection was found and data was written; true otherwise
+ */
 bool cdExamAToBGeolist(uint8_t *start, uint8_t *end, struct coord *arg2, struct coord *arg3, struct coord *arg4,
 		int16_t geoflags, bool checkvertical, int arg7, float ymax, float ymin, float *arg10, struct coord *arg11,
 		struct coord *arg12, struct coord *arg13, struct geo **geoptr, int roomnum)
@@ -3515,7 +3474,7 @@ int cdExamCylMove06(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomN
 		sp40.y = arg2->y - arg0->y;
 		sp40.z = arg2->z - arg0->z;
 
-		cd000250cc(arg0, &sp40, width);
+		cdCheckSlideAgainstEdgeXZ(arg0, &sp40, width);
 	} else if (!arrayIntersects(sp4c, arg3)) {
 		cdClearResults();
 		result = CDRESULT_ERROR;
@@ -3548,7 +3507,7 @@ int cdExamCylMove08(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomN
 		sp40.y = arg2->y - arg0->y;
 		sp40.z = arg2->z - arg0->z;
 
-		cd000250cc(arg0, &sp40, width);
+		cdCheckSlideAgainstEdgeXZ(arg0, &sp40, width);
 	}
 
 	return result;
@@ -3636,28 +3595,41 @@ int cdTestLos11(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomNum *
 	return cdTestLos10(arg0, arg1, arg2, arg3, types, GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT | GEOFLAG_BLOCK_SHOOT);
 }
 
-bool cd0002ded8(struct coord *arg0, struct coord *arg1, struct prop *prop)
+/**
+ * Check if a ray from rayStart to rayEnd intersects the collision geometry of the given prop.
+ *
+ * This function performs a line-segment collision test against a prop's geometry
+ * using the GEOTYPE_* structures (tiles, blocks, cylinders).
+ * If a hit is detected, it updates the obstacle system with hit details.
+ *
+ * rayStart    The start point of the ray
+ * rayEnd    The end point of the ray
+ * prop    The prop whose geometry to check against
+ *
+ * return true if the ray did NOT hit the prop's geometry; false if a collision was found
+ */
+bool cdIsPathClearToProp(struct coord *rayStart, struct coord *rayEnd, struct prop *prop)
 {
 	uint8_t *start;
 	uint8_t *end;
-	struct coord sp7c;
+	struct coord rayDir;
 	bool result = false;
-	struct coord sp6c;
-	struct coord sp60;
-	struct coord sp54;
-	float sp50 = 4294967296;
-	struct geo *geo;
+	struct coord hitPoint;
+	struct coord surfaceNormal1;
+	struct coord surfaceNormal2;
+	float bestDistanceSqr = 4294967296;
+	struct geo *hitGeometry;
 
-	sp7c.x = arg1->x - arg0->x;
-	sp7c.y = arg1->y - arg0->y;
-	sp7c.z = arg1->z - arg0->z;
+	rayDir.x = rayEnd->x - rayStart->x;
+	rayDir.y = rayEnd->y - rayStart->y;
+	rayDir.z = rayEnd->z - rayStart->z;
 
 	if (propUpdateGeometry(prop, &start, &end)) {
-		if (!cdExamAToBGeolist(start, end, arg0, arg1, &sp7c,
+		if (!cdExamAToBGeolist(start, end, rayStart, rayEnd, &rayDir,
 					GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT | GEOFLAG_BLOCK_SHOOT,
-					CHECKVERTICAL_YES, 1, 0, 0, &sp50, &sp6c, &sp60, &sp54, &geo, -999)) {
+					CHECKVERTICAL_YES, 1, 0, 0, &bestDistanceSqr, &hitPoint, &surfaceNormal1, &surfaceNormal2, &hitGeometry, -999)) {
 			result = true;
-			cdSetObstacleVtxColPropFltGeo(&sp60, &sp54, &sp6c, prop, sp50, geo);
+			cdSetObstacleVtxColPropFltGeo(&surfaceNormal1, &surfaceNormal2, &hitPoint, prop, bestDistanceSqr, hitGeometry);
 		}
 	}
 
@@ -3669,7 +3641,6 @@ bool cd0002ded8(struct coord *arg0, struct coord *arg1, struct prop *prop)
  */
 bool cdBlockExcludesBlockLaterally(struct geoblock *block1, struct geoblock *block2)
 {
-	int32_t stack[4];
 	float zero = 0.0f;
 	int numvertices0 = block1->header.numvertices;
 	int numvertices1 = block2->header.numvertices;
@@ -3689,16 +3660,12 @@ bool cdBlockExcludesBlockLaterally(struct geoblock *block1, struct geoblock *blo
 			}
 		} else {
 			double sum1 = block1->vertices[i][0] * diff1 + block1->vertices[i][1] * diff2;
-			double sum2;
+			double sum2 = 0.0f;
 			int j = (next + 1) % numvertices0;
 			int k;
 
 			while (j != i) {
 				sum2 = block1->vertices[j][0] * diff1 + block1->vertices[j][1] * diff2;
-
-				if (1);
-				if (1);
-				if (1);
 
 				if (sum2 != sum1) {
 					break;

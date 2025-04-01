@@ -496,7 +496,7 @@ float bmoveCalculateLookahead(void)
 	if (cdExamLos08(&spf0, spe0, &sp150,
 				CDTYPE_BG | CDTYPE_CLOSEDDOORS,
 				GEOFLAG_FLOOR1 | GEOFLAG_FLOOR2 | GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT) == CDRESULT_COLLISION) {
-		cdGetPos(&sp150, 455, "bondmove.c");
+		cdGetPos(&sp150);
 		flags = cdGetGeoFlags();
 
 		sp160 = sqrtf((sp150.x - spf0.x) * (sp150.x - spf0.x)
@@ -1403,7 +1403,6 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						}
 					}
 
-#ifndef PLATFORM_N64
 					// Handle turning and looking up/down via mouselook when aiming
 					if (g_Vars.currentplayer->insightaimmode && allowmcross && bgunGetWeaponNum(HAND_RIGHT) != WEAPON_HORIZONSCANNER) {
 						if (g_Vars.currentplayer->swivelpos[0] > 0.9f) {
@@ -1432,7 +1431,6 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 						g_Vars.currentplayer->swivelpos[0] = 0.f;
 						g_Vars.currentplayer->swivelpos[1] = 0.f;
 					}
-#endif
 
 					// Handle A button
 					if (allowc1buttons) {
@@ -1444,7 +1442,6 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 							}
 						} else {
 							for (i = 0; i < numsamples; i++) {
-#ifndef PLATFORM_N64
 								if (controlmode == CONTROLMODE_PC) {
 									if (joyGetButtonsPressedOnSample(i, contpad1, c1allowedbuttons & BUTTON_WPNFORWARD)) {
 										movedata.weaponforwardoffset++;
@@ -1455,7 +1452,6 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 									}
 									continue;
 								}
-#endif
 								if (joyGetButtonsOnSample(i, contpad1, invbuttons & c1allowedbuttons)) {
 									if (g_Vars.currentplayer->invdowntime > -2) {
 										if (joyGetButtonsPressedOnSample(i, contpad1, shootbuttons & c1allowedbuttons)) {
@@ -2422,9 +2418,9 @@ void bmove0f0cc19c(struct coord *arg)
 	float min;
 	float mult;
 
-	g_Vars.currentplayer->bond2.unk10.x = arg->x;
-	g_Vars.currentplayer->bond2.unk10.y = arg->y;
-	g_Vars.currentplayer->bond2.unk10.z = arg->z;
+	g_Vars.currentplayer->bond2.cameraPos.x = arg->x;
+	g_Vars.currentplayer->bond2.cameraPos.y = arg->y;
+	g_Vars.currentplayer->bond2.cameraPos.z = arg->z;
 
 	if (g_Vars.currentplayer->isdead && g_Vars.currentplayer->bondleandown > 0) {
 		g_Vars.currentplayer->bondleandown -= 0.25f;
@@ -2435,7 +2431,7 @@ void bmove0f0cc19c(struct coord *arg)
 	}
 
 	if (g_Vars.currentplayer->vv_verta < 0) {
-		g_Vars.currentplayer->bond2.unk10.y += -(1.0f - g_Vars.currentplayer->vv_cosverta) * g_Vars.currentplayer->bondleandown;
+		g_Vars.currentplayer->bond2.cameraPos.y += -(1.0f - g_Vars.currentplayer->vv_cosverta) * g_Vars.currentplayer->bondleandown;
 	}
 
 	if (cheatIsActive(CHEAT_SMALLJO)) {
@@ -2443,32 +2439,23 @@ void bmove0f0cc19c(struct coord *arg)
 			mult = g_Vars.currentplayer->bondentert * 0.6f + 0.4f;
 		} else if (g_Vars.currentplayer->bondmovemode == MOVEMODE_WALK && g_Vars.currentplayer->walkinitmove) {
 			mult = (1.0f - g_Vars.currentplayer->walkinitt) * 0.6f + 0.4f;
-			g_Vars.currentplayer->bond2.unk10.y += (g_Vars.currentplayer->crouchoffsetreal - g_Vars.currentplayer->crouchoffsetrealsmall) * g_Vars.currentplayer->walkinitt;
+			g_Vars.currentplayer->bond2.cameraPos.y += (g_Vars.currentplayer->crouchoffsetreal - g_Vars.currentplayer->crouchoffsetrealsmall) * g_Vars.currentplayer->walkinitt;
 		} else if (g_Vars.currentplayer->bondmovemode == MOVEMODE_WALK) {
 			mult = 0.4f;
-			g_Vars.currentplayer->bond2.unk10.y += (g_Vars.currentplayer->crouchoffsetreal - g_Vars.currentplayer->crouchoffsetrealsmall);
+			g_Vars.currentplayer->bond2.cameraPos.y += (g_Vars.currentplayer->crouchoffsetreal - g_Vars.currentplayer->crouchoffsetrealsmall);
 		} else {
 			mult = 0.4f;
 		}
 
-		g_Vars.currentplayer->bond2.unk10.y = (g_Vars.currentplayer->bond2.unk10.y - g_Vars.currentplayer->vv_manground) * mult;
-
-#if VERSION < VERSION_NTSC_1_0
-		if (g_Vars.currentplayer->bond2.unk10.y < 30) {
-			g_Vars.currentplayer->bond2.unk10.y = 30;
-		}
-#endif
-
-		g_Vars.currentplayer->bond2.unk10.y += g_Vars.currentplayer->vv_manground;
+		g_Vars.currentplayer->bond2.cameraPos.y = (g_Vars.currentplayer->bond2.cameraPos.y - g_Vars.currentplayer->vv_manground) * mult;
+		g_Vars.currentplayer->bond2.cameraPos.y += g_Vars.currentplayer->vv_manground;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	min = g_Vars.currentplayer->vv_ground + 10;
 
-	if (g_Vars.currentplayer->bond2.unk10.y < min) {
-		g_Vars.currentplayer->bond2.unk10.y = min;
+	if (g_Vars.currentplayer->bond2.cameraPos.y < min) {
+		g_Vars.currentplayer->bond2.cameraPos.y = min;
 	}
-#endif
 }
 
 void bmoveUpdateHead(float arg0, float arg1, float arg2, Mtxf *arg3, float arg4)
@@ -2520,9 +2507,9 @@ void bmoveUpdateHead(float arg0, float arg1, float arg2, Mtxf *arg3, float arg4)
 		quaternionToMtx(sp68, &sp180);
 	}
 
-	g_Vars.currentplayer->bond2.unk1c.x = sp180.m[2][0];
-	g_Vars.currentplayer->bond2.unk1c.y = sp180.m[2][1];
-	g_Vars.currentplayer->bond2.unk1c.z = sp180.m[2][2];
+	g_Vars.currentplayer->bond2.cameraForward.x = sp180.m[2][0];
+	g_Vars.currentplayer->bond2.cameraForward.y = sp180.m[2][1];
+	g_Vars.currentplayer->bond2.cameraForward.z = sp180.m[2][2];
 	g_Vars.currentplayer->bond2.unk28.x = sp180.m[1][0];
 	g_Vars.currentplayer->bond2.unk28.y = sp180.m[1][1];
 	g_Vars.currentplayer->bond2.unk28.z = sp180.m[1][2];

@@ -94,7 +94,7 @@ void bwalkInit(void)
 		struct coord delta;
 		mtx00016b58(&g_Vars.currentplayer->walkinitmtx,
 				0, 0, 0,
-				-g_Vars.currentplayer->bond2.unk1c.x, -g_Vars.currentplayer->bond2.unk1c.y, -g_Vars.currentplayer->bond2.unk1c.z,
+				-g_Vars.currentplayer->bond2.cameraForward.x, -g_Vars.currentplayer->bond2.cameraForward.y, -g_Vars.currentplayer->bond2.cameraForward.z,
 				g_Vars.currentplayer->bond2.unk28.x, g_Vars.currentplayer->bond2.unk28.y, g_Vars.currentplayer->bond2.unk28.z);
 		g_Vars.currentplayer->walkinitt = 0;
 		g_Vars.currentplayer->walkinitt2 = 0;
@@ -149,7 +149,7 @@ void bwalk0f0c3b38(struct coord *reltarget, struct defaultobj *obj)
 	abstarget.y = g_Vars.currentplayer->prop->pos.y;
 	abstarget.z = reltarget->z + g_Vars.currentplayer->prop->pos.z;
 
-	cdGetEdge(&globalthinga, &globalthingb, 223, "bondwalk.c");
+	cdGetEdge(&globalthinga, &globalthingb);
 
 	vector.x = globalthingb.z - globalthinga.z;
 	vector.y = 0;
@@ -392,7 +392,7 @@ bool bwalkCalculateNewPositionWithPush(struct coord *delta, float rotateamount, 
 
 				if (door->doorflags & DOORFLAG_DAMAGEONCONTACT) {
 					if (!g_Vars.currentplayer->isdead) {
-						cdGetEdge(&sp84, &sp78, 465, "bondwalk.c");
+						cdGetEdge(&sp84, &sp78);
 						sp90.x = sp78.f[2] - sp84.f[2];
 						sp90.y = 0;
 						sp90.z = sp84.f[0] - sp78.f[0];
@@ -524,7 +524,7 @@ int bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, i
 	int result = bwalkCalculateNewPositionWithPush(delta, 0, true, 0, types);
 
 	if (result == CDRESULT_COLLISION) {
-		cdGetEdge(arg1, arg2, 607, "bondwalk.c");
+		cdGetEdge(arg1, arg2);
 	}
 
 	return result;
@@ -548,7 +548,7 @@ int bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c,
 		}
 
 		if (result == CDRESULT_COLLISION) {
-			cdGetEdge(d, e, 635, "bondwalk.c");
+			cdGetEdge(d, e);
 
 			if (b->x != d->x
 					|| b->y != d->y

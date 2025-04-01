@@ -244,7 +244,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 
 			moveok = true;
 		} else {
-			cdGetEdge(&sp78, &sp6c, 453, "chr/chr.c");
+			cdGetEdge(&sp78, &sp6c);
 
 			// Attempt to find a valid position - method #1
 			sp60.x = dstpos->x - prop->pos.x;
@@ -1485,7 +1485,7 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 			return;
 		}
 
-		mtx00015be0(camGetProjectionMtxF(), mtx);
+		mtxApplyAffineInPlace(camGetProjectionMtxF(), mtx);
 
 		sp138.x = mtx->m[3][0];
 		sp138.y = mtx->m[3][1];
@@ -1510,9 +1510,9 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 		}
 
 		mtx4LoadYRotation(gunrot, &spb8);
-		mtx00015be0(&spb8, mtx);
+		mtxApplyAffineInPlace(&spb8, mtx);
 		mtx4LoadXRotation(gunrotx, &spf8);
-		mtx00015be0(&spf8, mtx);
+		mtxApplyAffineInPlace(&spf8, mtx);
 
 		gunrot = gunroty + theta;
 
@@ -1521,17 +1521,17 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 		}
 
 		mtx4LoadYRotation(gunrot, &spb8);
-		mtx00015be0(&spb8, mtx);
+		mtxApplyAffineInPlace(&spb8, mtx);
 
 		if (scale != 1.0f) {
-			mtx00015f04(scale, mtx);
+			mtxScaleRotationAndTranslation(scale, mtx);
 		}
 
 		mtx->m[3][0] = sp138.x;
 		mtx->m[3][1] = sp138.y;
 		mtx->m[3][2] = sp138.z;
 
-		mtx00015be0(camGetWorldToScreenMtxf(), mtx);
+		mtxApplyAffineInPlace(camGetWorldToScreenMtxf(), mtx);
 	} else {
 		if (g_CurModelChr->model->definition->skel == &g_SkelChr) {
 			lshoulderjoint = 2;
@@ -1694,7 +1694,7 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 					yrot += M_TAU;
 				}
 
-				mtx00015be0(camGetProjectionMtxF(), mtx);
+				mtxApplyAffineInPlace(camGetProjectionMtxF(), mtx);
 
 				sp70.x = mtx->m[3][0];
 				sp70.y = mtx->m[3][1];
@@ -1712,34 +1712,34 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 					}
 
 					mtx4LoadYRotation(yrot, &tmpmtx);
-					mtx00015be0(&tmpmtx, mtx);
+					mtxApplyAffineInPlace(&tmpmtx, mtx);
 
 					if (xrot != 0.0f) {
 						mtx4LoadXRotation(xrot, &tmpmtx);
-						mtx00015be0(&tmpmtx, mtx);
+						mtxApplyAffineInPlace(&tmpmtx, mtx);
 					}
 
 					if (zrot != 0.0f) {
 						mtx4LoadZRotation(zrot, &tmpmtx);
-						mtx00015be0(&tmpmtx, mtx);
+						mtxApplyAffineInPlace(&tmpmtx, mtx);
 					}
 
 					mtx4LoadYRotation(aimangle, &tmpmtx);
-					mtx00015be0(&tmpmtx, mtx);
+					mtxApplyAffineInPlace(&tmpmtx, mtx);
 				} else {
 					mtx4LoadYRotation(yrot, &tmpmtx);
-					mtx00015be0(&tmpmtx, mtx);
+					mtxApplyAffineInPlace(&tmpmtx, mtx);
 				}
 
 				if (scale != 1.0f) {
-					mtx00015f04(scale, mtx);
+					mtxScaleRotationAndTranslation(scale, mtx);
 				}
 
 				mtx->m[3][0] = sp70.x;
 				mtx->m[3][1] = sp70.y;
 				mtx->m[3][2] = sp70.z;
 
-				mtx00015be0(camGetWorldToScreenMtxf(), mtx);
+				mtxApplyAffineInPlace(camGetWorldToScreenMtxf(), mtx);
 			}
 		}
 	}
@@ -4224,14 +4224,14 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 			Mtxf *mtx;
 			float sp68;
 
-			if (func0f06b39c(&shotdata->gunpos2d, &shotdata->gundir2d, (struct coord *)rootmtx->m[3], radius)) {
+			if (isPointInViewCone(&shotdata->gunpos2d, &shotdata->gundir2d, (struct coord *)rootmtx->m[3], radius)) {
 				spb8 = 1;
 				hitpart = 1;
 			}
 
 			if (hitpart) {
 				if (chrGetShield(chr) > 0.0f) {
-					var8005efc0 = 10.0f / model->scale;
+					g_ShieldHitExpansion = 10.0f / model->scale;
 				}
 
 				child = prop->child;
@@ -4242,7 +4242,7 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 					child = next;
 				}
 
-				if (cheap || var8005efc0 > 0.0f) {
+				if (cheap || g_ShieldHitExpansion > 0.0f) {
 					hitpart = modelTestForHit(model, &shotdata->gunpos2d, &shotdata->gundir2d, &node);
 
 					while (hitpart > 0) {
@@ -4270,8 +4270,8 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 					}
 				}
 
-				if (var8005efc0 > 0.0f) {
-					var8005efc0 = 0.0f;
+				if (g_ShieldHitExpansion > 0.0f) {
+					g_ShieldHitExpansion = 0.0f;
 				}
 			}
 

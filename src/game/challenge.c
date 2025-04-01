@@ -205,7 +205,7 @@ void challengeDetermineUnlockedFeatures(void)
 		g_MpFeaturesUnlocked[j] = flag;
 	}
 
-	for (j = 0; j < func0f188bcc(); j++) {
+	for (j = 0; j < NUM_MPWEAPONS; j++) {
 		struct mpweapon *weapon = &g_MpWeapons[j];
 
 		if (weapon->unlockfeature > 0 && frIsDeviceUnlocked(weapon->weaponnum)) { // X-ray Scanner or Cloaking Device

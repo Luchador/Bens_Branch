@@ -76,11 +76,10 @@
  * rwdata (such as the selected head).
  */
 
-uint32_t var8005efb0 = 0;
 bool g_ModelDistanceDisabled = false;
 float g_ModelDistanceScale = 1;
 bool var8005efbc = false;
-float var8005efc0 = 0;
+float g_ShieldHitExpansion = 0; // How far from the model part's bbox to do a shield hit test
 bool (*var8005efc4)(struct model *model, struct modelnode *node) = NULL;
 Vtx *(*g_ModelVtxAllocatorFunc)(int numvertices) = NULL;
 void (*g_ModelJointPositionedFunc)(int mtxindex, Mtxf *mtx) = NULL;
@@ -451,7 +450,6 @@ float modelGetScreenDistance(struct model *model)
 	return 0;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 // ntsc-beta has this function in another file
 void *modelGetNodeRwData(struct model *model, struct modelnode *node)
 {
@@ -497,7 +495,6 @@ void *modelGetNodeRwData(struct model *model, struct modelnode *node)
 
 	return &rwdatas[index];
 }
-#endif
 
 void modelNodeGetPosition(struct model *model, struct modelnode *node, struct coord *pos)
 {
@@ -858,7 +855,7 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 		if ((g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) && (g_Anims[anim->animnum2].flags & ANIMFLAG_ABSOLUTETRANSLATION) == 0) {
 			mtx4LoadYRotation(rwdata->chrinfo.yrot, &sp78);
 			mtx4LoadRotation(&rot3, &sp38);
-			mtx00015be0(&sp78, &sp38);
+			mtxApplyAffineInPlace(&sp78, &sp38);
 			quaternion0f097044(&sp38, spec);
 		} else {
 			quaternionEulerToQuat(&rot3, spec);
@@ -885,7 +882,7 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 	mtxApplyAffineTransform(&sp198, &sp1d8, &sp158);
 
 	if (scale != 1.0f) {
-		mtx00015f4c(scale, &sp158);
+		mtxScaleRotationOnly(scale, &sp158);
 	}
 
 	if (sp24c) {
@@ -918,19 +915,19 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 		mtx4LoadRotationAndTranslation(pos, rot, &mtx68);
 
 		if (allowscale && model->scale != 1.0f) {
-			mtx00015f04(model->scale, &mtx68);
+			mtxScaleRotationAndTranslation(model->scale, &mtx68);
 		}
 
 		if (arg6->x != 1.0f) {
-			mtx00015df0(arg6->x, &mtx68);
+			mtxScaleRowX(arg6->x, &mtx68);
 		}
 
 		if (arg6->y != 1.0f) {
-			mtx00015e4c(arg6->y, &mtx68);
+			mtxScaleRowY(arg6->y, &mtx68);
 		}
 
 		if (arg6->z != 1.0f) {
-			mtx00015ea8(arg6->z, &mtx68);
+			mtxScaleRowZ(arg6->z, &mtx68);
 		}
 
 		mtxApplyAffineTransform(rendermtx, &mtx68, nodemtx);
@@ -944,19 +941,19 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 		mtx4LoadRotationAndTranslation(pos, rot, nodemtx);
 
 		if (allowscale && model->scale != 1.0f) {
-			mtx00015f04(model->scale, nodemtx);
+			mtxScaleRotationAndTranslation(model->scale, nodemtx);
 		}
 
 		if (arg6->x != 1.0f) {
-			mtx00015df0(arg6->x, nodemtx);
+			mtxScaleRowX(arg6->x, nodemtx);
 		}
 
 		if (arg6->y != 1.0f) {
-			mtx00015e4c(arg6->y, nodemtx);
+			mtxScaleRowY(arg6->y, nodemtx);
 		}
 
 		if (arg6->z != 1.0f) {
-			mtx00015ea8(arg6->z, nodemtx);
+			mtxScaleRowZ(arg6->z, nodemtx);
 		}
 	}
 
@@ -998,7 +995,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 			roty = 1.5f;
 		}
 
-		mtx00015edc(roty, finalmtx);
+		mtxScaleZAxis(roty, finalmtx);
 		mtx4SetTranslation(pos, finalmtx);
 
 		if (rendermtx != NULL) {
@@ -1031,15 +1028,15 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 		quaternionToTransformMtx(pos, rot, &mtx58);
 
 		if (arg5->x != 1.0f) {
-			mtx00015df0(arg5->x, &mtx58);
+			mtxScaleRowX(arg5->x, &mtx58);
 		}
 
 		if (arg5->y != 1.0f) {
-			mtx00015e4c(arg5->y, &mtx58);
+			mtxScaleRowY(arg5->y, &mtx58);
 		}
 
 		if (arg5->z != 1.0f) {
-			mtx00015ea8(arg5->z, &mtx58);
+			mtxScaleRowZ(arg5->z, &mtx58);
 		}
 
 		mtxApplyAffineTransform(rendermtx, &mtx58, nodemtx);
@@ -1053,15 +1050,15 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 		quaternionToTransformMtx(pos, rot, nodemtx);
 
 		if (arg5->x != 1.0f) {
-			mtx00015df0(arg5->x, nodemtx);
+			mtxScaleRowX(arg5->x, nodemtx);
 		}
 
 		if (arg5->y != 1.0f) {
-			mtx00015e4c(arg5->y, nodemtx);
+			mtxScaleRowY(arg5->y, nodemtx);
 		}
 
 		if (arg5->z != 1.0f) {
-			mtx00015ea8(arg5->z, nodemtx);
+			mtxScaleRowZ(arg5->z, nodemtx);
 		}
 	}
 
@@ -1101,7 +1098,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 			roty = 1.5f;
 		}
 
-		mtx00015edc(roty, finalmtx);
+		mtxScaleZAxis(roty, finalmtx);
 		mtx4SetTranslation(pos, finalmtx);
 
 		if (rendermtx != NULL) {
@@ -1608,15 +1605,9 @@ void modelSetMatrices(struct modelrenderdata *renderdata, struct model *model)
 
 	renderdata->unk10 += model->definition->nummatrices;
 
-#if VERSION >= VERSION_PAL_BETA
-	if (var8005efb0_2 || !modelasm00018680(renderdata, model)) {
-		modelUpdateMatrices(renderdata, model);
-	}
-#else
 	if (!modelasm00018680(renderdata, model)) {
 		modelUpdateMatrices(renderdata, model);
 	}
-#endif
 }
 
 void modelSetMatricesWithAnim(struct modelrenderdata *renderdata, struct model *model)
@@ -3664,13 +3655,13 @@ bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct co
 	float zsum2;
 	float zsum3;
 
-	if (var8005efc0 != 0.0f) {
-		xmin -= var8005efc0;
-		xmax += var8005efc0;
-		ymin -= var8005efc0;
-		ymax += var8005efc0;
-		zmin -= var8005efc0;
-		zmax += var8005efc0;
+	if (g_ShieldHitExpansion != 0.0f) {
+		xmin -= g_ShieldHitExpansion;
+		xmax += g_ShieldHitExpansion;
+		ymin -= g_ShieldHitExpansion;
+		ymax += g_ShieldHitExpansion;
+		zmin -= g_ShieldHitExpansion;
+		zmax += g_ShieldHitExpansion;
 	}
 
 	// x

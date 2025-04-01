@@ -16,6 +16,7 @@
 #include "mod.h"
 #include "system.h"
 #include "utils.h"
+#include "game/debug.h"
 
 uint32_t g_OsMemSize = 0;
 OSSched g_Sched;

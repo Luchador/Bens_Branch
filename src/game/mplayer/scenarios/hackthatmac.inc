@@ -611,7 +611,7 @@ Gfx *htmRenderHud(Gfx *gdl)
 		}
 
 		gdl = textSetCCCustom02(gdl);
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 	}
 
 	return gdl;

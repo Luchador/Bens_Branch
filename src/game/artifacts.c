@@ -169,7 +169,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 			s1 = &var800a41a0[g_Rooms[roomnum].gfxdata->lightsindex * 3];
 
 			roomPopulateMtx(&sp138, roomnum);
-			mtx00015f88(bgGetScaleBg2Gfx(), &sp138);
+			mtxScaleTransform(bgGetScaleBg2Gfx(), &sp138);
 			mtx4MultMtx4(camGetMtxF006c(), &sp138, &spf8);
 
 			viewwidth = viGetViewWidth();
@@ -584,7 +584,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 						spd4[0] = f24;
 						spd4[1] = f26;
 
-						textureCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
+						utilsCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
 
 						// Make artifacts slightly brighter when true
 						if (extra) {
@@ -599,7 +599,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 							spd4[0] = f24 * 0.4f;
 							spd4[1] = f26 * 0.4f;
 
-							textureCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
+							utilsCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
 						}
 					}
 				}

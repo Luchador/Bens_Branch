@@ -452,14 +452,14 @@ Gfx *htbRenderHud(Gfx *gdl)
 		textheight += y;
 
 #if VERSION >= VERSION_NTSC_1_0
-		gdl = text0f153990(gdl, x, y, textwidth, textheight);
+		gdl = textDrawBlackRectBordered(gdl, x, y, textwidth, textheight);
 		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0xa0, viGetWidth(), viGetHeight(), 0, 0);
 #else
 		gdl = text0f153858(gdl, &x, &y, &textwidth, &textheight);
 		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0x88, viGetWidth(), viGetHeight(), 0, 0);
 #endif
 
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 
 #ifndef PLATFORM_N64
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);

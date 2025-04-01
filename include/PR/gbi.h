@@ -902,11 +902,6 @@
 #define G_DL_NOPUSH 0x01
 
 /*
- * BEGIN C-specific section: (typedef's)
- */
-#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
-
-/*
  * Data Structures
  *
  * NOTE:
@@ -964,28 +959,6 @@ typedef union {
         uint8_t a;
     };
 } Col;
-
-/*
- * Sprite structure
- */
-
-typedef struct {
-	void  *SourceImagePointer;
-	void  *TlutPointer;
-	short Stride;
-	short SubImageWidth;
-	short SubImageHeight;
-	char  SourceImageType;
-	char  SourceImageBitSize;
-	short SourceImageOffsetS;
-	short SourceImageOffsetT;
-	char  dummy[4];
-} uSprite_t;
-
-typedef union {
-	uSprite_t     s;
-	long long int force_structure_allignment[3];
-} uSprite;
 
 /*
  * Triangle face
@@ -1739,10 +1712,6 @@ typedef union {
     (_SHIFTL((flag), 24,8)|_SHIFTL((v0)*10,16,8)| \
      _SHIFTL((v1)*10, 8,8)|_SHIFTL((v2)*10, 0,8))
 
-#define __gsSPLine3D_w1f(v0, v1, wd, flag)        \
-    (_SHIFTL((flag), 24,8)|_SHIFTL((v0)*10,16,8)| \
-     _SHIFTL((v1)*10, 8,8)|_SHIFTL((wd),    0,8))
-
 /***
  ***  1 Triangle
  ***/
@@ -1752,52 +1721,6 @@ typedef union {
                                                           \
     _g->words.w0 = _SHIFTL(G_TRI1, 24, 8);                \
     _g->words.w1 = __gsSP1Triangle_w1f(v0, v1, v2, flag); \
-}
-
-#define gsSP1Triangle(v0, v1, v2, flag)   \
-{                                         \
-    _SHIFTL(G_TRI1, 24, 8),               \
-    __gsSP1Triangle_w1f(v0, v1, v2, flag) \
-}
-
-/***
- ***  Line
- ***/
-#define gSPLine3D(pkt, v0, v1, flag)                  \
-{                                                     \
-    Gfx *_g = (Gfx *)(pkt);                           \
-                                                      \
-    _g->words.w0 = _SHIFTL(G_LINE3D, 24, 8);          \
-    _g->words.w1 = __gsSPLine3D_w1f(v0, v1, 0, flag); \
-}
-
-#define gsSPLine3D(v0, v1, flag)      \
-{                                     \
-    _SHIFTL(G_LINE3D, 24, 8),         \
-    __gsSPLine3D_w1f(v0, v1, 0, flag) \
-}
-
-/***
- ***  LineW
- ***/
-/* these macros are the same as SPLine3D, except they have an
- * additional parameter for width. The width is added to the "minimum"
- * thickness, which is 1.5 pixels. The units for width are in
- * half-pixel units, so a width of 1 translates to (.5 + 1.5) or
- * a 2.0 pixels wide line.
- */
-#define gSPLineW3D(pkt, v0, v1, wd, flag)              \
-{                                                      \
-    Gfx *_g = (Gfx *)(pkt);                            \
-                                                       \
-    _g->words.w0 = _SHIFTL(G_LINE3D, 24, 8);           \
-    _g->words.w1 = __gsSPLine3D_w1f(v0, v1, wd, flag); \
-}
-
-#define gsSPLineW3D(v0, v1, wd, flag)  \
-{                                      \
-    _SHIFTL(G_LINE3D, 24, 8),          \
-    __gsSPLine3D_w1f(v0, v1, wd, flag) \
 }
 
 /***
@@ -1842,14 +1765,9 @@ typedef union {
 #define gsSPSegment(segment, base)            \
     gsMoveWd(G_MW_SEGMENT, (segment)*4, base)
 
-#ifdef PLATFORM_N64
-#define SEGADDR(x) x
-#define UNSEGADDR(x) x
-#else
 // we mark all segmented addresses so that it'll be easier to recognize them later
 #define SEGADDR(x) ((void *)((uintptr_t)(x) | 1))
 #define UNSEGADDR(x) ((uintptr_t)(x) & ~1)
-#endif
 
 /*
  * Clipping Macros
@@ -3690,7 +3608,5 @@ typedef union {
 #define gsDPNoOp()           gsDPNoParam(G_NOOP)
 #define gDPNoOpTag(pkt, tag) gDPParam(pkt, G_NOOP, tag)
 #define gsDPNoOpTag(tag)     gsDPParam(G_NOOP, tag)
-
-#endif /* _LANGUAGE_C */
 
 #endif /* _GBI_H_ */

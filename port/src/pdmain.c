@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <time.h>
 #include <ultra64.h>
 #include <PR/ultrasched.h>
@@ -44,9 +45,7 @@
 #include "lib/model.h"
 #include "lib/anim.h"
 #include "lib/rdp.h"
-#include "lib/lib_2f490.h"
 #include "lib/rng.h"
-#include "string.h"
 #include "data.h"
 #include "types.h"
 #include "system.h"
@@ -61,11 +60,8 @@ bool g_AcceptCMDParams = false;
 int g_StageNum = STAGE_TITLE;
 uint32_t g_MainMemaHeapSize = 1024 * 300;
 bool g_MainIsEndscreen = false;
-int g_DoBootPakMenu = 0;
 int g_MainChangeToStageNum = -1;
-bool g_MainIsDebugMenuOpen = false;
 
-// Ben's comment: the change to allow all male guard heads means the memory limits need to be increased? Or does the PC port do this automatically?
 struct stageallocation g_StageAllocations8Mb[] = {
 	{ STAGE_CITRAINING,    "-ml0 -me0 -mgfx480 -mvtx392 -ma1600"             },
 	{ STAGE_DEFECTION,     "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
@@ -120,9 +116,7 @@ void mainInit(void)
 
 	g_AcceptCMDParams = true;
 
-	// no copyright screen
 	viConfigureForLegal();
-	viBlack(true);
 	viUpdateMode();
 
 	filesInit();
@@ -185,11 +179,6 @@ void mainLoop(void)
 	filesStop(5);
 
 	argGetLevel(&g_StageNum);
-
-	if (g_DoBootPakMenu) {
-		g_Vars.pakstocheck = 0xfd;
-		g_StageNum = STAGE_BOOTPAKMENU;
-	}
 
 	if (g_StageNum != STAGE_TITLE) {
 		titleSetNextStage(g_StageNum);
@@ -334,7 +323,6 @@ void mainLoop(void)
 		mempDisablePool(MEMPOOL_STAGE);
 		mempDisablePool(MEMPOOL_7);
 		filesStop(4);
-		viBlack(true);
 		pak0f116994();
 
 		g_StageNum = g_MainChangeToStageNum;

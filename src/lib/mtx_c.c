@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <string.h>
 #include "constants.h"
 #include "bss.h"
 #include "data.h"
@@ -99,7 +100,7 @@ void mtx4TransformVec(Mtxf *mtx, struct coord *vec, struct coord *dst)
 	dst->z += mtx->m[3][2];
 }
 
-void mtx00015be0(Mtxf *matrix1, Mtxf *matrix2)
+void mtxApplyAffineInPlace(Mtxf *matrix1, Mtxf *matrix2)
 {
 	mtxApplyAffineTransform(matrix1, matrix2, matrix2);
 }
@@ -209,7 +210,7 @@ void mtx4SetTranslation(struct coord *pos, Mtxf *mtx)
 	mtx->m[3][2] = pos->z;
 }
 
-void mtx00015df0(float mult, Mtxf *mtx)
+void mtxScaleRowX(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -217,14 +218,14 @@ void mtx00015df0(float mult, Mtxf *mtx)
 	mtx->m[0][3] *= mult;
 }
 
-void mtx00015e24(float mult, Mtxf *mtx)
+void mtxScaleXAxis(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
 	mtx->m[0][2] *= mult;
 }
 
-void mtx00015e4c(float mult, Mtxf *mtx)
+void mtxScaleRowY(float mult, Mtxf *mtx)
 {
 	mtx->m[1][0] *= mult;
 	mtx->m[1][1] *= mult;
@@ -232,14 +233,14 @@ void mtx00015e4c(float mult, Mtxf *mtx)
 	mtx->m[1][3] *= mult;
 }
 
-void mtx00015e80(float mult, Mtxf *mtx)
+void mtxScaleYAxis(float mult, Mtxf *mtx)
 {
 	mtx->m[1][0] *= mult;
 	mtx->m[1][1] *= mult;
 	mtx->m[1][2] *= mult;
 }
 
-void mtx00015ea8(float mult, Mtxf *mtx)
+void mtxScaleRowZ(float mult, Mtxf *mtx)
 {
 	mtx->m[2][0] *= mult;
 	mtx->m[2][1] *= mult;
@@ -247,14 +248,14 @@ void mtx00015ea8(float mult, Mtxf *mtx)
 	mtx->m[2][3] *= mult;
 }
 
-void mtx00015edc(float mult, Mtxf *mtx)
+void mtxScaleZAxis(float mult, Mtxf *mtx)
 {
 	mtx->m[2][0] *= mult;
 	mtx->m[2][1] *= mult;
 	mtx->m[2][2] *= mult;
 }
 
-void mtx00015f04(float mult, Mtxf *mtx)
+void mtxScaleRotationAndTranslation(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -272,7 +273,7 @@ void mtx00015f04(float mult, Mtxf *mtx)
 	mtx->m[2][3] *= mult;
 }
 
-void mtx00015f4c(float mult, Mtxf *mtx)
+void mtxScaleRotationOnly(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -287,7 +288,7 @@ void mtx00015f4c(float mult, Mtxf *mtx)
 	mtx->m[2][2] *= mult;
 }
 
-void mtx00015f88(float mult, Mtxf *mtx)
+void mtxScaleTransform(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -345,7 +346,7 @@ void mtxF2L(Mtxf *src, Mtxf *dst)
 	dst->l[3][3] = src32 << 16 | (src33 & 0xffff);
 #else
 	if (src != dst) {
-		bcopy(src, dst, sizeof(*dst));
+		memcpy(dst, src, sizeof(*dst));
 	}
 #endif
 }

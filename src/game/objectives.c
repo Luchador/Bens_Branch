@@ -1,4 +1,5 @@
-#include <ultra64.h>
+#include <stdio.h>
+#include <string.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/debug.h"
@@ -18,7 +19,6 @@
 #include "lib/dma.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
-#include "string.h"
 #include "lib/mtx.h"
 #include "data.h"
 #include "types.h"

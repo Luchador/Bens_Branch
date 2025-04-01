@@ -417,7 +417,7 @@ void playerReset(void)
 
 	playerSetCamPropertiesWithRoom(&pos,
 			&g_Vars.currentplayer->bond2.unk28,
-			&g_Vars.currentplayer->bond2.unk1c, rooms[0]);
+			&g_Vars.currentplayer->bond2.cameraForward, rooms[0]);
 
 	numchrs = chrsGetNumSlots();
 

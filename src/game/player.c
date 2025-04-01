@@ -115,7 +115,7 @@ struct vimode g_ViModes[] = {
 	// |               |                 |                |                 |          |                 |     |  |     cinemaheight
 	// |               |                 |                |                 |          |                 |     |  |     |  cinematop
 	// |               |                 |                |                 |          |                 |     |  |     |  |
-	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                VIMODE_LO, SCREEN_HEIGHT_LO, 0,  180, 20, 136, 42  }, // default
+	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                1,         SCREEN_HEIGHT_LO, 0,  180, 20, 136, 42  }, // default
 };
 
 uint32_t var8007073c = 0;
@@ -466,7 +466,7 @@ void playerStartNewLife(void)
 	g_Vars.currentplayer->prop->rooms[1] = -1;
 
 	playerSetCamPropertiesWithRoom(&pos, &g_Vars.currentplayer->bond2.unk28,
-			&g_Vars.currentplayer->bond2.unk1c, rooms[0]);
+			&g_Vars.currentplayer->bond2.cameraForward, rooms[0]);
 
 	if (g_Vars.coopplayernum >= 0) {
 		bool ammotypesheld[33];
@@ -912,7 +912,7 @@ void playerSpawn(void)
 
 					if (g_Vars.lvframenum > 0
 							&& (g_ChrSlots[i].hidden & CHRHFLAG_ONBONDSSCREEN)
-							&& func0f06b39c(&sp78, &sp90, &g_ChrSlots[i].prop->pos, modelGetEffectiveScale(g_ChrSlots[i].model))
+							&& isPointInViewCone(&sp78, &sp90, &g_ChrSlots[i].prop->pos, modelGetEffectiveScale(g_ChrSlots[i].model))
 							&& (rngRandom() % 8)) {
 						sqdist += 1000 * 1000;
 					}
@@ -1035,13 +1035,13 @@ void playerSpawn(void)
 
 void playerResetBond(struct playerbond *pb, struct coord *pos)
 {
-	pb->unk10.x = pos->x;
-	pb->unk10.y = pos->y;
-	pb->unk10.z = pos->z;
+	pb->cameraPos.x = pos->x;
+	pb->cameraPos.y = pos->y;
+	pb->cameraPos.z = pos->z;
 
-	pb->unk1c.x = 1;
-	pb->unk1c.y = 0;
-	pb->unk1c.z = 0;
+	pb->cameraForward.x = 1;
+	pb->cameraForward.y = 0;
+	pb->cameraForward.z = 0;
 
 	pb->unk28.x = 0;
 	pb->unk28.y = 1;
@@ -1532,13 +1532,13 @@ void playerTickMpSwirl(void)
 
 	angle = (g_MpSwirlAngleDegrees - g_Vars.currentplayer->vv_theta) * M_PI / 180.0f;
 
-	pos.x = sinf(angle) * g_MpSwirlDistance + g_Vars.currentplayer->bond2.unk10.x;
-	pos.y = g_Vars.currentplayer->bond2.unk10.y + g_MpSwirlDistance * 0.08f;
-	pos.z = cosf(angle) * g_MpSwirlDistance + g_Vars.currentplayer->bond2.unk10.z;
+	pos.x = sinf(angle) * g_MpSwirlDistance + g_Vars.currentplayer->bond2.cameraPos.x;
+	pos.y = g_Vars.currentplayer->bond2.cameraPos.y + g_MpSwirlDistance * 0.08f;
+	pos.z = cosf(angle) * g_MpSwirlDistance + g_Vars.currentplayer->bond2.cameraPos.z;
 
-	look.x = g_Vars.currentplayer->bond2.unk10.x - pos.x;
-	look.y = g_Vars.currentplayer->bond2.unk10.y - pos.y;
-	look.z = g_Vars.currentplayer->bond2.unk10.z - pos.z;
+	look.x = g_Vars.currentplayer->bond2.cameraPos.x - pos.x;
+	look.y = g_Vars.currentplayer->bond2.cameraPos.y - pos.y;
+	look.z = g_Vars.currentplayer->bond2.cameraPos.z - pos.z;
 
 	player0f0c1840(&pos, &up, &look, &g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms);
 
@@ -1848,13 +1848,13 @@ void playerTickCutscene(bool arg0)
 
 		bmoveSetMode(MOVEMODE_WALK);
 
-		pos.x += sp104 * (g_Vars.bond->bond2.unk10.x - pos.x);
-		pos.y += sp104 * (g_Vars.bond->bond2.unk10.y - pos.y);
-		pos.z += sp104 * (g_Vars.bond->bond2.unk10.z - pos.z);
+		pos.x += sp104 * (g_Vars.bond->bond2.cameraPos.x - pos.x);
+		pos.y += sp104 * (g_Vars.bond->bond2.cameraPos.y - pos.y);
+		pos.z += sp104 * (g_Vars.bond->bond2.cameraPos.z - pos.z);
 
 		mtx00016d58(&spc4, 0, 0, 0, -look.x, -look.y, -look.z, up.x, up.y, up.z);
 		mtx00016d58(&sp84, 0, 0, 0,
-				-g_Vars.bond->bond2.unk1c.x, -g_Vars.bond->bond2.unk1c.y, -g_Vars.bond->bond2.unk1c.z,
+				-g_Vars.bond->bond2.cameraForward.x, -g_Vars.bond->bond2.cameraForward.y, -g_Vars.bond->bond2.cameraForward.z,
 				g_Vars.bond->bond2.unk28.x, g_Vars.bond->bond2.unk28.y, g_Vars.bond->bond2.unk28.z);
 		quaternion0f097044(&spc4, sp74);
 		quaternion0f097044(&sp84, sp64);
@@ -1981,49 +1981,52 @@ float playerGetTeleportFovY(void)
 
 void playerUpdateZoom(void)
 {
-	float scale;
-	float fovy;
-	struct stagetableentry *stage;
+	if(g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY)
+	{
+		float scale;
+		float fovy;
+		struct stagetableentry *stage;
 
-	if (g_Vars.currentplayer->zoomintime < g_Vars.currentplayer->zoomintimemax) {
-		g_Vars.currentplayer->zoomintime += g_Vars.lvupdate60freal;
+		if (g_Vars.currentplayer->zoomintime < g_Vars.currentplayer->zoomintimemax) {
+			g_Vars.currentplayer->zoomintime += g_Vars.lvupdate60freal;
 
-		if (g_Vars.currentplayer->zoomintime > g_Vars.currentplayer->zoomintimemax) {
+			if (g_Vars.currentplayer->zoomintime > g_Vars.currentplayer->zoomintimemax) {
+				g_Vars.currentplayer->zoomintime = g_Vars.currentplayer->zoomintimemax;
+			}
+
+			g_Vars.currentplayer->zoominfovy = g_Vars.currentplayer->zoominfovyold +
+				(g_Vars.currentplayer->zoomintime *
+				(g_Vars.currentplayer->zoominfovynew - g_Vars.currentplayer->zoominfovyold))
+				/ g_Vars.currentplayer->zoomintimemax;
+		} else {
 			g_Vars.currentplayer->zoomintime = g_Vars.currentplayer->zoomintimemax;
+			g_Vars.currentplayer->zoominfovy = g_Vars.currentplayer->zoominfovynew;
 		}
 
-		g_Vars.currentplayer->zoominfovy = g_Vars.currentplayer->zoominfovyold +
-			(g_Vars.currentplayer->zoomintime *
-			 (g_Vars.currentplayer->zoominfovynew - g_Vars.currentplayer->zoominfovyold))
-			/ g_Vars.currentplayer->zoomintimemax;
-	} else {
-		g_Vars.currentplayer->zoomintime = g_Vars.currentplayer->zoomintimemax;
-		g_Vars.currentplayer->zoominfovy = g_Vars.currentplayer->zoominfovynew;
+		playermgrSetFovY(g_Vars.currentplayer->zoominfovy);
+		viSetFovY(g_Vars.currentplayer->zoominfovy);
+
+		if (g_Vars.currentplayer->teleportstate != TELEPORTSTATE_INACTIVE) {
+			fovy = playerGetTeleportFovY();
+			playermgrSetFovY(fovy);
+			viSetFovY(fovy);
+		}
+
+		if (g_Vars.currentplayer->zoominfovy >= 15) {
+			scale = 1;
+		} else if (g_Vars.currentplayer->zoominfovy >= 7) {
+			scale = (g_Vars.currentplayer->zoominfovy - 7) * 0.0875f + 0.3f;
+		} else if (g_Vars.currentplayer->zoominfovy >= 4) {
+			scale = (g_Vars.currentplayer->zoominfovy - 4) * (1.0f / 30.0f) + 0.2f;
+		} else if (g_Vars.currentplayer->zoominfovy >= 2) {
+			scale = (g_Vars.currentplayer->zoominfovy - 2) * (1.0f / 20.0f) + 0.1f;
+		} else {
+			scale = 0.1;
+		}
+
+		stage = stageGetCurrent();
+		bgSetScaleBg2Gfx((1 - (1 - stage->unk34) * (1 - scale) * (10.f / 9.0f)) * scale);
 	}
-
-	playermgrSetFovY(g_Vars.currentplayer->zoominfovy);
-	viSetFovY(g_Vars.currentplayer->zoominfovy);
-
-	if (g_Vars.currentplayer->teleportstate != TELEPORTSTATE_INACTIVE) {
-		fovy = playerGetTeleportFovY();
-		playermgrSetFovY(fovy);
-		viSetFovY(fovy);
-	}
-
-	if (g_Vars.currentplayer->zoominfovy >= 15) {
-		scale = 1;
-	} else if (g_Vars.currentplayer->zoominfovy >= 7) {
-		scale = (g_Vars.currentplayer->zoominfovy - 7) * 0.0875f + 0.3f;
-	} else if (g_Vars.currentplayer->zoominfovy >= 4) {
-		scale = (g_Vars.currentplayer->zoominfovy - 4) * (1.0f / 30.0f) + 0.2f;
-	} else if (g_Vars.currentplayer->zoominfovy >= 2) {
-		scale = (g_Vars.currentplayer->zoominfovy - 2) * (1.0f / 20.0f) + 0.1f;
-	} else {
-		scale = 0.1;
-	}
-
-	stage = stageGetCurrent();
-	bgSetScaleBg2Gfx((1 - (1 - stage->unk34) * (1 - scale) * (10.f / 9.0f)) * scale);
 }
 
 void playerStopAudioForPause(void)
@@ -2126,10 +2129,9 @@ Gfx *player0f0baf84(Gfx *gdl)
 {
 	if (g_Vars.currentplayer->pausemode != PAUSEMODE_UNPAUSED) {
 		Mtx *a = gfxAllocateMatrix();
-		uint16_t b;
 
-		mtxPerspective(a, &b, g_Vars.currentplayer->zoominfovy,
-				PAL ? 1.7316017150879f : 1.4545454978943f, 10, 300, 1);
+		mtxPerspective(a, g_Vars.currentplayer->zoominfovy,
+				1.4545454978943f, 10, 300, 1);
 
 		gSPMatrix(gdl++, (uintptr_t)(a), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 		//gSPPerspNormalize(gdl++, b);
@@ -2819,24 +2821,22 @@ int16_t playerGetViewportTop(void)
 	return top;
 }
 
-float player0f0bd358(void)
+float playerGetAspect(void)
 {
 	float result;
 	int16_t height = playerGetViewportHeight();
 	int16_t width = playerGetViewportWidth();
 
 	result = (float)width / (float)height;
-	result = g_ViModes[0].yscale * result;
 
 	return result * (videoGetAspect() / ((float)SCREEN_WIDTH_LO / (float)SCREEN_HEIGHT_LO));
 }
 
 void playerUpdateShake(void)
 {
-	struct coord coord = {0, 0, 0};
 
 	if (g_Vars.currentplayer->isdead == false) {
-		explosionsUpdateShake(&g_Vars.currentplayer->bond2.unk10, &g_Vars.currentplayer->bond2.unk1c, &coord);
+		explosionsUpdateShake(&g_Vars.currentplayer->bond2.cameraPos, &g_Vars.currentplayer->bond2.cameraForward);
 	} else {
 		viShake(0);
 	}
@@ -2933,18 +2933,16 @@ void playerTickTeleport(float *aspectratio)
 	}
 }
 
-void playerConfigureVi(void)
+void playerConfigureViForCredits(void)
 {
 	playermgrSetFovY(PLAYER_DEFAULT_FOV);
 	playermgrSetAspectRatio(videoGetAspect());
 	playermgrSetViewSize(videoGetWidth(), videoGetHeight());
 	playermgrSetViewPosition(-360 * 4, -240 * 2);
 
-	viSetMode(g_ViModes[0].xscale);
-
 	viSetFovAspectAndSize(PLAYER_DEFAULT_FOV, videoGetAspect(), videoGetWidth(), videoGetHeight());
 
-	viSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
+	viSetViewPosition(0, 0);
 	viSetSize(videoGetWidth(), videoGetHeight());
 	viSetBufSize(videoGetWidth(), videoGetHeight());
 }
@@ -2954,7 +2952,7 @@ void playerTick()
 	float aspectratio;
 	float f20;
 	
-	aspectratio = player0f0bd358();
+	aspectratio = playerGetAspect();
 
 	if (var8007083c != TELEPORTSTATE_INACTIVE) {
 		var8007083c = TELEPORTSTATE_INACTIVE;
@@ -2971,7 +2969,6 @@ void playerTick()
 	playermgrSetViewSize(playerGetViewportWidth(), playerGetViewportHeight());
 	playermgrSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
 
-	viSetMode(g_ViModes[0].xscale);
 	viSetFovAspectAndSize(PLAYER_DEFAULT_FOV, aspectratio, playerGetViewportWidth(), playerGetViewportHeight());
 	viSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
 	viSetSize(playerGetFbWidth(), playerGetFbHeight());
@@ -3024,6 +3021,8 @@ void playerTick()
 				// Eyespy is deployed
 				if (g_Vars.currentplayer->eyespy->active) {
 					// And is being controlled
+					playermgrSetFovY(PLAYER_DEFAULT_FOV); // Ben's comment: Reset FOV to default. This fixes a bug where if you zoom in with the Horizon Scanner then switch to the DrugSpy, the DrugSpy will also be zoomed in.
+					viSetFovY(PLAYER_DEFAULT_FOV);
 					int8_t contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
 					uint32_t buttons = joyGetButtons(contpad1, 0xffffffff);
 					if (inputKeyJustPressed(VK_ESCAPE)) {
@@ -3461,9 +3460,9 @@ void playerTick()
 		playerUpdateShake();
 		playerSetCameraMode(CAMERAMODE_DEFAULT);
 
-		spf4.x = g_Vars.currentplayer->bond2.unk10.x;
-		spf4.y = g_Vars.currentplayer->bond2.unk10.y;
-		spf4.z = g_Vars.currentplayer->bond2.unk10.z;
+		spf4.x = g_Vars.currentplayer->bond2.cameraPos.x;
+		spf4.y = g_Vars.currentplayer->bond2.cameraPos.y;
+		spf4.z = g_Vars.currentplayer->bond2.cameraPos.z;
 
 		spf4.x = a + spf4.x;
 		spf4.y = b + spf4.y;
@@ -3471,7 +3470,7 @@ void playerTick()
 
 		player0f0c1840(&spf4,
 				&g_Vars.currentplayer->bond2.unk28,
-				&g_Vars.currentplayer->bond2.unk1c,
+				&g_Vars.currentplayer->bond2.cameraForward,
 				&g_Vars.currentplayer->prop->pos,
 				g_Vars.currentplayer->prop->rooms);
 
@@ -3736,9 +3735,9 @@ void playerTick()
 		bmoveTick(1, 1, true, 0);
 		playerUpdateShake();
 		playerSetCameraMode(CAMERAMODE_DEFAULT);
-		player0f0c1840(&g_Vars.currentplayer->bond2.unk10,
+		player0f0c1840(&g_Vars.currentplayer->bond2.cameraPos,
 				&g_Vars.currentplayer->bond2.unk28,
-				&g_Vars.currentplayer->bond2.unk1c,
+				&g_Vars.currentplayer->bond2.cameraForward,
 				&g_Vars.currentplayer->prop->pos,
 				g_Vars.currentplayer->prop->rooms);
 	} else if (g_Vars.tickmode == TICKMODE_MPSWIRL) {
@@ -3772,8 +3771,8 @@ void playerTick()
 			pad.pos.x -= 100;
 		}
 
-		xdist = pad.pos.x - g_Vars.currentplayer->bond2.unk10.x;
-		zdist = pad.pos.z - g_Vars.currentplayer->bond2.unk10.z;
+		xdist = pad.pos.x - g_Vars.currentplayer->bond2.cameraPos.x;
+		zdist = pad.pos.z - g_Vars.currentplayer->bond2.cameraPos.z;
 		targetangle = atan2f(xdist, zdist);
 
 		if (targetangle > M_TAU) {
@@ -3849,9 +3848,9 @@ void playerTick()
 		bmoveTick(1, 1, 0, 1);
 		playerUpdateShake();
 		playerSetCameraMode(CAMERAMODE_DEFAULT);
-		player0f0c1840(&g_Vars.currentplayer->bond2.unk10,
+		player0f0c1840(&g_Vars.currentplayer->bond2.cameraPos,
 				&g_Vars.currentplayer->bond2.unk28,
-				&g_Vars.currentplayer->bond2.unk1c,
+				&g_Vars.currentplayer->bond2.cameraForward,
 				&g_Vars.currentplayer->prop->pos,
 				g_Vars.currentplayer->prop->rooms);
 	}
@@ -4067,7 +4066,7 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	camSetMtxF006c(s0);
 	mtxF2L2(s0->m, s1);
 	camSetOrthogonalMtxL(s1);
-	mtx00015f04(scale, &sp8c);
+	mtxScaleRotationAndTranslation(scale, &sp8c);
 	mtxF2L2(sp8c.m, g_Vars.currentplayer->mtxl005c);
 	mtx00016820(g_Vars.currentplayer->mtxl005c, g_Vars.currentplayer->mtxl0060);
 	camSetMtxL173c(g_Vars.currentplayer->mtxl005c);
@@ -4216,7 +4215,7 @@ Gfx *playerRenderShield(Gfx *gdl)
 		gDPSetPrimColor(gdl++, 0, 0, 0xff, 0xff, 0xff, (int)(175 * f20 * f20));
 		gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_01);
 
-		textureCalcScreenCoords(&gdl, sp90, sp88, g_TexShieldConfigs->width, g_TexShieldConfigs->height,
+		utilsCalcScreenCoords(&gdl, sp90, sp88, g_TexShieldConfigs->width, g_TexShieldConfigs->height,
 				(g_Vars.currentplayer->shieldshowrnd & 1) != 0,
 				(g_Vars.currentplayer->shieldshowrnd & 2) != 0,
 				(g_Vars.currentplayer->shieldshowrnd & 4) != 0,
@@ -4299,7 +4298,6 @@ Gfx *playerRenderHud(Gfx *gdl)
 				&& (!g_Vars.currentplayer->eyespy || (g_Vars.currentplayer->eyespy && !g_Vars.currentplayer->eyespy->active))
 				&& ((g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit) & DEVICE_NIGHTVISION)) {
 			gdl = bviewDrawNvLens(gdl);
-			gdl = bviewDrawNvBinoculars(gdl);
 		} else if (g_Vars.currentplayer->isdead == false
 				&& g_InCutscene == 0
 				&& (!g_Vars.currentplayer->eyespy || (g_Vars.currentplayer->eyespy && !g_Vars.currentplayer->eyespy->active))
@@ -4323,8 +4321,8 @@ Gfx *playerRenderHud(Gfx *gdl)
 		int d = viGetViewTop() + viGetViewHeight();
 
 		gdl = textConfigureGfxPipeline(gdl);
-		gdl = text0f153a34(gdl, a, b, c, d, 0x000000a0);
-		gdl = text0f153780(gdl);
+		gdl = textDrawColoredRect(gdl, a, b, c, d, 0x000000a0);
+		gdl = utilsSetTexturesToPerspective(gdl);
 	}
 
 	if (g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY
@@ -4540,8 +4538,8 @@ Gfx *playerRenderHud(Gfx *gdl)
 			int d = viGetViewTop() + viGetViewHeight();
 
 			gdl = textConfigureGfxPipeline(gdl);
-			gdl = text0f153a34(gdl, a, b, c, d, 0x000000a0);
-			gdl = text0f153780(gdl);
+			gdl = textDrawColoredRect(gdl, a, b, c, d, 0x000000a0);
+			gdl = utilsSetTexturesToPerspective(gdl);
 		}
 
 		gdl = hudmsgsRender(gdl);

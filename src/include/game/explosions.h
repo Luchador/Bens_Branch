@@ -16,7 +16,7 @@ float explosionGetVerticalRangeAtFrame(struct explosion *exp, int frame);
 void explosionGetBboxAtFrame(struct coord *lower, struct coord *upper, int frame, struct prop *prop);
 void explosionAlertChrs(float *radius, struct coord *noisepos);
 bool explosionCreate(struct prop *prop, struct coord *pos, RoomNum *rooms, int16_t type, int playernum, bool makescorch, struct coord *arg6, RoomNum room, struct coord *arg8);
-void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord *arg2);
+void explosionsUpdateShake(struct coord *cameraPos, struct coord *cameraForward);
 bool explosionOverlapsProp(struct explosion *exp, struct prop *prop, struct coord *pos1, struct coord *pos2);
 void explosionInflictDamage(struct prop *prop);
 uint32_t explosionTick(struct prop *prop);

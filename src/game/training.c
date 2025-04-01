@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/bg.h"
 #include "game/bondgun.h"
@@ -923,7 +924,7 @@ void frInitTargets(void)
 				mtx4LoadYRotation(M_PI, &sp144);
 			}
 
-			mtx00015f04(obj->model->scale, &sp144);
+			mtxScaleRotationAndTranslation(obj->model->scale, &sp144);
 			mtx4ToMtx3(&sp144, sp108);
 			mtx3Copy(sp108, obj->realrot);
 
@@ -1945,7 +1946,7 @@ void frTick(void)
 				}
 
 				mtx4LoadYRotation(g_FrData.targets[i].angle + M_PI, &spbc);
-				mtx00015f04(obj->model->scale, &spbc);
+				mtxScaleRotationAndTranslation(obj->model->scale, &spbc);
 				mtx4ToMtx3(&spbc, sp98);
 				mtx3Copy(sp98, obj->realrot);
 			}
@@ -2019,15 +2020,15 @@ bool frChooseFarsightTarget(void)
 					&& g_FrData.targets[i].active
 					&& g_FrData.targets[i].flags & FRTARGETFLAG_FARSIGHTAUTOTARGETABLE) {
 				struct prop *prop = g_FrData.targets[i].prop;
-				float xdiff = g_Vars.currentplayer->bond2.unk10.x - prop->pos.x;
-				float ydiff = g_Vars.currentplayer->bond2.unk10.y - prop->pos.y;
-				float zdiff = g_Vars.currentplayer->bond2.unk10.z - prop->pos.z;
+				float xdiff = g_Vars.currentplayer->bond2.cameraPos.x - prop->pos.x;
+				float ydiff = g_Vars.currentplayer->bond2.cameraPos.y - prop->pos.y;
+				float zdiff = g_Vars.currentplayer->bond2.cameraPos.z - prop->pos.z;
 				float dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 
 				if (dist > 0) {
-					float value = (xdiff * g_Vars.currentplayer->bond2.unk1c.f[0]
-							+ ydiff * g_Vars.currentplayer->bond2.unk1c.f[1]
-							+ zdiff * g_Vars.currentplayer->bond2.unk1c.f[2]) / dist;
+					float value = (xdiff * g_Vars.currentplayer->bond2.cameraForward.f[0]
+							+ ydiff * g_Vars.currentplayer->bond2.cameraForward.f[1]
+							+ zdiff * g_Vars.currentplayer->bond2.cameraForward.f[2]) / dist;
 
 					if (value);
 
@@ -3301,5 +3302,5 @@ Gfx *frRenderHud(Gfx *gdl)
 				string1, string2, 0x00ff00a0, alpha);
 	}
 
-	return text0f153780(gdl);
+	return utilsSetTexturesToPerspective(gdl);
 }

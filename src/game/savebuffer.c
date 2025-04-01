@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/camera.h"
@@ -37,14 +38,14 @@ void func0f0d4690(Mtxf *mtx)
 	pos.z = 0;
 
 	mtx4SetTranslation(&pos, mtx);
-	mtx00015e4c(-1, mtx);
+	mtxScaleRowY(-1, mtx);
 }
 
 void func0f0d475c(Mtxf *mtx)
 {
 	func0f0d4690(mtx);
-	mtx00015df0(0.1f, mtx);
-	mtx00015e4c(0.1f, mtx);
+	mtxScaleRowX(0.1f, mtx);
+	mtxScaleRowY(0.1f, mtx);
 }
 
 Gfx *func0f0d479c(Gfx *gdl)
@@ -143,8 +144,8 @@ Gfx *func0f0d4c80(Gfx *gdl)
 	Mtxf *mtxptr = gfxAllocateMatrix();
 
 	func0f0d4690(&mtx);
-	mtx00015df0(0.1f, &mtx);
-	mtx00015e4c(0.1f, &mtx);
+	mtxScaleRowX(0.1f, &mtx);
+	mtxScaleRowY(0.1f, &mtx);
 	mtxF2L(&mtx, mtxptr);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

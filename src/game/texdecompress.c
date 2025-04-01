@@ -1,4 +1,7 @@
 #include <ultra64.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "constants.h"
 #include "game/debug.h"
 #include "game/tex.h"
@@ -14,9 +17,6 @@
 #include "types.h"
 #include "mod.h"
 #include "platform.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 struct texture *g_Textures;
 struct texpool g_TexSharedPool;
@@ -2353,12 +2353,12 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 				uint8_t *ptr = mempAllocFromRight(ALIGN16(bytesout + 2 * sizeof(struct tex)), MEMPOOL_STAGE);
 				pool->rightpos = (struct tex *) ptr;
 
-				bcopy(tex, ptr, sizeof(struct tex));
+				memcpy(ptr, tex, sizeof(struct tex));
 
 				tex = (struct tex *) ptr;
 				ptr += sizeof(struct tex);
 
-				bcopy(pool->leftpos - 8, ptr, bytesout + 8);
+				memcpy(ptr, pool->leftpos - 8, bytesout + 8);
 
 				pool->rightpos->data = ptr + 8;
 				pool->rightpos->next = 0;

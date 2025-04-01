@@ -137,24 +137,3 @@ int osEepromLongWrite(uint8_t address, uint8_t *buffer, int nbytes)
 
 	return 0;
 }
-
-/* libc compatibility wrappers */
-
-#ifndef PLATFORM_OSX
-
-void bzero(void *ptr, size_t size)
-{
-	memset(ptr, 0, size);
-}
-
-void bcopy(const void *src, void *dst, size_t n)
-{
-	memcpy(dst, src, n);
-}
-
-int bcmp(const void *s1, const void *s2, size_t n)
-{
-	return memcmp(s1, s2, n);
-}
-
-#endif

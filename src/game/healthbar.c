@@ -509,8 +509,8 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	}
 
 	gdl = textConfigureGfxPipeline(gdl);
-	gdl = text0f153a34(gdl, underleft, undertop, underright, underbottom, undercol);
-	gdl = text0f153780(gdl);
+	gdl = textDrawColoredRect(gdl, underleft, undertop, underright, underbottom, undercol);
+	gdl = utilsSetTexturesToPerspective(gdl);
 
 	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);

@@ -26,7 +26,6 @@
 #include "lib/rng.h"
 #include "lib/mtx.h"
 #include "lib/lib_17ce0.h"
-#include "lib/lib_2f490.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
@@ -59,7 +58,7 @@ uint32_t var80061450 = 0x00000000;
 uint32_t var80061454 = 0xffffffff;
 int g_LightsPrevTickMode = 0;
 
-uint32_t func0f000920(int portalnum1, int portalnum2)
+uint32_t roomGetUpperAndLowerPortals(int portalnum1, int portalnum2)
 {
 	if (portalnum1 != portalnum2) {
 		int upper = (portalnum1 > portalnum2) ? portalnum1 : portalnum2;
@@ -442,8 +441,8 @@ bool lightsHandleHit(struct coord *gunpos, struct coord *hitpos, int roomnum)
 
 	for (i = 0; i < g_Rooms[roomnum].numlights; i++) {
 		if (light->healthy && light->vulnerable) {
-			if (func0002f490(&light->bbox[0], &light->bbox[1], &light->bbox[3], NULL, &spa4, &sp98, &sp8c, 0, 0)
-					|| func0002f490(&light->bbox[1], &light->bbox[2], &light->bbox[3], NULL, &spa4, &sp98, &sp8c, 0, 0)) {
+			if (utilsRayIntersectsTriangleS16(&light->bbox[0], &light->bbox[1], &light->bbox[3], NULL, &spa4, &sp98, &sp8c, 0, 0)
+					|| utilsRayIntersectsTriangleS16(&light->bbox[1], &light->bbox[2], &light->bbox[3], NULL, &spa4, &sp98, &sp8c, 0, 0)) {
 				struct coord soundpos;
 
 				soundpos.x = light->bbox[0].x;
@@ -936,13 +935,13 @@ bool lightTickBroken(int roomnum, int lightnum)
 			sp80.y = -sp8c.y;
 			sp80.z = -sp8c.z;
 
-			normalizeVector(&sp98, &spa4, 1546, "dlights.c");
+			utilsNormalizeVector(&sp98, &spa4, 1546, "dlights.c");
 
 			spa4.x += sp80.x;
 			spa4.y += sp80.y;
 			spa4.z += sp80.z;
 
-			normalizeVector(&spa4, &spa4, 1548, "dlights.c");
+			utilsNormalizeVector(&spa4, &spa4, 1548, "dlights.c");
 
 			room = (void *) (roomnum * sizeof(struct bgroom));
 
@@ -1750,7 +1749,7 @@ float func0f0053d0(int roomnum1, struct coord *pos1, int portalnum1, int roomnum
 							*sp68 = dist;
 						}
 					} else {
-						float sp50 = func0f000920(portalnum1, portalnum2);
+						float sp50 = roomGetUpperAndLowerPortals(portalnum1, portalnum2);
 
 						if (sp50 < sp64) {
 							struct coord sp44;

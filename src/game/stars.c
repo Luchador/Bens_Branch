@@ -225,13 +225,13 @@ Gfx *starsRender(Gfx *gdl)
 	sp154 = cosf(0.017453199252486f * (90.0f - viGetFovY() / viGetAspect() * 0.5f));
 
 	mtx4LoadIdentity(&mtx);
-	mtx00015be0(camGetWorldToScreenMtxf(), &mtx);
+	mtxApplyAffineInPlace(camGetWorldToScreenMtxf(), &mtx);
 
 	mtx.m[3][0] = 0.0f;
 	mtx.m[3][1] = 0.0f;
 	mtx.m[3][2] = 0.0f;
 
-	mtx00015f88(262.9f, &mtx);
+	mtxScaleTransform(262.9f, &mtx);
 
 	mtx.m[0][1] *= g_Vars.currentplayer->c_recipscaley;
 	mtx.m[1][1] *= g_Vars.currentplayer->c_recipscaley;

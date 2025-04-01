@@ -860,7 +860,7 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, float crossx, float crossy)
 		break;
 	}
 
-	gdl = text0f153780(gdl);
+	gdl = utilsSetTexturesToPerspective(gdl);
 
 	return gdl;
 }
@@ -915,7 +915,7 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 	gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
 
-	textureCalcScreenCoords(&gdl, spc4, spbc, tconfig->width, tconfig->height, 0, 0, 0, false);
+	utilsCalcScreenCoords(&gdl, spc4, spbc, tconfig->width, tconfig->height, 0, 0, 0, false);
 	
 	gDPPipeSync(gdl++);
 	gDPSetColorDither(gdl++, G_CD_BAYER);
@@ -1369,7 +1369,7 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, float crossx, float crossy)
 #endif
 
 		gdl = textSetCCCustom02(gdl);
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 	}
 
 	gdl = sightDrawDefault(gdl, sighton, crossx, crossy);

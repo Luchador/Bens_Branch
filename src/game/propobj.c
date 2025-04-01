@@ -1,5 +1,7 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 #include "constants.h"
 #include "game/bondmove.h"
 #include "game/bondwalk.h"
@@ -60,7 +62,6 @@
 #include "lib/dma.h"
 #include "lib/main.h"
 #include "lib/snd.h"
-#include "string.h"
 #include "lib/memp.h"
 #include "lib/model.h"
 #include "lib/path.h"
@@ -73,7 +74,6 @@
 #include "data.h"
 #include "textures.h"
 #include "types.h"
-#include "string.h"
 
 void rng2SetSeed(uint32_t seed);
 
@@ -119,7 +119,7 @@ struct prop *g_EmbedProp = NULL;
 int g_EmbedHitPart = 0;
 uint32_t g_EmbedSide = 0x00000000;
 int16_t var8006993c[3] = {0};
-uint32_t var80069944 = 0x00000000;
+uint32_t g_HitTextureNum = 0x00000000;
 float g_CctvWaitScale = 1;
 float g_CctvDamageRxScale = 1;
 float g_AutogunAccuracyScale = 1;
@@ -724,7 +724,7 @@ bool func0f06797c(struct coord *coord, float arg1, int padnum)
 	return func0f0678f8(coord, &sp1c, padnum);
 }
 
-bool objTestModelHit(struct model *model, float *max, float *min, float arg3[2], float arg4[2])
+bool objTestModelMeleeHit(struct model *model, float *max, float *min, float arg3[2], float arg4[2])
 {
 	struct modelnode *node = model->definition->rootnode;
 	bool first = true;
@@ -1737,7 +1737,7 @@ void objMergeColourFracs(int *colour, int shademode, float fracs[4])
 
 struct hovtype g_HovTypes[];
 
-void func0f069850(struct defaultobj *obj, struct coord *pos, float rot[3][3], struct geocyl *cyl)
+void objBuildHoveringCollisionVolume(struct defaultobj *obj, struct coord *pos, float rot[3][3], struct geocyl *cyl)
 {
 	Mtxf mtx;
 	struct modelrodata_bbox *bbox = objFindBboxRodata(obj);
@@ -1745,6 +1745,7 @@ void func0f069850(struct defaultobj *obj, struct coord *pos, float rot[3][3], st
 	struct hoverbikeobj *hoverbike;
 	struct hoverpropobj *hoverprop;
 
+	// Build transformation matrix in world space from position and rotation
 	mtx3ToMtx4(rot, &mtx);
 	mtx4SetTranslation(pos, &mtx);
 
@@ -1755,6 +1756,7 @@ void func0f069850(struct defaultobj *obj, struct coord *pos, float rot[3][3], st
 		rodata19 = modelGetPartRodata(obj->model->definition, MODELPART_HOVERBIKE_0064);
 	}
 
+	// Create a collision cylinder for cylinderical objects
 	if (obj->flags3 & OBJFLAG3_GEOCYL) {
 		cyl->header.type = GEOTYPE_CYL;
 		cyl->header.flags = GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT | GEOFLAG_BLOCK_SHOOT;
@@ -1775,6 +1777,7 @@ void func0f069850(struct defaultobj *obj, struct coord *pos, float rot[3][3], st
 		cyl->x = pos->x;
 		cyl->z = pos->z;
 		cyl->radius = 90.0f;
+	// If not a cylinder, create a collision box
 	} else {
 		if (rodata19 != NULL) {
 			objCalculateGeoBlockFromNode19Data(rodata19, bbox, &mtx, (struct geoblock *)cyl);
@@ -1834,7 +1837,7 @@ void func0f069c1c(struct defaultobj *obj)
 {
 	if (obj->geocyl) {
 		if (obj->hidden2 & OBJH2FLAG_08) {
-			func0f069850(obj, &obj->prop->pos, obj->realrot, obj->geocyl);
+			objBuildHoveringCollisionVolume(obj, &obj->prop->pos, obj->realrot, obj->geocyl);
 		}
 
 		func0f069b4c(obj);
@@ -2545,22 +2548,30 @@ float objGetRadius(struct defaultobj *obj)
 	return 10;
 }
 
-bool func0f06b39c(struct coord *arg0, struct coord *arg1, struct coord *arg2, float arg3)
+/*
+ * Returns true if point `target` is in front of `origin` in the direction of `direction`,
+ * and within a cone defined by `maxDistance`.
+ */
+bool isPointInViewCone(struct coord *origin, struct coord *direction, struct coord *target, float maxDistance)
 {
-	struct coord sp0c; // vector from arg0 to arg2
-	float value;
+	// Vector from origin to target
+	struct coord toTarget;
+	toTarget.x = target->x - origin->x;
+	toTarget.y = target->y - origin->y;
+	toTarget.z = target->z - origin->z;
 
-	sp0c.x = arg2->x - arg0->x;
-	sp0c.y = arg2->y - arg0->y;
-	sp0c.z = arg2->z - arg0->z;
+	// Dot product tells us if target is in front (positive result)
+	float dot = direction->x * toTarget.x + direction->y * toTarget.y + direction->z * toTarget.z;
 
-	value = arg1->f[0] * sp0c.f[0] + arg1->f[1] * sp0c.f[1] + arg1->f[2] * sp0c.f[2]; // dot product of arg1 and sp0c
+	if (dot > 0) {
+		// Square of direction magnitude
+		float dirLengthSqr = direction->x * direction->x + direction->y * direction->y + direction->z * direction->z;
 
-	if (value > 0) { // sp0c points in the same general direction as arg1
-		float a = arg1->f[0] * arg1->f[0] + arg1->f[1] * arg1->f[1] + arg1->f[2] * arg1->f[2];
-		float b = sp0c.f[0] * sp0c.f[0] + sp0c.f[1] * sp0c.f[1] + sp0c.f[2] * sp0c.f[2];
+		// Square of vector to target
+		float toTargetLengthSqr = toTarget.x * toTarget.x + toTarget.y * toTarget.y + toTarget.z * toTarget.z;
 
-		if ((b - arg3 * arg3) * a <= value * value) {
+		// If the squared projection is larger than the perpendicular distance squared, return true
+		if ((toTargetLengthSqr - maxDistance * maxDistance) * dirLengthSqr <= dot * dot) {
 			return true;
 		}
 	}
@@ -2568,47 +2579,35 @@ bool func0f06b39c(struct coord *arg0, struct coord *arg1, struct coord *arg2, fl
 	return false;
 }
 
-bool func0f06b488(struct prop *prop, struct coord *arg1, struct coord *arg2, struct coord *arg3, struct coord *arg4, struct coord *arg5, float *arg6)
+bool objSimpleRayTest(struct prop *prop, struct coord *rayStart, struct coord *rayEnd, struct coord *rayDir, struct coord *outHitPos, struct coord *outNormal, float *closest)
 {
-	struct coord sp3c;
-	struct coord sp30;
-	float f0;
-	struct coord sp20;
+	struct coord edgeStart;
+	struct coord edgeEnd;
+	struct coord intersection;
 
-	if (!cd0002ded8(arg1, arg2, prop)) {
-#if VERSION >= VERSION_PAL_FINAL
-		cdGetEdge(&sp3c, &sp30, 2910, "prop/propobj.c");
-		cdGetPos(&sp20, 2911, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-		cdGetEdge(&sp3c, &sp30, 2910, "propobj.c");
-		cdGetPos(&sp20, 2911, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-		cdGetEdge(&sp3c, &sp30, 2909, "propobj.c");
-		cdGetPos(&sp20, 2910, "propobj.c");
-#else
-		cdGetEdge(&sp3c, &sp30, 2898, "propobj.c");
-		cdGetPos(&sp20, 2899, "propobj.c");
-#endif
+	// If the path to the prop is blocked, proceed with fallback collision
+	if (!cdIsPathClearToProp(rayStart, rayEnd, prop)) {
+		cdGetEdge(&edgeStart, &edgeEnd); 
+		cdGetPos(&intersection);         // Collision contact point
 
-		f0 = (sp20.f[0] - arg1->f[0]) * arg3->f[0]
-			+ (sp20.f[1] - arg1->f[1]) * arg3->f[1]
-			+ (sp20.f[2] - arg1->f[2]) * arg3->f[2];
+		// Project intersection onto ray to get distance along the ray
+		float projection = (intersection.x - rayStart->x) * rayDir->x
+		                 + (intersection.y - rayStart->y) * rayDir->y
+		                 + (intersection.z - rayStart->z) * rayDir->z;
 
-		if (f0 < *arg6) {
-			*arg6 = f0;
+		if (projection < *closest) {
+			*closest = projection;
 
-			arg4->x = sp20.x;
-			arg4->y = sp20.y;
-			arg4->z = sp20.z;
+			*outHitPos = intersection;
 
-			arg5->x = -arg3->x;
-			arg5->y = 0.0f;
-			arg5->z = -arg3->z;
+			outNormal->x = -rayDir->x;
+			outNormal->y = 0.0f;
+			outNormal->z = -rayDir->z;
 
-			if (arg5->x != 0.0f || arg5->z != 0.0f) {
-				utilsNormalizeF(&arg5->x, &arg5->y, &arg5->z);
+			if (outNormal->x != 0.0f || outNormal->z != 0.0f) {
+				utilsNormalizeF(&outNormal->x, &outNormal->y, &outNormal->z);
 			} else {
-				arg5->z = 1.0f;
+				outNormal->z = 1.0f; // Default fallback direction
 			}
 
 			g_EmbedProp = prop;
@@ -2623,165 +2622,128 @@ bool func0f06b488(struct prop *prop, struct coord *arg1, struct coord *arg2, str
 	return false;
 }
 
-bool func0f06b610(struct defaultobj *obj, struct coord *arg1, struct coord *arg2, struct coord *arg3, float arg4, struct coord *arg5, struct coord *arg6, struct coord *arg7, struct coord *arg8, float *arg9)
-{
-	struct model *model = obj->model;
-	float f0 = modelGetEffectiveScale(model);
-	float xdiff;
-	float ydiff;
-	float zdiff;
-	float sum1 = 0.0f;
-	struct prop *prop = obj->prop;
-	struct prop *child;
+/*
+ * Perform a raycast against a dynamic object model (e.g. floating object or hoverbed shield),
+ * and update the closest hit data if an intersection is detected.
+ *
+ * This supports shield hits, fallback near-hit logic, and recursively checks child props.
+ *
+ * return true if the ray intersects the model or one of its children
+ */
+
+bool objTestModelHit(struct defaultobj *object, struct coord *rayOrigin, struct coord *rayEnd, struct coord *rayDir, float rayLength, struct coord *viewOrigin, struct coord *viewDir,struct coord *outHitPos, struct coord *outHitNormal, float *outClosestDist) {
+	struct model *model = object->model;
+	float scale = modelGetEffectiveScale(model);
+	struct prop *prop = object->prop;
 	bool result = false;
-	float sum2;
-	struct coord spfc;
-	struct coord spf0;
-	struct modelnode *node1;
-	int hitpart;
-	struct modelnode *spe4 = NULL;
-	struct hitthing thing1;
-	int mtxindex1;
-	struct modelnode *node;
-	struct hitthing thing2;
-	int mtxindex2;
-	struct modelnode *node2;
-	float sum3;
+	float projDist = 0.0f;
 
 	if (prop->parent == NULL) {
-		xdiff = prop->pos.f[0] - arg1->f[0];
-		ydiff = prop->pos.f[1] - arg1->f[1];
-		zdiff = prop->pos.f[2] - arg1->f[2];
-
-		sum1 = xdiff * arg3->f[0] + ydiff * arg3->f[1] + zdiff * arg3->f[2];
+		struct coord delta = {
+			prop->pos.x - rayOrigin->x,
+			prop->pos.y - rayOrigin->y,
+			prop->pos.z - rayOrigin->z,
+		};
+		projDist = delta.x * rayDir->x + delta.y * rayDir->y + delta.z * rayDir->z;
 	}
 
-	if (sum1 >= -f0 && sum1 <= arg4 + f0) {
+	if (projDist >= -scale && projDist <= rayLength + scale) {
 		if (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
-			if (var8005efc0 > 0.0f) {
-				hitpart = modelTestForHit(model, arg5, arg6, &spe4);
+			int hitPart = 0;
+			struct modelnode *hitNode = NULL;
+			struct hitthing hitData;
+			int hitMtxIndex = 0;
+			struct modelnode *mtxNode = NULL;
+			struct coord hitPosWorld, hitNormalWorld;
 
-				while (hitpart > 0) {
-					if (objTestShieldHit(model, spe4, arg5, arg6, &thing1, &mtxindex1, &node1)) {
-						mtx4TransformVec(&model->matrices[mtxindex1], &thing1.pos, &spfc);
+			if (g_ShieldHitExpansion > 0.0f) {
+				hitPart = modelTestForHit(model, viewOrigin, viewDir, &hitNode);
 
-						sum2 = (spfc.f[0] - arg5->f[0]) * arg6->f[0]
-							+ (spfc.f[1] - arg5->f[1]) * arg6->f[1]
-							+ (spfc.f[2] - arg5->f[2]) * arg6->f[2];
+				while (hitPart > 0) {
+					if (objTestShieldHit(model, hitNode, viewOrigin, viewDir, &hitData, &hitMtxIndex, &mtxNode)) {
+						mtx4TransformVec(&model->matrices[hitMtxIndex], &hitData.pos, &hitPosWorld);
+						float dist = (hitPosWorld.x - viewOrigin->x) * viewDir->x +
+									(hitPosWorld.y - viewOrigin->y) * viewDir->y +
+									(hitPosWorld.z - viewOrigin->z) * viewDir->z;
 
-						if (sum2 < *arg9) {
-							mtx4RotateVec(&model->matrices[mtxindex1], &thing1.unk0c, &spf0);
+						if (dist < *outClosestDist) {
+							mtx4RotateVec(&model->matrices[hitMtxIndex], &hitData.unk0c, &hitNormalWorld);
 
-							*arg9 = sum2;
+							*outClosestDist = dist;
+							mtx4TransformVec(camGetProjectionMtxF(), &hitPosWorld, outHitPos);
+							mtx4RotateVec(camGetProjectionMtxF(), &hitNormalWorld, outHitNormal);
 
-							mtx4TransformVec(camGetProjectionMtxF(), &spfc, arg7);
-							mtx4RotateVec(camGetProjectionMtxF(), &spf0, arg8);
-
-							if (arg8->x != 0.0f || arg8->y != 0.0f || arg8->z != 0.0f) {
-								utilsNormalizeF(&arg8->x, &arg8->y, &arg8->z);
+							if (outHitNormal->x != 0 || outHitNormal->y != 0 || outHitNormal->z != 0) {
+								utilsNormalizeF(&outHitNormal->x, &outHitNormal->y, &outHitNormal->z);
 							} else {
-								arg8->z = 1.0f;
+								outHitNormal->z = 1.0f;
 							}
 
 							g_EmbedProp = prop;
 							g_EmbedModel = model;
-							g_EmbedHitPart = hitpart;
-							g_EmbedNode = spe4;
+							g_EmbedHitPart = hitPart;
+							g_EmbedNode = hitNode;
+							g_EmbedSide = hitData.unk28 / 2;
 
-							g_EmbedSide = thing1.unk28 / 2;
-							var8006993c[0] = thing1.pos.x;
-							var8006993c[1] = thing1.pos.y;
-							var8006993c[2] = thing1.pos.z;
+							var8006993c[0] = hitData.pos.x;
+							var8006993c[1] = hitData.pos.y;
+							var8006993c[2] = hitData.pos.z;
 
-							result = 1;
+							result = true;
 						}
 					}
 
-					hitpart = modelTestForHit(model, arg5, arg6, &spe4);
+					hitPart = modelTestForHit(model, viewOrigin, viewDir, &hitNode);
 				}
 			} else {
-				do {
-					hitpart = modelTestForHit(model, arg5, arg6, &spe4);
+				hitPart = modelTestForHit(model, viewOrigin, viewDir, &hitNode);
 
-					if (hitpart > 0) {
-						if (func0f0849dc(model, spe4, arg5, arg6, &thing1, &mtxindex1, &node1)) {
-							break;
-						}
-					}
-				} while (hitpart > 0);
+				if (hitPart > 0 &&
+					func0f0849dc(model, hitNode, viewOrigin, viewDir, &hitData, &hitMtxIndex, &mtxNode)) {
+					mtx4TransformVec(&model->matrices[hitMtxIndex], &hitData.pos, &hitPosWorld);
+					float dist = (hitPosWorld.x - viewOrigin->x) * viewDir->x +
+								(hitPosWorld.y - viewOrigin->y) * viewDir->y +
+								(hitPosWorld.z - viewOrigin->z) * viewDir->z;
 
-				if (obj->flags3 & OBJFLAG3_HOVERBEDSHIELD) {
-					node = modelGetPart(model->definition, MODELPART_BASIC_0067);
+					if (dist >= 0.0f && dist <= *outClosestDist) {
+						mtx4RotateVec(&model->matrices[hitMtxIndex], &hitData.unk0c, &hitNormalWorld);
+						*outClosestDist = dist;
+						mtx4TransformVec(camGetProjectionMtxF(), &hitPosWorld, outHitPos);
 
-					if (node && objTestShieldHit(model, node, arg5, arg6, &thing2, &mtxindex2, &node2)) {
-						if (hitpart <= 0 ||
-								+ model->matrices[mtxindex2].m[0][2] * thing2.pos.f[0]
-								+ model->matrices[mtxindex2].m[1][2] * thing2.pos.f[1]
-								+ model->matrices[mtxindex2].m[2][2] * thing2.pos.f[2]
-								>
-								+ model->matrices[mtxindex1].m[0][2] * thing1.pos.f[0]
-								+ model->matrices[mtxindex1].m[1][2] * thing1.pos.f[1]
-								+ model->matrices[mtxindex1].m[2][2] * thing1.pos.f[2]
-								) {
-							hitpart = 1;
-
-							thing1 = thing2;
-							mtxindex1 = mtxindex2;
-							node1 = node2;
-							thing1.texturenum = 10000;
-						}
-					}
-				}
-
-				if (hitpart > 0) {
-					mtx4TransformVec(&model->matrices[mtxindex1], &thing1.pos, &spfc);
-
-					sum3 = (spfc.f[0] - arg5->f[0]) * arg6->f[0]
-						+ (spfc.f[1] - arg5->f[1]) * arg6->f[1]
-						+ (spfc.f[2] - arg5->f[2]) * arg6->f[2];
-
-					if (sum3 >= 0.0f && sum3 <= *arg9) {
-						mtx4RotateVec(&model->matrices[mtxindex1], &thing1.unk0c, &spf0);
-
-						*arg9 = sum1;
-
-						mtx4TransformVec(camGetProjectionMtxF(), &spfc, arg7);
-
-						if (spf0.f[0] * arg6->f[0] + spf0.f[1] * arg6->f[1] + spf0.f[2] * arg6->f[2] > 0.0f) {
-							spf0.f[0] = -spf0.f[0];
-							spf0.f[1] = -spf0.f[1];
-							spf0.f[2] = -spf0.f[2];
+						if (hitNormalWorld.x * viewDir->x + hitNormalWorld.y * viewDir->y + hitNormalWorld.z * viewDir->z > 0.0f) {
+							hitNormalWorld.x = -hitNormalWorld.x;
+							hitNormalWorld.y = -hitNormalWorld.y;
+							hitNormalWorld.z = -hitNormalWorld.z;
 						}
 
-						mtx4RotateVec(camGetProjectionMtxF(), &spf0, arg8);
+						mtx4RotateVec(camGetProjectionMtxF(), &hitNormalWorld, outHitNormal);
 
-						if (arg8->f[0] != 0.0f || arg8->f[1] != 0.0f || arg8->f[2] != 0.0f) {
-							utilsNormalizeF(&arg8->x, &arg8->y, &arg8->z);
+						if (outHitNormal->x != 0 || outHitNormal->y != 0 || outHitNormal->z != 0) {
+							utilsNormalizeF(&outHitNormal->x, &outHitNormal->y, &outHitNormal->z);
 						} else {
-							arg8->z = 1.0f;
+							outHitNormal->z = 1.0f;
 						}
 
 						g_EmbedProp = prop;
-						g_EmbedHitPart = hitpart;
+						g_EmbedHitPart = hitPart;
 						g_EmbedModel = model;
-						g_EmbedNode = node1;
+						g_EmbedNode = mtxNode;
+						g_HitTextureNum = hitData.texturenum;
 
-						var80069944 = thing1.texturenum;
+						if (hitData.texturenum == 10000) {
+							g_EmbedSide = hitData.unk28 / 2;
+							var8006993c[0] = hitData.pos.x;
+							var8006993c[1] = hitData.pos.y;
+							var8006993c[2] = hitData.pos.z;
+						}
 
 						result = true;
-
-						if (thing1.texturenum == 10000) {
-							g_EmbedSide = thing1.unk28 / 2;
-							var8006993c[0] = thing1.pos.x;
-							var8006993c[1] = thing1.pos.y;
-							var8006993c[2] = thing1.pos.z;
-						}
 					}
 				}
 			}
 		} else {
-			if (func0f06b39c(arg1, arg3, &prop->pos, modelGetEffectiveScale(model))
-					&& func0f06b488(prop, arg1, arg2, arg3, arg7, arg8, arg9)) {
+			if (isPointInViewCone(rayOrigin, rayDir, &prop->pos, modelGetEffectiveScale(model)) &&
+				objSimpleRayTest(prop, rayOrigin, rayEnd, rayDir, outHitPos, outHitNormal, outClosestDist)) {
 				g_EmbedModel = model;
 				g_EmbedNode = model->definition->rootnode;
 				result = true;
@@ -2789,12 +2751,13 @@ bool func0f06b610(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 		}
 	}
 
+	// Recursively test children
 	if (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
-		child = prop->child;
+		struct prop *child = prop->child;
 
 		while (child) {
 			if (child->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
-				if (func0f06b610(child->obj, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)) {
+				if (objTestModelHit(child->obj, rayOrigin, rayEnd, rayDir, rayLength, viewOrigin, viewDir, outHitPos, outHitNormal, outClosestDist)) {
 					result = true;
 				}
 			}
@@ -2804,24 +2767,6 @@ bool func0f06b610(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 	}
 
 	return result;
-}
-
-int func0f06be44(struct modelnode *rootnode)
-{
-	int count = 0;
-	struct modelnode *node = rootnode;
-
-	while (node) {
-		count++;
-
-		if (node->child) {
-			count += func0f06be44(node->child);
-		}
-
-		node = node->next;
-	}
-
-	return count;
 }
 
 bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelnode *node, struct coord *arg3, struct coord *arg4, void *arg5, float *arg6, struct modelnode **arg7, int *hitpart, int *arg9, struct modelnode **arg10)
@@ -2841,7 +2786,7 @@ bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelno
 	vertices = NULL;
 	s7 = false;
 
-	var8005efc0 = 2.5f / model->scale;
+	g_ShieldHitExpansion = 2.5f / model->scale;
 
 	sp74.x = arg3->x + arg4->f[0] * 32767.0f;
 	sp74.y = arg3->y + arg4->f[1] * 32767.0f;
@@ -2868,7 +2813,7 @@ bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelno
 				}
 			} else {
 				s7 = false;
-				var8005efc0 = 10.0f / model->scale;
+				g_ShieldHitExpansion = 10.0f / model->scale;
 
 				if (modelTestBboxNodeForHit(&rodata->bbox, modelFindNodeMtx(model, node, 0), arg3, arg4)) {
 					if (g_Vars.hitboundscount < ARRAYCOUNT(g_Vars.hitnodes)) {
@@ -2877,7 +2822,7 @@ bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelno
 					}
 				}
 
-				var8005efc0 = 2.5f / model->scale;
+				g_ShieldHitExpansion = 2.5f / model->scale;
 			}
 			break;
 		case MODELNODETYPE_DL:
@@ -2958,127 +2903,135 @@ bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelno
 		*arg9 = modelFindNodeMtxIndex(sp88, 0);
 	}
 
-	var8005efc0 = 0.0f;
+	g_ShieldHitExpansion = 0.0f;
 
 	return ok;
 }
 
-bool func0f06c28c(struct chrdata *chr, struct coord *arg1, struct coord *arg2, struct coord *arg3, float arg4, struct coord *arg5, struct coord *arg6, struct coord *arg7, struct coord *arg8, float *arg9)
+/*
+* Tests whether a ray intersects a character model (including their shield or weapon), and if so, records the nearest hit.
+*/
+bool objTestChrHit(struct chrdata *chr, struct coord *rayOrigin, struct coord *rayEnd, struct coord *rayDir, float rayLength, struct coord *viewOrigin, struct coord *viewDir, struct coord *outHitPos, struct coord *outHitNormal, float *outMinDist)
 {
-	float spec;
-	struct prop *prop = chr->prop;
-	float spe4 = chrGetHitRadius(chr);
-	float x = (prop->pos.f[0] - arg1->f[0]);
-	float y = (prop->pos.f[1] - arg1->f[1]);
-	float z = (prop->pos.f[2] - arg1->f[2]);
-	float spd4 = x * arg3->f[0] + y * arg3->f[1] + z * arg3->f[2];
-	int hitpart = 0;
-	struct modelnode *spcc = NULL;
-	bool result = false;
-	struct prop *child;
-	struct coord spb8;
-	struct coord spac;
-	struct hitthing sp7c;
-	int sp78 = 0;
-	struct modelnode *sp74 = NULL;
-	struct model *model = chr->model;
+    struct prop *prop = chr->prop;
+    float hitRadius = chrGetHitRadius(chr);
+    float shieldExpansion = 0.0f;
+    struct model *model = chr->model;
 
-	if (chrGetShield(chr) > 0.0f) {
-		var8005efc0 = 10.0f / chr->model->scale;
-	}
+    // Vector from ray origin to character
+    float dx = prop->pos.x - rayOrigin->x;
+    float dy = prop->pos.y - rayOrigin->y;
+    float dz = prop->pos.z - rayOrigin->z;
 
-	if (-spe4 <= spd4 && spd4 <= arg4 + spe4 && func0f06b39c(arg1, arg3, &prop->pos, spe4)) {
-		if ((prop->flags & PROPFLAG_ONTHISSCREENTHISTICK)) {
-			if (var8005efc0 > 0.0f) {
-				hitpart = modelTestForHit(model, arg5, arg6, &spcc);
+    float projectedDist = dx * rayDir->x + dy * rayDir->y + dz * rayDir->z;
 
-				while (hitpart > 0) {
-					if (objTestShieldHit(model, spcc, arg5, arg6, &sp7c, &sp78, &sp74)) {
-						mtx4TransformVec(&model->matrices[sp78], &sp7c.pos, &spb8);
+    bool hit = false;
 
-						spec = (spb8.f[0] - arg5->f[0]) * arg6->f[0]
-							+ (spb8.f[1] - arg5->f[1]) * arg6->f[1]
-							+ (spb8.f[2] - arg5->f[2]) * arg6->f[2];
+    if (chrGetShield(chr) > 0.0f) {
+        g_ShieldHitExpansion = 10.0f / model->scale;
+    }
 
-						if (spec < *arg9) {
-							mtx4RotateVec(&model->matrices[sp78], &sp7c.unk0c, &spac);
+    if (-hitRadius <= projectedDist && projectedDist <= rayLength + hitRadius &&
+        isPointInViewCone(rayOrigin, rayDir, &prop->pos, hitRadius)) {
 
-							*arg9 = spec;
+        if (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
+            int hitPart = 0;
+            struct modelnode *hitNode = NULL;
+            struct hitthing hitData;
+            int matrixIndex = 0;
+            struct modelnode *extraNode = NULL;
 
-							mtx4TransformVec(camGetProjectionMtxF(), &spb8, arg7);
-							mtx4RotateVec(camGetProjectionMtxF(), &spac, arg8);
+            if (g_ShieldHitExpansion > 0.0f) {
+                while ((hitPart = modelTestForHit(model, viewOrigin, viewDir, &hitNode)) > 0) {
+                    if (objTestShieldHit(model, hitNode, viewOrigin, viewDir, &hitData, &matrixIndex, &extraNode)) {
+                        struct coord hitWorldPos, hitWorldNormal;
+                        mtx4TransformVec(&model->matrices[matrixIndex], &hitData.pos, &hitWorldPos);
 
-							if (arg8->x != 0.0f || arg8->y != 0.0f || arg8->z != 0.0f) {
-								utilsNormalizeF(&arg8->x, &arg8->y, &arg8->z);
-							} else {
-								arg8->z = 1.0f;
-							}
+                        float distAlongRay = (hitWorldPos.x - viewOrigin->x) * viewDir->x
+                                           + (hitWorldPos.y - viewOrigin->y) * viewDir->y
+                                           + (hitWorldPos.z - viewOrigin->z) * viewDir->z;
 
-							g_EmbedProp = prop;
-							g_EmbedModel = model;
-							g_EmbedHitPart = hitpart;
-							g_EmbedNode = spcc;
-							g_EmbedSide = sp7c.unk28 / 2;
+                        if (distAlongRay < *outMinDist) {
+                            mtx4RotateVec(&model->matrices[matrixIndex], &hitData.unk0c, &hitWorldNormal);
 
-							var8006993c[0] = sp7c.pos.x;
-							var8006993c[1] = sp7c.pos.y;
-							var8006993c[2] = sp7c.pos.z;
+                            *outMinDist = distAlongRay;
 
-							result = true;
-						}
-					}
+                            mtx4TransformVec(camGetProjectionMtxF(), &hitWorldPos, outHitPos);
+                            mtx4RotateVec(camGetProjectionMtxF(), &hitWorldNormal, outHitNormal);
 
-					hitpart = modelTestForHit(model, arg5, arg6, &spcc);
-				}
-			} else {
-				hitpart = modelTestForHit(model, arg5, arg6, &spcc);
+                            if (outHitNormal->x != 0.0f || outHitNormal->y != 0.0f || outHitNormal->z != 0.0f) {
+                                utilsNormalizeF(&outHitNormal->x, &outHitNormal->y, &outHitNormal->z);
+                            } else {
+                                outHitNormal->z = 1.0f;
+                            }
 
-				if (hitpart > 0
-						&& func0f06bea0(model, model->definition->rootnode, model->definition->rootnode, arg5, arg6, &sp7c.pos, &spec, &spcc, &hitpart, &sp78, &sp74)
-						&& spec < *arg9) {
-					*arg9 = spec;
-					mtx4TransformVec(camGetProjectionMtxF(), &sp7c.pos, arg7);
-					mtx4RotateVec(camGetProjectionMtxF(), &sp7c.unk0c, arg8);
+                            g_EmbedProp = prop;
+                            g_EmbedModel = model;
+                            g_EmbedHitPart = hitPart;
+                            g_EmbedNode = hitNode;
+                            g_EmbedSide = hitData.unk28 / 2;
 
-					if (arg8->x != 0.0f || arg8->y != 0.0f || arg8->z != 0.0f) {
-						utilsNormalizeF(&arg8->x, &arg8->y, &arg8->z);
-					} else {
-						arg8->z = 1.0f;
-					}
+                            var8006993c[0] = hitData.pos.x;
+                            var8006993c[1] = hitData.pos.y;
+                            var8006993c[2] = hitData.pos.z;
 
-					g_EmbedProp = prop;
-					g_EmbedModel = model;
-					g_EmbedHitPart = hitpart;
-					g_EmbedNode = spcc;
+                            hit = true;
+                        }
+                    }
+                }
+            } else {
+                hitPart = modelTestForHit(model, viewOrigin, viewDir, &hitNode);
 
-					result = true;
-				}
-			}
-		} else if (func0f06b488(prop, arg1, arg2, arg3, arg7, arg8, arg9)) {
-			g_EmbedHitPart = HITPART_TORSO;
-			result = true;
-		}
-	}
+                if (hitPart > 0 &&
+                    func0f06bea0(model, model->definition->rootnode, model->definition->rootnode,
+                                 viewOrigin, viewDir, &hitData.pos, &projectedDist, &hitNode, &hitPart,
+                                 &matrixIndex, &extraNode) &&
+                    projectedDist < *outMinDist) {
+                    
+                    *outMinDist = projectedDist;
 
-	if (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
-		child = prop->child;
+                    mtx4TransformVec(camGetProjectionMtxF(), &hitData.pos, outHitPos);
+                    mtx4RotateVec(camGetProjectionMtxF(), &hitData.unk0c, outHitNormal);
 
-		while (child) {
-			if (child->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
-				if (func0f06b610(child->obj, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)) {
-					result = true;
-				}
-			}
+                    if (outHitNormal->x != 0.0f || outHitNormal->y != 0.0f || outHitNormal->z != 0.0f) {
+                        utilsNormalizeF(&outHitNormal->x, &outHitNormal->y, &outHitNormal->z);
+                    } else {
+                        outHitNormal->z = 1.0f;
+                    }
 
-			child = child->next;
-		}
-	}
+                    g_EmbedProp = prop;
+                    g_EmbedModel = model;
+                    g_EmbedHitPart = hitPart;
+                    g_EmbedNode = hitNode;
 
-	if (var8005efc0 > 0.0f) {
-		var8005efc0 = 0.0f;
-	}
+                    hit = true;
+                }
+            }
+        } else if (objSimpleRayTest(prop, rayOrigin, rayEnd, rayDir, outHitPos, outHitNormal, outMinDist)) {
+            g_EmbedHitPart = HITPART_TORSO;
+            hit = true;
+        }
+    }
 
-	return result;
+    // Check attachments like weapons
+    if (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
+        struct prop *child = prop->child;
+
+        while (child) {
+            if (child->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
+                if (objTestModelHit(child->obj, rayOrigin, rayEnd, rayDir, rayLength, viewOrigin, viewDir, outHitPos, outHitNormal, outMinDist)) {
+                    hit = true;
+                }
+            }
+            child = child->next;
+        }
+    }
+
+    if (g_ShieldHitExpansion > 0.0f) {
+        g_ShieldHitExpansion = 0.0f;
+    }
+
+    return hit;
 }
 
 bool projectileFindCollidingProp(struct prop *prop, struct coord *pos1, struct coord *pos2, uint32_t cdtypes, struct coord *arg4, struct coord *arg5, RoomNum *rooms)
@@ -3149,7 +3102,7 @@ bool projectileFindCollidingProp(struct prop *prop, struct coord *pos1, struct c
 							}
 						}
 
-						if (func0f06b610(obj, pos1, pos2, &sp98, dist, &sp88, &sp7c, arg4, arg5, &spa8)) {
+						if (objTestModelHit(obj, pos1, pos2, &sp98, dist, &sp88, &sp7c, arg4, arg5, &spa8)) {
 							spa4 = true;
 						}
 					}
@@ -3169,12 +3122,12 @@ bool projectileFindCollidingProp(struct prop *prop, struct coord *pos1, struct c
 						}
 					}
 
-					if (func0f06c28c(chr, pos1, pos2, &sp98, dist, &sp88, &sp7c, arg4, arg5, &spa8)) {
+					if (objTestChrHit(chr, pos1, pos2, &sp98, dist, &sp88, &sp7c, arg4, arg5, &spa8)) {
 						spa4 = true;
 					}
 				} else if (iterprop->type == PROPTYPE_PLAYER
 						&& g_Vars.players[playermgrGetPlayerNumByProp(iterprop)]->bondperimenabled) {
-					if (func0f06b488(iterprop, pos1, pos2, &sp98, arg4, arg5, &spa8)) {
+					if (objSimpleRayTest(iterprop, pos1, pos2, &sp98, arg4, arg5, &spa8)) {
 						spa4 = true;
 					}
 				}
@@ -3217,7 +3170,7 @@ int func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 	}
 
 	g_EmbedProp = 0;
-	var80069944 = 0;
+	g_HitTextureNum = 0;
 
 	sp1c4.x = pos->x;
 	sp1c4.y = pos->y;
@@ -3246,7 +3199,7 @@ int func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 					hitthing.pos.y *= scale;
 					hitthing.pos.z *= scale;
 
-					var80069944 = hitthing.texturenum;
+					g_HitTextureNum = hitthing.texturenum;
 
 					s0 = true;
 
@@ -3265,15 +3218,7 @@ int func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 
 				if (cdExamLos09(&prop->pos, spa0, &sp1c4, CDTYPE_BG) == CDRESULT_COLLISION) {
 					s0 = true;
-#if VERSION >= VERSION_PAL_FINAL
-					cdGetPos(&hitthing.pos, 4258, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-					cdGetPos(&hitthing.pos, 4258, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-					cdGetPos(&hitthing.pos, 4257, "propobj.c");
-#else
-					cdGetPos(&hitthing.pos, 4246, "propobj.c");
-#endif
+					cdGetPos(&hitthing.pos);
 					cdGetObstacleNormal(&hitthing.unk0c);
 				}
 			}
@@ -3356,7 +3301,7 @@ bool func0f06d37c(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 	float f2;
 
 	g_EmbedProp = NULL;
-	var80069944 = 0;
+	g_HitTextureNum = 0;
 
 	sp80.x = arg1->x;
 	sp80.y = arg1->y;
@@ -3382,15 +3327,7 @@ bool func0f06d37c(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 			}
 
 			if (!result) {
-#if VERSION >= VERSION_PAL_FINAL
-				cdGetEdge(&sp64, &sp58, 4386, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-				cdGetEdge(&sp64, &sp58, 4386, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-				cdGetEdge(&sp64, &sp58, 4385, "propobj.c");
-#else
-				cdGetEdge(&sp64, &sp58, 4374, "propobj.c");
-#endif
+				cdGetEdge(&sp64, &sp58);
 
 				arg3->x = sp58.z - sp64.z;
 				arg3->y = 0.0f;
@@ -3939,7 +3876,7 @@ void objLand2(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
 	RoomNum newrooms[8];
 
 	func0f06e9cc(arg2, &sp40);
-	mtx00015f04(obj->model->scale, &sp40);
+	mtxScaleRotationAndTranslation(obj->model->scale, &sp40);
 
 	newpos.x = arg1->x - sp40.m[1][0] * ymin;
 	newpos.y = arg1->y - sp40.m[1][1] * ymin;
@@ -4007,7 +3944,7 @@ void knifeLand(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
 	func0f06e9cc(&sp1c, &sp90);
 	mtx4LoadXRotation(-1.5705463f, &sp50);
 	mtx4MultMtx4(&sp90, &sp50, &spd0);
-	mtx00015f04(obj->model->scale, &spd0);
+	mtxScaleRotationAndTranslation(obj->model->scale, &spd0);
 
 	newpos.x = arg1->x - zero;
 	newpos.y = arg1->y - zero;
@@ -4770,43 +4707,48 @@ struct hovtype g_HovTypes[] = {
 	/* HOVTYPE_4     */ { 170, BOB(2, 2, 0.0010, 1.0), BOB(0.0031410926021636, 0.0031410926021636, 0.000005235154276306, 0.00018846555030905), BOB(0.0031410926021636, 0.0031410926021636, 0.000005235154276306, 0.00018846555030905) },
 };
 
-void func0f070a1c(struct modelrodata_bbox *bbox, float rot[3][3], struct coord *pos, struct coord *vertices)
+// Transforms the bottom 4 corners of a bounding box into world space, given a rotation and position
+void ojbBBoxTransformBottomVertices(struct modelrodata_bbox *bbox, float rot[3][3], struct coord *pos, struct coord *vertices)
 {
-	float sp54 = rot[0][0] * bbox->xmin;
-	float sp50 = rot[0][1] * bbox->xmin;
-	float sp4c = rot[0][2] * bbox->xmin;
+	// Precompute rotated X axis contributions
+	float xMinRotX = rot[0][0] * bbox->xmin;
+	float xMinRotY = rot[0][1] * bbox->xmin;
+	float xMinRotZ = rot[0][2] * bbox->xmin;
 
-	float sp48 = rot[2][0] * bbox->zmin;
-	float sp44 = rot[2][1] * bbox->zmin;
-	float sp40 = rot[2][2] * bbox->zmin;
+	float xMaxRotX = rot[0][0] * bbox->xmax;
+	float xMaxRotY = rot[0][1] * bbox->xmax;
+	float xMaxRotZ = rot[0][2] * bbox->xmax;
 
-	float sp3c = rot[0][0] * bbox->xmax;
-	float sp38 = rot[0][1] * bbox->xmax;
-	float sp34 = rot[0][2] * bbox->xmax;
+	// Precompute rotated Z axis contributions
+	float zMinRotX = rot[2][0] * bbox->zmin;
+	float zMinRotY = rot[2][1] * bbox->zmin;
+	float zMinRotZ = rot[2][2] * bbox->zmin;
 
-	float sp30 = rot[2][0] * bbox->zmax;
-	float sp2c = rot[2][1] * bbox->zmax;
-	float sp28 = rot[2][2] * bbox->zmax;
+	float zMaxRotX = rot[2][0] * bbox->zmax;
+	float zMaxRotY = rot[2][1] * bbox->zmax;
+	float zMaxRotZ = rot[2][2] * bbox->zmax;
 
-	float sp24 = rot[1][0] * bbox->ymin + pos->f[0];
-	float sp20 = rot[1][1] * bbox->ymin + pos->f[1];
-	float sp1c = rot[1][2] * bbox->ymin + pos->f[2];
+	// Compute the translation offset based on ymin and the position
+	float yOffsetX = rot[1][0] * bbox->ymin + pos->x;
+	float yOffsetY = rot[1][1] * bbox->ymin + pos->y;
+	float yOffsetZ = rot[1][2] * bbox->ymin + pos->z;
 
-	vertices[0].x = sp54 + sp24 + sp48;
-	vertices[0].y = sp50 + sp20 + sp44;
-	vertices[0].z = sp4c + sp1c + sp40;
+	// Final transformed vertices (bottom four corners of the bbox)
+	vertices[0].x = xMinRotX + yOffsetX + zMinRotX;
+	vertices[0].y = xMinRotY + yOffsetY + zMinRotY;
+	vertices[0].z = xMinRotZ + yOffsetZ + zMinRotZ;
 
-	vertices[1].x = sp54 + sp24 + sp30;
-	vertices[1].y = sp50 + sp20 + sp2c;
-	vertices[1].z = sp4c + sp1c + sp28;
+	vertices[1].x = xMinRotX + yOffsetX + zMaxRotX;
+	vertices[1].y = xMinRotY + yOffsetY + zMaxRotY;
+	vertices[1].z = xMinRotZ + yOffsetZ + zMaxRotZ;
 
-	vertices[2].x = sp3c + sp24 + sp30;
-	vertices[2].y = sp38 + sp20 + sp2c;
-	vertices[2].z = sp34 + sp1c + sp28;
+	vertices[2].x = xMaxRotX + yOffsetX + zMaxRotX;
+	vertices[2].y = xMaxRotY + yOffsetY + zMaxRotY;
+	vertices[2].z = xMaxRotZ + yOffsetZ + zMaxRotZ;
 
-	vertices[3].x = sp3c + sp24 + sp48;
-	vertices[3].y = sp38 + sp20 + sp44;
-	vertices[3].z = sp34 + sp1c + sp40;
+	vertices[3].x = xMaxRotX + yOffsetX + zMinRotX;
+	vertices[3].y = xMaxRotY + yOffsetY + zMinRotY;
+	vertices[3].z = xMaxRotZ + yOffsetZ + zMinRotZ;
 }
 
 void func0f070bd0(struct modelrodata_type19 *rodata, float rot[3][3], struct coord *pos, struct coord *vertices)
@@ -4827,7 +4769,7 @@ void func0f070ca0(struct defaultobj *obj, struct geotilef *tile, uint32_t flags,
 	int j;
 
 	if (bbox != NULL) {
-		func0f070a1c(bbox, obj->realrot, &obj->prop->pos, vertices);
+		ojbBBoxTransformBottomVertices(bbox, obj->realrot, &obj->prop->pos, vertices);
 	} else if (rodata != NULL) {
 		func0f070bd0(rodata, obj->realrot, &obj->prop->pos, vertices);
 	}
@@ -5332,10 +5274,10 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 	}
 
 	mtx4LoadXRotation(xrot, &sp108);
-	mtx00015be0(&sp108, &sp148);
+	mtxApplyAffineInPlace(&sp108, &sp148);
 	mtx4LoadYRotation(hov->yrot, &sp108);
-	mtx00015be0(&sp108, &sp148);
-	mtx00015f04(obj->model->scale, &sp148);
+	mtxApplyAffineInPlace(&sp108, &sp148);
+	mtxScaleRotationAndTranslation(obj->model->scale, &sp148);
 
 	if (obj->type == OBJTYPE_HOVERBIKE) {
 		struct hoverbikeobj *bike = (struct hoverbikeobj *) obj;
@@ -5419,7 +5361,7 @@ int func0f072144(struct defaultobj *obj, struct coord *arg1, float arg2, bool ar
 		}
 
 		mtx4LoadYRotation(yrot, &spa4);
-		mtx00015f04(obj->model->scale, &spa4);
+		mtxScaleRotationAndTranslation(obj->model->scale, &spa4);
 		mtx4ToMtx3(&spa4, sp460);
 	} else {
 		yrot = 0.0f;
@@ -5480,7 +5422,7 @@ int func0f072144(struct defaultobj *obj, struct coord *arg1, float arg2, bool ar
 	}
 
 	if (cdresult == CDRESULT_NOCOLLISION) {
-		func0f069850(obj, &pos, sp460, &geounion.cyl);
+		objBuildHoveringCollisionVolume(obj, &pos, sp460, &geounion.cyl);
 
 		if (obj->flags3 & OBJFLAG3_GEOCYL) {
 			cdresult = cdExamCylMove01(&prop->pos, &pos, geounion.cyl.radius, rooms, CDTYPE_ALL,
@@ -5617,15 +5559,7 @@ float objCollide(struct defaultobj *movingobj, struct coord *movingvel, float ro
 
 				objApplyMomentum(obstacleobj, &obstaclevel, 0.0f, true, true);
 
-#if VERSION >= VERSION_PAL_FINAL
-				cdGetEdge(&sp70, &sp64, 7356, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-				cdGetEdge(&sp70, &sp64, 7356, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-				cdGetEdge(&sp70, &sp64, 7355, "propobj.c");
-#else
-				cdGetEdge(&sp70, &sp64, 7308, "propobj.c");
-#endif
+				cdGetEdge(&sp70, &sp64);
 
 				if (cdGetSavedPos(&sp58, &sp4c)) {
 					sp4c.x -= sp58.x;
@@ -5960,7 +5894,7 @@ bool rocketTickFbw(struct weaponobj *rocket)
 		mtx4LoadXRotation(M_TAU - projectile->unk014, &sp118);
 		mtx4LoadYRotation(projectile->unk018, &spd8);
 		mtx4MultMtx4(&spd8, &sp118, &sp98);
-		mtx00015f04(rocket->base.model->scale, &sp98);
+		mtxScaleRotationAndTranslation(rocket->base.model->scale, &sp98);
 		mtx4ToMtx3(&sp98, rocket->base.realrot);
 	}
 
@@ -6342,7 +6276,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 							sp3c4.y -= sp3d0.y;
 							sp3c4.z -= sp3d0.z;
 						} else {
-							cdGetEdge(&sp3d0, &sp3c4, 8339, "propobj.c");
+							cdGetEdge(&sp3d0, &sp3c4);
 
 							sp3d0.x -= sp3c4.x;
 							sp3d0.y -= sp3c4.y;
@@ -6376,7 +6310,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 
 						projectile->unk0dc += f0;
 
-						cdGetEdge(&sp3e8, &sp3dc, 8377, "propobj.c");
+						cdGetEdge(&sp3e8, &sp3dc);
 
 						sp3f4.x = sp3dc.z - sp3e8.z;
 						sp3f4.y = 0.0f;
@@ -6823,7 +6757,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 										stick = false;
 									}
 
-									if (var80069944 == 10000) {
+									if (g_HitTextureNum == 10000) {
 										stick = false;
 									}
 
@@ -6885,13 +6819,14 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 								} else if (hitprop->type == PROPTYPE_OBJ) {
 									struct defaultobj *hitobj = hitprop->obj;
 
-									if (var80069944 == 10000) {
+									if (g_HitTextureNum == 10000) {
 										shield = (hitobj->flags3 & OBJFLAG3_SHOWSHIELD) ? 4 : 8;
 
 										shieldhitCreate(hitprop, shield, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
 									}
 
-									if (hitobj->modelnum == MODEL_TARGET && var80069944 == TEXTURE_0B9E) {
+									// Texture 0B9E is the target texture
+									if (hitobj->modelnum == MODEL_TARGET && g_HitTextureNum == TEXTURE_0B9E) {
 										frCalculateHit(hitobj, &sp5e8, 0.0f);
 									}
 								}
@@ -6912,7 +6847,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 									func0f0341dc(g_EmbedProp->chr, 2.0f, &var8009ce78, &weapon->gset, ownerprop2,
 											g_EmbedHitPart, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
 								} else if (g_EmbedProp->type == PROPTYPE_OBJ || g_EmbedProp->type == PROPTYPE_WEAPON) {
-									if (var80069944 == 10000) {
+									if (g_HitTextureNum == 10000) {
 										float shield = (g_EmbedProp->obj->flags3 & OBJFLAG3_SHOWSHIELD) ? 4 : 8;
 
 										shieldhitCreate(hitprop, shield, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
@@ -6928,7 +6863,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 								if (hitprop->type == PROPTYPE_CHR || (hitprop->type == PROPTYPE_PLAYER && hitprop->chr)) {
 									struct chrdata *chr = hitprop->chr;
 									func0f034080(chr, g_EmbedNode, g_EmbedProp, g_EmbedModel, g_EmbedSide, var8006993c);
-								} else if ((hitprop->type == PROPTYPE_OBJ || hitprop->type == PROPTYPE_WEAPON) && var80069944 == 10000) {
+								} else if ((hitprop->type == PROPTYPE_OBJ || hitprop->type == PROPTYPE_WEAPON) && g_HitTextureNum == 10000) {
 									shield = (hitprop->obj->flags3 & OBJFLAG3_SHOWSHIELD) ? 4 : 8;
 
 									shieldhitCreate(hitprop, shield, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
@@ -7297,9 +7232,9 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 
 					quaternionSlerp(projectile->unk068, projectile->unk078, projectile->unk060, quaternion);
 					quaternionToMtx(quaternion, &spac);
-					mtx00015e24(projectile->unk0b8[0], &spac);
-					mtx00015e80(projectile->unk0b8[1], &spac);
-					mtx00015edc(projectile->unk0b8[2], &spac);
+					mtxScaleXAxis(projectile->unk0b8[0], &spac);
+					mtxScaleYAxis(projectile->unk0b8[1], &spac);
+					mtxScaleZAxis(projectile->unk0b8[2], &spac);
 					mtx4ToMtx3(&spac, obj->realrot);
 					stop = false;
 				}
@@ -7587,7 +7522,7 @@ void doorInitMatrices(struct prop *prop)
 	Mtxf *matrices = model->matrices;
 
 	func0f08c424(door, matrices);
-	mtx00015be0(camGetWorldToScreenMtxf(), matrices);
+	mtxApplyAffineInPlace(camGetWorldToScreenMtxf(), matrices);
 
 	if (model->definition->skel == &g_Skel11) {
 		union modelrodata *rodata;
@@ -8185,7 +8120,7 @@ void cctvInitMatrices(struct prop *prop, Mtxf *mtx)
 
 	mtx4TransformVecInPlace(mtx, &sp64);
 	mtx4SetTranslation(&sp64, &matrices[1]);
-	mtx00015be0(camGetWorldToScreenMtxf(), &matrices[1]);
+	mtxApplyAffineInPlace(camGetWorldToScreenMtxf(), &matrices[1]);
 }
 
 void fanTick(struct prop *prop)
@@ -8734,21 +8669,21 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 	mtx4TransformVecInPlace(mtx, &sp4c);
 	mtx4LoadYRotation(yrot, &matrices[1]);
 	mtx4SetTranslation(&sp4c, &matrices[1]);
-	mtx00015f04(autogun->base.model->scale, &matrices[1]);
-	mtx00015be0(camGetWorldToScreenMtxf(), &matrices[1]);
+	mtxScaleRotationAndTranslation(autogun->base.model->scale, &matrices[1]);
+	mtxApplyAffineInPlace(camGetWorldToScreenMtxf(), &matrices[1]);
 
 	node2 = modelGetPart(model->definition, MODELPART_AUTOGUN_0002);
 	rodata = node2->rodata;
 	mtx4LoadZRotation(xrot, &matrices[2]);
 	mtx4SetTranslation(&rodata->position.pos, &matrices[2]);
-	mtx00015be0(&matrices[1], &matrices[2]);
+	mtxApplyAffineInPlace(&matrices[1], &matrices[2]);
 
 	tmp = modelFindNodeMtx(model, node2, 0x100);
 
 	if (tmp != NULL) {
 		mtx4LoadZRotation(xrot * 0.5f, tmp);
 		mtx4SetTranslation(&rodata->position.pos, tmp);
-		mtx00015be0(&matrices[1], tmp);
+		mtxApplyAffineInPlace(&matrices[1], tmp);
 	}
 
 	node3 = modelGetPart(model->definition, MODELPART_AUTOGUN_0003);
@@ -8758,7 +8693,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 		rodata = node3->rodata;
 		mtx4LoadXRotation(autogun->barrelrot, tmp);
 		mtx4SetTranslation(&rodata->position.pos, tmp);
-		mtx00015be0(&matrices[2], tmp);
+		mtxApplyAffineInPlace(&matrices[2], tmp);
 	}
 
 	node4 = modelGetPart(model->definition, MODELPART_AUTOGUN_0004);
@@ -8767,7 +8702,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 		tmp = modelFindNodeMtx(model, node4, 0);
 		rodata = node4->rodata;
 		mtx4LoadTranslation(&rodata->position.pos, tmp);
-		mtx00015be0(&matrices[2], tmp);
+		mtxApplyAffineInPlace(&matrices[2], tmp);
 	}
 
 	node6 = modelGetPart(model->definition, MODELPART_AUTOGUN_0006);
@@ -8777,7 +8712,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 		rodata = node6->rodata;
 		mtx4LoadXRotation(autogun->barrelrot, tmp);
 		mtx4SetTranslation(&rodata->position.pos, tmp);
-		mtx00015be0(&matrices[2], tmp);
+		mtxApplyAffineInPlace(&matrices[2], tmp);
 	}
 }
 
@@ -8897,7 +8832,7 @@ void autogunTickShoot(struct prop *autogunprop)
 						|| (targetprop && (targetprop->type == PROPTYPE_CHR))
 						|| (g_Vars.antiplayernum >= 0 && targetprop && targetprop == g_Vars.anti->prop)) {
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos, CDTYPE_ALL, GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-						cdGetPos(&hitpos, 11458, "propobj.c");
+						cdGetPos(&hitpos);
 
 						hitprop = cdGetObstacleProp();
 
@@ -8946,7 +8881,7 @@ void autogunTickShoot(struct prop *autogunprop)
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos,
 								CDTYPE_ALL & ~CDTYPE_PLAYERS,
 								GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-						cdGetPos(&hitpos, 11513, "propobj.c");
+						cdGetPos(&hitpos);
 
 						hitprop = cdGetObstacleProp();
 						missed = true;
@@ -8976,7 +8911,7 @@ void autogunTickShoot(struct prop *autogunprop)
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos,
 								CDTYPE_DOORS | CDTYPE_BG,
 								GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-						cdGetPos(&hitpos, 11539, "propobj.c");
+						cdGetPos(&hitpos);
 
 						missed = true;
 					}
@@ -9647,7 +9582,7 @@ void chopperIncrementMovement(struct prop *prop, float goalroty, float goalrotx,
 	}
 
 	mtx4LoadRotation(&spfc, &sp7c);
-	mtx00015f04(chopper->base.model->scale, &sp7c);
+	mtxScaleRotationAndTranslation(chopper->base.model->scale, &sp7c);
 	mtx4MultMtx4(&sp7c, &sp3c, &spbc);
 	mtx4ToMtx3(&spbc, rotmtx3);
 	mtx3Copy(rotmtx3, chopper->base.realrot);
@@ -9819,7 +9754,7 @@ void chopperTickFall(struct prop *chopperprop)
 			ground = cdFindGroundAtCyl(&chopperprop->pos, 5, chopperprop->rooms, NULL, NULL);
 			chopperprop->pos.y -= 100;
 
-			cdGetPos(&sp64, 12449, "propobj.c");
+			cdGetPos(&sp64);
 
 			newpos.x = sp64.x;
 			newpos.y = ground + 20;
@@ -10360,7 +10295,7 @@ void hovercarTick(struct prop *prop)
 		}
 
 		mtx4LoadRotation(&sp12c, &spac);
-		mtx00015f04(hovercar->base.model->scale, &spac);
+		mtxScaleRotationAndTranslation(hovercar->base.model->scale, &spac);
 		mtx4MultMtx4(&spac, &sp6c, &spec);
 		mtx4ToMtx3(&spec, sp15c);
 		mtx3Copy(sp15c, hovercar->base.realrot);
@@ -10514,19 +10449,19 @@ void hangingmonitorInitMatrices(struct prop *prop)
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0000);
 	mtx4LoadTranslation(&rodata->position.pos, &matrices[1]);
-	mtx00015be0(matrices, &matrices[1]);
+	mtxApplyAffineInPlace(matrices, &matrices[1]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0001);
 	mtx4LoadTranslation(&rodata->position.pos, &matrices[2]);
-	mtx00015be0(matrices, &matrices[2]);
+	mtxApplyAffineInPlace(matrices, &matrices[2]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0002);
 	mtx4LoadTranslation(&rodata->position.pos, &matrices[3]);
-	mtx00015be0(matrices, &matrices[3]);
+	mtxApplyAffineInPlace(matrices, &matrices[3]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0003);
 	mtx4LoadTranslation(&rodata->position.pos, &matrices[4]);
-	mtx00015be0(matrices, &matrices[4]);
+	mtxApplyAffineInPlace(matrices, &matrices[4]);
 }
 
 void objInitMatrices(struct prop *prop)
@@ -13226,7 +13161,7 @@ bool objDrop(struct prop *prop, bool lazy)
 			} else {
 				// No collision checks
 				mtx4LoadIdentity(&spf0);
-				mtx00015f04(model->scale, &spf0);
+				mtxScaleRotationAndTranslation(model->scale, &spf0);
 				mtx4SetTranslation(&root->pos, &spf0);
 				roomsCopy(root->rooms, rooms);
 			}
@@ -13504,14 +13439,14 @@ bool objTestShieldHit(struct model *model, struct modelnode *node, struct coord 
 
 	mtx4RotateVecInPlace(&mtx, &spac);
 
-	if (var8005efc0 != 0.0f) {
-		min.x = rodata->xmin - var8005efc0;
-		min.y = rodata->ymin - var8005efc0;
-		min.z = rodata->zmin - var8005efc0;
+	if (g_ShieldHitExpansion != 0.0f) {
+		min.x = rodata->xmin - g_ShieldHitExpansion;
+		min.y = rodata->ymin - g_ShieldHitExpansion;
+		min.z = rodata->zmin - g_ShieldHitExpansion;
 
-		max.x = rodata->xmax + var8005efc0;
-		max.y = rodata->ymax + var8005efc0;
-		max.z = rodata->zmax + var8005efc0;
+		max.x = rodata->xmax + g_ShieldHitExpansion;
+		max.y = rodata->ymax + g_ShieldHitExpansion;
+		max.z = rodata->zmax + g_ShieldHitExpansion;
 	} else {
 		min.x = rodata->xmin;
 		min.y = rodata->ymin;
@@ -14169,7 +14104,7 @@ void func0f0859a0(struct prop *prop, struct shotdata *shotdata)
 		child = next;
 	}
 
-	if (var8005efc0 > 0.0f) {
+	if (g_ShieldHitExpansion > 0.0f) {
 		hitpart = modelTestForHit(model, &shotdata->gunpos2d, &shotdata->gundir2d, &node1);
 
 		while (hitpart > 0) {
@@ -17055,7 +16990,7 @@ void func0f08c424(struct doorobj *door, Mtxf *matrix)
 	mtx4SetTranslation(&door->base.prop->pos, matrix);
 
 	if (door->doorflags & DOORFLAG_FLIP) {
-		mtx00015edc(-1, matrix);
+		mtxScaleZAxis(-1, matrix);
 	}
 }
 
@@ -17328,7 +17263,7 @@ struct prop *doorInit(struct doorobj *door, struct coord *pos, Mtxf *mtx, RoomNu
 		}
 
 		mtx4Copy(mtx, &sp38);
-		mtx00015f04(g_ModelStates[door->base.modelnum].scale * (1.0f / 4096.0f), &sp38);
+		mtxScaleRotationAndTranslation(g_ModelStates[door->base.modelnum].scale * (1.0f / 4096.0f), &sp38);
 		mtx4ToMtx3(&sp38, door->base.realrot);
 
 		door->frac = (door->base.flags & OBJFLAG_DOOR_KEEPOPEN) ? door->maxfrac : 0;
@@ -18890,7 +18825,7 @@ Gfx *countdownTimerRender(Gfx *gdl)
 		gdl = bgunDrawHudString(gdl, fmt, viewright + 8, HUDHALIGN_MIDDLE, y, HUDVALIGN_MIDDLE, 0x00ff00a0);
 		gdl = bgunDrawHudInteger(gdl, (ms % 100) / 10, viewright + 14, HUDHALIGN_MIDDLE, y, HUDVALIGN_MIDDLE, 0x00ff00a0);
 		gdl = bgunDrawHudInteger(gdl, ms % 10, viewright + 18, HUDHALIGN_MIDDLE, y, HUDVALIGN_MIDDLE, 0x00ff00a0);
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	}
@@ -19124,7 +19059,7 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 					mtx4LoadIdentity(&sp13c);
 					mtx4LoadXRotation(rotx, &spe0);
 					mtx4LoadYRotation(roty, &spa0);
-					mtx00015be0(&spa0, &spe0);
+					mtxApplyAffineInPlace(&spa0, &spe0);
 
 					sp120.x = dir->x * 0.27777776f;
 					sp120.y = dir->y * 0.27777776f;
@@ -19162,7 +19097,7 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 						CDTYPE_OBJS | CDTYPE_DOORS | CDTYPE_CHRS | CDTYPE_PATHBLOCKER| CDTYPE_BG,
 						GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
 				blocked = true;
-				cdGetPos(&endpos, 24482, "propobj.c");
+				cdGetPos(&endpos);
 				obstacle = cdGetObstacleProp();
 			}
 
@@ -19180,7 +19115,7 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 				aimpos.y = targetprop->pos.y - 20.0f;
 				aimpos.z = targetprop->pos.z;
 
-				if (func0f06b39c(pos, dir, &aimpos, 30)) {
+				if (isPointInViewCone(pos, dir, &aimpos, 30)) {
 					float f0 = 0.16f * g_Vars.lvupdate60freal * arg1->unk0c;
 
 					if (dist > 200.0f) {

@@ -1,4 +1,5 @@
 #include "n_synthInternals.h"
+#include <string.h>
 #include <os.h>
 #include "platform.h"
 #include <types.h>
@@ -211,7 +212,7 @@ int n_alLoadParam(N_PVoice *filter, int paramID, void *param)
 				a->dc_loop.end = a->dc_table->waveInfo.adpcmWave.loop->end;
 				a->dc_loop.count = a->dc_table->waveInfo.adpcmWave.loop->count;
 
-				bcopy(a->dc_table->waveInfo.adpcmWave.loop->state, a->dc_lstate, sizeof(ADPCM_STATE));
+				memcpy(a->dc_lstate, a->dc_table->waveInfo.adpcmWave.loop->state, sizeof(ADPCM_STATE));
 			} else {
 				a->dc_loop.start = a->dc_loop.end = a->dc_loop.count = 0;
 			}

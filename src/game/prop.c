@@ -1208,7 +1208,7 @@ void hitCreate(struct shotdata *shotdata, struct prop *prop, float hitdistance, 
 	}
 }
 
-// Ben's comment: also used for pistol whip
+// Also used for pistol whip
 void handInflictMeleeDamage(int handnum, struct gset *gset, bool arg2)
 {
 	int cdtypes;
@@ -1254,12 +1254,9 @@ void handInflictMeleeDamage(int handnum, struct gset *gset, bool arg2)
 			struct defaultobj *obj = prop->obj;
 			bool isglass = false;
 
-			if (obj && gset->weaponnum != WEAPON_TRANQUILIZER) {
-				isglass =
-#ifdef AVOID_UB
-					(prop->type == PROPTYPE_OBJ) &&
-#endif
-					(obj->type == OBJTYPE_GLASS || obj->type == OBJTYPE_TINTEDGLASS);
+			if (obj && gset->weaponnum != WEAPON_TRANQUILIZER) 
+			{
+				isglass = (prop->type == PROPTYPE_OBJ) && (obj->type == OBJTYPE_GLASS || obj->type == OBJTYPE_TINTEDGLASS);
 			}
 
 			if (arg2) {
@@ -1280,11 +1277,7 @@ void handInflictMeleeDamage(int handnum, struct gset *gset, bool arg2)
 				struct model *model;
 				struct weaponfunc *func = gsetGetWeaponFunction(gset);
 
-#ifdef AVOID_UB
 				if (func && (func->type & 0xff) == INVENTORYFUNCTYPE_MELEE) {
-#else
-				if ((func->type & 0xff) == INVENTORYFUNCTYPE_MELEE) {
-#endif
 					struct weaponfunc_melee *meleefunc = (struct weaponfunc_melee *)func;
 					rangelimit = meleefunc->range;
 
@@ -1303,7 +1296,7 @@ void handInflictMeleeDamage(int handnum, struct gset *gset, bool arg2)
 					model = chr->model;
 				}
 
-				if (objTestModelHit(model, &distance, &sp110, spfc, spf4)
+				if (objTestModelMeleeHit(model, &distance, &sp110, spfc, spf4)
 						&& sp110 <= 0
 						&& distance >= -rangelimit) {
 					cdtypes = CDTYPE_OBJS | CDTYPE_DOORS | CDTYPE_PATHBLOCKER | CDTYPE_BG;
@@ -2630,16 +2623,16 @@ void farsightChooseTarget(void)
 							&& chr->actiontype != ACT_DEAD
 							&& (chr->hidden & CHRHFLAG_CLOAKED) == 0
 							&& (prop->type != PROPTYPE_PLAYER || !g_Vars.players[playermgrGetPlayerNumByProp(prop)]->isdead)) {
-						float xdist = g_Vars.currentplayer->bond2.unk10.x - prop->pos.x;
-						float ydist = g_Vars.currentplayer->bond2.unk10.y - prop->pos.y;
-						float zdist = g_Vars.currentplayer->bond2.unk10.z - prop->pos.z;
+						float xdist = g_Vars.currentplayer->bond2.cameraPos.x - prop->pos.x;
+						float ydist = g_Vars.currentplayer->bond2.cameraPos.y - prop->pos.y;
+						float zdist = g_Vars.currentplayer->bond2.cameraPos.z - prop->pos.z;
 
 						float dist = sqrtf(xdist * xdist + ydist * ydist + zdist * zdist);
 
 						if (dist > 0) {
-							float thing = (xdist * g_Vars.currentplayer->bond2.unk1c.f[0]
-									+ ydist * g_Vars.currentplayer->bond2.unk1c.f[1]
-									+ zdist * g_Vars.currentplayer->bond2.unk1c.f[2]) / dist;
+							float thing = (xdist * g_Vars.currentplayer->bond2.cameraForward.f[0]
+									+ ydist * g_Vars.currentplayer->bond2.cameraForward.f[1]
+									+ zdist * g_Vars.currentplayer->bond2.cameraForward.f[2]) / dist;
 
 							if (thing < 0 && thing < bestthing) {
 								bestthing = thing;
@@ -2830,9 +2823,9 @@ void autoaimTick(void)
 		}
 
 		if (cangangsta) {
-			float xdist = g_Vars.currentplayer->bond2.unk10.x - bestprop->pos.x;
-			float ydist = g_Vars.currentplayer->bond2.unk10.y - bestprop->pos.y;
-			float zdist = g_Vars.currentplayer->bond2.unk10.z - bestprop->pos.z;
+			float xdist = g_Vars.currentplayer->bond2.cameraPos.x - bestprop->pos.x;
+			float ydist = g_Vars.currentplayer->bond2.cameraPos.y - bestprop->pos.y;
+			float zdist = g_Vars.currentplayer->bond2.cameraPos.z - bestprop->pos.z;
 			float dist = sqrtf(xdist * xdist + ydist * ydist + zdist * zdist);
 
 			if (dist < 200) {

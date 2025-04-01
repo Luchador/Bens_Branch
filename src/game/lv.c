@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdio.h>
 #include "constants.h"
 #include "bss.h"
 #include "data.h"
@@ -810,7 +811,7 @@ Gfx *lvRenderFPS(Gfx *gdl)
 
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRender(gdl, &x, &y, buffer, g_CharsNumeric, g_FontNumeric, color, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
-		gdl = text0f153780(gdl);
+		gdl = utilsSetTexturesToPerspective(gdl);
 
 		gSPClearExtraGeometryModeEXT(gdl++, g_HudAlignModeL);
 	}
@@ -1327,11 +1328,11 @@ Gfx *lvRender(Gfx *gdl)
 
 						if (alpha) {
 							gdl = textConfigureGfxPipeline(gdl);
-							gdl = text0f153a34(gdl,
+							gdl = textDrawColoredRect(gdl,
 									viGetViewLeft(), viGetViewTop(),
 									viGetViewLeft() + viGetViewWidth(),
 									viGetViewTop() + viGetViewHeight(), 0xffffff00 | alpha);
-							gdl = text0f153780(gdl);
+							gdl = utilsSetTexturesToPerspective(gdl);
 						}
 					}
 				}

@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/bondeyespy.h"
 #include "game/chraction.h"
@@ -26,6 +27,7 @@
 #include "data.h"
 #include "types.h"
 #include "input.h"
+#include "game/debug.h"
 
 uint8_t g_EyespyPickup = false;
 uint8_t g_EyespyHit = EYESPYHIT_NONE;
@@ -262,7 +264,7 @@ int eyespy0f0cf890(struct coord *arg0, struct coord *arg1, struct coord *arg2, s
 		}
 
 		if (someint == 0) {
-			cdGetEdge(arg3, arg4, 350, "bondeyespy.c");
+			cdGetEdge(arg3, arg4);
 
 			if (arg3->f[0] != arg1->f[0]
 					|| arg3->f[1] != arg1->f[1]
@@ -307,7 +309,7 @@ int eyespy0f0cf9f8(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 	return -1;
 }
 
-int eyespy0f0cfafc(struct coord *arg0, struct coord *arg1, struct coord *arg2)
+int eyespyTrySidePush(struct coord *moveDir, struct coord *targetA, struct coord *targetB)
 {
 	struct coord sp34;
 	struct coord sp28;
@@ -315,21 +317,21 @@ int eyespy0f0cfafc(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 	struct prop *prop = g_Vars.currentplayer->eyespy->prop;
 	float tmp;
 
-	sp34.x = arg1->x - (prop->pos.x + arg0->f[0]);
-	sp34.z = arg1->z - (prop->pos.z + arg0->f[2]);
+	sp34.x = targetA->x - (prop->pos.x + moveDir->f[0]);
+	sp34.z = targetA->z - (prop->pos.z + moveDir->f[2]);
 
 	if (sp34.f[0] * sp34.f[0] + sp34.f[2] * sp34.f[2] <= width * width) {
-		if (arg1->f[0] != prop->pos.f[0] || arg1->f[2] != prop->pos.f[2]) {
-			sp34.x = -(arg1->z - prop->pos.z);
+		if (targetA->f[0] != prop->pos.f[0] || targetA->f[2] != prop->pos.f[2]) {
+			sp34.x = -(targetA->z - prop->pos.z);
 			sp34.y = 0;
-			sp34.z = arg1->x - prop->pos.x;
+			sp34.z = targetA->x - prop->pos.x;
 
 			tmp = sqrtf(sp34.f[0] * sp34.f[0] + sp34.f[2] * sp34.f[2]);
 
 			sp34.x = sp34.f[0] * (1.0f / tmp);
 			sp34.z = sp34.f[2] * (1.0f / tmp);
 
-			tmp = arg0->f[0] * sp34.f[0] + arg0->f[2] * sp34.f[2];
+			tmp = moveDir->f[0] * sp34.f[0] + moveDir->f[2] * sp34.f[2];
 
 			sp34.x = sp34.x * tmp;
 			sp34.z = sp34.z * tmp;
@@ -343,21 +345,21 @@ int eyespy0f0cfafc(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 			}
 		}
 	} else {
-		sp34.x = arg2->x - (prop->pos.x + arg0->f[0]);
-		sp34.z = arg2->z - (prop->pos.z + arg0->f[2]);
+		sp34.x = targetB->x - (prop->pos.x + moveDir->f[0]);
+		sp34.z = targetB->z - (prop->pos.z + moveDir->f[2]);
 
 		if (sp34.f[0] * sp34.f[0] + sp34.f[2] * sp34.f[2] <= width * width) {
-			if (arg2->f[0] != prop->pos.f[0] || arg2->f[2] != prop->pos.f[2]) {
-				sp34.x = -(arg2->z - prop->pos.z);
+			if (targetB->f[0] != prop->pos.f[0] || targetB->f[2] != prop->pos.f[2]) {
+				sp34.x = -(targetB->z - prop->pos.z);
 				sp34.y = 0;
-				sp34.z = arg2->x - prop->pos.x;
+				sp34.z = targetB->x - prop->pos.x;
 
 				tmp = sqrtf(sp34.f[0] * sp34.f[0] + sp34.f[2] * sp34.f[2]);
 
 				sp34.x = sp34.f[0] * (1.0f / tmp);
 				sp34.z = sp34.f[2] * (1.0f / tmp);
 
-				tmp = arg0->f[0] * sp34.f[0] + arg0->f[2] * sp34.f[2];
+				tmp = moveDir->f[0] * sp34.f[0] + moveDir->f[2] * sp34.f[2];
 
 				sp34.x = sp34.x * tmp;
 				sp34.z = sp34.z * tmp;
@@ -381,7 +383,7 @@ int eyespy0f0cfdd0(struct coord *vel, struct coord *arg1, struct coord *arg2)
 	bool result = eyespyCalculateNewPositionWithPush(vel);
 
 	if (result != CDRESULT_NOCOLLISION) {
-		cdGetEdge(arg1, arg2, 473, "bondeyespy.c");
+		cdGetEdge(arg1, arg2);
 	}
 
 	return result;
@@ -416,15 +418,15 @@ void eyespyUpdateVertical(void)
 	if (eyespy0f0cfdd0(&dist, &spac, &spa0) == CDRESULT_COLLISION) {
 		if (eyespy0f0cf890(&dist, &spac, &spa0, &sp60, &sp54)) {
 			if (eyespy0f0cf9f8(&dist, &spac, &spa0) <= 0) {
-				eyespy0f0cfafc(&dist, &spac, &spa0);
+				eyespyTrySidePush(&dist, &spac, &spa0);
 			}
 		} else {
 			eyespy0f0cf890(&dist, &sp60, &sp54, &sp44, &sp38);
 
 			if (eyespy0f0cf9f8(&dist, &sp60, &sp54) <= 0
 					&& eyespy0f0cf9f8(&dist, &spac, &spa0) <= 0
-					&& eyespy0f0cfafc(&dist, &sp60, &sp54) <= 0) {
-				eyespy0f0cfafc(&dist, &spac, &spa0);
+					&& eyespyTrySidePush(&dist, &sp60, &sp54) <= 0) {
+				eyespyTrySidePush(&dist, &spac, &spa0);
 			}
 		}
 	}
