@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+#include <PR/ultratypes.h>
 #include <PR/mbi.h>
 #include <stdint.h>
 #include "platform.h"
@@ -198,9 +199,9 @@ void            n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *evt, ALMicroTim
 void        	n_alEvtqFlushType(ALEventQueue *evtq, int16_t type);
 
 struct oscstate {
-	uint32_t unk00;
+	u32 unk00;
 	uint8_t unk04;
-	uint32_t unk08;
+	u32 unk08;
 	float unk0c;
 	float unk10;
 };
@@ -241,7 +242,7 @@ typedef struct {
     int                 uspt;           /* microseconds per tick            */
     int                 nextDelta;      /* microseconds to next callback    */
     int                 state;
-    uint16_t                 chanMask;       /* active channels                  */
+    u16                 chanMask;       /* active channels                  */
     int16_t                 vol;            /* overall sequence volume          */
     uint8_t                  maxChannels;    /* number of MIDI channels          */
     uint8_t                  debugFlags;     /* control which error get reported */
@@ -271,7 +272,7 @@ typedef struct {
     int                 uspt;           /* microseconds per tick            */
     int                 nextDelta;      /* microseconds to next callback    */
     int                 state;
-    uint16_t                 chanMask;       /* active channels                  */
+    u16                 chanMask;       /* active channels                  */
     int16_t                 vol;            /* overall sequence volume          */
     uint8_t                  maxChannels;    /* number of MIDI channels          */
     uint8_t                  debugFlags;     /* control which error get reported */
@@ -310,7 +311,7 @@ void    n_alSeqNextEvent(ALSeq *seq, N_ALEvent *event);
 
 void    n_alCSeqNew(ALCSeq *seq, uint8_t *ptr);
 void    n_alCSeqNextEvent(ALCSeq *seq, N_ALEvent *evt, int arg2);
-void    n_alCSeqNewMarker(ALCSeq *seq, ALCSeqMarker *m, uint32_t ticks);
+void    n_alCSeqNewMarker(ALCSeq *seq, ALCSeqMarker *m, u32 ticks);
 
 
 /*
@@ -404,8 +405,8 @@ void     n_alSndpSetSound(ALSndId id);
 
 float func0003b9d4(int arg0);
 void func0003ba64(struct fx *fx, float outputrate);
-int16_t _getRate(float vol, float tgt, int count, uint16_t *ratel);
-int16_t _getVol(int16_t ivol, int samples, int16_t ratem, uint16_t ratel);
+int16_t _getRate(float vol, float tgt, int count, u16 *ratel);
+int16_t _getVol(int16_t ivol, int samples, int16_t ratem, u16 ratel);
 
 #ifdef _LANGUAGE_C_PLUS_PLUS
 }

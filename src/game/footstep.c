@@ -116,7 +116,7 @@ int footstepChooseSound(struct chrdata *chr, int footstepindex)
 	}
 
 	if (CHRRACE(chr) == RACE_SKEDAR && chr->bodynum != BODY_MINISKEDAR) {
-		uint32_t result;
+		u32 result;
 		chr->lastfootsample ^= 1;
 
 		if (floortype == FLOORTYPE_METAL) {

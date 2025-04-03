@@ -14,6 +14,10 @@
  */
 #define ms *(((int)((float)44.1))&~0x7)
 
+#ifdef AVOID_UB
+float atan2f(float x, float z);
+#endif
+
 int SMALLROOM_PARAMS_N[26] = {
 	/* sections	 length */
 	3,           55 ms,
@@ -31,7 +35,7 @@ int BIGROOM_PARAMS_N[10] = {
 
 #define M_PI    3.141592741f
 
-void calcLowPassBiquadCoefficients(float outputrate, float arg1, float arg2, float *arg3, float *arg4)
+void func0003b710(float outputrate, float arg1, float arg2, float *arg3, float *arg4)
 {
 	float sp24;
 	float sp20;
@@ -41,9 +45,13 @@ void calcLowPassBiquadCoefficients(float outputrate, float arg1, float arg2, flo
 		arg1 = outputrate - 200;
 	}
 
-	//sp24 = atan2f(arg1 * M_PI, outputrate);
-	float norm = arg1 / outputrate;
-	sp24 = norm * M_PI; 
+	// @bug: the declaration for atan2f is missing, so an implicit declaration
+	// is used by the compiler. The implicit declaration uses integer arguments,
+	// so these floats are being converted to ints here. atan2f then interprets
+	// the integer bits as a float. Similar story with the return value: atan2f
+	// returns a float in $f0, but the implicit declaration uses an integer so
+	// it's reading from $v0, which is a garbage value.
+	sp24 = atan2f(arg1 * M_PI, outputrate);
 	sp20 = sp24 * sp24;
 	sp1c = (sp24 * 1.4142136573792f) / arg2;
 
@@ -122,7 +130,7 @@ void func0003ba64(struct fx *fx, float outputrate)
 		fx->unk02 = 10;
 	}
 
-	calcLowPassBiquadCoefficients(outputrate, fx->unk00 + 10.0f, fx->unk02 / 10.0f, sp30, sp24);
+	func0003b710(outputrate, fx->unk00 + 10.0f, fx->unk02 / 10.0f, sp30, sp24);
 
 	for (i = 3; i < 8; i++) {
 		fx->unk08[i] = 0;
@@ -141,7 +149,7 @@ void func0003ba64(struct fx *fx, float outputrate)
 
 void n_alFxNew(ALFx **fx_ar, ALSynConfig *c, int16_t bus, ALHeap *hp)
 {
-	uint16_t i, j, k;
+	u16 i, j, k;
 	int *param = 0;
 	ALDelay	*d;
 	ALFx *r;

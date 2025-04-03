@@ -159,7 +159,7 @@ void htbInit(void)
 	g_ScenarioData.htb.token = NULL;
 }
 
-void htbAddPad(int16_t padnum)
+void htbAddPad(s16 padnum)
 {
 	struct scenariodata_htb *data = &g_ScenarioData.htb;
 
@@ -176,7 +176,7 @@ int htbNumProps(void)
 	return 1;
 }
 
-void htbRemoveAmmoCrateAtPad(int16_t padnum)
+void htbRemoveAmmoCrateAtPad(s16 padnum)
 {
 	struct prop *prop = g_Vars.activeprops;
 

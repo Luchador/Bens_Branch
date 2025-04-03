@@ -1,5 +1,6 @@
 #ifndef _IN_GAME_ROOM_H
 #define _IN_GAME_ROOM_H
+#include <ultra64.h>
 #include "data.h"
 #include "types.h"
 

@@ -1,6 +1,4 @@
 #include <ultra64.h>
-#include <stdio.h>
-#include <string.h>
 #include "constants.h"
 #include "game/filelist.h"
 #include "game/tex.h"
@@ -18,6 +16,7 @@
 #include "lib/vi.h"
 #include "lib/joy.h"
 #include "lib/mema.h"
+#include "string.h"
 #include "data.h"
 #include "types.h"
 
@@ -800,7 +799,7 @@ bool filemgrSaveOrLoad(struct fileguid *guid, int fileop, uintptr_t playernum)
 void filemgrDeleteCurrentFile(void)
 {
 	bool error = false;
-	int8_t device = pakFindBySerial(g_FilemgrFileToDelete.deviceserial);
+	s8 device = pakFindBySerial(g_FilemgrFileToDelete.deviceserial);
 	int i;
 
 	if (device >= 0) {
@@ -1934,7 +1933,7 @@ char *pakMenuTextEditingPakName(struct menuitem *item)
 MenuItemHandlerResult pakSelectionMenuHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_CHECKDISABLED) {
-		if (!mempakIsOkay((int8_t)item->param)) {
+		if (!mempakIsOkay((s8)item->param)) {
 			return true;
 		}
 	}

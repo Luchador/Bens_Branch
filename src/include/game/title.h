@@ -13,6 +13,7 @@ void titleReset(void);
 
 Gfx *titleClear(Gfx *gdl);
 
+char *mpPlayerGetWeaponOfChoiceName(unsigned int playernum, unsigned int slot);
 void titleSetLight(Lights1 *light, int8_t r, int8_t g, int8_t b, float luminosity, struct coord *dir);
 void titleInitLegal(void);
 void titleTickLegal(void);

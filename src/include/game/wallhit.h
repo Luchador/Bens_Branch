@@ -25,6 +25,7 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 		float width, float height, uint8_t minalpha, uint8_t maxalpha,
 		int rotdeg, uint32_t timermax, uint32_t timerspeed, bool xlu);
 
+int wallhit0f140750(struct coord *coord);
 Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlupass);
 Gfx *wallhitRenderBgHits(int roomnum, Gfx *gdl);
 void wallhitsRecolour(void);

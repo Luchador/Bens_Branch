@@ -189,8 +189,8 @@ int splatsCreate(int qty, float arg1, struct prop *prop, struct shotdata *shotda
 		mtx4RotateVec(&spa4, &spfc, &shotdata->gundir3d);
 		mtx4RotateVec(&spa4, &spf0, &shotdata->gundir2d);
 
-		utilsNormalizeVector(&shotdata->gundir3d, &shotdata->gundir3d, 403, "splat.c");
-		utilsNormalizeVector(&shotdata->gundir2d, &shotdata->gundir2d, 404, "splat.c");
+		normalizeVector(&shotdata->gundir3d, &shotdata->gundir3d, 403, "splat.c");
+		normalizeVector(&shotdata->gundir2d, &shotdata->gundir2d, 404, "splat.c");
 
 		if (splat0f149274(arg1, prop, shotdata, /*reused var*/ dist, isskedar, splattype, timermax, chr, timerspeed)) {
 			numdropped++;
@@ -318,7 +318,7 @@ bool splat0f149274(float arg0, struct prop *chrprop, struct shotdata *shotdata, 
 				hitpos = &hit->pos;
 				sp504 = &hit->hitthing.unk0c;
 				objprop = hit->prop;
-				mtxindex = (int8_t)hit->mtxindex;
+				mtxindex = (s8)hit->mtxindex;
 				room = 1;
 				translucent = false;
 				hasresult = true;
@@ -455,7 +455,7 @@ void splat0f14986c(struct splatdata *splat)
 			NULL, texnum, splat->room, splat->objprop,
 			splat->chrprop, splat->mtxindex, 0, splat->chr,
 			width, height, minalpha, maxalpha,
-			rngRandom() % 360, (uint16_t)splat->timermax, splat->timerspeed, translucent);
+			rngRandom() % 360, (u16)splat->timermax, splat->timerspeed, translucent);
 
 	if (isskedarblood) {
 		smokerooms[0] = splat->room;

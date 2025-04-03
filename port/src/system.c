@@ -4,7 +4,6 @@
 
 #include <stdlib.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
@@ -112,7 +111,7 @@ void sysInit(void)
 	if (!timer) {
 		// no function or hires timers not supported, fallback to lower resolution timer
 		sysLogPrintf(LOG_WARNING, "SYS: hires waitable timers not available");
-		timer = CreateWaitableTimerA(NULL, false, NULL);
+		timer = CreateWaitableTimerA(NULL, FALSE, NULL);
 	}
 #endif
 }
@@ -304,7 +303,7 @@ void sysSleep(const int64_t hns)
 #ifdef PLATFORM_WIN32
 	static LARGE_INTEGER li;
 	li.QuadPart = -hns;
-	SetWaitableTimer(timer, &li, 0, NULL, NULL, false);
+	SetWaitableTimer(timer, &li, 0, NULL, NULL, FALSE);
 	WaitForSingleObject(timer, INFINITE);
 #else
 	const struct timespec spec = { 0, hns * 100 };

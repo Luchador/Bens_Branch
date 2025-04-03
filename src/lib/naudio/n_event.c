@@ -1,5 +1,4 @@
 #include <libaudio.h>
-#include <string.h>
 #include "n_libaudio.h"
 
 void n_alEvtqNew(ALEventQueue *evtq, N_ALEventListItem *items, int itemCount)
@@ -26,7 +25,7 @@ ALMicroTime n_alEvtqNextEvent(ALEventQueue *evtq, N_ALEvent *evt)
 
 	if (item) {
 		alUnlink((ALLink *)item);
-		memcpy(evt, &item->evt, sizeof(*evt));
+		bcopy(&item->evt, evt, sizeof(*evt));
 		alLink((ALLink *)item, &evtq->freeList);
 		delta = item->delta;
 	} else {
@@ -60,7 +59,7 @@ void n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *evt, ALMicroTime delta, in
 	}
 
 	alUnlink((ALLink *)item);
-	memcpy(&item->evt, evt, sizeof(*evt));
+	bcopy(evt, &item->evt, sizeof(*evt));
 
 	if (delta == AL_EVTQ_END) {
 		postAtEnd = -1;
@@ -92,7 +91,7 @@ void n_alEvtqPostEvent(ALEventQueue *evtq, N_ALEvent *evt, ALMicroTime delta, in
 	}
 }
 
-void n_alEvtqFlushType(ALEventQueue *evtq, int16_t type)
+void n_alEvtqFlushType(ALEventQueue *evtq, s16 type)
 {
 	ALLink *thisNode;
 	ALLink *nextNode;

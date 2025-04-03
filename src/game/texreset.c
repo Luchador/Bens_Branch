@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <string.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/texdecompress.h"
@@ -93,7 +92,7 @@ void texReset(void)
 	uint32_t tcofs = 0;
 	for (int i = 0; i < ARRAYCOUNT(tcptrs); ++i) {
 		*tcptrs[i].dst = g_TextureConfigSegment + tcofs;
-		memcpy(*tcptrs[i].dst, tcptrs[i].src, tcptrs[i].size);
+		bcopy(tcptrs[i].src, *tcptrs[i].dst, tcptrs[i].size);
 		tcofs += tcptrs[i].size;
 	}
 

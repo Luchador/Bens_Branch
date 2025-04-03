@@ -3,7 +3,7 @@
 #include "data.h"
 #include "types.h"
 
-uint8_t g_Skel0BJoints[][2] = {
+u8 g_Skel0BJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },

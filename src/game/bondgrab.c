@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/bondgrab.h"
 #include "game/bondmove.h"
@@ -182,7 +181,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 			sp98.y = g_Vars.currentplayer->prop->pos.y;
 			sp98.z = delta->z + g_Vars.currentplayer->prop->pos.z;
 
-			cdGetEdge(&spb0, &spa4);
+			cdGetEdge(&spb0, &spa4, 201, "bondgrab.c");
 
 			spc8.x = spa4.z - spb0.z;
 			spc8.y = 0.0f;
@@ -194,7 +193,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 				spc8.z = 1.0f;
 			}
 
-			rayIntersectLineXZ(&spb0, &spa4, &sp98, &spc8, &spd4);
+			func0f02e3dc(&spb0, &spa4, &sp98, &spc8, &spd4);
 
 			spbc.x = (sp98.x - g_Vars.currentplayer->prop->pos.x) / g_Vars.lvupdate60freal;
 			spbc.y = 0.0f;
@@ -210,7 +209,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 			struct coord sp50;
 			struct coord sp44;
 
-			cdGetEdge(&sp68, &sp5c);
+			cdGetEdge(&sp68, &sp5c, 228, "bondgrab.c");
 
 			if (cdGetSavedPos(&sp50, &sp44)) {
 				sp44.x -= sp50.x;
@@ -226,7 +225,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 				sp44.z = obj->prop->pos.z - var8009de70->pos.z;
 			}
 
-			rayIntersectLineXZ(&sp68, &sp5c, &sp50, &sp44, &sp8c);
+			func0f02e3dc(&sp68, &sp5c, &sp50, &sp44, &sp8c);
 
 			sp80.x = delta->x;
 			sp80.y = 0.0f;
@@ -586,50 +585,50 @@ bool bgrab0f0cdb04(float angle, bool arg2)
 	return result;
 }
 
-bool bgrabTryPushObject(float angle)
+bool bgrab0f0cdb68(float angle)
 {
-	struct coord edgeStart;
-	struct coord edgeEnd;
+	struct coord spa4;
+	struct coord sp98;
 	struct coord sp8c;
 	struct coord sp80;
-	float edgeDirX;
-	float edgeDirZ;
-	float maxAllowedDistance; // Push limit based on angle/speed
-	float pushDirX;
-	float pushDirZ;
+	float sp7c;
+	float sp78;
+	float f2;
+	float f20;
+	float f22;
 	int i;
 	float f0;
 	float sp60 = -1.0f;
-	struct coord moveVec;
+	struct coord sp54;
 	float f12;
 	float radius;
 	float ymax;
 	float ymin;
 
-	cdGetEdge(&edgeStart, &edgeEnd);
+	cdGetEdge(&spa4, &sp98, 678, "bondgrab.c");
 
-	edgeDirX = edgeEnd.f[0] - edgeStart.f[0]; // x direction
-	edgeDirZ = edgeEnd.f[2] - edgeStart.f[2]; // z direction
+	sp7c = sp98.f[0] - spa4.f[0];
+	sp78 = sp98.f[2] - spa4.f[2];
 
-	if (edgeDirX == 0.0f && edgeDirZ == 0.0f) {
-		edgeDirZ = 1.0f;
+	if (sp7c == 0.0f && sp78 == 0.0f) {
+		sp78 = 1.0f;
 	} else {
-		f12 = 1.0f / sqrtf(edgeDirX * edgeDirX + edgeDirZ * edgeDirZ);
-		edgeDirX = edgeDirX * f12;
-		edgeDirZ = edgeDirZ * f12;
+		f12 = 1.0f / sqrtf(sp7c * sp7c + sp78 * sp78);
+		sp7c = sp7c * f12;
+		sp78 = sp78 * f12;
 	}
 
-	pushDirX = edgeDirZ;
-	pushDirZ = -edgeDirX;
+	f20 = sp78;
+	f22 = -sp7c;
 
-	if ((pushDirX * (g_Vars.currentplayer->prop->pos.x - edgeStart.f[0]) + pushDirZ * (g_Vars.currentplayer->prop->pos.z - edgeStart.f[2])) < 0.0f) {
-		pushDirX = -pushDirX;
-		pushDirZ = -pushDirZ;
+	if ((f20 * (g_Vars.currentplayer->prop->pos.x - spa4.f[0]) + f22 * (g_Vars.currentplayer->prop->pos.z - spa4.f[2])) < 0.0f) {
+		f20 = -f20;
+		f22 = -f22;
 	}
 
 	if (g_CdHasSavedBlock) {
 		for (i = 0; i < g_CdSavedBlock.header.numvertices; i++) {
-			f0 = (g_CdSavedBlock.vertices[i][0] - edgeStart.f[0]) * pushDirX + (g_CdSavedBlock.vertices[i][1] - edgeStart.f[2]) * pushDirZ;
+			f0 = (g_CdSavedBlock.vertices[i][0] - spa4.f[0]) * f20 + (g_CdSavedBlock.vertices[i][1] - spa4.f[2]) * f22;
 
 			if (f0 < 0.0f) {
 				f0 = -f0;
@@ -641,8 +640,8 @@ bool bgrabTryPushObject(float angle)
 		}
 	} else {
 		if (cdGetSavedPos(&sp8c, &sp80)) {
-			float f0 = (sp8c.f[0] - edgeStart.f[0]) * pushDirX + pushDirZ * (sp8c.f[2] - edgeStart.f[2]);
-			float f16 = (sp80.f[0] - edgeStart.f[0]) * pushDirX + pushDirZ * (sp80.f[2] - edgeStart.f[2]);
+			float f0 = (sp8c.f[0] - spa4.f[0]) * f20 + f22 * (sp8c.f[2] - spa4.f[2]);
+			float f16 = (sp80.f[0] - spa4.f[0]) * f20 + f22 * (sp80.f[2] - spa4.f[2]);
 
 			if (f16 < f0) {
 				f0 = f16;
@@ -656,7 +655,7 @@ bool bgrabTryPushObject(float angle)
 				if (g_Vars.currentplayer->grabbedprop->obj->flags3 & OBJFLAG3_GEOCYL) {
 					objGetBbox(g_Vars.currentplayer->grabbedprop, &radius, &ymax, &ymin);
 
-					f0 = (var8009de78.f[0] - edgeStart.f[0]) * pushDirX + (var8009de78.f[2] - edgeStart.f[2]) * pushDirZ;
+					f0 = (var8009de78.f[0] - spa4.f[0]) * f20 + (var8009de78.f[2] - spa4.f[2]) * f22;
 					f0 -= radius;
 
 					if (f0 < 0.0f) {
@@ -667,18 +666,22 @@ bool bgrabTryPushObject(float angle)
 		}
 	}
 
-	maxAllowedDistance = fabsf(sinf(angle) * 400.0f);
+	f2 = sinf(angle) * 400.0f;
 
-	if (maxAllowedDistance < sp60) {
-		sp60 = maxAllowedDistance;
+	if (f2 < 0.0f) {
+		f2 = -f2;
+	}
+
+	if (f2 < sp60) {
+		sp60 = f2;
 	}
 
 	if (sp60 >= 0.0f) {
-		moveVec.x = sp60 * pushDirX * 1.01f;
-		moveVec.y = 0.0f;
-		moveVec.z = sp60 * pushDirZ * 1.01f;
+		sp54.x = sp60 * f20 * 1.01f;
+		sp54.y = 0.0f;
+		sp54.z = sp60 * f22 * 1.01f;
 
-		bgrab0f0ce0bc(&moveVec);
+		bgrab0f0ce0bc(&sp54);
 
 		return bgrab0f0cdb04(angle, true);
 	}
@@ -692,7 +695,7 @@ void bgrab0f0cdef0(void)
 		float angle = g_Vars.currentplayer->speedtheta * g_Vars.lvupdate60freal * 0.017450513318181f * 3.5f;
 
 		if (bgrab0f0cdb04(angle, true) == 0) {
-			bgrabTryPushObject(angle);
+			bgrab0f0cdb68(angle);
 		}
 	}
 }
@@ -702,7 +705,7 @@ bool bgrab0f0cdf64(struct coord *delta, struct coord *arg1, struct coord *arg2)
 	bool result = bgrabCalculateNewPositiontWithPush(delta, 0, true);
 
 	if (!result) {
-		cdGetEdge(arg1, arg2);
+		cdGetEdge(arg1, arg2, 815, "bondgrab.c");
 	}
 
 	return result;
@@ -747,6 +750,10 @@ void bgrab0f0ce0bc(struct coord *arg0)
 		if (value <= 0) {
 			value = 1;
 		}
+	}
+
+	if (value) {
+		// empty
 	}
 }
 
@@ -859,13 +866,13 @@ void bgrabHandleActivate(void)
 void bgrabUpdateSpeedSideways(float targetspeed, float accelspeed, int mult)
 {
 	if (targetspeed < g_Vars.currentplayer->speedstrafe) {
-		g_Vars.currentplayer->speedstrafe -= accelspeed * mult;
+		g_Vars.currentplayer->speedstrafe -= PALUPF(accelspeed * mult);
 
 		if (g_Vars.currentplayer->speedstrafe < targetspeed) {
 			g_Vars.currentplayer->speedstrafe = targetspeed;
 		}
 	} else if (g_Vars.currentplayer->speedstrafe < targetspeed) {
-		g_Vars.currentplayer->speedstrafe += accelspeed * mult;
+		g_Vars.currentplayer->speedstrafe += PALUPF(accelspeed * mult);
 
 		if (g_Vars.currentplayer->speedstrafe > targetspeed) {
 			g_Vars.currentplayer->speedstrafe = targetspeed;
@@ -966,48 +973,69 @@ void bgrabUpdateSpeedTheta(void)
 	g_Vars.currentplayer->speedtheta = g_Vars.currentplayer->bondgrabthetaspeedsum * 0.01529997587204f;
 }
 
-void bgrabUpdatePlayerMovement(void)
+void bgrab0f0ce924(void)
 {
+	float mult;
+	float sp88;
+	float sp84;
+	float sp80;
+	struct coord sp74 = {0, 0, 0};
+	float sp70;
+	float sp6c;
+	float speedforwards;
+	float speedsideways;
+	float speedtheta;
+	float maxspeed;
+	float xdelta;
+	float zdelta;
+	float sp50;
+	float sp4c;
+	float sp48;
+	float sp44;
+	float sp40;
+	float sp3c;
+	float sp38;
+	float breathing;
+
 	if (g_Vars.lvupdate240 > 0) {
-		struct coord moveVector = {0, 0, 0};
-		float stickForwardDelta;
-		float stickSideDelta;
-		float speedforwards;
-		float speedsideways;
-		float speedtheta;
-		float xdelta;
-		float zdelta;
-		float localSideDelta;
-		float localForwardDelta;
-		float localMoveSideComponent;
-		float localMoveForwardComponent;
+		bmove0f0cba88(&sp70, &sp6c, &g_Vars.currentplayer->bondshotspeed, g_Vars.currentplayer->vv_sintheta, g_Vars.currentplayer->vv_costheta);
 
-		// Read stick input and update movement
-		bmove0f0cba88(&stickForwardDelta, &stickSideDelta, &g_Vars.currentplayer->bondshotspeed, g_Vars.currentplayer->vv_sintheta, g_Vars.currentplayer->vv_costheta);
-		g_Vars.currentplayer->speedforwards += stickForwardDelta;
-		g_Vars.currentplayer->speedsideways += stickSideDelta;
+		g_Vars.currentplayer->speedforwards += sp70;
+		g_Vars.currentplayer->speedsideways += sp6c;
 
-		float mult = g_HeadAnims[HEADANIM_MOVING].translateperframe * 0.5f * g_Vars.lvupdate60freal;
-		float headBobSideways = mult * g_Vars.currentplayer->speedsideways;
+		mult = g_HeadAnims[HEADANIM_MOVING].translateperframe * 0.5f * g_Vars.lvupdate60freal;
+		sp88 = mult * g_Vars.currentplayer->speedsideways;
 
-		speedsideways = fabsf(g_Vars.currentplayer->speedsideways * 0.8f);
-		speedforwards = fabsf(g_Vars.currentplayer->speedforwards);
-		speedtheta = fabsf(g_Vars.currentplayer->speedtheta * 0.8f);
+		speedsideways = g_Vars.currentplayer->speedsideways * 0.8f;
+		speedforwards = g_Vars.currentplayer->speedforwards;
+		speedtheta = g_Vars.currentplayer->speedtheta * 0.8f;
 
-		float finalSpeed = speedforwards;
-
-		if (speedsideways > finalSpeed) {
-			finalSpeed = speedsideways;
+		if (speedsideways < 0.0f) {
+			speedsideways = -speedsideways;
 		}
 
-		if (speedtheta > finalSpeed) {
-			finalSpeed = speedtheta;
+		if (speedforwards < 0.0f) {
+			speedforwards = -speedforwards;
 		}
 
-		if (finalSpeed >= 0.75f) {
-			g_Vars.currentplayer->bondbreathing += (finalSpeed - 0.75f) * g_Vars.lvupdate60freal / 900.0f;
+		if (speedtheta < 0.0f) {
+			speedtheta = -speedtheta;
+		}
+
+		maxspeed = speedforwards;
+
+		if (speedsideways > maxspeed) {
+			maxspeed = speedsideways;
+		}
+
+		if (speedtheta > maxspeed) {
+			maxspeed = speedtheta;
+		}
+
+		if (maxspeed >= 0.75f) {
+			g_Vars.currentplayer->bondbreathing += (maxspeed - 0.75f) * g_Vars.lvupdate60freal / 900.0f;
 		} else {
-			g_Vars.currentplayer->bondbreathing -= (0.75f - finalSpeed) * g_Vars.lvupdate60freal / 2700.0f;
+			g_Vars.currentplayer->bondbreathing -= (0.75f - maxspeed) * g_Vars.lvupdate60freal / 2700.0f;
 		}
 
 		if (g_Vars.currentplayer->bondbreathing < 0.0f) {
@@ -1016,79 +1044,79 @@ void bgrabUpdatePlayerMovement(void)
 			g_Vars.currentplayer->bondbreathing = 1.0f;
 		}
 
-		bmove0f0cc654(finalSpeed, g_Vars.currentplayer->speedforwards, headBobSideways);
+		bmove0f0cc654(maxspeed, g_Vars.currentplayer->speedforwards, sp88);
 
-		g_Vars.currentplayer->gunspeed = finalSpeed;
+		g_Vars.currentplayer->gunspeed = maxspeed;
 
-		float headX = g_Vars.currentplayer->headpos.x;
-		float headZ = g_Vars.currentplayer->headpos.z;
+		sp84 = g_Vars.currentplayer->headpos.x;
+		sp80 = g_Vars.currentplayer->headpos.z;
 
 		if (cheatIsActive(CHEAT_SMALLJO)) {
-			headX *= 0.4f;
-			headZ *= 0.4f;
+			sp84 *= 0.4f;
+			sp80 *= 0.4f;
 		}
 
-		moveVector.x += (headZ * g_Vars.currentplayer->bond2.unk00.f[0] - headX * g_Vars.currentplayer->bond2.unk00.f[2]) * g_Vars.lvupdate60freal;
-		moveVector.z += (headZ * g_Vars.currentplayer->bond2.unk00.f[2] + headX * g_Vars.currentplayer->bond2.unk00.f[0]) * g_Vars.lvupdate60freal;
+		sp74.x += (sp80 * g_Vars.currentplayer->bond2.unk00.f[0] - sp84 * g_Vars.currentplayer->bond2.unk00.f[2]) * g_Vars.lvupdate60freal;
+		sp74.z += (sp80 * g_Vars.currentplayer->bond2.unk00.f[2] + sp84 * g_Vars.currentplayer->bond2.unk00.f[0]) * g_Vars.lvupdate60freal;
 
-		bmoveUpdateMoveInitSpeed(&moveVector);
+		bmoveUpdateMoveInitSpeed(&sp74);
 
 		if (cheatIsActive(CHEAT_TURBOMODE)) { // Ben's comment: was formerly a turbo mode debug function
-			moveVector.x += (g_Vars.currentplayer->bond2.unk00.f[0] * g_Vars.currentplayer->speedforwards - (g_Vars.currentplayer->bond2.unk00.f[2] * g_Vars.currentplayer->speedsideways)) * g_Vars.lvupdate60freal * 10.0f;
-			moveVector.z += (g_Vars.currentplayer->bond2.unk00.f[2] * g_Vars.currentplayer->speedforwards + (g_Vars.currentplayer->bond2.unk00.f[0] * g_Vars.currentplayer->speedsideways)) * g_Vars.lvupdate60freal * 10.0f;
+			sp74.x += (g_Vars.currentplayer->bond2.unk00.f[0] * g_Vars.currentplayer->speedforwards - (g_Vars.currentplayer->bond2.unk00.f[2] * g_Vars.currentplayer->speedsideways)) * g_Vars.lvupdate60freal * 10.0f;
+			sp74.z += (g_Vars.currentplayer->bond2.unk00.f[2] * g_Vars.currentplayer->speedforwards + (g_Vars.currentplayer->bond2.unk00.f[0] * g_Vars.currentplayer->speedsideways)) * g_Vars.lvupdate60freal * 10.0f;
 		}
 
-		bgrab0f0ce0bc(&moveVector);
+		bgrab0f0ce0bc(&sp74);
 
 		xdelta = g_Vars.currentplayer->prop->pos.f[0] - g_Vars.currentplayer->bondprevpos.f[0];
 		zdelta = g_Vars.currentplayer->prop->pos.f[2] - g_Vars.currentplayer->bondprevpos.f[2];
 
-		localSideDelta = -xdelta * g_Vars.currentplayer->bond2.unk00.f[2] + zdelta * g_Vars.currentplayer->bond2.unk00.f[0];
-		localForwardDelta = xdelta * g_Vars.currentplayer->bond2.unk00.f[0] + zdelta * g_Vars.currentplayer->bond2.unk00.f[2];
-		localMoveSideComponent = -moveVector.f[0] * g_Vars.currentplayer->bond2.unk00.f[2] + moveVector.f[2] * g_Vars.currentplayer->bond2.unk00.f[0];
-		localMoveForwardComponent = moveVector.f[0] * g_Vars.currentplayer->bond2.unk00.f[0] + moveVector.f[2] * g_Vars.currentplayer->bond2.unk00.f[2];
+		sp50 = -xdelta * g_Vars.currentplayer->bond2.unk00.f[2] + zdelta * g_Vars.currentplayer->bond2.unk00.f[0];
+		sp4c = xdelta * g_Vars.currentplayer->bond2.unk00.f[0] + zdelta * g_Vars.currentplayer->bond2.unk00.f[2];
+		sp48 = -sp74.f[0] * g_Vars.currentplayer->bond2.unk00.f[2] + sp74.f[2] * g_Vars.currentplayer->bond2.unk00.f[0];
+		sp44 = sp74.f[0] * g_Vars.currentplayer->bond2.unk00.f[0] + sp74.f[2] * g_Vars.currentplayer->bond2.unk00.f[2];
 
-		if (localMoveSideComponent != 0.0f) {
-			if (g_Vars.currentplayer->speedstrafe * localMoveSideComponent > 0.0f) {
-				localSideDelta /= localMoveSideComponent;
+		if (sp48 != 0.0f) {
+			if (g_Vars.currentplayer->speedstrafe * sp48 > 0.0f) {
+				sp50 /= sp48;
 
-				if (localSideDelta <= 0.0f) {
+				if (sp50 <= 0.0f) {
 					g_Vars.currentplayer->speedstrafe = 0.0f;
-				} else if (localSideDelta < 1.0f) {
-					g_Vars.currentplayer->speedstrafe *= localSideDelta;
+				} else if (sp50 < 1.0f) {
+					g_Vars.currentplayer->speedstrafe *= sp50;
 				}
 			}
 		}
 
-		if (localMoveForwardComponent != 0.0f) {
-			if (g_Vars.currentplayer->speedgo * localMoveForwardComponent > 0.0f) {
-				localForwardDelta /= localMoveForwardComponent;
+		if (sp44 != 0.0f) {
+			if (g_Vars.currentplayer->speedgo * sp44 > 0.0f) {
+				sp4c /= sp44;
 
-				if (localForwardDelta <= 0.0f) {
+				if (sp4c <= 0.0f) {
 					g_Vars.currentplayer->speedgo = 0.0f;
-				} else if (localForwardDelta < 1.0f) {
-					g_Vars.currentplayer->speedgo *= localForwardDelta;
+				} else if (sp4c < 1.0f) {
+					g_Vars.currentplayer->speedgo *= sp4c;
 				}
 			}
 		}
 
-		float rotSpeed = g_Vars.currentplayer->speedtheta;
-		float verticalSpeedNormalized = g_Vars.currentplayer->speedverta / 0.7f;
-		float gunSpeed = g_Vars.currentplayer->gunspeed;
+		sp40 = g_Vars.currentplayer->speedtheta;
+		sp3c = g_Vars.currentplayer->speedverta / 0.7f;
+		sp38 = g_Vars.currentplayer->gunspeed;
 
-		float breathingOffset = bheadGetBreathingValue();
+		breathing = bheadGetBreathingValue();
 
-		if (verticalSpeedNormalized > 1.0f) {
-			verticalSpeedNormalized = 1.0f;
-		} else if (verticalSpeedNormalized < -1.0f) {
-			verticalSpeedNormalized = -1.0f;
+		if (sp3c > 1.0f) {
+			sp3c = 1.0f;
+		} else if (sp3c < -1.0f) {
+			sp3c = -1.0f;
 		}
 
 		if (g_Vars.currentplayer->headanim == HEADANIM_MOVING) {
-			breathingOffset *= 1.2f;
+			breathing *= 1.2f;
 		}
 
-		bgun0f09d8dc(breathingOffset, gunSpeed, verticalSpeedNormalized, rotSpeed, 0.0f);
+		bgun0f09d8dc(breathing, sp38, sp3c, sp40, 0.0f);
 		bgunSetAdjustPos(g_Vars.currentplayer->vv_verta360 * 0.017450513f);
 	}
 }
@@ -1098,7 +1126,7 @@ void bgrabTick(void)
 	bgrabUpdatePrevPos();
 	bgrab0f0cdef0();
 	bmoveUpdateVerta();
-	bgrabUpdatePlayerMovement();
+	bgrab0f0ce924();
 	bgrab0f0ce178();
 	bgrabUpdateVertical();
 

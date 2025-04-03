@@ -7,7 +7,7 @@
 #include "data.h"
 #include "types.h"
 
-uint32_t g_ArgBuffer[30];
+u32 g_ArgBuffer[30];
 
 int argc = 1;
 
@@ -63,7 +63,8 @@ void argSetString(char *string)
 
 bool argsParseDebugArgs(void)
 {
-	uint32_t devaddr;
+	u32 devaddr;
+	u32 stack;
 	int i;
 	bool ret = false;
 

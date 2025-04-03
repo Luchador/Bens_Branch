@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include <math.h>
-#include <stdio.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/bondmove.h"
@@ -2827,7 +2826,7 @@ void bgunTickHand(int handnum)
 	lvupdate = g_Vars.lvupdate60;
 
 	hand->animframeinc = g_Vars.lvupdate60;
-	hand->animframeincfreal += g_Vars.lvupdate60;
+	hand->animframeincfreal += PALUPF(g_Vars.lvupdate60);
 
 	while (i >= 0) {
 		lvupdate = bgunTickInc(&info, handnum, lvupdate);
@@ -3159,10 +3158,11 @@ uint32_t bgunCalculateGunMemCapacity(void)
 void bgunFreeGunMem(void)
 {
 	g_Vars.currentplayer->gunctrl.gunmemowner = GUNMEMOWNER_FREE;
-	
+#ifndef PLATFORM_N64
 	// gunmem is stale and so are the textures in it
 	// TODO: figure out how to purge only those textures
 	videoResetTextureCache();
+#endif
 }
 
 void bgunSetGunMemWeapon(int weaponnum)
@@ -3288,10 +3288,10 @@ void bgunTickGunLoad(void)
 {
 	int i;
 	int numthistick;
-	uint64_t remaining;
+	u64 remaining;
 	int padding;
-	uint64_t allocsize;
-	uint64_t loadsize;
+	u64 allocsize;
+	u64 loadsize;
 	uintptr_t ptr;
 	struct player *player = g_Vars.currentplayer;
 	struct modeldef *modeldef;
@@ -3733,7 +3733,7 @@ void bgunCreateXBowBolt(struct defaultobj *obj, struct coord *coord, RoomNum *ro
 			}
 		}
 
-		ensurePropHasProjectile(objprop);
+		func0f0685e4(objprop);
 
 		if (obj->hidden & OBJHFLAG_PROJECTILE) {
 			obj->projectile->flags |= PROJECTILEFLAG_AIRBORNE;
@@ -3801,7 +3801,7 @@ struct defaultobj *bgunCreateThrownProjectile2(struct chrdata *chr, struct gset 
 	}
 
 	if (gset->weaponnum == WEAPON_COMBATKNIFE) {
-		mtxRotateF(mtx.m, 90.0f / (RANDOMFRAC() + 12.1f),
+		guRotateF(mtx.m, 90.0f / (RANDOMFRAC() + 12.1f),
 				arg4->m[1][0], arg4->m[1][1], arg4->m[1][2]);
 	} else {
 		mtxLoadRandomRotation(&mtx);
@@ -6530,7 +6530,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			hand->unk0d20.f[0] = -((RANDOMFRAC() - 0.5f) * 0.5333333f * 0.0625f + mult * 0.5333333f);
 			hand->unk0d20.f[1] = RANDOMFRAC() * 2.5f * 0.125f + 2.5f;
 			hand->unk0d20.f[2] = -(RANDOMFRAC() + 1.0f);
-			spd0.f[0] = (RANDOMFRAC() + 3.0f) * M_TAU / 208.0f;
+			spd0.f[0] = (RANDOMFRAC() + 3.0f) * PALUPF(M_TAU) / 208.0f;
 			spd0.f[1] = RANDOMFRAC() * 2.0f * M_TAU / 544.0f - 0.0115481345f;
 			spd0.f[2] = RANDOMFRAC() * 2.0f * M_TAU / 544.0f - 0.0115481345f;
 			break;
@@ -6538,7 +6538,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			hand->unk0d20.f[0] = 0.0f;
 			hand->unk0d20.f[1] = RANDOMFRAC() * 2.5f * 0.125f + 2.5f;
 			hand->unk0d20.f[2] = (RANDOMFRAC() + 1.0f) * 0.25f;
-			spd0.f[0] = (RANDOMFRAC() + 3.0f) * M_TAU / 368.0f;
+			spd0.f[0] = (RANDOMFRAC() + 3.0f) * PALUPF(M_TAU) / 368.0f;
 			spd0.f[1] = RANDOMFRAC() * 2.0f * M_TAU / 944.0f - 0.006654857f;
 			spd0.f[2] = RANDOMFRAC() * 2.0f * M_TAU / 944.0f - 0.006654857f;
 			break;
@@ -6554,7 +6554,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			sp84.f[1] = (hand->posmtx.m[3][1] - hand->prevmtx.m[3][1]) / g_Vars.lvupdate60freal;
 			sp84.f[2] = (hand->posmtx.m[3][2] - hand->prevmtx.m[3][2]) / g_Vars.lvupdate60freal;
 
-			mtxFullInverse4x4(hand->posmtx.m, sp44.m);
+			mtx00017588(hand->posmtx.m, sp44.m);
 			mtx4RotateVecInPlace(&sp44, &sp84);
 
 			hand->unk0d20.f[0] += sp84.f[0] * 0.3f;
@@ -7670,19 +7670,19 @@ void bgunRender(Gfx **gdlptr)
 	}
 
 	gdl = viPrepareZbuf(gdl);
-	gdl = viPrepareHudDraw(gdl);
+	gdl = vi0000b1d0(gdl);
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 
-	gdl = viSetupProjectionWithZRange(gdl, 1.5, 1000);
+	gdl = vi0000aca4(gdl, 1.5, 1000);
 
 	if (g_Vars.currentplayer->teleportstate != TELEPORTSTATE_INACTIVE) {
 		float f2;
 
-		f2 = playerGetAspect();
+		f2 = player0f0bd358();
 
-		gdl = viSetupWeaponProjection(gdl, 60, f2);
+		gdl = vi0000b0e8(gdl, 60, f2);
 	}
 
 	gdl = lasersightRenderBeam(gdl);
@@ -7821,7 +7821,7 @@ void bgunRender(Gfx **gdlptr)
 					for (j = 0; j < rodata->numvertices; j++) {
 						int k;
 
-						(rodata->vertices + j)->t -= g_Vars.lvupdate240 * 25;
+						(rodata->vertices + j)->t -= g_Vars.lvupdate240 * PALUP(25);
 
 						if ((rodata->vertices + j)->t < -0x6000) {
 							for (k = 0; k < rodata->numvertices; k++) {
@@ -7863,7 +7863,7 @@ void bgunRender(Gfx **gdlptr)
 	casingsRender(&gdl);
 
 	gdl = zbufConfigureRdp(gdl);
-	gdl = viPrepareHudDraw(gdl);
+	gdl = vi0000b1d0(gdl);
 
 	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
@@ -8183,6 +8183,44 @@ int bgunConsiderToggleGunFunction(int usedowntime, bool trigpressed, bool fromac
 	const bool extcontrols = PLAYER_EXTCFG().extcontrols;
 	bool docontinue;
 	switch (bgunGetWeaponNum(HAND_RIGHT)) {
+	/*case WEAPON_SNIPERRIFLE:
+		if (extcontrols && usedowntime < 0) {
+			return USETIMER_CONTINUE;
+		}
+
+		// At 25 ticks (or B+Z), start showing the new function
+		g_Vars.currentplayer->gunctrl.invertgunfunc = true;
+
+		// B+Z immediately triggers crouch or stand
+		if (trigpressed) {
+			if (extcontrols) {
+				g_Vars.currentplayer->hands[HAND_RIGHT].activatesecondary = true;
+			}
+			return USETIMER_STOP;
+		}
+
+		if (fromdedicatedbutton) {
+			g_Vars.currentplayer->hands[HAND_RIGHT].activatesecondary = true;
+			return USETIMER_CONTINUE;
+		}
+
+		if (extcontrols) {
+			docontinue = (ABS(usedowntime) < 0);
+		} else {
+			// Don't do anything if B hasn't been held for 50/60ths of a second
+			docontinue = (usedowntime < TICKS(50));
+		}
+		if (docontinue) {
+			return USETIMER_CONTINUE;
+		}
+
+		if (g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc != FUNC_SECONDARY) {
+			return USETIMER_CONTINUE;
+		}
+
+		// Do crouch or stand
+		g_Vars.currentplayer->hands[HAND_RIGHT].activatesecondary = true;
+		return (extcontrols ? USETIMER_STOP : USETIMER_REPEAT);*/
 	case WEAPON_RCP120:
 		// very special alt-button handling for RCP-120's cloaking
 		if (!trigpressed && extcontrols && fromdedicatedbutton) {
@@ -9028,7 +9066,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 						if (fadeamount >= TICKS(64)) {
 							// Unit is transitioning to filled
 							weight = (fadeamount * 4 - TICKS(252)) / 3;
-							weight = weight;
+							weight = PALUP(weight);
 
 							if (weight > 255) {
 								weight = 255;
@@ -9038,7 +9076,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 						} else {
 							// Unit is bright and has not started transitioning to filled yet
 							weight = fadeamount * 4;
-							weight = weight;
+							weight = PALUP(weight);
 							colour = colourBlend(0xffffffbf, emptycolour, weight);
 						}
 
@@ -9051,7 +9089,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 					int fadeamount = abmag->timer60 - (i - numunits + (int) ref) * TICKS(64);
 
 					if (fadeamount >= 0) {
-						weight = fadeamount;
+						weight = PALUP(fadeamount);
 
 						if (weight > 255) {
 							colour = emptycolour;
@@ -9217,7 +9255,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 	fncolour = 0xff000040;
 	funcnum = hand->gset.weaponfunc;
-	fnfaderinc = g_Vars.lvupdate240 * 2;
+	fnfaderinc = PALUP(g_Vars.lvupdate240 * 2);
 
 	bgunGetWeaponInfo(&info, HAND_RIGHT);
 	tmpfuncnum = bgunIsUsingSecondaryFunction();
@@ -9319,7 +9357,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 		}
 
 		if (func) {
-			langRemoveNewline(langGet(func->name));
+			langGet(func->name);
 
 			colour = 0xff5555ff;
 
@@ -9328,7 +9366,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 				ctrl->curfnstr = func->name;
 			}
 
-			str = langRemoveNewline(langGet(ctrl->curfnstr));
+			str = langGet(ctrl->curfnstr);
 
 			struct player *player = g_Vars.currentplayer;
 			int weaponnum = player->gunctrl.weaponnum;
@@ -9366,7 +9404,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 				x = xpos - textwidth - 13;
 				//y = bottom - textheight + 3;
-				y = bottom - textheight - 7;
+				y = bottom - textheight;
 
 				if (ctrl->fnstrtimer > 192) {
 					alpha = 255 - (ctrl->fnstrtimer - 192) * 255 / 63U;

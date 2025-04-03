@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
+#include <PR/ultratypes.h>
 #include "platform.h"
 #include "system.h"
 #include "utils.h"
@@ -188,7 +189,7 @@ char *strDuplicate(const char *str)
 	if (!str) {
 		return NULL;
 	}
-	const uint32_t len = strlen(str);
+	const u32 len = strlen(str);
 	char *out = sysMemAlloc(len + 1);
 	if (out) {
 		memcpy(out, str, len + 1);

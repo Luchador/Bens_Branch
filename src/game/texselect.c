@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdbool.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/playermgr.h"

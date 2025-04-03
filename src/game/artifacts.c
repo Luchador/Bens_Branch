@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "lib/sched.h"
 #include "constants.h"
 #include "game/camera.h"
@@ -584,7 +583,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 						spd4[0] = f24;
 						spd4[1] = f26;
 
-						utilsCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
+						textureCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
 
 						// Make artifacts slightly brighter when true
 						if (extra) {
@@ -599,7 +598,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 							spd4[0] = f24 * 0.4f;
 							spd4[1] = f26 * 0.4f;
 
-							utilsCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
+							textureCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
 						}
 					}
 				}

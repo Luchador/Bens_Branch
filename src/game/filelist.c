@@ -42,7 +42,7 @@ void func0f110bf8(void)
 /**
  * Allocate and build a file list.
  */
-void filelistCreate(int listnum, uint8_t filetype)
+void filelistCreate(int listnum, u8 filetype)
 {
 	if (g_FileLists[listnum] == NULL) {
 		g_FileLists[listnum] = memaAlloc(align16(sizeof(struct filelist)));
@@ -58,7 +58,7 @@ void filelistCreate(int listnum, uint8_t filetype)
 	var80062944 = true;
 }
 
-int filelistFindOrCreate(uint8_t filetype)
+int filelistFindOrCreate(u8 filetype)
 {
 	int bestindex = -1;
 	int i;

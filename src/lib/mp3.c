@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include <stdint.h>
-#include <string.h>
 #include <n_libaudio.h>
 #include "naudio/n_abi.h"
 #include "ultra/audio/synthInternals.h"
@@ -28,7 +27,7 @@ extern float *var8009c644;
 
 void mp3Init(ALHeap *heap)
 {
-	memset(&g_Mp3Vars, 0, sizeof(struct mp3vars));
+	bzero(&g_Mp3Vars, sizeof(struct mp3vars));
 
 	g_AsiStream = alHeapAlloc(heap, sizeof(struct asistream), 1);
 	var8005f6f8 = alHeapAlloc(heap, 1, 34 * 256 * sizeof(var8005f6f8[0]));
@@ -189,7 +188,7 @@ int func00037fc0(int arg0, Acmd **cmd)
 				g_Mp3Vars.var8009c3d0 = 0;
 				g_Mp3Vars.var8009c3d8 = 0;
 
-				memset(g_Mp3Vars.var8009c3d4[0], 0, 0x440);
+				bzero(g_Mp3Vars.var8009c3d4[0], 0x440);
 			}
 		} else {
 			g_Mp3Vars.var8009c3f0--;
@@ -329,7 +328,7 @@ void func00038924(struct mp3vars *vars)
 
 		if (vars->var8009c39c != vars->var8009c3ec) {
 			if (N_SpeakerType.headphone) {
-				vars->var8009c39c = ((int16_t)(vars->var8009c3ec & 0x7f) >> 1) + 32;
+				vars->var8009c39c = ((s16)(vars->var8009c3ec & 0x7f) >> 1) + 32;
 			} else {
 				if (N_SpeakerType.mono) {
 					vars->var8009c39c = 64;
@@ -370,7 +369,7 @@ int func00038ba8(int arg0, uint8_t *arg1, int arg2, int arg3)
 	proc = n_syn->dma(&sp1c);
 	sp1c = (uintptr_t)(proc(g_Mp3Vars.romaddr + g_Mp3Vars.var8009c3c4, arg2, 0));
 
-	memcpy(arg1, (uint8_t *)sp1c, arg2);
+	bcopy((uint8_t *)sp1c, arg1, arg2);
 
 	g_Mp3Vars.var8009c3c4 += arg2;
 

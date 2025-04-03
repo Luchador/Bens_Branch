@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include "lib/sched.h"
 #include "naudio/n_synthInternals.h"
-#include "game/utils.h"
 #include "constants.h"
 #include "bss.h"
 #include "lib/audiodma.h"
@@ -95,7 +94,7 @@ void amgrFrame(void)
 	static AudioInfo *previnfo = NULL;
 	static int frameWindowCounter = 0;
 
-	g_AmgrElapsedGameTime = utilsGetCount();
+	g_AmgrElapsedGameTime = osGetCount();
 
 	AudioInfo *info = g_AudioManager.audioInfo[g_AdmaCurFrame % 3];
 
@@ -131,7 +130,7 @@ void amgrFrame(void)
 	//frameWindowCounter++;
 	frameWindowCounter = (frameWindowCounter + 1) % 240; // Avoid overflow
 
-	g_AmgrElapsedGameTime2 = utilsGetCount();
+	g_AmgrElapsedGameTime2 = osGetCount();
 
 	//if (frameWindowCounter % 240 == 0) {
 	if (frameWindowCounter == 0) {

@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdbool.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/debug.h"

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdbool.h>
 #include "constants.h"
 #include "game/weather.h"
 #include "bss.h"

@@ -5,11 +5,11 @@
 
 // gbi related functions
 void gbiReset(void);
-void gbiSetSegment(int segment, uint32_t offset);
-void gbiSetVtx(uint32_t src_offset, uint32_t dst_offset);
-uint32_t gbiConvertGdl(uint8_t *dst, uint32_t dstpos, uint8_t *src, uint32_t srcpos, int segment_cmds);
-void gbiConvertVtx(uint8_t* dst, uint32_t dstpos, int count);
-void gbiGdlRewriteAddrs(uint8_t* dst, uint32_t offset);
-void gbiAddTexAddr(uint32_t src_offset, uint32_t dst_offset);
+void gbiSetSegment(int segment, u32 offset);
+void gbiSetVtx(u32 src_offset, u32 dst_offset);
+u32 gbiConvertGdl(u8 *dst, u32 dstpos, u8 *src, u32 srcpos, int segment_cmds);
+void gbiConvertVtx(u8* dst, u32 dstpos, int count);
+void gbiGdlRewriteAddrs(u8* dst, u32 offset);
+void gbiAddTexAddr(u32 src_offset, u32 dst_offset);
 
 #endif

@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/bondmove.h"
 #include "game/bondwalk.h"
@@ -94,7 +93,7 @@ void bwalkInit(void)
 		struct coord delta;
 		mtx00016b58(&g_Vars.currentplayer->walkinitmtx,
 				0, 0, 0,
-				-g_Vars.currentplayer->bond2.cameraForward.x, -g_Vars.currentplayer->bond2.cameraForward.y, -g_Vars.currentplayer->bond2.cameraForward.z,
+				-g_Vars.currentplayer->bond2.unk1c.x, -g_Vars.currentplayer->bond2.unk1c.y, -g_Vars.currentplayer->bond2.unk1c.z,
 				g_Vars.currentplayer->bond2.unk28.x, g_Vars.currentplayer->bond2.unk28.y, g_Vars.currentplayer->bond2.unk28.z);
 		g_Vars.currentplayer->walkinitt = 0;
 		g_Vars.currentplayer->walkinitt2 = 0;
@@ -149,7 +148,7 @@ void bwalk0f0c3b38(struct coord *reltarget, struct defaultobj *obj)
 	abstarget.y = g_Vars.currentplayer->prop->pos.y;
 	abstarget.z = reltarget->z + g_Vars.currentplayer->prop->pos.z;
 
-	cdGetEdge(&globalthinga, &globalthingb);
+	cdGetEdge(&globalthinga, &globalthingb, 223, "bondwalk.c");
 
 	vector.x = globalthingb.z - globalthinga.z;
 	vector.y = 0;
@@ -161,7 +160,7 @@ void bwalk0f0c3b38(struct coord *reltarget, struct defaultobj *obj)
 		vector.z = 1;
 	}
 
-	rayIntersectLineXZ(&globalthinga, &globalthingb, &abstarget, &vector, &posunk);
+	func0f02e3dc(&globalthinga, &globalthingb, &abstarget, &vector, &posunk);
 
 	tween.x = (abstarget.x - g_Vars.currentplayer->prop->pos.x) / g_Vars.lvupdate60freal;
 	tween.y = 0;
@@ -392,7 +391,7 @@ bool bwalkCalculateNewPositionWithPush(struct coord *delta, float rotateamount, 
 
 				if (door->doorflags & DOORFLAG_DAMAGEONCONTACT) {
 					if (!g_Vars.currentplayer->isdead) {
-						cdGetEdge(&sp84, &sp78);
+						cdGetEdge(&sp84, &sp78, 465, "bondwalk.c");
 						sp90.x = sp78.f[2] - sp84.f[2];
 						sp90.y = 0;
 						sp90.z = sp84.f[0] - sp78.f[0];
@@ -524,7 +523,7 @@ int bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, i
 	int result = bwalkCalculateNewPositionWithPush(delta, 0, true, 0, types);
 
 	if (result == CDRESULT_COLLISION) {
-		cdGetEdge(arg1, arg2);
+		cdGetEdge(arg1, arg2, 607, "bondwalk.c");
 	}
 
 	return result;
@@ -548,7 +547,7 @@ int bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c,
 		}
 
 		if (result == CDRESULT_COLLISION) {
-			cdGetEdge(d, e);
+			cdGetEdge(d, e, 635, "bondwalk.c");
 
 			if (b->x != d->x
 					|| b->y != d->y
@@ -671,13 +670,13 @@ void bwalkUpdateSpeedSideways(float targetspeed, float accelspeed, int mult)
 	}
 
 	if (g_Vars.currentplayer->speedstrafe > targetspeed) {
-		g_Vars.currentplayer->speedstrafe -= accelspeed * mult;
+		g_Vars.currentplayer->speedstrafe -= PALUPF(accelspeed * mult);
 
 		if (g_Vars.currentplayer->speedstrafe < targetspeed) {
 			g_Vars.currentplayer->speedstrafe = targetspeed;
 		}
 	} else if (g_Vars.currentplayer->speedstrafe < targetspeed) {
-		g_Vars.currentplayer->speedstrafe += accelspeed * mult;
+		g_Vars.currentplayer->speedstrafe += PALUPF(accelspeed * mult);
 
 		if (g_Vars.currentplayer->speedstrafe > targetspeed) {
 			g_Vars.currentplayer->speedstrafe = targetspeed;
@@ -1203,7 +1202,7 @@ void bwalkUpdateCrouchOffset(void)
 
 		// float *frac, float maxfrac, float *fracspeed, float accel, float decel, float maxspeed
 		applySpeed(&g_Vars.currentplayer->crouchoffset, targetoffset,
-				&g_Vars.currentplayer->crouchspeed, 0.5f, 0.5f, 5.0f);
+				&g_Vars.currentplayer->crouchspeed, PALUPF(0.5f), PALUPF(0.5f), PALUPF(5.0f));
 
 		bwalkUpdateCrouchOffsetReal();
 
@@ -1484,8 +1483,8 @@ void bwalk0f0c69b8(void)
 
 		dist = sqrtf(spb4 * spb4 + spb0 * spb0);
 
-		if (g_Vars.lvupdate60freal > 4) {
-			lvupdate60f = 4;
+		if (g_Vars.lvupdate60freal > PALUPF(4)) {
+			lvupdate60f = PALUPF(4);
 			lvupdate240 = 4;
 		} else {
 			lvupdate60f = g_Vars.lvupdate60freal;
@@ -1493,7 +1492,7 @@ void bwalk0f0c69b8(void)
 		}
 
 		for (i = 0; i < lvupdate240; i++) {
-			spa8 += (dist - spa8) * 0.1f;
+			spa8 += (dist - spa8) * PALUPF(0.1f);
 		}
 
 		spa8 += 3.75f * lvupdate60f;
@@ -1723,7 +1722,7 @@ void bwalk0f0c69b8(void)
 	}
 
 	sp44 = g_Vars.currentplayer->speedtheta;
-	sp40 = g_Vars.currentplayer->speedverta / 0.7f + g_Vars.currentplayer->crouchspeed / 5.0f;
+	sp40 = g_Vars.currentplayer->speedverta / 0.7f + g_Vars.currentplayer->crouchspeed / PALUPF(5.0f);
 	sp3c = g_Vars.currentplayer->gunspeed;
 
 	breathing = bheadGetBreathingValue();

@@ -3,7 +3,7 @@
 #include "data.h"
 #include "types.h"
 
-uint8_t g_SkelDrCarollJoints[][2] = {
+u8 g_SkelDrCarollJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -14,7 +14,7 @@ struct skeleton g_SkelDrCaroll = {
 	SKEL_DRCAROLL, ARRAYCOUNT(g_SkelDrCarollJoints), g_SkelDrCarollJoints,
 };
 
-uint8_t g_Skel22Joints[][2] = {
+u8 g_Skel22Joints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -51,7 +51,7 @@ struct skeleton g_Skel22 = {
 	SKEL_22, ARRAYCOUNT(g_Skel22Joints), g_Skel22Joints,
 };
 
-uint8_t g_SkelRobotJoints[][2] = {
+u8 g_SkelRobotJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 2 },
 	{ 2, 1 },

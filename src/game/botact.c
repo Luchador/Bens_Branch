@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/debug.h"
@@ -460,7 +459,7 @@ bool botactFindRocketRoute(struct chrdata *chr, struct coord *frompos, struct co
  *
  * It's the ground position of the pad plus 1.5 metres.
  */
-void botactGetRocketNextStepPos(uint16_t padnum, struct coord *pos)
+void botactGetRocketNextStepPos(u16 padnum, struct coord *pos)
 {
 	struct pad pad;
 	RoomNum rooms[2];

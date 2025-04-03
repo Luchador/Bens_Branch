@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <string.h>
 #include "internal.h"
 #include "mp3.h"
 
@@ -19,23 +18,21 @@ float *var8009c6dc;
 
 uint32_t g_MP3Init = 0;
 
-int mp3FillBitstreamBuffer(struct asistream *stream)
+int mp3main00043dd0(struct asistream *stream)
 {
 	int sp1c = 0x1000;
 	int sp18;
 
 	if (stream->unk201c + stream->unk3f88 > 0x1ffb) {
-		memcpy(&stream->unk1c, &stream->unk1c[sp1c], sp1c);
+		bcopy(&stream->unk1c[sp1c], &stream->unk1c, sp1c);
 		stream->unk201c -= sp1c;
 		stream->unk2020 -= sp1c * 8;
 	}
 
-	
-
 	sp18 = stream->unk04(stream->unk00, &stream->unk1c[stream->unk201c], stream->unk3f88, -1);
 
 	if (sp18 < stream->unk3f88) {
-		memset(&stream->unk1c[sp18], 0, stream->unk3f88 - sp18);
+		bzero(&stream->unk1c[sp18], stream->unk3f88 - sp18);
 	}
 
 	stream->unk18 += stream->unk3f88;
@@ -194,7 +191,7 @@ struct asistream *mp3main00044460(int arg0, void *arg1, int arg2)
 
 	stream->unk8474 = 0;
 
-	memset(&stream->unk6a64, 0, sizeof(stream->unk6a64[0]));
+	bzero(&stream->unk6a64, sizeof(stream->unk6a64[0]));
 
 	return stream;
 }

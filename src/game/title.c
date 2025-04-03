@@ -1,15 +1,15 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/title.h"
+#include "game/bondgun.h"
 #include "game/modelmgr.h"
 #include "game/tex.h"
+#include "game/inv.h"
 #include "game/playermgr.h"
 #include "game/menuutils.h"
 #include "game/gfxmemory.h"
 #include "game/credits.h"
 #include "game/bondview.h"
-#include "game/mtxutils.h"
 #include "game/textutils.h"
 #include "game/file.h"
 #include "game/lv.h"
@@ -63,6 +63,26 @@ Lights1 g_TitleLightPdLogoNotFront = gdSPDefLights1(0xff, 0xff, 0xff, 0x00, 0x00
 Lights1 g_TitleLightPdLogoMain = gdSPDefLights1(0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x7f);
 Lights1 g_TitleLightNintendoRare = gdSPDefLights1(0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 Lights1 g_TitleLightRareLogo = gdSPDefLights1(0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x7f);
+
+char *mpPlayerGetWeaponOfChoiceName(unsigned int playernum, unsigned int slot)
+{
+	char *name;
+	int weapon1;
+	int weapon2;
+	unsigned int prevplayernum = g_Vars.currentplayernum;
+	int weapon;
+
+	setCurrentPlayerNum(playernum);
+
+	invGetWeaponOfChoice(&weapon1, &weapon2);
+
+	weapon = slot == 1 ? weapon2 : weapon1;
+
+	name = bgunGetName(weapon);
+	setCurrentPlayerNum(prevplayernum);
+
+	return strcat(langRemoveNewline(name), "\n");
+}
 
 void titleSetLight(Lights1 *light, int8_t r, int8_t g, int8_t b, float luminosity, struct coord *dir)
 {
@@ -918,7 +938,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	}
 
 	lookat = gfxAllocateLookAt(2);
-	mtxLookAtReflect(&spf0, lookat, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+	guLookAtReflect(&spf0, lookat, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 	gSPLookAt(gdl++, lookat);
 
 	{

@@ -1,7 +1,10 @@
 #ifndef _IN_BOOT_SCHED_H
 #define _IN_BOOT_SCHED_H
+#include <ultra64.h>
+#include <PR/ultrasched.h>
 #include "types.h"
 
+void schedSubmitTask(OSScTask *t);
 void schedInitArtifacts(void);
 void schedResetArtifacts(void);
 struct artifact *schedGetWriteArtifacts(void);
@@ -10,6 +13,6 @@ void schedIncrementWriteArtifacts(void);
 void schedIncrementFrontArtifacts(void);
 void schedUpdatePendingArtifacts(void);
 void schedConsiderScreenshot(void);
-void schedEndFrame();
+void schedEndFrame(OSSched *sc);
 
 #endif

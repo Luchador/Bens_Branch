@@ -47,10 +47,10 @@ None
 Last Winner*
 Last Loser*
 Random*
-Challenge*
-Combat Challenges*
-Abort Challenge*
-Abort*
+Challenge
+Combat Challenges
+Abort Challenge
+Abort
 Are you sure you want*to abort the game?
 Abort
 Cancel

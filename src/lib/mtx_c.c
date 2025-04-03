@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <string.h>
 #include "constants.h"
 #include "bss.h"
 #include "data.h"
@@ -310,22 +309,22 @@ void mtx00015f88(float mult, Mtxf *mtx)
 void mtxF2L(Mtxf *src, Mtxf *dst)
 {
 #ifndef GBI_FLOATS
-	uint32_t src00 = (int) (src->m[0][0] * var8005ef10[0]);
-	uint32_t src01 = (int) (src->m[0][1] * var8005ef10[0]);
-	uint32_t src02 = (int) (src->m[0][2] * var8005ef10[0]);
-	uint32_t src03 = (int) (src->m[0][3] * var8005ef10[1]);
-	uint32_t src10 = (int) (src->m[1][0] * var8005ef10[0]);
-	uint32_t src11 = (int) (src->m[1][1] * var8005ef10[0]);
-	uint32_t src12 = (int) (src->m[1][2] * var8005ef10[0]);
-	uint32_t src13 = (int) (src->m[1][3] * var8005ef10[1]);
-	uint32_t src20 = (int) (src->m[2][0] * var8005ef10[0]);
-	uint32_t src21 = (int) (src->m[2][1] * var8005ef10[0]);
-	uint32_t src22 = (int) (src->m[2][2] * var8005ef10[0]);
-	uint32_t src23 = (int) (src->m[2][3] * var8005ef10[1]);
-	uint32_t src30 = (int) (src->m[3][0] * var8005ef10[0]);
-	uint32_t src31 = (int) (src->m[3][1] * var8005ef10[0]);
-	uint32_t src32 = (int) (src->m[3][2] * var8005ef10[0]);
-	uint32_t src33 = (int) (src->m[3][3] * var8005ef10[1]);
+	u32 src00 = (int) (src->m[0][0] * var8005ef10[0]);
+	u32 src01 = (int) (src->m[0][1] * var8005ef10[0]);
+	u32 src02 = (int) (src->m[0][2] * var8005ef10[0]);
+	u32 src03 = (int) (src->m[0][3] * var8005ef10[1]);
+	u32 src10 = (int) (src->m[1][0] * var8005ef10[0]);
+	u32 src11 = (int) (src->m[1][1] * var8005ef10[0]);
+	u32 src12 = (int) (src->m[1][2] * var8005ef10[0]);
+	u32 src13 = (int) (src->m[1][3] * var8005ef10[1]);
+	u32 src20 = (int) (src->m[2][0] * var8005ef10[0]);
+	u32 src21 = (int) (src->m[2][1] * var8005ef10[0]);
+	u32 src22 = (int) (src->m[2][2] * var8005ef10[0]);
+	u32 src23 = (int) (src->m[2][3] * var8005ef10[1]);
+	u32 src30 = (int) (src->m[3][0] * var8005ef10[0]);
+	u32 src31 = (int) (src->m[3][1] * var8005ef10[0]);
+	u32 src32 = (int) (src->m[3][2] * var8005ef10[0]);
+	u32 src33 = (int) (src->m[3][3] * var8005ef10[1]);
 
 	dst->l[0][0] = (src00 & 0xffff0000) | src01 >> 16;
 	dst->l[0][1] = (src02 & 0xffff0000) | src03 >> 16;
@@ -346,7 +345,7 @@ void mtxF2L(Mtxf *src, Mtxf *dst)
 	dst->l[3][3] = src32 << 16 | (src33 & 0xffff);
 #else
 	if (src != dst) {
-		memcpy(dst, src, sizeof(*dst));
+		bcopy(src, dst, sizeof(*dst));
 	}
 #endif
 }

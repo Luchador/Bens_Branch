@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <assert.h>
+#include <PR/ultratypes.h>
 #include <PR/gbi.h>
 
 #include "data.h"

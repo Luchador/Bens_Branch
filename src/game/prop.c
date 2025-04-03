@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
@@ -1990,7 +1991,7 @@ void propsTickPlayer(bool islastplayer)
 				prop->propupdate60err = g_Vars.lvupdate60 & 3;
 				g_Vars.lvupdate60 >>= 2;
 				g_Vars.lvupdate60f = g_Vars.lvupdate240 / 4.0f;
-				g_Vars.lvupdate60freal = g_Vars.lvupdate60f;
+				g_Vars.lvupdate60freal = PALUPF(g_Vars.lvupdate60f);
 			} else {
 				g_Vars.lvupdate240 = savedlvupdate240;
 				g_Vars.lvupdate60 = savedlvupdate60;
@@ -2054,12 +2055,12 @@ void propsTickPlayer(bool islastplayer)
 					prop->propupdate60err = g_Vars.lvupdate60 & 3;
 					g_Vars.lvupdate60 >>= 2;
 					g_Vars.lvupdate60f = g_Vars.lvupdate240 / 4.0f;
-					g_Vars.lvupdate60freal = g_Vars.lvupdate60f;
+					g_Vars.lvupdate60freal = PALUPF(g_Vars.lvupdate60f);
 				} else {
 					g_Vars.lvupdate240 = savedslotupdate240;
 					g_Vars.lvupdate60 = savedslotupdate240_60;
 					g_Vars.lvupdate60f = savedslotupdate240f;
-					vars->lvupdate60freal = savedslotupdate240f;
+					vars->lvupdate60freal = PALUPF(savedslotupdate240f);
 				}
 
 				// Tick the prop
@@ -2102,7 +2103,7 @@ void propsTickPlayer(bool islastplayer)
 					g_Vars.lvupdate240 = savedslotupdate240;
 					g_Vars.lvupdate60 = savedslotupdate240_60;
 					g_Vars.lvupdate60f = savedslotupdate240f;
-					vars->lvupdate60freal = savedslotupdate240f;
+					vars->lvupdate60freal = PALUPF(savedslotupdate240f);
 				}
 
 				prop->lastupdateframe = g_Vars.updateframe;
@@ -2630,16 +2631,16 @@ void farsightChooseTarget(void)
 							&& chr->actiontype != ACT_DEAD
 							&& (chr->hidden & CHRHFLAG_CLOAKED) == 0
 							&& (prop->type != PROPTYPE_PLAYER || !g_Vars.players[playermgrGetPlayerNumByProp(prop)]->isdead)) {
-						float xdist = g_Vars.currentplayer->bond2.cameraPos.x - prop->pos.x;
-						float ydist = g_Vars.currentplayer->bond2.cameraPos.y - prop->pos.y;
-						float zdist = g_Vars.currentplayer->bond2.cameraPos.z - prop->pos.z;
+						float xdist = g_Vars.currentplayer->bond2.unk10.x - prop->pos.x;
+						float ydist = g_Vars.currentplayer->bond2.unk10.y - prop->pos.y;
+						float zdist = g_Vars.currentplayer->bond2.unk10.z - prop->pos.z;
 
 						float dist = sqrtf(xdist * xdist + ydist * ydist + zdist * zdist);
 
 						if (dist > 0) {
-							float thing = (xdist * g_Vars.currentplayer->bond2.cameraForward.f[0]
-									+ ydist * g_Vars.currentplayer->bond2.cameraForward.f[1]
-									+ zdist * g_Vars.currentplayer->bond2.cameraForward.f[2]) / dist;
+							float thing = (xdist * g_Vars.currentplayer->bond2.unk1c.f[0]
+									+ ydist * g_Vars.currentplayer->bond2.unk1c.f[1]
+									+ zdist * g_Vars.currentplayer->bond2.unk1c.f[2]) / dist;
 
 							if (thing < 0 && thing < bestthing) {
 								bestthing = thing;
@@ -2830,9 +2831,9 @@ void autoaimTick(void)
 		}
 
 		if (cangangsta) {
-			float xdist = g_Vars.currentplayer->bond2.cameraPos.x - bestprop->pos.x;
-			float ydist = g_Vars.currentplayer->bond2.cameraPos.y - bestprop->pos.y;
-			float zdist = g_Vars.currentplayer->bond2.cameraPos.z - bestprop->pos.z;
+			float xdist = g_Vars.currentplayer->bond2.unk10.x - bestprop->pos.x;
+			float ydist = g_Vars.currentplayer->bond2.unk10.y - bestprop->pos.y;
+			float zdist = g_Vars.currentplayer->bond2.unk10.z - bestprop->pos.z;
 			float dist = sqrtf(xdist * xdist + ydist * ydist + zdist * zdist);
 
 			if (dist < 200) {

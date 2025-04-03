@@ -25,6 +25,10 @@
 extern "C" {
 #endif
 
+#include <PR/ultratypes.h>
+
+#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
+
 /**************************************************************************
  *
  * Type definitions
@@ -68,29 +72,29 @@ extern "C" {
  *
  */
 typedef struct {
-	uint32_t	type;
-	uint32_t	flags;
+	u32	type;
+	u32	flags;
 
-	uint64_t	*ucode_boot;
-	uint32_t	ucode_boot_size;
+	u64	*ucode_boot;
+	u32	ucode_boot_size;
 
-	uint64_t	*ucode;
-	uint32_t	ucode_size;
+	u64	*ucode;
+	u32	ucode_size;
 
-	uint64_t	*ucode_data;
-	uint32_t	ucode_data_size;
+	u64	*ucode_data;
+	u32	ucode_data_size;
 
-	uint64_t	*dram_stack;
-	uint32_t	dram_stack_size;
+	u64	*dram_stack;
+	u32	dram_stack_size;
 
-	uint64_t	*output_buff;
-	uint64_t	*output_buff_size;
+	u64	*output_buff;
+	u64	*output_buff_size;
 
-	uint64_t	*data_ptr;
-	uint32_t	data_size;
+	u64	*data_ptr;
+	u32	data_size;
 
-	uint64_t	*yield_data_ptr;
-	uint32_t	yield_data_size;
+	u64	*yield_data_ptr;
+	u32	yield_data_size;
 
 } OSTask_t;
 
@@ -98,6 +102,8 @@ typedef union {
     OSTask_t		t;
     long long int	force_structure_alignment;
 } OSTask;
+
+#endif /* _LANGUAGE_C */
 
 /**************************************************************************
  *

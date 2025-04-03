@@ -379,3 +379,44 @@ void memaFree(void *addr, uint64_t size)
 {
 	_memaFree((uintptr_t) addr, size);
 }
+
+/**
+ * Find and return the largest amount of contiguous free space in the pool.
+ * ie. the biggest allocation that mema can currently make.
+ */
+uint64_t memaGetLongestFree(void)
+{
+	struct memaspace *curr;
+	int biggest = 0;
+
+	memaDefrag();
+
+	curr = &g_MemaHeap.spaces[0];
+
+	while (curr->addr != (uintptr_t)-1) {
+		if (curr->size > biggest) {
+			biggest = curr->size;
+		}
+
+		curr++;
+	}
+
+	if (biggest) {
+		return biggest;
+	}
+
+	return 0;
+}
+
+bool memaRealloc(uintptr_t addr, uint64_t oldsize, uint64_t newsize)
+{
+	if (newsize > oldsize) {
+		if (!memaGrow(addr + oldsize, newsize - oldsize)) {
+			return false;
+		}
+	} else if (oldsize > newsize) {
+		memaFree((void *)(addr + newsize), oldsize - newsize);
+	}
+
+	return true;
+}

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <time.h>
 #include <ultra64.h>
 #include <PR/ultrasched.h>
@@ -59,6 +60,7 @@ void rngSetSeed(uint32_t seed);
 bool g_AcceptCMDParams = false;
 int g_StageNum = STAGE_TITLE;
 uint32_t g_MainMemaHeapSize = 1024 * 300;
+bool g_MainGameLogicEnabled = true;
 bool g_MainIsEndscreen = false;
 int g_DoBootPakMenu = 0;
 int g_MainChangeToStageNum = -1;
@@ -135,6 +137,7 @@ void mainInit(void)
 	mempResetPool(MEMPOOL_8);
 	mempResetPool(MEMPOOL_PERMANENT);
 	challengesInit();
+	utilsInit();
 	texInit();
 	lvInit();
 	cheatsInit();
@@ -156,6 +159,7 @@ void mainInit(void)
 void mainProc(void)
 {
 	mainInit();
+	rdpInit();
 	sndInit();
 
 	while (true) {
@@ -200,10 +204,11 @@ void mainLoop(void)
 		}
 	}
 
-	rngSetSeed(utilsGetCount());
+	rngSetSeed(osGetCount());
 
 	// Outer loop - this is infinite because ending is never changed
 	while (!ending) {
+		g_MainGameLogicEnabled = true;
 		g_MainIsEndscreen = false;
 
 		if (g_AcceptCMDParams) {
@@ -318,11 +323,11 @@ void mainLoop(void)
 		frametimeCalculate();
 
 		while (g_MainChangeToStageNum < 0) {
-			const int cycles = utilsGetCount() - g_Vars.thisframestartt;
+			const int cycles = osGetCount() - g_Vars.thisframestartt;
 			if (!g_Vars.mininc60 || (cycles >= g_Vars.mininc60 * CYCLES_PER_FRAME - CYCLES_PER_FRAME / 2)) {
 				videoStartFrame();
 				mainTick();
-				schedEndFrame();
+				schedEndFrame(&g_Sched);
 			}
 			if (g_TickExtraSleep) {
 				sysSleep(EXTRA_SLEEP_TIME);
@@ -351,36 +356,40 @@ void mainTick(void)
 		frametimeCalculate();
 		joyDebugJoy();
 
-		gdl = gdlstart = gfxGetMasterDisplayList();
+		if (g_MainGameLogicEnabled) {
+			gdl = gdlstart = gfxGetMasterDisplayList();
 
-		gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-		gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 0x0100, 6, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 0x0100, 6, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 
-		lvTick();
-		playermgrShuffle();
+			lvTick();
+			playermgrShuffle();
 
-		if (g_StageNum < STAGE_TITLE) {
-			for (i = 0; i < PLAYERCOUNT(); i++) {
-				setCurrentPlayerNum(playermgrGetPlayerAtOrder(i));
+			if (g_StageNum < STAGE_TITLE) {
+				for (i = 0; i < PLAYERCOUNT(); i++) {
+					setCurrentPlayerNum(playermgrGetPlayerAtOrder(i));
 
-				if (!titleIsKeepingMode()) {
-					viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
-					viSetFovAspectAndSize(
-							g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
-							g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
+					if (!titleIsKeepingMode()) {
+						viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
+						viSetFovAspectAndSize(
+								g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
+								g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
+					}
+
+					lvTickPlayer();
 				}
-
-				lvTickPlayer();
 			}
+
+			gdl = lvRender(gdl);
+
+			gDPFullSync(gdl++);
+			gSPEndDisplayList(gdl++);
 		}
 
-		gdl = lvRender(gdl);
-
-		gDPFullSync(gdl++);
-		gSPEndDisplayList(gdl++);
-
-		gfxSwapBuffers();
-		viUpdateMode();
+		if (g_MainGameLogicEnabled) {
+			gfxSwapBuffers();
+			viUpdateMode();
+		}
 
 		// Used in PC port
 		rdpCreateTask(gdlstart, gdl, 0);

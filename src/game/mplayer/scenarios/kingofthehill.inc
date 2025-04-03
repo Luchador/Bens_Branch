@@ -20,7 +20,7 @@ MenuItemHandlerResult menuhandlerMpHillTime(int operation, struct menuitem *item
 		data->slider.value = g_Vars.mphilltime;
 		break;
 	case MENUOP_SET:
-		g_Vars.mphilltime = (uint8_t)data->slider.value;
+		g_Vars.mphilltime = (u8)data->slider.value;
 		break;
 	case MENUOP_GETSLIDERLABEL:
 		sprintf(data->slider.label, langGet(L_MPWEAPONS_023), data->slider.value + 10); // "%ds/Point"
@@ -217,7 +217,7 @@ void kohInit(void)
 
 void kohInitProps(void)
 {
-	int16_t pad_id = 0;
+	s16 pad_id = 0;
 	struct pad pad;
 
 	if (g_ScenarioData.koh.hillcount > 1) {
@@ -540,7 +540,7 @@ void kohTick(void)
 			targetg = 1;
 			targetb = 0.25f;
 		} else {
-			uint32_t colour = g_TeamColours[g_ScenarioData.koh.occupiedteam];
+			u32 colour = g_TeamColours[g_ScenarioData.koh.occupiedteam];
 			targetr = ((int)(colour >> 24 & 0xff) + 0xff) * (1.0f / 512.0f);
 			targetg = ((int)(colour >> 16 & 0xff) + 0xff) * (1.0f / 512.0f);
 			targetb = ((int)(colour >> 8 & 0xff) + 0xff) * (1.0f / 512.0f);
@@ -678,7 +678,7 @@ Gfx *kohRadarExtra(Gfx *gdl)
 {
 	if (g_MpSetup.options & MPOPTION_KOH_HILLONRADAR && !g_ScenarioData.koh.movehill) {
 		struct coord dist;
-		uint32_t colour;
+		u32 colour;
 		dist.x = g_ScenarioData.koh.hillpos.x - g_Vars.currentplayer->prop->pos.x;
 		dist.y = g_ScenarioData.koh.hillpos.y - g_Vars.currentplayer->prop->pos.y;
 		dist.z = g_ScenarioData.koh.hillpos.z - g_Vars.currentplayer->prop->pos.z;

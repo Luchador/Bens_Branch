@@ -8,8 +8,9 @@
 #define EXT_SEG *
 #define REF_SEG
 
-extern bool g_SchedViModesPending;
-//extern int g_ViUnblackTimer;
+extern int var8005ce74;
+extern bool g_SchedViModesPending[NUM_GFXTASKS];
+extern int g_ViUnblackTimer;
 extern int g_ViShakeDirection;
 extern int g_ViShakeIntensity;
 extern int g_ViShakeTimer;
@@ -67,6 +68,7 @@ extern uint8_t g_FileState;
 extern bool var80062944;
 extern bool var80062948;
 extern bool var8006294c;
+extern bool g_WeatherTickEnabled;
 extern struct var80062960 *var80062960;
 extern float g_ChrAnimSpeed;
 extern int g_SelectedAnimNum;
@@ -331,6 +333,7 @@ extern int g_MusicSilenceTimer60;
 extern struct surfacetype *g_SurfaceTypes[15];
 extern uint16_t *g_ZbufPtr1;
 extern float g_AlmostZero;
+extern struct coord g_ZeroVector;
 extern struct menudialogdef g_2PMissionInventoryHMenuDialog;
 extern struct menudialogdef g_2PMissionInventoryVMenuDialog;
 extern struct menudialogdef g_MpEndscreenChallengeCheatedMenuDialog;

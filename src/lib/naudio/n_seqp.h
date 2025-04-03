@@ -36,11 +36,11 @@ char __n_voiceNeedsNoteKill(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime k
 void __n_seqpReleaseVoice(N_ALSeqPlayer *seqp, N_ALVoice *voice, ALMicroTime deltaTime);
 
 
-N_ALVoiceState   *__n_mapVoice(N_ALSeqPlayer *, uint8_t, uint8_t, uint8_t);
-N_ALVoiceState   *__n_lookupVoice(N_ALSeqPlayer *, uint8_t, uint8_t);
-ALSound          *__n_lookupSound(N_ALSeqPlayer *, uint8_t, uint8_t, uint8_t);
-ALSound          *__n_lookupSoundQuick(N_ALSeqPlayer *, uint8_t, uint8_t, uint8_t);
-int16_t               __n_vsVol(N_ALVoiceState *voice, N_ALSeqPlayer *seqp);
+N_ALVoiceState   *__n_mapVoice(N_ALSeqPlayer *, u8, u8, u8);
+N_ALVoiceState   *__n_lookupVoice(N_ALSeqPlayer *, u8, u8);
+ALSound          *__n_lookupSound(N_ALSeqPlayer *, u8, u8, u8);
+ALSound          *__n_lookupSoundQuick(N_ALSeqPlayer *, u8, u8, u8);
+s16               __n_vsVol(N_ALVoiceState *voice, N_ALSeqPlayer *seqp);
 ALMicroTime       __n_vsDelta(N_ALVoiceState *voice, ALMicroTime t);
 ALPan             __n_vsPan(N_ALVoiceState *voice, N_ALSeqPlayer *seqp);
 void		  __n_initFromBank(N_ALSeqPlayer *seqp, ALBank *b);

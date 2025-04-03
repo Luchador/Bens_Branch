@@ -20,6 +20,7 @@
 #ifndef _GBI_H_
 #define _GBI_H_
 
+#include <PR/ultratypes.h>
 #include "gbiex.h"
 #include <stdint.h>
 #include "platform.h"
@@ -556,10 +557,10 @@
 #define G_BL_0       3
 
 #define GBL_c1(m1a, m1b, m2a, m2b)                        \
-    (uint32_t)(m1a) << 30 | (uint32_t)(m1b) << 26 | (uint32_t)(m2a) << 22 | (uint32_t)(m2b) << 18
+    (u32)(m1a) << 30 | (u32)(m1b) << 26 | (u32)(m2a) << 22 | (u32)(m2b) << 18
 
 #define GBL_c2(m1a, m1b, m2a, m2b)                        \
-    (uint32_t)(m1a) << 28 | (uint32_t)(m1b) << 24 | (uint32_t)(m2a) << 20 | (uint32_t)(m2b) << 16
+    (u32)(m1a) << 28 | (u32)(m1b) << 24 | (u32)(m2a) << 20 | (u32)(m2b) << 16
 
 #define RM_AA_ZB_OPA_SURF(clk)                                   \
     AA_EN | Z_CMP | Z_UPD | IM_RD | CVG_DST_CLAMP |              \
@@ -902,6 +903,11 @@
 #define G_DL_NOPUSH 0x01
 
 /*
+ * BEGIN C-specific section: (typedef's)
+ */
+#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
+
+/*
  * Data Structures
  *
  * NOTE:
@@ -937,28 +943,50 @@
 typedef struct {
 	union {
 		struct {
-			/*0x00*/ int16_t x;
-			/*0x02*/ int16_t y;
-			/*0x04*/ int16_t z;
+			/*0x00*/ s16 x;
+			/*0x02*/ s16 y;
+			/*0x04*/ s16 z;
 		};
-		int16_t v[3];
+		s16 v[3];
 	};
-	/*0x06*/ uint8_t flags;
-	/*0x07*/ uint8_t colour;
-	/*0x08*/ int16_t s;
-	/*0x0a*/ int16_t t;
+	/*0x06*/ u8 flags;
+	/*0x07*/ u8 colour;
+	/*0x08*/ s16 s;
+	/*0x0a*/ s16 t;
 } Vtx;
 
 typedef union {
-    uint32_t word;
-    uint8_t bytes[4];
+    u32 word;
+    u8 bytes[4];
     struct {
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
-        uint8_t a;
+        u8 r;
+        u8 g;
+        u8 b;
+        u8 a;
     };
 } Col;
+
+/*
+ * Sprite structure
+ */
+
+typedef struct {
+	void  *SourceImagePointer;
+	void  *TlutPointer;
+	short Stride;
+	short SubImageWidth;
+	short SubImageHeight;
+	char  SourceImageType;
+	char  SourceImageBitSize;
+	short SourceImageOffsetS;
+	short SourceImageOffsetT;
+	char  dummy[4];
+} uSprite_t;
+
+typedef union {
+	uSprite_t     s;
+	long long int force_structure_allignment[3];
+} uSprite;
 
 /*
  * Triangle face
@@ -1534,9 +1562,9 @@ typedef struct {
 typedef union {
 	Gwords         words;
 #ifdef PLATFORM_64BIT
-	uint8_t             bytes[16];
+	u8             bytes[16];
 #else
-	uint8_t             bytes[8];
+	u8             bytes[8];
 #endif
 	Gdma           dma;
 	Gvtx           vtx;
@@ -1712,6 +1740,10 @@ typedef union {
     (_SHIFTL((flag), 24,8)|_SHIFTL((v0)*10,16,8)| \
      _SHIFTL((v1)*10, 8,8)|_SHIFTL((v2)*10, 0,8))
 
+#define __gsSPLine3D_w1f(v0, v1, wd, flag)        \
+    (_SHIFTL((flag), 24,8)|_SHIFTL((v0)*10,16,8)| \
+     _SHIFTL((v1)*10, 8,8)|_SHIFTL((wd),    0,8))
+
 /***
  ***  1 Triangle
  ***/
@@ -1721,6 +1753,52 @@ typedef union {
                                                           \
     _g->words.w0 = _SHIFTL(G_TRI1, 24, 8);                \
     _g->words.w1 = __gsSP1Triangle_w1f(v0, v1, v2, flag); \
+}
+
+#define gsSP1Triangle(v0, v1, v2, flag)   \
+{                                         \
+    _SHIFTL(G_TRI1, 24, 8),               \
+    __gsSP1Triangle_w1f(v0, v1, v2, flag) \
+}
+
+/***
+ ***  Line
+ ***/
+#define gSPLine3D(pkt, v0, v1, flag)                  \
+{                                                     \
+    Gfx *_g = (Gfx *)(pkt);                           \
+                                                      \
+    _g->words.w0 = _SHIFTL(G_LINE3D, 24, 8);          \
+    _g->words.w1 = __gsSPLine3D_w1f(v0, v1, 0, flag); \
+}
+
+#define gsSPLine3D(v0, v1, flag)      \
+{                                     \
+    _SHIFTL(G_LINE3D, 24, 8),         \
+    __gsSPLine3D_w1f(v0, v1, 0, flag) \
+}
+
+/***
+ ***  LineW
+ ***/
+/* these macros are the same as SPLine3D, except they have an
+ * additional parameter for width. The width is added to the "minimum"
+ * thickness, which is 1.5 pixels. The units for width are in
+ * half-pixel units, so a width of 1 translates to (.5 + 1.5) or
+ * a 2.0 pixels wide line.
+ */
+#define gSPLineW3D(pkt, v0, v1, wd, flag)              \
+{                                                      \
+    Gfx *_g = (Gfx *)(pkt);                            \
+                                                       \
+    _g->words.w0 = _SHIFTL(G_LINE3D, 24, 8);           \
+    _g->words.w1 = __gsSPLine3D_w1f(v0, v1, wd, flag); \
+}
+
+#define gsSPLineW3D(v0, v1, wd, flag)  \
+{                                      \
+    _SHIFTL(G_LINE3D, 24, 8),          \
+    __gsSPLine3D_w1f(v0, v1, wd, flag) \
 }
 
 /***
@@ -1765,9 +1843,14 @@ typedef union {
 #define gsSPSegment(segment, base)            \
     gsMoveWd(G_MW_SEGMENT, (segment)*4, base)
 
+#ifdef PLATFORM_N64
+#define SEGADDR(x) x
+#define UNSEGADDR(x) x
+#else
 // we mark all segmented addresses so that it'll be easier to recognize them later
 #define SEGADDR(x) ((void *)((uintptr_t)(x) | 1))
 #define UNSEGADDR(x) ((uintptr_t)(x) & ~1)
+#endif
 
 /*
  * Clipping Macros
@@ -3543,23 +3626,23 @@ typedef union {
     Gfx *_g = (Gfx *)(pkt);                                                     \
                                                                                 \
     _g->words.w0 = (_SHIFTL(G_TEXRECT, 24, 8) |                                 \
-            _SHIFTL(MAX((int16_t)(xh),0), 12, 12) |                                 \
-            _SHIFTL(MAX((int16_t)(yh),0), 0, 12));                                  \
+            _SHIFTL(MAX((s16)(xh),0), 12, 12) |                                 \
+            _SHIFTL(MAX((s16)(yh),0), 0, 12));                                  \
     _g->words.w1 = (_SHIFTL((tile), 24, 3) |                                    \
-            _SHIFTL(MAX((int16_t)(xl),0), 12, 12) |                                 \
-            _SHIFTL(MAX((int16_t)(yl),0), 0, 12));                                  \
+            _SHIFTL(MAX((s16)(xl),0), 12, 12) |                                 \
+            _SHIFTL(MAX((s16)(yl),0), 0, 12));                                  \
     gImmp1(pkt, G_RDPHALF_1,                                                    \
             (_SHIFTL(((s) -                                                     \
-                      (((int16_t)(xl) < 0) ?                                        \
-                       (((int16_t)(dsdx) < 0) ?                                     \
-                        (MAX((((int16_t)(xl)*(int16_t)(dsdx))>>7),0)) :                 \
-                        (MIN((((int16_t)(xl)*(int16_t)(dsdx))>>7),0))) : 0)),           \
+                      (((s16)(xl) < 0) ?                                        \
+                       (((s16)(dsdx) < 0) ?                                     \
+                        (MAX((((s16)(xl)*(s16)(dsdx))>>7),0)) :                 \
+                        (MIN((((s16)(xl)*(s16)(dsdx))>>7),0))) : 0)),           \
                         16, 16) |                                               \
                         _SHIFTL(((t) -                                          \
                                 (((yl) < 0) ?                                   \
-                                 (((int16_t)(dtdy) < 0) ?                           \
-                                  (MAX((((int16_t)(yl)*(int16_t)(dtdy))>>7),0)) :       \
-                                  (MIN((((int16_t)(yl)*(int16_t)(dtdy))>>7),0))) : 0)), \
+                                 (((s16)(dtdy) < 0) ?                           \
+                                  (MAX((((s16)(yl)*(s16)(dtdy))>>7),0)) :       \
+                                  (MIN((((s16)(yl)*(s16)(dtdy))>>7),0))) : 0)), \
                                   0, 16)));                                     \
     gImmp1(pkt, G_RDPHALF_2, (_SHIFTL((dsdx), 16, 16) |                         \
                 _SHIFTL((dtdy), 0, 16)));                                       \
@@ -3608,5 +3691,7 @@ typedef union {
 #define gsDPNoOp()           gsDPNoParam(G_NOOP)
 #define gDPNoOpTag(pkt, tag) gDPParam(pkt, G_NOOP, tag)
 #define gsDPNoOpTag(tag)     gsDPParam(G_NOOP, tag)
+
+#endif /* _LANGUAGE_C */
 
 #endif /* _GBI_H_ */

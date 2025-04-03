@@ -1,16 +1,17 @@
 #ifndef IN_GAME_GAMEFILE_H
 #define IN_GAME_GAMEFILE_H
+#include <ultra64.h>
 #include "data.h"
 #include "types.h"
 
-uint32_t gamefileHasFlag(uint32_t value);
-void gamefileSetFlag(uint32_t value);
-void gamefileUnsetFlag(uint32_t value);
+u32 gamefileHasFlag(u32 value);
+void gamefileSetFlag(u32 value);
+void gamefileUnsetFlag(u32 value);
 void gamefileApplyOptions(struct gamefile *file);
 void gamefileLoadDefaults(struct gamefile *file);
 int gamefileLoad(int device);
-int gamefileSave(int device, int filenum, uint16_t deviceserial);
-void gamefileGetOverview(char *arg0, char *name, uint8_t *stage, uint8_t *difficulty, uint32_t *time);
+int gamefileSave(int device, int filenum, u16 deviceserial);
+void gamefileGetOverview(char *arg0, char *name, u8 *stage, u8 *difficulty, u32 *time);
 void gamefileUnlockEverything(void);
 
 #endif

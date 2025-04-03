@@ -1,8 +1,7 @@
 #include <ultra64.h>
-#include <stdio.h>
-#include <string.h>
 #include "constants.h"
 #include "lib/sched.h"
+#include "string.h"
 #include "game/cheats.h"
 #include "game/inv.h"
 #include "game/playermgr.h"
@@ -12,6 +11,7 @@
 #include "game/pak.h"
 #include "bss.h"
 #include "data.h"
+#include "string.h"
 #include "types.h"
 
 uint32_t g_CheatsActiveBank0;

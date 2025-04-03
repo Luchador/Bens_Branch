@@ -586,8 +586,8 @@ int botIsObjCollectable(struct defaultobj *obj)
 void botCheckPickups(struct chrdata *chr)
 {
 	int i;
-	int16_t *propnumptr;
-	int16_t propnums[260];
+	s16 *propnumptr;
+	s16 propnums[260];
 	RoomNum allrooms[22];
 	RoomNum neighbours[12];
 
@@ -855,7 +855,7 @@ int botTick(struct prop *prop)
 			}
 
 			if (chr->blurdrugamount > 0 && !chrIsDead(chr) && aibot->skrocket == NULL) {
-				targetangle += chr->blurdrugamount * 0.00031410926021636f * sinf((g_Vars.lvframe60 % TICKS(120)) * 0.052351541817188f);
+				targetangle += chr->blurdrugamount * PALUPF(0.00031410926021636f) * sinf((g_Vars.lvframe60 % TICKS(120)) * PALUPF(0.052351541817188f));
 
 				if (targetangle >= M_TAU) {
 					targetangle -= M_TAU;

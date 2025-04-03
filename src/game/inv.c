@@ -665,9 +665,9 @@ void invChooseCycleBackWeapon(int *ptr1, int *ptr2, bool arg2)
 	*ptr2 = weapon2;
 }
 
-bool invHasKeyFlags(uint32_t wantkeyflags)
+bool invHasKeyFlags(u32 wantkeyflags)
 {
-	uint32_t heldkeyflags = 0;
+	u32 heldkeyflags = 0;
 	struct invitem *item = g_Vars.currentplayer->weapons;
 
 	while (item) {
@@ -908,7 +908,7 @@ int invGetWeaponNumByIndex(int index)
 	return 0;
 }
 
-uint16_t invGetNameIdByIndex(int index)
+u16 invGetNameIdByIndex(int index)
 {
 	struct invitem *item = invGetItemByIndex(index);
 	int weaponnum = 0;
@@ -993,12 +993,12 @@ void invInsertTextOverride(struct textoverride *override)
 	g_Vars.textoverrides = override;
 }
 
-uint32_t invGetCurrentIndex(void)
+u32 invGetCurrentIndex(void)
 {
 	return g_Vars.currentplayer->equipcuritem;
 }
 
-void invSetCurrentIndex(uint32_t item)
+void invSetCurrentIndex(u32 item)
 {
 	g_Vars.currentplayer->equipcuritem = item;
 }

@@ -216,7 +216,7 @@ uint32_t pakGenerateSerial(int8_t device)
 
 	value = g_Paks[device].unk2c8;
 	rand = (rngRandom() % 496) + 16; // range 16-511
-	count = utilsGetCount();
+	count = osGetCount();
 
 	return value ^ rand ^ count;
 }
@@ -239,6 +239,11 @@ bool mempakIsOkay(int8_t device)
 	return false;
 }
 
+int pakGetFileIdsByType(int8_t device, uint32_t filetype, uint32_t *fileids)
+{
+	return _pakGetFileIdsByType(device, filetype, fileids);
+}
+
 int pak0f1167d8(int8_t device)
 {
 	return pak0f119298(device);
@@ -247,6 +252,11 @@ int pak0f1167d8(int8_t device)
 int pakReadBodyAtGuid(int8_t device, int fileid, uint8_t *body, int arg3)
 {
 	return _pakReadBodyAtGuid(device, fileid, body, arg3);
+}
+
+int pakSaveAtGuid(int8_t device, int fileid, int filetype, uint8_t *body, int *outfileid, uint8_t *olddata)
+{
+	return _pakSaveAtGuid(device, fileid, filetype, body, outfileid, olddata);
 }
 
 bool pakDeleteFile(int8_t device, int fileid)
@@ -532,7 +542,7 @@ PakErr2 pakReadHeaderAtOffset(int8_t device, uint32_t offset, struct pakfilehead
  * a swap file reserved for atomic writes. The new file is written into the
  * swap file, then the old file is marked as swap.
  */
-int pakSaveAtGuid(int8_t device, int fileid, int filetype, uint8_t *newdata, int *outfileid, uint8_t *olddataptr)
+int _pakSaveAtGuid(int8_t device, int fileid, int filetype, uint8_t *newdata, int *outfileid, uint8_t *olddataptr)
 {
 	struct pakfileheader header;
 	struct pakfileheader swapheader;
@@ -1055,7 +1065,7 @@ int _pakReadBodyAtGuid(int8_t device, int fileid, uint8_t *body, int arg3)
 	return 0;
 }
 
-int pakGetFileIdsByType(int8_t device, uint32_t filetype, uint32_t *fileids)
+int _pakGetFileIdsByType(int8_t device, uint32_t filetype, uint32_t *fileids)
 {
 	struct pakfileheader header;
 	uint32_t offset = 0;
@@ -1586,7 +1596,7 @@ int pakRepairFilesystem(int8_t device)
 		return -1;
 	}
 
-	return 0;
+	return (VERSION >= VERSION_NTSC_1_0 ? 0 : 1);
 }
 
 /**
@@ -1594,7 +1604,11 @@ int pakRepairFilesystem(int8_t device)
  *
  * NTSC Beta forgets to include return values.
  */
+#if VERSION >= VERSION_NTSC_1_0
 bool pakCreateInitialFiles(int8_t device)
+#else
+void pakCreateInitialFiles(int8_t device)
+#endif
 {
 	struct pakfileheader header;
 	int i;
@@ -1612,17 +1626,29 @@ bool pakCreateInitialFiles(int8_t device)
 
 	uint32_t filecounts[] = { 2, 3, 5, 5, 5 };
 
+#if VERSION >= VERSION_NTSC_1_0
 	char *filenames[] = { "BOS\n", "CAM\n", "MPP\n", "MPG\n", "GAM" };
+#else
+	char *filenames[] = { "BOS", "CAM", "MPP", "MPG", "GAM" };
+#endif
 
 	// Iterate all files on the pak and decrease the counts per filetype
 	if (pakGetFileIdsByType(device, PAKFILETYPE_ALL, fileids) != 0) {
+#if VERSION >= VERSION_NTSC_1_0
 		return false;
+#else
+		return;
+#endif
 	}
 
 	for (i = 0; fileids[i] != 0; i++) {
+#if VERSION >= VERSION_NTSC_1_0
 		if (pakFindFile(device, fileids[i], &header) == -1) {
 			return false;
 		}
+#else
+		pakFindFile(device, fileids[i], &header);
+#endif
 
 		for (j = 0; j < ARRAYCOUNT(filetypes); j++) {
 			if (header.filetype == filetypes[j]) {
@@ -1711,6 +1737,11 @@ void pakMergeBlanks(int8_t device)
 	}
 }
 
+int pakGetFeatures(int8_t device)
+{
+	return g_Paks[device].features;
+}
+
 void pakSetFeatures(int8_t device, uint8_t features, uint32_t line, char *file)
 {
 	if (g_Paks[device].features == 0) {
@@ -1726,6 +1757,30 @@ void pakSetFeatures(int8_t device, uint8_t features, uint32_t line, char *file)
 		}
 	}
 }
+
+void pakRemoveAllFeatures(int8_t device, uint32_t arg1, uint32_t arg2)
+{
+	if (g_Paks[device].features) {
+		g_Paks[device].features = 0;
+	}
+
+	if (g_Paks[device].features);
+}
+
+/*const char var7f1b4294[] = "Pak %d - Pak_StartOne called from line %d in %s -> Flags = %0x\n";
+const char var7f1b42d4[] = "\nPak_StartOne -> Pak%d, Modes -\n";
+const char var7f1b42f8[] = "Memory,";
+const char var7f1b4300[] = "Rumble,";
+const char var7f1b4308[] = "Game Boy";
+const char var7f1b4314[] = "\n";
+const char var7f1b4318[] = "Pak %d -> %u Bytes of scratch for cache 2 memory at %0x\n";
+const char var7f1b4354[] = "\nPak%d -> Pak_EndOne - Called from line %d in %s : Modes -\n";
+const char var7f1b4390[] = "Memory,";
+const char var7f1b4398[] = "Rumble,";
+const char var7f1b43a0[] = "Game Boy";
+const char var7f1b43ac[] = "\n";
+const char var7f1b43b0[] = "Pak -> FATAL ERROR -> MEMORY INSTANCE ENDING IS NO LONGER SUPPORTED\n";
+const char var7f1b43f8[] = "Pak -> Pak_MakeOne - Id=%d is finished\n";*/
 
 void pakSetDefaults(int8_t device)
 {

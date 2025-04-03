@@ -4,7 +4,6 @@
 #include "data.h"
 #include "types.h"
 
-char *mpPlayerGetWeaponOfChoiceName(unsigned int playernum, unsigned int slot);
 MenuItemHandlerResult mpStatsForPlayerDropdownHandler(int operation, struct menuitem *item, union handlerdata *data);
 char *mpMenuTextInGameLimit(struct menuitem *item);
 char *menutextPauseOrUnpause(int arg0);
@@ -21,7 +20,7 @@ MenuItemHandlerResult mpPlayerTitleMenuHandler(int operation, struct menuitem *i
 char *mpMenuTextPlayerTitle(int arg0);
 MenuItemHandlerResult mpConfirmPlayerNameHandler(int operation, struct menuitem *item, union handlerdata *data);
 void mpPushPauseDialog(void);
-void mpPushEndscreenDialog(uint32_t arg0, uint32_t playernum);
+void mpPushEndscreenDialog(u32 arg0, u32 playernum);
 MenuItemHandlerResult menuhandlerMpEndGame(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandler00178018(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpInGameLimitLabel(int operation, struct menuitem *item, union handlerdata *data);

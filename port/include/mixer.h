@@ -34,7 +34,7 @@ void aEnvMixerImpl(uint8_t flags, ENVMIX_STATE state, int16_t some_vol);
 void aSetVolumeImpl(uint8_t flags, int16_t v, int16_t t, int16_t r);
 void aPoleFilterImpl(uint8_t flags, int16_t gain, uint32_t t, uint32_t addr);
 void aDisableImpl(uint16_t outp, uint32_t b, uint32_t c);
-void aPlayMP3Impl(const void *mp3file, uint32_t mp3size, void *out, int reset);
+void aPlayMP3Impl(const void *mp3file, u32 mp3size, void *out, int reset);
 
 #define aDisable(pkt, o, b, c) aDisableImpl(o, b, c)
 #define aClearBuffer(pkt, d, c) aClearBufferImpl(d, c)

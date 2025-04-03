@@ -3,6 +3,6 @@
 #include "data.h"
 #include "types.h"
 
-uint8_t *ailistFindById(int ailistid);
+u8 *ailistFindById(int ailistid);
 
 #endif

@@ -35,9 +35,8 @@
 
 #include "types.h"
 #include "data.h"
-#include "video.h"
 #include <stdbool.h>
-#undef bool // Ben's comment: line 1445 "bool used_textures[2] = {false, false};" is treated as an int, not a bool. The #undef here fixes it.
+#undef bool // Ben's comment: for some reason line 1445 "bool used_textures[2] = {false, false};" kept getting treated as an int, not a bool. The #undef here fixes it.
 
 uintptr_t gfxFramebuffer;
 

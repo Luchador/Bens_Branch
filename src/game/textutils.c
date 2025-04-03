@@ -1,5 +1,6 @@
 #include <ultra64.h>
-#include <math.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/debug.h"
@@ -87,12 +88,12 @@ struct fontchar *g_CharToRender;
 
 struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
 
-uint16_t var8007fb3c[] = {
+u16 var8007fb3c[] = {
 	0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00,
 	0xff00, 0xff24, 0xff48, 0xff6c, 0xff90, 0xffb4, 0xffd8, 0xffff,
 };
 
-uint16_t var8007fb5c[] = {
+u16 var8007fb5c[] = {
 	0xff00, 0xff58, 0xff74, 0xff90, 0xffac, 0xffc8, 0xffe4, 0xffff,
 	0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
 	0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00,
@@ -193,11 +194,21 @@ void textReset(void)
 	g_TextRotated90 = false;
 	g_WrapIndentCount = 0;
 
-	textLoadFont(REF_SEG _fontnumericSegmentRomStart, REF_SEG _fontnumericSegmentRomEnd, &g_FontNumeric, &g_CharsNumeric, false);
-	textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
-	textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
-	textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
-	textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
+	if (g_Vars.stagenum == STAGE_TITLE) {
+		textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
+		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
+		textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
+	} else if (g_Vars.stagenum == STAGE_CREDITS) {
+		textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
+		textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
+		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
+		textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
+	} else {
+		textLoadFont(REF_SEG _fontnumericSegmentRomStart, REF_SEG _fontnumericSegmentRomEnd, &g_FontNumeric, &g_CharsNumeric, false);
+		textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
+		textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
+		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
+	}
 
 	// Fonts are loaded again every time a stage is loaded so free the memory allocated for the previous fonts
 	textFreeFontCharacters();
@@ -254,11 +265,11 @@ Gfx *textSetCCCustom02(Gfx *gdl)
 
 Gfx *text0f153858(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 {
-	/*gdl = textSetPrimColour(gdl, 0x00000000);
+	gdl = textSetPrimColour(gdl, 0x00000000);
 
 	gDPFillRectangle(gdl++, *x1, *y1, *x2, *y2);
 
-	gdl = textSetCCCustom02(gdl);*/
+	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
 }
@@ -672,14 +683,14 @@ Gfx *textMakeCreditVerts(Gfx *gdl, int *arg1, struct fontchar *curchar, struct f
 {
 	int tmp1;
 	int tmp2;
-	int16_t sp3e;
-	int16_t sp3c;
-	int16_t sp3a;
-	int16_t sp38;
-	int16_t sp36;
-	int16_t sp34;
-	int16_t sp32;
-	int16_t sp30;
+	s16 sp3e;
+	s16 sp3c;
+	s16 sp3a;
+	s16 sp38;
+	s16 sp36;
+	s16 sp34;
+	s16 sp32;
+	s16 sp30;
 	Vtx *vertices;
 	Col *colours;
 
@@ -1395,7 +1406,7 @@ void textWrap(int wrapwidth, char *src, char *dst, struct fontchar *chars, struc
 	}
 }
 
-uint8_t *textLoadBMP(const char *filename, uint16_t *width, uint16_t *height) {
+uint8_t *textLoadBMP(const char *filename, u16 *width, u16 *height) {
     FILE *file = fopen(filename, "rb");  // Open in binary mode
     if (!file) {
         printf("Error: Could not open BMP file.\n");
@@ -1464,13 +1475,13 @@ uint8_t *textLoadBMP(const char *filename, uint16_t *width, uint16_t *height) {
     return flipped_data;  // Return the flipped image
 }
 
-struct fontchar *createChar(char *filename, uint16_t index)
+struct fontchar *createChar(char *filename, u16 index)
 {
 	struct fontchar *newchar = malloc(sizeof(struct fontchar));
 	newchar->index = index;
 
-	uint16_t width;
-	uint16_t height;
+	u16 width;
+	u16 height;
 
 	if (!newchar) return NULL;  // Handle memory allocation failure
 
@@ -1493,7 +1504,7 @@ struct fontchar *createChar(char *filename, uint16_t index)
 // Load the characters in the HD Handel Gothic font. The bmp's are named hg_0.bmp, hg_1.bmp, etc...with the images in ASCII order
 void textLoadCustomFont()
 {
-	uint16_t i = 0;
+	u16 i = 0;
 	for (i = 0; i < TOTAL_CHARS; i++) {
 		char filename[20];
 		snprintf(filename, sizeof(filename), "hg_%d.bmp", ASCII_START + i);

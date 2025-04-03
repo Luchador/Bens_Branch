@@ -1,5 +1,6 @@
 #ifndef IN_GAME_BODY_H
 #define IN_GAME_BODY_H
+#include <ultra64.h>
 #include "data.h"
 #include "types.h"
 
@@ -9,8 +10,8 @@ void bodiesReset(int stagenum);
 
 unsigned int bodyGetRace(int bodynum);
 bool bodyLoad(int bodynum);
-struct model *body0f02ce8c(int bodynum, int headnum, struct modeldef *bodymodeldef, struct modeldef *headmodeldef, bool sunglasses, struct model *model, bool isplayer, uint8_t varyheight);
-struct model *body0f02d338(int bodynum, int headnum, struct modeldef *bodymodeldef, struct modeldef *headmodeldef, bool sunglasses, uint8_t varyheight);
+struct model *body0f02ce8c(int bodynum, int headnum, struct modeldef *bodymodeldef, struct modeldef *headmodeldef, bool sunglasses, struct model *model, bool isplayer, u8 varyheight);
+struct model *body0f02d338(int bodynum, int headnum, struct modeldef *bodymodeldef, struct modeldef *headmodeldef, bool sunglasses, u8 varyheight);
 struct model *bodyAllocateModel(int bodynum, int headnum, uint32_t spawnflags);
 int bodyGetRandomBond(void);
 int bodyChooseHead(int bodynum);

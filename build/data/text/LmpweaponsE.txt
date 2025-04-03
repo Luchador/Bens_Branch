@@ -163,13 +163,13 @@ Cancel*
 Time Limit:*
 Score Limit:*
 Team Score Limit:*
-Challenge Completed!*
-Challenge Failed!*
-Challenge Cheated!*
+Challenge Completed!
+Challenge Failed!
+Challenge Cheated!
 Cutscene Subtitles*
 In-Game Subtitles*
 Alternative Title Screen*
-Start Challenge*
+Start Challenge
 dataDyne Investigation
 Error*
 The Controller Pak*has been removed.*

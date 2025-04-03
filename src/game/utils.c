@@ -1,24 +1,27 @@
-#include <math.h>
+#include <ultra64.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/memp.h"
+#include "lib/mtx.h"
 #include "lib/vi.h"
 #include "data.h"
 #include "types.h"
 #include "game/debug.h"
-#include "system.h"
+#include "bss.h"
+#include "types.h"
 
+void *var800ac0d0;
+uint8_t *var800ac0e8[4];
+
+float var800845d0 = 999999;
 float g_AlmostZero = 0.00001f;
+struct coord g_ZeroVector = {0, 0, 0};
 struct coord g_RightVector = {0, 0, 1};
-
-#define COUNTER_NUM (46875ULL)
-#define COUNTER_DEN (1000ULL)
-
-uint64_t utilsGetCount(void)
-{
-	return (sysGetMicroseconds() * COUNTER_NUM) / COUNTER_DEN;
-}
+uint8_t *var80084610 = NULL;
+uint8_t *var80084614 = NULL;
+uint8_t *var80084618 = NULL;
 
 uint32_t align4(uint32_t arg0)
 {
@@ -47,7 +50,33 @@ uintptr_t align32(uintptr_t arg0)
 	return arg0;
 }
 
-bool utilsNormalizeVector(struct coord *invec, struct coord *normalizedvec, uint32_t line, char *file)
+void utilsInit(void)
+{
+	int i;
+	uint32_t slotssize = 0x1900;
+	uint32_t allocsize;
+
+	var800ac0d0 = mempAlloc(10000, MEMPOOL_8);
+
+	allocsize = align16(0x3900);
+	var800ac0e8[0] = mempAlloc(allocsize, MEMPOOL_8);
+
+	if (var800ac0e8[0] != NULL) {
+		for (i = 0; i < ARRAYCOUNT(var800ac0e8); i++) {
+			var800ac0e8[i] = var800ac0e8[0] + ((i * 100) << 4);
+		}
+	} else {
+		for (i = 0; i < ARRAYCOUNT(var800ac0e8); i++) {
+			var800ac0e8[i] = NULL;
+		}
+	}
+
+	var80084610 = var800ac0e8[0] + slotssize;
+	var80084618 = var800ac0e8[0] + allocsize - 1;
+	var80084614 = var80084610;
+}
+
+bool normalizeVector(struct coord *invec, struct coord *normalizedvec, uint32_t line, char *file)
 {
 	float sqdist = invec->x * invec->x + invec->y * invec->y + invec->z * invec->z;
 	float mult;
@@ -69,18 +98,6 @@ bool utilsNormalizeVector(struct coord *invec, struct coord *normalizedvec, uint
 	return true;
 }
 
-float utilsClampF(float f, float min, float max)
-{
-	const float t = f < min ? min : f;
-	return t > max ? max : t;
-}
-
-int utilsClamp(int d, int min, int max)
-{
-	const int t = d < min ? min : d;
-	return t > max ? max : t;
-}
-
 void utilsNormalizeF(float *x, float *y, float *z)
 {
 	float hyp = sqrtf(*x * *x + *y * *y + *z * *z);
@@ -97,7 +114,7 @@ void utilsNormalizeF(float *x, float *y, float *z)
 	}
 }
 
-void utilsCalcScreenCoords(Gfx **gdlptr, float *screenpos, float *brightness, int width, int height, int arg5, int arg6, int arg7, int arg8)
+void textureCalcScreenCoords(Gfx **gdlptr, float *screenpos, float *brightness, int width, int height, int arg5, int arg6, int arg7, int arg8)
 {
 	if (brightness[0] > 0.0f && brightness[1] > 0.0f) {
 		Gfx *gdl = *gdlptr;
@@ -322,167 +339,211 @@ void CatmullRomSplineInterp(struct coord *arg0, struct coord *arg1, struct coord
 	arg5->z = mult0 * arg0->f[2] + mult1 * arg1->f[2] + mult2 * arg2->f[2] + mult3 * arg3->f[2];
 }
 
-// Möller–Trumbore ray-triangle intersection algorithm
-bool utilsRayIntersectsTriangle(
-	float ax, float ay, float az,                // Vertex A of triangle
-	float bx, float by, float bz,                // Vertex B of triangle
-	float cx, float cy, float cz,                // Vertex C of triangle
-	struct coord *offset,                        // Optional offset to apply to triangle
-	struct coord *rayOrigin,
-	struct coord *rayEnd,
-	struct coord *rayDir,
-	struct coord *outIntersection,               // Optional output: intersection point
-	struct coord *outNormal)                     // Optional output: triangle normal
+static bool implementation(
+	float f0, float f1, float f2,
+	float f12, float f13, float f14,
+	float f15, float f16, float f17,
+	struct coord *arg3, struct coord *t0, struct coord *t1,
+	struct coord *t2, struct coord *t3, struct coord *t4)
 {
-	// Apply offset to triangle vertex A if provided
-	if (offset != NULL) {
-		ax += offset->x;
-		ay += offset->y;
-		az += offset->z;
-	}
+float f3;
+float f4;
+float f5;
+float f6;
+float f7;
+float f8;
+float f9;
+float f10;
+float f11;
+float f18;
+float f19;
+float f20;
+float f21;
+float f22;
+float f23;
+float f24;
+float f25;
+float f26;
+float f27;
+float f28;
 
-	// Triangle edges
-	float edge1x = bx - ax;
-	float edge1y = by - ay;
-	float edge1z = bz - az;
+f3 = f12 - f0;
+f4 = f13 - f1;
+f5 = f14 - f2;
+f6 = f15 - f12;
+f7 = f16 - f13;
+f8 = f17 - f14;
+f9 = f15 - f0;
+f10 = f16 - f1;
+f11 = f17 - f2;
 
-	float edge2x = cx - bx;
-	float edge2y = cy - by;
-	float edge2z = cz - bz;
-
-	// Normal = cross(edge1, edge2)
-	float normalX = edge1y * edge2z - edge1z * edge2y;
-	float normalY = edge1z * edge2x - edge1x * edge2z;
-	float normalZ = edge1x * edge2y - edge1y * edge2x;
-
-	// Plane D = dot(normal, vertex A)
-	float planeD = -(normalX * ax + normalY * ay + normalZ * az);
-
-	// Ray direction and origin
-	float dirX = rayDir->x;
-	float dirY = rayDir->y;
-	float dirZ = rayDir->z;
-
-	float originX = rayOrigin->x;
-	float originY = rayOrigin->y;
-	float originZ = rayOrigin->z;
-
-	// Dot product of normal and ray direction
-	float denom = normalX * dirX + normalY * dirY + normalZ * dirZ;
-
-	if (denom == 0.0f) {
-		// Ray is parallel to triangle
-		return false;
-	}
-
-	// Calculate distance along ray to intersection point
-	float t = -(normalX * originX + normalY * originY + normalZ * originZ + planeD) / denom;
-
-	// Compute intersection point: P = origin + t * dir
-	float px = originX + t * dirX;
-	float py = originY + t * dirY;
-	float pz = originZ + t * dirZ;
-
-	// Test if point lies between ray origin and ray end
-	float endX = rayEnd->x;
-	float endY = rayEnd->y;
-	float endZ = rayEnd->z;
-
-	float vecToPointX = px - originX;
-	float vecToPointY = py - originY;
-	float vecToPointZ = pz - originZ;
-
-	float segmentX = endX - originX;
-	float segmentY = endY - originY;
-	float segmentZ = endZ - originZ;
-
-	// If dot(vecToPoint, segment) < 0, point is behind origin
-	float forwardTest = vecToPointX * segmentX + vecToPointY * segmentY + vecToPointZ * segmentZ;
-
-	if (forwardTest < 0) {
-		return false;
-	}
-
-	// Check if point lies within ray segment
-	float toEndX = px - endX;
-	float toEndY = py - endY;
-	float toEndZ = pz - endZ;
-
-	float backTest = toEndX * segmentX + toEndY * segmentY + toEndZ * segmentZ;
-
-	if (backTest > 0) {
-		return false;
-	}
-
-	// Barycentric coordinate test
-	float edge0x = bx - ax;
-	float edge0y = by - ay;
-	float edge0z = bz - az;
-
-	float edge1x2 = cx - ax;
-	float edge1y2 = cy - ay;
-	float edge1z2 = cz - az;
-
-	float dx = px - ax;
-	float dy = py - ay;
-	float dz = pz - az;
-
-	float dot00 = edge0x * edge0x + edge0y * edge0y + edge0z * edge0z;
-	float dot01 = edge0x * edge1x2 + edge0y * edge1y2 + edge0z * edge1z2;
-	float dot02 = edge0x * dx + edge0y * dy + edge0z * dz;
-	float dot11 = edge1x2 * edge1x2 + edge1y2 * edge1y2 + edge1z2 * edge1z2;
-	float dot12 = edge1x2 * dx + edge1y2 * dy + edge1z2 * dz;
-
-	float denomBary = dot00 * dot11 - dot01 * dot01;
-
-	if (denomBary == 0.0f) {
-		return false;
-	}
-
-	float u = (dot11 * dot02 - dot01 * dot12) / denomBary;
-	float v = (dot00 * dot12 - dot01 * dot02) / denomBary;
-
-	if (u < 0.0f || v < 0.0f || u + v > 1.0f) {
-		// Outside triangle
-		return false;
-	}
-
-	// Passed all tests: intersection is valid
-	if (outIntersection) {
-		outIntersection->x = px;
-		outIntersection->y = py;
-		outIntersection->z = pz;
-	}
-
-	if (outNormal) {
-		outNormal->x = normalX;
-		outNormal->y = normalY;
-		outNormal->z = normalZ;
-	}
-
-return true;
+if (arg3 != NULL) {
+	f0 += arg3->x;
+	f1 += arg3->y;
+	f2 += arg3->z;
 }
 
-bool utilsRayIntersectsTriangleS16(struct vec3s16 *arg0, struct vec3s16 *arg1, struct vec3s16 *arg2,
-		struct coord *arg3, struct coord *t0, struct coord *t1,
-		struct coord *t2, struct coord *t3, struct coord *t4)
-{
-	// Casting arg0/arg1/arg2 properties from s16 to float
-	return utilsRayIntersectsTriangle(
-			arg0->x, arg0->y, arg0->z,
-			arg1->x, arg1->y, arg1->z,
-			arg2->x, arg2->y, arg2->z,
-			arg3, t0, t1, t2, t3, t4);
+f12 = f4 * f8;
+f13 = f7 * f5;
+f14 = f5 * f6;
+f12 = f12 - f13;
+f15 = f8 * f3;
+f16 = f3 * f7;
+f13 = f14 - f15;
+f14 = f6 * f4;
+f14 = f16 - f14;
+f15 = f12 * f0;
+f16 = f13 * f1;
+f17 = f14 * f2;
+f15 = f15 + f16;
+f15 = f15 + f17;
+
+f16 = t2->x;
+f17 = t2->y;
+f18 = t2->z;
+
+f19 = f12 * f16;
+f20 = f13 * f17;
+f19 = f19 + f20;
+f20 = f14 * f18;
+f19 = f19 + f20;
+
+if (f19 == 0.0f) {
+	return false;
 }
 
-bool utilsRayIntersectsTriangleF(struct coord *arg0, struct coord *arg1, struct coord *arg2,
-		struct coord *arg3, struct coord *t0, struct coord *t1,
-		struct coord *t2, struct coord *t3, struct coord *t4)
+f20 = t1->x;
+f21 = t1->y;
+f22 = t1->z;
+f23 = f12 * f20;
+f24 = f13 * f21;
+f23 = f15 - f23;
+f25 = f14 * f22;
+f23 = f23 - f24;
+f23 = f23 - f25;
+f19 = f23 / f19;
+f23 = f19 * f16;
+f24 = f19 * f17;
+f23 = f20 + f23;
+f25 = f19 * f18;
+f24 = f21 + f24;
+f25 = f22 + f25;
+f26 = f23 - f20;
+f26 = f16 * f26;
+f27 = f24 - f21;
+f27 = f17 * f27;
+f28 = f25 - f22;
+f26 = f26 + f27;
+f27 = f18 * f28;
+f26 = f26 + f27;
+
+if (f26 > 0) {
+	return false;
+}
+
+f20 = t0->x;
+f21 = t0->y;
+f22 = t0->z;
+f26 = f23 - f20;
+f26 = f16 * f26;
+f27 = f24 - f21;
+f27 = f17 * f27;
+f28 = f25 - f22;
+f26 = f26 + f27;
+f27 = f18 * f28;
+f26 = f26 + f27;
+
+if (f26 < 0) {
+	return false;
+}
+
+f0 = f23 - f0;
+f1 = f24 - f1;
+f2 = f25 - f2;
+f26 = f6 * f4;
+f27 = f3 * f7;
+f26 = f26 - f27;
+
+if (f26 != 0.0f) {
+	f27 = f0 * f4;
+	f28 = f1 * f3;
+} else {
+	f26 = f7 * f5;
+	f27 = f4 * f8;
+	f26 = f26 - f27;
+
+	if (f26 != 0.0f) {
+		f27 = f1 * f5;
+		f28 = f2 * f4;
+	} else {
+		f26 = f8 * f3;
+		f27 = f5 * f6;
+		f26 = f26 - f27;
+		f27 = f2 * f3;
+		f28 = f0 * f5;
+	}
+}
+
+f27 = f27 - f28;
+f27 = f27 / f26;
+
+if (f27 < 0.0f) {
+	return false;
+}
+
+if (f3 != 0.0f) {
+	f28 = f27 * f9;
+	f28 = f0 - f28;
+	f28 = f28 / f3;
+} else if (f4 != 0.0f) {
+	f28 = f27 * f10;
+	f28 = f1 - f28;
+	f28 = f28 / f4;
+} else {
+	f28 = f27 * f11;
+	f28 = f2 - f28;
+	f28 = f28 / f5;
+}
+
+if (f28 >= 0.0f && f28 + f27 <= 1.0f) {
+	if (t3 != NULL) {
+		t3->x = f23;
+		t3->y = f24;
+		t3->z = f25;
+	}
+
+	if (t4 != NULL) {
+		t4->x = f12;
+		t4->y = f13;
+		t4->z = f14;
+	}
+
+	return true;
+}
+
+return false;
+}
+
+bool func0002f490(struct vec3s16 *arg0, struct vec3s16 *arg1, struct vec3s16 *arg2,
+	struct coord *arg3, struct coord *t0, struct coord *t1,
+	struct coord *t2, struct coord *t3, struct coord *t4)
 {
-	// No casting (arg0/arg1/arg2 properties are already floats)
-	return utilsRayIntersectsTriangle(
-			arg0->x, arg0->y, arg0->z,
-			arg1->x, arg1->y, arg1->z,
-			arg2->x, arg2->y, arg2->z,
-			arg3, t0, t1, t2, t3, t4);
+// Casting arg0/arg1/arg2 properties from s16 to float
+return implementation(
+		arg0->x, arg0->y, arg0->z,
+		arg1->x, arg1->y, arg1->z,
+		arg2->x, arg2->y, arg2->z,
+		arg3, t0, t1, t2, t3, t4);
+}
+
+bool func0002f560(struct coord *arg0, struct coord *arg1, struct coord *arg2,
+	struct coord *arg3, struct coord *t0, struct coord *t1,
+	struct coord *t2, struct coord *t3, struct coord *t4)
+{
+// No casting (arg0/arg1/arg2 properties are already floats)
+return implementation(
+		arg0->x, arg0->y, arg0->z,
+		arg1->x, arg1->y, arg1->z,
+		arg2->x, arg2->y, arg2->z,
+		arg3, t0, t1, t2, t3, t4);
 }

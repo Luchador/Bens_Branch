@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "lib/sched.h"
 #include "constants.h"
 #include "game/bondmove.h"
@@ -244,7 +243,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 
 			moveok = true;
 		} else {
-			cdGetEdge(&sp78, &sp6c);
+			cdGetEdge(&sp78, &sp6c, 453, "chr/chr.c");
 
 			// Attempt to find a valid position - method #1
 			sp60.x = dstpos->x - prop->pos.x;
@@ -442,7 +441,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 	int race = CHRRACE(chr);
 	float yincrement = 0.0f;
 	bool inlift;
-	uint16_t floorflags = 0;
+	u16 floorflags = 0;
 	int lvupdate240;
 	float lvupdate60f;
 	float lvupdate60freal;
@@ -498,7 +497,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 
 						if (lvupdate240 >= 25) {
 							lvupdate60f = 4.0f;
-							lvupdate60freal = 4.0f;
+							lvupdate60freal = PALUPF(4.0f);
 							lvupdate240 = 16;
 						}
 					}
@@ -506,7 +505,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 						&& ((chr->prop->flags & (PROPFLAG_ONANYSCREENTHISTICK | PROPFLAG_ONANYSCREENPREVTICK)) == 0)
 						&& lvupdate240 >= 25) {
 					lvupdate60f = 4.0f;
-					lvupdate60freal = 4.0f;
+					lvupdate60freal = PALUPF(4.0f);
 					lvupdate240 = 16;
 				}
 
@@ -678,7 +677,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 			RoomNum sp78[8];
 			float ground;
 			struct modelnode *node;
-			uint16_t nodetype;
+			u16 nodetype;
 			float sp68;
 			uint8_t die;
 
@@ -1386,7 +1385,7 @@ void chrFlinchBody(struct chrdata *chr)
 	if (chr->actiontype != ACT_DEAD && chr->flinchcnt < 0) {
 		chr->flinchcnt = 1;
 		chr->hidden2 &= 0x0fff;
-		chr->hidden2 |= (uint16_t)(rngRandom() << 13);
+		chr->hidden2 |= (u16)(rngRandom() << 13);
 	}
 }
 
@@ -1612,7 +1611,7 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 						&& g_CurModelChr->actiontype != ACT_DEAD
 						&& g_CurModelChr->actiontype != ACT_DIE) {
 					zrot = g_CurModelChr->drugheadsway / 360.0f * M_TAU;
-					xrot -= (28.0f - fabsf(g_CurModelChr->drugheadsway)) / 250.0f * M_TAU;
+					xrot -= (28.0f - ABS(g_CurModelChr->drugheadsway)) / 250.0f * M_TAU;
 				}
 			}
 
@@ -2500,7 +2499,7 @@ int chrTick(struct prop *prop)
 				sp130 = bike->w * 1000;
 
 				sp17c.x = cosf(sp178) * sp130;
-				sp17c.y = fabsf(bike->w) * 200 + 25;
+				sp17c.y = ABS(bike->w) * 200 + 25;
 				sp17c.z = sinf(-sp178) * sp130;
 
 				mtx4LoadTranslation(&sp17c, &sp1a8);
@@ -2749,7 +2748,7 @@ bool chr0f024738(struct chrdata *chr)
 
 						mtx3ToMtx4(obj->realrot, &thing->unk02c);
 						mtx4SetTranslation(&obj->prop->pos, &thing->unk02c);
-						mtxInvertAffineMatrix(thing->unk02c.m, thing->unk06c.m);
+						mtx000172f0(thing->unk02c.m, thing->unk06c.m);
 
 						campos = &g_Vars.currentplayer->cam_pos;
 
@@ -3465,7 +3464,11 @@ void chr0f0260c4(struct model *model, int hitpart, struct modelnode *node, struc
 			// Iterate the primary DL, and once the end is reached
 			// iterate the secondary DL if we have one.
 			while (true) {
-				op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
+#ifdef PLATFORM_N64
+				op = *(s8 *)&gdlptr->words.w0;
+#else
+				op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
+#endif
 
 				if (op == G_ENDDL) {
 					if (gdlptr2) {
@@ -3582,7 +3585,7 @@ void chr0f0260c4(struct model *model, int hitpart, struct modelnode *node, struc
 			}
 
 			while (true) {
-				int op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
+				int op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 				if (op == G_ENDDL) {
 					if (gdlptr2) {
@@ -3740,7 +3743,11 @@ void chrBruise(struct model *model, int hitpart, struct modelnode *node, struct 
 			// Iterate the primary DL, and once the end is reached
 			// iterate the secondary DL if we have one.
 			while (true) {
-				op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
+#ifdef PLATFORM_N64
+				op = *(s8 *)&gdlptr->words.w0;
+#else
+				op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
+#endif
 
 				if (op == G_ENDDL) {
 					if (gdlptr2) {
@@ -3876,7 +3883,7 @@ void chrBruise(struct model *model, int hitpart, struct modelnode *node, struct 
 				}
 
 				while (true) {
-				int op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
+				int op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 					if (op == G_ENDDL) {
 						if (gdlptr2) {
@@ -4066,7 +4073,7 @@ void chrDisfigure(struct chrdata *chr, struct coord *exppos, float damageradius)
 					}
 
 					while (true) {
-						int op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
+						int op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 						if (op == G_ENDDL) {
 							if (gdlptr2 == NULL) {
@@ -4246,7 +4253,7 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 					hitpart = modelTestForHit(model, &shotdata->gunpos2d, &shotdata->gundir2d, &node);
 
 					while (hitpart > 0) {
-						if (objTestShieldHit(model, node, &shotdata->gunpos2d, &shotdata->gundir2d, &sp88, &sp84, &sp80)) {
+						if (func0f084594(model, node, &shotdata->gunpos2d, &shotdata->gundir2d, &sp88, &sp84, &sp80)) {
 							mtx4TransformVec(&model->matrices[sp84], &sp88.pos, &spdc);
 							mtx4TransformVecInPlace(camGetProjectionMtxF(), &spdc);
 							mtx4RotateVec(&model->matrices[sp84], &sp88.unk0c, &spd0);
@@ -6077,8 +6084,8 @@ Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, uint32_t alpha)
 			int numiterations = (rngRandom() % 4) + 1;
 			int newcmnum = chr->cmnum2;
 			int candidate;
-			int8_t operation = 0;
-			int8_t again = true;
+			s8 operation = 0;
+			s8 again = true;
 			int i;
 
 			for (i = 0; i <= numiterations; ) {

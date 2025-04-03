@@ -4,13 +4,14 @@
 #include "constants.h"
 #include "types.h"
 
+extern OSSched g_Sched;
 extern uint8_t g_SchedSpecialArtifactIndexes[3];
 extern int g_SchedWriteArtifactsIndex;
 extern uint8_t *g_VmMarker;
 extern uint32_t g_VmRamEnd;
 extern uint32_t g_VmVirtualToPhysicalTableEnd;
 extern AMAudioMgr g_AudioManager;
-extern Mtx *g_CameraPerspectiveMtxF;
+extern Mtx *var80092870;
 extern int g_SndMaxFxBusses;
 extern struct seqinstance g_SeqInstances[3];
 extern ALHeap g_SndHeap;

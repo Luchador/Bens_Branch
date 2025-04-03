@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "constants.h"
 #include "game/bondgun.h"
 #include "game/bossfile.h"
@@ -32,6 +30,7 @@
 #include "lib/joy.h"
 #include "lib/main.h"
 #include "lib/snd.h"
+#include "string.h"
 #include "data.h"
 #include "types.h"
 

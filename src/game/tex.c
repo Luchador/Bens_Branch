@@ -37,6 +37,7 @@ struct tilesize {
 };
 
 int g_TexLutMode;
+uint32_t var800ab5b4;
 struct tilestate g_TexTileStates[8];
 struct tilesize g_TexTileSizes[8];
 uint32_t g_TexFilter2D = G_TF_BILERP;
@@ -174,6 +175,24 @@ struct surfacetype *g_SurfaceTypes[] = {
 	/*12*/ &g_SurfaceTypeGlassXlu,
 	/*13*/ &g_SurfaceTypeNone,
 	/*14*/ &g_SurfaceTypeDeepWater,
+};
+
+char *var80084494[] = {
+	"default",
+	"stone",
+	"wood",
+	"metal",
+	"glass",
+	"shallow water",
+	"snow",
+	"dirt",
+	"mud",
+	"tile",
+	"metalobj",
+	"chr",
+	"glass xlu",
+	"no hit",
+	"deep water",
 };
 
 bool g_TexPipeSynced = false;

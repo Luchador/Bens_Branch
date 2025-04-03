@@ -303,7 +303,7 @@ void menuTick(void)
 				if (g_MenuData.root == MENUROOT_MPSETUP) {
 					// Check if player is joining the game
 					bool canjoin;
-					uint32_t buttons = joyGetButtonsPressedThisFrame(i, 0xffffffff);
+					u32 buttons = joyGetButtonsPressedThisFrame(i, 0xffffffff);
 					canjoin = true;
 
 					if (g_BossFile.locktype == MPLOCKTYPE_CHALLENGE) {
@@ -361,7 +361,7 @@ void menuTick(void)
 				// Note that MPENDSCREEN also refers to coop and anti modes.
 				// Handle re-opening the endscreen by pressing B.
 				if (g_MenuData.root == MENUROOT_MPENDSCREEN) {
-					uint32_t buttons2 = joyGetButtonsPressedThisFrame(g_PlayerConfigsArray[i].contpad1, 0xffffffff);
+					u32 buttons2 = joyGetButtonsPressedThisFrame(g_PlayerConfigsArray[i].contpad1, 0xffffffff);
 
 					if (buttons2 & B_BUTTON) {
 						int playernum = -1;

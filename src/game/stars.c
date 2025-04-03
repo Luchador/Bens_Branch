@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/tex.h"
@@ -96,6 +95,8 @@ void starInsert(int index, struct coord *arg1)
 	}
 }
 
+#define ABS2(value) ((value) < 0 ? -(value) : (value))
+
 void starsReset(void)
 {
 	int v0 = 0;
@@ -150,7 +151,7 @@ void starsReset(void)
 
 			utilsNormalizeF(&spd4.f[0], &spd4.f[1], &spd4.f[2]);
 
-			f0 = (fabsf(spd4.f[0]) > fabsf(spd4.f[1])) ? (fabsf(spd4.f[0]) > fabsf(spd4.f[2]) ? fabsf(spd4.f[0]) : fabsf(spd4.f[2])) : (fabsf(spd4.f[1]) > fabsf(spd4.f[2]) ? fabsf(spd4.f[1]) : fabsf(spd4.f[2]));
+			f0 = (ABS2(spd4.f[0]) > ABS2(spd4.f[1])) ? (ABS2(spd4.f[0]) > ABS2(spd4.f[2]) ? ABS2(spd4.f[0]) : ABS2(spd4.f[2])) : (ABS2(spd4.f[1]) > ABS2(spd4.f[2]) ? ABS2(spd4.f[1]) : ABS2(spd4.f[2]));
 
 			spc8.f[0] = spd4.f[0] / f0;
 			spc8.f[1] = spd4.f[1] / f0;

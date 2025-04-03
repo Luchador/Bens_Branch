@@ -571,30 +571,30 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, int x, int y, int radius, int cornergap, ui
 		if (dist > 0.5f || dist < -0.5f) {
 			accel = dist * 0.05f;
 
-			if (accel > 2.0f) {
-				accel = 2.0f;
+			if (accel > PALUPF(2.0f)) {
+				accel = PALUPF(2.0f);
 			}
 
-			if (accel < -2.0f) {
-				accel = -2.0f;
+			if (accel < -PALUPF(2.0f)) {
+				accel = -PALUPF(2.0f);
 			}
 
 			if (accel > xspeed) {
-				accel = 0.05f;
+				accel = PALUPF(0.05f);
 			} else if (accel < xspeed) {
-				accel = -0.05f;
+				accel = -PALUPF(0.05f);
 			} else {
 				accel = 0.0f;
 			}
 
 			xspeed += accel;
 
-			if (xspeed > 2.0f) {
-				xspeed = 2.0f;
+			if (xspeed > PALUPF(2.0f)) {
+				xspeed = PALUPF(2.0f);
 			}
 
-			if (xspeed < -2.0f) {
-				xspeed = -2.0f;
+			if (xspeed < -PALUPF(2.0f)) {
+				xspeed = -PALUPF(2.0f);
 			}
 
 			xpos += xspeed;
@@ -608,29 +608,29 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, int x, int y, int radius, int cornergap, ui
 		if (dist > 0.5f || dist < -0.5f) {
 			accel = dist * 0.05f;
 
-			if (accel > 2.0f) {
-				accel = 2.0f;
+			if (accel > PALUPF(2.0f)) {
+				accel = PALUPF(2.0f);
 			}
-			if (accel < -2.0f) {
-				accel = -2.0f;
+			if (accel < -PALUPF(2.0f)) {
+				accel = -PALUPF(2.0f);
 			}
 
 			if (yspeed < accel) {
-				accel = 0.05f;
+				accel = PALUPF(0.05f);
 			} else if (accel < yspeed) {
-				accel = -0.05f;
+				accel = -PALUPF(0.05f);
 			} else {
 				accel = 0.0f;
 			}
 
 			yspeed += accel;
 
-			if (yspeed > 2.0f) {
-				yspeed = 2.0f;
+			if (yspeed > PALUPF(2.0f)) {
+				yspeed = PALUPF(2.0f);
 			}
 
-			if (yspeed < -2.0f) {
-				yspeed = -2.0f;
+			if (yspeed < -PALUPF(2.0f)) {
+				yspeed = -PALUPF(2.0f);
 			}
 
 			ypos += yspeed;
@@ -915,7 +915,7 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 	gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
 
-	utilsCalcScreenCoords(&gdl, spc4, spbc, tconfig->width, tconfig->height, 0, 0, 0, false);
+	textureCalcScreenCoords(&gdl, spc4, spbc, tconfig->width, tconfig->height, 0, 0, 0, false);
 	
 	gDPPipeSync(gdl++);
 	gDPSetColorDither(gdl++, G_CD_BAYER);
@@ -927,6 +927,11 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 	gDPSetTextureLUT(gdl++, G_TT_NONE);
 
 	return gdl;
+}
+
+Gfx *sightDrawType2(Gfx *gdl, bool sighton, float crossx, float crossy)
+{
+	return sightDrawClassic(gdl, sighton, crossx, crossy);
 }
 
 #define COLOUR_LIGHTRED 0xff555564
@@ -1567,7 +1572,7 @@ Gfx *sightDraw(Gfx *gdl, bool sighton, int sight)
 		gdl = sightDrawClassic(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	case SIGHT_2:
-		gdl = sightDrawClassic(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
+		gdl = sightDrawType2(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	case SIGHT_3:
 		gdl = sightDrawDefault(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);

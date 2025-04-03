@@ -1,6 +1,4 @@
 #include <ultra64.h>
-#include <stdio.h>
-#include <string.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/savebuffer.h"
@@ -20,6 +18,7 @@
 #include "lib/snd.h"
 #include "lib/vi.h"
 #include "lib/rng.h"
+#include "string.h"
 #include "data.h"
 #include "gbiex.h"
 #include "types.h"

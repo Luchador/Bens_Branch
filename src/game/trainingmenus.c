@@ -1,6 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
-#include <stdio.h>
+#include <stdbool.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/bondgun.h"
@@ -151,6 +151,10 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 		// Render weapon name
 		x = renderdata->x + 10;
 		y = renderdata->y;
+
+#if VERSION == VERSION_JPN_FINAL
+		y++;
+#endif
 
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRenderProjected(gdl, &x, &y, bgunGetName(weaponnum2), g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
@@ -2405,7 +2409,7 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 
 		if (index < NUM_BIO_LOCATIONS) {
 			// Location bio - render texture
-			uint8_t texturenums[] = { 0x1b, 0x0d, 0x0e, 0x10, 0x11, 0x12, 0x13, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1c, 0x1d };
+			u8 texturenums[] = { 0x1b, 0x0d, 0x0e, 0x10, 0x11, 0x12, 0x13, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1c, 0x1d };
 			int texturenum = texturenums[index];
 
 			gDPPipeSync(gdl++);

@@ -1,6 +1,6 @@
 #include "n_synthInternals.h"
 
-void n_alSynSetPan(N_ALVoice *v, uint8_t pan)
+void n_alSynSetPan(N_ALVoice *v, u8 pan)
 {
 	ALParam *update;
 

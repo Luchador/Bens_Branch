@@ -236,7 +236,7 @@ void camSetWorldToScreenMtxf(Mtxf *mtx)
 	player->unk0484 = g_GfxMemPos;
 }
 
-Mtxf *cam0f0b5050(uint8_t *arg0)
+Mtxf *camGetWorldToScreenMtx(uint8_t *arg0)
 {
 	Mtxf *result = NULL;
 	int i;
@@ -272,7 +272,7 @@ Mtxf *cam0f0b5050(uint8_t *arg0)
 	return result;
 }
 
-Mtxf *cam0f0b53a4(uint8_t *arg0)
+Mtxf *camGetProjectionMtx(uint8_t *arg0)
 {
 	Mtxf *result = NULL;
 	int i;
@@ -362,7 +362,7 @@ float camGetLodScaleZ(void)
 	return g_Vars.currentplayer->c_lodscalez;
 }
 
-uint32_t camGetLodScaleZU32(void)
+u32 camGetLodScaleZU32(void)
 {
 	return g_Vars.currentplayer->c_lodscalezu32;
 }

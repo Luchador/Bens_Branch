@@ -358,18 +358,18 @@ void setupResetProxyMines(void)
 	}
 }
 
-int setupCountCommandType(uint32_t type)
+int setupCountCommandType(u32 type)
 {
 	struct defaultobj *obj = (struct defaultobj *)g_StageSetup.props;
 	int count = 0;
 
 	if (obj) {
 		while (obj->type != OBJTYPE_END) {
-			if (obj->type == (uint8_t)type) {
+			if (obj->type == (u8)type) {
 				count++;
 			}
 
-			obj = (struct defaultobj *)((uint32_t *)obj + setupGetCmdLength((uint32_t *)obj));
+			obj = (struct defaultobj *)((u32 *)obj + setupGetCmdLength((u32 *)obj));
 		}
 	}
 
@@ -387,7 +387,7 @@ void setupCreateObject(struct defaultobj *obj, int cmdindex)
 	struct coord pos;
 	RoomNum rooms[8];
 	struct prop *prop2;
-	uint32_t flag40;
+	u32 flag40;
 	struct chrdata *chr;
 	struct prop *prop;
 
@@ -542,7 +542,7 @@ void setupCreateObject(struct defaultobj *obj, int cmdindex)
 						}
 					}
 
-					if ((uint32_t)(obj->flags & flag40) == 0) {
+					if ((u32)(obj->flags & flag40) == 0) {
 						if (obj->flags & OBJFLAG_00000002) {
 							if (bbox->ymax == bbox->ymin) {
 								zscale = maxscale;
@@ -825,7 +825,7 @@ void setupCreateAutogun(struct autogunobj *autogun, int cmdindex)
 {
 	setupCreateObject(&autogun->base, cmdindex);
 
-	autogun->maxspeed = *(int *)&autogun->maxspeed * M_TAU / 65536.0f;
+	autogun->maxspeed = *(int *)&autogun->maxspeed * PALUPF(M_TAU) / 65536.0f;
 	autogun->aimdist = *(int *)&autogun->aimdist * 100.0f / 65536.0f;
 	autogun->ymaxleft = *(int *)&autogun->ymaxleft * M_TAU / 65536.0f;
 	autogun->ymaxright = *(int *)&autogun->ymaxright * M_TAU / 65536.0f;
@@ -1113,9 +1113,9 @@ void setupCreateDoor(struct doorobj *door, int cmdindex)
 		// converting it to a float and writing it back to the same property.
 		door->maxfrac = *(int *) &door->maxfrac / 65536.0f;
 		door->perimfrac = *(int *) &door->perimfrac / 65536.0f;
-		door->accel = *(int *) &door->accel / 65536000.0f;
-		door->decel = *(int *) &door->decel / 65536000.0f;
-		door->maxspeed = *(int *) &door->maxspeed / 65536.0f;
+		door->accel = PALUPF(*(int *) &door->accel) / 65536000.0f;
+		door->decel = PALUPF(*(int *) &door->decel) / 65536000.0f;
+		door->maxspeed = PALUPF(*(int *) &door->maxspeed) / 65536.0f;
 
 		// The sibling door is stored as a relative command number,
 		// but at runtime it's a pointer.
@@ -1174,17 +1174,17 @@ void setupCreateHov(struct defaultobj *obj, struct hov *hov)
 	hov->prevgroundframe60 = -1;
 }
 
-void setupLoadBriefing(int stagenum, uint8_t *buffer, int bufferlen, struct briefing *briefing)
+void setupLoadBriefing(int stagenum, u8 *buffer, int bufferlen, struct briefing *briefing)
 {
 	if (stagenum < STAGE_TITLE) {
 		int stageindex = stageGetIndex(stagenum);
 		struct defaultobj *start;
-		uint16_t setupfilenum;
+		u16 setupfilenum;
 		int setupfilesize;
 		struct objective *objective;
 		struct briefingobj *briefingobj;
 		int i;
-		uint8_t *langbuffer;
+		u8 *langbuffer;
 		int langbufferlen;
 		struct stagesetup *setup;
 
@@ -1220,7 +1220,7 @@ void setupLoadBriefing(int stagenum, uint8_t *buffer, int bufferlen, struct brie
 				wanttype = BRIEFINGTYPE_TEXT_SA;
 			}
 
-			for (i = 0; (uint32_t)(i < ARRAYCOUNT(briefing->objectivenames)); i++) {
+			for (i = 0; (u32)(i < ARRAYCOUNT(briefing->objectivenames)); i++) {
 				briefing->objectivenames[i] = 0;
 			}
 
@@ -1251,7 +1251,7 @@ void setupLoadBriefing(int stagenum, uint8_t *buffer, int bufferlen, struct brie
 					break;
 				}
 
-				obj = (struct defaultobj *)((uint32_t *)obj + setupGetCmdLength((uint32_t *)obj));
+				obj = (struct defaultobj *)((u32 *)obj + setupGetCmdLength((u32 *)obj));
 			}
 		}
 	}
@@ -1266,7 +1266,7 @@ void setupLoadFiles(int stagenum)
 	int numobjs = 0;
 	int extra;
 	struct stagesetup *setup;
-	uint16_t filenum;
+	u16 filenum;
 	bool modified;
 
 	g_PadEffects = NULL;
@@ -1287,11 +1287,11 @@ void setupLoadFiles(int stagenum)
 
 		g_LoadType = LOADTYPE_SETUP;
 
-		g_GeCreditsData = (uint8_t *)fileLoadToNew(filenum, FILELOADMETHOD_DEFAULT, LOADTYPE_SETUP);
+		g_GeCreditsData = (u8 *)fileLoadToNew(filenum, FILELOADMETHOD_DEFAULT, LOADTYPE_SETUP);
 		setup = (struct stagesetup *)g_GeCreditsData;
 
 		g_StageSetup.intro = (int *)((uintptr_t)setup + (uintptr_t)setup->intro);
-		g_StageSetup.props = (uint32_t *)((uintptr_t)setup + (uintptr_t)setup->props);
+		g_StageSetup.props = (u32 *)((uintptr_t)setup + (uintptr_t)setup->props);
 		g_StageSetup.paths = (struct path *)((uintptr_t)setup + (uintptr_t)setup->paths);
 		g_StageSetup.ailists = (struct ailist *)((uintptr_t)setup + (uintptr_t)setup->ailists);
 
@@ -1306,7 +1306,7 @@ void setupLoadFiles(int stagenum)
 		// Convert ailist pointers from file-local to proper pointers
 		if (g_StageSetup.ailists) {
 			for (i = 0; g_StageSetup.ailists[i].list != NULL; i++) {
-				g_StageSetup.ailists[i].list = (uint8_t *)((uintptr_t)setup + (uintptr_t)g_StageSetup.ailists[i].list);
+				g_StageSetup.ailists[i].list = (u8 *)((uintptr_t)setup + (uintptr_t)g_StageSetup.ailists[i].list);
 			}
 		}
 
@@ -1475,7 +1475,7 @@ void setupCreateProps(int stagenum)
 		}
 
 		if (g_StageSetup.props) {
-			uint32_t diffflag = 0;
+			u32 diffflag = 0;
 			int index;
 
 			diffflag |= 1 << (lvGetDifficulty() + 4);
@@ -1500,7 +1500,7 @@ void setupCreateProps(int stagenum)
 				case OBJTYPE_GRENADEPROB:
 					{
 						struct grenadeprobobj *grenadeprob = (struct grenadeprobobj *)obj;
-						uint8_t probability = grenadeprob->probability;
+						u8 probability = grenadeprob->probability;
 						struct chrdata *chr = chrFindByLiteralId(grenadeprob->chrnum);
 
 						if (chr && chr->prop && chr->model) {
@@ -1594,8 +1594,8 @@ void setupCreateProps(int stagenum)
 						struct prop *prop;
 						int i;
 
-						lift->accel = *(int *)&lift->accel / 65536.0f;
-						lift->maxspeed = *(int *)&lift->maxspeed / 65536.0f;
+						lift->accel = PALUPF(*(int *)&lift->accel) / 65536.0f;
+						lift->maxspeed = PALUPF(*(int *)&lift->maxspeed) / 65536.0f;
 						lift->dist = 0;
 						lift->speed = 0;
 						lift->levelcur = 0;
@@ -1681,8 +1681,8 @@ void setupCreateProps(int stagenum)
 						struct fanobj *fan = (struct fanobj *)obj;
 
 						fan->yrot = 0;
-						fan->ymaxspeed = *(int *)&fan->ymaxspeed / 65536.0f;
-						fan->yaccel = *(int *)&fan->yaccel / 65536.0f;
+						fan->ymaxspeed = PALUPF(*(int *)&fan->ymaxspeed) / 65536.0f;
+						fan->yaccel = PALUPF(*(int *)&fan->yaccel) / 65536.0f;
 
 						setupCreateObject(obj, index);
 					}
@@ -1968,7 +1968,7 @@ void setupCreateProps(int stagenum)
 
 						objectiveInsert(objective);
 
-						if ((uint32_t)objective->index < 7) {
+						if ((u32)objective->index < 7) {
 							g_Briefing.objectivenames[objective->index] = objective->text;
 							g_Briefing.objectivedifficulties[objective->index] = objective->difficulties;
 						}
@@ -1999,7 +1999,7 @@ void setupCreateProps(int stagenum)
 					break;
 				}
 
-				obj = (struct defaultobj *)((uint32_t *)obj + setupGetCmdLength((uint32_t *)obj));
+				obj = (struct defaultobj *)((u32 *)obj + setupGetCmdLength((u32 *)obj));
 				index++;
 			}
 
@@ -2218,7 +2218,7 @@ void setupCreateProps(int stagenum)
 					break;
 				}
 
-				obj = (struct defaultobj *)((uint32_t *)obj + setupGetCmdLength((uint32_t *)obj));
+				obj = (struct defaultobj *)((u32 *)obj + setupGetCmdLength((u32 *)obj));
 				index++;
 			}
 		}

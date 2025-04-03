@@ -65,8 +65,8 @@ static uint32_t convertPads(uint8_t *dst, uint32_t dstpos, uint8_t *src, uint32_
 
 		// Position
 		if (flags & PADFLAG_INTPOS) {
-			int16_t *srcptr = (int16_t *) &src[srcpos];
-			int16_t *dstptr = (int16_t *) &dst[dstpos];
+			s16 *srcptr = (s16 *) &src[srcpos];
+			s16 *dstptr = (s16 *) &dst[dstpos];
 
 			dstptr[0] = PD_BE16(srcptr[0]);
 			dstptr[1] = PD_BE16(srcptr[1]);

@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/savebuffer.h"
@@ -77,8 +76,8 @@ float getSlideTimeToEdgeXZ(struct widthxz *circle, struct xz *edgeStart, struct 
 	float edgedist;
 	float sp90;
 	float sp8c;
-	float normalX;
-	float offsetX;
+	float sp88;
+	float sp84;
 	float sp80;
 	float sp7c;
 	float sp78;
@@ -89,8 +88,8 @@ float getSlideTimeToEdgeXZ(struct widthxz *circle, struct xz *edgeStart, struct 
 	float sp64;
 	float sp60;
 	float sp5c;
-	float startDist;
-	float endDist;
+	float sp58;
+	float sp54;
 
 	movementdist = sqrtf(movement->x * movement->x + movement->z * movement->z);
 
@@ -101,8 +100,8 @@ float getSlideTimeToEdgeXZ(struct widthxz *circle, struct xz *edgeStart, struct 
 	normmovevec.x = movement->x * (1.0f / movementdist);
 	normmovevec.z = movement->z * (1.0f / movementdist);
 
-	edgedistx = edgeEnd->x - edgeStart->x;
-	edgedistz = edgeEnd->z - edgeStart->z;
+	edgedistx = edgeStart->x - edgeStart->x;
+	edgedistz = edgeStart->z - edgeStart->z;
 
 	edgedist = sqrtf(edgedistx * edgedistx + edgedistz * edgedistz);
 
@@ -111,20 +110,20 @@ float getSlideTimeToEdgeXZ(struct widthxz *circle, struct xz *edgeStart, struct 
 	}
 
 	sp90 = 1.0f / edgedist;
-	normalX = edgedistz * sp90;
+	sp88 = edgedistz * sp90;
 	sp8c = -edgedistx * sp90;
 
-	offsetX = circle->width * normalX;
+	sp84 = circle->width * sp88;
 	sp80 = circle->width * sp8c;
 
-	if (offsetX * (circle->x - edgeStart->x) + sp80 * (circle->z - edgeStart->z) < 0.0f) {
-		offsetX = -offsetX;
+	if (sp84 * (circle->x - edgeStart->x) + sp80 * (circle->z - edgeStart->z) < 0.0f) {
+		sp84 = -sp84;
 		sp80 = -sp80;
 	}
 
-	sp78 = edgeStart->x + offsetX;
+	sp78 = edgeStart->x + sp84;
 	sp7c = edgeStart->z + sp80;
-	sp70 = edgeStart->x + offsetX;
+	sp70 = edgeStart->x + sp84;
 	sp74 = edgeStart->z + sp80;
 
 	sp68 = (movement->z * sp78) - (sp7c * movement->x);
@@ -142,7 +141,7 @@ float getSlideTimeToEdgeXZ(struct widthxz *circle, struct xz *edgeStart, struct 
 		edgeStart = edgeStart;
 		edgeStart = tmp;
 
-		normalX = -normalX;
+		sp88 = -sp88;
 		sp8c = -sp8c;
 	}
 
@@ -159,14 +158,14 @@ handlezero:
 	} else if (sp6c < sp68) {
 		sp60 = rayIntersectCircleXZ(circle, &normmovevec, edgeStart);
 	} else {
-		startDist = normalX * (circle->x - edgeStart->x) + sp8c * (circle->z - edgeStart->z);
-		endDist = normalX * (circle->x + movement->x - edgeStart->x) + sp8c * (circle->z + movement->z - edgeStart->z);
+		sp58 = sp88 * (circle->x - edgeStart->x) + sp8c * (circle->z - edgeStart->z);
+		sp54 = sp88 * (circle->x + movement->x - edgeStart->x) + sp8c * (circle->z + movement->z - edgeStart->z);
 
-		if (startDist == endDist) {
+		if (sp58 == sp54) {
 			return 1.0f;
 		}
 
-		sp60 = (startDist - circle->width) * movementdist / (startDist - endDist);
+		sp60 = (sp58 - circle->width) * movementdist / (sp58 - sp54);
 	}
 
 	if (movementdist < sp60) {

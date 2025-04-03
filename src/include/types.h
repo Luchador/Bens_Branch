@@ -2,6 +2,7 @@
 #define _IN_TYPES_H
 #include <ultra64.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <PR/ultrasched.h>
 #include "n_libaudio.h"
 #include "constants.h"
@@ -11,6 +12,7 @@
 
 #define bool int
 
+#include <stdint.h>
 #define romptr_t uintptr_t
 
 typedef int PakErr1;
@@ -2040,21 +2042,21 @@ struct playerbond {
 	// unk00.x = look vector x (-1 to +1)
 	// unk00.y = always 0?
 	// unk00.z = look vector z (-1 to +1)
-	struct coord unk00;
+	/*0x0338 0x036c*/ struct coord unk00;
 
-	float radius; // always 30?
+	/*0x0344 0x0378*/ float radius; // always 30?
 
-	struct coord cameraPos;
+	/*0x0348 0x037c*/ struct coord unk10;
 
 	// unk1c.x = affected by both left/right and up/down looking
 	// unk1c.y = vertical look vector (-1 for down, 1 for up)
 	// unk1c.z = affected by both left/right and up/down looking
-	struct coord cameraForward;
+	/*0x0354 0x0388*/ struct coord unk1c;
 
 	// unk28.x = affected by both horiz and vertical angle
 	// unk28.y = 0 when looking up or down, .999 when looking horizontal
 	// unk28.z = pos.z
-	struct coord unk28;
+	/*0x0360 0x0394*/ struct coord unk28;
 };
 
 struct trackedprop {
@@ -2822,7 +2824,7 @@ struct path {
 };
 
 struct covercandidate {
-	uint64_t sqdist;
+	u64 sqdist;
 	int covernum;
 };
 
@@ -5509,8 +5511,8 @@ typedef struct {
 } AMAudioMgr;
 
 union audioparam {
-	int intparam;
-	float floatparam;
+	int s32;
+	float f32;
 };
 
 struct animationdefinition {
@@ -5611,6 +5613,7 @@ struct mp3vars {
 struct rdptask {
 	OSScTask sctask;
 	uint16_t *framebuffer;
+	uint32_t unk5c;
 };
 
 struct warpparams {

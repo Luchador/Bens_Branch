@@ -2124,7 +2124,7 @@ void sndTickNosedive(void)
 			if (lvIsPaused()) {
 				// Fade out volume during pause instead of stopping abruptly
 				if (g_SndNosediveVolume > 0) {
-					g_SndNosediveVolume -= g_Vars.diffframe240 * 80;
+					g_SndNosediveVolume -= g_Vars.diffframe240 * PALUP(80);
 
 					if (g_SndNosediveVolume < 0) {
 						g_SndNosediveVolume = 0;
@@ -2145,7 +2145,7 @@ void sndTickNosedive(void)
 
 				// Fade in over about 2 seconds
 				if (g_SndNosediveVolume < 20000) {
-					g_SndNosediveVolume += g_Vars.diffframe240 * 40;
+					g_SndNosediveVolume += g_Vars.diffframe240 * PALUP(40);
 
 					if (g_SndNosediveVolume > 20000) {
 						g_SndNosediveVolume = 20000;
@@ -2157,7 +2157,7 @@ void sndTickNosedive(void)
 		} else {
 			// Reached the configured fade out point
 			if (g_SndNosediveVolume > 0) {
-				g_SndNosediveVolume -= g_Vars.diffframe240 * 80;
+				g_SndNosediveVolume -= g_Vars.diffframe240 * PALUP(80);
 
 				if (g_SndNosediveVolume < 0) {
 					g_SndNosediveVolume = 0;
@@ -2208,7 +2208,7 @@ void sndTickUfo(void)
 			if (lvIsPaused()) {
 				// Fade out volume during pause instead of stopping abruptly
 				if (g_SndUfoVolume > 0) {
-					g_SndUfoVolume -= g_Vars.diffframe240 * 120;
+					g_SndUfoVolume -= g_Vars.diffframe240 * PALUP(120);
 
 					if (g_SndUfoVolume < 0) {
 						g_SndUfoVolume = 0;
@@ -2229,7 +2229,7 @@ void sndTickUfo(void)
 
 				// Fade in over about 2.4 seconds
 				if (g_SndUfoVolume < AL_VOL_FULL) {
-					g_SndUfoVolume += g_Vars.diffframe240 * 40;
+					g_SndUfoVolume += g_Vars.diffframe240 * PALUP(40);
 
 					if (g_SndUfoVolume > AL_VOL_FULL) {
 						g_SndUfoVolume = AL_VOL_FULL;
@@ -2241,7 +2241,7 @@ void sndTickUfo(void)
 		} else {
 			// Reached the configured fade out point
 			if (g_SndUfoVolume > 0) {
-				g_SndUfoVolume -= g_Vars.diffframe240 * 120;
+				g_SndUfoVolume -= g_Vars.diffframe240 * PALUP(120);
 
 				if (g_SndUfoVolume < 0) {
 					g_SndUfoVolume = 0;

@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include <math.h>
-#include <stdio.h>
 #include "constants.h"
 #include "game/dlights.h"
 #include "game/menuutils.h"
@@ -11,7 +10,6 @@
 #include "game/gfxmemory.h"
 #include "game/lang.h"
 #include "game/options.h"
-#include "game/utils.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/joy.h"
@@ -22,15 +20,17 @@
 #include "data.h"
 #include "types.h"
 #include "gbiex.h"
+#ifndef PLATFORM_N64
 #include "game/player.h"
 #include "video.h"
-#include "game/debug.h"
+#endif
 
 uint8_t g_IrScanlines[2][480];
 int g_NumActiveEffects = 0;
 uint8_t g_BlurChange = 0;
-bool g_MotionBlurActive = false;
+uint8_t var8007f848 = 0;
 int g_IrBinocularRadius = 90;
+int var8007f850 = 3;
 
 Gfx *bviewDrawIrRect(Gfx *gdl, int x1, int y1, int x2, int y2)
 {
@@ -127,19 +127,23 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, uint32_t colour, uint32_t alpha)
 	int viewheight = viGetViewHeight();
 	int viewwidth = viGetViewWidth();
 	int viewleft = viGetViewLeft();
-	int finalAlpha;
+	float somefloat;
+	int newalpha;
 	int i;
 
-	if (g_MotionBlurActive) {
+	if (var8007f848) {
 		return gdl;
 	}
 
-	g_MotionBlurActive = true;
+	var8007f848 = true;
 
-	finalAlpha = alpha;
+	newalpha = alpha;
+	newalpha += g_BlurChange;
 
 	// Reduced from 230 so it doesn't ruin the bloom and sharpen shaders in ReShade
-	finalAlpha = utilsClamp(alpha + g_BlurChange, 0, 100);
+	if (newalpha > 100) {
+		newalpha = 100;
+	}
 
 	g_BlurChange = 0;
 
@@ -147,18 +151,17 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, uint32_t colour, uint32_t alpha)
 		return gdl;
 	}
 
-	// Capture fb at the end of this frame
+	// capture fb at the end of this frame
 	g_BlurFbCapTimer = 0;
 
-	// Don't render first blur frame as we haven't captured the fb yet
+	// don't render first blur frame as we haven't captured the fb yet
 	if (g_BlurFbDirty) {
 		return gdl;
 	}
 
-	// Render fullscreen textured quad using the previous framebuffer (g_BlurFb) with motion blur alpha
 	gDPPipeSync(gdl++);
 
-	gdl = bviewPrepareStaticRgba16(gdl, colour, finalAlpha);
+	gdl = bviewPrepareStaticRgba16(gdl, colour, newalpha);
 
 	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_BlurFb);
 	gSPImageRectangleEXT(gdl++,
@@ -1565,6 +1568,11 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	return gdl;
 }
 
+void bview0f1572f8(void)
+{
+	// empty
+}
+
 uint8_t var8007f878 = 0;
 
 Gfx *bviewDrawNvLens(Gfx *gdl)
@@ -1630,6 +1638,14 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 	return gdl;
 }
 
+/**
+ * Night vision doesn't have binoculars.
+ */
+Gfx *bviewDrawNvBinoculars(Gfx *gdl)
+{
+	return gdl;
+}
+
 Gfx *bviewDrawIrLens(Gfx *gdl)
 {
 	int i;
@@ -1660,7 +1676,7 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 	viewcentrex = (viewleft + viewright) / 2;
 
 	outerradius = g_IrBinocularRadius;
-	innerradius = g_IrBinocularRadius / 3;
+	innerradius = g_IrBinocularRadius / var8007f850;
 
 	g_NumActiveEffects++;
 
@@ -1887,16 +1903,6 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	};
 
 	int turnangle = atan2f(-lookx, lookz) * 180.0f / M_PI;
-	int directionIndex = (turnangle + 22) / 45;
-	if(directionIndex > 8)
-	{
-		directionIndex = 8;
-	}
-	if(directionIndex < 0)
-	{
-		directionIndex = 0;
-	}
-
 	float fovy;
 	char arrows[12];
 	int tmplensheight = 130;
@@ -1922,8 +1928,6 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 		tmplensheight = viewheight - 30;
 	}
 
-	tmplensheight = utilsClampF(tmplensheight, 0, viewheight);
-
 	if (((int)(g_20SecIntervalFrac * 30.0f) & 1) == 1) {
 		sprintf(arrows, ">> ");
 	} else {
@@ -1942,7 +1946,7 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	gdl = textSetCCCustom02(gdl);
 
 	// Prepare text buffers
-	sprintf(directiontext, "%s %s:%03d", arrows, &directions[directionIndex], turnangle);
+	sprintf(directiontext, "%s %s:%03d", arrows, &directions[(turnangle + 22) / 45], turnangle);
 	sprintf(hertztext, "%s %s%s%4.2fh", arrows, "", "", menuGetCosOscFrac(4) * 4.6f + 917.4f);
 
 	fovy = viGetFovY();
@@ -2022,70 +2026,66 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	if (!videoFramebuffersSupported()) {
 		return gdl;
 	}
+	// make a copy of what we have drawn so far and use it as a texture
+	gDPFlushEXT(gdl++);
+	gDPCopyFramebufferEXT(gdl++, g_PrevFrameFb, 0, 0, 0, G_ON);
+	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_PrevFrameFb);
 
-	if(g_PrevFrameFb >= 0)
-	{
-		// make a copy of what we have drawn so far and use it as a texture
-		gDPFlushEXT(gdl++);
-		gDPCopyFramebufferEXT(gdl++, g_PrevFrameFb, 0, 0, 0, G_ON);
-		gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_PrevFrameFb);
-
-		// Iterate horizontal lines down the lens with a bit extra on top and bottom
-		for (liney = lenstop - 9; liney < lenstop + lensheight + vsplit + 9; liney++) {
-			if (liney < lenstop + lensheight && liney >= lenstop) {
-				// Inside the lens
-				if ((liney % 2) == 0) {
-					colour = 0x00ffffff;
-				} else {
-					colour = 0x7fffffff;
-				}
-
-				range = (liney - lenstop - lensheight * 0.5f) / (lensheight * 0.5f);
-
-				if (range < 0) {
-					range = -range;
-				}
-
-				if (range > 1) {
-					range = 0;
-				}
-
-				range = (range - 0.75f) * 4.0f;
-
-				if (range < 0) {
-					range = 0;
-				}
-
-				if (range > 0) {
-					colour = colourBlend(0x000000ff, colour, range * 255.0f);
-				}
+	// Iterate horizontal lines down the lens with a bit extra on top and bottom
+	for (liney = lenstop - 9; liney < lenstop + lensheight + vsplit + 9; liney++) {
+		if (liney < lenstop + lensheight && liney >= lenstop) {
+			// Inside the lens
+			if ((liney % 2) == 0) {
+				colour = 0x00ffffff;
 			} else {
-				// Outside of the lens
-				if ((liney % 2) == 0) {
-					colour = 0x007f7fff;
-				} else {
-					colour = 0x7fffffff;
-				}
+				colour = 0x7fffffff;
+			}
 
+			range = (liney - lenstop - lensheight * 0.5f) / (lensheight * 0.5f);
+
+			if (range < 0) {
+				range = -range;
+			}
+
+			if (range > 1) {
 				range = 0;
 			}
 
-			// Different coloured lines at 1/4 and 3/4 marks in the lens
-			if (liney == lenstop + lensheight / 4 || liney == lenstop + lensheight - lensheight / 4) {
-				colour = 0xffffffff;
+			range = (range - 0.75f) * 4.0f;
+
+			if (range < 0) {
+				range = 0;
 			}
 
-			gDPSetColor(gdl++, G_SETENVCOLOR, colour);
+			if (range > 0) {
+				colour = colourBlend(0x000000ff, colour, range * 255.0f);
+			}
+		} else {
+			// Outside of the lens
+			if ((liney % 2) == 0) {
+				colour = 0x007f7fff;
+			} else {
+				colour = 0x7fffffff;
+			}
 
-			const float xscale = RANDOMFRAC() * range + 1;
-			const float halfwidth = viewwidth / 2.f;
-			const int left = viewleft + halfwidth * (1.f - xscale);
-			const int right = viewleft + halfwidth * (1.f + xscale);
-			gSPImageRectangleEXT(gdl++,
-				left << 2, liney << 2, viewleft, liney,
-				right << 2, (liney + 1) << 2, viewleft + viewwidth, liney + 1,
-				0, videoGetNativeWidth(), videoGetNativeHeight());
+			range = 0;
 		}
+
+		// Different coloured lines at 1/4 and 3/4 marks in the lens
+		if (liney == lenstop + lensheight / 4 || liney == lenstop + lensheight - lensheight / 4) {
+			colour = 0xffffffff;
+		}
+
+		gDPSetColor(gdl++, G_SETENVCOLOR, colour);
+
+		const float xscale = RANDOMFRAC() * range + 1;
+		const float halfwidth = viewwidth / 2.f;
+		const int left = viewleft + halfwidth * (1.f - xscale);
+		const int right = viewleft + halfwidth * (1.f + xscale);
+		gSPImageRectangleEXT(gdl++,
+			left << 2, liney << 2, viewleft, liney,
+			right << 2, (liney + 1) << 2, viewleft + viewwidth, liney + 1,
+			0, videoGetNativeWidth(), videoGetNativeHeight());
 	}
 
 	return gdl;
@@ -2153,7 +2153,7 @@ Gfx *bviewDrawIrBinoculars(Gfx *gdl)
 void bviewSetMotionBlur(uint32_t bluramount)
 {
 	g_NumActiveEffects = 0;
-	g_MotionBlurActive = false;
+	var8007f848 = 0;
 	g_BlurChange = (bluramount << 1) / 3; // same as multiplying by 2/3
 }
 

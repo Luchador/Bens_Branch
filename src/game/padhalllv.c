@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/prop.h"
 #include "game/bg.h"
@@ -171,7 +170,7 @@ struct waypoint *waypointFindClosestToPos(struct coord *pos, RoomNum *rooms)
 					checkmore[i] = false;
 				} else if (cdresult == CDRESULT_COLLISION) {
 					checkmore[i] = true;
-					cdGetEdge(&sp250[i], &sp1d8[i]);
+					cdGetEdge(&sp250[i], &sp1d8[i], 441, "padhalllv.c");
 				} else {
 					closest = candwaypoints[i];
 					break;

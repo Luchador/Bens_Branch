@@ -18,7 +18,7 @@ Acmd *n_alFxPull(int sampleOffset, Acmd *p, int arg2)
 	int16_t *in_ptr, *out_ptr, *prev_out_ptr = 0;
 	ALDelay *d;
 	int sp58 = 1;
-	uint32_t j;
+	u32 j;
 
 	/*
 	 * pull channels going into this effect first
@@ -66,7 +66,7 @@ Acmd *n_alFxPull(int sampleOffset, Acmd *p, int arg2)
 			ptr = _n_loadOutputBuffer(r, d, j, buff2, ptr);
 
 			if (d->ffcoef) {
-				aMix(ptr++, 0, (uint16_t)d->ffcoef, buff1, buff2);
+				aMix(ptr++, 0, (u16)d->ffcoef, buff1, buff2);
 
 				if (!d->rs && !d->lp) {
 					ptr = _n_saveBuffer(r, j, out_ptr, buff2, ptr);
@@ -74,7 +74,7 @@ Acmd *n_alFxPull(int sampleOffset, Acmd *p, int arg2)
 			}
 
 			if (d->fbcoef) {
-				aMix(ptr++, 0, (uint16_t)d->fbcoef, buff2, buff1);
+				aMix(ptr++, 0, (u16)d->fbcoef, buff2, buff1);
 				ptr = _n_saveBuffer(r, j, in_ptr, buff1, ptr);
 			}
 
@@ -88,15 +88,15 @@ Acmd *n_alFxPull(int sampleOffset, Acmd *p, int arg2)
 
 			if (d->gain) {
 				if (var8009c344[arg2]) {
-					aMix(ptr++, 0, (uint16_t)d->gain, buff2, output);
+					aMix(ptr++, 0, (u16)d->gain, buff2, output);
 				} else {
-					uint32_t sp34 = d->gain * 1.4141999483109f;
+					u32 sp34 = d->gain * 1.4141999483109f;
 
 					if (sp34 > 0x7fff) {
 						sp34 = 0x7fff;
 					}
 
-					aMix(ptr++, 0, (uint16_t)sp34, buff2, output);
+					aMix(ptr++, 0, (u16)sp34, buff2, output);
 				}
 			}
 

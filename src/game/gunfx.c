@@ -6,12 +6,12 @@
 #include "game/weaponutils.h"
 #include "game/tex.h"
 #include "game/camera.h"
-#include "game/mtxutils.h"
 #include "game/debug.h"
 #include "game/gfxmemory.h"
 #include "game/file.h"
 #include "game/utils.h"
 #include "bss.h"
+#include "game/mtxutils.h"
 #include "lib/main.h"
 #include "lib/model.h"
 #include "lib/rng.h"
@@ -168,8 +168,8 @@ void beamCreateForHand(int handnum)
 }
 
 Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
-		float arg2, struct coord *headpos, uint32_t headcolour,
-		float arg5, struct coord *tailpos, uint32_t tailcolour)
+		float arg2, struct coord *headpos, u32 headcolour,
+		float arg5, struct coord *tailpos, u32 tailcolour)
 {
 	struct coord spe4;
 	float length;
@@ -182,6 +182,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	Mtxf *worldtoscreenmtx = camGetWorldToScreenMtxf();
 	struct coord sp74 = {0, 0, 0};
 	float mult;
+	u32 stack[2];
 	struct coord sp5c;
 
 	spe4.f[0] = tailpos->f[0] - headpos->f[0];
@@ -298,6 +299,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 
 Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 {
+	u32 stack;
 	Mtxf *sp188;
 	Mtxf sp148;
 
@@ -702,9 +704,9 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 	if (casing != NULL) {
 		struct coord spa4 = {0, 0, 0};
 		Mtxf sp64;
-		uint32_t magic = 0x15aca6;
-		uint32_t sp5c;
-		uint32_t sp4c;
+		u32 magic = 0x15aca6;
+		u32 sp5c;
+		u32 sp4c;
 		float newyspeed;
 		float f0;
 
@@ -1045,12 +1047,17 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	Mtxf sp124;
 	int i;
 
-	static uint32_t sp1 = 800;
+	static u32 sp1 = 800;
+#ifndef PLATFORM_N64
 	// laser fades out farther away
-	static uint32_t sp2 = 7000 * 3;
-	static uint32_t sp3 = 9000 * 3;
-	static uint32_t spb = 24;
-	static uint32_t spi = 6;
+	static u32 sp2 = 7000 * 3;
+	static u32 sp3 = 9000 * 3;
+#else
+	static u32 sp2 = 7000;
+	static u32 sp3 = 9000;
+#endif
+	static u32 spb = 24;
+	static u32 spi = 6;
 
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
@@ -1225,6 +1232,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 
 Gfx *lasersightRenderBeam(Gfx *gdl)
 {
+	u32 stack;
 	struct player *player = g_Vars.currentplayer;
 	Mtxf *mtx;
 	int i;

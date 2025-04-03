@@ -63,7 +63,7 @@ void modelmgrAllocateSlots(int numobjs, int numchrs)
 	int rwdata1sizetotal;
 	int rwdata3sizetotal;
 	int bindingssize;
-	uint8_t *ptr;
+	u8 *ptr;
 	int i;
 	int totalsize;
 	int modelssize;

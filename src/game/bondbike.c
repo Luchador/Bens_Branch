@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/bondbike.h"
 #include "game/bondmove.h"
@@ -52,7 +51,7 @@ void bbikeInit(void)
 	mtx4TransformVec(&matrix, &g_Vars.currentplayer->bondvehicleoffset, &g_Vars.currentplayer->bondenteraim);
 	mtx00016b58(&g_Vars.currentplayer->bondentermtx,
 			0, 0, 0,
-			-g_Vars.currentplayer->bond2.cameraForward.x, -g_Vars.currentplayer->bond2.cameraForward.y, -g_Vars.currentplayer->bond2.cameraForward.z,
+			-g_Vars.currentplayer->bond2.unk1c.x, -g_Vars.currentplayer->bond2.unk1c.y, -g_Vars.currentplayer->bond2.unk1c.z,
 			g_Vars.currentplayer->bond2.unk28.x, g_Vars.currentplayer->bond2.unk28.y, g_Vars.currentplayer->bond2.unk28.z);
 
 	g_Vars.currentplayer->speedtheta = 0;
@@ -256,7 +255,7 @@ void bbikeApplyMoveData(struct movedata *data)
 	// Sideways
 	if (data->digitalstepleft) {
 		float value2 = -1.0f - g_Vars.currentplayer->speedsideways;
-		float tmp = data->digitalstepleft * -0.1f;
+		float tmp = data->digitalstepleft * PALUPF(-0.1f);
 
 		if (value2 < tmp) {
 			value2 = tmp;
@@ -265,7 +264,7 @@ void bbikeApplyMoveData(struct movedata *data)
 		g_Vars.currentplayer->speedsideways += value2;
 	} else if (data->digitalstepright) {
 		float value2 = 1.0f - g_Vars.currentplayer->speedsideways;
-		float tmp = data->digitalstepright * 0.1f;
+		float tmp = data->digitalstepright * PALUPF(0.1f);
 
 		if (value2 > tmp) {
 			value2 = tmp;
@@ -325,7 +324,7 @@ void bbike0f0d2b40(struct defaultobj *bike, struct coord *arg1, float arg2, stru
 	struct coord sp60;
 	struct coord sp54;
 
-	cdGetEdge(&sp78, &sp6c);
+	cdGetEdge(&sp78, &sp6c, 333, "bondbike.c");
 
 	sp60.x = bike->prop->pos.x;
 	sp60.y = bike->prop->pos.y;
@@ -335,7 +334,7 @@ void bbike0f0d2b40(struct defaultobj *bike, struct coord *arg1, float arg2, stru
 	sp54.y = obstacle->prop->pos.y - bike->prop->pos.y;
 	sp54.z = obstacle->prop->pos.z - bike->prop->pos.z;
 
-	rayIntersectLineXZ(&sp78, &sp6c, &sp60, &sp54, &sp9c);
+	func0f02e3dc(&sp78, &sp6c, &sp60, &sp54, &sp9c);
 
 	sp90.x = arg1->f[0];
 	sp90.y = 0;
@@ -614,7 +613,7 @@ int bbike0f0d3680(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 	int result = bbikeCalculateNewPositionWithPush(arg0, 0);
 
 	if (!result) {
-		cdGetEdge(arg1, arg2);
+		cdGetEdge(arg1, arg2, 659, "bondbike.c");
 	}
 
 	return result;
@@ -638,7 +637,7 @@ int bbike0f0d36d4(struct coord *arg0, struct coord *arg1, struct coord *arg2, st
 		}
 
 		if (someint == 0) {
-			cdGetEdge(arg3, arg4);
+			cdGetEdge(arg3, arg4, 685, "bondbike.c");
 
 			if (arg3->f[0] != arg1->f[0]
 					|| arg3->f[1] != arg1->f[1]
@@ -973,9 +972,9 @@ void bbikeTick(void)
 		quaternionToMtx(sp84, &sp164);
 	}
 
-	g_Vars.currentplayer->bond2.cameraForward.x = sp164.m[2][0];
-	g_Vars.currentplayer->bond2.cameraForward.y = sp164.m[2][1];
-	g_Vars.currentplayer->bond2.cameraForward.z = sp164.m[2][2];
+	g_Vars.currentplayer->bond2.unk1c.x = sp164.m[2][0];
+	g_Vars.currentplayer->bond2.unk1c.y = sp164.m[2][1];
+	g_Vars.currentplayer->bond2.unk1c.z = sp164.m[2][2];
 	g_Vars.currentplayer->bond2.unk28.x = sp164.m[1][0];
 	g_Vars.currentplayer->bond2.unk28.y = sp164.m[1][1];
 	g_Vars.currentplayer->bond2.unk28.z = sp164.m[1][2];

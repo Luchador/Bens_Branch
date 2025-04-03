@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/dlights.h"
@@ -125,11 +124,11 @@ bool explosionCreateComplex(struct prop *prop, struct coord *pos, RoomNum *rooms
 float explosionGetHorizontalRangeAtFrame(struct explosion *exp, int frame)
 {
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
-	float changerate = type->changerateh;
+	float changerate = PALUPF(type->changerateh);
 	float result;
 
 	if (exp->type == EXPLOSIONTYPE_GASBARREL && frame > TICKS(32)) {
-		result = frame * 3.0f + 40.0f;
+		result = frame * PALUPF(3.0f) + 40.0f;
 
 		if (result > 300) {
 			result = 300;
@@ -144,7 +143,7 @@ float explosionGetHorizontalRangeAtFrame(struct explosion *exp, int frame)
 float explosionGetVerticalRangeAtFrame(struct explosion *exp, int frame)
 {
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
-	float changerate = type->changeratev;
+	float changerate = PALUPF(type->changeratev);
 	float result;
 
 	if (exp->type == EXPLOSIONTYPE_GASBARREL && frame > TICKS(32)) {
@@ -513,10 +512,10 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 	return exp != NULL;
 }
 
-void explosionsUpdateShake(struct coord *cameraPos, struct coord *cameraForward)
+void explosionsUpdateShake(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 {
-	float rotatedX;
-	float rotatedZ;
+	float sp54;
+	float sp50;
 	int i;
 	float intensity;
 
@@ -525,20 +524,18 @@ void explosionsUpdateShake(struct coord *cameraPos, struct coord *cameraForward)
 		return;
 	}
 
-	// Rotate the camera forward vector by 0.8 radians
-	rotatedX = cosf(0.8f) * cameraForward->f[0] - sinf(0.8f) * cameraForward->f[2];
-	rotatedZ = sinf(0.8f) * cameraForward->f[0] + cosf(0.8f) * cameraForward->f[2];
+	sp54 = cosf(0.8f) * arg1->f[0] - sinf(0.8f) * arg1->f[2];
+	sp50 = sinf(0.8f) * arg1->f[0] + cosf(0.8f) * arg1->f[2];
 
 	intensity = 0.0f;
 
-	// Loop through explosions to compute total shake intensity
 	for (i = 0; i < g_MaxExplosions; i++) {
 		struct prop *prop = g_Explosions[i].prop;
 
 		if (prop) {
-			float xdiff = prop->pos.x - cameraPos->x;
-			float ydiff = prop->pos.y - cameraPos->y;
-			float zdiff = prop->pos.z - cameraPos->z;
+			float xdiff = prop->pos.x - arg0->x;
+			float ydiff = prop->pos.y - arg0->y;
+			float zdiff = prop->pos.z - arg0->z;
 
 			float dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 			float mult;
@@ -553,7 +550,6 @@ void explosionsUpdateShake(struct coord *cameraPos, struct coord *cameraForward)
 		}
 	}
 
-	// Add extra shake intensity if needed
 	if (g_ExplosionShakeIntensityTimer > 0) {
 		g_ExplosionShakeIntensityTimer--;
 		intensity++;
@@ -561,10 +557,15 @@ void explosionsUpdateShake(struct coord *cameraPos, struct coord *cameraForward)
 
 	g_ExplosionShakeTotalTimer--;
 
-	// Alternate Y-axis shake direction every other frame
 	if (g_ExplosionShakeTotalTimer & 2) {
+		arg2->y = intensity;
 		intensity = -intensity;
+	} else {
+		arg2->y = -intensity;
 	}
+
+	arg2->x = intensity * sp54;
+	arg2->z = intensity * sp50;
 
 	viShake(g_ExplosionShakeTotalTimer * intensity);
 }
@@ -944,7 +945,7 @@ void explosionInflictDamage(struct prop *expprop)
 	}
 }
 
-uint32_t explosionTick(struct prop *prop)
+u32 explosionTick(struct prop *prop)
 {
 	struct explosion *exp = prop->explosion;
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
@@ -1173,7 +1174,7 @@ uint32_t explosionTick(struct prop *prop)
 	return TICKOP_NONE;
 }
 
-uint32_t explosionTickPlayer(struct prop *prop)
+u32 explosionTickPlayer(struct prop *prop)
 {
 	Mtxf *matrix = camGetWorldToScreenMtxf();
 
@@ -1237,9 +1238,9 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		if (USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) {
 			colours[0].word = 0xffffffff;
 		} else if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
-			uint32_t alpha = 0x80;
-			uint32_t red;
-			uint32_t green;
+			u32 alpha = 0x80;
+			u32 red;
+			u32 green;
 			float expdist = sqrtf(ERASERSQDIST(prop->pos.f));
 
 			if (g_Vars.currentplayer->eraserpropdist < expdist) {
@@ -1261,7 +1262,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 			colours[0].word = PD_BE32(red << 24 | green << 16 | alpha | 0x80800000);
 		} else {
-			static uint32_t var8007e93c = 0xffffffff;
+			static u32 var8007e93c = 0xffffffff;
 			colours[0].word = 0xffffffff;
 			colours[0].word = var8007e93c;
 		}

@@ -1,6 +1,4 @@
 #include <ultra64.h>
-#include <stdio.h>
-#include <string.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/objectives.h"
@@ -20,6 +18,7 @@
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/main.h"
+#include "string.h"
 #include "data.h"
 #include "types.h"
 #include "input.h"
@@ -32,6 +31,8 @@ int g_ScissorX2 = 0;
 int g_ScissorY1 = 0;
 int g_ScissorY2 = 0;
 
+int var800711a0 = 0;
+int var800711a4 = 0;
 int g_LineHeight = LINEHEIGHT;
 
 int8_t g_KeyboardKeys[5][10] = {
@@ -781,7 +782,7 @@ void menuitemDropdownInit(struct menuitem *item, union menuitemdata *data)
 	item->handler(MENUOP_GETSELECTEDINDEX, item, &handlerdata);
 
 	if (handlerdata.dropdown.value < 0xffff) {
-		data->dropdown.list.index = (uint16_t) handlerdata.dropdown.value;
+		data->dropdown.list.index = (u16) handlerdata.dropdown.value;
 	} else {
 		// The value won't fit in unk02.
 		// Maybe MENUOP_25 is getting a scaled-down value?
@@ -1179,7 +1180,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 			y = context->y + row * 11 + 15;
 
 			if (row == 4) {
-				uint16_t labels[] = {
+				u16 labels[] = {
 					L_OPTIONS_314, // "DEL"
 					L_OPTIONS_315, // "CAPS"
 					L_OPTIONS_316, // "CANCEL"
@@ -3193,7 +3194,7 @@ bool menuitemMarqueeTick(struct menuitem *item, union menuitemdata *data)
 	struct fontchar *font1;
 	struct font *font2;
 	int increment;
-	uint16_t texthash = 0;
+	u16 texthash = 0;
 	char *text = menuResolveParam2Text(item);
 	int limit;
 
@@ -3877,7 +3878,7 @@ Gfx *menuitemControllerRenderLines(Gfx *gdl, struct menurendercontext *context, 
 }
 
 // These are the action names, like "AIM", and "LOOK UP"
-uint16_t var80071354[][9] = {
+u16 var80071354[][9] = {
 	/*0*/  { L_MPWEAPONS_194, L_MPWEAPONS_196, L_MPWEAPONS_202, L_MPWEAPONS_197, L_MPWEAPONS_203, L_MPWEAPONS_204, L_MPWEAPONS_206, L_MPWEAPONS_205, L_MPWEAPONS_210 },
 	/*1*/  { L_MPWEAPONS_194, L_MPWEAPONS_200, L_MPWEAPONS_202, L_MPWEAPONS_201, L_MPWEAPONS_203, L_MPWEAPONS_204, L_MPWEAPONS_207, L_MPWEAPONS_205, L_MPWEAPONS_210 },
 	/*2*/  { L_MPWEAPONS_203, L_MPWEAPONS_196, L_MPWEAPONS_202, L_MPWEAPONS_197, L_MPWEAPONS_205, L_MPWEAPONS_204, L_MPWEAPONS_206, L_MPWEAPONS_194, L_MPWEAPONS_210 },
@@ -3892,7 +3893,7 @@ uint16_t var80071354[][9] = {
 	/*11*/ { L_OPTIONS_003,   L_OPTIONS_003,   L_MPWEAPONS_212, L_OPTIONS_003,   L_MPWEAPONS_203, L_MPWEAPONS_204, L_MPWEAPONS_208, L_MPWEAPONS_205, L_OPTIONS_003   },
 };
 
-uint16_t menuitemControllerGetButtonAction(int mode, int buttonnum)
+u16 menuitemControllerGetButtonAction(int mode, int buttonnum)
 {
 	uint32_t textid = var80071354[mode][buttonnum];
 
@@ -3923,14 +3924,14 @@ uint16_t menuitemControllerGetButtonAction(int mode, int buttonnum)
  * Note that the valuecolour argument is mostly unused - only the alpha channel
  * is used because the rest is bitwise or'ed to white.
  */
-Gfx *menuitemControllerRenderText(Gfx *gdl, int curmode, struct menurendercontext *context, int padx, int pady, uint32_t valuecolour, uint32_t labelcolour, int8_t prevmode)
+Gfx *menuitemControllerRenderText(Gfx *gdl, int curmode, struct menurendercontext *context, int padx, int pady, uint32_t valuecolour, uint32_t labelcolour, s8 prevmode)
 {
 	int rx;
 	int ry;
-	uint16_t textnum;
+	u16 textnum;
 	uint32_t colour;
 
-	uint16_t labels[] = {
+	u16 labels[] = {
 		/*0*/ L_MPWEAPONS_185, // "L/R BUTTONS:"
 		/*1*/ L_MPWEAPONS_186, // "UP C BUTTON:"
 		/*2*/ L_MPWEAPONS_187, // "LEFT/RIGHT C BUTTONS:"
@@ -3995,7 +3996,7 @@ Gfx *menuitemControllerRenderText(Gfx *gdl, int curmode, struct menurendercontex
 	return text0f153780(gdl);
 }
 
-Gfx *menuitemControllerRenderPad(Gfx *gdl, struct menurendercontext *context, int padx, int pady, int curmode, uint32_t alpha, uint32_t colour1, uint32_t colour2, int8_t prevmode)
+Gfx *menuitemControllerRenderPad(Gfx *gdl, struct menurendercontext *context, int padx, int pady, int curmode, uint32_t alpha, uint32_t colour1, uint32_t colour2, s8 prevmode)
 {
 	int rx = context->x + padx;
 	int ry = context->y + pady + 4;

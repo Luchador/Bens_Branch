@@ -15,11 +15,11 @@ struct admaitem {
 	uintptr_t startaddr;
 
 	int lastframe;
-	uint8_t *ptr;
+	u8 *ptr;
 };
 
 struct admastate {
-	uint8_t initialised;
+	u8 initialised;
 	struct admaitem *firstused;
 	struct admaitem *firstfree;
 };
@@ -28,7 +28,7 @@ int g_AdmaNumItemsThisFrame = 0;
 
 struct admastate g_AdmaState;
 struct admaitem g_AdmaItems[ADMA_MAX_ITEMS];
-uint32_t g_AdmaCurFrame;
+u32 g_AdmaCurFrame;
 
 /**
  * This routine handles the DMA'ing of samples from ROM to RAM. First it checks

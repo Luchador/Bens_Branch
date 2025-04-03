@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include <math.h>
-#include <string.h>
 #include "constants.h"
 #include "game/debug.h"
 #include "game/dlights.h"
@@ -1007,7 +1006,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 				|| stagenum == g_Stages[STAGEINDEX_MBR].id
 				|| stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id)) {
 		gdl = envStopFog(gdl);
-		gdl = viSetupSkyProjection(gdl);
+		gdl = vi0000ab78(gdl);
 
 		roomnum = -1;
 
@@ -1041,7 +1040,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 			gdl = envStopFog(gdl);
 			gdl = starsRender(gdl);
 			gdl = text0f153780(gdl);
-			gdl = viSetupSkyProjection(gdl);
+			gdl = vi0000ab78(gdl);
 		}
 
 		if (roomnum != -1) {
@@ -1870,7 +1869,7 @@ Gfx *bgRender(Gfx *gdl)
 	gdl = bgScissorToViewport(gdl);
 	gdl = envStopFog(gdl);
 
-	gSPMatrix(gdl++, g_CameraPerspectiveMtxF, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, var80092870, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	gdl = playerLoadMatrix(gdl);
 
@@ -2262,7 +2261,7 @@ uint32_t bgInflate(uint8_t *src, uint8_t *dst, uint32_t len)
 		result = rzipInflate(src, dst, &scratch);
 	} else {
 		result = len;
-		memcpy(dst, src, len);
+		bcopy(src, dst, len);
 	}
 
 	return result;
@@ -3310,7 +3309,7 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 
 						if (!(arg0->y < min.y && arg1->y < min.y) && !(arg0->y > max.y && arg1->y > max.y)) {
 							if (bgTestLineIntersectsBbox(arg0, arg2, &min, &max)
-									&& utilsRayIntersectsTriangleF(point1, point2, point3, NULL, arg0, arg1, arg2, &sp8c, &sp80)) {
+									&& func0002f560(point1, point2, point3, NULL, arg0, arg1, arg2, &sp8c, &sp80)) {
 								tmp = sp8c.x - arg0->x;
 								sqdist = tmp * tmp;
 
@@ -3594,7 +3593,7 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 
 						if (!(arg1->y < min.y && arg2->y < min.y) && !(arg1->y > max.y && arg2->y > max.y)) {
 							if (bgTestLineIntersectsBbox(arg1, arg3, &min, &max)
-									&& utilsRayIntersectsTriangleF(point1, point2, point3, NULL, arg1, arg2, arg3, &sp84, &sp78)) {
+									&& func0002f560(point1, point2, point3, NULL, arg1, arg2, arg3, &sp84, &sp78)) {
 								tmp = sp84.x - arg1->x;
 								sqdist = tmp * tmp;
 
@@ -3797,7 +3796,7 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 
 								if (!(arg0->y > max.y && arg1->y > max.y)) {
 									if (bgTestLineIntersectsBbox(arg0, arg2, &min, &max)
-											&& utilsRayIntersectsTriangleF(point1, point2, point3, NULL, arg0, arg1, arg2, &spb0, &spa4)) {
+											&& func0002f560(point1, point2, point3, NULL, arg0, arg1, arg2, &spb0, &spa4)) {
 										float tmp;
 
 										tmp = spb0.x - arg0->x;

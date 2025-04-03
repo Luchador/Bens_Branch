@@ -281,7 +281,7 @@ void pacTick(void)
 		{
 			data->age240 += g_Vars.lvupdate240;
 
-			if (data->age240 > (uint32_t)TICKS(240 * 60)) {
+			if (data->age240 > (u32)TICKS(240 * 60)) {
 				data->age240 = 0;
 				data->survivalcounts[data->victims[data->victimindex]]++;
 				scenarioCreateHudmsg(data->victims[data->victimindex], langGet(L_MPWEAPONS_007)); // "Have a point for living!"
@@ -393,7 +393,7 @@ bool pacRadarChr(Gfx **gdl, struct prop *prop)
 			dist.z = prop->pos.z - g_Vars.currentplayer->prop->pos.z;
 
 			if (g_MpSetup.options & MPOPTION_TEAMSENABLED) {
-				uint32_t colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
+				u32 colour = g_TeamColours[radarGetTeamIndex(prop->chr->team)];
 				*gdl = radarDrawDot(*gdl, vprop, &dist, colour, 0, 1);
 			} else {
 				*gdl = radarDrawDot(*gdl, vprop, &dist, 0x00ff0000, 0, 1);

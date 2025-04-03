@@ -1,5 +1,6 @@
 #ifndef IN_GAME_SETUP_H
 #define IN_GAME_SETUP_H
+#include <ultra64.h>
 #include "data.h"
 #include "types.h"
 
@@ -15,7 +16,7 @@ void setupCreateConditionalScenery(struct linksceneryobj *link);
 void setupCreateBlockedPath(struct blockedpathobj *link);
 void setupResetTVScreens(void);
 void setupResetProxyMines(void);
-int setupCountCommandType(uint32_t type);
+int setupCountCommandType(u32 type);
 void setupCreateObject(struct defaultobj *obj, int cmdindex);
 void setupPlaceWeapon(struct weaponobj *weapon, int cmdindex);
 //void setupCreateHat(struct hatobj *hat, int cmdindex);
@@ -30,7 +31,7 @@ int setupGetPortalByPad(int padnum);
 int setupGetPortalByDoorPad(int padnum);
 void setupCreateDoor(struct doorobj *door, int cmdindex);
 void setupCreateHov(struct defaultobj *obj, struct hov *hov);
-void setupLoadBriefing(int stagenum, uint8_t *buffer, int bufferlen, struct briefing *briefing);
+void setupLoadBriefing(int stagenum, u8 *buffer, int bufferlen, struct briefing *briefing);
 void setupLoadFiles(int stagenum);
 void setupCreateProps(int stagenum);
 

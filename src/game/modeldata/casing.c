@@ -3,7 +3,7 @@
 #include "data.h"
 #include "types.h"
 
-uint8_t g_SkelCasingJoints[][2] = {
+u8 g_SkelCasingJoints[][2] = {
 	{ 0, 0 },
 };
 

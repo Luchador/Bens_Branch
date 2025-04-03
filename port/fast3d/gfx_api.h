@@ -1,7 +1,11 @@
 #ifndef GFX_API_H
 #define GFX_API_H
 
+#ifndef __cplusplus
 #include <stdint.h>
+#include <stdbool.h>
+#endif
+
 #include "gfx_rendering_api.h"
 #include "gfx_window_manager_api.h"
 

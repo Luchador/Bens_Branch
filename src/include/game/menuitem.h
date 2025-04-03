@@ -73,9 +73,9 @@ void menuitemPlayerStatsInit(struct menuitem *item, union menuitemdata *data);
 Gfx *menuitemControllerRenderLine(Gfx *gdl, int speed, int x1, int y1, int x2, int y2);
 Gfx *menuitemControllerRenderTexture(Gfx *gdl, int x, int y, int texturenum, uint32_t alpha);
 Gfx *menuitemControllerRenderLines(Gfx *gdl, struct menurendercontext *context, int firstindex, int lastindex, int padx, int pady, uint32_t alpha);
-uint16_t menuitemControllerGetButtonAction(int mode, int buttonnum);
+u16 menuitemControllerGetButtonAction(int mode, int buttonnum);
 Gfx *menuitemControllerRenderText(Gfx *gdl, int curmode, struct menurendercontext *context, int padx, int pady, uint32_t valuecolour, uint32_t labelcolour, int8_t prevmode);
-Gfx *menuitemControllerRenderPad(Gfx *gdl, struct menurendercontext *context, int padx, int pady, int curmode, uint32_t alpha, uint32_t colour1, uint32_t colour2, int8_t prevmode);
+Gfx *menuitemControllerRenderPad(Gfx *gdl, struct menurendercontext *context, int padx, int pady, int curmode, uint32_t alpha, uint32_t colour1, uint32_t colour2, s8 prevmode);
 Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context);
 void menuitemControllerInit(union menuitemdata *data);
 

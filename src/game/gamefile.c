@@ -301,7 +301,7 @@ int gamefileLoad(int device)
 	return -1;
 }
 
-int gamefileSave(int device, int fileid, uint16_t deviceserial)
+int gamefileSave(int device, int fileid, u16 deviceserial)
 {
 	uint32_t value;
 	int newfileid;

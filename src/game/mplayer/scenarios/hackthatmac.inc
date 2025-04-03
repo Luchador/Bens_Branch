@@ -167,7 +167,7 @@ int htmNumProps(void)
 	return HTM_NUM_TERMINALS + 1;
 }
 
-void htmAddPad(int16_t padnum)
+void htmAddPad(s16 padnum)
 {
 	struct scenariodata_htm *data = &g_ScenarioData.htm;
 
@@ -500,7 +500,7 @@ void htmTickChr(struct chrdata *chr)
 
 		rangexz = sqrtf(dist.x * dist.x + dist.z * dist.z);
 
-		rangey = fabsf(dist.y);
+		rangey = ABS(dist.y);
 
 		relangle = atan2f(dist.x, dist.z) * 57.295776367188f + angle;
 

@@ -1,3 +1,4 @@
+#include <PR/ultratypes.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <SDL.h>

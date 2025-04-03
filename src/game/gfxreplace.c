@@ -308,7 +308,7 @@ void gfxReplaceGbiCommands(Gfx *startgdl, Gfx *endgdl, int type)
 
 	Gfx *gdl = startgdl;
 
-	while ((endgdl && gdl < endgdl) || (!endgdl && (int8_t)gdl->bytes[GFX_W0_BYTE(0)] != G_ENDDL)) {
+	while ((endgdl && gdl < endgdl) || (!endgdl && (s8)gdl->bytes[GFX_W0_BYTE(0)] != G_ENDDL)) {
 		Gfx *src = groups[type];
 
 		while (src->words.w0 != 0) {

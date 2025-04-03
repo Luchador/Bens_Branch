@@ -1,7 +1,5 @@
 #include <ultra64.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 #include "constants.h"
 #include "game/bossfile.h"
 #include "game/cheats.h"
@@ -30,6 +28,7 @@
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/main.h"
+#include "string.h"
 #include "data.h"
 #include "types.h"
 
@@ -1256,7 +1255,7 @@ void endscreenPrepare(void)
 	uint32_t secs;
 	int timedalreadyunlocked;
 	int complalreadyunlocked;
-	uint16_t prevbest;
+	u16 prevbest;
 	bool nowunlocked;
 
 	g_Menus[g_MpPlayerNum].endscreen.stageindex = g_MissionConfig.stageindex;
@@ -1396,7 +1395,7 @@ void endscreenPrepare(void)
 
 				if (g_MissionConfig.stagenum == STAGE_SKEDARRUINS && g_AltTitleUnlocked == false) {
 					g_AltTitleUnlocked = true;
-					*(int8_t *)&g_AltTitleEnabled = true;
+					*(s8 *)&g_AltTitleEnabled = true;
 					bossfileSave();
 				}
 			}

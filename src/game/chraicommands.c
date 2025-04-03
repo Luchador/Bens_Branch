@@ -736,7 +736,7 @@ bool ai0019(void)
 
 	if (chr && chr->prop) {
 		float damage = gsetGetDamage((struct gset *)&cmd[4]);
-		chrDamageByImpact(chr, damage, &pos, (struct gset *)&cmd[4], NULL, (int8_t)cmd[3]);
+		chrDamageByImpact(chr, damage, &pos, (struct gset *)&cmd[4], NULL, (s8)cmd[3]);
 	}
 
 	g_Vars.aioffset += 8;
@@ -770,7 +770,7 @@ bool aiChrDamageChr(void)
 			utilsNormalizeF(&vector.x, &vector.y, &vector.z);
 			weapon = prop->weapon;
 			damage = gsetGetDamage(&weapon->gset);
-			chrDamageByImpact(chr2, damage, &vector, &weapon->gset, chr1->prop, (int8_t)cmd[4]);
+			chrDamageByImpact(chr2, damage, &vector, &weapon->gset, chr1->prop, (s8)cmd[4]);
 		}
 	}
 
@@ -3117,7 +3117,7 @@ bool aiSetShield(void)
  */
 bool aiSetReactionSpeed(void)
 {
-	int8_t *cmd = (int8_t *)g_Vars.ailist + g_Vars.aioffset;
+	s8 *cmd = (s8 *)g_Vars.ailist + g_Vars.aioffset;
 
 	g_Vars.chrdata->speedrating = cmd[2];
 	g_Vars.aioffset += 3;
@@ -3130,7 +3130,7 @@ bool aiSetReactionSpeed(void)
  */
 bool aiSetRecoverySpeed(void)
 {
-	int8_t *cmd = (int8_t *)g_Vars.ailist + g_Vars.aioffset;
+	s8 *cmd = (s8 *)g_Vars.ailist + g_Vars.aioffset;
 
 	g_Vars.chrdata->arghrating = cmd[2];
 	g_Vars.aioffset += 3;
@@ -3143,7 +3143,7 @@ bool aiSetRecoverySpeed(void)
  */
 bool aiSetAccuracy(void)
 {
-	int8_t *cmd = (int8_t *)g_Vars.ailist + g_Vars.aioffset;
+	s8 *cmd = (s8 *)g_Vars.ailist + g_Vars.aioffset;
 
 	g_Vars.chrdata->accuracyrating = cmd[2];
 	g_Vars.aioffset += 3;
@@ -3156,7 +3156,7 @@ bool aiSetAccuracy(void)
  */
 bool aiSetDodgeRating(void)
 {
-	int8_t *cmd = (int8_t *)g_Vars.ailist + g_Vars.aioffset;
+	s8 *cmd = (s8 *)g_Vars.ailist + g_Vars.aioffset;
 
 	if (cmd[2] == 0) {
 		g_Vars.chrdata->dodgerating = cmd[3];
@@ -3177,7 +3177,7 @@ bool aiSetDodgeRating(void)
  */
 bool aiSetUnarmedDodgeRating(void)
 {
-	int8_t *cmd = (int8_t *)g_Vars.ailist + g_Vars.aioffset;
+	s8 *cmd = (s8 *)g_Vars.ailist + g_Vars.aioffset;
 
 	g_Vars.chrdata->unarmeddodgerating = cmd[2];
 	g_Vars.aioffset += 3;
@@ -3986,7 +3986,7 @@ bool aiSpawnChrAtPad(void)
 
 	if (spawnflags);
 
-	if (chrSpawnAtPad(g_Vars.chrdata, cmd->b2, (int8_t)cmd->b3, pad, ailist, spawnflags)) {
+	if (chrSpawnAtPad(g_Vars.chrdata, cmd->b2, (s8)cmd->b3, pad, ailist, spawnflags)) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd->b12);
 	} else {
 		g_Vars.aioffset += 13;
@@ -4005,7 +4005,7 @@ bool aiSpawnChrAtChr(void)
 	uint16_t ailistid = cmd[6] | (cmd[5] << 8);
 	uint8_t *ailist = ailistFindById(ailistid);
 
-	if (chrSpawnAtChr(g_Vars.chrdata, cmd[2], (int8_t)cmd[3], cmd[4], ailist, spawnflags)) {
+	if (chrSpawnAtChr(g_Vars.chrdata, cmd[2], (s8)cmd[3], cmd[4], ailist, spawnflags)) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[11]);
 	} else {
 		g_Vars.aioffset += 12;
@@ -4342,9 +4342,9 @@ bool aiSpeak(void)
 	}
 
 	if (cmd[2] == CHR_P1P2) {
-		channelnum = psPlayFromProp((int8_t)cmd[7], audio_id, 0, g_Vars.chrdata->prop, PSTYPE_NONE, PSFLAG_FORHUDMSG);
+		channelnum = psPlayFromProp((s8)cmd[7], audio_id, 0, g_Vars.chrdata->prop, PSTYPE_NONE, PSFLAG_FORHUDMSG);
 	} else {
-		channelnum = psPlayFromProp((int8_t)cmd[7], audio_id, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, PSFLAG_FORHUDMSG);
+		channelnum = psPlayFromProp((s8)cmd[7], audio_id, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, PSFLAG_FORHUDMSG);
 	}
 
 	if (text && !sndIsFiltered(audio_id)) {
@@ -4366,7 +4366,7 @@ bool aiPlaySound(void)
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	int16_t audio_id = cmd[3] | (cmd[2] << 8);
 
-	psPlayFromProp((int8_t)cmd[4], audio_id, 0, NULL, PSTYPE_NONE, 0);
+	psPlayFromProp((s8)cmd[4], audio_id, 0, NULL, PSTYPE_NONE, 0);
 
 	g_Vars.aioffset += 5;
 
@@ -4381,7 +4381,7 @@ bool aiAssignSound(void)
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	int16_t audio_id = cmd[3] | (cmd[2] << 8);
 
-	psPlayFromProp((int8_t)cmd[4], audio_id, -1, NULL, PSTYPE_MARKER, 0);
+	psPlayFromProp((s8)cmd[4], audio_id, -1, NULL, PSTYPE_MARKER, 0);
 
 	g_Vars.aioffset += 5;
 
@@ -4394,7 +4394,7 @@ bool aiAssignSound(void)
 bool aiAudioMuteChannel(void)
 {
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
-	int8_t channel = (int8_t)cmd[2];
+	s8 channel = (s8)cmd[2];
 
 	psMuteChannel(channel);
 	g_Vars.aioffset += 3;
@@ -4408,7 +4408,7 @@ bool aiAudioMuteChannel(void)
 bool aiIfChannelFree(void)
 {
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
-	int8_t channel = (int8_t) cmd[2];
+	s8 channel = (s8) cmd[2];
 
 	if (psIsChannelFree(channel)) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[3]);
@@ -4428,7 +4428,7 @@ bool aiSetObjectSoundVolume(void)
 	int16_t volume = cmd[4] | (cmd[3] << 8);
 	uint16_t volchangetimer60 = cmd[6] | (cmd[5] << 8);
 
-	psModify((int8_t)cmd[2], volume, -1, NULL, volchangetimer60, 2500, 3000, 0);
+	psModify((s8)cmd[2], volume, -1, NULL, volchangetimer60, 2500, 3000, 0);
 
 	g_Vars.aioffset += 7;
 
@@ -4445,7 +4445,7 @@ bool aiSetObjectSoundVolumeByDistance(void)
 	uint16_t volchangetimer60 = cmd[6] | (cmd[5] << 8);
 	int volume = psCalculateVolumeFromDistance(playerdist, 400, 2500, 3000, AL_VOL_FULL);
 
-	psModify((int8_t)cmd[2], volume, -1, NULL, volchangetimer60, 2500, 3000, 0);
+	psModify((s8)cmd[2], volume, -1, NULL, volchangetimer60, 2500, 3000, 0);
 
 	g_Vars.aioffset += 7;
 
@@ -4462,7 +4462,7 @@ bool aiSetObjectSoundPlaying(void)
 	uint16_t volchangetimer60 = cmd[5] | (cmd[4] << 8);
 
 	if (obj && obj->prop) {
-		psModify((int8_t)cmd[2], -1, -1, obj->prop, volchangetimer60, 2500, 3000, 0);
+		psModify((s8)cmd[2], -1, -1, obj->prop, volchangetimer60, 2500, 3000, 0);
 	}
 
 	g_Vars.aioffset += 6;
@@ -4490,7 +4490,7 @@ bool aiPlayRepeatingSoundFromObject(void)
 			volchangetimer60 = thing1;
 		}
 
-		psModify((int8_t)cmd[2], -1, -1, obj->prop, volchangetimer60, dist2, dist3, PSFLAG_REPEATING);
+		psModify((s8)cmd[2], -1, -1, obj->prop, volchangetimer60, dist2, dist3, PSFLAG_REPEATING);
 	}
 
 	g_Vars.aioffset += 10;
@@ -4512,13 +4512,13 @@ bool aiPlaySoundFromEntity(void)
 		struct defaultobj *obj = objFindByTagId(cmd[3]);
 
 		if (obj && obj->prop) {
-			psModify((int8_t)cmd[2], -1, -1, obj->prop, volchangetimer60, dist2, dist3, 0);
+			psModify((s8)cmd[2], -1, -1, obj->prop, volchangetimer60, dist2, dist3, 0);
 		}
 	} else {
 		struct chrdata *chr = chrFindById(g_Vars.chrdata, cmd[3]);
 
 		if (chr && chr->prop) {
-			psModify((int8_t)cmd[2], -1, -1, chr->prop, volchangetimer60, dist2, dist3, 0);
+			psModify((s8)cmd[2], -1, -1, chr->prop, volchangetimer60, dist2, dist3, 0);
 		}
 	}
 
@@ -4551,7 +4551,7 @@ bool aiIfObjectSoundVolumeLessThan(void)
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	int16_t value = cmd[4] | (cmd[3] << 8);
 
-	if (psGetVolume((int8_t)cmd[2]) < value) {
+	if (psGetVolume((s8)cmd[2]) < value) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[5]);
 	} else {
 		g_Vars.aioffset += 6;
@@ -5233,7 +5233,7 @@ bool aiIfNumPlayersLessThan(void)
 {
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 
-	if ((int8_t)cmd[2] > PLAYERCOUNT()) {
+	if ((s8)cmd[2] > PLAYERCOUNT()) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[3]);
 	} else {
 		g_Vars.aioffset += 4;
@@ -5256,7 +5256,7 @@ bool aiIfChrAmmoQuantityLessThan(void)
 		uint32_t playernum = playermgrGetPlayerNumByProp(chr->prop);
 		setCurrentPlayerNum(playernum);
 
-		if (bgunGetAmmoCount((int8_t)cmd[3]) < (int8_t)cmd[4]) {
+		if (bgunGetAmmoCount((s8)cmd[3]) < (s8)cmd[4]) {
 			passes = true;
 		}
 
@@ -5284,7 +5284,7 @@ bool aiChrDrawWeapon(void)
 		uint32_t prevplayernum = g_Vars.currentplayernum;
 		uint32_t playernum = playermgrGetPlayerNumByProp(chr->prop);
 		setCurrentPlayerNum(playernum);
-		bgunEquipWeapon2(0, (int8_t)cmd[3]);
+		bgunEquipWeapon2(0, (s8)cmd[3]);
 		bgunEquipWeapon2(1, 0);
 		setCurrentPlayerNum(prevplayernum);
 	}
@@ -5306,7 +5306,7 @@ bool aiChrDrawWeaponInCutscene(void)
 		uint32_t prevplayernum = g_Vars.currentplayernum;
 		uint32_t playernum = playermgrGetPlayerNumByProp(chr->prop);
 		setCurrentPlayerNum(playernum);
-		bgunEquipWeapon((int8_t)cmd[3]);
+		bgunEquipWeapon((s8)cmd[3]);
 		setCurrentPlayerNum(prevplayernum);
 	}
 
@@ -5328,9 +5328,9 @@ bool ai00ee(void)
 		uint32_t playernum = playermgrGetPlayerNumByProp(chr->prop);
 		setCurrentPlayerNum(playernum);
 
-		g_Vars.currentplayer->bondforcespeed.x = (int8_t)cmd[3];
+		g_Vars.currentplayer->bondforcespeed.x = (s8)cmd[3];
 		g_Vars.currentplayer->bondforcespeed.y = 0;
-		g_Vars.currentplayer->bondforcespeed.z = (int8_t)cmd[4];
+		g_Vars.currentplayer->bondforcespeed.z = (s8)cmd[4];
 
 		setCurrentPlayerNum(prevplayernum);
 	}
@@ -5488,7 +5488,7 @@ bool aiPlayXTrack(void)
 {
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	g_Vars.aioffset += 5;
-	musicSetXReason((int8_t)cmd[2], cmd[3], cmd[4]);
+	musicSetXReason((s8)cmd[2], cmd[3], cmd[4]);
 
 	return false;
 }
@@ -5500,7 +5500,7 @@ bool aiStopXTrack(void)
 {
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	g_Vars.aioffset += 3;
-	musicUnsetXReason((int8_t)cmd[2]);
+	musicUnsetXReason((s8)cmd[2]);
 
 	return false;
 }
@@ -6880,7 +6880,7 @@ bool aiSayQuip(void)
 					} else {
 						distance = chrGetDistanceLostToTargetInLastSecond(g_Vars.chrdata);
 
-						if (abs(distance) > 50) {
+						if (ABS(distance) > 50) {
 							psStopSound(g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0xffff);
 							psCreate(0, g_Vars.chrdata->prop, audioid, -1,
 									-1, PSFLAG_FORPROP, 0, PSTYPE_CHRTALK, 0, -1, 0, -1, -1, -1, -1);
@@ -6943,7 +6943,7 @@ bool aiSayQuip(void)
 						} else {
 							distance = chrGetDistanceLostToTargetInLastSecond(g_Vars.chrdata);
 
-							if (abs(distance) > 50) {
+							if (ABS(distance) > 50) {
 								psStopSound(g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0xffff);
 								psCreate(0, g_Vars.chrdata->prop, audioid, -1,
 										-1, PSFLAG_FORPROP, 0, PSTYPE_CHRTALK, 0, -1, 0, -1, -1, -1, -1);
@@ -6953,7 +6953,9 @@ bool aiSayQuip(void)
 						if (cmd[8]) {
 							text = langGet(g_QuipTexts[cmd[8] - 1][i]);
 
+#if VERSION >= VERSION_NTSC_1_0
 							if (!sndIsFiltered(audioid))
+#endif
 							{
 								hudmsgCreateWithColour(text, HUDMSGTYPE_INGAMESUBTITLE, cmd[9]);
 							}
@@ -7293,7 +7295,7 @@ bool ai0139(void)
 	uint32_t angle = (cmd[3] << 16) | (cmd[4] << 8) | cmd[5] | (cmd[2] << 24);
 	struct coord pos;
 
-	chrTryOrbitTarget(g_Vars.chrdata, angle, &pos, cmd[7], cmd[6]);
+	chr0f04c874(g_Vars.chrdata, angle, &pos, cmd[7], cmd[6]);
 
 	g_Vars.aioffset += 8;
 
@@ -8613,22 +8615,22 @@ bool aiSayCiStaffQuip(void)
 
 	if (cmd[2] == CIQUIP_GREETING) {
 		quip = g_CiGreetingQuips[g_Vars.chrdata->morale][rngRandom() % 3];
-		psPlayFromProp((int8_t)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
+		psPlayFromProp((s8)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
 	}
 
 	if (cmd[2] == CIQUIP_MAIN) {
 		quip = g_CiMainQuips[g_Vars.chrdata->morale][rngRandom() % 3];
-		psPlayFromProp((int8_t)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
+		psPlayFromProp((s8)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
 	}
 
 	if (cmd[2] == CIQUIP_ANNOYED) {
 		quip = g_CiAnnoyedQuips[g_Vars.chrdata->morale][rngRandom() % 3];
-		psPlayFromProp((int8_t)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
+		psPlayFromProp((s8)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
 	}
 
 	if (cmd[2] == CIQUIP_THANKS) {
 		quip = g_CiThanksQuips[g_Vars.chrdata->morale];
-		psPlayFromProp((int8_t)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
+		psPlayFromProp((s8)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
 	}
 
 	g_Vars.aioffset += 4;
@@ -9599,7 +9601,7 @@ bool aiPlaySoundFromProp(void)
 	int16_t audio_id = cmd[5] | (cmd[4] << 8);
 	int volume = cmd[7] | (cmd[6] << 8);
 	uint16_t flags = cmd[10] | (cmd[10] << 8); // @bug: Using 10 twice
-	int channel = (int8_t)cmd[2];
+	int channel = (s8)cmd[2];
 	int16_t type = cmd[8];
 	struct defaultobj *obj = objFindByTagId(cmd[3]);
 
@@ -9663,7 +9665,7 @@ bool aiRemoveWeaponFromInventory(void)
  */
 bool aiIfMusicEventQueueIsEmpty(void)
 {
-	float value = (uint64_t)utilsGetCount() * 64 / 3000;
+	float value = (u64)osGetCount() * 64 / 3000;
 
 #ifdef PLATFORM_N64 // will hang forever until the audio thread wakes it up
 	if (g_MusicEventQueueLength) {

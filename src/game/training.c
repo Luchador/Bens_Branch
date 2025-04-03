@@ -1,6 +1,5 @@
 #include <ultra64.h>
 #include <math.h>
-#include <stdio.h>
 #include "constants.h"
 #include "game/bg.h"
 #include "game/bondgun.h"
@@ -49,13 +48,13 @@ struct frdata g_FrData;
 struct trainingdata g_DtData;
 struct trainingdata g_HtData;
 
-uint16_t *g_FrScriptOffsets = NULL;
+u16 *g_FrScriptOffsets = NULL;
 uint8_t g_FrIsValidWeapon = false;
 uint8_t g_FrDataLoaded = false;
 uint8_t g_FrNumSounds = 0;
 uint8_t *g_FrRomData = NULL;
 
-uint16_t g_FrPads[] = {
+u16 g_FrPads[] = {
 	0x00d6, 0x00d7, 0x00d9, 0x00d8, 0x00da, 0x00db, 0x00dc, 0x00dd,
 	0x00de, 0x00df, 0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x00e4, 0x00e5,
 	0x00e6, 0x00e7, 0x00e8, 0x00e9, 0x00ea, 0x00eb, 0x00f4, 0x00f3,
@@ -717,7 +716,7 @@ bool frTargetIsAtScriptStart(int targetnum)
  */
 char *frGetInstructionalText(uint32_t index)
 {
-	uint16_t textid = (uint16_t)(g_FrRomData[index * 2] << 8) | g_FrRomData[index * 2 + 1];
+	u16 textid = (u16)(g_FrRomData[index * 2] << 8) | g_FrRomData[index * 2 + 1];
 
 	return langGet(textid);
 }
@@ -2020,15 +2019,15 @@ bool frChooseFarsightTarget(void)
 					&& g_FrData.targets[i].active
 					&& g_FrData.targets[i].flags & FRTARGETFLAG_FARSIGHTAUTOTARGETABLE) {
 				struct prop *prop = g_FrData.targets[i].prop;
-				float xdiff = g_Vars.currentplayer->bond2.cameraPos.x - prop->pos.x;
-				float ydiff = g_Vars.currentplayer->bond2.cameraPos.y - prop->pos.y;
-				float zdiff = g_Vars.currentplayer->bond2.cameraPos.z - prop->pos.z;
+				float xdiff = g_Vars.currentplayer->bond2.unk10.x - prop->pos.x;
+				float ydiff = g_Vars.currentplayer->bond2.unk10.y - prop->pos.y;
+				float zdiff = g_Vars.currentplayer->bond2.unk10.z - prop->pos.z;
 				float dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 
 				if (dist > 0) {
-					float value = (xdiff * g_Vars.currentplayer->bond2.cameraForward.f[0]
-							+ ydiff * g_Vars.currentplayer->bond2.cameraForward.f[1]
-							+ zdiff * g_Vars.currentplayer->bond2.cameraForward.f[2]) / dist;
+					float value = (xdiff * g_Vars.currentplayer->bond2.unk1c.f[0]
+							+ ydiff * g_Vars.currentplayer->bond2.unk1c.f[1]
+							+ zdiff * g_Vars.currentplayer->bond2.unk1c.f[2]) / dist;
 
 					if (value);
 

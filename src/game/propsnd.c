@@ -276,12 +276,12 @@ void psTickChannel(int channelnum)
 			float f12 = channel->targetvol - channel->currentvol;
 			float f14 = (1.0f / 6000.0f) * g_Vars.lvupdate60 * channel->volchangespeed;
 
-			if (fabsf(f12) > 1.0f) {
+			if (ABS(f12) > 1.0f) {
 				if (f14 > 1.0f) {
 					f14 = 1.0f;
 				}
 
-				if (fabsf(f14 * f12) > 1.0f) {
+				if (ABS(f14 * f12) > 1.0f) {
 					newvol = channel->currentvol + (int) (f14 * f12);
 				}
 			}
@@ -310,7 +310,7 @@ void psTickChannel(int channelnum)
 				int diff = channel->targetpan - channel->currentpan;
 				int lvupdate = g_Vars.lvupdate240 * 512 / 240;
 				int dir = diff < 0 ? -1 : 1;
-				int absdiff = abs(diff);
+				int absdiff = ABS(diff);
 				int amount = absdiff < lvupdate ? absdiff : lvupdate;
 
 				channel->currentpan += amount * dir;
@@ -328,7 +328,7 @@ void psTickChannel(int channelnum)
 			newfx = -1;
 		}
 
-		if (newpitch > 0.0f && fabsf(newpitch - channel->currentpitch) > 0.01f) {
+		if (newpitch > 0.0f && ABS(newpitch - channel->currentpitch) > 0.01f) {
 			channel->currentpitch = newpitch;
 		} else {
 			newpitch = -1.0f;
@@ -982,7 +982,7 @@ int psCalculatePan3(int degrees, float arg1, struct pschannel *channel)
 	} else {
 		int v0;
 		int dir = degrees > 0 ? 1 : -1;
-		int absdegrees = abs(degrees);
+		int absdegrees = ABS(degrees);
 
 		result = 128 + (int) (AL_PAN_CENTER + (180 - absdegrees) * dir * 0.7f);
 	}
@@ -1015,7 +1015,7 @@ int psCalculatePan2(struct coord *pos, int arg1, float arg2, struct pschannel *c
 
 			sp3c *= arg2;
 
-			f2 = atan2f(fabsf(sp3c), fabsf(sp38));
+			f2 = atan2f(ABSF(sp3c), ABSF(sp38));
 
 			if (sp3c >= 0.0f && sp38 >= 0.0f) {
 				// empty

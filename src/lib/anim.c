@@ -1,9 +1,9 @@
 #include <ultra64.h>
 #include <stdint.h>
-#include <string.h>
 #include "constants.h"
 #include "game/prop.h"
 #include "game/textutils.h"
+#include "game/utils.h"
 #include "game/bg.h"
 #include "bss.h"
 #include "lib/dma.h"
@@ -12,7 +12,9 @@
 #include "lib/anim.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
 #include "mod.h"
+#endif
 
 #define ANIM_HEADER_CACHE_SIZE 40
 #define ANIM_FRAME_CACHE_SIZE  32
@@ -83,7 +85,7 @@ void animsInit(void)
 	g_AnimHeaderAnimNums  = mempAlloc(ALIGN64(ANIM_HEADER_CACHE_SIZE * sizeof(*g_AnimHeaderAnimNums)), MEMPOOL_PERMANENT);
 	g_AnimHeaderBirths    = mempAlloc(ALIGN64(ANIM_HEADER_CACHE_SIZE * sizeof(*g_AnimHeaderBirths)), MEMPOOL_PERMANENT);
 	g_AnimReplacements    = mempAlloc(ALIGN64(g_NumAnimations * sizeof(uint8_t *)), MEMPOOL_PERMANENT);
-	memset(g_AnimReplacements, 0, g_NumAnimations * sizeof(uint8_t *));
+	bzero(g_AnimReplacements, g_NumAnimations * sizeof(uint8_t *));
 
 	animsInitTables();
 
@@ -137,7 +139,7 @@ extern uint8_t EXT_SEG _animationsSegmentRomStart;
 uint8_t *animDma(uint8_t *dst, unsigned int segoffset, unsigned int len)
 {
 	/*if (g_AnimHostEnabled) {
-		memcpy(dst, &g_AnimHostSegment[segoffset], len);
+		bcopy(&g_AnimHostSegment[segoffset], dst, len);
 		return dst;
 	}*/
 

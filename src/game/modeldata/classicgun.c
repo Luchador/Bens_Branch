@@ -3,7 +3,7 @@
 #include "data.h"
 #include "types.h"
 
-uint8_t g_SkelClassicGunJoints[][2] = {
+u8 g_SkelClassicGunJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },

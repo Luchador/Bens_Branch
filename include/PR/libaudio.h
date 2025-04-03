@@ -40,6 +40,23 @@ extern "C" {
 /***********************************************************************
  * misc defines
  ***********************************************************************/
+#ifndef _EMULATOR
+#	ifdef AUD_PROFILE
+
+#define PROFILE_AUD(num, cnt, max, min)	\
+{					\
+    uint32_t currCnt = osGetCount();	\
+    currCnt -= lastCnt[cnt_index];	\
+    cnt_index--;			\
+    cnt += currCnt;			\
+    num++;				\
+             				\
+    if ( currCnt > max ) max = currCnt;	\
+    if ( currCnt < min ) min = currCnt;	\
+}
+
+#	endif /* AUD_PROFILE */
+#endif /* EMULATOR */
 
 #ifndef NULL
 #define NULL 0
@@ -170,7 +187,7 @@ typedef struct {
     uint8_t          keyMin;
     uint8_t          keyMax;
     uint8_t          keyBase;
-    int8_t          detune;
+    s8          detune;
 } ALKeyMap;
 
 typedef struct {
@@ -650,7 +667,7 @@ typedef struct {
     uint8_t unk24;
     uint8_t attackVolume;
     uint8_t decayVolume;
-    int8_t unk27;
+    s8 unk27;
     uint8_t tremType;
     uint8_t tremRate;
     uint8_t tremDepth;

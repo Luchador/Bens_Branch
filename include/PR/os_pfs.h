@@ -34,7 +34,10 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
+#include <PR/ultratypes.h>
+
+
+#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 
 /**************************************************************************
  *
@@ -49,25 +52,28 @@ typedef struct {
 	int		status;
 	//OSMesgQueue 	*queue;
 	int		channel;
-	uint8_t		id[32];
-	uint8_t		label[32];
+	u8		id[32];
+	u8		label[32];
 	int		version;
 	int		dir_size;
 	int		inode_table;		/* block location */
 	int		minode_table;		/* mirrioring inode_table */
 	int		dir_table;		/* block location */
 	int		inode_start_page;	/* page # */
-	uint8_t		banks;
-	uint8_t		activebank;
+	u8		banks;
+	u8		activebank;
 } OSPfs;
 
 typedef struct {
-	uint32_t	file_size;	/* bytes */
-  	uint32_t 	game_code;
-  	uint16_t 	company_code;
+	u32	file_size;	/* bytes */
+  	u32 	game_code;
+  	u16 	company_code;
   	char  	ext_name[4];
   	char 	game_name[16];
 } OSPfsState;
+
+
+#endif /* defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS) */
 
 #if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
 

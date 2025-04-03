@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/dlights.h"
@@ -441,8 +440,8 @@ bool lightsHandleHit(struct coord *gunpos, struct coord *hitpos, int roomnum)
 
 	for (i = 0; i < g_Rooms[roomnum].numlights; i++) {
 		if (light->healthy && light->vulnerable) {
-			if (utilsRayIntersectsTriangleS16(&light->bbox[0], &light->bbox[1], &light->bbox[3], NULL, &spa4, &sp98, &sp8c, 0, 0)
-					|| utilsRayIntersectsTriangleS16(&light->bbox[1], &light->bbox[2], &light->bbox[3], NULL, &spa4, &sp98, &sp8c, 0, 0)) {
+			if (func0002f490(&light->bbox[0], &light->bbox[1], &light->bbox[3], NULL, &spa4, &sp98, &sp8c, 0, 0)
+					|| func0002f490(&light->bbox[1], &light->bbox[2], &light->bbox[3], NULL, &spa4, &sp98, &sp8c, 0, 0)) {
 				struct coord soundpos;
 
 				soundpos.x = light->bbox[0].x;
@@ -935,13 +934,13 @@ bool lightTickBroken(int roomnum, int lightnum)
 			sp80.y = -sp8c.y;
 			sp80.z = -sp8c.z;
 
-			utilsNormalizeVector(&sp98, &spa4, 1546, "dlights.c");
+			normalizeVector(&sp98, &spa4, 1546, "dlights.c");
 
 			spa4.x += sp80.x;
 			spa4.y += sp80.y;
 			spa4.z += sp80.z;
 
-			utilsNormalizeVector(&spa4, &spa4, 1548, "dlights.c");
+			normalizeVector(&spa4, &spa4, 1548, "dlights.c");
 
 			room = (void *) (roomnum * sizeof(struct bgroom));
 

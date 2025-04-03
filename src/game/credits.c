@@ -1,4 +1,4 @@
-#include <math.h>
+#include <ultra64.h>
 #include "constants.h"
 #include "game/camera.h"
 #include "game/menuutils.h"
@@ -24,8 +24,9 @@
 #include "lib/vi.h"
 #include "data.h"
 #include "types.h"
+#ifndef PLATFORM_N64
 #include "input.h"
-#include "video.h"
+#endif
 
 /**
  * Credits
@@ -106,6 +107,7 @@ struct particle {
 	float rotation;
 	uint8_t movetype;
 	uint8_t confignum;
+	uint8_t unk12;
 	uint8_t size;
 	uint8_t colourindex;
 };
@@ -118,15 +120,20 @@ struct creditsbglayer {
 };
 
 struct creditsdata {
-	struct particle particles[500];
-	struct menumodel menumodel;
+	/*0x0000*/ uint32_t unk0000;
+	/*0x0004*/ uint32_t unk0004;
+	/*0x0008*/ uint32_t unk0008;
+	/*0x000c*/ struct particle particles[500];
+	/*0x2eec*/ uint8_t unk2eec;
+	/*0x2ef0*/ struct menumodel menumodel;
+	/*0x34a8*/ uint8_t unk34a8[0xcac];
 
 	/**
 	 * Credit indexes 1 through 16 are randomised. coreteammap stores the chosen
 	 * order. The index is the apparent credit index and the value is the real
 	 * credit index that it maps to.
 	 */
-	uint32_t coreteammap[NUM_CORE_TEAM + 1];
+	/*0x4154*/ uint32_t coreteammap[NUM_CORE_TEAM + 1];
 
 	/**
 	 * creditnum is the credit index of the first credit being displayed on the
@@ -136,24 +143,38 @@ struct creditsdata {
 	 * through the coreteammap, so its value won't actually correspond with the
 	 * credit being displayed.
 	 */
-	int creditnum;
+	/*0x4198*/ int creditnum;
 
-	uint8_t numthisslide;
-	float slideage; // age in seconds
-	float slidelifetime; // in seconds
-	uint8_t unk41a8[8];
-	int8_t unk41b0[2];
-	struct creditsbglayer bglayers[4];
-	uint8_t slidesenabled;
-	int8_t particlecolourindex1;
-	int8_t particlecolourindex2;
-	float particlecolourweight;
-	uint8_t particlemovetype;
-	uint8_t particleconfignum1;
-	uint8_t particleconfignum2;
-	float particlemaxsize;
-	float particleminsize;
-	uint32_t blacktimer60;
+	/*0x419c*/ uint8_t numthisslide;
+	/*0x41a0*/ float slideage; // age in seconds
+	/*0x41a4*/ float slidelifetime; // in seconds
+	/*0x41a8*/ uint8_t unk41a8[8];
+	/*0x41b0*/ int8_t unk41b0[2];
+	/*0x41b4*/ struct creditsbglayer bglayers[4];
+	/*0x41f4*/ uint8_t slidesenabled;
+	/*0x41f5*/ int8_t particlecolourindex1;
+	/*0x41f6*/ int8_t particlecolourindex2;
+	/*0x41f8*/ float particlecolourweight;
+	/*0x41fc*/ uint8_t particlemovetype;
+	/*0x41fd*/ uint8_t particleconfignum1;
+	/*0x41fe*/ uint8_t particleconfignum2;
+	/*0x41ff*/ uint8_t particlemaxsize;
+	/*0x4200*/ uint8_t particleminsize;
+	/*0x4204*/ uint32_t blacktimer60;
+	/*0x4208*/ uint8_t unk4208;
+	/*0x420c*/ uint32_t unk420c;
+	/*0x4210*/ uint32_t unk4210;
+	/*0x4214*/ uint32_t unk4214;
+	/*0x4218*/ uint32_t unk4218;
+	/*0x421c*/ uint32_t unk421c;
+	/*0x4220*/ uint32_t unk4220;
+	/*0x4224*/ uint32_t unk4224;
+	/*0x4228*/ uint32_t unk4228;
+	/*0x422c*/ uint32_t unk422c;
+	/*0x4230*/ uint32_t unk4230;
+	/*0x4234*/ uint32_t unk4234;
+	/*0x4238*/ uint32_t unk4238;
+	/*0x423c*/ uint32_t unk423c;
 };
 
 float g_CreditsParticleRotationFrac;
@@ -161,28 +182,27 @@ uint32_t g_CreditsCurFrame;
 uint32_t g_CreditsPrevFrame;
 uint32_t g_CreditsCurFrame2;
 struct creditsdata *g_CreditsData;
-int g_BackgroundPlaneSize = 300;
 
 bool g_CreditsScrollStarted = false;
 bool g_CreditsAltTitleRequested = false;
 bool g_CreditsUsingAltTitle = false;
 
-void creditsMap9BgVertices(Vtx *vertices, float rotationAngle, float offsetX, float texturePhase, float  textureScaleS, float textureScaleT)
+void creditsMap9BgVertices(Vtx *vertices, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6)
 {
-	float rotatedOffsetS = offsetX * sinf(rotationAngle) * cosf(rotationAngle);
-	float rotatedOffsetT = offsetX * cosf(rotationAngle) * sinf(rotationAngle);
+	float a = arg2 * sinf(arg1) + arg3 * cosf(arg1);
+	float b = arg2 * cosf(arg1) - arg3 * sinf(arg1);
 
-	vertices[0].s = (sinf(texturePhase) + cosf(texturePhase)) * textureScaleS + rotatedOffsetS;
-	vertices[0].t = (cosf(texturePhase) - sinf(texturePhase)) * textureScaleT + rotatedOffsetT;
+	vertices[0].s = (sinf(arg4) + cosf(arg4)) * arg5 + a;
+	vertices[0].t = (cosf(arg4) - sinf(arg4)) * arg6 + b;
 
-	vertices[2].s = (sinf(texturePhase + M_PI / 2) + cosf(texturePhase + M_PI / 2)) * textureScaleS + rotatedOffsetS;
-	vertices[2].t = (cosf(texturePhase + M_PI / 2) - sinf(texturePhase + M_PI / 2)) * textureScaleT + rotatedOffsetT;
+	vertices[2].s = (sinf(arg4 + 1.5707963705063f) + cosf(arg4 + 1.5707963705063f)) * arg5 + a;
+	vertices[2].t = (cosf(arg4 + 1.5707963705063f) - sinf(arg4 + 1.5707963705063f)) * arg6 + b;
 
-	vertices[8].s = (sinf(texturePhase + M_PI) + cosf(texturePhase + M_PI)) * textureScaleS + rotatedOffsetS;
-	vertices[8].t = (cosf(texturePhase + M_PI) - sinf(texturePhase + M_PI)) * textureScaleT + rotatedOffsetT;
+	vertices[8].s = (sinf(arg4 + 3.1415927410126f) + cosf(arg4 + 3.1415927410126f)) * arg5 + a;
+	vertices[8].t = (cosf(arg4 + 3.1415927410126f) - sinf(arg4 + 3.1415927410126f)) * arg6 + b;
 
-	vertices[6].s = (sinf(texturePhase + M_PI + (M_PI / 2)) + cosf(texturePhase + M_PI + (M_PI / 2))) * textureScaleS + rotatedOffsetS;
-	vertices[6].t = (cosf(texturePhase + M_PI + (M_PI / 2)) - sinf(texturePhase + M_PI + (M_PI / 2))) * textureScaleT + rotatedOffsetT;
+	vertices[6].s = (sinf(arg4 + 4.7123889923096f) + cosf(arg4 + 4.7123889923096f)) * arg5 + a;
+	vertices[6].t = (cosf(arg4 + 4.7123889923096f) - sinf(arg4 + 4.7123889923096f)) * arg6 + b;
 
 	vertices[1].s = (vertices[0].s + vertices[2].s) / 2;
 	vertices[1].t = (vertices[0].t + vertices[2].t) / 2;
@@ -200,14 +220,26 @@ void creditsMap9BgVertices(Vtx *vertices, float rotationAngle, float offsetX, fl
 	vertices[4].t = (vertices[3].t + vertices[5].t) / 2;
 }
 
-// Creates a 4 quad plane centered at 0,0 with the corners at +/-g_BackgroundPlaneSize
+/**
+ * Initialises the vertices coordinates. The generated x and y coordinates are:
+ *
+ * 0:  -1800  -1800
+ * 1:  0      -1800
+ * 2:  1800   -1800
+ * 3:  -1800  0
+ * 4:  0      0
+ * 5:  1800   0
+ * 6:  -1800  1800
+ * 7:  0      1800
+ * 8:  1800   1800
+ */
 void creditsInitBgVertices(Vtx *vertices, int z)
 {
 	int i;
 
 	for (i = 0; i < 9; i++) {
-		vertices[i].x = (i % 3) * g_BackgroundPlaneSize - g_BackgroundPlaneSize;
-		vertices[i].y = (i / 3) * g_BackgroundPlaneSize - g_BackgroundPlaneSize;
+		vertices[i].x = (i % 3) * 1800 - 1800;
+		vertices[i].y = (i / 3) * 1800 - 1800;
 		vertices[i].z = z;
 	}
 }
@@ -270,26 +302,27 @@ void creditsChooseBgColours(Vtx *vertices, Col *colours, int confignum, int alph
 }
 
 struct creditsbgtype {
-	int16_t scaleS;
-	int16_t scaleT;
-	int16_t startZ;
+	int16_t unk00;
+	int16_t unk02;
+	int16_t unk04;
 	int texturenum;
-	float offsetx;
+	float unk0c;
+	float unk10;
 };
 
 struct creditsbgtype g_CreditsBgTypes[] = {
-	{ 10000, 10000, -200, 0x04, 120},
-	{ 1000,  1000,  -200, 0x05, 220},
-	{ 1000,  10000, -50,  0x06, 220},
-	{ 1000,  10000, -200, 0x26, 220},
-	{ 500,   10000, -200, 0x26, 520},
-	{ 1000,  20000, -50,  0x26, 120},
-	{ 10000, 10000, -200, 0x2a, 120},
-	{ 10000, 10000, -200, 0x2b, 80 },
-	{ 10000, 3000,  -200, 0x2b, 80 },
-	{ 3000,  3000,  -200, 0x2d, 120},
-	{ 10000, 10000, -200, 0x07, 80 },
-	{ 10000, 1000,  -200, 0x2d, 220},
+	{ 10000, 10000, -200, 0x04, 120, 0 },
+	{ 1000,  1000,  -200, 0x05, 220, 0 },
+	{ 1000,  10000, -50,  0x06, 220, 0 },
+	{ 1000,  10000, -200, 0x26, 220, 0 },
+	{ 500,   10000, -200, 0x26, 520, 0 },
+	{ 1000,  20000, -50,  0x26, 120, 0 },
+	{ 10000, 10000, -200, 0x2a, 120, 0 },
+	{ 10000, 10000, -200, 0x2b, 80,  0 },
+	{ 10000, 3000,  -200, 0x2b, 80,  0 },
+	{ 3000,  3000,  -200, 0x2d, 120, 0 },
+	{ 10000, 10000, -200, 0x07, 80,  0 },
+	{ 10000, 1000,  -200, 0x2d, 220, 0 },
 };
 
 Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float arg3, uint32_t alpha, int arg5)
@@ -297,7 +330,8 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float 
 	Vtx *vertices;
 	Col *colours;
 	float pan;
-	float offsetx;
+	float b;
+	float c;
 	float rotation;
 
 	gdl = menugfx0f0e2498(gdl);
@@ -315,13 +349,14 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float 
 	colours = gfxAllocateColours(3);
 	vertices = gfxAllocateVertices(9);
 
-	creditsInitBgVertices(vertices, (int)((g_CreditsBgTypes[type].startZ + 2000) * arg3) - 2000);
+	creditsInitBgVertices(vertices, (int)((g_CreditsBgTypes[type].unk04 + 2000) * arg3) - 2000);
 
 	rotation = g_CreditsData->bglayers[layernum].rotspeed * g_CreditsCurFrame2 * 0.25f;
 	pan = g_CreditsData->bglayers[layernum].panspeed * g_CreditsCurFrame2 * 0.25f;
-	offsetx = g_CreditsBgTypes[type].offsetx * 32.0f;
+	b = g_CreditsBgTypes[type].unk0c * 32.0f;
+	c = g_CreditsBgTypes[type].unk10 * 32.0f;
 
-	creditsMap9BgVertices(vertices, pan, offsetx, rotation, g_CreditsBgTypes[type].scaleS, g_CreditsBgTypes[type].scaleT);
+	creditsMap9BgVertices(vertices, pan, b, c, rotation, g_CreditsBgTypes[type].unk00, g_CreditsBgTypes[type].unk02);
 
 	if (g_CreditsBgTypes[type].texturenum == 4) {
 		alpha = alpha * 2 / 3;
@@ -496,7 +531,7 @@ Gfx *creditsFillFramebuffer(Gfx *gdl, uint32_t colour)
 
 	gdl = textSetPrimColour(gdl, colour);
 
-	gDPFillRectangle(gdl++, 0, 0, videoGetWidth(), videoGetHeight());
+	gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -505,6 +540,7 @@ Gfx *creditsFillFramebuffer(Gfx *gdl, uint32_t colour)
 
 void creditsResetParticles(void)
 {
+	float tmp;
 	int i;
 
 	g_CreditsData->particlecolourindex1 = -1;
@@ -513,19 +549,22 @@ void creditsResetParticles(void)
 	g_CreditsData->particleconfignum1 = 0;
 	g_CreditsData->particleconfignum2 = 0;
 	g_CreditsData->particleminsize = 0;
-	g_CreditsData->particlemaxsize = 0.1f;
+	g_CreditsData->particlemaxsize = 7;
 
 	for (i = 0; i < ARRAYCOUNT(g_CreditsData->particles); i++) {
-		g_CreditsData->particles[i].x = RANDOMFRAC() * 2 * 200.0f - 200.0f;
+		tmp = RANDOMFRAC();
+		g_CreditsData->particles[i].x = (tmp + tmp) * 3000.0f - 3000.0f;
 
-		g_CreditsData->particles[i].y = RANDOMFRAC() * 2 * 200.0f - 200.0f;
+		tmp = RANDOMFRAC();
+		g_CreditsData->particles[i].y = (tmp + tmp) * 3000.0f - 3000.0f;
 
+		g_CreditsData->particles[i].unk12 = rngRandom() % 4;
 		g_CreditsData->particles[i].colourindex = rngRandom() % 4;
 		g_CreditsData->particles[i].rotation = RANDOMFRAC() * M_TAU;
 
 		if (g_CreditsData->particleminsize < g_CreditsData->particlemaxsize) {
 			g_CreditsData->particles[i].size = g_CreditsData->particleminsize
-				+ (RANDOMFRAC() * (g_CreditsData->particlemaxsize / 10.0f));
+				+ (rngRandom() % (g_CreditsData->particlemaxsize - g_CreditsData->particleminsize));
 		} else {
 			g_CreditsData->particles[i].size = g_CreditsData->particleminsize;
 		}
@@ -595,14 +634,15 @@ void creditsTickParticles(void)
 
 		// If the particle has gone behind the camera, reset it
 		if (g_CreditsData->particles[i].z > 0.0f) {
-			g_CreditsData->particles[i].x = RANDOMFRAC() * 2.0f * 200.0f - 200.0f;
-			g_CreditsData->particles[i].y = RANDOMFRAC() * 2.0f * 200.0f - 200.0f;
+			g_CreditsData->particles[i].x = RANDOMFRAC() * 2.0f * 3000.0f - 3000.0f;
+			g_CreditsData->particles[i].y = RANDOMFRAC() * 2.0f * 3000.0f - 3000.0f;
+			g_CreditsData->particles[i].unk12 = rngRandom() % 4;
 			g_CreditsData->particles[i].colourindex = rngRandom() % 4;
 			g_CreditsData->particles[i].rotation = RANDOMFRAC() * M_TAU;
 
 			if (g_CreditsData->particleminsize < g_CreditsData->particlemaxsize) {
 				g_CreditsData->particles[i].size = g_CreditsData->particleminsize
-					+ RANDOMFRAC() * (g_CreditsData->particlemaxsize / 10.0f);
+					+ rngRandom() % (g_CreditsData->particlemaxsize - g_CreditsData->particleminsize);
 			} else {
 				g_CreditsData->particles[i].size = g_CreditsData->particleminsize;
 			}
@@ -1130,6 +1170,7 @@ void creditsTickSlide(void)
 				g_CreditsData->slideage = 0;
 				g_CreditsData->slidesenabled = false;
 				g_CreditsData->blacktimer60 = 0;
+				g_CreditsData->unk4208 = 0;
 
 				musicEndMenu();
 				musicStartPrimary(0);
@@ -1480,7 +1521,7 @@ void creditsTick(void)
 		creditsCreatePendingBgLayers(0xffffffff);
 	}
 
-	if (!g_CreditsData->slidesenabled && g_CreditsData->blacktimer60 < 1360) {
+	if (!g_CreditsData->slidesenabled && g_CreditsData->blacktimer60 < (PAL ? 1150 : 1360)) {
 		g_CreditsData->blacktimer60 += g_Vars.diffframe60;
 	}
 }
@@ -1494,12 +1535,11 @@ Gfx *creditsDraw(Gfx *gdl)
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
-	viSetUseZBuf(true);
 	gdl = viPrepareZbuf(gdl);
-	gdl = viPrepareHudDraw(gdl);
-	//gdl = creditsFillFramebuffer(gdl, 0x000000ff);
+	gdl = vi0000b1d0(gdl);
+	gdl = creditsFillFramebuffer(gdl, 0x000000ff);
 
-	//gDPSetScissorFrac(gdl++, G_SC_NON_INTERLACE, 0, 120, viGetWidth() * 4.0f, (viGetHeight() - 30) * 4.0f);
+	gDPSetScissorFrac(gdl++, G_SC_NON_INTERLACE, 0, 120, viGetWidth() * 4.0f, (viGetHeight() - 30) * 4.0f);
 
 	creditsTick();
 
@@ -1533,11 +1573,11 @@ Gfx *creditsDraw(Gfx *gdl)
 			g_CreditsData->menumodel.currotx = g_CreditsData->menumodel.newrotx = -0.26175770163536;
 			g_CreditsData->menumodel.currotz = g_CreditsData->menumodel.newrotz = 0;
 
-			g_CreditsData->menumodel.newposx = 1400.0f - (scrolltimer240 / TICKS(14400.0f)) * 3300.0f;
-			g_CreditsData->menumodel.newposy = 240;
+			g_CreditsData->menumodel.newposx = 833.0f - (scrolltimer240 / TICKS(14400.0f)) * 2413.0f;
+			g_CreditsData->menumodel.newposy = VERSION == VERSION_PAL_FINAL ? 65.86 : 70.86;
 			g_CreditsData->menumodel.newposz = -2050;
 
-			g_CreditsData->menumodel.newscale = 0.3;
+			g_CreditsData->menumodel.newscale = 1.467;
 			g_CreditsData->menumodel.newparams = MENUMODELPARAMS_SET_FILENUM(FILE_PPDMENU);
 			g_CreditsData->menumodel.drawbehinddialog = true;
 			g_CreditsData->menumodel.partvisibility = NULL;
@@ -1546,7 +1586,7 @@ Gfx *creditsDraw(Gfx *gdl)
 
 			gSPMatrix(gdl++, (uintptr_t)(matrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-			//gdl = creditsFillFramebuffer(gdl, 0x000000d8);
+			gdl = creditsFillFramebuffer(gdl, 0x000000d8);
 		}
 
 		mtx4LoadIdentity(&sp68);
@@ -1576,7 +1616,7 @@ Gfx *creditsDraw(Gfx *gdl)
 			}
 
 			if (alpha) {
-				//gdl = creditsFillFramebuffer(gdl, alpha);
+				gdl = creditsFillFramebuffer(gdl, alpha);
 			}
 		}
 	}
@@ -1612,6 +1652,7 @@ void creditsReset(void)
 
 	g_CreditsData = mempAlloc(sizeof(struct creditsdata), MEMPOOL_STAGE);
 
+	g_CreditsData->unk2eec = 0;
 	g_CreditsData->unk41b0[0] = 0;
 	g_CreditsData->unk41b0[1] = 0;
 
@@ -1647,7 +1688,7 @@ void creditsReset(void)
 		g_CreditsData->blacktimer60 = TICKS(1140);
 	}
 
-	playerConfigureViForCredits();
+	playerConfigureVi();
 }
 
 /**

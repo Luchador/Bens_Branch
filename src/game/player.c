@@ -32,7 +32,6 @@
 #include "game/filemgr.h"
 #include "game/inv.h"
 #include "game/playermgr.h"
-#include "game/mtxutils.h"
 #include "game/explosions.h"
 #include "game/bondview.h"
 #include "game/textutils.h"
@@ -86,9 +85,9 @@ float g_WarpType3RotAngle;
 float g_WarpType3Range;
 float g_WarpType3Height;
 float g_WarpType3MoreHeight;
-uint32_t g_WarpType3Pad;
+u32 g_WarpType3Pad;
 int g_WarpType2HasDirection;
-uint32_t g_WarpType2Arg2;
+u32 g_WarpType2Arg2;
 int g_CutsceneCurAnimFrame60;
 int g_CutsceneCurAnimFrame240;
 int16_t g_CutsceneAnimNum;
@@ -99,6 +98,7 @@ bool g_CutsceneSkipRequested;
 float g_CutsceneCurTotalFrame60f;
 int g_CutsceneTweenDuration60;
 float g_CutsceneTweenFrac; // 0 when bars across the top and bottom, 1 when fullscreen
+u32 var8009de34;
 int16_t g_SpawnPoints[24];
 int g_NumSpawnPoints;
 
@@ -115,11 +115,14 @@ struct vimode g_ViModes[] = {
 	// |               |                 |                |                 |          |                 |     |  |     cinemaheight
 	// |               |                 |                |                 |          |                 |     |  |     |  cinematop
 	// |               |                 |                |                 |          |                 |     |  |     |  |
-	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                1,         SCREEN_HEIGHT_LO, 0,  180, 20, 136, 42  }, // default
+	{ SCREEN_WIDTH_LO, SCREEN_HEIGHT_LO, SCREEN_WIDTH_LO, 1,                VIMODE_LO, SCREEN_HEIGHT_LO, 0,  180, 20, 136, 42  }, // default
+	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.5,              VIMODE_LO, SCREEN_HEIGHT_HI, 0,  180, 20, 136, 42  }, // hi-res
 };
 
-uint32_t var8007073c = 0;
-uint32_t var8007074c = 0;
+u32 var80070730 = 0xffffffff;
+u32 var80070734 = 0xffffffff;
+u32 var8007073c = 0;
+u32 var8007074c = 0;
 
 bool g_PlayersWithControl[] = {
 	true, true, true, true
@@ -179,7 +182,11 @@ float playerChooseSpawnLocation(float chrradius, struct coord *dstpos, RoomNum *
 	struct pad pad;
 	RoomNum tmppadrooms[2];
 	float bestsqdist;
+#ifdef AVOID_UB
 	RoomNum neighbours[21]; // prevent bgRoomGetNeighbours from writing out of bounds
+#else
+	RoomNum neighbours[20];
+#endif
 
 	// Iterate all spawn pads and populate the category arrays
 	for (p = 0; p < numpads; p++) {
@@ -466,7 +473,7 @@ void playerStartNewLife(void)
 	g_Vars.currentplayer->prop->rooms[1] = -1;
 
 	playerSetCamPropertiesWithRoom(&pos, &g_Vars.currentplayer->bond2.unk28,
-			&g_Vars.currentplayer->bond2.cameraForward, rooms[0]);
+			&g_Vars.currentplayer->bond2.unk1c, rooms[0]);
 
 	if (g_Vars.coopplayernum >= 0) {
 		bool ammotypesheld[33];
@@ -1035,13 +1042,13 @@ void playerSpawn(void)
 
 void playerResetBond(struct playerbond *pb, struct coord *pos)
 {
-	pb->cameraPos.x = pos->x;
-	pb->cameraPos.y = pos->y;
-	pb->cameraPos.z = pos->z;
+	pb->unk10.x = pos->x;
+	pb->unk10.y = pos->y;
+	pb->unk10.z = pos->z;
 
-	pb->cameraForward.x = 1;
-	pb->cameraForward.y = 0;
-	pb->cameraForward.z = 0;
+	pb->unk1c.x = 1;
+	pb->unk1c.y = 0;
+	pb->unk1c.z = 0;
 
 	pb->unk28.x = 0;
 	pb->unk28.y = 1;
@@ -1216,6 +1223,7 @@ void playerTickChrBody(void)
 		uint8_t *allocation;
 		void *spe8;
 		int offset2;
+		u32 stack2;
 		struct weaponobj *weaponobj;
 
 		// Unused
@@ -1258,7 +1266,7 @@ void playerTickChrBody(void)
 		int headnum = HEAD_DARK_COMBAT;
 		bool sp60 = false;
 		struct model *model = NULL;
-		uint32_t *rwdatas;
+		u32 *rwdatas;
 
 		g_Vars.currentplayer->haschrbody = true;
 		playerChooseBodyAndHead(&bodynum, &headnum, &sp60);
@@ -1295,7 +1303,7 @@ void playerTickChrBody(void)
 			offset1 += sizeof(struct anim);
 			offset1 = ALIGN64(offset1);
 
-			rwdatas = (uint32_t *)(allocation + offset1);
+			rwdatas = (u32 *)(allocation + offset1);
 			offset1 += 0x400;
 #ifdef PLATFORM_64BIT
 			offset1 += 0x200;
@@ -1532,13 +1540,13 @@ void playerTickMpSwirl(void)
 
 	angle = (g_MpSwirlAngleDegrees - g_Vars.currentplayer->vv_theta) * M_PI / 180.0f;
 
-	pos.x = sinf(angle) * g_MpSwirlDistance + g_Vars.currentplayer->bond2.cameraPos.x;
-	pos.y = g_Vars.currentplayer->bond2.cameraPos.y + g_MpSwirlDistance * 0.08f;
-	pos.z = cosf(angle) * g_MpSwirlDistance + g_Vars.currentplayer->bond2.cameraPos.z;
+	pos.x = sinf(angle) * g_MpSwirlDistance + g_Vars.currentplayer->bond2.unk10.x;
+	pos.y = g_Vars.currentplayer->bond2.unk10.y + g_MpSwirlDistance * 0.08f;
+	pos.z = cosf(angle) * g_MpSwirlDistance + g_Vars.currentplayer->bond2.unk10.z;
 
-	look.x = g_Vars.currentplayer->bond2.cameraPos.x - pos.x;
-	look.y = g_Vars.currentplayer->bond2.cameraPos.y - pos.y;
-	look.z = g_Vars.currentplayer->bond2.cameraPos.z - pos.z;
+	look.x = g_Vars.currentplayer->bond2.unk10.x - pos.x;
+	look.y = g_Vars.currentplayer->bond2.unk10.y - pos.y;
+	look.z = g_Vars.currentplayer->bond2.unk10.z - pos.z;
 
 	player0f0c1840(&pos, &up, &look, &g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms);
 
@@ -1768,8 +1776,8 @@ void playerTickCutscene(bool arg0)
 	float translatescale = bgGetStageTranslationThing();
 	float fovy;
 	int endframe;
-	int8_t contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-	uint32_t buttons;
+	s8 contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
+	u32 buttons;
 	float tweenfrac;
 	float sp104;
 	Mtxf spc4;
@@ -1848,13 +1856,13 @@ void playerTickCutscene(bool arg0)
 
 		bmoveSetMode(MOVEMODE_WALK);
 
-		pos.x += sp104 * (g_Vars.bond->bond2.cameraPos.x - pos.x);
-		pos.y += sp104 * (g_Vars.bond->bond2.cameraPos.y - pos.y);
-		pos.z += sp104 * (g_Vars.bond->bond2.cameraPos.z - pos.z);
+		pos.x += sp104 * (g_Vars.bond->bond2.unk10.x - pos.x);
+		pos.y += sp104 * (g_Vars.bond->bond2.unk10.y - pos.y);
+		pos.z += sp104 * (g_Vars.bond->bond2.unk10.z - pos.z);
 
 		mtx00016d58(&spc4, 0, 0, 0, -look.x, -look.y, -look.z, up.x, up.y, up.z);
 		mtx00016d58(&sp84, 0, 0, 0,
-				-g_Vars.bond->bond2.cameraForward.x, -g_Vars.bond->bond2.cameraForward.y, -g_Vars.bond->bond2.cameraForward.z,
+				-g_Vars.bond->bond2.unk1c.x, -g_Vars.bond->bond2.unk1c.y, -g_Vars.bond->bond2.unk1c.z,
 				g_Vars.bond->bond2.unk28.x, g_Vars.bond->bond2.unk28.y, g_Vars.bond->bond2.unk28.z);
 		quaternion0f097044(&spc4, sp74);
 		quaternion0f097044(&sp84, sp64);
@@ -1960,7 +1968,7 @@ void playerTweenFovY(float targetfovy)
 float playerGetTeleportFovY(void)
 {
 	float time;
-	uint32_t fovyoffset;
+	u32 fovyoffset;
 
 	if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_PREENTER) {
 		return 60.0f;
@@ -1981,52 +1989,49 @@ float playerGetTeleportFovY(void)
 
 void playerUpdateZoom(void)
 {
-	if(g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY)
-	{
-		float scale;
-		float fovy;
-		struct stagetableentry *stage;
+	float scale;
+	float fovy;
+	struct stagetableentry *stage;
 
-		if (g_Vars.currentplayer->zoomintime < g_Vars.currentplayer->zoomintimemax) {
-			g_Vars.currentplayer->zoomintime += g_Vars.lvupdate60freal;
+	if (g_Vars.currentplayer->zoomintime < g_Vars.currentplayer->zoomintimemax) {
+		g_Vars.currentplayer->zoomintime += g_Vars.lvupdate60freal;
 
-			if (g_Vars.currentplayer->zoomintime > g_Vars.currentplayer->zoomintimemax) {
-				g_Vars.currentplayer->zoomintime = g_Vars.currentplayer->zoomintimemax;
-			}
-
-			g_Vars.currentplayer->zoominfovy = g_Vars.currentplayer->zoominfovyold +
-				(g_Vars.currentplayer->zoomintime *
-				(g_Vars.currentplayer->zoominfovynew - g_Vars.currentplayer->zoominfovyold))
-				/ g_Vars.currentplayer->zoomintimemax;
-		} else {
+		if (g_Vars.currentplayer->zoomintime > g_Vars.currentplayer->zoomintimemax) {
 			g_Vars.currentplayer->zoomintime = g_Vars.currentplayer->zoomintimemax;
-			g_Vars.currentplayer->zoominfovy = g_Vars.currentplayer->zoominfovynew;
 		}
 
-		playermgrSetFovY(g_Vars.currentplayer->zoominfovy);
-		viSetFovY(g_Vars.currentplayer->zoominfovy);
-
-		if (g_Vars.currentplayer->teleportstate != TELEPORTSTATE_INACTIVE) {
-			fovy = playerGetTeleportFovY();
-			playermgrSetFovY(fovy);
-			viSetFovY(fovy);
-		}
-
-		if (g_Vars.currentplayer->zoominfovy >= 15) {
-			scale = 1;
-		} else if (g_Vars.currentplayer->zoominfovy >= 7) {
-			scale = (g_Vars.currentplayer->zoominfovy - 7) * 0.0875f + 0.3f;
-		} else if (g_Vars.currentplayer->zoominfovy >= 4) {
-			scale = (g_Vars.currentplayer->zoominfovy - 4) * (1.0f / 30.0f) + 0.2f;
-		} else if (g_Vars.currentplayer->zoominfovy >= 2) {
-			scale = (g_Vars.currentplayer->zoominfovy - 2) * (1.0f / 20.0f) + 0.1f;
-		} else {
-			scale = 0.1;
-		}
-
-		stage = stageGetCurrent();
-		bgSetScaleBg2Gfx((1 - (1 - stage->unk34) * (1 - scale) * (10.f / 9.0f)) * scale);
+		g_Vars.currentplayer->zoominfovy = g_Vars.currentplayer->zoominfovyold +
+			(g_Vars.currentplayer->zoomintime *
+			 (g_Vars.currentplayer->zoominfovynew - g_Vars.currentplayer->zoominfovyold))
+			/ g_Vars.currentplayer->zoomintimemax;
+	} else {
+		g_Vars.currentplayer->zoomintime = g_Vars.currentplayer->zoomintimemax;
+		g_Vars.currentplayer->zoominfovy = g_Vars.currentplayer->zoominfovynew;
 	}
+
+	playermgrSetFovY(g_Vars.currentplayer->zoominfovy);
+	viSetFovY(g_Vars.currentplayer->zoominfovy);
+
+	if (g_Vars.currentplayer->teleportstate != TELEPORTSTATE_INACTIVE) {
+		fovy = playerGetTeleportFovY();
+		playermgrSetFovY(fovy);
+		viSetFovY(fovy);
+	}
+
+	if (g_Vars.currentplayer->zoominfovy >= 15) {
+		scale = 1;
+	} else if (g_Vars.currentplayer->zoominfovy >= 7) {
+		scale = (g_Vars.currentplayer->zoominfovy - 7) * 0.0875f + 0.3f;
+	} else if (g_Vars.currentplayer->zoominfovy >= 4) {
+		scale = (g_Vars.currentplayer->zoominfovy - 4) * (1.0f / 30.0f) + 0.2f;
+	} else if (g_Vars.currentplayer->zoominfovy >= 2) {
+		scale = (g_Vars.currentplayer->zoominfovy - 2) * (1.0f / 20.0f) + 0.1f;
+	} else {
+		scale = 0.1;
+	}
+
+	stage = stageGetCurrent();
+	bgSetScaleBg2Gfx((1 - (1 - stage->unk34) * (1 - scale) * (10.f / 9.0f)) * scale);
 }
 
 void playerStopAudioForPause(void)
@@ -2046,8 +2051,8 @@ void playerStopAudioForPause(void)
 	}
 }
 
-uint32_t var8007083c = 0;
-uint32_t g_GlobalMenuRoot = 0;
+u32 var8007083c = 0;
+u32 g_GlobalMenuRoot = 0;
 
 void playerTickPauseMenu(void)
 {
@@ -2129,9 +2134,10 @@ Gfx *player0f0baf84(Gfx *gdl)
 {
 	if (g_Vars.currentplayer->pausemode != PAUSEMODE_UNPAUSED) {
 		Mtx *a = gfxAllocateMatrix();
+		u16 b;
 
-		mtxPerspective(a, g_Vars.currentplayer->zoominfovy,
-				1.4545454978943f, 10, 300, 1);
+		guPerspective(a, &b, g_Vars.currentplayer->zoominfovy,
+				PAL ? 1.7316017150879f : 1.4545454978943f, 10, 300, 1);
 
 		gSPMatrix(gdl++, (uintptr_t)(a), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 		//gSPPerspNormalize(gdl++, b);
@@ -2140,7 +2146,7 @@ Gfx *player0f0baf84(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *playerDrawFade(Gfx *gdl, uint32_t r, uint32_t g, uint32_t b, float frac)
+Gfx *playerDrawFade(Gfx *gdl, u32 r, u32 g, u32 b, float frac)
 {
 	if (frac > 0) {
 		gDPPipeSync(gdl++);
@@ -2264,7 +2270,7 @@ void playerTickChrFade(void)
 		}
 
 		if (chr) {
-			chr->fadealpha = (int8_t)(frac * 255);
+			chr->fadealpha = (s8)(frac * 255);
 		}
 	}
 }
@@ -2821,22 +2827,24 @@ int16_t playerGetViewportTop(void)
 	return top;
 }
 
-float playerGetAspect(void)
+float player0f0bd358(void)
 {
 	float result;
 	int16_t height = playerGetViewportHeight();
 	int16_t width = playerGetViewportWidth();
 
 	result = (float)width / (float)height;
+	result = g_ViModes[0].yscale * result;
 
 	return result * (videoGetAspect() / ((float)SCREEN_WIDTH_LO / (float)SCREEN_HEIGHT_LO));
 }
 
 void playerUpdateShake(void)
 {
+	struct coord coord = {0, 0, 0};
 
 	if (g_Vars.currentplayer->isdead == false) {
-		explosionsUpdateShake(&g_Vars.currentplayer->bond2.cameraPos, &g_Vars.currentplayer->bond2.cameraForward);
+		explosionsUpdateShake(&g_Vars.currentplayer->bond2.unk10, &g_Vars.currentplayer->bond2.unk1c, &coord);
 	} else {
 		viShake(0);
 	}
@@ -2876,7 +2884,7 @@ void playerTickTeleport(float *aspectratio)
 	// State 1: TELEPORTSTATE_PREENTER
 	// Wait in this state for 24 ticks
 	if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_PREENTER) {
-		uint32_t time = g_Vars.currentplayer->teleporttime + g_Vars.lvupdate60;
+		u32 time = g_Vars.currentplayer->teleporttime + g_Vars.lvupdate60;
 
 		if (time >= 24) {
 			g_Vars.currentplayer->teleporttime = 0;
@@ -2889,7 +2897,7 @@ void playerTickTeleport(float *aspectratio)
 	// State 2: TELEPORTSTATE_ENTERING
 	// Adjust aspect ratio over 48 ticks
 	if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_ENTERING) {
-		uint32_t time = g_Vars.currentplayer->teleporttime + g_Vars.lvupdate60;
+		u32 time = g_Vars.currentplayer->teleporttime + g_Vars.lvupdate60;
 
 		if (g_Vars.currentplayer->teleporttime == 48) {
 			g_Vars.currentplayer->teleportstate = TELEPORTSTATE_WHITE;
@@ -2910,7 +2918,7 @@ void playerTickTeleport(float *aspectratio)
 	// Adjust aspect ratio over 48 ticks, but with slightly faster
 	// time progression in the first several ticks.
 	if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_EXITING) {
-		uint32_t time = g_Vars.currentplayer->teleporttime + g_Vars.lvupdate60;
+		u32 time = g_Vars.currentplayer->teleporttime + g_Vars.lvupdate60;
 
 		if (g_Vars.currentplayer->teleporttime < 7) {
 			time = g_Vars.currentplayer->teleporttime + 1;
@@ -2933,20 +2941,22 @@ void playerTickTeleport(float *aspectratio)
 	}
 }
 
-void playerConfigureViForCredits(void)
+void playerConfigureVi(void)
 {
+	float ratio = player0f0bd358();
+
 	playermgrSetFovY(PLAYER_DEFAULT_FOV);
-	playermgrSetAspectRatio(videoGetAspect());
-	playermgrSetViewSize(videoGetWidth(), videoGetHeight());
-	playermgrSetViewPosition(-360 * 4, -240 * 2);
+	playermgrSetAspectRatio(ratio);
+	playermgrSetViewSize(playerGetViewportWidth(), playerGetViewportHeight());
+	playermgrSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
 
-	viSetMode();
+	viSetMode(g_ViModes[0].xscale);
 
-	viSetFovAspectAndSize(PLAYER_DEFAULT_FOV, videoGetAspect(), videoGetWidth(), videoGetHeight());
+	viSetFovAspectAndSize(PLAYER_DEFAULT_FOV, ratio, playerGetViewportWidth(), playerGetViewportHeight());
 
-	viSetViewPosition(0, 0);
-	viSetSize(videoGetWidth(), videoGetHeight());
-	viSetBufSize(videoGetWidth(), videoGetHeight());
+	viSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
+	viSetSize(playerGetFbWidth(), playerGetFbHeight());
+	viSetBufSize(playerGetFbWidth(), playerGetFbHeight());
 }
 
 void playerTick()
@@ -2954,7 +2964,7 @@ void playerTick()
 	float aspectratio;
 	float f20;
 	
-	aspectratio = playerGetAspect();
+	aspectratio = player0f0bd358();
 
 	if (var8007083c != TELEPORTSTATE_INACTIVE) {
 		var8007083c = TELEPORTSTATE_INACTIVE;
@@ -2971,7 +2981,7 @@ void playerTick()
 	playermgrSetViewSize(playerGetViewportWidth(), playerGetViewportHeight());
 	playermgrSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
 
-	viSetMode();
+	viSetMode(g_ViModes[0].xscale);
 	viSetFovAspectAndSize(PLAYER_DEFAULT_FOV, aspectratio, playerGetViewportWidth(), playerGetViewportHeight());
 	viSetViewPosition(playerGetViewportLeft(), playerGetViewportTop());
 	viSetSize(playerGetFbWidth(), playerGetFbHeight());
@@ -2998,8 +3008,8 @@ void playerTick()
 	playerTickExplode();
 
 	// Ben's comment: Check input for gangsta mode. Not sure where to put this so I'll just leave it here for now.
-	int8_t contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex); // Gangsta
-	uint32_t buttonsnow = joyGetButtonsPressedThisFrame(contpadnum, 0xffffffff);
+	s8 contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex); // Gangsta
+	u32 buttonsnow = joyGetButtonsPressedThisFrame(contpadnum, 0xffffffff);
 	if (buttonsnow & CONT_GKEY) {  // Gangsta key pressed
 		g_Vars.currentplayer->wantsgangsta = !g_Vars.currentplayer->wantsgangsta;
 	}
@@ -3007,7 +3017,7 @@ void playerTick()
 	if (g_Vars.currentplayer->eyespy) {
 		// The stage uses an eyespy
 		struct eyespy *eyespy = g_Vars.currentplayer->eyespy;
-		uint32_t playernum = g_Vars.currentplayernum;
+		u32 playernum = g_Vars.currentplayernum;
 
 		if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
 			// Turn off the eyespy if active
@@ -3024,10 +3034,8 @@ void playerTick()
 				// Eyespy is deployed
 				if (g_Vars.currentplayer->eyespy->active) {
 					// And is being controlled
-					playermgrSetFovY(PLAYER_DEFAULT_FOV); // Ben's comment: Reset FOV to default. This fixes a bug where if you zoom in with the Horizon Scanner then switch to the DrugSpy, the DrugSpy will also be zoomed in.
-					viSetFovY(PLAYER_DEFAULT_FOV);
-					int8_t contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-					uint32_t buttons = joyGetButtons(contpad1, 0xffffffff);
+					s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
+					u32 buttons = joyGetButtons(contpad1, 0xffffffff);
 					if (inputKeyJustPressed(VK_ESCAPE)) {
 						buttons |= START_BUTTON;
 					}
@@ -3097,7 +3105,7 @@ void playerTick()
 		g_InCutscene = false;
 	}
 
-	if (g_Vars.tickmode == (uint32_t)TICKMODE_CUTSCENE) {
+	if (g_Vars.tickmode == (u32)TICKMODE_CUTSCENE) {
 		// In a cutscene
 		int i;
 
@@ -3133,7 +3141,7 @@ void playerTick()
 		g_WarpType1Pad = g_Vars.currentplayer->teleportcamerapad;
 		bmoveTick(0, 0, 0, 1);
 		playerExecutePreparedWarp();
-	} else if (g_Vars.currentplayer->visionmode == (uint32_t)VISIONMODE_SLAYERROCKET) {
+	} else if (g_Vars.currentplayer->visionmode == (u32)VISIONMODE_SLAYERROCKET) {
 		// Controlling a Slayer rocket
 		struct coord rocketpos = {0, 0, 0};
 		struct coord sp2f0 = {0, 0, 1};
@@ -3201,13 +3209,13 @@ void playerTick()
 
 			if (rocket->base.hidden & OBJHFLAG_PROJECTILE) {
 				struct projectile *projectile = rocket->base.projectile;
-				uint32_t mode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
+				u32 mode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
 				float targetspeed;
-				int8_t contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-				int8_t contpad2 = optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
-				int8_t stickx = 0;
-				int8_t sticky = 0;
-				int8_t rsticky = joyGetRStickY(contpad1);
+				s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
+				s8 contpad2 = optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
+				s8 stickx = 0;
+				s8 sticky = 0;
+				s8 rsticky = joyGetRStickY(contpad1);
 				Mtxf sp1fc;
 				Mtxf sp1bc;
 				Mtxf sp17c;
@@ -3463,9 +3471,9 @@ void playerTick()
 		playerUpdateShake();
 		playerSetCameraMode(CAMERAMODE_DEFAULT);
 
-		spf4.x = g_Vars.currentplayer->bond2.cameraPos.x;
-		spf4.y = g_Vars.currentplayer->bond2.cameraPos.y;
-		spf4.z = g_Vars.currentplayer->bond2.cameraPos.z;
+		spf4.x = g_Vars.currentplayer->bond2.unk10.x;
+		spf4.y = g_Vars.currentplayer->bond2.unk10.y;
+		spf4.z = g_Vars.currentplayer->bond2.unk10.z;
 
 		spf4.x = a + spf4.x;
 		spf4.y = b + spf4.y;
@@ -3473,7 +3481,7 @@ void playerTick()
 
 		player0f0c1840(&spf4,
 				&g_Vars.currentplayer->bond2.unk28,
-				&g_Vars.currentplayer->bond2.cameraForward,
+				&g_Vars.currentplayer->bond2.unk1c,
 				&g_Vars.currentplayer->prop->pos,
 				g_Vars.currentplayer->prop->rooms);
 
@@ -3738,9 +3746,9 @@ void playerTick()
 		bmoveTick(1, 1, true, 0);
 		playerUpdateShake();
 		playerSetCameraMode(CAMERAMODE_DEFAULT);
-		player0f0c1840(&g_Vars.currentplayer->bond2.cameraPos,
+		player0f0c1840(&g_Vars.currentplayer->bond2.unk10,
 				&g_Vars.currentplayer->bond2.unk28,
-				&g_Vars.currentplayer->bond2.cameraForward,
+				&g_Vars.currentplayer->bond2.unk1c,
 				&g_Vars.currentplayer->prop->pos,
 				g_Vars.currentplayer->prop->rooms);
 	} else if (g_Vars.tickmode == TICKMODE_MPSWIRL) {
@@ -3774,8 +3782,8 @@ void playerTick()
 			pad.pos.x -= 100;
 		}
 
-		xdist = pad.pos.x - g_Vars.currentplayer->bond2.cameraPos.x;
-		zdist = pad.pos.z - g_Vars.currentplayer->bond2.cameraPos.z;
+		xdist = pad.pos.x - g_Vars.currentplayer->bond2.unk10.x;
+		zdist = pad.pos.z - g_Vars.currentplayer->bond2.unk10.z;
 		targetangle = atan2f(xdist, zdist);
 
 		if (targetangle > M_TAU) {
@@ -3851,9 +3859,9 @@ void playerTick()
 		bmoveTick(1, 1, 0, 1);
 		playerUpdateShake();
 		playerSetCameraMode(CAMERAMODE_DEFAULT);
-		player0f0c1840(&g_Vars.currentplayer->bond2.cameraPos,
+		player0f0c1840(&g_Vars.currentplayer->bond2.unk10,
 				&g_Vars.currentplayer->bond2.unk28,
-				&g_Vars.currentplayer->bond2.cameraForward,
+				&g_Vars.currentplayer->bond2.unk1c,
 				&g_Vars.currentplayer->prop->pos,
 				g_Vars.currentplayer->prop->rooms);
 	}
@@ -3863,7 +3871,7 @@ void playerTick()
 
 	// Also a leftover from GE? Maybe cancelling fade in mission intros?
 	if (var8007074c) {
-		int8_t contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
+		s8 contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
 
 		if (!lvIsPaused() && joyGetButtonsPressedThisFrame(contpad1, A_BUTTON | B_BUTTON | Z_TRIG | START_BUTTON | R_TRIG)) {
 			var8007074c = 2;
@@ -4037,7 +4045,7 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
-	mtxLookAtReflect(&spd0, lookat,
+	guLookAtReflect(&spd0, lookat,
 			sp74.x, sp74.y, sp74.z,
 			sp80.x, sp80.y, sp80.z,
 			cam_up->x, cam_up->y, cam_up->z);
@@ -4067,10 +4075,10 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	}
 
 	camSetMtxF006c(s0);
-	mtxF2L2(s0->m, s1);
+	guMtxF2L(s0->m, s1);
 	camSetOrthogonalMtxL(s1);
 	mtx00015f04(scale, &sp8c);
-	mtxF2L2(sp8c.m, g_Vars.currentplayer->mtxl005c);
+	guMtxF2L(sp8c.m, g_Vars.currentplayer->mtxl005c);
 	mtx00016820(g_Vars.currentplayer->mtxl005c, g_Vars.currentplayer->mtxl0060);
 	camSetMtxL173c(g_Vars.currentplayer->mtxl005c);
 	camSetMtxL1738(g_Vars.currentplayer->mtxl0060);
@@ -4218,7 +4226,7 @@ Gfx *playerRenderShield(Gfx *gdl)
 		gDPSetPrimColor(gdl++, 0, 0, 0xff, 0xff, 0xff, (int)(175 * f20 * f20));
 		gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_01);
 
-		utilsCalcScreenCoords(&gdl, sp90, sp88, g_TexShieldConfigs->width, g_TexShieldConfigs->height,
+		textureCalcScreenCoords(&gdl, sp90, sp88, g_TexShieldConfigs->width, g_TexShieldConfigs->height,
 				(g_Vars.currentplayer->shieldshowrnd & 1) != 0,
 				(g_Vars.currentplayer->shieldshowrnd & 2) != 0,
 				(g_Vars.currentplayer->shieldshowrnd & 4) != 0,
@@ -4301,6 +4309,7 @@ Gfx *playerRenderHud(Gfx *gdl)
 				&& (!g_Vars.currentplayer->eyespy || (g_Vars.currentplayer->eyespy && !g_Vars.currentplayer->eyespy->active))
 				&& ((g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit) & DEVICE_NIGHTVISION)) {
 			gdl = bviewDrawNvLens(gdl);
+			gdl = bviewDrawNvBinoculars(gdl);
 		} else if (g_Vars.currentplayer->isdead == false
 				&& g_InCutscene == 0
 				&& (!g_Vars.currentplayer->eyespy || (g_Vars.currentplayer->eyespy && !g_Vars.currentplayer->eyespy->active))
@@ -4395,8 +4404,8 @@ Gfx *playerRenderHud(Gfx *gdl)
 							if (g_Vars.coopplayernum >= 0 &&
 									(!g_Vars.bond->isdead || !g_Vars.coop->isdead)) {
 								float totalhealth;
-								uint32_t buddyplayernum = g_Vars.bondplayernum;
-								uint32_t prevplayernum = g_Vars.currentplayernum;
+								u32 buddyplayernum = g_Vars.bondplayernum;
+								u32 prevplayernum = g_Vars.currentplayernum;
 								float stealhealth;
 								float shield;
 
@@ -4449,7 +4458,7 @@ Gfx *playerRenderHud(Gfx *gdl)
 							}
 						}
 					} else {
-						uint32_t playernum = g_Vars.currentplayernum;
+						u32 playernum = g_Vars.currentplayernum;
 						int playercount = PLAYERCOUNT();
 						struct chrdata *chr = g_Vars.currentplayer->prop->chr;
 						int numdeaths = 0;
@@ -4566,11 +4575,11 @@ void playerDie(bool force)
 	playerDieByShooter(shooter, force);
 }
 
-void playerDieByShooter(uint32_t shooter, bool force)
+void playerDieByShooter(u32 shooter, bool force)
 {
 	if (!g_Vars.currentplayer->isdead && (force || !g_Vars.currentplayer->invincible))
 	{
-		uint32_t prevplayernum = g_MpPlayerNum;
+		u32 prevplayernum = g_MpPlayerNum;
 		g_MpPlayerNum = g_Vars.currentplayerstats->mpindex;
 		menuFinalizePlayerDataAndPopDialogs();
 		g_MpPlayerNum = prevplayernum;
@@ -4850,7 +4859,7 @@ void playersClearMemCamRoom(void)
 
 void playerSetPerimEnabled(struct prop *prop, bool enable)
 {
-	uint32_t playernum = playermgrGetPlayerNumByProp(prop);
+	u32 playernum = playermgrGetPlayerNumByProp(prop);
 
 	if (g_Vars.players[playernum]->haschrbody) {
 		chrSetPerimEnabled(prop->chr, enable);

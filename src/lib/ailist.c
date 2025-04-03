@@ -8,7 +8,7 @@
 int g_NumGlobalAilists = 0;
 int g_NumLvAilists = 0;
 
-uint8_t *ailistFindById(int ailistid)
+u8 *ailistFindById(int ailistid)
 {
 	int lower;
 	int upper;

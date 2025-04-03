@@ -1,7 +1,5 @@
 #include <ultra64.h>
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
+#include "constants.h"
 #include "constants.h"
 #include "game/propsnd.h"
 #include "game/weaponutils.h"
@@ -24,6 +22,7 @@
 #include "lib/vi.h"
 #include "data.h"
 #include "types.h"
+#include "string.h"
 
 uint32_t g_NextHudMessageId;
 
@@ -1122,7 +1121,7 @@ void hudmsgsTick(void)
 					sndStart(var80095200, SFX_HUDMSG, NULL, -1, -1, -1, -1, -1);
 				}
 
-				fadeintime = (sqrtf(msg->width * msg->width + msg->height * msg->height) + 132) / 7.0f;
+				fadeintime = (sqrtf(msg->width * msg->width + msg->height * msg->height) + 132) / PALUPF(7.0f);
 
 				msg->timer += g_Vars.lvupdate60;
 
@@ -1160,7 +1159,7 @@ void hudmsgsTick(void)
 			}
 			break;
 		case HUDMSGSTATE_FADINGOUT:
-			fadeouttime = (sqrtf(msg->width * msg->width + msg->height * msg->height) + 92) / 7.0f;
+			fadeouttime = (sqrtf(msg->width * msg->width + msg->height * msg->height) + 92) / PALUPF(7.0f);
 
 			msg->timer += g_Vars.lvupdate60;
 
@@ -1301,7 +1300,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 					bordercolour = (bordercolour & 0xffffff00) + (alpha & 0xff);
 				}
 
-				spc0 = (sqrtf(msg->width * msg->width + msg->height * msg->height) + 132.0f) / 7.0f;
+				spc0 = (sqrtf(msg->width * msg->width + msg->height * msg->height) + 132.0f) / PALUPF(7.0f);
 
 				if (spc0 > 30.0f) {
 					spc0 = 30.0f;
@@ -1317,7 +1316,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 					spc0 = 0.0f;
 				}
 
-				tmp = msg->timer * 7.0f;
+				tmp = msg->timer * PALUPF(7.0f);
 
 				textSetDiagonalBlend(x, y, tmp, DIAGMODE_FADEIN);
 
@@ -1364,7 +1363,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 			{
 				uint32_t bordercolour;
 				uint32_t stack;
-				float spa8 = (sqrtf(msg->width * msg->width + msg->height * msg->height) + 92.0f) / 7.0f;
+				float spa8 = (sqrtf(msg->width * msg->width + msg->height * msg->height) + 92.0f) / PALUPF(7.0f);
 				float tmp;
 
 				bordercolour = msg->textcolour | 0x40;
@@ -1374,7 +1373,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 					bordercolour = (bordercolour & 0xffffff00) + (alpha & 0xff);
 				}
 
-				tmp = (spa8 - msg->timer) * 7.0f;
+				tmp = (spa8 - msg->timer) * PALUPF(7.0f);
 
 				textSetDiagonalBlend(x + msg->width, y + msg->height, tmp, DIAGMODE_FADEOUT);
 

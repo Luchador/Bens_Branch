@@ -7,12 +7,12 @@
  */
 char __alCSeqNextDelta(ALCSeq *seq, int *pDeltaTicks)
 {
-	uint32_t i;
-	uint32_t	firstTime = 0xffffffff;
-	uint32_t lastTicks = seq->lastDeltaTicks;
+	u32 i;
+	u32	firstTime = 0xffffffff;
+	u32 lastTicks = seq->lastDeltaTicks;
 
 	if (!seq->validTracks) {
-		return 0;
+		return FALSE;
 	}
 
 	for (i = 0; i < 16; i++) {
@@ -30,5 +30,5 @@ char __alCSeqNextDelta(ALCSeq *seq, int *pDeltaTicks)
 	seq->deltaFlag = 0;
 	*pDeltaTicks = firstTime;
 
-	return 1;
+	return TRUE;
 }

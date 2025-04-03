@@ -47,7 +47,7 @@ float sphereradius = 100;
 \
 	vertices[i].t += g_TCoordOffset; // Ben's comment: scrolls the T coord around the sphere but honestly I can't see much difference when this is commented out
 
-Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord *arg3, uint8_t arg4, uint8_t arg5, uint8_t arg6, uint8_t arg7, int8_t depth)
+Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, s8 depth)
 {
 	struct coord sp7c;
 	struct coord sp70;
@@ -504,23 +504,20 @@ void nbombsTick(void)
 
 Gfx *nbombsRender(Gfx *gdl)
 {
-	if (g_NbombsActive) 
-	{
-		int i;
-		Gfx *subgdl = NULL;
+	int i;
+	Gfx *subgdl = NULL;
 
-		for (i = 0; i < ARRAYCOUNT(g_Nbombs); i++) {
-			if (g_Nbombs[i].age240 >= 0) {
-				if (!subgdl) {
-					subgdl = nbombCreateGdl();
-				}
-
-				gdl = nbombRender(gdl, &g_Nbombs[i], subgdl);
+	for (i = 0; i < ARRAYCOUNT(g_Nbombs); i++) {
+		if (g_Nbombs[i].age240 >= 0) {
+			if (!subgdl) {
+				subgdl = nbombCreateGdl();
 			}
-		}
 
-		return gdl;
+			gdl = nbombRender(gdl, &g_Nbombs[i], subgdl);
+		}
 	}
+
+	return gdl;
 }
 
 void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)
@@ -564,8 +561,8 @@ void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)
 
 		if (g_Nbombs[index].audiohandle20) {
 			union audioparam param;
-			param.floatparam = 0.4f;
-			audioPostEvent(g_Nbombs[index].audiohandle20, AL_SNDP_PITCH_EVT, param.intparam);
+			param.f32 = 0.4f;
+			audioPostEvent(g_Nbombs[index].audiohandle20, AL_SNDP_PITCH_EVT, param.s32);
 		}
 	}
 
@@ -574,8 +571,8 @@ void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)
 
 		if (g_Nbombs[index].audiohandle24) {
 			union audioparam param;
-			param.floatparam = 0.4f;
-			audioPostEvent(g_Nbombs[index].audiohandle24, AL_SNDP_PITCH_EVT, param.intparam);
+			param.f32 = 0.4f;
+			audioPostEvent(g_Nbombs[index].audiohandle24, AL_SNDP_PITCH_EVT, param.s32);
 		}
 	}
 }

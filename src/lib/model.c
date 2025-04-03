@@ -14,7 +14,6 @@
 #include "lib/model.h"
 #include "data.h"
 #include "types.h"
-#include "game/debug.h"
 
 /**
  * -- Model Definitions --
@@ -1868,7 +1867,7 @@ void modelSetAnimation2(struct model *model, int16_t animnum, int flip, float fs
 			float sp94;
 			struct coord translate = {0, 0, 0};
 			float sp84;
-			uint8_t frameslot;
+			u8 frameslot;
 			struct coord rot1;
 			struct coord scale1;
 			float sp64;
@@ -2228,7 +2227,7 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, float curframe, float e
 				float sine;
 				float cosine;
 				struct coord translate = {0, 0, 0};
-				uint8_t frameslot;
+				u8 frameslot;
 				float f20;
 				int floorcur;
 				int floorend;
@@ -2966,7 +2965,7 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 			}
 		}
 	} else if (renderdata->unk30 == 5) {
-		uint8_t alpha;
+		u8 alpha;
 
 		if (arg1) {
 			gDPPipeSync(renderdata->gdl++);
@@ -3126,7 +3125,7 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 			}
 		}
 	} else if (renderdata->unk30 == 5) {
-		uint8_t alpha;
+		u8 alpha;
 
 		gDPPipeSync(renderdata->gdl++);
 		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
@@ -3337,51 +3336,61 @@ void modelRenderNodeStarGunfire(struct modelrenderdata *renderdata, struct model
 		struct modelrodata_stargunfire *rodata = &node->rodata->stargunfire;
 		int i;
 
-		if (!rodata->gdl)
-		{
-			return;
-		}
+		if (rodata->gdl) {
+			Vtx *src = (Vtx *) rodata->vertices;
+			Vtx *dst = g_ModelVtxAllocatorFunc(rodata->unk00 * 4);
 
-		Vtx *src = (Vtx *) rodata->vertices;
-		Vtx *dst = g_ModelVtxAllocatorFunc(rodata->unk00 * 4);
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, dst);
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2]));
+			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
 
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, dst);
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2]));
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
+			gDPSetFogColor(renderdata->gdl++, 0x00, 0x00, 0x00, 0x00);
+			gSPDisplayList(renderdata->gdl++, rodata->gdl);
 
-		gDPSetFogColor(renderdata->gdl++, 0, 0, 0, 0);
-		gSPDisplayList(renderdata->gdl++, rodata->gdl);
+			for (i = 0; i < rodata->unk00; i++) {
+				uint16_t rand1 = (rngRandom() << 10) & 0xffff;
+				int s4 = ((coss(rand1) << 5) * 181) >> 18;
+				int s3 = ((sins(rand1) << 5) * 181) >> 18;
+				int s1 = rngRandom() >> 31;
+				int mult = 0x10000 - (rngRandom() & 0x3fff);
+				int corner1 = 0x200 + s3;
+				int corner2 = 0x200 - s3;
+				int corner3 = 0x200 - s4;
+				int corner4 = 0x200 + s4;
 
-		for (i = 0; i < rodata->unk00; i++) 
-		{
-			float s4 = 724;
-			float s3 = 0;
-			int mult = 65535 - (rngRandom() & 16383);
+				dst[0] = src[0];
+				dst[1] = src[1];
+				dst[2] = src[2];
+				dst[3] = src[3];
 
-			int texRight = 512 + s3;
-			int texLeft = 512 - s3;
-			int texTop = 512 - s4;
-			int texBottom = 512 + s4;
+				dst[0].s = corner3;
+				dst[0].t = corner2;
+				dst[0].x = (src[(s1 + 0) % 4].x * mult) >> 16;
+				dst[0].y = (src[(s1 + 0) % 4].y * mult) >> 16;
+				dst[0].z = (src[(s1 + 0) % 4].z * mult) >> 16;
 
-			for(int corner = 0; corner < 4; corner++)
-			{
-				dst[corner] = src[corner];
-				dst[corner].x = (src[corner].x * mult) / 65536;
-				dst[corner].y = (src[corner].y * mult) / 65536;
-				dst[corner].z = (src[corner].z * mult) / 65536;
+				dst[1].s = corner1;
+				dst[1].t = corner3;
+				dst[1].x = (src[(s1 + 1) % 4].x * mult) >> 16;
+				dst[1].y = (src[(s1 + 1) % 4].y * mult) >> 16;
+				dst[1].z = (src[(s1 + 1) % 4].z * mult) >> 16;
 
-				switch (corner) {
-					case 0: dst[corner].s = texTop;     dst[corner].t = texLeft;   break;
-					case 1: dst[corner].s = texRight;   dst[corner].t = texTop;    break;
-					case 2: dst[corner].s = texBottom;  dst[corner].t = texRight; break;
-					case 3: dst[corner].s = texLeft;    dst[corner].t = texBottom;;  break;
-				}
+				dst[2].s = corner4;
+				dst[2].t = corner1;
+				dst[2].x = (src[(s1 + 2) % 4].x * mult) >> 16;
+				dst[2].y = (src[(s1 + 2) % 4].y * mult) >> 16;
+				dst[2].z = (src[(s1 + 2) % 4].z * mult) >> 16;
+
+				dst[3].s = corner2;
+				dst[3].t = corner4;
+				dst[3].x = (src[(s1 + 3) % 4].x * mult) >> 16;
+				dst[3].y = (src[(s1 + 3) % 4].y * mult) >> 16;
+				dst[3].z = (src[(s1 + 3) % 4].z * mult) >> 16;
+
+				src += 4;
+				dst += 4;
 			}
-
-			src += 4;
-			dst += 4;
 		}
-		
 	}
 }
 
@@ -3505,15 +3514,15 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 
 		if (rodata->texture) {
 			int centre;
-			uint16_t sp62;
+			u16 sp62;
 			int sp5c;
 			int sp58;
 
 			tconfig = rodata->texture;
 
-			sp62 = (rngRandom() * 1024) & 65535;
-			sp5c = ((int)(cosf(RANDOMFRAC()) * 32768.0f) * tconfig->width * 181) / 262144;
-			sp58 = ((int)(sinf(RANDOMFRAC()) * 32768.0f) * tconfig->width * 181) / 262144;
+			sp62 = (rngRandom() * 1024) & 0xffff;
+			sp5c = (coss(sp62) * tconfig->width * 0xb5) >> 18;
+			sp58 = (sins(sp62) * tconfig->width * 0xb5) >> 18;
 
 			centre = tconfig->width << 4;
 

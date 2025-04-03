@@ -1,6 +1,6 @@
 #include "n_synthInternals.h"
 
-void n_alSynSetVol(N_ALVoice *v, int16_t volume, ALMicroTime t)
+void n_alSynSetVol(N_ALVoice *v, s16 volume, ALMicroTime t)
 {
 	ALParam  *update;
 	ALFilter *f;

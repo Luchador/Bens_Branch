@@ -1,6 +1,4 @@
 #include <ultra64.h>
-#include <math.h>
-#include <stdio.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/menuutils.h"
@@ -1395,13 +1393,15 @@ void menuPushDialog(struct menudialogdef *dialogdef)
 
 					menuOpenDialog(sibling, dialog, &g_Menus[g_MpPlayerNum]);
 
-					dialog->dstx = dialog->x = -videoGetWidth();
+					dialog->dstx = dialog->x = -SCREEN_320;
 					dialog->dsty = dialog->y = (viGetHeight() - dialog->height) / 2;
 					dialog->type = 0;
 
 					sibling = sibling->nextsibling;
 				}
 			}
+
+			if (sibling);
 
 			menuPlaySound(MENUSOUND_OPENDIALOG);
 
@@ -1756,6 +1756,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		struct modelrenderdata renderdata = {NULL, true, 3};
 		Mtxf *matrices;
 		int i;
+		uint32_t stack[3];
 		struct coord tmpcoord;
 		float screenpos[2];
 		Mtxf rotmtx;
@@ -1770,7 +1771,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		// Types 2 and 3 are unused. Type 4 is the credits scrolling logo.
 		if (modeltype < MENUMODELTYPE_3 && g_MenuData.usezbuf) {
 			gdl = viPrepareZbuf(gdl);
-			gdl = viPrepareHudDraw(gdl);
+			gdl = vi0000b1d0(gdl);
 
 			g_MenuData.usezbuf = false;
 
@@ -1832,25 +1833,25 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 			if (menumodel->curposx != menumodel->newposx) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curposx = (menumodel->newposx * 0.002f) + ((1.0f - 0.002f) * menumodel->curposx);
+					menumodel->curposx = (menumodel->newposx * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposx);
 				}
 			}
 
 			if (menumodel->curposy != menumodel->newposy) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curposy = (menumodel->newposy * 0.002f) + ((1.0f - 0.002f) * menumodel->curposy);
+					menumodel->curposy = (menumodel->newposy * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposy);
 				}
 			}
 
 			if (menumodel->curposz != menumodel->newposz) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curposz = (menumodel->newposz * 0.002f) + ((1.0f - 0.002f) * menumodel->curposz);
+					menumodel->curposz = (menumodel->newposz * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposz);
 				}
 			}
 
 			if (menumodel->curscale != menumodel->newscale) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curscale = (menumodel->newscale * 0.002f) + ((1.0f - 0.002f) * menumodel->curscale);
+					menumodel->curscale = (menumodel->newscale * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curscale);
 				}
 			}
 
@@ -2057,8 +2058,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				viSetViewPosition(x1, g_MenuScissorY1);
 				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (x2 - x1), g_MenuScissorY2 - g_MenuScissorY1);
 
-				gdl = viSetupFixedZPerspective(gdl, var800a2048[g_MpPlayerNum]);
-				gdl = viSetupProjectionWithZRange(gdl, znear, zfar);
+				gdl = vi0000af00(gdl, var800a2048[g_MpPlayerNum]);
+				gdl = vi0000aca4(gdl, znear, zfar);
 			}
 		}
 
@@ -2074,10 +2075,10 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		// Set new animation if requested
 		if (menumodel->newanimnum && menumodel->curanimnum != menumodel->newanimnum) {
 			if (menumodel->reverseanim) {
-				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, -0.5f, 0.0f);
+				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, PALUPF(-0.5f), 0.0f);
 				modelSetAnimFrame(&menumodel->bodymodel, modelGetNumAnimFrames(&menumodel->bodymodel));
 			} else {
-				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, 0.5f, 0.0f);
+				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, PALUPF(0.5f), 0.0f);
 			}
 
 			menumodel->curanimnum = menumodel->newanimnum;

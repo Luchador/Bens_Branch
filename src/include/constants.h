@@ -48,6 +48,8 @@
 #define MINFLOAT ((float)-3.40282346638528860e+38)
 #define MAXFLOAT ((float)3.40282346638528860e+38)
 
+#define ABS(val)            ((val) > 0 ? (val) : -(val))
+#define ABSF(val)           ((val) > 0.0f ? (val) : -(val))
 #define ALIGN2(val)         (((val) | 1) ^ 0x1)
 #define ALIGN4(val)         (((val) | 3) ^ 0x3)
 #define ALIGN8(val)         ((((val) + 0x7) | 0x7) ^ 0x7)
@@ -56,8 +58,8 @@
 #define ARRAYCOUNT(a)       (int)(sizeof(a) / sizeof(a[0]))
 #define CHRNAVSEED(chr)     ((g_Vars.lvframe60 >> 9) * 128 + chr->chrnum * 8)
 #define CHRRACE(chr)        (chr ? chr->race : RACE_HUMAN)
-#define CRASH()             *(uint8_t *)0 = 69
-#define CYCLES_PER_FRAME    ((int) 781250)
+#define CRASH()             *(u8 *)0 = 69
+#define CYCLES_PER_FRAME    ((int) 62500000LL*3/4 / 60)
 #define LINEHEIGHT          (11)
 #define MIXCOLOUR(dialog, property) dialog->transitionfrac < 0.0f ? g_MenuColours[dialog->type].property : colourBlend(g_MenuColours[dialog->type2].property, g_MenuColours[dialog->type].property, dialog->colourweight)
 #define MPCHR(index)        ((index) < MAX_PLAYERS ? &g_PlayerConfigsArray[index].base : &g_BotConfigsArray[(index) - MAX_PLAYERS].base)
@@ -96,6 +98,8 @@
 		(p[2] - g_Vars.currentplayer->eraserpos.f[2]) * (p[2] - g_Vars.currentplayer->eraserpos.f[2]))
 
 #define TICKS(val)    (val)
+#define PALUP(val)    (val)
+#define PALUPF(val)   (val)
 #define FRAMEDURATION (1 / 60.0f)
 
 // Macro to convert an ASCII character to N64 font code.
@@ -4229,6 +4233,9 @@
 #define VEHICLEMODE_OFF         0
 #define VEHICLEMODE_ENGINESTART 1
 #define VEHICLEMODE_RUNNING     2
+
+#define VIMODE_NONE 0
+#define VIMODE_LO   1
 
 #define VISIONMODE_NORMAL             0
 #define VISIONMODE_XRAY               1

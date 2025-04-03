@@ -5,8 +5,8 @@
 #include "types.h"
 
 void func0f110bf8(void);
-void filelistCreate(int listnum, uint8_t filetype);
-int filelistFindOrCreate(uint8_t filetype);
+void filelistCreate(int listnum, u8 filetype);
+int filelistFindOrCreate(u8 filetype);
 void filelistInvalidatePak(int device);
 void filelistsTick(void);
 void filelistUpdate(struct filelist *list);

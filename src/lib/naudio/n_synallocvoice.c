@@ -1,6 +1,6 @@
 #include "n_synthInternals.h"
 
-int _allocatePVoice(N_PVoice **pvoice, int16_t priority);
+int _allocatePVoice(N_PVoice **pvoice, s16 priority);
 
 int n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
 {
@@ -36,6 +36,8 @@ int n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
 				update->moredata.i = 368; /* pvoice->offset - 184 */
 
 				n_alEnvmixerParam(voice->pvoice, AL_FILTER_ADD_UPDATE, update);
+			} else {
+				// empty
 			}
 
 			/*
@@ -48,6 +50,8 @@ int n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
 				update->type = AL_FILTER_STOP_VOICE;
 				update->next = 0;
 				n_alEnvmixerParam(voice->pvoice, AL_FILTER_ADD_UPDATE, update);
+			} else {
+				// empty
 			}
 		} else {
 			pvoice->offset = 0;
@@ -59,7 +63,7 @@ int n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
 	return (pvoice != 0);
 }
 
-int _allocatePVoice(N_PVoice **pvoice, int16_t priority)
+int _allocatePVoice(N_PVoice **pvoice, s16 priority)
 {
 	ALLink *dl;
 	N_PVoice *pv;

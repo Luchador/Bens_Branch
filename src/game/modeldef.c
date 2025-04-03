@@ -1,5 +1,4 @@
 #include <ultra64.h>
-#include <stdio.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/bondgun.h"

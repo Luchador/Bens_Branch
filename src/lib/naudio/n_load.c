@@ -1,5 +1,4 @@
 #include "n_synthInternals.h"
-#include <string.h>
 #include <os.h>
 #include "platform.h"
 #include <types.h>
@@ -7,12 +6,12 @@
 #define ADPCMFBYTES      9
 #define LFSAMPLES        4
 
-Acmd *_decodeChunk(Acmd *ptr, N_PVoice *f, int tsam, int nbytes, int16_t outp, int16_t inp, uint32_t flags);
+Acmd *_decodeChunk(Acmd *ptr, N_PVoice *f, int tsam, int nbytes, s16 outp, s16 inp, u32 flags);
 
-Acmd *n_alAdpcmPull(N_PVoice *filter, int16_t *outp, int outCount, Acmd *p)
+Acmd *n_alAdpcmPull(N_PVoice *filter, s16 *outp, int outCount, Acmd *p)
 {
 	Acmd *ptr = p;
-	int16_t inp;
+	s16 inp;
 	int tsam;
 	int nframes;
 	int nbytes;
@@ -212,7 +211,7 @@ int n_alLoadParam(N_PVoice *filter, int paramID, void *param)
 				a->dc_loop.end = a->dc_table->waveInfo.adpcmWave.loop->end;
 				a->dc_loop.count = a->dc_table->waveInfo.adpcmWave.loop->count;
 
-				memcpy(a->dc_lstate, a->dc_table->waveInfo.adpcmWave.loop->state, sizeof(ADPCM_STATE));
+				bcopy(a->dc_table->waveInfo.adpcmWave.loop->state, a->dc_lstate, sizeof(ADPCM_STATE));
 			} else {
 				a->dc_loop.start = a->dc_loop.end = a->dc_loop.count = 0;
 			}
@@ -258,7 +257,7 @@ int n_alLoadParam(N_PVoice *filter, int paramID, void *param)
 	return 0;
 }
 
-Acmd *_decodeChunk(Acmd *ptr, N_PVoice *f, int tsam, int nbytes, int16_t outp, int16_t inp, uint32_t flags)
+Acmd *_decodeChunk(Acmd *ptr, N_PVoice *f, int tsam, int nbytes, s16 outp, s16 inp, u32 flags)
 {
 	intptr_t dramAlign, dramLoc;
 

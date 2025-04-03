@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdbool.h>
 #include "constants.h"
 #include "game/bg.h"
 #include "game/chraction.h"
@@ -109,7 +110,7 @@ void *vtxstoreAllocate(int count, int index, struct modelnode *node, int level)
 	int numchrs;
 	int tally;
 	int rand;
-	uint32_t size;
+	u32 size;
 	//struct chrdata *chrs[6];
 	struct chrdata *chrs[600]; // Increase by factor of 100
 

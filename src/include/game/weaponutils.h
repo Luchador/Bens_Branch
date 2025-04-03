@@ -31,7 +31,7 @@ float gsetGetDamage(struct gset *gset);
 uint8_t gsetGetFireslotDuration(struct gset *gset);
 uint16_t gsetGetSingleShootSound(struct gset *gset);
 bool gsetHasFunctionFlags(struct gset *gset, uint32_t flags);
-int8_t weaponGetNumTicksPerShot(uint32_t weaponnum, uint32_t funcindex);
+s8 weaponGetNumTicksPerShot(uint32_t weaponnum, uint32_t funcindex);
 uint32_t currentPlayerGetSight(void);
 void gsetGetNoiseSettings(struct gset *gset, struct noisesettings *settings);
 struct guncmd *gsetGetPriToSecAnim(struct gset *gset);
