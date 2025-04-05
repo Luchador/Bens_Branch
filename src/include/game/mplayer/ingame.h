@@ -1,9 +1,9 @@
-#ifndef _IN_GAME_MPLAYER_INGAME_H
-#define _IN_GAME_MPLAYER_INGAME_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
+char *mpPlayerGetWeaponOfChoiceName(unsigned int playernum, unsigned int slot);
 MenuItemHandlerResult mpStatsForPlayerDropdownHandler(int operation, struct menuitem *item, union handlerdata *data);
 char *mpMenuTextInGameLimit(struct menuitem *item);
 char *menutextPauseOrUnpause(int arg0);
@@ -20,10 +20,8 @@ MenuItemHandlerResult mpPlayerTitleMenuHandler(int operation, struct menuitem *i
 char *mpMenuTextPlayerTitle(int arg0);
 MenuItemHandlerResult mpConfirmPlayerNameHandler(int operation, struct menuitem *item, union handlerdata *data);
 void mpPushPauseDialog(void);
-void mpPushEndscreenDialog(u32 arg0, u32 playernum);
+void mpPushEndscreenDialog(uint32_t arg0, uint32_t playernum);
 MenuItemHandlerResult menuhandlerMpEndGame(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandler00178018(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpInGameLimitLabel(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpPause(int operation, struct menuitem *item, union handlerdata *data);
-
-#endif

@@ -1,7 +1,5 @@
-#ifndef _IN_GAME_CHALLENGE_H
-#define _IN_GAME_CHALLENGE_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -47,5 +45,3 @@ bool challengeIsCompletedByPlayerWithNumPlayers(int mpchrnum, int index, int num
 void challengeSetCompletedByPlayerWithNumPlayers(uint32_t mpchrnum, int index, int numplayers, bool completed);
 void challengeConsiderMarkingComplete(void);
 bool challengeIsFeatureUnlocked(int feature);
-
-#endif

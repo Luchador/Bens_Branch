@@ -1,7 +1,5 @@
-#ifndef _IN_GAME_DYNTEX_H
-#define _IN_GAME_DYNTEX_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -12,4 +10,3 @@ void dyntexSetCurrentRoom(RoomNum roomnum);
 void dyntexReset(void);
 bool dyntexHasRoom(void);
 
-#endif

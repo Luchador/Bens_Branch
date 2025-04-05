@@ -8,11 +8,13 @@
 #include "game/tex.h"
 #include "game/camera.h"
 #include "game/gfxmemory.h"
+#include "game/mtxutils.h"
 #include "game/sparks.h"
 #include "game/weather.h"
 #include "game/bg.h"
 #include "game/file.h"
 #include "game/lv.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/main.h"
 #include "lib/snd.h"
@@ -247,7 +249,7 @@ void weatherSetBoundaries(struct weatherparticledata *data, int index, float min
 {
 	((float *)(&data->boundarymin))[index] = min;
 	((float *)(&data->boundarymax))[index] = max;
-	((float *)(&data->boundaryrange))[index] = ABS(min) + ABS(max);
+	((float *)(&data->boundaryrange))[index] = fabsf(min) + fabsf(max);
 }
 
 struct weatherparticledata *weatherAllocateParticles(void)
@@ -553,14 +555,14 @@ void weatherTickRain(struct weatherdata *weather)
 			lVar6 = 2;
 
 			// Reset particle
-			particle->pos.x = data->boundarymin.x + RANDOMFRAC() * (ABS(data->boundarymin.x) + ABS(data->boundarymax.x));
-			particle->pos.z = data->boundarymin.z + RANDOMFRAC() * (ABS(data->boundarymin.z) + ABS(data->boundarymax.z));
+			particle->pos.x = data->boundarymin.x + RANDOMFRAC() * (fabsf(data->boundarymin.x) + fabsf(data->boundarymax.x));
+			particle->pos.z = data->boundarymin.z + RANDOMFRAC() * (fabsf(data->boundarymin.z) + fabsf(data->boundarymax.z));
 
 			particle->horizspeed = RANDOMFRAC() + 0.7f;
 
 			particle->inc.y = -(RANDOMFRAC() * g_RainSpeedExtra + weather->raindropfallspeed);
 
-			if (ABS(relativetotal) < 2 && weather->numcurrentsnowflakes != weather->numdesiredparticles) {
+			if (abs(relativetotal) < 2 && weather->numcurrentsnowflakes != weather->numdesiredparticles) {
 				if (weather->numcurrentsnowflakes < weather->numdesiredparticles) {
 					if ((particle->active & 3) == 0) {
 						particle->active = true;
@@ -736,8 +738,8 @@ void weatherTickSnow(struct weatherdata *weather)
 		if (particle->pos.y < data->boundarymin.y) {
 			lVar7 = 2;
 
-			particle->pos.x = data->boundarymin.f[0] + RANDOMFRAC() * (ABS(data->boundarymin.f[0]) + ABS(data->boundarymax.f[0]));
-			particle->pos.z = data->boundarymin.f[2] + RANDOMFRAC() * (ABS(data->boundarymin.f[2]) + ABS(data->boundarymax.f[2]));
+			particle->pos.x = data->boundarymin.f[0] + RANDOMFRAC() * (fabsf(data->boundarymin.f[0]) + fabsf(data->boundarymax.f[0]));
+			particle->pos.z = data->boundarymin.f[2] + RANDOMFRAC() * (fabsf(data->boundarymin.f[2]) + fabsf(data->boundarymax.f[2]));
 
 			particle->horizspeed = RANDOMFRAC() + 0.7f;
 
@@ -745,7 +747,7 @@ void weatherTickSnow(struct weatherdata *weather)
 			particle->inc.x = weather->windspeedx * particle->horizspeed;
 			particle->inc.z = weather->windspeedz * particle->horizspeed;
 
-			if (ABS(relativetotal) < 20 && weather->numcurrentsnowflakes != weather->numdesiredparticles) {
+			if (abs(relativetotal) < 20 && weather->numcurrentsnowflakes != weather->numdesiredparticles) {
 				if (weather->numcurrentsnowflakes < weather->numdesiredparticles) {
 					if ((particle->active & 3) == 0) {
 						particle->active = true;
@@ -838,7 +840,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 		numsparksavailable = 0;
 	}
 
-	osGetCount();
+	utilsGetCount();
 
 	for (i = 0; i < ARRAYCOUNT(timings1); i++) {
 		timings1[i] = 0;
@@ -890,7 +892,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 		numtris = 0;
 
 		mtx4LoadIdentity(&worldtoscreenmtx);
-		mtx00015be0(camGetWorldToScreenMtxf(), &worldtoscreenmtx);
+		mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &worldtoscreenmtx);
 
 		worldtoscreenmtx.m[3][0] = 0.0f;
 		worldtoscreenmtx.m[3][1] = 0.0f;
@@ -1162,7 +1164,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 		gSPColor(gdl++, (uintptr_t)(colours), 2);
 
-		timings2[0] = osGetCount();
+		timings2[0] = utilsGetCount();
 
 		for (p = 0; p < ARRAYCOUNT(particledata->particles); p++) {
 			struct coord sp108;
@@ -1174,14 +1176,14 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 			struct coord spd4;
 
 			if (particle2->active & 3) {
-				timings2[7] = osGetCount();
+				timings2[7] = utilsGetCount();
 
 				sp108.f[0] = particle2->pos.f[0] + particledata->unk3e80.f[0];
 				sp108.f[1] = particle2->pos.f[1] + particledata->unk3e80.f[1];
 				sp108.f[2] = particle2->pos.f[2] + particledata->unk3e80.f[2];
 
-				if (cam0f0b5b9c(&sp108, 150)) {
-					timings1[7] = timings1[7] + osGetCount() - timings2[7];
+				if (camIsPointInFrustum(&sp108, 150)) {
+					timings1[7] = timings1[7] + utilsGetCount() - timings2[7];
 
 					sp218[0] = particle2->pos.f[0];
 					sp218[1] = particle2->pos.f[2];
@@ -1207,8 +1209,8 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 							positions[i].f[2] = particle2->pos.f[2];
 						}
 
-						timings2[1] = osGetCount();
-						timings2[2] = osGetCount();
+						timings2[1] = utilsGetCount();
+						timings2[2] = utilsGetCount();
 
 						if (wetclip && numbadrooms > 0) {
 							spca8.f[0] = spc90.f[0] = (particle2->pos.f[0] + particledata->unk3e80.f[0]) * scale;
@@ -1241,7 +1243,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 								spc9c.f[2] = tmp;
 							}
 
-							timings2[3] = osGetCount();
+							timings2[3] = utilsGetCount();
 
 							for (i = 0; i < numbadrooms; i++) {
 								if (spc9c.f[0] <= g_Rooms[badrooms[i]].bbmax[0]
@@ -1256,13 +1258,13 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 								}
 							}
 
-							timings1[3] = timings1[3] + osGetCount() - timings2[3];
+							timings1[3] = timings1[3] + utilsGetCount() - timings2[3];
 						}
 
-						timings1[2] = timings1[2] + osGetCount() - timings2[2];
+						timings1[2] = timings1[2] + utilsGetCount() - timings2[2];
 
 						if (draw) {
-							timings2[4] = osGetCount();
+							timings2[4] = utilsGetCount();
 
 							cddiv2 = cddiv / 10.0f;
 							rainout2 = rainout / 10.0f;
@@ -1317,8 +1319,8 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 								}
 							}
 
-							timings1[4] = timings1[4] + osGetCount() - timings2[4];
-							timings2[5] = osGetCount();
+							timings1[4] = timings1[4] + utilsGetCount() - timings2[4];
+							timings2[5] = utilsGetCount();
 
 							vertices[vtxindex + 0].t = 256;
 							vertices[vtxindex + 1].s = 256;
@@ -1329,8 +1331,8 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 							vertices[vtxindex + 2].t = 0;
 							vertices[vtxindex + 0].s = 0;
 
-							timings1[5] = timings1[5] + osGetCount() - timings2[5];
-							timings2[6] = osGetCount();
+							timings1[5] = timings1[5] + utilsGetCount() - timings2[5];
+							timings2[6] = utilsGetCount();
 
 							vertices[vtxindex + 0].x = positions[0].f[0];
 							vertices[vtxindex + 0].y = positions[0].f[1];
@@ -1352,8 +1354,8 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 								numtris++;
 							}
 
-							timings1[6] = timings1[6] + osGetCount() - timings2[6];
-							timings1[1] = timings1[1] + osGetCount() - timings2[1];
+							timings1[6] = timings1[6] + utilsGetCount() - timings2[6];
+							timings1[1] = timings1[1] + utilsGetCount() - timings2[1];
 						}
 					}
 
@@ -1467,7 +1469,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 	sp198 = 0;
 
 	mtx4LoadIdentity(&sp1cc);
-	mtx00015be0(camGetWorldToScreenMtxf(), &sp1cc);
+	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &sp1cc);
 
 	sp1cc.m[3][0] = 0.0f;
 	sp1cc.m[3][1] = 0.0f;
@@ -1659,14 +1661,14 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 		s1 = true;
 
 		if (particle->active & 3) {
-			sp1354[0] = osGetCount();
+			sp1354[0] = utilsGetCount();
 
 			sp124.f[0] = particle->pos.f[0] + particledata->unk3e80.f[0];
 			sp124.f[1] = particle->pos.f[1] + particledata->unk3e80.f[1];
 			sp124.f[2] = particle->pos.f[2] + particledata->unk3e80.f[2];
 
-			if (cam0f0b5b9c(&sp124, 5)) {
-				sp137c[0] = sp137c[0] + osGetCount() - sp1354[0];
+			if (camIsPointInFrustum(&sp124, 5)) {
+				sp137c[0] = sp137c[0] + utilsGetCount() - sp1354[0];
 
 				sp21c = particle->pos.f[0];
 				sp220 = particle->pos.f[2];
@@ -1860,10 +1862,10 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 						// Note: Goal writes all the S's first then T's. XBLA uses ST pairs.
 						// And the rain function uses a different order too.
 						{
-							u16 x1;
-							u16 y1;
-							u16 x2;
-							u16 y2;
+							uint16_t x1;
+							uint16_t y1;
+							uint16_t x2;
+							uint16_t y2;
 
 							y2 += 0;
 							x1 = ((p & 1) >> 0) * 8;

@@ -159,7 +159,7 @@ void htbInit(void)
 	g_ScenarioData.htb.token = NULL;
 }
 
-void htbAddPad(s16 padnum)
+void htbAddPad(int16_t padnum)
 {
 	struct scenariodata_htb *data = &g_ScenarioData.htb;
 
@@ -176,7 +176,7 @@ int htbNumProps(void)
 	return 1;
 }
 
-void htbRemoveAmmoCrateAtPad(s16 padnum)
+void htbRemoveAmmoCrateAtPad(int16_t padnum)
 {
 	struct prop *prop = g_Vars.activeprops;
 
@@ -252,9 +252,7 @@ void htbCreateToken(void)
 	// NTSC beta doesn't check the prop type, so it could potentially replace a
 	// player, bot, explosion or smoke.
 	while (prop && count < 20) {
-#if VERSION >= VERSION_NTSC_1_0
 		if (prop->type == PROPTYPE_OBJ)
-#endif
 		{
 			obj = prop->obj;
 
@@ -403,13 +401,6 @@ void htbTickChr(struct chrdata *chr)
 	}
 }
 
-/**
- * @bug: In NTSC Final, the calculation of mins and subsequent subtraction from
- * time240 should use 14400 instead of 7200. This has no noticeable
- * effect unless the score duration is increased to above 30 seconds.
- *
- * PAL recognises that mins will always be 0 and simplifies the calculation.
- */
 Gfx *htbRenderHud(Gfx *gdl)
 {
 	int time240;
@@ -427,22 +418,13 @@ Gfx *htbRenderHud(Gfx *gdl)
 
 		time240 = TICKS(7200) - g_Vars.currentplayerstats->tokenheldtime;
 
-#if VERSION >= VERSION_PAL_BETA
 		secs = (time240 + TICKS(240) - 1) / TICKS(240);
 		sprintf(text, "%d:%02d", 0, secs);
-#else
-		mins = time240 / TICKS(7200);
-		time240 -= TICKS(7200) * mins;
-		secs = (time240 + TICKS(240) - 1) / TICKS(240);
-		sprintf(text, "%d:%02d", mins, secs);
-#endif
 
-#ifndef PLATFORM_N64
 		const int playercount = PLAYERCOUNT();
 		if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 			gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 		}
-#endif
 
 		gdl = textConfigureGfxPipeline(gdl);
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
@@ -451,19 +433,12 @@ Gfx *htbRenderHud(Gfx *gdl)
 		textwidth += x;
 		textheight += y;
 
-#if VERSION >= VERSION_NTSC_1_0
 		gdl = text0f153990(gdl, x, y, textwidth, textheight);
 		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0xa0, viGetWidth(), viGetHeight(), 0, 0);
-#else
-		gdl = text0f153858(gdl, &x, &y, &textwidth, &textheight);
-		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0x88, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 
 		gdl = text0f153780(gdl);
 
-#ifndef PLATFORM_N64
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
-#endif
 	}
 
 	return gdl;

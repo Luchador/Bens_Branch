@@ -1,7 +1,5 @@
-#ifndef IN_GAME_PROPOBJ_H
-#define IN_GAME_PROPOBJ_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -341,5 +339,3 @@ void currentPlayerDropAllItems(void);
 void weaponCreateForPlayerDrop(int weaponnum);
 void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct coord *pos, struct coord *direction, uint8_t weaponnum, struct prop *targetprop);
 void objSetModelPartVisible(struct defaultobj *obj, int partnum, bool visible);
-
-#endif

@@ -1,7 +1,5 @@
-#ifndef IN_GAME_MUSIC_H
-#define IN_GAME_MUSIC_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -42,5 +40,3 @@ void musicEndTemporaryAmbient(void);
 void musicSetXReason(int reason, uint32_t minsecs, uint32_t maxsecs);
 void musicUnsetXReason(int reason);
 void musicTickAmbient(void);
-
-#endif

@@ -1,5 +1,5 @@
-#ifndef _IN_GAME_GUNFX_H
-#define _IN_GAME_GUNFX_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -32,5 +32,3 @@ Gfx *lasersightRenderBeam(Gfx *gdl);
 void lasersightSetBeam(int id, int arg1, struct coord *near, struct coord *far);
 void lasersightSetDot(int arg0, struct coord *pos, struct coord *rot);
 void lasersightFree(int arg0);
-
-#endif

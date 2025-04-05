@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/camera.h"
 #include "game/menuutils.h"
@@ -8,6 +9,7 @@
 #include "game/savebuffer.h"
 #include "game/menugfx.h"
 #include "game/menu.h"
+#include "game/mtxutils.h"
 #include "game/credits.h"
 #include "game/textutils.h"
 #include "game/file.h"
@@ -1521,7 +1523,7 @@ void creditsTick(void)
 		creditsCreatePendingBgLayers(0xffffffff);
 	}
 
-	if (!g_CreditsData->slidesenabled && g_CreditsData->blacktimer60 < (PAL ? 1150 : 1360)) {
+	if (!g_CreditsData->slidesenabled && g_CreditsData->blacktimer60 < 1360) {
 		g_CreditsData->blacktimer60 += g_Vars.diffframe60;
 	}
 }
@@ -1539,7 +1541,7 @@ Gfx *creditsDraw(Gfx *gdl)
 	gdl = vi0000b1d0(gdl);
 	gdl = creditsFillFramebuffer(gdl, 0x000000ff);
 
-	gDPSetScissorFrac(gdl++, G_SC_NON_INTERLACE, 0, 120, viGetWidth() * 4.0f, (viGetHeight() - 30) * 4.0f);
+	gDPSetScissorFrac(gdl++, 0, 120, viGetWidth() * 4.0f, (viGetHeight() - 30) * 4.0f);
 
 	creditsTick();
 
@@ -1574,7 +1576,7 @@ Gfx *creditsDraw(Gfx *gdl)
 			g_CreditsData->menumodel.currotz = g_CreditsData->menumodel.newrotz = 0;
 
 			g_CreditsData->menumodel.newposx = 833.0f - (scrolltimer240 / TICKS(14400.0f)) * 2413.0f;
-			g_CreditsData->menumodel.newposy = VERSION == VERSION_PAL_FINAL ? 65.86 : 70.86;
+			g_CreditsData->menumodel.newposy = 70.86;
 			g_CreditsData->menumodel.newposz = -2050;
 
 			g_CreditsData->menumodel.newscale = 1.467;
@@ -1635,7 +1637,6 @@ Gfx *creditsDraw(Gfx *gdl)
 		g_Vars.antiplayernum = -1;
 
 		lvSetDifficulty(DIFF_A);
-		viBlack(true);
 	}
 
 	return gdl;

@@ -1,17 +1,15 @@
-#ifndef _IN_BSS_H
-#define _IN_BSS_H
-#include <ultra64.h>
+#pragma once
+
 #include "constants.h"
 #include "types.h"
 
-extern OSSched g_Sched;
 extern uint8_t g_SchedSpecialArtifactIndexes[3];
 extern int g_SchedWriteArtifactsIndex;
 extern uint8_t *g_VmMarker;
 extern uint32_t g_VmRamEnd;
 extern uint32_t g_VmVirtualToPhysicalTableEnd;
 extern AMAudioMgr g_AudioManager;
-extern Mtx *var80092870;
+extern Mtx *g_CameraPerspectiveMtxF;
 extern int g_SndMaxFxBusses;
 extern struct seqinstance g_SeqInstances[3];
 extern ALHeap g_SndHeap;
@@ -109,15 +107,15 @@ extern struct anim *g_AnimSlots;
 extern int g_ModelNumObjs;
 extern int g_ModelNumChrs;
 extern struct modelrwdatabinding *g_ModelRwdataBindings[3];
-extern struct coord var8009dd20;
-extern float var8009dd2c;
-extern struct coord var8009dd30;
-extern float var8009dd3c;
-extern struct coord var8009dd40;
-extern float var8009dd4c;
-extern struct coord var8009dd50;
-extern float var8009dd5c;
-extern float var8009dd6c;
+extern struct coord g_CamFrustumTopNormal;
+extern float g_CamFrustumTopOffset;
+extern struct coord g_CamFrustumBottomNormal;
+extern float g_CamFrustumBottomOffset;
+extern struct coord g_CamFrustumLeftNormal;
+extern float g_CamFrustumLeftOffset;
+extern struct coord g_CamFrustumRightNormal;
+extern float g_CamFrustumRightOffset;
+extern float g_CamFrustumViewOffset;
 extern int g_DefaultWeapons[2];
 extern int g_CutsceneCurAnimFrame60;
 extern int16_t g_CutsceneAnimNum;
@@ -166,7 +164,7 @@ extern struct smoke *g_Smokes;
 extern int g_MaxSmokes;
 extern Mtx var800a3448;
 extern Mtx var800a3488;
-extern struct spark g_Sparks[100];
+extern struct spark g_Sparks[MAX_SPARKS];
 extern int g_NextSparkIndex;
 extern struct sparkgroup g_SparkGroups[10];
 extern int g_NextSparkGroupIndex;
@@ -251,5 +249,3 @@ extern struct mpsetup g_MpSetup;
 extern struct bossfile g_BossFile;
 extern struct chrdata *g_MpBotChrPtrs[MAX_BOTS];
 extern bool g_ValidGbcRomFound;
-
-#endif

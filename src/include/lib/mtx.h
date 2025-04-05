@@ -1,33 +1,8 @@
-#ifndef _IN_LIB_MTX_H
-#define _IN_LIB_MTX_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
-void mtx4LoadIdentity(Mtxf *mtx);
-void mtx4MultMtx4InPlace(Mtxf *multmtx, Mtxf *subject);
-void mtx4MultMtx4(Mtxf *mtx1, Mtxf *mtx2, Mtxf *dst);
-void mtx4RotateVecInPlace(Mtxf *mtx, struct coord *vec);
-void mtx4RotateVec(Mtxf *mtx, struct coord *vec, struct coord *dst);
-void mtx4TransformVecInPlace(Mtxf *mtx, struct coord *vec);
-void mtx4TransformVec(Mtxf *mtx, struct coord *vec, struct coord *dst);
-void mtx00015be0(Mtxf *matrix1, Mtxf *matrix2);
-void mtxApplyAffineTransform(Mtxf *arg0, Mtxf *arg1, Mtxf *dst);
-void mtx3Copy(float src[3][3], float dst[3][3]);
-void mtx4Copy(Mtxf *src, Mtxf *dst);
-void mtx3ToMtx4(float src[3][3], Mtxf *dst);
-void mtx4ToMtx3(Mtxf *src, float dst[3][3]);
-void mtx4SetTranslation(struct coord *pos, Mtxf *mtx);
-void mtx00015df0(float arg0, Mtxf *mtx);
-void mtx00015e24(float mult, Mtxf *mtx);
-void mtx00015e4c(float arg0, Mtxf *mtx);
-void mtx00015e80(float mult, Mtxf *mtx);
-void mtx00015ea8(float arg0, Mtxf *mtx);
-void mtx00015edc(float mult, Mtxf *mtx);
-void mtx00015f04(float scale, Mtxf *arg1);
-void mtx00015f4c(float scale, Mtxf *arg1);
-void mtx00015f88(float arg0, Mtxf *arg1);
-void mtxF2L(Mtxf *src, Mtxf *dst);
 void mtx00016110(float mtx1[3][3], float mtx2[3][3]);
 void mtx00016140(float mtx1[3][3], float mtx2[3][3], float dst[3][3]);
 void mtx3LinearTransform(float arg0[3][3], float src[3], float dest[3]);
@@ -46,8 +21,8 @@ void mtx00016760(void);
 void mtx00016784(void);
 void mtx00016798(Mtxf *src, Mtxf *dst);
 void mtx00016820(Mtx *src, Mtx *dst);
-void mtx00016874(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
-void mtx00016ae4(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
+void mtxBuildCameraMatrix(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
+void mtxBuildLookAtMatrix(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
 void mtx00016b58(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
 void mtx00016d58(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
 uint32_t mtx00016dcc(float arg0, float arg1);
@@ -62,5 +37,3 @@ void mtx00017614(float arg0[4][4], float arg1[4][4]);
 float mtx00017a78(float arg0[4][4]);
 float mtx00017c2c(float arg0, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8);
 float mtx00017cbc(float arg0, float arg1, float arg2, float arg3);
-
-#endif

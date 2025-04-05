@@ -1,14 +1,16 @@
-#include <ultra64.h>
-#include <stdint.h>
+#include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "constants.h"
-#include "game/menuutils.h"
 #include "game/debug.h"
+#include "game/file.h"
 #include "game/gfxmemory.h"
+#include "game/lang.h"
+#include "game/menuutils.h"
 #include "game/savebuffer.h"
 #include "game/textutils.h"
-#include "game/file.h"
-#include "game/lang.h"
 #include "fs.h"
 #include "bss.h"
 #include "lib/vi.h"
@@ -18,10 +20,6 @@
 #include "data.h"
 #include "types.h"
 #include "platform.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
 
 #define SPACE_WIDTH 5
 
@@ -88,12 +86,12 @@ struct fontchar *g_CharToRender;
 
 struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
 
-u16 var8007fb3c[] = {
+uint16_t var8007fb3c[] = {
 	0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00,
 	0xff00, 0xff24, 0xff48, 0xff6c, 0xff90, 0xffb4, 0xffd8, 0xffff,
 };
 
-u16 var8007fb5c[] = {
+uint16_t var8007fb5c[] = {
 	0xff00, 0xff58, 0xff74, 0xff90, 0xffac, 0xffc8, 0xffe4, 0xffff,
 	0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff,
 	0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00, 0xff00,
@@ -140,7 +138,7 @@ void textLoadFont(uint8_t *romstart, uint8_t *romend, struct font **fontptr, str
 	font = mempAlloc(len, MEMPOOL_STAGE);
 	chars = font->chars;
 
-	dmaExec(font, (romptr_t) romstart, len);
+	memcpy(font, (const void *) ((romptr_t) romstart), len);
 
 	// Convert pointers
 	for (i = 0; i < NUMCHARS(); i++) {
@@ -683,14 +681,14 @@ Gfx *textMakeCreditVerts(Gfx *gdl, int *arg1, struct fontchar *curchar, struct f
 {
 	int tmp1;
 	int tmp2;
-	s16 sp3e;
-	s16 sp3c;
-	s16 sp3a;
-	s16 sp38;
-	s16 sp36;
-	s16 sp34;
-	s16 sp32;
-	s16 sp30;
+	int16_t sp3e;
+	int16_t sp3c;
+	int16_t sp3a;
+	int16_t sp38;
+	int16_t sp36;
+	int16_t sp34;
+	int16_t sp32;
+	int16_t sp30;
 	Vtx *vertices;
 	Col *colours;
 
@@ -1406,7 +1404,7 @@ void textWrap(int wrapwidth, char *src, char *dst, struct fontchar *chars, struc
 	}
 }
 
-uint8_t *textLoadBMP(const char *filename, u16 *width, u16 *height) {
+uint8_t *textLoadBMP(const char *filename, uint16_t *width, uint16_t *height) {
     FILE *file = fopen(filename, "rb");  // Open in binary mode
     if (!file) {
         printf("Error: Could not open BMP file.\n");
@@ -1475,13 +1473,13 @@ uint8_t *textLoadBMP(const char *filename, u16 *width, u16 *height) {
     return flipped_data;  // Return the flipped image
 }
 
-struct fontchar *createChar(char *filename, u16 index)
+struct fontchar *createChar(char *filename, uint16_t index)
 {
 	struct fontchar *newchar = malloc(sizeof(struct fontchar));
 	newchar->index = index;
 
-	u16 width;
-	u16 height;
+	uint16_t width;
+	uint16_t height;
 
 	if (!newchar) return NULL;  // Handle memory allocation failure
 
@@ -1504,7 +1502,7 @@ struct fontchar *createChar(char *filename, u16 index)
 // Load the characters in the HD Handel Gothic font. The bmp's are named hg_0.bmp, hg_1.bmp, etc...with the images in ASCII order
 void textLoadCustomFont()
 {
-	u16 i = 0;
+	uint16_t i = 0;
 	for (i = 0; i < TOTAL_CHARS; i++) {
 		char filename[20];
 		snprintf(filename, sizeof(filename), "hg_%d.bmp", ASCII_START + i);

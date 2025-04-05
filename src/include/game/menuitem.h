@@ -1,7 +1,5 @@
-#ifndef IN_GAME_MENUITEM_H
-#define IN_GAME_MENUITEM_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -33,9 +31,7 @@ Gfx *menuitemLabelRender(Gfx *gdl, struct menurendercontext *context);
 
 Gfx *menuitemMeterRender(Gfx *gdl, struct menurendercontext *context);
 
-#ifndef PLATFORM_N64
 Gfx *menuitemColorBoxRender(Gfx *gdl, struct menurendercontext *context);
-#endif
 
 Gfx *menuitemSelectableRender(Gfx *gdl, struct menurendercontext *context);
 bool menuitemSelectableTick(struct menuitem *item, struct menuinputs *inputs, uint32_t tickflags);
@@ -73,9 +69,9 @@ void menuitemPlayerStatsInit(struct menuitem *item, union menuitemdata *data);
 Gfx *menuitemControllerRenderLine(Gfx *gdl, int speed, int x1, int y1, int x2, int y2);
 Gfx *menuitemControllerRenderTexture(Gfx *gdl, int x, int y, int texturenum, uint32_t alpha);
 Gfx *menuitemControllerRenderLines(Gfx *gdl, struct menurendercontext *context, int firstindex, int lastindex, int padx, int pady, uint32_t alpha);
-u16 menuitemControllerGetButtonAction(int mode, int buttonnum);
+uint16_t menuitemControllerGetButtonAction(int mode, int buttonnum);
 Gfx *menuitemControllerRenderText(Gfx *gdl, int curmode, struct menurendercontext *context, int padx, int pady, uint32_t valuecolour, uint32_t labelcolour, int8_t prevmode);
-Gfx *menuitemControllerRenderPad(Gfx *gdl, struct menurendercontext *context, int padx, int pady, int curmode, uint32_t alpha, uint32_t colour1, uint32_t colour2, s8 prevmode);
+Gfx *menuitemControllerRenderPad(Gfx *gdl, struct menurendercontext *context, int padx, int pady, int curmode, uint32_t alpha, uint32_t colour1, uint32_t colour2, int8_t prevmode);
 Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context);
 void menuitemControllerInit(union menuitemdata *data);
 
@@ -84,8 +80,4 @@ bool menuitemTick(struct menuitem *item, struct menudialog *dialog, struct menui
 void menuitemInit(struct menuitem *item, union menuitemdata *data);
 Gfx *menuitemOverlay(Gfx *gdl, int16_t x, int16_t y, int16_t x2, int16_t y2, struct menuitem *item, struct menudialog *dialog, union menuitemdata *data);
 
-#ifndef PLATFORM_N64
 int menuitemGetTop(struct menuitem *item, struct menudialog *dialog);
-#endif
-
-#endif

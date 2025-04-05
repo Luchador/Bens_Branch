@@ -1,7 +1,5 @@
-#ifndef _IN_GAME_BOT_H
-#define _IN_GAME_BOT_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -20,7 +18,7 @@ bool botApplyMovement(struct chrdata *chr);
 bool botIsAboutToAttack(struct chrdata *chr, bool arg1);
 int botTick(struct prop *prop);
 float botCalculateMaxSpeed(struct chrdata *chr);
-void bot0f1921f8(struct chrdata *chr, float *move, int numupdates, float arg3);
+void botUpdateSmoothedMovement(struct chrdata *chr, float *move, int numupdates, float arg3);
 void botDisarm(struct chrdata *chr, struct prop *attacker);
 void botSetTarget(struct chrdata *chr, int propnum);
 bool botIsTargetInvisible(struct chrdata *botchr, struct chrdata *otherchr);
@@ -54,5 +52,3 @@ int botIsChrsCtcTokenHeld(struct chrdata *chr);
 bool botShouldReturnCtcToken(struct chrdata *chr);
 int botGetNumTeammatesDefendingHill(struct chrdata *bot);
 void botCheckFetch(struct chrdata *chr);
-
-#endif

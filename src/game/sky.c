@@ -1,8 +1,10 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "constants.h"
 #include "game/quaternion.h"
+#include "game/mtxutils.h"
 #include "game/utils.h"
 #include "game/camera.h"
 #include "game/sky.h"
@@ -19,8 +21,6 @@
 #include "game/gfxmemory.h"
 #include "game/artifacts.h"
 #include "game/player.h"
-
-#define SKYABS(val) (val >= 0.0f ? (val) : -(val))
 
 #define CORNERSTATE_NONE     0x0
 #define CORNERSTATE_BR       0x1
@@ -70,7 +70,7 @@ void skyGetWorldPosFromScreenPos(float left, float top, struct coord *dst)
 	pos[0] = left + camGetScreenLeft();
 	pos[1] = top + camGetScreenTop() + envGetCurrent()->clouds_height;
 
-	cam0f0b4c3c(pos, dst, 100);
+	camProjectScreenToWorldDir(pos, dst, 100);
 	mtx4RotateVecInPlace(mtx, dst);
 }
 
@@ -784,7 +784,7 @@ Gfx *skyRender(Gfx *gdl)
 		int i;
 
 		mtx4MultMtx4(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp3cc);
-		guScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
+		mtxScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
 		mtx4MultMtx4(&sp3cc, &g_SkyMtx, &sp38c);
 
 		for (i = 0; i < numvertices; i++) {
@@ -1265,7 +1265,7 @@ Gfx *skyRender(Gfx *gdl)
 	int i;
 
 	mtx4MultMtx4(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp1ec);
-	guScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
+	mtxScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
 	mtx4MultMtx4(&sp1ec, &g_SkyMtx, &sp1ac);
 
 	for (i = 0; i < numvertices; i++) {
@@ -1316,7 +1316,7 @@ Gfx *skyRender(Gfx *gdl)
 /**
  * Convert a 3D vertex to 2D.
  */
-void skyConvertVertex(struct skyvtx3d *srcvtx, Mtxf *mtx, u16 arg2, float arg3, float arg4, struct skyvtx2d *dstvtx)
+void skyConvertVertex(struct skyvtx3d *srcvtx, Mtxf *mtx, uint16_t arg2, float arg3, float arg4, struct skyvtx2d *dstvtx)
 {
 	float sp68[4];
 	float t;
@@ -1688,23 +1688,23 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 	sp354[0] = sp364[0] * svtx2->t;
 	sp358[0] = sp364[0] * 32767.0f;
 
-	sp330[0] = SKYABS(sp338[0]);
-	sp334[0] = SKYABS(sp33c[0]);
+	sp330[0] = fabsf(sp338[0]);
+	sp334[0] = fabsf(sp33c[0]);
 
-	if (sp330[0] < SKYABS(sp344[0])) {
-		sp330[0] = SKYABS(sp344[0]);
+	if (sp330[0] < fabsf(sp344[0])) {
+		sp330[0] = fabsf(sp344[0]);
 	}
 
-	if (sp334[0] < SKYABS(sp348[0])) {
-		sp334[0] = SKYABS(sp348[0]);
+	if (sp334[0] < fabsf(sp348[0])) {
+		sp334[0] = fabsf(sp348[0]);
 	}
 
-	if (sp330[0] < SKYABS(sp350[0])) {
-		sp330[0] = SKYABS(sp350[0]);
+	if (sp330[0] < fabsf(sp350[0])) {
+		sp330[0] = fabsf(sp350[0]);
 	}
 
-	if (sp334[0] < SKYABS(sp354[0])) {
-		sp334[0] = SKYABS(sp354[0]);
+	if (sp334[0] < fabsf(sp354[0])) {
+		sp334[0] = fabsf(sp354[0]);
 	}
 
 	sp310[0] = svtx0->r + 0.5f;
@@ -1812,8 +1812,8 @@ Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struct
 	sp208[0] = sp368 * (1.0f / 32.0f);
 
 	for (i = 0; i < 8; i++) {
-		sp1d0[i] = SKYABS(sp290[i]) * (1.0f / 32.0f);
-		sp1b0[i] = SKYABS(sp2b0[i]) * (1.0f / 32.0f);
+		sp1d0[i] = fabsf(sp290[i]) * (1.0f / 32.0f);
+		sp1b0[i] = fabsf(sp2b0[i]) * (1.0f / 32.0f);
 	}
 
 	sp1a0[0] = sp200[0] + (2.0f * sp1d0[4]) + sp1b0[4];
@@ -2213,31 +2213,31 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 	sp394[0] = sp3a8[0] * vtx3->t;
 	sp398[0] = sp3a8[0] * 32767.0f;
 
-	sp364[0] = SKYABS(sp36c[0]);
-	sp368[0] = SKYABS(sp370[0]);
+	sp364[0] = fabsf(sp36c[0]);
+	sp368[0] = fabsf(sp370[0]);
 
-	if (sp364[0] < SKYABS(sp378[0])) {
-		sp364[0] = SKYABS(sp378[0]);
+	if (sp364[0] < fabsf(sp378[0])) {
+		sp364[0] = fabsf(sp378[0]);
 	}
 
-	if (sp368[0] < SKYABS(sp37c[0])) {
-		sp368[0] = SKYABS(sp37c[0]);
+	if (sp368[0] < fabsf(sp37c[0])) {
+		sp368[0] = fabsf(sp37c[0]);
 	}
 
-	if (sp364[0] < SKYABS(sp384[0])) {
-		sp364[0] = SKYABS(sp384[0]);
+	if (sp364[0] < fabsf(sp384[0])) {
+		sp364[0] = fabsf(sp384[0]);
 	}
 
-	if (sp368[0] < SKYABS(sp388[0])) {
-		sp368[0] = SKYABS(sp388[0]);
+	if (sp368[0] < fabsf(sp388[0])) {
+		sp368[0] = fabsf(sp388[0]);
 	}
 
-	if (sp364[0] < SKYABS(sp390[0])) {
-		sp364[0] = SKYABS(sp390[0]);
+	if (sp364[0] < fabsf(sp390[0])) {
+		sp364[0] = fabsf(sp390[0]);
 	}
 
-	if (sp368[0] < SKYABS(sp394[0])) {
-		sp368[0] = SKYABS(sp394[0]);
+	if (sp368[0] < fabsf(sp394[0])) {
+		sp368[0] = fabsf(sp394[0]);
 	}
 
 	sp354[0] = sp36c[0]; sp354[1] = sp370[0]; sp354[2] = sp374[0];
@@ -2324,8 +2324,8 @@ Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *vtx0, struct skyvtx2d *vtx1, struc
 	sp23c[0] = sp3ac * (1.0f / 32.0f);
 
 	for (i = 0; i < 4; i++) {
-		sp214[i] = SKYABS(sp2d4[i]) * (1.0f / 32.0f);
-		sp1f4[i] = SKYABS(sp2f4[i]) * (1.0f / 32.0f);
+		sp214[i] = fabsf(sp2d4[i]) * (1.0f / 32.0f);
+		sp1f4[i] = fabsf(sp2f4[i]) * (1.0f / 32.0f);
 	}
 
 	sp1d4[0] = sp234[0] + (2.0f * sp214[0]) + sp1f4[0];
@@ -2422,7 +2422,6 @@ void skyCreateSunArtifact(struct artifact *artifact, int x, int y)
 	int viewheight = viGetViewHeight();
 
 	if (x >= viewleft && x < viewleft + viewwidth && y >= viewtop && y < viewtop + viewheight) {
-#ifndef PLATFORM_N64
 		const int i = (artifact - schedGetWriteArtifacts()) >> 3;
 		struct coord zero = { 0.f };
 		struct environment *env = envGetCurrent();
@@ -2430,11 +2429,10 @@ void skyCreateSunArtifact(struct artifact *artifact, int x, int y)
 		sunpos.x = env->suns[i].pos[0];
 		sunpos.y = env->suns[i].pos[1];
 		sunpos.z = env->suns[i].pos[2];
-		artifact->unk02 = artifactTestLos(&sunpos, &zero, x, y) * 0xfffc;
-#endif
-		artifact->unk08 = &g_ZbufPtr1[(int)camGetScreenWidth() * y + x];
-		artifact->unk0c.u16_2 = x;
-		artifact->unk0c.u16_1 = y;
+		artifact->losCheckResult = artifactTestLos(&sunpos, &zero, x, y) * 0xfffc;
+		artifact->zbufferPixelPtr = &g_ZbufPtr1[(int)camGetScreenWidth() * y + x];
+		artifact->screenPos.screenX = x;
+		artifact->screenPos.screenY = y;
 		artifact->type = ARTIFACTTYPE_CIRCLE;
 	}
 }
@@ -2445,7 +2443,7 @@ float skyGetArtifactGroupIntensityFrac(struct artifact *artifacts)
 	int i;
 
 	for (i = 0; i < 8; i++) {
-		if (artifacts[i].type == ARTIFACTTYPE_CIRCLE && artifacts[i].unk02 == 0xfffc) {
+		if (artifacts[i].type == ARTIFACTTYPE_CIRCLE && artifacts[i].losCheckResult == 0xfffc) {
 			sum += 0.125f;
 		}
 	}
@@ -2614,7 +2612,7 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 					sp12c[1] = radius * 0.50f;
 					sp12c[0] *=  SCREEN_ASPECT / videoGetAspect();
 
-					textureCalcScreenCoords(&gdl, sp134, sp12c, g_TexLightGlareConfigs[5].width, g_TexLightGlareConfigs[5].height, 0, 1, 1, 1);
+					utilsRenderScreenTexture(&gdl, sp134, sp12c, g_TexLightGlareConfigs[5].width, g_TexLightGlareConfigs[5].height, 0, 1, 1, true);
 
 					gDPPipeSync(gdl++);
 					gDPSetColorDither(gdl++, G_CD_BAYER);
@@ -2698,7 +2696,7 @@ Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size,
 
 	sp174[0] *=  SCREEN_ASPECT / videoGetAspect();
 
-	textureCalcScreenCoords(&gdl, sp17c, sp174, g_TexLightGlareConfigs[6].width, g_TexLightGlareConfigs[6].height, 0, 1, 1, 1);
+	utilsRenderScreenTexture(&gdl, sp17c, sp174, g_TexLightGlareConfigs[6].width, g_TexLightGlareConfigs[6].height, 0, 1, 1, true);
 
 	// Render the other artifacts
 	texSelect(&gdl, &g_TexLightGlareConfigs[1], 4, 0, 2, 1, NULL);
@@ -2757,7 +2755,7 @@ Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size,
 
 		sp174[0] *=  SCREEN_ASPECT / videoGetAspect();
 
-		textureCalcScreenCoords(&gdl, sp17c, sp174, g_TexLightGlareConfigs[1].width, g_TexLightGlareConfigs[1].height, 0, 0, 0, 0);
+		utilsRenderScreenTexture(&gdl, sp17c, sp174, g_TexLightGlareConfigs[1].width, g_TexLightGlareConfigs[1].height, 0, 0, 0, false);
 	}
 
 	// Check if the source is close to the center of the screen and create the bloom effect if so

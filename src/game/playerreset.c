@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "constants.h"
 #include "game/bondmove.h"
@@ -208,7 +209,7 @@ void playerReset(void)
 				cmd = (struct cmd32 *)((uintptr_t)cmd + 8);
 				break;
 			case INTROCMD_OUTFIT:
-				g_Vars.currentplayer->bondtype = cmd->param1;
+				g_Vars.currentplayer->outfit = cmd->param1;
 				cmd = (struct cmd32 *)((uintptr_t)cmd + 8);
 				break;
 			case INTROCMD_6:
@@ -391,7 +392,7 @@ void playerReset(void)
 			&g_Vars.currentplayer->floortype,
 			&g_Vars.currentplayer->floorflags,
 			&g_Vars.currentplayer->floorroom,
-			0, 0);
+			false, 0);
 
 	pos.y = g_Vars.currentplayer->vv_eyeheight + groundy;
 	g_Vars.currentplayer->vv_manground = groundy;
@@ -449,7 +450,7 @@ void playerReset(void)
 		g_Vars.aibuddies[i] = NULL;
 	}
 
-	playerChooseBodyAndHead(&bodynum, &headnum, 0);
+	playerChooseBodyAndHead(&bodynum, &headnum, false);
 	g_Vars.currentplayer->prop->chr->bodynum = bodynum;
 	g_Vars.currentplayer->prop->chr->headnum = headnum;
 }

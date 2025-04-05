@@ -1,7 +1,5 @@
-#ifndef _IN_GAME_SKY_H
-#define _IN_GAME_SKY_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -32,5 +30,3 @@ Gfx *skyRenderArtifacts(Gfx *gdl);
 void skySetOverexposure(int arg0, int arg1, int arg2);
 int skyCalculateOverexposureComponent(int arg0, int arg1);
 Gfx *skyRenderOverexposure(Gfx *gdl);
-
-#endif

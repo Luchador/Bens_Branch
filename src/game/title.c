@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/title.h"
 #include "game/bondgun.h"
@@ -6,6 +7,7 @@
 #include "game/tex.h"
 #include "game/inv.h"
 #include "game/playermgr.h"
+#include "game/mtxutils.h"
 #include "game/menuutils.h"
 #include "game/gfxmemory.h"
 #include "game/credits.h"
@@ -63,26 +65,6 @@ Lights1 g_TitleLightPdLogoNotFront = gdSPDefLights1(0xff, 0xff, 0xff, 0x00, 0x00
 Lights1 g_TitleLightPdLogoMain = gdSPDefLights1(0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x7f);
 Lights1 g_TitleLightNintendoRare = gdSPDefLights1(0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 Lights1 g_TitleLightRareLogo = gdSPDefLights1(0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x00, 0x7f);
-
-char *mpPlayerGetWeaponOfChoiceName(unsigned int playernum, unsigned int slot)
-{
-	char *name;
-	int weapon1;
-	int weapon2;
-	unsigned int prevplayernum = g_Vars.currentplayernum;
-	int weapon;
-
-	setCurrentPlayerNum(playernum);
-
-	invGetWeaponOfChoice(&weapon1, &weapon2);
-
-	weapon = slot == 1 ? weapon2 : weapon1;
-
-	name = bgunGetName(weapon);
-	setCurrentPlayerNum(prevplayernum);
-
-	return strcat(langRemoveNewline(name), "\n");
-}
 
 void titleSetLight(Lights1 *light, int8_t r, int8_t g, int8_t b, float luminosity, struct coord *dir)
 {
@@ -412,7 +394,8 @@ void titleTickPdLogo(void)
 
 	if (g_PdLogoTriggerExit) {
 		// Exiting due to player not pressing anything
-		if (g_AltTitleEnabled) {
+		//if (g_AltTitleEnabled) {
+		if(true) {
 			g_TitleMode = TITLEMODE_SKIP;
 			creditsRequestAltTitle();
 			g_TitleNextStage = STAGE_CREDITS; // for alt title screen
@@ -424,7 +407,6 @@ void titleTickPdLogo(void)
 			g_Vars.antiplayernum = -1;
 
 			lvSetDifficulty(DIFF_A);
-			viBlack(true);
 		} else {
 			titleSetNextMode(TITLEMODE_SKIP);
 		}
@@ -938,26 +920,25 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	}
 
 	lookat = gfxAllocateLookAt(2);
-	guLookAtReflect(&spf0, lookat, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+	mtxLookAtReflect(&spf0, lookat, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 	gSPLookAt(gdl++, lookat);
 
-	{
-		float angle1;
-		float angle2;
+	float angle1;
+	float angle2;
 
-		angle1 = (g_PdLogoLightDirFrac + -1.0f);
-		angle2 = 0.0f - 0.15f * g_PdLogoLightDirFrac;
-		angle1 = M_PI + angle1 * M_PI;
-		angle2 = M_PI + angle2 * M_PI;
+	angle1 = (g_PdLogoLightDirFrac + -1.0f);
+	angle2 = 0.0f - 0.15f * g_PdLogoLightDirFrac;
+	angle1 = M_PI + angle1 * M_PI;
+	angle2 = M_PI + angle2 * M_PI;
 
-		g_TitleLightPdLogoMain.a.l.col[0] = g_TitleLightPdLogoMain.a.l.col[1] = g_TitleLightPdLogoMain.a.l.col[2] = g_TitleLightPdLogoMain.a.l.colc[0] = g_TitleLightPdLogoMain.a.l.colc[1] = g_TitleLightPdLogoMain.a.l.colc[2] = 0;
-		g_TitleLightPdLogoMain.l[0].l.col[0] = g_TitleLightPdLogoMain.l[0].l.col[1] = g_TitleLightPdLogoMain.l[0].l.col[2] = g_TitleLightPdLogoMain.l[0].l.colc[0] = g_TitleLightPdLogoMain.l[0].l.colc[1] = g_TitleLightPdLogoMain.l[0].l.colc[2] = 0xff;
-		g_TitleLightPdLogoMain.l[0].l.dir[0] = 127.0f * sinf(angle1) * cosf(angle2);
-		g_TitleLightPdLogoMain.l[0].l.dir[1] = 127.0f * sinf(angle2);
-		g_TitleLightPdLogoMain.l[0].l.dir[2] = 127.0f * cosf(angle1) * cosf(angle2);
-	}
+	g_TitleLightPdLogoMain.a.l.col[0] = g_TitleLightPdLogoMain.a.l.col[1] = g_TitleLightPdLogoMain.a.l.col[2] = g_TitleLightPdLogoMain.a.l.colc[0] = g_TitleLightPdLogoMain.a.l.colc[1] = g_TitleLightPdLogoMain.a.l.colc[2] = 0;
+	g_TitleLightPdLogoMain.l[0].l.col[0] = g_TitleLightPdLogoMain.l[0].l.col[1] = g_TitleLightPdLogoMain.l[0].l.col[2] = g_TitleLightPdLogoMain.l[0].l.colc[0] = g_TitleLightPdLogoMain.l[0].l.colc[1] = g_TitleLightPdLogoMain.l[0].l.colc[2] = 0xff;
+	g_TitleLightPdLogoMain.l[0].l.dir[0] = 127.0f * sinf(angle1) * cosf(angle2);
+	g_TitleLightPdLogoMain.l[0].l.dir[1] = 127.0f * sinf(angle2);
+	g_TitleLightPdLogoMain.l[0].l.dir[2] = 127.0f * cosf(angle1) * cosf(angle2);
+	
 
-	mtx00016ae4(&sp2b0, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+	mtxBuildLookAtMatrix(&sp2b0, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
 	model = g_PdLogoUseCombinedModel == true ? g_TitleModel : g_TitleModelNLogo2;
 
@@ -965,7 +946,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	mtx4LoadXRotation(g_PdLogoXRotCur, &sp1a8);
 	mtx4MultMtx4InPlace(&sp1a8, &sp1e8);
 	mtx4MultMtx4(&sp2b0, &sp1e8, &sp270);
-	mtx00015f04(g_PdLogoScale, &sp270);
+	mtxScaleRotationPart(g_PdLogoScale, &sp270);
 
 	g_TitleLightPdLogoNotFront.a.l.col[0] = g_TitleLightPdLogoNotFront.a.l.col[1] = g_TitleLightPdLogoNotFront.a.l.col[2] = g_TitleLightPdLogoNotFront.a.l.colc[0] = g_TitleLightPdLogoNotFront.a.l.colc[1] = g_TitleLightPdLogoNotFront.a.l.colc[2] = 255.0f * g_PdLogoAmbientLightFrac;
 
@@ -1039,7 +1020,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		}
 	}
 
-	gdl = titleRenderPdLogoModel(gdl, model, 1, g_PdLogoFrac, 240, 1.0f, &sp270, gfxAllocateVertices(numvertices), gfxAllocateColours(numcolours));
+	gdl = titleRenderPdLogoModel(gdl, model, true, g_PdLogoFrac, 240, 1.0f, &sp270, gfxAllocateVertices(numvertices), gfxAllocateColours(numcolours));
 
 	gSPSetLights1(gdl++, g_TitleLightPdLogoMain);
 	{
@@ -1047,9 +1028,9 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		mtx4LoadTranslation(&sp64, &sp1e8);
 	}
 
-	mtx00015f88(1.0f + sp13c, &sp1e8);
+	mtxScale3x4(1.0f + sp13c, &sp1e8);
 	mtx4MultMtx4(&sp2b0, &sp1e8, &sp230);
-	mtx00015f04(0.308f, &sp230);
+	mtxScaleRotationPart(0.308f, &sp230);
 
 	// Render the "PERFECT DARK" model
 	if (g_PdLogoTitleStep >= 0) {
@@ -1200,9 +1181,9 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 		sp9c.z = 0.0f;
 
 		mtx4LoadRotation(&sp9c, &spa8);
-		mtx00015f88(fracdone * 0.2f + 1.0f, &spa8);
+		mtxScale3x4(fracdone * 0.2f + 1.0f, &spa8);
 
-		mtx00016ae4(&sp108,
+		mtxBuildLookAtMatrix(&sp108,
 				/* pos  */ 0.0f, 0.0f, 4000,
 				/* look */ 0.0f, 0.0f, 0.0f,
 				/* up   */ 0.0f, 1.0f, 0.0f);
@@ -1290,13 +1271,10 @@ void titleTickRareLogo(void)
 		g_TitleTimer += g_Vars.lvupdate60;
 
 		if (joyGetButtonsPressedThisFrame(0, 0xffffffff)) {
-			if (0 == 1) { // "Warm reset"
-				g_TitleButtonPressed = true;
-				titleSetNextMode(TITLEMODE_PDLOGO);
-			} else if (!g_TitleButtonPressed) {
+			if (!g_TitleButtonPressed) {
 				if (g_TitleTimer < TICKS(60)) {
 					g_TitleButtonPressed = true;
-
+			
 					if (g_TitleTimer < TICKS(100)) {
 						g_TitleTimer = TICKS(100);
 					}
@@ -1389,9 +1367,9 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 	spb4.z = 0;
 
 	mtx4LoadRotation(&spb4, &spc0);
-	mtx00015f88(1 + fracdone * 0.25f, &spc0);
+	mtxScale3x4(1 + fracdone * 0.25f, &spc0);
 
-	mtx00016ae4(&sp118,
+	mtxBuildLookAtMatrix(&sp118,
 			/* pos  */ 0, 0, 4000,
 			/* look */ 0, 0, 0,
 			/* up   */ 0, 1, 0);
@@ -1502,7 +1480,7 @@ void titleInitSkip(void)
 
 	if (g_IsTitleDemo) {
 		g_TitleNextStage = STAGE_DEFECTION;
-		g_IsTitleDemo++;
+		g_IsTitleDemo = false;
 	}
 
 	mainChangeToStage(g_TitleNextStage);
@@ -1512,7 +1490,6 @@ void titleInitSkip(void)
 	g_Vars.antiplayernum = -1;
 
 	lvSetDifficulty(DIFF_A);
-	viBlack(true);
 }
 
 void titleSetNextMode(int mode)
@@ -1553,8 +1530,6 @@ void titleTick(void)
 			break;
 		}
 
-		viBlack(true);
-
 		g_TitleNextMode = -1;
 	}
 
@@ -1594,10 +1569,6 @@ void titleTick(void)
 		case TITLEMODE_SKIP:
 			titleInitSkip();
 			break;
-		}
-
-		if (g_TitleMode != TITLEMODE_SKIP) {
-			viBlack(false);
 		}
 	}
 

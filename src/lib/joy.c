@@ -1,6 +1,6 @@
-#include <ultra64.h>
 #include "constants.h"
 #include "game/pak.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/main.h"
 #include "lib/joy.h"
@@ -47,7 +47,6 @@ struct joydata {
 	int nextsecondlast;
 	unsigned int buttonspressed[NUM_PADS];
 	unsigned int buttonsreleased[NUM_PADS];
-	int unk200;
 };
 
 struct joydata g_JoyData[NUM_DATA];
@@ -72,7 +71,7 @@ bool g_JoyQueuesCreated = false;
 bool g_JoyInitDone = false;
 bool g_JoyNeedsInit = true;
 unsigned int g_JoyCyclicPollDisableCount = 0;
-unsigned int var8005eec0 = 1;
+bool g_AllowTitleInput = true;
 int g_JoyNextPfsStateIndex = 0;
 
 bool g_JoyPfsPollMasterEnabled = true;
@@ -174,7 +173,7 @@ void joyPollPfs(int force)
 			&& !doingit) {
 		doingit = true;
 		prevcount = thiscount;
-		thiscount = osGetCount();
+		thiscount = utilsGetCount();
 		diffcount = (thiscount - prevcount) / 256;
 		value = g_JoyPfsPollInterval * 2;
 
@@ -240,7 +239,6 @@ void joyInit(void)
 		g_JoyData[i].curstart = 0;
 		g_JoyData[i].nextlast = 0;
 		g_JoyData[i].nextsecondlast = 0;
-		g_JoyData[i].unk200 = -1;
 
 		for (j = 0; j < NUM_PADS; j++) {
 			g_JoyData[i].samples[0].pads[j].button = 0;
@@ -279,7 +277,7 @@ void joyReset(void)
 
 		joyCheckStatus();
 
-		var8005eec0 = 1;
+		g_AllowTitleInput = true;
 	}
 }
 
@@ -341,10 +339,6 @@ void joyCheckStatus(void)
 int8_t contGetFreeSlot(void)
 {
 	int i;
-
-	if (g_JoyDataPtr->unk200 >= 0) {
-		return g_JoyDataPtr->unk200;
-	}
 
 	for (i = 0; i < NUM_PADS; i++) {
 		if ((g_JoyConnectedControllers & (1 << i)) == 0) {
@@ -414,10 +408,9 @@ void joyConsumeSamples(struct joydata *joydata)
  * The use of the static variable suggests that the function is able to be
  * called recursively, but its behaviour should not be run when recursing.
  */
-void joy00014238(void)
+void joyTickRumbleOnce(void)
 {
 	static bool doingit = false;
-	int i;
 
 	if (!doingit) {
 		doingit = true;
@@ -438,9 +431,9 @@ void joyDebugJoy(void)
 
 	joyConsumeSamples(&g_JoyData[0]);
 
-	if (joyIsCyclicPollingEnabled() && var8005eec0 && joyGetNumSamples() <= 0) {
+	if (joyIsCyclicPollingEnabled() && g_AllowTitleInput && joyGetNumSamples() <= 0) {
 		joyDisableCyclicPolling();
-		joy00014238();
+		joyTickRumbleOnce();
 		joyEnableCyclicPolling();
 		joyConsumeSamples(&g_JoyData[0]);
 	}
@@ -477,7 +470,7 @@ void joyReadData(void)
 
 void joySetAllowTitleInput(bool value)
 {
-	var8005eec0 = value;
+	g_AllowTitleInput = value;
 }
 
 int joyGetNumSamples(void)
@@ -486,7 +479,7 @@ int joyGetNumSamples(void)
 }
 
 int joyGetRStickXOnSample(int samplenum, int8_t contpadnum) {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsRStickX[contpadnum]++;
 		return 0;
 	}
@@ -499,7 +492,7 @@ int joyGetRStickXOnSample(int samplenum, int8_t contpadnum) {
 }
 
 int joyGetRStickYOnSample(int samplenum, int8_t contpadnum) {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickY[contpadnum]++;
 		return 0;
 	}
@@ -513,7 +506,7 @@ int joyGetRStickYOnSample(int samplenum, int8_t contpadnum) {
 
 int joyGetStickXOnSample(int samplenum, int8_t contpadnum)
 {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickX[contpadnum]++;
 		return 0;
 	}
@@ -527,7 +520,7 @@ int joyGetStickXOnSample(int samplenum, int8_t contpadnum)
 
 int joyGetStickYOnSample(int samplenum, int8_t contpadnum)
 {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickY[contpadnum]++;
 		return 0;
 	}
@@ -541,7 +534,7 @@ int joyGetStickYOnSample(int samplenum, int8_t contpadnum)
 
 int joyGetRStickYOnSampleIndex(int samplenum, int8_t contpadnum)
 {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickY[contpadnum]++;
 		return 0;
 	}
@@ -555,7 +548,7 @@ int joyGetRStickYOnSampleIndex(int samplenum, int8_t contpadnum)
 
 int joyGetStickYOnSampleIndex(int samplenum, int8_t contpadnum)
 {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickY[contpadnum]++;
 		return 0;
 	}
@@ -571,7 +564,7 @@ unsigned int joyGetButtonsOnSample(int samplenum, int8_t contpadnum, unsigned in
 {
 	unsigned int button;
 
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsButtons[contpadnum]++;
 		return 0;
 	}
@@ -590,7 +583,7 @@ unsigned int joyGetButtonsPressedOnSample(int samplenum, int8_t contpadnum, unsi
 	unsigned int button1;
 	unsigned int button2;
 
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsButtonsPressed[contpadnum]++;
 		return 0;
 	}
@@ -619,7 +612,7 @@ int joyCountButtonsOnSpecificSamples(unsigned int *checksamples, int8_t contpadn
 	int i;
 	unsigned int button;
 
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsButtons[contpadnum]++;
 		return 0;
 	}
@@ -652,7 +645,7 @@ int joyCountButtonsOnSpecificSamples(unsigned int *checksamples, int8_t contpadn
 
 int8_t joyGetStickX(int8_t contpadnum)
 {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickX[contpadnum]++;
 		return 0;
 	}
@@ -665,7 +658,7 @@ int8_t joyGetStickX(int8_t contpadnum)
 }
 
 int8_t joyGetRStickX(int8_t contpadnum) {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsRStickX[contpadnum]++;
 		return 0;
 	}
@@ -678,7 +671,7 @@ int8_t joyGetRStickX(int8_t contpadnum) {
 }
 
 int8_t joyGetRStickY(int8_t contpadnum) {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsRStickY[contpadnum]++;
 		return 0;
 	}
@@ -692,7 +685,7 @@ int8_t joyGetRStickY(int8_t contpadnum) {
 
 int8_t joyGetStickY(int8_t contpadnum)
 {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsStickY[contpadnum]++;
 		return 0;
 	}
@@ -706,7 +699,7 @@ int8_t joyGetStickY(int8_t contpadnum)
 
 unsigned int joyGetButtons(int8_t contpadnum, unsigned int mask)
 {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsButtons[contpadnum]++;
 		return 0;
 	}
@@ -720,7 +713,7 @@ unsigned int joyGetButtons(int8_t contpadnum, unsigned int mask)
 
 unsigned int joyGetButtonsPressedThisFrame(int8_t contpadnum, unsigned int mask)
 {
-	if (g_JoyDataPtr->unk200 < 0 && (g_JoyConnectedControllers >> contpadnum & 1) == 0) {
+	if ((g_JoyConnectedControllers >> contpadnum & 1) == 0) {
 		g_JoyBadReadsButtonsPressed[contpadnum]++;
 		return 0;
 	}

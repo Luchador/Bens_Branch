@@ -1,7 +1,5 @@
-#ifndef _IN_GAME_WEATHER_H
-#define _IN_GAME_WEATHER_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -23,5 +21,3 @@ bool weatherIsRoomWeatherProof(int room);
 Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2);
 Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2);
 void weatherStop(void);
-
-#endif

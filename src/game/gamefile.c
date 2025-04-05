@@ -301,7 +301,7 @@ int gamefileLoad(int device)
 	return -1;
 }
 
-int gamefileSave(int device, int fileid, u16 deviceserial)
+int gamefileSave(int device, int fileid, uint16_t deviceserial)
 {
 	uint32_t value;
 	int newfileid;
@@ -315,7 +315,7 @@ int gamefileSave(int device, int fileid, u16 deviceserial)
 	p1index = g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0 ? 0 : 4;
 	p2index = g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0 ? 1 : 5;
 
-	var80075bd0[0] = 1;
+	var80075bd0[0] = true;
 
 	pakSetBitflag(GAMEFILEFLAG_P1_FORWARDPITCH, g_GameFile.flags, optionsGetForwardPitch(p1index));
 	pakSetBitflag(GAMEFILEFLAG_P1_AUTOAIM, g_GameFile.flags, optionsGetAutoAim(p1index));

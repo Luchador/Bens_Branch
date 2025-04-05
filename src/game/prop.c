@@ -16,6 +16,7 @@
 #include "game/weaponutils.h"
 #include "game/tex.h"
 #include "game/camera.h"
+#include "game/mtxutils.h"
 #include "game/player.h"
 #include "game/playermgr.h"
 #include "game/explosions.h"
@@ -644,8 +645,8 @@ struct prop *shotCalculateHits(int handnum, bool isshooting, struct coord *gunpo
 		hitpos.z = shotdata.gunpos3d.z + shotdata.gundir3d.z * 65536;
 	}
 
-	portal00018148(&playerprop->pos, &shotdata.gunpos3d, playerprop->rooms, spc8, 0, 0);
-	portal00018148(&shotdata.gunpos3d, &hitpos, spc8, spb8, rooms, 30);
+	portalTraceLineThroughRooms(&playerprop->pos, &shotdata.gunpos3d, playerprop->rooms, spc8, 0, 0);
+	portalTraceLineThroughRooms(&shotdata.gunpos3d, &hitpos, spc8, spb8, rooms, 30);
 
 	if (shotdata.gset.weaponnum != WEAPON_FARSIGHT || g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
 		roomsptr = rooms;
@@ -770,7 +771,7 @@ struct prop *shotCalculateHits(int handnum, bool isshooting, struct coord *gunpo
 					exppos.y = shotdata.hits[i].pos.y;
 					exppos.z = shotdata.hits[i].pos.z;
 
-					func0f065e74(&root->pos, root->rooms, &exppos, exprooms);
+					propUpdatePositionRoomsSimple(&root->pos, root->rooms, &exppos, exprooms);
 					explosionCreateSimple(0, &exppos, exprooms, EXPLOSIONTYPE_PHOENIX, g_Vars.currentplayernum);
 				}
 			}
@@ -1001,7 +1002,7 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 	rooms[0] = rooms[130] = -1;
 	spc8[0] = g_Vars.currentplayer->cam_room;
 	spc8[1] = -1;
-	portal00018148(&shotdata.gunpos3d, endpos3d, spc8, spb8, rooms, 30);
+	portalTraceLineThroughRooms(&shotdata.gunpos3d, endpos3d, spc8, spb8, rooms, 30);
 
 	roomsptr = rooms;
 
@@ -1991,7 +1992,7 @@ void propsTickPlayer(bool islastplayer)
 				prop->propupdate60err = g_Vars.lvupdate60 & 3;
 				g_Vars.lvupdate60 >>= 2;
 				g_Vars.lvupdate60f = g_Vars.lvupdate240 / 4.0f;
-				g_Vars.lvupdate60freal = PALUPF(g_Vars.lvupdate60f);
+				g_Vars.lvupdate60freal = g_Vars.lvupdate60f;
 			} else {
 				g_Vars.lvupdate240 = savedlvupdate240;
 				g_Vars.lvupdate60 = savedlvupdate60;
@@ -2055,12 +2056,12 @@ void propsTickPlayer(bool islastplayer)
 					prop->propupdate60err = g_Vars.lvupdate60 & 3;
 					g_Vars.lvupdate60 >>= 2;
 					g_Vars.lvupdate60f = g_Vars.lvupdate240 / 4.0f;
-					g_Vars.lvupdate60freal = PALUPF(g_Vars.lvupdate60f);
+					g_Vars.lvupdate60freal = g_Vars.lvupdate60f;
 				} else {
 					g_Vars.lvupdate240 = savedslotupdate240;
 					g_Vars.lvupdate60 = savedslotupdate240_60;
 					g_Vars.lvupdate60f = savedslotupdate240f;
-					vars->lvupdate60freal = PALUPF(savedslotupdate240f);
+					vars->lvupdate60freal = savedslotupdate240f;
 				}
 
 				// Tick the prop
@@ -2103,7 +2104,7 @@ void propsTickPlayer(bool islastplayer)
 					g_Vars.lvupdate240 = savedslotupdate240;
 					g_Vars.lvupdate60 = savedslotupdate240_60;
 					g_Vars.lvupdate60f = savedslotupdate240f;
-					vars->lvupdate60freal = PALUPF(savedslotupdate240f);
+					vars->lvupdate60freal = savedslotupdate240f;
 				}
 
 				prop->lastupdateframe = g_Vars.updateframe;
@@ -2404,7 +2405,7 @@ void propsTickPadEffects(void)
 	}
 }
 
-void propSetPerimEnabled(struct prop *prop, int enable)
+void propSetPerimEnabled(struct prop *prop, bool enable)
 {
 	if (prop->type == PROPTYPE_CHR) {
 		chrSetPerimEnabled(prop->chr, enable);
@@ -2508,23 +2509,23 @@ float func0f06438c(struct prop *prop, struct coord *arg1, float *arg2, float *ar
 		return -1;
 	}
 
-	cam0f0b4d04(arg1, spa0);
+	camProjectViewToScreen(arg1, spa0);
 	sp94.x = arg2[0];
 	sp94.y = arg1->y;
 	sp94.z = arg1->z;
-	cam0f0b4d04(&sp94, sp8c);
+	camProjectViewToScreen(&sp94, sp8c);
 	sp94.x = arg2[1];
 	sp94.y = arg1->y;
 	sp94.z = arg1->z;
-	cam0f0b4d04(&sp94, sp84);
+	camProjectViewToScreen(&sp94, sp84);
 	sp94.x = arg1->x;
 	sp94.y = arg3[1];
 	sp94.z = arg1->z;
-	cam0f0b4d04(&sp94, sp7c);
+	camProjectViewToScreen(&sp94, sp7c);
 	sp94.x = arg1->x;
 	sp94.y = arg3[0];
 	sp94.z = arg1->z;
-	cam0f0b4d04(&sp94, sp74);
+	camProjectViewToScreen(&sp94, sp74);
 
 	if (sp74[1] >= top && bottom >= sp7c[1]) {
 		sp4c = false;
@@ -2718,7 +2719,7 @@ void autoaimTick(void)
 						if (spac.z < 0) {
 							spac.x = mtx->m[3][0];
 							spac.y = mtx->m[3][1];
-							cam0f0b4d04(&spac, aimpos);
+							camProjectViewToScreen(&spac, aimpos);
 						}
 					}
 				} else {
@@ -3170,13 +3171,14 @@ void propRegisterRooms(struct prop *prop)
 	}
 }
 
-void func0f065d1c(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms, RoomNum *morerooms, unsigned int arg5)
+// Finds which room or rooms newpos is in with the option to get all rooms visited along the way
+void propFindRoomsContainingNewPos(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms, RoomNum *morerooms, unsigned int arg5)
 {
-	RoomNum stackrooms[8];
+	RoomNum stackrooms[8]; // Temp array for holding all rooms the line from pos to newpos passes through
 	int index;
 	int i;
 
-	portal00018148(pos, newpos, rooms, stackrooms, morerooms, arg5);
+	portalTraceLineThroughRooms(pos, newpos, rooms, stackrooms, morerooms, arg5);
 
 	index = 0;
 
@@ -3190,17 +3192,19 @@ void func0f065d1c(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomN
 	newrooms[index] = -1;
 }
 
-void func0f065dd8(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms)
+// Finds which room or rooms newpos is in
+void propFindRoomsContainingNewPosSimple(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms)
 {
-	func0f065d1c(pos, rooms, newpos, newrooms, NULL, 0);
+	propFindRoomsContainingNewPos(pos, rooms, newpos, newrooms, NULL, 0);
 }
 
-void func0f065dfc(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms, RoomNum *morerooms, unsigned int arg5)
+// Tracks which rooms a prop belongs to
+void propUpdatePositionRooms(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms, RoomNum *morerooms, unsigned int arg5)
 {
-	func0f065d1c(pos, rooms, newpos, newrooms, morerooms, arg5);
+	propFindRoomsContainingNewPos(pos, rooms, newpos, newrooms, morerooms, arg5);
 
 	if (newrooms[0] == -1) {
-		func0f065e98(pos, rooms, newpos, newrooms);
+		propResolveNewPositionRooms(rooms, newpos, newrooms); // Fallback method if propFindRoomsContainingNewPos() don't work
 
 		if (morerooms) {
 			roomsAppend(newrooms, morerooms, arg5);
@@ -3208,12 +3212,17 @@ void func0f065dfc(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomN
 	}
 }
 
-void func0f065e74(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms)
+// Faster version of propUpdatePositionRooms() that doesn't check for all rooms encountered along the search path
+void propUpdatePositionRoomsSimple(struct coord *pos, RoomNum *rooms, struct coord *newpos, RoomNum *newrooms)
 {
-	func0f065dfc(pos, rooms, newpos, newrooms, NULL, 0);
+	propUpdatePositionRooms(pos, rooms, newpos, newrooms, NULL, 0);
 }
 
-void func0f065e98(struct coord *pos, RoomNum *rooms, struct coord *pos2, RoomNum *dstrooms)
+/**
+	This function is responsible for determining which room a new position (pos2) belongs to, 
+	falling back to a known list of current rooms (rooms) if it can’t determine a better one
+*/
+void propResolveNewPositionRooms(RoomNum *rooms, struct coord *pos2, RoomNum *dstrooms)
 {
 	RoomNum inrooms[21];
 	RoomNum aboverooms[21];

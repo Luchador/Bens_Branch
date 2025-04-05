@@ -19,7 +19,6 @@
 
 uint32_t g_OsMemSize = 0;
 int g_OsMemSizeMb = 32;
-OSSched g_Sched;
 
 uint8_t *g_MempHeap = NULL;
 uint32_t g_MempHeapSize = 0;
@@ -27,7 +26,7 @@ uint32_t g_MempHeapSize = 0;
 int g_TickRateDiv = 1;
 int g_TickExtraSleep = true;
 
-bool g_SkipIntro = false;
+int g_SkipIntro = 0;
 
 int g_FileAutoSelect = -1;
 
@@ -104,7 +103,7 @@ int main(int argc, const char **argv)
 
 	g_StageNum = sysArgGetInt("--boot-stage", STAGE_TITLE);
 
-	if (g_StageNum == STAGE_TITLE && (sysArgCheck("--skip-intro") || g_SkipIntro)) {
+	if (g_StageNum == STAGE_TITLE && (sysArgCheck("--skip-intro") || g_SkipIntro == 1)) {
 		// shorthand for --boot-stage 0x26
 		g_StageNum = STAGE_CITRAINING;
 	} else if (g_StageNum < 0x01 || g_StageNum > 0x5d) {

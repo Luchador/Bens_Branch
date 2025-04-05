@@ -267,7 +267,6 @@ void ctcInitProps(void)
 				mpchr->team -= scenarioGetMaxTeams();
 			}
 
-#if VERSION >= VERSION_NTSC_1_0
 			mpindex = func0f18d0e8(k);
 
 			if (mpindex >= 0) {
@@ -277,15 +276,6 @@ void ctcInitProps(void)
 					chr->team = 1 << mpchr->team;
 				}
 			}
-#else
-			if (func0f18d0e8(k) >= 0) {
-				struct chrdata *chr = mpGetChrFromPlayerIndex(func0f18d0e8(k));
-
-				if (chr) {
-					chr->team = 1 << mpchr->team;
-				}
-			}
-#endif
 
 			g_ScenarioData.ctc.playercountsperteam[mpchr->team]++;
 		}

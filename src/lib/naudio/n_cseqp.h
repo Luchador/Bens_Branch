@@ -17,10 +17,6 @@
  * Copyright Laws of the United States.
  *====================================================================*/
 
-#ifndef __N_CSEQP__
-#define __N_CSEQP__
+ #pragma once
 
 void	__n_CSPPostNextSeqEvent(N_ALCSPlayer *seqp);
-
-
-#endif /* __N_CSEQP__ */

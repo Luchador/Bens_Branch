@@ -199,7 +199,7 @@ void bossfileSetDefaults(void)
 	g_BossFile.locktype = MPLOCKTYPE_NONE;
 	g_Vars.bossfileid = 0;
 	g_Vars.bossdeviceserial = 0;
-	g_Vars.language = (PAL ? 7 : 0);
+	g_Vars.language = 0;
 	g_AltTitleUnlocked = 0;
 	g_AltTitleEnabled = false;
 

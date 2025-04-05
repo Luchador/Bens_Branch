@@ -6,15 +6,15 @@
 
 extern struct mp3decfourbytes *var8009c650[];
 
-int mp3util000461c0(u8 *buffer, int *a2, int a3, struct mp3decfourbytes *v8, int t0)
+int mp3util000461c0(uint8_t *buffer, int *a2, int a3, struct mp3decfourbytes *v8, int t0)
 {
 	int v4 = t0;
 	int v5 = *buffer;
-	int v6 = (a3 << 8) + (u8)(((v5 << 8) | (u32)buffer[1]) >> (8 - (v4 & 7)));
-	if (*(u8 *)(var8005f6fc + v6)) {
-		return *(u8 *)(var8005f6f8 + v6) & 0xF;
+	int v6 = (a3 << 8) + (uint8_t)(((v5 << 8) | (uint32_t)buffer[1]) >> (8 - (v4 & 7)));
+	if (*(uint8_t *)(var8005f6fc + v6)) {
+		return *(uint8_t *)(var8005f6f8 + v6) & 0xF;
 	}
-	u32 v9 = 0x80u >> (v4 & 7);
+	uint32_t v9 = 0x80u >> (v4 & 7);
 
 	do {
 		int v10;
@@ -35,39 +35,39 @@ int mp3util000461c0(u8 *buffer, int *a2, int a3, struct mp3decfourbytes *v8, int
 	return v8->unk02;
 }
 
-int mp3util00046290(u32 *ptr, u8 s1, u8 t0)
+int mp3util00046290(uint32_t *ptr, uint8_t s1, uint8_t t0)
 {
 	return *ptr << (t0 & 7) >> (32 - s1);
 }
 
-int mp3utilGetBits(u8 *buffer, int *count, int numbits)
+int mp3utilGetBits(uint8_t *buffer, int *count, int numbits)
 {
-	const int result = PD_BE32(*(u32 *)(buffer + (*count >> 3))) << (*count & 7) >> (32 - numbits);
+	const int result = PD_BE32(*(uint32_t *)(buffer + (*count >> 3))) << (*count & 7) >> (32 - numbits);
 	*count += numbits;
 	return result;
 }
 
-int mp3util000462f8(u8 *arg0, int *arg1, int arg2, int arg3, int arg4, int arg5, s16 **arg6, u8 **arg7)
+int mp3util000462f8(uint8_t *arg0, int *arg1, int arg2, int arg3, int arg4, int arg5, int16_t **arg6, uint8_t **arg7)
 {
-	s8 cVar1;
-	u32 uVar2;
-	u32 uVar3;
+	int8_t cVar1;
+	uint32_t uVar2;
+	uint32_t uVar3;
 	int *piVar4;
-	u32 uVar5;
-	s16 *puVar6;
-	u8 *puVar7;
+	uint32_t uVar5;
+	int16_t *puVar6;
+	uint8_t *puVar7;
 	int iVar8;
 
 	struct mp3decfourbytes *s0 = var8009c650[arg2];
 
 	uVar5 = *arg1;
-	puVar6 = (s16 *)*arg6;
-	puVar7 = (u8 *)*arg7;
+	puVar6 = (int16_t *)*arg6;
+	puVar7 = (uint8_t *)*arg7;
 	piVar4 = (int *)(arg0 + (uVar5 >> 3));
 	iVar8 = -arg3;
 
 	while (iVar8 = arg5 + iVar8, iVar8 > 0) {
-		uVar2 = mp3util000461c0((u8 *)piVar4, arg1, arg2, s0, uVar5);
+		uVar2 = mp3util000461c0((uint8_t *)piVar4, arg1, arg2, s0, uVar5);
 		if ((arg4 != 0) && (uVar2 == 0xf)) {
 			uVar2 = mp3util00046290(piVar4, arg4, uVar5);
 			uVar2 = uVar2 + 0xf;
@@ -75,11 +75,11 @@ int mp3util000462f8(u8 *arg0, int *arg1, int arg2, int arg3, int arg4, int arg5,
 		if (uVar2 == 0) {
 			*puVar7 = 0;
 		} else {
-			cVar1 = *(s8 *)piVar4;
+			cVar1 = *(int8_t *)piVar4;
 			uVar3 = uVar5 & 7;
-			piVar4 = (int *)((u8 *)piVar4 + ((uVar3 + 1) >> 3));
+			piVar4 = (int *)((uint8_t *)piVar4 + ((uVar3 + 1) >> 3));
 			uVar5 = uVar5 + 1;
-			if (((u32)cVar1 >> ((7 - uVar3) & 0x1f) & 1) == 0) {
+			if (((uint32_t)cVar1 >> ((7 - uVar3) & 0x1f) & 1) == 0) {
 				*puVar7 = 0;
 			} else {
 				*puVar7 = 1;
@@ -89,17 +89,17 @@ int mp3util000462f8(u8 *arg0, int *arg1, int arg2, int arg3, int arg4, int arg5,
 			uVar3 = mp3util00046290(piVar4, arg4, uVar5);
 			iVar8 = uVar3 + 0xf;
 		}
-		*puVar6 = (s16)uVar2;
-		puVar6[1] = (s16)iVar8;
+		*puVar6 = (int16_t)uVar2;
+		puVar6[1] = (int16_t)iVar8;
 		puVar6 = puVar6 + 2;
 		if (iVar8 == 0) {
 			puVar7[1] = 0;
 		} else {
-			cVar1 = *(s8 *)piVar4;
+			cVar1 = *(int8_t *)piVar4;
 			uVar2 = uVar5 & 7;
-			piVar4 = (int *)((u8 *)piVar4 + ((uVar2 + 1) >> 3));
+			piVar4 = (int *)((uint8_t *)piVar4 + ((uVar2 + 1) >> 3));
 			uVar5 = uVar5 + 1;
-			if (((u32)cVar1 >> ((7 - uVar2) & 0x1f) & 1) == 0) {
+			if (((uint32_t)cVar1 >> ((7 - uVar2) & 0x1f) & 1) == 0) {
 				puVar7[1] = 0;
 			} else {
 				puVar7[1] = 1;
@@ -117,19 +117,19 @@ int mp3util000462f8(u8 *arg0, int *arg1, int arg2, int arg3, int arg4, int arg5,
 	return arg3;
 }
 
-int mp3util000464a8(u8 *arg0, int *arg1, int arg2, int arg3, int arg4, s16 **arg5, u8 **arg6)
+int mp3util000464a8(uint8_t *arg0, int *arg1, int arg2, int arg3, int arg4, int16_t **arg5, uint8_t **arg6)
 {
-	u32 uVar1;
-	u32 uVar2;
+	uint32_t uVar1;
+	uint32_t uVar2;
 	int *piVar3;
 	int iVar4;
-	u32 uVar5;
-	u32 uVar6;
-	u32 uVar7;
-	u32 uVar8;
-	u32 uVar9;
-	s16 *puVar10;
-	u8 *puVar11;
+	uint32_t uVar5;
+	uint32_t uVar6;
+	uint32_t uVar7;
+	uint32_t uVar8;
+	uint32_t uVar9;
+	int16_t *puVar10;
+	uint8_t *puVar11;
 
 	struct mp3decfourbytes *s0 = var8009c650[arg2];
 
@@ -140,42 +140,42 @@ int mp3util000464a8(u8 *arg0, int *arg1, int arg2, int arg3, int arg4, s16 **arg
 
 	if (((int)(arg4 - uVar5) > 0) && (iVar4 = arg3, arg3 + -0x240 < 0)) {
 		do {
-			uVar1 = mp3util000461c0((u8 *)piVar3, arg1, arg2, s0, uVar5);
+			uVar1 = mp3util000461c0((uint8_t *)piVar3, arg1, arg2, s0, uVar5);
 			uVar6 = uVar1 >> 3 & 1;
 			uVar7 = uVar1 >> 2 & 1;
 			uVar8 = uVar1 >> 1 & 1;
 			uVar1 = uVar1 & 1;
-			*puVar10 = (s16)uVar6;
-			puVar10[1] = (s16)uVar7;
-			puVar10[2] = (s16)uVar8;
-			puVar10[3] = (s16)uVar1;
+			*puVar10 = (int16_t)uVar6;
+			puVar10[1] = (int16_t)uVar7;
+			puVar10[2] = (int16_t)uVar8;
+			puVar10[3] = (int16_t)uVar1;
 			uVar2 = mp3util00046290(piVar3, 4, uVar5);
 			uVar9 = 3;
-			*puVar11 = (u8)uVar2;
+			*puVar11 = (uint8_t)uVar2;
 			if (uVar6 != 0) {
 				uVar6 = uVar6 & uVar2 >> 3;
 				uVar9 = 2;
 			}
-			*puVar11 = (u8)uVar6;
+			*puVar11 = (uint8_t)uVar6;
 			if (uVar7 != 0) {
 				uVar7 = uVar7 & uVar2 >> uVar9;
 				uVar9 = uVar9 - 1;
 			}
-			puVar11[1] = (u8)uVar7;
+			puVar11[1] = (uint8_t)uVar7;
 			if (uVar8 != 0) {
 				uVar8 = uVar8 & uVar2 >> (uVar9 & 0x1f);
 				uVar9 = uVar9 - 1;
 			}
-			puVar11[2] = (u8)uVar8;
+			puVar11[2] = (uint8_t)uVar8;
 			if (uVar1 != 0) {
 				uVar1 = uVar1 & uVar2 >> (uVar9 & 0x1f);
 				uVar9 = uVar9 - 1;
 			}
-			puVar11[3] = (u8)uVar1;
+			puVar11[3] = (uint8_t)uVar1;
 			uVar1 = uVar5 & 7;
 			uVar5 = uVar5 - (uVar9 + 1);
 			if ((int)(uVar1 - (uVar9 + 1)) < 0) {
-				piVar3 = (int *)((u8 *)piVar3 - 1);
+				piVar3 = (int *)((uint8_t *)piVar3 - 1);
 			}
 			puVar10 = puVar10 + 4;
 			puVar11 = puVar11 + 4;

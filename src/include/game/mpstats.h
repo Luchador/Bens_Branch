@@ -1,7 +1,5 @@
-#ifndef IN_GAME_MPSTATS_H
-#define IN_GAME_MPSTATS_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -19,5 +17,3 @@ int mpstatsGetPlayerKillCount(void);
 void mpstatsRecordPlayerDeath(void);
 void mpstatsRecordPlayerSuicide(void);
 void mpstatsRecordDeath(int aplayernum, int vplayernum);
-
-#endif

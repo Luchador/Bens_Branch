@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <PR/ultratypes.h>
 #include "types.h"
 #include "constants.h"
 
@@ -19,8 +18,8 @@
 
 #define PD_ALIGN(val, size) (((val) + ((size) - 1)) & ~((size) - 1))
 
-#define PD_PTR_BASE(x, b) (void *)((u8 *)b + (uintptr_t)x)
-#define PD_PTR_BASEOFS(x, b, d) (void *)((u8 *)b - d + (uintptr_t)x)
+#define PD_PTR_BASE(x, b) (void *)((uint8_t *)b + (uintptr_t)x)
+#define PD_PTR_BASEOFS(x, b, d) (void *)((uint8_t *)b - d + (uintptr_t)x)
 
 static inline float swapF32(float x) { *(uint32_t*)&x = PD_BE32(*(uint32_t*)&x); return x; }
 static inline uint32_t swapU32(uint32_t x) { return PD_BE32(x); }
@@ -33,10 +32,10 @@ static inline uint32_t swapUnk(uint32_t x) { assert(0 && "unknown type"); return
 
 #define PD_SWAPPED_VAL(x) _Generic((x), \
 	float: swapF32, \
-	u32: swapU32, \
+	uint32_t: swapU32, \
 	int: swapS32, \
-	u16: swapU16, \
-	s16: swapS16, \
+	uint16_t: swapU16, \
+	int16_t: swapS16, \
 	struct coord: swapCrd, \
 	default: swapUnk	\
 )(x)

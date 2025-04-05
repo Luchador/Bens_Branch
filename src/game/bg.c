@@ -1,39 +1,39 @@
 #include <ultra64.h>
 #include <math.h>
+#include <string.h>
 #include "constants.h"
+#include "game/artifacts.h"
+#include "game/bg.h"
+#include "game/bondgun.h"
+#include "game/camera.h"
+#include "game/chr.h"
 #include "game/debug.h"
 #include "game/dlights.h"
-#include "game/menuutils.h"
-#include "game/portal.h"
-#include "game/room.h"
-#include "game/chr.h"
-#include "game/prop.h"
-#include "game/bondgun.h"
-#include "game/tex.h"
-#include "game/camera.h"
-#include "game/player.h"
-#include "game/sky.h"
-#include "game/stars.h"
 #include "game/dyntex.h"
-#include "game/artifacts.h"
-#include "game/textutils.h"
+#include "game/env.h"
+#include "game/file.h"
 #include "game/gfxmemory.h"
 #include "game/gfxreplace.h"
-#include "game/bg.h"
-#include "game/portalconv.h"
-#include "game/stagetable.h"
-#include "game/env.h"
-#include "game/room.h"
-#include "game/file.h"
 #include "game/lv.h"
+#include "game/menuutils.h"
+#include "game/mtxutils.h"
+#include "game/player.h"
+#include "game/portal.h"
+#include "game/portalconv.h"
+#include "game/prop.h"
+#include "game/room.h"
+#include "game/sky.h"
+#include "game/stagetable.h"
+#include "game/stars.h"
+#include "game/tex.h"
 #include "game/texdecompress.h"
+#include "game/textutils.h"
 #include "game/utils.h"
 #include "game/wallhit.h"
 #include "bss.h"
 #include "lib/dma.h"
 #include "lib/lib_17ce0.h"
 #include "lib/main.h"
-#include "lib/mema.h"
 #include "lib/memp.h"
 #include "lib/mtx.h"
 #include "lib/rng.h"
@@ -111,8 +111,8 @@ struct bgsnake g_BgSnake;
 int g_StageIndex = 1;
 uint8_t *var8007fc08 = NULL;
 
-int16_t var8007fc0c = 0;
-int16_t var8007fc10 = 0;
+int16_t g_RoomStreamingBoostTimer = 0;
+int16_t g_NumRoomLoadsLeftThisFrame = 0; // Number of rooms that are allowed to be loaded in a single frame
 int g_NumRoomsWithGlares = 0;
 int g_CamRoom = 1;
 struct drawslot *g_BgSpecialDrawSlot = &g_BgDrawSlots[60];
@@ -227,11 +227,11 @@ void bgSetRoomOnscreen(int roomnum, int draworder, struct screenbox *box)
 
 			bgUnpausePropsInRoom(roomnum, false);
 
-			if (g_Rooms[roomnum].loaded240 == 0 && var8007fc10 > 0) {
-				var8007fc10--;
+			if (g_Rooms[roomnum].loaded240 == 0 && g_NumRoomLoadsLeftThisFrame > 0) {
+				g_NumRoomLoadsLeftThisFrame--;
 				bgLoadRoom(roomnum);
 			} else if (g_Rooms[roomnum].loaded240 == 0) {
-				var8007fc10--;
+				g_NumRoomLoadsLeftThisFrame--;
 			}
 		}
 	}
@@ -816,14 +816,14 @@ Gfx *bgRenderRoomInXray(Gfx *gdl, int roomnum)
 	}
 
 	if (g_Rooms[roomnum].loaded240 == 0) {
-		if (var8007fc10 > 0) {
-			var8007fc10--;
+		if (g_NumRoomLoadsLeftThisFrame > 0) {
+			g_NumRoomLoadsLeftThisFrame--;
 			bgLoadRoom(roomnum);
 		}
 	}
 
 	if (g_Rooms[roomnum].loaded240 == 0) {
-		var8007fc10--;
+		g_NumRoomLoadsLeftThisFrame--;
 	}
 
 	if (g_Rooms[roomnum].loaded240 == 0) {
@@ -1006,7 +1006,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 				|| stagenum == g_Stages[STAGEINDEX_MBR].id
 				|| stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id)) {
 		gdl = envStopFog(gdl);
-		gdl = vi0000ab78(gdl);
+		gdl = viSetCamNoTranslation(gdl);
 
 		roomnum = -1;
 
@@ -1040,7 +1040,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 			gdl = envStopFog(gdl);
 			gdl = starsRender(gdl);
 			gdl = text0f153780(gdl);
-			gdl = vi0000ab78(gdl);
+			gdl = viSetCamNoTranslation(gdl);
 		}
 
 		if (roomnum != -1) {
@@ -1056,8 +1056,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 
 	// Build an array of room numbers per onscreen prop.
 	// For each onscreen prop there is exactly one entry in the roomnumsbyprop array.
-	roomnumptr = roomnumsbyprop; \
-	if (g_BgNumDrawSlots);
+	roomnumptr = roomnumsbyprop;
 
 	for (ptr = g_Vars.onscreenprops; ptr < g_Vars.endonscreenprops; ptr++) {
 		*roomnumptr = 0;
@@ -1280,7 +1279,7 @@ void bgReset(int stagenum)
 	uint32_t section1compsize;
 	uintptr_t scratch;
 
-	var8007fc0c = 8;
+	g_RoomStreamingBoostTimer = 8;
 	g_BgUnloadDelay240 = 120;
 	g_BgUnloadDelay240_2 = 120;
 	g_StageIndex = bgGetStageIndex(stagenum);
@@ -1772,10 +1771,10 @@ void bgBuildTables(int stagenum)
 		}
 	}
 
-	var8007fc10 = 200;
+	g_NumRoomLoadsLeftThisFrame = 200;
 
 	wallhitReset();
-	func0f002a98();
+	roomResetLights();
 	func0f001c0c();
 }
 
@@ -1837,20 +1836,21 @@ void bgTick(void)
 	tickmode = g_Vars.tickmode;
 
 	if (tickmode == TICKMODE_NORMAL) {
-		var8007fc10 = 4;
+		g_NumRoomLoadsLeftThisFrame = 4;
 
-		if (var8007fc0c)
+		// On the first few frames of gameplay allow 200 rooms to be loaded instead of just 4
+		if (g_RoomStreamingBoostTimer)
 		{
-			var8007fc0c--;
-			var8007fc10 = 200;
+			g_RoomStreamingBoostTimer--;
+			g_NumRoomLoadsLeftThisFrame = 200;
 		}
 	} else {
-		var8007fc0c = 8;
-		var8007fc10 = 200;
+		g_RoomStreamingBoostTimer = 8;
+		g_NumRoomLoadsLeftThisFrame = 200;
 	}
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
-		var8007fc10 = 100;
+		g_NumRoomLoadsLeftThisFrame = 100;
 	}
 
 	g_CamRoom = g_Vars.currentplayer->cam_room;
@@ -1869,7 +1869,7 @@ Gfx *bgRender(Gfx *gdl)
 	gdl = bgScissorToViewport(gdl);
 	gdl = envStopFog(gdl);
 
-	gSPMatrix(gdl++, var80092870, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, g_CameraPerspectiveMtxF, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	gdl = playerLoadMatrix(gdl);
 
@@ -1923,7 +1923,7 @@ Gfx *bgScissorWithinViewport(Gfx *gdl, int viewleft, int viewtop, int viewright,
 			viewbottom = g_Vars.currentplayer->viewtop + g_Vars.currentplayer->viewheight;
 		}
 
-		gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viewleft, viewtop, viewright, viewbottom);
+		gDPSetScissor(gdl++, viewleft, viewtop, viewright, viewbottom);
 	}
 
 	return gdl;
@@ -2035,7 +2035,7 @@ bool bg3dPosTo2dPos(struct coord *cornerpos, struct coord *screenpos)
 	screenpos->z = cornerpos->z;
 
 	mtx4TransformVecInPlace(matrix, screenpos);
-	cam0f0b4d68(screenpos, screenpos->f);
+	camProjectViewToScreenSafe(screenpos, screenpos->f);
 
 	if (screenpos->z > 0) {
 		return false;
@@ -2072,7 +2072,7 @@ bool bgGetPortalScreenBbox(int portalnum, struct screenbox *box)
 
 	for (j = 0; j < len; j++) {
 		if (thing->coord.z <= 0.0f) {
-			cam0f0b4d68(&thing->coord, sp2e4);
+			camProjectViewToScreenSafe(&thing->coord, sp2e4);
 
 			if (numvalid == 0) {
 				sp2d4[0][0] = sp2d4[1][0] = sp2e4[0];
@@ -2261,7 +2261,7 @@ uint32_t bgInflate(uint8_t *src, uint8_t *dst, uint32_t len)
 		result = rzipInflate(src, dst, &scratch);
 	} else {
 		result = len;
-		bcopy(src, dst, len);
+		memcpy(dst, src, len);
 	}
 
 	return result;
@@ -2659,7 +2659,6 @@ void bgTickRooms(void)
 
 			if (numunloaded < 2 && g_Rooms[i].loaded240 == g_BgUnloadDelay240_2) {
 				bgUnloadRoom(i);
-				memaDefrag();
 				numunloaded++;
 			}
 		}
@@ -5287,7 +5286,7 @@ Gfx *bgRenderSceneAndLoadCandidate(Gfx *gdl)
 	}
 
 	// Consider loading one room by finding the load candidate that is closest to the player
-	if (g_BgLoadCandidateTimer240 == 0 && var8007fc10 == 4 && g_Vars.tickmode == TICKMODE_NORMAL) {
+	if (g_BgLoadCandidateTimer240 == 0 && g_NumRoomLoadsLeftThisFrame == 4 && g_Vars.tickmode == TICKMODE_NORMAL) {
 		struct player *player = g_Vars.currentplayer;
 		int i;
 		float value;
@@ -5307,33 +5306,33 @@ Gfx *bgRenderSceneAndLoadCandidate(Gfx *gdl)
 
 					radius = g_Rooms[i].radius;
 
-					if (var8009dd6c + radius < player->projectionmtx->m[2][0] * g_Rooms[i].centre.f[0]
+					if (g_CamFrustumViewOffset + radius < player->projectionmtx->m[2][0] * g_Rooms[i].centre.f[0]
 							+ player->projectionmtx->m[2][1] * g_Rooms[i].centre.f[1]
 							+ player->projectionmtx->m[2][2] * g_Rooms[i].centre.f[2]) {
 						value *= 3.0f;
 					}
 
-					if (var8009dd4c + radius < var8009dd40.f[0] * g_Rooms[i].centre.f[0]
-							+ var8009dd40.f[1] * g_Rooms[i].centre.f[1]
-							+ var8009dd40.f[2] * g_Rooms[i].centre.f[2]) {
+					if (g_CamFrustumLeftOffset + radius < g_CamFrustumLeftNormal.f[0] * g_Rooms[i].centre.f[0]
+							+ g_CamFrustumLeftNormal.f[1] * g_Rooms[i].centre.f[1]
+							+ g_CamFrustumLeftNormal.f[2] * g_Rooms[i].centre.f[2]) {
 						value *= 1.5f;
 					}
 
-					if (var8009dd5c + radius < var8009dd50.f[0] * g_Rooms[i].centre.f[0]
-							+ var8009dd50.f[1] * g_Rooms[i].centre.f[1]
-							+ var8009dd50.f[2] * g_Rooms[i].centre.f[2]) {
+					if (g_CamFrustumRightOffset + radius < g_CamFrustumRightNormal.f[0] * g_Rooms[i].centre.f[0]
+							+ g_CamFrustumRightNormal.f[1] * g_Rooms[i].centre.f[1]
+							+ g_CamFrustumRightNormal.f[2] * g_Rooms[i].centre.f[2]) {
 						value *= 1.5f;
 					}
 
-					if (var8009dd2c + radius < var8009dd20.f[0] * g_Rooms[i].centre.f[0]
-							+ var8009dd20.f[1] * g_Rooms[i].centre.f[1]
-							+ var8009dd20.f[2] * g_Rooms[i].centre.f[2]) {
+					if (g_CamFrustumTopOffset + radius < g_CamFrustumTopNormal.f[0] * g_Rooms[i].centre.f[0]
+							+ g_CamFrustumTopNormal.f[1] * g_Rooms[i].centre.f[1]
+							+ g_CamFrustumTopNormal.f[2] * g_Rooms[i].centre.f[2]) {
 						value *= 2.0f;
 					}
 
-					if (var8009dd3c + radius < var8009dd30.f[0] * g_Rooms[i].centre.f[0]
-							+ var8009dd30.f[1] * g_Rooms[i].centre.f[1]
-							+ var8009dd30.f[2] * g_Rooms[i].centre.f[2]) {
+					if (g_CamFrustumBottomOffset + radius < g_CamFrustumBottomNormal.f[0] * g_Rooms[i].centre.f[0]
+							+ g_CamFrustumBottomNormal.f[1] * g_Rooms[i].centre.f[1]
+							+ g_CamFrustumBottomNormal.f[2] * g_Rooms[i].centre.f[2]) {
 						value *= 2.0f;
 					}
 
@@ -5641,7 +5640,7 @@ void bgSetPortalOpenState(int portal, bool open)
 	g_BgPortals[portal].flags = (g_BgPortals[portal].flags | PORTALFLAG_CLOSED) ^ (open != false);
 }
 
-float var8007fcb4 = 0;
+float g_PortalMidplaneOffset = 0.0f;
 
 int bgFindPortalBetweenPositions(struct coord *pos1, struct coord *pos2)
 {
@@ -5653,7 +5652,7 @@ int bgFindPortalBetweenPositions(struct coord *pos1, struct coord *pos2)
 
 	for (i = 0; g_BgPortals[i].verticesoffset; i++) {
 		if (portalCalculateIntersection(i, pos1, pos2) != PORTALINTERSECTION_NONE) {
-			thisthing = var8007fcb4;
+			thisthing = g_PortalMidplaneOffset;
 
 			if (thisthing < 0) {
 				thisthing = -thisthing;

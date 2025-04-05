@@ -5,7 +5,6 @@
 #include <string.h>
 #include <errno.h>
 #include <PR/os.h>
-#include <PR/ultratypes.h>
 #include "platform.h"
 #include "system.h"
 #include "input.h"
@@ -17,20 +16,9 @@
 #define EEPROM_FNAME "eeprom.bin"
 #define EEPROM_PATH "$S/" EEPROM_FNAME
 
-#define OS_COUNTER_RATE 46875000ULL
-#define OS_COUNTER_NUM (OS_COUNTER_RATE / 1000ULL)
-#define OS_COUNTER_DEN (1000000ULL / 1000ULL)
-
 static uint8_t eeprom[EEPROM_SIZE];
 static char eepromPath[FS_MAXPATH + 1];
 static int eepromLoaded = 0;
-
-/* Time */
-
-uint64_t osGetCount(void)
-{
-	return (sysGetMicroseconds() * OS_COUNTER_NUM) / OS_COUNTER_DEN;
-}
 
 /* Cont */
 
@@ -149,24 +137,3 @@ int osEepromLongWrite(uint8_t address, uint8_t *buffer, int nbytes)
 
 	return 0;
 }
-
-/* libc compatibility wrappers */
-
-#ifndef PLATFORM_OSX
-
-void bzero(void *ptr, size_t size)
-{
-	memset(ptr, 0, size);
-}
-
-void bcopy(const void *src, void *dst, size_t n)
-{
-	memcpy(dst, src, n);
-}
-
-int bcmp(const void *s1, const void *s2, size_t n)
-{
-	return memcmp(s1, s2, n);
-}
-
-#endif

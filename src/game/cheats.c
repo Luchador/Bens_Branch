@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdio.h>
 #include "constants.h"
 #include "lib/sched.h"
 #include "string.h"

@@ -20,6 +20,7 @@
 #include "game/training.h"
 #include "game/gamefile.h"
 #include "game/mplayer/mplayer.h"
+#include "game/debug.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/joy.h"
@@ -29,9 +30,9 @@
 #include "types.h"
 
 uint8_t g_FileState = 0;
-bool var80062944 = false;
-bool var80062948 = false;
-bool var8006294c = false;
+bool g_MainMenuOpen = false;
+bool g_CombatSimMode = false;
+bool g_IsAnyMenuOpen = false;
 
 void menuCountDialogs(void)
 {
@@ -189,7 +190,6 @@ void menuTick(void)
 	if (g_MpMatchHasEnded) {
 		if (g_Vars.lvframenum >= 4) {
 			if (g_Vars.stagenum == STAGE_CITRAINING) {
-				viBlack(false);
 				g_MpNumJoined = 0;
 
 				if (g_Vars.usingadvsetup) {
@@ -227,7 +227,6 @@ void menuTick(void)
 
 			g_MpMatchHasEnded = false;
 		} else {
-			viBlack(true);
 			g_PlayersWithControl[0] = false;
 		}
 	}
@@ -251,7 +250,7 @@ void menuTick(void)
 	g_Vars.unk000498 = 0;
 
 	if (g_MenuData.count > 0) {
-		var8006294c = true;
+		g_IsAnyMenuOpen = true;
 
 		if (g_MenuData.root == MENUROOT_MPSETUP) {
 			if (g_MenuData.unk008 == -1) {
@@ -303,7 +302,7 @@ void menuTick(void)
 				if (g_MenuData.root == MENUROOT_MPSETUP) {
 					// Check if player is joining the game
 					bool canjoin;
-					u32 buttons = joyGetButtonsPressedThisFrame(i, 0xffffffff);
+					uint32_t buttons = joyGetButtonsPressedThisFrame(i, 0xffffffff);
 					canjoin = true;
 
 					if (g_BossFile.locktype == MPLOCKTYPE_CHALLENGE) {
@@ -361,7 +360,7 @@ void menuTick(void)
 				// Note that MPENDSCREEN also refers to coop and anti modes.
 				// Handle re-opening the endscreen by pressing B.
 				if (g_MenuData.root == MENUROOT_MPENDSCREEN) {
-					u32 buttons2 = joyGetButtonsPressedThisFrame(g_PlayerConfigsArray[i].contpad1, 0xffffffff);
+					uint32_t buttons2 = joyGetButtonsPressedThisFrame(g_PlayerConfigsArray[i].contpad1, 0xffffffff);
 
 					if (buttons2 & B_BUTTON) {
 						int playernum = -1;
@@ -398,22 +397,22 @@ void menuTick(void)
 			menuResetAllDialogsAndSetNewRoot(NULL, -5);
 		}
 	} else {
-		var8006294c = false;
+		g_IsAnyMenuOpen = false;
 	}
 
-	if (var8006294c) {
-		if (!var80062948 &&
+	if (g_IsAnyMenuOpen) {
+		if (!g_CombatSimMode &&
 				(g_MenuData.root == MENUROOT_MPSETUP)) {
-			var80062948 = true;
+			g_CombatSimMode = true;
 			filelistCreate(0, FILETYPE_MPPLAYER);
 			filelistCreate(1, FILETYPE_MPSETUP);
 		}
 
-		if (var80062944) {
+		if (g_MainMenuOpen) {
 			filelistsTick();
 		}
 	} else {
-		if (var80062944 == true) {
+		if (g_MainMenuOpen == true) {
 			menuStop();
 		}
 	}

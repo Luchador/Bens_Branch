@@ -1,26 +1,5 @@
-#define VERSION_NTSC_BETA  0
-#define VERSION_NTSC_1_0   1
-#define VERSION_NTSC_FINAL 2
-#define VERSION_PAL_BETA   3
-#define VERSION_PAL_FINAL  4
-#define VERSION_JPN_FINAL  5
-
-#if VERSION >= VERSION_JPN_FINAL
-#include "gamefiles.jpn-final.inc"
-#include "libfiles.jpn-final.inc"
-#elif VERSION >= VERSION_PAL_FINAL
-#include "gamefiles.pal-final.inc"
-#include "libfiles.pal-final.inc"
-#elif VERSION >= VERSION_PAL_BETA
-#include "gamefiles.pal-beta.inc"
-#include "libfiles.pal-beta.inc"
-#elif VERSION >= VERSION_NTSC_1_0
 #include "gamefiles.ntsc-final.inc"
 #include "libfiles.ntsc-final.inc"
-#else
-#include "gamefiles.ntsc-beta.inc"
-#include "libfiles.ntsc-beta.inc"
-#endif
 
 #define BEGIN_SEG(name) \
 	_##name##SegmentStart = ADDR(.name); \
@@ -279,21 +258,12 @@ SECTIONS
 	 * and multi-byte. jpn-final combines them into one segment.
 	 */
 
-#if VERSION == VERSION_JPN_FINAL
-	FONT(jpn)
-#else
+
 	FONT(jpnsingle)
 	FONT(jpnmulti)
-#endif
 
 	/* Subtract based on how much overlap there is */
-#if VERSION == VERSION_JPN_FINAL
-	_fontjpnSegmentRomStart = _fontjpnSegmentRomStart - 0x6f0;
-#elif VERSION >= VERSION_PAL_BETA
-	_fontjpnsingleSegmentRomStart = _fontjpnsingleSegmentRomStart - 0x6f0;
-#elif VERSION >= VERSION_NTSC_1_0
 	_fontjpnsingleSegmentRomStart = _fontjpnsingleSegmentRomStart - 0x6e0;
-#endif
 
 	/***************************************************************************
 	 * animations
@@ -475,19 +445,7 @@ SECTIONS
 	. = 0;
 	_filesSegmentRomStart = __rompos;
 
-#if VERSION == VERSION_JPN_FINAL
-#include "../src/assets/jpn-final/files/list.ld"
-#elif VERSION == VERSION_PAL_FINAL
-#include "../src/assets/pal-final/files/list.ld"
-#elif VERSION == VERSION_PAL_BETA
-#include "../src/assets/pal-beta/files/list.ld"
-#elif VERSION == VERSION_NTSC_FINAL
 #include "../src/assets/ntsc-final/files/list.ld"
-#elif VERSION == VERSION_NTSC_1_0
-#include "../src/assets/ntsc-1.0/files/list.ld"
-#elif VERSION == VERSION_NTSC_BETA
-#include "../src/assets/ntsc-beta/files/list.ld"
-#endif
 
 	_filesSegmentRomEnd = __rompos;
 
@@ -568,16 +526,11 @@ SECTIONS
 	 * -------------------------------------------------------------------------
 	 */
 
-#if VERSION >= VERSION_NTSC_1_0
 	BEGIN_SEG(accessingpak)
 	{
 		build/ROMID/assets/accessingpakZ.o (.data);
 	}
 	END_SEG(accessingpak)
-#else
-	_accessingpakSegmentRomStart = 0;
-	_accessingpakSegmentRomEnd = 0;
-#endif
 
 	BEGIN_SEG(fill)
 	{

@@ -1,6 +1,5 @@
-#ifndef IN_GAME_MENU_H
-#define IN_GAME_MENU_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -94,5 +93,3 @@ MenuItemHandlerResult amPickTargetMenuList(int operation, struct menuitem *item,
 MenuItemHandlerResult menuhandlerRepairPak(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerRetrySavePak(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerWarnRepairPak(int operation, struct menuitem *item, union handlerdata *data);
-
-#endif

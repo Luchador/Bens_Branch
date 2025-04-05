@@ -1,6 +1,5 @@
-#ifndef IN_GAME_BONDBIKE_H
-#define IN_GAME_BONDBIKE_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -20,5 +19,3 @@ int bbike0f0d3840(struct coord *arg0, struct coord *arg1, struct coord *arg2);
 int bbike0f0d3940(struct coord *arg0, struct coord *arg1, struct coord *arg2);
 void bbike0f0d3c60(struct coord *arg0);
 void bbikeTick(void);
-
-#endif

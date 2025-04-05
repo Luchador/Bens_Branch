@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/room.h"
+#include "game/mtxutils.h"
 #include "bss.h"
 #include "lib/mtx.h"
 #include "data.h"
@@ -142,7 +143,7 @@ int roomTouchMtx(int roomnum)
 
 	if (index == -1
 			|| g_Vars.currentplayer->lastroomforoffset != g_RoomMtxBaseRooms[index]
-			|| g_RoomMtxScales[index] != var8005ef10[0]) {
+			|| g_RoomMtxScales[index] != g_MtxFloatToFixedScale[0]) {
 		// There's no cache for this room or it's invalid.
 		// Unlink the old cache item if any and create a new one.
 		if (index != -1) {
@@ -160,7 +161,7 @@ int roomTouchMtx(int roomnum)
 	}
 
 	g_RoomMtxBaseRooms[index] = g_Vars.currentplayer->lastroomforoffset;
-	g_RoomMtxScales[index] = var8005ef10[0];
+	g_RoomMtxScales[index] = g_MtxFloatToFixedScale[0];
 
 	roomPopulateMtx(&mtx, roomnum);
 	mtxF2L(&mtx, &g_RoomMtxMatrices[index]);

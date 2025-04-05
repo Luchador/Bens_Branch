@@ -1,5 +1,5 @@
-#ifndef IN_GAME_TEX_H
-#define IN_GAME_TEX_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -27,5 +27,3 @@ int texGetSizeInBytes(struct tex *tex, int lod);
 void texGetDepthAndSize(struct tex *tex, int *arg1, int *arg2);
 int texLoadFromGdl(Gfx *instart, int gdlsizeinbytes, Gfx *outstart, struct texpool *pool, uint8_t *vtxstart);
 void texCopyGdls(Gfx *src, Gfx *dst, int numbytes);
-
-#endif

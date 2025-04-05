@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
 #include "game/dlights.h"
@@ -429,8 +430,6 @@ uint32_t smokeTick(struct prop *prop)
 		return TICKOP_NONE;
 	}
 
-	// These tick values aren't adjusted for PAL,
-	// so smoke will hang around for longer in PAL versions
 	lvupdate = g_Vars.lvupdate60 < 15 ? (float)g_Vars.lvupdate60 : 15.0f;
 
 	for (i = 0; i < lvupdate; i++) {

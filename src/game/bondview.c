@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/dlights.h"
 #include "game/menuutils.h"
@@ -446,7 +447,7 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
 
 	if (starting) {
 		fullradius = viewheight * 0.5f;
-		startupfrac = startuptimer60 / (PAL ? 41.0f : 50.0f);
+		startupfrac = startuptimer60 / 50.0f;
 		curradius = fullradius * startupfrac;
 		spec = startupfrac * 255.0f;
 

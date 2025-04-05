@@ -1,4 +1,7 @@
-#include <ultra64.h>
+#pragma once
+
+#include <math.h>
+#include <string.h>
 #include "internal.h"
 #include "mp3.h"
 
@@ -1925,7 +1928,7 @@ bool mp3decInit(void)
 		return false;
 	}
 
-	bzero(var8009c640, 10500 * sizeof(struct mp3decfourbytes));
+	memset(var8009c640, 0, 10500 * sizeof(struct mp3decfourbytes));
 
 	for (sp264 = 0; sp264 < 34; sp264++) {
 		sp254 = var8005f670[sp264];
@@ -1946,7 +1949,7 @@ bool mp3decInit(void)
 
 		sp230 = 1;
 		sp228 = 1;
-		bzero(sp28, sizeof(sp28));
+		memset(sp28, 0, sizeof(sp28));
 		sp260 = 1;
 
 		while (sp228) {
@@ -2014,12 +2017,12 @@ bool mp3decInit(void)
 	}
 
 	for (i = 0; i < 8192; i++) {
-		var8009c648[i] = func00045ed0(i, 1.3333333730698f);
+		var8009c648[i] = powf(i, 1.3333333730698f);
 	}
 
 	for (i = 0; i < 256; i++) {
-		var8009c6d8[i] = func00045ed0(2.0f, i * -0.5f);
-		var8009c6dc[i] = func00045ed0(2.0f, i * -2.0f);
+		var8009c6d8[i] = powf(2.0f, i * -0.5f);
+		var8009c6dc[i] = powf(2.0f, i * -2.0f);
 	}
 
 	return true;
@@ -2070,7 +2073,7 @@ bool mp3dec00040164(struct asistream *stream, uint32_t gr, uint32_t ch)
 		sp1b8 = var700579b8[sp1bc].unk00[1];
 	}
 
-	sp60 = func00045ed0(2, (stream->global_gain[gr][ch] - 210.0f) * 0.25f);
+	sp60 = powf(2, (stream->global_gain[gr][ch] - 210.0f) * 0.25f);
 	scale = stream->scalefac_scale[gr][ch];
 
 	for (sfb = 0; sfb < 22; sfb++) {
@@ -2164,7 +2167,7 @@ bool mp3dec00040164(struct asistream *stream, uint32_t gr, uint32_t ch)
 	}
 
 	if (sp48 < 576) {
-		bzero(sp40, stream->unk4660[ch] * 4);
+		memset(sp40, 0, stream->unk4660[ch] * 4);
 		return true;
 	}
 
@@ -2336,9 +2339,9 @@ bool mp3dec00041600(struct asistream *stream, uint32_t gr, uint32_t ch)
 	}
 
 	if (window_switching && block_type == 2) {
-		bcopy(sp70[sp48][sp44][mixed + 1], sp28, 0x10);
+		memcpy(sp28, sp70[sp48][sp44][mixed + 1], 0x10);
 	} else {
-		bcopy(sp70[sp48][sp44][0], sp28, 0x10);
+		memcpy(sp28, sp70[sp48][sp44][0], 0x10);
 	}
 
 	sfb = 0;
@@ -2481,7 +2484,7 @@ bool mp3dec00042238(struct asistream *stream, uint32_t gr, uint32_t ch)
 		if (var8009c650[sp38] == NULL) {
 			sp2c = sp30 - sp48;
 
-			bzero(sp44, sp2c * 2);
+			memset(sp44, 0, sp2c * 2);
 
 			sp44 += sp2c;
 			sp40 += sp2c;
@@ -2504,7 +2507,7 @@ bool mp3dec00042238(struct asistream *stream, uint32_t gr, uint32_t ch)
 
 	if (sp48 < 576) {
 		stream->unk4660[ch] = 576 - sp48;
-		bzero(sp44, stream->unk4660[ch] * 2);
+		memset(sp44, 0, stream->unk4660[ch] * 2);
 	} else {
 		stream->unk4660[ch] = 0;
 	}
@@ -2717,7 +2720,7 @@ bool mp3decDecodeFrame(struct asistream *stream)
 	int sp940;
 	int i;
 	int j;
-	u16 *sp934;
+	uint16_t *sp934;
 	struct asistream_4f64 sp34[32];
 	float sp30;
 	float sp2c;
@@ -2792,8 +2795,8 @@ bool mp3decDecodeFrame(struct asistream *stream)
 		}
 
 		while (i < 32) {
-			bcopy(&stream->unk6a64[ch][i], &sp34[i], sizeof(struct asistream_4f64));
-			bzero(&stream->unk6a64[ch][i], sizeof(struct asistream_4f64));
+			memcpy(&sp34[i], &stream->unk6a64[ch][i], sizeof(struct asistream_4f64));
+			memset(&stream->unk6a64[ch][i], 0, sizeof(struct asistream_4f64));
 			i++;
 		}
 

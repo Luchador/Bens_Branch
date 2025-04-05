@@ -1,5 +1,4 @@
-#include <ultra64.h>
-#include <stdint.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "lib/sched.h"
 #include "game/player.h"
@@ -15,11 +14,12 @@
 
 uint32_t g_ZbufWidth;
 uint32_t g_ZbufHeight;
-uint16_t g_ArtifactsCfb0[0x180]; // 0x180 = 384
-uint16_t g_ArtifactsCfb1[0x180];
-uint16_t g_ArtifactsCfb2[0x180];
+uint16_t g_ArtifactsCfb0[384];
+uint16_t g_ArtifactsCfb1[384];
+uint16_t g_ArtifactsCfb2[384];
 
 uint16_t *g_ZbufPtr1 = NULL;
+static void *g_ZbufAllocRaw = NULL; // Keep track of original pointer for free()
 
 void *zbufGetAllocation(void)
 {
@@ -28,8 +28,14 @@ void *zbufGetAllocation(void)
 
 void zbufReset(int stagenum)
 {
-	g_ZbufPtr1 = NULL;
+	// Free any existing allocation
+	if (g_ZbufAllocRaw != NULL) {
+		free(g_ZbufAllocRaw);
+		g_ZbufAllocRaw = NULL;
+		g_ZbufPtr1 = NULL;
+	}
 
+	// Allocate new z-buffer if not title stage
 	if (stagenum != STAGE_TITLE) {
 		zbufAllocate();
 	}
@@ -50,16 +56,19 @@ void zbufReset(int stagenum)
  */
 void zbufAllocate(void)
 {
-	g_ZbufWidth = MAX(640, FBALLOC_WIDTH_HI);
+	g_ZbufWidth = viGetWidth();
+	g_ZbufHeight = viGetHeight();
 
-	if (g_Vars.normmplayerisrunning && PLAYERCOUNT() >= 2) {
-		g_ZbufHeight = MAX(220, FBALLOC_HEIGHT_HI);
+	// Allocate extra for alignment
+	size_t size = g_ZbufWidth * g_ZbufHeight * sizeof(uint16_t) + 0x40;
+	g_ZbufAllocRaw = malloc(size);
+
+	if (g_ZbufAllocRaw != NULL) {
+		// Align to 64-byte boundary
+		g_ZbufPtr1 = (void *)(((uintptr_t)g_ZbufAllocRaw + 0x3f) & ~0x3f);
 	} else {
-		g_ZbufHeight = MAX(220, FBALLOC_HEIGHT_HI);
+		g_ZbufPtr1 = NULL;
 	}
-
-	g_ZbufPtr1 = mempAlloc(g_ZbufWidth * g_ZbufHeight * sizeof(uint16_t) + 0x40, MEMPOOL_STAGE);
-	g_ZbufPtr1 = (void *) (((uintptr_t) g_ZbufPtr1 + 0x3f) & ~0x3f);
 }
 
 /**
@@ -91,16 +100,6 @@ Gfx *zbufConfigureRdp(Gfx *gdl)
 	return gdl;
 }
 
-/**
- * Clear the current player's portion of the z-buffer.
- */
-Gfx *zbufClear(Gfx *gdl)
-{
-	gDPClearDepthEXT(gdl++);
-
-	return gdl;
-}
-
 uint16_t *zbufGetArtifactsCfb(int index)
 {
 	uint16_t *addr;
@@ -125,20 +124,20 @@ uint16_t *zbufGetArtifactsCfb(int index)
 Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 {
 	struct artifact *artifacts = schedGetWriteArtifacts();
-	uint16_t *sp4c = g_ZbufPtr1;
-	uint32_t s4 = 0;
-	uint16_t *sp44;
-	uint16_t *s2;
+	uint16_t *mainZBuffer = g_ZbufPtr1;
+	uint32_t artifactIndex = 0;
+	uint16_t *artifactCfb; // Color framebuffer for artifacts
+	uint16_t *pixelOutputPtr;
 	uint16_t *image;
 	int i;
 
 	viGetBackBuffer();
-	sp44 = zbufGetArtifactsCfb(g_SchedWriteArtifactsIndex);
+	artifactCfb = zbufGetArtifactsCfb(g_SchedWriteArtifactsIndex);
 	g_SchedSpecialArtifactIndexes[g_SchedWriteArtifactsIndex] = 1;
 
 	gDPPipeSync(gdl++);
-	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(sp44));
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, 0, 0, videoGetWidth(), videoGetHeight());
+	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(artifactCfb));
+	gDPSetScissor(gdl++, 0, 0, videoGetWidth(), videoGetHeight());
 	gDPSetCycleType(gdl++, G_CYC_COPY);
 	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0080, 4, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -162,8 +161,8 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 
 	for (i = 0; i < MAX_ARTIFACTS; i++) {
 		if (artifacts[i].type != ARTIFACTTYPE_FREE) {
-			s2 = &sp44[s4];
-			image = &sp4c[artifacts[i].unk0c.u16_1 * viGetWidth()];
+			pixelOutputPtr = &artifactCfb[artifactIndex];
+			image = &mainZBuffer[artifacts[i].screenPos.screenY * viGetWidth()];
 
 			gDPPipeSync(gdl++);
 			gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, videoGetWidth(), image);
@@ -172,12 +171,12 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 			gDPPipeSync(gdl++);
 
 			gSPTextureRectangle(gdl++,
-					s4 << 2, 0,
-					(s4 + 3) << 2, 0,
-					G_TX_RENDERTILE, (artifacts[i].unk0c.u16_2 * 32) + 16, 0x0010, 0x1000, 0);
+					artifactIndex << 2, 0,
+					(artifactIndex + 3) << 2, 0,
+					G_TX_RENDERTILE, (artifacts[i].screenPos.screenX * 32) + 16, 0x0010, 0x1000, 0);
 
-			artifacts[i].unk0c.u16p = s2;
-			s4++;
+			artifacts[i].screenPos.outputPixelPtr = pixelOutputPtr;
+			artifactIndex++;
 		}
 	}
 
@@ -185,7 +184,7 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	gDPLoadSync(gdl++);
 	gDPTileSync(gdl++);
 	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
-	gDPSetScissorFrac(gdl++, G_SC_NON_INTERLACE, 0, 0, viGetWidth() * 4.0f, viGetHeight() * 4.0f);
+	gDPSetScissorFrac(gdl++, 0, 0, viGetWidth() * 4.0f, viGetHeight() * 4.0f);
 	gSPSetGeometryMode(gdl++, G_ZBUFFER);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);

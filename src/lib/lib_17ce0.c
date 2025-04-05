@@ -9,9 +9,9 @@
 #include "data.h"
 #include "types.h"
 
-uint8_t var8005ef20 = 254;
+uint8_t g_PortalTraceCounter = 254;
 
-uint8_t var8009a4e0[456][2];
+uint8_t g_PortalIntersectionCache[456][2]; // Cache to avoid recalculating expensive intersection logic for each portal multiple times within the same trace pass
 
 void portalGetAvgVertexPos(int portalnum, struct coord *avg)
 {
@@ -102,7 +102,8 @@ int portalCalculateIntersection(int portalnum, struct coord *pos1, struct coord 
 	sp60.f[1] = pos2->f[1] - pos1->f[1];
 	sp60.f[2] = pos2->f[2] - pos1->f[2];
 
-	var8007fcb4 = (value1 + value2) * 0.5f - (g_PortalMetrics + portalnum)->min;
+	// Tells us how far along the viewing ray the portal lies
+	g_PortalMidplaneOffset = (value1 + value2) * 0.5f - (g_PortalMetrics + portalnum)->min;
 
 	curr = &pvertices->vertices[0];
 	next = &pvertices->vertices[1];
@@ -152,102 +153,87 @@ int portalCalculateIntersection(int portalnum, struct coord *pos1, struct coord 
 		: PORTALINTERSECTION_FRONTTOBEHIND;
 }
 
-void portal00018148(struct coord *pos1, struct coord *pos2, RoomNum *rooms1, RoomNum *rooms2, RoomNum *rooms3, int arg5)
+// Runs a trace from startPos to endPos and fills outputRooms with all the rooms the line crosses. Has an option to return another list of all rooms visited along the way.
+void portalTraceLineThroughRooms(struct coord *startPos, struct coord *endPos, RoomNum *startRooms, RoomNum *outputRooms, RoomNum *allVisitedRooms, int maxVisitedRooms)
 {
-	int i;
-	int j;
-	int roomnum;
-	int numportals;
-	int16_t *portalnums;
-	RoomNum rooms9c[16];
-	RoomNum rooms7c[16];
-	RoomNum rooms5c[16];
+    int i, j;
+    int numPortals;
+    int portalIndex;
+    RoomNum room;
+    int16_t *portalList;
 
-	for (i = 0; i < 8; i++) {
-		rooms9c[i] = rooms1[i];
-		rooms5c[i] = rooms1[i];
+    RoomNum currentWave[16];
+    RoomNum newWave[16];
+    RoomNum visitedRooms[16];
 
-		if (rooms1[i] == -1) {
-			break;
-		}
-	}
+    // Initialize the starting room wave and visited list
+    for (i = 0; i < 8; i++) {
+        currentWave[i] = startRooms[i];
+        visitedRooms[i] = startRooms[i];
+        if (startRooms[i] == -1) break;
+    }
 
-	var8005ef20++;
+    // Advance the portal trace counter
+    g_PortalTraceCounter++;
+    if (g_PortalTraceCounter == 255) {
+        for (i = 0; i < g_BgNumPortalCameraCacheItems; i++) {
+            g_PortalIntersectionCache[i][0] = 0xff; // Reset cache
+        }
+        g_PortalTraceCounter = 0;
+    }
 
-	if (var8005ef20 == 255) {
-		for (i = 0; i < g_BgNumPortalCameraCacheItems; i++) {
-			var8009a4e0[i][0] = 0xff;
-		}
+    // Flood traversal through portals
+    do {
+        newWave[0] = -1; // Clear next wave
 
-		var8005ef20 = 0;
-	}
+        for (j = 0; (room = currentWave[j]) != -1 && j < 16; j++) {
+            numPortals = g_Rooms[room].numportals;
+            portalList = &g_RoomPortals[g_Rooms[room].roomportallistoffset];
 
-	do {
-		rooms7c[0] = -1;
+            for (i = 0; i < numPortals; i++) {
+                portalIndex = portalList[i];
+                uint8_t *cacheEntry = g_PortalIntersectionCache[portalIndex];
 
-		for (j = 0; (roomnum = rooms9c[j]) != -1 && j < 16; j++) {
-			numportals = g_Rooms[roomnum].numportals;
-			portalnums = &g_RoomPortals[g_Rooms[roomnum].roomportallistoffset];
+                // Check cache or calculate new portal intersection
+                if (cacheEntry[0] != g_PortalTraceCounter) {
+                    cacheEntry[0] = g_PortalTraceCounter;
+                    cacheEntry[1] = portalCalculateIntersection(portalIndex, startPos, endPos);
+                }
 
-			for (i = 0; i < numportals; i++) {
-				int portalnum = *portalnums;
-				uint8_t *s1 = var8009a4e0[portalnum];
+                // Check portal directionality and traverse
+                if (cacheEntry[1] != PORTALINTERSECTION_NONE) {
+                    if (cacheEntry[1] == PORTALINTERSECTION_BEHINDTOFRONT && room == g_BgPortals[portalIndex].roomnum1) {
+                        portalTryAppendRoom(newWave, g_BgPortals[portalIndex].roomnum2);
+                        portalTryAppendRoom(visitedRooms, g_BgPortals[portalIndex].roomnum2);
+                        cacheEntry[1] = PORTALINTERSECTION_NONE;
+                    } else if (cacheEntry[1] == PORTALINTERSECTION_FRONTTOBEHIND && room == g_BgPortals[portalIndex].roomnum2) {
+                        portalTryAppendRoom(newWave, g_BgPortals[portalIndex].roomnum1);
+                        portalTryAppendRoom(visitedRooms, g_BgPortals[portalIndex].roomnum1);
+                        cacheEntry[1] = PORTALINTERSECTION_NONE;
+                    }
+                }
+            }
+        }
 
-				if (s1[0] != var8005ef20) {
-					s1[0] = var8005ef20;
-					s1[1] = portalCalculateIntersection(portalnum, pos1, pos2);
-				}
+        // Copy newWave into currentWave for next loop iteration
+        for (i = 0; i < 16; i++) {
+            currentWave[i] = newWave[i];
+            if (newWave[i] == -1) break;
+        }
+    } while (newWave[0] != -1);
 
-				if (s1[1] != PORTALINTERSECTION_NONE) {
-					if (s1[1] == PORTALINTERSECTION_BEHINDTOFRONT) {
-						if (roomnum == g_BgPortals[portalnum].roomnum1) {
-							portalTryAppendRoom(rooms7c, g_BgPortals[portalnum].roomnum2);
-							portalTryAppendRoom(rooms5c, g_BgPortals[portalnum].roomnum2);
-							s1[1] = PORTALINTERSECTION_NONE;
-						}
-					}
+    // Output the final traversed rooms
+    for (i = 0; i < 7 && visitedRooms[i] != -1; i++) {
+        outputRooms[i] = visitedRooms[i];
+    }
+    outputRooms[i] = -1;
 
-					if (s1[1] == PORTALINTERSECTION_FRONTTOBEHIND) {
-						if (roomnum == g_BgPortals[portalnum].roomnum2) {
-							portalTryAppendRoom(rooms7c, g_BgPortals[portalnum].roomnum1);
-							portalTryAppendRoom(rooms5c, g_BgPortals[portalnum].roomnum1);
-							s1[1] = PORTALINTERSECTION_NONE;
-						}
-					}
-				}
-
-				portalnums++;
-			}
-		}
-
-		if (rooms7c[0] == -1) {
-			break;
-		}
-
-		for (i = 0; i < 16; i++) {
-			rooms9c[i] = rooms7c[i];
-
-			if (rooms7c[i] == -1) {
-				break;
-			}
-		}
-	} while (rooms7c[0] != -1);
-
-	for (i = 0; i < 7 && rooms9c[i] != -1; i++) {
-		rooms2[i] = rooms9c[i];
-	}
-
-	rooms2[i] = -1;
-
-	if (rooms3 != NULL) {
-		for (i = 0; i < arg5; i++) {
-			rooms3[i] = rooms5c[i];
-
-			if (rooms5c[i] == -1) {
-				break;
-			}
-		}
-
-		rooms3[i] = -1;
-	}
+    // Optional: output all rooms encountered
+    if (allVisitedRooms != NULL) {
+        for (i = 0; i < maxVisitedRooms; i++) {
+            allVisitedRooms[i] = visitedRooms[i];
+            if (visitedRooms[i] == -1) break;
+        }
+        allVisitedRooms[i] = -1;
+    }
 }

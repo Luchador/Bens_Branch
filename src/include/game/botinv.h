@@ -1,6 +1,5 @@
-#ifndef IN_GAME_BOTINV_H
-#define IN_GAME_BOTINV_H
-#include <ultra64.h>
+#pragma once
+
 #include <stdint.h>
 #include "data.h"
 #include "types.h"
@@ -27,5 +26,3 @@ bool botinvSwitchToWeapon(struct chrdata *chr, int weaponnum, int funcnum);
 void botinvDrop(struct chrdata *chr, int weaponnum, uint8_t dropall);
 void botinvDropAll(struct chrdata *chr, uint32_t weaponnum);
 void botinvDropOne(struct chrdata *chr, uint32_t weaponnum);
-
-#endif

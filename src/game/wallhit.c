@@ -1,18 +1,20 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "constants.h"
-#include "game/dlights.h"
 #include "game/chr.h"
-#include "game/weaponutils.h"
-#include "game/tex.h"
-#include "game/playermgr.h"
-#include "game/room.h"
-#include "game/gfxmemory.h"
+#include "game/dlights.h"
 #include "game/file.h"
+#include "game/gfxmemory.h"
+#include "game/mtxutils.h"
+#include "game/playermgr.h"
 #include "game/options.h"
+#include "game/room.h"
+#include "game/tex.h"
 #include "game/utils.h"
 #include "game/wallhit.h"
+#include "game/weaponutils.h"
 #include "bss.h"
 #include "lib/main.h"
 #include "lib/rng.h"
@@ -34,18 +36,17 @@ struct wallhit *g_Wallhits;
 struct wallhit *g_FreeWallhits;
 struct wallhit *g_ActiveWallhits;
 
-int var8007f740 = 0;
-u8 g_WallhitBloodColour[4] = {0x40, 0x0a, 0x0a, 0x00};
+uint8_t g_WallhitBloodColour[4] = {0x40, 0x0a, 0x0a, 0x00};
 float var8007f748 = 1;
 float var8007f74c = 1;
-u32 var8007f750 = 0;
+uint32_t var8007f750 = 0;
 float var8007f754 = 0;
 float var8007f758 = 0;
 
 struct wallhittex {
 	float width;
 	float height;
-	u8 type;
+	uint8_t type;
 };
 
 struct wallhittex g_WallhitTexes[] = {
@@ -69,7 +70,7 @@ struct wallhittex g_WallhitTexes[] = {
 	/*0x11*/ { 6,   6,   WALLHITTYPE_BULLET }, // WALLHITTEX_METAL
 };
 
-s16 wallhitFinaliseAxis(float value)
+int16_t wallhitFinaliseAxis(float value)
 {
 	if (value > var8007f754) {
 		var8007f754 = value;
@@ -194,7 +195,7 @@ void wallhitFree(struct wallhit *wallhit)
 	}
 }
 
-void wallhitsFreeByProp(struct prop *prop, s8 layer)
+void wallhitsFreeByProp(struct prop *prop, int8_t layer)
 {
 	struct prop *copy = prop;
 
@@ -241,7 +242,7 @@ void wallhitChooseBloodColour(struct prop *prop)
 	}
 }
 
-void wallhitFade(struct wallhit *wallhit, u32 arg1)
+void wallhitFade(struct wallhit *wallhit, uint32_t arg1)
 {
 	if (!wallhit->fading) {
 		if (wallhit->objprop) {
@@ -285,9 +286,9 @@ bool wallhitRemoveOneInRoom(int room)
 {
 	if (room == -1 || g_WallhitCountsPerRoom[room]) {
 		float ratio = 0.0f;
-		u32 blooddropframe = U32_MAX;
-		u32 bloodpuddleframe = U32_MAX;
-		u32 otherframe = U32_MAX;
+		uint32_t blooddropframe = U32_MAX;
+		uint32_t bloodpuddleframe = U32_MAX;
+		uint32_t otherframe = U32_MAX;
 		int blooddropindex = -1;
 		int bloodpuddleindex = -1;
 		int otherindex = -1;
@@ -365,7 +366,7 @@ bool wallhitRemoveOneInRoom(int room)
 void wallhitRemoveOne(void)
 {
 	int room;
-	u32 i;
+	uint32_t i;
 	bool done = false;
 
 	for (i = 0; !done && i < 3; i++) {
@@ -393,9 +394,6 @@ void wallhitRemoveOne(void)
 			}
 		}
 
-		if (1);
-		if (1);
-
 		if (bestroom != -1) {
 			int min = bestroom == 0 ? g_MinPropWallhits : g_MinBgWallhitsPerRoom;
 
@@ -410,8 +408,6 @@ void wallhitRemoveOne(void)
 	if (!done) {
 		wallhitRemoveOneInRoom(-1);
 	}
-
-	if (1);
 }
 
 void wallhitsTick(void)
@@ -421,7 +417,6 @@ void wallhitsTick(void)
 	int numallocated;
 	int i;
 	int j;
-	u32 stack[3];
 	float midx;
 	float midy;
 	float midz;
@@ -429,14 +424,11 @@ void wallhitsTick(void)
 	float f24;
 	struct wallhit *wallhit;
 	struct coord spc8[4];
-	u32 stack2[4];
 
 	static int var8007f834 = 0;
 
 	sp12c = (g_Vars.lvupdate240 + 2.0f) * 0.25f;
 	fov = currentPlayerGetGunZoomFov();
-
-	var8007f740 = 0;
 
 	if (fov == 0.0f || fov == 60.0f) {
 		var8007f748 = 1;
@@ -474,7 +466,7 @@ void wallhitsTick(void)
 		}
 
 		if (wallhit->timermax) {
-			u32 amount = (u32)(f0 + 0.5f);
+			uint32_t amount = (uint32_t)(f0 + 0.5f);
 
 			if (wallhit->expanding) {
 				if (wallhit->timercur > wallhit->timermax) {
@@ -514,9 +506,9 @@ void wallhitsTick(void)
 
 					wallhit->vertices2 = gfxAllocateVertices(4);
 
-					midx = g_ZeroVector.x; \
-					midy = g_ZeroVector.y; \
-					midz = g_ZeroVector.z;
+					midx = 0;
+					midy = 0;
+					midz = 0;
 
 					// Copy the vertices into a float array
 					for (j = 0; j < ARRAYCOUNT(wallhit->vertices); j++) {
@@ -571,7 +563,7 @@ void wallhitsTick(void)
 				}
 
 				for (j = 0; j < ARRAYCOUNT(wallhit->basecolours); j++) {
-					u32 alpha;
+					uint32_t alpha;
 
 					if (f22 > 1.0f) {
 						f22 = 1.0f;
@@ -602,39 +594,9 @@ void wallhitsTick(void)
 	}
 }
 
-const char var7f1b5a5c[] = "g_MaxRound = %s%s%f";
-const char var7f1b5a70[] = "";
-const char var7f1b5a74[] = "";
-const char var7f1b5a78[] = "g_MinRound = %s%s%f";
-const char var7f1b5a8c[] = "";
-const char var7f1b5a90[] = "";
-const char var7f1b5a94[] = "Done %d Z buffer calcs";
-const char var7f1b5aac[] = "ZOOM : g_ZoomFactor=%s%s%f";
-const char var7f1b5ac8[] = "";
-const char var7f1b5acc[] = "";
-const char var7f1b5ad0[] = "ZOOM : g_ZoomScalar=%s%s%f";
-const char var7f1b5aec[] = "";
-const char var7f1b5af0[] = "";
-const char var7f1b5af4[] = "ZOOM : scale=%s%s%f";
-const char var7f1b5b08[] = "";
-const char var7f1b5b0c[] = "";
-const char var7f1b5b10[] = "WallHit_Tick : Status - RED";
-const char var7f1b5b2c[] = "WallHit_Tick : Status - YELLOW (%u)";
-const char var7f1b5b50[] = "WallHit_Tick : Status - GREEN";
-const char var7f1b5b70[] = "WallHit_Tick : %d Used";
-const char var7f1b5b88[] = "WallHit_Tick : %d Free";
-const char var7f1b5ba0[] = "WallHit_Tick : %d Pending";
-const char var7f1b5bbc[] = "WallHit_Tick : %d Blood";
-const char var7f1b5bd4[] = "WallHit_Tick : %d Other";
-const char var7f1b5bec[] = "WallHit_Tick : %d Ratio";
-const char var7f1b5c04[] = "WallHit_Tick : %d(%d) Prop Hits";
-const char var7f1b5c24[] = "tLifeTime=%s%s%f, tScalarGbl=%f";
-const char var7f1b5c44[] = "";
-const char var7f1b5c48[] = "";
-
-void wallhitCreate(struct coord *relpos, struct coord *arg1, struct coord *arg2, s16 arg3[3],
-		s16 arg4[3], s16 texnum, RoomNum room, struct prop *objprop,
-		s8 mtxindex, s8 arg9, struct chrdata *chr, bool xlu)
+void wallhitCreate(struct coord *relpos, struct coord *arg1, struct coord *arg2, int16_t arg3[3],
+		int16_t arg4[3], int16_t texnum, RoomNum room, struct prop *objprop,
+		int8_t mtxindex, int8_t arg9, struct chrdata *chr, bool xlu)
 {
 	float scale = RANDOMFRAC() * 0.1f + 0.6f;
 	float width = g_WallhitTexes[texnum].width * scale;
@@ -647,11 +609,11 @@ void wallhitCreate(struct coord *relpos, struct coord *arg1, struct coord *arg2,
 			0, 0, 0, xlu);
 }
 
-void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct coord *arg2, s16 arg3[3],
-		s16 arg4[3], s16 texnum, RoomNum room, struct prop *objprop,
-		struct prop *chrprop, s8 mtxindex, s8 arg10, struct chrdata *chr,
-		float width, float height, u8 minalpha, u8 maxalpha,
-		int rotdeg, u32 timermax, u32 timerspeed, bool xlu)
+void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct coord *arg2, int16_t arg3[3],
+		int16_t arg4[3], int16_t texnum, RoomNum room, struct prop *objprop,
+		struct prop *chrprop, int8_t mtxindex, int8_t arg10, struct chrdata *chr,
+		float width, float height, uint8_t minalpha, uint8_t maxalpha,
+		int rotdeg, uint32_t timermax, uint32_t timerspeed, bool xlu)
 {
 	struct coord sp1f4;
 	struct coord sp1e8;
@@ -665,27 +627,23 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 	struct coord sp17c[4];
 	int type;
 	float f0;
-	u8 alpha;
+	uint8_t alpha;
 	struct wallhit *wallhit;
 	float mult = 1.0f;
 	float brightnessfrac;
-#if VERSION >= VERSION_NTSC_1_0
 	bool paintball;
-#endif
-	u32 stack[6];
 	struct coord sp13c;
 	struct coord sp130;
-	u32 stack2[3];
 	struct coord sp118;
 	int i;
 	int room2;
-	u32 range;
+	uint32_t range;
 
 	sp1b8.x = arg1->x;
 	sp1b8.y = arg1->y;
 	sp1b8.z = arg1->z;
 
-	normalizeVector(&sp1b8, &sp1b8, 956, "wallhit.c");
+	utilsNormalizeVec(&sp1b8, &sp1b8);
 
 	paintball = chrIsUsingPaintball(chr);
 
@@ -788,9 +746,9 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 		sp1ac.f[1] = relpos->y;
 		sp1ac.f[2] = relpos->z;
 
-		xiszero = ABS(arg1->x) < g_AlmostZero ? true : false;
-		yiszero = ABS(arg1->y) < g_AlmostZero ? true : false;
-		ziszero = ABS(arg1->z) < g_AlmostZero ? true : false;
+		xiszero = fabsf(arg1->x) < g_AlmostZero ? true : false;
+		yiszero = fabsf(arg1->y) < g_AlmostZero ? true : false;
+		ziszero = fabsf(arg1->z) < g_AlmostZero ? true : false;
 
 		if (xiszero && ziszero) {
 			sp1f4.x = -1.0f;
@@ -825,17 +783,14 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 			sp130.y = arg4[1];
 			sp130.z = arg4[2];
 
-			normalizeVector(&sp13c, &sp13c, 1151, "wallhit.c");
-			normalizeVector(&sp130, &sp130, 1152, "wallhit.c");
+			utilsNormalizeVec(&sp13c, &sp13c);
+			utilsNormalizeVec(&sp130, &sp130);
 
 			f0 = (sp13c.x * sp130.x + sp13c.y * sp130.y + sp13c.z * sp130.z) * -1.0f;
 
 			sp118.x = f0 * sp13c.x + sp130.x;
 			sp118.y = f0 * sp13c.y + sp130.y;
 			sp118.z = f0 * sp13c.z + sp130.z;
-
-			//Calculates a cross product but nothing is done with it
-			//utilsCalcLeftHandedCross(&sp13c, &sp118, &sp100);
 
 			sp1f4.x = sp13c.x;
 			sp1f4.y = sp13c.y;
@@ -859,10 +814,8 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 		}
 
 		if (rotdeg != 0) {
-			u32 stack[6];
 			float spd0 = sinf(rotdeg * 0.017453292f);
 			float spcc = cosf(rotdeg * 0.017453292f);
-			u32 stack2[12];
 
 			sp1dc.x = spcc * sp1f4.x + spd0 * sp1e8.x;
 			sp1dc.y = spcc * sp1f4.y + spd0 * sp1e8.y;
@@ -987,9 +940,9 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 
 		for (i = 0; i < ARRAYCOUNT(sp17c); i++) {
 			struct coord sp58;
-			s16 x;
-			s16 y;
-			s16 z;
+			int16_t x;
+			int16_t y;
+			int16_t z;
 
 			sp58.x = sp17c[i].x + sp1ac.x;
 			sp58.y = sp17c[i].y + sp1ac.y;
@@ -1027,14 +980,14 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 		}
 
 		{
-			u8 r;
-			u8 g;
-			u8 b;
-			u8 a;
+			uint8_t r;
+			uint8_t g;
+			uint8_t b;
+			uint8_t a;
 
 			brightnessfrac = roomGetFinalBrightnessForPlayer(room2) * (1.0f / 255.0f);
 
-			range = maxalpha - (u32)minalpha;
+			range = maxalpha - (uint32_t)minalpha;
 
 			if (range) {
 				alpha = minalpha + (rngRandom() % range);
@@ -1089,9 +1042,9 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 }
 
 /**
- * Maybe a LOD calculation?
+ * This function seems to help decals render at long distance and not z-fight
  */
-int wallhit0f140750(struct coord *coord)
+int wallhitCalcLiftDistance(struct coord *coord)
 {
 	float x;
 	float y;
@@ -1101,8 +1054,6 @@ int wallhit0f140750(struct coord *coord)
 	x = g_Vars.currentplayer->projectionmtx->m[3][0] - coord->f[0];
 	y = g_Vars.currentplayer->projectionmtx->m[3][1] - coord->f[1];
 	z = g_Vars.currentplayer->projectionmtx->m[3][2] - coord->f[2];
-
-	var8007f740++;
 
 	if (x < 0) {
 		x = -x;
@@ -1158,9 +1109,7 @@ Gfx *wallhitRenderOpaBgHits(int roomnum, Gfx *gdl)
 
 	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
 	gSPSetGeometryMode(gdl++, G_CULL_BACK);
-#if VERSION >= VERSION_NTSC_1_0
 	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-#endif
 	gDPSetColorDither(gdl++, G_CD_NOISE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 
@@ -1176,7 +1125,7 @@ Gfx *wallhitRenderOpaBgHits(int roomnum, Gfx *gdl)
 			if (wallhit->xlu) {
 				wallhit->unk6b = 1;
 			} else {
-				wallhit->unk6b = wallhit0f140750(&wallhit->relpos);
+				wallhit->unk6b = wallhitCalcLiftDistance(&wallhit->relpos);
 			}
 
 			if (wallhit->texturenum != prevtexturenum || wallhit->unk6b != prev6b) {
@@ -1220,9 +1169,7 @@ Gfx *wallhitRenderXluBgHits(int roomnum, Gfx *gdl)
 	int prev6b;
 
 	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-#if VERSION >= VERSION_NTSC_1_0
 	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-#endif
 	gDPSetColorDither(gdl++, G_CD_NOISE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 
@@ -1276,7 +1223,7 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 	struct defaultobj *obj = prop->obj;
 	bool hasany = false;
 	struct wallhit *wallhit;
-	s16 prevmtxindex = -1;
+	int16_t prevmtxindex = -1;
 	int prevtexturenum = -1;
 	int prev6b = -1;
 
@@ -1290,9 +1237,7 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 		gSPSetGeometryMode(gdl++, G_CULL_BACK);
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-#endif
 	gDPSetColorDither(gdl++, G_CD_NOISE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 
@@ -1318,7 +1263,7 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 					sp74.y = wallhit->relpos.y + prop->pos.y;
 					sp74.z = wallhit->relpos.z + prop->pos.z;
 
-					wallhit->unk6b = wallhit0f140750(&sp74);
+					wallhit->unk6b = wallhitCalcLiftDistance(&sp74);
 				}
 			} else {
 				wallhit->unk6b = 1;

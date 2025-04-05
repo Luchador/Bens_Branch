@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "game/bg.h"
 #include "game/chraction.h"
@@ -7,7 +8,6 @@
 #include "game/vtxstore.h"
 #include "game/propobj.h"
 #include "bss.h"
-#include "lib/mema.h"
 #include "lib/model.h"
 #include "lib/rng.h"
 #include "data.h"
@@ -90,7 +90,7 @@ void vtxstoreTick(void)
 						int size = ALIGN16(g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].count * 0x0c);
 						vtxstoreFixRefs(g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].unk00, g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[i].unk00);
 						g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[i].unk0e += g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].unk0e;
-						memaFree(g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].unk00, size);
+						free(g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].unk00);
 						g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].unk0e = 0;
 						g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].val2 += g_VtxstoreTypes[VTXSTORETYPE_OBJVTX].unk24[j].count;
 					}
@@ -110,7 +110,7 @@ void *vtxstoreAllocate(int count, int index, struct modelnode *node, int level)
 	int numchrs;
 	int tally;
 	int rand;
-	u32 size;
+	uint32_t size;
 	//struct chrdata *chrs[6];
 	struct chrdata *chrs[600]; // Increase by factor of 100
 
@@ -118,7 +118,7 @@ void *vtxstoreAllocate(int count, int index, struct modelnode *node, int level)
 		for (i = 0; i < g_VtxstoreTypes[index].numallocated; i++) {
 			if (g_VtxstoreTypes[index].unk24[i].unk0e == 0) {
 				size = ALIGN16(count * 0xc);
-				g_VtxstoreTypes[index].unk24[i].unk00 = memaAlloc(size);
+				g_VtxstoreTypes[index].unk24[i].unk00 = malloc(size);
 
 				if (g_VtxstoreTypes[index].unk24[i].unk00) {
 					g_VtxstoreTypes[index].unk24[i].count = count;
@@ -192,7 +192,7 @@ void vtxstoreFree(int type, void *arg1)
 				return;
 			}
 
-			memaFree(g_VtxstoreTypes[type].unk24[i].unk00, ALIGN16(g_VtxstoreTypes[type].unk24[i].count * 0xc));
+			free(g_VtxstoreTypes[type].unk24[i].unk00);
 
 			g_VtxstoreTypes[type].val2 += g_VtxstoreTypes[type].unk24[i].count;
 			return;

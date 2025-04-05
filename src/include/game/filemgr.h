@@ -1,7 +1,5 @@
-#ifndef IN_GAME_FILEMGR_H
-#define IN_GAME_FILEMGR_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -81,5 +79,3 @@ MenuItemHandlerResult filemgrOpenDeleteFileMenuHandler(int operation, struct men
 MenuItemHandlerResult filemgrConfirmRenameMenuHandler(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult filemgrSaveElsewhereYesMenuHandler(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult filemgrSelectLocationMenuHandler(int operation, struct menuitem *item, union handlerdata *data);
-
-#endif

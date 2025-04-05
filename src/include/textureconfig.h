@@ -1,6 +1,4 @@
-#ifndef IN_TEXTURECONFIG_H
-#define IN_TEXTURECONFIG_H
-#include <ultra64.h>
+#pragma once
 
 extern Gfx g_TcGdl1[14];
 extern Gfx g_TcGdl2[13];
@@ -23,5 +21,3 @@ extern struct textureconfig g_TcSparkConfigs[1];
 extern struct textureconfig g_TcGeneralConfigs[56];
 extern struct textureconfig g_TcRadarConfigs[1];
 extern struct textureconfig g_TcStarsConfigs[1];
-
-#endif

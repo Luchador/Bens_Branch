@@ -1,8 +1,9 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/bondmove.h"
-#include "game/utils.h"
 #include "game/bondhead.h"
+#include "game/bondmove.h"
+#include "game/mtxutils.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/rng.h"
 #include "lib/mtx.h"

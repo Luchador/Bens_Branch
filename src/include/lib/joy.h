@@ -1,6 +1,5 @@
-#ifndef _IN_LIB_JOY_H
-#define _IN_LIB_JOY_H
-#include <ultra64.h>
+#pragma once
+
 #include <stdint.h>
 #include "data.h"
 #include "types.h"
@@ -20,10 +19,10 @@ void joyDisableTemporarily(void);
 void joyReset(void);
 void joyCheckStatus(void);
 unsigned int joyGetConnectedControllers(void);
-void joy00014238(void);
+void joyTickRumbleOnce(void);
 void joyDebugJoy(void);
 void joyReadData(void);
-void joySetAllowTitleInput(bool value); // Determines if the player can press a button to skip part of the intro or has to wait
+void joySetAllowTitleInput(bool value); // Determines if the player can press a button to skip the rest of the intro or has to wait
 int joyGetNumSamples(void);
 int joyGetRStickXOnSample(int samplenum, int8_t contpadnum);
 int joyGetRStickYOnSample(int samplenum, int8_t contpadnum);
@@ -49,5 +48,3 @@ void joyStopRumble(int8_t device, bool disablepolling);
 int joyGetPakState(int8_t device);
 int joyGetPakState2(int8_t device);
 void joysTickRumble(void);
-
-#endif

@@ -1,6 +1,6 @@
 #include "n_synthInternals.h"
 
-int _allocatePVoice(N_PVoice **pvoice, s16 priority);
+int _allocatePVoice(N_PVoice **pvoice, int16_t priority);
 
 int n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
 {
@@ -63,7 +63,7 @@ int n_alSynAllocVoice(N_ALVoice *voice, ALVoiceConfig *vc)
 	return (pvoice != 0);
 }
 
-int _allocatePVoice(N_PVoice **pvoice, s16 priority)
+int _allocatePVoice(N_PVoice **pvoice, int16_t priority)
 {
 	ALLink *dl;
 	N_PVoice *pv;

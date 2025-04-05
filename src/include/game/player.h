@@ -1,6 +1,5 @@
-#ifndef _IN_GAME_PLAYER_H
-#define _IN_GAME_PLAYER_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -8,11 +7,11 @@ float playerChooseSpawnLocation(float chrradius, struct coord *dstpos, RoomNum *
 float playerChooseGeneralSpawnLocation(float chrradius, struct coord *pos, RoomNum *rooms, struct prop *prop);
 void playerStartNewLife(void);
 void playerLoadDefaults(void);
-bool playerSpawnAnti(struct chrdata *chr, int param_2);
+bool playerSpawnAnti(struct chrdata *hostchr, bool force);
 void playerSpawn(void);
-void playerResetBond(struct playerbond *pb, struct coord *pos);
+void playerResetBond(struct playerjo *pb, struct coord *pos);
 void playersTickAllChrBodies(void);
-void playerChooseBodyAndHead(int *bodynum, int *headnum, int *arg2);
+void playerChooseBodyAndHead(int *bodynum, int *headnum, bool *arg2);
 void playerTickChrBody(void);
 void playerRemoveChrBody(void);
 void playerTickMpSwirl(void);
@@ -104,5 +103,3 @@ void playerSetCamPropertiesWithRoom(struct coord *pos, struct coord *up, struct 
 void playerSetCamPropertiesWithoutRoom(struct coord *pos, struct coord *up, struct coord *look, int room);
 void playerSetCamProperties(struct coord *pos, struct coord *up, struct coord *look, int room);
 void playerClearMemCamRoom(void);
-
-#endif

@@ -1,6 +1,5 @@
-#ifndef _IN_LIB_MODEL_H
-#define _IN_LIB_MODEL_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -95,7 +94,7 @@ void modelRenderNodeStarGunfire(struct modelrenderdata *renderdata, struct model
 void modelSelectTexture(struct modelrenderdata *renderdata, struct textureconfig *tconfig, int arg2);
 void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model *model, struct modelnode *node);
 void modelRender(struct modelrenderdata *renderdata, struct model *model);
-bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct coord *arg2, struct coord *arg3);
+bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct coord *lineStart, struct coord *lineDir);
 int modelTestForHit(struct model *model, struct coord *arg1, struct coord *arg2, struct modelnode **startnode);
 void modelPromoteNodeOffsetsToPointers(struct modelnode *node, uint32_t vma, uintptr_t fileramaddr);
 void modelPromoteOffsetsToPointers(struct modeldef *modeldef, uint32_t arg1, uintptr_t arg2);
@@ -107,5 +106,3 @@ void animInit(struct anim *anim);
 void modelAttachHead(struct model *model, struct modeldef *arg1, struct modelnode *node, struct modeldef *arg3);
 void modelIterateDisplayLists(struct modeldef *modeldef, struct modelnode **nodeptr, Gfx **gdlptr);
 void modelNodeReplaceGdl(struct modeldef *modeldef, struct modelnode *node, Gfx *find, Gfx *replacement);
-
-#endif

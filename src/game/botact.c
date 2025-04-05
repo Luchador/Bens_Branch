@@ -1,10 +1,12 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/debug.h"
 #include "game/chr.h"
 #include "game/propsnd.h"
 #include "game/bondgun.h"
+#include "game/mtxutils.h"
 #include "game/weaponutils.h"
 #include "game/playermgr.h"
 #include "game/botact.h"
@@ -375,9 +377,9 @@ void botactThrow(struct chrdata *chr)
 	}
 
 	mtx4LoadXRotation(0.34901028871536f, &sp84);
-	mtx00015be0(&sp84, &sp164);
+	mtxApplyAffineTransformInPlace(&sp84, &sp164);
 	mtx4LoadYRotation(sp80, &sp84);
-	mtx00015be0(&sp84, &sp164);
+	mtxApplyAffineTransformInPlace(&sp84, &sp164);
 
 	bgunCreateThrownProjectile2(chr, &gset, &prop->pos, prop->rooms, &sp164, &sp228);
 
@@ -459,7 +461,7 @@ bool botactFindRocketRoute(struct chrdata *chr, struct coord *frompos, struct co
  *
  * It's the ground position of the pad plus 1.5 metres.
  */
-void botactGetRocketNextStepPos(u16 padnum, struct coord *pos)
+void botactGetRocketNextStepPos(uint16_t padnum, struct coord *pos)
 {
 	struct pad pad;
 	RoomNum rooms[2];
@@ -499,7 +501,7 @@ void botactCreateSlayerRocket(struct chrdata *chr)
 
 		mtx4LoadXRotation(xrot, &sp196);
 		mtx4LoadYRotation(yrot, &sp132);
-		mtx00015be0(&sp132, &sp196);
+		mtxApplyAffineTransformInPlace(&sp132, &sp196);
 		mtx4LoadIdentity(&sp260);
 
 		bgunCreateXBowBolt(&rocket->base, &chr->prop->pos, chr->prop->rooms, &sp196, &sp100, &sp260, chr->prop, &chr->prop->pos);

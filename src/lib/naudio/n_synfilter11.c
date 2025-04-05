@@ -1,6 +1,6 @@
 #include "n_synthInternals.h"
 
-void n_alSynFilter11(N_ALVoice *v, u8 channel)
+void n_alSynFilter11(N_ALVoice *v, uint8_t channel)
 {
 	ALParam *update;
 

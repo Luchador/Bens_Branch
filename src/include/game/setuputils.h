@@ -1,5 +1,5 @@
-#ifndef IN_GAME_SETUPUTILS_H
-#define IN_GAME_SETUPUTILS_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -14,5 +14,3 @@ void setupGetObjOverlappedRooms(struct defaultobj *obj, struct coord *pos, float
 void setup0f0923d4(struct defaultobj *obj);
 struct defaultobj *setupGetObjByCmdIndex(uint32_t cmdindex);
 struct defaultobj *setupFindObjForReuse(int type, struct defaultobj **arg1, struct defaultobj **arg2, bool musthaveprop, bool musthavemodel, struct modeldef *modeldef);
-
-#endif

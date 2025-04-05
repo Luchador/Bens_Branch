@@ -1,6 +1,5 @@
-#ifndef _IN_GAME_ROOM_H
-#define _IN_GAME_ROOM_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -18,5 +17,3 @@ int roomTouchMtx(int roomnum);
 Gfx *roomApplyMtx(Gfx *gdl, int roomnum);
 struct coord *roomGetPosPtr(int room);
 void roomGetPos(int room, struct coord *pos);
-
-#endif

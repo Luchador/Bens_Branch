@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/dlights.h"
@@ -35,7 +36,7 @@ int *var8009cad8;
 int g_NumPortals;
 int var8009cae0;
 int var8009cae4;
-float (*var8009cae8)(int roomnum, float mult, int portalnum1, int portalnum2); // function pointer
+float (*portalTransferLightAmount)(int roomnum, float mult, int portalnum1, int portalnum2); // function pointer
 uint8_t var8009caec;
 uint8_t var8009caed;
 uint8_t var8009caee;
@@ -47,14 +48,12 @@ uint32_t var80061424 = 0x00000000;
 struct coord *var80061428 = NULL;
 uint16_t **var8006142c = NULL;
 uint16_t **var80061430 = NULL;
-float *var80061434 = NULL;
+float *g_RoomLightInfluence = NULL;
 bool *g_IsPortalClosed = NULL;
 float var8006143c = 50;
 uint32_t var80061444 = 1;
 uint32_t var80061448 = 0x00000000;
 bool g_IsSwitchingGoggles = false;
-uint32_t var80061450 = 0x00000000;
-uint32_t var80061454 = 0xffffffff;
 int g_LightsPrevTickMode = 0;
 
 uint32_t func0f000920(int portalnum1, int portalnum2)
@@ -545,7 +544,7 @@ void func0f001c0c(void)
 	 */
 	ptr = zbufGetAllocation();
 
-	var80061434 = (float *)ptr;
+	g_RoomLightInfluence = (float *)ptr;
 	ptr += table1size;
 
 	g_IsPortalClosed = (bool *)ptr;
@@ -574,7 +573,7 @@ void func0f001c0c(void)
 		g_IsPortalClosed[100] = false;
 	}
 
-	func0f00215c(sp48);
+	lightComputeInfluenceMatrix(sp48);
 
 	for (i = 1, table3size = 0; i < g_Vars.roomcount; i++) {
 		sp44[i] = utilCompressZeroRuns((void *)(i * var8009cae0 + sp48), g_Vars.roomcount, (void *)(&s5[i * var8009cae0]), 1);
@@ -633,14 +632,14 @@ void func0f001c0c(void)
 	}
 }
 
-float func0f002334(int roomnum, float mult, int portalnum1, int portalnum2);
+float lightEstimateTransferFraction(int roomnum, float mult, int portalnum1, int portalnum2);
 
-void func0f00215c(uint8_t *arg0)
+void lightComputeInfluenceMatrix(uint8_t *arg0)
 {
 	int i;
 	int j;
 
-	var8009cae8 = &func0f002334;
+	portalTransferLightAmount = &lightEstimateTransferFraction;
 
 	var8006143c = 50.0f;
 	var8009cae4 = 20;
@@ -648,23 +647,23 @@ void func0f00215c(uint8_t *arg0)
 	for (i = 1; i < g_Vars.roomcount; i++) {
 		uint8_t *ptr = &arg0[i * var8009cae0];
 
-		func0f00259c(i);
+		lightCalcAmbientLighting(i);
 
 		for (j = 0; j < 1; j++) {
 			ptr[j] = 0;
 		}
 
 		for (j = 1; j < g_Vars.roomcount; j++) {
-			if (var80061434[i] < var80061434[j]) {
-				var80061434[j] = var80061434[i];
+			if (g_RoomLightInfluence[i] < g_RoomLightInfluence[j]) {
+				g_RoomLightInfluence[j] = g_RoomLightInfluence[i];
 			}
 
-			ptr[j] = var80061434[j];
+			ptr[j] = g_RoomLightInfluence[j];
 		}
 	}
 }
 
-float func0f002334(int roomnum, float mult, int portalnum1, int portalnum2)
+float lightEstimateTransferFraction(int roomnum, float mult, int portalnum1, int portalnum2)
 {
 	float surfacearea = 0;
 	float result;
@@ -728,20 +727,20 @@ void lightsCalculateRoomDimensions(void)
 	}
 }
 
-void func0f00259c(int roomnum)
+void lightCalcAmbientLighting(int roomnum)
 {
 	int i;
 	float sp58;
 	float f20 = 0.0f;
 
 	for (i = 0; i < g_Vars.roomcount; i++) {
-		var80061434[i] = 0.0f;
+		g_RoomLightInfluence[i] = 0.0f;
 	}
 
-	var80061434[roomnum] = sqrtf(g_Rooms[roomnum].volume) * 255.0f;
+	g_RoomLightInfluence[roomnum] = sqrtf(g_Rooms[roomnum].volume) * 255.0f;
 
 	if (g_Rooms[roomnum].numportals != 0) {
-		func0f002844(roomnum, var80061434[roomnum], 0, -1);
+		roomPropagateClosedPortalLight(roomnum, g_RoomLightInfluence[roomnum], 0, -1);
 	}
 
 	for (i = 0; i < g_Rooms[roomnum].numportals; i++) {
@@ -751,20 +750,20 @@ void func0f00259c(int roomnum)
 	sp58 = (g_Rooms[roomnum].surfacearea - f20) / g_Rooms[roomnum].surfacearea;
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
-		var80061434[i] *= 3.0f / sqrtf(g_Rooms[i].volume);
+		g_RoomLightInfluence[i] *= 3.0f / sqrtf(g_Rooms[i].volume);
 	}
 
-	if (var80061434[roomnum] > 255.0f) {
-		var80061434[roomnum] = 255.0f;
+	if (g_RoomLightInfluence[roomnum] > 255.0f) {
+		g_RoomLightInfluence[roomnum] = 255.0f;
 	}
 
 	if (sp58 < 0.1f) {
 		g_Rooms[roomnum].br_light_min = g_Rooms[roomnum].br_light_max >> 1;
-		var80061434[roomnum] = g_Rooms[roomnum].br_light_max;
+		g_RoomLightInfluence[roomnum] = g_Rooms[roomnum].br_light_max;
 	}
 }
 
-void func0f002844(int roomnum, float arg1, int arg2, int portalnum)
+void roomPropagateClosedPortalLight(int roomnum, float arg1, int arg2, int portalnum)
 {
 	int i;
 	int otherroomnum = -1;
@@ -789,24 +788,24 @@ void func0f002844(int roomnum, float arg1, int arg2, int portalnum)
 			}
 
 			if (iterroomnum != otherroomnum) {
-				float f0 = var8009cae8(roomnum, arg1, portalnum, iterportalnum);
+				float f0 = portalTransferLightAmount(roomnum, arg1, portalnum, iterportalnum);
 
 				if (f0 > var8006143c && arg2 < var8009cae4) { // f0 > 50.0 &&  arg2 < 20
-					var80061434[roomnum] -= f0;
-					var80061434[iterroomnum] += f0;
+					g_RoomLightInfluence[roomnum] -= f0;
+					g_RoomLightInfluence[iterroomnum] += f0;
 
-					if (var80061434[roomnum] < 0.0f) {
-						var80061434[roomnum] = 0.0f;
+					if (g_RoomLightInfluence[roomnum] < 0.0f) {
+						g_RoomLightInfluence[roomnum] = 0.0f;
 					}
 
-					func0f002844(iterroomnum, f0, arg2 + 1, iterportalnum);
+					roomPropagateClosedPortalLight(iterroomnum, f0, arg2 + 1, iterportalnum);
 				}
 			}
 		}
 	}
 }
 
-void func0f002a98(void)
+void roomResetLights(void)
 {
 	int i;
 
@@ -934,13 +933,13 @@ bool lightTickBroken(int roomnum, int lightnum)
 			sp80.y = -sp8c.y;
 			sp80.z = -sp8c.z;
 
-			normalizeVector(&sp98, &spa4, 1546, "dlights.c");
+			utilsNormalizeVec(&sp98, &spa4);
 
 			spa4.x += sp80.x;
 			spa4.y += sp80.y;
 			spa4.z += sp80.z;
 
-			normalizeVector(&spa4, &spa4, 1548, "dlights.c");
+			utilsNormalizeVec(&spa4, &spa4);
 
 			room = (void *) (roomnum * sizeof(struct bgroom));
 

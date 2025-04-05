@@ -1,7 +1,5 @@
-#ifndef IN_GAME_CHEATS_H
-#define IN_GAME_CHEATS_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -29,5 +27,3 @@ MenuDialogHandlerResult cheatMenuHandleDialog(int operation, struct menudialogde
 MenuItemHandlerResult cheatCheckboxMenuHandler(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult cheatMenuHandleBuddyCheckbox(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult cheatMenuHandleTurnOffAllCheats(int operation, struct menuitem *item, union handlerdata *data);
-
-#endif

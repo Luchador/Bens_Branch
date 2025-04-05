@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include "versions.h"
 #include <libaudio.h>
 #include "n_libaudio.h"
 #include "n_seqp.h"
@@ -459,7 +458,7 @@ void func00034f0c(N_ALCSPlayer *seqp, uint8_t channel)
 
 	for (vs = seqp->vAllocHead; vs != NULL; vs = vs->next) {
 		if (vs->channel == channel && vs->envPhase != AL_PHASE_RELEASE) {
-			s16 volume = __n_vsVol(vs, (N_ALSeqPlayer *) seqp);
+			int16_t volume = __n_vsVol(vs, (N_ALSeqPlayer *) seqp);
 
 			n_alSynSetVol(&vs->voice, volume, __n_vsDelta(vs, seqp->curTime));
 		}
@@ -469,8 +468,8 @@ void func00034f0c(N_ALCSPlayer *seqp, uint8_t channel)
 void func00034fb8(N_ALCSPlayer *seqp, uint8_t channel)
 {
 	N_ALVoiceState *vs;
-	s16 sp2a;
-	s8 sp29 = (s8)seqp->chanState[channel].unk12 - 64;
+	int16_t sp2a;
+	int8_t sp29 = (int8_t)seqp->chanState[channel].unk12 - 64;
 	float sp24 = seqp->chanState[channel].pitchBend;
 
 	for (vs = seqp->vAllocHead; vs != 0; vs = vs->next) {
@@ -500,7 +499,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 	uint8_t                  byte1;
 	uint8_t                  byte2;
 	ALMIDIEvent         *midi = &event->msg.midi;
-	s16                 vol;
+	int16_t                 vol;
 	N_ALEvent           evt;
 	ALMicroTime         deltaTime;
 	N_ALVoiceState     *vstate;
@@ -509,7 +508,7 @@ void __n_CSPHandleMIDIMsg(N_ALCSPlayer *seqp, N_ALEvent *event)
 	int                 sp90;
 	ALVoiceConfig       config;
 	ALSound            *sound;
-	s16                 cents;
+	int16_t                 cents;
 	float                 pitch,oscValue;
 	uint8_t                  fxmix;
 	uint8_t                  sp76;

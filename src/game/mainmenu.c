@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/bondgun.h"
 #include "game/bossfile.h"
@@ -684,8 +685,6 @@ MenuItemHandlerResult menuhandlerAcceptMission(int operation, struct menuitem *i
 		lvSetDifficulty(g_MissionConfig.difficulty);
 		titleSetNextMode(TITLEMODE_SKIP);
 		mainChangeToStage(g_MissionConfig.stagenum);
-
-		viBlack(true);
 	}
 
 	return 0;
@@ -2241,7 +2240,7 @@ struct menuitem g_AudioOptionsMenuItems[] = {
 		MENUITEMTYPE_SEPARATOR,
 		0,
 		0,
-		(VERSION >= VERSION_PAL_FINAL ? 200 : 0),
+		0,
 		0,
 		NULL,
 	},

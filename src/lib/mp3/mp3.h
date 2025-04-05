@@ -1,5 +1,5 @@
-#ifndef _IN_LIB_MP3_MP3_H
-#define _IN_LIB_MP3_MP3_H
+#pragma once
+
 #include "types.h"
 #include "platform.h"
 
@@ -102,5 +102,3 @@ struct asistream {
 uint32_t mp3mainInit(void);
 struct asistream *mp3main00044460(int arg0, void *arg1, int arg2);
 int mp3main0004453c(struct asistream *stream, struct mp3thing **arg1, int *arg2);
-
-#endif

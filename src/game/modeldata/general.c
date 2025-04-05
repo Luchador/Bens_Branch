@@ -3,7 +3,7 @@
 #include "data.h"
 #include "types.h"
 
-u8 g_SkelDropshipJoints[][2] = {
+uint8_t g_SkelDropshipJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -26,7 +26,7 @@ struct skeleton g_SkelDropship = {
 	SKEL_DROPSHIP, ARRAYCOUNT(g_SkelDropshipJoints), g_SkelDropshipJoints,
 };
 
-u8 g_SkelSkShuttleJoints[][2] = {
+uint8_t g_SkelSkShuttleJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -51,7 +51,7 @@ struct skeleton g_SkelSkShuttle = {
 	SKEL_SKSHUTTLE, ARRAYCOUNT(g_SkelSkShuttleJoints), g_SkelSkShuttleJoints,
 };
 
-u8 g_SkelLiftJoints[][2] = {
+uint8_t g_SkelLiftJoints[][2] = {
 	{ 0, 0 },
 };
 
@@ -59,7 +59,7 @@ struct skeleton g_SkelLift = {
 	SKEL_LIFT, ARRAYCOUNT(g_SkelLiftJoints), g_SkelLiftJoints,
 };
 
-u8 g_SkelCctvJoints[][2] = {
+uint8_t g_SkelCctvJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 };
@@ -68,7 +68,7 @@ struct skeleton g_SkelCctv = {
 	SKEL_CCTV, ARRAYCOUNT(g_SkelCctvJoints), g_SkelCctvJoints,
 };
 
-u8 g_SkelTerminalJoints[][2] = {
+uint8_t g_SkelTerminalJoints[][2] = {
 	{ 0, 0 },
 };
 
@@ -76,7 +76,7 @@ struct skeleton g_SkelTerminal = {
 	SKEL_TERMINAL, ARRAYCOUNT(g_SkelTerminalJoints), g_SkelTerminalJoints,
 };
 
-u8 g_SkelCiHubJoints[][2] = {
+uint8_t g_SkelCiHubJoints[][2] = {
 	{ 0, 0 },
 };
 
@@ -84,7 +84,7 @@ struct skeleton g_SkelCiHub = {
 	SKEL_CIHUB, ARRAYCOUNT(g_SkelCiHubJoints), g_SkelCiHubJoints,
 };
 
-u8 g_Skel19Joints[][2] = {
+uint8_t g_Skel19Joints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -96,7 +96,7 @@ struct skeleton g_Skel19 = {
 	SKEL_19, ARRAYCOUNT(g_Skel19Joints), g_Skel19Joints,
 };
 
-u8 g_SkelAutogunJoints[][2] = {
+uint8_t g_SkelAutogunJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -109,7 +109,7 @@ struct skeleton g_SkelAutogun = {
 	SKEL_AUTOGUN, ARRAYCOUNT(g_SkelAutogunJoints), g_SkelAutogunJoints,
 };
 
-u8 g_Skel11Joints[][2] = {
+uint8_t g_Skel11Joints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -119,7 +119,7 @@ struct skeleton g_Skel11 = {
 	SKEL_11, ARRAYCOUNT(g_Skel11Joints), g_Skel11Joints,
 };
 
-u8 g_Skel13Joints[][2] = {
+uint8_t g_Skel13Joints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -139,7 +139,7 @@ struct skeleton g_Skel13 = {
 	SKEL_13, ARRAYCOUNT(g_Skel13Joints), g_Skel13Joints,
 };
 
-u8 g_Skel18Joints[][2] = {
+uint8_t g_Skel18Joints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -151,7 +151,7 @@ struct skeleton g_Skel18 = {
 	SKEL_18, ARRAYCOUNT(g_Skel18Joints), g_Skel18Joints,
 };
 
-u8 g_Skel12Joints[][2] = {
+uint8_t g_Skel12Joints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -162,7 +162,7 @@ struct skeleton g_Skel12 = {
 	SKEL_12, ARRAYCOUNT(g_Skel12Joints), g_Skel12Joints,
 };
 
-u8 g_SkelWindowedDoorJoints[][2] = {
+uint8_t g_SkelWindowedDoorJoints[][2] = {
 	{ 0, 0 },
 };
 
@@ -170,7 +170,7 @@ struct skeleton g_SkelWindowedDoor = {
 	SKEL_WINDOWEDDOOR, ARRAYCOUNT(g_SkelWindowedDoorJoints), g_SkelWindowedDoorJoints,
 };
 
-u8 g_Skel17Joints[][2] = {
+uint8_t g_Skel17Joints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -182,7 +182,7 @@ struct skeleton g_Skel17 = {
 	SKEL_17, ARRAYCOUNT(g_Skel17Joints), g_Skel17Joints,
 };
 
-u8 g_Skel0CJoints[][2] = {
+uint8_t g_Skel0CJoints[][2] = {
 	{ 0, 0 },
 };
 
@@ -190,7 +190,7 @@ struct skeleton g_Skel0C = {
 	SKEL_0C, ARRAYCOUNT(g_Skel0CJoints), g_Skel0CJoints,
 };
 
-u8 g_SkelLogoJoints[][2] = {
+uint8_t g_SkelLogoJoints[][2] = {
 	{ 0, 0 },
 };
 
@@ -198,7 +198,7 @@ struct skeleton g_SkelLogo = {
 	SKEL_LOGO, ARRAYCOUNT(g_SkelLogoJoints), g_SkelLogoJoints,
 };
 
-u8 g_SkelPdLogoJoints[][2] = {
+uint8_t g_SkelPdLogoJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -222,7 +222,7 @@ struct skeleton g_SkelPdLogo = {
 	SKEL_PDLOGO, ARRAYCOUNT(g_SkelPdLogoJoints), g_SkelPdLogoJoints,
 };
 
-u8 g_SkelHoverbikeJoints[][2] = {
+uint8_t g_SkelHoverbikeJoints[][2] = {
 	{ 0, 0 },
 };
 
@@ -230,7 +230,7 @@ struct skeleton g_SkelHoverbike = {
 	SKEL_HOVERBIKE, ARRAYCOUNT(g_SkelHoverbikeJoints), g_SkelHoverbikeJoints,
 };
 
-u8 g_SkelJumpshipJoints[][2] = {
+uint8_t g_SkelJumpshipJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -245,7 +245,7 @@ struct skeleton g_SkelJumpship = {
 	SKEL_JUMPSHIP, ARRAYCOUNT(g_SkelJumpshipJoints), g_SkelJumpshipJoints,
 };
 
-u8 g_SkelChopperJoints[][2] = {
+uint8_t g_SkelChopperJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -255,7 +255,7 @@ struct skeleton g_SkelChopper = {
 	SKEL_CHOPPER, ARRAYCOUNT(g_SkelChopperJoints), g_SkelChopperJoints,
 };
 
-u8 g_SkelRopeJoints[][2] = {
+uint8_t g_SkelRopeJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -283,7 +283,7 @@ struct skeleton g_SkelRope = {
 	SKEL_ROPE, ARRAYCOUNT(g_SkelRopeJoints), g_SkelRopeJoints,
 };
 
-u8 g_SkelBannerJoints[][2] = {
+uint8_t g_SkelBannerJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -301,7 +301,7 @@ struct skeleton g_SkelBanner = {
 	SKEL_BANNER, ARRAYCOUNT(g_SkelBannerJoints), g_SkelBannerJoints,
 };
 
-u8 g_SkelMaianUfoJoints[][2] = {
+uint8_t g_SkelMaianUfoJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -311,7 +311,7 @@ struct skeleton g_SkelMaianUfo = {
 	SKEL_MAIANUFO, ARRAYCOUNT(g_SkelMaianUfoJoints), g_SkelMaianUfoJoints,
 };
 
-u8 g_SkelCableCarJoints[][2] = {
+uint8_t g_SkelCableCarJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -321,7 +321,7 @@ struct skeleton g_SkelCableCar = {
 	SKEL_CABLECAR, ARRAYCOUNT(g_SkelCableCarJoints), g_SkelCableCarJoints,
 };
 
-u8 g_SkelSubmarineJoints[][2] = {
+uint8_t g_SkelSubmarineJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -333,7 +333,7 @@ struct skeleton g_SkelSubmarine = {
 	SKEL_SUBMARINE, ARRAYCOUNT(g_SkelSubmarineJoints), g_SkelSubmarineJoints,
 };
 
-u8 g_SkelTargetJoints[][2] = {
+uint8_t g_SkelTargetJoints[][2] = {
 	{ 0, 0 },
 };
 
@@ -341,7 +341,7 @@ struct skeleton g_SkelTarget = {
 	SKEL_TARGET, ARRAYCOUNT(g_SkelTargetJoints), g_SkelTargetJoints,
 };
 
-u8 g_SkelRareLogoJoints[][2] = {
+uint8_t g_SkelRareLogoJoints[][2] = {
 	{ 0, 0 },
 };
 
@@ -349,7 +349,7 @@ struct skeleton g_SkelRareLogo = {
 	SKEL_RARELOGO, ARRAYCOUNT(g_SkelRareLogoJoints), g_SkelRareLogoJoints,
 };
 
-u8 g_SkelWireFenceJoints[][2] = {
+uint8_t g_SkelWireFenceJoints[][2] = {
 	{ 0, 0 },
 	{ 1, 1 },
 	{ 2, 2 },
@@ -359,7 +359,7 @@ struct skeleton g_SkelWireFence = {
 	SKEL_WIREFENCE, ARRAYCOUNT(g_SkelWireFenceJoints), g_SkelWireFenceJoints,
 };
 
-u8 g_SkelBBJoints[][2] = {
+uint8_t g_SkelBBJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },
@@ -846,7 +846,7 @@ struct modelstate g_ModelStates[NUM_MODELS] = {
 	/*0x01b8*/ { NULL, FILE_PBUDDYBRIDGE,           0x0199 },
 };
 
-s8 g_PropExplosionTypes[] = {
+int8_t g_PropExplosionTypes[] = {
 	/*0x0000*/ EXPLOSIONTYPE_NONE,
 	/*0x0001*/ EXPLOSIONTYPE_NONE,
 	/*0x0002*/ EXPLOSIONTYPE_NONE,

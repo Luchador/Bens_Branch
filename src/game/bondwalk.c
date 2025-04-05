@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/bondmove.h"
 #include "game/bondwalk.h"
@@ -148,7 +149,7 @@ void bwalk0f0c3b38(struct coord *reltarget, struct defaultobj *obj)
 	abstarget.y = g_Vars.currentplayer->prop->pos.y;
 	abstarget.z = reltarget->z + g_Vars.currentplayer->prop->pos.z;
 
-	cdGetEdge(&globalthinga, &globalthingb, 223, "bondwalk.c");
+	cdGetEdge(&globalthinga, &globalthingb);
 
 	vector.x = globalthingb.z - globalthinga.z;
 	vector.y = 0;
@@ -201,7 +202,7 @@ int bwalkTryMoveUpwards(float amount)
 	types = g_Vars.bondcollisions ? CDTYPE_ALL : CDTYPE_BG;
 
 	playerGetBbox(g_Vars.currentplayer->prop, &radius, &ymax, &ymin);
-	func0f065e74(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &newpos, rooms);
+	propUpdatePositionRoomsSimple(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &newpos, rooms);
 	bmoveFindEnteredRoomsByPos(g_Vars.currentplayer, &newpos, rooms);
 	propSetPerimEnabled(g_Vars.currentplayer->prop, false);
 
@@ -247,7 +248,7 @@ bool bwalkCanMoveUpwards(float amount)
 	types = g_Vars.bondcollisions ? CDTYPE_ALL : CDTYPE_BG;
 
 	playerGetBbox(g_Vars.currentplayer->prop, &radius, &ymax, &ymin);
-	func0f065e74(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &newpos, rooms);
+	propUpdatePositionRoomsSimple(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &newpos, rooms);
 	bmoveFindEnteredRoomsByPos(g_Vars.currentplayer, &newpos, rooms);
 	propSetPerimEnabled(g_Vars.currentplayer->prop, false);
 
@@ -306,7 +307,7 @@ bool bwalkCalculateNewPosition(struct coord *vel, float rotateamount, bool apply
 		playerGetBbox(g_Vars.currentplayer->prop, &radius, &ymax, &ymin);
 		radius += extrawidth;
 
-		func0f065dfc(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms,
+		propUpdatePositionRooms(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms,
 				&dstpos, dstrooms, sp64, 20);
 
 		bmoveFindEnteredRoomsByPos(g_Vars.currentplayer, &dstpos, dstrooms);
@@ -391,7 +392,7 @@ bool bwalkCalculateNewPositionWithPush(struct coord *delta, float rotateamount, 
 
 				if (door->doorflags & DOORFLAG_DAMAGEONCONTACT) {
 					if (!g_Vars.currentplayer->isdead) {
-						cdGetEdge(&sp84, &sp78, 465, "bondwalk.c");
+						cdGetEdge(&sp84, &sp78);
 						sp90.x = sp78.f[2] - sp84.f[2];
 						sp90.y = 0;
 						sp90.z = sp84.f[0] - sp78.f[0];
@@ -523,7 +524,7 @@ int bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, i
 	int result = bwalkCalculateNewPositionWithPush(delta, 0, true, 0, types);
 
 	if (result == CDRESULT_COLLISION) {
-		cdGetEdge(arg1, arg2, 607, "bondwalk.c");
+		cdGetEdge(arg1, arg2);
 	}
 
 	return result;
@@ -547,7 +548,7 @@ int bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c,
 		}
 
 		if (result == CDRESULT_COLLISION) {
-			cdGetEdge(d, e, 635, "bondwalk.c");
+			cdGetEdge(d, e);
 
 			if (b->x != d->x
 					|| b->y != d->y
@@ -670,13 +671,13 @@ void bwalkUpdateSpeedSideways(float targetspeed, float accelspeed, int mult)
 	}
 
 	if (g_Vars.currentplayer->speedstrafe > targetspeed) {
-		g_Vars.currentplayer->speedstrafe -= PALUPF(accelspeed * mult);
+		g_Vars.currentplayer->speedstrafe -= accelspeed * mult;
 
 		if (g_Vars.currentplayer->speedstrafe < targetspeed) {
 			g_Vars.currentplayer->speedstrafe = targetspeed;
 		}
 	} else if (g_Vars.currentplayer->speedstrafe < targetspeed) {
-		g_Vars.currentplayer->speedstrafe += PALUPF(accelspeed * mult);
+		g_Vars.currentplayer->speedstrafe += accelspeed * mult;
 
 		if (g_Vars.currentplayer->speedstrafe > targetspeed) {
 			g_Vars.currentplayer->speedstrafe = targetspeed;
@@ -723,7 +724,7 @@ void bwalkUpdateVertical(void)
 	struct coord testpos;
 	struct coord newpos;
 	RoomNum newrooms[8];
-	int newinlift;
+	bool newinlift;
 	struct prop *lift = NULL;
 	float sumground;
 	float moveamount;
@@ -811,7 +812,7 @@ void bwalkUpdateVertical(void)
 							|| bwalkTryMoveUpwards(moveamount) == CDRESULT_NOCOLLISION) {
 						// Going up
 						g_Vars.currentplayer->vv_manground += moveamount;
-						g_Vars.currentplayer->sumground = g_Vars.currentplayer->vv_manground / (PAL ? 0.054400026798248f : 0.045499980449677f);
+						g_Vars.currentplayer->sumground = g_Vars.currentplayer->vv_manground / 0.045499980449677f;
 					}
 				}
 			}
@@ -861,16 +862,16 @@ void bwalkUpdateVertical(void)
 	// In other words, not falling
 	if (g_Vars.currentplayer->bdeltapos.y >= 0.0f
 			|| g_Vars.currentplayer->vv_ground > g_Vars.currentplayer->vv_manground) {
-		g_Vars.currentplayer->sumground = g_Vars.currentplayer->vv_manground / (PAL ? 0.054400026798248f : 0.045499980449677f);
+		g_Vars.currentplayer->sumground = g_Vars.currentplayer->vv_manground / 0.045499980449677f;
 
 		for (i = 0; i < g_Vars.lvupdate240; i++) {
 			g_Vars.currentplayer->sumground =
-				g_Vars.currentplayer->sumground * (PAL ? 0.94559997320175f : 0.9545f) + g_Vars.currentplayer->vv_ground;
+				g_Vars.currentplayer->sumground * 0.9545f + g_Vars.currentplayer->vv_ground;
 		}
 
 		if (g_Vars.currentplayer->vv_manground < g_Vars.currentplayer->vv_ground) {
 			// Feet are lower than the ground
-			sumground = g_Vars.currentplayer->sumground * (PAL ? 0.054400026798248f : 0.045499980449677f);
+			sumground = g_Vars.currentplayer->sumground * 0.045499980449677f;
 
 			if (sumground < g_Vars.currentplayer->vv_ground - 50) {
 				sumground = g_Vars.currentplayer->vv_ground - 50;
@@ -1065,11 +1066,11 @@ void bwalkUpdateVertical(void)
 	for (i = 0; i < g_Vars.lvupdate240; i++) {
 		if (g_Vars.currentplayer->crouchtime240 > 0) {
 			g_Vars.currentplayer->sumcrouch =
-				g_Vars.currentplayer->sumcrouch * (PAL ? 0.93540000915527f : 0.9456f) + g_Vars.currentplayer->crouchfall;
+				g_Vars.currentplayer->sumcrouch * 0.9456f + g_Vars.currentplayer->crouchfall;
 			g_Vars.currentplayer->crouchtime240--;
 		} else {
 			if (g_Vars.currentplayer->crouchfall < 0) {
-				g_Vars.currentplayer->crouchfall -= (PAL ? -1.3636363744736f : -1.125f);
+				g_Vars.currentplayer->crouchfall -= -1.125f;
 
 				if (g_Vars.currentplayer->crouchfall >= 0) {
 					g_Vars.currentplayer->crouchfall = 0;
@@ -1077,12 +1078,12 @@ void bwalkUpdateVertical(void)
 			}
 
 			g_Vars.currentplayer->sumcrouch =
-				g_Vars.currentplayer->sumcrouch * (PAL ? 0.93540000915527f : 0.9456f) + g_Vars.currentplayer->crouchfall;
+				g_Vars.currentplayer->sumcrouch * 0.9456f + g_Vars.currentplayer->crouchfall;
 		}
 	}
 
 	{
-		g_Vars.currentplayer->crouchheight = g_Vars.currentplayer->sumcrouch * (PAL ? 0.064599990844727f : 0.054400026798248f);
+		g_Vars.currentplayer->crouchheight = g_Vars.currentplayer->sumcrouch * 0.054400026798248f;
 		g_Vars.currentplayer->vv_height =
 			(g_Vars.currentplayer->headpos.y / g_Vars.currentplayer->standheight)
 			* g_Vars.currentplayer->vv_eyeheight;
@@ -1108,7 +1109,7 @@ void bwalkUpdateVertical(void)
 	if (newpos.x != g_Vars.currentplayer->prop->pos.x
 			|| newpos.y != g_Vars.currentplayer->prop->pos.y
 			|| newpos.z != g_Vars.currentplayer->prop->pos.z) {
-		func0f065e74(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &newpos, newrooms);
+		propUpdatePositionRoomsSimple(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &newpos, newrooms);
 
 		g_Vars.currentplayer->prop->pos.x = newpos.x;
 		g_Vars.currentplayer->prop->pos.y = newpos.y;
@@ -1202,7 +1203,7 @@ void bwalkUpdateCrouchOffset(void)
 
 		// float *frac, float maxfrac, float *fracspeed, float accel, float decel, float maxspeed
 		applySpeed(&g_Vars.currentplayer->crouchoffset, targetoffset,
-				&g_Vars.currentplayer->crouchspeed, PALUPF(0.5f), PALUPF(0.5f), PALUPF(5.0f));
+				&g_Vars.currentplayer->crouchspeed, 0.5f, 0.5f, 5.0f);
 
 		bwalkUpdateCrouchOffsetReal();
 
@@ -1483,8 +1484,8 @@ void bwalk0f0c69b8(void)
 
 		dist = sqrtf(spb4 * spb4 + spb0 * spb0);
 
-		if (g_Vars.lvupdate60freal > PALUPF(4)) {
-			lvupdate60f = PALUPF(4);
+		if (g_Vars.lvupdate60freal > 4) {
+			lvupdate60f = 4;
 			lvupdate240 = 4;
 		} else {
 			lvupdate60f = g_Vars.lvupdate60freal;
@@ -1492,7 +1493,7 @@ void bwalk0f0c69b8(void)
 		}
 
 		for (i = 0; i < lvupdate240; i++) {
-			spa8 += (dist - spa8) * PALUPF(0.1f);
+			spa8 += (dist - spa8) * 0.1f;
 		}
 
 		spa8 += 3.75f * lvupdate60f;
@@ -1722,7 +1723,7 @@ void bwalk0f0c69b8(void)
 	}
 
 	sp44 = g_Vars.currentplayer->speedtheta;
-	sp40 = g_Vars.currentplayer->speedverta / 0.7f + g_Vars.currentplayer->crouchspeed / PALUPF(5.0f);
+	sp40 = g_Vars.currentplayer->speedverta / 0.7f + g_Vars.currentplayer->crouchspeed / 5.0f;
 	sp3c = g_Vars.currentplayer->gunspeed;
 
 	breathing = bheadGetBreathingValue();

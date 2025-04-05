@@ -1,5 +1,4 @@
-#ifndef IN_MATH_H
-#define IN_MATH_H
+#pragma once
 
 #include_next <math.h>
 #undef M_PI
@@ -16,5 +15,3 @@ float roundf(float x);
 
 #define RAD2DEG(rad) ((rad) * (180.0f / M_PI))
 #define RAD2DEG2(rad) ((rad) * 180.0f / M_PI)
-
-#endif

@@ -1,5 +1,5 @@
-#ifndef _IN_GAME_MPLAYER_SCENARIOS_H
-#define _IN_GAME_MPLAYER_SCENARIOS_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -28,5 +28,3 @@ bool scenarioRadarChr(Gfx **gdl, struct prop *prop);
 float scenarioChooseSpawnLocation(float chrradius, struct coord *pos, RoomNum *rooms, struct prop *prop);
 int scenarioGetMaxTeams(void);
 void scenarioHighlightRoom(RoomNum room, int *arg1, int *arg2, int *arg3);
-
-#endif

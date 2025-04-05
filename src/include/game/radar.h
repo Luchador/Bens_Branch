@@ -1,7 +1,5 @@
-#ifndef IN_GAME_RADAR_H
-#define IN_GAME_RADAR_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -10,5 +8,3 @@ int radarGetTeamIndex(int team);
 Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, uint32_t colour1, uint32_t colour2, bool swapcolours);
 Gfx *radarRender(Gfx *gdl);
 Gfx *radarRenderRTrackedProps(Gfx *gdl);
-
-#endif

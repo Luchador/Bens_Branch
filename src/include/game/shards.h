@@ -1,5 +1,5 @@
-#ifndef IN_GAME_SHARDS_H
-#define IN_GAME_SHARDS_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -8,5 +8,3 @@ void shardsReset(void);
 Gfx *shardsRender(Gfx *gdl);
 void shardsStop(void);
 void shardsTick(void);
-
-#endif

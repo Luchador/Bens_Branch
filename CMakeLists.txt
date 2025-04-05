@@ -80,15 +80,9 @@ message(STATUS "Target platform: ${TARGET_PLATFORM}")
 
 # Calculate version info and binary name
 
-set(VERSION_IS_PAL 0)
-
 if(ROMID STREQUAL "ntsc-final")
   set(VERSION 2)
   set(BIN_REGION "")
-elseif(ROMID STREQUAL "pal-final")
-  set(VERSION 4)
-  set(BIN_REGION ".pal")
-  set(VERSION_IS_PAL 1)
 elseif(ROMID STREQUAL "jpn-final")
   set(VERSION 5)
   set(BIN_REGION ".jpn")
@@ -142,7 +136,6 @@ add_definitions(
   -DROM_SIZE=32
   -DAVOID_UB=1
   -D_LANGUAGE_C=1
-  -DPAL=${VERSION_IS_PAL}
   -DVERSION=${VERSION}
 )
 
@@ -277,12 +270,10 @@ set(SRC_LIB
   src/lib/lib_3e3e0.c
   src/lib/lib_17ce0.c
   src/lib/lib_39c80.c
-  src/lib/mema.c
   src/lib/memp.c
   src/lib/model.c
   src/lib/modelasm_c.c
   src/lib/mp3.c
-  src/lib/mtx_c.c
   src/lib/mtx.c
   src/lib/music.c
   src/lib/path.c

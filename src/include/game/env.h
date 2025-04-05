@@ -1,6 +1,5 @@
-#ifndef IN_GAME_ENV_H
-#define IN_GAME_ENV_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -22,5 +21,3 @@ Gfx *envStopFog(Gfx *gdl);
 bool envIsPosInFogMaxDistance(struct coord *pos, float tolerance);
 struct distfadesettings *envGetDistFadeSettings(void);
 int envGetObjShadeMode(struct prop *prop, float arg1[4]);
-
-#endif

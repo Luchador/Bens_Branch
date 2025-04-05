@@ -1,5 +1,5 @@
-#ifndef _IN_GAME_PLAYERMGR_H
-#define _IN_GAME_PLAYERMGR_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -20,5 +20,3 @@ void playermgrCreateWeapon(int hand);
 void playermgrShuffle(void);
 int playermgrGetOrderOfPlayer(int playernum);
 int playermgrGetPlayerAtOrder(int ordernum);
-
-#endif

@@ -1,16 +1,21 @@
 #include <ultra64.h>
+#include <math.h>
 #include "lib/sched.h"
 #include "constants.h"
-#include "game/camera.h"
-#include "game/dlights.h"
-#include "game/env.h"
-#include "game/utils.h"
-#include "game/tex.h"
-#include "game/sky.h"
 #include "game/artifacts.h"
 #include "game/bg.h"
-#include "game/stagetable.h"
+#include "game/camera.h"
+#include "game/debug.h"
+#include "game/dlights.h"
+#include "game/env.h"
+#include "game/mtxutils.h"
+#include "game/player.h"
+#include "game/prop.h"
 #include "game/room.h"
+#include "game/sky.h"
+#include "game/stagetable.h"
+#include "game/tex.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/mtx.h"
@@ -18,9 +23,6 @@
 #include "types.h"
 #include "lib/collision.h"
 #include "lib/lib_17ce0.h"
-#include "game/player.h"
-#include "game/prop.h"
-#include "game/debug.h"
 
 uint8_t *var800a41a0;
 
@@ -38,64 +40,6 @@ void artifactsTick(void)
 {
 	schedIncrementWriteArtifacts();
 	schedIncrementFrontArtifacts();
-}
-
-uint16_t func0f13c574(float arg0)
-{
-	uint32_t value = arg0 * 8.0f;
-	uint32_t left;
-	uint32_t right = value;
-
-	if (value > 0x3f800) {
-		right = value & 0x7ff;
-		right &= 0x7ff;
-		left = 7;
-	} else if (value > 0x3f000) {
-		right = value & 0x7ff;
-		right &= 0x7ff;
-		left = 6;
-	} else if (value > 0x3e000) {
-		right = (value >> 1) & 0x7ff;
-		right &= 0x7ff;
-		left = 5;
-	} else if (value > 0x3c000) {
-		right = (value >> 2) & 0x7ff;
-		right &= 0x7ff;
-		left = 4;
-	} else if (value > 0x38000) {
-		right = (value >> 3) & 0x7ff;
-		right &= 0x7ff;
-		left = 3;
-	} else if (value > 0x30000) {
-		right = (value >> 4) & 0x7ff;
-		right &= 0x7ff;
-		left = 2;
-	} else if (value > 0x20000) {
-		right = (value >> 5) & 0x7ff;
-		right &= 0x7ff;
-		left = 1;
-	} else {
-		right = (value >> 6) & 0x7ff;
-		right &= 0x7ff;
-		left = 0;
-	}
-
-	return left << 13 | (right << 2);
-}
-
-int func0f13c710(float arg0)
-{
-	if (arg0 > 0.0f) {
-		if (arg0 > 2147483520.0f) {
-			arg0 = 2147483520;
-		}
-	} else {
-		if (arg0 < -2147483520) {
-			arg0 = -2147483520;
-		}
-	}
-
-	return arg0;
 }
 
 bool artifactTestLos(struct coord *spec, struct coord *roompos, int xi, int yi)
@@ -116,7 +60,7 @@ bool artifactTestLos(struct coord *spec, struct coord *roompos, int xi, int yi)
 	struct coord gundir3d;
 	struct coord gunpos3d = g_Vars.currentplayer->cam_pos;
 	float crosspos[2] = { (float)xi, (float)yi };
-	cam0f0b4c3c(crosspos, &gundir2d, 1.f);
+	camProjectScreenToWorldDir(crosspos, &gundir2d, 1.f);
 	mtx4RotateVec(camGetProjectionMtxF(), &gundir2d, &gundir3d);
 
 	return shotTestLos(&gunpos2d, &gundir2d, &gunpos3d, &gundir3d, &endpos);
@@ -151,7 +95,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 	Mtxf sp138;
 	Mtxf spf8;
 	struct coord spec;
-	float spdc[4];
+	float screenPos[4];
 	struct coord origin;
 	struct coord spc4;
 	struct light *roomlights;
@@ -168,7 +112,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 			s1 = &var800a41a0[g_Rooms[roomnum].gfxdata->lightsindex * 3];
 
 			roomPopulateMtx(&sp138, roomnum);
-			mtx00015f88(bgGetScaleBg2Gfx(), &sp138);
+			mtxScale3x4(bgGetScaleBg2Gfx(), &sp138);
 			mtx4MultMtx4(camGetMtxF006c(), &sp138, &spf8);
 
 			viewwidth = viGetViewWidth();
@@ -215,18 +159,18 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 
 				if (sp190 > 0.0f) {
 					for (l = 3; l >= 0; l--) {
-						spdc[l] = origin.f[0] * spf8.m[0][l] + origin.f[1] * spf8.m[1][l] + origin.f[2] * spf8.m[2][l] + spf8.m[3][l];
+						screenPos[l] = origin.f[0] * spf8.m[0][l] + origin.f[1] * spf8.m[1][l] + origin.f[2] * spf8.m[2][l] + spf8.m[3][l];
 
-						if (l == 3 && spdc[l] <= 0.0f) {
+						if (l == 3 && screenPos[l] <= 0.0f) {
 							break;
 						}
 					}
 
-					if (spdc[3] > 0.0001f) {
-						f20 = 1.0f / spdc[3];
-						x = func0f13c710(viewleft + (1.0f + spdc[0] * f20) * (viewwidth * 0.5f));
-						y = func0f13c710(viewtop + (1.0f - spdc[1] * f20) * (viewheight * 0.5f));
-						f0 = (spdc[2] * f20 * 511.0f + 511.0f) * 32.0f;
+					if (screenPos[3] > 0.0001f) {
+						f20 = 1.0f / screenPos[3];
+						x = utilsClampF(viewleft + (1.0f + screenPos[0] * f20) * (viewwidth * 0.5f), -2147483520.0f, 2147483520.0f);
+						y = utilsClampF(viewtop + (1.0f - screenPos[1] * f20) * (viewheight * 0.5f), -2147483520.0f, 2147483520.0f);
+						f0 = (screenPos[2] * f20 * 511.0f + 511.0f) * 32.0f;
 
 						if (f0 < 32576.0f) {
 							brightnessfrac = 1.0f;
@@ -309,15 +253,15 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 						spec.z = origin.z + (roomlights[i].bbox[j].z - origin.z) * 0.6f;
 
 						for (k = 3; k >= 0; k--) {
-							spdc[k] = spec.f[0] * spf8.m[0][k] + spec.f[1] * spf8.m[1][k] + spec.f[2] * spf8.m[2][k] + spf8.m[3][k];
+							screenPos[k] = spec.f[0] * spf8.m[0][k] + spec.f[1] * spf8.m[1][k] + spec.f[2] * spf8.m[2][k] + spf8.m[3][k];
 
-							if (k == 3 && spdc[k] <= 0.0f) {
+							if (k == 3 && screenPos[k] <= 0.0f) {
 								break;
 							}
 						}
 
-						if (spdc[3] > 0.0f) {
-							f20 = 1.0f / spdc[3];
+						if (screenPos[3] > 0.0f) {
+							f20 = 1.0f / screenPos[3];
 
 							if (f20 > 9999.0f) {
 								f20 = 9999.0f;
@@ -327,9 +271,9 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 								f20 = -9999.0f;
 							}
 
-							xi = func0f13c710(viewleft + (1.0f + spdc[0] * f20) * (viewwidth * 0.5f));
-							yi = func0f13c710(viewtop + (1.0f - spdc[1] * f20) * (viewheight * 0.5f));
-							f0 = (spdc[2] * f20 * 511.0f + 511.0f) * 32.0f;
+							xi = utilsClampF(viewleft + (1.0f + screenPos[0] * f20) * (viewwidth * 0.5f), -2147483520.0f, 2147483520.0f);
+							yi = utilsClampF(viewtop + (1.0f - screenPos[1] * f20) * (viewheight * 0.5f), -2147483520.0f, 2147483520.0f);
+							f0 = (screenPos[2] * f20 * 511.0f + 511.0f) * 32.0f;
 
 							if (g_ZbufPtr1
 									&& xi >= (int)viewleft
@@ -348,13 +292,13 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 								}
 
 								if (index < MAX_ARTIFACTS) {
-									artifact->unk02 = artifactTestLos(&spec, &g_BgRooms[roomnum].pos, xi, yi);
-									artifact->unk04 = func0f13c574(f0) >> 2;
-									artifact->unk08 = &g_ZbufPtr1[viGetWidth() * yi + xi];
+									artifact->losCheckResult = artifactTestLos(&spec, &g_BgRooms[roomnum].pos, xi, yi);
+									artifact->zbufferDepth = f0;
+									artifact->zbufferPixelPtr = &g_ZbufPtr1[viGetWidth() * yi + xi];
 									artifact->light = &roomlights[i];
 									artifact->type = ARTIFACTTYPE_GLARE;
-									artifact->unk0c.u16_2 = xi;
-									artifact->unk0c.u16_1 = yi;
+									artifact->screenPos.screenX = xi;
+									artifact->screenPos.screenY = yi;
 								}
 							}
 						}
@@ -406,37 +350,29 @@ Gfx *artifactsUnconfigureForGlares(Gfx *gdl)
 
 Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 {
-	int i;
-	int j;
+	int i, j, k, l;
 	int lightindex;
 	struct artifact *artifacts;
-	uint16_t min;
-	uint16_t max;
-	float lightop_cur_frac;
-	int t2;
 	struct light *light;
-	uint8_t *s3;
-	int k;
+	float minDepth, maxDepth;
+	float lightop_cur_frac;
+	int totalLosHits;
+	uint8_t *lightStats;
 	int count;
-	uint16_t t4;
-	float add;
-	int l;
+	float addGlow;
 	float brightness; // The closer you get to an artifact, the higher this becomes.
-	int avg;
 	float f0;
 	int v1;
-	int r;
-	int g;
-	int b;
-	uint8_t colour[4];
+	int r, g, b;
+	uint8_t envColor[4];
 	int16_t lightroompos[3];
 	struct coord lightworldpos;
 	struct coord lightscreenpos;
-	float spdc[2];
-	float spd4[2];
-	float f24;
-	bool extra;
-	float f26;
+	float screenPos[2];
+	float screenSize[2];
+	float aspectScale;
+	bool addWhiteOverlay;
+	float screenScale;
 
 	artifacts = schedGetFrontArtifacts();
 	lightop_cur_frac = roomGetLightOpCurFrac(roomnum);
@@ -458,38 +394,32 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 		if (count > 0) {
 			if (roomnum == light->roomnum) {
 				lightindex = ((uintptr_t)light - (uintptr_t)g_BgLightsFileData) / sizeof(struct light);
-				s3 = &var800a41a0[lightindex * 3];
-				t2 = 0;
-				min = 0xffff;
-				max = 0;
+				lightStats = &var800a41a0[lightindex * 3];
+				totalLosHits = 0;
+				minDepth = 65536.0f;
+				maxDepth = 0.0f;
 
 				for (k = i; k < i + count; k++) {
-					if (artifacts[k].unk04 > max) {
-						max = artifacts[k].unk04;
+					if (artifacts[k].zbufferDepth > maxDepth) {
+						maxDepth = artifacts[k].zbufferDepth;
 					}
 
-					if (artifacts[k].unk04 < min) {
-						min = artifacts[k].unk04;
+					if (artifacts[k].zbufferDepth < minDepth) {
+						minDepth = artifacts[k].zbufferDepth;
 					}
 				}
 
-				avg = (max - min) >> 1;
-
-				if (avg < 25) {
-					avg = 25;
-				}
-
 				for (k = i; k < i + count; k++) {
-					t2 += artifacts[k].unk02;
+					totalLosHits += artifacts[k].losCheckResult;
 
 					artifacts[k].type = ARTIFACTTYPE_FREE;
 				}
 
-				s3[0] = func0f13d3c4(s3[0], t2 * 2);
+				lightStats[0] = func0f13d3c4(lightStats[0], totalLosHits * 2);
 
-				if (t2 > 0) {
+				if (totalLosHits > 0) {
 					brightness = viGetFovY() * 0.017453292f;
-					add = cosf(brightness) / sinf(brightness) * 14.6f;
+					addGlow = cosf(brightness) / sinf(brightness) * 14.6f;
 
 					if (lightIsHealthy(roomnum, lightindex - g_Rooms[roomnum].gfxdata->lightsindex)) {
 						if (!lightIsOn(roomnum, lightindex - g_Rooms[roomnum].gfxdata->lightsindex)) {
@@ -509,16 +439,16 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 					b = ((light->colour >> 4) & 0xf) * 17;
 
 					if ((r == 0xff && g == 0xff && b == 0xff) || (r == 0xff && g + b < 35)) {
-						extra = false;
+						addWhiteOverlay = false;
 					} else {
-						extra = true;
+						addWhiteOverlay = true;
 					}
 
 					if (USINGDEVICE(DEVICE_NIGHTVISION)) {
-						s3[2] *= (int) (lightop_cur_frac * 7.0f);
+						lightStats[2] *= (int) (lightop_cur_frac * 7.0f);
 					}
 
-					f0 = s3[2] * (1.0f / 255.0f);
+					f0 = lightStats[2] * (1.0f / 255.0f);
 
 					skySetOverexposure((int) ((float)f0 * r), (int) ((float)f0 * g), (int) ((float)f0 * b));
 
@@ -530,7 +460,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 
 					mtx4RotateVecInPlace(camGetWorldToScreenMtxf(), &lightscreenpos);
 
-					cam0f0b4d04(&lightscreenpos, spdc);
+					camProjectViewToScreen(&lightscreenpos, screenPos);
 
 					brightness *= 27500.0f / (-lightscreenpos.z < 1.0f ? 1.0f : -lightscreenpos.z);
 
@@ -538,35 +468,35 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 						brightness *= light->brightnessmult * (1.0f / 32.0f);
 					}
 
-					brightness *= s3[1] * (1.0f / 255.0f);
+					brightness *= lightStats[1] * (1.0f / 255.0f);
 
 					if (USINGDEVICE(DEVICE_NIGHTVISION)) {
 						brightness *= 14.0f * lightop_cur_frac;
 					}
 
-					brightness += add;
+					brightness += addGlow;
 					brightness *= 2.0f * roomGetSettledLocalBrightnessFrac(roomnum);
 
 					if (brightness > 750.0f) {
 						brightness = 750.0f;
 					}
 
-					f24 = stageGetCurrent()->light_width * brightness * 0.01f;
-					f26 = stageGetCurrent()->light_height * brightness * 0.01f;
+					aspectScale = stageGetCurrent()->light_width * brightness * 0.01f;
+					screenScale = stageGetCurrent()->light_height * brightness * 0.01f;
 
-					f24 *= viGetViewWidth() * (1.0f / 240.0f) / camGetPerspAspect();
-					f26 *= viGetViewHeight() * (1.0f / 240.0f);
+					aspectScale *= viGetViewWidth() * (1.0f / 240.0f) / camGetPerspAspect();
+					screenScale *= viGetViewHeight() * (1.0f / 240.0f);
 
 					if (brightness > 3.0f) {
 						float alpha = (light->colour & 0xf) * 17;
 
-						colour[0] = r;
-						colour[1] = g;
-						colour[2] = b;
+						envColor[0] = r;
+						envColor[1] = g;
+						envColor[2] = b;
 
 						alpha *= stageGetCurrent()->light_alpha / 255.0f;
-						alpha *= (s3[1] / 255.0f);
-						alpha *= (s3[0] / 8.0f);
+						alpha *= (lightStats[1] / 255.0f);
+						alpha *= (lightStats[0] / 8.0f);
 
 						if (USINGDEVICE(DEVICE_NIGHTVISION)) {
 							alpha *= lightop_cur_frac * 7.0f;
@@ -576,35 +506,35 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 							alpha = 255.0f;
 						}
 
-						colour[3] = alpha;
+						envColor[3] = alpha;
 
-						gDPSetEnvColor(gdl++, colour[0], colour[1], colour[2], colour[3]);
+						gDPSetEnvColor(gdl++, envColor[0], envColor[1], envColor[2], envColor[3]);
 
-						spd4[0] = f24;
-						spd4[1] = f26;
+						screenSize[0] = aspectScale;
+						screenSize[1] = screenScale;
 
-						textureCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
+						utilsRenderScreenTexture(&gdl, screenPos, screenSize, 64, 64, false, false, false, true);
 
 						// Make artifacts slightly brighter when true
-						if (extra) {
-							colour[0] = 0xff;
-							colour[1] = 0xff;
-							colour[2] = 0xff;
-							colour[3] = stageGetCurrent()->light_alpha;
-							colour[3] = s3[0] * colour[3] / 8;
+						if (addWhiteOverlay) {
+							envColor[0] = 0xff;
+							envColor[1] = 0xff;
+							envColor[2] = 0xff;
+							envColor[3] = stageGetCurrent()->light_alpha;
+							envColor[3] = lightStats[0] * envColor[3] / 8;
 
-							gDPSetEnvColor(gdl++, colour[0], colour[1], colour[2], colour[3]);
+							gDPSetEnvColor(gdl++, envColor[0], envColor[1], envColor[2], envColor[3]);
 
-							spd4[0] = f24 * 0.4f;
-							spd4[1] = f26 * 0.4f;
+							screenSize[0] = aspectScale * 0.4f;
+							screenSize[1] = screenScale * 0.4f;
 
-							textureCalcScreenCoords(&gdl, spdc, spd4, 64, 64, false, false, false, 1);
+							utilsRenderScreenTexture(&gdl, screenPos, screenSize, 64, 64, false, false, false, true);
 						}
 					}
 				}
 
-				s3[1] = 0;
-				s3[2] = 0;
+				lightStats[1] = 0;
+				lightStats[2] = 0;
 			}
 
 			// This is incrementing i past all the artifacts for this particular

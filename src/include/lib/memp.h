@@ -1,6 +1,5 @@
-#ifndef _IN_LIB_MEMP_H
-#define _IN_LIB_MEMP_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -13,5 +12,3 @@ uint32_t mempGetPoolFree(uint8_t poolnum, uint32_t bank);
 void mempResetPool(uint8_t pool);
 void mempDisablePool(uint8_t pool);
 void *mempAllocFromRight(uint32_t len, uint8_t pool);
-
-#endif

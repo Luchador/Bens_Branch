@@ -1,5 +1,5 @@
-#ifndef _IN_GAME_SMOKE_H
-#define _IN_GAME_SMOKE_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -17,9 +17,7 @@ void smokeCreateAtProp(struct prop *prop, int16_t type);
 void smokeCreateAtPadEffect(struct padeffectobj *effect, struct coord *pos, RoomNum *rooms, int16_t type);
 void smokeClearForProp(struct prop *prop);
 struct smoke *smokeCreateSimple(struct coord *pos, RoomNum *rooms, int16_t type);
-u32 smokeTick(struct prop *prop);
-u32 smokeTickPlayer(struct prop *prop);
+uint32_t smokeTick(struct prop *prop);
+uint32_t smokeTickPlayer(struct prop *prop);
 Gfx *smokeRender(struct prop *prop, Gfx *gdl, bool xlupass);
 void smokeClearSomeTypes(void);
-
-#endif

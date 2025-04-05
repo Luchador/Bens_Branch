@@ -1,7 +1,5 @@
-#ifndef IN_GAME_PROPSND_H
-#define IN_GAME_PROPSND_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -34,5 +32,3 @@ void psGetTheoreticalVolPan(struct coord *pos, RoomNum *rooms, int16_t soundnum,
 void psApplyVolPan(struct sndstate *handle, struct coord *pos, float dist1, float dist2, float dist3, RoomNum *rooms, int16_t soundnum, int arg7, float *distanceptr);
 int psGetRandomSparkSound(void);
 int psGetDuration60(int channelnum);
-
-#endif

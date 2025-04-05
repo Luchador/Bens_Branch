@@ -168,8 +168,8 @@ void beamCreateForHand(int handnum)
 }
 
 Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
-		float arg2, struct coord *headpos, u32 headcolour,
-		float arg5, struct coord *tailpos, u32 tailcolour)
+		float arg2, struct coord *headpos, uint32_t headcolour,
+		float arg5, struct coord *tailpos, uint32_t tailcolour)
 {
 	struct coord spe4;
 	float length;
@@ -182,7 +182,6 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	Mtxf *worldtoscreenmtx = camGetWorldToScreenMtxf();
 	struct coord sp74 = {0, 0, 0};
 	float mult;
-	u32 stack[2];
 	struct coord sp5c;
 
 	spe4.f[0] = tailpos->f[0] - headpos->f[0];
@@ -247,8 +246,8 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 
 	mtx4LoadTranslation(headpos, &sp84);
 
-	mtx00015f04(1.0f / arg2, &sp84);
-	mtx00015be0(worldtoscreenmtx, &sp84);
+	mtxScaleRotationPart(1.0f / arg2, &sp84);
+	mtxApplyAffineTransformInPlace(worldtoscreenmtx, &sp84);
 	mtxF2L(&sp84, spc8);
 
 	mult = arg5 * arg2;
@@ -299,7 +298,6 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 
 Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 {
-	u32 stack;
 	Mtxf *sp188;
 	Mtxf sp148;
 
@@ -434,8 +432,8 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 				&& sp138.f[2] > -32000.0f && sp138.f[2] < 32000.0f) {
 			spd8 = true;
 			mtx4LoadTranslation(&sp138, &sp148);
-			mtx00015f04(0.1f, &sp148);
-			mtx00015be0(worldtoscreenmtx, &sp148);
+			mtxScaleRotationPart(0.1f, &sp148);
+			mtxApplyAffineTransformInPlace(worldtoscreenmtx, &sp148);
 
 			for (i = 0; i < 4; i++) {
 				for (j = 0; j < 4; j++) {
@@ -461,7 +459,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 					spb8[0] = spb8[1] = sp130 / 10;
 					tmp = -spcc.f[2];
 
-					cam0f0b4e68(spb8, tmp, spc0);
+					camScaleViewToScreen(spb8, tmp, spc0);
 
 					if (spc0[0] < 2) {
 						spcc.f[0] *= spc0[0] * 0.5f;
@@ -704,9 +702,9 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 	if (casing != NULL) {
 		struct coord spa4 = {0, 0, 0};
 		Mtxf sp64;
-		u32 magic = 0x15aca6;
-		u32 sp5c;
-		u32 sp4c;
+		uint32_t magic = 0x15aca6;
+		uint32_t sp5c;
+		uint32_t sp4c;
 		float newyspeed;
 		float f0;
 
@@ -842,7 +840,7 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 	mtx.m[2][3] = 0.0f;
 	mtx.m[3][3] = 1.0f;
 
-	mtx00015f04(0.1000000089407f, &mtx);
+	mtxScaleRotationPart(0.1000000089407f, &mtx);
 	mtx4SetTranslation(&casing->pos, &mtx);
 	mtxApplyAffineTransform(camGetWorldToScreenMtxf(), &mtx, model.matrices);
 
@@ -869,7 +867,7 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 
 		*gdlptr = renderdata.gdl;
 
-		mtxF2LBulk(matrices, modeldef->nummatrices);
+		mtxConvertToFixedPoint(matrices, modeldef->nummatrices);
 	}
 }
 
@@ -1047,17 +1045,17 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	Mtxf sp124;
 	int i;
 
-	static u32 sp1 = 800;
+	static uint32_t sp1 = 800;
 #ifndef PLATFORM_N64
 	// laser fades out farther away
-	static u32 sp2 = 7000 * 3;
-	static u32 sp3 = 9000 * 3;
+	static uint32_t sp2 = 7000 * 3;
+	static uint32_t sp3 = 9000 * 3;
 #else
-	static u32 sp2 = 7000;
-	static u32 sp3 = 9000;
+	static uint32_t sp2 = 7000;
+	static uint32_t sp3 = 9000;
 #endif
-	static u32 spb = 24;
-	static u32 spi = 6;
+	static uint32_t spb = 24;
+	static uint32_t spi = 6;
 
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
@@ -1071,14 +1069,14 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
 
 	mtx4LoadIdentity(&sp164);
-	mtx00015be0(camGetWorldToScreenMtxf(), &sp164);
+	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &sp164);
 	mtx4LoadIdentity(&sp124);
-	mtx00015be0(camGetProjectionMtxF(), &sp124);
+	mtxApplyAffineTransformInPlace(camGetProjectionMtxF(), &sp124);
 
 	sp124.m[3][0] = sp124.m[3][1] = sp124.m[3][2] = 0.0f;
 
 	mtx4LoadIdentity(&sp1b0);
-	mtx00015be0(camGetWorldToScreenMtxf(), &sp1b0);
+	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &sp1b0);
 
 	campos.x = player->cam_pos.x;
 	campos.y = player->cam_pos.y;
@@ -1088,7 +1086,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	sp1b0.m[3][1] = 0.0f;
 	sp1b0.m[3][2] = 0.0f;
 
-	mtx00015f88(0.2f, &sp1b0);
+	mtxScale3x4(0.2f, &sp1b0);
 
 	mtx = gfxAllocateMatrix();
 	mtxF2L(&sp1b0, mtx);
@@ -1232,7 +1230,6 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 
 Gfx *lasersightRenderBeam(Gfx *gdl)
 {
-	u32 stack;
 	struct player *player = g_Vars.currentplayer;
 	Mtxf *mtx;
 	int i;
@@ -1256,16 +1253,16 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	texSelect(&gdl, &g_TexGeneralConfigs[3], 4, 0, 2, 1, NULL);
 	mtx4LoadIdentity(&sp14c);
 
-	mtx00015be0(camGetWorldToScreenMtxf(), &sp14c);
+	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &sp14c);
 	mtx4LoadIdentity(&sp10c);
-	mtx00015be0(camGetProjectionMtxF(), &sp10c);
+	mtxApplyAffineTransformInPlace(camGetProjectionMtxF(), &sp10c);
 
 	sp10c.m[3][1] = 0;
 	sp10c.m[3][0] = 0;
 	sp10c.m[3][2] = 0;
 
 	mtx4LoadIdentity(&sp198);
-	mtx00015be0(camGetWorldToScreenMtxf(), &sp198);
+	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &sp198);
 
 	campos.x = player->cam_pos.x;
 	campos.y = player->cam_pos.y;
@@ -1275,7 +1272,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	sp198.m[3][1] = 0;
 	sp198.m[3][2] = 0;
 
-	mtx00015f88(0.2f, &sp198);
+	mtxScale3x4(0.2f, &sp198);
 	mtx = gfxAllocateMatrix();
 	mtxF2L(&sp198, mtx);
 

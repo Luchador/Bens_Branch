@@ -1,5 +1,5 @@
-#ifndef IN_GAME_ACTIVEMENU_H
-#define IN_GAME_ACTIVEMENU_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -25,5 +25,3 @@ Gfx *amRenderText(Gfx *gdl, char *text, uint32_t colour, int16_t left, int16_t t
 Gfx *amRenderAibotInfo(Gfx *gdl, int buddynum);
 Gfx *amRenderSlot(Gfx *gdl, char *text, int16_t x, int16_t y, int mode, int flags);
 Gfx *amRender(Gfx *gdl);
-
-#endif

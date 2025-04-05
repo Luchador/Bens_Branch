@@ -1,6 +1,5 @@
-#ifndef _IN_GAME_CHR_CHR_H
-#define _IN_GAME_CHR_CHR_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -8,7 +7,7 @@ void chrSetChrnum(struct chrdata *chr, int16_t chrnum);
 void chrDeregister(int chrnum);
 void chrCalculatePushPos(struct chrdata *chr, struct coord *pos, RoomNum *rooms, bool arg3);
 bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, float arg3, bool arg4);
-bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, float *mangroundptr);
+bool chrApplyMovementAndResolveGround(struct model *model, struct coord *arg1, struct coord *arg2, float *mangroundptr);
 int chrsGetNumFree(void);
 int16_t chrsGetNextUnusedChrnum(void);
 struct prop *chr0f020b14(struct prop *prop, struct model *model, struct coord *pos, RoomNum *rooms, float arg3, uint8_t *ailist);
@@ -83,5 +82,3 @@ struct prop *chrGetHeldUsableProp(struct chrdata *chr, int hand);
 struct prop *chrGetTargetProp(struct chrdata *chr);
 bool chrUpdateGeometry(struct prop *prop, uint8_t **start, uint8_t **end);
 void chrGetBbox(struct prop *prop, float *radius, float *ymax, float *ymin);
-
-#endif

@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/bossfile.h"
 #include "game/cheats.h"
@@ -617,7 +618,6 @@ void endscreenContinue(int context)
 						lvSetDifficulty(g_MissionConfig.difficulty);
 						titleSetNextMode(TITLEMODE_SKIP);
 						mainChangeToStage(g_MissionConfig.stagenum);
-						viBlack(true);
 					}
 				} else if (g_Vars.stagenum == STAGE_SKEDARRUINS) {
 					// Commit to starting credits
@@ -626,7 +626,6 @@ void endscreenContinue(int context)
 					lvSetDifficulty(g_MissionConfig.difficulty);
 					titleSetNextMode(TITLEMODE_SKIP);
 					mainChangeToStage(g_MissionConfig.stagenum);
-					viBlack(true);
 				}
 			} else {
 				if (context == 1) {
@@ -1255,7 +1254,7 @@ void endscreenPrepare(void)
 	uint32_t secs;
 	int timedalreadyunlocked;
 	int complalreadyunlocked;
-	u16 prevbest;
+	uint16_t prevbest;
 	bool nowunlocked;
 
 	g_Menus[g_MpPlayerNum].endscreen.stageindex = g_MissionConfig.stageindex;
@@ -1395,7 +1394,7 @@ void endscreenPrepare(void)
 
 				if (g_MissionConfig.stagenum == STAGE_SKEDARRUINS && g_AltTitleUnlocked == false) {
 					g_AltTitleUnlocked = true;
-					*(s8 *)&g_AltTitleEnabled = true;
+					*(int8_t *)&g_AltTitleEnabled = true;
 					bossfileSave();
 				}
 			}

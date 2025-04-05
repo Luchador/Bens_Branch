@@ -1,10 +1,12 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/tex.h"
 #include "game/stars.h"
 #include "game/textutils.h"
 #include "game/camera.h"
+#include "game/mtxutils.h"
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/vi.h"
@@ -13,6 +15,7 @@
 #include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
+#include "video.h"
 
 
 int g_StarCount;
@@ -95,33 +98,27 @@ void starInsert(int index, struct coord *arg1)
 	}
 }
 
-#define ABS2(value) ((value) < 0 ? -(value) : (value))
-
 void starsReset(void)
 {
-	int v0 = 0;
-	int v1 = 0;
-	struct coord spd4;
-	struct coord spc8;
+	int gridX = 0;
+	int gridY = 0;
+	struct coord starDirection;
+	struct coord majorAxisUnit;
 	int i = 0;
-	float spc0 = 0.0f;
-	float spbc = 0.0f;
-	int count = 0;
-	int spb0 = 0;
-	float f0 = 0.0f;
-	int tmp = 0;
-	int tmp1 = 0;
-	int tmp2 = 0;
+	float majorCoord1 = 0.0f;
+	float majorCoord2 = 0.0f;
+	int indexCount = 0;
+	int faceIndex = 0;
+	float maxAbs = 0.0f;
+	int gridCellCount = 0;
+	int faceCellIndex = 0;
 
 	g_StarPositions = NULL;
 
 	g_StarsBelowHorizon = false;
 	g_StarGridSize = 3;
 
-	if (g_Vars.stagenum == STAGE_DEFECTION || g_Vars.stagenum == STAGE_EXTRACTION) {
-		g_StarCount = 200;
-		g_StarGridSize = 2;
-	} else if (g_Vars.stagenum == STAGE_ATTACKSHIP) {
+	if (g_Vars.stagenum == STAGE_ATTACKSHIP) {
 		g_StarsBelowHorizon = true;
 		g_StarCount = 1200;
 	} else {
@@ -129,8 +126,11 @@ void starsReset(void)
 		g_StarGridSize = 2;
 	}
 
-	tmp = g_StarGridSize + 1;
-	g_StarPositions = mempAlloc(ALIGN64(g_StarCount * 3U + tmp * 72 * tmp + 6 * g_StarGridSize * g_StarGridSize * 4U + 4), MEMPOOL_STAGE);
+	int gridPlusOne = g_StarGridSize + 1;
+	g_StarPositions = mempAlloc(
+		ALIGN64((g_StarCount * 3) + (gridPlusOne * 72 * gridPlusOne) + (g_StarGridSize * g_StarGridSize * 24) + 4),
+		MEMPOOL_STAGE
+	);
 
 	if (g_StarPositions != NULL) {
 		g_StarPosIndexes = (int *)(g_StarPositions + g_StarCount * 3);
@@ -139,56 +139,51 @@ void starsReset(void)
 			g_StarPosIndexes[i] = 0;
 		}
 
-		count = 6 * g_StarGridSize * g_StarGridSize + 1;
-		g_StarData3 = (float *)(count * sizeof(float) + (uintptr_t)g_StarPosIndexes);
+		indexCount = 6 * g_StarGridSize * g_StarGridSize + 1;
+		g_StarData3 = (float *)(indexCount * sizeof(float) + (uintptr_t)g_StarPosIndexes);
 
 		stars0f135c70();
 
 		for (i = 0; i < g_StarCount; i++) {
-			spd4.f[0] = 2.0f * RANDOMFRAC() - 1.0f;
-			spd4.f[1] = g_StarsBelowHorizon ? 2.0f * RANDOMFRAC() - 1.0f : RANDOMFRAC();
-			spd4.f[2] = 2.0f * RANDOMFRAC() - 1.0f;
+			starDirection.x = 2.0f * RANDOMFRAC() - 1.0f;
+			starDirection.y = g_StarsBelowHorizon ? 2.0f * RANDOMFRAC() - 1.0f : RANDOMFRAC();
+			starDirection.z = 2.0f * RANDOMFRAC() - 1.0f;
 
-			utilsNormalizeF(&spd4.f[0], &spd4.f[1], &spd4.f[2]);
+			utilsNormalizeF(&starDirection.x, &starDirection.y, &starDirection.z);
 
-			f0 = (ABS2(spd4.f[0]) > ABS2(spd4.f[1])) ? (ABS2(spd4.f[0]) > ABS2(spd4.f[2]) ? ABS2(spd4.f[0]) : ABS2(spd4.f[2])) : (ABS2(spd4.f[1]) > ABS2(spd4.f[2]) ? ABS2(spd4.f[1]) : ABS2(spd4.f[2]));
+			maxAbs = (fabsf(starDirection.x) > fabsf(starDirection.y))
+				? (fabsf(starDirection.x) > fabsf(starDirection.z) ? fabsf(starDirection.x) : fabsf(starDirection.z))
+				: (fabsf(starDirection.y) > fabsf(starDirection.z) ? fabsf(starDirection.y) : fabsf(starDirection.z));
 
-			spc8.f[0] = spd4.f[0] / f0;
-			spc8.f[1] = spd4.f[1] / f0;
-			spc8.f[2] = spd4.f[2] / f0;
+			majorAxisUnit.x = starDirection.x / maxAbs;
+			majorAxisUnit.y = starDirection.y / maxAbs;
+			majorAxisUnit.z = starDirection.z / maxAbs;
 
-			tmp1 = g_StarGridSize * g_StarGridSize;
+			gridCellCount = g_StarGridSize * g_StarGridSize;
 
-			if (spc8.f[0] == 1 || spc8.f[0] == -1) {
-				spb0 = spc8.f[0] == -1 ? 0 : 1;
-				spc0 = spc8.f[1];
-				spbc = spc8.f[2];
-			} else if (spc8.f[1] == 1 || spc8.f[1] == -1) {
-				spb0 = spc8.f[1] == -1 ? 2 : 3;
-				spc0 = spc8.f[2];
-				spbc = spc8.f[0];
-			} else if (spc8.f[2] == 1 || spc8.f[2] == -1) {
-				spb0 = spc8.f[2] == -1 ? 4 : 5;
-				spc0 = spc8.f[0];
-				spbc = spc8.f[1];
-			} else {
-				// empty
+			if (majorAxisUnit.x == 1 || majorAxisUnit.x == -1) {
+				faceIndex = majorAxisUnit.x == -1 ? 0 : 1;
+				majorCoord1 = majorAxisUnit.y;
+				majorCoord2 = majorAxisUnit.z;
+			} else if (majorAxisUnit.y == 1 || majorAxisUnit.y == -1) {
+				faceIndex = majorAxisUnit.y == -1 ? 2 : 3;
+				majorCoord1 = majorAxisUnit.z;
+				majorCoord2 = majorAxisUnit.x;
+			} else if (majorAxisUnit.z == 1 || majorAxisUnit.z == -1) {
+				faceIndex = majorAxisUnit.z == -1 ? 4 : 5;
+				majorCoord1 = majorAxisUnit.x;
+				majorCoord2 = majorAxisUnit.y;
 			}
 
-			v0 = (spc0 + 1) / 2 * g_StarGridSize;
-			v1 = (spbc + 1) / 2 * g_StarGridSize;
+			gridX = (majorCoord1 + 1) / 2 * g_StarGridSize;
+			gridY = (majorCoord2 + 1) / 2 * g_StarGridSize;
 
-			if (v0 == g_StarGridSize) {
-				v0--;
-			}
+			if (gridX == g_StarGridSize) gridX--;
+			if (gridY == g_StarGridSize) gridY--;
 
-			if (v1 == g_StarGridSize) {
-				v1--;
-			}
+			faceCellIndex = faceIndex * gridCellCount + gridX + g_StarGridSize * gridY;
 
-			tmp2 = v0 + g_StarGridSize * v1;
-
-			starInsert(spb0 * tmp1 + tmp2, &spd4);
+			starInsert(faceCellIndex, &starDirection);
 		}
 	}
 }
@@ -223,16 +218,16 @@ Gfx *starsRender(Gfx *gdl)
 
 	colours[i] = colourBlend(colours[i], colours[i] & 0xff, 0x5f);
 
-	sp154 = cosf(0.017453199252486f * (90.0f - viGetFovY() / viGetAspect() * 0.5f));
+	sp154 = cosf(0.017453199252486f * (90.0f - viGetFovY() / videoGetAspect() * 0.5f));
 
 	mtx4LoadIdentity(&mtx);
-	mtx00015be0(camGetWorldToScreenMtxf(), &mtx);
+	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &mtx);
 
 	mtx.m[3][0] = 0.0f;
 	mtx.m[3][1] = 0.0f;
 	mtx.m[3][2] = 0.0f;
 
-	mtx00015f88(262.9f, &mtx);
+	mtxScale3x4(262.9f, &mtx);
 
 	mtx.m[0][1] *= g_Vars.currentplayer->c_recipscaley;
 	mtx.m[1][1] *= g_Vars.currentplayer->c_recipscaley;

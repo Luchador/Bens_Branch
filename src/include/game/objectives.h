@@ -1,7 +1,5 @@
-#ifndef IN_GAME_OBJECTIVES_H
-#define IN_GAME_OBJECTIVES_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -33,5 +31,3 @@ void objectiveCheckHolograph(float sqdist);
 struct prop *chopperGetTargetProp(struct chopperobj *heli);
 struct defaultobj *objFindByTagId(int tag_id);
 struct tag *tagFindById(int tag_id);
-
-#endif

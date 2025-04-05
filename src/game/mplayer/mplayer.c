@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/title.h"
 #include "game/pdmode.h"
@@ -1472,7 +1473,7 @@ struct mpweaponset g_MpWeaponSets[12] = {
 
 int g_MpWeaponSetNum = 0x00000000;
 
-u16 g_AwardNames[] = {
+uint16_t g_AwardNames[] = {
 	L_MPMENU_000, // "Most Suicidal"
 	L_MPMENU_001, // "Who Needs Ammo?"
 	L_MPMENU_002, // "Least Shielded"
@@ -2409,7 +2410,7 @@ int mpGetBodyId(uint8_t bodynum)
 	return g_MpBodies[bodynum].bodynum;
 }
 
-int mpGetMpbodynumByBodynum(u16 bodynum)
+int mpGetMpbodynumByBodynum(uint16_t bodynum)
 {
 	int i;
 
@@ -2626,7 +2627,7 @@ struct mptrack g_MpTracks[] = {
 
 bool mpIsTrackUnlocked(int tracknum)
 {
-	s16 stageindex = g_MpTracks[tracknum].unlockstage;
+	int16_t stageindex = g_MpTracks[tracknum].unlockstage;
 	bool unlocked = false;
 	uint32_t i;
 
@@ -3466,7 +3467,7 @@ void mpplayerfileGetOverview(char *arg0, char *name, uint32_t *playtime)
 	*playtime = savebufferReadBits(&buffer, 28);
 }
 
-int mpplayerfileSave(int playernum, int device, int fileid, u16 deviceserial)
+int mpplayerfileSave(int playernum, int device, int fileid, uint16_t deviceserial)
 {
 	int ret;
 	int newfileid;
@@ -3494,7 +3495,7 @@ int mpplayerfileSave(int playernum, int device, int fileid, u16 deviceserial)
 	return -1;
 }
 
-int mpplayerfileLoad(int playernum, int device, int fileid, u16 deviceserial)
+int mpplayerfileLoad(int playernum, int device, int fileid, uint16_t deviceserial)
 {
 	int ret;
 	struct savebuffer buffer;
@@ -3593,7 +3594,7 @@ void mpApplyConfig(struct mpconfigfull *config)
 {
 	int i;
 	int j;
-	u16 chrslots;
+	uint16_t chrslots;
 
 	g_MpSetup.scenario = config->config.setup.scenario;
 
@@ -3650,16 +3651,6 @@ void mp0f18dec4(int slot)
 	config = challengeLoadConfig(confignum, buffer, sizeof(buffer));
 
 	mpApplyConfig(config);
-
-#if VERSION >= VERSION_JPN_FINAL
-	g_MpSetup.chrslots &= 0x0f;
-
-	for (i = 0; i < MAX_BOTS; i++) {
-		if (g_BotConfigsArray[i].difficulty != BOTDIFF_DISABLED) {
-			g_MpSetup.chrslots |= 1 << (i + 4);
-		}
-	}
-#endif
 }
 
 void mpsetupfileLoadWad(struct savebuffer *buffer)
@@ -3778,7 +3769,7 @@ void mpsetupfileSaveWad(struct savebuffer *buffer)
 	}
 }
 
-void mpsetupfileGetOverview(char *arg0, char *filename, u16 *numsims, u16 *stagenum, u16 *scenarionum)
+void mpsetupfileGetOverview(char *arg0, char *filename, uint16_t *numsims, uint16_t *stagenum, uint16_t *scenarionum)
 {
 	struct savebuffer buffer;
 
@@ -3791,7 +3782,7 @@ void mpsetupfileGetOverview(char *arg0, char *filename, u16 *numsims, u16 *stage
 	*scenarionum = savebufferReadBits(&buffer, 3);
 }
 
-int mpsetupfileSave(int device, int fileid, u16 deviceserial)
+int mpsetupfileSave(int device, int fileid, uint16_t deviceserial)
 {
 	int ret;
 	int newfileid;
@@ -3818,7 +3809,7 @@ int mpsetupfileSave(int device, int fileid, u16 deviceserial)
 	return -1;
 }
 
-int mpsetupfileLoad(int device, int fileid, u16 deviceserial)
+int mpsetupfileLoad(int device, int fileid, uint16_t deviceserial)
 {
 	int ret;
 	struct savebuffer buffer;

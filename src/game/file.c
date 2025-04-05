@@ -94,7 +94,7 @@ void fileLoad(uint8_t *dst, unsigned int allocationlen, romptr_t *romaddrptr, st
 
 	if (allocationlen == 0) {
 		// DMA with no inflate
-		dmaExec(dst, *romaddrptr, romsize);
+		memcpy(dst, (const void *) *romaddrptr, romsize);
 	} else {
 		// DMA the compressed data to scratch space then inflate
 		uint8_t *scratch = (dst + allocationlen) - ((romsize + 7) & (uintptr_t)~7);
@@ -104,7 +104,7 @@ void fileLoad(uint8_t *dst, unsigned int allocationlen, romptr_t *romaddrptr, st
 		} else {
 			int result;
 
-			dmaExec(scratch, *romaddrptr, romsize);
+			memcpy(scratch, (const void *) *romaddrptr, romsize);
 			result = rzipInflate(scratch, dst, buffer);
 
 			result = ALIGN16(result);
@@ -142,7 +142,7 @@ void fileLoadPartToAddr(uint16_t filenum, void *memaddr, int offset, unsigned in
 	if (fileGetRomSizeByTableAddress((uintptr_t*)&g_FileTable[filenum])) {
 		const uint8_t *src = romdataFileGetData(filenum);
 		if (src) {
-			dmaExec(memaddr, (uintptr_t) src + offset, len);
+			memcpy(memaddr, (const void *) (uintptr_t) src + offset, len);
 		}
 		// this intentionally does not execute romdataFilePreprocess,
 		// because bg files are loaded and inflated in parts
@@ -163,7 +163,7 @@ unsigned int fileGetInflatedSize(int filenum, unsigned int loadtype)
 
 	if (romaddr == 0) {
 	} else {
-		dmaExec(ptr, romaddr, 0x40);
+		memcpy(ptr, (const void *) romaddr, 0x40);
 	}
 
 	if (rzipIs1173(ptr)) {

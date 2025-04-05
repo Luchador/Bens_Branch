@@ -1719,7 +1719,7 @@ static void gfx_sp_movemem(uint8_t index, uint8_t offset, const void* data) {
             break;
         case G_MV_LOOKATY:
         case G_MV_LOOKATX:
-            // I think this is only really used for guLookAtReflect
+            // I think this is only really used for mtxLookAtReflect
             index = !((index - G_MV_LOOKATY) / 2);
             rsp.lookat[index] = ((const Light *)data)->l;
             rsp.lookat_enabled = (index == 0) || (rsp.lookat[1].dir[0] || rsp.lookat[1].dir[1]);
@@ -1763,7 +1763,7 @@ static void gfx_sp_texture(uint16_t sc, uint16_t tc, uint8_t level, uint8_t tile
     }
 }
 
-static void gfx_dp_set_scissor(uint32_t mode, uint32_t ulx, uint32_t uly, uint32_t lrx, uint32_t lry) {
+static void gfx_dp_set_scissor(uint32_t ulx, uint32_t uly, uint32_t lrx, uint32_t lry) {
     float x = ulx / 4.0f;
     float y = lry / 4.0f;
     float width = (lrx - ulx) / 4.0f;
@@ -2284,7 +2284,6 @@ static void gfx_run_dl(Gfx* cmd) {
     const char* fileName;
 
     Gfx* dListStart = cmd;
-    uint64_t ourHash = -1;
 
     for (;;) {
         uint32_t opcode = cmd->words.w0 >> 24;
@@ -2480,7 +2479,7 @@ static void gfx_run_dl(Gfx* cmd) {
                 break;
             }
             case G_SETSCISSOR:
-                gfx_dp_set_scissor(C1(24, 2), C0(12, 12), C0(0, 12), C1(12, 12), C1(0, 12));
+                gfx_dp_set_scissor(C0(12, 12), C0(0, 12), C1(12, 12), C1(0, 12));
                 break;
             case G_SETZIMG:
                 gfx_dp_set_z_image(seg_addr(cmd->words.w1));

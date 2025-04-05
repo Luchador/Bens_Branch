@@ -4,6 +4,7 @@
 #include "game/quaternion.h"
 #include "game/camera.h"
 #include "game/tex.h"
+#include "game/mtxutils.h"
 #include "game/gfxmemory.h"
 #include "game/bg.h"
 #include "game/file.h"
@@ -79,8 +80,7 @@
 uint32_t var8005efb0 = 0;
 bool g_ModelDistanceDisabled = false;
 float g_ModelDistanceScale = 1;
-bool var8005efbc = false;
-float var8005efc0 = 0;
+float g_ExtraBoundsDist = 0;
 bool (*var8005efc4)(struct model *model, struct modelnode *node) = NULL;
 Vtx *(*g_ModelVtxAllocatorFunc)(int numvertices) = NULL;
 void (*g_ModelJointPositionedFunc)(int mtxindex, Mtxf *mtx) = NULL;
@@ -451,7 +451,6 @@ float modelGetScreenDistance(struct model *model)
 	return 0;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 // ntsc-beta has this function in another file
 void *modelGetNodeRwData(struct model *model, struct modelnode *node)
 {
@@ -497,7 +496,6 @@ void *modelGetNodeRwData(struct model *model, struct modelnode *node)
 
 	return &rwdatas[index];
 }
-#endif
 
 void modelNodeGetPosition(struct model *model, struct modelnode *node, struct coord *pos)
 {
@@ -858,7 +856,7 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 		if ((g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) && (g_Anims[anim->animnum2].flags & ANIMFLAG_ABSOLUTETRANSLATION) == 0) {
 			mtx4LoadYRotation(rwdata->chrinfo.yrot, &sp78);
 			mtx4LoadRotation(&rot3, &sp38);
-			mtx00015be0(&sp78, &sp38);
+			mtxApplyAffineTransformInPlace(&sp78, &sp38);
 			quaternion0f097044(&sp38, spec);
 		} else {
 			quaternionEulerToQuat(&rot3, spec);
@@ -918,19 +916,19 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 		mtx4LoadRotationAndTranslation(pos, rot, &mtx68);
 
 		if (allowscale && model->scale != 1.0f) {
-			mtx00015f04(model->scale, &mtx68);
+			mtxScaleRotationPart(model->scale, &mtx68);
 		}
 
 		if (arg6->x != 1.0f) {
-			mtx00015df0(arg6->x, &mtx68);
+			mtxScaleRow0Full(arg6->x, &mtx68);
 		}
 
 		if (arg6->y != 1.0f) {
-			mtx00015e4c(arg6->y, &mtx68);
+			mtxScaleRow1Full(arg6->y, &mtx68);
 		}
 
 		if (arg6->z != 1.0f) {
-			mtx00015ea8(arg6->z, &mtx68);
+			mtxScaleRow2Full(arg6->z, &mtx68);
 		}
 
 		mtxApplyAffineTransform(rendermtx, &mtx68, nodemtx);
@@ -944,19 +942,19 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 		mtx4LoadRotationAndTranslation(pos, rot, nodemtx);
 
 		if (allowscale && model->scale != 1.0f) {
-			mtx00015f04(model->scale, nodemtx);
+			mtxScaleRotationPart(model->scale, nodemtx);
 		}
 
 		if (arg6->x != 1.0f) {
-			mtx00015df0(arg6->x, nodemtx);
+			mtxScaleRow0Full(arg6->x, nodemtx);
 		}
 
 		if (arg6->y != 1.0f) {
-			mtx00015e4c(arg6->y, nodemtx);
+			mtxScaleRow1Full(arg6->y, nodemtx);
 		}
 
 		if (arg6->z != 1.0f) {
-			mtx00015ea8(arg6->z, nodemtx);
+			mtxScaleRow2Full(arg6->z, nodemtx);
 		}
 	}
 
@@ -998,7 +996,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 			roty = 1.5f;
 		}
 
-		mtx00015edc(roty, finalmtx);
+		mtxScaleRow2Vec(roty, finalmtx);
 		mtx4SetTranslation(pos, finalmtx);
 
 		if (rendermtx != NULL) {
@@ -1031,15 +1029,15 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 		quaternionToTransformMtx(pos, rot, &mtx58);
 
 		if (arg5->x != 1.0f) {
-			mtx00015df0(arg5->x, &mtx58);
+			mtxScaleRow0Full(arg5->x, &mtx58);
 		}
 
 		if (arg5->y != 1.0f) {
-			mtx00015e4c(arg5->y, &mtx58);
+			mtxScaleRow1Full(arg5->y, &mtx58);
 		}
 
 		if (arg5->z != 1.0f) {
-			mtx00015ea8(arg5->z, &mtx58);
+			mtxScaleRow2Full(arg5->z, &mtx58);
 		}
 
 		mtxApplyAffineTransform(rendermtx, &mtx58, nodemtx);
@@ -1053,15 +1051,15 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 		quaternionToTransformMtx(pos, rot, nodemtx);
 
 		if (arg5->x != 1.0f) {
-			mtx00015df0(arg5->x, nodemtx);
+			mtxScaleRow0Full(arg5->x, nodemtx);
 		}
 
 		if (arg5->y != 1.0f) {
-			mtx00015e4c(arg5->y, nodemtx);
+			mtxScaleRow1Full(arg5->y, nodemtx);
 		}
 
 		if (arg5->z != 1.0f) {
-			mtx00015ea8(arg5->z, nodemtx);
+			mtxScaleRow2Full(arg5->z, nodemtx);
 		}
 	}
 
@@ -1101,7 +1099,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 			roty = 1.5f;
 		}
 
-		mtx00015edc(roty, finalmtx);
+		mtxScaleRow2Vec(roty, finalmtx);
 		mtx4SetTranslation(pos, finalmtx);
 
 		if (rendermtx != NULL) {
@@ -1608,15 +1606,9 @@ void modelSetMatrices(struct modelrenderdata *renderdata, struct model *model)
 
 	renderdata->unk10 += model->definition->nummatrices;
 
-#if VERSION >= VERSION_PAL_BETA
-	if (var8005efb0_2 || !modelasm00018680(renderdata, model)) {
-		modelUpdateMatrices(renderdata, model);
-	}
-#else
 	if (!modelasm00018680(renderdata, model)) {
 		modelUpdateMatrices(renderdata, model);
 	}
-#endif
 }
 
 void modelSetMatricesWithAnim(struct modelrenderdata *renderdata, struct model *model)
@@ -1766,7 +1758,7 @@ float modelGetEffectiveAnimSpeed(struct model *model)
 int modelConstrainOrWrapAnimFrame(int frame, int16_t animnum, float endframe)
 {
 	if (frame < 0) {
-		if (var8005efbc || (g_Anims[animnum].flags & ANIMFLAG_LOOP)) {
+		if (g_Anims[animnum].flags & ANIMFLAG_LOOP) {
 			frame = animGetNumFrames(animnum) - (-frame % animGetNumFrames(animnum));
 		} else {
 			frame = 0;
@@ -1774,7 +1766,7 @@ int modelConstrainOrWrapAnimFrame(int frame, int16_t animnum, float endframe)
 	} else if (endframe >= 0 && frame > (int)endframe) {
 		frame = (int)ceilf(endframe);
 	} else if (frame >= animGetNumFrames(animnum)) {
-		if (var8005efbc || (g_Anims[animnum].flags & ANIMFLAG_LOOP)) {
+		if (g_Anims[animnum].flags & ANIMFLAG_LOOP) {
 			frame = frame % animGetNumFrames(animnum);
 		} else {
 			frame = animGetNumFrames(animnum) - 1;
@@ -1867,7 +1859,7 @@ void modelSetAnimation2(struct model *model, int16_t animnum, int flip, float fs
 			float sp94;
 			struct coord translate = {0, 0, 0};
 			float sp84;
-			u8 frameslot;
+			uint8_t frameslot;
 			struct coord rot1;
 			struct coord scale1;
 			float sp64;
@@ -2067,15 +2059,6 @@ void modelSetAnimFlipFunction(struct model *model, void *callback)
 	}
 }
 
-#if VERSION < VERSION_NTSC_1_0
-void modelSetAnimUnk6c(struct model *model, int value)
-{
-	if (model->anim) {
-		model->anim->unk6c = value;
-	}
-}
-#endif
-
 void modelSetAnimSpeed(struct model *model, float speed, float startframe)
 {
 	struct anim *anim = model->anim;
@@ -2084,11 +2067,11 @@ void modelSetAnimSpeed(struct model *model, float speed, float startframe)
 		if (startframe > 0) {
 			anim->timespeed = startframe;
 			anim->newspeed = speed;
-			anim->elapsespeed = 0;
+			anim->elapsespeed = 0.0f;
 			anim->oldspeed = anim->speed;
 		} else {
 			anim->speed = speed;
-			anim->timespeed = 0;
+			anim->timespeed = 0.0f;
 		}
 	}
 }
@@ -2145,7 +2128,15 @@ void modelSetAnimFrame(struct model *model, float frame)
 
 	if (anim) {
 		framea = (int)floorf(frame);
-		forwards = anim->speed >= 0;
+		
+		if(anim->speed >= 0)
+		{
+			forwards = true;
+		}
+		else 
+		{
+			forwards = false;
+		}
 
 		frameb = (forwards ? framea + 1 : framea - 1);
 
@@ -2227,7 +2218,7 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, float curframe, float e
 				float sine;
 				float cosine;
 				struct coord translate = {0, 0, 0};
-				u8 frameslot;
+				uint8_t frameslot;
 				float f20;
 				int floorcur;
 				int floorend;
@@ -2704,7 +2695,6 @@ void modelTickAnimQuarterSpeed(struct model *model, int lvupdate240, bool arg2)
 	}
 }
 
-#if VERSION < VERSION_PAL_BETA
 /**
  * This is identical to the above function but removes the 0.25f multipliers.
  */
@@ -2847,7 +2837,6 @@ void modelTickAnim(struct model *model, int lvupdate240, bool arg2)
 		}
 	}
 }
-#endif
 
 void modelApplyRenderModeType1(struct modelrenderdata *renderdata)
 {
@@ -2965,7 +2954,7 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 			}
 		}
 	} else if (renderdata->unk30 == 5) {
-		u8 alpha;
+		uint8_t alpha;
 
 		if (arg1) {
 			gDPPipeSync(renderdata->gdl++);
@@ -3125,7 +3114,7 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 			}
 		}
 	} else if (renderdata->unk30 == 5) {
-		u8 alpha;
+		uint8_t alpha;
 
 		gDPPipeSync(renderdata->gdl++);
 		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
@@ -3336,61 +3325,51 @@ void modelRenderNodeStarGunfire(struct modelrenderdata *renderdata, struct model
 		struct modelrodata_stargunfire *rodata = &node->rodata->stargunfire;
 		int i;
 
-		if (rodata->gdl) {
-			Vtx *src = (Vtx *) rodata->vertices;
-			Vtx *dst = g_ModelVtxAllocatorFunc(rodata->unk00 * 4);
-
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, dst);
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2]));
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
-
-			gDPSetFogColor(renderdata->gdl++, 0x00, 0x00, 0x00, 0x00);
-			gSPDisplayList(renderdata->gdl++, rodata->gdl);
-
-			for (i = 0; i < rodata->unk00; i++) {
-				uint16_t rand1 = (rngRandom() << 10) & 0xffff;
-				int s4 = ((coss(rand1) << 5) * 181) >> 18;
-				int s3 = ((sins(rand1) << 5) * 181) >> 18;
-				int s1 = rngRandom() >> 31;
-				int mult = 0x10000 - (rngRandom() & 0x3fff);
-				int corner1 = 0x200 + s3;
-				int corner2 = 0x200 - s3;
-				int corner3 = 0x200 - s4;
-				int corner4 = 0x200 + s4;
-
-				dst[0] = src[0];
-				dst[1] = src[1];
-				dst[2] = src[2];
-				dst[3] = src[3];
-
-				dst[0].s = corner3;
-				dst[0].t = corner2;
-				dst[0].x = (src[(s1 + 0) % 4].x * mult) >> 16;
-				dst[0].y = (src[(s1 + 0) % 4].y * mult) >> 16;
-				dst[0].z = (src[(s1 + 0) % 4].z * mult) >> 16;
-
-				dst[1].s = corner1;
-				dst[1].t = corner3;
-				dst[1].x = (src[(s1 + 1) % 4].x * mult) >> 16;
-				dst[1].y = (src[(s1 + 1) % 4].y * mult) >> 16;
-				dst[1].z = (src[(s1 + 1) % 4].z * mult) >> 16;
-
-				dst[2].s = corner4;
-				dst[2].t = corner1;
-				dst[2].x = (src[(s1 + 2) % 4].x * mult) >> 16;
-				dst[2].y = (src[(s1 + 2) % 4].y * mult) >> 16;
-				dst[2].z = (src[(s1 + 2) % 4].z * mult) >> 16;
-
-				dst[3].s = corner2;
-				dst[3].t = corner4;
-				dst[3].x = (src[(s1 + 3) % 4].x * mult) >> 16;
-				dst[3].y = (src[(s1 + 3) % 4].y * mult) >> 16;
-				dst[3].z = (src[(s1 + 3) % 4].z * mult) >> 16;
-
-				src += 4;
-				dst += 4;
-			}
+		if (!rodata->gdl)
+		{
+			return;
 		}
+
+		Vtx *src = (Vtx *) rodata->vertices;
+		Vtx *dst = g_ModelVtxAllocatorFunc(rodata->unk00 * 4);
+
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, dst);
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2]));
+		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
+
+		gDPSetFogColor(renderdata->gdl++, 0, 0, 0, 0);
+		gSPDisplayList(renderdata->gdl++, rodata->gdl);
+
+		for (i = 0; i < rodata->unk00; i++) 
+		{
+			float s4 = 724;
+			float s3 = 0;
+			int mult = 65535 - (rngRandom() & 16383);
+
+			int texRight = 512 + s3;
+			int texLeft = 512 - s3;
+			int texTop = 512 - s4;
+			int texBottom = 512 + s4;
+
+			for(int corner = 0; corner < 4; corner++)
+			{
+				dst[corner] = src[corner];
+				dst[corner].x = (src[corner].x * mult) / 65536;
+				dst[corner].y = (src[corner].y * mult) / 65536;
+				dst[corner].z = (src[corner].z * mult) / 65536;
+
+				switch (corner) {
+					case 0: dst[corner].s = texTop;     dst[corner].t = texLeft;   break;
+					case 1: dst[corner].s = texRight;   dst[corner].t = texTop;    break;
+					case 2: dst[corner].s = texBottom;  dst[corner].t = texRight; break;
+					case 3: dst[corner].s = texLeft;    dst[corner].t = texBottom;;  break;
+				}
+			}
+
+			src += 4;
+			dst += 4;
+		}
+		
 	}
 }
 
@@ -3401,151 +3380,135 @@ void modelSelectTexture(struct modelrenderdata *renderdata, struct textureconfig
 
 void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model *model, struct modelnode *node)
 {
-	float negspc0;
-	struct modelrodata_chrgunfire *rodata = &node->rodata->chrgunfire;
+	if (!(renderdata->flags & MODELRENDERFLAG_XLU)) {
+		return;
+	}
+
 	union modelrwdata *rwdata = modelGetNodeRwData(model, node);
+
+	if (!rwdata->chrgunfire.visible) {
+		return;
+	}
+
+
+	struct modelrodata_chrgunfire *rodata = &node->rodata->chrgunfire;
+	Mtxf *mtx = &model->matrices[modelFindNodeMtxIndex(node, 0)];
+
 	Vtx *vertices;
-	float spf0;
-	float spec;
-	struct coord spe0;
-	float spdc;
-	float spd8;
-	float rot2;
-	float spd0;
-	float spcc;
-	float spc8;
-	float spc4;
-	float spc0;
-	float spbc;
-	float negspcc;
-	float negspc8;
-	float scale;
-	Mtxf *mtx;
-	float tmp;
-	struct coord sp9c;
-	struct coord sp90;
 	Vtx vtxtemplate = {0};
 	Col colourtemplate = {0xffffffff};
-	struct textureconfig *tconfig;
 	Col *colours;
+	struct coord center;
+	struct textureconfig *tconfig;
 	float distance;
 
-	if ((renderdata->flags & MODELRENDERFLAG_XLU) && rwdata->chrgunfire.visible) {
-		int index = modelFindNodeMtxIndex(node, 0);
-		mtx = &model->matrices[index];
+	int index = modelFindNodeMtxIndex(node, 0);
+	mtx = &model->matrices[index];
 
-		spe0.x = -(rodata->pos.f[0] * mtx->m[0][0] + rodata->pos.f[1] * mtx->m[1][0] + rodata->pos.f[2] * mtx->m[2][0] + mtx->m[3][0]);
-		spe0.y = -(rodata->pos.f[0] * mtx->m[0][1] + rodata->pos.f[1] * mtx->m[1][1] + rodata->pos.f[2] * mtx->m[2][1] + mtx->m[3][1]);
-		spe0.z = -(rodata->pos.f[0] * mtx->m[0][2] + rodata->pos.f[1] * mtx->m[1][2] + rodata->pos.f[2] * mtx->m[2][2] + mtx->m[3][2]);
+	struct coord viewdir;
+	viewdir.x = -(rodata->pos.f[0] * mtx->m[0][0] + rodata->pos.f[1] * mtx->m[1][0] + rodata->pos.f[2] * mtx->m[2][0] + mtx->m[3][0]);
+	viewdir.y = -(rodata->pos.f[0] * mtx->m[0][1] + rodata->pos.f[1] * mtx->m[1][1] + rodata->pos.f[2] * mtx->m[2][1] + mtx->m[3][1]);
+	viewdir.z = -(rodata->pos.f[0] * mtx->m[0][2] + rodata->pos.f[1] * mtx->m[1][2] + rodata->pos.f[2] * mtx->m[2][2] + mtx->m[3][2]);
 
-		distance = sqrtf(spe0.f[0] * spe0.f[0] + spe0.f[1] * spe0.f[1] + spe0.f[2] * spe0.f[2]);
+	distance = sqrtf(viewdir.x * viewdir.x + viewdir.y * viewdir.y + viewdir.z * viewdir.z);
 
-		if (distance > 0) {
-			float tmp = 1 / (model->scale * distance);
-			spe0.f[0] *= tmp;
-			spe0.f[1] *= tmp;
-			spe0.f[2] *= tmp;
-		} else {
-			spe0.f[0] = 0;
-			spe0.f[1] = 0;
-			spe0.f[2] = 1 / model->scale;
-		}
-
-		spec = acosf(spe0.f[0] * mtx->m[1][0] + spe0.f[1] * mtx->m[1][1] + spe0.f[2] * mtx->m[1][2]);
-		spf0 = acosf(-(spe0.f[0] * mtx->m[2][0] + spe0.f[1] * mtx->m[2][1] + spe0.f[2] * mtx->m[2][2]) / sinf(spec));
-
-		tmp = -(spe0.f[0] * mtx->m[0][0] + spe0.f[1] * mtx->m[0][1] + spe0.f[2] * mtx->m[0][2]);
-
-		if (tmp < 0) {
-			spf0 = M_TAU - spf0;
-		}
-
-		spdc = cosf(spf0);
-		spd8 = sinf(spf0);
-		rot2 = cosf(spec);
-		spd0 = sinf(spec);
-
-		scale = 0.75f + (rngRandom() % 128) * (1.0f / 256.0f); // 0.75 to 1.25
-
-		sp9c.f[0] = rodata->dim.f[0] * scale;
-		sp9c.f[1] = rodata->dim.f[1] * scale;
-		sp9c.f[2] = rodata->dim.f[2] * scale;
-
-		spcc = sp9c.f[0] * spdc * 0.5f;
-		spc8 = sp9c.f[2] * spd8 * 0.5f;
-		spc4 = sp9c.f[1] * spd0 * 0.5f;
-
-		spc0 = sp9c.f[0] * rot2 * spd8 * 0.5f;
-		spbc = sp9c.f[2] * rot2 * spdc * 0.5f;
-
-		negspcc = -spcc;
-		negspc8 = -spc8;
-		negspc0 = -spc0;
-
-		sp90.f[0] = rodata->pos.f[0] - sp9c.f[0] * 0.5f;
-		sp90.f[1] = rodata->pos.f[1];
-		sp90.f[2] = rodata->pos.f[2];
-
-		vertices = g_ModelVtxAllocatorFunc(4);
-
-		colours = (Col *) gfxAllocateColours(1);
-
-		vertices[0] = vtxtemplate;
-		vertices[1] = vtxtemplate;
-		vertices[2] = vtxtemplate;
-		vertices[3] = vtxtemplate;
-
-		colours[0] = colourtemplate;
-
-		vertices[0].x = sp90.f[0] + negspcc + negspc0;
-		vertices[0].y = sp90.f[1] - spc4;
-		vertices[0].z = sp90.f[2] - negspc8 + -spbc;
-		vertices[1].x = sp90.f[0] + negspcc - negspc0;
-		vertices[1].y = sp90.f[1] + spc4;
-		vertices[1].z = sp90.f[2] - negspc8 - -spbc;
-		vertices[2].x = sp90.f[0] - negspcc - negspc0;
-		vertices[2].y = sp90.f[1] + spc4;
-		vertices[2].z = sp90.f[2] + negspc8 - -spbc;
-		vertices[3].x = sp90.f[0] - negspcc + negspc0;
-		vertices[3].y = sp90.f[1] - spc4;
-		vertices[3].z = sp90.f[2] + negspc8 + -spbc;
-
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
-
-		if (rodata->texture) {
-			int centre;
-			u16 sp62;
-			int sp5c;
-			int sp58;
-
-			tconfig = rodata->texture;
-
-			sp62 = (rngRandom() * 1024) & 0xffff;
-			sp5c = (coss(sp62) * tconfig->width * 0xb5) >> 18;
-			sp58 = (sins(sp62) * tconfig->width * 0xb5) >> 18;
-
-			centre = tconfig->width << 4;
-
-			vertices[0].s = centre - sp5c;
-			vertices[0].t = centre - sp58;
-			vertices[1].s = centre + sp58;
-			vertices[1].t = centre - sp5c;
-			vertices[2].s = centre + sp5c;
-			vertices[2].t = centre + sp58;
-			vertices[3].s = centre - sp58;
-			vertices[3].t = centre + sp5c;
-
-			modelSelectTexture(renderdata, tconfig, 4);
-		} else {
-			modelSelectTexture(renderdata, NULL, 1);
-		}
-
-		gSPSetGeometryMode(renderdata->gdl++, G_CULL_BACK);
-		gSPMatrix(renderdata->gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-		gSPColor(renderdata->gdl++, colours, 1);
-		gSPVertex(renderdata->gdl++, vertices, 4, 0);
-		gSPTri2(renderdata->gdl++, 0, 1, 2, 2, 3, 0);
+	if (distance > 0) {
+		float tmp = 1 / (model->scale * distance);
+		viewdir.x *= tmp;
+		viewdir.y *= tmp;
+		viewdir.z *= tmp;
+	} else {
+		viewdir.x = 0;
+		viewdir.y = 0;
+		viewdir.z = 1 / model->scale;
 	}
+
+	float pitch = acosf(viewdir.x * mtx->m[1][0] + viewdir.y * mtx->m[1][1] + viewdir.z * mtx->m[1][2]);
+	float yaw = acosf(-(viewdir.x * mtx->m[2][0] + viewdir.y * mtx->m[2][1] + viewdir.z * mtx->m[2][2]) / sinf(pitch));
+	float forward = -(viewdir.x * mtx->m[0][0] + viewdir.y * mtx->m[0][1] + viewdir.z * mtx->m[0][2]);
+
+	if (forward < 0) {
+		yaw = M_TAU - yaw;
+	}
+
+	float cos_yaw = cosf(yaw);
+	float sin_yaw = sinf(yaw);
+	float cos_pitch = cosf(pitch);
+	float sin_pitch = sinf(pitch);
+
+	float flashscale = 0.75f + (rngRandom() % 128) * (1.0f / 256.0f); // 0.75 to 1.25
+
+	struct coord scaled = {
+		.x = rodata->dim.x * flashscale,
+		.y = rodata->dim.y * flashscale,
+		.z = rodata->dim.z * flashscale,
+	};
+
+	float xoffset = scaled.x * cos_yaw * 0.5f;
+	float zoffset = scaled.z * sin_yaw * 0.5f;
+	float yoffset = scaled.y * sin_pitch * 0.5f;
+
+	float xrot = scaled.x * cos_pitch * sin_yaw * 0.5f;
+	float zrot = scaled.z * cos_pitch * cos_yaw * 0.5f;
+
+	center.x = rodata->pos.x - scaled.x * 0.5f;
+	center.y = rodata->pos.y;
+	center.z = rodata->pos.z;
+
+	vertices = g_ModelVtxAllocatorFunc(4);
+
+	colours = (Col *) gfxAllocateColours(1);
+
+	vertices[0] = vtxtemplate;
+	vertices[1] = vtxtemplate;
+	vertices[2] = vtxtemplate;
+	vertices[3] = vtxtemplate;
+
+	colours[0] = colourtemplate;
+
+	vertices[0].x = center.f[0] + -xoffset - yoffset;
+	vertices[0].y = center.f[1] - yoffset;
+	vertices[0].z = center.f[2] + zoffset - zrot;
+	vertices[1].x = center.f[0] - xoffset + yoffset;
+	vertices[1].y = center.f[1] + yoffset;
+	vertices[1].z = center.f[2] + zoffset + zrot;
+	vertices[2].x = center.f[0] + xoffset + yoffset;
+	vertices[2].y = center.f[1] + yoffset;
+	vertices[2].z = center.f[2] - zoffset + zrot;
+	vertices[3].x = center.f[0] + xoffset - yoffset;
+	vertices[3].y = center.f[1] - yoffset;
+	vertices[3].z = center.f[2] - zoffset - zrot;
+
+	gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
+
+	if (rodata->texture) {
+
+		tconfig = rodata->texture;
+
+		int rotx = ((int)(cosf(RANDOMFRAC()) * 32768.0f) * tconfig->width * 181) / 262144;
+		int roty = ((int)(sinf(RANDOMFRAC()) * 32768.0f) * tconfig->width * 181) / 262144;
+
+		int centreuv = tconfig->width << 4;
+
+		vertices[0].s = centreuv - rotx;
+		vertices[0].t = centreuv - roty;
+		vertices[1].s = centreuv + roty;
+		vertices[1].t = centreuv - rotx;
+		vertices[2].s = centreuv + rotx;
+		vertices[2].t = centreuv + roty;
+		vertices[3].s = centreuv - roty;
+		vertices[3].t = centreuv + rotx;
+
+		modelSelectTexture(renderdata, tconfig, 4);
+	} else {
+		modelSelectTexture(renderdata, NULL, 1);
+	}
+
+	gSPSetGeometryMode(renderdata->gdl++, G_CULL_BACK);
+	gSPMatrix(renderdata->gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gSPColor(renderdata->gdl++, colours, 1);
+	gSPVertex(renderdata->gdl++, vertices, 4, 0);
+	gSPTri2(renderdata->gdl++, 0, 1, 2, 2, 3, 0);
 }
 
 void modelRender(struct modelrenderdata *renderdata, struct model *model)
@@ -3664,13 +3627,13 @@ bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct co
 	float zsum2;
 	float zsum3;
 
-	if (var8005efc0 != 0.0f) {
-		xmin -= var8005efc0;
-		xmax += var8005efc0;
-		ymin -= var8005efc0;
-		ymax += var8005efc0;
-		zmin -= var8005efc0;
-		zmax += var8005efc0;
+	if (g_ExtraBoundsDist != 0.0f) {
+		xmin -= g_ExtraBoundsDist;
+		xmax += g_ExtraBoundsDist;
+		ymin -= g_ExtraBoundsDist;
+		ymax += g_ExtraBoundsDist;
+		zmin -= g_ExtraBoundsDist;
+		zmax += g_ExtraBoundsDist;
 	}
 
 	// x

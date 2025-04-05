@@ -1,5 +1,5 @@
-#ifndef _IN_DATA_H
-#define _IN_DATA_H
+#pragma once
+
 #include <ultra64.h>
 #include <stdint.h>
 #include "constants.h"
@@ -8,16 +8,14 @@
 #define EXT_SEG *
 #define REF_SEG
 
-extern int var8005ce74;
+extern int g_SchedViModeToggle;
 extern bool g_SchedViModesPending[NUM_GFXTASKS];
-extern int g_ViUnblackTimer;
 extern int g_ViShakeDirection;
 extern int g_ViShakeIntensity;
 extern int g_ViShakeTimer;
 extern uint8_t g_LoadType;
 extern bool g_MainIsEndscreen;
 extern bool g_MainIsBooting;
-extern bool g_MainIsDebugMenuOpen;
 extern bool g_SndDisabled;
 extern uint16_t g_SfxVolume;
 extern int g_SoundMode;
@@ -25,12 +23,12 @@ extern int g_SndNumPlaying;
 extern struct audiorussmapping g_AudioRussMappings[];
 extern struct audioconfig g_AudioConfigs[];
 extern bool g_JoyPfsPollMasterEnabled;
-extern float var8005ef10[2];
+extern float g_MtxFloatToFixedScale[2];
 extern int g_NumGlobalAilists;
 extern int g_NumLvAilists;
 extern bool g_ModelDistanceDisabled;
 extern float g_ModelDistanceScale;
-extern float var8005efc0;
+extern float g_ExtraBoundsDist;
 extern bool g_ModelAnimMergingEnabled;
 extern uint32_t g_NextAnimFrameIndex;
 extern int16_t g_NumAnimations;
@@ -39,8 +37,7 @@ extern uint8_t *g_AnimToHeaderSlot;
 extern int16_t *var8005f014;
 extern int g_AnimMaxBytesPerFrame;
 extern int g_AnimMaxHeaderLength;
-extern int g_CdHasSavedBlock;
-extern int var8005f038;
+extern bool g_CdHasSavedBlock;
 extern struct rdptask *g_RdpCurTask;
 extern N_ALSndPlayer *g_SndPlayer;
 extern int16_t n_eqpower[];
@@ -65,10 +62,9 @@ extern int g_TitleDelayedMode;
 extern int g_TitleTimer;
 extern int g_TitleNextStage;
 extern uint8_t g_FileState;
-extern bool var80062944;
-extern bool var80062948;
-extern bool var8006294c;
-extern bool g_WeatherTickEnabled;
+extern bool g_MainMenuOpen;
+extern bool g_CombatSimMode;
+extern bool g_IsAnyMenuOpen;
 extern struct var80062960 *var80062960;
 extern float g_ChrAnimSpeed;
 extern int g_SelectedAnimNum;
@@ -168,7 +164,7 @@ extern uint32_t var8007073c;
 extern uint32_t var8007074c;
 extern bool g_PlayersWithControl[];
 extern bool g_PlayerInvincible;
-extern int g_InCutscene;
+extern bool g_InCutscene;
 extern int16_t g_DeathAnimations[];
 extern int g_NumDeathAnimations;
 extern int g_ScissorX1;
@@ -313,11 +309,11 @@ extern struct font *g_FontHandelGothicLg;
 extern struct fontchar *g_CharsHandelGothicLg;
 extern bool g_DoRedrawEffect;
 extern int g_StageIndex;
-extern int16_t var8007fc0c;
+extern int16_t g_RoomStreamingBoostTimer;
 extern struct drawslot *g_BgSpecialDrawSlot;
 extern uint16_t g_BgFrameCount;
 extern int g_BgNumPortalCameraCacheItems;
-extern float var8007fcb4;
+extern float g_PortalMidplaneOffset;
 extern struct stagetableentry g_Stages[61];
 extern int g_RoomMtxNumSlots;
 extern uint32_t g_GfxNumSwaps;
@@ -333,7 +329,6 @@ extern int g_MusicSilenceTimer60;
 extern struct surfacetype *g_SurfaceTypes[15];
 extern uint16_t *g_ZbufPtr1;
 extern float g_AlmostZero;
-extern struct coord g_ZeroVector;
 extern struct menudialogdef g_2PMissionInventoryHMenuDialog;
 extern struct menudialogdef g_2PMissionInventoryVMenuDialog;
 extern struct menudialogdef g_MpEndscreenChallengeCheatedMenuDialog;
@@ -425,7 +420,7 @@ extern int g_BlurFbCapTimer;
 extern bool g_BlurFbDirty;
 extern int g_TickRateDiv;
 extern int g_TickExtraSleep;
-extern bool g_MusicDisableMpDeath;
+extern int g_MusicDisableMpDeath;
 extern int g_BgunGeMuzzleFlashes;
 extern int g_FileAutoSelect;
 
@@ -441,8 +436,6 @@ extern TextData *g_TextOptionsData;
 extern TextData *g_TextPropObjData;
 extern TextData *g_TextTitleData;
 
-extern int g_ReplacementTextureList[4000]; // There's 3502 textures in the ROM
-
 extern struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
 extern struct fontchar *g_CharToRender; // Character to render using the HD font
 
@@ -451,5 +444,3 @@ extern struct fontchar *g_CharToRender; // Character to render using the HD font
 
 #define TEX_FILTER_2D g_TexFilter2D
 #define ADJUST_ZOOM_FOV(x) ((x) * PLAYER_EXTCFG().fovzoommult)
-
-#endif

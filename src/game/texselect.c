@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "game/tex.h"
 #include "game/playermgr.h"
+#include "game/mtxutils.h"
 #include "game/bg.h"
 #include "game/texdecompress.h"
 #include "bss.h"

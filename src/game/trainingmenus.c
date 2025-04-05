@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/bondgun.h"
@@ -121,13 +122,6 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 		weaponnum = frGetWeaponBySlot(data->list.value);
 		score = ciGetFiringRangeScore(frGetWeaponIndexByWeapon(weaponnum));
 
-#if VERSION < VERSION_NTSC_1_0
-		if (g_Menus[g_MpPlayerNum].layers[g_Menus[g_MpPlayerNum].depth - 1].numsiblings > 1) {
-			menuCloseDialog();
-			menuPushDialog(&g_FrWeaponListMenuDialog);
-		}
-#endif
-
 		frLoadData();
 		frSetSlot(data->list.value);
 
@@ -151,10 +145,6 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 		// Render weapon name
 		x = renderdata->x + 10;
 		y = renderdata->y;
-
-#if VERSION == VERSION_JPN_FINAL
-		y++;
-#endif
 
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRenderProjected(gdl, &x, &y, bgunGetName(weaponnum2), g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
@@ -658,7 +648,7 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 		// Bull's-eye count
 		sprintf(text, "%d\n", frdata->numhitsbullseye);
 		x = renderdata->x + 93;
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 15 : 14);
+		y = renderdata->y + 14;
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
@@ -672,59 +662,59 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 		// Bull's-eye score
 		sprintf(text, "%d\n", frdata->numhitsbullseye * 10);
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
-		x = renderdata->x - textheight + (VERSION == VERSION_JPN_FINAL ? 192 : 182);
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 15 : 14);
+		x = renderdata->x - textheight + 182;
+		y = renderdata->y + 14;
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
 		// Zone 1 count
 		sprintf(text, "%d\n", frdata->numhitsring1);
 		x = renderdata->x + 93;
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 27 : 25);
+		y = renderdata->y + 25;
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
 		// "Zone 1"
 		sprintf(text, langGet(L_MPMENU_462));
 		x = renderdata->x + 122;
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 26 : 25);
+		y = renderdata->y + 25;
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
 		// Zone 1 score
 		sprintf(text, "%d\n", frdata->numhitsring1 * 5);
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
-		x = renderdata->x - textheight + (VERSION == VERSION_JPN_FINAL ? 192 : 182);
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 27 : 25);
+		x = renderdata->x - textheight + 182;
+		y = renderdata->y + 25;
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
 		// Zone 2 count
 		sprintf(text, "%d\n", frdata->numhitsring2);
 		x = renderdata->x + 93;
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 39 : 36);
+		y = renderdata->y + 36;
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
 		// "Zone 2"
 		sprintf(text, langGet(L_MPMENU_463));
 		x = renderdata->x + 122;
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 38 : 36);
+		y = renderdata->y + 36;
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
 		// Zone 2 score
 		sprintf(text, "%d\n", frdata->numhitsring2 * 2);
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
-		x = renderdata->x - textheight + (VERSION == VERSION_JPN_FINAL ? 192 : 182);
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 39 : 36);
+		x = renderdata->x - textheight + 182;
+		y = renderdata->y + 36;
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
 		// Zone 3 count
 		sprintf(text, "%d\n", frdata->numhitsring3);
 		x = renderdata->x + 93;
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 51 : 47);
+		y = renderdata->y + 47;
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
@@ -732,15 +722,15 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 		// Note: developers forgot to remove last argument when copy/pasting
 		sprintf(text, langGet(L_MPMENU_464), frdata->numhitsring3);
 		x = renderdata->x + 122;
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 50 : 47);
+		y = renderdata->y + 47;
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
 		// Zone 3 score
 		sprintf(text, "%d\n", frdata->numhitsring3);
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
-		x = renderdata->x - textheight + (VERSION == VERSION_JPN_FINAL ? 192 : 182);
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 51 : 47);
+		x = renderdata->x - textheight + 182;
+		y = renderdata->y + 47;
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
 
@@ -756,7 +746,7 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 		sprintf(text, "%d\n", frdata->numhitsring3 + frdata->numhitsbullseye + frdata->numhitsring1 + frdata->numhitsring2);
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0);
 		x = renderdata->x - textheight + 188;
-		y = renderdata->y + (VERSION == VERSION_JPN_FINAL ? 64 : 63);
+		y = renderdata->y + 63;
 
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, COLOUR(), viGetWidth(), viGetHeight(), 0, 0);
@@ -972,7 +962,7 @@ struct menuitem g_FrTrainingInfoInGameMenuItems[] = {
 		DESCRIPTION_FRWEAPON,
 		MENUITEMFLAG_DARKERBG,
 		0x0000010e,
-		PAL ? 0x69 : 0x5f,
+		0x5f,
 		NULL,
 	},
 	{
@@ -1065,7 +1055,7 @@ struct menuitem g_FrTrainingInfoPreGameMenuItems[] = {
 		DESCRIPTION_FRWEAPON,
 		MENUITEMFLAG_DARKERBG,
 		0x0000010e,
-		PAL ? 0x69 : 0x5f,
+		0x5f,
 		NULL,
 	},
 	{
@@ -1113,16 +1103,6 @@ struct menuitem g_FrCompletedMenuItems[] = {
 		0,
 		NULL,
 	},
-#if VERSION < VERSION_NTSC_1_0
-	{
-		MENUITEMTYPE_SEPARATOR,
-		0,
-		0,
-		0,
-		0,
-		NULL,
-	},
-#endif
 	{
 		MENUITEMTYPE_LABEL,
 		0,
@@ -1953,7 +1933,7 @@ char *htMenuTextCancelOrAbort(struct menuitem *item)
 char *htMenuTextTimeTakenValue(struct menuitem *item)
 {
 	struct trainingdata *data = getHoloTrainingData();
-	float secs = data->timetaken / (PAL ? 50.0f : 60.0f);
+	float secs = data->timetaken / 60.0f;
 
 	if (secs >= 60.0f) {
 		int mins = 0;
@@ -2006,7 +1986,7 @@ struct menuitem g_DtDetailsMenuItems[] = {
 		DESCRIPTION_DEVICETRAINING,
 		0,
 		0x000000aa,
-		PAL ? 0xd6 : 0xbe,
+		0xbe,
 		NULL,
 	},
 	{
@@ -2014,7 +1994,7 @@ struct menuitem g_DtDetailsMenuItems[] = {
 		0,
 		MENUITEMFLAG_NEWCOLUMN | MENUITEMFLAG_00000002,
 		0x0000008c,
-		PAL ? 0xb4 : 0x9c,
+		0x9c,
 		NULL,
 	},
 	{
@@ -2091,7 +2071,7 @@ struct menuitem g_DtFailedMenuItems[] = {
 		DESCRIPTION_DEVICETIP1,
 		0,
 		0x00000082,
-		PAL ? 110 : 100,
+		100,
 		NULL,
 	},
 	{ MENUITEMTYPE_END },
@@ -2144,7 +2124,7 @@ struct menuitem g_DtCompletedMenuItems[] = {
 		DESCRIPTION_DEVICETIP2,
 		0,
 		0x00000082,
-		PAL ? 110 : 100,
+		100,
 		NULL,
 	},
 	{ MENUITEMTYPE_END },
@@ -2271,13 +2251,7 @@ struct menuitem g_HtFailedMenuItems[] = {
 		DESCRIPTION_HOLOTIP1,
 		0,
 		0x00000082,
-#if VERSION >= VERSION_JPN_FINAL
-		120,
-#elif PAL
-		110,
-#else
 		100,
-#endif
 		NULL,
 	},
 	{ MENUITEMTYPE_END },
@@ -2330,13 +2304,7 @@ struct menuitem g_HtCompletedMenuItems[] = {
 		DESCRIPTION_HOLOTIP2,
 		0,
 		0x00000082,
-#if VERSION >= VERSION_JPN_FINAL
-		120,
-#elif PAL
-		110,
-#else
 		100,
-#endif
 		NULL,
 	},
 	{ MENUITEMTYPE_END },
@@ -2409,7 +2377,7 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 
 		if (index < NUM_BIO_LOCATIONS) {
 			// Location bio - render texture
-			u8 texturenums[] = { 0x1b, 0x0d, 0x0e, 0x10, 0x11, 0x12, 0x13, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1c, 0x1d };
+			uint8_t texturenums[] = { 0x1b, 0x0d, 0x0e, 0x10, 0x11, 0x12, 0x13, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1c, 0x1d };
 			int texturenum = texturenums[index];
 
 			gDPPipeSync(gdl++);

@@ -1,6 +1,5 @@
-#ifndef _IN_LIB_MAIN_H
-#define _IN_LIB_MAIN_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -14,5 +13,3 @@ void mainEndStage(void);
 void mainChangeToStage(int stagenum);
 void mainFinalObjectiveCheck(void);
 int mainGetStageNum(void);
-
-#endif

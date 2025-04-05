@@ -1,7 +1,5 @@
-#ifndef IN_GAME_DLIGHTS_H
-#define IN_GAME_DLIGHTS_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -28,11 +26,11 @@ void roomSetLightsFaulty(int roomnum, int chance);
 void roomSetLightBroken(int roomnum, int lightnum);
 void lightsReset(void);
 void func0f001c0c(void);
-void func0f00215c(uint8_t *arg0);
+void lightComputeInfluenceMatrix(uint8_t *arg0);
 void lightsCalculateRoomDimensions(void);
-void func0f00259c(int roomnum);
-void func0f002844(int roomnum, float arg1, int arg2, int portalnum);
-void func0f002a98(void);
+void lightCalcAmbientLighting(int roomnum);
+void roomPropagateClosedPortalLight(int roomnum, float arg1, int arg2, int portalnum);
+void roomResetLights(void);
 void roomSetLightsOn(int roomnum, int enable);
 void roomSetLightOp(int roomnum, int operation, uint8_t br_to, uint8_t br_from, uint8_t duration60);
 bool lightTickBroken(int roomnum, int lightnum);
@@ -50,5 +48,3 @@ void func0f00505c(void);
 float func0f0053d0(int room1, struct coord *arg1, int portal1, int room2, struct coord *arg4, int portal2, float *arg6);
 void func0f0056f4(int room1, struct coord *coord1, int room2, struct coord *coord2, int arg4, float *arg5, int arg6);
 void func0f005bb0(void);
-
-#endif

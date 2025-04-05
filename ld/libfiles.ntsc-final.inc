@@ -8,10 +8,6 @@
 	build/ROMID/lib/ultra/os/exceptvars.o (section); \
 	build/ROMID/lib/ultra/os/exceptasm.o (section); \
 	build/ROMID/lib/ultra/os/createthread.o (section); \
-	build/ROMID/lib/ultra/gu/lookat.o (section); \
-	build/ROMID/lib/ultra/gu/lookatref.o (section); \
-	build/ROMID/lib/ultra/gu/perspective.o (section); \
-	build/ROMID/lib/ultra/gu/rotate.o (section); \
 	build/ROMID/lib/ultra/libc/xldtob.o (section); \
 	build/ROMID/lib/ultra/io/pfsisplug.o (section); \
 	build/ROMID/lib/ultra/libc/llcvt.o (section); \
@@ -100,13 +96,10 @@
 	build/ROMID/lib/naudio/n_synsetpriority.o (section); \
 	build/ROMID/lib/naudio/n_load.o (section); \
 	build/ROMID/lib/naudio/n_resample2.o (section); \
-	build/ROMID/lib/mp3/lib_45ed0.o (section); \
 	build/ROMID/lib/mp3/util.o (section); \
 	build/ROMID/lib/mp3/lib_46650.o (section); \
 	build/ROMID/lib/mp3/lib_47550.o (section); \
 	build/ROMID/lib/naudio/n_resample.o (section); \
-	build/ROMID/lib/mp3/lib_47d20.o (section); \
-	build/ROMID/lib/mp3/lib_47ef0.o (section); \
 	build/ROMID/lib/ultra/os/writebackdcacheall.o (section); \
 	build/ROMID/lib/ultra/os/invalicache.o (section); \
 	build/ROMID/lib/ultra/os/getfpccsr.o (section); \
@@ -149,7 +142,6 @@
 	build/ROMID/lib/ultra/io/devmgr.o (section); \
 	build/ROMID/lib/ultra/os/thread.o (section); \
 	build/ROMID/lib/ultra/os/destroythread.o (section); \
-	build/ROMID/lib/ultra/gu/mtxutil.o (section); \
 	build/ROMID/lib/ultra/gu/sqrtf.o (section); \
 	build/ROMID/lib/ultra/libc/string.o (section); \
 	build/ROMID/lib/ultra/libc/ldiv.o (section); \
@@ -162,9 +154,7 @@
 	build/ROMID/lib/ultra/io/sirawwrite.o (section); \
 	build/ROMID/lib/ultra/os/writebackdcache.o (section); \
 	build/ROMID/lib/ultra/libc/ll.o (section); \
-	build/ROMID/lib/ultra/libc/bzero.o (section); \
 	build/ROMID/lib/ultra/os/getcause.o (section); \
-	build/ROMID/lib/ultra/libc/bcopy.o (section); \
 	build/ROMID/lib/ultra/os/virtualtophysical.o (section); \
 	build/ROMID/lib/ultra/io/spsetstat.o (section); \
 	build/ROMID/lib/ultra/io/spsetpc.o (section); \
@@ -181,7 +171,6 @@
 	build/ROMID/lib/ultra/io/pfsallocatefile.o (section); \
 	build/ROMID/lib/ultra/io/pfsdeletefile.o (section); \
 	build/ROMID/lib/ultra/io/pfschecker.o (section); \
-	build/ROMID/lib/ultra/libc/bcmp.o (section); \
 	build/ROMID/lib/ultra/os/maptlb.o (section); \
 	build/ROMID/lib/ultra/io/aisetfreq.o (section); \
 	build/ROMID/lib/ultra/io/aisetnextbuf.o (section); \
@@ -195,10 +184,6 @@
 	build/ROMID/lib/ultra/io/contreaddata.o (section); \
 	build/ROMID/lib/ultra/io/motor.o (section); \
 	build/ROMID/lib/ultra/gu/align.o (section); \
-	build/ROMID/lib/ultra/gu/coss.o (section); \
-	build/ROMID/lib/ultra/gu/sins.o (section); \
-	build/ROMID/lib/ultra/gu/frustum.o (section); \
-	build/ROMID/lib/ultra/gu/scale.o (section); \
 	build/ROMID/lib/ultra/io/conteepprobe.o (section); \
 	build/ROMID/lib/ultra/io/conteepread.o (section); \
 	build/ROMID/lib/ultra/io/conteeplongread.o (section); \

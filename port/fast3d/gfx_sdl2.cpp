@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <unistd.h>
 #include <time.h>
+#include <stdint.h>
 
 #include "platform.h"
 #include "system.h"
@@ -146,7 +147,7 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
 
     // ideally we need 3.0 compat
     // if that doesn't work, try 3.2 core in case we're on mac, 2.1 compat as a last resort
-    static u32 glver[][3] = {
+    static uint32_t glver[][3] = {
         { 0, 0, 0                                    }, // for command line override
         { 3, 0, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY }, // 3.0: default, has all the features required
         { 4, 1, SDL_GL_CONTEXT_PROFILE_CORE          }, // 4.1core: macs only have core profile and this is the latest
@@ -155,8 +156,8 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
         { 2, 1, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY }, // 2.1: absolute last resort, will still require GLSL130 as an extension
     };
 
-    u32 verstart = 1;
-    const u32 verend = sizeof(glver) / sizeof(*glver);
+    uint32_t verstart = 1;
+    const uint32_t verend = sizeof(glver) / sizeof(*glver);
     const char *verstr = sysArgGetString("--gl-version");
     if (verstr && *verstr) {
         // user override
@@ -170,9 +171,9 @@ static void gfx_sdl_init(const struct GfxWindowInitSettings *set) {
     }
 
     ctx = NULL;
-    u32 vmin = 0, vmaj = 0, vprof = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY;
+    uint32_t vmin = 0, vmaj = 0, vprof = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY;
     const char *vprofstr = "";
-    for (u32 i = verstart; i < verend && !ctx; ++i) {
+    for (uint32_t i = verstart; i < verend && !ctx; ++i) {
         vmaj = glver[i][0];
         vmin = glver[i][1];
         vprof = glver[i][2];

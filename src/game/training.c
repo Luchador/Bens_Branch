@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/bg.h"
 #include "game/bondgun.h"
@@ -8,13 +9,12 @@
 #include "game/dlights.h"
 #include "game/explosions.h"
 #include "game/filemgr.h"
-#include "game/weaponutils.h"
-#include "game/textutils.h"
 #include "game/gamefile.h"
 #include "game/hudmsg.h"
 #include "game/inv.h"
 #include "game/lang.h"
 #include "game/menu.h"
+#include "game/mtxutils.h"
 #include "game/objectives.h"
 #include "game/pad.h"
 #include "game/padhalllv.h"
@@ -23,9 +23,11 @@
 #include "game/propobj.h"
 #include "game/propsnd.h"
 #include "game/shards.h"
+#include "game/textutils.h"
 #include "game/training.h"
 #include "game/trainingmenus.h"
 #include "game/wallhit.h"
+#include "game/weaponutils.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/dma.h"
@@ -48,13 +50,13 @@ struct frdata g_FrData;
 struct trainingdata g_DtData;
 struct trainingdata g_HtData;
 
-u16 *g_FrScriptOffsets = NULL;
+uint16_t *g_FrScriptOffsets = NULL;
 uint8_t g_FrIsValidWeapon = false;
 uint8_t g_FrDataLoaded = false;
 uint8_t g_FrNumSounds = 0;
 uint8_t *g_FrRomData = NULL;
 
-u16 g_FrPads[] = {
+uint16_t g_FrPads[] = {
 	0x00d6, 0x00d7, 0x00d9, 0x00d8, 0x00da, 0x00db, 0x00dc, 0x00dd,
 	0x00de, 0x00df, 0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x00e4, 0x00e5,
 	0x00e6, 0x00e7, 0x00e8, 0x00e9, 0x00ea, 0x00eb, 0x00f4, 0x00f3,
@@ -716,7 +718,7 @@ bool frTargetIsAtScriptStart(int targetnum)
  */
 char *frGetInstructionalText(uint32_t index)
 {
-	u16 textid = (u16)(g_FrRomData[index * 2] << 8) | g_FrRomData[index * 2 + 1];
+	uint16_t textid = (uint16_t)(g_FrRomData[index * 2] << 8) | g_FrRomData[index * 2 + 1];
 
 	return langGet(textid);
 }
@@ -923,7 +925,7 @@ void frInitTargets(void)
 				mtx4LoadYRotation(M_PI, &sp144);
 			}
 
-			mtx00015f04(obj->model->scale, &sp144);
+			mtxScaleRotationPart(obj->model->scale, &sp144);
 			mtx4ToMtx3(&sp144, sp108);
 			mtx3Copy(sp108, obj->realrot);
 
@@ -1945,7 +1947,7 @@ void frTick(void)
 				}
 
 				mtx4LoadYRotation(g_FrData.targets[i].angle + M_PI, &spbc);
-				mtx00015f04(obj->model->scale, &spbc);
+				mtxScaleRotationPart(obj->model->scale, &spbc);
 				mtx4ToMtx3(&spbc, sp98);
 				mtx3Copy(sp98, obj->realrot);
 			}
@@ -3245,8 +3247,8 @@ Gfx *frRenderHud(Gfx *gdl)
 	int alpha = 0xa0;
 	float mult;
 
-	if (viGetViewWidth() > (VERSION >= VERSION_PAL_FINAL ? 330 : 400)) {
-		mult = VERSION >= VERSION_PAL_FINAL ? 1.5f : 2;
+	if (viGetViewWidth() > 400) {
+		mult = 2;
 	} else {
 		mult = 1;
 	}

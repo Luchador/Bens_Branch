@@ -39,7 +39,7 @@ int g_MusicDeathTimer240 = 0;   // Counts down 5 seconds while death music plays
 int g_MusicAge60 = 0;           // The current age of the MP track being played
 int g_MusicLife60 = TICKS(120); // The max age of any MP track (this value is changed in MP code)
 int g_MusicSilenceTimer60 = 0;  // Counts down the 2 second silence between MP track changes
-bool g_MusicDisableMpDeath = false;
+int g_MusicDisableMpDeath = 0;
 
 
 uint16_t musicGetVolume(void)
@@ -435,7 +435,7 @@ void _musicStartMpDeath(float arg0)
 
 void musicStartMpDeath(void)
 {
-	if (g_MusicDisableMpDeath) {
+	if (g_MusicDisableMpDeath == 1) {
 		return;
 	}
 

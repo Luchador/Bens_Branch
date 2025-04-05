@@ -1,5 +1,5 @@
-#ifndef _IN_GAME_BONDGUN_H
-#define _IN_GAME_BONDGUN_H
+#pragma once
+
 #include <ultra64.h>
 #include <stdint.h>
 #include "data.h"
@@ -184,5 +184,3 @@ void bgun0f0abd30(int handnum);
 int bgunGetWeaponNum2(int handnum);
 int8_t bgunFreeFireslotWrapper(int fireslot);
 int8_t bgunFreeFireslot(int fireslot);
-
-#endif

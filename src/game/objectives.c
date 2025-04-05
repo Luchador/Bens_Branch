@@ -1,4 +1,4 @@
-#include <ultra64.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/debug.h"
@@ -156,11 +156,11 @@ int objectiveCheck(int index)
 			// iteration of the while loop below will skip past it.
 			uint32_t *cmd = (uint32_t *)g_Objectives[index];
 
-			while ((u8)PD_BE32(cmd[0]) != OBJTYPE_ENDOBJECTIVE) {
+			while ((uint8_t)PD_BE32(cmd[0]) != OBJTYPE_ENDOBJECTIVE) {
 				// The status of this requirement
 				int reqstatus = OBJECTIVE_COMPLETE;
 
-				switch ((u8)PD_BE32(cmd[0])) {
+				switch ((uint8_t)PD_BE32(cmd[0])) {
 				case OBJECTIVETYPE_DESTROYOBJ:
 					{
 						struct defaultobj *obj = objFindByTagId(cmd[1]);

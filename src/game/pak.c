@@ -1,12 +1,10 @@
-#include "versions.h"
-#include <ultra64.h>
 #include "constants.h"
 #include "game/bossfile.h"
-#include "game/filelist.h"
-#include "game/menu.h"
 #include "game/crc.h"
+#include "game/filelist.h"
 #include "game/gamefile.h"
 #include "game/lv.h"
+#include "game/menu.h"
 #include "game/mplayer/mplayer.h"
 #include "game/pak.h"
 #include "game/utils.h"
@@ -71,7 +69,7 @@
  * The effective file types are:
  *
  * BOS (length 0x70) - The "boss" file stores things global to all game files,
- *     such as the alternative title setting and chosen language if PAL.
+ *     such as the alternative title setting
  * GAM (length 0xb0) - Single player game files
  * MPP (length 0x60) - Multiplayer player files
  * MPG (length 0x50) - Multiplayer game setup files
@@ -147,15 +145,7 @@ struct pak g_Paks[5]; // controller paks + EEPROM
 
 OSPfs g_Pfses[MAX_PLAYERS];
 
-uint32_t var80075ccc = 0x00000400;
-uint32_t g_PakHasEeprom = false;
-uint32_t g_PakDebugForceCrc = 0;
-uint32_t g_PakDebugForceScrub = 0;
-uint32_t g_PakDebugPakDump = 0;
-uint32_t g_PakDebugPakCache = 1;
-uint32_t g_PakDebugPakInit = 0;
-
-uint32_t g_PakDebugWipeEeprom = 0;
+bool g_PakHasEeprom = false;
 
 char g_PakNoteGameName[] = {
 	N64CHAR('P'),
@@ -216,7 +206,7 @@ uint32_t pakGenerateSerial(int8_t device)
 
 	value = g_Paks[device].unk2c8;
 	rand = (rngRandom() % 496) + 16; // range 16-511
-	count = osGetCount();
+	count = utilsGetCount();
 
 	return value ^ rand ^ count;
 }
@@ -517,12 +507,10 @@ PakErr2 pakReadHeaderAtOffset(int8_t device, uint32_t offset, struct pakfilehead
 			return PAK_ERR2_VERSION;
 		}
 
-		if (g_PakDebugPakCache) {
-			pakSaveHeaderToCache(device, blocknum, (struct pakfileheader *) sp38);
+		pakSaveHeaderToCache(device, blocknum, (struct pakfileheader *) sp38);
 
-			if (!pakRetrieveHeaderFromCache(device, blocknum, headerptr)) {
-				return PAK_ERR2_CORRUPT;
-			}
+		if (!pakRetrieveHeaderFromCache(device, blocknum, headerptr)) {
+			return PAK_ERR2_CORRUPT;
 		}
 	}
 
@@ -1596,7 +1584,7 @@ int pakRepairFilesystem(int8_t device)
 		return -1;
 	}
 
-	return (VERSION >= VERSION_NTSC_1_0 ? 0 : 1);
+	return (0);
 }
 
 /**
@@ -1604,11 +1592,7 @@ int pakRepairFilesystem(int8_t device)
  *
  * NTSC Beta forgets to include return values.
  */
-#if VERSION >= VERSION_NTSC_1_0
 bool pakCreateInitialFiles(int8_t device)
-#else
-void pakCreateInitialFiles(int8_t device)
-#endif
 {
 	struct pakfileheader header;
 	int i;
@@ -1626,29 +1610,17 @@ void pakCreateInitialFiles(int8_t device)
 
 	uint32_t filecounts[] = { 2, 3, 5, 5, 5 };
 
-#if VERSION >= VERSION_NTSC_1_0
 	char *filenames[] = { "BOS\n", "CAM\n", "MPP\n", "MPG\n", "GAM" };
-#else
-	char *filenames[] = { "BOS", "CAM", "MPP", "MPG", "GAM" };
-#endif
 
 	// Iterate all files on the pak and decrease the counts per filetype
 	if (pakGetFileIdsByType(device, PAKFILETYPE_ALL, fileids) != 0) {
-#if VERSION >= VERSION_NTSC_1_0
 		return false;
-#else
-		return;
-#endif
 	}
 
 	for (i = 0; fileids[i] != 0; i++) {
-#if VERSION >= VERSION_NTSC_1_0
 		if (pakFindFile(device, fileids[i], &header) == -1) {
 			return false;
 		}
-#else
-		pakFindFile(device, fileids[i], &header);
-#endif
 
 		for (j = 0; j < ARRAYCOUNT(filetypes); j++) {
 			if (header.filetype == filetypes[j]) {
@@ -2523,9 +2495,7 @@ int pakWriteFileAtOffset(int8_t device, uint32_t offset, uint32_t filetype, uint
 
 	joyEnableCyclicPolling(JOYARGS(4393));
 
-	if (g_PakDebugPakCache) {
-		pakSaveHeaderToCache(device, offset / pakGetBlockSize(device), newheader);
-	}
+	pakSaveHeaderToCache(device, offset / pakGetBlockSize(device), newheader);
 
 	return 0;
 }
@@ -2689,30 +2659,6 @@ void pakExecuteDebugOperations(void)
 {
 	bool disablepolling = false;
 	int8_t i;
-
-	if (g_PakDebugPakDump) {
-		g_PakDebugPakDump = false;
-	}
-
-	if (g_PakDebugWipeEeprom) {
-		pakWipe(SAVEDEVICE_GAMEPAK, 0, 0x80);
-		g_PakDebugWipeEeprom = false;
-	}
-
-	if (g_PakDebugPakInit) {
-		int device = g_PakDebugPakInit - 1;
-
-		joyDisableCyclicPolling();
-		pakInitPak(PFS(device), device, 0);
-		joyEnableCyclicPolling();
-
-		g_PakDebugPakInit = false;
-	}
-
-	if (g_PakDebugForceScrub) {
-		pakCreateFilesystem(SAVEDEVICE_GAMEPAK);
-		g_PakDebugForceScrub = false;
-	}
 
 	pakCheckPlugged();
 

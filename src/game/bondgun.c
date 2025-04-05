@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/bondmove.h"
@@ -2721,7 +2722,7 @@ void bgunUpdateHandState2(struct hand *hand, int handnum, struct coord *viewmode
 	sp38.y = (tmp * 10.0f * 0.017453292f) * (handnum != HAND_RIGHT ? -1.0f : 1.0f);
 
 	mtx4LoadRotation(&sp38, arg4);
-	mtx00015be0(arg4, arg5);
+	mtxApplyAffineTransformInPlace(arg4, arg5);
 
 	viewmodelpos->y -= 1.0f * hand->turnuprot;
 	viewmodelpos->x -= 9.0f * hand->turnuprot * (handnum != HAND_RIGHT ? 1.0f : -1.0f);
@@ -2826,7 +2827,7 @@ void bgunTickHand(int handnum)
 	lvupdate = g_Vars.lvupdate60;
 
 	hand->animframeinc = g_Vars.lvupdate60;
-	hand->animframeincfreal += PALUPF(g_Vars.lvupdate60);
+	hand->animframeincfreal += g_Vars.lvupdate60;
 
 	while (i >= 0) {
 		lvupdate = bgunTickInc(&info, handnum, lvupdate);
@@ -2999,30 +3000,30 @@ void bgunUpdateBlend(struct hand *hand, int handnum)
 	sp5c.x += handGetXShift(handnum);
 
 	for (i = 0; i < g_Vars.lvupdate240; i++) {
-		hand->damppossum.x = (PAL ? 0.9847f : 0.9872f) * hand->damppossum.x + sp5c.f[0];
-		hand->damppossum.y = (PAL ? 0.9847f : 0.9872f) * hand->damppossum.y + sp5c.f[1];
-		hand->damppossum.z = (PAL ? 0.9847f : 0.9872f) * hand->damppossum.z + sp5c.f[2];
+		hand->damppossum.x = 0.9872f * hand->damppossum.x + sp5c.f[0];
+		hand->damppossum.y = 0.9872f * hand->damppossum.y + sp5c.f[1];
+		hand->damppossum.z = 0.9872f * hand->damppossum.z + sp5c.f[2];
 
-		hand->damplooksum.x = (PAL ? 0.9847f : 0.9872f) * hand->damplooksum.x + sp50.f[0];
-		hand->damplooksum.y = (PAL ? 0.9847f : 0.9872f) * hand->damplooksum.y + sp50.f[1];
-		hand->damplooksum.z = (PAL ? 0.9847f : 0.9872f) * hand->damplooksum.z + sp50.f[2];
+		hand->damplooksum.x = 0.9872f * hand->damplooksum.x + sp50.f[0];
+		hand->damplooksum.y = 0.9872f * hand->damplooksum.y + sp50.f[1];
+		hand->damplooksum.z = 0.9872f * hand->damplooksum.z + sp50.f[2];
 
-		hand->dampupsum.x = (PAL ? 0.9847f : 0.9872f) * hand->dampupsum.x + sp44.f[0];
-		hand->dampupsum.y = (PAL ? 0.9847f : 0.9872f) * hand->dampupsum.y + sp44.f[1];
-		hand->dampupsum.z = (PAL ? 0.9847f : 0.9872f) * hand->dampupsum.z + sp44.f[2];
+		hand->dampupsum.x = 0.9872f * hand->dampupsum.x + sp44.f[0];
+		hand->dampupsum.y = 0.9872f * hand->dampupsum.y + sp44.f[1];
+		hand->dampupsum.z = 0.9872f * hand->dampupsum.z + sp44.f[2];
 	}
 
-	hand->damppos.x = hand->damppossum.x * (PAL ? 0.01529997587204f : 0.012799978f) * 2;
-	hand->damppos.y = hand->damppossum.y * (PAL ? 0.01529997587204f : 0.012799978f) * 2;
-	hand->damppos.z = hand->damppossum.z * (PAL ? 0.01529997587204f : 0.012799978f) * 2;
+	hand->damppos.x = hand->damppossum.x * 0.012799978f * 2;
+	hand->damppos.y = hand->damppossum.y * 0.012799978f * 2;
+	hand->damppos.z = hand->damppossum.z * 0.012799978f * 2;
 
-	hand->damplook.x = hand->damplooksum.x * (PAL ? 0.01529997587204f : 0.012799978f);
-	hand->damplook.y = hand->damplooksum.y * (PAL ? 0.01529997587204f : 0.012799978f);
-	hand->damplook.z = hand->damplooksum.z * (PAL ? 0.01529997587204f : 0.012799978f);
+	hand->damplook.x = hand->damplooksum.x * 0.012799978f;
+	hand->damplook.y = hand->damplooksum.y * 0.012799978f;
+	hand->damplook.z = hand->damplooksum.z * 0.012799978f;
 
-	hand->dampup.x = hand->dampupsum.x * (PAL ? 0.01529997587204f : 0.012799978f);
-	hand->dampup.y = hand->dampupsum.y * (PAL ? 0.01529997587204f : 0.012799978f);
-	hand->dampup.z = hand->dampupsum.z * (PAL ? 0.01529997587204f : 0.012799978f);
+	hand->dampup.x = hand->dampupsum.x * 0.012799978f;
+	hand->dampup.y = hand->dampupsum.y * 0.012799978f;
+	hand->dampup.z = hand->dampupsum.z * 0.012799978f;
 }
 
 void bgun0f09d8dc(float breathing, float arg1, float arg2, float arg3, float arg4)
@@ -3158,11 +3159,9 @@ uint32_t bgunCalculateGunMemCapacity(void)
 void bgunFreeGunMem(void)
 {
 	g_Vars.currentplayer->gunctrl.gunmemowner = GUNMEMOWNER_FREE;
-#ifndef PLATFORM_N64
 	// gunmem is stale and so are the textures in it
 	// TODO: figure out how to purge only those textures
 	videoResetTextureCache();
-#endif
 }
 
 void bgunSetGunMemWeapon(int weaponnum)
@@ -3288,10 +3287,10 @@ void bgunTickGunLoad(void)
 {
 	int i;
 	int numthistick;
-	u64 remaining;
+	uint64_t remaining;
 	int padding;
-	u64 allocsize;
-	u64 loadsize;
+	uint64_t allocsize;
+	uint64_t loadsize;
 	uintptr_t ptr;
 	struct player *player = g_Vars.currentplayer;
 	struct modeldef *modeldef;
@@ -3665,13 +3664,10 @@ void bgunTickLoad(void)
  */
 bool bgunLoadAll(void)
 {
-	// PAL adds a check for the eyespy being used
-//#if VERSION >= VERSION_PAL_BETA
 	if ((g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit & DEVICE_EYESPY)) {
 		g_Vars.currentplayer->gunctrl.loadall = false;
 		return false;
 	}
-//#endif
 
 	bgunEnterFlux();
 
@@ -3717,7 +3713,7 @@ void bgunCreateXBowBolt(struct defaultobj *obj, struct coord *coord, RoomNum *ro
 	if (objprop) {
 		propActivate(objprop);
 		propEnable(objprop);
-		mtx00015f04(obj->model->scale, matrix1);
+		mtxScaleRotationPart(obj->model->scale, matrix1);
 		func0f06a580(obj, coord, matrix1, rooms);
 
 		if (obj->type == OBJTYPE_WEAPON && ((struct weaponobj *) obj)->weaponnum == WEAPON_BOLT) {
@@ -3801,7 +3797,7 @@ struct defaultobj *bgunCreateThrownProjectile2(struct chrdata *chr, struct gset 
 	}
 
 	if (gset->weaponnum == WEAPON_COMBATKNIFE) {
-		guRotateF(mtx.m, 90.0f / (RANDOMFRAC() + 12.1f),
+		mtxRotateF(mtx.m, 90.0f / (RANDOMFRAC() + 12.1f),
 				arg4->m[1][0], arg4->m[1][1], arg4->m[1][2]);
 	} else {
 		mtxLoadRandomRotation(&mtx);
@@ -4093,7 +4089,7 @@ void bgunUpdateHeldRocket(int handnum)
 				mtx.m[3][1] = 0;
 				mtx.m[3][2] = 0;
 
-				mtx00015f04(obj->model->scale, &mtx);
+				mtxScaleRotationPart(obj->model->scale, &mtx);
 				func0f06a580(obj, &hand->muzzlepos, &mtx, playerprop->rooms);
 				propDeregisterRooms(objprop);
 			}
@@ -4332,7 +4328,7 @@ void bgunCreateFiredProjectile(int handnum)
 							weapon->base.model->scale *= funcdef->scale;
 
 							mtx3ToMtx4(weapon->base.realrot, &sp78);
-							mtx00015f04(funcdef->scale, &sp78);
+							mtxScaleRotationPart(funcdef->scale, &sp78);
 							mtx4ToMtx3(&sp78, weapon->base.realrot);
 						}
 
@@ -4453,7 +4449,7 @@ void bgunSwivel(float screenx, float screeny, float crossdamp, float aimdamp)
 
 				if (!(sp94.z < 0.0000001f) || !(sp94.z > -0.0000001f)) {
 					if (sp94.z > -6000.0f) {
-						cam0f0b4d04(&sp94, sp8c);
+						camProjectViewToScreen(&sp94, sp8c);
 
 						x[h] = sp8c[0];
 						y[h] = sp8c[1];
@@ -4487,8 +4483,8 @@ void bgunSwivel(float screenx, float screeny, float crossdamp, float aimdamp)
 
 		for (h = 0; h < 2; h++) {
 			hand = &player->hands[h];
-			hand->guncrosspossum[0] = (PAL ? 0.913f : 0.9269697f) * hand->guncrosspossum[0] + x[h];
-			hand->guncrosspossum[1] = (PAL ? 0.913f : 0.9269697f) * hand->guncrosspossum[1] + y[h];
+			hand->guncrosspossum[0] = 0.9269697f * hand->guncrosspossum[0] + x[h];
+			hand->guncrosspossum[1] = 0.9269697f * hand->guncrosspossum[1] + y[h];
 		}
 	}
 
@@ -4511,8 +4507,8 @@ void bgunSwivel(float screenx, float screeny, float crossdamp, float aimdamp)
 	player->crosspos[1] += camGetScreenTop();
 
 	for (h = 0; h < 2; h++) {
-		player->hands[h].crosspos[0] = player->hands[h].guncrosspossum[0] * (PAL ? 0.08700001f : 0.07303029f) * screenwidth * 0.5f + screenwidth * 0.5f;
-		player->hands[h].crosspos[1] = player->hands[h].guncrosspossum[1] * (PAL ? 0.08700001f : 0.07303029f) * screenheight * 0.5f + screenheight * 0.5f;
+		player->hands[h].crosspos[0] = player->hands[h].guncrosspossum[0] * 0.07303029f * screenwidth * 0.5f + screenwidth * 0.5f;
+		player->hands[h].crosspos[1] = player->hands[h].guncrosspossum[1] * 0.07303029f * screenheight * 0.5f + screenheight * 0.5f;
 
 		if (player->hands[h].crosspos[0] < 3.0f) {
 			player->hands[h].crosspos[0] = 3.0f;
@@ -4540,7 +4536,7 @@ void bgunSwivel(float screenx, float screeny, float crossdamp, float aimdamp)
 	player->crosspos2[0] += camGetScreenLeft();
 	player->crosspos2[1] += camGetScreenTop();
 
-	cam0f0b4c3c(player->crosspos2, &aimpos, 1000);
+	camProjectScreenToWorldDir(player->crosspos2, &aimpos, 1000);
 
 	bgunSetAimPos(&aimpos);
 }
@@ -4554,7 +4550,7 @@ void bgunSwivel(float screenx, float screeny, float crossdamp, float aimdamp)
 void bgunSwivelWithDamp(float screenx, float screeny, float crossdamp)
 {
 	struct weapon *weapon = weaponFindById(bgunGetWeaponNum(HAND_RIGHT));
-	float aimdamp = PAL ? weapon->aimsettings->aimdamppal : weapon->aimsettings->aimdamp;
+	float aimdamp = weapon->aimsettings->aimdamp;
 
 	if (aimdamp < crossdamp) {
 		aimdamp = crossdamp;
@@ -4572,9 +4568,9 @@ void bgunSwivelWithDamp(float screenx, float screeny, float crossdamp)
 void bgunSwivelWithoutDamp(float screenx, float screeny)
 {
 	struct weapon *weapon = weaponFindById(bgunGetWeaponNum(HAND_RIGHT));
-	float aimdamp = PAL ? weapon->aimsettings->aimdamppal : weapon->aimsettings->aimdamp;
+	float aimdamp = weapon->aimsettings->aimdamp;
 
-	bgunSwivel(screenx, screeny, PAL ? 0.935f : 0.945f, aimdamp);
+	bgunSwivel(screenx, screeny, 0.945f, aimdamp);
 }
 
 void bgunGetCrossPos(float *x, float *y)
@@ -4591,7 +4587,7 @@ void bgun0f0a0c08(struct coord *arg0, struct coord *arg1)
 	arg0->y = 0;
 	arg0->z = 0;
 
-	cam0f0b4c3c(g_Vars.currentplayer->crosspos, arg1, 1);
+	camProjectScreenToWorldDir(g_Vars.currentplayer->crosspos, arg1, 1);
 }
 
 void bgun0f0a0c44(int handnum, struct coord *arg1, struct coord *arg2)
@@ -4600,7 +4596,7 @@ void bgun0f0a0c44(int handnum, struct coord *arg1, struct coord *arg2)
 	arg1->y = 0;
 	arg1->z = 0;
 
-	cam0f0b4c3c(g_Vars.currentplayer->hands[handnum].crosspos, arg2, 1);
+	camProjectScreenToWorldDir(g_Vars.currentplayer->hands[handnum].crosspos, arg2, 1);
 }
 
 void bgunCalculatePlayerShotSpread(struct coord *gunpos2d, struct coord *gundir2d, int handnum, bool dorandom)
@@ -4656,7 +4652,7 @@ void bgunCalculatePlayerShotSpread(struct coord *gunpos2d, struct coord *gundir2
 	gunpos2d->y = 0;
 	gunpos2d->z = 0;
 
-	cam0f0b4c3c(crosspos, gundir2d, 1);
+	camProjectScreenToWorldDir(crosspos, gundir2d, 1);
 }
 
 void bgunCalculateBotShotSpread(struct coord *arg0, int weaponnum, int funcnum, bool arg3, int crouchpos, bool dual)
@@ -5964,7 +5960,7 @@ void bgunUpdateGangsta(struct hand *hand, int handnum, struct coord *viewmodelpo
 	sp38.z = (tmp * 66.6f * 0.017453292f) * (handnum != HAND_RIGHT ? 1.0f : -1.0f);
 
 	mtx4LoadRotation(&sp38, arg4);
-	mtx00015be0(arg4, arg5);
+	mtxApplyAffineTransformInPlace(arg4, arg5);
 
 	viewmodelpos->y += 4.0f * hand->gangstarot;
 	viewmodelpos->x += 2.0f * hand->gangstarot * (handnum != HAND_RIGHT ? 1.0f : -1.0f);
@@ -6178,7 +6174,7 @@ void bgunUpdateLasersight(struct hand *hand, struct modeldef *modeldef, int hand
 
 			mtx4TransformVecInPlace((Mtxf *)((uintptr_t)allocation + mtxindex * sizeof(Mtxf)), &beamfar);
 		} else {
-			cam0f0b4c3c(g_Vars.currentplayer->crosspos, &beamfar, 1);
+			camProjectScreenToWorldDir(g_Vars.currentplayer->crosspos, &beamfar, 1);
 
 			beamfar.x *= 500.0f;
 			beamfar.y *= 500.0f;
@@ -6403,9 +6399,9 @@ void bgunUpdateShotgun(struct hand *hand, uint8_t *allocation, bool *arg2, struc
 		if (node) {
 			sp34 = modelFindNodeMtxIndex(node, 0);
 
-			mtx00015ea8((1.0f - hand->matmot1) * 8.0f + 0.5f, (Mtxf *)((uintptr_t)allocation + sp34 * sizeof(Mtxf)));
-			mtx00015df0((1.0f - hand->matmot1) * 3.0f + 1.0f, (Mtxf *)((uintptr_t)allocation + sp34 * sizeof(Mtxf)));
-			mtx00015e4c((1.0f - hand->matmot1) * 3.0f + 1.0f, (Mtxf *)((uintptr_t)allocation + sp34 * sizeof(Mtxf)));
+			mtxScaleRow2Full((1.0f - hand->matmot1) * 8.0f + 0.5f, (Mtxf *)((uintptr_t)allocation + sp34 * sizeof(Mtxf)));
+			mtxScaleRow0Full((1.0f - hand->matmot1) * 3.0f + 1.0f, (Mtxf *)((uintptr_t)allocation + sp34 * sizeof(Mtxf)));
+			mtxScaleRow1Full((1.0f - hand->matmot1) * 3.0f + 1.0f, (Mtxf *)((uintptr_t)allocation + sp34 * sizeof(Mtxf)));
 		}
 	}
 }
@@ -6448,7 +6444,7 @@ void bgunUpdateMagnum(struct hand *hand, int handnum, struct modeldef *modeldef,
 				tmp += index;
 
 				mtx4Copy(tmp, &sp4c);
-				mtx00015f04(9.999999f, &sp4c);
+				mtxScaleRotationPart(9.999999f, &sp4c);
 				mtx4MultMtx4InPlace(camGetProjectionMtxF(), &sp4c);
 
 				casingCreateForHand(handnum, ground, &sp4c);
@@ -6530,7 +6526,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			hand->unk0d20.f[0] = -((RANDOMFRAC() - 0.5f) * 0.5333333f * 0.0625f + mult * 0.5333333f);
 			hand->unk0d20.f[1] = RANDOMFRAC() * 2.5f * 0.125f + 2.5f;
 			hand->unk0d20.f[2] = -(RANDOMFRAC() + 1.0f);
-			spd0.f[0] = (RANDOMFRAC() + 3.0f) * PALUPF(M_TAU) / 208.0f;
+			spd0.f[0] = (RANDOMFRAC() + 3.0f) * M_TAU / 208.0f;
 			spd0.f[1] = RANDOMFRAC() * 2.0f * M_TAU / 544.0f - 0.0115481345f;
 			spd0.f[2] = RANDOMFRAC() * 2.0f * M_TAU / 544.0f - 0.0115481345f;
 			break;
@@ -6538,7 +6534,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			hand->unk0d20.f[0] = 0.0f;
 			hand->unk0d20.f[1] = RANDOMFRAC() * 2.5f * 0.125f + 2.5f;
 			hand->unk0d20.f[2] = (RANDOMFRAC() + 1.0f) * 0.25f;
-			spd0.f[0] = (RANDOMFRAC() + 3.0f) * PALUPF(M_TAU) / 368.0f;
+			spd0.f[0] = (RANDOMFRAC() + 3.0f) * M_TAU / 368.0f;
 			spd0.f[1] = RANDOMFRAC() * 2.0f * M_TAU / 944.0f - 0.006654857f;
 			spd0.f[2] = RANDOMFRAC() * 2.0f * M_TAU / 944.0f - 0.006654857f;
 			break;
@@ -6625,8 +6621,8 @@ void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *
 	mtx += mtxindex;
 
 	mtx4MultMtx4InPlace(mtx, &spd8);
-	mtx00015f04(spb4, &spd8);
-	mtx00015ea8(muzzlez, &spd8);
+	mtxScaleRotationPart(spb4, &spd8);
+	mtxScaleRow2Full(muzzlez, &spd8);
 	mtx4Copy(&spd8, mtx);
 
 	if (shotstotake == 0 && weaponnum != WEAPON_REAPER) {
@@ -6662,7 +6658,7 @@ void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *
 
 			mtx4LoadIdentity(&sp70);
 			mtx4Align(sp70.m, RANDOMFRAC() * M_TAU, -sp60.x, -sp60.y, -sp60.z);
-			mtx00015f04(0.10000001f * spb4, &sp70);
+			mtxScaleRotationPart(0.10000001f * spb4, &sp70);
 
 			mtx = (Mtxf *)allocation;
 
@@ -6711,7 +6707,7 @@ void bgunCreateFx(struct hand *hand, int handnum, struct weaponfunc *funcdef, in
 				mtx += modelFindNodeMtxIndex(node, 0);
 
 				mtx4Copy(mtx, &sp24);
-				mtx00015f04(9.999999f, &sp24);
+				mtxScaleRotationPart(9.999999f, &sp24);
 				mtx4MultMtx4InPlace(camGetProjectionMtxF(), &sp24);
 
 				casingCreateForHand(handnum, ground, &sp24);
@@ -6822,7 +6818,7 @@ bool bgunCheckForCloseWall()
 
 	spc8[0] = g_Vars.currentplayer->cam_room;
 	spc8[1] = -1;
-	portal00018148(&g_Vars.currentplayer->cam_pos, &checkpos, spc8, spb8, rooms, 30);
+	portalTraceLineThroughRooms(&g_Vars.currentplayer->cam_pos, &checkpos, spc8, spb8, rooms, 30);
 
 	roomsptr = rooms;
 
@@ -7020,7 +7016,7 @@ void bgun0f0a5550(int handnum)
 		viewmodelpos.f[1] += hand->posrotmtx.m[3][1];
 		viewmodelpos.f[2] += hand->posrotmtx.m[3][2];
 
-		mtx00015be0(&hand->posrotmtx, &sp234);
+		mtxApplyAffineTransformInPlace(&hand->posrotmtx, &sp234);
 
 		sp234.m[3][0] = 0.0f;
 		sp234.m[3][1] = 0.0f;
@@ -7036,7 +7032,7 @@ void bgun0f0a5550(int handnum)
 			hand->damplook.x, hand->damplook.y, hand->damplook.z,
 			hand->dampup.x, hand->dampup.y, hand->dampup.z);
 
-	mtx00015be0(&sp284, &sp234);
+	mtxApplyAffineTransformInPlace(&sp284, &sp234);
 
 	sp1a4.x = 0.0f;
 	sp1a4.y = M_PI;
@@ -7080,10 +7076,10 @@ void bgun0f0a5550(int handnum)
 		hand->handmodel.matrices = (Mtxf *)mtxallocation;
 
 		if (weaponHasFlag(weaponnum, WEAPONFLAG_DUALFLIP) && handnum == HAND_LEFT) {
-			mtx00015e24(-1, &sp2c4);
+			mtxScaleRow0Vec(-1, &sp2c4);
 		}
 
-		mtx00015f04(0.10000001f, &sp2c4);
+		mtxScaleRotationPart(0.10000001f, &sp2c4);
 
 		mtx4Copy(&sp2c4, (Mtxf *)mtxallocation);
 
@@ -7122,9 +7118,7 @@ void bgun0f0a5550(int handnum)
 		{
 			bool a0 = true;
 			struct modelrenderdata renderdata = {NULL, true, 3};
-//#if VERSION >= VERSION_PAL_BETA
 			bool a3 = false;
-//#endif
 			int spcc;
 			Mtxf *spc8;
 			Mtxf *spc4;
@@ -7179,7 +7173,6 @@ void bgun0f0a5550(int handnum)
 				a0 = false;
 			}
 
-//#if VERSION >= VERSION_PAL_BETA
 			switch (modelGetAnimNum(&hand->gunmodel)) {
 			case ANIM_GUN_CROSSBOW_EQUIP:
 			case ANIM_GUN_LAPTOP_EQUIP:
@@ -7199,7 +7192,6 @@ void bgun0f0a5550(int handnum)
 				a3 = 1;
 				break;
 			}
-//#endif
 
 			if (a0) {
 				if (player->hands[HAND_RIGHT].unk0dd4 == -1) {
@@ -7374,10 +7366,7 @@ void bgun0f0a5550(int handnum)
 	}
 
 	hand->animframeinc = 0;
-
-//#if VERSION >= VERSION_PAL_BETA
 	hand->animframeincfreal = 0;
-//#endif
 }
 
 void bgunTickMaulerCharge(void)
@@ -7633,12 +7622,6 @@ int bgunAllocateFireslot(void)
 	for (i = 0; i < ARRAYCOUNT(g_Fireslots); i++) {
 		if (g_Fireslots[i].endlvframe < 0) {
 			g_Fireslots[i].endlvframe = 0;
-
-#if VERSION < VERSION_NTSC_1_0
-			g_Fireslots[i].unk04nb = 0;
-			g_Fireslots[i].unk08nb = 0;
-#endif
-
 			g_Fireslots[i].beam.age = -1;
 			index = i;
 			break;
@@ -7672,7 +7655,7 @@ void bgunRender(Gfx **gdlptr)
 	gdl = viPrepareZbuf(gdl);
 	gdl = vi0000b1d0(gdl);
 
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
+	gDPSetScissor(gdl++, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 
 	gdl = vi0000aca4(gdl, 1.5, 1000);
@@ -7706,8 +7689,6 @@ void bgunRender(Gfx **gdlptr)
 				gSPSetLights1(gdl++, g_GunLight);
 				gSPLookAt(gdl++, camGetLookAt());
 			}
-
-			//gSPPerspNormalize(gdl++, mtx00016dcc(0, 300));
 
 			// There is support for guns having a TV screen on them
 			// but no guns have this model part so it's not used.
@@ -7792,7 +7773,7 @@ void bgunRender(Gfx **gdlptr)
 
 				if (rocketmodel && rocketmodel->definition) {
 					modelRender(&renderdata, rocketmodel);
-					mtxF2LBulk(rocketmodel->matrices, rocketmodel->definition->nummatrices);
+					mtxConvertToFixedPoint(rocketmodel->matrices, rocketmodel->definition->nummatrices);
 
 					if (hand->firedrocket) {
 						hand->rocket = NULL;
@@ -7821,7 +7802,7 @@ void bgunRender(Gfx **gdlptr)
 					for (j = 0; j < rodata->numvertices; j++) {
 						int k;
 
-						(rodata->vertices + j)->t -= g_Vars.lvupdate240 * PALUP(25);
+						(rodata->vertices + j)->t -= g_Vars.lvupdate240 * 25;
 
 						if ((rodata->vertices + j)->t < -0x6000) {
 							for (k = 0; k < rodata->numvertices; k++) {
@@ -7855,17 +7836,17 @@ void bgunRender(Gfx **gdlptr)
 				gSPClearGeometryMode(gdl++, G_CULL_BOTH);
 			}
 
-			mtxF2LBulk(hand->gunmodel.matrices, hand->gunmodel.definition->nummatrices);
+			mtxConvertToFixedPoint(hand->gunmodel.matrices, hand->gunmodel.definition->nummatrices);
 			mtx00016784();
 		}
 	}
 
 	casingsRender(&gdl);
 
-	gdl = zbufConfigureRdp(gdl);
+	//gdl = zbufConfigureRdp(gdl);
 	gdl = vi0000b1d0(gdl);
 
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
+	gDPSetScissor(gdl++, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 
 	*gdlptr = gdl;
@@ -9066,7 +9047,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 						if (fadeamount >= TICKS(64)) {
 							// Unit is transitioning to filled
 							weight = (fadeamount * 4 - TICKS(252)) / 3;
-							weight = PALUP(weight);
+							weight = weight;
 
 							if (weight > 255) {
 								weight = 255;
@@ -9076,7 +9057,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 						} else {
 							// Unit is bright and has not started transitioning to filled yet
 							weight = fadeamount * 4;
-							weight = PALUP(weight);
+							weight = weight;
 							colour = colourBlend(0xffffffbf, emptycolour, weight);
 						}
 
@@ -9089,7 +9070,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 					int fadeamount = abmag->timer60 - (i - numunits + (int) ref) * TICKS(64);
 
 					if (fadeamount >= 0) {
-						weight = PALUP(fadeamount);
+						weight = fadeamount;
 
 						if (weight > 255) {
 							colour = emptycolour;
@@ -9255,7 +9236,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 	fncolour = 0xff000040;
 	funcnum = hand->gset.weaponfunc;
-	fnfaderinc = PALUP(g_Vars.lvupdate240 * 2);
+	fnfaderinc = g_Vars.lvupdate240 * 2;
 
 	bgunGetWeaponInfo(&info, HAND_RIGHT);
 	tmpfuncnum = bgunIsUsingSecondaryFunction();

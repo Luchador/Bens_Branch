@@ -41,7 +41,6 @@
 #include "lib/main.h"
 #include "lib/snd.h"
 #include "lib/memp.h"
-#include "lib/mema.h"
 #include "lib/model.h"
 #include "lib/anim.h"
 #include "lib/rdp.h"
@@ -59,62 +58,57 @@ void rngSetSeed(uint32_t seed);
 
 bool g_AcceptCMDParams = false;
 int g_StageNum = STAGE_TITLE;
-uint32_t g_MainMemaHeapSize = 1024 * 300;
-bool g_MainGameLogicEnabled = true;
 bool g_MainIsEndscreen = false;
 int g_DoBootPakMenu = 0;
 int g_MainChangeToStageNum = -1;
-bool g_MainIsDebugMenuOpen = false;
 
-// Ben's comment: the change to allow all male guard heads means the memory limits need to be increased? Or does the PC port do this automatically?
 struct stageallocation g_StageAllocations8Mb[] = {
-	{ STAGE_CITRAINING,    "-ml0 -me0 -mgfx480 -mvtx392 -ma1600"             },
-	{ STAGE_DEFECTION,     "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_INVESTIGATION, "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_EXTRACTION,    "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_CHICAGO,       "-ml0 -me0 -mgfx110 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_G5BUILDING,    "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_VILLA,         "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_INFILTRATION,  "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2000" },
-	{ STAGE_RESCUE,        "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2000" },
-	{ STAGE_ESCAPE,        "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2000" },
-	{ STAGE_AIRBASE,       "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_AIRFORCEONE,   "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_CRASHSITE,     "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_PELAGIC,       "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_DEEPSEA,       "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_DEFENSE,       "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_ATTACKSHIP,    "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_SKEDARRUINS,   "-ml0 -me0 -mgfx110 -mgfxtra320 -mvtx400 -ma2400" },
-	{ STAGE_MP_SKEDAR,     "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_RAVINE,     "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_PIPES,      "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_G5BUILDING, "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_SEWERS,     "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_WAREHOUSE,  "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_BASE,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_COMPLEX,    "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_TEMPLE,     "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_FELICITY,   "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_AREA52,     "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_GRID,       "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_CARPARK,    "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_RUINS,      "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_FORTRESS,   "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MP_VILLA,      "-ml0 -me0 -mgfx200 -mvtx200 -ma400"            },
-	{ STAGE_MBR,           "-ml0 -me0 -mgfx120 -mvtx100 -ma700"            },
-	{ STAGE_MAIANSOS,      "-ml0 -me0 -mgfx120 -mvtx100 -ma500"            },
-	{ STAGE_WAR,           "-ml0 -me0 -mgfx120 -mvtx98 -ma400"             },
-	{ STAGE_DUEL,          "-ml0 -me0 -mgfx120 -mvtx100 -ma700"            },
-	{ STAGE_TITLE,         "-ml0 -me0 -mgfx80 -mvtx20 -ma001"              },
-	{ 0,                   "-ml0 -me0 -mgfx120 -mvtx98 -ma300"             },
+	{ STAGE_CITRAINING,    "-ml0 -me0 -mgfx480 -mvtx392"             },
+	{ STAGE_DEFECTION,     "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_INVESTIGATION, "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_EXTRACTION,    "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_CHICAGO,       "-ml0 -me0 -mgfx110 -mgfxtra320 -mvtx400" },
+	{ STAGE_G5BUILDING,    "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_VILLA,         "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_INFILTRATION,  "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_RESCUE,        "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_ESCAPE,        "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_AIRBASE,       "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_AIRFORCEONE,   "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_CRASHSITE,     "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_PELAGIC,       "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_DEEPSEA,       "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_DEFENSE,       "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_ATTACKSHIP,    "-ml0 -me0 -mgfx440 -mgfxtra320 -mvtx400" },
+	{ STAGE_SKEDARRUINS,   "-ml0 -me0 -mgfx110 -mgfxtra320 -mvtx400" },
+	{ STAGE_MP_SKEDAR,     "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_RAVINE,     "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_PIPES,      "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_G5BUILDING, "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_SEWERS,     "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_WAREHOUSE,  "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_BASE,       "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_COMPLEX,    "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_TEMPLE,     "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_FELICITY,   "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_AREA52,     "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_GRID,       "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_CARPARK,    "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_RUINS,      "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_FORTRESS,   "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MP_VILLA,      "-ml0 -me0 -mgfx200 -mvtx200"             },
+	{ STAGE_MBR,           "-ml0 -me0 -mgfx120 -mvtx100"             },
+	{ STAGE_MAIANSOS,      "-ml0 -me0 -mgfx120 -mvtx100"             },
+	{ STAGE_WAR,           "-ml0 -me0 -mgfx120 -mvtx98"              },
+	{ STAGE_DUEL,          "-ml0 -me0 -mgfx120 -mvtx100"             },
+	{ STAGE_TITLE,         "-ml0 -me0 -mgfx80 -mvtx20"               },
+	{ 0,                   "-ml0 -me0 -mgfx120 -mvtx98"              },
 };
 
 bool g_MainIsBooting = true;
 
 void mainInit(void)
 {
-	dmaInit();
 	varsInit();
 	joyInit();
 	joyReset();
@@ -123,13 +117,12 @@ void mainInit(void)
 
 	// no copyright screen
 	viConfigureForLegal();
-	viBlack(true);
 	viUpdateMode();
 
 	filesInit();
 
 	if (g_AcceptCMDParams) {
-		argSetString("          -ml0 -me0 -mgfx100 -mvtx50 -mt700 -ma400");
+		argSetString("          -ml0 -me0 -mgfx100 -mvtx50 -mt700");
 	}
 
 	mempSetHeap(g_MempHeap, g_MempHeapSize);
@@ -137,7 +130,6 @@ void mainInit(void)
 	mempResetPool(MEMPOOL_8);
 	mempResetPool(MEMPOOL_PERMANENT);
 	challengesInit();
-	utilsInit();
 	texInit();
 	lvInit();
 	cheatsInit();
@@ -159,7 +151,6 @@ void mainInit(void)
 void mainProc(void)
 {
 	mainInit();
-	rdpInit();
 	sndInit();
 
 	while (true) {
@@ -204,11 +195,10 @@ void mainLoop(void)
 		}
 	}
 
-	rngSetSeed(osGetCount());
+	rngSetSeed(utilsGetCount());
 
 	// Outer loop - this is infinite because ending is never changed
 	while (!ending) {
-		g_MainGameLogicEnabled = true;
 		g_MainIsEndscreen = false;
 
 		if (g_AcceptCMDParams) {
@@ -216,10 +206,10 @@ void mainLoop(void)
 
 			if (g_StageNum < STAGE_TITLE && getNumPlayers() >= 2) {
 				index = 0; \
-				while (g_StageAllocations8Mb[index].stagenum) { \
-					if (g_StageNum + 400 == g_StageAllocations8Mb[index].stagenum) { \
-						break; \
-					} \
+				while (g_StageAllocations8Mb[index].stagenum) {
+					if (g_StageNum + 400 == g_StageAllocations8Mb[index].stagenum) {
+						break;
+					}
 					index++;
 				}
 
@@ -248,11 +238,6 @@ void mainLoop(void)
 		mempResetPool(MEMPOOL_STAGE);
 		filesStop(4);
 
-		if (argFindByPrefix(1, "-ma")) {
-			g_MainMemaHeapSize = strtol(argFindByPrefix(1, "-ma"), NULL, 0) * 1024;
-		}
-
-		memaReset(mempAlloc(g_MainMemaHeapSize, MEMPOOL_STAGE), g_MainMemaHeapSize);
 		langInit();
 		playermgrReset();
 
@@ -323,11 +308,11 @@ void mainLoop(void)
 		frametimeCalculate();
 
 		while (g_MainChangeToStageNum < 0) {
-			const int cycles = osGetCount() - g_Vars.thisframestartt;
+			const int cycles = utilsGetCount() - g_Vars.thisframestartt;
 			if (!g_Vars.mininc60 || (cycles >= g_Vars.mininc60 * CYCLES_PER_FRAME - CYCLES_PER_FRAME / 2)) {
 				videoStartFrame();
 				mainTick();
-				schedEndFrame(&g_Sched);
+				schedEndFrame();
 			}
 			if (g_TickExtraSleep) {
 				sysSleep(EXTRA_SLEEP_TIME);
@@ -338,7 +323,6 @@ void mainLoop(void)
 		mempDisablePool(MEMPOOL_STAGE);
 		mempDisablePool(MEMPOOL_7);
 		filesStop(4);
-		viBlack(true);
 		pak0f116994();
 
 		g_StageNum = g_MainChangeToStageNum;
@@ -356,44 +340,39 @@ void mainTick(void)
 		frametimeCalculate();
 		joyDebugJoy();
 
-		if (g_MainGameLogicEnabled) {
-			gdl = gdlstart = gfxGetMasterDisplayList();
+		gdl = gdlstart = gfxGetMasterDisplayList();
 
-			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 0x0100, 6, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+		gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+		gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 0x0100, 6, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 
-			lvTick();
-			playermgrShuffle();
+		lvTick();
+		playermgrShuffle();
 
-			if (g_StageNum < STAGE_TITLE) {
-				for (i = 0; i < PLAYERCOUNT(); i++) {
-					setCurrentPlayerNum(playermgrGetPlayerAtOrder(i));
+		if (g_StageNum < STAGE_TITLE) {
+			for (i = 0; i < PLAYERCOUNT(); i++) {
+				setCurrentPlayerNum(playermgrGetPlayerAtOrder(i));
 
-					if (!titleIsKeepingMode()) {
-						viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
-						viSetFovAspectAndSize(
-								g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
-								g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
-					}
-
-					lvTickPlayer();
+				if (!titleIsKeepingMode()) {
+					viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
+					viSetFovAspectAndSize(
+							g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
+							g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
 				}
+
+				lvTickPlayer();
 			}
-
-			gdl = lvRender(gdl);
-
-			gDPFullSync(gdl++);
-			gSPEndDisplayList(gdl++);
 		}
 
-		if (g_MainGameLogicEnabled) {
-			gfxSwapBuffers();
-			viUpdateMode();
-		}
+		gdl = lvRender(gdl);
 
-		// Used in PC port
+		gDPFullSync(gdl++);
+		gSPEndDisplayList(gdl++);
+
+		gfxSwapBuffers();
+		viUpdateMode();
+
+		// Create the graphics task
 		rdpCreateTask(gdlstart, gdl, 0);
-		memaPrint();
 	}
 }
 

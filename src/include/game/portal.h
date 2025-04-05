@@ -1,5 +1,5 @@
-#ifndef _IN_GAME_PORTAL_H
-#define _IN_GAME_PORTAL_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -10,5 +10,3 @@ float portalGetXluFrac(int arg0);
 void portal0f0b65a8(int numportals);
 void portalsReset(void);
 void acousticReset(void);
-
-#endif

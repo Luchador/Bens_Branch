@@ -20,7 +20,7 @@ MenuItemHandlerResult menuhandlerMpHillTime(int operation, struct menuitem *item
 		data->slider.value = g_Vars.mphilltime;
 		break;
 	case MENUOP_SET:
-		g_Vars.mphilltime = (u8)data->slider.value;
+		g_Vars.mphilltime = (uint8_t)data->slider.value;
 		break;
 	case MENUOP_GETSLIDERLABEL:
 		sprintf(data->slider.label, langGet(L_MPWEAPONS_023), data->slider.value + 10); // "%ds/Point"
@@ -217,7 +217,7 @@ void kohInit(void)
 
 void kohInitProps(void)
 {
-	s16 pad_id = 0;
+	int16_t pad_id = 0;
 	struct pad pad;
 
 	if (g_ScenarioData.koh.hillcount > 1) {
@@ -450,11 +450,7 @@ void kohTick(void)
 				g_ScenarioData.koh.elapsed240 = 0;
 
 				// "%has captured the Hill!"
-#if VERSION >= VERSION_JPN_FINAL
-				sprintf(text, langGet(L_MPWEAPONS_022), scenarioRemoveLineBreaks(g_BossFile.teamnames[hillteam], 0));
-#else
 				sprintf(text, langGet(L_MPWEAPONS_022), &g_BossFile.teamnames[hillteam]);
-#endif
 
 				prevplayernum2 = g_Vars.currentplayernum;
 
@@ -463,21 +459,12 @@ void kohTick(void)
 
 					chr = g_Vars.currentplayer->prop->chr;
 
-#if VERSION >= VERSION_JPN_FINAL
-					if (radarGetTeamIndex(chr->team) == g_ScenarioData.koh.occupiedteam) {
-						// "We have the Hill!"
-						hudmsgCreateWithFlags(langGet(L_MPWEAPONS_021), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE | HUDMSGFLAG_NOWRAP);
-					} else {
-						hudmsgCreateWithFlags(text, HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE | HUDMSGFLAG_NOWRAP);
-					}
-#else
 					if (radarGetTeamIndex(chr->team) == g_ScenarioData.koh.occupiedteam) {
 						// "We have the Hill!"
 						hudmsgCreateWithFlags(langGet(L_MPWEAPONS_021), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE);
 					} else {
 						hudmsgCreateWithFlags(text, HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE);
 					}
-#endif
 				}
 
 				setCurrentPlayerNum(prevplayernum2);
@@ -513,11 +500,7 @@ void kohTick(void)
 								setCurrentPlayerNum(playernum2);
 
 								// "King of the Hill!"
-#if VERSION >= VERSION_JPN_FINAL
 								hudmsgCreateWithFlags(langGet(L_MPWEAPONS_020), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE | HUDMSGFLAG_NOWRAP);
-#else
-								hudmsgCreateWithFlags(langGet(L_MPWEAPONS_020), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE);
-#endif
 							}
 						}
 
@@ -540,7 +523,7 @@ void kohTick(void)
 			targetg = 1;
 			targetb = 0.25f;
 		} else {
-			u32 colour = g_TeamColours[g_ScenarioData.koh.occupiedteam];
+			uint32_t colour = g_TeamColours[g_ScenarioData.koh.occupiedteam];
 			targetr = ((int)(colour >> 24 & 0xff) + 0xff) * (1.0f / 512.0f);
 			targetg = ((int)(colour >> 16 & 0xff) + 0xff) * (1.0f / 512.0f);
 			targetb = ((int)(colour >> 8 & 0xff) + 0xff) * (1.0f / 512.0f);
@@ -554,31 +537,19 @@ void kohTick(void)
 	// while paused.
 	if (g_ScenarioData.koh.colourfracr != targetr) {
 		for (i = 0; i < g_Vars.diffframe60; i++) {
-#if PAL
-			g_ScenarioData.koh.colourfracr = 0.0597f * targetr + 0.9403f * g_ScenarioData.koh.colourfracr;
-#else
 			g_ScenarioData.koh.colourfracr = 0.05f * targetr + 0.95f * g_ScenarioData.koh.colourfracr;
-#endif
 		}
 	}
 
 	if (g_ScenarioData.koh.colourfracg != targetg) {
 		for (i = 0; i < g_Vars.diffframe60; i++) {
-#if PAL
-			g_ScenarioData.koh.colourfracg = 0.0597f * targetg + 0.9403f * g_ScenarioData.koh.colourfracg;
-#else
 			g_ScenarioData.koh.colourfracg = 0.05f * targetg + 0.95f * g_ScenarioData.koh.colourfracg;
-#endif
 		}
 	}
 
 	if (g_ScenarioData.koh.colourfracb != targetb) {
 		for (i = 0; i < g_Vars.diffframe60; i++) {
-#if PAL
-			g_ScenarioData.koh.colourfracb = 0.0597f * targetb + 0.9403f * g_ScenarioData.koh.colourfracb;
-#else
 			g_ScenarioData.koh.colourfracb = 0.05f * targetb + 0.95f * g_ScenarioData.koh.colourfracb;
-#endif
 		}
 	}
 }
@@ -600,15 +571,11 @@ Gfx *kohRenderHud(Gfx *gdl)
 		y = viGetViewTop() + 10;
 
 		time240 = g_Vars.mphilltime * TICKS(240) - g_ScenarioData.koh.elapsed240;
-		time240 += VERSION >= VERSION_PAL_BETA ? TICKS(2640) - 1 : 2400;
+		time240 += 2400;
 		mins = time240 / TICKS(60 * 240);
 		time240 -= TICKS(60 * 240) * mins;
 
-#if VERSION >= VERSION_PAL_BETA
-		secs = time240 / TICKS(240);
-#else
 		secs = (time240 + (TICKS(240) - 1)) / TICKS(240);
-#endif
 
 		if ((g_Vars.mphilltime * 60 + 600) / 3600) {
 			sprintf(text, "%d:%02d", mins, secs);
@@ -616,12 +583,10 @@ Gfx *kohRenderHud(Gfx *gdl)
 			sprintf(text, "%02d", secs);
 		}
 
-#ifndef PLATFORM_N64
 		const int playercount = PLAYERCOUNT();
 		if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
 			gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 		}
-#endif
 
 		gdl = textConfigureGfxPipeline(gdl);
 		textMeasure(&textheight, &textwidth, text, g_CharsHandelGothicXs, g_FontHandelGothicXs, 0);
@@ -630,18 +595,11 @@ Gfx *kohRenderHud(Gfx *gdl)
 		textwidth += x;
 		textheight += y;
 
-#if VERSION >= VERSION_NTSC_1_0
 		gdl = text0f153990(gdl, x, y, textwidth, textheight);
 		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0xa0, viGetWidth(), viGetHeight(), 0, 0);
-#else
-		gdl = text0f153858(gdl, &x, &y, &textwidth, &textheight);
-		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0x88, viGetWidth(), viGetHeight(), 0, 0);
-#endif
 		gdl = text0f153780(gdl);
 
-#ifndef PLATFORM_N64
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
-#endif
 	}
 
 	return gdl;
@@ -678,7 +636,7 @@ Gfx *kohRadarExtra(Gfx *gdl)
 {
 	if (g_MpSetup.options & MPOPTION_KOH_HILLONRADAR && !g_ScenarioData.koh.movehill) {
 		struct coord dist;
-		u32 colour;
+		uint32_t colour;
 		dist.x = g_ScenarioData.koh.hillpos.x - g_Vars.currentplayer->prop->pos.x;
 		dist.y = g_ScenarioData.koh.hillpos.y - g_Vars.currentplayer->prop->pos.y;
 		dist.z = g_ScenarioData.koh.hillpos.z - g_Vars.currentplayer->prop->pos.z;

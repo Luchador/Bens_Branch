@@ -17,8 +17,7 @@
  * Copyright Laws of the United States.
  *====================================================================*/
 
-#ifndef __N_SNDP__
-#define __N_SNDP__
+#pragma once
 
 #include <libaudio.h>
 #include "n_libaudio.h"
@@ -103,5 +102,3 @@ ALMicroTime     _n_sndpVoiceHandler(void *node);
 void            _n_handleEvent(N_ALSndpEvent *event);
 void		_removeEvents(ALEventQueue *evtq, N_ALSoundState *state, uint16_t typemask);
 int		_DivintByfloat (int i, float f);
-
-#endif /* __N_SNDP__ */
