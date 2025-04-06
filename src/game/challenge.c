@@ -367,39 +367,20 @@ struct mpconfigfull *challengeLoadConfig(int confignum, uint8_t *buffer, int len
 	uint8_t buffer2[sizeof(struct mpstrings) + 40];
 	struct mpstrings *loadedstrings;
 	uintptr_t bank;
-	uint32_t language_id = 0;
 
-	extern uint8_t EXT_SEG _mpconfigsSegmentRomStart;
-	extern struct mpstrings EXT_SEG _mpstringsESegmentRomStart;
-	extern struct mpstrings EXT_SEG _mpstringsJSegmentRomStart;
-	extern struct mpstrings EXT_SEG _mpstringsPSegmentRomStart;
-	extern struct mpstrings EXT_SEG _mpstringsGSegmentRomStart;
-	extern struct mpstrings EXT_SEG _mpstringsFSegmentRomStart;
-	extern struct mpstrings EXT_SEG _mpstringsSSegmentRomStart;
-	extern struct mpstrings EXT_SEG _mpstringsISegmentRomStart;
-	extern struct mpstrings EXT_SEG _mpstringsESegmentRomEnd;
-	extern struct mpstrings EXT_SEG _mpstringsJSegmentRomEnd;
-	extern struct mpstrings EXT_SEG _mpstringsPSegmentRomEnd;
-	extern struct mpstrings EXT_SEG _mpstringsGSegmentRomEnd;
-	extern struct mpstrings EXT_SEG _mpstringsFSegmentRomEnd;
-	extern struct mpstrings EXT_SEG _mpstringsSSegmentRomEnd;
-	extern struct mpstrings EXT_SEG _mpstringsISegmentRomEnd;
+	extern uint8_t *_mpconfigsSegmentRomStart;
+	extern struct mpstrings *_mpstringsESegmentRomStart;
+	extern struct mpstrings *_mpstringsESegmentRomEnd;
 
 	uintptr_t banks[][2] = {
-		{ (uintptr_t)REF_SEG _mpstringsESegmentRomStart, (uintptr_t)REF_SEG _mpstringsESegmentRomEnd },
-		{ (uintptr_t)REF_SEG _mpstringsJSegmentRomStart, (uintptr_t)REF_SEG _mpstringsJSegmentRomEnd },
-		{ (uintptr_t)REF_SEG _mpstringsPSegmentRomStart, (uintptr_t)REF_SEG _mpstringsPSegmentRomEnd },
-		{ (uintptr_t)REF_SEG _mpstringsGSegmentRomStart, (uintptr_t)REF_SEG _mpstringsGSegmentRomEnd },
-		{ (uintptr_t)REF_SEG _mpstringsFSegmentRomStart, (uintptr_t)REF_SEG _mpstringsFSegmentRomEnd },
-		{ (uintptr_t)REF_SEG _mpstringsSSegmentRomStart, (uintptr_t)REF_SEG _mpstringsSSegmentRomEnd },
-		{ (uintptr_t)REF_SEG _mpstringsISegmentRomStart, (uintptr_t)REF_SEG _mpstringsISegmentRomEnd },
+		{ (uintptr_t)_mpstringsESegmentRomStart, (uintptr_t)_mpstringsESegmentRomEnd },
 	};
 
 	// Load mpconfigs
-	mpconfig = dmaExecWithAutoAlign(buffer, (uintptr_t)REF_SEG _mpconfigsSegmentRomStart + confignum * sizeof(struct mpconfig), sizeof(struct mpconfig));
+	mpconfig = dmaExecWithAutoAlign(buffer, (uintptr_t)_mpconfigsSegmentRomStart + confignum * sizeof(struct mpconfig), sizeof(struct mpconfig));
 
 	// Load mpstrings
-	bank = banks[language_id][0];
+	bank = banks[0][0];
 	loadedstrings = dmaExecWithAutoAlign(buffer2, bank + confignum * sizeof(struct mpstrings), sizeof(struct mpstrings));
 
 	mpconfig->strings = *loadedstrings;

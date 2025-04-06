@@ -1116,13 +1116,13 @@ int scenarioPickUpBriefcase(struct chrdata *chr, struct prop *prop)
 				}
 
 				// "You captured the %s%s"
-				sprintf(text1, langRemoveNewline(langGet(L_MPWEAPONS_004)), g_BossFile.teamnames[i], langRemoveNewline(bgunGetShortName(WEAPON_BRIEFCASE2)));
+				sprintf(text1, langGet(L_MPWEAPONS_004), g_BossFile.teamnames[i], langRemoveNewline(bgunGetShortName(WEAPON_BRIEFCASE2)));
 
 				// "%scaptured our %s"
-				sprintf(text2, langRemoveNewline(langGet(L_MPWEAPONS_005)), mpchr->name, langRemoveNewline(bgunGetShortName(WEAPON_BRIEFCASE2)));
+				sprintf(text2, langGet(L_MPWEAPONS_005), mpchr->name, langRemoveNewline(bgunGetShortName(WEAPON_BRIEFCASE2)));
 
 				// "%scaptured the %s%s"
-				sprintf(text3, langRemoveNewline(langGet(L_MPWEAPONS_006)), mpchr->name, g_BossFile.teamnames[i], langRemoveNewline(bgunGetShortName(WEAPON_BRIEFCASE2)));
+				sprintf(text3, langGet(L_MPWEAPONS_006), mpchr->name, g_BossFile.teamnames[i], langRemoveNewline(bgunGetShortName(WEAPON_BRIEFCASE2)));
 
 				prevplayernum = g_Vars.currentplayernum;
 

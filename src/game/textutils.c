@@ -122,9 +122,9 @@ void textSetWrapIndent(int count)
 
 void textLoadFont(uint8_t *romstart, uint8_t *romend, struct font **fontptr, struct fontchar **charsptr, bool monospace)
 {
-	extern uint8_t EXT_SEG _fonthandelgothicsmSegmentRomStart;
-	extern uint8_t EXT_SEG _fonthandelgothicxsSegmentRomStart;
-	extern uint8_t EXT_SEG _fonthandelgothicmdSegmentRomStart;
+	extern uint8_t *_fonthandelgothicsmSegmentRomStart;
+	extern uint8_t *_fonthandelgothicxsSegmentRomStart;
+	extern uint8_t *_fonthandelgothicmdSegmentRomStart;
 
 	uint32_t len;
 	int maxwidth;
@@ -167,15 +167,15 @@ void textLoadFont(uint8_t *romstart, uint8_t *romend, struct font **fontptr, str
 
 void textReset(void)
 {
-	extern uint8_t EXT_SEG _fontbankgothicSegmentRomStart,     EXT_SEG _fontbankgothicSegmentRomEnd;
-	extern uint8_t EXT_SEG _fontzurichSegmentRomStart,         EXT_SEG _fontzurichSegmentRomEnd;
-	extern uint8_t EXT_SEG _fontnumericSegmentRomStart,        EXT_SEG _fontnumericSegmentRomEnd;
-	extern uint8_t EXT_SEG _fonthandelgothicsmSegmentRomStart, EXT_SEG _fonthandelgothicsmSegmentRomEnd;
-	extern uint8_t EXT_SEG _fonthandelgothicxsSegmentRomStart, EXT_SEG _fonthandelgothicxsSegmentRomEnd;
-	extern uint8_t EXT_SEG _fonthandelgothicmdSegmentRomStart, EXT_SEG _fonthandelgothicmdSegmentRomEnd;
-	extern uint8_t EXT_SEG _fonthandelgothiclgSegmentRomStart, EXT_SEG _fonthandelgothiclgSegmentRomEnd;
-	extern uint8_t EXT_SEG _fontocramdSegmentRomStart,         EXT_SEG _fontocramdSegmentRomEnd;
-	extern uint8_t EXT_SEG _fontocralgSegmentRomStart,         EXT_SEG _fontocralgSegmentRomEnd;
+	extern uint8_t *_fontbankgothicSegmentRomStart,     *_fontbankgothicSegmentRomEnd;
+	extern uint8_t *_fontzurichSegmentRomStart,         *_fontzurichSegmentRomEnd;
+	extern uint8_t *_fontnumericSegmentRomStart,        *_fontnumericSegmentRomEnd;
+	extern uint8_t *_fonthandelgothicsmSegmentRomStart, *_fonthandelgothicsmSegmentRomEnd;
+	extern uint8_t *_fonthandelgothicxsSegmentRomStart, *_fonthandelgothicxsSegmentRomEnd;
+	extern uint8_t *_fonthandelgothicmdSegmentRomStart, *_fonthandelgothicmdSegmentRomEnd;
+	extern uint8_t *_fonthandelgothiclgSegmentRomStart, *_fonthandelgothiclgSegmentRomEnd;
+	extern uint8_t *_fontocramdSegmentRomStart,         *_fontocramdSegmentRomEnd;
+	extern uint8_t *_fontocralgSegmentRomStart,         *_fontocralgSegmentRomEnd;
 
 	g_FontNumeric = NULL;
 	g_FontHandelGothicXs = NULL;
@@ -193,19 +193,19 @@ void textReset(void)
 	g_WrapIndentCount = 0;
 
 	if (g_Vars.stagenum == STAGE_TITLE) {
-		textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
-		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
-		textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
+		textLoadFont(_fonthandelgothicsmSegmentRomStart, _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
+		textLoadFont(_fonthandelgothicmdSegmentRomStart, _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
+		textLoadFont(_fonthandelgothiclgSegmentRomStart, _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
 	} else if (g_Vars.stagenum == STAGE_CREDITS) {
-		textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
-		textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
-		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
-		textLoadFont(REF_SEG _fonthandelgothiclgSegmentRomStart, REF_SEG _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
+		textLoadFont(_fonthandelgothicxsSegmentRomStart, _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
+		textLoadFont(_fonthandelgothicsmSegmentRomStart, _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
+		textLoadFont(_fonthandelgothicmdSegmentRomStart, _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
+		textLoadFont(_fonthandelgothiclgSegmentRomStart, _fonthandelgothiclgSegmentRomEnd, &g_FontHandelGothicLg, &g_CharsHandelGothicLg, false);
 	} else {
-		textLoadFont(REF_SEG _fontnumericSegmentRomStart, REF_SEG _fontnumericSegmentRomEnd, &g_FontNumeric, &g_CharsNumeric, false);
-		textLoadFont(REF_SEG _fonthandelgothicxsSegmentRomStart, REF_SEG _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
-		textLoadFont(REF_SEG _fonthandelgothicsmSegmentRomStart, REF_SEG _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
-		textLoadFont(REF_SEG _fonthandelgothicmdSegmentRomStart, REF_SEG _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
+		textLoadFont(_fontnumericSegmentRomStart, _fontnumericSegmentRomEnd, &g_FontNumeric, &g_CharsNumeric, false);
+		textLoadFont(_fonthandelgothicxsSegmentRomStart, _fonthandelgothicxsSegmentRomEnd, &g_FontHandelGothicXs, &g_CharsHandelGothicXs, false);
+		textLoadFont(_fonthandelgothicsmSegmentRomStart, _fonthandelgothicsmSegmentRomEnd, &g_FontHandelGothicSm, &g_CharsHandelGothicSm, false);
+		textLoadFont(_fonthandelgothicmdSegmentRomStart, _fonthandelgothicmdSegmentRomEnd, &g_FontHandelGothicMd, &g_CharsHandelGothicMd, false);
 	}
 
 	// Fonts are loaded again every time a stage is loaded so free the memory allocated for the previous fonts

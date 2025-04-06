@@ -1,12 +1,8 @@
 #pragma once
 
-#include <ultra64.h>
 #include <stdint.h>
 #include "constants.h"
 #include "types.h"
-
-#define EXT_SEG *
-#define REF_SEG
 
 extern int g_SchedViModeToggle;
 extern bool g_SchedViModesPending[NUM_GFXTASKS];

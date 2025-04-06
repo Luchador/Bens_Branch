@@ -9,12 +9,12 @@
 
 void texInit(void)
 {
-	extern uint8_t EXT_SEG _textureslistSegmentRomStart;
-	extern uint8_t EXT_SEG _textureslistSegmentRomEnd;
+	extern uint8_t *_textureslistSegmentRomStart;
+	extern uint8_t *_textureslistSegmentRomEnd;
 
-	uint32_t len = ((REF_SEG _textureslistSegmentRomEnd - REF_SEG _textureslistSegmentRomStart) + 15) & -16;
+	uint32_t len = ((_textureslistSegmentRomEnd - _textureslistSegmentRomStart) + 15) & -16;
 
 	g_Textures = mempAlloc(len, MEMPOOL_PERMANENT);
 
-	memcpy(g_Textures, (const void *) ((romptr_t) REF_SEG _textureslistSegmentRomStart), len);
+	memcpy(g_Textures, (const void *) ((romptr_t) _textureslistSegmentRomStart), len);
 }

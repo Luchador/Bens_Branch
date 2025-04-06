@@ -39,9 +39,9 @@ extern Gfx *g_TexGdl3;
 extern struct textureconfig *g_TexRedLinesConfigs;
 extern struct textureconfig *g_TexGroup11Configs;
 
-extern uint8_t EXT_SEG _textureconfigSegmentRomStart;
-extern uint8_t EXT_SEG _textureconfigSegmentStart;
-extern uint8_t EXT_SEG _textureconfigSegmentEnd;
+extern uint8_t *_textureconfigSegmentRomStart;
+extern uint8_t *_textureconfigSegmentStart;
+extern uint8_t *_textureconfigSegmentEnd;
 
 void texReset(void)
 {

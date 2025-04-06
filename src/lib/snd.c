@@ -798,12 +798,12 @@ int16_t var8005ecf8[] = {
 	-1,
 };
 
-extern uint8_t EXT_SEG _sfxctlSegmentRomStart;
-extern uint8_t EXT_SEG _sfxtblSegmentRomStart;
-extern uint8_t EXT_SEG _seqctlSegmentRomStart;
-extern uint8_t EXT_SEG _seqctlSegmentRomEnd;
-extern uint8_t EXT_SEG _seqtblSegmentRomStart;
-extern uint8_t EXT_SEG _sequencesSegmentRomStart;
+extern uint8_t *_sfxctlSegmentRomStart;
+extern uint8_t *_sfxtblSegmentRomStart;
+extern uint8_t *_seqctlSegmentRomStart;
+extern uint8_t *_seqctlSegmentRomEnd;
+extern uint8_t *_seqtblSegmentRomStart;
+extern uint8_t *_sequencesSegmentRomStart;
 
 bool sndIsPlayingMp3(void)
 {
@@ -880,19 +880,19 @@ void sndLoadSfxCtl(void)
 
 	// Load the first 256 bytes of the ctl file.
 	size = 256;
-	memcpy(buffer, (const void *)((romptr_t) REF_SEG _sfxctlSegmentRomStart), size);
+	memcpy(buffer, (const void *)((romptr_t) _sfxctlSegmentRomStart), size);
 
 	// Get the ROM address of the first (and only) bank,
 	// then load the first 256 bytes of the bank.
 	file = (ALBankFile *) buffer;
-	romaddr = (romptr_t) REF_SEG _sfxctlSegmentRomStart;
+	romaddr = (romptr_t) _sfxctlSegmentRomStart;
 	romaddr += (uintptr_t)file->bankArray[0];
 	memcpy(buffer, (const void *) romaddr, size);
 
 	// Get the ROM address of the first (and only) instrument,
 	// then load the first 256 bytes of the instrument.
 	bank = (ALBank *) buffer;
-	romaddr = (romptr_t) REF_SEG _sfxctlSegmentRomStart;
+	romaddr = (romptr_t) _sfxctlSegmentRomStart;
 	romaddr += (uintptr_t)bank->instArray[0];
 	memcpy(buffer, (const void *) romaddr, size);
 
@@ -913,7 +913,7 @@ void sndLoadSfxCtl(void)
 
 	// Convert ctl-local offsets to ROM offsets
 	for (i = 0; i < g_NumSounds; i++) {
-		g_ALSoundRomOffsets[i] += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
+		g_ALSoundRomOffsets[i] += (romptr_t) _sfxctlSegmentRomStart;
 	}
 
 	// Allocate and initialise cache
@@ -950,7 +950,7 @@ ALEnvelope *sndLoadEnvelope(uintptr_t offset, uint16_t cacheindex)
 	int sum1;
 	int sum2;
 
-	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
+	offset += (romptr_t) _sfxctlSegmentRomStart;
 
 	do {
 		memcpy(s2, (const void *) offset, 16 * sizeof(uintptr_t));
@@ -988,7 +988,7 @@ ALKeyMap *sndLoadKeymap(uintptr_t offset, uint16_t cacheindex)
 	int sum1;
 	int sum2;
 
-	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
+	offset += (romptr_t) _sfxctlSegmentRomStart;
 
 	do {
 		memcpy(s2, (const void *) offset, 16 * sizeof(uintptr_t));
@@ -1026,7 +1026,7 @@ ALADPCMBook *sndLoadAdpcmBook(uintptr_t offset, uint16_t cacheindex)
 	int sum1;
 	int sum2;
 
-	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
+	offset += (romptr_t) _sfxctlSegmentRomStart;
 
 	do {
 		memcpy(s2, (const void *) offset, 0x140);
@@ -1066,7 +1066,7 @@ ALADPCMloop *sndLoadAdpcmLoop(uintptr_t offset, uint16_t cacheindex)
 		return NULL;
 	}
 
-	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
+	offset += (romptr_t) _sfxctlSegmentRomStart;
 
 	do {
 		memcpy(s2, (const void *) offset, 16 * sizeof(uintptr_t));
@@ -1104,7 +1104,7 @@ ALWaveTable *sndLoadWavetable(uintptr_t offset, uint16_t cacheindex)
 	int sum2;
 	ALWaveTable *tmp;
 
-	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
+	offset += (romptr_t) _sfxctlSegmentRomStart;
 
 	do {
 		memcpy(s2, (const void *) offset, 16 * sizeof(uintptr_t));
@@ -1127,7 +1127,7 @@ ALWaveTable *sndLoadWavetable(uintptr_t offset, uint16_t cacheindex)
 
 	*tmp = *s1;
 
-	tmp->base += (romptr_t) REF_SEG _sfxtblSegmentRomStart;
+	tmp->base += (romptr_t) _sfxtblSegmentRomStart;
 
 	if (tmp->type == AL_ADPCM_WAVE) {
 		tmp->waveInfo.adpcmWave.book = sndLoadAdpcmBook((uintptr_t)tmp->waveInfo.adpcmWave.book, cacheindex);
@@ -1303,7 +1303,7 @@ void sndInit(void)
 	if (!g_SndDisabled) {
 		// Allocate memory for the audio heap,
 		// clear it and give it to the audio library
-		uint32_t len = REF_SEG _seqctlSegmentRomEnd - REF_SEG _seqctlSegmentRomStart;
+		uint32_t len = _seqctlSegmentRomEnd - _seqctlSegmentRomStart;
 		uint8_t *ptr = mempAlloc(heaplen, MEMPOOL_PERMANENT);
 		int i;
 		uint8_t *heapstart = ptr;
@@ -1328,27 +1328,27 @@ void sndInit(void)
 		// Load seq.ctl
 		var80095200 = 0xffffffff;
 		bankfile = alHeapAlloc(&g_SndHeap, 1, len);
-		memcpy(bankfile, (const void *)((romptr_t) REF_SEG _seqctlSegmentRomStart), len);
+		memcpy(bankfile, (const void *)((romptr_t) _seqctlSegmentRomStart), len);
 
 		// Load seq.tbl
-		alBnkfNew(bankfile, REF_SEG _seqtblSegmentRomStart);
+		alBnkfNew(bankfile, _seqtblSegmentRomStart);
 
 		// Load the sequences table. To do this, load the header of the
 		// sequences segment and read the number of sequences, then allocate
 		// enough space for the table and load it.
 		var80095204 = bankfile->bankArray[0];
 		g_SeqTable = alHeapDBAlloc(0, 0, &g_SndHeap, 1, 0x10);
-		memcpy(g_SeqTable, (const void *)((romptr_t) REF_SEG _sequencesSegmentRomStart), 0x10);
+		memcpy(g_SeqTable, (const void *)((romptr_t) _sequencesSegmentRomStart), 0x10);
 
 		len = g_SeqTable->count * sizeof(struct seqtableentry) + 4;
 		g_SeqTable = alHeapDBAlloc(0, 0, &g_SndHeap, 1, len);
-		memcpy(g_SeqTable, (const void *)((romptr_t) REF_SEG _sequencesSegmentRomStart), (len + 0xf) & ~0xf);
+		memcpy(g_SeqTable, (const void *)((romptr_t) _sequencesSegmentRomStart), (len + 0xf) & ~0xf);
 
 		// Promote segment-relative offsets to ROM addresses
 		g_SeqRomAddrs = mempAlloc(g_SeqTable->count * sizeof(uintptr_t), MEMPOOL_PERMANENT);
 		
 		for (i = 0; i < g_SeqTable->count; i++) {
-			g_SeqRomAddrs[i] = g_SeqTable->entries[i].romaddr + (romptr_t) REF_SEG _sequencesSegmentRomStart;
+			g_SeqRomAddrs[i] = g_SeqTable->entries[i].romaddr + (romptr_t) _sequencesSegmentRomStart;
 		}
 
 		synconfig.maxVVoices = 44;

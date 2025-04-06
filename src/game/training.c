@@ -393,7 +393,7 @@ void *frLoadRomData(uint32_t len)
 	g_FrRomData = mempAlloc(ALIGN16(len), MEMPOOL_STAGE);
 
 	if (g_FrRomData) {
-		return dmaExecWithAutoAlign(g_FrRomData, (romptr_t) REF_SEG _firingrangeSegmentRomStart, len);
+		return dmaExecWithAutoAlign(g_FrRomData, (romptr_t) _firingrangeSegmentRomStart, len);
 	}
 
 	return NULL;
@@ -962,7 +962,7 @@ void frUnlockDoor(void)
 void frLoadData(void)
 {
 	if (!g_FrDataLoaded) {
-		int len = (int) REF_SEG _firingrangeSegmentRomEnd - (int) REF_SEG _firingrangeSegmentRomStart;
+		int len = (int) _firingrangeSegmentRomEnd - (int) _firingrangeSegmentRomStart;
 		int index = 0;
 		uint32_t i;
 		uint32_t numscripts = 1;

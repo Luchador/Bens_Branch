@@ -2181,7 +2181,7 @@ void texLoadFromDisplayList(Gfx *gdl, struct texpool *pool, int arg2)
 	}
 }
 
-extern uint8_t EXT_SEG _texturesdataSegmentRomStart;
+extern uint8_t *_texturesdataSegmentRomStart;
 
 /**
  * Load and decompress a texture from ROM.
@@ -2281,7 +2281,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 			{
 				// Copy the compressed texture to RAM
 				memcpy(alignedcompbuffer,
-				     	(const void *) ((romptr_t) REF_SEG _texturesdataSegmentRomStart + (thisoffset & 0xfffffff8)),
+				     	(const void *) ((romptr_t) _texturesdataSegmentRomStart + (thisoffset & 0xfffffff8)),
 						((uintptr_t) (nextoffset - thisoffset) + 0x1f) >> 4 << 4);
 				compptr = (uint8_t *) alignedcompbuffer + (thisoffset & 7);
 			}
