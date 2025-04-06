@@ -1,6 +1,5 @@
-#ifndef IN_GAME_LANG_H
-#define IN_GAME_LANG_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -3827,5 +3826,3 @@ enum l_wax {
 	L_WAX_027,
 	L_WAX_END
 };
-
-#endif

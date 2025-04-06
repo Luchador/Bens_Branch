@@ -1,6 +1,5 @@
-#ifndef IN_GAME_NBOMB_H
-#define IN_GAME_NBOMB_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -18,5 +17,3 @@ void nbombCreateStorm(struct coord *pos, struct prop *ownerprop);
 float gasGetDoorFrac(int tagnum);
 Gfx *nbombRenderOverlay(Gfx *gdl);
 Gfx *gasRender(Gfx *gdl);
-
-#endif

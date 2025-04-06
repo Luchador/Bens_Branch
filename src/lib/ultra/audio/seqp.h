@@ -10,15 +10,15 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #endif
 
-ALVoiceState    *__mapVoice(ALSeqPlayer *, u8, u8, u8);
+ALVoiceState    *__mapVoice(ALSeqPlayer *, uint8_t, uint8_t, uint8_t);
 void            __unmapVoice(ALSeqPlayer *seqp, ALVoice *voice);
 char		__voiceNeedsNoteKill(ALSeqPlayer *seqp, ALVoice *voice, ALMicroTime killTime);	/* sct 1/5/96 */
 
-ALVoiceState    *__lookupVoice(ALSeqPlayer *, u8, u8);
-ALSound         *__lookupSound(ALSeqPlayer *, u8, u8, u8);
-ALSound         *__lookupSoundQuick(ALSeqPlayer *, u8, u8, u8);
+ALVoiceState    *__lookupVoice(ALSeqPlayer *, uint8_t, uint8_t);
+ALSound         *__lookupSound(ALSeqPlayer *, uint8_t, uint8_t, uint8_t);
+ALSound         *__lookupSoundQuick(ALSeqPlayer *, uint8_t, uint8_t, uint8_t);
 
-s16             __vsVol(ALVoiceState *voice, ALSeqPlayer *seqp);
+int16_t             __vsVol(ALVoiceState *voice, ALSeqPlayer *seqp);
 ALMicroTime     __vsDelta(ALVoiceState *voice, ALMicroTime t);
 ALPan           __vsPan(ALVoiceState *voice, ALSeqPlayer *seqp);
 

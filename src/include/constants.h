@@ -1,6 +1,5 @@
-#ifndef _IN_CONSTANTS_H
-#define _IN_CONSTANTS_H
-#include "versions.h"
+#pragma once
+
 #include "math.h"
 #include "animations.h"
 #include "input.h"
@@ -30,6 +29,7 @@
 #define MAX_PLAYERS            4
 #define MAX_PROPSPERROOMCHUNK  7
 #define MAX_ROOMPROPLISTCHUNKS 256
+#define MAX_SPARKS             300
 #define MAX_SQUADRONS          16
 #define MAX_TEAMS              8
 
@@ -48,8 +48,6 @@
 #define MINFLOAT ((float)-3.40282346638528860e+38)
 #define MAXFLOAT ((float)3.40282346638528860e+38)
 
-#define ABS(val)            ((val) > 0 ? (val) : -(val))
-#define ABSF(val)           ((val) > 0.0f ? (val) : -(val))
 #define ALIGN2(val)         (((val) | 1) ^ 0x1)
 #define ALIGN4(val)         (((val) | 3) ^ 0x3)
 #define ALIGN8(val)         ((((val) + 0x7) | 0x7) ^ 0x7)
@@ -58,7 +56,7 @@
 #define ARRAYCOUNT(a)       (int)(sizeof(a) / sizeof(a[0]))
 #define CHRNAVSEED(chr)     ((g_Vars.lvframe60 >> 9) * 128 + chr->chrnum * 8)
 #define CHRRACE(chr)        (chr ? chr->race : RACE_HUMAN)
-#define CRASH()             *(u8 *)0 = 69
+#define CRASH()             *(uint8_t *)0 = 69
 #define CYCLES_PER_FRAME    ((int) 62500000LL*3/4 / 60)
 #define LINEHEIGHT          (11)
 #define MIXCOLOUR(dialog, property) dialog->transitionfrac < 0.0f ? g_MenuColours[dialog->type].property : colourBlend(g_MenuColours[dialog->type2].property, g_MenuColours[dialog->type].property, dialog->colourweight)
@@ -98,8 +96,6 @@
 		(p[2] - g_Vars.currentplayer->eraserpos.f[2]) * (p[2] - g_Vars.currentplayer->eraserpos.f[2]))
 
 #define TICKS(val)    (val)
-#define PALUP(val)    (val)
-#define PALUPF(val)   (val)
 #define FRAMEDURATION (1 / 60.0f)
 
 // Macro to convert an ASCII character to N64 font code.
@@ -1047,30 +1043,30 @@
 #define GAILIST_INIT_PUGILIST_BUDDY    0x0013
 #define GAILIST_BUDDY_MAIN             0x0014
 #define GAILIST_BUDDY_STEALTH          0x0015
-#define GAILIST_SHOW_OBJ_FAILED_MSG    (VERSION >= VERSION_NTSC_1_0 ? 0x0016 : 0x0015)
-#define GAILIST_REBUILD_GROUPS         (VERSION >= VERSION_NTSC_1_0 ? 0x0017 : 0x0016)
-#define GAILIST_DO_BORED_ANIMATION     (VERSION >= VERSION_NTSC_1_0 ? 0x0018 : 0x0017)
-#define GAILIST_DO_SITTING_ANIMATION   (VERSION >= VERSION_NTSC_1_0 ? 0x0019 : 0x0018)
-#define GAILIST_PATROLLER_DIS_TALKING  (VERSION >= VERSION_NTSC_1_0 ? 0x001a : 0x0019)
-#define GAILIST_OBSERVE_CAMSPY         (VERSION >= VERSION_NTSC_1_0 ? 0x001b : 0x001a)
-#define GAILIST_SURPRISED              (VERSION >= VERSION_NTSC_1_0 ? 0x001c : 0x001b)
-#define GAILIST_SEARCH_FOR_PLAYER      (VERSION >= VERSION_NTSC_1_0 ? 0x001d : 0x001c)
-#define GAILIST_LOOK_AROUND            (VERSION >= VERSION_NTSC_1_0 ? 0x001e : 0x001d)
-#define GAILIST_RELATED_TO_SPAWNING    (VERSION >= VERSION_NTSC_1_0 ? 0x001f : 0x001e)
-#define GAILIST_BUDDY_WARP             (VERSION >= VERSION_NTSC_1_0 ? 0x0020 : 0x001f)
-#define GAILIST_STOP_AND_IDLE          (VERSION >= VERSION_NTSC_1_0 ? 0x0021 : 0x0020)
-#define GAILIST_COMMENT_ON_PLAYER_DEAD (VERSION >= VERSION_NTSC_1_0 ? 0x0022 : 0x0021) // unused
-#define GAILIST_DODGE                  (VERSION >= VERSION_NTSC_1_0 ? 0x0023 : 0x0022)
-#define GAILIST_FOLLOW_BOND            (VERSION >= VERSION_NTSC_1_0 ? 0x0024 : 0x0023)
-#define GAILIST_POINTLESS              (VERSION >= VERSION_NTSC_1_0 ? 0x0025 : 0x0024) // unused
-#define GAILIST_INIT_PSYCHOSIS         (VERSION >= VERSION_NTSC_1_0 ? 0x0026 : 0x0025)
-#define GAILIST_PSYCHOSISED            (VERSION >= VERSION_NTSC_1_0 ? 0x0027 : 0x0026)
-#define GAILIST_AIBOT_DEAD             (VERSION >= VERSION_NTSC_1_0 ? 0x0028 : 0x0027) // unused
-#define GAILIST_AIBOT_INIT             (VERSION >= VERSION_NTSC_1_0 ? 0x0029 : 0x0028) // unused
-#define GAILIST_AIBOT_MAIN             (VERSION >= VERSION_NTSC_1_0 ? 0x002a : 0x0029) // unused
-#define GAILIST_AVOID                  (VERSION >= VERSION_NTSC_1_0 ? 0x002b : 0x002a) // unused
-#define GAILIST_INIT_SEARCH            (VERSION >= VERSION_NTSC_1_0 ? 0x002c : 0x002b) // unused
-#define GAILIST_INVINCIBLE_AND_IDLE    (VERSION >= VERSION_NTSC_1_0 ? 0x002d : 0x002c)
+#define GAILIST_SHOW_OBJ_FAILED_MSG    0x0016
+#define GAILIST_REBUILD_GROUPS         0x0017
+#define GAILIST_DO_BORED_ANIMATION     0x0018
+#define GAILIST_DO_SITTING_ANIMATION   0x0019
+#define GAILIST_PATROLLER_DIS_TALKING  0x001a
+#define GAILIST_OBSERVE_CAMSPY         0x001b
+#define GAILIST_SURPRISED              0x001c
+#define GAILIST_SEARCH_FOR_PLAYER      0x001d
+#define GAILIST_LOOK_AROUND            0x001e
+#define GAILIST_RELATED_TO_SPAWNING    0x001f
+#define GAILIST_BUDDY_WARP             0x0020
+#define GAILIST_STOP_AND_IDLE          0x0021
+#define GAILIST_COMMENT_ON_PLAYER_DEAD 0x0022 // unused
+#define GAILIST_DODGE                  0x0023
+#define GAILIST_FOLLOW_BOND            0x0024
+#define GAILIST_POINTLESS              0x0025 // unused
+#define GAILIST_INIT_PSYCHOSIS         0x0026
+#define GAILIST_PSYCHOSISED            0x0027
+#define GAILIST_AIBOT_DEAD             0x0028 // unused
+#define GAILIST_AIBOT_INIT             0x0029 // unused
+#define GAILIST_AIBOT_MAIN             0x002a // unused
+#define GAILIST_AVOID                  0x002b // unused
+#define GAILIST_INIT_SEARCH            0x002c // unused
+#define GAILIST_INVINCIBLE_AND_IDLE    0x002d
 
 #define GAMEFILEFLAG_P1_FORWARDPITCH      0x00
 #define GAMEFILEFLAG_P1_AUTOAIM           0x01
@@ -2217,7 +2213,7 @@
 #define MODEL_BUDDYBRIDGE           0x01b8
 #define MODEL_JPNLOGO               0x01b9
 #define MODEL_JPNPD                 0x01ba
-#define NUM_MODELS                  (VERSION == VERSION_JPN_FINAL ? 0x1bb : 0x1b9)
+#define NUM_MODELS                  0x1b9
 
 #define MODELNODETYPE_CHRINFO      0x01
 #define MODELNODETYPE_POSITION     0x02
@@ -2946,23 +2942,6 @@
 #define MPWEAPON_DEVASTATOR       0x16
 #define MPWEAPON_ROCKETLAUNCHER   0x17
 #define MPWEAPON_SLAYER           0x18
-#ifdef PLATFORM_N64
-#define MPWEAPON_COMBATKNIFE      (VERSION == VERSION_JPN_FINAL ?    0 : 0x19)
-#define MPWEAPON_CROSSBOW         (VERSION == VERSION_JPN_FINAL ? 0x19 : 0x1a)
-#define MPWEAPON_TRANQUILIZER     (VERSION == VERSION_JPN_FINAL ? 0x1a : 0x1b)
-#define MPWEAPON_GRENADE          (VERSION == VERSION_JPN_FINAL ? 0x1b : 0x1c)
-#define MPWEAPON_NBOMB            (VERSION == VERSION_JPN_FINAL ? 0x1c : 0x1d)
-#define MPWEAPON_TIMEDMINE        (VERSION == VERSION_JPN_FINAL ? 0x1d : 0x1e)
-#define MPWEAPON_PROXIMITYMINE    (VERSION == VERSION_JPN_FINAL ? 0x1e : 0x1f)
-#define MPWEAPON_REMOTEMINE       (VERSION == VERSION_JPN_FINAL ? 0x1f : 0x20)
-#define MPWEAPON_LASER            (VERSION == VERSION_JPN_FINAL ? 0x20 : 0x21)
-#define MPWEAPON_XRAYSCANNER      (VERSION == VERSION_JPN_FINAL ? 0x21 : 0x22)
-#define MPWEAPON_CLOAKINGDEVICE   (VERSION == VERSION_JPN_FINAL ? 0x22 : 0x23)
-#define MPWEAPON_COMBATBOOST      (VERSION == VERSION_JPN_FINAL ? 0x23 : 0x24)
-#define MPWEAPON_SHIELD           (VERSION == VERSION_JPN_FINAL ? 0x24 : 0x25)
-#define MPWEAPON_DISABLED         (VERSION == VERSION_JPN_FINAL ? 0x25 : 0x26)
-#define NUM_MPWEAPONS             (VERSION == VERSION_JPN_FINAL ? 0x26 : 0x27)
-#else // add all classic weapons to multiplayer and allow combat knife in JPN
 #define MPWEAPON_COMBATKNIFE      0x19
 #define MPWEAPON_CROSSBOW         0x1a
 #define MPWEAPON_TRANQUILIZER     0x1b
@@ -2986,7 +2965,6 @@
 #define MPWEAPON_SHIELD           0x2d
 #define MPWEAPON_DISABLED         0x2e
 #define NUM_MPWEAPONS             0x2f
-#endif
 
 #define MUSICEVENTTYPE_PLAY        1
 #define MUSICEVENTTYPE_STOP        2
@@ -3916,7 +3894,7 @@
 		- STACKSIZE_RMON \
 		- STACKSIZE_SCHED \
 		- STACKSIZE_AUDIO \
-		- (VERSION >= VERSION_NTSC_1_0 ? 8 : 0))
+		- 8)
 
 #define STAGE_MP_RANDOM     0x01
 #define STAGE_MAIANSOS      0x09
@@ -4643,5 +4621,3 @@ enum weaponnum {
 #define CROSSHAIR_HEALTH_ON_WHITE 2
 
 #define EXTRA_SLEEP_TIME 1000LL // 100us
-
-#endif

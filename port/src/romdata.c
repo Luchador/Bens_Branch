@@ -26,15 +26,11 @@
 #define ROMDATA_ROM_NAME "pd." VERSION_ROMID ".z64"
 #define ROMDATA_ROM_SIZE 33554432
 
-#if VERSION == VERSION_NTSC_FINAL
 #define ROMDATA_ROM_TITLE "Perfect Dark"
 #define ROMDATA_ROM_ID "NPDE"
 #define ROMDATA_ROM_DESC "NTSC v1.1"
 #define ROMDATA_FILES_OFS 0x28080
 #define ROMDATA_DATA_OFS 0x39850
-#else
-#error "This ROM version is unsupported."
-#endif
 
 #define ROMDATA_MAX_FILES 2048
 

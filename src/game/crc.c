@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include <stdint.h>
 #include "constants.h"
 #include "bss.h"
@@ -6,7 +5,7 @@
 #include "data.h"
 #include "types.h"
 
-void crcCalculateU16Pair(uint8_t *start, uint8_t *end, u16 *checksum)
+void crcCalculateU16Pair(uint8_t *start, uint8_t *end, uint16_t *checksum)
 {
 	uint8_t *ptr;
 	uint32_t salt = 0;

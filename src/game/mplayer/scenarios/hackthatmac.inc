@@ -167,7 +167,7 @@ int htmNumProps(void)
 	return HTM_NUM_TERMINALS + 1;
 }
 
-void htmAddPad(s16 padnum)
+void htmAddPad(int16_t padnum)
 {
 	struct scenariodata_htm *data = &g_ScenarioData.htm;
 
@@ -251,9 +251,7 @@ void htbCreateUplink(void)
 	struct defaultobj *candidates[20];
 
 	while (prop && count < 20) {
-#if VERSION >= VERSION_NTSC_1_0
 		if (prop->type == PROPTYPE_OBJ)
-#endif
 		{
 			obj = prop->obj;
 
@@ -451,22 +449,14 @@ void htmTickChr(struct chrdata *chr)
 						*time = 0;
 
 						if (chr == NULL) {
-#if VERSION >= VERSION_JPN_FINAL
-							hudmsgCreateWithFlags(langGet(L_MPWEAPONS_018), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE | HUDMSGFLAG_NOWRAP); // "Starting download."
-#else
 							hudmsgCreateWithFlags(langGet(L_MPWEAPONS_018), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE); // "Starting download."
-#endif
 							psCreate(NULL, data->terminals[data->dlterminalnum].prop, SFX_01BF, -1,
 									-1, PSFLAG_REPEATING, PSFLAG2_MPPAUSABLE, PSTYPE_NONE, NULL, -1, NULL, -1, -1, -1, -1);
 						}
 					}
 				} else {
 					if (chr == NULL) {
-#if VERSION >= VERSION_JPN_FINAL
-						hudmsgCreateWithFlags(langGet(L_MPWEAPONS_019), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE | HUDMSGFLAG_NOWRAP); // "You need to use the Data Uplink."
-#else
 						hudmsgCreateWithFlags(langGet(L_MPWEAPONS_019), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE); // "You need to use the Data Uplink."
-#endif
 						snd00010718(NULL, 0, AL_VOL_FULL, AL_PAN_CENTER, SFX_01CC, 1, 1, -1, 1);
 					}
 				}
@@ -500,7 +490,7 @@ void htmTickChr(struct chrdata *chr)
 
 		rangexz = sqrtf(dist.x * dist.x + dist.z * dist.z);
 
-		rangey = ABS(dist.y);
+		rangey = fabsf(dist.y);
 
 		relangle = atan2f(dist.x, dist.z) * 57.295776367188f + angle;
 
@@ -527,11 +517,7 @@ void htmTickChr(struct chrdata *chr)
 
 			if (chr == NULL) {
 				// "Connection broken."
-#if VERSION >= VERSION_JPN_FINAL
-				hudmsgCreateWithFlags(langGet(L_MPWEAPONS_017), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE | HUDMSGFLAG_NOWRAP);
-#else
 				hudmsgCreateWithFlags(langGet(L_MPWEAPONS_017), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE);
-#endif
 				psStopSound(data->terminals[data->dlterminalnum].prop, PSTYPE_GENERAL, 0xffff);
 				snd00010718(NULL, 0, AL_VOL_FULL, AL_PAN_CENTER, SFX_01CC, 1, 1, -1, 1);
 			}
@@ -548,11 +534,7 @@ void htmTickChr(struct chrdata *chr)
 
 				if (chr == NULL) {
 					// "Download successful."
-#if VERSION >= VERSION_JPN_FINAL
-					hudmsgCreateWithFlags(langGet(L_MPWEAPONS_016), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE | HUDMSGFLAG_NOWRAP);
-#else
 					hudmsgCreateWithFlags(langGet(L_MPWEAPONS_016), HUDMSGTYPE_MPSCENARIO, HUDMSGFLAG_ONLYIFALIVE);
-#endif
 					psStopSound(data->terminals[data->dlterminalnum].prop, PSTYPE_GENERAL, 0xffff);
 					snd00010718(NULL, 0, AL_VOL_FULL, AL_PAN_CENTER, SFX_01C1, 1, 1, -1, 1);
 				}

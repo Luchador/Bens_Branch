@@ -32,10 +32,10 @@ void menuStop(void)
 {
 	inputAutoLockMouse(true);
 
-	if (var80062944) {
-		var80062944 = false;
-		var80062948 = false;
+	if (g_MainMenuOpen) {
+		g_MainMenuOpen = false;
+		g_CombatSimMode = false;
 		joySetDefaultPfsPollInterval();
-		func0f110bf8();
+		filelistUnload();
 	}
 }

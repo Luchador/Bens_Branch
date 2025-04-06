@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "constants.h"
 #include "game/cheats.h"
@@ -16,7 +17,6 @@
 #include "bss.h"
 #include "lib/joy.h"
 #include "lib/snd.h"
-#include "lib/mema.h"
 #include "data.h"
 #include "types.h"
 
@@ -24,16 +24,14 @@ int g_FilelistKnownPlugCounts[5];
 
 struct filelist *g_FileLists[MAX_PLAYERS] = { NULL };
 bool var80075bd0[] = { true, true, true, true };
-bool var80075be0[] = { false, false, false, false };
-uint32_t var80075bf0 = false;
 
-void func0f110bf8(void)
+void filelistUnload(void)
 {
 	int i;
 
 	for (i = 0; i < ARRAYCOUNT(g_FileLists); i++) {
 		if (g_FileLists[i] != NULL) {
-			memaFree(g_FileLists[i], align16(sizeof(struct filelist)));
+			free(g_FileLists[i]);
 			g_FileLists[i] = NULL;
 		}
 	}
@@ -42,23 +40,23 @@ void func0f110bf8(void)
 /**
  * Allocate and build a file list.
  */
-void filelistCreate(int listnum, u8 filetype)
+void filelistCreate(int listnum, uint8_t filetype)
 {
 	if (g_FileLists[listnum] == NULL) {
-		g_FileLists[listnum] = memaAlloc(align16(sizeof(struct filelist)));
+		g_FileLists[listnum] = malloc(align16(sizeof(struct filelist)));
 	}
 
 	g_FileLists[listnum]->timeuntilupdate = 1;
 	g_FileLists[listnum]->filetype = filetype;
 
-	if (var80062944 == false) {
+	if (g_MainMenuOpen == false) {
 		joySetPfsPollInterval(3);
 	}
 
-	var80062944 = true;
+	g_MainMenuOpen = true;
 }
 
-int filelistFindOrCreate(u8 filetype)
+int filelistFindOrCreate(uint8_t filetype)
 {
 	int bestindex = -1;
 	int i;

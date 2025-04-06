@@ -2223,7 +2223,7 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 	//uint8_t compbuffer[4 * 1024 + 0x40];
 	uint8_t compbuffer[4 * 1024 * 2 + 0x40];
 	uint8_t *compptr;
-	int hasloddata;
+	bool hasloddata;
 	int iszlib;
 	int numlods;
 	struct tex *tex;
@@ -2280,8 +2280,8 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 			else
 			{
 				// Copy the compressed texture to RAM
-				dmaExec(alignedcompbuffer,
-						(romptr_t) REF_SEG _texturesdataSegmentRomStart + (thisoffset & 0xfffffff8),
+				memcpy(alignedcompbuffer,
+				     	(const void *) ((romptr_t) REF_SEG _texturesdataSegmentRomStart + (thisoffset & 0xfffffff8)),
 						((uintptr_t) (nextoffset - thisoffset) + 0x1f) >> 4 << 4);
 				compptr = (uint8_t *) alignedcompbuffer + (thisoffset & 7);
 			}
@@ -2353,12 +2353,12 @@ void texLoad(texnum_t *updateword, struct texpool *pool)
 				uint8_t *ptr = mempAllocFromRight(ALIGN16(bytesout + 2 * sizeof(struct tex)), MEMPOOL_STAGE);
 				pool->rightpos = (struct tex *) ptr;
 
-				bcopy(tex, ptr, sizeof(struct tex));
+				memcpy(ptr, tex, sizeof(struct tex));
 
 				tex = (struct tex *) ptr;
 				ptr += sizeof(struct tex);
 
-				bcopy(pool->leftpos - 8, ptr, bytesout + 8);
+				memcpy(ptr, pool->leftpos - 8, bytesout + 8);
 
 				pool->rightpos->data = ptr + 8;
 				pool->rightpos->next = 0;
@@ -2487,15 +2487,7 @@ int createBMP(uint16_t num, int width, int height, void *dst, uint32_t dstSize)
 
 	const int ret = fsFileLoadTo(buildDynamicPath(fullpath, filename), dst, dstSize);
 
-	if (ret > 0) {
-		int i = 0;
-		for(i = 0; i < ARRAYCOUNT(g_ReplacementTextureList); i++) {
-			if(g_ReplacementTextureList[i] == -1) {
-				g_ReplacementTextureList[i] = num;
-			}
-		}
-		return ret;
-	}
-
+	//TODO: Incomplete
+	
 	return -1;
 }

@@ -1,7 +1,5 @@
-#ifndef IN_GAME_EXPLOSIONS_H
-#define IN_GAME_EXPLOSIONS_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -23,5 +21,3 @@ uint32_t explosionTick(struct prop *prop);
 uint32_t explosionTickPlayer(struct prop *prop);
 Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass);
 Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx *gdl, struct coord *coord, int arg4);
-
-#endif

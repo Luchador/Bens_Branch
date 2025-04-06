@@ -30,14 +30,13 @@
 #ifndef _OS_H_
 #define	_OS_H_
 
-#define	ALIGN(s, align)	(((u32)(s) + ((align)-1)) & ~((align)-1))
+#include <stdint.h>
 
-#include <PR/ultratypes.h>
+#define	ALIGN(s, align)	(((uint32_t)(s) + ((align)-1)) & ~((align)-1))
+
 #include <PR/os_cont.h>
 #include <PR/os_pfs.h>
-#include <PR/os_reg.h>
 #include <PR/os_eeprom.h>
 #include <PR/os_motor.h>
-#include <PR/os_libc.h>
 
 #endif /* !_OS_H */

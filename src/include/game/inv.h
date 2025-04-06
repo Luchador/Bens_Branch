@@ -1,7 +1,5 @@
-#ifndef IN_GAME_INV_H
-#define IN_GAME_INV_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -53,5 +51,3 @@ char *invGetPickupTextByObj(struct defaultobj *obj);
 char *invGetPickupTextByWeaponNum(int weaponnum);
 void invIncrementHeldTime(int param_1, int param_2);
 void invGetWeaponOfChoice(int *weapon1, int *weapon2);
-
-#endif

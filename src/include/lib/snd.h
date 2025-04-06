@@ -1,7 +1,5 @@
-#ifndef _IN_LIB_SND_H
-#define _IN_LIB_SND_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -42,5 +40,3 @@ void sndTickNosedive(void);
 void sndPlayUfo(int seconds);
 void sndStopUfo(void);
 void sndTickUfo(void);
-
-#endif

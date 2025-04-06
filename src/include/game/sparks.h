@@ -1,6 +1,5 @@
-#ifndef _IN_GAME_SPARKS_H
-#define _IN_GAME_SPARKS_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -12,5 +11,3 @@ void sparkCreate(struct coord *pos, struct sparktype *type);
 void sparkgroupEnsureFreeSparkSlot(struct sparkgroup *group);
 void sparksCreate(int room, struct prop *prop, struct coord *pos, struct coord *arg3, struct coord *dir, int type);
 Gfx *sparksRender(Gfx *gdl);
-
-#endif

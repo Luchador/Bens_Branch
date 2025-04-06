@@ -1,6 +1,5 @@
-#ifndef _IN_LIB_MP3_H
-#define _IN_LIB_MP3_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -16,5 +15,3 @@ int func00037fc0(int arg0, Acmd **cmd);
 void func00038924(struct mp3vars *vars);
 void func00038b90(void *fn);
 void mp3Dma(void);
-
-#endif

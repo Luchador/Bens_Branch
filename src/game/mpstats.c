@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/inv.h"
@@ -69,7 +70,7 @@ void mpstatsDecrementTotalKnockoutCount(void)
 	g_Vars.knockoutcount--;
 }
 
-u8 mpstatsGetTotalKnockoutCount(void)
+uint8_t mpstatsGetTotalKnockoutCount(void)
 {
 	return g_Vars.knockoutcount;
 }

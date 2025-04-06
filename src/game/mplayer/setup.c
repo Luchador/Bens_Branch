@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/savebuffer.h"
@@ -1007,7 +1008,6 @@ struct menudialogdef g_MpSavePlayerMenuDialog = {
 };
 
 struct menuitem g_MpSaveSetupNameMenuItems[] = {
-#if VERSION != VERSION_JPN_FINAL
 	{
 		MENUITEMTYPE_LABEL,
 		0,
@@ -1016,7 +1016,6 @@ struct menuitem g_MpSaveSetupNameMenuItems[] = {
 		0,
 		NULL,
 	},
-#endif
 	{
 		MENUITEMTYPE_KEYBOARD,
 		0,
@@ -4355,16 +4354,6 @@ struct menuitem g_MpChallengesListOrDetailsMenuItems[] = {
 		0x0000004d,
 		mpChallengesListMenuHandler,
 	},
-#if VERSION < VERSION_NTSC_1_0
-	{
-		MENUITEMTYPE_LABEL,
-		2,
-		MENUITEMFLAG_LESSLEFTPADDING | MENUITEMFLAG_LABEL_ALTCOLOUR,
-		0x7f179198,
-		0,
-		(void *)0x7f1790a8,
-	},
-#endif
 	{
 		MENUITEMTYPE_SCROLLABLE,
 		DESCRIPTION_MPCHALLENGE,

@@ -1,7 +1,5 @@
-#ifndef IN_GAME_PDOPTIONS_H
-#define IN_GAME_PDOPTIONS_H
-#include <ultra64.h>
-#include <math.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -47,5 +45,3 @@ uint8_t optionsGetScreenSplit(void);
 void optionsSetScreenSplit(uint8_t split);
 uint16_t optionsGetMusicVolume(void);
 void optionsSetMusicVolume(uint16_t volume);
-
-#endif

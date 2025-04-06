@@ -1,6 +1,5 @@
-#ifndef _IN_TYPES_H
-#define _IN_TYPES_H
-#include <ultra64.h>
+#pragma once
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <PR/ultrasched.h>
@@ -10,9 +9,6 @@
 #include "gbi.h"
 #include "platform.h"
 
-#define bool int
-
-#include <stdint.h>
 #define romptr_t uintptr_t
 
 typedef int PakErr1;
@@ -658,15 +654,15 @@ struct modelrwdata_chrinfo { // type 0x01
 };
 
 struct modelrwdata_05 { // type 0x05
-	bool unk00;
+	int unk00;
 };
 
 struct modelrwdata_distance { // type 0x08
-	bool visible;
+	int visible;
 };
 
 struct modelrwdata_reorder { // type 0x09
-	bool reverse;
+	int reverse;
 };
 
 struct modelrwdata_0b { // type 0x0b
@@ -680,7 +676,7 @@ struct modelrwdata_chrgunfire { // type 0x0c
 };
 
 struct modelrwdata_toggle { // type 0x12
-	bool visible;
+	int visible;
 };
 
 struct modelrwdata_headspot { // type 0x17
@@ -1058,7 +1054,7 @@ struct waydata {
 struct act_patrol {
 	/*0x02c*/ struct path *path;
 	/*0x030*/ int nextstep;
-	/*0x034*/ bool forward;
+	/*0x034*/ int forward;
 	/*0x038*/ struct waydata waydata;
 	/*0x07c*/ float turnspeed;
 };
@@ -1294,23 +1290,23 @@ struct chrdata {
 	/*0x304*/ float pushspeed[2];
 	/*0x30c*/ float gunroty[2];
 	/*0x314*/ float gunrotx[2];
-	/*0x31c*/ uint32_t onladder;
+	/*0x31c*/ bool  onladder;
 	/*0x320*/ struct coord laddernormal;
 
 	/*0x32c*/
 	uint8_t liftaction : 8;
 
-	uint8_t inlift : 1;
+	bool    inlift : 1;
 	uint8_t pouncebits : 3;
 	uint8_t unk32c_12 : 2;
 	uint8_t darkroomthing : 1;
 	uint8_t playerdeadthing : 1;
 
 	uint8_t p1p2 : 2;
-	uint8_t unk32c_18 : 1;
-	uint8_t noblood : 1;
-	uint8_t rtracked : 1;
-	uint8_t unk32c_21 : 1;
+	bool    unk32c_18 : 1;
+	bool    noblood : 1;
+	bool    rtracked : 1;
+	bool    unk32c_21 : 1;
 	uint8_t unk32c_22 : 2;
 
 	uint8_t specialdie : 8;
@@ -1945,7 +1941,7 @@ struct chopperobj { // objtype 0x39
 	/*0xb0*/ float otz;
 	/*0xb4*/ float bob;
 	/*0xb8*/ float bobstrength;
-	/*0xbc*/ bool targetvisible;
+	/*0xbc*/ int targetvisible;
 	/*0xc0*/ int timer60;
 	/*0xc4*/ int patroltimer60;
 	/*0xc8*/ float gunturnyspeed60;
@@ -1955,7 +1951,7 @@ struct chopperobj { // objtype 0x39
 	/*0xd8*/ float barrelrotspeed;
 	/*0xdc*/ float barrelrot;
 	/*0xe0*/ struct fireslotthing *fireslotthing;
-	/*0xe4*/ bool dead;
+	/*0xe4*/ int dead;
 };
 
 struct mineobj { // objtype 0x3a
@@ -2037,7 +2033,7 @@ struct gunheld {
 	int totaltime240_60;
 };
 
-struct playerbond {
+struct playerjo {
 
 	// unk00.x = look vector x (-1 to +1)
 	// unk00.y = always 0?
@@ -2518,13 +2514,13 @@ struct player {
 	/*0x0310*/ struct coord bondprevpos;
 	/*0x031c*/ float thetadie;
 	/*0x0320*/ float vertadie;
-	/*0x0324*/ uint32_t bondtype; // OUTFIT constant
+	/*0x0324*/ uint32_t outfit; // OUTFIT constant
 	/*0x0328*/ bool startnewbonddie;
 	/*0x032c*/ bool redbloodfinished;
 	/*0x0330*/ bool deathanimfinished;
 	/*0x0334*/ int controldef;
-	/*0x0338*/ struct playerbond bonddie;
-	/*0x036c*/ struct playerbond bond2;
+	/*0x0338*/ struct playerjo bonddie;
+	/*0x036c*/ struct playerjo bond2;
 	/*0x03a0*/ bool resetheadpos;
 	/*0x03a4*/ bool resetheadrot;
 	/*0x03a8*/ bool resetheadtick;
@@ -2809,6 +2805,7 @@ struct player {
 	/*0x1c72*/ int16_t amdowntime; // for alt-modes, used like invdowntime and amdowntime
 	/*0x1c76*/ bool wantsgangsta; // player wants to turn weapon sideways
 	/*0x1c74*/ float swivelpos[2];
+	           bool hasplayeddeathmusic;
 };
 
 struct ailist {
@@ -2824,7 +2821,7 @@ struct path {
 };
 
 struct covercandidate {
-	u64 sqdist;
+	uint64_t sqdist;
 	int covernum;
 };
 
@@ -3484,19 +3481,20 @@ struct audioconfig {
 };
 
 struct artifact {
-	uint16_t type;
-	uint16_t unk02;
-	uint16_t unk04;
-	uint16_t unk06;
-	uint16_t *unk08;
+	uint16_t type;                  // ARTIFACTTYPE_FREE or ARTIFACTTYPE_GLARE
+	uint16_t losCheckResult;        // Result of line-of-sight test (0 = occluded, 1 = visible)
+	float zbufferDepth;             // Used for sorting/rendering depth. Not used on PC?
+	uint16_t *zbufferPixelPtr;      // Pointer to the Z-buffer pixel this artifact maps to
+
 	union {
-		uint16_t *u16p;
+		uint16_t *outputPixelPtr;   // Written to in zbufDrawArtifactsOffscreen
 		struct {
-			uint16_t u16_1;
-			uint16_t u16_2;
+			uint16_t screenY;       // Screen Y coordinate (row)
+			uint16_t screenX;       // Screen X coordinate (column)
 		};
-	} unk0c;
-	struct light *light;
+	} screenPos;
+
+	struct light *light;            // Pointer to the source light this glare comes from
 };
 
 struct credit {
@@ -3683,10 +3681,6 @@ struct fireslotthing {
 
 struct fireslot {
 	/*0x00*/ int endlvframe;
-#if VERSION < VERSION_NTSC_1_0
-	struct sndstate *unk04nb;
-	struct sndstate *unk08nb;
-#endif
 	/*0x04*/ struct beam beam;
 };
 
@@ -5490,7 +5484,7 @@ struct fontchar {
 
 struct font {
 	int kerning[13 * 13];
-	struct fontchar chars[94]; // can be 135 in PAL
+	struct fontchar chars[94];
 };
 
 typedef struct AudioInfo_s {
@@ -5860,6 +5854,6 @@ typedef struct {
     uint32_t colorsImportant;// Important colors (0 = all)
 } BMPInfoHeader;
 
-#pragma pack()
+//#define bool int
 
-#endif
+#pragma pack()

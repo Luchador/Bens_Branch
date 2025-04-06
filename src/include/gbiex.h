@@ -1,5 +1,4 @@
-#ifndef _IN_GBIEX_H
-#define _IN_GBIEX_H
+#pragma once
 
 /**
  * 07 gSPColor - copy colors from segment + offset into DMEM
@@ -289,16 +288,16 @@
 {                                                                                       \
     Gfx* _g = (Gfx*)(pkt);                                                              \
                                                                                         \
-    _g->words.w0 = _SHIFTL(G_EXTRAGEOMETRYMODE_EXT, 24, 8) | _SHIFTL(~(u32)(c), 0, 24); \
-    _g->words.w1 = (u32)(s);                                                            \
+    _g->words.w0 = _SHIFTL(G_EXTRAGEOMETRYMODE_EXT, 24, 8) | _SHIFTL(~(uint32_t)(c), 0, 24); \
+    _g->words.w1 = (uint32_t)(s);                                                            \
 }
 
 #define gDPSetSubpixelOffsetEXT(pkt, x, y)                                             \
 {                                                                                      \
     Gfx *_g = (Gfx*)(pkt);                                                             \
                                                                                        \
-    _g->words.w0 = _SHIFTL(G_SETSUBPIXELOFFSET_EXT, 24, 8) | _SHIFTL((s16)(x), 0, 16); \
-    _g->words.w1 = _SHIFTL((s16)(y), 0, 16);                                           \
+    _g->words.w0 = _SHIFTL(G_SETSUBPIXELOFFSET_EXT, 24, 8) | _SHIFTL((int16_t)(x), 0, 16); \
+    _g->words.w1 = _SHIFTL((int16_t)(y), 0, 16);                                           \
 }
 
 #define gSPSetExtraGeometryModeEXT(pkt, word) gSPExtraGeometryModeEXT((pkt), 0, word)
@@ -324,5 +323,3 @@
 #define gSPTextureRectangleEXT gSPTextureRectangle
 
 #endif // PLATFORM_N64
-
-#endif

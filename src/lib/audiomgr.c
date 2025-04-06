@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <stdint.h>
+#include "game/utils.h"
 #include "lib/sched.h"
 #include "naudio/n_synthInternals.h"
 #include "constants.h"
@@ -94,7 +95,7 @@ void amgrFrame(void)
 	static AudioInfo *previnfo = NULL;
 	static int frameWindowCounter = 0;
 
-	g_AmgrElapsedGameTime = osGetCount();
+	g_AmgrElapsedGameTime = utilsGetCount();
 
 	AudioInfo *info = g_AudioManager.audioInfo[g_AdmaCurFrame % 3];
 
@@ -113,7 +114,7 @@ void amgrFrame(void)
 		info->frameSamples = AUDIO_FRAME_SAMPLES_LOW;
 		g_AudioFrameDownsampleCounter = 2;
 	} else {
-		// have space in audio queue, render 2 naudio frames this frame (and 1 extra on PAL)
+		// have space in audio queue, render 2 naudio frames this frame
 		info->frameSamples = AUDIO_FRAME_SAMPLES_HIGH;
 
 		if (g_AudioFrameDownsampleCounter != 0) {
@@ -130,7 +131,7 @@ void amgrFrame(void)
 	//frameWindowCounter++;
 	frameWindowCounter = (frameWindowCounter + 1) % 240; // Avoid overflow
 
-	g_AmgrElapsedGameTime2 = osGetCount();
+	g_AmgrElapsedGameTime2 = utilsGetCount();
 
 	//if (frameWindowCounter % 240 == 0) {
 	if (frameWindowCounter == 0) {

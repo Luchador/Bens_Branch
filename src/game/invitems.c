@@ -69,9 +69,9 @@ struct recoilsettings invrecoilsettings_reaper      = { 0.6, 0.6, 2.6, 0.2, 1 };
  * float guntransside
  * float aimdamppal
  * float aimdamp
- * u32 tracktype
- * u32 unused
- * u32 flags
+ * uint32_t tracktype
+ * uint32_t unused
+ * uint32_t flags
  *
  * zoomfov is in degrees. The default field of view is 60. A zoomfov value of 30
  * means a 2x zoom is being used.
@@ -404,11 +404,7 @@ struct guncmd invanim_falcon2_reload_singlewield[] = {
 	gunscript_playsound(10, SFX_01D8)
 	gunscript_hidepart(19, MODELPART_FALCON2_MAGAZINE1)
 	gunscript_waittime(24, 1)
-#if VERSION >= VERSION_NTSC_1_0
 	gunscript_playsound(24, SFX_80F6)
-#else
-	gunscript_playsound(24, SFX_01D9)
-#endif
 	gunscript_hidepart(24, MODELPART_FALCON2_MAGAZINE2)
 	gunscript_playsound(53, SFX_01DB)
 	gunscript_waittime(53, 3)
@@ -423,11 +419,7 @@ struct guncmd invanim_falcon2scope_reload_singlewield[] = {
 	gunscript_playsound(10, SFX_01D8)
 	gunscript_hidepart(19, MODELPART_FALCON2_MAGAZINE1)
 	gunscript_waittime(24, 1)
-#if VERSION >= VERSION_NTSC_1_0
 	gunscript_playsound(24, SFX_80F6)
-#else
-	gunscript_playsound(24, SFX_01D9)
-#endif
 	gunscript_hidepart(24, MODELPART_FALCON2_MAGAZINE2)
 	gunscript_playsound(53, SFX_01DB)
 	gunscript_waittime(53, 3)
@@ -440,11 +432,7 @@ struct guncmd invanim_falcon2_reload_dualwield[] = {
 	gunscript_showpart(1, MODELPART_FALCON2_MAGAZINE1)
 	gunscript_playsound(6, SFX_01D8)
 	gunscript_waittime(50, 1)
-#if VERSION >= VERSION_NTSC_1_0
 	gunscript_playsound(50, SFX_80F6)
-#else
-	gunscript_playsound(50, SFX_01D9)
-#endif
 	gunscript_playsound(71, SFX_01DB)
 	gunscript_end
 };
@@ -667,11 +655,7 @@ struct guncmd invanim_magsec_reload_singlewield[] = {
 	gunscript_hidepart(22, MODELPART_PISTOL_MAGAZINE2)
 	gunscript_showpart(22, MODELPART_PISTOL_MAGAZINE1)
 	gunscript_setsoundspeed(27, 1300)
-#if VERSION >= VERSION_NTSC_1_0
 	gunscript_playsound(27, SFX_80F6)
-#else
-	gunscript_playsound(27, SFX_01D9)
-#endif
 	gunscript_waittime(30, 1)
 	gunscript_waittime(56, 3)
 	gunscript_setsoundspeed(58, 1300)
@@ -686,11 +670,7 @@ struct guncmd invanim_magsec_reload_dualwield[] = {
 	gunscript_playsound(5, SFX_01D8)
 	gunscript_hidepart(25, MODELPART_PISTOL_MAGAZINE1)
 	gunscript_setsoundspeed(47, 1300)
-#if VERSION >= VERSION_NTSC_1_0
 	gunscript_playsound(47, SFX_80F6)
-#else
-	gunscript_playsound(47, SFX_01D9)
-#endif
 	gunscript_waittime(49, 1)
 	gunscript_setsoundspeed(69, 1300)
 	gunscript_playsound(69, SFX_01DB)
@@ -1295,11 +1275,7 @@ struct guncmd invanim_cmp150_reload_singlewield[] = {
 	gunscript_setsoundspeed(9, 950)
 	gunscript_playsound(9, SFX_01D8)
 	gunscript_setsoundspeed(44, 950)
-#if VERSION >= VERSION_NTSC_1_0
 	gunscript_playsound(44, SFX_80F6)
-#else
-	gunscript_playsound(44, SFX_01D9)
-#endif
 	gunscript_hidepart(45, MODELPART_CMP150_MAGAZINE2)
 	gunscript_showpart(45, MODELPART_CMP150_MAGAZINE1)
 	gunscript_waittime(45, 1)
@@ -1315,11 +1291,7 @@ struct guncmd invanim_cmp150_reload_dualwield[] = {
 	gunscript_setsoundspeed(20, 950)
 	gunscript_playsound(20, SFX_01D8)
 	gunscript_setsoundspeed(61, 950)
-#if VERSION >= VERSION_NTSC_1_0
 	gunscript_playsound(61, SFX_80F6)
-#else
-	gunscript_playsound(61, SFX_01D9)
-#endif
 	gunscript_hidepart(61, MODELPART_CMP150_MAGAZINE2)
 	gunscript_showpart(61, MODELPART_CMP150_MAGAZINE1)
 	gunscript_waittime(61, 1)
@@ -2318,12 +2290,7 @@ struct weapon invitem_k7avenger = {
 	L_GUN_019, // name
 	L_GUN_149, // manufacturer
 	L_GUN_168, // description
-#if VERSION >= VERSION_NTSC_1_0
 	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_HASHANDS,
-#else
-	// NTSC beta uses "an" in "Picked up an K7 Avenger"
-	WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_TRACKTIMEUSED | WEAPONFLAG_00000400 | WEAPONFLAG_00002000 | WEAPONFLAG_HASHANDS | WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN,
-#endif
 };
 
 struct gunviscmd gunviscmds_laptopgun[] = {
@@ -2453,11 +2420,7 @@ struct weapon invitem_laptopgun = {
 	1, // sway
 	gunviscmds_laptopgun, // gunviscmds
 	invpartvisibility_laptopgun, // part visibility
-#if VERSION >= VERSION_PAL_FINAL
-	L_GUN_251, // short name
-#else
 	L_GUN_024, // short name
-#endif
 	L_GUN_024, // name
 	L_GUN_150, // manufacturer
 	L_GUN_172, // description
@@ -3896,11 +3859,7 @@ struct weapon invitem_tranquilizer = {
 	1, // sway
 	gunviscmds_tranquilizer, // gunviscmds
 	invpartvisibility_tranquilizer, // part visibility
-#if VERSION >= VERSION_PAL_FINAL
-	L_GUN_247, // short name
-#else
 	L_GUN_034, // short name
-#endif
 	L_GUN_034, // name
 	L_GUN_000, // manufacturer
 	L_GUN_181, // description
@@ -5105,11 +5064,7 @@ struct weapon invitem_nightvision = {
 	1, // sway
 	NULL, // gunviscmds
 	NULL, // part visibility
-#if VERSION >= VERSION_PAL_FINAL
-	L_GUN_244, // short name
-#else
 	L_GUN_059, // short name
-#endif
 	L_GUN_059, // name
 	L_GUN_000, // manufacturer
 	L_GUN_191, // description
@@ -5295,11 +5250,7 @@ struct weapon invitem_suicidepill = {
 	1, // sway
 	NULL, // gunviscmds
 	NULL, // part visibility
-#if VERSION >= VERSION_PAL_FINAL
-	L_GUN_246, // short name
-#else
 	L_GUN_072, // short name
-#endif
 	L_GUN_072, // name
 	L_GUN_000, // manufacturer
 	L_GUN_000, // description
@@ -5370,11 +5321,7 @@ struct weapon invitem_disguise40 = {
 	1, // sway
 	NULL, // gunviscmds
 	NULL, // part visibility
-#if VERSION >= VERSION_PAL_FINAL
-	L_GUN_250, // short name
-#else
 	L_GUN_043, // short name
-#endif
 	L_GUN_043, // name
 	L_GUN_000, // manufacturer
 	L_GUN_211, // description
@@ -5399,11 +5346,7 @@ struct weapon invitem_disguise41 = {
 	1, // sway
 	NULL, // gunviscmds
 	NULL, // part visibility
-#if VERSION >= VERSION_PAL_FINAL
-	L_GUN_250, // short name
-#else
 	L_GUN_043, // short name
-#endif
 	L_GUN_043, // name
 	L_GUN_000, // manufacturer
 	L_GUN_211, // description
@@ -5515,12 +5458,7 @@ struct weapon invitem_xrayscanner = {
 	L_GUN_065, // name
 	L_GUN_000, // manufacturer
 	L_GUN_193, // description
-#if VERSION >= VERSION_NTSC_1_0
 	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_DETERMINER_S_AN | WEAPONFLAG_DETERMINER_F_AN | WEAPONFLAG_UNDROPPABLE,
-#else
-	// NTSC beta uses "a" in "Picked up a X-ray scanner"
-	WEAPONFLAG_ONEHANDED | WEAPONFLAG_AICANUSE | WEAPONFLAG_00000040 | WEAPONFLAG_UNDROPPABLE,
-#endif
 };
 
 struct guncmd invanim_datauplink_equip[] = {
@@ -5595,11 +5533,7 @@ struct weapon invitem_doordecoder = {
 	1, // sway
 	NULL, // gunviscmds
 	NULL, // part visibility
-#if VERSION >= VERSION_PAL_FINAL
-	L_GUN_245, // short name
-#else
 	L_GUN_063, // short name
-#endif
 	L_GUN_063, // name
 	L_GUN_000, // manufacturer
 	L_GUN_200, // description
@@ -5828,11 +5762,7 @@ struct weapon invitem_autosurgeon = {
 	1, // sway
 	NULL, // gunviscmds
 	NULL, // part visibility
-#if VERSION >= VERSION_PAL_FINAL
-	L_GUN_248, // short name
-#else
 	L_GUN_220, // short name
-#endif
 	L_GUN_220, // name
 	L_GUN_000, // manufacturer
 	L_GUN_201, // description
@@ -5910,11 +5840,7 @@ struct weapon invitem_backupdisk = {
 	1, // sway
 	NULL, // gunviscmds
 	NULL, // part visibility
-#if VERSION >= VERSION_PAL_FINAL
-	L_GUN_249, // short name
-#else
 	L_GUN_227, // short name
-#endif
 	L_GUN_227, // name
 	L_GUN_000, // manufacturer
 	L_GUN_209, // description
@@ -5999,7 +5925,6 @@ struct weapon invitem_necklace = {
 	WEAPONFLAG_UNDROPPABLE,
 };
 
-#if VERSION >= VERSION_NTSC_1_0
 struct weapon invitem_shieldtechitem = {
 	FILE_PCHRSHIELD, // hi model
 	FILE_PCHRSHIELD, // lo model
@@ -6025,7 +5950,6 @@ struct weapon invitem_shieldtechitem = {
 	L_GUN_241, // description
 	WEAPONFLAG_UNDROPPABLE,
 };
-#endif
 
 struct weapon invitem_keycard = {
 	FILE_PKEYCARD, // hi model

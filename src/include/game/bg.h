@@ -1,5 +1,5 @@
-#ifndef IN_GAME_BG_H
-#define IN_GAME_BG_H
+#pragma once
+
 #include <ultra64.h>
 #include <stdint.h>
 #include "data.h"
@@ -13,7 +13,7 @@ Gfx *bgRenderXrayData(Gfx *gdl, struct xraydata *xraydata);
 Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t vertices1[3], int16_t vertices2[3], int16_t vertices3[3], uint32_t colour1, uint32_t colour2, uint32_t colour3);
 void bgChooseXrayVtxColour(bool *inrange, int16_t vertex[3], uint32_t *colour, struct xraydata *xraydata);
 Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t arg2[3], int16_t arg3[3], int16_t arg4[3], int arg5, int arg6, int arg7, int arg8, int arg9, int arg10);
-Gfx *bgRenderGdlInXray(Gfx *gdl, s8 *readgdl, Vtx *vertices, int16_t arg3[3]);
+Gfx *bgRenderGdlInXray(Gfx *gdl, int8_t *readgdl, Vtx *vertices, int16_t arg3[3]);
 Gfx *bgRenderRoomXrayPass(Gfx *gdl, int roomnum, struct roomblock *blocks, bool recurse, int16_t arg4[3]);
 Gfx *bgRenderRoomInXray(Gfx *gdl, int roomnum);
 Gfx *bgRenderSceneInXray(Gfx *gdl);
@@ -47,7 +47,7 @@ bool bgRoomIsStandby(int room);
 bool bgRoomIsOnPlayerScreen(int room, uint32_t playernum);
 bool bgRoomIsOnPlayerStandby(int room, uint32_t aibotindex);
 int bgFindPortalByVertices(struct portalvertices *pvertices);
-uint32_t bgInflate(uint8_t *src, u8 *dst, uint32_t len);
+uint32_t bgInflate(uint8_t *src, uint8_t *dst, uint32_t len);
 Gfx *bgGetNextGdlInBlock(struct roomblock *block, Gfx *start, Gfx *end);
 Gfx *bgGetNextGdlInLayer(int roomnum, Gfx *start, uint32_t types);
 Vtx *bgFindVerticesForGdl(int roomnum, Gfx *gdl);
@@ -98,8 +98,4 @@ int bgFindPortalBetweenPositions(struct coord *pos1, struct coord *pos2);
 bool bgIsBboxOverlapping(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3);
 void bgCalculatePortalBbox(int portalnum, struct coord *bbmin, struct coord *bbmax);
 void bgFindEnteredRooms(struct coord *bbmin, struct coord *upper, RoomNum *rooms, int maxlen, bool arg4);
-#ifndef PLATFORM_N64
 void bgCalculateGlaresForVisibleRooms(void);
-#endif
-
-#endif

@@ -1,9 +1,3 @@
-
-
-#ifndef __seq__
-#define __seq__
+#pragma once
 
 char __alSeqNextDelta (ALSeq *seq, int *pDeltaTicks);
-
-
-#endif /* __seq__ */

@@ -1,6 +1,5 @@
-#ifndef _IN_LIB_LIB_17CE0_H
-#define _IN_LIB_LIB_17CE0_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -11,6 +10,4 @@
 void portalGetAvgVertexPos(int portalnum, struct coord *avg);
 void portalTryAppendRoom(RoomNum *rooms, RoomNum roomnum);
 int portalCalculateIntersection(int portalnum, struct coord *pos1, struct coord *pos2);
-void portal00018148(struct coord *pos, struct coord *pos2, RoomNum *rooms, RoomNum *arg3, RoomNum *arg4, int arg5);
-
-#endif
+void portalTraceLineThroughRooms(struct coord *startPos, struct coord *endPos, RoomNum *startRooms, RoomNum *outputRooms, RoomNum *allVisitedRooms, int maxVisitedRooms);

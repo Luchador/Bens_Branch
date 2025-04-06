@@ -67,11 +67,6 @@
 #define A_MIX			0x10
 
 /*
- * BEGIN C-specific section: (typedef's)
- */
-#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
-
-/*
  * Data Structures.
  */
 
@@ -409,8 +404,6 @@ typedef short ENVMIX_STATE[40];
 #include "mixer.h"
 
 #endif
-
-#endif /* _LANGUAGE_C */
 
 #endif /* !_ABI_H_ */
 

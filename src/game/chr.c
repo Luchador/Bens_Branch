@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "lib/sched.h"
 #include "constants.h"
 #include "game/bondmove.h"
@@ -216,7 +217,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 		}
 	}
 
-	func0f065dfc(&prop->pos, prop->rooms, dstpos, dstrooms, sp84, 20);
+	propUpdatePositionRooms(&prop->pos, prop->rooms, dstpos, dstrooms, sp84, 20);
 
 	chrFindEnteredRooms(chr, dstpos, dstrooms);
 
@@ -243,7 +244,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 
 			moveok = true;
 		} else {
-			cdGetEdge(&sp78, &sp6c, 453, "chr/chr.c");
+			cdGetEdge(&sp78, &sp6c);
 
 			// Attempt to find a valid position - method #1
 			sp60.x = dstpos->x - prop->pos.x;
@@ -264,7 +265,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 				sp44.y = dstpos->y;
 				sp44.z = sp54.z * value + prop->pos.z;
 
-				func0f065dfc(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
+				propUpdatePositionRooms(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
 
 				chrFindEnteredRooms(chr, &sp44, dstrooms);
 
@@ -310,7 +311,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 						sp44.y = dstpos->y;
 						sp44.z = sp54.z * value + prop->pos.z;
 
-						func0f065dfc(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
+						propUpdatePositionRooms(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
 
 						chrFindEnteredRooms(chr, &sp44, dstrooms);
 
@@ -354,7 +355,7 @@ void chrCalculatePushPos(struct chrdata *chr, struct coord *dstpos, RoomNum *dst
 							sp44.y = dstpos->y;
 							sp44.z = sp54.z * value + prop->pos.z;
 
-							func0f065dfc(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
+							propUpdatePositionRooms(&prop->pos, prop->rooms, &sp44, dstrooms, sp84, 20);
 
 							chrFindEnteredRooms(chr, &sp44, dstrooms);
 
@@ -413,7 +414,7 @@ bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, float a
 	newpos.z = pos->z;
 
 	chrGetBbox(chr->prop, &radius, &ymax, &ymin);
-	func0f065e74(pos, rooms, &newpos, newrooms);
+	propUpdatePositionRoomsSimple(pos, rooms, &newpos, newrooms);
 	chrFindEnteredRooms(chr, &newpos, newrooms);
 	chrSetPerimEnabled(chr, false);
 	result = cdTestVolume(&newpos, radius, newrooms, CDTYPE_ALL, CHECKVERTICAL_YES,
@@ -429,7 +430,7 @@ bool chr0f01f264(struct chrdata *chr, struct coord *pos, RoomNum *rooms, float a
 	return result == CDRESULT_NOCOLLISION;
 }
 
-bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, float *mangroundptr)
+bool chrApplyMovementAndResolveGround(struct model *model, struct coord *arg1, struct coord *arg2, float *mangroundptr)
 {
 	struct chrdata *chr = model->chr;
 	struct prop *prop = chr->prop;
@@ -441,7 +442,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 	int race = CHRRACE(chr);
 	float yincrement = 0.0f;
 	bool inlift;
-	u16 floorflags = 0;
+	uint16_t floorflags = 0;
 	int lvupdate240;
 	float lvupdate60f;
 	float lvupdate60freal;
@@ -457,11 +458,12 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 
 #define VAR(property) property
 
+	// Handle absolute-translation animations (typically death anims)
 	if (g_Anims[model->anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) {
 		if (chr->hidden & CHRHFLAG_00020000) {
-			func0f065e98(&prop->pos, prop->rooms, arg2, spfc);
+			propResolveNewPositionRooms(prop->rooms, arg2, spfc);
 		} else {
-			func0f065e74(&prop->pos, prop->rooms, arg2, spfc);
+			propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, arg2, spfc);
 		}
 
 		ground = cdFindGroundInfoAtCyl(arg2, chr->radius, spfc, &chr->floorcol, &chr->floortype, &floorflags, &chr->floorroom, &inlift, &lift);
@@ -476,7 +478,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 		chr->fallspeed.y = 0.0f;
 		chr->fallspeed.z = 0.0f;
 		chr->manground = ground;
-		chr->sumground = ground * (PAL ? 8.4175090789795f : 9.999998f);
+		chr->sumground = ground * 10.0f;
 		arg2->y -= ground;
 	} else {
 		arg2->y += manground;
@@ -497,7 +499,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 
 						if (lvupdate240 >= 25) {
 							lvupdate60f = 4.0f;
-							lvupdate60freal = PALUPF(4.0f);
+							lvupdate60freal = 4.0f;
 							lvupdate240 = 16;
 						}
 					}
@@ -505,17 +507,18 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 						&& ((chr->prop->flags & (PROPFLAG_ONANYSCREENTHISTICK | PROPFLAG_ONANYSCREENPREVTICK)) == 0)
 						&& lvupdate240 >= 25) {
 					lvupdate60f = 4.0f;
-					lvupdate60freal = PALUPF(4.0f);
+					lvupdate60freal = 4.0f;
 					lvupdate240 = 16;
 				}
 
-				bot0f1921f8(chr, move, lvupdate240, lvupdate60freal);
+				botUpdateSmoothedMovement(chr, move, lvupdate240, lvupdate60freal);
 			}
 
 			arg2->x = arg1->x + move[0];
 			arg2->z = arg1->z + move[1];
 		}
 
+		// Determine if character is on a ladder
 		if (chr->actiontype == ACT_PATROL || chr->actiontype == ACT_GOPOS) {
 			chr->onladder = cdFindLadder(&chr->prop->pos, chr->radius * 2.5f,
 					chr->manground + chr->height - chr->prop->pos.y,
@@ -544,7 +547,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 				chr->height = 90.0f;
 			}
 
-			bmove0f0cb904(&chr->aibot->shotspeed);
+			bmoveDampenVelocity(&chr->aibot->shotspeed);
 
 			arg2->x += chr->aibot->shotspeed.x * g_HeadAnims[HEADANIM_MOVING].translateperframe * VAR(lvupdate60freal) * 0.5f;
 			arg2->z += chr->aibot->shotspeed.z * g_HeadAnims[HEADANIM_MOVING].translateperframe * VAR(lvupdate60freal) * 0.5f;
@@ -578,6 +581,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 			}
 		}
 
+		// Push speed and fall speed application
 		if (chr->pushspeed[0] != 0.0f || chr->pushspeed[1] != 0.0f) {
 			arg2->x += chr->pushspeed[0] * VAR(lvupdate60freal);
 			arg2->z += chr->pushspeed[1] * VAR(lvupdate60freal);
@@ -677,7 +681,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 			RoomNum sp78[8];
 			float ground;
 			struct modelnode *node;
-			u16 nodetype;
+			uint16_t nodetype;
 			float sp68;
 			uint8_t die;
 
@@ -706,7 +710,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 						sp88.y = manground + 69.0f;
 						sp88.z = arg2->z;
 
-						func0f065e74(arg2, spfc, &sp88, sp78);
+						propUpdatePositionRoomsSimple(arg2, spfc, &sp88, sp78);
 						chrFindEnteredRooms(chr, &sp88, sp78);
 					} else {
 						sp98 = arg2;
@@ -762,7 +766,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 
 					chr->chrflags &= ~CHRCFLAG_FORCETOGROUND;
 					chr->manground = chr->ground;
-					chr->sumground = chr->ground * (PAL ? 8.4175090789795f : 9.999998f);
+					chr->sumground = chr->ground * 10.0f;
 
 					manground = chr->manground;
 
@@ -790,7 +794,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 
 						if (chr->manground <= chr->ground) {
 							chr->manground = chr->ground;
-							chr->sumground = chr->ground * (PAL ? 8.4175090789795f : 9.999998f);
+							chr->sumground = chr->ground * 10.0f;
 							chr->fallspeed.y = 0.0f;
 
 							if (floorflags & GEOFLAG_DIE) {
@@ -815,16 +819,16 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 						}
 					} else if (chr->manground <= chr->ground) {
 						for (i = 0; i < g_Vars.lvupdate60; i++) {
-							chr->sumground = chr->sumground * (PAL ? 0.88120001554489f : 0.9f) + chr->ground;
-							chr->fallspeed.x *= (PAL ? 0.88120001554489f : 0.9f);
-							chr->fallspeed.z *= (PAL ? 0.88120001554489f : 0.9f);
+							chr->sumground = chr->sumground * 0.9f + chr->ground;
+							chr->fallspeed.x *= 0.9f;
+							chr->fallspeed.z *= 0.9f;
 						}
 
-						chr->manground = chr->sumground * (PAL ? 0.11879998445511f : 0.10000002384186f);
+						chr->manground = chr->sumground * 0.1f;
 
 						if (chr->manground < chr->ground - 30.0f) {
 							chr->manground = chr->ground - 30.0f;
-							chr->sumground = (chr->ground - 30.0f) * (PAL ? 8.4175090789795f : 9.999998f);
+							chr->sumground = (chr->ground - 30.0f) * 10.0f;
 						}
 
 						if (chr->fallspeed.x < 0.1f && chr->fallspeed.x > -0.1f) {
@@ -844,7 +848,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 
 						arg2->y += chr->manground - manground;
 
-						func0f065e74(&spd0, spc0, arg2, spfc);
+						propUpdatePositionRoomsSimple(&spd0, spc0, arg2, spfc);
 						chrFindEnteredRooms(chr, arg2, spfc);
 					}
 				}
@@ -855,6 +859,7 @@ bool chr0f01f378(struct model *model, struct coord *arg1, struct coord *arg2, fl
 		}
 	}
 
+	// Final prop position update and room tracking
 	*mangroundptr = chr->manground;
 
 	prop->pos.x = arg2->x;
@@ -1136,7 +1141,7 @@ void chrInit(struct prop *prop, uint8_t *ailist)
 	chr->gunrotx[1] = 0;
 	chr->unk348[0] = 0;
 	chr->unk348[1] = 0;
-	chr->onladder = 0;
+	chr->onladder = false;
 	chr->laddernormal.x = 0;
 	chr->laddernormal.y = 0;
 	chr->laddernormal.z = 0;
@@ -1179,7 +1184,7 @@ struct prop *chr0f020b14(struct prop *prop, struct model *model,
 
 	chr = prop->chr;
 
-	modelSetAnim70(model, chr0f01f378);
+	modelSetAnim70(model, chrApplyMovementAndResolveGround);
 	model->chr = chr;
 	model->unk01 = 1;
 	chr->model = model;
@@ -1190,7 +1195,7 @@ struct prop *chr0f020b14(struct prop *prop, struct model *model,
 	testpos.y = pos->y + 100;
 	testpos.z = pos->z;
 
-	chr->ground = chr->manground = ground = cdFindGroundInfoAtCyl(&testpos, chr->radius, rooms, &chr->floorcol, &chr->floortype, NULL, &chr->floorroom, NULL, NULL);
+	chr->ground = chr->manground = ground = cdFindGroundInfoAtCyl(&testpos, chr->radius, rooms, &chr->floorcol, &chr->floortype, NULL, &chr->floorroom, false, NULL);
 
 	chr->sumground = ground * 10.0f;
 
@@ -1385,7 +1390,7 @@ void chrFlinchBody(struct chrdata *chr)
 	if (chr->actiontype != ACT_DEAD && chr->flinchcnt < 0) {
 		chr->flinchcnt = 1;
 		chr->hidden2 &= 0x0fff;
-		chr->hidden2 |= (u16)(rngRandom() << 13);
+		chr->hidden2 |= (uint16_t)(rngRandom() << 13);
 	}
 }
 
@@ -1422,13 +1427,13 @@ float chrGetFlinchAmount(struct chrdata *chr)
 		if (value < 4) {
 			value = sinf(value * 1.5705462694168f / 4);
 		} else {
-			value = 1 - sinf((value - 4) * (PAL ? 0.07478791475296f : 0.060405626893044f));
+			value = 1 - sinf((value - 4) * 0.0604f);
 		}
 	} else {
 		if (value < TICKS(10)) {
 			value = sinf(value * 1.5705462694168f / TICKS(10));
 		} else {
-			value = 1 - sinf((value - TICKS(10)) * (PAL ? 0.098159141838551f : 0.078527316451073f));
+			value = 1 - sinf((value - TICKS(10)) * 0.0785f);
 		}
 	}
 
@@ -1484,7 +1489,7 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 			return;
 		}
 
-		mtx00015be0(camGetProjectionMtxF(), mtx);
+		mtxApplyAffineTransformInPlace(camGetProjectionMtxF(), mtx);
 
 		sp138.x = mtx->m[3][0];
 		sp138.y = mtx->m[3][1];
@@ -1509,9 +1514,9 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 		}
 
 		mtx4LoadYRotation(gunrot, &spb8);
-		mtx00015be0(&spb8, mtx);
+		mtxApplyAffineTransformInPlace(&spb8, mtx);
 		mtx4LoadXRotation(gunrotx, &spf8);
-		mtx00015be0(&spf8, mtx);
+		mtxApplyAffineTransformInPlace(&spf8, mtx);
 
 		gunrot = gunroty + theta;
 
@@ -1520,17 +1525,17 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 		}
 
 		mtx4LoadYRotation(gunrot, &spb8);
-		mtx00015be0(&spb8, mtx);
+		mtxApplyAffineTransformInPlace(&spb8, mtx);
 
 		if (scale != 1.0f) {
-			mtx00015f04(scale, mtx);
+			mtxScaleRotationPart(scale, mtx);
 		}
 
 		mtx->m[3][0] = sp138.x;
 		mtx->m[3][1] = sp138.y;
 		mtx->m[3][2] = sp138.z;
 
-		mtx00015be0(camGetWorldToScreenMtxf(), mtx);
+		mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), mtx);
 	} else {
 		if (g_CurModelChr->model->definition->skel == &g_SkelChr) {
 			lshoulderjoint = 2;
@@ -1611,7 +1616,7 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 						&& g_CurModelChr->actiontype != ACT_DEAD
 						&& g_CurModelChr->actiontype != ACT_DIE) {
 					zrot = g_CurModelChr->drugheadsway / 360.0f * M_TAU;
-					xrot -= (28.0f - ABS(g_CurModelChr->drugheadsway)) / 250.0f * M_TAU;
+					xrot -= (28.0f - fabsf(g_CurModelChr->drugheadsway)) / 250.0f * M_TAU;
 				}
 			}
 
@@ -1693,7 +1698,7 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 					yrot += M_TAU;
 				}
 
-				mtx00015be0(camGetProjectionMtxF(), mtx);
+				mtxApplyAffineTransformInPlace(camGetProjectionMtxF(), mtx);
 
 				sp70.x = mtx->m[3][0];
 				sp70.y = mtx->m[3][1];
@@ -1711,34 +1716,34 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 					}
 
 					mtx4LoadYRotation(yrot, &tmpmtx);
-					mtx00015be0(&tmpmtx, mtx);
+					mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
 
 					if (xrot != 0.0f) {
 						mtx4LoadXRotation(xrot, &tmpmtx);
-						mtx00015be0(&tmpmtx, mtx);
+						mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
 					}
 
 					if (zrot != 0.0f) {
 						mtx4LoadZRotation(zrot, &tmpmtx);
-						mtx00015be0(&tmpmtx, mtx);
+						mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
 					}
 
 					mtx4LoadYRotation(aimangle, &tmpmtx);
-					mtx00015be0(&tmpmtx, mtx);
+					mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
 				} else {
 					mtx4LoadYRotation(yrot, &tmpmtx);
-					mtx00015be0(&tmpmtx, mtx);
+					mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
 				}
 
 				if (scale != 1.0f) {
-					mtx00015f04(scale, mtx);
+					mtxScaleRotationPart(scale, mtx);
 				}
 
 				mtx->m[3][0] = sp70.x;
 				mtx->m[3][1] = sp70.y;
 				mtx->m[3][2] = sp70.z;
 
-				mtx00015be0(camGetWorldToScreenMtxf(), mtx);
+				mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), mtx);
 			}
 		}
 	}
@@ -2499,7 +2504,7 @@ int chrTick(struct prop *prop)
 				sp130 = bike->w * 1000;
 
 				sp17c.x = cosf(sp178) * sp130;
-				sp17c.y = ABS(bike->w) * 200 + 25;
+				sp17c.y = fabsf(bike->w) * 200 + 25;
 				sp17c.z = sinf(-sp178) * sp130;
 
 				mtx4LoadTranslation(&sp17c, &sp1a8);
@@ -2517,7 +2522,7 @@ int chrTick(struct prop *prop)
 		if (fulltick && g_CurModelChr->flinchcnt >= 0) {
 			g_CurModelChr->flinchcnt += g_Vars.lvupdate60;
 
-			if (g_CurModelChr->flinchcnt >= (PAL ? 24 : 30)) {
+			if (g_CurModelChr->flinchcnt >= 30) {
 				g_CurModelChr->flinchcnt = -1;
 			}
 		}
@@ -2867,11 +2872,11 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 
 						mtxApplyAffineTransform(camGetWorldToScreenMtxf(), &thing->unk02c, &thing->unk0ec);
 						mtx4TransformVec(&thing->unk0ec, &spa0, &sp70);
-						cam0f0b4dec(&sp70, thing->unk134);
+						camProjectViewToScreenAbsZ(&sp70, thing->unk134);
 						mtx4TransformVec(&thing->unk0ec, &sp94, &sp70);
-						cam0f0b4dec(&sp70, thing->unk13c);
+						camProjectViewToScreenAbsZ(&sp70, thing->unk13c);
 						mtx4TransformVec(&thing->unk0ec, &sp88, &sp70);
-						cam0f0b4dec(&sp70, thing->unk144);
+						camProjectViewToScreenAbsZ(&sp70, thing->unk144);
 
 						thing->unk130 = 1;
 						thing->unk14c = thing->unk13c[1] - thing->unk134[1];
@@ -2925,7 +2930,7 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 						}
 
 						mtx4TransformVec(mtx, &sp64, &sp70);
-						cam0f0b4dec(&sp70, sp80);
+						camProjectViewToScreenAbsZ(&sp70, sp80);
 
 						value = thing->unk14c * sp80[0] + thing->unk150 * sp80[1] - thing->unk154;
 
@@ -2990,7 +2995,7 @@ void chrRenderAttachedObject(struct prop *prop, struct modelrenderdata *renderda
 		}
 
 		if (xlupass) {
-			mtxF2LBulk(model->matrices, model->definition->nummatrices);
+			mtxConvertToFixedPoint(model->matrices, model->definition->nummatrices);
 		}
 	}
 }
@@ -3340,7 +3345,7 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 				}
 			}
 
-			mtxF2LBulk(model->matrices, model->definition->nummatrices);
+			mtxConvertToFixedPoint(model->matrices, model->definition->nummatrices);
 
 			if (USINGDEVICE(DEVICE_IRSCANNER)) {
 				gdl = chrRenderShield(gdl, chr, 0x80);
@@ -3464,11 +3469,7 @@ void chr0f0260c4(struct model *model, int hitpart, struct modelnode *node, struc
 			// Iterate the primary DL, and once the end is reached
 			// iterate the secondary DL if we have one.
 			while (true) {
-#ifdef PLATFORM_N64
-				op = *(s8 *)&gdlptr->words.w0;
-#else
-				op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
-#endif
+				op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 				if (op == G_ENDDL) {
 					if (gdlptr2) {
@@ -3585,7 +3586,7 @@ void chr0f0260c4(struct model *model, int hitpart, struct modelnode *node, struc
 			}
 
 			while (true) {
-				int op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
+				int op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 				if (op == G_ENDDL) {
 					if (gdlptr2) {
@@ -3743,11 +3744,7 @@ void chrBruise(struct model *model, int hitpart, struct modelnode *node, struct 
 			// Iterate the primary DL, and once the end is reached
 			// iterate the secondary DL if we have one.
 			while (true) {
-#ifdef PLATFORM_N64
-				op = *(s8 *)&gdlptr->words.w0;
-#else
-				op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
-#endif
+				op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 				if (op == G_ENDDL) {
 					if (gdlptr2) {
@@ -3883,7 +3880,7 @@ void chrBruise(struct model *model, int hitpart, struct modelnode *node, struct 
 				}
 
 				while (true) {
-				int op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
+				int op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 					if (op == G_ENDDL) {
 						if (gdlptr2) {
@@ -4073,7 +4070,7 @@ void chrDisfigure(struct chrdata *chr, struct coord *exppos, float damageradius)
 					}
 
 					while (true) {
-						int op = (s8)gdlptr->bytes[GFX_W0_BYTE(0)];
+						int op = (int8_t)gdlptr->bytes[GFX_W0_BYTE(0)];
 
 						if (op == G_ENDDL) {
 							if (gdlptr2 == NULL) {
@@ -4238,7 +4235,7 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 
 			if (hitpart) {
 				if (chrGetShield(chr) > 0.0f) {
-					var8005efc0 = 10.0f / model->scale;
+					g_ExtraBoundsDist = 10.0f / model->scale;
 				}
 
 				child = prop->child;
@@ -4249,7 +4246,7 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 					child = next;
 				}
 
-				if (cheap || var8005efc0 > 0.0f) {
+				if (cheap || g_ExtraBoundsDist > 0.0f) {
 					hitpart = modelTestForHit(model, &shotdata->gunpos2d, &shotdata->gundir2d, &node);
 
 					while (hitpart > 0) {
@@ -4277,8 +4274,8 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 					}
 				}
 
-				if (var8005efc0 > 0.0f) {
-					var8005efc0 = 0.0f;
+				if (g_ExtraBoundsDist > 0.0f) {
+					g_ExtraBoundsDist = 0.0f;
 				}
 			}
 
@@ -4444,7 +4441,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 						&& race != RACE_EYESPY
 						&& !ismelee
 						&& shotdata->gset.weaponnum != WEAPON_TRANQUILIZER) {
-					uint8_t darker;
+					bool darker;
 
 					if (chr->bodynum == BODY_MRBLONDE || race == RACE_SKEDAR) {
 						darker = true;
@@ -5288,7 +5285,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			if ((prop->type == PROPTYPE_OBJ || prop->type == PROPTYPE_WEAPON || prop->type == PROPTYPE_DOOR)
 					&& (prop->obj->flags3 & OBJFLAG3_SHOWSHIELD)) {
-				float mult = (sinf((g_Vars.thisframestart240 % TICKS(350)) * (PAL ? 0.021588264033198f : 0.0179491f)) + 1.0f) * 0.5f;
+				float mult = (sinf((g_Vars.thisframestart240 % TICKS(350)) * 0.0179491f) + 1.0f) * 0.5f;
 
 				colours->a = 50 + (uint8_t) (int) (120.0f * mult);
 				colours->r = (uint8_t) red2 + 50.0f * mult;
@@ -5512,11 +5509,11 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			} else if (g_Vars.lvframe60 - hit->lvframe60 <= TICKS(80)) {
 				float value;
 
-				value = (hit->lvframe60 - g_Vars.lvframe60 + TICKS(80)) * (PAL ? 3.8636362552643f : 3.1875f);
+				value = (hit->lvframe60 - g_Vars.lvframe60 + TICKS(80)) * 3.1875f;
 				value *= alpha * (1.0f / 255.0f);
 				alpha1 = (int) value;
 
-				value = (hit->lvframe60 - g_Vars.lvframe60 + TICKS(80)) * (PAL ? 3.8636362552643f : 3.1875f);
+				value = (hit->lvframe60 - g_Vars.lvframe60 + TICKS(80)) * 3.1875f;
 				value *= alpha * (1.0f / 255.0f);
 				alpha2 = (int) value;
 			} else {
@@ -5926,7 +5923,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 		if (thisprop->parent == NULL) {
 			// Rendering the chr prop - configure renderer
 			gDPPipeSync(gdl++);
-			gDPSetScissor(gdl++, G_SC_NON_INTERLACE, 0, 0, 16, 16);
+			gDPSetScissor(gdl++, 0, 0, 16, 16);
 			gDPSetCycleType(gdl++, G_CYC_COPY);
 			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0080, 4, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -5973,7 +5970,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 						coord.y = mtx->m[3][1];
 						coord.z = mtx->m[3][2];
 
-						cam0f0b4d68(&coord, screenpos);
+						camProjectViewToScreenSafe(&coord, screenpos);
 
 						if (screenpos[0] < 0.0f) {
 							screenpos[0] = 0.0f;
@@ -6054,7 +6051,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 			gDPLoadSync(gdl++);
 			gDPTileSync(gdl++);
 			gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
-			gDPSetScissor(gdl++, G_SC_NON_INTERLACE, 0, 0, viGetWidth(), viGetHeight());
+			gDPSetScissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
 			gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 			gDPSetRenderMode(gdl++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
 			gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
@@ -6084,8 +6081,8 @@ Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, uint32_t alpha)
 			int numiterations = (rngRandom() % 4) + 1;
 			int newcmnum = chr->cmnum2;
 			int candidate;
-			s8 operation = 0;
-			s8 again = true;
+			int8_t operation = 0;
+			int8_t again = true;
 			int i;
 
 			for (i = 0; i <= numiterations; ) {
@@ -6169,7 +6166,7 @@ void shieldhitsTick(void)
 			if (g_ShieldHits[i].prop) {
 				if (g_ShieldHits[i].lvframe60 >= g_Vars.lvframe60 - TICKS(80)) {
 					changed = true;
-					g_ShieldHits[i].shield += (propGetShieldThing(&g_ShieldHits[i].prop) - g_ShieldHits[i].shield) * g_Vars.lvupdate60f * (PAL ? 0.0151515156f : 0.0125f);
+					g_ShieldHits[i].shield += (propGetShieldThing(&g_ShieldHits[i].prop) - g_ShieldHits[i].shield) * g_Vars.lvupdate60f * 0.0125f;
 				}
 
 				for (j = 0; j < 32; j++) {

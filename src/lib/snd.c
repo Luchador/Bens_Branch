@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include "n_libaudio.h"
 #include "constants.h"
 #include "game/file.h"
@@ -83,7 +82,7 @@ struct sndstate *g_SndNosediveHandle = NULL;
 struct sndstate *g_SndUfoHandle = NULL;
 
 uint16_t g_SfxVolume = AL_VOL_FULL;
-int g_SoundMode = (VERSION >= VERSION_NTSC_1_0 ? SOUNDMODE_STEREO : SOUNDMODE_SURROUND);
+int g_SoundMode = SOUNDMODE_STEREO;
 bool g_SndMp3Enabled = false;
 
 int g_SndNumPlaying = 0;
@@ -705,22 +704,13 @@ int16_t var8005ecf8[] = {
 	0x5fff,
 	0x6665,
 	0x5fff,
-#if VERSION >= VERSION_NTSC_1_0
 	0x5998,
 	0x5998,
-#else
-	0x5fff,
-	0x5fff,
-#endif
 	0x5332,
 	0x5332,
 	0x5fff,
 	0x3332,
-#if VERSION >= VERSION_NTSC_1_0
 	0x4ccc,
-#else
-	0x3fff,
-#endif
 	0x5fff,
 	0x4ccc,
 	0x3fff,
@@ -760,11 +750,7 @@ int16_t var8005ecf8[] = {
 	0x7332,
 	0x7332,
 	0x4ccc,
-#if VERSION >= VERSION_NTSC_1_0
 	0x3c28,
-#else
-	0x4ccc,
-#endif
 	0x4ccc,
 	0x4ccc,
 	0x4ccc,
@@ -826,7 +812,6 @@ bool sndIsPlayingMp3(void)
 
 uint16_t snd0000e9dc(void)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	int result;
 
 	if (func00033ec4(0) < 0x5000) {
@@ -836,20 +821,15 @@ uint16_t snd0000e9dc(void)
 	}
 
 	return result;
-#else
-	return func00033ec4(0);
-#endif
 }
 
 void sndSetSfxVolume(uint16_t volume)
 {
 	uint8_t i;
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (volume > 0x5000) {
 		volume = 0x5000;
 	}
-#endif
 
 	for (i = 0; i < NUM_KEYTHINGS; i++) {
 		func00033f44(i, volume);
@@ -862,11 +842,9 @@ void snd0000ea80(uint16_t volume)
 {
 	uint8_t i;
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (volume > 0x5000) {
 		volume = 0x5000;
 	}
-#endif
 
 	for (i = 0; i < NUM_KEYTHINGS; i++) {
 		func00033f44(i, volume);
@@ -902,21 +880,21 @@ void sndLoadSfxCtl(void)
 
 	// Load the first 256 bytes of the ctl file.
 	size = 256;
-	dmaExec(buffer, (romptr_t) REF_SEG _sfxctlSegmentRomStart, size);
+	memcpy(buffer, (const void *)((romptr_t) REF_SEG _sfxctlSegmentRomStart), size);
 
 	// Get the ROM address of the first (and only) bank,
 	// then load the first 256 bytes of the bank.
 	file = (ALBankFile *) buffer;
 	romaddr = (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 	romaddr += (uintptr_t)file->bankArray[0];
-	dmaExec(buffer, romaddr, size);
+	memcpy(buffer, (const void *) romaddr, size);
 
 	// Get the ROM address of the first (and only) instrument,
 	// then load the first 256 bytes of the instrument.
 	bank = (ALBank *) buffer;
 	romaddr = (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 	romaddr += (uintptr_t)bank->instArray[0];
-	dmaExec(buffer, romaddr, size);
+	memcpy(buffer, (const void *) romaddr, size);
 
 	// Get the soundCount (spoiler: there's 1545+1).
 	// The final one might be a null terminator?
@@ -929,7 +907,7 @@ void sndLoadSfxCtl(void)
 	size = g_NumSounds * sizeof(uintptr_t) + 20;
 	size = ALIGN16(size);
 	g_ALSoundRomOffsets = alHeapAlloc(&g_SndHeap, 1, size);
-	dmaExec(g_ALSoundRomOffsets, romaddr, size);
+	memcpy(g_ALSoundRomOffsets, (const void *) romaddr, size);
 
 	*(uintptr_t *)&g_ALSoundRomOffsets += 0x10;
 
@@ -946,17 +924,11 @@ void sndLoadSfxCtl(void)
 	}
 
 	for (i = 0; i < NUM_CACHE_SLOTS; i++) {
-#if VERSION >= VERSION_NTSC_1_0
 		g_SndCache.ages[i] = 1;
-#else
-		g_SndCache.ages[i] = g_Vars.updateframe;
-#endif
-
 		g_SndCache.refcounts[i] = 0;
 	}
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 void sndIncrementAges(void)
 {
 	int i;
@@ -967,11 +939,9 @@ void sndIncrementAges(void)
 		}
 	}
 }
-#endif
 
 ALEnvelope *sndLoadEnvelope(uintptr_t offset, uint16_t cacheindex)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	uint8_t spaf[0x90];
 	uint8_t sp5f[0x90];
 	ALEnvelope *s2 = (ALEnvelope *)ALIGN16((uintptr_t)spaf);
@@ -983,14 +953,14 @@ ALEnvelope *sndLoadEnvelope(uintptr_t offset, uint16_t cacheindex)
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
 	do {
-		dmaExecHighPriority(s2, offset, 16 * sizeof(uintptr_t));
+		memcpy(s2, (const void *) offset, 16 * sizeof(uintptr_t));
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
 			sum1 += ((uint32_t *)s2)[i];
 		}
 
-		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
+		memcpy(s1, (const void *) offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
@@ -999,14 +969,6 @@ ALEnvelope *sndLoadEnvelope(uintptr_t offset, uint16_t cacheindex)
 
 		if (1);
 	} while (sum1 != sum2);
-#else
-	uint8_t sp5f[0x50];
-	ALEnvelope *s1 = (ALEnvelope *)ALIGN16((uintptr_t)sp5f);
-
-	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
-
-	dmaExecHighPriority(s1, offset, 0x40);
-#endif
 
 	g_SndCache.envelopes[cacheindex] = *s1;
 
@@ -1018,7 +980,6 @@ ALEnvelope *sndLoadEnvelope(uintptr_t offset, uint16_t cacheindex)
 
 ALKeyMap *sndLoadKeymap(uintptr_t offset, uint16_t cacheindex)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	uint8_t spaf[0x90];
 	uint8_t sp5f[0x90];
 	ALKeyMap *s2 = (ALKeyMap *)ALIGN16((uintptr_t)spaf);
@@ -1030,14 +991,14 @@ ALKeyMap *sndLoadKeymap(uintptr_t offset, uint16_t cacheindex)
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
 	do {
-		dmaExecHighPriority(s2, offset, 16 * sizeof(uintptr_t));
+		memcpy(s2, (const void *) offset, 16 * sizeof(uintptr_t));
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
 			sum1 += ((uint32_t *)s2)[i];
 		}
 
-		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
+		memcpy(s1, (const void *) offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
@@ -1046,14 +1007,6 @@ ALKeyMap *sndLoadKeymap(uintptr_t offset, uint16_t cacheindex)
 
 		if (1);
 	} while (sum1 != sum2);
-#else
-	uint8_t sp5f[0x50];
-	ALKeyMap *s1 = (ALKeyMap *)ALIGN16((uintptr_t)sp5f);
-
-	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
-
-	dmaExecHighPriority(s1, offset, 0x40);
-#endif
 
 	g_SndCache.keymaps[cacheindex] = *s1;
 
@@ -1065,7 +1018,6 @@ ALKeyMap *sndLoadKeymap(uintptr_t offset, uint16_t cacheindex)
 
 ALADPCMBook *sndLoadAdpcmBook(uintptr_t offset, uint16_t cacheindex)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	uint8_t spaf[0x150];
 	uint8_t sp5f[0x150];
 	ALADPCMBook *s2 = (ALADPCMBook *)ALIGN16((uintptr_t)spaf);
@@ -1077,30 +1029,20 @@ ALADPCMBook *sndLoadAdpcmBook(uintptr_t offset, uint16_t cacheindex)
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
 	do {
-		dmaExecHighPriority(s2, offset, 0x140);
+		memcpy(s2, (const void *) offset, 0x140);
 		sum1 = 0;
 
 		for (i = 0; i < 80U; i++) {
 			sum1 += ((uint32_t *)s2)[i];
 		}
 
-		dmaExecHighPriority(s1, offset, 0x140);
+		memcpy(s1, (const void *) offset, 0x140);
 		sum2 = 0;
 
 		for (i = 0; i < 80U; i++) {
 			sum2 += ((uint32_t *)s1)[i];
 		}
-
-		if (1);
 	} while (sum1 != sum2);
-#else
-	uint8_t sp5f[0x150];
-	ALADPCMBook *s1 = (ALADPCMBook *)ALIGN16((uintptr_t)sp5f);
-
-	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
-
-	dmaExecHighPriority(s1, offset, 0x140);
-#endif
 
 	g_SndCache.books[cacheindex] = *s1;
 
@@ -1112,7 +1054,6 @@ ALADPCMBook *sndLoadAdpcmBook(uintptr_t offset, uint16_t cacheindex)
 
 ALADPCMloop *sndLoadAdpcmLoop(uintptr_t offset, uint16_t cacheindex)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	uint8_t spaf[0x90];
 	uint8_t sp5f[0x90];
 	ALADPCMloop *s2 = (ALADPCMloop *)ALIGN16((uintptr_t)spaf);
@@ -1128,34 +1069,21 @@ ALADPCMloop *sndLoadAdpcmLoop(uintptr_t offset, uint16_t cacheindex)
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
 	do {
-		dmaExecHighPriority(s2, offset, 16 * sizeof(uintptr_t));
+		memcpy(s2, (const void *) offset, 16 * sizeof(uintptr_t));
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
 			sum1 += ((uint32_t *)s2)[i];
 		}
 
-		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
+		memcpy(s1, (const void *) offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
 			sum2 += ((uint32_t *)s1)[i];
 		}
 
-		if (1);
 	} while (sum1 != sum2);
-#else
-	uint8_t sp5f[0x50];
-	ALADPCMloop *s1 = (ALADPCMloop *)ALIGN16((uintptr_t)sp5f);
-
-	if (offset == 0) {
-		return NULL;
-	}
-
-	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
-
-	dmaExecHighPriority(s1, offset, 0x40);
-#endif
 
 	g_SndCache.loops[cacheindex] = *s1;
 
@@ -1167,7 +1095,6 @@ ALADPCMloop *sndLoadAdpcmLoop(uintptr_t offset, uint16_t cacheindex)
 
 ALWaveTable *sndLoadWavetable(uintptr_t offset, uint16_t cacheindex)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	uint8_t spaf[0x90];
 	uint8_t sp5f[0x90];
 	ALWaveTable *s2 = (ALWaveTable *)ALIGN16((uintptr_t)spaf);
@@ -1180,31 +1107,21 @@ ALWaveTable *sndLoadWavetable(uintptr_t offset, uint16_t cacheindex)
 	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
 
 	do {
-		dmaExecHighPriority(s2, offset, 16 * sizeof(uintptr_t));
+		memcpy(s2, (const void *) offset, 16 * sizeof(uintptr_t));
 		sum1 = 0;
 
 		for (i = 0; i < 16U; i++) {
 			sum1 += ((uint32_t *)s2)[i];
 		}
 
-		dmaExecHighPriority(s1, offset, 16 * sizeof(uintptr_t));
+		memcpy(s1, (const void *) offset, 16 * sizeof(uintptr_t));
 		sum2 = 0;
 
 		for (i = 0; i < 16U; i++) {
 			sum2 += ((uint32_t *)s1)[i];
 		}
 
-		if (1);
 	} while (sum1 != sum2);
-#else
-	uint8_t sp5f[0x50];
-	ALWaveTable *s1 = (ALWaveTable *)ALIGN16((uintptr_t)sp5f);
-	ALWaveTable *tmp;
-
-	offset += (romptr_t) REF_SEG _sfxctlSegmentRomStart;
-
-	dmaExecHighPriority(s1, offset, 0x40);
-#endif
 
 	tmp = &g_SndCache.wavetables[cacheindex];
 
@@ -1285,19 +1202,10 @@ ALSound *sndLoadSound(int16_t soundnum)
 
 		for (i = 0; i < NUM_CACHE_SLOTS; i++) {
 			if (g_SndCache.refcounts[i] == 0) {
-#if VERSION >= VERSION_NTSC_1_0
 				if (g_SndCache.ages[i] > oldestage) {
 					oldestage = g_SndCache.ages[i];
 					oldestindex = i;
 				}
-#else
-				int age = g_Vars.updateframe - g_SndCache.ages[i] + 1;
-
-				if (age > oldestage) {
-					oldestage = age;
-					oldestindex = i;
-				}
-#endif
 			}
 		}
 
@@ -1315,7 +1223,7 @@ ALSound *sndLoadSound(int16_t soundnum)
 		}
 
 		// DMA the ALSound data
-		dmaExecHighPriority(sound, g_ALSoundRomOffsets[sfxnum - 1], 0x40);
+		memcpy(sound, (const void *) g_ALSoundRomOffsets[sfxnum - 1], 0x40);
 
 		// Promote segment offsets to pointers and load their child data
 		sound->envelope = sndLoadEnvelope((uintptr_t)sound->envelope, cacheindex);
@@ -1329,11 +1237,7 @@ ALSound *sndLoadSound(int16_t soundnum)
 	}
 
 	// Reset this cache item's age, even if it already existed in the cache
-#if VERSION >= VERSION_NTSC_1_0
 	g_SndCache.ages[cacheindex] = 1;
-#else
-	g_SndCache.ages[cacheindex] = g_Vars.updateframe;
-#endif
 
 	return &g_SndCache.sounds[cacheindex];
 }
@@ -1424,7 +1328,7 @@ void sndInit(void)
 		// Load seq.ctl
 		var80095200 = 0xffffffff;
 		bankfile = alHeapAlloc(&g_SndHeap, 1, len);
-		dmaExec(bankfile, (romptr_t) REF_SEG _seqctlSegmentRomStart, len);
+		memcpy(bankfile, (const void *)((romptr_t) REF_SEG _seqctlSegmentRomStart), len);
 
 		// Load seq.tbl
 		alBnkfNew(bankfile, REF_SEG _seqtblSegmentRomStart);
@@ -1434,11 +1338,11 @@ void sndInit(void)
 		// enough space for the table and load it.
 		var80095204 = bankfile->bankArray[0];
 		g_SeqTable = alHeapDBAlloc(0, 0, &g_SndHeap, 1, 0x10);
-		dmaExec(g_SeqTable, (romptr_t) REF_SEG _sequencesSegmentRomStart, 0x10);
+		memcpy(g_SeqTable, (const void *)((romptr_t) REF_SEG _sequencesSegmentRomStart), 0x10);
 
 		len = g_SeqTable->count * sizeof(struct seqtableentry) + 4;
 		g_SeqTable = alHeapDBAlloc(0, 0, &g_SndHeap, 1, len);
-		dmaExec(g_SeqTable, (romptr_t) REF_SEG _sequencesSegmentRomStart, (len + 0xf) & ~0xf);
+		memcpy(g_SeqTable, (const void *)((romptr_t) REF_SEG _sequencesSegmentRomStart), (len + 0xf) & ~0xf);
 
 		// Promote segment-relative offsets to ROM addresses
 		g_SeqRomAddrs = mempAlloc(g_SeqTable->count * sizeof(uintptr_t), MEMPOOL_PERMANENT);
@@ -1510,11 +1414,6 @@ bool sndStopMp3(int16_t arg0)
 	return true;
 }
 
-void snd0000fc40(int arg0)
-{
-	// empty
-}
-
 bool seqPlay(struct seqinstance *seq, int tracknum)
 {
 	uint32_t stack;
@@ -1531,8 +1430,6 @@ bool seqPlay(struct seqinstance *seq, int tracknum)
 	}
 
 	seq->tracknum = tracknum;
-
-	if (g_SeqTable && tracknum);
 
 	if (state != AL_STOPPED) {
 		return false;
@@ -1566,7 +1463,7 @@ bool seqPlay(struct seqinstance *seq, int tracknum)
 			ziplen = extlen;
 			binstart = seq->data;
 			zipstart = NULL;
-			dmaExec(binstart, (romptr_t)extseq, extlen);
+			memcpy(binstart, (const void *)((romptr_t)extseq), extlen);
 		}
 		sysMemFree(extseq);
 	} else
@@ -1582,22 +1479,18 @@ bool seqPlay(struct seqinstance *seq, int tracknum)
 		binstart = seq->data;
 		zipstart = binstart + binlen - ziplen;
 	
-		dmaExec(zipstart, g_SeqRomAddrs[seq->tracknum], ziplen);
+		memcpy(zipstart, (const void *)(g_SeqRomAddrs[seq->tracknum]), ziplen);
 		ziplen = rzipInflate(zipstart, binstart, scratch);
 	}
 
-#ifndef PLATFORM_N64
 	preprocessALCMidiHdr(binstart, ziplen, NULL);
-#endif
 
 
-#if AVOID_UB
 	// To avoid undefined behaviour, we must change the sequence player's state
 	// from AL_STOPPED to something else. Otherwise a race condition can occur
 	// where the same sequence player is used for two sequences if the audio
 	// thread hasn't run between the two calls and updated its state.
 	seq->seqp->state = AL_STARTING;
-#endif
 
 	n_alCSeqNew(&seq->seq, seq->data);
 	n_alCSPSetSeq(seq->seqp, &seq->seq);
@@ -1828,7 +1721,6 @@ bool sndIsFiltered(int audio_id)
 				return true;
 			}
 		}
-#if VERSION >= VERSION_NTSC_1_0
 		else {
 			// @bug: The masking here makes it impossible to match hangar guy's
 			// audio ID, so his phrase can be said even with the lang filter on.
@@ -1841,7 +1733,6 @@ bool sndIsFiltered(int audio_id)
 				return true;
 			}
 		}
-#endif
 	}
 
 	return false;
@@ -1861,15 +1752,9 @@ void sndAdjust(struct sndstate **handle, bool ismp3, int vol, int pan, int sound
 			fxmix = 0;
 		}
 
-#if VERSION >= VERSION_NTSC_1_0
 		if (pan != -1 && g_SoundMode == SOUNDMODE_SURROUND && (pan & 0x80)) {
 			fxmix += 128;
 		}
-#else
-		if (g_SoundMode == SOUNDMODE_SURROUND && (pan & 0x80)) {
-			fxmix += 128;
-		}
-#endif
 	}
 
 	if (soundnum > 0) {
@@ -2124,7 +2009,7 @@ void sndTickNosedive(void)
 			if (lvIsPaused()) {
 				// Fade out volume during pause instead of stopping abruptly
 				if (g_SndNosediveVolume > 0) {
-					g_SndNosediveVolume -= g_Vars.diffframe240 * PALUP(80);
+					g_SndNosediveVolume -= g_Vars.diffframe240 * 80;
 
 					if (g_SndNosediveVolume < 0) {
 						g_SndNosediveVolume = 0;
@@ -2145,7 +2030,7 @@ void sndTickNosedive(void)
 
 				// Fade in over about 2 seconds
 				if (g_SndNosediveVolume < 20000) {
-					g_SndNosediveVolume += g_Vars.diffframe240 * PALUP(40);
+					g_SndNosediveVolume += g_Vars.diffframe240 * 40;
 
 					if (g_SndNosediveVolume > 20000) {
 						g_SndNosediveVolume = 20000;
@@ -2157,7 +2042,7 @@ void sndTickNosedive(void)
 		} else {
 			// Reached the configured fade out point
 			if (g_SndNosediveVolume > 0) {
-				g_SndNosediveVolume -= g_Vars.diffframe240 * PALUP(80);
+				g_SndNosediveVolume -= g_Vars.diffframe240 * 80;
 
 				if (g_SndNosediveVolume < 0) {
 					g_SndNosediveVolume = 0;
@@ -2208,7 +2093,7 @@ void sndTickUfo(void)
 			if (lvIsPaused()) {
 				// Fade out volume during pause instead of stopping abruptly
 				if (g_SndUfoVolume > 0) {
-					g_SndUfoVolume -= g_Vars.diffframe240 * PALUP(120);
+					g_SndUfoVolume -= g_Vars.diffframe240 * 120;
 
 					if (g_SndUfoVolume < 0) {
 						g_SndUfoVolume = 0;
@@ -2229,7 +2114,7 @@ void sndTickUfo(void)
 
 				// Fade in over about 2.4 seconds
 				if (g_SndUfoVolume < AL_VOL_FULL) {
-					g_SndUfoVolume += g_Vars.diffframe240 * PALUP(40);
+					g_SndUfoVolume += g_Vars.diffframe240 * 40;
 
 					if (g_SndUfoVolume > AL_VOL_FULL) {
 						g_SndUfoVolume = AL_VOL_FULL;
@@ -2241,7 +2126,7 @@ void sndTickUfo(void)
 		} else {
 			// Reached the configured fade out point
 			if (g_SndUfoVolume > 0) {
-				g_SndUfoVolume -= g_Vars.diffframe240 * PALUP(120);
+				g_SndUfoVolume -= g_Vars.diffframe240 * 120;
 
 				if (g_SndUfoVolume < 0) {
 					g_SndUfoVolume = 0;

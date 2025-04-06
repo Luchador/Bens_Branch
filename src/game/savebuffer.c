@@ -1,10 +1,12 @@
 #include <ultra64.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/tex.h"
 #include "game/camera.h"
 #include "game/savebuffer.h"
 #include "game/gfxmemory.h"
 #include "game/file.h"
+#include "game/mtxutils.h"
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/vi.h"
@@ -36,14 +38,14 @@ void func0f0d4690(Mtxf *mtx)
 	pos.z = 0;
 
 	mtx4SetTranslation(&pos, mtx);
-	mtx00015e4c(-1, mtx);
+	mtxScaleRow1Full(-1, mtx);
 }
 
 void func0f0d475c(Mtxf *mtx)
 {
 	func0f0d4690(mtx);
-	mtx00015df0(0.1f, mtx);
-	mtx00015e4c(0.1f, mtx);
+	mtxScaleRow0Full(0.1f, mtx);
+	mtxScaleRow1Full(0.1f, mtx);
 }
 
 Gfx *func0f0d479c(Gfx *gdl)
@@ -60,7 +62,7 @@ Gfx *func0f0d479c(Gfx *gdl)
 	mtxF2L(&mtx, mtx2);
 	mtx4LoadIdentity(&mtx);
 
-	guFrustumF(mtx.m,
+	mtxFrustumF(mtx.m,
 			-(float) viGetWidth() * 0.5f, viGetWidth() * 0.5f,
 			-(float) viGetHeight() * 0.5f, viGetHeight() * 0.5f,
 			10, 10000, 1);
@@ -142,8 +144,8 @@ Gfx *func0f0d4c80(Gfx *gdl)
 	Mtxf *mtxptr = gfxAllocateMatrix();
 
 	func0f0d4690(&mtx);
-	mtx00015df0(0.1f, &mtx);
-	mtx00015e4c(0.1f, &mtx);
+	mtxScaleRow0Full(0.1f, &mtx);
+	mtxScaleRow1Full(0.1f, &mtx);
 	mtxF2L(&mtx, mtxptr);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

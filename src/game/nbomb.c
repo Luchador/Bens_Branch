@@ -10,6 +10,7 @@
 #include "game/chraction.h"
 #include "game/prop.h"
 #include "game/objectives.h"
+#include "game/mtxutils.h"
 #include "game/tex.h"
 #include "game/camera.h"
 #include "game/savebuffer.h"
@@ -47,7 +48,7 @@ float sphereradius = 100;
 \
 	vertices[i].t += g_TCoordOffset; // Ben's comment: scrolls the T coord around the sphere but honestly I can't see much difference when this is commented out
 
-Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord *arg3, u8 arg4, u8 arg5, u8 arg6, u8 arg7, s8 depth)
+Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord *arg3, uint8_t arg4, uint8_t arg5, uint8_t arg6, uint8_t arg7, int8_t depth)
 {
 	struct coord sp7c;
 	struct coord sp70;
@@ -283,10 +284,10 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 	sp3c.z = 0;
 
 	mtx4LoadRotation(&sp3c, &sp88);
-	mtx00015f04(nbomb->radius / 2000.0f, &sp88);
+	mtxScaleRotationPart(nbomb->radius / 2000.0f, &sp88);
 	mtx4MultMtx4(&sp48, &sp88, &spc8);
 
-	mtx00015be0(camGetWorldToScreenMtxf(), &spc8);
+	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &spc8);
 	mtxF2L(&spc8, mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/bondbike.h"
 #include "game/bondmove.h"
@@ -17,6 +18,7 @@
 #include "game/objectives.h"
 #include "game/options.h"
 #include "game/propobj.h"
+#include "game/mtxutils.h"
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/mtx.h"
@@ -135,7 +137,7 @@ void bbikeTryDismountAngle(float relativeangle, float distance)
 		propSetPerimEnabled(g_Vars.currentplayer->hoverbike, false);
 		propSetPerimEnabled(g_Vars.currentplayer->prop, false);
 
-		func0f065e74(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &pos, rooms);
+		propUpdatePositionRoomsSimple(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &pos, rooms);
 		bmoveFindEnteredRoomsByPos(g_Vars.currentplayer, &pos, rooms);
 
 		result = cdTestCylMove02(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms,
@@ -255,7 +257,7 @@ void bbikeApplyMoveData(struct movedata *data)
 	// Sideways
 	if (data->digitalstepleft) {
 		float value2 = -1.0f - g_Vars.currentplayer->speedsideways;
-		float tmp = data->digitalstepleft * PALUPF(-0.1f);
+		float tmp = data->digitalstepleft * -0.1f;
 
 		if (value2 < tmp) {
 			value2 = tmp;
@@ -264,7 +266,7 @@ void bbikeApplyMoveData(struct movedata *data)
 		g_Vars.currentplayer->speedsideways += value2;
 	} else if (data->digitalstepright) {
 		float value2 = 1.0f - g_Vars.currentplayer->speedsideways;
-		float tmp = data->digitalstepright * PALUPF(0.1f);
+		float tmp = data->digitalstepright * 0.1f;
 
 		if (value2 > tmp) {
 			value2 = tmp;
@@ -308,7 +310,7 @@ void bbikeApplyMoveData(struct movedata *data)
 		sp30.f[1] = -sinf(sp3c);
 		sp30.f[2] = cosf(sp3c);
 
-		cam0f0b4d04(&sp30, sp28);
+		camProjectViewToScreen(&sp30, sp28);
 
 		g_Vars.currentplayer->gunextraaimy = -((sp28[1] - camGetScreenTop()) * 2.0f / camGetScreenHeight() - 1.0f) * 0.75f;
 	}
@@ -324,7 +326,7 @@ void bbike0f0d2b40(struct defaultobj *bike, struct coord *arg1, float arg2, stru
 	struct coord sp60;
 	struct coord sp54;
 
-	cdGetEdge(&sp78, &sp6c, 333, "bondbike.c");
+	cdGetEdge(&sp78, &sp6c);
 
 	sp60.x = bike->prop->pos.x;
 	sp60.y = bike->prop->pos.y;
@@ -406,7 +408,7 @@ int bbikeCalculateNewPosition(struct coord *vel, float angledelta)
 		dstpos.z += vel->z;
 
 		objGetBbox(g_Vars.currentplayer->hoverbike, &radius, &ymax, &ymin);
-		func0f065dfc(&g_Vars.currentplayer->hoverbike->pos,
+		propUpdatePositionRooms(&g_Vars.currentplayer->hoverbike->pos,
 				g_Vars.currentplayer->hoverbike->rooms,
 				&dstpos, dstrooms, spa8, 20);
 
@@ -461,7 +463,7 @@ int bbikeCalculateNewPosition(struct coord *vel, float angledelta)
 		hoverpropSetTurnAngle(&bike->base, newangle);
 
 		mtx4LoadYRotation(newangle, &sp44);
-		mtx00015f04(bike->base.model->scale, &sp44);
+		mtxScaleRotationPart(bike->base.model->scale, &sp44);
 		mtx4ToMtx3(&sp44, bike->base.realrot);
 	}
 
@@ -547,7 +549,7 @@ void bbikeUpdateVertical(struct coord *pos)
 
 	angle = hoverpropGetTurnAngle(bike);
 
-	func0f065e74(&bike->prop->pos, bike->prop->rooms, pos, newrooms);
+	propUpdatePositionRoomsSimple(&bike->prop->pos, bike->prop->rooms, pos, newrooms);
 
 	bmoveFindEnteredRoomsByPos(g_Vars.currentplayer, pos, newrooms);
 	propDeregisterRooms(g_Vars.currentplayer->prop);
@@ -613,7 +615,7 @@ int bbike0f0d3680(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 	int result = bbikeCalculateNewPositionWithPush(arg0, 0);
 
 	if (!result) {
-		cdGetEdge(arg1, arg2, 659, "bondbike.c");
+		cdGetEdge(arg1, arg2);
 	}
 
 	return result;
@@ -637,7 +639,7 @@ int bbike0f0d36d4(struct coord *arg0, struct coord *arg1, struct coord *arg2, st
 		}
 
 		if (someint == 0) {
-			cdGetEdge(arg3, arg4, 685, "bondbike.c");
+			cdGetEdge(arg3, arg4);
 
 			if (arg3->f[0] != arg1->f[0]
 					|| arg3->f[1] != arg1->f[1]
@@ -852,7 +854,7 @@ void bbikeTick(void)
 			}
 
 			for (i = 0; i < g_Vars.lvupdate240; i++) {
-				hovbikespeed += (sqdist - hovbikespeed) * (PAL ? 0.003f : 0.0025f);
+				hovbikespeed += (sqdist - hovbikespeed) * 0.0025f;
 			}
 
 			sp200 = 1.0f - (hovbikespeed + hovbikespeed);
@@ -910,7 +912,6 @@ void bbikeTick(void)
 
 		prop = g_Vars.currentplayer->prop;
 
-#if VERSION >= VERSION_NTSC_1_0
 		for (j = 0; prop->rooms[j] != -1; j++) {
 			if (prop->rooms[j] == g_Vars.currentplayer->floorroom) {
 				propDeregisterRooms(prop);
@@ -919,7 +920,6 @@ void bbikeTick(void)
 				break;
 			}
 		}
-#endif
 	}
 
 	bheadAdjustAnimation(0);
@@ -932,7 +932,7 @@ void bbikeTick(void)
 
 	mtx4MultMtx4InPlace(&sp124, &sp164);
 	mtx3ToMtx4(obj->realrot, &sp124);
-	mtx00015f04(1.0f / obj->model->scale, &sp124);
+	mtxScaleRotationPart(1.0f / obj->model->scale, &sp124);
 	mtx4LoadYRotation(hoverpropGetTurnAngle(obj), &spe4);
 	quaternion0f097044(&spe4, spd4);
 	quaternion0f097044(&sp124, spc4);

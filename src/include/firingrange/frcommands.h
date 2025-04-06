@@ -3,7 +3,7 @@
  *
  * frpadnum - is the location where the target will appear.
  * script - is the target script index that the target will use.
- *     For example, 0x0c means it will use the script at "u8 target0c".
+ *     For example, 0x0c means it will use the script at "uint8_t target0c".
  * maxdamage - is how much health the target has.
  * flags - is a bitwise field. See below
  *

@@ -314,7 +314,7 @@ void playermgrAllocatePlayer(int index)
 	g_Vars.players[index]->colourfadefracold = 0;
 	g_Vars.players[index]->colourfadefracnew = 0;
 
-	g_Vars.players[index]->bondtype = OUTFIT_DEFAULT;
+	g_Vars.players[index]->outfit = OUTFIT_DEFAULT;
 	g_Vars.players[index]->startnewbonddie = true;
 	g_Vars.players[index]->redbloodfinished = false;
 	g_Vars.players[index]->deathanimfinished = false;

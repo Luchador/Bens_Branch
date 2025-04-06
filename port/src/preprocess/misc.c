@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdint.h>
 #include <assert.h>
-#include <PR/ultratypes.h>
 #include <PR/gbi.h>
 
 #include "data.h"
@@ -54,9 +53,7 @@ uint8_t *preprocessMpConfigs(uint8_t* data, uint32_t size, uint32_t* outSize)
 		// TODO: are these required or are they always 0?
 		PD_SWAP_VAL(cfg->setup.fileguid.deviceserial);
 		PD_SWAP_VAL(cfg->setup.fileguid.fileid);
-		// convert MPWEAPON_ to take classic weapons and JPN weapons into account
 		for (int j = 0; j < ARRAYCOUNT(cfg->setup.weapons); ++j) {
-			// in other versions we only care about the shield and above
 			if (cfg->setup.weapons[j] >= 0x25) {
 				cfg->setup.weapons[j] += (MPWEAPON_SHIELD - MPWEAPON_PP9I);
 			}

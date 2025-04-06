@@ -2,6 +2,7 @@
 #include <math.h>
 #include "constants.h"
 #include "game/padhalllv.h"
+#include "game/mtxutils.h"
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/mtx.h"
@@ -229,18 +230,18 @@ void mtx00016710(float mult, float mtx[4][4])
 
 void mtx00016748(float arg0)
 {
-	var8005ef10[0] = 65536 * arg0;
+	g_MtxFloatToFixedScale[0] = 65536 * arg0;
 }
 
 void mtx00016760(void)
 {
-	g_Vars.unk000510 = var8005ef10[0];
-	var8005ef10[0] = 65536;
+	g_Vars.unk000510 = g_MtxFloatToFixedScale[0];
+	g_MtxFloatToFixedScale[0] = 65536;
 }
 
 void mtx00016784(void)
 {
-	var8005ef10[0] = g_Vars.unk000510;
+	g_MtxFloatToFixedScale[0] = g_Vars.unk000510;
 }
 
 /**
@@ -251,35 +252,45 @@ void mtx00016784(void)
  */
 void mtx00016798(Mtxf *src, Mtxf *dst)
 {
-	u32 *srcwords = (u32 *) src;
+	uint32_t *srcwords = (uint32_t *) src;
 	float *dstfloats = (float *) dst;
 	int i;
 
 	for (i = 0; i < 8; i++) {
-		u32 word1 = srcwords[i + 0];
-		u32 word2 = srcwords[i + 8];
+		uint32_t word1 = srcwords[i + 0];
+		uint32_t word2 = srcwords[i + 8];
 
-		dstfloats[(i << 1) + 0] = (int) ((word1 & 0xffff0000) | (word2 >> 16)) / var8005ef10[0];
-		dstfloats[(i << 1) + 1] = (int) ((word1 << 16) | (word2 & 0xffff)) / var8005ef10[i & 1];
+		dstfloats[(i << 1) + 0] = (int) ((word1 & 0xffff0000) | (word2 >> 16)) / g_MtxFloatToFixedScale[0];
+		dstfloats[(i << 1) + 1] = (int) ((word1 << 16) | (word2 & 0xffff)) / g_MtxFloatToFixedScale[i & 1];
 	}
 }
 
 void mtx00016820(Mtx *src, Mtx *dst)
 {
-	u32 *srcwords = (u32 *) src;
-	u32 *dstwords = (u32 *) dst;
+	uint32_t *srcwords = (uint32_t *) src;
+	uint32_t *dstwords = (uint32_t *) dst;
 	int i;
 
 	for (i = 0; i < 8; i++) {
-		u32 word1 = srcwords[i + 0];
-		u32 word2 = srcwords[i + 8];
+		uint32_t word1 = srcwords[i + 0];
+		uint32_t word2 = srcwords[i + 8];
 
 		dstwords[(i << 1) + 0] = (word1 & 0xffff0000) | (word2 >> 16);
 		dstwords[(i << 1) + 1] = (word1 << 16) | (word2 & 0xffff);
 	}
 }
 
-void mtx00016874(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
+/**
+ * Constructs a view matrix (camera transform) using position, look direction, and up vector.
+ *
+ * - pos(x, y, z): The position of the camera in world space.
+ * - look(x, y, z): The direction the camera is looking (not a target point).
+ * - up(x, y, z): The camera's up direction.
+ *
+ * Output matrix transforms world coordinates into camera (view) space.
+ * Equivalent to gluLookAt().
+ */
+void mtxBuildCameraMatrix(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
 {
 	float a;
 	float b;
@@ -330,9 +341,9 @@ void mtx00016874(Mtxf *mtx, float posx, float posy, float posz, float lookx, flo
 	mtx->m[3][3] = 1;
 }
 
-void mtx00016ae4(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
+void mtxBuildLookAtMatrix(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
 {
-	mtx00016874(mtx, posx, posy, posz, lookx - posx, looky - posy, lookz - posz, upx, upy, upz);
+	mtxBuildCameraMatrix(mtx, posx, posy, posz, lookx - posx, looky - posy, lookz - posz, upx, upy, upz);
 }
 
 void mtx00016b58(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
@@ -391,10 +402,10 @@ void mtx00016d58(Mtxf *mtx, float posx, float posy, float posz, float lookx, flo
 	mtx00016b58(mtx, posx, posy, posz, lookx - posx, looky - posy, lookz - posz, upx, upy, upz);
 }
 
-u32 mtx00016dcc(float arg0, float arg1)
+uint32_t mtx00016dcc(float arg0, float arg1)
 {
 	float sum = arg0 + arg1;
-	u16 result;
+	uint16_t result;
 
 	if (sum <= 2) {
 		result = 0xffff;
@@ -458,7 +469,7 @@ void mtx00016e98(float mtx[4][4], float angle, float x, float y, float z)
 void mtx4Align(float mtx[4][4], float angle, float x, float y, float z)
 {
 	angle = RAD2DEG(angle);
-	guAlignF(mtx, angle, x, y, z);
+	mtxAlignF(mtx, angle, x, y, z);
 }
 
 void mtx4LoadRotationFrom(float src[4][4], float dst[4][4])

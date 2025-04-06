@@ -1,7 +1,5 @@
-#ifndef _IN_LIB_ANIM_H
-#define _IN_LIB_ANIM_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -24,5 +22,3 @@ void animGetRotTranslateScale(int part, bool flip, struct skeleton *skel, int16_
 uint16_t animGetPosAngleAsInt(int part, bool flip, struct skeleton *skel, int16_t animnum, int framenum, int16_t inttranslate[3], bool arg6);
 float animGetTranslateAngle(int part, bool flip, struct skeleton *skel, int16_t animnum, int framenum, struct coord *pos, bool arg6);
 float animGetCameraValue(int part, int16_t animnum, uint8_t frameslot);
-
-#endif

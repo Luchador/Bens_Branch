@@ -1,8 +1,9 @@
 #include <ultra64.h>
 #include "constants.h"
-#include "game/smoke.h"
 #include "game/bg.h"
+#include "game/mtxutils.h"
 #include "game/propobj.h"
+#include "game/smoke.h"
 #include "game/splat.h"
 #include "game/utils.h"
 #include "game/wallhit.h"
@@ -30,13 +31,13 @@ struct splatdata {
 	int room;
 	int isskedar;
 	int translucent;
-	float unk50;
+	float sizescale;
 	int timermax;
 	int timerspeed;
 };
 
 float g_SplatDistanceScaleFactor = 0.15;
-float g_SplatRandomOffsetMax = 12; // When a splat is made there's some randomness from where the hit is calculated to where it's actually placed, with 12 being the max possible distance.
+float g_SplatRandomOffsetMax = 12; // When a splat is made there's some randomness from where the hit is calculated to where it's actually placed, with 12 being the max possible distance
 float g_SplatMaxDistance = 180;
 float g_SplatMinSize = 5;
 float g_SplatMaxSize = 50;
@@ -189,8 +190,8 @@ int splatsCreate(int qty, float arg1, struct prop *prop, struct shotdata *shotda
 		mtx4RotateVec(&spa4, &spfc, &shotdata->gundir3d);
 		mtx4RotateVec(&spa4, &spf0, &shotdata->gundir2d);
 
-		normalizeVector(&shotdata->gundir3d, &shotdata->gundir3d, 403, "splat.c");
-		normalizeVector(&shotdata->gundir2d, &shotdata->gundir2d, 404, "splat.c");
+		utilsNormalizeVec(&shotdata->gundir3d, &shotdata->gundir3d);
+		utilsNormalizeVec(&shotdata->gundir2d, &shotdata->gundir2d);
 
 		if (splat0f149274(arg1, prop, shotdata, /*reused var*/ dist, isskedar, splattype, timermax, chr, timerspeed)) {
 			numdropped++;
@@ -244,8 +245,8 @@ bool splat0f149274(float arg0, struct prop *chrprop, struct shotdata *shotdata, 
 		endpos.f[i] = stackshotdata.gunpos3d.f[i] + stackshotdata.gundir3d.f[i] * g_SplatMaxDistance;
 	}
 
-	portal00018148(&chrprop->pos, &stackshotdata.gunpos3d, chrprop->rooms, gunrooms, NULL, 0);
-	portal00018148(&stackshotdata.gunpos3d, &endpos, gunrooms, endrooms, rooms, ARRAYCOUNT(rooms) - 1);
+	portalTraceLineThroughRooms(&chrprop->pos, &stackshotdata.gunpos3d, chrprop->rooms, gunrooms, NULL, 0);
+	portalTraceLineThroughRooms(&stackshotdata.gunpos3d, &endpos, gunrooms, endrooms, rooms, ARRAYCOUNT(rooms) - 1);
 
 	for (i = 0; rooms[i] != -1; i++) {
 		if (bgTestHitInRoom(&stackshotdata.gunpos3d, &endpos, rooms[i], &hitthing)
@@ -318,7 +319,7 @@ bool splat0f149274(float arg0, struct prop *chrprop, struct shotdata *shotdata, 
 				hitpos = &hit->pos;
 				sp504 = &hit->hitthing.unk0c;
 				objprop = hit->prop;
-				mtxindex = (s8)hit->mtxindex;
+				mtxindex = (int8_t)hit->mtxindex;
 				room = 1;
 				translucent = false;
 				hasresult = true;
@@ -344,7 +345,7 @@ bool splat0f149274(float arg0, struct prop *chrprop, struct shotdata *shotdata, 
 		splatdata.room = room;
 		splatdata.isskedar = isskedar;
 		splatdata.timermax = timermax;
-		splatdata.unk50 = arg0;
+		splatdata.sizescale = arg0;
 		splatdata.splattype = splattype;
 		splatdata.timerspeed = timerspeed;
 		splatdata.translucent = translucent;
@@ -353,10 +354,6 @@ bool splat0f149274(float arg0, struct prop *chrprop, struct shotdata *shotdata, 
 
 		return true;
 	}
-
-	if (hitthing.pos.x);
-	if (hitthing.pos.y);
-	if (hitthing.pos.z);
 
 	return false;
 }
@@ -370,8 +367,8 @@ void splat0f14986c(struct splatdata *splat)
 	float splatsizetype = 0; // Splats can be little, medium, or big
 	float height;
 	float width;
-	uint8_t maxalpha = 0xff;
-	uint8_t minalpha = 0xc0;
+	uint8_t maxalpha = 255;
+	uint8_t minalpha = 192;
 	int texnum;
 	bool isskedarblood = splat->isskedar & 1;
 	bool translucent = splat->translucent;
@@ -446,8 +443,8 @@ void splat0f14986c(struct splatdata *splat)
 		height = g_SplatMaxSize;
 	}
 
-	width *= splat->unk50;
-	height *= splat->unk50;
+	width *= splat->sizescale;
+	height *= splat->sizescale;
 
 	wallhitChooseBloodColour(splat->chrprop);
 
@@ -455,7 +452,7 @@ void splat0f14986c(struct splatdata *splat)
 			NULL, texnum, splat->room, splat->objprop,
 			splat->chrprop, splat->mtxindex, 0, splat->chr,
 			width, height, minalpha, maxalpha,
-			rngRandom() % 360, (u16)splat->timermax, splat->timerspeed, translucent);
+			rngRandom() % 360, (uint16_t)splat->timermax, splat->timerspeed, translucent);
 
 	if (isskedarblood) {
 		smokerooms[0] = splat->room;

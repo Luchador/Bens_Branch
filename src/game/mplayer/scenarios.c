@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/dlights.h"
@@ -17,6 +18,7 @@
 #include "game/textutils.h"
 #include "game/mplayer/setup.h"
 #include "game/mplayer/scenarios.h"
+#include "game/mtxutils.h"
 #include "game/radar.h"
 #include "game/botcmd.h"
 #include "game/botinv.h"
@@ -1240,7 +1242,7 @@ void scenarioHandleDroppedToken(struct chrdata *chr, struct prop *prop)
 				mtx00016d58(&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
 
 				if (obj->model) {
-					mtx00015f04(obj->model->scale, &mtx);
+					mtxScaleRotationPart(obj->model->scale, &mtx);
 				}
 
 				rooms[0] = pad.room;

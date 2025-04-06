@@ -1,5 +1,5 @@
-#ifndef IN_GAME_PAK_H
-#define IN_GAME_PAK_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -99,5 +99,3 @@ void pakClearAllBitflags(uint8_t *flags);
 void pakN64FontCodeToAscii(char *src, char *dst, int len);
 int8_t pakFindBySerial(int deviceserial);
 bool gbpakIsAnyPerfectDark(void);
-
-#endif

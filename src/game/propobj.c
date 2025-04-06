@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/bondmove.h"
 #include "game/bondwalk.h"
@@ -70,6 +71,7 @@
 #include "lib/collision.h"
 #include "lib/lib_17ce0.h"
 #include "lib/lib_317f0.h"
+#include "video.h"
 #include "data.h"
 #include "textures.h"
 #include "types.h"
@@ -107,7 +109,7 @@ struct sndstate *g_GasAudioHandle = NULL;
 uint32_t g_CountdownTimerOff = COUNTDOWNTIMERREASON_AI;
 bool g_CountdownTimerRunning = false;
 float g_CountdownTimerValue60 = 0;
-uint32_t g_PlayersDetonatingMines = 0x00000000;
+uint32_t g_PlayersDetonatingMines = 0;
 int g_NextWeaponSlot = 0;
 int g_NextHatSlot = 0;
 struct linkliftdoorobj *g_LiftDoors = NULL;
@@ -117,9 +119,9 @@ struct linksceneryobj *g_LinkedScenery = NULL;
 struct blockedpathobj *g_BlockedPaths = NULL;
 struct prop *g_EmbedProp = NULL;
 int g_EmbedHitPart = 0;
-uint32_t g_EmbedSide = 0x00000000;
-s16 var8006993c[3] = {0};
-uint32_t var80069944 = 0x00000000;
+uint32_t g_EmbedSide = 0;
+int16_t var8006993c[3] = {0};
+uint32_t var80069944 = 0;
 float g_CctvWaitScale = 1;
 float g_CctvDamageRxScale = 1;
 float g_AutogunAccuracyScale = 1;
@@ -158,10 +160,9 @@ bool doorCallLift(struct prop *doorprop, bool allowclose)
 		while (link) {
 			if (doorprop == link->door && link->lift
 					&& (link->lift->type == PROPTYPE_OBJ || link->lift->type == PROPTYPE_DOOR)) {
-				bool type = link->lift->obj->type;
 				handled = true;
 
-				if (type == OBJTYPE_DOOR) {
+				if (link->lift->obj->type == OBJTYPE_DOOR) {
 					// This appears to be handling situations where the setup
 					// file specifies a door as the lift object. It activates
 					// that door, which then calls doorCallLift. This allows
@@ -169,11 +170,8 @@ bool doorCallLift(struct prop *doorprop, bool allowclose)
 					// rather than directly to the lift, but this doesn't happen
 					// in practice so this branch is unused.
 					doorsActivate(link->lift, allowclose);
-				} else if (type == OBJTYPE_LIFT) {
+				} else if (link->lift->obj->type == OBJTYPE_LIFT) {
 					if (allowclose
-#if VERSION < VERSION_NTSC_1_0
-							&& g_Vars.currentplayer->lift == link->lift
-#endif
 							&& door->base.type == OBJTYPE_DOOR
 							&& !doorIsClosed(door)) {
 						handled = false;
@@ -190,10 +188,8 @@ bool doorCallLift(struct prop *doorprop, bool allowclose)
 
 						if (vacant) {
 							for (i = 0; i < numchrslots; i++) {
-								/**
-								 * @bug: This is missing a chrIsDead check.
-								 * If a chr dies in a lift it can no longer be called.
-								 */
+								 // @bug: This is missing a chrIsDead check.
+								 // If a chr dies in a lift it can no longer be called.
 								if (g_ChrSlots[i].prop && g_ChrSlots[i].lift == link->lift) {
 									vacant = false;
 									break;
@@ -923,7 +919,7 @@ void func0f06803c(struct coord *arg0, float *arg1, float *arg2, float *arg3, flo
 	struct coord sp4c;
 	float sp44[2];
 
-	float aspect = viGetAspect();
+	float aspect = videoGetAspect();
 	float fovy = viGetFovY();
 
 	if (g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit & DEVICE_EYESPY) {
@@ -936,7 +932,7 @@ void func0f06803c(struct coord *arg0, float *arg1, float *arg2, float *arg3, flo
 	sp4c.y = arg0->y;
 	sp4c.z = arg0->z;
 
-	cam0f0b4eb8(&sp4c, sp44, fovy, aspect);
+	camProjectWithZoomAndAspect(&sp4c, sp44, fovy, aspect);
 
 	arg3[0] = sp44[0];
 
@@ -944,7 +940,7 @@ void func0f06803c(struct coord *arg0, float *arg1, float *arg2, float *arg3, flo
 	sp4c.y = arg0->y;
 	sp4c.z = arg0->z;
 
-	cam0f0b4eb8(&sp4c, sp44, fovy, aspect);
+	camProjectWithZoomAndAspect(&sp4c, sp44, fovy, aspect);
 
 	arg4[0] = sp44[0];
 
@@ -952,7 +948,7 @@ void func0f06803c(struct coord *arg0, float *arg1, float *arg2, float *arg3, flo
 	sp4c.y = arg2[1];
 	sp4c.z = arg0->z;
 
-	cam0f0b4eb8(&sp4c, sp44, fovy, aspect);
+	camProjectWithZoomAndAspect(&sp4c, sp44, fovy, aspect);
 
 	arg3[1] = sp44[1];
 
@@ -960,7 +956,7 @@ void func0f06803c(struct coord *arg0, float *arg1, float *arg2, float *arg3, flo
 	sp4c.y = arg2[0];
 	sp4c.z = arg0->z;
 
-	cam0f0b4eb8(&sp4c, sp44, fovy, aspect);
+	camProjectWithZoomAndAspect(&sp4c, sp44, fovy, aspect);
 
 	arg4[1] = sp44[1];
 }
@@ -973,7 +969,7 @@ struct defaultobj *objFindByPadNum(int padnum)
 		if (prop->type == PROPTYPE_OBJ) {
 			struct defaultobj *obj = prop->obj;
 
-			if (obj->pad == (s16)padnum) {
+			if (obj->pad == (int16_t)padnum) {
 				return obj;
 			}
 		}
@@ -2271,7 +2267,7 @@ void func0f06a730(struct defaultobj *obj, struct coord *arg1, Mtxf *mtx, RoomNum
 		pos2.y = centre->y - sp70.m[row][1] * min;
 		pos2.z = centre->z - sp70.m[row][2] * min;
 
-		func0f065e74(arg1, rooms, &pos2, rooms2);
+		propUpdatePositionRoomsSimple(arg1, rooms, &pos2, rooms2);
 
 		if (cdFindFloorRoomYColourFlagsAtPos(&pos2, rooms2, &y, &obj->floorcol, NULL) > 0)
 		{
@@ -2299,7 +2295,7 @@ void func0f06a730(struct defaultobj *obj, struct coord *arg1, Mtxf *mtx, RoomNum
 		}
 	}
 
-	func0f065e74(arg1, rooms, &pos2, rooms2);
+	propUpdatePositionRoomsSimple(arg1, rooms, &pos2, rooms2);
 	func0f06a580(obj, &pos2, &sp70, rooms2);
 }
 
@@ -2324,7 +2320,7 @@ void func0f06ab60(struct defaultobj *obj, struct coord *arg1, Mtxf *arg2, RoomNu
 	newpos.y = arg4->y - sp5c.m[2][1] * mult;
 	newpos.z = arg4->z - sp5c.m[2][2] * mult;
 
-	func0f065e74(arg1, rooms, &newpos, newrooms);
+	propUpdatePositionRoomsSimple(arg1, rooms, &newpos, newrooms);
 	func0f06a580(obj, &newpos, &sp5c, newrooms);
 }
 
@@ -2578,19 +2574,8 @@ bool func0f06b488(struct prop *prop, struct coord *arg1, struct coord *arg2, str
 	struct coord sp20;
 
 	if (!cd0002ded8(arg1, arg2, prop)) {
-#if VERSION >= VERSION_PAL_FINAL
-		cdGetEdge(&sp3c, &sp30, 2910, "prop/propobj.c");
-		cdGetPos(&sp20, 2911, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-		cdGetEdge(&sp3c, &sp30, 2910, "propobj.c");
-		cdGetPos(&sp20, 2911, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-		cdGetEdge(&sp3c, &sp30, 2909, "propobj.c");
-		cdGetPos(&sp20, 2910, "propobj.c");
-#else
-		cdGetEdge(&sp3c, &sp30, 2898, "propobj.c");
-		cdGetPos(&sp20, 2899, "propobj.c");
-#endif
+		cdGetEdge(&sp3c, &sp30);
+		cdGetPos(&sp20);
 
 		f0 = (sp20.f[0] - arg1->f[0]) * arg3->f[0]
 			+ (sp20.f[1] - arg1->f[1]) * arg3->f[1]
@@ -2660,7 +2645,7 @@ bool func0f06b610(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 
 	if (sum1 >= -f0 && sum1 <= arg4 + f0) {
 		if (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
-			if (var8005efc0 > 0.0f) {
+			if (g_ExtraBoundsDist > 0.0f) {
 				hitpart = modelTestForHit(model, arg5, arg6, &spe4);
 
 				while (hitpart > 0) {
@@ -2843,7 +2828,7 @@ bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelno
 	vertices = NULL;
 	s7 = false;
 
-	var8005efc0 = 2.5f / model->scale;
+	g_ExtraBoundsDist = 2.5f / model->scale;
 
 	sp74.x = arg3->x + arg4->f[0] * 32767.0f;
 	sp74.y = arg3->y + arg4->f[1] * 32767.0f;
@@ -2870,7 +2855,7 @@ bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelno
 				}
 			} else {
 				s7 = false;
-				var8005efc0 = 10.0f / model->scale;
+				g_ExtraBoundsDist = 10.0f / model->scale;
 
 				if (modelTestBboxNodeForHit(&rodata->bbox, modelFindNodeMtx(model, node, 0), arg3, arg4)) {
 					if (g_Vars.hitboundscount < ARRAYCOUNT(g_Vars.hitnodes)) {
@@ -2879,7 +2864,7 @@ bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelno
 					}
 				}
 
-				var8005efc0 = 2.5f / model->scale;
+				g_ExtraBoundsDist = 2.5f / model->scale;
 			}
 			break;
 		case MODELNODETYPE_DL:
@@ -2960,7 +2945,7 @@ bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelno
 		*arg9 = modelFindNodeMtxIndex(sp88, 0);
 	}
 
-	var8005efc0 = 0.0f;
+	g_ExtraBoundsDist = 0.0f;
 
 	return ok;
 }
@@ -2986,12 +2971,12 @@ bool func0f06c28c(struct chrdata *chr, struct coord *arg1, struct coord *arg2, s
 	struct model *model = chr->model;
 
 	if (chrGetShield(chr) > 0.0f) {
-		var8005efc0 = 10.0f / chr->model->scale;
+		g_ExtraBoundsDist = 10.0f / chr->model->scale;
 	}
 
 	if (-spe4 <= spd4 && spd4 <= arg4 + spe4 && func0f06b39c(arg1, arg3, &prop->pos, spe4)) {
 		if ((prop->flags & PROPFLAG_ONTHISSCREENTHISTICK)) {
-			if (var8005efc0 > 0.0f) {
+			if (g_ExtraBoundsDist > 0.0f) {
 				hitpart = modelTestForHit(model, arg5, arg6, &spcc);
 
 				while (hitpart > 0) {
@@ -3076,8 +3061,8 @@ bool func0f06c28c(struct chrdata *chr, struct coord *arg1, struct coord *arg2, s
 		}
 	}
 
-	if (var8005efc0 > 0.0f) {
-		var8005efc0 = 0.0f;
+	if (g_ExtraBoundsDist > 0.0f) {
+		g_ExtraBoundsDist = 0.0f;
 	}
 
 	return result;
@@ -3087,8 +3072,8 @@ bool projectileFindCollidingProp(struct prop *prop, struct coord *pos1, struct c
 {
 	bool result = false;
 	float dist;
-	s16 *propnumptr;
-	s16 propnums[256];
+	int16_t *propnumptr;
+	int16_t propnums[256];
 	float spa8;
 	bool spa4 = false;
 	struct coord sp98;
@@ -3228,7 +3213,7 @@ int func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 	if ((prop->pos.x != pos->x || prop->pos.y != pos->y || prop->pos.z != pos->z)
 			&& (obj->hidden & OBJHFLAG_PROJECTILE)
 			&& (obj->projectile->flags & PROJECTILEFLAG_STICKY)) {
-		portal00018148(&prop->pos, &sp1c4, prop->rooms, spb8, spcc, 20);
+		portalTraceLineThroughRooms(&prop->pos, &sp1c4, prop->rooms, spb8, spcc, 20);
 
 		ptr = spcc;
 
@@ -3267,15 +3252,7 @@ int func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 
 				if (cdExamLos09(&prop->pos, spa0, &sp1c4, CDTYPE_BG) == CDRESULT_COLLISION) {
 					s0 = true;
-#if VERSION >= VERSION_PAL_FINAL
-					cdGetPos(&hitthing.pos, 4258, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-					cdGetPos(&hitthing.pos, 4258, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-					cdGetPos(&hitthing.pos, 4257, "propobj.c");
-#else
-					cdGetPos(&hitthing.pos, 4246, "propobj.c");
-#endif
+					cdGetPos(&hitthing.pos);
 					cdGetObstacleNormal(&hitthing.unk0c);
 				}
 			}
@@ -3384,15 +3361,7 @@ bool func0f06d37c(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 			}
 
 			if (!result) {
-#if VERSION >= VERSION_PAL_FINAL
-				cdGetEdge(&sp64, &sp58, 4386, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-				cdGetEdge(&sp64, &sp58, 4386, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-				cdGetEdge(&sp64, &sp58, 4385, "propobj.c");
-#else
-				cdGetEdge(&sp64, &sp58, 4374, "propobj.c");
-#endif
+				cdGetEdge(&sp64, &sp58);
 
 				arg3->x = sp58.z - sp64.z;
 				arg3->y = 0.0f;
@@ -3484,7 +3453,7 @@ bool func0f06d37c(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 					sp4c.y = sp80.y;
 					sp4c.z = prop->pos.z;
 
-					func0f065e74(&prop->pos, prop->rooms, &sp4c, rooms);
+					propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp4c, rooms);
 
 					prop->pos.y = sp4c.y;
 
@@ -3941,13 +3910,13 @@ void objLand2(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
 	RoomNum newrooms[8];
 
 	func0f06e9cc(arg2, &sp40);
-	mtx00015f04(obj->model->scale, &sp40);
+	mtxScaleRotationPart(obj->model->scale, &sp40);
 
 	newpos.x = arg1->x - sp40.m[1][0] * ymin;
 	newpos.y = arg1->y - sp40.m[1][1] * ymin;
 	newpos.z = arg1->z - sp40.m[1][2] * ymin;
 
-	func0f065e74(&prop->pos, prop->rooms, &newpos, newrooms);
+	propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &newpos, newrooms);
 	func0f06a580(obj, &newpos, &sp40, newrooms);
 }
 
@@ -3975,7 +3944,7 @@ void boltLand(struct weaponobj *weapon, struct coord *arg1)
 	newpos.y = arg1->y - mtx.m[2][1] * zmax;
 	newpos.z = arg1->z - mtx.m[2][2] * zmax;
 
-	func0f065dd8(&prop->pos, prop->rooms, &newpos, newrooms);
+	propFindRoomsContainingNewPosSimple(&prop->pos, prop->rooms, &newpos, newrooms);
 	func0f06a580(&weapon->base, &newpos, &mtx, newrooms);
 
 	beamnum = boltbeamFindByProp(prop);
@@ -4009,13 +3978,13 @@ void knifeLand(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
 	func0f06e9cc(&sp1c, &sp90);
 	mtx4LoadXRotation(-1.5705463f, &sp50);
 	mtx4MultMtx4(&sp90, &sp50, &spd0);
-	mtx00015f04(obj->model->scale, &spd0);
+	mtxScaleRotationPart(obj->model->scale, &spd0);
 
 	newpos.x = arg1->x - zero;
 	newpos.y = arg1->y - zero;
 	newpos.z = arg1->z - zero;
 
-	func0f065e74(&prop->pos, prop->rooms, &newpos, newrooms);
+	propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &newpos, newrooms);
 	func0f06a580(obj, &newpos, &spd0, newrooms);
 }
 
@@ -4167,7 +4136,7 @@ bool propExplode(struct prop *prop, int exptype)
 			pos.z = parent->pos.z;
 		}
 
-		func0f065e74(&parent->pos, parent->rooms, &pos, rooms);
+		propUpdatePositionRoomsSimple(&parent->pos, parent->rooms, &pos, rooms);
 
 		result = explosionCreateComplex(NULL, &pos, rooms, exptype, playernum);
 	} else if ((obj->hidden & (OBJHFLAG_EMBEDDED | OBJHFLAG_PROJECTILE | OBJHFLAG_00020000)) == OBJHFLAG_00020000) {
@@ -4762,7 +4731,7 @@ int glassCalculateOpacity(struct coord *pos, float opadist, float maxopacity, fl
 struct prop *g_Lifts[10] = {NULL};
 
 #define BOB(minamount, randamount, accel, maxspeed) \
-	minamount, randamount, PALUPF(accel), PALUPF(maxspeed)
+	minamount, randamount, accel, maxspeed
 
 struct hovtype g_HovTypes[] = {
 	/* HOVTYPE_BED   */ { 90,  BOB(1, 2, 0.0010, 1.0), BOB(0.0062821852043271, 0.0062821852043271, 0.000010470308552613, 0.00031410926021636), BOB(0.0062821852043271, 0.0062821852043271, 0.000010470308552613, 0.00031410926021636) },
@@ -4870,7 +4839,7 @@ void liftActivate(struct prop *prop, uint8_t liftnum)
 	}
 }
 
-struct prop *liftFindByPad(s16 padnum)
+struct prop *liftFindByPad(int16_t padnum)
 {
 	struct pad pad;
 	padUnpack(padnum, PADFIELD_LIFT, &pad);
@@ -5169,11 +5138,11 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 
 		setupGetObjOverlappedRooms(obj, &sp90, obj->realrot, sp9c);
 
-		func0f065e74(&prop->pos, prop->rooms, &sp1b4, sp198);
+		propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp1b4, sp198);
 		roomsAppend(sp9c, sp198, ARRAYCOUNT(sp198));
 		ground1 = cdFindGroundAtCyl(&sp1b4, 5, sp198, &obj->floorcol, NULL);
 
-		func0f065e74(&prop->pos, prop->rooms, &sp1a8, sp188);
+		propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp1a8, sp188);
 		roomsAppend(sp9c, sp188, ARRAYCOUNT(sp188));
 		ground2 = cdFindGroundAtCyl(&sp1a8, 5, sp188, NULL, NULL);
 
@@ -5265,10 +5234,10 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 		float f12;
 		float f2;
 
-		hov->groundpitch += (groundangle - hov->groundpitch) * (PAL ? 0.0893f : 0.075f);
+		hov->groundpitch += (groundangle - hov->groundpitch) * 0.075f;
 
 		f0 = ground - hov->y;
-		f12 = (PAL ? 0.102000005f : 0.085f);
+		f12 = 0.085f;
 
 		if (hov->y < hov->ground) {
 			if (f0 >= 0.0f) {
@@ -5281,8 +5250,8 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 				f12 *= 1.0f + (f2 - 10.0f) * 0.2f;
 			}
 
-			if (f12 > PALUPF(0.5f)) {
-				f12 = PALUPF(0.5f);
+			if (f12 > 0.5f) {
+				f12 = 0.5f;
 			}
 
 			f0 *= f12;
@@ -5334,10 +5303,10 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 	}
 
 	mtx4LoadXRotation(xrot, &sp108);
-	mtx00015be0(&sp108, &sp148);
+	mtxApplyAffineTransformInPlace(&sp108, &sp148);
 	mtx4LoadYRotation(hov->yrot, &sp108);
-	mtx00015be0(&sp108, &sp148);
-	mtx00015f04(obj->model->scale, &sp148);
+	mtxApplyAffineTransformInPlace(&sp108, &sp148);
+	mtxScaleRotationPart(obj->model->scale, &sp148);
 
 	if (obj->type == OBJTYPE_HOVERBIKE) {
 		struct hoverbikeobj *bike = (struct hoverbikeobj *) obj;
@@ -5421,7 +5390,7 @@ int func0f072144(struct defaultobj *obj, struct coord *arg1, float arg2, bool ar
 		}
 
 		mtx4LoadYRotation(yrot, &spa4);
-		mtx00015f04(obj->model->scale, &spa4);
+		mtxScaleRotationPart(obj->model->scale, &spa4);
 		mtx4ToMtx3(&spa4, sp460);
 	} else {
 		yrot = 0.0f;
@@ -5451,7 +5420,7 @@ int func0f072144(struct defaultobj *obj, struct coord *arg1, float arg2, bool ar
 		pos.x += arg1->x;
 		pos.z += arg1->z;
 
-		func0f065e74(&prop->pos, prop->rooms, &pos, rooms);
+		propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &pos, rooms);
 		setupGetObjOverlappedRooms(obj, &pos, sp460, rooms);
 
 		if (obj->type == OBJTYPE_HOVERBIKE) {
@@ -5619,15 +5588,7 @@ float objCollide(struct defaultobj *movingobj, struct coord *movingvel, float ro
 
 				objApplyMomentum(obstacleobj, &obstaclevel, 0.0f, true, true);
 
-#if VERSION >= VERSION_PAL_FINAL
-				cdGetEdge(&sp70, &sp64, 7356, "prop/propobj.c");
-#elif VERSION >= VERSION_PAL_BETA
-				cdGetEdge(&sp70, &sp64, 7356, "propobj.c");
-#elif VERSION >= VERSION_NTSC_1_0
-				cdGetEdge(&sp70, &sp64, 7355, "propobj.c");
-#else
-				cdGetEdge(&sp70, &sp64, 7308, "propobj.c");
-#endif
+				cdGetEdge(&sp70, &sp64);
 
 				if (cdGetSavedPos(&sp58, &sp4c)) {
 					sp4c.x -= sp58.x;
@@ -5693,7 +5654,7 @@ void hoverbikeUpdateMovement(struct hoverbikeobj *bike, float speedforwards, flo
 	}
 
 	for (i = 0; i < g_Vars.lvupdate60; i++) {
-		bike->w += (tmp - bike->w) * (PAL ? 0.0893f : 0.075f);
+		bike->w += (tmp - bike->w) * 0.075f;
 	}
 
 	sp6c += bike->w * 12;
@@ -5772,18 +5733,18 @@ void hoverbikeUpdateMovement(struct hoverbikeobj *bike, float speedforwards, flo
 	sp68 += speedsideways * 0.2512874007225f;
 
 	for (i = 0; i < g_Vars.lvupdate60; i++) {
-		bike->speedabs[1] *= PAL ? 0.964f : 0.97f;
-		bike->speedabs[0] *= PAL ? 0.964f : 0.97f;
-		bike->speedabs[1] += bike->rels[1] * cosangle * PALUPF(1.08f);
-		bike->speedabs[0] += bike->rels[1] * sinangle * PALUPF(1.08f);
-		bike->speedabs[1] += bike->rels[0] * sinangle * PALUPF(0.72f);
-		bike->speedabs[0] += -bike->rels[0] * cosangle * PALUPF(0.72f);
+		bike->speedabs[1] *= 0.97f;
+		bike->speedabs[0] *= 0.97f;
+		bike->speedabs[1] += bike->rels[1] * cosangle * 1.08f;
+		bike->speedabs[0] += bike->rels[1] * sinangle * 1.08f;
+		bike->speedabs[1] += bike->rels[0] * sinangle * 0.72f;
+		bike->speedabs[0] += -bike->rels[0] * cosangle * 0.72f;
 	}
 
 	for (i = 0; i < g_Vars.lvupdate60; i++) {
-		bike->exreal += (sp70 - bike->exreal) * (PAL ? 0.0478f : 0.04f);
-		bike->ezreal += (sp6c - bike->ezreal) * (PAL ? 0.177f : 0.15f);
-		bike->ezreal2 += (sp68 - bike->ezreal2) * (PAL ? 0.0478f : 0.04f);
+		bike->exreal += (sp70 - bike->exreal) * 0.04f;
+		bike->ezreal += (sp6c - bike->ezreal) * 0.15f;
+		bike->ezreal2 += (sp68 - bike->ezreal2) * 0.04f;
 	}
 
 	if (speedforwards >= 0.99f) {
@@ -5858,8 +5819,8 @@ void hoverbikeUpdateMovement(struct hoverbikeobj *bike, float speedforwards, flo
 void platformDisplaceProps2(struct prop *platform, Mtxf *arg1)
 {
 	struct prop *prop;
-	s16 *propnumptr;
-	s16 propnums[256];
+	int16_t *propnumptr;
+	int16_t propnums[256];
 	uint8_t *sp9c;
 	uint8_t *sp98;
 	Mtxf sp58;
@@ -5888,7 +5849,7 @@ void platformDisplaceProps2(struct prop *platform, Mtxf *arg1)
 					prop->pos.z = sp58.m[3][2];
 
 					propDeregisterRooms(prop);
-					func0f065e74(&platform->pos, platform->rooms, &prop->pos, prop->rooms);
+					propUpdatePositionRoomsSimple(&platform->pos, platform->rooms, &prop->pos, prop->rooms);
 					func0f069c70(obj, true, true);
 				}
 			}
@@ -5955,14 +5916,14 @@ bool rocketTickFbw(struct weaponobj *rocket)
 		yrot = atan2f(ydist, sqrtf(xdist * xdist + zdist * zdist));
 
 		for (i = 0; i < g_Vars.lvupdate240; i++) {
-			projectile->unk018 = modelTweenRotAxis(projectile->unk018, xrot, PAL ? 0.02246f : 0.01875f);
-			projectile->unk014 = modelTweenRotAxis(projectile->unk014, yrot, PAL ? 0.02246f : 0.01875f);
+			projectile->unk018 = modelTweenRotAxis(projectile->unk018, xrot, 0.01875f);
+			projectile->unk014 = modelTweenRotAxis(projectile->unk014, yrot, 0.01875f);
 		}
 
 		mtx4LoadXRotation(M_TAU - projectile->unk014, &sp118);
 		mtx4LoadYRotation(projectile->unk018, &spd8);
 		mtx4MultMtx4(&spd8, &sp118, &sp98);
-		mtx00015f04(rocket->base.model->scale, &sp98);
+		mtxScaleRotationPart(rocket->base.model->scale, &sp98);
 		mtx4ToMtx3(&sp98, rocket->base.realrot);
 	}
 
@@ -6001,7 +5962,7 @@ bool rocketTickFbw(struct weaponobj *rocket)
 	}
 
 	if (cdresult == CDRESULT_NOCOLLISION) {
-		func0f065e74(&rocketprop->pos, rocketprop->rooms, &newpos, newrooms);
+		propUpdatePositionRoomsSimple(&rocketprop->pos, rocketprop->rooms, &newpos, newrooms);
 
 		rocketprop->pos.x = newpos.x;
 		rocketprop->pos.y = newpos.y;
@@ -6101,7 +6062,7 @@ int projectileLaunch(struct defaultobj *obj, struct projectile *projectile, stru
 	if (cdresult == CDRESULT_NOCOLLISION) {
 		RoomNum rooms[8];
 
-		func0f065e74(&prop->pos, prop->rooms, &projectile->nextsteppos, rooms);
+		propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &projectile->nextsteppos, rooms);
 
 		prop->pos.x = projectile->nextsteppos.x;
 		prop->pos.y = projectile->nextsteppos.y;
@@ -6116,7 +6077,7 @@ int projectileLaunch(struct defaultobj *obj, struct projectile *projectile, stru
 		if (weapon->weaponnum == WEAPON_ROCKET || weapon->weaponnum == WEAPON_HOMINGROCKET) {
 			weapon->timer240 = 0;
 
-			func0f065e74(&prop->pos, prop->rooms, arg2, rooms);
+			propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, arg2, rooms);
 
 			prop->pos.x = arg2->x;
 			prop->pos.y = arg2->y;
@@ -6344,7 +6305,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 							sp3c4.y -= sp3d0.y;
 							sp3c4.z -= sp3d0.z;
 						} else {
-							cdGetEdge(&sp3d0, &sp3c4, 8339, "propobj.c");
+							cdGetEdge(&sp3d0, &sp3c4);
 
 							sp3d0.x -= sp3c4.x;
 							sp3d0.y -= sp3c4.y;
@@ -6378,7 +6339,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 
 						projectile->unk0dc += f0;
 
-						cdGetEdge(&sp3e8, &sp3dc, 8377, "propobj.c");
+						cdGetEdge(&sp3e8, &sp3dc);
 
 						sp3f4.x = sp3dc.z - sp3e8.z;
 						sp3f4.y = 0.0f;
@@ -7024,7 +6985,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 						if (cdresult != CDRESULT_COLLISION) {
 							RoomNum rooms[8];
 
-							func0f065e74(&prop->pos, prop->rooms, &sp5dc, rooms);
+							propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp5dc, rooms);
 
 							prop->pos.x = sp5dc.x;
 							prop->pos.y = sp5dc.y;
@@ -7044,7 +7005,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 								sp5dc.z = sp5e8.z;
 							}
 
-							func0f065e74(&prop->pos, prop->rooms, &sp5dc, rooms);
+							propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp5dc, rooms);
 
 							prop->pos.x = sp5dc.x;
 							prop->pos.y = sp5dc.y;
@@ -7299,9 +7260,9 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 
 					quaternionSlerp(projectile->unk068, projectile->unk078, projectile->unk060, quaternion);
 					quaternionToMtx(quaternion, &spac);
-					mtx00015e24(projectile->unk0b8[0], &spac);
-					mtx00015e80(projectile->unk0b8[1], &spac);
-					mtx00015edc(projectile->unk0b8[2], &spac);
+					mtxScaleRow0Vec(projectile->unk0b8[0], &spac);
+					mtxScaleRow1Vec(projectile->unk0b8[1], &spac);
+					mtxScaleRow2Vec(projectile->unk0b8[2], &spac);
 					mtx4ToMtx3(&spac, obj->realrot);
 					stop = false;
 				}
@@ -7317,8 +7278,8 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 					stop = false;
 
 					for (i = 0; i < g_Vars.lvupdate60; i++) {
-						sp5dc.x += PALUPF(projectile->speed.x);
-						sp5dc.z += PALUPF(projectile->speed.z);
+						sp5dc.x += projectile->speed.x;
+						sp5dc.z += projectile->speed.z;
 
 						if (projectile->unk060 >= 1.0f) {
 							if (projectile->unk098 > 0.0f) {
@@ -7589,7 +7550,7 @@ void doorInitMatrices(struct prop *prop)
 	Mtxf *matrices = model->matrices;
 
 	func0f08c424(door, matrices);
-	mtx00015be0(camGetWorldToScreenMtxf(), matrices);
+	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), matrices);
 
 	if (model->definition->skel == &g_Skel11) {
 		union modelrodata *rodata;
@@ -7632,10 +7593,10 @@ void doorInitMatrices(struct prop *prop)
 	}
 }
 
-void platformDisplaceProps(struct prop *platform, s16 *propnums, struct coord *prevpos, struct coord *newpos)
+void platformDisplaceProps(struct prop *platform, int16_t *propnums, struct coord *prevpos, struct coord *newpos)
 {
 	struct prop *prop;
-	s16 *propnumptr = propnums;
+	int16_t *propnumptr = propnums;
 
 	while (*propnumptr >= 0) {
 		prop = &g_Vars.props[*propnumptr];
@@ -7666,7 +7627,7 @@ void platformDisplaceProps(struct prop *platform, s16 *propnums, struct coord *p
 
 					propDeregisterRooms(prop);
 
-					func0f065e74(&platform->pos, platform->rooms, &prop->pos, prop->rooms);
+					propUpdatePositionRoomsSimple(&platform->pos, platform->rooms, &prop->pos, prop->rooms);
 					func0f069c70(obj, true, true);
 				}
 			}
@@ -7677,7 +7638,7 @@ void platformDisplaceProps(struct prop *platform, s16 *propnums, struct coord *p
 			if (chr->fallspeed.y == 0.0f) {
 				chr->ground += newpos->y - prevpos->y;
 				chr->manground += newpos->y - prevpos->y;
-				chr->sumground = chr->manground * (PAL ? 8.417509f : 9.999998f);
+				chr->sumground = chr->manground * 10.0f;
 
 				prop->pos.x += newpos->x - prevpos->x;
 				prop->pos.y += newpos->y - prevpos->y;
@@ -7685,7 +7646,7 @@ void platformDisplaceProps(struct prop *platform, s16 *propnums, struct coord *p
 
 				propDeregisterRooms(prop);
 
-				func0f065e74(&platform->pos, platform->rooms, &prop->pos, prop->rooms);
+				propUpdatePositionRoomsSimple(&platform->pos, platform->rooms, &prop->pos, prop->rooms);
 				chrUpdateRooms(chr);
 				modelSetRootPosition(chr->model, &prop->pos);
 
@@ -7740,7 +7701,7 @@ void platformDisplaceProps(struct prop *platform, s16 *propnums, struct coord *p
 								sp78.y = prop->pos.y + ydist;
 								sp78.z = prop->pos.z;
 
-								func0f065e74(&prop->pos, prop->rooms, &sp78, sp68);
+								propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp78, sp68);
 
 								prop->pos.x = sp78.x;
 								prop->pos.y = sp78.y;
@@ -7750,10 +7711,10 @@ void platformDisplaceProps(struct prop *platform, s16 *propnums, struct coord *p
 								roomsCopy(sp68, prop->rooms);
 
 								g_Vars.players[playernum]->vv_manground += ydist;
-								g_Vars.players[playernum]->sumground = g_Vars.players[playernum]->vv_manground / (PAL ? 0.054400026798248f : 0.045499980449677f);
+								g_Vars.players[playernum]->sumground = g_Vars.players[playernum]->vv_manground / 0.045499980449677f;
 							} else if (bwalkTryMoveUpwards(ydist) == CDRESULT_NOCOLLISION) {
 								g_Vars.players[playernum]->vv_manground += ydist;
-								g_Vars.players[playernum]->sumground = g_Vars.players[playernum]->vv_manground / (PAL ? 0.054400026798248f : 0.045499980449677f);
+								g_Vars.players[playernum]->sumground = g_Vars.players[playernum]->vv_manground / 0.045499980449677f;
 							}
 
 							playerUpdatePerimInfo();
@@ -7791,7 +7752,7 @@ void liftTick(struct prop *prop)
 	RoomNum newrooms[8];
 	struct coord prevpos;
 	float prevdist;
-	s16 propnums[256];
+	int16_t propnums[256];
 	int stop;
 
 	lift->prevpos.x = prop->pos.x;
@@ -7874,7 +7835,7 @@ void liftTick(struct prop *prop)
 				}
 			}
 
-			func0f065e74(&prop->pos, prop->rooms, &newpos, newrooms);
+			propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &newpos, newrooms);
 
 			prop->pos.x = newpos.x;
 			prop->pos.y = newpos.y;
@@ -7912,7 +7873,7 @@ void escastepTick(struct prop *prop)
 	int i;
 	float mult;
 	struct coord oldpos;
-	s16 propnums[256];
+	int16_t propnums[256];
 	bool resetting;
 
 	resetting = false;
@@ -8187,7 +8148,7 @@ void cctvInitMatrices(struct prop *prop, Mtxf *mtx)
 
 	mtx4TransformVecInPlace(mtx, &sp64);
 	mtx4SetTranslation(&sp64, &matrices[1]);
-	mtx00015be0(camGetWorldToScreenMtxf(), &matrices[1]);
+	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &matrices[1]);
 }
 
 void fanTick(struct prop *prop)
@@ -8306,8 +8267,14 @@ void autogunTick(struct prop *prop)
 			autogun->yzero = RANDOMFRAC() * M_TAU;
 		}
 
-		applyRotation(&autogun->yrot, autogun->yzero, &autogun->yspeed, PALUPF(0.00001163367596746f), PALUPF(0.00001163367596746f), PALUPF(0.00069802056532353f));
-		applyRotation(&autogun->xrot, autogun->xzero, &autogun->xspeed, PALUPF(0.0000058168379837298f), PALUPF(0.0000058168379837298f), PALUPF(0.00034901028266177f));
+		applyRotation(&autogun->yrot, autogun->yzero, &autogun->yspeed,
+			0.00001163367596746f,
+			0.00001163367596746f,
+			0.00069802056532353f);
+		applyRotation(&autogun->xrot, autogun->xzero, &autogun->xspeed,
+			0.0000058168379837298f,
+			0.0000058168379837298f,
+			0.00034901028266177f);
 		return;
 	}
 
@@ -8323,8 +8290,14 @@ void autogunTick(struct prop *prop)
 			autogun->yzero = RANDOMFRAC() * M_TAU;
 		}
 
-		applyRotation(&autogun->yrot, autogun->yzero, &autogun->yspeed, PALUPF(0.00001163367596746f), PALUPF(0.00001163367596746f), PALUPF(0.00069802056532353f));
-		applyRotation(&autogun->xrot, autogun->xzero, &autogun->xspeed, PALUPF(0.0000058168379837298f), PALUPF(0.0000058168379837298f), PALUPF(0.00034901028266177f));
+		applyRotation(&autogun->yrot, autogun->yzero, &autogun->yspeed,
+			0.00001163367596746f,
+			0.00001163367596746f,
+			0.00069802056532353f);
+		applyRotation(&autogun->xrot, autogun->xzero, &autogun->xspeed,
+			0.0000058168379837298f,
+			0.0000058168379837298f,
+			0.00034901028266177f);
 
 		maxspeed = cosf(autogun->yrot);
 
@@ -8596,7 +8569,7 @@ void autogunTick(struct prop *prop)
 
 	// The turret swivels left and right while firing
 	if (autogun->firing) {
-		goalyrot += limitangle * 0.8f * sinf((g_Vars.lvframe60 % TICKS(120)) * PALUPF(0.05235154f));
+		goalyrot += limitangle * 0.8f * sinf((g_Vars.lvframe60 % TICKS(120)) * 0.05235154f);
 
 		if (goalyrot < 0.0f) {
 			goalyrot += M_TAU;
@@ -8629,8 +8602,8 @@ void autogunTick(struct prop *prop)
 		goalyrot -= M_TAU;
 	}
 
-	applyRotation(&autogun->yrot, goalyrot, &autogun->yspeed, PALUPF(0.00087252567755058f), PALUPF(0.00087252567755058f), autogun->maxspeed);
-	applyRotation(&autogun->xrot, goalxrot, &autogun->xspeed, PALUPF(0.00087252567755058f), PALUPF(0.00087252567755058f), autogun->maxspeed);
+	applyRotation(&autogun->yrot, goalyrot, &autogun->yspeed, 0.00087252567755058f, 0.00087252567755058f, autogun->maxspeed);
+	applyRotation(&autogun->xrot, goalxrot, &autogun->xspeed, 0.00087252567755058f, 0.00087252567755058f, autogun->maxspeed);
 
 	f12 = goalyrot - autogun->yrot;
 
@@ -8736,21 +8709,21 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 	mtx4TransformVecInPlace(mtx, &sp4c);
 	mtx4LoadYRotation(yrot, &matrices[1]);
 	mtx4SetTranslation(&sp4c, &matrices[1]);
-	mtx00015f04(autogun->base.model->scale, &matrices[1]);
-	mtx00015be0(camGetWorldToScreenMtxf(), &matrices[1]);
+	mtxScaleRotationPart(autogun->base.model->scale, &matrices[1]);
+	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &matrices[1]);
 
 	node2 = modelGetPart(model->definition, MODELPART_AUTOGUN_0002);
 	rodata = node2->rodata;
 	mtx4LoadZRotation(xrot, &matrices[2]);
 	mtx4SetTranslation(&rodata->position.pos, &matrices[2]);
-	mtx00015be0(&matrices[1], &matrices[2]);
+	mtxApplyAffineTransformInPlace(&matrices[1], &matrices[2]);
 
 	tmp = modelFindNodeMtx(model, node2, 0x100);
 
 	if (tmp != NULL) {
 		mtx4LoadZRotation(xrot * 0.5f, tmp);
 		mtx4SetTranslation(&rodata->position.pos, tmp);
-		mtx00015be0(&matrices[1], tmp);
+		mtxApplyAffineTransformInPlace(&matrices[1], tmp);
 	}
 
 	node3 = modelGetPart(model->definition, MODELPART_AUTOGUN_0003);
@@ -8760,7 +8733,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 		rodata = node3->rodata;
 		mtx4LoadXRotation(autogun->barrelrot, tmp);
 		mtx4SetTranslation(&rodata->position.pos, tmp);
-		mtx00015be0(&matrices[2], tmp);
+		mtxApplyAffineTransformInPlace(&matrices[2], tmp);
 	}
 
 	node4 = modelGetPart(model->definition, MODELPART_AUTOGUN_0004);
@@ -8769,7 +8742,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 		tmp = modelFindNodeMtx(model, node4, 0);
 		rodata = node4->rodata;
 		mtx4LoadTranslation(&rodata->position.pos, tmp);
-		mtx00015be0(&matrices[2], tmp);
+		mtxApplyAffineTransformInPlace(&matrices[2], tmp);
 	}
 
 	node6 = modelGetPart(model->definition, MODELPART_AUTOGUN_0006);
@@ -8779,7 +8752,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 		rodata = node6->rodata;
 		mtx4LoadXRotation(autogun->barrelrot, tmp);
 		mtx4SetTranslation(&rodata->position.pos, tmp);
-		mtx00015be0(&matrices[2], tmp);
+		mtxApplyAffineTransformInPlace(&matrices[2], tmp);
 	}
 }
 
@@ -8899,7 +8872,7 @@ void autogunTickShoot(struct prop *autogunprop)
 						|| (targetprop && (targetprop->type == PROPTYPE_CHR))
 						|| (g_Vars.antiplayernum >= 0 && targetprop && targetprop == g_Vars.anti->prop)) {
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos, CDTYPE_ALL, GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-						cdGetPos(&hitpos, 11458, "propobj.c");
+						cdGetPos(&hitpos);
 
 						hitprop = cdGetObstacleProp();
 
@@ -8948,7 +8921,7 @@ void autogunTickShoot(struct prop *autogunprop)
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos,
 								CDTYPE_ALL & ~CDTYPE_PLAYERS,
 								GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-						cdGetPos(&hitpos, 11513, "propobj.c");
+						cdGetPos(&hitpos);
 
 						hitprop = cdGetObstacleProp();
 						missed = true;
@@ -8978,7 +8951,7 @@ void autogunTickShoot(struct prop *autogunprop)
 					if (cdExamLos08(&gunpos, gunrooms, &hitpos,
 								CDTYPE_DOORS | CDTYPE_BG,
 								GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
-						cdGetPos(&hitpos, 11539, "propobj.c");
+						cdGetPos(&hitpos);
 
 						missed = true;
 					}
@@ -9048,7 +9021,7 @@ void autogunTickShoot(struct prop *autogunprop)
 				}
 
 				if (missed) {
-					portal00018148(&gunpos, &hitpos, gunrooms, hitrooms, NULL, 0);
+					portalTraceLineThroughRooms(&gunpos, &hitpos, gunrooms, hitrooms, NULL, 0);
 
 					if (chrIsUsingPaintball(ownerchr)) {
 						sparksCreate(hitrooms[0], NULL, &hitpos, 0, 0, SPARKTYPE_PAINT);
@@ -9649,7 +9622,7 @@ void chopperIncrementMovement(struct prop *prop, float goalroty, float goalrotx,
 	}
 
 	mtx4LoadRotation(&spfc, &sp7c);
-	mtx00015f04(chopper->base.model->scale, &sp7c);
+	mtxScaleRotationPart(chopper->base.model->scale, &sp7c);
 	mtx4MultMtx4(&sp7c, &sp3c, &spbc);
 	mtx4ToMtx3(&spbc, rotmtx3);
 	mtx3Copy(rotmtx3, chopper->base.realrot);
@@ -9680,7 +9653,7 @@ void chopperIncrementMovement(struct prop *prop, float goalroty, float goalrotx,
 	newpos.y = prop->pos.y + chopper->vy * g_Vars.lvupdate60freal;
 	newpos.z = prop->pos.z + chopper->vz * g_Vars.lvupdate60freal;
 
-	func0f065e74(&prop->pos, prop->rooms, &newpos, newrooms);
+	propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &newpos, newrooms);
 
 	prop->pos.x = newpos.x;
 	prop->pos.y = newpos.y;
@@ -9780,12 +9753,12 @@ void chopperTickFall(struct prop *chopperprop)
 	} else {
 		// Area 51 interceptors do collision checks
 		// and explode once they hit the ground.
-		float mult = 1.0f - PALUPF(0.02f);
+		float mult = 1.0f - 0.02f;
 		float bob;
 		int i;
 
 		for (i = 1; i < g_Vars.lvupdate60; i++) {
-			mult *= 1.0f - PALUPF(0.02f);
+			mult *= 1.0f - 0.02f;
 		}
 
 		bob = chopper->bob + 0.052358999848366f;
@@ -9821,13 +9794,13 @@ void chopperTickFall(struct prop *chopperprop)
 			ground = cdFindGroundAtCyl(&chopperprop->pos, 5, chopperprop->rooms, NULL, NULL);
 			chopperprop->pos.y -= 100;
 
-			cdGetPos(&sp64, 12449, "propobj.c");
+			cdGetPos(&sp64);
 
 			newpos.x = sp64.x;
 			newpos.y = ground + 20;
 			newpos.z = sp64.z;
 
-			func0f065e74(&chopperprop->pos, chopperprop->rooms, &newpos, newrooms);
+			propUpdatePositionRoomsSimple(&chopperprop->pos, chopperprop->rooms, &newpos, newrooms);
 
 			chopperprop->pos.x = newpos.x;
 			chopperprop->pos.y = newpos.y;
@@ -10096,8 +10069,8 @@ void chopperTickCombat(struct prop *chopperprop)
 	}
 }
 
-#define HOVVALUE1() ((ishoverbot ? 15.0f : 5.0f) * PALUPF(0.00021813141938765f))
-#define HOVVALUE2() ((ishoverbot ? 15.0f : 5.0f) * PALUPF(0.013087885454297f))
+#define HOVVALUE1() ((ishoverbot ? 15.0f : 5.0f) * 0.00021813141938765f)
+#define HOVVALUE2() ((ishoverbot ? 15.0f : 5.0f) * 0.013087885454297f)
 
 void hovercarTick(struct prop *prop)
 {
@@ -10186,7 +10159,7 @@ void hovercarTick(struct prop *prop)
 					hovercar->speedtime60 = 1;
 				}
 
-				func0f065e74(&prop->pos, prop->rooms, &sp1c0, sp1b0);
+				propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp1c0, sp1b0);
 
 				prop->pos.x = sp1c0.x;
 				prop->pos.y = sp1c0.y;
@@ -10311,11 +10284,7 @@ void hovercarTick(struct prop *prop)
 		}
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (hovercar->speed > 0)
-#else
-	if (hovercar->speed != 0.0f)
-#endif
 	{
 		sp190 = hovercar->roty;
 		sp18c = hovercar->rotx;
@@ -10362,7 +10331,7 @@ void hovercarTick(struct prop *prop)
 		}
 
 		mtx4LoadRotation(&sp12c, &spac);
-		mtx00015f04(hovercar->base.model->scale, &spac);
+		mtxScaleRotationPart(hovercar->base.model->scale, &spac);
 		mtx4MultMtx4(&spac, &sp6c, &spec);
 		mtx4ToMtx3(&spec, sp15c);
 		mtx3Copy(sp15c, hovercar->base.realrot);
@@ -10377,16 +10346,14 @@ void hovercarTick(struct prop *prop)
 		sp150.y = prop->pos.y + sp194.f[1] * (hovercar->speed * g_Vars.lvupdate60freal);
 		sp150.z = prop->pos.z + sp194.f[2] * (hovercar->speed * g_Vars.lvupdate60freal);
 
-		func0f065e74(&prop->pos, prop->rooms, &sp150, sp140);
+		propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp150, sp140);
 
 		if (ishoverbot) {
 			sp150.y = cdFindGroundAtCyl(&sp150, 5, sp140, NULL, NULL) + 35;
 
-#if VERSION >= VERSION_NTSC_1_0
 			if (sp150.y < -100000) {
 				sp150.y = prop->pos.y + sp194.f[1] * (hovercar->speed * g_Vars.lvupdate60freal);
 			}
-#endif
 		}
 
 		prop->pos.x = sp150.x;
@@ -10516,19 +10483,19 @@ void hangingmonitorInitMatrices(struct prop *prop)
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0000);
 	mtx4LoadTranslation(&rodata->position.pos, &matrices[1]);
-	mtx00015be0(matrices, &matrices[1]);
+	mtxApplyAffineTransformInPlace(matrices, &matrices[1]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0001);
 	mtx4LoadTranslation(&rodata->position.pos, &matrices[2]);
-	mtx00015be0(matrices, &matrices[2]);
+	mtxApplyAffineTransformInPlace(matrices, &matrices[2]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0002);
 	mtx4LoadTranslation(&rodata->position.pos, &matrices[3]);
-	mtx00015be0(matrices, &matrices[3]);
+	mtxApplyAffineTransformInPlace(matrices, &matrices[3]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0003);
 	mtx4LoadTranslation(&rodata->position.pos, &matrices[4]);
-	mtx00015be0(matrices, &matrices[4]);
+	mtxApplyAffineTransformInPlace(matrices, &matrices[4]);
 }
 
 void objInitMatrices(struct prop *prop)
@@ -10796,9 +10763,9 @@ int objTickPlayer(struct prop *prop)
 						sp400.z = sp412.m[3][2];
 
 						if (obj->flags3 & OBJFLAG3_00000010) {
-							func0f065e98(&prop->pos, prop->rooms, &sp400, sp384);
+							propResolveNewPositionRooms(prop->rooms, &sp400, sp384);
 						} else {
-							func0f065e74(&prop->pos, prop->rooms, &sp400, sp384);
+							propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp400, sp384);
 						}
 
 						prop->pos.x = sp400.x;
@@ -10891,9 +10858,9 @@ int objTickPlayer(struct prop *prop)
 				sp236.z = (float)sp116.z + prop->pos.z;
 
 				if (obj->flags3 & OBJFLAG3_00000010) {
-					func0f065e98(&prop->pos, prop->rooms, &sp236, sp220);
+					propResolveNewPositionRooms(prop->rooms, &sp236, sp220);
 				} else {
-					func0f065e74(&prop->pos, prop->rooms, &sp236, sp220);
+					propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp236, sp220);
 				}
 
 				if (modelGetCurAnimFrame(model) >= modelGetNumAnimFrames(model) - 1) {
@@ -12094,7 +12061,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 				if (obj->flags2 & OBJFLAG2_DRAWONTOP) {
 					sp60 = 0;
 				} else if (obj->flags & OBJFLAG_DEACTIVATED) {
-					sp60 = wallhit0f140750(&prop->pos);
+					sp60 = wallhitCalcLiftDistance(&prop->pos);
 				} else {
 					sp60 = 1;
 				}
@@ -12108,7 +12075,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 				if (obj->flags2 & OBJFLAG2_DRAWONTOP) {
 					sp60 = 0;
 				} else if (obj->flags & OBJFLAG_DEACTIVATED) {
-					sp60 = wallhit0f140750(&prop->pos);
+					sp60 = wallhitCalcLiftDistance(&prop->pos);
 				} else {
 					sp60 = 1;
 				}
@@ -12118,7 +12085,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 				if (obj->flags2 & OBJFLAG2_DRAWONTOP) {
 					sp60 = 0;
 				} else if (obj->flags & (OBJFLAG_DEACTIVATED | OBJFLAG_MONITOR_20000000)) {
-					sp60 = wallhit0f140750(&prop->pos);
+					sp60 = wallhitCalcLiftDistance(&prop->pos);
 				} else {
 					sp60 = 1;
 				}
@@ -12201,7 +12168,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 			if (orthogonal) {
 				player0f0c3320(model->matrices, model->definition->nummatrices);
 			} else {
-				mtxF2LBulk(model->matrices, model->definition->nummatrices);
+				mtxConvertToFixedPoint(model->matrices, model->definition->nummatrices);
 			}
 
 			if ((obj->flags3 & (OBJFLAG3_SHOWSHIELD | OBJFLAG3_SHIELDHIT)) && objIsHealthy(obj)) {
@@ -12290,11 +12257,7 @@ Gfx *objRenderShadow(struct defaultobj *obj, Gfx *gdl)
 	float angle;
 	float y;
 
-#if VERSION >= VERSION_NTSC_1_0
 	int room = cdFindFloorRoomYColourFlagsAtPos(&obj->prop->pos, obj->prop->rooms, &y, NULL, NULL);
-#else
-	int room = cdFindFloorRoomYColourFlagsAtPos(&obj->prop->pos, obj->prop->rooms, &y, NULL);
-#endif
 
 	if (room > 0 && (obj->modelnum == MODEL_HOOVERBOT || obj->modelnum == MODEL_TESTERBOT)) {
 		angle = hoverpropGetTurnAngle(obj);
@@ -12344,7 +12307,7 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		frac = objCalculateFadeDistOpacityFrac(prop, modelGetEffectiveScale(obj->model));
 
 		if (prop->timetoregen > 0 && prop->timetoregen < TICKS(60)) {
-			frac *= (TICKS(60.0f) - prop->timetoregen) * (PAL ? 0.019999999552965f : 0.016666667535901f);
+			frac *= (TICKS(60.0f) - prop->timetoregen) * 0.016666667535901f;
 		}
 
 		alpha = frac * 255.0f;
@@ -12387,7 +12350,7 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 	if (g_Vars.lvmpbotlevel && obj->type == OBJTYPE_WEAPON) {
 		if (obj->flags3 & OBJFLAG3_HARDFREEING) {
 			weapon = (struct weaponobj *)obj;
-			alpha = ((float)alpha * (float)weapon->fadeouttimer60) * (PAL ? 0.019999999552965f : 0.016666667535901f);
+			alpha = ((float)alpha * (float)weapon->fadeouttimer60) * 0.016666667535901f;
 
 			if (alpha < 0) {
 				alpha = 0;
@@ -12758,13 +12721,10 @@ void objDeform(struct defaultobj *obj, int level)
 					}
 
 					for (i = 0; i < rodata->numvertices; i++) {
-						s16 tmp = average;
+						int16_t tmp = average;
 
 						rng2SetSeed(rodata->vertices[i].x + rodata->vertices[i].y + rodata->vertices[i].z + salt);
 
-#if VERSION < VERSION_NTSC_1_0
-						if (uninitialisedvariable)
-#endif
 						{
 							if (swap) {
 								if (rwdata->vertices[i].v[axis] >= tmp) {
@@ -12790,28 +12750,28 @@ void objDeform(struct defaultobj *obj, int level)
 						rwdata->vertices[i].z += (int)(((int)(random2() % 20) - 10) * spb0[2]);
 
 						if (parentbbox != NULL) {
-							if (rwdata->vertices[i].x < (s16)parentbbox->xmin) {
-								rwdata->vertices[i].x = (s16)parentbbox->xmin;
+							if (rwdata->vertices[i].x < (int16_t)parentbbox->xmin) {
+								rwdata->vertices[i].x = (int16_t)parentbbox->xmin;
 							}
 
-							if (rwdata->vertices[i].x > (s16)parentbbox->xmax) {
-								rwdata->vertices[i].x = (s16)parentbbox->xmax;
+							if (rwdata->vertices[i].x > (int16_t)parentbbox->xmax) {
+								rwdata->vertices[i].x = (int16_t)parentbbox->xmax;
 							}
 
-							if (rwdata->vertices[i].y < (s16)parentbbox->ymin) {
-								rwdata->vertices[i].y = (s16)parentbbox->ymin;
+							if (rwdata->vertices[i].y < (int16_t)parentbbox->ymin) {
+								rwdata->vertices[i].y = (int16_t)parentbbox->ymin;
 							}
 
-							if (rwdata->vertices[i].y > (s16)parentbbox->ymax) {
-								rwdata->vertices[i].y = (s16)parentbbox->ymax;
+							if (rwdata->vertices[i].y > (int16_t)parentbbox->ymax) {
+								rwdata->vertices[i].y = (int16_t)parentbbox->ymax;
 							}
 
-							if (rwdata->vertices[i].z < (s16)parentbbox->zmin) {
-								rwdata->vertices[i].z = (s16)parentbbox->zmin;
+							if (rwdata->vertices[i].z < (int16_t)parentbbox->zmin) {
+								rwdata->vertices[i].z = (int16_t)parentbbox->zmin;
 							}
 
-							if (rwdata->vertices[i].z > (s16)parentbbox->zmax) {
-								rwdata->vertices[i].z = (s16)parentbbox->zmax;
+							if (rwdata->vertices[i].z > (int16_t)parentbbox->zmax) {
+								rwdata->vertices[i].z = (int16_t)parentbbox->zmax;
 							}
 						}
 					}
@@ -12874,15 +12834,9 @@ void objBounce(struct defaultobj *obj, struct coord *gundir2d)
 		projectile->speed.y = (RANDOMFRAC() * 3.3333333f) + 3.3333333f;
 		projectile->speed.z = (RANDOMFRAC() * 6.6666665f) - 3.3333333f;
 
-#if PAL
-		rot.x = RANDOMFRAC() * 0.029447744f - 0.014723872f;
-		rot.y = RANDOMFRAC() * 0.029447744f - 0.014723872f;
-		rot.z = RANDOMFRAC() * 0.029447744f - 0.014723872f;
-#else
 		rot.x = RANDOMFRAC() * 0.024539785f - 0.012269893f;
 		rot.y = RANDOMFRAC() * 0.024539785f - 0.012269893f;
 		rot.z = RANDOMFRAC() * 0.024539785f - 0.012269893f;
-#endif
 
 		mtx4LoadRotation(&rot, &projectile->mtx);
 
@@ -12964,14 +12918,14 @@ void objApplyMomentum(struct defaultobj *obj, struct coord *speed, float rotatio
 				projectile->bounciness = 0.8f;
 				projectile->unk098 = 0.0027777778f;
 				projectile->unk0e0 = 0.000041881234f;
-				projectile->unk0e4 = PAL ? 0.969f : 0.974f;
+				projectile->unk0e4 = 0.974f;
 				projectile->unk0ec = 0.07852732f;
 				projectile->unk0f0 = 6.6666665f;
 			} else {
 				projectile->bounciness = 0.5f;
 				projectile->unk098 = 0.013888889f;
 				projectile->unk0e0 = 0.00020940616f;
-				projectile->unk0e4 = PAL ? 0.953f : 0.961f;
+				projectile->unk0e4 = 0.961f;
 				projectile->unk0ec = 0.07852732f;
 				projectile->unk0f0 = 6.6666665f;
 			}
@@ -12987,21 +12941,21 @@ void objApplyMomentum(struct defaultobj *obj, struct coord *speed, float rotatio
 			projectile->bounciness = 0.1f;
 			projectile->unk098 = 0.055555556f;
 			projectile->unk0e0 = 0.00083762466f;
-			projectile->unk0e4 = PAL ? 0.953f : 0.961f;
+			projectile->unk0e4 = 0.961f;
 			projectile->unk0ec = 0.009815915f;
 			projectile->unk0f0 = 0.8333333f;
 		} else if (sp24 > 75.0f || sp20 > 75.0f) {
 			projectile->bounciness = 0.1f;
 			projectile->unk098 = 0.055555556f;
 			projectile->unk0e0 = 0.00083762466f;
-			projectile->unk0e4 = PAL ? 0.953f : 0.961f;
+			projectile->unk0e4 = 0.961f;
 			projectile->unk0ec = 0.01963183f;
 			projectile->unk0f0 = 0.8333333f;
 		} else {
 			projectile->bounciness = 0.1f;
 			projectile->unk098 = 0.055555556f;
 			projectile->unk0e0 = 0.00041881233f;
-			projectile->unk0e4 = PAL ? 0.953f : 0.961f;
+			projectile->unk0e4 = 0.961f;
 			projectile->unk0ec = 0.07852732f;
 			projectile->unk0f0 = 1.6666666f;
 		}
@@ -13134,7 +13088,7 @@ bool objDrop(struct prop *prop, bool lazy)
 			spe4.z += root->pos.z;
 
 			mtx4SetTranslation(&spe4, &spf0);
-			func0f065e74(&root->pos, root->rooms, &spe4, rooms);
+			propUpdatePositionRoomsSimple(&root->pos, root->rooms, &spe4, rooms);
 		} else {
 			if (projectile->droptype == DROPTYPE_SURRENDER && parent->type == PROPTYPE_CHR) {
 				struct chrdata *chr = parent->chr;
@@ -13145,9 +13099,9 @@ bool objDrop(struct prop *prop, bool lazy)
 				projectile->speed.y = -RANDOMFRAC() * 0.83333331346512f;
 				projectile->speed.z = cosf(angle) * 1.6666666269302f;
 
-				rot.x = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
-				rot.y = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
-				rot.z = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
+				rot.x = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
+				rot.y = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
+				rot.z = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 
 				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
 			} else if (projectile->droptype == DROPTYPE_THROWGRENADE && parent->type == PROPTYPE_CHR) {
@@ -13170,9 +13124,9 @@ bool objDrop(struct prop *prop, bool lazy)
 				projectile->speed.y = (((dist >= 1200) * ((dist - 1200) / 1200)) + 1) * 6.6666665077209f;
 				projectile->speed.z = cosf(angle) * 13.333333015442f * (dist / 1000);
 
-				rot.x = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
-				rot.y = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
-				rot.z = RANDOMFRAC() * PALUPF(0.012269892729819f) - PALUPF(0.0061349463649094f);
+				rot.x = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
+				rot.y = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
+				rot.z = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 
 				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
 				projectileSetSticky(prop);
@@ -13187,9 +13141,9 @@ bool objDrop(struct prop *prop, bool lazy)
 				projectile->speed.y = RANDOMFRAC() * 3.3333332538605f;
 				projectile->speed.z = (RANDOMFRAC() * 3.3333332538605f + 3.3333332538605f) * cosf(angle);
 
-				rot.x = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
-				rot.y = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
-				rot.z = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
+				rot.x = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
+				rot.y = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
+				rot.z = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 
 				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
 			} else if (projectile->droptype == DROPTYPE_OWNERREAP) {
@@ -13199,9 +13153,9 @@ bool objDrop(struct prop *prop, bool lazy)
 				projectile->speed.y = 0.0f;
 				projectile->speed.z = (0.5f - RANDOMFRAC()) * 1.6666666269302f;
 
-				rot.x = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
-				rot.y = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
-				rot.z = RANDOMFRAC() * PALUPF(0.049079570919275f) - PALUPF(0.024539785459638f);
+				rot.x = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
+				rot.y = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
+				rot.z = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 
 				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
 			} else {
@@ -13234,7 +13188,7 @@ bool objDrop(struct prop *prop, bool lazy)
 			} else {
 				// No collision checks
 				mtx4LoadIdentity(&spf0);
-				mtx00015f04(model->scale, &spf0);
+				mtxScaleRotationPart(model->scale, &spf0);
 				mtx4SetTranslation(&root->pos, &spf0);
 				roomsCopy(root->rooms, rooms);
 			}
@@ -13285,17 +13239,12 @@ bool objDrop(struct prop *prop, bool lazy)
  */
 void objFall(struct defaultobj *obj, int playernum)
 {
-#if VERSION >= VERSION_NTSC_1_0
 	if (obj->type == OBJTYPE_AUTOGUN && g_Vars.normmplayerisrunning) {
 		// Don't set owner playernum
 	} else {
 		obj->hidden &= 0x0fffffff;
 		obj->hidden |= (playernum << 28) & 0xf0000000;
 	}
-#else
-	obj->hidden &= 0x0fffffff;
-	obj->hidden |= (playernum << 28) & 0xf0000000;
-#endif
 
 	if ((obj->flags2 & OBJFLAG2_NOFALL) == 0
 			&& (obj->flags3 & OBJFLAG3_10000000) == 0
@@ -13316,15 +13265,9 @@ void objFall(struct defaultobj *obj, int playernum)
 			projectile->speed.z = RANDOMFRAC() * 1.6666666f - 0.8333333f;
 
 			if ((obj->flags2 & OBJFLAG2_FALLWITHOUTROTATION) == 0) {
-#if PAL
-				rot.x = RANDOMFRAC() * 0.0058895489f - 0.0029447745f;
-				rot.y = RANDOMFRAC() * 0.0058895489f - 0.0029447745f;
-				rot.z = RANDOMFRAC() * 0.0058895489f - 0.0029447745f;
-#else
 				rot.x = RANDOMFRAC() * 0.0049079573f - 0.0024539786f;
 				rot.y = RANDOMFRAC() * 0.0049079573f - 0.0024539786f;
 				rot.z = RANDOMFRAC() * 0.0049079573f - 0.0024539786f;
-#endif
 			}
 
 			mtx4LoadRotation(&rot, &projectile->mtx);
@@ -13346,8 +13289,8 @@ void objFall(struct defaultobj *obj, int playernum)
 void objDestroySupportedObjects(struct prop *tableprop, int playernum)
 {
 	struct prop *prop;
-	s16 *propnumptr;
-	s16 propnums[256];
+	int16_t *propnumptr;
+	int16_t propnums[256];
 	uint8_t *start;
 	uint8_t *end;
 
@@ -13362,9 +13305,7 @@ void objDestroySupportedObjects(struct prop *tableprop, int playernum)
 			if (prop->type == PROPTYPE_OBJ || prop->type == PROPTYPE_WEAPON) {
 				struct defaultobj *obj = prop->obj;
 
-#if VERSION >= VERSION_NTSC_1_0
 				if (obj)
-#endif
 				{
 					if (prop->pos.y > tableprop->pos.y
 							&& (obj->hidden & OBJHFLAG_00008000)
@@ -13384,7 +13325,7 @@ void objCheckDestroyed(struct defaultobj *obj, struct coord *pos, int playernum)
 	if (obj->damage > obj->maxdamage || objGetDestroyedLevel(obj)) {
 		struct prop *prop = obj->prop;
 		struct prop *rootprop = prop;
-		s16 exptype = g_PropExplosionTypes[8 + obj->modelnum];
+		int16_t exptype = g_PropExplosionTypes[8 + obj->modelnum];
 		RoomNum rooms[8];
 
 		// If in Deep Sea outro
@@ -13401,7 +13342,7 @@ void objCheckDestroyed(struct defaultobj *obj, struct coord *pos, int playernum)
 			obj->damage = 0;
 			obj->hidden2 |= OBJH2FLAG_DESTROYED;
 
-			func0f065e74(&rootprop->pos, rootprop->rooms, pos, rooms);
+			propUpdatePositionRoomsSimple(&rootprop->pos, rootprop->rooms, pos, rooms);
 			explosionCreateComplex(prop, pos, rooms, exptype, playernum);
 
 			if (obj->flags2 & OBJFLAG2_REMOVEWHENDESTROYED) {
@@ -13461,7 +13402,7 @@ void objCheckDestroyed(struct defaultobj *obj, struct coord *pos, int playernum)
 					objDeform(obj, (shotstaken >> 2) + 1);
 				}
 
-				func0f065e74(&rootprop->pos, rootprop->rooms, pos, rooms);
+				propUpdatePositionRoomsSimple(&rootprop->pos, rootprop->rooms, pos, rooms);
 
 				if (exptype != EXPLOSIONTYPE_NONE) {
 					explosionCreateSimple(prop, pos, rooms, EXPLOSIONTYPE_6, playernum);
@@ -13525,14 +13466,14 @@ bool func0f084594(struct model *model, struct modelnode *node, struct coord *arg
 
 	mtx4RotateVecInPlace(&mtx, &spac);
 
-	if (var8005efc0 != 0.0f) {
-		min.x = rodata->xmin - var8005efc0;
-		min.y = rodata->ymin - var8005efc0;
-		min.z = rodata->zmin - var8005efc0;
+	if (g_ExtraBoundsDist != 0.0f) {
+		min.x = rodata->xmin - g_ExtraBoundsDist;
+		min.y = rodata->ymin - g_ExtraBoundsDist;
+		min.z = rodata->zmin - g_ExtraBoundsDist;
 
-		max.x = rodata->xmax + var8005efc0;
-		max.y = rodata->ymax + var8005efc0;
-		max.z = rodata->zmax + var8005efc0;
+		max.x = rodata->xmax + g_ExtraBoundsDist;
+		max.y = rodata->ymax + g_ExtraBoundsDist;
+		max.z = rodata->zmax + g_ExtraBoundsDist;
 	} else {
 		min.x = rodata->xmin;
 		min.y = rodata->ymin;
@@ -13846,17 +13787,12 @@ void func0f085050(struct prop *prop, float damage, struct coord *pos, int arg3, 
 {
 	struct defaultobj *obj = prop->obj;
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (obj->type == OBJTYPE_AUTOGUN && g_Vars.normmplayerisrunning) {
 		// do nothing
 	} else {
 		obj->hidden &= 0x0fffffff;
 		obj->hidden |= (playernum << 28) & 0xf0000000;
 	}
-#else
-	obj->hidden &= 0x0fffffff;
-	obj->hidden |= (playernum << 28) & 0xf0000000;
-#endif
 
 	if ((obj->hidden & OBJHFLAG_HASOWNER) == 0) {
 		struct prop *child = prop->child;
@@ -13945,17 +13881,12 @@ void objTakeGunfire(struct defaultobj *obj, float damage, struct coord *pos, int
 void objDamage(struct defaultobj *obj, float damage, struct coord *pos, int weaponnum, int playernum)
 {
 	// Store the attacker playernum into the object's "hidden" field
-#if VERSION >= VERSION_NTSC_1_0
 	// ...but not for deployed laptop guns in multiplayer, because those bits
 	// designate the owner of the gun
 	if (obj->type != OBJTYPE_AUTOGUN || !g_Vars.normmplayerisrunning) {
 		obj->hidden &= 0x0fffffff;
 		obj->hidden |= (playernum << 28) & 0xf0000000;
 	}
-#else
-	obj->hidden &= 0x0fffffff;
-	obj->hidden |= (playernum << 28) & 0xf0000000;
-#endif
 
 	if (obj->type == OBJTYPE_GASBOTTLE && objGetDestroyedLevel(obj) == 1) {
 		return;
@@ -14221,7 +14152,7 @@ void func0f0859a0(struct prop *prop, struct shotdata *shotdata)
 		child = next;
 	}
 
-	if (var8005efc0 > 0.0f) {
+	if (g_ExtraBoundsDist > 0.0f) {
 		hitpart = modelTestForHit(model, &shotdata->gunpos2d, &shotdata->gundir2d, &node1);
 
 		while (hitpart > 0) {
@@ -14321,8 +14252,8 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 	struct coord spec;
 	float tmp;
 	struct prop *spe4;
-	s16 textureindex;
-	s16 spdc[3];
+	int16_t textureindex;
+	int16_t spdc[3];
 
 	if (func != NULL) {
 		if ((func->type & 0xff) == INVENTORYFUNCTYPE_MELEE) {
@@ -14360,9 +14291,7 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 		if (hit->hitthing.texturenum == TEXTURE_0B9E) {
 			frCalculateHit(obj, &sp110, shotdata->gset.unk063a);
 		} else if ((shotdata->gset.weaponnum != WEAPON_CALLISTO || shotdata->gset.weaponfunc != FUNC_SECONDARY)
-#if VERSION >= VERSION_NTSC_1_0
 				&& shotdata->gset.weaponnum != WEAPON_FARSIGHT
-#endif
 				) {
 			// For some penetrating weapons, unset hits beyond the shot distance
 			spe4 = hit->prop;
@@ -14432,7 +14361,7 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 			wallhitCreate(&hit->hitthing.pos, &hit->hitthing.unk0c, &shotdata->gunpos3d, 0,
 					0, textureindex, 1, hitprop, hit->mtxindex, iswindoweddoor, g_Vars.currentplayer->prop->chr, true);
 		} else {
-			s16 textureindex;
+			int16_t textureindex;
 			struct surfacetype *surfacetype;
 			int spcc;
 			int8_t spcb = false;
@@ -15034,7 +14963,6 @@ void ammotypeGetDeterminer(char *dst, int ammotype, int qty)
 	langRemoveNewline(dst);
 }
 
-#if VERSION < VERSION_PAL_BETA
 void ammotypeGetPickupName(char *dst, int ammotype2, int qty)
 {
 	int ammotype = ammotype2;
@@ -15086,7 +15014,6 @@ void ammotypeGetPickupName(char *dst, int ammotype2, int qty)
 		}
 	}
 }
-#endif
 
 void ammotypePlayPickupSound(uint32_t ammotype)
 {
@@ -15126,7 +15053,7 @@ void ammotypePlayPickupSound(uint32_t ammotype)
 
 int propPlayPickupSound(struct prop *prop, int weapon)
 {
-	s16 sound;
+	int16_t sound;
 
 	if (weapon == WEAPON_COMBATKNIFE || weapon == WEAPON_COMBATKNIFE) {
 		sound = SFX_PICKUP_KNIFE;
@@ -16577,7 +16504,7 @@ struct autogunobj *laptopDeploy(int modelnum, struct gset *gset, struct chrdata 
 			laptop->xrot = 0;
 			laptop->ymaxleft = 12.56f;
 			laptop->ymaxright = -12.56f;
-			laptop->maxspeed = PALUPF(0.0697f);
+			laptop->maxspeed = 0.0697f;
 
 			prop->forcetick = true;
 
@@ -17020,8 +16947,8 @@ bool vectorIsInFrontOfDoor(struct doorobj *door, struct coord *vector)
  */
 bool doorIsRangeEmpty(struct doorobj *door)
 {
-	s16 *propnumptr;
-	s16 propnums[256];
+	int16_t *propnumptr;
+	int16_t propnums[256];
 
 	roomGetProps(door->base.prop->rooms, propnums, 256);
 	propnumptr = propnums;
@@ -17052,8 +16979,8 @@ bool doorIsRangeEmpty(struct doorobj *door)
 void doorsCheckAutomatic(void)
 {
 	struct prop *doorprop;
-	s16 *propnumptr;
-	s16 propnums[256];
+	int16_t *propnumptr;
+	int16_t propnums[256];
 
 	roomGetProps(g_Vars.currentplayer->prop->rooms, propnums, 256);
 	propnumptr = propnums;
@@ -17117,7 +17044,7 @@ void func0f08c424(struct doorobj *door, Mtxf *matrix)
 	mtx4SetTranslation(&door->base.prop->pos, matrix);
 
 	if (door->doorflags & DOORFLAG_FLIP) {
-		mtx00015edc(-1, matrix);
+		mtxScaleRow2Vec(-1, matrix);
 	}
 }
 
@@ -17197,9 +17124,9 @@ void doorUpdateTiles(struct doorobj *door)
 			}
 		} else if (door->doortype == DOORTYPE_HULL) {
 			if (door->base.flags & OBJFLAG_DOOR_OPENTOFRONT) {
-				guRotateF(sp98.m, 360 - door->frac, pad.normal.x, pad.normal.y, pad.normal.z);
+				mtxRotateF(sp98.m, 360 - door->frac, pad.normal.x, pad.normal.y, pad.normal.z);
 			} else {
-				guRotateF(sp98.m, door->frac, pad.normal.x, pad.normal.y, pad.normal.z);
+				mtxRotateF(sp98.m, door->frac, pad.normal.x, pad.normal.y, pad.normal.z);
 			}
 		} else {
 			if (door->base.flags & OBJFLAG_DOOR_OPENTOFRONT) {
@@ -17264,7 +17191,7 @@ void door0f08cb20(struct doorobj *door, Vtx *src, Vtx *dst, int numvertices)
 {
 	int i;
 	int j;
-	s16 ref;
+	int16_t ref;
 	struct modelrodata_bbox bbox;
 
 	doorGetBbox(door, &bbox);
@@ -17390,7 +17317,7 @@ struct prop *doorInit(struct doorobj *door, struct coord *pos, Mtxf *mtx, RoomNu
 		}
 
 		mtx4Copy(mtx, &sp38);
-		mtx00015f04(g_ModelStates[door->base.modelnum].scale * (1.0f / 4096.0f), &sp38);
+		mtxScaleRotationPart(g_ModelStates[door->base.modelnum].scale * (1.0f / 4096.0f), &sp38);
 		mtx4ToMtx3(&sp38, door->base.realrot);
 
 		door->frac = (door->base.flags & OBJFLAG_DOOR_KEEPOPEN) ? door->maxfrac : 0;
@@ -17418,7 +17345,7 @@ struct prop *doorInit(struct doorobj *door, struct coord *pos, Mtxf *mtx, RoomNu
 			mtx4ToMtx3(&sp38, door->mtx98);
 		}
 
-		func0f065e74(pos, rooms, centre, sp28);
+		propUpdatePositionRoomsSimple(pos, rooms, centre, sp28);
 
 		prop->type = PROPTYPE_DOOR;
 		prop->door = door;
@@ -17498,13 +17425,8 @@ void doorPlayOpeningSound(int soundtype, struct prop *prop)
 	}
 
 	if (sound1) {
-#if VERSION >= VERSION_NTSC_1_0
 		psCreate(NULL, prop, sound1, -1,
 				-1, PSFLAG_0400, 0, PSTYPE_DOOR, 0, -1, 0, -1, -1, -1, -1);
-#else
-		psCreate(NULL, prop, sound1, -1,
-				-1, 0, 0, PSTYPE_DOOR, 0, -1, 0, -1, -1, -1, -1);
-#endif
 	}
 
 	if (sound2) {
@@ -17562,13 +17484,8 @@ void doorPlayClosingSound(int soundtype, struct prop *prop)
 	}
 
 	if (sound1) {
-#if VERSION >= VERSION_NTSC_1_0
 		psCreate(NULL, prop, sound1, -1,
 				-1, PSFLAG_0400, 0, PSTYPE_DOOR, 0, -1, 0, -1, -1, -1, -1);
-#else
-		psCreate(NULL, prop, sound1, -1,
-				-1, 0, 0, PSTYPE_DOOR, 0, -1, 0, -1, -1, -1, -1);
-#endif
 	}
 
 	if (sound2) {
@@ -17625,13 +17542,8 @@ void doorPlayOpenedSound(int soundtype, struct prop *prop)
 	}
 
 	if (sound) {
-#if VERSION >= VERSION_NTSC_1_0
 		psCreate(NULL, prop, sound, -1,
 				-1, PSFLAG_0400, 0, PSTYPE_DOOR, 0, -1, 0, -1, -1, -1, -1);
-#else
-		psCreate(NULL, prop, sound, -1,
-				-1, 0, 0, PSTYPE_DOOR, 0, -1, 0, -1, -1, -1, -1);
-#endif
 	}
 }
 
@@ -17675,13 +17587,8 @@ void doorPlayClosedSound(int soundtype, struct prop *prop)
 	}
 
 	if (sound) {
-#if VERSION >= VERSION_NTSC_1_0
 		psCreate(NULL, prop, sound, -1,
 				-1, PSFLAG_0400, 0, PSTYPE_DOOR, 0, -1, 0, -1, -1, -1, -1);
-#else
-		psCreate(NULL, prop, sound, -1,
-				-1, 0, 0, PSTYPE_DOOR, 0, -1, 0, -1, -1, -1, -1);
-#endif
 	}
 }
 
@@ -18199,11 +18106,7 @@ void doorsCalcFrac(struct doorobj *door)
 
 			loopprop = loopdoor->base.prop;
 
-#if VERSION >= VERSION_NTSC_1_0
 			if ((door->doorflags & DOORFLAG_UNBLOCKABLEOPEN) == 0 || loopdoor->mode == DOORMODE_CLOSING)
-#else
-			if ((door->doorflags & DOORFLAG_UNBLOCKABLEOPEN) == 0)
-#endif
 			{
 				propSetPerimEnabled(loopprop, false);
 
@@ -18220,7 +18123,6 @@ void doorsCalcFrac(struct doorobj *door)
 
 						chr->hidden |= CHRHFLAG_BLOCKINGDOOR;
 
-#if VERSION >= VERSION_NTSC_1_0
 						// Consider warping the chr past the lift door
 						if (!g_Vars.normmplayerisrunning && (chr->hidden & CHRHFLAG_BASICGUARD)) {
 							bool isliftdoor = false;
@@ -18255,7 +18157,6 @@ void doorsCalcFrac(struct doorobj *door)
 								}
 							}
 						}
-#endif
 					}
 
 					break;
@@ -18839,7 +18740,7 @@ void gasTick(void)
 			}
 
 			if (g_GasSoundTimer240 < g_GasReleaseTimerMax240) {
-				s16 soundnum = -1;
+				int16_t soundnum = -1;
 
 				g_GasSoundTimer240 += g_Vars.lvupdate60freal;
 
@@ -18960,16 +18861,10 @@ Gfx *countdownTimerRender(Gfx *gdl)
 	return gdl;
 }
 
-const char var7f1aa16c[] = "ALARM : PAN 1 = %d (%s%f)";
-const char var7f1aa188[] = "";
-const char var7f1aa18c[] = "ALARM : DIR 1 = %d";
-const char var7f1aa1a0[] = "ALARM : ADD 1 = %d (%s%f)";
-const char var7f1aa1bc[] = "";
-
 void alarmTick(void)
 {
 	if (alarmIsActive()) {
-		s16 sound;
+		int16_t sound;
 
 		// allow user to override alarm
 		sound = g_Stages[g_StageIndex].alarm;
@@ -19186,7 +19081,7 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 					mtx4LoadIdentity(&sp13c);
 					mtx4LoadXRotation(rotx, &spe0);
 					mtx4LoadYRotation(roty, &spa0);
-					mtx00015be0(&spa0, &spe0);
+					mtxApplyAffineTransformInPlace(&spa0, &spe0);
 
 					sp120.x = dir->x * 0.27777776f;
 					sp120.y = dir->y * 0.27777776f;
@@ -19224,7 +19119,7 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 						CDTYPE_OBJS | CDTYPE_DOORS | CDTYPE_CHRS | CDTYPE_PATHBLOCKER| CDTYPE_BG,
 						GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
 				blocked = true;
-				cdGetPos(&endpos, 24482, "propobj.c");
+				cdGetPos(&endpos);
 				obstacle = cdGetObstacleProp();
 			}
 
@@ -19302,7 +19197,7 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 							bgunPlayPropHitSound(&gset, obstacle, -1);
 						}
 
-						func0f065e74(pos, fromprop->rooms, &endpos, sp1c8);
+						propUpdatePositionRoomsSimple(pos, fromprop->rooms, &endpos, sp1c8);
 						sparksCreate(sp1c8[0], obstacle, &endpos, NULL, NULL, SPARKTYPE_DEFAULT);
 						objTakeGunfire(obstacle->obj, gsetGetDamage(&gset), &endpos, weaponnum, -1);
 
@@ -19315,7 +19210,7 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 						}
 					}
 				} else {
-					func0f065e74(pos, fromprop->rooms, &endpos, sp1c8);
+					propUpdatePositionRoomsSimple(pos, fromprop->rooms, &endpos, sp1c8);
 
 					if (weaponnum != WEAPON_CHOPPERGUN) {
 						bgunPlayBgHitSound(&gset, &endpos, -1, sp1c8);

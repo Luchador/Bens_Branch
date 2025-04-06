@@ -1,7 +1,5 @@
-#ifndef _IN_GAME_TITLE_H
-#define _IN_GAME_TITLE_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -13,7 +11,6 @@ void titleReset(void);
 
 Gfx *titleClear(Gfx *gdl);
 
-char *mpPlayerGetWeaponOfChoiceName(unsigned int playernum, unsigned int slot);
 void titleSetLight(Lights1 *light, int8_t r, int8_t g, int8_t b, float luminosity, struct coord *dir);
 void titleInitLegal(void);
 void titleTickLegal(void);
@@ -21,7 +18,7 @@ Gfx *titleRenderLegal(Gfx *gdl);
 void titleInitPdLogo(void);
 void titleExitPdLogo(void);
 void titleTickPdLogo(void);
-Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, int arg2, float arg3, int arg4, float arg5, Mtxf *arg6, Vtx *vertices, Col *colours);
+Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3, int arg4, float arg5, Mtxf *arg6, Vtx *vertices, Col *colours);
 void titleSkipToPdTitle(void);
 Gfx *titleRenderPdLogo(Gfx *gdl);
 void titleInitNintendoLogo(void);
@@ -45,5 +42,3 @@ Gfx *titleRender(Gfx *gdl);
 int getNumPlayers(void);
 void setNumPlayers(int numplayers);
 void titleSetNextStage(int stagenum);
-
-#endif

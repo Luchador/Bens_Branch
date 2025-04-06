@@ -1,6 +1,6 @@
 #include "n_synthInternals.h"
+#include <math.h>
 #include <os.h>
-#include <gu.h>
 #include "types.h"
 #include <stdint.h>
 
@@ -14,11 +14,11 @@ Acmd *n_alResamplePull2(N_PVoice *e, int16_t *outp, int outCount, Acmd *p)
 	ptr = n_alResamplePull(e, outp, p);
 
 	if (e->unk8c != 0 && e->unk8c < 64) {
-		if (e->unk8c >= 6) {
-			sp28 = 26755 / sqrtf(e->unk8c + 1.0f);
-		} else {
+		//if (e->unk8c >= 6) {
+		//	sp28 = 26755 / sqrtf(e->unk8c + 1.0f);
+		//} else {
 			sp28 = 65536 / (e->unk8c + 1.0f);
-		}
+		//}
 
 		if (sp28 < 7723) {
 			sp28 = 7723;

@@ -1,5 +1,5 @@
-#ifndef IN_GAME_BONDGRAB_H
-#define IN_GAME_BONDGRAB_H
+#pragma once
+
 #include <ultra64.h>
 #include "data.h"
 #include "types.h"
@@ -26,5 +26,3 @@ void bgrabApplyMoveData(struct movedata *data);
 void bgrabUpdateSpeedTheta(void);
 void bgrab0f0ce924(void);
 void bgrabTick(void);
-
-#endif

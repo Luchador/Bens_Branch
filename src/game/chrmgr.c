@@ -23,7 +23,7 @@ void chrmgrReset(void)
 		g_ShieldHits[i].prop = NULL;
 	}
 
-	g_ShieldHitActive = 0;
+	g_ShieldHitActive = false;
 	g_NumChrs = 0;
 	g_Chrnums = NULL;
 	g_ChrIndexes = NULL;

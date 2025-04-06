@@ -12,16 +12,16 @@
 #include "data.h"
 #include "types.h"
 
-struct coord var8009dd20;
-float var8009dd2c;
-struct coord var8009dd30;
-float var8009dd3c;
-struct coord var8009dd40;
-float var8009dd4c;
-struct coord var8009dd50;
-float var8009dd5c;
-struct coord var8009dd60;
-float var8009dd6c;
+struct coord g_CamFrustumTopNormal;
+float g_CamFrustumTopOffset;
+struct coord g_CamFrustumBottomNormal;
+float g_CamFrustumBottomOffset;
+struct coord g_CamFrustumLeftNormal;
+float g_CamFrustumLeftOffset;
+struct coord g_CamFrustumRightNormal;
+float g_CamFrustumRightOffset;
+struct coord g_CamFrustumViewOrigin;
+float g_CamFrustumViewOffset;
 
 void camSetScreenSize(float width, float height)
 {
@@ -101,7 +101,7 @@ void camSetScale(void)
 	player->c_cameraleftnorm.z = -fVar5 * fVar4;
 }
 
-void cam0f0b4c3c(float pos2d[2], struct coord *dir2d, float arg2)
+void camProjectScreenToWorldDir(float pos2d[2], struct coord *dir2d, float desiredLength)
 {
 	struct player *player = g_Vars.currentplayer;
 	float sp20;
@@ -112,14 +112,14 @@ void cam0f0b4c3c(float pos2d[2], struct coord *dir2d, float arg2)
 	sp1c = (player->c_halfheight - (pos2d[1] - player->c_screentop)) * player->c_scaley;
 	sp20 = (pos2d[0] - player->c_screenleft - player->c_halfwidth) * player->c_scalex;
 
-	f2 = arg2 / sqrtf(sp20 * sp20 + sp1c * sp1c + sp18 * sp18);
+	f2 = desiredLength / sqrtf(sp20 * sp20 + sp1c * sp1c + sp18 * sp18);
 
 	dir2d->x = sp20 * f2;
 	dir2d->y = sp1c * f2;
 	dir2d->z = sp18 * f2;
 }
 
-void cam0f0b4d04(struct coord *in, float *out)
+void camProjectViewToScreen(struct coord *in, float *out)
 {
 	struct player *player = g_Vars.currentplayer;
 	float value = 1.0f / in->z;
@@ -128,7 +128,8 @@ void cam0f0b4d04(struct coord *in, float *out)
 	out[0] = (player->c_screenleft + player->c_halfwidth) - in->x * value * player->c_recipscalex;
 }
 
-void cam0f0b4d68(struct coord *in, float out[2])
+// Same as above function but avoids division by 0
+void camProjectViewToScreenSafe(struct coord *in, float out[2])
 {
 	struct player *player = g_Vars.currentplayer;
 	float value;
@@ -143,7 +144,7 @@ void cam0f0b4d68(struct coord *in, float out[2])
 	out[0] = (player->c_screenleft + player->c_halfwidth) - in->x * value * player->c_recipscalex;
 }
 
-void cam0f0b4dec(struct coord *in, float out[2])
+void camProjectViewToScreenAbsZ(struct coord *in, float out[2])
 {
 	struct player *player = g_Vars.currentplayer;
 	float value = 1.0f / in->z;
@@ -156,13 +157,15 @@ void cam0f0b4dec(struct coord *in, float out[2])
 	out[0] = (player->c_screenleft + player->c_halfwidth) - in->x * value * player->c_recipscalex;
 }
 
-void cam0f0b4e68(float in[2], float divisor, float out[2])
+// Convert a 2D coordinate in view space to screen-relative coordinates
+void camScaleViewToScreen(float in[2], float divisor, float out[2])
 {
 	out[1] = in[1] * (1.0f / divisor) * g_Vars.currentplayer->c_recipscaley;
 	out[0] = in[0] * (1.0f / divisor) * g_Vars.currentplayer->c_recipscalex;
 }
 
-void cam0f0b4eb8(struct coord *arg0, float arg1[2], float zoom, float aspect)
+// Project a world coordinate onto 2D screen space, but with adjustable zoom and aspect ratio instead of relying on the current camera settings
+void camProjectWithZoomAndAspect(struct coord *arg0, float arg1[2], float zoom, float aspect)
 {
 	float f12;
 	float f14;
@@ -362,11 +365,6 @@ float camGetLodScaleZ(void)
 	return g_Vars.currentplayer->c_lodscalez;
 }
 
-u32 camGetLodScaleZU32(void)
-{
-	return g_Vars.currentplayer->c_lodscalezu32;
-}
-
 float camGetScreenWidth(void)
 {
 	return g_Vars.currentplayer->c_screenwidth;
@@ -397,7 +395,7 @@ float camGetPerspAspect(void)
 	return g_Vars.currentplayer->c_perspaspect;
 }
 
-void cam0f0b5838(void)
+void camComputeFrustumEdgePlanes(void)
 {
 	float sp2c;
 	float sp28;
@@ -416,17 +414,17 @@ void cam0f0b5838(void)
 	sp24 *= sp2c;
 	sp20 = -sp2c;
 
-	var8009dd20.f[0] = -sp20 * mtx->m[1][0] + (sp24) * mtx->m[2][0];
-	var8009dd20.f[1] = -sp20 * mtx->m[1][1] + (sp24) * mtx->m[2][1];
-	var8009dd20.f[2] = -sp20 * mtx->m[1][2] + (sp24) * mtx->m[2][2];
+	g_CamFrustumTopNormal.f[0] = -sp20 * mtx->m[1][0] + (sp24) * mtx->m[2][0];
+	g_CamFrustumTopNormal.f[1] = -sp20 * mtx->m[1][1] + (sp24) * mtx->m[2][1];
+	g_CamFrustumTopNormal.f[2] = -sp20 * mtx->m[1][2] + (sp24) * mtx->m[2][2];
 
-	var8009dd2c = var8009dd20.f[0] * mtx->m[3][0] + var8009dd20.f[1] * mtx->m[3][1] + var8009dd20.f[2] * mtx->m[3][2];
+	g_CamFrustumTopOffset = g_CamFrustumTopNormal.f[0] * mtx->m[3][0] + g_CamFrustumTopNormal.f[1] * mtx->m[3][1] + g_CamFrustumTopNormal.f[2] * mtx->m[3][2];
 
-	var8009dd30.f[0] = sp20 * mtx->m[1][0] + (sp24) * mtx->m[2][0];
-	var8009dd30.f[1] = sp20 * mtx->m[1][1] + (sp24) * mtx->m[2][1];
-	var8009dd30.f[2] = sp20 * mtx->m[1][2] + (sp24) * mtx->m[2][2];
+	g_CamFrustumBottomNormal.f[0] = sp20 * mtx->m[1][0] + (sp24) * mtx->m[2][0];
+	g_CamFrustumBottomNormal.f[1] = sp20 * mtx->m[1][1] + (sp24) * mtx->m[2][1];
+	g_CamFrustumBottomNormal.f[2] = sp20 * mtx->m[1][2] + (sp24) * mtx->m[2][2];
 
-	var8009dd3c = var8009dd30.f[0] * mtx->m[3][0] + var8009dd30.f[1] * mtx->m[3][1] + var8009dd30.f[2] * mtx->m[3][2];
+	g_CamFrustumBottomOffset = g_CamFrustumBottomNormal.f[0] * mtx->m[3][0] + g_CamFrustumBottomNormal.f[1] * mtx->m[3][1] + g_CamFrustumBottomNormal.f[2] * mtx->m[3][2];
 
 	sp28 = -player->c_halfwidth * player->c_scalex;
 
@@ -434,46 +432,47 @@ void cam0f0b5838(void)
 	sp28 *= sp10;
 	sp14 = -sp10;
 
-	var8009dd40.f[0] = sp14 * mtx->m[0][0] - sp28 * mtx->m[2][0];
-	var8009dd40.f[1] = sp14 * mtx->m[0][1] - sp28 * mtx->m[2][1];
-	var8009dd40.f[2] = sp14 * mtx->m[0][2] - sp28 * mtx->m[2][2];
+	g_CamFrustumLeftNormal.f[0] = sp14 * mtx->m[0][0] - sp28 * mtx->m[2][0];
+	g_CamFrustumLeftNormal.f[1] = sp14 * mtx->m[0][1] - sp28 * mtx->m[2][1];
+	g_CamFrustumLeftNormal.f[2] = sp14 * mtx->m[0][2] - sp28 * mtx->m[2][2];
 
-	var8009dd4c = var8009dd40.f[0] * mtx->m[3][0] + var8009dd40.f[1] * mtx->m[3][1] + var8009dd40.f[2] * mtx->m[3][2];
+	g_CamFrustumLeftOffset = g_CamFrustumLeftNormal.f[0] * mtx->m[3][0] + g_CamFrustumLeftNormal.f[1] * mtx->m[3][1] + g_CamFrustumLeftNormal.f[2] * mtx->m[3][2];
 
-	var8009dd50.f[0] = -sp14 * mtx->m[0][0] - sp28 * mtx->m[2][0];
-	var8009dd50.f[1] = -sp14 * mtx->m[0][1] - sp28 * mtx->m[2][1];
-	var8009dd50.f[2] = -sp14 * mtx->m[0][2] - sp28 * mtx->m[2][2];
+	g_CamFrustumRightNormal.f[0] = -sp14 * mtx->m[0][0] - sp28 * mtx->m[2][0];
+	g_CamFrustumRightNormal.f[1] = -sp14 * mtx->m[0][1] - sp28 * mtx->m[2][1];
+	g_CamFrustumRightNormal.f[2] = -sp14 * mtx->m[0][2] - sp28 * mtx->m[2][2];
 
-	var8009dd5c = var8009dd50.f[0] * mtx->m[3][0] + var8009dd50.f[1] * mtx->m[3][1] + var8009dd50.f[2] * mtx->m[3][2];
+	g_CamFrustumRightOffset = g_CamFrustumRightNormal.f[0] * mtx->m[3][0] + g_CamFrustumRightNormal.f[1] * mtx->m[3][1] + g_CamFrustumRightNormal.f[2] * mtx->m[3][2];
 
-	var8009dd60.f[0] = -mtx->m[3][0];
-	var8009dd60.f[1] = -mtx->m[3][1];
-	var8009dd60.f[2] = -mtx->m[3][2];
+	g_CamFrustumViewOrigin.f[0] = -mtx->m[3][0];
+	g_CamFrustumViewOrigin.f[1] = -mtx->m[3][1];
+	g_CamFrustumViewOrigin.f[2] = -mtx->m[3][2];
 
-	var8009dd6c = mtx->m[2][0] * mtx->m[3][0] + mtx->m[2][1] * mtx->m[3][1] + mtx->m[2][2] * mtx->m[3][2];
+	g_CamFrustumViewOffset = mtx->m[2][0] * mtx->m[3][0] + mtx->m[2][1] * mtx->m[3][1] + mtx->m[2][2] * mtx->m[3][2];
 }
 
-bool cam0f0b5b9c(struct coord *arg0, float arg1)
+// Determines if a point or sphere (point + radius) is in the camera's view
+bool camIsPointInFrustum(struct coord *point, float radius)
 {
 	Mtxf *mtx = g_Vars.currentplayer->projectionmtx;
 
-	if (var8009dd6c + arg1 < mtx->m[2][0] * arg0->f[0] + mtx->m[2][1] * arg0->f[1] + mtx->m[2][2] * arg0->f[2]) {
+	if (g_CamFrustumViewOffset + radius < mtx->m[2][0] * point->f[0] + mtx->m[2][1] * point->f[1] + mtx->m[2][2] * point->f[2]) {
 		return false;
 	}
 
-	if (var8009dd4c + arg1 < var8009dd40.f[0] * arg0->f[0] + var8009dd40.f[1] * arg0->f[1] + var8009dd40.f[2] * arg0->f[2]) {
+	if (g_CamFrustumLeftOffset + radius < g_CamFrustumLeftNormal.f[0] * point->f[0] + g_CamFrustumLeftNormal.f[1] * point->f[1] + g_CamFrustumLeftNormal.f[2] * point->f[2]) {
 		return false;
 	}
 
-	if (var8009dd5c + arg1 < var8009dd50.f[0] * arg0->f[0] + var8009dd50.f[1] * arg0->f[1] + var8009dd50.f[2] * arg0->f[2]) {
+	if (g_CamFrustumRightOffset + radius < g_CamFrustumRightNormal.f[0] * point->f[0] + g_CamFrustumRightNormal.f[1] * point->f[1] + g_CamFrustumRightNormal.f[2] * point->f[2]) {
 		return false;
 	}
 
-	if (var8009dd2c + arg1 < var8009dd20.f[0] * arg0->f[0] + var8009dd20.f[1] * arg0->f[1] + var8009dd20.f[2] * arg0->f[2]) {
+	if (g_CamFrustumTopOffset + radius < g_CamFrustumTopNormal.f[0] * point->f[0] + g_CamFrustumTopNormal.f[1] * point->f[1] + g_CamFrustumTopNormal.f[2] * point->f[2]) {
 		return false;
 	}
 
-	if (var8009dd3c + arg1 < var8009dd30.f[0] * arg0->f[0] + var8009dd30.f[1] * arg0->f[1] + var8009dd30.f[2] * arg0->f[2]) {
+	if (g_CamFrustumBottomOffset + radius < g_CamFrustumBottomNormal.f[0] * point->f[0] + g_CamFrustumBottomNormal.f[1] * point->f[1] + g_CamFrustumBottomNormal.f[2] * point->f[2]) {
 		return false;
 	}
 
@@ -501,7 +500,7 @@ bool camIsPosInScreenBox(struct coord *pos, float arg1, struct drawslot *drawslo
 	float sp1c;
 	float sp18;
 
-	if (var8009dd6c + arg1 < g_Vars.currentplayer->projectionmtx->m[2][0] * pos->f[0] + g_Vars.currentplayer->projectionmtx->m[2][1] * pos->f[1] + g_Vars.currentplayer->projectionmtx->m[2][2] * pos->f[2]) {
+	if (g_CamFrustumViewOffset + arg1 < g_Vars.currentplayer->projectionmtx->m[2][0] * pos->f[0] + g_Vars.currentplayer->projectionmtx->m[2][1] * pos->f[1] + g_Vars.currentplayer->projectionmtx->m[2][2] * pos->f[2]) {
 		return false;
 	}
 

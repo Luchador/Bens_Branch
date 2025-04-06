@@ -3,7 +3,7 @@
 #include "data.h"
 #include "types.h"
 
-u8 g_SkelSkedarJoints[][2] = {
+uint8_t g_SkelSkedarJoints[][2] = {
 	{ 0,  0  },
 	{ 1,  1  },
 	{ 2,  2  },

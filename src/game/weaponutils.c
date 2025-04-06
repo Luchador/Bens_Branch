@@ -519,21 +519,6 @@ float gsetGetDamage(struct gset *gset)
 
 uint8_t gsetGetFireslotDuration(struct gset *gset)
 {
-/*#if VERSION >= VERSION_PAL_FINAL
-	struct weaponfunc *func = gsetGetWeaponFunction(gset);
-	uint8_t result = 0;
-
-	if (func && (func->type & 0xff) == INVENTORYFUNCTYPE_SHOOT) {
-		struct weaponfunc_shoot *funcshoot = (struct weaponfunc_shoot *)func;
-		result = funcshoot->duration60;
-	}
-
-	if (result >= 4) {
-		result = TICKS(result);
-	}
-
-	return result;
-#else*/
 	struct weaponfunc *func = gsetGetWeaponFunction(gset);
 
 	if (func && (func->type & 0xff) == INVENTORYFUNCTYPE_SHOOT) {
@@ -542,7 +527,6 @@ uint8_t gsetGetFireslotDuration(struct gset *gset)
 	}
 
 	return 0;
-//#endif
 }
 
 uint16_t gsetGetSingleShootSound(struct gset *gset)

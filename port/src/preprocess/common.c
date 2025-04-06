@@ -3,7 +3,7 @@
 static struct ptrmarker ptrMarkers[MAX_PTR_MARKERS];
 static int numPtrMarkers;
 
-void ptrAdd(u32 ptr_src, uintptr_t ptr_host)
+void ptrAdd(uint32_t ptr_src, uintptr_t ptr_host)
 {
 	if (numPtrMarkers >= ARRAYCOUNT(ptrMarkers)) {
 		sysFatalError("ptrAdd(%p, %p): ptrmarker limit exceeded", (void *)(uintptr_t)ptr_src, (void *)ptr_host);

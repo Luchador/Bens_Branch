@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include "constants.h"
 #include "bss.h"
 #include "data.h"
@@ -25,7 +24,7 @@ void shardsTick(void)
 
 				for (j = 0; j < (int)lvupdate; j++) {
 					g_Shards[i].pos.y += g_Shards[i].vel.y;
-					g_Shards[i].vel.y -= PALUPF(0.1f);
+					g_Shards[i].vel.y -= 0.1f;
 				}
 
 				if (g_Shards[i].age60 >= TICKS(150)) {

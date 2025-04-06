@@ -1,6 +1,5 @@
-#ifndef _IN_CHR_CHRAICOMMANDS_H
-#define _IN_CHR_CHRAICOMMANDS_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -447,5 +446,3 @@
 /*0x01e0*/ bool aiRemoveReferencesToChr(void);
 
 void propDecrementSoundCount(struct prop *prop);
-
-#endif

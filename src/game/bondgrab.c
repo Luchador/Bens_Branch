@@ -1,15 +1,17 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/bondgrab.h"
+#include "game/bondgun.h"
+#include "game/bondhead.h"
 #include "game/bondmove.h"
 #include "game/cheats.h"
 #include "game/chraction.h"
 #include "game/debug.h"
-#include "game/prop.h"
+#include "game/mtxutils.h"
 #include "game/objectives.h"
-#include "game/bondgun.h"
 #include "game/player.h"
-#include "game/bondhead.h"
+#include "game/prop.h"
 #include "game/propobj.h"
 #include "game/utils.h"
 #include "bss.h"
@@ -181,7 +183,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 			sp98.y = g_Vars.currentplayer->prop->pos.y;
 			sp98.z = delta->z + g_Vars.currentplayer->prop->pos.z;
 
-			cdGetEdge(&spb0, &spa4, 201, "bondgrab.c");
+			cdGetEdge(&spb0, &spa4);
 
 			spc8.x = spa4.z - spb0.z;
 			spc8.y = 0.0f;
@@ -209,7 +211,7 @@ void bgrab0f0ccbf0(struct coord *delta, float angle, struct defaultobj *obj)
 			struct coord sp50;
 			struct coord sp44;
 
-			cdGetEdge(&sp68, &sp5c, 228, "bondgrab.c");
+			cdGetEdge(&sp68, &sp5c);
 
 			if (cdGetSavedPos(&sp50, &sp44)) {
 				sp44.x -= sp50.x;
@@ -283,7 +285,7 @@ bool bgrabTryMoveUpwards(float y)
 	newpos.z = g_Vars.currentplayer->prop->pos.z;
 
 	playerGetBbox(g_Vars.currentplayer->prop, &radius, &ymax, &ymin);
-	func0f065e74(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &newpos, rooms);
+	propUpdatePositionRoomsSimple(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &newpos, rooms);
 	bmoveFindEnteredRoomsByPos(g_Vars.currentplayer, &newpos, rooms);
 	propSetPerimEnabled(g_Vars.currentplayer->prop, false);
 
@@ -338,7 +340,7 @@ int bgrabCalculateNewPosition(struct coord *delta, float angle, bool arg2)
 		pos.y += delta->y;
 		pos.z += delta->z;
 
-		func0f065e74(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &pos, rooms);
+		propUpdatePositionRoomsSimple(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms, &pos, rooms);
 
 		bmoveFindEnteredRoomsByPos(g_Vars.currentplayer, &pos, rooms);
 
@@ -605,7 +607,7 @@ bool bgrab0f0cdb68(float angle)
 	float ymax;
 	float ymin;
 
-	cdGetEdge(&spa4, &sp98, 678, "bondgrab.c");
+	cdGetEdge(&spa4, &sp98);
 
 	sp7c = sp98.f[0] - spa4.f[0];
 	sp78 = sp98.f[2] - spa4.f[2];
@@ -705,7 +707,7 @@ bool bgrab0f0cdf64(struct coord *delta, struct coord *arg1, struct coord *arg2)
 	bool result = bgrabCalculateNewPositiontWithPush(delta, 0, true);
 
 	if (!result) {
-		cdGetEdge(arg1, arg2, 815, "bondgrab.c");
+		cdGetEdge(arg1, arg2);
 	}
 
 	return result;
@@ -779,7 +781,7 @@ void bgrabUpdateVertical(void)
 {
 	int i;
 	float tmp;
-	int inlift;
+	bool inlift;
 	struct prop *lift = NULL;
 	float dist;
 	float f14;
@@ -806,7 +808,7 @@ void bgrabUpdateVertical(void)
 				f0 = f14 - g_Vars.currentplayer->vv_ground;
 				g_Vars.currentplayer->vv_ground += f0;
 				g_Vars.currentplayer->vv_manground += f0;
-				g_Vars.currentplayer->sumground = g_Vars.currentplayer->vv_manground / (PAL ? 0.054400026798248f : 0.045499980449677f);
+				g_Vars.currentplayer->sumground = g_Vars.currentplayer->vv_manground / 0.045499980449677f;
 			}
 		}
 	} else {
@@ -866,13 +868,13 @@ void bgrabHandleActivate(void)
 void bgrabUpdateSpeedSideways(float targetspeed, float accelspeed, int mult)
 {
 	if (targetspeed < g_Vars.currentplayer->speedstrafe) {
-		g_Vars.currentplayer->speedstrafe -= PALUPF(accelspeed * mult);
+		g_Vars.currentplayer->speedstrafe -= accelspeed * mult;
 
 		if (g_Vars.currentplayer->speedstrafe < targetspeed) {
 			g_Vars.currentplayer->speedstrafe = targetspeed;
 		}
 	} else if (g_Vars.currentplayer->speedstrafe < targetspeed) {
-		g_Vars.currentplayer->speedstrafe += PALUPF(accelspeed * mult);
+		g_Vars.currentplayer->speedstrafe += accelspeed * mult;
 
 		if (g_Vars.currentplayer->speedstrafe > targetspeed) {
 			g_Vars.currentplayer->speedstrafe = targetspeed;

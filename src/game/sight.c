@@ -222,13 +222,13 @@ void sightTick(bool sighton)
 
 	for (i = 0; i < ARRAYCOUNT(g_Vars.currentplayer->targetset); i++) {
 		if (g_Vars.currentplayer->targetset[i] > TICKS(512)) {
-			if (g_Vars.currentplayer->targetset[i] < (VERSION >= VERSION_PAL_BETA ? TICKS(1020) : 1024) - g_Vars.lvupdate240) {
+			if (g_Vars.currentplayer->targetset[i] < 1024 - g_Vars.lvupdate240) {
 				g_Vars.currentplayer->targetset[i] += g_Vars.lvupdate240;
 			} else {
 				g_Vars.currentplayer->targetset[i] = TICKS(1020);
 			}
 		} else {
-			if (g_Vars.currentplayer->targetset[i] < (VERSION >= VERSION_PAL_BETA ? TICKS(512) : 516) - g_Vars.lvupdate240) {
+			if (g_Vars.currentplayer->targetset[i] < 516 - g_Vars.lvupdate240) {
 				g_Vars.currentplayer->targetset[i] += g_Vars.lvupdate240;
 			} else {
 				g_Vars.currentplayer->targetset[i] = TICKS(512);
@@ -544,7 +544,7 @@ Gfx *sightDrawAimer(Gfx *gdl, int x, int y, int radius, int cornergap, uint32_t 
  * updated when the aimer is held. This means releasing and pressing R again
  * causes the box to appear where it was last.
  *
- * The default Y position is not quite centered, is not updated for PAL,
+ * The default Y position is not quite centered,
  * and is not reset for split screen play. There's also no viewport boundary
  * checks. It's likely that this feature was just a concept and was dropped
  * pretty early.
@@ -571,30 +571,30 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, int x, int y, int radius, int cornergap, ui
 		if (dist > 0.5f || dist < -0.5f) {
 			accel = dist * 0.05f;
 
-			if (accel > PALUPF(2.0f)) {
-				accel = PALUPF(2.0f);
+			if (accel > 2.0f) {
+				accel = 2.0f;
 			}
 
-			if (accel < -PALUPF(2.0f)) {
-				accel = -PALUPF(2.0f);
+			if (accel < -2.0f) {
+				accel = -2.0f;
 			}
 
 			if (accel > xspeed) {
-				accel = PALUPF(0.05f);
+				accel = 0.05f;
 			} else if (accel < xspeed) {
-				accel = -PALUPF(0.05f);
+				accel = -0.05f;
 			} else {
 				accel = 0.0f;
 			}
 
 			xspeed += accel;
 
-			if (xspeed > PALUPF(2.0f)) {
-				xspeed = PALUPF(2.0f);
+			if (xspeed > 2.0f) {
+				xspeed = 2.0f;
 			}
 
-			if (xspeed < -PALUPF(2.0f)) {
-				xspeed = -PALUPF(2.0f);
+			if (xspeed < -2.0f) {
+				xspeed = -2.0f;
 			}
 
 			xpos += xspeed;
@@ -608,29 +608,29 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, int x, int y, int radius, int cornergap, ui
 		if (dist > 0.5f || dist < -0.5f) {
 			accel = dist * 0.05f;
 
-			if (accel > PALUPF(2.0f)) {
-				accel = PALUPF(2.0f);
+			if (accel > 2.0f) {
+				accel = 2.0f;
 			}
-			if (accel < -PALUPF(2.0f)) {
-				accel = -PALUPF(2.0f);
+			if (accel < -2.0f) {
+				accel = -2.0f;
 			}
 
 			if (yspeed < accel) {
-				accel = PALUPF(0.05f);
+				accel = 0.05f;
 			} else if (accel < yspeed) {
-				accel = -PALUPF(0.05f);
+				accel = -0.05f;
 			} else {
 				accel = 0.0f;
 			}
 
 			yspeed += accel;
 
-			if (yspeed > PALUPF(2.0f)) {
-				yspeed = PALUPF(2.0f);
+			if (yspeed > 2.0f) {
+				yspeed = 2.0f;
 			}
 
-			if (yspeed < -PALUPF(2.0f)) {
-				yspeed = -PALUPF(2.0f);
+			if (yspeed < -2.0f) {
+				yspeed = -2.0f;
 			}
 
 			ypos += yspeed;
@@ -672,9 +672,7 @@ Gfx *sightDrawDelayedAimer(Gfx *gdl, int x, int y, int radius, int cornergap, ui
 
 	gdl = textSetCCCustom02(gdl);
 
-#ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-#endif
 
 	return gdl;
 }
@@ -915,7 +913,7 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 	gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
 
-	textureCalcScreenCoords(&gdl, spc4, spbc, tconfig->width, tconfig->height, 0, 0, 0, false);
+	utilsRenderScreenTexture(&gdl, spc4, spbc, tconfig->width, tconfig->height, 0, 0, 0, false);
 	
 	gDPPipeSync(gdl++);
 	gDPSetColorDither(gdl++, G_CD_BAYER);

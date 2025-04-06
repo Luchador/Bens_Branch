@@ -1,7 +1,5 @@
-#ifndef IN_GAME_BONDWALK_H
-#define IN_GAME_BONDWALK_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -32,5 +30,3 @@ void bwalkHandleActivate(void);
 void bwalkApplyMoveData(struct movedata *data);
 void bwalk0f0c69b8(void);
 void bwalkTick(void);
-
-#endif

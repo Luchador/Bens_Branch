@@ -1,5 +1,5 @@
-#ifndef _IN_LIB_LIB_317F0_H
-#define _IN_LIB_LIB_317F0_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -20,5 +20,3 @@ uint16_t func00033ec4(uint8_t index);
 struct sndstate *sndpGetHeadState(void);
 ALMicroTime sndpGetCurTime(void);
 void func00033f44(uint8_t index, uint16_t volume);
-
-#endif

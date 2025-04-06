@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include "constants.h"
 #include "game/bondhead.h"
+#include "game/mtxutils.h"
 #include "game/bg.h"
 #include "game/pad.h"
 #include "bss.h"

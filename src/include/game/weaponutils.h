@@ -1,5 +1,5 @@
-#ifndef IN_GAME_WEAPONUTILS_H
-#define IN_GAME_WEAPONUTILS_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -31,12 +31,10 @@ float gsetGetDamage(struct gset *gset);
 uint8_t gsetGetFireslotDuration(struct gset *gset);
 uint16_t gsetGetSingleShootSound(struct gset *gset);
 bool gsetHasFunctionFlags(struct gset *gset, uint32_t flags);
-s8 weaponGetNumTicksPerShot(uint32_t weaponnum, uint32_t funcindex);
+int8_t weaponGetNumTicksPerShot(uint32_t weaponnum, uint32_t funcindex);
 uint32_t currentPlayerGetSight(void);
 void gsetGetNoiseSettings(struct gset *gset, struct noisesettings *settings);
 struct guncmd *gsetGetPriToSecAnim(struct gset *gset);
 struct guncmd *gsetGetSecToPriAnim(struct gset *gset);
 void Lerp2D(float *param_1, float *param_2, float scale, float *dst);
 void ScaleVector2D(float *a, float *b, float *dst);
-
-#endif

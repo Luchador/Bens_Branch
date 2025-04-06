@@ -1,5 +1,4 @@
-#ifndef _IN_VERSIONINFO_H
-#define _IN_VERSIONINFO_H
+#pragma once
 
 #define VERSION_TARGET "@VERSION_TARGET@"
 #define VERSION_ARCH "@VERSION_ARCH@"
@@ -7,5 +6,3 @@
 #define VERSION_BUILD "@VERSION_BUILD@"
 #define VERSION_HASH "@VERSION_HASH@"
 #define VERSION_BRANCH "@VERSION_BRANCH@"
-
-#endif

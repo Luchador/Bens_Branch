@@ -1,13 +1,9 @@
-#include <ultra64.h>
-#include <stdbool.h>
 #include "constants.h"
 #include "game/weather.h"
 #include "bss.h"
 #include "lib/main.h"
 #include "data.h"
 #include "types.h"
-
-bool g_WeatherTickEnabled = true;
 
 void weatherTick(void)
 {
@@ -17,14 +13,12 @@ void weatherTick(void)
 		return;
 	}
 
-	if (g_WeatherTickEnabled) {
-		switch (g_WeatherData->type) {
-		case WEATHERTYPE_RAIN:
-			weatherTickRain(g_WeatherData);
-			break;
-		case WEATHERTYPE_SNOW:
-			weatherTickSnow(g_WeatherData);
-			break;
-		}
+	switch (g_WeatherData->type) {
+	case WEATHERTYPE_RAIN:
+		weatherTickRain(g_WeatherData);
+		break;
+	case WEATHERTYPE_SNOW:
+		weatherTickSnow(g_WeatherData);
+		break;
 	}
 }

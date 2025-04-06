@@ -1,5 +1,4 @@
-#ifndef _IN_PLATFORM_H
-#define _IN_PLATFORM_H
+#pragma once
 
 // detect OS
 #if defined(_WIN32)
@@ -88,6 +87,4 @@
 	#define PD_CONSTRUCTOR __attribute__((constructor))
 #else
 	#error "Implement PD_CONSTRUCTOR macro for your compiler."
-#endif
-
 #endif

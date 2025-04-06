@@ -70,6 +70,11 @@ void raceInitAnimGroups(struct attackanimgroup **groups)
 	}
 }
 
+/**
+ * Calculate and return the average forward movement speed for an animation,
+ * normalized to world units (likely meters per frame). Also stores the raw
+ * average forward delta in a lookup table for later use.
+ */
 int raceCountAnims(struct animtablerow *rows)
 {
 	int i;
@@ -79,11 +84,11 @@ int raceCountAnims(struct animtablerow *rows)
 	return i;
 }
 
-float race0f0005c0(int16_t animnum)
+float raceCalculateAnimSpeed(int16_t animnum)
 {
 	float avgforward = raceGetAnimSumForwardAsInt(animnum, 0, animGetNumFrames(animnum) - 1) / (float) animGetNumFrames(animnum);
 
-	var8005f014[animnum] = avgforward;
+	g_AnimAvgForwardPerFrame[animnum] = avgforward;
 
 	return avgforward * 0.1000000089407f;
 }
@@ -109,7 +114,7 @@ void raceInitAnims(void)
 		}
 
 		for (i = 0; g_MoveAnims[race][i].animnum >= 0; i++) {
-			g_MoveAnims[race][i].value = race0f0005c0(g_MoveAnims[race][i].animnum);
+			g_MoveAnims[race][i].value = raceCalculateAnimSpeed(g_MoveAnims[race][i].animnum);
 		}
 	}
 

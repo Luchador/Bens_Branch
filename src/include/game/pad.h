@@ -1,7 +1,5 @@
-#ifndef IN_GAME_PAD_H
-#define IN_GAME_PAD_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -20,5 +18,3 @@ void coverSetFlag(int covernum, uint32_t flag);
 void coverUnsetFlag(int covernum, uint32_t flag);
 void coverSetOutOfSight(int covernum, bool enable);
 bool coverIsSpecial(struct cover *cover);
-
-#endif

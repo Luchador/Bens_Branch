@@ -1,5 +1,5 @@
-#ifndef _IN_LIB_MP3_INTERNAL_H
-#define _IN_LIB_MP3_INTERNAL_H
+#pragma once
+
 #include <stdint.h>
 #include "mp3.h"
 
@@ -22,5 +22,3 @@ void func00047550(struct asistream_4f64 *arg0, int arg1, struct asistream_4f64 *
 float func00047d20(float arg0);
 
 float func00047ef0(float arg0);
-
-#endif

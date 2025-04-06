@@ -5,7 +5,6 @@
 #include <ctype.h>
 #include <constants.h>
 #include <sys/stat.h>
-#include <PR/ultratypes.h>
 #include "config.h"
 #include "system.h"
 #include "platform.h"

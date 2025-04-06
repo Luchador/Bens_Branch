@@ -1,5 +1,5 @@
-#ifndef IN_GAME_MPLAYER_MPLAYER_H
-#define IN_GAME_MPLAYER_MPLAYER_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -33,9 +33,7 @@ int func0f189058(bool full);
 int func0f189088(void);
 char *mpGetWeaponSetName(int arg0);
 void func0f18913c(void);
-#ifndef PLATFORM_N64
 void mpSetRandomWeapons(uint8_t weapons[]);
-#endif
 void mpApplyWeaponSet(void);
 void mpSetWeaponSet(int weaponsetnum);
 void mpApplyWeaponSetIfValid(void);
@@ -122,5 +120,3 @@ int mpsetupfileSave(int device, int filenum, uint16_t deviceserial);
 int mpsetupfileLoad(int device, int filenum, uint16_t deviceserial);
 void mpResetHeads(void);
 struct modeldef *mpClearHeads(int index, int *headnum);
-
-#endif

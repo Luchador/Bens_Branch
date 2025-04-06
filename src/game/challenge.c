@@ -280,7 +280,7 @@ int challengeGetNumAvailable(void)
 
 char *challengeGetName(int challengeindex)
 {
-	return langGet(g_MpChallenges[challengeindex].name);
+	return langRemoveNewline(langGet(g_MpChallenges[challengeindex].name));
 }
 
 char *challengeGetNameBySlot(int slot)
@@ -361,14 +361,12 @@ bool challengeIsCompletedByChrWithNumPlayersBySlot(int mpchrnum, int slot, int n
 	return false;
 }
 
-#define BTYPE uintptr_t
-
 struct mpconfigfull *challengeLoadConfig(int confignum, uint8_t *buffer, int len)
 {
 	struct mpconfigfull *mpconfig;
 	uint8_t buffer2[sizeof(struct mpstrings) + 40];
 	struct mpstrings *loadedstrings;
-	BTYPE bank;
+	uintptr_t bank;
 	uint32_t language_id = 0;
 
 	extern uint8_t EXT_SEG _mpconfigsSegmentRomStart;
@@ -387,18 +385,18 @@ struct mpconfigfull *challengeLoadConfig(int confignum, uint8_t *buffer, int len
 	extern struct mpstrings EXT_SEG _mpstringsSSegmentRomEnd;
 	extern struct mpstrings EXT_SEG _mpstringsISegmentRomEnd;
 
-	BTYPE banks[][2] = {
-		{ (BTYPE)REF_SEG _mpstringsESegmentRomStart, (BTYPE)REF_SEG _mpstringsESegmentRomEnd },
-		{ (BTYPE)REF_SEG _mpstringsJSegmentRomStart, (BTYPE)REF_SEG _mpstringsJSegmentRomEnd },
-		{ (BTYPE)REF_SEG _mpstringsPSegmentRomStart, (BTYPE)REF_SEG _mpstringsPSegmentRomEnd },
-		{ (BTYPE)REF_SEG _mpstringsGSegmentRomStart, (BTYPE)REF_SEG _mpstringsGSegmentRomEnd },
-		{ (BTYPE)REF_SEG _mpstringsFSegmentRomStart, (BTYPE)REF_SEG _mpstringsFSegmentRomEnd },
-		{ (BTYPE)REF_SEG _mpstringsSSegmentRomStart, (BTYPE)REF_SEG _mpstringsSSegmentRomEnd },
-		{ (BTYPE)REF_SEG _mpstringsISegmentRomStart, (BTYPE)REF_SEG _mpstringsISegmentRomEnd },
+	uintptr_t banks[][2] = {
+		{ (uintptr_t)REF_SEG _mpstringsESegmentRomStart, (uintptr_t)REF_SEG _mpstringsESegmentRomEnd },
+		{ (uintptr_t)REF_SEG _mpstringsJSegmentRomStart, (uintptr_t)REF_SEG _mpstringsJSegmentRomEnd },
+		{ (uintptr_t)REF_SEG _mpstringsPSegmentRomStart, (uintptr_t)REF_SEG _mpstringsPSegmentRomEnd },
+		{ (uintptr_t)REF_SEG _mpstringsGSegmentRomStart, (uintptr_t)REF_SEG _mpstringsGSegmentRomEnd },
+		{ (uintptr_t)REF_SEG _mpstringsFSegmentRomStart, (uintptr_t)REF_SEG _mpstringsFSegmentRomEnd },
+		{ (uintptr_t)REF_SEG _mpstringsSSegmentRomStart, (uintptr_t)REF_SEG _mpstringsSSegmentRomEnd },
+		{ (uintptr_t)REF_SEG _mpstringsISegmentRomStart, (uintptr_t)REF_SEG _mpstringsISegmentRomEnd },
 	};
 
 	// Load mpconfigs
-	mpconfig = dmaExecWithAutoAlign(buffer, (BTYPE)REF_SEG _mpconfigsSegmentRomStart + confignum * sizeof(struct mpconfig), sizeof(struct mpconfig));
+	mpconfig = dmaExecWithAutoAlign(buffer, (uintptr_t)REF_SEG _mpconfigsSegmentRomStart + confignum * sizeof(struct mpconfig), sizeof(struct mpconfig));
 
 	// Load mpstrings
 	bank = banks[language_id][0];
@@ -727,7 +725,7 @@ int challengeGetAutoFocusedIndex(int mpchrnum)
 
 char *challengeGetName2(int playernum, int challengeindex)
 {
-	return langGet(g_MpChallenges[challengeindex].name);
+	return langRemoveNewline(langGet(g_MpChallenges[challengeindex].name));
 }
 
 bool challengeIsCompletedByPlayerWithNumPlayers2(int mpchrnum, int index, int numplayers)

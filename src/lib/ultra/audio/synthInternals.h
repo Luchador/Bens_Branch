@@ -20,8 +20,7 @@
  * Copyright Laws of the United States.
  *====================================================================*/
 
-#ifndef __audioInternals__
-#define __audioInternals__
+#pragma once
 
 #include <libaudio.h>
 #include <stdint.h>
@@ -344,6 +343,4 @@ int             _timeToSamples(ALSynth *ALSynth, int micros);
 ALMicroTime     _samplesToTime(ALSynth *synth, int samples);
 
 void            _init_lpfilter(ALLowPass *lp);
-
-#endif
 

@@ -1,4 +1,3 @@
-#include <PR/ultratypes.h>
 #include <PR/ultrasched.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -28,14 +27,12 @@ int g_SchedWriteArtifactsIndex;
 int g_SchedFrontArtifactsIndex;
 int g_SchedPendingArtifactsIndex;
 
-int var8005ce74 = 0;
+int g_SchedViModeToggle = 0;
 bool g_SchedViModesPending[NUM_GFXTASKS] = {false, false};
-int g_ViUnblackTimer = NUM_FRAMEBUFFERS + 1;
 int g_ViShakeDirection = 1;
 int g_ViShakeIntensity = 0;
 float g_ViShakeIntensityMult = 1.f;
 int g_ViShakeTimer = 0;
-bool g_SchedIsFirstTask = true;
 
 int g_PrevFrameFb = -1;
 int g_BlurFb = -1;
@@ -44,37 +41,12 @@ bool g_BlurFbDirty = true;
 
 void __scUpdateViMode(void)
 {
-	if (g_SchedIsFirstTask) {
-		g_SchedIsFirstTask = false;
-	}
+	g_SchedViModeToggle ^= 1;  // Toggle between 0 and 1
 
-	var8005ce74 = (var8005ce74 + 1) % 2;
-
-	if (g_SchedViModesPending[1 - var8005ce74]) {
-		// TODO: make this a little less awkward
+	if (g_SchedViModesPending[g_SchedViModeToggle ^ 1]) {
 		extern struct rend_vidat *g_ViBackData;
 		videoUpdateNativeResolution(g_ViBackData->bufx, g_ViBackData->bufy);
-		g_SchedViModesPending[1 - var8005ce74] = false;
-	}
-
-	if (g_ViUnblackTimer != 0 && g_ViUnblackTimer <= NUM_FRAMEBUFFERS) {
-		g_ViUnblackTimer--;
-	}
-}
-
-/**
- * Nintendo's sheduler accepts tasks on a "command" message queue.
- * This isn't used here.
- *
- * In PD, the main and audio threads submit tasks by calling this function
- * instead. It temporarily increases the calling thread's priority above the
- * scheduler, adds the task to the linked list directly and attempts to execute
- * it. This is faster than the queue method because it avoids switching threads.
- */
-void schedSubmitTask(OSScTask *t)
-{
-	if (t->list.t.type == M_GFXTASK) {
-		videoSubmitCommands((Gfx *)t->list.t.data_ptr);
+		g_SchedViModesPending[g_SchedViModeToggle ^ 1] = false;
 	}
 }
 
@@ -104,16 +76,14 @@ void schedAudioFrame()
  * rendered periodically (once every 16 retraces). I guess this makes it render
  * if the RDP has hung.
  */
-void schedEndFrame(OSSched *sc)
+void schedEndFrame()
 {
-	sc->frameCount++;
-
-	viHandleRetrace();
+	viHandleShake();
 
 	inputUpdate();
 
 	joyReadData();
-	joy00014238();
+	joyTickRumbleOnce();
 
 	schedAudioFrame();
 	videoEndFrame();

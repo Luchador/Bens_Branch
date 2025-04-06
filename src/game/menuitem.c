@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/menuutils.h"
 #include "game/objectives.h"
@@ -271,7 +272,7 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 	halfheight = context->height / 2;
 	halfheight /= g_LineHeight;
@@ -539,7 +540,7 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 							g_ScissorY2 = g_ScissorY1;
 						}
 
-						gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+						gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 						spb8.type19.gdl = gdl;
 						spb8.type19.unk04 = optionindex;
@@ -674,7 +675,7 @@ bool menuitemListTick(struct menuitem *item, struct menuinputs *inputs, uint32_t
 		prev = data->list.curoffsety;
 
 		for (i = 0; i < g_Vars.diffframe60; i++) {
-			f0 = data->list.targetoffsety * (PAL ? 0.404f : 0.35f) + (PAL ? 0.59599995613098f : 0.65f) * f0;
+			f0 = data->list.targetoffsety * 0.35f + 0.65f * f0;
 		}
 
 		data->list.curoffsety = f0;
@@ -782,7 +783,7 @@ void menuitemDropdownInit(struct menuitem *item, union menuitemdata *data)
 	item->handler(MENUOP_GETSELECTEDINDEX, item, &handlerdata);
 
 	if (handlerdata.dropdown.value < 0xffff) {
-		data->dropdown.list.index = (u16) handlerdata.dropdown.value;
+		data->dropdown.list.index = (uint16_t) handlerdata.dropdown.value;
 	} else {
 		// The value won't fit in unk02.
 		// Maybe MENUOP_25 is getting a scaled-down value?
@@ -1180,7 +1181,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 			y = context->y + row * 11 + 15;
 
 			if (row == 4) {
-				u16 labels[] = {
+				uint16_t labels[] = {
 					L_OPTIONS_314, // "DEL"
 					L_OPTIONS_315, // "CAPS"
 					L_OPTIONS_316, // "CANCEL"
@@ -1883,7 +1884,7 @@ Gfx *menuitemLabelRender(Gfx *gdl, struct menurendercontext *context)
 	int x;
 	int y;
 	struct menudfc *menudfc;
-	int8_t savedvalue = g_DoRedrawEffect;
+	bool savedvalue = g_DoRedrawEffect;
 	struct fontchar *font1 = g_CharsHandelGothicSm;
 	struct font *font2 = g_FontHandelGothicSm;
 
@@ -3163,7 +3164,7 @@ Gfx *menuitemMarqueeRender(Gfx *gdl, struct menurendercontext *context)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 	textBackupAndResetBlends();
 
@@ -3194,7 +3195,7 @@ bool menuitemMarqueeTick(struct menuitem *item, union menuitemdata *data)
 	struct fontchar *font1;
 	struct font *font2;
 	int increment;
-	u16 texthash = 0;
+	uint16_t texthash = 0;
 	char *text = menuResolveParam2Text(item);
 	int limit;
 
@@ -3399,7 +3400,7 @@ Gfx *menuitemRankingRender(Gfx *gdl, struct menurendercontext *context)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 	gdl = textConfigureGfxPipeline(gdl);
 
@@ -3647,7 +3648,7 @@ Gfx *menuitemPlayerStatsRender(Gfx *gdl, struct menurendercontext *context)
 			g_ScissorY2 = g_ScissorY1;
 		}
 
-		gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+		gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 		ypos -= data->scrolloffset;
 
@@ -3878,7 +3879,7 @@ Gfx *menuitemControllerRenderLines(Gfx *gdl, struct menurendercontext *context, 
 }
 
 // These are the action names, like "AIM", and "LOOK UP"
-u16 var80071354[][9] = {
+uint16_t var80071354[][9] = {
 	/*0*/  { L_MPWEAPONS_194, L_MPWEAPONS_196, L_MPWEAPONS_202, L_MPWEAPONS_197, L_MPWEAPONS_203, L_MPWEAPONS_204, L_MPWEAPONS_206, L_MPWEAPONS_205, L_MPWEAPONS_210 },
 	/*1*/  { L_MPWEAPONS_194, L_MPWEAPONS_200, L_MPWEAPONS_202, L_MPWEAPONS_201, L_MPWEAPONS_203, L_MPWEAPONS_204, L_MPWEAPONS_207, L_MPWEAPONS_205, L_MPWEAPONS_210 },
 	/*2*/  { L_MPWEAPONS_203, L_MPWEAPONS_196, L_MPWEAPONS_202, L_MPWEAPONS_197, L_MPWEAPONS_205, L_MPWEAPONS_204, L_MPWEAPONS_206, L_MPWEAPONS_194, L_MPWEAPONS_210 },
@@ -3893,7 +3894,7 @@ u16 var80071354[][9] = {
 	/*11*/ { L_OPTIONS_003,   L_OPTIONS_003,   L_MPWEAPONS_212, L_OPTIONS_003,   L_MPWEAPONS_203, L_MPWEAPONS_204, L_MPWEAPONS_208, L_MPWEAPONS_205, L_OPTIONS_003   },
 };
 
-u16 menuitemControllerGetButtonAction(int mode, int buttonnum)
+uint16_t menuitemControllerGetButtonAction(int mode, int buttonnum)
 {
 	uint32_t textid = var80071354[mode][buttonnum];
 
@@ -3924,14 +3925,14 @@ u16 menuitemControllerGetButtonAction(int mode, int buttonnum)
  * Note that the valuecolour argument is mostly unused - only the alpha channel
  * is used because the rest is bitwise or'ed to white.
  */
-Gfx *menuitemControllerRenderText(Gfx *gdl, int curmode, struct menurendercontext *context, int padx, int pady, uint32_t valuecolour, uint32_t labelcolour, s8 prevmode)
+Gfx *menuitemControllerRenderText(Gfx *gdl, int curmode, struct menurendercontext *context, int padx, int pady, uint32_t valuecolour, uint32_t labelcolour, int8_t prevmode)
 {
 	int rx;
 	int ry;
-	u16 textnum;
+	uint16_t textnum;
 	uint32_t colour;
 
-	u16 labels[] = {
+	uint16_t labels[] = {
 		/*0*/ L_MPWEAPONS_185, // "L/R BUTTONS:"
 		/*1*/ L_MPWEAPONS_186, // "UP C BUTTON:"
 		/*2*/ L_MPWEAPONS_187, // "LEFT/RIGHT C BUTTONS:"
@@ -3996,7 +3997,7 @@ Gfx *menuitemControllerRenderText(Gfx *gdl, int curmode, struct menurendercontex
 	return text0f153780(gdl);
 }
 
-Gfx *menuitemControllerRenderPad(Gfx *gdl, struct menurendercontext *context, int padx, int pady, int curmode, uint32_t alpha, uint32_t colour1, uint32_t colour2, s8 prevmode)
+Gfx *menuitemControllerRenderPad(Gfx *gdl, struct menurendercontext *context, int padx, int pady, int curmode, uint32_t alpha, uint32_t colour1, uint32_t colour2, int8_t prevmode)
 {
 	int rx = context->x + padx;
 	int ry = context->y + pady + 4;
@@ -4121,9 +4122,8 @@ Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context)
 	if (g_Menus[g_MpPlayerNum].main.controlmode == CONTROLMODE_PC) {
 		x = context->x;
 		y = context->y + 92;
-#if VERSION == VERSION_JPN_FINAL
 		y += 34;
-#endif
+
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRenderProjected(gdl, &x, &y,
 				"PC Port control scheme.\n"
@@ -4140,7 +4140,7 @@ Gfx *menuitemControllerRender(Gfx *gdl, struct menurendercontext *context)
 				g_Menus[g_MpPlayerNum].main.controlmode + 4,
 				contalpha, textcolour, colour, data->prevmode);
 	} else {
-		gdl = menuitemControllerRenderPad(gdl, context, 0, PAL ? 19 : 15,
+		gdl = menuitemControllerRenderPad(gdl, context, 0, 15,
 				g_Menus[g_MpPlayerNum].main.controlmode,
 				contalpha, textcolour, colour, data->prevmode);
 

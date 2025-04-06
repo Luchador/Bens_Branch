@@ -913,7 +913,7 @@ void inputRumble(int idx, float strength, float time)
 			strength *= 65535.f;
 			time *= 1000.f;
 		}
-		SDL_GameControllerRumble(pads[idx], (u16)strength, (u16)strength, (uint32_t)time);
+		SDL_GameControllerRumble(pads[idx], (uint16_t)strength, (uint16_t)strength, (uint32_t)time);
 	}
 }
 
@@ -1156,7 +1156,7 @@ int inputKeyPressed(uint32_t vk)
 
 int inputKeyJustPressed(uint32_t vk)
 {
-	const s8 pressed = inputKeyPressed(vk);
+	const int8_t pressed = inputKeyPressed(vk);
 	const int result = pressed && !vkPrevState[vk];
 	vkPrevState[vk] = pressed;
 	return result;

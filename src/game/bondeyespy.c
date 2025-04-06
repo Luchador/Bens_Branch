@@ -1,4 +1,6 @@
 #include <ultra64.h>
+#include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/bondeyespy.h"
 #include "game/chraction.h"
@@ -29,8 +31,8 @@
 uint8_t g_EyespyPickup = false;
 uint8_t g_EyespyHit = EYESPYHIT_NONE;
 uint8_t g_EyespyPrevHit = EYESPYHIT_NONE;
-float g_EyespyMaxHeight = 160;
-float g_EyespyMinHeight = 80;
+float g_EyespyMaxHeight = 160.0f;
+float g_EyespyMinHeight = 80.0f;
 uint32_t g_EyespyFallAccel = 100;
 uint32_t g_EyespyMaxFallSpeed = 3000;
 
@@ -42,13 +44,13 @@ uint32_t g_EyespyMaxFallSpeed = 3000;
 float eyespyFindGround(RoomNum *floorroom)
 {
 	struct prop *prop = g_Vars.currentplayer->eyespy->prop;
-	int inlift;
+	bool inlift;
 	struct prop *lift;
 	struct coord pos;
-	float yoffset = 50;
+	float yoffset = 50.0f;
 	float ground;
 
-	if (g_EyespyMaxHeight - g_Vars.currentplayer->eyespy->height < 50) {
+	if (g_EyespyMaxHeight - g_Vars.currentplayer->eyespy->height < 50.0f) {
 		yoffset = g_EyespyMaxHeight - g_Vars.currentplayer->eyespy->height;
 	}
 
@@ -92,7 +94,7 @@ int eyespyTryMoveUpwards(float yvel)
 		f0 = g_Vars.currentplayer->eyespy->oldground - prop->pos.y;
 	}
 
-	func0f065e74(&prop->pos, prop->rooms, &dstpos, dstrooms);
+	propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &dstpos, dstrooms);
 	chrFindEnteredRooms(prop->chr, &dstpos, dstrooms);
 	propSetPerimEnabled(prop, false);
 
@@ -148,7 +150,7 @@ int eyespyCalculateNewPosition(struct coord *vel)
 		}
 
 		// This must be populating dstrooms at least
-		func0f065dfc(&eyespyprop->pos, eyespyprop->rooms, &dstpos, dstrooms, sp74, 20);
+		propUpdatePositionRooms(&eyespyprop->pos, eyespyprop->rooms, &dstpos, dstrooms, sp74, 20);
 
 		// Check if dstrooms contains the eyespy's old room.
 		// If so, simplify dstrooms so it only contains that room.
@@ -261,7 +263,7 @@ int eyespy0f0cf890(struct coord *arg0, struct coord *arg1, struct coord *arg2, s
 		}
 
 		if (someint == 0) {
-			cdGetEdge(arg3, arg4, 350, "bondeyespy.c");
+			cdGetEdge(arg3, arg4);
 
 			if (arg3->f[0] != arg1->f[0]
 					|| arg3->f[1] != arg1->f[1]
@@ -380,7 +382,7 @@ int eyespy0f0cfdd0(struct coord *vel, struct coord *arg1, struct coord *arg2)
 	bool result = eyespyCalculateNewPositionWithPush(vel);
 
 	if (result != CDRESULT_NOCOLLISION) {
-		cdGetEdge(arg1, arg2, 473, "bondeyespy.c");
+		cdGetEdge(arg1, arg2);
 	}
 
 	return result;
@@ -640,7 +642,7 @@ bool eyespyTryLaunch(void)
 
 	playerSetPerimEnabled(g_Vars.currentplayer->prop, true);
 	propDeregisterRooms(g_Vars.currentplayer->eyespy->prop);
-	func0f065e74(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms,
+	propUpdatePositionRoomsSimple(&g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms,
 			&g_Vars.currentplayer->eyespy->prop->pos, g_Vars.currentplayer->eyespy->prop->rooms);
 
 	chrUpdateRooms(chr);
@@ -1021,7 +1023,7 @@ void eyespyProcessInput(bool allowbuttons)
 
 	// Update bob
 	if (yacceleration == 0.0f) {
-		if (g_Vars.currentplayer->eyespy->bobactive || ABS(g_Vars.currentplayer->eyespy->vel.y) < 0.1f) {
+		if (g_Vars.currentplayer->eyespy->bobactive || fabsf(g_Vars.currentplayer->eyespy->vel.y) < 0.1f) {
 			g_Vars.currentplayer->eyespy->bobactive = true;
 			g_Vars.currentplayer->eyespy->bobtimer += g_Vars.lvupdate60;
 			// HACK: how do I scale this properly?

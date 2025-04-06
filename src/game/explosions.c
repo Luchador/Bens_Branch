@@ -1,4 +1,5 @@
-#include <ultra64.h>
+#include <stdint.h>
+#include <math.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/dlights.h"
@@ -124,11 +125,11 @@ bool explosionCreateComplex(struct prop *prop, struct coord *pos, RoomNum *rooms
 float explosionGetHorizontalRangeAtFrame(struct explosion *exp, int frame)
 {
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
-	float changerate = PALUPF(type->changerateh);
+	float changerate = type->changerateh;
 	float result;
 
 	if (exp->type == EXPLOSIONTYPE_GASBARREL && frame > TICKS(32)) {
-		result = frame * PALUPF(3.0f) + 40.0f;
+		result = frame * 3.0f + 40.0f;
 
 		if (result > 300) {
 			result = 300;
@@ -143,7 +144,7 @@ float explosionGetHorizontalRangeAtFrame(struct explosion *exp, int frame)
 float explosionGetVerticalRangeAtFrame(struct explosion *exp, int frame)
 {
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
-	float changerate = PALUPF(type->changeratev);
+	float changerate = type->changeratev;
 	float result;
 
 	if (exp->type == EXPLOSIONTYPE_GASBARREL && frame > TICKS(32)) {
@@ -945,7 +946,7 @@ void explosionInflictDamage(struct prop *expprop)
 	}
 }
 
-u32 explosionTick(struct prop *prop)
+uint32_t explosionTick(struct prop *prop)
 {
 	struct explosion *exp = prop->explosion;
 	struct explosiontype *type = &g_ExplosionTypes[exp->type];
@@ -1174,7 +1175,7 @@ u32 explosionTick(struct prop *prop)
 	return TICKOP_NONE;
 }
 
-u32 explosionTickPlayer(struct prop *prop)
+uint32_t explosionTickPlayer(struct prop *prop)
 {
 	Mtxf *matrix = camGetWorldToScreenMtxf();
 
@@ -1238,9 +1239,9 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		if (USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) {
 			colours[0].word = 0xffffffff;
 		} else if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
-			u32 alpha = 0x80;
-			u32 red;
-			u32 green;
+			uint32_t alpha = 0x80;
+			uint32_t red;
+			uint32_t green;
 			float expdist = sqrtf(ERASERSQDIST(prop->pos.f));
 
 			if (g_Vars.currentplayer->eraserpropdist < expdist) {
@@ -1262,7 +1263,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 			colours[0].word = PD_BE32(red << 24 | green << 16 | alpha | 0x80800000);
 		} else {
-			static u32 var8007e93c = 0xffffffff;
+			static uint32_t var8007e93c = 0xffffffff;
 			colours[0].word = 0xffffffff;
 			colours[0].word = var8007e93c;
 		}

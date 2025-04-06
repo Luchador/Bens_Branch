@@ -1,22 +1,18 @@
-#ifndef _IN_LIB_VI_H
-#define _IN_LIB_VI_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
 void viConfigureForLogos(void);
-void viConfigureForCopyright(uint16_t *fb);
 void viConfigureForLegal(void);
 void viReset(int stagenum);
-void viBlack(bool black);
-void viHandleRetrace(void);
+void viHandleShake(void);
 void viUpdateMode(void);
 void viShake(float intensity);
-void viSetMode(int mode);
+void viSetMode();
 uint16_t *viGetBackBuffer(void);
 Vp *viGetCurrentPlayerViewport(void);
-Gfx *vi0000ab78(Gfx *gdl);
+Gfx *viSetCamNoTranslation(Gfx *gdl);
 Gfx *vi0000aca4(Gfx *gdl, float znear, float zfar);
 Gfx *vi0000ad5c(Gfx *gdl, Vp *vp);
 Gfx *vi0000af00(Gfx *gdl, Vp *vp);
@@ -47,5 +43,3 @@ float viGetFovY(void);
 void viSetZRange(float arg0, float arg1);
 void viGetZRange(struct zrange *zrange);
 Gfx *viSetFillColour(Gfx *gdl, int r, int g, int b);
-
-#endif

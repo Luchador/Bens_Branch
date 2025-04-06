@@ -16,7 +16,6 @@
 #include "bss.h"
 #include "lib/memp.h"
 #include "lib/model.h"
-#include "lib/mema.h"
 #include "lib/rng.h"
 #include "lib/mtx.h"
 #include "lib/ailist.h"
@@ -524,7 +523,7 @@ struct prop *bodyAllocateEyespy(struct pad *pad, RoomNum room)
 	struct prop *prop;
 	struct chrdata *chr;
 	struct model *model;
-	int inlift;
+	bool inlift;
 	struct prop *lift;
 	float ground;
 

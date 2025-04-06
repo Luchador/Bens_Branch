@@ -1,13 +1,9 @@
-#ifndef _IN_GAME_GAME_166E40_H
-#define _IN_GAME_GAME_166E40_H
-#include <ultra64.h>
+#pragma once
+
 #include <stdint.h>
 #include "data.h"
 #include "types.h"
-
-#ifndef PLATFORM_N64
 #include "romdata.h"
-#endif
 
 romptr_t fileGetRomAddress(int filenum);
 int fileGetRomSize(int filenum);
@@ -22,5 +18,3 @@ void fileSetSize(int filenum, void *ptr, unsigned int size, bool reallocate);
 void filesStop(uint8_t arg0);
 TextData* loadFileIntoMemory(const char *filename);
 char* buildDynamicPath(const char *directory, const char *filename);
-
-#endif

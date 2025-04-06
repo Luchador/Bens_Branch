@@ -149,7 +149,7 @@ void func0003ba64(struct fx *fx, float outputrate)
 
 void n_alFxNew(ALFx **fx_ar, ALSynConfig *c, int16_t bus, ALHeap *hp)
 {
-	u16 i, j, k;
+	uint16_t i, j, k;
 	int *param = 0;
 	ALDelay	*d;
 	ALFx *r;

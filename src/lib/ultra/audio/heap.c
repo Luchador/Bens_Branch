@@ -1,7 +1,7 @@
 #include "synthInternals.h"
 #include <libaudio.h>
 
-void alHeapInit(ALHeap *hp, u8 *base, int len)
+void alHeapInit(ALHeap *hp, uint8_t *base, int len)
 {
 	hp->base = base;
 	hp->len = len;
@@ -9,10 +9,10 @@ void alHeapInit(ALHeap *hp, u8 *base, int len)
 	hp->count = 0;
 }
 
-void *alHeapDBAlloc(u8 *file, int line, ALHeap *hp, int num, int size)
+void *alHeapDBAlloc(uint8_t *file, int line, ALHeap *hp, int num, int size)
 {
 	int bytes;
-	u8 *ptr = 0;
+	uint8_t *ptr = 0;
 
 	bytes = (num * size + 0xf) & ~0xf;
 

@@ -224,7 +224,7 @@ static void *crashGetModuleBase(const void *addr)
 
 static void crashStackTrace(char *msg, int sig, void *pc)
 {
-	u32 msglen = 0;
+	uint32_t msglen = 0;
 	void *frames[CRASH_MAX_FRAMES] = { NULL };
 
 	const int nframes = backtrace(frames, CRASH_MAX_FRAMES);

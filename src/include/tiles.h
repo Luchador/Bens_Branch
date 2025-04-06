@@ -1,5 +1,4 @@
-#ifndef _IN_TILES_H
-#define _IN_TILES_H
+#pragma once
 
 #include "tiles/ame.h"
 #include "tiles/arch.h"
@@ -61,5 +60,3 @@
 #include "tiles/mp18.h"
 #include "tiles/mp19.h"
 #include "tiles/mp20.h"
-
-#endif

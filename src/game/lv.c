@@ -1,4 +1,6 @@
 #include <ultra64.h>
+#include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "bss.h"
 #include "data.h"
@@ -680,7 +682,7 @@ void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerp
 }
 
 // This function positions the four corners of the threat box on the screen
-void lvPositionThreatBox(struct prop *prop, bool inchild, struct coord *playerpos, int *activeslots, float *distances)
+void lvPositionThreatBox(struct prop *prop, bool inchild, struct coord *playerpos, bool *activeslots, float *distances)
 {
 	int i;
 	float sp128;
@@ -742,7 +744,7 @@ void lvFindThreats(void)
 	int i;
 	struct prop *prop;
 	float distances[ARRAYCOUNT(g_Vars.currentplayer->trackedprops)] = {0};
-	int activeslots[ARRAYCOUNT(g_Vars.currentplayer->trackedprops)] = {false};
+	bool activeslots[ARRAYCOUNT(g_Vars.currentplayer->trackedprops)] = {false};
 	struct prop **propptr = g_Vars.endonscreenprops - 1;
 	struct coord campos;
 
@@ -859,7 +861,7 @@ Gfx *lvRender(Gfx *gdl)
 		gdl = viPrepareZbuf(gdl);
 		gdl = vi0000b1d0(gdl);
 
-		gDPSetScissorFrac(gdl++, 0,
+		gDPSetScissorFrac(gdl++,
 				viGetViewLeft() * 4.0f, viGetViewTop() * 4.0f,
 				(viGetViewLeft() + viGetViewWidth()) * 4.0f,
 				(viGetViewTop() + viGetViewHeight()) * 4.0f);
@@ -867,7 +869,7 @@ Gfx *lvRender(Gfx *gdl)
 		gdl = titleRender(gdl);
 		gdl = lvRenderFade(gdl);
 	} else if (g_Vars.stagenum == STAGE_BOOTPAKMENU) {
-		gSPClipRatio(gdl++, FRUSTRATIO_2);
+		//gSPClipRatio(gdl++, FRUSTRATIO_2);
 		gSPDisplayList(gdl++, &var800613a0);
 		gSPDisplayList(gdl++, &var80061380);
 
@@ -882,7 +884,7 @@ Gfx *lvRender(Gfx *gdl)
 		gdl = bgScissorToViewport(gdl);
 		gdl = menuRender(gdl);
 	} else if (g_Vars.stagenum == STAGE_CREDITS) {
-		gSPClipRatio(gdl++, FRUSTRATIO_2);
+		//gSPClipRatio(gdl++, FRUSTRATIO_2);
 		gSPDisplayList(gdl++, &var800613a0);
 		gSPDisplayList(gdl++, &var80061380);
 
@@ -908,7 +910,7 @@ Gfx *lvRender(Gfx *gdl)
 
 		playercount = forcesingleplayer ? 1 : PLAYERCOUNT();
 
-		gSPClipRatio(gdl++, FRUSTRATIO_2);
+		//gSPClipRatio(gdl++, FRUSTRATIO_2);
 
 		for (i = 0; i < playercount; i++) {
 			bool islastplayer;
@@ -1189,7 +1191,7 @@ Gfx *lvRender(Gfx *gdl)
 									sndStart(var80095200, SFX_INFIL_STATIC_MEDIUM, NULL, -1, -1, -1, -1, -1);
 								}
 
-								cutscenestatic = 225 - g_CutsceneStaticTimer * PALUP(10);
+								cutscenestatic = 225 - g_CutsceneStaticTimer * 10;
 							}
 
 							// Consider a single frame of static, separate
@@ -1254,8 +1256,8 @@ Gfx *lvRender(Gfx *gdl)
 						if (g_Vars.speedpillchange < 15) {
 							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
 									g_Vars.speedpillchange * 180 / 15,
-									(float)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f,
-									(float)g_Vars.speedpillchange * (PAL ? 0.023076923564076f : 0.02000000141561f) + 1.1f);
+									(float)g_Vars.speedpillchange * 0.02f + 1.1f,
+									(float)g_Vars.speedpillchange * 0.02f + 1.1f);
 							gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
 									g_Vars.speedpillchange * 0.0066666668280959f);
 						} else {
@@ -1414,7 +1416,7 @@ Gfx *lvRender(Gfx *gdl)
 		}
 	}
 
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, 0, 0, viGetWidth(), viGetHeight());
+	gDPSetScissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
 
 	if (videoGetDisplayFPS()) {
 		gdl = lvRenderFPS(gdl);
@@ -1721,7 +1723,7 @@ void lvTick(void)
 	g_Vars.lvframe60 += g_Vars.lvupdate60;
 	g_Vars.lvframe240 += g_Vars.lvupdate240;
 	g_Vars.lvupdate60frealprev = g_Vars.lvupdate60freal;
-	g_Vars.lvupdate60freal = PALUPF(g_Vars.lvupdate60f);
+	g_Vars.lvupdate60freal = g_Vars.lvupdate60f;
 
 	bgunTickBoost();
 	hudmsgsTick();

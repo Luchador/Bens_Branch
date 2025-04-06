@@ -1,4 +1,6 @@
 #include <ultra64.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "game/filelist.h"
 #include "game/tex.h"
@@ -15,7 +17,6 @@
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/joy.h"
-#include "lib/mema.h"
 #include "string.h"
 #include "data.h"
 #include "types.h"
@@ -400,7 +401,7 @@ void func0f10898c(void)
 	case FILEOP_READ_GAME:
 	case FILEOP_READ_MPSETUP:
 	case FILEOP_READ_MPPLAYER:
-		memaFree(g_Menus[g_MpPlayerNum].fm.unke44, align16(g_FileTypeSizes[g_Menus[g_MpPlayerNum].fm.filetypeplusone - 1]));
+		free(g_Menus[g_MpPlayerNum].fm.unke44);
 		break;
 	case FILEOP_LOAD_GAME:
 	case FILEOP_LOAD_MPPLAYER:
@@ -424,8 +425,7 @@ void filemgrHandleSuccess(void)
 	case FILEOP_WRITE_GAME:
 	case FILEOP_WRITE_MPSETUP:
 	case FILEOP_WRITE_MPPLAYER:
-		memaFree(g_Menus[g_MpPlayerNum].fm.unke44,
-				align16(g_FileTypeSizes[g_Menus[g_MpPlayerNum].fm.filetypeplusone - 1]));
+		free(g_Menus[g_MpPlayerNum].fm.unke44);
 		break;
 	case FILEOP_LOAD_GAME:
 		g_Vars.bossfileid = g_Menus[g_MpPlayerNum].fm.fileid;
@@ -692,7 +692,7 @@ bool filemgrAttemptOperation(int device, bool closeonsuccess)
 				g_Menus[g_MpPlayerNum].fm.fileid,
 				filetypes[g_Menus[g_MpPlayerNum].fm.fileop - 6],
 				g_Menus[g_MpPlayerNum].fm.unke44, &newfileid, NULL);
-		var80075bd0[g_Menus[g_MpPlayerNum].fm.fileop - 6] = 1;
+		var80075bd0[g_Menus[g_MpPlayerNum].fm.fileop - 6] = true;
 		break;
 	case FILEOP_LOAD_GAME:
 		errnum = gamefileLoad(device);
@@ -799,7 +799,7 @@ bool filemgrSaveOrLoad(struct fileguid *guid, int fileop, uintptr_t playernum)
 void filemgrDeleteCurrentFile(void)
 {
 	bool error = false;
-	s8 device = pakFindBySerial(g_FilemgrFileToDelete.deviceserial);
+	int8_t device = pakFindBySerial(g_FilemgrFileToDelete.deviceserial);
 	int i;
 
 	if (device >= 0) {
@@ -1029,7 +1029,7 @@ void func0f1097d0(int device)
 		var800a21e8.fileid = g_FileLists[0]->deviceguids[device].fileid;
 		var800a21e8.deviceserial = g_FileLists[0]->deviceguids[device].deviceserial;
 
-		thing = memaAlloc(align16(g_FileTypeSizes[g_Menus[g_MpPlayerNum].fm.filetypeplusone - 1]));
+		thing = malloc(align16(g_FileTypeSizes[g_Menus[g_MpPlayerNum].fm.filetypeplusone - 1]));
 
 		if (thing) {
 			filemgrSaveOrLoad(&g_FilemgrFileToCopy, g_Menus[g_MpPlayerNum].fm.filetypeplusone + 103, (uintptr_t) thing);
@@ -1037,7 +1037,7 @@ void func0f1097d0(int device)
 			filemgrPushErrorDialog(FILEERROR_OUTOFMEMORY);
 		}
 
-		var80075bd0[g_Menus[g_MpPlayerNum].fm.filetypeplusone - 1] = 1;
+		var80075bd0[g_Menus[g_MpPlayerNum].fm.filetypeplusone - 1] = true;
 	}
 }
 
@@ -1933,7 +1933,7 @@ char *pakMenuTextEditingPakName(struct menuitem *item)
 MenuItemHandlerResult pakSelectionMenuHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_CHECKDISABLED) {
-		if (!mempakIsOkay((s8)item->param)) {
+		if (!mempakIsOkay((int8_t)item->param)) {
 			return true;
 		}
 	}
@@ -1959,7 +1959,7 @@ MenuDialogHandlerResult pakChoosePakMenuDialog(int operation, struct menudialogd
 		g_Menus[g_MpPlayerNum].fm.unke24 = 0;
 		break;
 	case MENUOP_TICK:
-		var80062944 = true;
+		g_MainMenuOpen = true;
 		break;
 	case MENUOP_CLOSE:
 		if (g_Vars.stagenum != STAGE_BOOTPAKMENU) {
@@ -2281,7 +2281,7 @@ MenuDialogHandlerResult filemgrMainMenuDialog(int operation, struct menudialogde
 		}
 		break;
 	case MENUOP_CLOSE:
-		func0f110bf8();
+		filelistUnload();
 		break;
 	}
 

@@ -1,6 +1,5 @@
-#ifndef IN_GAME_TRAINING_MENUS_H
-#define IN_GAME_TRAINING_MENUS_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -57,5 +56,3 @@ MenuItemHandlerResult menuhandler001a6a70(int operation, struct menuitem *item, 
 MenuItemHandlerResult ciHangarInformationMenuHandler(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult frDifficultyMenuHandler(int operation, struct menuitem *item, union handlerdata *data);
-
-#endif

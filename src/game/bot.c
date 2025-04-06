@@ -103,7 +103,7 @@ void botReset(struct chrdata *chr, uint8_t respawning)
 			chr->weapons_held[1] = NULL;
 			chr->weapons_held[2] = NULL;
 			chr->liftaction = 0;
-			chr->inlift = 0;
+			chr->inlift = false;
 			chr->lift = NULL;
 			chr->height = 185;
 
@@ -586,8 +586,8 @@ int botIsObjCollectable(struct defaultobj *obj)
 void botCheckPickups(struct chrdata *chr)
 {
 	int i;
-	s16 *propnumptr;
-	s16 propnums[260];
+	int16_t *propnumptr;
+	int16_t propnums[260];
 	RoomNum allrooms[22];
 	RoomNum neighbours[12];
 
@@ -855,7 +855,7 @@ int botTick(struct prop *prop)
 			}
 
 			if (chr->blurdrugamount > 0 && !chrIsDead(chr) && aibot->skrocket == NULL) {
-				targetangle += chr->blurdrugamount * PALUPF(0.00031410926021636f) * sinf((g_Vars.lvframe60 % TICKS(120)) * PALUPF(0.052351541817188f));
+				targetangle += chr->blurdrugamount * 0.00031410926021636f * sinf((g_Vars.lvframe60 % TICKS(120)) * 0.052351541817188f);
 
 				if (targetangle >= M_TAU) {
 					targetangle -= M_TAU;
@@ -922,7 +922,7 @@ int botTick(struct prop *prop)
 				bool left = chr->weapons_held[HAND_LEFT] ? true : false;
 				bool right = (0, chr->weapons_held[HAND_RIGHT] ? true : false);
 
-				func0f03e9f4(chr, aibot->attackanimconfig, left, right, 0);
+				chrCalcAim(chr, aibot->attackanimconfig, left, right, 0);
 			} else {
 				chrResetAimEndProperties(chr);
 			}
@@ -1015,7 +1015,7 @@ float botCalculateMaxSpeed(struct chrdata *chr)
 	return speed;
 }
 
-void bot0f1921f8(struct chrdata *chr, float *move, int numupdates, float arg3)
+void botUpdateSmoothedMovement(struct chrdata *chr, float *move, int numupdates, float arg3)
 {
 	int i;
 	float sp50;
@@ -1059,8 +1059,8 @@ void bot0f1921f8(struct chrdata *chr, float *move, int numupdates, float arg3)
 	tmp = 0.055000007152557f * arg3 / numupdates;
 
 	for (i = 0; i < numupdates; i++) {
-		chr->aibot->moveratex = (PAL ? 0.935f : 0.945f) * chr->aibot->moveratex + sp30[0];
-		chr->aibot->moveratey = (PAL ? 0.935f : 0.945f) * chr->aibot->moveratey + sp30[1];
+		chr->aibot->moveratex = 0.945f * chr->aibot->moveratex + sp30[0];
+		chr->aibot->moveratey = 0.945f * chr->aibot->moveratey + sp30[1];
 
 		move[0] += chr->aibot->moveratex * tmp;
 		move[1] += chr->aibot->moveratey * tmp;
@@ -1359,10 +1359,10 @@ void bot0f192a74(struct chrdata *chr)
 	}
 
 	for (i = 0; i < g_Vars.lvupdate240; i++) {
-		aibot->extraanglerate = aibot->extraanglerate * (PAL ? 0.97f : 0.97500002384186f) + aibot->extraanglebase;
+		aibot->extraanglerate = aibot->extraanglerate * 0.97500002384186f + aibot->extraanglebase;
 	}
 
-	aibot->extraangle = aibot->extraanglerate * (PAL ? 0.029999971389771f : 0.024999976158142f);
+	aibot->extraangle = aibot->extraanglerate * 0.024999976158142f;
 }
 
 /**
@@ -1665,7 +1665,7 @@ int botFindTeammateToFollow(struct chrdata *chr, float range)
 
 void botScheduleReload(struct chrdata *chr, int handnum)
 {
-	chr->aibot->timeuntilreload60[handnum] = g_AibotWeaponPreferences[chr->aibot->weaponnum].reloaddelay * (PAL ? 50 : 60);
+	chr->aibot->timeuntilreload60[handnum] = g_AibotWeaponPreferences[chr->aibot->weaponnum].reloaddelay * 60;
 
 	if (g_AibotWeaponPreferences[chr->aibot->weaponnum].allowpartialreloaddelay) {
 		int capacity = botactGetClipCapacityByFunction(chr->aibot->weaponnum, chr->aibot->gunfunc);
@@ -3025,7 +3025,7 @@ void botTickUnpaused(struct chrdata *chr)
 					zdist = -zdist;
 				}
 
-				if (xdist > 20 || zdist > 20 || (ydist > 200 && chr->inlift == 0)) {
+				if (xdist > 20 || zdist > 20 || (ydist > 200 && chr->inlift == false)) {
 					chr->myaction = newaction;
 					chrGoToRoomPos(chr, &aibot->gotopos, aibot->gotorooms, GOPOSFLAG_RUN);
 				} else {

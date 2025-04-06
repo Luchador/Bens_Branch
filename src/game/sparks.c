@@ -1,10 +1,12 @@
 #include <ultra64.h>
+#include <math.h>
 #include <stdint.h>
 #include "constants.h"
 #include "game/dlights.h"
 #include "game/camera.h"
 #include "game/chr.h"
 #include "game/gfxmemory.h"
+#include "game/mtxutils.h"
 #include "game/tex.h"
 #include "game/sparks.h"
 #include "game/file.h"
@@ -15,7 +17,7 @@
 #include "data.h"
 #include "types.h"
 
-struct spark g_Sparks[100];
+struct spark g_Sparks[MAX_SPARKS]; // Originally 100
 int g_NextSparkIndex;
 struct sparkgroup g_SparkGroups[10];
 int g_NextSparkGroupIndex;
@@ -140,7 +142,7 @@ void sparksCreate(int room, struct prop *prop, struct coord *pos, struct coord *
 
 	if ((typenum == SPARKTYPE_BLOOD || typenum == SPARKTYPE_FLESH) && prop && prop->type == PROPTYPE_CHR) {
 		struct chrdata *chr = prop->chr;
-		u32 colours[3];
+		uint32_t colours[3];
 
 		chrGetBloodColour(chr->bodynum, NULL, colours);
 
@@ -281,10 +283,10 @@ Gfx *sparksRender(Gfx *gdl)
 	Mtxf spd4;
 
 	if (g_SparksAreActive) {
-		if (ABS(g_Vars.currentplayer->cam_look.y) > ABS(g_Vars.currentplayer->cam_look.x)) {
-			axis = ABS(g_Vars.currentplayer->cam_look.z) > ABS(g_Vars.currentplayer->cam_look.y) ? 2 : 1;
+		if (fabsf(g_Vars.currentplayer->cam_look.y) > fabsf(g_Vars.currentplayer->cam_look.x)) {
+			axis = fabsf(g_Vars.currentplayer->cam_look.z) > fabsf(g_Vars.currentplayer->cam_look.y) ? 2 : 1;
 		} else {
-			axis = ABS(g_Vars.currentplayer->cam_look.z) > ABS(g_Vars.currentplayer->cam_look.x) ? 2 : 0;
+			axis = fabsf(g_Vars.currentplayer->cam_look.z) > fabsf(g_Vars.currentplayer->cam_look.x) ? 2 : 0;
 		}
 
 		texSelect(&gdl, &g_TexSparkConfigs[0], 4, 0, 2, 1, NULL);
@@ -358,11 +360,11 @@ Gfx *sparksRender(Gfx *gdl)
 						colours[0].word = PD_BE32(type->unk1c);
 						colours[1].word = PD_BE32(type->unk20);
 					} else if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
-						v1 = ((u32) (sp13c * 255.0f) << 24) | ((u32) ((1.0f - sp13c) * 255.0f) << 16);
+						v1 = ((uint32_t) (sp13c * 255.0f) << 24) | ((uint32_t) ((1.0f - sp13c) * 255.0f) << 16);
 
 						// @bug? Second part also reads from type->unk1c
-						colours[0].word = PD_BE32(v1 | (u32) (sp138 * (float) (type->unk1c & 0xff)) | 0x3f00);
-						colours[1].word = PD_BE32(v1 | (u32) (sp138 * (float) (type->unk1c & 0xff)) | 0x3f00);
+						colours[0].word = PD_BE32(v1 | (uint32_t) (sp138 * (float) (type->unk1c & 0xff)) | 0x3f00);
+						colours[1].word = PD_BE32(v1 | (uint32_t) (sp138 * (float) (type->unk1c & 0xff)) | 0x3f00);
 					} else {
 						colours[0].word = PD_BE32(type->unk1c);
 						colours[1].word = PD_BE32(type->unk20);
@@ -391,7 +393,7 @@ Gfx *sparksRender(Gfx *gdl)
 					spd4.m[3][3] = 0.05f;
 
 					mtx4SetTranslation(&group->pos, &spd4);
-					mtx00015be0(camGetWorldToScreenMtxf(), &spd4);
+					mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &spd4);
 
 					mtx = gfxAllocateMatrix();
 					mtxF2L(&spd4, mtx);
@@ -439,7 +441,7 @@ Gfx *sparksRender(Gfx *gdl)
 
 							switch (axis) {
 							case 0:
-								if (ABS(spark->speed.z) > ABS(spark->speed.y)) {
+								if (fabsf(spark->speed.z) > fabsf(spark->speed.y)) {
 									vertices[1].y = vertices[1].y - type->unk06 - group->age * type->unk0a - (int)sp120;
 									vertices[2].y = vertices[2].y + type->unk06 + group->age * type->unk0a + (int)sp120;
 								} else {
@@ -448,7 +450,7 @@ Gfx *sparksRender(Gfx *gdl)
 								}
 								break;
 							case 1:
-								if (ABS(spark->speed.x) > ABS(spark->speed.z)) {
+								if (fabsf(spark->speed.x) > fabsf(spark->speed.z)) {
 									vertices[1].z = vertices[1].z - type->unk06 - group->age * type->unk0a - (int)sp120;
 									vertices[2].z = vertices[2].z + type->unk06 + group->age * type->unk0a + (int)sp120;
 								} else {
@@ -457,7 +459,7 @@ Gfx *sparksRender(Gfx *gdl)
 								}
 								break;
 							case 2:
-								if (ABS(spark->speed.x) > ABS(spark->speed.y)) {
+								if (fabsf(spark->speed.x) > fabsf(spark->speed.y)) {
 									vertices[1].y = vertices[1].y - type->unk06 - group->age * type->unk0a - (int)sp120;
 									vertices[2].y = vertices[2].y + type->unk06 + group->age * type->unk0a + (int)sp120;
 								} else {

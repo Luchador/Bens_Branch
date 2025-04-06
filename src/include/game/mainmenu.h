@@ -1,7 +1,5 @@
-#ifndef IN_GAME_MAINMENU_H
-#define IN_GAME_MAINMENU_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -11,9 +9,7 @@ extern struct menudialogdef g_AcceptMissionMenuDialog;
 extern struct menudialogdef g_PreAndPostMissionBriefingMenuDialog;
 extern struct menudialogdef g_RetryMissionMenuDialog;
 extern struct menudialogdef g_NextMissionMenuDialog;
-#ifndef PLATFORM_N64
 extern struct menudialogdef g_ExitGameMenuDialog;
-#endif
 
 char *menuTextCurrentStageName(struct menuitem *item);
 char *soloMenuTextDifficulty(struct menuitem *item);
@@ -85,5 +81,3 @@ MenuItemHandlerResult menuhandlerShowZoomRange(int operation, struct menuitem *i
 MenuItemHandlerResult menuhandlerSightOnScreen(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerSoloDifficulty(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerSoundMode(int operation, struct menuitem *item, union handlerdata *data);
-
-#endif

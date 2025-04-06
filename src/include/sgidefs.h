@@ -9,8 +9,8 @@
  *  in part, without the prior written consent of Silicon Graphics, Inc.  *
  *									  *
  **************************************************************************/
-#ifndef __SGIDEFS_H__
-#define __SGIDEFS_H__
+
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -185,5 +185,3 @@ typedef __uint32_t __scunsigned_t;
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* !__SGIDEFS_H__ */

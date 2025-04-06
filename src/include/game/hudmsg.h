@@ -1,7 +1,5 @@
-#ifndef IN_GAME_HUDMSG_H
-#define IN_GAME_HUDMSG_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -31,5 +29,3 @@ void hudmsgsSetOff(uint32_t reason);
 void hudmsgsRemoveForDeadPlayer(int playernum);
 Gfx *hudmsgsRender(Gfx *gdl);
 void hudmsgsStop(void);
-
-#endif

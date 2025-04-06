@@ -82,12 +82,6 @@ int rzipInflate(void *srcp, void *dst, void *scratch)
 	}
 }
 
-uint32_t rzipInit(void)
-{
-	// this builds tables in the original assembly version, we don't need that
-	return 0;
-}
-
 void *rzipGetSomething(void)
 {
 	return var80091558;

@@ -1,6 +1,5 @@
-#ifndef IN_GAME_TRAINING_TRAINING_H
-#define IN_GAME_TRAINING_TRAINING_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -117,11 +116,8 @@ bool frGetMinAccuracy(char *buffer, float accuracy);
 bool frGetHudMiddleSubtext(char *buffer);
 bool frGetFeedback(char *score, char *zone);
 Gfx *frRenderHudElement(Gfx *gdl, int x, int y, char *string1, char *string2, uint32_t colour, uint8_t alpha);
-
 void frGetTargetsDestroyedValue(char *buffer);
 void frGetScoreValue(char *buffer);
 float frGetAccuracy(char *buffer);
 bool frFormatTime(char *buffer);
 Gfx *frRenderHud(Gfx *gdl);
-
-#endif

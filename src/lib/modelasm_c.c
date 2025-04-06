@@ -335,9 +335,9 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 				}
 
 				if (sr8 & 2) {
-					t2 = *(s16 *) &t0slot[60].unk00;
-					t3 = *(s16 *) &t0slot[60].unk02;
-					t4 = *(s16 *) &t0slot[60].unk04;
+					t2 = *(int16_t *) &t0slot[60].unk00;
+					t3 = *(int16_t *) &t0slot[60].unk02;
+					t4 = *(int16_t *) &t0slot[60].unk04;
 
 					if (node == modeldef->rootnode) {
 						f21 = t2 * anim->animscale;

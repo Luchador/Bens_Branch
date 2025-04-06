@@ -1,40 +1,11 @@
 #include <ultra64.h>
+#include <string.h>
 #include "constants.h"
-#include "bss.h"
 #include "lib/dma.h"
 #include "data.h"
 #include "types.h"
 
-volatile uint32_t g_DmaNumSlotsBusy;
-volatile uint8_t g_DmaSlotsBusy[32];
-
 uint8_t g_LoadType = 0;
-
-void dmaInit(void)
-{
-	int i;
-
-	for (i = 0; i < ARRAYCOUNT(g_DmaSlotsBusy); i++) {
-		g_DmaSlotsBusy[i] = 0;
-	}
-
-	g_DmaNumSlotsBusy = 0;
-}
-
-void dmaStart(void *memaddr, romptr_t romaddr, uint32_t len, bool priority)
-{
-	bcopy((const void *)romaddr, memaddr, len);
-}
-
-void dmaExec(void *memaddr, romptr_t romaddr, uint32_t len)
-{
-	dmaStart(memaddr, romaddr, len, false);
-}
-
-void dmaExecHighPriority(void *memaddr, romptr_t romaddr, uint32_t len)
-{
-	dmaStart(memaddr, romaddr, len, true);
-}
 
 /**
  * DMA data from ROM to RAM with automatic alignment.
@@ -62,7 +33,7 @@ void *dmaExecWithAutoAlign(void *memaddr, romptr_t romaddr, uint32_t len)
 		return (void *)(alignedmem + offset);
 	}
 
-	dmaExec((void *)alignedmem, alignedrom, alignedlen);
+	memcpy((void *)alignedmem, (const void *) alignedrom, alignedlen);
 
 	return (void *)(alignedmem + offset);
 }

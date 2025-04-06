@@ -1,7 +1,5 @@
-#ifndef _IN_GAME_CHR_CHRACTION_H
-#define _IN_GAME_CHR_CHRACTION_H
-#include <ultra64.h>
-#include <stdint.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -74,7 +72,7 @@ int chrGoPosCalculateBaseTtl(struct chrdata *chr);
 void chrGoPosConsiderRestart(struct chrdata *chr);
 void chrGoPosInitExpensive(struct chrdata *chr);
 void chrGoPosAdvanceWaypoint(struct chrdata *chr);
-int chrPatrolCalculateStep(struct chrdata *chr, bool *forward, int numsteps);
+int chrPatrolCalculateStep(struct chrdata *chr, int *forward, int numsteps);
 int16_t chrPatrolCalculatePadNum(struct chrdata *chr, int numsteps);
 void chrPatrolGetCurWaypointInfoWithFlags(struct chrdata *chr, struct coord *pos, RoomNum *rooms, uint32_t *flags);
 void func0f037580(struct chrdata *chr);
@@ -130,7 +128,7 @@ float chrGetInverseTheta(struct chrdata *chr);
 float chrGetAimAngle(struct chrdata *chr);
 float chrGetPitchAngle(struct chrdata *chr);
 int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, float toleranceangle);
-bool func0f03e9f4(struct chrdata *chr, struct attackanimconfig *animcfg, int arg2, int arg3, float arg4);
+bool chrCalcAim(struct chrdata *chr, struct attackanimconfig *animcfg, bool firingleft, bool firingright, float arg4);
 void chrCalculateAimEndProperties(struct chrdata *chr, struct attackanimconfig *animcfg, bool firingleft, bool firingright, float shootrotx);
 float chrGetAimLimitAngle(float sqdist);
 void chrCalculateHit(struct chrdata *chr, bool *angleokptr, bool *hit, struct gset *gset);
@@ -199,7 +197,7 @@ struct prop *chrSpawnAtCoord(int body, int head, struct coord *pos, RoomNum *roo
 bool chrIsPropPresetBlockingSightToTarget(struct chrdata *chr);
 bool chrMoveToPos(struct chrdata *chr, struct coord *pos, RoomNum *room, float angle, bool ignorebg);
 bool chrCheckCoverOutOfSight(struct chrdata *chr, int covernum, bool soft);
-int chrAssignCoverByCriteria(struct chrdata *chr, u16 arg1, int arg2);
+int chrAssignCoverByCriteria(struct chrdata *chr, uint16_t arg1, int arg2);
 int chrAssignCoverAwayFromDanger(struct chrdata *chr, int mindist, int maxdist);
 bool chrRunFromPos(struct chrdata *chr, uint32_t goposflags, float distance, struct coord *frompos);
 float func0f04c784(struct chrdata *chr);
@@ -327,5 +325,3 @@ bool audioWasNotPlayedRecently(int16_t audioid);
 void chrToggleModelPart(struct chrdata *chr, int partnum);
 bool chrIsAvoiding(struct chrdata *chr);
 void chrDrCarollEmitSparks(struct chrdata *chr);
-
-#endif

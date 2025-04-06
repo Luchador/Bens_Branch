@@ -1,8 +1,6 @@
-#ifndef _IN_LIB_AILIST_H
-#define _IN_LIB_AILIST_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
-u8 *ailistFindById(int ailistid);
-
-#endif
+uint8_t *ailistFindById(int ailistid);

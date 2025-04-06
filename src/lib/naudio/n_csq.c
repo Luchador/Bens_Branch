@@ -156,7 +156,7 @@ uint32_t __n_alCSeqGetTrackEvent(ALCSeq *seq, uint32_t track, N_ALEvent *event, 
 		}
 	}
 
-	return TRUE;
+	return 1;
 }
 
 int alCSeqGetTicks(ALCSeq *seq)

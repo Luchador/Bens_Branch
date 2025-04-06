@@ -1,13 +1,11 @@
 #include <ultra64.h>
 #include <stdint.h>
+#include <string.h>
 #include "constants.h"
 #include "bss.h"
-#include "lib/dma.h"
 #include "lib/memp.h"
 #include "data.h"
 #include "types.h"
-
-int g_ReplacementTextureList[4000];
 
 void texInit(void)
 {
@@ -18,10 +16,5 @@ void texInit(void)
 
 	g_Textures = mempAlloc(len, MEMPOOL_PERMANENT);
 
-	dmaExec(g_Textures, (romptr_t) REF_SEG _textureslistSegmentRomStart, len);
-
-	int i = 0;
-	for(i = 0; i < ARRAYCOUNT(g_ReplacementTextureList); i++) {
-		g_ReplacementTextureList[i] = -1;
-	}
+	memcpy(g_Textures, (const void *) ((romptr_t) REF_SEG _textureslistSegmentRomStart), len);
 }

@@ -1,5 +1,5 @@
-#ifndef IN_GAME_BONDHEAD_H
-#define IN_GAME_BONDHEAD_H
+#pragma once
+
 #include <ultra64.h>
 #include <stdint.h>
 #include "data.h"
@@ -17,5 +17,3 @@ void bheadAdjustAnimation(float speed);
 void bheadStartDeathAnimation(int16_t animnum, uint32_t flip, float fstarttime, float speed);
 void bheadSetSpeed(float speed);
 float bheadGetBreathingValue(void);
-
-#endif

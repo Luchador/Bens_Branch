@@ -1,4 +1,6 @@
 #include <ultra64.h>
+#include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/menuutils.h"
@@ -383,10 +385,8 @@ void amApply(int slot)
 					amSetAiBuddyTemperament(true); // aggressive
 				} else if (slot == 7) {
 					amSetAiBuddyTemperament(false); // passive
-#if VERSION >= VERSION_NTSC_1_0
 				} else if (slot == 3) {
 					amSetAiBuddyStealth();
-#endif
 				}
 			}
 		} else if (g_Vars.normmplayerisrunning) {

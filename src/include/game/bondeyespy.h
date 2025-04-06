@@ -1,5 +1,5 @@
-#ifndef IN_GAME_BONDEYESPY_H
-#define IN_GAME_BONDEYESPY_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -14,5 +14,3 @@ int eyespy0f0cfdd0(struct coord *vel, struct coord *arg1, struct coord *arg2);
 void eyespyUpdateVertical(void);
 bool eyespyTryLaunch(void);
 void eyespyProcessInput(bool allowbuttons);
-
-#endif

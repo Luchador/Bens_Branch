@@ -1,6 +1,5 @@
-#ifndef IN_GAME_PLAYERRESET_H
-#define IN_GAME_PLAYERRESET_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -10,5 +9,3 @@ void modelmgrAllocateSlots(int numobjs, int numchrs);
 bool modelmgrLoadProjectileModeldefs(int weaponnum);
 void playerInitEyespy(void);
 void playerReset(void);
-
-#endif

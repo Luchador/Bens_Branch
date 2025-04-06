@@ -2,43 +2,44 @@
 #include <math.h>
 #include "../lib/naudio/n_sndp.h"
 #include "constants.h"
+#include "game/bg.h"
+#include "game/bondgun.h"
 #include "game/bondmove.h"
 #include "game/cheats.h"
-#include "game/chraction.h"
+#include "game/chr.h"
 #include "game/chrai.h"
 #include "game/chraicommands.h"
+#include "game/chraction.h"
 #include "game/debug.h"
 #include "game/dlights.h"
-#include "game/playerreset.h"
-#include "game/title.h"
-#include "game/chr.h"
-#include "game/prop.h"
-#include "game/setuputils.h"
-#include "game/propsnd.h"
-#include "game/objectives.h"
-#include "game/bondgun.h"
-#include "game/weaponutils.h"
-#include "game/modelmgr.h"
-#include "game/player.h"
+#include "game/env.h"
+#include "game/explosions.h"
+#include "game/gamefile.h"
 #include "game/hudmsg.h"
 #include "game/inv.h"
-#include "game/playermgr.h"
-#include "game/explosions.h"
-#include "game/smoke.h"
-#include "game/weather.h"
-#include "game/bg.h"
-#include "game/stagetable.h"
-#include "game/env.h"
-#include "game/lv.h"
-#include "game/music.h"
-#include "game/training.h"
-#include "game/gamefile.h"
 #include "game/lang.h"
-#include "game/pad.h"
-#include "game/options.h"
-#include "game/propobj.h"
+#include "game/lv.h"
+#include "game/modelmgr.h"
 #include "game/mpstats.h"
+#include "game/mtxutils.h"
+#include "game/music.h"
+#include "game/objectives.h"
+#include "game/options.h"
+#include "game/pad.h"
+#include "game/player.h"
+#include "game/playerreset.h"
+#include "game/playermgr.h"
+#include "game/prop.h"
+#include "game/propobj.h"
+#include "game/propsnd.h"
+#include "game/setuputils.h"
+#include "game/smoke.h"
+#include "game/stagetable.h"
+#include "game/title.h"
+#include "game/training.h"
 #include "game/utils.h"
+#include "game/weather.h"
+#include "game/weaponutils.h"
 #include "bss.h"
 #include "lib/main.h"
 #include "lib/model.h"
@@ -736,7 +737,7 @@ bool ai0019(void)
 
 	if (chr && chr->prop) {
 		float damage = gsetGetDamage((struct gset *)&cmd[4]);
-		chrDamageByImpact(chr, damage, &pos, (struct gset *)&cmd[4], NULL, (s8)cmd[3]);
+		chrDamageByImpact(chr, damage, &pos, (struct gset *)&cmd[4], NULL, (int8_t)cmd[3]);
 	}
 
 	g_Vars.aioffset += 8;
@@ -770,7 +771,7 @@ bool aiChrDamageChr(void)
 			utilsNormalizeF(&vector.x, &vector.y, &vector.z);
 			weapon = prop->weapon;
 			damage = gsetGetDamage(&weapon->gset);
-			chrDamageByImpact(chr2, damage, &vector, &weapon->gset, chr1->prop, (s8)cmd[4]);
+			chrDamageByImpact(chr2, damage, &vector, &weapon->gset, chr1->prop, (int8_t)cmd[4]);
 		}
 	}
 
@@ -1734,11 +1735,7 @@ bool aiIfChrDistanceToPadGreaterThan(void)
 		padnum = g_Vars.chrdata->padpreset1;
 	}
 
-#if VERSION >= VERSION_NTSC_1_0
 	if (chr && padnum < 9000 && chrGetDistanceToPad(chr, padnum) > distance)
-#else
-	if (chr && chrGetDistanceToPad(chr, padnum) > distance)
-#endif
 	{
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[7]);
 	} else {
@@ -1857,11 +1854,7 @@ bool aiIfChrInRoom(void)
 
 		for (i = 0; i < PLAYERCOUNT(); i++) {
 			if (g_Vars.players[i]->eyespy && g_Vars.players[i]->eyespy->prop
-#if VERSION >= VERSION_NTSC_1_0
 					&& chrGetDistanceToPad(g_Vars.players[i]->eyespy->prop->chr, pad_id) < 150.0f
-#else
-					&& chrGetDistanceToPad(g_Vars.players[i]->eyespy->prop->chr, 0x4d) < 150.0f
-#endif
 					) {
 				pass = true;
 			}
@@ -2280,7 +2273,7 @@ bool aiObjectMoveToPad(void)
 				pad.up.x, pad.up.y, pad.up.z);
 
 		if (obj->model) {
-			mtx00015f04(obj->model->scale, &matrix);
+			mtxScaleRotationPart(obj->model->scale, &matrix);
 		}
 
 		rooms[0] = pad.room;
@@ -3117,7 +3110,7 @@ bool aiSetShield(void)
  */
 bool aiSetReactionSpeed(void)
 {
-	s8 *cmd = (s8 *)g_Vars.ailist + g_Vars.aioffset;
+	int8_t *cmd = (int8_t *)g_Vars.ailist + g_Vars.aioffset;
 
 	g_Vars.chrdata->speedrating = cmd[2];
 	g_Vars.aioffset += 3;
@@ -3130,7 +3123,7 @@ bool aiSetReactionSpeed(void)
  */
 bool aiSetRecoverySpeed(void)
 {
-	s8 *cmd = (s8 *)g_Vars.ailist + g_Vars.aioffset;
+	int8_t *cmd = (int8_t *)g_Vars.ailist + g_Vars.aioffset;
 
 	g_Vars.chrdata->arghrating = cmd[2];
 	g_Vars.aioffset += 3;
@@ -3143,7 +3136,7 @@ bool aiSetRecoverySpeed(void)
  */
 bool aiSetAccuracy(void)
 {
-	s8 *cmd = (s8 *)g_Vars.ailist + g_Vars.aioffset;
+	int8_t *cmd = (int8_t *)g_Vars.ailist + g_Vars.aioffset;
 
 	g_Vars.chrdata->accuracyrating = cmd[2];
 	g_Vars.aioffset += 3;
@@ -3156,7 +3149,7 @@ bool aiSetAccuracy(void)
  */
 bool aiSetDodgeRating(void)
 {
-	s8 *cmd = (s8 *)g_Vars.ailist + g_Vars.aioffset;
+	int8_t *cmd = (int8_t *)g_Vars.ailist + g_Vars.aioffset;
 
 	if (cmd[2] == 0) {
 		g_Vars.chrdata->dodgerating = cmd[3];
@@ -3177,7 +3170,7 @@ bool aiSetDodgeRating(void)
  */
 bool aiSetUnarmedDodgeRating(void)
 {
-	s8 *cmd = (s8 *)g_Vars.ailist + g_Vars.aioffset;
+	int8_t *cmd = (int8_t *)g_Vars.ailist + g_Vars.aioffset;
 
 	g_Vars.chrdata->unarmeddodgerating = cmd[2];
 	g_Vars.aioffset += 3;
@@ -3986,7 +3979,7 @@ bool aiSpawnChrAtPad(void)
 
 	if (spawnflags);
 
-	if (chrSpawnAtPad(g_Vars.chrdata, cmd->b2, (s8)cmd->b3, pad, ailist, spawnflags)) {
+	if (chrSpawnAtPad(g_Vars.chrdata, cmd->b2, (int8_t)cmd->b3, pad, ailist, spawnflags)) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd->b12);
 	} else {
 		g_Vars.aioffset += 13;
@@ -4005,7 +3998,7 @@ bool aiSpawnChrAtChr(void)
 	uint16_t ailistid = cmd[6] | (cmd[5] << 8);
 	uint8_t *ailist = ailistFindById(ailistid);
 
-	if (chrSpawnAtChr(g_Vars.chrdata, cmd[2], (s8)cmd[3], cmd[4], ailist, spawnflags)) {
+	if (chrSpawnAtChr(g_Vars.chrdata, cmd[2], (int8_t)cmd[3], cmd[4], ailist, spawnflags)) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[11]);
 	} else {
 		g_Vars.aioffset += 12;
@@ -4027,17 +4020,6 @@ bool aiTryEquipWeapon(void)
 	if (g_Vars.chrdata && g_Vars.chrdata->prop && g_Vars.chrdata->model) {
 		// If the Marqis cheat is active, don't give guns to chrs,
 		// except where required for objectives.
-#if VERSION < VERSION_NTSC_1_0
-		// On NTSC beta, Marquis is disabled entirely on MBR, and the K7 guard
-		// on Investigation PA is excluded here (ie. is given his weapon).
-		if (cheatIsActive(CHEAT_MARQUIS) && g_Vars.stagenum != STAGE_MBR) {
-			if (g_Vars.stagenum == STAGE_INVESTIGATION
-					&& lvGetDifficulty() == DIFF_PA
-					&& cmd[4] == WEAPON_K7AVENGER) {
-				prop = chrGiveWeapon(g_Vars.chrdata, model, cmd[4], flags);
-			}
-		}
-#elif VERSION < VERSION_PAL_BETA
 		// NTSC final enables Marquis for MBR, but fails to realise why it was
 		// disabled in the first place (Cass needs to equip her Falcon).
 		// Additionally, NTSC Final changes the logic so the chrs are given
@@ -4049,17 +4031,6 @@ bool aiTryEquipWeapon(void)
 
 			prop = chrGiveWeapon(g_Vars.chrdata, model, cmd[4], flags);
 		}
-#else
-		// PAL fixes Cass on MBR by allowing her to equip her weapon
-		if (cheatIsActive(CHEAT_MARQUIS)) {
-			if (g_Vars.chrdata->bodynum != BODY_CASSANDRA || mainGetStageNum() != STAGE_MBR) {
-				flags &= ~OBJFLAG_WEAPON_LEFTHANDED;
-				flags |= OBJFLAG_WEAPON_AICANNOTUSE;
-			}
-
-			prop = chrGiveWeapon(g_Vars.chrdata, model, cmd[4], flags);
-		}
-#endif
 		else if (cheatIsActive(CHEAT_ENEMYROCKETS)) {
 			switch (cmd[4]) {
 			case WEAPON_FALCON2:
@@ -4342,9 +4313,9 @@ bool aiSpeak(void)
 	}
 
 	if (cmd[2] == CHR_P1P2) {
-		channelnum = psPlayFromProp((s8)cmd[7], audio_id, 0, g_Vars.chrdata->prop, PSTYPE_NONE, PSFLAG_FORHUDMSG);
+		channelnum = psPlayFromProp((int8_t)cmd[7], audio_id, 0, g_Vars.chrdata->prop, PSTYPE_NONE, PSFLAG_FORHUDMSG);
 	} else {
-		channelnum = psPlayFromProp((s8)cmd[7], audio_id, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, PSFLAG_FORHUDMSG);
+		channelnum = psPlayFromProp((int8_t)cmd[7], audio_id, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, PSFLAG_FORHUDMSG);
 	}
 
 	if (text && !sndIsFiltered(audio_id)) {
@@ -4366,7 +4337,7 @@ bool aiPlaySound(void)
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	int16_t audio_id = cmd[3] | (cmd[2] << 8);
 
-	psPlayFromProp((s8)cmd[4], audio_id, 0, NULL, PSTYPE_NONE, 0);
+	psPlayFromProp((int8_t)cmd[4], audio_id, 0, NULL, PSTYPE_NONE, 0);
 
 	g_Vars.aioffset += 5;
 
@@ -4381,7 +4352,7 @@ bool aiAssignSound(void)
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	int16_t audio_id = cmd[3] | (cmd[2] << 8);
 
-	psPlayFromProp((s8)cmd[4], audio_id, -1, NULL, PSTYPE_MARKER, 0);
+	psPlayFromProp((int8_t)cmd[4], audio_id, -1, NULL, PSTYPE_MARKER, 0);
 
 	g_Vars.aioffset += 5;
 
@@ -4394,7 +4365,7 @@ bool aiAssignSound(void)
 bool aiAudioMuteChannel(void)
 {
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
-	s8 channel = (s8)cmd[2];
+	int8_t channel = (int8_t)cmd[2];
 
 	psMuteChannel(channel);
 	g_Vars.aioffset += 3;
@@ -4408,7 +4379,7 @@ bool aiAudioMuteChannel(void)
 bool aiIfChannelFree(void)
 {
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
-	s8 channel = (s8) cmd[2];
+	int8_t channel = (int8_t) cmd[2];
 
 	if (psIsChannelFree(channel)) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[3]);
@@ -4428,7 +4399,7 @@ bool aiSetObjectSoundVolume(void)
 	int16_t volume = cmd[4] | (cmd[3] << 8);
 	uint16_t volchangetimer60 = cmd[6] | (cmd[5] << 8);
 
-	psModify((s8)cmd[2], volume, -1, NULL, volchangetimer60, 2500, 3000, 0);
+	psModify((int8_t)cmd[2], volume, -1, NULL, volchangetimer60, 2500, 3000, 0);
 
 	g_Vars.aioffset += 7;
 
@@ -4445,7 +4416,7 @@ bool aiSetObjectSoundVolumeByDistance(void)
 	uint16_t volchangetimer60 = cmd[6] | (cmd[5] << 8);
 	int volume = psCalculateVolumeFromDistance(playerdist, 400, 2500, 3000, AL_VOL_FULL);
 
-	psModify((s8)cmd[2], volume, -1, NULL, volchangetimer60, 2500, 3000, 0);
+	psModify((int8_t)cmd[2], volume, -1, NULL, volchangetimer60, 2500, 3000, 0);
 
 	g_Vars.aioffset += 7;
 
@@ -4462,7 +4433,7 @@ bool aiSetObjectSoundPlaying(void)
 	uint16_t volchangetimer60 = cmd[5] | (cmd[4] << 8);
 
 	if (obj && obj->prop) {
-		psModify((s8)cmd[2], -1, -1, obj->prop, volchangetimer60, 2500, 3000, 0);
+		psModify((int8_t)cmd[2], -1, -1, obj->prop, volchangetimer60, 2500, 3000, 0);
 	}
 
 	g_Vars.aioffset += 6;
@@ -4490,7 +4461,7 @@ bool aiPlayRepeatingSoundFromObject(void)
 			volchangetimer60 = thing1;
 		}
 
-		psModify((s8)cmd[2], -1, -1, obj->prop, volchangetimer60, dist2, dist3, PSFLAG_REPEATING);
+		psModify((int8_t)cmd[2], -1, -1, obj->prop, volchangetimer60, dist2, dist3, PSFLAG_REPEATING);
 	}
 
 	g_Vars.aioffset += 10;
@@ -4512,13 +4483,13 @@ bool aiPlaySoundFromEntity(void)
 		struct defaultobj *obj = objFindByTagId(cmd[3]);
 
 		if (obj && obj->prop) {
-			psModify((s8)cmd[2], -1, -1, obj->prop, volchangetimer60, dist2, dist3, 0);
+			psModify((int8_t)cmd[2], -1, -1, obj->prop, volchangetimer60, dist2, dist3, 0);
 		}
 	} else {
 		struct chrdata *chr = chrFindById(g_Vars.chrdata, cmd[3]);
 
 		if (chr && chr->prop) {
-			psModify((s8)cmd[2], -1, -1, chr->prop, volchangetimer60, dist2, dist3, 0);
+			psModify((int8_t)cmd[2], -1, -1, chr->prop, volchangetimer60, dist2, dist3, 0);
 		}
 	}
 
@@ -4551,7 +4522,7 @@ bool aiIfObjectSoundVolumeLessThan(void)
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	int16_t value = cmd[4] | (cmd[3] << 8);
 
-	if (psGetVolume((s8)cmd[2]) < value) {
+	if (psGetVolume((int8_t)cmd[2]) < value) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[5]);
 	} else {
 		g_Vars.aioffset += 6;
@@ -4957,21 +4928,6 @@ bool aiDisableObj(void)
 	struct defaultobj *obj = objFindByTagId(cmd[2]);
 
 	if (obj && obj->prop && obj->model) {
-#if VERSION >= VERSION_PAL_FINAL
-		if (g_Vars.autocutplaying
-				&& mainGetStageNum() == STAGE_AIRFORCEONE
-				&& (obj->modelnum == MODEL_AIRFORCE1 || obj->modelnum == MODEL_SK_SHUTTLE)) {
-			// ignore
-		} else {
-			if (obj->prop->parent) {
-				objDetach(obj->prop);
-			} else {
-				propDeregisterRooms(obj->prop);
-				propDelist(obj->prop);
-				propDisable(obj->prop);
-			}
-		}
-#else
 		if (obj->prop->parent) {
 			objDetach(obj->prop);
 		} else {
@@ -4979,7 +4935,6 @@ bool aiDisableObj(void)
 			propDelist(obj->prop);
 			propDisable(obj->prop);
 		}
-#endif
 	}
 
 	g_Vars.aioffset += 3;
@@ -5233,7 +5188,7 @@ bool aiIfNumPlayersLessThan(void)
 {
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 
-	if ((s8)cmd[2] > PLAYERCOUNT()) {
+	if ((int8_t)cmd[2] > PLAYERCOUNT()) {
 		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[3]);
 	} else {
 		g_Vars.aioffset += 4;
@@ -5256,7 +5211,7 @@ bool aiIfChrAmmoQuantityLessThan(void)
 		uint32_t playernum = playermgrGetPlayerNumByProp(chr->prop);
 		setCurrentPlayerNum(playernum);
 
-		if (bgunGetAmmoCount((s8)cmd[3]) < (s8)cmd[4]) {
+		if (bgunGetAmmoCount((int8_t)cmd[3]) < (int8_t)cmd[4]) {
 			passes = true;
 		}
 
@@ -5284,7 +5239,7 @@ bool aiChrDrawWeapon(void)
 		uint32_t prevplayernum = g_Vars.currentplayernum;
 		uint32_t playernum = playermgrGetPlayerNumByProp(chr->prop);
 		setCurrentPlayerNum(playernum);
-		bgunEquipWeapon2(0, (s8)cmd[3]);
+		bgunEquipWeapon2(0, (int8_t)cmd[3]);
 		bgunEquipWeapon2(1, 0);
 		setCurrentPlayerNum(prevplayernum);
 	}
@@ -5306,7 +5261,7 @@ bool aiChrDrawWeaponInCutscene(void)
 		uint32_t prevplayernum = g_Vars.currentplayernum;
 		uint32_t playernum = playermgrGetPlayerNumByProp(chr->prop);
 		setCurrentPlayerNum(playernum);
-		bgunEquipWeapon((s8)cmd[3]);
+		bgunEquipWeapon((int8_t)cmd[3]);
 		setCurrentPlayerNum(prevplayernum);
 	}
 
@@ -5328,9 +5283,9 @@ bool ai00ee(void)
 		uint32_t playernum = playermgrGetPlayerNumByProp(chr->prop);
 		setCurrentPlayerNum(playernum);
 
-		g_Vars.currentplayer->bondforcespeed.x = (s8)cmd[3];
+		g_Vars.currentplayer->bondforcespeed.x = (int8_t)cmd[3];
 		g_Vars.currentplayer->bondforcespeed.y = 0;
-		g_Vars.currentplayer->bondforcespeed.z = (s8)cmd[4];
+		g_Vars.currentplayer->bondforcespeed.z = (int8_t)cmd[4];
 
 		setCurrentPlayerNum(prevplayernum);
 	}
@@ -5488,7 +5443,7 @@ bool aiPlayXTrack(void)
 {
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	g_Vars.aioffset += 5;
-	musicSetXReason((s8)cmd[2], cmd[3], cmd[4]);
+	musicSetXReason((int8_t)cmd[2], cmd[3], cmd[4]);
 
 	return false;
 }
@@ -5500,7 +5455,7 @@ bool aiStopXTrack(void)
 {
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	g_Vars.aioffset += 3;
-	musicUnsetXReason((s8)cmd[2]);
+	musicUnsetXReason((int8_t)cmd[2]);
 
 	return false;
 }
@@ -6478,11 +6433,7 @@ int16_t g_GuardQuipBank[][4] = {
 	{ QUIP_HEARNOISE,          SFX_M0_HEAR_THAT,                 SFX_M0_WHATS_THAT_NOISE,          SFX_M0_HEARD_A_NOISE              },
 	{ QUIP_10,                 SFX_0037,                         SFX_0037,                         SFX_0037                          },
 	{ QUIP_SEEPLAYER,          SFX_M0_HEY_YOU,                   SFX_M0_INTRUDER_ALERT,            SFX_M0_GOT_A_CONTACT              },
-#if VERSION >= VERSION_NTSC_1_0
 	{ QUIP_SHOTUNALERT,        SFX_M0_HOLY_SHH,                  SFX_M0_HOLY_SHH,                  SFX_M0_WHAT_THE_HELL              },
-#else
-	{ QUIP_SHOTUNALERT,        SFX_80F6,                         SFX_80F6,                         SFX_M0_WHAT_THE_HELL              },
-#endif
 	{ QUIP_INJURED1,           SFX_M0_MEDIC,                     SFX_M0_OW,                        SFX_M0_YOU_SHOT_ME                },
 	{ QUIP_INJURED2,           SFX_M0_IM_HIT,                    SFX_M0_IM_TAKING_FIRE,            SFX_M0_TAKING_DAMAGE              },
 	{ QUIP_KILLEDPLAYER1,      SFX_M0_GRAB_A_BODY_BAG,           SFX_M0_ONE_FOR_THE_MORGUE,        SFX_M0_REST_IN_PEACE              },
@@ -6531,21 +6482,13 @@ int16_t g_GuardQuipBank[][4] = {
 	{ QUIP_WARNFRIENDS,        SFX_M1_M2_LOOK_OUT_SHES_COMING, SFX_M1_M2_TAKE_COVER,            SFX_M1_M2_LOOK_OUT_LOOK_OUT       },
 	{ QUIP_GOFORALARM,         SFX_0037,                       SFX_0037,                        SFX_0037                          },
 	{ QUIP_SURPRISED,          SFX_M1_HOLY,                    SFX_M1_WHAT_THE_HELL,            SFX_M1_WHA                        },
-#if VERSION >= VERSION_NTSC_1_0
 	{ QUIP_INSPECTBODY,        SFX_M1_NOOO,                    SFX_M1_OH_GOD_HES_DEAD,          SFX_M1_HES_GONE                   },
-#else
-	{ QUIP_INSPECTBODY,        SFX_0313,                       SFX_M1_NOOO,                     SFX_M1_HES_GONE                   },
-#endif
 	{ QUIP_20,                 SFX_M1_M2_LOOK_OUT_SHES_COMING, SFX_M1_M2_TAKE_COVER,            SFX_M1_M2_LOOK_OUT_LOOK_OUT       },
 	{ QUIP_HITPLAYER,          SFX_M1_IM_JUST_TOO_GOOD,        SFX_M1_YEAH_BABY,                SFX_M1_YEAH_BABY                  },
 	{ QUIP_MISSEDPLAYER1,      SFX_M1_BLOODY_STUPID_GUN,       SFX_M1_MY_GUN_ITS_USELESS,       SFX_M1_DAMN_IT                    },
 	{ QUIP_MISSEDPLAYER2,      SFX_M1_STOP_DODGING,            SFX_M1_SOMEONE_HIT_HER,          SFX_M1_DAMN_SHES_GOOD             },
 	{ QUIP_GOTOCOVER2,         SFX_M1_GO_FOR_IT,               SFX_M1_GO_GO_GO,                 SFX_M1_RUN                        },
-#if VERSION >= VERSION_NTSC_1_0
 	{ QUIP_DIE,                SFX_M1_SCREAM,                  SFX_M1_WHY_ME,                   SFX_M1_CHOKING                    },
-#else
-	{ QUIP_DIE,                SFX_034C,                       SFX_M1_WHY_ME,                   SFX_M1_CHOKING                    },
-#endif
 	{ QUIP_26,                 SFX_M1_OUTSTANDING,             SFX_M1_IM_JUST_TOO_GOOD,         SFX_M1_YEEHAH_GOT_ONE             },
 	{ QUIP_SEARCHSUCCESS,      SFX_M1_OVER_THERE,              SFX_M1_HALT,                     SFX_M1_FREEZE                     },
 	{ QUIP_SEEEYESPY,          SFX_M1_WHAT_IS_IT,              SFX_M1_HOW_DID_THAT_GET_HERE,    SFX_M1_DONT_TOUCH_IT              },
@@ -6587,11 +6530,7 @@ int16_t g_GuardQuipBank[][4] = {
 	{ QUIP_MISSEDPLAYER1,      SFX_M2_DAMN_MISSED_AGAIN,               SFX_M2_I_DONT_BELIEVE_IT,               SFX_M2_DAMN_YOU                         },
 	{ QUIP_MISSEDPLAYER2,      SFX_M2_HELL_SHES_GOOD,                  SFX_M2_STOP_MOVING,                     SFX_M2_NO_ESCAPE_FOR_YOU                },
 	{ QUIP_GOTOCOVER2,         SFX_M2_MOVE_IT_MOVE_IT,                 SFX_M2_GET_TO_COVER_NOW,                SFX_M2_RUN_FOR_IT                       },
-#if VERSION >= VERSION_NTSC_1_0
 	{ QUIP_DIE,                SFX_M2_NOOO,                            SFX_M2_OH_GOD_IM_DYING,                 SFX_M2_I_DONT_WANT_TO_DIE               },
-#else
-	{ QUIP_DIE,                SFX_0411,                               SFX_M2_OH_GOD_IM_DYING,                 SFX_M2_I_DONT_WANT_TO_DIE               },
-#endif
 	{ QUIP_26,                 SFX_M2_IM_THE_MAN,                      SFX_M2_BOY_THAT_WAS_CLOSE,              SFX_M2_DID_YOU_SEE_THAT                 },
 	{ QUIP_SEARCHSUCCESS,      SFX_M2_GET_HER,                         SFX_M2_THERE_ATTACK,                    SFX_M2_HEY_YOU_STOP                     },
 	{ QUIP_SEEEYESPY,          SFX_M2_IS_IT_DANGEROUS,                 SFX_M2_DONT_MOVE,                       SFX_M2_STAY_BACK                        },
@@ -6631,11 +6570,7 @@ int16_t g_GuardQuipBank[][4] = {
 	{ QUIP_20,                 SFX_F_TARGET_ATTACKING,   SFX_F_UNDER_FIRE,         SFX_F_WERE_UNDER_FIRE   },
 	{ QUIP_HITPLAYER,          SFX_F_DID_THAT_HURT,      SFX_F_YOU_WANT_SOME_MORE, SFX_0037                },
 	{ QUIP_MISSEDPLAYER1,      SFX_F_THIS_GUNS_USELESS,  SFX_0037,                 SFX_F_STAND_STILL       },
-#if VERSION >= VERSION_NTSC_1_0
 	{ QUIP_MISSEDPLAYER2,      SFX_F_STAND_STILL,        SFX_F_SOMEONE_HIT_HER,    SFX_F_DAMN_SHES_GOOD    },
-#else
-	{ QUIP_MISSEDPLAYER2,      SFX_F_STAND_STILL,        SFX_F_SOMEONE_HIT_HER,    SFX_M1_SCREAM           },
-#endif
 	{ QUIP_GOTOCOVER2,         SFX_F_GO_FOR_IT,          SFX_0037,                 SFX_F_RUN               },
 	{ QUIP_DIE,                SFX_F_WHY_ME,             SFX_F_NOO,                SFX_F_MY_GOD            },
 	{ QUIP_26,                 SFX_F_IM_JUST_TOO_GOOD,   SFX_0037,                 SFX_F_SUCH_A_WASTE      },
@@ -6880,7 +6815,7 @@ bool aiSayQuip(void)
 					} else {
 						distance = chrGetDistanceLostToTargetInLastSecond(g_Vars.chrdata);
 
-						if (ABS(distance) > 50) {
+						if (abs(distance) > 50) {
 							psStopSound(g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0xffff);
 							psCreate(0, g_Vars.chrdata->prop, audioid, -1,
 									-1, PSFLAG_FORPROP, 0, PSTYPE_CHRTALK, 0, -1, 0, -1, -1, -1, -1);
@@ -6897,18 +6832,14 @@ bool aiSayQuip(void)
 
 						text = langGet(g_QuipTexts[cmd[8] - 1][1 + column]);
 
-#if VERSION >= VERSION_NTSC_1_0
 						if (!sndIsFiltered(audioid))
-#endif
 						{
 							hudmsgCreateWithColour(text, HUDMSGTYPE_INGAMESUBTITLE, cmd[9]);
 						}
 					} else if (cmd[8]) {
 						text = langGet(g_QuipTexts[cmd[8] - 1][1 + g_Vars.chrdata->tude]);
 
-#if VERSION >= VERSION_NTSC_1_0
 						if (!sndIsFiltered(audioid))
-#endif
 						{
 							hudmsgCreateWithColour(text, HUDMSGTYPE_INGAMESUBTITLE, cmd[9]);
 						}
@@ -6943,7 +6874,7 @@ bool aiSayQuip(void)
 						} else {
 							distance = chrGetDistanceLostToTargetInLastSecond(g_Vars.chrdata);
 
-							if (ABS(distance) > 50) {
+							if (abs(distance) > 50) {
 								psStopSound(g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0xffff);
 								psCreate(0, g_Vars.chrdata->prop, audioid, -1,
 										-1, PSFLAG_FORPROP, 0, PSTYPE_CHRTALK, 0, -1, 0, -1, -1, -1, -1);
@@ -6953,9 +6884,7 @@ bool aiSayQuip(void)
 						if (cmd[8]) {
 							text = langGet(g_QuipTexts[cmd[8] - 1][i]);
 
-#if VERSION >= VERSION_NTSC_1_0
 							if (!sndIsFiltered(audioid))
-#endif
 							{
 								hudmsgCreateWithColour(text, HUDMSGTYPE_INGAMESUBTITLE, cmd[9]);
 							}
@@ -8615,22 +8544,22 @@ bool aiSayCiStaffQuip(void)
 
 	if (cmd[2] == CIQUIP_GREETING) {
 		quip = g_CiGreetingQuips[g_Vars.chrdata->morale][rngRandom() % 3];
-		psPlayFromProp((s8)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
+		psPlayFromProp((int8_t)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
 	}
 
 	if (cmd[2] == CIQUIP_MAIN) {
 		quip = g_CiMainQuips[g_Vars.chrdata->morale][rngRandom() % 3];
-		psPlayFromProp((s8)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
+		psPlayFromProp((int8_t)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
 	}
 
 	if (cmd[2] == CIQUIP_ANNOYED) {
 		quip = g_CiAnnoyedQuips[g_Vars.chrdata->morale][rngRandom() % 3];
-		psPlayFromProp((s8)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
+		psPlayFromProp((int8_t)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
 	}
 
 	if (cmd[2] == CIQUIP_THANKS) {
 		quip = g_CiThanksQuips[g_Vars.chrdata->morale];
-		psPlayFromProp((s8)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
+		psPlayFromProp((int8_t)cmd[3], quip, 0, g_Vars.chrdata->prop, PSTYPE_CHRTALK, 0);
 	}
 
 	g_Vars.aioffset += 4;
@@ -8761,9 +8690,7 @@ bool aiClearInventory(void)
 
 		if (g_Vars.currentplayer == g_Vars.bond || g_Vars.currentplayer == g_Vars.coop) {
 			invClear();
-#if VERSION >= VERSION_NTSC_1_0
 			g_Vars.currentplayer->devicesactive = 0;
-#endif
 			invGiveSingleWeapon(WEAPON_UNARMED);
 			bgunEquipWeapon(WEAPON_UNARMED);
 		}
@@ -9601,7 +9528,7 @@ bool aiPlaySoundFromProp(void)
 	int16_t audio_id = cmd[5] | (cmd[4] << 8);
 	int volume = cmd[7] | (cmd[6] << 8);
 	uint16_t flags = cmd[10] | (cmd[10] << 8); // @bug: Using 10 twice
-	int channel = (s8)cmd[2];
+	int channel = (int8_t)cmd[2];
 	int16_t type = cmd[8];
 	struct defaultobj *obj = objFindByTagId(cmd[3]);
 
@@ -9665,7 +9592,7 @@ bool aiRemoveWeaponFromInventory(void)
  */
 bool aiIfMusicEventQueueIsEmpty(void)
 {
-	float value = (u64)osGetCount() * 64 / 3000;
+	float value = (uint64_t)utilsGetCount() * 64 / 3000;
 
 #ifdef PLATFORM_N64 // will hang forever until the audio thread wakes it up
 	if (g_MusicEventQueueLength) {
@@ -9716,7 +9643,6 @@ bool aiRemoveReferencesToChr(void)
 	return false;
 }
 
-#if VERSION >= VERSION_NTSC_1_0
 /**
  * @cmd 01b4
  */
@@ -9732,4 +9658,3 @@ bool ai01b4(void)
 
 	return false;
 }
-#endif

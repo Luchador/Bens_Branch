@@ -1,5 +1,5 @@
-#ifndef _IN_GAME_LV_H
-#define _IN_GAME_LV_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -16,8 +16,8 @@ void lvReset(int stagenum);
 Gfx *lvRenderFade(Gfx *gdl);
 void lvFadeReset(void);
 bool lvUpdateTrackedProp(struct trackedprop *trackedprop, int index);
-void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerpos, int *activeslots, float *param_5);
-void lvPositionThreatBox(struct prop *prop, bool inchild, struct coord *playerpos, int *activeslots, float *distances);
+void lvFindThreatsForProp(struct prop *prop, bool inchild, struct coord *playerpos, bool *activeslots, float *param_5);
+void lvPositionThreatBox(struct prop *prop, bool inchild, struct coord *playerpos, bool *activeslots, float *distances);
 void lvFindThreats(void);
 Gfx *lvRender(Gfx *gdl);
 void lvUpdateSoloHandicaps(void);
@@ -39,5 +39,3 @@ void lvSetMpScoreLimit(uint32_t limit);
 void lvSetMpTeamScoreLimit(uint32_t limit);
 float lvGetStageTimeInSeconds(void);
 int lvGetStageTime60(void);
-
-#endif

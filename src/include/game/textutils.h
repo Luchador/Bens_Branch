@@ -1,5 +1,5 @@
-#ifndef _IN_GAME_GAME_TEXTUTILS_H
-#define _IN_GAME_GAME_TEXTUTILS_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -52,5 +52,3 @@ unsigned char *textLoadBMP(const char *filename, uint16_t *width, uint16_t *heig
 void textLoadCustomFont();
 void textFreeFontCharacters();
 //char *generateBitmapASCII(struct fontchar *charData);
-
-#endif

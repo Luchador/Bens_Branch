@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <stdint.h>
+#include <string.h>
 #include "constants.h"
 #include "game/prop.h"
 #include "game/textutils.h"
@@ -36,7 +37,7 @@ int g_NextAnimHeaderIndex = 0;
 int16_t g_NumAnimations = 0;
 struct animtableentry *g_Anims = NULL;
 uint8_t *g_AnimToHeaderSlot = NULL;
-int16_t *var8005f014 = NULL;
+float *g_AnimAvgForwardPerFrame = NULL;
 int g_AnimMaxBytesPerFrame = 176;
 int g_AnimMaxHeaderLength = 608;
 uint8_t *g_AnimHostSegment = NULL;
@@ -52,7 +53,7 @@ void animsInit(void)
 	unsigned int tablelen = ALIGN64(REF_SEG _animationsTableRomEnd - REF_SEG _animationsTableRomStart);
 
 	ptr = mempAlloc(tablelen, MEMPOOL_PERMANENT);
-	dmaExec(ptr, (romptr_t) REF_SEG _animationsTableRomStart, tablelen);
+	memcpy(ptr, (const void *) ((romptr_t) REF_SEG _animationsTableRomStart), tablelen);
 
 	g_NumAnimations = g_NumRomAnimations = ptr[0];
 	g_Anims = g_RomAnims = (struct animtableentry *)&ptr[1];
@@ -74,7 +75,7 @@ void animsInit(void)
 	g_AnimMaxBytesPerFrame = ALIGN16(g_AnimMaxBytesPerFrame + 34);
 
 	g_AnimToHeaderSlot    = mempAlloc(ALIGN64(g_NumAnimations), MEMPOOL_PERMANENT);
-	var8005f014           = mempAlloc(ALIGN64(g_NumAnimations * sizeof(*var8005f014)), MEMPOOL_PERMANENT);
+	g_AnimAvgForwardPerFrame           = mempAlloc(ALIGN64(g_NumAnimations * sizeof(*g_AnimAvgForwardPerFrame)), MEMPOOL_PERMANENT);
 	g_AnimFrameByteSlots  = mempAlloc(ALIGN64(ANIM_FRAME_CACHE_SIZE * g_AnimMaxBytesPerFrame), MEMPOOL_PERMANENT);
 	g_AnimFrameBytes      = mempAlloc(ALIGN64(ANIM_FRAME_CACHE_SIZE * sizeof(*g_AnimFrameBytes)), MEMPOOL_PERMANENT);
 	g_AnimFrameAnimNums   = mempAlloc(ALIGN64(ANIM_FRAME_CACHE_SIZE * sizeof(*g_AnimFrameAnimNums)), MEMPOOL_PERMANENT);
@@ -85,7 +86,7 @@ void animsInit(void)
 	g_AnimHeaderAnimNums  = mempAlloc(ALIGN64(ANIM_HEADER_CACHE_SIZE * sizeof(*g_AnimHeaderAnimNums)), MEMPOOL_PERMANENT);
 	g_AnimHeaderBirths    = mempAlloc(ALIGN64(ANIM_HEADER_CACHE_SIZE * sizeof(*g_AnimHeaderBirths)), MEMPOOL_PERMANENT);
 	g_AnimReplacements    = mempAlloc(ALIGN64(g_NumAnimations * sizeof(uint8_t *)), MEMPOOL_PERMANENT);
-	bzero(g_AnimReplacements, g_NumAnimations * sizeof(uint8_t *));
+	memset(g_AnimReplacements, 0, g_NumAnimations * sizeof(uint8_t *));
 
 	animsInitTables();
 
@@ -98,7 +99,7 @@ void animsInitTables(void)
 
 	for (i = 0; i < g_NumAnimations; i++) {
 		g_AnimToHeaderSlot[i] = 0xff;
-		var8005f014[i] = 0;
+		g_AnimAvgForwardPerFrame[i] = 0;
 	}
 
 	for (i = 0; i < ANIM_FRAME_CACHE_SIZE; i++) {
@@ -138,11 +139,6 @@ extern uint8_t EXT_SEG _animationsSegmentRomStart;
 
 uint8_t *animDma(uint8_t *dst, unsigned int segoffset, unsigned int len)
 {
-	/*if (g_AnimHostEnabled) {
-		bcopy(&g_AnimHostSegment[segoffset], dst, len);
-		return dst;
-	}*/
-
 	return dmaExecWithAutoAlign(dst, (romptr_t) REF_SEG _animationsSegmentRomStart + segoffset, len);
 }
 
@@ -640,7 +636,7 @@ uint16_t animGetPosAngleAsInt(int part, bool flip, struct skeleton *skel, int16_
 	if (arg6) {
 		inttranslate[0] = 0;
 		inttranslate[1] = 0;
-		inttranslate[2] = var8005f014[animnum];
+		inttranslate[2] = g_AnimAvgForwardPerFrame[animnum];
 	} else {
 		animLoadHeader(animnum);
 		slot = animLoadFrame(animnum, framenum);

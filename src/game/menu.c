@@ -1,4 +1,6 @@
 #include <ultra64.h>
+#include <math.h>
+#include <stdio.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/menuutils.h"
@@ -14,6 +16,7 @@
 #include "game/menugfx.h"
 #include "game/menuitem.h"
 #include "game/menu.h"
+#include "game/mtxutils.h"
 #include "game/filelist.h"
 #include "game/filemgr.h"
 #include "game/credits.h"
@@ -452,17 +455,12 @@ void menuGetItemBlocksRequired(struct menuitem *item, int *numwords)
 	case MENUITEMTYPE_18:
 		*numwords = 1;
 		break;
-#if VERSION < VERSION_PAL_BETA
 	case MENUITEMTYPE_SCROLLABLE:
-#endif
 	case MENUITEMTYPE_MARQUEE:
 	case MENUITEMTYPE_CONTROLLER:
 		*numwords = 2;
 		break;
 	case MENUITEMTYPE_LIST:
-#if VERSION >= VERSION_PAL_BETA
-	case MENUITEMTYPE_SCROLLABLE:
-#endif
 		*numwords = 3;
 		break;
 	case MENUITEMTYPE_DROPDOWN:
@@ -1833,25 +1831,25 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 			if (menumodel->curposx != menumodel->newposx) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curposx = (menumodel->newposx * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposx);
+					menumodel->curposx = (menumodel->newposx * 0.002f) + ((1.0f - 0.002f) * menumodel->curposx);
 				}
 			}
 
 			if (menumodel->curposy != menumodel->newposy) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curposy = (menumodel->newposy * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposy);
+					menumodel->curposy = (menumodel->newposy * 0.002f) + ((1.0f - 0.002f) * menumodel->curposy);
 				}
 			}
 
 			if (menumodel->curposz != menumodel->newposz) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curposz = (menumodel->newposz * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curposz);
+					menumodel->curposz = (menumodel->newposz * 0.002f) + ((1.0f - 0.002f) * menumodel->curposz);
 				}
 			}
 
 			if (menumodel->curscale != menumodel->newscale) {
 				for (i = 0; i < g_Vars.diffframe60; i++) {
-					menumodel->curscale = (menumodel->newscale * PALUPF(0.002f)) + ((1.0f - PALUPF(0.002f)) * menumodel->curscale);
+					menumodel->curscale = (menumodel->newscale * 0.002f) + ((1.0f - 0.002f) * menumodel->curscale);
 				}
 			}
 
@@ -1959,7 +1957,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		screenpos[0] = menumodel->curposx + 160; // Fix screenpos being off center
 		screenpos[1] = menumodel->curposy + 110; // Fix screenpos being off center
 
-		cam0f0b4c3c(screenpos, &tmpcoord, 1.0f);
+		camProjectScreenToWorldDir(screenpos, &tmpcoord, 1.0f);
 
 		mtx4LoadIdentity(&posmtx);
 
@@ -2001,9 +1999,9 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		mtx4LoadTranslation(&tmpcoord, &posmtx);
 
 		if (haszoom) {
-			mtx00015f04(scale * zoomy, &posmtx);
+			mtxScaleRotationPart(scale * zoomy, &posmtx);
 		} else {
-			mtx00015f04(scale, &posmtx);
+			mtxScaleRotationPart(scale, &posmtx);
 		}
 
 		{
@@ -2075,10 +2073,10 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		// Set new animation if requested
 		if (menumodel->newanimnum && menumodel->curanimnum != menumodel->newanimnum) {
 			if (menumodel->reverseanim) {
-				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, PALUPF(-0.5f), 0.0f);
+				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, -0.5f, 0.0f);
 				modelSetAnimFrame(&menumodel->bodymodel, modelGetNumAnimFrames(&menumodel->bodymodel));
 			} else {
-				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, PALUPF(0.5f), 0.0f);
+				modelSetAnimation(&menumodel->bodymodel, menumodel->newanimnum, false, 0, 0.5f, 0.0f);
 			}
 
 			menumodel->curanimnum = menumodel->newanimnum;
@@ -2159,7 +2157,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 					pos.y = matrices[mtxindex].m[3][1];
 					pos.z = matrices[mtxindex].m[3][2];
 
-					cam0f0b4d04(&pos, screenpos);
+					camProjectViewToScreen(&pos, screenpos);
 
 					g_MenuProjectFromX = ((int)screenpos[0] - viGetWidth() / 2);
 					g_MenuProjectFromY = (int)screenpos[1] - viGetHeight() / 2;
@@ -2289,7 +2287,7 @@ Gfx *menuApplyScissor(Gfx *gdl)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gDPSetScissor(gdl++, G_SC_NON_INTERLACE, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 	return gdl;
 }
@@ -2786,10 +2784,10 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 			gdl = textSetCCCustom02(gdl);
 			
 
-			gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
+			gDPSetScissor(gdl++, viGetViewLeft(), viGetViewTop(),
 					viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 		} else {
-			gDPSetScissor(gdl++, G_SC_NON_INTERLACE, viGetViewLeft(), viGetViewTop(),
+			gDPSetScissor(gdl++, viGetViewLeft(), viGetViewTop(),
 					viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 		}
 
@@ -3659,7 +3657,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, uint32_t t
 	definition = dialog->definition;
 	menu = &g_Menus[g_MpPlayerNum];
 
-	if (g_Menus[g_MpPlayerNum].fm.unke40_00 || g_MainIsDebugMenuOpen) {
+	if (g_Menus[g_MpPlayerNum].fm.unke40_00) {
 		inputs->leftright = inputs->updown = inputs->select = inputs->back = inputs->xaxis = inputs->yaxis = inputs->shoulder = inputs->back2 = inputs->unk14 = 0;
 		g_Menus[g_MpPlayerNum].fm.unke40_00 = false;
 	}
@@ -3979,7 +3977,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, uint32_t t
 					handlerdata = (union menuitemdata *)&menu->blocks[menu->rows[rowindex].blockindex];
 				}
 
-				if (g_Menus[g_MpPlayerNum].fm.unke40_00 == 0 && !g_MainIsDebugMenuOpen) {
+				if (g_Menus[g_MpPlayerNum].fm.unke40_00 == 0) {
 					if ((tickflags & MENUTICKFLAG_DIALOGISCURRENT) && item == dialog->focuseditem) {
 						uint32_t itemtickflags = tickflags | MENUTICKFLAG_ITEMISFOCUSED;
 
@@ -4110,7 +4108,7 @@ void dialogTick(struct menudialog *dialog, struct menuinputs *inputs, uint32_t t
 		}
 	}
 
-	if (g_Menus[g_MpPlayerNum].fm.unke40_00 || g_MainIsDebugMenuOpen) {
+	if (g_Menus[g_MpPlayerNum].fm.unke40_00) {
 		inputs->leftright = inputs->updown = inputs->select = inputs->back = inputs->xaxis = inputs->yaxis = inputs->shoulder = inputs->back2 = inputs->unk14 = 0;
 		g_Menus[g_MpPlayerNum].fm.unke40_00 = false;
 	}
@@ -5581,7 +5579,7 @@ void func0f0fd494(struct coord *pos)
 	matrix = camGetWorldToScreenMtxf();
 
 	mtx4TransformVec(matrix, pos, &coord);
-	cam0f0b4d04(&coord, xy);
+	camProjectViewToScreen(&coord, xy);
 
 	g_MenuData.unk670 = (int)xy[0] - viGetWidth() / 2;
 	g_MenuData.unk674 = (int)xy[1] - viGetHeight() / 2;

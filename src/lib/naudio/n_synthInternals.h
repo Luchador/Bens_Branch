@@ -17,8 +17,7 @@
  * Copyright Laws of the United States.
  *====================================================================*/
 
-#ifndef __N_SYNTHINTERNALS__
-#define __N_SYNTHINTERNALS__
+#pragma once
 
 #include <n_libaudio.h>
 #include <synthInternals.h>
@@ -175,5 +174,3 @@ void n_alSaveNew(void);
 
 void n_alSynNew(ALSynConfig *c);
 void n_alSynDelete(void);
-
-#endif /*  __N_SYNTHINTERNALS__ */

@@ -42,11 +42,9 @@
  * memp memory is to load a new stage which wipes the stage pool.
  */
 
-#ifndef PLATFORM_N64
 // TODO: set this in a config or something
 //#define MEMP_EXPANSION_POOL_SIZE (8 * 1024 * 1024)
 #define MEMP_EXPANSION_POOL_SIZE (8 * 1024 * 1024)
-#endif
 
 struct memorypool {
 	/*0x00*/ uint8_t *start;

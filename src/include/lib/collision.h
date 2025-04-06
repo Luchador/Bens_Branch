@@ -1,6 +1,5 @@
-#ifndef _IN_LIB_COLLISION_H
-#define _IN_LIB_COLLISION_H
-#include <ultra64.h>
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -9,11 +8,11 @@ float rayIntersectCircleXZ(struct widthxz *arg0, struct xz *arg1, struct xz *arg
 float getSlideTimeToEdgeXZ(struct widthxz *circle, struct xz *edgeStart, struct xz *edgeEnd, struct xz *movement);
 
 float cd00024e40(void);
-void cdGetEdge(struct coord *pos1, struct coord *pos2, int32_t line, char *file);
+void cdGetEdge(struct coord *pos1, struct coord *pos2);
 float cd00024e98(void);
 int cd00024ea4(void);
 struct prop *cdGetObstacleProp(void);
-void cdGetPos(struct coord *pos, int32_t line, char *file);
+void cdGetPos(struct coord *pos);
 void cdGetObstacleNormal(struct coord *normal);
 int32_t cdGetGeoFlags(void);
 void cdSetSavedPos(struct coord *pos1, struct coord *pos2);
@@ -57,8 +56,6 @@ int cdTestLos10(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomNum *
 int cdTestLos11(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomNum *arg3, int32_t types);
 bool cd0002ded8(struct coord *arg0, struct coord *arg1, struct prop *prop);
 int cdTestBlockOverlapsAnyProp(struct geoblock *geo, RoomNum *rooms, int32_t types);
-int cd0002f02c(struct geoblock *block, RoomNum *rooms, int types);
+bool cd0002f02c(struct geoblock *block, RoomNum *rooms, int types);
 bool cdIsNearlyInSight(struct coord *viewpos, RoomNum *rooms, struct coord *targetpos, float distance, int arg4);
 bool cdTestAToB(struct coord *pos, struct coord *coord2, RoomNum *rooms, int32_t types, int16_t geoflags, bool checkvertical, int arg6, float ymax, float ymin);
-
-#endif

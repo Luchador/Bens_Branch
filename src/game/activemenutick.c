@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <math.h>
 #include "constants.h"
 #include "game/activemenu.h"
 #include "game/pdmode.h"

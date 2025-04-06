@@ -1,5 +1,5 @@
-#ifndef _IN_GAME_MPLAYER_SETUP_H
-#define _IN_GAME_MPLAYER_SETUP_H
+#pragma once
+
 #include "data.h"
 #include "types.h"
 
@@ -143,9 +143,7 @@ MenuDialogHandlerResult menudialogMpSimulant(int operation, struct menudialogdef
 MenuItemHandlerResult menuhandlerMpSimulantHead(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpSimulantBody(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpDeleteSimulant(int operation, struct menuitem *item, union handlerdata *data);
-#ifndef PLATFORM_N64
 MenuItemHandlerResult menuhandlerMpCopySimulant(int operation, struct menuitem *item, union handlerdata *data);
-#endif
 MenuItemHandlerResult menuhandlerMpChangeSimulantType(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpClearAllSimulants(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpAddSimulant(int operation, struct menuitem *item, union handlerdata *data);
@@ -179,5 +177,3 @@ MenuDialogHandlerResult menudialogCombatSimulator(int operation, struct menudial
 MenuItemHandlerResult menuhandlerMpAdvancedSetup(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpDisplayTeam(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerMpOneHitKills(int operation, struct menuitem *item, union handlerdata *data);
-
-#endif
