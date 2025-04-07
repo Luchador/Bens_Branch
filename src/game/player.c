@@ -3230,11 +3230,7 @@ void playerTick()
 				float sp13c[4];
 				float sp12c[4];
 				float prevspeed;
-#ifdef AVOID_UB
 				float sp11c[4];
-#else
-				float sp11c[3];
-#endif
 				bool explode = false;
 				// NOTE: slayer handling
 				bool slow = false;

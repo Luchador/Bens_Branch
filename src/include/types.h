@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <PR/ultrasched.h>
 #include "n_libaudio.h"
 #include "constants.h"
 #include "tiles.h"
@@ -3170,96 +3169,45 @@ struct shadesettings {
 };
 
 struct environment {
-	/*0x00*/ int fogmin;
-	/*0x04*/ int fogmax;
-	/*0x08*/ uint8_t sky_r;
-	/*0x09*/ uint8_t sky_g;
-	/*0x0a*/ uint8_t sky_b;
-	/*0x0b*/ uint8_t numsuns;
-	/*0x0c*/ struct sun *suns;
-	/*0x10*/ uint8_t clouds_enabled;
-	/*0x14*/ float clouds_scale;
-	/*0x18*/ int16_t clouds_type;
-	/*0x1c*/ float clouds_r;
-	/*0x20*/ float clouds_g;
-	/*0x24*/ float clouds_b;
-	/*0x28*/ uint8_t water_enabled;
-	/*0x2c*/ float water_scale;
-	/*0x30*/ int16_t water_type;
-	/*0x34*/ float water_r;
-	/*0x38*/ float water_g;
-	/*0x3c*/ float water_b;
-	/*0x40*/ float clouds_height;
-	/*0x44*/ float skyredfrac;
-	/*0x48*/ float skygreenfrac;
-	/*0x4c*/ float skybluefrac;
+	int stage;
+	int16_t near;
+	int16_t far;
+	int16_t opaperc;
+	int16_t xluperc;
+	int16_t refdist;
+	int fogmin;
+	int fogmax;
+	uint8_t sky_r;
+	uint8_t sky_g;
+	uint8_t sky_b;
+	uint8_t numsuns;
+	struct sun *suns;
+	uint8_t clouds_enabled;
+	uint8_t clouds_r;
+	uint8_t clouds_g;
+	uint8_t clouds_b;
+	float clouds_scale;
+	int16_t clouds_type;
+	float clouds_height;
+	uint8_t water_enabled;
+	uint8_t water_r;
+	uint8_t water_g;
+	uint8_t water_b;
+	float water_scale;
+	int16_t water_type;
+	float skyredfrac;
+	float skygreenfrac;
+	float skybluefrac;
 };
 
 struct sun {
-	/*0x00*/ uint8_t lens_flare;
-	/*0x01*/ uint8_t red;
-	/*0x02*/ uint8_t green;
-	/*0x03*/ uint8_t blue;
-	/*0x04*/ float pos[3];
-	/*0x10*/ int16_t texture_size;
-	/*0x12*/ int16_t orb_size;
-};
-
-struct fogenvironment {
-	/*0x00*/ int16_t stage;
-	/*0x02*/ int16_t near;
-	/*0x04*/ int16_t far;
-	/*0x06*/ int16_t opaperc;
-	/*0x08*/ int16_t xluperc;
-	/*0x0a*/ int16_t refdist;
-	/*0x0c*/ int16_t fogmin;
-	/*0x0e*/ int16_t fogmax;
-	/*0x10*/ uint8_t sky_r;
-	/*0x11*/ uint8_t sky_g;
-	/*0x12*/ uint8_t sky_b;
-	/*0x13*/ uint8_t numsuns;
-	/*0x14*/ struct sun *suns;
-	/*0x18*/ uint8_t clouds_enabled;
-	/*0x1a*/ int16_t clouds_scale;
-	/*0x1c*/ uint8_t clouds_type;
-	/*0x1d*/ uint8_t clouds_r;
-	/*0x1e*/ uint8_t clouds_g;
-	/*0x1f*/ uint8_t clouds_b;
-	/*0x20*/ uint8_t water_enabled;
-	/*0x22*/ int16_t water_scale;
-	/*0x24*/ uint8_t water_type;
-	/*0x25*/ uint8_t water_r;
-	/*0x26*/ uint8_t water_g;
-	/*0x27*/ uint8_t water_b;
-	/*0x28*/ uint8_t clouds_height;
-};
-
-struct nofogenvironment {
-	/*0x00*/ int stage;
-	/*0x04*/ int16_t near;
-	/*0x06*/ int16_t far;
-	/*0x08*/ int16_t opaperc;
-	/*0x0a*/ int16_t xluperc;
-	/*0x0c*/ int16_t refdist;
-	/*0x0e*/ uint8_t sky_r;
-	/*0x0f*/ uint8_t sky_g;
-	/*0x10*/ uint8_t sky_b;
-	/*0x11*/ uint8_t numsuns;
-	/*0x14*/ struct sun *suns;
-	/*0x18*/ uint8_t clouds_enabled;
-	/*0x19*/ uint8_t clouds_r;
-	/*0x1a*/ uint8_t clouds_g;
-	/*0x1b*/ uint8_t clouds_b;
-	/*0x1c*/ float clouds_scale;
-	/*0x20*/ int16_t clouds_type;
-	/*0x22*/ uint8_t water_enabled;
-	/*0x23*/ uint8_t water_r;
-	/*0x24*/ uint8_t water_g;
-	/*0x25*/ uint8_t water_b;
-	/*0x28*/ float water_scale;
-	/*0x2c*/ int16_t water_type;
-	/*0x30*/ float clouds_height;
-	/*0x34*/ bool transparency;
+	uint8_t lens_flare;
+	uint8_t red;
+	uint8_t green;
+	uint8_t blue;
+	float pos[3];
+	int16_t texture_size;
+	int16_t orb_size;
 };
 
 struct menuitemdata_controller {
@@ -4413,8 +4361,32 @@ struct textoverride {
 	/*0x24*/ struct defaultobj *obj;
 };
 
+typedef struct {
+	int		status;
+	int		channel;
+	uint8_t		id[32];
+	uint8_t		label[32];
+	int		version;
+	int		dir_size;
+	int		inode_table;		/* block location */
+	int		minode_table;		/* mirrioring inode_table */
+	int		dir_table;		/* block location */
+	int		inode_start_page;	/* page # */
+	uint8_t		banks;
+	uint8_t		activebank;
+} PakPfs;
+
+typedef struct {
+	uint32_t	file_size;	/* bytes */
+  	uint32_t 	game_code;
+  	uint16_t 	company_code;
+  	char  	ext_name[4];
+  	char 	game_name[16];
+} PakPfsState;
+
+
 struct pakdata {
-	/*0x000*/ OSPfsState notes[16];
+	/*0x000*/ PakPfsState notes[16];
 	/*0x200*/ bool notesinuse[16];
 	/*0x240*/ uint16_t pagesused;
 	/*0x242*/ uint16_t pagesfree;
@@ -4473,6 +4445,16 @@ struct pak {
 	/*0x2c4*/ uint8_t *unk2c4; // len 4096
 	/*0x2c8*/ uint32_t unk2c8;
 };
+
+typedef struct OSScTask_s {
+    struct OSScTask_s   *next;          /* note: this must be first */
+    uint32_t                 state;
+    uint32_t			flags;
+    void		*framebuffer;	/* used by graphics tasks */
+
+    OSTask              list;
+    //OSMesg              msg;
+} OSScTask;
 
 struct gecreditsdata {
 	/*0x00*/ uint16_t text1;
@@ -5620,9 +5602,9 @@ struct warpparams {
 struct hitthing {
 	struct coord pos; // world pos
 	struct coord unk0c;
-	Vtx *unk18;
-	Vtx *unk1c;
-	Vtx *unk20;
+	Vtx *point1;
+	Vtx *point2;
+	Vtx *point3;
 	Gfx *tricmd;
 	int16_t unk28;
 	int16_t texturenum;

@@ -53,7 +53,6 @@ static displaymode *vidModes = &vidModeDefault;
 
 static int texFilter = FILTER_LINEAR;
 static int texFilter2D = true;
-static int texDetail = false;
 
 static uint32_t dlcount = 0;
 static uint32_t frames = 0;
@@ -63,7 +62,6 @@ static double fpsTime = 0.0;
 static int fpsNumFrames = 0;
 
 static bool framebuffers_enabled;
-static bool detail_textures;
 
 static int videoInitDisplayModes(void);
 
@@ -76,7 +74,6 @@ int videoInit(void)
 	gfx_current_native_viewport.height = 220;
 	gfx_current_native_aspect = 320.f / 220.f;
 	framebuffers_enabled = (bool)vidFramebuffers;
-	detail_textures = (bool)texDetail;
 	gfx_msaa_level = vidMSAA;
 
 	struct GfxInitSettings set = {
@@ -372,11 +369,6 @@ uint32_t videoGetTextureFilter(void)
 	return texFilter;
 }
 
-int videoGetDetailTextures(void)
-{
-	return texDetail;
-}
-
 void videoSetWindowOffset(int x, int y)
 {
 	gfx_current_game_window_viewport.x = x;
@@ -442,12 +434,6 @@ void videoSetTextureFilter(uint32_t filter)
 void videoSetTextureFilter2D(int filter)
 {
 	texFilter2D = !!filter;
-}
-
-void videoSetDetailTextures(int detail)
-{
-	texDetail = !!detail;
-	detail_textures = (bool)texDetail;
 }
 
 int videoCreateFramebuffer(uint32_t w, uint32_t h, int upscale, int autoresize)
@@ -540,5 +526,4 @@ PD_CONSTRUCTOR static void videoConfigInit(void)
 	configRegisterInt("Video.MSAA", &vidMSAA, 1, 16);
 	configRegisterInt("Video.TextureFilter", &texFilter, 0, 2);
 	configRegisterInt("Video.TextureFilter2D", &texFilter2D, 0, 1);
-	configRegisterInt("Video.DetailTextures", &texDetail, 0, 1);
 }

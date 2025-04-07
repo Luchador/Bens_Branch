@@ -8,6 +8,7 @@
 #include "game/mplayer/mplayer.h"
 #include "game/pak.h"
 #include "game/utils.h"
+#include "fs.h"
 #include "bss.h"
 #include "lib/args.h"
 #include "lib/joy.h"
@@ -15,6 +16,7 @@
 #include "lib/main.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
+#include "system.h"
 #include "string.h"
 #include "data.h"
 #include "types.h"
@@ -125,25 +127,25 @@
 #define LINE_4742 4547
 #define LINE_4801 4606
 
-/**
- * In NTSC Beta the functions joyDisableCyclicPolling and joyEnableCyclicPolling
- * take two arguments: __LINE__ and __FILE__. In newer versions of the game
- * these functions take no arguments. This macro is here to avoid using VERSION
- * checks everywhere where these are called.
- */
-#define JOYARGS(line)
-
 #define SETBANNER(banner) if (g_ShowPakMenuBanner) { menuSetBanner(banner, true); }
 
 #define PAKFEATURE_MEMORY  0x01
 #define PAKFEATURE_RUMBLE  0x02
 #define PAKFEATURE_GAMEBOY 0x04
 
+#define EEPROM_SIZE (256 * 8)
+#define EEPROM_FNAME "eeprom.bin"
+#define EEPROM_PATH "$S/" EEPROM_FNAME
+
+static uint8_t eeprom[EEPROM_SIZE];
+static char eepromPath[FS_MAXPATH + 1];
+static int eepromLoaded = 0;
+
 const char g_N64FontCodeMap[] = "\0************** 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#'*+,-./:=?@";
 
 struct pak g_Paks[5]; // controller paks + EEPROM
 
-OSPfs g_Pfses[MAX_PLAYERS];
+PakPfs g_Pfses[MAX_PLAYERS];
 
 bool g_PakHasEeprom = false;
 
@@ -368,9 +370,7 @@ PakErr1 _pakDeleteGameNote(int8_t device, uint16_t company_code, uint32_t game_c
 	int result;
 
 	if (mempakIsReadyOrFull(device)) {
-		joyDisableCyclicPolling(JOYARGS(738));
 		result = pakDeleteGameNote3(PFS(device), company_code, game_code, game_name, ext_name);
-		joyEnableCyclicPolling(JOYARGS(740));
 
 		if (pakHandleResult(result, device, true, LINE_825)) {
 			g_Paks[device].unk2b8_02 = 1;
@@ -622,7 +622,7 @@ int _pakSaveAtGuid(int8_t device, int fileid, int filetype, uint8_t *newdata, in
 	return 0;
 }
 
-PakErr1 pakInitPak(OSPfs *pfs, int channel, int *arg3)
+PakErr1 pakInitPak(PakPfs *pfs, int channel, int *arg3)
 {
 	if (pfs) {
 		return inputRumbleSupported(channel) ? 11 : 1;
@@ -635,7 +635,7 @@ PakErr1 pakInitPak(OSPfs *pfs, int channel, int *arg3)
 	return 0;
 }
 
-PakErr1 _pakReadWriteBlock(OSPfs *pfs, int file_no, uint8_t flag, uint32_t address, uint32_t len, uint8_t *buffer)
+PakErr1 _pakReadWriteBlock(PakPfs *pfs, int file_no, uint8_t flag, uint32_t address, uint32_t len, uint8_t *buffer)
 {
 	uint32_t newaddress;
 
@@ -662,14 +662,12 @@ PakErr1 _pakReadWriteBlock(OSPfs *pfs, int file_no, uint8_t flag, uint32_t addre
 	return PAK_ERR1_EEPROMINVALIDOP;
 }
 
-PakErr1 pakQueryNumNotes(OSPfs *pfs, int *max_files, int *files_used)
+PakErr1 pakQueryNumNotes(PakPfs *pfs, int *max_files, int *files_used)
 {
 	if (pfs) {
 		int result;
 
-		joyDisableCyclicPolling(JOYARGS(1308));
 		result = 1;
-		joyEnableCyclicPolling(JOYARGS(1310));
 
 		return result;
 	}
@@ -684,14 +682,12 @@ PakErr1 pakQueryNumNotes(OSPfs *pfs, int *max_files, int *files_used)
 	return PAK_ERR1_OK;
 }
 
-PakErr1 pakQueryNumFreeBytes(OSPfs *pfs, int *bytes_not_used)
+PakErr1 pakQueryNumFreeBytes(PakPfs *pfs, int *bytes_not_used)
 {
 	if (pfs) {
 		int result;
 
-		joyDisableCyclicPolling(JOYARGS(1337));
 		result = 1;
-		joyEnableCyclicPolling(JOYARGS(1339));
 
 		return result;
 	}
@@ -705,14 +701,12 @@ PakErr1 pakQueryNumFreeBytes(OSPfs *pfs, int *bytes_not_used)
 	return PAK_ERR1_OK;
 }
 
-PakErr1 pakQueryNoteState(OSPfs *pfs, int file_no, OSPfsState *note)
+PakErr1 pakQueryNoteState(PakPfs *pfs, int file_no, PakPfsState *note)
 {
 	if (pfs) {
 		int result;
 
-		joyDisableCyclicPolling(JOYARGS(1363));
 		result = 1;
-		joyEnableCyclicPolling(JOYARGS(1365));
 
 		return result;
 	}
@@ -733,7 +727,7 @@ PakErr1 pakQueryNoteState(OSPfs *pfs, int file_no, OSPfsState *note)
 	return PAK_ERR1_OK;
 }
 
-PakErr1 pakAllocateNote(OSPfs *pfs, uint16_t company_code, uint32_t game_code, char *game_name, char *ext_name, int size, int *file_no)
+PakErr1 pakAllocateNote(PakPfs *pfs, uint16_t company_code, uint32_t game_code, char *game_name, char *ext_name, int size, int *file_no)
 {
 	if (pfs) {
 		return 1;
@@ -748,7 +742,7 @@ PakErr1 pakAllocateNote(OSPfs *pfs, uint16_t company_code, uint32_t game_code, c
 	return PAK_ERR1_OK;
 }
 
-PakErr1 pakDeleteGameNote3(OSPfs *pfs, uint16_t company_code, uint32_t game_code, char *game_name, char *ext_name)
+PakErr1 pakDeleteGameNote3(PakPfs *pfs, uint16_t company_code, uint32_t game_code, char *game_name, char *ext_name)
 {
 	if (pfs) {
 		return 1;
@@ -761,7 +755,7 @@ PakErr1 pakDeleteGameNote3(OSPfs *pfs, uint16_t company_code, uint32_t game_code
 	return PAK_ERR1_OK;
 }
 
-PakErr1 pakFindNote(OSPfs *pfs, uint16_t company_code, uint32_t game_code, char *game_name, char *ext_name, int *file_no)
+PakErr1 pakFindNote(PakPfs *pfs, uint16_t company_code, uint32_t game_code, char *game_name, char *ext_name, int *file_no)
 {
 	if (pfs) {
 		return 1;
@@ -775,14 +769,12 @@ PakErr1 pakFindNote(OSPfs *pfs, uint16_t company_code, uint32_t game_code, char 
 	return PAK_ERR1_EEPROMMISSING;
 }
 
-PakErr1 _pakResizeNote(OSPfs *pfs, uint16_t company_code, uint32_t game_code, uint8_t *game_name, uint8_t *ext_name, uint32_t numbytes)
+PakErr1 _pakResizeNote(PakPfs *pfs, uint16_t company_code, uint32_t game_code, uint8_t *game_name, uint8_t *ext_name, uint32_t numbytes)
 {
 	if (pfs) {
 		int result;
 
-		joyDisableCyclicPolling(JOYARGS(1496));
 		result = 1;
-		joyEnableCyclicPolling(JOYARGS(1498));
 
 		return result;
 	}
@@ -817,7 +809,7 @@ bool pakResizeNote(int8_t device, int numpages)
 {
 	int errnum;
 	struct pak *devicedata;
-	OSPfsState *note;
+	PakPfsState *note;
 	uint32_t numbytes;
 
 	pakGetPdNumPages(device);
@@ -1780,14 +1772,12 @@ void pakSetDefaults(int8_t device)
 	g_Paks[device].unk2c8 = 0;
 }
 
-PakErr1 pakReadWriteBlock(int8_t device, OSPfs *pfs, int file_no, uint8_t flag, uint32_t address, uint32_t len, uint8_t *buffer)
+PakErr1 pakReadWriteBlock(int8_t device, PakPfs *pfs, int file_no, uint8_t flag, uint32_t address, uint32_t len, uint8_t *buffer)
 {
 	int result;
 	len = pakAlign(device, len);
 
-	joyDisableCyclicPolling(JOYARGS(3096));
 	result = _pakReadWriteBlock(pfs, file_no, flag, address, len, buffer);
-	joyEnableCyclicPolling(JOYARGS(3098));
 
 	return result;
 }
@@ -1843,12 +1833,10 @@ bool pakQueryTotalUsage(int8_t device)
 void pakQueryPdSize(int8_t device)
 {
 	uint32_t stack;
-	OSPfsState note;
+	PakPfsState note;
 	int result;
 
-	joyDisableCyclicPolling(JOYARGS(3242));
 	result = pakQueryNoteState(PFS(device), g_Paks[device].pdnoteindex, &note);
-	joyEnableCyclicPolling(JOYARGS(3244));
 
 	if (pakHandleResult(result, device, true, LINE_3599)) {
 		g_Paks[device].pdnumbytes = note.file_size;
@@ -1885,9 +1873,7 @@ bool mempakPrepare(int8_t device)
 	}
 
 	// Find the PD note if it exists
-	joyDisableCyclicPolling(JOYARGS(3319));
 	sp48 = pakFindNote(PFS(device), ROM_COMPANYCODE, ROM_GAMECODE, g_PakNoteGameName, g_PakNoteExtName, &g_Paks[device].pdnoteindex);
-	joyEnableCyclicPolling(JOYARGS(3321));
 
 	// If it doesn't exist, allocate it
 	if (sp48 != PAK_ERR1_OK) {
@@ -1899,9 +1885,7 @@ bool mempakPrepare(int8_t device)
 
 		notesize = g_Paks[device].pdnumnotes * (256 * NUM_PAGES);
 
-		joyDisableCyclicPolling(JOYARGS(3336));
 		sp48 = pakAllocateNote(PFS(device), ROM_COMPANYCODE, ROM_GAMECODE, g_PakNoteGameName, g_PakNoteExtName, notesize, &g_Paks[device].pdnoteindex);
-		joyEnableCyclicPolling(JOYARGS(3338));
 
 		g_Paks[device].unk2b8_02 = true;
 
@@ -1976,8 +1960,6 @@ bool pakProbe(int8_t device)
 	int ret;
 	bool done = false;
 
-	joyDisableCyclicPolling();
-
 	// Try memory pak
 	ret = pakInitPak(PFS(device), device, NULL);
 
@@ -2004,7 +1986,7 @@ bool pakProbe(int8_t device)
 
 		if (!done) {
 			// Try rumble pak
-			ret = osMotorProbe(PFS(device), device);
+			ret = joyMotorProbe(PFS(device), device);
 
 			if (pakHandleResult(ret, device, false, LINE_3865)) {
 				g_Paks[device].type = PAKTYPE_RUMBLE;
@@ -2035,8 +2017,6 @@ bool pakProbe(int8_t device)
 			}
 		}
 	}
-
-	joyEnableCyclicPolling();
 
 	return plugged;
 }
@@ -2279,8 +2259,6 @@ int pak0f11b86c(int8_t device, uint32_t offset, uint8_t *data, struct pakfilehea
 		filelen = alignedfilelen;
 	}
 
-	joyDisableCyclicPolling(JOYARGS(4008));
-
 	for (i = 0; i != filelen; i++) {
 		offsetinblock = i % pakGetBlockSize(device);
 		blocknum = i / pakGetBlockSize(device);
@@ -2292,7 +2270,6 @@ int pak0f11b86c(int8_t device, uint32_t offset, uint8_t *data, struct pakfilehea
 			ret = pakReadWriteBlock(device, PFS(device), g_Paks[device].pdnoteindex, 0, absoluteoffset, pakGetBlockSize(device), sp58); // Read
 
 			if (!pakHandleResult(ret, device, true, LINE_4394)) {
-				joyEnableCyclicPolling(JOYARGS(4032));
 
 				if (ret == 1) {
 					return 1;
@@ -2307,8 +2284,6 @@ int pak0f11b86c(int8_t device, uint32_t offset, uint8_t *data, struct pakfilehea
 			data++;
 		}
 	}
-
-	joyEnableCyclicPolling(JOYARGS(4054));
 
 	return 0;
 }
@@ -2433,8 +2408,6 @@ int pakWriteFileAtOffset(int8_t device, uint32_t offset, uint32_t filetype, uint
 		numblocks++;
 	}
 
-	joyDisableCyclicPolling(JOYARGS(4292));
-
 	// Write the header with writecompleted = 0, followed by the data, then
 	// rewrite the header with writecompleted = 1. This allows the game to
 	// detect if data on the pak was only partially written.
@@ -2481,7 +2454,6 @@ int pakWriteFileAtOffset(int8_t device, uint32_t offset, uint32_t filetype, uint
 				result = pakReadWriteBlock(device, PFS(device), g_Paks[device].pdnoteindex, 1, offset + i * blocksize, pakGetBlockSize(device), &newfilebytes[offsetinfile]); // Write
 
 				if (!pakHandleResult(result, device, true, LINE_4742)) {
-					joyEnableCyclicPolling(JOYARGS(4380));
 
 					if (result == PAK_ERR1_NOPAK) {
 						return 1;
@@ -2492,8 +2464,6 @@ int pakWriteFileAtOffset(int8_t device, uint32_t offset, uint32_t filetype, uint
 			}
 		}
 	}
-
-	joyEnableCyclicPolling(JOYARGS(4393));
 
 	pakSaveHeaderToCache(device, offset / pakGetBlockSize(device), newheader);
 
@@ -2509,9 +2479,7 @@ bool pakRepair(int8_t device)
 	case PAKSTATE_MEM_DEVICEERROR:
 		break;
 	default:
-		joyDisableCyclicPolling(JOYARGS(4425));
 		result = 1;
-		joyEnableCyclicPolling(JOYARGS(4427));
 
 		if (result == PAK_ERR1_OK) {
 			g_Paks[device].state = PAKSTATE_PROBE;
@@ -2526,11 +2494,6 @@ bool pakRepair(int8_t device)
 
 	return false;
 }
-
-/*const char var7f1b45f4[] = "PakMac_PaksLive()=%x\n";
-const char var7f1b460c[] = "paksNeedToBeLive4Game=%x\n";
-const char var7f1b4628[] = "paksNeedToBeLive4Menu=%x\n";
-const char var7f1b4644[] = "g_LastPackPattern=%x\n";*/
 
 bool pakHandleResult(int err1, int8_t device, bool arg2, uint32_t line)
 {
@@ -2873,9 +2836,7 @@ void pakTickState(int8_t device)
 		g_Paks[device].state = PAKSTATE_MEM_PREPARE;
 		break;
 	case PAKSTATE_MEM_PREPARE:
-		joyDisableCyclicPolling();
 		mempakPrepare(device);
-		joyEnableCyclicPolling();
 		break;
 	case PAKSTATE_MEM_POST_PREPARE:
 		SETBANNER(-1);
@@ -2962,9 +2923,6 @@ void pakTickState(int8_t device)
 
 void pakProbeEeprom(void)
 {
-	joyDisableCyclicPolling(JOYARGS(6199));
-	joyEnableCyclicPolling(JOYARGS(6201));
-
 	g_PakHasEeprom = true;
 
 	if (argFindByPrefix(1, "-scrub")) {
@@ -2976,9 +2934,7 @@ PakErr1 pakReadEeprom(uint8_t address, uint8_t *buffer, uint32_t len)
 {
 	int result;
 
-	joyDisableCyclicPolling(JOYARGS(6234));
-	result = osEepromLongRead(address, buffer, len);
-	joyEnableCyclicPolling(JOYARGS(6236));
+	result = pakEepromLongRead(address, buffer, len);
 
 	return result == PAK_ERR1_OK ? PAK_ERR1_OK : PAK_ERR1_EEPROMREADFAILED;
 }
@@ -2987,9 +2943,7 @@ PakErr1 pakWriteEeprom(uint8_t address, uint8_t *buffer, uint32_t len)
 {
 	int result;
 
-	joyDisableCyclicPolling(JOYARGS(6269));
-	result = osEepromLongWrite(address, buffer, len);
-	joyEnableCyclicPolling(JOYARGS(6271));
+	result = pakEepromLongWrite(address, buffer, len);
 
 	return result == PAK_ERR1_OK ? PAK_ERR1_OK : PAK_ERR1_EEPROMWRITEFAILED;
 }
@@ -3093,4 +3047,72 @@ int8_t pakFindBySerial(int findserial)
 bool gbpakIsAnyPerfectDark(void)
 {
 	return g_ValidGbcRomFound;
+}
+
+static inline void pakEepromSetPath(void)
+{
+	const char *extPath = sysArgGetString("--eeprom-file");
+	if (extPath && extPath[0]) {
+		if (extPath[0] == '$' || fsPathIsAbsolute(extPath) || fsPathIsCwdRelative(extPath)) {
+			strncpy(eepromPath, extPath, FS_MAXPATH);
+		} else {
+			// just a filename, look for it in the save dir
+			snprintf(eepromPath, FS_MAXPATH, "$S/%s", extPath);
+		}
+	} else {
+		strncpy(eepromPath, EEPROM_PATH, FS_MAXPATH);
+	}
+}
+
+static inline void pakEeepromLoad(const char *fname)
+{
+	if (!eepromLoaded) {
+		eepromLoaded = 1;
+		FILE *fp = fsFileOpenRead(fname);
+		if (fp) {
+			fread(eeprom, 1, EEPROM_SIZE, fp);
+			fsFileFree(fp);
+		} else {
+			sysLogPrintf(LOG_NOTE, "could not read EEPROM from `%s`: %s", fsFullPath(fname), strerror(errno));
+		}
+	}
+}
+
+static inline void pakEeepromSave(const char *fname)
+{
+	FILE* fp = fsFileOpenWrite(fname);
+	if (fp) {
+		fwrite(eeprom, 1, EEPROM_SIZE, fp);
+		fsFileFree(fp);
+	} else {
+		sysLogPrintf(LOG_ERROR, "could not save EEPROM to `%s`: %s", fsFullPath(fname), strerror(errno));
+	}
+}
+
+int pakEepromLongRead(uint8_t address, uint8_t *buffer, int nbytes)
+{
+	if (!eepromPath[0]) {
+		pakEepromSetPath();
+	}
+
+	pakEeepromLoad(eepromPath);
+
+	memcpy(buffer, eeprom + address * 8, nbytes);
+
+	return 0;
+}
+
+int pakEepromLongWrite(uint8_t address, uint8_t *buffer, int nbytes)
+{
+	if (!eepromPath[0]) {
+		pakEepromSetPath();
+	}
+
+	pakEeepromLoad(eepromPath);
+
+	memcpy(eeprom + address * 8, buffer, nbytes);
+
+	pakEeepromSave(eepromPath);
+
+	return 0;
 }

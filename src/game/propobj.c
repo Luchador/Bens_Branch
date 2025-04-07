@@ -10965,9 +10965,9 @@ int objTickPlayer(struct prop *prop)
 	if (invalidframe) {
 		pass2 = false;
 	} else if (prop == bmoveGetHoverbike() || prop == bmoveGetGrabbedProp()) {
-		pass2 = posIsInDrawDistance(&prop->pos);
+		pass2 = true;
 	} else if (obj->flags2 & OBJFLAG2_CANFILLVIEWPORT) {
-		pass2 = posIsInDrawDistance(&prop->pos);
+		pass2 = true;
 	} else if ((obj->hidden & OBJHFLAG_GONE) == 0 && (obj->flags2 & OBJFLAG2_INVISIBLE) == 0) {
 		pass2 = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), sp564);
 	} else {
@@ -12495,10 +12495,10 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 	if (USINGDEVICE(DEVICE_NIGHTVISION)) {
 		if ((obj->flags & OBJFLAG_PATHBLOCKER) == 0) {
-			colour[0] = var8009caed;
-			colour[1] = var8009caed;
-			colour[2] = var8009caed;
-			colour[3] = var8009caee;
+			colour[0] = g_NVPropBrightness;
+			colour[1] = g_NVPropBrightness;
+			colour[2] = g_NVPropBrightness;
+			colour[3] = g_NVPropHighlight;
 		}
 	} else if (USINGDEVICE(DEVICE_IRSCANNER)) {
 		if ((obj->hidden & OBJHFLAG_CONDITIONALSCENERY) || (obj->flags3 & OBJFLAG3_INFRARED)) {
@@ -17900,22 +17900,6 @@ bool func0f08e8ac(struct prop *prop, struct coord *pos, float arg2, bool arg3)
 	return result;
 }
 
-bool posIsInDrawDistance(struct coord *pos)
-{
-	struct coord *campos = &g_Vars.currentplayer->cam_pos;
-	float x = pos->x - campos->x;
-	float y = pos->y - campos->y;
-	float z = pos->z - campos->z;
-	float aggregate = x * x + y * y + z * z;
-	bool result = true;
-
-	if (aggregate > 32000 * 32000) {
-		result = false;
-	}
-
-	return result;
-}
-
 void doorCreateSparks(struct doorobj *door)
 {
 	struct pad pad;
@@ -18722,7 +18706,7 @@ void gasTick(void)
 	}
 
 	if (g_GasReleaseTimer240 > 0 && !g_PlayerInvincible) {
-		envApplyTransitionFrac(g_GasReleaseTimer240 / g_GasReleaseTimerMax240);
+		//envApplyTransitionFrac(g_GasReleaseTimer240 / g_GasReleaseTimerMax240);
 
 		if (g_GasEnableDamage) {
 			if (g_GasLastCough60 < g_Vars.lvframe60 - TICKS(225)) {

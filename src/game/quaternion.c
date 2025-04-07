@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include <math.h>
 #include "constants.h"
 #include "game/quaternion.h"
@@ -178,9 +177,12 @@ void quaternionSlerp(float q1[4], float q2[4], float t, float result[4])
 	}
 }
 
-void quaternion0f097518(float q[4], float t, float result[4])
+/*
+This function performs slerp between the identity quaternion [1, 0, 0, 0] and a target quaternion q, storing the interpolated quaternion in result
+*/
+void quaternionSlerpFromIdentity(float target[4], float t, float result[4])
 {
-	float sp34 = q[0];
+	float sp34 = target[0];
 	float sp30 = 1.0f;
 	float sp2c;
 	float sp28;
@@ -189,16 +191,16 @@ void quaternion0f097518(float q[4], float t, float result[4])
 	float sp1c;
 	float sp18;
 
-	if (q[0] < 0.0f) {
+	if (target[0] < 0.0f) {
 		sp34 = -sp34;
 		sp30 = -sp30;
 	}
 
 	if (sp34 < -0.99998999f) {
-		result[0] = q[0] * t - (1.0f - t) * sp30;
-		result[1] = q[1] * t;
-		result[2] = q[2] * t;
-		result[3] = q[3] * t;
+		result[0] = target[0] * t - (1.0f - t) * sp30;
+		result[1] = target[1] * t;
+		result[2] = target[2] * t;
+		result[3] = target[3] * t;
 	} else if (sp34 <= 0.99998999f) {
 		sp2c = acosf(sp34);
 		sp28 = t * sp2c;
@@ -207,15 +209,15 @@ void quaternion0f097518(float q[4], float t, float result[4])
 		sp1c = sinf(sp28) / sp20;
 		sp18 = sinf(sp24) / sp20;
 
-		result[0] = q[0] * sp1c + sp18 * sp30;
-		result[1] = q[1] * sp1c;
-		result[2] = q[2] * sp1c;
-		result[3] = q[3] * sp1c;
+		result[0] = target[0] * sp1c + sp18 * sp30;
+		result[1] = target[1] * sp1c;
+		result[2] = target[2] * sp1c;
+		result[3] = target[3] * sp1c;
 	} else {
-		result[0] = q[0] * t + (1.0f - t) * sp30;
-		result[1] = q[1] * t;
-		result[2] = q[2] * t;
-		result[3] = q[3] * t;
+		result[0] = target[0] * t + (1.0f - t) * sp30;
+		result[1] = target[1] * t;
+		result[2] = target[2] * t;
+		result[3] = target[3] * t;
 	}
 }
 

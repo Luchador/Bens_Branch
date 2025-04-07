@@ -964,7 +964,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 		float sp2c[4];
 
 		quaternionEulerToQuat(rot, sp3c);
-		quaternion0f097518(sp3c, 0.5f, sp2c);
+		quaternionSlerpFromIdentity(sp3c, 0.5f, sp2c);
 
 		if (rendermtx != NULL) {
 			quaternionToTransformMtx(pos, sp2c, &mtx68);
@@ -1067,7 +1067,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 		Mtxf *nodemtx = &matrices[mtxindex1];
 		float sp2c[4];
 
-		quaternion0f097518(rot, 0.5f, sp2c);
+		quaternionSlerpFromIdentity(rot, 0.5f, sp2c);
 
 		if (rendermtx != NULL) {
 			quaternionToTransformMtx(pos, sp2c, &mtx58);

@@ -1563,7 +1563,7 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 		}
 	}
 
-	gdl = func0f0d479c(gdl);
+	gdl = gfxSetCustomProjection(gdl);
 
 	return gdl;
 }

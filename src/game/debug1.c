@@ -31,6 +31,20 @@ int debug_log_float(const char *message, float num)
 	return 1;
 }
 
+int debug_log_string(const char *message)
+{
+	FILE *debug_file = fopen("debug.log", "a");
+    if (debug_file == NULL) {
+        perror("Error opening debug.log");
+        return 0;
+    }
+
+    fprintf(debug_file, message);
+    fclose(debug_file);
+
+	return 1;
+}
+
 int debug_erase()
 {
 	FILE *file = fopen("debug.log", "w"); // Open in write mode, truncates the file

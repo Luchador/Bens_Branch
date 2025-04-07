@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include <math.h>
 #include "lib/sched.h"
 #include "constants.h"
@@ -68,239 +67,225 @@ bool artifactTestLos(struct coord *spec, struct coord *roompos, int xi, int yi)
 
 void artifactsCalculateGlaresForRoom(int roomnum)
 {
-	int i;
-	int j;
-	int k;
-	int l;
-	float f0;
-	int numlights;
-	float viewwidth;
-	float viewheight;
-	float viewleft;
-	float viewtop;
-	uint8_t *s1;
+	float lightDepth;
 	float x;
 	float y;
-	float f16;
-	float f20;
+	float invW;
 	int xi;
 	int yi;
-	float sp190;
+	float directionalDot;
 	float brightnessfrac;
 	float thisfrac;
-	float tmp;
-	float tmp2;
-	float tmp3;
-	float sp178;
+	float clampDiff;
+	float depthFalloff;
+	float directionalScale;
 	Mtxf sp138;
 	Mtxf spf8;
 	struct coord spec;
 	float screenPos[4];
-	struct coord origin;
-	struct coord spc4;
-	struct light *roomlights;
 	int index;
 	struct artifact *artifacts = schedGetWriteArtifacts();
 	struct coord *campos = &g_Vars.currentplayer->cam_pos;
 	struct artifact *artifact;
 
-	if (g_Rooms[roomnum].gfxdata != NULL && g_Rooms[roomnum].loaded240) {
-		numlights = g_Rooms[roomnum].gfxdata->numlights;
+	if (!g_Rooms[roomnum].gfxdata || !g_Rooms[roomnum].loaded240) {
+		return;
+	}
 
-		if (numlights != 0) {
-			roomlights = (struct light *)&g_BgLightsFileData[g_Rooms[roomnum].gfxdata->lightsindex * 0x22];
-			s1 = &var800a41a0[g_Rooms[roomnum].gfxdata->lightsindex * 3];
+	int numlights = g_Rooms[roomnum].gfxdata->numlights;
 
-			roomPopulateMtx(&sp138, roomnum);
-			mtxScale3x4(bgGetScaleBg2Gfx(), &sp138);
-			mtx4MultMtx4(camGetMtxF006c(), &sp138, &spf8);
+	if (numlights == 0) {
+		return;
+	}
 
-			viewwidth = viGetViewWidth();
-			viewheight = viGetViewHeight();
-			viewleft = viGetViewLeft();
-			viewtop = viGetViewTop();
+	struct light *roomlights = (struct light *)&g_BgLightsFileData[g_Rooms[roomnum].gfxdata->lightsindex * 0x22];
+	uint8_t *lightGlares = &var800a41a0[g_Rooms[roomnum].gfxdata->lightsindex * 3];
 
-			for (i = 0; i < numlights; i++) {
-				origin.x = 0.0f;
-				origin.y = 0.0f;
-				origin.z = 0.0f;
+	roomPopulateMtx(&sp138, roomnum);
+	mtxScale3x4(bgGetScaleBg2Gfx(), &sp138);
+	mtx4MultMtx4(camGetMtxF006c(), &sp138, &spf8);
 
-				for (j = 0; j < ARRAYCOUNT(roomlights[i].bbox); j++) {
-					origin.x += roomlights[i].bbox[j].x;
-					origin.y += roomlights[i].bbox[j].y;
-					origin.z += roomlights[i].bbox[j].z;
+	float viewwidth = viGetViewWidth();
+	float viewheight = viGetViewHeight();
+	float viewleft = viGetViewLeft();
+	float viewtop = viGetViewTop();
+
+	for (int i = 0; i < numlights; i++) {
+		struct coord lightOrigin = {0};
+		for (int j = 0; j < ARRAYCOUNT(roomlights[i].bbox); j++) {
+			lightOrigin.x += roomlights[i].bbox[j].x;
+			lightOrigin.y += roomlights[i].bbox[j].y;
+			lightOrigin.z += roomlights[i].bbox[j].z;
+		}
+		lightOrigin.x /= 4.0f;
+		lightOrigin.y /= 4.0f;
+		lightOrigin.z /= 4.0f;
+
+		struct coord lightToCam;
+		for (int j = 0; j != 3; j++) {
+			lightToCam.f[j] = lightOrigin.f[j] - (campos->f[j] - g_BgRooms[roomnum].pos.f[j]);
+		}
+
+		lightGlares[i * 3 + 1] = 0;
+		lightGlares[i * 3 + 2] = 0;
+
+		float lightDirLengthSq = roomlights[i].dirx * roomlights[i].dirx + roomlights[i].diry * roomlights[i].diry + roomlights[i].dirz * roomlights[i].dirz;
+		float camToLightLengthSq = lightToCam.f[0] * lightToCam.f[0] + lightToCam.f[1] * lightToCam.f[1] + lightToCam.f[2] * lightToCam.f[2];
+
+		if (lightDirLengthSq > 0.0001f && camToLightLengthSq > 0.0001f) {
+			directionalDot = -((roomlights[i].dirx * lightToCam.f[0] + roomlights[i].diry * lightToCam.f[1] + roomlights[i].dirz * lightToCam.f[2]) / sqrtf(lightDirLengthSq * camToLightLengthSq));
+
+			if (directionalDot > 0.4f) {
+				directionalDot = 0.4f;
+			}
+
+			directionalDot *= 2.5f;
+		} else {
+			directionalDot = 0.0f;
+		}
+
+		if (directionalDot > 0.0f) {
+			for (int l = 3; l >= 0; l--) {
+				screenPos[l] = lightOrigin.f[0] * spf8.m[0][l] + lightOrigin.f[1] * spf8.m[1][l] + lightOrigin.f[2] * spf8.m[2][l] + spf8.m[3][l];
+
+				if (l == 3 && screenPos[l] <= 0.0f) {
+					break;
 				}
+			}
 
-				origin.x /= 4.0f;
-				origin.y /= 4.0f;
-				origin.z /= 4.0f;
+			if (screenPos[3] > 0.0001f) {
+				invW = 1.0f / screenPos[3];
+				x = utilsClampF(viewleft + (1.0f + screenPos[0] * invW) * (viewwidth * 0.5f), -2147483520.0f, 2147483520.0f);
+				y = utilsClampF(viewtop + (1.0f - screenPos[1] * invW) * (viewheight * 0.5f), -2147483520.0f, 2147483520.0f);
+				lightDepth = (screenPos[2] * invW * 511.0f + 511.0f) * 32.0f;
 
-				for (j = 0; j != 3; j++) {
-					spc4.f[j] = origin.f[j] - (campos->f[j] - g_BgRooms[roomnum].pos.f[j]);
-				}
+				if (lightDepth < 32576.0f) {
+					brightnessfrac = 1.0f;
+					clampDiff = (brightnessfrac - 1.00f);
 
-				s1[i * 3 + 1] = 0;
-				s1[i * 3 + 2] = 0;
-
-				tmp = roomlights[i].dirx * roomlights[i].dirx + roomlights[i].diry * roomlights[i].diry + roomlights[i].dirz * roomlights[i].dirz;
-				f16 = spc4.f[0] * spc4.f[0] + spc4.f[1] * spc4.f[1] + spc4.f[2] * spc4.f[2];
-
-				if (tmp > 0.0001f && f16 > 0.0001f) {
-					sp190 = -((roomlights[i].dirx * spc4.f[0] + roomlights[i].diry * spc4.f[1] + roomlights[i].dirz * spc4.f[2]) / sqrtf(tmp * f16));
-
-					if (sp190 > 0.4f) {
-						sp190 = 0.4f;
+					if (x <= 10.0f + viewleft) {
+						brightnessfrac = 0.0f;
+					} else if (y <= 30.0f + viewtop) {
+						brightnessfrac = 0.0f;
+					} else if (x >= -10.0f + viewleft + viewwidth) {
+						brightnessfrac = 0.0f;
+					} else if (y >= -30.0f + viewtop + viewheight) {
+						brightnessfrac = 0.0f;
 					}
 
-					sp190 *= 2.5f;
-				} else {
-					sp190 = 0.0f;
-				}
+					directionalScale = 1.0f - 2.0f * clampDiff;
 
-				if (sp190 > 0.0f) {
-					for (l = 3; l >= 0; l--) {
-						screenPos[l] = origin.f[0] * spf8.m[0][l] + origin.f[1] * spf8.m[1][l] + origin.f[2] * spf8.m[2][l] + spf8.m[3][l];
+					if (brightnessfrac != 0.0f) {
+						brightnessfrac = 1.0f;
 
-						if (l == 3 && screenPos[l] <= 0.0f) {
-							break;
-						}
-					}
+						if (x < viewleft + 90.0f) {
+							thisfrac = (x - (10.0f + viewleft)) / 80.0f;
 
-					if (screenPos[3] > 0.0001f) {
-						f20 = 1.0f / screenPos[3];
-						x = utilsClampF(viewleft + (1.0f + screenPos[0] * f20) * (viewwidth * 0.5f), -2147483520.0f, 2147483520.0f);
-						y = utilsClampF(viewtop + (1.0f - screenPos[1] * f20) * (viewheight * 0.5f), -2147483520.0f, 2147483520.0f);
-						f0 = (screenPos[2] * f20 * 511.0f + 511.0f) * 32.0f;
-
-						if (f0 < 32576.0f) {
-							brightnessfrac = 1.0f;
-							tmp2 = (brightnessfrac - 1.00f);
-
-							if (x <= 10.0f + viewleft) {
-								brightnessfrac = 0.0f;
-							} else if (y <= 30.0f + viewtop) {
-								brightnessfrac = 0.0f;
-							} else if (x >= -10.0f + viewleft + viewwidth) {
-								brightnessfrac = 0.0f;
-							} else if (y >= -30.0f + viewtop + viewheight) {
-								brightnessfrac = 0.0f;
-							}
-
-							sp178 = 1.0f - 2.0f * tmp2;
-
-							if (brightnessfrac != 0.0f) {
-								brightnessfrac = 1.0f;
-
-								if (x < viewleft + 90.0f) {
-									thisfrac = (x - (10.0f + viewleft)) / 80.0f;
-
-									if (thisfrac < brightnessfrac) {
-										brightnessfrac = thisfrac;
-									}
-								}
-
-								if (y < viewtop + 100.0f) {
-									thisfrac = (y - (viewtop + 30.0f)) / 70.0f;
-
-									if (thisfrac < brightnessfrac) {
-										brightnessfrac = thisfrac;
-									}
-								}
-
-								if (x > viewleft + viewwidth - 90.0f) {
-									thisfrac = (viewleft + viewwidth - 10.0f - x) / 80.0f;
-
-									if (thisfrac < brightnessfrac) {
-										brightnessfrac = thisfrac;
-									}
-								}
-
-								if (y > viewtop + viewheight - 100.0f) {
-									thisfrac = (viewtop + viewheight - 30.0f - y) / 70.0f;
-
-									if (thisfrac < brightnessfrac) {
-										brightnessfrac = thisfrac;
-									}
-								}
-							}
-
-							tmp3 = 32300.0f - f0;
-
-							if (tmp3 < 0.0f) {
-								tmp3 = 0.0f;
-							}
-
-							if (tmp3 > 1300.0f) {
-								tmp3 = 1300.0f;
-							}
-
-							tmp3 *= 1.0f / 1300.0f;
-
-							if (2.0f * tmp2 > 1.0f) {
-								sp178 = 0.0f;
-							}
-
-							s1[i * 3 + 1] = sp190 * 255.0f * sp178;
-							s1[i * 3 + 2] = brightnessfrac * tmp3 * sp190 * 64.0f * 1;
-						}
-					}
-				}
-
-				if (s1[i * 3 + 1] > 0) {
-					for (j = 0; j < ARRAYCOUNT(roomlights[i].bbox); j++) {
-						spec.x = origin.x + (roomlights[i].bbox[j].x - origin.x) * 0.6f;
-						spec.y = origin.y + (roomlights[i].bbox[j].y - origin.y) * 0.6f;
-						spec.z = origin.z + (roomlights[i].bbox[j].z - origin.z) * 0.6f;
-
-						for (k = 3; k >= 0; k--) {
-							screenPos[k] = spec.f[0] * spf8.m[0][k] + spec.f[1] * spf8.m[1][k] + spec.f[2] * spf8.m[2][k] + spf8.m[3][k];
-
-							if (k == 3 && screenPos[k] <= 0.0f) {
-								break;
+							if (thisfrac < brightnessfrac) {
+								brightnessfrac = thisfrac;
 							}
 						}
 
-						if (screenPos[3] > 0.0f) {
-							f20 = 1.0f / screenPos[3];
+						if (y < viewtop + 100.0f) {
+							thisfrac = (y - (viewtop + 30.0f)) / 70.0f;
 
-							if (f20 > 9999.0f) {
-								f20 = 9999.0f;
+							if (thisfrac < brightnessfrac) {
+								brightnessfrac = thisfrac;
 							}
+						}
 
-							if (f20 < -9999.0f) {
-								f20 = -9999.0f;
+						if (x > viewleft + viewwidth - 90.0f) {
+							thisfrac = (viewleft + viewwidth - 10.0f - x) / 80.0f;
+
+							if (thisfrac < brightnessfrac) {
+								brightnessfrac = thisfrac;
 							}
+						}
 
-							xi = utilsClampF(viewleft + (1.0f + screenPos[0] * f20) * (viewwidth * 0.5f), -2147483520.0f, 2147483520.0f);
-							yi = utilsClampF(viewtop + (1.0f - screenPos[1] * f20) * (viewheight * 0.5f), -2147483520.0f, 2147483520.0f);
-							f0 = (screenPos[2] * f20 * 511.0f + 511.0f) * 32.0f;
+						if (y > viewtop + viewheight - 100.0f) {
+							thisfrac = (viewtop + viewheight - 30.0f - y) / 70.0f;
 
-							if (g_ZbufPtr1
-									&& xi >= (int)viewleft
-									&& xi < (int)(viewleft + viewwidth)
-									&& yi >= (int)viewtop
-									&& yi < (int)(viewtop + viewheight)
-									&& f0 < 32576.0f) {
-								index = envGetCurrent()->numsuns;
-								index *= 8;
-								artifact = artifacts;
-								artifact += index;
-
-								while (artifact->type != ARTIFACTTYPE_FREE) {
-									index++;
-									artifact++;
-								}
-
-								if (index < MAX_ARTIFACTS) {
-									artifact->losCheckResult = artifactTestLos(&spec, &g_BgRooms[roomnum].pos, xi, yi);
-									artifact->zbufferDepth = f0;
-									artifact->zbufferPixelPtr = &g_ZbufPtr1[viGetWidth() * yi + xi];
-									artifact->light = &roomlights[i];
-									artifact->type = ARTIFACTTYPE_GLARE;
-									artifact->screenPos.screenX = xi;
-									artifact->screenPos.screenY = yi;
-								}
+							if (thisfrac < brightnessfrac) {
+								brightnessfrac = thisfrac;
 							}
+						}
+					}
+
+					depthFalloff = 32300.0f - lightDepth;
+
+					if (depthFalloff < 0.0f) {
+						depthFalloff = 0.0f;
+					}
+
+					if (depthFalloff > 1300.0f) {
+						depthFalloff = 1300.0f;
+					}
+
+					depthFalloff *= 1.0f / 1300.0f;
+
+					if (2.0f * clampDiff > 1.0f) {
+						directionalScale = 0.0f;
+					}
+
+					lightGlares[i * 3 + 1] = directionalDot * 255.0f * directionalScale;
+					lightGlares[i * 3 + 2] = brightnessfrac * depthFalloff * directionalDot * 64.0f * 1;
+				}
+			}
+		}
+
+		if (lightGlares[i * 3 + 1] > 0) {
+			for (int j = 0; j < ARRAYCOUNT(roomlights[i].bbox); j++) {
+				spec.x = lightOrigin.x + (roomlights[i].bbox[j].x - lightOrigin.x) * 0.6f;
+				spec.y = lightOrigin.y + (roomlights[i].bbox[j].y - lightOrigin.y) * 0.6f;
+				spec.z = lightOrigin.z + (roomlights[i].bbox[j].z - lightOrigin.z) * 0.6f;
+
+				for (int k = 3; k >= 0; k--) {
+					screenPos[k] = spec.f[0] * spf8.m[0][k] + spec.f[1] * spf8.m[1][k] + spec.f[2] * spf8.m[2][k] + spf8.m[3][k];
+
+					if (k == 3 && screenPos[k] <= 0.0f) {
+						break;
+					}
+				}
+
+				if (screenPos[3] > 0.0f) {
+					invW = 1.0f / screenPos[3];
+
+					if (invW > 9999.0f) {
+						invW = 9999.0f;
+					}
+
+					if (invW < -9999.0f) {
+						invW = -9999.0f;
+					}
+
+					xi = utilsClampF(viewleft + (1.0f + screenPos[0] * invW) * (viewwidth * 0.5f), -2147483520.0f, 2147483520.0f);
+					yi = utilsClampF(viewtop + (1.0f - screenPos[1] * invW) * (viewheight * 0.5f), -2147483520.0f, 2147483520.0f);
+					lightDepth = (screenPos[2] * invW * 511.0f + 511.0f) * 32.0f;
+
+					if (g_ZbufPtr1
+							&& xi >= (int)viewleft
+							&& xi < (int)(viewleft + viewwidth)
+							&& yi >= (int)viewtop
+							&& yi < (int)(viewtop + viewheight)
+							&& lightDepth < 32576.0f) {
+						index = envGetCurrent()->numsuns;
+						index *= 8;
+						artifact = artifacts;
+						artifact += index;
+
+						while (artifact->type != ARTIFACTTYPE_FREE) {
+							index++;
+							artifact++;
+						}
+
+						if (index < MAX_ARTIFACTS) {
+							artifact->losCheckResult = artifactTestLos(&spec, &g_BgRooms[roomnum].pos, xi, yi);
+							artifact->zbufferDepth = lightDepth;
+							artifact->zbufferPixelPtr = &g_ZbufPtr1[viGetWidth() * yi + xi];
+							artifact->light = &roomlights[i];
+							artifact->type = ARTIFACTTYPE_GLARE;
+							artifact->screenPos.screenX = xi;
+							artifact->screenPos.screenY = yi;
 						}
 					}
 				}

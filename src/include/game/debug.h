@@ -6,4 +6,6 @@
 uint32_t dprint();
 int debug_log(const char *message, int num);
 int debug_log_float(const char *message, float num);
+int debug_log_string(const char *message);
 int debug_erase();
+void writeVertexShaderToFile(const char *vs_buf);

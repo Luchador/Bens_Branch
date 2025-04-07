@@ -1601,7 +1601,7 @@ Gfx *creditsDraw(Gfx *gdl)
 		gdl = creditsDrawParticles(gdl);
 
 		if (g_CreditsData->slidesenabled) {
-			gdl = creditsDrawSlide(func0f0d479c(gdl));
+			gdl = creditsDrawSlide(gfxSetCustomProjection(gdl));
 		}
 
 		if (!g_CreditsData->slidesenabled) {

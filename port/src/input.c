@@ -2,7 +2,6 @@
 #include <ctype.h>
 #include <SDL.h>
 #include <stdint.h>
-#include <PR/os_cont.h>
 #include "platform.h"
 #include "input.h"
 #include "video.h"
@@ -743,7 +742,7 @@ static inline int inputAxisScale(int x, const int deadzone, const float scale)
 	}
 }
 
-int inputReadController(int idx, OSContPad *npad)
+int inputReadController(int idx, JoyContPad *npad)
 {
 	if (idx < 0 || idx >= INPUT_MAX_CONTROLLERS  || !npad) {
 		return -1;

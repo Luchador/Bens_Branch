@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
@@ -13,7 +12,6 @@ void joySetDefaultPfsPollInterval(void);
 int joyShiftPfsStates(void);
 void joyRecordPfsState(uint8_t pfsstate);
 void joyPollPfs(int force);
-void joySetPfsTemporarilyPlugged(int8_t index);
 void joyInit(void);
 void joyDisableTemporarily(void);
 void joyReset(void);
@@ -39,12 +37,11 @@ int8_t joyGetRStickX(int8_t contpadnum);
 int8_t joyGetRStickY(int8_t contpadnum);
 unsigned int joyGetButtons(int8_t contpadnum, unsigned int mask);
 unsigned int joyGetButtonsPressedThisFrame(int8_t contpadnum, unsigned int mask);
-bool joyIsCyclicPollingEnabled(void);
-void joyDisableCyclicPolling(void);
-void joyEnableCyclicPolling(void);
 void joyDestroy(void);
 void joyGetContpadNumsForPlayer(int8_t playernum, int *pad1, int *pad2);
 void joyStopRumble(int8_t device, bool disablepolling);
 int joyGetPakState(int8_t device);
 int joyGetPakState2(int8_t device);
 void joysTickRumble(void);
+int joyMotorProbe(PakPfs* pfs, int channel);
+int joyMotorAccess(PakPfs *pfs, int cmd);

@@ -1,6 +1,5 @@
 #include "n_synthInternals.h"
 #include <math.h>
-#include <os.h>
 #include <stdint.h>
 
 Acmd *n_alResamplePull(N_PVoice *e, int16_t *outp, Acmd *p)

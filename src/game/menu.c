@@ -2197,7 +2197,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		mtx00016784();
 
 		if (modeltype < MENUMODELTYPE_3) {
-			gdl = func0f0d479c(gdl);
+			gdl = gfxSetCustomProjection(gdl);
 		}
 
 		gDPPipeSync(gdl++);
@@ -4833,7 +4833,7 @@ Gfx *menuRender(Gfx *gdl)
 
 	g_MpPlayerNum = 0;
 
-	gdl = func0f0d479c(gdl);
+	gdl = gfxSetCustomProjection(gdl);
 
 	gSPDisplayList(gdl++, var800613a0);
 
@@ -4953,7 +4953,7 @@ Gfx *menuRender(Gfx *gdl)
 #ifndef PLATFORM_N64
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 #endif
-		gdl = func0f0d479c(gdl);
+		gdl = gfxSetCustomProjection(gdl);
 	}
 
 	if (g_MenuData.count > 0) {

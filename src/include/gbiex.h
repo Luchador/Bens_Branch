@@ -14,9 +14,6 @@
 #define gSPColor(pkt, v, n)                           \
     gDma1p(pkt, G_COL, v, sizeof(Col)*(n),((n)-1)<<2)
 
-#define gsSPColor(v, n, v0)                        \
-    gsDma1p(G_COL, v, sizeof(Col)*(n), ((n)-1)<<2)
-
 /**
  * B1	rsp_tri4
  * Draws up to four triangles at a time.
@@ -179,8 +176,6 @@
 #define G_CC_CUSTOM_26  TEXEL1,    TEXEL0,      LOD_FRACTION, TEXEL0,      TEXEL0,    0,           ENVIRONMENT,   0
 #define G_CC_CUSTOM_27  PRIMITIVE, ENVIRONMENT, TEXEL0,       ENVIRONMENT, PRIMITIVE, ENVIRONMENT, TEXEL0,        ENVIRONMENT
 
-#ifndef PLATFORM_N64
-
 /* Extended commands */
 
 #define G_SETFB_EXT                  0x21
@@ -237,16 +232,6 @@
     _g->words.w0 = _SHIFTL(G_INVALTEXCACHE_EXT, 24, 8);\
     _g->words.w1 = (uintptr_t)(addr);                  \
 }
-
-#define gDPGrayscaleEXT(pkt, state)                    \
-{                                                      \
-    Gfx* _g = (Gfx*)(pkt);                             \
-                                                       \
-    _g->words.w0 = _SHIFTL(G_SETGRAYSCALE_EXT, 24, 8); \
-    _g->words.w1 = state;                              \
-}
-
-#define gDPSetGrayscaleColorEXT(pkt, r, g, b, lerp) DPRGBColor(pkt, G_SETINTENSITY_EXT, r, g, b, lerp)
 
 // NOTE: these will function correctly only if you pass `gdl++` as `pkt`
 
@@ -316,10 +301,3 @@
 
 #undef gDPHudRectangle
 #define gDPHudRectangle(pkt, x1, y1, x2, y2) gDPFillRectangleEXT(pkt, (x1), y1, ((x2 + 1)), (y2) + 1)
-
-#else // PLATFORM_N64
-
-#define gDPFillRectangleEXT gDPFillRectangle
-#define gSPTextureRectangleEXT gSPTextureRectangle
-
-#endif // PLATFORM_N64

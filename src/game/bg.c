@@ -2268,8 +2268,8 @@ uint32_t bgInflate(uint8_t *src, uint8_t *dst, uint32_t len)
 }
 
 Gfx *bgGetNextGdlInBlock(struct roomblock *block, Gfx *start, Gfx *end)
-{ \
-	Gfx *tmp; \
+{
+	Gfx *tmp;
 	while (true) {
 		if (block == NULL) {
 			return end;
@@ -2588,11 +2588,8 @@ void bgLoadRoom(int roomnum)
 
 		// Do some find/replaces in the gdls based on environment configuration
 		if (g_FogEnabled) {
-			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->opablocks, 1);
-			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->xlublocks, 5);
-		} else if (!g_EnvHasTransparency) {
-			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->opablocks, 6);
-			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->xlublocks, 7);
+			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->opablocks, 0);
+			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->xlublocks, 1);
 		}
 
 		// Create vertex batches - these are used for hit detection
@@ -2685,7 +2682,7 @@ Gfx *bgRenderRoomPass(Gfx *gdl, int roomnum, struct roomblock *block, bool inclu
 
 		v0 = (uintptr_t)g_Rooms[roomnum].colours;
 
-		if (v0 != NULL) {
+		if (v0 != 0) {
 			uintptr_t addr = ALIGN8((uintptr_t)&g_Rooms[roomnum].gfxdata->vertices[g_Rooms[roomnum].gfxdata->numvertices]);
 			v0 += (((uintptr_t)block->colours - addr) >> 2) * 4;
 		} else {
@@ -3080,7 +3077,7 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 {
 	int16_t triref = 0;
 	int trisremaining = 0;
-	bool intersectsbbox;
+	bool intersectsbbox = false;
 	float *ptr;
 	float tmp = 0.0f;
 	float sqdist = 0.0f;
@@ -3113,7 +3110,7 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 			}
 			break;
 		} else if (gdl->dma.cmd == G_VTX) {
-			ptr = var800a6470;
+			ptr = g_TransformedVertices;
 			count = gdl->bytes[GFX_W0_BYTE(1)] & 0xf;
 			if (gdl->words.w1 & 1) {
 				// segmented address
@@ -3243,9 +3240,9 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 					break;
 				}
 
-				point1 = (struct coord *) (var800a6470 + points[0] * 3);
-				point2 = (struct coord *) (var800a6470 + points[1] * 3);
-				point3 = (struct coord *) (var800a6470 + points[2] * 3);
+				point1 = (struct coord *) (g_TransformedVertices + points[0] * 3);
+				point2 = (struct coord *) (g_TransformedVertices + points[1] * 3);
+				point3 = (struct coord *) (g_TransformedVertices + points[2] * 3);
 
 				min.x = point1->x;
 				max.x = point1->x;
@@ -3337,9 +3334,9 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 									hitthing->unk0c.x = sp80.x;
 									hitthing->unk0c.y = sp80.y;
 									hitthing->unk0c.z = sp80.z;
-									hitthing->unk18 = &vtx[points[0]];
-									hitthing->unk1c = &vtx[points[1]];
-									hitthing->unk20 = &vtx[points[2]];
+									hitthing->point1 = &vtx[points[0]];
+									hitthing->point2 = &vtx[points[1]];
+									hitthing->point3 = &vtx[points[2]];
 									hitthing->texturenum = texturenum;
 									hitthing->tricmd = gdl;
 									hitthing->unk28 = triref;
@@ -3381,13 +3378,13 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 {
 	int16_t triref = 0;
 	int i = 0;
-	bool intersectsbbox;
+	bool intersectsbbox = false;
 	int count;
-	int spdc;
-	int spd8;
+	int spdc = 16;
+	int spd8 = 0;
 	int numvertices;
 	float *ptr;
-	bool hit;
+	bool hit = false;
 	float tmp;
 	float sqdist;
 	Vtx *vtx;
@@ -3396,16 +3393,13 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 	struct coord *point3;
 	uint32_t word;
 	Gfx *tri4gdl;
-	Mtxf *mtx;
+	Mtxf *mtx = gfxAllocateMatrix();
+	mtx4LoadIdentity(mtx);
 	struct coord min;
 	struct coord max;
 	struct coord sp84;
 	struct coord sp78;
 	int points[3];
-
-	spdc = 16;
-	spd8 = 0;
-	hit = false;
 
 	while (true) {
 		if (gdl->dma.cmd == G_ENDDL) {
@@ -3433,7 +3427,7 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 				spd8 = numvertices + count;
 			}
 
-			ptr = &var800a6470[count * 3];
+			ptr = &g_TransformedVertices[count * 3];
 
 			while (numvertices > 0) {
 				ptr[0] = vtx->x;
@@ -3447,7 +3441,7 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 				vtx++;
 			}
 
-			ptr = &var800a6470[spdc];
+			ptr = &g_TransformedVertices[spdc];
 
 			min.x = ptr[0];
 			max.x = ptr[0];
@@ -3459,30 +3453,14 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 			ptr += 3;
 
 			for (i = spdc; i < spd8; i++) {
-				if (ptr[0] < min.x) {
-					min.x = ptr[0];
-				}
-
-				if (ptr[1] < min.y) {
-					min.y = ptr[1];
-				}
-
-				if (ptr[2] < min.z) {
-					min.z = ptr[2];
-				}
-
-				if (ptr[0] > max.x) {
-					max.x = ptr[0];
-				}
-
-				if (ptr[1] > max.y) {
-					max.y = ptr[1];
-				}
-
-				if (ptr[2] > max.z) {
-					max.z = ptr[2];
-				}
-
+				min.x = MIN(min.x, ptr[0]);
+				min.y = MIN(min.y, ptr[1]);
+				min.z = MIN(min.z, ptr[2]);
+			
+				max.x = MAX(max.x, ptr[0]);
+				max.y = MAX(max.y, ptr[1]);
+				max.z = MAX(max.z, ptr[2]);
+			
 				ptr += 3;
 			}
 
@@ -3527,68 +3505,35 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 					break;
 				}
 
-				point1 = (struct coord *) (var800a6470 + points[0] * 3);
-				point2 = (struct coord *) (var800a6470 + points[1] * 3);
-				point3 = (struct coord *) (var800a6470 + points[2] * 3);
+				point1 = (struct coord *) (g_TransformedVertices + points[0] * 3);
+				point2 = (struct coord *) (g_TransformedVertices + points[1] * 3);
+				point3 = (struct coord *) (g_TransformedVertices + points[2] * 3);
 
 				min.x = point1->x;
 				max.x = point1->x;
 
-				if (point2->x < min.x) {
-					min.x = point2->x;
-				}
-
-				if (point2->x > max.x) {
-					max.x = point2->x;
-				}
-
-				if (point3->x < min.x) {
-					min.x = point3->x;
-				}
-
-				if (point3->x > max.x) {
-					max.x = point3->x;
-				}
+				min.x = MIN(min.x, point2->x);
+				max.x = MAX(max.x, point2->x);
+				min.x = MIN(min.x, point3->x);
+				max.x = MAX(max.x, point3->x);
 
 				if (!(arg1->x < min.x && arg2->x < min.x) && !(arg1->x > max.x && arg2->x > max.x)) {
 					min.z = point1->z;
 					max.z = point1->z;
 
-					if (point2->z < min.z) {
-						min.z = point2->z;
-					}
-
-					if (point2->z > max.z) {
-						max.z = point2->z;
-					}
-
-					if (point3->z < min.z) {
-						min.z = point3->z;
-					}
-
-					if (point3->z > max.z) {
-						max.z = point3->z;
-					}
+					min.z = MIN(min.z, point2->z);
+					max.z = MAX(max.z, point2->z);
+					min.z = MIN(min.z, point3->z);
+					max.z = MAX(max.z, point3->z);
 
 					if (!(arg1->z < min.z && arg2->z < min.z) && !(arg1->z > max.z && arg2->z > max.z)) {
 						min.y = point1->y;
 						max.y = point1->y;
 
-						if (point2->y < min.y) {
-							min.y = point2->y;
-						}
-
-						if (point2->y > max.y) {
-							max.y = point2->y;
-						}
-
-						if (point3->y < min.y) {
-							min.y = point3->y;
-						}
-
-						if (point3->y > max.y) {
-							max.y = point3->y;
-						}
+						min.y = MIN(min.y, point2->y);
+						max.y = MAX(max.y, point2->y);
+						min.y = MIN(min.y, point3->y);
+						max.y = MAX(max.y, point3->y);
 
 						if (!(arg1->y < min.y && arg2->y < min.y) && !(arg1->y > max.y && arg2->y > max.y)) {
 							if (bgTestLineIntersectsBbox(arg1, arg3, &min, &max)
@@ -3613,9 +3558,9 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 									hitthing->unk0c.x = sp78.x;
 									hitthing->unk0c.y = sp78.y;
 									hitthing->unk0c.z = sp78.z;
-									hitthing->unk18 = &vtx[points[0]];
-									hitthing->unk1c = &vtx[points[1]];
-									hitthing->unk20 = &vtx[points[2]];
+									hitthing->point1 = &vtx[points[0]];
+									hitthing->point2 = &vtx[points[1]];
+									hitthing->point3 = &vtx[points[2]];
 									hitthing->texturenum = -1;
 									hitthing->tricmd = gdl;
 									hitthing->unk28 = triref;
@@ -3681,7 +3626,7 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 	iter = &gdl[batch->gbicmdindex];
 	vtx = (Vtx *)((UNSEGADDR(iter->words.w1) & 0xffffff) + (uintptr_t)vtx);
 	numvertices = (((uint32_t) iter->bytes[GFX_W0_BYTE(1)] >> 4) & 0xf) + 1;
-	ptr = var800a6470;
+	ptr = g_TransformedVertices;
 
 	while (numvertices > 0) {
 		ptr[0] = g_BgRooms[roomnum].pos.x + vtx->x;
@@ -3724,9 +3669,9 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 				break;
 			}
 
-			point1 = (struct coord *) (var800a6470 + points[0] * 3);
-			point2 = (struct coord *) (var800a6470 + points[1] * 3);
-			point3 = (struct coord *) (var800a6470 + points[2] * 3);
+			point1 = (struct coord *) (g_TransformedVertices + points[0] * 3);
+			point2 = (struct coord *) (g_TransformedVertices + points[1] * 3);
+			point3 = (struct coord *) (g_TransformedVertices + points[2] * 3);
 
 			min.x = point1->x;
 
@@ -3835,9 +3780,9 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 												hitthing->unk0c.x = spa4.x;
 												hitthing->unk0c.y = spa4.y;
 												hitthing->unk0c.z = spa4.z;
-												hitthing->unk18 = &vtx[points[0]];
-												hitthing->unk1c = &vtx[points[1]];
-												hitthing->unk20 = &vtx[points[2]];
+												hitthing->point1 = &vtx[points[0]];
+												hitthing->point2 = &vtx[points[1]];
+												hitthing->point3 = &vtx[points[2]];
 												hitthing->texturenum = texturenum;
 												hitthing->tricmd = iter;
 												hitthing->unk28 = triref;
@@ -3878,7 +3823,7 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 	return hit;
 }
 
-int bg0f1612e4(struct coord *bbmin, struct coord *bbmax, struct coord *frompos, struct coord *dist, struct coord *arg4, struct coord *arg5)
+int bgRayIntersectAABBEntryPoint(struct coord *bbmin, struct coord *bbmax, struct coord *frompos, struct coord *dist, struct coord *invdir, struct coord *out_pos)
 {
 	int i;
 	uint8_t bail = true;
@@ -3908,7 +3853,7 @@ int bg0f1612e4(struct coord *bbmin, struct coord *bbmax, struct coord *frompos, 
 
 	for (i = 0; i < 3; i++) {
 		if (sp48[i] != 2 && dist->f[i] != 0.0f) {
-			sp2c[i] = (sp38[i] - frompos->f[i]) * arg4->f[i];
+			sp2c[i] = (sp38[i] - frompos->f[i]) * invdir->f[i];
 		} else {
 			sp2c[i] = -1.0f;
 		}
@@ -3928,13 +3873,13 @@ int bg0f1612e4(struct coord *bbmin, struct coord *bbmax, struct coord *frompos, 
 
 	for (i = 0; i < 3; i++) {
 		if (bestindex != i) {
-			arg5->f[i] = frompos->f[i] + sp2c[bestindex] * dist->f[i];
+			out_pos->f[i] = frompos->f[i] + sp2c[bestindex] * dist->f[i];
 
-			if (arg5->f[i] < bbmin->f[i] || arg5->f[i] > bbmax->f[i]) {
+			if (out_pos->f[i] < bbmin->f[i] || out_pos->f[i] > bbmax->f[i]) {
 				return 0;
 			}
 		} else {
-			arg5->f[i] = sp38[i];
+			out_pos->f[i] = sp38[i];
 		}
 	}
 
@@ -4002,7 +3947,7 @@ bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, st
 	numbatches = g_Rooms[roomnum].numvtxbatches;
 
 	for (i = 0; i < numbatches; batch++, i++) {
-		j = bg0f1612e4(&batch->bbmin, &batch->bbmax, &from, &dist, &sp94, &hitthing->pos);
+		j = bgRayIntersectAABBEntryPoint(&batch->bbmin, &batch->bbmax, &from, &dist, &sp94, &hitthing->pos);
 
 		if (j == 0) {
 			continue;
@@ -4125,9 +4070,9 @@ bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, st
 								hitthing->unk0c.x = sp60.unk0c.x;
 								hitthing->unk0c.y = sp60.unk0c.y;
 								hitthing->unk0c.z = sp60.unk0c.z;
-								hitthing->unk18 = sp60.unk18;
-								hitthing->unk1c = sp60.unk1c;
-								hitthing->unk20 = sp60.unk20;
+								hitthing->point1 = sp60.point1;
+								hitthing->point2 = sp60.point2;
+								hitthing->point3 = sp60.point3;
 								hitthing->texturenum = sp60.texturenum;
 								hitthing->tricmd = sp60.tricmd;
 								hitthing->unk28 = sp60.unk28;

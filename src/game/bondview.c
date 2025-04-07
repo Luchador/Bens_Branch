@@ -1467,7 +1467,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				yoffset = 0;
 			}
 
-			gdl = func0f0d479c(gdl);
+			gdl = gfxSetCustomProjection(gdl);
 
 			gSPClearGeometryMode(gdl++, G_CULL_BOTH);
 			gSPSetGeometryMode(gdl++, G_SHADE | G_SHADING_SMOOTH);
@@ -1569,12 +1569,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	return gdl;
 }
 
-void bview0f1572f8(void)
-{
-	// empty
-}
-
-uint8_t var8007f878 = 0;
+uint8_t g_NightVisionFrameCounter = 0;
 
 Gfx *bviewDrawNvLens(Gfx *gdl)
 {
@@ -1594,11 +1589,11 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 		return gdl;
 	}
 
-	var8009caec = 0xbc;
+	g_NVBGBrightness = 0xbc;
 	g_NVChrHighlight = 0xbe; // Character brightness when using NV
 	g_NVChrBrightness = 0xde;
-	var8009caed = 0x50;
-	var8009caee = 0xc0;
+	g_NVPropBrightness = 0x50;
+	g_NVPropHighlight = 0xc0;
 
 	brightness = roomGetFinalBrightness(g_Vars.currentplayer->prop->rooms[0]);
 
@@ -1614,7 +1609,7 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 
 	gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 0xff);
 
-	var8007f878++;
+	g_NightVisionFrameCounter++;
 
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 	gSPSetExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
@@ -1622,7 +1617,7 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 	for (y = viewtop; y < viewbottom; y++) {
 		uint8_t green;
 
-		if (((var8007f878 & 1) != (y & 1)) != 0) {
+		if (((g_NightVisionFrameCounter & 1) != (y & 1)) != 0) {
 			uint8_t tmp = rngRandom() % 12;
 			green = 0xff - tmp;
 		} else {
@@ -1732,7 +1727,7 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 		g_Vars.currentplayer->fsscanline++;
 	}
 
-	var8009caec = 0xff;
+	g_NVBGBrightness = 0xff;
 	g_NVChrHighlight = 0xde;
 	g_NVChrBrightness = 0xde;
 

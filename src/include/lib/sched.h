@@ -1,6 +1,5 @@
 #pragma once
 
-#include <PR/ultrasched.h>
 #include "types.h"
 
 void schedInitArtifacts(void);

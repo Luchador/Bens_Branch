@@ -5319,7 +5319,7 @@ bool aiIfObjInRoom(void)
  */
 bool aiSwitchToAltSky(void)
 {
-	envApplyTransitionFrac(1);
+	//envApplyTransitionFrac(1);
 	g_Vars.aioffset += 2;
 
 	return false;
@@ -8661,7 +8661,7 @@ bool ai01aa(void)
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	float a = 3000;
 
-	func0f0056f4(
+	updateShortestDistanceBetweenRooms(
 			g_Vars.currentplayer->prop->rooms[0],
 			&g_Vars.currentplayer->prop->pos,
 			g_Vars.chrdata->prop->rooms[0],

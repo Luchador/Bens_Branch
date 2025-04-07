@@ -9,6 +9,8 @@
 #include "preprocess/common.h"
 #include "preprocess/gbi.h"
 
+#define	ALIGN(s, align)	(((uint32_t)(s) + ((align)-1)) & ~((align)-1))
+
 /**
  * 4 bytes decompressed size of primary data
  * 4 bytes compressed size of section 1 in its entirety

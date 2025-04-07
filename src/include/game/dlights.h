@@ -46,5 +46,5 @@ void roomHighlight(int roomnum);
 void func0f004c6c(void);
 void func0f00505c(void);
 float func0f0053d0(int room1, struct coord *arg1, int portal1, int room2, struct coord *arg4, int portal2, float *arg6);
-void func0f0056f4(int room1, struct coord *coord1, int room2, struct coord *coord2, int arg4, float *arg5, int arg6);
+void updateShortestDistanceBetweenRooms(int room1, struct coord *coord1, int room2, struct coord *coord2, int arg4, float *arg5, int arg6);
 void func0f005bb0(void);

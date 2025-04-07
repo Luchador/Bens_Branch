@@ -1086,7 +1086,7 @@ Gfx *amRender(Gfx *gdl)
 					&g_AmMenus[g_AmIndex].dsty);
 		}
 
-		gdl = func0f0d479c(gdl);
+		gdl = gfxSetCustomProjection(gdl);
 
 		colours = gfxAllocateColours(2);
 		vertices = gfxAllocateVertices(8);

@@ -3,7 +3,7 @@
 #include "data.h"
 #include "types.h"
 
-float var800a6470[16 * 3];
+float g_TransformedVertices[16 * 3];
 
 struct var800a6538 var800a6538[16];
 uint32_t g_BgRoomTestsDisabled;

@@ -1,4 +1,3 @@
-#include <os.h>
 #include "n_synthInternals.h"
 
 void n_alSynFreeVoice(N_ALVoice *voice)

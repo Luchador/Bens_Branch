@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <PR/ultrasched.h>
 
 #include "lib/main.h"
 #include "bss.h"

@@ -315,7 +315,6 @@ int func0f08e5a8(RoomNum *rooms, struct screenbox *box);
 float objCalculateFadeDistOpacityFrac(struct prop *prop, float modelscale);
 bool posIsInObjFadeDistance(struct coord *coord, float modelscale);
 bool func0f08e8ac(struct prop *prop, struct coord *pos, float arg2, bool arg3);
-bool posIsInDrawDistance(struct coord *arg);
 void doorCreateSparks(struct doorobj *door);
 bool doorCalcIntendedFrac(struct doorobj *door);
 void doorsCalcFrac(struct doorobj *door);

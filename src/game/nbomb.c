@@ -646,7 +646,7 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 
 		drawn = true;
 
-		gdl = func0f0d479c(gdl);
+		gdl = gfxSetCustomProjection(gdl);
 
 		texSelect(&gdl, &g_TexGeneralConfigs[10], 2, 1, 2, true, NULL);
 
@@ -814,7 +814,7 @@ Gfx *gasRender(Gfx *gdl)
 
 			drawn = true;
 
-			gdl = func0f0d479c(gdl);
+			gdl = gfxSetCustomProjection(gdl);
 
 			texSelect(&gdl, &g_TexGeneralConfigs[6], 4, 1, 2, true, NULL);
 

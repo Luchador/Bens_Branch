@@ -35,11 +35,10 @@ int *var8009cad0;
 int *var8009cad8;
 int g_NumPortals;
 int var8009cae0;
-int var8009cae4;
 float (*portalTransferLightAmount)(int roomnum, float mult, int portalnum1, int portalnum2); // function pointer
-uint8_t var8009caec;
-uint8_t var8009caed;
-uint8_t var8009caee;
+uint8_t g_NVBGBrightness;
+uint8_t g_NVPropBrightness;
+uint8_t g_NVPropHighlight;
 uint8_t g_NVChrHighlight;
 uint8_t g_NVChrBrightness;
 
@@ -50,9 +49,6 @@ uint16_t **var8006142c = NULL;
 uint16_t **var80061430 = NULL;
 float *g_RoomLightInfluence = NULL;
 bool *g_IsPortalClosed = NULL;
-float var8006143c = 50;
-uint32_t var80061444 = 1;
-uint32_t var80061448 = 0x00000000;
 bool g_IsSwitchingGoggles = false;
 int g_LightsPrevTickMode = 0;
 
@@ -93,7 +89,7 @@ uint8_t roomGetFinalBrightnessForPlayer(int roomnum)
 	int brightness = g_Rooms[roomnum].br_flash;
 
 	if (USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) {
-		brightness += var8009caec;
+		brightness += g_NVBGBrightness;
 	} else {
 		brightness += g_Rooms[roomnum].br_settled_regional;
 	}
@@ -109,17 +105,12 @@ uint8_t roomGetFinalBrightnessForPlayer(int roomnum)
 	return brightness;
 }
 
-uint8_t func0f000b18(uint32_t arg0)
-{
-	return 255;
-}
-
 uint8_t roomGetSettledRegionalBrightnessForPlayer(int roomnum)
 {
 	uint32_t brightness;
 
 	if (USINGDEVICE(DEVICE_NIGHTVISION) || USINGDEVICE(DEVICE_IRSCANNER)) {
-		return var8009caec;
+		return g_NVBGBrightness;
 	}
 
 	if (g_Rooms[roomnum].flags & ROOMFLAG_BRIGHTNESS_CALCED) {
@@ -180,7 +171,7 @@ float roomGetSettledLocalBrightnessFrac(int roomnum)
 }
 
 /**
- * The resulting position is not a world position. It is relative to the room.
+ * The resulting position is not a world position. It is relative to the room
  */
 bool lightGetBboxCentre(int roomnum, uint32_t lightnum, struct coord *pos)
 {
@@ -243,16 +234,6 @@ void roomSetFlashBrightness(int roomnum, int value)
 	g_Rooms[roomnum].br_flash = value;
 }
 
-void lightGetDirection(int roomnum, uint32_t lightnum, struct coord *dir)
-{
-	struct light *light = (struct light *)&g_BgLightsFileData[g_Rooms[roomnum].lightindex * 0x22];
-	light += lightnum;
-
-	dir->x = light->dirx;
-	dir->y = light->diry;
-	dir->z = light->dirz;
-}
-
 void roomSetDefaults(struct room *room)
 {
 	room->br_light_min = 0;
@@ -271,6 +252,7 @@ void roomSetDefaults(struct room *room)
 	room->lightop_duration240 = 0;
 }
 
+// Used for environment map reflections
 Gfx *lightsSetForRoom(Gfx *gdl, RoomNum roomnum)
 {
 	Lights1 *lights = gfxAllocate(sizeof(Lights1));
@@ -291,9 +273,9 @@ Gfx *lightsSetForRoom(Gfx *gdl, RoomNum roomnum)
 	lights->l[0].l.colc[0] = brightness;
 	lights->l[0].l.colc[1] = brightness;
 	lights->l[0].l.colc[2] = brightness;
-	lights->l[0].l.dir[0] = 0x4d;
-	lights->l[0].l.dir[1] = 0x4d;
-	lights->l[0].l.dir[2] = 0x2e;
+	lights->l[0].l.dir[0] = 77;
+	lights->l[0].l.dir[1] = 77;
+	lights->l[0].l.dir[2] = 46;
 
 	gSPSetLights1(gdl++, (*lights));
 
@@ -305,9 +287,9 @@ Gfx *lightsSetForRoom(Gfx *gdl, RoomNum roomnum)
 
 Gfx *lightsSetDefault(Gfx *gdl)
 {
-	static Lights1 var80061460 = gdSPDefLights1(0x96, 0x96, 0x96, 0xff, 0xff, 0xff, 0x4d, 0x4d, 0x2e);
+	static Lights1 envLight = gdSPDefLights1(150, 150, 150, 255, 255, 255, 77, 77, 46);
 
-	gSPSetLights1(gdl++, var80061460);
+	gSPSetLights1(gdl++, envLight);
 
 	gSPLookAtX(gdl++, &camGetLookAt()->l[0]);
 	gSPLookAtY(gdl++, &camGetLookAt()->l[1]);
@@ -490,9 +472,7 @@ void roomSetLightBroken(int roomnum, int lightnum)
 
 void lightsReset(void)
 {
-	if (var80061444) {
 		func0f004c6c();
-	}
 }
 
 void func0f001c0c(void)
@@ -641,9 +621,6 @@ void lightComputeInfluenceMatrix(uint8_t *arg0)
 
 	portalTransferLightAmount = &lightEstimateTransferFraction;
 
-	var8006143c = 50.0f;
-	var8009cae4 = 20;
-
 	for (i = 1; i < g_Vars.roomcount; i++) {
 		uint8_t *ptr = &arg0[i * var8009cae0];
 
@@ -790,7 +767,7 @@ void roomPropagateClosedPortalLight(int roomnum, float arg1, int arg2, int porta
 			if (iterroomnum != otherroomnum) {
 				float f0 = portalTransferLightAmount(roomnum, arg1, portalnum, iterportalnum);
 
-				if (f0 > var8006143c && arg2 < var8009cae4) { // f0 > 50.0 &&  arg2 < 20
+				if (f0 > 50.0f && arg2 < 20) { // f0 > 50.0 &&  arg2 < 20
 					g_RoomLightInfluence[roomnum] -= f0;
 					g_RoomLightInfluence[iterroomnum] += f0;
 
@@ -1804,12 +1781,11 @@ float func0f0053d0(int roomnum1, struct coord *pos1, int portalnum1, int roomnum
 	return *sp68;
 }
 
-void func0f0056f4(int roomnum1, struct coord *pos1, int roomnum2, struct coord *pos2, int arg4, float *result, int arg6)
+void updateShortestDistanceBetweenRooms(int roomnum1, struct coord *pos1, int roomnum2, struct coord *pos2, int arg4, float *result, int arg6)
 {
 	float dist;
 
-	if (!var80061444
-			|| PLAYERCOUNT() >= 3
+	if (    PLAYERCOUNT() >= 3
 			|| roomnum1 == roomnum2
 			|| roomnum1 == -1
 			|| roomnum2 == -1) {

@@ -80,6 +80,13 @@ static struct GfxClipParameters gfx_opengl_get_clip_parameters(void) {
     return { false, framebuffers[current_framebuffer].invert_y };
 }
 
+// Configures vertex attribute pointers for a given shader program.
+// For each active attribute in the ShaderProgram, this enables the
+// attribute and tells OpenGL how to read the corresponding data
+// from the vertex buffer, based on its size and offset.
+//
+// Assumes that the currently bound VBO contains interleaved float data
+// matching the layout described by ShaderProgram.
 static void gfx_opengl_vertex_array_set_attribs(struct ShaderProgram* prg) {
     size_t num_floats = prg->num_floats;
     size_t pos = 0;
@@ -241,7 +248,7 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     gfx_cc_get_features(shader_id0, shader_id1, &cc_features);
 
     char vs_buf[2048];
-    char fs_buf[8192];
+    char fs_buf[8096];
     size_t vs_len = 0;
     size_t fs_len = 0;
     size_t num_floats = 4;
@@ -349,7 +356,6 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
 
     append_line(fs_buf, &fs_len, "#define TEX_OFFSET(tex, uv, texSize, off) SAMPLE_TEX(tex, uv - (off)/texSize)");
 
-    // append_line(fs_buf, &fs_len, "precision mediump float;");
     for (int i = 0; i < 2; i++) {
         if (cc_features.used_textures[i]) {
             fs_len += sprintf(fs_buf + fs_len, "INPUT vec2 vTexCoord%d;\n", i);
@@ -576,6 +582,7 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     }
 
     GLuint shader_program = glCreateProgram();
+    
     glAttachShader(shader_program, vertex_shader);
     glAttachShader(shader_program, fragment_shader);
     glLinkProgram(shader_program);

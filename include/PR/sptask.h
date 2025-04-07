@@ -27,8 +27,6 @@ extern "C" {
 
 #include <stdint.h>
 
-#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
-
 /**************************************************************************
  *
  * Type definitions
@@ -103,19 +101,11 @@ typedef union {
     long long int	force_structure_alignment;
 } OSTask;
 
-#endif /* _LANGUAGE_C */
-
 /**************************************************************************
  *
  * Global definitions
  *
  */
-
-
-
-#if defined(_LANGUAGE_C) || defined(_LANGUAGE_C_PLUS_PLUS)
-
-#endif /* _LANGUAGE_C */
 
 #ifdef _LANGUAGE_C_PLUS_PLUS
 }

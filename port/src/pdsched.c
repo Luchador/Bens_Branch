@@ -1,4 +1,3 @@
-#include <PR/ultrasched.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "lib/sched.h"
@@ -15,7 +14,6 @@
 #include "data.h"
 #include "types.h"
 #include "game/debug.h"
-
 #include "video.h"
 #include "audio.h"
 #include "input.h"

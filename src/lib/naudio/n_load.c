@@ -1,5 +1,4 @@
 #include "n_synthInternals.h"
-#include <os.h>
 #include <string.h>
 #include "platform.h"
 #include <types.h>

@@ -177,24 +177,6 @@ struct surfacetype *g_SurfaceTypes[] = {
 	/*14*/ &g_SurfaceTypeDeepWater,
 };
 
-char *var80084494[] = {
-	"default",
-	"stone",
-	"wood",
-	"metal",
-	"glass",
-	"shallow water",
-	"snow",
-	"dirt",
-	"mud",
-	"tile",
-	"metalobj",
-	"chr",
-	"glass xlu",
-	"no hit",
-	"deep water",
-};
-
 bool g_TexPipeSynced = false;
 
 void texResetTiles(void)

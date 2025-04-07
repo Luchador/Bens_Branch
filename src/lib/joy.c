@@ -36,7 +36,7 @@
 #define NUM_PADS    MAXCONTROLLERS
 
 struct contsample {
-	OSContPad pads[NUM_PADS];
+	JoyContPad pads[NUM_PADS];
 };
 
 struct joydata {
@@ -51,7 +51,7 @@ struct joydata {
 
 struct joydata g_JoyData[NUM_DATA];
 int g_JoyDisableCooldown[NUM_PADS];
-OSContStatus g_JoyContStatuses[NUM_PADS];
+JoyContStatus g_JoyContStatuses[NUM_PADS];
 uint8_t g_JoyPfsStates[100];
 
 struct joydata *g_JoyDataPtr = &g_JoyData[0];
@@ -70,7 +70,6 @@ uint8_t g_JoyConnectedControllers = 0;
 bool g_JoyQueuesCreated = false;
 bool g_JoyInitDone = false;
 bool g_JoyNeedsInit = true;
-unsigned int g_JoyCyclicPollDisableCount = 0;
 bool g_AllowTitleInput = true;
 int g_JoyNextPfsStateIndex = 0;
 
@@ -84,7 +83,6 @@ bool g_JoyCyclicPollingLocked = true;
 void joyLockCyclicPolling(void)
 {
 	if (g_JoyCyclicPollingLocked) {
-		joyDisableCyclicPolling();
 		g_JoyCyclicPollingLocked = false;
 	}
 }
@@ -92,7 +90,6 @@ void joyLockCyclicPolling(void)
 void joyUnlockCyclicPolling(void)
 {
 	if (!g_JoyCyclicPollingLocked) {
-		joyEnableCyclicPolling();
 		g_JoyCyclicPollingLocked = true;
 	}
 }
@@ -169,7 +166,7 @@ void joyPollPfs(int force)
 	unsigned int value;
 
 	if (g_JoyPfsPollMasterEnabled
-			&& (force == 2 || (g_JoyPfsPollInterval && (force || ((g_JoyCyclicPollDisableCount == 0 || !g_JoyCyclicPollingLocked) && g_JoyPfsPollEnabled))))
+			&& (force == 2 || (g_JoyPfsPollInterval && (force || ((!g_JoyCyclicPollingLocked) && g_JoyPfsPollEnabled))))
 			&& !doingit) {
 		doingit = true;
 		prevcount = thiscount;
@@ -190,10 +187,6 @@ void joyPollPfs(int force)
 
 			g_JoyPfsPollCount++;
 
-			if (force) {
-				joyDisableCyclicPolling();
-			}
-
 			bitpattern =
    			(inputRumbleSupported(0) << 0) |
    			(inputRumbleSupported(1) << 1) |
@@ -207,10 +200,6 @@ void joyPollPfs(int force)
 				}
 			}
 
-			if (force) {
-				joyEnableCyclicPolling();
-			}
-
 			bitpattern |= 0x10; // eeprom
 
 			joyRecordPfsState(bitpattern);
@@ -220,11 +209,6 @@ void joyPollPfs(int force)
 
 		doingit = false;
 	}
-}
-
-void joySetPfsTemporarilyPlugged(int8_t index)
-{
-	joyRecordPfsState(0);
 }
 
 void joyInit(void)
@@ -281,17 +265,38 @@ void joyReset(void)
 	}
 }
 
+int joyContInit(uint8_t *bitpattern, JoyContStatus *data)
+{
+	if (bitpattern) {
+		*bitpattern = inputControllerMask();
+	}
+	if (data) {
+		for (int i = 0; i < MAXCONTROLLERS; ++i, ++data) {
+			if (inputControllerConnected(i)) {
+				data->errnum = 0;
+				data->type = CONT_ABSOLUTE;
+				data->status = CONT_CARD_ON;
+			} else {
+				data->errnum = CONT_NO_RESPONSE_ERROR;
+				data->type = 0;
+				data->status = 0;
+			}
+		}
+	}
+	return 0;
+}
+
 void joyCheckStatus(void)
 {
 	static uint8_t prevconnected = 0xff;
 
-	// osContInit should be called only once. The first time this function is
+	// joyContInit should be called only once. The first time this function is
 	// called it'll take the first branch here, and all subsequent calls will
 	// take the second branch.
 	if (g_JoyNeedsInit) {
 		int i;
 		g_JoyNeedsInit = false;
-		osContInit(&g_JoyConnectedControllers, g_JoyContStatuses);
+		joyContInit(&g_JoyConnectedControllers, g_JoyContStatuses);
 		g_JoyInitDone = true;
 
 		for (i = 0; i < NUM_PADS; i++) {
@@ -423,20 +428,11 @@ void joyTickRumbleOnce(void)
 
 void joyDebugJoy(void)
 {
-	static unsigned int var8005ef08 = 0;
-
 	if (g_Vars.paksneededformenu) {
 		joyPollPfs(1);
 	}
 
 	joyConsumeSamples(&g_JoyData[0]);
-
-	if (joyIsCyclicPollingEnabled() && g_AllowTitleInput && joyGetNumSamples() <= 0) {
-		joyDisableCyclicPolling();
-		joyTickRumbleOnce();
-		joyEnableCyclicPolling();
-		joyConsumeSamples(&g_JoyData[0]);
-	}
 }
 
 void joyReadData(void)
@@ -725,42 +721,15 @@ unsigned int joyGetButtonsPressedThisFrame(int8_t contpadnum, unsigned int mask)
 	return g_JoyDataPtr->buttonspressed[contpadnum] & mask;
 }
 
-bool joyIsCyclicPollingEnabled(void)
-{
-	return g_JoyCyclicPollDisableCount ? false : true;
-}
-
-/**
- * If cyclic polling is enabled, send a message to the scheduler thread telling
- * it to update the joy state (connected controllers, PFS etc). Then block while
- * waiting for its done message to come back, and increment the disable count.
- *
- * If cyclic polling was already disabled, simply increase the disable count.
- */
-void joyDisableCyclicPolling(void)
-{
-	g_JoyCyclicPollDisableCount++;
-}
-
-/**
- * Indicate that the caller is done with cyclic polling being disabled,
- * and enable cyclic polling if there are no callers left who want it disabled.
- */
-void joyEnableCyclicPolling(void)
-{
-
-	g_JoyCyclicPollDisableCount--;
-}
-
 void joyDestroy(void)
 {
 	int i;
 
 	for (i = 0; i < NUM_PADS; i++) {
-		if (osMotorProbe(PFS(i), i) == 0) {
-			osMotorStop(PFS(i));
-			osMotorStop(PFS(i));
-			osMotorStop(PFS(i));
+		if (joyMotorProbe(PFS(i), i) == 0) {
+			joyMotorAccess(PFS(i), 0);
+			joyMotorAccess(PFS(i), 0);
+			joyMotorAccess(PFS(i), 0);
 		}
 	}
 }
@@ -790,18 +759,11 @@ void joyStopRumble(int8_t arg0, bool disablepolling)
 		int device = arg0;
 
 		if (g_Paks[device].type != PAKTYPE_MEMORY && g_Paks[device].type != PAKTYPE_GAMEBOY) {
-			if (disablepolling) {
-				joyDisableCyclicPolling();
-			}
 
-			if (osMotorProbe(PFS(device), device) == 0) {
-				osMotorStop(PFS(device));
-				osMotorStop(PFS(device));
-				osMotorStop(PFS(device));
-			}
-
-			if (disablepolling) {
-				joyEnableCyclicPolling();
+			if (joyMotorProbe(PFS(device), device) == 0) {
+				joyMotorAccess(PFS(device), 0);
+				joyMotorAccess(PFS(device), 0);
+				joyMotorAccess(PFS(device), 0);
 			}
 
 			if (g_Paks[device].rumblestate != RUMBLESTATE_DISABLED_STOPPING
@@ -833,14 +795,14 @@ void joysTickRumble(void)
 			switch (g_Paks[i].rumblestate) {
 			case RUMBLESTATE_ENABLED_STARTING:
 				g_Paks[i].rumblestate = RUMBLESTATE_ENABLED_RUMBLING;
-				osMotorStart(PFS(i));
+				joyMotorAccess(PFS(i), 1);
 				break;
 			case RUMBLESTATE_ENABLED_RUMBLING:
 				if (g_Paks[i].rumblepulsestopat != -1) {
 					if (g_Paks[i].rumblepulsetimer == 0) {
-						osMotorStart(PFS(i));
+						joyMotorAccess(PFS(i), 1);
 					} else if (g_Paks[i].rumblepulsestopat == g_Paks[i].rumblepulsetimer) {
-						osMotorStop(PFS(i));
+						joyMotorAccess(PFS(i), 0);
 					}
 
 					g_Paks[i].rumblepulsetimer++;
@@ -858,10 +820,10 @@ void joysTickRumble(void)
 				break;
 			case RUMBLESTATE_ENABLED_STOPPING:
 				g_Paks[i].rumblestate = RUMBLESTATE_ENABLED_STOPPED;
-				osMotorStop(PFS(i));
+				joyMotorAccess(PFS(i), 0);
 				break;
 			case RUMBLESTATE_DISABLED_STOPPING:
-				osMotorStop(PFS(i));
+			joyMotorAccess(PFS(i), 0);
 				g_Paks[i].rumblestate = RUMBLESTATE_DISABLED_STOPPED;
 				break;
 			case RUMBLESTATE_ENABLING:
@@ -871,4 +833,27 @@ void joysTickRumble(void)
 			}
 		}
 	}
+}
+
+int joyMotorProbe(PakPfs* pfs, int channel)
+{
+	if (pfs && inputRumbleSupported(channel)) {
+		pfs->channel = channel;
+		pfs->activebank = 0xff;
+		pfs->status = 0x8; // PFS_MOTOR_INITIALIZED
+		return 0;
+	}
+	return PFS_ERR_NOPACK;
+}
+
+int joyMotorAccess(PakPfs *pfs, int cmd)
+{
+	if (!pfs || pfs->channel < 0 || pfs->channel >= INPUT_MAX_CONTROLLERS) {
+		return PFS_ERR_NOPACK;
+	}
+
+	const float strength = (float)(cmd == 1);
+	inputRumble(pfs->channel, strength, 5.f); // hope someone turns it off in those 5 seconds
+
+	return 0;
 }

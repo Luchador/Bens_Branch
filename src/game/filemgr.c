@@ -1724,7 +1724,7 @@ void filemgrPushDeleteFileDialog(int listnum)
 MenuItemHandlerResult pakDeleteGameNoteMenuHandler(int operation, struct menuitem *item, union handlerdata *data)
 {
 	if (operation == MENUOP_SET) {
-		OSPfsState *note = &g_EditingPak->notes[g_Menus[g_MpPlayerNum].fm.noteindex];
+		PakPfsState *note = &g_EditingPak->notes[g_Menus[g_MpPlayerNum].fm.noteindex];
 		int result;
 
 		g_Menus[g_MpPlayerNum].fm.unke24 = g_Menus[g_MpPlayerNum].fm.unke24 | (1 << g_Menus[g_MpPlayerNum].fm.device);
@@ -1753,7 +1753,7 @@ MenuItemHandlerResult pakGameNoteListMenuHandler(int operation, struct menuitem 
 	int y;
 	Gfx *gdl;
 	struct menuitemrenderdata *renderdata;
-	OSPfsState *note;
+	PakPfsState *note;
 	char tmpname[40];
 	char tmpext[12];
 	char generalbuffer[60];

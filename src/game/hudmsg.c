@@ -297,7 +297,7 @@ Gfx *hudmsgRenderBox(Gfx *gdl, int x1, int y1, int x2, int y2, float bgopacity, 
 		f20 *= (f0 - 0.5f) + (f0 - 0.5f);
 	}
 
-	gdl = func0f0d479c(gdl);
+	gdl = gfxSetCustomProjection(gdl);
 
 	gdl = menugfxDrawFilledRect(gdl, x1, y1, x2, y1 + 1, bordercolour, bordercolour);
 	gdl = menugfxDrawFilledRect(gdl, x1, y2, x2, y2 + 1, bordercolour, bordercolour);

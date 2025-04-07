@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include <math.h>
 #include "constants.h"
 #include "game/race.h"
@@ -70,11 +69,6 @@ void raceInitAnimGroups(struct attackanimgroup **groups)
 	}
 }
 
-/**
- * Calculate and return the average forward movement speed for an animation,
- * normalized to world units (likely meters per frame). Also stores the raw
- * average forward delta in a lookup table for later use.
- */
 int raceCountAnims(struct animtablerow *rows)
 {
 	int i;
@@ -84,13 +78,18 @@ int raceCountAnims(struct animtablerow *rows)
 	return i;
 }
 
+/**
+ * Calculate and return the average forward movement speed for an animation,
+ * normalized to world units (likely meters per frame). Also stores the raw
+ * average forward delta in a lookup table for later use.
+ */
 float raceCalculateAnimSpeed(int16_t animnum)
 {
 	float avgforward = raceGetAnimSumForwardAsInt(animnum, 0, animGetNumFrames(animnum) - 1) / (float) animGetNumFrames(animnum);
 
 	g_AnimAvgForwardPerFrame[animnum] = avgforward;
 
-	return avgforward * 0.1000000089407f;
+	return avgforward * 0.1f;
 }
 
 void raceInitAnims(void)

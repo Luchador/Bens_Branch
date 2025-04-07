@@ -1,6 +1,5 @@
 #include "n_synthInternals.h"
 #include <math.h>
-#include <os.h>
 
 /*
  * WARNING: THE FOLLOWING CONSTANT MUST BE KEPT IN SYNC

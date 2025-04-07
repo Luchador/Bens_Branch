@@ -5,7 +5,7 @@
 
 void func0f0d4690(Mtxf *mtx);
 void func0f0d475c(Mtxf *mtx);
-Gfx *func0f0d479c(Gfx *gdl);
+Gfx *gfxSetCustomProjection(Gfx *gdl);
 Gfx *func0f0d49c8(Gfx *gdl);
 Gfx *func0f0d4a3c(Gfx *gdl, int arg1);
 Gfx *func0f0d4c80(Gfx *gdl);

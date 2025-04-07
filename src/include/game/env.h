@@ -12,10 +12,9 @@ struct distfadesettings {
 struct environment *envGetCurrent(void);
 float envGetSquaredFogMax(void);
 void envTick(void);
-void envApplyFogEnvironment(struct fogenvironment *sky);
-void envApplyNoFogEnvironment(struct nofogenvironment *sky);
+void envApplyEnvironment(struct environment *sky);
 void envChooseAndApply(int stagenum);
-void envApplyTransitionFrac(float arg0);
+//void envApplyTransitionFrac(float arg0);
 Gfx *envStartFog(Gfx *gdl, bool xlupass);
 Gfx *envStopFog(Gfx *gdl);
 bool envIsPosInFogMaxDistance(struct coord *pos, float tolerance);

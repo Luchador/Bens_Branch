@@ -48,7 +48,7 @@ void func0f0d475c(Mtxf *mtx)
 	mtxScaleRow1Full(0.1f, mtx);
 }
 
-Gfx *func0f0d479c(Gfx *gdl)
+Gfx *gfxSetCustomProjection(Gfx *gdl)
 {
 	Mtxf mtx;
 	Mtxf *mtx1;

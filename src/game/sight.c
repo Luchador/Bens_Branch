@@ -1061,7 +1061,7 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, float crossx, float crossy)
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 #endif
 
-	gdl = func0f0d479c(gdl);
+	gdl = gfxSetCustomProjection(gdl);
 
 	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
 	gSPSetGeometryMode(gdl++, G_SHADE | G_SHADING_SMOOTH);
@@ -1405,7 +1405,7 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 	vertices = gfxAllocateVertices(8);
 	colours = gfxAllocateColours(2);
-	gdl = func0f0d479c(gdl);
+	gdl = gfxSetCustomProjection(gdl);
 
 	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
 	gSPSetGeometryMode(gdl++, G_SHADE | G_SHADING_SMOOTH);

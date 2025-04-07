@@ -2333,7 +2333,7 @@ int chrTick(struct prop *prop)
 		if (isrepeatframe) {
 			needsupdate = false;
 		} else {
-			needsupdate = posIsInDrawDistance(&prop->pos);
+			needsupdate = true;
 		}
 	} else if (chr->actiontype == ACT_PATROL || chr->actiontype == ACT_GOPOS) {
 		if ((chr->actiontype == ACT_PATROL && chr->act_patrol.waydata.mode == WAYMODE_MAGIC)

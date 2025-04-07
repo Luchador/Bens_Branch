@@ -1,5 +1,4 @@
 #include "n_synthInternals.h"
-#include <os.h>
 
 Acmd *n_alSavePull(int sampleOffset, Acmd *p)
 {

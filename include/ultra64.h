@@ -23,7 +23,6 @@
 #define _ULTRA64_H_
 
 #include "platform.h"
-#include <PR/os.h>
 #include <PR/sptask.h>
 #include <PR/mbi.h>
 #include <PR/libaudio.h>
