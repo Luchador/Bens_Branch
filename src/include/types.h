@@ -5075,7 +5075,7 @@ struct shieldhit {
 };
 
 struct bgroom {
-	uintptr_t unk00;
+	uintptr_t ptr_gfxdata;
 	struct coord pos;
 	uint8_t br_light_min;
 	uint8_t br_light_max;
@@ -5209,9 +5209,9 @@ struct light {
 	/*0x0a*/ struct vec3s16 bbox[4];
 };
 
-struct var80061420 {
-	uint8_t *unk00;
-	uint8_t *unk04;
+struct lightvisdata {
+	uint8_t *portalvis_compressed;
+	uint8_t *roomvis_compressed;
 };
 
 struct menurendercontext {

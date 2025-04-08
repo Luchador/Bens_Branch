@@ -877,7 +877,7 @@ Gfx *lvRender(Gfx *gdl)
 		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 		viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
 				g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
-		mtx00016748(1);
+		mtxConvertToFixed(1);
 
 		gdl = vi0000b1d0(gdl);
 		gdl = viRenderViewportEdges(gdl);
@@ -892,7 +892,7 @@ Gfx *lvRender(Gfx *gdl)
 		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 		viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
 				g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
-		mtx00016748(1);
+		mtxConvertToFixed(1);
 
 		gdl = vi0000b1a8(gdl);
 		gdl = vi0000b1d0(gdl);
@@ -968,7 +968,7 @@ Gfx *lvRender(Gfx *gdl)
 			viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 			viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
 					g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
-			mtx00016748(g_Vars.currentplayerstats->scale_bg2gfx);
+			mtxConvertToFixed(g_Vars.currentplayerstats->scale_bg2gfx);
 			envTick();
 			gdl = viPrepareZbuf(gdl);
 			gdl = vi0000b1d0(gdl);
@@ -997,7 +997,7 @@ Gfx *lvRender(Gfx *gdl)
 			} else if (g_GamePaused) {
 				gdl = viRenderViewportEdges(gdl);
 				gdl = bgScissorToViewport(gdl);
-				mtx00016748(1);
+				mtxConvertToFixed(1);
 
 				if (g_Vars.currentplayer->menuisactive) {
 					gdl = menuRender(gdl);
@@ -1207,136 +1207,136 @@ Gfx *lvRender(Gfx *gdl)
 						}
 						break;
 					}
-				}
 					
-				if (g_CutsceneStaticAudioHandle && !cutscenehasstatic) {
-					audioStop(g_CutsceneStaticAudioHandle);
-				}
 
-				// Slayer rocket shows static when flying out of bounds
-				if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKET
-						&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
-					gdl = bviewDrawSlayerRocketInterlace(gdl, 0xffffffff, 0xffffffff);
+					if (g_CutsceneStaticAudioHandle && !cutscenehasstatic) {
+						audioStop(g_CutsceneStaticAudioHandle);
+					}
 
-					if (g_Vars.currentplayer->badrockettime > 0) {
-						uint32_t slayerstatic = g_Vars.currentplayer->badrockettime * 255 / TICKS(90);
+					// Slayer rocket shows static when flying out of bounds
+					if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKET
+							&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
+						gdl = bviewDrawSlayerRocketInterlace(gdl, 0xffffffff, 0xffffffff);
 
-						if (slayerstatic > 255) {
-							slayerstatic = 255;
+						if (g_Vars.currentplayer->badrockettime > 0) {
+							uint32_t slayerstatic = g_Vars.currentplayer->badrockettime * 255 / TICKS(90);
+
+							if (slayerstatic > 255) {
+								slayerstatic = 255;
+							}
+
+							gdl = bviewDrawStatic(gdl, 0x4fffffff, slayerstatic);
+						}
+					}
+
+					if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKETSTATIC) {
+						gdl = bviewDrawStatic(gdl, 0x4fffffff, 255);
+						g_Vars.currentplayer->visionmode = VISIONMODE_NORMAL;
+					}
+
+					if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY
+							&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
+						int xraything = 99;
+
+						if (g_Vars.currentplayer->erasertime < TICKS(200)) {
+							xraything = 249 - (g_Vars.currentplayer->erasertime * 3 >> 2);
 						}
 
-						gdl = bviewDrawStatic(gdl, 0x4fffffff, slayerstatic);
-					}
-				}
-
-				if (g_Vars.currentplayer->visionmode == VISIONMODE_SLAYERROCKETSTATIC) {
-					gdl = bviewDrawStatic(gdl, 0x4fffffff, 255);
-					g_Vars.currentplayer->visionmode = VISIONMODE_NORMAL;
-				}
-
-				if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY
-						&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
-					int xraything = 99;
-
-					if (g_Vars.currentplayer->erasertime < TICKS(200)) {
-						xraything = 249 - (g_Vars.currentplayer->erasertime * 3 >> 2);
+						gdl = bviewDrawZoomBlur(gdl, 0xffffffff, xraything, 1.05f, 1.05f);
 					}
 
-					gdl = bviewDrawZoomBlur(gdl, 0xffffffff, xraything, 1.05f, 1.05f);
-				}
+					// Handle combat boosts
+					if ((g_Vars.speedpillchange > 0 && g_Vars.speedpillchange < 30)
+							|| (g_Vars.speedpillwant && !g_Vars.speedpillon)
+							|| (!g_Vars.speedpillwant && g_Vars.speedpillon)) {
+						if (g_Vars.speedpillchange == 30 && !g_Vars.speedpillwant) {
+							sndStart(var80095200, lvGetSlowMotionType() ? SFX_JO_BOOST_ACTIVATE : SFX_ARGH_JO_02AD, 0, -1, -1, -1, -1, -1);
+						}
 
-				// Handle combat boosts
-				if ((g_Vars.speedpillchange > 0 && g_Vars.speedpillchange < 30)
-						|| (g_Vars.speedpillwant && !g_Vars.speedpillon)
-						|| (!g_Vars.speedpillwant && g_Vars.speedpillon)) {
-					if (g_Vars.speedpillchange == 30 && !g_Vars.speedpillwant) {
-						sndStart(var80095200, lvGetSlowMotionType() ? SFX_JO_BOOST_ACTIVATE : SFX_ARGH_JO_02AD, 0, -1, -1, -1, -1, -1);
-					}
-
-					if (g_Vars.speedpillchange < 15) {
-						gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
-								g_Vars.speedpillchange * 180 / 15,
-								(float)g_Vars.speedpillchange * 0.02f + 1.1f,
-								(float)g_Vars.speedpillchange * 0.02f + 1.1f);
-						gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
-								g_Vars.speedpillchange * 0.0066666668280959f);
-					} else {
-						gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
-								(30 - g_Vars.speedpillchange) * 180 / 15,
-								(float)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f,
-								(float)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f);
-						gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
-								(30.0f - g_Vars.speedpillchange) * 0.0066666668280959f);
-					}
-
-					if (g_Vars.currentplayernum == 0) {
-						if (g_Vars.speedpillwant) {
-							g_Vars.speedpillchange++;
+						if (g_Vars.speedpillchange < 15) {
+							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
+									g_Vars.speedpillchange * 180 / 15,
+									(float)g_Vars.speedpillchange * 0.02f + 1.1f,
+									(float)g_Vars.speedpillchange * 0.02f + 1.1f);
+							gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
+									g_Vars.speedpillchange * 0.0066666668280959f);
 						} else {
-							g_Vars.speedpillchange--;
+							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
+									(30 - g_Vars.speedpillchange) * 180 / 15,
+									(float)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f,
+									(float)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f);
+							gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
+									(30.0f - g_Vars.speedpillchange) * 0.0066666668280959f);
+						}
+
+						if (g_Vars.currentplayernum == 0) {
+							if (g_Vars.speedpillwant) {
+								g_Vars.speedpillchange++;
+							} else {
+								g_Vars.speedpillchange--;
+							}
+						}
+
+						if (g_Vars.speedpillchange > 30) {
+							g_Vars.speedpillchange = 30;
+						} else if (g_Vars.speedpillchange < 0) {
+							g_Vars.speedpillchange = 0;
 						}
 					}
 
-					if (g_Vars.speedpillchange > 30) {
-						g_Vars.speedpillchange = 30;
-					} else if (g_Vars.speedpillchange < 0) {
-						g_Vars.speedpillchange = 0;
-					}
-				}
-
-				if (g_Vars.speedpillchange > 15) {
-					g_Vars.speedpillon = true;
-				} else {
-					g_Vars.speedpillon = false;
-				}
-
-				if (bluramount) {
-					bviewClearMotionBlur();
-					gdl = bviewDrawMotionBlur(gdl, 0xffffffff, bluramount);
-				}
-
-				// Handle blur effect in cutscenes (Extraction intro?)
-				if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
-					float cutsceneblurfrac = playerGetCutsceneBlurFrac();
-
-					if (cutsceneblurfrac > 0) {
-						gdl = bviewDrawMotionBlur(gdl, 0xffffff00, cutsceneblurfrac * 255);
-					}
-				}
-
-				// Render white when teleporting
-				if (g_Vars.currentplayer->teleportstate > TELEPORTSTATE_INACTIVE) {
-					alpha = 0;
-
-					if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_WHITE) {
-						alpha = 255;
+					if (g_Vars.speedpillchange > 15) {
+						g_Vars.speedpillon = true;
+					} else {
+						g_Vars.speedpillon = false;
 					}
 
-					if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_EXITING
-							&& g_Vars.currentplayer->teleporttime < 16) {
-						alpha = -g_Vars.currentplayer->teleporttime * 16 + 240;
+					if (bluramount) {
+						bviewClearMotionBlur();
+						gdl = bviewDrawMotionBlur(gdl, 0xffffffff, bluramount);
 					}
 
-					if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_ENTERING) {
-						if (g_Vars.currentplayer->teleporttime > 32) {
-							alpha = g_Vars.currentplayer->teleporttime * 16 - 512;
+					// Handle blur effect in cutscenes (Extraction intro?)
+					if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
+						float cutsceneblurfrac = playerGetCutsceneBlurFrac();
+
+						if (cutsceneblurfrac > 0) {
+							gdl = bviewDrawMotionBlur(gdl, 0xffffff00, cutsceneblurfrac * 255);
 						}
+					}
 
-						if (g_Vars.currentplayer->teleporttime == 48) {
+					// Render white when teleporting
+					if (g_Vars.currentplayer->teleportstate > TELEPORTSTATE_INACTIVE) {
+						alpha = 0;
+
+						if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_WHITE) {
 							alpha = 255;
 						}
-					}
 
-					if (alpha) {
-						gdl = textConfigureGfxPipeline(gdl);
-						gdl = text0f153a34(gdl,
-								viGetViewLeft(), viGetViewTop(),
-								viGetViewLeft() + viGetViewWidth(),
-								viGetViewTop() + viGetViewHeight(), 0xffffff00 | alpha);
-						gdl = text0f153780(gdl);
+						if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_EXITING
+								&& g_Vars.currentplayer->teleporttime < 16) {
+							alpha = -g_Vars.currentplayer->teleporttime * 16 + 240;
+						}
+
+						if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_ENTERING) {
+							if (g_Vars.currentplayer->teleporttime > 32) {
+								alpha = g_Vars.currentplayer->teleporttime * 16 - 512;
+							}
+
+							if (g_Vars.currentplayer->teleporttime == 48) {
+								alpha = 255;
+							}
+						}
+
+						if (alpha) {
+							gdl = textConfigureGfxPipeline(gdl);
+							gdl = text0f153a34(gdl,
+									viGetViewLeft(), viGetViewTop(),
+									viGetViewLeft() + viGetViewWidth(),
+									viGetViewTop() + viGetViewHeight(), 0xffffff00 | alpha);
+							gdl = text0f153780(gdl);
+						}
 					}
 				}
-				
 
 				gdl = scenarioRenderHud(gdl);
 				gdl = lvRenderFade(gdl);
@@ -1347,13 +1347,13 @@ Gfx *lvRender(Gfx *gdl)
 
 				gdl = skyRenderOverexposure(gdl);
 				gdl = amRender(gdl);
-				mtx00016748(1);
+				mtxConvertToFixed(1);
 
 				if (g_Vars.currentplayer->menuisactive) {
 					gdl = menuRender(gdl);
 				}
 
-				mtx00016748(g_Vars.currentplayerstats->scale_bg2gfx);
+				mtxConvertToFixed(g_Vars.currentplayerstats->scale_bg2gfx);
 
 				if (g_Vars.mplayerisrunning) {
 					gdl = mpRenderModalText(gdl);

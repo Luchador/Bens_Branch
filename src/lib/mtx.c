@@ -228,7 +228,7 @@ void mtx00016710(float mult, float mtx[4][4])
 	mtx[3][2] *= mult;
 }
 
-void mtx00016748(float arg0)
+void mtxConvertToFixed(float arg0)
 {
 	g_MtxFloatToFixedScale[0] = 65536 * arg0;
 }

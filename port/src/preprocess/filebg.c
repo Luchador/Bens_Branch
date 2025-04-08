@@ -119,7 +119,7 @@ static void convertPrimaryRooms(uint8_t *dst, uint32_t *dstpos, uint8_t *src, ui
 	}
 
 	for (int i = 0; i < numRooms + 1; i++) {
-		host_rooms[i].unk00 = PD_BE32(n64_rooms[i].ptr_gfxdata);
+		host_rooms[i].ptr_gfxdata = PD_BE32(n64_rooms[i].ptr_gfxdata);
 		host_rooms[i].pos = PD_SWAPPED_VAL(n64_rooms[i].pos);
 		host_rooms[i].br_light_min = n64_rooms[i].br_light_min;
 		host_rooms[i].br_light_max = n64_rooms[i].br_light_max;
@@ -487,15 +487,6 @@ void preprocessBgSection2Header(uint8_t* data, uint32_t size)
 	uint16_t* header = (uint16_t*)data;
 	PD_SWAP_VAL(header[0]); // inflatedsize
 	PD_SWAP_VAL(header[1]); // section2compsize
-}
-
-void preprocessBgSection2(uint8_t* data, uint32_t size)
-{
-	// section2 is a texture id list
-	uint16_t* section2 = (uint16_t*)data;
-	for (int i = 0; i < size; ++i) {
-		PD_SWAP_VAL(section2[i]);
-	}
 }
 
 void preprocessBgSection3Header(uint8_t* data, uint32_t size)

@@ -53,4 +53,6 @@ void ptrAdd(uint32_t ptr_src, uintptr_t ptr_host);
 struct ptrmarker* ptrFind(uintptr_t ptr_src);
 void ptrReset(void);
 
+void writePreprocessedTextureIdsToFile(const char* filename, uint8_t* data, uint32_t size);
+
 #endif

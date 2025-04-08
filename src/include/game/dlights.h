@@ -25,7 +25,7 @@ bool lightsHandleHit(struct coord *gunpos, struct coord *hitpos, int roomnum);
 void roomSetLightsFaulty(int roomnum, int chance);
 void roomSetLightBroken(int roomnum, int lightnum);
 void lightsReset(void);
-void func0f001c0c(void);
+void roomPreprocessVisibility(void);
 void lightComputeInfluenceMatrix(uint8_t *arg0);
 void lightsCalculateRoomDimensions(void);
 void lightCalcAmbientLighting(int roomnum);

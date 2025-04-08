@@ -354,6 +354,10 @@
 #define _G_CC_BLENDPEDECALA ENVIRONMENT, PRIMITIVE, TEXEL0,        PRIMITIVE, 0,         0,      0,             TEXEL0
 #define _G_CC_TWOCOLORTEX   PRIMITIVE,   SHADE,     TEXEL0,        SHADE,     0,         0,      0,             SHADE
 
+/* used for 1-cycle sparse mip-maps, primitive color has color of lowest LOD */
+#define _G_CC_SPARSEST      PRIMITIVE,   TEXEL0,    LOD_FRACTION,  TEXEL0,    PRIMITIVE, TEXEL0, LOD_FRACTION,  TEXEL0
+#define G_CC_TEMPLERP       TEXEL1,      TEXEL0,    PRIM_LOD_FRAC, TEXEL0,    TEXEL1,    TEXEL0, PRIM_LOD_FRAC, TEXEL0
+
 /* typical CC cycle 1 modes, usually followed by other cycle 2 modes */
 #define G_CC_TRILERP        TEXEL1,      TEXEL0,    LOD_FRACTION,  TEXEL0,    TEXEL1,    TEXEL0, LOD_FRACTION,  TEXEL0
 #define G_CC_INTERFERENCE   TEXEL0,      0,         TEXEL1,        0,         TEXEL0,    0,      TEXEL1,        0
@@ -1282,6 +1286,10 @@ typedef union {
     (_SHIFTL((flag), 24,8)|_SHIFTL((v0)*10,16,8)| \
      _SHIFTL((v1)*10, 8,8)|_SHIFTL((v2)*10, 0,8))
 
+#define __gsSPLine3D_w1f(v0, v1, wd, flag)        \
+    (_SHIFTL((flag), 24,8)|_SHIFTL((v0)*10,16,8)| \
+     _SHIFTL((v1)*10, 8,8)|_SHIFTL((wd),    0,8))
+
 /***
  ***  1 Triangle
  ***/
@@ -1296,6 +1304,9 @@ typedef union {
 #define gSPSegment(pkt, segment, base)            \
     gMoveWd(pkt, G_MW_SEGMENT, (segment)*4, base)
 
+#define gsSPSegment(segment, base)            \
+    gsMoveWd(G_MW_SEGMENT, (segment)*4, base)
+
 #ifdef PLATFORM_N64
 #define SEGADDR(x) x
 #define UNSEGADDR(x) x
@@ -1304,6 +1315,22 @@ typedef union {
 #define SEGADDR(x) ((void *)((uintptr_t)(x) | 1))
 #define UNSEGADDR(x) ((uintptr_t)(x) & ~1)
 #endif
+
+/*
+ * Clipping Macros
+ */
+#define FR_NEG_FRUSTRATIO_1 0x00000001
+#define FR_POS_FRUSTRATIO_1 0x0000ffff
+#define FR_NEG_FRUSTRATIO_2 0x00000002
+#define FR_POS_FRUSTRATIO_2 0x0000fffe
+#define FR_NEG_FRUSTRATIO_3 0x00000003
+#define FR_POS_FRUSTRATIO_3 0x0000fffd
+#define FR_NEG_FRUSTRATIO_4 0x00000004
+#define FR_POS_FRUSTRATIO_4 0x0000fffc
+#define FR_NEG_FRUSTRATIO_5 0x00000005
+#define FR_POS_FRUSTRATIO_5 0x0000fffb
+#define FR_NEG_FRUSTRATIO_6 0x00000006
+#define FR_POS_FRUSTRATIO_6 0x0000fffa
 
 /*
  * r should be one of: FRUSTRATIO_1, FRUSTRATIO_2, FRUSTRATIO_3, ... FRUSTRATIO_6
@@ -1500,7 +1527,7 @@ typedef union {
 #define gDPSetTexturePersp(pkt, type)   gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTPERSP, 1, type)
 #define gsDPSetTexturePersp(type)       gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTPERSP, 1, type)
 #define gDPSetTextureDetail(pkt, type)  gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTDETAIL, 2, type)
-//#define gsDPSetTextureDetail(type)      gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTDETAIL, 2, type)
+#define gsDPSetTextureDetail(type)      gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTDETAIL, 2, type)
 #define gDPSetTextureLOD(pkt, type)     gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTLOD, 1, type)
 #define gsDPSetTextureLOD(type)         gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTLOD, 1, type)
 #define gDPSetTextureLUT(pkt, type)     gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTLUT, 2, type)

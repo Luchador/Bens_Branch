@@ -14,7 +14,6 @@ uint8_t* preprocessSequences(uint8_t *data, uint32_t size, uint32_t *outSize);
 uint8_t* preprocessTexturesList(uint8_t *data, uint32_t size, uint32_t *outSize);
 
 void preprocessBgSection1(uint8_t* data, uint32_t size, uint32_t ofs);
-void preprocessBgSection2(uint8_t *data, uint32_t size);
 void preprocessBgSection3(uint8_t* data, uint32_t size);
 void preprocessBgSection1Header(uint8_t *data, uint32_t size);
 void preprocessBgSection2Header(uint8_t *data, uint32_t size);

@@ -42,8 +42,7 @@ uint8_t g_NVPropHighlight;
 uint8_t g_NVChrHighlight;
 uint8_t g_NVChrBrightness;
 
-struct var80061420 *var80061420 = NULL;
-uint32_t var80061424 = 0x00000000;
+struct lightvisdata *g_LightVisData = NULL;
 struct coord *var80061428 = NULL;
 uint16_t **var8006142c = NULL;
 uint16_t **var80061430 = NULL;
@@ -475,7 +474,19 @@ void lightsReset(void)
 		func0f004c6c();
 }
 
-void func0f001c0c(void)
+/**
+ * Preprocess lighting and visibility data for all rooms and portals.
+ *
+ * This function calculates which rooms can influence lighting in other rooms
+ * by:
+ * - Marking closed/open portals
+ * - Computing influence matrices across portals
+ * - Compressing visibility bitfields for each room to reduce memory
+ * - Storing compressed per-room influence data into `g_LightVisibilityData`
+ *
+ * Memory is allocated temporarily in the Z-buffer region and permanently from MEMPOOL_STAGE.
+ */
+void roomPreprocessVisibility(void)
 {
 	int i;
 	int sp68;
@@ -485,9 +496,9 @@ void func0f001c0c(void)
 	int table4size;
 	int sp54;
 	uint8_t *ptr;
-	uint8_t *s5;
-	uint8_t *sp48;
-	int *sp44;
+	uint8_t *tempCompressedData;
+	uint8_t *uncompressedRoomVisMatrix;
+	int *compressedSizes;
 	int j;
 
 	lightsCalculateRoomDimensions();
@@ -530,15 +541,15 @@ void func0f001c0c(void)
 	g_IsPortalClosed = (bool *)ptr;
 	ptr += table2size;
 
-	sp44 = (int *)(ptr);
+	compressedSizes = (int *)(ptr);
 	ptr += table3size;
 
-	sp48 = (uint8_t *)ptr;
+	uncompressedRoomVisMatrix = (uint8_t *)ptr;
 	ptr += table4size;
 
-	s5 = (uint8_t *)ptr;
+	tempCompressedData = (uint8_t *)ptr;
 
-	var80061420 = mempAlloc(sp68, MEMPOOL_STAGE);
+	g_LightVisData = mempAlloc(sp68, MEMPOOL_STAGE);
 
 	for (i = 0; i < g_NumPortals; i++) {
 		if (PORTAL_IS_CLOSED(i)) {
@@ -553,11 +564,11 @@ void func0f001c0c(void)
 		g_IsPortalClosed[100] = false;
 	}
 
-	lightComputeInfluenceMatrix(sp48);
+	lightComputeInfluenceMatrix(uncompressedRoomVisMatrix);
 
 	for (i = 1, table3size = 0; i < g_Vars.roomcount; i++) {
-		sp44[i] = utilCompressZeroRuns((void *)(i * var8009cae0 + sp48), g_Vars.roomcount, (void *)(&s5[i * var8009cae0]), 1);
-		table3size += align4(sp44[i]);
+		compressedSizes[i] = utilCompressRoomData((void *)(i * var8009cae0 + uncompressedRoomVisMatrix), g_Vars.roomcount, (void *)(&tempCompressedData[i * var8009cae0]), 1);
+		table3size += align4(compressedSizes[i]);
 	}
 
 	ptr = mempAlloc(align16(table3size), MEMPOOL_STAGE);
@@ -567,24 +578,24 @@ void func0f001c0c(void)
 	sp54 = 0;
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
-		int size = align4(sp44[i]);
+		int size = align4(compressedSizes[i]);
 
-		var80061420[i].unk00 = ptr;
+		g_LightVisData[i].portalvis_compressed = ptr;
 
 		ptr += size;
 		sp54 += size;
 
-		for (j = 0; j < sp44[i]; j++) {
-			var80061420[i].unk00[j] = *(&s5[i * var8009cae0] + j);
+		for (j = 0; j < compressedSizes[i]; j++) {
+			g_LightVisData[i].portalvis_compressed[j] = *(&tempCompressedData[i * var8009cae0] + j);
 		}
 	}
 
 	table3size = 0;
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
-		sp44[i] = utilCompressZeroRuns((void *)(sp48 + i), g_Vars.roomcount, (void *)(&s5[i * var8009cae0]), var8009cae0);
+		compressedSizes[i] = utilCompressRoomData((void *)(uncompressedRoomVisMatrix + i), g_Vars.roomcount, (void *)(&tempCompressedData[i * var8009cae0]), var8009cae0);
 
-		table3size += align4(sp44[i]);
+		table3size += align4(compressedSizes[i]);
 	}
 
 	ptr = mempAlloc(align16(table3size), MEMPOOL_STAGE);
@@ -592,12 +603,12 @@ void func0f001c0c(void)
 	align16(table3size);
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
-		var80061420[i].unk04 = ptr;
+		g_LightVisData[i].roomvis_compressed = ptr;
 
-		ptr += align4(sp44[i]);
+		ptr += align4(compressedSizes[i]);
 
-		for (j = 0; j < sp44[i]; j++) {
-			var80061420[i].unk04[j] = *(&s5[i * var8009cae0] + j);
+		for (j = 0; j < compressedSizes[i]; j++) {
+			g_LightVisData[i].roomvis_compressed[j] = *(&tempCompressedData[i * var8009cae0] + j);
 		}
 	}
 
@@ -795,7 +806,7 @@ void roomResetLights(void)
 		roomInitLights(i);
 	}
 
-	var80061420 = NULL;
+	g_LightVisData = NULL;
 }
 
 void roomSetLightsOn(int roomnum, int enable)
@@ -1057,7 +1068,7 @@ void roomsTickLighting(void)
 		lightsTickPerfectDarkness();
 	}
 
-	if (var80061420 == NULL) {
+	if (g_LightVisData == NULL) {
 		return;
 	}
 
@@ -1190,18 +1201,18 @@ void roomsTickLighting(void)
 		if (g_Rooms[i].br_flash != 0) {
 			int increment = g_Vars.lvupdate240 * 2;
 
-			if (var80061420 != NULL) {
+			if (g_LightVisData != NULL) {
 				int spa0 = 0;
 				int sp9c = 0;
 
-				int ret = untilCompressRoomData(var80061420[i].unk04, &spa0, &sp9c);
+				int ret = utilDecompressRoomData(g_LightVisData[i].roomvis_compressed, &spa0, &sp9c);
 
 				while (ret != -1) {
 					if (ret != 0) {
 						g_Rooms[sp9c].flags |= ROOMFLAG_BRIGHTNESS_DIRTY_TEMP;
 					}
 
-					ret = untilCompressRoomData(var80061420[i].unk04, &spa0, &sp9c);
+					ret = utilDecompressRoomData(g_LightVisData[i].roomvis_compressed, &spa0, &sp9c);
 				}
 			}
 
@@ -1212,10 +1223,8 @@ void roomsTickLighting(void)
 
 				g_Rooms[i].br_flash -= increment;
 			} else {
-				// @bug: In this branch br_flash is zero or negative.
-				// Both instances of br_flash should be negated here.
-				if (increment < g_Rooms[i].br_flash) {
-					increment = g_Rooms[i].br_flash;
+				if (increment < -g_Rooms[i].br_flash) {
+					increment = -g_Rooms[i].br_flash;
 				}
 
 				g_Rooms[i].br_flash += increment;
@@ -1244,7 +1253,7 @@ void roomsTickLighting(void)
 					int sp90 = 0;
 					int sp8c = 0;
 
-					int ret = untilCompressRoomData(var80061420[i].unk00, &sp90, &sp8c);
+					int ret = utilDecompressRoomData(g_LightVisData[i].portalvis_compressed, &sp90, &sp8c);
 
 					while (ret != -1) {
 						if (sp8c != 0) {
@@ -1257,7 +1266,7 @@ void roomsTickLighting(void)
 							sum += add;
 						}
 
-						ret = untilCompressRoomData(var80061420[i].unk00, &sp90, &sp8c);
+						ret = utilDecompressRoomData(g_LightVisData[i].portalvis_compressed, &sp90, &sp8c);
 					}
 
 					if (sum > 255) {
@@ -1339,12 +1348,12 @@ void lightsTick(void)
  */
 void roomFlashLighting(int roomnum, int start, int limit)
 {
-	if (var80061420 && !(g_Rooms[roomnum].flags & ROOMFLAG_OUTDOORS ? 1 : 0)) {
+	if (g_LightVisData && !(g_Rooms[roomnum].flags & ROOMFLAG_OUTDOORS ? 1 : 0)) {
 		int value;
 		int sp78 = 0;
 		int neighbournum = 0;
 
-		value = untilCompressRoomData(var80061420[roomnum].unk04, &sp78, &neighbournum);
+		value = utilDecompressRoomData(g_LightVisData[roomnum].roomvis_compressed, &sp78, &neighbournum);
 
 		while (value != -1) {
 			float increment = value * (1.0f / 255.0f) * start * 5.0f;
@@ -1365,7 +1374,7 @@ void roomFlashLighting(int roomnum, int start, int limit)
 				roomFlashLocalLighting(neighbournum, increment, limit);
 			}
 
-			value = untilCompressRoomData(var80061420[roomnum].unk04, &sp78, &neighbournum);
+			value = utilDecompressRoomData(g_LightVisData[roomnum].roomvis_compressed, &sp78, &neighbournum);
 		}
 	}
 }

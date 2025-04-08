@@ -43,6 +43,7 @@
 #include "gbiex.h"
 #include "types.h"
 #include "preprocess.h"
+#include "preprocess/common.h"
 #include "system.h"
 #include "video.h"
 #include "platform.h"
@@ -1348,10 +1349,8 @@ void bgReset(int stagenum)
 	// Iterate texture IDs and ensure they're loaded
 	inflatedsize = (*(int16_t *) &header[0] & 0x7fff) >> 1;
 
-	preprocessBgSection2((uint8_t *)section2, inflatedsize);
-
 	for (i = 0; i ^ inflatedsize; i++) {
-		texLoadFromTextureNum(section2[i] & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff & 0xffff, NULL);
+		texLoadFromTextureNum(section2[i] & 0xffff, NULL);
 	}
 
 	// Free section 2
@@ -1366,7 +1365,7 @@ void bgReset(int stagenum)
 		g_BgRooms = (struct bgroom *)(g_BgPrimaryData2[1] + g_BgPrimaryData - 0x0f000000);
 		g_Vars.roomcount = 0;
 
-		for (j = 1; g_BgRooms[j].unk00 != 0; j++) {
+		for (j = 1; g_BgRooms[j].ptr_gfxdata != 0; j++) {
 			g_Vars.roomcount++;
 		}
 
@@ -1452,7 +1451,7 @@ void bgBuildTables(int stagenum)
 		g_Vars.playerstats[i].scale_bg2gfx = g_Stages[g_StageIndex].unk18;
 	}
 
-	mtx00016748(1);
+	mtxConvertToFixed(1);
 
 	if (var800a4920 == 0) {
 		numportals = 0;
@@ -1775,13 +1774,13 @@ void bgBuildTables(int stagenum)
 
 	wallhitReset();
 	roomResetLights();
-	func0f001c0c();
+	roomPreprocessVisibility();
 }
 
 void bgStop(void)
 {
 	bgUnloadAllRooms();
-	mtx00016748(1);
+	mtxConvertToFixed(1);
 }
 
 float bgGetStageTranslationThing(void)
@@ -1797,7 +1796,7 @@ float bgGetScaleBg2Gfx(void)
 void bgSetScaleBg2Gfx(float scale)
 {
 	g_Vars.currentplayerstats->scale_bg2gfx = g_Stages[g_StageIndex].unk18 * scale;
-	mtx00016748(g_Vars.currentplayerstats->scale_bg2gfx);
+	mtxConvertToFixed(g_Vars.currentplayerstats->scale_bg2gfx);
 }
 
 /**
@@ -2149,7 +2148,7 @@ bool bgGetPortalScreenBbox(int portalnum, struct screenbox *box)
 
 Gfx *bgDrawBoxEdge(Gfx *gdl, int x1, int y1, int x2, int y2)
 {
-	gDPFillRectangle(gdl++, x1, y1, x2 + 1, y2 + 1);
+	//gDPFillRectangle(gdl++, x1, y1, x2 + 1, y2 + 1);
 
 	return gdl;
 }
@@ -2424,8 +2423,8 @@ void bgLoadRoom(int roomnum)
 
 		// Calculate the file offset and read length
 		// of the compressed room data in the BG file
-		readlen = ((g_BgRooms[roomnum + 1].unk00 - g_BgRooms[roomnum].unk00) + 0xf) & ~0xf;
-		fileoffset = (g_BgPrimaryData + g_BgRooms[roomnum].unk00 - g_BgPrimaryData) - 0x0f000000;
+		readlen = ((g_BgRooms[roomnum + 1].ptr_gfxdata - g_BgRooms[roomnum].ptr_gfxdata) + 0xf) & ~0xf;
+		fileoffset = (g_BgPrimaryData + g_BgRooms[roomnum].ptr_gfxdata - g_BgPrimaryData) - 0x0f000000;
 		fileoffset -= var8007fc54;
 
 		if (readlen > alloclen) {
@@ -2444,26 +2443,26 @@ void bgLoadRoom(int roomnum)
 		}
 
 		// Inflate the data to the left side of the allocation
-		inflatedlen = bgInflate(memaddr, allocation, g_BgRooms[roomnum + 1].unk00 - g_BgRooms[roomnum].unk00);
-		inflatedlen = preprocessBgRoom(allocation, inflatedlen, g_BgRooms[roomnum].unk00);
+		inflatedlen = bgInflate(memaddr, allocation, g_BgRooms[roomnum + 1].ptr_gfxdata - g_BgRooms[roomnum].ptr_gfxdata);
+		inflatedlen = preprocessBgRoom(allocation, inflatedlen, g_BgRooms[roomnum].ptr_gfxdata);
 
 		g_Rooms[roomnum].gfxdata = (struct roomgfxdata *)allocation;
 
 		// Promote offsets to pointers in the gfxdata header
 		if (g_Rooms[roomnum].gfxdata->vertices) {
-			g_Rooms[roomnum].gfxdata->vertices = (Vtx *) (allocation + ((uintptr_t) g_Rooms[roomnum].gfxdata->vertices - g_BgRooms[roomnum].unk00));
+			g_Rooms[roomnum].gfxdata->vertices = (Vtx *) (allocation + ((uintptr_t) g_Rooms[roomnum].gfxdata->vertices - g_BgRooms[roomnum].ptr_gfxdata));
 		}
 
 		if (g_Rooms[roomnum].gfxdata->colours) {
-			g_Rooms[roomnum].gfxdata->colours = (Col *) (allocation + ((uintptr_t) g_Rooms[roomnum].gfxdata->colours - g_BgRooms[roomnum].unk00));
+			g_Rooms[roomnum].gfxdata->colours = (Col *) (allocation + ((uintptr_t) g_Rooms[roomnum].gfxdata->colours - g_BgRooms[roomnum].ptr_gfxdata));
 		}
 
 		if (g_Rooms[roomnum].gfxdata->opablocks) {
-			g_Rooms[roomnum].gfxdata->opablocks = (struct roomblock *) (allocation + ((uintptr_t) g_Rooms[roomnum].gfxdata->opablocks - g_BgRooms[roomnum].unk00));
+			g_Rooms[roomnum].gfxdata->opablocks = (struct roomblock *) (allocation + ((uintptr_t) g_Rooms[roomnum].gfxdata->opablocks - g_BgRooms[roomnum].ptr_gfxdata));
 		}
 
 		if (g_Rooms[roomnum].gfxdata->xlublocks) {
-			g_Rooms[roomnum].gfxdata->xlublocks = (struct roomblock *) (allocation + ((uintptr_t) g_Rooms[roomnum].gfxdata->xlublocks - g_BgRooms[roomnum].unk00));
+			g_Rooms[roomnum].gfxdata->xlublocks = (struct roomblock *) (allocation + ((uintptr_t) g_Rooms[roomnum].gfxdata->xlublocks - g_BgRooms[roomnum].ptr_gfxdata));
 		}
 
 		// Promote offsets to pointers in each gfxdata block
@@ -2473,30 +2472,30 @@ void bgLoadRoom(int roomnum)
 			switch (block1->type) {
 			case ROOMBLOCKTYPE_LEAF:
 				if (block1->next != NULL) {
-					block1->next = (struct roomblock *) (allocation + ((uintptr_t) block1->next - g_BgRooms[roomnum].unk00));
+					block1->next = (struct roomblock *) (allocation + ((uintptr_t) block1->next - g_BgRooms[roomnum].ptr_gfxdata));
 				}
 				if (block1->gdl != 0) {
-					block1->gdl = (Gfx *) (allocation + ((uintptr_t) block1->gdl - g_BgRooms[roomnum].unk00));
+					block1->gdl = (Gfx *) (allocation + ((uintptr_t) block1->gdl - g_BgRooms[roomnum].ptr_gfxdata));
 				}
 				if (block1->vertices != 0) {
-					block1->vertices = (Vtx *) (allocation + ((uintptr_t) block1->vertices - g_BgRooms[roomnum].unk00));
+					block1->vertices = (Vtx *) (allocation + ((uintptr_t) block1->vertices - g_BgRooms[roomnum].ptr_gfxdata));
 				}
 				if (block1->colours != 0) {
-					block1->colours = (Col *) (allocation + ((uintptr_t) block1->colours - g_BgRooms[roomnum].unk00));
+					block1->colours = (Col *) (allocation + ((uintptr_t) block1->colours - g_BgRooms[roomnum].ptr_gfxdata));
 				}
 				break;
 			case ROOMBLOCKTYPE_PARENT:
 				if (block1->next != NULL) {
-					block1->next = (struct roomblock *) (allocation + ((uintptr_t) block1->next - g_BgRooms[roomnum].unk00));
+					block1->next = (struct roomblock *) (allocation + ((uintptr_t) block1->next - g_BgRooms[roomnum].ptr_gfxdata));
 				}
 				if (block1->gdl != 0) {
-					block1->gdl = (Gfx *) (allocation + ((uintptr_t) block1->gdl - g_BgRooms[roomnum].unk00));
+					block1->gdl = (Gfx *) (allocation + ((uintptr_t) block1->gdl - g_BgRooms[roomnum].ptr_gfxdata));
 				}
 				if (block1->vertices != 0) {
-					block1->vertices = (Vtx *) (allocation + ((uintptr_t) block1->vertices - g_BgRooms[roomnum].unk00));
+					block1->vertices = (Vtx *) (allocation + ((uintptr_t) block1->vertices - g_BgRooms[roomnum].ptr_gfxdata));
 				}
 				if (block1->colours != 0) {
-					block1->colours = (Col *) (allocation + ((uintptr_t) block1->colours - g_BgRooms[roomnum].unk00));
+					block1->colours = (Col *) (allocation + ((uintptr_t) block1->colours - g_BgRooms[roomnum].ptr_gfxdata));
 				}
 				if ((uintptr_t) block1->vertices < end1) {
 					end1 = (uintptr_t) block1->vertices;

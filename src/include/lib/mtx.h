@@ -16,7 +16,7 @@ void mtx4GetRotation(float mtx[4][4], struct coord *dst);
 void mtx4LoadRotationAndTranslation(struct coord *pos, struct coord *rot, Mtxf *mtx);
 void mtx4LoadTranslation(struct coord *pos, Mtxf *mtx);
 void mtx00016710(float mult, float mtx[4][4]);
-void mtx00016748(float arg0);
+void mtxConvertToFixed(float arg0);
 void mtx00016760(void);
 void mtx00016784(void);
 void mtx00016798(Mtxf *src, Mtxf *dst);

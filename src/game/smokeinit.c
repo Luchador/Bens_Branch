@@ -21,7 +21,7 @@ Gfx var800613a0[] = {
 	gsDPPipelineMode(G_PM_1PRIMITIVE),
 	gsDPSetTextureLOD(G_TL_TILE),
 	gsDPSetTextureLUT(G_TT_NONE),
-	//gsDPSetTextureDetail(G_TD_CLAMP),
+	gsDPSetTextureDetail(G_TD_CLAMP),
 	gsDPSetTexturePersp(G_TP_PERSP),
 	gsDPSetTextureFilter(G_TF_BILERP),
 	gsDPSetTextureConvert(G_TC_FILT),

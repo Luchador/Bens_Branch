@@ -190,7 +190,7 @@ static struct RDP {
     uint64_t combine_mode;
     bool grayscale;
     bool tex_lod;
-    bool tex_detail; // Needed for blue carpets in Defection
+    bool tex_detail;
 
     uint8_t prim_lod_fraction;
     struct RGBA env_color, prim_color, fog_color, fill_color, grayscale_color;
@@ -220,8 +220,11 @@ static struct GfxDimensions gfx_prev_dimensions;
 struct XYWidthHeight gfx_current_game_window_viewport;
 struct XYWidthHeight gfx_current_native_viewport;
 float gfx_current_native_aspect = 4.f / 3.f;
+//bool gfx_framebuffers_enabled = true;
+//bool gfx_detail_textures_enabled = true;
 
 bool fbenabled = true;
+bool dtenabled = true;
 
 static bool game_renders_to_framebuffer;
 static int game_framebuffer;
@@ -1213,6 +1216,8 @@ static void gfx_sp_modify_vertex(uint16_t vtx_idx, uint8_t where, uint32_t val) 
 }
 
 static inline int gfx_lod_tile_offset(const int i) {
+    if (dtenabled)
+        return ((rdp.tex_lod && !rdp.tex_detail) ? 0 : i);
     return (rdp.tex_lod ? rdp.tex_detail : i);
 }
 

@@ -250,7 +250,7 @@ float coordsGetDistance(struct coord *a, struct coord *b)
 }
 
 // RLE-ish compression algorithm
-int utilCompressZeroRuns(uint8_t *input, int numEntries, uint8_t *output, int entrySize) {
+int utilCompressRoomData(uint8_t *input, int numEntries, uint8_t *output, int entrySize) {
     int outputIndex = 0;
     int zeroRunLength = 0;
 
@@ -291,7 +291,7 @@ int utilCompressZeroRuns(uint8_t *input, int numEntries, uint8_t *output, int en
     return outputIndex;
 }
 
-int untilCompressRoomData(uint8_t *arg0, int *arg1, int *roomnum)
+int utilDecompressRoomData(uint8_t *arg0, int *arg1, int *roomnum)
 {
 	int result;
 
