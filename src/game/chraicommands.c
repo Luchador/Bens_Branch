@@ -5662,13 +5662,13 @@ bool aiSetLights(void)
 	if (roomnum >= 0) {
 		switch (cmd[4]) {
 		case LIGHTOP_TURNOFF:
-			roomSetLightsOn(roomnum, false);
+			lightSetLightsOn(roomnum, false);
 			break;
 		case LIGHTOP_TURNON:
-			roomSetLightsOn(roomnum, true);
+			lightSetLightsOn(roomnum, true);
 			break;
 		default:
-			roomSetLightOp(roomnum, cmd[4], cmd[5], cmd[6], TICKS(cmd[7]));
+			lightSetLightOp(roomnum, cmd[4], cmd[5], cmd[6], TICKS(cmd[7]));
 			break;
 		}
 	}
@@ -8661,7 +8661,7 @@ bool ai01aa(void)
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	float a = 3000;
 
-	updateShortestDistanceBetweenRooms(
+	lightUpdateShortestDistanceBetweenRooms(
 			g_Vars.currentplayer->prop->rooms[0],
 			&g_Vars.currentplayer->prop->pos,
 			g_Vars.chrdata->prop->rooms[0],

@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "game/artifacts.h"
 #include "game/bg.h"
@@ -646,7 +647,7 @@ Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t arg2[3], int1
 	return gdl;
 }
 
-uint32_t var8007fc54 = 0;
+uint32_t g_BgPointerOffset = 0;
 bool g_BgCmdStack[20] = {0};
 int g_BgCmdStackIndex = 0;
 uint32_t g_BgCmdResult = BGRESULT_TRUE;
@@ -1296,8 +1297,8 @@ void bgReset(int stagenum)
 	inflatedsize = *(uint32_t *)&header[0];
 	section1compsize = *(uint32_t *)&header[4];
 	primcompsize = *(uint32_t *)&header[8];
-	var8007fc54 = inflatedsize - primcompsize;
-	var8007fc54 -= 0xc;
+	g_BgPointerOffset = inflatedsize - primcompsize;
+	g_BgPointerOffset -= 0xc; //0xc probably accounts for fixed header data
 
 #ifdef PLATFORM_64BIT
 	inflatedsize = romdataFileGetEstimatedSize(inflatedsize, LOADTYPE_BG);
@@ -2416,7 +2417,7 @@ void bgLoadRoom(int roomnum)
 #endif
 
 	// allocate room data from heap to not take up mema space
-	allocation = sysMemAlloc(alloclen);
+	allocation = malloc(alloclen);
 
 	if (allocation != NULL) {
 		dyntexSetCurrentRoom(roomnum);
@@ -2425,7 +2426,7 @@ void bgLoadRoom(int roomnum)
 		// of the compressed room data in the BG file
 		readlen = ((g_BgRooms[roomnum + 1].ptr_gfxdata - g_BgRooms[roomnum].ptr_gfxdata) + 0xf) & ~0xf;
 		fileoffset = (g_BgPrimaryData + g_BgRooms[roomnum].ptr_gfxdata - g_BgPrimaryData) - 0x0f000000;
-		fileoffset -= var8007fc54;
+		fileoffset -= g_BgPointerOffset;
 
 		if (readlen > alloclen) {
 			dyntexSetCurrentRoom(-1);
@@ -2677,7 +2678,7 @@ Gfx *bgRenderRoomPass(Gfx *gdl, int roomnum, struct roomblock *block, bool inclu
 
 		gSPSegment(gdl++, SPSEGMENT_BG_VTX, (uintptr_t)(block->vertices));
 
-		roomHighlight(roomnum);
+		lightHighlight(roomnum);
 
 		v0 = (uintptr_t)g_Rooms[roomnum].colours;
 
@@ -2770,7 +2771,7 @@ Gfx *bgRenderRoomXlu(Gfx *gdl, int roomnum)
 			return gdl;
 		}
 
-		roomHighlight(roomnum);
+		lightHighlight(roomnum);
 
 		if (g_Rooms[roomnum].gfxdata);
 		if (g_Rooms[roomnum].gfxdata);
@@ -3081,9 +3082,7 @@ bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, 
 	float tmp = 0.0f;
 	float sqdist = 0.0f;
 	bool hit = false;
-	struct coord *point1;
-	struct coord *point2;
-	struct coord *point3;
+	struct coord *point1, *point2, *point3;
 	Vtx *vtx;
 	Gfx *imggdl = NULL;
 	int texturenum;

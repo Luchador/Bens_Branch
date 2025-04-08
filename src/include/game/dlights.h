@@ -3,7 +3,7 @@
 #include "data.h"
 #include "types.h"
 
-uint32_t func0f000920(int portalnum1, int portalnum2);
+uint32_t roomGetUpperAndLowerPortal(int portalnum1, int portalnum2);
 struct light *roomGetLight(int roomnum, int lightnum);
 uint8_t roomGetFinalBrightness(int roomnum);
 uint8_t roomGetFinalBrightnessForPlayer(int roomnum);
@@ -31,20 +31,20 @@ void lightsCalculateRoomDimensions(void);
 void lightCalcAmbientLighting(int roomnum);
 void roomPropagateClosedPortalLight(int roomnum, float arg1, int arg2, int portalnum);
 void roomResetLights(void);
-void roomSetLightsOn(int roomnum, int enable);
-void roomSetLightOp(int roomnum, int operation, uint8_t br_to, uint8_t br_from, uint8_t duration60);
+void lightSetLightsOn(int roomnum, int enable);
+void lightSetLightOp(int roomnum, int operation, uint8_t br_to, uint8_t br_from, uint8_t duration60);
 bool lightTickBroken(int roomnum, int lightnum);
 void lightingTick(void);
 void lightsConfigureForPerfectDarknessCutscene(void);
 void lightsConfigureForPerfectDarknessGameplay(void);
 void lightsTickPerfectDarkness(void);
-void roomsTickLighting(void);
-void lightsTick(void);
-void roomFlashLighting(int roomnum, int start, int limit);
-void roomFlashLocalLighting(int roomnum, int increment, int limit);
-void roomHighlight(int roomnum);
-void func0f004c6c(void);
-void func0f00505c(void);
-float func0f0053d0(int room1, struct coord *arg1, int portal1, int room2, struct coord *arg4, int portal2, float *arg6);
-void updateShortestDistanceBetweenRooms(int room1, struct coord *coord1, int room2, struct coord *coord2, int arg4, float *arg5, int arg6);
-void func0f005bb0(void);
+void lightTick(void);
+void lightsMuzzleFlashTick(void);
+void lightFlash(int roomnum, int start, int limit);
+void lightFlashLocal(int roomnum, int increment, int limit);
+void lightHighlight(int roomnum);
+void lightInitDistanceMatrices(void);
+void lightComputeShortestPaths(void);
+float lightCalcDistanceBetweenPoints(int room1, struct coord *arg1, int portal1, int room2, struct coord *arg4, int portal2, float *arg6);
+void lightUpdateShortestDistanceBetweenRooms(int room1, struct coord *coord1, int room2, struct coord *coord2, int arg4, float *arg5, int arg6);
+void lightUpdateGoggles(void);

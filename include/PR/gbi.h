@@ -349,11 +349,6 @@
 #define G_CC_BLENDPE                PRIMITIVE,                ENVIRONMENT, TEXEL0,       ENVIRONMENT, TEXEL0,    0,     SHADE,     0
 #define G_CC_BLENDPEDECALA          PRIMITIVE,                ENVIRONMENT, TEXEL0,       ENVIRONMENT, 0,         0,     0,         TEXEL0
 
-/* oddball modes */
-#define _G_CC_BLENDPE       ENVIRONMENT, PRIMITIVE, TEXEL0,        PRIMITIVE, TEXEL0,    0,      SHADE,         0
-#define _G_CC_BLENDPEDECALA ENVIRONMENT, PRIMITIVE, TEXEL0,        PRIMITIVE, 0,         0,      0,             TEXEL0
-#define _G_CC_TWOCOLORTEX   PRIMITIVE,   SHADE,     TEXEL0,        SHADE,     0,         0,      0,             SHADE
-
 /* used for 1-cycle sparse mip-maps, primitive color has color of lowest LOD */
 #define _G_CC_SPARSEST      PRIMITIVE,   TEXEL0,    LOD_FRACTION,  TEXEL0,    PRIMITIVE, TEXEL0, LOD_FRACTION,  TEXEL0
 #define G_CC_TEMPLERP       TEXEL1,      TEXEL0,    PRIM_LOD_FRAC, TEXEL0,    TEXEL1,    TEXEL0, PRIM_LOD_FRAC, TEXEL0
@@ -373,8 +368,6 @@
 #define G_CC_MODULATERGB_PRIM2  G_CC_MODULATEI_PRIM2
 #define G_CC_MODULATERGBA_PRIM2 G_CC_MODULATEIA_PRIM2
 #define G_CC_DECALRGB2          0,                    0,        0,         COMBINED, 0,           0,        0,         SHADE
-#define G_CC_BLENDI2            ENVIRONMENT,          SHADE,    COMBINED,  SHADE,    0,           0,        0,         SHADE
-#define G_CC_BLENDIA2           ENVIRONMENT,          SHADE,    COMBINED,  SHADE,    COMBINED,    0,        SHADE,     0
 
 /*
  * G_SETOTHERMODE_L sft: shift count
@@ -1242,21 +1235,6 @@ typedef union {
     _SHIFTL((c), 24, 8),  _SHIFTL((p0), 16, 16) | _SHIFTL((p1), 8, 8) \
 }
 
-#define gImmp3(pkt, c, p0, p1, p2)                                \
-{                                                                 \
-    Gfx *_g = (Gfx *)(pkt);                                       \
-                                                                  \
-    _g->words.w0 = _SHIFTL((c), 24, 8);                           \
-    _g->words.w1 = (_SHIFTL((p0), 16, 16) | _SHIFTL((p1), 8, 8) | \
-            _SHIFTL((p2), 0, 8));                                 \
-}
-
-#define gsImmp3(c, p0, p1, p2)                         \
-{                                                      \
-    _SHIFTL((c), 24, 8), (_SHIFTL((p0), 16, 16) |      \
-            _SHIFTL((p1), 8, 8) | _SHIFTL((p2), 0, 8)) \
-}
-
 #define gImmp21(pkt, c, p0, p1, dat)                              \
 {                                                                 \
     Gfx *_g = (Gfx *)(pkt);                                       \
@@ -1304,9 +1282,6 @@ typedef union {
 #define gSPSegment(pkt, segment, base)            \
     gMoveWd(pkt, G_MW_SEGMENT, (segment)*4, base)
 
-#define gsSPSegment(segment, base)            \
-    gsMoveWd(G_MW_SEGMENT, (segment)*4, base)
-
 #ifdef PLATFORM_N64
 #define SEGADDR(x) x
 #define UNSEGADDR(x) x
@@ -1315,22 +1290,6 @@ typedef union {
 #define SEGADDR(x) ((void *)((uintptr_t)(x) | 1))
 #define UNSEGADDR(x) ((uintptr_t)(x) & ~1)
 #endif
-
-/*
- * Clipping Macros
- */
-#define FR_NEG_FRUSTRATIO_1 0x00000001
-#define FR_POS_FRUSTRATIO_1 0x0000ffff
-#define FR_NEG_FRUSTRATIO_2 0x00000002
-#define FR_POS_FRUSTRATIO_2 0x0000fffe
-#define FR_NEG_FRUSTRATIO_3 0x00000003
-#define FR_POS_FRUSTRATIO_3 0x0000fffd
-#define FR_NEG_FRUSTRATIO_4 0x00000004
-#define FR_POS_FRUSTRATIO_4 0x0000fffc
-#define FR_NEG_FRUSTRATIO_5 0x00000005
-#define FR_POS_FRUSTRATIO_5 0x0000fffb
-#define FR_NEG_FRUSTRATIO_6 0x00000006
-#define FR_POS_FRUSTRATIO_6 0x0000fffa
 
 /*
  * r should be one of: FRUSTRATIO_1, FRUSTRATIO_2, FRUSTRATIO_3, ... FRUSTRATIO_6
@@ -1738,12 +1697,6 @@ typedef union {
 #define CALC_DXT(width, b_txl)                              \
     (((1 << G_TX_DXT_FRAC) + TXL2WORDS(width, b_txl) - 1) / \
      TXL2WORDS(width, b_txl))
-
-#define TXL2WORDS_4b(txls) MAX(1, ((txls)/16))
-
-#define CALC_DXT_4b(width)                              \
-    (((1 << G_TX_DXT_FRAC) + TXL2WORDS_4b(width) - 1) / \
-     TXL2WORDS_4b(width))
 
 #define gDPLoadTileGeneric(pkt, c, tile, uls, ult, lrs, lrt)     \
 {                                                                \

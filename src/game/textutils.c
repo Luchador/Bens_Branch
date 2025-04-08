@@ -781,9 +781,6 @@ Gfx *textRenderCredit(Gfx *gdl, float x, float y, float widthscale, float height
 	fx = *ptr - (widthscale - 1.0f) * textwidth * 0.5f * hdir;
 	fy = y - (heightscale - 1.0f) * lineheight * 0.5f * vdir;
 
-	if (fx);
-	if (fy);
-
 	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (uintptr_t)(var8007fb3c));
@@ -816,7 +813,6 @@ Gfx *textRenderCredit(Gfx *gdl, float x, float y, float widthscale, float height
 			}
 		}
 	}
-
 
 	return gdl;
 }

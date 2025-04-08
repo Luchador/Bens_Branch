@@ -16798,7 +16798,7 @@ void weaponSetGunfireVisible(struct prop *prop, bool visible, RoomNum room)
 	}
 
 	if (flash && room != -1) {
-		roomFlashLighting(room, 48, 128);
+		lightFlash(room, 48, 128);
 	}
 }
 
@@ -17943,7 +17943,7 @@ void doorCreateSparks(struct doorobj *door)
 			-1, 0, 0, PSTYPE_NONE, &sp7c, -1, door->base.prop->rooms, -1, -1, -1, -1);
 
 	for (i = 0; door->base.prop->rooms[i] != -1; i++) {
-		roomFlashLighting(door->base.prop->rooms[i], 128, 200);
+		lightFlash(door->base.prop->rooms[i], 128, 200);
 	}
 }
 

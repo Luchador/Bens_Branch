@@ -5,6 +5,7 @@
 
 #include "data.h"
 #include "bss.h"
+#include "game/debug.h"
 
 #include "preprocess/common.h"
 #include "preprocess/gbi.h"
@@ -171,6 +172,7 @@ static void convertPrimaryPortals(uint8_t *dst, uint32_t *dstpos, uint8_t *src, 
 		if (host_pvertices->count == 0)  break;
 	}
 }
+
 
 static void convertPrimaryBgCmds(uint8_t *dst, uint32_t *dstpos, uint8_t *src, uint32_t dst_portalvtxs, uint32_t src_portalvtxs)
 {

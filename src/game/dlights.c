@@ -1,25 +1,23 @@
-#include <ultra64.h>
 #include <math.h>
 #include "constants.h"
+#include "game/bg.h"
+#include "game/camera.h"
 #include "game/cheats.h"
 #include "game/dlights.h"
-#include "game/debug.h"
-#include "game/gfxmemory.h"
-#include "game/propsnd.h"
-#include "game/tex.h"
-#include "game/camera.h"
-#include "game/player.h"
-#include "game/smoke.h"
-#include "game/sparks.h"
-#include "game/bg.h"
 #include "game/file.h"
+#include "game/gfxmemory.h"
 #include "game/lv.h"
-#include "game/zbuf.h"
 #include "game/mplayer/scenarios.h"
+#include "game/player.h"
 #include "game/portal.h"
 #include "game/propobj.h"
+#include "game/propsnd.h"
+#include "game/smoke.h"
+#include "game/sparks.h"
+#include "game/tex.h"
 #include "game/utils.h"
 #include "game/wallhit.h"
+#include "game/zbuf.h"
 #include "bss.h"
 #include "lib/snd.h"
 #include "lib/memp.h"
@@ -31,11 +29,11 @@
 #include "types.h"
 #include "platform.h"
 
-int *var8009cad0;
-int *var8009cad8;
+int *g_PortalTraversalQueue;
+int *g_PortalIsTranslucent;
 int g_NumPortals;
-int var8009cae0;
-float (*portalTransferLightAmount)(int roomnum, float mult, int portalnum1, int portalnum2); // function pointer
+int g_RoomCountStride; // The number of rooms in the level, used as the stride (width) of a 2D matrix stored in a 1D array
+float (*portalTransferLightAmount)(int roomnum, float mult, int portalnum1, int portalnum2);
 uint8_t g_NVBGBrightness;
 uint8_t g_NVPropBrightness;
 uint8_t g_NVPropHighlight;
@@ -43,21 +41,21 @@ uint8_t g_NVChrHighlight;
 uint8_t g_NVChrBrightness;
 
 struct lightvisdata *g_LightVisData = NULL;
-struct coord *var80061428 = NULL;
-uint16_t **var8006142c = NULL;
-uint16_t **var80061430 = NULL;
+struct coord *g_PortalPositions = NULL;
+uint16_t **g_PortalWorkingDistances = NULL;
+uint16_t **g_PortalDistanceMatrix = NULL;
 float *g_RoomLightInfluence = NULL;
 bool *g_IsPortalClosed = NULL;
 bool g_IsSwitchingGoggles = false;
 int g_LightsPrevTickMode = 0;
 
-uint32_t func0f000920(int portalnum1, int portalnum2)
+uint32_t roomGetUpperAndLowerPortal(int portalnum1, int portalnum2)
 {
 	if (portalnum1 != portalnum2) {
 		int upper = (portalnum1 > portalnum2) ? portalnum1 : portalnum2;
 		int lower = (portalnum1 < portalnum2) ? portalnum1 : portalnum2;
 
-		return var80061430[upper][lower];
+		return g_PortalDistanceMatrix[upper][lower];
 	}
 
 	return 0;
@@ -471,7 +469,7 @@ void roomSetLightBroken(int roomnum, int lightnum)
 
 void lightsReset(void)
 {
-		func0f004c6c();
+		lightInitDistanceMatrices();
 }
 
 /**
@@ -512,7 +510,7 @@ void roomPreprocessVisibility(void)
 	table1size = align16(g_Vars.roomcount * 4);
 	table2size = align16(g_NumPortals * 4);
 	table3size = align16(g_Vars.roomcount * 4);
-	table4size = align16((uint32_t)var8009cae0 * (uint32_t)var8009cae0);
+	table4size = align16((uint32_t)g_RoomCountStride * (uint32_t)g_RoomCountStride);
 #ifdef PLATFORM_64BIT
 	sp68 = align16(g_Vars.roomcount * 8 * 2);
 #else
@@ -567,7 +565,7 @@ void roomPreprocessVisibility(void)
 	lightComputeInfluenceMatrix(uncompressedRoomVisMatrix);
 
 	for (i = 1, table3size = 0; i < g_Vars.roomcount; i++) {
-		compressedSizes[i] = utilCompressRoomData((void *)(i * var8009cae0 + uncompressedRoomVisMatrix), g_Vars.roomcount, (void *)(&tempCompressedData[i * var8009cae0]), 1);
+		compressedSizes[i] = utilCompressRoomData((void *)(i * g_RoomCountStride + uncompressedRoomVisMatrix), g_Vars.roomcount, (void *)(&tempCompressedData[i * g_RoomCountStride]), 1);
 		table3size += align4(compressedSizes[i]);
 	}
 
@@ -586,14 +584,14 @@ void roomPreprocessVisibility(void)
 		sp54 += size;
 
 		for (j = 0; j < compressedSizes[i]; j++) {
-			g_LightVisData[i].portalvis_compressed[j] = *(&tempCompressedData[i * var8009cae0] + j);
+			g_LightVisData[i].portalvis_compressed[j] = *(&tempCompressedData[i * g_RoomCountStride] + j);
 		}
 	}
 
 	table3size = 0;
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
-		compressedSizes[i] = utilCompressRoomData((void *)(uncompressedRoomVisMatrix + i), g_Vars.roomcount, (void *)(&tempCompressedData[i * var8009cae0]), var8009cae0);
+		compressedSizes[i] = utilCompressRoomData((void *)(uncompressedRoomVisMatrix + i), g_Vars.roomcount, (void *)(&tempCompressedData[i * g_RoomCountStride]), g_RoomCountStride);
 
 		table3size += align4(compressedSizes[i]);
 	}
@@ -608,7 +606,7 @@ void roomPreprocessVisibility(void)
 		ptr += align4(compressedSizes[i]);
 
 		for (j = 0; j < compressedSizes[i]; j++) {
-			g_LightVisData[i].roomvis_compressed[j] = *(&tempCompressedData[i * var8009cae0] + j);
+			g_LightVisData[i].roomvis_compressed[j] = *(&tempCompressedData[i * g_RoomCountStride] + j);
 		}
 	}
 
@@ -633,7 +631,7 @@ void lightComputeInfluenceMatrix(uint8_t *arg0)
 	portalTransferLightAmount = &lightEstimateTransferFraction;
 
 	for (i = 1; i < g_Vars.roomcount; i++) {
-		uint8_t *ptr = &arg0[i * var8009cae0];
+		uint8_t *ptr = &arg0[i * g_RoomCountStride];
 
 		lightCalcAmbientLighting(i);
 
@@ -797,7 +795,7 @@ void roomResetLights(void)
 {
 	int i;
 
-	var8009cae0 = align4(g_Vars.roomcount);
+	g_RoomCountStride = align4(g_Vars.roomcount);
 	g_LightsPrevTickMode = 0;
 	g_Vars.remakewallhitvtx = 0;
 
@@ -809,7 +807,7 @@ void roomResetLights(void)
 	g_LightVisData = NULL;
 }
 
-void roomSetLightsOn(int roomnum, int enable)
+void lightSetLightsOn(int roomnum, int enable)
 {
 	struct light *light = (struct light *)&g_BgLightsFileData[g_Rooms[roomnum].lightindex * 0x22];
 	int i;
@@ -833,7 +831,7 @@ void roomSetLightsOn(int roomnum, int enable)
 	g_Rooms[roomnum].flags |= ROOMFLAG_LIGHTS_DIRTY;
 }
 
-void roomSetLightOp(int roomnum, int operation, uint8_t br_to, uint8_t br_from, uint8_t duration60)
+void lightSetLightOp(int roomnum, int operation, uint8_t br_to, uint8_t br_from, uint8_t duration60)
 {
 	if (cheatIsActive(CHEAT_PERFECTDARKNESS) == false) {
 		g_Rooms[roomnum].lightop = operation;
@@ -963,7 +961,7 @@ bool lightTickBroken(int roomnum, int lightnum)
 				smokeCreateSimple(&centre, smokerooms, SMOKETYPE_BULLETIMPACT);
 			}
 
-			roomFlashLighting(roomnum, 64, 80);
+			lightFlash(roomnum, 64, 80);
 			psCreate(NULL, NULL, psGetRandomSparkSound(), -1, -1, PSFLAG_0400, 0, PSTYPE_FOOTSTEP, &centre, -1.0f, 0, roomnum, -1.0f, -1.0f, -1.0f);
 			return true;
 		}
@@ -980,7 +978,7 @@ void lightingTick(void)
 {
 	int i;
 
-	roomsTickLighting();
+	lightTick();
 
 	if (g_Vars.remakewallhitvtx) {
 		wallhitsRecolour();
@@ -1052,7 +1050,7 @@ void lightsTickPerfectDarkness(void)
 	}
 }
 
-void roomsTickLighting(void)
+void lightTick(void)
 {
 	int i;
 	int numprocessed = 0;
@@ -1089,7 +1087,7 @@ void roomsTickLighting(void)
 			}
 
 			g_Rooms[i].flags |= ROOMFLAG_LIGHTS_DIRTY;
-			roomSetLightOp(i, LIGHTOP_NONE, 0, 0, 0);
+			lightSetLightOp(i, LIGHTOP_NONE, 0, 0, 0);
 			break;
 		case LIGHTOP_SETRANDOM:
 			if (g_Rooms[i].lightop_timer240 < 0) {
@@ -1116,7 +1114,7 @@ void roomsTickLighting(void)
 					g_Rooms[i].lightop_cur_frac = 0.0f;
 				}
 			} else {
-				roomSetLightOp(i, LIGHTOP_NONE, 0, 0, 0);
+				lightSetLightOp(i, LIGHTOP_NONE, 0, 0, 0);
 			}
 
 			g_Rooms[i].flags |= ROOMFLAG_LIGHTS_DIRTY;
@@ -1329,57 +1327,92 @@ void roomsTickLighting(void)
 	}
 }
 
-void lightsTick(void)
+void lightsMuzzleFlashTick(void)
 {
 	struct hand *hand1 = &g_Vars.currentplayer->hands[0];
 	struct hand *hand2 = &g_Vars.currentplayer->hands[1];
 
-	func0f005bb0();
+	lightUpdateGoggles();
 
 	if (hand1->flashon || hand2->flashon) {
-		roomFlashLighting(g_Vars.currentplayer->prop->rooms[0], 64, 80);
+		lightFlash(g_Vars.currentplayer->prop->rooms[0], 64, 80);
 	}
 }
+
+/*int extractTextureNumFromBatch(Gfx *gdl, Gfx *triCmd) {
+	Gfx *tmpgdl = triCmd;
+
+	while (tmpgdl->bytes[GFX_W0_BYTE(0)] != G_SETTIMG && tmpgdl > gdl) {
+		tmpgdl--;
+	}
+
+	if (tmpgdl == gdl || (tmpgdl->words.w1 & 1)) {
+		return -1;
+	}
+
+	uintptr_t tmp = UNSEGADDR(tmpgdl->words.w1) - 8;
+	return *(int16_t *)(k_ptr_t)(tmp);
+}*/
 
 /**
  * Set a lighting flash in the given room and its neighbours.
  *
  * The room must not have ROOMFLAG_OUTDOORS.
  */
-void roomFlashLighting(int roomnum, int start, int limit)
+void lightFlash(int roomnum, int start, int limit)
 {
-	if (g_LightVisData && !(g_Rooms[roomnum].flags & ROOMFLAG_OUTDOORS ? 1 : 0)) {
-		int value;
-		int sp78 = 0;
-		int neighbournum = 0;
+	/*int texid = -1;
+	bool shouldFlash = true;
+
+	if (!(g_Rooms[roomnum].flags & ROOMFLAG_OUTDOORS) && g_LightVisData) {
+		struct vtxbatch *batch = g_Rooms[roomnum].vtxbatches;
+		int numbatches = g_Rooms[roomnum].numvtxbatches;
+
+		if(batch != NULL)
+		{
+			for (int i = 0; i < numbatches; i++, batch++) {
+				Gfx *gdl = batch->gdl;
+				Gfx *iter = &gdl[batch->gbicmdindex];
+				if(gdl != NULL && iter != NULL)
+				{
+					texid = extractTextureNumFromBatch(gdl, iter);
+				}
+
+				if (texid == 0x42 || texid == 0x43) {
+					shouldFlash = false;
+				}
+			}
+		}
+	}*/
+
+	int value;
+	int sp78 = 0;
+	int neighbournum = 0;
+
+	value = utilDecompressRoomData(g_LightVisData[roomnum].roomvis_compressed, &sp78, &neighbournum);
+
+	while (value != -1) {
+		float increment = value * (1.0f / 255.0f) * start * 5.0f;
+
+		if (start > 0) {
+			if (increment > start) {
+				increment = start;
+			}
+		} else {
+			if (increment < start) {
+				increment = start;
+			}
+		}
+
+		if (!(g_Rooms[neighbournum].flags & ROOMFLAG_OUTDOORS)) {
+			lightFlashLocal(neighbournum, increment, limit);
+		}
 
 		value = utilDecompressRoomData(g_LightVisData[roomnum].roomvis_compressed, &sp78, &neighbournum);
-
-		while (value != -1) {
-			float increment = value * (1.0f / 255.0f) * start * 5.0f;
-
-			if (start > 0) {
-				if (increment > start) {
-					increment = start;
-				}
-			} else {
-				if (increment < start) {
-					increment = start;
-				}
-			}
-
-			// @bug: Should be checking neighbournum flags, not roomnum
-			//if (!(g_Rooms[roomnum].flags & ROOMFLAG_OUTDOORS ? 1 : 0)) {
-			if (!(g_Rooms[neighbournum].flags & ROOMFLAG_OUTDOORS ? 1 : 0)) { // Fix
-				roomFlashLocalLighting(neighbournum, increment, limit);
-			}
-
-			value = utilDecompressRoomData(g_LightVisData[roomnum].roomvis_compressed, &sp78, &neighbournum);
-		}
 	}
 }
 
-void roomFlashLocalLighting(int roomnum, int increment, int limit)
+void lightFlashLocal(int roomnum, int increment, int limit)
 {
 	if (roomnum) {
 		if (g_Rooms[roomnum].flags & ROOMFLAG_ONSCREEN) {
@@ -1406,16 +1439,10 @@ void roomFlashLocalLighting(int roomnum, int increment, int limit)
 	}
 }
 
-void roomHighlight(int roomnum)
+void lightHighlight(int roomnum)
 {
-	int i;
-	int tmpr;
-	int tmpg;
-	int tmpb;
-	int alpha;
-	int red;
-	int green;
-	int blue;
+	int tmpr, tmpg, tmpb;
+	int red, green, blue, alpha;
 	int extra;
 	int numcolours;
 	Col *src;
@@ -1445,8 +1472,7 @@ void roomHighlight(int roomnum)
 			return;
 		}
 
-		for (i = 0; i < numcolours; i++) {
-			// @bug? Why is this looking up vertices using a colour index?
+		for (int i = 0; i < g_Rooms[roomnum].gfxdata->numvertices; i++) {
 			if (g_Rooms[roomnum].gfxdata->vertices[i].flags & 0x01) {
 				dst[i].r = src[i].r;
 				dst[i].g = src[i].g;
@@ -1504,29 +1530,9 @@ void roomHighlight(int roomnum)
 					scenarioHighlightRoom(roomnum, &red, &green, &blue);
 				}
 
-				if (red > 255) {
-					red = 255;
-				}
-
-				if (green > 255) {
-					green = 255;
-				}
-
-				if (blue > 255) {
-					blue = 255;
-				}
-
-				if (red < 0) {
-					red = 0;
-				}
-
-				if (green < 0) {
-					green = 0;
-				}
-
-				if (blue < 0) {
-					blue = 0;
-				}
+				red = utilsClamp(red, 0, 255);
+				green = utilsClamp(green, 0, 255);
+				blue = utilsClamp(blue, 0, 255);
 
 				// Sets room color
 				dst[i].r = red;
@@ -1538,7 +1544,19 @@ void roomHighlight(int roomnum)
 	}
 }
 
-void func0f004c6c(void)
+/**
+ * Initializes portal distance matrices used for lighting
+ *
+ * Allocates and computes:
+ * - g_PortalPositions: 3D positions of portals
+ * - g_PortalIsTranslucent: Portal flags (1 = translucent / relevant)
+ * - g_PortalWorkingDistances: Working matrix of shortest portal-to-portal distances
+ * - g_PortalDistanceMatrix: Final compact matrix storing min(i→j, j→i) distances
+ *
+ * Then calls lightComputeShortestPaths() to perform breadth-first search traversal
+ * and compute the actual distances between portals.
+ */
+void lightInitDistanceMatrices(void)
 {
 	int sp44;
 	int sp40;
@@ -1573,16 +1591,16 @@ void func0f004c6c(void)
 
 	s4 = align16(s4);
 	ptr = mempAlloc(align16(s4), MEMPOOL_STAGE);
-	var80061430 = (void *)ptr;
+	g_PortalDistanceMatrix = (void *)ptr;
 
 	ptr += sp38;
 
 	for (i = 0; i < g_NumPortals; i++) {
 		if (i != 0) {
-			var80061430[i] = (void *)ptr;
+			g_PortalDistanceMatrix[i] = (void *)ptr;
 			ptr += i * 2;
 		} else {
-			var80061430[i] = 0;
+			g_PortalDistanceMatrix[i] = 0;
 		}
 	}
 
@@ -1595,74 +1613,82 @@ void func0f004c6c(void)
 	align16((int)s4);
 
 	ptr = mempGetNextStageAllocation();
-	var8009cad0 = (void *)ptr;
+	g_PortalTraversalQueue = (void *)ptr;
 	ptr += sp44;
 
-	var8009cad8 = (void *)ptr;
+	g_PortalIsTranslucent = (void *)ptr;
 	ptr += sp40;
 
-	var8006142c = (void *)ptr;
+	g_PortalWorkingDistances = (void *)ptr;
 	ptr += sp38;
 
 	backupptr = ptr;
 
 	ptr += g_NumPortals * sp34;
-	var80061428 = (void *)ptr;
+	g_PortalPositions = (void *)ptr;
 	ptr = backupptr;
 
 	s4 = sp38;
 
 	for (i = 0; i < g_NumPortals; i++) {
-		var8006142c[i] = (void *)ptr;
+		g_PortalWorkingDistances[i] = (void *)ptr;
 		ptr += sp34;
 		s4 += sp34;
 
 		for (j = 0; j < g_NumPortals; j++) {
-			var8006142c[i][j] = 0x8009;
+			g_PortalWorkingDistances[i][j] = 0x8009;
 		}
 	}
 
 	for (i = 0; i < g_NumPortals; i++) {
-		var8009cad8[i] = portalGetXluFrac(i) > 0.5f;
+		g_PortalIsTranslucent[i] = portalGetXluFrac(i) > 0.5f;
 
-		portalGetAvgVertexPos(i, &var80061428[i]);
+		portalGetAvgVertexPos(i, &g_PortalPositions[i]);
 	}
 
 	if (g_Vars.stagenum == STAGE_INVESTIGATION) {
-		var8009cad8[0] = 1;
+		g_PortalIsTranslucent[0] = 1;
 	}
 
 	for (i = 0; i < g_NumPortals; i++) {
-		var8006142c[i][i] = 0;
+		g_PortalWorkingDistances[i][i] = 0;
 	}
 
-	func0f00505c();
+	lightComputeShortestPaths();
 
 	for (i = 0; i < g_NumPortals; i++) {
 		for (j = 0; j < i; j++) {
-			uint16_t a = var8006142c[i][j];
-			uint16_t b = var8006142c[j][i];
+			uint16_t a = g_PortalWorkingDistances[i][j];
+			uint16_t b = g_PortalWorkingDistances[j][i];
 
-			var80061430[i][j] = a < b ? a : b;
+			g_PortalDistanceMatrix[i][j] = a < b ? a : b;
 		}
 	}
 }
 
-void func0f00505c(void)
+/**
+ * Build a shortest-path distance table between all portals.
+ * 
+ * This function performs a breadth-first traversal starting from
+ * each portal, computing the shortest cumulative distances (up to
+ * 5800 units) to other portals using Euclidean distance between
+ * portal center points. The resulting distances are stored in
+ * var8006142c[i][j] (distance from portal i to portal j).
+ * 
+ * Likely used for lighting, sound, or AI line-of-sight calculations.
+ */
+void lightComputeShortestPaths(void)
 {
-	int j;
+	int i, j, k, l;
 	int sp78;
-	int i;
-	int k;
 	int portalnum;
 	int portalnum2;
 	int roomnum;
-	int l;
 	uint16_t dist;
 
 	for (i = 0; i < g_NumPortals; i++) {
-		for (j = 0, var8009cad0[0] = i, sp78 = 1; j != sp78; j = (j + 1) & 0x7ff) {
-			portalnum = var8009cad0[j];
+		for (j = 0, g_PortalTraversalQueue[0] = i, sp78 = 1; j != sp78; j = (j + 1) & 0x7ff) {
+			portalnum = g_PortalTraversalQueue[j];
 
 			for (k = 0; k < 2; k++) {
 				if (k != 0) {
@@ -1674,23 +1700,23 @@ void func0f00505c(void)
 				for (l = 0; l < g_Rooms[roomnum].numportals; l++) {
 					portalnum2 = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + l];
 
-					if (portalnum2 != portalnum && var8009cad8[portalnum2] != 0) {
-						if (var8006142c[portalnum][portalnum2] >= 0x8000) {
-							float xdiff = var80061428[portalnum].x - var80061428[portalnum2].x;
-							float ydiff = var80061428[portalnum].y - var80061428[portalnum2].y;
-							float zdiff = var80061428[portalnum].z - var80061428[portalnum2].z;
+					if (portalnum2 != portalnum && g_PortalIsTranslucent[portalnum2] != 0) {
+						if (g_PortalWorkingDistances[portalnum][portalnum2] >= 0x8000) {
+							float xdiff = g_PortalPositions[portalnum].x - g_PortalPositions[portalnum2].x;
+							float ydiff = g_PortalPositions[portalnum].y - g_PortalPositions[portalnum2].y;
+							float zdiff = g_PortalPositions[portalnum].z - g_PortalPositions[portalnum2].z;
 
 							float dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 
-							var8006142c[portalnum][portalnum2] = dist;
-							var8006142c[portalnum2][portalnum] = dist;
+							g_PortalWorkingDistances[portalnum][portalnum2] = dist;
+							g_PortalWorkingDistances[portalnum2][portalnum] = dist;
 						}
 
-						dist = (var8006142c[i][portalnum] + var8006142c[portalnum2][portalnum]);
+						dist = (g_PortalWorkingDistances[i][portalnum] + g_PortalWorkingDistances[portalnum2][portalnum]);
 
-						if (dist <= 5800 && ((i == portalnum) != 0 || dist < var8006142c[i][portalnum2])) {
-							var8006142c[i][portalnum2] = dist;
-							var8009cad0[sp78] = portalnum2;
+						if (dist <= 5800 && ((i == portalnum) != 0 || dist < g_PortalWorkingDistances[i][portalnum2])) {
+							g_PortalWorkingDistances[i][portalnum2] = dist;
+							g_PortalTraversalQueue[sp78] = portalnum2;
 							sp78 = (sp78 + 1) & 0x7ff;
 						}
 					}
@@ -1700,80 +1726,91 @@ void func0f00505c(void)
 	}
 }
 
-float func0f0053d0(int roomnum1, struct coord *pos1, int portalnum1, int roomnum2, struct coord *pos2, int portalnum2, float *arg6)
+/**
+ * Compute the approximate navigable distance between two positions in the level,
+ * optionally constrained by a maximum distance (arg6).
+ *
+ * If the positions are in different rooms/portals, this factors in a cost
+ * for transitioning between the given portals.
+ *
+ * If a shorter valid distance is found, it updates *arg6 (if provided).
+ *
+ * Returns the best (shortest) distance found.
+ */
+float lightCalcDistanceBetweenPoints(int roomnum1, struct coord *pos1, int portalnum1, int roomnum2, struct coord *pos2, int portalnum2, float *maxAllowedDistance)
 {
-	float sp6c;
-	float *sp68;
-	float sp64;
+	float fallbackMaxDistance; // Used when maxDistPtr is NULL - acts as a large fallback ceiling
+	float *maxDistRef; // Pointer to the working max distance value
+	float currentMaxDistance; // Local snapshot of current max distance limit for internal checks
 	float xdiff;
 	float ydiff;
 	float zdiff;
 
-	sp6c = 32767.0f;
-	sp68 = arg6 ? arg6 : &sp6c;
-	sp64 = *sp68;
+	fallbackMaxDistance = 32767.0f;
+	maxDistRef = maxAllowedDistance ? maxAllowedDistance : &fallbackMaxDistance;
+	currentMaxDistance = *maxDistRef;
 
 	xdiff = pos1->x - pos2->x;
 	xdiff = xdiff > 0.0f ? xdiff : -xdiff;
 
-	if (xdiff < sp64) {
+	if (xdiff < currentMaxDistance) {
 		zdiff = pos1->z - pos2->z;
 		zdiff = zdiff > 0.0f ? zdiff : -zdiff;
 
-		if (zdiff < sp64) {
+		if (zdiff < currentMaxDistance) {
 			ydiff = pos1->y - pos2->y;
 			ydiff = ydiff > 0.0f ? ydiff : -ydiff;
 
-			if (ydiff < sp64) {
+			if (ydiff < currentMaxDistance) {
 				float dist = sqrtf(xdiff * xdiff + ydiff * ydiff + zdiff * zdiff);
 
-				if (dist < sp64) {
+				if (dist < currentMaxDistance) {
 					if (roomnum1 == roomnum2 || portalnum1 == portalnum2) {
-						if (dist < *sp68) {
-							*sp68 = dist;
+						if (dist < *maxDistRef) {
+							*maxDistRef = dist;
 						}
 					} else {
-						float sp50 = func0f000920(portalnum1, portalnum2);
+						float sp50 = roomGetUpperAndLowerPortal(portalnum1, portalnum2);
 
-						if (sp50 < sp64) {
+						if (sp50 < currentMaxDistance) {
 							struct coord sp44;
 							float xdiff2;
 							float zdiff2;
 
 							portalGetAvgVertexPos(portalnum1, &sp44);
-							sp64 -= sp50;
+							currentMaxDistance -= sp50;
 
 							xdiff2 = sp44.x - pos1->x;
 							xdiff2 = xdiff2 > 0.0f ? xdiff2 : -xdiff2;
 
-							if (xdiff2 < sp64) {
+							if (xdiff2 < currentMaxDistance) {
 								zdiff2 = sp44.z - pos1->z;
 								zdiff2 = zdiff2 > 0.0f ? zdiff2 : -zdiff2;
 
-								if (zdiff2 < sp64) {
+								if (zdiff2 < currentMaxDistance) {
 									float sp38 = sqrtf(xdiff2 * xdiff2 + zdiff2 * zdiff2);
 
-									if (sp38 < sp64) {
+									if (sp38 < currentMaxDistance) {
 										struct coord sp2c;
 										float xdiff3;
 										float zdiff3;
 
 										portalGetAvgVertexPos(portalnum2, &sp2c);
-										sp64 -= sp38;
+										currentMaxDistance -= sp38;
 
 										xdiff3 = sp2c.x - pos2->x;
 										xdiff3 = xdiff3 > 0.0f ? xdiff3 : -xdiff3;
 
-										if (xdiff3 < sp64) {
+										if (xdiff3 < currentMaxDistance) {
 											zdiff3 = sp2c.z - pos2->z;
 											zdiff3 = zdiff3 > 0.0f ? zdiff3 : -zdiff3;
 
-											if (zdiff3 < sp64) {
+											if (zdiff3 < currentMaxDistance) {
 												float dist3 = sqrtf(xdiff3 * xdiff3 + zdiff3 * zdiff3);
 
-												if (dist3 < sp64) {
-													sp64 -= dist3;
-													*sp68 -= sp64;
+												if (dist3 < currentMaxDistance) {
+													currentMaxDistance -= dist3;
+													*maxDistRef -= currentMaxDistance;
 												}
 											}
 										}
@@ -1787,10 +1824,10 @@ float func0f0053d0(int roomnum1, struct coord *pos1, int portalnum1, int roomnum
 		}
 	}
 
-	return *sp68;
+	return *maxDistRef;
 }
 
-void updateShortestDistanceBetweenRooms(int roomnum1, struct coord *pos1, int roomnum2, struct coord *pos2, int arg4, float *result, int arg6)
+void lightUpdateShortestDistanceBetweenRooms(int roomnum1, struct coord *pos1, int roomnum2, struct coord *pos2, int arg4, float *result, int arg6)
 {
 	float dist;
 
@@ -1839,44 +1876,11 @@ void updateShortestDistanceBetweenRooms(int roomnum1, struct coord *pos1, int ro
 			for (j = 0; j < g_Rooms[roomnum2].numportals; j++) {
 				portalnum2 = g_RoomPortals[g_Rooms[roomnum2].roomportallistoffset + j];
 
-				dist = func0f0053d0(roomnum1, pos1, portalnum1, roomnum2, pos2, portalnum2, result);
+				dist = lightCalcDistanceBetweenPoints(roomnum1, pos1, portalnum1, roomnum2, pos2, portalnum2, result);
 
 				if (dist < *result) {
 					*result = dist;
 				}
-			}
-		}
-	}
-}
-
-void func0f0059fc(int roomnum1, struct coord *pos1, int roomnum2, struct coord *pos2, int arg4, float *result)
-{
-	int portalnum1;
-	int portalnum2;
-	int i;
-	int j;
-	float dist;
-
-	*result = 32767;
-
-	if (roomnum1 == roomnum2) {
-		*result = coordsGetDistance(pos1, pos2);
-		return;
-	}
-
-	for (i = 0; i < g_Rooms[roomnum1].numportals; i++) {
-		portalnum1 = g_RoomPortals[g_Rooms[roomnum1].roomportallistoffset + i];
-		if (1);
-
-		for (j = 0; j < g_Rooms[roomnum2].numportals; j++) {
-			portalnum2 = g_RoomPortals[g_Rooms[roomnum2].roomportallistoffset + j];
-			if (j);
-			if (j);
-
-			dist = func0f0053d0(roomnum1, pos1, portalnum1, roomnum2, pos2, portalnum2, NULL);
-
-			if (dist < *result) {
-				*result = dist;
 			}
 		}
 	}
@@ -1888,7 +1892,7 @@ void func0f0059fc(int roomnum1, struct coord *pos1, int roomnum2, struct coord *
  * - Sets g_IsSwitchingGoggles if equipping or unequipping NV/IR on this frame.
  * - Updates the player's usinggoggles property.
  */
-void func0f005bb0(void)
+void lightUpdateGoggles(void)
 {
 	int brightness = roomGetFinalBrightness(g_Vars.currentplayer->prop->rooms[0]);
 

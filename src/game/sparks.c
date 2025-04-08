@@ -235,21 +235,21 @@ void sparksCreate(int room, struct prop *prop, struct coord *pos, struct coord *
 
 	switch (typenum) {
 	case SPARKTYPE_DEFAULT:
-		roomFlashLighting(group->room, 24, 32);
+		lightFlash(group->room, 24, 32);
 		break;
 	case SPARKTYPE_ENVIRONMENTAL1:
 		if (g_Vars.stagenum != STAGE_CRASHSITE) {
-			roomFlashLighting(group->room, 32, 128);
+			lightFlash(group->room, 32, 128);
 		}
 		break;
 	case SPARKTYPE_ENVIRONMENTAL2:
 		if (g_Vars.stagenum != STAGE_CRASHSITE) {
-			roomFlashLighting(group->room, 64, 128);
+			lightFlash(group->room, 64, 128);
 		}
 		break;
 	case SPARKTYPE_ENVIRONMENTAL3:
 		if (g_Vars.stagenum != STAGE_CRASHSITE) {
-			roomFlashLighting(group->room, 200, 255);
+			lightFlash(group->room, 200, 255);
 		}
 		break;
 	}

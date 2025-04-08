@@ -403,12 +403,12 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 
 			if (format == G_IM_FMT_CI) {
 				uint32_t a3 = lrs + 1;
-				uint32_t t0 = (0x3ff - tex->unk0a) < a3 ? (0x3ff - tex->unk0a) : 0;
+				uint32_t t0 = (0x3ff - tex->texTlutTmemOffset) < a3 ? (0x3ff - tex->texTlutTmemOffset) : 0;
 
 				a3 -= t0;
 
 				gDPLoadSync(gdl++);
-				gDPLoadTLUT06(gdl++, a3, t0, tex->unk0a + a3, t0);
+				gDPLoadTLUT06(gdl++, a3, t0, tex->texTlutTmemOffset + a3, t0);
 				gDPPipeSync(gdl++);
 
 				if (arg5) {
@@ -521,12 +521,12 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 
 			if (format == G_IM_FMT_CI) {
 				uint32_t a2 = lrs + 1;
-				uint32_t a3 = (0x3ff - tex->unk0a) < a2 ? (0x3ff - tex->unk0a) : 0;
+				uint32_t a3 = (0x3ff - tex->texTlutTmemOffset) < a2 ? (0x3ff - tex->texTlutTmemOffset) : 0;
 
 				a2 -= a3;
 
 				gDPLoadSync(gdl++);
-				gDPLoadTLUT06(gdl++, a2, a3, tex->unk0a + a2, a3);
+				gDPLoadTLUT06(gdl++, a2, a3, tex->texTlutTmemOffset + a2, a3);
 				gDPPipeSync(gdl++);
 
 				if (arg5) {

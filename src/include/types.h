@@ -5690,7 +5690,7 @@ struct tex {
 	/*0x04*/ uint8_t *data;
 	/*0x08*/ uint8_t width;
 	/*0x09*/ uint8_t height;
-	/*0x0a*/ uint8_t unk0a;
+	/*0x0a*/ uint8_t texTlutTmemOffset; // Offset into TMEM for TLUT (palette) data
 	/*0x0b*/ uint8_t numlods : 3;
 	/*0x0b*/ uint8_t gbiformat : 3;
 	/*0x0b*/ uint8_t depth : 2;

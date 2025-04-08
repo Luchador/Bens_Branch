@@ -900,7 +900,7 @@ int psCalculateVol(struct coord *pos, float dist1, float dist2, float dist3, Roo
 			camroom = -1;
 		}
 
-		updateShortestDistanceBetweenRooms(camroom, &player->cam_pos, roomnum, pos, 0, &playerdist, s0);
+		lightUpdateShortestDistanceBetweenRooms(camroom, &player->cam_pos, roomnum, pos, 0, &playerdist, s0);
 	}
 
 	if (playerdistptr != NULL) {

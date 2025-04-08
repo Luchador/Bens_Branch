@@ -250,7 +250,7 @@ int texInflateZlib(uint8_t *src, uint8_t *dst, bool hasloddata, int numlods, str
 		if (lod == 0) {
 			pool->rightpos->width = width;
 			pool->rightpos->height = height;
-			pool->rightpos->unk0a = numcolours - 1;
+			pool->rightpos->texTlutTmemOffset = numcolours - 1;
 			pool->rightpos->gbiformat = g_TexFormatGbiMappings[format];
 			pool->rightpos->depth = g_TexFormatDepths[format];
 			pool->rightpos->lutmodeindex = g_TexFormatLutModes[format] >> G_MDSFT_TEXTLUT;
@@ -336,7 +336,7 @@ int texInflateZlib(uint8_t *src, uint8_t *dst, bool hasloddata, int numlods, str
 		dst[totalbytesout + 0] = dst[totalbytesout - 2];
 		dst[totalbytesout + 1] = dst[totalbytesout - 1];
 		totalbytesout += 2;
-		pool->rightpos->unk0a++;
+		pool->rightpos->texTlutTmemOffset++;
 	}
 
 	totalbytesout = (totalbytesout + 7) & ~7;

@@ -1007,7 +1007,7 @@ Gfx *lvRender(Gfx *gdl)
 				gdl = viRenderViewportEdges(gdl);
 				gdl = skyRender(gdl);
 				bgTick();
-				lightsTick();
+				lightsMuzzleFlashTick();
 				propsTickPlayer(islastplayer);
 				scenarioTickChr(NULL);
 				propsSort();

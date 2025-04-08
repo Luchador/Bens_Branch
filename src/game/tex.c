@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdio.h>
 #include "constants.h"
 #include "game/dyntex.h"
 #include "game/tex.h"
@@ -9,6 +10,7 @@
 #include "textures.h"
 #include "types.h"
 #include "platform.h"
+#include "game/debug.h"
 
 #define TXMODE_WRAP   0
 #define TXMODE_CLAMP  1
@@ -506,12 +508,12 @@ Gfx *texWriteLoadToTmemAddr(Gfx *gdl, struct tex *tex, int tmemoffset)
 
 		{
 			int tmp = len;
-			int a2 = (uint32_t)(0x3ff - tex->unk0a) < len ? (uint32_t)(0x3ff - tex->unk0a) : 0;
+			int a2 = (uint32_t)(0x3ff - tex->texTlutTmemOffset) < len ? (uint32_t)(0x3ff - tex->texTlutTmemOffset) : 0;
 
 			tmp -= a2;
 
 			gDPLoadSync(gdl++);
-			gDPLoadTLUT06(gdl++, tmp, a2, tex->unk0a + tmp, a2);
+			gDPLoadTLUT06(gdl++, tmp, a2, tex->texTlutTmemOffset + tmp, a2);
 		}
 	}
 
@@ -616,12 +618,12 @@ Gfx *texWriteLoadToTmemZero(Gfx *gdl, struct tex *tex)
 
 		{
 			int tmp = len;
-			int a2 = (uint32_t)(0x3ff - tex->unk0a) < len ? (uint32_t)(0x3ff - tex->unk0a) : 0;
+			int a2 = (uint32_t)(0x3ff - tex->texTlutTmemOffset) < len ? (uint32_t)(0x3ff - tex->texTlutTmemOffset) : 0;
 
 			tmp -= a2;
 
 			gDPLoadSync(gdl++);
-			gDPLoadTLUT06(gdl++, tmp, a2, tex->unk0a + tmp, a2);
+			gDPLoadTLUT06(gdl++, tmp, a2, tex->texTlutTmemOffset + tmp, a2);
 		}
 	}
 

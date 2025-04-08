@@ -239,7 +239,7 @@ void kohInitProps(void)
 	g_ScenarioData.koh.hillpos.y = cdFindFloorYColourTypeAtPos(&g_ScenarioData.koh.hillpos, &g_ScenarioData.koh.hillrooms[0], 0, 0);
 	g_ScenarioData.koh.movehill = false;
 
-	roomSetLightOp(g_ScenarioData.koh.hillrooms[0], LIGHTOP_HIGHLIGHT, 0, 0, 0);
+	lightSetLightOp(g_ScenarioData.koh.hillrooms[0], LIGHTOP_HIGHLIGHT, 0, 0, 0);
 }
 
 /**
@@ -301,7 +301,7 @@ void kohTick(void)
 				&& g_ScenarioData.koh.colourfracb >= .95f) {
 			// The old hill is now "natural enough" to set it back to full
 			// natural colour and actually choose a new hill.
-			roomSetLightOp(g_ScenarioData.koh.hillrooms[0], LIGHTOP_NONE, 0, 0, 0);
+			lightSetLightOp(g_ScenarioData.koh.hillrooms[0], LIGHTOP_NONE, 0, 0, 0);
 
 			// Choose the new hill. Note that hillcount refers to the number of
 			// hill options, which is always >= 2.
@@ -330,7 +330,7 @@ void kohTick(void)
 
 			g_ScenarioData.koh.hillpos.y = cdFindFloorYColourTypeAtPos(&g_ScenarioData.koh.hillpos, g_ScenarioData.koh.hillrooms, NULL, NULL);
 
-			roomSetLightOp(g_ScenarioData.koh.hillrooms[0], LIGHTOP_HIGHLIGHT, 0, 0, 0);
+			lightSetLightOp(g_ScenarioData.koh.hillrooms[0], LIGHTOP_HIGHLIGHT, 0, 0, 0);
 
 			g_ScenarioData.koh.occupiedteam = -1;
 			g_ScenarioData.koh.elapsed240 = 0;

@@ -420,13 +420,13 @@ static void gfx_generate_cc(struct ColorCombiner* comb, const ColorCombinerKey& 
                     case G_CCMUX_NOISE:
                         val = SHADER_NOISE;
                         break;
+                    case G_CCMUX_ENV_ALPHA:
+                    case G_CCMUX_ENVIRONMENT:
                     case G_CCMUX_PRIMITIVE:
                     case G_CCMUX_PRIMITIVE_ALPHA:
                     case G_CCMUX_PRIM_LOD_FRAC:
                     case G_CCMUX_SHADE:
                     case G_CCMUX_SHADE_ALPHA:
-                    case G_CCMUX_ENVIRONMENT:
-                    case G_CCMUX_ENV_ALPHA:
                     case G_CCMUX_LOD_FRACTION:
                         if (input_number[c[i][0][j]] == 0) {
                             shader_input_mapping[0][next_input_number - 1] = c[i][0][j];
@@ -478,9 +478,9 @@ static void gfx_generate_cc(struct ColorCombiner* comb, const ColorCombinerKey& 
                             break;
                         }
                         [[fallthrough]]; // for G_ACMUX_PRIM_LOD_FRAC
+                    case G_ACMUX_ENVIRONMENT:
                     case G_ACMUX_PRIMITIVE:
                     case G_ACMUX_SHADE:
-                    case G_ACMUX_ENVIRONMENT:
                         if (input_number[c[i][1][j]] == 0) {
                             shader_input_mapping[1][next_input_number - 1] = c[i][1][j];
                             input_number[c[i][1][j]] = next_input_number++;
