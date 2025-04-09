@@ -2186,15 +2186,11 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 		gdl = renderdata.gdl;
 
-		mtx00016760();
-
 		for (i = 0; i < menumodel->bodymodeldef->nummatrices; i++) {
 			Mtxf sp70;
 			mtx4Copy((Mtxf *)((uintptr_t)menumodel->bodymodel.matrices + i * sizeof(Mtxf)), &sp70);
 			mtxF2L(&sp70, &menumodel->bodymodel.matrices[i]);
 		}
-
-		mtx00016784();
 
 		if (modeltype < MENUMODELTYPE_3) {
 			gdl = gfxSetCustomProjection(gdl);

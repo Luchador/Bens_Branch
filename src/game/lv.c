@@ -874,7 +874,6 @@ Gfx *lvRender(Gfx *gdl)
 		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 		viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
 				g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
-		mtxConvertToFixed(1);
 
 		gdl = vi0000b1d0(gdl);
 		gdl = viRenderViewportEdges(gdl);
@@ -889,7 +888,6 @@ Gfx *lvRender(Gfx *gdl)
 		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 		viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
 				g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
-		mtxConvertToFixed(1);
 
 		gdl = vi0000b1a8(gdl);
 		gdl = vi0000b1d0(gdl);
@@ -965,7 +963,6 @@ Gfx *lvRender(Gfx *gdl)
 			viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 			viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
 					g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
-			mtxConvertToFixed(g_Vars.currentplayerstats->scale_bg2gfx);
 			envTick();
 			gdl = viPrepareZbuf(gdl);
 			gdl = vi0000b1d0(gdl);
@@ -994,7 +991,6 @@ Gfx *lvRender(Gfx *gdl)
 			} else if (g_GamePaused) {
 				gdl = viRenderViewportEdges(gdl);
 				gdl = bgScissorToViewport(gdl);
-				mtxConvertToFixed(1);
 
 				if (g_Vars.currentplayer->menuisactive) {
 					gdl = menuRender(gdl);
@@ -1345,13 +1341,10 @@ Gfx *lvRender(Gfx *gdl)
 
 				gdl = skyRenderOverexposure(gdl);
 				gdl = amRender(gdl);
-				mtxConvertToFixed(1);
 
 				if (g_Vars.currentplayer->menuisactive) {
 					gdl = menuRender(gdl);
 				}
-
-				mtxConvertToFixed(g_Vars.currentplayerstats->scale_bg2gfx);
 
 				if (g_Vars.mplayerisrunning) {
 					gdl = mpRenderModalText(gdl);

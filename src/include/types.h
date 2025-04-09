@@ -3084,7 +3084,6 @@ struct stagetableentry {
 	/*0x0e*/ uint16_t setupfileid;
 	/*0x10*/ uint16_t mpsetupfileid;
 	/*0x14*/ float unk14;
-	/*0x18*/ float unk18;
 	/*0x1c*/ float unk1c;
 	/*0x20*/ uint16_t unk20;
 	/*0x22*/ uint8_t unk22;

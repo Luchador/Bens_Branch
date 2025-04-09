@@ -12167,8 +12167,6 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 		if (xlupass) {
 			if (orthogonal) {
 				player0f0c3320(model->matrices, model->definition->nummatrices);
-			} else {
-				mtxConvertToFixedPoint(model->matrices, model->definition->nummatrices);
 			}
 
 			if ((obj->flags3 & (OBJFLAG3_SHOWSHIELD | OBJFLAG3_SHIELDHIT)) && objIsHealthy(obj)) {

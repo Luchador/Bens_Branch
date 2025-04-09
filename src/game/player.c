@@ -4031,7 +4031,7 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
-	mtx00016b58(g_Vars.currentplayer->mtxf0068,
+	mtxBuildLookAtMatrix2(g_Vars.currentplayer->mtxf0068,
 			cam_pos->x, cam_pos->y, cam_pos->z,
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);

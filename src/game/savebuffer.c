@@ -57,7 +57,6 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 	mtx1 = gfxAllocateMatrix();
 	mtx2 = gfxAllocateMatrix();
 
-	mtx00016760();
 	func0f0d475c(&mtx);
 	mtxF2L(&mtx, mtx2);
 	mtx4LoadIdentity(&mtx);
@@ -68,7 +67,6 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 			10, 10000, 1);
 
 	mtxF2L(&mtx, mtx1);
-	mtx00016784();
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx2), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gSPMatrix(gdl++, (uintptr_t)(mtx1), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);

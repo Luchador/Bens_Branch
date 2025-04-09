@@ -2993,10 +2993,6 @@ void chrRenderAttachedObject(struct prop *prop, struct modelrenderdata *renderda
 			chrRenderAttachedObject(child, renderdata, xlupass, chr);
 			child = child->next;
 		}
-
-		if (xlupass) {
-			mtxConvertToFixedPoint(model->matrices, model->definition->nummatrices);
-		}
 	}
 }
 
@@ -3344,8 +3340,6 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 					}
 				}
 			}
-
-			mtxConvertToFixedPoint(model->matrices, model->definition->nummatrices);
 
 			if (USINGDEVICE(DEVICE_IRSCANNER)) {
 				gdl = chrRenderShield(gdl, chr, 0x80);

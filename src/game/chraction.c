@@ -8820,7 +8820,7 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 						spb4 = camGetProjectionMtx((uint8_t *)sp108);
 
 						if (spb4) {
-							mtx00016798(sp108, &spc8);
+							//mtx00016798(sp108, &spc8);
 							mtxApplyAffineTransformInPlace(spb4, &spc8);
 
 							spb8.x = burstrodata->pos.x;
@@ -8842,7 +8842,7 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 							sp6c = camGetProjectionMtx((uint8_t *)spb0);
 
 							if (sp6c) {
-								mtx00016798(spb0, &sp70);
+								//mtx00016798(spb0, &sp70);
 								mtxApplyAffineTransformInPlace(sp6c, &sp70);
 
 								sp114 = 1;
@@ -9337,7 +9337,7 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 						mtxptr1 = modelFindNodeMtx(chr->model, node, 0);
 
 						if (isdifferentmtx) {
-							mtx00016798(mtxptr1, &spc8);
+							//mtx00016798(mtxptr1, &spc8);
 							mtxptr1 = &spc8;
 						}
 
@@ -9381,7 +9381,7 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 					mtxptr2 = modelFindNodeMtx(chr->model, bestnode, 0);
 
 					if (isdifferentmtx) {
-						mtx00016798(mtxptr2, &sp48);
+						//mtx00016798(mtxptr2, &sp48);
 						mtxptr2 = &sp48;
 					}
 

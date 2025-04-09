@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <string.h>
 #include "constants.h"
 #include "game/objectives.h"
 #include "game/mtxutils.h"
@@ -22,8 +23,6 @@
 
 #define	FTOFIX32(x)	(int)((x) * (float)0x00010000)
 #define	FTOFRAC8(x)	((int) MIN(((x) * (128.0f)), 127.0f) & 0xff)
-
-float g_MtxFloatToFixedScale[] = {65536, 65536};
 
 void mtxLoadRandomRotation(Mtxf *mtx)
 {
@@ -62,94 +61,11 @@ void mtxApplyRotation(Mtxf *arg0, Mtxf *arg1, int count)
 	}
 }
 
-// Convert an array of floating-point matrices (Mtxf) into the special fixed-point format required by the N64's graphics microcode
-void mtxConvertToFixedPoint(Mtxf *mtx, int count)
-{
-#ifndef GBI_FLOATS
-	do {
-		uint32_t m00 = (int) (mtx->m[0][0] * g_MtxFloatToFixedScale[0]);
-		uint32_t m01 = (int) (mtx->m[0][1] * g_MtxFloatToFixedScale[0]);
-		uint32_t m02 = (int) (mtx->m[0][2] * g_MtxFloatToFixedScale[0]);
-		uint32_t m03 = (int) (mtx->m[0][3] * g_MtxFloatToFixedScale[1]);
-		uint32_t m10 = (int) (mtx->m[1][0] * g_MtxFloatToFixedScale[0]);
-		uint32_t m11 = (int) (mtx->m[1][1] * g_MtxFloatToFixedScale[0]);
-		uint32_t m12 = (int) (mtx->m[1][2] * g_MtxFloatToFixedScale[0]);
-		uint32_t m13 = (int) (mtx->m[1][3] * g_MtxFloatToFixedScale[1]);
-		uint32_t m20 = (int) (mtx->m[2][0] * g_MtxFloatToFixedScale[0]);
-		uint32_t m21 = (int) (mtx->m[2][1] * g_MtxFloatToFixedScale[0]);
-		uint32_t m22 = (int) (mtx->m[2][2] * g_MtxFloatToFixedScale[0]);
-		uint32_t m23 = (int) (mtx->m[2][3] * g_MtxFloatToFixedScale[1]);
-		uint32_t m30 = (int) (mtx->m[3][0] * g_MtxFloatToFixedScale[0]);
-		uint32_t m31 = (int) (mtx->m[3][1] * g_MtxFloatToFixedScale[0]);
-		uint32_t m32 = (int) (mtx->m[3][2] * g_MtxFloatToFixedScale[0]);
-		uint32_t m33 = (int) (mtx->m[3][3] * g_MtxFloatToFixedScale[1]);
-
-		mtx->l[0][0] = (m00 & 0xffff0000) | m01 >> 16;
-		mtx->l[0][1] = (m02 & 0xffff0000) | m03 >> 16;
-		mtx->l[0][2] = (m10 & 0xffff0000) | m11 >> 16;
-		mtx->l[0][3] = (m12 & 0xffff0000) | m13 >> 16;
-		mtx->l[1][0] = (m20 & 0xffff0000) | m21 >> 16;
-		mtx->l[1][1] = (m22 & 0xffff0000) | m23 >> 16;
-		mtx->l[1][2] = (m30 & 0xffff0000) | m31 >> 16;
-		mtx->l[1][3] = (m32 & 0xffff0000) | m33 >> 16;
-		mtx->l[2][0] = m00 << 16 | (m01 & 0xffff);
-		mtx->l[2][1] = m02 << 16 | (m03 & 0xffff);
-		mtx->l[2][2] = m10 << 16 | (m11 & 0xffff);
-		mtx->l[2][3] = m12 << 16 | (m13 & 0xffff);
-		mtx->l[3][0] = m20 << 16 | (m21 & 0xffff);
-		mtx->l[3][1] = m22 << 16 | (m23 & 0xffff);
-		mtx->l[3][2] = m30 << 16 | (m31 & 0xffff);
-		mtx->l[3][3] = m32 << 16 | (m33 & 0xffff);
-
-		mtx++;
-
-		count--;
-	} while (count);
-#endif
-}
-
 void mtxF2L(Mtxf *src, Mtxf *dst)
 {
-#ifndef GBI_FLOATS
-	uint32_t src00 = (int) (src->m[0][0] * g_MtxFloatToFixedScale[0]);
-	uint32_t src01 = (int) (src->m[0][1] * g_MtxFloatToFixedScale[0]);
-	uint32_t src02 = (int) (src->m[0][2] * g_MtxFloatToFixedScale[0]);
-	uint32_t src03 = (int) (src->m[0][3] * g_MtxFloatToFixedScale[1]);
-	uint32_t src10 = (int) (src->m[1][0] * g_MtxFloatToFixedScale[0]);
-	uint32_t src11 = (int) (src->m[1][1] * g_MtxFloatToFixedScale[0]);
-	uint32_t src12 = (int) (src->m[1][2] * g_MtxFloatToFixedScale[0]);
-	uint32_t src13 = (int) (src->m[1][3] * g_MtxFloatToFixedScale[1]);
-	uint32_t src20 = (int) (src->m[2][0] * g_MtxFloatToFixedScale[0]);
-	uint32_t src21 = (int) (src->m[2][1] * g_MtxFloatToFixedScale[0]);
-	uint32_t src22 = (int) (src->m[2][2] * g_MtxFloatToFixedScale[0]);
-	uint32_t src23 = (int) (src->m[2][3] * g_MtxFloatToFixedScale[1]);
-	uint32_t src30 = (int) (src->m[3][0] * g_MtxFloatToFixedScale[0]);
-	uint32_t src31 = (int) (src->m[3][1] * g_MtxFloatToFixedScale[0]);
-	uint32_t src32 = (int) (src->m[3][2] * g_MtxFloatToFixedScale[0]);
-	uint32_t src33 = (int) (src->m[3][3] * g_MtxFloatToFixedScale[1]);
-
-	dst->l[0][0] = (src00 & 0xffff0000) | src01 >> 16;
-	dst->l[0][1] = (src02 & 0xffff0000) | src03 >> 16;
-	dst->l[0][2] = (src10 & 0xffff0000) | src11 >> 16;
-	dst->l[0][3] = (src12 & 0xffff0000) | src13 >> 16;
-	dst->l[1][0] = (src20 & 0xffff0000) | src21 >> 16;
-	dst->l[1][1] = (src22 & 0xffff0000) | src23 >> 16;
-	dst->l[1][2] = (src30 & 0xffff0000) | src31 >> 16;
-	dst->l[1][3] = (src32 & 0xffff0000) | src33 >> 16;
-
-	dst->l[2][0] = src00 << 16 | (src01 & 0xffff);
-	dst->l[2][1] = src02 << 16 | (src03 & 0xffff);
-	dst->l[2][2] = src10 << 16 | (src11 & 0xffff);
-	dst->l[2][3] = src12 << 16 | (src13 & 0xffff);
-	dst->l[3][0] = src20 << 16 | (src21 & 0xffff);
-	dst->l[3][1] = src22 << 16 | (src23 & 0xffff);
-	dst->l[3][2] = src30 << 16 | (src31 & 0xffff);
-	dst->l[3][3] = src32 << 16 | (src33 & 0xffff);
-#else
 	if (src != dst) {
 		memcpy(dst, src, sizeof(*dst));
 	}
-#endif
 }
 
 void mtxAlignF(float mf[4][4], float a, float x, float y, float z)
@@ -203,28 +119,9 @@ void mtxAlign(Mtx *m, float a, float x, float y, float z)
 
 void mtxF2L2(float mf[4][4], Mtx *m)
 {
-#ifdef GBI_FLOATS
 	if ((Mtx *)mf != m) {
 		memcpy(m, mf, sizeof(*m));
 	}
-#else
-	int	i, j;
-	int	e1, e2;
-	int	*ai, *af;
-
-	ai = (int *) &m->m[0][0];
-	af = (int *) &m->m[2][0];
-
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 2; j++) {
-			e1 = FTOFIX32(mf[i][j * 2]);
-			e2 = FTOFIX32(mf[i][j * 2 + 1]);
-
-			*(ai++) = (e1 & 0xffff0000) | ((e2 >> 16) & 0xffff);
-			*(af++) = ((e1 << 16) & 0xffff0000) | (e2 & 0xffff);
-		}
-	}
-#endif
 }
 
 /*

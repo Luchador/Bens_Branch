@@ -19,7 +19,6 @@ extern int g_SndNumPlaying;
 extern struct audiorussmapping g_AudioRussMappings[];
 extern struct audioconfig g_AudioConfigs[];
 extern bool g_JoyPfsPollMasterEnabled;
-extern float g_MtxFloatToFixedScale[2];
 extern int g_NumGlobalAilists;
 extern int g_NumLvAilists;
 extern bool g_ModelDistanceDisabled;

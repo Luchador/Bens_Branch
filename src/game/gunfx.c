@@ -866,8 +866,6 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 		modelRender(&renderdata, &model);
 
 		*gdlptr = renderdata.gdl;
-
-		mtxConvertToFixedPoint(matrices, modeldef->nummatrices);
 	}
 }
 

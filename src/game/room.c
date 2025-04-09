@@ -142,8 +142,7 @@ int roomTouchMtx(int roomnum)
 	Mtxf mtx;
 
 	if (index == -1
-			|| g_Vars.currentplayer->lastroomforoffset != g_RoomMtxBaseRooms[index]
-			|| g_RoomMtxScales[index] != g_MtxFloatToFixedScale[0]) {
+			|| g_Vars.currentplayer->lastroomforoffset != g_RoomMtxBaseRooms[index]) {
 		// There's no cache for this room or it's invalid.
 		// Unlink the old cache item if any and create a new one.
 		if (index != -1) {
@@ -161,7 +160,6 @@ int roomTouchMtx(int roomnum)
 	}
 
 	g_RoomMtxBaseRooms[index] = g_Vars.currentplayer->lastroomforoffset;
-	g_RoomMtxScales[index] = g_MtxFloatToFixedScale[0];
 
 	roomPopulateMtx(&mtx, roomnum);
 	mtxF2L(&mtx, &g_RoomMtxMatrices[index]);

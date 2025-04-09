@@ -228,22 +228,6 @@ void mtx00016710(float mult, float mtx[4][4])
 	mtx[3][2] *= mult;
 }
 
-void mtxConvertToFixed(float arg0)
-{
-	g_MtxFloatToFixedScale[0] = 65536 * arg0;
-}
-
-void mtx00016760(void)
-{
-	g_Vars.unk000510 = g_MtxFloatToFixedScale[0];
-	g_MtxFloatToFixedScale[0] = 65536;
-}
-
-void mtx00016784(void)
-{
-	g_MtxFloatToFixedScale[0] = g_Vars.unk000510;
-}
-
 /**
  * src is passed as an Mtxf but it's read as words rather than floats.
  * It might be an Mtx rather than Mtxf.
@@ -260,8 +244,8 @@ void mtx00016798(Mtxf *src, Mtxf *dst)
 		uint32_t word1 = srcwords[i + 0];
 		uint32_t word2 = srcwords[i + 8];
 
-		dstfloats[(i << 1) + 0] = (int) ((word1 & 0xffff0000) | (word2 >> 16)) / g_MtxFloatToFixedScale[0];
-		dstfloats[(i << 1) + 1] = (int) ((word1 << 16) | (word2 & 0xffff)) / g_MtxFloatToFixedScale[i & 1];
+		dstfloats[(i << 1) + 0] = (int) ((word1 & 0xffff0000) | (word2 >> 16));
+		dstfloats[(i << 1) + 1] = (int) ((word1 << 16) | (word2 & 0xffff));
 	}
 }
 
@@ -346,7 +330,7 @@ void mtxBuildLookAtMatrix(Mtxf *mtx, float posx, float posy, float posz, float l
 	mtxBuildCameraMatrix(mtx, posx, posy, posz, lookx - posx, looky - posy, lookz - posz, upx, upy, upz);
 }
 
-void mtx00016b58(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
+void mtxBuildLookAtMatrix2(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
 {
 	float a;
 	float b;
@@ -399,28 +383,15 @@ void mtx00016b58(Mtxf *mtx, float posx, float posy, float posz, float lookx, flo
 
 void mtx00016d58(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
 {
-	mtx00016b58(mtx, posx, posy, posz, lookx - posx, looky - posy, lookz - posz, upx, upy, upz);
+	mtxBuildLookAtMatrix2(mtx, posx, posy, posz, lookx - posx, looky - posy, lookz - posz, upx, upy, upz);
 }
 
-uint32_t mtx00016dcc(float arg0, float arg1)
-{
-	float sum = arg0 + arg1;
-	uint16_t result;
-
-	if (sum <= 2) {
-		result = 0xffff;
-	} else {
-		result = 0x20000 / sum;
-
-		if (result <= 0) {
-			result = 1;
-		}
-	}
-
-	return result;
-}
-
-void mtx00016e98(float mtx[4][4], float angle, float x, float y, float z)
+/**
+ * Builds a "look-at"-style rotation matrix that aligns to the given vector (x, y, z),
+ * applying a twist around the vector by the given angle.
+ * Used for aligning muzzle flashes.
+ */
+void mtxBuildFacingMatrix(float mtx[4][4], float angle, float x, float y, float z)
 {
 	float sine;
 	float cosine;

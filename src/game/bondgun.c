@@ -3968,8 +3968,8 @@ void bgunCreateThrownProjectile(int handnum, struct gset *gset)
 
 			// Check within 20 degrees
 			if (radians > 0.34901026f || radians < -0.34901026f) {
-				mtx00016b58(&spf8, 0, 0, 0, gundir.x, gundir.y, gundir.z, 0, 1, 0);
-				mtx00016b58(&spb8, 0, 0, 0, sp140.x, sp140.y, sp140.z, 0, 1, 0);
+				mtxBuildLookAtMatrix2(&spf8, 0, 0, 0, gundir.x, gundir.y, gundir.z, 0, 1, 0);
+				mtxBuildLookAtMatrix2(&spb8, 0, 0, 0, sp140.x, sp140.y, sp140.z, 0, 1, 0);
 
 				quaternion0f097044(&spf8, sp68);
 				quaternion0f097044(&spb8, sp58);
@@ -4210,8 +4210,8 @@ void bgunCreateFiredProjectile(int handnum)
 					radians = acosf(gundir.f[0] * sp1bc.f[0] + gundir.f[1] * sp1bc.f[1] + gundir.f[2] * sp1bc.f[2]);
 
 					if (radians > 0.17450513f || radians < -0.17450513f) {
-						mtx00016b58(&sp174, 0.0f, 0.0f, 0.0f, gundir.x, gundir.y, gundir.z, 0.0f, 1.0f, 0.0f);
-						mtx00016b58(&sp134, 0.0f, 0.0f, 0.0f, sp1bc.x, sp1bc.y, sp1bc.z, 0.0f, 1.0f, 0.0f);
+						mtxBuildLookAtMatrix2(&sp174, 0.0f, 0.0f, 0.0f, gundir.x, gundir.y, gundir.z, 0.0f, 1.0f, 0.0f);
+						mtxBuildLookAtMatrix2(&sp134, 0.0f, 0.0f, 0.0f, sp1bc.x, sp1bc.y, sp1bc.z, 0.0f, 1.0f, 0.0f);
 
 						quaternion0f097044(&sp174, spe4);
 						quaternion0f097044(&sp134, spd4);
@@ -4695,7 +4695,7 @@ void bgunCalculateBotShotSpread(struct coord *arg0, int weaponnum, int funcnum, 
 	sp48.z = -1.0f;
 
 	utilsNormalizeF(&sp48.x, &sp48.y, &sp48.z);
-	mtx00016b58(&mtx, 0.0f, 0.0f, 0.0f, arg0->x, arg0->y, arg0->z, 0.0f, -1.0f, 0.0f);
+	mtxBuildLookAtMatrix2(&mtx, 0.0f, 0.0f, 0.0f, arg0->x, arg0->y, arg0->z, 0.0f, -1.0f, 0.0f);
 	mtx4RotateVec(&mtx, &sp48, arg0);
 }
 
@@ -6588,7 +6588,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 	}
 }
 
-void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *modeldef,
+void bgunMuzzleFlash(struct hand *hand, struct weapon *weapondef, struct modeldef *modeldef,
 		struct weaponfunc *funcdef, int maxburst, uint8_t *allocation, int weaponnum,
 		bool **arg7, int mtxindex, Mtxf *arg9, Mtxf *arg10)
 {
@@ -6662,7 +6662,7 @@ void bgun0f0a4e44(struct hand *hand, struct weapon *weapondef, struct modeldef *
 
 			mtx = (Mtxf *)allocation;
 
-			mtx00016e98(arg10->m, 0, mtx->m[3][0] - hand->aimpos.x, mtx->m[3][1] - hand->aimpos.y, mtx->m[3][2] - hand->aimpos.z);
+			mtxBuildFacingMatrix(arg10->m, 0, mtx->m[3][0] - hand->aimpos.x, mtx->m[3][1] - hand->aimpos.y, mtx->m[3][2] - hand->aimpos.z);
 			mtx4MultMtx4InPlace(arg10, &sp70);
 			mtx00016710(muzzlez, sp70.m);
 			mtx4MultMtx4InPlace(arg9, &sp70);
@@ -7294,7 +7294,7 @@ void bgun0f0a5550(int handnum)
 				hand->muzzlez = -((Mtxf *)((uintptr_t)mtxallocation + sp6c * sizeof(Mtxf)))->m[3][2];
 
 				if (hand->flashon && sp1e0 > 0 && weaponnum != WEAPON_SHOTGUN && g_Vars.lvupdate240 != 0) {
-					bgun0f0a4e44(hand, weapondef, modeldef, funcdef, sp1e0, mtxallocation, weaponnum, sp1e4, sp6c, &sp234, &sp1f4);
+					bgunMuzzleFlash(hand, weapondef, modeldef, funcdef, sp1e0, mtxallocation, weaponnum, sp1e4, sp6c, &sp234, &sp1f4);
 				}
 			} else if (weaponnum == WEAPON_GRENADE
 					|| weaponnum == WEAPON_TIMEDMINE
@@ -7765,15 +7765,12 @@ void bgunRender(Gfx **gdlptr)
 
 			renderdata.zbufferenabled = true;
 
-			mtx00016760();
-
 			// Render rocket launcher's rocket if it's in Jo's hand or in the launcher
 			if (hand->rocket) {
 				struct model *rocketmodel = hand->rocket->base.model; // 98
 
 				if (rocketmodel && rocketmodel->definition) {
 					modelRender(&renderdata, rocketmodel);
-					mtxConvertToFixedPoint(rocketmodel->matrices, rocketmodel->definition->nummatrices);
 
 					if (hand->firedrocket) {
 						hand->rocket = NULL;
@@ -7835,9 +7832,6 @@ void bgunRender(Gfx **gdlptr)
 			if (weaponHasFlag(weaponnum, WEAPONFLAG_DUALFLIP)) {
 				gSPClearGeometryMode(gdl++, G_CULL_BOTH);
 			}
-
-			mtxConvertToFixedPoint(hand->gunmodel.matrices, hand->gunmodel.definition->nummatrices);
-			mtx00016784();
 		}
 	}
 

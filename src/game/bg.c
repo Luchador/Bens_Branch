@@ -1449,10 +1449,8 @@ void bgBuildTables(int stagenum)
 	}
 
 	for (i = 0; i < MAX_PLAYERS; i++) {
-		g_Vars.playerstats[i].scale_bg2gfx = g_Stages[g_StageIndex].unk18;
+		g_Vars.playerstats[i].scale_bg2gfx = 1.0f;
 	}
-
-	mtxConvertToFixed(1);
 
 	if (var800a4920 == 0) {
 		numportals = 0;
@@ -1781,7 +1779,6 @@ void bgBuildTables(int stagenum)
 void bgStop(void)
 {
 	bgUnloadAllRooms();
-	mtxConvertToFixed(1);
 }
 
 float bgGetStageTranslationThing(void)
@@ -1796,8 +1793,7 @@ float bgGetScaleBg2Gfx(void)
 
 void bgSetScaleBg2Gfx(float scale)
 {
-	g_Vars.currentplayerstats->scale_bg2gfx = g_Stages[g_StageIndex].unk18 * scale;
-	mtxConvertToFixed(g_Vars.currentplayerstats->scale_bg2gfx);
+	g_Vars.currentplayerstats->scale_bg2gfx = 1.0f;
 }
 
 /**

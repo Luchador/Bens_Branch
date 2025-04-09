@@ -755,22 +755,7 @@ typedef struct {
 #define GFX_TRI_VTX(i) (2 - i)
 #endif
 
-/*
- * 4x4 matrix, fixed point s15.16 format.
- * First 8 words are integer portion of the 4x4 matrix
- * Last 8 words are the fraction portion of the 4x4 matrix
- */
-#ifdef GBI_FLOATS
-// 4x4 float matrix
-typedef float Mtx_t[4][4];
-#else
-typedef int32_t Mtx_t[4][4];
-#endif
-
-typedef union {
-	Mtx_t         m;
-	long long int force_structure_alignment;
-} Mtx;
+typedef float Mtx[4][4];
 
 /*
  * The viewport structure elements have 2 bits of fraction, necessary
@@ -807,16 +792,6 @@ typedef union {
 #define G_MV_L0       0x86
 #define G_MV_L1       0x88
 #define G_MV_L2       0x8a
-#define G_MV_L3       0x8c
-#define G_MV_L4       0x8e
-#define G_MV_L5       0x90
-#define G_MV_L6       0x92
-#define G_MV_L7       0x94
-#define G_MV_TXTATT   0x96
-#define G_MV_MATRIX_1 0x9e /* NOTE: this is in moveword table */
-#define G_MV_MATRIX_2 0x98
-#define G_MV_MATRIX_3 0x9a
-#define G_MV_MATRIX_4 0x9c
 
 /*
  * MOVEWORD indices

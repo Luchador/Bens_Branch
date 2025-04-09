@@ -9,7 +9,6 @@ void func0f0965e4(float *arg0, float *arg1, float arg2);
 void mtxApplyRotation(Mtxf *arg0, Mtxf *arg1, int count);
 void mtxAlignF(float mf[4][4], float a, float x, float y, float z);
 void mtxAlign(Mtx *m, float a, float x, float y, float z);
-void mtxConvertToFixedPoint(Mtxf *matrices, int count);
 void mtxF2L2(float mf[4][4], Mtx *m);
 void mtxF2L(Mtxf *src, Mtxf *dst);
 void mtx4MultMtx4InPlace(Mtxf *multmtx, Mtxf *subject);
