@@ -1442,11 +1442,11 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);
 
-	mtx4LoadIdentity(&sp110);
+	mtx4LoadIdentityF(&sp110);
 
-	modelmtx = gfxAllocateMatrix();
+	modelmtx = gfxAllocateMatrixF();
 
-	mtxF2L(&sp110, modelmtx);
+	mtx4CopyF(&sp110, modelmtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(modelmtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 

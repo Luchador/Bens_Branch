@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <string.h>
 #include "constants.h"
 #include "../lib/naudio/n_sndp.h"
 #include "game/chraction.h"
@@ -28,22 +29,22 @@
 #include "platform.h"
 
 int16_t g_TCoordOffset; // Animates the textures going around the sphere
-bool firsthalf;
+bool secondhalf;
 struct nbomb g_Nbombs[6];
 
 bool g_NbombsActive = false;
-float sphereradius = 100;
+float g_SphereRadius = 2000.0f;
 
-// Ben's comment: if (firsthalf && vertices[i].t == 0) fixes texture seam when atan2f(src.x, src.z) returns 0
+// Ben's comment: if (secondhalf && vertices[i].t == 0) fixes texture seam when atan2f(src.x, src.z) returns 0
 #define MAKEVERTEX(i, src) \
-	vertices[i].x = src.x * sphereradius; \
-	vertices[i].y = src.y * sphereradius; \
-	vertices[i].z = src.z * sphereradius; \
+	vertices[i].x = src.x * g_SphereRadius; \
+	vertices[i].y = src.y * g_SphereRadius; \
+	vertices[i].z = src.z * g_SphereRadius; \
 	vertices[i].s = src.y * 256.0f * 32.0f; \
 	vertices[i].t = atan2f(src.x, src.z) / M_TAU * 256.0f * 32.0f; \
 	vertices[i].colour = 0; \
 \
-	if (firsthalf && vertices[i].t == 0) { \
+	if (secondhalf && vertices[i].t == 0) { \
 	} \
 \
 	vertices[i].t += g_TCoordOffset; // Ben's comment: scrolls the T coord around the sphere but honestly I can't see much difference when this is commented out
@@ -122,7 +123,7 @@ Gfx *nbombCreateSphere(Gfx *gdl, int depth)
 		{ 0,  -1, 0  },
 	};
 
-	firsthalf = false;
+	secondhalf = false;
 
 	vertices = gfxAllocateVertices(6);
 
@@ -141,7 +142,7 @@ Gfx *nbombCreateSphere(Gfx *gdl, int depth)
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[1], &sp5c[5], &sp5c[0], 1, 5, 0, 6, depth);
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[2], &sp5c[5], &sp5c[1], 2, 5, 1, 6, depth);
 
-	firsthalf = true;
+	secondhalf = true;
 
 	vertices = gfxAllocateVertices(6);
 
@@ -253,17 +254,16 @@ struct sndstate *g_NbombAudioHandle = NULL;
 
 Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 {
-	float divider = 2048;
-	Mtxf *mtx;
-	Mtxf spc8;
-	Mtxf sp88;
-	Mtxf sp48;
-	struct coord sp3c;
+	float rotationDivider = 2048;
+	Mtx *mtx;
+	Mtx mtxLocalToWorld;
+	Mtx mtxRotationScaleMtx;
+	Mtx mtxLocalToClip;
+	struct coord rotationAxis;
 	uint32_t colour;
 	Col *colours;
 
 	mtx = gfxAllocateMatrix();
-	sphereradius = 2000.0f;
 	colour = nbombCalculateAlpha(nbomb);
 
 	colours = gfxAllocateColours(2);
@@ -272,23 +272,23 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 
 	gSPColor(gdl++, (uintptr_t)(colours), 2);
 
-	sp3c.x = 0;
-	sp3c.y = 0;
-	sp3c.z = -100;
+	rotationAxis.x = 0;
+	rotationAxis.y = 0;
+	rotationAxis.z = -100;
 
-	mtx4LoadIdentity(&sp48);
-	mtx4LoadTranslation(&nbomb->pos, &sp48);
+	mtxIdent(&mtxLocalToClip);
+	mtx4LoadTranslation(&nbomb->pos, &mtxLocalToClip);
 
-	sp3c.x = 0;
-	sp3c.y = nbomb->unk14 / divider * M_TAU;
-	sp3c.z = 0;
+	rotationAxis.x = 0;
+	rotationAxis.y = nbomb->rotAmount / rotationDivider * M_TAU;
+	rotationAxis.z = 0;
 
-	mtx4LoadRotation(&sp3c, &sp88);
-	mtxScaleRotationPart(nbomb->radius / 2000.0f, &sp88);
-	mtx4MultMtx4(&sp48, &sp88, &spc8);
+	mtx4LoadRotation(&rotationAxis, &mtxRotationScaleMtx);
+	mtxScaleRotationPart(nbomb->radius / 2000.0f, &mtxRotationScaleMtx);
+	mtx4MultMtx4(&mtxLocalToClip, &mtxRotationScaleMtx, &mtxLocalToWorld);
 
-	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &spc8);
-	mtxF2L(&spc8, mtx);
+	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), (Mtxf*)&mtxLocalToWorld);
+	memcpy(mtx, &mtxLocalToWorld, sizeof(*mtx));
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -405,10 +405,8 @@ void nbombTick(struct nbomb *nbomb)
 		if (nbomb->age240 < TICKS(80)) {
 			nbomb->radius = nbomb->age240 / 80.0f;
 			nbomb->radius = sqrtf(sqrtf(nbomb->radius));
-			nbomb->unk18 = 0;
 		} else {
 			nbomb->radius = sinf((nbomb->age240 - TICKS(80)) * 0.0523333363235f) * 0.05f + 1.0f;
-			nbomb->unk18 = ((nbomb->age240 - TICKS(80)) / 270.0f) * 3.0f;
 		}
 
 		nbomb->radius *= 500.0f;
@@ -421,9 +419,9 @@ void nbombTick(struct nbomb *nbomb)
 			age60 = 40;
 		}
 
-		nbomb->unk14 += increment * age60;
+		nbomb->rotAmount += increment * age60;
 
-		nbomb->unk14 %= 0x800; //0x800 = 2048
+		nbomb->rotAmount %= 0x800; //0x800 = 2048
 
 		if (nbomb->age240 > 370) { // N-Bomb lifespan (6 seconds)
 			nbomb->age240 = -1;
@@ -555,15 +553,13 @@ void nbombCreateStorm(struct coord *pos, struct prop *ownerprop)
 	g_Nbombs[index].age240 = 0;
 	g_Nbombs[index].ownerprop = ownerprop;
 
-	// Newer versions only play audio if the handles are null,
-	// while ntsc-beta clears the handles then plays them unconditionally.
 	if (g_Nbombs[index].audiohandle20 == NULL) {
 		sndStart(var80095200, SFX_LAUNCH_ROCKET, &g_Nbombs[index].audiohandle20, -1, -1, -1, -1, -1);
 
 		if (g_Nbombs[index].audiohandle20) {
 			union audioparam param;
 			param.f32 = 0.4f;
-			audioPostEvent(g_Nbombs[index].audiohandle20, AL_SNDP_PITCH_EVT, param.s32);
+			audioPostEvent(g_Nbombs[index].audiohandle20, AL_SNDP_PITCH_EVT, param.s32); // N-bomb sound is a pitched down rocket launch sound
 		}
 	}
 
@@ -705,7 +701,7 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 	return gdl;
 }
 
-//The gas rendering for Area 51 Escape is here too
+// The gas rendering for Area 51 Escape is here too
 Gfx *gasRender(Gfx *gdl)
 {
 	bool show = false;

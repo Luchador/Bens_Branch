@@ -891,16 +891,16 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 		particledata = weather->particledata[arg2];
 		numtris = 0;
 
-		mtx4LoadIdentity(&worldtoscreenmtx);
-		mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &worldtoscreenmtx);
+		mtx4LoadIdentityF(&worldtoscreenmtx);
+		mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &worldtoscreenmtx);
 
 		worldtoscreenmtx.m[3][0] = 0.0f;
 		worldtoscreenmtx.m[3][1] = 0.0f;
 		worldtoscreenmtx.m[3][2] = 0.0f;
 
-		mtx = gfxAllocateMatrix();
+		mtx = gfxAllocateMatrixF();
 
-		mtxF2L(&worldtoscreenmtx, mtx);
+		mtx4CopyF(&worldtoscreenmtx, mtx);
 
 		gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -1468,16 +1468,16 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 	sp198 = 0;
 
-	mtx4LoadIdentity(&sp1cc);
-	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &sp1cc);
+	mtx4LoadIdentityF(&sp1cc);
+	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &sp1cc);
 
 	sp1cc.m[3][0] = 0.0f;
 	sp1cc.m[3][1] = 0.0f;
 	sp1cc.m[3][2] = 0.0f;
 
-	mtx = gfxAllocateMatrix();
+	mtx = gfxAllocateMatrixF();
 
-	mtxF2L(&sp1cc, mtx);
+	mtx4CopyF(&sp1cc, mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 

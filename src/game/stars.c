@@ -220,8 +220,8 @@ Gfx *starsRender(Gfx *gdl)
 
 	sp154 = cosf(0.017453199252486f * (90.0f - viGetFovY() / videoGetAspect() * 0.5f));
 
-	mtx4LoadIdentity(&mtx);
-	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &mtx);
+	mtx4LoadIdentityF(&mtx);
+	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &mtx);
 
 	mtx.m[3][0] = 0.0f;
 	mtx.m[3][1] = 0.0f;

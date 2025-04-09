@@ -8821,7 +8821,7 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 
 						if (spb4) {
 							//mtx00016798(sp108, &spc8);
-							mtxApplyAffineTransformInPlace(spb4, &spc8);
+							mtxApplyAffineTransformInPlaceF(spb4, &spc8);
 
 							spb8.x = burstrodata->pos.x;
 							spb8.y = burstrodata->pos.y;
@@ -8843,7 +8843,7 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 
 							if (sp6c) {
 								//mtx00016798(spb0, &sp70);
-								mtxApplyAffineTransformInPlace(sp6c, &sp70);
+								mtxApplyAffineTransformInPlaceF(sp6c, &sp70);
 
 								sp114 = 1;
 								sp118.x = sp70.m[3][0];
@@ -9838,10 +9838,10 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 
 							// Calculate and projectile's matrix,
 							// spawn position and speed
-							mtx4LoadIdentity(&identmtx);
+							mtx4LoadIdentityF(&identmtx);
 							mtx4LoadXRotation(rotx, &projectilemtx);
 							mtx4LoadYRotation(roty, &yrotmtx);
-							mtxApplyAffineTransformInPlace(&yrotmtx, &projectilemtx);
+							mtxApplyAffineTransformInPlaceF(&yrotmtx, &projectilemtx);
 
 							sp15c.x = vector.x * sp168;
 							sp15c.y = vector.y * sp168;

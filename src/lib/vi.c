@@ -245,19 +245,19 @@ Gfx *viSetCamNoTranslation(Gfx *gdl)
 	mtxPerspectiveF(projF.m, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar * 2, 1);
 
 	// Copy the current camera matrix and zero its translation part
-	mtx4Copy(camGetWorldToScreenMtxf(), &viewNoTransF);
+	mtx4CopyF(camGetWorldToScreenMtxf(), &viewNoTransF);
 	viewNoTransF.m[3][0] = 0;
 	viewNoTransF.m[3][1] = 0;
 	viewNoTransF.m[3][2] = 0;
 
 	// Multiply projection * view matrix (no translation)
-	mtx4MultMtx4(&projF, &viewNoTransF, &projViewF);
-	projMtx = gfxAllocateMatrix();
+	mtx4MultMtx4F(&projF, &viewNoTransF, &projViewF);
+	projMtx = gfxAllocateMatrixF();
 	mtxF2L2(projViewF.m, projMtx);
 
 	// Load identity modelview matrix
-	mtx4LoadIdentity(&identityF);
-	modelviewMtx = gfxAllocateMatrix();
+	mtx4LoadIdentityF(&identityF);
+	modelviewMtx = gfxAllocateMatrixF();
 	mtxF2L2(identityF.m, modelviewMtx);
 
 	// Set projection matrix
@@ -272,7 +272,7 @@ Gfx *viSetCamNoTranslation(Gfx *gdl)
 Gfx *vi0000aca4(Gfx *gdl, float znear, float zfar)
 {
 	Mtxf tmp;
-	Mtx *mtx = gfxAllocateMatrix();
+	Mtx *mtx = gfxAllocateMatrixF();
 
 	mtxPerspectiveF(tmp.m, g_ViBackData->fovy, g_ViBackData->aspect, znear, zfar, 1);
 	mtxF2L2(tmp.m, mtx);
@@ -292,7 +292,7 @@ Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 
 	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
-	g_CameraPerspectiveMtxF = gfxAllocateMatrix();
+	g_CameraPerspectiveMtxF = gfxAllocateMatrixF();
 	mtxPerspectiveF(g_ActiveProjectionMtx.m, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
 	mtxF2L2(g_ActiveProjectionMtx.m, g_CameraPerspectiveMtxF);
 
@@ -320,7 +320,7 @@ Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 
 	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
-	g_CameraPerspectiveMtxF = gfxAllocateMatrix();
+	g_CameraPerspectiveMtxF = gfxAllocateMatrixF();
 	mtxPerspectiveF(g_ActiveProjectionMtx.m, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
 	mtxF2L2(g_ActiveProjectionMtx.m, g_CameraPerspectiveMtxF);
 
@@ -335,7 +335,7 @@ Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 Gfx *vi0000b0e8(Gfx *gdl, float fovy, float aspect)
 {
 	Mtxf tmp;
-	Mtx *mtx = gfxAllocateMatrix();
+	Mtx *mtx = gfxAllocateMatrixF();
 
 	mtxPerspectiveF(tmp.m, fovy, aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
 	mtxF2L2(tmp.m, mtx);

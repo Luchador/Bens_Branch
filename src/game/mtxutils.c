@@ -32,7 +32,7 @@ void mtxLoadRandomRotation(Mtxf *mtx)
 	coord.y = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
 	coord.z = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
 
-	mtx4LoadRotation(&coord, mtx);
+	mtx4LoadRotationF(&coord, mtx);
 }
 
 void mtxRandomToss(struct coord *coord, Mtxf *mtx)
@@ -57,14 +57,7 @@ void mtxApplyRotation(Mtxf *arg0, Mtxf *arg1, int count)
 	int i;
 
 	for (i = 0; i < count; i++) {
-		mtxApplyAffineTransformInPlace(arg1, arg0);
-	}
-}
-
-void mtxF2L(Mtxf *src, Mtxf *dst)
-{
-	if (src != dst) {
-		memcpy(dst, src, sizeof(*dst));
+		mtxApplyAffineTransformInPlaceF(arg1, arg0);
 	}
 }
 
@@ -109,11 +102,41 @@ void mtxAlignF(float mf[4][4], float a, float x, float y, float z)
 
 void mtxAlign(Mtx *m, float a, float x, float y, float z)
 {
-	float mf[4][4];
+	static float dtor = 3.1415926f / 180.0f;
+	float s, c, h, hinv;
 
-	mtxAlignF(mf, a, x, y, z);
+	utilsNormalizeF(&x, &y, &z);
 
-	mtxF2L2(mf, m);
+	a *= dtor;
+	s = sinf(a);
+	c = cosf(a);
+	h = sqrtf(x * x + z * z);
+
+	mtxIdentF(*m);
+
+	if (h != 0) {
+		hinv = 1 / h;
+
+		(*m)[0][0] = (-z*c - s*y*x) * hinv;
+		(*m)[1][0] = (z*s - c*y*x) * hinv;
+		(*m)[2][0] = -x;
+		(*m)[3][0] = 0;
+
+		(*m)[0][1] = s*h;
+		(*m)[1][1] = c*h;
+		(*m)[2][1] = -y;
+		(*m)[3][1] = 0;
+
+		(*m)[0][2] = (c*x - s*y*z) * hinv;
+		(*m)[1][2] = (-s*x - c*y*z) * hinv;
+		(*m)[2][2] = -z;
+		(*m)[3][2] = 0;
+
+		(*m)[0][3] = 0;
+		(*m)[1][3] = 0;
+		(*m)[2][3] = 0;
+		(*m)[3][3] = 1;
+	}
 }
 
 
@@ -141,14 +164,16 @@ void mtxIdentF(float mf[4][4])
 
 void mtxIdent(Mtx *m)
 {
-	float mf[4][4];
+	int	i, j;
 
-	mtxIdentF(mf);
-
-	mtxF2L2(mf, m);
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 4; j++) {
+			(*m)[i][j] = i == j ? 1 : 0;
+		}
+	}
 }
 
-void mtx4LoadIdentity(Mtxf *mtx)
+void mtx4LoadIdentityF(Mtxf *mtx)
 {
 	mtx->m[0][0] = 1;
 	mtx->m[0][1] = 0;
@@ -173,7 +198,7 @@ void mtx4LoadIdentity(Mtxf *mtx)
 
 void mtx4MultMtx4InPlace(Mtxf *multmtx, Mtxf *subject)
 {
-	mtx4MultMtx4(multmtx, subject, subject);
+	mtx4MultMtx4F(multmtx, subject, subject);
 }
 
 /*
@@ -183,7 +208,7 @@ void mtx4MultMtx4InPlace(Mtxf *multmtx, Mtxf *subject)
  * The operation is column-major, which is typical for graphics applications.
  * This is used in transformations like combining translation, rotation, and scale.
  */
-void mtx4MultMtx4(Mtxf *mtx1, Mtxf *mtx2, Mtxf *dst)
+void mtx4MultMtx4F(Mtxf *mtx1, Mtxf *mtx2, Mtxf *dst)
 {
 	int i;
 	float m00 = mtx2->m[0][0];
@@ -211,27 +236,46 @@ void mtx4MultMtx4(Mtxf *mtx1, Mtxf *mtx2, Mtxf *dst)
 	}
 }
 
+void mtx4MultMtx4(Mtx *mtx1, Mtx *mtx2, Mtx *dst)
+{
+	int i;
+	float m00 = (*mtx2)[0][0];
+	float m01 = (*mtx2)[0][1];
+	float m02 = (*mtx2)[0][2];
+	float m03 = (*mtx2)[0][3];
+	float m10 = (*mtx2)[1][0];
+	float m11 = (*mtx2)[1][1];
+	float m12 = (*mtx2)[1][2];
+	float m13 = (*mtx2)[1][3];
+	float m20 = (*mtx2)[2][0];
+	float m21 = (*mtx2)[2][1];
+	float m22 = (*mtx2)[2][2];
+	float m23 = (*mtx2)[2][3];
+	float m30 = (*mtx2)[3][0];
+	float m31 = (*mtx2)[3][1];
+	float m32 = (*mtx2)[3][2];
+	float m33 = (*mtx2)[3][3];
+
+	for (i = 0; i < 4; i++) {
+		(*dst)[0][i] = (*mtx1)[0][i] * m00 + (*mtx1)[1][i] * m01 + (*mtx1)[2][i] * m02 + (*mtx1)[3][i] * m03;
+		(*dst)[1][i] = (*mtx1)[0][i] * m10 + (*mtx1)[1][i] * m11 + (*mtx1)[2][i] * m12 + (*mtx1)[3][i] * m13;
+		(*dst)[2][i] = (*mtx1)[0][i] * m20 + (*mtx1)[1][i] * m21 + (*mtx1)[2][i] * m22 + (*mtx1)[3][i] * m23;
+		(*dst)[3][i] = (*mtx1)[0][i] * m30 + (*mtx1)[1][i] * m31 + (*mtx1)[2][i] * m32 + (*mtx1)[3][i] * m33;
+	}
+}
+
 /*
 * Scaling Matrix Functions
 */
 
-void mtxScaleF(float mf[4][4], float x, float y, float z)
-{
-	mtxIdentF(mf);
-
-	mf[0][0] = x;
-	mf[1][1] = y;
-	mf[2][2] = z;
-	mf[3][3] = 1;
-}
-
 void mtxScale(Mtx *m, float x, float y, float z)
 {
-	float mf[4][4];
+	mtxIdent(m);
 
-	mtxScaleF(mf, x, y, z);
-
-	mtxF2L2(mf, m);
+	(*m)[0][0] = x;
+	(*m)[1][1] = y;
+	(*m)[2][2] = z;
+	(*m)[3][3] = 1;
 }
 
 void mtxScaleRow0Full(float mult, Mtxf *mtx)
@@ -279,7 +323,7 @@ void mtxScaleRow2Vec(float mult, Mtxf *mtx)
 	mtx->m[2][2] *= mult;
 }
 
-void mtxScaleRotationPart(float mult, Mtxf *mtx)
+void mtxScaleRotationPartF(float mult, Mtxf *mtx)
 {
 	mtx->m[0][0] *= mult;
 	mtx->m[0][1] *= mult;
@@ -295,6 +339,24 @@ void mtxScaleRotationPart(float mult, Mtxf *mtx)
 	mtx->m[2][1] *= mult;
 	mtx->m[2][2] *= mult;
 	mtx->m[2][3] *= mult;
+}
+
+void mtxScaleRotationPart(float mult, Mtx *mtx)
+{
+	(*mtx)[0][0] *= mult;
+	(*mtx)[0][1] *= mult;
+	(*mtx)[0][2] *= mult;
+	(*mtx)[0][3] *= mult;
+
+	(*mtx)[1][0] *= mult;
+	(*mtx)[1][1] *= mult;
+	(*mtx)[1][2] *= mult;
+	(*mtx)[1][3] *= mult;
+
+	(*mtx)[2][0] *= mult;
+	(*mtx)[2][1] *= mult;
+	(*mtx)[2][2] *= mult;
+	(*mtx)[2][3] *= mult;
 }
 
 /*
@@ -383,7 +445,7 @@ void mtx4TransformVec(Mtxf *mtx, struct coord *vec, struct coord *dst)
 	dst->z += mtx->m[3][2];
 }
 
-void mtxApplyAffineTransformInPlace(Mtxf *matrix1, Mtxf *matrix2)
+void mtxApplyAffineTransformInPlaceF(Mtxf *matrix1, Mtxf *matrix2)
 {
 	mtxApplyAffineTransform(matrix1, matrix2, matrix2);
 }
@@ -463,11 +525,24 @@ void mtxFrustumF(float mf[4][4], float l, float r, float b, float t, float n, fl
 
 void mtxFrustum(Mtx *m, float l, float r, float b, float t, float n, float f, float scale)
 {
-	float mf[4][4];
+	int i, j;
 
-	mtxFrustumF(mf, l, r, b, t, n, f, scale);
+	mtxIdent(m);
 
-	mtxF2L2(mf, m);
+	(*m)[0][0] = 2 * n / (r - l);
+	(*m)[1][1] = 2 * n / (t - b);
+	(*m)[2][0] = (r + l) / (r - l);
+	(*m)[2][1] = (t + b) / (t - b);
+	(*m)[2][2] = -(f + n) / (f - n);
+	(*m)[2][3] = -1;
+	(*m)[3][2] = -2 * f * n / (f - n);
+	(*m)[3][3] = 0;
+
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 4; j++) {
+			(*m)[i][j] *= scale;
+		}
+	}
 }
 
 /*
@@ -647,11 +722,15 @@ void mtx3Copy(float src[3][3], float dst[3][3])
 	dst[2][2] = src[2][2];
 }
 
-void mtx4Copy(Mtxf *src, Mtxf *dst)
+void mtx4CopyF(Mtxf *src, Mtxf *dst)
 {
 	*dst = *src;
 }
 
+void mtx4Copy(Mtx *src, Mtx *dst)
+{
+	memcpy(dst, src, sizeof(dst));
+}
 
 void mtx00015f4c(float mult, Mtxf *mtx)
 {

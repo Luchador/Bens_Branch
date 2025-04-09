@@ -1531,7 +1531,7 @@ void creditsTick(void)
 Gfx *creditsDraw(Gfx *gdl)
 {
 	Mtxf sp68;
-	Mtxf *matrix = gfxAllocateMatrix();
+	Mtxf *matrix = gfxAllocateMatrixF();
 
 	static uint32_t scrolltimer240 = 0;
 
@@ -1591,8 +1591,8 @@ Gfx *creditsDraw(Gfx *gdl)
 			gdl = creditsFillFramebuffer(gdl, 0x000000d8);
 		}
 
-		mtx4LoadIdentity(&sp68);
-		mtxF2L(&sp68, matrix);
+		mtx4LoadIdentityF(&sp68);
+		mtx4CopyF(&sp68, matrix);
 		camSetWorldToScreenMtxf(&sp68);
 
 		gSPMatrix(gdl++, (uintptr_t)(matrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

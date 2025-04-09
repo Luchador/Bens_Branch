@@ -1489,7 +1489,7 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 			return;
 		}
 
-		mtxApplyAffineTransformInPlace(camGetProjectionMtxF(), mtx);
+		mtxApplyAffineTransformInPlaceF(camGetProjectionMtxF(), mtx);
 
 		sp138.x = mtx->m[3][0];
 		sp138.y = mtx->m[3][1];
@@ -1514,9 +1514,9 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 		}
 
 		mtx4LoadYRotation(gunrot, &spb8);
-		mtxApplyAffineTransformInPlace(&spb8, mtx);
+		mtxApplyAffineTransformInPlaceF(&spb8, mtx);
 		mtx4LoadXRotation(gunrotx, &spf8);
-		mtxApplyAffineTransformInPlace(&spf8, mtx);
+		mtxApplyAffineTransformInPlaceF(&spf8, mtx);
 
 		gunrot = gunroty + theta;
 
@@ -1525,17 +1525,17 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 		}
 
 		mtx4LoadYRotation(gunrot, &spb8);
-		mtxApplyAffineTransformInPlace(&spb8, mtx);
+		mtxApplyAffineTransformInPlaceF(&spb8, mtx);
 
 		if (scale != 1.0f) {
-			mtxScaleRotationPart(scale, mtx);
+			mtxScaleRotationPartF(scale, mtx);
 		}
 
 		mtx->m[3][0] = sp138.x;
 		mtx->m[3][1] = sp138.y;
 		mtx->m[3][2] = sp138.z;
 
-		mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), mtx);
+		mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), mtx);
 	} else {
 		if (g_CurModelChr->model->definition->skel == &g_SkelChr) {
 			lshoulderjoint = 2;
@@ -1698,7 +1698,7 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 					yrot += M_TAU;
 				}
 
-				mtxApplyAffineTransformInPlace(camGetProjectionMtxF(), mtx);
+				mtxApplyAffineTransformInPlaceF(camGetProjectionMtxF(), mtx);
 
 				sp70.x = mtx->m[3][0];
 				sp70.y = mtx->m[3][1];
@@ -1716,34 +1716,34 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 					}
 
 					mtx4LoadYRotation(yrot, &tmpmtx);
-					mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
+					mtxApplyAffineTransformInPlaceF(&tmpmtx, mtx);
 
 					if (xrot != 0.0f) {
 						mtx4LoadXRotation(xrot, &tmpmtx);
-						mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
+						mtxApplyAffineTransformInPlaceF(&tmpmtx, mtx);
 					}
 
 					if (zrot != 0.0f) {
 						mtx4LoadZRotation(zrot, &tmpmtx);
-						mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
+						mtxApplyAffineTransformInPlaceF(&tmpmtx, mtx);
 					}
 
 					mtx4LoadYRotation(aimangle, &tmpmtx);
-					mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
+					mtxApplyAffineTransformInPlaceF(&tmpmtx, mtx);
 				} else {
 					mtx4LoadYRotation(yrot, &tmpmtx);
-					mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
+					mtxApplyAffineTransformInPlaceF(&tmpmtx, mtx);
 				}
 
 				if (scale != 1.0f) {
-					mtxScaleRotationPart(scale, mtx);
+					mtxScaleRotationPartF(scale, mtx);
 				}
 
 				mtx->m[3][0] = sp70.x;
 				mtx->m[3][1] = sp70.y;
 				mtx->m[3][2] = sp70.z;
 
-				mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), mtx);
+				mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), mtx);
 			}
 		}
 	}
@@ -2491,7 +2491,7 @@ int chrTick(struct prop *prop)
 			sp190.y = 0.0f;
 			sp190.z = cosf(angle) * 19;
 
-			mtx4LoadTranslation(&sp190, &sp1a8);
+			mtx4LoadTranslationF(&sp190, &sp1a8);
 			mtx4MultMtx4InPlace(camGetWorldToScreenMtxf(), &sp1a8);
 			sp210.unk00 = &sp1a8;
 		} else if (prop->type == PROPTYPE_PLAYER) {
@@ -2507,7 +2507,7 @@ int chrTick(struct prop *prop)
 				sp17c.y = fabsf(bike->w) * 200 + 25;
 				sp17c.z = sinf(-sp178) * sp130;
 
-				mtx4LoadTranslation(&sp17c, &sp1a8);
+				mtx4LoadTranslationF(&sp17c, &sp1a8);
 				mtx4MultMtx4InPlace(camGetWorldToScreenMtxf(), &sp1a8);
 				sp210.unk00 = &sp1a8;
 			} else {

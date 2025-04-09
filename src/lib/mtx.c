@@ -153,7 +153,7 @@ void mtx4LoadZRotation(float angle, Mtxf *mtx)
 	mtx->m[3][3] = 1;
 }
 
-void mtx4LoadRotation(struct coord *src, Mtxf *dest)
+void mtx4LoadRotationF(struct coord *src, Mtxf *dest)
 {
 	float xcos = cosf(src->x);
 	float xsin = sinf(src->x);
@@ -187,6 +187,40 @@ void mtx4LoadRotation(struct coord *src, Mtxf *dest)
 	dest->m[3][3] = 1;
 }
 
+void mtx4LoadRotation(struct coord *src, Mtx *dest)
+{
+	float xcos = cosf(src->x);
+	float xsin = sinf(src->x);
+	float ycos = cosf(src->y);
+	float ysin = sinf(src->y);
+	float zcos = cosf(src->z);
+	float zsin = sinf(src->z);
+	float a = xsin * zsin;
+	float b = xcos * zsin;
+	float c = xsin * zcos;
+	float d = xcos * zcos;
+
+	(*dest)[0][0] = ycos * zcos;
+	(*dest)[0][1] = ycos * zsin;
+	(*dest)[0][2] = -ysin;
+	(*dest)[0][3] = 0;
+
+	(*dest)[1][0] = c * ysin - xcos * zsin;
+	(*dest)[1][1] = a * ysin + xcos * zcos;
+	(*dest)[1][2] = xsin * ycos;
+	(*dest)[1][3] = 0;
+
+	(*dest)[2][0] = d * ysin + xsin * zsin;
+	(*dest)[2][1] = b * ysin - xsin * zcos;
+	(*dest)[2][2] = xcos * ycos;
+	(*dest)[2][3] = 0;
+
+	(*dest)[3][0] = 0;
+	(*dest)[3][1] = 0;
+	(*dest)[3][2] = 0;
+	(*dest)[3][3] = 1;
+}
+
 #define EPSILON 0.0000019073486f
 
 void mtx4GetRotation(float mtx[4][4], struct coord *dst)
@@ -210,14 +244,20 @@ void mtx4GetRotation(float mtx[4][4], struct coord *dst)
 
 void mtx4LoadRotationAndTranslation(struct coord *pos, struct coord *rot, Mtxf *mtx)
 {
-	mtx4LoadRotation(rot, mtx);
+	mtx4LoadRotationF(rot, mtx);
 	mtx4SetTranslation(pos, mtx);
 }
 
-void mtx4LoadTranslation(struct coord *pos, Mtxf *mtx)
+void mtx4LoadTranslationF(struct coord *pos, Mtxf *mtx)
 {
-	mtx4LoadIdentity(mtx);
+	mtx4LoadIdentityF(mtx);
 	mtx4SetTranslation(pos, mtx);
+}
+
+void mtx4LoadTranslation(struct coord *pos, Mtx *mtx)
+{
+	mtxIdent(mtx);
+	mtx4SetTranslation(pos, (Mtxf*)mtx);
 }
 
 void mtx00016710(float mult, float mtx[4][4])
@@ -226,42 +266,6 @@ void mtx00016710(float mult, float mtx[4][4])
 	mtx[1][2] *= mult;
 	mtx[2][2] *= mult;
 	mtx[3][2] *= mult;
-}
-
-/**
- * src is passed as an Mtxf but it's read as words rather than floats.
- * It might be an Mtx rather than Mtxf.
- *
- * @TODO: Investigate
- */
-void mtx00016798(Mtxf *src, Mtxf *dst)
-{
-	uint32_t *srcwords = (uint32_t *) src;
-	float *dstfloats = (float *) dst;
-	int i;
-
-	for (i = 0; i < 8; i++) {
-		uint32_t word1 = srcwords[i + 0];
-		uint32_t word2 = srcwords[i + 8];
-
-		dstfloats[(i << 1) + 0] = (int) ((word1 & 0xffff0000) | (word2 >> 16));
-		dstfloats[(i << 1) + 1] = (int) ((word1 << 16) | (word2 & 0xffff));
-	}
-}
-
-void mtx00016820(Mtx *src, Mtx *dst)
-{
-	uint32_t *srcwords = (uint32_t *) src;
-	uint32_t *dstwords = (uint32_t *) dst;
-	int i;
-
-	for (i = 0; i < 8; i++) {
-		uint32_t word1 = srcwords[i + 0];
-		uint32_t word2 = srcwords[i + 8];
-
-		dstwords[(i << 1) + 0] = (word1 & 0xffff0000) | (word2 >> 16);
-		dstwords[(i << 1) + 1] = (word1 << 16) | (word2 & 0xffff);
-	}
 }
 
 /**
@@ -434,7 +438,7 @@ void mtxBuildFacingMatrix(float mtx[4][4], float angle, float x, float y, float 
 		return;
 	}
 
-	mtx4LoadIdentity((Mtxf *)mtx);
+	mtx4LoadIdentityF((Mtxf *)mtx);
 }
 
 void mtx4Align(float mtx[4][4], float angle, float x, float y, float z)

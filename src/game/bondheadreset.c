@@ -100,7 +100,7 @@ void bheadReset(void)
 		modelSetAnimation(&g_Vars.currentplayer->model, ANIM_TWO_GUN_HOLD, 0, 0, 0.5f, 0);
 
 		modelUpdateInfo(&g_Vars.currentplayer->model);
-		mtx4LoadIdentity(&sp48);
+		mtx4LoadIdentityF(&sp48);
 		renderdata.unk00 = &sp48;
 		renderdata.unk10 = g_Vars.currentplayer->bondheadmatrices;
 		modelSetMatricesWithAnim(&renderdata, &g_Vars.currentplayer->model);

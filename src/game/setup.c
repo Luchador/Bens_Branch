@@ -581,7 +581,7 @@ void setupCreateObject(struct defaultobj *obj, int cmdindex)
 			}
 
 			modelSetScale(obj->model, obj->model->scale * scale);
-			mtxScaleRotationPart(obj->model->scale, &mtx);
+			mtxScaleRotationPartF(obj->model->scale, &mtx);
 
 			if (obj->flags2 & OBJFLAG2_DONTPAUSE) {
 				prop2->flags |= PROPFLAG_DONTPAUSE;
@@ -802,7 +802,7 @@ void setupCreateCctv(struct cctvobj *cctv, int cmdindex)
 		}
 
 		mtx00016d58(&cctv->camrotm, 0.0f, 0.0f, 0.0f, xdiff, ydiff, zdiff, 0.0f, 1.0f, 0.0f);
-		mtxScaleRotationPart(obj->model->scale, &cctv->camrotm);
+		mtxScaleRotationPartF(obj->model->scale, &cctv->camrotm);
 
 		cctv->toleft = 0;
 		cctv->yleft = *(int *)&cctv->yleft * M_TAU / 65536.0f;
@@ -920,14 +920,14 @@ void setupCreateSingleMonitor(struct singlemonitorobj *monitor, int cmdindex)
 
 			propReparent(prop, owner->prop);
 			mtx4LoadXRotation(0.3664608001709f, &sp64);
-			mtxScaleRotationPart(monitor->base.model->scale / owner->model->scale, &sp64);
+			mtxScaleRotationPartF(monitor->base.model->scale / owner->model->scale, &sp64);
 			modelGetRootPosition(monitor->base.model, &spa4);
 
 			spa4.x = -spa4.x;
 			spa4.y = -spa4.y;
 			spa4.z = -spa4.z;
 
-			mtx4LoadTranslation(&spa4, &sp24);
+			mtx4LoadTranslationF(&spa4, &sp24);
 			mtxApplyAffineTransform(&sp64, &sp24, &monitor->base.embedment->matrix);
 		}
 	} else {

@@ -1030,7 +1030,7 @@ void projectileReset(struct projectile *projectile)
 	projectile->unk018 = 0;
 	projectile->unk01c = 0;
 
-	mtx4LoadIdentity(&projectile->mtx);
+	mtx4LoadIdentityF(&projectile->mtx);
 
 	projectile->unk060 = 1;
 	projectile->ownerprop = NULL;
@@ -1949,7 +1949,7 @@ void objCreateOneDebris(struct defaultobj *obj, int partindex, struct prop *prop
 				rot.y = RANDOMFRAC() * 0.04907957f - 0.024539785f;
 				rot.z = RANDOMFRAC() * 0.04907957f - 0.024539785f;
 
-				mtx4LoadRotation(&rot, &projectile->mtx);
+				mtx4LoadRotationF(&rot, &projectile->mtx);
 			}
 
 			debris->model->scale = obj->model->scale;
@@ -2199,13 +2199,13 @@ void func0f06a730(struct defaultobj *obj, struct coord *arg1, Mtxf *mtx, RoomNum
 		pos2.y = centre->y - sp70.m[1][1] * max;
 		pos2.z = centre->z - sp70.m[1][2] * max;
 	} else if (obj->flags & OBJFLAG_00000008) {
-		mtx4Copy(mtx, &sp70);
+		mtx4CopyF(mtx, &sp70);
 
 		pos2.x = centre->x - sp70.m[1][0] * min;
 		pos2.y = centre->y - sp70.m[1][1] * min;
 		pos2.z = centre->z - sp70.m[1][2] * min;
 	} else {
-		mtx4Copy(mtx, &sp70);
+		mtx4CopyF(mtx, &sp70);
 
 		row = 0;
 		isnegative = false;
@@ -3608,10 +3608,10 @@ void projectileFall(struct defaultobj *obj, float arg1[3][3])
 
 		mtx3ToMtx4(obj->realrot, &sp148);
 		mtx4GetRotation(sp148.m, &sp188);
-		mtx4LoadRotation(&sp188, &sp108);
+		mtx4LoadRotationF(&sp188, &sp108);
 		quaternionEulerToQuat(&sp188, projectile->unk068);
 		mtx4LoadRotationFrom(sp108.m, spc8.m);
-		mtx4MultMtx4(&spc8, &sp148, &sp88);
+		mtx4MultMtx4F(&spc8, &sp148, &sp88);
 
 		projectile->unk0b8[0] = sqrtf(sp88.m[0][0] * sp88.m[0][0] + sp88.m[0][1] * sp88.m[0][1] + sp88.m[0][2] * sp88.m[0][2]);
 		projectile->unk0b8[1] = sqrtf(sp88.m[1][0] * sp88.m[1][0] + sp88.m[1][1] * sp88.m[1][1] + sp88.m[1][2] * sp88.m[1][2]);
@@ -3897,7 +3897,7 @@ void func0f06e9cc(struct coord *arg0, Mtxf *arg1)
 	mtx4LoadYRotation(-1.5705463f + spf4, &sp70);
 	mtx4LoadXRotation(-1.5705463f - spf0, &sp30);
 
-	mtx4MultMtx4(&sp70, &sp30, arg1);
+	mtx4MultMtx4F(&sp70, &sp30, arg1);
 }
 
 void objLand2(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
@@ -3910,7 +3910,7 @@ void objLand2(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
 	RoomNum newrooms[8];
 
 	func0f06e9cc(arg2, &sp40);
-	mtxScaleRotationPart(obj->model->scale, &sp40);
+	mtxScaleRotationPartF(obj->model->scale, &sp40);
 
 	newpos.x = arg1->x - sp40.m[1][0] * ymin;
 	newpos.y = arg1->y - sp40.m[1][1] * ymin;
@@ -3977,8 +3977,8 @@ void knifeLand(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
 
 	func0f06e9cc(&sp1c, &sp90);
 	mtx4LoadXRotation(-1.5705463f, &sp50);
-	mtx4MultMtx4(&sp90, &sp50, &spd0);
-	mtxScaleRotationPart(obj->model->scale, &spd0);
+	mtx4MultMtx4F(&sp90, &sp50, &spd0);
+	mtxScaleRotationPartF(obj->model->scale, &spd0);
 
 	newpos.x = arg1->x - zero;
 	newpos.y = arg1->y - zero;
@@ -4021,7 +4021,7 @@ bool objEmbed(struct prop *prop, struct prop *parent, struct model *model, struc
 			sp28.y = -sp28.y;
 			sp28.z = -sp28.z;
 
-			mtx4LoadTranslation(&sp28, &sp74);
+			mtx4LoadTranslationF(&sp28, &sp74);
 			mtx3ToMtx4(obj->realrot, &sp34);
 			mtx4SetTranslation(&prop->pos, &sp34);
 			mtxApplyAffineTransform(&sp34, &sp74, &sp134);
@@ -4249,7 +4249,7 @@ void weaponTick(struct prop *prop)
 						projectile->speed.y = direction.y;
 						projectile->speed.z = direction.z;
 
-						mtx4LoadIdentity(&projectile->mtx);
+						mtx4LoadIdentityF(&projectile->mtx);
 
 						projectile->obj = (struct defaultobj *)weapon;
 						projectile->unk0d8 = g_Vars.lvframenum;
@@ -4512,7 +4512,7 @@ void weaponTick(struct prop *prop)
 
 			if (obj->embedment) {
 				if (prop->parent && prop->parent->type != PROPTYPE_CHR) {
-					mtx4Copy(&obj->embedment->matrix, &spf8);
+					mtx4CopyF(&obj->embedment->matrix, &spf8);
 
 					spf8.m[3][0] = spf8.m[3][1] = spf8.m[3][2] = 0.0f;
 					spf8.m[0][3] = spf8.m[1][3] = spf8.m[2][3] = 0.0f;
@@ -4520,7 +4520,7 @@ void weaponTick(struct prop *prop)
 					sp6c.f[0] = sp60.f[0] = sp6c.f[1] = sp60.f[1] = 0.0f;
 					sp6c.f[2] = sp60.f[2] = objGetLocalZMax(bbox);
 
-					mtx4MultMtx4(&spf8, &spb8, &sp78);
+					mtx4MultMtx4F(&spf8, &spb8, &sp78);
 					mtx4RotateVecInPlace(&spf8, &sp6c);
 					mtx4RotateVecInPlace(&sp78, &sp60);
 
@@ -4528,14 +4528,14 @@ void weaponTick(struct prop *prop)
 					sp78.m[3][1] = obj->embedment->matrix.m[3][1] - (sp60.f[1] - sp6c.f[1]);
 					sp78.m[3][2] = obj->embedment->matrix.m[3][2] - (sp60.f[2] - sp6c.f[2]);
 
-					mtx4Copy(&sp78, &obj->embedment->matrix);
+					mtx4CopyF(&sp78, &obj->embedment->matrix);
 				}
 			} else {
 				sp6c.f[0] = sp60.f[0] = sp6c.f[1] = sp60.f[1] = 0.0f;
 				sp6c.f[2] = sp60.f[2] = objGetLocalZMax(bbox);
 
 				mtx3ToMtx4(obj->realrot, &spf8);
-				mtx4MultMtx4(&spf8, &spb8, &sp78);
+				mtx4MultMtx4F(&spf8, &spb8, &sp78);
 				mtx4ToMtx3(&sp78, obj->realrot);
 
 				mtx4RotateVecInPlace(&spf8, &sp6c);
@@ -5303,10 +5303,10 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 	}
 
 	mtx4LoadXRotation(xrot, &sp108);
-	mtxApplyAffineTransformInPlace(&sp108, &sp148);
+	mtxApplyAffineTransformInPlaceF(&sp108, &sp148);
 	mtx4LoadYRotation(hov->yrot, &sp108);
-	mtxApplyAffineTransformInPlace(&sp108, &sp148);
-	mtxScaleRotationPart(obj->model->scale, &sp148);
+	mtxApplyAffineTransformInPlaceF(&sp108, &sp148);
+	mtxScaleRotationPartF(obj->model->scale, &sp148);
 
 	if (obj->type == OBJTYPE_HOVERBIKE) {
 		struct hoverbikeobj *bike = (struct hoverbikeobj *) obj;
@@ -5315,13 +5315,13 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 		if (bike->exreal != 0.0f) {
 			mtx4LoadXRotation(bike->exreal, &sp108);
 			mtxApplyAffineTransform(&sp148, &sp108, &spc8);
-			mtx4Copy(&spc8, &sp148);
+			mtx4CopyF(&spc8, &sp148);
 		}
 
 		if (ezreal != 0.0f) {
 			mtx4LoadZRotation(ezreal, &sp108);
 			mtxApplyAffineTransform(&sp148, &sp108, &spc8);
-			mtx4Copy(&spc8, &sp148);
+			mtx4CopyF(&spc8, &sp148);
 		}
 	}
 
@@ -5390,7 +5390,7 @@ int func0f072144(struct defaultobj *obj, struct coord *arg1, float arg2, bool ar
 		}
 
 		mtx4LoadYRotation(yrot, &spa4);
-		mtxScaleRotationPart(obj->model->scale, &spa4);
+		mtxScaleRotationPartF(obj->model->scale, &spa4);
 		mtx4ToMtx3(&spa4, sp460);
 	} else {
 		yrot = 0.0f;
@@ -5922,8 +5922,8 @@ bool rocketTickFbw(struct weaponobj *rocket)
 
 		mtx4LoadXRotation(M_TAU - projectile->unk014, &sp118);
 		mtx4LoadYRotation(projectile->unk018, &spd8);
-		mtx4MultMtx4(&spd8, &sp118, &sp98);
-		mtxScaleRotationPart(rocket->base.model->scale, &sp98);
+		mtx4MultMtx4F(&spd8, &sp118, &sp98);
+		mtxScaleRotationPartF(rocket->base.model->scale, &sp98);
 		mtx4ToMtx3(&sp98, rocket->base.realrot);
 	}
 
@@ -6509,7 +6509,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 				mtx3ToMtx4(obj->realrot, &sp484);
 				mtx4SetTranslation(&prop->pos, &sp484);
 				mtx000172f0(sp504.m, sp4c4.m);
-				mtx4MultMtx4(&sp484, &sp4c4, &sp544);
+				mtx4MultMtx4F(&sp484, &sp4c4, &sp544);
 				platformDisplaceProps2(prop, &sp544);
 				result = true;
 			} else if (projectile->flags & PROJECTILEFLAG_AIRBORNE) {
@@ -6580,7 +6580,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 						struct coord sp290;
 						float sp28c;
 
-						mtx4LoadIdentity(&mtx);
+						mtx4LoadIdentityF(&mtx);
 
 						mtx.m[0][0] = obj->realrot[0][0] / sp29c;
 						mtx.m[0][1] = obj->realrot[0][1] / sp29c;
@@ -7550,7 +7550,7 @@ void doorInitMatrices(struct prop *prop)
 	Mtxf *matrices = model->matrices;
 
 	func0f08c424(door, matrices);
-	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), matrices);
+	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), matrices);
 
 	if (model->definition->skel == &g_Skel11) {
 		union modelrodata *rodata;
@@ -8140,7 +8140,7 @@ void cctvInitMatrices(struct prop *prop, Mtxf *mtx)
 	}
 
 	mtx4LoadYRotation(yrot, &sp24);
-	mtx4MultMtx4(&sp24, &cctv->camrotm, &matrices[1]);
+	mtx4MultMtx4F(&sp24, &cctv->camrotm, &matrices[1]);
 
 	sp64.x = rodata->position.pos.x;
 	sp64.y = rodata->position.pos.y;
@@ -8148,7 +8148,7 @@ void cctvInitMatrices(struct prop *prop, Mtxf *mtx)
 
 	mtx4TransformVecInPlace(mtx, &sp64);
 	mtx4SetTranslation(&sp64, &matrices[1]);
-	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &matrices[1]);
+	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &matrices[1]);
 }
 
 void fanTick(struct prop *prop)
@@ -8709,21 +8709,21 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 	mtx4TransformVecInPlace(mtx, &sp4c);
 	mtx4LoadYRotation(yrot, &matrices[1]);
 	mtx4SetTranslation(&sp4c, &matrices[1]);
-	mtxScaleRotationPart(autogun->base.model->scale, &matrices[1]);
-	mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &matrices[1]);
+	mtxScaleRotationPartF(autogun->base.model->scale, &matrices[1]);
+	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &matrices[1]);
 
 	node2 = modelGetPart(model->definition, MODELPART_AUTOGUN_0002);
 	rodata = node2->rodata;
 	mtx4LoadZRotation(xrot, &matrices[2]);
 	mtx4SetTranslation(&rodata->position.pos, &matrices[2]);
-	mtxApplyAffineTransformInPlace(&matrices[1], &matrices[2]);
+	mtxApplyAffineTransformInPlaceF(&matrices[1], &matrices[2]);
 
 	tmp = modelFindNodeMtx(model, node2, 0x100);
 
 	if (tmp != NULL) {
 		mtx4LoadZRotation(xrot * 0.5f, tmp);
 		mtx4SetTranslation(&rodata->position.pos, tmp);
-		mtxApplyAffineTransformInPlace(&matrices[1], tmp);
+		mtxApplyAffineTransformInPlaceF(&matrices[1], tmp);
 	}
 
 	node3 = modelGetPart(model->definition, MODELPART_AUTOGUN_0003);
@@ -8733,7 +8733,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 		rodata = node3->rodata;
 		mtx4LoadXRotation(autogun->barrelrot, tmp);
 		mtx4SetTranslation(&rodata->position.pos, tmp);
-		mtxApplyAffineTransformInPlace(&matrices[2], tmp);
+		mtxApplyAffineTransformInPlaceF(&matrices[2], tmp);
 	}
 
 	node4 = modelGetPart(model->definition, MODELPART_AUTOGUN_0004);
@@ -8741,8 +8741,8 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 	if (node4 != NULL) {
 		tmp = modelFindNodeMtx(model, node4, 0);
 		rodata = node4->rodata;
-		mtx4LoadTranslation(&rodata->position.pos, tmp);
-		mtxApplyAffineTransformInPlace(&matrices[2], tmp);
+		mtx4LoadTranslationF(&rodata->position.pos, tmp);
+		mtxApplyAffineTransformInPlaceF(&matrices[2], tmp);
 	}
 
 	node6 = modelGetPart(model->definition, MODELPART_AUTOGUN_0006);
@@ -8752,7 +8752,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 		rodata = node6->rodata;
 		mtx4LoadXRotation(autogun->barrelrot, tmp);
 		mtx4SetTranslation(&rodata->position.pos, tmp);
-		mtxApplyAffineTransformInPlace(&matrices[2], tmp);
+		mtxApplyAffineTransformInPlaceF(&matrices[2], tmp);
 	}
 }
 
@@ -9347,7 +9347,7 @@ void chopperFireRocket(struct chopperobj *chopper, bool side)
 		pos.z = -400;
 
 		mtx3ToMtx4(chopper->base.realrot, &sp2c);
-		mtx4LoadTranslation(&pos, &sp6c);
+		mtx4LoadTranslationF(&pos, &sp6c);
 		mtx4MultMtx4InPlace(&sp2c, &sp6c);
 
 		pos.x = sp6c.m[3][0] + chopperprop->pos.f[0];
@@ -9408,7 +9408,7 @@ void chopperIncrementBarrel(struct prop *chopperprop, bool firing)
 		}
 
 		mtx3ToMtx4(obj->realrot, &sp50);
-		mtx4LoadTranslation(&gunpos, &sp90);
+		mtx4LoadTranslationF(&gunpos, &sp90);
 		mtx4MultMtx4InPlace(&sp50, &sp90);
 
 		gunpos.x = sp90.m[3][0] + chopperprop->pos.f[0];
@@ -9621,9 +9621,9 @@ void chopperIncrementMovement(struct prop *prop, float goalroty, float goalrotx,
 		mtx4LoadZRotation(currotz + M_TAU, &sp3c);
 	}
 
-	mtx4LoadRotation(&spfc, &sp7c);
-	mtxScaleRotationPart(chopper->base.model->scale, &sp7c);
-	mtx4MultMtx4(&sp7c, &sp3c, &spbc);
+	mtx4LoadRotationF(&spfc, &sp7c);
+	mtxScaleRotationPartF(chopper->base.model->scale, &sp7c);
+	mtx4MultMtx4F(&sp7c, &sp3c, &spbc);
 	mtx4ToMtx3(&spbc, rotmtx3);
 	mtx3Copy(rotmtx3, chopper->base.realrot);
 
@@ -10330,9 +10330,9 @@ void hovercarTick(struct prop *prop)
 			mtx4LoadZRotation(sp188 + M_TAU, &sp6c);
 		}
 
-		mtx4LoadRotation(&sp12c, &spac);
-		mtxScaleRotationPart(hovercar->base.model->scale, &spac);
-		mtx4MultMtx4(&spac, &sp6c, &spec);
+		mtx4LoadRotationF(&sp12c, &spac);
+		mtxScaleRotationPartF(hovercar->base.model->scale, &spac);
+		mtx4MultMtx4F(&spac, &sp6c, &spec);
 		mtx4ToMtx3(&spec, sp15c);
 		mtx3Copy(sp15c, hovercar->base.realrot);
 
@@ -10460,7 +10460,7 @@ void weaponInitMatrices(struct prop *prop)
 	Mtxf *ptr = &mtxes[i];
 
 	for (; i < model->definition->nummatrices; i++) {
-		mtx4LoadIdentity(ptr);
+		mtx4LoadIdentityF(ptr);
 		ptr++;
 	}
 }
@@ -10482,20 +10482,20 @@ void hangingmonitorInitMatrices(struct prop *prop)
 	union modelrodata *rodata;
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0000);
-	mtx4LoadTranslation(&rodata->position.pos, &matrices[1]);
-	mtxApplyAffineTransformInPlace(matrices, &matrices[1]);
+	mtx4LoadTranslationF(&rodata->position.pos, &matrices[1]);
+	mtxApplyAffineTransformInPlaceF(matrices, &matrices[1]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0001);
-	mtx4LoadTranslation(&rodata->position.pos, &matrices[2]);
-	mtxApplyAffineTransformInPlace(matrices, &matrices[2]);
+	mtx4LoadTranslationF(&rodata->position.pos, &matrices[2]);
+	mtxApplyAffineTransformInPlaceF(matrices, &matrices[2]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0002);
-	mtx4LoadTranslation(&rodata->position.pos, &matrices[3]);
-	mtxApplyAffineTransformInPlace(matrices, &matrices[3]);
+	mtx4LoadTranslationF(&rodata->position.pos, &matrices[3]);
+	mtxApplyAffineTransformInPlaceF(matrices, &matrices[3]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0003);
-	mtx4LoadTranslation(&rodata->position.pos, &matrices[4]);
-	mtxApplyAffineTransformInPlace(matrices, &matrices[4]);
+	mtx4LoadTranslationF(&rodata->position.pos, &matrices[4]);
+	mtxApplyAffineTransformInPlaceF(matrices, &matrices[4]);
 }
 
 void objInitMatrices(struct prop *prop)
@@ -10525,7 +10525,7 @@ void objInitMatrices(struct prop *prop)
 				struct modelrenderdata thing = {NULL, 1, 3};
 				Mtxf sp28;
 
-				mtx4Copy(obj->model->matrices, &sp28);
+				mtx4CopyF(obj->model->matrices, &sp28);
 
 				thing.unk10 = obj->model->matrices;
 				thing.unk00 = &sp28;
@@ -10845,7 +10845,7 @@ int objTickPlayer(struct prop *prop)
 
 			mtx3ToMtx4(obj->realrot, &sp248);
 			mtx4SetTranslation(&prop->pos, &sp248);
-			mtx4MultMtx4(camGetWorldToScreenMtxf(), &sp248, &sp152);
+			mtx4MultMtx4F(camGetWorldToScreenMtxf(), &sp248, &sp152);
 
 			sp556 = true;
 			sp312.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
@@ -12206,10 +12206,10 @@ Gfx *gfxRenderRadialShadow(Gfx *gdl, float x, float y, float z, float angle, flo
 	pos.y = y + 2.0f;
 	pos.z = z;
 
-	mtx = gfxAllocateMatrix();
+	mtx = gfxAllocateMatrixF();
 	mtx4LoadYRotationWithTranslation(&pos, angle, &spc0);
-	mtx4MultMtx4(camGetWorldToScreenMtxf(), &spc0, &sp80);
-	mtxF2L(&sp80, mtx);
+	mtx4MultMtx4F(camGetWorldToScreenMtxf(), &spc0, &sp80);
+	mtx4CopyF(&sp80, mtx);
 
 	for (i = 0; i < 4; i++) {
 		vertices[i].y = 0;
@@ -12836,7 +12836,7 @@ void objBounce(struct defaultobj *obj, struct coord *gundir2d)
 		rot.y = RANDOMFRAC() * 0.024539785f - 0.012269893f;
 		rot.z = RANDOMFRAC() * 0.024539785f - 0.012269893f;
 
-		mtx4LoadRotation(&rot, &projectile->mtx);
+		mtx4LoadRotationF(&rot, &projectile->mtx);
 
 		projectile->flags |= PROJECTILEFLAG_AIRBORNE;
 
@@ -13101,7 +13101,7 @@ bool objDrop(struct prop *prop, bool lazy)
 				rot.y = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 				rot.z = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 
-				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
+				mtx4LoadRotationF(&rot, (Mtxf *)&projectile->mtx);
 			} else if (projectile->droptype == DROPTYPE_THROWGRENADE && parent->type == PROPTYPE_CHR) {
 				struct chrdata *chr = parent->chr;
 				struct coord rot = {0, 0, 0};
@@ -13126,7 +13126,7 @@ bool objDrop(struct prop *prop, bool lazy)
 				rot.y = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 				rot.z = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 
-				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
+				mtx4LoadRotationF(&rot, (Mtxf *)&projectile->mtx);
 				projectileSetSticky(prop);
 			} else if (projectile->droptype == DROPTYPE_HAT) {
 				struct coord rot = {0, 0, 0};
@@ -13143,7 +13143,7 @@ bool objDrop(struct prop *prop, bool lazy)
 				rot.y = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 				rot.z = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 
-				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
+				mtx4LoadRotationF(&rot, (Mtxf *)&projectile->mtx);
 			} else if (projectile->droptype == DROPTYPE_OWNERREAP) {
 				struct coord rot = {0, 0, 0};
 
@@ -13155,7 +13155,7 @@ bool objDrop(struct prop *prop, bool lazy)
 				rot.y = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 				rot.z = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 
-				mtx4LoadRotation(&rot, (Mtxf *)&projectile->mtx);
+				mtx4LoadRotationF(&rot, (Mtxf *)&projectile->mtx);
 			} else {
 				// DROPTYPE_OWNERREAP
 				// Ben's comment: This gives dropped weapons a random velocity instead of just dropping straight down.
@@ -13185,8 +13185,8 @@ bool objDrop(struct prop *prop, bool lazy)
 				prop->z = -sp48->m[3][2];
 			} else {
 				// No collision checks
-				mtx4LoadIdentity(&spf0);
-				mtxScaleRotationPart(model->scale, &spf0);
+				mtx4LoadIdentityF(&spf0);
+				mtxScaleRotationPartF(model->scale, &spf0);
 				mtx4SetTranslation(&root->pos, &spf0);
 				roomsCopy(root->rooms, rooms);
 			}
@@ -13268,7 +13268,7 @@ void objFall(struct defaultobj *obj, int playernum)
 				rot.z = RANDOMFRAC() * 0.0049079573f - 0.0024539786f;
 			}
 
-			mtx4LoadRotation(&rot, &projectile->mtx);
+			mtx4LoadRotationF(&rot, &projectile->mtx);
 
 			projectile->flags |= PROJECTILEFLAG_AIRBORNE;
 
@@ -14451,7 +14451,7 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 				spb0.y = shotdata->gundir3d.y * 3.0f;
 				spb0.z = shotdata->gundir3d.z * 3.0f;
 
-				mtx4MultMtx4(camGetProjectionMtxF(), &obj->model->matrices[hit->mtxindex], &sp58);
+				mtx4MultMtx4F(camGetProjectionMtxF(), &obj->model->matrices[hit->mtxindex], &sp58);
 				mtx4TransformVec(&sp58, &hit->hitthing.pos, &spa4);
 
 				pushdir.x = shotdata->gundir3d.x;
@@ -17111,7 +17111,7 @@ void doorUpdateTiles(struct doorobj *door)
 		sp80.z = door->startpos.z - sp8c.z;
 
 		mtx3ToMtx4(door->mtx98, &spdc);
-		mtx4LoadTranslation(&sp80, &sp98);
+		mtx4LoadTranslationF(&sp80, &sp98);
 		mtx4MultMtx4InPlace(&sp98, &spdc);
 
 		if (door->doortype == DOORTYPE_AZTECCHAIR) {
@@ -17135,7 +17135,7 @@ void doorUpdateTiles(struct doorobj *door)
 		}
 
 		mtx4MultMtx4InPlace(&sp98, &spdc);
-		mtx4LoadTranslation(&sp8c, &sp98);
+		mtx4LoadTranslationF(&sp8c, &sp98);
 		mtx4MultMtx4InPlace(&sp98, &spdc);
 		mtx4ToMtx3(&spdc, door->base.realrot);
 
@@ -17314,8 +17314,8 @@ struct prop *doorInit(struct doorobj *door, struct coord *pos, Mtxf *mtx, RoomNu
 			break;
 		}
 
-		mtx4Copy(mtx, &sp38);
-		mtxScaleRotationPart(g_ModelStates[door->base.modelnum].scale * (1.0f / 4096.0f), &sp38);
+		mtx4CopyF(mtx, &sp38);
+		mtxScaleRotationPartF(g_ModelStates[door->base.modelnum].scale * (1.0f / 4096.0f), &sp38);
 		mtx4ToMtx3(&sp38, door->base.realrot);
 
 		door->frac = (door->base.flags & OBJFLAG_DOOR_KEEPOPEN) ? door->maxfrac : 0;
@@ -17646,7 +17646,7 @@ void doorFinishOpen(struct doorobj *door)
 
 		if (door->base.hidden & OBJHFLAG_PROJECTILE) {
 			door->base.projectile->flags |= PROJECTILEFLAG_AIRBORNE;
-			mtx4LoadIdentity((Mtxf *)&door->base.projectile->mtx);
+			mtx4LoadIdentityF((Mtxf *)&door->base.projectile->mtx);
 		}
 	}
 
@@ -19060,10 +19060,10 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 				rocket = weaponCreateProjectileFromWeaponNum(MODEL_CHRDYROCKETMIS, WEAPON_ROCKET, NULL); // dataDyne chopper fires a rocket
 
 				if (rocket) { 
-					mtx4LoadIdentity(&sp13c);
+					mtx4LoadIdentityF(&sp13c);
 					mtx4LoadXRotation(rotx, &spe0);
 					mtx4LoadYRotation(roty, &spa0);
-					mtxApplyAffineTransformInPlace(&spa0, &spe0);
+					mtxApplyAffineTransformInPlaceF(&spa0, &spe0);
 
 					sp120.x = dir->x * 0.27777776f;
 					sp120.y = dir->y * 0.27777776f;

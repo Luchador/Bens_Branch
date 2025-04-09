@@ -1823,7 +1823,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			}
 		}
 
-		mtx4LoadIdentity(&rotmtx);
+		mtx4LoadIdentityF(&rotmtx);
 
 		// For the hudpiece, tween the position and scale to the new values and apply rotation.
 		if (modeltype == MENUMODELTYPE_HUDPIECE) {
@@ -1867,7 +1867,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			tmpcoord.y = roty;
 			tmpcoord.z = rotz;
 
-			mtx4LoadRotation(&tmpcoord, &rotmtx);
+			mtx4LoadRotationF(&tmpcoord, &rotmtx);
 		} else {
 			// If the caller is reconfiguring the model's position, rotation or scale, tween towards the new values.
 			if (menumodel->configuring) {
@@ -1928,7 +1928,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 						tmpcoord.y = roty;
 						tmpcoord.z = rotz;
 
-						mtx4LoadRotation(&tmpcoord, &rotmtx);
+						mtx4LoadRotationF(&tmpcoord, &rotmtx);
 					}
 				}
 			}
@@ -1948,7 +1948,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				tmpcoord.y = roty;
 				tmpcoord.z = rotz;
 
-				mtx4LoadRotation(&tmpcoord, &rotmtx);
+				mtx4LoadRotationF(&tmpcoord, &rotmtx);
 			}
 		}
 
@@ -1959,7 +1959,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 		camProjectScreenToWorldDir(screenpos, &tmpcoord, 1.0f);
 
-		mtx4LoadIdentity(&posmtx);
+		mtx4LoadIdentityF(&posmtx);
 
 		// Show or hide model parts according to the visibility list
 		if (menumodel->partvisibility != NULL) {
@@ -1996,12 +1996,12 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			tmpcoord.z = rotz * tmpcoord.z;
 		}
 
-		mtx4LoadTranslation(&tmpcoord, &posmtx);
+		mtx4LoadTranslationF(&tmpcoord, &posmtx);
 
 		if (haszoom) {
-			mtxScaleRotationPart(scale * zoomy, &posmtx);
+			mtxScaleRotationPartF(scale * zoomy, &posmtx);
 		} else {
-			mtxScaleRotationPart(scale, &posmtx);
+			mtxScaleRotationPartF(scale, &posmtx);
 		}
 
 		{
@@ -2011,22 +2011,22 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			Mtxf sp184;
 
 			if (haszoom) {
-				mtx4LoadTranslation(&zoompos, &sp204);
+				mtx4LoadTranslationF(&zoompos, &sp204);
 			} else {
 				tmpcoord.x = menumodel->displacex;
 				tmpcoord.y = menumodel->displacey;
 				tmpcoord.z = menumodel->displacez;
 
-				mtx4LoadTranslation(&tmpcoord, &sp204);
+				mtx4LoadTranslationF(&tmpcoord, &sp204);
 			}
 
-			mtx4MultMtx4(&posmtx, &rotmtx, &sp244);
+			mtx4MultMtx4F(&posmtx, &rotmtx, &sp244);
 
 			if (modeltype == MENUMODELTYPE_3) {
-				mtx4MultMtx4(&sp1c4, &sp244, &sp184);
-				mtx4MultMtx4(&sp184, &sp204, &menumodel->mtx);
+				mtx4MultMtx4F(&sp1c4, &sp244, &sp184);
+				mtx4MultMtx4F(&sp184, &sp204, &menumodel->mtx);
 			} else {
-				mtx4MultMtx4(&sp244, &sp204, &menumodel->mtx);
+				mtx4MultMtx4F(&sp244, &sp204, &menumodel->mtx);
 			}
 		}
 
@@ -2065,7 +2065,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		matrices = gfxAllocate(menumodel->bodymodeldef->nummatrices * sizeof(Mtxf));
 
 		for (i = 0; i < menumodel->bodymodeldef->nummatrices; i++) {
-			mtx4LoadIdentity(&matrices[i]);
+			mtx4LoadIdentityF(&matrices[i]);
 		}
 
 		menumodel->bodymodel.matrices = matrices;
@@ -2101,7 +2101,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			}
 		}
 
-		mtx4Copy(&menumodel->mtx, matrices);
+		mtx4CopyF(&menumodel->mtx, matrices);
 
 		renderdata.unk00 = &menumodel->mtx;
 		renderdata.unk10 = menumodel->bodymodel.matrices;
@@ -2135,10 +2135,10 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				Mtxf sp120;
 				Mtxf spe0;
 
-				mtx4LoadIdentity(&sp120);
+				mtx4LoadIdentityF(&sp120);
 				mtx4LoadXRotation(menuGetCosOscFrac(4), &sp120);
-				mtx4MultMtx4((Mtxf *)((uintptr_t)matrices + mtxindex * sizeof(Mtxf)), &sp120, &spe0);
-				mtx4Copy(&spe0, (Mtxf *)((uintptr_t)matrices + mtxindex * sizeof(Mtxf)));
+				mtx4MultMtx4F((Mtxf *)((uintptr_t)matrices + mtxindex * sizeof(Mtxf)), &sp120, &spe0);
+				mtx4CopyF(&spe0, (Mtxf *)((uintptr_t)matrices + mtxindex * sizeof(Mtxf)));
 			}
 
 			// Make the menu projection lines come from the hudpiece eye
@@ -2185,12 +2185,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		modelRender(&renderdata, &menumodel->bodymodel);
 
 		gdl = renderdata.gdl;
-
-		for (i = 0; i < menumodel->bodymodeldef->nummatrices; i++) {
-			Mtxf sp70;
-			mtx4Copy((Mtxf *)((uintptr_t)menumodel->bodymodel.matrices + i * sizeof(Mtxf)), &sp70);
-			mtxF2L(&sp70, &menumodel->bodymodel.matrices[i]);
-		}
 
 		if (modeltype < MENUMODELTYPE_3) {
 			gdl = gfxSetCustomProjection(gdl);

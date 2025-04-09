@@ -855,8 +855,8 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 
 		if ((g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) && (g_Anims[anim->animnum2].flags & ANIMFLAG_ABSOLUTETRANSLATION) == 0) {
 			mtx4LoadYRotation(rwdata->chrinfo.yrot, &sp78);
-			mtx4LoadRotation(&rot3, &sp38);
-			mtxApplyAffineTransformInPlace(&sp78, &sp38);
+			mtx4LoadRotationF(&rot3, &sp38);
+			mtxApplyAffineTransformInPlaceF(&sp78, &sp38);
 			quaternion0f097044(&sp38, spec);
 		} else {
 			quaternionEulerToQuat(&rot3, spec);
@@ -867,11 +867,11 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 		quaternionSlerp(spfc, spec, anim->fracmerge, spdc);
 		quaternionToMtx(spdc, &sp1d8);
 	} else {
-		mtx4LoadRotation(&rot1, &sp1d8);
+		mtx4LoadRotationF(&rot1, &sp1d8);
 	}
 
 	if (g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) {
-		mtx4LoadTranslation(sp254, &sp198);
+		mtx4LoadTranslationF(sp254, &sp198);
 	} else {
 		if (rwdata->chrinfo.unk18 != 0.0f) {
 			sp250 = modelTweenRotAxis(sp250, rwdata->chrinfo.unk1c, rwdata->chrinfo.unk18);
@@ -889,7 +889,7 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 	if (sp24c) {
 		mtxApplyAffineTransform(sp24c, &sp158, mtx);
 	} else {
-		mtx4Copy(&sp158, mtx);
+		mtx4CopyF(&sp158, mtx);
 	}
 }
 
@@ -916,7 +916,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 		mtx4LoadRotationAndTranslation(pos, rot, &mtx68);
 
 		if (allowscale && model->scale != 1.0f) {
-			mtxScaleRotationPart(model->scale, &mtx68);
+			mtxScaleRotationPartF(model->scale, &mtx68);
 		}
 
 		if (arg6->x != 1.0f) {
@@ -942,7 +942,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 		mtx4LoadRotationAndTranslation(pos, rot, nodemtx);
 
 		if (allowscale && model->scale != 1.0f) {
-			mtxScaleRotationPart(model->scale, nodemtx);
+			mtxScaleRotationPartF(model->scale, nodemtx);
 		}
 
 		if (arg6->x != 1.0f) {
@@ -1232,10 +1232,10 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 		}
 
 		if (mtx) {
-			mtx4LoadTranslation(&rodata->pos, &spe8);
+			mtx4LoadTranslationF(&rodata->pos, &spe8);
 			mtxApplyAffineTransform(mtx, &spe8, &model->matrices[rodata->mtxindex0]);
 		} else {
-			mtx4LoadTranslation(&rodata->pos, &model->matrices[rodata->mtxindex0]);
+			mtx4LoadTranslationF(&rodata->pos, &model->matrices[rodata->mtxindex0]);
 		}
 	}
 }
@@ -1255,10 +1255,10 @@ void modelUpdatePositionHeldNodeMtx(struct modelrenderdata *arg0, struct model *
 	}
 
 	if (sp68) {
-		mtx4LoadTranslation(&rodata->positionheld.pos, &sp28);
+		mtx4LoadTranslationF(&rodata->positionheld.pos, &sp28);
 		mtxApplyAffineTransform(sp68, &sp28, &matrices[mtxindex]);
 	} else {
-		mtx4LoadTranslation(&rodata->positionheld.pos, &matrices[mtxindex]);
+		mtx4LoadTranslationF(&rodata->positionheld.pos, &matrices[mtxindex]);
 	}
 }
 

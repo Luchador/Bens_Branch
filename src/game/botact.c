@@ -368,7 +368,7 @@ void botactThrow(struct chrdata *chr)
 	sp228.y = sp152.y * mult;
 	sp228.z = sp152.z * mult;
 
-	mtx4LoadIdentity(&sp164);
+	mtx4LoadIdentityF(&sp164);
 
 	if (chr->aibot->weaponnum == WEAPON_COMBATKNIFE) {
 		mtx4LoadZRotation(M_PI * 1.5f, &sp164);
@@ -377,9 +377,9 @@ void botactThrow(struct chrdata *chr)
 	}
 
 	mtx4LoadXRotation(0.34901028871536f, &sp84);
-	mtxApplyAffineTransformInPlace(&sp84, &sp164);
+	mtxApplyAffineTransformInPlaceF(&sp84, &sp164);
 	mtx4LoadYRotation(sp80, &sp84);
-	mtxApplyAffineTransformInPlace(&sp84, &sp164);
+	mtxApplyAffineTransformInPlaceF(&sp84, &sp164);
 
 	bgunCreateThrownProjectile2(chr, &gset, &prop->pos, prop->rooms, &sp164, &sp228);
 
@@ -501,8 +501,8 @@ void botactCreateSlayerRocket(struct chrdata *chr)
 
 		mtx4LoadXRotation(xrot, &sp196);
 		mtx4LoadYRotation(yrot, &sp132);
-		mtxApplyAffineTransformInPlace(&sp132, &sp196);
-		mtx4LoadIdentity(&sp260);
+		mtxApplyAffineTransformInPlaceF(&sp132, &sp196);
+		mtx4LoadIdentityF(&sp260);
 
 		bgunCreateXBowBolt(&rocket->base, &chr->prop->pos, chr->prop->rooms, &sp196, &sp100, &sp260, chr->prop, &chr->prop->pos);
 

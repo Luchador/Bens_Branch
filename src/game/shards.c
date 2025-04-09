@@ -234,7 +234,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 				bool render = true;
 				float alphamult = 1.0f;
 				float xraydist;
-				Mtxf *mtx = gfxAllocateMatrix();
+				Mtxf *mtx = gfxAllocateMatrixF();
 
 				if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 					xraydist = sqrtf(ERASERSQDIST(g_Shards[i].pos.f));
@@ -267,7 +267,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 							&& shardmtx.m[3][1] < 10000 && shardmtx.m[3][1] > -10000
 							&& shardmtx.m[3][2] < 10000 && shardmtx.m[3][2] > -10000)
 					{
-						mtxF2L(&shardmtx, mtx);
+						mtx4CopyF(&shardmtx, mtx);
 
 						gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -353,7 +353,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 				bool render = true;
 				float alphamult = 1.0f;
 				float xraydist;
-				Mtxf *mtx = gfxAllocateMatrix();
+				Mtxf *mtx = gfxAllocateMatrixF();
 
 				if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 					xraydist = sqrtf(ERASERSQDIST(g_Shards[i].pos.f));
@@ -386,7 +386,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 							&& shardmtx.m[3][1] < 10000 && shardmtx.m[3][1] > -10000
 							&& shardmtx.m[3][2] < 10000 && shardmtx.m[3][2] > -10000)
 					{
-						mtxF2L(&shardmtx, mtx);
+						mtx4CopyF(&shardmtx, mtx);
 
 						gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 

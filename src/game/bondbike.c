@@ -463,7 +463,7 @@ int bbikeCalculateNewPosition(struct coord *vel, float angledelta)
 		hoverpropSetTurnAngle(&bike->base, newangle);
 
 		mtx4LoadYRotation(newangle, &sp44);
-		mtxScaleRotationPart(bike->base.model->scale, &sp44);
+		mtxScaleRotationPartF(bike->base.model->scale, &sp44);
 		mtx4ToMtx3(&sp44, bike->base.realrot);
 	}
 
@@ -932,7 +932,7 @@ void bbikeTick(void)
 
 	mtx4MultMtx4InPlace(&sp124, &sp164);
 	mtx3ToMtx4(obj->realrot, &sp124);
-	mtxScaleRotationPart(1.0f / obj->model->scale, &sp124);
+	mtxScaleRotationPartF(1.0f / obj->model->scale, &sp124);
 	mtx4LoadYRotation(hoverpropGetTurnAngle(obj), &spe4);
 	quaternion0f097044(&spe4, spd4);
 	quaternion0f097044(&sp124, spc4);

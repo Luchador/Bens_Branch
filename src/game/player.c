@@ -1223,46 +1223,11 @@ void playerTickChrBody(void)
 		struct modeldef *headmodeldef = NULL;
 		struct modeldef *weaponmodeldef;
 		int offset1 = 0;
-		uint8_t *allocation;
+		uint8_t *allocation = NULL;
 		void *spe8;
 		int offset2;
 		struct weaponobj *weaponobj;
-
-		// Unused
-		struct weaponobj template = {
-			256,                    // extrascale
-			0,                      // hidden2
-			OBJTYPE_WEAPON,         // type
-			MODEL_CHRFALCON2,       // modelnum
-			-1,                     // pad
-			OBJFLAG_ASSIGNEDTOCHR,  // flags
-			0,                      // flags2
-			0,                      // flags3
-			NULL,                   // prop
-			NULL,                   // model
-			1, 0, 0,                // realrot
-			0, 1, 0,
-			0, 0, 1,
-			0,                      // hidden
-			NULL,                   // geo
-			NULL,                   // projectile
-			0,                      // damage
-			1000,                   // maxdamage
-			0xff, 0xff, 0xff, 0x00, // shadecol
-			0xff, 0xff, 0xff, 0x00, // nextcol
-			0x0fff,                 // floorcol
-			0,                      // tiles
-			WEAPON_FALCON2,         // weaponnum
-			0,                      // unk5d
-			0,                      // unk5e
-			FUNC_PRIMARY,           // gunfunc
-			0,                      // fadeouttimer60
-			-1,                     // dualweaponnum
-			-1,                     // timer240
-			NULL,                   // dualweapon
-		};
-
-		int weaponmodelnum;
+		int weaponmodelnum = 0;
 		int weaponnum = bgunGetWeaponNum2(HAND_RIGHT);
 		int bodynum = BODY_DARK_COMBAT;
 		int headnum = HEAD_DARK_COMBAT;
@@ -1430,16 +1395,22 @@ void playerTickChrBody(void)
 		g_Vars.currentplayer->vv_height = g_Vars.currentplayer->vv_eyeheight;
 
 		if (weaponmodelnum >= 0) {
-			if (g_Vars.mplayerisrunning == false) {
-				weaponmodeldef = modeldefLoad(g_ModelStates[weaponmodelnum].fileid, allocation + offset1, offset2 - offset1, &texpool);
-				fileGetLoadedSize(g_ModelStates[weaponmodelnum].fileid);
-				modelAllocateRwData(weaponmodeldef);
-			} else {
-				weaponobj = NULL;
-				weaponmodeldef = NULL;
+			if(allocation != NULL)
+			{
+				if (g_Vars.mplayerisrunning == false) {
+					weaponmodeldef = modeldefLoad(g_ModelStates[weaponmodelnum].fileid, allocation + offset1, offset2 - offset1, &texpool);
+					fileGetLoadedSize(g_ModelStates[weaponmodelnum].fileid);
+					modelAllocateRwData(weaponmodeldef);
+				} else {
+					weaponobj = NULL;
+					weaponmodeldef = NULL;
+				}
 			}
 
-			weaponCreateForChr(chr, weaponmodelnum, weaponnum, 0, weaponobj, weaponmodeldef);
+			if(weaponmodeldef != NULL && weaponobj != NULL && weaponmodeldef != NULL)
+			{
+				weaponCreateForChr(chr, weaponmodelnum, weaponnum, 0, weaponobj, weaponmodeldef);
+			}
 		}
 
 		chr->fireslots[0] = bgunAllocateFireslot();
@@ -1756,7 +1727,7 @@ void playerReorientForCutsceneStop(int tweenduration60)
 	frameslot = animLoadFrame(g_CutsceneAnimNum, lastframe);
 	animForgetFrameBirths();
 	animGetRotTranslateScale(0, 0, &g_Skel20, g_CutsceneAnimNum, frameslot, &rot, &translate, &scale);
-	mtx4LoadRotation(&rot, &rotmtx);
+	mtx4LoadRotationF(&rot, &rotmtx);
 
 	theta = atan2f(-rotmtx.m[2][0], -rotmtx.m[2][2]);
 	theta = (M_TAU - theta) * 57.304901123047f;
@@ -1834,7 +1805,7 @@ void playerTickCutscene(bool arg0)
 	pos.y = translate.y * translatescale;
 	pos.z = translate.z * translatescale;
 
-	mtx4LoadRotation(&rot, &rotmtx);
+	mtx4LoadRotationF(&rot, &rotmtx);
 
 	up.x = rotmtx.m[1][0];
 	up.y = rotmtx.m[1][1];
@@ -2138,7 +2109,7 @@ void playerUnpause(void)
 Gfx *player0f0baf84(Gfx *gdl)
 {
 	if (g_Vars.currentplayer->pausemode != PAUSEMODE_UNPAUSED) {
-		Mtx *a = gfxAllocateMatrix();
+		Mtx *a = gfxAllocateMatrixF();
 		uint16_t b;
 
 		mtxPerspective(a, &b, g_Vars.currentplayer->zoominfovy, 1.4545454978943f, 10, 300, 1);
@@ -2574,14 +2545,14 @@ void playerDisplayDamage(void)
 Gfx *playerRenderHealthBar(Gfx *gdl)
 {
 	Mtxf matrix;
-	Mtxf *addr = gfxAllocateMatrix();
+	Mtxf *addr = gfxAllocateMatrixF();
 
 	float fovsc = 60.f / PLAYER_DEFAULT_FOV;
 	if (fovsc > 1.01f) {
 		fovsc *= 1.1f;
 	}
 	mtxBuildLookAtMatrix(&matrix, 0, 370.f * fovsc, 0, 0, 0, 0, 0, 0, -1);
-	mtxF2L(&matrix, addr);
+	mtx4CopyF(&matrix, addr);
 
 	gSPMatrix(gdl++, (uintptr_t)((void *)addr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gDPPipeSync(gdl++);
@@ -4001,10 +3972,10 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	scale = bgGetScaleBg2Gfx();
 	playerSetGlobalDrawWorldOffset(g_Vars.currentplayer->cam_room);
 
-	g_Vars.currentplayer->mtxl005c = gfxAllocateMatrix();
-	g_Vars.currentplayer->mtxl0060 = gfxAllocateMatrix();
-	g_Vars.currentplayer->mtxf0064 = gfxAllocateMatrix();
-	g_Vars.currentplayer->mtxf0068 = gfxAllocateMatrix();
+	g_Vars.currentplayer->mtxl005c = gfxAllocateMatrixF();
+	g_Vars.currentplayer->mtxl0060 = gfxAllocateMatrixF();
+	g_Vars.currentplayer->mtxf0064 = gfxAllocateMatrixF();
+	g_Vars.currentplayer->mtxf0068 = gfxAllocateMatrixF();
 
 	lookat = gfxAllocateLookAt(2);
 
@@ -4036,9 +4007,9 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
-	s1 = gfxAllocateMatrix();
-	s0 = gfxAllocateMatrix();
-	mtx4MultMtx4(camGetMtxF1754(), &sp8c, s0);
+	s1 = gfxAllocateMatrixF();
+	s0 = gfxAllocateMatrixF();
+	mtx4MultMtx4F(camGetMtxF1754(), &sp8c, s0);
 
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < 4; j++) {
@@ -4053,9 +4024,8 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	camSetMtxF006c(s0);
 	mtxF2L2(s0->m, s1);
 	camSetOrthogonalMtxL(s1);
-	mtxScaleRotationPart(scale, &sp8c);
+	mtxScaleRotationPartF(scale, &sp8c);
 	mtxF2L2(sp8c.m, g_Vars.currentplayer->mtxl005c);
-	mtx00016820(g_Vars.currentplayer->mtxl005c, g_Vars.currentplayer->mtxl0060);
 	camSetMtxL173c(g_Vars.currentplayer->mtxl005c);
 	camSetMtxL1738(g_Vars.currentplayer->mtxl0060);
 	camSetWorldToScreenMtxf(g_Vars.currentplayer->mtxf0064);
@@ -5451,6 +5421,6 @@ void player0f0c3320(Mtxf *matrices, int count)
 		sp40.m[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;
 		sp40.m[3][2] -= g_Vars.currentplayer->globaldrawworldoffset.z;
 
-		mtxF2L(&sp40, matrices + i);
+		mtx4CopyF(&sp40, matrices + i);
 	}
 }

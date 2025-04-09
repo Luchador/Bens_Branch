@@ -1242,7 +1242,7 @@ void scenarioHandleDroppedToken(struct chrdata *chr, struct prop *prop)
 				mtx00016d58(&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
 
 				if (obj->model) {
-					mtxScaleRotationPart(obj->model->scale, &mtx);
+					mtxScaleRotationPartF(obj->model->scale, &mtx);
 				}
 
 				rooms[0] = pad.room;

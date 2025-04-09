@@ -385,7 +385,7 @@ Gfx *sparksRender(Gfx *gdl)
 					sp120 *= viGetFovY() / 60.0f;
 					sp120 *= (float)(SCREEN_WIDTH_LO * SCREEN_HEIGHT_LO) / (float)(SCREEN_WIDTH_HI * SCREEN_HEIGHT_HI);
 
-					mtx4LoadIdentity(&spd4);
+					mtx4LoadIdentityF(&spd4);
 
 					spd4.m[0][0] = 0.05f;
 					spd4.m[1][1] = 0.05f;
@@ -393,10 +393,10 @@ Gfx *sparksRender(Gfx *gdl)
 					spd4.m[3][3] = 0.05f;
 
 					mtx4SetTranslation(&group->pos, &spd4);
-					mtxApplyAffineTransformInPlace(camGetWorldToScreenMtxf(), &spd4);
+					mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &spd4);
 
-					mtx = gfxAllocateMatrix();
-					mtxF2L(&spd4, mtx);
+					mtx = gfxAllocateMatrixF();
+					mtx4CopyF(&spd4, mtx);
 
 					gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 

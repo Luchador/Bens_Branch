@@ -100,7 +100,7 @@ void roomPopulateMtx(Mtxf *mtx, int roomnum)
 {
 	int stagenum = g_Vars.stagenum;
 
-	mtx4LoadIdentity(mtx);
+	mtx4LoadIdentityF(mtx);
 
 	mtx->m[0][0] = 1;
 	mtx->m[1][1] = 1;
@@ -162,7 +162,7 @@ int roomTouchMtx(int roomnum)
 	g_RoomMtxBaseRooms[index] = g_Vars.currentplayer->lastroomforoffset;
 
 	roomPopulateMtx(&mtx, roomnum);
-	mtxF2L(&mtx, &g_RoomMtxMatrices[index]);
+	mtx4CopyF(&mtx, &g_RoomMtxMatrices[index]);
 
 	return index;
 }

@@ -573,7 +573,7 @@ Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3
 	renderdata.unk00 = arg6;
 	renderdata.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
 
-	mtx4Copy(arg6, renderdata.unk10);
+	mtx4CopyF(arg6, renderdata.unk10);
 
 	model->matrices = renderdata.unk10;
 
@@ -586,11 +586,6 @@ Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3
 	modelRender(&renderdata, model);
 
 	gdl = renderdata.gdl;
-
-	for (j = 0, k = 0; j < model->definition->nummatrices; j++, k += sizeof(Mtxf)) {
-		mtx4Copy((Mtxf *)((uintptr_t)model->matrices + k), &sp6c);
-		mtxF2L(&sp6c, model->matrices + j);
-	}
 
 	return gdl;
 }
@@ -945,8 +940,8 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	mtx4LoadYRotation(g_PdLogoYRotCur, &sp1e8);
 	mtx4LoadXRotation(g_PdLogoXRotCur, &sp1a8);
 	mtx4MultMtx4InPlace(&sp1a8, &sp1e8);
-	mtx4MultMtx4(&sp2b0, &sp1e8, &sp270);
-	mtxScaleRotationPart(g_PdLogoScale, &sp270);
+	mtx4MultMtx4F(&sp2b0, &sp1e8, &sp270);
+	mtxScaleRotationPartF(g_PdLogoScale, &sp270);
 
 	g_TitleLightPdLogoNotFront.a.l.col[0] = g_TitleLightPdLogoNotFront.a.l.col[1] = g_TitleLightPdLogoNotFront.a.l.col[2] = g_TitleLightPdLogoNotFront.a.l.colc[0] = g_TitleLightPdLogoNotFront.a.l.colc[1] = g_TitleLightPdLogoNotFront.a.l.colc[2] = 255.0f * g_PdLogoAmbientLightFrac;
 
@@ -1025,12 +1020,12 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	gSPSetLights1(gdl++, g_TitleLightPdLogoMain);
 	{
 		struct coord sp64 = {0, 0, 1000};
-		mtx4LoadTranslation(&sp64, &sp1e8);
+		mtx4LoadTranslationF(&sp64, &sp1e8);
 	}
 
 	mtxScale3x4(1.0f + sp13c, &sp1e8);
-	mtx4MultMtx4(&sp2b0, &sp1e8, &sp230);
-	mtxScaleRotationPart(0.308f, &sp230);
+	mtx4MultMtx4F(&sp2b0, &sp1e8, &sp230);
+	mtxScaleRotationPartF(0.308f, &sp230);
 
 	// Render the "PERFECT DARK" model
 	if (g_PdLogoTitleStep >= 0) {
@@ -1180,7 +1175,7 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 		sp9c.y = (-cosf((1.0f - (fracdone / 1)) * M_PI) * 0.5f + .5f) * 0.35f;
 		sp9c.z = 0.0f;
 
-		mtx4LoadRotation(&sp9c, &spa8);
+		mtx4LoadRotationF(&sp9c, &spa8);
 		mtxScale3x4(fracdone * 0.2f + 1.0f, &spa8);
 
 		mtxBuildLookAtMatrix(&sp108,
@@ -1189,11 +1184,11 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 				/* up   */ 0.0f, 1.0f, 0.0f);
 
 		mtx4MultMtx4InPlace(&sp108, &spa8);
-		mtx4Copy(&spa8, &sp108);
+		mtx4CopyF(&spa8, &sp108);
 		renderdata.unk00 = &sp108;
 
 		renderdata.unk10 = gfxAllocate(g_TitleModel->definition->nummatrices * sizeof(Mtxf));
-		mtx4Copy(&sp108, renderdata.unk10);
+		mtx4CopyF(&sp108, renderdata.unk10);
 		g_TitleModel->matrices = renderdata.unk10;
 
 		modelUpdateRelations(g_TitleModel);
@@ -1205,11 +1200,6 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 		modelRender(&renderdata, g_TitleModel);
 
 		gdl = renderdata.gdl;
-
-		for (i = 0, j = 0; i < g_TitleModel->definition->nummatrices; i++, j += sizeof(Mtxf)) {
-			mtx4Copy((Mtxf *)((uintptr_t)g_TitleModel->matrices + j), &sp54);
-			mtxF2L(&sp54, g_TitleModel->matrices + i);
-		}
 	}
 
 	return gdl;
@@ -1366,7 +1356,7 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 	spb4.y = 1.5707963705063f * tmp;
 	spb4.z = 0;
 
-	mtx4LoadRotation(&spb4, &spc0);
+	mtx4LoadRotationF(&spb4, &spc0);
 	mtxScale3x4(1 + fracdone * 0.25f, &spc0);
 
 	mtxBuildLookAtMatrix(&sp118,
@@ -1375,11 +1365,11 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 			/* up   */ 0, 1, 0);
 
 	mtx4MultMtx4InPlace(&sp118, &spc0);
-	mtx4Copy(&spc0, &sp118);
+	mtx4CopyF(&spc0, &sp118);
 
 	renderdata.unk00 = &sp118;
 	renderdata.unk10 = gfxAllocate(g_TitleModel->definition->nummatrices * sizeof(Mtxf));
-	mtx4Copy(&sp118, renderdata.unk10);
+	mtx4CopyF(&sp118, renderdata.unk10);
 
 	g_TitleModel->matrices = renderdata.unk10;
 
@@ -1440,12 +1430,6 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 	modelRender(&renderdata, g_TitleModel);
 
 	gdl = renderdata.gdl;
-
-	for (i = 0, j = 0; i < g_TitleModel->definition->nummatrices; i++, j += sizeof(Mtxf)) {
-		Mtxf sp58;
-		mtx4Copy((Mtxf *)((uintptr_t)g_TitleModel->matrices + j), &sp58);
-		mtxF2L(&sp58, g_TitleModel->matrices + i);
-	}
 
 	return gdl;
 }

@@ -28,10 +28,8 @@ typedef uint32_t k_ptr_t;
 // Matrices are stored as Mtxfs then converted to an Mtx when passed to the GPU.
 // Mtxs use a union and a long long int to force alignments. Mtxfs are not
 // aligned but still use the union for consistency with Mtx.
-typedef union {
+typedef struct {
 	float m[4][4];
-	uint32_t l[4][4];
-	int unused;
 } Mtxf;
 
 // Ben's comment: used for loading plaintext files for game strings e.g. briefings, weapon names, etc...
@@ -5414,14 +5412,11 @@ struct nbomb {
 	struct coord pos;
 	int age240;
 	float radius;
-	int16_t unk14;
-	float unk18;
+	int16_t rotAmount;
 	struct prop *ownerprop;
 	struct sndstate *audiohandle20;
 	struct sndstate *audiohandle24;
-#ifndef PLATFORM_N64
 	int spawnframe240; // spawned on this frame
-#endif
 };
 
 struct roomacousticdata {

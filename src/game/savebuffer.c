@@ -27,7 +27,7 @@ void func0f0d4690(Mtxf *mtx)
 {
 	struct coord pos;
 
-	mtx4LoadIdentity(mtx);
+	mtx4LoadIdentityF(mtx);
 
 	pos.x = -159.75f;
 	pos.y = 120.25f;
@@ -54,19 +54,19 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 	Mtxf *mtx1;
 	Mtxf *mtx2;
 
-	mtx1 = gfxAllocateMatrix();
-	mtx2 = gfxAllocateMatrix();
+	mtx1 = gfxAllocateMatrixF();
+	mtx2 = gfxAllocateMatrixF();
 
 	func0f0d475c(&mtx);
-	mtxF2L(&mtx, mtx2);
-	mtx4LoadIdentity(&mtx);
+	mtx4CopyF(&mtx, mtx2);
+	mtx4LoadIdentityF(&mtx);
 
 	mtxFrustumF(mtx.m,
 			-(float) viGetWidth() * 0.5f, viGetWidth() * 0.5f,
 			-(float) viGetHeight() * 0.5f, viGetHeight() * 0.5f,
 			10, 10000, 1);
 
-	mtxF2L(&mtx, mtx1);
+	mtx4CopyF(&mtx, mtx1);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx2), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gSPMatrix(gdl++, (uintptr_t)(mtx1), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
@@ -106,7 +106,7 @@ Gfx *func0f0d49c8(Gfx *gdl)
 Gfx *func0f0d4a3c(Gfx *gdl, int arg1)
 {
 	Mtxf mtx;
-	Mtxf *mtxptr = gfxAllocateMatrix();
+	Mtxf *mtxptr = gfxAllocateMatrixF();
 
 	gDPPipeSync(gdl++);
 
@@ -129,7 +129,7 @@ Gfx *func0f0d4a3c(Gfx *gdl, int arg1)
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);
 
 	func0f0d4690(&mtx);
-	mtxF2L(&mtx, mtxptr);
+	mtx4CopyF(&mtx, mtxptr);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -139,12 +139,12 @@ Gfx *func0f0d4a3c(Gfx *gdl, int arg1)
 Gfx *func0f0d4c80(Gfx *gdl)
 {
 	Mtxf mtx;
-	Mtxf *mtxptr = gfxAllocateMatrix();
+	Mtxf *mtxptr = gfxAllocateMatrixF();
 
 	func0f0d4690(&mtx);
 	mtxScaleRow0Full(0.1f, &mtx);
 	mtxScaleRow1Full(0.1f, &mtx);
-	mtxF2L(&mtx, mtxptr);
+	mtx4CopyF(&mtx, mtxptr);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 

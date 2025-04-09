@@ -11,13 +11,14 @@ void mtx4LoadYRotationWithTranslation(struct coord *pos, float radians, Mtxf *mt
 void mtx4LoadXRotation(float radians, Mtxf *mtx);
 void mtx4LoadYRotation(float radians, Mtxf *mtx);
 void mtx4LoadZRotation(float radians, Mtxf *mtx);
-void mtx4LoadRotation(struct coord *rot, Mtxf *mtx);
+void mtx4LoadRotationF(struct coord *rot, Mtxf *mtx);
+void mtx4LoadRotation(struct coord *src, Mtx *dest);
 void mtx4GetRotation(float mtx[4][4], struct coord *dst);
 void mtx4LoadRotationAndTranslation(struct coord *pos, struct coord *rot, Mtxf *mtx);
-void mtx4LoadTranslation(struct coord *pos, Mtxf *mtx);
+void mtx4LoadTranslationF(struct coord *pos, Mtxf *mtx);
+void mtx4LoadTranslation(struct coord *pos, Mtx *mtx);
 void mtx00016710(float mult, float mtx[4][4]);
 void mtx00016798(Mtxf *src, Mtxf *dst);
-void mtx00016820(Mtx *src, Mtx *dst);
 void mtxBuildCameraMatrix(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
 void mtxBuildLookAtMatrix(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
 void mtxBuildLookAtMatrix2(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);

@@ -2273,7 +2273,7 @@ bool aiObjectMoveToPad(void)
 				pad.up.x, pad.up.y, pad.up.z);
 
 		if (obj->model) {
-			mtxScaleRotationPart(obj->model->scale, &matrix);
+			mtxScaleRotationPartF(obj->model->scale, &matrix);
 		}
 
 		rooms[0] = pad.room;

@@ -3387,8 +3387,8 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 	struct coord *point3;
 	uint32_t word;
 	Gfx *tri4gdl;
-	Mtxf *mtx = gfxAllocateMatrix();
-	mtx4LoadIdentity(mtx);
+	Mtxf *mtx = gfxAllocateMatrixF();
+	mtx4LoadIdentityF(mtx);
 	struct coord min;
 	struct coord max;
 	struct coord sp84;

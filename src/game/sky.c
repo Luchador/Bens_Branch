@@ -783,9 +783,9 @@ Gfx *skyRender(Gfx *gdl)
 		struct skyvtx2d watervertices2d[5];
 		int i;
 
-		mtx4MultMtx4(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp3cc);
-		mtxScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
-		mtx4MultMtx4(&sp3cc, &g_SkyMtx, &sp38c);
+		mtx4MultMtx4F(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp3cc);
+		mtxScale(&g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
+		mtx4MultMtx4F(&sp3cc, &g_SkyMtx, &sp38c);
 
 		for (i = 0; i < numvertices; i++) {
 			skyConvertVertex(&watervertices3d[i], &sp38c, 130, 65535.0f, 65535.0f, &watervertices2d[i]);
@@ -839,9 +839,9 @@ Gfx *skyRender(Gfx *gdl)
 
 			Vtx *verts = gfxAllocateVertices(numvertices);
 			Col *cols = gfxAllocateColours(numvertices);
-			Mtxf *mtx = gfxAllocateMatrix();
-			mtx4MultMtx4(camGetWorldToScreenMtxf(), &g_SkyMtx, mtx);
-			mtxF2L(mtx, mtx);
+			Mtxf *mtx = gfxAllocateMatrixF();
+			mtx4MultMtx4F(camGetWorldToScreenMtxf(), &g_SkyMtx, mtx);
+			mtx4CopyF(mtx, mtx);
 
 			gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
 			gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
@@ -1264,9 +1264,9 @@ Gfx *skyRender(Gfx *gdl)
 	struct skyvtx2d skyvertices2d[5];
 	int i;
 
-	mtx4MultMtx4(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp1ec);
-	mtxScaleF(g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
-	mtx4MultMtx4(&sp1ec, &g_SkyMtx, &sp1ac);
+	mtx4MultMtx4F(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp1ec);
+	mtxScale(&g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
+	mtx4MultMtx4F(&sp1ec, &g_SkyMtx, &sp1ac);
 
 	for (i = 0; i < numvertices; i++) {
 		skyConvertVertex(&skyvertices3d[i], &sp1ac, 130, 65535.0f, 65535.0f, &skyvertices2d[i]);
@@ -1277,9 +1277,9 @@ Gfx *skyRender(Gfx *gdl)
 
 	Vtx *verts = gfxAllocateVertices(numvertices);
 	Col *cols = gfxAllocateColours(numvertices);
-	Mtxf *mtx = gfxAllocateMatrix();
-	mtx4MultMtx4(camGetWorldToScreenMtxf(), &g_SkyMtx, mtx);
-	mtxF2L(mtx, mtx);
+	Mtxf *mtx = gfxAllocateMatrixF();
+	mtx4MultMtx4F(camGetWorldToScreenMtxf(), &g_SkyMtx, mtx);
+	mtx4CopyF(mtx, mtx);
 
 	gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
