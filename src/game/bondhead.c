@@ -2,6 +2,7 @@
 #include "constants.h"
 #include "game/bondhead.h"
 #include "game/bondmove.h"
+#include "game/debug.h"
 #include "game/mtxutils.h"
 #include "game/utils.h"
 #include "bss.h"

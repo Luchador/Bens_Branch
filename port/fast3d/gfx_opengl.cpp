@@ -20,6 +20,8 @@
 #include "gfx_rendering_api.h"
 #include "gfx_pc.h"
 #include "gfx_api.h"
+#include "gfx_opengl.h"
+#include "gfxdata.h"
 
 using namespace std;
 
@@ -80,13 +82,6 @@ static struct GfxClipParameters gfx_opengl_get_clip_parameters(void) {
     return { false, framebuffers[current_framebuffer].invert_y };
 }
 
-// Configures vertex attribute pointers for a given shader program.
-// For each active attribute in the ShaderProgram, this enables the
-// attribute and tells OpenGL how to read the corresponding data
-// from the vertex buffer, based on its size and offset.
-//
-// Assumes that the currently bound VBO contains interleaved float data
-// matching the layout described by ShaderProgram.
 static void gfx_opengl_vertex_array_set_attribs(struct ShaderProgram* prg) {
     size_t num_floats = prg->num_floats;
     size_t pos = 0;
@@ -146,8 +141,6 @@ static void append_line(char* buf, size_t* len, const char* str) {
     buf[(*len)++] = '\n';
 }
 
-#define RAND_NOISE "((random(vec3(floor(gl_FragCoord.xy * noise_scale), float(frame_count))) + 1.0) / 2.0)"
-
 static const char* shader_item_to_str(uint32_t item, bool with_alpha, bool only_alpha, bool inputs_have_alpha,
                                       bool hint_single_element) {
     if (!only_alpha) {
@@ -178,9 +171,6 @@ static const char* shader_item_to_str(uint32_t item, bool with_alpha, bool only_
                 return with_alpha ? "texVal1" : "texVal1.rgb";
             case SHADER_COMBINED:
                 return with_alpha ? "texel" : "texel.rgb";
-            case SHADER_NOISE:
-                return with_alpha ? "vec4(" RAND_NOISE ", " RAND_NOISE ", " RAND_NOISE ", " RAND_NOISE ")"
-                                  : "vec3(" RAND_NOISE ", " RAND_NOISE ", " RAND_NOISE ")";
         }
     } else {
         switch (item) {
@@ -206,14 +196,10 @@ static const char* shader_item_to_str(uint32_t item, bool with_alpha, bool only_
                 return "texVal1.a";
             case SHADER_COMBINED:
                 return "texel.a";
-            case SHADER_NOISE:
-                return RAND_NOISE;
         }
     }
     return "";
 }
-
-#undef RAND_NOISE
 
 static void append_formula(char* buf, size_t* len, uint8_t c[2][4], bool do_single, bool do_multiply, bool do_mix,
                            bool with_alpha, bool only_alpha, bool opt_alpha) {
@@ -248,12 +234,16 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     gfx_cc_get_features(shader_id0, shader_id1, &cc_features);
 
     char vs_buf[2048];
-    char fs_buf[8096];
+    char fs_buf[8192];
     size_t vs_len = 0;
     size_t fs_len = 0;
     size_t num_floats = 4;
 
+    //
+    //
     // Vertex shader
+    //
+    //
 
     vs_len += sprintf(vs_buf + vs_len, "#version %s\n", gl_glsl_version_str);
 
@@ -261,13 +251,8 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         append_line(vs_buf, &vs_len, "precision mediump float;");
     }
 
-    if (gl_glsl_version >= 130) {
-        append_line(vs_buf, &vs_len, "#define INPUT in");
-        append_line(vs_buf, &vs_len, "#define OUTPUT out");
-    } else {
-        append_line(vs_buf, &vs_len, "#define INPUT attribute");
-        append_line(vs_buf, &vs_len, "#define OUTPUT varying");
-    }
+    append_line(vs_buf, &vs_len, "#define INPUT in");
+    append_line(vs_buf, &vs_len, "#define OUTPUT out");
 
     append_line(vs_buf, &vs_len, "INPUT vec4 aVtxPos;");
 
@@ -291,17 +276,17 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         num_floats += 4;
     }
 
-    if (cc_features.opt_grayscale) {
-        append_line(vs_buf, &vs_len, "INPUT vec4 aGrayscaleColor;");
-        append_line(vs_buf, &vs_len, "OUTPUT vec4 vGrayscaleColor;");
-        num_floats += 4;
-    }
-
     for (int i = 0; i < cc_features.num_inputs; i++) {
         vs_len += sprintf(vs_buf + vs_len, "INPUT vec%d aInput%d;\n", cc_features.opt_alpha ? 4 : 3, i + 1);
         vs_len += sprintf(vs_buf + vs_len, "OUTPUT vec%d vInput%d;\n", cc_features.opt_alpha ? 4 : 3, i + 1);
         num_floats += cc_features.opt_alpha ? 4 : 3;
     }
+
+    // Fog inputs/outputs
+    append_line(vs_buf, &vs_len, "uniform vec3 uCamPos;");
+    append_line(vs_buf, &vs_len, "uniform float uFogStart;");
+    append_line(vs_buf, &vs_len, "uniform float uFogEnd;");
+    append_line(vs_buf, &vs_len, "OUTPUT float vFogAmount;");
 
     append_line(vs_buf, &vs_len, "void main() {");
     for (int i = 0; i < 2; i++) {
@@ -318,21 +303,26 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     if (cc_features.opt_fog) {
         append_line(vs_buf, &vs_len, "    vFog = aFog;");
     }
-    if (cc_features.opt_grayscale) {
-        append_line(vs_buf, &vs_len, "    vGrayscaleColor = aGrayscaleColor;");
-    }
     for (int i = 0; i < cc_features.num_inputs; i++) {
         vs_len += sprintf(vs_buf + vs_len, "    vInput%d = aInput%d;\n", i + 1, i + 1);
     }
 
-    append_line(vs_buf, &vs_len, "    gl_Position = aVtxPos;");
+    append_line(vs_buf, &vs_len, "gl_Position = aVtxPos;");
+    append_line(vs_buf, &vs_len, "vec3 worldPos = aVtxPos.xyz;");
+    append_line(vs_buf, &vs_len, "float dist = distance(worldPos, uCamPos);");
+    append_line(vs_buf, &vs_len, "vFogAmount = clamp((dist - uFogStart) / (uFogEnd - uFogStart), 0.0, 1.0);");
+
     if (!GLAD_GL_ARB_depth_clamp) {
         // HACK: workaround for no GL_DEPTH_CLAMP
         append_line(vs_buf, &vs_len, "    gl_Position.z *= 0.3f;");
     }
     append_line(vs_buf, &vs_len, "}");
 
+    //
+    //
     // Fragment shader
+    //
+    //
 
     fs_len += sprintf(fs_buf + fs_len, "#version %s\n", gl_glsl_version_str);
 
@@ -340,22 +330,16 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         append_line(fs_buf, &fs_len, "precision mediump float;");
     }
 
-    if (gl_glsl_version >= 130) {
-        append_line(fs_buf, &fs_len, "#define INPUT in");
-        append_line(fs_buf, &fs_len, "#define OUTPUT_COLOR outColor");
-        append_line(fs_buf, &fs_len, "#define SAMPLE_TEX(tex, uv) texture(tex, uv)");
-    } else {
-        append_line(fs_buf, &fs_len, "#define INPUT varying");
-        append_line(fs_buf, &fs_len, "#define OUTPUT_COLOR gl_FragColor");
-        append_line(fs_buf, &fs_len, "#define SAMPLE_TEX(tex, uv) texture2D(tex, uv)");
-    }
+    append_line(fs_buf, &fs_len, "#define INPUT in");
+    append_line(fs_buf, &fs_len, "#define OUTPUT_COLOR outColor");
+    append_line(fs_buf, &fs_len, "#define SAMPLE_TEX(tex, uv) texture(tex, uv)");
 
     // Reference approach to color wrapping as per GLideN64
     // Return wrapped value of x in interval [low, high)
-    append_line(fs_buf, &fs_len, "#define WRAP(x, low, high) mod((x)-(low), (high)-(low)) + (low)");
 
     append_line(fs_buf, &fs_len, "#define TEX_OFFSET(tex, uv, texSize, off) SAMPLE_TEX(tex, uv - (off)/texSize)");
 
+    append_line(fs_buf, &fs_len, "precision mediump float;");
     for (int i = 0; i < 2; i++) {
         if (cc_features.used_textures[i]) {
             fs_len += sprintf(fs_buf + fs_len, "INPUT vec2 vTexCoord%d;\n", i);
@@ -369,13 +353,12 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     if (cc_features.opt_fog) {
         append_line(fs_buf, &fs_len, "INPUT vec4 vFog;");
     }
-    if (cc_features.opt_grayscale) {
-        append_line(fs_buf, &fs_len, "INPUT vec4 vGrayscaleColor;");
-    }
     for (int i = 0; i < cc_features.num_inputs; i++) {
         fs_len += sprintf(fs_buf + fs_len, "INPUT vec%d vInput%d;\n", cc_features.opt_alpha ? 4 : 3, i + 1);
     }
 
+    append_line(fs_buf, &fs_len, "INPUT float vFogAmount;");
+    
     if (cc_features.used_textures[0]) {
         append_line(fs_buf, &fs_len, "uniform sampler2D uTex0;");
         if (current_filter_mode == FILTER_THREE_POINT)
@@ -388,12 +371,7 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     }
 
     append_line(fs_buf, &fs_len, "uniform int frame_count;");
-    append_line(fs_buf, &fs_len, "uniform float noise_scale;");
-
-    append_line(fs_buf, &fs_len, "float random(in vec3 value) {");
-    append_line(fs_buf, &fs_len, "    float random = dot(sin(value), vec3(12.9898, 78.233, 37.719));");
-    append_line(fs_buf, &fs_len, "    return fract(sin(random) * 143758.5453);");
-    append_line(fs_buf, &fs_len, "}");
+    append_line(fs_buf, &fs_len, "uniform vec3 fogColor = vec3(0.5, 0.8, 1.0);");
 
     if (current_filter_mode == FILTER_THREE_POINT) {
         append_line(fs_buf, &fs_len, "vec4 filter3point(in sampler2D tex, in vec2 texCoord, in vec2 texSize) {");
@@ -443,10 +421,7 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         }
     }
 
-    if (gl_glsl_version >= 130) {
-        append_line(fs_buf, &fs_len, "out vec4 outColor;");
-    }
-
+    append_line(fs_buf, &fs_len, "out vec4 outColor;");
     append_line(fs_buf, &fs_len, "void main() {");
 
     for (int i = 0; i < 2; i++) {
@@ -500,13 +475,8 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
                            cc_features.opt_alpha);
         }
         append_line(fs_buf, &fs_len, ";");
-
-        if (c == 0) {
-            append_line(fs_buf, &fs_len, "    texel = WRAP(texel, -1.01, 1.01);");
-        }
     }
 
-    append_line(fs_buf, &fs_len, "    texel = WRAP(texel, -0.51, 1.51);");
     append_line(fs_buf, &fs_len, "    texel = clamp(texel, 0.0, 1.0);");
     // TODO discard if alpha is 0?
     if (cc_features.opt_fog) {
@@ -517,36 +487,24 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         }
     }
 
-    if (cc_features.opt_texture_edge && cc_features.opt_alpha) {
-        append_line(fs_buf, &fs_len, "    if (texel.a > 0.19) texel.a = 1.0; else discard;");
-    }
-
-    if (cc_features.opt_alpha && cc_features.opt_noise) {
-        append_line(fs_buf, &fs_len,
-                    "    texel.a *= floor(clamp(random(vec3(floor(gl_FragCoord.xy * noise_scale), float(frame_count))) + "
-                    "texel.a, 0.0, 1.0));");
-    }
-
-    if (cc_features.opt_grayscale) {
-        append_line(fs_buf, &fs_len, "    float intensity = (texel.r + texel.g + texel.b) / 3.0;");
-        append_line(fs_buf, &fs_len, "    vec3 new_texel = vGrayscaleColor.rgb * intensity;");
-        append_line(fs_buf, &fs_len, "    texel.rgb = mix(texel.rgb, new_texel, vGrayscaleColor.a);");
-    }
+    /*if (cc_features.opt_alpha) {
+        append_line(fs_buf, &fs_len, "    texel = vec4(mix(texel.rgb, fogColor.rgb, vFogAmount), texel.a);");
+    } else {
+        append_line(fs_buf, &fs_len, "    texel = mix(texel.rgb, fogColor.rgb, vFogAmount);");
+    }*/
 
     if (cc_features.opt_alpha) {
-        if (cc_features.opt_alpha_threshold) {
-            append_line(fs_buf, &fs_len, "    if (texel.a < 8.0 / 256.0) discard;");
-        }
-        if (cc_features.opt_invisible) {
-            append_line(fs_buf, &fs_len, "    texel.a = 0.0;");
-        }
-
         append_line(fs_buf, &fs_len, "    OUTPUT_COLOR = texel;");
     } else {
         append_line(fs_buf, &fs_len, "    OUTPUT_COLOR = vec4(texel, 1.0);");
     }
 
     append_line(fs_buf, &fs_len, "}");
+
+    /*if(cc_features.opt_fog)
+    {
+        writeShadersToFile(vs_buf, "shaderdump.txt");
+    }*/
 
     vs_buf[vs_len] = '\0';
     fs_buf[fs_len] = '\0';
@@ -582,7 +540,6 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     }
 
     GLuint shader_program = glCreateProgram();
-    
     glAttachShader(shader_program, vertex_shader);
     glAttachShader(shader_program, fragment_shader);
     glLinkProgram(shader_program);
@@ -647,6 +604,17 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
 
     glUseProgram(shader_program);
 
+    // Set camera position
+    GLint camPosLoc = glGetUniformLocation(shader_program, "uCamPos");
+    glUniform3f(camPosLoc, g_GfxCamPos.x, g_GfxCamPos.y, g_GfxCamPos.z);
+
+    // Set fog start and fog end
+    GLint fogStartLoc = glGetUniformLocation(shader_program, "uFogStart");
+    GLint fogEndLoc = glGetUniformLocation(shader_program, "uFogEnd");
+
+    glUniform1f(fogStartLoc, 300.0f);
+    glUniform1f(fogEndLoc, 1000.0f);
+
     if (cc_features.used_textures[0]) {
         GLint sampler_location = glGetUniformLocation(shader_program, "uTex0");
         glUniform1i(sampler_location, 0);
@@ -664,6 +632,47 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     gfx_opengl_load_shader(prg);
 
     return prg;
+}
+
+void writeShadersToFile(const char *fs_buf, const char *filename) {
+    FILE *file = fopen(filename, "w");
+
+    if (!file) {
+        perror("Failed to open file for writing shaders");
+        return;
+    }
+
+    if (fs_buf) {
+        fprintf(file, "%s\n", fs_buf);
+    } else {
+        fprintf(file, "[Fragment shader buffer is NULL]\n");
+    }
+
+    fclose(file);
+}
+
+int debug_log(const char *message, int num)
+{
+	FILE *debug_file = fopen("debug.log", "a");
+    if (debug_file == NULL) {
+        perror("Error opening debug.log");
+        return 0;
+    }
+
+    fprintf(debug_file, message, num);
+    fclose(debug_file);
+
+	return 1;
+}
+
+void debug_log_coord(const struct coord *pos) {
+    FILE *file = fopen("debug.log", "a"); // Open in append mode
+    if (file) {
+        fprintf(file, "coord: x = %.6f, y = %.6f, z = %.6f\n", pos->x, pos->y, pos->z);
+        fclose(file);
+    } else {
+        perror("Failed to open debug.log");
+    }
 }
 
 static struct ShaderProgram* gfx_opengl_lookup_shader(uint64_t shader_id0, uint32_t shader_id1) {

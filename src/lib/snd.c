@@ -1905,7 +1905,7 @@ struct sndstate *sndStart(int arg0, int16_t sound, struct sndstate **handle, int
 	}
 
 	if (sp40.id < (uint32_t)g_NumSounds) {
-		return func00033820(arg0, sp40.id, volume, pan & 0x7f, pitch, fxmix, fxbus, handle);
+		return func00033820(sp40.id, volume, pan & 0x7f, pitch, fxmix, fxbus, handle);
 	}
 
 	return NULL;

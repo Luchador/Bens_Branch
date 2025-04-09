@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include <math.h>
 #include "constants.h"
+#include "gfxdata.h"
 #include "game/bondeyespy.h"
 #include "game/bondmove.h"
 #include "game/cheats.h"
@@ -103,6 +104,8 @@ uint32_t var8009de34;
 int16_t g_SpawnPoints[24];
 int g_NumSpawnPoints;
 
+struct coord g_GfxCamPos = {0.0f, 0.0f, 0.0f};
+
 struct vimode g_ViModes[] = {
 	// fbwidth
 	// |               fbheight
@@ -120,8 +123,6 @@ struct vimode g_ViModes[] = {
 	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.5,              VIMODE_LO, SCREEN_HEIGHT_HI, 0,  180, 20, 136, 42  }, // hi-res
 };
 
-uint32_t var80070730 = 0xffffffff;
-uint32_t var80070734 = 0xffffffff;
 uint32_t var8007073c = 0;
 uint32_t var8007074c = 0;
 
@@ -4811,6 +4812,10 @@ void playerSetCamProperties(struct coord *pos, struct coord *up, struct coord *l
 	player->cam_look.y = look->y;
 	player->cam_look.z = look->z;
 	player->cam_room = room;
+
+	g_GfxCamPos.x = player->cam_pos.x;
+	g_GfxCamPos.y = player->cam_pos.y;
+	g_GfxCamPos.z = player->cam_pos.z;
 }
 
 void playerClearMemCamRoom(void)

@@ -34,7 +34,6 @@ struct N_SpeakerType {
 	uint8_t surround;
 	uint8_t mono;
 	uint8_t headphone;
-	uint8_t unk03;
 };
 
 extern struct N_SpeakerType N_SpeakerType;
@@ -162,7 +161,6 @@ typedef struct {
 typedef struct {
     struct sndstate *sndstate;
     int data;
-    int data2;
 } N_ALGenericEvent;
 
 typedef struct {

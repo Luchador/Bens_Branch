@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "game/debug.h"
 #include <stdio.h>
+#include <types.h>
 
 int debug_log(const char *message, int num)
 {
@@ -57,4 +58,14 @@ int debug_erase()
     printf("Log file erased successfully.\n");
 
     return 0;
+}
+
+void debug_log_coord(const struct coord *pos) {
+    FILE *file = fopen("debug.log", "a"); // Open in append mode
+    if (file) {
+        fprintf(file, "coord: x = %.6f, y = %.6f, z = %.6f\n", pos->x, pos->y, pos->z);
+        fclose(file);
+    } else {
+        perror("Failed to open debug.log");
+    }
 }

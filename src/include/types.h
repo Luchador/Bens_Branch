@@ -2528,7 +2528,7 @@ struct player {
 	/*0x03b4*/ int headwalkingtime60;
 	/*0x03b8*/ float headamplitude;
 	/*0x03bc*/ float sideamplitude;
-	/*0x03c0*/ struct coord headpos;
+	/*0x03c0*/ struct coord headpos; // Head position relative to the player's base position
 	/*0x03cc*/ struct coord headlook;
 	/*0x03d8*/ struct coord headup;
 	/*0x03e4*/ struct coord headpossum;

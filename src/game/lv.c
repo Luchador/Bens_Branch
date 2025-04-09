@@ -5,6 +5,7 @@
 #include "bss.h"
 #include "data.h"
 #include "game/activemenu.h"
+#include "game/artifacts.h"
 #include "game/bg.h"
 #include "game/body.h"
 #include "game/bondgun.h"
@@ -12,34 +13,26 @@
 #include "game/bondmove.h"
 #include "game/bondview.h"
 #include "game/casing.h"
+#include "game/challenge.h"
 #include "game/cheats.h"
 #include "game/chr.h"
+#include "game/chrmgr.h"
 #include "game/chraction.h"
+#include "game/chrutils.h"
 #include "game/credits.h"
-#include "game/debug.h"
 #include "game/dlights.h"
+#include "game/env.h"
 #include "game/explosions.h"
 #include "game/filemgr.h"
-#include "game/menuutils.h"
-#include "game/chrutils.h"
 #include "game/gunfx.h"
-#include "game/weaponutils.h"
-#include "game/modelmgr.h"
-#include "game/portal.h"
-#include "game/sky.h"
-#include "game/artifacts.h"
-#include "game/textutils.h"
-#include "game/zbuf.h"
-#include "game/challenge.h"
-#include "game/chrmgr.h"
-#include "game/env.h"
 #include "game/gfxmemory.h"
-#include "game/gunfx.h"
 #include "game/hudmsg.h"
 #include "game/inv.h"
 #include "game/lang.h"
 #include "game/lv.h"
 #include "game/menu.h"
+#include "game/menuutils.h"
+#include "game/modelmgr.h"
 #include "game/mplayer/mplayer.h"
 #include "game/mplayer/scenarios.h"
 #include "game/mplayer/setup.h"
@@ -51,6 +44,7 @@
 #include "game/player.h"
 #include "game/playermgr.h"
 #include "game/playerreset.h"
+#include "game/portal.h"
 #include "game/prop.h"
 #include "game/propobj.h"
 #include "game/propobjstop.h"
@@ -66,13 +60,16 @@
 #include "game/stars.h"
 #include "game/tex.h"
 #include "game/texdecompress.h"
+#include "game/textutils.h"
 #include "game/tiles.h"
 #include "game/title.h"
 #include "game/training.h"
 #include "game/utils.h"
 #include "game/vtxstore.h"
 #include "game/wallhit.h"
+#include "game/weaponutils.h"
 #include "game/weather.h"
+#include "game/zbuf.h"
 #include "lib/anim.h"
 #include "lib/args.h"
 #include "lib/collision.h"
@@ -1207,6 +1204,7 @@ Gfx *lvRender(Gfx *gdl)
 						}
 						break;
 					}
+				}
 					
 
 					if (g_CutsceneStaticAudioHandle && !cutscenehasstatic) {
@@ -1336,7 +1334,7 @@ Gfx *lvRender(Gfx *gdl)
 							gdl = text0f153780(gdl);
 						}
 					}
-				}
+				
 
 				gdl = scenarioRenderHud(gdl);
 				gdl = lvRenderFade(gdl);
@@ -1970,6 +1968,7 @@ void lvStop(void)
 	psStop();
 	musicStop();
 	hudmsgsStop();
+	portalsStop();
 
 	if (g_Vars.stagenum < STAGE_TITLE) {
 		bgStop();

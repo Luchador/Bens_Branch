@@ -9,4 +9,5 @@ float portalGetXluFrac2(int arg0);
 float portalGetXluFrac(int arg0);
 void portal0f0b65a8(int numportals);
 void portalsReset(void);
+void portalsStop(void);
 void acousticReset(void);

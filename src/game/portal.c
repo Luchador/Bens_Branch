@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "game/bondeyespy.h"
 #include "game/bondmove.h"
@@ -6,6 +7,7 @@
 #include "game/chraction.h"
 #include "game/inv.h"
 #include "game/nbomb.h"
+#include "game/debug.h"
 #include "game/title.h"
 #include "game/chr.h"
 #include "game/body.h"
@@ -98,7 +100,12 @@ void portal0f0b65a8(int numportals)
 {
 	if (numportals > 0) {
 		g_NumPortalXluFracs = numportals;
-		g_PortalXluFracs = mempAlloc(ALIGN16(numportals * 2), MEMPOOL_STAGE);
+		g_PortalXluFracs = malloc(ALIGN16(numportals * sizeof(uint16_t)));
+
+		if (g_PortalXluFracs == NULL) {
+			// Handle allocation failure if needed
+			g_NumPortalXluFracs = 0;
+		}
 	} else {
 		g_PortalXluFracs = NULL;
 	}
@@ -145,6 +152,15 @@ void portalsReset(void)
 			portalGetXluFrac(i);
 			portalGetXluFrac2(i);
 		}
+	}
+}
+
+void portalsStop(void)
+{
+	if (g_PortalXluFracs) {
+		free(g_PortalXluFracs);
+		g_PortalXluFracs = NULL;
+		g_NumPortalXluFracs = 0;
 	}
 }
 
