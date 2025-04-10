@@ -37,7 +37,6 @@
 	build/ROMID/lib/joy.o (section); \
 	build/ROMID/lib/varsinit.o (section); \
 	build/ROMID/lib/mtxasm.o (section); \
-	build/ROMID/lib/mtx.o (section); \
 	build/ROMID/lib/lib_17ce0.o (section); \
 	build/ROMID/lib/ailist.o (section); \
 	build/ROMID/lib/path.o (section); \

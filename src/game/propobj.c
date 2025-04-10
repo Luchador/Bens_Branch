@@ -4025,7 +4025,7 @@ bool objEmbed(struct prop *prop, struct prop *parent, struct model *model, struc
 			mtx4SetTranslation(&prop->pos, (Mtx*)&sp34);
 			mtxApplyAffineTransform((Mtx*)&sp34, (Mtx*)&sp74, (Mtx*)&sp134);
 			mtxApplyAffineTransform((Mtx*)camGetProjectionMtxF(), (Mtx*)sp24, (Mtx*)&spf4);
-			mtxInvertAffine(spf4.m, spb4.m);
+			mtx000172f0(spf4.m, spb4.m);
 			mtxApplyAffineTransform((Mtx*)&spb4, (Mtx*)&sp134, (Mtx*)&obj->embedment->matrix);
 
 			return true;
@@ -6507,7 +6507,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 				func0f069c70(obj, false, true);
 				mtx3ToMtx4(obj->realrot, (Mtx*)&sp484);
 				mtx4SetTranslation(&prop->pos, (Mtx*)&sp484);
-				mtxInvertAffine(sp504.m, sp4c4.m);
+				mtx000172f0(sp504.m, sp4c4.m);
 				mtx4MultMtx4((Mtx*)&sp484, (Mtx*)&sp4c4, (Mtx*)&sp544);
 				platformDisplaceProps2(prop, &sp544);
 				result = true;
@@ -13449,7 +13449,7 @@ bool func0f084594(struct model *model, struct modelnode *node, struct coord *arg
 	rodata = &node->rodata->bbox;
 
 	mtxindex = modelFindNodeMtxIndex(node, 0);
-	mtxInvertAffine(model->matrices[mtxindex].m, mtx.m);
+	mtx000172f0(model->matrices[mtxindex].m, mtx.m);
 
 	spb8.x = arg2->x;
 	spb8.y = arg2->y;
@@ -13643,7 +13643,7 @@ bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *
 			if (mtx && mtx != spd0) {
 				spd0 = mtx;
 
-				mtxInvertAffine(mtx->m, sp64.m);
+				mtx000172f0(mtx->m, sp64.m);
 
 				spec.x = arg2->x;
 				spec.y = arg2->y;

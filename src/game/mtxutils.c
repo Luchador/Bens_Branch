@@ -20,8 +20,6 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #endif
 
-#define EPSILON 0.0000019073486f
-
 #define	FTOFRAC8(x)	((int) MIN(((x) * (128.0f)), 127.0f) & 0xff)
 
 void integrateDampedMotion(float *arg0, float *arg1, float arg2)
@@ -29,6 +27,17 @@ void integrateDampedMotion(float *arg0, float *arg1, float arg2)
 	float tmp = arg1[0] - arg2 * 0.27777779f;
 	arg0[0] += arg2 * (arg1[0] + tmp) * 0.5f;
 	arg1[0] = tmp;
+}
+
+void mtxLoadRandomRotation(Mtx *mtx)
+{
+	struct coord coord = {0, 0, 0};
+
+	coord.x = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
+	coord.y = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
+	coord.z = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
+
+	mtx4LoadRotationF(&coord, (Mtxf*)mtx);
 }
 
 void mtxRandomToss(struct coord *coord, Mtx *mtx)
@@ -330,264 +339,6 @@ void mtx4RotateVec(Mtx *mtx, struct coord *vec, struct coord *dst)
 	dst->z = (*mtx)[0][2] * x + (*mtx)[1][2] * y + (*mtx)[2][2] * z;
 }
 
-void mtxLoadRandomRotation(Mtx *mtx)
-{
-	struct coord coord = {0, 0, 0};
-
-	coord.x = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
-	coord.y = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
-	coord.z = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
-
-	mtx4LoadRotationF(&coord, (Mtxf*)mtx);
-}
-
-void mtx4LoadYRotationWithTranslation(struct coord *coord, float angle, Mtxf *mtx)
-{
-	float cos = cosf(angle);
-	float sin = sinf(angle);
-
-	mtx->m[0][0] = cos;
-	mtx->m[0][1] = 0;
-	mtx->m[0][2] = -sin;
-	mtx->m[0][3] = 0;
-
-	mtx->m[1][0] = 0;
-	mtx->m[1][1] = 1;
-	mtx->m[1][2] = 0;
-	mtx->m[1][3] = 0;
-
-	mtx->m[2][0] = sin;
-	mtx->m[2][1] = 0;
-	mtx->m[2][2] = cos;
-	mtx->m[2][3] = 0;
-
-	mtx->m[3][0] = coord->x;
-	mtx->m[3][1] = coord->y;
-	mtx->m[3][2] = coord->z;
-	mtx->m[3][3] = 1;
-}
-
-void mtx4LoadXRotationF(float angle, Mtxf *mtx)
-{
-	float cos = cosf(angle);
-	float sin = sinf(angle);
-
-	mtx->m[0][0] = 1;
-	mtx->m[0][1] = 0;
-	mtx->m[0][2] = 0;
-	mtx->m[0][3] = 0;
-
-	mtx->m[1][0] = 0;
-	mtx->m[1][1] = cos;
-	mtx->m[1][2] = sin;
-	mtx->m[1][3] = 0;
-
-	mtx->m[2][0] = 0;
-	mtx->m[2][1] = -sin;
-	mtx->m[2][2] = cos;
-	mtx->m[2][3] = 0;
-
-	mtx->m[3][0] = 0;
-	mtx->m[3][1] = 0;
-	mtx->m[3][2] = 0;
-	mtx->m[3][3] = 1;
-}
-
-void mtx4LoadYRotationF(float angle, Mtxf *mtx)
-{
-	float cos = cosf(angle);
-	float sin = sinf(angle);
-
-	mtx->m[0][0] = cos;
-	mtx->m[0][1] = 0;
-	mtx->m[0][2] = -sin;
-	mtx->m[0][3] = 0;
-
-	mtx->m[1][0] = 0;
-	mtx->m[1][1] = 1;
-	mtx->m[1][2] = 0;
-	mtx->m[1][3] = 0;
-
-	mtx->m[2][0] = sin;
-	mtx->m[2][1] = 0;
-	mtx->m[2][2] = cos;
-	mtx->m[2][3] = 0;
-
-	mtx->m[3][0] = 0;
-	mtx->m[3][1] = 0;
-	mtx->m[3][2] = 0;
-	mtx->m[3][3] = 1;
-}
-
-void mtx4LoadYRotation(float angle, Mtx *mtx)
-{
-	float cos = cosf(angle);
-	float sin = sinf(angle);
-
-	(*mtx)[0][0] = cos;
-	(*mtx)[0][1] = 0;
-	(*mtx)[0][2] = -sin;
-	(*mtx)[0][3] = 0;
-
-	(*mtx)[1][0] = 0;
-	(*mtx)[1][1] = 1;
-	(*mtx)[1][2] = 0;
-	(*mtx)[1][3] = 0;
-
-	(*mtx)[2][0] = sin;
-	(*mtx)[2][1] = 0;
-	(*mtx)[2][2] = cos;
-	(*mtx)[2][3] = 0;
-
-	(*mtx)[3][0] = 0;
-	(*mtx)[3][1] = 0;
-	(*mtx)[3][2] = 0;
-	(*mtx)[3][3] = 1;
-}
-
-void mtx4LoadZRotationF(float angle, Mtxf *mtx)
-{
-	float cos = cosf(angle);
-	float sin = sinf(angle);
-
-	mtx->m[0][0] = cos;
-	mtx->m[0][1] = sin;
-	mtx->m[0][2] = 0;
-	mtx->m[0][3] = 0;
-
-	mtx->m[1][0] = -sin;
-	mtx->m[1][1] = cos;
-	mtx->m[1][2] = 0;
-	mtx->m[1][3] = 0;
-
-	mtx->m[2][0] = 0;
-	mtx->m[2][1] = 0;
-	mtx->m[2][2] = 1;
-	mtx->m[2][3] = 0;
-
-	mtx->m[3][0] = 0;
-	mtx->m[3][1] = 0;
-	mtx->m[3][2] = 0;
-	mtx->m[3][3] = 1;
-}
-
-void mtx4LoadRotationF(struct coord *src, Mtxf *dest)
-{
-	float xcos = cosf(src->x);
-	float xsin = sinf(src->x);
-	float ycos = cosf(src->y);
-	float ysin = sinf(src->y);
-	float zcos = cosf(src->z);
-	float zsin = sinf(src->z);
-	float a = xsin * zsin;
-	float b = xcos * zsin;
-	float c = xsin * zcos;
-	float d = xcos * zcos;
-
-	dest->m[0][0] = ycos * zcos;
-	dest->m[0][1] = ycos * zsin;
-	dest->m[0][2] = -ysin;
-	dest->m[0][3] = 0;
-
-	dest->m[1][0] = c * ysin - xcos * zsin;
-	dest->m[1][1] = a * ysin + xcos * zcos;
-	dest->m[1][2] = xsin * ycos;
-	dest->m[1][3] = 0;
-
-	dest->m[2][0] = d * ysin + xsin * zsin;
-	dest->m[2][1] = b * ysin - xsin * zcos;
-	dest->m[2][2] = xcos * ycos;
-	dest->m[2][3] = 0;
-
-	dest->m[3][0] = 0;
-	dest->m[3][1] = 0;
-	dest->m[3][2] = 0;
-	dest->m[3][3] = 1;
-}
-
-void mtx4LoadRotation(struct coord *src, Mtx *dest)
-{
-	float xcos = cosf(src->x);
-	float xsin = sinf(src->x);
-	float ycos = cosf(src->y);
-	float ysin = sinf(src->y);
-	float zcos = cosf(src->z);
-	float zsin = sinf(src->z);
-	float a = xsin * zsin;
-	float b = xcos * zsin;
-	float c = xsin * zcos;
-	float d = xcos * zcos;
-
-	(*dest)[0][0] = ycos * zcos;
-	(*dest)[0][1] = ycos * zsin;
-	(*dest)[0][2] = -ysin;
-	(*dest)[0][3] = 0;
-
-	(*dest)[1][0] = c * ysin - xcos * zsin;
-	(*dest)[1][1] = a * ysin + xcos * zcos;
-	(*dest)[1][2] = xsin * ycos;
-	(*dest)[1][3] = 0;
-
-	(*dest)[2][0] = d * ysin + xsin * zsin;
-	(*dest)[2][1] = b * ysin - xsin * zcos;
-	(*dest)[2][2] = xcos * ycos;
-	(*dest)[2][3] = 0;
-
-	(*dest)[3][0] = 0;
-	(*dest)[3][1] = 0;
-	(*dest)[3][2] = 0;
-	(*dest)[3][3] = 1;
-}
-
-void mtx4GetRotation(float mtx[4][4], struct coord *dst)
-{
-	float norm;
-	float sin_x_cos_y = mtx[1][2];
-	float cos_x_cos_y = mtx[2][2];
-
-	norm = sqrtf(sin_x_cos_y * sin_x_cos_y + cos_x_cos_y * cos_x_cos_y);
-
-	if (EPSILON < norm) {
-		dst->x = atan2f(mtx[1][2], mtx[2][2]);
-		dst->y = atan2f(-mtx[0][2], norm);
-		dst->z = atan2f(mtx[0][1], mtx[0][0]);
-	} else {
-		dst->x = 0;
-		dst->y = atan2f(-mtx[0][2], norm);
-		dst->z = atan2f(-mtx[1][0], mtx[1][1]);
-	}
-}
-
-void mtx4LoadRotationAndTranslation(struct coord *pos, struct coord *rot, Mtxf *mtx)
-{
-	mtx4LoadRotationF(rot, mtx);
-	mtx4SetTranslation(pos, (Mtx*)mtx);
-}
-
-void mtx4LoadRotationFrom(float src[4][4], float dst[4][4])
-{
-	dst[0][0] = src[0][0];
-	dst[0][1] = src[1][0];
-	dst[0][2] = src[2][0];
-
-	dst[1][0] = src[0][1];
-	dst[1][1] = src[1][1];
-	dst[1][2] = src[2][1];
-
-	dst[2][0] = src[0][2];
-	dst[2][1] = src[1][2];
-	dst[2][2] = src[2][2];
-
-	dst[3][0] = 0;
-	dst[3][1] = 0;
-	dst[3][2] = 0;
-
-	dst[0][3] = 0;
-	dst[1][3] = 0;
-	dst[2][3] = 0;
-	dst[3][3] = 1;
-}
-
 /*
 * Frustum Matrix Functions
 */
@@ -885,6 +636,231 @@ void mtx00016208(float mtx[3][3], struct coord *coord)
 	coord->z = tmp[2];
 }
 
+void mtx4LoadYRotationWithTranslation(struct coord *coord, float angle, Mtxf *mtx)
+{
+	float cos = cosf(angle);
+	float sin = sinf(angle);
+
+	mtx->m[0][0] = cos;
+	mtx->m[0][1] = 0;
+	mtx->m[0][2] = -sin;
+	mtx->m[0][3] = 0;
+
+	mtx->m[1][0] = 0;
+	mtx->m[1][1] = 1;
+	mtx->m[1][2] = 0;
+	mtx->m[1][3] = 0;
+
+	mtx->m[2][0] = sin;
+	mtx->m[2][1] = 0;
+	mtx->m[2][2] = cos;
+	mtx->m[2][3] = 0;
+
+	mtx->m[3][0] = coord->x;
+	mtx->m[3][1] = coord->y;
+	mtx->m[3][2] = coord->z;
+	mtx->m[3][3] = 1;
+}
+
+void mtx4LoadXRotationF(float angle, Mtxf *mtx)
+{
+	float cos = cosf(angle);
+	float sin = sinf(angle);
+
+	mtx->m[0][0] = 1;
+	mtx->m[0][1] = 0;
+	mtx->m[0][2] = 0;
+	mtx->m[0][3] = 0;
+
+	mtx->m[1][0] = 0;
+	mtx->m[1][1] = cos;
+	mtx->m[1][2] = sin;
+	mtx->m[1][3] = 0;
+
+	mtx->m[2][0] = 0;
+	mtx->m[2][1] = -sin;
+	mtx->m[2][2] = cos;
+	mtx->m[2][3] = 0;
+
+	mtx->m[3][0] = 0;
+	mtx->m[3][1] = 0;
+	mtx->m[3][2] = 0;
+	mtx->m[3][3] = 1;
+}
+
+void mtx4LoadYRotationF(float angle, Mtxf *mtx)
+{
+	float cos = cosf(angle);
+	float sin = sinf(angle);
+
+	mtx->m[0][0] = cos;
+	mtx->m[0][1] = 0;
+	mtx->m[0][2] = -sin;
+	mtx->m[0][3] = 0;
+
+	mtx->m[1][0] = 0;
+	mtx->m[1][1] = 1;
+	mtx->m[1][2] = 0;
+	mtx->m[1][3] = 0;
+
+	mtx->m[2][0] = sin;
+	mtx->m[2][1] = 0;
+	mtx->m[2][2] = cos;
+	mtx->m[2][3] = 0;
+
+	mtx->m[3][0] = 0;
+	mtx->m[3][1] = 0;
+	mtx->m[3][2] = 0;
+	mtx->m[3][3] = 1;
+}
+
+void mtx4LoadYRotation(float angle, Mtx *mtx)
+{
+	float cos = cosf(angle);
+	float sin = sinf(angle);
+
+	(*mtx)[0][0] = cos;
+	(*mtx)[0][1] = 0;
+	(*mtx)[0][2] = -sin;
+	(*mtx)[0][3] = 0;
+
+	(*mtx)[1][0] = 0;
+	(*mtx)[1][1] = 1;
+	(*mtx)[1][2] = 0;
+	(*mtx)[1][3] = 0;
+
+	(*mtx)[2][0] = sin;
+	(*mtx)[2][1] = 0;
+	(*mtx)[2][2] = cos;
+	(*mtx)[2][3] = 0;
+
+	(*mtx)[3][0] = 0;
+	(*mtx)[3][1] = 0;
+	(*mtx)[3][2] = 0;
+	(*mtx)[3][3] = 1;
+}
+
+void mtx4LoadZRotationF(float angle, Mtxf *mtx)
+{
+	float cos = cosf(angle);
+	float sin = sinf(angle);
+
+	mtx->m[0][0] = cos;
+	mtx->m[0][1] = sin;
+	mtx->m[0][2] = 0;
+	mtx->m[0][3] = 0;
+
+	mtx->m[1][0] = -sin;
+	mtx->m[1][1] = cos;
+	mtx->m[1][2] = 0;
+	mtx->m[1][3] = 0;
+
+	mtx->m[2][0] = 0;
+	mtx->m[2][1] = 0;
+	mtx->m[2][2] = 1;
+	mtx->m[2][3] = 0;
+
+	mtx->m[3][0] = 0;
+	mtx->m[3][1] = 0;
+	mtx->m[3][2] = 0;
+	mtx->m[3][3] = 1;
+}
+
+void mtx4LoadRotationF(struct coord *src, Mtxf *dest)
+{
+	float xcos = cosf(src->x);
+	float xsin = sinf(src->x);
+	float ycos = cosf(src->y);
+	float ysin = sinf(src->y);
+	float zcos = cosf(src->z);
+	float zsin = sinf(src->z);
+	float a = xsin * zsin;
+	float b = xcos * zsin;
+	float c = xsin * zcos;
+	float d = xcos * zcos;
+
+	dest->m[0][0] = ycos * zcos;
+	dest->m[0][1] = ycos * zsin;
+	dest->m[0][2] = -ysin;
+	dest->m[0][3] = 0;
+
+	dest->m[1][0] = c * ysin - xcos * zsin;
+	dest->m[1][1] = a * ysin + xcos * zcos;
+	dest->m[1][2] = xsin * ycos;
+	dest->m[1][3] = 0;
+
+	dest->m[2][0] = d * ysin + xsin * zsin;
+	dest->m[2][1] = b * ysin - xsin * zcos;
+	dest->m[2][2] = xcos * ycos;
+	dest->m[2][3] = 0;
+
+	dest->m[3][0] = 0;
+	dest->m[3][1] = 0;
+	dest->m[3][2] = 0;
+	dest->m[3][3] = 1;
+}
+
+void mtx4LoadRotation(struct coord *src, Mtx *dest)
+{
+	float xcos = cosf(src->x);
+	float xsin = sinf(src->x);
+	float ycos = cosf(src->y);
+	float ysin = sinf(src->y);
+	float zcos = cosf(src->z);
+	float zsin = sinf(src->z);
+	float a = xsin * zsin;
+	float b = xcos * zsin;
+	float c = xsin * zcos;
+	float d = xcos * zcos;
+
+	(*dest)[0][0] = ycos * zcos;
+	(*dest)[0][1] = ycos * zsin;
+	(*dest)[0][2] = -ysin;
+	(*dest)[0][3] = 0;
+
+	(*dest)[1][0] = c * ysin - xcos * zsin;
+	(*dest)[1][1] = a * ysin + xcos * zcos;
+	(*dest)[1][2] = xsin * ycos;
+	(*dest)[1][3] = 0;
+
+	(*dest)[2][0] = d * ysin + xsin * zsin;
+	(*dest)[2][1] = b * ysin - xsin * zcos;
+	(*dest)[2][2] = xcos * ycos;
+	(*dest)[2][3] = 0;
+
+	(*dest)[3][0] = 0;
+	(*dest)[3][1] = 0;
+	(*dest)[3][2] = 0;
+	(*dest)[3][3] = 1;
+}
+
+#define EPSILON 0.0000019073486f
+
+void mtx4GetRotation(float mtx[4][4], struct coord *dst)
+{
+	float norm;
+	float sin_x_cos_y = mtx[1][2];
+	float cos_x_cos_y = mtx[2][2];
+
+	norm = sqrtf(sin_x_cos_y * sin_x_cos_y + cos_x_cos_y * cos_x_cos_y);
+
+	if (EPSILON < norm) {
+		dst->x = atan2f(mtx[1][2], mtx[2][2]);
+		dst->y = atan2f(-mtx[0][2], norm);
+		dst->z = atan2f(mtx[0][1], mtx[0][0]);
+	} else {
+		dst->x = 0;
+		dst->y = atan2f(-mtx[0][2], norm);
+		dst->z = atan2f(-mtx[1][0], mtx[1][1]);
+	}
+}
+
+void mtx4LoadRotationAndTranslation(struct coord *pos, struct coord *rot, Mtxf *mtx)
+{
+	mtx4LoadRotationF(rot, mtx);
+	mtx4SetTranslation(pos, (Mtx*)mtx);
+}
+
 void mtx4LoadTranslationF(struct coord *pos, Mtxf *mtx)
 {
 	mtxIdent((Mtx*)mtx);
@@ -1084,6 +1060,30 @@ void mtx4Align(float mtx[4][4], float angle, float x, float y, float z)
 	mtxAlign((Mtx*)mtx, angle, x, y, z);
 }
 
+void mtx4LoadRotationFrom(float src[4][4], float dst[4][4])
+{
+	dst[0][0] = src[0][0];
+	dst[0][1] = src[1][0];
+	dst[0][2] = src[2][0];
+
+	dst[1][0] = src[0][1];
+	dst[1][1] = src[1][1];
+	dst[1][2] = src[2][1];
+
+	dst[2][0] = src[0][2];
+	dst[2][1] = src[1][2];
+	dst[2][2] = src[2][2];
+
+	dst[3][0] = 0;
+	dst[3][1] = 0;
+	dst[3][2] = 0;
+
+	dst[0][3] = 0;
+	dst[1][3] = 0;
+	dst[2][3] = 0;
+	dst[3][3] = 1;
+}
+
 void mtx000170e4(float src[4][4], float dst[4][4])
 {
 	float tmp = (src[0][0] * src[0][0] + src[1][0] * src[1][0] + src[2][0] * src[2][0]);
@@ -1134,7 +1134,7 @@ void mtx0001719c(float arg0[4][4], float arg1[4][4])
 	arg1[3][3] = 1;
 }
 
-void mtxInvertAffine(float arg0[4][4], float arg1[4][4])
+void mtx000172f0(float arg0[4][4], float arg1[4][4])
 {
 	float f0 = 0.0f;
 	f0 += arg0[0][0] * arg0[1][1] * arg0[2][2];
@@ -1163,15 +1163,15 @@ void mtxInvertAffine(float arg0[4][4], float arg1[4][4])
 	arg1[3][3] = 1.0f;
 }
 
-void mtxInverse4x4(float arg0[4][4], float arg1[4][4])
+void mtx00017588(float arg0[4][4], float arg1[4][4])
 {
 	int i;
 	int j;
 	float tmp;
 
-	mtxAdjugate4x4(arg0, arg1);
+	mtx00017614(arg0, arg1);
 
-	tmp = 1.0f / mtxDet4x4(arg0);
+	tmp = 1.0f / mtx00017a78(arg0);
 
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < 4; j++) {
@@ -1180,7 +1180,7 @@ void mtxInverse4x4(float arg0[4][4], float arg1[4][4])
 	}
 }
 
-void mtxAdjugate4x4(float arg0[4][4], float arg1[4][4])
+void mtx00017614(float arg0[4][4], float arg1[4][4])
 {
 	float mtx00, mtx10, mtx20, mtx30;
 	float mtx04, mtx14, mtx24, mtx34;
@@ -1196,69 +1196,67 @@ void mtxAdjugate4x4(float arg0[4][4], float arg1[4][4])
 	mtx30 = arg0[3][0]; mtx34 = arg0[3][1];
 	mtx38 = arg0[3][2]; mtx3c = arg0[3][3];
 
-	arg1[0][0] =  mtxDet3x3(mtx14, mtx24, mtx34, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
-	arg1[1][0] = -mtxDet3x3(mtx10, mtx20, mtx30, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
-	arg1[2][0] =  mtxDet3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx1c, mtx2c, mtx3c);
-	arg1[3][0] = -mtxDet3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx18, mtx28, mtx38);
-	arg1[0][1] = -mtxDet3x3(mtx04, mtx24, mtx34, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
-	arg1[1][1] =  mtxDet3x3(mtx00, mtx20, mtx30, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
-	arg1[2][1] = -mtxDet3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx0c, mtx2c, mtx3c);
-	arg1[3][1] =  mtxDet3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx08, mtx28, mtx38);
-	arg1[0][2] =  mtxDet3x3(mtx04, mtx14, mtx34, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
-	arg1[1][2] = -mtxDet3x3(mtx00, mtx10, mtx30, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
-	arg1[2][2] =  mtxDet3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx0c, mtx1c, mtx3c);
-	arg1[3][2] = -mtxDet3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx08, mtx18, mtx38);
-	arg1[0][3] = -mtxDet3x3(mtx04, mtx14, mtx24, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
-	arg1[1][3] =  mtxDet3x3(mtx00, mtx10, mtx20, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
-	arg1[2][3] = -mtxDet3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx0c, mtx1c, mtx2c);
-	arg1[3][3] =  mtxDet3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx08, mtx18, mtx28);
+	arg1[0][0] =  mtx00017c2c(mtx14, mtx24, mtx34, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
+	arg1[1][0] = -mtx00017c2c(mtx10, mtx20, mtx30, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
+	arg1[2][0] =  mtx00017c2c(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx1c, mtx2c, mtx3c);
+	arg1[3][0] = -mtx00017c2c(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx18, mtx28, mtx38);
+	arg1[0][1] = -mtx00017c2c(mtx04, mtx24, mtx34, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
+	arg1[1][1] =  mtx00017c2c(mtx00, mtx20, mtx30, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
+	arg1[2][1] = -mtx00017c2c(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx0c, mtx2c, mtx3c);
+	arg1[3][1] =  mtx00017c2c(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx08, mtx28, mtx38);
+	arg1[0][2] =  mtx00017c2c(mtx04, mtx14, mtx34, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
+	arg1[1][2] = -mtx00017c2c(mtx00, mtx10, mtx30, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
+	arg1[2][2] =  mtx00017c2c(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx0c, mtx1c, mtx3c);
+	arg1[3][2] = -mtx00017c2c(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx08, mtx18, mtx38);
+	arg1[0][3] = -mtx00017c2c(mtx04, mtx14, mtx24, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
+	arg1[1][3] =  mtx00017c2c(mtx00, mtx10, mtx20, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
+	arg1[2][3] = -mtx00017c2c(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx0c, mtx1c, mtx2c);
+	arg1[3][3] =  mtx00017c2c(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx08, mtx18, mtx28);
 }
 
-// Computes the determinant of a 2x2 matrix
-// | a b |
-// | c d |
-float mtxDet2x2(float a, float b, float c, float d) {
-    return a * d - b * c;
+float mtx00017a78(float arg0[4][4])
+{
+	float tmp;
+	float sp78, sp74, sp70, sp6c;
+	float sp68, sp64, sp60, sp5c;
+	float sp58, sp54, sp50, sp4c;
+	float sp48, sp44, sp40, sp3c;
+	float sp38;
+	float sp34;
+	float sp30;
+
+	sp78 = arg0[0][0]; sp68 = arg0[0][1];
+	sp58 = arg0[0][2]; sp48 = arg0[0][3];
+	sp74 = arg0[1][0]; sp64 = arg0[1][1];
+	sp54 = arg0[1][2]; sp44 = arg0[1][3];
+	sp70 = arg0[2][0]; sp60 = arg0[2][1];
+	sp50 = arg0[2][2]; sp40 = arg0[2][3];
+	sp6c = arg0[3][0]; sp5c = arg0[3][1];
+	sp4c = arg0[3][2]; sp3c = arg0[3][3];
+
+	sp30 = mtx00017c2c(sp74, sp70, sp6c, sp64, sp60, sp5c, sp44, sp40, sp3c);
+	sp34 = mtx00017c2c(sp74, sp70, sp6c, sp54, sp50, sp4c, sp44, sp40, sp3c);
+	sp38 = mtx00017c2c(sp64, sp60, sp5c, sp54, sp50, sp4c, sp44, sp40, sp3c);
+
+	tmp = mtx00017c2c(sp74, sp70, sp6c, sp64, sp60, sp5c, sp54, sp50, sp4c);
+
+	return (sp78 * sp38 - sp68 * sp34 + sp58 * sp30) - tmp * sp48;
 }
 
-// Computes the determinant of a 3x3 matrix using elements provided explicitly
-float mtxDet3x3(
-    float a00, float a01, float a02,
-    float a10, float a11, float a12,
-    float a20, float a21, float a22
-) {
-    return a00 * mtxDet2x2(a11, a12, a21, a22)
-         - a01 * mtxDet2x2(a10, a12, a20, a22)
-         + a02 * mtxDet2x2(a10, a11, a20, a21);
+float mtx00017c2c(float arg0, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8)
+{
+	float sp24;
+	float sp20;
+	float sp1c;
+
+	sp1c = mtx00017cbc(arg1, arg2, arg7, arg8);
+	sp20 = mtx00017cbc(arg4, arg5, arg7, arg8);
+	sp24 = mtx00017cbc(arg1, arg2, arg4, arg5);
+
+	return sp24 * arg6 + (arg0 * sp20 - arg3 * sp1c);
 }
 
-// Computes the determinant of a 4x4 matrix
-float mtxDet4x4(float m[4][4]) {
-    float a0 = m[0][0], a1 = m[0][1], a2 = m[0][2], a3 = m[0][3];
-
-    float det0 = mtxDet3x3(
-        m[1][1], m[1][2], m[1][3],
-        m[2][1], m[2][2], m[2][3],
-        m[3][1], m[3][2], m[3][3]
-    );
-
-    float det1 = mtxDet3x3(
-        m[1][0], m[1][2], m[1][3],
-        m[2][0], m[2][2], m[2][3],
-        m[3][0], m[3][2], m[3][3]
-    );
-
-    float det2 = mtxDet3x3(
-        m[1][0], m[1][1], m[1][3],
-        m[2][0], m[2][1], m[2][3],
-        m[3][0], m[3][1], m[3][3]
-    );
-
-    float det3 = mtxDet3x3(
-        m[1][0], m[1][1], m[1][2],
-        m[2][0], m[2][1], m[2][2],
-        m[3][0], m[3][1], m[3][2]
-    );
-
-    return a0 * det0 - a1 * det1 + a2 * det2 - a3 * det3;
+float mtx00017cbc(float arg0, float arg1, float arg2, float arg3)
+{
+	return arg0 * arg3 - arg1 * arg2;
 }

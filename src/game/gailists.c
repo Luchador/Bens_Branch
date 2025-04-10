@@ -1,9 +1,9 @@
 #include <ultra64.h>
 #include "game/chraicommands.h"
+#include "game/prop.h"
 #include "commands.h"
 #include "intro.h"
 #include "gunscript.h"
-#include "game/prop.h"
 #include "game/lang.h"
 #include "data.h"
 #include "types.h"
