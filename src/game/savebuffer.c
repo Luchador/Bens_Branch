@@ -1,17 +1,16 @@
 #include <ultra64.h>
 #include <stdio.h>
 #include "constants.h"
-#include "game/tex.h"
 #include "game/camera.h"
-#include "game/savebuffer.h"
 #include "game/gfxmemory.h"
 #include "game/file.h"
 #include "game/mtxutils.h"
+#include "game/savebuffer.h"
+#include "game/tex.h"
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/main.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 
@@ -27,7 +26,7 @@ void func0f0d4690(Mtxf *mtx)
 {
 	struct coord pos;
 
-	mtx4LoadIdentityF(mtx);
+	mtxIdent((Mtx*)mtx);
 
 	pos.x = -159.75f;
 	pos.y = 120.25f;
@@ -37,15 +36,16 @@ void func0f0d4690(Mtxf *mtx)
 	pos.y = (.5f + viGetHeight()) * 0.5f;
 	pos.z = 0;
 
-	mtx4SetTranslation(&pos, mtx);
-	mtxScaleRow1Full(-1, mtx);
+	mtx4SetTranslation(&pos, (Mtx*)mtx);
+	mtxScaleRow1Full(-1, (Mtx*)mtx);
 }
+
 
 void func0f0d475c(Mtxf *mtx)
 {
 	func0f0d4690(mtx);
-	mtxScaleRow0Full(0.1f, mtx);
-	mtxScaleRow1Full(0.1f, mtx);
+	mtxScaleRow0Full(0.1f, (Mtx*)mtx);
+	mtxScaleRow1Full(0.1f, (Mtx*)mtx);
 }
 
 Gfx *gfxSetCustomProjection(Gfx *gdl)
@@ -59,9 +59,9 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 
 	func0f0d475c(&mtx);
 	mtx4CopyF(&mtx, mtx2);
-	mtx4LoadIdentityF(&mtx);
+	mtxIdent((Mtx*)&mtx);
 
-	mtxFrustumF(mtx.m,
+	mtxFrustum((Mtx*)&mtx,
 			-(float) viGetWidth() * 0.5f, viGetWidth() * 0.5f,
 			-(float) viGetHeight() * 0.5f, viGetHeight() * 0.5f,
 			10, 10000, 1);
@@ -95,7 +95,7 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *func0f0d49c8(Gfx *gdl)
+Gfx *savebufferSetup2DRender(Gfx *gdl)
 {
 	gSPViewport(gdl++, (uintptr_t)(viGetCurrentPlayerViewport()));
 	gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
@@ -142,8 +142,8 @@ Gfx *func0f0d4c80(Gfx *gdl)
 	Mtxf *mtxptr = gfxAllocateMatrixF();
 
 	func0f0d4690(&mtx);
-	mtxScaleRow0Full(0.1f, &mtx);
-	mtxScaleRow1Full(0.1f, &mtx);
+	mtxScaleRow0Full(0.1f, (Mtx*)&mtx);
+	mtxScaleRow1Full(0.1f, (Mtx*)&mtx);
 	mtx4CopyF(&mtx, mtxptr);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

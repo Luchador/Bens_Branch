@@ -54,7 +54,6 @@
 #include "lib/snd.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/lib_317f0.h"
 #include "data.h"

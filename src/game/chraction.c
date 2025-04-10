@@ -51,7 +51,6 @@
 #include "lib/model.h"
 #include "lib/snd.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/ailist.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
@@ -8821,13 +8820,13 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 
 						if (spb4) {
 							//mtx00016798(sp108, &spc8);
-							mtxApplyAffineTransformInPlaceF(spb4, &spc8);
+							mtxApplyAffineTransformInPlace((Mtx*)spb4, (Mtx*)&spc8);
 
 							spb8.x = burstrodata->pos.x;
 							spb8.y = burstrodata->pos.y;
 							spb8.z = burstrodata->pos.z;
 
-							mtx4TransformVecInPlace(&spc8, &spb8);
+							mtx4TransformVecInPlace((Mtx*)&spc8, &spb8);
 
 							sp114 = 1;
 							sp118.x = spb8.x;
@@ -8843,7 +8842,7 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 
 							if (sp6c) {
 								//mtx00016798(spb0, &sp70);
-								mtxApplyAffineTransformInPlaceF(sp6c, &sp70);
+								mtxApplyAffineTransformInPlace((Mtx*)sp6c, (Mtx*)&sp70);
 
 								sp114 = 1;
 								sp118.x = sp70.m[3][0];
@@ -9264,13 +9263,13 @@ bool chrGetGunPos(struct chrdata *chr, int handnum, struct coord *gunpos)
 				gunpos->y = rodata->pos.y;
 				gunpos->z = rodata->pos.z;
 
-				mtxApplyAffineTransform(camGetProjectionMtxF(), spac, &sp6c);
-				mtx4TransformVecInPlace(&sp6c, gunpos);
+				mtxApplyAffineTransform((Mtx*)camGetProjectionMtxF(), (Mtx*)spac, (Mtx*)&sp6c);
+				mtx4TransformVecInPlace((Mtx*)&sp6c, gunpos);
 				result = true;
 			} else if ((part1 = modelGetPart(model->definition, MODELPART_0001))) {
 				sp64 = modelFindNodeMtx(model, part1, 0);
 
-				mtxApplyAffineTransform(camGetProjectionMtxF(), sp64, &sp24);
+				mtxApplyAffineTransform((Mtx*)camGetProjectionMtxF(), (Mtx*)sp64, (Mtx*)&sp24);
 
 				gunpos->x = sp24.m[3][0];
 				gunpos->y = sp24.m[3][1];
@@ -9326,8 +9325,8 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 			worldtoscreenmtx = camGetWorldToScreenMtx((uint8_t *)chr->model->matrices);
 
 			if (worldtoscreenmtx) {
-				mtx4TransformVec(worldtoscreenmtx, pos, &sp124);
-				mtx4RotateVec(worldtoscreenmtx, vector, &sp118);
+				mtx4TransformVec((Mtx*)worldtoscreenmtx, pos, &sp124);
+				mtx4RotateVec((Mtx*)worldtoscreenmtx, vector, &sp118);
 
 				isdifferentmtx = (camGetWorldToScreenMtxf() != worldtoscreenmtx);
 				node = chr->model->definition->rootnode;
@@ -9838,10 +9837,10 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 
 							// Calculate and projectile's matrix,
 							// spawn position and speed
-							mtx4LoadIdentityF(&identmtx);
-							mtx4LoadXRotation(rotx, &projectilemtx);
-							mtx4LoadYRotation(roty, &yrotmtx);
-							mtxApplyAffineTransformInPlaceF(&yrotmtx, &projectilemtx);
+							mtxIdent((Mtx*)&identmtx);
+							mtx4LoadXRotationF(rotx, &projectilemtx);
+							mtx4LoadYRotationF(roty, &yrotmtx);
+							mtxApplyAffineTransformInPlace((Mtx*)&yrotmtx, (Mtx*)&projectilemtx);
 
 							sp15c.x = vector.x * sp168;
 							sp15c.y = vector.y * sp168;
@@ -10558,8 +10557,8 @@ void chrTickRobotAttack(struct chrdata *chr)
 			act->pos[i].y = rodata->position.pos.y - 300.0f;
 			act->pos[i].z = rodata->position.pos.z;
 
-			mtx4LoadYRotation(invtheta, &spa4);
-			mtx4RotateVec(&spa4, &act->pos[i], &spe4);
+			mtx4LoadYRotationF(invtheta, &spa4);
+			mtx4RotateVec((Mtx*)&spa4, &act->pos[i], &spe4);
 
 			spe4.x *= chr->model->scale;
 			spe4.y *= chr->model->scale;
@@ -13867,7 +13866,7 @@ bool chrIsTargetAimingAtMe(struct chrdata *chr)
 
 				bgun0f0a0c08(&sp68, &sp56);
 				modelGetRootPosition(model, &sp44);
-				mtx4TransformVecInPlace(camGetWorldToScreenMtxf(), &sp44);
+				mtx4TransformVecInPlace((Mtx*)camGetWorldToScreenMtxf(), &sp44);
 
 				if (func0f06b39c(&sp68, &sp56, &sp44, somefloat)) {
 					return true;

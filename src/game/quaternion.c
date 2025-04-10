@@ -2,7 +2,6 @@
 #include "constants.h"
 #include "game/quaternion.h"
 #include "bss.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 
@@ -50,7 +49,7 @@ void quaternionSetRotationAroundZ(float angle, float quat[4])
 	quat[3] = sinf(angle * 0.5f);
 }
 
-void quaternionToMtx(float quat[4], Mtxf *mtx)
+void quaternionToMtxF(float quat[4], Mtxf *mtx)
 {
 	float mult = 2.0f / (quat[0] * quat[0] + quat[1] * quat[1] + quat[2] * quat[2] + quat[3] * quat[3]);
 	float a = quat[1] * mult;
@@ -89,12 +88,13 @@ void quaternionToMtx(float quat[4], Mtxf *mtx)
 	mtx->m[3][3] = 1.0f;
 }
 
-void quaternion0f097044(Mtxf *mtx, float arg1[4])
+void quaternion3x3MtxToQuatF(Mtxf *mtx, float arg1[4])
 {
 	float var1;
 	float var2;
 	float trace = mtx->m[0][0] + mtx->m[1][1] + mtx->m[2][2] + 1.0f;
 
+	// If trace is large enough, the matrix is suitable for a simplified fast conversion
 	if (trace > 0.01f) {
 		var1 = sqrtf(trace);
 		var2 = 0.5f / var1;
@@ -103,6 +103,7 @@ void quaternion0f097044(Mtxf *mtx, float arg1[4])
 		arg1[1] = (mtx->m[1][2] - mtx->m[2][1]) * var2;
 		arg1[2] = (mtx->m[2][0] - mtx->m[0][2]) * var2;
 		arg1[3] = (mtx->m[0][1] - mtx->m[1][0]) * var2;
+	// If trace is too small, the matrix may be near gimbal lock, use an alternative quaternion extraction formula
 	} else {
 		int i;
 		int j;
@@ -132,9 +133,54 @@ void quaternion0f097044(Mtxf *mtx, float arg1[4])
 	}
 }
 
+void quaternion3x3MtxToQuat(Mtx *mtx, float arg1[4])
+{
+	float var1;
+	float var2;
+	float trace = (*mtx)[0][0] + (*mtx)[1][1] + (*mtx)[2][2] + 1.0f;
+
+	// If trace is large enough, the matrix is suitable for a simplified fast conversion
+	if (trace > 0.01f) {
+		var1 = sqrtf(trace);
+		var2 = 0.5f / var1;
+
+		arg1[0] = var1 * 0.5f;
+		arg1[1] = ((*mtx)[1][2] - (*mtx)[2][1]) * var2;
+		arg1[2] = ((*mtx)[2][0] - (*mtx)[0][2]) * var2;
+		arg1[3] = ((*mtx)[0][1] - (*mtx)[1][0]) * var2;
+	// If trace is too small, the matrix may be near gimbal lock, use an alternative quaternion extraction formula
+	} else {
+		int i;
+		int j;
+		int indices[3] = {1, 2, 0};
+		int k;
+
+		i = 0;
+
+		if ((*mtx)[0][0] < (*mtx)[1][1]) {
+			i = 1;
+		}
+
+		if ((*mtx)[i][i] < (*mtx)[2][2]) {
+			i = 2;
+		}
+
+		j = indices[i];
+		k = indices[j];
+
+		var1 = sqrtf((*mtx)[i][i] - ((*mtx)[j][j] + (*mtx)[k][k]) + 1.0f);
+		var2 = 0.5f / var1;
+
+		arg1[i + 1] = var1 * 0.5f;
+		arg1[    0] = ((*mtx)[j][k] - (*mtx)[k][j]) * var2;
+		arg1[j + 1] = ((*mtx)[i][j] + (*mtx)[j][i]) * var2;
+		arg1[k + 1] = ((*mtx)[i][k] + (*mtx)[k][i]) * var2;
+	}
+}
+
 void quaternionToTransformMtx(struct coord *pos, float rot[4], Mtxf *mtx)
 {
-	quaternionToMtx(rot, mtx);
+	quaternionToMtxF(rot, mtx);
 
 	mtx->m[3][0] = pos->x;
 	mtx->m[3][1] = pos->y;

@@ -141,6 +141,8 @@ static void append_line(char* buf, size_t* len, const char* str) {
     buf[(*len)++] = '\n';
 }
 
+#define RAND_NOISE "((random(vec3(floor(gl_FragCoord.xy * noise_scale), float(frame_count))) + 1.0) / 2.0)"
+
 static const char* shader_item_to_str(uint32_t item, bool with_alpha, bool only_alpha, bool inputs_have_alpha,
                                       bool hint_single_element) {
     if (!only_alpha) {
@@ -171,6 +173,9 @@ static const char* shader_item_to_str(uint32_t item, bool with_alpha, bool only_
                 return with_alpha ? "texVal1" : "texVal1.rgb";
             case SHADER_COMBINED:
                 return with_alpha ? "texel" : "texel.rgb";
+            case SHADER_NOISE:
+                return with_alpha ? "vec4(" RAND_NOISE ", " RAND_NOISE ", " RAND_NOISE ", " RAND_NOISE ")"
+                                  : "vec3(" RAND_NOISE ", " RAND_NOISE ", " RAND_NOISE ")";
         }
     } else {
         switch (item) {
@@ -196,10 +201,14 @@ static const char* shader_item_to_str(uint32_t item, bool with_alpha, bool only_
                 return "texVal1.a";
             case SHADER_COMBINED:
                 return "texel.a";
+            case SHADER_NOISE:
+                return RAND_NOISE;
         }
     }
     return "";
 }
+
+#undef RAND_NOISE
 
 static void append_formula(char* buf, size_t* len, uint8_t c[2][4], bool do_single, bool do_multiply, bool do_mix,
                            bool with_alpha, bool only_alpha, bool opt_alpha) {
@@ -371,7 +380,13 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     }
 
     append_line(fs_buf, &fs_len, "uniform int frame_count;");
+    append_line(fs_buf, &fs_len, "uniform float noise_scale;");
     append_line(fs_buf, &fs_len, "uniform vec3 fogColor = vec3(0.5, 0.8, 1.0);");
+
+    append_line(fs_buf, &fs_len, "float random(in vec3 value) {");
+    append_line(fs_buf, &fs_len, "    float random = dot(sin(value), vec3(12.9898, 78.233, 37.719));");
+    append_line(fs_buf, &fs_len, "    return fract(sin(random) * 143758.5453);");
+    append_line(fs_buf, &fs_len, "}");
 
     if (current_filter_mode == FILTER_THREE_POINT) {
         append_line(fs_buf, &fs_len, "vec4 filter3point(in sampler2D tex, in vec2 texCoord, in vec2 texSize) {");

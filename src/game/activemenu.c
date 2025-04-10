@@ -23,7 +23,6 @@
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/main.h"
-#include "lib/mtx.h"
 #include "lib/ailist.h"
 #include "string.h"
 #include "data.h"
@@ -1166,7 +1165,7 @@ Gfx *amRender(Gfx *gdl)
 		gSPTri4(gdl++, 0, 4, 7, 7, 3, 0, 0, 1, 5, 5, 4, 0);
 		gSPTri4(gdl++, 1, 2, 6, 6, 5, 1, 6, 2, 3, 3, 7, 6);
 
-		gdl = func0f0d49c8(gdl);
+		gdl = savebufferSetup2DRender(gdl);
 
 		// Draw slots
 		for (column = 0; column < 3; column++) {

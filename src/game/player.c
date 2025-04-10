@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include <math.h>
+#include <string.h>
 #include "constants.h"
 #include "gfxdata.h"
 #include "game/bondeyespy.h"
@@ -66,7 +67,6 @@
 #include "lib/memp.h"
 #include "lib/model.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
@@ -891,8 +891,8 @@ void playerSpawn(void)
 				int prevplayernum = g_Vars.currentplayernum;
 				setCurrentPlayerNum(g_Vars.bondplayernum);
 				bgun0f0a0c08(&sp84, &sp9c);
-				mtx4RotateVec(camGetProjectionMtxF(), &sp9c, &sp90);
-				mtx4TransformVec(camGetProjectionMtxF(), &sp84, &sp78);
+				mtx4RotateVec((Mtx*)camGetProjectionMtxF(), &sp9c, &sp90);
+				mtx4TransformVec((Mtx*)camGetProjectionMtxF(), &sp84, &sp78);
 				setCurrentPlayerNum(prevplayernum);
 			}
 
@@ -1833,15 +1833,15 @@ void playerTickCutscene(bool arg0)
 		pos.y += sp104 * (g_Vars.bond->bond2.unk10.y - pos.y);
 		pos.z += sp104 * (g_Vars.bond->bond2.unk10.z - pos.z);
 
-		mtx00016d58(&spc4, 0, 0, 0, -look.x, -look.y, -look.z, up.x, up.y, up.z);
-		mtx00016d58(&sp84, 0, 0, 0,
+		mtxBuildLookAtFromTargetF(&spc4, 0, 0, 0, -look.x, -look.y, -look.z, up.x, up.y, up.z);
+		mtxBuildLookAtFromTargetF(&sp84, 0, 0, 0,
 				-g_Vars.bond->bond2.unk1c.x, -g_Vars.bond->bond2.unk1c.y, -g_Vars.bond->bond2.unk1c.z,
 				g_Vars.bond->bond2.unk28.x, g_Vars.bond->bond2.unk28.y, g_Vars.bond->bond2.unk28.z);
-		quaternion0f097044(&spc4, sp74);
-		quaternion0f097044(&sp84, sp64);
+		quaternion3x3MtxToQuatF(&spc4, sp74);
+		quaternion3x3MtxToQuatF(&sp84, sp64);
 		quaternionAvoidFlips(sp64, sp74);
 		quaternionSlerp(sp74, sp64, sp104, sp54);
-		quaternionToMtx(sp54, &rotmtx);
+		quaternionToMtxF(sp54, &rotmtx);
 
 		up.x = rotmtx.m[1][0];
 		up.y = rotmtx.m[1][1];
@@ -2109,12 +2109,11 @@ void playerUnpause(void)
 Gfx *player0f0baf84(Gfx *gdl)
 {
 	if (g_Vars.currentplayer->pausemode != PAUSEMODE_UNPAUSED) {
-		Mtx *a = gfxAllocateMatrixF();
-		uint16_t b;
+		Mtx *mtx = gfxAllocateMatrixF();
 
-		mtxPerspective(a, &b, g_Vars.currentplayer->zoominfovy, 1.4545454978943f, 10, 300, 1);
+		mtxPerspective(mtx, g_Vars.currentplayer->zoominfovy, 1.4545454978943f, 10, 300, 1);
 
-		gSPMatrix(gdl++, (uintptr_t)(a), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	}
 
 	return gdl;
@@ -2551,7 +2550,7 @@ Gfx *playerRenderHealthBar(Gfx *gdl)
 	if (fovsc > 1.01f) {
 		fovsc *= 1.1f;
 	}
-	mtxBuildLookAtMatrix(&matrix, 0, 370.f * fovsc, 0, 0, 0, 0, 0, 0, -1);
+	mtxBuildLookAtMatrixF(&matrix, 0, 370.f * fovsc, 0, 0, 0, 0, 0, 0, -1);
 	mtx4CopyF(&matrix, addr);
 
 	gSPMatrix(gdl++, (uintptr_t)((void *)addr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -3340,8 +3339,8 @@ void playerTick()
 				sp15c[3] = 0;
 
 				quaternionMultQuaternion(sp15c, sp14c, sp13c);
-				quaternionToMtx(sp13c, &sp1fc);
-				mtx4RotateVecInPlace(&sp1fc, &projectile->speed);
+				quaternionToMtxF(sp13c, &sp1fc);
+				mtx4RotateVecInPlace((Mtx*)&sp1fc, &projectile->speed);
 
 				projectile->powerlimit240 = -1;
 				projectile->flags |= PROJECTILEFLAG_NOTIMELIMIT;
@@ -3396,11 +3395,11 @@ void playerTick()
 				projectile->speed.y = (projectile->speed.y * newspeed) / prevspeed;
 				projectile->speed.z = (projectile->speed.z * newspeed) / prevspeed;
 
-				mtx3ToMtx4(sp2b8, &sp1bc);
-				quaternion0f097044(&sp1bc, sp12c);
+				mtx3ToMtx4(sp2b8, (Mtx*)&sp1bc);
+				quaternion3x3MtxToQuatF(&sp1bc, sp12c);
 				quaternionMultQuaternion(sp13c, sp12c, sp11c);
-				quaternionToMtx(sp11c, &sp17c);
-				mtx4ToMtx3(&sp17c, sp2b8);
+				quaternionToMtxF(sp11c, &sp17c);
+				mtx4ToMtx3((Mtx*)&sp17c, sp2b8);
 
 				rocket->base.realrot[0][0] = sp2b8[0][0] * sp2a8;
 				rocket->base.realrot[0][1] = sp2b8[0][1] * sp2a8;
@@ -3953,7 +3952,7 @@ void playerSetGlobalDrawCameraOffset(void)
 	g_Vars.currentplayer->globaldrawcameraoffset.y = g_Vars.currentplayer->globaldrawworldoffset.y;
 	g_Vars.currentplayer->globaldrawcameraoffset.z = g_Vars.currentplayer->globaldrawworldoffset.z;
 
-	mtx4RotateVecInPlace(camGetWorldToScreenMtxf(), &g_Vars.currentplayer->globaldrawcameraoffset);
+	mtx4RotateVecInPlace((Mtx*)camGetWorldToScreenMtxf(), &g_Vars.currentplayer->globaldrawcameraoffset);
 }
 
 void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struct coord *cam_up)
@@ -4002,14 +4001,14 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
-	mtxBuildLookAtMatrix2(g_Vars.currentplayer->mtxf0068,
+	mtxBuildLookAtMatrix2F(g_Vars.currentplayer->mtxf0068,
 			cam_pos->x, cam_pos->y, cam_pos->z,
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
 	s1 = gfxAllocateMatrixF();
 	s0 = gfxAllocateMatrixF();
-	mtx4MultMtx4F(camGetMtxF1754(), &sp8c, s0);
+	mtx4MultMtx4((Mtx*)camGetMtxF1754(), (Mtx*)&sp8c, (Mtx*)s0);
 
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < 4; j++) {
@@ -4022,10 +4021,10 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	}
 
 	camSetMtxF006c(s0);
-	mtxF2L2(s0->m, s1);
+	memcpy(s1, s0->m, sizeof(*s1));
 	camSetOrthogonalMtxL(s1);
-	mtxScaleRotationPartF(scale, &sp8c);
-	mtxF2L2(sp8c.m, g_Vars.currentplayer->mtxl005c);
+	mtxScaleRotationPart(scale, (Mtx*)&sp8c);
+	memcpy(g_Vars.currentplayer->mtxl005c, &sp8c, sizeof(*g_Vars.currentplayer->mtxl005c));
 	camSetMtxL173c(g_Vars.currentplayer->mtxl005c);
 	camSetMtxL1738(g_Vars.currentplayer->mtxl0060);
 	camSetWorldToScreenMtxf(g_Vars.currentplayer->mtxf0064);
@@ -5007,7 +5006,7 @@ int playerTickThirdPerson(struct prop *prop)
 					spe8 = player->model00d4->matrices;
 				}
 
-				mtxApplyAffineTransform(camGetProjectionMtxF(), spe8, &spa8);
+				mtxApplyAffineTransform((Mtx*)camGetProjectionMtxF(), (Mtx*)spe8, (Mtx*)&spa8);
 
 				sp9c.x = spa8.m[3][0] + spa8.m[1][0] * 7;
 				sp9c.y = spa8.m[3][1] + spa8.m[1][1] * 7;
@@ -5415,7 +5414,7 @@ void player0f0c3320(Mtxf *matrices, int count)
 	int j;
 
 	for (i = 0, j = 0; i < count; i++, j += sizeof(Mtxf)) {
-		mtxApplyAffineTransform(camGetProjectionMtxF(), (Mtxf *)((uintptr_t)matrices + j), &sp40);
+		mtxApplyAffineTransform((Mtx*)camGetProjectionMtxF(), (Mtx*)((uintptr_t)matrices + j), (Mtx*)&sp40);
 
 		sp40.m[3][0] -= g_Vars.currentplayer->globaldrawworldoffset.x;
 		sp40.m[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;

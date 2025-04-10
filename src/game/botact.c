@@ -15,7 +15,6 @@
 #include "game/propobj.h"
 #include "bss.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
 #include "data.h"
@@ -368,18 +367,18 @@ void botactThrow(struct chrdata *chr)
 	sp228.y = sp152.y * mult;
 	sp228.z = sp152.z * mult;
 
-	mtx4LoadIdentityF(&sp164);
+	mtxIdent((Mtx*)&sp164);
 
 	if (chr->aibot->weaponnum == WEAPON_COMBATKNIFE) {
-		mtx4LoadZRotation(M_PI * 1.5f, &sp164);
-		mtx4LoadXRotation(M_PI, &sp84);
-		mtx4MultMtx4InPlace(&sp84, &sp164);
+		mtx4LoadZRotationF(M_PI * 1.5f, &sp164);
+		mtx4LoadXRotationF(M_PI, &sp84);
+		mtx4MultMtx4InPlace((Mtx*)&sp84, (Mtx*)&sp164);
 	}
 
-	mtx4LoadXRotation(0.34901028871536f, &sp84);
-	mtxApplyAffineTransformInPlaceF(&sp84, &sp164);
-	mtx4LoadYRotation(sp80, &sp84);
-	mtxApplyAffineTransformInPlaceF(&sp84, &sp164);
+	mtx4LoadXRotationF(0.34901028871536f, &sp84);
+	mtxApplyAffineTransformInPlace((Mtx*)&sp84, (Mtx*)&sp164);
+	mtx4LoadYRotationF(sp80, &sp84);
+	mtxApplyAffineTransformInPlace((Mtx*)&sp84, (Mtx*)&sp164);
 
 	bgunCreateThrownProjectile2(chr, &gset, &prop->pos, prop->rooms, &sp164, &sp228);
 
@@ -499,10 +498,10 @@ void botactCreateSlayerRocket(struct chrdata *chr)
 		sp100.y = sinf(xrot);
 		sp100.z = cosf(xrot) * cosf(yrot);
 
-		mtx4LoadXRotation(xrot, &sp196);
-		mtx4LoadYRotation(yrot, &sp132);
-		mtxApplyAffineTransformInPlaceF(&sp132, &sp196);
-		mtx4LoadIdentityF(&sp260);
+		mtx4LoadXRotationF(xrot, &sp196);
+		mtx4LoadYRotationF(yrot, &sp132);
+		mtxApplyAffineTransformInPlace((Mtx*)&sp132, (Mtx*)&sp196);
+		mtxIdent((Mtx*)&sp260);
 
 		bgunCreateXBowBolt(&rocket->base, &chr->prop->pos, chr->prop->rooms, &sp196, &sp100, &sp260, chr->prop, &chr->prop->pos);
 

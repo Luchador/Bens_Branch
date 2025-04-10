@@ -14,7 +14,6 @@
 #include "game/propobj.h"
 #include "bss.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 

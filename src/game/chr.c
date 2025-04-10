@@ -42,16 +42,13 @@
 #include "lib/main.h"
 #include "lib/model.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
 #include "game/debug.h"
 #include "data.h"
 #include "gbiex.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "video.h"
-#endif
 
 void rng2SetSeed(uint32_t seed);
 
@@ -784,7 +781,7 @@ bool chrApplyMovementAndResolveGround(struct model *model, struct coord *arg1, s
 
 						sp68 = chr->fallspeed.y;
 
-						func0f0965e4(&yincrement, &sp68, VAR(lvupdate60freal));
+						integrateDampedMotion(&yincrement, &sp68, VAR(lvupdate60freal));
 
 						if (chr0f01f264(chr, arg2, spfc, yincrement, false))
 						{
@@ -1489,7 +1486,7 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 			return;
 		}
 
-		mtxApplyAffineTransformInPlaceF(camGetProjectionMtxF(), mtx);
+		mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtxF(), (Mtx*)mtx);
 
 		sp138.x = mtx->m[3][0];
 		sp138.y = mtx->m[3][1];
@@ -1513,10 +1510,10 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 			gunrot -= M_TAU;
 		}
 
-		mtx4LoadYRotation(gunrot, &spb8);
-		mtxApplyAffineTransformInPlaceF(&spb8, mtx);
-		mtx4LoadXRotation(gunrotx, &spf8);
-		mtxApplyAffineTransformInPlaceF(&spf8, mtx);
+		mtx4LoadYRotationF(gunrot, &spb8);
+		mtxApplyAffineTransformInPlace((Mtx*)&spb8, (Mtx*)mtx);
+		mtx4LoadXRotationF(gunrotx, &spf8);
+		mtxApplyAffineTransformInPlace((Mtx*)&spf8, (Mtx*)mtx);
 
 		gunrot = gunroty + theta;
 
@@ -1524,18 +1521,18 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 			gunrot -= M_TAU;
 		}
 
-		mtx4LoadYRotation(gunrot, &spb8);
-		mtxApplyAffineTransformInPlaceF(&spb8, mtx);
+		mtx4LoadYRotationF(gunrot, &spb8);
+		mtxApplyAffineTransformInPlace((Mtx*)&spb8, (Mtx*)mtx);
 
 		if (scale != 1.0f) {
-			mtxScaleRotationPartF(scale, mtx);
+			mtxScaleRotationPart(scale, (Mtx*)mtx);
 		}
 
 		mtx->m[3][0] = sp138.x;
 		mtx->m[3][1] = sp138.y;
 		mtx->m[3][2] = sp138.z;
 
-		mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), mtx);
+		mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)mtx);
 	} else {
 		if (g_CurModelChr->model->definition->skel == &g_SkelChr) {
 			lshoulderjoint = 2;
@@ -1698,7 +1695,7 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 					yrot += M_TAU;
 				}
 
-				mtxApplyAffineTransformInPlaceF(camGetProjectionMtxF(), mtx);
+				mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtxF(), (Mtx*)mtx);
 
 				sp70.x = mtx->m[3][0];
 				sp70.y = mtx->m[3][1];
@@ -1715,35 +1712,35 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 						yrot += M_TAU;
 					}
 
-					mtx4LoadYRotation(yrot, &tmpmtx);
-					mtxApplyAffineTransformInPlaceF(&tmpmtx, mtx);
+					mtx4LoadYRotationF(yrot, &tmpmtx);
+					mtxApplyAffineTransformInPlace((Mtx*)&tmpmtx, (Mtx*)mtx);
 
 					if (xrot != 0.0f) {
-						mtx4LoadXRotation(xrot, &tmpmtx);
-						mtxApplyAffineTransformInPlaceF(&tmpmtx, mtx);
+						mtx4LoadXRotationF(xrot, &tmpmtx);
+						mtxApplyAffineTransformInPlace((Mtx*)&tmpmtx, (Mtx*)mtx);
 					}
 
 					if (zrot != 0.0f) {
-						mtx4LoadZRotation(zrot, &tmpmtx);
-						mtxApplyAffineTransformInPlaceF(&tmpmtx, mtx);
+						mtx4LoadZRotationF(zrot, &tmpmtx);
+						mtxApplyAffineTransformInPlace((Mtx*)&tmpmtx, (Mtx*)mtx);
 					}
 
-					mtx4LoadYRotation(aimangle, &tmpmtx);
-					mtxApplyAffineTransformInPlaceF(&tmpmtx, mtx);
+					mtx4LoadYRotationF(aimangle, &tmpmtx);
+					mtxApplyAffineTransformInPlace((Mtx*)&tmpmtx, (Mtx*)mtx);
 				} else {
-					mtx4LoadYRotation(yrot, &tmpmtx);
-					mtxApplyAffineTransformInPlaceF(&tmpmtx, mtx);
+					mtx4LoadYRotationF(yrot, &tmpmtx);
+					mtxApplyAffineTransformInPlace((Mtx*)&tmpmtx, (Mtx*)mtx);
 				}
 
 				if (scale != 1.0f) {
-					mtxScaleRotationPartF(scale, mtx);
+					mtxScaleRotationPart(scale, (Mtx*)mtx);
 				}
 
 				mtx->m[3][0] = sp70.x;
 				mtx->m[3][1] = sp70.y;
 				mtx->m[3][2] = sp70.z;
 
-				mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), mtx);
+				mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)mtx);
 			}
 		}
 	}
@@ -1841,19 +1838,19 @@ void chr0f022214(struct chrdata *chr, struct prop *prop, bool fulltick)
 		prop->flags |= PROPFLAG_ONTHISSCREENTHISTICK | PROPFLAG_ONANYSCREENTHISTICK;
 
 		if (obj->hidden & OBJHFLAG_EMBEDDED) {
-			mtxApplyAffineTransform(sp104, &obj->embedment->matrix, &sp80);
+			mtxApplyAffineTransform((Mtx*)sp104, (Mtx*)&obj->embedment->matrix, (Mtx*)&sp80);
 			thing.unk00 = &sp80;
 		} else if (CHRRACE(chr) == RACE_SKEDAR) {
 			// The skedar hand position is rotated weirdly, so compensate for it
-			mtx4LoadYRotation(1.3192588090897f, &sp80);
-			mtx4LoadZRotation(1.5705462694168f, &sp40);
-			mtx4MultMtx4InPlace(&sp40, &sp80);
-			mtx4MultMtx4InPlace(sp104, &sp80);
+			mtx4LoadYRotationF(1.3192588090897f, &sp80);
+			mtx4LoadZRotationF(1.5705462694168f, &sp40);
+			mtx4MultMtx4InPlace((Mtx*)&sp40, (Mtx*)&sp80);
+			mtx4MultMtx4InPlace((Mtx*)sp104, (Mtx*)&sp80);
 			thing.unk00 = &sp80;
 		} else if (prop == chr->weapons_held[HAND_LEFT]) {
 			// Flip the model
-			mtx4LoadZRotation(M_PI, &sp80);
-			mtx4MultMtx4InPlace(sp104, &sp80);
+			mtx4LoadZRotationF(M_PI, &sp80);
+			mtx4MultMtx4InPlace((Mtx*)sp104, (Mtx*)&sp80);
 			thing.unk00 = &sp80;
 		} else {
 			thing.unk00 = sp104;
@@ -2492,7 +2489,7 @@ int chrTick(struct prop *prop)
 			sp190.z = cosf(angle) * 19;
 
 			mtx4LoadTranslationF(&sp190, &sp1a8);
-			mtx4MultMtx4InPlace(camGetWorldToScreenMtxf(), &sp1a8);
+			mtx4MultMtx4InPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp1a8);
 			sp210.unk00 = &sp1a8;
 		} else if (prop->type == PROPTYPE_PLAYER) {
 			float sp130;
@@ -2508,7 +2505,7 @@ int chrTick(struct prop *prop)
 				sp17c.z = sinf(-sp178) * sp130;
 
 				mtx4LoadTranslationF(&sp17c, &sp1a8);
-				mtx4MultMtx4InPlace(camGetWorldToScreenMtxf(), &sp1a8);
+				mtx4MultMtx4InPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp1a8);
 				sp210.unk00 = &sp1a8;
 			} else {
 				sp210.unk00 = camGetWorldToScreenMtxf();
@@ -2751,9 +2748,9 @@ bool chr0f024738(struct chrdata *chr)
 						struct modelrodata_bbox *bbox = objFindBboxRodata(obj);
 						thing->bbox = *bbox;
 
-						mtx3ToMtx4(obj->realrot, &thing->unk02c);
-						mtx4SetTranslation(&obj->prop->pos, &thing->unk02c);
-						mtx000172f0(thing->unk02c.m, thing->unk06c.m);
+						mtx3ToMtx4(obj->realrot, (Mtx*)&thing->unk02c);
+						mtx4SetTranslation(&obj->prop->pos, (Mtx*)&thing->unk02c);
+						mtxInvertAffine(thing->unk02c.m, thing->unk06c.m);
 
 						campos = &g_Vars.currentplayer->cam_pos;
 
@@ -2762,7 +2759,7 @@ bool chr0f024738(struct chrdata *chr)
 								+ thing->unk06c.m[1][2] * campos->f[1]
 								+ thing->unk06c.m[2][2] * campos->f[2]) + thing->unk06c.m[3][2];
 
-						mtxApplyAffineTransform(&thing->unk06c, camGetProjectionMtxF(), &thing->unk0ac);
+						mtxApplyAffineTransform((Mtx*)&thing->unk06c, (Mtx*)camGetProjectionMtxF(), (Mtx*)&thing->unk0ac);
 						thing->unk00c = true;
 					}
 
@@ -2841,7 +2838,7 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 					spb0 = false;
 					door = thing->prop->door;
 
-					mtxApplyAffineTransform(&thing->unk0ac, mtx, &spb4);
+					mtxApplyAffineTransform((Mtx*)&thing->unk0ac, (Mtx*)mtx, (Mtx*)&spb4);
 
 					if (thing->unk130 == 0) {
 						if (door->doortype == DOORTYPE_VERTICAL) {
@@ -2870,12 +2867,12 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 							sp88.z = thing->bbox.zmin;
 						}
 
-						mtxApplyAffineTransform(camGetWorldToScreenMtxf(), &thing->unk02c, &thing->unk0ec);
-						mtx4TransformVec(&thing->unk0ec, &spa0, &sp70);
+						mtxApplyAffineTransform((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&thing->unk02c, (Mtx*)&thing->unk0ec);
+						mtx4TransformVec((Mtx*)&thing->unk0ec, &spa0, &sp70);
 						camProjectViewToScreenAbsZ(&sp70, thing->unk134);
-						mtx4TransformVec(&thing->unk0ec, &sp94, &sp70);
+						mtx4TransformVec((Mtx*)&thing->unk0ec, &sp94, &sp70);
 						camProjectViewToScreenAbsZ(&sp70, thing->unk13c);
-						mtx4TransformVec(&thing->unk0ec, &sp88, &sp70);
+						mtx4TransformVec((Mtx*)&thing->unk0ec, &sp88, &sp70);
 						camProjectViewToScreenAbsZ(&sp70, thing->unk144);
 
 						thing->unk130 = 1;
@@ -2929,7 +2926,7 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 							break;
 						}
 
-						mtx4TransformVec(mtx, &sp64, &sp70);
+						mtx4TransformVec((Mtx*)mtx, &sp64, &sp70);
 						camProjectViewToScreenAbsZ(&sp70, sp80);
 
 						value = thing->unk14c * sp80[0] + thing->unk150 * sp80[1] - thing->unk154;
@@ -2941,7 +2938,7 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 						}
 
 						if (!done) {
-							mtx4TransformVec(&spb4, &sp64, &sp70);
+							mtx4TransformVec((Mtx*)&spb4, &sp64, &sp70);
 
 							if (sp70.x >= thing->bbox.xmin
 									&& sp70.x <= thing->bbox.xmax
@@ -4245,10 +4242,10 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 
 					while (hitpart > 0) {
 						if (func0f084594(model, node, &shotdata->gunpos2d, &shotdata->gundir2d, &sp88, &sp84, &sp80)) {
-							mtx4TransformVec(&model->matrices[sp84], &sp88.pos, &spdc);
-							mtx4TransformVecInPlace(camGetProjectionMtxF(), &spdc);
-							mtx4RotateVec(&model->matrices[sp84], &sp88.unk0c, &spd0);
-							mtx4RotateVecInPlace(camGetProjectionMtxF(), &spd0);
+							mtx4TransformVec((Mtx*)&model->matrices[sp84], &sp88.pos, &spdc);
+							mtx4TransformVecInPlace((Mtx*)camGetProjectionMtxF(), &spdc);
+							mtx4RotateVec((Mtx*)&model->matrices[sp84], &sp88.unk0c, &spd0);
+							mtx4RotateVecInPlace((Mtx*)camGetProjectionMtxF(), &spd0);
 							break;
 						}
 
@@ -4260,8 +4257,8 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 					if (hitpart > 0) {
 						if (func0f06bea0(model, model->definition->rootnode, model->definition->rootnode, &shotdata->gunpos2d,
 									&shotdata->gundir2d, &sp88.pos, &sp70, &node, &hitpart, &sp84, &sp80)) {
-							mtx4TransformVec(camGetProjectionMtxF(), &sp88.pos, &spdc);
-							mtx4RotateVec(camGetProjectionMtxF(), &sp88.unk0c, &spd0);
+							mtx4TransformVec((Mtx*)camGetProjectionMtxF(), &sp88.pos, &spdc);
+							mtx4RotateVec((Mtx*)camGetProjectionMtxF(), &sp88.unk0c, &spd0);
 						} else {
 							hitpart = 0;
 						}
@@ -4328,7 +4325,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 		sp98.y = shotdata->gunpos2d.y - (hit->distance * shotdata->gundir2d.y) / shotdata->gundir2d.z;
 		sp98.z = shotdata->gunpos2d.z - hit->distance;
 
-		mtx4TransformVec(camGetProjectionMtxF(), &sp98, &hitpos);
+		mtx4TransformVec((Mtx*)camGetProjectionMtxF(), &sp98, &hitpos);
 		bgunSetHitPos(&hitpos);
 		bgunPlayPropHitSound(&shotdata->gset, hit->prop, -1);
 
@@ -4427,7 +4424,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 
 				// Create blood
 				mtx0001719c(sp58->m, spb0.m);
-				mtx4TransformVec(&spb0, &sp98, &sp5c);
+				mtx4TransformVec((Mtx*)&spb0, &sp98, &sp5c);
 
 				if (!chr->noblood
 						&& race != RACE_DRCAROLL

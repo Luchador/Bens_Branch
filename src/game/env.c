@@ -154,7 +154,7 @@ void envApplyEnvironment(struct environment *env)
 		return;
 	}
 
-	viSetZRange(env->near, env->far);
+	viSetZRange(15.0f, 20000.0f); //TEMP: hard code z ranges
 
 	g_Env.fogmin = env->fogmin;
 	g_Env.fogmax = env->fogmax;

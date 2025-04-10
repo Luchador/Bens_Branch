@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include "constants.h"
 #include "game/bondhead.h"
 #include "game/bg.h"
@@ -6,7 +5,6 @@
 #include "game/setup.h"
 #include "bss.h"
 #include "lib/collision.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/model.h"
 #include "data.h"

@@ -6,7 +6,6 @@
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/memp.h"
-#include "lib/mtx.h"
 #include "lib/vi.h"
 #include "data.h"
 #include "types.h"

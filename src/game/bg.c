@@ -36,7 +36,6 @@
 #include "lib/lib_17ce0.h"
 #include "lib/main.h"
 #include "lib/memp.h"
-#include "lib/mtx.h"
 #include "lib/rng.h"
 #include "lib/rzip.h"
 #include "lib/vi.h"
@@ -2030,7 +2029,7 @@ bool bg3dPosTo2dPos(struct coord *cornerpos, struct coord *screenpos)
 	screenpos->y = cornerpos->y;
 	screenpos->z = cornerpos->z;
 
-	mtx4TransformVecInPlace(matrix, screenpos);
+	mtx4TransformVecInPlace((Mtx*)matrix, screenpos);
 	camProjectViewToScreenSafe(screenpos, screenpos->f);
 
 	if (screenpos->z > 0) {
@@ -3388,7 +3387,7 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 	uint32_t word;
 	Gfx *tri4gdl;
 	Mtxf *mtx = gfxAllocateMatrixF();
-	mtx4LoadIdentityF(mtx);
+	mtxIdent((Mtx*)mtx);
 	struct coord min;
 	struct coord max;
 	struct coord sp84;
@@ -3428,7 +3427,7 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 				ptr[1] = vtx->y;
 				ptr[2] = vtx->z;
 
-				mtx4TransformVecInPlace(mtx, (struct coord *) ptr);
+				mtx4TransformVecInPlace((Mtx*)mtx, (struct coord *) ptr);
 
 				numvertices--;
 				ptr += 3;
@@ -4707,7 +4706,7 @@ void bgTickPortalsXray(void)
 	eraserpos.f[1] = 0.0f;
 	eraserpos.f[2] = player->eraserdepth;
 
-	mtx4TransformVecInPlace(camGetProjectionMtxF(), &eraserpos);
+	mtx4TransformVecInPlace((Mtx*)camGetProjectionMtxF(), &eraserpos);
 
 	player->eraserpos.f[0] = eraserpos.f[0];
 	player->eraserpos.f[1] = eraserpos.f[1];

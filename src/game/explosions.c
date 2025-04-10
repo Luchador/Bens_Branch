@@ -24,7 +24,6 @@
 #include "lib/vi.h"
 #include "lib/main.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "data.h"
 #include "types.h"

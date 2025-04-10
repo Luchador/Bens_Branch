@@ -10,7 +10,6 @@
 #include "game/propobj.h"
 #include "bss.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 
@@ -21,21 +20,18 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #endif
 
-#define	FTOFIX32(x)	(int)((x) * (float)0x00010000)
+#define EPSILON 0.0000019073486f
+
 #define	FTOFRAC8(x)	((int) MIN(((x) * (128.0f)), 127.0f) & 0xff)
 
-void mtxLoadRandomRotation(Mtxf *mtx)
+void integrateDampedMotion(float *arg0, float *arg1, float arg2)
 {
-	struct coord coord = {0, 0, 0};
-
-	coord.x = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
-	coord.y = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
-	coord.z = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
-
-	mtx4LoadRotationF(&coord, mtx);
+	float tmp = arg1[0] - arg2 * 0.27777779f;
+	arg0[0] += arg2 * (arg1[0] + tmp) * 0.5f;
+	arg1[0] = tmp;
 }
 
-void mtxRandomToss(struct coord *coord, Mtxf *mtx)
+void mtxRandomToss(struct coord *coord, Mtx *mtx)
 {
 	coord->x = RANDOMFRAC() * 1.6666666269302f * 4.0f - 3.3333332538605f;
 	coord->y = RANDOMFRAC() * 1.6666666269302f * 4.0f;
@@ -44,59 +40,13 @@ void mtxRandomToss(struct coord *coord, Mtxf *mtx)
 	mtxLoadRandomRotation(mtx);
 }
 
-void func0f0965e4(float *arg0, float *arg1, float arg2)
-{
-	float tmp = arg1[0] - arg2 * 0.27777779f;
-	arg0[0] += arg2 * (arg1[0] + tmp) * 0.5f;
-	arg1[0] = tmp;
-}
-
 // Used for spinning falling objects such as grenades and dropped guns
-void mtxApplyRotation(Mtxf *arg0, Mtxf *arg1, int count)
+void mtxApplyRotation(Mtx *arg0, Mtx *arg1, int count)
 {
 	int i;
 
 	for (i = 0; i < count; i++) {
-		mtxApplyAffineTransformInPlaceF(arg1, arg0);
-	}
-}
-
-void mtxAlignF(float mf[4][4], float a, float x, float y, float z)
-{
-	static float dtor = 3.1415926f / 180.0f;
-	float s, c, h, hinv;
-
-	utilsNormalizeF(&x, &y, &z);
-
-	a *= dtor;
-	s = sinf(a);
-	c = cosf(a);
-	h = sqrtf(x * x + z * z);
-
-	mtxIdentF(mf);
-
-	if (h != 0) {
-		hinv = 1 / h;
-
-		mf[0][0] = (-z*c - s*y*x) * hinv;
-		mf[1][0] = (z*s - c*y*x) * hinv;
-		mf[2][0] = -x;
-		mf[3][0] = 0;
-
-		mf[0][1] = s*h;
-		mf[1][1] = c*h;
-		mf[2][1] = -y;
-		mf[3][1] = 0;
-
-		mf[0][2] = (c*x - s*y*z) * hinv;
-		mf[1][2] = (-s*x - c*y*z) * hinv;
-		mf[2][2] = -z;
-		mf[3][2] = 0;
-
-		mf[0][3] = 0;
-		mf[1][3] = 0;
-		mf[2][3] = 0;
-		mf[3][3] = 1;
+		mtxApplyAffineTransformInPlace(arg1, arg0);
 	}
 }
 
@@ -112,7 +62,7 @@ void mtxAlign(Mtx *m, float a, float x, float y, float z)
 	c = cosf(a);
 	h = sqrtf(x * x + z * z);
 
-	mtxIdentF(*m);
+	mtxIdent((Mtx*)*m);
 
 	if (h != 0) {
 		hinv = 1 / h;
@@ -139,28 +89,9 @@ void mtxAlign(Mtx *m, float a, float x, float y, float z)
 	}
 }
 
-
-void mtxF2L2(float mf[4][4], Mtx *m)
-{
-	if ((Mtx *)mf != m) {
-		memcpy(m, mf, sizeof(*m));
-	}
-}
-
 /*
 * Identity Matrix Functions
 */
-
-void mtxIdentF(float mf[4][4])
-{
-	int	i, j;
-
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 4; j++) {
-			mf[i][j] = i == j ? 1 : 0;
-		}
-	}
-}
 
 void mtxIdent(Mtx *m)
 {
@@ -173,15 +104,359 @@ void mtxIdent(Mtx *m)
 	}
 }
 
-void mtx4LoadIdentityF(Mtxf *mtx)
+/*
+* Translation Matrix Functions
+*/
+
+void mtx4TransformVecInPlace(Mtx *mtx, struct coord *vec)
 {
+	mtx4TransformVec(mtx, vec, vec);
+}
+
+void mtx4TransformVec(Mtx *mtx, struct coord *vec, struct coord *dst)
+{
+	float x = vec->x;
+	float y = vec->y;
+	float z = vec->z;
+
+	dst->x = (*mtx)[0][0] * x + (*mtx)[1][0] * y + (*mtx)[2][0] * z;
+	dst->y = (*mtx)[0][1] * x + (*mtx)[1][1] * y + (*mtx)[2][1] * z;
+	dst->z = (*mtx)[0][2] * x + (*mtx)[1][2] * y + (*mtx)[2][2] * z;
+
+	dst->x += (*mtx)[3][0];
+	dst->y += (*mtx)[3][1];
+	dst->z += (*mtx)[3][2];
+}
+
+void mtxApplyAffineTransformInPlace(Mtx *matrix1, Mtx *matrix2)
+{
+	mtxApplyAffineTransform(matrix1, matrix2, matrix2);
+}
+
+void mtxApplyAffineTransform(Mtx *arg0, Mtx *arg1, Mtx *dst)
+{
+	float m00 = (*arg1)[0][0];
+	float m01 = (*arg1)[0][1];
+	float m02 = (*arg1)[0][2];
+	float m03 = (*arg1)[0][3];
+	float m10 = (*arg1)[1][0];
+	float m11 = (*arg1)[1][1];
+	float m12 = (*arg1)[1][2];
+	float m13 = (*arg1)[1][3];
+	float m20 = (*arg1)[2][0];
+	float m21 = (*arg1)[2][1];
+	float m22 = (*arg1)[2][2];
+	float m23 = (*arg1)[2][3];
+	float m30 = (*arg1)[3][0];
+	float m31 = (*arg1)[3][1];
+	float m32 = (*arg1)[3][2];
+	float m33 = (*arg1)[3][3];
+
+	(*dst)[0][0] = (*arg0)[0][0] * m00 + (*arg0)[1][0] * m01 + (*arg0)[2][0] * m02;
+	(*dst)[0][1] = (*arg0)[0][1] * m00 + (*arg0)[1][1] * m01 + (*arg0)[2][1] * m02;
+	(*dst)[0][2] = (*arg0)[0][2] * m00 + (*arg0)[1][2] * m01 + (*arg0)[2][2] * m02;
+	(*dst)[0][3] = 0;
+
+	(*dst)[1][0] = (*arg0)[0][0] * m10 + (*arg0)[1][0] * m11 + (*arg0)[2][0] * m12;
+	(*dst)[1][1] = (*arg0)[0][1] * m10 + (*arg0)[1][1] * m11 + (*arg0)[2][1] * m12;
+	(*dst)[1][2] = (*arg0)[0][2] * m10 + (*arg0)[1][2] * m11 + (*arg0)[2][2] * m12;
+	(*dst)[1][3] = 0;
+
+	(*dst)[2][0] = (*arg0)[0][0] * m20 + (*arg0)[1][0] * m21 + (*arg0)[2][0] * m22;
+	(*dst)[2][1] = (*arg0)[0][1] * m20 + (*arg0)[1][1] * m21 + (*arg0)[2][1] * m22;
+	(*dst)[2][2] = (*arg0)[0][2] * m20 + (*arg0)[1][2] * m21 + (*arg0)[2][2] * m22;
+	(*dst)[2][3] = 0;
+
+	(*dst)[3][0] = (*arg0)[0][0] * m30 + (*arg0)[1][0] * m31 + (*arg0)[2][0] * m32 + (*arg0)[3][0];
+	(*dst)[3][1] = (*arg0)[0][1] * m30 + (*arg0)[1][1] * m31 + (*arg0)[2][1] * m32 + (*arg0)[3][1];
+	(*dst)[3][2] = (*arg0)[0][2] * m30 + (*arg0)[1][2] * m31 + (*arg0)[2][2] * m32 + (*arg0)[3][2];
+	(*dst)[3][3] = 1;
+}
+
+void mtx4SetTranslation(struct coord *pos, Mtx *mtx)
+{
+	(*mtx)[3][0] = pos->x;
+	(*mtx)[3][1] = pos->y;
+	(*mtx)[3][2] = pos->z;
+}
+
+/*
+* Scaling Matrix Functions
+*/
+
+void mtxScale(Mtx *m, float x, float y, float z)
+{
+	mtxIdent(m);
+
+	(*m)[0][0] = x;
+	(*m)[1][1] = y;
+	(*m)[2][2] = z;
+	(*m)[3][3] = 1;
+}
+
+void mtxScaleRow0Full(float mult, Mtx *mtx)
+{
+	(*mtx)[0][0] *= mult;
+	(*mtx)[0][1] *= mult;
+	(*mtx)[0][2] *= mult;
+	(*mtx)[0][3] *= mult;
+}
+
+void mtxScaleRow0Vec(float mult, Mtx *mtx)
+{
+	(*mtx)[0][0] *= mult;
+	(*mtx)[0][1] *= mult;
+	(*mtx)[0][2] *= mult;
+}
+
+void mtxScaleRow1Full(float mult, Mtx *mtx)
+{
+	(*mtx)[1][0] *= mult;
+	(*mtx)[1][1] *= mult;
+	(*mtx)[1][2] *= mult;
+	(*mtx)[1][3] *= mult;
+}
+
+void mtxScaleRow1Vec(float mult, Mtx *mtx)
+{
+	(*mtx)[1][0] *= mult;
+	(*mtx)[1][1] *= mult;
+	(*mtx)[1][2] *= mult;
+}
+
+void mtxScaleRow2Full(float mult, Mtx *mtx)
+{
+	(*mtx)[2][0] *= mult;
+	(*mtx)[2][1] *= mult;
+	(*mtx)[2][2] *= mult;
+	(*mtx)[2][3] *= mult;
+}
+
+void mtxScaleRow2Vec(float mult, Mtx *mtx)
+{
+	(*mtx)[2][0] *= mult;
+	(*mtx)[2][1] *= mult;
+	(*mtx)[2][2] *= mult;
+}
+
+void mtxScaleRotationPart(float mult, Mtx *mtx)
+{
+	(*mtx)[0][0] *= mult;
+	(*mtx)[0][1] *= mult;
+	(*mtx)[0][2] *= mult;
+	(*mtx)[0][3] *= mult;
+
+	(*mtx)[1][0] *= mult;
+	(*mtx)[1][1] *= mult;
+	(*mtx)[1][2] *= mult;
+	(*mtx)[1][3] *= mult;
+
+	(*mtx)[2][0] *= mult;
+	(*mtx)[2][1] *= mult;
+	(*mtx)[2][2] *= mult;
+	(*mtx)[2][3] *= mult;
+}
+
+// Multiplies all the 3D rotational and translational components (but not the fourth column)
+void mtxScale3x4(float mult, Mtx *mtx)
+{
+	(*mtx)[0][0] *= mult;
+	(*mtx)[0][1] *= mult;
+	(*mtx)[0][2] *= mult;
+
+	(*mtx)[1][0] *= mult;
+	(*mtx)[1][1] *= mult;
+	(*mtx)[1][2] *= mult;
+
+	(*mtx)[2][0] *= mult;
+	(*mtx)[2][1] *= mult;
+	(*mtx)[2][2] *= mult;
+
+	(*mtx)[3][0] *= mult;
+	(*mtx)[3][1] *= mult;
+	(*mtx)[3][2] *= mult;
+}
+
+/*
+* Rotation Matrix Functions
+*/
+
+void mtxRotate(Mtx *mtx, float a, float x, float y, float z)
+{
+	float sine;
+	float cosine;
+	float ab, bc, ca, t;
+
+	utilsNormalizeF(&x, &y, &z);
+	a *= 3.1415926f / 180.0f;
+	sine = sinf(a);
+	cosine = cosf(a);
+	t = 1 - cosine;
+	ab = x * y * t;
+	bc = y * z * t;
+	ca = z * x * t;
+
+	mtxIdent(mtx);
+
+	t = x * x;
+	(*mtx)[0][0] = t + cosine * (1 - t);
+	(*mtx)[2][1] = bc - x * sine;
+	(*mtx)[1][2] = bc + x * sine;
+
+	t = y * y;
+	(*mtx)[1][1] = t + cosine * (1 - t);
+	(*mtx)[2][0] = ca + y * sine;
+	(*mtx)[0][2] = ca - y * sine;
+
+	t = z * z;
+	(*mtx)[2][2] = t + cosine * (1 - t);
+	(*mtx)[1][0] = ab - z * sine;
+	(*mtx)[0][1] = ab + z * sine;
+}
+
+void mtx4RotateVecInPlace(Mtx *mtx, struct coord *vec)
+{
+	mtx4RotateVec((Mtx*)mtx, vec, vec);
+}
+
+void mtx4RotateVec(Mtx *mtx, struct coord *vec, struct coord *dst)
+{
+	float x = vec->x;
+	float y = vec->y;
+	float z = vec->z;
+
+	dst->x = (*mtx)[0][0] * x + (*mtx)[1][0] * y + (*mtx)[2][0] * z;
+	dst->y = (*mtx)[0][1] * x + (*mtx)[1][1] * y + (*mtx)[2][1] * z;
+	dst->z = (*mtx)[0][2] * x + (*mtx)[1][2] * y + (*mtx)[2][2] * z;
+}
+
+void mtxLoadRandomRotation(Mtx *mtx)
+{
+	struct coord coord = {0, 0, 0};
+
+	coord.x = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
+	coord.y = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
+	coord.z = RANDOMFRAC() * M_TAU * 0.0078125f - 0.024539785459638f;
+
+	mtx4LoadRotationF(&coord, (Mtxf*)mtx);
+}
+
+void mtx4LoadYRotationWithTranslation(struct coord *coord, float angle, Mtxf *mtx)
+{
+	float cos = cosf(angle);
+	float sin = sinf(angle);
+
+	mtx->m[0][0] = cos;
+	mtx->m[0][1] = 0;
+	mtx->m[0][2] = -sin;
+	mtx->m[0][3] = 0;
+
+	mtx->m[1][0] = 0;
+	mtx->m[1][1] = 1;
+	mtx->m[1][2] = 0;
+	mtx->m[1][3] = 0;
+
+	mtx->m[2][0] = sin;
+	mtx->m[2][1] = 0;
+	mtx->m[2][2] = cos;
+	mtx->m[2][3] = 0;
+
+	mtx->m[3][0] = coord->x;
+	mtx->m[3][1] = coord->y;
+	mtx->m[3][2] = coord->z;
+	mtx->m[3][3] = 1;
+}
+
+void mtx4LoadXRotationF(float angle, Mtxf *mtx)
+{
+	float cos = cosf(angle);
+	float sin = sinf(angle);
+
 	mtx->m[0][0] = 1;
 	mtx->m[0][1] = 0;
 	mtx->m[0][2] = 0;
 	mtx->m[0][3] = 0;
 
 	mtx->m[1][0] = 0;
+	mtx->m[1][1] = cos;
+	mtx->m[1][2] = sin;
+	mtx->m[1][3] = 0;
+
+	mtx->m[2][0] = 0;
+	mtx->m[2][1] = -sin;
+	mtx->m[2][2] = cos;
+	mtx->m[2][3] = 0;
+
+	mtx->m[3][0] = 0;
+	mtx->m[3][1] = 0;
+	mtx->m[3][2] = 0;
+	mtx->m[3][3] = 1;
+}
+
+void mtx4LoadYRotationF(float angle, Mtxf *mtx)
+{
+	float cos = cosf(angle);
+	float sin = sinf(angle);
+
+	mtx->m[0][0] = cos;
+	mtx->m[0][1] = 0;
+	mtx->m[0][2] = -sin;
+	mtx->m[0][3] = 0;
+
+	mtx->m[1][0] = 0;
 	mtx->m[1][1] = 1;
+	mtx->m[1][2] = 0;
+	mtx->m[1][3] = 0;
+
+	mtx->m[2][0] = sin;
+	mtx->m[2][1] = 0;
+	mtx->m[2][2] = cos;
+	mtx->m[2][3] = 0;
+
+	mtx->m[3][0] = 0;
+	mtx->m[3][1] = 0;
+	mtx->m[3][2] = 0;
+	mtx->m[3][3] = 1;
+}
+
+void mtx4LoadYRotation(float angle, Mtx *mtx)
+{
+	float cos = cosf(angle);
+	float sin = sinf(angle);
+
+	(*mtx)[0][0] = cos;
+	(*mtx)[0][1] = 0;
+	(*mtx)[0][2] = -sin;
+	(*mtx)[0][3] = 0;
+
+	(*mtx)[1][0] = 0;
+	(*mtx)[1][1] = 1;
+	(*mtx)[1][2] = 0;
+	(*mtx)[1][3] = 0;
+
+	(*mtx)[2][0] = sin;
+	(*mtx)[2][1] = 0;
+	(*mtx)[2][2] = cos;
+	(*mtx)[2][3] = 0;
+
+	(*mtx)[3][0] = 0;
+	(*mtx)[3][1] = 0;
+	(*mtx)[3][2] = 0;
+	(*mtx)[3][3] = 1;
+}
+
+void mtx4LoadZRotationF(float angle, Mtxf *mtx)
+{
+	float cos = cosf(angle);
+	float sin = sinf(angle);
+
+	mtx->m[0][0] = cos;
+	mtx->m[0][1] = sin;
+	mtx->m[0][2] = 0;
+	mtx->m[0][3] = 0;
+
+	mtx->m[1][0] = -sin;
+	mtx->m[1][1] = cos;
 	mtx->m[1][2] = 0;
 	mtx->m[1][3] = 0;
 
@@ -196,9 +471,343 @@ void mtx4LoadIdentityF(Mtxf *mtx)
 	mtx->m[3][3] = 1;
 }
 
-void mtx4MultMtx4InPlace(Mtxf *multmtx, Mtxf *subject)
+void mtx4LoadRotationF(struct coord *src, Mtxf *dest)
 {
-	mtx4MultMtx4F(multmtx, subject, subject);
+	float xcos = cosf(src->x);
+	float xsin = sinf(src->x);
+	float ycos = cosf(src->y);
+	float ysin = sinf(src->y);
+	float zcos = cosf(src->z);
+	float zsin = sinf(src->z);
+	float a = xsin * zsin;
+	float b = xcos * zsin;
+	float c = xsin * zcos;
+	float d = xcos * zcos;
+
+	dest->m[0][0] = ycos * zcos;
+	dest->m[0][1] = ycos * zsin;
+	dest->m[0][2] = -ysin;
+	dest->m[0][3] = 0;
+
+	dest->m[1][0] = c * ysin - xcos * zsin;
+	dest->m[1][1] = a * ysin + xcos * zcos;
+	dest->m[1][2] = xsin * ycos;
+	dest->m[1][3] = 0;
+
+	dest->m[2][0] = d * ysin + xsin * zsin;
+	dest->m[2][1] = b * ysin - xsin * zcos;
+	dest->m[2][2] = xcos * ycos;
+	dest->m[2][3] = 0;
+
+	dest->m[3][0] = 0;
+	dest->m[3][1] = 0;
+	dest->m[3][2] = 0;
+	dest->m[3][3] = 1;
+}
+
+void mtx4LoadRotation(struct coord *src, Mtx *dest)
+{
+	float xcos = cosf(src->x);
+	float xsin = sinf(src->x);
+	float ycos = cosf(src->y);
+	float ysin = sinf(src->y);
+	float zcos = cosf(src->z);
+	float zsin = sinf(src->z);
+	float a = xsin * zsin;
+	float b = xcos * zsin;
+	float c = xsin * zcos;
+	float d = xcos * zcos;
+
+	(*dest)[0][0] = ycos * zcos;
+	(*dest)[0][1] = ycos * zsin;
+	(*dest)[0][2] = -ysin;
+	(*dest)[0][3] = 0;
+
+	(*dest)[1][0] = c * ysin - xcos * zsin;
+	(*dest)[1][1] = a * ysin + xcos * zcos;
+	(*dest)[1][2] = xsin * ycos;
+	(*dest)[1][3] = 0;
+
+	(*dest)[2][0] = d * ysin + xsin * zsin;
+	(*dest)[2][1] = b * ysin - xsin * zcos;
+	(*dest)[2][2] = xcos * ycos;
+	(*dest)[2][3] = 0;
+
+	(*dest)[3][0] = 0;
+	(*dest)[3][1] = 0;
+	(*dest)[3][2] = 0;
+	(*dest)[3][3] = 1;
+}
+
+void mtx4GetRotation(float mtx[4][4], struct coord *dst)
+{
+	float norm;
+	float sin_x_cos_y = mtx[1][2];
+	float cos_x_cos_y = mtx[2][2];
+
+	norm = sqrtf(sin_x_cos_y * sin_x_cos_y + cos_x_cos_y * cos_x_cos_y);
+
+	if (EPSILON < norm) {
+		dst->x = atan2f(mtx[1][2], mtx[2][2]);
+		dst->y = atan2f(-mtx[0][2], norm);
+		dst->z = atan2f(mtx[0][1], mtx[0][0]);
+	} else {
+		dst->x = 0;
+		dst->y = atan2f(-mtx[0][2], norm);
+		dst->z = atan2f(-mtx[1][0], mtx[1][1]);
+	}
+}
+
+void mtx4LoadRotationAndTranslation(struct coord *pos, struct coord *rot, Mtxf *mtx)
+{
+	mtx4LoadRotationF(rot, mtx);
+	mtx4SetTranslation(pos, (Mtx*)mtx);
+}
+
+void mtx4LoadRotationFrom(float src[4][4], float dst[4][4])
+{
+	dst[0][0] = src[0][0];
+	dst[0][1] = src[1][0];
+	dst[0][2] = src[2][0];
+
+	dst[1][0] = src[0][1];
+	dst[1][1] = src[1][1];
+	dst[1][2] = src[2][1];
+
+	dst[2][0] = src[0][2];
+	dst[2][1] = src[1][2];
+	dst[2][2] = src[2][2];
+
+	dst[3][0] = 0;
+	dst[3][1] = 0;
+	dst[3][2] = 0;
+
+	dst[0][3] = 0;
+	dst[1][3] = 0;
+	dst[2][3] = 0;
+	dst[3][3] = 1;
+}
+
+/*
+* Frustum Matrix Functions
+*/
+
+void mtxFrustum(Mtx *m, float l, float r, float b, float t, float n, float f, float scale)
+{
+	int i, j;
+
+	mtxIdent(m);
+
+	(*m)[0][0] = 2 * n / (r - l);
+	(*m)[1][1] = 2 * n / (t - b);
+	(*m)[2][0] = (r + l) / (r - l);
+	(*m)[2][1] = (t + b) / (t - b);
+	(*m)[2][2] = -(f + n) / (f - n);
+	(*m)[2][3] = -1;
+	(*m)[3][2] = -2 * f * n / (f - n);
+	(*m)[3][3] = 0;
+
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 4; j++) {
+			(*m)[i][j] *= scale;
+		}
+	}
+}
+
+/*
+*  Perspective Matrix Functions
+*/
+
+void mtxPerspective(Mtx *mtx, float fovy, float aspect, float near, float far, float scale)
+{
+	float cot;
+	int	i, j;
+
+	mtxIdent((Mtx*)mtx);
+
+	fovy *= 3.1415926f / 180.0f;
+	cot = cosf(fovy * 0.5f) / sinf(fovy * 0.5f);
+
+	(*mtx)[0][0] = cot / aspect;
+	(*mtx)[1][1] = cot;
+	(*mtx)[2][2] = (near + far) / (near - far);
+	(*mtx)[2][3] = -1;
+	(*mtx)[3][2] = (2.0f * near * far) / (near - far);
+	(*mtx)[3][3] = 0;
+
+	for (i = 0; i < 4; i++) {
+		for (j = 0; j < 4; j++) {
+			(*mtx)[i][j] *= scale;
+		}
+	}
+}
+
+/*
+* Reflection Matrix Functions
+*/
+
+void mtxLookAtReflect(Mtx *mtx, LookAt *l, float xEye, float yEye, float zEye, float xAt,  float yAt,  float zAt, float xUp,  float yUp,  float zUp)
+{
+	float len, xLook, yLook, zLook, xRight, yRight, zRight;
+
+	mtxIdent(mtx);
+
+	xLook = xAt - xEye;
+	yLook = yAt - yEye;
+	zLook = zAt - zEye;
+
+	/* Negate because positive Z is behind us: */
+	len = -1.0f / sqrtf (xLook*xLook + yLook*yLook + zLook*zLook);
+	xLook *= len;
+	yLook *= len;
+	zLook *= len;
+
+	/* Right = Up x Look */
+
+	xRight = yUp * zLook - zUp * yLook;
+	yRight = zUp * xLook - xUp * zLook;
+	zRight = xUp * yLook - yUp * xLook;
+	len = 1.0f / sqrtf (xRight*xRight + yRight*yRight + zRight*zRight);
+	xRight *= len;
+	yRight *= len;
+	zRight *= len;
+
+	/* Up = Look x Right */
+
+	xUp = yLook * zRight - zLook * yRight;
+	yUp = zLook * xRight - xLook * zRight;
+	zUp = xLook * yRight - yLook * xRight;
+	len = 1.0f / sqrtf (xUp*xUp + yUp*yUp + zUp*zUp);
+	xUp *= len;
+	yUp *= len;
+	zUp *= len;
+
+	/* reflectance vectors = Up and Right */
+
+	l->l[0].l.dir[0] = FTOFRAC8(xRight);
+	l->l[0].l.dir[1] = FTOFRAC8(yRight);
+	l->l[0].l.dir[2] = FTOFRAC8(zRight);
+	l->l[1].l.dir[0] = FTOFRAC8(xUp);
+	l->l[1].l.dir[1] = FTOFRAC8(yUp);
+	l->l[1].l.dir[2] = FTOFRAC8(zUp);
+	l->l[0].l.col[0] = 0x00;
+	l->l[0].l.col[1] = 0x00;
+	l->l[0].l.col[2] = 0x00;
+	l->l[0].l.pad1 = 0x00;
+	l->l[0].l.colc[0] = 0x00;
+	l->l[0].l.colc[1] = 0x00;
+	l->l[0].l.colc[2] = 0x00;
+	l->l[0].l.pad2 = 0x00;
+	l->l[1].l.col[0] = 0x00;
+	l->l[1].l.col[1] = 0x80;
+	l->l[1].l.col[2] = 0x00;
+	l->l[1].l.pad1 = 0x00;
+	l->l[1].l.colc[0] = 0x00;
+	l->l[1].l.colc[1] = 0x80;
+	l->l[1].l.colc[2] = 0x00;
+	l->l[1].l.pad2 = 0x00;
+
+	(*mtx)[0][0] = xRight;
+	(*mtx)[1][0] = yRight;
+	(*mtx)[2][0] = zRight;
+	(*mtx)[3][0] = -(xEye * xRight + yEye * yRight + zEye * zRight);
+
+	(*mtx)[0][1] = xUp;
+	(*mtx)[1][1] = yUp;
+	(*mtx)[2][1] = zUp;
+	(*mtx)[3][1] = -(xEye * xUp + yEye * yUp + zEye * zUp);
+
+	(*mtx)[0][2] = xLook;
+	(*mtx)[1][2] = yLook;
+	(*mtx)[2][2] = zLook;
+	(*mtx)[3][2] = -(xEye * xLook + yEye * yLook + zEye * zLook);
+
+	(*mtx)[0][3] = 0;
+	(*mtx)[1][3] = 0;
+	(*mtx)[2][3] = 0;
+	(*mtx)[3][3] = 1;
+}
+
+/*
+* Copy Matrix Functions
+*/
+
+void mtx3Copy(float src[3][3], float dst[3][3])
+{
+	dst[0][0] = src[0][0];
+	dst[0][1] = src[0][1];
+	dst[0][2] = src[0][2];
+
+	dst[1][0] = src[1][0];
+	dst[1][1] = src[1][1];
+	dst[1][2] = src[1][2];
+
+	dst[2][0] = src[2][0];
+	dst[2][1] = src[2][1];
+	dst[2][2] = src[2][2];
+}
+
+void mtx4CopyF(Mtxf *src, Mtxf *dst)
+{
+	*dst = *src;
+}
+
+void mtxScaleRotationOnly(float mult, Mtx *mtx)
+{
+	(*mtx)[0][0] *= mult;
+	(*mtx)[0][1] *= mult;
+	(*mtx)[0][2] *= mult;
+
+	(*mtx)[1][0] *= mult;
+	(*mtx)[1][1] *= mult;
+	(*mtx)[1][2] *= mult;
+
+	(*mtx)[2][0] *= mult;
+	(*mtx)[2][1] *= mult;
+	(*mtx)[2][2] *= mult;
+}
+
+void mtx3ToMtx4(float src[3][3], Mtx *dst)
+{
+	(*dst)[0][0] = src[0][0];
+	(*dst)[0][1] = src[0][1];
+	(*dst)[0][2] = src[0][2];
+	(*dst)[0][3] = 0;
+
+	(*dst)[1][0] = src[1][0];
+	(*dst)[1][1] = src[1][1];
+	(*dst)[1][2] = src[1][2];
+	(*dst)[1][3] = 0;
+
+	(*dst)[2][0] = src[2][0];
+	(*dst)[2][1] = src[2][1];
+	(*dst)[2][2] = src[2][2];
+	(*dst)[2][3] = 0;
+
+	(*dst)[3][0] = 0;
+	(*dst)[3][1] = 0;
+	(*dst)[3][2] = 0;
+	(*dst)[3][3] = 1;
+}
+
+void mtx4ToMtx3(Mtx *src, float dst[3][3])
+{
+	dst[0][0] = (*src)[0][0];
+	dst[0][1] = (*src)[0][1];
+	dst[0][2] = (*src)[0][2];
+
+	dst[1][0] = (*src)[1][0];
+	dst[1][1] = (*src)[1][1];
+	dst[1][2] = (*src)[1][2];
+
+	dst[2][0] = (*src)[2][0];
+	dst[2][1] = (*src)[2][1];
+	dst[2][2] = (*src)[2][2];
+}
+
+void mtx4MultMtx4InPlace(Mtx *multmtx, Mtx *subject)
+{
+	mtx4MultMtx4(multmtx, subject, subject);
 }
 
 /*
@@ -208,34 +817,6 @@ void mtx4MultMtx4InPlace(Mtxf *multmtx, Mtxf *subject)
  * The operation is column-major, which is typical for graphics applications.
  * This is used in transformations like combining translation, rotation, and scale.
  */
-void mtx4MultMtx4F(Mtxf *mtx1, Mtxf *mtx2, Mtxf *dst)
-{
-	int i;
-	float m00 = mtx2->m[0][0];
-	float m01 = mtx2->m[0][1];
-	float m02 = mtx2->m[0][2];
-	float m03 = mtx2->m[0][3];
-	float m10 = mtx2->m[1][0];
-	float m11 = mtx2->m[1][1];
-	float m12 = mtx2->m[1][2];
-	float m13 = mtx2->m[1][3];
-	float m20 = mtx2->m[2][0];
-	float m21 = mtx2->m[2][1];
-	float m22 = mtx2->m[2][2];
-	float m23 = mtx2->m[2][3];
-	float m30 = mtx2->m[3][0];
-	float m31 = mtx2->m[3][1];
-	float m32 = mtx2->m[3][2];
-	float m33 = mtx2->m[3][3];
-
-	for (i = 0; i < 4; i++) {
-		dst->m[0][i] = mtx1->m[0][i] * m00 + mtx1->m[1][i] * m01 + mtx1->m[2][i] * m02 + mtx1->m[3][i] * m03;
-		dst->m[1][i] = mtx1->m[0][i] * m10 + mtx1->m[1][i] * m11 + mtx1->m[2][i] * m12 + mtx1->m[3][i] * m13;
-		dst->m[2][i] = mtx1->m[0][i] * m20 + mtx1->m[1][i] * m21 + mtx1->m[2][i] * m22 + mtx1->m[3][i] * m23;
-		dst->m[3][i] = mtx1->m[0][i] * m30 + mtx1->m[1][i] * m31 + mtx1->m[2][i] * m32 + mtx1->m[3][i] * m33;
-	}
-}
-
 void mtx4MultMtx4(Mtx *mtx1, Mtx *mtx2, Mtx *dst)
 {
 	int i;
@@ -264,523 +845,420 @@ void mtx4MultMtx4(Mtx *mtx1, Mtx *mtx2, Mtx *dst)
 	}
 }
 
-/*
-* Scaling Matrix Functions
-*/
-
-void mtxScale(Mtx *m, float x, float y, float z)
+void mtx00016110(float mtx1[3][3], float mtx2[3][3])
 {
-	mtxIdent(m);
+	float mtx3[3][3];
 
-	(*m)[0][0] = x;
-	(*m)[1][1] = y;
-	(*m)[2][2] = z;
-	(*m)[3][3] = 1;
+	mtx00016140(mtx1, mtx2, mtx3);
+	mtx3Copy(mtx3, mtx2);
 }
 
-void mtxScaleRow0Full(float mult, Mtxf *mtx)
+void mtx00016140(float mtx1[3][3], float mtx2[3][3], float dst[3][3])
 {
-	mtx->m[0][0] *= mult;
-	mtx->m[0][1] *= mult;
-	mtx->m[0][2] *= mult;
-	mtx->m[0][3] *= mult;
+	int i;
+	int j;
+
+	for (i = 0; i < 3; i++) {
+		for (j = 0; j < 3; j++) {
+			dst[j][i] = mtx1[0][i] * mtx2[j][0] + mtx1[1][i] * mtx2[j][1] + mtx1[2][i] * mtx2[j][2];
+		}
+	}
 }
 
-void mtxScaleRow0Vec(float mult, Mtxf *mtx)
+void mtx3LinearTransform(float mtx[3][3], float src[3], float dest[3])
 {
-	mtx->m[0][0] *= mult;
-	mtx->m[0][1] *= mult;
-	mtx->m[0][2] *= mult;
+	int i;
+
+	for (i = 0; i < 3; i++) {
+		dest[i] = mtx[0][i] * src[0] + mtx[1][i] * src[1] + mtx[2][i] * src[2];
+	}
 }
 
-void mtxScaleRow1Full(float mult, Mtxf *mtx)
+void mtx00016208(float mtx[3][3], struct coord *coord)
 {
-	mtx->m[1][0] *= mult;
-	mtx->m[1][1] *= mult;
-	mtx->m[1][2] *= mult;
-	mtx->m[1][3] *= mult;
+	float tmp[3];
+
+	mtx3LinearTransform(mtx, (float *)coord, tmp);
+
+	coord->x = tmp[0];
+	coord->y = tmp[1];
+	coord->z = tmp[2];
 }
 
-void mtxScaleRow1Vec(float mult, Mtxf *mtx)
+void mtx4LoadTranslationF(struct coord *pos, Mtxf *mtx)
 {
-	mtx->m[1][0] *= mult;
-	mtx->m[1][1] *= mult;
-	mtx->m[1][2] *= mult;
+	mtxIdent((Mtx*)mtx);
+	mtx4SetTranslation(pos, (Mtx*)mtx);
 }
 
-void mtxScaleRow2Full(float mult, Mtxf *mtx)
+void mtx4LoadTranslation(struct coord *pos, Mtx *mtx)
 {
-	mtx->m[2][0] *= mult;
-	mtx->m[2][1] *= mult;
-	mtx->m[2][2] *= mult;
-	mtx->m[2][3] *= mult;
+	mtxIdent(mtx);
+	mtx4SetTranslation(pos, (Mtx*)mtx);
 }
 
-void mtxScaleRow2Vec(float mult, Mtxf *mtx)
+void mtx00016710(float mult, float mtx[4][4])
 {
-	mtx->m[2][0] *= mult;
-	mtx->m[2][1] *= mult;
-	mtx->m[2][2] *= mult;
+	mtx[0][2] *= mult;
+	mtx[1][2] *= mult;
+	mtx[2][2] *= mult;
+	mtx[3][2] *= mult;
 }
 
-void mtxScaleRotationPartF(float mult, Mtxf *mtx)
+/**
+ * Constructs a view matrix (camera transform) using position, look direction, and up vector.
+ *
+ * - pos(x, y, z): The position of the camera in world space.
+ * - look(x, y, z): The direction the camera is looking (not a target point).
+ * - up(x, y, z): The camera's up direction.
+ *
+ * Output matrix transforms world coordinates into camera (view) space.
+ * Equivalent to gluLookAt().
+ */
+void mtxBuildCameraMatrix(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
 {
-	mtx->m[0][0] *= mult;
-	mtx->m[0][1] *= mult;
-	mtx->m[0][2] *= mult;
-	mtx->m[0][3] *= mult;
+	float a;
+	float b;
+	float c;
+	float tmp;
 
-	mtx->m[1][0] *= mult;
-	mtx->m[1][1] *= mult;
-	mtx->m[1][2] *= mult;
-	mtx->m[1][3] *= mult;
+	tmp = -1 / sqrtf(lookx * lookx + looky * looky + lookz * lookz);
+	lookx *= tmp;
+	looky *= tmp;
+	lookz *= tmp;
 
-	mtx->m[2][0] *= mult;
-	mtx->m[2][1] *= mult;
-	mtx->m[2][2] *= mult;
-	mtx->m[2][3] *= mult;
+	a = upy * lookz - upz * looky;
+	b = upz * lookx - upx * lookz;
+	c = upx * looky - upy * lookx;
+
+	tmp = 1 / sqrtf(a * a + b * b + c * c);
+	a *= tmp;
+	b *= tmp;
+	c *= tmp;
+
+	upx = looky * c - lookz * b;
+	upy = lookz * a - lookx * c;
+	upz = lookx * b - looky * a;
+
+	tmp = 1 / sqrtf(upx * upx + upy * upy + upz * upz);
+	upx *= tmp;
+	upy *= tmp;
+	upz *= tmp;
+
+	mtx->m[0][0] = a;
+	mtx->m[1][0] = b;
+	mtx->m[2][0] = c;
+	mtx->m[3][0] = -(posx * a + posy * b + posz * c);
+
+	mtx->m[0][1] = upx;
+	mtx->m[1][1] = upy;
+	mtx->m[2][1] = upz;
+	mtx->m[3][1] = -(posx * upx + posy * upy + posz * upz);
+
+	mtx->m[0][2] = lookx;
+	mtx->m[1][2] = looky;
+	mtx->m[2][2] = lookz;
+	mtx->m[3][2] = -(posx * lookx + posy * looky + posz * lookz);
+
+	mtx->m[0][3] = 0;
+	mtx->m[1][3] = 0;
+	mtx->m[2][3] = 0;
+	mtx->m[3][3] = 1;
 }
 
-void mtxScaleRotationPart(float mult, Mtx *mtx)
+void mtxBuildLookAtMatrixF(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
 {
-	(*mtx)[0][0] *= mult;
-	(*mtx)[0][1] *= mult;
-	(*mtx)[0][2] *= mult;
-	(*mtx)[0][3] *= mult;
-
-	(*mtx)[1][0] *= mult;
-	(*mtx)[1][1] *= mult;
-	(*mtx)[1][2] *= mult;
-	(*mtx)[1][3] *= mult;
-
-	(*mtx)[2][0] *= mult;
-	(*mtx)[2][1] *= mult;
-	(*mtx)[2][2] *= mult;
-	(*mtx)[2][3] *= mult;
+	mtxBuildCameraMatrix(mtx, posx, posy, posz, lookx - posx, looky - posy, lookz - posz, upx, upy, upz);
 }
 
-/*
-* Rotation Matrix Functions
-*/
+void mtxBuildLookAtMatrix2F(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
+{
+	float a;
+	float b;
+	float c;
+	float tmp;
 
-void mtxRotateF(float mf[4][4], float a, float x, float y, float z)
+	tmp = -1 / sqrtf(lookx * lookx + looky * looky + lookz * lookz);
+	lookx *= tmp;
+	looky *= tmp;
+	lookz *= tmp;
+
+	a = upy * lookz - upz * looky;
+	b = upz * lookx - upx * lookz;
+	c = upx * looky - upy * lookx;
+
+	tmp = 1 / sqrtf(a * a + b * b + c * c);
+	a *= tmp;
+	b *= tmp;
+	c *= tmp;
+
+	upx = looky * c - lookz * b;
+	upy = lookz * a - lookx * c;
+	upz = lookx * b - looky * a;
+
+	tmp = 1 / sqrtf(upx * upx + upy * upy + upz * upz);
+	upx *= tmp;
+	upy *= tmp;
+	upz *= tmp;
+
+	mtx->m[0][0] = a;
+	mtx->m[1][0] = upx;
+	mtx->m[2][0] = lookx;
+	mtx->m[3][0] = posx;
+
+	mtx->m[0][1] = b;
+	mtx->m[1][1] = upy;
+	mtx->m[2][1] = looky;
+	mtx->m[3][1] = posy;
+
+	mtx->m[0][2] = c;
+	mtx->m[1][2] = upz;
+	mtx->m[2][2] = lookz;
+	mtx->m[3][2] = posz;
+
+	mtx->m[0][3] = 0;
+	mtx->m[1][3] = 0;
+	mtx->m[2][3] = 0;
+	mtx->m[3][3] = 1;
+}
+
+void mtxBuildLookAtFromTargetF(Mtxf *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz)
+{
+	mtxBuildLookAtMatrix2F(mtx, posx, posy, posz, lookx - posx, looky - posy, lookz - posz, upx, upy, upz);
+}
+
+/**
+ * Builds a "look-at"-style rotation matrix that aligns to the given vector (x, y, z),
+ * applying a twist around the vector by the given angle.
+ * Used for aligning muzzle flashes.
+ */
+void mtxBuildFacingMatrix(float mtx[4][4], float angle, float x, float y, float z)
 {
 	float sine;
 	float cosine;
-	float ab, bc, ca, t;
+	float norm;
+	float invnorm;
+	float cos_x;
+	float sin_x;
+	float cos_z;
+	float sin_z;
 
 	utilsNormalizeF(&x, &y, &z);
-	a *= 3.1415926f / 180.0f;
-	sine = sinf(a);
-	cosine = cosf(a);
-	t = 1 - cosine;
-	ab = x * y * t;
-	bc = y * z * t;
-	ca = z * x * t;
+	sine = sinf(angle);
+	cosine = cosf(angle);
+	norm = sqrtf(x * x + z * z);
 
-	mtxIdentF(mf);
+	if (norm != 0) {
+		cos_x = x * cosine;
+		sin_x = x * sine;
+		cos_z = z * cosine;
+		sin_z = z * sine;
+		invnorm = 1 / norm;
 
-	t = x * x;
-	mf[0][0] = t + cosine * (1 - t);
-	mf[2][1] = bc - x * sine;
-	mf[1][2] = bc + x * sine;
+		mtx[0][0] = (-cos_z - y * sin_x) * invnorm;
+		mtx[1][0] = (sine * norm);
+		mtx[2][0] = (cos_x - y * sin_z) * invnorm;
+		mtx[3][0] = 0;
+		mtx[0][1] = (sin_z - y * cos_x) * invnorm;
+		mtx[1][1] = (cosine * norm);
+		mtx[2][1] = (-sin_x - y * cos_z) * invnorm;
+		mtx[3][1] = 0;
+		mtx[0][2] = -x;
+		mtx[1][2] = -y;
+		mtx[2][2] = -z;
+		mtx[3][2] = 0;
 
-	t = y * y;
-	mf[1][1] = t + cosine * (1 - t);
-	mf[2][0] = ca + y * sine;
-	mf[0][2] = ca - y * sine;
+		mtx[0][3] = 0;
+		mtx[1][3] = 0;
+		mtx[2][3] = 0;
+		mtx[3][3] = 1;
+		return;
+	}
 
-	t = z * z;
-	mf[2][2] = t + cosine * (1 - t);
-	mf[1][0] = ab - z * sine;
-	mf[0][1] = ab + z * sine;
+	mtxIdent((Mtx*)mtx);
 }
 
-void mtxRotate(Mtx *m, float a, float x, float y, float z)
+void mtx4Align(float mtx[4][4], float angle, float x, float y, float z)
 {
-	float mf[4][4];
-
-	mtxRotateF(mf, a, x, y, z);
-
-	mtxF2L2(mf, m);
+	angle = RAD2DEG(angle);
+	mtxAlign((Mtx*)mtx, angle, x, y, z);
 }
 
-void mtx4RotateVecInPlace(Mtxf *mtx, struct coord *vec)
+void mtx000170e4(float src[4][4], float dst[4][4])
 {
-	mtx4RotateVec(mtx, vec, vec);
+	float tmp = (src[0][0] * src[0][0] + src[1][0] * src[1][0] + src[2][0] * src[2][0]);
+	tmp = 1 / tmp;
+
+	dst[0][0] = src[0][0] * tmp;
+	dst[0][1] = src[1][0] * tmp;
+	dst[0][2] = src[2][0] * tmp;
+
+	dst[1][0] = src[0][1] * tmp;
+	dst[1][1] = src[1][1] * tmp;
+	dst[1][2] = src[2][1] * tmp;
+
+	dst[2][0] = src[0][2] * tmp;
+	dst[2][1] = src[1][2] * tmp;
+	dst[2][2] = src[2][2] * tmp;
+
+	dst[3][0] = 0;
+	dst[3][1] = 0;
+	dst[3][2] = 0;
+
+	dst[0][3] = 0;
+	dst[1][3] = 0;
+	dst[2][3] = 0;
+	dst[3][3] = 1;
 }
 
-void mtx4RotateVec(Mtxf *mtx, struct coord *vec, struct coord *dst)
+void mtx0001719c(float arg0[4][4], float arg1[4][4])
 {
-	float x = vec->x;
-	float y = vec->y;
-	float z = vec->z;
+	float tmp = arg0[0][0] * arg0[0][0] + arg0[1][0] * arg0[1][0] + arg0[2][0] * arg0[2][0];
+	tmp = 1 / tmp;
 
-	dst->x = mtx->m[0][0] * x + mtx->m[1][0] * y + mtx->m[2][0] * z;
-	dst->y = mtx->m[0][1] * x + mtx->m[1][1] * y + mtx->m[2][1] * z;
-	dst->z = mtx->m[0][2] * x + mtx->m[1][2] * y + mtx->m[2][2] * z;
+	arg1[0][0] = arg0[0][0] * tmp;
+	arg1[0][1] = arg0[1][0] * tmp;
+	arg1[0][2] = arg0[2][0] * tmp;
+	arg1[1][0] = arg0[0][1] * tmp;
+	arg1[1][1] = arg0[1][1] * tmp;
+	arg1[1][2] = arg0[2][1] * tmp;
+	arg1[2][0] = arg0[0][2] * tmp;
+	arg1[2][1] = arg0[1][2] * tmp;
+	arg1[2][2] = arg0[2][2] * tmp;
+	arg1[3][0] = -(arg1[0][0] * arg0[3][0] + arg1[1][0] * arg0[3][1] + arg1[2][0] * arg0[3][2]);
+	arg1[3][1] = -(arg1[0][1] * arg0[3][0] + arg1[1][1] * arg0[3][1] + arg1[2][1] * arg0[3][2]);
+	arg1[3][2] = -(arg1[0][2] * arg0[3][0] + arg1[1][2] * arg0[3][1] + arg1[2][2] * arg0[3][2]);
+	arg1[0][3] = 0;
+	arg1[1][3] = 0;
+	arg1[2][3] = 0;
+	arg1[3][3] = 1;
 }
 
-/*
-* Translation Matrix Functions
-*/
-
-void mtx4TransformVecInPlace(Mtxf *mtx, struct coord *vec)
+void mtxInvertAffine(float arg0[4][4], float arg1[4][4])
 {
-	mtx4TransformVec(mtx, vec, vec);
+	float f0 = 0.0f;
+	f0 += arg0[0][0] * arg0[1][1] * arg0[2][2];
+	f0 += arg0[0][1] * arg0[1][2] * arg0[2][0];
+	f0 += arg0[0][2] * arg0[1][0] * arg0[2][1];
+	f0 -= arg0[0][2] * arg0[1][1] * arg0[2][0];
+	f0 -= arg0[0][1] * arg0[1][0] * arg0[2][2];
+	f0 -= arg0[0][0] * arg0[1][2] * arg0[2][1];
+	f0 = 1.0f / f0;
+
+	arg1[0][0] = (arg0[1][1] * arg0[2][2] - arg0[1][2] * arg0[2][1]) * f0;
+	arg1[1][0] = (arg0[1][2] * arg0[2][0] - arg0[1][0] * arg0[2][2]) * f0;
+	arg1[2][0] = (arg0[1][0] * arg0[2][1] - arg0[1][1] * arg0[2][0]) * f0;
+	arg1[0][1] = (arg0[0][2] * arg0[2][1] - arg0[0][1] * arg0[2][2]) * f0;
+	arg1[1][1] = (arg0[0][0] * arg0[2][2] - arg0[0][2] * arg0[2][0]) * f0;
+	arg1[2][1] = (arg0[0][1] * arg0[2][0] - arg0[0][0] * arg0[2][1]) * f0;
+	arg1[0][2] = (arg0[0][1] * arg0[1][2] - arg0[0][2] * arg0[1][1]) * f0;
+	arg1[1][2] = (arg0[0][2] * arg0[1][0] - arg0[0][0] * arg0[1][2]) * f0;
+	arg1[2][2] = (arg0[0][0] * arg0[1][1] - arg0[0][1] * arg0[1][0]) * f0;
+	arg1[3][0] = -(arg0[3][0] * arg1[0][0] + arg0[3][1] * arg1[1][0] + arg0[3][2] * arg1[2][0]);
+	arg1[3][1] = -(arg0[3][0] * arg1[0][1] + arg0[3][1] * arg1[1][1] + arg0[3][2] * arg1[2][1]);
+	arg1[3][2] = -(arg0[3][0] * arg1[0][2] + arg0[3][1] * arg1[1][2] + arg0[3][2] * arg1[2][2]);
+	arg1[0][3] = 0.0f;
+	arg1[1][3] = 0.0f;
+	arg1[2][3] = 0.0f;
+	arg1[3][3] = 1.0f;
 }
 
-void mtx4TransformVec(Mtxf *mtx, struct coord *vec, struct coord *dst)
+void mtxInverse4x4(float arg0[4][4], float arg1[4][4])
 {
-	float x = vec->x;
-	float y = vec->y;
-	float z = vec->z;
+	int i;
+	int j;
+	float tmp;
 
-	dst->x = mtx->m[0][0] * x + mtx->m[1][0] * y + mtx->m[2][0] * z;
-	dst->y = mtx->m[0][1] * x + mtx->m[1][1] * y + mtx->m[2][1] * z;
-	dst->z = mtx->m[0][2] * x + mtx->m[1][2] * y + mtx->m[2][2] * z;
+	mtxAdjugate4x4(arg0, arg1);
 
-	dst->x += mtx->m[3][0];
-	dst->y += mtx->m[3][1];
-	dst->z += mtx->m[3][2];
-}
-
-void mtxApplyAffineTransformInPlaceF(Mtxf *matrix1, Mtxf *matrix2)
-{
-	mtxApplyAffineTransform(matrix1, matrix2, matrix2);
-}
-
-void mtxApplyAffineTransform(Mtxf *arg0, Mtxf *arg1, Mtxf *dst)
-{
-	float m00 = arg1->m[0][0];
-	float m01 = arg1->m[0][1];
-	float m02 = arg1->m[0][2];
-	float m03 = arg1->m[0][3];
-	float m10 = arg1->m[1][0];
-	float m11 = arg1->m[1][1];
-	float m12 = arg1->m[1][2];
-	float m13 = arg1->m[1][3];
-	float m20 = arg1->m[2][0];
-	float m21 = arg1->m[2][1];
-	float m22 = arg1->m[2][2];
-	float m23 = arg1->m[2][3];
-	float m30 = arg1->m[3][0];
-	float m31 = arg1->m[3][1];
-	float m32 = arg1->m[3][2];
-	float m33 = arg1->m[3][3];
-
-	dst->m[0][0] = arg0->m[0][0] * m00 + arg0->m[1][0] * m01 + arg0->m[2][0] * m02;
-	dst->m[0][1] = arg0->m[0][1] * m00 + arg0->m[1][1] * m01 + arg0->m[2][1] * m02;
-	dst->m[0][2] = arg0->m[0][2] * m00 + arg0->m[1][2] * m01 + arg0->m[2][2] * m02;
-	dst->m[0][3] = 0;
-
-	dst->m[1][0] = arg0->m[0][0] * m10 + arg0->m[1][0] * m11 + arg0->m[2][0] * m12;
-	dst->m[1][1] = arg0->m[0][1] * m10 + arg0->m[1][1] * m11 + arg0->m[2][1] * m12;
-	dst->m[1][2] = arg0->m[0][2] * m10 + arg0->m[1][2] * m11 + arg0->m[2][2] * m12;
-	dst->m[1][3] = 0;
-
-	dst->m[2][0] = arg0->m[0][0] * m20 + arg0->m[1][0] * m21 + arg0->m[2][0] * m22;
-	dst->m[2][1] = arg0->m[0][1] * m20 + arg0->m[1][1] * m21 + arg0->m[2][1] * m22;
-	dst->m[2][2] = arg0->m[0][2] * m20 + arg0->m[1][2] * m21 + arg0->m[2][2] * m22;
-	dst->m[2][3] = 0;
-
-	dst->m[3][0] = arg0->m[0][0] * m30 + arg0->m[1][0] * m31 + arg0->m[2][0] * m32 + arg0->m[3][0];
-	dst->m[3][1] = arg0->m[0][1] * m30 + arg0->m[1][1] * m31 + arg0->m[2][1] * m32 + arg0->m[3][1];
-	dst->m[3][2] = arg0->m[0][2] * m30 + arg0->m[1][2] * m31 + arg0->m[2][2] * m32 + arg0->m[3][2];
-	dst->m[3][3] = 1;
-}
-
-void mtx4SetTranslation(struct coord *pos, Mtxf *mtx)
-{
-	mtx->m[3][0] = pos->x;
-	mtx->m[3][1] = pos->y;
-	mtx->m[3][2] = pos->z;
-}
-
-/*
-* Frustum Matrix Functions
-*/
-
-void mtxFrustumF(float mf[4][4], float l, float r, float b, float t, float n, float f, float scale)
-{
-	int i, j;
-
-	mtxIdentF(mf);
-
-	mf[0][0] = 2 * n / (r - l);
-	mf[1][1] = 2 * n / (t - b);
-	mf[2][0] = (r + l) / (r - l);
-	mf[2][1] = (t + b) / (t - b);
-	mf[2][2] = -(f + n) / (f - n);
-	mf[2][3] = -1;
-	mf[3][2] = -2 * f * n / (f - n);
-	mf[3][3] = 0;
+	tmp = 1.0f / mtxDet4x4(arg0);
 
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < 4; j++) {
-			mf[i][j] *= scale;
+			arg1[i][j] *= tmp;
 		}
 	}
 }
 
-void mtxFrustum(Mtx *m, float l, float r, float b, float t, float n, float f, float scale)
+void mtxAdjugate4x4(float arg0[4][4], float arg1[4][4])
 {
-	int i, j;
+	float mtx00, mtx10, mtx20, mtx30;
+	float mtx04, mtx14, mtx24, mtx34;
+	float mtx08, mtx18, mtx28, mtx38;
+	float mtx0c, mtx1c, mtx2c, mtx3c;
 
-	mtxIdent(m);
+	mtx00 = arg0[0][0]; mtx04 = arg0[0][1];
+	mtx08 = arg0[0][2]; mtx0c = arg0[0][3];
+	mtx10 = arg0[1][0]; mtx14 = arg0[1][1];
+	mtx18 = arg0[1][2]; mtx1c = arg0[1][3];
+	mtx20 = arg0[2][0]; mtx24 = arg0[2][1];
+	mtx28 = arg0[2][2]; mtx2c = arg0[2][3];
+	mtx30 = arg0[3][0]; mtx34 = arg0[3][1];
+	mtx38 = arg0[3][2]; mtx3c = arg0[3][3];
 
-	(*m)[0][0] = 2 * n / (r - l);
-	(*m)[1][1] = 2 * n / (t - b);
-	(*m)[2][0] = (r + l) / (r - l);
-	(*m)[2][1] = (t + b) / (t - b);
-	(*m)[2][2] = -(f + n) / (f - n);
-	(*m)[2][3] = -1;
-	(*m)[3][2] = -2 * f * n / (f - n);
-	(*m)[3][3] = 0;
-
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 4; j++) {
-			(*m)[i][j] *= scale;
-		}
-	}
+	arg1[0][0] =  mtxDet3x3(mtx14, mtx24, mtx34, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
+	arg1[1][0] = -mtxDet3x3(mtx10, mtx20, mtx30, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
+	arg1[2][0] =  mtxDet3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx1c, mtx2c, mtx3c);
+	arg1[3][0] = -mtxDet3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx18, mtx28, mtx38);
+	arg1[0][1] = -mtxDet3x3(mtx04, mtx24, mtx34, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
+	arg1[1][1] =  mtxDet3x3(mtx00, mtx20, mtx30, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
+	arg1[2][1] = -mtxDet3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx0c, mtx2c, mtx3c);
+	arg1[3][1] =  mtxDet3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx08, mtx28, mtx38);
+	arg1[0][2] =  mtxDet3x3(mtx04, mtx14, mtx34, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
+	arg1[1][2] = -mtxDet3x3(mtx00, mtx10, mtx30, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
+	arg1[2][2] =  mtxDet3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx0c, mtx1c, mtx3c);
+	arg1[3][2] = -mtxDet3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx08, mtx18, mtx38);
+	arg1[0][3] = -mtxDet3x3(mtx04, mtx14, mtx24, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
+	arg1[1][3] =  mtxDet3x3(mtx00, mtx10, mtx20, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
+	arg1[2][3] = -mtxDet3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx0c, mtx1c, mtx2c);
+	arg1[3][3] =  mtxDet3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx08, mtx18, mtx28);
 }
 
-/*
-*  Perspective Matrix Functions
-*/
-
-void mtxPerspectiveF(float mf[4][4], float fovy, float aspect, float near, float far, float scale)
-{
-	float cot;
-	int	i, j;
-
-	mtxIdentF(mf);
-
-	fovy *= 3.1415926f / 180.0f;
-	cot = cosf(fovy * 0.5f) / sinf(fovy * 0.5f);
-
-	mf[0][0] = cot / aspect;
-	mf[1][1] = cot;
-	mf[2][2] = (near + far) / (near - far);
-	mf[2][3] = -1;
-	mf[3][2] = (2.0f * near * far) / (near - far);
-	mf[3][3] = 0;
-
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 4; j++) {
-			mf[i][j] *= scale;
-		}
-	}
+// Computes the determinant of a 2x2 matrix
+// | a b |
+// | c d |
+float mtxDet2x2(float a, float b, float c, float d) {
+    return a * d - b * c;
 }
 
-void mtxPerspective(Mtx *m, uint16_t *perspNorm, float fovy, float aspect, float near, float far, float scale)
-{
-	float mf[4][4];
-
-	mtxPerspectiveF(mf, fovy, aspect, near, far, scale);
-
-	mtxF2L2(mf, m);
+// Computes the determinant of a 3x3 matrix using elements provided explicitly
+float mtxDet3x3(
+    float a00, float a01, float a02,
+    float a10, float a11, float a12,
+    float a20, float a21, float a22
+) {
+    return a00 * mtxDet2x2(a11, a12, a21, a22)
+         - a01 * mtxDet2x2(a10, a12, a20, a22)
+         + a02 * mtxDet2x2(a10, a11, a20, a21);
 }
 
-/*
-* Reflection Matrix Functions
-*/
+// Computes the determinant of a 4x4 matrix
+float mtxDet4x4(float m[4][4]) {
+    float a0 = m[0][0], a1 = m[0][1], a2 = m[0][2], a3 = m[0][3];
 
-void mtxLookAtReflectF(float mf[4][4], LookAt *l,
-	float xEye, float yEye, float zEye,
-	float xAt,  float yAt,  float zAt,
-	float xUp,  float yUp,  float zUp)
-{
-float len, xLook, yLook, zLook, xRight, yRight, zRight;
+    float det0 = mtxDet3x3(
+        m[1][1], m[1][2], m[1][3],
+        m[2][1], m[2][2], m[2][3],
+        m[3][1], m[3][2], m[3][3]
+    );
 
-mtxIdentF(mf);
+    float det1 = mtxDet3x3(
+        m[1][0], m[1][2], m[1][3],
+        m[2][0], m[2][2], m[2][3],
+        m[3][0], m[3][2], m[3][3]
+    );
 
-xLook = xAt - xEye;
-yLook = yAt - yEye;
-zLook = zAt - zEye;
+    float det2 = mtxDet3x3(
+        m[1][0], m[1][1], m[1][3],
+        m[2][0], m[2][1], m[2][3],
+        m[3][0], m[3][1], m[3][3]
+    );
 
-/* Negate because positive Z is behind us: */
-len = -1.0f / sqrtf (xLook*xLook + yLook*yLook + zLook*zLook);
-xLook *= len;
-yLook *= len;
-zLook *= len;
+    float det3 = mtxDet3x3(
+        m[1][0], m[1][1], m[1][2],
+        m[2][0], m[2][1], m[2][2],
+        m[3][0], m[3][1], m[3][2]
+    );
 
-/* Right = Up x Look */
-
-xRight = yUp * zLook - zUp * yLook;
-yRight = zUp * xLook - xUp * zLook;
-zRight = xUp * yLook - yUp * xLook;
-len = 1.0f / sqrtf (xRight*xRight + yRight*yRight + zRight*zRight);
-xRight *= len;
-yRight *= len;
-zRight *= len;
-
-/* Up = Look x Right */
-
-xUp = yLook * zRight - zLook * yRight;
-yUp = zLook * xRight - xLook * zRight;
-zUp = xLook * yRight - yLook * xRight;
-len = 1.0f / sqrtf (xUp*xUp + yUp*yUp + zUp*zUp);
-xUp *= len;
-yUp *= len;
-zUp *= len;
-
-/* reflectance vectors = Up and Right */
-
-l->l[0].l.dir[0] = FTOFRAC8(xRight);
-l->l[0].l.dir[1] = FTOFRAC8(yRight);
-l->l[0].l.dir[2] = FTOFRAC8(zRight);
-l->l[1].l.dir[0] = FTOFRAC8(xUp);
-l->l[1].l.dir[1] = FTOFRAC8(yUp);
-l->l[1].l.dir[2] = FTOFRAC8(zUp);
-l->l[0].l.col[0] = 0x00;
-l->l[0].l.col[1] = 0x00;
-l->l[0].l.col[2] = 0x00;
-l->l[0].l.pad1 = 0x00;
-l->l[0].l.colc[0] = 0x00;
-l->l[0].l.colc[1] = 0x00;
-l->l[0].l.colc[2] = 0x00;
-l->l[0].l.pad2 = 0x00;
-l->l[1].l.col[0] = 0x00;
-l->l[1].l.col[1] = 0x80;
-l->l[1].l.col[2] = 0x00;
-l->l[1].l.pad1 = 0x00;
-l->l[1].l.colc[0] = 0x00;
-l->l[1].l.colc[1] = 0x80;
-l->l[1].l.colc[2] = 0x00;
-l->l[1].l.pad2 = 0x00;
-
-mf[0][0] = xRight;
-mf[1][0] = yRight;
-mf[2][0] = zRight;
-mf[3][0] = -(xEye * xRight + yEye * yRight + zEye * zRight);
-
-mf[0][1] = xUp;
-mf[1][1] = yUp;
-mf[2][1] = zUp;
-mf[3][1] = -(xEye * xUp + yEye * yUp + zEye * zUp);
-
-mf[0][2] = xLook;
-mf[1][2] = yLook;
-mf[2][2] = zLook;
-mf[3][2] = -(xEye * xLook + yEye * yLook + zEye * zLook);
-
-mf[0][3] = 0;
-mf[1][3] = 0;
-mf[2][3] = 0;
-mf[3][3] = 1;
-}
-
-void mtxLookAtReflect(Mtx *m, LookAt *l, float xEye, float yEye, float zEye,
-	float xAt,  float yAt,  float zAt,
-	float xUp,  float yUp,  float zUp)
-{
-float mf[4][4];
-
-mtxLookAtReflectF(mf, l, xEye, yEye, zEye, xAt, yAt, zAt,
-		xUp, yUp, zUp);
-
-mtxF2L2(mf, m);
-}
-
-// Multiplies all the 3D rotational and translational components (but not the fourth column)
-void mtxScale3x4(float mult, Mtxf *mtx)
-{
-	mtx->m[0][0] *= mult;
-	mtx->m[0][1] *= mult;
-	mtx->m[0][2] *= mult;
-
-	mtx->m[1][0] *= mult;
-	mtx->m[1][1] *= mult;
-	mtx->m[1][2] *= mult;
-
-	mtx->m[2][0] *= mult;
-	mtx->m[2][1] *= mult;
-	mtx->m[2][2] *= mult;
-
-	mtx->m[3][0] *= mult;
-	mtx->m[3][1] *= mult;
-	mtx->m[3][2] *= mult;
-}
-
-/*
-* Copy Matrix Functions
-*/
-
-void mtx3Copy(float src[3][3], float dst[3][3])
-{
-	dst[0][0] = src[0][0];
-	dst[0][1] = src[0][1];
-	dst[0][2] = src[0][2];
-
-	dst[1][0] = src[1][0];
-	dst[1][1] = src[1][1];
-	dst[1][2] = src[1][2];
-
-	dst[2][0] = src[2][0];
-	dst[2][1] = src[2][1];
-	dst[2][2] = src[2][2];
-}
-
-void mtx4CopyF(Mtxf *src, Mtxf *dst)
-{
-	*dst = *src;
-}
-
-void mtx4Copy(Mtx *src, Mtx *dst)
-{
-	memcpy(dst, src, sizeof(dst));
-}
-
-void mtx00015f4c(float mult, Mtxf *mtx)
-{
-	mtx->m[0][0] *= mult;
-	mtx->m[0][1] *= mult;
-	mtx->m[0][2] *= mult;
-
-	mtx->m[1][0] *= mult;
-	mtx->m[1][1] *= mult;
-	mtx->m[1][2] *= mult;
-
-	mtx->m[2][0] *= mult;
-	mtx->m[2][1] *= mult;
-	mtx->m[2][2] *= mult;
-}
-
-void mtx3ToMtx4(float src[3][3], Mtxf *dst)
-{
-	dst->m[0][0] = src[0][0];
-	dst->m[0][1] = src[0][1];
-	dst->m[0][2] = src[0][2];
-	dst->m[0][3] = 0;
-
-	dst->m[1][0] = src[1][0];
-	dst->m[1][1] = src[1][1];
-	dst->m[1][2] = src[1][2];
-	dst->m[1][3] = 0;
-
-	dst->m[2][0] = src[2][0];
-	dst->m[2][1] = src[2][1];
-	dst->m[2][2] = src[2][2];
-	dst->m[2][3] = 0;
-
-	dst->m[3][0] = 0;
-	dst->m[3][1] = 0;
-	dst->m[3][2] = 0;
-	dst->m[3][3] = 1;
-}
-
-void mtx4ToMtx3(Mtxf *src, float dst[3][3])
-{
-	dst[0][0] = src->m[0][0];
-	dst[0][1] = src->m[0][1];
-	dst[0][2] = src->m[0][2];
-
-	dst[1][0] = src->m[1][0];
-	dst[1][1] = src->m[1][1];
-	dst[1][2] = src->m[1][2];
-
-	dst[2][0] = src->m[2][0];
-	dst[2][1] = src->m[2][1];
-	dst[2][2] = src->m[2][2];
+    return a0 * det0 - a1 * det1 + a2 * det2 - a3 * det3;
 }

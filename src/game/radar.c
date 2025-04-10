@@ -11,7 +11,6 @@
 #include "game/options.h"
 #include "bss.h"
 #include "lib/vi.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "gbiex.h"
 #include "types.h"

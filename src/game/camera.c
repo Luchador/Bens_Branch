@@ -8,7 +8,6 @@
 #include "game/bg.h"
 #include "game/texdecompress.h"
 #include "bss.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 
@@ -203,9 +202,9 @@ void camSetMtxF006c(Mtxf *mtx)
 	g_Vars.currentplayer->mtxf006c = mtx;
 }
 
-Mtxf *camGetMtxF006c(void)
+Mtx *camGetMtxF006c(void)
 {
-	return g_Vars.currentplayer->mtxf006c;
+	return (Mtx*)g_Vars.currentplayer->mtxf006c;
 }
 
 void camSetPerspectiveMtxL(Mtx *mtx)

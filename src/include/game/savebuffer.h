@@ -6,7 +6,7 @@
 void func0f0d4690(Mtxf *mtx);
 void func0f0d475c(Mtxf *mtx);
 Gfx *gfxSetCustomProjection(Gfx *gdl);
-Gfx *func0f0d49c8(Gfx *gdl);
+Gfx *savebufferSetup2DRender(Gfx *gdl);
 Gfx *func0f0d4a3c(Gfx *gdl, int arg1);
 Gfx *func0f0d4c80(Gfx *gdl);
 Gfx *menugfxDrawPlane(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1, uint32_t colour2, int type);

@@ -3,7 +3,6 @@
 #include "game/room.h"
 #include "game/mtxutils.h"
 #include "bss.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 
@@ -100,7 +99,7 @@ void roomPopulateMtx(Mtxf *mtx, int roomnum)
 {
 	int stagenum = g_Vars.stagenum;
 
-	mtx4LoadIdentityF(mtx);
+	mtxIdent((Mtx*)mtx);
 
 	mtx->m[0][0] = 1;
 	mtx->m[1][1] = 1;

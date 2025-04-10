@@ -8,6 +8,7 @@
 #include "game/debug.h"
 #include "game/footstep.h"
 #include "game/menuutils.h"
+#include "game/mtxutils.h"
 #include "game/chr.h"
 #include "game/prop.h"
 #include "game/propsnd.h"
@@ -23,7 +24,6 @@
 #include "lib/model.h"
 #include "lib/snd.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
 #include "data.h"
@@ -92,7 +92,7 @@ void bwalkInit(void)
 
 	if (g_Vars.currentplayer->walkinitmove) {
 		struct coord delta;
-		mtxBuildLookAtMatrix2(&g_Vars.currentplayer->walkinitmtx,
+		mtxBuildLookAtMatrix2F(&g_Vars.currentplayer->walkinitmtx,
 				0, 0, 0,
 				-g_Vars.currentplayer->bond2.unk1c.x, -g_Vars.currentplayer->bond2.unk1c.y, -g_Vars.currentplayer->bond2.unk1c.z,
 				g_Vars.currentplayer->bond2.unk28.x, g_Vars.currentplayer->bond2.unk28.y, g_Vars.currentplayer->bond2.unk28.z);

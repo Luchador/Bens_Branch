@@ -13,7 +13,6 @@
 #include "game/tex.h"
 #include "bss.h"
 #include "lib/vi.h"
-#include "lib/mtx.h"
 #include "lib/sched.h"
 #include "data.h"
 #include "types.h"
@@ -71,7 +70,7 @@ void skyGetWorldPosFromScreenPos(float left, float top, struct coord *dst)
 	pos[1] = top + camGetScreenTop() + envGetCurrent()->clouds_height;
 
 	camProjectScreenToWorldDir(pos, dst, 100);
-	mtx4RotateVecInPlace(mtx, dst);
+	mtx4RotateVecInPlace((Mtx*)mtx, dst);
 }
 
 bool skyIsScreenCornerInSky(struct coord *corner3dpos, struct coord *dstpos, float *dstfrac)
@@ -783,9 +782,9 @@ Gfx *skyRender(Gfx *gdl)
 		struct skyvtx2d watervertices2d[5];
 		int i;
 
-		mtx4MultMtx4F(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp3cc);
+		mtx4MultMtx4((Mtx*)camGetMtxF1754(), (Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp3cc);
 		mtxScale(&g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
-		mtx4MultMtx4F(&sp3cc, &g_SkyMtx, &sp38c);
+		mtx4MultMtx4((Mtx*)&sp3cc, (Mtx*)&g_SkyMtx, (Mtx*)&sp38c);
 
 		for (i = 0; i < numvertices; i++) {
 			skyConvertVertex(&watervertices3d[i], &sp38c, 130, 65535.0f, 65535.0f, &watervertices2d[i]);
@@ -840,7 +839,7 @@ Gfx *skyRender(Gfx *gdl)
 			Vtx *verts = gfxAllocateVertices(numvertices);
 			Col *cols = gfxAllocateColours(numvertices);
 			Mtxf *mtx = gfxAllocateMatrixF();
-			mtx4MultMtx4F(camGetWorldToScreenMtxf(), &g_SkyMtx, mtx);
+			mtx4MultMtx4((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&g_SkyMtx, (Mtx*)mtx);
 			mtx4CopyF(mtx, mtx);
 
 			gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
@@ -1264,9 +1263,9 @@ Gfx *skyRender(Gfx *gdl)
 	struct skyvtx2d skyvertices2d[5];
 	int i;
 
-	mtx4MultMtx4F(camGetMtxF1754(), camGetWorldToScreenMtxf(), &sp1ec);
+	mtx4MultMtx4((Mtx*)camGetMtxF1754(), (Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp1ec);
 	mtxScale(&g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
-	mtx4MultMtx4F(&sp1ec, &g_SkyMtx, &sp1ac);
+	mtx4MultMtx4((Mtx*)&sp1ec, (Mtx*)&g_SkyMtx, (Mtx*)&sp1ac);
 
 	for (i = 0; i < numvertices; i++) {
 		skyConvertVertex(&skyvertices3d[i], &sp1ac, 130, 65535.0f, 65535.0f, &skyvertices2d[i]);
@@ -1278,7 +1277,7 @@ Gfx *skyRender(Gfx *gdl)
 	Vtx *verts = gfxAllocateVertices(numvertices);
 	Col *cols = gfxAllocateColours(numvertices);
 	Mtxf *mtx = gfxAllocateMatrixF();
-	mtx4MultMtx4F(camGetWorldToScreenMtxf(), &g_SkyMtx, mtx);
+	mtx4MultMtx4((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&g_SkyMtx, (Mtx*)mtx);
 	mtx4CopyF(mtx, mtx);
 
 	gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
@@ -2504,8 +2503,8 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 		colour[2] = sun->blue;
 
 		if (!xray) {
-			mtx4TransformVecInPlace(sp16c, &g_SunPositions[i]);
-			mtx4TransformVecInPlace(sp168, &g_SunPositions[i]);
+			mtx4TransformVecInPlace((Mtx*)sp16c, &g_SunPositions[i]);
+			mtx4TransformVecInPlace((Mtx*)sp168, &g_SunPositions[i]);
 
 			if (g_SunPositions[i].f[2] > 1.0f) {
 				g_SunScreenXPositions[i] = (g_SunPositions[i].f[0] / g_SunPositions[i].f[2] + 1.0f) * 0.5f * viewwidthf + viewleftf;
@@ -2798,8 +2797,8 @@ Gfx *skyRenderTeleportFlare(Gfx *gdl, float x, float y, float z, float size, flo
 	sp64.y = y;
 	sp64.z = z;
 
-	mtx4TransformVecInPlace(camGetWorldToScreenMtxf(), &sp64);
-	mtx4TransformVecInPlace(camGetMtxF1754(), &sp64);
+	mtx4TransformVecInPlace((Mtx*)camGetWorldToScreenMtxf(), &sp64);
+	mtx4TransformVecInPlace((Mtx*)camGetMtxF1754(), &sp64);
 
 	if (sp64.z > 1.0f) {
 		float xpos;
@@ -2894,8 +2893,8 @@ Gfx *skyRenderTeleportFlares(Gfx *gdl)
 		spd0[2] = g_TeleportToUp.f[1] * f20_2;
 		spd0[3] = g_TeleportToUp.f[2] * f20_2;
 
-		quaternionToMtx(spd0, &mtx);
-		mtx4RotateVecInPlace(&mtx, &spe0);
+		quaternionToMtxF(spd0, &mtx);
+		mtx4RotateVecInPlace((Mtx*)&mtx, &spe0);
 
 		spe0.x += g_TeleportToPos.x;
 		spe0.y += g_TeleportToPos.y;

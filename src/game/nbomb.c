@@ -22,7 +22,6 @@
 #include "lib/vi.h"
 #include "lib/snd.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
@@ -287,7 +286,7 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 	mtxScaleRotationPart(nbomb->radius / 2000.0f, &mtxRotationScaleMtx);
 	mtx4MultMtx4(&mtxLocalToClip, &mtxRotationScaleMtx, &mtxLocalToWorld);
 
-	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), (Mtxf*)&mtxLocalToWorld);
+	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), &mtxLocalToWorld);
 	memcpy(mtx, &mtxLocalToWorld, sizeof(*mtx));
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -695,7 +694,7 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 	}
 
 	if (drawn) {
-		gdl = func0f0d49c8(gdl);
+		gdl = savebufferSetup2DRender(gdl);
 	}
 
 	return gdl;
@@ -896,7 +895,7 @@ Gfx *gasRender(Gfx *gdl)
 	}
 
 	if (drawn) {
-		gdl = func0f0d49c8(gdl);
+		gdl = savebufferSetup2DRender(gdl);
 	}
 
 	return gdl;

@@ -21,7 +21,6 @@
 #include "lib/joy.h"
 #include "lib/main.h"
 #include "lib/snd.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
 #include "data.h"

@@ -13,7 +13,6 @@
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 
@@ -385,15 +384,15 @@ Gfx *sparksRender(Gfx *gdl)
 					sp120 *= viGetFovY() / 60.0f;
 					sp120 *= (float)(SCREEN_WIDTH_LO * SCREEN_HEIGHT_LO) / (float)(SCREEN_WIDTH_HI * SCREEN_HEIGHT_HI);
 
-					mtx4LoadIdentityF(&spd4);
+					mtxIdent((Mtx*)&spd4);
 
 					spd4.m[0][0] = 0.05f;
 					spd4.m[1][1] = 0.05f;
 					spd4.m[2][2] = 0.05f;
 					spd4.m[3][3] = 0.05f;
 
-					mtx4SetTranslation(&group->pos, &spd4);
-					mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &spd4);
+					mtx4SetTranslation(&group->pos, (Mtx*)&spd4);
+					mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&spd4);
 
 					mtx = gfxAllocateMatrixF();
 					mtx4CopyF(&spd4, mtx);

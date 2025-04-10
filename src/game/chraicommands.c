@@ -46,7 +46,6 @@
 #include "lib/snd.h"
 #include "lib/music.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/ailist.h"
 #include "lib/anim.h"
 #include "lib/lib_317f0.h"
@@ -2267,13 +2266,13 @@ bool aiObjectMoveToPad(void)
 
 	if (obj && obj->prop) {
 		padUnpack(padnum, PADFIELD_POS | PADFIELD_LOOK | PADFIELD_UP | PADFIELD_ROOM, &pad);
-		mtx00016d58(&matrix,
+		mtxBuildLookAtFromTargetF(&matrix,
 				0, 0, 0,
 				-pad.look.x, -pad.look.y, -pad.look.z,
 				pad.up.x, pad.up.y, pad.up.z);
 
 		if (obj->model) {
-			mtxScaleRotationPartF(obj->model->scale, &matrix);
+			mtxScaleRotationPart(obj->model->scale, (Mtx*)&matrix);
 		}
 
 		rooms[0] = pad.room;

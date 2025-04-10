@@ -33,7 +33,6 @@
 #include "lib/snd.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
 #include "data.h"
@@ -1239,10 +1238,10 @@ void scenarioHandleDroppedToken(struct chrdata *chr, struct prop *prop)
 
 				padUnpack(g_ScenarioData.ctc.spawnpadsperteam[g_ScenarioData.ctc.teamindexes[i]].homepad,
 						PADFIELD_POS | PADFIELD_LOOK | PADFIELD_UP | PADFIELD_ROOM, &pad);
-				mtx00016d58(&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
+				mtxBuildLookAtFromTargetF(&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
 
 				if (obj->model) {
-					mtxScaleRotationPartF(obj->model->scale, &mtx);
+					mtxScaleRotationPart(obj->model->scale, (Mtx*)&mtx);
 				}
 
 				rooms[0] = pad.room;

@@ -274,7 +274,6 @@ set(SRC_LIB
   src/lib/model.c
   src/lib/modelasm_c.c
   src/lib/mp3.c
-  src/lib/mtx.c
   src/lib/music.c
   src/lib/path.c
   src/lib/rdp.c

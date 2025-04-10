@@ -18,7 +18,7 @@ void camSetMtxL1738(Mtx *mtx);
 void camSetMtxL173c(Mtx *mtx);
 Mtx *camGetMtxL173c(void);
 void camSetMtxF006c(Mtxf *mtx);
-Mtxf *camGetMtxF006c(void);
+Mtx *camGetMtxF006c(void);
 void camSetPerspectiveMtxL(Mtx *value);
 Mtx *camGetPerspectiveMtxL(void);
 void camSetOrthogonalMtxL(Mtx *mtx);

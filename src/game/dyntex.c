@@ -6,7 +6,6 @@
 #include "bss.h"
 #include "lib/main.h"
 #include "lib/memp.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 

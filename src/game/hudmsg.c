@@ -18,7 +18,6 @@
 #include "bss.h"
 #include "lib/lib_317f0.h"
 #include "lib/memp.h"
-#include "lib/mtx.h"
 #include "lib/snd.h"
 #include "string.h"
 #include "lib/vi.h"
@@ -304,7 +303,7 @@ Gfx *hudmsgRenderBox(Gfx *gdl, int x1, int y1, int x2, int y2, float bgopacity, 
 	gdl = menugfxDrawFilledRect(gdl, x1, y1 + 1, x1 + 1, y2, bordercolour, bordercolour);
 	gdl = menugfxDrawFilledRect(gdl, x2, y1, x2 + 1, y2 + 1, bordercolour, bordercolour);
 
-	gdl = func0f0d49c8(gdl);
+	gdl = savebufferSetup2DRender(gdl);
 
 	if (textopacity > 0.0f) {
 		float width = (x1 + x2) * 0.5f;

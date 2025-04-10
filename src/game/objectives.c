@@ -19,7 +19,6 @@
 #include "lib/memp.h"
 #include "lib/rng.h"
 #include "string.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 #include "platform.h"

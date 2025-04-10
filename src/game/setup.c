@@ -32,7 +32,6 @@
 #include "lib/model.h"
 #include "lib/path.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/ailist.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
@@ -440,7 +439,7 @@ void setupCreateObject(struct defaultobj *obj, int cmdindex)
 		padUnpack(obj->pad, PADFIELD_POS | PADFIELD_LOOK | PADFIELD_UP | PADFIELD_BBOX | PADFIELD_ROOM, &pad);
 
 		if (pad.room > 0) {
-			mtx00016d58(&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
+			mtxBuildLookAtFromTargetF(&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
 
 			pos.x = pad.pos.x;
 			pos.y = pad.pos.y;
@@ -572,16 +571,16 @@ void setupCreateObject(struct defaultobj *obj, int cmdindex)
 						xscale = yscale = zscale = 1;
 					}
 
-					mtxScaleRow0Vec(xscale, &mtx);
-					mtxScaleRow1Vec(yscale, &mtx);
-					mtxScaleRow2Vec(zscale, &mtx);
+					mtxScaleRow0Vec(xscale, (Mtx*)&mtx);
+					mtxScaleRow1Vec(yscale, (Mtx*)&mtx);
+					mtxScaleRow2Vec(zscale, (Mtx*)&mtx);
 
 					modelSetScale(obj->model, obj->model->scale * maxscale);
 				}
 			}
 
 			modelSetScale(obj->model, obj->model->scale * scale);
-			mtxScaleRotationPartF(obj->model->scale, &mtx);
+			mtxScaleRotationPart(obj->model->scale, (Mtx*)&mtx);
 
 			if (obj->flags2 & OBJFLAG2_DONTPAUSE) {
 				prop2->flags |= PROPFLAG_DONTPAUSE;
@@ -797,12 +796,8 @@ void setupCreateCctv(struct cctvobj *cctv, int cmdindex)
 		ydiff = lenspos.y - pad.pos.y;
 		zdiff = lenspos.z - pad.pos.z;
 
-		if (ydiff) {
-			// empty
-		}
-
-		mtx00016d58(&cctv->camrotm, 0.0f, 0.0f, 0.0f, xdiff, ydiff, zdiff, 0.0f, 1.0f, 0.0f);
-		mtxScaleRotationPartF(obj->model->scale, &cctv->camrotm);
+		mtxBuildLookAtFromTargetF(&cctv->camrotm, 0.0f, 0.0f, 0.0f, xdiff, ydiff, zdiff, 0.0f, 1.0f, 0.0f);
+		mtxScaleRotationPart(obj->model->scale, (Mtx*)&cctv->camrotm);
 
 		cctv->toleft = 0;
 		cctv->yleft = *(int *)&cctv->yleft * M_TAU / 65536.0f;
@@ -814,10 +809,6 @@ void setupCreateCctv(struct cctvobj *cctv, int cmdindex)
 
 		cctv->yzero = atan2f(xdiff, zdiff);
 		cctv->xzero = M_TAU - atan2f(ydiff, sqrtf(xdiff * xdiff + zdiff * zdiff));
-
-		if (xdiff || zdiff) {
-			// empty
-		}
 
 		cctv->seebondtime60 = 0;
 	}
@@ -919,8 +910,8 @@ void setupCreateSingleMonitor(struct singlemonitorobj *monitor, int cmdindex)
 			}
 
 			propReparent(prop, owner->prop);
-			mtx4LoadXRotation(0.3664608001709f, &sp64);
-			mtxScaleRotationPartF(monitor->base.model->scale / owner->model->scale, &sp64);
+			mtx4LoadXRotationF(0.3664608001709f, &sp64);
+			mtxScaleRotationPart(monitor->base.model->scale / owner->model->scale, (Mtx*)&sp64);
 			modelGetRootPosition(monitor->base.model, &spa4);
 
 			spa4.x = -spa4.x;
@@ -928,7 +919,7 @@ void setupCreateSingleMonitor(struct singlemonitorobj *monitor, int cmdindex)
 			spa4.z = -spa4.z;
 
 			mtx4LoadTranslationF(&spa4, &sp24);
-			mtxApplyAffineTransform(&sp64, &sp24, &monitor->base.embedment->matrix);
+			mtxApplyAffineTransform((Mtx*)&sp64, (Mtx*)&sp24, (Mtx*)&monitor->base.embedment->matrix);
 		}
 	} else {
 		setupCreateObject(&monitor->base, cmdindex);
@@ -1071,13 +1062,13 @@ void setupCreateDoor(struct doorobj *door, int cmdindex)
 
 		bbox = modeldefFindBboxRodata(g_ModelStates[modelnum].modeldef);
 
-		mtx00016d58(&sp110, 0, 0, 0,
+		mtxBuildLookAtFromTargetF(&sp110, 0, 0, 0,
 				-pad.look.x, -pad.look.y, -pad.look.z,
 				pad.up.x, pad.up.y, pad.up.z);
-		mtx4LoadXRotation(1.5705462694168f, &finalmtx);
-		mtx4LoadZRotation(1.5705462694168f, &zrotmtx);
-		mtx4MultMtx4InPlace(&zrotmtx, &finalmtx);
-		mtx4MultMtx4InPlace(&sp110, &finalmtx);
+		mtx4LoadXRotationF(1.5705462694168f, &finalmtx);
+		mtx4LoadZRotationF(1.5705462694168f, &zrotmtx);
+		mtx4MultMtx4InPlace((Mtx*)&zrotmtx, (Mtx*)&finalmtx);
+		mtx4MultMtx4InPlace((Mtx*)&sp110, (Mtx*)&finalmtx);
 
 		padGetCentre(door->base.pad, &centre);
 
@@ -1089,9 +1080,9 @@ void setupCreateDoor(struct doorobj *door, int cmdindex)
 			xscale = yscale = zscale = 1;
 		}
 
-		mtxScaleRow0Vec(xscale, &finalmtx);
-		mtxScaleRow1Vec(yscale, &finalmtx);
-		mtxScaleRow2Vec(zscale, &finalmtx);
+		mtxScaleRow0Vec(xscale, (Mtx*)&finalmtx);
+		mtxScaleRow1Vec(yscale, (Mtx*)&finalmtx);
+		mtxScaleRow2Vec(zscale, (Mtx*)&finalmtx);
 
 		pos.x = pad.pos.x;
 		pos.y = pad.pos.y;
@@ -1727,14 +1718,14 @@ void setupCreateProps(int stagenum)
 						if (obj->flags & OBJFLAG_ESCSTEP_ZALIGNED) {
 							step->frame = escstepy;
 							escstepy += 40;
-							mtx4LoadYRotation(4.7116389274597f, (Mtxf *) &sp1a8);
-							mtx4ToMtx3((Mtxf *) &sp1a8, sp184);
+							mtx4LoadYRotationF(4.7116389274597f, (Mtxf *) &sp1a8);
+							mtx4ToMtx3((Mtx *) &sp1a8, sp184);
 							mtx00016110(sp184, obj->realrot);
 						} else {
 							step->frame = escstepx;
 							escstepx += 40;
-							mtx4LoadYRotation(M_PI, (Mtxf *) &sp1a8);
-							mtx4ToMtx3((Mtxf *) &sp1a8, sp184);
+							mtx4LoadYRotationF(M_PI, (Mtxf *) &sp1a8);
+							mtx4ToMtx3((Mtx *) &sp1a8, sp184);
 							mtx00016110(sp184, obj->realrot);
 						}
 					}

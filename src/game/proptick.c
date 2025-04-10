@@ -38,7 +38,6 @@
 #include "lib/main.h"
 #include "lib/model.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
 #include "data.h"

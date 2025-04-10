@@ -15,7 +15,6 @@
 #include "game/propobj.h"
 #include "game/utils.h"
 #include "bss.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
 #include "data.h"
@@ -56,8 +55,8 @@ void bgrabInit(void)
 	g_Vars.currentplayer->gunextraaimx = 0;
 	g_Vars.currentplayer->gunextraaimy = 0;
 
-	mtx4LoadYRotation((g_Vars.currentplayer->vv_theta * M_TAU) / 360.0f, &matrix);
-	mtx4RotateVecInPlace(&matrix, &g_Vars.currentplayer->grabbedposoffset);
+	mtx4LoadYRotationF((g_Vars.currentplayer->vv_theta * M_TAU) / 360.0f, &matrix);
+	mtx4RotateVecInPlace((Mtx*)&matrix, &g_Vars.currentplayer->grabbedposoffset);
 
 	g_Vars.currentplayer->bondprevtheta = g_Vars.currentplayer->vv_theta;
 

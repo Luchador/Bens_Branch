@@ -9,7 +9,6 @@
 #include "bss.h"
 #include "lib/dma.h"
 #include "lib/memp.h"
-#include "lib/mtx.h"
 #include "lib/lib_17ce0.h"
 #include "lib/anim.h"
 #include "lib/collision.h"

@@ -12,7 +12,6 @@
 #include "lib/vi.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 #include "video.h"
@@ -220,14 +219,14 @@ Gfx *starsRender(Gfx *gdl)
 
 	sp154 = cosf(0.017453199252486f * (90.0f - viGetFovY() / videoGetAspect() * 0.5f));
 
-	mtx4LoadIdentityF(&mtx);
-	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &mtx);
+	mtxIdent((Mtx*)&mtx);
+	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&mtx);
 
 	mtx.m[3][0] = 0.0f;
 	mtx.m[3][1] = 0.0f;
 	mtx.m[3][2] = 0.0f;
 
-	mtxScale3x4(262.9f, &mtx);
+	mtxScale3x4(262.9f, (Mtx*)&mtx);
 
 	mtx.m[0][1] *= g_Vars.currentplayer->c_recipscaley;
 	mtx.m[1][1] *= g_Vars.currentplayer->c_recipscaley;

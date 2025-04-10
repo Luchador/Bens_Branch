@@ -7,7 +7,6 @@
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/model.h"
 #include "data.h"
@@ -152,7 +151,7 @@ void bheadUpdate(float arg0, float arg1)
 			modelTickAnimQuarterSpeed(&g_Vars.currentplayer->model, g_Vars.lvupdate240, true);
 			modelSetAnimMergingEnabled(mergeenabled);
 			modelUpdateInfo(&g_Vars.currentplayer->model);
-			mtx4LoadIdentityF(&sp40);
+			mtxIdent((Mtx*)&sp40);
 
 			sp80.unk00 = &sp40;
 			sp80.unk10 = g_Vars.currentplayer->bondheadmatrices;

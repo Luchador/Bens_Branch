@@ -35,7 +35,6 @@
 #include "lib/joy.h"
 #include "lib/snd.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "data.h"
 #include "types.h"
@@ -1834,7 +1833,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 			g_Vars.currentplayer->gunzoomfovs[1] = eraserfov;
 
-			mtx4TransformVec(camGetWorldToScreenMtxf(), &g_Vars.currentplayer->autoerasertarget->pos, &spa0);
+			mtx4TransformVec((Mtx*)camGetWorldToScreenMtxf(), &g_Vars.currentplayer->autoerasertarget->pos, &spa0);
 
 			camProjectWithZoomAndAspect(&spa0, crosspos, eraserfov, g_Vars.currentplayer->c_perspaspect);
 
@@ -2434,25 +2433,25 @@ void bmoveUpdateHead(float arg0, float arg1, float arg2, Mtxf *arg3, float arg4)
 	}
 
 	bheadUpdate(sp244, arg2);
-	mtx4LoadXRotation(DEG2RAD(360 - g_Vars.currentplayer->vv_verta360), &sp180);
+	mtx4LoadXRotationF(DEG2RAD(360 - g_Vars.currentplayer->vv_verta360), &sp180);
 
 	if (optionsGetHeadRoll(g_Vars.currentplayerstats->mpindex)) {
-		mtx00016d58(&sp116,
+		mtxBuildLookAtFromTargetF(&sp116,
 				0, 0, 0,
 				-g_Vars.currentplayer->headlook.x, -g_Vars.currentplayer->headlook.y, -g_Vars.currentplayer->headlook.z,
 				g_Vars.currentplayer->headup.x, g_Vars.currentplayer->headup.y, g_Vars.currentplayer->headup.z);
-		mtx4MultMtx4InPlace(&sp116, &sp180);
+		mtx4MultMtx4InPlace((Mtx*)&sp116, (Mtx*)&sp180);
 	}
 
-	mtx4LoadYRotation(DEG2RAD(360 - g_Vars.currentplayer->vv_theta), &sp116);
-	mtx4MultMtx4InPlace(&sp116, &sp180);
+	mtx4LoadYRotationF(DEG2RAD(360 - g_Vars.currentplayer->vv_theta), &sp116);
+	mtx4MultMtx4InPlace((Mtx*)&sp116, (Mtx*)&sp180);
 
 	if (arg3) {
-		quaternion0f097044(&sp180, sp100);
-		quaternion0f097044(arg3, sp84);
+		quaternion3x3MtxToQuatF(&sp180, sp100);
+		quaternion3x3MtxToQuatF(arg3, sp84);
 		quaternionAvoidFlips(sp100, sp84);
 		quaternionSlerp(sp100, sp84, arg4, sp68);
-		quaternionToMtx(sp68, &sp180);
+		quaternionToMtxF(sp68, &sp180);
 	}
 
 	g_Vars.currentplayer->bond2.unk1c.x = sp180.m[2][0];

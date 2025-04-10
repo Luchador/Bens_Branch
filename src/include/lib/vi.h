@@ -3,7 +3,6 @@
 #include "data.h"
 #include "types.h"
 
-void viConfigureForLogos(void);
 void viConfigureForLegal(void);
 void viReset(int stagenum);
 void viHandleShake(void);

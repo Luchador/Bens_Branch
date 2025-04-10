@@ -21,7 +21,6 @@
 #include "game/mtxutils.h"
 #include "game/utils.h"
 #include "bss.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/collision.h"
 #include "game/debug.h"
@@ -48,10 +47,10 @@ void bbikeInit(void)
 	g_Vars.currentplayer->bondenterpos.y = g_Vars.currentplayer->prop->pos.y;
 	g_Vars.currentplayer->bondenterpos.z = g_Vars.currentplayer->prop->pos.z;
 
-	mtx3ToMtx4(hoverbike->base.realrot, &matrix);
-	mtx4SetTranslation(&hoverbike->base.prop->pos, &matrix);
-	mtx4TransformVec(&matrix, &g_Vars.currentplayer->bondvehicleoffset, &g_Vars.currentplayer->bondenteraim);
-	mtxBuildLookAtMatrix2(&g_Vars.currentplayer->bondentermtx,
+	mtx3ToMtx4(hoverbike->base.realrot, (Mtx*)&matrix);
+	mtx4SetTranslation(&hoverbike->base.prop->pos, (Mtx*)&matrix);
+	mtx4TransformVec((Mtx*)&matrix, &g_Vars.currentplayer->bondvehicleoffset, &g_Vars.currentplayer->bondenteraim);
+	mtxBuildLookAtMatrix2F(&g_Vars.currentplayer->bondentermtx,
 			0, 0, 0,
 			-g_Vars.currentplayer->bond2.unk1c.x, -g_Vars.currentplayer->bond2.unk1c.y, -g_Vars.currentplayer->bond2.unk1c.z,
 			g_Vars.currentplayer->bond2.unk28.x, g_Vars.currentplayer->bond2.unk28.y, g_Vars.currentplayer->bond2.unk28.z);
@@ -452,7 +451,7 @@ int bbikeCalculateNewPosition(struct coord *vel, float angledelta)
 
 	if (angledelta) {
 		float newangle = hoverpropGetTurnAngle(&bike->base) - angledelta;
-		Mtxf sp44;
+		Mtx sp44;
 
 		if (newangle >= M_TAU) {
 			newangle -= M_TAU;
@@ -463,7 +462,7 @@ int bbikeCalculateNewPosition(struct coord *vel, float angledelta)
 		hoverpropSetTurnAngle(&bike->base, newangle);
 
 		mtx4LoadYRotation(newangle, &sp44);
-		mtxScaleRotationPartF(bike->base.model->scale, &sp44);
+		mtxScaleRotationPart(bike->base.model->scale, &sp44);
 		mtx4ToMtx3(&sp44, bike->base.realrot);
 	}
 
@@ -803,8 +802,8 @@ void bbikeTick(void)
 	Mtxf sp1a8;
 	int j;
 	Mtxf sp164;
-	Mtxf sp124;
-	Mtxf spe4;
+	Mtx sp124;
+	Mtx spe4;
 	float spd4[4];
 	float spc4[4];
 	float spb4[4];
@@ -904,9 +903,9 @@ void bbikeTick(void)
 
 		hovTick(obj, &bike->hov);
 		func0f069c70(obj, true, true);
-		mtx3ToMtx4(obj->realrot, &sp1a8);
-		mtx4SetTranslation(&obj->prop->pos, &sp1a8);
-		mtx4TransformVec(&sp1a8, &g_Vars.currentplayer->bondvehicleoffset, &sp1e8);
+		mtx3ToMtx4(obj->realrot, (Mtx*)&sp1a8);
+		mtx4SetTranslation(&obj->prop->pos, (Mtx*)&sp1a8);
+		mtx4TransformVec((Mtx*)&sp1a8, &g_Vars.currentplayer->bondvehicleoffset, &sp1e8);
 
 		bbikeUpdateVertical(&sp1e8);
 
@@ -924,22 +923,22 @@ void bbikeTick(void)
 
 	bheadAdjustAnimation(0);
 	bheadUpdate(0, 0);
-	mtx4LoadXRotation((360.0f - g_Vars.currentplayer->vv_verta360) * 0.017450513318181f, &sp164);
+	mtx4LoadXRotationF((360.0f - g_Vars.currentplayer->vv_verta360) * 0.017450513318181f, &sp164);
 
-	mtx00016d58(&sp124, 0.0f, 0.0f, 0.0f,
+	mtxBuildLookAtFromTargetF((Mtxf*)&sp124, 0.0f, 0.0f, 0.0f,
 			-g_Vars.currentplayer->headlook.x, -g_Vars.currentplayer->headlook.y, -g_Vars.currentplayer->headlook.z,
 			g_Vars.currentplayer->headup.x, g_Vars.currentplayer->headup.y, g_Vars.currentplayer->headup.z);
 
-	mtx4MultMtx4InPlace(&sp124, &sp164);
+	mtx4MultMtx4InPlace((Mtx*)&sp124, (Mtx*)&sp164);
 	mtx3ToMtx4(obj->realrot, &sp124);
-	mtxScaleRotationPartF(1.0f / obj->model->scale, &sp124);
+	mtxScaleRotationPart(1.0f / obj->model->scale, (Mtx*)&sp124);
 	mtx4LoadYRotation(hoverpropGetTurnAngle(obj), &spe4);
-	quaternion0f097044(&spe4, spd4);
-	quaternion0f097044(&sp124, spc4);
+	quaternion3x3MtxToQuat(&spe4, spd4);
+	quaternion3x3MtxToQuat(&sp124, spc4);
 	quaternionAvoidFlips(spc4, spd4);
 	quaternionSlerp(spd4, spc4, 0.8f, spb4);
-	quaternionToMtx(spb4, &sp124);
-	mtx4MultMtx4InPlace(&sp124, &sp164);
+	quaternionToMtxF(spb4, (Mtxf*)&sp124);
+	mtx4MultMtx4InPlace((Mtx*)&sp124, (Mtx*)&sp164);
 
 	if (g_Vars.currentplayer->bondvehiclemode == VEHICLEMODE_OFF) {
 		g_Vars.currentplayer->bondentert += g_Vars.lvupdate60freal / 60.0f;
@@ -965,11 +964,11 @@ void bbikeTick(void)
 					-1, 0, 0, PSTYPE_NONE, NULL, -1, NULL, -1, -1, -1, -1);
 		}
 
-		quaternion0f097044(&g_Vars.currentplayer->bondentermtx, spa4);
-		quaternion0f097044(&sp164, sp94);
+		quaternion3x3MtxToQuatF(&g_Vars.currentplayer->bondentermtx, spa4);
+		quaternion3x3MtxToQuatF(&sp164, sp94);
 		quaternionAvoidFlips(sp94, spa4);
 		quaternionSlerp(spa4, sp94, 1.0f - g_Vars.currentplayer->bondentert2, sp84);
-		quaternionToMtx(sp84, &sp164);
+		quaternionToMtxF(sp84, &sp164);
 	}
 
 	g_Vars.currentplayer->bond2.unk1c.x = sp164.m[2][0];

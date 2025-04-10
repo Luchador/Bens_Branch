@@ -21,14 +21,11 @@
 #include "lib/joy.h"
 #include "lib/main.h"
 #include "lib/memp.h"
-#include "lib/mtx.h"
 #include "lib/rng.h"
 #include "lib/vi.h"
 #include "data.h"
 #include "types.h"
-#ifndef PLATFORM_N64
 #include "input.h"
-#endif
 
 /**
  * Credits
@@ -1591,7 +1588,7 @@ Gfx *creditsDraw(Gfx *gdl)
 			gdl = creditsFillFramebuffer(gdl, 0x000000d8);
 		}
 
-		mtx4LoadIdentityF(&sp68);
+		mtxIdent((Mtx*)&sp68);
 		mtx4CopyF(&sp68, matrix);
 		camSetWorldToScreenMtxf(&sp68);
 

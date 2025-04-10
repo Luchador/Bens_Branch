@@ -1211,7 +1211,7 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, float crossx, float crossy)
 		gdl = sightDrawSkedarTriangle(gdl, x + 2, y + 0, DIR_LEFT, colour);
 	}
 
-	gdl = func0f0d49c8(gdl);
+	gdl = savebufferSetup2DRender(gdl);
 
 #ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
@@ -1468,7 +1468,7 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 	gSPVertex(gdl++, vertices, 8, 0);
 	gSPTri4(gdl++, 0, 4, 5, 5, 3, 6, 7, 6, 1, 4, 7, 2);
 
-	gdl = func0f0d49c8(gdl);
+	gdl = savebufferSetup2DRender(gdl);
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
 	// Draw border over inner points

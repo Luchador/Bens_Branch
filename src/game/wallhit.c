@@ -18,7 +18,6 @@
 #include "bss.h"
 #include "lib/main.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 
@@ -855,8 +854,8 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 			sp78.y = sp1d0.y;
 			sp78.z = sp1d0.z;
 
-			mtx4RotateVecInPlace(mtx, &sp84);
-			mtx4RotateVecInPlace(mtx, &sp78);
+			mtx4RotateVecInPlace((Mtx*)mtx, &sp84);
+			mtx4RotateVecInPlace((Mtx*)mtx, &sp78);
 
 			width /= sqrtf(sp84.x * sp84.x + sp84.y * sp84.y + sp84.z * sp84.z);
 			height /= sqrtf(sp78.x * sp78.x + sp78.y * sp78.y + sp78.z * sp78.z);

@@ -16,7 +16,6 @@
 #include "lib/vi.h"
 #include "lib/main.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 #include "video.h"
@@ -162,7 +161,7 @@ void func0f0e0cbc(int arg0, int arg1, int16_t arg2, int16_t arg3, Vtx *vertex, M
 
 	vertex->colour = 0;
 
-	mtx4TransformVecInPlace(arg5, &sp24);
+	mtx4TransformVecInPlace((Mtx*)arg5, &sp24);
 
 	vertex->s = sp24.x * 32;
 	vertex->t = sp24.y * 32;
@@ -1428,7 +1427,7 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 
 	// Prepare stuff for drawing the particles
 	gdl = func0f0d4c80(gdl);
-	gdl = func0f0d49c8(gdl);
+	gdl = savebufferSetup2DRender(gdl);
 
 	texSelect(&gdl, &g_TexGeneralConfigs[1], 2, 1, 2, true, NULL);
 
@@ -1442,7 +1441,7 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);
 
-	mtx4LoadIdentityF(&sp110);
+	mtxIdent((Mtx*)&sp110);
 
 	modelmtx = gfxAllocateMatrixF();
 

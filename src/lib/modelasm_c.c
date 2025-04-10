@@ -4,7 +4,6 @@
 #include "bss.h"
 #include "data.h"
 #include "lib/model.h"
-#include "lib/mtx.h"
 #include "types.h"
 #include "platform.h"
 

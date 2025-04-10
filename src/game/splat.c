@@ -11,7 +11,6 @@
 #include "lib/lib_17ce0.h"
 #include "lib/model.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 
@@ -187,8 +186,8 @@ int splatsCreate(int qty, float arg1, struct prop *prop, struct shotdata *shotda
 		}
 
 		mtx4LoadRotationF(&spe4, &spa4);
-		mtx4RotateVec(&spa4, &spfc, &shotdata->gundir3d);
-		mtx4RotateVec(&spa4, &spf0, &shotdata->gundir2d);
+		mtx4RotateVec((Mtx*)&spa4, &spfc, &shotdata->gundir3d);
+		mtx4RotateVec((Mtx*)&spa4, &spf0, &shotdata->gundir2d);
 
 		utilsNormalizeVec(&shotdata->gundir3d, &shotdata->gundir3d);
 		utilsNormalizeVec(&shotdata->gundir2d, &shotdata->gundir2d);

@@ -17,7 +17,6 @@
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/vi.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 #include "lib/collision.h"
@@ -60,7 +59,7 @@ bool artifactTestLos(struct coord *spec, struct coord *roompos, int xi, int yi)
 	struct coord gunpos3d = g_Vars.currentplayer->cam_pos;
 	float crosspos[2] = { (float)xi, (float)yi };
 	camProjectScreenToWorldDir(crosspos, &gundir2d, 1.f);
-	mtx4RotateVec(camGetProjectionMtxF(), &gundir2d, &gundir3d);
+	mtx4RotateVec((Mtx*)camGetProjectionMtxF(), &gundir2d, &gundir3d);
 
 	return shotTestLos(&gunpos2d, &gundir2d, &gunpos3d, &gundir3d, &endpos);
 }
@@ -102,8 +101,8 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 	uint8_t *lightGlares = &var800a41a0[g_Rooms[roomnum].gfxdata->lightsindex * 3];
 
 	roomPopulateMtx(&sp138, roomnum);
-	mtxScale3x4(bgGetScaleBg2Gfx(), &sp138);
-	mtx4MultMtx4F(camGetMtxF006c(), &sp138, &spf8);
+	mtxScale3x4(bgGetScaleBg2Gfx(), (Mtx*)&sp138);
+	mtx4MultMtx4(camGetMtxF006c(), (Mtx*)&sp138, (Mtx*)&spf8);
 
 	float viewwidth = viGetViewWidth();
 	float viewheight = viGetViewHeight();
@@ -443,7 +442,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 						lightscreenpos.f[l] = lightworldpos.f[l] - g_Vars.currentplayer->cam_pos.f[l];
 					}
 
-					mtx4RotateVecInPlace(camGetWorldToScreenMtxf(), &lightscreenpos);
+					mtx4RotateVecInPlace((Mtx*)camGetWorldToScreenMtxf(), &lightscreenpos);
 
 					camProjectViewToScreen(&lightscreenpos, screenPos);
 

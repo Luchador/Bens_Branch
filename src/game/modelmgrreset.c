@@ -19,7 +19,6 @@
 #include "bss.h"
 #include "lib/collision.h"
 #include "lib/memp.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "data.h"
 #include "types.h"

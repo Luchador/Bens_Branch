@@ -5,7 +5,6 @@
 #include "game/bg.h"
 #include "game/pad.h"
 #include "bss.h"
-#include "lib/mtx.h"
 #include "lib/anim.h"
 #include "lib/model.h"
 #include "data.h"
@@ -100,7 +99,7 @@ void bheadReset(void)
 		modelSetAnimation(&g_Vars.currentplayer->model, ANIM_TWO_GUN_HOLD, 0, 0, 0.5f, 0);
 
 		modelUpdateInfo(&g_Vars.currentplayer->model);
-		mtx4LoadIdentityF(&sp48);
+		mtxIdent((Mtx*)&sp48);
 		renderdata.unk00 = &sp48;
 		renderdata.unk10 = g_Vars.currentplayer->bondheadmatrices;
 		modelSetMatricesWithAnim(&renderdata, &g_Vars.currentplayer->model);

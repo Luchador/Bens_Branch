@@ -12,7 +12,6 @@
 #include "bss.h"
 #include "lib/args.h"
 #include "lib/joy.h"
-#include "lib/lib_06440.h"
 #include "lib/main.h"
 #include "lib/memp.h"
 #include "lib/rng.h"

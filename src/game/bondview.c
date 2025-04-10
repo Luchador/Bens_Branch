@@ -17,14 +17,11 @@
 #include "lib/main.h"
 #include "lib/rng.h"
 #include "string.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 #include "gbiex.h"
-#ifndef PLATFORM_N64
 #include "game/player.h"
 #include "video.h"
-#endif
 
 uint8_t g_IrScanlines[2][480];
 int g_NumActiveEffects = 0;
@@ -1563,7 +1560,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			}
 		}
 
-		gdl = func0f0d49c8(gdl);
+		gdl = savebufferSetup2DRender(gdl);
 	}
 
 	return gdl;

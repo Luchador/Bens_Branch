@@ -45,7 +45,6 @@
 #include "lib/memp.h"
 #include "lib/rng.h"
 #include "string.h"
-#include "lib/mtx.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
@@ -1823,7 +1822,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			}
 		}
 
-		mtx4LoadIdentityF(&rotmtx);
+		mtxIdent((Mtx*)&rotmtx);
 
 		// For the hudpiece, tween the position and scale to the new values and apply rotation.
 		if (modeltype == MENUMODELTYPE_HUDPIECE) {
@@ -1918,7 +1917,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 						quaternionEulerToQuat(&tmprot, sp2ac);
 						quaternionSlerp(sp2bc, sp2ac, fracnew, sp29c);
-						quaternionToMtx(sp29c, &rotmtx);
+						quaternionToMtxF(sp29c, &rotmtx);
 					} else {
 						menumodel->currotx = rotx = menumodel->newrotx;
 						menumodel->curroty = roty = menumodel->newroty;
@@ -1959,7 +1958,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 		camProjectScreenToWorldDir(screenpos, &tmpcoord, 1.0f);
 
-		mtx4LoadIdentityF(&posmtx);
+		mtxIdent((Mtx*)&posmtx);
 
 		// Show or hide model parts according to the visibility list
 		if (menumodel->partvisibility != NULL) {
@@ -1999,9 +1998,9 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		mtx4LoadTranslationF(&tmpcoord, &posmtx);
 
 		if (haszoom) {
-			mtxScaleRotationPartF(scale * zoomy, &posmtx);
+			mtxScaleRotationPart(scale * zoomy, (Mtx*)&posmtx);
 		} else {
-			mtxScaleRotationPartF(scale, &posmtx);
+			mtxScaleRotationPart(scale, (Mtx*)&posmtx);
 		}
 
 		{
@@ -2020,13 +2019,13 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				mtx4LoadTranslationF(&tmpcoord, &sp204);
 			}
 
-			mtx4MultMtx4F(&posmtx, &rotmtx, &sp244);
+			mtx4MultMtx4((Mtx*)&posmtx, (Mtx*)&rotmtx, (Mtx*)&sp244);
 
 			if (modeltype == MENUMODELTYPE_3) {
-				mtx4MultMtx4F(&sp1c4, &sp244, &sp184);
-				mtx4MultMtx4F(&sp184, &sp204, &menumodel->mtx);
+				mtx4MultMtx4((Mtx*)&sp1c4, (Mtx*)&sp244, (Mtx*)&sp184);
+				mtx4MultMtx4((Mtx*)&sp184, (Mtx*)&sp204, (Mtx*)&menumodel->mtx);
 			} else {
-				mtx4MultMtx4F(&sp244, &sp204, &menumodel->mtx);
+				mtx4MultMtx4((Mtx*)&sp244, (Mtx*)&sp204, (Mtx*)&menumodel->mtx);
 			}
 		}
 
@@ -2034,7 +2033,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 		if (modeltype < MENUMODELTYPE_3) {
 			if (modeltype != MENUMODELTYPE_DEFAULT) {
-				gdl = func0f0d49c8(gdl);
+				gdl = savebufferSetup2DRender(gdl);
 				gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 			} else {
 				int halfScreenWidth = SCREEN_WIDTH_LO >> 1;
@@ -2051,7 +2050,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				static uint32_t znear = 10;
 				static uint32_t zfar = 300;
 
-				gdl = func0f0d49c8(gdl);
+				gdl = savebufferSetup2DRender(gdl);
 
 				viSetViewPosition(x1, g_MenuScissorY1);
 				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (x2 - x1), g_MenuScissorY2 - g_MenuScissorY1);
@@ -2065,7 +2064,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		matrices = gfxAllocate(menumodel->bodymodeldef->nummatrices * sizeof(Mtxf));
 
 		for (i = 0; i < menumodel->bodymodeldef->nummatrices; i++) {
-			mtx4LoadIdentityF(&matrices[i]);
+			mtxIdent((Mtx*)&matrices[i]);
 		}
 
 		menumodel->bodymodel.matrices = matrices;
@@ -2135,9 +2134,9 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				Mtxf sp120;
 				Mtxf spe0;
 
-				mtx4LoadIdentityF(&sp120);
-				mtx4LoadXRotation(menuGetCosOscFrac(4), &sp120);
-				mtx4MultMtx4F((Mtxf *)((uintptr_t)matrices + mtxindex * sizeof(Mtxf)), &sp120, &spe0);
+				mtxIdent((Mtx*)&sp120);
+				mtx4LoadXRotationF(menuGetCosOscFrac(4), &sp120);
+				mtx4MultMtx4((Mtx *)((uintptr_t)matrices + mtxindex * sizeof(Mtx)), (Mtx*)&sp120, (Mtx*)&spe0);
 				mtx4CopyF(&spe0, (Mtxf *)((uintptr_t)matrices + mtxindex * sizeof(Mtxf)));
 			}
 
@@ -4935,7 +4934,7 @@ Gfx *menuRender(Gfx *gdl)
 	// Render the health bar (playerRenderHealthBar may choose not to render)
 	if ((g_MenuData.bg || g_MenuData.nextbg != 255)
 			&& (!g_Vars.currentplayer->eyespy || !g_Vars.currentplayer->eyespy->active)) {
-		gdl = func0f0d49c8(gdl);
+		gdl = savebufferSetup2DRender(gdl);
 #ifndef PLATFORM_N64
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 #endif
@@ -5108,7 +5107,7 @@ Gfx *menuRender(Gfx *gdl)
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
-	gdl = func0f0d49c8(gdl);
+	gdl = savebufferSetup2DRender(gdl);
 
 	return gdl;
 }
@@ -5568,7 +5567,7 @@ void func0f0fd494(struct coord *pos)
 
 	matrix = camGetWorldToScreenMtxf();
 
-	mtx4TransformVec(matrix, pos, &coord);
+	mtx4TransformVec((Mtx*)matrix, pos, &coord);
 	camProjectViewToScreen(&coord, xy);
 
 	g_MenuData.unk670 = (int)xy[0] - viGetWidth() / 2;

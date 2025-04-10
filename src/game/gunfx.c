@@ -15,7 +15,6 @@
 #include "lib/main.h"
 #include "lib/model.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 
@@ -198,7 +197,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	spe4.f[1] /= length;
 	spe4.f[2] /= length;
 
-	mtx4TransformVec(camGetWorldToScreenMtxf(), headpos, &sp5c);
+	mtx4TransformVec((Mtx*)camGetWorldToScreenMtxf(), headpos, &sp5c);
 
 	if (sp5c.f[0] * arg2 > 10000.0f || sp5c.f[0] * arg2 < -10000.0f) {
 		return gdl;
@@ -212,7 +211,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 		return gdl;
 	}
 
-	mtx4TransformVec(camGetWorldToScreenMtxf(), tailpos, &sp5c);
+	mtx4TransformVec((Mtx*)camGetWorldToScreenMtxf(), tailpos, &sp5c);
 
 	if (sp5c.f[0] * arg2 > 10000.0f || sp5c.f[0] * arg2 < -10000.0f) {
 		return gdl;
@@ -246,8 +245,8 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 
 	mtx4LoadTranslationF(headpos, &sp84);
 
-	mtxScaleRotationPartF(1.0f / arg2, &sp84);
-	mtxApplyAffineTransformInPlaceF(worldtoscreenmtx, &sp84);
+	mtxScaleRotationPart(1.0f / arg2, (Mtx*)&sp84);
+	mtxApplyAffineTransformInPlace((Mtx*)worldtoscreenmtx, (Mtx*)&sp84);
 	mtx4CopyF(&sp84, spc8);
 
 	mult = arg5 * arg2;
@@ -432,8 +431,8 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 				&& sp138.f[2] > -32000.0f && sp138.f[2] < 32000.0f) {
 			spd8 = true;
 			mtx4LoadTranslationF(&sp138, &sp148);
-			mtxScaleRotationPartF(0.1f, &sp148);
-			mtxApplyAffineTransformInPlaceF(worldtoscreenmtx, &sp148);
+			mtxScaleRotationPart(0.1f, (Mtx*)&sp148);
+			mtxApplyAffineTransformInPlace((Mtx*)worldtoscreenmtx, (Mtx*)&sp148);
 
 			for (i = 0; i < 4; i++) {
 				for (j = 0; j < 4; j++) {
@@ -454,7 +453,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 					spcc.f[1] = sp138.f[1] + beam->dir.f[1] * sp12c;
 					spcc.f[2] = sp138.f[2] + beam->dir.f[2] * sp12c;
 
-					mtx4TransformVecInPlace(worldtoscreenmtx, &spcc);
+					mtx4TransformVecInPlace((Mtx*)worldtoscreenmtx, &spcc);
 
 					spb8[0] = spb8[1] = sp130 / 10;
 					tmp = -spcc.f[2];
@@ -467,7 +466,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 						spcc.f[2] *= spc0[0] * 0.5f;
 					}
 
-					mtx4TransformVecInPlace(camGetProjectionMtxF(), &spcc);
+					mtx4TransformVecInPlace((Mtx*)camGetProjectionMtxF(), &spcc);
 
 					spcc.f[0] -= sp138.f[0];
 					spcc.f[1] -= sp138.f[1];
@@ -641,7 +640,7 @@ struct casing *casingCreate(struct modeldef *modeldef, Mtxf *mtx)
 		casing->pos.y = mtx->m[3][1];
 		casing->pos.z = mtx->m[3][2];
 
-		mtx4ToMtx3(mtx, rot);
+		mtx4ToMtx3((Mtx*)mtx, rot);
 
 		for (i = 0; i < 3; i++) {
 			for (j = 0; j < 3; j++) {
@@ -716,14 +715,14 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 			casing->speed.y = RANDOMFRAC() * 2.5f * 0.0625f + 2.5f;
 			casing->speed.z = 0.0f;
 
-			mtx4RotateVecInPlace(mtx, &casing->speed);
+			mtx4RotateVecInPlace((Mtx*)mtx, &casing->speed);
 
 			spa4.x = 2.0f * RANDOMFRAC() * M_TAU * 0.0625f - 0.39263657f;
 			spa4.y = 2.0f * RANDOMFRAC() * M_TAU * 0.0625f - 0.39263657f;
 			spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.0625f - 0.39263657f;
 
 			mtx4LoadRotationF(&spa4, &sp64);
-			mtx4ToMtx3(&sp64, spc8);
+			mtx4ToMtx3((Mtx*)&sp64, spc8);
 
 			for (i = 0; i < 3; i++) {
 				for (j = 0; j < 3; j++) {
@@ -764,7 +763,7 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 				casing->speed.z = -1.0f;
 			}
 
-			mtx4RotateVecInPlace(mtx, &casing->speed);
+			mtx4RotateVecInPlace((Mtx*)mtx, &casing->speed);
 
 			if (weaponnum == WEAPON_REAPER) {
 				spa4.x = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
@@ -772,7 +771,7 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 				spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 
 				mtx4LoadRotationF(&spa4, &sp64);
-				mtx4RotateVecInPlace(&sp64, &casing->speed);
+				mtx4RotateVecInPlace((Mtx*)&sp64, &casing->speed);
 			}
 
 			spa4.x = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
@@ -780,7 +779,7 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 			spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 
 			mtx4LoadRotationF(&spa4, &sp64);
-			mtx4ToMtx3(&sp64, spc8);
+			mtx4ToMtx3((Mtx*)&sp64, spc8);
 
 			for (i = 0; i < 3; i++) {
 				for (j = 0; j < 3; j++) {
@@ -840,9 +839,9 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 	mtx.m[2][3] = 0.0f;
 	mtx.m[3][3] = 1.0f;
 
-	mtxScaleRotationPartF(0.1000000089407f, &mtx);
-	mtx4SetTranslation(&casing->pos, &mtx);
-	mtxApplyAffineTransform(camGetWorldToScreenMtxf(), &mtx, model.matrices);
+	mtxScaleRotationPart(0.10f, (Mtx*)&mtx);
+	mtx4SetTranslation(&casing->pos, (Mtx*)&mtx);
+	mtxApplyAffineTransform((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&mtx, (Mtx*)model.matrices);
 
 	// Check if any coordinate is out of range
 	for (i = 0; i < 3; i++) {
@@ -1066,15 +1065,15 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	gDPSetTextureLUT(gdl++, G_TT_NONE);
 	gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
 
-	mtx4LoadIdentityF(&sp164);
-	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &sp164);
-	mtx4LoadIdentityF(&sp124);
-	mtxApplyAffineTransformInPlaceF(camGetProjectionMtxF(), &sp124);
+	mtxIdent((Mtx*)&sp164);
+	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp164);
+	mtxIdent((Mtx*)&sp124);
+	mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtxF(), (Mtx*)&sp124);
 
 	sp124.m[3][0] = sp124.m[3][1] = sp124.m[3][2] = 0.0f;
 
-	mtx4LoadIdentityF(&sp1b0);
-	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &sp1b0);
+	mtxIdent((Mtx*)&sp1b0);
+	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp1b0);
 
 	campos.x = player->cam_pos.x;
 	campos.y = player->cam_pos.y;
@@ -1084,7 +1083,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	sp1b0.m[3][1] = 0.0f;
 	sp1b0.m[3][2] = 0.0f;
 
-	mtxScale3x4(0.2f, &sp1b0);
+	mtxScale3x4(0.2f, (Mtx*)&sp1b0);
 
 	mtx = gfxAllocateMatrixF();
 	mtx4CopyF(&sp1b0, mtx);
@@ -1249,18 +1248,18 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
 
 	texSelect(&gdl, &g_TexGeneralConfigs[3], 4, 0, 2, 1, NULL);
-	mtx4LoadIdentityF(&sp14c);
+	mtxIdent((Mtx*)&sp14c);
 
-	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &sp14c);
-	mtx4LoadIdentityF(&sp10c);
-	mtxApplyAffineTransformInPlaceF(camGetProjectionMtxF(), &sp10c);
+	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp14c);
+	mtxIdent((Mtx*)&sp10c);
+	mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtxF(), (Mtx*)&sp10c);
 
 	sp10c.m[3][1] = 0;
 	sp10c.m[3][0] = 0;
 	sp10c.m[3][2] = 0;
 
-	mtx4LoadIdentityF(&sp198);
-	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &sp198);
+	mtxIdent((Mtx*)&sp198);
+	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp198);
 
 	campos.x = player->cam_pos.x;
 	campos.y = player->cam_pos.y;
@@ -1270,7 +1269,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	sp198.m[3][1] = 0;
 	sp198.m[3][2] = 0;
 
-	mtxScale3x4(0.2f, &sp198);
+	mtxScale3x4(0.2f, (Mtx*)&sp198);
 	mtx = gfxAllocateMatrixF();
 	mtx4CopyF(&sp198, mtx);
 
@@ -1290,7 +1289,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 			sp98.y = g_LaserSights[i].beamnear.y;
 			sp98.z = g_LaserSights[i].beamnear.z;
 
-			mtx4TransformVecInPlace(&sp14c, &sp98);
+			mtx4TransformVecInPlace((Mtx*)&sp14c, &sp98);
 
 			spa8.x = sp98.f[0] < 0.0f ? 1.0f : -1.0f;
 			spa8.y = 2.0f;
@@ -1298,7 +1297,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 
 			utilsNormalizeF(&spa8.x, &spa8.y, &spa8.z);
 
-			mtx4RotateVecInPlace(&sp10c, &spa8);
+			mtx4RotateVecInPlace((Mtx*)&sp10c, &spa8);
 
 			spcc.x = g_LaserSights[i].beamnear.x;
 			spcc.y = g_LaserSights[i].beamnear.y;

@@ -35,7 +35,6 @@
 #include "lib/snd.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 
@@ -919,14 +918,14 @@ void frInitTargets(void)
 			}
 
 			if (g_FrData.targets[i].flags & FRTARGETFLAG_SPAWNFACINGAWAY) {
-				mtx4LoadYRotation(0.0f, &sp144);
+				mtx4LoadYRotationF(0.0f, &sp144);
 				g_FrData.targets[i].angle = M_PI;
 			} else {
-				mtx4LoadYRotation(M_PI, &sp144);
+				mtx4LoadYRotationF(M_PI, &sp144);
 			}
 
-			mtxScaleRotationPartF(obj->model->scale, &sp144);
-			mtx4ToMtx3(&sp144, sp108);
+			mtxScaleRotationPart(obj->model->scale, (Mtx*)&sp144);
+			mtx4ToMtx3((Mtx*)&sp144, sp108);
 			mtx3Copy(sp108, obj->realrot);
 
 			prop->pos.x = pos.x;
@@ -1946,9 +1945,9 @@ void frTick(void)
 					}
 				}
 
-				mtx4LoadYRotation(g_FrData.targets[i].angle + M_PI, &spbc);
-				mtxScaleRotationPartF(obj->model->scale, &spbc);
-				mtx4ToMtx3(&spbc, sp98);
+				mtx4LoadYRotationF(g_FrData.targets[i].angle + M_PI, &spbc);
+				mtxScaleRotationPart(obj->model->scale, (Mtx*)&spbc);
+				mtx4ToMtx3((Mtx*)&spbc, sp98);
 				mtx3Copy(sp98, obj->realrot);
 			}
 

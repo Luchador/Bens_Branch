@@ -5,7 +5,6 @@
 #include "game/padhalllv.h"
 #include "bss.h"
 #include "lib/lib_17ce0.h"
-#include "lib/mtx.h"
 #include "data.h"
 #include "types.h"
 

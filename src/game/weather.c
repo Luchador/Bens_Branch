@@ -20,7 +20,6 @@
 #include "lib/snd.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
-#include "lib/mtx.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
 #include "types.h"
@@ -891,8 +890,8 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 		particledata = weather->particledata[arg2];
 		numtris = 0;
 
-		mtx4LoadIdentityF(&worldtoscreenmtx);
-		mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &worldtoscreenmtx);
+		mtxIdent((Mtx*)&worldtoscreenmtx);
+		mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&worldtoscreenmtx);
 
 		worldtoscreenmtx.m[3][0] = 0.0f;
 		worldtoscreenmtx.m[3][1] = 0.0f;
@@ -1468,8 +1467,8 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 	sp198 = 0;
 
-	mtx4LoadIdentityF(&sp1cc);
-	mtxApplyAffineTransformInPlaceF(camGetWorldToScreenMtxf(), &sp1cc);
+	mtxIdent((Mtx*)&sp1cc);
+	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp1cc);
 
 	sp1cc.m[3][0] = 0.0f;
 	sp1cc.m[3][1] = 0.0f;

@@ -12,7 +12,6 @@
 #include "game/camera.h"
 #include "game/gfxmemory.h"
 #include "bss.h"
-#include "lib/mtx.h"
 #include "lib/rng.h"
 #include "types.h"
 
