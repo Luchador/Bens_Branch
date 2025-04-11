@@ -63,7 +63,7 @@ Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, stru
 {
 	Vtx *vertices = gfxAllocateVertices(4);
 	Col *colours = (Col *)gfxAllocateColours(1);
-	Mtxf *mtx = camGetProjectionMtxF();
+	Mtxf *mtx = camGetProjectionMtx();
 	struct coord spa0;
 	struct coord sp94;
 	struct coord sp88;

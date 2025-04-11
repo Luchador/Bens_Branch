@@ -1486,7 +1486,7 @@ void chrHandleJointPositioned(int joint, Mtx *mtx)
 			return;
 		}
 
-		mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtxF(), (Mtx*)mtx);
+		mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtx(), (Mtx*)mtx);
 
 		sp138.x = (*mtx)[3][0];
 		sp138.y = (*mtx)[3][1];
@@ -1695,7 +1695,7 @@ void chrHandleJointPositioned(int joint, Mtx *mtx)
 					yrot += M_TAU;
 				}
 
-				mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtxF(), mtx);
+				mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtx(), mtx);
 
 				sp70.x = (*mtx)[3][0];
 				sp70.y = (*mtx)[3][1];
@@ -2759,7 +2759,7 @@ bool chr0f024738(struct chrdata *chr)
 								+ thing->unk06c.m[1][2] * campos->f[1]
 								+ thing->unk06c.m[2][2] * campos->f[2]) + thing->unk06c.m[3][2];
 
-						mtxApplyAffineTransform((Mtx*)&thing->unk06c, (Mtx*)camGetProjectionMtxF(), (Mtx*)&thing->unk0ac);
+						mtxApplyAffineTransform((Mtx*)&thing->unk06c, (Mtx*)camGetProjectionMtx(), (Mtx*)&thing->unk0ac);
 						thing->unk00c = true;
 					}
 
@@ -4233,7 +4233,7 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 
 				while (child) {
 					next = child->next;
-					func0f0859a0(child, shotdata);
+					propTestModelHit(child, shotdata);
 					child = next;
 				}
 
@@ -4243,9 +4243,9 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 					while (hitpart > 0) {
 						if (func0f084594(model, node, &shotdata->gunpos2d, &shotdata->gundir2d, &sp88, &sp84, &sp80)) {
 							mtx4TransformVec((Mtx*)&model->matrices[sp84], &sp88.pos, &spdc);
-							mtx4TransformVecInPlace((Mtx*)camGetProjectionMtxF(), &spdc);
+							mtx4TransformVecInPlace((Mtx*)camGetProjectionMtx(), &spdc);
 							mtx4RotateVec((Mtx*)&model->matrices[sp84], &sp88.unk0c, &spd0);
-							mtx4RotateVecInPlace((Mtx*)camGetProjectionMtxF(), &spd0);
+							mtx4RotateVecInPlace((Mtx*)camGetProjectionMtx(), &spd0);
 							break;
 						}
 
@@ -4257,8 +4257,8 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 					if (hitpart > 0) {
 						if (func0f06bea0(model, model->definition->rootnode, model->definition->rootnode, &shotdata->gunpos2d,
 									&shotdata->gundir2d, &sp88.pos, &sp70, &node, &hitpart, &sp84, &sp80)) {
-							mtx4TransformVec((Mtx*)camGetProjectionMtxF(), &sp88.pos, &spdc);
-							mtx4RotateVec((Mtx*)camGetProjectionMtxF(), &sp88.unk0c, &spd0);
+							mtx4TransformVec((Mtx*)camGetProjectionMtx(), &sp88.pos, &spdc);
+							mtx4RotateVec((Mtx*)camGetProjectionMtx(), &sp88.unk0c, &spd0);
 						} else {
 							hitpart = 0;
 						}
@@ -4325,7 +4325,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 		sp98.y = shotdata->gunpos2d.y - (hit->distance * shotdata->gundir2d.y) / shotdata->gundir2d.z;
 		sp98.z = shotdata->gunpos2d.z - hit->distance;
 
-		mtx4TransformVec((Mtx*)camGetProjectionMtxF(), &sp98, &hitpos);
+		mtx4TransformVec((Mtx*)camGetProjectionMtx(), &sp98, &hitpos);
 		bgunSetHitPos(&hitpos);
 		bgunPlayPropHitSound(&shotdata->gset, hit->prop, -1);
 

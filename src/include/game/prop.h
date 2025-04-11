@@ -63,4 +63,4 @@ void roomGetProps(RoomNum *room, int16_t *propnums, int len);
 void propsDefragRoomProps(void);
 void propGetBbox(struct prop *prop, float *radius, float *ymax, float *ymin);
 bool propUpdateGeometry(struct prop *prop, uint8_t **start, uint8_t **end);
-bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *gunpos3d, struct coord *gundir3d, struct coord *endpos3d);
+bool propTestArtifactLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *gunpos3d, struct coord *gundir3d, struct coord *endpos3d);

@@ -273,7 +273,7 @@ Mtxf *camGetWorldToScreenMtx(uint8_t *arg0)
 	return result;
 }
 
-Mtxf *camGetProjectionMtx(uint8_t *arg0)
+Mtxf *camGetProjectionMtxForPlayers(uint8_t *arg0)
 {
 	Mtxf *result = NULL;
 	int i;
@@ -338,7 +338,7 @@ void camSetProjectionMtxF(Mtxf *mtx)
 	player->projectionmtx = mtx;
 }
 
-Mtxf *camGetProjectionMtxF(void)
+Mtxf *camGetProjectionMtx(void)
 {
 	return g_Vars.currentplayer->projectionmtx;
 }

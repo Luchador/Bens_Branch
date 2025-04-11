@@ -2235,7 +2235,7 @@ struct hand {
 	/*0x0cbc*/ int animframeinc;
 	/*0x0cc0*/ uint32_t animframeincfreal;
 	/*0x0cc4*/ int animmode;
-	/*0x0cc8*/ uint8_t unk0cc8_01 : 1;
+	/*0x0cc8*/ uint8_t waitingForRelease : 1;
 	/*0x0cc8*/ uint8_t unk0cc8_02 : 1;
 	/*0x0cc8*/ uint8_t incrementalreloading : 1;
 	/*0x0cc8*/ uint8_t unk0cc8_04 : 3;
@@ -2247,7 +2247,7 @@ struct hand {
 	/*0x0cdc*/ uint32_t statejob;
 	/*0x0ce0*/ int statevar1;
 	/*0x0ce4*/ int attacktype;
-	/*0x0ce8*/ struct guncmd *unk0ce8;
+	/*0x0ce8*/ struct guncmd *currentGunCmd;
 	/*0x0cec*/ bool hasdotinfo;
 	/*0x0cf0*/ struct coord dotpos;
 	/*0x0cfc*/ struct coord dotrot;
@@ -5621,14 +5621,14 @@ struct hit {
 };
 
 struct shotdata {
-	/*0x00*/ struct coord gunpos2d;
-	/*0x0c*/ struct coord gundir2d;
-	/*0x18*/ struct gset gset;
-	/*0x1c*/ struct coord gunpos3d;
-	/*0x28*/ struct coord gundir3d;
-	/*0x34*/ float distance;
-	/*0x38*/ int penetration;
-	/*0x3c*/ struct hit hits[10];
+	struct coord gunpos2d;
+	struct coord gundir2d;
+	struct gset gset;
+	struct coord gunpos3d;
+	struct coord gundir3d;
+	float distance;
+	int penetration;
+	struct hit hits[10];
 };
 
 struct hatposition {

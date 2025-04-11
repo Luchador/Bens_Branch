@@ -891,8 +891,8 @@ void playerSpawn(void)
 				int prevplayernum = g_Vars.currentplayernum;
 				setCurrentPlayerNum(g_Vars.bondplayernum);
 				bgun0f0a0c08(&sp84, &sp9c);
-				mtx4RotateVec((Mtx*)camGetProjectionMtxF(), &sp9c, &sp90);
-				mtx4TransformVec((Mtx*)camGetProjectionMtxF(), &sp84, &sp78);
+				mtx4RotateVec((Mtx*)camGetProjectionMtx(), &sp9c, &sp90);
+				mtx4TransformVec((Mtx*)camGetProjectionMtx(), &sp84, &sp78);
 				setCurrentPlayerNum(prevplayernum);
 			}
 
@@ -5004,7 +5004,7 @@ int playerTickThirdPerson(struct prop *prop)
 					spe8 = player->model00d4->matrices;
 				}
 
-				mtxApplyAffineTransform((Mtx*)camGetProjectionMtxF(), (Mtx*)spe8, (Mtx*)&spa8);
+				mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)spe8, (Mtx*)&spa8);
 
 				sp9c.x = spa8.m[3][0] + spa8.m[1][0] * 7;
 				sp9c.y = spa8.m[3][1] + spa8.m[1][1] * 7;
@@ -5412,7 +5412,7 @@ void player0f0c3320(Mtxf *matrices, int count)
 	int j;
 
 	for (i = 0, j = 0; i < count; i++, j += sizeof(Mtxf)) {
-		mtxApplyAffineTransform((Mtx*)camGetProjectionMtxF(), (Mtx*)((uintptr_t)matrices + j), (Mtx*)&sp40);
+		mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)((uintptr_t)matrices + j), (Mtx*)&sp40);
 
 		sp40.m[3][0] -= g_Vars.currentplayer->globaldrawworldoffset.x;
 		sp40.m[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;

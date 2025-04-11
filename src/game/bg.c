@@ -3590,7 +3590,7 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 	return hit;
 }
 
-bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct vtxbatch *batch, int roomnum, struct hitthing *hitthing)
+bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct vtxbatch *batch, int roomnum, struct hitthing *hitthing, bool artifactTest)
 {
 	int16_t triref = 0;
 	int trisremaining = 0;
@@ -3614,6 +3614,11 @@ bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *a
 	Gfx *iter;
 	Gfx *tmpgdl;
 	Gfx *tri4gdl;
+
+	if(batch->type == VTXBATCHTYPE_XLU && artifactTest)
+	{
+		return false;
+	}
 
 	vtx = bgFindVerticesForGdl(roomnum, gdl);
 	iter = &gdl[batch->gbicmdindex];
@@ -3890,7 +3895,7 @@ int bgRayIntersectAABBEntryPoint(struct coord *bbmin, struct coord *bbmax, struc
  * Room vertices are already grouped into batches, where each batch has a
  * precomputed bounding box.
  */
-bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, struct hitthing *hitthing)
+bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, struct hitthing *hitthing, bool artifactTest)
 {
 	int i;
 	int count;
@@ -3982,7 +3987,7 @@ bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, st
 			count = 0;
 
 			for (j = 0; j < ARRAYCOUNT(var800a6538); j++) {
-				if (bgTestHitInVtxBatch(&from, &to, &dist, &g_Rooms[roomnum].vtxbatches[var800a6538[j].vtxbatchindex], roomnum, hitthing)) {
+				if (bgTestHitInVtxBatch(&from, &to, &dist, &g_Rooms[roomnum].vtxbatches[var800a6538[j].vtxbatchindex], roomnum, hitthing, artifactTest)) {
 					f0 = from.x - hitthing->pos.x;
 					f2 = f0 * f0;
 
@@ -4031,7 +4036,7 @@ bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, st
 	batch = g_Rooms[roomnum].vtxbatches;
 
 	for (i = 0; i < count; i++) {
-		if (bgTestHitInVtxBatch(&from, &to, &dist, &batch[var800a6538[i].vtxbatchindex], roomnum, hitthing)) {
+		if (bgTestHitInVtxBatch(&from, &to, &dist, &batch[var800a6538[i].vtxbatchindex], roomnum, hitthing, artifactTest)) {
 			i++;
 
 			if (i < count) {
@@ -4046,7 +4051,7 @@ bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, st
 
 				for (; i < count; i++) {
 					if (var800a6538[i].unk04 <= spc8) {
-						if (bgTestHitInVtxBatch(&from, &to, &dist, &batch[var800a6538[i].vtxbatchindex], roomnum, &sp60)) {
+						if (bgTestHitInVtxBatch(&from, &to, &dist, &batch[var800a6538[i].vtxbatchindex], roomnum, &sp60, artifactTest)) {
 							f0 = from.f[0] - sp60.pos.f[0];
 							f20 = f0 * f0;
 
@@ -4706,7 +4711,7 @@ void bgTickPortalsXray(void)
 	eraserpos.f[1] = 0.0f;
 	eraserpos.f[2] = player->eraserdepth;
 
-	mtx4TransformVecInPlace((Mtx*)camGetProjectionMtxF(), &eraserpos);
+	mtx4TransformVecInPlace((Mtx*)camGetProjectionMtx(), &eraserpos);
 
 	player->eraserpos.f[0] = eraserpos.f[0];
 	player->eraserpos.f[1] = eraserpos.f[1];

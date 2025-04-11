@@ -1147,7 +1147,7 @@ uint32_t explosionTick(struct prop *prop)
 			}
 
 			if (g_Rooms[exp->room].gfxdata) {
-				if (g_Rooms[exp->room].gfxdata->xlublocks && bgTestHitInRoom(&prop->pos, &exp->unk3d0, exp->room, &hitthing)) {
+				if (g_Rooms[exp->room].gfxdata->xlublocks && bgTestHitInRoom(&prop->pos, &exp->unk3d0, exp->room, &hitthing, false)) {
 					xlu = hitthing.unk2c == 2;
 				}
 
@@ -1306,7 +1306,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx *gdl, struct coord *coord, int arg4)
 {
 	Vtx *vertices = gfxAllocateVertices(4);
-	Mtxf *mtx = camGetProjectionMtxF();
+	Mtxf *mtx = camGetProjectionMtx();
 	struct coord spbc;
 	struct coord spb0;
 	struct coord spa4;

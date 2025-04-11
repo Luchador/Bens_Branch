@@ -658,7 +658,7 @@ struct prop *shotCalculateHits(int handnum, bool isshooting, struct coord *gunpo
 		bgGetForceOnscreenRooms(roomsptr, 100);
 
 		for (i = 0; rooms[i] != -1; i++) {
-			if (bgTestHitInRoom(&shotdata.gunpos3d, &hitpos, rooms[i], &sp664)) {
+			if (bgTestHitInRoom(&shotdata.gunpos3d, &hitpos, rooms[i], &sp664, false)) {
 				sp664.pos.x *= 1;
 				sp664.pos.y *= 1;
 				sp664.pos.z *= 1;
@@ -947,14 +947,8 @@ struct prop *shotCalculateHits(int handnum, bool isshooting, struct coord *gunpo
 	return result;
 }
 
-#ifndef PLATFORM_N64
-
-/**
- * Checks if the specified line of sight (gunpos3d - endpos3d) intersects any props or BG,
- * using the same process as shotCalculateHits, except with no side effects and cheap = true.
- * Returns true if nothing was hit.
- */
-bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *gunpos3d, struct coord *gundir3d, struct coord *endpos3d)
+// Return true if we *didn't* hit anything
+bool propTestArtifactLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *gunpos3d, struct coord *gundir3d, struct coord *endpos3d)
 {
 	struct prop **propptr;
 	struct hitthing sp664;
@@ -1014,7 +1008,7 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 
 	// Check for BG hits first
 	for (i = 0; rooms[i] != -1; i++) {
-		if (bgTestHitInRoom(&shotdata.gunpos3d, endpos3d, rooms[i], &sp664)) {
+		if (bgTestHitInRoom(&shotdata.gunpos3d, endpos3d, rooms[i], &sp664, true)) {
 			// check if it's far enough away from the end point
 			if (fabsf(sp664.pos.x - endpos3d->x) >= 0.1f ||
 					fabsf(sp664.pos.y - endpos3d->y) >= 0.1f ||
@@ -1042,12 +1036,20 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 					|| (prop->type == PROPTYPE_OBJ && prop->obj->type != OBJTYPE_GLASS && prop->obj->type != OBJTYPE_TINTEDGLASS)) {
 				objTestHit(prop, &shotdata);
 			}
-			if (shotdata.hits[0].prop) {
+			if (shotdata.hits[0].prop) { 
+				// 88 and 89 correspond to the glass texture used on lifts in CI and DD
+				if(shotdata.hits[0].hitthing.texturenum == 88 || shotdata.hits[0].hitthing.texturenum == 89)
+				{
+					return true;
+				}
+
 				// ignore some glass parts and shields
-				if (shotdata.hits[0].slowsbullet && shotdata.hits[0].hitthing.texturenum != 10000) {
+				if (shotdata.hits[0].slowsbullet && shotdata.hits[0].hitthing.texturenum != 10000 && shotdata.hits[0].hitthing.texturenum != 89)
+				{
 					return false;
 				}
 			}
+			//(g_Textures[shotdata.hits[0].hitthing.texturenum].surfacetype == SURFACETYPE_GLASS || g_Textures[shotdata.hits[0].hitthing.texturenum].surfacetype == SURFACETYPE_GLASSXLU)
 		}
 		propptr--;
 	}
@@ -1055,8 +1057,6 @@ bool shotTestLos(struct coord *gunpos2d, struct coord *gundir2d, struct coord *g
 	// did not hit anything
 	return true;
 }
-
-#endif
 
 struct prop *propFindAimingAt(int handnum, bool isshooting, unsigned int context)
 {
@@ -1071,8 +1071,8 @@ struct prop *propFindAimingAt(int handnum, bool isshooting, unsigned int context
 		gunpos2d.y -= 15 * RANDOMFRAC();
 	}
 
-	mtx4TransformVec((Mtx*)camGetProjectionMtxF(), &gunpos2d, &gunpos3d);
-	mtx4RotateVec((Mtx*)camGetProjectionMtxF(), &gundir2d, &gundir3d);
+	mtx4TransformVec((Mtx*)camGetProjectionMtx(), &gunpos2d, &gunpos3d);
+	mtx4RotateVec((Mtx*)camGetProjectionMtx(), &gundir2d, &gundir3d);
 
 	return shotCalculateHits(handnum, isshooting, &gunpos2d, &gundir2d, &gunpos3d, &gundir3d, 0, 4294836224, PLAYERCOUNT() >= 2);
 }
@@ -1087,8 +1087,8 @@ void shotCreate(int handnum, bool isshooting, bool dorandom, int numshots, bool 
 	bgunCalculatePlayerShotSpread(&gunpos2d, &gundir2d, handnum, dorandom);
 
 	if (numshots > 0) {
-		mtx4TransformVec((Mtx*)camGetProjectionMtxF(), &gunpos2d, &gunpos3d);
-		mtx4RotateVec((Mtx*)camGetProjectionMtxF(), &gundir2d, &gundir3d);
+		mtx4TransformVec((Mtx*)camGetProjectionMtx(), &gunpos2d, &gunpos3d);
+		mtx4RotateVec((Mtx*)camGetProjectionMtx(), &gundir2d, &gundir3d);
 
 		shotCalculateHits(handnum, isshooting, &gunpos2d, &gundir2d, &gunpos3d, &gundir3d, 0, 4294836224, cheap);
 
@@ -1342,7 +1342,7 @@ void handInflictMeleeDamage(int handnum, struct gset *gset, bool arg2)
 							if (!chrIsAvoiding(chr)) {
 								bgunCalculatePlayerShotSpread(&gunpos2d, &gundir2d, handnum, true);
 								skipthething = true;
-								mtx4RotateVecInPlace((Mtx*)camGetProjectionMtxF(), &gundir2d);
+								mtx4RotateVecInPlace((Mtx*)camGetProjectionMtx(), &gundir2d);
 								bgunPlayPropHitSound(gset, prop, -1);
 
 								if (chr->model && chrGetShield(chr) > 0) {

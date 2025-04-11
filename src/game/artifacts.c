@@ -42,8 +42,6 @@ void artifactsTick(void)
 
 bool artifactTestLos(struct coord *spec, struct coord *roompos, int xi, int yi)
 {
-	int i = 0;
-
 	if (!g_Vars.currentplayer) {
 		return false;
 	}
@@ -59,9 +57,9 @@ bool artifactTestLos(struct coord *spec, struct coord *roompos, int xi, int yi)
 	struct coord gunpos3d = g_Vars.currentplayer->cam_pos;
 	float crosspos[2] = { (float)xi, (float)yi };
 	camProjectScreenToWorldDir(crosspos, &gundir2d, 1.f);
-	mtx4RotateVec((Mtx*)camGetProjectionMtxF(), &gundir2d, &gundir3d);
+	mtx4RotateVec((Mtx*)camGetProjectionMtx(), &gundir2d, &gundir3d);
 
-	return shotTestLos(&gunpos2d, &gundir2d, &gunpos3d, &gundir3d, &endpos);
+	return propTestArtifactLos(&gunpos2d, &gundir2d, &gunpos3d, &gundir3d, &endpos);
 }
 
 void artifactsCalculateGlaresForRoom(int roomnum)
@@ -474,8 +472,6 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 
 						float dist = 1.0f - (artifacts[i].dist / 2500.0f);
 						float overexposureAmount = lightStats[2] * (1.0f / 255.0f) * utilsClampF(dist, 0.0f, 1.0f);
-
-						skySetOverexposure((int) ((float)overexposureAmount * r), (int) ((float)overexposureAmount * g), (int) ((float)overexposureAmount * b));
 						
 						envColor[0] = r;
 						envColor[1] = g;
@@ -495,7 +491,17 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 
 						envColor[3] = alpha;
 
-						gDPSetEnvColor(gdl++, envColor[0], envColor[1], envColor[2], envColor[3]);
+						// Only render overexposure if alpha is over 10.0
+						if(alpha > 10.0f)
+						{
+							skySetOverexposure((int) ((float)overexposureAmount * r), (int) ((float)overexposureAmount * g), (int) ((float)overexposureAmount * b));
+							gDPSetEnvColor(gdl++, envColor[0], envColor[1], envColor[2], envColor[3]);
+						}
+						// Still render the light, but don't do overexposure
+						else
+						{
+							gDPSetEnvColor(gdl++, envColor[0], envColor[1], envColor[2], 0xff);
+						}
 
 						screenSize[0] = aspectScale;
 						screenSize[1] = screenScale;

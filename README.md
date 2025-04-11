@@ -24,6 +24,7 @@ Changes include:
 
 Bug fixes:
 * Fixed light glares rendering on top of first person models
+* Fixed light glares not rendering through translucent surfaces
 * Fixed Jonathan being unable to shoot the player in The Duel
 * Fixed the bug where wine bottles don't play their shatter sound half the time when destroyed
 * Fixed the function indicator not turning yellow during RC-P120 secondary mode

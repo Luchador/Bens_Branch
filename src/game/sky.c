@@ -63,7 +63,7 @@ uint32_t FloatToUInt32(float arg0)
 
 void skyGetWorldPosFromScreenPos(float left, float top, struct coord *dst)
 {
-	Mtxf *mtx = camGetProjectionMtxF();
+	Mtxf *mtx = camGetProjectionMtx();
 	float pos[2];
 
 	pos[0] = left + camGetScreenLeft();

@@ -227,7 +227,7 @@ bool func0f085194(struct defaultobj *obj);
 bool objIsMortal(struct defaultobj *obj);
 void objTakeGunfire(struct defaultobj *obj, float damage, struct coord *pos, int weaponnum, int playernum);
 void objDamage(struct defaultobj *obj, float damage, struct coord *pos, int weaponnum, int playernum);
-void func0f0859a0(struct prop *prop, struct shotdata *shotdata);
+void propTestModelHit(struct prop *prop, struct shotdata *shotdata);
 void objTestHit(struct prop *prop, struct shotdata *shotdata);
 void objHit(struct shotdata *shotdata, struct hit *hit);
 uint32_t propobjGetCiTagId(struct prop *prop);

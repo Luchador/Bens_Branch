@@ -466,7 +466,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 						spcc.f[2] *= spc0[0] * 0.5f;
 					}
 
-					mtx4TransformVecInPlace((Mtx*)camGetProjectionMtxF(), &spcc);
+					mtx4TransformVecInPlace((Mtx*)camGetProjectionMtx(), &spcc);
 
 					spcc.f[0] -= sp138.f[0];
 					spcc.f[1] -= sp138.f[1];
@@ -1068,7 +1068,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	mtxIdent((Mtx*)&sp164);
 	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp164);
 	mtxIdent((Mtx*)&sp124);
-	mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtxF(), (Mtx*)&sp124);
+	mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtx(), (Mtx*)&sp124);
 
 	sp124.m[3][0] = sp124.m[3][1] = sp124.m[3][2] = 0.0f;
 
@@ -1252,7 +1252,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 
 	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp14c);
 	mtxIdent((Mtx*)&sp10c);
-	mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtxF(), (Mtx*)&sp10c);
+	mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtx(), (Mtx*)&sp10c);
 
 	sp10c.m[3][1] = 0;
 	sp10c.m[3][0] = 0;

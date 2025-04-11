@@ -64,9 +64,9 @@ bool bgTestLineIntersectsIntBbox(struct coord *arg0, struct coord *arg1, int *ar
 bool bgTestLineIntersectsBbox(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3);
 bool bgTestHitOnObj(struct coord *arg0, struct coord *arg1, struct coord *arg2, Gfx *gdl, Gfx *gdl2, Vtx *vertices, struct hitthing *hitthing);
 bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2, struct coord *arg3, Gfx *arg4, Gfx *arg5, Vtx *vertices, float *arg7, struct hitthing *hitthing);
-bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct vtxbatch *batches, int roomnum, struct hitthing *hitthing);
+bool bgTestHitInVtxBatch(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct vtxbatch *batches, int roomnum, struct hitthing *hitthing, bool artifactTest);
 int bgRayIntersectAABBEntryPoint(struct coord *bbmin, struct coord *bbmax, struct coord *frompos, struct coord *dist, struct coord *invdir, struct coord *out_pos);
-bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, struct hitthing *hitthing);
+bool bgTestHitInRoom(struct coord *frompos, struct coord *topos, int roomnum, struct hitthing *hitthing, bool artifactTest);
 bool bgRoomIsLoaded(int room);
 bool bgRoomContainsCoord(struct coord *pos, RoomNum roomnum);
 bool bgTestPosInRoomCheap(struct coord *pos, RoomNum roomnum);

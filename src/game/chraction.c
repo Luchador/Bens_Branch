@@ -8816,7 +8816,7 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 					if (burstnode) {
 						sp108 = modelFindNodeMtx(gunmodel, burstnode, 0);
 						burstrodata = &burstnode->rodata->chrgunfire;
-						spb4 = camGetProjectionMtx((uint8_t *)sp108);
+						spb4 = camGetProjectionMtxForPlayers((uint8_t *)sp108);
 
 						if (spb4) {
 							mtxApplyAffineTransformInPlace((Mtx*)spb4, (Mtx*)&spc8);
@@ -8837,7 +8837,7 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 
 						if (posnode) {
 							spb0 = modelFindNodeMtx(gunmodel, posnode, 0);
-							sp6c = camGetProjectionMtx((uint8_t *)spb0);
+							sp6c = camGetProjectionMtxForPlayers((uint8_t *)spb0);
 
 							if (sp6c) {
 								mtxApplyAffineTransformInPlace((Mtx*)sp6c, (Mtx*)&sp70);
@@ -9261,13 +9261,13 @@ bool chrGetGunPos(struct chrdata *chr, int handnum, struct coord *gunpos)
 				gunpos->y = rodata->pos.y;
 				gunpos->z = rodata->pos.z;
 
-				mtxApplyAffineTransform((Mtx*)camGetProjectionMtxF(), (Mtx*)spac, (Mtx*)&sp6c);
+				mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)spac, (Mtx*)&sp6c);
 				mtx4TransformVecInPlace((Mtx*)&sp6c, gunpos);
 				result = true;
 			} else if ((part1 = modelGetPart(model->definition, MODELPART_0001))) {
 				sp64 = modelFindNodeMtx(model, part1, 0);
 
-				mtxApplyAffineTransform((Mtx*)camGetProjectionMtxF(), (Mtx*)sp64, (Mtx*)&sp24);
+				mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)sp64, (Mtx*)&sp24);
 
 				gunpos->x = sp24.m[3][0];
 				gunpos->y = sp24.m[3][1];

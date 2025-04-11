@@ -314,8 +314,8 @@ void bgun0f098030(struct hand *hand, struct modeldef *modeldef)
 
 float bgun0f09815c(struct hand *hand)
 {
-	if (hand->animmode == HANDANIMMODE_BUSY && hand->unk0ce8 != NULL) {
-		if (hand->unk0ce8->unk04 < 0) {
+	if (hand->animmode == HANDANIMMODE_BUSY && hand->currentGunCmd != NULL) {
+		if (hand->currentGunCmd->unk04 < 0) {
 			return modelGetNumAnimFrames(&hand->gunmodel) - modelGetCurAnimFrame(&hand->gunmodel);
 		}
 
@@ -354,13 +354,13 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 
 		if (hand->animload >= 0) {
 			animspeedmult = 1.0f;
-			animspeed = hand->unk0ce8->unk04 / 10000.0f;
+			animspeed = hand->currentGunCmd->unk04 / 10000.0f;
 
 			if (hand->unk0d0e_07 && g_Vars.currentplayer->hands[HAND_LEFT].inuse) {
 				animspeedmult = RANDOMFRAC() * 0.77f + 0.7f;
 			}
 
-			if (hand->unk0ce8 && animspeed < 0.0f) {
+			if (hand->currentGunCmd && animspeed < 0.0f) {
 				modelSetAnimation(&hand->gunmodel, hand->animload, false, 0.0f, animspeedmult * animspeed, 0.0f);
 				modelSetAnimFrame(&hand->gunmodel, modelGetNumAnimFrames(&hand->gunmodel));
 			} else {
@@ -382,9 +382,9 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 			s4--;
 		}
 
-		if (hand->unk0ce8) {
+		if (hand->currentGunCmd) {
 			done = false;
-			cmd = hand->unk0ce8;
+			cmd = hand->currentGunCmd;
 
 			if (cmd) {
 				s0 = 0;
@@ -419,7 +419,7 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 					} else {
 						switch (cmd->type) {
 						case GUNCMD_WAITFORZRELEASED:
-							if (hand->unk0cc8_01) {
+							if (hand->waitingForRelease) {
 								if (s2 >= cmd->unk02 && s4 < cmd->unk02 && s4 < s2) {
 									int tmp = cmd->unk02 - (int) bgun0f09815c(hand);
 									tmp /= 2;
@@ -461,9 +461,9 @@ void bgun0f0981e8(struct hand *hand, struct modeldef *modeldef)
 
 		s2 = bgun0f09815c(hand);
 
-		if (hand->unk0ce8) {
+		if (hand->currentGunCmd) {
 			bool done = false;
-			struct guncmd *cmd = hand->unk0ce8;
+			struct guncmd *cmd = hand->currentGunCmd;
 			float speed = 1.0f;
 			bool hasspeed = false;
 
@@ -544,9 +544,9 @@ void bgunStartAnimation(struct guncmd *cmd, int handnum, struct hand *hand)
 	} else {
 		hand->animload = cmd->unk02;
 		hand->animmode = HANDANIMMODE_IDLE;
-		hand->unk0cc8_01 = 0;
+		hand->waitingForRelease = 0;
 		hand->incrementalreloading = false;
-		hand->unk0ce8 = cmd;
+		hand->currentGunCmd = cmd;
 		hand->animloopcount = 0;
 		hand->unk0cc8_02 = 0;
 		hand->unk0d0e_07 = false;
@@ -556,7 +556,7 @@ void bgunStartAnimation(struct guncmd *cmd, int handnum, struct hand *hand)
 
 bool bgun0f098a44(struct hand *hand, int time)
 {
-	struct guncmd *cmd = hand->unk0ce8;
+	struct guncmd *cmd = hand->currentGunCmd;
 	int waittimekeyframe = -1;
 	int zreleasekeyframe = -1;
 
@@ -577,7 +577,7 @@ bool bgun0f098a44(struct hand *hand, int time)
 	}
 
 	if (waittimekeyframe >= 0) {
-		if (hand->unk0cc8_01 && (int)bgun0f09815c(hand) <= zreleasekeyframe) {
+		if (hand->waitingForRelease && (int)bgun0f09815c(hand) <= zreleasekeyframe) {
 			return false;
 		}
 
@@ -589,7 +589,7 @@ bool bgun0f098a44(struct hand *hand, int time)
 
 int bgun0f098b80(struct hand *hand, int arg1)
 {
-	struct guncmd *cmd = hand->unk0ce8;
+	struct guncmd *cmd = hand->currentGunCmd;
 	int keyframe = -1;
 
 	if (hand->animmode == HANDANIMMODE_IDLE) {
@@ -622,9 +622,9 @@ void bgunResetAnim(struct hand *hand)
 {
 	hand->animload = -1;
 	hand->animmode = HANDANIMMODE_IDLE;
-	hand->unk0cc8_01 = false;
+	hand->waitingForRelease = false;
 	hand->incrementalreloading = false;
-	hand->unk0ce8 = NULL;
+	hand->currentGunCmd = NULL;
 	hand->animloopcount = 0;
 	hand->unk0cc8_02 = false;
 	hand->unk0d0e_07 = false;
@@ -924,7 +924,7 @@ int bgunTickIncIdle(struct handweaponinfo *info, int handnum, struct hand *hand,
 		} else if (reloadtype == 0) {
 			// Clip is empty
 			if (hand->triggeron && info->weaponnum != WEAPON_NONE) {
-				hand->unk0cc8_01 = false;
+				hand->waitingForRelease = false;
 
 				if (bgunSetState(handnum, HANDSTATE_ATTACKEMPTY)) {
 					return lvupdate;
@@ -1763,7 +1763,7 @@ bool bgunTickIncAttackingShoot(struct handweaponinfo *info, int handnum, struct 
 
 			if (func->fire_animation) {
 				bgunStartAnimation(func->fire_animation, handnum, hand);
-				hand->unk0cc8_01 = true;
+				hand->waitingForRelease = true;
 			}
 
 			hand->burstbullets = 0;
@@ -1810,7 +1810,7 @@ bool bgunTickIncAttackingShoot(struct handweaponinfo *info, int handnum, struct 
 		}
 
 		if (hand->triggerreleased) {
-			hand->unk0cc8_01 = false;
+			hand->waitingForRelease = false;
 		}
 
 		return false;
@@ -1863,18 +1863,18 @@ bool bgunTickIncAttackingThrow(int handnum, struct hand *hand)
 
 			if (func->base.fire_animation) {
 				bgunStartAnimation(func->base.fire_animation, handnum, hand);
-				hand->unk0cc8_01 = true;
+				hand->waitingForRelease = true;
 			}
 		}
 
 		if (func->base.fire_animation) {
 			if (hand->triggerreleased) {
-				hand->unk0cc8_01 = false;
+				hand->waitingForRelease = false;
 			}
 
 			if (bgun0f098a44(hand, 2)) {
 				hand->stateminor = HANDSTATEMINOR_ATTACK_THROW_1;
-				hand->unk0cc8_01 = false;
+				hand->waitingForRelease = false;
 			}
 		} else {
 			hand->stateminor = HANDSTATEMINOR_ATTACK_THROW_1;
@@ -1982,18 +1982,18 @@ bool bgunTickIncAttackingMelee(int handnum, struct hand *hand)
 
 			if (func->fire_animation) {
 				bgunStartAnimation(func->fire_animation, handnum, hand);
-				hand->unk0cc8_01 = true;
+				hand->waitingForRelease = true;
 			}
 		}
 
 		if (func->fire_animation) {
 			if (hand->triggerreleased) {
-				hand->unk0cc8_01 = false;
+				hand->waitingForRelease = false;
 			}
 
 			if (bgun0f098a44(hand, 2)) {
 				hand->stateminor = HANDSTATEMINOR_ATTACK_MELEE_1;
-				hand->unk0cc8_01 = false;
+				hand->waitingForRelease = false;
 			}
 		} else {
 			hand->stateminor = HANDSTATEMINOR_ATTACK_MELEE_1;
@@ -2002,7 +2002,7 @@ bool bgunTickIncAttackingMelee(int handnum, struct hand *hand)
 
 	if (hand->stateminor == HANDSTATEMINOR_ATTACK_MELEE_3 && bgun0f098a44(hand, 3)) {
 		hand->stateminor = HANDSTATEMINOR_ATTACK_MELEE_1;
-		hand->unk0cc8_01 = false;
+		hand->waitingForRelease = false;
 	}
 
 	if (hand->stateminor == HANDSTATEMINOR_ATTACK_MELEE_1) {
@@ -3946,7 +3946,7 @@ void bgunCreateThrownProjectile(int handnum, struct gset *gset)
 	playerSetPerimEnabled(playerprop, true);
 
 	bgunCalculatePlayerShotSpread(&gunpos, &gundir, handnum, true);
-	mtx4RotateVecInPlace((Mtx*)camGetProjectionMtxF(), &gundir);
+	mtx4RotateVecInPlace((Mtx*)camGetProjectionMtx(), &gundir);
 
 	if (droppinggrenade) {
 		// Dropping a grenade because player is in an nbomb storm
@@ -4182,7 +4182,7 @@ void bgunCreateFiredProjectile(int handnum)
 
 			mtxIdent((Mtx*)&sp270);
 			bgunCalculatePlayerShotSpread(&gunpos, &gundir, handnum, true);
-			mtx4RotateVecInPlace((Mtx*)camGetProjectionMtxF(), &gundir);
+			mtx4RotateVecInPlace((Mtx*)camGetProjectionMtx(), &gundir);
 
 			spawnpos.x = hand->muzzlepos.x;
 			spawnpos.y = hand->muzzlepos.y;
@@ -4405,7 +4405,7 @@ void bgunSwivel(float screenx, float screeny, float crossdamp, float aimdamp)
 	// recentre until the reload animation is almost complete
 	if (!player->hands[HAND_LEFT].inuse
 			&& player->hands[HAND_RIGHT].state == HANDSTATE_RELOAD
-			&& player->hands[HAND_RIGHT].unk0ce8) {
+			&& player->hands[HAND_RIGHT].currentGunCmd) {
 		numframes = 25;
 
 		if (player->hands[HAND_RIGHT].gset.weaponnum == WEAPON_CROSSBOW) {
@@ -5516,7 +5516,7 @@ bool bgun0f0a27c8(void)
 	if (func
 			&& (func->type & 0xff) == INVENTORYFUNCTYPE_MELEE
 			&& hand->state == HANDSTATE_ATTACK
-			&& hand->unk0ce8 != NULL
+			&& hand->currentGunCmd != NULL
 			&& hand->animmode == HANDANIMMODE_BUSY
 			&& !bgun0f098a44(hand, 2)) {
 		return true;
@@ -5530,7 +5530,7 @@ bool bgun0f0a27c8(void)
 		if (func
 				&& (func->type & 0xff) == INVENTORYFUNCTYPE_MELEE
 				&& hand->state == HANDSTATE_ATTACK
-				&& hand->unk0ce8 != NULL
+				&& hand->currentGunCmd != NULL
 				&& hand->animmode == HANDANIMMODE_BUSY
 				&& !bgun0f098a44(hand, 2)) {
 			return true;
@@ -6126,7 +6126,7 @@ void bgunUpdateLasersight(struct hand *hand, struct modeldef *modeldef, int hand
 		beamnear.y = ((Mtxf *)((uintptr_t)allocation + mtxindex * sizeof(Mtxf)))->m[3][1];
 		beamnear.z = ((Mtxf *)((uintptr_t)allocation + mtxindex * sizeof(Mtxf)))->m[3][2];
 
-		mtx4TransformVecInPlace((Mtx*)camGetProjectionMtxF(), &beamnear);
+		mtx4TransformVecInPlace((Mtx*)camGetProjectionMtx(), &beamnear);
 
 		if (hand->useposrot
 				|| (g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit & DEVICE_XRAYSCANNER)) {
@@ -6145,13 +6145,13 @@ void bgunUpdateLasersight(struct hand *hand, struct modeldef *modeldef, int hand
 			sp3c.z = beamnear.z;
 
 			mtx4TransformVec((Mtx*)camGetWorldToScreenMtxf(), &sp3c, &sp54);
-			mtx4RotateVec((Mtx*)camGetProjectionMtxF(), &sp48, &sp30);
+			mtx4RotateVec((Mtx*)camGetProjectionMtx(), &sp48, &sp30);
 
 			beamfar.x *= 500.0f;
 			beamfar.y *= 500.0f;
 			beamfar.z *= 500.0f;
 
-			mtx4RotateVecInPlace((Mtx*)camGetProjectionMtxF(), &beamfar);
+			mtx4RotateVecInPlace((Mtx*)camGetProjectionMtx(), &beamfar);
 
 			beamfar.x += beamnear.x;
 			beamfar.y += beamnear.y;
@@ -6183,7 +6183,7 @@ void bgunUpdateLasersight(struct hand *hand, struct modeldef *modeldef, int hand
 			beamfar.z *= 500.0f;
 		}
 
-		mtx4TransformVecInPlace((Mtx*)camGetProjectionMtxF(), &beamfar);
+		mtx4TransformVecInPlace((Mtx*)camGetProjectionMtx(), &beamfar);
 		lasersightSetBeam(handnum, 1, &beamnear, &beamfar);
 
 		if (handnum == HAND_RIGHT && hand->hasdotinfo && !busy) {
@@ -6448,7 +6448,7 @@ void bgunUpdateMagnum(struct hand *hand, int handnum, struct modeldef *modeldef,
 
 				sp4c = *tmp;
 				mtxScaleRotationPart(10.0f, (Mtx*)&sp4c);
-				mtx4MultMtx4InPlace((Mtx*)camGetProjectionMtxF(), (Mtx*)&sp4c);
+				mtx4MultMtx4InPlace((Mtx*)camGetProjectionMtx(), (Mtx*)&sp4c);
 
 				casingCreateForHand(handnum, ground, &sp4c);
 			}
@@ -6711,7 +6711,7 @@ void bgunCreateFx(struct hand *hand, int handnum, struct weaponfunc *funcdef, in
 
 				mtx4Copy((Mtx*)mtx, (Mtx*)&sp24);
 				mtxScaleRotationPart(10.0f, (Mtx*)&sp24);
-				mtx4MultMtx4InPlace((Mtx*)camGetProjectionMtxF(), (Mtx*)&sp24);
+				mtx4MultMtx4InPlace((Mtx*)camGetProjectionMtx(), (Mtx*)&sp24);
 
 				casingCreateForHand(handnum, ground, &sp24);
 			} else {
@@ -6803,9 +6803,9 @@ bool bgunCheckForCloseWall()
 	bool nearbywall = false;
 	struct hitthing hit;
 	struct coord hitpos;
-	RoomNum spc8[8];
-	RoomNum spb8[8];
-	RoomNum rooms[131];
+	RoomNum currentRoom[8];
+	RoomNum outRooms[8];
+	RoomNum allVisitedRooms[131];
 	RoomNum *roomsptr;
 	float checkdistance = 100;
 	struct prop *playerprop = g_Vars.currentplayer->prop;
@@ -6819,11 +6819,11 @@ bool bgunCheckForCloseWall()
 	checkpos.y = g_Vars.currentplayer->cam_pos.y + g_Vars.currentplayer->cam_look.y * checkdistance;
 	checkpos.z = g_Vars.currentplayer->cam_pos.z + g_Vars.currentplayer->cam_look.z * checkdistance;
 
-	spc8[0] = g_Vars.currentplayer->cam_room;
-	spc8[1] = -1;
-	portalTraceLineThroughRooms(&g_Vars.currentplayer->cam_pos, &checkpos, spc8, spb8, rooms, 30);
+	currentRoom[0] = g_Vars.currentplayer->cam_room;
+	currentRoom[1] = -1;
+	portalTraceLineThroughRooms(&g_Vars.currentplayer->cam_pos, &checkpos, currentRoom, outRooms, allVisitedRooms, 30);
 
-	roomsptr = rooms;
+	roomsptr = allVisitedRooms;
 
 	while (*roomsptr != -1) {
 		roomsptr++;
@@ -6831,8 +6831,8 @@ bool bgunCheckForCloseWall()
 
 	int i = 0;
 
-	for (i = 0; rooms[i] != -1; i++) {
-		nearbywall = bgTestHitInRoom(&g_Vars.currentplayer->cam_pos, &checkpos, rooms[i], &hit);
+	for (i = 0; allVisitedRooms[i] != -1; i++) {
+		nearbywall = bgTestHitInRoom(&g_Vars.currentplayer->cam_pos, &checkpos, allVisitedRooms[i], &hit, false);
 		if(nearbywall) {
 			return true;
 		}
@@ -7062,7 +7062,7 @@ void bgunTickHandWeapModel(int handnum)
 	mtx4Copy((Mtx*)&sp2c4, (Mtx*)&hand->cammtx);
 	mtx4Copy((Mtx*)&hand->posmtx, (Mtx*)&hand->prevmtx);
 
-	mtxApplyAffineTransform((Mtx*)camGetProjectionMtxF(), (Mtx*)&hand->cammtx, (Mtx*)&hand->posmtx);
+	mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)&hand->cammtx, (Mtx*)&hand->posmtx);
 
 	if (hand->visible) {
 		for (j = 0x5a; j < 0x5d; j++) {
@@ -7292,7 +7292,7 @@ void bgunTickHandWeapModel(int handnum)
 				hand->muzzlepos.f[2] = mtx->m[3][2];
 
 				mtx4Copy((Mtx*)mtx, (Mtx*)&hand->muzzlemat);
-				mtx4TransformVecInPlace((Mtx*)camGetProjectionMtxF(), &hand->muzzlepos);
+				mtx4TransformVecInPlace((Mtx*)camGetProjectionMtx(), &hand->muzzlepos);
 
 				hand->muzzlez = -((Mtxf *)((uintptr_t)mtxallocation + sp6c * sizeof(Mtxf)))->m[3][2];
 
@@ -7314,7 +7314,7 @@ void bgunTickHandWeapModel(int handnum)
 				hand->muzzlepos.z = mtx->m[3][2];
 
 				mtx4Copy((Mtx*)mtx, (Mtx*)&hand->muzzlemat);
-				mtx4TransformVecInPlace((Mtx*)camGetProjectionMtxF(), &hand->muzzlepos);
+				mtx4TransformVecInPlace((Mtx*)camGetProjectionMtx(), &hand->muzzlepos);
 
 				hand->muzzlez = -((Mtxf *)((uintptr_t)mtxallocation + sp6c * sizeof(Mtxf)))->m[3][2];
 			} else {
