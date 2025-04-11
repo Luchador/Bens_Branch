@@ -82,7 +82,7 @@ float g_ModelDistanceScale = 1;
 float g_ExtraBoundsDist = 0;
 bool (*var8005efc4)(struct model *model, struct modelnode *node) = NULL;
 Vtx *(*g_ModelVtxAllocatorFunc)(int numvertices) = NULL;
-void (*g_ModelJointPositionedFunc)(int mtxindex, Mtxf *mtx) = NULL;
+void (*g_ModelJointPositionedFunc)(int mtxindex, Mtx *mtx) = NULL;
 
 // Ben's comment: this is ancient trigonometric code using lookup tables. I'd like to replace it but it causes occasional graphical bugs. For now I'll just let it be.
 uint16_t var8006ae90[] = {
@@ -853,10 +853,10 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 		}
 
 		if ((g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) && (g_Anims[anim->animnum2].flags & ANIMFLAG_ABSOLUTETRANSLATION) == 0) {
-			mtx4LoadYRotationF(rwdata->chrinfo.yrot, &sp78);
-			mtx4LoadRotationF(&rot3, &sp38);
+			mtx4LoadYRotation(rwdata->chrinfo.yrot, (Mtx*)&sp78);
+			mtx4LoadRotation(&rot3, (Mtx*)&sp38);
 			mtxApplyAffineTransformInPlace((Mtx*)&sp78, (Mtx*)&sp38);
-			quaternion3x3MtxToQuatF(&sp38, spec);
+			quaternion3x3MtxToQuat((Mtx*)&sp38, spec);
 		} else {
 			quaternionEulerToQuat(&rot3, spec);
 		}
@@ -864,19 +864,19 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 		quaternionEulerToQuat(&rot1, spfc);
 		quaternionAvoidFlips(spfc, spec);
 		quaternionSlerp(spfc, spec, anim->fracmerge, spdc);
-		quaternionToMtxF(spdc, &sp1d8);
+		quaternionToMtx(spdc, (Mtx*)&sp1d8);
 	} else {
-		mtx4LoadRotationF(&rot1, &sp1d8);
+		mtx4LoadRotation(&rot1, (Mtx*)&sp1d8);
 	}
 
 	if (g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) {
-		mtx4LoadTranslationF(sp254, &sp198);
+		mtx4LoadTranslation(sp254, (Mtx*)&sp198);
 	} else {
 		if (rwdata->chrinfo.unk18 != 0.0f) {
 			sp250 = modelTweenRotAxis(sp250, rwdata->chrinfo.unk1c, rwdata->chrinfo.unk18);
 		}
 
-		mtx4LoadYRotationWithTranslation(sp254, sp250, &sp198);
+		mtx4LoadYRotationWithTranslation(sp254, sp250, (Mtx*)&sp198);
 	}
 
 	mtxApplyAffineTransform((Mtx*)&sp198, (Mtx*)&sp1d8, (Mtx*)&sp158);
@@ -888,7 +888,7 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 	if (sp24c) {
 		mtxApplyAffineTransform((Mtx*)sp24c, (Mtx*)&sp158, (Mtx*)mtx);
 	} else {
-		mtx4CopyF(&sp158, mtx);
+		mtx4Copy((Mtx*)&sp158, (Mtx*)mtx);
 	}
 }
 
@@ -896,69 +896,69 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 {
 	int nodetype = node->type;
 	struct modelrodata_position *rodata = &node->rodata->position;
-	Mtxf *rendermtx;
-	Mtxf mtx68;
+	Mtx *rendermtx;
+	Mtx mtx68;
 	int mtxindex0 = rodata->mtxindex0;
 	int mtxindex1 = rodata->mtxindex1;
 	int mtxindex2 = rodata->mtxindex2;
-	Mtxf *matrices = model->matrices;
+	Mtx *matrices = (Mtx*)model->matrices;
 
 	if (node->parent != NULL) {
-		rendermtx = modelFindNodeMtx(model, node->parent, 0);
+		rendermtx = (Mtx*)modelFindNodeMtx(model, node->parent, 0);
 	} else {
-		rendermtx = renderdata->unk00;
+		rendermtx = (Mtx*)renderdata->unk00;
 	}
 
 	if (rendermtx != NULL) {
-		Mtxf *nodemtx = &matrices[mtxindex0];
+		Mtx *nodemtx = &matrices[mtxindex0];
 
 		mtx4LoadRotationAndTranslation(pos, rot, &mtx68);
 
 		if (allowscale && model->scale != 1.0f) {
-			mtxScaleRotationPart(model->scale, (Mtx*)&mtx68);
+			mtxScaleRotationPart(model->scale, &mtx68);
 		}
 
 		if (arg6->x != 1.0f) {
-			mtxScaleRow0Full(arg6->x, (Mtx*)&mtx68);
+			mtxScaleRow0Full(arg6->x, &mtx68);
 		}
 
 		if (arg6->y != 1.0f) {
-			mtxScaleRow1Full(arg6->y, (Mtx*)&mtx68);
+			mtxScaleRow1Full(arg6->y, &mtx68);
 		}
 
 		if (arg6->z != 1.0f) {
-			mtxScaleRow2Full(arg6->z, (Mtx*)&mtx68);
+			mtxScaleRow2Full(arg6->z, &mtx68);
 		}
 
-		mtxApplyAffineTransform((Mtx*)rendermtx, (Mtx*)&mtx68, (Mtx*)nodemtx);
+		mtxApplyAffineTransform((Mtx*)rendermtx, &mtx68, (Mtx*)nodemtx);
 
 		if (g_ModelJointPositionedFunc != NULL) {
 			g_ModelJointPositionedFunc(mtxindex0, nodemtx);
 		}
 	} else {
-		Mtxf *nodemtx = &matrices[mtxindex0];
+		Mtx *nodemtx = &matrices[mtxindex0];
 
 		mtx4LoadRotationAndTranslation(pos, rot, nodemtx);
 
 		if (allowscale && model->scale != 1.0f) {
-			mtxScaleRotationPart(model->scale, (Mtx*)nodemtx);
+			mtxScaleRotationPart(model->scale, nodemtx);
 		}
 
 		if (arg6->x != 1.0f) {
-			mtxScaleRow0Full(arg6->x, (Mtx*)nodemtx);
+			mtxScaleRow0Full(arg6->x, nodemtx);
 		}
 
 		if (arg6->y != 1.0f) {
-			mtxScaleRow1Full(arg6->y, (Mtx*)nodemtx);
+			mtxScaleRow1Full(arg6->y, nodemtx);
 		}
 
 		if (arg6->z != 1.0f) {
-			mtxScaleRow2Full(arg6->z, (Mtx*)nodemtx);
+			mtxScaleRow2Full(arg6->z, nodemtx);
 		}
 	}
 
 	if (nodetype & MODELNODETYPE_0100) {
-		Mtxf *nodemtx = &matrices[mtxindex1];
+		Mtx *nodemtx = &matrices[mtxindex1];
 		float sp3c[4];
 		float sp2c[4];
 
@@ -967,14 +967,14 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 
 		if (rendermtx != NULL) {
 			quaternionToTransformMtx(pos, sp2c, &mtx68);
-			mtxApplyAffineTransform((Mtx*)rendermtx, (Mtx*)&mtx68, (Mtx*)nodemtx);
+			mtxApplyAffineTransform(rendermtx, &mtx68, nodemtx);
 		} else {
 			quaternionToTransformMtx(pos, sp2c, nodemtx);
 		}
 	}
 
 	if (nodetype & MODELNODETYPE_0200) {
-		Mtxf *finalmtx = rendermtx ? &mtx68 : &matrices[mtxindex2];
+		Mtx *finalmtx = rendermtx ? &mtx68 : &matrices[mtxindex2];
 		float roty = rot->y;
 
 		if (roty < M_PI) {
@@ -983,7 +983,7 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 			roty = M_TAU - (M_TAU - roty) * 0.5f;
 		}
 
-		mtx4LoadYRotationF(roty, finalmtx);
+		mtx4LoadYRotation(roty, finalmtx);
 
 		if (roty >= M_PI) {
 			roty = M_TAU - roty;
@@ -995,12 +995,12 @@ void modelPositionJointUsingVecRot(struct modelrenderdata *renderdata, struct mo
 			roty = 1.5f;
 		}
 
-		mtxScaleRow2Vec(roty, (Mtx*)finalmtx);
-		mtx4SetTranslation(pos, (Mtx*)finalmtx);
+		mtxScaleRow2Vec(roty, finalmtx);
+		mtx4SetTranslation(pos, finalmtx);
 
 		if (rendermtx != NULL) {
-			Mtxf *nodemtx = &matrices[mtxindex2];
-			mtxApplyAffineTransform((Mtx*)rendermtx, (Mtx*)finalmtx, (Mtx*)nodemtx);
+			Mtx *nodemtx = &matrices[mtxindex2];
+			mtxApplyAffineTransform(rendermtx, finalmtx, nodemtx);
 		}
 	}
 }
@@ -1010,7 +1010,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 	int nodetype = node->type;
 	struct modelrodata_position *rodata = &node->rodata->position;
 	Mtxf *rendermtx;
-	Mtxf mtx58;
+	Mtx mtx58;
 	int mtxindex0 = rodata->mtxindex0;
 	int mtxindex1 = rodata->mtxindex1;
 	int mtxindex2 = rodata->mtxindex2;
@@ -1023,23 +1023,23 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 	}
 
 	if (rendermtx != NULL) {
-		Mtxf *nodemtx = &matrices[mtxindex0];
+		Mtx *nodemtx = (Mtx*)&matrices[mtxindex0];
 
 		quaternionToTransformMtx(pos, rot, &mtx58);
 
 		if (arg5->x != 1.0f) {
-			mtxScaleRow0Full(arg5->x, (Mtx*)&mtx58);
+			mtxScaleRow0Full(arg5->x, &mtx58);
 		}
 
 		if (arg5->y != 1.0f) {
-			mtxScaleRow1Full(arg5->y, (Mtx*)&mtx58);
+			mtxScaleRow1Full(arg5->y, &mtx58);
 		}
 
 		if (arg5->z != 1.0f) {
-			mtxScaleRow2Full(arg5->z, (Mtx*)&mtx58);
+			mtxScaleRow2Full(arg5->z, &mtx58);
 		}
 
-		mtxApplyAffineTransform((Mtx*)rendermtx, (Mtx*)&mtx58, (Mtx*)nodemtx);
+		mtxApplyAffineTransform((Mtx*)rendermtx, &mtx58, nodemtx);
 
 		if (g_ModelJointPositionedFunc != NULL) {
 			g_ModelJointPositionedFunc(mtxindex0, nodemtx);
@@ -1047,7 +1047,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 	} else {
 		Mtxf *nodemtx = &matrices[mtxindex0];
 
-		quaternionToTransformMtx(pos, rot, nodemtx);
+		quaternionToTransformMtx(pos, rot, (Mtx*)nodemtx);
 
 		if (arg5->x != 1.0f) {
 			mtxScaleRow0Full(arg5->x, (Mtx*)nodemtx);
@@ -1070,14 +1070,14 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 
 		if (rendermtx != NULL) {
 			quaternionToTransformMtx(pos, sp2c, &mtx58);
-			mtxApplyAffineTransform((Mtx*)rendermtx, (Mtx*)&mtx58, (Mtx*)nodemtx);
+			mtxApplyAffineTransform((Mtx*)rendermtx, &mtx58, (Mtx*)nodemtx);
 		} else {
-			quaternionToTransformMtx(pos, sp2c, nodemtx);
+			quaternionToTransformMtx(pos, sp2c, (Mtx*)nodemtx);
 		}
 	}
 
 	if (nodetype & MODELNODETYPE_0200) {
-		Mtxf *finalmtx = rendermtx ? &mtx58 : &matrices[mtxindex2];
+		Mtx *finalmtx = rendermtx ? &mtx58 : (Mtx*)&matrices[mtxindex2];
 		float roty = 2.0f * acosf(rot[0]);
 
 		if (roty < M_PI) {
@@ -1086,7 +1086,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 			roty = M_TAU - (M_TAU - roty) * 0.5f;
 		}
 
-		mtx4LoadYRotationF(roty, finalmtx);
+		mtx4LoadYRotation(roty, finalmtx);
 
 		if (roty >= M_PI) {
 			roty = M_TAU - roty;
@@ -1098,146 +1098,125 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 			roty = 1.5f;
 		}
 
-		mtxScaleRow2Vec(roty, (Mtx*)finalmtx);
-		mtx4SetTranslation(pos, (Mtx*)finalmtx);
+		mtxScaleRow2Vec(roty, finalmtx);
+		mtx4SetTranslation(pos, finalmtx);
 
 		if (rendermtx != NULL) {
-			Mtxf *nodemtx = &matrices[mtxindex2];
-			mtxApplyAffineTransform((Mtx*)rendermtx, (Mtx*)finalmtx, (Mtx*)nodemtx);
+			Mtx *nodemtx = (Mtx*)&matrices[mtxindex2];
+			mtxApplyAffineTransform((Mtx*)rendermtx, finalmtx, nodemtx);
 		}
 	}
 }
 
 void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model *model, struct modelnode *node)
 {
-	struct anim *anim;
+	struct anim *anim = model->anim;
 	struct modelrodata_position *rodata = &node->rodata->position;
-	int animpart;
 	struct skeleton *skel;
-	struct coord rot1;
-	struct coord translate1;
-	struct coord scale1;
-	bool sp128;
-	Mtxf spe8;
-	Mtxf *mtx;
-	float spe0;
-	struct coord rot2;
-	struct coord translate2;
-	struct coord scale2;
-	struct coord rot3;
-	struct coord translate3;
-	struct coord scale3;
-	float sp88[4];
-	float sp78[4];
-	float sp68[4];
-	struct coord rot4;
-	struct coord translate4;
-	struct coord scale4;
+	int partIndex = rodata->part;
 
-	anim = model->anim;
+	struct coord rotBase, transBase, scaleBase;
+	struct coord rotInterp, transInterp, scaleInterp;
+	struct coord rotBlend, transBlend, scaleBlend;
+	struct coord rotNext, transNext, scaleNext;
+
+	bool useAbsoluteTranslation = false;
+	Mtxf tempMatrix;
 
 	if (anim != NULL) {
-		animpart = rodata->part;
-		skel = model->definition->skel;
-
 		if (anim->animnum != 0) {
-			sp128 = (g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) && node == model->definition->rootnode;
+			skel = model->definition->skel;
+			useAbsoluteTranslation = (g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) && (node == model->definition->rootnode);
 
-			animGetRotTranslateScale(animpart, anim->flip, skel, anim->animnum, anim->frameslot1, &rot1, &translate1, &scale1);
+			animGetRotTranslateScale(partIndex, anim->flip, skel, anim->animnum, anim->frameslot1, &rotBase, &transBase, &scaleBase);
 
-			if (g_Vars.in_cutscene && anim->speed > 0.0f) {
-				spe0 = floorf(anim->frac / anim->speed) * anim->speed;
-			} else {
-				spe0 = anim->frac;
-			}
+			float frameLerp = g_Vars.in_cutscene && anim->speed > 0.0f
+				? floorf(anim->frac / anim->speed) * anim->speed
+				: anim->frac;
 
-			if (spe0 != 0.0f) {
-				animGetRotTranslateScale(animpart, anim->flip, skel, anim->animnum, anim->frameslot2, &rot2, &translate2, &scale2);
-				modelTweenRot(&rot1, &rot2, spe0);
+			if (frameLerp != 0.0f) {
+				animGetRotTranslateScale(partIndex, anim->flip, skel, anim->animnum, anim->frameslot2, &rotInterp, &transInterp, &scaleInterp);
+				modelTweenRot(&rotBase, &rotInterp, frameLerp);
 
-				if (sp128)
-				{
-					modelTweenPos(&translate1, &translate2, spe0);
+				if (useAbsoluteTranslation) {
+					modelTweenPos(&transBase, &transInterp, frameLerp);
 				}
 			}
 		} else {
-			translate1.f[0] = translate1.f[1] = translate1.f[2] = 0.0f;
-			rot1.f[0] = rot1.f[1] = rot1.f[2] = 0.0f;
-			scale1.f[0] = scale1.f[1] = scale1.f[2] = 1.0f;
-
-			sp128 = false;
+			rotBase = (struct coord){0};
+			transBase = (struct coord){0};
+			scaleBase = (struct coord){1.0f, 1.0f, 1.0f};
+			useAbsoluteTranslation = false;
 		}
 
 		if (anim->fracmerge != 0.0f) {
-			animGetRotTranslateScale(animpart, anim->flip2, skel, anim->animnum2, anim->frameslot3, &rot3, &translate3, &scale3);
+			animGetRotTranslateScale(partIndex, anim->flip2, skel, anim->animnum2, anim->frameslot3, &rotBlend, &transBlend, &scaleBlend);
 
 			if (anim->frac2 != 0.0f) {
-				animGetRotTranslateScale(animpart, anim->flip2, skel, anim->animnum2, anim->frameslot4, &rot4, &translate4, &scale4);
-				modelTweenRot(&rot3, &rot4, anim->frac2);
+				animGetRotTranslateScale(partIndex, anim->flip2, skel, anim->animnum2, anim->frameslot4, &rotNext, &transNext, &scaleNext);
+				modelTweenRot(&rotBlend, &rotNext, anim->frac2);
 			}
 
-			quaternionEulerToQuat(&rot1, sp88);
-			quaternionEulerToQuat(&rot3, sp78);
-			quaternionAvoidFlips(sp88, sp78);
-			quaternionSlerp(sp88, sp78, anim->fracmerge, sp68);
+			float quatBase[4], quatBlend[4], quatFinal[4];
+			quaternionEulerToQuat(&rotBase, quatBase);
+			quaternionEulerToQuat(&rotBlend, quatBlend);
+			quaternionAvoidFlips(quatBase, quatBlend);
+			quaternionSlerp(quatBase, quatBlend, anim->fracmerge, quatFinal);
 
-			if (translate1.f[0] != 0.0f || translate1.f[1] != 0.0f || translate1.f[2] != 0.0f) {
-				translate1.x *= anim->animscale;
-				translate1.y *= anim->animscale;
-				translate1.z *= anim->animscale;
+			if (transBase.x != 0.0f || transBase.y != 0.0f || transBase.z != 0.0f) {
+				transBase.x *= anim->animscale;
+				transBase.y *= anim->animscale;
+				transBase.z *= anim->animscale;
 
 				if (node != model->definition->rootnode) {
-					translate1.x += rodata->pos.x;
-					translate1.y += rodata->pos.y;
-					translate1.z += rodata->pos.z;
+					transBase.x += rodata->pos.x;
+					transBase.y += rodata->pos.y;
+					transBase.z += rodata->pos.z;
 				}
 
-				modelPositionJointUsingQuatRot(renderdata, model, node, sp68, &translate1, &scale1);
+				modelPositionJointUsingQuatRot(renderdata, model, node, quatFinal, &transBase, &scaleBase);
 			} else if (node != model->definition->rootnode) {
-				modelPositionJointUsingQuatRot(renderdata, model, node, sp68, &rodata->pos, &scale1);
+				modelPositionJointUsingQuatRot(renderdata, model, node, quatFinal, &rodata->pos, &scaleBase);
 			} else {
-				modelPositionJointUsingQuatRot(renderdata, model, node, sp68, &translate1, &scale1);
+				modelPositionJointUsingQuatRot(renderdata, model, node, quatFinal, &transBase, &scaleBase);
 			}
-		} else if (sp128) {
-			float mult = bgGetStageTranslationThing();
+		} else if (useAbsoluteTranslation) {
+			float stageScale = bgGetStageTranslationThing();
 
-			translate1.x *= mult;
-			translate1.y *= mult;
-			translate1.z *= mult;
+			transBase.x *= stageScale;
+			transBase.y *= stageScale;
+			transBase.z *= stageScale;
 
-			modelPositionJointUsingVecRot(renderdata, model, node, &rot1, &translate1, true, &scale1);
-		} else if (translate1.f[0] != 0.0f || translate1.f[1] != 0.0f || translate1.f[2] != 0.0f) {
-			translate1.x *= anim->animscale;
-			translate1.y *= anim->animscale;
-			translate1.z *= anim->animscale;
+			modelPositionJointUsingVecRot(renderdata, model, node, &rotBase, &transBase, true, &scaleBase);
+		} else if (transBase.x != 0.0f || transBase.y != 0.0f || transBase.z != 0.0f) {
+			transBase.x *= anim->animscale;
+			transBase.y *= anim->animscale;
+			transBase.z *= anim->animscale;
 
 			if (node != model->definition->rootnode) {
-				translate1.x += rodata->pos.x;
-				translate1.y += rodata->pos.y;
-				translate1.z += rodata->pos.z;
+				transBase.x += rodata->pos.x;
+				transBase.y += rodata->pos.y;
+				transBase.z += rodata->pos.z;
 			}
 
-			modelPositionJointUsingVecRot(renderdata, model, node, &rot1, &translate1, false, &scale1);
+			modelPositionJointUsingVecRot(renderdata, model, node, &rotBase, &transBase, false, &scaleBase);
 		} else if (node != model->definition->rootnode) {
-			modelPositionJointUsingVecRot(renderdata, model, node, &rot1, &rodata->pos, false, &scale1);
+			modelPositionJointUsingVecRot(renderdata, model, node, &rotBase, &rodata->pos, false, &scaleBase);
 		} else {
-			modelPositionJointUsingVecRot(renderdata, model, node, &rot1, &translate1, false, &scale1);
+			modelPositionJointUsingVecRot(renderdata, model, node, &rotBase, &transBase, false, &scaleBase);
 		}
 	} else {
-		if (node->parent) {
-			mtx = modelFindNodeMtx(model, node->parent, 0);
-		} else {
-			mtx = renderdata->unk00;
-		}
+		Mtxf *parentMtx = node->parent ? modelFindNodeMtx(model, node->parent, 0) : renderdata->unk00;
 
-		if (mtx) {
-			mtx4LoadTranslationF(&rodata->pos, &spe8);
-			mtxApplyAffineTransform((Mtx*)mtx, (Mtx*)&spe8, (Mtx*)&model->matrices[rodata->mtxindex0]);
+		if (parentMtx) {
+			mtx4LoadTranslation(&rodata->pos, (Mtx *)&tempMatrix);
+			mtxApplyAffineTransform((Mtx *)parentMtx, (Mtx *)&tempMatrix, (Mtx *)&model->matrices[rodata->mtxindex0]);
 		} else {
-			mtx4LoadTranslationF(&rodata->pos, &model->matrices[rodata->mtxindex0]);
+			mtx4LoadTranslation(&rodata->pos, (Mtx *)&model->matrices[rodata->mtxindex0]);
 		}
 	}
 }
+
 
 void modelUpdatePositionHeldNodeMtx(struct modelrenderdata *arg0, struct model *model, struct modelnode *node)
 {
@@ -1254,10 +1233,10 @@ void modelUpdatePositionHeldNodeMtx(struct modelrenderdata *arg0, struct model *
 	}
 
 	if (sp68) {
-		mtx4LoadTranslationF(&rodata->positionheld.pos, &sp28);
+		mtx4LoadTranslation(&rodata->positionheld.pos, (Mtx*)&sp28);
 		mtxApplyAffineTransform((Mtx*)sp68, (Mtx*)&sp28, (Mtx*)&matrices[mtxindex]);
 	} else {
-		mtx4LoadTranslationF(&rodata->positionheld.pos, &matrices[mtxindex]);
+		mtx4LoadTranslation(&rodata->positionheld.pos, (Mtx*)&matrices[mtxindex]);
 	}
 }
 

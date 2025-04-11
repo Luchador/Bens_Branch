@@ -120,7 +120,7 @@ struct prop *g_EmbedProp = NULL;
 int g_EmbedHitPart = 0;
 uint32_t g_EmbedSide = 0;
 int16_t var8006993c[3] = {0};
-uint32_t var80069944 = 0;
+uint32_t g_HitTextureNum = 0;
 float g_CctvWaitScale = 1;
 float g_CctvDamageRxScale = 1;
 float g_AutogunAccuracyScale = 1;
@@ -647,7 +647,7 @@ bool func0f0675c8(struct coord *pos, float arg1, struct modelrodata_bbox *bbox, 
 	sp4c.y = pos->y - mtx->m[3][1];
 	sp4c.z = pos->z - mtx->m[3][2];
 
-	mtx000170e4(mtx->m, sp58.m);
+	mtxNormalizeRotationMatrix(mtx->m, sp58.m);
 	mtx4RotateVec((Mtx*)&sp58, &sp4c, &sp40);
 	mtx4RotateVec((Mtx*)&sp58, &sp34, &sp28);
 
@@ -1104,7 +1104,7 @@ struct projectile *projectileAllocate(void)
 	}
 }
 
-void func0f0685e4(struct prop *prop)
+void projectileManage(struct prop *prop)
 {
 	struct defaultobj *obj = prop->obj;
 
@@ -1797,7 +1797,7 @@ void func0f069b4c(struct defaultobj *obj)
 	uint8_t *ptr = (uint8_t *) obj->unkgeo;
 
 	if (ptr != NULL) {
-		if ((obj->hidden2 & OBJH2FLAG_08)) {
+		if ((obj->hidden2 & OBJH2FLAG_DYNAMIC_COLLISION)) {
 			if (obj->flags3 & OBJFLAG3_GEOCYL) {
 				ptr += sizeof(struct geocyl);
 			} else {
@@ -1830,7 +1830,7 @@ void func0f069b4c(struct defaultobj *obj)
 void func0f069c1c(struct defaultobj *obj)
 {
 	if (obj->geocyl) {
-		if (obj->hidden2 & OBJH2FLAG_08) {
+		if (obj->hidden2 & OBJH2FLAG_DYNAMIC_COLLISION) {
 			func0f069850(obj, &obj->prop->pos, obj->realrot, obj->geocyl);
 		}
 
@@ -1948,7 +1948,7 @@ void objCreateOneDebris(struct defaultobj *obj, int partindex, struct prop *prop
 				rot.y = RANDOMFRAC() * 0.04907957f - 0.024539785f;
 				rot.z = RANDOMFRAC() * 0.04907957f - 0.024539785f;
 
-				mtx4LoadRotationF(&rot, &projectile->mtx);
+				mtx4LoadRotation(&rot, (Mtx*)&projectile->mtx);
 			}
 
 			debris->model->scale = obj->model->scale;
@@ -2019,7 +2019,7 @@ struct prop *objInit(struct defaultobj *obj, struct modeldef *modeldef, struct p
 
 		geosize = obj->geocount * 0x40;
 
-		if (obj->flags & OBJFLAG_00000100) {
+		if (obj->flags & OBJFLAG_GEOMETRY_TEMP_ENABLED) {
 			if (obj->flags3 & OBJFLAG3_GEOCYL) {
 				geosize += sizeof(struct geocyl);
 			} else {
@@ -2027,9 +2027,9 @@ struct prop *objInit(struct defaultobj *obj, struct modeldef *modeldef, struct p
 			}
 
 			obj->geocount++;
-			obj->hidden2 |= OBJH2FLAG_08;
+			obj->hidden2 |= OBJH2FLAG_DYNAMIC_COLLISION;
 		} else {
-			obj->hidden2 &= ~OBJH2FLAG_08;
+			obj->hidden2 &= ~OBJH2FLAG_DYNAMIC_COLLISION;
 		}
 
 		if (obj->geocount > 0) {
@@ -2191,20 +2191,20 @@ void func0f06a730(struct defaultobj *obj, struct coord *arg1, Mtxf *mtx, RoomNum
 	bool isnegative;
 
 	if (obj->flags & OBJFLAG_UPSIDEDOWN) {
-		mtx4LoadZRotationF(M_PI, &sp70);
+		mtx4LoadZRotation(M_PI, (Mtx*)&sp70);
 		mtx4MultMtx4InPlace((Mtx*)mtx, (Mtx*)&sp70);
 
 		pos2.x = centre->x - sp70.m[1][0] * max;
 		pos2.y = centre->y - sp70.m[1][1] * max;
 		pos2.z = centre->z - sp70.m[1][2] * max;
 	} else if (obj->flags & OBJFLAG_00000008) {
-		mtx4CopyF(mtx, &sp70);
+		mtx4Copy((Mtx*)mtx, (Mtx*)&sp70);
 
 		pos2.x = centre->x - sp70.m[1][0] * min;
 		pos2.y = centre->y - sp70.m[1][1] * min;
 		pos2.z = centre->z - sp70.m[1][2] * min;
 	} else {
-		mtx4CopyF(mtx, &sp70);
+		mtx4Copy((Mtx*)mtx, (Mtx*)&sp70);
 
 		row = 0;
 		isnegative = false;
@@ -2310,8 +2310,8 @@ void func0f06ab60(struct defaultobj *obj, struct coord *arg1, Mtxf *arg2, RoomNu
 	bbox = modelFindBboxRodata(obj->model);
 	mult = objGetLocalZMin(bbox);
 
-	mtx4LoadXRotationF(4.7116389274597f, &sp5c);
-	mtx4LoadYRotationF(M_PI, &sp1c);
+	mtx4LoadXRotation(4.7116389274597f, (Mtx*)&sp5c);
+	mtx4LoadYRotation(M_PI, (Mtx*)&sp1c);
 	mtx4MultMtx4InPlace((Mtx*)&sp1c, (Mtx*)&sp5c);
 	mtx4MultMtx4InPlace((Mtx*)arg2, (Mtx*)&sp5c);
 
@@ -2752,7 +2752,7 @@ bool func0f06b610(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 						g_EmbedModel = model;
 						g_EmbedNode = node1;
 
-						var80069944 = thing1.texturenum;
+						g_HitTextureNum = thing1.texturenum;
 
 						result = true;
 
@@ -3203,7 +3203,7 @@ int func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 	}
 
 	g_EmbedProp = 0;
-	var80069944 = 0;
+	g_HitTextureNum = 0;
 
 	sp1c4.x = pos->x;
 	sp1c4.y = pos->y;
@@ -3232,7 +3232,7 @@ int func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 					hitthing.pos.y *= scale;
 					hitthing.pos.z *= scale;
 
-					var80069944 = hitthing.texturenum;
+					g_HitTextureNum = hitthing.texturenum;
 
 					s0 = true;
 
@@ -3319,7 +3319,7 @@ int func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, 
 	return cdresult;
 }
 
-bool func0f06d37c(struct defaultobj *obj, struct coord *arg1, struct coord *arg2, struct coord *arg3)
+bool projectileTryMove(struct defaultobj *obj, struct coord *arg1, struct coord *arg2, struct coord *arg3)
 {
 	struct prop *prop = obj->prop;
 	float radius = objGetRadius(obj);
@@ -3334,7 +3334,7 @@ bool func0f06d37c(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 	float f2;
 
 	g_EmbedProp = NULL;
-	var80069944 = 0;
+	g_HitTextureNum = 0;
 
 	sp80.x = arg1->x;
 	sp80.y = arg1->y;
@@ -3607,7 +3607,7 @@ void projectileFall(struct defaultobj *obj, float arg1[3][3])
 
 		mtx3ToMtx4(obj->realrot, (Mtx*)&sp148);
 		mtx4GetRotation(sp148.m, &sp188);
-		mtx4LoadRotationF(&sp188, &sp108);
+		mtx4LoadRotation(&sp188, (Mtx*)&sp108);
 		quaternionEulerToQuat(&sp188, projectile->unk068);
 		mtx4LoadRotationFrom(sp108.m, spc8.m);
 		mtx4MultMtx4((Mtx*)&spc8, (Mtx*)&sp148, (Mtx*)&sp88);
@@ -3883,7 +3883,7 @@ void func0f06e9cc(struct coord *arg0, Mtxf *arg1)
 
 	spf4 = atan2f(sp118, sp114);
 
-	mtx4LoadYRotationF(-spf4, &spb0);
+	mtx4LoadYRotation(-spf4, (Mtx*)&spb0);
 
 	sp24.x = sp124;
 	sp24.y = sp120;
@@ -3893,8 +3893,8 @@ void func0f06e9cc(struct coord *arg0, Mtxf *arg1)
 
 	spf0 = atan2f(sp24.x, sp24.y);
 
-	mtx4LoadYRotationF(-1.5705463f + spf4, &sp70);
-	mtx4LoadXRotationF(-1.5705463f - spf0, &sp30);
+	mtx4LoadYRotation(-1.5705463f + spf4, (Mtx*)&sp70);
+	mtx4LoadXRotation(-1.5705463f - spf0, (Mtx*)&sp30);
 
 	mtx4MultMtx4((Mtx*)&sp70, (Mtx*)&sp30, (Mtx*)arg1);
 }
@@ -3975,7 +3975,7 @@ void knifeLand(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
 	sp1c.z = RANDOMFRAC() * 0.8f + arg2->z - 0.4f;
 
 	func0f06e9cc(&sp1c, &sp90);
-	mtx4LoadXRotationF(-1.5705463f, &sp50);
+	mtx4LoadXRotation(-1.5705463f, (Mtx*)&sp50);
 	mtx4MultMtx4((Mtx*)&sp90, (Mtx*)&sp50, (Mtx*)&spd0);
 	mtxScaleRotationPart(obj->model->scale, (Mtx*)&spd0);
 
@@ -4020,12 +4020,12 @@ bool objEmbed(struct prop *prop, struct prop *parent, struct model *model, struc
 			sp28.y = -sp28.y;
 			sp28.z = -sp28.z;
 
-			mtx4LoadTranslationF(&sp28, &sp74);
+			mtx4LoadTranslation(&sp28, (Mtx*)&sp74);
 			mtx3ToMtx4(obj->realrot, (Mtx*)&sp34);
 			mtx4SetTranslation(&prop->pos, (Mtx*)&sp34);
 			mtxApplyAffineTransform((Mtx*)&sp34, (Mtx*)&sp74, (Mtx*)&sp134);
 			mtxApplyAffineTransform((Mtx*)camGetProjectionMtxF(), (Mtx*)sp24, (Mtx*)&spf4);
-			mtx000172f0(spf4.m, spb4.m);
+			mtxInvertAffine(spf4.m, spb4.m);
 			mtxApplyAffineTransform((Mtx*)&spb4, (Mtx*)&sp134, (Mtx*)&obj->embedment->matrix);
 
 			return true;
@@ -4218,7 +4218,7 @@ void weaponTick(struct prop *prop)
 					struct prop *parent;
 					struct projectile *projectile = NULL;
 
-					func0f0685e4(prop);
+					projectileManage(prop);
 
 					if (obj->hidden & OBJHFLAG_EMBEDDED) {
 						projectile = obj->embedment->projectile;
@@ -4507,11 +4507,11 @@ void weaponTick(struct prop *prop)
 				radians = -radians;
 			}
 
-			mtx4LoadYRotationF(radians, &spb8);
+			mtx4LoadYRotation(radians, (Mtx*)&spb8);
 
 			if (obj->embedment) {
 				if (prop->parent && prop->parent->type != PROPTYPE_CHR) {
-					mtx4CopyF(&obj->embedment->matrix, &spf8);
+					mtx4Copy((Mtx*)&obj->embedment->matrix, (Mtx*)&spf8);
 
 					spf8.m[3][0] = spf8.m[3][1] = spf8.m[3][2] = 0.0f;
 					spf8.m[0][3] = spf8.m[1][3] = spf8.m[2][3] = 0.0f;
@@ -4527,7 +4527,7 @@ void weaponTick(struct prop *prop)
 					sp78.m[3][1] = obj->embedment->matrix.m[3][1] - (sp60.f[1] - sp6c.f[1]);
 					sp78.m[3][2] = obj->embedment->matrix.m[3][2] - (sp60.f[2] - sp6c.f[2]);
 
-					mtx4CopyF(&sp78, &obj->embedment->matrix);
+					mtx4Copy((Mtx*)&sp78, (Mtx*)&obj->embedment->matrix);
 				}
 			} else {
 				sp6c.f[0] = sp60.f[0] = sp6c.f[1] = sp60.f[1] = 0.0f;
@@ -5291,7 +5291,7 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 
 	prop->pos.y = objGetHovBobOffsetY(obj) + hov->y;
 
-	mtx4LoadZRotationF(hov->bobrollcur, &sp148);
+	mtx4LoadZRotation(hov->bobrollcur, (Mtx*)&sp148);
 
 	xrot = hov->groundpitch + hov->bobpitchcur;
 
@@ -5301,9 +5301,9 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 		xrot += M_TAU;
 	}
 
-	mtx4LoadXRotationF(xrot, &sp108);
+	mtx4LoadXRotation(xrot, (Mtx*)&sp108);
 	mtxApplyAffineTransformInPlace((Mtx*)&sp108, (Mtx*)&sp148);
-	mtx4LoadYRotationF(hov->yrot, &sp108);
+	mtx4LoadYRotation(hov->yrot, (Mtx*)&sp108);
 	mtxApplyAffineTransformInPlace((Mtx*)&sp108, (Mtx*)&sp148);
 	mtxScaleRotationPart(obj->model->scale, (Mtx*)&sp148);
 
@@ -5312,15 +5312,15 @@ void hovTick(struct defaultobj *obj, struct hov *hov)
 		float ezreal = bike->ezreal + bike->ezreal2;
 
 		if (bike->exreal != 0.0f) {
-			mtx4LoadXRotationF(bike->exreal, &sp108);
+			mtx4LoadXRotation(bike->exreal, (Mtx*)&sp108);
 			mtxApplyAffineTransform((Mtx*)&sp148, (Mtx*)&sp108, (Mtx*)&spc8);
-			mtx4CopyF(&spc8, &sp148);
+			mtx4Copy((Mtx*)&spc8, (Mtx*)&sp148);
 		}
 
 		if (ezreal != 0.0f) {
-			mtx4LoadZRotationF(ezreal, &sp108);
+			mtx4LoadZRotation(ezreal, (Mtx*)&sp108);
 			mtxApplyAffineTransform((Mtx*)&sp148, (Mtx*)&sp108, (Mtx*)&spc8);
-			mtx4CopyF(&spc8, &sp148);
+			mtx4Copy((Mtx*)&spc8, (Mtx*)&sp148);
 		}
 	}
 
@@ -5388,7 +5388,7 @@ int func0f072144(struct defaultobj *obj, struct coord *arg1, float arg2, bool ar
 			yrot = hoverpropGetTurnAngle(obj);
 		}
 
-		mtx4LoadYRotationF(yrot, &spa4);
+		mtx4LoadYRotation(yrot, (Mtx*)&spa4);
 		mtxScaleRotationPart(obj->model->scale, (Mtx*)&spa4);
 		mtx4ToMtx3((Mtx*)&spa4, sp460);
 	} else {
@@ -5401,9 +5401,9 @@ int func0f072144(struct defaultobj *obj, struct coord *arg1, float arg2, bool ar
 				arg2 += M_TAU;
 			}
 
-			mtx4LoadYRotationF(arg2, &sp64);
+			mtx4LoadYRotation(arg2, (Mtx*)&sp64);
 			mtx4ToMtx3((Mtx*)&sp64, sp40);
-			mtx00016140(sp40, obj->realrot, sp460);
+			mtx3x3TransposeMul(sp40, obj->realrot, sp460);
 		} else {
 			mtx3Copy(obj->realrot, sp460);
 		}
@@ -5472,7 +5472,7 @@ int func0f072144(struct defaultobj *obj, struct coord *arg1, float arg2, bool ar
 		propDeregisterRooms(prop);
 		roomsCopy(rooms, prop->rooms);
 
-		if (obj->geocyl && (obj->hidden2 & OBJH2FLAG_08)) {
+		if (obj->geocyl && (obj->hidden2 & OBJH2FLAG_DYNAMIC_COLLISION)) {
 			if (obj->flags3 & OBJFLAG3_GEOCYL) {
 				*obj->geocyl = geounion.cyl;
 			} else {
@@ -5919,8 +5919,8 @@ bool rocketTickFbw(struct weaponobj *rocket)
 			projectile->unk014 = modelTweenRotAxis(projectile->unk014, yrot, 0.01875f);
 		}
 
-		mtx4LoadXRotationF(M_TAU - projectile->unk014, &sp118);
-		mtx4LoadYRotationF(projectile->unk018, &spd8);
+		mtx4LoadXRotation(M_TAU - projectile->unk014, (Mtx*)&sp118);
+		mtx4LoadYRotation(projectile->unk018, (Mtx*)&spd8);
 		mtx4MultMtx4((Mtx*)&spd8, (Mtx*)&sp118, (Mtx*)&sp98);
 		mtxScaleRotationPart(rocket->base.model->scale, (Mtx*)&sp98);
 		mtx4ToMtx3((Mtx*)&sp98, rocket->base.realrot);
@@ -6119,243 +6119,281 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 	float shield;
 	int i;
 
-	if (g_Vars.lvupdate240 > 0) {
-		if (obj->type == OBJTYPE_WEAPON && ((struct weaponobj *)obj)->weaponnum == WEAPON_SKROCKET) {
-			result = rocketTickFbw((struct weaponobj *) obj);
-		} else if (projectile->flags & PROJECTILEFLAG_00001000) {
-			result = (projectile->flags & PROJECTILEFLAG_00002000) != 0;
-			projectile->flags &= ~(PROJECTILEFLAG_00001000 | PROJECTILEFLAG_00002000);
-		} else {
-			obj->hidden &= ~OBJHFLAG_00020000;
+	if (g_Vars.lvupdate240 <= 0)
+	{
+		return result;
+	}
 
-			if (projectile->flags & PROJECTILEFLAG_LAUNCHING) {
-				projectileLaunch(obj, projectile, &sp5e8, &sp5f4);
-			}
+	if (obj->type == OBJTYPE_WEAPON && ((struct weaponobj *)obj)->weaponnum == WEAPON_SKROCKET) {
+		result = rocketTickFbw((struct weaponobj *) obj);
+	} else if (projectile->flags & PROJECTILEFLAG_00001000) {
+		result = (projectile->flags & PROJECTILEFLAG_00002000) != 0;
+		projectile->flags &= ~(PROJECTILEFLAG_00001000 | PROJECTILEFLAG_00002000);
+	} else {
+		obj->hidden &= ~OBJHFLAG_00020000;
 
-			sp5dc.x = prop->pos.x;
-			sp5dc.y = prop->pos.y;
-			sp5dc.z = prop->pos.z;
+		if (projectile->flags & PROJECTILEFLAG_LAUNCHING) {
+			projectileLaunch(obj, projectile, &sp5e8, &sp5f4);
+		}
 
-			if (projectile->pickuptimer240 > 0) {
-				projectile->pickuptimer240 -= g_Vars.lvupdate240;
-			}
+		sp5dc.x = prop->pos.x;
+		sp5dc.y = prop->pos.y;
+		sp5dc.z = prop->pos.z;
 
-			if (projectile->flags & PROJECTILEFLAG_SLIDING) {
-				float x;
-				float innerdist;
-				float outerdist;
-				float z;
+		if (projectile->pickuptimer240 > 0) {
+			projectile->pickuptimer240 -= g_Vars.lvupdate240;
+		}
 
-				mtx3ToMtx4(obj->realrot, (Mtx*)&sp504);
-				mtx4SetTranslation(&prop->pos, (Mtx*)&sp504);
+		if (projectile->flags & PROJECTILEFLAG_SLIDING) {
+			float x;
+			float innerdist;
+			float outerdist;
+			float z;
 
-				if (projectile->unk0dc > 0.0f) {
-					projectile->unk0dc -= projectile->unk0e0 * g_Vars.lvupdate60freal;
+			mtx3ToMtx4(obj->realrot, (Mtx*)&sp504);
+			mtx4SetTranslation(&prop->pos, (Mtx*)&sp504);
 
-					if (projectile->unk0dc < 0.0f) {
-						projectile->unk0dc = 0.0f;
-					} else if (projectile->unk0e4 < 1.0f) {
-						for (i = 0; i < g_Vars.lvupdate60; i++) {
-							if (projectile->unk0dc > projectile->unk0ec) {
-								projectile->unk0dc = projectile->unk0ec + (projectile->unk0dc - projectile->unk0ec) * projectile->unk0e4;
-							}
-						}
-					}
-				} else if (projectile->unk0dc < 0.0f) {
-					projectile->unk0dc += projectile->unk0e0 * g_Vars.lvupdate60freal;
+			if (projectile->unk0dc > 0.0f) {
+				projectile->unk0dc -= projectile->unk0e0 * g_Vars.lvupdate60freal;
 
-					if (projectile->unk0dc > 0.0f) {
-						projectile->unk0dc = 0.0f;
-					} else if (projectile->unk0e4 < 1.0f) {
-						for (i = 0; i < g_Vars.lvupdate60; i++) {
-							if (projectile->unk0dc < -projectile->unk0ec) {
-								projectile->unk0dc = -projectile->unk0ec + (projectile->unk0dc + projectile->unk0ec) * projectile->unk0e4;
-							}
+				if (projectile->unk0dc < 0.0f) {
+					projectile->unk0dc = 0.0f;
+				} else if (projectile->unk0e4 < 1.0f) {
+					for (i = 0; i < g_Vars.lvupdate60; i++) {
+						if (projectile->unk0dc > projectile->unk0ec) {
+							projectile->unk0dc = projectile->unk0ec + (projectile->unk0dc - projectile->unk0ec) * projectile->unk0e4;
 						}
 					}
 				}
+			} else if (projectile->unk0dc < 0.0f) {
+				projectile->unk0dc += projectile->unk0e0 * g_Vars.lvupdate60freal;
 
-				if ((projectile->speed.f[0] != 0.0f || projectile->speed.f[2] != 0.0f) && projectile->unk098 > 0.0f) {
-					dist = sqrtf(projectile->speed.f[0] * projectile->speed.f[0] + projectile->speed.f[2] * projectile->speed.f[2]);
+				if (projectile->unk0dc > 0.0f) {
+					projectile->unk0dc = 0.0f;
+				} else if (projectile->unk0e4 < 1.0f) {
+					for (i = 0; i < g_Vars.lvupdate60; i++) {
+						if (projectile->unk0dc < -projectile->unk0ec) {
+							projectile->unk0dc = -projectile->unk0ec + (projectile->unk0dc + projectile->unk0ec) * projectile->unk0e4;
+						}
+					}
+				}
+			}
 
-					if (dist > 0.0f) {
-						float f12 = projectile->unk098 * g_Vars.lvupdate60freal / dist;
+			if ((projectile->speed.f[0] != 0.0f || projectile->speed.f[2] != 0.0f) && projectile->unk098 > 0.0f) {
+				dist = sqrtf(projectile->speed.f[0] * projectile->speed.f[0] + projectile->speed.f[2] * projectile->speed.f[2]);
 
-						if (f12 >= 1.0f) {
-							projectile->speed.x = 0.0f;
-							projectile->speed.z = 0.0f;
-						} else {
-							projectile->speed.x -= projectile->speed.x * f12;
-							projectile->speed.z -= projectile->speed.z * f12;
+				if (dist > 0.0f) {
+					float f12 = projectile->unk098 * g_Vars.lvupdate60freal / dist;
 
-							if (projectile->unk0e4 < 1.0f) {
-								for (i = 0; i < g_Vars.lvupdate60; i++) {
-									if (projectile->speed.x > projectile->unk0f0) {
-										projectile->speed.x = (projectile->speed.x - projectile->unk0f0) * projectile->unk0e4 + projectile->unk0f0;
-									} else if (projectile->speed.x < -projectile->unk0f0) {
-										projectile->speed.x = (projectile->speed.x + projectile->unk0f0) * projectile->unk0e4 + -projectile->unk0f0;
-									}
+					if (f12 >= 1.0f) {
+						projectile->speed.x = 0.0f;
+						projectile->speed.z = 0.0f;
+					} else {
+						projectile->speed.x -= projectile->speed.x * f12;
+						projectile->speed.z -= projectile->speed.z * f12;
 
-									if (projectile->speed.z > projectile->unk0f0) {
-										projectile->speed.z = (projectile->speed.z - projectile->unk0f0) * projectile->unk0e4 + projectile->unk0f0;
-									} else if (projectile->speed.z < -projectile->unk0f0) {
-										projectile->speed.z = (projectile->speed.z + projectile->unk0f0) * projectile->unk0e4 + -projectile->unk0f0;
-									}
+						if (projectile->unk0e4 < 1.0f) {
+							for (i = 0; i < g_Vars.lvupdate60; i++) {
+								if (projectile->speed.x > projectile->unk0f0) {
+									projectile->speed.x = (projectile->speed.x - projectile->unk0f0) * projectile->unk0e4 + projectile->unk0f0;
+								} else if (projectile->speed.x < -projectile->unk0f0) {
+									projectile->speed.x = (projectile->speed.x + projectile->unk0f0) * projectile->unk0e4 + -projectile->unk0f0;
+								}
+
+								if (projectile->speed.z > projectile->unk0f0) {
+									projectile->speed.z = (projectile->speed.z - projectile->unk0f0) * projectile->unk0e4 + projectile->unk0f0;
+								} else if (projectile->speed.z < -projectile->unk0f0) {
+									projectile->speed.z = (projectile->speed.z + projectile->unk0f0) * projectile->unk0e4 + -projectile->unk0f0;
 								}
 							}
 						}
+					}
+				} else {
+					projectile->speed.x = 0.0f;
+					projectile->speed.z = 0.0f;
+				}
+			}
+
+			if (projectile->ownerprop) {
+				propSetPerimEnabled(projectile->ownerprop, false);
+			}
+
+			// Objects become more difficult to push
+			// as you push them away from their pad
+			haslimitedarea = obj->pad >= 0 && (obj->flags3 & (OBJFLAG3_GRABBABLE | OBJFLAG3_PUSHFREELY)) == 0;
+
+			if (haslimitedarea) {
+				padUnpack(obj->pad, PADFIELD_POS, &pad);
+
+				innerdist = 200.0f;
+				outerdist = 300.0f;
+
+				if (obj->flags3 & OBJFLAG3_LONGPUSHRANGE) {
+					innerdist += 700.0f;
+					outerdist += 700.0f;
+				}
+
+				if (obj->modelnum == MODEL_SKPUZZLEOBJECT) {
+					innerdist = 230.0f;
+				}
+
+				x = pad.pos.x - prop->pos.x;
+				z = pad.pos.z - prop->pos.z;
+
+				dist = sqrtf(x * x + z * z);
+
+				if (dist > outerdist) {
+					projectile->unk0dc = 0.0f;
+				} else if (dist > innerdist) {
+					projectile->unk0dc *= (outerdist - dist) * 0.01f;
+				}
+			}
+
+			sp5a8 = projectile->unk0dc * g_Vars.lvupdate60freal;
+
+			if (sp5a8 != 0.0f) {
+				struct coord sp404 = {0, 0, 0};
+
+				cdresult = func0f072144(obj, &sp404, sp5a8, true);
+
+				if (cdresult != CDRESULT_ERROR && cdresult == CDRESULT_COLLISION) {
+					projectile->unk0dc = -projectile->unk0dc * projectile->bounciness;
+					objCollide(obj, &sp404, sp5a8);
+				}
+			}
+
+			sp59c.x = projectile->speed.x * g_Vars.lvupdate60freal;
+			sp59c.y = 0.0f;
+			sp59c.z = projectile->speed.z * g_Vars.lvupdate60freal;
+
+			if (haslimitedarea) {
+				x = pad.pos.x - prop->pos.x - sp59c.x;
+				z = pad.pos.z - prop->pos.z - sp59c.z;
+
+				dist = sqrtf(x * x + z * z);
+
+				if (dist > outerdist) {
+					projectile->speed.f[0] = \
+					projectile->speed.f[2] = \
+					projectile->unk0dc = \
+					sp59c.f[0] = \
+					sp59c.f[2] = 0.0f;
+				} else if (dist > innerdist) {
+					projectile->speed.x *= (outerdist - dist) * 0.01f;
+					projectile->speed.z *= (outerdist - dist) * 0.01f;
+
+					sp59c.x *= (outerdist - dist) * 0.01f;
+					sp59c.z *= (outerdist - dist) * 0.01f;
+				}
+			}
+
+			cdresult = func0f072144(obj, &sp59c, 0.0f, true);
+
+			if (cdresult == CDRESULT_COLLISION) {
+				sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->bounciness;
+
+				if (sp58c > 0.0f) {
+					float f0;
+					struct coord sp3f4;
+					struct coord sp3e8;
+					struct coord sp3dc;
+					struct coord sp3d0;
+					struct coord sp3c4;
+					struct coord sp3b8;
+					struct coord sp3ac;
+					float f0_2;
+
+					if (cdGetSavedPos(&sp3d0, &sp3c4)) {
+						sp3c4.x -= sp3d0.x;
+						sp3c4.y -= sp3d0.y;
+						sp3c4.z -= sp3d0.z;
 					} else {
-						projectile->speed.x = 0.0f;
-						projectile->speed.z = 0.0f;
-					}
-				}
+						cdGetEdge(&sp3d0, &sp3c4);
 
-				if (projectile->ownerprop) {
-					propSetPerimEnabled(projectile->ownerprop, false);
-				}
+						sp3d0.x -= sp3c4.x;
+						sp3d0.y -= sp3c4.y;
+						sp3d0.z -= sp3c4.z;
 
-				// Objects become more difficult to push
-				// as you push them away from their pad
-				haslimitedarea = obj->pad >= 0 && (obj->flags3 & (OBJFLAG3_GRABBABLE | OBJFLAG3_PUSHFREELY)) == 0;
+						sp3c4.x = -sp3d0.z;
+						sp3c4.y = sp3d0.y;
+						sp3c4.z = sp3d0.x;
 
-				if (haslimitedarea) {
-					padUnpack(obj->pad, PADFIELD_POS, &pad);
-
-					innerdist = 200.0f;
-					outerdist = 300.0f;
-
-					if (obj->flags3 & OBJFLAG3_LONGPUSHRANGE) {
-						innerdist += 700.0f;
-						outerdist += 700.0f;
+						sp3d0.x = prop->pos.x;
+						sp3d0.y = prop->pos.y;
+						sp3d0.z = prop->pos.z;
 					}
 
-					if (obj->modelnum == MODEL_SKPUZZLEOBJECT) {
-						innerdist = 230.0f;
+					func0f02e4f8(&sp3d0, &sp3c4, &sp3b8);
+
+					sp3ac.x = prop->pos.x - sp5dc.x;
+					sp3ac.y = 0.0f;
+					sp3ac.z = prop->pos.z - sp5dc.z;
+
+					sp3b8.x -= prop->pos.x;
+					sp3b8.z -= prop->pos.z;
+
+					f0 = (-sp3b8.f[0] * sp3ac.f[2] + sp3b8.f[2] * sp3ac.f[0]) * 0.0001f;
+
+					if (f0 > projectile->unk0ec) {
+						f0 = projectile->unk0ec;
+					} else if (f0 < -projectile->unk0ec) {
+						f0 = -projectile->unk0ec;
 					}
 
-					x = pad.pos.x - prop->pos.x;
-					z = pad.pos.z - prop->pos.z;
+					projectile->unk0dc += f0;
 
-					dist = sqrtf(x * x + z * z);
+					cdGetEdge(&sp3e8, &sp3dc);
 
-					if (dist > outerdist) {
-						projectile->unk0dc = 0.0f;
-					} else if (dist > innerdist) {
-						projectile->unk0dc *= (outerdist - dist) * 0.01f;
+					sp3f4.x = sp3dc.z - sp3e8.z;
+					sp3f4.y = 0.0f;
+					sp3f4.z = sp3e8.x - sp3dc.x;
+
+					if (sp3f4.f[0] != 0.0f || sp3f4.f[2] != 0.0f) {
+						utilsNormalizeF(&sp3f4.x, &sp3f4.y, &sp3f4.z);
+					} else {
+						sp3f4.z = 1.0f;
 					}
-				}
 
-				sp5a8 = projectile->unk0dc * g_Vars.lvupdate60freal;
+					f0_2 = projectile->speed.f[0] * sp3f4.f[0] + projectile->speed.f[2] * sp3f4.f[2];
+					f0_2 *= -(sp58c + 1.0f);
 
-				if (sp5a8 != 0.0f) {
-					struct coord sp404 = {0, 0, 0};
+					sp590.x = projectile->speed.x + sp3f4.f[0] * f0_2;
+					sp590.y = 0.0f;
+					sp590.z = projectile->speed.z + sp3f4.f[2] * f0_2;
 
-					cdresult = func0f072144(obj, &sp404, sp5a8, true);
+					sp59c.x = sp590.f[0] * g_Vars.lvupdate60freal;
+					sp59c.y = 0.0f;
+					sp59c.z = sp590.f[2] * g_Vars.lvupdate60freal;
 
-					if (cdresult != CDRESULT_ERROR && cdresult == CDRESULT_COLLISION) {
-						projectile->unk0dc = -projectile->unk0dc * projectile->bounciness;
-						objCollide(obj, &sp404, sp5a8);
-					}
-				}
+					if (haslimitedarea) {
+						x = pad.pos.x - prop->pos.x - sp59c.x;
+						z = pad.pos.z - prop->pos.z - sp59c.z;
 
-				sp59c.x = projectile->speed.x * g_Vars.lvupdate60freal;
-				sp59c.y = 0.0f;
-				sp59c.z = projectile->speed.z * g_Vars.lvupdate60freal;
+						dist = sqrtf(x * x + z * z);
 
-				if (haslimitedarea) {
-					x = pad.pos.x - prop->pos.x - sp59c.x;
-					z = pad.pos.z - prop->pos.z - sp59c.z;
+						if (dist > outerdist) {
+							projectile->speed.f[0] = \
+							projectile->speed.f[2] = \
+							projectile->unk0dc = \
+							sp59c.f[0] = \
+							sp59c.f[2] = 0.0f;
+						} else if (dist > innerdist) {
+							projectile->speed.x *= (outerdist - dist) * 0.01f;
+							projectile->speed.z *= (outerdist - dist) * 0.01f;
 
-					dist = sqrtf(x * x + z * z);
-
-					if (dist > outerdist) {
-						projectile->speed.f[0] = \
-						projectile->speed.f[2] = \
-						projectile->unk0dc = \
-						sp59c.f[0] = \
-						sp59c.f[2] = 0.0f;
-					} else if (dist > innerdist) {
-						projectile->speed.x *= (outerdist - dist) * 0.01f;
-						projectile->speed.z *= (outerdist - dist) * 0.01f;
-
-						sp59c.x *= (outerdist - dist) * 0.01f;
-						sp59c.z *= (outerdist - dist) * 0.01f;
-					}
-				}
-
-				cdresult = func0f072144(obj, &sp59c, 0.0f, true);
-
-				if (cdresult == CDRESULT_COLLISION) {
-					sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->bounciness;
-
-					if (sp58c > 0.0f) {
-						float f0;
-						struct coord sp3f4;
-						struct coord sp3e8;
-						struct coord sp3dc;
-						struct coord sp3d0;
-						struct coord sp3c4;
-						struct coord sp3b8;
-						struct coord sp3ac;
-						float f0_2;
-
-						if (cdGetSavedPos(&sp3d0, &sp3c4)) {
-							sp3c4.x -= sp3d0.x;
-							sp3c4.y -= sp3d0.y;
-							sp3c4.z -= sp3d0.z;
-						} else {
-							cdGetEdge(&sp3d0, &sp3c4);
-
-							sp3d0.x -= sp3c4.x;
-							sp3d0.y -= sp3c4.y;
-							sp3d0.z -= sp3c4.z;
-
-							sp3c4.x = -sp3d0.z;
-							sp3c4.y = sp3d0.y;
-							sp3c4.z = sp3d0.x;
-
-							sp3d0.x = prop->pos.x;
-							sp3d0.y = prop->pos.y;
-							sp3d0.z = prop->pos.z;
+							sp59c.x *= (outerdist - dist) * 0.01f;
+							sp59c.z *= (outerdist - dist) * 0.01f;
 						}
+					}
 
-						func0f02e4f8(&sp3d0, &sp3c4, &sp3b8);
+					cdresult = func0f072144(obj, &sp59c, 0.0f, true);
 
-						sp3ac.x = prop->pos.x - sp5dc.x;
-						sp3ac.y = 0.0f;
-						sp3ac.z = prop->pos.z - sp5dc.z;
+					if (cdresult == CDRESULT_COLLISION) {
+						sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->bounciness;
 
-						sp3b8.x -= prop->pos.x;
-						sp3b8.z -= prop->pos.z;
-
-						f0 = (-sp3b8.f[0] * sp3ac.f[2] + sp3b8.f[2] * sp3ac.f[0]) * 0.0001f;
-
-						if (f0 > projectile->unk0ec) {
-							f0 = projectile->unk0ec;
-						} else if (f0 < -projectile->unk0ec) {
-							f0 = -projectile->unk0ec;
-						}
-
-						projectile->unk0dc += f0;
-
-						cdGetEdge(&sp3e8, &sp3dc);
-
-						sp3f4.x = sp3dc.z - sp3e8.z;
-						sp3f4.y = 0.0f;
-						sp3f4.z = sp3e8.x - sp3dc.x;
-
-						if (sp3f4.f[0] != 0.0f || sp3f4.f[2] != 0.0f) {
-							utilsNormalizeF(&sp3f4.x, &sp3f4.y, &sp3f4.z);
-						} else {
-							sp3f4.z = 1.0f;
-						}
-
-						f0_2 = projectile->speed.f[0] * sp3f4.f[0] + projectile->speed.f[2] * sp3f4.f[2];
-						f0_2 *= -(sp58c + 1.0f);
-
-						sp590.x = projectile->speed.x + sp3f4.f[0] * f0_2;
+						sp590.x = -projectile->speed.f[0] * sp58c;
 						sp590.y = 0.0f;
-						sp590.z = projectile->speed.z + sp3f4.f[2] * f0_2;
+						sp590.z = -projectile->speed.f[2] * sp58c;
 
 						sp59c.x = sp590.f[0] * g_Vars.lvupdate60freal;
 						sp59c.y = 0.0f;
@@ -6385,986 +6423,950 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 						cdresult = func0f072144(obj, &sp59c, 0.0f, true);
 
 						if (cdresult == CDRESULT_COLLISION) {
-							sp58c = objCollide(obj, &sp59c, 0.0f) * projectile->bounciness;
+							objCollide(obj, &sp59c, 0.0f);
 
-							sp590.x = -projectile->speed.f[0] * sp58c;
-							sp590.y = 0.0f;
-							sp590.z = -projectile->speed.f[2] * sp58c;
+							if (sp3e8.f[0] != sp3dc.f[0] || sp3e8.f[2] != sp3dc.f[2]) {
+								float f12;
+								struct coord sp398;
+								float f14;
 
-							sp59c.x = sp590.f[0] * g_Vars.lvupdate60freal;
-							sp59c.y = 0.0f;
-							sp59c.z = sp590.f[2] * g_Vars.lvupdate60freal;
+								sp398.x = sp3dc.x - sp3e8.x;
+								sp398.z = sp3dc.z - sp3e8.z;
 
-							if (haslimitedarea) {
-								x = pad.pos.x - prop->pos.x - sp59c.x;
-								z = pad.pos.z - prop->pos.z - sp59c.z;
+								f12 = 1.0f / sqrtf(sp398.f[0] * sp398.f[0] + sp398.f[2] * sp398.f[2]);
 
-								dist = sqrtf(x * x + z * z);
+								sp398.x *= f12;
+								sp398.z *= f12;
 
-								if (dist > outerdist) {
-									projectile->speed.f[0] = \
-									projectile->speed.f[2] = \
-									projectile->unk0dc = \
-									sp59c.f[0] = \
-									sp59c.f[2] = 0.0f;
-								} else if (dist > innerdist) {
-									projectile->speed.x *= (outerdist - dist) * 0.01f;
-									projectile->speed.z *= (outerdist - dist) * 0.01f;
+								f14 = projectile->speed.f[0] * sp398.f[0] + projectile->speed.f[2] * sp398.f[2];
 
-									sp59c.x *= (outerdist - dist) * 0.01f;
-									sp59c.z *= (outerdist - dist) * 0.01f;
+								sp590.x = sp398.f[0] * f14;
+								sp590.y = 0.0f;
+								sp590.z = sp398.f[2] * f14;
+
+								sp59c.x = sp590.f[0] * g_Vars.lvupdate60freal;
+								sp59c.y = 0.0f;
+								sp59c.z = sp590.f[2] * g_Vars.lvupdate60freal;
+
+								if (haslimitedarea) {
+									x = pad.pos.x - prop->pos.x - sp59c.x;
+									z = pad.pos.z - prop->pos.z - sp59c.z;
+
+									dist = sqrtf(x * x + z * z);
+
+									if (dist > outerdist) {
+										projectile->speed.f[0] = \
+										projectile->speed.f[2] = \
+										projectile->unk0dc = \
+										sp59c.f[0] = \
+										sp59c.f[2] = 0.0f;
+									} else if (dist > innerdist) {
+										projectile->speed.x *= (outerdist - dist) * 0.01f;
+										projectile->speed.z *= (outerdist - dist) * 0.01f;
+
+										sp59c.x *= (outerdist - dist) * 0.01f;
+										sp59c.z *= (outerdist - dist) * 0.01f;
+									}
+								}
+
+								cdresult = func0f072144(obj, &sp59c, 0.0f, true);
+
+								if (cdresult == CDRESULT_COLLISION) {
+									objCollide(obj, &sp59c, 0.0f);
 								}
 							}
+						}
+					}
 
-							cdresult = func0f072144(obj, &sp59c, 0.0f, true);
+					if (cdresult == CDRESULT_NOCOLLISION) {
+						projectile->speed.x = sp590.x;
+						projectile->speed.y = sp590.y;
+						projectile->speed.z = sp590.z;
+					}
+				}
+			}
 
-							if (cdresult == CDRESULT_COLLISION) {
-								objCollide(obj, &sp59c, 0.0f);
+			if (cdresult != CDRESULT_NOCOLLISION) {
+				projectile->unk0dc = 0.0f;
+				projectile->speed.z = 0.0f;
+				projectile->speed.x = 0.0f;
+			}
 
-								if (sp3e8.f[0] != sp3dc.f[0] || sp3e8.f[2] != sp3dc.f[2]) {
-									float f12;
-									struct coord sp398;
-									float f14;
+			if (projectile->ownerprop) {
+				propSetPerimEnabled(projectile->ownerprop, true);
+			}
 
-									sp398.x = sp3dc.x - sp3e8.x;
-									sp398.z = sp3dc.z - sp3e8.z;
+			if (projectile->speed.f[0] == 0.0f && projectile->speed.f[2] == 0.0f && projectile->unk0dc == 0.0f) {
+				objFreeProjectile(obj);
+			}
 
-									f12 = 1.0f / sqrtf(sp398.f[0] * sp398.f[0] + sp398.f[2] * sp398.f[2]);
+			if (cdresult == CDRESULT_NOCOLLISION) {
+				ground = cdFindGroundAtCyl(&prop->pos, 2, prop->rooms, &obj->floorcol, NULL);
 
-									sp398.x *= f12;
-									sp398.z *= f12;
+				if (ground > -30000.0f) {
+					prop->pos.y = ground + objGetHovBobOffsetY(obj);
+				}
+			}
 
-									f14 = projectile->speed.f[0] * sp398.f[0] + projectile->speed.f[2] * sp398.f[2];
+			func0f069c70(obj, false, true);
+			mtx3ToMtx4(obj->realrot, (Mtx*)&sp484);
+			mtx4SetTranslation(&prop->pos, (Mtx*)&sp484);
+			mtxInvertAffine(sp504.m, sp4c4.m);
+			mtx4MultMtx4((Mtx*)&sp484, (Mtx*)&sp4c4, (Mtx*)&sp544);
+			platformDisplaceProps2(prop, &sp544);
+			result = true;
+		} else if (projectile->flags & PROJECTILEFLAG_AIRBORNE) {
+			float sp390;
+			RoomNum roomnum;
+			struct coord sp380;
+			float sp37c;
+			float realrot[3][3];
+			bool sp354 = false;
+			bool sp350 = false;
+			bool handled = false;
+			Mtxf sp30c;
+			bool homingrocket;
 
-									sp590.x = sp398.f[0] * f14;
-									sp590.y = 0.0f;
-									sp590.z = sp398.f[2] * f14;
+			projectile->losttimer240 += g_Vars.lvupdate240;
 
-									sp59c.x = sp590.f[0] * g_Vars.lvupdate60freal;
-									sp59c.y = 0.0f;
-									sp59c.z = sp590.f[2] * g_Vars.lvupdate60freal;
+			if (((projectile->flags & PROJECTILEFLAG_NOTIMELIMIT) == 0 && projectile->losttimer240 > TICKS(9600))
+					|| prop->pos.y < -20000.0f || prop->pos.y > 32000.0f
+					|| prop->pos.x < -32000.0f || prop->pos.x > 32000.0f
+					|| prop->pos.z < -32000.0f || prop->pos.z > 32000.0f) {
+				obj->hidden |= OBJHFLAG_DELETING;
+			}
 
-									if (haslimitedarea) {
-										x = pad.pos.x - prop->pos.x - sp59c.x;
-										z = pad.pos.z - prop->pos.z - sp59c.z;
+			projectile->flighttime240 += g_Vars.lvupdate240;
 
-										dist = sqrtf(x * x + z * z);
+			mtx3Copy(obj->realrot, realrot);
 
-										if (dist > outerdist) {
-											projectile->speed.f[0] = \
-											projectile->speed.f[2] = \
-											projectile->unk0dc = \
-											sp59c.f[0] = \
-											sp59c.f[2] = 0.0f;
-										} else if (dist > innerdist) {
-											projectile->speed.x *= (outerdist - dist) * 0.01f;
-											projectile->speed.z *= (outerdist - dist) * 0.01f;
+			if (projectile->flags & PROJECTILEFLAG_00000020) {
+				if (projectile->unk01c < (1.0f / 3.6f)) {
+					projectile->unk0ac += projectile->unk014 * g_Vars.lvupdate60freal;
+					projectile->unk0a8 += projectile->unk0ac * g_Vars.lvupdate60freal;
+					projectile->unk01c += (1.0f / 90.0f) * g_Vars.lvupdate60freal;
 
-											sp59c.x *= (outerdist - dist) * 0.01f;
-											sp59c.z *= (outerdist - dist) * 0.01f;
+					if (projectile->unk01c > (1.0f / 3.6f)) {
+						projectile->unk01c = (1.0f / 3.6f);
+					}
+				} else {
+					if (projectile->unk0a8 > sp5dc.y) {
+						projectile->unk0ac += projectile->unk014 * g_Vars.lvupdate60freal;
+						projectile->unk0a8 += projectile->unk0ac * g_Vars.lvupdate60freal;
+
+						sp5dc.y += 0.07f * (projectile->unk0a8 - sp5dc.y) * g_Vars.lvupdate60freal;
+					} else {
+						sp5dc.y = projectile->unk0a8;
+
+						projectile->flags &= ~PROJECTILEFLAG_00000020;
+						projectile->flags |= PROJECTILEFLAG_POWERED;
+						projectile->speed.y = projectile->unk0ac;
+						projectile->unk01c = 0.0f;
+					}
+				}
+			}
+
+			homingrocket = false;
+
+			if (obj->type == OBJTYPE_WEAPON && ((struct weaponobj *)obj)->weaponnum == WEAPON_HOMINGROCKET) {
+				homingrocket = true;
+			}
+
+			if (homingrocket) {
+				struct coord sp2f8 = {0, 0, 0};
+				struct coord sp2ec = {0, 0, 1};
+				struct coord sp2e0 = {0, 1, 0};
+
+				if (obj && obj->prop && projectile->targetprop) {
+					Mtxf mtx;
+					float sp29c = sqrtf(obj->realrot[0][0] * obj->realrot[0][0] + obj->realrot[1][0] * obj->realrot[1][0] + obj->realrot[2][0] * obj->realrot[2][0]);
+					struct coord sp290;
+					float sp28c;
+
+					mtxIdent((Mtx*)&mtx);
+
+					mtx.m[0][0] = obj->realrot[0][0] / sp29c;
+					mtx.m[0][1] = obj->realrot[0][1] / sp29c;
+					mtx.m[0][2] = obj->realrot[0][2] / sp29c;
+					mtx.m[1][0] = obj->realrot[1][0] / sp29c;
+					mtx.m[1][1] = obj->realrot[1][1] / sp29c;
+					mtx.m[1][2] = obj->realrot[1][2] / sp29c;
+					mtx.m[2][0] = obj->realrot[2][0] / sp29c;
+					mtx.m[2][1] = obj->realrot[2][1] / sp29c;
+					mtx.m[2][2] = obj->realrot[2][2] / sp29c;
+
+					sp2f8.x = obj->prop->pos.x;
+					sp2f8.y = obj->prop->pos.y;
+					sp2f8.z = obj->prop->pos.z;
+
+					sp290.x = projectile->targetprop->pos.x - sp2f8.x;
+					sp290.y = projectile->targetprop->pos.y - sp2f8.y;
+					sp290.z = projectile->targetprop->pos.z - sp2f8.z;
+
+					utilsNormalizeF(&sp290.x, &sp290.y, &sp290.z);
+
+					sp2ec.x = projectile->speed.x;
+					sp2ec.y = projectile->speed.y;
+					sp2ec.z = projectile->speed.z;
+
+					utilsNormalizeF(&sp2ec.x, &sp2ec.y, &sp2ec.z);
+
+					sp28c = acosf(sp2ec.f[0] * sp290.f[0] + sp2ec.f[1] * sp290.f[1] + sp2ec.f[2] * sp290.f[2]);
+
+					if (sp28c > 0.001f || sp28c < -0.001f) {
+						struct coord sp280;
+						float sp270[4];
+						float sp260[4];
+						float sp250[4];
+						float angle;
+						Mtx sp20c;
+						float tmp;
+
+						static float var80069bc4 = 0;
+						static uint32_t kkg = 3;
+						static uint32_t kkd = 20;
+						static uint32_t kkp = 120;
+
+						tmp = ((kkd / 100.0f * var80069bc4 / LVUPDATE60FREAL()) + (kkp / 100.00f * sp28c * LVUPDATE60FREAL())) * (kkg / 100.000f);
+
+						var80069bc4 = sp28c;
+
+						sp280.x = sp2ec.f[1] * sp290.f[2] - sp2ec.f[2] * sp290.f[1];
+						sp280.y = -(sp2ec.f[0] * sp290.f[2] - sp2ec.f[2] * sp290.f[0]);
+						sp280.z = sp2ec.f[0] * sp290.f[1] - sp2ec.f[1] * sp290.f[0];
+
+						sp260[0] = cosf(tmp * 0.5f);
+						sp260[1] = sp280.f[0] * sinf(tmp * 0.5f);
+						sp260[2] = sp280.f[1] * sinf(tmp * 0.5f);
+						sp260[3] = sp280.f[2] * sinf(tmp * 0.5f);
+
+						quaternionToMtx(sp260, &sp20c);
+
+						projectile->unk018 = 0.0f;
+						projectile->unk014 = 0.0f;
+						projectile->unk010 = 0.0f;
+
+						mtx4RotateVecInPlace(&sp20c, &projectile->speed);
+
+						quaternion3x3MtxToQuat((Mtx*)&mtx, sp270);
+						quaternionMultQuaternion(sp270, sp260, sp250);
+						quaternionToMtx(sp250, &sp20c);
+
+						obj->realrot[0][0] = sp20c[0][0] * sp29c;
+						obj->realrot[0][1] = sp20c[0][1] * sp29c;
+						obj->realrot[0][2] = sp20c[0][2] * sp29c;
+						obj->realrot[1][0] = sp20c[1][0] * sp29c;
+						obj->realrot[1][1] = sp20c[1][1] * sp29c;
+						obj->realrot[1][2] = sp20c[1][2] * sp29c;
+						obj->realrot[2][0] = sp20c[2][0] * sp29c;
+						obj->realrot[2][1] = sp20c[2][1] * sp29c;
+						obj->realrot[2][2] = sp20c[2][2] * sp29c;
+					}
+				}
+			}
+
+			if ((projectile->flags & PROJECTILEFLAG_POWERED) == 0) {
+				// Apply gravity
+				float f0;
+
+				projectile->speed.y += (projectile->unk014 + projectile->unk01c) * g_Vars.lvupdate60freal;
+
+				if (projectile->flags & PROJECTILEFLAG_LIGHTWEIGHT) {
+					f0 = projectile->speed.y - (1.0f / 7.2f) * g_Vars.lvupdate60freal;
+				} else {
+					f0 = projectile->speed.y - (1.0f / 3.6f) * g_Vars.lvupdate60freal;
+				}
+
+				sp5dc.y += g_Vars.lvupdate60freal * (projectile->speed.y + f0) * 0.5f;
+
+				projectile->speed.y = f0;
+			} else {
+				projectile->speed.y += (projectile->unk014 + projectile->unk01c) * g_Vars.lvupdate60freal;
+				sp5dc.y += projectile->speed.y * g_Vars.lvupdate60freal;
+			}
+
+			projectile->speed.x += projectile->unk010 * g_Vars.lvupdate60freal;
+			projectile->speed.z += projectile->unk018 * g_Vars.lvupdate60freal;
+
+			sp5dc.x += projectile->speed.x * g_Vars.lvupdate60freal;
+			sp5dc.z += projectile->speed.z * g_Vars.lvupdate60freal;
+
+			mtx3ToMtx4(obj->realrot, (Mtx*)&sp30c);
+			mtxApplyRotation((Mtx*)&sp30c, (Mtx*)&projectile->mtx, g_Vars.lvupdate240); // Makes projectiles spin as they fall. This includes dropped weapons.
+			mtx4ToMtx3((Mtx*)&sp30c, obj->realrot);
+
+			sp5c8.x = prop->pos.x;
+			sp5c8.y = prop->pos.y;
+			sp5c8.z = prop->pos.z;
+
+			roomsCopy(prop->rooms, sp5b8);
+
+			if (projectile->ownerprop) {
+				propSetPerimEnabled(projectile->ownerprop, false);
+			}
+
+			if (projectile->flags & PROJECTILEFLAG_STICKY) {
+				cdresult = func0f06cd00(obj, &sp5dc, &sp5e8, &sp5f4);
+			} else {
+				cdresult = projectileTryMove(obj, &sp5dc, &sp5e8, &sp5f4);
+			}
+
+			if (projectile->ownerprop) {
+				propSetPerimEnabled(projectile->ownerprop, true);
+			}
+
+			result = true;
+
+			if (projectile->flags & PROJECTILEFLAG_STICKY) {
+				if (cdresult == CDRESULT_COLLISION) {
+					bool stick = false;
+					struct prop *hitprop = NULL;
+					struct weaponobj *weapon2;
+					struct weaponobj *weapon;
+
+					if (g_EmbedProp != NULL) {
+						hitprop = g_EmbedProp;
+
+						while (hitprop->parent) {
+							hitprop = hitprop->parent;
+						}
+					}
+
+					if (obj->type == OBJTYPE_AUTOGUN) {
+						// Thrown laptops can stick to the BG but not props
+						if (hitprop == NULL) {
+							stick = true;
+						}
+					} else if (obj->type == OBJTYPE_WEAPON) {
+						weapon2 = (struct weaponobj *) obj;
+
+						if (weapon2->weaponnum == WEAPON_REMOTEMINE
+								|| weapon2->weaponnum == WEAPON_TIMEDMINE
+								|| weapon2->weaponnum == WEAPON_PROXIMITYMINE
+								|| weapon2->weaponnum == WEAPON_COMMSRIDER
+								|| weapon2->weaponnum == WEAPON_TRACERBUG
+								|| weapon2->weaponnum == WEAPON_TARGETAMPLIFIER
+								|| weapon2->weaponnum == WEAPON_BOLT
+								|| weapon2->weaponnum == WEAPON_COMBATKNIFE
+								|| weapon2->weaponnum == WEAPON_ECMMINE
+								|| gsetHasFunctionFlags(&weapon2->gset, FUNCFLAG_STICKTOWALL)) {
+							stick = true;
+
+							if (weapon2->weaponnum == WEAPON_GRENADEROUND && weapon2->gunfunc == FUNC_SECONDARY) {
+								if (weapon2->timer240 == 1) {
+									stick = false;
+									weapon2->timer240 = 0;
+								} else {
+									weapon2->timer240 = TICKS(480);
+								}
+							}
+						}
+					}
+
+					if (stick) {
+						weapon = NULL;
+
+						if (obj->type == OBJTYPE_WEAPON) {
+							weapon = (struct weaponobj *) obj;
+						}
+
+						if (g_EmbedProp && (g_EmbedProp->type == PROPTYPE_OBJ || g_EmbedProp->type == PROPTYPE_WEAPON || g_EmbedProp->type == PROPTYPE_DOOR)) {
+							struct defaultobj *embedobj = g_EmbedProp->obj;
+
+							if (weapon
+									&& (weapon->weaponnum == WEAPON_BOLT || weapon->weaponnum == WEAPON_COMBATKNIFE)
+									&& embedobj->type == OBJTYPE_WEAPON) {
+								stick = false;
+							}
+						}
+
+						if (hitprop != NULL) {
+							if (hitprop->type == PROPTYPE_OBJ || hitprop->type == PROPTYPE_WEAPON || hitprop->type == PROPTYPE_DOOR) {
+								struct defaultobj *hitobj = hitprop->obj;
+
+								if ((hitobj->hidden & OBJHFLAG_PROJECTILE)
+										&& (hitobj->projectile->flags & PROJECTILEFLAG_SLIDING) == 0) {
+									stick = false;
+								}
+
+								if (g_HitTextureNum == 10000) {
+									stick = false;
+								}
+
+								if (weapon && (weapon->weaponnum == WEAPON_BOLT || weapon->weaponnum == WEAPON_COMBATKNIFE)) {
+									if (hitobj->type == OBJTYPE_GLASS || hitobj->type == OBJTYPE_TINTEDGLASS) {
+										bgunPlayGlassHitSound(&prop->pos, prop->rooms, -1);
+
+										if ((hitobj->flags2 & OBJFLAG2_IMMUNETOGUNFIRE) == 0) {
+											objTakeGunfire(hitobj, 100, &prop->pos, weapon->weaponnum, g_Vars.currentplayernum);
+											objDropRecursively(hitprop, false);
+											stick = false;
+											handled = true;
+										}
+									}
+								}
+							} else if ((hitprop->type == PROPTYPE_CHR || hitprop->type == PROPTYPE_PLAYER)
+									&& chrGetShield(hitprop->chr) > 0.0f) {
+								stick = false;
+							}
+						}
+					}
+
+					if (!handled && g_EmbedProp && obj->type == OBJTYPE_WEAPON) {
+						struct weaponobj *weapon = (struct weaponobj *) obj;
+
+						if (weapon->weaponnum == WEAPON_BOLT || weapon->weaponnum == WEAPON_COMBATKNIFE) {
+							if (hitprop->type == PROPTYPE_CHR || (hitprop->type == PROPTYPE_PLAYER && hitprop->chr)) {
+								struct chrdata *hitchr = hitprop->chr;
+
+								if ((obj->projectile->flags & PROJECTILEFLAG_AIRBORNE) && obj->projectile->bouncecount <= 0) {
+									float ownershield;
+									struct prop *ownerprop;
+
+									ownerprop = obj->projectile->ownerprop;
+									ownershield = chrGetShield(hitchr);
+
+									func0f0341dc(hitchr, gsetGetDamage(&weapon->gset), &var8009ce78, &weapon->gset, ownerprop,
+											g_EmbedHitPart, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
+
+									if (ownershield <= 0.0f) {
+										chrEmitSparks(hitchr, g_EmbedProp, g_EmbedHitPart, &sp5e8, &sp5f4, ownerprop ? ownerprop->chr : NULL);
+
+										if (g_EmbedProp->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
+											if (g_EmbedModel && g_EmbedHitPart != HITPART_GUN && g_EmbedHitPart != HITPART_HAT) {
+												struct coord sp1c8;
+												Mtxf sp188;
+												Mtxf *sp184;
+
+												sp184 = modelFindNodeMtx(g_EmbedModel, g_EmbedNode, 0);
+												mtx4TransformVec((Mtx*)camGetWorldToScreenMtxf(), &sp5e8, &sp1c8);
+												mtxInvertRigidBodyMatrix(sp184->m, sp188.m);
+												mtx4TransformVecInPlace((Mtx*)&sp188, &sp1c8);
+
+												chr0f0260c4(g_EmbedModel, g_EmbedHitPart, g_EmbedNode, &sp1c8);
+											}
+										}
+									}
+								}
+							} else if (hitprop->type == PROPTYPE_OBJ) {
+								struct defaultobj *hitobj = hitprop->obj;
+
+								if (g_HitTextureNum == 10000) {
+									shield = (hitobj->flags3 & OBJFLAG3_SHOWSHIELD) ? 4 : 8;
+
+									shieldhitCreate(hitprop, shield, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
+								}
+
+								if (hitobj->modelnum == MODEL_TARGET && g_HitTextureNum == TEXTURE_0B9E) {
+									frCalculateHit(hitobj, &sp5e8, 0.0f);
+								}
+							}
+						} else if (weapon->weaponnum == WEAPON_ROCKET || weapon->weaponnum == WEAPON_HOMINGROCKET) {
+							int ownerplayernum = (obj->hidden & 0xf0000000) >> 28;
+
+							if (g_EmbedProp->type == PROPTYPE_CHR || (g_EmbedProp->type == PROPTYPE_PLAYER && g_EmbedProp->chr)) {
+								struct prop *ownerprop2 = NULL;
+
+								if (g_Vars.normmplayerisrunning) {
+									struct chrdata *ownerchr = mpGetChrFromPlayerIndex(ownerplayernum);
+
+									if (ownerchr != NULL) {
+										ownerprop2 = ownerchr->prop;
+									}
+								}
+
+								func0f0341dc(g_EmbedProp->chr, 2.0f, &var8009ce78, &weapon->gset, ownerprop2,
+										g_EmbedHitPart, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
+							} else if (g_EmbedProp->type == PROPTYPE_OBJ || g_EmbedProp->type == PROPTYPE_WEAPON) {
+								if (g_HitTextureNum == 10000) {
+									float shield = (g_EmbedProp->obj->flags3 & OBJFLAG3_SHOWSHIELD) ? 4 : 8;
+
+									shieldhitCreate(hitprop, shield, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
+								}
+
+								objDamage(g_EmbedProp->obj, 100, &prop->pos, weapon->weaponnum, ownerplayernum);
+							}
+
+							handled = true;
+							func0f069c70(obj, true, true);
+							weapon->timer240 = 0;
+						} else {
+							if (hitprop->type == PROPTYPE_CHR || (hitprop->type == PROPTYPE_PLAYER && hitprop->chr)) {
+								struct chrdata *chr = hitprop->chr;
+								func0f034080(chr, g_EmbedNode, g_EmbedProp, g_EmbedModel, g_EmbedSide, var8006993c);
+							} else if ((hitprop->type == PROPTYPE_OBJ || hitprop->type == PROPTYPE_WEAPON) && g_HitTextureNum == 10000) {
+								shield = (hitprop->obj->flags3 & OBJFLAG3_SHOWSHIELD) ? 4 : 8;
+
+								shieldhitCreate(hitprop, shield, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
+							}
+						}
+					}
+
+					if (!handled && stick) {
+						handled = true;
+
+						func0f069c70(obj, true, true);
+
+						if (obj->type == OBJTYPE_WEAPON) {
+							struct weaponobj *weapon = (struct weaponobj *) obj;
+
+							if (weapon->weaponnum == WEAPON_BOLT || weapon->weaponnum == WEAPON_COMBATKNIFE) {
+								if (obj->projectile->ownerprop && obj->projectile->ownerprop->type == PROPTYPE_PLAYER) {
+									int prevplayernum = g_Vars.currentplayernum;
+									setCurrentPlayerNum(playermgrGetPlayerNumByProp(obj->projectile->ownerprop));
+									mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_TOTAL);
+
+									if (g_EmbedProp != NULL) {
+										if (g_EmbedProp->type == PROPTYPE_OBJ) {
+											if (objIsHealthy(g_EmbedProp->obj)) {
+												mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_OBJECT);
+											}
+										} else if (g_EmbedProp->type == PROPTYPE_CHR || g_EmbedProp->type == PROPTYPE_PLAYER) {
+											struct chrdata *embedchr = g_EmbedProp->chr;
+											bool dead = false;
+
+											if (embedchr && embedchr->actiontype == ACT_DEAD) {
+												dead = true;
+											}
+
+											if (g_EmbedProp->type == PROPTYPE_PLAYER && g_Vars.players[playermgrGetPlayerNumByProp(g_EmbedProp)]->isdead) {
+												dead = true;
+											}
+
+											if (!dead) {
+												switch (g_EmbedHitPart) {
+												case 0:
+													break;
+												case HITPART_HEAD:
+													mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_HEAD);
+													break;
+												case HITPART_GUN:
+													mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_GUN);
+													break;
+												case HITPART_HAT:
+													mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_HAT);
+													break;
+												case HITPART_PELVIS:
+												case HITPART_TORSO:
+													mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_BODY);
+													break;
+												default:
+													mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_LIMB);
+													break;
+												}
+											}
 										}
 									}
 
-									cdresult = func0f072144(obj, &sp59c, 0.0f, true);
+									setCurrentPlayerNum(prevplayernum);
+								}
 
-									if (cdresult == CDRESULT_COLLISION) {
-										objCollide(obj, &sp59c, 0.0f);
+								if (hitprop == NULL || hitprop->type == PROPTYPE_OBJ || hitprop->type == PROPTYPE_WEAPON || hitprop->type == PROPTYPE_DOOR) {
+									struct coord dir;
+									struct prop *ownerprop = obj->projectile->ownerprop;
+
+									dir.x = projectile->speed.x;
+									dir.y = projectile->speed.y;
+									dir.z = projectile->speed.z;
+
+									utilsNormalizeF(&dir.x, &dir.y, &dir.z);
+
+									if (chrIsUsingPaintball(ownerprop ? ownerprop->chr : NULL)) {
+										sparksCreate(prop->rooms[0], prop, &sp5e8, &dir, &sp5f4, SPARKTYPE_PAINT);
+									} else {
+										sparksCreate(prop->rooms[0], prop, &sp5e8, &dir, &sp5f4, SPARKTYPE_PROJECTILE);
 									}
 								}
 							}
 						}
 
-						if (cdresult == CDRESULT_NOCOLLISION) {
-							projectile->speed.x = sp590.x;
-							projectile->speed.y = sp590.y;
-							projectile->speed.z = sp590.z;
-						}
+						objLand(prop, &sp5e8, &sp5f4, embedded);
 					}
 				}
 
-				if (cdresult != CDRESULT_NOCOLLISION) {
-					projectile->unk0dc = 0.0f;
-					projectile->speed.z = 0.0f;
-					projectile->speed.x = 0.0f;
-				}
+				if (!handled) {
+					if (cdresult != CDRESULT_COLLISION) {
+						RoomNum rooms[8];
 
-				if (projectile->ownerprop) {
-					propSetPerimEnabled(projectile->ownerprop, true);
-				}
+						propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp5dc, rooms);
 
-				if (projectile->speed.f[0] == 0.0f && projectile->speed.f[2] == 0.0f && projectile->unk0dc == 0.0f) {
-					objFreeProjectile(obj);
-				}
+						prop->pos.x = sp5dc.x;
+						prop->pos.y = sp5dc.y;
+						prop->pos.z = sp5dc.z;
 
-				if (cdresult == CDRESULT_NOCOLLISION) {
-					ground = cdFindGroundAtCyl(&prop->pos, 2, prop->rooms, &obj->floorcol, NULL);
-
-					if (ground > -30000.0f) {
-						prop->pos.y = ground + objGetHovBobOffsetY(obj);
-					}
-				}
-
-				func0f069c70(obj, false, true);
-				mtx3ToMtx4(obj->realrot, (Mtx*)&sp484);
-				mtx4SetTranslation(&prop->pos, (Mtx*)&sp484);
-				mtx000172f0(sp504.m, sp4c4.m);
-				mtx4MultMtx4((Mtx*)&sp484, (Mtx*)&sp4c4, (Mtx*)&sp544);
-				platformDisplaceProps2(prop, &sp544);
-				result = true;
-			} else if (projectile->flags & PROJECTILEFLAG_AIRBORNE) {
-				float sp390;
-				RoomNum roomnum;
-				struct coord sp380;
-				float sp37c;
-				float realrot[3][3];
-				bool sp354 = false;
-				bool sp350 = false;
-				bool handled = false;
-				Mtxf sp30c;
-				bool homingrocket;
-
-				projectile->losttimer240 += g_Vars.lvupdate240;
-
-				if (((projectile->flags & PROJECTILEFLAG_NOTIMELIMIT) == 0 && projectile->losttimer240 > TICKS(9600))
-						|| prop->pos.y < -20000.0f || prop->pos.y > 32000.0f
-						|| prop->pos.x < -32000.0f || prop->pos.x > 32000.0f
-						|| prop->pos.z < -32000.0f || prop->pos.z > 32000.0f) {
-					obj->hidden |= OBJHFLAG_DELETING;
-				}
-
-				projectile->flighttime240 += g_Vars.lvupdate240;
-
-				mtx3Copy(obj->realrot, realrot);
-
-				if (projectile->flags & PROJECTILEFLAG_00000020) {
-					if (projectile->unk01c < (1.0f / 3.6f)) {
-						projectile->unk0ac += projectile->unk014 * g_Vars.lvupdate60freal;
-						projectile->unk0a8 += projectile->unk0ac * g_Vars.lvupdate60freal;
-						projectile->unk01c += (1.0f / 90.0f) * g_Vars.lvupdate60freal;
-
-						if (projectile->unk01c > (1.0f / 3.6f)) {
-							projectile->unk01c = (1.0f / 3.6f);
-						}
+						propDeregisterRooms(prop);
+						roomsCopy(rooms, prop->rooms);
 					} else {
-						if (projectile->unk0a8 > sp5dc.y) {
-							projectile->unk0ac += projectile->unk014 * g_Vars.lvupdate60freal;
-							projectile->unk0a8 += projectile->unk0ac * g_Vars.lvupdate60freal;
+						RoomNum rooms[8];
 
-							sp5dc.y += 0.07f * (projectile->unk0a8 - sp5dc.y) * g_Vars.lvupdate60freal;
+						if (g_EmbedProp && (g_EmbedProp->type == PROPTYPE_CHR || g_EmbedProp->type == PROPTYPE_PLAYER)) {
+							sp5dc.x = prop->pos.x;
+							sp5dc.z = prop->pos.z;
 						} else {
-							sp5dc.y = projectile->unk0a8;
-
-							projectile->flags &= ~PROJECTILEFLAG_00000020;
-							projectile->flags |= PROJECTILEFLAG_POWERED;
-							projectile->speed.y = projectile->unk0ac;
-							projectile->unk01c = 0.0f;
+							sp5dc.x = sp5e8.x;
+							sp5dc.y = sp5e8.y;
+							sp5dc.z = sp5e8.z;
 						}
+
+						propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp5dc, rooms);
+
+						prop->pos.x = sp5dc.x;
+						prop->pos.y = sp5dc.y;
+						prop->pos.z = sp5dc.z;
+
+						propDeregisterRooms(prop);
+						roomsCopy(rooms, prop->rooms);
 					}
 				}
+			}
 
-				homingrocket = false;
+			if (!handled) {
+				uint16_t geoflags;
 
-				if (obj->type == OBJTYPE_WEAPON && ((struct weaponobj *)obj)->weaponnum == WEAPON_HOMINGROCKET) {
-					homingrocket = true;
-				}
+				sp37c = objGetRotatedLocalYMinByMtx3(objFindBboxRodata(obj), obj->realrot);
 
-				if (homingrocket) {
-					struct coord sp2f8 = {0, 0, 0};
-					struct coord sp2ec = {0, 0, 1};
-					struct coord sp2e0 = {0, 1, 0};
+				sp5ac.x = prop->pos.x;
+				sp5ac.y = prop->pos.y + sp37c;
+				sp5ac.z = prop->pos.z;
 
-					if (obj && obj->prop && projectile->targetprop) {
-						Mtxf mtx;
-						float sp29c = sqrtf(obj->realrot[0][0] * obj->realrot[0][0] + obj->realrot[1][0] * obj->realrot[1][0] + obj->realrot[2][0] * obj->realrot[2][0]);
-						struct coord sp290;
-						float sp28c;
+				roomnum = cdFindCeilingRoomYColourFlagsNormalAtPos(&sp5ac, prop->rooms, &sp390, &obj->floorcol, &geoflags, &sp380);
 
-						mtxIdent((Mtx*)&mtx);
+				if (roomnum > 0
+						&& prop->pos.y + sp37c < sp390
+						&& !cdTestLos03(&sp5c8, sp5b8, &sp5ac, CDTYPE_OBJS | CDTYPE_BG, GEOFLAG_FLOOR1 | GEOFLAG_FLOOR2))
+				{
+					sp354 = true;
+					sp5f4.x = sp380.x;
+					sp5f4.y = sp380.y;
+					sp5f4.z = sp380.z;
 
-						mtx.m[0][0] = obj->realrot[0][0] / sp29c;
-						mtx.m[0][1] = obj->realrot[0][1] / sp29c;
-						mtx.m[0][2] = obj->realrot[0][2] / sp29c;
-						mtx.m[1][0] = obj->realrot[1][0] / sp29c;
-						mtx.m[1][1] = obj->realrot[1][1] / sp29c;
-						mtx.m[1][2] = obj->realrot[1][2] / sp29c;
-						mtx.m[2][0] = obj->realrot[2][0] / sp29c;
-						mtx.m[2][1] = obj->realrot[2][1] / sp29c;
-						mtx.m[2][2] = obj->realrot[2][2] / sp29c;
+					utilsNormalizeF(&sp5f4.x, &sp5f4.y, &sp5f4.z);
 
-						sp2f8.x = obj->prop->pos.x;
-						sp2f8.y = obj->prop->pos.y;
-						sp2f8.z = obj->prop->pos.z;
+					sp5e8.x = prop->pos.x;
+					sp5e8.y = sp390;
+					sp5e8.z = prop->pos.z;
 
-						sp290.x = projectile->targetprop->pos.x - sp2f8.x;
-						sp290.y = projectile->targetprop->pos.y - sp2f8.y;
-						sp290.z = projectile->targetprop->pos.z - sp2f8.z;
+					cdresult = CDRESULT_COLLISION;
 
-						utilsNormalizeF(&sp290.x, &sp290.y, &sp290.z);
-
-						sp2ec.x = projectile->speed.x;
-						sp2ec.y = projectile->speed.y;
-						sp2ec.z = projectile->speed.z;
-
-						utilsNormalizeF(&sp2ec.x, &sp2ec.y, &sp2ec.z);
-
-						sp28c = acosf(sp2ec.f[0] * sp290.f[0] + sp2ec.f[1] * sp290.f[1] + sp2ec.f[2] * sp290.f[2]);
-
-						if (sp28c > 0.001f || sp28c < -0.001f) {
-							struct coord sp280;
-							float sp270[4];
-							float sp260[4];
-							float sp250[4];
-							float angle;
-							Mtxf sp20c;
-							float tmp;
-
-							static float var80069bc4 = 0;
-							static uint32_t kkg = 3;
-							static uint32_t kkd = 20;
-							static uint32_t kkp = 120;
-
-							tmp = ((kkd / 100.0f * var80069bc4 / LVUPDATE60FREAL()) + (kkp / 100.00f * sp28c * LVUPDATE60FREAL())) * (kkg / 100.000f);
-
-							var80069bc4 = sp28c;
-
-							sp280.x = sp2ec.f[1] * sp290.f[2] - sp2ec.f[2] * sp290.f[1];
-							sp280.y = -(sp2ec.f[0] * sp290.f[2] - sp2ec.f[2] * sp290.f[0]);
-							sp280.z = sp2ec.f[0] * sp290.f[1] - sp2ec.f[1] * sp290.f[0];
-
-							sp260[0] = cosf(tmp * 0.5f);
-							sp260[1] = sp280.f[0] * sinf(tmp * 0.5f);
-							sp260[2] = sp280.f[1] * sinf(tmp * 0.5f);
-							sp260[3] = sp280.f[2] * sinf(tmp * 0.5f);
-
-							quaternionToMtxF(sp260, &sp20c);
-
-							projectile->unk018 = 0.0f;
-							projectile->unk014 = 0.0f;
-							projectile->unk010 = 0.0f;
-
-							mtx4RotateVecInPlace((Mtx*)&sp20c, &projectile->speed);
-
-							quaternion3x3MtxToQuatF(&mtx, sp270);
-							quaternionMultQuaternion(sp270, sp260, sp250);
-							quaternionToMtxF(sp250, &sp20c);
-
-							obj->realrot[0][0] = sp20c.m[0][0] * sp29c;
-							obj->realrot[0][1] = sp20c.m[0][1] * sp29c;
-							obj->realrot[0][2] = sp20c.m[0][2] * sp29c;
-							obj->realrot[1][0] = sp20c.m[1][0] * sp29c;
-							obj->realrot[1][1] = sp20c.m[1][1] * sp29c;
-							obj->realrot[1][2] = sp20c.m[1][2] * sp29c;
-							obj->realrot[2][0] = sp20c.m[2][0] * sp29c;
-							obj->realrot[2][1] = sp20c.m[2][1] * sp29c;
-							obj->realrot[2][2] = sp20c.m[2][2] * sp29c;
-						}
+					if (geoflags & GEOFLAG_DIE) {
+						obj->hidden |= OBJHFLAG_DELETING;
 					}
-				}
-
-				if ((projectile->flags & PROJECTILEFLAG_POWERED) == 0) {
-					// Apply gravity
-					float f0;
-
-					projectile->speed.y += (projectile->unk014 + projectile->unk01c) * g_Vars.lvupdate60freal;
-
-					if (projectile->flags & PROJECTILEFLAG_LIGHTWEIGHT) {
-						f0 = projectile->speed.y - (1.0f / 7.2f) * g_Vars.lvupdate60freal;
-					} else {
-						f0 = projectile->speed.y - (1.0f / 3.6f) * g_Vars.lvupdate60freal;
-					}
-
-					sp5dc.y += g_Vars.lvupdate60freal * (projectile->speed.y + f0) * 0.5f;
-
-					projectile->speed.y = f0;
 				} else {
-					projectile->speed.y += (projectile->unk014 + projectile->unk01c) * g_Vars.lvupdate60freal;
-					sp5dc.y += projectile->speed.y * g_Vars.lvupdate60freal;
+					roomnum = cdFindFloorRoomYColourNormalPropAtPos(&prop->pos, prop->rooms, &sp390, &obj->floorcol, &sp380, NULL);
+
+					if (roomnum <= 0 && (projectile->flags & PROJECTILEFLAG_STICKY) == 0) {
+						if ((projectile->flags & PROJECTILEFLAG_00010000) == 0) {
+							projectile->flags |= PROJECTILEFLAG_00010000;
+
+							if (cdFindFloorRoomAtPos(&sp5c8, sp5b8) > 0) {
+								projectile->flags |= PROJECTILEFLAG_INROOM;
+							}
+						}
+
+						if (projectile->flags & PROJECTILEFLAG_INROOM) {
+							prop->pos.x = sp5c8.x;
+							prop->pos.y = sp5c8.y;
+							prop->pos.z = sp5c8.z;
+
+							propDeregisterRooms(prop);
+							roomsCopy(sp5b8, prop->rooms);
+
+							roomnum = cdFindFloorRoomYColourFlagsAtPos(&prop->pos, prop->rooms, &sp390, &obj->floorcol, NULL);
+
+							projectile->speed.x = 0.0f;
+							projectile->speed.z = 0.0f;
+						}
+					}
 				}
 
-				projectile->speed.x += projectile->unk010 * g_Vars.lvupdate60freal;
-				projectile->speed.z += projectile->unk018 * g_Vars.lvupdate60freal;
+				if (roomnum > 0) {
+					projectile->flags |= PROJECTILEFLAG_INROOM;
+				} else {
+					projectile->flags &= ~PROJECTILEFLAG_INROOM;
+				}
 
-				sp5dc.x += projectile->speed.x * g_Vars.lvupdate60freal;
-				sp5dc.z += projectile->speed.z * g_Vars.lvupdate60freal;
+				if (cdresult == CDRESULT_COLLISION) {
+					// Bouncing
+					if ((projectile->speed.y <= 0.0f && sp5c8.y <= prop->pos.y)
+							|| ((projectile->flags & PROJECTILEFLAG_STICKY) == 0 && sp354)) {
+						sp350 = true;
+					}
 
-				mtx3ToMtx4(obj->realrot, (Mtx*)&sp30c);
-				mtxApplyRotation((Mtx*)&sp30c, (Mtx*)&projectile->mtx, g_Vars.lvupdate240); // Makes projectiles spin as they fall. This includes dropped weapons.
-				mtx4ToMtx3((Mtx*)&sp30c, obj->realrot);
+					if (projectile->bounciness > 0.0f) {
+						float oldyspeed;
+						float f0 = projectile->speed.f[0] * sp5f4.f[0] + projectile->speed.f[1] * sp5f4.f[1] + projectile->speed.f[2] * sp5f4.f[2];
+
+						f0 *= -(projectile->bounciness + 1.0f);
+
+						oldyspeed = projectile->speed.y;
+
+						projectile->speed.x += f0 * sp5f4.x;
+						projectile->speed.y += f0 * sp5f4.y;
+						projectile->speed.z += f0 * sp5f4.z;
+
+						if (oldyspeed <= 0.0f && projectile->speed.y >= 0.0f) {
+							sp350 = true;
+						}
+
+						if (obj->type == OBJTYPE_WEAPON) {
+							struct weaponobj *weapon = (struct weaponobj *) obj;
+
+							if (weapon->weaponnum == WEAPON_GRENADE && weapon->gunfunc == FUNC_SECONDARY) {
+								smokeCreateAtProp(prop, SMOKETYPE_PINBALL);
+							}
+						}
+					}
+
+					if (sp350) {
+						prop->pos.y = sp5e8.y - sp37c;
+
+						if (sp354) {
+							prop->pos.y += func0f06a620(obj);
+						}
+					}
+
+					if ((projectile->flags & PROJECTILEFLAG_00000100) == 0
+							&& (projectile->bounceframe < 0 || projectile->bounceframe < g_Vars.lvframe60 - TICKS(60))) {
+						mtxLoadRandomRotation((Mtx*)&projectile->mtx);
+					}
+
+					projectile->bouncecount++;
+					projectile->bounceframe = g_Vars.lvframe60;
+
+					if ((obj->hidden & OBJHFLAG_00010000) == 0) {
+						obj->hidden |= OBJHFLAG_DAMAGEFORBOUNCE;
+					}
+
+					if (sp350) {
+						if ((projectile->flags & PROJECTILEFLAG_STICKY) == 0 && projectile->bouncecount >= 6) {
+							if (sp354) {
+								projectileFall(obj, realrot);
+							}
+						} else if (projectile->bounciness > 0.0f) {
+							if (projectile->speed.y >= 0.0f && projectile->speed.y < 2.2222223f) {
+								if ((projectile->flags & PROJECTILEFLAG_00000002) && projectile->bouncecount == 1) {
+									projectile->speed.y = 2.2222223f;
+								} else {
+									if (sp354) {
+										projectileFall(obj, realrot);
+									}
+								}
+							}
+						} else {
+							if (sp354) {
+								projectileFall(obj, realrot);
+							}
+						}
+					}
+				}
+
+				if (obj->type == OBJTYPE_WEAPON) {
+					struct weaponobj *weapon = (struct weaponobj *) obj;
+
+					if (weapon->weaponnum == WEAPON_COMBATKNIFE && weapon->gunfunc == FUNC_SECONDARY) {
+						knifePlayWooshSound(obj);
+					} else if (weapon->weaponnum == WEAPON_ROCKET) {
+						if (cdresult == CDRESULT_COLLISION) {
+							weapon->timer240 = 0;
+						} else {
+							float tmp = projectile->speed.f[0] * projectile->speed.f[0]
+								+ projectile->speed.f[1] * projectile->speed.f[1]
+								+ projectile->speed.f[2] * projectile->speed.f[2];
+
+							if (tmp > 27777.773f) {
+								projectile->unk010 = 0.0f;
+								projectile->unk014 = 0.0f;
+								projectile->unk018 = 0.0f;
+							}
+
+							if (projectile->powerlimit240 >= 0 && projectile->flighttime240 > projectile->powerlimit240) {
+								projectile->unk01c = 0.0f;
+								projectile->flags &= ~(PROJECTILEFLAG_POWERED | PROJECTILEFLAG_00000020);
+							} else {
+								struct coord smokepos;
+
+								smokepos.x = projectile->speed.x;
+								smokepos.y = projectile->speed.y;
+								smokepos.z = projectile->speed.z;
+
+								utilsNormalizeF(&smokepos.x, &smokepos.y, &smokepos.z);
+
+								smokepos.x = prop->pos.x - smokepos.x * 20.0f;
+								smokepos.y = prop->pos.y - smokepos.y * 20.0f;
+								smokepos.z = prop->pos.z - smokepos.z * 20.0f;
+
+								smokeCreateSimple(&smokepos, prop->rooms, SMOKETYPE_ROCKETTAIL);
+							}
+						}
+					} else if (weapon->weaponnum == WEAPON_HOMINGROCKET) {
+						if (cdresult == CDRESULT_COLLISION) {
+							weapon->timer240 = 0;
+						} else {
+							smokeCreateSimple(&prop->pos, prop->rooms, SMOKETYPE_HOMINGTAIL);
+						}
+					} else if (weapon->weaponnum == WEAPON_GRENADEROUND
+							|| (weapon->weaponnum == WEAPON_NBOMB && weapon->gunfunc == FUNC_PRIMARY)) {
+						if (sp350
+								|| (projectile->flags & PROJECTILEFLAG_FALLING)
+								|| (projectile->speed.x < 0.1f && projectile->speed.x > -0.1f
+									&& projectile->speed.y < 0.1f && projectile->speed.y > -0.1f
+									&& projectile->speed.z < 0.1f && projectile->speed.z > -0.1f)
+								|| (prop->pos.x - sp5c8.x < 0.1f && prop->pos.x - sp5c8.x > -0.1f
+									&& prop->pos.y - sp5c8.y < 0.1f && prop->pos.y - sp5c8.y > -0.1f
+									&& prop->pos.z - sp5c8.z < 0.1f && prop->pos.z - sp5c8.z > -0.1f)) {
+							if (weapon->weaponnum != WEAPON_NBOMB || weapon->timer240 >= 0) {
+								weapon->timer240 = 0;
+							}
+						} else if (weapon->weaponnum != WEAPON_NBOMB) {
+							smokeCreateSimple(&prop->pos, prop->rooms, SMOKETYPE_GRENADETAIL);
+						}
+					}
+
+					if (cdresult == CDRESULT_COLLISION) {
+						if (projectile->unk0a4 < g_Vars.lvframenum - 2) {
+							if (weapon->weaponnum == WEAPON_COMBATKNIFE || weapon->weaponnum == WEAPON_COMBATKNIFE) {
+								psCreate(0, prop, SFX_808B, -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
+							} else if (weapon->weaponnum == WEAPON_GRENADE && weapon->gunfunc == FUNC_SECONDARY) {
+								uint16_t sp100[] = {SFX_0027, SFX_0028, SFX_0029, SFX_002A};
+
+								psCreate(0, prop, sp100[rngRandom() % 4], -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
+								psCreate(0, prop, SFX_EYESPYHIT, -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
+							} else {
+								psCreate(0, prop, SFX_EYESPYHIT, -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
+							}
+						}
+
+						projectile->unk0a4 = g_Vars.lvframenum;
+					}
+				}
+
+				func0f069c70(obj, true, true);
+			}
+		} else if (projectile->flags & PROJECTILEFLAG_FALLING) {
+			// Some objects are placed in mid-air and then given this flag
+			// at level start, which causes them fall down to their resting
+			// position. Once stopped, the flag is removed.
+			bool stop = true;
+			float quaternion[4];
+			Mtx spac;
+
+			if (projectile->unk060 < 1.0f) {
+				projectile->unk060 += projectile->unk064 * g_Vars.lvupdate60freal;
+
+				if (g_Vars.lvupdate60 > 0) {
+					projectile->unk064 *= 1.1f;
+				}
+
+				if (projectile->unk060 > 1.0f) {
+					projectile->unk060 = 1.0f;
+				}
+
+				quaternionSlerp(projectile->unk068, projectile->unk078, projectile->unk060, quaternion);
+				quaternionToMtx(quaternion, &spac);
+				mtxScaleRow0Vec(projectile->unk0b8[0], &spac);
+				mtxScaleRow1Vec(projectile->unk0b8[1], &spac);
+				mtxScaleRow2Vec(projectile->unk0b8[2], &spac);
+				mtx4ToMtx3(&spac, obj->realrot);
+				stop = false;
+			}
+
+			if (projectile->speed.f[0] != 0.0f || projectile->speed.f[2] != 0.0f || projectile->unk060 < 1.0f) {
+				float f12;
+				float spa4;
+				RoomNum roomnum;
+				float sp98 = objGetRotatedLocalYMinByMtx3(objFindBboxRodata(obj), obj->realrot);
+				uint16_t geoflags;
+
+				stop = false;
+
+				for (int i = 0; i < g_Vars.lvupdate60; i++) {
+					sp5dc.x += projectile->speed.x;
+					sp5dc.z += projectile->speed.z;
+
+					if (projectile->unk060 >= 1.0f) {
+						if (projectile->unk098 > 0.0f) {
+							float dist = sqrtf(projectile->speed.f[0] * projectile->speed.f[0] + projectile->speed.f[2] * projectile->speed.f[2]);
+
+							if (dist > 0.0f) {
+								f12 = projectile->unk098 * g_Vars.lvupdate60freal / dist;
+
+								if (f12 >= 1.0f) {
+									projectile->speed.x = 0.0f;
+									projectile->speed.z = 0.0f;
+								} else {
+									projectile->speed.x -= projectile->speed.x * f12;
+									projectile->speed.z -= projectile->speed.z * f12;
+								}
+							} else {
+								projectile->speed.x = 0.0f;
+								projectile->speed.z = 0.0f;
+							}
+						} else {
+							projectile->speed.x *= 0.9f;
+							projectile->speed.z *= 0.9f;
+						}
+					}
+				}
 
 				sp5c8.x = prop->pos.x;
 				sp5c8.y = prop->pos.y;
 				sp5c8.z = prop->pos.z;
 
 				roomsCopy(prop->rooms, sp5b8);
-
-				if (projectile->ownerprop) {
-					propSetPerimEnabled(projectile->ownerprop, false);
-				}
-
-				if (projectile->flags & PROJECTILEFLAG_STICKY) {
-					cdresult = func0f06cd00(obj, &sp5dc, &sp5e8, &sp5f4);
-				} else {
-					cdresult = func0f06d37c(obj, &sp5dc, &sp5e8, &sp5f4);
-				}
-
-				if (projectile->ownerprop) {
-					propSetPerimEnabled(projectile->ownerprop, true);
-				}
+				projectileTryMove(obj, &sp5dc, &sp5e8, &sp5f4);
 
 				result = true;
 
-				if (projectile->flags & PROJECTILEFLAG_STICKY) {
-					if (cdresult == CDRESULT_COLLISION) {
-						bool stick = false;
-						struct prop *hitprop = NULL;
-						struct weaponobj *weapon2;
-						struct weaponobj *weapon;
+				sp5ac.x = prop->pos.x;
+				sp5ac.y = prop->pos.y + sp98;
+				sp5ac.z = prop->pos.z;
 
-						if (g_EmbedProp != NULL) {
-							hitprop = g_EmbedProp;
+				roomnum = cdFindCeilingRoomYColourFlagsAtPos(&sp5ac, prop->rooms, &spa4, &obj->floorcol, &geoflags);
 
-							while (hitprop->parent) {
-								hitprop = hitprop->parent;
-							}
-						}
-
-						if (obj->type == OBJTYPE_AUTOGUN) {
-							// Thrown laptops can stick to the BG but not props
-							if (hitprop == NULL) {
-								stick = true;
-							}
-						} else if (obj->type == OBJTYPE_WEAPON) {
-							weapon2 = (struct weaponobj *) obj;
-
-							if (weapon2->weaponnum == WEAPON_REMOTEMINE
-									|| weapon2->weaponnum == WEAPON_TIMEDMINE
-									|| weapon2->weaponnum == WEAPON_PROXIMITYMINE
-									|| weapon2->weaponnum == WEAPON_COMMSRIDER
-									|| weapon2->weaponnum == WEAPON_TRACERBUG
-									|| weapon2->weaponnum == WEAPON_TARGETAMPLIFIER
-									|| weapon2->weaponnum == WEAPON_BOLT
-									|| weapon2->weaponnum == WEAPON_COMBATKNIFE
-									|| weapon2->weaponnum == WEAPON_ECMMINE
-									|| gsetHasFunctionFlags(&weapon2->gset, FUNCFLAG_STICKTOWALL)) {
-								stick = true;
-
-								if (weapon2->weaponnum == WEAPON_GRENADEROUND && weapon2->gunfunc == FUNC_SECONDARY) {
-									if (weapon2->timer240 == 1) {
-										stick = false;
-										weapon2->timer240 = 0;
-									} else {
-										weapon2->timer240 = TICKS(480);
-									}
-								}
-							}
-						}
-
-						if (stick) {
-							weapon = NULL;
-
-							if (obj->type == OBJTYPE_WEAPON) {
-								weapon = (struct weaponobj *) obj;
-							}
-
-							if (g_EmbedProp && (g_EmbedProp->type == PROPTYPE_OBJ || g_EmbedProp->type == PROPTYPE_WEAPON || g_EmbedProp->type == PROPTYPE_DOOR)) {
-								struct defaultobj *embedobj = g_EmbedProp->obj;
-
-								if (weapon
-										&& (weapon->weaponnum == WEAPON_BOLT || weapon->weaponnum == WEAPON_COMBATKNIFE)
-										&& embedobj->type == OBJTYPE_WEAPON) {
-									stick = false;
-								}
-							}
-
-							if (hitprop != NULL) {
-								if (hitprop->type == PROPTYPE_OBJ || hitprop->type == PROPTYPE_WEAPON || hitprop->type == PROPTYPE_DOOR) {
-									struct defaultobj *hitobj = hitprop->obj;
-
-									if ((hitobj->hidden & OBJHFLAG_PROJECTILE)
-											&& (hitobj->projectile->flags & PROJECTILEFLAG_SLIDING) == 0) {
-										stick = false;
-									}
-
-									if (var80069944 == 10000) {
-										stick = false;
-									}
-
-									if (weapon && (weapon->weaponnum == WEAPON_BOLT || weapon->weaponnum == WEAPON_COMBATKNIFE)) {
-										if (hitobj->type == OBJTYPE_GLASS || hitobj->type == OBJTYPE_TINTEDGLASS) {
-											bgunPlayGlassHitSound(&prop->pos, prop->rooms, -1);
-
-											if ((hitobj->flags2 & OBJFLAG2_IMMUNETOGUNFIRE) == 0) {
-												objTakeGunfire(hitobj, 100, &prop->pos, weapon->weaponnum, g_Vars.currentplayernum);
-												objDropRecursively(hitprop, false);
-												stick = false;
-												handled = true;
-											}
-										}
-									}
-								} else if ((hitprop->type == PROPTYPE_CHR || hitprop->type == PROPTYPE_PLAYER)
-										&& chrGetShield(hitprop->chr) > 0.0f) {
-									stick = false;
-								}
-							}
-						}
-
-						if (!handled && g_EmbedProp && obj->type == OBJTYPE_WEAPON) {
-							struct weaponobj *weapon = (struct weaponobj *) obj;
-
-							if (weapon->weaponnum == WEAPON_BOLT || weapon->weaponnum == WEAPON_COMBATKNIFE) {
-								if (hitprop->type == PROPTYPE_CHR || (hitprop->type == PROPTYPE_PLAYER && hitprop->chr)) {
-									struct chrdata *hitchr = hitprop->chr;
-
-									if ((obj->projectile->flags & PROJECTILEFLAG_AIRBORNE) && obj->projectile->bouncecount <= 0) {
-										float ownershield;
-										struct prop *ownerprop;
-
-										ownerprop = obj->projectile->ownerprop;
-										ownershield = chrGetShield(hitchr);
-
-										func0f0341dc(hitchr, gsetGetDamage(&weapon->gset), &var8009ce78, &weapon->gset, ownerprop,
-												g_EmbedHitPart, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
-
-										if (ownershield <= 0.0f) {
-											chrEmitSparks(hitchr, g_EmbedProp, g_EmbedHitPart, &sp5e8, &sp5f4, ownerprop ? ownerprop->chr : NULL);
-
-											if (g_EmbedProp->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
-												if (g_EmbedModel && g_EmbedHitPart != HITPART_GUN && g_EmbedHitPart != HITPART_HAT) {
-													struct coord sp1c8;
-													Mtxf sp188;
-													Mtxf *sp184;
-
-													sp184 = modelFindNodeMtx(g_EmbedModel, g_EmbedNode, 0);
-													mtx4TransformVec((Mtx*)camGetWorldToScreenMtxf(), &sp5e8, &sp1c8);
-													mtx0001719c(sp184->m, sp188.m);
-													mtx4TransformVecInPlace((Mtx*)&sp188, &sp1c8);
-
-													chr0f0260c4(g_EmbedModel, g_EmbedHitPart, g_EmbedNode, &sp1c8);
-												}
-											}
-										}
-									}
-								} else if (hitprop->type == PROPTYPE_OBJ) {
-									struct defaultobj *hitobj = hitprop->obj;
-
-									if (var80069944 == 10000) {
-										shield = (hitobj->flags3 & OBJFLAG3_SHOWSHIELD) ? 4 : 8;
-
-										shieldhitCreate(hitprop, shield, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
-									}
-
-									if (hitobj->modelnum == MODEL_TARGET && var80069944 == TEXTURE_0B9E) {
-										frCalculateHit(hitobj, &sp5e8, 0.0f);
-									}
-								}
-							} else if (weapon->weaponnum == WEAPON_ROCKET || weapon->weaponnum == WEAPON_HOMINGROCKET) {
-								int ownerplayernum = (obj->hidden & 0xf0000000) >> 28;
-
-								if (g_EmbedProp->type == PROPTYPE_CHR || (g_EmbedProp->type == PROPTYPE_PLAYER && g_EmbedProp->chr)) {
-									struct prop *ownerprop2 = NULL;
-
-									if (g_Vars.normmplayerisrunning) {
-										struct chrdata *ownerchr = mpGetChrFromPlayerIndex(ownerplayernum);
-
-										if (ownerchr != NULL) {
-											ownerprop2 = ownerchr->prop;
-										}
-									}
-
-									func0f0341dc(g_EmbedProp->chr, 2.0f, &var8009ce78, &weapon->gset, ownerprop2,
-											g_EmbedHitPart, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
-								} else if (g_EmbedProp->type == PROPTYPE_OBJ || g_EmbedProp->type == PROPTYPE_WEAPON) {
-									if (var80069944 == 10000) {
-										float shield = (g_EmbedProp->obj->flags3 & OBJFLAG3_SHOWSHIELD) ? 4 : 8;
-
-										shieldhitCreate(hitprop, shield, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
-									}
-
-									objDamage(g_EmbedProp->obj, 100, &prop->pos, weapon->weaponnum, ownerplayernum);
-								}
-
-								handled = true;
-								func0f069c70(obj, true, true);
-								weapon->timer240 = 0;
-							} else {
-								if (hitprop->type == PROPTYPE_CHR || (hitprop->type == PROPTYPE_PLAYER && hitprop->chr)) {
-									struct chrdata *chr = hitprop->chr;
-									func0f034080(chr, g_EmbedNode, g_EmbedProp, g_EmbedModel, g_EmbedSide, var8006993c);
-								} else if ((hitprop->type == PROPTYPE_OBJ || hitprop->type == PROPTYPE_WEAPON) && var80069944 == 10000) {
-									shield = (hitprop->obj->flags3 & OBJFLAG3_SHOWSHIELD) ? 4 : 8;
-
-									shieldhitCreate(hitprop, shield, g_EmbedProp, g_EmbedNode, g_EmbedModel, g_EmbedSide, var8006993c);
-								}
-							}
-						}
-
-						if (!handled && stick) {
-							handled = true;
-
-							func0f069c70(obj, true, true);
-
-							if (obj->type == OBJTYPE_WEAPON) {
-								struct weaponobj *weapon = (struct weaponobj *) obj;
-
-								if (weapon->weaponnum == WEAPON_BOLT || weapon->weaponnum == WEAPON_COMBATKNIFE) {
-									if (obj->projectile->ownerprop && obj->projectile->ownerprop->type == PROPTYPE_PLAYER) {
-										int prevplayernum = g_Vars.currentplayernum;
-										setCurrentPlayerNum(playermgrGetPlayerNumByProp(obj->projectile->ownerprop));
-										mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_TOTAL);
-
-										if (g_EmbedProp != NULL) {
-											if (g_EmbedProp->type == PROPTYPE_OBJ) {
-												if (objIsHealthy(g_EmbedProp->obj)) {
-													mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_OBJECT);
-												}
-											} else if (g_EmbedProp->type == PROPTYPE_CHR || g_EmbedProp->type == PROPTYPE_PLAYER) {
-												struct chrdata *embedchr = g_EmbedProp->chr;
-												bool dead = false;
-
-												if (embedchr && embedchr->actiontype == ACT_DEAD) {
-													dead = true;
-												}
-
-												if (g_EmbedProp->type == PROPTYPE_PLAYER && g_Vars.players[playermgrGetPlayerNumByProp(g_EmbedProp)]->isdead) {
-													dead = true;
-												}
-
-												if (!dead) {
-													switch (g_EmbedHitPart) {
-													case 0:
-														break;
-													case HITPART_HEAD:
-														mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_HEAD);
-														break;
-													case HITPART_GUN:
-														mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_GUN);
-														break;
-													case HITPART_HAT:
-														mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_HAT);
-														break;
-													case HITPART_PELVIS:
-													case HITPART_TORSO:
-														mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_BODY);
-														break;
-													default:
-														mpstatsIncrementPlayerShotCount(&weapon->gset, SHOTREGION_LIMB);
-														break;
-													}
-												}
-											}
-										}
-
-										setCurrentPlayerNum(prevplayernum);
-									}
-
-									if (hitprop == NULL || hitprop->type == PROPTYPE_OBJ || hitprop->type == PROPTYPE_WEAPON || hitprop->type == PROPTYPE_DOOR) {
-										struct coord dir;
-										struct prop *ownerprop = obj->projectile->ownerprop;
-
-										dir.x = projectile->speed.x;
-										dir.y = projectile->speed.y;
-										dir.z = projectile->speed.z;
-
-										utilsNormalizeF(&dir.x, &dir.y, &dir.z);
-
-										if (chrIsUsingPaintball(ownerprop ? ownerprop->chr : NULL)) {
-											sparksCreate(prop->rooms[0], prop, &sp5e8, &dir, &sp5f4, SPARKTYPE_PAINT);
-										} else {
-											sparksCreate(prop->rooms[0], prop, &sp5e8, &dir, &sp5f4, SPARKTYPE_PROJECTILE);
-										}
-									}
-								}
-							}
-
-							objLand(prop, &sp5e8, &sp5f4, embedded);
-						}
-					}
-
-					if (!handled) {
-						if (cdresult != CDRESULT_COLLISION) {
-							RoomNum rooms[8];
-
-							propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp5dc, rooms);
-
-							prop->pos.x = sp5dc.x;
-							prop->pos.y = sp5dc.y;
-							prop->pos.z = sp5dc.z;
-
-							propDeregisterRooms(prop);
-							roomsCopy(rooms, prop->rooms);
-						} else {
-							RoomNum rooms[8];
-
-							if (g_EmbedProp && (g_EmbedProp->type == PROPTYPE_CHR || g_EmbedProp->type == PROPTYPE_PLAYER)) {
-								sp5dc.x = prop->pos.x;
-								sp5dc.z = prop->pos.z;
-							} else {
-								sp5dc.x = sp5e8.x;
-								sp5dc.y = sp5e8.y;
-								sp5dc.z = sp5e8.z;
-							}
-
-							propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &sp5dc, rooms);
-
-							prop->pos.x = sp5dc.x;
-							prop->pos.y = sp5dc.y;
-							prop->pos.z = sp5dc.z;
-
-							propDeregisterRooms(prop);
-							roomsCopy(rooms, prop->rooms);
-						}
-					}
+				if (roomnum <= 0 || cdTestLos03(&sp5c8, sp5b8, &sp5ac, CDTYPE_OBJS | CDTYPE_BG, GEOFLAG_FLOOR1 | GEOFLAG_FLOOR2)) {
+					roomnum = cdFindFloorRoomYColourFlagsAtPos(&prop->pos, prop->rooms, &spa4, &obj->floorcol, &geoflags);
 				}
 
-				if (!handled) {
-					uint16_t geoflags;
+				if (roomnum <= 0) {
+					prop->pos.x = sp5c8.x;
+					prop->pos.z = sp5c8.z;
 
-					sp37c = objGetRotatedLocalYMinByMtx3(objFindBboxRodata(obj), obj->realrot);
+					propDeregisterRooms(prop);
+					roomsCopy(sp5b8, prop->rooms);
+					roomnum = cdFindFloorRoomYColourFlagsAtPos(&prop->pos, prop->rooms, &spa4, &obj->floorcol, &geoflags);
 
-					sp5ac.x = prop->pos.x;
-					sp5ac.y = prop->pos.y + sp37c;
-					sp5ac.z = prop->pos.z;
-
-					roomnum = cdFindCeilingRoomYColourFlagsNormalAtPos(&sp5ac, prop->rooms, &sp390, &obj->floorcol, &geoflags, &sp380);
-
-					if (roomnum > 0
-							&& prop->pos.y + sp37c < sp390
-							&& !cdTestLos03(&sp5c8, sp5b8, &sp5ac, CDTYPE_OBJS | CDTYPE_BG, GEOFLAG_FLOOR1 | GEOFLAG_FLOOR2))
-					{
-						sp354 = true;
-						sp5f4.x = sp380.x;
-						sp5f4.y = sp380.y;
-						sp5f4.z = sp380.z;
-
-						utilsNormalizeF(&sp5f4.x, &sp5f4.y, &sp5f4.z);
-
-						sp5e8.x = prop->pos.x;
-						sp5e8.y = sp390;
-						sp5e8.z = prop->pos.z;
-
-						cdresult = CDRESULT_COLLISION;
-
-						if (geoflags & GEOFLAG_DIE) {
-							obj->hidden |= OBJHFLAG_DELETING;
-						}
-					} else {
-						roomnum = cdFindFloorRoomYColourNormalPropAtPos(&prop->pos, prop->rooms, &sp390, &obj->floorcol, &sp380, NULL);
-
-						if (roomnum <= 0 && (projectile->flags & PROJECTILEFLAG_STICKY) == 0) {
-							if ((projectile->flags & PROJECTILEFLAG_00010000) == 0) {
-								projectile->flags |= PROJECTILEFLAG_00010000;
-
-								if (cdFindFloorRoomAtPos(&sp5c8, sp5b8) > 0) {
-									projectile->flags |= PROJECTILEFLAG_INROOM;
-								}
-							}
-
-							if (projectile->flags & PROJECTILEFLAG_INROOM) {
-								prop->pos.x = sp5c8.x;
-								prop->pos.y = sp5c8.y;
-								prop->pos.z = sp5c8.z;
-
-								propDeregisterRooms(prop);
-								roomsCopy(sp5b8, prop->rooms);
-
-								roomnum = cdFindFloorRoomYColourFlagsAtPos(&prop->pos, prop->rooms, &sp390, &obj->floorcol, NULL);
-
-								projectile->speed.x = 0.0f;
-								projectile->speed.z = 0.0f;
-							}
-						}
-					}
-
-					if (roomnum > 0) {
-						projectile->flags |= PROJECTILEFLAG_INROOM;
-					} else {
-						projectile->flags &= ~PROJECTILEFLAG_INROOM;
-					}
-
-					if (cdresult == CDRESULT_COLLISION) {
-						// Bouncing
-						if ((projectile->speed.y <= 0.0f && sp5c8.y <= prop->pos.y)
-								|| ((projectile->flags & PROJECTILEFLAG_STICKY) == 0 && sp354)) {
-							sp350 = true;
-						}
-
-						if (projectile->bounciness > 0.0f) {
-							float oldyspeed;
-							float f0 = projectile->speed.f[0] * sp5f4.f[0] + projectile->speed.f[1] * sp5f4.f[1] + projectile->speed.f[2] * sp5f4.f[2];
-
-							f0 *= -(projectile->bounciness + 1.0f);
-
-							oldyspeed = projectile->speed.y;
-
-							projectile->speed.x += f0 * sp5f4.x;
-							projectile->speed.y += f0 * sp5f4.y;
-							projectile->speed.z += f0 * sp5f4.z;
-
-							if (oldyspeed <= 0.0f && projectile->speed.y >= 0.0f) {
-								sp350 = true;
-							}
-
-							if (obj->type == OBJTYPE_WEAPON) {
-								struct weaponobj *weapon = (struct weaponobj *) obj;
-
-								if (weapon->weaponnum == WEAPON_GRENADE && weapon->gunfunc == FUNC_SECONDARY) {
-									smokeCreateAtProp(prop, SMOKETYPE_PINBALL);
-								}
-							}
-						}
-
-						if (sp350) {
-							prop->pos.y = sp5e8.y - sp37c;
-
-							if (sp354) {
-								prop->pos.y += func0f06a620(obj);
-							}
-						}
-
-						if ((projectile->flags & PROJECTILEFLAG_00000100) == 0
-								&& (projectile->bounceframe < 0 || projectile->bounceframe < g_Vars.lvframe60 - TICKS(60))) {
-							mtxLoadRandomRotation((Mtx*)&projectile->mtx);
-						}
-
-						projectile->bouncecount++;
-						projectile->bounceframe = g_Vars.lvframe60;
-
-						if ((obj->hidden & OBJHFLAG_00010000) == 0) {
-							obj->hidden |= OBJHFLAG_DAMAGEFORBOUNCE;
-						}
-
-						if (sp350) {
-							if ((projectile->flags & PROJECTILEFLAG_STICKY) == 0 && projectile->bouncecount >= 6) {
-								if (sp354) {
-									projectileFall(obj, realrot);
-								}
-							} else if (projectile->bounciness > 0.0f) {
-								if (projectile->speed.y >= 0.0f && projectile->speed.y < 2.2222223f) {
-									if ((projectile->flags & PROJECTILEFLAG_00000002) && projectile->bouncecount == 1) {
-										projectile->speed.y = 2.2222223f;
-									} else {
-										if (sp354) {
-											projectileFall(obj, realrot);
-										}
-									}
-								}
-							} else {
-								if (sp354) {
-									projectileFall(obj, realrot);
-								}
-							}
-						}
-					}
-
-					if (obj->type == OBJTYPE_WEAPON) {
-						struct weaponobj *weapon = (struct weaponobj *) obj;
-
-						if (weapon->weaponnum == WEAPON_COMBATKNIFE && weapon->gunfunc == FUNC_SECONDARY) {
-							knifePlayWooshSound(obj);
-						} else if (weapon->weaponnum == WEAPON_ROCKET) {
-							if (cdresult == CDRESULT_COLLISION) {
-								weapon->timer240 = 0;
-							} else {
-								float tmp = projectile->speed.f[0] * projectile->speed.f[0]
-									+ projectile->speed.f[1] * projectile->speed.f[1]
-									+ projectile->speed.f[2] * projectile->speed.f[2];
-
-								if (tmp > 27777.773f) {
-									projectile->unk010 = 0.0f;
-									projectile->unk014 = 0.0f;
-									projectile->unk018 = 0.0f;
-								}
-
-								if (projectile->powerlimit240 >= 0 && projectile->flighttime240 > projectile->powerlimit240) {
-									projectile->unk01c = 0.0f;
-									projectile->flags &= ~(PROJECTILEFLAG_POWERED | PROJECTILEFLAG_00000020);
-								} else {
-									struct coord smokepos;
-
-									smokepos.x = projectile->speed.x;
-									smokepos.y = projectile->speed.y;
-									smokepos.z = projectile->speed.z;
-
-									utilsNormalizeF(&smokepos.x, &smokepos.y, &smokepos.z);
-
-									smokepos.x = prop->pos.x - smokepos.x * 20.0f;
-									smokepos.y = prop->pos.y - smokepos.y * 20.0f;
-									smokepos.z = prop->pos.z - smokepos.z * 20.0f;
-
-									smokeCreateSimple(&smokepos, prop->rooms, SMOKETYPE_ROCKETTAIL);
-								}
-							}
-						} else if (weapon->weaponnum == WEAPON_HOMINGROCKET) {
-							if (cdresult == CDRESULT_COLLISION) {
-								weapon->timer240 = 0;
-							} else {
-								smokeCreateSimple(&prop->pos, prop->rooms, SMOKETYPE_HOMINGTAIL);
-							}
-						} else if (weapon->weaponnum == WEAPON_GRENADEROUND
-								|| (weapon->weaponnum == WEAPON_NBOMB && weapon->gunfunc == FUNC_PRIMARY)) {
-							if (sp350
-									|| (projectile->flags & PROJECTILEFLAG_FALLING)
-									|| (projectile->speed.x < 0.1f && projectile->speed.x > -0.1f
-										&& projectile->speed.y < 0.1f && projectile->speed.y > -0.1f
-										&& projectile->speed.z < 0.1f && projectile->speed.z > -0.1f)
-									|| (prop->pos.x - sp5c8.x < 0.1f && prop->pos.x - sp5c8.x > -0.1f
-										&& prop->pos.y - sp5c8.y < 0.1f && prop->pos.y - sp5c8.y > -0.1f
-										&& prop->pos.z - sp5c8.z < 0.1f && prop->pos.z - sp5c8.z > -0.1f)) {
-								if (weapon->weaponnum != WEAPON_NBOMB || weapon->timer240 >= 0) {
-									weapon->timer240 = 0;
-								}
-							} else if (weapon->weaponnum != WEAPON_NBOMB) {
-								smokeCreateSimple(&prop->pos, prop->rooms, SMOKETYPE_GRENADETAIL);
-							}
-						}
-
-						if (cdresult == CDRESULT_COLLISION) {
-							if (projectile->unk0a4 < g_Vars.lvframenum - 2) {
-								if (weapon->weaponnum == WEAPON_COMBATKNIFE || weapon->weaponnum == WEAPON_COMBATKNIFE) {
-									psCreate(0, prop, SFX_808B, -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
-								} else if (weapon->weaponnum == WEAPON_GRENADE && weapon->gunfunc == FUNC_SECONDARY) {
-									uint16_t sp100[] = {SFX_0027, SFX_0028, SFX_0029, SFX_002A};
-
-									psCreate(0, prop, sp100[rngRandom() % 4], -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
-									psCreate(0, prop, SFX_EYESPYHIT, -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
-								} else {
-									psCreate(0, prop, SFX_EYESPYHIT, -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
-								}
-							}
-
-							projectile->unk0a4 = g_Vars.lvframenum;
-						}
-					}
-
-					func0f069c70(obj, true, true);
-				}
-			} else if (projectile->flags & PROJECTILEFLAG_FALLING) {
-				// Some objects are placed in mid-air and then given this flag
-				// at level start, which causes them fall down to their resting
-				// position. Once stopped, the flag is removed.
-				bool stop = true;
-				float quaternion[4];
-				Mtxf spac;
-
-				if (projectile->unk060 < 1.0f) {
-					projectile->unk060 += projectile->unk064 * g_Vars.lvupdate60freal;
-
-					if (g_Vars.lvupdate60 > 0) {
-						projectile->unk064 *= 1.1f;
-					}
-
-					if (projectile->unk060 > 1.0f) {
-						projectile->unk060 = 1.0f;
-					}
-
-					quaternionSlerp(projectile->unk068, projectile->unk078, projectile->unk060, quaternion);
-					quaternionToMtxF(quaternion, &spac);
-					mtxScaleRow0Vec(projectile->unk0b8[0], (Mtx*)&spac);
-					mtxScaleRow1Vec(projectile->unk0b8[1], (Mtx*)&spac);
-					mtxScaleRow2Vec(projectile->unk0b8[2], (Mtx*)&spac);
-					mtx4ToMtx3((Mtx*)&spac, obj->realrot);
-					stop = false;
+					projectile->speed.x = 0.0f;
+					projectile->speed.z = 0.0f;
 				}
 
-				if (projectile->speed.f[0] != 0.0f || projectile->speed.f[2] != 0.0f || projectile->unk060 < 1.0f) {
-					float f12;
-					float spa4;
-					RoomNum roomnum;
-					int i;
-					float sp98 = objGetRotatedLocalYMinByMtx3(objFindBboxRodata(obj), obj->realrot);
-					uint16_t geoflags;
+				if (roomnum > 0) {
+					prop->pos.y = spa4 - sp98 + func0f06a620(obj);
 
-					stop = false;
-
-					for (i = 0; i < g_Vars.lvupdate60; i++) {
-						sp5dc.x += projectile->speed.x;
-						sp5dc.z += projectile->speed.z;
-
-						if (projectile->unk060 >= 1.0f) {
-							if (projectile->unk098 > 0.0f) {
-								float dist = sqrtf(projectile->speed.f[0] * projectile->speed.f[0] + projectile->speed.f[2] * projectile->speed.f[2]);
-
-								if (dist > 0.0f) {
-									f12 = projectile->unk098 * g_Vars.lvupdate60freal / dist;
-
-									if (f12 >= 1.0f) {
-										projectile->speed.x = 0.0f;
-										projectile->speed.z = 0.0f;
-									} else {
-										projectile->speed.x -= projectile->speed.x * f12;
-										projectile->speed.z -= projectile->speed.z * f12;
-									}
-								} else {
-									projectile->speed.x = 0.0f;
-									projectile->speed.z = 0.0f;
-								}
-							} else {
-								projectile->speed.x *= 0.9f;
-								projectile->speed.z *= 0.9f;
-							}
-						}
+					if (geoflags & GEOFLAG_DIE) {
+						obj->hidden |= OBJHFLAG_DELETING;
 					}
-
-					sp5c8.x = prop->pos.x;
-					sp5c8.y = prop->pos.y;
-					sp5c8.z = prop->pos.z;
-
-					roomsCopy(prop->rooms, sp5b8);
-					func0f06d37c(obj, &sp5dc, &sp5e8, &sp5f4);
-
-					result = true;
-
-					sp5ac.x = prop->pos.x;
-					sp5ac.y = prop->pos.y + sp98;
-					sp5ac.z = prop->pos.z;
-
-					roomnum = cdFindCeilingRoomYColourFlagsAtPos(&sp5ac, prop->rooms, &spa4, &obj->floorcol, &geoflags);
-
-					if (roomnum <= 0 || cdTestLos03(&sp5c8, sp5b8, &sp5ac, CDTYPE_OBJS | CDTYPE_BG, GEOFLAG_FLOOR1 | GEOFLAG_FLOOR2)) {
-						roomnum = cdFindFloorRoomYColourFlagsAtPos(&prop->pos, prop->rooms, &spa4, &obj->floorcol, &geoflags);
-					}
-
-					if (roomnum <= 0) {
-						prop->pos.x = sp5c8.x;
-						prop->pos.z = sp5c8.z;
-
-						propDeregisterRooms(prop);
-						roomsCopy(sp5b8, prop->rooms);
-						roomnum = cdFindFloorRoomYColourFlagsAtPos(&prop->pos, prop->rooms, &spa4, &obj->floorcol, &geoflags);
-
-						projectile->speed.x = 0.0f;
-						projectile->speed.z = 0.0f;
-					}
-
-					if (roomnum > 0) {
-						prop->pos.y = spa4 - sp98 + func0f06a620(obj);
-
-						if (geoflags & GEOFLAG_DIE) {
-							obj->hidden |= OBJHFLAG_DELETING;
-						}
-					} else {
-						prop->pos.y = sp5c8.y;
-					}
-
-					if (projectile->speed.x < 0.1f && projectile->speed.x > -0.1f
-							&& projectile->speed.z < 0.1f && projectile->speed.z > -0.1f) {
-						projectile->speed.z = 0.0f;
-						projectile->speed.x = 0.0f;
-					}
+				} else {
+					prop->pos.y = sp5c8.y;
 				}
 
-				if (stop) {
-					objFreeProjectile(obj);
-
-					if (obj->type == OBJTYPE_WEAPON) {
-						struct weaponobj *weapon = (struct weaponobj *) obj;
-						objectiveCheckThrowInRoom(weapon->weaponnum, prop->rooms);
-					}
+				if (projectile->speed.x < 0.1f && projectile->speed.x > -0.1f
+						&& projectile->speed.z < 0.1f && projectile->speed.z > -0.1f) {
+					projectile->speed.z = 0.0f;
+					projectile->speed.x = 0.0f;
 				}
+			}
 
-				if (result) {
-					func0f069c70(obj, true, true);
+			if (stop) {
+				objFreeProjectile(obj);
+
+				if (obj->type == OBJTYPE_WEAPON) {
+					struct weaponobj *weapon = (struct weaponobj *) obj;
+					objectiveCheckThrowInRoom(weapon->weaponnum, prop->rooms);
 				}
+			}
+
+			if (result) {
+				func0f069c70(obj, true, true);
 			}
 		}
 	}
@@ -7556,12 +7558,12 @@ void doorInitMatrices(struct prop *prop)
 		float xrot = M_TAU - door->frac * 0.017450513318181f;
 
 		rodata = modelGetPartRodata(model->definition, MODELPART_0001);
-		mtx4LoadXRotationF(xrot, MTX(1));
+		mtx4LoadXRotation(xrot, (Mtx*)MTX(1));
 		mtx4SetTranslation(&rodata->position.pos, (Mtx*)MTX(1));
 		mtx4MultMtx4InPlace((Mtx*)MTX(0), (Mtx*)MTX(1));
 
 		rodata = modelGetPartRodata(model->definition, MODELPART_0002);
-		mtx4LoadXRotationF(M_TAU - xrot, MTX(2));
+		mtx4LoadXRotation(M_TAU - xrot, (Mtx*)MTX(2));
 		mtx4SetTranslation(&rodata->position.pos, (Mtx*)MTX(2));
 		mtx4MultMtx4InPlace((Mtx*)MTX(0), (Mtx*)MTX(2));
 	} else if (model->definition->skel == &g_Skel13) {
@@ -7580,12 +7582,12 @@ void doorInitMatrices(struct prop *prop)
 			int index2 = (i << 1) + 2;
 
 			rodata = modelGetPartRodata(model->definition, index1);
-			mtx4LoadZRotationF(zrot1, MTX(index1));
+			mtx4LoadZRotation(zrot1, (Mtx*)MTX(index1));
 			mtx4SetTranslation(&rodata->position.pos, (Mtx*)MTX(index1));
 			mtx4MultMtx4InPlace((Mtx*)MTX(0), (Mtx*)MTX(index1));
 
 			rodata = modelGetPartRodata(model->definition, index2);
-			mtx4LoadZRotationF(zrot2, MTX(index2));
+			mtx4LoadZRotation(zrot2, (Mtx*)MTX(index2));
 			mtx4SetTranslation(&rodata->position.pos, (Mtx*)MTX(index2));
 			mtx4MultMtx4InPlace((Mtx*)MTX(index1), (Mtx*)MTX(index2));
 		}
@@ -8138,7 +8140,7 @@ void cctvInitMatrices(struct prop *prop, Mtxf *mtx)
 		yrot -= M_TAU;
 	}
 
-	mtx4LoadYRotationF(yrot, &sp24);
+	mtx4LoadYRotation(yrot, (Mtx*)&sp24);
 	mtx4MultMtx4((Mtx*)&sp24, (Mtx*)&cctv->camrotm, (Mtx*)&matrices[1]);
 
 	sp64.x = rodata->position.pos.x;
@@ -8211,9 +8213,9 @@ void fanUpdateModel(struct prop *prop)
 		angle -= M_TAU;
 	}
 
-	mtx4LoadYRotationF(angle, &sp6c);
+	mtx4LoadYRotation(angle, (Mtx*)&sp6c);
 	mtx4ToMtx3((Mtx*)&sp6c, sp48);
-	mtx00016140(fan->base.realrot, sp48, sp24);
+	mtx3x3TransposeMul(fan->base.realrot, sp48, sp24);
 	mtx3Copy(sp24, fan->base.realrot);
 }
 
@@ -8706,21 +8708,21 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 	sp4c.z = rodata->position.pos.z;
 
 	mtx4TransformVecInPlace((Mtx*)mtx, &sp4c);
-	mtx4LoadYRotationF(yrot, &matrices[1]);
+	mtx4LoadYRotation(yrot, (Mtx*)&matrices[1]);
 	mtx4SetTranslation(&sp4c, (Mtx*)&matrices[1]);
 	mtxScaleRotationPart(autogun->base.model->scale, (Mtx*)&matrices[1]);
 	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&matrices[1]);
 
 	node2 = modelGetPart(model->definition, MODELPART_AUTOGUN_0002);
 	rodata = node2->rodata;
-	mtx4LoadZRotationF(xrot, &matrices[2]);
+	mtx4LoadZRotation(xrot, (Mtx*)&matrices[2]);
 	mtx4SetTranslation(&rodata->position.pos, (Mtx*)&matrices[2]);
 	mtxApplyAffineTransformInPlace((Mtx*)&matrices[1], (Mtx*)&matrices[2]);
 
 	tmp = modelFindNodeMtx(model, node2, 0x100);
 
 	if (tmp != NULL) {
-		mtx4LoadZRotationF(xrot * 0.5f, tmp);
+		mtx4LoadZRotation(xrot * 0.5f, (Mtx*)tmp);
 		mtx4SetTranslation(&rodata->position.pos, (Mtx*)tmp);
 		mtxApplyAffineTransformInPlace((Mtx*)&matrices[1], (Mtx*)tmp);
 	}
@@ -8730,7 +8732,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 	if (node3 != NULL) {
 		tmp = modelFindNodeMtx(model, node3, 0);
 		rodata = node3->rodata;
-		mtx4LoadXRotationF(autogun->barrelrot, tmp);
+		mtx4LoadXRotation(autogun->barrelrot, (Mtx*)tmp);
 		mtx4SetTranslation(&rodata->position.pos, (Mtx*)tmp);
 		mtxApplyAffineTransformInPlace((Mtx*)&matrices[2], (Mtx*)tmp);
 	}
@@ -8740,7 +8742,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 	if (node4 != NULL) {
 		tmp = modelFindNodeMtx(model, node4, 0);
 		rodata = node4->rodata;
-		mtx4LoadTranslationF(&rodata->position.pos, tmp);
+		mtx4LoadTranslation(&rodata->position.pos, (Mtx*)tmp);
 		mtxApplyAffineTransformInPlace((Mtx*)&matrices[2], (Mtx*)tmp);
 	}
 
@@ -8749,7 +8751,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 	if (node6 != NULL) {
 		tmp = modelFindNodeMtx(model, node6, 0);
 		rodata = node6->rodata;
-		mtx4LoadXRotationF(autogun->barrelrot, tmp);
+		mtx4LoadXRotation(autogun->barrelrot, (Mtx*)tmp);
 		mtx4SetTranslation(&rodata->position.pos, (Mtx*)tmp);
 		mtxApplyAffineTransformInPlace((Mtx*)&matrices[2], (Mtx*)tmp);
 	}
@@ -9147,15 +9149,15 @@ void chopperInitMatrices(struct prop *prop)
 	Mtxf sp28;
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_CHOPPER_0001);
-	mtx4LoadZRotationF(M_TAU - chopper->gunrotx, &sp68);
-	mtx4LoadYRotationF(chopper->gunroty + 1.5707963705063f, &sp28);
+	mtx4LoadZRotation(M_TAU - chopper->gunrotx, (Mtx*)&sp68);
+	mtx4LoadYRotation(chopper->gunroty + 1.5707963705063f, (Mtx*)&sp28);
 	mtxApplyAffineTransform((Mtx*)&sp28, (Mtx*)&sp68, (Mtx*)&spa8);
 
 	mtx4SetTranslation(&rodata->position.pos, (Mtx*)&spa8);
 	mtxApplyAffineTransform((Mtx*)matrices, (Mtx*)&spa8, (Mtx*)&matrices[1]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_CHOPPER_0002);
-	mtx4LoadXRotationF(chopper->barrelrot, &spa8);
+	mtx4LoadXRotation(chopper->barrelrot, (Mtx*)&spa8);
 	mtx4SetTranslation(&rodata->position.pos, (Mtx*)&spa8);
 	mtxApplyAffineTransform((Mtx*)&matrices[1], (Mtx*)&spa8, (Mtx*)&matrices[2]);
 }
@@ -9346,7 +9348,7 @@ void chopperFireRocket(struct chopperobj *chopper, bool side)
 		pos.z = -400;
 
 		mtx3ToMtx4(chopper->base.realrot, (Mtx*)&sp2c);
-		mtx4LoadTranslationF(&pos, &sp6c);
+		mtx4LoadTranslation(&pos, (Mtx*)&sp6c);
 		mtx4MultMtx4InPlace((Mtx*)&sp2c, (Mtx*)&sp6c);
 
 		pos.x = sp6c.m[3][0] + chopperprop->pos.f[0];
@@ -9407,7 +9409,7 @@ void chopperIncrementBarrel(struct prop *chopperprop, bool firing)
 		}
 
 		mtx3ToMtx4(obj->realrot, (Mtx*)&sp50);
-		mtx4LoadTranslationF(&gunpos, &sp90);
+		mtx4LoadTranslation(&gunpos, (Mtx*)&sp90);
 		mtx4MultMtx4InPlace((Mtx*)&sp50, (Mtx*)&sp90);
 
 		gunpos.x = sp90.m[3][0] + chopperprop->pos.f[0];
@@ -9615,12 +9617,12 @@ void chopperIncrementMovement(struct prop *prop, float goalroty, float goalrotx,
 	spfc.z = 0.0f;
 
 	if (currotz >= 0) {
-		mtx4LoadZRotationF(currotz, &sp3c);
+		mtx4LoadZRotation(currotz, (Mtx*)&sp3c);
 	} else {
-		mtx4LoadZRotationF(currotz + M_TAU, &sp3c);
+		mtx4LoadZRotation(currotz + M_TAU, (Mtx*)&sp3c);
 	}
 
-	mtx4LoadRotationF(&spfc, &sp7c);
+	mtx4LoadRotation(&spfc, (Mtx*)&sp7c);
 	mtxScaleRotationPart(chopper->base.model->scale, (Mtx*)&sp7c);
 	mtx4MultMtx4((Mtx*)&sp7c, (Mtx*)&sp3c, (Mtx*)&spbc);
 	mtx4ToMtx3((Mtx*)&spbc, rotmtx3);
@@ -10324,12 +10326,12 @@ void hovercarTick(struct prop *prop)
 		sp12c.z = 0;
 
 		if (sp188 >= 0) {
-			mtx4LoadZRotationF(sp188, &sp6c);
+			mtx4LoadZRotation(sp188, (Mtx*)&sp6c);
 		} else {
-			mtx4LoadZRotationF(sp188 + M_TAU, &sp6c);
+			mtx4LoadZRotation(sp188 + M_TAU, (Mtx*)&sp6c);
 		}
 
-		mtx4LoadRotationF(&sp12c, &spac);
+		mtx4LoadRotation(&sp12c, (Mtx*)&spac);
 		mtxScaleRotationPart(hovercar->base.model->scale, (Mtx*)&spac);
 		mtx4MultMtx4((Mtx*)&spac, (Mtx*)&sp6c, (Mtx*)&spec);
 		mtx4ToMtx3((Mtx*)&spec, sp15c);
@@ -10481,19 +10483,19 @@ void hangingmonitorInitMatrices(struct prop *prop)
 	union modelrodata *rodata;
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0000);
-	mtx4LoadTranslationF(&rodata->position.pos, &matrices[1]);
+	mtx4LoadTranslation(&rodata->position.pos, (Mtx*)&matrices[1]);
 	mtxApplyAffineTransformInPlace((Mtx*)matrices, (Mtx*)&matrices[1]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0001);
-	mtx4LoadTranslationF(&rodata->position.pos, &matrices[2]);
+	mtx4LoadTranslation(&rodata->position.pos, (Mtx*)&matrices[2]);
 	mtxApplyAffineTransformInPlace((Mtx*)matrices, (Mtx*)&matrices[2]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0002);
-	mtx4LoadTranslationF(&rodata->position.pos, &matrices[3]);
+	mtx4LoadTranslation(&rodata->position.pos, (Mtx*)&matrices[3]);
 	mtxApplyAffineTransformInPlace((Mtx*)matrices, (Mtx*)&matrices[3]);
 
 	rodata = modelGetPartRodata(model->definition, MODELPART_0003);
-	mtx4LoadTranslationF(&rodata->position.pos, &matrices[4]);
+	mtx4LoadTranslation(&rodata->position.pos, (Mtx*)&matrices[4]);
 	mtxApplyAffineTransformInPlace((Mtx*)matrices, (Mtx*)&matrices[4]);
 }
 
@@ -10524,7 +10526,7 @@ void objInitMatrices(struct prop *prop)
 				struct modelrenderdata thing = {NULL, 1, 3};
 				Mtxf sp28;
 
-				mtx4CopyF(obj->model->matrices, &sp28);
+				mtx4Copy((Mtx*)obj->model->matrices, (Mtx*)&sp28);
 
 				thing.unk10 = obj->model->matrices;
 				thing.unk00 = &sp28;
@@ -10600,10 +10602,10 @@ uint32_t objTick(struct prop *prop)
 				}
 			} else {
 				// Object was previously damaged. Maybe glass?
-				if (obj->hidden2 & OBJH2FLAG_08) {
-					obj->flags |= OBJFLAG_00000100;
+				if (obj->hidden2 & OBJH2FLAG_DYNAMIC_COLLISION) {
+					obj->flags |= OBJFLAG_GEOMETRY_TEMP_ENABLED;
 				} else {
-					obj->flags &= ~OBJFLAG_00000100;
+					obj->flags &= ~OBJFLAG_GEOMETRY_TEMP_ENABLED;
 				}
 
 				obj->damage = 0;
@@ -12206,9 +12208,9 @@ Gfx *gfxRenderRadialShadow(Gfx *gdl, float x, float y, float z, float angle, flo
 	pos.z = z;
 
 	mtx = gfxAllocateMatrixF();
-	mtx4LoadYRotationWithTranslation(&pos, angle, &spc0);
+	mtx4LoadYRotationWithTranslation(&pos, angle, (Mtx*)&spc0);
 	mtx4MultMtx4((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&spc0, (Mtx*)&sp80);
-	mtx4CopyF(&sp80, mtx);
+	mtx4Copy((Mtx*)&sp80, (Mtx*)mtx);
 
 	for (i = 0; i < 4; i++) {
 		vertices[i].y = 0;
@@ -12818,7 +12820,7 @@ void objBounce(struct defaultobj *obj, struct coord *gundir2d)
 	struct coord rot = {0, 0, 0};
 	struct projectile *projectile = NULL;
 
-	func0f0685e4(obj->prop);
+	projectileManage(obj->prop);
 
 	if (obj->hidden & OBJHFLAG_EMBEDDED) {
 		projectile = obj->embedment->projectile;
@@ -12835,7 +12837,7 @@ void objBounce(struct defaultobj *obj, struct coord *gundir2d)
 		rot.y = RANDOMFRAC() * 0.024539785f - 0.012269893f;
 		rot.z = RANDOMFRAC() * 0.024539785f - 0.012269893f;
 
-		mtx4LoadRotationF(&rot, &projectile->mtx);
+		mtx4LoadRotation(&rot, (Mtx*)&projectile->mtx);
 
 		projectile->flags |= PROJECTILEFLAG_AIRBORNE;
 
@@ -12859,7 +12861,7 @@ void objSetDropped(struct prop *prop, uint32_t droptype)
 	if (parent) {
 		struct defaultobj *obj = prop->obj;
 
-		func0f0685e4(prop);
+		projectileManage(prop);
 
 		if ((obj->hidden & OBJHFLAG_EMBEDDED) && obj->embedment->projectile) {
 			obj->embedment->projectile->droptype = droptype;
@@ -12883,7 +12885,7 @@ void objApplyMomentum(struct defaultobj *obj, struct coord *speed, float rotatio
 	float sp24;
 	float sp20;
 
-	func0f0685e4(obj->prop);
+	projectileManage(obj->prop);
 
 	if (obj->hidden & OBJHFLAG_EMBEDDED) {
 		projectile = obj->embedment->projectile;
@@ -13100,7 +13102,7 @@ bool objDrop(struct prop *prop, bool lazy)
 				rot.y = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 				rot.z = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 
-				mtx4LoadRotationF(&rot, (Mtxf *)&projectile->mtx);
+				mtx4LoadRotation(&rot, (Mtx*)&projectile->mtx);
 			} else if (projectile->droptype == DROPTYPE_THROWGRENADE && parent->type == PROPTYPE_CHR) {
 				struct chrdata *chr = parent->chr;
 				struct coord rot = {0, 0, 0};
@@ -13125,7 +13127,7 @@ bool objDrop(struct prop *prop, bool lazy)
 				rot.y = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 				rot.z = RANDOMFRAC() * 0.012269892729819f - 0.0061349463649094f;
 
-				mtx4LoadRotationF(&rot, (Mtxf *)&projectile->mtx);
+				mtx4LoadRotation(&rot, (Mtx*)&projectile->mtx);
 				projectileSetSticky(prop);
 			} else if (projectile->droptype == DROPTYPE_HAT) {
 				struct coord rot = {0, 0, 0};
@@ -13142,7 +13144,7 @@ bool objDrop(struct prop *prop, bool lazy)
 				rot.y = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 				rot.z = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 
-				mtx4LoadRotationF(&rot, (Mtxf *)&projectile->mtx);
+				mtx4LoadRotation(&rot, (Mtx*)&projectile->mtx);
 			} else if (projectile->droptype == DROPTYPE_OWNERREAP) {
 				struct coord rot = {0, 0, 0};
 
@@ -13154,7 +13156,7 @@ bool objDrop(struct prop *prop, bool lazy)
 				rot.y = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 				rot.z = RANDOMFRAC() * 0.049079570919275f - 0.024539785459638f;
 
-				mtx4LoadRotationF(&rot, (Mtxf *)&projectile->mtx);
+				mtx4LoadRotation(&rot, (Mtx*)&projectile->mtx);
 			} else {
 				// DROPTYPE_OWNERREAP
 				// Ben's comment: This gives dropped weapons a random velocity instead of just dropping straight down.
@@ -13250,7 +13252,7 @@ void objFall(struct defaultobj *obj, int playernum)
 		struct coord rot = {0, 0, 0};
 		struct projectile *projectile = NULL;
 
-		func0f0685e4(obj->prop);
+		projectileManage(obj->prop);
 
 		if (obj->hidden & OBJHFLAG_PROJECTILE) {
 			projectile = obj->projectile;
@@ -13267,11 +13269,11 @@ void objFall(struct defaultobj *obj, int playernum)
 				rot.z = RANDOMFRAC() * 0.0049079573f - 0.0024539786f;
 			}
 
-			mtx4LoadRotationF(&rot, &projectile->mtx);
+			mtx4LoadRotation(&rot, (Mtx*)&projectile->mtx);
 
 			projectile->flags |= PROJECTILEFLAG_AIRBORNE;
 
-			obj->flags &= ~OBJFLAG_00000100;
+			obj->flags &= ~OBJFLAG_GEOMETRY_TEMP_ENABLED;
 			obj->hidden &= ~OBJHFLAG_00008000;
 		}
 	}
@@ -13422,7 +13424,7 @@ void objCheckDestroyed(struct defaultobj *obj, struct coord *pos, int playernum)
 				obj->hidden |= OBJHFLAG_00001000;
 
 				if ((obj->flags3 & OBJFLAG3_10000000) == 0) {
-					obj->flags &= ~OBJFLAG_00000100;
+					obj->flags &= ~OBJFLAG_GEOMETRY_TEMP_ENABLED;
 				}
 			}
 		}
@@ -13449,7 +13451,7 @@ bool func0f084594(struct model *model, struct modelnode *node, struct coord *arg
 	rodata = &node->rodata->bbox;
 
 	mtxindex = modelFindNodeMtxIndex(node, 0);
-	mtx000172f0(model->matrices[mtxindex].m, mtx.m);
+	mtxInvertAffine(model->matrices[mtxindex].m, mtx.m);
 
 	spb8.x = arg2->x;
 	spb8.y = arg2->y;
@@ -13643,7 +13645,7 @@ bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *
 			if (mtx && mtx != spd0) {
 				spd0 = mtx;
 
-				mtx000172f0(mtx->m, sp64.m);
+				mtxInvertAffine(mtx->m, sp64.m);
 
 				spec.x = arg2->x;
 				spec.y = arg2->y;
@@ -14775,10 +14777,10 @@ bool objUpdateGeometry(struct prop *prop, uint8_t **start, uint8_t **end)
 	struct defaultobj *obj = prop->obj;
 
 	if (obj->unkgeo && (obj->flags3 & OBJFLAG3_WALKTHROUGH) == 0) {
-		if (obj->hidden2 & OBJH2FLAG_08) {
+		if (obj->hidden2 & OBJH2FLAG_DYNAMIC_COLLISION) {
 			int len = (obj->flags3 & OBJFLAG3_GEOCYL) ? sizeof(struct geocyl) : sizeof(struct geoblock);
 
-			if (obj->flags & OBJFLAG_00000100) {
+			if (obj->flags & OBJFLAG_GEOMETRY_TEMP_ENABLED) {
 				if ((obj->hidden & (OBJHFLAG_PERIMDISABLED | OBJHFLAG_DOORPERIMDISABLED)) == 0) {
 					*start = (void *) obj->unkgeo;
 					*end = (void *)((uintptr_t)obj->unkgeo + len);
@@ -14817,7 +14819,7 @@ void objGetBbox(struct prop *prop, float *radius, float *ymax, float *ymin)
 {
 	struct defaultobj *obj = prop->obj;
 
-	if (obj->unkgeo && obj->hidden2 & OBJH2FLAG_08) {
+	if (obj->unkgeo && obj->hidden2 & OBJH2FLAG_DYNAMIC_COLLISION) {
 		if (obj->flags3 & OBJFLAG3_GEOCYL) {
 			*radius = obj->geocyl->radius;
 			*ymin = obj->geocyl->ymin;
@@ -17110,14 +17112,14 @@ void doorUpdateTiles(struct doorobj *door)
 		sp80.z = door->startpos.z - sp8c.z;
 
 		mtx3ToMtx4(door->mtx98, (Mtx*)&spdc);
-		mtx4LoadTranslationF(&sp80, &sp98);
+		mtx4LoadTranslation(&sp80, (Mtx*)&sp98);
 		mtx4MultMtx4InPlace((Mtx*)&sp98, (Mtx*)&spdc);
 
 		if (door->doortype == DOORTYPE_AZTECCHAIR) {
 			if (door->base.flags & OBJFLAG_DOOR_OPENTOFRONT) {
-				mtx4LoadZRotationF(M_TAU - door->frac * 0.017450513318181f, &sp98);
+				mtx4LoadZRotation(M_TAU - door->frac * 0.017450513318181f, (Mtx*)&sp98);
 			} else {
-				mtx4LoadZRotationF(door->frac * 0.017450513318181f, &sp98);
+				mtx4LoadZRotation(door->frac * 0.017450513318181f, (Mtx*)&sp98);
 			}
 		} else if (door->doortype == DOORTYPE_HULL) {
 			if (door->base.flags & OBJFLAG_DOOR_OPENTOFRONT) {
@@ -17127,14 +17129,14 @@ void doorUpdateTiles(struct doorobj *door)
 			}
 		} else {
 			if (door->base.flags & OBJFLAG_DOOR_OPENTOFRONT) {
-				mtx4LoadYRotationF(M_TAU - door->frac * 0.017450513318181f, &sp98);
+				mtx4LoadYRotation(M_TAU - door->frac * 0.017450513318181f, (Mtx*)&sp98);
 			} else {
-				mtx4LoadYRotationF(door->frac * 0.017450513318181f, &sp98);
+				mtx4LoadYRotation(door->frac * 0.017450513318181f, (Mtx*)&sp98);
 			}
 		}
 
 		mtx4MultMtx4InPlace((Mtx*)&sp98, (Mtx*)&spdc);
-		mtx4LoadTranslationF(&sp8c, &sp98);
+		mtx4LoadTranslation(&sp8c, (Mtx*)&sp98);
 		mtx4MultMtx4InPlace((Mtx*)&sp98, (Mtx*)&spdc);
 		mtx4ToMtx3((Mtx*)&spdc, door->base.realrot);
 
@@ -17297,7 +17299,7 @@ struct prop *doorInit(struct doorobj *door, struct coord *pos, Mtxf *mtx, RoomNu
 	Mtxf sp38;
 	RoomNum sp28[8];
 
-	door->base.flags |= OBJFLAG_00000100;
+	door->base.flags |= OBJFLAG_GEOMETRY_TEMP_ENABLED;
 	prop = objInitWithAutoModel(&door->base);
 
 	if (prop != NULL) {
@@ -17313,7 +17315,7 @@ struct prop *doorInit(struct doorobj *door, struct coord *pos, Mtxf *mtx, RoomNu
 			break;
 		}
 
-		mtx4CopyF(mtx, &sp38);
+		mtx4Copy((Mtx*)mtx, (Mtx*)&sp38);
 		mtxScaleRotationPart(g_ModelStates[door->base.modelnum].scale * (1.0f / 4096.0f), (Mtx*)&sp38);
 		mtx4ToMtx3((Mtx*)&sp38, door->base.realrot);
 
@@ -17606,9 +17608,9 @@ void doorStartOpen(struct doorobj *door)
 		door->base.flags |= OBJFLAG_CANNOT_ACTIVATE;
 		door->perimfrac = 0;
 
-		if (cyl && (door->base.flags & OBJFLAG_00000100)) {
+		if (cyl && (door->base.flags & OBJFLAG_GEOMETRY_TEMP_ENABLED)) {
 			cyl->header.numvertices = 0;
-			door->base.flags &= ~OBJFLAG_00000100;
+			door->base.flags &= ~OBJFLAG_GEOMETRY_TEMP_ENABLED;
 		}
 	}
 
@@ -17641,7 +17643,7 @@ void doorFinishOpen(struct doorobj *door)
 	doorPlayOpenedSound(door->soundtype, door->base.prop);
 
 	if (door->doortype == DOORTYPE_FALLAWAY) {
-		func0f0685e4(door->base.prop);
+		projectileManage(door->base.prop);
 
 		if (door->base.hidden & OBJHFLAG_PROJECTILE) {
 			door->base.projectile->flags |= PROJECTILEFLAG_AIRBORNE;
@@ -19060,8 +19062,8 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 
 				if (rocket) { 
 					mtxIdent((Mtx*)&sp13c);
-					mtx4LoadXRotationF(rotx, &spe0);
-					mtx4LoadYRotationF(roty, &spa0);
+					mtx4LoadXRotation(rotx, (Mtx*)&spe0);
+					mtx4LoadYRotation(roty, (Mtx*)&spa0);
 					mtxApplyAffineTransformInPlace((Mtx*)&spa0, (Mtx*)&spe0);
 
 					sp120.x = dir->x * 0.27777776f;

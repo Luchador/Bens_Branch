@@ -1821,7 +1821,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 				&& g_Vars.currentplayer->insightaimmode
 				&& (movedata.farsighttempautoseek || g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY)
 				&& g_Vars.currentplayer->autoeraserdist > 0) {
-			eraserfov = cam0f0b49b8(500.0f / g_Vars.currentplayer->autoeraserdist);
+			eraserfov = camGetEraserFOV(500.0f / g_Vars.currentplayer->autoeraserdist);
 
 			if (eraserfov > PLAYER_DEFAULT_FOV) {
 				eraserfov = PLAYER_DEFAULT_FOV;
@@ -2433,25 +2433,25 @@ void bmoveUpdateHead(float arg0, float arg1, float arg2, Mtxf *arg3, float arg4)
 	}
 
 	bheadUpdate(sp244, arg2);
-	mtx4LoadXRotationF(DEG2RAD(360 - g_Vars.currentplayer->vv_verta360), &sp180);
+	mtx4LoadXRotation(DEG2RAD(360 - g_Vars.currentplayer->vv_verta360), (Mtx*)&sp180);
 
 	if (optionsGetHeadRoll(g_Vars.currentplayerstats->mpindex)) {
-		mtxBuildLookAtFromTargetF(&sp116,
+		mtxBuildLookAtFromTarget((Mtx*)&sp116,
 				0, 0, 0,
 				-g_Vars.currentplayer->headlook.x, -g_Vars.currentplayer->headlook.y, -g_Vars.currentplayer->headlook.z,
 				g_Vars.currentplayer->headup.x, g_Vars.currentplayer->headup.y, g_Vars.currentplayer->headup.z);
 		mtx4MultMtx4InPlace((Mtx*)&sp116, (Mtx*)&sp180);
 	}
 
-	mtx4LoadYRotationF(DEG2RAD(360 - g_Vars.currentplayer->vv_theta), &sp116);
+	mtx4LoadYRotation(DEG2RAD(360 - g_Vars.currentplayer->vv_theta), (Mtx*)&sp116);
 	mtx4MultMtx4InPlace((Mtx*)&sp116, (Mtx*)&sp180);
 
 	if (arg3) {
-		quaternion3x3MtxToQuatF(&sp180, sp100);
-		quaternion3x3MtxToQuatF(arg3, sp84);
+		quaternion3x3MtxToQuat((Mtx*)&sp180, sp100);
+		quaternion3x3MtxToQuat((Mtx*)arg3, sp84);
 		quaternionAvoidFlips(sp100, sp84);
 		quaternionSlerp(sp100, sp84, arg4, sp68);
-		quaternionToMtxF(sp68, &sp180);
+		quaternionToMtx(sp68, (Mtx*)&sp180);
 	}
 
 	g_Vars.currentplayer->bond2.unk1c.x = sp180.m[2][0];

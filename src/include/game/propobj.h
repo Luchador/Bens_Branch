@@ -65,7 +65,7 @@ void projectileFree(struct projectile *projectile);
 void projectilesUnrefOwner(struct prop *owner);
 void projectileReset(struct projectile *projectile);
 struct projectile *projectileAllocate(void);
-void func0f0685e4(struct prop *prop);
+void projectileManage(struct prop *prop);
 void projectileSetSticky(struct prop *prop);
 void embedmentFree(struct embedment *embedment);
 struct embedment *embedmentAllocate(void);
@@ -111,7 +111,7 @@ bool func0f06bea0(struct model *model, struct modelnode *arg1, struct modelnode 
 bool func0f06c28c(struct chrdata *chr, struct coord *arg1, struct coord *arg2, struct coord *arg3, float arg4, struct coord *arg5, struct coord *arg6, struct coord *arg7, struct coord *arg8, float *arg9);
 bool projectileFindCollidingProp(struct prop *prop, struct coord *pos, struct coord *arg2, uint32_t cdtypes, struct coord *arg4, struct coord *arg5, RoomNum *rooms);
 int func0f06cd00(struct defaultobj *obj, struct coord *pos, struct coord *arg2, struct coord *arg3);
-bool func0f06d37c(struct defaultobj *obj, struct coord *arg1, struct coord *arg2, struct coord *arg3);
+bool projectileTryMove(struct defaultobj *obj, struct coord *arg1, struct coord *arg2, struct coord *arg3);
 void applySpeed(float *distdone, float maxdist, float *speed, float accel, float decel, float maxspeed);
 void applyRotation(float *angle, float maxrot, float *speed, float accel, float decel, float maxspeed);
 void projectileFall(struct defaultobj *obj, float mtx[3][3]);
@@ -222,7 +222,6 @@ bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *
 uint32_t add43214321(uint32_t value);
 void glassDestroy(struct defaultobj *obj);
 void doorDestroyGlass(struct doorobj *door);
-void cctvHandleLensShot(struct defaultobj *obj);
 void func0f085050(struct prop *prop, float damage, struct coord *pos, int arg3, int playernum);
 bool func0f085194(struct defaultobj *obj);
 bool objIsMortal(struct defaultobj *obj);

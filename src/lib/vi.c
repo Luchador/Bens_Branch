@@ -228,7 +228,7 @@ Gfx *viSetCamNoTranslation(Gfx *gdl)
 	mtxPerspective((Mtx*)&projF, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar * 2, 1);
 
 	// Copy the current camera matrix and zero its translation part
-	mtx4CopyF(camGetWorldToScreenMtxf(), &viewNoTransF);
+	mtx4Copy((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&viewNoTransF);
 	viewNoTransF.m[3][0] = 0;
 	viewNoTransF.m[3][1] = 0;
 	viewNoTransF.m[3][2] = 0;
@@ -282,7 +282,7 @@ Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtxF), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	camSetPerspectiveMtxL(g_CameraPerspectiveMtxF);
-	camSetMtxF1754(&g_ActiveProjectionMtx);
+	camSetSkyMtx(&g_ActiveProjectionMtx);
 
 	return gdl;
 }
@@ -310,7 +310,7 @@ Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtxF), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	camSetPerspectiveMtxL(g_CameraPerspectiveMtxF);
-	camSetMtxF1754(&g_ActiveProjectionMtx);
+	camSetSkyMtx(&g_ActiveProjectionMtx);
 
 	return gdl;
 }

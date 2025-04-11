@@ -55,7 +55,7 @@ void bgrabInit(void)
 	g_Vars.currentplayer->gunextraaimx = 0;
 	g_Vars.currentplayer->gunextraaimy = 0;
 
-	mtx4LoadYRotationF((g_Vars.currentplayer->vv_theta * M_TAU) / 360.0f, &matrix);
+	mtx4LoadYRotation((g_Vars.currentplayer->vv_theta * M_TAU) / 360.0f, (Mtx*)&matrix);
 	mtx4RotateVecInPlace((Mtx*)&matrix, &g_Vars.currentplayer->grabbedposoffset);
 
 	g_Vars.currentplayer->bondprevtheta = g_Vars.currentplayer->vv_theta;

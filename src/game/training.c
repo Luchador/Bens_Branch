@@ -918,10 +918,10 @@ void frInitTargets(void)
 			}
 
 			if (g_FrData.targets[i].flags & FRTARGETFLAG_SPAWNFACINGAWAY) {
-				mtx4LoadYRotationF(0.0f, &sp144);
+				mtx4LoadYRotation(0.0f, (Mtx*)&sp144);
 				g_FrData.targets[i].angle = M_PI;
 			} else {
-				mtx4LoadYRotationF(M_PI, &sp144);
+				mtx4LoadYRotation(M_PI, (Mtx*)&sp144);
 			}
 
 			mtxScaleRotationPart(obj->model->scale, (Mtx*)&sp144);
@@ -1945,7 +1945,7 @@ void frTick(void)
 					}
 				}
 
-				mtx4LoadYRotationF(g_FrData.targets[i].angle + M_PI, &spbc);
+				mtx4LoadYRotation(g_FrData.targets[i].angle + M_PI, (Mtx*)&spbc);
 				mtxScaleRotationPart(obj->model->scale, (Mtx*)&spbc);
 				mtx4ToMtx3((Mtx*)&spbc, sp98);
 				mtx3Copy(sp98, obj->realrot);

@@ -49,14 +49,13 @@ void camSetPerspective(float near, float fovy, float aspect)
 	player->c_perspaspect = aspect;
 }
 
-float cam0f0b49b8(float arg0)
+// Used by the FarSight
+float camGetEraserFOV(float arg0)
 {
 	float result = atan2f(g_Vars.currentplayer->c_scalelod60 * arg0 * g_Vars.currentplayer->c_halfheight, 1.0f);
 	result *= 114.591552f;
 
-	if (result < 0) {
-		result = -result;
-	}
+	result = fabsf(result);
 
 	return result;
 }
@@ -177,34 +176,34 @@ void camProjectWithZoomAndAspect(struct coord *arg0, float arg1[2], float zoom, 
 	arg1[0] = player->c_screenleft + player->c_halfwidth - f14 * arg0->f[0];
 }
 
-void camSetMtxL1738(Mtx *mtx)
+/*void camSetMtxL1738(Mtx *mtx)
 {
 	g_Vars.currentplayer->mtxl1738 = mtx;
-}
+}*/
 
-Mtx *camGetMtxL1738(void)
+/*Mtx *camGetMtxL1738(void)
 {
 	return g_Vars.currentplayer->mtxl1738;
-}
+}*/
 
-void camSetMtxL173c(Mtx *mtx)
+/*void camSetMtxL173c(Mtx *mtx)
 {
 	g_Vars.currentplayer->mtxl173c = mtx;
-}
+}*/
 
-Mtx *camGetMtxL173c(void)
+/*Mtx *camGetMtxL173c(void)
 {
 	return g_Vars.currentplayer->mtxl173c;
+}*/
+
+void camSetArtifactMtx(Mtx *mtx)
+{
+	g_Vars.currentplayer->artifactMtx = (Mtxf*)mtx;
 }
 
-void camSetMtxF006c(Mtxf *mtx)
+Mtx *camGetArtifactMtx(void)
 {
-	g_Vars.currentplayer->mtxf006c = mtx;
-}
-
-Mtx *camGetMtxF006c(void)
-{
-	return (Mtx*)g_Vars.currentplayer->mtxf006c;
+	return (Mtx*)g_Vars.currentplayer->artifactMtx;
 }
 
 void camSetPerspectiveMtxL(Mtx *mtx)
@@ -227,12 +226,12 @@ Mtx *camGetOrthogonalMtxL(void)
 	return g_Vars.currentplayer->orthomtxl;
 }
 
-void camSetWorldToScreenMtxf(Mtxf *mtx)
+void camSetWorldToScreenMtx(Mtx *mtx)
 {
 	struct player *player = g_Vars.currentplayer;
 
 	player->prevworldtoscreenmtx = player->worldtoscreenmtx;
-	player->worldtoscreenmtx = mtx;
+	player->worldtoscreenmtx = (Mtxf*)mtx;
 	player->c_viewfmdynticknum = g_GfxNumSwaps;
 	player->unk0488 = player->unk0484;
 	player->unk0484 = g_GfxMemPos;
@@ -315,14 +314,14 @@ Mtxf *camGetWorldToScreenMtxf(void)
 	return g_Vars.currentplayer->worldtoscreenmtx;
 }
 
-void camSetMtxF1754(Mtxf *mtx)
+void camSetSkyMtx(Mtxf *mtx)
 {
-	g_Vars.currentplayer->mtxf1754 = mtx;
+	g_Vars.currentplayer->skyMtx = mtx;
 }
 
-Mtxf *camGetMtxF1754(void)
+Mtxf *camGetSkyMtx(void)
 {
-	return g_Vars.currentplayer->mtxf1754;
+	return g_Vars.currentplayer->skyMtx;
 }
 
 Mtxf *camGetPrevWorldToScreenMtxf(void)
@@ -478,94 +477,91 @@ bool camIsPointInFrustum(struct coord *point, float radius)
 	return true;
 }
 
-bool camIsPosInScreenBox(struct coord *pos, float arg1, struct drawslot *drawslot)
+bool camIsPosInScreenBox(struct coord *pos, float radius, struct drawslot *drawslot)
 {
-	struct coord sp74;
-	float sp70;
-	struct coord sp64;
-	float sp60;
-	struct coord sp54;
-	float sp50;
-	struct coord sp44;
-	float sp40;
-	float sp3c;
-	float sp38;
-	float sp34;
-	float sp30;
-	float sp2c;
-	float sp28;
-	float sp24;
-	float sp20;
-	float sp1c;
-	float sp18;
+	struct coord planeNormal;
+	float planeOffset;
 
-	if (g_CamFrustumViewOffset + arg1 < g_Vars.currentplayer->projectionmtx->m[2][0] * pos->f[0] + g_Vars.currentplayer->projectionmtx->m[2][1] * pos->f[1] + g_Vars.currentplayer->projectionmtx->m[2][2] * pos->f[2]) {
+	// Back-face culling: camera facing direction vs. point
+	float cameraDepth = g_Vars.currentplayer->projectionmtx->m[2][0] * pos->x +
+	                    g_Vars.currentplayer->projectionmtx->m[2][1] * pos->y +
+	                    g_Vars.currentplayer->projectionmtx->m[2][2] * pos->z;
+
+	if (g_CamFrustumViewOffset + radius < cameraDepth) {
 		return false;
 	}
 
-	sp38 = (drawslot->box.xmin - g_Vars.currentplayer->c_screenleft - g_Vars.currentplayer->c_halfwidth) * g_Vars.currentplayer->c_scalex;
+	// --- Left plane ---
+	float leftOffset = (drawslot->box.xmin - g_Vars.currentplayer->c_screenleft - g_Vars.currentplayer->c_halfwidth) * g_Vars.currentplayer->c_scalex;
+	float leftLenInv = 1.0f / sqrtf(leftOffset * leftOffset + 1.0f);
+	float leftX = leftOffset * leftLenInv;
+	float leftY = -leftLenInv;
 
-	sp3c = 1.0f / sqrtf(sp38 * sp38 + 1.0f);
-	sp38 *= sp3c;
-	sp24 = -sp3c;
+	planeNormal.x = leftY * g_Vars.currentplayer->projectionmtx->m[0][0] - leftX * g_Vars.currentplayer->projectionmtx->m[2][0];
+	planeNormal.y = leftY * g_Vars.currentplayer->projectionmtx->m[0][1] - leftX * g_Vars.currentplayer->projectionmtx->m[2][1];
+	planeNormal.z = leftY * g_Vars.currentplayer->projectionmtx->m[0][2] - leftX * g_Vars.currentplayer->projectionmtx->m[2][2];
+	planeOffset = planeNormal.x * g_Vars.currentplayer->projectionmtx->m[3][0] +
+	              planeNormal.y * g_Vars.currentplayer->projectionmtx->m[3][1] +
+	              planeNormal.z * g_Vars.currentplayer->projectionmtx->m[3][2];
 
-	sp54.f[0] = sp24 * g_Vars.currentplayer->projectionmtx->m[0][0] - sp38 * g_Vars.currentplayer->projectionmtx->m[2][0];
-	sp54.f[1] = sp24 * g_Vars.currentplayer->projectionmtx->m[0][1] - sp38 * g_Vars.currentplayer->projectionmtx->m[2][1];
-	sp54.f[2] = sp24 * g_Vars.currentplayer->projectionmtx->m[0][2] - sp38 * g_Vars.currentplayer->projectionmtx->m[2][2];
-
-	sp50 = sp54.f[0] * g_Vars.currentplayer->projectionmtx->m[3][0] + sp54.f[1] * g_Vars.currentplayer->projectionmtx->m[3][1] + sp54.f[2] * g_Vars.currentplayer->projectionmtx->m[3][2];
-
-	if (sp50 + arg1 < sp54.f[0] * pos->f[0] + sp54.f[1] * pos->f[1] + sp54.f[2] * pos->f[2]) {
+	if (planeOffset + radius < planeNormal.x * pos->x + planeNormal.y * pos->y + planeNormal.z * pos->z) {
 		return false;
 	}
 
-	sp38 = -(drawslot->box.xmax - g_Vars.currentplayer->c_screenleft - g_Vars.currentplayer->c_halfwidth) * g_Vars.currentplayer->c_scalex;
-	sp30 = 1.0f / sqrtf(sp38 * sp38 + 1.0f);
-	sp38 *= sp30;
-	sp20 = -sp30;
+	// --- Right plane ---
+	float rightOffset = -(drawslot->box.xmax - g_Vars.currentplayer->c_screenleft - g_Vars.currentplayer->c_halfwidth) * g_Vars.currentplayer->c_scalex;
+	float rightLenInv = 1.0f / sqrtf(rightOffset * rightOffset + 1.0f);
+	float rightX = rightOffset * rightLenInv;
+	float rightY = -rightLenInv;
 
-	sp44.f[0] = -sp20 * g_Vars.currentplayer->projectionmtx->m[0][0] - sp38 * g_Vars.currentplayer->projectionmtx->m[2][0];
-	sp44.f[1] = -sp20 * g_Vars.currentplayer->projectionmtx->m[0][1] - sp38 * g_Vars.currentplayer->projectionmtx->m[2][1];
-	sp44.f[2] = -sp20 * g_Vars.currentplayer->projectionmtx->m[0][2] - sp38 * g_Vars.currentplayer->projectionmtx->m[2][2];
+	planeNormal.x = -rightY * g_Vars.currentplayer->projectionmtx->m[0][0] - rightX * g_Vars.currentplayer->projectionmtx->m[2][0];
+	planeNormal.y = -rightY * g_Vars.currentplayer->projectionmtx->m[0][1] - rightX * g_Vars.currentplayer->projectionmtx->m[2][1];
+	planeNormal.z = -rightY * g_Vars.currentplayer->projectionmtx->m[0][2] - rightX * g_Vars.currentplayer->projectionmtx->m[2][2];
+	planeOffset = planeNormal.x * g_Vars.currentplayer->projectionmtx->m[3][0] +
+	              planeNormal.y * g_Vars.currentplayer->projectionmtx->m[3][1] +
+	              planeNormal.z * g_Vars.currentplayer->projectionmtx->m[3][2];
 
-	sp40 = sp44.f[0] * g_Vars.currentplayer->projectionmtx->m[3][0] + sp44.f[1] * g_Vars.currentplayer->projectionmtx->m[3][1] + sp44.f[2] * g_Vars.currentplayer->projectionmtx->m[3][2];
-
-	if (sp40 + arg1 < sp44.f[0] * pos->f[0] + sp44.f[1] * pos->f[1] + sp44.f[2] * pos->f[2]) {
+	if (planeOffset + radius < planeNormal.x * pos->x + planeNormal.y * pos->y + planeNormal.z * pos->z) {
 		return false;
 	}
 
-	sp34 = (g_Vars.currentplayer->c_halfheight - (drawslot->box.ymin - g_Vars.currentplayer->c_screentop)) * g_Vars.currentplayer->c_scaley;
-	sp2c = 1.0f / sqrtf(sp34 * sp34 + 1.0f);
-	sp34 *= sp2c;
-	sp1c = -sp2c;
+	// --- Top plane ---
+	float topOffset = (g_Vars.currentplayer->c_halfheight - (drawslot->box.ymin - g_Vars.currentplayer->c_screentop)) * g_Vars.currentplayer->c_scaley;
+	float topLenInv = 1.0f / sqrtf(topOffset * topOffset + 1.0f);
+	float topY = topOffset * topLenInv;
+	float topZ = -topLenInv;
 
-	sp74.f[0] = -sp1c * g_Vars.currentplayer->projectionmtx->m[1][0] + sp34 * g_Vars.currentplayer->projectionmtx->m[2][0];
-	sp74.f[1] = -sp1c * g_Vars.currentplayer->projectionmtx->m[1][1] + sp34 * g_Vars.currentplayer->projectionmtx->m[2][1];
-	sp74.f[2] = -sp1c * g_Vars.currentplayer->projectionmtx->m[1][2] + sp34 * g_Vars.currentplayer->projectionmtx->m[2][2];
+	planeNormal.x = -topZ * g_Vars.currentplayer->projectionmtx->m[1][0] + topY * g_Vars.currentplayer->projectionmtx->m[2][0];
+	planeNormal.y = -topZ * g_Vars.currentplayer->projectionmtx->m[1][1] + topY * g_Vars.currentplayer->projectionmtx->m[2][1];
+	planeNormal.z = -topZ * g_Vars.currentplayer->projectionmtx->m[1][2] + topY * g_Vars.currentplayer->projectionmtx->m[2][2];
+	planeOffset = planeNormal.x * g_Vars.currentplayer->projectionmtx->m[3][0] +
+	              planeNormal.y * g_Vars.currentplayer->projectionmtx->m[3][1] +
+	              planeNormal.z * g_Vars.currentplayer->projectionmtx->m[3][2];
 
-	sp70 = sp74.f[0] * g_Vars.currentplayer->projectionmtx->m[3][0] + sp74.f[1] * g_Vars.currentplayer->projectionmtx->m[3][1] + sp74.f[2] * g_Vars.currentplayer->projectionmtx->m[3][2];
-
-	if (sp70 + arg1 < sp74.f[0] * pos->f[0] + sp74.f[1] * pos->f[1] + sp74.f[2] * pos->f[2]) {
+	if (planeOffset + radius < planeNormal.x * pos->x + planeNormal.y * pos->y + planeNormal.z * pos->z) {
 		return false;
 	}
 
-	sp34 = -(g_Vars.currentplayer->c_halfheight - (drawslot->box.ymax - g_Vars.currentplayer->c_screentop)) * g_Vars.currentplayer->c_scaley;
-	sp28 = 1.0f / sqrtf(sp34 * sp34 + 1.0f);
-	sp34 *= sp28;
-	sp18 = -sp28;
+	// --- Bottom plane ---
+	float bottomOffset = -(g_Vars.currentplayer->c_halfheight - (drawslot->box.ymax - g_Vars.currentplayer->c_screentop)) * g_Vars.currentplayer->c_scaley;
+	float bottomLenInv = 1.0f / sqrtf(bottomOffset * bottomOffset + 1.0f);
+	float bottomY = bottomOffset * bottomLenInv;
+	float bottomZ = -bottomLenInv;
 
-	sp64.f[0] = sp18 * g_Vars.currentplayer->projectionmtx->m[1][0] + sp34 * g_Vars.currentplayer->projectionmtx->m[2][0];
-	sp64.f[1] = sp18 * g_Vars.currentplayer->projectionmtx->m[1][1] + sp34 * g_Vars.currentplayer->projectionmtx->m[2][1];
-	sp64.f[2] = sp18 * g_Vars.currentplayer->projectionmtx->m[1][2] + sp34 * g_Vars.currentplayer->projectionmtx->m[2][2];
+	planeNormal.x = bottomZ * g_Vars.currentplayer->projectionmtx->m[1][0] + bottomY * g_Vars.currentplayer->projectionmtx->m[2][0];
+	planeNormal.y = bottomZ * g_Vars.currentplayer->projectionmtx->m[1][1] + bottomY * g_Vars.currentplayer->projectionmtx->m[2][1];
+	planeNormal.z = bottomZ * g_Vars.currentplayer->projectionmtx->m[1][2] + bottomY * g_Vars.currentplayer->projectionmtx->m[2][2];
+	planeOffset = planeNormal.x * g_Vars.currentplayer->projectionmtx->m[3][0] +
+	              planeNormal.y * g_Vars.currentplayer->projectionmtx->m[3][1] +
+	              planeNormal.z * g_Vars.currentplayer->projectionmtx->m[3][2];
 
-	sp60 = sp64.f[0] * g_Vars.currentplayer->projectionmtx->m[3][0] + sp64.f[1] * g_Vars.currentplayer->projectionmtx->m[3][1] + sp64.f[2] * g_Vars.currentplayer->projectionmtx->m[3][2];
-
-	if (sp60 + arg1 < sp64.f[0] * pos->f[0] + sp64.f[1] * pos->f[1] + sp64.f[2] * pos->f[2]) {
+	if (planeOffset + radius < planeNormal.x * pos->x + planeNormal.y * pos->y + planeNormal.z * pos->z) {
 		return false;
 	}
 
 	return true;
 }
+
 
 /**
  * This function is building a drawslot on the stack so it can pass it to

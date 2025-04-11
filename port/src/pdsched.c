@@ -19,7 +19,7 @@
 #include "input.h"
 #include "mixer.h"
 
-struct artifact g_ArtifactLists[3][240];
+struct artifact g_ArtifactLists[3][480]; // Originally 240
 uint8_t g_SchedSpecialArtifactIndexes[3];
 int g_SchedWriteArtifactsIndex;
 int g_SchedFrontArtifactsIndex;

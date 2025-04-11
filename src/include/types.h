@@ -2372,10 +2372,9 @@ struct player {
 	/*0x0044*/ struct coord globaldrawcameraoffset;
 	/*0x0050*/ struct coord globaldrawworldbgoffset;
 	/*0x005c*/ Mtx *mtxl005c;
-	/*0x0060*/ Mtx *mtxl0060;
 	/*0x0064*/ Mtxf *mtxf0064;
 	/*0x0068*/ Mtxf *mtxf0068;
-	/*0x006c*/ Mtxf *mtxf006c;
+	/*0x006c*/ Mtxf *artifactMtx;
 	/*0x0070*/ float sumground;
 	/*0x0074*/ float vv_manground; // Feet Y value in absolute coordinates
 	/*0x0078*/ float vv_ground; // Ground Y value in absolute coordinates
@@ -2608,13 +2607,13 @@ struct player {
 	/*0x1748*/ Mtxf *mtxf1748;
 	/*0x174c*/ Mtxf *projectionmtx;
 	/*0x1750*/ Mtx *perspmtxl;
-	/*0x1754*/ Mtxf *mtxf1754;
+	/*0x1754*/ Mtxf *skyMtx;
 	/*0x1758*/ Mtx *orthomtxl;
 	/*0x175c*/ LookAt *lookat;
 	/*0x1760*/ Mtxf *prevworldtoscreenmtx;
 	/*0x1764*/ int c_prevviewfmdynticknum;
 	/*0x1768*/ Mtxf *prevprojectionmtx;
-	/*0x176c*/ float c_scalelod60;
+	/*0x176c*/ float c_scalelod60; // Used by FarSight target locator
 	/*0x1770*/ float c_scalelod;
 	/*0x1774*/ float c_lodscalez;
 	/*0x1778*/ uint32_t c_lodscalezu32;
@@ -3428,7 +3427,7 @@ struct audioconfig {
 struct artifact {
 	uint16_t type;                  // ARTIFACTTYPE_FREE or ARTIFACTTYPE_GLARE
 	uint16_t losCheckResult;        // Result of line-of-sight test (0 = occluded, 1 = visible)
-	float zbufferDepth;             // Used for sorting/rendering depth. Not used on PC?
+	float zbufferDepth;             // Used for sorting/rendering depth.
 	uint16_t *zbufferPixelPtr;      // Pointer to the Z-buffer pixel this artifact maps to
 
 	union {
@@ -3440,6 +3439,7 @@ struct artifact {
 	} screenPos;
 
 	struct light *light;            // Pointer to the source light this glare comes from
+	float dist;                     // Distance to player camera
 };
 
 struct credit {

@@ -492,7 +492,7 @@ void playermgrAllocatePlayer(int index)
 	g_Vars.players[index]->mtxf1748 = NULL;
 	g_Vars.players[index]->projectionmtx = NULL;
 	g_Vars.players[index]->perspmtxl = NULL;
-	g_Vars.players[index]->mtxf1754 = NULL;
+	g_Vars.players[index]->skyMtx = NULL;
 	g_Vars.players[index]->orthomtxl = NULL;
 	g_Vars.players[index]->lookat = NULL;
 	g_Vars.players[index]->prevworldtoscreenmtx = NULL;

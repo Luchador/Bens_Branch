@@ -439,7 +439,7 @@ void setupCreateObject(struct defaultobj *obj, int cmdindex)
 		padUnpack(obj->pad, PADFIELD_POS | PADFIELD_LOOK | PADFIELD_UP | PADFIELD_BBOX | PADFIELD_ROOM, &pad);
 
 		if (pad.room > 0) {
-			mtxBuildLookAtFromTargetF(&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
+			mtxBuildLookAtFromTarget((Mtx*)&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
 
 			pos.x = pad.pos.x;
 			pos.y = pad.pos.y;
@@ -796,7 +796,7 @@ void setupCreateCctv(struct cctvobj *cctv, int cmdindex)
 		ydiff = lenspos.y - pad.pos.y;
 		zdiff = lenspos.z - pad.pos.z;
 
-		mtxBuildLookAtFromTargetF(&cctv->camrotm, 0.0f, 0.0f, 0.0f, xdiff, ydiff, zdiff, 0.0f, 1.0f, 0.0f);
+		mtxBuildLookAtFromTarget((Mtx*)&cctv->camrotm, 0.0f, 0.0f, 0.0f, xdiff, ydiff, zdiff, 0.0f, 1.0f, 0.0f);
 		mtxScaleRotationPart(obj->model->scale, (Mtx*)&cctv->camrotm);
 
 		cctv->toleft = 0;
@@ -910,7 +910,7 @@ void setupCreateSingleMonitor(struct singlemonitorobj *monitor, int cmdindex)
 			}
 
 			propReparent(prop, owner->prop);
-			mtx4LoadXRotationF(0.3664608001709f, &sp64);
+			mtx4LoadXRotation(0.3664608001709f, (Mtx*)&sp64);
 			mtxScaleRotationPart(monitor->base.model->scale / owner->model->scale, (Mtx*)&sp64);
 			modelGetRootPosition(monitor->base.model, &spa4);
 
@@ -918,7 +918,7 @@ void setupCreateSingleMonitor(struct singlemonitorobj *monitor, int cmdindex)
 			spa4.y = -spa4.y;
 			spa4.z = -spa4.z;
 
-			mtx4LoadTranslationF(&spa4, &sp24);
+			mtx4LoadTranslation(&spa4, (Mtx*)&sp24);
 			mtxApplyAffineTransform((Mtx*)&sp64, (Mtx*)&sp24, (Mtx*)&monitor->base.embedment->matrix);
 		}
 	} else {
@@ -1062,11 +1062,11 @@ void setupCreateDoor(struct doorobj *door, int cmdindex)
 
 		bbox = modeldefFindBboxRodata(g_ModelStates[modelnum].modeldef);
 
-		mtxBuildLookAtFromTargetF(&sp110, 0, 0, 0,
+		mtxBuildLookAtFromTarget((Mtx*)&sp110, 0, 0, 0,
 				-pad.look.x, -pad.look.y, -pad.look.z,
 				pad.up.x, pad.up.y, pad.up.z);
-		mtx4LoadXRotationF(1.5705462694168f, &finalmtx);
-		mtx4LoadZRotationF(1.5705462694168f, &zrotmtx);
+		mtx4LoadXRotation(1.5705462694168f, (Mtx*)&finalmtx);
+		mtx4LoadZRotation(1.5705462694168f, (Mtx*)&zrotmtx);
 		mtx4MultMtx4InPlace((Mtx*)&zrotmtx, (Mtx*)&finalmtx);
 		mtx4MultMtx4InPlace((Mtx*)&sp110, (Mtx*)&finalmtx);
 
@@ -1622,7 +1622,7 @@ void setupCreateProps(int stagenum)
 							}
 						}
 
-						obj->flags &= ~OBJFLAG_00000100;
+						obj->flags &= ~OBJFLAG_GEOMETRY_TEMP_ENABLED;
 
 						setupCreateObject(obj, index);
 
@@ -1718,15 +1718,15 @@ void setupCreateProps(int stagenum)
 						if (obj->flags & OBJFLAG_ESCSTEP_ZALIGNED) {
 							step->frame = escstepy;
 							escstepy += 40;
-							mtx4LoadYRotationF(4.7116389274597f, (Mtxf *) &sp1a8);
+							mtx4LoadYRotation(4.7116389274597f, (Mtx*) &sp1a8);
 							mtx4ToMtx3((Mtx *) &sp1a8, sp184);
-							mtx00016110(sp184, obj->realrot);
+							mtx3x3TransposeMulInPlace(sp184, obj->realrot);
 						} else {
 							step->frame = escstepx;
 							escstepx += 40;
-							mtx4LoadYRotationF(M_PI, (Mtxf *) &sp1a8);
+							mtx4LoadYRotation(M_PI, (Mtx*) &sp1a8);
 							mtx4ToMtx3((Mtx *) &sp1a8, sp184);
-							mtx00016110(sp184, obj->realrot);
+							mtx3x3TransposeMulInPlace(sp184, obj->realrot);
 						}
 					}
 					break;

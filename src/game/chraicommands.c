@@ -2266,7 +2266,7 @@ bool aiObjectMoveToPad(void)
 
 	if (obj && obj->prop) {
 		padUnpack(padnum, PADFIELD_POS | PADFIELD_LOOK | PADFIELD_UP | PADFIELD_ROOM, &pad);
-		mtxBuildLookAtFromTargetF(&matrix,
+		mtxBuildLookAtFromTarget((Mtx*)&matrix,
 				0, 0, 0,
 				-pad.look.x, -pad.look.y, -pad.look.z,
 				pad.up.x, pad.up.y, pad.up.z);

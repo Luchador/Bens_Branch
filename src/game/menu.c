@@ -1866,7 +1866,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			tmpcoord.y = roty;
 			tmpcoord.z = rotz;
 
-			mtx4LoadRotationF(&tmpcoord, &rotmtx);
+			mtx4LoadRotation(&tmpcoord, (Mtx*)&rotmtx);
 		} else {
 			// If the caller is reconfiguring the model's position, rotation or scale, tween towards the new values.
 			if (menumodel->configuring) {
@@ -1917,7 +1917,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 						quaternionEulerToQuat(&tmprot, sp2ac);
 						quaternionSlerp(sp2bc, sp2ac, fracnew, sp29c);
-						quaternionToMtxF(sp29c, &rotmtx);
+						quaternionToMtx(sp29c, (Mtx*)&rotmtx);
 					} else {
 						menumodel->currotx = rotx = menumodel->newrotx;
 						menumodel->curroty = roty = menumodel->newroty;
@@ -1927,7 +1927,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 						tmpcoord.y = roty;
 						tmpcoord.z = rotz;
 
-						mtx4LoadRotationF(&tmpcoord, &rotmtx);
+						mtx4LoadRotation(&tmpcoord, (Mtx*)&rotmtx);
 					}
 				}
 			}
@@ -1947,7 +1947,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				tmpcoord.y = roty;
 				tmpcoord.z = rotz;
 
-				mtx4LoadRotationF(&tmpcoord, &rotmtx);
+				mtx4LoadRotation(&tmpcoord, (Mtx*)&rotmtx);
 			}
 		}
 
@@ -1995,7 +1995,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			tmpcoord.z = rotz * tmpcoord.z;
 		}
 
-		mtx4LoadTranslationF(&tmpcoord, &posmtx);
+		mtx4LoadTranslation(&tmpcoord, (Mtx*)&posmtx);
 
 		if (haszoom) {
 			mtxScaleRotationPart(scale * zoomy, (Mtx*)&posmtx);
@@ -2010,13 +2010,13 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			Mtxf sp184;
 
 			if (haszoom) {
-				mtx4LoadTranslationF(&zoompos, &sp204);
+				mtx4LoadTranslation(&zoompos, (Mtx*)&sp204);
 			} else {
 				tmpcoord.x = menumodel->displacex;
 				tmpcoord.y = menumodel->displacey;
 				tmpcoord.z = menumodel->displacez;
 
-				mtx4LoadTranslationF(&tmpcoord, &sp204);
+				mtx4LoadTranslation(&tmpcoord, (Mtx*)&sp204);
 			}
 
 			mtx4MultMtx4((Mtx*)&posmtx, (Mtx*)&rotmtx, (Mtx*)&sp244);
@@ -2100,7 +2100,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			}
 		}
 
-		mtx4CopyF(&menumodel->mtx, matrices);
+		mtx4Copy((Mtx*)&menumodel->mtx, (Mtx*)matrices);
 
 		renderdata.unk00 = &menumodel->mtx;
 		renderdata.unk10 = menumodel->bodymodel.matrices;
@@ -2135,9 +2135,9 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				Mtxf spe0;
 
 				mtxIdent((Mtx*)&sp120);
-				mtx4LoadXRotationF(menuGetCosOscFrac(4), &sp120);
+				mtx4LoadXRotation(menuGetCosOscFrac(4), (Mtx*)&sp120);
 				mtx4MultMtx4((Mtx *)((uintptr_t)matrices + mtxindex * sizeof(Mtx)), (Mtx*)&sp120, (Mtx*)&spe0);
-				mtx4CopyF(&spe0, (Mtxf *)((uintptr_t)matrices + mtxindex * sizeof(Mtxf)));
+				mtx4Copy((Mtx*)&spe0, (Mtx *)((uintptr_t)matrices + mtxindex * sizeof(Mtx)));
 			}
 
 			// Make the menu projection lines come from the hudpiece eye

@@ -243,11 +243,11 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	vertices = gfxAllocateVertices(4);
 	spc8 = gfxAllocateMatrixF();
 
-	mtx4LoadTranslationF(headpos, &sp84);
+	mtx4LoadTranslation(headpos, (Mtx*)&sp84);
 
 	mtxScaleRotationPart(1.0f / arg2, (Mtx*)&sp84);
 	mtxApplyAffineTransformInPlace((Mtx*)worldtoscreenmtx, (Mtx*)&sp84);
-	mtx4CopyF(&sp84, spc8);
+	mtx4Copy((Mtx*)&sp84, (Mtx*)spc8);
 
 	mult = arg5 * arg2;
 
@@ -430,7 +430,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 				&& sp138.f[1] > -32000.0f && sp138.f[1] < 32000.0f
 				&& sp138.f[2] > -32000.0f && sp138.f[2] < 32000.0f) {
 			spd8 = true;
-			mtx4LoadTranslationF(&sp138, &sp148);
+			mtx4LoadTranslation(&sp138, (Mtx*)&sp148);
 			mtxScaleRotationPart(0.1f, (Mtx*)&sp148);
 			mtxApplyAffineTransformInPlace((Mtx*)worldtoscreenmtx, (Mtx*)&sp148);
 
@@ -444,7 +444,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 			}
 
 			if (spd8) {
-				mtx4CopyF(&sp148, sp188);
+				mtx4Copy((Mtx*)&sp148, (Mtx*)sp188);
 
 				if (beam->weaponnum);
 
@@ -690,7 +690,7 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 		return;
 	}
 
-	mtx4CopyF(mtx, &spec);
+	mtx4Copy((Mtx*)mtx, (Mtx*)&spec);
 
 	modeldef = bgunGetCartModeldef();
 
@@ -721,7 +721,7 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 			spa4.y = 2.0f * RANDOMFRAC() * M_TAU * 0.0625f - 0.39263657f;
 			spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.0625f - 0.39263657f;
 
-			mtx4LoadRotationF(&spa4, &sp64);
+			mtx4LoadRotation(&spa4, (Mtx*)&sp64);
 			mtx4ToMtx3((Mtx*)&sp64, spc8);
 
 			for (i = 0; i < 3; i++) {
@@ -770,7 +770,7 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 				spa4.y = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 				spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 
-				mtx4LoadRotationF(&spa4, &sp64);
+				mtx4LoadRotation(&spa4, (Mtx*)&sp64);
 				mtx4RotateVecInPlace((Mtx*)&sp64, &casing->speed);
 			}
 
@@ -778,7 +778,7 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 			spa4.y = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 			spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 
-			mtx4LoadRotationF(&spa4, &sp64);
+			mtx4LoadRotation(&spa4, (Mtx*)&sp64);
 			mtx4ToMtx3((Mtx*)&sp64, spc8);
 
 			for (i = 0; i < 3; i++) {
@@ -1086,7 +1086,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	mtxScale3x4(0.2f, (Mtx*)&sp1b0);
 
 	mtx = gfxAllocateMatrixF();
-	mtx4CopyF(&sp1b0, mtx);
+	mtx4Copy((Mtx*)&sp1b0, (Mtx*)mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -1271,7 +1271,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 
 	mtxScale3x4(0.2f, (Mtx*)&sp198);
 	mtx = gfxAllocateMatrixF();
-	mtx4CopyF(&sp198, mtx);
+	mtx4Copy((Mtx*)&sp198, (Mtx*)mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 

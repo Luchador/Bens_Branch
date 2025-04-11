@@ -185,7 +185,7 @@ int splatsCreate(int qty, float arg1, struct prop *prop, struct shotdata *shotda
 			spe4.f[j] = (RANDOMFRAC() * g_SplatRandomOffsetMax * 2.0f - g_SplatRandomOffsetMax) * 0.017453292384744f;
 		}
 
-		mtx4LoadRotationF(&spe4, &spa4);
+		mtx4LoadRotation(&spe4, (Mtx*)&spa4);
 		mtx4RotateVec((Mtx*)&spa4, &spfc, &shotdata->gundir3d);
 		mtx4RotateVec((Mtx*)&spa4, &spf0, &shotdata->gundir2d);
 

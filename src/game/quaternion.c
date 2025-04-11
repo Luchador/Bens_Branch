@@ -49,7 +49,7 @@ void quaternionSetRotationAroundZ(float angle, float quat[4])
 	quat[3] = sinf(angle * 0.5f);
 }
 
-void quaternionToMtxF(float quat[4], Mtxf *mtx)
+void quaternionToMtx(float quat[4], Mtx *mtx)
 {
 	float mult = 2.0f / (quat[0] * quat[0] + quat[1] * quat[1] + quat[2] * quat[2] + quat[3] * quat[3]);
 	float a = quat[1] * mult;
@@ -66,71 +66,26 @@ void quaternionToMtxF(float quat[4], Mtxf *mtx)
 	float sp18 = quat[2] * c;
 	float sp14 = quat[3] * c;
 
-	mtx->m[0][0] = 1.0f - (sp1c + sp14);
-	mtx->m[0][1] = sp24 + sp2c;
-	mtx->m[0][2] = sp20 - sp30;
+	(*mtx)[0][0] = 1.0f - (sp1c + sp14);
+	(*mtx)[0][1] = sp24 + sp2c;
+	(*mtx)[0][2] = sp20 - sp30;
 
-	mtx->m[1][0] = sp24 - sp2c;
-	mtx->m[1][1] = 1.0f - (sp28 + sp14);
-	mtx->m[1][2] = sp18 + sp34;
+	(*mtx)[1][0] = sp24 - sp2c;
+	(*mtx)[1][1] = 1.0f - (sp28 + sp14);
+	(*mtx)[1][2] = sp18 + sp34;
 
-	mtx->m[2][0] = sp20 + sp30;
-	mtx->m[2][1] = sp18 - sp34;
-	mtx->m[2][2] = 1.0f - (sp28 + sp1c);
+	(*mtx)[2][0] = sp20 + sp30;
+	(*mtx)[2][1] = sp18 - sp34;
+	(*mtx)[2][2] = 1.0f - (sp28 + sp1c);
 
-	mtx->m[3][0] = 0.0f;
-	mtx->m[3][1] = 0.0f;
-	mtx->m[3][2] = 0.0f;
+	(*mtx)[3][0] = 0.0f;
+	(*mtx)[3][1] = 0.0f;
+	(*mtx)[3][2] = 0.0f;
 
-	mtx->m[0][3] = 0.0f;
-	mtx->m[1][3] = 0.0f;
-	mtx->m[2][3] = 0.0f;
-	mtx->m[3][3] = 1.0f;
-}
-
-void quaternion3x3MtxToQuatF(Mtxf *mtx, float arg1[4])
-{
-	float var1;
-	float var2;
-	float trace = mtx->m[0][0] + mtx->m[1][1] + mtx->m[2][2] + 1.0f;
-
-	// If trace is large enough, the matrix is suitable for a simplified fast conversion
-	if (trace > 0.01f) {
-		var1 = sqrtf(trace);
-		var2 = 0.5f / var1;
-
-		arg1[0] = var1 * 0.5f;
-		arg1[1] = (mtx->m[1][2] - mtx->m[2][1]) * var2;
-		arg1[2] = (mtx->m[2][0] - mtx->m[0][2]) * var2;
-		arg1[3] = (mtx->m[0][1] - mtx->m[1][0]) * var2;
-	// If trace is too small, the matrix may be near gimbal lock, use an alternative quaternion extraction formula
-	} else {
-		int i;
-		int j;
-		int indices[3] = {1, 2, 0};
-		int k;
-
-		i = 0;
-
-		if (mtx->m[0][0] < mtx->m[1][1]) {
-			i = 1;
-		}
-
-		if (mtx->m[i][i] < mtx->m[2][2]) {
-			i = 2;
-		}
-
-		j = indices[i];
-		k = indices[j];
-
-		var1 = sqrtf(mtx->m[i][i] - (mtx->m[j][j] + mtx->m[k][k]) + 1.0f);
-		var2 = 0.5f / var1;
-
-		arg1[i + 1] = var1 * 0.5f;
-		arg1[    0] = (mtx->m[j][k] - mtx->m[k][j]) * var2;
-		arg1[j + 1] = (mtx->m[i][j] + mtx->m[j][i]) * var2;
-		arg1[k + 1] = (mtx->m[i][k] + mtx->m[k][i]) * var2;
-	}
+	(*mtx)[0][3] = 0.0f;
+	(*mtx)[1][3] = 0.0f;
+	(*mtx)[2][3] = 0.0f;
+	(*mtx)[3][3] = 1.0f;
 }
 
 void quaternion3x3MtxToQuat(Mtx *mtx, float arg1[4])
@@ -178,13 +133,13 @@ void quaternion3x3MtxToQuat(Mtx *mtx, float arg1[4])
 	}
 }
 
-void quaternionToTransformMtx(struct coord *pos, float rot[4], Mtxf *mtx)
+void quaternionToTransformMtx(struct coord *pos, float rot[4], Mtx *mtx)
 {
-	quaternionToMtxF(rot, mtx);
+	quaternionToMtx(rot, mtx);
 
-	mtx->m[3][0] = pos->x;
-	mtx->m[3][1] = pos->y;
-	mtx->m[3][2] = pos->z;
+	(*mtx)[3][0] = pos->x;
+	(*mtx)[3][1] = pos->y;
+	(*mtx)[3][2] = pos->z;
 }
 
 #define EPSILON 0.00001001f

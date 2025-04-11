@@ -1452,7 +1452,7 @@ float chrGetFlinchAmount(struct chrdata *chr)
  * - Body flinching when shot
  * - Chrs aiming up, down, left and right
  */
-void chrHandleJointPositioned(int joint, Mtxf *mtx)
+void chrHandleJointPositioned(int joint, Mtx *mtx)
 {
 	float scale = 1.0f;
 	int lshoulderjoint;
@@ -1460,8 +1460,8 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 	int waistjoint;
 	int neckjoint;
 	struct coord sp138;
-	Mtxf spf8;
-	Mtxf spb8;
+	Mtx spf8;
+	Mtx spb8;
 	float gunroty;
 	float gunrotx;
 	float theta;
@@ -1488,13 +1488,13 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 
 		mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtxF(), (Mtx*)mtx);
 
-		sp138.x = mtx->m[3][0];
-		sp138.y = mtx->m[3][1];
-		sp138.z = mtx->m[3][2];
+		sp138.x = (*mtx)[3][0];
+		sp138.y = (*mtx)[3][1];
+		sp138.z = (*mtx)[3][2];
 
-		mtx->m[3][0] = 0.0f;
-		mtx->m[3][1] = 0.0f;
-		mtx->m[3][2] = 0.0f;
+		(*mtx)[3][0] = 0.0f;
+		(*mtx)[3][1] = 0.0f;
+		(*mtx)[3][2] = 0.0f;
 
 		if (gunrotx < 0.0f) {
 			gunrotx += M_TAU;
@@ -1510,10 +1510,10 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 			gunrot -= M_TAU;
 		}
 
-		mtx4LoadYRotationF(gunrot, &spb8);
-		mtxApplyAffineTransformInPlace((Mtx*)&spb8, (Mtx*)mtx);
-		mtx4LoadXRotationF(gunrotx, &spf8);
-		mtxApplyAffineTransformInPlace((Mtx*)&spf8, (Mtx*)mtx);
+		mtx4LoadYRotation(gunrot, &spb8);
+		mtxApplyAffineTransformInPlace(&spb8, mtx);
+		mtx4LoadXRotation(gunrotx, &spf8);
+		mtxApplyAffineTransformInPlace(&spf8, mtx);
 
 		gunrot = gunroty + theta;
 
@@ -1521,18 +1521,18 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 			gunrot -= M_TAU;
 		}
 
-		mtx4LoadYRotationF(gunrot, &spb8);
-		mtxApplyAffineTransformInPlace((Mtx*)&spb8, (Mtx*)mtx);
+		mtx4LoadYRotation(gunrot, &spb8);
+		mtxApplyAffineTransformInPlace(&spb8, mtx);
 
 		if (scale != 1.0f) {
-			mtxScaleRotationPart(scale, (Mtx*)mtx);
+			mtxScaleRotationPart(scale, mtx);
 		}
 
-		mtx->m[3][0] = sp138.x;
-		mtx->m[3][1] = sp138.y;
-		mtx->m[3][2] = sp138.z;
+		(*mtx)[3][0] = sp138.x;
+		(*mtx)[3][1] = sp138.y;
+		(*mtx)[3][2] = sp138.z;
 
-		mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)mtx);
+		mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), mtx);
 	} else {
 		if (g_CurModelChr->model->definition->skel == &g_SkelChr) {
 			lshoulderjoint = 2;
@@ -1681,7 +1681,7 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 			if (xrot != 0.0f || yrot != 0.0f || zrot != 0.0f || scale != 1.0f) {
 				struct coord sp70;
 				float aimangle;
-				Mtxf tmpmtx;
+				Mtx tmpmtx;
 
 				aimangle = chrGetAimAngle(g_CurModelChr);
 
@@ -1695,15 +1695,15 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 					yrot += M_TAU;
 				}
 
-				mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtxF(), (Mtx*)mtx);
+				mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtxF(), mtx);
 
-				sp70.x = mtx->m[3][0];
-				sp70.y = mtx->m[3][1];
-				sp70.z = mtx->m[3][2];
+				sp70.x = (*mtx)[3][0];
+				sp70.y = (*mtx)[3][1];
+				sp70.z = (*mtx)[3][2];
 
-				mtx->m[3][0] = 0.0f;
-				mtx->m[3][1] = 0.0f;
-				mtx->m[3][2] = 0.0f;
+				(*mtx)[3][0] = 0.0f;
+				(*mtx)[3][1] = 0.0f;
+				(*mtx)[3][2] = 0.0f;
 
 				if (xrot != 0.0f || zrot != 0.0f) {
 					yrot -= aimangle;
@@ -1712,35 +1712,35 @@ void chrHandleJointPositioned(int joint, Mtxf *mtx)
 						yrot += M_TAU;
 					}
 
-					mtx4LoadYRotationF(yrot, &tmpmtx);
-					mtxApplyAffineTransformInPlace((Mtx*)&tmpmtx, (Mtx*)mtx);
+					mtx4LoadYRotation(yrot, &tmpmtx);
+					mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
 
 					if (xrot != 0.0f) {
-						mtx4LoadXRotationF(xrot, &tmpmtx);
-						mtxApplyAffineTransformInPlace((Mtx*)&tmpmtx, (Mtx*)mtx);
+						mtx4LoadXRotation(xrot, &tmpmtx);
+						mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
 					}
 
 					if (zrot != 0.0f) {
-						mtx4LoadZRotationF(zrot, &tmpmtx);
-						mtxApplyAffineTransformInPlace((Mtx*)&tmpmtx, (Mtx*)mtx);
+						mtx4LoadZRotation(zrot, &tmpmtx);
+						mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
 					}
 
-					mtx4LoadYRotationF(aimangle, &tmpmtx);
-					mtxApplyAffineTransformInPlace((Mtx*)&tmpmtx, (Mtx*)mtx);
+					mtx4LoadYRotation(aimangle, &tmpmtx);
+					mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
 				} else {
-					mtx4LoadYRotationF(yrot, &tmpmtx);
-					mtxApplyAffineTransformInPlace((Mtx*)&tmpmtx, (Mtx*)mtx);
+					mtx4LoadYRotation(yrot, &tmpmtx);
+					mtxApplyAffineTransformInPlace(&tmpmtx, mtx);
 				}
 
 				if (scale != 1.0f) {
-					mtxScaleRotationPart(scale, (Mtx*)mtx);
+					mtxScaleRotationPart(scale, mtx);
 				}
 
-				mtx->m[3][0] = sp70.x;
-				mtx->m[3][1] = sp70.y;
-				mtx->m[3][2] = sp70.z;
+				(*mtx)[3][0] = sp70.x;
+				(*mtx)[3][1] = sp70.y;
+				(*mtx)[3][2] = sp70.z;
 
-				mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)mtx);
+				mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), mtx);
 			}
 		}
 	}
@@ -1842,14 +1842,14 @@ void chr0f022214(struct chrdata *chr, struct prop *prop, bool fulltick)
 			thing.unk00 = &sp80;
 		} else if (CHRRACE(chr) == RACE_SKEDAR) {
 			// The skedar hand position is rotated weirdly, so compensate for it
-			mtx4LoadYRotationF(1.3192588090897f, &sp80);
-			mtx4LoadZRotationF(1.5705462694168f, &sp40);
+			mtx4LoadYRotation(1.3192588090897f, (Mtx*)&sp80);
+			mtx4LoadZRotation(1.5705462694168f, (Mtx*)&sp40);
 			mtx4MultMtx4InPlace((Mtx*)&sp40, (Mtx*)&sp80);
 			mtx4MultMtx4InPlace((Mtx*)sp104, (Mtx*)&sp80);
 			thing.unk00 = &sp80;
 		} else if (prop == chr->weapons_held[HAND_LEFT]) {
 			// Flip the model
-			mtx4LoadZRotationF(M_PI, &sp80);
+			mtx4LoadZRotation(M_PI, (Mtx*)&sp80);
 			mtx4MultMtx4InPlace((Mtx*)sp104, (Mtx*)&sp80);
 			thing.unk00 = &sp80;
 		} else {
@@ -2488,7 +2488,7 @@ int chrTick(struct prop *prop)
 			sp190.y = 0.0f;
 			sp190.z = cosf(angle) * 19;
 
-			mtx4LoadTranslationF(&sp190, &sp1a8);
+			mtx4LoadTranslation(&sp190, (Mtx*)&sp1a8);
 			mtx4MultMtx4InPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp1a8);
 			sp210.unk00 = &sp1a8;
 		} else if (prop->type == PROPTYPE_PLAYER) {
@@ -2504,7 +2504,7 @@ int chrTick(struct prop *prop)
 				sp17c.y = fabsf(bike->w) * 200 + 25;
 				sp17c.z = sinf(-sp178) * sp130;
 
-				mtx4LoadTranslationF(&sp17c, &sp1a8);
+				mtx4LoadTranslation(&sp17c, (Mtx*)&sp1a8);
 				mtx4MultMtx4InPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp1a8);
 				sp210.unk00 = &sp1a8;
 			} else {
@@ -2750,7 +2750,7 @@ bool chr0f024738(struct chrdata *chr)
 
 						mtx3ToMtx4(obj->realrot, (Mtx*)&thing->unk02c);
 						mtx4SetTranslation(&obj->prop->pos, (Mtx*)&thing->unk02c);
-						mtx000172f0(thing->unk02c.m, thing->unk06c.m);
+						mtxInvertAffine(thing->unk02c.m, thing->unk06c.m);
 
 						campos = &g_Vars.currentplayer->cam_pos;
 
@@ -4423,7 +4423,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				Mtxf *sp58 = modelFindNodeMtx(hit->model, hit->bboxnode, 0);
 
 				// Create blood
-				mtx0001719c(sp58->m, spb0.m);
+				mtxInvertRigidBodyMatrix(sp58->m, spb0.m);
 				mtx4TransformVec((Mtx*)&spb0, &sp98, &sp5c);
 
 				if (!chr->noblood

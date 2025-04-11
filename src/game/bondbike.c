@@ -31,7 +31,7 @@
 void bbikeInit(void)
 {
 	struct hoverbikeobj *hoverbike = (struct hoverbikeobj *)g_Vars.currentplayer->hoverbike->obj;
-	Mtxf matrix;
+	Mtx matrix;
 
 	g_Vars.currentplayer->bondmovemode = MOVEMODE_BIKE;
 	g_Vars.currentplayer->bondvehiclemode = 0;
@@ -47,10 +47,10 @@ void bbikeInit(void)
 	g_Vars.currentplayer->bondenterpos.y = g_Vars.currentplayer->prop->pos.y;
 	g_Vars.currentplayer->bondenterpos.z = g_Vars.currentplayer->prop->pos.z;
 
-	mtx3ToMtx4(hoverbike->base.realrot, (Mtx*)&matrix);
-	mtx4SetTranslation(&hoverbike->base.prop->pos, (Mtx*)&matrix);
-	mtx4TransformVec((Mtx*)&matrix, &g_Vars.currentplayer->bondvehicleoffset, &g_Vars.currentplayer->bondenteraim);
-	mtxBuildLookAtMatrix2F(&g_Vars.currentplayer->bondentermtx,
+	mtx3ToMtx4(hoverbike->base.realrot, &matrix);
+	mtx4SetTranslation(&hoverbike->base.prop->pos, &matrix);
+	mtx4TransformVec(&matrix, &g_Vars.currentplayer->bondvehicleoffset, &g_Vars.currentplayer->bondenteraim);
+	mtxBuildLookAtMatrix2F((Mtx*)&g_Vars.currentplayer->bondentermtx,
 			0, 0, 0,
 			-g_Vars.currentplayer->bond2.unk1c.x, -g_Vars.currentplayer->bond2.unk1c.y, -g_Vars.currentplayer->bond2.unk1c.z,
 			g_Vars.currentplayer->bond2.unk28.x, g_Vars.currentplayer->bond2.unk28.y, g_Vars.currentplayer->bond2.unk28.z);
@@ -799,9 +799,9 @@ void bbikeTick(void)
 	float sp1f8;
 	float sp1f4;
 	struct coord sp1e8;
-	Mtxf sp1a8;
+	Mtx sp1a8;
 	int j;
-	Mtxf sp164;
+	Mtx sp164;
 	Mtx sp124;
 	Mtx spe4;
 	float spd4[4];
@@ -903,9 +903,9 @@ void bbikeTick(void)
 
 		hovTick(obj, &bike->hov);
 		func0f069c70(obj, true, true);
-		mtx3ToMtx4(obj->realrot, (Mtx*)&sp1a8);
-		mtx4SetTranslation(&obj->prop->pos, (Mtx*)&sp1a8);
-		mtx4TransformVec((Mtx*)&sp1a8, &g_Vars.currentplayer->bondvehicleoffset, &sp1e8);
+		mtx3ToMtx4(obj->realrot, &sp1a8);
+		mtx4SetTranslation(&obj->prop->pos, &sp1a8);
+		mtx4TransformVec(&sp1a8, &g_Vars.currentplayer->bondvehicleoffset, &sp1e8);
 
 		bbikeUpdateVertical(&sp1e8);
 
@@ -923,22 +923,22 @@ void bbikeTick(void)
 
 	bheadAdjustAnimation(0);
 	bheadUpdate(0, 0);
-	mtx4LoadXRotationF((360.0f - g_Vars.currentplayer->vv_verta360) * 0.017450513318181f, &sp164);
+	mtx4LoadXRotation((360.0f - g_Vars.currentplayer->vv_verta360) * 0.017450513318181f, &sp164);
 
-	mtxBuildLookAtFromTargetF((Mtxf*)&sp124, 0.0f, 0.0f, 0.0f,
+	mtxBuildLookAtFromTarget(&sp124, 0.0f, 0.0f, 0.0f,
 			-g_Vars.currentplayer->headlook.x, -g_Vars.currentplayer->headlook.y, -g_Vars.currentplayer->headlook.z,
 			g_Vars.currentplayer->headup.x, g_Vars.currentplayer->headup.y, g_Vars.currentplayer->headup.z);
 
-	mtx4MultMtx4InPlace((Mtx*)&sp124, (Mtx*)&sp164);
+	mtx4MultMtx4InPlace(&sp124, &sp164);
 	mtx3ToMtx4(obj->realrot, &sp124);
-	mtxScaleRotationPart(1.0f / obj->model->scale, (Mtx*)&sp124);
+	mtxScaleRotationPart(1.0f / obj->model->scale, &sp124);
 	mtx4LoadYRotation(hoverpropGetTurnAngle(obj), &spe4);
 	quaternion3x3MtxToQuat(&spe4, spd4);
 	quaternion3x3MtxToQuat(&sp124, spc4);
 	quaternionAvoidFlips(spc4, spd4);
 	quaternionSlerp(spd4, spc4, 0.8f, spb4);
-	quaternionToMtxF(spb4, (Mtxf*)&sp124);
-	mtx4MultMtx4InPlace((Mtx*)&sp124, (Mtx*)&sp164);
+	quaternionToMtx(spb4, &sp124);
+	mtx4MultMtx4InPlace(&sp124, &sp164);
 
 	if (g_Vars.currentplayer->bondvehiclemode == VEHICLEMODE_OFF) {
 		g_Vars.currentplayer->bondentert += g_Vars.lvupdate60freal / 60.0f;
@@ -964,19 +964,19 @@ void bbikeTick(void)
 					-1, 0, 0, PSTYPE_NONE, NULL, -1, NULL, -1, -1, -1, -1);
 		}
 
-		quaternion3x3MtxToQuatF(&g_Vars.currentplayer->bondentermtx, spa4);
-		quaternion3x3MtxToQuatF(&sp164, sp94);
+		quaternion3x3MtxToQuat((Mtx*)&g_Vars.currentplayer->bondentermtx, spa4);
+		quaternion3x3MtxToQuat((Mtx*)&sp164, sp94);
 		quaternionAvoidFlips(sp94, spa4);
 		quaternionSlerp(spa4, sp94, 1.0f - g_Vars.currentplayer->bondentert2, sp84);
-		quaternionToMtxF(sp84, &sp164);
+		quaternionToMtx(sp84, (Mtx*)&sp164);
 	}
 
-	g_Vars.currentplayer->bond2.unk1c.x = sp164.m[2][0];
-	g_Vars.currentplayer->bond2.unk1c.y = sp164.m[2][1];
-	g_Vars.currentplayer->bond2.unk1c.z = sp164.m[2][2];
-	g_Vars.currentplayer->bond2.unk28.x = sp164.m[1][0];
-	g_Vars.currentplayer->bond2.unk28.y = sp164.m[1][1];
-	g_Vars.currentplayer->bond2.unk28.z = sp164.m[1][2];
+	g_Vars.currentplayer->bond2.unk1c.x = sp164[2][0];
+	g_Vars.currentplayer->bond2.unk1c.y = sp164[2][1];
+	g_Vars.currentplayer->bond2.unk1c.z = sp164[2][2];
+	g_Vars.currentplayer->bond2.unk28.x = sp164[1][0];
+	g_Vars.currentplayer->bond2.unk28.y = sp164[1][1];
+	g_Vars.currentplayer->bond2.unk28.z = sp164[1][2];
 
 	if (g_Vars.currentplayer->bondvehiclemode == VEHICLEMODE_OFF) {
 		pos.x = (g_Vars.currentplayer->bondenterpos.x - g_Vars.currentplayer->bondenteraim.x) * g_Vars.currentplayer->bondentert2 + g_Vars.currentplayer->prop->pos.x;

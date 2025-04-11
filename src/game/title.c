@@ -572,7 +572,7 @@ Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3
 	renderdata.unk00 = arg6;
 	renderdata.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
 
-	mtx4CopyF(arg6, renderdata.unk10);
+	mtx4Copy((Mtx*)arg6, (Mtx*)renderdata.unk10);
 
 	model->matrices = renderdata.unk10;
 
@@ -932,12 +932,12 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	g_TitleLightPdLogoMain.l[0].l.dir[2] = 127.0f * cosf(angle1) * cosf(angle2);
 	
 
-	mtxBuildLookAtMatrixF(&sp2b0, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+	mtxBuildLookAtMatrixF((Mtx*)&sp2b0, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
 	model = g_PdLogoUseCombinedModel == true ? g_TitleModel : g_TitleModelNLogo2;
 
-	mtx4LoadYRotationF(g_PdLogoYRotCur, &sp1e8);
-	mtx4LoadXRotationF(g_PdLogoXRotCur, &sp1a8);
+	mtx4LoadYRotation(g_PdLogoYRotCur, (Mtx*)&sp1e8);
+	mtx4LoadXRotation(g_PdLogoXRotCur, (Mtx*)&sp1a8);
 	mtx4MultMtx4InPlace((Mtx*)&sp1a8, (Mtx*)&sp1e8);
 	mtx4MultMtx4((Mtx*)&sp2b0, (Mtx*)&sp1e8, (Mtx*)&sp270);
 	mtxScaleRotationPart(g_PdLogoScale, (Mtx*)&sp270);
@@ -1019,7 +1019,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	gSPSetLights1(gdl++, g_TitleLightPdLogoMain);
 	{
 		struct coord sp64 = {0, 0, 1000};
-		mtx4LoadTranslationF(&sp64, &sp1e8);
+		mtx4LoadTranslation(&sp64, (Mtx*)&sp1e8);
 	}
 
 	mtxScale3x4(1.0f + sp13c, (Mtx*)&sp1e8);
@@ -1174,20 +1174,20 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 		sp9c.y = (-cosf((1.0f - (fracdone / 1)) * M_PI) * 0.5f + .5f) * 0.35f;
 		sp9c.z = 0.0f;
 
-		mtx4LoadRotationF(&sp9c, &spa8);
+		mtx4LoadRotation(&sp9c, (Mtx*)&spa8);
 		mtxScale3x4(fracdone * 0.2f + 1.0f, (Mtx*)&spa8);
 
-		mtxBuildLookAtMatrixF(&sp108,
+		mtxBuildLookAtMatrixF((Mtx*)&sp108,
 				/* pos  */ 0.0f, 0.0f, 4000,
 				/* look */ 0.0f, 0.0f, 0.0f,
 				/* up   */ 0.0f, 1.0f, 0.0f);
 
 		mtx4MultMtx4InPlace((Mtx*)&sp108, (Mtx*)&spa8);
-		mtx4CopyF(&spa8, &sp108);
+		mtx4Copy((Mtx*)&spa8, (Mtx*)&sp108);
 		renderdata.unk00 = &sp108;
 
 		renderdata.unk10 = gfxAllocate(g_TitleModel->definition->nummatrices * sizeof(Mtxf));
-		mtx4CopyF(&sp108, renderdata.unk10);
+		mtx4Copy((Mtx*)&sp108, (Mtx*)renderdata.unk10);
 		g_TitleModel->matrices = renderdata.unk10;
 
 		modelUpdateRelations(g_TitleModel);
@@ -1355,20 +1355,20 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 	spb4.y = 1.5707963705063f * tmp;
 	spb4.z = 0;
 
-	mtx4LoadRotationF(&spb4, &spc0);
+	mtx4LoadRotation(&spb4, (Mtx*)&spc0);
 	mtxScale3x4(1 + fracdone * 0.25f, (Mtx*)&spc0);
 
-	mtxBuildLookAtMatrixF(&sp118,
+	mtxBuildLookAtMatrixF((Mtx*)&sp118,
 			/* pos  */ 0, 0, 4000,
 			/* look */ 0, 0, 0,
 			/* up   */ 0, 1, 0);
 
 	mtx4MultMtx4InPlace((Mtx*)&sp118, (Mtx*)&spc0);
-	mtx4CopyF(&spc0, &sp118);
+	mtx4Copy((Mtx*)&spc0, (Mtx*)&sp118);
 
 	renderdata.unk00 = &sp118;
 	renderdata.unk10 = gfxAllocate(g_TitleModel->definition->nummatrices * sizeof(Mtxf));
-	mtx4CopyF(&sp118, renderdata.unk10);
+	mtx4Copy((Mtx*)&sp118, (Mtx*)renderdata.unk10);
 
 	g_TitleModel->matrices = renderdata.unk10;
 

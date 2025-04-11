@@ -1589,8 +1589,8 @@ Gfx *creditsDraw(Gfx *gdl)
 		}
 
 		mtxIdent((Mtx*)&sp68);
-		mtx4CopyF(&sp68, matrix);
-		camSetWorldToScreenMtxf(&sp68);
+		mtx4Copy((Mtx*)&sp68, (Mtx*)matrix);
+		camSetWorldToScreenMtx((Mtx*)&sp68);
 
 		gSPMatrix(gdl++, (uintptr_t)(matrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 

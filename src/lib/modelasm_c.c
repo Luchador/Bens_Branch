@@ -369,7 +369,7 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 				modelasmMtxMultiply(t0mtx, t1mtx);
 
 				if (g_ModelJointPositionedFunc) {
-					g_ModelJointPositionedFunc(node->rodata->position.mtxindex0, &model->matrices[node->rodata->position.mtxindex0]);
+					g_ModelJointPositionedFunc(node->rodata->position.mtxindex0, (Mtx*)&model->matrices[node->rodata->position.mtxindex0]);
 				}
 
 				if (node->type & MODELNODETYPE_0100) {

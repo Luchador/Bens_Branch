@@ -276,7 +276,7 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 	rotationAxis.z = -100;
 
 	mtxIdent(&mtxLocalToClip);
-	mtx4LoadTranslation(&nbomb->pos, &mtxLocalToClip);
+	mtx4LoadTranslation(&nbomb->pos, (Mtx*)&mtxLocalToClip);
 
 	rotationAxis.x = 0;
 	rotationAxis.y = nbomb->rotAmount / rotationDivider * M_TAU;

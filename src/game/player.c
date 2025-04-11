@@ -1727,7 +1727,7 @@ void playerReorientForCutsceneStop(int tweenduration60)
 	frameslot = animLoadFrame(g_CutsceneAnimNum, lastframe);
 	animForgetFrameBirths();
 	animGetRotTranslateScale(0, 0, &g_Skel20, g_CutsceneAnimNum, frameslot, &rot, &translate, &scale);
-	mtx4LoadRotationF(&rot, &rotmtx);
+	mtx4LoadRotation(&rot, (Mtx*)&rotmtx);
 
 	theta = atan2f(-rotmtx.m[2][0], -rotmtx.m[2][2]);
 	theta = (M_TAU - theta) * 57.304901123047f;
@@ -1805,7 +1805,7 @@ void playerTickCutscene(bool arg0)
 	pos.y = translate.y * translatescale;
 	pos.z = translate.z * translatescale;
 
-	mtx4LoadRotationF(&rot, &rotmtx);
+	mtx4LoadRotation(&rot, (Mtx*)&rotmtx);
 
 	up.x = rotmtx.m[1][0];
 	up.y = rotmtx.m[1][1];
@@ -1833,15 +1833,15 @@ void playerTickCutscene(bool arg0)
 		pos.y += sp104 * (g_Vars.bond->bond2.unk10.y - pos.y);
 		pos.z += sp104 * (g_Vars.bond->bond2.unk10.z - pos.z);
 
-		mtxBuildLookAtFromTargetF(&spc4, 0, 0, 0, -look.x, -look.y, -look.z, up.x, up.y, up.z);
-		mtxBuildLookAtFromTargetF(&sp84, 0, 0, 0,
+		mtxBuildLookAtFromTarget((Mtx*)&spc4, 0, 0, 0, -look.x, -look.y, -look.z, up.x, up.y, up.z);
+		mtxBuildLookAtFromTarget((Mtx*)&sp84, 0, 0, 0,
 				-g_Vars.bond->bond2.unk1c.x, -g_Vars.bond->bond2.unk1c.y, -g_Vars.bond->bond2.unk1c.z,
 				g_Vars.bond->bond2.unk28.x, g_Vars.bond->bond2.unk28.y, g_Vars.bond->bond2.unk28.z);
-		quaternion3x3MtxToQuatF(&spc4, sp74);
-		quaternion3x3MtxToQuatF(&sp84, sp64);
+		quaternion3x3MtxToQuat((Mtx*)&spc4, sp74);
+		quaternion3x3MtxToQuat((Mtx*)&sp84, sp64);
 		quaternionAvoidFlips(sp64, sp74);
 		quaternionSlerp(sp74, sp64, sp104, sp54);
-		quaternionToMtxF(sp54, &rotmtx);
+		quaternionToMtx(sp54, (Mtx*)&rotmtx);
 
 		up.x = rotmtx.m[1][0];
 		up.y = rotmtx.m[1][1];
@@ -2550,8 +2550,8 @@ Gfx *playerRenderHealthBar(Gfx *gdl)
 	if (fovsc > 1.01f) {
 		fovsc *= 1.1f;
 	}
-	mtxBuildLookAtMatrixF(&matrix, 0, 370.f * fovsc, 0, 0, 0, 0, 0, 0, -1);
-	mtx4CopyF(&matrix, addr);
+	mtxBuildLookAtMatrixF((Mtx*)&matrix, 0, 370.f * fovsc, 0, 0, 0, 0, 0, 0, -1);
+	mtx4Copy((Mtx*)&matrix, (Mtx*)addr);
 
 	gSPMatrix(gdl++, (uintptr_t)((void *)addr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gDPPipeSync(gdl++);
@@ -3339,7 +3339,7 @@ void playerTick()
 				sp15c[3] = 0;
 
 				quaternionMultQuaternion(sp15c, sp14c, sp13c);
-				quaternionToMtxF(sp13c, &sp1fc);
+				quaternionToMtx(sp13c, (Mtx*)&sp1fc);
 				mtx4RotateVecInPlace((Mtx*)&sp1fc, &projectile->speed);
 
 				projectile->powerlimit240 = -1;
@@ -3396,9 +3396,9 @@ void playerTick()
 				projectile->speed.z = (projectile->speed.z * newspeed) / prevspeed;
 
 				mtx3ToMtx4(sp2b8, (Mtx*)&sp1bc);
-				quaternion3x3MtxToQuatF(&sp1bc, sp12c);
+				quaternion3x3MtxToQuat((Mtx*)&sp1bc, sp12c);
 				quaternionMultQuaternion(sp13c, sp12c, sp11c);
-				quaternionToMtxF(sp11c, &sp17c);
+				quaternionToMtx(sp11c, (Mtx*)&sp17c);
 				mtx4ToMtx3((Mtx*)&sp17c, sp2b8);
 
 				rocket->base.realrot[0][0] = sp2b8[0][0] * sp2a8;
@@ -3971,8 +3971,7 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	scale = bgGetScaleBg2Gfx();
 	playerSetGlobalDrawWorldOffset(g_Vars.currentplayer->cam_room);
 
-	g_Vars.currentplayer->mtxl005c = gfxAllocateMatrixF();
-	g_Vars.currentplayer->mtxl0060 = gfxAllocateMatrixF();
+	//g_Vars.currentplayer->mtxl005c = gfxAllocateMatrixF();
 	g_Vars.currentplayer->mtxf0064 = gfxAllocateMatrixF();
 	g_Vars.currentplayer->mtxf0068 = gfxAllocateMatrixF();
 
@@ -3986,7 +3985,7 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	sp80.f[1] = sp74.f[1] + cam_look->f[1];
 	sp80.f[2] = sp74.f[2] + cam_look->f[2];
 
-	mtxBuildCameraMatrix(&sp8c,
+	mtxBuildCameraMatrix((Mtx*)&sp8c,
 			sp74.x, sp74.y, sp74.z,
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
@@ -3996,19 +3995,19 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 			sp80.x, sp80.y, sp80.z,
 			cam_up->x, cam_up->y, cam_up->z);
 
-	mtxBuildCameraMatrix(g_Vars.currentplayer->mtxf0064,
+	mtxBuildCameraMatrix((Mtx*)g_Vars.currentplayer->mtxf0064,
 			cam_pos->x, cam_pos->y, cam_pos->z,
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
-	mtxBuildLookAtMatrix2F(g_Vars.currentplayer->mtxf0068,
+	mtxBuildLookAtMatrix2F((Mtx*)g_Vars.currentplayer->mtxf0068,
 			cam_pos->x, cam_pos->y, cam_pos->z,
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
 	s1 = gfxAllocateMatrixF();
 	s0 = gfxAllocateMatrixF();
-	mtx4MultMtx4((Mtx*)camGetMtxF1754(), (Mtx*)&sp8c, (Mtx*)s0);
+	mtx4MultMtx4((Mtx*)camGetSkyMtx(), (Mtx*)&sp8c, (Mtx*)s0);
 
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < 4; j++) {
@@ -4020,14 +4019,13 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 		}
 	}
 
-	camSetMtxF006c(s0);
+	camSetArtifactMtx((Mtx*)s0);
 	memcpy(s1, s0->m, sizeof(*s1));
 	camSetOrthogonalMtxL(s1);
 	mtxScaleRotationPart(scale, (Mtx*)&sp8c);
-	memcpy(g_Vars.currentplayer->mtxl005c, &sp8c, sizeof(*g_Vars.currentplayer->mtxl005c));
-	camSetMtxL173c(g_Vars.currentplayer->mtxl005c);
-	camSetMtxL1738(g_Vars.currentplayer->mtxl0060);
-	camSetWorldToScreenMtxf(g_Vars.currentplayer->mtxf0064);
+	//memcpy(g_Vars.currentplayer->mtxl005c, &sp8c, sizeof(*g_Vars.currentplayer->mtxl005c));
+	//camSetMtxL173c(g_Vars.currentplayer->mtxl005c);
+	camSetWorldToScreenMtx((Mtx*)g_Vars.currentplayer->mtxf0064);
 	camSetProjectionMtxF(g_Vars.currentplayer->mtxf0068);
 	camSetLookAt(lookat);
 	camComputeFrustumEdgePlanes();
@@ -5403,7 +5401,7 @@ Gfx *playerRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 Gfx *playerLoadMatrix(Gfx *gdl)
 {
-	gSPMatrix(gdl++, g_Vars.currentplayer->mtxl005c, G_MTX_LOAD);
+	//gSPMatrix(gdl++, g_Vars.currentplayer->mtxl005c, G_MTX_LOAD);
 	return gdl;
 }
 
@@ -5420,6 +5418,6 @@ void player0f0c3320(Mtxf *matrices, int count)
 		sp40.m[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;
 		sp40.m[3][2] -= g_Vars.currentplayer->globaldrawworldoffset.z;
 
-		mtx4CopyF(&sp40, matrices + i);
+		mtx4Copy((Mtx*)&sp40, (Mtx*)matrices + i);
 	}
 }

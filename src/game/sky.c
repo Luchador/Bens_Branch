@@ -782,7 +782,7 @@ Gfx *skyRender(Gfx *gdl)
 		struct skyvtx2d watervertices2d[5];
 		int i;
 
-		mtx4MultMtx4((Mtx*)camGetMtxF1754(), (Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp3cc);
+		mtx4MultMtx4((Mtx*)camGetSkyMtx(), (Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp3cc);
 		mtxScale(&g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
 		mtx4MultMtx4((Mtx*)&sp3cc, (Mtx*)&g_SkyMtx, (Mtx*)&sp38c);
 
@@ -840,7 +840,7 @@ Gfx *skyRender(Gfx *gdl)
 			Col *cols = gfxAllocateColours(numvertices);
 			Mtxf *mtx = gfxAllocateMatrixF();
 			mtx4MultMtx4((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&g_SkyMtx, (Mtx*)mtx);
-			mtx4CopyF(mtx, mtx);
+			mtx4Copy((Mtx*)mtx, (Mtx*)mtx);
 
 			gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
 			gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
@@ -1263,7 +1263,7 @@ Gfx *skyRender(Gfx *gdl)
 	struct skyvtx2d skyvertices2d[5];
 	int i;
 
-	mtx4MultMtx4((Mtx*)camGetMtxF1754(), (Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp1ec);
+	mtx4MultMtx4((Mtx*)camGetSkyMtx(), (Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp1ec);
 	mtxScale(&g_SkyMtx.m, 1.0f / scale, 1.0f / scale, 1.0f / scale);
 	mtx4MultMtx4((Mtx*)&sp1ec, (Mtx*)&g_SkyMtx, (Mtx*)&sp1ac);
 
@@ -1278,7 +1278,7 @@ Gfx *skyRender(Gfx *gdl)
 	Col *cols = gfxAllocateColours(numvertices);
 	Mtxf *mtx = gfxAllocateMatrixF();
 	mtx4MultMtx4((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&g_SkyMtx, (Mtx*)mtx);
-	mtx4CopyF(mtx, mtx);
+	mtx4Copy((Mtx*)mtx, (Mtx*)mtx);
 
 	gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
@@ -2474,7 +2474,7 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 	float radius;
 
 	sp16c = camGetWorldToScreenMtxf();
-	sp168 = camGetMtxF1754();
+	sp168 = camGetSkyMtx();
 	env = envGetCurrent();
 
 	if (env->numsuns <= 0 || !g_ZbufPtr1 || g_Vars.mplayerisrunning) {
@@ -2798,7 +2798,7 @@ Gfx *skyRenderTeleportFlare(Gfx *gdl, float x, float y, float z, float size, flo
 	sp64.z = z;
 
 	mtx4TransformVecInPlace((Mtx*)camGetWorldToScreenMtxf(), &sp64);
-	mtx4TransformVecInPlace((Mtx*)camGetMtxF1754(), &sp64);
+	mtx4TransformVecInPlace((Mtx*)camGetSkyMtx(), &sp64);
 
 	if (sp64.z > 1.0f) {
 		float xpos;
@@ -2893,7 +2893,7 @@ Gfx *skyRenderTeleportFlares(Gfx *gdl)
 		spd0[2] = g_TeleportToUp.f[1] * f20_2;
 		spd0[3] = g_TeleportToUp.f[2] * f20_2;
 
-		quaternionToMtxF(spd0, &mtx);
+		quaternionToMtx(spd0, (Mtx*)&mtx);
 		mtx4RotateVecInPlace((Mtx*)&mtx, &spe0);
 
 		spe0.x += g_TeleportToPos.x;

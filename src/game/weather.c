@@ -899,7 +899,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 		mtx = gfxAllocateMatrixF();
 
-		mtx4CopyF(&worldtoscreenmtx, mtx);
+		mtx4Copy((Mtx*)&worldtoscreenmtx, (Mtx*)mtx);
 
 		gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -1476,7 +1476,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 	mtx = gfxAllocateMatrixF();
 
-	mtx4CopyF(&sp1cc, mtx);
+	mtx4Copy((Mtx*)&sp1cc, (Mtx*)mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 

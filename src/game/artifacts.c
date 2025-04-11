@@ -70,6 +70,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 	float x;
 	float y;
 	float invW;
+	float dist;
 	int xi;
 	int yi;
 	float directionalDot;
@@ -102,7 +103,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 
 	roomPopulateMtx(&sp138, roomnum);
 	mtxScale3x4(bgGetScaleBg2Gfx(), (Mtx*)&sp138);
-	mtx4MultMtx4(camGetMtxF006c(), (Mtx*)&sp138, (Mtx*)&spf8);
+	mtx4MultMtx4(camGetArtifactMtx(), (Mtx*)&sp138, (Mtx*)&spf8);
 
 	float viewwidth = viGetViewWidth();
 	float viewheight = viGetViewHeight();
@@ -131,6 +132,8 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 		float lightDirLengthSq = roomlights[i].dirx * roomlights[i].dirx + roomlights[i].diry * roomlights[i].diry + roomlights[i].dirz * roomlights[i].dirz;
 		float camToLightLengthSq = lightToCam.f[0] * lightToCam.f[0] + lightToCam.f[1] * lightToCam.f[1] + lightToCam.f[2] * lightToCam.f[2];
 
+		
+
 		if (lightDirLengthSq > 0.0001f && camToLightLengthSq > 0.0001f) {
 			directionalDot = -((roomlights[i].dirx * lightToCam.f[0] + roomlights[i].diry * lightToCam.f[1] + roomlights[i].dirz * lightToCam.f[2]) / sqrtf(lightDirLengthSq * camToLightLengthSq));
 
@@ -158,7 +161,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 				y = utilsClampF(viewtop + (1.0f - screenPos[1] * invW) * (viewheight * 0.5f), -2147483520.0f, 2147483520.0f);
 				lightDepth = (screenPos[2] * invW * 511.0f + 511.0f) * 32.0f;
 
-				if (lightDepth < 32576.0f) {
+				if (lightDepth < 32576.0f * 2) {
 					brightnessfrac = 1.0f;
 					clampDiff = (brightnessfrac - 1.00f);
 
@@ -210,17 +213,17 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 						}
 					}
 
-					depthFalloff = 32300.0f - lightDepth;
+					depthFalloff = 32300.0f * 2 - lightDepth;
 
 					if (depthFalloff < 0.0f) {
 						depthFalloff = 0.0f;
 					}
 
-					if (depthFalloff > 1300.0f) {
-						depthFalloff = 1300.0f;
+					if (depthFalloff > 2600.0f) {
+						depthFalloff = 2600.0f;
 					}
 
-					depthFalloff *= 1.0f / 1300.0f;
+					depthFalloff *= 1.0f / 2600.0f;
 
 					if (2.0f * clampDiff > 1.0f) {
 						directionalScale = 0.0f;
@@ -265,8 +268,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 							&& xi >= (int)viewleft
 							&& xi < (int)(viewleft + viewwidth)
 							&& yi >= (int)viewtop
-							&& yi < (int)(viewtop + viewheight)
-							&& lightDepth < 32576.0f) {
+							&& yi < (int)(viewtop + viewheight)) {
 						index = envGetCurrent()->numsuns;
 						index *= 8;
 						artifact = artifacts;
@@ -285,6 +287,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 							artifact->type = ARTIFACTTYPE_GLARE;
 							artifact->screenPos.screenX = xi;
 							artifact->screenPos.screenY = yi;
+							artifact->dist = sqrt(camToLightLengthSq);
 						}
 					}
 				}
@@ -345,7 +348,6 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 	int count;
 	float addGlow;
 	float brightness; // The closer you get to an artifact, the higher this becomes.
-	float f0;
 	int v1;
 	int r, g, b;
 	uint8_t envColor[4];
@@ -432,10 +434,6 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 						lightStats[2] *= (int) (lightop_cur_frac * 7.0f);
 					}
 
-					f0 = lightStats[2] * (1.0f / 255.0f);
-
-					skySetOverexposure((int) ((float)f0 * r), (int) ((float)f0 * g), (int) ((float)f0 * b));
-
 					for (l = 0; l < 3; l++) {
 						lightroompos[l] = (light->bbox[0].s[l] + light->bbox[1].s[l] + light->bbox[2].s[l] + light->bbox[3].s[l]) / 4;
 						lightworldpos.f[l] = lightroompos[l] + g_BgRooms[roomnum].pos.f[l];
@@ -474,6 +472,11 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 					if (brightness > 3.0f) {
 						float alpha = (light->colour & 0xf) * 17;
 
+						float dist = 1.0f - (artifacts[i].dist / 2500.0f);
+						float overexposureAmount = lightStats[2] * (1.0f / 255.0f) * utilsClampF(dist, 0.0f, 1.0f);
+
+						skySetOverexposure((int) ((float)overexposureAmount * r), (int) ((float)overexposureAmount * g), (int) ((float)overexposureAmount * b));
+						
 						envColor[0] = r;
 						envColor[1] = g;
 						envColor[2] = b;

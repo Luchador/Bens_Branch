@@ -58,7 +58,7 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 	mtx2 = gfxAllocateMatrixF();
 
 	func0f0d475c(&mtx);
-	mtx4CopyF(&mtx, mtx2);
+	mtx4Copy((Mtx*)&mtx, (Mtx*)mtx2);
 	mtxIdent((Mtx*)&mtx);
 
 	mtxFrustum((Mtx*)&mtx,
@@ -66,7 +66,7 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 			-(float) viGetHeight() * 0.5f, viGetHeight() * 0.5f,
 			10, 10000, 1);
 
-	mtx4CopyF(&mtx, mtx1);
+	mtx4Copy((Mtx*)&mtx, (Mtx*)mtx1);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx2), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gSPMatrix(gdl++, (uintptr_t)(mtx1), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
@@ -129,7 +129,7 @@ Gfx *func0f0d4a3c(Gfx *gdl, int arg1)
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);
 
 	func0f0d4690(&mtx);
-	mtx4CopyF(&mtx, mtxptr);
+	mtx4Copy((Mtx*)&mtx, (Mtx*)mtxptr);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -144,7 +144,7 @@ Gfx *func0f0d4c80(Gfx *gdl)
 	func0f0d4690(&mtx);
 	mtxScaleRow0Full(0.1f, (Mtx*)&mtx);
 	mtxScaleRow1Full(0.1f, (Mtx*)&mtx);
-	mtx4CopyF(&mtx, mtxptr);
+	mtx4Copy((Mtx*)&mtx, (Mtx*)mtxptr);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 

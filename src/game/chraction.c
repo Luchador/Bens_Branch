@@ -8819,7 +8819,6 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 						spb4 = camGetProjectionMtx((uint8_t *)sp108);
 
 						if (spb4) {
-							//mtx00016798(sp108, &spc8);
 							mtxApplyAffineTransformInPlace((Mtx*)spb4, (Mtx*)&spc8);
 
 							spb8.x = burstrodata->pos.x;
@@ -8841,7 +8840,6 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 							sp6c = camGetProjectionMtx((uint8_t *)spb0);
 
 							if (sp6c) {
-								//mtx00016798(spb0, &sp70);
 								mtxApplyAffineTransformInPlace((Mtx*)sp6c, (Mtx*)&sp70);
 
 								sp114 = 1;
@@ -9336,7 +9334,6 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 						mtxptr1 = modelFindNodeMtx(chr->model, node, 0);
 
 						if (isdifferentmtx) {
-							//mtx00016798(mtxptr1, &spc8);
 							mtxptr1 = &spc8;
 						}
 
@@ -9380,7 +9377,6 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 					mtxptr2 = modelFindNodeMtx(chr->model, bestnode, 0);
 
 					if (isdifferentmtx) {
-						//mtx00016798(mtxptr2, &sp48);
 						mtxptr2 = &sp48;
 					}
 
@@ -9838,8 +9834,8 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 							// Calculate and projectile's matrix,
 							// spawn position and speed
 							mtxIdent((Mtx*)&identmtx);
-							mtx4LoadXRotationF(rotx, &projectilemtx);
-							mtx4LoadYRotationF(roty, &yrotmtx);
+							mtx4LoadXRotation(rotx, (Mtx*)&projectilemtx);
+							mtx4LoadYRotation(roty, (Mtx*)&yrotmtx);
 							mtxApplyAffineTransformInPlace((Mtx*)&yrotmtx, (Mtx*)&projectilemtx);
 
 							sp15c.x = vector.x * sp168;
@@ -10557,7 +10553,7 @@ void chrTickRobotAttack(struct chrdata *chr)
 			act->pos[i].y = rodata->position.pos.y - 300.0f;
 			act->pos[i].z = rodata->position.pos.z;
 
-			mtx4LoadYRotationF(invtheta, &spa4);
+			mtx4LoadYRotation(invtheta, (Mtx*)&spa4);
 			mtx4RotateVec((Mtx*)&spa4, &act->pos[i], &spe4);
 
 			spe4.x *= chr->model->scale;

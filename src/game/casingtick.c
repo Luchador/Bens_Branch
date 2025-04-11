@@ -68,7 +68,7 @@ void casingTick(struct casing *casing)
 	}
 
 	for (i = 0; i < g_Vars.lvupdate240; i++) {
-		mtx00016110(sp8c, sp68);
+		mtx3x3TransposeMulInPlace(sp8c, sp68);
 	}
 
 	for (i = 0; i < 3; i++) {

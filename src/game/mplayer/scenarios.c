@@ -1238,7 +1238,7 @@ void scenarioHandleDroppedToken(struct chrdata *chr, struct prop *prop)
 
 				padUnpack(g_ScenarioData.ctc.spawnpadsperteam[g_ScenarioData.ctc.teamindexes[i]].homepad,
 						PADFIELD_POS | PADFIELD_LOOK | PADFIELD_UP | PADFIELD_ROOM, &pad);
-				mtxBuildLookAtFromTargetF(&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
+				mtxBuildLookAtFromTarget((Mtx*)&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
 
 				if (obj->model) {
 					mtxScaleRotationPart(obj->model->scale, (Mtx*)&mtx);

@@ -1445,7 +1445,7 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 
 	modelmtx = gfxAllocateMatrixF();
 
-	mtx4CopyF(&sp110, modelmtx);
+	mtx4Copy((Mtx*)&sp110, (Mtx*)modelmtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(modelmtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 

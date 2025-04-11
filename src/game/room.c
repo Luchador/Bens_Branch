@@ -161,7 +161,7 @@ int roomTouchMtx(int roomnum)
 	g_RoomMtxBaseRooms[index] = g_Vars.currentplayer->lastroomforoffset;
 
 	roomPopulateMtx(&mtx, roomnum);
-	mtx4CopyF(&mtx, &g_RoomMtxMatrices[index]);
+	mtx4Copy((Mtx*)&mtx, (Mtx*)&g_RoomMtxMatrices[index]);
 
 	return index;
 }

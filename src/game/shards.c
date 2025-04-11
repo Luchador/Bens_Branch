@@ -256,7 +256,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 				if (render) {
 					struct shard *shard = (struct shard *) ((uint8_t *)g_Shards + i * sizeof(struct shard));
 
-					mtx4LoadRotationAndTranslation(&shard->pos, &shard->rot, &shardmtx);
+					mtx4LoadRotationAndTranslation(&shard->pos, &shard->rot, (Mtx*)&shardmtx);
 
 					shardmtx.m[3][0] -= g_Vars.currentplayer->globaldrawworldoffset.x;
 					shardmtx.m[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;
@@ -266,7 +266,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 							&& shardmtx.m[3][1] < 10000 && shardmtx.m[3][1] > -10000
 							&& shardmtx.m[3][2] < 10000 && shardmtx.m[3][2] > -10000)
 					{
-						mtx4CopyF(&shardmtx, mtx);
+						mtx4Copy((Mtx*)&shardmtx, (Mtx*)mtx);
 
 						gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -315,7 +315,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 
 		gSPClearGeometryMode(gdl++, G_LIGHTING | G_TEXTURE_GEN);
 		gSPMatrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-		gSPMatrix(gdl++, camGetMtxL173c(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+		//gSPMatrix(gdl++, camGetMtxL173c(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	}
 
 	return gdl;
@@ -375,7 +375,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 				if (render) {
 					struct shard *shard = (struct shard *) ((uint8_t *)g_Shards + i * sizeof(struct shard));
 
-					mtx4LoadRotationAndTranslation(&shard->pos, &shard->rot, &shardmtx);
+					mtx4LoadRotationAndTranslation(&shard->pos, &shard->rot, (Mtx*)&shardmtx);
 
 					shardmtx.m[3][0] -= g_Vars.currentplayer->globaldrawworldoffset.x;
 					shardmtx.m[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;
@@ -385,7 +385,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 							&& shardmtx.m[3][1] < 10000 && shardmtx.m[3][1] > -10000
 							&& shardmtx.m[3][2] < 10000 && shardmtx.m[3][2] > -10000)
 					{
-						mtx4CopyF(&shardmtx, mtx);
+						mtx4Copy((Mtx*)&shardmtx, (Mtx*)mtx);
 
 						gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -434,7 +434,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 
 		gSPClearGeometryMode(gdl++, G_LIGHTING | G_TEXTURE_GEN);
 		gSPMatrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-		gSPMatrix(gdl++, camGetMtxL173c(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+		//gSPMatrix(gdl++, camGetMtxL173c(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	}
 
 	return gdl;
