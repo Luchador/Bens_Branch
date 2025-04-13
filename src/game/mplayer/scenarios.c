@@ -540,7 +540,6 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 				gDPSetTextureFilter(gdl++, G_TF_POINT);
 				gDPSetColorDither(gdl++, G_CD_DISABLE);
 				gSPClearGeometryMode(gdl++, G_ZBUFFER);
-				gDPPipeSync(gdl++);
 				gDPSetTexturePersp(gdl++, G_TP_NONE);
 				gDPSetCycleType(gdl++, G_CYC_FILL);
 				gDPSetRenderMode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
@@ -561,7 +560,6 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 			gDPSetTextureFilter(gdl++, G_TF_POINT);
 			gDPSetColorDither(gdl++, G_CD_DISABLE);
 			gSPClearGeometryMode(gdl++, G_ZBUFFER);
-			gDPPipeSync(gdl++);
 			gDPSetTexturePersp(gdl++, G_TP_NONE);
 			gDPSetCycleType(gdl++, G_CYC_FILL);
 			gDPSetRenderMode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);

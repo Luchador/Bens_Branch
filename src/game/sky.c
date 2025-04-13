@@ -288,11 +288,9 @@ Gfx *skyRender(Gfx *gdl)
 					viGetViewLeft() + viGetViewWidth() - 1,
 					viGetViewTop() + viGetViewHeight() - 1);
 
-			gDPPipeSync(gdl++);
 			return gdl;
 		}
 
-		gDPPipeSync(gdl++);
 		gDPSetCycleType(gdl++, G_CYC_FILL);
 
 		if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
@@ -308,7 +306,6 @@ Gfx *skyRender(Gfx *gdl)
 				g_Vars.currentplayer->viewleft + g_Vars.currentplayer->viewwidth - 1,
 				g_Vars.currentplayer->viewtop + g_Vars.currentplayer->viewheight - 1);
 
-		gDPPipeSync(gdl++);
 		return gdl;
 	}
 
@@ -822,15 +819,12 @@ Gfx *skyRender(Gfx *gdl)
 				}
 			}
 
-			gDPPipeSync(gdl++);
 			gDPSetCycleType(gdl++, G_CYC_FILL);
 			gDPSetRenderMode(gdl++, G_RM_NOOP, G_RM_NOOP2);
 			gDPSetTexturePersp(gdl++, G_TP_NONE);
 			gDPFillRectangle(gdl++, (int)(x1 * 0.25f), (int)(y1 * 0.25f), (int)(x2 * 0.25f), (int)(y2 * 0.25f));
-			gDPPipeSync(gdl++);
 			gDPSetTexturePersp(gdl++, G_TP_PERSP);
 		} else {
-			gDPPipeSync(gdl++);
 
 			texSelect(&gdl, &g_TexSkyWaterConfigs[env->water_type], 1, 0, 2, 1, NULL);
 
@@ -1247,8 +1241,6 @@ Gfx *skyRender(Gfx *gdl)
 	default:
 		return gdl;
 	}
-
-	gDPPipeSync(gdl++);
 
 	texSelect(&gdl, &g_TexSkyWaterConfigs[env->clouds_type], 1, 0, 2, 1, NULL);
 
@@ -2598,7 +2590,6 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 
 					utilsRenderScreenTexture(&gdl, texCenter, texRadius, g_TexLightGlareConfigs[5].width, g_TexLightGlareConfigs[5].height, 0, 1, 1, true);
 
-					gDPPipeSync(gdl++);
 					gDPSetColorDither(gdl++, G_CD_BAYER);
 					gDPSetTexturePersp(gdl++, G_TP_PERSP);
 					gDPSetTextureLOD(gdl++, G_TL_LOD);
@@ -3012,8 +3003,6 @@ Gfx *skyRenderOverexposure(Gfx *gdl)
 				viGetViewTop(),
 				viGetViewLeft() + viGetViewWidth(),
 				viGetViewTop() + viGetViewHeight());
-
-		gDPPipeSync(gdl++);
 	}
 
 	gDPSetColorDither(gdl++, G_CD_BAYER);

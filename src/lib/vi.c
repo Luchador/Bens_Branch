@@ -356,7 +356,6 @@ Gfx *viFillBuffer(Gfx *gdl)
 {
 	gDPSetCycleType(gdl++, G_CYC_FILL);
 	gDPFillRectangle(gdl++, 0, 0, g_ViBackData->bufx - 1, g_ViBackData->bufy - 1);
-	gDPPipeSync(gdl++);
 
 	return gdl;
 }
@@ -375,7 +374,6 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 		if (viGetViewTop() > 0) {
 			// Fill above
 			gDPFillRectangle(gdl++, 0, 0, viGetWidth() - 1, viGetViewTop() - 1);
-			gDPPipeSync(gdl++);
 		}
 
 		if (viGetViewTop() + viGetViewHeight() < viGetHeight()) {
@@ -383,7 +381,6 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 			gDPFillRectangle(gdl++,
 					0, viGetViewTop() + viGetViewHeight(),
 					viGetWidth() - 1, viGetHeight() - 1);
-			gDPPipeSync(gdl++);
 		}
 	} else {
 		if (g_Vars.currentplayerindex == 0) {
@@ -402,7 +399,6 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 			if (g_Vars.players[topplayernum]->viewtop > 0) {
 				// Fill above all viewports - full width
 				gDPFillRectangle(gdl++, 0, 0, viGetWidth() - 1, g_Vars.players[topplayernum]->viewtop - 1);
-				gDPPipeSync(gdl++);
 			}
 
 			if (g_Vars.players[bottomplayernum]->viewtop + g_Vars.players[bottomplayernum]->viewheight < viGetHeight()) {
@@ -410,14 +406,12 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 				gDPFillRectangle(gdl++,
 						0, g_Vars.players[bottomplayernum]->viewtop + g_Vars.players[bottomplayernum]->viewheight,
 						viGetWidth() - 1, viGetHeight() - 1);
-				gDPPipeSync(gdl++);
 			}
 
 			// Horizontal middle line
 			gDPFillRectangle(gdl++,
 					0, g_Vars.players[tmpplayernum]->viewtop - 1,
 					viGetWidth() - 1, g_Vars.players[tmpplayernum]->viewtop - 1);
-			gDPPipeSync(gdl++);
 
 			if (PLAYERCOUNT() >= 3 ||
 					(PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL))) {
@@ -429,7 +423,6 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 				gDPFillRectangle(gdl++,
 						g_Vars.players[tmpplayernum]->viewleft + g_Vars.players[tmpplayernum]->viewwidth, 0,
 						g_Vars.players[tmpplayernum]->viewleft + g_Vars.players[tmpplayernum]->viewwidth, viGetHeight() - 1);
-				gDPPipeSync(gdl++);
 			}
 
 			if (PLAYERCOUNT() == 3) {
@@ -437,7 +430,6 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 				gDPFillRectangle(gdl++,
 						g_Vars.players[tmpplayernum]->viewleft + g_Vars.players[tmpplayernum]->viewwidth + 1, g_Vars.players[tmpplayernum]->viewtop,
 						viGetWidth() - 1, viGetHeight() - 1);
-				gDPPipeSync(gdl++);
 			}
 		}
 	}

@@ -689,7 +689,6 @@ MenuItemHandlerResult mpChallengesListHandler(int operation, struct menuitem *it
 
 		gdl = text0f153780(gdl);
 
-		gDPPipeSync(gdl++);
 		gDPSetTexturePersp(gdl++, G_TP_NONE);
 		gDPSetAlphaCompare(gdl++, G_AC_NONE);
 		gDPSetTextureLOD(gdl++, G_TL_TILE);
@@ -895,7 +894,6 @@ MenuItemHandlerResult mpMedalMenuHandler(int operation, struct menuitem *item, u
 		struct menuitemrenderdata *renderdata = data->type19.renderdata2;
 		uint32_t colour;
 
-		gDPPipeSync(gdl++);
 		gDPSetTexturePersp(gdl++, G_TP_NONE);
 		gDPSetAlphaCompare(gdl++, G_AC_NONE);
 		gDPSetTextureLOD(gdl++, G_TL_TILE);
@@ -4509,7 +4507,6 @@ MenuItemHandlerResult mpChallengesListMenuHandler(int operation, struct menuitem
 		gdl = textRenderProjected(gdl, &x, &y, challengeGetNameBySlot(data->type19.unk04), g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 		gdl = text0f153780(gdl);
 
-		gDPPipeSync(gdl++);
 		gDPSetTexturePersp(gdl++, G_TP_NONE);
 		gDPSetAlphaCompare(gdl++, G_AC_NONE);
 		gDPSetTextureLOD(gdl++, G_TL_TILE);

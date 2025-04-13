@@ -1271,14 +1271,10 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 		for (i = 14; i >= 0; i--) {
 			gDPSetTextureImage(gdl++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, g_ExplosionTexturePairs[i].texturenum1);
-			gDPLoadSync(gdl++);
 			gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, 1567, 0);
 
 			gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, g_ExplosionTexturePairs[i].texturenum2);
-			gDPLoadSync(gdl++);
 			gDPLoadBlock(gdl++, 5, 0, 0, 223, 0);
-
-			gDPPipeSync(gdl++);
 
 			for (j = 0; j < ARRAYCOUNT(exp->parts); j++) {
 				if (exp->parts[j].frame > 0) {

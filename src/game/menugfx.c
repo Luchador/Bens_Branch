@@ -87,7 +87,6 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 	colours = gfxAllocateColours(1);
 	vertices = gfxAllocateVertices(4);
 
-	gDPPipeSync(gdl++);
 	gSPTexture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
 
 	gDPLoadTextureBlock(gdl++, g_BlurBuffer, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, BLURIMG_HEIGHT, 0,
@@ -97,7 +96,6 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 	// LoadTextureBlock will set up the sizes, but we'll use the framebuffer instead of g_BlurBuffer
 	gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, g_MenuScreenFb);
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
@@ -206,7 +204,6 @@ Gfx *menugfxDrawDropdownBackground(Gfx *gdl, int x1, int y1, int x2, int y2)
 	uint32_t colour1;
 	uint32_t colour2;
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
@@ -270,7 +267,6 @@ Gfx *menugfxDrawListGroupHeader(Gfx *gdl, int x1, int y1, int x2, int y2, int x3
 	uint32_t alpha1;
 	uint32_t alpha2;
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
@@ -349,7 +345,6 @@ Gfx *menugfxRenderGradient(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t co
 	Vtx *vertices = gfxAllocateVertices(6);
 	int ymid;
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
@@ -420,7 +415,6 @@ Gfx *menugfxRenderSlider(Gfx *gdl, int x1, int y1, int x2, int y2, int markerx, 
 	Col *colours = gfxAllocateColours(3);
 	Vtx *vertices = gfxAllocateVertices(6);
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
@@ -471,12 +465,10 @@ Gfx *menugfxRenderSlider(Gfx *gdl, int x1, int y1, int x2, int y2, int markerx, 
 
 	gSPTri1(gdl++, 3, 4, 5);
 
-	gDPPipeSync(gdl++);
 	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 
 	gSPTri1(gdl++, 0, 1, 2);
 
-	gDPPipeSync(gdl++);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	// Line to the left of the marker: blue -> white gradient
@@ -511,7 +503,6 @@ Gfx *menugfx0f0e2348(Gfx *gdl)
 
 Gfx *menugfx0f0e2498(Gfx *gdl)
 {
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
@@ -840,7 +831,6 @@ Gfx *menugfxDrawCarouselChevron(Gfx *gdl, int x, int y, int size, int direction,
 	colours = gfxAllocateColours(2);
 	vertices = gfxAllocateVertices(3);
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
@@ -923,7 +913,6 @@ Gfx *menugfxDrawDialogChevron(Gfx *gdl, int x, int y, int size, int direction, u
 	colours = gfxAllocateColours(2);
 	vertices = gfxAllocateVertices(4);
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);

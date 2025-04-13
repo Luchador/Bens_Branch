@@ -493,8 +493,6 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 							sp8cright = viGetWidth();
 						}
 
-						gDPPipeSync(gdl++);
-
 						g_ScissorX1 = sp94left;
 						g_ScissorX2 = sp8cright;
 						g_ScissorY1 = sp90top;
@@ -3353,8 +3351,6 @@ Gfx *menuitemRankingRender(Gfx *gdl, struct menurendercontext *context)
 	// Horizontal line between header and body
 	gdl = menugfxDrawFilledRect(gdl, context->x, context->y + 9, context->x + context->width, context->y + 10, linecolour1, linecolour1);
 
-	gDPPipeSync(gdl++);
-
 	g_ScissorX1 = context->x;
 	g_ScissorX2 = (context->x + context->width);
 	g_ScissorY1 = context->y + 10;
@@ -3601,8 +3597,6 @@ Gfx *menuitemPlayerStatsRender(Gfx *gdl, struct menurendercontext *context)
 			data->scrolloffset = gap;
 		}
 
-		gDPPipeSync(gdl++);
-
 		g_ScissorX1 = context->x;
 		g_ScissorX2 = (context->x + context->width);
 		g_ScissorY1 = context->y + ypos;
@@ -3747,7 +3741,6 @@ Gfx *menuitemControllerRenderLine(Gfx *gdl, int speed, int x1, int y1, int x2, i
 
 Gfx *menuitemControllerRenderTexture(Gfx *gdl, int x, int y, int texturenum, uint32_t alpha)
 {
-	gDPPipeSync(gdl++);
 	gDPSetTexturePersp(gdl++, G_TP_NONE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetTextureLOD(gdl++, G_TL_TILE);
@@ -3815,7 +3808,6 @@ Gfx *menuitemControllerRenderLines(Gfx *gdl, struct menurendercontext *context, 
 	speed = (int)(-g_20SecIntervalFrac * 4.0f * 50.0f) % 4;
 	alpha = alpha >> 1;
 
-	gDPPipeSync(gdl++);
 	gDPSetTexturePersp(gdl++, G_TP_NONE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetTextureLOD(gdl++, G_TL_TILE);

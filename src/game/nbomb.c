@@ -217,7 +217,6 @@ Gfx *nbombCreateGdl(void)
 
 	texSelect(&gdl, &g_TexGeneralConfigs[10], 2, 1, 2, 1, NULL);
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
@@ -645,7 +644,6 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 
 		texSelect(&gdl, &g_TexGeneralConfigs[10], 2, 1, 2, true, NULL);
 
-		gDPPipeSync(gdl++);
 		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 		gDPSetAlphaCompare(gdl++, G_AC_NONE);
 		gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
@@ -813,7 +811,6 @@ Gfx *gasRender(Gfx *gdl)
 
 			texSelect(&gdl, &g_TexGeneralConfigs[6], 4, 1, 2, true, NULL);
 
-			gDPPipeSync(gdl++);
 			gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 			gDPSetAlphaCompare(gdl++, G_AC_NONE);
 			gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);

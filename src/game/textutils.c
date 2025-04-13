@@ -216,7 +216,6 @@ void textReset(void)
 
 Gfx *textConfigureGfxPipeline(Gfx *gdl)
 {
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetColorDither(gdl++, G_CD_DISABLE);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
@@ -235,7 +234,6 @@ Gfx *textConfigureGfxPipeline(Gfx *gdl)
 
 Gfx *text0f153780(Gfx *gdl)
 {
-	gDPPipeSync(gdl++);
 	gDPSetColorDither(gdl++, G_CD_BAYER);
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);
 	gDPSetTextureLOD(gdl++, G_TL_LOD);
@@ -245,7 +243,6 @@ Gfx *text0f153780(Gfx *gdl)
 
 Gfx *textSetPrimColour(Gfx *gdl, uint32_t colour)
 {
-	gDPPipeSync(gdl++);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 
@@ -696,9 +693,7 @@ Gfx *textMakeCreditVerts(Gfx *gdl, int *arg1, struct fontchar *curchar, struct f
 	*arg1 = *arg1 - tmp2 + 1;
 
 	gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, curchar->pixeldata);
-	gDPLoadSync(gdl++);
 	gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, ((curchar->height * 8 + 17) >> 1) - 1, 2048);
-	gDPPipeSync(gdl++);
 
 	tmp1 = 0;
 	tmp2 = 0;
@@ -781,16 +776,13 @@ Gfx *textRenderCredit(Gfx *gdl, float x, float y, float widthscale, float height
 	fx = *ptr - (widthscale - 1.0f) * textwidth * 0.5f * hdir;
 	fy = y - (heightscale - 1.0f) * lineheight * 0.5f * vdir;
 
-	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (uintptr_t)(var8007fb3c));
 
-	gDPLoadSync(gdl++);
 	gDPLoadTLUTCmd(gdl++, 6, 15);
 	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c);
 	gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
-	gDPPipeSync(gdl++);
 
 	if (text != NULL) {
 		while (*text != '\0') {
@@ -837,9 +829,7 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, int *x, int *y, struct fontchar *curchar,
 			g_CharToRender = curchar;
 			//gDPSetTextureImage(gdl++, G_IM_FMT_CUSTOMFONT, G_IM_SIZ_16b, 1, &g_HandelGothicData[g_CharToRender->index].pixeldata);
 			gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-			gDPLoadSync(gdl++);
 			gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, ((curchar->height * 8 + 17) >> 1) - 1, 2048);
-			gDPPipeSync(gdl++);
 
 			if (g_Blend.types) {
 				gdl = text0f154ecc(gdl, *x, *y + arg10);
@@ -986,18 +976,15 @@ Gfx *textRenderProjected(Gfx *gdl, int *x, int *y, char *text, struct fontchar *
 		lineheight = chars['['].height + chars['['].baseline;
 	}
  
-	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (uintptr_t)(var8007fb3c));
 	//gDPSetTextureImage(gdl++, G_IM_FMT_CUSTOMFONT, G_IM_SIZ_16b, 1, &g_HandelGothicData[50].pixeldata);
-	gDPLoadSync(gdl++);
 	gDPLoadTLUTCmd(gdl++, 6, 15);
 	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	//gDPSetTile(gdl++, G_IM_FMT_CUSTOMFONT, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c);
 	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 128, 128);
 	gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
-	gDPPipeSync(gdl++);
 
 	g_Blend.colour04 = colour;
 	g_Blend.colour44 = colour;
@@ -1070,9 +1057,7 @@ Gfx *textRenderChar(Gfx *gdl, int *x, int *y, struct fontchar *char1, struct fon
 		}
 
 		gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, char1->pixeldata);
-		gDPLoadSync(gdl++);
 		gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, ((char1->height * 8 + 17) >> 1) - 1, 2048);
-		gDPPipeSync(gdl++);
 
 		gdl = textRenderOutline(gdl, *x - 1, sp38 - 1, char1, arg6, arg7 - 1, arg8, arg9);
 	}
@@ -1159,10 +1144,8 @@ Gfx *textRender(Gfx *gdl, int *x, int *y, char *text,
 		lineheight = chars['['].height + chars['['].baseline;
 	}
 
-	gDPPipeSync(gdl++);
 	gDPSetTextureLUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (uintptr_t)(&var8007fb5c));
-	gDPLoadSync(gdl++);
 	gDPLoadTLUTCmd(gdl++, 6, 31);
 	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c);
@@ -1175,7 +1158,6 @@ Gfx *textRender(Gfx *gdl, int *x, int *y, char *text,
 			0, 0, 0, COMBINED, COMBINED, 0, ENVIRONMENT, 0);
 	gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
 	gDPSetEnvColorViaWord(gdl++, arg6);
-	gDPPipeSync(gdl++);
 
 	g_Blend.colour08 = colour;
 	g_Blend.colour48 = colour;
@@ -1202,7 +1184,6 @@ Gfx *textRender(Gfx *gdl, int *x, int *y, char *text,
 		}
 	}
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetCombineLERP(gdl++,
 			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0,

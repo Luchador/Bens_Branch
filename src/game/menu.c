@@ -2189,7 +2189,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			gdl = gfxSetCustomProjection(gdl);
 		}
 
-		gDPPipeSync(gdl++);
 		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 		gDPSetAlphaCompare(gdl++, G_AC_NONE);
 		gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
@@ -2229,8 +2228,6 @@ void menuGetTeamTitlebarColours(uint32_t *top, uint32_t *middle, uint32_t *botto
 
 Gfx *menuApplyScissor(Gfx *gdl)
 {
-	gDPPipeSync(gdl++);
-
 	g_ScissorX1 = g_MenuScissorX1;
 	g_ScissorX2 = g_MenuScissorX2;
 	g_ScissorY1 = g_MenuScissorY1;

@@ -62,7 +62,6 @@ Gfx *bviewPrepareStaticRgba16(Gfx *gdl, uint32_t colour, uint32_t alpha)
 	static uint32_t envcol = 0xffffffff;
 	static uint32_t primcol = 0x7f7f7fff;
 
-	gDPPipeSync(gdl++);
 	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -93,7 +92,6 @@ Gfx *bviewPrepareStaticI8(Gfx *gdl, uint32_t colour, uint32_t alpha)
 	static uint32_t envcol = 0xffffffff;
 	static uint32_t primcol = 0x7f7f7fff;
 
-	gDPPipeSync(gdl++);
 	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_8b, 0, 0x0000, 5, 0,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -157,8 +155,6 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, uint32_t colour, uint32_t alpha)
 		return gdl;
 	}
 
-	gDPPipeSync(gdl++);
-
 	gdl = bviewPrepareStaticRgba16(gdl, colour, newalpha);
 
 	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_BlurFb);
@@ -180,9 +176,6 @@ Gfx *bviewDrawStatic(Gfx *gdl, uint32_t arg1, int arg2)
 	int viewwidth = viGetViewWidth();
 	int viewleft = viGetViewLeft();
 	uint16_t *fb2 = (uint16_t *) (k_ptr_t)(rngRandom() & 0xfff00);
-	int y;
-
-	gDPPipeSync(gdl++);
 
 	gdl = bviewPrepareStaticI8(gdl, arg1, arg2);
 
@@ -214,8 +207,6 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	gDPPipeSync(gdl++);
 
 	increment = (2.6179938316345f - angle) / viewheight;
 
@@ -261,8 +252,6 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	gDPPipeSync(gdl++);
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
@@ -324,8 +313,6 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, uint32_t colour, int alpha, float arg3, float a
 	if (g_BlurFbDirty) {
 		return gdl;
 	}
-
-	gDPPipeSync(gdl++);
 
 	somefloat = (viewheight - viewheight / arg4) * 0.5f;
 
@@ -453,8 +440,6 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
 		}
 	}
 
-	gDPPipeSync(gdl++);
-
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
 	// make a copy of the current back buffer contents that we will be using as a texture
@@ -518,7 +503,6 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
 		}
 	}
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
@@ -944,7 +928,6 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		int g;
 		int b;
 
-		gDPPipeSync(gdl++); \
 		gDPSetCycleType(gdl++, G_CYC_1CYCLE); \
 		gDPSetColorDither(gdl++, G_CD_DISABLE); \
 		gDPSetTexturePersp(gdl++, G_TP_NONE); \
@@ -1432,7 +1415,6 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			}
 		}
 
-		gDPPipeSync(gdl++); \
 		gDPSetColorDither(gdl++, G_CD_BAYER); \
 		gDPSetTexturePersp(gdl++, G_TP_PERSP); \
 		gDPSetTextureLOD(gdl++, G_TL_LOD);
@@ -1602,8 +1584,6 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 		gdl = bviewDrawMotionBlur(gdl, 0x00ff0000, 0x60);
 	}
 
-	gDPPipeSync(gdl++);
-
 	gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 0xff);
 
 	g_NightVisionFrameCounter++;
@@ -1728,8 +1708,6 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 	g_NVChrHighlight = 0xde;
 	g_NVChrBrightness = 0xde;
 
-	gDPPipeSync(gdl++);
-
 	gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 255);
 
 	sqinnerradius = innerradius * innerradius;
@@ -1810,8 +1788,6 @@ Gfx *bviewDrawIntroFaderBlur(Gfx *gdl, int arg1)
 		return gdl;
 	}
 
-	gDPPipeSync(gdl++);
-
 	gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 255);
 
 	halfheight = viewheight * 0.5f;
@@ -1855,8 +1831,6 @@ Gfx *bviewDrawIntroText(Gfx *gdl)
 	if (g_NumActiveEffects >= 2) {
 		return gdl;
 	}
-
-	gDPPipeSync(gdl++);
 
 	gdl = bviewPrepareStaticRgba16(gdl, 0x8f8f8f8f, 255);
 
@@ -2008,8 +1982,6 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 			g_CharsHandelGothicXs, g_FontHandelGothicXs, 0xffffff7f, viGetWidth(), viGetHeight(), 0, 0);
 	gdl = text0f153780(gdl);
 
-	gDPPipeSync(gdl++);
-
 	gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 255);
 
 	if (vsplit) {
@@ -2107,7 +2079,6 @@ Gfx *bviewDrawIrBinoculars(Gfx *gdl)
 	int sqradius = radius * radius;
 	int y;
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);

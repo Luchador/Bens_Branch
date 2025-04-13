@@ -436,7 +436,6 @@ Gfx *lvRenderFade(Gfx *gdl)
 		return gdl;
 	}
 
-	gDPPipeSync(gdl++);
 	gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 	gDPSetPrimColorViaWord(gdl++, 0, 0, colour);

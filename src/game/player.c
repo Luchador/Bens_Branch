@@ -2122,7 +2122,6 @@ Gfx *player0f0baf84(Gfx *gdl)
 Gfx *playerDrawFade(Gfx *gdl, uint32_t r, uint32_t g, uint32_t b, float frac)
 {
 	if (frac > 0) {
-		gDPPipeSync(gdl++);
 		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 		gDPSetColorDither(gdl++, G_CD_DISABLE);
 		gDPSetTexturePersp(gdl++, G_TP_NONE);
@@ -2136,7 +2135,6 @@ Gfx *playerDrawFade(Gfx *gdl, uint32_t r, uint32_t g, uint32_t b, float frac)
 		gDPSetPrimColor(gdl++, 0, 0, r, g, b, (int)(frac * 255));
 		gDPFillRectangle(gdl++, viGetViewLeft(), viGetViewTop(),
 				viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
-		gDPPipeSync(gdl++);
 		gDPSetColorDither(gdl++, G_CD_BAYER);
 		gDPSetTexturePersp(gdl++, G_TP_PERSP);
 		gDPSetTextureLOD(gdl++, G_TL_LOD);
@@ -2554,7 +2552,6 @@ Gfx *playerRenderHealthBar(Gfx *gdl)
 	mtx4Copy((Mtx*)&matrix, (Mtx*)addr);
 
 	gSPMatrix(gdl++, (uintptr_t)((void *)addr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);

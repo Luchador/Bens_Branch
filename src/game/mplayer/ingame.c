@@ -570,7 +570,6 @@ MenuItemHandlerResult mpAwardsMenuHandler(int operation, struct menuitem *item, 
 				}
 
 				if (!configured) {
-					gDPPipeSync(gdl++);
 					gDPSetTexturePersp(gdl++, G_TP_NONE);
 					gDPSetAlphaCompare(gdl++, G_AC_NONE);
 					gDPSetTextureLOD(gdl++, G_TL_TILE);

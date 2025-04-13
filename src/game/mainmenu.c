@@ -1844,7 +1844,6 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 		}
 
 		// Draw the thumbnail
-		gDPPipeSync(gdl++);
 		gDPSetTexturePersp(gdl++, G_TP_NONE);
 		gDPSetAlphaCompare(gdl++, G_AC_NONE);
 		gDPSetTextureLOD(gdl++, G_TL_TILE);

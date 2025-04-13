@@ -1090,7 +1090,6 @@ Gfx *amRender(Gfx *gdl)
 		colours = gfxAllocateColours(2);
 		vertices = gfxAllocateVertices(8);
 
-		gDPPipeSync(gdl++);
 		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 		gDPSetAlphaCompare(gdl++, G_AC_NONE);
 		gDPSetAlphaDither(gdl++, G_AD_NOISE);
@@ -1366,7 +1365,6 @@ Gfx *amRender(Gfx *gdl)
 			healthfrac = 0;
 		}
 
-		gDPPipeSync(gdl++);
 		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 		gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 		gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);

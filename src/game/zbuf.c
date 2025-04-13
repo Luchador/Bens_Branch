@@ -86,8 +86,6 @@ Gfx *zbufConfigureRdp(Gfx *gdl)
 		subamount = 0;
 	}
 
-	gDPPipeSync(gdl++);
-
 	return gdl;
 }
 
@@ -136,7 +134,6 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	sp44 = zbufGetArtifactsCfb(g_SchedWriteArtifactsIndex);
 	g_SchedSpecialArtifactIndexes[g_SchedWriteArtifactsIndex] = 1;
 
-	gDPPipeSync(gdl++);
 	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(sp44));
 	gDPSetScissor(gdl++, 0, 0, videoGetWidth(), videoGetHeight());
 	gDPSetCycleType(gdl++, G_CYC_COPY);
@@ -158,18 +155,14 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	gDPSetTextureLUT(gdl++, G_TT_NONE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gSPClearGeometryMode(gdl++, G_ZBUFFER);
-	gDPTileSync(gdl++);
 
 	for (i = 0; i < MAX_ARTIFACTS; i++) {
 		if (artifacts[i].type != ARTIFACTTYPE_FREE) {
 			s2 = &sp44[s4];
 			image = &sp4c[artifacts[i].screenPos.screenY * viGetWidth()];
 
-			gDPPipeSync(gdl++);
 			gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, videoGetWidth(), image);
-			gDPLoadSync(gdl++);
 			gDPLoadBlock(gdl++, 5, 0, 0, viGetWidth() - 1, 0);
-			gDPPipeSync(gdl++);
 
 			gSPTextureRectangle(gdl++,
 					s4 << 2, 0,
@@ -181,9 +174,6 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 		}
 	}
 
-	gDPPipeSync(gdl++);
-	gDPLoadSync(gdl++);
-	gDPTileSync(gdl++);
 	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
 	gDPSetScissorFrac(gdl++, 0, 0, viGetWidth() * 4.0f, viGetHeight() * 4.0f);
 	gSPSetGeometryMode(gdl++, G_ZBUFFER);

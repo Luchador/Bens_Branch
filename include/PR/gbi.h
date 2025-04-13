@@ -1770,11 +1770,9 @@ typedef union {
     gDPSetTextureImage(pkt, fmt, siz##_LOAD_BLOCK, 1, timg);      \
     gDPSetTile(pkt, fmt, siz##_LOAD_BLOCK, 0, 0, G_TX_LOADTILE,   \
             0 , cmt, maskt, shiftt, cms, masks, shifts);          \
-    gDPLoadSync(pkt);                                             \
     gDPLoadBlock(pkt, G_TX_LOADTILE, 0, 0,                        \
             (((width)*(height) + siz##_INCR) >> siz##_SHIFT) -1,  \
             CALC_DXT(width, siz##_BYTES));                        \
-    gDPPipeSync(pkt);                                             \
     gDPSetTile(pkt, fmt, siz,                                     \
             (((width) * siz##_LINE_BYTES)+7)>>3, 0,               \
             G_TX_RENDERTILE, pal, cmt, maskt, shiftt, cms, masks, \
@@ -1787,12 +1785,9 @@ typedef union {
 #define gDPLoadTLUT(pkt, count, tmemaddr, dram)                    \
 {                                                                  \
     gDPSetTextureImage(pkt, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, dram); \
-    gDPTileSync(pkt);                                              \
     gDPSetTile(pkt, 0, 0, 0, tmemaddr,                             \
             G_TX_LOADTILE, 0 , 0, 0, 0, 0, 0, 0);                  \
-    gDPLoadSync(pkt);                                              \
     gDPLoadTLUTCmd(pkt, G_TX_LOADTILE, ((count)-1));               \
-    gDPPipeSync(pkt);                                              \
 }
 
 #define gDPSetScissor(pkt, ulx, uly, lrx, lry)                   \
@@ -1911,14 +1906,7 @@ typedef union {
     gImmp1(pkt, G_RDPHALF_2, (unsigned int)(wordlo)); \
 }
 
-#define gDPFullSync(pkt)     gDPNoParam(pkt, G_RDPFULLSYNC)
 #define gsDPFullSync()       gsDPNoParam(G_RDPFULLSYNC)
-#define gDPTileSync(pkt)     gDPNoParam(pkt, G_RDPTILESYNC)
-#define gsDPTileSync()       gsDPNoParam(G_RDPTILESYNC)
-#define gDPPipeSync(pkt)     gDPNoParam(pkt, G_RDPPIPESYNC)
-#define gsDPPipeSync()       gsDPNoParam(G_RDPPIPESYNC)
-#define gDPLoadSync(pkt)     gDPNoParam(pkt, G_RDPLOADSYNC)
-#define gsDPLoadSync()       gsDPNoParam(G_RDPLOADSYNC)
 #define gDPNoOp(pkt)         gDPNoParam(pkt, G_NOOP)
 #define gsDPNoOp()           gsDPNoParam(G_NOOP)
 #define gDPNoOpTag(pkt, tag) gDPParam(pkt, G_NOOP, tag)

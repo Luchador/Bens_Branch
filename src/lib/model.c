@@ -2818,7 +2818,6 @@ void modelTickAnim(struct model *model, int lvupdate240, bool arg2)
 
 void modelApplyRenderModeType1(struct modelrenderdata *renderdata)
 {
-	gDPPipeSync(renderdata->gdl++);
 	gDPSetCycleType(renderdata->gdl++, G_CYC_1CYCLE);
 
 	if (renderdata->zbufferenabled) {
@@ -2834,7 +2833,6 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 {
 	if (renderdata->unk30 == 7) {
 		if (arg1) {
-			gDPPipeSync(renderdata->gdl++);
 			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 			gDPSetEnvColorViaWord(renderdata->gdl++, renderdata->envcolour | 0xff);
@@ -2854,7 +2852,6 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 		}
 	} else if (renderdata->unk30 == 8) {
 		if (arg1) {
-			gDPPipeSync(renderdata->gdl++);
 			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 			gDPSetEnvColorViaWord(renderdata->gdl++, renderdata->envcolour);
@@ -2869,7 +2866,6 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 	} else if (renderdata->unk30 == 9) {
 		if ((renderdata->envcolour & 0xff) == 0) {
 			if (arg1) {
-				gDPPipeSync(renderdata->gdl++);
 				gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 				gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 				gDPSetEnvColorViaWord(renderdata->gdl++, 0xffffffff);
@@ -2890,7 +2886,6 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 			}
 		} else {
 			if (arg1) {
-				gDPPipeSync(renderdata->gdl++);
 				gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 				gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 				gDPSetEnvColor(renderdata->gdl++, 0, 0, 0, renderdata->envcolour);
@@ -2914,7 +2909,6 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 		}
 	} else if (renderdata->unk30 == 4) {
 		if (arg1) {
-			gDPPipeSync(renderdata->gdl++);
 			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->envcolour);
 			gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
@@ -2935,7 +2929,6 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 		uint8_t alpha;
 
 		if (arg1) {
-			gDPPipeSync(renderdata->gdl++);
 			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 
@@ -2969,7 +2962,6 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 		}
 	} else {
 		if (arg1) {
-			gDPPipeSync(renderdata->gdl++);
 			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 			gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
 
@@ -2991,7 +2983,6 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 {
 	if (renderdata->unk30 == 7) {
-		gDPPipeSync(renderdata->gdl++);
 		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 		gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 		gDPSetEnvColorViaWord(renderdata->gdl++, renderdata->envcolour | 0x000000ff);
@@ -3011,7 +3002,6 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 			}
 		}
 	} else if (renderdata->unk30 == 8) {
-		gDPPipeSync(renderdata->gdl++);
 		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 		gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 		gDPSetEnvColorViaWord(renderdata->gdl++, renderdata->envcolour);
@@ -3024,7 +3014,6 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 		}
 	} else if (renderdata->unk30 == 9) {
 		if ((renderdata->envcolour & 0xff) == 0) {
-			gDPPipeSync(renderdata->gdl++);
 			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 			gDPSetEnvColorViaWord(renderdata->gdl++, 0xffffffff);
@@ -3048,7 +3037,6 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 				}
 			}
 		} else {
-			gDPPipeSync(renderdata->gdl++);
 			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 			gDPSetEnvColorViaWord(renderdata->gdl++, renderdata->envcolour & 0xff);
@@ -3073,7 +3061,6 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 			}
 		}
 	} else if (renderdata->unk30 == 4) {
-		gDPPipeSync(renderdata->gdl++);
 		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 		gDPSetFogColorViaWord(renderdata->gdl++, renderdata->envcolour);
 		gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
@@ -3094,7 +3081,6 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 	} else if (renderdata->unk30 == 5) {
 		uint8_t alpha;
 
-		gDPPipeSync(renderdata->gdl++);
 		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 		gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 
@@ -3122,7 +3108,6 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 			gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 		}
 	} else {
-		gDPPipeSync(renderdata->gdl++);
 		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 		gDPSetFogColorViaWord(renderdata->gdl++, 0xffffff00);
 		gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
@@ -3145,7 +3130,6 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 
 void modelApplyRenderModeType2(struct modelrenderdata *renderdata)
 {
-	gDPPipeSync(renderdata->gdl++);
 	gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 
 	if (renderdata->zbufferenabled) {

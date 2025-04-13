@@ -59,7 +59,6 @@ Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, int arg2, in
 	gDPSetTextureFilter(gdl++, G_TF_POINT);
 	gDPSetTextureConvert(gdl++, G_TC_FILT);
 	gDPSetTextureLUT(gdl++, G_TT_NONE);
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
@@ -82,7 +81,6 @@ Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, int arg2, in
 	gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
 	utilsRenderScreenTexture(&gdl, spb0, spa8, tconfig->width, tconfig->height, 0, 0, 0, false);
 
-	gDPPipeSync(gdl++);
 	gDPSetColorDither(gdl++, G_CD_BAYER);
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
@@ -311,7 +309,6 @@ Gfx *radarRender(Gfx *gdl)
 
 	gdl = radarRenderBackground(gdl, tconfig, g_RadarX, g_RadarY, 0x10);
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);

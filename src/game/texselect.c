@@ -152,7 +152,6 @@ void texSetRenderMode(Gfx **gdlptr, int rendermode, int numcycles, int arg3)
 	Gfx *gdl = *gdlptr;
 
 	if (numcycles == 1) {
-		gDPPipeSync(gdl++);
 		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 
 		switch (rendermode) {
@@ -195,7 +194,6 @@ void texSetRenderMode(Gfx **gdlptr, int rendermode, int numcycles, int arg3)
 			break;
 		}
 	} else {
-		gDPPipeSync(gdl++);
 		gDPSetCycleType(gdl++, G_CYC_2CYCLE);
 
 		switch (rendermode) {
@@ -390,15 +388,11 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 			gDPSetTextureImage(gdl++, format, depth2, 1, tconfig->textureptr);
 
 			if (depth2 == G_IM_SIZ_16b) {
-				gDPLoadSync(gdl++);
 				gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, lrs, 0);
 			} else {
 				gDPSetTile(gdl++, G_IM_FMT_RGBA, depth2, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-				gDPLoadSync(gdl++);
 				gDPLoadBlock(gdl++, 5, 0, 0, lrs, 0);
 			}
-
-			gDPPipeSync(gdl++);
 
 			if (format == G_IM_FMT_CI) {
 				uint32_t a3 = lrs + 1;
@@ -406,9 +400,7 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 
 				a3 -= t0;
 
-				gDPLoadSync(gdl++);
 				gDPLoadTLUT06(gdl++, a3, t0, tex->texTlutTmemOffset + a3, t0);
-				gDPPipeSync(gdl++);
 
 				if (arg5) {
 					gDPSetTextureLUT(gdl++, lutmode);
@@ -508,15 +500,11 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 			gDPSetTextureImage(gdl++, format, depth2, 1, tconfig->textureptr);
 
 			if (depth2 == G_IM_SIZ_16b) {
-				gDPLoadSync(gdl++);
 				gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, lrs, 0);
 			} else {
 				gDPSetTile(gdl++, G_IM_FMT_RGBA, depth2, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-				gDPLoadSync(gdl++);
 				gDPLoadBlock(gdl++, 5, 0, 0, lrs, 0);
 			}
-
-			gDPPipeSync(gdl++);
 
 			if (format == G_IM_FMT_CI) {
 				uint32_t a2 = lrs + 1;
@@ -524,9 +512,7 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 
 				a2 -= a3;
 
-				gDPLoadSync(gdl++);
 				gDPLoadTLUT06(gdl++, a2, a3, tex->texTlutTmemOffset + a2, a3);
-				gDPPipeSync(gdl++);
 
 				if (arg5) {
 					gDPSetTextureLUT(gdl++, lutmode);

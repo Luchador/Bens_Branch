@@ -363,7 +363,6 @@ void mainTick(void)
 
 		gdl = lvRender(gdl);
 
-		gDPFullSync(gdl++);
 		gSPEndDisplayList(gdl++);
 
 		gfxSwapBuffers();

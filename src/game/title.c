@@ -215,7 +215,6 @@ Gfx *titleRenderLegal(Gfx *gdl)
 			} else if (elem->type == LEGALELEMENTTYPE_DOLBYLOGO) {
 				gdl = text0f153780(gdl);
 
-				gDPPipeSync(gdl++);
 				gDPSetTexturePersp(gdl++, G_TP_NONE);
 				gDPSetAlphaCompare(gdl++, G_AC_NONE);
 				gDPSetTextureLOD(gdl++, G_TL_TILE);
@@ -238,7 +237,6 @@ Gfx *titleRenderLegal(Gfx *gdl)
 			} else if (elem->type == LEGALELEMENTTYPE_RARELOGO) {
 				gdl = text0f153780(gdl);
 
-				gDPPipeSync(gdl++);
 				gDPSetTexturePersp(gdl++, G_TP_NONE);
 				gDPSetAlphaCompare(gdl++, G_AC_NONE);
 				gDPSetTextureLOD(gdl++, G_TL_TILE);

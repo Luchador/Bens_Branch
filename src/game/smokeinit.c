@@ -31,7 +31,6 @@ Gfx var800613a0[] = {
 	gsDPSetRenderMode(G_RM_OPA_SURF, G_RM_OPA_SURF2),
 	gsDPSetColorDither(G_CD_MAGICSQ),
 	gsDPSetAlphaDither(G_AD_PATTERN),
-	gsDPPipeSync(),
 	gsSPEndDisplayList(),
 };
 

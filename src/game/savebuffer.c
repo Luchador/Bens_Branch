@@ -90,8 +90,6 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 
 	gSPViewport(gdl++, g_Viewport);
 
-	gDPPipeSync(gdl++);
-
 	return gdl;
 }
 
@@ -108,15 +106,12 @@ Gfx *func0f0d4a3c(Gfx *gdl, int arg1)
 	Mtxf mtx;
 	Mtxf *mtxptr = gfxAllocateMatrixF();
 
-	gDPPipeSync(gdl++);
-
 	if (arg1 == 0) {
 		texSelect(&gdl, &g_TexGeneralConfigs[6], 2, 0, 2, 1, NULL);
 	} else if (arg1 == 1) {
 		texSelect(&gdl, &g_TexGeneralConfigs[11], 2, 0, 2, 1, NULL);
 	}
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);

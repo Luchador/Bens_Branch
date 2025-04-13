@@ -5829,23 +5829,18 @@ Gfx *shieldhitRender(Gfx *gdl, struct prop *prop1, struct prop *prop2, int alpha
 								index = 0;
 							}
 
-							gDPPipeSync(gdl++);
 							gDPSetTextureLUT(gdl++, G_TT_NONE);
-#ifndef PLATFORM_N64
 							gDPLoadTextureBlock(gdl++, var8009ccc0[index], G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
-#endif
 							gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 							gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
 							gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
 							gSPTexture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
 							gDPSetTextureFilter(gdl++, G_TF_BILERP);
 							gDPSetColorDither(gdl++, G_CD_BAYER);
-#ifndef PLATFORM_N64
 							gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, (((16 * G_IM_SIZ_16b_BYTES)+7)>>3), 0, 0, 0,
 								G_TX_MIRROR | G_TX_WRAP, 4, G_TX_NOLOD, G_TX_MIRROR | G_TX_WRAP, 4, G_TX_NOLOD);
 							gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 16 << G_TEXTURE_IMAGE_FRAC, 16 << G_TEXTURE_IMAGE_FRAC);
 							gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, var8009ccc0[index]);
-#endif
 
 							gdl = chrRenderShieldComponent(gdl, NULL, prop1, model, node, -7, -1, -1, 255);
 						} else {
@@ -5913,7 +5908,6 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 
 		if (thisprop->parent == NULL) {
 			// Rendering the chr prop - configure renderer
-			gDPPipeSync(gdl++);
 			gDPSetScissor(gdl++, 0, 0, 16, 16);
 			gDPSetCycleType(gdl++, G_CYC_COPY);
 			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -6038,9 +6032,6 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 
 		if (thisprop->parent == NULL) {
 			// Back in the chr prop - reconfigure the renderer for normal use
-			gDPPipeSync(gdl++);
-			gDPLoadSync(gdl++);
-			gDPTileSync(gdl++);
 			gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
 			gDPSetScissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
 			gDPSetCycleType(gdl++, G_CYC_1CYCLE);

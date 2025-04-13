@@ -151,7 +151,6 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 		gdl = text0f153780(gdl);
 
 		// Prepare the star texture for the difficulties
-		gDPPipeSync(gdl++);
 		gDPSetTexturePersp(gdl++, G_TP_NONE);
 		gDPSetAlphaCompare(gdl++, G_AC_NONE);
 		gDPSetTextureLOD(gdl++, G_TL_TILE);
@@ -590,7 +589,6 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 		linecolourfig = (linecolourfig & 0xffffff00) | ((linecolourfig & 0xff) * (renderdata->colour & 0xff) >> 8);
 		linecolourtex = (linecolourtex & 0xffffff00) | ((linecolourtex & 0xff) * (renderdata->colour & 0xff) >> 8);
 
-		gDPPipeSync(gdl++);
 		gDPSetTexturePersp(gdl++, G_TP_NONE);
 		gDPSetAlphaCompare(gdl++, G_AC_NONE);
 		gDPSetTextureLOD(gdl++, G_TL_TILE);
@@ -2380,7 +2378,6 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 			uint8_t texturenums[] = { 0x1b, 0x0d, 0x0e, 0x10, 0x11, 0x12, 0x13, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1c, 0x1d };
 			int texturenum = texturenums[index];
 
-			gDPPipeSync(gdl++);
 			gDPSetTexturePersp(gdl++, G_TP_NONE);
 			gDPSetAlphaCompare(gdl++, G_AC_NONE);
 			gDPSetTextureLOD(gdl++, G_TL_TILE);

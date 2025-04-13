@@ -280,6 +280,8 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         }
     }
 
+    append_line(vs_buf, &vs_len, "uniform mat4 uMVP;");
+
     if (cc_features.opt_fog) {
         append_line(vs_buf, &vs_len, "INPUT vec4 aFog;");
         append_line(vs_buf, &vs_len, "OUTPUT vec4 vFog;");
@@ -310,15 +312,14 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
             }
         }
     }
-
     if (cc_features.opt_fog) {
         append_line(vs_buf, &vs_len, "    vFog = aFog;");
     }
-    
     for (int i = 0; i < cc_features.num_inputs; i++) {
         vs_len += sprintf(vs_buf + vs_len, "    vInput%d = aInput%d;\n", i + 1, i + 1);
     }
 
+    //append_line(vs_buf, &vs_len, "gl_Position = uMVP * aVtxPos;");
     append_line(vs_buf, &vs_len, "gl_Position = aVtxPos;");
     append_line(vs_buf, &vs_len, "vec3 worldPos = aVtxPos.xyz;");
     append_line(vs_buf, &vs_len, "float dist = distance(worldPos, uCamPos);");
@@ -348,7 +349,6 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     append_line(fs_buf, &fs_len, "#define TEX_OFFSET(tex, uv, texSize, off) SAMPLE_TEX(tex, uv - (off)/texSize)");
 
     append_line(fs_buf, &fs_len, "precision mediump float;");
-
     for (int i = 0; i < 2; i++) {
         if (cc_features.used_textures[i]) {
             fs_len += sprintf(fs_buf + fs_len, "INPUT vec2 vTexCoord%d;\n", i);
@@ -359,11 +359,9 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
             }
         }
     }
-
     if (cc_features.opt_fog) {
         append_line(fs_buf, &fs_len, "INPUT vec4 vFog;");
     }
-
     for (int i = 0; i < cc_features.num_inputs; i++) {
         fs_len += sprintf(fs_buf + fs_len, "INPUT vec%d vInput%d;\n", cc_features.opt_alpha ? 4 : 3, i + 1);
     }
@@ -375,7 +373,6 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         if (current_filter_mode == FILTER_THREE_POINT)
             append_line(fs_buf, &fs_len, "uniform int three_point_filter0;");
     }
-
     if (cc_features.used_textures[1]) {
         append_line(fs_buf, &fs_len, "uniform sampler2D uTex1;");
         if (current_filter_mode == FILTER_THREE_POINT)
@@ -603,11 +600,11 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         ++cnt;
     }
 
-    if (cc_features.opt_grayscale) {
+    /*if (cc_features.opt_grayscale) {
         prg->attrib_locations[cnt] = glGetAttribLocation(shader_program, "aGrayscaleColor");
         prg->attrib_sizes[cnt] = 4;
         ++cnt;
-    }
+    }*/
 
     for (int i = 0; i < cc_features.num_inputs; i++) {
         char name[16];
@@ -625,6 +622,11 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     prg->num_attribs = cnt;
 
     glUseProgram(shader_program);
+
+    //logModelViewProjMatrix();
+
+    GLint uMVPLoc = glGetUniformLocation(shader_program, "uMVP");
+    glUniformMatrix4fv(uMVPLoc, 1, GL_TRUE, &g_ModelViewProj[0][0]);
 
     // Set camera position
     GLint camPosLoc = glGetUniformLocation(shader_program, "uCamPos");
@@ -694,6 +696,26 @@ void debug_log_coord(const struct coord *pos) {
         fclose(file);
     } else {
         perror("Failed to open debug.log");
+    }
+}
+
+void logModelViewProjMatrix(void)
+{
+    FILE *f = fopen("debug.log", "a"); // append mode
+
+    if (f) {
+        fprintf(f, "ModelViewProjection Matrix:\n");
+
+        for (int i = 0; i < 4; i++) {
+            fprintf(f, "[ %9.5f %9.5f %9.5f %9.5f ]\n",
+                g_ModelViewProj[i][0],
+                g_ModelViewProj[i][1],
+                g_ModelViewProj[i][2],
+                g_ModelViewProj[i][3]);
+        }
+
+        fprintf(f, "\n");
+        fclose(f);
     }
 }
 

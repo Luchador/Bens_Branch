@@ -36,9 +36,11 @@
 #include "types.h"
 #include "data.h"
 #include <stdbool.h>
-#undef bool // Ben's comment: for some reason line 1445 "bool used_textures[2] = {false, false};" kept getting treated as an int, not a bool. The #undef here fixes it.
+#include <stdio.h>
 
 uintptr_t gfxFramebuffer;
+
+float g_ModelViewProj[4][4];
 
 #define SUPPORT_CHECK(x) assert(x)
 
@@ -63,7 +65,7 @@ uintptr_t gfxFramebuffer;
 #define MAX_VERTEX_COLORS 64
 
 //#define TEXTURE_CACHE_MAX_SIZE 1024
-#define TEXTURE_CACHE_MAX_SIZE 65536
+#define TEXTURE_CACHE_MAX_SIZE 4096
 
 #define C0(pos, width) ((cmd->words.w0 >> (pos)) & ((1U << width) - 1))
 #define C1(pos, width) ((cmd->words.w1 >> (pos)) & ((1U << width) - 1))
@@ -224,7 +226,6 @@ float gfx_current_native_aspect = 4.f / 3.f;
 //bool gfx_detail_textures_enabled = true;
 
 bool fbenabled = true;
-bool dtenabled = true;
 
 static bool game_renders_to_framebuffer;
 static int game_framebuffer;
@@ -1015,6 +1016,8 @@ static void gfx_sp_matrix(uint8_t parameters, const int32_t* addr) {
         rsp.lights_changed = 1;
     }
     gfx_matrix_mul(rsp.MP_matrix, rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1], rsp.P_matrix);
+    //gfx_matrix_mul(rsp.MP_matrix, rsp.P_matrix, rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1]);
+    memcpy(g_ModelViewProj, rsp.MP_matrix, sizeof(float[4][4]));
 }
 
 static void gfx_sp_pop_matrix(uint32_t count) {
@@ -1062,8 +1065,8 @@ static void gfx_sp_vertex(size_t n_vertices, size_t dest_index, const Vtx* verti
 
         x = gfx_adjust_x_for_aspect_ratio(x, w);
 
-        short U = v->s * rsp.texture_scaling_factor.s >> 16;
-        short V = v->t * rsp.texture_scaling_factor.t >> 16;
+        int U = v->s * rsp.texture_scaling_factor.s >> 16;
+        int V = v->t * rsp.texture_scaling_factor.t >> 16;
 
         const struct NormalColor *vcn = &rsp.vertex_colors[v->colour >> 2];
 
@@ -1194,8 +1197,8 @@ static void gfx_sp_vertex(size_t n_vertices, size_t dest_index, const Vtx* verti
 static void gfx_sp_modify_vertex(uint16_t vtx_idx, uint8_t where, uint32_t val) {
     SUPPORT_CHECK(where == G_MWO_POINT_ST);
 
-    int16_t s = (int16_t)(val >> 16);
-    int16_t t = (int16_t)val;
+    int32_t s = (int16_t)(val >> 16);
+    int32_t t = (int16_t)val;
 
     struct LoadedVertex* v = &rsp.loaded_vertices[vtx_idx];
     v->u = s;
@@ -2133,8 +2136,8 @@ static void gfx_dp_texture_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int3
 }
 
 static void gfx_dp_image_rectangle(int32_t tile, int32_t w, int32_t h,
-                                   int32_t ulx, int32_t uly, int16_t uls, int16_t ult,
-                                   int32_t lrx, int32_t lry, int16_t lrs, int16_t lrt) {
+                                   int32_t ulx, int32_t uly, int32_t uls, int32_t ult,
+                                   int32_t lrx, int32_t lry, int32_t lrs, int32_t lrt) {
     uint64_t saved_combine_mode = rdp.combine_mode;
 
     struct LoadedVertex* ul = &rsp.loaded_vertices[MAX_VERTICES + 0];
@@ -2380,9 +2383,9 @@ static void gfx_run_dl(Gfx* cmd) {
             case G_SETFILLCOLOR:
                 gfx_dp_set_fill_color(cmd->words.w1);
                 break;
-            case G_SETINTENSITY_EXT:
+            /*case G_SETINTENSITY_EXT:
                 gfx_dp_set_grayscale_color(C1(24, 8), C1(16, 8), C1(8, 8), C1(0, 8));
-                break;
+                break;*/
             case G_SETCOMBINE:
                 gfx_dp_set_combine_mode(color_comb(C0(20, 4), C1(28, 4), C0(15, 5), C1(15, 3)),
                                         alpha_comb(C0(12, 3), C1(12, 3), C0(9, 3), C1(9, 3)),
@@ -2446,9 +2449,12 @@ static void gfx_run_dl(Gfx* cmd) {
                 break;
             }
             case G_IMAGERECT_EXT: {
-                int16_t tile, iw, ih;
-                int16_t x0, y0, s0, t0;
-                int16_t x1, y1, s1, t1;
+                //int16_t tile, iw, ih;
+                //int16_t x0, y0, s0, t0;
+                //int16_t x1, y1, s1, t1;
+                int32_t tile, iw, ih;
+                int32_t x0, y0, s0, t0;
+                int32_t x1, y1, s1, t1;
                 tile = C0(0, 3);
                 iw = C1(16, 16);
                 ih = C1(0, 16);

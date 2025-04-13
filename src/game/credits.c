@@ -335,7 +335,6 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float 
 
 	gdl = menugfx0f0e2498(gdl);
 
-	gDPPipeSync(gdl++);
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
