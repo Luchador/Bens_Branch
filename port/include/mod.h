@@ -16,4 +16,6 @@ void *modAnimationLoadData(uint16_t num);
 
 void *modSequenceLoad(uint16_t num, uint32_t *outSize);
 
+int modTextLoad(uint16_t num, void *dst, uint32_t dstSize);
+
 #endif

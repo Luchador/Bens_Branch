@@ -1176,9 +1176,9 @@ uint32_t explosionTick(struct prop *prop)
 
 uint32_t explosionTickPlayer(struct prop *prop)
 {
-	Mtxf *matrix = camGetWorldToScreenMtxf();
+	Mtx *matrix = camGetPlayerWorldToScreenMtx();
 
-	prop->z = -(matrix->m[0][2] * prop->pos.x + matrix->m[1][2] * prop->pos.y + matrix->m[2][2] * prop->pos.z + matrix->m[3][2]);
+	prop->z = -((*matrix)[0][2] * prop->pos.x + (*matrix)[1][2] * prop->pos.y + (*matrix)[2][2] * prop->pos.z + (*matrix)[3][2]);
 
 	if (prop->z < 100) {
 		prop->z *= 0.5f;
@@ -1306,7 +1306,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx *gdl, struct coord *coord, int arg4)
 {
 	Vtx *vertices = gfxAllocateVertices(4);
-	Mtxf *mtx = camGetProjectionMtx();
+	Mtxf *mtx = (Mtxf*)camGetProjectionMtx();
 	struct coord spbc;
 	struct coord spb0;
 	struct coord spa4;

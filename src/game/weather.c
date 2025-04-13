@@ -891,7 +891,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 		numtris = 0;
 
 		mtxIdent((Mtx*)&worldtoscreenmtx);
-		mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&worldtoscreenmtx);
+		mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&worldtoscreenmtx);
 
 		worldtoscreenmtx.m[3][0] = 0.0f;
 		worldtoscreenmtx.m[3][1] = 0.0f;
@@ -1468,7 +1468,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 	sp198 = 0;
 
 	mtxIdent((Mtx*)&sp1cc);
-	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp1cc);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp1cc);
 
 	sp1cc.m[3][0] = 0.0f;
 	sp1cc.m[3][1] = 0.0f;

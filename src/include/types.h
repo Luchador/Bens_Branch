@@ -1319,7 +1319,7 @@ struct chrdata {
 	/*0x33a*/ uint8_t deaddropsplatsadded;
 	/*0x33b*/ int8_t aimtesttimer60;
 	/*0x33c*/ struct coord lastdroppos;
-	/*0x348*/ struct fireslotthing *unk348[2];
+	/*0x348*/ struct fireslotthing *roboguns[2];
 	/*0x350*/ struct chrdata *lastattacker;
 	/*0x354*/ int16_t aipunchdodgelist;
 	/*0x356*/ int16_t aishootingatmelist;
@@ -2374,7 +2374,7 @@ struct player {
 	/*0x005c*/ Mtx *mtxl005c;
 	/*0x0064*/ Mtxf *mtxf0064;
 	/*0x0068*/ Mtxf *mtxf0068;
-	/*0x006c*/ Mtxf *artifactMtx;
+	/*0x006c*/ Mtx *artifactMtx;
 	/*0x0070*/ float sumground;
 	/*0x0074*/ float vv_manground; // Feet Y value in absolute coordinates
 	/*0x0078*/ float vv_ground; // Ground Y value in absolute coordinates
@@ -2607,12 +2607,12 @@ struct player {
 	/*0x1748*/ Mtxf *mtxf1748;
 	/*0x174c*/ Mtxf *projectionmtx;
 	/*0x1750*/ Mtx *perspmtxl;
-	/*0x1754*/ Mtxf *skyMtx;
+	/*0x1754*/ Mtx *skyMtx;
 	/*0x1758*/ Mtx *orthomtxl;
 	/*0x175c*/ LookAt *lookat;
-	/*0x1760*/ Mtxf *prevworldtoscreenmtx;
+	/*0x1760*/ Mtx *prevworldtoscreenmtx;
 	/*0x1764*/ int c_prevviewfmdynticknum;
-	/*0x1768*/ Mtxf *prevprojectionmtx;
+	/*0x1768*/ Mtx *prevprojectionmtx;
 	/*0x176c*/ float c_scalelod60; // Used by FarSight target locator
 	/*0x1770*/ float c_scalelod;
 	/*0x1774*/ float c_lodscalez;

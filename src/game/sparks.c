@@ -392,7 +392,7 @@ Gfx *sparksRender(Gfx *gdl)
 					spd4.m[3][3] = 0.05f;
 
 					mtx4SetTranslation(&group->pos, (Mtx*)&spd4);
-					mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&spd4);
+					mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&spd4);
 
 					mtx = gfxAllocateMatrixF();
 					mtx4Copy((Mtx*)&spd4, (Mtx*)mtx);

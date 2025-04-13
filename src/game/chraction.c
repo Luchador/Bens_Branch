@@ -8784,14 +8784,11 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 			int sp114;
 			struct modelnode *burstnode;
 			struct modelrwdata_chrinfo *chrrwdata;
-			Mtxf *sp108;
-			Mtxf spc8;
+			Mtx spc8;
 			struct modelrodata_chrgunfire *burstrodata;
 			struct coord spb8;
-			Mtxf *spb4;
-			Mtxf *spb0;
 			Mtxf sp70;
-			Mtxf *sp6c;
+			Mtx *sp6c;
 			struct coord sp60;
 			struct coord sp54;
 			struct coord sp48;
@@ -8814,18 +8811,18 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 					burstnode = modelGetPart(gunmodel->definition, MODELPART_CHRGUN_GUNFIRE);
 
 					if (burstnode) {
-						sp108 = modelFindNodeMtx(gunmodel, burstnode, 0);
+				    	Mtx *sp108 = (Mtx*)modelFindNodeMtx(gunmodel, burstnode, 0);
 						burstrodata = &burstnode->rodata->chrgunfire;
-						spb4 = camGetProjectionMtxForPlayers((uint8_t *)sp108);
+						Mtx *spb4 = camGetProjectionMtxForPlayers((uint8_t *)sp108);
 
 						if (spb4) {
-							mtxApplyAffineTransformInPlace((Mtx*)spb4, (Mtx*)&spc8);
+							mtxApplyAffineTransformInPlace(spb4, &spc8);
 
 							spb8.x = burstrodata->pos.x;
 							spb8.y = burstrodata->pos.y;
 							spb8.z = burstrodata->pos.z;
 
-							mtx4TransformVecInPlace((Mtx*)&spc8, &spb8);
+							mtx4TransformVecInPlace(&spc8, &spb8);
 
 							sp114 = 1;
 							sp118.x = spb8.x;
@@ -8836,11 +8833,11 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 						posnode = modelGetPart(gunmodel->definition, MODELPART_CHRGUN_0001);
 
 						if (posnode) {
-							spb0 = modelFindNodeMtx(gunmodel, posnode, 0);
+							Mtx *spb0 = (Mtx*)modelFindNodeMtx(gunmodel, posnode, 0);
 							sp6c = camGetProjectionMtxForPlayers((uint8_t *)spb0);
 
 							if (sp6c) {
-								mtxApplyAffineTransformInPlace((Mtx*)sp6c, (Mtx*)&sp70);
+								mtxApplyAffineTransformInPlace(sp6c, (Mtx*)&sp70);
 
 								sp114 = 1;
 								sp118.x = sp70.m[3][0];
@@ -9236,49 +9233,65 @@ void chrCalculateHit(struct chrdata *chr, bool *angleokptr, bool *hit, struct gs
  */
 bool chrGetGunPos(struct chrdata *chr, int handnum, struct coord *gunpos)
 {
-	struct prop *weaponprop = chrGetHeldProp(chr, handnum);
-	struct defaultobj *obj;
-	struct model *model;
-	bool result = false;
-	struct modelnode *part0;
-	struct modelnode *part1;
-	Mtxf *spac;
-	Mtxf sp6c;
-	struct modelrodata_chrgunfire *rodata;
-	Mtxf *sp64;
-	Mtxf sp24;
+	struct prop *weaponProp = chrGetHeldProp(chr, handnum);
+	struct defaultobj *weaponObj;
+	struct model *weaponModel;
+	bool success = false;
 
-	if (weaponprop) {
-		obj = weaponprop->obj;
-		model = obj->model;
+	struct modelnode *gunfireNode;
+	struct modelnode *fallbackNode;
+	Mtx *gunfireNodeMtx;
+	Mtx transformedMtx;
+	struct modelrodata_chrgunfire *gunfireData;
 
-		if ((chr->prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) && (weaponprop->flags & PROPFLAG_ONTHISSCREENTHISTICK)) {
-			if ((part0 = modelGetPart(model->definition, MODELPART_0000))) {
-				spac = modelFindNodeMtx(model, part0, 0);
-				rodata = &part0->rodata->chrgunfire;
+	Mtx *fallbackNodeMtx;
+	Mtx fallbackTransformed;
 
-				gunpos->x = rodata->pos.x;
-				gunpos->y = rodata->pos.y;
-				gunpos->z = rodata->pos.z;
+	if (!weaponProp) {
+		return false;
+	}
 
-				mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)spac, (Mtx*)&sp6c);
-				mtx4TransformVecInPlace((Mtx*)&sp6c, gunpos);
-				result = true;
-			} else if ((part1 = modelGetPart(model->definition, MODELPART_0001))) {
-				sp64 = modelFindNodeMtx(model, part1, 0);
+	weaponObj = weaponProp->obj;
+	weaponModel = weaponObj->model;
 
-				mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)sp64, (Mtx*)&sp24);
+	// Only proceed if both the character and the weapon are visible this frame
+	if ((chr->prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) &&
+		(weaponProp->flags & PROPFLAG_ONTHISSCREENTHISTICK)) {
 
-				gunpos->x = sp24.m[3][0];
-				gunpos->y = sp24.m[3][1];
-				gunpos->z = sp24.m[3][2];
+		// Try to get the main gun part (MODELPART_0000)
+		gunfireNode = modelGetPart(weaponModel->definition, MODELPART_0000);
 
-				result = true;
+		if (gunfireNode) {
+			gunfireNodeMtx = (Mtx *)modelFindNodeMtx(weaponModel, gunfireNode, 0);
+			gunfireData = &gunfireNode->rodata->chrgunfire;
+
+			// Start with the local offset
+			gunpos->x = gunfireData->pos.x;
+			gunpos->y = gunfireData->pos.y;
+			gunpos->z = gunfireData->pos.z;
+
+			// Transform to world space
+			mtxApplyAffineTransform(camGetProjectionMtx(), gunfireNodeMtx, &transformedMtx);
+			mtx4TransformVecInPlace(&transformedMtx, gunpos);
+			success = true;
+
+		} else {
+			// Fallback: Use MODELPART_0001's matrix position
+			fallbackNode = modelGetPart(weaponModel->definition, MODELPART_0001);
+
+			if (fallbackNode) {
+				fallbackNodeMtx = (Mtx *)modelFindNodeMtx(weaponModel, fallbackNode, 0);
+				mtxApplyAffineTransform(camGetProjectionMtx(), fallbackNodeMtx, &fallbackTransformed);
+
+				gunpos->x = fallbackTransformed[3][0];
+				gunpos->y = fallbackTransformed[3][1];
+				gunpos->z = fallbackTransformed[3][2];
+				success = true;
 			}
 		}
 	}
 
-	return result;
+	return success;
 }
 
 /**
@@ -9288,64 +9301,49 @@ bool chrGetGunPos(struct chrdata *chr, int handnum, struct coord *gunpos)
  * Shield hits are calculated using the bounding box of each body part.
  * This gives a bit of padding around the chr which can register as a hit.
  *
- * nodeptr    - will be populated with a pointer to the bbox model node.
- * hitpartptr - will be populated with the HITPART constant value.
- * modelptr   - will be populated with a pointer to the chr's model.
- * sideptr    - will be populated with an index in the range 0-5 which
+ * outNode    - will be populated with a pointer to the bbox model node.
+ * outHitPart - will be populated with the HITPART constant value.
+ * outModel   - will be populated with a pointer to the chr's model.
+ * outSide    - will be populated with an index in the range 0-5 which
  *              represents which side of the node's bounding box was hit.
  */
-void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord *vector,
-		struct modelnode **nodeptr, int *hitpartptr, struct model **modelptr, int *sideptr)
+void chrCalculateShieldHit(struct chrdata *chr, struct coord *hitPos, struct coord *dirVector,
+		struct modelnode **outNode, int *outHitPart, struct model **outModel, int *outSide)
 {
 	struct prop *prop = chr->prop;
-	bool done = false;
-	bool isdifferentmtx;
-	struct coord sp124;
-	struct coord sp118;
-	int i;
-	struct modelnode *bestnode;
-	Mtxf spc8;
 	float bestvolume;
-	Mtxf *worldtoscreenmtx;
 	struct modelnode *node;
-	float x;
-	float y;
-	float z;
 	float volume;
-	Mtxf *mtxptr1;
-	Mtxf *mtxptr2;
-	float sides[6];
+	Mtx *modelMtx;
 
 	if (prop->type != PROPTYPE_PLAYER || g_Vars.normmplayerisrunning || chrGetShield(chr) > 0) {
 		if (prop->flags & (PROPFLAG_ONTHISSCREENTHISTICK | PROPFLAG_ONANYSCREENTHISTICK | PROPFLAG_ONANYSCREENPREVTICK)) {
-			bestnode = NULL;
+			struct modelnode *closestNode = NULL;
 			bestvolume = MAXFLOAT;
-			worldtoscreenmtx = camGetWorldToScreenMtx((uint8_t *)chr->model->matrices);
+			Mtx* worldtoscreenmtx = camGetWorldToScreenMtx((uint8_t *)chr->model->matrices);
 
 			if (worldtoscreenmtx) {
-				mtx4TransformVec((Mtx*)worldtoscreenmtx, pos, &sp124);
-				mtx4RotateVec((Mtx*)worldtoscreenmtx, vector, &sp118);
+				struct coord hitPosScreen;
+				struct coord dirVectorScreen;
 
-				isdifferentmtx = (camGetWorldToScreenMtxf() != worldtoscreenmtx);
+				mtx4TransformVec(worldtoscreenmtx, hitPos, &hitPosScreen);
+				mtx4RotateVec(worldtoscreenmtx, dirVector, &dirVectorScreen);
+
 				node = chr->model->definition->rootnode;
 
 				while (node) {
 					if ((node->type & 0xff) == MODELNODETYPE_BBOX) {
-						mtxptr1 = modelFindNodeMtx(chr->model, node, 0);
+						modelMtx = (Mtx*)modelFindNodeMtx(chr->model, node, 0);
 
-						if (isdifferentmtx) {
-							mtxptr1 = &spc8;
-						}
-
-						x = mtxptr1->m[3][0] - sp124.f[0];
-						y = mtxptr1->m[3][1] - sp124.f[1];
-						z = mtxptr1->m[3][2] - sp124.f[2];
+						float x = (*modelMtx)[3][0] - hitPosScreen.x;
+						float y = (*modelMtx)[3][1] - hitPosScreen.y;
+						float z = (*modelMtx)[3][2] - hitPosScreen.z;
 
 						volume = x * x + y * y + z * z;
 
 						if (volume < bestvolume) {
 							bestvolume = volume;
-							bestnode = node;
+							closestNode = node;
 						}
 					}
 
@@ -9364,28 +9362,24 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 					}
 				}
 
-				if (bestnode != NULL)
+				if (closestNode != NULL)
 				{
-					Mtxf sp48;
-					struct modelrodata_bbox *rodata = &bestnode->rodata->bbox;
+					struct modelrodata_bbox *rodata = &closestNode->rodata->bbox;
 
-					*hitpartptr = rodata->hitpart;
-					*nodeptr = bestnode;
-					*modelptr = chr->model;
-					*sideptr = 0;
+					*outHitPart = rodata->hitpart;
+					*outNode = closestNode;
+					*outModel = chr->model;
+					*outSide = 0;
 
-					mtxptr2 = modelFindNodeMtx(chr->model, bestnode, 0);
-
-					if (isdifferentmtx) {
-						mtxptr2 = &sp48;
-					}
+					modelMtx = (Mtx*)modelFindNodeMtx(chr->model, closestNode, 0);
 
 					bestvolume = -2;
 
-					x = (sp118.f[0] * mtxptr2->m[0][0]) + (sp118.f[1] * mtxptr2->m[0][1]) + (sp118.f[2] * mtxptr2->m[0][2]);
-					y = (sp118.f[0] * mtxptr2->m[1][0]) + (sp118.f[1] * mtxptr2->m[1][1]) + (sp118.f[2] * mtxptr2->m[1][2]);
-					z = (sp118.f[0] * mtxptr2->m[2][0]) + (sp118.f[1] * mtxptr2->m[2][1]) + (sp118.f[2] * mtxptr2->m[2][2]);
+					float x = (dirVectorScreen.f[0] * (*modelMtx)[0][0]) + (dirVectorScreen.f[1] * (*modelMtx)[0][1]) + (dirVectorScreen.f[2] * (*modelMtx)[0][2]);
+					float y = (dirVectorScreen.f[0] * (*modelMtx)[1][0]) + (dirVectorScreen.f[1] * (*modelMtx)[1][1]) + (dirVectorScreen.f[2] * (*modelMtx)[1][2]);
+					float z = (dirVectorScreen.f[0] * (*modelMtx)[2][0]) + (dirVectorScreen.f[1] * (*modelMtx)[2][1]) + (dirVectorScreen.f[2] * (*modelMtx)[2][2]);
 
+					float sides[6];
 					sides[0] = x;
 					sides[1] = -x;
 					sides[2] = y;
@@ -9393,48 +9387,46 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 					sides[4] = z;
 					sides[5] = -z;
 
-					for (i = 0; i < ARRAYCOUNT(sides); i++) {
+					for (int i = 0; i < ARRAYCOUNT(sides); i++) {
 						if (sides[i] > bestvolume) {
 							bestvolume = sides[i];
-							*sideptr = i;
+							*outSide = i;
 						}
 					}
 
-					done = true;
+					return;
 				}
 			}
 		}
 
 		// If no node was found above, search the model for the torso bbox
 		// and return that.
-		if (!done) {
-			node = chr->model->definition->rootnode;
+		node = chr->model->definition->rootnode;
 
-			while (node) {
+		while (node) {
 
-				if ((node->type & 0xff) == MODELNODETYPE_BBOX) {
-					struct modelrodata_bbox *rodata = &node->rodata->bbox;
+			if ((node->type & 0xff) == MODELNODETYPE_BBOX) {
+				struct modelrodata_bbox *rodata = &node->rodata->bbox;
 
-					if (rodata->hitpart == HITPART_TORSO) {
-						*hitpartptr = rodata->hitpart;
-						*nodeptr = node;
-						*modelptr = chr->model;
-						*sideptr = 0;
-						return;
-					}
+				if (rodata->hitpart == HITPART_TORSO) {
+					*outHitPart = rodata->hitpart;
+					*outNode = node;
+					*outModel = chr->model;
+					*outSide = 0;
+					return;
 				}
+			}
 
-				if (node->child) {
-					node = node->child;
-				} else {
-					while (node) {
-						if (node->next) {
-							node = node->next;
-							break;
-						}
-
-						node = node->parent;
+			if (node->child) {
+				node = node->child;
+			} else {
+				while (node) {
+					if (node->next) {
+						node = node->next;
+						break;
 					}
+
+					node = node->parent;
 				}
 			}
 		}
@@ -9444,55 +9436,47 @@ void chrCalculateShieldHit(struct chrdata *chr, struct coord *pos, struct coord 
 /**
  * Calculates the trajectory for thrown items.
  */
-void chrCalculateTrajectory(struct coord *frompos, float arg1, struct coord *aimpos, struct coord *arg3)
+void chrCalculateTrajectory(struct coord *fromPos, float velocityScalar, struct coord *aimPos, struct coord *outVelocity)
 {
-	float xvel;
-	float yvel;
-	float zvel;
-	float latvel;
-	float vel;
-	float sp40;
-	float sp3c;
-	float sp38;
-	float sp30;
-	float sp2c;
-	float sp24;
-	float sp28;
-	float sp20;
+	// Apply scalar reduction to the base velocity input
+	velocityScalar *= 0.6f;
 
-	arg1 *= 0.59999999f;
+	// Compute directional velocity deltas
+	float dx = (aimPos->x - fromPos->x) * 0.01f;
+	float dy = (aimPos->y - fromPos->y) * 0.01f;
+	float dz = (aimPos->z - fromPos->z) * 0.01f;
 
-	xvel = (aimpos->x - frompos->x) * 0.01f;
-	yvel = (aimpos->y - frompos->y) * 0.01f;
-	zvel = (aimpos->z - frompos->z) * 0.01f;
+	// Full 3D velocity magnitude and lateral (horizontal) component
+	float totalSpeed = sqrtf(dx * dx + dy * dy + dz * dz);
+	float lateralSpeed = sqrtf(dx * dx + dz * dz);
 
-	vel = sqrtf(xvel * xvel + yvel * yvel + zvel * zvel);
-	latvel = sqrtf(xvel * xvel + zvel * zvel);
-	sp38 = latvel / vel;
-	sp40 = acosf(sp38);
+	float lateralFraction = lateralSpeed / totalSpeed;
+	float angleToHorizontal = acosf(lateralFraction);
 
-	if (yvel < 0) {
-		sp40 = -sp40;
+	// Flip angle based on direction
+	if (dy < 0) {
+		angleToHorizontal = -angleToHorizontal;
 	}
 
-	sp2c = (vel * 9.81f * sp38 * sp38) / (arg1 * arg1) + yvel / vel;
+	// Estimate launch pitch using gravity and vertical aim offset
+	float gravity = 9.81f;
+	float verticalRatio = (totalSpeed * gravity * lateralFraction * lateralFraction) / (velocityScalar * velocityScalar);
+	verticalRatio += dy / totalSpeed;
 
-	if (sp2c < -1) {
-		sp2c = -1;
-	} else if (sp2c > 1) {
-		sp2c = 1;
-	}
+	// Clamp asin input to [-1, 1]
+	if (verticalRatio < -1.0f) verticalRatio = -1.0f;
+	if (verticalRatio > 1.0f)  verticalRatio =  1.0f;
 
-	sp3c = (asinf(sp2c) - sp40) * 0.5f + sp40;
-	sp28 = cosf(sp3c);
-	sp30 = sinf(sp3c);
+	// Adjust pitch angle based on ballistic arc
+	float adjustedPitch = (asinf(verticalRatio) - angleToHorizontal) * 0.5f + angleToHorizontal;
+	float cosPitch = cosf(adjustedPitch);
+	float sinPitch = sinf(adjustedPitch);
 
-	arg3->x = xvel / latvel * sp28;
-	arg3->y = sp30;
-	arg3->z = zvel / latvel * sp28;
+	// Final direction vector
+	outVelocity->x = (dx / lateralSpeed) * cosPitch;
+	outVelocity->y = sinPitch;
+	outVelocity->z = (dz / lateralSpeed) * cosPitch;
 }
-
-const char var7f1a8ae4[] = "aimadjust=%d";
 
 /**
  * Fire the chr's gun, check what was hit and do all the appropriate things
@@ -10114,25 +10098,25 @@ void func0f041a74(struct chrdata *chr)
 	if (chr->actiontype == ACT_ROBOTATTACK) {
 		if (chr->act_robotattack.firing[0]) {
 			chr->prop->forcetick = true;
-			projectileCreate(chr->prop, chr->unk348[0], &chr->act_robotattack.pos[0],
+			projectileCreate(chr->prop, chr->roboguns[0], &chr->act_robotattack.pos[0],
 					&chr->act_robotattack.dir[0], chr->act_robotattack.guntype[0], chrGetTargetProp(chr));
-			chr->unk348[1]->unk08 = g_Vars.lvframe60 + 2;
-			chr->unk348[1]->unk14 = chr->unk348[0]->unk14;
+			chr->roboguns[1]->unk08 = g_Vars.lvframe60 + 2;
+			chr->roboguns[1]->unk14 = chr->roboguns[0]->unk14;
 		} else {
 			chr->prop->forcetick = false;
 		}
 
 		if (chr->act_robotattack.firing[1]) {
 			chr->prop->forcetick = true;
-			projectileCreate(chr->prop, chr->unk348[1], &chr->act_robotattack.pos[1],
+			projectileCreate(chr->prop, chr->roboguns[1], &chr->act_robotattack.pos[1],
 					&chr->act_robotattack.dir[1], chr->act_robotattack.guntype[1], chrGetTargetProp(chr));
-			chr->unk348[0]->unk14 = chr->unk348[1]->unk14;
+			chr->roboguns[0]->unk14 = chr->roboguns[1]->unk14;
 		} else {
 			chr->prop->forcetick = false;
 		}
 
-		beamTick(chr->unk348[0]->beam);
-		beamTick(chr->unk348[1]->beam);
+		beamTick(chr->roboguns[0]->beam);
+		beamTick(chr->roboguns[1]->beam);
 	} else if (chr->actiontype == ACT_ATTACKAMOUNT) {
 		if (chr->act_attack.numshots < chr->act_attack.maxshots
 				&& (chr->hidden & CHRHFLAG_FIRINGRIGHT)) {
@@ -10151,7 +10135,7 @@ void func0f041a74(struct chrdata *chr)
 	}
 }
 
-bool func0f041c44(struct chrdata *chr)
+bool chrConfigureRoll(struct chrdata *chr)
 {
 	if (CHRRACE(chr) == RACE_HUMAN) {
 		if (chr->act_attack.animcfg == &g_RollAttackAnims[2] || chr->act_attack.animcfg == &g_RollAttackAnims[3]) {
@@ -10217,7 +10201,7 @@ void chrTickFire(struct chrdata *chr)
 			&& curframe < chr->act_attack.animcfg->unk1c
 			&& (chr->act_attack.animcfg->unk24 < 0 || curframe < chr->act_attack.animcfg->unk24)) {
 		if (!chr->act_attack.dorecoil) {
-			if (!func0f041c44(chr)) {
+			if (!chrConfigureRoll(chr)) {
 				modelSetAnimation(model, modelGetAnimNum(model), model->anim->flip,
 						chr->act_attack.animcfg->unk1c, chrGetRangedSpeed(chr, 0.5f, 0.8f), 8);
 
@@ -10237,7 +10221,7 @@ void chrTickFire(struct chrdata *chr)
 	if (curframe >= modelGetAnimEndFrame(model)) {
 		if (modelGetAnimNum(model) != ANIM_SNIPING_ONGROUND
 				&& (chr->act_attack.dooneburst || chr->act_attack.numshots > chr->act_attack.maxshots)) {
-			if (!func0f041c44(chr)) {
+			if (!chrConfigureRoll(chr)) {
 				if (chr->act_attack.flags & ATTACKFLAG_AIMATTARGET) {
 					chrRecordLastSeeTargetTime(chr);
 				}
@@ -10437,22 +10421,22 @@ void robotAttack(struct chrdata *chr)
 {
 	uint32_t numshots = rngRandom() % 20;
 
-	if (chr->unk348[0] && chr->unk348[1]) {
+	if (chr->roboguns[0] && chr->roboguns[1]) {
 		chr->actiontype = ACT_ROBOTATTACK;
 
-		chr->unk348[0]->beam->age = -1;
-		chr->unk348[0]->unk00 = rngRandom() % 3;
-		chr->unk348[0]->unk01 = 0;
-		chr->unk348[0]->unk08 = -1;
-		chr->unk348[0]->unk0c = 0.85f;
+		chr->roboguns[0]->beam->age = -1;
+		chr->roboguns[0]->unk00 = rngRandom() % 3;
+		chr->roboguns[0]->unk01 = 0;
+		chr->roboguns[0]->unk08 = -1;
+		chr->roboguns[0]->unk0c = 0.85f;
 
 		if ((lvGetDifficulty() == DIFF_PA) * 0.2f) {
-			chr->unk348[0]->unk10 = 2.0f;
+			chr->roboguns[0]->unk10 = 2.0f;
 		} else {
-			chr->unk348[0]->unk10 = 1.0f;
+			chr->roboguns[0]->unk10 = 1.0f;
 		}
 
-		chr->unk348[0]->unk14 = 0.0f;
+		chr->roboguns[0]->unk14 = 0.0f;
 
 		chr->act_robotattack.pos[0].x = 0.0f;
 		chr->act_robotattack.pos[0].y = 0.0f;
@@ -10463,13 +10447,13 @@ void robotAttack(struct chrdata *chr)
 		chr->act_robotattack.guntype[0] = WEAPON_WATCHLASER;
 		chr->act_robotattack.firing[0] = false;
 
-		chr->unk348[1]->beam->age = -1;
-		chr->unk348[1]->unk00 = rngRandom() % 3;
-		chr->unk348[1]->unk01 = 0;
-		chr->unk348[1]->unk08 = -1;
-		chr->unk348[1]->unk0c = 0.85f;
-		chr->unk348[1]->unk10 = 0.2f;
-		chr->unk348[1]->unk14 = 0.0f;
+		chr->roboguns[1]->beam->age = -1;
+		chr->roboguns[1]->unk00 = rngRandom() % 3;
+		chr->roboguns[1]->unk01 = 0;
+		chr->roboguns[1]->unk08 = -1;
+		chr->roboguns[1]->unk0c = 0.85f;
+		chr->roboguns[1]->unk10 = 0.2f;
+		chr->roboguns[1]->unk14 = 0.0f;
 
 		chr->act_robotattack.guntype[1] = WEAPON_WATCHLASER;
 		chr->act_robotattack.firing[1] = false;
@@ -10517,10 +10501,10 @@ void chrTickRobotAttack(struct chrdata *chr)
 		empty = false;
 
 		if (act->numshots[i] > 0) {
-			chr->unk348[i]->unk01 = !(chr->unk348[i]->unk00 % 3);
-			firing = !(chr->unk348[i]->unk00 % 2);
+			chr->roboguns[i]->unk01 = !(chr->roboguns[i]->unk00 % 3);
+			firing = !(chr->roboguns[i]->unk00 % 2);
 		} else {
-			chr->unk348[i]->unk01 = 0;
+			chr->roboguns[i]->unk01 = 0;
 			firing = false;
 		}
 
@@ -10631,7 +10615,7 @@ void chrTickRobotAttack(struct chrdata *chr)
 				act->numshots[i]--;
 			}
 
-			chr->unk348[i]->unk00++;
+			chr->roboguns[i]->unk00++;
 		}
 	}
 }
@@ -13862,7 +13846,7 @@ bool chrIsTargetAimingAtMe(struct chrdata *chr)
 
 				bgun0f0a0c08(&sp68, &sp56);
 				modelGetRootPosition(model, &sp44);
-				mtx4TransformVecInPlace((Mtx*)camGetWorldToScreenMtxf(), &sp44);
+				mtx4TransformVecInPlace(camGetPlayerWorldToScreenMtx(), &sp44);
 
 				if (func0f06b39c(&sp68, &sp56, &sp44, somefloat)) {
 					return true;

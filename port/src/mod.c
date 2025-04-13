@@ -13,6 +13,7 @@
 #define MOD_TEXTURES_DIR "textures"
 #define MOD_ANIMATIONS_DIR "animations"
 #define MOD_SEQUENCES_DIR "sequences"
+#define MOD_TEXT_DIR "text"
 
 extern struct stagemusic g_StageTracks[];
 extern struct stageallocation g_StageAllocations8Mb[];
@@ -530,4 +531,26 @@ int modAnimationLoadDescriptor(uint16_t num, struct animtableentry *anim)
 	sysLogPrintf(LOG_NOTE, "mod: loaded external animation %04x", num);
 
 	return true;
+}
+
+int modTextLoad(uint16_t num, void *dst, uint32_t dstSize)
+{
+	static int dirExists = -1;
+	if (dirExists < 0) {
+		dirExists = (fsFileSize(MOD_TEXT_DIR "/") >= 0);
+	}
+
+	if (!dirExists) {
+		return -1;
+	}
+
+	char path[FS_MAXPATH + 1];
+	snprintf(path, sizeof(path), MOD_TEXT_DIR "/%04x.bin", num);
+
+	const int ret = fsFileLoadTo(path, dst, dstSize);
+	if (ret > 0) {
+		sysLogPrintf(LOG_NOTE, "mod: loaded external text file %04x", num);
+	}
+
+	return ret;
 }

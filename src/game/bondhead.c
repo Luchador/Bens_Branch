@@ -120,7 +120,7 @@ void bheadUpdate(float arg0, float arg1)
 		animspeed = modelGetAbsAnimSpeed(&g_Vars.currentplayer->model);
 
 		if (g_Vars.currentplayer->headanim == HEADANIM_RESTING) {
-			if (animspeed > 0.69999998807907f) {
+			if (animspeed > 0.7f) {
 				g_Vars.currentplayer->headamplitude = 1;
 			} else if (animspeed > 0.1f) {
 				g_Vars.currentplayer->headamplitude = 0.4f + (animspeed - 0.1f) * 0.60000002384186f / 0.59999996423721f;
@@ -141,7 +141,7 @@ void bheadUpdate(float arg0, float arg1)
 
 		{
 			struct modelrenderdata sp80 = {NULL, 1, 3};
-			Mtxf sp40;
+			Mtx sp40;
 			struct coord modelpos = {0, 0, 0};
 			bool mergeenabled = modelIsAnimMergingEnabled();
 
@@ -151,9 +151,9 @@ void bheadUpdate(float arg0, float arg1)
 			modelTickAnimQuarterSpeed(&g_Vars.currentplayer->model, g_Vars.lvupdate240, true);
 			modelSetAnimMergingEnabled(mergeenabled);
 			modelUpdateInfo(&g_Vars.currentplayer->model);
-			mtxIdent((Mtx*)&sp40);
+			mtxIdent(&sp40);
 
-			sp80.unk00 = &sp40;
+			sp80.unk00 = (Mtxf*)&sp40;
 			sp80.unk10 = g_Vars.currentplayer->bondheadmatrices;
 			modelSetMatricesWithAnim(&sp80, &g_Vars.currentplayer->model);
 

@@ -41,8 +41,8 @@ float g_SplatMaxDistance = 180;
 float g_SplatMinSize = 5;
 float g_SplatMaxSize = 50;
 
-bool splat0f149274(float arg0, struct prop *prop, struct shotdata *shotdata, float arg3, bool isskedar, int arg5, int arg6, struct chrdata *chr, int arg8);
-void splat0f14986c(struct splatdata *splatdata);
+bool splatTest(float sizeScale, struct prop *prop, struct shotdata *shotdata, float arg3, bool isSkedar, int arg5, int arg6, struct chrdata *chr, int arg8);
+void splatCreate(struct splatdata *splatdata);
 
 void splatTickChr(struct prop *prop)
 {
@@ -137,7 +137,7 @@ int splatsCreate(int qty, float arg1, struct prop *prop, struct shotdata *shotda
 	struct coord spfc;
 	struct coord spf0;
 	struct coord spe4;
-	Mtxf spa4;
+	Mtx spa4;
 	int numdropped = 0;
 	float dist;
 	int i;
@@ -185,14 +185,14 @@ int splatsCreate(int qty, float arg1, struct prop *prop, struct shotdata *shotda
 			spe4.f[j] = (RANDOMFRAC() * g_SplatRandomOffsetMax * 2.0f - g_SplatRandomOffsetMax) * 0.017453292384744f;
 		}
 
-		mtx4LoadRotation(&spe4, (Mtx*)&spa4);
-		mtx4RotateVec((Mtx*)&spa4, &spfc, &shotdata->gundir3d);
-		mtx4RotateVec((Mtx*)&spa4, &spf0, &shotdata->gundir2d);
+		mtx4LoadRotation(&spe4, &spa4);
+		mtx4RotateVec(&spa4, &spfc, &shotdata->gundir3d);
+		mtx4RotateVec(&spa4, &spf0, &shotdata->gundir2d);
 
 		utilsNormalizeVec(&shotdata->gundir3d, &shotdata->gundir3d);
 		utilsNormalizeVec(&shotdata->gundir2d, &shotdata->gundir2d);
 
-		if (splat0f149274(arg1, prop, shotdata, /*reused var*/ dist, isskedar, splattype, timermax, chr, timerspeed)) {
+		if (splatTest(arg1, prop, shotdata, /*reused var*/ dist, isskedar, splattype, timermax, chr, timerspeed)) {
 			numdropped++;
 		}
 	}
@@ -209,7 +209,7 @@ int splatsCreate(int qty, float arg1, struct prop *prop, struct shotdata *shotda
 	return numdropped;
 }
 
-bool splat0f149274(float arg0, struct prop *chrprop, struct shotdata *shotdata, float arg3, bool isskedar, int splattype, int timermax, struct chrdata *chr, int timerspeed)
+bool splatTest(float sizeScale, struct prop *chrprop, struct shotdata *shotdata, float arg3, bool isSkedar, int splattype, int timermax, struct chrdata *chr, int timerspeed)
 {
 	struct prop **propptr;
 	struct prop *objprop;
@@ -342,14 +342,14 @@ bool splat0f149274(float arg0, struct prop *chrprop, struct shotdata *shotdata, 
 		splatdata.chr = chr;
 		splatdata.mtxindex = mtxindex;
 		splatdata.room = room;
-		splatdata.isskedar = isskedar;
+		splatdata.isskedar = isSkedar;
 		splatdata.timermax = timermax;
-		splatdata.sizescale = arg0;
+		splatdata.sizescale = sizeScale;
 		splatdata.splattype = splattype;
 		splatdata.timerspeed = timerspeed;
 		splatdata.translucent = translucent;
 
-		splat0f14986c(&splatdata);
+		splatCreate(&splatdata);
 
 		return true;
 	}
@@ -357,7 +357,7 @@ bool splat0f149274(float arg0, struct prop *chrprop, struct shotdata *shotdata, 
 	return false;
 }
 
-void splat0f14986c(struct splatdata *splat)
+void splatCreate(struct splatdata *splat)
 {
 	float splatscalex; // Splat width before randomness is applied
 	float splatscaley; // Splat height before randomness is applied

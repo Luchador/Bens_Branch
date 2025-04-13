@@ -258,7 +258,7 @@ Gfx *envStopFog(Gfx *gdl)
 bool envIsPosInFogMaxDistance(struct coord *pos, float tolerance)
 {
 	struct coord sp24;
-	Mtxf *mtx;
+	Mtx *mtx;
 	struct coord *campos;
 	float tmp;
 
@@ -272,13 +272,13 @@ bool envIsPosInFogMaxDistance(struct coord *pos, float tolerance)
 		return true;
 	}
 
-	mtx = camGetWorldToScreenMtxf();
+	mtx = camGetPlayerWorldToScreenMtx();
 
 	sp24.x = pos->x - campos->x;
 	sp24.y = pos->y - campos->y;
 	sp24.z = pos->z - campos->z;
 
-	tmp = sp24.f[0] * mtx->m[0][0] + sp24.f[1] * mtx->m[0][1] + sp24.f[2] * mtx->m[0][2];
+	tmp = sp24.f[0] * (*mtx)[0][0] + sp24.f[1] * (*mtx)[0][1] + sp24.f[2] * (*mtx)[0][2];
 
 	if (tmp > g_EnvFogMax + tolerance) {
 		return false;

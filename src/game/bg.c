@@ -653,7 +653,6 @@ uint32_t g_BgCmdResult = BGRESULT_TRUE;
 
 Gfx *bgRenderGdlInXray(Gfx *gdl, int8_t *readgdl, Vtx *vertices, int16_t arg3[3])
 {
-	int i;
 	uint8_t *verticesuint8_t = (uint8_t *) vertices;
 	struct xraydata xraydata;
 	struct stagetableentry *stage = stageGetCurrent();
@@ -692,7 +691,7 @@ Gfx *bgRenderGdlInXray(Gfx *gdl, int8_t *readgdl, Vtx *vertices, int16_t arg3[3]
 			int numvertices = ((uint32_t) cmd->bytes[GFX_W0_BYTE(1)] >> 4) + 1;
 			uint32_t offset = UNSEGADDR(cmd->words.w1) & 0xffffff;
 
-			for (i = 0; i < numvertices; i++) {
+			for (int i = 0; i < numvertices; i++) {
 				Vtx *vtx = (Vtx *) (verticesuint8_t + offset);
 
 				dmemvertices[dmemindex + i][0] = vtx->x;
@@ -2023,7 +2022,7 @@ bool bgRoomIntersectsScreenBox(int room, struct screenbox *screen)
 
 bool bg3dPosTo2dPos(struct coord *cornerpos, struct coord *screenpos)
 {
-	Mtxf *matrix = camGetWorldToScreenMtxf();
+	Mtxf *matrix = (Mtxf*)camGetPlayerWorldToScreenMtx();
 
 	screenpos->x = cornerpos->x;
 	screenpos->y = cornerpos->y;
@@ -4711,7 +4710,7 @@ void bgTickPortalsXray(void)
 	eraserpos.f[1] = 0.0f;
 	eraserpos.f[2] = player->eraserdepth;
 
-	mtx4TransformVecInPlace((Mtx*)camGetProjectionMtx(), &eraserpos);
+	mtx4TransformVecInPlace(camGetProjectionMtx(), &eraserpos);
 
 	player->eraserpos.f[0] = eraserpos.f[0];
 	player->eraserpos.f[1] = eraserpos.f[1];

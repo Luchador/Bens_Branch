@@ -286,7 +286,7 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 	mtxScaleRotationPart(nbomb->radius / 2000.0f, &mtxRotationScaleMtx);
 	mtx4MultMtx4(&mtxLocalToClip, &mtxRotationScaleMtx, &mtxLocalToWorld);
 
-	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), &mtxLocalToWorld);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), &mtxLocalToWorld);
 	memcpy(mtx, &mtxLocalToWorld, sizeof(*mtx));
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

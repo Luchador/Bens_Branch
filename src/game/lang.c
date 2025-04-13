@@ -2,7 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <stdbool.h>
 #include "constants.h"
+#include "mod.h"
 #include "game/file.h"
 #include "game/lang.h"
 #include "game/debug.h"
@@ -16,6 +19,8 @@
 #include "platform.h"
 #include "fs.h"
 #include "video.h"
+
+#define TEXTDIR "./" DEFAULT_BASEDIR_NAME "/text"
 
 uint16_t *g_FrameBuffers[NUM_FRAMEBUFFERS];
 
@@ -122,41 +127,56 @@ const char* langGetText(TextData *filedata, int line) {
 	}
 }
 
+// Check mod directory for text files. If they don't exist, use the default ./data/text directory.
+static const char *resolveTextFilePath(const char *moddir, const char *filename, char *outbuf, size_t outbufSize)
+{
+	if (moddir) {
+		snprintf(outbuf, outbufSize, "%s/text/%s", moddir, filename);
+
+		if (access(outbuf, F_OK) == 0) {
+			return outbuf; // Found in moddir
+		}
+	}
+
+	snprintf(outbuf, outbufSize, "%s/%s", TEXTDIR, filename);
+	return outbuf; // Fallback to basedir
+}
 
 // Ben's comment: Fetch the text data for everything. Unlike the original we won't be swapping out text banks on stage loads. This makes things far simpler.
 void langInit()
 {
-	char *fullpath = "./" DEFAULT_BASEDIR_NAME "/text"; // ./data/text
-
-	g_TextGunData = loadFileIntoMemory(buildDynamicPath(fullpath, "LgunE.txt"));
-	g_TextMiscData = loadFileIntoMemory(buildDynamicPath(fullpath, "LmiscE.txt"));
-	g_TextMPMenuData = loadFileIntoMemory(buildDynamicPath(fullpath, "LmpmenuE.txt"));
-	g_TextMPWeaponsData = loadFileIntoMemory(buildDynamicPath(fullpath, "LmpweaponsE.txt"));
-	g_TextOptionsData = loadFileIntoMemory(buildDynamicPath(fullpath, "LoptionsE.txt"));
-	g_TextPropObjData = loadFileIntoMemory(buildDynamicPath(fullpath, "LpropobjE.txt"));
-	g_TextTitleData = loadFileIntoMemory(buildDynamicPath(fullpath, "LtitleE.txt"));
-	g_TextameData = loadFileIntoMemory(buildDynamicPath(fullpath, "LameE.txt"));
-	g_TextearData = loadFileIntoMemory(buildDynamicPath(fullpath, "LearE.txt"));
-	g_TextarkData = loadFileIntoMemory(buildDynamicPath(fullpath, "LarkE.txt"));
-	g_TexteldData = loadFileIntoMemory(buildDynamicPath(fullpath, "LeldE.txt"));
-	g_TextpeteData = loadFileIntoMemory(buildDynamicPath(fullpath, "LpeteE.txt"));
-	g_TextdepoData = loadFileIntoMemory(buildDynamicPath(fullpath, "LdepoE.txt"));
-	g_TextlueData = loadFileIntoMemory(buildDynamicPath(fullpath, "LlueE.txt"));
-	g_TextlipData = loadFileIntoMemory(buildDynamicPath(fullpath, "LlipE.txt"));
-	g_TexttraData = loadFileIntoMemory(buildDynamicPath(fullpath, "LtraE.txt"));
-	g_TextcaveData = loadFileIntoMemory(buildDynamicPath(fullpath, "LcaveE.txt"));
-	g_TextritData = loadFileIntoMemory(buildDynamicPath(fullpath, "LritE.txt"));
-	g_TextaztData = loadFileIntoMemory(buildDynamicPath(fullpath, "LaztE.txt"));
-	g_TextdamData = loadFileIntoMemory(buildDynamicPath(fullpath, "LdamE.txt"));
-	g_TextpamData = loadFileIntoMemory(buildDynamicPath(fullpath, "LpamE.txt"));
-	g_TextimpData = loadFileIntoMemory(buildDynamicPath(fullpath, "LimpE.txt"));
-	g_TextleeData = loadFileIntoMemory(buildDynamicPath(fullpath, "LleeE.txt"));
-	g_TextshoData = loadFileIntoMemory(buildDynamicPath(fullpath, "LshoE.txt"));
-	g_TextwaxData = loadFileIntoMemory(buildDynamicPath(fullpath, "LwaxE.txt"));
-	g_TextsevData = loadFileIntoMemory(buildDynamicPath(fullpath, "LsevE.txt"));
-	g_TextstatData = loadFileIntoMemory(buildDynamicPath(fullpath, "LstatE.txt"));
-	g_TextateData = loadFileIntoMemory(buildDynamicPath(fullpath, "LateE.txt"));
-	g_TextdishData = loadFileIntoMemory(buildDynamicPath(fullpath, "LdishE.txt"));
+	char fullpathBuf[1024];
+	const char *moddir = fsGetModDir();
+	
+	g_TextGunData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LgunE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextMiscData      = loadFileIntoMemory(resolveTextFilePath(moddir, "LmiscE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextMPMenuData    = loadFileIntoMemory(resolveTextFilePath(moddir, "LmpmenuE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextMPWeaponsData = loadFileIntoMemory(resolveTextFilePath(moddir, "LmpweaponsE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextOptionsData   = loadFileIntoMemory(resolveTextFilePath(moddir, "LoptionsE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextPropObjData   = loadFileIntoMemory(resolveTextFilePath(moddir, "LpropobjE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextTitleData     = loadFileIntoMemory(resolveTextFilePath(moddir, "LtitleE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextameData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LameE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextearData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LearE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextarkData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LarkE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TexteldData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LeldE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextpeteData      = loadFileIntoMemory(resolveTextFilePath(moddir, "LpeteE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextdepoData      = loadFileIntoMemory(resolveTextFilePath(moddir, "LdepoE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextlueData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LlueE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextlipData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LlipE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TexttraData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LtraE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextcaveData      = loadFileIntoMemory(resolveTextFilePath(moddir, "LcaveE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextritData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LritE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextaztData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LaztE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextdamData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LdamE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextpamData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LpamE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextimpData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LimpE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextleeData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LleeE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextshoData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LshoE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextwaxData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LwaxE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextsevData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LsevE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextstatData      = loadFileIntoMemory(resolveTextFilePath(moddir, "LstatE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextateData       = loadFileIntoMemory(resolveTextFilePath(moddir, "LateE.txt", fullpathBuf, sizeof(fullpathBuf)));
+	g_TextdishData      = loadFileIntoMemory(resolveTextFilePath(moddir, "LdishE.txt", fullpathBuf, sizeof(fullpathBuf)));
 
 	// The original language files use an asterisk to represent a new line. Those asterisks need to be swapped for a newline character.
 	langReplaceAsterisk(g_TextGunData);
@@ -198,8 +218,7 @@ char *langGet(int textid)
 		return "Difficulty\n"; // Stop the "Difficulty" text from creating a new line on the end screen
 	}
 
-	int i = 0;
-	for(i = 0; i < ARRAYCOUNT(g_LangBanks); i++)
+	for(int i = 0; i < ARRAYCOUNT(g_LangBanks); i++)
 	{
 		if(textid >= g_LangBanks[i].begin && textid < g_LangBanks[i].end)
 		{

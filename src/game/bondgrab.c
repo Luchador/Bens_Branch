@@ -28,7 +28,7 @@ bool var80070e80 = false;
 void bgrabInit(void)
 {
 	int prevmode = g_Vars.currentplayer->bondmovemode;
-	Mtxf matrix;
+	Mtx matrix;
 	struct prop *prop = g_Vars.currentplayer->grabbedprop;
 
 	g_Vars.currentplayer->bondmovemode = MOVEMODE_GRAB;
@@ -55,7 +55,7 @@ void bgrabInit(void)
 	g_Vars.currentplayer->gunextraaimx = 0;
 	g_Vars.currentplayer->gunextraaimy = 0;
 
-	mtx4LoadYRotation((g_Vars.currentplayer->vv_theta * M_TAU) / 360.0f, (Mtx*)&matrix);
+	mtx4LoadYRotation((g_Vars.currentplayer->vv_theta * M_TAU) / 360.0f, &matrix);
 	mtx4RotateVecInPlace((Mtx*)&matrix, &g_Vars.currentplayer->grabbedposoffset);
 
 	g_Vars.currentplayer->bondprevtheta = g_Vars.currentplayer->vv_theta;
@@ -1045,7 +1045,7 @@ void bgrab0f0ce924(void)
 			g_Vars.currentplayer->bondbreathing = 1.0f;
 		}
 
-		bmove0f0cc654(maxspeed, g_Vars.currentplayer->speedforwards, sp88);
+		bmoveUpdateHeadNoTargetMtx(maxspeed, g_Vars.currentplayer->speedforwards, sp88);
 
 		g_Vars.currentplayer->gunspeed = maxspeed;
 
@@ -1159,7 +1159,7 @@ void bgrabTick(void)
 
 	bmoveUpdateRooms(g_Vars.currentplayer);
 	objectiveCheckRoomEntered(g_Vars.currentplayer->prop->rooms[0]);
-	bmove0f0cc19c(&g_Vars.currentplayer->prop->pos);
+	bmoveUpdateEyeHeight(&g_Vars.currentplayer->prop->pos);
 	playerUpdatePerimInfo();
 	doorsCheckAutomatic();
 

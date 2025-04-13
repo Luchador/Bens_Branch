@@ -29,16 +29,15 @@
 #include "game/options.h"
 #include "game/propobj.h"
 #include "bss.h"
-#include "lib/lib_17ce0.h"
-#include "lib/vi.h"
+#include "lib/anim.h"
 #include "lib/collision.h"
 #include "lib/joy.h"
+#include "lib/lib_17ce0.h"
 #include "lib/snd.h"
 #include "lib/rng.h"
-#include "lib/anim.h"
+#include "lib/vi.h"
 #include "data.h"
 #include "types.h"
-#include <math.h>
 #include "input.h"
 #include "video.h"
 
@@ -314,11 +313,16 @@ void bmoveApplyMoveData(struct movedata *data)
 
 void bmoveUpdateSpeedTheta(void)
 {
-	if (g_Vars.currentplayer->bondmovemode == MOVEMODE_BIKE) {
-		// empty
-	} else if (g_Vars.currentplayer->bondmovemode == MOVEMODE_GRAB) {
+	switch (g_Vars.currentplayer->bondmovemode) {
+	case MOVEMODE_GRAB:
 		bgrabUpdateSpeedTheta();
-	} else if (g_Vars.currentplayer->bondmovemode == MOVEMODE_WALK) {
+		break;
+
+	case MOVEMODE_BIKE:
+	case MOVEMODE_WALK:
+	default:
+		// No update needed for these modes
+		break;
 	}
 }
 
@@ -1833,7 +1837,7 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 			g_Vars.currentplayer->gunzoomfovs[1] = eraserfov;
 
-			mtx4TransformVec((Mtx*)camGetWorldToScreenMtxf(), &g_Vars.currentplayer->autoerasertarget->pos, &spa0);
+			mtx4TransformVec(camGetPlayerWorldToScreenMtx(), &g_Vars.currentplayer->autoerasertarget->pos, &spa0);
 
 			camProjectWithZoomAndAspect(&spa0, crosspos, eraserfov, g_Vars.currentplayer->c_perspaspect);
 
@@ -2078,14 +2082,11 @@ void bmoveProcessInput(bool allowc1x, bool allowc1y, bool allowc1buttons, bool i
 
 		bgunSetAimType(0);
 
-		if (
-				(
-				 movedata.canautoaim
+		if ((    movedata.canautoaim
 				 && (bmoveIsAutoAimXEnabledForCurrentWeapon() || bmoveIsAutoAimYEnabledForCurrentWeapon())
 				 && g_Vars.currentplayer->autoxaimprop
 				 && g_Vars.currentplayer->autoyaimprop
-				 && weaponHasAimFlag(weaponnum, INVAIMFLAG_AUTOAIM)
-				)
+				 && weaponHasAimFlag(weaponnum, INVAIMFLAG_AUTOAIM))
 				|| (bgunGetWeaponNum(HAND_RIGHT) == WEAPON_CMP150 && g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponfunc == FUNC_SECONDARY)) {
 			// Auto aim - move crosshair towards target
 			int followlockon = false;
@@ -2360,7 +2361,7 @@ void bmoveUpdateVerta(void)
 	}
 }
 
-void bmove0f0cc19c(struct coord *arg)
+void bmoveUpdateEyeHeight(struct coord *arg)
 {
 	float min;
 	float mult;
@@ -2369,6 +2370,7 @@ void bmove0f0cc19c(struct coord *arg)
 	g_Vars.currentplayer->bond2.unk10.y = arg->y;
 	g_Vars.currentplayer->bond2.unk10.z = arg->z;
 
+	// Lean down when dead
 	if (g_Vars.currentplayer->isdead && g_Vars.currentplayer->bondleandown > 0) {
 		g_Vars.currentplayer->bondleandown -= 0.25f;
 
@@ -2381,6 +2383,7 @@ void bmove0f0cc19c(struct coord *arg)
 		g_Vars.currentplayer->bond2.unk10.y += -(1.0f - g_Vars.currentplayer->vv_cosverta) * g_Vars.currentplayer->bondleandown;
 	}
 
+	// Small Jo scaling logic
 	if (cheatIsActive(CHEAT_SMALLJO)) {
 		if (g_Vars.currentplayer->bondmovemode == MOVEMODE_BIKE) {
 			mult = g_Vars.currentplayer->bondentert * 0.6f + 0.4f;
@@ -2398,6 +2401,7 @@ void bmove0f0cc19c(struct coord *arg)
 		g_Vars.currentplayer->bond2.unk10.y += g_Vars.currentplayer->vv_manground;
 	}
 
+	// Make sure head doesn't go below the ground
 	min = g_Vars.currentplayer->vv_ground + 10;
 
 	if (g_Vars.currentplayer->bond2.unk10.y < min) {
@@ -2405,64 +2409,81 @@ void bmove0f0cc19c(struct coord *arg)
 	}
 }
 
-void bmoveUpdateHead(float arg0, float arg1, float arg2, Mtxf *arg3, float arg4)
+void bmoveUpdateHead(float animFrameDelta, float animSpeed, float headTilt, Mtxf *targetMatrix, float blendFraction)
 {
-	float sp244 = 0;
-	Mtxf sp180;
-	Mtxf sp116;
-	float sp100[4];
-	float sp84[4];
-	float sp68[4];
+	float animationRate = 0;
+	Mtx headMatrix;             // Final head orientation matrix
+	Mtx tempMatrix;             // Used for building intermediate transforms
+	float currentQuat[4];       // Quaternion from calculated headMatrix
+	float targetQuat[4];        // Quaternion from provided targetMatrix
+	float blendedQuat[4];       // Result of slerped quaternion
 
-	if (g_Vars.currentplayer->isdead == false) {
-		bheadAdjustAnimation(arg0);
+	if (!g_Vars.currentplayer->isdead) {
+		bheadAdjustAnimation(animFrameDelta);
 
-		if (arg0 != 0) {
-			sp244 = arg1 / arg0;
-		} else if (arg1 == 0) {
-			arg0 = 0;
+		if (animFrameDelta != 0) {
+			animationRate = animSpeed / animFrameDelta;
+		} else if (animSpeed == 0) {
+			animFrameDelta = 0;
 		}
 	} else {
+		// Player just died, start a new death animation
 		if (g_Vars.currentplayer->startnewbonddie) {
-			bheadStartDeathAnimation(g_DeathAnimations[rngRandom() % g_NumDeathAnimations], rngRandom() % 2, 0, 1);
+			bheadStartDeathAnimation(
+				g_DeathAnimations[rngRandom() % g_NumDeathAnimations],
+				rngRandom() % 2,
+				0,
+				1
+			);
 			g_Vars.currentplayer->startnewbonddie = false;
 		}
 
-		bheadSetSpeed(0.5);
-		arg2 = 0;
+		// Set fixed speed for death animation
+		bheadSetSpeed(0.5f);
+		headTilt = 0;
 	}
 
-	bheadUpdate(sp244, arg2);
-	mtx4LoadXRotation(DEG2RAD(360 - g_Vars.currentplayer->vv_verta360), (Mtx*)&sp180);
+	// Update head animation with computed rate and tilt
+	bheadUpdate(animationRate, headTilt);
 
+	// Start with a vertical rotation (pitch/tilt)
+	mtx4LoadXRotation(DEG2RAD(360 - g_Vars.currentplayer->vv_verta360), &headMatrix);
+
+	// Optional head roll via look vector and up vector
 	if (optionsGetHeadRoll(g_Vars.currentplayerstats->mpindex)) {
-		mtxBuildLookAtFromTarget((Mtx*)&sp116,
-				0, 0, 0,
-				-g_Vars.currentplayer->headlook.x, -g_Vars.currentplayer->headlook.y, -g_Vars.currentplayer->headlook.z,
-				g_Vars.currentplayer->headup.x, g_Vars.currentplayer->headup.y, g_Vars.currentplayer->headup.z);
-		mtx4MultMtx4InPlace((Mtx*)&sp116, (Mtx*)&sp180);
+		mtxBuildLookAtFromTarget(
+			&tempMatrix,
+			0, 0, 0,
+			-g_Vars.currentplayer->headlook.x, -g_Vars.currentplayer->headlook.y, -g_Vars.currentplayer->headlook.z,
+			g_Vars.currentplayer->headup.x, g_Vars.currentplayer->headup.y, g_Vars.currentplayer->headup.z
+		);
+		mtx4MultMtx4InPlace(&tempMatrix, &headMatrix);
 	}
 
-	mtx4LoadYRotation(DEG2RAD(360 - g_Vars.currentplayer->vv_theta), (Mtx*)&sp116);
-	mtx4MultMtx4InPlace((Mtx*)&sp116, (Mtx*)&sp180);
+	// Add horizontal rotation (yaw/heading)
+	mtx4LoadYRotation(DEG2RAD(360 - g_Vars.currentplayer->vv_theta), &tempMatrix);
+	mtx4MultMtx4InPlace(&tempMatrix, &headMatrix);
 
-	if (arg3) {
-		quaternion3x3MtxToQuat((Mtx*)&sp180, sp100);
-		quaternion3x3MtxToQuat((Mtx*)arg3, sp84);
-		quaternionAvoidFlips(sp100, sp84);
-		quaternionSlerp(sp100, sp84, arg4, sp68);
-		quaternionToMtx(sp68, (Mtx*)&sp180);
+	// Blend toward the target orientation if one was provided
+	if (targetMatrix) {
+		quaternion3x3MtxToQuat(&headMatrix, currentQuat);
+		quaternion3x3MtxToQuat((Mtx *)targetMatrix, targetQuat);
+		quaternionAvoidFlips(currentQuat, targetQuat);
+		quaternionSlerp(currentQuat, targetQuat, blendFraction, blendedQuat);
+		quaternionToMtx(blendedQuat, &headMatrix);
 	}
 
-	g_Vars.currentplayer->bond2.unk1c.x = sp180.m[2][0];
-	g_Vars.currentplayer->bond2.unk1c.y = sp180.m[2][1];
-	g_Vars.currentplayer->bond2.unk1c.z = sp180.m[2][2];
-	g_Vars.currentplayer->bond2.unk28.x = sp180.m[1][0];
-	g_Vars.currentplayer->bond2.unk28.y = sp180.m[1][1];
-	g_Vars.currentplayer->bond2.unk28.z = sp180.m[1][2];
+	// Set head orientation vectors in bond2 struct
+	g_Vars.currentplayer->bond2.unk1c.x = headMatrix[2][0];  // Forward vector
+	g_Vars.currentplayer->bond2.unk1c.y = headMatrix[2][1];
+	g_Vars.currentplayer->bond2.unk1c.z = headMatrix[2][2];
+
+	g_Vars.currentplayer->bond2.unk28.x = headMatrix[1][0];  // Up vector
+	g_Vars.currentplayer->bond2.unk28.y = headMatrix[1][1];
+	g_Vars.currentplayer->bond2.unk28.z = headMatrix[1][2];
 }
 
-void bmove0f0cc654(float arg0, float arg1, float arg2)
+void bmoveUpdateHeadNoTargetMtx(float arg0, float arg1, float arg2)
 {
 	bmoveUpdateHead(arg0, arg1, arg2, NULL, 0);
 }

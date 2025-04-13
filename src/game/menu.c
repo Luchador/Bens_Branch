@@ -5565,7 +5565,7 @@ void func0f0fd494(struct coord *pos)
 
 	g_MenuData.unk5d5_04 = true;
 
-	matrix = camGetWorldToScreenMtxf();
+	matrix = (Mtxf*)camGetPlayerWorldToScreenMtx();
 
 	mtx4TransformVec((Mtx*)matrix, pos, &coord);
 	camProjectViewToScreen(&coord, xy);

@@ -20,7 +20,7 @@
 #include "video.h"
 #include "platform.h"
 
-Mtxf g_ActiveProjectionMtx;
+Mtx g_ActiveProjectionMtx;
 Mtx *g_CameraPerspectiveMtxF;
 uint8_t g_ViFrontIndex;
 uint8_t g_ViBackIndex;
@@ -228,7 +228,7 @@ Gfx *viSetCamNoTranslation(Gfx *gdl)
 	mtxPerspective((Mtx*)&projF, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar * 2, 1);
 
 	// Copy the current camera matrix and zero its translation part
-	mtx4Copy((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&viewNoTransF);
+	mtx4Copy(camGetPlayerWorldToScreenMtx(), (Mtx*)&viewNoTransF);
 	viewNoTransF.m[3][0] = 0;
 	viewNoTransF.m[3][1] = 0;
 	viewNoTransF.m[3][2] = 0;
@@ -276,8 +276,8 @@ Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
 	g_CameraPerspectiveMtxF = gfxAllocateMatrixF();
-	mtxPerspective((Mtx*)&g_ActiveProjectionMtx, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
-	memcpy(g_CameraPerspectiveMtxF, g_ActiveProjectionMtx.m, sizeof(*g_CameraPerspectiveMtxF));
+	mtxPerspective(&g_ActiveProjectionMtx, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
+	memcpy(g_CameraPerspectiveMtxF, g_ActiveProjectionMtx, sizeof(*g_CameraPerspectiveMtxF));
 
 	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtxF), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
@@ -304,8 +304,8 @@ Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
 	g_CameraPerspectiveMtxF = gfxAllocateMatrixF();
-	mtxPerspective((Mtx*)&g_ActiveProjectionMtx, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
-	memcpy(g_CameraPerspectiveMtxF, g_ActiveProjectionMtx.m, sizeof(*g_CameraPerspectiveMtxF));
+	mtxPerspective(&g_ActiveProjectionMtx, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
+	memcpy(g_CameraPerspectiveMtxF, g_ActiveProjectionMtx, sizeof(*g_CameraPerspectiveMtxF));
 
 	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtxF), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 

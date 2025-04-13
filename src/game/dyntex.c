@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "game/chraction.h"
 #include "game/dyntex.h"
+#include "game/debug.h"
 #include "bss.h"
 #include "lib/main.h"
 #include "lib/memp.h"
@@ -177,9 +178,6 @@ void dyntexTickRoom(int roomnum, Vtx *vertices)
 			int adds = 0;
 			int addt = 0;
 
-			// @bug: Using i for both outer and inner loops
-			// Ben's change: fixing this bug, although I think in practice it happened to be harmless in the original PD.
-			// What it would have done is, if there were multiple types of dynamic textures in one room, only one would animate.
 			for (j = 0; j < type->numvertices; j++) {
 				Vtx *vertex = (Vtx *)((uintptr_t)vertices + g_DyntexVertices[type->vertexlistoffset + j].offset);
 
@@ -346,6 +344,7 @@ void dyntexSetCurrentType(int16_t type)
 	}
 
 	g_DyntexCurType = type;
+	
 }
 
 void dyntexSetCurrentRoom(RoomNum roomnum)

@@ -684,7 +684,7 @@ struct prop *shotCalculateHits(int handnum, bool isshooting, struct coord *gunpo
 	}
 
 	if (hitbg && shotdata.gset.weaponnum != WEAPON_FARSIGHT) {
-		mtx4TransformVec((Mtx*)camGetWorldToScreenMtxf(), &sp694.pos, &sp658);
+		mtx4TransformVec((Mtx*)camGetPlayerWorldToScreenMtx(), &sp694.pos, &sp658);
 
 		if (shotdata.distance > -sp658.z) {
 			shotdata.distance = -sp658.z;
@@ -1071,8 +1071,8 @@ struct prop *propFindAimingAt(int handnum, bool isshooting, unsigned int context
 		gunpos2d.y -= 15 * RANDOMFRAC();
 	}
 
-	mtx4TransformVec((Mtx*)camGetProjectionMtx(), &gunpos2d, &gunpos3d);
-	mtx4RotateVec((Mtx*)camGetProjectionMtx(), &gundir2d, &gundir3d);
+	mtx4TransformVec(camGetProjectionMtx(), &gunpos2d, &gunpos3d);
+	mtx4RotateVec(camGetProjectionMtx(), &gundir2d, &gundir3d);
 
 	return shotCalculateHits(handnum, isshooting, &gunpos2d, &gundir2d, &gunpos3d, &gundir3d, 0, 4294836224, PLAYERCOUNT() >= 2);
 }
@@ -1087,8 +1087,8 @@ void shotCreate(int handnum, bool isshooting, bool dorandom, int numshots, bool 
 	bgunCalculatePlayerShotSpread(&gunpos2d, &gundir2d, handnum, dorandom);
 
 	if (numshots > 0) {
-		mtx4TransformVec((Mtx*)camGetProjectionMtx(), &gunpos2d, &gunpos3d);
-		mtx4RotateVec((Mtx*)camGetProjectionMtx(), &gundir2d, &gundir3d);
+		mtx4TransformVec(camGetProjectionMtx(), &gunpos2d, &gunpos3d);
+		mtx4RotateVec(camGetProjectionMtx(), &gundir2d, &gundir3d);
 
 		shotCalculateHits(handnum, isshooting, &gunpos2d, &gundir2d, &gunpos3d, &gundir3d, 0, 4294836224, cheap);
 
@@ -1342,7 +1342,7 @@ void handInflictMeleeDamage(int handnum, struct gset *gset, bool arg2)
 							if (!chrIsAvoiding(chr)) {
 								bgunCalculatePlayerShotSpread(&gunpos2d, &gundir2d, handnum, true);
 								skipthething = true;
-								mtx4RotateVecInPlace((Mtx*)camGetProjectionMtx(), &gundir2d);
+								mtx4RotateVecInPlace(camGetProjectionMtx(), &gundir2d);
 								bgunPlayPropHitSound(gset, prop, -1);
 
 								if (chr->model && chrGetShield(chr) > 0) {

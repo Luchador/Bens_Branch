@@ -46,13 +46,11 @@
 #endif
 
 uint8_t *g_GfxBuffers[NUM_GFXTASKS + 1];
-uint32_t var800aa58c;
 uint8_t *g_VtxBuffers[NUM_GFXTASKS + 1];
 uint8_t *g_GfxMemPos;
 uint8_t g_GfxActiveBufferIndex;
 uint32_t g_GfxRequestedDisplayList;
 
-// Ben's comment: originally there was an array that changed this based on player count. I'm just using a constant value, the one used for 4 players.
 uint32_t g_GfxSize = 0x00028000 * GFX_SIZE_MULTIPLIER;
 
 uint32_t g_VtxSize = 0x00028000;

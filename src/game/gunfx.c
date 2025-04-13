@@ -106,10 +106,10 @@ void beamCreateForHand(int handnum)
 {
 	struct player *player = g_Vars.currentplayer;
 	struct hand *hand = player->hands + handnum;
-	Mtxf *mtx = camGetWorldToScreenMtxf();
+	Mtx *mtx = camGetPlayerWorldToScreenMtx();
 	float tmp;
 
-	tmp = hand->hitpos.f[0] * mtx->m[0][2] + hand->hitpos.f[1] * mtx->m[1][2] + hand->hitpos.f[2] * mtx->m[2][2] + mtx->m[3][2];
+	tmp = hand->hitpos.f[0] * (*mtx)[0][2] + hand->hitpos.f[1] * (*mtx)[1][2] + hand->hitpos.f[2] * (*mtx)[2][2] + (*mtx)[3][2];
 	tmp = -tmp;
 
 	if (tmp < hand->muzzlez) {
@@ -178,7 +178,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	Mtxf *spc8;
 	Col *colours = gfxAllocateColours(2);
 	Mtxf sp84;
-	Mtxf *worldtoscreenmtx = camGetWorldToScreenMtxf();
+	Mtxf *worldtoscreenmtx = (Mtxf*)camGetPlayerWorldToScreenMtx();
 	struct coord sp74 = {0, 0, 0};
 	float mult;
 	struct coord sp5c;
@@ -197,7 +197,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	spe4.f[1] /= length;
 	spe4.f[2] /= length;
 
-	mtx4TransformVec((Mtx*)camGetWorldToScreenMtxf(), headpos, &sp5c);
+	mtx4TransformVec(camGetPlayerWorldToScreenMtx(), headpos, &sp5c);
 
 	if (sp5c.f[0] * arg2 > 10000.0f || sp5c.f[0] * arg2 < -10000.0f) {
 		return gdl;
@@ -211,7 +211,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 		return gdl;
 	}
 
-	mtx4TransformVec((Mtx*)camGetWorldToScreenMtxf(), tailpos, &sp5c);
+	mtx4TransformVec(camGetPlayerWorldToScreenMtx(), tailpos, &sp5c);
 
 	if (sp5c.f[0] * arg2 > 10000.0f || sp5c.f[0] * arg2 < -10000.0f) {
 		return gdl;
@@ -315,7 +315,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 		float spf0 = 1.4142f;
 		struct textureconfig *texconfig = &g_TexBeamConfigs[arg3];
 		int i;
-		Mtxf *worldtoscreenmtx = camGetWorldToScreenMtxf();
+		Mtxf *worldtoscreenmtx = (Mtxf*)camGetPlayerWorldToScreenMtx();
 		int j;
 		int spd8;
 		struct coord spcc;
@@ -466,7 +466,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 						spcc.f[2] *= spc0[0] * 0.5f;
 					}
 
-					mtx4TransformVecInPlace((Mtx*)camGetProjectionMtx(), &spcc);
+					mtx4TransformVecInPlace(camGetProjectionMtx(), &spcc);
 
 					spcc.f[0] -= sp138.f[0];
 					spcc.f[1] -= sp138.f[1];
@@ -656,14 +656,14 @@ struct casing *casingCreate(struct modeldef *modeldef, Mtxf *mtx)
 	return NULL;
 }
 
-void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
+void casingCreateForHand(int handnum, float ground, Mtx *mtx)
 {
 	float oldyspeed;
 	struct casing *casing = NULL;
 	struct player *player = g_Vars.currentplayer;
 	int i;
 	int j;
-	Mtxf spec;
+	Mtx spec;
 	float spc8[3][3];
 	int weaponnum = bgunGetWeaponNum(handnum);
 	int casingtype = -1;
@@ -690,17 +690,17 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 		return;
 	}
 
-	mtx4Copy((Mtx*)mtx, (Mtx*)&spec);
+	mtx4Copy(mtx, &spec);
 
 	modeldef = bgunGetCartModeldef();
 
 	if (modeldef != NULL) {
-		casing = casingCreate(modeldef, &spec);
+		casing = casingCreate(modeldef, (Mtxf*)&spec);
 	}
 
 	if (casing != NULL) {
 		struct coord spa4 = {0, 0, 0};
-		Mtxf sp64;
+		Mtx sp64;
 		uint32_t magic = 0x15aca6;
 		uint32_t sp5c;
 		uint32_t sp4c;
@@ -715,14 +715,14 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 			casing->speed.y = RANDOMFRAC() * 2.5f * 0.0625f + 2.5f;
 			casing->speed.z = 0.0f;
 
-			mtx4RotateVecInPlace((Mtx*)mtx, &casing->speed);
+			mtx4RotateVecInPlace(mtx, &casing->speed);
 
 			spa4.x = 2.0f * RANDOMFRAC() * M_TAU * 0.0625f - 0.39263657f;
 			spa4.y = 2.0f * RANDOMFRAC() * M_TAU * 0.0625f - 0.39263657f;
 			spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.0625f - 0.39263657f;
 
-			mtx4LoadRotation(&spa4, (Mtx*)&sp64);
-			mtx4ToMtx3((Mtx*)&sp64, spc8);
+			mtx4LoadRotation(&spa4, &sp64);
+			mtx4ToMtx3(&sp64, spc8);
 
 			for (i = 0; i < 3; i++) {
 				for (j = 0; j < 3; j++) {
@@ -763,23 +763,23 @@ void casingCreateForHand(int handnum, float ground, Mtxf *mtx)
 				casing->speed.z = -1.0f;
 			}
 
-			mtx4RotateVecInPlace((Mtx*)mtx, &casing->speed);
+			mtx4RotateVecInPlace(mtx, &casing->speed);
 
 			if (weaponnum == WEAPON_REAPER) {
 				spa4.x = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 				spa4.y = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 				spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 
-				mtx4LoadRotation(&spa4, (Mtx*)&sp64);
-				mtx4RotateVecInPlace((Mtx*)&sp64, &casing->speed);
+				mtx4LoadRotation(&spa4, &sp64);
+				mtx4RotateVecInPlace(&sp64, &casing->speed);
 			}
 
 			spa4.x = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 			spa4.y = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 			spa4.z = 2.0f * RANDOMFRAC() * M_TAU * 0.015625f - 0.09815914f;
 
-			mtx4LoadRotation(&spa4, (Mtx*)&sp64);
-			mtx4ToMtx3((Mtx*)&sp64, spc8);
+			mtx4LoadRotation(&spa4, &sp64);
+			mtx4ToMtx3(&sp64, spc8);
 
 			for (i = 0; i < 3; i++) {
 				for (j = 0; j < 3; j++) {
@@ -841,7 +841,7 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 
 	mtxScaleRotationPart(0.10f, (Mtx*)&mtx);
 	mtx4SetTranslation(&casing->pos, (Mtx*)&mtx);
-	mtxApplyAffineTransform((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&mtx, (Mtx*)model.matrices);
+	mtxApplyAffineTransform(camGetPlayerWorldToScreenMtx(), (Mtx*)&mtx, (Mtx*)model.matrices);
 
 	// Check if any coordinate is out of range
 	for (i = 0; i < 3; i++) {
@@ -1066,14 +1066,14 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
 
 	mtxIdent((Mtx*)&sp164);
-	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp164);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp164);
 	mtxIdent((Mtx*)&sp124);
-	mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtx(), (Mtx*)&sp124);
+	mtxApplyAffineTransformInPlace(camGetProjectionMtx(), (Mtx*)&sp124);
 
 	sp124.m[3][0] = sp124.m[3][1] = sp124.m[3][2] = 0.0f;
 
 	mtxIdent((Mtx*)&sp1b0);
-	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp1b0);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp1b0);
 
 	campos.x = player->cam_pos.x;
 	campos.y = player->cam_pos.y;
@@ -1250,16 +1250,16 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	texSelect(&gdl, &g_TexGeneralConfigs[3], 4, 0, 2, 1, NULL);
 	mtxIdent((Mtx*)&sp14c);
 
-	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp14c);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp14c);
 	mtxIdent((Mtx*)&sp10c);
-	mtxApplyAffineTransformInPlace((Mtx*)camGetProjectionMtx(), (Mtx*)&sp10c);
+	mtxApplyAffineTransformInPlace(camGetProjectionMtx(), (Mtx*)&sp10c);
 
 	sp10c.m[3][1] = 0;
 	sp10c.m[3][0] = 0;
 	sp10c.m[3][2] = 0;
 
 	mtxIdent((Mtx*)&sp198);
-	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp198);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp198);
 
 	campos.x = player->cam_pos.x;
 	campos.y = player->cam_pos.y;

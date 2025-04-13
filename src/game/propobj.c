@@ -2660,8 +2660,8 @@ bool func0f06b610(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 
 							*arg9 = sum2;
 
-							mtx4TransformVec((Mtx*)camGetProjectionMtx(), &spfc, arg7);
-							mtx4RotateVec((Mtx*)camGetProjectionMtx(), &spf0, arg8);
+							mtx4TransformVec(camGetProjectionMtx(), &spfc, arg7);
+							mtx4RotateVec(camGetProjectionMtx(), &spf0, arg8);
 
 							if (arg8->x != 0.0f || arg8->y != 0.0f || arg8->z != 0.0f) {
 								utilsNormalizeF(&arg8->x, &arg8->y, &arg8->z);
@@ -2731,7 +2731,7 @@ bool func0f06b610(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 
 						*arg9 = sum1;
 
-						mtx4TransformVec((Mtx*)camGetProjectionMtx(), &spfc, arg7);
+						mtx4TransformVec(camGetProjectionMtx(), &spfc, arg7);
 
 						if (spf0.f[0] * arg6->f[0] + spf0.f[1] * arg6->f[1] + spf0.f[2] * arg6->f[2] > 0.0f) {
 							spf0.f[0] = -spf0.f[0];
@@ -2739,7 +2739,7 @@ bool func0f06b610(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 							spf0.f[2] = -spf0.f[2];
 						}
 
-						mtx4RotateVec((Mtx*)camGetProjectionMtx(), &spf0, arg8);
+						mtx4RotateVec(camGetProjectionMtx(), &spf0, arg8);
 
 						if (arg8->f[0] != 0.0f || arg8->f[1] != 0.0f || arg8->f[2] != 0.0f) {
 							utilsNormalizeF(&arg8->x, &arg8->y, &arg8->z);
@@ -2991,8 +2991,8 @@ bool func0f06c28c(struct chrdata *chr, struct coord *arg1, struct coord *arg2, s
 
 							*arg9 = spec;
 
-							mtx4TransformVec((Mtx*)camGetProjectionMtx(), &spb8, arg7);
-							mtx4RotateVec((Mtx*)camGetProjectionMtx(), &spac, arg8);
+							mtx4TransformVec(camGetProjectionMtx(), &spb8, arg7);
+							mtx4RotateVec(camGetProjectionMtx(), &spac, arg8);
 
 							if (arg8->x != 0.0f || arg8->y != 0.0f || arg8->z != 0.0f) {
 								utilsNormalizeF(&arg8->x, &arg8->y, &arg8->z);
@@ -3023,8 +3023,8 @@ bool func0f06c28c(struct chrdata *chr, struct coord *arg1, struct coord *arg2, s
 						&& func0f06bea0(model, model->definition->rootnode, model->definition->rootnode, arg5, arg6, &sp7c.pos, &spec, &spcc, &hitpart, &sp78, &sp74)
 						&& spec < *arg9) {
 					*arg9 = spec;
-					mtx4TransformVec((Mtx*)camGetProjectionMtx(), &sp7c.pos, arg7);
-					mtx4RotateVec((Mtx*)camGetProjectionMtx(), &sp7c.unk0c, arg8);
+					mtx4TransformVec(camGetProjectionMtx(), &sp7c.pos, arg7);
+					mtx4RotateVec(camGetProjectionMtx(), &sp7c.unk0c, arg8);
 
 					if (arg8->x != 0.0f || arg8->y != 0.0f || arg8->z != 0.0f) {
 						utilsNormalizeF(&arg8->x, &arg8->y, &arg8->z);
@@ -3101,13 +3101,13 @@ bool projectileFindCollidingProp(struct prop *prop, struct coord *pos1, struct c
 	sp88.y = pos1->y;
 	sp88.z = pos1->z;
 
-	mtx4TransformVecInPlace((Mtx*)camGetWorldToScreenMtxf(), &sp88);
+	mtx4TransformVecInPlace(camGetPlayerWorldToScreenMtx(), &sp88);
 
 	sp7c.x = sp98.x;
 	sp7c.y = sp98.y;
 	sp7c.z = sp98.z;
 
-	mtx4RotateVecInPlace((Mtx*)camGetWorldToScreenMtxf(), &sp7c);
+	mtx4RotateVecInPlace(camGetPlayerWorldToScreenMtx(), &sp7c);
 
 	spa8 = dist;
 
@@ -4024,7 +4024,7 @@ bool objEmbed(struct prop *prop, struct prop *parent, struct model *model, struc
 			mtx3ToMtx4(obj->realrot, (Mtx*)&sp34);
 			mtx4SetTranslation(&prop->pos, (Mtx*)&sp34);
 			mtxApplyAffineTransform((Mtx*)&sp34, (Mtx*)&sp74, (Mtx*)&sp134);
-			mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)sp24, (Mtx*)&spf4);
+			mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)sp24, (Mtx*)&spf4);
 			mtxInvertAffine(spf4.m, spb4.m);
 			mtxApplyAffineTransform((Mtx*)&spb4, (Mtx*)&sp134, (Mtx*)&obj->embedment->matrix);
 
@@ -4128,7 +4128,7 @@ bool propExplode(struct prop *prop, int exptype)
 			pos.y = mtx->m[3][1];
 			pos.z = mtx->m[3][2];
 
-			mtx4TransformVecInPlace((Mtx*)camGetProjectionMtx(), &pos);
+			mtx4TransformVecInPlace(camGetProjectionMtx(), &pos);
 		} else {
 			pos.x = parent->pos.x;
 			pos.y = parent->pos.y;
@@ -6839,7 +6839,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 												Mtxf *sp184;
 
 												sp184 = modelFindNodeMtx(g_EmbedModel, g_EmbedNode, 0);
-												mtx4TransformVec((Mtx*)camGetWorldToScreenMtxf(), &sp5e8, &sp1c8);
+												mtx4TransformVec(camGetPlayerWorldToScreenMtx(), &sp5e8, &sp1c8);
 												mtxInvertRigidBodyMatrix(sp184->m, sp188.m);
 												mtx4TransformVecInPlace((Mtx*)&sp188, &sp1c8);
 
@@ -7551,7 +7551,7 @@ void doorInitMatrices(struct prop *prop)
 	Mtxf *matrices = model->matrices;
 
 	func0f08c424(door, matrices);
-	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)matrices);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)matrices);
 
 	if (model->definition->skel == &g_Skel11) {
 		union modelrodata *rodata;
@@ -8149,7 +8149,7 @@ void cctvInitMatrices(struct prop *prop, Mtxf *mtx)
 
 	mtx4TransformVecInPlace((Mtx*)mtx, &sp64);
 	mtx4SetTranslation(&sp64, (Mtx*)&matrices[1]);
-	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&matrices[1]);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&matrices[1]);
 }
 
 void fanTick(struct prop *prop)
@@ -8711,7 +8711,7 @@ void autogunInitMatrices(struct prop *prop, Mtxf *mtx)
 	mtx4LoadYRotation(yrot, (Mtx*)&matrices[1]);
 	mtx4SetTranslation(&sp4c, (Mtx*)&matrices[1]);
 	mtxScaleRotationPart(autogun->base.model->scale, (Mtx*)&matrices[1]);
-	mtxApplyAffineTransformInPlace((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&matrices[1]);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&matrices[1]);
 
 	node2 = modelGetPart(model->definition, MODELPART_AUTOGUN_0002);
 	rodata = node2->rodata;
@@ -8841,7 +8841,7 @@ void autogunTickShoot(struct prop *autogunprop)
 						gunpos.z = 0.0f;
 					}
 
-					mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)sp108, (Mtx*)&spc8);
+					mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)sp108, (Mtx*)&spc8);
 					mtx4TransformVecInPlace((Mtx*)&spc8, &gunpos);
 
 					if (cdTestLos10(&autogunprop->pos, autogunprop->rooms, &gunpos, gunrooms, CDTYPE_BG, GEOFLAG_BLOCK_SHOOT) == CDRESULT_COLLISION) {
@@ -10509,7 +10509,7 @@ void objInitMatrices(struct prop *prop)
 	} else {
 		mtx3ToMtx4(obj->realrot,(Mtx*)&mtx);
 		mtx4SetTranslation(&prop->pos, (Mtx*)&mtx);
-		mtxApplyAffineTransform((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&mtx, (Mtx*)obj->model->matrices);
+		mtxApplyAffineTransform(camGetPlayerWorldToScreenMtx(), (Mtx*)&mtx, (Mtx*)obj->model->matrices);
 
 		if (obj->type == OBJTYPE_CCTV) {
 			cctvInitMatrices(prop, &mtx);
@@ -10752,11 +10752,11 @@ int objTickPlayer(struct prop *prop)
 
 					sp556 = true;
 					sp476.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
-					sp476.unk00 = camGetWorldToScreenMtxf();
+					sp476.unk00 = (Mtxf*)camGetPlayerWorldToScreenMtx();
 					modelSetMatricesWithAnim(&sp476, model);
 
 					if (fulltick) {
-						mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)model->matrices, (Mtx*)&sp412);
+						mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)model->matrices, (Mtx*)&sp412);
 						mtx4ToMtx3((Mtx*)&sp412, obj->realrot);
 
 						sp400.x = sp412.m[3][0];
@@ -10846,7 +10846,7 @@ int objTickPlayer(struct prop *prop)
 
 			mtx3ToMtx4(obj->realrot, (Mtx*)&sp248);
 			mtx4SetTranslation(&prop->pos, (Mtx*)&sp248);
-			mtx4MultMtx4((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&sp248, (Mtx*)&sp152);
+			mtx4MultMtx4(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp248, (Mtx*)&sp152);
 
 			sp556 = true;
 			sp312.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
@@ -10867,7 +10867,7 @@ int objTickPlayer(struct prop *prop)
 				if (modelGetCurAnimFrame(model) >= modelGetNumAnimFrames(model) - 1) {
 					modelmgrFreeAnim(model->anim);
 					model->anim = NULL;
-					mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)model->matrices, (Mtx*)&sp248);
+					mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)model->matrices, (Mtx*)&sp248);
 					mtx4ToMtx3((Mtx*)&sp248, obj->realrot);
 					tagnum = objGetTagNum(obj);
 
@@ -11051,8 +11051,8 @@ Gfx *propsRenderBeams(Gfx *gdl)
 			struct chrdata *chr = prop->chr;
 
 			if (CHRRACE(chr) == RACE_ROBOT) {
-				gdl = beamRender(gdl, chr->unk348[0]->beam, true, true);
-				gdl = beamRender(gdl, chr->unk348[1]->beam, true, true);
+				gdl = beamRender(gdl, chr->roboguns[0]->beam, true, true);
+				gdl = beamRender(gdl, chr->roboguns[1]->beam, true, true);
 			} else {
 				if (chr->fireslots[0] >= 0) {
 					gdl = beamRender(gdl, &g_Fireslots[chr->fireslots[0]].beam, true, false);
@@ -12209,7 +12209,7 @@ Gfx *gfxRenderRadialShadow(Gfx *gdl, float x, float y, float z, float angle, flo
 
 	mtx = gfxAllocateMatrixF();
 	mtx4LoadYRotationWithTranslation(&pos, angle, (Mtx*)&spc0);
-	mtx4MultMtx4((Mtx*)camGetWorldToScreenMtxf(), (Mtx*)&spc0, (Mtx*)&sp80);
+	mtx4MultMtx4(camGetPlayerWorldToScreenMtx(), (Mtx*)&spc0, (Mtx*)&sp80);
 	mtx4Copy((Mtx*)&sp80, (Mtx*)mtx);
 
 	for (i = 0; i < 4; i++) {
@@ -12845,7 +12845,7 @@ void objBounce(struct defaultobj *obj, struct coord *gundir2d)
 		dir.y = gundir2d->y;
 		dir.z = gundir2d->z;
 
-		mtx4RotateVecInPlace((Mtx*)camGetProjectionMtx(), &dir);
+		mtx4RotateVecInPlace(camGetProjectionMtx(), &dir);
 
 		projectile->speed.x += 3.3333333f * dir.x;
 		projectile->speed.z += 3.3333333f * dir.z;
@@ -13166,7 +13166,7 @@ bool objDrop(struct prop *prop, bool lazy)
 			if (!lazy && (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK)) {
 				// Do collision checks
 				Mtxf *sp48 = modelGetRootMtx(model);
-				mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)sp48, (Mtx*)&spf0);
+				mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)sp48, (Mtx*)&spf0);
 				propSetPerimEnabled(root, false);
 
 				spe4.x = spf0.m[3][0];
@@ -14178,9 +14178,9 @@ void propTestModelHit(struct prop *prop, struct shotdata *shotdata)
 				}
 			}
 
-			mtx4TransformVec((Mtx*)camGetProjectionMtx(), &spd8, &sp7c);
+			mtx4TransformVec(camGetProjectionMtx(), &spd8, &sp7c);
 			mtx4RotateVec((Mtx*)&model->matrices[spe4], &hitthing1.unk0c, &sp70);
-			mtx4RotateVecInPlace((Mtx*)camGetProjectionMtx(), &sp70);
+			mtx4RotateVecInPlace(camGetProjectionMtx(), &sp70);
 
 			hitCreate(shotdata, prop, spd4, hitpart,
 					node1, &hitthing1, spe4, node2,
@@ -14250,7 +14250,7 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 	sp110.y = shotdata->gunpos2d.y - hit->distance * shotdata->gundir2d.y / shotdata->gundir2d.z;
 	sp110.z = shotdata->gunpos2d.z - hit->distance;
 
-	mtx4TransformVecInPlace((Mtx*)camGetProjectionMtx(), &sp110);
+	mtx4TransformVecInPlace(camGetProjectionMtx(), &sp110);
 
 	if (!slowsbullet && chrIsUsingPaintball(g_Vars.currentplayer->prop->chr)) {
 		slowsbullet = true;
@@ -14418,7 +14418,7 @@ void objHit(struct shotdata *shotdata, struct hit *hit)
 				spb0.y = shotdata->gundir3d.y * 3.0f;
 				spb0.z = shotdata->gundir3d.z * 3.0f;
 
-				mtx4MultMtx4((Mtx*)camGetProjectionMtx(), (Mtx*)&obj->model->matrices[hit->mtxindex], (Mtx*)&sp58);
+				mtx4MultMtx4(camGetProjectionMtx(), (Mtx*)&obj->model->matrices[hit->mtxindex], (Mtx*)&sp58);
 				mtx4TransformVec((Mtx*)&sp58, &hit->hitthing.pos, &spa4);
 
 				pushdir.x = shotdata->gundir3d.x;
@@ -17807,7 +17807,7 @@ bool posIsInObjFadeDistance(struct coord *pos, float modelscale)
 
 	if (settings != NULL) {
 		struct coord *campos = &g_Vars.currentplayer->cam_pos;
-		Mtxf *mtx = camGetWorldToScreenMtxf();
+		Mtxf *mtx = (Mtxf*)camGetPlayerWorldToScreenMtx();
 
 		tmp.x = pos->x - campos->x;
 		tmp.y = pos->y - campos->y;

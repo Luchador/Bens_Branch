@@ -37,8 +37,8 @@ void bmove0f0cba88(float *a, float *b, struct coord *c, float mult1, float mult2
 void bmoveUpdateMoveInitSpeed(struct coord *newpos);
 void bmoveTick(bool allowc1x, bool allowc1y, bool allowc1buttons, bool ignorec2);
 void bmoveUpdateVerta(void);
-void bmove0f0cc19c(struct coord *arg);
-void bmoveUpdateHead(float arg0, float arg1, float arg2, Mtxf *arg3, float arg4);
-void bmove0f0cc654(float arg0, float arg1, float arg2);
+void bmoveUpdateEyeHeight(struct coord *arg);
+void bmoveUpdateHead(float animFrameDelta, float animSpeed, float headTilt, Mtxf *targetMatrix, float blendFraction);
+void bmoveUpdateHeadNoTargetMtx(float arg0, float arg1, float arg2);
 int bmoveGetCrouchPos(void);
 int bmoveGetCrouchPosByPlayer(int playernum);

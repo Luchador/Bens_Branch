@@ -63,7 +63,7 @@ Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, stru
 {
 	Vtx *vertices = gfxAllocateVertices(4);
 	Col *colours = (Col *)gfxAllocateColours(1);
-	Mtxf *mtx = camGetProjectionMtx();
+	Mtxf *mtx = (Mtxf*)camGetProjectionMtx();
 	struct coord spa0;
 	struct coord sp94;
 	struct coord sp88;
@@ -560,7 +560,7 @@ uint32_t smokeTick(struct prop *prop)
 
 uint32_t smokeTickPlayer(struct prop *prop)
 {
-	Mtxf *matrix = camGetWorldToScreenMtxf();
+	Mtxf *matrix = (Mtxf*)camGetPlayerWorldToScreenMtx();
 
 	prop->z = -(matrix->m[0][2] * prop->pos.x + matrix->m[1][2] * prop->pos.y + matrix->m[2][2] * prop->pos.z + matrix->m[3][2]);
 

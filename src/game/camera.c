@@ -176,34 +176,14 @@ void camProjectWithZoomAndAspect(struct coord *arg0, float arg1[2], float zoom, 
 	arg1[0] = player->c_screenleft + player->c_halfwidth - f14 * arg0->f[0];
 }
 
-/*void camSetMtxL1738(Mtx *mtx)
-{
-	g_Vars.currentplayer->mtxl1738 = mtx;
-}*/
-
-/*Mtx *camGetMtxL1738(void)
-{
-	return g_Vars.currentplayer->mtxl1738;
-}*/
-
-/*void camSetMtxL173c(Mtx *mtx)
-{
-	g_Vars.currentplayer->mtxl173c = mtx;
-}*/
-
-/*Mtx *camGetMtxL173c(void)
-{
-	return g_Vars.currentplayer->mtxl173c;
-}*/
-
 void camSetArtifactMtx(Mtx *mtx)
 {
-	g_Vars.currentplayer->artifactMtx = (Mtxf*)mtx;
+	g_Vars.currentplayer->artifactMtx = mtx;
 }
 
 Mtx *camGetArtifactMtx(void)
 {
-	return (Mtx*)g_Vars.currentplayer->artifactMtx;
+	return g_Vars.currentplayer->artifactMtx;
 }
 
 void camSetPerspectiveMtxL(Mtx *mtx)
@@ -230,14 +210,14 @@ void camSetWorldToScreenMtx(Mtx *mtx)
 {
 	struct player *player = g_Vars.currentplayer;
 
-	player->prevworldtoscreenmtx = player->worldtoscreenmtx;
+	player->prevworldtoscreenmtx = (Mtx*)player->worldtoscreenmtx;
 	player->worldtoscreenmtx = (Mtxf*)mtx;
 	player->c_viewfmdynticknum = g_GfxNumSwaps;
 	player->unk0488 = player->unk0484;
 	player->unk0484 = g_GfxMemPos;
 }
 
-Mtxf *camGetWorldToScreenMtx(uint8_t *arg0)
+Mtx *camGetWorldToScreenMtx(uint8_t *arg0)
 {
 	Mtxf *result = NULL;
 	int i;
@@ -257,7 +237,7 @@ Mtxf *camGetWorldToScreenMtx(uint8_t *arg0)
 			if (g_Vars.currentplayerindex >= playermgrGetOrderOfPlayer(i)) {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_prevviewfmdynticknum + 1) {
 					if (arg0 >= g_Vars.players[i]->unk0488 && (uint8_t *)result < g_Vars.players[i]->unk0488) {
-						result = g_Vars.players[i]->prevworldtoscreenmtx;
+						result = (Mtxf*)g_Vars.players[i]->prevworldtoscreenmtx;
 					}
 				}
 			} else {
@@ -270,12 +250,12 @@ Mtxf *camGetWorldToScreenMtx(uint8_t *arg0)
 		}
 	}
 
-	return result;
+	return (Mtx*)result;
 }
 
-Mtxf *camGetProjectionMtxForPlayers(uint8_t *arg0)
+Mtx *camGetProjectionMtxForPlayers(uint8_t *arg0)
 {
-	Mtxf *result = NULL;
+	Mtx *result = NULL;
 	int i;
 
 	if (arg0 >= g_VtxBuffers[g_GfxActiveBufferIndex] && arg0 < g_VtxBuffers[g_GfxActiveBufferIndex + 1]) {
@@ -283,7 +263,7 @@ Mtxf *camGetProjectionMtxForPlayers(uint8_t *arg0)
 			if (g_Vars.currentplayerindex >= playermgrGetOrderOfPlayer(i)) {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_viewfmdynticknum) {
 					if (arg0 >= g_Vars.players[i]->unk0484 && (uint8_t *)result < g_Vars.players[i]->unk0484) {
-						result = g_Vars.players[i]->projectionmtx;
+						result = (Mtx*)g_Vars.players[i]->projectionmtx;
 					}
 				}
 			}
@@ -299,7 +279,7 @@ Mtxf *camGetProjectionMtxForPlayers(uint8_t *arg0)
 			} else {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_viewfmdynticknum + 1) {
 					if (arg0 >= g_Vars.players[i]->unk0484 && (uint8_t *)result < g_Vars.players[i]->unk0484) {
-						result = g_Vars.players[i]->projectionmtx;
+						result = (Mtx*)g_Vars.players[i]->projectionmtx;
 					}
 				}
 			}
@@ -309,43 +289,33 @@ Mtxf *camGetProjectionMtxForPlayers(uint8_t *arg0)
 	return result;
 }
 
-Mtxf *camGetWorldToScreenMtxf(void)
+Mtx *camGetPlayerWorldToScreenMtx(void)
 {
-	return g_Vars.currentplayer->worldtoscreenmtx;
+	return (Mtx*)g_Vars.currentplayer->worldtoscreenmtx;
 }
 
-void camSetSkyMtx(Mtxf *mtx)
+void camSetSkyMtx(Mtx *mtx)
 {
 	g_Vars.currentplayer->skyMtx = mtx;
 }
 
-Mtxf *camGetSkyMtx(void)
+Mtx *camGetSkyMtx(void)
 {
-	return g_Vars.currentplayer->skyMtx;
+	return (Mtx*)g_Vars.currentplayer->skyMtx;
 }
 
-Mtxf *camGetPrevWorldToScreenMtxf(void)
-{
-	return g_Vars.currentplayer->prevworldtoscreenmtx;
-}
-
-void camSetProjectionMtxF(Mtxf *mtx)
+void camSetProjectionMtx(Mtx *mtx)
 {
 	struct player *player = g_Vars.currentplayer;
 
 	player->c_prevviewfmdynticknum = player->c_viewfmdynticknum;
-	player->prevprojectionmtx = player->projectionmtx;
-	player->projectionmtx = mtx;
+	player->prevprojectionmtx = (Mtx*)player->projectionmtx;
+	player->projectionmtx = (Mtxf*)mtx;
 }
 
-Mtxf *camGetProjectionMtx(void)
+Mtx *camGetProjectionMtx(void)
 {
-	return g_Vars.currentplayer->projectionmtx;
-}
-
-Mtxf *camGetPrevProjectionMtxF(void)
-{
-	return g_Vars.currentplayer->prevprojectionmtx;
+	return (Mtx*)g_Vars.currentplayer->projectionmtx;
 }
 
 void camSetLookAt(LookAt *lookat)
@@ -400,29 +370,29 @@ void camComputeFrustumEdgePlanes(void)
 	float sp24;
 	float sp20;
 	struct player *player;
-	Mtxf *mtx;
+	Mtx *mtx;
 	float sp14;
 	float sp10;
 
 	player = g_Vars.currentplayer;
 	sp24 = player->c_halfheight * player->c_scaley;
-	mtx = player->projectionmtx;
+	mtx = (Mtx*)player->projectionmtx;
 
 	sp2c = 1.0f / sqrtf(sp24 * sp24 + 1.0f);
 	sp24 *= sp2c;
 	sp20 = -sp2c;
 
-	g_CamFrustumTopNormal.f[0] = -sp20 * mtx->m[1][0] + (sp24) * mtx->m[2][0];
-	g_CamFrustumTopNormal.f[1] = -sp20 * mtx->m[1][1] + (sp24) * mtx->m[2][1];
-	g_CamFrustumTopNormal.f[2] = -sp20 * mtx->m[1][2] + (sp24) * mtx->m[2][2];
+	g_CamFrustumTopNormal.f[0] = -sp20 * (*mtx)[1][0] + (sp24) * (*mtx)[2][0];
+	g_CamFrustumTopNormal.f[1] = -sp20 * (*mtx)[1][1] + (sp24) * (*mtx)[2][1];
+	g_CamFrustumTopNormal.f[2] = -sp20 * (*mtx)[1][2] + (sp24) * (*mtx)[2][2];
 
-	g_CamFrustumTopOffset = g_CamFrustumTopNormal.f[0] * mtx->m[3][0] + g_CamFrustumTopNormal.f[1] * mtx->m[3][1] + g_CamFrustumTopNormal.f[2] * mtx->m[3][2];
+	g_CamFrustumTopOffset = g_CamFrustumTopNormal.f[0] * (*mtx)[3][0] + g_CamFrustumTopNormal.f[1] * (*mtx)[3][1] + g_CamFrustumTopNormal.f[2] * (*mtx)[3][2];
 
-	g_CamFrustumBottomNormal.f[0] = sp20 * mtx->m[1][0] + (sp24) * mtx->m[2][0];
-	g_CamFrustumBottomNormal.f[1] = sp20 * mtx->m[1][1] + (sp24) * mtx->m[2][1];
-	g_CamFrustumBottomNormal.f[2] = sp20 * mtx->m[1][2] + (sp24) * mtx->m[2][2];
+	g_CamFrustumBottomNormal.f[0] = sp20 * (*mtx)[1][0] + (sp24) * (*mtx)[2][0];
+	g_CamFrustumBottomNormal.f[1] = sp20 * (*mtx)[1][1] + (sp24) * (*mtx)[2][1];
+	g_CamFrustumBottomNormal.f[2] = sp20 * (*mtx)[1][2] + (sp24) * (*mtx)[2][2];
 
-	g_CamFrustumBottomOffset = g_CamFrustumBottomNormal.f[0] * mtx->m[3][0] + g_CamFrustumBottomNormal.f[1] * mtx->m[3][1] + g_CamFrustumBottomNormal.f[2] * mtx->m[3][2];
+	g_CamFrustumBottomOffset = g_CamFrustumBottomNormal.f[0] * (*mtx)[3][0] + g_CamFrustumBottomNormal.f[1] * (*mtx)[3][1] + g_CamFrustumBottomNormal.f[2] * (*mtx)[3][2];
 
 	sp28 = -player->c_halfwidth * player->c_scalex;
 
@@ -430,23 +400,23 @@ void camComputeFrustumEdgePlanes(void)
 	sp28 *= sp10;
 	sp14 = -sp10;
 
-	g_CamFrustumLeftNormal.f[0] = sp14 * mtx->m[0][0] - sp28 * mtx->m[2][0];
-	g_CamFrustumLeftNormal.f[1] = sp14 * mtx->m[0][1] - sp28 * mtx->m[2][1];
-	g_CamFrustumLeftNormal.f[2] = sp14 * mtx->m[0][2] - sp28 * mtx->m[2][2];
+	g_CamFrustumLeftNormal.f[0] = sp14 * (*mtx)[0][0] - sp28 * (*mtx)[2][0];
+	g_CamFrustumLeftNormal.f[1] = sp14 * (*mtx)[0][1] - sp28 * (*mtx)[2][1];
+	g_CamFrustumLeftNormal.f[2] = sp14 * (*mtx)[0][2] - sp28 * (*mtx)[2][2];
 
-	g_CamFrustumLeftOffset = g_CamFrustumLeftNormal.f[0] * mtx->m[3][0] + g_CamFrustumLeftNormal.f[1] * mtx->m[3][1] + g_CamFrustumLeftNormal.f[2] * mtx->m[3][2];
+	g_CamFrustumLeftOffset = g_CamFrustumLeftNormal.f[0] * (*mtx)[3][0] + g_CamFrustumLeftNormal.f[1] * (*mtx)[3][1] + g_CamFrustumLeftNormal.f[2] * (*mtx)[3][2];
 
-	g_CamFrustumRightNormal.f[0] = -sp14 * mtx->m[0][0] - sp28 * mtx->m[2][0];
-	g_CamFrustumRightNormal.f[1] = -sp14 * mtx->m[0][1] - sp28 * mtx->m[2][1];
-	g_CamFrustumRightNormal.f[2] = -sp14 * mtx->m[0][2] - sp28 * mtx->m[2][2];
+	g_CamFrustumRightNormal.f[0] = -sp14 * (*mtx)[0][0] - sp28 * (*mtx)[2][0];
+	g_CamFrustumRightNormal.f[1] = -sp14 * (*mtx)[0][1] - sp28 * (*mtx)[2][1];
+	g_CamFrustumRightNormal.f[2] = -sp14 * (*mtx)[0][2] - sp28 * (*mtx)[2][2];
 
-	g_CamFrustumRightOffset = g_CamFrustumRightNormal.f[0] * mtx->m[3][0] + g_CamFrustumRightNormal.f[1] * mtx->m[3][1] + g_CamFrustumRightNormal.f[2] * mtx->m[3][2];
+	g_CamFrustumRightOffset = g_CamFrustumRightNormal.f[0] * (*mtx)[3][0] + g_CamFrustumRightNormal.f[1] * (*mtx)[3][1] + g_CamFrustumRightNormal.f[2] * (*mtx)[3][2];
 
-	g_CamFrustumViewOrigin.f[0] = -mtx->m[3][0];
-	g_CamFrustumViewOrigin.f[1] = -mtx->m[3][1];
-	g_CamFrustumViewOrigin.f[2] = -mtx->m[3][2];
+	g_CamFrustumViewOrigin.f[0] = -(*mtx)[3][0];
+	g_CamFrustumViewOrigin.f[1] = -(*mtx)[3][1];
+	g_CamFrustumViewOrigin.f[2] = -(*mtx)[3][2];
 
-	g_CamFrustumViewOffset = mtx->m[2][0] * mtx->m[3][0] + mtx->m[2][1] * mtx->m[3][1] + mtx->m[2][2] * mtx->m[3][2];
+	g_CamFrustumViewOffset = (*mtx)[2][0] * (*mtx)[3][0] + (*mtx)[2][1] * (*mtx)[3][1] + (*mtx)[2][2] * (*mtx)[3][2];
 }
 
 // Determines if a point or sphere (point + radius) is in the camera's view

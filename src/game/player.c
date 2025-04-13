@@ -891,8 +891,8 @@ void playerSpawn(void)
 				int prevplayernum = g_Vars.currentplayernum;
 				setCurrentPlayerNum(g_Vars.bondplayernum);
 				bgun0f0a0c08(&sp84, &sp9c);
-				mtx4RotateVec((Mtx*)camGetProjectionMtx(), &sp9c, &sp90);
-				mtx4TransformVec((Mtx*)camGetProjectionMtx(), &sp84, &sp78);
+				mtx4RotateVec(camGetProjectionMtx(), &sp9c, &sp90);
+				mtx4TransformVec(camGetProjectionMtx(), &sp84, &sp78);
 				setCurrentPlayerNum(prevplayernum);
 			}
 
@@ -1717,7 +1717,7 @@ void playerReorientForCutsceneStop(int tweenduration60)
 	struct coord translate;
 	struct coord scale;
 	uint8_t frameslot;
-	Mtxf rotmtx;
+	Mtx rotmtx;
 	int lastframe;
 	float theta;
 
@@ -1727,9 +1727,9 @@ void playerReorientForCutsceneStop(int tweenduration60)
 	frameslot = animLoadFrame(g_CutsceneAnimNum, lastframe);
 	animForgetFrameBirths();
 	animGetRotTranslateScale(0, 0, &g_Skel20, g_CutsceneAnimNum, frameslot, &rot, &translate, &scale);
-	mtx4LoadRotation(&rot, (Mtx*)&rotmtx);
+	mtx4LoadRotation(&rot, &rotmtx);
 
-	theta = atan2f(-rotmtx.m[2][0], -rotmtx.m[2][2]);
+	theta = atan2f(-rotmtx[2][0], -rotmtx[2][2]);
 	theta = (M_TAU - theta) * 57.304901123047f;
 	g_Vars.bond->vv_theta = theta;
 
@@ -3952,7 +3952,7 @@ void playerSetGlobalDrawCameraOffset(void)
 	g_Vars.currentplayer->globaldrawcameraoffset.y = g_Vars.currentplayer->globaldrawworldoffset.y;
 	g_Vars.currentplayer->globaldrawcameraoffset.z = g_Vars.currentplayer->globaldrawworldoffset.z;
 
-	mtx4RotateVecInPlace((Mtx*)camGetWorldToScreenMtxf(), &g_Vars.currentplayer->globaldrawcameraoffset);
+	mtx4RotateVecInPlace(camGetPlayerWorldToScreenMtx(), &g_Vars.currentplayer->globaldrawcameraoffset);
 }
 
 void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struct coord *cam_up)
@@ -4007,7 +4007,7 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 
 	s1 = gfxAllocateMatrixF();
 	s0 = gfxAllocateMatrixF();
-	mtx4MultMtx4((Mtx*)camGetSkyMtx(), (Mtx*)&sp8c, (Mtx*)s0);
+	mtx4MultMtx4(camGetSkyMtx(), (Mtx*)&sp8c, (Mtx*)s0);
 
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < 4; j++) {
@@ -4026,7 +4026,7 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	//memcpy(g_Vars.currentplayer->mtxl005c, &sp8c, sizeof(*g_Vars.currentplayer->mtxl005c));
 	//camSetMtxL173c(g_Vars.currentplayer->mtxl005c);
 	camSetWorldToScreenMtx((Mtx*)g_Vars.currentplayer->mtxf0064);
-	camSetProjectionMtxF(g_Vars.currentplayer->mtxf0068);
+	camSetProjectionMtx((Mtx*)g_Vars.currentplayer->mtxf0068);
 	camSetLookAt(lookat);
 	camComputeFrustumEdgePlanes();
 	playerSetGlobalDrawCameraOffset();
@@ -5004,7 +5004,7 @@ int playerTickThirdPerson(struct prop *prop)
 					spe8 = player->model00d4->matrices;
 				}
 
-				mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)spe8, (Mtx*)&spa8);
+				mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)spe8, (Mtx*)&spa8);
 
 				sp9c.x = spa8.m[3][0] + spa8.m[1][0] * 7;
 				sp9c.y = spa8.m[3][1] + spa8.m[1][1] * 7;
@@ -5022,7 +5022,7 @@ int playerTickThirdPerson(struct prop *prop)
 			}
 
 			bmoveUpdateVerta();
-			bmove0f0cc19c(&sp9c);
+			bmoveUpdateEyeHeight(&sp9c);
 
 			return tickop1;
 		}
@@ -5412,7 +5412,7 @@ void player0f0c3320(Mtxf *matrices, int count)
 	int j;
 
 	for (i = 0, j = 0; i < count; i++, j += sizeof(Mtxf)) {
-		mtxApplyAffineTransform((Mtx*)camGetProjectionMtx(), (Mtx*)((uintptr_t)matrices + j), (Mtx*)&sp40);
+		mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)((uintptr_t)matrices + j), (Mtx*)&sp40);
 
 		sp40.m[3][0] -= g_Vars.currentplayer->globaldrawworldoffset.x;
 		sp40.m[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;

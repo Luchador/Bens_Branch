@@ -380,7 +380,7 @@ void botactThrow(struct chrdata *chr)
 	mtx4LoadYRotation(sp80, (Mtx*)&sp84);
 	mtxApplyAffineTransformInPlace((Mtx*)&sp84, (Mtx*)&sp164);
 
-	bgunCreateThrownProjectile2(chr, &gset, &prop->pos, prop->rooms, &sp164, &sp228);
+	bgunCreateThrownProjectile2(chr, &gset, &prop->pos, prop->rooms, (Mtx*)&sp164, &sp228);
 
 	if (gset.weaponnum == WEAPON_REMOTEMINE) {
 		chr->aibot->flags |= BOTFLAG_THREWREMOTEMINE;
@@ -476,52 +476,55 @@ void botactGetRocketNextStepPos(uint16_t padnum, struct coord *pos)
 }
 
 /**
- * Create a Slayer rocket in fly-by-wire mode (ie. remote controlled).
+ * Create a Slayer rocket in fly-by-wire mode (i.e. remote controlled).
  */
 void botactCreateSlayerRocket(struct chrdata *chr)
 {
 	struct weaponobj *rocket = weaponCreateProjectileFromWeaponNum(MODEL_CHRSKROCKETMIS, WEAPON_SKROCKET, chr);
 
 	if (rocket) {
-		Mtxf sp260;
-		Mtxf sp196;
-		Mtxf sp132;
-		struct coord sp120 = {0, 0, 0};
-		float yrot;
-		float xrot;
-		struct coord sp100;
+		Mtx rotationX;
+		Mtx rotationY;
+		Mtx identity;
+		struct coord direction;
+		float yaw = chrGetAimAngle(chr);
+		float pitch = chrGetPitchAngle(chr);
 
-		yrot = chrGetAimAngle(chr);
-		xrot = chrGetPitchAngle(chr);
+		// Calculate direction vector from pitch and yaw
+		direction.x = cosf(pitch) * sinf(yaw);
+		direction.y = sinf(pitch);
+		direction.z = cosf(pitch) * cosf(yaw);
 
-		sp100.x = cosf(xrot) * sinf(yrot);
-		sp100.y = sinf(xrot);
-		sp100.z = cosf(xrot) * cosf(yrot);
+		// Build transformation matrices
+		mtx4LoadXRotation(pitch, &rotationX);
+		mtx4LoadYRotation(yaw, &rotationY);
+		mtxApplyAffineTransformInPlace(&rotationY, &rotationX); // Combine pitch and yaw
+		mtxIdent(&identity);
 
-		mtx4LoadXRotation(xrot, (Mtx*)&sp196);
-		mtx4LoadYRotation(yrot, (Mtx*)&sp132);
-		mtxApplyAffineTransformInPlace((Mtx*)&sp132, (Mtx*)&sp196);
-		mtxIdent((Mtx*)&sp260);
-
-		bgunCreateXBowBolt(&rocket->base, &chr->prop->pos, chr->prop->rooms, &sp196, &sp100, &sp260, chr->prop, &chr->prop->pos);
+		// Create projectile with direction and rotation
+		bgunCreateXBowBolt(&rocket->base, &chr->prop->pos, chr->prop->rooms, (Mtxf *)&rotationX, &direction, (Mtxf *)&identity, chr->prop, &chr->prop->pos);
 
 		if (rocket->base.hidden & OBJHFLAG_PROJECTILE) {
 			struct prop *target = chrGetTargetProp(chr);
 			rocket->timer240 = -1;
-			rocket->base.projectile->unk010 = 7.5;
-			rocket->base.projectile->unk014 = xrot;
-			rocket->base.projectile->unk018 = yrot;
+			rocket->base.projectile->unk010 = 7.5f;
+			rocket->base.projectile->unk014 = pitch;
+			rocket->base.projectile->unk018 = yaw;
 			rocket->base.projectile->smoketimer240 = 0;
 			rocket->base.projectile->pickuptimer240 = 0x20000000;
 
-			// Fire rocket sound
+			// Play rocket launch sound
 			psCreate(NULL, rocket->base.prop, SFX_LAUNCH_ROCKET_8053, -1,
-					-1, 0, 0, PSTYPE_NONE, 0, -1, 0, -1, -1, -1, -1);
+				-1, 0, 0, PSTYPE_NONE, 0, -1, 0, -1, -1, -1, -1);
 
-			if (!botactFindRocketRoute(chr, &chr->prop->pos, &target->pos, chr->prop->rooms, target->rooms, rocket->base.projectile)) {
-				rocket->timer240 = 0; // blow up rocket
+			// Try to find a path to the target; if not, detonate immediately
+			if (!botactFindRocketRoute(chr, &chr->prop->pos, &target->pos,
+					chr->prop->rooms, target->rooms, rocket->base.projectile)) {
+				rocket->timer240 = 0; // Detonate rocket
 			} else {
-				botactGetRocketNextStepPos(rocket->base.projectile->waypads[0], &rocket->base.projectile->nextsteppos);
+				// Get the first waypoint along the route
+				botactGetRocketNextStepPos(rocket->base.projectile->waypads[0],
+					&rocket->base.projectile->nextsteppos);
 				chr->aibot->skrocket = rocket->base.prop;
 			}
 		}

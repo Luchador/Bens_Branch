@@ -1559,7 +1559,7 @@ void bwalk0f0c69b8(void)
 			spe0 /= 0.4f;
 		}
 
-		bmove0f0cc654(maxspeed, g_Vars.currentplayer->speedforwards * spc0 + spc8, spe0);
+		bmoveUpdateHeadNoTargetMtx(maxspeed, g_Vars.currentplayer->speedforwards * spc0 + spc8, spe0);
 
 		g_Vars.currentplayer->gunspeed = maxspeed;
 
@@ -1775,9 +1775,9 @@ void bwalkTick(void)
 		coord.z = (g_Vars.currentplayer->walkinitstart.z - g_Vars.currentplayer->walkinitpos.z)
 			* (1.0f - g_Vars.currentplayer->walkinitt2) + g_Vars.currentplayer->prop->pos.z;
 
-		bmove0f0cc19c(&coord);
+		bmoveUpdateEyeHeight(&coord);
 	} else {
-		bmove0f0cc19c(&g_Vars.currentplayer->prop->pos);
+		bmoveUpdateEyeHeight(&g_Vars.currentplayer->prop->pos);
 	}
 
 	playerUpdatePerimInfo();

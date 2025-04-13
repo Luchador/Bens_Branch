@@ -421,12 +421,12 @@ void bodyAllocateChr(int stagenum, struct packedchr *packed, int cmdindex)
 				chr->height = 185;
 				chr->radius = 30;
 			} else if (bodynum == BODY_CHICROB) {
-				chr->unk348[0] = mempAlloc(sizeof(struct fireslotthing), MEMPOOL_STAGE);
-				chr->unk348[1] = mempAlloc(sizeof(struct fireslotthing), MEMPOOL_STAGE);
-				chr->unk348[0]->beam = mempAlloc(ALIGN16(sizeof(struct beam)), MEMPOOL_STAGE);
-				chr->unk348[1]->beam = mempAlloc(ALIGN16(sizeof(struct beam)), MEMPOOL_STAGE);
-				chr->unk348[0]->beam->age = -1;
-				chr->unk348[1]->beam->age = -1;
+				chr->roboguns[0] = mempAlloc(sizeof(struct fireslotthing), MEMPOOL_STAGE);
+				chr->roboguns[1] = mempAlloc(sizeof(struct fireslotthing), MEMPOOL_STAGE);
+				chr->roboguns[0]->beam = mempAlloc(ALIGN16(sizeof(struct beam)), MEMPOOL_STAGE);
+				chr->roboguns[1]->beam = mempAlloc(ALIGN16(sizeof(struct beam)), MEMPOOL_STAGE);
+				chr->roboguns[0]->beam->age = -1;
+				chr->roboguns[1]->beam->age = -1;
 				chr->height = 200;
 				chr->radius = 42;
 			}

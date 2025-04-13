@@ -94,13 +94,13 @@ void bheadReset(void)
 
 	{
 		struct modelrenderdata renderdata = {NULL, 1, 3};
-		Mtxf sp48;
+		Mtx sp48;
 
 		modelSetAnimation(&g_Vars.currentplayer->model, ANIM_TWO_GUN_HOLD, 0, 0, 0.5f, 0);
 
 		modelUpdateInfo(&g_Vars.currentplayer->model);
-		mtxIdent((Mtx*)&sp48);
-		renderdata.unk00 = &sp48;
+		mtxIdent(&sp48);
+		renderdata.unk00 = (Mtxf*)&sp48;
 		renderdata.unk10 = g_Vars.currentplayer->bondheadmatrices;
 		modelSetMatricesWithAnim(&renderdata, &g_Vars.currentplayer->model);
 

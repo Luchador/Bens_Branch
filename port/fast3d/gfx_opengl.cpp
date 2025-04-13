@@ -242,7 +242,7 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     struct CCFeatures cc_features = { 0 };
     gfx_cc_get_features(shader_id0, shader_id1, &cc_features);
 
-    char vs_buf[2048];
+    char vs_buf[4096];
     char fs_buf[8192];
     size_t vs_len = 0;
     size_t fs_len = 0;
@@ -279,6 +279,7 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
             }
         }
     }
+
     if (cc_features.opt_fog) {
         append_line(vs_buf, &vs_len, "INPUT vec4 aFog;");
         append_line(vs_buf, &vs_len, "OUTPUT vec4 vFog;");
@@ -309,9 +310,11 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
             }
         }
     }
+
     if (cc_features.opt_fog) {
         append_line(vs_buf, &vs_len, "    vFog = aFog;");
     }
+    
     for (int i = 0; i < cc_features.num_inputs; i++) {
         vs_len += sprintf(vs_buf + vs_len, "    vInput%d = aInput%d;\n", i + 1, i + 1);
     }
@@ -335,10 +338,6 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
 
     fs_len += sprintf(fs_buf + fs_len, "#version %s\n", gl_glsl_version_str);
 
-    if (gl_es) {
-        append_line(fs_buf, &fs_len, "precision mediump float;");
-    }
-
     append_line(fs_buf, &fs_len, "#define INPUT in");
     append_line(fs_buf, &fs_len, "#define OUTPUT_COLOR outColor");
     append_line(fs_buf, &fs_len, "#define SAMPLE_TEX(tex, uv) texture(tex, uv)");
@@ -349,6 +348,7 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     append_line(fs_buf, &fs_len, "#define TEX_OFFSET(tex, uv, texSize, off) SAMPLE_TEX(tex, uv - (off)/texSize)");
 
     append_line(fs_buf, &fs_len, "precision mediump float;");
+
     for (int i = 0; i < 2; i++) {
         if (cc_features.used_textures[i]) {
             fs_len += sprintf(fs_buf + fs_len, "INPUT vec2 vTexCoord%d;\n", i);
@@ -359,9 +359,11 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
             }
         }
     }
+
     if (cc_features.opt_fog) {
         append_line(fs_buf, &fs_len, "INPUT vec4 vFog;");
     }
+
     for (int i = 0; i < cc_features.num_inputs; i++) {
         fs_len += sprintf(fs_buf + fs_len, "INPUT vec%d vInput%d;\n", cc_features.opt_alpha ? 4 : 3, i + 1);
     }
@@ -373,6 +375,7 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         if (current_filter_mode == FILTER_THREE_POINT)
             append_line(fs_buf, &fs_len, "uniform int three_point_filter0;");
     }
+
     if (cc_features.used_textures[1]) {
         append_line(fs_buf, &fs_len, "uniform sampler2D uTex1;");
         if (current_filter_mode == FILTER_THREE_POINT)

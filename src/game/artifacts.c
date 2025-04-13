@@ -77,8 +77,8 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 	float clampDiff;
 	float depthFalloff;
 	float directionalScale;
-	Mtxf sp138;
-	Mtxf spf8;
+	Mtx sp138;
+	Mtx spf8;
 	struct coord spec;
 	float screenPos[4];
 	int index;
@@ -99,9 +99,9 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 	struct light *roomlights = (struct light *)&g_BgLightsFileData[g_Rooms[roomnum].gfxdata->lightsindex * 0x22];
 	uint8_t *lightGlares = &var800a41a0[g_Rooms[roomnum].gfxdata->lightsindex * 3];
 
-	roomPopulateMtx(&sp138, roomnum);
-	mtxScale3x4(bgGetScaleBg2Gfx(), (Mtx*)&sp138);
-	mtx4MultMtx4(camGetArtifactMtx(), (Mtx*)&sp138, (Mtx*)&spf8);
+	roomPopulateMtx((Mtxf*)&sp138, roomnum);
+	mtxScale3x4(bgGetScaleBg2Gfx(), &sp138);
+	mtx4MultMtx4(camGetArtifactMtx(), &sp138, &spf8);
 
 	float viewwidth = viGetViewWidth();
 	float viewheight = viGetViewHeight();
@@ -146,7 +146,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 
 		if (directionalDot > 0.0f) {
 			for (int l = 3; l >= 0; l--) {
-				screenPos[l] = lightOrigin.f[0] * spf8.m[0][l] + lightOrigin.f[1] * spf8.m[1][l] + lightOrigin.f[2] * spf8.m[2][l] + spf8.m[3][l];
+				screenPos[l] = lightOrigin.f[0] * spf8[0][l] + lightOrigin.f[1] * spf8[1][l] + lightOrigin.f[2] * spf8[2][l] + spf8[3][l];
 
 				if (l == 3 && screenPos[l] <= 0.0f) {
 					break;
@@ -240,7 +240,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 				spec.z = lightOrigin.z + (roomlights[i].bbox[j].z - lightOrigin.z) * 0.6f;
 
 				for (int k = 3; k >= 0; k--) {
-					screenPos[k] = spec.f[0] * spf8.m[0][k] + spec.f[1] * spf8.m[1][k] + spec.f[2] * spf8.m[2][k] + spf8.m[3][k];
+					screenPos[k] = spec.f[0] * spf8[0][k] + spec.f[1] * spf8[1][k] + spec.f[2] * spf8[2][k] + spf8[3][k];
 
 					if (k == 3 && screenPos[k] <= 0.0f) {
 						break;
@@ -438,7 +438,7 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 						lightscreenpos.f[l] = lightworldpos.f[l] - g_Vars.currentplayer->cam_pos.f[l];
 					}
 
-					mtx4RotateVecInPlace((Mtx*)camGetWorldToScreenMtxf(), &lightscreenpos);
+					mtx4RotateVecInPlace((Mtx*)camGetPlayerWorldToScreenMtx(), &lightscreenpos);
 
 					camProjectViewToScreen(&lightscreenpos, screenPos);
 

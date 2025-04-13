@@ -992,7 +992,6 @@ static void gfx_matrix_mul(float res[4][4], const float a[4][4], const float b[4
 static void gfx_sp_matrix(uint8_t parameters, const int32_t* addr) {
     float matrix[4][4];
 
-    // For a modified GBI where fixed point values are replaced with floats
     memcpy(matrix, addr, sizeof(matrix));
 
     if (parameters & G_MTX_PROJECTION) {
@@ -1204,8 +1203,8 @@ static void gfx_sp_modify_vertex(uint16_t vtx_idx, uint8_t where, uint32_t val) 
 }
 
 static inline int gfx_lod_tile_offset(const int i) {
-    if (dtenabled)
-        return ((rdp.tex_lod && !rdp.tex_detail) ? 0 : i);
+    //if (dtenabled)
+        //return ((rdp.tex_lod && !rdp.tex_detail) ? 0 : i);
     return (rdp.tex_lod ? rdp.tex_detail : i);
 }
 
@@ -1294,7 +1293,7 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
     const bool use_noise = (rdp.other_mode_l & (3U << G_MDSFT_ALPHACOMPARE)) == G_AC_DITHER;
     const bool use_2cyc = (rdp.other_mode_h & (3U << G_MDSFT_CYCLETYPE)) == G_CYC_2CYCLE;
     const bool alpha_threshold = (rdp.other_mode_l & (3U << G_MDSFT_ALPHACOMPARE)) == G_AC_THRESHOLD;
-    const bool invisible = (rdp.other_mode_l & (3 << 24)) == (G_BL_0 << 24) && (rdp.other_mode_l & (3 << 20)) == (G_BL_CLR_MEM << 20);
+    //const bool invisible = (rdp.other_mode_l & (3 << 24)) == (G_BL_0 << 24) && (rdp.other_mode_l & (3 << 20)) == (G_BL_CLR_MEM << 20);
     const bool use_grayscale = rdp.grayscale;
     const bool use_modulate = use_alpha && (rsp.extra_geometry_mode & G_MODULATE_EXT) != 0;
     const bool use_blur = (rdp.other_mode_h & (3U << G_MDSFT_TEXTFILT)) == G_TF_BLUR_EXT;
@@ -1321,9 +1320,9 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
     if (alpha_threshold) {
         cc_options |= (uint64_t)SHADER_OPT_ALPHA_THRESHOLD;
     }
-    if (invisible) {
+    /*if (invisible) {
         cc_options |= (uint64_t)SHADER_OPT_INVISIBLE;
-    }
+    }*/
     if (use_grayscale) {
         cc_options |= (uint64_t)SHADER_OPT_GRAYSCALE;
     }
