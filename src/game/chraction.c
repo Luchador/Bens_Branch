@@ -39,6 +39,7 @@
 #include "game/prop.h"
 #include "game/propobj.h"
 #include "game/propsnd.h"
+#include "game/room.h"
 #include "game/sparks.h"
 #include "game/stagetable.h"
 #include "game/tex.h"
@@ -5099,7 +5100,7 @@ bool chrIsRoomOffScreen(struct chrdata *chr, struct coord *waypos, RoomNum *wayr
 		for (i = 0; i < PLAYERCOUNT(); i++) {
 			portalTraceLineThroughRooms(waypos, &g_Vars.players[i]->prop->pos, wayrooms, sp50, 0, 0);
 
-			if (arrayIntersects(g_Vars.players[i]->prop->rooms, sp50)) {
+			if (roomArrayIntersects(g_Vars.players[i]->prop->rooms, sp50)) {
 				offscreen = false;
 				break;
 			}
@@ -13848,7 +13849,7 @@ bool chrIsTargetAimingAtMe(struct chrdata *chr)
 				modelGetRootPosition(model, &sp44);
 				mtx4TransformVecInPlace(camGetPlayerWorldToScreenMtx(), &sp44);
 
-				if (func0f06b39c(&sp68, &sp56, &sp44, somefloat)) {
+				if (utilsIsPointInCone(&sp68, &sp56, &sp44, somefloat)) {
 					return true;
 				}
 			}
@@ -14711,7 +14712,7 @@ int chrAssignCoverByCriteria(struct chrdata *chr, uint16_t criteria, int refdist
 		if (coverUnpack(i, &cover)
 				&& !coverIsSpecial(&cover)
 				&& ((criteria & COVERCRITERIA_2000) == 0 || (cover.flags & COVERFLAG_OMNIDIRECTIONAL))
-				&& ((criteria & COVERCRITERIA_1000) || (cover.flags & COVERFLAG_AIMDIFFROOM) == 0 || !arrayIntersects(cover.rooms, target->rooms))) {
+				&& ((criteria & COVERCRITERIA_1000) || (cover.flags & COVERFLAG_AIMDIFFROOM) == 0 || !roomArrayIntersects(cover.rooms, target->rooms))) {
 			userandomdist = false;
 
 			if ((criteria & COVERCRITERIA_0001) && (criteria & COVERCRITERIA_FURTHEREST)) {
@@ -14740,12 +14741,12 @@ int chrAssignCoverByCriteria(struct chrdata *chr, uint16_t criteria, int refdist
 					bgRoomGetNeighbours(roomprop->rooms[0], &rooms[0], 7);
 				}
 
-				if (((criteria & COVERCRITERIA_0040) == 0 || !arrayIntersects(cover.rooms, rooms))
-						&& ((criteria & COVERCRITERIA_0020) == 0 || arrayIntersects(cover.rooms, rooms))
+				if (((criteria & COVERCRITERIA_0040) == 0 || !roomArrayIntersects(cover.rooms, rooms))
+						&& ((criteria & COVERCRITERIA_0020) == 0 || roomArrayIntersects(cover.rooms, rooms))
 						&& (rooms[1] == -1
 							|| chr->oldrooms[0] == -1
 							|| (criteria & COVERCRITERIA_0200) == 0
-							|| !arrayIntersects(cover.rooms, chr->oldrooms))) {
+							|| !roomArrayIntersects(cover.rooms, chr->oldrooms))) {
 					if (criteria & COVERCRITERIA_DISTTOME) {
 						sqdist = chrGetSquaredDistanceToCoord(chr, cover.pos);
 					} else if (criteria & COVERCRITERIA_DISTTOTARGET) {

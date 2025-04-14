@@ -5,6 +5,7 @@
 #include "game/prop.h"
 #include "game/textutils.h"
 #include "game/bg.h"
+#include "game/room.h"
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/dma.h"
@@ -3248,65 +3249,74 @@ bool cdTestAToB(struct coord *pos, struct coord *coord2, RoomNum *rooms, int32_t
 	return true;
 }
 
-int cdExamAToB(struct coord *arg0, struct coord *arg1, RoomNum *rooms, int types, int16_t geoflags, bool checkvertical, int arg6, float ymax, float ymin)
+int cdExamAToB(struct coord *from, struct coord *to, RoomNum *rooms, int types,
+               int16_t geoflags, bool checkvertical, int flags, float ymax, float ymin)
 {
-	int roomnum;
-	RoomNum *roomptr;
-	uint8_t *start;
-	uint8_t *end;
-	struct coord sp2c4;
-	bool sp2c0 = false;
-	struct coord sp2b4;
-	struct coord sp2a8;
-	struct coord sp29c;
-	float sp298 = 4294967296;
-	struct geo *sp294;
-	int16_t *propnumptr;
+	RoomNum roomnum;
+	RoomNum *roomiter;
+	uint8_t *geolistStart;
+	uint8_t *geolistEnd;
+	struct coord dir;                 // Direction vector from A to B
+	bool collided = false;
+	struct coord collisionNormal;
+	struct coord hitPos;
+	struct coord edgeDir;
+	float closestDist = 4294967296.0f;
+	struct geo *hitGeo = NULL;
+	int16_t *propiter;
 	int16_t propnums[256];
 
-	sp2c4.x = arg1->x - arg0->x;
-	sp2c4.y = arg1->y - arg0->y;
-	sp2c4.z = arg1->z - arg0->z;
+	// Compute direction vector from A to B
+	dir.x = to->x - from->x;
+	dir.y = to->y - from->y;
+	dir.z = to->z - from->z;
 
+	// --- Check against background geometry in each room ---
 	if (types & CDTYPE_BG) {
-		roomptr = rooms;
+		roomiter = rooms;
 		roomnum = rooms[0];
 
 		while (roomnum != -1) {
 			if (roomnum < g_TileNumRooms) {
-				int32_t *ptr = &g_TileRooms[roomnum];
-				start = g_TileFileData.uint8_t + ptr[0];
-				end = g_TileFileData.uint8_t + ptr[1];
+				int32_t *roomOffsets = &g_TileRooms[roomnum];
+				geolistStart = g_TileFileData.uint8_t + roomOffsets[0];
+				geolistEnd = g_TileFileData.uint8_t + roomOffsets[1];
 
-				if (!cdExamAToBGeolist(start, end, arg0, arg1, &sp2c4, geoflags, checkvertical, arg6, ymax, ymin, &sp298, &sp2b4, &sp2a8, &sp29c, &sp294, roomnum)) {
-					sp2c0 = true;
-					cdSetObstacleVtxColPropFltGeo(&sp2a8, &sp29c, &sp2b4, NULL, sp298, sp294);
+				if (!cdExamAToBGeolist(geolistStart, geolistEnd, from, to, &dir,
+						geoflags, checkvertical, flags, ymax, ymin,
+						&closestDist, &collisionNormal, &hitPos, &edgeDir, &hitGeo, roomnum)) {
+					collided = true;
+					cdSetObstacleVtxColPropFltGeo(&hitPos, &edgeDir, &collisionNormal, NULL, closestDist, hitGeo);
 				}
 			}
 
-			roomptr++;
-			roomnum = *roomptr;
+			roomiter++;
+			roomnum = *roomiter;
 		}
 	}
 
-	roomGetProps(rooms, propnums, 256);
-	propnumptr = propnums;
+	// --- Check against dynamic props in the same rooms ---
+	roomGetProps(rooms, propnums, ARRAYCOUNT(propnums));
+	propiter = propnums;
 
-	while (*propnumptr >= 0) {
-		struct prop *prop = &g_Vars.props[*propnumptr];
+	while (*propiter >= 0) {
+		struct prop *prop = &g_Vars.props[*propiter];
 
 		if (propIsOfCdType(prop, types)
-				&& propUpdateGeometry(prop, &start, &end)
-				&& !cdExamAToBGeolist(start, end, arg0, arg1, &sp2c4, geoflags, checkvertical, arg6, ymax, ymin, &sp298, &sp2b4, &sp2a8, &sp29c, &sp294, -999)) {
-			sp2c0 = true;
-			cdSetObstacleVtxColPropFltGeo(&sp2a8, &sp29c, &sp2b4, prop, sp298, sp294);
+				&& propUpdateGeometry(prop, &geolistStart, &geolistEnd)
+				&& !cdExamAToBGeolist(geolistStart, geolistEnd, from, to, &dir,
+					geoflags, checkvertical, flags, ymax, ymin,
+					&closestDist, &collisionNormal, &hitPos, &edgeDir, &hitGeo, -999)) {
+			collided = true;
+			cdSetObstacleVtxColPropFltGeo(&hitPos, &edgeDir, &collisionNormal, prop, closestDist, hitGeo);
 		}
 
-		propnumptr++;
+		propiter++;
 	}
 
-	return !sp2c0;
+	return !collided;
 }
+
 
 bool cdTestCylMove01(struct coord *pos, RoomNum *rooms, struct coord *targetpos, int32_t types, int32_t arg4, float ymax, float ymin)
 {
@@ -3326,7 +3336,7 @@ int cdTestCylMove02(struct coord *pos, RoomNum *rooms, struct coord *coord2, Roo
 
 	propFindRoomsContainingNewPos(pos, rooms, coord2, sp34, sp44, 20);
 
-	if (arrayIntersects(sp34, rooms2)) {
+	if (roomArrayIntersects(sp34, rooms2)) {
 		result = cdTestAToB(pos, coord2, sp44, types, GEOFLAG_WALL, CHECKVERTICAL_NO, arg5, ymax, ymin);
 	} else {
 		result = CDRESULT_COLLISION;
@@ -3364,7 +3374,7 @@ int cdExamCylMove05(struct coord *pos, RoomNum *rooms, struct coord *pos2, RoomN
 
 	result = cdExamAToB(pos, pos2, sp44, types, GEOFLAG_WALL, CHECKVERTICAL_NO, arg5, ymax, ymin);
 
-	if (result != CDRESULT_COLLISION && !arrayIntersects(sp34, rooms2)) {
+	if (result != CDRESULT_COLLISION && !roomArrayIntersects(sp34, rooms2)) {
 		cdClearResults();
 		result = CDRESULT_ERROR;
 	}
@@ -3389,7 +3399,7 @@ int cdExamCylMove06(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomN
 		sp40.z = arg2->z - arg0->z;
 
 		cdComputeSlideTimeToEdgeXZ(arg0, &sp40, width);
-	} else if (!arrayIntersects(sp4c, arg3)) {
+	} else if (!roomArrayIntersects(sp4c, arg3)) {
 		cdClearResults();
 		result = CDRESULT_ERROR;
 	}
@@ -3450,7 +3460,7 @@ bool cdTestLos05(struct coord *coord, RoomNum *rooms, struct coord *coord2, Room
 
 	propFindRoomsContainingNewPos(coord, rooms, coord2, sp34, sp44, 20);
 
-	if (arrayIntersects(sp34, rooms2)) {
+	if (roomArrayIntersects(sp34, rooms2)) {
 		result = cdTestAToB(coord, coord2, sp44, types, geoflags, CHECKVERTICAL_YES, 1, 0, 0);
 	} else {
 		result = false;
@@ -3471,7 +3481,7 @@ bool cdTestLos07(struct coord *pos, RoomNum *rooms, struct coord *pos2, RoomNum 
 
 	propFindRoomsContainingNewPos(pos, rooms, pos2, rooms3, sp34, 20);
 
-	if (arrayIntersects(rooms3, rooms2)) {
+	if (roomArrayIntersects(rooms3, rooms2)) {
 		result = cdTestAToB(pos, pos2, sp34, types, geoflags, CHECKVERTICAL_YES, 1, 0, 0);
 	} else {
 		result = false;

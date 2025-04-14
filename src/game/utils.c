@@ -290,7 +290,7 @@ int utilCompressRoomData(uint8_t *input, int numEntries, uint8_t *output, int en
     return outputIndex;
 }
 
-int utilDecompressRoomData(uint8_t *arg0, int *arg1, int *roomnum)
+int utilsDecompressRoomData(uint8_t *arg0, int *arg1, int *roomnum)
 {
 	int result;
 
@@ -323,14 +323,14 @@ int utilDecompressRoomData(uint8_t *arg0, int *arg1, int *roomnum)
 	return result;
 }
 
-void InterpTwoPoints(struct coord *arg0, struct coord *arg1, float standfrac, struct coord *vel)
+void utilsInterpTwoPoints(struct coord *arg0, struct coord *arg1, float standfrac, struct coord *vel)
 {
 	vel->x = (arg1->x - arg0->x) * standfrac + arg0->x;
 	vel->y = (arg1->y - arg0->y) * standfrac + arg0->y;
 	vel->z = (arg1->z - arg0->z) * standfrac + arg0->z;
 }
 
-void CatmullRomSplineInterp(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, float arg4, struct coord *arg5)
+void utilsCatmullRomSplineInterp(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, float arg4, struct coord *arg5)
 {
 	float mult0;
 	float mult1;
@@ -350,7 +350,31 @@ void CatmullRomSplineInterp(struct coord *arg0, struct coord *arg1, struct coord
 	arg5->z = mult0 * arg0->f[2] + mult1 * arg1->f[2] + mult2 * arg2->f[2] + mult3 * arg3->f[2];
 }
 
-static bool implementation(
+bool utilsIsPointInCone(struct coord *arg0, struct coord *arg1, struct coord *arg2, float arg3)
+{
+	struct coord sp0c; // vector from arg0 to arg2
+	float value;
+
+	sp0c.x = arg2->x - arg0->x;
+	sp0c.y = arg2->y - arg0->y;
+	sp0c.z = arg2->z - arg0->z;
+
+	value = arg1->f[0] * sp0c.f[0] + arg1->f[1] * sp0c.f[1] + arg1->f[2] * sp0c.f[2]; // dot product of arg1 and sp0c
+
+	if (value > 0) { // sp0c points in the same general direction as arg1
+		float a = arg1->f[0] * arg1->f[0] + arg1->f[1] * arg1->f[1] + arg1->f[2] * arg1->f[2];
+		float b = sp0c.f[0] * sp0c.f[0] + sp0c.f[1] * sp0c.f[1] + sp0c.f[2] * sp0c.f[2];
+
+		if ((b - arg3 * arg3) * a <= value * value) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+// Möller–Trumbore algorithm
+static bool utilsTriRayIntersectionTest(
 	float f0, float f1, float f2,
 	float f12, float f13, float f14,
 	float f15, float f16, float f17,
@@ -540,7 +564,7 @@ bool func0002f490(struct vec3s16 *arg0, struct vec3s16 *arg1, struct vec3s16 *ar
 	struct coord *t2, struct coord *t3, struct coord *t4)
 {
 // Casting arg0/arg1/arg2 properties from s16 to float
-return implementation(
+return utilsTriRayIntersectionTest(
 		arg0->x, arg0->y, arg0->z,
 		arg1->x, arg1->y, arg1->z,
 		arg2->x, arg2->y, arg2->z,
@@ -552,9 +576,10 @@ bool func0002f560(struct coord *arg0, struct coord *arg1, struct coord *arg2,
 	struct coord *t2, struct coord *t3, struct coord *t4)
 {
 // No casting (arg0/arg1/arg2 properties are already floats)
-return implementation(
+return utilsTriRayIntersectionTest(
 		arg0->x, arg0->y, arg0->z,
 		arg1->x, arg1->y, arg1->z,
 		arg2->x, arg2->y, arg2->z,
 		arg3, t0, t1, t2, t3, t4);
 }
+

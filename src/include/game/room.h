@@ -17,3 +17,4 @@ int roomTouchMtx(int roomnum);
 Gfx *roomApplyMtx(Gfx *gdl, int roomnum);
 struct coord *roomGetPosPtr(int room);
 void roomGetPos(int room, struct coord *pos);
+bool roomArrayIntersects(RoomNum *a, RoomNum *b);

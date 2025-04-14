@@ -595,7 +595,7 @@ bool explosionOverlapsProp(struct explosion *exp, struct prop *prop, struct coor
 
 			rooms[2] = -1;
 
-			if (arrayIntersects(prop->rooms, rooms)
+			if (roomArrayIntersects(prop->rooms, rooms)
 					&& minpos->x <= exp->bbs[i].bbmax.x
 					&& minpos->y <= exp->bbs[i].bbmax.y
 					&& minpos->z <= exp->bbs[i].bbmax.z

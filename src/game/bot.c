@@ -19,6 +19,7 @@
 #include "game/botact.h"
 #include "game/botinv.h"
 #include "game/challenge.h"
+#include "game/room.h"
 #include "game/lang.h"
 #include "game/mplayer/mplayer.h"
 #include "game/pad.h"
@@ -721,7 +722,7 @@ bool botIsAboutToAttack(struct chrdata *chr, bool arg1)
 
 		if (chr->aibot->config->difficulty > BOTDIFF_MEAT) {
 			if (chr->aibot->chrslastseen60[mpindex] >= g_Vars.lvframe60 - TICKS(240)
-					|| (arrayIntersects(chr->prop->rooms, target->rooms))) {
+					|| (roomArrayIntersects(chr->prop->rooms, target->rooms))) {
 				result = true;
 			}
 

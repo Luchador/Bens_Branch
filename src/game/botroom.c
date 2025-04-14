@@ -12,6 +12,8 @@
 #include "game/lang.h"
 #include "game/mplayer/mplayer.h"
 #include "game/mplayer/scenarios.h"
+#include "game/utils.h"
+#include "game/room.h"
 #include "game/pad.h"
 #include "bss.h"
 #include "lib/dma.h"
@@ -78,7 +80,7 @@ bool botroomFindPos(RoomNum room, struct coord *pos, float *angleptr, int *padnu
 		count = coverGetCount();
 
 		for (i = 0; i < count; i++) {
-			if (coverUnpack(i, &cover) && !coverIsSpecial(&cover) && arrayIntersects(cover.rooms, rooms)) {
+			if (coverUnpack(i, &cover) && !coverIsSpecial(&cover) && roomArrayIntersects(cover.rooms, rooms)) {
 				if (sp50 && (cover.flags & COVERFLAG_AIBOTINUSE)) {
 					coverUnsetFlag(i, COVERFLAG_AIBOTINUSE);
 					covernums[covercount] = i;

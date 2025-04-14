@@ -2602,7 +2602,7 @@ struct player {
 	/*0x1734*/ float c_recipscaley;
 	/*0x1738*/ Mtx *mtxl1738;
 	/*0x173c*/ Mtx *mtxl173c;
-	/*0x1740*/ Mtxf *worldtoscreenmtx;
+	/*0x1740*/ Mtx *worldtoscreenmtx;
 	/*0x1744*/ int c_viewfmdynticknum;
 	/*0x1748*/ Mtxf *mtxf1748;
 	/*0x174c*/ Mtxf *projectionmtx;

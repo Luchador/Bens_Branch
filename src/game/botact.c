@@ -13,6 +13,7 @@
 #include "game/pad.h"
 #include "game/padhalllv.h"
 #include "game/propobj.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/rng.h"
 #include "lib/anim.h"
@@ -247,7 +248,7 @@ bool botactShootFarsight(struct chrdata *chr, int arg1, struct coord *vector, st
 				// chance of passing.
 				if (oppchr != chr
 						&& value > rand
-						&& func0f06b39c(arg3, vector, &oppprop->pos, chrGetHitRadius(oppchr))) {
+						&& utilsIsPointInCone(arg3, vector, &oppprop->pos, chrGetHitRadius(oppchr))) {
 					bgunPlayPropHitSound(&gset, oppprop, -1);
 
 					if (oppchr->model && chrGetShield(oppchr) > 0) {

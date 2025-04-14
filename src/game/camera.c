@@ -210,8 +210,8 @@ void camSetWorldToScreenMtx(Mtx *mtx)
 {
 	struct player *player = g_Vars.currentplayer;
 
-	player->prevworldtoscreenmtx = (Mtx*)player->worldtoscreenmtx;
-	player->worldtoscreenmtx = (Mtxf*)mtx;
+	player->prevworldtoscreenmtx = player->worldtoscreenmtx;
+	player->worldtoscreenmtx = mtx;
 	player->c_viewfmdynticknum = g_GfxNumSwaps;
 	player->unk0488 = player->unk0484;
 	player->unk0484 = g_GfxMemPos;
@@ -219,15 +219,16 @@ void camSetWorldToScreenMtx(Mtx *mtx)
 
 Mtx *camGetWorldToScreenMtx(uint8_t *arg0)
 {
-	Mtxf *result = NULL;
 	int i;
 
+	// Check against active VTX buffer range
 	if (arg0 >= g_VtxBuffers[g_GfxActiveBufferIndex] && arg0 < g_VtxBuffers[g_GfxActiveBufferIndex + 1]) {
 		for (i = 0; i < PLAYERCOUNT(); i++) {
 			if (g_Vars.currentplayerindex >= playermgrGetOrderOfPlayer(i)) {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_viewfmdynticknum) {
-					if (arg0 >= g_Vars.players[i]->unk0484 && (uint8_t *)result < g_Vars.players[i]->unk0484) {
-						result = g_Vars.players[i]->worldtoscreenmtx;
+					if (arg0 >= g_Vars.players[i]->unk0484 &&
+							(uintptr_t)arg0 < (uintptr_t)g_Vars.players[i]->unk0484) {
+						return g_Vars.players[i]->worldtoscreenmtx;
 					}
 				}
 			}
@@ -236,21 +237,23 @@ Mtx *camGetWorldToScreenMtx(uint8_t *arg0)
 		for (i = 0; i < PLAYERCOUNT(); i++) {
 			if (g_Vars.currentplayerindex >= playermgrGetOrderOfPlayer(i)) {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_prevviewfmdynticknum + 1) {
-					if (arg0 >= g_Vars.players[i]->unk0488 && (uint8_t *)result < g_Vars.players[i]->unk0488) {
-						result = (Mtxf*)g_Vars.players[i]->prevworldtoscreenmtx;
+					if (arg0 >= g_Vars.players[i]->unk0488 &&
+							(uintptr_t)arg0 < (uintptr_t)g_Vars.players[i]->unk0488) {
+						return g_Vars.players[i]->prevworldtoscreenmtx;
 					}
 				}
 			} else {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_viewfmdynticknum + 1) {
-					if (arg0 >= g_Vars.players[i]->unk0484 && (uint8_t *)result < g_Vars.players[i]->unk0484) {
-						result = g_Vars.players[i]->worldtoscreenmtx;
+					if (arg0 >= g_Vars.players[i]->unk0484 &&
+							(uintptr_t)arg0 < (uintptr_t)g_Vars.players[i]->unk0484) {
+						return g_Vars.players[i]->worldtoscreenmtx;
 					}
 				}
 			}
 		}
 	}
 
-	return (Mtx*)result;
+	return NULL;
 }
 
 Mtx *camGetProjectionMtxForPlayers(uint8_t *arg0)
@@ -291,7 +294,7 @@ Mtx *camGetProjectionMtxForPlayers(uint8_t *arg0)
 
 Mtx *camGetPlayerWorldToScreenMtx(void)
 {
-	return (Mtx*)g_Vars.currentplayer->worldtoscreenmtx;
+	return g_Vars.currentplayer->worldtoscreenmtx;
 }
 
 void camSetSkyMtx(Mtx *mtx)

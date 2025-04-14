@@ -244,11 +244,11 @@ float playerChooseSpawnLocation(float chrradius, struct coord *dstpos, RoomNum *
 					bestsqdist = sqdist;
 				}
 
-				if (arrayIntersects(tmppadrooms, g_MpBotChrPtrs[i]->prop->rooms)) {
+				if (roomArrayIntersects(tmppadrooms, g_MpBotChrPtrs[i]->prop->rooms)) {
 					verybadpads[p] = true;
 				}
 
-				if (verybadpads[p] || arrayIntersects(neighbours, g_MpBotChrPtrs[i]->prop->rooms)) {
+				if (verybadpads[p] || roomArrayIntersects(neighbours, g_MpBotChrPtrs[i]->prop->rooms)) {
 					badpads[p] = true;
 				}
 			}
@@ -922,7 +922,7 @@ void playerSpawn(void)
 
 					if (g_Vars.lvframenum > 0
 							&& (g_ChrSlots[i].hidden & CHRHFLAG_ONBONDSSCREEN)
-							&& func0f06b39c(&sp78, &sp90, &g_ChrSlots[i].prop->pos, modelGetEffectiveScale(g_ChrSlots[i].model))
+							&& utilsIsPointInCone(&sp78, &sp90, &g_ChrSlots[i].prop->pos, modelGetEffectiveScale(g_ChrSlots[i].model))
 							&& (rngRandom() % 8)) {
 						sqdist += 1000 * 1000;
 					}

@@ -14,6 +14,7 @@
 #include "game/training.h"
 #include "game/lang.h"
 #include "game/propobj.h"
+#include "game/room.h"
 #include "bss.h"
 #include "lib/dma.h"
 #include "lib/memp.h"
@@ -387,7 +388,7 @@ void objectiveCheckThrowInRoom(int arg0, RoomNum *inrooms)
 				requirerooms[0] = room;
 				requirerooms[1] = -1;
 
-				if (arrayIntersects(requirerooms, inrooms)) {
+				if (roomArrayIntersects(requirerooms, inrooms)) {
 					criteria->status = OBJECTIVE_COMPLETE;
 				}
 			}

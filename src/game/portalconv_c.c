@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <string.h>
 #include "constants.h"
 #include "bss.h"
 #include "lib/memp.h"
@@ -13,7 +14,9 @@
  */
 int portalConvertCoordinates(int portalnum, int *start, struct portalthing2 *things)
 {
-	Mtxf *mtx = g_Vars.currentplayer->worldtoscreenmtx;
+	Mtx mtx;
+	memcpy(mtx, g_Vars.currentplayer->worldtoscreenmtx, sizeof(Mtx));
+
 	struct portalvertices *pvertices = (struct portalvertices *) ((uintptr_t) g_BgPortals + g_BgPortals[portalnum].verticesoffset);
 	struct portalthing2 *left;
 	struct portalthing2 *right = &things[39];
@@ -25,13 +28,13 @@ int portalConvertCoordinates(int portalnum, int *start, struct portalthing2 *thi
 		float y = pvertices->vertices[i].y;
 		float z = pvertices->vertices[i].z;
 
-		right->coord.x = mtx->m[0][0] * x + mtx->m[1][0] * y + mtx->m[2][0] * z;
-		right->coord.y = mtx->m[0][1] * x + mtx->m[1][1] * y + mtx->m[2][1] * z;
-		right->coord.z = mtx->m[0][2] * x + mtx->m[1][2] * y + mtx->m[2][2] * z;
+		right->coord.x = mtx[0][0] * x + mtx[1][0] * y + mtx[2][0] * z;
+		right->coord.y = mtx[0][1] * x + mtx[1][1] * y + mtx[2][1] * z;
+		right->coord.z = mtx[0][2] * x + mtx[1][2] * y + mtx[2][2] * z;
 
-		right->coord.x += mtx->m[3][0];
-		right->coord.y += mtx->m[3][1];
-		right->coord.z += mtx->m[3][2];
+		right->coord.x += mtx[3][0];
+		right->coord.y += mtx[3][1];
+		right->coord.z += mtx[3][2];
 
 		if (right->coord.z < 0.0f) {
 			right->behind = false;

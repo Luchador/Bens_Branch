@@ -3625,10 +3625,10 @@ char *invMenuTextWeaponName(struct menuitem *item)
 
 	if (weapon) {
 		if (weapon->manufacturer == L_GUN_000) { // "\n"
-			return langRemoveNewline(langGet(L_OPTIONS_003)); // "\n"
+			return langGet(L_OPTIONS_003); // "\n"
 		}
 
-		return langRemoveNewline(langGet(weapon->name));
+		return langGet(weapon->name);
 	}
 
 	return langGet(L_OPTIONS_004); // "\n"
@@ -3732,6 +3732,7 @@ char *invMenuTextWeaponDescription(struct menuitem *item)
 	return langGet(L_OPTIONS_003); // "\n"
 }
 
+// Pause menu weapon list and weapon info
 struct menuitem g_SoloMissionInventoryMenuItems[] = {
 	{
 		MENUITEMTYPE_LIST,
@@ -4001,10 +4002,6 @@ MenuItemHandlerResult menuhandlerAbortMission(int operation, struct menuitem *it
 
 MenuDialogHandlerResult menudialogAbortMission(int operation, struct menudialogdef *dialogdef, union handlerdata *data)
 {
-	if (operation == MENUOP_TICK) {
-		// empty
-	}
-
 	return 0;
 }
 

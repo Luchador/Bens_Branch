@@ -190,3 +190,35 @@ void roomGetPos(int room, struct coord *pos)
 	pos->y = g_BgRooms[room].pos.y;
 	pos->z = g_BgRooms[room].pos.z;
 }
+
+/**
+ * Check if two room arrays share any room number.
+ *
+ * Both arrays are terminated by -1. The function returns true if there is
+ * at least one room number that appears in both arrays.
+ */
+bool roomArrayIntersects(RoomNum *a, RoomNum *b)
+{
+	RoomNum *aptr = a;
+	RoomNum aval = *aptr;
+	RoomNum *bptr;
+	RoomNum bval;
+
+	while (aval != -1) {
+		bptr = b; bval = *bptr;
+
+		while (bval != -1) {
+			if (aval == bval) {
+				return true;
+			}
+
+			bptr++;
+			bval = *bptr;
+		}
+
+		aptr++;
+		aval = *aptr;
+	}
+
+	return false;
+}

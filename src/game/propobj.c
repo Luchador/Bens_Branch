@@ -47,6 +47,7 @@
 #include "game/mpstats.h"
 #include "game/bot.h"
 #include "game/botact.h"
+#include "game/room.h"
 #include "game/training.h"
 #include "game/lang.h"
 #include "game/mplayer/mplayer.h"
@@ -987,7 +988,7 @@ struct defaultobj *objFindByPos(struct coord *pos, RoomNum *rooms)
 
 	while (prop) {
 		if (prop->type == PROPTYPE_OBJ
-				&& arrayIntersects(prop->rooms, rooms)
+				&& roomArrayIntersects(prop->rooms, rooms)
 				&& propUpdateGeometry(prop, &sp38, &sp34)
 				&& cd000266a4(pos->x, pos->z, (struct geo *)sp38)) {
 			return prop->obj;
@@ -2542,59 +2543,36 @@ float objGetRadius(struct defaultobj *obj)
 	return 10;
 }
 
-bool func0f06b39c(struct coord *arg0, struct coord *arg1, struct coord *arg2, float arg3)
-{
-	struct coord sp0c; // vector from arg0 to arg2
-	float value;
-
-	sp0c.x = arg2->x - arg0->x;
-	sp0c.y = arg2->y - arg0->y;
-	sp0c.z = arg2->z - arg0->z;
-
-	value = arg1->f[0] * sp0c.f[0] + arg1->f[1] * sp0c.f[1] + arg1->f[2] * sp0c.f[2]; // dot product of arg1 and sp0c
-
-	if (value > 0) { // sp0c points in the same general direction as arg1
-		float a = arg1->f[0] * arg1->f[0] + arg1->f[1] * arg1->f[1] + arg1->f[2] * arg1->f[2];
-		float b = sp0c.f[0] * sp0c.f[0] + sp0c.f[1] * sp0c.f[1] + sp0c.f[2] * sp0c.f[2];
-
-		if ((b - arg3 * arg3) * a <= value * value) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool func0f06b488(struct prop *prop, struct coord *arg1, struct coord *arg2, struct coord *arg3, struct coord *arg4, struct coord *arg5, float *arg6)
+bool projectileTryEmbedOnProp(struct prop *prop, struct coord *start, struct coord *end, struct coord *direction, struct coord *outPosition, struct coord *outNormal, float *closestDistance)
 {
 	struct coord sp3c;
 	struct coord sp30;
 	float f0;
 	struct coord sp20;
 
-	if (!cd0002ded8(arg1, arg2, prop)) {
+	if (!cd0002ded8(start, end, prop)) {
 		cdGetEdge(&sp3c, &sp30);
 		cdGetPos(&sp20);
 
-		f0 = (sp20.f[0] - arg1->f[0]) * arg3->f[0]
-			+ (sp20.f[1] - arg1->f[1]) * arg3->f[1]
-			+ (sp20.f[2] - arg1->f[2]) * arg3->f[2];
+		f0 = (sp20.f[0] - start->f[0]) * direction->f[0]
+			+ (sp20.f[1] - start->f[1]) * direction->f[1]
+			+ (sp20.f[2] - start->f[2]) * direction->f[2];
 
-		if (f0 < *arg6) {
-			*arg6 = f0;
+		if (f0 < *closestDistance) {
+			*closestDistance = f0;
 
-			arg4->x = sp20.x;
-			arg4->y = sp20.y;
-			arg4->z = sp20.z;
+			outPosition->x = sp20.x;
+			outPosition->y = sp20.y;
+			outPosition->z = sp20.z;
 
-			arg5->x = -arg3->x;
-			arg5->y = 0.0f;
-			arg5->z = -arg3->z;
+			outNormal->x = -direction->x;
+			outNormal->y = 0.0f;
+			outNormal->z = -direction->z;
 
-			if (arg5->x != 0.0f || arg5->z != 0.0f) {
-				utilsNormalizeF(&arg5->x, &arg5->y, &arg5->z);
+			if (outNormal->x != 0.0f || outNormal->z != 0.0f) {
+				utilsNormalizeF(&outNormal->x, &outNormal->y, &outNormal->z);
 			} else {
-				arg5->z = 1.0f;
+				outNormal->z = 1.0f;
 			}
 
 			g_EmbedProp = prop;
@@ -2609,7 +2587,8 @@ bool func0f06b488(struct prop *prop, struct coord *arg1, struct coord *arg2, str
 	return false;
 }
 
-bool func0f06b610(struct defaultobj *obj, struct coord *arg1, struct coord *arg2, struct coord *arg3, float arg4, struct coord *arg5, struct coord *arg6, struct coord *arg7, struct coord *arg8, float *arg9)
+// e.g. a crossbow bolt embedding in a character
+bool projectileTestEmbedComplex(struct defaultobj *obj, struct coord *arg1, struct coord *arg2, struct coord *arg3, float arg4, struct coord *arg5, struct coord *arg6, struct coord *arg7, struct coord *arg8, float *arg9)
 {
 	struct model *model = obj->model;
 	float f0 = modelGetEffectiveScale(model);
@@ -2766,8 +2745,8 @@ bool func0f06b610(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 				}
 			}
 		} else {
-			if (func0f06b39c(arg1, arg3, &prop->pos, modelGetEffectiveScale(model))
-					&& func0f06b488(prop, arg1, arg2, arg3, arg7, arg8, arg9)) {
+			if (utilsIsPointInCone(arg1, arg3, &prop->pos, modelGetEffectiveScale(model))
+					&& projectileTryEmbedOnProp(prop, arg1, arg2, arg3, arg7, arg8, arg9)) {
 				g_EmbedModel = model;
 				g_EmbedNode = model->definition->rootnode;
 				result = true;
@@ -2780,7 +2759,7 @@ bool func0f06b610(struct defaultobj *obj, struct coord *arg1, struct coord *arg2
 
 		while (child) {
 			if (child->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
-				if (func0f06b610(child->obj, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)) {
+				if (projectileTestEmbedComplex(child->obj, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)) {
 					result = true;
 				}
 			}
@@ -2973,7 +2952,7 @@ bool func0f06c28c(struct chrdata *chr, struct coord *arg1, struct coord *arg2, s
 		g_ExtraBoundsDist = 10.0f / chr->model->scale;
 	}
 
-	if (-spe4 <= spd4 && spd4 <= arg4 + spe4 && func0f06b39c(arg1, arg3, &prop->pos, spe4)) {
+	if (-spe4 <= spd4 && spd4 <= arg4 + spe4 && utilsIsPointInCone(arg1, arg3, &prop->pos, spe4)) {
 		if ((prop->flags & PROPFLAG_ONTHISSCREENTHISTICK)) {
 			if (g_ExtraBoundsDist > 0.0f) {
 				hitpart = modelTestForHit(model, arg5, arg6, &spcc);
@@ -3040,7 +3019,7 @@ bool func0f06c28c(struct chrdata *chr, struct coord *arg1, struct coord *arg2, s
 					result = true;
 				}
 			}
-		} else if (func0f06b488(prop, arg1, arg2, arg3, arg7, arg8, arg9)) {
+		} else if (projectileTryEmbedOnProp(prop, arg1, arg2, arg3, arg7, arg8, arg9)) {
 			g_EmbedHitPart = HITPART_TORSO;
 			result = true;
 		}
@@ -3051,7 +3030,7 @@ bool func0f06c28c(struct chrdata *chr, struct coord *arg1, struct coord *arg2, s
 
 		while (child) {
 			if (child->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
-				if (func0f06b610(child->obj, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)) {
+				if (projectileTestEmbedComplex(child->obj, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)) {
 					result = true;
 				}
 			}
@@ -3135,7 +3114,7 @@ bool projectileFindCollidingProp(struct prop *prop, struct coord *pos1, struct c
 							}
 						}
 
-						if (func0f06b610(obj, pos1, pos2, &sp98, dist, &sp88, &sp7c, arg4, arg5, &spa8)) {
+						if (projectileTestEmbedComplex(obj, pos1, pos2, &sp98, dist, &sp88, &sp7c, arg4, arg5, &spa8)) {
 							spa4 = true;
 						}
 					}
@@ -3160,7 +3139,7 @@ bool projectileFindCollidingProp(struct prop *prop, struct coord *pos1, struct c
 					}
 				} else if (iterprop->type == PROPTYPE_PLAYER
 						&& g_Vars.players[playermgrGetPlayerNumByProp(iterprop)]->bondperimenabled) {
-					if (func0f06b488(iterprop, pos1, pos2, &sp98, arg4, arg5, &spa8)) {
+					if (projectileTryEmbedOnProp(iterprop, pos1, pos2, &sp98, arg4, arg5, &spa8)) {
 						spa4 = true;
 					}
 				}
@@ -14935,7 +14914,8 @@ void ammotypeGetPickupName(char *dst, int ammotype2, int qty)
 	if (ammotype == AMMOTYPE_PISTOL || ammotype == AMMOTYPE_SMG || ammotype == AMMOTYPE_RIFLE) {
 		strcat(dst, langGet(L_PROPOBJ_010)); // "ammo"
 	} else if (ammotype == AMMOTYPE_KNIFE) {
-		strcat(dst, langGet(L_PROPOBJ_021)); // "combat"
+		char* combat = langRemoveNewline(langGet(L_PROPOBJ_021));
+		strcat(dst, combat); // "combat"
 
 		if (qty == 1) {
 			strcat(dst, langGet(L_PROPOBJ_022)); // "knife"
@@ -14972,6 +14952,11 @@ void ammotypeGetPickupName(char *dst, int ammotype2, int qty)
 
 		if (textnum >= 0) {
 			strcat(dst, langGet(textnum));
+		}
+
+		if(textnum == L_PROPOBJ_015)
+		{
+			langRemoveNewline(dst);
 		}
 
 		if (qty >= 2 && ammotype != AMMOTYPE_REAPER && ammotype != AMMOTYPE_SEDATIVE && ammotype != AMMOTYPE_CLOAK) {
@@ -18429,7 +18414,7 @@ bool doorTestForInteract(struct prop *prop)
 
 		if (xdiff * xdiff + zdiff * zdiff < 40000 && ydiff < 200 && ydiff > -200) {
 			maybe = true;
-		} else if (arrayIntersects(prop->rooms, playerprop->rooms)) {
+		} else if (roomArrayIntersects(prop->rooms, playerprop->rooms)) {
 			if (func0f06797c(&playerprop->pos, 150, door->base.pad)) {
 				maybe = true;
 			} else if ((door->doorflags & (DOORFLAG_0080 | DOORFLAG_0100)) != DOORFLAG_0080) {
@@ -19086,7 +19071,7 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 				aimpos.y = targetprop->pos.y - 20.0f;
 				aimpos.z = targetprop->pos.z;
 
-				if (func0f06b39c(pos, dir, &aimpos, 30)) {
+				if (utilsIsPointInCone(pos, dir, &aimpos, 30)) {
 					float f0 = 0.16f * g_Vars.lvupdate60freal * arg1->unk0c;
 
 					if (dist > 200.0f) {

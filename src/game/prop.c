@@ -2997,32 +2997,6 @@ void roomsAppend(RoomNum *newrooms, RoomNum *dstrooms, int maxlen)
 	}
 }
 
-bool arrayIntersects(RoomNum *a, RoomNum *b)
-{
-	RoomNum *aptr = a;
-	RoomNum aval = *aptr;
-	RoomNum *bptr;
-	RoomNum bval;
-
-	while (aval != -1) {
-		bptr = b; bval = *bptr;
-
-		while (bval != -1) {
-			if (aval == bval) {
-				return true;
-			}
-
-			bptr++;
-			bval = *bptr;
-		}
-
-		aptr++;
-		aval = *aptr;
-	}
-
-	return false;
-}
-
 bool propTryAddToChunk(int16_t propnum, int chunkindex)
 {
 	int i;

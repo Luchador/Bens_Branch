@@ -2166,10 +2166,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 		gSPSetLights1(gdl++, var80071468);
 
-#ifdef AVOID_UB
 		// during the credits camGetLookAt() can return NULL
 		if (camGetLookAt())
-#endif
 		gSPLookAt(gdl++, camGetLookAt());
 
 		renderdata.unk30 = 1;
@@ -2280,10 +2278,6 @@ Gfx *menuApplyScissor(Gfx *gdl)
 
 /**
  * Render a single menu dialog.
- *
- * The lightweight argument is always false. If set to true, a lighter-weight
- * variant of the dialog is rendered which has no borders, less background,
- * no overlays and no models such as inventory weapons.
  */
 Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 {

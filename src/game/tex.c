@@ -39,7 +39,6 @@ struct tilesize {
 };
 
 int g_TexLutMode;
-uint32_t var800ab5b4;
 struct tilestate g_TexTileStates[8];
 struct tilesize g_TexTileSizes[8];
 uint32_t g_TexFilter2D = G_TF_BILERP;
@@ -178,8 +177,6 @@ struct surfacetype *g_SurfaceTypes[] = {
 	/*13*/ &g_SurfaceTypeNone,
 	/*14*/ &g_SurfaceTypeDeepWater,
 };
-
-bool g_TexPipeSynced = false;
 
 void texResetTiles(void)
 {
@@ -466,10 +463,6 @@ Gfx *texWriteLoadToTmemAddr(Gfx *gdl, struct tex *tex, int tmemoffset)
 	if (tex->lutmodeindex == 0) {
 		gDPSetTextureImage(gdl++, tex->gbiformat, depth, 1, tex->data);
 
-		if (!g_TexPipeSynced) {
-			g_TexPipeSynced = true;
-		}
-
 		if (depth == G_IM_SIZ_16b && tmemoffset == 0) {
 			gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, len - 1, 0);
 		} else {
@@ -483,10 +476,6 @@ Gfx *texWriteLoadToTmemAddr(Gfx *gdl, struct tex *tex, int tmemoffset)
 		}
 	} else {
 		gDPSetTextureImage(gdl++, tex->gbiformat, depth, 1, tex->data);
-
-		if (!g_TexPipeSynced) {
-			g_TexPipeSynced = true;
-		}
 
 		if (depth == G_IM_SIZ_16b && tmemoffset == 0) {
 			gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, len - 1, 0);
@@ -573,10 +562,6 @@ Gfx *texWriteLoadToTmemZero(Gfx *gdl, struct tex *tex)
 	if (tex->lutmodeindex == 0) {
 		gDPSetTextureImage(gdl++, tex->gbiformat, depth, 1, tex->data);
 
-		if (!g_TexPipeSynced) {
-			g_TexPipeSynced = true;
-		}
-
 		if (depth == G_IM_SIZ_16b) {
 			gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, len - 1, 0);
 		} else {
@@ -588,10 +573,6 @@ Gfx *texWriteLoadToTmemZero(Gfx *gdl, struct tex *tex)
 		}
 	} else {
 		gDPSetTextureImage(gdl++, tex->gbiformat, depth, 1, tex->data);
-
-		if (!g_TexPipeSynced) {
-			g_TexPipeSynced = true;
-		}
 
 		if (depth == G_IM_SIZ_16b) {
 			gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, len - 1, 0);
@@ -673,8 +654,6 @@ Gfx *texHandleType2(Gfx *gdl, struct tex *tex, int smode, int tmode, int offset,
 		tile += tex->numlods;
 	}
 
-	g_TexPipeSynced = true;
-
 	return gdl;
 }
 
@@ -702,8 +681,6 @@ Gfx *texHandleType1(Gfx *gdl, struct tex *tex1, int smode, int tmode, int offset
 		tile += tex1->numlods;
 	}
 
-	g_TexPipeSynced = true;
-
 	return gdl;
 }
 
@@ -729,8 +706,6 @@ Gfx *texHandleType0(Gfx *gdl, struct tex *tex, int smode, int tmode, int offset,
 		tile += tex->numlods;
 	}
 
-	g_TexPipeSynced = true;
-
 	return gdl;
 }
 
@@ -738,8 +713,6 @@ Gfx *texHandleType4(Gfx *gdl, struct tex *tex, int smode, int tmode, int offset)
 {
 	gdl = texWriteLoadToTmemZero(gdl, tex);
 	gdl = texWriteTile(gdl, tex, smode, tmode, offset, 0);
-
-	g_TexPipeSynced = true;
 
 	return gdl;
 }
@@ -749,8 +722,6 @@ Gfx *texHandleType3(Gfx *gdl, struct tex *tex, int smode, int tmode, int offset)
 	gdl = texWriteLoadToTmemZero(gdl, tex);
 	gdl = texWriteTile(gdl, tex, smode, tmode, offset, 0);
 	gdl = texWriteTile(gdl, tex, smode, tmode, offset, 1);
-
-	g_TexPipeSynced = true;
 
 	return gdl;
 }
@@ -800,7 +771,6 @@ int texLoadFromGdl(Gfx *instart, int gdlsizeinbytes, Gfx *outstart, struct texpo
 	animated = false;
 	spe8 = false;
 	spe4 = false;
-	g_TexPipeSynced = false;
 	spf4 = 0;
 	ingdl = instart;
 	outgdl = outstart;
@@ -1037,7 +1007,6 @@ int texLoadFromGdl(Gfx *instart, int gdlsizeinbytes, Gfx *outstart, struct texpo
 			}
 
 			appendtex = true;
-			g_TexPipeSynced = false;
 
 			*outgdl = *ingdl;
 			outgdl++;

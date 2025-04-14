@@ -47,7 +47,6 @@ uint32_t propDoorGetCdTypes(struct prop *prop);
 bool propIsOfCdType(struct prop *prop, uint32_t types);
 void roomsCopy(RoomNum *srcrooms, RoomNum *dstrooms);
 void roomsAppend(RoomNum *newrooms, RoomNum *dstrooms, int maxlen);
-bool arrayIntersects(RoomNum *a, RoomNum *b);
 bool propTryAddToChunk(int16_t propnum, int chunkindex);
 int roomAllocatePropListChunk(int room, int arg1);
 void propRegisterRoom(struct prop *prop, RoomNum room);

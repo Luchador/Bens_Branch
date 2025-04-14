@@ -1202,14 +1202,14 @@ void lightTick(void)
 				int spa0 = 0;
 				int sp9c = 0;
 
-				int ret = utilDecompressRoomData(g_LightVisData[i].roomvis_compressed, &spa0, &sp9c);
+				int ret = utilsDecompressRoomData(g_LightVisData[i].roomvis_compressed, &spa0, &sp9c);
 
 				while (ret != -1) {
 					if (ret != 0) {
 						g_Rooms[sp9c].flags |= ROOMFLAG_BRIGHTNESS_DIRTY_TEMP;
 					}
 
-					ret = utilDecompressRoomData(g_LightVisData[i].roomvis_compressed, &spa0, &sp9c);
+					ret = utilsDecompressRoomData(g_LightVisData[i].roomvis_compressed, &spa0, &sp9c);
 				}
 			}
 
@@ -1250,7 +1250,7 @@ void lightTick(void)
 					int sp90 = 0;
 					int sp8c = 0;
 
-					int ret = utilDecompressRoomData(g_LightVisData[i].portalvis_compressed, &sp90, &sp8c);
+					int ret = utilsDecompressRoomData(g_LightVisData[i].portalvis_compressed, &sp90, &sp8c);
 
 					while (ret != -1) {
 						if (sp8c != 0) {
@@ -1263,7 +1263,7 @@ void lightTick(void)
 							sum += add;
 						}
 
-						ret = utilDecompressRoomData(g_LightVisData[i].portalvis_compressed, &sp90, &sp8c);
+						ret = utilsDecompressRoomData(g_LightVisData[i].portalvis_compressed, &sp90, &sp8c);
 					}
 
 					if (sum > 255) {
@@ -1388,7 +1388,7 @@ void lightFlash(int roomnum, int start, int limit)
 	int sp78 = 0;
 	int neighbournum = 0;
 
-	value = utilDecompressRoomData(g_LightVisData[roomnum].roomvis_compressed, &sp78, &neighbournum);
+	value = utilsDecompressRoomData(g_LightVisData[roomnum].roomvis_compressed, &sp78, &neighbournum);
 
 	while (value != -1) {
 		float increment = value * (1.0f / 255.0f) * start * 5.0f;
@@ -1407,7 +1407,7 @@ void lightFlash(int roomnum, int start, int limit)
 			lightFlashLocal(neighbournum, increment, limit);
 		}
 
-		value = utilDecompressRoomData(g_LightVisData[roomnum].roomvis_compressed, &sp78, &neighbournum);
+		value = utilsDecompressRoomData(g_LightVisData[roomnum].roomvis_compressed, &sp78, &neighbournum);
 	}
 }
 
