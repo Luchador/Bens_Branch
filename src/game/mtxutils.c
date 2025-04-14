@@ -941,7 +941,7 @@ void mtxBuildLookAtFromTarget(Mtx *mtx, float posx, float posy, float posz, floa
  * applying a twist around the vector by the given angle.
  * Used for aligning muzzle flashes.
  */
-void mtxBuildFacingMatrix(Mtx *mtx, float angle, float x, float y, float z)
+void mtxBuildFacingMatrix(float mtx[4][4], float angle, float x, float y, float z)
 {
 	float sine;
 	float cosine;
@@ -964,27 +964,27 @@ void mtxBuildFacingMatrix(Mtx *mtx, float angle, float x, float y, float z)
 		sin_z = z * sine;
 		invnorm = 1 / norm;
 
-		(*mtx)[0][0] = (-cos_z - y * sin_x) * invnorm;
-		(*mtx)[1][0] = (sine * norm);
-		(*mtx)[2][0] = (cos_x - y * sin_z) * invnorm;
-		(*mtx)[3][0] = 0;
-		(*mtx)[0][1] = (sin_z - y * cos_x) * invnorm;
-		(*mtx)[1][1] = (cosine * norm);
-		(*mtx)[2][1] = (-sin_x - y * cos_z) * invnorm;
-		(*mtx)[3][1] = 0;
-		(*mtx)[0][2] = -x;
-		(*mtx)[1][2] = -y;
-		(*mtx)[2][2] = -z;
-		(*mtx)[3][2] = 0;
+		mtx[0][0] = (-cos_z - y * sin_x) * invnorm;
+		mtx[1][0] = (sine * norm);
+		mtx[2][0] = (cos_x - y * sin_z) * invnorm;
+		mtx[3][0] = 0;
+		mtx[0][1] = (sin_z - y * cos_x) * invnorm;
+		mtx[1][1] = (cosine * norm);
+		mtx[2][1] = (-sin_x - y * cos_z) * invnorm;
+		mtx[3][1] = 0;
+		mtx[0][2] = -x;
+		mtx[1][2] = -y;
+		mtx[2][2] = -z;
+		mtx[3][2] = 0;
 
-		(*mtx)[0][3] = 0;
-		(*mtx)[1][3] = 0;
-		(*mtx)[2][3] = 0;
-		(*mtx)[3][3] = 1;
+		mtx[0][3] = 0;
+		mtx[1][3] = 0;
+		mtx[2][3] = 0;
+		mtx[3][3] = 1;
 		return;
 	}
 
-	mtxIdent(mtx);
+	mtxIdent((Mtx*)mtx);
 }
 
 void mtx4Align(Mtx *mtx, float angle, float x, float y, float z)

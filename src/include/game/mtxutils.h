@@ -53,7 +53,7 @@ void mtxBuildCameraMatrix(Mtx *mtx, float posx, float posy, float posz, float lo
 void mtxBuildLookAtMatrixF(Mtx *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
 void mtxBuildLookAtMatrix2F(Mtx *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
 void mtxBuildLookAtFromTarget(Mtx *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
-void mtxBuildFacingMatrix(Mtx *mtx, float angle, float x, float y, float z);
+void mtxBuildFacingMatrix(float mtx[4][4], float angle, float x, float y, float z);
 void mtx4Align(Mtx *mtx, float radians, float x, float y, float z);
 void mtx4LoadRotationFrom(Mtx *src, Mtx *dst);
 void mtxNormalizeRotationMatrix(Mtx *src, Mtx *dst);
