@@ -6489,18 +6489,18 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 
 void bgunMuzzleFlash(struct hand *hand, struct weapon *weapondef, struct modeldef *modeldef,
 		struct weaponfunc *funcdef, int maxburst, uint8_t *allocation, int weaponnum,
-		bool **arg7, int mtxindex, Mtxf *arg9, Mtxf *arg10)
+		bool **arg7, int mtxindex, Mtx *arg9, Mtx *arg10)
 {
-	Mtxf spd8;
+	Mtx spd8;
 	int index;
 	int shotstotake;
 	bool spc4[3] = {false, false, false};
-	Mtxf *mtx;
+	Mtx *mtx;
 	int i;
 	int partnum;
 	float spb4;
 	float muzzlez;
-	Mtxf sp70;
+	Mtx sp70;
 
 	index = hand->burstbullets % maxburst;
 	shotstotake = hand->shotstotake;
@@ -6508,21 +6508,21 @@ void bgunMuzzleFlash(struct hand *hand, struct weapon *weapondef, struct modelde
 	spb4 = RANDOMFRAC() * 0.25f + 1.0f;
 	muzzlez = weapondef->muzzlez;
 
-	mtxIdent((Mtx*)&spd8);
+	mtxIdent(&spd8);
 
 	if (funcdef && (funcdef->flags & FUNCFLAG_00000001)) {
-		mtx4LoadZRotation(RANDOMFRAC() * M_TAU, (Mtx*)&spd8);
+		mtx4LoadZRotation(RANDOMFRAC() * M_TAU, &spd8);
 	}
 
-	mtx4LoadZRotation((RANDOMFRAC() * 0.3 - 0.15), (Mtx*)&spd8);
+	mtx4LoadZRotation((RANDOMFRAC() * 0.3 - 0.15), &spd8);
 
-	mtx = (Mtxf *)allocation;
+	mtx = (Mtx*)allocation;
 	mtx += mtxindex;
 
-	mtx4MultMtx4InPlace((Mtx*)mtx, (Mtx*)&spd8);
-	mtxScaleRotationPart(spb4, (Mtx*)&spd8);
-	mtxScaleRow2Full(muzzlez, (Mtx*)&spd8);
-	mtx4Copy((Mtx*)&spd8, (Mtx*)mtx);
+	mtx4MultMtx4InPlace(mtx, &spd8);
+	mtxScaleRotationPart(spb4, &spd8);
+	mtxScaleRow2Full(muzzlez, &spd8);
+	mtx4Copy(&spd8, mtx);
 
 	if (shotstotake == 0 && weaponnum != WEAPON_REAPER) {
 		shotstotake++;
@@ -6551,26 +6551,26 @@ void bgunMuzzleFlash(struct hand *hand, struct weapon *weapondef, struct modelde
 			struct modelrodata_position *rodata = &node->rodata->position;
 			int mtxindex = modelFindNodeMtxIndex(node, 0);
 
-			sp60.x = rodata->pos.x * spd8.m[0][0] + rodata->pos.y * spd8.m[1][0] + rodata->pos.z * spd8.m[2][0] + spd8.m[3][0];
-			sp60.y = rodata->pos.x * spd8.m[0][1] + rodata->pos.y * spd8.m[1][1] + rodata->pos.z * spd8.m[2][1] + spd8.m[3][1];
-			sp60.z = rodata->pos.x * spd8.m[0][2] + rodata->pos.y * spd8.m[1][2] + rodata->pos.z * spd8.m[2][2] + spd8.m[3][2];
+			sp60.x = rodata->pos.x * spd8[0][0] + rodata->pos.y * spd8[1][0] + rodata->pos.z * spd8[2][0] + spd8[3][0];
+			sp60.y = rodata->pos.x * spd8[0][1] + rodata->pos.y * spd8[1][1] + rodata->pos.z * spd8[2][1] + spd8[3][1];
+			sp60.z = rodata->pos.x * spd8[0][2] + rodata->pos.y * spd8[1][2] + rodata->pos.z * spd8[2][2] + spd8[3][2];
 
-			mtxIdent((Mtx*)&sp70);
-			mtx4Align(sp70.m, RANDOMFRAC() * M_TAU, -sp60.x, -sp60.y, -sp60.z);
-			mtxScaleRotationPart(0.10f * spb4, (Mtx*)&sp70);
+			mtxIdent(&sp70);
+			mtx4Align(&sp70, RANDOMFRAC() * M_TAU, -sp60.x, -sp60.y, -sp60.z);
+			mtxScaleRotationPart(0.10f * spb4, &sp70);
 
-			mtx = (Mtxf *)allocation;
+			mtx = (Mtx*)allocation;
 
-			mtxBuildFacingMatrix(arg10->m, 0, mtx->m[3][0] - hand->aimpos.x, mtx->m[3][1] - hand->aimpos.y, mtx->m[3][2] - hand->aimpos.z);
-			mtx4MultMtx4InPlace((Mtx*)arg10,(Mtx*) &sp70);
-			mtx00016710(muzzlez, sp70.m);
-			mtx4MultMtx4InPlace((Mtx*)arg9, (Mtx*)&sp70);
-			mtx4SetTranslation(&sp60, (Mtx*)&sp70);
+			mtxBuildFacingMatrix(arg10, 0, (*mtx)[3][0] - hand->aimpos.x, (*mtx)[3][1] - hand->aimpos.y, (*mtx)[3][2] - hand->aimpos.z);
+			mtx4MultMtx4InPlace((Mtx*)arg10, &sp70);
+			mtx00016710(muzzlez, &sp70);
+			mtx4MultMtx4InPlace(arg9, &sp70);
+			mtx4SetTranslation(&sp60, &sp70);
 
-			mtx = (Mtxf *)allocation;
+			mtx = (Mtx*)allocation;
 			mtx += mtxindex;
 
-			mtx4Copy((Mtx*)&sp70, (Mtx*)mtx);
+			mtx4Copy(&sp70, mtx);
 		}
 	}
 }
@@ -7193,7 +7193,7 @@ void bgunTickHandWeapModel(int handnum)
 			hand->muzzlez = -((Mtxf *)((uintptr_t)mtxallocation + sp6c * sizeof(Mtxf)))->m[3][2];
 
 			if (hand->flashon && sp1e0 > 0 && weaponnum != WEAPON_SHOTGUN && g_Vars.lvupdate240 != 0) {
-				bgunMuzzleFlash(hand, weapondef, modeldef, funcdef, sp1e0, mtxallocation, weaponnum, sp1e4, sp6c, &sp234, &sp1f4);
+				bgunMuzzleFlash(hand, weapondef, modeldef, funcdef, sp1e0, mtxallocation, weaponnum, sp1e4, sp6c, (Mtx*)&sp234, (Mtx*)&sp1f4);
 			}
 		} else if (weaponnum == WEAPON_GRENADE
 				|| weaponnum == WEAPON_TIMEDMINE

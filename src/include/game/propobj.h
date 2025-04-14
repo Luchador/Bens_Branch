@@ -49,7 +49,7 @@ float objGetRotatedLocalMax(struct modelrodata_bbox *bbox, float arg1, float arg
 int objCalculateGeoBlockVertices(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax, Mtxf *mtx, struct geoblock *block);
 void objCalculateGeoBlockFromBboxAndMtx(struct modelrodata_bbox *bbox, Mtxf *mtx, struct geoblock *block);
 void objCalculateGeoBlockFromNode19Data(struct modelrodata_type19 *rodata19, struct modelrodata_bbox *bbox, Mtxf *mtx, struct geoblock *block);
-bool func0f0675c8(struct coord *pos, float arg1, struct modelrodata_bbox *bbox, Mtxf *mtx);
+bool sphereIntersectsOrientedBbox(struct coord *pos, float arg1, struct modelrodata_bbox *bbox, Mtx *mtx);
 bool func0f0677ac(struct coord *coord, struct coord *arg1, struct coord *pos, struct coord *normal, struct coord *up, struct coord *look, float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 bool func0f0678f8(struct coord *coord, struct coord *arg1, int padnum);
 bool func0f06797c(struct coord *coord, float arg1, int padnum);
@@ -217,7 +217,7 @@ void objFall(struct defaultobj *obj, int playernum);
 void objDestroySupportedObjects(struct prop *prop, int playernum);
 void objCheckDestroyed(struct defaultobj *obj, struct coord *pos, int playernum);
 bool func0f084594(struct model *model, struct modelnode *node, struct coord *arg2, struct coord *arg3, struct hitthing *arg4, int *arg5, struct modelnode **arg6);
-bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *arg2, struct coord *arg3, struct hitthing *hitthing, int *dstmtxindex, struct modelnode **dstnode);
+bool objModelTestRayHit(struct model *model, struct modelnode *nodearg, struct coord *arg2, struct coord *arg3, struct hitthing *hitthing, int *dstmtxindex, struct modelnode **dstnode);
 uint32_t add43214321(uint32_t value);
 void glassDestroy(struct defaultobj *obj);
 void doorDestroyGlass(struct doorobj *door);

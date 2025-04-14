@@ -1,4 +1,5 @@
-#include <ultra64.h>
+#include <stdlib.h>
+#include "lib/memp.h"
 #include "constants.h"
 #include "game/room.h"
 #include "game/mtxutils.h"
@@ -50,7 +51,7 @@ uint8_t *g_RoomMtxAges;
 RoomNum *g_RoomMtxLinkedRooms;
 RoomNum *g_RoomMtxBaseRooms;
 float *g_RoomMtxScales;
-Mtxf *g_RoomMtxMatrices;
+Mtx *g_RoomMtxMatrices;
 
 int g_RoomMtxNumSlots = 0;
 
@@ -82,6 +83,49 @@ void roomFreeMtx(int index)
 	g_RoomMtxScales[index] = 1;
 }
 
+void roomsAllocate(void)
+{
+	int i;
+
+	g_RoomMtxNumSlots = 300;
+
+	g_RoomMtxAges = malloc(ALIGN16(g_RoomMtxNumSlots));
+	g_RoomMtxLinkedRooms = malloc(ALIGN16(g_RoomMtxNumSlots * sizeof(*g_RoomMtxLinkedRooms)));
+	g_RoomMtxBaseRooms = malloc(ALIGN16(g_RoomMtxNumSlots * sizeof(*g_RoomMtxBaseRooms)));
+	g_RoomMtxScales = malloc(ALIGN16(g_RoomMtxNumSlots * sizeof(*g_RoomMtxScales)));
+	g_RoomMtxMatrices = malloc(ALIGN16(g_RoomMtxNumSlots * sizeof(*g_RoomMtxMatrices)));
+
+	for (i = 0; i < PLAYERCOUNT(); i++) {
+		g_Vars.players[i]->lastroomforoffset = -1;
+	}
+
+	for (i = 0; i < g_RoomMtxNumSlots; i++) {
+		g_RoomMtxLinkedRooms[i] = -1;
+		g_RoomMtxAges[i] = 2;
+		g_RoomMtxBaseRooms[i] = -1;
+		g_RoomMtxScales[i] = 1;
+	}
+
+	for (i = 0; i < g_Vars.roomcount; i++) {
+		g_Rooms[i].roommtxindex = -1;
+	}
+}
+
+void roomsFree()
+{
+	free(g_RoomMtxAges);
+	free(g_RoomMtxLinkedRooms);
+	free(g_RoomMtxBaseRooms);
+	free(g_RoomMtxScales);
+	free(g_RoomMtxMatrices);
+
+	g_RoomMtxAges = NULL;
+	g_RoomMtxLinkedRooms = NULL;
+	g_RoomMtxBaseRooms = NULL;
+	g_RoomMtxScales = NULL;
+	g_RoomMtxMatrices = NULL;
+}
+
 int roomAllocateMtx(void)
 {
 	int i;
@@ -95,15 +139,15 @@ int roomAllocateMtx(void)
 	return 0;
 }
 
-void roomPopulateMtx(Mtxf *mtx, int roomnum)
+void roomPopulateMtx(Mtx *mtx, int roomnum)
 {
 	int stagenum = g_Vars.stagenum;
 
-	mtxIdent((Mtx*)mtx);
+	mtxIdent(mtx);
 
-	mtx->m[0][0] = 1;
-	mtx->m[1][1] = 1;
-	mtx->m[2][2] = 1;
+	(*mtx)[0][0] = 1;
+	(*mtx)[1][1] = 1;
+	(*mtx)[2][2] = 1;
 
 	// These are rooms that are always active, such as the moon in Defection.
 	// This is probably making those rooms always drawn a certain distance away
@@ -118,13 +162,13 @@ void roomPopulateMtx(Mtxf *mtx, int roomnum)
 					|| stagenum == g_Stages[STAGEINDEX_EXTRACTION].id
 					|| stagenum == g_Stages[STAGEINDEX_MBR].id) && roomnum == 0x01)
 			|| (stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id && roomnum == 0x71)) {
-		mtx->m[3][0] = g_BgRooms[roomnum].pos.x;
-		mtx->m[3][1] = g_BgRooms[roomnum].pos.y;
-		mtx->m[3][2] = g_BgRooms[roomnum].pos.z;
+		(*mtx)[3][0] = g_BgRooms[roomnum].pos.x;
+		(*mtx)[3][1] = g_BgRooms[roomnum].pos.y;
+		(*mtx)[3][2] = g_BgRooms[roomnum].pos.z;
 	} else {
-		mtx->m[3][0] = g_BgRooms[roomnum].pos.x - g_Vars.currentplayer->globaldrawworldoffset.x;
-		mtx->m[3][1] = g_BgRooms[roomnum].pos.y - g_Vars.currentplayer->globaldrawworldoffset.y;
-		mtx->m[3][2] = g_BgRooms[roomnum].pos.z - g_Vars.currentplayer->globaldrawworldoffset.z;
+		(*mtx)[3][0] = g_BgRooms[roomnum].pos.x - g_Vars.currentplayer->globaldrawworldoffset.x;
+		(*mtx)[3][1] = g_BgRooms[roomnum].pos.y - g_Vars.currentplayer->globaldrawworldoffset.y;
+		(*mtx)[3][2] = g_BgRooms[roomnum].pos.z - g_Vars.currentplayer->globaldrawworldoffset.z;
 	}
 }
 
@@ -138,7 +182,7 @@ void roomPopulateMtx(Mtxf *mtx, int roomnum)
 int roomTouchMtx(int roomnum)
 {
 	int index = g_Rooms[roomnum].roommtxindex;
-	Mtxf mtx;
+	Mtx mtx;
 
 	if (index == -1
 			|| g_Vars.currentplayer->lastroomforoffset != g_RoomMtxBaseRooms[index]) {
@@ -161,7 +205,7 @@ int roomTouchMtx(int roomnum)
 	g_RoomMtxBaseRooms[index] = g_Vars.currentplayer->lastroomforoffset;
 
 	roomPopulateMtx(&mtx, roomnum);
-	mtx4Copy((Mtx*)&mtx, (Mtx*)&g_RoomMtxMatrices[index]);
+	mtx4Copy(&mtx, &g_RoomMtxMatrices[index]);
 
 	return index;
 }

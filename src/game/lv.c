@@ -1959,6 +1959,7 @@ void lvStop(void)
 	musicStop();
 	hudmsgsStop();
 	portalsStop();
+	roomsFree();
 
 	if (g_Vars.stagenum < STAGE_TITLE) {
 		bgStop();

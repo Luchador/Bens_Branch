@@ -1639,7 +1639,7 @@ void bgBuildTables(int stagenum)
 			g_Rooms[i].xluwallhits = NULL;
 		}
 
-		roomsReset();
+		roomsAllocate();
 
 		g_Rooms[0].bbmin[0] = 0.0f;
 		g_Rooms[0].bbmin[1] = 0.0f;

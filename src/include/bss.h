@@ -198,7 +198,7 @@ extern uint8_t *g_RoomMtxAges;
 extern RoomNum *g_RoomMtxLinkedRooms;
 extern RoomNum *g_RoomMtxBaseRooms;
 extern float *g_RoomMtxScales;
-extern Mtxf *g_RoomMtxMatrices;
+extern Mtx *g_RoomMtxMatrices;
 extern struct fileinfo g_FileInfo[NUM_FILES];
 extern uint8_t *g_VtxBuffers[3];
 extern uint8_t *g_GfxMemPos;

@@ -634,9 +634,9 @@ void objCalculateGeoBlockFromNode19Data(struct modelrodata_type19 *rodata19, str
 	block->ymax = mtx->m[3][1] + objGetRotatedLocalYMaxByMtx4(bbox, mtx);
 }
 
-bool func0f0675c8(struct coord *pos, float arg1, struct modelrodata_bbox *bbox, Mtxf *mtx)
+bool sphereIntersectsOrientedBbox(struct coord *pos, float arg1, struct modelrodata_bbox *bbox, Mtx *mtx)
 {
-	Mtxf sp58;
+	Mtx sp58;
 	struct coord sp4c;
 	struct coord sp40;
 	struct coord sp34;
@@ -644,13 +644,13 @@ bool func0f0675c8(struct coord *pos, float arg1, struct modelrodata_bbox *bbox, 
 
 	sp34.f[0] = sp34.f[1] = sp34.f[2] = arg1;
 
-	sp4c.x = pos->x - mtx->m[3][0];
-	sp4c.y = pos->y - mtx->m[3][1];
-	sp4c.z = pos->z - mtx->m[3][2];
+	sp4c.x = pos->x - (*mtx)[3][0];
+	sp4c.y = pos->y - (*mtx)[3][1];
+	sp4c.z = pos->z - (*mtx)[3][2];
 
-	mtxNormalizeRotationMatrix(mtx->m, sp58.m);
-	mtx4RotateVec((Mtx*)&sp58, &sp4c, &sp40);
-	mtx4RotateVec((Mtx*)&sp58, &sp34, &sp28);
+	mtxNormalizeRotationMatrix(mtx, &sp58);
+	mtx4RotateVec(&sp58, &sp4c, &sp40);
+	mtx4RotateVec(&sp58, &sp34, &sp28);
 
 	if (sp28.x < 0.0f) {
 		sp28.x = -sp28.x;
@@ -2669,7 +2669,7 @@ bool projectileTestEmbedComplex(struct defaultobj *obj, struct coord *arg1, stru
 					hitpart = modelTestForHit(model, arg5, arg6, &spe4);
 
 					if (hitpart > 0) {
-						if (func0f0849dc(model, spe4, arg5, arg6, &thing1, &mtxindex1, &node1)) {
+						if (objModelTestRayHit(model, spe4, arg5, arg6, &thing1, &mtxindex1, &node1)) {
 							break;
 						}
 					}
@@ -3549,9 +3549,7 @@ void applyRotation(float *angle, float maxrot, float *speed, float accel, float 
  */
 void projectileFall(struct defaultobj *obj, float arg1[3][3])
 {
-	int t2;
-	int t4;
-	int t3;
+	int t2, t3, t4;
 	struct coord sp188;
 	Mtxf sp148;
 	Mtxf sp108;
@@ -3585,10 +3583,10 @@ void projectileFall(struct defaultobj *obj, float arg1[3][3])
 		projectile->flags &= ~PROJECTILEFLAG_STICKY;
 
 		mtx3ToMtx4(obj->realrot, (Mtx*)&sp148);
-		mtx4GetRotation(sp148.m, &sp188);
+		mtx4GetRotation((Mtx*)&sp148, &sp188);
 		mtx4LoadRotation(&sp188, (Mtx*)&sp108);
 		quaternionEulerToQuat(&sp188, projectile->unk068);
-		mtx4LoadRotationFrom(sp108.m, spc8.m);
+		mtx4LoadRotationFrom((Mtx*)&sp108, (Mtx*)&spc8);
 		mtx4MultMtx4((Mtx*)&spc8, (Mtx*)&sp148, (Mtx*)&sp88);
 
 		projectile->unk0b8[0] = sqrtf(sp88.m[0][0] * sp88.m[0][0] + sp88.m[0][1] * sp88.m[0][1] + sp88.m[0][2] * sp88.m[0][2]);
@@ -3758,7 +3756,7 @@ void projectileFall(struct defaultobj *obj, float arg1[3][3])
 		spc8.m[3][2] = 0.0f;
 		spc8.m[3][3] = 1.0f;
 
-		mtx4GetRotation(spc8.m, &sp188);
+		mtx4GetRotation((Mtx*)&spc8, &sp188);
 		quaternionEulerToQuat(&sp188, projectile->unk078);
 		quaternionAvoidFlips(projectile->unk068, projectile->unk078);
 
@@ -4004,7 +4002,7 @@ bool objEmbed(struct prop *prop, struct prop *parent, struct model *model, struc
 			mtx4SetTranslation(&prop->pos, (Mtx*)&sp34);
 			mtxApplyAffineTransform((Mtx*)&sp34, (Mtx*)&sp74, (Mtx*)&sp134);
 			mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)sp24, (Mtx*)&spf4);
-			mtxInvertAffine(spf4.m, spb4.m);
+			mtxInvertAffine((Mtx*)&spf4, (Mtx*)&spb4);
 			mtxApplyAffineTransform((Mtx*)&spb4, (Mtx*)&sp134, (Mtx*)&obj->embedment->matrix);
 
 			return true;
@@ -6490,7 +6488,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 			func0f069c70(obj, false, true);
 			mtx3ToMtx4(obj->realrot, (Mtx*)&sp484);
 			mtx4SetTranslation(&prop->pos, (Mtx*)&sp484);
-			mtxInvertAffine(sp504.m, sp4c4.m);
+			mtxInvertAffine((Mtx*)&sp504, (Mtx*)&sp4c4);
 			mtx4MultMtx4((Mtx*)&sp484, (Mtx*)&sp4c4, (Mtx*)&sp544);
 			platformDisplaceProps2(prop, &sp544);
 			result = true;
@@ -6819,7 +6817,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 
 												sp184 = modelFindNodeMtx(g_EmbedModel, g_EmbedNode, 0);
 												mtx4TransformVec(camGetPlayerWorldToScreenMtx(), &sp5e8, &sp1c8);
-												mtxInvertRigidBodyMatrix(sp184->m, sp188.m);
+												mtxInvertRigidBodyMatrix((Mtx*)sp184, (Mtx*)&sp188);
 												mtx4TransformVecInPlace((Mtx*)&sp188, &sp1c8);
 
 												chr0f0260c4(g_EmbedModel, g_EmbedHitPart, g_EmbedNode, &sp1c8);
@@ -13430,7 +13428,7 @@ bool func0f084594(struct model *model, struct modelnode *node, struct coord *arg
 	rodata = &node->rodata->bbox;
 
 	mtxindex = modelFindNodeMtxIndex(node, 0);
-	mtxInvertAffine(model->matrices[mtxindex].m, mtx.m);
+	mtxInvertAffine((Mtx*)&model->matrices[mtxindex], (Mtx*)&mtx);
 
 	spb8.x = arg2->x;
 	spb8.y = arg2->y;
@@ -13550,12 +13548,12 @@ bool func0f084594(struct model *model, struct modelnode *node, struct coord *arg
 	return ok;
 }
 
-bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *arg2, struct coord *arg3, struct hitthing *hitthing, int *dstmtxindex, struct modelnode **dstnode)
+bool objModelTestRayHit(struct model *model, struct modelnode *nodearg, struct coord *arg2, struct coord *arg3, struct hitthing *hitthing, int *dstmtxindex, struct modelnode **dstnode)
 {
 	struct coord spec;
 	struct coord spe0;
 	struct coord spd4;
-	Mtxf *spd0 = NULL;
+	Mtx *spd0 = NULL;
 	bool done = false;
 	struct modelnode *node = nodearg;
 	Vtx *vertices = NULL;
@@ -13614,29 +13612,29 @@ bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *
 
 		if (s3 != NULL) {
 			int mtxindex = modelFindNodeMtxIndex(node, 0);
-			Mtxf *mtx = NULL;
-			Mtxf sp64;
+			Mtx *mtx = NULL;
+			Mtx sp64;
 
 			if (mtxindex >= 0) {
-				mtx = &model->matrices[mtxindex];
+				mtx = (Mtx*)&model->matrices[mtxindex];
 			}
 
 			if (mtx && mtx != spd0) {
 				spd0 = mtx;
 
-				mtxInvertAffine(mtx->m, sp64.m);
+				mtxInvertAffine(mtx, (Mtx*)&sp64);
 
 				spec.x = arg2->x;
 				spec.y = arg2->y;
 				spec.z = arg2->z;
 
-				mtx4TransformVecInPlace((Mtx*)&sp64, &spec);
+				mtx4TransformVecInPlace(&sp64, &spec);
 
 				spd4.x = arg3->x;
 				spd4.y = arg3->y;
 				spd4.z = arg3->z;
 
-				mtx4RotateVecInPlace((Mtx*)&sp64, &spd4);
+				mtx4RotateVecInPlace(&sp64, &spd4);
 
 				spe0.x = spd4.x * 32767.0f + spec.x;
 				spe0.y = spd4.y * 32767.0f + spec.y;
@@ -14118,7 +14116,7 @@ void propTestModelHit(struct prop *prop, struct shotdata *shotdata)
 		do {
 			hitpart = modelTestForHit(model, &shotdata->gunpos2d, &shotdata->gundir2d, &node1);
 
-			if (hitpart > 0 && func0f0849dc(model, node1, &shotdata->gunpos2d, &shotdata->gundir2d, &hitthing1, &spe4, &node2)) {
+			if (hitpart > 0 && objModelTestRayHit(model, node1, &shotdata->gunpos2d, &shotdata->gundir2d, &hitthing1, &spe4, &node2)) {
 				break;
 			}
 		} while (hitpart > 0);
@@ -18424,7 +18422,7 @@ bool doorTestForInteract(struct prop *prop)
 				doorGetBbox(door, &bbox);
 				func0f08c424(door, &matrix);
 
-				if (func0f0675c8(&playerprop->pos, 150, &bbox, &matrix)) {
+				if (sphereIntersectsOrientedBbox(&playerprop->pos, 150, &bbox, (Mtx*)&matrix)) {
 					maybe = true;
 				}
 			}
