@@ -1995,6 +1995,7 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	if (!videoFramebuffersSupported()) {
 		return gdl;
 	}
+	
 	// make a copy of what we have drawn so far and use it as a texture
 	gDPFlushEXT(gdl++);
 	gDPCopyFramebufferEXT(gdl++, g_PrevFrameFb, 0, 0, 0, G_ON);
@@ -2052,7 +2053,7 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 		const int left = viewleft + halfwidth * (1.f - xscale);
 		const int right = viewleft + halfwidth * (1.f + xscale);
 		gSPImageRectangleEXT(gdl++,
-			left << 2, liney << 2, viewleft, liney,
+			0, liney << 2, viewleft, liney,
 			right << 2, (liney + 1) << 2, viewleft + viewwidth, liney + 1,
 			0, videoGetNativeWidth(), videoGetNativeHeight());
 	}
