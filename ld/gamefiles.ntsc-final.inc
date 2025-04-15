@@ -35,6 +35,7 @@
 	build/ROMID/game/surfacereset.o (section); \
 	build/ROMID/game/vtxstorereset.o (section); \
 	build/ROMID/game/tilesreset.o (section); \
+	build/ROMID/game/roomreset.o (section); \
 	build/ROMID/game/setupcover.o (section); \
 	build/ROMID/game/skyreset.o (section); \
 	build/ROMID/game/gunfxreset.o (section); \

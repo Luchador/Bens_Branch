@@ -53,12 +53,12 @@ void mtxBuildCameraMatrix(Mtx *mtx, float posx, float posy, float posz, float lo
 void mtxBuildLookAtMatrixF(Mtx *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
 void mtxBuildLookAtMatrix2F(Mtx *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
 void mtxBuildLookAtFromTarget(Mtx *mtx, float posx, float posy, float posz, float lookx, float looky, float lookz, float upx, float upy, float upz);
-void mtxBuildFacingMatrix(float mtx[4][4], float angle, float x, float y, float z);
+void mtxBuildFacingMatrix(Mtx *mtx, float angle, float x, float y, float z);
 void mtx4Align(Mtx *mtx, float radians, float x, float y, float z);
 void mtx4LoadRotationFrom(Mtx *src, Mtx *dst);
-void mtxNormalizeRotationMatrix(Mtx *src, Mtx *dst);
-void mtxInvertRigidBodyMatrix(Mtx *arg0, Mtx *arg1);
-void mtxInvertAffine(Mtx *arg0, Mtx *arg1);
+void mtxNormalizeRotationMatrix(float src[4][4], float dst[4][4]);
+void mtxInvertRigidBodyMatrix(float arg0[4][4], float arg1[4][4]);
+void mtxInvertAffine(float arg0[4][4], float arg1[4][4]);
 void mtxFullInverse4x4(float arg0[4][4], float arg1[4][4]);
 void mtxAdjugate4x4(float arg0[4][4], float arg1[4][4]);
 float mtxDet4x4(float arg0[4][4]);

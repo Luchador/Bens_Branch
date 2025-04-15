@@ -941,7 +941,7 @@ void mtxBuildLookAtFromTarget(Mtx *mtx, float posx, float posy, float posz, floa
  * applying a twist around the vector by the given angle.
  * Used for aligning muzzle flashes.
  */
-void mtxBuildFacingMatrix(float mtx[4][4], float angle, float x, float y, float z)
+void mtxBuildFacingMatrix(Mtx *mtx, float angle, float x, float y, float z)
 {
 	float sine;
 	float cosine;
@@ -964,27 +964,27 @@ void mtxBuildFacingMatrix(float mtx[4][4], float angle, float x, float y, float 
 		sin_z = z * sine;
 		invnorm = 1 / norm;
 
-		mtx[0][0] = (-cos_z - y * sin_x) * invnorm;
-		mtx[1][0] = (sine * norm);
-		mtx[2][0] = (cos_x - y * sin_z) * invnorm;
-		mtx[3][0] = 0;
-		mtx[0][1] = (sin_z - y * cos_x) * invnorm;
-		mtx[1][1] = (cosine * norm);
-		mtx[2][1] = (-sin_x - y * cos_z) * invnorm;
-		mtx[3][1] = 0;
-		mtx[0][2] = -x;
-		mtx[1][2] = -y;
-		mtx[2][2] = -z;
-		mtx[3][2] = 0;
+		(*mtx)[0][0] = (-cos_z - y * sin_x) * invnorm;
+		(*mtx)[1][0] = (sine * norm);
+		(*mtx)[2][0] = (cos_x - y * sin_z) * invnorm;
+		(*mtx)[3][0] = 0;
+		(*mtx)[0][1] = (sin_z - y * cos_x) * invnorm;
+		(*mtx)[1][1] = (cosine * norm);
+		(*mtx)[2][1] = (-sin_x - y * cos_z) * invnorm;
+		(*mtx)[3][1] = 0;
+		(*mtx)[0][2] = -x;
+		(*mtx)[1][2] = -y;
+		(*mtx)[2][2] = -z;
+		(*mtx)[3][2] = 0;
 
-		mtx[0][3] = 0;
-		mtx[1][3] = 0;
-		mtx[2][3] = 0;
-		mtx[3][3] = 1;
+		(*mtx)[0][3] = 0;
+		(*mtx)[1][3] = 0;
+		(*mtx)[2][3] = 0;
+		(*mtx)[3][3] = 1;
 		return;
 	}
 
-	mtxIdent((Mtx*)mtx);
+	mtxIdent(mtx);
 }
 
 void mtx4Align(Mtx *mtx, float angle, float x, float y, float z)
@@ -1017,87 +1017,87 @@ void mtx4LoadRotationFrom(Mtx *src, Mtx *dst)
 	(*dst)[3][3] = 1;
 }
 
-void mtxNormalizeRotationMatrix(Mtx *src, Mtx *dst)
+void mtxNormalizeRotationMatrix(float src[4][4], float dst[4][4])
 {
-	float tmp = ((*src)[0][0] * (*src)[0][0] + (*src)[1][0] * (*src)[1][0] + (*src)[2][0] * (*src)[2][0]);
+	float tmp = (src[0][0] * src[0][0] + src[1][0] * src[1][0] + src[2][0] * src[2][0]);
 	tmp = 1 / tmp;
 
-	(*dst)[0][0] = (*src)[0][0] * tmp;
-	(*dst)[0][1] = (*src)[1][0] * tmp;
-	(*dst)[0][2] = (*src)[2][0] * tmp;
+	dst[0][0] = src[0][0] * tmp;
+	dst[0][1] = src[1][0] * tmp;
+	dst[0][2] = src[2][0] * tmp;
 
-	(*dst)[1][0] = (*src)[0][1] * tmp;
-	(*dst)[1][1] = (*src)[1][1] * tmp;
-	(*dst)[1][2] = (*src)[2][1] * tmp;
+	dst[1][0] = src[0][1] * tmp;
+	dst[1][1] = src[1][1] * tmp;
+	dst[1][2] = src[2][1] * tmp;
 
-	(*dst)[2][0] = (*src)[0][2] * tmp;
-	(*dst)[2][1] = (*src)[1][2] * tmp;
-	(*dst)[2][2] = (*src)[2][2] * tmp;
+	dst[2][0] = src[0][2] * tmp;
+	dst[2][1] = src[1][2] * tmp;
+	dst[2][2] = src[2][2] * tmp;
 
-	(*dst)[3][0] = 0;
-	(*dst)[3][1] = 0;
-	(*dst)[3][2] = 0;
+	dst[3][0] = 0;
+	dst[3][1] = 0;
+	dst[3][2] = 0;
 
-	(*dst)[0][3] = 0;
-	(*dst)[1][3] = 0;
-	(*dst)[2][3] = 0;
-	(*dst)[3][3] = 1;
+	dst[0][3] = 0;
+	dst[1][3] = 0;
+	dst[2][3] = 0;
+	dst[3][3] = 1;
 }
 
 /*
  *   Inverts a transformation matrix that contains only rotation and translation.
  *   Assumes the rotation part is orthonormal.
  */
-void mtxInvertRigidBodyMatrix(Mtx *arg0, Mtx *arg1)
+void mtxInvertRigidBodyMatrix(float arg0[4][4], float arg1[4][4])
 {
-	float tmp = (*arg0)[0][0] * (*arg0)[0][0] + (*arg0)[1][0] * (*arg0)[1][0] + (*arg0)[2][0] * (*arg0)[2][0];
+	float tmp = arg0[0][0] * arg0[0][0] + arg0[1][0] * arg0[1][0] + arg0[2][0] * arg0[2][0];
 	tmp = 1 / tmp;
 
-	(*arg1)[0][0] = (*arg0)[0][0] * tmp;
-	(*arg1)[0][1] = (*arg0)[1][0] * tmp;
-	(*arg1)[0][2] = (*arg0)[2][0] * tmp;
-	(*arg1)[1][0] = (*arg0)[0][1] * tmp;
-	(*arg1)[1][1] = (*arg0)[1][1] * tmp;
-	(*arg1)[1][2] = (*arg0)[2][1] * tmp;
-	(*arg1)[2][0] = (*arg0)[0][2] * tmp;
-	(*arg1)[2][1] = (*arg0)[1][2] * tmp;
-	(*arg1)[2][2] = (*arg0)[2][2] * tmp;
-	(*arg1)[3][0] = -((*arg1)[0][0] * (*arg0)[3][0] + (*arg1)[1][0] * (*arg0)[3][1] + (*arg1)[2][0] * (*arg0)[3][2]);
-	(*arg1)[3][1] = -((*arg1)[0][1] * (*arg0)[3][0] + (*arg1)[1][1] * (*arg0)[3][1] + (*arg1)[2][1] * (*arg0)[3][2]);
-	(*arg1)[3][2] = -((*arg1)[0][2] * (*arg0)[3][0] + (*arg1)[1][2] * (*arg0)[3][1] + (*arg1)[2][2] * (*arg0)[3][2]);
-	(*arg1)[0][3] = 0;
-	(*arg1)[1][3] = 0;
-	(*arg1)[2][3] = 0;
-	(*arg1)[3][3] = 1;
+	arg1[0][0] = arg0[0][0] * tmp;
+	arg1[0][1] = arg0[1][0] * tmp;
+	arg1[0][2] = arg0[2][0] * tmp;
+	arg1[1][0] = arg0[0][1] * tmp;
+	arg1[1][1] = arg0[1][1] * tmp;
+	arg1[1][2] = arg0[2][1] * tmp;
+	arg1[2][0] = arg0[0][2] * tmp;
+	arg1[2][1] = arg0[1][2] * tmp;
+	arg1[2][2] = arg0[2][2] * tmp;
+	arg1[3][0] = -(arg1[0][0] * arg0[3][0] + arg1[1][0] * arg0[3][1] + arg1[2][0] * arg0[3][2]);
+	arg1[3][1] = -(arg1[0][1] * arg0[3][0] + arg1[1][1] * arg0[3][1] + arg1[2][1] * arg0[3][2]);
+	arg1[3][2] = -(arg1[0][2] * arg0[3][0] + arg1[1][2] * arg0[3][1] + arg1[2][2] * arg0[3][2]);
+	arg1[0][3] = 0;
+	arg1[1][3] = 0;
+	arg1[2][3] = 0;
+	arg1[3][3] = 1;
 }
 
-void mtxInvertAffine(Mtx *arg0, Mtx *arg1)
+void mtxInvertAffine(float arg0[4][4], float arg1[4][4])
 {
 	float f0 = 0.0f;
-	f0 += (*arg0)[0][0] * (*arg0)[1][1] * (*arg0)[2][2];
-	f0 += (*arg0)[0][1] * (*arg0)[1][2] * (*arg0)[2][0];
-	f0 += (*arg0)[0][2] * (*arg0)[1][0] * (*arg0)[2][1];
-	f0 -= (*arg0)[0][2] * (*arg0)[1][1] * (*arg0)[2][0];
-	f0 -= (*arg0)[0][1] * (*arg0)[1][0] * (*arg0)[2][2];
-	f0 -= (*arg0)[0][0] * (*arg0)[1][2] * (*arg0)[2][1];
+	f0 += arg0[0][0] * arg0[1][1] * arg0[2][2];
+	f0 += arg0[0][1] * arg0[1][2] * arg0[2][0];
+	f0 += arg0[0][2] * arg0[1][0] * arg0[2][1];
+	f0 -= arg0[0][2] * arg0[1][1] * arg0[2][0];
+	f0 -= arg0[0][1] * arg0[1][0] * arg0[2][2];
+	f0 -= arg0[0][0] * arg0[1][2] * arg0[2][1];
 	f0 = 1.0f / f0;
 
-	(*arg1)[0][0] = ((*arg0)[1][1] * (*arg0)[2][2] - (*arg0)[1][2] * (*arg0)[2][1]) * f0;
-	(*arg1)[1][0] = ((*arg0)[1][2] * (*arg0)[2][0] - (*arg0)[1][0] * (*arg0)[2][2]) * f0;
-	(*arg1)[2][0] = ((*arg0)[1][0] * (*arg0)[2][1] - (*arg0)[1][1] * (*arg0)[2][0]) * f0;
-	(*arg1)[0][1] = ((*arg0)[0][2] * (*arg0)[2][1] - (*arg0)[0][1] * (*arg0)[2][2]) * f0;
-	(*arg1)[1][1] = ((*arg0)[0][0] * (*arg0)[2][2] - (*arg0)[0][2] * (*arg0)[2][0]) * f0;
-	(*arg1)[2][1] = ((*arg0)[0][1] * (*arg0)[2][0] - (*arg0)[0][0] * (*arg0)[2][1]) * f0;
-	(*arg1)[0][2] = ((*arg0)[0][1] * (*arg0)[1][2] - (*arg0)[0][2] * (*arg0)[1][1]) * f0;
-	(*arg1)[1][2] = ((*arg0)[0][2] * (*arg0)[1][0] - (*arg0)[0][0] * (*arg0)[1][2]) * f0;
-	(*arg1)[2][2] = ((*arg0)[0][0] * (*arg0)[1][1] - (*arg0)[0][1] * (*arg0)[1][0]) * f0;
-	(*arg1)[3][0] = -((*arg0)[3][0] * (*arg1)[0][0] + (*arg0)[3][1] * (*arg1)[1][0] + (*arg0)[3][2] * (*arg1)[2][0]);
-	(*arg1)[3][1] = -((*arg0)[3][0] * (*arg1)[0][1] + (*arg0)[3][1] * (*arg1)[1][1] + (*arg0)[3][2] * (*arg1)[2][1]);
-	(*arg1)[3][2] = -((*arg0)[3][0] * (*arg1)[0][2] + (*arg0)[3][1] * (*arg1)[1][2] + (*arg0)[3][2] * (*arg1)[2][2]);
-	(*arg1)[0][3] = 0.0f;
-	(*arg1)[1][3] = 0.0f;
-	(*arg1)[2][3] = 0.0f;
-	(*arg1)[3][3] = 1.0f;
+	arg1[0][0] = (arg0[1][1] * arg0[2][2] - arg0[1][2] * arg0[2][1]) * f0;
+	arg1[1][0] = (arg0[1][2] * arg0[2][0] - arg0[1][0] * arg0[2][2]) * f0;
+	arg1[2][0] = (arg0[1][0] * arg0[2][1] - arg0[1][1] * arg0[2][0]) * f0;
+	arg1[0][1] = (arg0[0][2] * arg0[2][1] - arg0[0][1] * arg0[2][2]) * f0;
+	arg1[1][1] = (arg0[0][0] * arg0[2][2] - arg0[0][2] * arg0[2][0]) * f0;
+	arg1[2][1] = (arg0[0][1] * arg0[2][0] - arg0[0][0] * arg0[2][1]) * f0;
+	arg1[0][2] = (arg0[0][1] * arg0[1][2] - arg0[0][2] * arg0[1][1]) * f0;
+	arg1[1][2] = (arg0[0][2] * arg0[1][0] - arg0[0][0] * arg0[1][2]) * f0;
+	arg1[2][2] = (arg0[0][0] * arg0[1][1] - arg0[0][1] * arg0[1][0]) * f0;
+	arg1[3][0] = -(arg0[3][0] * arg1[0][0] + arg0[3][1] * arg1[1][0] + arg0[3][2] * arg1[2][0]);
+	arg1[3][1] = -(arg0[3][0] * arg1[0][1] + arg0[3][1] * arg1[1][1] + arg0[3][2] * arg1[2][1]);
+	arg1[3][2] = -(arg0[3][0] * arg1[0][2] + arg0[3][1] * arg1[1][2] + arg0[3][2] * arg1[2][2]);
+	arg1[0][3] = 0.0f;
+	arg1[1][3] = 0.0f;
+	arg1[2][3] = 0.0f;
+	arg1[3][3] = 1.0f;
 }
 
 void mtxFullInverse4x4(float arg0[4][4], float arg1[4][4])
