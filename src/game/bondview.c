@@ -10,6 +10,7 @@
 #include "game/textutils.h"
 #include "game/gfxmemory.h"
 #include "game/lang.h"
+#include "game/utils.h"
 #include "game/options.h"
 #include "bss.h"
 #include "lib/vi.h"
@@ -1912,8 +1913,11 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 
 	gdl = textSetCCCustom02(gdl);
 
+	int index = ((int)(atan2f(-lookx, lookz) * (180.0f / M_PI) + 360 + 22) % 360) / 45;
+	index = utilsClamp(index, 0, 8);
+
 	// Prepare text buffers
-	sprintf(directiontext, "%s %s:%03d", arrows, &directions[(turnangle + 22) / 45], turnangle);
+	sprintf(directiontext, "%s %s:%03d", arrows, &directions[index], turnangle);
 	sprintf(hertztext, "%s %s%s%4.2fh", arrows, "", "", menuGetCosOscFrac(4) * 4.6f + 917.4f);
 
 	fovy = viGetFovY();
@@ -2048,7 +2052,7 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 		const int left = viewleft + halfwidth * (1.f - xscale);
 		const int right = viewleft + halfwidth * (1.f + xscale);
 		gSPImageRectangleEXT(gdl++,
-			left << 2, liney << 2, viewleft, liney,
+			0, liney << 2, viewleft, liney,
 			right << 2, (liney + 1) << 2, viewleft + viewwidth, liney + 1,
 			0, videoGetNativeWidth(), videoGetNativeHeight());
 	}

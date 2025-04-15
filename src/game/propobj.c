@@ -634,42 +634,7 @@ void objCalculateGeoBlockFromNode19Data(struct modelrodata_type19 *rodata19, str
 	block->ymax = mtx->m[3][1] + objGetRotatedLocalYMaxByMtx4(bbox, mtx);
 }
 
-bool func0f0675c8(struct coord *pos, float arg1, struct modelrodata_bbox *bbox, Mtxf *mtx)
-{
-	Mtxf sp58;
-	struct coord sp4c;
-	struct coord sp40;
-	struct coord sp34;
-	struct coord sp28;
-
-	sp34.f[0] = sp34.f[1] = sp34.f[2] = arg1;
-
-	sp4c.x = pos->x - mtx->m[3][0];
-	sp4c.y = pos->y - mtx->m[3][1];
-	sp4c.z = pos->z - mtx->m[3][2];
-
-	mtxNormalizeRotationMatrix(mtx->m, sp58.m);
-	mtx4RotateVec((Mtx*)&sp58, &sp4c, &sp40);
-	mtx4RotateVec((Mtx*)&sp58, &sp34, &sp28);
-
-	if (sp28.x < 0.0f) {
-		sp28.x = -sp28.x;
-	}
-
-	if (sp28.y < 0.0f) {
-		sp28.y = -sp28.y;
-	}
-
-	if (sp28.z < 0.0f) {
-		sp28.z = -sp28.z;
-	}
-
-	return sp40.x - sp28.x <= bbox->xmax && sp28.x + sp40.x >= bbox->xmin
-		&& sp40.y - sp28.y <= bbox->ymax && sp28.y + sp40.y >= bbox->ymin
-		&& sp40.z - sp28.z <= bbox->zmax && sp28.z + sp40.z >= bbox->zmin;
-}
-
-bool func0f0677ac(struct coord *coord, struct coord *arg1, struct coord *pos,
+bool func0f0677ac(struct coord *coord, struct coord *radius, struct coord *pos,
 		struct coord *normal, struct coord *up, struct coord *look,
 		float xmin, float xmax, float ymin, float ymax, float zmin, float zmax)
 {
@@ -680,19 +645,19 @@ bool func0f0677ac(struct coord *coord, struct coord *arg1, struct coord *pos,
 
 	f0 = xdiff * look->f[0] + ydiff * look->f[1] + zdiff * look->f[2];
 
-	if (f0 > arg1->z + zmax || f0 < zmin - arg1->z) {
+	if (f0 > radius->z + zmax || f0 < zmin - radius->z) {
 		return false;
 	}
 
 	f0 = xdiff * up->f[0] + ydiff * up->f[1] + zdiff * up->f[2];
 
-	if (f0 > arg1->y + ymax || f0 < ymin - arg1->y) {
+	if (f0 > radius->y + ymax || f0 < ymin - radius->y) {
 		return false;
 	}
 
 	f0 = xdiff * normal->f[0] + ydiff * normal->f[1] + zdiff * normal->f[2];
 
-	if (f0 > arg1->x + xmax || f0 < xmin - arg1->x) {
+	if (f0 > radius->x + xmax || f0 < xmin - radius->x) {
 		return false;
 	}
 
@@ -4002,7 +3967,7 @@ bool objEmbed(struct prop *prop, struct prop *parent, struct model *model, struc
 			mtx4SetTranslation(&prop->pos, (Mtx*)&sp34);
 			mtxApplyAffineTransform((Mtx*)&sp34, (Mtx*)&sp74, (Mtx*)&sp134);
 			mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)sp24, (Mtx*)&spf4);
-			mtxInvertAffine(spf4.m, spb4.m);
+			mtxInvertAffine((Mtx*)&spf4.m, (Mtx*)&spb4.m);
 			mtxApplyAffineTransform((Mtx*)&spb4, (Mtx*)&sp134, (Mtx*)&obj->embedment->matrix);
 
 			return true;
@@ -6488,7 +6453,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 			func0f069c70(obj, false, true);
 			mtx3ToMtx4(obj->realrot, (Mtx*)&sp484);
 			mtx4SetTranslation(&prop->pos, (Mtx*)&sp484);
-			mtxInvertAffine(sp504.m, sp4c4.m);
+			mtxInvertAffine((Mtx*)&sp504.m, (Mtx*)&sp4c4.m);
 			mtx4MultMtx4((Mtx*)&sp484, (Mtx*)&sp4c4, (Mtx*)&sp544);
 			platformDisplaceProps2(prop, &sp544);
 			result = true;
@@ -6817,7 +6782,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 
 												sp184 = modelFindNodeMtx(g_EmbedModel, g_EmbedNode, 0);
 												mtx4TransformVec(camGetPlayerWorldToScreenMtx(), &sp5e8, &sp1c8);
-												mtxInvertRigidBodyMatrix(sp184->m, sp188.m);
+												mtxInvertRigidBodyMatrix((Mtx*)&sp184->m, (Mtx*)&sp188.m);
 												mtx4TransformVecInPlace((Mtx*)&sp188, &sp1c8);
 
 												chr0f0260c4(g_EmbedModel, g_EmbedHitPart, g_EmbedNode, &sp1c8);
@@ -10947,7 +10912,7 @@ int objTickPlayer(struct prop *prop)
 	} else if (obj->flags2 & OBJFLAG2_CANFILLVIEWPORT) {
 		pass2 = true;
 	} else if ((obj->hidden & OBJHFLAG_GONE) == 0 && (obj->flags2 & OBJFLAG2_INVISIBLE) == 0) {
-		pass2 = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), sp564);
+		pass2 = posShouldRenderForProp(prop, &prop->pos, modelGetEffectiveScale(model), sp564);
 	} else {
 		pass2 = false;
 	}
@@ -12280,7 +12245,7 @@ Gfx *objRender(struct prop *prop, Gfx *gdl, bool xlupass)
 	}
 
 	if (obj->type != OBJTYPE_TINTEDGLASS) {
-		frac = objCalculateFadeDistOpacityFrac(prop, modelGetEffectiveScale(obj->model));
+		frac = 1.0f;
 
 		if (prop->timetoregen > 0 && prop->timetoregen < TICKS(60)) {
 			frac *= (TICKS(60.0f) - prop->timetoregen) * 0.016666667535901f;
@@ -13428,7 +13393,7 @@ bool func0f084594(struct model *model, struct modelnode *node, struct coord *arg
 	rodata = &node->rodata->bbox;
 
 	mtxindex = modelFindNodeMtxIndex(node, 0);
-	mtxInvertAffine(model->matrices[mtxindex].m, mtx.m);
+	mtxInvertAffine((Mtx*)&model->matrices[mtxindex].m, (Mtx*)&mtx.m);
 
 	spb8.x = arg2->x;
 	spb8.y = arg2->y;
@@ -13622,7 +13587,7 @@ bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *
 			if (mtx && mtx != spd0) {
 				spd0 = mtx;
 
-				mtxInvertAffine(mtx->m, sp64.m);
+				mtxInvertAffine((Mtx*)&mtx->m, (Mtx*)&sp64.m);
 
 				spec.x = arg2->x;
 				spec.y = arg2->y;
@@ -15807,7 +15772,7 @@ int objTestForPickup(struct prop *prop)
 	return TICKOP_NONE;
 }
 
-bool func0f0899dc(struct prop *prop, struct coord *arg1, float *arg2, float *arg3)
+bool propGetScreenBoundsIfVisible(struct prop *prop, struct coord *arg1, float *arg2, float *arg3)
 {
 	if (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
 		struct defaultobj *obj = prop->obj;
@@ -17748,40 +17713,7 @@ int func0f08e5a8(RoomNum *rooms2, struct screenbox *box)
 	return result;
 }
 
-/**
- * If the stage's environment allows it, objects in the distance fade out after
- * a certain point.
- *
- * The settings are not quite a opa/xlu distance. They are implemented as
- * percentages of a reference distance.
- *
- * Example settings:
- * refdist = 600
- * opaperc = 3333 (600 + 33.33% of 600)
- * xluperc = 4444 (600 + 44.44% of 600)
- *
- * This feature is only used on Pelagic II.
- */
-float objCalculateFadeDistOpacityFrac(struct prop *prop, float modelscale)
-{
-	float result = 1;
-	struct distfadesettings *settings = envGetDistFadeSettings();
-
-	if (settings != NULL && prop->z > settings->refdist) {
-		float scalez = camGetLodScaleZ();
-		float distperc = ((prop->z - settings->refdist) * 100.0f / modelscale + settings->refdist) * scalez;
-
-		if (distperc >= settings->xluperc) {
-			result = 0;
-		} else if (distperc > settings->opaperc) {
-			result = (settings->xluperc - distperc) / (settings->xluperc - settings->opaperc);
-		}
-	}
-
-	return result;
-}
-
-bool posIsInObjFadeDistance(struct coord *pos, float modelscale)
+/*bool posIsInObjFadeDistance(struct coord *pos, float modelscale)
 {
 	bool result = true;
 	struct distfadesettings *settings = envGetDistFadeSettings();
@@ -17809,9 +17741,9 @@ bool posIsInObjFadeDistance(struct coord *pos, float modelscale)
 	}
 
 	return result;
-}
+}*/
 
-bool func0f08e8ac(struct prop *prop, struct coord *pos, float arg2, bool arg3)
+bool posShouldRenderForProp(struct prop *prop, struct coord *pos, float arg2, bool arg3)
 {
 	RoomNum *rooms;
 	RoomNum roomnum;
@@ -17822,7 +17754,7 @@ bool func0f08e8ac(struct prop *prop, struct coord *pos, float arg2, bool arg3)
 
 	while (roomnum != -1) {
 		if (g_Rooms[roomnum].flags & ROOMFLAG_ONSCREEN) {
-			if (envIsPosInFogMaxDistance(pos, arg2) && (!arg3 || posIsInObjFadeDistance(pos, arg2))) {
+			if (envIsWithinFogRenderDistance(pos, arg2)) {
 				result = camIsPosInFovAndVisibleRoom(prop->rooms, pos, arg2);
 
 				if (result) {
@@ -18422,7 +18354,7 @@ bool doorTestForInteract(struct prop *prop)
 				doorGetBbox(door, &bbox);
 				func0f08c424(door, &matrix);
 
-				if (func0f0675c8(&playerprop->pos, 150, &bbox, &matrix)) {
+				if (utilsSphereIntersectsOrientedBbox(&playerprop->pos, 150, &bbox, (Mtx*)&matrix)) {
 					maybe = true;
 				}
 			}

@@ -17,6 +17,6 @@ void envChooseAndApply(int stagenum);
 //void envApplyTransitionFrac(float arg0);
 Gfx *envStartFog(Gfx *gdl, bool xlupass);
 Gfx *envStopFog(Gfx *gdl);
-bool envIsPosInFogMaxDistance(struct coord *pos, float tolerance);
+bool envIsWithinFogRenderDistance(struct coord *pos, float tolerance);
 struct distfadesettings *envGetDistFadeSettings(void);
 int envGetObjShadeMode(struct prop *prop, float arg1[4]);

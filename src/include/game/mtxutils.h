@@ -56,11 +56,11 @@ void mtxBuildLookAtFromTarget(Mtx *mtx, float posx, float posy, float posz, floa
 void mtxBuildFacingMatrix(Mtx *mtx, float angle, float x, float y, float z);
 void mtx4Align(Mtx *mtx, float radians, float x, float y, float z);
 void mtx4LoadRotationFrom(Mtx *src, Mtx *dst);
-void mtxNormalizeRotationMatrix(float src[4][4], float dst[4][4]);
-void mtxInvertRigidBodyMatrix(float arg0[4][4], float arg1[4][4]);
-void mtxInvertAffine(float arg0[4][4], float arg1[4][4]);
-void mtxFullInverse4x4(float arg0[4][4], float arg1[4][4]);
-void mtxAdjugate4x4(float arg0[4][4], float arg1[4][4]);
-float mtxDet4x4(float arg0[4][4]);
+void mtxNormalizeRotationMatrix(Mtx *src, Mtx *dst);
+void mtxInvertRigidBodyMatrix(Mtx *arg0, Mtx *arg1);
+void mtxInvertAffine(Mtx *arg0, Mtx *arg1);
+void mtxFullInverse4x4(Mtx *mtx1, Mtx *mtx2);
+void mtxAdjugate4x4(Mtx *mtx1, Mtx *mtx2);
+float mtxDet4x4(Mtx *mtx);
 float mtxDet3x3(float arg0, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6, float arg7, float arg8);
 float mtxDet2x2(float arg0, float arg1, float arg2, float arg3);

@@ -2291,7 +2291,7 @@ int chrTick(struct prop *prop)
 			if (eyespy == g_Vars.currentplayer->eyespy && eyespy->active) {
 				needsupdate = false;
 			} else {
-				needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
+				needsupdate = posShouldRenderForProp(prop, &prop->pos, modelGetEffectiveScale(model), true);
 			}
 
 			if (fulltick) {
@@ -2336,7 +2336,7 @@ int chrTick(struct prop *prop)
 	} else if (chr->actiontype == ACT_PATROL || chr->actiontype == ACT_GOPOS) {
 		if ((chr->actiontype == ACT_PATROL && chr->act_patrol.waydata.mode == WAYMODE_MAGIC)
 				|| (chr->actiontype == ACT_GOPOS && chr->act_gopos.waydata.mode == WAYMODE_MAGIC)) {
-			needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
+			needsupdate = posShouldRenderForProp(prop, &prop->pos, modelGetEffectiveScale(model), true);
 
 			if (needsupdate) {
 				model->anim->average = false;
@@ -2348,7 +2348,7 @@ int chrTick(struct prop *prop)
 				chrAdvanceAnims(chr, lvupdate240, true);
 			}
 
-			needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
+			needsupdate = posShouldRenderForProp(prop, &prop->pos, modelGetEffectiveScale(model), true);
 
 			if (needsupdate) {
 				if (chr->actiontype == ACT_PATROL) {
@@ -2362,7 +2362,7 @@ int chrTick(struct prop *prop)
 				&& !((prop->flags & (PROPFLAG_ONANYSCREENTHISTICK | PROPFLAG_ONANYSCREENPREVTICK)) != 0);
 		}
 	} else if (chr->actiontype == ACT_ANIM && !chr->act_anim.movewheninvis) {
-		needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
+		needsupdate = posShouldRenderForProp(prop, &prop->pos, modelGetEffectiveScale(model), true);
 
 		if (fulltick) {
 			model->anim->average = false;
@@ -2378,9 +2378,9 @@ int chrTick(struct prop *prop)
 
 		if (chr->chrflags & CHRCFLAG_FORCETOGROUND) {
 			chrAdvanceAnims(chr, lvupdate240, true);
-			needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
+			needsupdate = posShouldRenderForProp(prop, &prop->pos, modelGetEffectiveScale(model), true);
 		} else {
-			needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
+			needsupdate = posShouldRenderForProp(prop, &prop->pos, modelGetEffectiveScale(model), true);
 
 			if (g_Vars.mplayerisrunning) {
 				if (fulltick) {
@@ -2405,14 +2405,14 @@ int chrTick(struct prop *prop)
 			}
 		}
 	} else if (chr->actiontype == ACT_DEAD) {
-		needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
+		needsupdate = posShouldRenderForProp(prop, &prop->pos, modelGetEffectiveScale(model), true);
 	} else if (prop->type == PROPTYPE_PLAYER
 			&& (g_Vars.mplayerisrunning
 				|| (player = g_Vars.players[playermgrGetPlayerNumByProp(prop)], player->cameramode == CAMERAMODE_EYESPY)
 				|| (player->cameramode == CAMERAMODE_THIRDPERSON && player->visionmode == VISIONMODE_SLAYERROCKET))) {
 		model->anim->average = false;
 		chrAdvanceAnims(chr, lvupdate240, true);
-		needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
+		needsupdate = posShouldRenderForProp(prop, &prop->pos, modelGetEffectiveScale(model), true);
 	} else {
 		isrepeatframe2 = false;
 
@@ -2432,7 +2432,7 @@ int chrTick(struct prop *prop)
 		if (isrepeatframe2) {
 			needsupdate = false;
 		} else {
-			needsupdate = func0f08e8ac(prop, &prop->pos, modelGetEffectiveScale(model), true);
+			needsupdate = posShouldRenderForProp(prop, &prop->pos, modelGetEffectiveScale(model), true);
 		}
 	}
 
@@ -2532,7 +2532,6 @@ int chrTick(struct prop *prop)
 			float xdiff;
 			float ydiff;
 			float zdiff;
-			float sp114 = camGetLodScaleZ();
 			bool restore = false;
 			float prevfrac;
 			int prevframea;
@@ -2751,7 +2750,7 @@ bool chr0f024738(struct chrdata *chr)
 
 						mtx3ToMtx4(obj->realrot, (Mtx*)&thing->unk02c);
 						mtx4SetTranslation(&obj->prop->pos, (Mtx*)&thing->unk02c);
-						mtxInvertAffine(thing->unk02c.m, thing->unk06c.m);
+						mtxInvertAffine((Mtx*)thing->unk02c.m, (Mtx*)thing->unk06c.m);
 
 						campos = &g_Vars.currentplayer->cam_pos;
 
@@ -3096,7 +3095,6 @@ Gfx *chrRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 	chrGetBloodColour(chr->bodynum, bloodcolour, NULL);
 	chrSetBloodColour(bloodcolour);
-	alpha *= objCalculateFadeDistOpacityFrac(prop, modelGetEffectiveScale(model));
 
 	if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 		float fadedist;
@@ -4424,7 +4422,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				Mtxf *sp58 = modelFindNodeMtx(hit->model, hit->bboxnode, 0);
 
 				// Create blood
-				mtxInvertRigidBodyMatrix(sp58->m, spb0.m);
+				mtxInvertRigidBodyMatrix((Mtx*)sp58->m, (Mtx*)spb0.m);
 				mtx4TransformVec((Mtx*)&spb0, &sp98, &sp5c);
 
 				if (!chr->noblood

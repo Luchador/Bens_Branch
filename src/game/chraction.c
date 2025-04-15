@@ -14316,7 +14316,7 @@ bool chrIsPosOffScreen(struct coord *pos, RoomNum *rooms)
 	bool offscreen = true;
 	int i;
 
-	if (envIsPosInFogMaxDistance(pos, 0)) {
+	if (envIsWithinFogRenderDistance(pos, 0)) {
 		for (i = 0; rooms[i] != -1; i++) {
 			if (bgRoomIsOnscreen(rooms[i])) {
 				break;

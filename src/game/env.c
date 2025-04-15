@@ -255,7 +255,7 @@ Gfx *envStopFog(Gfx *gdl)
 	return gdl;
 }
 
-bool envIsPosInFogMaxDistance(struct coord *pos, float tolerance)
+bool envIsWithinFogRenderDistance(struct coord *pos, float tolerance)
 {
 	struct coord sp24;
 	Mtx *mtx;

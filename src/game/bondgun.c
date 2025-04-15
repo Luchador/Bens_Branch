@@ -4139,144 +4139,246 @@ void bgunFreeHeldRocket(int handnum)
 
 void bgunCreateFiredProjectile(int handnum)
 {
-	struct hand *hand = &g_Vars.currentplayer->hands[handnum];
-	struct prop *playerprop = g_Vars.currentplayer->prop;
-	struct coord *prevpos = &g_Vars.currentplayer->bondprevpos;
-	struct coord *extrapos = &g_Vars.currentplayer->bondextrapos;
-	struct weapon *weapondef = weaponFindById(hand->gset.weaponnum);
-	bool failed = false;
+	struct weapon *weapondef;
+	struct hand *hand;
+	Mtxf sp270;
+	struct coord sp264;
+	float sp260;
+	float sp25c;
+	struct coord sp250;
+	Mtxf sp210;
+	struct coord gunpos;
+	struct coord gundir;
+	struct prop *playerprop;
+	struct coord *prevpos;
+	struct coord *extrapos;
+	struct coord spawnpos;
+	struct weaponobj *weapon;
+	struct weaponfunc *tmp;
+	struct weaponfunc_shootprojectile *funcdef;
+	struct coord aimpos;
+	struct coord sp1bc;
+	float frac;
+	float radians;
+	Mtxf sp174;
+	Mtxf sp134;
+	Mtxf spf4;
+	float spe4[4];
+	float spd4[4];
+	float spc4[4];
 
-	if (!weapondef) return;
+	hand = g_Vars.currentplayer->hands + handnum;
 
-	struct weaponfunc *basefunc = weapondef->functions[hand->gset.weaponfunc];
-	if (!basefunc || basefunc->type != INVENTORYFUNCTYPE_SHOOT_PROJECTILE) return;
+	playerprop = g_Vars.currentplayer->prop;
+	prevpos = &g_Vars.currentplayer->bondprevpos;
+	extrapos = &g_Vars.currentplayer->bondextrapos;
 
-	struct weaponfunc_shootprojectile *funcdef = (struct weaponfunc_shootprojectile *)basefunc;
+	weapondef = weaponFindById(hand->gset.weaponnum);
 
-	Mtx identity;
-	mtxIdent(&identity);
+	if (weapondef) {
+		tmp = weapondef->functions[hand->gset.weaponfunc];
 
-	struct coord gunpos, gundir;
-	bgunCalculatePlayerShotSpread(&gunpos, &gundir, handnum, true);
-	mtx4RotateVecInPlace(camGetProjectionMtx(), &gundir);
+		if (tmp && tmp->type == INVENTORYFUNCTYPE_SHOOT_PROJECTILE) {
+			funcdef = (struct weaponfunc_shootprojectile *)tmp;
 
-	struct coord spawnpos = hand->muzzlepos;
+			mtxIdent((Mtx*)&sp270);
+			bgunCalculatePlayerShotSpread(&gunpos, &gundir, handnum, true);
+			mtx4RotateVecInPlace(camGetProjectionMtx(), &gundir);
 
-	if (hand->gset.weaponnum == WEAPON_SLAYER && hand->gset.weaponfunc == FUNC_SECONDARY) {
-		spawnpos.x += 50.0f * gundir.x;
-		spawnpos.y += 50.0f * gundir.y;
-		spawnpos.z += 50.0f * gundir.z;
-	}
+			spawnpos.x = hand->muzzlepos.x;
+			spawnpos.y = hand->muzzlepos.y;
+			spawnpos.z = hand->muzzlepos.z;
 
-	float speed = funcdef->speed * (1.0f / 36.0f);
-	float travelDist = funcdef->traveldist * 1.6666666f;
+			if (hand->gset.weaponnum == WEAPON_SLAYER && hand->gset.weaponfunc == FUNC_SECONDARY) {
+				spawnpos.x += 50.0f * gundir.x;
+				spawnpos.y += 50.0f * gundir.y;
+				spawnpos.z += 50.0f * gundir.z;
+			}
 
-	struct coord velocity = {
-		gundir.x * speed,
-		gundir.y * speed,
-		gundir.z * speed
-	};
+			sp260 = funcdef->speed * 1.6666666f / 60.0f;
+			sp25c = funcdef->traveldist * 1.6666666f;
 
-	struct coord displacement = {
-		velocity.x * g_Vars.lvupdate60freal + gundir.x * travelDist,
-		velocity.y * g_Vars.lvupdate60freal + gundir.y * travelDist,
-		velocity.z * g_Vars.lvupdate60freal + gundir.z * travelDist
-	};
+			if (gsetHasFunctionFlags(&hand->gset, FUNCFLAG_CALCULATETRAJECTORY)) {
+				propFindAimingAt(HAND_RIGHT, false, FINDPROPCONTEXT_QUERY);
 
-	if (!(funcdef->base.base.flags & FUNCFLAG_FLYBYWIRE) && g_Vars.lvupdate240 > 0) {
-		displacement.x += (playerprop->pos.x - prevpos->x + extrapos->x) / g_Vars.lvupdate60freal;
-		displacement.y += (playerprop->pos.y - prevpos->y + extrapos->y) / g_Vars.lvupdate60freal;
-		displacement.z += (playerprop->pos.z - prevpos->z + extrapos->z) / g_Vars.lvupdate60freal;
-	}
+				if (hand->hasdotinfo) {
+					aimpos.x = hand->dotpos.x;
+					aimpos.y = hand->dotpos.y;
+					aimpos.z = hand->dotpos.z;
 
-	Mtx handmatrix;
-	memcpy(handmatrix, &g_Vars.currentplayer->hands[handnum].posmtx, sizeof(Mtx));
-	handmatrix[3][0] = handmatrix[3][1] = handmatrix[3][2] = 0.0f;
+					chrCalculateTrajectory(&spawnpos, sp25c, &aimpos, &sp1bc);
 
-	struct weaponobj *weapon = NULL;
+					radians = acosf(gundir.f[0] * sp1bc.f[0] + gundir.f[1] * sp1bc.f[1] + gundir.f[2] * sp1bc.f[2]);
 
-	if (hand->rocket) {
-		hand->firedrocket = true;
-		weapon = hand->rocket;
-		weapon->base.flags2 &= ~OBJFLAG2_THROWTHROUGH;
-		weapon->base.flags &= ~OBJFLAG_HELDROCKET;
+					if (radians > 0.17450513f || radians < -0.17450513f) {
+						mtxBuildLookAtMatrix2F((Mtx*)&sp174, 0.0f, 0.0f, 0.0f, gundir.x, gundir.y, gundir.z, 0.0f, 1.0f, 0.0f);
+						mtxBuildLookAtMatrix2F((Mtx*)&sp134, 0.0f, 0.0f, 0.0f, sp1bc.x, sp1bc.y, sp1bc.z, 0.0f, 1.0f, 0.0f);
 
-		if (funcdef->base.base.flags & FUNCFLAG_HOMINGROCKET) {
-			weapon->weaponnum = WEAPON_HOMINGROCKET;
+						quaternion3x3MtxToQuat((Mtx*)&sp174, spe4);
+						quaternion3x3MtxToQuat((Mtx*)&sp134, spd4);
+						quaternionAvoidFlips(spe4, spd4);
+
+						frac = 0.17450513f / radians;
+
+						if (frac < 0.0f) {
+							frac = -frac;
+						}
+
+						quaternionSlerp(spe4, spd4, frac, spc4);
+						quaternionToMtx(spc4, (Mtx*)&spf4);
+
+						gundir.x = -spf4.m[2][0];
+						gundir.y = -spf4.m[2][1];
+						gundir.z = -spf4.m[2][2];
+					} else {
+						gundir.x = sp1bc.x;
+						gundir.y = sp1bc.y;
+						gundir.z = sp1bc.z;
+					}
+				}
+			}
+
+			sp250.x = gundir.x * sp260;
+			sp250.y = gundir.y * sp260;
+			sp250.z = gundir.z * sp260;
+
+			sp264.x = sp250.f[0] * g_Vars.lvupdate60freal + gundir.f[0] * sp25c;
+			sp264.y = sp250.f[1] * g_Vars.lvupdate60freal + gundir.f[1] * sp25c;
+			sp264.z = sp250.f[2] * g_Vars.lvupdate60freal + gundir.f[2] * sp25c;
+
+			if ((funcdef->base.base.flags & FUNCFLAG_FLYBYWIRE) == 0 && g_Vars.lvupdate240 > 0) {
+				sp264.x += (playerprop->pos.x - prevpos->x + extrapos->x) / g_Vars.lvupdate60freal;
+				sp264.y += (playerprop->pos.y - prevpos->y + extrapos->y) / g_Vars.lvupdate60freal;
+				sp264.z += (playerprop->pos.z - prevpos->z + extrapos->z) / g_Vars.lvupdate60freal;
+			}
+
+			sp210 = g_Vars.currentplayer->hands[handnum].posmtx;
+
+			sp210.m[3][0] = 0.0f;
+			sp210.m[3][1] = 0.0f;
+			sp210.m[3][2] = 0.0f;
+
+			if (hand->rocket) {
+				hand->firedrocket = true;
+
+				weapon = hand->rocket;
+				weapon->base.flags2 &= ~OBJFLAG2_THROWTHROUGH;
+				weapon->base.flags &= ~OBJFLAG_HELDROCKET;
+
+				if (funcdef->base.base.flags & FUNCFLAG_HOMINGROCKET) {
+					weapon->weaponnum = WEAPON_HOMINGROCKET;
+				}
+			} else if (hand->gset.weaponnum == WEAPON_ROCKETLAUNCHER || hand->gset.weaponnum == WEAPON_SLAYER) {
+				int weaponnum = WEAPON_ROCKET;
+
+				if (funcdef->base.base.flags & FUNCFLAG_HOMINGROCKET) {
+					weaponnum = WEAPON_HOMINGROCKET;
+				}
+
+				weapon = weaponCreateProjectileFromWeaponNum(funcdef->projectilemodelnum, weaponnum, g_Vars.currentplayer->prop->chr);
+			} else if (hand->gset.weaponnum == WEAPON_CROSSBOW) {
+				weapon = weaponCreateProjectileFromWeaponNum(funcdef->projectilemodelnum, WEAPON_BOLT, g_Vars.currentplayer->prop->chr);
+
+				if (weapon) {
+					weapon->gunfunc = hand->gset.weaponfunc;
+				}
+			} else if (hand->gset.weaponnum == WEAPON_DEVASTATOR) {
+				weapon = weaponCreateProjectileFromWeaponNum(funcdef->projectilemodelnum, WEAPON_GRENADEROUND, g_Vars.currentplayer->prop->chr);
+
+				if (weapon) {
+					weapon->gunfunc = hand->gset.weaponfunc;
+				}
+			} else if (hand->gset.weaponnum == WEAPON_SUPERDRAGON) {
+				weapon = weaponCreateProjectileFromWeaponNum(funcdef->projectilemodelnum, WEAPON_GRENADEROUND, g_Vars.currentplayer->prop->chr);
+
+				if (weapon) {
+					weapon->gunfunc = FUNC_2;
+				}
+			} else {
+				weapon = weaponCreateProjectileFromGset(funcdef->projectilemodelnum, &hand->gset, g_Vars.currentplayer->prop->chr);
+			}
+
+			if (weapon) {
+				bool failed = false;
+				Mtxf sp78;
+				struct coord sp6c;
+				struct coord sp60;
+
+				if (weapon->base.model && weapon->base.model->definition) {
+					weapon->timer240 = funcdef->timer60;
+
+					if (weapon->timer240 != -1) {
+						weapon->timer240 = TICKS(weapon->timer240 * 4);
+					}
+
+					weapon->base.hidden &= 0x0fffffff;
+					weapon->base.hidden |= g_Vars.currentplayernum << 28;
+
+					bgun0f09ed2c(&weapon->base, &spawnpos, &sp210, &sp264, &sp270);
+
+					if (weapon->base.hidden & OBJHFLAG_PROJECTILE) {
+						if (funcdef->base.base.flags & FUNCFLAG_PROJECTILE_LIGHTWEIGHT) {
+							weapon->base.projectile->flags |= PROJECTILEFLAG_LIGHTWEIGHT;
+						} else if (funcdef->base.base.flags & FUNCFLAG_PROJECTILE_POWERED) {
+							weapon->base.projectile->flags |= PROJECTILEFLAG_POWERED;
+						}
+
+						weapon->base.projectile->targetprop = g_Vars.currentplayer->trackedprops[0].prop;
+
+						if (funcdef->scale != 1.0f) {
+							weapon->base.model->scale *= funcdef->scale;
+
+							mtx3ToMtx4(weapon->base.realrot, (Mtx*)&sp78);
+							mtxScaleRotationPart(funcdef->scale, (Mtx*)&sp78);
+							mtx4ToMtx3((Mtx*)&sp78, weapon->base.realrot);
+						}
+
+						weapon->base.projectile->powerlimit240 = TICKS(1200);
+						weapon->base.projectile->unk0a8 = weapon->base.prop->pos.y;
+						weapon->base.projectile->unk0ac = weapon->base.projectile->speed.y;
+						weapon->base.projectile->unk010 = sp250.x;
+						weapon->base.projectile->unk014 = sp250.y;
+						weapon->base.projectile->unk018 = sp250.z;
+						weapon->base.projectile->pickuptimer240 = TICKS(240);
+						weapon->base.projectile->bounciness = funcdef->reflectangle;
+						weapon->base.projectile->unk098 = funcdef->unk50 * 1.6666666f;
+
+						if (funcdef->soundnum > 0) {
+							psCreate(NULL, weapon->base.prop, funcdef->soundnum, -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
+						}
+
+						if (funcdef->base.base.flags & FUNCFLAG_FLYBYWIRE) {
+							playerLaunchSlayerRocket(weapon);
+						}
+
+						if (weapon->base.projectile->flags & PROJECTILEFLAG_LAUNCHING) {
+							projectileLaunch(&weapon->base, weapon->base.projectile, &sp6c, &sp60);
+						}
+					} else {
+						failed = true;
+					}
+				} else {
+					failed = true;
+				}
+
+				if (failed) {
+					weapon->timer240 = -1;
+
+					if (weapon->base.prop) {
+						propFree(weapon->base.prop);
+					}
+
+					if (weapon->base.model) {
+						modelmgrFreeModel(weapon->base.model);
+					}
+
+					weapon->base.prop = NULL;
+					weapon->base.model = NULL;
+				}
+			}
 		}
-	} else if (hand->gset.weaponnum == WEAPON_ROCKETLAUNCHER || hand->gset.weaponnum == WEAPON_SLAYER) {
-		int weaponnum = (funcdef->base.base.flags & FUNCFLAG_HOMINGROCKET) ? WEAPON_HOMINGROCKET : WEAPON_ROCKET;
-		weapon = weaponCreateProjectileFromWeaponNum(funcdef->projectilemodelnum, weaponnum, playerprop->chr);
-	} else if (hand->gset.weaponnum == WEAPON_CROSSBOW) {
-		weapon = weaponCreateProjectileFromWeaponNum(funcdef->projectilemodelnum, WEAPON_BOLT, playerprop->chr);
-		if (weapon) weapon->gunfunc = hand->gset.weaponfunc;
-	} else if (hand->gset.weaponnum == WEAPON_DEVASTATOR || hand->gset.weaponnum == WEAPON_SUPERDRAGON) {
-		weapon = weaponCreateProjectileFromWeaponNum(funcdef->projectilemodelnum, WEAPON_GRENADEROUND, playerprop->chr);
-		if (weapon) weapon->gunfunc = (hand->gset.weaponnum == WEAPON_SUPERDRAGON) ? FUNC_2 : hand->gset.weaponfunc;
-	} else {
-		weapon = weaponCreateProjectileFromGset(funcdef->projectilemodelnum, &hand->gset, playerprop->chr);
-	}
-
-	if (!weapon) return;
-
-	weapon->timer240 = (funcdef->timer60 == -1) ? -1 : TICKS(funcdef->timer60 * 4);
-	weapon->base.hidden &= 0x0fffffff;
-	weapon->base.hidden |= g_Vars.currentplayernum << 28;
-
-	bgun0f09ed2c(&weapon->base, &spawnpos, (Mtxf*)&handmatrix, &displacement, (Mtxf*)&identity);
-
-	if (!(weapon->base.hidden & OBJHFLAG_PROJECTILE))
-	{
-		failed = true;
-	}
-
-	if (funcdef->base.base.flags & FUNCFLAG_PROJECTILE_LIGHTWEIGHT)
-		weapon->base.projectile->flags |= PROJECTILEFLAG_LIGHTWEIGHT;
-	else if (funcdef->base.base.flags & FUNCFLAG_PROJECTILE_POWERED)
-		weapon->base.projectile->flags |= PROJECTILEFLAG_POWERED;
-
-	weapon->base.projectile->targetprop = g_Vars.currentplayer->trackedprops[0].prop;
-	weapon->base.projectile->powerlimit240 = TICKS(1200);
-	weapon->base.projectile->unk0a8 = weapon->base.prop->pos.y;
-	weapon->base.projectile->unk0ac = weapon->base.projectile->speed.y;
-	weapon->base.projectile->unk010 = velocity.x;
-	weapon->base.projectile->unk014 = velocity.y;
-	weapon->base.projectile->unk018 = velocity.z;
-	weapon->base.projectile->pickuptimer240 = TICKS(240);
-	weapon->base.projectile->bounciness = funcdef->reflectangle;
-	weapon->base.projectile->unk098 = funcdef->unk50 * 1.6666666f;
-
-	if (funcdef->scale != 1.0f) {
-		weapon->base.model->scale *= funcdef->scale;
-		Mtx scaled;
-		mtx3ToMtx4(weapon->base.realrot, &scaled);
-		mtxScaleRotationPart(funcdef->scale, &scaled);
-		mtx4ToMtx3(&scaled, weapon->base.realrot);
-	}
-
-	if (funcdef->soundnum > 0) {
-		psCreate(NULL, weapon->base.prop, funcdef->soundnum, -1, -1, 0, 0, PSTYPE_NONE, 0, -1.0f, 0, -1, -1.0f, -1.0f, -1.0f);
-	}
-
-	if (funcdef->base.base.flags & FUNCFLAG_FLYBYWIRE) {
-		playerLaunchSlayerRocket(weapon);
-	}
-
-	if (weapon->base.projectile->flags & PROJECTILEFLAG_LAUNCHING) {
-		struct coord dummy1, dummy2;
-		projectileLaunch(&weapon->base, weapon->base.projectile, &dummy1, &dummy2);
-	}
-
-	if(failed)
-	{
-		weapon->timer240 = -1;
-		if (weapon->base.prop) propFree(weapon->base.prop);
-		if (weapon->base.model) modelmgrFreeModel(weapon->base.model);
-		weapon->base.prop = NULL;
-		weapon->base.model = NULL;
 	}
 }
-
 
 void bgunSwivel(float screenx, float screeny, float crossdamp, float aimdamp)
 {
@@ -6186,7 +6288,6 @@ void bgunUpdateReaper(struct hand *hand, struct modeldef *modeldef)
 	node = modelGetPart(modeldef, MODELPART_REAPER_002E);
 
 	if (node) {
-		debug_log("node \n", 0);
 		var8009d0f0[1] = modelFindNodeMtxIndex(node, 0);
 	}
 
@@ -6449,7 +6550,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 			movementVelocity.z = (hand->posmtx.m[3][2] - hand->prevmtx.m[3][2]) / g_Vars.lvupdate60freal;
 
 			Mtx invMtx;
-			mtxFullInverse4x4(hand->posmtx.m, invMtx);
+			mtxFullInverse4x4((Mtx*)hand->posmtx.m, &invMtx);
 			mtx4RotateVecInPlace(&invMtx, &movementVelocity);
 
 			hand->unk0d20.x += movementVelocity.x * 0.3f;
@@ -6489,7 +6590,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 
 void bgunMuzzleFlash(struct hand *hand, struct weapon *weapondef, struct modeldef *modeldef,
 		struct weaponfunc *funcdef, int maxburst, uint8_t *allocation, int weaponnum,
-		bool **arg7, int mtxindex, Mtx *arg9, Mtx *arg10)
+		bool **arg7, int mtxindex, Mtxf *arg9, Mtxf *arg10)
 {
 	Mtx spd8;
 	int index;
@@ -6561,10 +6662,10 @@ void bgunMuzzleFlash(struct hand *hand, struct weapon *weapondef, struct modelde
 
 			mtx = (Mtx*)allocation;
 
-			mtxBuildFacingMatrix(arg10, 0, (*mtx)[3][0] - hand->aimpos.x, (*mtx)[3][1] - hand->aimpos.y, (*mtx)[3][2] - hand->aimpos.z);
+			mtxBuildFacingMatrix((Mtx*)&arg10->m, 0, (*mtx)[3][0] - hand->aimpos.x, (*mtx)[3][1] - hand->aimpos.y, (*mtx)[3][2] - hand->aimpos.z);
 			mtx4MultMtx4InPlace((Mtx*)arg10, &sp70);
 			mtx00016710(muzzlez, &sp70);
-			mtx4MultMtx4InPlace(arg9, &sp70);
+			mtx4MultMtx4InPlace((Mtx*)arg9, &sp70);
 			mtx4SetTranslation(&sp60, &sp70);
 
 			mtx = (Mtx*)allocation;
@@ -6744,8 +6845,8 @@ void bgunTickHandWeapModel(int handnum)
 	Mtxf sp284;
 	struct modeldef *modeldef = NULL;
 	struct coord viewmodelpos = {0, 0, 0};
-	Mtxf sp234;
-	Mtxf sp1f4;
+	Mtx sp234;
+	Mtx sp1f4;
 	union modelrodata *rodata;
 	bool *sp1e4[3] = {NULL, NULL, NULL};
 	int sp1e0 = 0;
@@ -6754,7 +6855,6 @@ void bgunTickHandWeapModel(int handnum)
 	struct hand *hand = player->hands + handnum;
 	struct weaponfunc *funcdef;
 	struct weaponfunc_shoot *shootfunc = NULL;
-	int i;
 	int weaponnum = bgunGetWeaponNum2(handnum);
 	struct weapon *weapondef;
 	Mtxf *mtx;
@@ -6869,7 +6969,7 @@ void bgunTickHandWeapModel(int handnum)
 		mtxallocation = gfxAllocate(modeldef->nummatrices * sizeof(Mtxf));
 
 		if (weaponHasFlag(weaponnum, WEAPONFLAG_02000000)) {
-			for (i = 0; i < modeldef->nummatrices; i++) {
+			for (int i = 0; i < modeldef->nummatrices; i++) {
 				mtx = (Mtxf *)(mtxallocation + i * sizeof(Mtxf));
 				mtxIdent((Mtx*)mtx);
 			}
@@ -6888,13 +6988,13 @@ void bgunTickHandWeapModel(int handnum)
 		}
 	}
 
-	mtxIdent((Mtx*)&sp234);
+	mtxIdent(&sp234);
 
 	if (weaponHasFlag(weaponnum, WEAPONFLAG_GANGSTA)) {
-		bgunUpdateGangsta(hand, handnum, &viewmodelpos, funcdef, &sp284, &sp234);
+		bgunUpdateGangsta(hand, handnum, &viewmodelpos, funcdef, &sp284, (Mtxf*)&sp234);
 	}
 
-	// Ben's comment: weapons with the gangsta flag check for a nearby wall to see if they can be turned up
+	// Ben's comment: weapons with the turn up flag check for a nearby wall to see if they can be turned up
 	if (weaponHasFlag(weaponnum, WEAPONFLAG_TURNUP)) {
 		g_CloseToWall = bgunCheckForCloseWall();
 		if(g_CloseToWall) {
@@ -6907,7 +7007,7 @@ void bgunTickHandWeapModel(int handnum)
 				hand->turnuprot = 0;
 			}
 		}
-		bgunUpdateHandState2(hand, handnum, &viewmodelpos, funcdef, &sp284, &sp234);
+		bgunUpdateHandState2(hand, handnum, &viewmodelpos, funcdef, &sp284, (Mtxf*)&sp234);
 	}
 
 	if (hand->useposrot) {
@@ -6915,11 +7015,11 @@ void bgunTickHandWeapModel(int handnum)
 		viewmodelpos.f[1] += hand->posrotmtx.m[3][1];
 		viewmodelpos.f[2] += hand->posrotmtx.m[3][2];
 
-		mtxApplyAffineTransformInPlace((Mtx*)&hand->posrotmtx, (Mtx*)&sp234);
+		mtxApplyAffineTransformInPlace((Mtx*)&hand->posrotmtx, &sp234);
 
-		sp234.m[3][0] = 0.0f;
-		sp234.m[3][1] = 0.0f;
-		sp234.m[3][2] = 0.0f;
+		sp234[3][0] = 0.0f;
+		sp234[3][1] = 0.0f;
+		sp234[3][2] = 0.0f;
 	} else {
 		hand->rotxoffset = 0.0f;
 		hand->posoffset.x = 0.0f;
@@ -6931,7 +7031,7 @@ void bgunTickHandWeapModel(int handnum)
 			hand->damplook.x, hand->damplook.y, hand->damplook.z,
 			hand->dampup.x, hand->dampup.y, hand->dampup.z);
 
-	mtxApplyAffineTransformInPlace((Mtx*)&sp284, (Mtx*)&sp234);
+	mtxApplyAffineTransformInPlace((Mtx*)&sp284, &sp234);
 
 	sp1a4.x = 0.0f;
 	sp1a4.y = M_PI;
@@ -6951,8 +7051,8 @@ void bgunTickHandWeapModel(int handnum)
 
 	mtx4LoadRotation(&sp1a4, (Mtx*)&sp124);
 	mtx4MultMtx4((Mtx*)&sp124, (Mtx*)&sp164, (Mtx*)&sp284);
-	mtx4MultMtx4InPlace((Mtx*)&sp284, (Mtx*)&sp234);
-	mtx4Copy((Mtx*)&sp234, (Mtx*)&sp2c4);
+	mtx4MultMtx4InPlace((Mtx*)&sp284, &sp234);
+	mtx4Copy(&sp234, (Mtx*)&sp2c4);
 	mtx4SetTranslation(&viewmodelpos, (Mtx*)&sp2c4);
 
 	mtx4Copy((Mtx*)&sp2c4, (Mtx*)&hand->cammtx);
@@ -7193,7 +7293,7 @@ void bgunTickHandWeapModel(int handnum)
 			hand->muzzlez = -((Mtxf *)((uintptr_t)mtxallocation + sp6c * sizeof(Mtxf)))->m[3][2];
 
 			if (hand->flashon && sp1e0 > 0 && weaponnum != WEAPON_SHOTGUN && g_Vars.lvupdate240 != 0) {
-				bgunMuzzleFlash(hand, weapondef, modeldef, funcdef, sp1e0, mtxallocation, weaponnum, sp1e4, sp6c, (Mtx*)&sp234, (Mtx*)&sp1f4);
+				bgunMuzzleFlash(hand, weapondef, modeldef, funcdef, sp1e0, mtxallocation, weaponnum, sp1e4, sp6c, (Mtxf*)&sp234, (Mtxf*)&sp1f4);
 			}
 		} else if (weaponnum == WEAPON_GRENADE
 				|| weaponnum == WEAPON_TIMEDMINE

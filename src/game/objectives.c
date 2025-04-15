@@ -426,7 +426,7 @@ void objectiveCheckHolograph(float maxdist)
 					maxdist = maxdist * maxdist;
 				}
 
-				if (dist < maxdist && func0f0899dc(obj->prop, &sp9c, sp94, sp8c)) {
+				if (dist < maxdist && propGetScreenBoundsIfVisible(obj->prop, &sp9c, sp94, sp8c)) {
 					float sp78[2];
 					float sp70[2];
 					func0f06803c(&sp9c, sp94, sp8c, sp78, sp70);

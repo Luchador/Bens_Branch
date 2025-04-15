@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "constants.h"
 #include "game/debug.h"
+#include "game/mtxutils.h"
 #include "game/utils.h"
 #include "bss.h"
 #include "lib/memp.h"
@@ -373,6 +374,41 @@ bool utilsIsPointInCone(struct coord *arg0, struct coord *arg1, struct coord *ar
 	return false;
 }
 
+bool utilsSphereIntersectsOrientedBbox(struct coord *sphereCenter, float radius, struct modelrodata_bbox *bbox, Mtx *mtx)
+{
+	Mtx sp58;
+	struct coord sp4c;
+	struct coord sp40;
+	struct coord sp34;
+	struct coord sp28;
+
+	sp34.x = sp34.y = sp34.z = radius;
+
+	sp4c.x = sphereCenter->x - (*mtx)[3][0];
+	sp4c.y = sphereCenter->y - (*mtx)[3][1];
+	sp4c.z = sphereCenter->z - (*mtx)[3][2];
+
+	mtxNormalizeRotationMatrix(mtx, &sp58);
+	mtx4RotateVec(&sp58, &sp4c, &sp40);
+	mtx4RotateVec(&sp58, &sp34, &sp28);
+
+	if (sp28.x < 0.0f) {
+		sp28.x = -sp28.x;
+	}
+
+	if (sp28.y < 0.0f) {
+		sp28.y = -sp28.y;
+	}
+
+	if (sp28.z < 0.0f) {
+		sp28.z = -sp28.z;
+	}
+
+	return sp40.x - sp28.x <= bbox->xmax && sp28.x + sp40.x >= bbox->xmin
+		&& sp40.y - sp28.y <= bbox->ymax && sp28.y + sp40.y >= bbox->ymin
+		&& sp40.z - sp28.z <= bbox->zmax && sp28.z + sp40.z >= bbox->zmin;
+}
+
 // Möller–Trumbore algorithm
 static bool utilsTriRayIntersectionTest(
 	float f0, float f1, float f2,
@@ -559,7 +595,7 @@ if (f28 >= 0.0f && f28 + f27 <= 1.0f) {
 return false;
 }
 
-bool func0002f490(struct vec3s16 *arg0, struct vec3s16 *arg1, struct vec3s16 *arg2,
+bool utilsIntersectTest1(struct vec3s16 *arg0, struct vec3s16 *arg1, struct vec3s16 *arg2,
 	struct coord *arg3, struct coord *t0, struct coord *t1,
 	struct coord *t2, struct coord *t3, struct coord *t4)
 {
@@ -571,7 +607,7 @@ return utilsTriRayIntersectionTest(
 		arg3, t0, t1, t2, t3, t4);
 }
 
-bool func0002f560(struct coord *arg0, struct coord *arg1, struct coord *arg2,
+bool utilsIntersectTest2(struct coord *arg0, struct coord *arg1, struct coord *arg2,
 	struct coord *arg3, struct coord *t0, struct coord *t1,
 	struct coord *t2, struct coord *t3, struct coord *t4)
 {

@@ -2355,7 +2355,7 @@ bool cd0002aac0IntTile(struct coord *arg0, struct coord *arg1, struct coord *arg
 	uint8_t numvertices = tile->header.numvertices;
 
 	for (i = 2; i < numvertices; i++) {
-		if (func0002f490((struct vec3s16 *)&tile->vertices[0][0],
+		if (utilsIntersectTest1((struct vec3s16 *)&tile->vertices[0][0],
 					(struct vec3s16 *)&tile->vertices[i - 1][0],
 					(struct vec3s16 *)&tile->vertices[i][0],
 					NULL, arg0, arg1, arg2, arg4, arg5)) {
@@ -2372,7 +2372,7 @@ bool cd0002ab98FltTile(struct coord *arg0, struct coord *arg1, struct coord *arg
 	uint8_t numvertices = tile->header.numvertices;
 
 	for (i = 2; i < numvertices; i++) {
-		if (func0002f560(&tile->vertices[0], &tile->vertices[i - 1], &tile->vertices[i],
+		if (utilsIntersectTest2(&tile->vertices[0], &tile->vertices[i - 1], &tile->vertices[i],
 					NULL, arg0, arg1, arg2, arg4, arg5)) {
 			return true;
 		}

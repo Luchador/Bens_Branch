@@ -375,7 +375,7 @@ void mtxPerspective(Mtx *mtx, float fovy, float aspect, float near, float far, f
 	float cot;
 	int	i, j;
 
-	mtxIdent((Mtx*)mtx);
+	mtxIdent(mtx);
 
 	fovy *= 3.1415926f / 180.0f;
 	cot = cosf(fovy * 0.5f) / sinf(fovy * 0.5f);
@@ -1017,141 +1017,139 @@ void mtx4LoadRotationFrom(Mtx *src, Mtx *dst)
 	(*dst)[3][3] = 1;
 }
 
-void mtxNormalizeRotationMatrix(float src[4][4], float dst[4][4])
+void mtxNormalizeRotationMatrix(Mtx *src, Mtx *dst)
 {
-	float tmp = (src[0][0] * src[0][0] + src[1][0] * src[1][0] + src[2][0] * src[2][0]);
+	float tmp = ((*src)[0][0] * (*src)[0][0] + (*src)[1][0] * (*src)[1][0] + (*src)[2][0] * (*src)[2][0]);
 	tmp = 1 / tmp;
 
-	dst[0][0] = src[0][0] * tmp;
-	dst[0][1] = src[1][0] * tmp;
-	dst[0][2] = src[2][0] * tmp;
+	(*dst)[0][0] = (*src)[0][0] * tmp;
+	(*dst)[0][1] = (*src)[1][0] * tmp;
+	(*dst)[0][2] = (*src)[2][0] * tmp;
 
-	dst[1][0] = src[0][1] * tmp;
-	dst[1][1] = src[1][1] * tmp;
-	dst[1][2] = src[2][1] * tmp;
+	(*dst)[1][0] = (*src)[0][1] * tmp;
+	(*dst)[1][1] = (*src)[1][1] * tmp;
+	(*dst)[1][2] = (*src)[2][1] * tmp;
 
-	dst[2][0] = src[0][2] * tmp;
-	dst[2][1] = src[1][2] * tmp;
-	dst[2][2] = src[2][2] * tmp;
+	(*dst)[2][0] = (*src)[0][2] * tmp;
+	(*dst)[2][1] = (*src)[1][2] * tmp;
+	(*dst)[2][2] = (*src)[2][2] * tmp;
 
-	dst[3][0] = 0;
-	dst[3][1] = 0;
-	dst[3][2] = 0;
+	(*dst)[3][0] = 0;
+	(*dst)[3][1] = 0;
+	(*dst)[3][2] = 0;
 
-	dst[0][3] = 0;
-	dst[1][3] = 0;
-	dst[2][3] = 0;
-	dst[3][3] = 1;
+	(*dst)[0][3] = 0;
+	(*dst)[1][3] = 0;
+	(*dst)[2][3] = 0;
+	(*dst)[3][3] = 1;
 }
 
 /*
  *   Inverts a transformation matrix that contains only rotation and translation.
  *   Assumes the rotation part is orthonormal.
  */
-void mtxInvertRigidBodyMatrix(float arg0[4][4], float arg1[4][4])
+void mtxInvertRigidBodyMatrix(Mtx *arg0, Mtx *arg1)
 {
-	float tmp = arg0[0][0] * arg0[0][0] + arg0[1][0] * arg0[1][0] + arg0[2][0] * arg0[2][0];
+	float tmp = (*arg0)[0][0] * (*arg0)[0][0] + (*arg0)[1][0] * (*arg0)[1][0] + (*arg0)[2][0] * (*arg0)[2][0];
 	tmp = 1 / tmp;
 
-	arg1[0][0] = arg0[0][0] * tmp;
-	arg1[0][1] = arg0[1][0] * tmp;
-	arg1[0][2] = arg0[2][0] * tmp;
-	arg1[1][0] = arg0[0][1] * tmp;
-	arg1[1][1] = arg0[1][1] * tmp;
-	arg1[1][2] = arg0[2][1] * tmp;
-	arg1[2][0] = arg0[0][2] * tmp;
-	arg1[2][1] = arg0[1][2] * tmp;
-	arg1[2][2] = arg0[2][2] * tmp;
-	arg1[3][0] = -(arg1[0][0] * arg0[3][0] + arg1[1][0] * arg0[3][1] + arg1[2][0] * arg0[3][2]);
-	arg1[3][1] = -(arg1[0][1] * arg0[3][0] + arg1[1][1] * arg0[3][1] + arg1[2][1] * arg0[3][2]);
-	arg1[3][2] = -(arg1[0][2] * arg0[3][0] + arg1[1][2] * arg0[3][1] + arg1[2][2] * arg0[3][2]);
-	arg1[0][3] = 0;
-	arg1[1][3] = 0;
-	arg1[2][3] = 0;
-	arg1[3][3] = 1;
+	(*arg1)[0][0] = (*arg0)[0][0] * tmp;
+	(*arg1)[0][1] = (*arg0)[1][0] * tmp;
+	(*arg1)[0][2] = (*arg0)[2][0] * tmp;
+	(*arg1)[1][0] = (*arg0)[0][1] * tmp;
+	(*arg1)[1][1] = (*arg0)[1][1] * tmp;
+	(*arg1)[1][2] = (*arg0)[2][1] * tmp;
+	(*arg1)[2][0] = (*arg0)[0][2] * tmp;
+	(*arg1)[2][1] = (*arg0)[1][2] * tmp;
+	(*arg1)[2][2] = (*arg0)[2][2] * tmp;
+	(*arg1)[3][0] = -((*arg1)[0][0] * (*arg0)[3][0] + (*arg1)[1][0] * (*arg0)[3][1] + (*arg1)[2][0] * (*arg0)[3][2]);
+	(*arg1)[3][1] = -((*arg1)[0][1] * (*arg0)[3][0] + (*arg1)[1][1] * (*arg0)[3][1] + (*arg1)[2][1] * (*arg0)[3][2]);
+	(*arg1)[3][2] = -((*arg1)[0][2] * (*arg0)[3][0] + (*arg1)[1][2] * (*arg0)[3][1] + (*arg1)[2][2] * (*arg0)[3][2]);
+	(*arg1)[0][3] = 0;
+	(*arg1)[1][3] = 0;
+	(*arg1)[2][3] = 0;
+	(*arg1)[3][3] = 1;
 }
 
-void mtxInvertAffine(float arg0[4][4], float arg1[4][4])
+void mtxInvertAffine(Mtx *arg0, Mtx *arg1)
 {
 	float f0 = 0.0f;
-	f0 += arg0[0][0] * arg0[1][1] * arg0[2][2];
-	f0 += arg0[0][1] * arg0[1][2] * arg0[2][0];
-	f0 += arg0[0][2] * arg0[1][0] * arg0[2][1];
-	f0 -= arg0[0][2] * arg0[1][1] * arg0[2][0];
-	f0 -= arg0[0][1] * arg0[1][0] * arg0[2][2];
-	f0 -= arg0[0][0] * arg0[1][2] * arg0[2][1];
+	f0 += (*arg0)[0][0] * (*arg0)[1][1] * (*arg0)[2][2];
+	f0 += (*arg0)[0][1] * (*arg0)[1][2] * (*arg0)[2][0];
+	f0 += (*arg0)[0][2] * (*arg0)[1][0] * (*arg0)[2][1];
+	f0 -= (*arg0)[0][2] * (*arg0)[1][1] * (*arg0)[2][0];
+	f0 -= (*arg0)[0][1] * (*arg0)[1][0] * (*arg0)[2][2];
+	f0 -= (*arg0)[0][0] * (*arg0)[1][2] * (*arg0)[2][1];
 	f0 = 1.0f / f0;
 
-	arg1[0][0] = (arg0[1][1] * arg0[2][2] - arg0[1][2] * arg0[2][1]) * f0;
-	arg1[1][0] = (arg0[1][2] * arg0[2][0] - arg0[1][0] * arg0[2][2]) * f0;
-	arg1[2][0] = (arg0[1][0] * arg0[2][1] - arg0[1][1] * arg0[2][0]) * f0;
-	arg1[0][1] = (arg0[0][2] * arg0[2][1] - arg0[0][1] * arg0[2][2]) * f0;
-	arg1[1][1] = (arg0[0][0] * arg0[2][2] - arg0[0][2] * arg0[2][0]) * f0;
-	arg1[2][1] = (arg0[0][1] * arg0[2][0] - arg0[0][0] * arg0[2][1]) * f0;
-	arg1[0][2] = (arg0[0][1] * arg0[1][2] - arg0[0][2] * arg0[1][1]) * f0;
-	arg1[1][2] = (arg0[0][2] * arg0[1][0] - arg0[0][0] * arg0[1][2]) * f0;
-	arg1[2][2] = (arg0[0][0] * arg0[1][1] - arg0[0][1] * arg0[1][0]) * f0;
-	arg1[3][0] = -(arg0[3][0] * arg1[0][0] + arg0[3][1] * arg1[1][0] + arg0[3][2] * arg1[2][0]);
-	arg1[3][1] = -(arg0[3][0] * arg1[0][1] + arg0[3][1] * arg1[1][1] + arg0[3][2] * arg1[2][1]);
-	arg1[3][2] = -(arg0[3][0] * arg1[0][2] + arg0[3][1] * arg1[1][2] + arg0[3][2] * arg1[2][2]);
-	arg1[0][3] = 0.0f;
-	arg1[1][3] = 0.0f;
-	arg1[2][3] = 0.0f;
-	arg1[3][3] = 1.0f;
+	(*arg1)[0][0] = ((*arg0)[1][1] * (*arg0)[2][2] - (*arg0)[1][2] * (*arg0)[2][1]) * f0;
+	(*arg1)[1][0] = ((*arg0)[1][2] * (*arg0)[2][0] - (*arg0)[1][0] * (*arg0)[2][2]) * f0;
+	(*arg1)[2][0] = ((*arg0)[1][0] * (*arg0)[2][1] - (*arg0)[1][1] * (*arg0)[2][0]) * f0;
+	(*arg1)[0][1] = ((*arg0)[0][2] * (*arg0)[2][1] - (*arg0)[0][1] * (*arg0)[2][2]) * f0;
+	(*arg1)[1][1] = ((*arg0)[0][0] * (*arg0)[2][2] - (*arg0)[0][2] * (*arg0)[2][0]) * f0;
+	(*arg1)[2][1] = ((*arg0)[0][1] * (*arg0)[2][0] - (*arg0)[0][0] * (*arg0)[2][1]) * f0;
+	(*arg1)[0][2] = ((*arg0)[0][1] * (*arg0)[1][2] - (*arg0)[0][2] * (*arg0)[1][1]) * f0;
+	(*arg1)[1][2] = ((*arg0)[0][2] * (*arg0)[1][0] - (*arg0)[0][0] * (*arg0)[1][2]) * f0;
+	(*arg1)[2][2] = ((*arg0)[0][0] * (*arg0)[1][1] - (*arg0)[0][1] * (*arg0)[1][0]) * f0;
+	(*arg1)[3][0] = -((*arg0)[3][0] * (*arg1)[0][0] + (*arg0)[3][1] * (*arg1)[1][0] + (*arg0)[3][2] * (*arg1)[2][0]);
+	(*arg1)[3][1] = -((*arg0)[3][0] * (*arg1)[0][1] + (*arg0)[3][1] * (*arg1)[1][1] + (*arg0)[3][2] * (*arg1)[2][1]);
+	(*arg1)[3][2] = -((*arg0)[3][0] * (*arg1)[0][2] + (*arg0)[3][1] * (*arg1)[1][2] + (*arg0)[3][2] * (*arg1)[2][2]);
+	(*arg1)[0][3] = 0.0f;
+	(*arg1)[1][3] = 0.0f;
+	(*arg1)[2][3] = 0.0f;
+	(*arg1)[3][3] = 1.0f;
 }
 
-void mtxFullInverse4x4(float arg0[4][4], float arg1[4][4])
+void mtxFullInverse4x4(Mtx *mtx1, Mtx *mtx2)
 {
-	int i;
-	int j;
 	float tmp;
 
-	mtxAdjugate4x4(arg0, arg1);
+	mtxAdjugate4x4(mtx1, mtx2);
 
-	tmp = 1.0f / mtxDet4x4(arg0);
+	tmp = 1.0f / mtxDet4x4(mtx1);
 
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 4; j++) {
-			arg1[i][j] *= tmp;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			(*mtx2)[i][j] *= tmp;
 		}
 	}
 }
 
-void mtxAdjugate4x4(float arg0[4][4], float arg1[4][4])
+void mtxAdjugate4x4(Mtx *mtx1, Mtx *mtx2)
 {
 	float mtx00, mtx10, mtx20, mtx30;
 	float mtx04, mtx14, mtx24, mtx34;
 	float mtx08, mtx18, mtx28, mtx38;
 	float mtx0c, mtx1c, mtx2c, mtx3c;
 
-	mtx00 = arg0[0][0]; mtx04 = arg0[0][1];
-	mtx08 = arg0[0][2]; mtx0c = arg0[0][3];
-	mtx10 = arg0[1][0]; mtx14 = arg0[1][1];
-	mtx18 = arg0[1][2]; mtx1c = arg0[1][3];
-	mtx20 = arg0[2][0]; mtx24 = arg0[2][1];
-	mtx28 = arg0[2][2]; mtx2c = arg0[2][3];
-	mtx30 = arg0[3][0]; mtx34 = arg0[3][1];
-	mtx38 = arg0[3][2]; mtx3c = arg0[3][3];
+	mtx00 = (*mtx1)[0][0]; mtx04 = (*mtx1)[0][1];
+	mtx08 = (*mtx1)[0][2]; mtx0c = (*mtx1)[0][3];
+	mtx10 = (*mtx1)[1][0]; mtx14 = (*mtx1)[1][1];
+	mtx18 = (*mtx1)[1][2]; mtx1c = (*mtx1)[1][3];
+	mtx20 = (*mtx1)[2][0]; mtx24 = (*mtx1)[2][1];
+	mtx28 = (*mtx1)[2][2]; mtx2c = (*mtx1)[2][3];
+	mtx30 = (*mtx1)[3][0]; mtx34 = (*mtx1)[3][1];
+	mtx38 = (*mtx1)[3][2]; mtx3c = (*mtx1)[3][3];
 
-	arg1[0][0] =  mtxDet3x3(mtx14, mtx24, mtx34, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
-	arg1[1][0] = -mtxDet3x3(mtx10, mtx20, mtx30, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
-	arg1[2][0] =  mtxDet3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx1c, mtx2c, mtx3c);
-	arg1[3][0] = -mtxDet3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx18, mtx28, mtx38);
-	arg1[0][1] = -mtxDet3x3(mtx04, mtx24, mtx34, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
-	arg1[1][1] =  mtxDet3x3(mtx00, mtx20, mtx30, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
-	arg1[2][1] = -mtxDet3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx0c, mtx2c, mtx3c);
-	arg1[3][1] =  mtxDet3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx08, mtx28, mtx38);
-	arg1[0][2] =  mtxDet3x3(mtx04, mtx14, mtx34, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
-	arg1[1][2] = -mtxDet3x3(mtx00, mtx10, mtx30, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
-	arg1[2][2] =  mtxDet3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx0c, mtx1c, mtx3c);
-	arg1[3][2] = -mtxDet3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx08, mtx18, mtx38);
-	arg1[0][3] = -mtxDet3x3(mtx04, mtx14, mtx24, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
-	arg1[1][3] =  mtxDet3x3(mtx00, mtx10, mtx20, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
-	arg1[2][3] = -mtxDet3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx0c, mtx1c, mtx2c);
-	arg1[3][3] =  mtxDet3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx08, mtx18, mtx28);
+	(*mtx2)[0][0] =  mtxDet3x3(mtx14, mtx24, mtx34, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
+	(*mtx2)[1][0] = -mtxDet3x3(mtx10, mtx20, mtx30, mtx18, mtx28, mtx38, mtx1c, mtx2c, mtx3c);
+	(*mtx2)[2][0] =  mtxDet3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx1c, mtx2c, mtx3c);
+	(*mtx2)[3][0] = -mtxDet3x3(mtx10, mtx20, mtx30, mtx14, mtx24, mtx34, mtx18, mtx28, mtx38);
+	(*mtx2)[0][1] = -mtxDet3x3(mtx04, mtx24, mtx34, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
+	(*mtx2)[1][1] =  mtxDet3x3(mtx00, mtx20, mtx30, mtx08, mtx28, mtx38, mtx0c, mtx2c, mtx3c);
+	(*mtx2)[2][1] = -mtxDet3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx0c, mtx2c, mtx3c);
+	(*mtx2)[3][1] =  mtxDet3x3(mtx00, mtx20, mtx30, mtx04, mtx24, mtx34, mtx08, mtx28, mtx38);
+	(*mtx2)[0][2] =  mtxDet3x3(mtx04, mtx14, mtx34, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
+	(*mtx2)[1][2] = -mtxDet3x3(mtx00, mtx10, mtx30, mtx08, mtx18, mtx38, mtx0c, mtx1c, mtx3c);
+	(*mtx2)[2][2] =  mtxDet3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx0c, mtx1c, mtx3c);
+	(*mtx2)[3][2] = -mtxDet3x3(mtx00, mtx10, mtx30, mtx04, mtx14, mtx34, mtx08, mtx18, mtx38);
+	(*mtx2)[0][3] = -mtxDet3x3(mtx04, mtx14, mtx24, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
+	(*mtx2)[1][3] =  mtxDet3x3(mtx00, mtx10, mtx20, mtx08, mtx18, mtx28, mtx0c, mtx1c, mtx2c);
+	(*mtx2)[2][3] = -mtxDet3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx0c, mtx1c, mtx2c);
+	(*mtx2)[3][3] =  mtxDet3x3(mtx00, mtx10, mtx20, mtx04, mtx14, mtx24, mtx08, mtx18, mtx28);
 }
 
-float mtxDet4x4(float arg0[4][4])
+float mtxDet4x4(Mtx *mtx)
 {
 	float tmp;
 	float sp78, sp74, sp70, sp6c;
@@ -1162,14 +1160,14 @@ float mtxDet4x4(float arg0[4][4])
 	float sp34;
 	float sp30;
 
-	sp78 = arg0[0][0]; sp68 = arg0[0][1];
-	sp58 = arg0[0][2]; sp48 = arg0[0][3];
-	sp74 = arg0[1][0]; sp64 = arg0[1][1];
-	sp54 = arg0[1][2]; sp44 = arg0[1][3];
-	sp70 = arg0[2][0]; sp60 = arg0[2][1];
-	sp50 = arg0[2][2]; sp40 = arg0[2][3];
-	sp6c = arg0[3][0]; sp5c = arg0[3][1];
-	sp4c = arg0[3][2]; sp3c = arg0[3][3];
+	sp78 = (*mtx)[0][0]; sp68 = (*mtx)[0][1];
+	sp58 = (*mtx)[0][2]; sp48 = (*mtx)[0][3];
+	sp74 = (*mtx)[1][0]; sp64 = (*mtx)[1][1];
+	sp54 = (*mtx)[1][2]; sp44 = (*mtx)[1][3];
+	sp70 = (*mtx)[2][0]; sp60 = (*mtx)[2][1];
+	sp50 = (*mtx)[2][2]; sp40 = (*mtx)[2][3];
+	sp6c = (*mtx)[3][0]; sp5c = (*mtx)[3][1];
+	sp4c = (*mtx)[3][2]; sp3c = (*mtx)[3][3];
 
 	sp30 = mtxDet3x3(sp74, sp70, sp6c, sp64, sp60, sp5c, sp44, sp40, sp3c);
 	sp34 = mtxDet3x3(sp74, sp70, sp6c, sp54, sp50, sp4c, sp44, sp40, sp3c);
