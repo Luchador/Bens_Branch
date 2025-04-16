@@ -21,7 +21,7 @@
 #include "platform.h"
 
 Mtx g_ActiveProjectionMtx;
-Mtx *g_CameraPerspectiveMtxF;
+Mtx *g_CameraPerspectiveMtx;
 uint8_t g_ViFrontIndex;
 uint8_t g_ViBackIndex;
 
@@ -38,19 +38,7 @@ struct rend_vidat g_ViDataArray[NUM_GFXTASKS] = {
 		0, 0,                                   // viewleft and viewtop
 		true,                                   // usezbuf
 		0,
-	}, {
-		0, 0, 0, 0,
-		FBALLOC_WIDTH_LO, FBALLOC_HEIGHT_LO,    // x and y
-		60,                                     // fovy
-		(float) FBALLOC_WIDTH_LO / (float) FBALLOC_HEIGHT_LO, // aspect
-		30,                                     // znear
-		10000,                                  // zfar
-		FBALLOC_WIDTH_LO, FBALLOC_HEIGHT_LO,    // bufx and bufy
-		FBALLOC_WIDTH_LO, FBALLOC_HEIGHT_LO,    // viewx and viewy
-		0, 0,                                   // viewleft and viewtop
-		true,                                   // usezbuf
-		0,
-	},
+	}
 };
 
 struct rend_vidat *g_ViBackData = &g_ViDataArray[0];
@@ -65,17 +53,13 @@ int g_ViSlot = 0;
  */
 void viConfigureForLegal(void)
 {
-	int i;
+		g_ViDataArray[0].x = FBALLOC_WIDTH_LO;
+		g_ViDataArray[0].bufx = FBALLOC_WIDTH_LO;
+		g_ViDataArray[0].viewx = FBALLOC_WIDTH_LO;
 
-	for (i = 0; i < NUM_GFXTASKS; i++) {
-		g_ViDataArray[i].x = FBALLOC_WIDTH_LO;
-		g_ViDataArray[i].bufx = FBALLOC_WIDTH_LO;
-		g_ViDataArray[i].viewx = FBALLOC_WIDTH_LO;
-
-		g_ViDataArray[i].y = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[i].bufy = FBALLOC_HEIGHT_LO;
-		g_ViDataArray[i].viewy = FBALLOC_HEIGHT_LO;
-	}
+		g_ViDataArray[0].y = FBALLOC_HEIGHT_LO;
+		g_ViDataArray[0].bufy = FBALLOC_HEIGHT_LO;
+		g_ViDataArray[0].viewy = FBALLOC_HEIGHT_LO;
 }
 
 /**
@@ -217,31 +201,31 @@ Vp *viGetCurrentPlayerViewport(void)
  */
 Gfx *viSetCamNoTranslation(Gfx *gdl)
 {
-	Mtxf projF;
-	Mtxf viewNoTransF;
-	Mtxf projViewF;
-	Mtxf identityF;
+	Mtx projF;
+	Mtx viewNoTransF;
+	Mtx projViewF;
+	Mtx identityF;
 	Mtx *projMtx;
 	Mtx *modelviewMtx;
 
 	// Create a perspective projection matrix
-	mtxPerspective((Mtx*)&projF, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar * 2, 1);
+	mtxPerspective((Mtx*)&projF, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar * 2);
 
 	// Copy the current camera matrix and zero its translation part
-	mtx4Copy(camGetPlayerWorldToScreenMtx(), (Mtx*)&viewNoTransF);
-	viewNoTransF.m[3][0] = 0;
-	viewNoTransF.m[3][1] = 0;
-	viewNoTransF.m[3][2] = 0;
+	mtx4Copy(camGetPlayerWorldToScreenMtx(), &viewNoTransF);
+	viewNoTransF[3][0] = 0;
+	viewNoTransF[3][1] = 0;
+	viewNoTransF[3][2] = 0;
 
 	// Multiply projection * view matrix (no translation)
-	mtx4MultMtx4((Mtx*)&projF, (Mtx*)&viewNoTransF, (Mtx*)&projViewF);
-	projMtx = gfxAllocateMatrixF();
-	memcpy(projMtx, projViewF.m, sizeof(*projMtx));
+	mtx4MultMtx4(&projF, &viewNoTransF, &projViewF);
+	projMtx = gfxAllocateMatrix();
+	memcpy(projMtx, projViewF, sizeof(*projMtx));
 
 	// Load identity modelview matrix
-	mtxIdent((Mtx*)&identityF);
-	modelviewMtx = gfxAllocateMatrixF();
-	memcpy(modelviewMtx, identityF.m, sizeof(*modelviewMtx));
+	mtxIdent(&identityF);
+	modelviewMtx = gfxAllocateMatrix();
+	memcpy(modelviewMtx, &identityF, sizeof(*modelviewMtx));
 
 	// Set projection matrix
 	gSPMatrix(gdl++, (uintptr_t)(projMtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
@@ -254,11 +238,11 @@ Gfx *viSetCamNoTranslation(Gfx *gdl)
 
 Gfx *vi0000aca4(Gfx *gdl, float znear, float zfar)
 {
-	Mtxf tmp;
-	Mtx *mtx = gfxAllocateMatrixF();
+	Mtx tmp;
+	Mtx *mtx = gfxAllocateMatrix();
 
-	mtxPerspective((Mtx*)&tmp, g_ViBackData->fovy, g_ViBackData->aspect, znear, zfar, 1);
-	memcpy(mtx, tmp.m, sizeof(*mtx));
+	mtxPerspective(&tmp, g_ViBackData->fovy, g_ViBackData->aspect, znear, zfar);
+	memcpy(mtx, tmp, sizeof(*mtx));
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
@@ -275,13 +259,13 @@ Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 
 	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
-	g_CameraPerspectiveMtxF = gfxAllocateMatrixF();
-	mtxPerspective(&g_ActiveProjectionMtx, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
-	memcpy(g_CameraPerspectiveMtxF, g_ActiveProjectionMtx, sizeof(*g_CameraPerspectiveMtxF));
+	g_CameraPerspectiveMtx = gfxAllocateMatrix();
+	mtxPerspective(&g_ActiveProjectionMtx, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar);
+	memcpy(g_CameraPerspectiveMtx, g_ActiveProjectionMtx, sizeof(*g_CameraPerspectiveMtx));
 
-	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtxF), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
-	camSetPerspectiveMtxL(g_CameraPerspectiveMtxF);
+	camSetPerspectiveMtxL(g_CameraPerspectiveMtx);
 	camSetSkyMtx(&g_ActiveProjectionMtx);
 
 	return gdl;
@@ -303,13 +287,13 @@ Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 
 	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
-	g_CameraPerspectiveMtxF = gfxAllocateMatrixF();
-	mtxPerspective(&g_ActiveProjectionMtx, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
-	memcpy(g_CameraPerspectiveMtxF, g_ActiveProjectionMtx, sizeof(*g_CameraPerspectiveMtxF));
+	g_CameraPerspectiveMtx = gfxAllocateMatrix();
+	mtxPerspective(&g_ActiveProjectionMtx, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar);
+	memcpy(g_CameraPerspectiveMtx, g_ActiveProjectionMtx, sizeof(*g_CameraPerspectiveMtx));
 
-	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtxF), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
-	camSetPerspectiveMtxL(g_CameraPerspectiveMtxF);
+	camSetPerspectiveMtxL(g_CameraPerspectiveMtx);
 	camSetSkyMtx(&g_ActiveProjectionMtx);
 
 	return gdl;
@@ -317,11 +301,11 @@ Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 
 Gfx *vi0000b0e8(Gfx *gdl, float fovy, float aspect)
 {
-	Mtxf tmp;
-	Mtx *mtx = gfxAllocateMatrixF();
+	Mtx tmp;
+	Mtx *mtx = gfxAllocateMatrix();
 
-	mtxPerspective((Mtx*)&tmp, fovy, aspect, g_ViBackData->znear, g_ViBackData->zfar, 1);
-	memcpy(mtx, tmp.m, sizeof(*mtx));
+	mtxPerspective(&tmp, fovy, aspect, g_ViBackData->znear, g_ViBackData->zfar);
+	memcpy(mtx, &tmp, sizeof(*mtx));
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
@@ -515,7 +499,7 @@ void viSetFovY(float fovy)
 {
 	g_ViBackData->fovy = fovy;
 
-	camSetPerspective(g_ViBackData->znear, g_ViBackData->fovy, g_ViBackData->aspect);
+	camSetPerspective(g_ViBackData->fovy, g_ViBackData->aspect);
 	camSetScale();
 }
 
@@ -523,7 +507,7 @@ void viSetAspect(float aspect)
 {
 	g_ViBackData->aspect = aspect;
 
-	camSetPerspective(g_ViBackData->znear, g_ViBackData->fovy, g_ViBackData->aspect);
+	camSetPerspective(g_ViBackData->fovy, g_ViBackData->aspect);
 	camSetScale();
 }
 
@@ -540,7 +524,7 @@ void viSetFovAspectAndSize(float fovy, float aspect, int16_t width, int16_t heig
 	g_ViBackData->viewy = height;
 
 	camSetScreenSize(g_ViBackData->viewx, g_ViBackData->viewy);
-	camSetPerspective(g_ViBackData->znear, g_ViBackData->fovy, g_ViBackData->aspect);
+	camSetPerspective(g_ViBackData->fovy, g_ViBackData->aspect);
 	camSetScale();
 }
 
@@ -554,7 +538,7 @@ void viSetZRange(float near, float far)
 	g_ViBackData->znear = near;
 	g_ViBackData->zfar = far;
 
-	camSetPerspective(g_ViBackData->znear, g_ViBackData->fovy, g_ViBackData->aspect);
+	camSetPerspective(g_ViBackData->fovy, g_ViBackData->aspect);
 	camSetScale();
 }
 

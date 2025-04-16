@@ -224,12 +224,6 @@ void playermgrAllocatePlayer(int index)
 	g_Vars.players[index]->globaldrawworldoffset.x = 0;
 	g_Vars.players[index]->globaldrawworldoffset.y = 0;
 	g_Vars.players[index]->globaldrawworldoffset.z = 0;
-	g_Vars.players[index]->globaldrawcameraoffset.x = 0;
-	g_Vars.players[index]->globaldrawcameraoffset.y = 0;
-	g_Vars.players[index]->globaldrawcameraoffset.z = 0;
-	g_Vars.players[index]->globaldrawworldbgoffset.x = 0;
-	g_Vars.players[index]->globaldrawworldbgoffset.y = 0;
-	g_Vars.players[index]->globaldrawworldbgoffset.z = 0;
 
 	g_Vars.players[index]->vv_manground = 0;
 	g_Vars.players[index]->vv_ground = 0;
@@ -475,7 +469,6 @@ void playermgrAllocatePlayer(int index)
 	g_Vars.players[index]->c_screenheight = SCREEN_240;
 	g_Vars.players[index]->c_screenleft = 0;
 	g_Vars.players[index]->c_screentop = 0;
-	g_Vars.players[index]->c_perspnear = 10;
 	g_Vars.players[index]->c_perspfovy = 46;
 	g_Vars.players[index]->c_perspaspect = 1;
 	g_Vars.players[index]->c_halfwidth = SCREEN_320 / 2;
@@ -489,7 +482,6 @@ void playermgrAllocatePlayer(int index)
 	g_Vars.players[index]->mtxl173c = NULL;
 	g_Vars.players[index]->worldtoscreenmtx = NULL;
 	g_Vars.players[index]->c_viewfmdynticknum = -1;
-	g_Vars.players[index]->mtxf1748 = NULL;
 	g_Vars.players[index]->projectionmtx = NULL;
 	g_Vars.players[index]->perspmtxl = NULL;
 	g_Vars.players[index]->skyMtx = NULL;

@@ -2260,19 +2260,19 @@ bool aiObjectMoveToPad(void)
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 	struct defaultobj *obj = objFindByTagId(cmd[2]);
 	uint16_t padnum = cmd[4] | (cmd[3] << 8);
-	Mtxf matrix;
+	Mtx matrix;
 	struct pad pad;
 	RoomNum rooms[2];
 
 	if (obj && obj->prop) {
 		padUnpack(padnum, PADFIELD_POS | PADFIELD_LOOK | PADFIELD_UP | PADFIELD_ROOM, &pad);
-		mtxBuildLookAtFromTarget((Mtx*)&matrix,
+		mtxBuildLookAtFromTarget(&matrix,
 				0, 0, 0,
 				-pad.look.x, -pad.look.y, -pad.look.z,
 				pad.up.x, pad.up.y, pad.up.z);
 
 		if (obj->model) {
-			mtxScaleRotationPart(obj->model->scale, (Mtx*)&matrix);
+			mtxScaleRotationPart(obj->model->scale, &matrix);
 		}
 
 		rooms[0] = pad.room;
@@ -4845,7 +4845,7 @@ bool aiObjectDoAnimation(void)
 			animInit(obj->model->anim);
 			modelSetAnimPlaySpeed(obj->model, 1, 0);
 			modelSetAnimation(obj->model, anim_id, 0, fstartframe, thing, 0);
-			modelSetAnimScale(obj->model, bgGetStageTranslationThing() * obj->model->scale * 100.0f);
+			modelSetAnimScale(obj->model, 100.0f * obj->model->scale * 100.0f);
 		}
 	}
 
@@ -5077,10 +5077,8 @@ bool ai00e3(void)
 		uint32_t playernum = playermgrGetPlayerNumByProp(chr->prop);
 		setCurrentPlayerNum(playernum);
 
-		if (var8007074c != 2) {
-			playerSetFadeColour(0, 0, 0, 0);
-			playerSetFadeFrac(60, 1);
-		}
+		playerSetFadeColour(0, 0, 0, 0);
+		playerSetFadeFrac(60, 1);
 
 		setCurrentPlayerNum(prevplayernum);
 	}
@@ -5100,11 +5098,8 @@ bool ai00e4(void)
 
 	for (playernum = 0; playernum < PLAYERCOUNT(); playernum++) {
 		setCurrentPlayerNum(playernum);
-
-		if (var8007074c != 2) {
-			playerSetFadeColour(0, 0, 0, 1);
-			playerSetFadeFrac(60, 0);
-		}
+		playerSetFadeColour(0, 0, 0, 1);
+		playerSetFadeFrac(60, 0);
 	}
 
 	setCurrentPlayerNum(prevplayernum);
@@ -5371,7 +5366,6 @@ bool ai00f4(void)
  */
 bool ai00f5(void)
 {
-	var8007073c = 1;
 	g_Vars.aioffset += 2;
 
 	return false;
@@ -5384,11 +5378,7 @@ bool ai00f6(void)
 {
 	uint8_t *cmd = g_Vars.ailist + g_Vars.aioffset;
 
-	if (var8007073c == 2) { // Unreachable?
-		g_Vars.aioffset = chraiGoToLabel(g_Vars.ailist, g_Vars.aioffset, cmd[2]);
-	} else {
-		g_Vars.aioffset += 3;
-	}
+	g_Vars.aioffset += 3;
 
 	return false;
 }

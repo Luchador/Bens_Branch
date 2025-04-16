@@ -1222,7 +1222,7 @@ void scenarioHandleDroppedToken(struct chrdata *chr, struct prop *prop)
 	struct weaponobj *weapon = prop->weapon;
 	struct defaultobj *obj;
 	struct pad pad;
-	Mtxf mtx;
+	Mtx mtx;
 	RoomNum rooms[2];
 
 	if (g_MpSetup.scenario == MPSCENARIO_CAPTURETHECASE) {
@@ -1236,10 +1236,10 @@ void scenarioHandleDroppedToken(struct chrdata *chr, struct prop *prop)
 
 				padUnpack(g_ScenarioData.ctc.spawnpadsperteam[g_ScenarioData.ctc.teamindexes[i]].homepad,
 						PADFIELD_POS | PADFIELD_LOOK | PADFIELD_UP | PADFIELD_ROOM, &pad);
-				mtxBuildLookAtFromTarget((Mtx*)&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
+				mtxBuildLookAtFromTarget(&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
 
 				if (obj->model) {
-					mtxScaleRotationPart(obj->model->scale, (Mtx*)&mtx);
+					mtxScaleRotationPart(obj->model->scale, &mtx);
 				}
 
 				rooms[0] = pad.room;

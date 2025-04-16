@@ -339,7 +339,7 @@ void lvReset(int stagenum)
 	shardsReset();
 	frReset();
 
-	if (g_Vars.stagenum == STAGE_TITLE) { // Ben's comment: this if statement is necessary or the game crashes when returning from a mission.
+	if (g_Vars.stagenum == STAGE_TITLE) {
 		// empty
 	} else if (stagenum == STAGE_BOOTPAKMENU) {
 		setCurrentPlayerNum(0);
@@ -1929,8 +1929,6 @@ void lvTickPlayer(void)
 	float zdiff;
 
 	playerTick();
-
-
 
 	xdiff = g_Vars.currentplayer->prop->pos.x - g_Vars.currentplayer->bondprevpos.x;
 	zdiff = g_Vars.currentplayer->prop->pos.z - g_Vars.currentplayer->bondprevpos.z;

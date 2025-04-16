@@ -53,16 +53,11 @@ struct coord {
 	};
 };
 
-/*struct coord {
-	union {
-		struct {
-			double x;
-			double y;
-			double z;
-		};
-		double f[3];
-	};
-};*/
+struct dcoord {
+	double x;
+	double y;
+	double z;
+};
 
 struct bbox {
 	float xmin;
@@ -2369,8 +2364,6 @@ struct player {
 	/*0x0030*/ bool isfalling;
 	/*0x0034*/ int fallstart; // lvframe60 when player started falling
 	/*0x0038*/ struct coord globaldrawworldoffset;
-	/*0x0044*/ struct coord globaldrawcameraoffset;
-	/*0x0050*/ struct coord globaldrawworldbgoffset;
 	/*0x005c*/ Mtx *mtxl005c;
 	/*0x0064*/ Mtxf *mtxf0064;
 	/*0x0068*/ Mtxf *mtxf0068;
@@ -2591,7 +2584,6 @@ struct player {
 	/*0x1708*/ float c_screenheight;
 	/*0x170c*/ float c_screenleft;
 	/*0x1710*/ float c_screentop;
-	/*0x1714*/ float c_perspnear;
 	/*0x1718*/ float c_perspfovy;
 	/*0x171c*/ float c_perspaspect;
 	/*0x1720*/ float c_halfwidth;
@@ -2604,7 +2596,6 @@ struct player {
 	/*0x173c*/ Mtx *mtxl173c;
 	/*0x1740*/ Mtx *worldtoscreenmtx;
 	/*0x1744*/ int c_viewfmdynticknum;
-	/*0x1748*/ Mtxf *mtxf1748;
 	/*0x174c*/ Mtxf *projectionmtx;
 	/*0x1750*/ Mtx *perspmtxl;
 	/*0x1754*/ Mtx *skyMtx;
@@ -3069,30 +3060,22 @@ struct headorbody {
 };
 
 struct stagetableentry {
-	/*0x00*/ int16_t id;
-	/*0x02*/ uint8_t light_type;
-	/*0x03*/ uint8_t light_alpha;
-	/*0x04*/ uint8_t light_width;
-	/*0x05*/ uint8_t light_height;
-	/*0x06*/ uint16_t unk06;
-	/*0x08*/ uint16_t bgfileid;
-	/*0x0a*/ uint16_t tilefileid;
-	/*0x0c*/ uint16_t padsfileid;
-	/*0x0e*/ uint16_t setupfileid;
-	/*0x10*/ uint16_t mpsetupfileid;
-	/*0x14*/ float unk14;
-	/*0x1c*/ float unk1c;
-	/*0x20*/ uint16_t unk20;
-	/*0x22*/ uint8_t unk22;
-	/*0x23*/ int8_t unk23;
-	/*0x24*/ uint32_t unk24;
-	/*0x28*/ uint32_t unk28;
-	/*0x2c*/ int16_t unk2c;
-	/*0x2e*/ int16_t eraserpropdist;
-	/*0x30*/ int16_t unk30;
-	/*0x34*/ float unk34;
-	/*0x38*/ int16_t alarm;
-	/*0x3a*/ uint16_t extragunmem;
+	int16_t id;
+	uint8_t light_type;
+	uint8_t light_alpha;
+	uint8_t light_width;
+	uint8_t light_height;
+	uint16_t unk06;
+	uint16_t bgfileid;
+	uint16_t tilefileid;
+	uint16_t padsfileid;
+	uint16_t setupfileid;
+	uint16_t mpsetupfileid;
+	int16_t maxXRayEdgeLength;
+	int16_t eraserpropdist;
+	int16_t unk30;
+	int16_t alarm;
+	uint16_t extragunmem;
 };
 
 struct langbank {
@@ -4238,7 +4221,7 @@ struct criteria_throwinroom {
 };
 
 struct criteria_holograph {
-	uint32_t unk00;
+	uint32_t holo_unk00;
 	uint32_t obj;
 	uint32_t status;
 	struct criteria_holograph *next;
@@ -5768,8 +5751,8 @@ struct xraydata {
 	/*0x014*/ float unk014;
 	/*0x018*/ float unk018;
 	/*0x01c*/ float unk01c;
-	/*0x020*/ int unk020;
-	/*0x024*/ int unk024;
+	/*0x020*/ int maxEdgeLength;
+	/*0x024*/ int maxEdgeLengthSq;
 	/*0x028*/ int16_t vertices[16][3];
 	/*0x088*/ uint32_t colours[16];
 	/*0x0c8*/ int16_t tris[64][3];

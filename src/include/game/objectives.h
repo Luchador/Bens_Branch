@@ -12,10 +12,6 @@ void objectiveInsert(struct objective *objective);
 void objectiveAddRoomEnteredCriteria(struct criteria_roomentered *criteria);
 void objectiveAddThrowInRoomCriteria(struct criteria_throwinroom *criteria);
 void objectiveAddHolographCriteria(struct criteria_holograph *criteria);
-
-uint32_t xorBaffbeff(uint32_t value);
-uint32_t xorBabeffff(uint32_t value);
-uint32_t xorBoobless(uint32_t value);
 void tagsReset(void);
 int objGetTagNum(struct defaultobj *obj);
 int objectiveGetCount(void);

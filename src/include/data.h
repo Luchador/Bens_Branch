@@ -155,8 +155,6 @@ extern int g_ModelMostType2;
 extern int g_ModelMostType3;
 extern int g_ModelMostModels;
 extern int g_ModelMostAnims;
-extern uint32_t var8007073c;
-extern uint32_t var8007074c;
 extern bool g_PlayersWithControl[];
 extern bool g_PlayerInvincible;
 extern bool g_InCutscene;

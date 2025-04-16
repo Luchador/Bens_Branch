@@ -2711,7 +2711,7 @@ void autoaimTick(void)
 
 					if (bestprop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
 						struct defaultobj *obj = bestprop->obj;
-						Mtxf *mtx = modelGetRootMtx(obj->model);
+						Mtxf *mtx = (Mtxf*)modelGetRootMtx(obj->model);
 						struct coord spac;
 						spac.z = mtx->m[3][2];
 

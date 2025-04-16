@@ -490,14 +490,14 @@ Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t arg2[3], int1
 	int sp68 = -1;
 	int sp64 = 0;
 
-	if (xraydata->unk020 > 0) {
+	if (xraydata->maxEdgeLength > 0) {
 		spa4[0] = arg3[0] - arg2[0];
 		spa4[1] = arg3[1] - arg2[1];
 		spa4[2] = arg3[2] - arg2[2];
 
 		sum = spa4[0] * spa4[0] + spa4[1] * spa4[1] + spa4[2] * spa4[2];
 
-		if (sum > xraydata->unk024) {
+		if (sum > xraydata->maxEdgeLengthSq) {
 			sp84[0][0] = (arg3[0] + arg2[0]) / 2;
 			sp84[0][1] = (arg3[1] + arg2[1]) / 2;
 			sp84[0][2] = (arg3[2] + arg2[2]) / 2;
@@ -515,7 +515,7 @@ Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t arg2[3], int1
 
 		sum = spa4[0] * spa4[0] + spa4[1] * spa4[1] + spa4[2] * spa4[2];
 
-		if (sum > xraydata->unk024) {
+		if (sum > xraydata->maxEdgeLengthSq) {
 			sp84[1][0] = (arg4[0] + arg3[0]) / 2;
 			sp84[1][1] = (arg4[1] + arg3[1]) / 2;
 			sp84[1][2] = (arg4[2] + arg3[2]) / 2;
@@ -533,7 +533,7 @@ Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t arg2[3], int1
 
 		sum = spa4[0] * spa4[0] + spa4[1] * spa4[1] + spa4[2] * spa4[2];
 
-		if (sum > xraydata->unk024) {
+		if (sum > xraydata->maxEdgeLengthSq) {
 			sp84[2][0] = (arg2[0] + arg4[0]) / 2;
 			sp84[2][1] = (arg2[1] + arg4[1]) / 2;
 			sp84[2][2] = (arg2[2] + arg4[2]) / 2;
@@ -670,8 +670,8 @@ Gfx *bgRenderGdlInXray(Gfx *gdl, int8_t *readgdl, Vtx *vertices, int16_t arg3[3]
 	}
 
 	xraydata.unk014 = 0.250f;
-	xraydata.unk020 = stage->unk2c;
-	xraydata.unk024 = xraydata.unk020 * xraydata.unk020;
+	xraydata.maxEdgeLength = stage->maxXRayEdgeLength;
+	xraydata.maxEdgeLengthSq = xraydata.maxEdgeLength * xraydata.maxEdgeLength;
 	xraydata.unk000 = arg3[0];
 	xraydata.unk004 = arg3[1];
 	xraydata.unk008 = arg3[2];
@@ -807,7 +807,7 @@ Gfx *bgRenderRoomXrayPass(Gfx *gdl, int roomnum, struct roomblock *block, bool r
 Gfx *bgRenderRoomInXray(Gfx *gdl, int roomnum)
 {
 	struct coord sp54;
-	struct coord globaldrawworldoffset;
+	struct coord roomoffset;
 	int16_t sp40[3];
 	struct player *player = g_Vars.currentplayer;
 
@@ -830,11 +830,11 @@ Gfx *bgRenderRoomInXray(Gfx *gdl, int roomnum)
 		return gdl;
 	}
 
-	roomGetPos(roomnum, &globaldrawworldoffset);
+	roomGetPos(roomnum, &roomoffset);
 
-	sp54.x = player->eraserpos.x - globaldrawworldoffset.x;
-	sp54.y = player->eraserpos.y - globaldrawworldoffset.y;
-	sp54.z = player->eraserpos.z - globaldrawworldoffset.z;
+	sp54.x = player->eraserpos.x - roomoffset.x;
+	sp54.y = player->eraserpos.y - roomoffset.y;
+	sp54.z = player->eraserpos.z - roomoffset.z;
 
 	sp40[0] = sp54.f[0];
 	sp40[1] = sp54.f[1];
@@ -1751,7 +1751,7 @@ void bgBuildTables(int stagenum)
 		}
 
 		for (i = 0; g_BgPortals[i].verticesoffset != 0; i++) {
-			bgInitPortal(i); // Ben's comment: This plays a role in the laser sight bug
+			bgInitPortal(i);
 		}
 
 		for (i = 1; i < g_Vars.roomcount; i++) {
@@ -1777,21 +1777,6 @@ void bgBuildTables(int stagenum)
 void bgStop(void)
 {
 	bgUnloadAllRooms();
-}
-
-float bgGetStageTranslationThing(void)
-{
-	return g_Stages[g_StageIndex].unk1c / g_Stages[g_StageIndex].unk14;
-}
-
-float bgGetScaleBg2Gfx(void)
-{
-	return g_Vars.currentplayerstats->scale_bg2gfx;
-}
-
-void bgSetScaleBg2Gfx(float scale)
-{
-	g_Vars.currentplayerstats->scale_bg2gfx = 1.0f;
 }
 
 /**
@@ -1863,7 +1848,7 @@ Gfx *bgRender(Gfx *gdl)
 	gdl = bgScissorToViewport(gdl);
 	gdl = envStopFog(gdl);
 
-	gSPMatrix(gdl++, g_CameraPerspectiveMtxF, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gSPMatrix(gdl++, g_CameraPerspectiveMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	gdl = playerLoadMatrix(gdl);
 
@@ -3385,7 +3370,7 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 	struct coord *point3;
 	uint32_t word;
 	Gfx *tri4gdl;
-	Mtxf *mtx = gfxAllocateMatrixF();
+	Mtxf *mtx = gfxAllocateMatrix();
 	mtxIdent((Mtx*)mtx);
 	struct coord min;
 	struct coord max;
@@ -5408,17 +5393,14 @@ void bgCalculateScreenProperties(void)
 
 void bgExpandRoomToPortals(int roomnum)
 {
-	int i;
-	int j;
-	int k;
 	int count = 0;
 
-	for (i = 0; i < g_Rooms[roomnum].numportals; i++) {
+	for (int i = 0; i < g_Rooms[roomnum].numportals; i++) {
 		int portalnum = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + i];
 		struct portalvertices *pvertices = (struct portalvertices *)((uintptr_t)g_BgPortals + g_BgPortals[portalnum].verticesoffset);
 
-		for (j = 0; j < pvertices->count; j++) {
-			for (k = 0; k < 3; k++) {
+		for (int j = 0; j < pvertices->count; j++) {
+			for (int k = 0; k < 3; k++) {
 				float value = pvertices->vertices[j].f[k];
 
 				if (value < g_Rooms[roomnum].bbmin[k]) {
@@ -5433,15 +5415,11 @@ void bgExpandRoomToPortals(int roomnum)
 			}
 		}
 	}
-
-	if (count);
 }
 
 bool bgPortalExists(int portalnum)
 {
-	int i;
-
-	for (i = 0; g_BgPortals[i].verticesoffset != 0; i++) {
+	for (int i = 0; g_BgPortals[i].verticesoffset != 0; i++) {
 		if (i == portalnum) {
 			return true;
 		}
@@ -5527,15 +5505,12 @@ void bgInitPortal(int portalnum)
 void bgInitRoom(int roomnum)
 {
 	struct portalvertices *pvertices;
-	int i;
-	int j;
-	int k;
 	struct portalmetric metric;
 	int16_t portalnum;
 	int16_t portalnum2;
 	float tmp;
 
-	for (i = 0; i < g_Rooms[roomnum].numportals; i++) {
+	for (int i = 0; i < g_Rooms[roomnum].numportals; i++) {
 		portalnum = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + i];
 
 		metric.normal.f[0] = (g_PortalMetrics + portalnum)->normal.f[0];
@@ -5554,7 +5529,7 @@ void bgInitRoom(int roomnum)
 			metric.max = -tmp;
 		}
 
-		for (j = 0; j < g_Rooms[roomnum].numportals; j++) {
+		for (int j = 0; j < g_Rooms[roomnum].numportals; j++) {
 			portalnum2 = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + j];
 
 			if (portalnum2 == portalnum) {
@@ -5563,7 +5538,7 @@ void bgInitRoom(int roomnum)
 
 			pvertices = (struct portalvertices *)((uintptr_t)g_BgPortals + g_BgPortals[portalnum2].verticesoffset);
 
-			for (k = 0; k < pvertices->count; k++) {
+			for (int k = 0; k < pvertices->count; k++) {
 				tmp = metric.normal.f[0] * pvertices->vertices[k].f[0]
 					+ metric.normal.f[1] * pvertices->vertices[k].f[1]
 					+ metric.normal.f[2] * pvertices->vertices[k].f[2];
@@ -5590,9 +5565,8 @@ int bgFindPortalBetweenPositions(struct coord *pos1, struct coord *pos2)
 	int count = 0;
 	float bestthing = MAXFLOAT;
 	float thisthing;
-	int i;
 
-	for (i = 0; g_BgPortals[i].verticesoffset; i++) {
+	for (int i = 0; g_BgPortals[i].verticesoffset; i++) {
 		if (portalCalculateIntersection(i, pos1, pos2) != PORTALINTERSECTION_NONE) {
 			thisthing = g_PortalMidplaneOffset;
 
@@ -5601,8 +5575,6 @@ int bgFindPortalBetweenPositions(struct coord *pos1, struct coord *pos2)
 			}
 
 			if (thisthing < bestthing) {
-				if (count);
-				if (i);
 				bestportalnum = i;
 				bestthing = thisthing;
 				count++;
@@ -5615,9 +5587,7 @@ int bgFindPortalBetweenPositions(struct coord *pos1, struct coord *pos2)
 
 bool bgIsBboxOverlapping(struct coord *portalbbmin, struct coord *portalbbmax, struct coord *propbbmin, struct coord *propbbmax)
 {
-	int i;
-
-	for (i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) {
 		if (propbbmin->f[i] > portalbbmax->f[i] || propbbmax->f[i] < portalbbmin->f[i]) {
 			return false;
 		}
@@ -5629,8 +5599,6 @@ bool bgIsBboxOverlapping(struct coord *portalbbmin, struct coord *portalbbmax, s
 void bgCalculatePortalBbox(int portalnum, struct coord *bbmin, struct coord *bbmax)
 {
 	struct portalvertices *pvertices;
-	int i;
-	int j;
 
 	bbmin->x = MAXFLOAT;
 	bbmin->y = MAXFLOAT;
@@ -5642,8 +5610,8 @@ void bgCalculatePortalBbox(int portalnum, struct coord *bbmin, struct coord *bbm
 
 	pvertices = (struct portalvertices *)((uintptr_t)g_BgPortals + g_BgPortals[portalnum].verticesoffset);
 
-	for (i = 0; i < pvertices->count; i++) {
-		for (j = 0; j < 3; j++) {
+	for (int i = 0; i < pvertices->count; i++) {
+		for (int j = 0; j < 3; j++) {
 			float value = pvertices->vertices[i].f[j];
 
 			if (value < bbmin->f[j]) {
@@ -5737,12 +5705,10 @@ end:
 
 void bgCalculateGlaresForVisibleRooms(void)
 {
-	int i;
-
 	g_NumRoomsWithGlares = 0;
 
 	if (!g_Vars.mplayerisrunning) {
-		for (i = 1; i < g_Vars.roomcount; i++) {
+		for (int i = 1; i < g_Vars.roomcount; i++) {
 			if (g_Rooms[i].flags & ROOMFLAG_ONSCREEN) {
 				artifactsCalculateGlaresForRoom(i);
 				if (g_NumRoomsWithGlares < 100) {

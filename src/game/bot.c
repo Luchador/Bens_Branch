@@ -425,7 +425,7 @@ bool botTestPropForPickup(struct prop *prop, struct chrdata *chr)
 		return false;
 	}
 
-	if (func0f085194(obj) && obj->type != OBJTYPE_HAT) {
+	if (objIsMovablePickup(obj) && obj->type != OBJTYPE_HAT) {
 		if (obj->flags & OBJFLAG_UNCOLLECTABLE) {
 			return false;
 		}

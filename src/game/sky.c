@@ -832,7 +832,7 @@ Gfx *skyRender(Gfx *gdl)
 
 			Vtx *verts = gfxAllocateVertices(numvertices);
 			Col *cols = gfxAllocateColours(numvertices);
-			Mtx *mtx = gfxAllocateMatrixF();
+			Mtx *mtx = gfxAllocateMatrix();
 			mtx4MultMtx4(camGetPlayerWorldToScreenMtx(), (Mtx*)&g_SkyMtx, mtx);
 
 			gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
@@ -1267,7 +1267,7 @@ Gfx *skyRender(Gfx *gdl)
 
 	Vtx *verts = gfxAllocateVertices(numvertices);
 	Col *cols = gfxAllocateColours(numvertices);
-	Mtxf *mtx = gfxAllocateMatrixF();
+	Mtxf *mtx = gfxAllocateMatrix();
 	mtx4MultMtx4(camGetPlayerWorldToScreenMtx(), (Mtx*)&g_SkyMtx, (Mtx*)mtx);
 	mtx4Copy((Mtx*)mtx, (Mtx*)mtx);
 

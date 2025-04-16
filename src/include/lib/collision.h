@@ -54,7 +54,7 @@ int cdExamLos08(struct coord *pos, RoomNum *rooms, struct coord *pos2, int32_t t
 int cdExamLos09(struct coord *pos, RoomNum *rooms, struct coord *pos2, int32_t types);
 int cdTestLos10(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomNum *arg3, int32_t types, int16_t geoflags);
 int cdTestLos11(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomNum *arg3, int32_t types);
-bool cd0002ded8(struct coord *arg0, struct coord *arg1, struct prop *prop);
+bool cdIsLineBlockedByProp(struct coord *arg0, struct coord *arg1, struct prop *prop);
 int cdTestBlockOverlapsAnyProp(struct geoblock *geo, RoomNum *rooms, int32_t types);
 bool cd0002f02c(struct geoblock *block, RoomNum *rooms, int types);
 bool cdIsNearlyInSight(struct coord *viewpos, RoomNum *rooms, struct coord *targetpos, float distance, int arg4);

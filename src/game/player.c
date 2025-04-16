@@ -123,9 +123,6 @@ struct vimode g_ViModes[] = {
 	{ SCREEN_WIDTH_HI, SCREEN_HEIGHT_HI, SCREEN_WIDTH_HI, 0.5,              VIMODE_LO, SCREEN_HEIGHT_HI, 0,  180, 20, 136, 42  }, // hi-res
 };
 
-uint32_t var8007073c = 0;
-uint32_t var8007074c = 0;
-
 bool g_PlayersWithControl[] = {
 	true, true, true, true
 };
@@ -184,11 +181,7 @@ float playerChooseSpawnLocation(float chrradius, struct coord *dstpos, RoomNum *
 	struct pad pad;
 	RoomNum tmppadrooms[2];
 	float bestsqdist;
-#ifdef AVOID_UB
 	RoomNum neighbours[21]; // prevent bgRoomGetNeighbours from writing out of bounds
-#else
-	RoomNum neighbours[20];
-#endif
 
 	// Iterate all spawn pads and populate the category arrays
 	for (p = 0; p < numpads; p++) {
@@ -264,7 +257,7 @@ float playerChooseSpawnLocation(float chrradius, struct coord *dstpos, RoomNum *
 	// are at least 10m away. For each pad added, set their distance to -1 so
 	// they don't get reused later.
 	i = rngRandom() % numpads;
-	p = i; \
+	p = i;
 	while (sllen < 4) {
 		if (padsqdists[p] > 1000 * 1000 && !badpads[p]) {
 			padUnpack(pads[p], PADFIELD_POS | PADFIELD_ROOM | PADFIELD_LOOK, &pad);
@@ -591,12 +584,6 @@ void playerLoadDefaults(void)
 	g_Vars.currentplayer->globaldrawworldoffset.x = 0;
 	g_Vars.currentplayer->globaldrawworldoffset.y = 0;
 	g_Vars.currentplayer->globaldrawworldoffset.z = 0;
-	g_Vars.currentplayer->globaldrawcameraoffset.x = 0;
-	g_Vars.currentplayer->globaldrawcameraoffset.y = 0;
-	g_Vars.currentplayer->globaldrawcameraoffset.z = 0;
-	g_Vars.currentplayer->globaldrawworldbgoffset.x = 0;
-	g_Vars.currentplayer->globaldrawworldbgoffset.y = 0;
-	g_Vars.currentplayer->globaldrawworldbgoffset.z = 0;
 
 	g_Vars.currentplayer->cameramode = CAMERAMODE_DEFAULT;
 	g_Vars.currentplayer->memcampos.x = 0;
@@ -1521,7 +1508,7 @@ void playerTickMpSwirl(void)
 	look.y = g_Vars.currentplayer->bond2.unk10.y - pos.y;
 	look.z = g_Vars.currentplayer->bond2.unk10.z - pos.z;
 
-	player0f0c1840(&pos, &up, &look, &g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms);
+	playerFindAndSetCameraRoom(&pos, &up, &look, &g_Vars.currentplayer->prop->pos, g_Vars.currentplayer->prop->rooms);
 
 	if (g_MpSwirlDistance < 5.0f) {
 		playerEndCutscene();
@@ -1535,7 +1522,6 @@ void player0f0b9a20(void)
 	envChooseAndApply(mainGetStageNum());
 	bgunEquipWeapon2(HAND_LEFT, g_DefaultWeapons[HAND_LEFT]);
 	bgunEquipWeapon2(HAND_RIGHT, g_DefaultWeapons[HAND_RIGHT]);
-	var8007074c = 0;
 }
 
 void playerEndCutscene(void)
@@ -1667,7 +1653,7 @@ void playerExecutePreparedWarp(void)
 		}
 	}
 
-	player0f0c1ba4(&pos, &up, &look, &memcampos, room);
+	playerSetCamFromMemCam(&pos, &up, &look, &memcampos, room);
 }
 
 void playerStartCutscene2(void)
@@ -1746,7 +1732,7 @@ void playerTickCutscene(bool arg0)
 	struct coord scale;
 	uint8_t frameslot;
 	Mtxf rotmtx;
-	float translatescale = bgGetStageTranslationThing();
+	float translatescale = 100.0f;
 	float fovy;
 	int endframe;
 	int8_t contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
@@ -1856,7 +1842,7 @@ void playerTickCutscene(bool arg0)
 	}
 
 	playerSetCameraMode(CAMERAMODE_THIRDPERSON);
-	player0f0c1bd8(&pos, &up, &look);
+	playerUpdateCameraRoom(&pos, &up, &look);
 	playermgrSetFovY(fovy);
 	viSetFovY(fovy);
 
@@ -1964,9 +1950,7 @@ void playerUpdateZoom(void)
 {
 	if(g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY) // Ben's comment: only update zoom if the CamSpy is not active
 	{
-		float scale;
 		float fovy;
-		struct stagetableentry *stage;
 
 		if (g_Vars.currentplayer->zoomintime < g_Vars.currentplayer->zoomintimemax) {
 			g_Vars.currentplayer->zoomintime += g_Vars.lvupdate60freal;
@@ -1992,33 +1976,17 @@ void playerUpdateZoom(void)
 			playermgrSetFovY(fovy);
 			viSetFovY(fovy);
 		}
-
-		if (g_Vars.currentplayer->zoominfovy >= 15) {
-			scale = 1;
-		} else if (g_Vars.currentplayer->zoominfovy >= 7) {
-			scale = (g_Vars.currentplayer->zoominfovy - 7) * 0.0875f + 0.3f;
-		} else if (g_Vars.currentplayer->zoominfovy >= 4) {
-			scale = (g_Vars.currentplayer->zoominfovy - 4) * (1.0f / 30.0f) + 0.2f;
-		} else if (g_Vars.currentplayer->zoominfovy >= 2) {
-			scale = (g_Vars.currentplayer->zoominfovy - 2) * (1.0f / 20.0f) + 0.1f;
-		} else {
-			scale = 0.1;
-		}
-
-		stage = stageGetCurrent();
-		bgSetScaleBg2Gfx((1 - (1 - stage->unk34) * (1 - scale) * (10.f / 9.0f)) * scale);
 	}
 }
 
 void playerStopAudioForPause(void)
 {
 	struct hand *hand;
-	int i;
 
 	alarmStopAudio();
 	gasStopAudio();
 
-	for (i = 0; i < 2; i++) {
+	for (int i = 0; i < 2; i++) {
 		hand = &g_Vars.currentplayer->hands[i];
 
 		if (hand->audiohandle2 && sndGetState(hand->audiohandle2) != AL_STOPPED) {
@@ -2109,9 +2077,9 @@ void playerUnpause(void)
 Gfx *player0f0baf84(Gfx *gdl)
 {
 	if (g_Vars.currentplayer->pausemode != PAUSEMODE_UNPAUSED) {
-		Mtx *mtx = gfxAllocateMatrixF();
+		Mtx *mtx = gfxAllocateMatrix();
 
-		mtxPerspective(mtx, g_Vars.currentplayer->zoominfovy, 1.4545454978943f, 10, 300, 1);
+		mtxPerspective(mtx, g_Vars.currentplayer->zoominfovy, 1.4545454978943f, 10, 300);
 
 		gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	}
@@ -2542,7 +2510,7 @@ void playerDisplayDamage(void)
 Gfx *playerRenderHealthBar(Gfx *gdl)
 {
 	Mtxf matrix;
-	Mtxf *addr = gfxAllocateMatrixF();
+	Mtxf *addr = gfxAllocateMatrix();
 
 	float fovsc = 60.f / PLAYER_DEFAULT_FOV;
 	if (fovsc > 1.01f) {
@@ -3106,7 +3074,7 @@ void playerTick()
 		playerTickChrBody();
 		bmoveTick(0, 0, 0, 1);
 		playerSetCameraMode(CAMERAMODE_EYESPY);
-		player0f0c1bd8(&sp308, &g_Vars.currentplayer->eyespy->up, &g_Vars.currentplayer->eyespy->look);
+		playerUpdateCameraRoom(&sp308, &g_Vars.currentplayer->eyespy->up, &g_Vars.currentplayer->eyespy->look);
 	} else if (g_Vars.currentplayer->teleportstate == TELEPORTSTATE_WHITE) {
 		// Deep Sea teleport
 		playerTickChrBody();
@@ -3418,9 +3386,9 @@ void playerTick()
 		g_Vars.currentplayer->waitforzrelease = true;
 
 		if (rocket && rocket->base.prop) {
-			player0f0c1840(&rocketpos, &sp2e4, &sp2f0, &rocket->base.prop->pos, rocket->base.prop->rooms);
+			playerFindAndSetCameraRoom(&rocketpos, &sp2e4, &sp2f0, &rocket->base.prop->pos, rocket->base.prop->rooms);
 		} else {
-			player0f0c1840(&rocketpos, &sp2e4, &sp2f0, NULL, NULL);
+			playerFindAndSetCameraRoom(&rocketpos, &sp2e4, &sp2f0, NULL, NULL);
 		}
 	} else if (g_Vars.tickmode == TICKMODE_NORMAL) {
 		// Normal movement
@@ -3451,7 +3419,7 @@ void playerTick()
 		spf4.y = b + spf4.y;
 		spf4.z = c + spf4.z;
 
-		player0f0c1840(&spf4,
+		playerFindAndSetCameraRoom(&spf4,
 				&g_Vars.currentplayer->bond2.unk28,
 				&g_Vars.currentplayer->bond2.unk1c,
 				&g_Vars.currentplayer->prop->pos,
@@ -3718,7 +3686,7 @@ void playerTick()
 		bmoveTick(1, 1, true, 0);
 		playerUpdateShake();
 		playerSetCameraMode(CAMERAMODE_DEFAULT);
-		player0f0c1840(&g_Vars.currentplayer->bond2.unk10,
+		playerFindAndSetCameraRoom(&g_Vars.currentplayer->bond2.unk10,
 				&g_Vars.currentplayer->bond2.unk28,
 				&g_Vars.currentplayer->bond2.unk1c,
 				&g_Vars.currentplayer->prop->pos,
@@ -3831,7 +3799,7 @@ void playerTick()
 		bmoveTick(1, 1, 0, 1);
 		playerUpdateShake();
 		playerSetCameraMode(CAMERAMODE_DEFAULT);
-		player0f0c1840(&g_Vars.currentplayer->bond2.unk10,
+		playerFindAndSetCameraRoom(&g_Vars.currentplayer->bond2.unk10,
 				&g_Vars.currentplayer->bond2.unk28,
 				&g_Vars.currentplayer->bond2.unk1c,
 				&g_Vars.currentplayer->prop->pos,
@@ -3936,53 +3904,39 @@ void playerSetGlobalDrawWorldOffset(int room)
 {
 	roomGetPos(room, &g_Vars.currentplayer->globaldrawworldoffset);
 
-	g_Vars.currentplayer->globaldrawworldbgoffset.x = g_Vars.currentplayer->globaldrawworldoffset.x;
-	g_Vars.currentplayer->globaldrawworldbgoffset.y = g_Vars.currentplayer->globaldrawworldoffset.y;
-	g_Vars.currentplayer->globaldrawworldbgoffset.z = g_Vars.currentplayer->globaldrawworldoffset.z;
-
 	roomSetLastForOffset(room);
-}
-
-void playerSetGlobalDrawCameraOffset(void)
-{
-	g_Vars.currentplayer->globaldrawcameraoffset.x = g_Vars.currentplayer->globaldrawworldoffset.x;
-	g_Vars.currentplayer->globaldrawcameraoffset.y = g_Vars.currentplayer->globaldrawworldoffset.y;
-	g_Vars.currentplayer->globaldrawcameraoffset.z = g_Vars.currentplayer->globaldrawworldoffset.z;
-
-	mtx4RotateVecInPlace(camGetPlayerWorldToScreenMtx(), &g_Vars.currentplayer->globaldrawcameraoffset);
 }
 
 void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struct coord *cam_up)
 {
 	Mtx spd0;
 	LookAt *lookat;
-	Mtxf sp8c;
+	Mtx sp8c;
 	struct coord sp80;
 	struct coord sp74;
 	float scale;
-	Mtxf *s0;
+	Mtx *s0;
 	Mtx *s1;
 	int i;
 	int j;
 
-	scale = bgGetScaleBg2Gfx();
 	playerSetGlobalDrawWorldOffset(g_Vars.currentplayer->cam_room);
 
-	//g_Vars.currentplayer->mtxl005c = gfxAllocateMatrixF();
-	g_Vars.currentplayer->mtxf0064 = gfxAllocateMatrixF();
-	g_Vars.currentplayer->mtxf0068 = gfxAllocateMatrixF();
+	//g_Vars.currentplayer->mtxl005c = gfxAllocateMatrix();
+	g_Vars.currentplayer->mtxf0064 = gfxAllocateMatrix();
+	g_Vars.currentplayer->mtxf0068 = gfxAllocateMatrix();
 
 	lookat = gfxAllocateLookAt(2);
 
-	sp74.x = (cam_pos->x - g_Vars.currentplayer->globaldrawworldoffset.x) * scale;
-	sp74.y = (cam_pos->y - g_Vars.currentplayer->globaldrawworldoffset.y) * scale;
-	sp74.z = (cam_pos->z - g_Vars.currentplayer->globaldrawworldoffset.z) * scale;
+	sp74.x = (cam_pos->x - g_Vars.currentplayer->globaldrawworldoffset.x);
+	sp74.y = (cam_pos->y - g_Vars.currentplayer->globaldrawworldoffset.y);
+	sp74.z = (cam_pos->z - g_Vars.currentplayer->globaldrawworldoffset.z);
 
 	sp80.f[0] = sp74.f[0] + cam_look->f[0];
 	sp80.f[1] = sp74.f[1] + cam_look->f[1];
 	sp80.f[2] = sp74.f[2] + cam_look->f[2];
 
-	mtxBuildCameraMatrix((Mtx*)&sp8c,
+	mtxBuildCameraMatrix(&sp8c,
 			sp74.x, sp74.y, sp74.z,
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
@@ -4002,31 +3956,17 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
-	s1 = gfxAllocateMatrixF();
-	s0 = gfxAllocateMatrixF();
-	mtx4MultMtx4(camGetSkyMtx(), (Mtx*)&sp8c, (Mtx*)s0);
+	s1 = gfxAllocateMatrix();
+	s0 = gfxAllocateMatrix();
+	mtx4MultMtx4(camGetSkyMtx(), &sp8c, s0);
 
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 4; j++) {
-			if (s0->m[i][j] > 32000.0f) {
-				s0->m[i][j] = 32000.0f;
-			} else if (s0->m[i][j] < -32000.0f) {
-				s0->m[i][j] = -32000.0f;
-			}
-		}
-	}
-
-	camSetArtifactMtx((Mtx*)s0);
-	memcpy(s1, s0->m, sizeof(*s1));
+	camSetArtifactMtx(s0);
+	memcpy(s1, s0, sizeof(*s1));
 	camSetOrthogonalMtxL(s1);
-	mtxScaleRotationPart(scale, (Mtx*)&sp8c);
-	//memcpy(g_Vars.currentplayer->mtxl005c, &sp8c, sizeof(*g_Vars.currentplayer->mtxl005c));
-	//camSetMtxL173c(g_Vars.currentplayer->mtxl005c);
 	camSetWorldToScreenMtx((Mtx*)g_Vars.currentplayer->mtxf0064);
 	camSetProjectionMtx((Mtx*)g_Vars.currentplayer->mtxf0068);
 	camSetLookAt(lookat);
 	camComputeFrustumEdgePlanes();
-	playerSetGlobalDrawCameraOffset();
 }
 
 Gfx *playerUpdateShootRot(Gfx *gdl)
@@ -4401,13 +4341,12 @@ Gfx *playerRenderHud(Gfx *gdl)
 						int playercount = PLAYERCOUNT();
 						struct chrdata *chr = g_Vars.currentplayer->prop->chr;
 						int numdeaths = 0;
-						int i;
 
 						if (chr) {
 							chr->chrflags |= CHRCFLAG_HIDDEN;
 						}
 
-						for (i = 0; i < playercount; i++) {
+						for (int i = 0; i < playercount; i++) {
 							numdeaths += g_Vars.playerstats[i].kills[playernum];
 						}
 
@@ -4614,32 +4553,19 @@ bool playerIsHealthVisible(void)
 	return g_Vars.currentplayer->healthshowmode != HEALTHSHOWMODE_HIDDEN;
 }
 
-// Never called
-void playerSetInvincible(bool enable)
-{
-	if (enable) {
-		cheatActivate(CHEAT_INVINCIBLE);
-	} else {
-		cheatDeactivate(CHEAT_INVINCIBLE);
-	}
-}
-
-void playerSetBondVisible(bool visible)
-{
-	g_Vars.bondvisible = visible;
-}
-
-void playerSetBondCollisionsEnabled(bool enabled)
-{
-	g_Vars.bondcollisions = enabled;
-}
-
 void playerSetCameraMode(int mode)
 {
 	g_Vars.currentplayer->cameramode = mode;
 }
 
-void player0f0c1840(struct coord *pos, struct coord *up, struct coord *look, struct coord *pos2, RoomNum *rooms2)
+/*
+* This function:
+* Determines which room the camera is in,
+* tries tracing from the player’s body to the camera to find a room,
+* falls back to spatial proximity queries,
+* then sets the camera using the best available room.
+*/
+void playerFindAndSetCameraRoom(struct coord *pos, struct coord *up, struct coord *look, struct coord *pos2, RoomNum *rooms2)
 {
 	bool done = false;
 	RoomNum inrooms[21];
@@ -4728,21 +4654,21 @@ void player0f0c1840(struct coord *pos, struct coord *up, struct coord *look, str
 	}
 }
 
-void player0f0c1ba4(struct coord *pos, struct coord *up, struct coord *look, struct coord *memcampos, int memcamroom)
+void playerSetCamFromMemCam(struct coord *pos, struct coord *up, struct coord *look, struct coord *memcampos, int memcamroom)
 {
 	RoomNum rooms[2];
 	rooms[0] = memcamroom;
 	rooms[1] = -1;
 
-	player0f0c1840(pos, up, look, memcampos, rooms);
+	playerFindAndSetCameraRoom(pos, up, look, memcampos, rooms);
 }
 
-void player0f0c1bd8(struct coord *pos, struct coord *up, struct coord *look)
+void playerUpdateCameraRoom(struct coord *pos, struct coord *up, struct coord *look)
 {
 	if (g_Vars.currentplayer->memcamroom >= 0) {
-		player0f0c1ba4(pos, up, look, &g_Vars.currentplayer->memcampos, g_Vars.currentplayer->memcamroom);
+		playerSetCamFromMemCam(pos, up, look, &g_Vars.currentplayer->memcampos, g_Vars.currentplayer->memcamroom);
 	} else {
-		player0f0c1840(pos, up, look, NULL, NULL);
+		playerFindAndSetCameraRoom(pos, up, look, NULL, NULL);
 	}
 }
 
@@ -4963,8 +4889,8 @@ int playerTickThirdPerson(struct prop *prop)
 	struct chrdata *chr = prop->chr;
 	int i;
 	int tickop1;
-	Mtxf *spe8;
-	Mtxf spa8;
+	Mtx *spe8;
+	Mtx spa8;
 	struct coord sp9c;
 	int tickop2;
 	struct coord sp8c;
@@ -4996,16 +4922,16 @@ int playerTickThirdPerson(struct prop *prop)
 
 			if (prop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
 				if (player->model00d4->definition->skel == &g_SkelChr) {
-					spe8 = player->model00d4->matrices;
+					spe8 = (Mtx*)player->model00d4->matrices;
 				} else {
-					spe8 = player->model00d4->matrices;
+					spe8 = (Mtx*)player->model00d4->matrices;
 				}
 
-				mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)spe8, (Mtx*)&spa8);
+				mtxApplyAffineTransform(camGetProjectionMtx(), spe8, &spa8);
 
-				sp9c.x = spa8.m[3][0] + spa8.m[1][0] * 7;
-				sp9c.y = spa8.m[3][1] + spa8.m[1][1] * 7;
-				sp9c.z = spa8.m[3][2] + spa8.m[1][2] * 7;
+				sp9c.x = spa8[3][0] + spa8[1][0] * 7;
+				sp9c.y = spa8[3][1] + spa8[1][1] * 7;
+				sp9c.z = spa8[3][2] + spa8[1][2] * 7;
 
 				player->vv_theta = (M_TAU - chrGetInverseTheta(chr)) * 360.0f / M_TAU;
 				player->vv_verta = 0;
@@ -5402,19 +5328,19 @@ Gfx *playerLoadMatrix(Gfx *gdl)
 	return gdl;
 }
 
-void player0f0c3320(Mtxf *matrices, int count)
+void player0f0c3320(Mtx *matrices, int count)
 {
-	Mtxf sp40;
+	Mtx sp40;
 	int i;
 	int j;
 
-	for (i = 0, j = 0; i < count; i++, j += sizeof(Mtxf)) {
-		mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)((uintptr_t)matrices + j), (Mtx*)&sp40);
+	for (i = 0, j = 0; i < count; i++, j += sizeof(Mtx)) {
+		mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)((uintptr_t)matrices + j), &sp40);
 
-		sp40.m[3][0] -= g_Vars.currentplayer->globaldrawworldoffset.x;
-		sp40.m[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;
-		sp40.m[3][2] -= g_Vars.currentplayer->globaldrawworldoffset.z;
+		sp40[3][0] -= g_Vars.currentplayer->globaldrawworldoffset.x;
+		sp40[3][1] -= g_Vars.currentplayer->globaldrawworldoffset.y;
+		sp40[3][2] -= g_Vars.currentplayer->globaldrawworldoffset.z;
 
-		mtx4Copy((Mtx*)&sp40, (Mtx*)matrices + i);
+		mtx4Copy(&sp40, matrices + i);
 	}
 }

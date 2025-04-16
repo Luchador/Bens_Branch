@@ -8,6 +8,7 @@ float fabsf(float x);
 float roundf(float x);
 
 #define M_PI    3.141592741f
+#define M_PI_2  1.5707963267948966192f // π / 2
 
 #define M_TAU    (M_PI * 2)
 

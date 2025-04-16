@@ -50,7 +50,7 @@ uint8_t *g_RoomMtxAges;
 RoomNum *g_RoomMtxLinkedRooms;
 RoomNum *g_RoomMtxBaseRooms;
 float *g_RoomMtxScales;
-Mtxf *g_RoomMtxMatrices;
+Mtx *g_RoomMtxMatrices;
 
 int g_RoomMtxNumSlots = 0;
 
@@ -95,15 +95,15 @@ int roomAllocateMtx(void)
 	return 0;
 }
 
-void roomPopulateMtx(Mtxf *mtx, int roomnum)
+void roomPopulateMtx(Mtx *mtx, int roomnum)
 {
 	int stagenum = g_Vars.stagenum;
 
-	mtxIdent((Mtx*)mtx);
+	mtxIdent(mtx);
 
-	mtx->m[0][0] = 1;
-	mtx->m[1][1] = 1;
-	mtx->m[2][2] = 1;
+	(*mtx)[0][0] = 1;
+	(*mtx)[1][1] = 1;
+	(*mtx)[2][2] = 1;
 
 	// These are rooms that are always active, such as the moon in Defection.
 	// This is probably making those rooms always drawn a certain distance away
@@ -118,13 +118,13 @@ void roomPopulateMtx(Mtxf *mtx, int roomnum)
 					|| stagenum == g_Stages[STAGEINDEX_EXTRACTION].id
 					|| stagenum == g_Stages[STAGEINDEX_MBR].id) && roomnum == 0x01)
 			|| (stagenum == g_Stages[STAGEINDEX_ATTACKSHIP].id && roomnum == 0x71)) {
-		mtx->m[3][0] = g_BgRooms[roomnum].pos.x;
-		mtx->m[3][1] = g_BgRooms[roomnum].pos.y;
-		mtx->m[3][2] = g_BgRooms[roomnum].pos.z;
+		(*mtx)[3][0] = g_BgRooms[roomnum].pos.x;
+		(*mtx)[3][1] = g_BgRooms[roomnum].pos.y;
+		(*mtx)[3][2] = g_BgRooms[roomnum].pos.z;
 	} else {
-		mtx->m[3][0] = g_BgRooms[roomnum].pos.x - g_Vars.currentplayer->globaldrawworldoffset.x;
-		mtx->m[3][1] = g_BgRooms[roomnum].pos.y - g_Vars.currentplayer->globaldrawworldoffset.y;
-		mtx->m[3][2] = g_BgRooms[roomnum].pos.z - g_Vars.currentplayer->globaldrawworldoffset.z;
+		(*mtx)[3][0] = g_BgRooms[roomnum].pos.x - g_Vars.currentplayer->globaldrawworldoffset.x;
+		(*mtx)[3][1] = g_BgRooms[roomnum].pos.y - g_Vars.currentplayer->globaldrawworldoffset.y;
+		(*mtx)[3][2] = g_BgRooms[roomnum].pos.z - g_Vars.currentplayer->globaldrawworldoffset.z;
 	}
 }
 
@@ -138,7 +138,7 @@ void roomPopulateMtx(Mtxf *mtx, int roomnum)
 int roomTouchMtx(int roomnum)
 {
 	int index = g_Rooms[roomnum].roommtxindex;
-	Mtxf mtx;
+	Mtx mtx;
 
 	if (index == -1
 			|| g_Vars.currentplayer->lastroomforoffset != g_RoomMtxBaseRooms[index]) {
@@ -161,7 +161,7 @@ int roomTouchMtx(int roomnum)
 	g_RoomMtxBaseRooms[index] = g_Vars.currentplayer->lastroomforoffset;
 
 	roomPopulateMtx(&mtx, roomnum);
-	mtx4Copy((Mtx*)&mtx, (Mtx*)&g_RoomMtxMatrices[index]);
+	mtx4Copy(&mtx, &g_RoomMtxMatrices[index]);
 
 	return index;
 }

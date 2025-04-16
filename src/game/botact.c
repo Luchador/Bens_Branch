@@ -328,10 +328,10 @@ int botactGetWeaponByAmmoType(int ammotype)
 void botactThrow(struct chrdata *chr)
 {
 	struct coord sp228 = {0, 0, 0};
-	Mtxf sp164;
+	Mtx sp164;
 	struct coord sp152;
 	struct prop *prop = chr->prop;
-	Mtxf sp84;
+	Mtx sp84;
 	float sp80 = chrGetAimAngle(chr);
 	struct gset gset = {0};
 	struct prop *target = chrGetTargetProp(chr);
@@ -368,20 +368,20 @@ void botactThrow(struct chrdata *chr)
 	sp228.y = sp152.y * mult;
 	sp228.z = sp152.z * mult;
 
-	mtxIdent((Mtx*)&sp164);
+	mtxIdent(&sp164);
 
 	if (chr->aibot->weaponnum == WEAPON_COMBATKNIFE) {
-		mtx4LoadZRotation(M_PI * 1.5f, (Mtx*)&sp164);
-		mtx4LoadXRotation(M_PI, (Mtx*)&sp84);
-		mtx4MultMtx4InPlace((Mtx*)&sp84, (Mtx*)&sp164);
+		mtx4LoadZRotation(M_PI * 1.5f, &sp164);
+		mtx4LoadXRotation(M_PI, &sp84);
+		mtx4MultMtx4InPlace(&sp84, &sp164);
 	}
 
-	mtx4LoadXRotation(0.34901028871536f, (Mtx*)&sp84);
-	mtxApplyAffineTransformInPlace((Mtx*)&sp84, (Mtx*)&sp164);
-	mtx4LoadYRotation(sp80, (Mtx*)&sp84);
-	mtxApplyAffineTransformInPlace((Mtx*)&sp84, (Mtx*)&sp164);
+	mtx4LoadXRotation(0.34901028871536f, &sp84);
+	mtxApplyAffineTransformInPlace(&sp84, &sp164);
+	mtx4LoadYRotation(sp80, &sp84);
+	mtxApplyAffineTransformInPlace(&sp84, &sp164);
 
-	bgunCreateThrownProjectile2(chr, &gset, &prop->pos, prop->rooms, (Mtx*)&sp164, &sp228);
+	bgunCreateThrownProjectile2(chr, &gset, &prop->pos, prop->rooms, &sp164, &sp228);
 
 	if (gset.weaponnum == WEAPON_REMOTEMINE) {
 		chr->aibot->flags |= BOTFLAG_THREWREMOTEMINE;

@@ -99,8 +99,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 	struct light *roomlights = (struct light *)&g_BgLightsFileData[g_Rooms[roomnum].gfxdata->lightsindex * 0x22];
 	uint8_t *lightGlares = &var800a41a0[g_Rooms[roomnum].gfxdata->lightsindex * 3];
 
-	roomPopulateMtx((Mtxf*)&sp138, roomnum);
-	mtxScale3x4(bgGetScaleBg2Gfx(), &sp138);
+	roomPopulateMtx(&sp138, roomnum);
 	mtx4MultMtx4(camGetArtifactMtx(), &sp138, &spf8);
 
 	float viewwidth = viGetViewWidth();

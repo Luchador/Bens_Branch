@@ -40,11 +40,10 @@ void camSetScreenPosition(float left, float top)
 	player->c_screentop = top;
 }
 
-void camSetPerspective(float near, float fovy, float aspect)
+void camSetPerspective(float fovy, float aspect)
 {
 	struct player *player = g_Vars.currentplayer;
 
-	player->c_perspnear = near;
 	player->c_perspfovy = fovy;
 	player->c_perspaspect = aspect;
 }
@@ -304,7 +303,7 @@ void camSetSkyMtx(Mtx *mtx)
 
 Mtx *camGetSkyMtx(void)
 {
-	return (Mtx*)g_Vars.currentplayer->skyMtx;
+	return g_Vars.currentplayer->skyMtx;
 }
 
 void camSetProjectionMtx(Mtx *mtx)
@@ -425,9 +424,9 @@ void camComputeFrustumEdgePlanes(void)
 // Determines if a point or sphere (point + radius) is in the camera's view
 bool camIsPointInFrustum(struct coord *point, float radius)
 {
-	Mtxf *mtx = g_Vars.currentplayer->projectionmtx;
+	Mtx *mtx = (Mtx*)g_Vars.currentplayer->projectionmtx;
 
-	if (g_CamFrustumViewOffset + radius < mtx->m[2][0] * point->f[0] + mtx->m[2][1] * point->f[1] + mtx->m[2][2] * point->f[2]) {
+	if (g_CamFrustumViewOffset + radius < (*mtx)[2][0] * point->f[0] + (*mtx)[2][1] * point->f[1] + (*mtx)[2][2] * point->f[2]) {
 		return false;
 	}
 

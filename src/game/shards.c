@@ -233,7 +233,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 				bool render = true;
 				float alphamult = 1.0f;
 				float xraydist;
-				Mtxf *mtx = gfxAllocateMatrixF();
+				Mtxf *mtx = gfxAllocateMatrix();
 
 				if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 					xraydist = sqrtf(ERASERSQDIST(g_Shards[i].pos.f));
@@ -352,7 +352,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 				bool render = true;
 				float alphamult = 1.0f;
 				float xraydist;
-				Mtxf *mtx = gfxAllocateMatrixF();
+				Mtxf *mtx = gfxAllocateMatrix();
 
 				if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 					xraydist = sqrtf(ERASERSQDIST(g_Shards[i].pos.f));

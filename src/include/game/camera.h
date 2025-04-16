@@ -5,7 +5,7 @@
 
 void camSetScreenSize(float width, float height);
 void camSetScreenPosition(float left, float top);
-void camSetPerspective(float near, float fovy, float aspect);
+void camSetPerspective(float fovy, float aspect);
 float camGetEraserFOV(float arg0);
 void camSetScale(void);
 void camProjectScreenToWorldDir(float pos2d[2], struct coord *dir2d, float arg2);

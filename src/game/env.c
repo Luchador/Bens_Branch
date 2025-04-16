@@ -105,7 +105,6 @@ float envGetSquaredFogMax(void)
 void envTick(void)
 {
 	struct zrange zrange;
-	float scale;
 	float zfar;
 	float znear;
 	float fogAlphaSlope;
@@ -117,10 +116,6 @@ void envTick(void)
 
 	// Get the Z range from the current vi configuration and scale it to world units
 	viGetZRange(&zrange);
-	scale = bgGetScaleBg2Gfx();
-
-	zrange.near /= scale;
-	zrange.far /= scale;
 
 	// Convert percentage-based fog range to fractional (0.0 - 1.0)
 	g_EnvFogMinFrac = g_Env.fogmin * 0.001f;
@@ -154,7 +149,7 @@ void envApplyEnvironment(struct environment *env)
 		return;
 	}
 
-	viSetZRange(15.0f, 20000.0f); //TEMP: hard code z ranges
+	viSetZRange(15.0f, 40000.0f); //TEMP: hard code z ranges
 
 	g_Env.fogmin = env->fogmin;
 	g_Env.fogmax = env->fogmax;

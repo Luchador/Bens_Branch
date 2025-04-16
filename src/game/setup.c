@@ -587,9 +587,9 @@ void setupCreateObject(struct defaultobj *obj, int cmdindex)
 			}
 
 			if (obj->flags & OBJFLAG_00000002) {
-				func0f06ab60(obj, &pos, &mtx, rooms, &centre);
+				objPlaceObjectAligned(obj, &pos, (Mtx*)&mtx, rooms, &centre);
 			} else {
-				func0f06a730(obj, &pos, &mtx, rooms, &centre);
+				func0f06a730(obj, &pos, (Mtx*)&mtx, rooms, &centre);
 			}
 
 			if (obj->hidden & OBJHFLAG_00008000) {
@@ -622,7 +622,7 @@ void setupPlaceWeapon(struct weaponobj *weapon, int cmdindex)
 				weapon->base.flags &= ~OBJFLAG_DEACTIVATED;
 				weapon->base.flags |= OBJFLAG_WEAPON_AICANNOTUSE;
 				modelmgrLoadProjectileModeldefs(weapon->weaponnum);
-				func0f08b25c(weapon, chr);
+				func0f08b208(weapon, chr);
 			} else {
 				if (cheatIsActive(CHEAT_ENEMYROCKETS)) {
 					switch (weapon->weaponnum) {
@@ -676,7 +676,7 @@ void setupPlaceWeapon(struct weaponobj *weapon, int cmdindex)
 				}
 
 				modelmgrLoadProjectileModeldefs(weapon->weaponnum);
-				func0f08b25c(weapon, chr);
+				func0f08b208(weapon, chr);
 			}
 		}
 	} else {
@@ -1117,7 +1117,7 @@ void setupCreateDoor(struct doorobj *door, int cmdindex)
 			door->sibling = (struct doorobj *) setupGetCmdByIndex(siblingcmdindex);
 		}
 
-		prop = doorInit(door, &pos, &finalmtx, rooms, &sp54, &centre);
+		prop = doorInit(door, &pos, (Mtx*)&finalmtx, rooms, &sp54, &centre);
 
 		if (door->base.flags & OBJFLAG_DOOR_HASPORTAL) {
 			door->portalnum = portalnum;

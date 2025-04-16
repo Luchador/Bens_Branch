@@ -369,29 +369,22 @@ void mtxFrustum(Mtx *m, float l, float r, float b, float t, float n, float f, fl
 /*
 *  Perspective Matrix Functions
 */
-
-void mtxPerspective(Mtx *mtx, float fovy, float aspect, float near, float far, float scale)
+void mtxPerspective(Mtx *mtx, float fovy, float aspect, float near, float far)
 {
-	float cot;
-	int	i, j;
-
+	float f;
 	mtxIdent(mtx);
 
-	fovy *= 3.1415926f / 180.0f;
-	cot = cosf(fovy * 0.5f) / sinf(fovy * 0.5f);
+	// Convert field of view to radians and compute cotangent
+	fovy *= (float)M_PI / 180.0f;
+	f = 1.0f / tanf(fovy * 0.5f);
 
-	(*mtx)[0][0] = cot / aspect;
-	(*mtx)[1][1] = cot;
-	(*mtx)[2][2] = (near + far) / (near - far);
-	(*mtx)[2][3] = -1;
-	(*mtx)[3][2] = (2.0f * near * far) / (near - far);
-	(*mtx)[3][3] = 0;
-
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 4; j++) {
-			(*mtx)[i][j] *= scale;
-		}
-	}
+	// Apply standard perspective projection matrix
+	(*mtx)[0][0] = f / aspect;
+	(*mtx)[1][1] = f;
+	(*mtx)[2][2] = -(far + near) / (far - near);
+	(*mtx)[2][3] = -1.0f;
+	(*mtx)[3][2] = -(2.0f * far * near) / (far - near);
+	(*mtx)[3][3] = 0.0f;
 }
 
 /*
@@ -1042,6 +1035,68 @@ void mtxNormalizeRotationMatrix(Mtx *src, Mtx *dst)
 	(*dst)[1][3] = 0;
 	(*dst)[2][3] = 0;
 	(*dst)[3][3] = 1;
+}
+
+void mtxBuildRotationTowardsVector(struct coord *direction, Mtx *outMatrix)
+{
+	float sp124;
+	float sp120;
+	float sp11c;
+	float sp118;
+	float sp114;
+	float f0;
+	float sp10c;
+	float sp108;
+	float sp104;
+	float a;
+	float b;
+	float spf4;
+	float spf0;
+	Mtx spb0;
+	Mtx sp70;
+	Mtx sp30;
+	struct coord sp24;
+
+	f0 = sqrtf(direction->f[0] * direction->f[0] + direction->f[1] * direction->f[1] + direction->f[2] * direction->f[2]);
+
+	sp10c = direction->x / f0;
+	sp108 = direction->y / f0;
+	sp104 = direction->z / f0;
+
+	if (sp10c == 0.0f && sp104 == 0.0f) {
+		sp124 = 0.0f;
+		sp120 = 0.0f;
+		sp11c = sp108;
+		sp118 = 1.0f;
+		sp114 = 0.0f;
+	} else {
+		a = sqrtf(sp10c * sp10c + sp104 * sp104);
+		b = sp10c / a;
+
+		sp118 = sp104 / a;
+		sp114 = -b;
+
+		sp124 = sp108 * b;
+		sp120 = -a;
+		sp11c = sp108 * sp118;
+	}
+
+	spf4 = atan2f(sp118, sp114);
+
+	mtx4LoadYRotation(-spf4, &spb0);
+
+	sp24.x = sp124;
+	sp24.y = sp120;
+	sp24.z = sp11c;
+
+	mtx4RotateVecInPlace(&spb0, &sp24);
+
+	spf0 = atan2f(sp24.x, sp24.y);
+
+	mtx4LoadYRotation(-1.5705463f + spf4, &sp70);
+	mtx4LoadXRotation(-1.5705463f - spf0, &sp30);
+
+	mtx4MultMtx4(&sp70, &sp30, outMatrix);
 }
 
 /*

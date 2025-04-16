@@ -12,7 +12,7 @@ void roomLinkMtx(int index, int roomnum);
 void roomUnlinkMtx(int index, int roomnum);
 void roomFreeMtx(int index);
 int roomAllocateMtx(void);
-void roomPopulateMtx(Mtxf *matrix, int roomnum);
+void roomPopulateMtx(Mtx *matrix, int roomnum);
 int roomTouchMtx(int roomnum);
 Gfx *roomApplyMtx(Gfx *gdl, int roomnum);
 struct coord *roomGetPosPtr(int room);

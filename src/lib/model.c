@@ -218,18 +218,18 @@ int modelFindNodeMtxIndex(struct modelnode *node, int arg1)
 	return -1;
 }
 
-Mtxf *modelFindNodeMtx(struct model *model, struct modelnode *node, int arg2)
+Mtx *modelFindNodeMtx(struct model *model, struct modelnode *node, int arg2)
 {
 	int index = modelFindNodeMtxIndex(node, arg2);
 
 	if (index >= 0) {
-		return &model->matrices[index];
+		return (Mtx*)&model->matrices[index];
 	}
 
 	return NULL;
 }
 
-Mtxf *modelGetRootMtx(struct model *model)
+Mtx *modelGetRootMtx(struct model *model)
 {
 	return modelFindNodeMtx(model, model->definition->rootnode, 0);
 }
@@ -441,7 +441,7 @@ void *modelGetPartRodata(struct modeldef *modeldef, int partnum)
 
 float modelGetScreenDistance(struct model *model)
 {
-	Mtxf *mtx = modelGetRootMtx(model);
+	Mtxf *mtx = (Mtxf*)modelGetRootMtx(model);
 
 	if (mtx) {
 		return -mtx->m[3][2];
@@ -826,7 +826,7 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 	if (rodata->chrinfo.mtxindex);
 
 	if (node->parent) {
-		sp24c = modelFindNodeMtx(model, node->parent, 0);
+		sp24c = (Mtxf*)modelFindNodeMtx(model, node->parent, 0);
 	} else {
 		sp24c = arg0->unk00;
 	}
@@ -1017,7 +1017,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 	Mtxf *matrices = model->matrices;
 
 	if (node->parent != NULL) {
-		rendermtx = modelFindNodeMtx(model, node->parent, 0);
+		rendermtx = (Mtxf*)modelFindNodeMtx(model, node->parent, 0);
 	} else {
 		rendermtx = renderdata->unk00;
 	}
@@ -1181,7 +1181,7 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 				modelPositionJointUsingQuatRot(renderdata, model, node, quatFinal, &transBase, &scaleBase);
 			}
 		} else if (useAbsoluteTranslation) {
-			float stageScale = bgGetStageTranslationThing();
+			float stageScale = 100.0f;
 
 			transBase.x *= stageScale;
 			transBase.y *= stageScale;
@@ -1206,7 +1206,7 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 			modelPositionJointUsingVecRot(renderdata, model, node, &rotBase, &transBase, false, &scaleBase);
 		}
 	} else {
-		Mtxf *parentMtx = node->parent ? modelFindNodeMtx(model, node->parent, 0) : renderdata->unk00;
+		Mtxf *parentMtx = node->parent ? (Mtxf*)modelFindNodeMtx(model, node->parent, 0) : renderdata->unk00;
 
 		if (parentMtx) {
 			mtx4LoadTranslation(&rodata->pos, (Mtx *)&tempMatrix);
@@ -1227,7 +1227,7 @@ void modelUpdatePositionHeldNodeMtx(struct modelrenderdata *arg0, struct model *
 	Mtxf *matrices = model->matrices;
 
 	if (node->parent) {
-		sp68 = modelFindNodeMtx(model, node->parent, 0);
+		sp68 = (Mtxf*)modelFindNodeMtx(model, node->parent, 0);
 	} else {
 		sp68 = arg0->unk00;
 	}
@@ -1247,7 +1247,7 @@ void modelUpdateDistanceRelations(struct model *model, struct modelnode *node)
 {
 	union modelrodata *rodata = node->rodata;
 	union modelrwdata *rwdata = modelGetNodeRwData(model, node);
-	Mtxf *mtx = modelFindNodeMtx(model, node, 0);
+	Mtxf *mtx = (Mtxf*)modelFindNodeMtx(model, node, 0);
 	float distance;
 
 	if (g_ModelDistanceDisabled || !mtx) {
@@ -1382,7 +1382,7 @@ void modelUpdateReorderRelations(struct model *model, struct modelnode *node)
 {
 	union modelrodata *rodata = node->rodata;
 	union modelrwdata *rwdata = modelGetNodeRwData(model, node);
-	Mtxf *mtx = modelFindNodeMtx(model, node, 0);
+	Mtxf *mtx = (Mtxf*)modelFindNodeMtx(model, node, 0);
 	struct coord sp38;
 	struct coord sp2c;
 	float tmp;
@@ -1849,7 +1849,7 @@ void modelSetAnimation2(struct model *model, int16_t animnum, int flip, float fs
 			float z;
 
 			if (g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) {
-				sp64 = bgGetStageTranslationThing();
+				sp64 = 100.0f;
 				animLoadHeader(anim->animnum);
 				frameslot = animLoadFrame(anim->animnum, anim->framea);
 				animForgetFrameBirths();
@@ -2254,7 +2254,7 @@ void modelSetAnimFrame2WithChrStuff(struct model *model, float curframe, float e
 				}
 
 				if (g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) {
-					f20 = bgGetStageTranslationThing();
+					f20 = 100.0f;
 
 					if (floorend != anim->framea) {
 						s0frame = modelConstrainOrWrapAnimFrame(floorend, anim->animnum, anim->endframe);
@@ -3776,7 +3776,7 @@ int modelTestForHit(struct model *model, struct coord *arg1, struct coord *arg2,
 		switch (type) {
 		case MODELNODETYPE_BBOX:
 			rodata = node->rodata;
-			mtx = modelFindNodeMtx(model, node, 0);
+			mtx = (Mtxf*)modelFindNodeMtx(model, node, 0);
 
 			if (modelTestBboxNodeForHit(&rodata->bbox, mtx, arg1, arg2)) {
 				*startnode = node;

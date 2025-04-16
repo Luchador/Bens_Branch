@@ -394,7 +394,7 @@ Gfx *sparksRender(Gfx *gdl)
 					mtx4SetTranslation(&group->pos, (Mtx*)&spd4);
 					mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&spd4);
 
-					mtx = gfxAllocateMatrixF();
+					mtx = gfxAllocateMatrix();
 					mtx4Copy((Mtx*)&spd4, (Mtx*)mtx);
 
 					gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

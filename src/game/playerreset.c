@@ -129,8 +129,6 @@ void playerReset(void)
 	g_InCutscene = false;
 	g_CutsceneFrameOverrun240 = 0;
 
-	var8007073c = 0;
-
 	g_Vars.currentplayer->bondexploding = false;
 	g_NumSpawnPoints = 0;
 	g_Vars.currentplayer->bondtankexplode = false;
@@ -142,8 +140,6 @@ void playerReset(void)
 	g_PlayerInvincible = false;
 
 	playerSetTickMode(TICKMODE_GE_FADEIN);
-
-	var8007074c = 0;
 
 	g_Vars.currentplayer->bondviewlevtime60 = 0;
 	g_Vars.currentplayer->bondwatchtime60 = 0;

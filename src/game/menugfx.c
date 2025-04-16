@@ -145,26 +145,6 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 	return gdl;
 }
 
-void func0f0e0cbc(int arg0, int arg1, int16_t arg2, int16_t arg3, Vtx *vertex, Mtxf *arg5)
-{
-	struct coord sp24;
-
-	sp24.x = (arg2 - arg0 + 100) * 0.25f;
-	sp24.y = (arg3 - arg1 + 100) * 0.25f;
-	sp24.z = 0;
-
-	vertex->x = arg2 * 10;
-	vertex->y = arg3 * 10;
-	vertex->z = -10;
-
-	vertex->colour = 0;
-
-	mtx4TransformVecInPlace((Mtx*)arg5, &sp24);
-
-	vertex->s = sp24.x * 32;
-	vertex->t = sp24.y * 32;
-}
-
 Gfx *menugfxRenderDialogBackground(Gfx *gdl, int x1, int y1, int x2, int y2, struct menudialog *dialog, uint32_t colour1, uint32_t colour2, float arg8)
 {
 	uint32_t leftcolour;
@@ -1432,7 +1412,7 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 
 	mtxIdent((Mtx*)&sp110);
 
-	modelmtx = gfxAllocateMatrixF();
+	modelmtx = gfxAllocateMatrix();
 
 	mtx4Copy((Mtx*)&sp110, (Mtx*)modelmtx);
 

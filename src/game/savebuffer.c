@@ -54,8 +54,8 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 	Mtxf *mtx1;
 	Mtxf *mtx2;
 
-	mtx1 = gfxAllocateMatrixF();
-	mtx2 = gfxAllocateMatrixF();
+	mtx1 = gfxAllocateMatrix();
+	mtx2 = gfxAllocateMatrix();
 
 	func0f0d475c(&mtx);
 	mtx4Copy((Mtx*)&mtx, (Mtx*)mtx2);
@@ -104,7 +104,7 @@ Gfx *savebufferSetup2DRender(Gfx *gdl)
 Gfx *func0f0d4a3c(Gfx *gdl, int arg1)
 {
 	Mtxf mtx;
-	Mtxf *mtxptr = gfxAllocateMatrixF();
+	Mtxf *mtxptr = gfxAllocateMatrix();
 
 	if (arg1 == 0) {
 		texSelect(&gdl, &g_TexGeneralConfigs[6], 2, 0, 2, 1, NULL);
@@ -134,7 +134,7 @@ Gfx *func0f0d4a3c(Gfx *gdl, int arg1)
 Gfx *func0f0d4c80(Gfx *gdl)
 {
 	Mtxf mtx;
-	Mtxf *mtxptr = gfxAllocateMatrixF();
+	Mtxf *mtxptr = gfxAllocateMatrix();
 
 	func0f0d4690(&mtx);
 	mtxScaleRow0Full(0.1f, (Mtx*)&mtx);

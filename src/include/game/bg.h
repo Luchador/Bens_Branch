@@ -1,7 +1,5 @@
 #pragma once
 
-#include <ultra64.h>
-#include <stdint.h>
 #include "data.h"
 #include "types.h"
 
@@ -25,9 +23,6 @@ float bgCalculatePortalSurfaceArea(int portal);
 void bgReset(int stagenum);
 void bgBuildTables(int stagenum);
 void bgStop(void);
-float bgGetStageTranslationThing(void);
-float bgGetScaleBg2Gfx(void);
-void bgSetScaleBg2Gfx(float arg0);
 void bgTickCounter(void);
 void bgTick(void);
 Gfx *bgRender(Gfx *gdl);

@@ -2661,7 +2661,7 @@ int bgunTickIncChangeGun(struct handweaponinfo *info, int handnum, struct hand *
 	return 0;
 }
 
-void bgunUpdateHandState2(struct hand *hand, int handnum, struct coord *viewmodelpos, struct weaponfunc *funcdef, Mtxf *arg4, Mtxf *arg5)
+void bgunUpdateHandState2(struct hand *hand, int handnum, struct coord *viewmodelpos, struct weaponfunc *funcdef, Mtx *rotMtx, Mtx *baseMtx)
 {
 	float tmp;
 	struct coord sp38 = {0, 0, 0};
@@ -2711,8 +2711,6 @@ void bgunUpdateHandState2(struct hand *hand, int handnum, struct coord *viewmode
 			if (hand->turnuprot < 0.0f) {
 				hand->turnuprot = 0.0f;
 			}
-		} else {
-			// Not rotated
 		}
 	}
 	
@@ -2721,21 +2719,11 @@ void bgunUpdateHandState2(struct hand *hand, int handnum, struct coord *viewmode
 	sp38.x = (tmp * 90.0f * 0.017453292f * -1.0f); // 0.017453292f for degree to radian conversion
 	sp38.y = (tmp * 10.0f * 0.017453292f) * (handnum != HAND_RIGHT ? -1.0f : 1.0f);
 
-	mtx4LoadRotation(&sp38, (Mtx*)arg4);
-	mtxApplyAffineTransformInPlace((Mtx*)arg4, (Mtx*)arg5);
+	mtx4LoadRotation(&sp38, rotMtx);
+	mtxApplyAffineTransformInPlace(rotMtx, baseMtx);
 
 	viewmodelpos->y -= 1.0f * hand->turnuprot;
 	viewmodelpos->x -= 9.0f * hand->turnuprot * (handnum != HAND_RIGHT ? 1.0f : -1.0f);
-}
-
-/**
- * This function may have implemented an early beta feature where the gun could
- * be held at the side of the screen, pointed upwards. The feature was shown in
- * a demo video but doesn't exist in any public version of the game.
- */
-int bgunTickIncState2(struct handweaponinfo *info, int handnum, struct hand *hand, int lvupdate)
-{
-	return 0;
 }
 
 int bgunTickInc(struct handweaponinfo *info, int handnum, int lvupdate)
@@ -2766,7 +2754,6 @@ int bgunTickInc(struct handweaponinfo *info, int handnum, int lvupdate)
 		result = bgunTickIncAttack(info, handnum, hand, lvupdate);
 		break;
 	case HANDSTATE_2:
-		result = bgunTickIncState2(info, handnum, hand, lvupdate);
 		break;
 	case HANDSTATE_CHANGEGUN:
 		result = bgunTickIncChangeGun(info, handnum, hand, lvupdate);
@@ -2837,11 +2824,6 @@ void bgunTickHand(int handnum)
 			break;
 		}
 	}
-}
-
-void bgunTickSwitch(void)
-{
-	bgunTickSwitch2();
 }
 
 void bgunInitHandAnims(void)
@@ -3714,7 +3696,7 @@ void bgunCreateXBowBolt(struct defaultobj *obj, struct coord *coord, RoomNum *ro
 		propActivate(objprop);
 		propEnable(objprop);
 		mtxScaleRotationPart(obj->model->scale, (Mtx*)matrix1);
-		func0f06a580(obj, coord, matrix1, rooms);
+		func0f06a580(obj, coord, (Mtx*)matrix1, rooms);
 
 		if (obj->type == OBJTYPE_WEAPON && ((struct weaponobj *) obj)->weaponnum == WEAPON_BOLT) {
 			int beamnum = boltbeamFindByProp(objprop);
@@ -4091,7 +4073,7 @@ void bgunUpdateHeldRocket(int handnum)
 				mtx.m[3][2] = 0;
 
 				mtxScaleRotationPart(obj->model->scale, (Mtx*)&mtx);
-				func0f06a580(obj, &hand->muzzlepos, &mtx, playerprop->rooms);
+				func0f06a580(obj, &hand->muzzlepos, (Mtx*)&mtx, playerprop->rooms);
 				propDeregisterRooms(objprop);
 			}
 
@@ -4300,7 +4282,7 @@ void bgunCreateFiredProjectile(int handnum)
 
 			if (weapon) {
 				bool failed = false;
-				Mtxf sp78;
+				Mtx sp78;
 				struct coord sp6c;
 				struct coord sp60;
 
@@ -4328,9 +4310,9 @@ void bgunCreateFiredProjectile(int handnum)
 						if (funcdef->scale != 1.0f) {
 							weapon->base.model->scale *= funcdef->scale;
 
-							mtx3ToMtx4(weapon->base.realrot, (Mtx*)&sp78);
-							mtxScaleRotationPart(funcdef->scale, (Mtx*)&sp78);
-							mtx4ToMtx3((Mtx*)&sp78, weapon->base.realrot);
+							mtx3ToMtx4(weapon->base.realrot, &sp78);
+							mtxScaleRotationPart(funcdef->scale, &sp78);
+							mtx4ToMtx3(&sp78, weapon->base.realrot);
 						}
 
 						weapon->base.projectile->powerlimit240 = TICKS(1200);
@@ -4663,7 +4645,7 @@ void bgunCalculateBotShotSpread(struct coord *arg0, int weaponnum, int funcnum, 
 	struct weapon *weapondef = weaponFindById(weaponnum);
 	float x;
 	float y;
-	Mtxf mtx;
+	Mtx mtx;
 	struct coord sp48;
 
 	if (weapondef) {
@@ -4696,8 +4678,8 @@ void bgunCalculateBotShotSpread(struct coord *arg0, int weaponnum, int funcnum, 
 	sp48.z = -1.0f;
 
 	utilsNormalizeF(&sp48.x, &sp48.y, &sp48.z);
-	mtxBuildLookAtMatrix2F((Mtx*)&mtx, 0.0f, 0.0f, 0.0f, arg0->x, arg0->y, arg0->z, 0.0f, -1.0f, 0.0f);
-	mtx4RotateVec((Mtx*)&mtx, &sp48, arg0);
+	mtxBuildLookAtMatrix2F(&mtx, 0.0f, 0.0f, 0.0f, arg0->x, arg0->y, arg0->z, 0.0f, -1.0f, 0.0f);
+	mtx4RotateVec(&mtx, &sp48, arg0);
 }
 
 bool bgunGetLastShootInfo(struct coord *pos, struct coord *dir, int handnum)
@@ -5882,7 +5864,7 @@ void bgunStartDetonateAnimation(int playernum)
  */
 
 // Ben's comment: in this version, it also checks if the player wants their gun to go into gangsta mode.
-void bgunUpdateGangsta(struct hand *hand, int handnum, struct coord *viewmodelpos, struct weaponfunc *funcdef, Mtxf *arg4, Mtxf *arg5)
+void bgunUpdateGangsta(struct hand *hand, int handnum, struct coord *viewmodelpos, struct weaponfunc *funcdef, Mtx *rotMtx, Mtx *baseMtx)
 {
 	float tmp;
 	struct coord sp38 = {0, 0, 0};
@@ -5962,8 +5944,8 @@ void bgunUpdateGangsta(struct hand *hand, int handnum, struct coord *viewmodelpo
 	tmp = -cosf(hand->gangstarot * M_PI) * 0.5f + 0.50f;
 	sp38.z = (tmp * 66.6f * 0.017453292f) * (handnum != HAND_RIGHT ? 1.0f : -1.0f);
 
-	mtx4LoadRotation(&sp38, (Mtx*)arg4);
-	mtxApplyAffineTransformInPlace((Mtx*)arg4, (Mtx*)arg5);
+	mtx4LoadRotation(&sp38, rotMtx);
+	mtxApplyAffineTransformInPlace(rotMtx, baseMtx);
 
 	viewmodelpos->y += 4.0f * hand->gangstarot;
 	viewmodelpos->x += 2.0f * hand->gangstarot * (handnum != HAND_RIGHT ? 1.0f : -1.0f);
@@ -6304,40 +6286,44 @@ void bgunUpdateReaper(struct hand *hand, struct modeldef *modeldef)
 void bgunUpdateSniperRifle(struct modeldef *modeldef, uint8_t *allocation)
 {
 	struct modelnode *nodes[4];
-	float sp88[4] = {0, 0, 0, 0};
-	int i;
-	float f26;
+	float scopeOffsets[4] = {0, 0, 0, 0};
+	float zoomFactor;
 	int mtxindex;
-	struct coord sp70;
+	struct coord offset;
 
-	f26 = 1.0f - (currentPlayerGetGunZoomFov() - 2.0f) / 58.0f;
+	// Zoom factor ranges from 0 (max zoom) to 1 (no zoom)
+	zoomFactor = 1.0f - (currentPlayerGetGunZoomFov() - 2.0f) / 58.0f;
 
 	nodes[0] = modelGetPart(modeldef, MODELPART_SNIPERRIFLE_SCOPE1);
 	nodes[1] = modelGetPart(modeldef, MODELPART_SNIPERRIFLE_SCOPE2);
 	nodes[2] = modelGetPart(modeldef, MODELPART_SNIPERRIFLE_SCOPE3);
 	nodes[3] = modelGetPart(modeldef, MODELPART_SNIPERRIFLE_SCOPE4);
 
-	for (i = 0; i < ARRAYCOUNT(nodes); i++) {
+	for (int i = 0; i < ARRAYCOUNT(nodes); i++) {
 		if (nodes[i]) {
-			float f20 = f26 * 4.0f;
-			mtxindex = modelFindNodeMtxIndex(nodes[i], 0);
-			sp88[i] = f20 - i;
+			float partialZoom = zoomFactor * 4.0f;
+			scopeOffsets[i] = partialZoom - i;
 
-			if (f20 < i) {
-				sp88[i] = 0.0f;
+			if (partialZoom < i) {
+				scopeOffsets[i] = 0.0f;
 			}
 
-			sp88[i] *= 100.0f;
+			scopeOffsets[i] *= 100.0f;
 
-			sp70.x = 0.0f;
-			sp70.y = 0.0f;
-			sp70.z = sp88[i];
+			offset.x = 0.0f;
+			offset.y = 0.0f;
+			offset.z = scopeOffsets[i];
 
-			mtx4RotateVecInPlace((Mtx *)((uintptr_t)allocation + mtxindex * sizeof(Mtx)), &sp70);
+			mtxindex = modelFindNodeMtxIndex(nodes[i], 0);
+			Mtx *matrix = (Mtx *)((uintptr_t)allocation + mtxindex * sizeof(Mtx));
 
-			((Mtxf *)((uintptr_t)allocation + mtxindex * sizeof(Mtxf)))->m[3][0] += sp70.x;
-			((Mtxf *)((uintptr_t)allocation + mtxindex * sizeof(Mtxf)))->m[3][1] += sp70.y;
-			((Mtxf *)((uintptr_t)allocation + mtxindex * sizeof(Mtxf)))->m[3][2] += sp70.z;
+			// Transform the offset by the rotation part of the matrix
+			mtx4RotateVecInPlace(matrix, &offset);
+
+			// Translate the matrix by the rotated offset
+			(*matrix)[3][0] += offset.x;
+			(*matrix)[3][1] += offset.y;
+			(*matrix)[3][2] += offset.z;
 		}
 	}
 }
@@ -6363,11 +6349,13 @@ void bgunUpdateDevastator(struct hand *hand, uint8_t *allocation, struct modelde
 		sp24.y = 0.0f;
 		sp24.z = 0.0f;
 
-		mtx4RotateVecInPlace((Mtx *)((uintptr_t)allocation + mtxindex * sizeof(Mtx)), &sp24);
+		Mtx *matrix = (Mtx *)((uintptr_t)allocation + mtxindex * sizeof(Mtx));
 
-		((Mtxf *)((uintptr_t)allocation + mtxindex * sizeof(Mtxf)))->m[3][0] += sp24.x;
-		((Mtxf *)((uintptr_t)allocation + mtxindex * sizeof(Mtxf)))->m[3][1] += sp24.y;
-		((Mtxf *)((uintptr_t)allocation + mtxindex * sizeof(Mtxf)))->m[3][2] += sp24.z;
+		mtx4RotateVecInPlace(matrix, &sp24);
+
+		(*matrix)[3][0] += sp24.x;
+		(*matrix)[3][1] += sp24.y;
+		(*matrix)[3][2] += sp24.z;
 	}
 }
 
@@ -6590,7 +6578,7 @@ void bgunTickEject(struct hand *hand, struct modeldef *modeldef, bool isdetonato
 
 void bgunMuzzleFlash(struct hand *hand, struct weapon *weapondef, struct modeldef *modeldef,
 		struct weaponfunc *funcdef, int maxburst, uint8_t *allocation, int weaponnum,
-		bool **arg7, int mtxindex, Mtxf *arg9, Mtxf *arg10)
+		bool **arg7, int mtxindex, Mtx *arg9, Mtx *arg10)
 {
 	Mtx spd8;
 	int index;
@@ -6662,10 +6650,10 @@ void bgunMuzzleFlash(struct hand *hand, struct weapon *weapondef, struct modelde
 
 			mtx = (Mtx*)allocation;
 
-			mtxBuildFacingMatrix((Mtx*)&arg10->m, 0, (*mtx)[3][0] - hand->aimpos.x, (*mtx)[3][1] - hand->aimpos.y, (*mtx)[3][2] - hand->aimpos.z);
+			mtxBuildFacingMatrix(arg10, 0, (*mtx)[3][0] - hand->aimpos.x, (*mtx)[3][1] - hand->aimpos.y, (*mtx)[3][2] - hand->aimpos.z);
 			mtx4MultMtx4InPlace((Mtx*)arg10, &sp70);
 			mtx00016710(muzzlez, &sp70);
-			mtx4MultMtx4InPlace((Mtx*)arg9, &sp70);
+			mtx4MultMtx4InPlace(arg9, &sp70);
 			mtx4SetTranslation(&sp60, &sp70);
 
 			mtx = (Mtx*)allocation;
@@ -6701,16 +6689,16 @@ void bgunCreateFx(struct hand *hand, int handnum, struct weaponfunc *funcdef, in
 			node = modelGetPart(modeldef, partnum);
 
 			if (node) {
-				Mtxf *mtx = (Mtxf *)allocation;
-				Mtxf sp24;
+				Mtx *mtx = (Mtx*)allocation;
+				Mtx sp24;
 
 				mtx += modelFindNodeMtxIndex(node, 0);
 
-				mtx4Copy((Mtx*)mtx, (Mtx*)&sp24);
-				mtxScaleRotationPart(10.0f, (Mtx*)&sp24);
-				mtx4MultMtx4InPlace(camGetProjectionMtx(), (Mtx*)&sp24);
+				mtx4Copy(mtx, &sp24);
+				mtxScaleRotationPart(10.0f, &sp24);
+				mtx4MultMtx4InPlace(camGetProjectionMtx(), &sp24);
 
-				casingCreateForHand(handnum, ground, (Mtx*)&sp24);
+				casingCreateForHand(handnum, ground, &sp24);
 			} else {
 				casingCreateForHand(handnum, ground, (Mtx*)&hand->posmtx);
 			}
@@ -6841,8 +6829,8 @@ bool bgunCheckForCloseWall()
 void bgunTickHandWeapModel(int handnum)
 {
 	uint8_t *mtxallocation;
-	Mtxf sp2c4;
-	Mtxf sp284;
+	Mtx sp2c4;
+	Mtx sp284;
 	struct modeldef *modeldef = NULL;
 	struct coord viewmodelpos = {0, 0, 0};
 	Mtx sp234;
@@ -6857,13 +6845,13 @@ void bgunTickHandWeapModel(int handnum)
 	struct weaponfunc_shoot *shootfunc = NULL;
 	int weaponnum = bgunGetWeaponNum2(handnum);
 	struct weapon *weapondef;
-	Mtxf *mtx;
+	Mtx *mtx;
 	bool isdetonator = false;
 	float fspare1;
 	float fspare2;
 	struct coord sp1a4;
-	Mtxf sp164;
-	Mtxf sp124;
+	Mtx sp164;
+	Mtx sp124;
 	struct coord sp118;
 	int j;
 
@@ -6966,12 +6954,12 @@ void bgunTickHandWeapModel(int handnum)
 
 	if (hand->visible) {
 		modeldef = player->gunctrl.gunmodeldef;
-		mtxallocation = gfxAllocate(modeldef->nummatrices * sizeof(Mtxf));
+		mtxallocation = gfxAllocate(modeldef->nummatrices * sizeof(Mtx));
 
 		if (weaponHasFlag(weaponnum, WEAPONFLAG_02000000)) {
 			for (int i = 0; i < modeldef->nummatrices; i++) {
-				mtx = (Mtxf *)(mtxallocation + i * sizeof(Mtxf));
-				mtxIdent((Mtx*)mtx);
+				mtx = (Mtx *)(mtxallocation + i * sizeof(Mtx));
+				mtxIdent(mtx);
 			}
 		}
 
@@ -6991,7 +6979,7 @@ void bgunTickHandWeapModel(int handnum)
 	mtxIdent(&sp234);
 
 	if (weaponHasFlag(weaponnum, WEAPONFLAG_GANGSTA)) {
-		bgunUpdateGangsta(hand, handnum, &viewmodelpos, funcdef, &sp284, (Mtxf*)&sp234);
+		bgunUpdateGangsta(hand, handnum, &viewmodelpos, funcdef, &sp284, &sp234);
 	}
 
 	// Ben's comment: weapons with the turn up flag check for a nearby wall to see if they can be turned up
@@ -7007,7 +6995,7 @@ void bgunTickHandWeapModel(int handnum)
 				hand->turnuprot = 0;
 			}
 		}
-		bgunUpdateHandState2(hand, handnum, &viewmodelpos, funcdef, &sp284, (Mtxf*)&sp234);
+		bgunUpdateHandState2(hand, handnum, &viewmodelpos, funcdef, &sp284, &sp234);
 	}
 
 	if (hand->useposrot) {
@@ -7027,17 +7015,17 @@ void bgunTickHandWeapModel(int handnum)
 		hand->posoffset.z = 0.0f;
 	}
 
-	mtxBuildLookAtFromTarget((Mtx*)&sp284, 0.0f, 0.0f, 0.0f,
+	mtxBuildLookAtFromTarget(&sp284, 0.0f, 0.0f, 0.0f,
 			hand->damplook.x, hand->damplook.y, hand->damplook.z,
 			hand->dampup.x, hand->dampup.y, hand->dampup.z);
 
-	mtxApplyAffineTransformInPlace((Mtx*)&sp284, &sp234);
+	mtxApplyAffineTransformInPlace(&sp284, &sp234);
 
 	sp1a4.x = 0.0f;
 	sp1a4.y = M_PI;
 	sp1a4.z = 0.0f;
 
-	mtx4LoadRotation(&sp1a4, (Mtx*)&sp164);
+	mtx4LoadRotation(&sp1a4, &sp164);
 
 	sp1a4.y = 0.0f;
 
@@ -7049,13 +7037,13 @@ void bgunTickHandWeapModel(int handnum)
 	hand->lastrotangx = sp1a4.f[0];
 	hand->lastrotangy = sp1a4.f[1];
 
-	mtx4LoadRotation(&sp1a4, (Mtx*)&sp124);
-	mtx4MultMtx4((Mtx*)&sp124, (Mtx*)&sp164, (Mtx*)&sp284);
-	mtx4MultMtx4InPlace((Mtx*)&sp284, &sp234);
-	mtx4Copy(&sp234, (Mtx*)&sp2c4);
-	mtx4SetTranslation(&viewmodelpos, (Mtx*)&sp2c4);
+	mtx4LoadRotation(&sp1a4, &sp124);
+	mtx4MultMtx4(&sp124, &sp164, &sp284);
+	mtx4MultMtx4InPlace(&sp284, &sp234);
+	mtx4Copy(&sp234, &sp2c4);
+	mtx4SetTranslation(&viewmodelpos, &sp2c4);
 
-	mtx4Copy((Mtx*)&sp2c4, (Mtx*)&hand->cammtx);
+	mtx4Copy(&sp2c4, (Mtx*)&hand->cammtx);
 	mtx4Copy((Mtx*)&hand->posmtx, (Mtx*)&hand->prevmtx);
 
 	mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)&hand->cammtx, (Mtx*)&hand->posmtx);
@@ -7075,12 +7063,12 @@ void bgunTickHandWeapModel(int handnum)
 		hand->handmodel.matrices = (Mtxf *)mtxallocation;
 
 		if (weaponHasFlag(weaponnum, WEAPONFLAG_DUALFLIP) && handnum == HAND_LEFT) {
-			mtxScaleRow0Vec(-1, (Mtx*)&sp2c4);
+			mtxScaleRow0Vec(-1, &sp2c4);
 		}
 
-		mtxScaleRotationPart(0.10f, (Mtx*)&sp2c4);
+		mtxScaleRotationPart(0.10f, &sp2c4);
 
-		mtx4Copy((Mtx*)&sp2c4, (Mtx*)mtxallocation);
+		mtx4Copy(&sp2c4, (Mtx*)mtxallocation);
 
 		if (hand->unk0cc8_04 > 0) {
 			switch (weaponnum) {
@@ -7119,14 +7107,12 @@ void bgunTickHandWeapModel(int handnum)
 		struct modelrenderdata renderdata = {NULL, true, 3};
 		bool a3 = false;
 		int spcc;
-		Mtxf *spc8;
-		Mtxf *spc4;
 		Mtxf sp84;
 		uint32_t sp80;
 		struct coord sp74;
 		int sp6c;
 
-		renderdata.unk00 = &sp2c4;
+		renderdata.unk00 = (Mtxf*)&sp2c4;
 		renderdata.unk10 = hand->gunmodel.matrices;
 
 		if (hand->animmode != HANDANIMMODE_IDLE) {
@@ -7193,10 +7179,12 @@ void bgunTickHandWeapModel(int handnum)
 		}
 
 		if (a0) {
+			Mtx *spc8;
+			Mtx *spc4;
 			if (player->hands[HAND_RIGHT].unk0dd4 == -1) {
 				mtxIdent((Mtx*)&sp84);
 
-				spc4 = hand->gunmodel.matrices;
+				spc4 = (Mtx*)hand->gunmodel.matrices;
 
 				renderdata.unk00 = &sp84;
 				renderdata.unk10 = player->hands[HAND_RIGHT].unk0dd8;
@@ -7205,14 +7193,14 @@ void bgunTickHandWeapModel(int handnum)
 
 				player->hands[HAND_RIGHT].unk0dd4 = 1;
 
-				hand->gunmodel.matrices = spc4;
+				hand->gunmodel.matrices = (Mtxf*)spc4;
 			}
 
-			spc8 = player->hands[HAND_RIGHT].unk0dd8;
-			spc4 = hand->gunmodel.matrices;
+			spc8 = (Mtx*)player->hands[HAND_RIGHT].unk0dd8;
+			spc4 = (Mtx*)hand->gunmodel.matrices;
 
 			for (spcc = 0; spcc < hand->gunmodel.definition->nummatrices; spcc++) {
-				mtxApplyAffineTransform((Mtx*)&sp2c4, (Mtx*)spc8, (Mtx*)spc4);
+				mtxApplyAffineTransform(&sp2c4, spc8, spc4);
 				spc8++;
 				spc4++;
 			}
@@ -7233,14 +7221,14 @@ void bgunTickHandWeapModel(int handnum)
 			sp74.f[1] = 0.0f;
 			sp74.f[2] = -hand->slidetrans;
 
-			mtx = (Mtxf *)mtxallocation;
+			mtx = (Mtx*)mtxallocation;
 			mtx += sp80;
 
-			mtx4RotateVecInPlace((Mtx*)mtx, &sp74);
+			mtx4RotateVecInPlace(mtx, &sp74);
 
-			mtx->m[3][0] += sp74.f[0];
-			mtx->m[3][1] += sp74.f[1];
-			mtx->m[3][2] += sp74.f[2];
+			(*mtx)[3][0] += sp74.f[0];
+			(*mtx)[3][1] += sp74.f[1];
+			(*mtx)[3][2] += sp74.f[2];
 		}
 
 		if (sp1e4[0] != NULL) {
@@ -7280,20 +7268,20 @@ void bgunTickHandWeapModel(int handnum)
 		if (node) {
 			sp6c = modelFindNodeMtxIndex(node, 0);
 
-			mtx = (Mtxf *)mtxallocation;
+			mtx = (Mtx*)mtxallocation;
 			mtx += sp6c;
 
-			hand->muzzlepos.f[0] = mtx->m[3][0];
-			hand->muzzlepos.f[1] = mtx->m[3][1];
-			hand->muzzlepos.f[2] = mtx->m[3][2];
+			hand->muzzlepos.f[0] = (*mtx)[3][0];
+			hand->muzzlepos.f[1] = (*mtx)[3][1];
+			hand->muzzlepos.f[2] = (*mtx)[3][2];
 
-			mtx4Copy((Mtx*)mtx, (Mtx*)&hand->muzzlemat);
+			mtx4Copy(mtx, (Mtx*)&hand->muzzlemat);
 			mtx4TransformVecInPlace(camGetProjectionMtx(), &hand->muzzlepos);
 
 			hand->muzzlez = -((Mtxf *)((uintptr_t)mtxallocation + sp6c * sizeof(Mtxf)))->m[3][2];
 
 			if (hand->flashon && sp1e0 > 0 && weaponnum != WEAPON_SHOTGUN && g_Vars.lvupdate240 != 0) {
-				bgunMuzzleFlash(hand, weapondef, modeldef, funcdef, sp1e0, mtxallocation, weaponnum, sp1e4, sp6c, (Mtxf*)&sp234, (Mtxf*)&sp1f4);
+				bgunMuzzleFlash(hand, weapondef, modeldef, funcdef, sp1e0, mtxallocation, weaponnum, sp1e4, sp6c, &sp234, &sp1f4);
 			}
 		} else if (weaponnum == WEAPON_GRENADE
 				|| weaponnum == WEAPON_TIMEDMINE
@@ -7302,14 +7290,14 @@ void bgunTickHandWeapModel(int handnum)
 				|| weaponnum == WEAPON_NBOMB) {
 			sp6c = modelFindNodeMtxIndex(modelGetPart(modeldef, MODELPART_GUN_HOLDPOS), 0);
 
-			mtx = (Mtxf *)mtxallocation;
+			mtx = (Mtx*)mtxallocation;
 			mtx += sp6c;
 
-			hand->muzzlepos.x = mtx->m[3][0];
-			hand->muzzlepos.y = mtx->m[3][1];
-			hand->muzzlepos.z = mtx->m[3][2];
+			hand->muzzlepos.x = (*mtx)[3][0];
+			hand->muzzlepos.y = (*mtx)[3][1];
+			hand->muzzlepos.z = (*mtx)[3][2];
 
-			mtx4Copy((Mtx*)mtx, (Mtx*)&hand->muzzlemat);
+			mtx4Copy(mtx, (Mtx*)&hand->muzzlemat);
 			mtx4TransformVecInPlace(camGetProjectionMtx(), &hand->muzzlepos);
 
 			hand->muzzlez = -((Mtxf *)((uintptr_t)mtxallocation + sp6c * sizeof(Mtxf)))->m[3][2];
@@ -8436,7 +8424,7 @@ void bgunTickGameplay(bool triggeron)
 	if (g_Vars.tickmode == TICKMODE_NORMAL && g_Vars.lvupdate240 > 0) {
 		bgunTickHand(HAND_RIGHT);
 		bgunTickHand(HAND_LEFT);
-		bgunTickSwitch();
+		bgunTickSwitch2();
 
 		if (cheatIsActive(CHEAT_UNLIMITEDAMMONORELOADS)) {
 			int i;
@@ -8476,9 +8464,7 @@ void bgunTickGameplay(bool triggeron)
 
 void bgunSetPassiveMode(bool enable)
 {
-	int i;
-
-	for (i = 0; i < PLAYERCOUNT(); i++) {
+	for (int i = 0; i < PLAYERCOUNT(); i++) {
 		g_Vars.players[i]->gunctrl.passivemode = enable;
 	}
 }

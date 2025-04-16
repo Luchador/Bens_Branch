@@ -1527,7 +1527,7 @@ void creditsTick(void)
 Gfx *creditsDraw(Gfx *gdl)
 {
 	Mtxf sp68;
-	Mtxf *matrix = gfxAllocateMatrixF();
+	Mtxf *matrix = gfxAllocateMatrix();
 
 	static uint32_t scrolltimer240 = 0;
 

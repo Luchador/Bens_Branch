@@ -241,7 +241,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	}
 
 	vertices = gfxAllocateVertices(4);
-	spc8 = gfxAllocateMatrixF();
+	spc8 = gfxAllocateMatrix();
 
 	mtx4LoadTranslation(headpos, (Mtx*)&sp84);
 
@@ -423,7 +423,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 			vertices = gfxAllocateVertices(4);
 		}
 
-		sp188 = gfxAllocateMatrixF();
+		sp188 = gfxAllocateMatrix();
 
 		if (sp12c > 0.0f
 				&& sp138.f[0] > -32000.0f && sp138.f[0] < 32000.0f
@@ -1085,7 +1085,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 
 	mtxScale3x4(0.2f, (Mtx*)&sp1b0);
 
-	mtx = gfxAllocateMatrixF();
+	mtx = gfxAllocateMatrix();
 	mtx4Copy((Mtx*)&sp1b0, (Mtx*)mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
@@ -1270,7 +1270,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	sp198.m[3][2] = 0;
 
 	mtxScale3x4(0.2f, (Mtx*)&sp198);
-	mtx = gfxAllocateMatrixF();
+	mtx = gfxAllocateMatrix();
 	mtx4Copy((Mtx*)&sp198, (Mtx*)mtx);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

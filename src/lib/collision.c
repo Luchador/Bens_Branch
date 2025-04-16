@@ -3519,32 +3519,42 @@ int cdTestLos11(struct coord *arg0, RoomNum *arg1, struct coord *arg2, RoomNum *
 	return cdTestLos10(arg0, arg1, arg2, arg3, types, GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT | GEOFLAG_BLOCK_SHOOT);
 }
 
-bool cd0002ded8(struct coord *arg0, struct coord *arg1, struct prop *prop)
+bool cdIsLineBlockedByProp(struct coord *lineStart, struct coord *lineEnd, struct prop *prop)
 {
-	uint8_t *start;
-	uint8_t *end;
-	struct coord sp7c;
-	bool result = false;
-	struct coord sp6c;
-	struct coord sp60;
-	struct coord sp54;
-	float sp50 = 4294967296;
-	struct geo *geo;
+	uint8_t *geoStart;
+	uint8_t *geoEnd;
+	struct coord rayDir;
+	bool blocked = false;
 
-	sp7c.x = arg1->x - arg0->x;
-	sp7c.y = arg1->y - arg0->y;
-	sp7c.z = arg1->z - arg0->z;
+	// These hold the intersection and normal data if a hit is found
+	struct coord hitPos;
+	struct coord hitNormal;
+	struct coord hitDirection;
 
-	if (propUpdateGeometry(prop, &start, &end)) {
-		if (!cdExamAToBGeolist(start, end, arg0, arg1, &sp7c,
-					GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT | GEOFLAG_BLOCK_SHOOT,
-					CHECKVERTICAL_YES, 1, 0, 0, &sp50, &sp6c, &sp60, &sp54, &geo, -999)) {
-			result = true;
-			cdSetObstacleVtxColPropFltGeo(&sp60, &sp54, &sp6c, prop, sp50, geo);
+	// Used to track the closest distance hit found so far
+	float closestDistance = 4294967296.0f;
+	struct geo *hitGeo = NULL;
+
+	// Compute the direction vector from start to end
+	rayDir.x = lineEnd->x - lineStart->x;
+	rayDir.y = lineEnd->y - lineStart->y;
+	rayDir.z = lineEnd->z - lineStart->z;
+
+	// Update the prop’s geometry pointers
+	if (propUpdateGeometry(prop, &geoStart, &geoEnd)) {
+		// Check for intersection with the prop’s geometry
+		bool hit = !cdExamAToBGeolist(geoStart, geoEnd, lineStart, lineEnd, &rayDir, GEOFLAG_WALL | GEOFLAG_BLOCK_SIGHT | GEOFLAG_BLOCK_SHOOT, CHECKVERTICAL_YES, 1, 0, 0, &closestDistance, &hitNormal, &hitDirection, &hitPos, &hitGeo, -999);
+
+		if (hit) {
+			blocked = true;
+
+			// Register the obstacle so other systems can react (e.g. AI, sound occlusion)
+			cdSetObstacleVtxColPropFltGeo(&hitDirection, &hitPos, &hitNormal, prop, closestDistance, hitGeo);
 		}
 	}
 
-	return !result;
+	// Return true if the line is NOT blocked
+	return !blocked;
 }
 
 /**

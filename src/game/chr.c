@@ -1831,7 +1831,7 @@ void chr0f022214(struct chrdata *chr, struct prop *prop, bool fulltick)
 	if (model->attachedtomodel && model->attachedtonode
 			&& (obj->hidden & OBJHFLAG_GONE) == 0
 			&& (obj->flags2 & OBJFLAG2_INVISIBLE) == 0) {
-		Mtxf *sp104 = modelFindNodeMtx(model->attachedtomodel, model->attachedtonode, 0);
+		Mtxf *sp104 = (Mtxf*)modelFindNodeMtx(model->attachedtomodel, model->attachedtonode, 0);
 		struct modelrenderdata thing = {NULL, 1, 3};
 		Mtxf sp80;
 		Mtxf sp40;
@@ -2797,14 +2797,14 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 	int i;
 	int j;
 	bool done;
-	Mtxf spb4;
+	Mtx spb4;
 	int spb0;
 	struct chrdata *chr;
 	struct coord spa0;
 	struct coord sp94;
 	struct coord sp88;
 	float sp80[2];
-	Mtxf *mtx;
+	Mtx *mtx;
 	struct coord sp70;
 	struct coord sp64;
 
@@ -2838,7 +2838,7 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 					spb0 = false;
 					door = thing->prop->door;
 
-					mtxApplyAffineTransform((Mtx*)&thing->unk0ac, (Mtx*)mtx, (Mtx*)&spb4);
+					mtxApplyAffineTransform((Mtx*)&thing->unk0ac, mtx, &spb4);
 
 					if (thing->unk130 == 0) {
 						if (door->doortype == DOORTYPE_VERTICAL) {
@@ -2926,7 +2926,7 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 							break;
 						}
 
-						mtx4TransformVec((Mtx*)mtx, &sp64, &sp70);
+						mtx4TransformVec(mtx, &sp64, &sp70);
 						camProjectViewToScreenAbsZ(&sp70, sp80);
 
 						value = thing->unk14c * sp80[0] + thing->unk150 * sp80[1] - thing->unk154;
@@ -2938,7 +2938,7 @@ bool chr0f024b18(struct model *model, struct modelnode *node)
 						}
 
 						if (!done) {
-							mtx4TransformVec((Mtx*)&spb4, &sp64, &sp70);
+							mtx4TransformVec(&spb4, &sp64, &sp70);
 
 							if (sp70.x >= thing->bbox.xmin
 									&& sp70.x <= thing->bbox.xmax
@@ -4211,14 +4211,14 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 			struct hitthing sp88;
 			int sp84 = 0;
 			struct modelnode *sp80 = NULL;
-			Mtxf *rootmtx = modelGetRootMtx(model);
+			Mtx *rootmtx = (Mtx*)modelGetRootMtx(model);
 			struct prop *next;
 			struct prop *child;
 			float sp70;
-			Mtxf *mtx;
+			Mtx *mtx;
 			float sp68;
 
-			if (utilsIsPointInCone(&shotdata->gunpos2d, &shotdata->gundir2d, (struct coord *)rootmtx->m[3], radius)) {
+			if (utilsIsPointInCone(&shotdata->gunpos2d, &shotdata->gundir2d, (struct coord *)(*rootmtx)[3], radius)) {
 				spb8 = 1;
 				hitpart = 1;
 			}
@@ -4270,8 +4270,8 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 			}
 
 			if (hitpart > 0) {
-				mtx = (Mtxf*)camGetPlayerWorldToScreenMtx();
-				sp68 = spdc.x * mtx->m[0][2] + spdc.y * mtx->m[1][2] + spdc.z * mtx->m[2][2] + mtx->m[3][2];
+				mtx = camGetPlayerWorldToScreenMtx();
+				sp68 = spdc.x * (*mtx)[0][2] + spdc.y * (*mtx)[1][2] + spdc.z * (*mtx)[2][2] + (*mtx)[3][2];
 				sp68 = -sp68;
 
 				if (sp68 < shotdata->distance) {
@@ -4297,7 +4297,7 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 {
 	struct prop *prop;
 	struct chrdata *chr;
-	Mtxf spb0;
+	Mtx spb0;
 	struct coord hitpos;
 	struct coord sp98;
 	int16_t sp90[3];
@@ -4419,11 +4419,11 @@ void chrHit(struct shotdata *shotdata, struct hit *hit)
 				// Shot a chr in the flesh
 				int race = CHRRACE(chr);
 				struct coord sp5c;
-				Mtxf *sp58 = modelFindNodeMtx(hit->model, hit->bboxnode, 0);
+				Mtx *sp58 = modelFindNodeMtx(hit->model, hit->bboxnode, 0);
 
 				// Create blood
-				mtxInvertRigidBodyMatrix((Mtx*)sp58->m, (Mtx*)spb0.m);
-				mtx4TransformVec((Mtx*)&spb0, &sp98, &sp5c);
+				mtxInvertRigidBodyMatrix(sp58, &spb0);
+				mtx4TransformVec(&spb0, &sp98, &sp5c);
 
 				if (!chr->noblood
 						&& race != RACE_DRCAROLL
@@ -4633,33 +4633,33 @@ bool chrCalculateAutoAim(struct prop *prop, struct coord *arg1, float *arg2, flo
 			&& !(prop->type == PROPTYPE_PLAYER && g_Vars.players[playermgrGetPlayerNumByProp(prop)]->isdead)
 			&& !(g_Vars.coopplayernum >= 0 && (prop == g_Vars.bond->prop || prop == g_Vars.coop->prop))) {
 		struct model *model = chr->model;
-		Mtxf *mtx1;
-		Mtxf *mtx2;
+		Mtx *mtx1;
+		Mtx *mtx2;
 
 		if (model->definition->skel == &g_SkelChr) {
-			mtx1 = &model->matrices[0];
-			mtx2 = &model->matrices[1];
-			arg1->z = mtx2->m[3][2] + (mtx1->m[3][2] - mtx2->m[3][2]) * 0.5f;
+			mtx1 = (Mtx*)&model->matrices[0];
+			mtx2 = (Mtx*)&model->matrices[1];
+			arg1->z = (*mtx2)[3][2] + ((*mtx1)[3][2] - (*mtx2)[3][2]) * 0.5f;
 		} else if (model->definition->skel == &g_SkelSkedar) {
-			mtx2 = &model->matrices[0];
-			arg1->z = mtx2->m[3][2];
+			mtx2 = (Mtx*)&model->matrices[0];
+			arg1->z = (*mtx2)[3][2];
 		} else if (model->definition->skel == &g_SkelDrCaroll) {
-			mtx2 = &model->matrices[0];
-			arg1->z = mtx2->m[3][2];
+			mtx2 = (Mtx*)&model->matrices[0];
+			arg1->z = (*mtx2)[3][2];
 		} else {
 			arg1->z = model->matrices[0].m[3][2];
 		}
 
 		if (arg1->z < 0) {
 			if (model->definition->skel == &g_SkelChr) {
-				arg1->x = mtx2->m[3][0] + (mtx1->m[3][0] - mtx2->m[3][0]) * 0.5f;
-				arg1->y = mtx2->m[3][1] + (mtx1->m[3][1] - mtx2->m[3][1]) * 0.5f;
+				arg1->x = (*mtx2)[3][0] + ((*mtx1)[3][0] - (*mtx2)[3][0]) * 0.5f;
+				arg1->y = (*mtx2)[3][1] + ((*mtx1)[3][1] - (*mtx2)[3][1]) * 0.5f;
 			} else if (model->definition->skel == &g_SkelSkedar) {
-				arg1->x = mtx2->m[3][0];
-				arg1->y = mtx2->m[3][1];
+				arg1->x = (*mtx2)[3][0];
+				arg1->y = (*mtx2)[3][1];
 			} else if (model->definition->skel == &g_SkelDrCaroll) {
-				arg1->x = mtx2->m[3][0];
-				arg1->y = mtx2->m[3][1];
+				arg1->x = (*mtx2)[3][0];
+				arg1->y = (*mtx2)[3][1];
 			} else {
 				arg1->x = model->matrices[0].m[3][0];
 				arg1->y = model->matrices[0].m[3][1];
@@ -4709,7 +4709,7 @@ int chr0f028e18(struct prop *arg0, struct modelnode *node, struct model *model, 
 }
 
 bool chr0f028e6c(int arg0, struct prop *prop, struct prop **propptr, struct modelnode **nodeptr, struct model **modelptr)
-{ \
+{
 	while (true) {
 		bool result = false;
 		struct model *model;
@@ -4872,9 +4872,7 @@ void shieldhitRemove(struct shieldhit *shieldhit)
 
 void shieldhitsRemoveByProp(struct prop *prop)
 {
-	int i;
-
-	for (i = 0; i < 20; i++) {
+	for (int i = 0; i < 20; i++) {
 		if (prop == g_ShieldHits[i].prop) {
 			shieldhitRemove(&g_ShieldHits[i]);
 		}
@@ -5045,7 +5043,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 	Vtx vtxtemplate = {0};
 	Vtx *vertices;
 	Col *colours;
-	Mtxf *modelmtx;
+	Mtx *modelmtx;
 	int i;
 	int xmin;
 	int xmax;
@@ -5101,7 +5099,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 	}
 
 	mtxindex = modelFindNodeMtxIndex(node, 0);
-	modelmtx = &model->matrices[mtxindex];
+	modelmtx = (Mtx*)&model->matrices[mtxindex];
 
 	xmin = bbox->xmin - gap;
 	xmax = bbox->xmax + gap;
@@ -5942,7 +5940,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 					}
 
 					if (index <= 19) {
-						Mtxf *mtx = modelFindNodeMtx(model, modelNodeFindMtxNode(node), 0);
+						Mtxf *mtx = (Mtxf*)modelFindNodeMtx(model, modelNodeFindMtxNode(node), 0);
 						int uls; // upper left s coordinate
 						int ult; // upper left t coordinate
 						struct coord coord;

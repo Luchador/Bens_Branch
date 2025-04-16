@@ -129,19 +129,12 @@ Vtx *gfxAllocateVertices(uint32_t count)
 	return ptr;
 }
 
-void *gfxAllocateMatrixF(void)
+void *gfxAllocateMatrix(void)
 {
 	void *ptr = g_GfxMemPos;
 	g_GfxMemPos += sizeof(Mtx);
 
 	return ptr;
-}
-
-Mtx *gfxAllocateMatrix(void) 
-{
-    Mtx *ptr = (Mtx *)g_GfxMemPos;
-    g_GfxMemPos += sizeof(Mtx);
-    return ptr;
 }
 
 /**
