@@ -20,6 +20,7 @@
 #include "lib/snd.h"
 #include "game/debug.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include <math.h>
 #include "video.h"
@@ -891,7 +892,8 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-	gDPSetPrimColor(gdl++, 0, 0, 0x00, 0x00, 0x00, 0x00);
+	struct RGBA color = {0, 0, 0, 0};
+	gfx_Set_Prim_Color(gdl++, color);
 
 	x1 = x - halfw;
 	y1 = y - (tconfig->height >> 1);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gfx.h"
 #include "data.h"
 #include "types.h"
 
@@ -23,3 +24,4 @@ bool utilsIntersectTest1(struct vec3s16 *arg0, struct vec3s16 *arg1, struct vec3
 bool utilsIntersectTest2(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, struct coord *arg4, struct coord *arg5, struct coord *arg6, struct coord *arg7, struct coord *arg8);
 bool utilsSphereIntersectsOrientedBbox(struct coord *sphereCenter, float radius, struct modelrodata_bbox *bbox, Mtx *mtx);
 bool utilsIsPointInCone(struct coord *pos, struct coord *dir, struct coord *aimpos, float arg3);
+struct RGBA utilsUnpackColorRGBA(uint32_t color);

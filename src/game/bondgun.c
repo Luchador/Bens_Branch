@@ -53,6 +53,7 @@
 #include "lib/lib_317f0.h"
 #include "lib/lib_17ce0.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "game/stagetable.h"
 #include "video.h"
@@ -7645,14 +7646,14 @@ void bgunRender(Gfx **gdlptr)
 	gDPSetScissor(gdl++, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 
-	gdl = vi0000aca4(gdl, 1.5, 1000);
+	gdl = viSetNearAndFarPlanes(gdl, 1.5, 1000);
 
 	if (g_Vars.currentplayer->teleportstate != TELEPORTSTATE_INACTIVE) {
 		float f2;
 
-		f2 = player0f0bd358();
+		f2 = playerGetAspect();
 
-		gdl = vi0000b0e8(gdl, 60, f2);
+		gdl = viSetFovAndAspect(gdl, 60, f2);
 	}
 
 	gdl = lasersightRenderBeam(gdl);
@@ -7838,9 +7839,7 @@ void bgunRender(Gfx **gdlptr)
  */
 struct sndstate **bgunAllocateAudioHandle(void)
 {
-	int i;
-
-	for (i = 0; i < ARRAYCOUNT(g_BgunAudioHandles); i++) {
+	for (int i = 0; i < ARRAYCOUNT(g_BgunAudioHandles); i++) {
 		if (g_BgunAudioHandles[i] == NULL) {
 			return &g_BgunAudioHandles[i];
 		}
@@ -7882,8 +7881,6 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, int texturenum)
 			struct chrdata *chr = prop->chr;
 			int16_t soundnum = -1;
 			bool overridden = false;
-			int vol;
-			int pan;
 
 			if (chrGetShield(chr) > 0) {
 				soundnum = SFX_SHIELD_DAMAGE;
@@ -7907,6 +7904,9 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, int texturenum)
 				soundnum = sounds[rand1 % ARRAYCOUNT(sounds)];
 			}
 
+			int vol = 0;
+			int pan = 0;
+
 			if (soundnum != -1) {
 				psGetTheoreticalVolPan(&prop->pos, prop->rooms, soundnum, &vol, &pan);
 
@@ -7925,8 +7925,6 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, int texturenum)
 		} else {
 			int16_t soundnum = -1;
 			bool overridden = false;
-			int vol;
-			int pan;
 
 			if (texturenum == 10000) {
 				soundnum = SFX_SHIELD_DAMAGE;
@@ -7956,6 +7954,9 @@ void bgunPlayPropHitSound(struct gset *gset, struct prop *prop, int texturenum)
 					soundnum = sounds[rand1 % ARRAYCOUNT(sounds)];
 				}
 			}
+
+			int vol = 0;
+			int pan = 0;
 
 			if (soundnum != -1) {
 				psGetTheoreticalVolPan(&prop->pos, prop->rooms, soundnum, &vol, &pan);
@@ -8306,7 +8307,6 @@ void bgunTickGameplay(bool triggeron)
 {
 	int gunsfiring[2] = {false, false};
 	struct player *player = g_Vars.currentplayer;
-	int i;
 
 	// Remove weapons if in passive mode
 	if (g_Vars.currentplayer->gunctrl.passivemode) {
@@ -8333,7 +8333,7 @@ void bgunTickGameplay(bool triggeron)
 	}
 
 	// Remove throwable items from inventory if there's no more left
-	for (i = 0; i < invGetCount(); i++) {
+	for (int i = 0; i < invGetCount(); i++) {
 		struct weapon *weapon;
 		int weaponnum = invGetWeaponNumByIndex(i);
 		int equippedweaponnum;
@@ -8427,14 +8427,13 @@ void bgunTickGameplay(bool triggeron)
 		bgunTickSwitch2();
 
 		if (cheatIsActive(CHEAT_UNLIMITEDAMMONORELOADS)) {
-			int i;
 			struct weapon *weapon;
 			struct hand *lhand = &g_Vars.currentplayer->hands[HAND_LEFT];
 			struct hand *rhand = &g_Vars.currentplayer->hands[HAND_RIGHT];
 
 			weapon = weaponFindById(rhand->gset.weaponnum);
 
-			for (i = 0; i != 2; i++) {
+			for (int i = 0; i != 2; i++) {
 				if (weapon && weapon->ammos[i] &&
 						bgunAmmotypeAllowsUnlimitedAmmo(weapon->ammos[i]->type)) {
 					rhand->loadedammo[i] = rhand->clipsizes[i];
@@ -8496,15 +8495,10 @@ void bgunSetHitPos(struct coord *coord)
 	player->hands[HAND_LEFT].hitpos.z = player->hands[HAND_RIGHT].hitpos.z = coord->z;
 }
 
-void bgun0f0a9494(uint32_t operation)
+void bgunResetDotInfo()
 {
-	switch (operation) {
-	case 0:
-		g_Vars.currentplayer->hands[HAND_LEFT].hasdotinfo = g_Vars.currentplayer->hands[HAND_RIGHT].hasdotinfo = false;
-		break;
-	case 1:
-		break;
-	}
+    g_Vars.currentplayer->hands[HAND_LEFT].hasdotinfo = false;
+    g_Vars.currentplayer->hands[HAND_RIGHT].hasdotinfo = false;
 }
 
 void bgun0f0a94d0(uint32_t operation, struct coord *pos, struct coord *rot)
@@ -8585,7 +8579,7 @@ void bgunSetAmmoQuantity(int ammotype, int quantity)
 	struct player *player = g_Vars.currentplayer;
 	int weaponnum = bgunGetWeaponNum(HAND_RIGHT);
 	int funcnum = -1;
-	int magamount;
+	int magamount = 0;
 
 	// Check if this ammo type applies to the player's equipped weapon
 	if (bgunGetAmmoTypeForWeapon(weaponnum, FUNC_PRIMARY) == ammotype) {
@@ -8609,8 +8603,6 @@ void bgunSetAmmoQuantity(int ammotype, int quantity)
 		return;
 	}
 
-	magamount = 0;
-
 	// For throwable items, the capacity applies to reserve + loaded
 	if (funcnum != -1 && weaponHasAmmoFlag(weaponnum, funcnum, AMMOFLAG_EQUIPPEDISRESERVE)) {
 		magamount = player->hands[0].loadedammo[funcnum] + player->hands[1].loadedammo[funcnum];
@@ -8625,14 +8617,12 @@ void bgunSetAmmoQuantity(int ammotype, int quantity)
 
 int bgunGetReservedAmmoCount(int ammotype)
 {
-	int i;
-	int j;
 	int total = g_Vars.currentplayer->ammoheldarr[ammotype];
 	struct player *player = g_Vars.currentplayer;
 
-	for (i = 0; i < 2; i++) {
+	for (int i = 0; i < 2; i++) {
 		if (player->hands[i].inuse) {
-			for (j = 0; j < 2; j++) {
+			for (int j = 0; j < 2; j++) {
 				if (player->gunctrl.ammotypes[j] == ammotype && weaponHasAmmoFlag(player->hands[i].gset.weaponnum, j, AMMOFLAG_NORESERVE)) {
 					total = total + player->hands[i].loadedammo[j];
 				}
@@ -8645,14 +8635,12 @@ int bgunGetReservedAmmoCount(int ammotype)
 
 int bgunGetAmmoCount(int ammotype)
 {
-	int i;
-	int j;
 	int total = g_Vars.currentplayer->ammoheldarr[ammotype];
 	struct player *player = g_Vars.currentplayer;
 
-	for (i = 0; i < 2; i++) {
+	for (int i = 0; i < 2; i++) {
 		if (player->hands[i].inuse) {
-			for (j = 0; j < 2; j++) {
+			for (int j = 0; j < 2; j++) {
 				if (player->gunctrl.ammotypes[j] == ammotype) {
 					total = total + player->hands[i].loadedammo[j];
 				}
@@ -8700,9 +8688,7 @@ bool bgunAmmotypeAllowsUnlimitedAmmo(uint32_t ammotype)
 
 void bgunGiveMaxAmmo(bool force)
 {
-	int i;
-
-	for (i = 0; i < ARRAYCOUNT(g_AmmoTypes); i++) {
+	for (int i = 0; i < ARRAYCOUNT(g_AmmoTypes); i++) {
 		bool give = true;
 
 		if (!force) {
@@ -8830,9 +8816,9 @@ void bgunResetAbmag(struct abmag *abmag)
 	abmag->timer60 = 0;
 }
 
-void bgun0f0a9da8(struct abmag *mag, int remaining, int capacity, int height)
+void bgunUpdateAmmoBar(struct abmag *mag, int remaining, int capacity, int height)
 {
-	int newchange;
+	int newchange = 0;
 
 	if (capacity > 20) {
 		int newremaining = height * remaining / capacity;
@@ -8926,9 +8912,8 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 	int gaugetop;
 	float ref;
 	int numunits = capacity;
-	int i;
 
-	bgun0f0a9da8(abmag, remaining, numunits, gaugeheight);
+	bgunUpdateAmmoBar(abmag, remaining, numunits, gaugeheight);
 
 	if (numunits > 20) {
 		// Use a single merged bar
@@ -8962,173 +8947,132 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 		}
 	}
 
-	if (unitheight == 0) {
-		/**
-		 * Using separate blocks, but the clip capacity is more than the gauge
-		 * height meaning each block is less than 1px. This is impossible
-		 * because the gauge switches modes away from separate blocks at 20,
-		 * therefore this code is unreachable.
-		 *
-		 * This code renders the gauge in the merged style, but uses 1px per
-		 * bullet and truncates the gauge at the gaugetop if needed. This is
-		 * clearly an early revision of the code, as it is visually misleading
-		 * and also lacks the transition effect.
-		 */
-		int partitiony;
-		int tmp;
+	uint32_t colour;
+	int unittop;
+	int unitbottom;
 
-		gaugeheight = y2 - gaugetop;
-		partitiony = y2 - gaugeheight * ref / numunits;
-		tmp = y2;
+	gdl = textSetPrimColour(gdl, emptycolour);
 
-		if (partitiony > gaugetop) {
-			// Render empty partition
-			gdl = textSetPrimColour(gdl, emptycolour);
+	unittop = gaugetop;
+	unitbottom = -1;
 
-			if (flip) {
-				gDPFillRectangleScaled(gdl++, x1, y2 - partitiony + y1, x2, gaugeheight + y1);
-			} else {
-				gDPFillRectangleScaled(gdl++, x1, gaugetop, x2, partitiony);
-			}
+	for (int i = 0; i < numunits; i++) {
+		bool newstate = false;
+		uint32_t weight;
 
-			gdl = textSetCCCustom02(gdl);
-		}
+		if (abmag->change > 0) {
+			// Loading or reloading
+			if (i >= numunits - (int)ref - abmag->change && i < numunits - (int)ref) {
+				// Unit is potentially unsettled
+				int fadeamount = abmag->timer60 - (numunits - (int)ref - i - 1) * TICKS(64);
 
-		// Render filled partition
-		gdl = textSetPrimColour(gdl, filledcolour);
-
-		if (flip) {
-			gDPFillRectangleScaled(gdl++, x1, y2 - tmp + y1, x2, y2 - partitiony + y1);
-		} else {
-			gDPFillRectangleScaled(gdl++, x1, partitiony, x2, y2);
-		}
-	} else {
-		uint32_t colour;
-		int unittop;
-		int unitbottom;
-
-		gdl = textSetPrimColour(gdl, emptycolour);
-
-		unittop = gaugetop;
-		unitbottom = -1;
-
-		for (i = 0; i < numunits; i++) {
-			bool newstate = false;
-			uint32_t weight;
-
-			if (abmag->change > 0) {
-				// Loading or reloading
-				if (i >= numunits - (int)ref - abmag->change && i < numunits - (int)ref) {
-					// Unit is potentially unsettled
-					int fadeamount = abmag->timer60 - (numunits - (int)ref - i - 1) * TICKS(64);
-
-					if (fadeamount >= 0) {
-						if (fadeamount >= TICKS(64)) {
-							// Unit is transitioning to filled
-							weight = (fadeamount * 4 - TICKS(252)) / 3;
-							weight = weight;
-
-							if (weight > 255) {
-								weight = 255;
-							}
-
-							colour = colourBlend(filledcolour, 0xffffffbf, weight);
-						} else {
-							// Unit is bright and has not started transitioning to filled yet
-							weight = fadeamount * 4;
-							weight = weight;
-							colour = colourBlend(0xffffffbf, emptycolour, weight);
-						}
-
-						newstate = true;
-					}
-				}
-			} else if (abmag->change < 0) {
-				// Firing
-				if (i < numunits - (int)ref - abmag->change && i >= numunits - (int) ref) {
-					int fadeamount = abmag->timer60 - (i - numunits + (int) ref) * TICKS(64);
-
-					if (fadeamount >= 0) {
-						weight = fadeamount;
+				if (fadeamount >= 0) {
+					if (fadeamount >= TICKS(64)) {
+						// Unit is transitioning to filled
+						weight = (fadeamount * 4 - TICKS(252)) / 3;
+						weight = weight;
 
 						if (weight > 255) {
-							colour = emptycolour;
-						} else {
-							// Unit was recently emptied
-							colour = colourBlend(emptycolour, filledcolour | 0xff, weight);
+							weight = 255;
 						}
 
-						newstate = true;
+						colour = colourBlend(filledcolour, 0xffffffbf, weight);
+					} else {
+						// Unit is bright and has not started transitioning to filled yet
+						weight = fadeamount * 4;
+						weight = weight;
+						colour = colourBlend(0xffffffbf, emptycolour, weight);
 					}
-				}
-			}
 
-			// Special case for units which are one after the last one being
-			// faded. I think their colour is calculated incorrectly by the code
-			// above and this is resetting them to the normal filled colour.
-			if (abmag->change < 0) {
-				// Firing
-				if (i == numunits - (int) ref - abmag->change) {
-					colour = filledcolour;
-					newstate = true;
-				}
-			} else {
-				if (i == numunits - (int) ref) {
-					colour = filledcolour;
 					newstate = true;
 				}
 			}
+		} else if (abmag->change < 0) {
+			// Firing
+			if (i < numunits - (int)ref - abmag->change && i >= numunits - (int) ref) {
+				int fadeamount = abmag->timer60 - (i - numunits + (int) ref) * TICKS(64);
 
-			// Calculate unittop and unitbottom. For merged gauges keep unittop
-			// as it is if possible, so the empty and filled partitions can be
-			// drawn whenever the state is changed in order to save gfx calls.
-			if (unitheight <= 2) {
-				if (newstate) {
-					if (unitbottom >= 0) {
-						// Render empty or transitioning unit of merged gauge
-						if (flip) {
-							gDPFillRectangleScaled(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
-						} else {
-							gDPFillRectangleScaled(gdl++, x1, unittop, x2, unitbottom);
-						}
+				if (fadeamount >= 0) {
+					weight = fadeamount;
+
+					if (weight > 255) {
+						colour = emptycolour;
+					} else {
+						// Unit was recently emptied
+						colour = colourBlend(emptycolour, filledcolour | 0xff, weight);
 					}
 
-					unittop = gaugetop + i * unitheight;
-				}
-
-				unitbottom = gaugetop + i * unitheight + unitheight;
-			} else {
-				// Separate blocks - reduce unitbottom by 1 to make a gap
-				unittop = gaugetop + i * unitheight;
-				unitbottom = gaugetop + i * unitheight + unitheight - 1;
-			}
-
-			if (newstate) {
-				gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
-			}
-
-			// For separate blocks, clip the unit bottom to the bottom of the gauge
-			if (unitbottom >= y2 - 1 && unitheight >= 2) {
-				unitbottom = y2;
-			}
-
-			// Render separated blocks
-			if (unitheight >= 3) {
-				if (flip) {
-					gDPFillRectangleScaled(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
-				} else {
-					gDPFillRectangleScaled(gdl++, x1, unittop, x2, unitbottom);
+					newstate = true;
 				}
 			}
-		} // end loop
+		}
 
-		// For merged gauges, render the final partition
+		// Special case for units which are one after the last one being
+		// faded. I think their colour is calculated incorrectly by the code
+		// above and this is resetting them to the normal filled colour.
+		if (abmag->change < 0) {
+			// Firing
+			if (i == numunits - (int) ref - abmag->change) {
+				colour = filledcolour;
+				newstate = true;
+			}
+		} else {
+			if (i == numunits - (int) ref) {
+				colour = filledcolour;
+				newstate = true;
+			}
+		}
+
+		// Calculate unittop and unitbottom. For merged gauges keep unittop
+		// as it is if possible, so the empty and filled partitions can be
+		// drawn whenever the state is changed in order to save gfx calls.
 		if (unitheight <= 2) {
+			if (newstate) {
+				if (unitbottom >= 0) {
+					// Render empty or transitioning unit of merged gauge
+					if (flip) {
+						gDPFillRectangleScaled(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
+					} else {
+						gDPFillRectangleScaled(gdl++, x1, unittop, x2, unitbottom);
+					}
+				}
+
+				unittop = gaugetop + i * unitheight;
+			}
+
+			unitbottom = gaugetop + i * unitheight + unitheight;
+		} else {
+			// Separate blocks - reduce unitbottom by 1 to make a gap
+			unittop = gaugetop + i * unitheight;
+			unitbottom = gaugetop + i * unitheight + unitheight - 1;
+		}
+
+		if (newstate) {
+			RGBA unpacked = utilsUnpackColorRGBA(colour);
+			gfx_Set_Prim_Color(gdl++, unpacked);
+		}
+
+		// For separate blocks, clip the unit bottom to the bottom of the gauge
+		if (unitbottom >= y2 - 1 && unitheight >= 2) {
+			unitbottom = y2;
+		}
+
+		// Render separated blocks
+		if (unitheight >= 3) {
 			if (flip) {
 				gDPFillRectangleScaled(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
 			} else {
 				gDPFillRectangleScaled(gdl++, x1, unittop, x2, unitbottom);
 			}
+		}
+	} // end loop
+
+	// For merged gauges, render the final partition
+	if (unitheight <= 2) {
+		if (flip) {
+			gDPFillRectangleScaled(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
+		} else {
+			gDPFillRectangleScaled(gdl++, x1, unittop, x2, unitbottom);
 		}
 	}
 
@@ -9209,8 +9153,6 @@ Gfx *bgunDrawHud(Gfx *gdl)
 				bottom += 2;
 			}
 		}
-	} else if (optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
-		bottom += 8;
 	}
 
 	fncolour = 0xff000040;

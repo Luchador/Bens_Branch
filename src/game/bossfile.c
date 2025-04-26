@@ -19,9 +19,7 @@
 #include "data.h"
 #include "types.h"
 
-uint8_t var800a22d0[0x5b];
-uint8_t g_AltTitleUnlocked;
-uint8_t g_AltTitleEnabled;
+bool g_AltTitleEnabled;
 
 void bossfileSetDefaults2(void)
 {
@@ -120,10 +118,7 @@ void bossfileLoad(void)
 		}
 
 		g_BossFile.usingmultipletunes = savebufferReadBits(&buffer, 1);
-		g_AltTitleUnlocked = savebufferReadBits(&buffer, 1);
 		g_AltTitleEnabled = savebufferReadBits(&buffer, 1);
-
-		func0f0d54c4(&buffer);
 	}
 
 	if (failed) {
@@ -165,16 +160,9 @@ void bossfileSave(void)
 	}
 
 	savebufferOr(&buffer, g_BossFile.usingmultipletunes, 1);
-	savebufferOr(&buffer, g_AltTitleUnlocked, 1);
 	savebufferOr(&buffer, g_AltTitleEnabled, 1);
 
-	func0f0d54c4(&buffer);
-
 	fileid = bossfileFindFileId();
-
-	if (fileid == 0) {
-
-	}
 
 	if (pakSaveAtGuid(SAVEDEVICE_GAMEPAK, fileid, PAKFILETYPE_BOSS, buffer.bytes, NULL, 0) != 0) {
 		sp12c = true;
@@ -200,7 +188,6 @@ void bossfileSetDefaults(void)
 	g_Vars.bossfileid = 0;
 	g_Vars.bossdeviceserial = 0;
 	g_Vars.language = 0;
-	g_AltTitleUnlocked = 0;
 	g_AltTitleEnabled = false;
 
 	bossfileSave();

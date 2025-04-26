@@ -371,13 +371,9 @@ void playermgrAllocatePlayer(int index)
 	for (i = 0; i < ARRAYCOUNT(g_Vars.players[index]->viewport); i++) {
 		g_Vars.players[index]->viewport[i].vp.vscale[0] = 640;
 		g_Vars.players[index]->viewport[i].vp.vscale[1] = 480;
-		g_Vars.players[index]->viewport[i].vp.vscale[2] = 511;
-		g_Vars.players[index]->viewport[i].vp.vscale[3] = 0;
 
 		g_Vars.players[index]->viewport[i].vp.vtrans[0] = 640;
 		g_Vars.players[index]->viewport[i].vp.vtrans[1] = 480;
-		g_Vars.players[index]->viewport[i].vp.vtrans[2] = 511;
-		g_Vars.players[index]->viewport[i].vp.vtrans[3] = 0;
 	}
 
 	g_Vars.players[index]->viewwidth = 100;

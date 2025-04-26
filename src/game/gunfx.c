@@ -175,10 +175,10 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	Vtx *vertices;
 	struct coord spd0;
 	struct coord *campos = &g_Vars.currentplayer->cam_pos;
-	Mtxf *spc8;
+	Mtx *spc8;
 	Col *colours = gfxAllocateColours(2);
-	Mtxf sp84;
-	Mtxf *worldtoscreenmtx = (Mtxf*)camGetPlayerWorldToScreenMtx();
+	Mtx sp84;
+	Mtx *worldtoscreenmtx = camGetPlayerWorldToScreenMtx();
 	struct coord sp74 = {0, 0, 0};
 	float mult;
 	struct coord sp5c;
@@ -243,11 +243,11 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	vertices = gfxAllocateVertices(4);
 	spc8 = gfxAllocateMatrix();
 
-	mtx4LoadTranslation(headpos, (Mtx*)&sp84);
+	mtx4LoadTranslation(headpos, &sp84);
 
-	mtxScaleRotationPart(1.0f / arg2, (Mtx*)&sp84);
-	mtxApplyAffineTransformInPlace((Mtx*)worldtoscreenmtx, (Mtx*)&sp84);
-	mtx4Copy((Mtx*)&sp84, (Mtx*)spc8);
+	mtxScaleRotationPart(1.0f / arg2, &sp84);
+	mtxApplyAffineTransformInPlace(worldtoscreenmtx, &sp84);
+	mtx4Copy(&sp84, spc8);
 
 	mult = arg5 * arg2;
 
@@ -297,8 +297,8 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 
 Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 {
-	Mtxf *sp188;
-	Mtxf sp148;
+	Mtx *sp188;
+	Mtx sp148;
 
 	if (arg3 < 5 && beam->age >= 0) {
 		Col *colours = gfxAllocateColours(1);
@@ -315,7 +315,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 		float spf0 = 1.4142f;
 		struct textureconfig *texconfig = &g_TexBeamConfigs[arg3];
 		int i;
-		Mtxf *worldtoscreenmtx = (Mtxf*)camGetPlayerWorldToScreenMtx();
+		Mtx *worldtoscreenmtx = camGetPlayerWorldToScreenMtx();
 		int j;
 		int spd8;
 		struct coord spcc;
@@ -430,13 +430,13 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 				&& sp138.f[1] > -32000.0f && sp138.f[1] < 32000.0f
 				&& sp138.f[2] > -32000.0f && sp138.f[2] < 32000.0f) {
 			spd8 = true;
-			mtx4LoadTranslation(&sp138, (Mtx*)&sp148);
-			mtxScaleRotationPart(0.1f, (Mtx*)&sp148);
-			mtxApplyAffineTransformInPlace((Mtx*)worldtoscreenmtx, (Mtx*)&sp148);
+			mtx4LoadTranslation(&sp138, &sp148);
+			mtxScaleRotationPart(0.1f, &sp148);
+			mtxApplyAffineTransformInPlace(worldtoscreenmtx, &sp148);
 
 			for (i = 0; i < 4; i++) {
 				for (j = 0; j < 4; j++) {
-					if (sp148.m[i][j] < -32000.0f || sp148.m[i][j] > 32000.0f) {
+					if (sp148[i][j] < -32000.0f || sp148[i][j] > 32000.0f) {
 						spd8 = false;
 						break;
 					}
@@ -453,7 +453,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 					spcc.f[1] = sp138.f[1] + beam->dir.f[1] * sp12c;
 					spcc.f[2] = sp138.f[2] + beam->dir.f[2] * sp12c;
 
-					mtx4TransformVecInPlace((Mtx*)worldtoscreenmtx, &spcc);
+					mtx4TransformVecInPlace(worldtoscreenmtx, &spcc);
 
 					spb8[0] = spb8[1] = sp130 / 10;
 					tmp = -spcc.f[2];
@@ -966,9 +966,7 @@ void boltbeamSetAutomatic(int beamnum, float speed)
 
 Gfx *boltbeamsRender(Gfx *gdl)
 {
-	int i;
-
-	for (i = 0; i < ARRAYCOUNT(g_BoltBeams); i++) {
+	for (int i = 0; i < ARRAYCOUNT(g_BoltBeams); i++) {
 		if (g_BoltBeams[i].unk00 != -1) {
 			gdl = beamRenderGeneric(gdl, g_TexLaserConfigs, 1, &g_BoltBeams[i].headpos, 0xafafff00, 2, &g_BoltBeams[i].tailpos, 0xafafff7f);
 		}

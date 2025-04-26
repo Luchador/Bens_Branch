@@ -1430,10 +1430,6 @@ MenuDialogHandlerResult ciCharacterProfileMenuDialog(int operation, struct menud
 
 	x = -130;
 
-	if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-		x = -100;
-	}
-
 	switch (operation) {
 	case MENUOP_OPEN:
 		if (bodynum == BODY_DRCAROLL) {
@@ -1761,13 +1757,8 @@ MenuDialogHandlerResult dtTrainingDetailsMenuDialog(int operation, struct menudi
 	case MENUOP_CLOSE:
 		break;
 	case MENUOP_TICK:
-		if (optionsGetScreenRatio() == SCREENRATIO_16_9) {
-			g_Menus[g_MpPlayerNum].menumodel.newposx = 70;
-			g_Menus[g_MpPlayerNum].menumodel.curposx = 70;
-		} else {
-			g_Menus[g_MpPlayerNum].menumodel.newposx = 90;
-			g_Menus[g_MpPlayerNum].menumodel.curposx = 90;
-		}
+		g_Menus[g_MpPlayerNum].menumodel.newposx = 90;
+		g_Menus[g_MpPlayerNum].menumodel.curposx = 90;
 
 		g_Menus[g_MpPlayerNum].menumodel.newposx *= ((float)SCREEN_WIDTH_LO / (float)SCREEN_HEIGHT_LO) / videoGetAspect();
 		g_Menus[g_MpPlayerNum].menumodel.curposx = g_Menus[g_MpPlayerNum].menumodel.newposx;

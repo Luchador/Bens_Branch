@@ -10,8 +10,6 @@
 
 uint8_t g_InGameSubtitles = 1;
 uint8_t g_CutsceneSubtitles = 0;
-int g_ScreenSize = SCREENSIZE_FULL;
-int g_ScreenRatio = SCREENRATIO_NORMAL;
 uint8_t g_ScreenSplit = SCREENSPLIT_HORIZONTAL;
 
 int optionsGetControlMode(int mpchrnum)
@@ -220,51 +218,6 @@ void optionsSetHeadRoll(int mpchrnum, bool enable)
 	} else {
 		g_PlayerConfigsArray[mpchrnum].options &= ~OPTION_HEADROLL;
 	}
-}
-
-int optionsGetEffectiveScreenSize(void)
-{
-	if (g_MenuData.root == MENUROOT_TRAINING) {
-		g_MpPlayerNum = 0;
-
-		if (g_Menus[g_MpPlayerNum].curdialog && g_GamePaused) {
-			return SCREENSIZE_FULL;
-		}
-	}
-
-	if (g_Menus[g_MpPlayerNum].curdialog) {
-		if (g_Menus[g_MpPlayerNum].curdialog->definition == &g_CiControlStylePlayer2MenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_CiControlStyleMenuDialog
-				|| g_Menus[g_MpPlayerNum].curdialog->definition == &g_SoloMissionControlStyleMenuDialog) {
-			return SCREENSIZE_FULL;
-		}
-	}
-
-	if (PLAYERCOUNT() >= 2 || g_MenuData.root == MENUROOT_MPSETUP) {
-		return SCREENSIZE_FULL;
-	}
-
-	return g_ScreenSize;
-}
-
-int optionsGetScreenSize(void)
-{
-	return g_ScreenSize;
-}
-
-void optionsSetScreenSize(int size)
-{
-	g_ScreenSize = size;
-}
-
-int optionsGetScreenRatio(void)
-{
-	return g_ScreenRatio;
-}
-
-void optionsSetScreenRatio(int ratio)
-{
-	g_ScreenRatio = SCREENRATIO_NORMAL;
 }
 
 uint8_t optionsGetScreenSplit(void)

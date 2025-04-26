@@ -1,4 +1,3 @@
-#include <ultra64.h>
 #include <math.h>
 #include <stdio.h>
 #include "constants.h"
@@ -16,6 +15,7 @@
 #include "game/challenge.h"
 #include "game/cheats.h"
 #include "game/chr.h"
+#include "game/debug.h"
 #include "game/chrmgr.h"
 #include "game/chraction.h"
 #include "game/chrutils.h"
@@ -82,6 +82,7 @@
 #include "lib/snd.h"
 #include "lib/vars.h"
 #include "lib/vi.h"
+#include "gfx.h"
 #include "types.h"
 #include "video.h"
 
@@ -436,9 +437,10 @@ Gfx *lvRenderFade(Gfx *gdl)
 		return gdl;
 	}
 
+	struct RGBA tmp = utilsUnpackColorRGBA(colour);
 	gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-	gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
+	gfx_Set_Prim_Color(gdl++, tmp);
 
 	gDPFillRectangle(gdl++,
 			viGetViewLeft(),
@@ -855,15 +857,11 @@ Gfx *lvRender(Gfx *gdl)
 		gdl = viPrepareZbuf(gdl);
 		gdl = vi0000b1d0(gdl);
 
-		gDPSetScissorFrac(gdl++,
-				viGetViewLeft() * 4.0f, viGetViewTop() * 4.0f,
-				(viGetViewLeft() + viGetViewWidth()) * 4.0f,
-				(viGetViewTop() + viGetViewHeight()) * 4.0f);
+		gDPSetScissor(gdl++, viGetViewLeft(), viGetViewTop(), (viGetViewLeft() + viGetViewWidth()), (viGetViewTop() + viGetViewHeight()));
 
 		gdl = titleRender(gdl);
 		gdl = lvRenderFade(gdl);
 	} else if (g_Vars.stagenum == STAGE_BOOTPAKMENU) {
-		//gSPClipRatio(gdl++, FRUSTRATIO_2);
 		gSPDisplayList(gdl++, &var800613a0);
 		gSPDisplayList(gdl++, &var80061380);
 
@@ -877,7 +875,6 @@ Gfx *lvRender(Gfx *gdl)
 		gdl = bgScissorToViewport(gdl);
 		gdl = menuRender(gdl);
 	} else if (g_Vars.stagenum == STAGE_CREDITS) {
-		//gSPClipRatio(gdl++, FRUSTRATIO_2);
 		gSPDisplayList(gdl++, &var800613a0);
 		gSPDisplayList(gdl++, &var80061380);
 
@@ -886,7 +883,7 @@ Gfx *lvRender(Gfx *gdl)
 		viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
 				g_Vars.currentplayer->viewwidth, g_Vars.currentplayer->viewheight);
 
-		gdl = vi0000b1a8(gdl);
+		gdl = vi0000ad5c(gdl, &g_Vars.currentplayer->viewport[0]);
 		gdl = vi0000b1d0(gdl);
 		gdl = viRenderViewportEdges(gdl);
 		gdl = creditsDraw(gdl);
@@ -901,8 +898,6 @@ Gfx *lvRender(Gfx *gdl)
 		struct chrdata *chr;
 
 		playercount = forcesingleplayer ? 1 : PLAYERCOUNT();
-
-		//gSPClipRatio(gdl++, FRUSTRATIO_2);
 
 		for (i = 0; i < playercount; i++) {
 			bool islastplayer;
@@ -1599,9 +1594,6 @@ int lvGetSlowMotionType(void)
 
 void lvTick(void)
 {
-	int j;
-	int i;
-
 	lvCheckPauseStateChanged();
 
 	if (g_Vars.pakstocheck) {
@@ -1625,9 +1617,9 @@ void lvTick(void)
 		g_Vars.joydisableframestogo = -1;
 	}
 
-	for (j = 0; j < PLAYERCOUNT(); j++) {
-		g_Vars.players[j]->hands[HAND_LEFT].hasdotinfo = false;
-		g_Vars.players[j]->hands[HAND_RIGHT].hasdotinfo = false;
+	for (int i = 0; i < PLAYERCOUNT(); i++) {
+		g_Vars.players[i]->hands[HAND_LEFT].hasdotinfo = false;
+		g_Vars.players[i]->hands[HAND_RIGHT].hasdotinfo = false;
 	}
 
 	if (lvIsPaused()) {
@@ -1635,8 +1627,8 @@ void lvTick(void)
 	} else if (mpIsPaused()) {
 		g_Vars.lvupdate240 = 0;
 
-		for (j = 0; j < PLAYERCOUNT(); j++) {
-			g_Vars.players[j]->joybutinhibit = 0xffffefff;
+		for (int i = 0; i < PLAYERCOUNT(); i++) {
+			g_Vars.players[i]->joybutinhibit = 0xffffefff;
 		}
 	} else {
 		int slowmo = lvGetSlowMotionType();
@@ -1659,11 +1651,8 @@ void lvTick(void)
 					for (playernum = 0; playernum < PLAYERCOUNT() && !foundnearbychr; playernum++) {
 						if (g_Vars.players[playernum]->isdead == false) {
 							RoomNum *rooms = g_Vars.players[playernum]->prop->rooms;
-							int r;
-
-							for (r = 0; rooms[r] != -1 && !foundnearbychr; r++) {
-								int otherplayernum;
-								for (otherplayernum = 0; otherplayernum < PLAYERCOUNT(); otherplayernum++) {
+							for (int r = 0; rooms[r] != -1 && !foundnearbychr; r++) {
+								for (int otherplayernum = 0; otherplayernum < PLAYERCOUNT(); otherplayernum++) {
 									if (playernum != otherplayernum
 											&& g_Vars.players[otherplayernum]->isdead == false
 											&& bgRoomIsOnPlayerScreen(rooms[r], otherplayernum)) {
@@ -1784,9 +1773,7 @@ void lvTick(void)
 
 			// Show HUD message at one minute remaining
 			if (elapsed < warntime && nexttime >= warntime) {
-				int i;
-
-				for (i = 0; i < PLAYERCOUNT(); i++) {
+				for (int i = 0; i < PLAYERCOUNT(); i++) {
 					setCurrentPlayerNum(i);
 					hudmsgCreate(langGet(L_MISC_068), HUDMSGTYPE_DEFAULT); // "One minute left."
 				}
@@ -1809,7 +1796,7 @@ void lvTick(void)
 		if (g_Vars.lvupdate240 != 0) {
 			int numdying = 0;
 
-			for (i = 0; i < PLAYERCOUNT(); i++) {
+			for (int i = 0; i < PLAYERCOUNT(); i++) {
 				if (g_Vars.players[i]->isdead) {
 					if (g_Vars.players[i]->redbloodfinished == false
 							|| g_Vars.players[i]->deathanimfinished == false
@@ -1819,7 +1806,7 @@ void lvTick(void)
 				}
 			}
 
-			for (i = 0; i < g_MpNumChrs; i++) {
+			for (int i = 0; i < g_MpNumChrs; i++) {
 				if (g_MpAllChrPtrs[i]->actiontype == ACT_DIE) {
 					numdying++;
 				}
@@ -1829,7 +1816,7 @@ void lvTick(void)
 				struct ranking rankings[MAX_MPCHRS];
 				int count = mpGetPlayerRankings(rankings);
 
-				for (i = 0; i < count; i++) {
+				for (int i = 0; i < count; i++) {
 					if (rankings[i].score >= g_MpScoreLimit) {
 						g_NumReasonsToEndMpMatch++;
 					}
@@ -1840,7 +1827,7 @@ void lvTick(void)
 				struct ranking rankings[MAX_MPCHRS];
 				int count = mpGetTeamRankings(rankings);
 
-				for (i = 0; i < count; i++) {
+				for (int i = 0; i < count; i++) {
 					if (rankings[i].score >= g_MpTeamScoreLimit) {
 						g_NumReasonsToEndMpMatch++;
 					}
@@ -1925,13 +1912,10 @@ void lvTick(void)
 
 void lvTickPlayer(void)
 {
-	float xdiff;
-	float zdiff;
-
 	playerTick();
 
-	xdiff = g_Vars.currentplayer->prop->pos.x - g_Vars.currentplayer->bondprevpos.x;
-	zdiff = g_Vars.currentplayer->prop->pos.z - g_Vars.currentplayer->bondprevpos.z;
+	float xdiff = g_Vars.currentplayer->prop->pos.x - g_Vars.currentplayer->bondprevpos.x;
+	float zdiff = g_Vars.currentplayer->prop->pos.z - g_Vars.currentplayer->bondprevpos.z;
 
 	g_Vars.currentplayerstats->distance += sqrtf(xdiff * xdiff + zdiff * zdiff);
 }
@@ -1957,6 +1941,7 @@ void lvStop(void)
 	musicStop();
 	hudmsgsStop();
 	portalsStop();
+	viStop();
 
 	if (g_Vars.stagenum < STAGE_TITLE) {
 		bgStop();

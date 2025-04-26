@@ -61,8 +61,8 @@ static void modelasmPrepareRotMtx180(int t2, int t3, int t4);
 static void modelasmPrepareRotMtx360(int t2, int t3, int t4);
 static void modelasmMathPain3(void);
 static void modelasmMathPain4(void);
-static void modelasmMtxMultiply(Mtxf *src, Mtxf *dst);
-static Mtxf *modelasmFindNodeMtx(struct model *model, struct modelnode *node);
+static void modelasmMtxMultiply(Mtx *src, Mtx *dst);
+static Mtx *modelasmFindNodeMtx(struct model *model, struct modelnode *node);
 
 /**
  * Reads animation data for the given model and applies matrix transformations
@@ -95,8 +95,8 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 	float f9;
 	float f10;
 	float f30;
-	Mtxf *t0mtx;
-	Mtxf *t1mtx;
+	Mtx *t0mtx;
+	Mtx *t1mtx;
 	int t1;
 	int t2;
 	uint8_t *s0ptr8;
@@ -363,8 +363,8 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 					}
 				}
 
-				t0mtx = node->parent ? modelasmFindNodeMtx(model, node->parent) : renderdata->unk00;
-				t1mtx = &model->matrices[node->rodata->position.mtxindex0];
+				t0mtx = node->parent ? modelasmFindNodeMtx(model, node->parent) : (Mtx*)renderdata->unk00;
+				t1mtx = (Mtx*)&model->matrices[node->rodata->position.mtxindex0];
 
 				modelasmMtxMultiply(t0mtx, t1mtx);
 
@@ -425,7 +425,7 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 					}
 
 					modelasmMathPain4();
-					t1mtx = &model->matrices[node->rodata->position.mtxindex1];
+					t1mtx = (Mtx*)&model->matrices[node->rodata->position.mtxindex1];
 					modelasmMtxMultiply(t0mtx, t1mtx);
 				}
 			}
@@ -437,7 +437,7 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 			f0 = 0;
 
 			if (!g_ModelDistanceDisabled && t0mtx) {
-				f0 = -t0mtx->m[3][2] * g_Vars.currentplayer->c_lodscalez * g_ModelDistanceScale;
+				f0 = -(*t0mtx)[3][2] * g_Vars.currentplayer->c_lodscalez * g_ModelDistanceScale;
 			}
 
 			if ((node->rodata->distance.near == 0.0f || f0 > node->rodata->distance.near * model->scale)
@@ -650,8 +650,8 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 					f20 *= model->scale;
 				}
 
-				t0mtx = renderdata->unk00;
-				t1mtx = &model->matrices[node->rodata->chrinfo.mtxindex];
+				t0mtx = (Mtx*)renderdata->unk00;
+				t1mtx = (Mtx*)&model->matrices[node->rodata->chrinfo.mtxindex];
 
 				modelasmMtxMultiply(t0mtx, t1mtx);
 			}
@@ -671,7 +671,7 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 			}
 			break;
 		case MODELNODETYPE_POSITIONHELD:
-			t0mtx = node->parent ? modelasmFindNodeMtx(model, node->parent) : renderdata->unk00;
+			t0mtx = node->parent ? modelasmFindNodeMtx(model, node->parent) : (Mtx*)renderdata->unk00;
 
 			f12 = 1;
 			f13 = 0;
@@ -689,7 +689,7 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 			f22 = node->rodata->positionheld.pos.y;
 			f23 = node->rodata->positionheld.pos.z;
 
-			t1mtx = &model->matrices[node->rodata->positionheld.mtxindex];
+			t1mtx = (Mtx*)&model->matrices[node->rodata->positionheld.mtxindex];
 
 			modelasmMtxMultiply(t0mtx, t1mtx);
 			break;
@@ -1423,7 +1423,7 @@ static void modelasmMathPain4(void)
 /**
  * Expects: f12-f23
  */
-static void modelasmMtxMultiply(Mtxf *src, Mtxf *dst)
+static void modelasmMtxMultiply(Mtx *src, Mtx *dst)
 {
 	float f0;
 	float f1;
@@ -1439,57 +1439,57 @@ static void modelasmMtxMultiply(Mtxf *src, Mtxf *dst)
 	int i;
 
 	for (i = 0; i < 3; i++) {
-		f0 = src->m[0][i];
-		f1 = src->m[1][i];
-		f2 = src->m[2][i];
-		f3 = src->m[3][i];
+		f0 = (*src)[0][i];
+		f1 = (*src)[1][i];
+		f2 = (*src)[2][i];
+		f3 = (*src)[3][i];
 
 		f4 = f0 * f12;
 		f5 = f1 * f13;
 		f6 = f2 * f14;
 
-		dst->m[0][i] = f4 + f5 + f6;
+		(*dst)[0][i] = f4 + f5 + f6;
 
 		f8 = f0 * f15;
 		f9 = f1 * f16;
 		f10 = f2 * f17;
 
-		dst->m[1][i] = f8 + f9 + f10;
+		(*dst)[1][i] = f8 + f9 + f10;
 
 		f4 = f0 * f18;
 		f5 = f1 * f19;
 		f6 = f2 * f20;
 
-		dst->m[2][i] = f4 + f5 + f6;
+		(*dst)[2][i] = f4 + f5 + f6;
 
 		f8 = f0 * f21;
 		f9 = f1 * f22;
 		f10 = f2 * f23;
 
-		dst->m[3][i] = f8 + f9 + f10 + f3;
+		(*dst)[3][i] = f8 + f9 + f10 + f3;
 	}
 
-	dst->m[0][3] = 0;
-	dst->m[1][3] = 0;
-	dst->m[2][3] = 0;
-	dst->m[3][3] = 1;
+	(*dst)[0][3] = 0;
+	(*dst)[1][3] = 0;
+	(*dst)[2][3] = 0;
+	(*dst)[3][3] = 1;
 }
 
-static Mtxf *modelasmFindNodeMtx(struct model *model, struct modelnode *node)
+static Mtx *modelasmFindNodeMtx(struct model *model, struct modelnode *node)
 {
 	do {
 		uint8_t type = node->type & 0xff;
 
 		if (type == MODELNODETYPE_CHRINFO) {
-			return &model->matrices[node->rodata->chrinfo.mtxindex];
+			return (Mtx*)&model->matrices[node->rodata->chrinfo.mtxindex];
 		}
 
 		if (type == MODELNODETYPE_POSITION) {
-			return &model->matrices[node->rodata->position.mtxindex0];
+			return (Mtx*)&model->matrices[node->rodata->position.mtxindex0];
 		}
 
 		if (type == MODELNODETYPE_POSITIONHELD) {
-			return &model->matrices[node->rodata->positionheld.mtxindex];
+			return (Mtx*)&model->matrices[node->rodata->positionheld.mtxindex];
 		}
 
 		node = node->parent;

@@ -1537,7 +1537,7 @@ Gfx *creditsDraw(Gfx *gdl)
 	gdl = vi0000b1d0(gdl);
 	gdl = creditsFillFramebuffer(gdl, 0x000000ff);
 
-	gDPSetScissorFrac(gdl++, 0, 120, viGetWidth() * 4.0f, (viGetHeight() - 30) * 4.0f);
+	gDPSetScissor(gdl++, 0, 30, viGetWidth(), (viGetHeight() - 30));
 
 	creditsTick();
 

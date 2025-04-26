@@ -130,10 +130,6 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, uint32_t alpha)
 		} else {
 			timery += 2;
 		}
-	} else {
-		if (optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
-			timery += 8;
-		}
 	}
 
 	// If this is a second player with their viewport on the right side of the
@@ -214,8 +210,6 @@ Gfx *hudmsgRenderZoomRange(Gfx *gdl, uint32_t alpha)
 		} else {
 			texty += 2;
 		}
-	} else if (optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
-		texty += 8;
 	}
 
 	// Left side - current zoom level
@@ -815,10 +809,6 @@ void hudmsgCalculatePosition(struct hudmessage *msg)
 				y += 8;
 			} else {
 				y += 3;
-			}
-		} else {
-			if (optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
-				y += 8;
 			}
 		}
 		break;

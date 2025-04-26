@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "constants.h"
 #include "game/dlights.h"
+#include "game/debug.h"
 #include "game/menuutils.h"
 #include "game/savebuffer.h"
 #include "game/sky.h"
@@ -21,13 +22,14 @@
 #include "data.h"
 #include "types.h"
 #include "gbiex.h"
+#include "gfx.h"
 #include "game/player.h"
 #include "video.h"
 
 uint8_t g_IrScanlines[2][480];
 int g_NumActiveEffects = 0;
 uint8_t g_BlurChange = 0;
-uint8_t var8007f848 = 0;
+bool g_DoNotRedrawBlur = false;
 int g_IrBinocularRadius = 90;
 int var8007f850 = 3;
 
@@ -128,16 +130,15 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, uint32_t colour, uint32_t alpha)
 	int newalpha;
 	int i;
 
-	if (var8007f848) {
+	if (g_DoNotRedrawBlur) {
 		return gdl;
 	}
 
-	var8007f848 = true;
+	g_DoNotRedrawBlur = true;
 
 	newalpha = alpha;
 	newalpha += g_BlurChange;
 
-	// Reduced from 230 so it doesn't ruin the bloom and sharpen shaders in ReShade
 	if (newalpha > 100) {
 		newalpha = 100;
 	}
@@ -221,9 +222,11 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 
 		if (offsety % 8 == 0 || y == viewtop) {
 			if (offsety % 16 < 8) {
-				gDPSetPrimColor(gdl++, 0, 0, 0xff, 0xff, 0x00, 0xff);
+				struct RGBA color = {255, 255, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else {
-				gDPSetPrimColor(gdl++, 0, 0, 0xff, 0xff, 0xbf, 0xff);
+				struct RGBA color = {255, 255, 191, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			}
 		}
 
@@ -265,9 +268,11 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 
 		if (offsety % 6 == 0 || y == viewtop) {
 			if (offsety % 12 < 6) {
-				gDPSetPrimColor(gdl++, 0, 0, 0x7f, 0xff, 0xff, 0xff);
+				struct RGBA color = {127, 255, 255, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else {
-				gDPSetPrimColor(gdl++, 0, 0, 0x00, 0xaf, 0xff, 0xff);
+				struct RGBA color = {0, 175, 255, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			}
 		}
 
@@ -507,7 +512,8 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-	gDPSetPrimColor(gdl++, 0, 0, 0x00, 0x00, 0x00, 0xff);
+	struct RGBA color = {0, 0, 0, 255};
+	gfx_Set_Prim_Color(gdl++, color);
 
 	s3 = 1;
 
@@ -533,7 +539,7 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
 			gdl = bviewDrawFisheyeRect(gdl, viewtop + viewtop + viewheight - i, 0.0f, viewleft, viewwidth);
 		}
 
-		gDPSetPrimColorViaWord(gdl++, 0, 0, 0x000000ff);
+		gfx_Set_Prim_Color(gdl++, color);
 
 		tmp = (float) one * halfheight;
 		f20 = halfheight;
@@ -946,14 +952,15 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 
 			// Up
 			if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {
-				brightness = 20; \
-				if (buttonsdown & umask) { \
-					brightness += 20; \
-				} \
-				if (buttonsthisframe & umask) { \
-					brightness += 20; \
-				} \
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff); \
+				brightness = 20;
+				if (buttonsdown & umask) {
+					brightness += 20;
+				}
+				if (buttonsthisframe & umask) {
+					brightness += 20;
+				}
+				struct RGBA color = {0, brightness, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 				brightness = 127;
 
@@ -962,9 +969,10 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				}
 
 				if (buttonsthisframe & umask) {
-					brightness += 63; \
-				} \
-				gDPSetPrimColor(gdl++, 0, 0, 0x10, 0x20, brightness, 0xff);
+					brightness += 63;
+				}
+				struct RGBA color = {16, 32, brightness, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else {
 				brightness = 20;
 
@@ -973,9 +981,10 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				}
 
 				if (buttonsthisframe & umask) {
-					brightness += 20; \
-				} \
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+					brightness += 20;
+				}
+				struct RGBA color = {brightness, brightness / 4, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			}
 
 			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
@@ -985,14 +994,14 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {
 				brightness = 20;
 
-				if (buttonsdown & dmask) { \
-					brightness += 20; \
-				} \
+				if (buttonsdown & dmask) {
+					brightness += 20;
+				}
 				if (buttonsthisframe & dmask) {
 					brightness += 20;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+				struct RGBA color = {0, brightness, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 				brightness = 127;
 
@@ -1003,8 +1012,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & dmask) {
 					brightness += 63;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, 0x10, 0x20, brightness, 0xff);
+				struct RGBA color = {16, 32, brightness, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else {
 				brightness = 20;
 
@@ -1015,8 +1024,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & dmask) {
 					brightness += 20;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+				struct RGBA color = {brightness, brightness / 4, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			}
 
 			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
@@ -1032,8 +1041,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & lmask) {
 					brightness += 20;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+				struct RGBA color = {0, brightness, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 				brightness = 127;
 
@@ -1044,8 +1053,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & lmask) {
 					brightness += 63;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, 0x10, 0x20, brightness, 0xff);
+				struct RGBA color = {16, 32, brightness, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else {
 				brightness = 20;
 
@@ -1056,8 +1065,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & lmask) {
 					brightness += 20;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+				struct RGBA color = {brightness, brightness / 4, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			}
 
 			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
@@ -1073,8 +1082,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & rmask) {
 					brightness += 20;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+				struct RGBA color = {0, brightness, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 				brightness = 127;
 
@@ -1085,8 +1094,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & rmask) {
 					brightness += 63;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, 0x10, 0x20, brightness, 0xff);
+				struct RGBA color = {16, 32, brightness, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else {
 				brightness = 20;
 
@@ -1097,8 +1106,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & rmask) {
 					brightness += 20;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+				struct RGBA color = {brightness, brightness / 4, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			}
 
 			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
@@ -1114,8 +1123,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & (R_TRIG)) {
 					brightness += 20;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+				struct RGBA color = {0, brightness, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 				brightness = 127;
 
@@ -1126,8 +1135,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & (R_TRIG)) {
 					brightness += 63;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, 0x10, 0x20, brightness, 0xff);
+				struct RGBA color = {16, 32, brightness, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else {
 				brightness = 20;
 
@@ -1138,8 +1147,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & (R_TRIG)) {
 					brightness += 20;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+				struct RGBA color = {brightness, brightness / 4, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			}
 
 			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
@@ -1155,8 +1164,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & Z_TRIG) {
 					brightness += 20;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+				struct RGBA color = {0, brightness, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 				brightness = 127;
 
@@ -1167,8 +1176,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & Z_TRIG) {
 					brightness += 63;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, 0x10, 0x20, brightness, 0xff);
+				struct RGBA color = {16, 32, brightness, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			} else {
 				brightness = 20;
 
@@ -1179,8 +1188,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (buttonsthisframe & Z_TRIG) {
 					brightness += 20;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+				struct RGBA color = {brightness, brightness / 4, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 			}
 
 			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
@@ -1193,14 +1202,17 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		brightness = tmpval < 0 ? -tmpval : tmpval;
 
 		if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {
-			gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+			struct RGBA color = {0, brightness, 0, 255};
+			gfx_Set_Prim_Color(gdl++, color);
 		} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 			r = brightness / 96.0f * 16.0f;
 			g = brightness / 96.0f * 32.0f;
 			b = brightness * 2.5f;
-			gDPSetPrimColor(gdl++, 0, 0, r, g, b, 0xff);
+			struct RGBA color = {r, g, b, 255};
+			gfx_Set_Prim_Color(gdl++, color);
 		} else {
-			gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+			struct RGBA color = {brightness, brightness / 4, 0, 255};
+			gfx_Set_Prim_Color(gdl++, color);
 		}
 
 		if (!vsplit)
@@ -1227,14 +1239,17 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		brightness = tmpval < 0 ? -tmpval : tmpval;
 
 		if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {
-			gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+			struct RGBA color = {0, brightness, 0, 255};
+			gfx_Set_Prim_Color(gdl++, color);
 		} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 			r = brightness / 96.0f * 16.0f;
 			g = brightness / 96.0f * 32.0f;
 			b = brightness * 2.5f;
-			gDPSetPrimColor(gdl++, 0, 0, r, g, b, 0xff);
+			struct RGBA color = {r, g, b, 255};
+			gfx_Set_Prim_Color(gdl++, color);
 		} else {
-			gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+			struct RGBA color = {brightness, brightness / 4, 0, 255};
+			gfx_Set_Prim_Color(gdl++, color);
 		}
 
 		if (!vsplit)
@@ -1265,8 +1280,9 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 
 				tmpval = g_Vars.currentplayer->eyespy->theta * 96.0f / 360.0f;
 				textheight = g_Vars.currentplayer->eyespy->theta * 35.0f / 360.0f;
-				brightness = tmpval < 0 ? -tmpval : tmpval; \
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+				brightness = tmpval < 0 ? -tmpval : tmpval;
+				struct RGBA color = {0, brightness, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 2
@@ -1276,7 +1292,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = (g_Vars.currentplayer->eyespy->costheta + 1.0f) * 35.0f * 0.5f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 3
@@ -1286,7 +1302,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = (g_Vars.currentplayer->eyespy->sintheta + 1.0f) * 35.0f * 0.5f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 4
@@ -1296,7 +1312,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = g_Vars.currentplayer->eyespy->verta * 35.0f / 360.0f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 5
@@ -1306,7 +1322,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = (g_Vars.currentplayer->eyespy->cosverta + 1.0f) * 35.0f * 0.5f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 6
@@ -1316,7 +1332,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = (g_Vars.currentplayer->eyespy->sinverta + 1.0f) * 35.0f * 0.5f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				gDPSetPrimColor(gdl++, 0, 0, 0, brightness, 0, 0xff);
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				x += scale * 2 + scale * 5;
@@ -1332,7 +1348,8 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = g_Vars.currentplayer->eyespy->theta * 35.0f / 360.0f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+				struct RGBA color = {brightness, brightness / 4, 0, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 2
@@ -1342,7 +1359,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = (g_Vars.currentplayer->eyespy->costheta + 1.0f) * 35.0f * 0.5f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 3
@@ -1352,7 +1369,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = (g_Vars.currentplayer->eyespy->sintheta + 1.0f) * 35.0f * 0.5f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 4
@@ -1362,7 +1379,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = g_Vars.currentplayer->eyespy->verta * 35.0f / 360.0f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 5
@@ -1372,7 +1389,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = (g_Vars.currentplayer->eyespy->cosverta + 1.0f) * 35.0f * 0.5f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 6
@@ -1382,7 +1399,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = (g_Vars.currentplayer->eyespy->sinverta + 1.0f) * 35.0f * 0.5f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				gDPSetPrimColor(gdl++, 0, 0, brightness, brightness >> 2, 0, 0xff);
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				x += scale * 2 + scale * 5;
@@ -1408,8 +1425,9 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				if (i >= g_Vars.currentplayer->eyespydarts) {
 					brightness2 = 0x88;
 				}
-
-				gDPSetPrimColor(gdl++, 0, 0, 0x10, 0x20, brightness2, 0xff);
+				
+				struct RGBA color = {16, 32, brightness2, 255};
+				gfx_Set_Prim_Color(gdl++, color);
 				gDPFillRectangle(gdl++, x, y - 4, x + width, y);
 
 				y -= 5;
@@ -1602,7 +1620,8 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 			green = 0x94;
 		}
 
-		gDPSetPrimColorViaWord(gdl++, 0, 0, (green << 16) + 0xff);
+		struct RGBA color = {0, green, 0, 255};
+		gfx_Set_Prim_Color(gdl++, color);
 
 		gDPFillRectangle(gdl++, viewleft, y, viewleft + viewwidth, y + 1);
 	}
@@ -1729,7 +1748,8 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 			red = 255;
 		}
 
-		gDPSetPrimColorViaWord(gdl++, 0, 0, (red << 24) + 0xff);
+		struct RGBA ircolor = {red, 0, 0, 255};
+		gfx_Set_Prim_Color(gdl++, ircolor);
 
 		a0 = viewcentrey - i;
 
@@ -1746,7 +1766,8 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 			gDPFillRectangle(gdl++, semicircleright, i, semicircleright + rightsidewidth, i + 1);
 
 			// The semicircle itself has a static colour
-			gDPSetPrimColorViaWord(gdl++, 0, 0, 0xee0000ff);
+			struct RGBA semicolor = {238, 0, 0, 255};
+			gfx_Set_Prim_Color(gdl++, semicolor);
 			gDPFillRectangle(gdl++, viewcentrex, i, viewcentrex + semicirclewidth, i + 1);
 		} else {
 			gDPFillRectangle(gdl++, viewleft, i, viewleft + viewwidth, i + 1);
@@ -2086,7 +2107,8 @@ Gfx *bviewDrawIrBinoculars(Gfx *gdl)
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-	gDPSetPrimColor(gdl++, 0, 0, 0x00, 0x00, 0x00, 0xff);
+	struct RGBA color = {0, 0, 0, 255};
+	gfx_Set_Prim_Color(gdl++, color);
 
 	for (y = viewtop; y < viewbottom; y++) {
 		int ytocentre = centrey - y;
@@ -2121,7 +2143,7 @@ Gfx *bviewDrawIrBinoculars(Gfx *gdl)
 void bviewSetMotionBlur(uint32_t bluramount)
 {
 	g_NumActiveEffects = 0;
-	var8007f848 = 0;
+	g_DoNotRedrawBlur = false;
 	g_BlurChange = (bluramount << 1) / 3; // same as multiplying by 2/3
 }
 

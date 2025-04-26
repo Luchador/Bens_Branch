@@ -18578,10 +18578,6 @@ Gfx *countdownTimerRender(Gfx *gdl)
 			} else {
 				y += 2;
 			}
-		} else {
-			if (optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
-				y += 8;
-			}
 		}
 
 		if (value60 < 0) {

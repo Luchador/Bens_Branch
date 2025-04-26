@@ -13,6 +13,7 @@
 #include "lib/anim.h"
 #include "lib/model.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 /**
@@ -2869,7 +2870,8 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 				gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 				gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 				gDPSetEnvColorViaWord(renderdata->gdl++, 0xffffffff);
-				gDPSetPrimColor(renderdata->gdl++, 0, 0, 0, 0, 0, (renderdata->envcolour >> 8) & 0xff);
+				struct RGBA color = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
+				gfx_Set_Prim_Color(renderdata->gdl++, color);
 				gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_CUSTOM_20);
 
 				if (renderdata->zbufferenabled) {
@@ -2897,7 +2899,8 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
 				}
 			} else {
-				gDPSetPrimColor(renderdata->gdl++, 0, 0, 0, 0, 0, (renderdata->envcolour >> 8) & 0xff);
+				struct RGBA color = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
+				gfx_Set_Prim_Color(renderdata->gdl++, color);
 				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_22, G_CC_CUSTOM_23);
 
 				if (renderdata->zbufferenabled) {
@@ -3017,7 +3020,8 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
 			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
 			gDPSetEnvColorViaWord(renderdata->gdl++, 0xffffffff);
-			gDPSetPrimColor(renderdata->gdl++, 0, 0, 0, 0, 0, (renderdata->envcolour >> 8) & 0xff);
+			struct RGBA color = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
+			gfx_Set_Prim_Color(renderdata->gdl++, color);
 
 			if (arg1) {
 				gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_CUSTOM_20);
@@ -3050,7 +3054,8 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
 				}
 			} else {
-				gDPSetPrimColor(renderdata->gdl++, 0, 0, 0, 0, 0, (renderdata->envcolour >> 8) & 0xff);
+				struct RGBA color = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
+				gfx_Set_Prim_Color(renderdata->gdl++, color);
 				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_22, G_CC_CUSTOM_23);
 
 				if (renderdata->zbufferenabled) {

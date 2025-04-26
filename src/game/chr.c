@@ -48,6 +48,7 @@
 #include "game/debug.h"
 #include "data.h"
 #include "gbiex.h"
+#include "gfx.h"
 #include "types.h"
 #include "video.h"
 
@@ -5913,7 +5914,8 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 			gDPSetTile(gdl++, G_IM_FMT_I, G_IM_SIZ_8b, 160, 0x0080, 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 15);
 			gSPTexture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
 			gDPSetEnvColor(gdl++, 0xff, 0xff, 0xff, 0xff);
-			gDPSetPrimColor(gdl++, 0, 0, 0xff, 0xff, 0xff, 0xff);
+			struct RGBA color = {255, 255, 255, 255};
+			gfx_Set_Prim_Color(gdl++, color);
 			gDPSetRenderMode(gdl++, G_RM_NOOP, G_RM_NOOP2);
 			gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 			gDPSetTextureFilter(gdl++, G_TF_POINT);

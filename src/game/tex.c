@@ -6,6 +6,7 @@
 #include "game/texdecompress.h"
 #include "bss.h"
 #include "data.h"
+#include "gfx.h"
 #include "gbiex.h"
 #include "textures.h"
 #include "types.h"
@@ -395,7 +396,8 @@ Gfx *texWriteTileFromDefinition(Gfx *gdl, struct tex *tex, int offset, int shift
 
 	line = texGetLineSizeInBytes(tex, 0);
 
-	gDPSetPrimColorViaWord(gdl++, min, 0, 0xffffffff);
+	struct RGBA color = {255, 255, 255, 255};
+	gfx_Set_Prim_Color(gdl++, color);
 
 	if (texTrySetLutMode(tex->lutmodeindex << G_MDSFT_TEXTLUT)) {
 		gDPSetTextureLUT(gdl++, tex->lutmodeindex << G_MDSFT_TEXTLUT);

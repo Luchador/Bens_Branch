@@ -71,8 +71,6 @@ MenuItemHandlerResult menuhandlerPaintball(int operation, struct menuitem *item,
 MenuItemHandlerResult menuhandlerPdMode(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerPdModeSetting(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerReversePitch(int operation, struct menuitem *item, union handlerdata *data);
-MenuItemHandlerResult menuhandlerScreenRatio(int operation, struct menuitem *item, union handlerdata *data);
-MenuItemHandlerResult menuhandlerScreenSize(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerScreenSplit(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerSfxVolume(int operation, struct menuitem *item, union handlerdata *data);
 MenuItemHandlerResult menuhandlerShowGunFunction(int operation, struct menuitem *item, union handlerdata *data);

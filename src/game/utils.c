@@ -619,3 +619,12 @@ return utilsTriRayIntersectionTest(
 		arg3, t0, t1, t2, t3, t4);
 }
 
+struct RGBA utilsUnpackColorRGBA(uint32_t color)
+{
+    struct RGBA result;
+    result.r = (color >> 24) & 0xFF;
+    result.g = (color >> 16) & 0xFF;
+    result.b = (color >> 8)  & 0xFF;
+    result.a = (color >> 0)  & 0xFF;
+    return result;
+}

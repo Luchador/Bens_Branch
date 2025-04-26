@@ -216,55 +216,6 @@ MenuItemHandlerResult menuhandlerSoundMode(int operation, struct menuitem *item,
 	return 0;
 }
 
-MenuItemHandlerResult menuhandlerScreenSize(int operation, struct menuitem *item, union handlerdata *data)
-{
-	uint16_t options[] = {
-		L_OPTIONS_220, // "Full"
-		L_OPTIONS_221, // "Wide"
-		L_OPTIONS_222, // "Cinema"
-	};
-
-	switch (operation) {
-	case MENUOP_GETOPTIONCOUNT:
-		data->dropdown.value = 3;
-		break;
-	case MENUOP_GETOPTIONTEXT:
-		return (uintptr_t) langGet(options[data->dropdown.value]);
-	case MENUOP_SET:
-		optionsSetScreenSize(data->dropdown.value);
-		g_Vars.modifiedfiles |= MODFILE_GAME;
-		break;
-	case MENUOP_GETSELECTEDINDEX:
-		data->dropdown.value = optionsGetEffectiveScreenSize();
-	}
-
-	return 0;
-}
-
-MenuItemHandlerResult menuhandlerScreenRatio(int operation, struct menuitem *item, union handlerdata *data)
-{
-	uint16_t options[] = {
-		L_OPTIONS_223, // "Normal"
-		L_OPTIONS_224, // "16:9"
-	};
-
-	switch (operation) {
-	case MENUOP_GETOPTIONCOUNT:
-		data->dropdown.value = 2;
-		break;
-	case MENUOP_GETOPTIONTEXT:
-		return (uintptr_t) langGet(options[data->dropdown.value]);
-	case MENUOP_SET:
-		optionsSetScreenRatio(data->dropdown.value);
-		g_Vars.modifiedfiles |= MODFILE_GAME;
-		break;
-	case MENUOP_GETSELECTEDINDEX:
-		data->dropdown.value = optionsGetScreenRatio();
-	}
-
-	return 0;
-}
-
 MenuItemHandlerResult menuhandlerScreenSplit(int operation, struct menuitem *item, union handlerdata *data)
 {
 	uint16_t options[] = {
@@ -373,11 +324,6 @@ MenuItemHandlerResult menuhandlerCutsceneSubtitles(int operation, struct menuite
 MenuItemHandlerResult menuhandlerAlternativeTitle(int operation, struct menuitem *item, union handlerdata *data)
 {
 	switch (operation) {
-	case MENUOP_CHECKHIDDEN:
-		if (g_Vars.stagenum != STAGE_CITRAINING || (uint8_t)g_AltTitleUnlocked == false) {
-			return true;
-		}
-		break;
 	case MENUOP_GET:
 		return g_AltTitleEnabled;
 	case MENUOP_SET:
@@ -2325,14 +2271,6 @@ struct menudialogdef g_2PMissionAudioOptionsVMenuDialog = {
 };
 
 struct menuitem g_VideoOptionsMenuItems[] = {
-	{
-		MENUITEMTYPE_DROPDOWN,
-		0,
-		0,
-		L_OPTIONS_215, // "Screen Size"
-		0,
-		menuhandlerScreenSize,
-	},
 	{
 		MENUITEMTYPE_DROPDOWN,
 		0,

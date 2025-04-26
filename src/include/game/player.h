@@ -48,7 +48,7 @@ int16_t playerGetViewportWidth(void);
 int16_t playerGetViewportLeft(void);
 int16_t playerGetViewportHeight(void);
 int16_t playerGetViewportTop(void);
-float player0f0bd358(void);
+float playerGetAspect(void);
 void playerUpdateShake(void);
 void playerTickTeleport(float *arg0);
 void playerConfigureVi(void);
@@ -102,3 +102,4 @@ void playerSetCamPropertiesWithRoom(struct coord *pos, struct coord *up, struct 
 void playerSetCamPropertiesWithoutRoom(struct coord *pos, struct coord *up, struct coord *look, int room);
 void playerSetCamProperties(struct coord *pos, struct coord *up, struct coord *look, int room);
 void playerClearMemCamRoom(void);
+Gfx *playerDrawCutsceneRects(Gfx *gdl);

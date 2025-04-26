@@ -65,10 +65,8 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 {
 	Col *colours;
 	Vtx *vertices;
-#if !defined(PLATFORM_N64)
 	int width;
 	int height;
-#endif
 
 	width = viGetWidth();
 	height = viGetHeight();
@@ -976,7 +974,7 @@ Gfx *menugfxRenderBgFailure(Gfx *gdl)
 
 	g_MenuProjectFromX = g_MenuProjectFromY = 0;
 
-	gdl = func0f0d4a3c(gdl, 0);
+	gdl = func0f0d4a3c(gdl);
 
 	var8009de90 = -100000;
 	var8009de94 = 100000;
@@ -1085,9 +1083,7 @@ Gfx *menugfxRenderBgCone(Gfx *gdl)
 	baseangle = M_TAU * g_20SecIntervalFrac * 2.0f;
 	colourupper = (uint32_t) (menuGetSinOscFrac(1.0f) * 255.0f) << 16;
 
-	gdl = func0f0d4a3c(gdl, 0);
-
-	if (1);
+	gdl = func0f0d4a3c(gdl);
 
 	var8009de90 = -100000;
 	var8009de94 = 100000;
@@ -1115,8 +1111,6 @@ Gfx *menugfxRenderBgCone(Gfx *gdl)
 
 	baseangle = M_TAU * g_20SecIntervalFrac;
 
-	if (1);
-
 	for (i = 0; i < 8; i++) {
 		if (gdl && gdl);
 
@@ -1135,160 +1129,6 @@ Gfx *menugfxRenderBgCone(Gfx *gdl)
 		colour = colourupper | 0xff00007f;
 
 		gdl = menugfxDrawPlane(gdl, x1, y1, x2, y2, colour, colour, MENUPLANE_09);
-	}
-
-	gdl = func0f0d4c80(gdl);
-
-	return gdl;
-}
-
-/**
- * Fill the framebuffer with a transparent green overlay.
- *
- * The amount of transparency varies from frame to frame. It's quite volatile.
- *
- * This function is not called.
- */
-Gfx *func0f0e458c(Gfx *gdl)
-{
-	g_MenuProjectFromX = 0;
-	g_MenuProjectFromY = -20 - viGetHeight() / 2;
-
-	gdl = func0f0d4a3c(gdl, 0);
-
-	var8009de90 = -100000;
-	var8009de94 = 100000;
-
-	gdl = menugfxDrawPlane(gdl, -1000, viGetHeight() + 10, 2000, viGetHeight() + 10, 0x00ff00bf, 0x00ff00bf, MENUPLANE_06);
-	gdl = menugfxDrawPlane(gdl, -1000, viGetHeight() + 10, 2000, viGetHeight() + 10, 0xffff00af, 0xffff00af, MENUPLANE_05);
-	gdl = func0f0d4c80(gdl);
-
-	g_MenuProjectFromX = g_MenuProjectFromY = 0;
-
-	return gdl;
-}
-
-Gfx *func0f0e46b0(Gfx *gdl, float arg1)
-{
-	int y1 = (g_MenuProjectFromY + 120) + arg1 * (0.0f - (g_MenuProjectFromY + 120));
-	int y2 = (g_MenuProjectFromY + 120) + arg1 * (240.0f - (g_MenuProjectFromY + 120));
-
-	gdl = func0f0d4a3c(gdl, 0);
-
-	var8009de90 = -100000;
-	var8009de94 = 100000;
-
-	gdl = menugfxDrawPlane(gdl, -1000, y1, 2000, y1, 0xffff007f, 0xffff007f, MENUPLANE_05);
-	gdl = menugfxDrawPlane(gdl, -1000, y1, 2000, y1, 0x00aa007f, 0x00aa007f, MENUPLANE_06);
-	gdl = menugfxDrawPlane(gdl, -1000, y2, 2000, y2, 0xffff007f, 0xffff007f, MENUPLANE_05);
-	gdl = menugfxDrawPlane(gdl, -1000, y2, 2000, y2, 0x00aa007f, 0x00aa007f, MENUPLANE_06);
-
-	gdl = func0f0d4c80(gdl);
-
-	return gdl;
-}
-
-/**
- * This is an exact copy of menugfxRenderBgFailure.
- */
-Gfx *menugfxRenderBgFailureCopy(Gfx *gdl)
-{
-	float spb4;
-	int i;
-	float angle;
-	int s0;
-	int s1;
-	int s2;
-	int s3;
-	int s6;
-	int s7;
-	uint32_t alpha1;
-	uint32_t alpha2;
-
-	spb4 = M_TAU * g_20SecIntervalFrac;
-
-	g_MenuProjectFromX = g_MenuProjectFromY = 0;
-
-	gdl = func0f0d4a3c(gdl, 0);
-
-	var8009de90 = -100000;
-	var8009de94 = 100000;
-
-	gdl = menugfxDrawPlane(gdl, -10000, 0, 10000, 0, 0x00007f7f, 0x00007f7f, MENUPLANE_04);
-	gdl = menugfxDrawPlane(gdl, -10000, 300, 10000, 300, 0x00007f7f, 0x00007f7f, MENUPLANE_04);
-
-	for (i = 0; i < 3; i++) {
-		angle = (2.0f * i * M_PI) / 3.0f + spb4;
-		s6 = sinf(angle) * 600.0f;
-		s3 = cosf(angle) * 600.0f;
-
-		angle += 0.52359879016876f;
-		s2 = sinf(angle) * 600.0f;
-		s0 = cosf(angle) * 600.0f;
-
-		angle += 0.52359879016876f;
-		s1 = sinf(angle) * 600.0f;
-		s7 = cosf(angle) * 600.0f;
-
-		s6 += 160;
-		s2 += 160;
-		s1 += 160;
-		s3 += 120;
-		s0 += 120;
-		s7 += 120;
-
-		gdl = menugfxDrawPlane(gdl, s6, s3, s2, s0, 0xff000040, 0xff00007f, MENUPLANE_02);
-		gdl = menugfxDrawPlane(gdl, s2, s0, s1, s7, 0xff00007f, 0xff000040, MENUPLANE_03);
-
-		angle = -2.0f * spb4 + (2.0f * i * M_PI) / 3.0f;
-		s6 = sinf(angle) * 600.0f;
-		s3 = cosf(angle) * 600.0f;
-
-		angle += 0.17453293502331f;
-		s2 = sinf(angle) * 600.0f;
-		s0 = cosf(angle) * 600.0f;
-
-		angle += 0.099733099341393f;
-		s1 = sinf(angle) * 600.0f;
-		s7 = cosf(angle) * 600.0f;
-
-		s6 += 160;
-		s2 += 160;
-		s1 += 160;
-		s3 += 120;
-		s0 += 120;
-		s7 += 120;
-
-		alpha1 = menuGetCosOscFrac(4) * 127.0f;
-		alpha2 = menuGetCosOscFrac(4) * 55.0f;
-
-		gdl = menugfxDrawPlane(gdl, s6, s3, s2, s0, 0xffff0000 | alpha2, 0xffff0000 | alpha1, MENUPLANE_02);
-		gdl = menugfxDrawPlane(gdl, s2, s0, s1, s7, 0xffff0000 | alpha1, 0xffff0000 | alpha2, MENUPLANE_03);
-
-		angle = -2.0f * spb4 + (2.0f * i * M_PI) / 3.0f + M_PI;
-		s6 = sinf(angle) * 600.0f;
-		s3 = cosf(angle) * 600.0f;
-
-		angle += 0.17453293502331f;
-		s2 = sinf(angle) * 600.0f;
-		s0 = cosf(angle) * 600.0f;
-
-		angle += 0.099733099341393f;
-		s1 = sinf(angle) * 600.0f;
-		s7 = cosf(angle) * 600.0f;
-
-		s6 += 160;
-		s2 += 160;
-		s1 += 160;
-		s3 += 120;
-		s0 += 120;
-		s7 += 120;
-
-		alpha1 = (1.0f - menuGetCosOscFrac(4)) * 99.0f;
-		alpha2 = (1.0f - menuGetCosOscFrac(4)) * 33.0f;
-
-		gdl = menugfxDrawPlane(gdl, s6, s3, s2, s0, 0xffffff00 | alpha2, 0xffffff00 | alpha1, MENUPLANE_02);
-		gdl = menugfxDrawPlane(gdl, s2, s0, s1, s7, 0xffffff00 | alpha1, 0xffffff00 | alpha2, MENUPLANE_03);
 	}
 
 	gdl = func0f0d4c80(gdl);
@@ -1381,7 +1221,7 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 	g_MenuProjectFromX = 0;
 	g_MenuProjectFromY = 0;
 
-	gdl = func0f0d4a3c(gdl, 0);
+	gdl = func0f0d4a3c(gdl);
 
 	var8009de90 = -100000;
 	var8009de94 = 100000;

@@ -575,7 +575,7 @@ struct prop *shotCalculateHits(int handnum, bool isshooting, struct coord *gunpo
 	RoomNum rooms2[8];
 	struct prop *hitprop;
 
-	bgun0f0a9494(arg6);
+	bgunResetDotInfo();
 
 	shotdata.gunpos3d.x = gunpos3d->x;
 	shotdata.gunpos3d.y = gunpos3d->y;
@@ -2711,13 +2711,13 @@ void autoaimTick(void)
 
 					if (bestprop->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
 						struct defaultobj *obj = bestprop->obj;
-						Mtxf *mtx = (Mtxf*)modelGetRootMtx(obj->model);
+						Mtx *mtx = modelGetRootMtx(obj->model);
 						struct coord spac;
-						spac.z = mtx->m[3][2];
+						spac.z = (*mtx)[3][2];
 
 						if (spac.z < 0) {
-							spac.x = mtx->m[3][0];
-							spac.y = mtx->m[3][1];
+							spac.x = (*mtx)[3][0];
+							spac.y = (*mtx)[3][1];
 							camProjectViewToScreen(&spac, aimpos);
 						}
 					}

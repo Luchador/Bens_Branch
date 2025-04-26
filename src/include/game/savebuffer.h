@@ -7,7 +7,7 @@ void func0f0d4690(Mtxf *mtx);
 void func0f0d475c(Mtxf *mtx);
 Gfx *gfxSetCustomProjection(Gfx *gdl);
 Gfx *savebufferSetup2DRender(Gfx *gdl);
-Gfx *func0f0d4a3c(Gfx *gdl, int arg1);
+Gfx *func0f0d4a3c(Gfx *gdl);
 Gfx *func0f0d4c80(Gfx *gdl);
 Gfx *menugfxDrawPlane(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1, uint32_t colour2, int type);
 void savebufferOr(struct savebuffer *buffer, uint32_t arg1, int arg2);
@@ -15,7 +15,6 @@ void savebufferWriteBits(struct savebuffer *buffer, uint32_t value, int numbits,
 uint32_t savebufferReadBits(struct savebuffer *buffer, int offset);
 void savebufferClear(struct savebuffer *buffer);
 void savebufferWriteData(struct savebuffer *buffer, uint8_t *data, uint8_t len);
-void func0f0d54c4(struct savebuffer *buffer);
 void savebufferReadString(struct savebuffer *buffer, char *dst, bool addlinebreak);
 void func0f0d55a4(struct savebuffer *buffer, char *src);
 void func0f0d564c(uint8_t *data, char *dst, bool addlinebreak);

@@ -6,6 +6,7 @@
 #include "game/modelmgr.h"
 #include "game/tex.h"
 #include "game/inv.h"
+#include "game/debug.h"
 #include "game/playermgr.h"
 #include "game/mtxutils.h"
 #include "game/menuutils.h"
@@ -31,6 +32,7 @@
 #include "string.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "string.h"
 #include "video.h"
@@ -391,8 +393,7 @@ void titleTickPdLogo(void)
 
 	if (g_PdLogoTriggerExit) {
 		// Exiting due to player not pressing anything
-		//if (g_AltTitleEnabled) {
-		if(true) {
+		if (g_AltTitleEnabled) {
 			g_TitleMode = TITLEMODE_SKIP;
 			creditsRequestAltTitle();
 			g_TitleNextStage = STAGE_CREDITS; // for alt title screen
@@ -422,7 +423,7 @@ void titleTickPdLogo(void)
 	}
 }
 
-Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3, int arg4, float arg5, Mtxf *arg6, Vtx *vertices, Col *colours)
+Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3, int arg4, float arg5, Mtx *arg6, Vtx *vertices, Col *colours)
 {
 	struct modelrenderdata renderdata = {NULL, true, 3};
 	int tmp2;
@@ -446,7 +447,6 @@ Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3
 	Vtx *t0;
 	Col *s1;
 	Col *s2;
-	Mtxf sp6c;
 
 	tmp = modelGetNodeRwData(model, modelGetPart(model->definition, MODELPART_LOGO_0000));
 	tmp->toggle.visible = arg2;
@@ -565,12 +565,13 @@ Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3
 		}
 	}
 
-	gDPSetPrimColor(gdl++, 0, 0, 0x00, 0x00, 0x00, alpha1);
+	struct RGBA color = {0, 0, 0, alpha1};
+	gfx_Set_Prim_Color(gdl++, color);
 
-	renderdata.unk00 = arg6;
-	renderdata.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
+	renderdata.unk00 = (Mtxf*)arg6;
+	renderdata.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtx));
 
-	mtx4Copy((Mtx*)arg6, (Mtx*)renderdata.unk10);
+	mtx4Copy(arg6, (Mtx*)renderdata.unk10);
 
 	model->matrices = renderdata.unk10;
 
@@ -656,13 +657,13 @@ void titleSkipToPdTitle(void)
 Gfx *titleRenderPdLogo(Gfx *gdl)
 {
 	struct modelrenderdata renderdata = {NULL, true, 3};
-	Mtxf sp2b0;
-	Mtxf sp270;
-	Mtxf sp230;
+	Mtx sp2b0;
+	Mtx sp270;
+	Mtx sp230;
 	struct model *model;
 	struct modelnode *node;
-	Mtxf sp1e8;
-	Mtxf sp1a8;
+	Mtx sp1e8;
+	Mtx sp1a8;
 
 	float yrotmax = 4.240475f;
 	float xrotmax = 0.47116387f;
@@ -930,15 +931,15 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	g_TitleLightPdLogoMain.l[0].l.dir[2] = 127.0f * cosf(angle1) * cosf(angle2);
 	
 
-	mtxBuildLookAtMatrixF((Mtx*)&sp2b0, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+	mtxBuildLookAtMatrixF(&sp2b0, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
 	model = g_PdLogoUseCombinedModel == true ? g_TitleModel : g_TitleModelNLogo2;
 
-	mtx4LoadYRotation(g_PdLogoYRotCur, (Mtx*)&sp1e8);
-	mtx4LoadXRotation(g_PdLogoXRotCur, (Mtx*)&sp1a8);
-	mtx4MultMtx4InPlace((Mtx*)&sp1a8, (Mtx*)&sp1e8);
-	mtx4MultMtx4((Mtx*)&sp2b0, (Mtx*)&sp1e8, (Mtx*)&sp270);
-	mtxScaleRotationPart(g_PdLogoScale, (Mtx*)&sp270);
+	mtx4LoadYRotation(g_PdLogoYRotCur, &sp1e8);
+	mtx4LoadXRotation(g_PdLogoXRotCur, &sp1a8);
+	mtx4MultMtx4InPlace(&sp1a8, &sp1e8);
+	mtx4MultMtx4(&sp2b0, &sp1e8, &sp270);
+	mtxScaleRotationPart(g_PdLogoScale, &sp270);
 
 	g_TitleLightPdLogoNotFront.a.l.col[0] = g_TitleLightPdLogoNotFront.a.l.col[1] = g_TitleLightPdLogoNotFront.a.l.col[2] = g_TitleLightPdLogoNotFront.a.l.colc[0] = g_TitleLightPdLogoNotFront.a.l.colc[1] = g_TitleLightPdLogoNotFront.a.l.colc[2] = 255.0f * g_PdLogoAmbientLightFrac;
 
@@ -1012,17 +1013,17 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		}
 	}
 
-	gdl = titleRenderPdLogoModel(gdl, model, true, g_PdLogoFrac, 240, 1.0f, &sp270, gfxAllocateVertices(numvertices), gfxAllocateColours(numcolours));
+	gdl = titleRenderPdLogoModel(gdl, model, true, g_PdLogoFrac, 240, 1.0f, (Mtx*)&sp270, gfxAllocateVertices(numvertices), gfxAllocateColours(numcolours));
 
 	gSPSetLights1(gdl++, g_TitleLightPdLogoMain);
 	{
 		struct coord sp64 = {0, 0, 1000};
-		mtx4LoadTranslation(&sp64, (Mtx*)&sp1e8);
+		mtx4LoadTranslation(&sp64, &sp1e8);
 	}
 
-	mtxScale3x4(1.0f + sp13c, (Mtx*)&sp1e8);
-	mtx4MultMtx4((Mtx*)&sp2b0, (Mtx*)&sp1e8, (Mtx*)&sp230);
-	mtxScaleRotationPart(0.308f, (Mtx*)&sp230);
+	mtxScale3x4(1.0f + sp13c, &sp1e8);
+	mtx4MultMtx4(&sp2b0, &sp1e8, &sp230);
+	mtxScaleRotationPart(0.308f, &sp230);
 
 	// Render the "PERFECT DARK" model
 	if (g_PdLogoTitleStep >= 0) {
@@ -1061,17 +1062,16 @@ void titleInitNintendoLogo(void)
 		g_TitleTimer = 0;
 	}
 
-	{
-		struct coord coord = {0, 0, 0};
+	struct coord coord = {0, 0, 0};
 
-		g_ModelStates[MODEL_NINTENDOLOGO].modeldef = modeldefLoad(g_ModelStates[MODEL_NINTENDOLOGO].fileid, nextaddr, TITLE_ALLOCSIZE, 0);
+	g_ModelStates[MODEL_NINTENDOLOGO].modeldef = modeldefLoad(g_ModelStates[MODEL_NINTENDOLOGO].fileid, nextaddr, TITLE_ALLOCSIZE, 0);
 
-		modelAllocateRwData(g_ModelStates[MODEL_NINTENDOLOGO].modeldef);
-		g_TitleModel = modelmgrInstantiateModelWithoutAnim(g_ModelStates[MODEL_NINTENDOLOGO].modeldef);
-		modelSetScale(g_TitleModel, 1);
-		modelSetRootPosition(g_TitleModel, &coord);
-		joySetAllowTitleInput(false);
-	}
+	modelAllocateRwData(g_ModelStates[MODEL_NINTENDOLOGO].modeldef);
+	g_TitleModel = modelmgrInstantiateModelWithoutAnim(g_ModelStates[MODEL_NINTENDOLOGO].modeldef);
+	modelSetScale(g_TitleModel, 1);
+	modelSetRootPosition(g_TitleModel, &coord);
+	joySetAllowTitleInput(false);
+
 }
 
 void titleExitNintendoLogo(void)
@@ -1122,84 +1122,73 @@ void titleTickNintendoLogo(void)
 
 Gfx *titleRenderNintendoLogo(Gfx *gdl)
 {
+	Mtx viewMatrix;
+	Mtx rotationMatrix;
+	Mtx *modelMatrices;
 	struct modelrenderdata renderdata = { NULL, true, 3 };
-	int i;
-	int j;
-	Mtxf sp108;
-	float fracdone = g_TitleTimer / (TICKS(240.0f));
-	struct coord lightdir = {0, 0, 0};
-	int v0;
+	struct coord lightDir = {0, 0, 0};
+	struct coord rotationAngles = {0, 0, 0};
 
+	float frac = g_TitleTimer / TICKS(240.0f);
+	int brightness = 255;
+
+	// Clear screen and setup lighting
 	gdl = titleClear(gdl);
-
 	gSPSetLights1(gdl++, g_TitleLightNintendoRare);
 
-	lightdir.z = sinf((1 - fracdone) * 1.5f * M_PI);
-	lightdir.x = cosf((1 - fracdone) * 1.5f * M_PI);
+	// Calculate light direction (rotates around Z/X)
+	lightDir.z = sinf((1 - frac) * 1.5f * M_PI);
+	lightDir.x = cosf((1 - frac) * 1.5f * M_PI);
+	utilsNormalizeF(&lightDir.x, &lightDir.y, &lightDir.z);
 
-	utilsNormalizeF(&lightdir.x, &lightdir.y, &lightdir.z);
+	// Adjust brightness fade in/out at start/end
+	if (frac < 0.1f) {
+		brightness = 255.0f * frac / 0.1f;
+	} else if (frac > 0.9f) {
+		brightness = 255.0f * (1.0f - frac) / 0.1f;
+	}
+	utilsClamp(brightness, 0, 255);
 
-	v0 = 255;
+	// Set light color based on calculated brightness and direction
+	titleSetLight(&g_TitleLightNintendoRare, brightness, brightness, brightness, 0.0f, &lightDir);
 
-	if (fracdone < 0.1f) {
-		v0 = 255.0f * fracdone / 0.1f;
+	// Rotation animation (X-axis tilt in early animation)
+	if (frac < 0.4f) {
+		float xangle = (-cosf((1.0f - frac / 0.4f) * M_PI) * 0.5f + 0.5f) * M_PI_2;
+		rotationAngles.x = xangle;
 	}
 
-	if (fracdone > 0.9f) {
-		v0 = (1 - fracdone) * 255.0f / 0.1f;
-	}
+	// Y-axis subtle bob
+	rotationAngles.y = (-cosf((1.0f - frac) * M_PI) * 0.5f + 0.5f) * 0.35f;
 
-	if (v0 > 255) {
-		v0 = 255;
-	}
+	// Build rotation and scale matrix
+	mtx4LoadRotation(&rotationAngles, &rotationMatrix);
+	mtxScale3x4(frac * 0.2f + 1.0f, &rotationMatrix);
 
-	if (v0 < 0) {
-		v0 = 0;
-	}
+	// Build view matrix looking toward the origin
+	mtxBuildLookAtMatrixF(&viewMatrix, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
-	titleSetLight(&g_TitleLightNintendoRare, v0, v0, v0, 0.0f, &lightdir);
-	{
-		Mtxf spa8;
-		struct coord sp9c;
-		Mtxf sp54;
+	// Combine view and model transforms
+	mtx4MultMtx4InPlace(&viewMatrix, &rotationMatrix);
+	mtx4Copy(&rotationMatrix, &viewMatrix);
 
-		sp9c.x = 0.0f;
+	// Assign to render data
+	renderdata.unk00 = (Mtxf*)&viewMatrix;
+	modelMatrices = gfxAllocate(g_TitleModel->definition->nummatrices * sizeof(Mtx));
+	mtx4Copy(&viewMatrix, (Mtx*)modelMatrices);
 
-		if (fracdone < 0.4f) {
-			sp9c.x = (-cosf((1.0f - fracdone / .4f) * M_PI) * 0.5f + 0.5f) * 1.5707963705063f;
-		}
+	g_TitleModel->matrices = (Mtxf*)modelMatrices;
 
-		sp9c.y = (-cosf((1.0f - (fracdone / 1)) * M_PI) * 0.5f + .5f) * 0.35f;
-		sp9c.z = 0.0f;
+	modelUpdateRelations(g_TitleModel);
 
-		mtx4LoadRotation(&sp9c, (Mtx*)&spa8);
-		mtxScale3x4(fracdone * 0.2f + 1.0f, (Mtx*)&spa8);
+	// Render
+	renderdata.flags = 3;
+	renderdata.zbufferenabled = false;
+	renderdata.gdl = gdl;
 
-		mtxBuildLookAtMatrixF((Mtx*)&sp108,
-				/* pos  */ 0.0f, 0.0f, 4000,
-				/* look */ 0.0f, 0.0f, 0.0f,
-				/* up   */ 0.0f, 1.0f, 0.0f);
+	modelRender(&renderdata, g_TitleModel);
 
-		mtx4MultMtx4InPlace((Mtx*)&sp108, (Mtx*)&spa8);
-		mtx4Copy((Mtx*)&spa8, (Mtx*)&sp108);
-		renderdata.unk00 = &sp108;
-
-		renderdata.unk10 = gfxAllocate(g_TitleModel->definition->nummatrices * sizeof(Mtxf));
-		mtx4Copy((Mtx*)&sp108, (Mtx*)renderdata.unk10);
-		g_TitleModel->matrices = renderdata.unk10;
-
-		modelUpdateRelations(g_TitleModel);
-
-		renderdata.flags = 3;
-		renderdata.zbufferenabled = false;
-		renderdata.gdl = gdl;
-
-		modelRender(&renderdata, g_TitleModel);
-
-		gdl = renderdata.gdl;
-	}
-
-	return gdl;
+	return renderdata.gdl;
 }
 
 void titleInitRareLogo(void)
@@ -1288,10 +1277,8 @@ float titleRotateClockwise(float arg0)
 Gfx *titleRenderRareLogo(Gfx *gdl)
 {
 	struct modelrenderdata renderdata = { NULL, true, 3 };
-	int i;
 	float fracdone = g_TitleTimer / TICKS(240.0f);
-	Mtxf sp118;
-	int j;
+	Mtx sp118;
 	int s0;
 
 	gdl = titleClear(gdl);
@@ -1300,10 +1287,9 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 		return gdl;
 	}
 
-	
 	struct coord lightdir = {0, 0, 0};
 	float tmp;
-	Mtxf spc0;
+	Mtx spc0;
 	struct coord spb4;
 	struct modelrwdata_toggle *rwdata;
 
@@ -1318,13 +1304,7 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 		s0 = 255.0f * fracdone / 0.1f;
 	}
 
-	if (s0 > 255) {
-		s0 = 255;
-	}
-
-	if (s0 < 0) {
-		s0 = 0;
-	}
+	utilsClamp(s0, 0, 255);
 
 	if (fracdone < 0.2f) {
 		titleSetLight(&g_TitleLightNintendoRare,
@@ -1353,20 +1333,20 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 	spb4.y = 1.5707963705063f * tmp;
 	spb4.z = 0;
 
-	mtx4LoadRotation(&spb4, (Mtx*)&spc0);
-	mtxScale3x4(1 + fracdone * 0.25f, (Mtx*)&spc0);
+	mtx4LoadRotation(&spb4, &spc0);
+	mtxScale3x4(1 + fracdone * 0.25f, &spc0);
 
-	mtxBuildLookAtMatrixF((Mtx*)&sp118,
+	mtxBuildLookAtMatrixF(&sp118,
 			/* pos  */ 0, 0, 4000,
 			/* look */ 0, 0, 0,
 			/* up   */ 0, 1, 0);
 
-	mtx4MultMtx4InPlace((Mtx*)&sp118, (Mtx*)&spc0);
-	mtx4Copy((Mtx*)&spc0, (Mtx*)&sp118);
+	mtx4MultMtx4InPlace(&sp118, &spc0);
+	mtx4Copy(&spc0, &sp118);
 
-	renderdata.unk00 = &sp118;
+	renderdata.unk00 = (Mtxf*)&sp118;
 	renderdata.unk10 = gfxAllocate(g_TitleModel->definition->nummatrices * sizeof(Mtxf));
-	mtx4Copy((Mtx*)&sp118, (Mtx*)renderdata.unk10);
+	mtx4Copy(&sp118, (Mtx*)renderdata.unk10);
 
 	g_TitleModel->matrices = renderdata.unk10;
 
@@ -1461,7 +1441,6 @@ void titleInitSkip(void)
 
 	if (g_IsTitleDemo) {
 		g_TitleNextStage = STAGE_DEFECTION;
-		g_IsTitleDemo = false;
 	}
 
 	mainChangeToStage(g_TitleNextStage);

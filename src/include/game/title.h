@@ -18,7 +18,7 @@ Gfx *titleRenderLegal(Gfx *gdl);
 void titleInitPdLogo(void);
 void titleExitPdLogo(void);
 void titleTickPdLogo(void);
-Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3, int arg4, float arg5, Mtxf *arg6, Vtx *vertices, Col *colours);
+Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3, int arg4, float arg5, Mtx *arg6, Vtx *vertices, Col *colours);
 void titleSkipToPdTitle(void);
 Gfx *titleRenderPdLogo(Gfx *gdl);
 void titleInitNintendoLogo(void);

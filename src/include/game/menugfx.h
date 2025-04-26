@@ -23,7 +23,6 @@ Gfx *menugfxDrawDialogChevron(Gfx *gdl, int x, int y, int arg2, int arg3, uint32
 Gfx *menugfxDrawCheckbox(Gfx *gdl, int x, int y, int size, bool fill, uint32_t bordercolour, uint32_t fillcolour);
 Gfx *menugfxRenderBgFailure(Gfx *gdl);
 Gfx *menugfxRenderBgCone(Gfx *gdl);
-Gfx *menugfxRenderBgFailureCopy(Gfx *gdl);
 void menugfxFreeParticles(void);
 uint32_t menugfxGetParticleArraySize(void);
 Gfx *menugfxRenderBgSuccess(Gfx *gdl);

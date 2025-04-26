@@ -13,6 +13,7 @@
 #include "lib/memp.h"
 #include "lib/rng.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "video.h"
 
@@ -189,14 +190,14 @@ void starsReset(void)
 
 Gfx *starsRender(Gfx *gdl)
 {
-	Mtxf mtx;
+	Mtx mtx;
 	float viewleft = viGetViewLeft();
 	float viewright = viewleft + viGetViewWidth();
 	float viewtop = viGetViewTop();
 	float viewbottom = viewtop + viGetViewHeight();
 	int i = 0;
-	float sp154;
-	struct coord sp148;
+	float fovCosThreshold;
+	struct coord camLookVector;
 	float screenmidx = g_Vars.currentplayer->c_screenleft + g_Vars.currentplayer->c_halfwidth;
 	float screenmidy = g_Vars.currentplayer->c_screentop + g_Vars.currentplayer->c_halfheight;
 	int j;
@@ -209,7 +210,7 @@ Gfx *starsRender(Gfx *gdl)
 		return gdl;
 	}
 
-	// Ben's comment: make stars twinkle. This code was in the original game, it was just missing the colours[i] assignment in the for loop. I also made the stars twinkle 5x faster.
+	// Ben's comment: make stars twinkle. This code was in the original game, it was just missing the colours[i] assignment in the for loop.
 	colours[0] = colourBlend(0xffffff7f, 0x7777777f, menuGetSinOscFrac(10) * 255);
 	colours[1] = colourBlend(0x0000aa7f, 0x2222ff7f, menuGetSinOscFrac(20) * 255);
 	colours[2] = colourBlend(0x0000ff7f, 0x5555ff7f, menuGetCosOscFrac(10) * 255);
@@ -217,28 +218,28 @@ Gfx *starsRender(Gfx *gdl)
 
 	colours[i] = colourBlend(colours[i], colours[i] & 0xff, 0x5f);
 
-	sp154 = cosf(0.017453199252486f * (90.0f - viGetFovY() / videoGetAspect() * 0.5f));
+	fovCosThreshold = cosf(0.017453199252486f * (90.0f - viGetFovY() / videoGetAspect() * 0.5f));
 
-	mtxIdent((Mtx*)&mtx);
-	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&mtx);
+	mtxIdent(&mtx);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), &mtx);
 
-	mtx.m[3][0] = 0.0f;
-	mtx.m[3][1] = 0.0f;
-	mtx.m[3][2] = 0.0f;
+	mtx[3][0] = 0.0f;
+	mtx[3][1] = 0.0f;
+	mtx[3][2] = 0.0f;
 
-	mtxScale3x4(262.9f, (Mtx*)&mtx);
+	mtxScale3x4(262.9f, &mtx);
 
-	mtx.m[0][1] *= g_Vars.currentplayer->c_recipscaley;
-	mtx.m[1][1] *= g_Vars.currentplayer->c_recipscaley;
-	mtx.m[2][1] *= g_Vars.currentplayer->c_recipscaley;
+	mtx[0][1] *= g_Vars.currentplayer->c_recipscaley;
+	mtx[1][1] *= g_Vars.currentplayer->c_recipscaley;
+	mtx[2][1] *= g_Vars.currentplayer->c_recipscaley;
 
-	mtx.m[0][0] *= g_Vars.currentplayer->c_recipscalex;
-	mtx.m[1][0] *= g_Vars.currentplayer->c_recipscalex;
-	mtx.m[2][0] *= g_Vars.currentplayer->c_recipscalex;
+	mtx[0][0] *= g_Vars.currentplayer->c_recipscalex;
+	mtx[1][0] *= g_Vars.currentplayer->c_recipscalex;
+	mtx[2][0] *= g_Vars.currentplayer->c_recipscalex;
 
-	sp148.f[0] = g_Vars.currentplayer->cam_look.f[0];
-	sp148.f[1] = g_Vars.currentplayer->cam_look.f[1];
-	sp148.f[2] = g_Vars.currentplayer->cam_look.f[2];
+	camLookVector.x = g_Vars.currentplayer->cam_look.x;
+	camLookVector.y = g_Vars.currentplayer->cam_look.y;
+	camLookVector.z = g_Vars.currentplayer->cam_look.z;
 
 	gdl = textSetPrimColour(gdl, 0xffffffff);
 
@@ -249,25 +250,25 @@ Gfx *starsRender(Gfx *gdl)
 		if (g_StarsBelowHorizon || i != 2) {
 			float f0;
 			float f0_2;
-			bool spd0[4][4];
-			struct coord spc4;
+			bool starVisible[4][4];
+			struct coord starPos;
 
 			for (j = 0; j <= g_StarGridSize; j++) {
 				for (k = 0; k <= g_StarGridSize; k++) {
 					tmp = ((g_StarGridSize + 1) * i * (g_StarGridSize + 1) + k + j * (g_StarGridSize + 1)) * 3;
-					f0 = sp148.f[0] * g_StarData3[tmp] + sp148.f[1] * g_StarData3[tmp + 1] + sp148.f[2] * g_StarData3[tmp + 2];
+					f0 = camLookVector.f[0] * g_StarData3[tmp] + camLookVector.f[1] * g_StarData3[tmp + 1] + camLookVector.f[2] * g_StarData3[tmp + 2];
 
-					if (f0 <= sp154) {
-						spd0[k][j] = true;
+					if (f0 <= fovCosThreshold) {
+						starVisible[k][j] = true;
 					} else {
-						spd0[k][j] = false;
+						starVisible[k][j] = false;
 					}
 				}
 			}
 
 			for (j = 0; j < g_StarGridSize; j++) {
 				for (k = 0; k < g_StarGridSize; k++) {
-					if (spd0[k][j] == 0 || spd0[k + 1][j] == 0 || spd0[k][j + 1] == 0 || spd0[k + 1][j + 1] == 0) {
+					if (starVisible[k][j] == 0 || starVisible[k + 1][j] == 0 || starVisible[k][j + 1] == 0 || starVisible[k + 1][j + 1] == 0) {
 						int tmp = g_StarGridSize * g_StarGridSize * i + k + j * g_StarGridSize;
 						int colourindex = 0;
 						float screenpos[2];
@@ -278,22 +279,23 @@ Gfx *starsRender(Gfx *gdl)
 
 						for (l = g_StarPosIndexes[tmp]; l < g_StarPosIndexes[tmp + 1]; l++) {
 							if (nextgroupstart == l) {
-								gDPSetPrimColorViaWord(gdl++, 0, 0, colours[colourindex]);
+								struct RGBA tmp = utilsUnpackColorRGBA(colours[colourindex]);
+								gfx_Set_Prim_Color(gdl++, tmp);
 
 								colourindex++;
 								nextgroupstart += groupsize;
 							}
 
-							spc4.f[0] = pos[0];
-							spc4.f[1] = pos[1];
-							spc4.f[2] = pos[2];
+							starPos.f[0] = pos[0];
+							starPos.f[1] = pos[1];
+							starPos.f[2] = pos[2];
 							pos += 3;
 
-							f0_2 = 1.0f / (mtx.m[0][2] * spc4.f[0] + mtx.m[1][2] * spc4.f[1] + mtx.m[2][2] * spc4.f[2]);
-							screenpos[1] = screenmidy + (mtx.m[0][1] * spc4.f[0] + mtx.m[1][1] * spc4.f[1] + mtx.m[2][1] * spc4.f[2]) * f0_2;
+							f0_2 = 1.0f / (mtx[0][2] * starPos.f[0] + mtx[1][2] * starPos.f[1] + mtx[2][2] * starPos.f[2]);
+							screenpos[1] = screenmidy + (mtx[0][1] * starPos.f[0] + mtx[1][1] * starPos.f[1] + mtx[2][1] * starPos.f[2]) * f0_2;
 
 							if (screenpos[1] > viewtop && screenpos[1] < viewbottom) {
-								screenpos[0] = screenmidx - (mtx.m[0][0] * spc4.f[0] + mtx.m[1][0] * spc4.f[1] + mtx.m[2][0] * spc4.f[2]) * f0_2;
+								screenpos[0] = screenmidx - (mtx[0][0] * starPos.f[0] + mtx[1][0] * starPos.f[1] + mtx[2][0] * starPos.f[2]) * f0_2;
 
 								if (screenpos[0] > viewleft && screenpos[0] < viewright) {
 									drawpos[0] = screenpos[0];

@@ -740,37 +740,17 @@ typedef union {
  * Triangle face
  */
 typedef struct {
-#ifdef PLATFORM_BIG_ENDIAN
-	unsigned char flag;
-	unsigned char v[3];
-#else
 	unsigned char v[3]; // reverse order
 	unsigned char flag;
-#endif
 } Tri;
 
-#ifdef PLATFORM_BIG_ENDIAN
-#define GFX_TRI_VTX(i) (i)
-#else
 #define GFX_TRI_VTX(i) (2 - i)
-#endif
 
 typedef float Mtx[4][4];
 
-/*
- * The viewport structure elements have 2 bits of fraction, necessary
- * to accomodate the sub-pixel positioning scaling for the hardware.
- * This can also be exploited to handle odd-sized viewports.
- *
- * Accounting for these fractional bits, using the default projection
- * and viewing matrices, the viewport structure is initialized thusly:
- *
- *   (SCREEN_WD/2)*4, (SCREEN_HT/2)*4, G_MAXZ, 0,
- *   (SCREEN_WD/2)*4, (SCREEN_HT/2)*4, 0, 0,
- */
 typedef struct {
-	short vscale[4]; /* scale, 2 bits fraction */
-	short vtrans[4]; /* translate, 2 bits fraction */
+	short vscale[2];
+	short vtrans[2];
 } Vp_t;
 
 typedef union {
@@ -946,22 +926,6 @@ typedef struct {
 } Gtri;
 
 typedef struct {
-#ifdef PLATFORM_BIG_ENDIAN
-	unsigned char cmd:8;
-	unsigned char pad:8;
-	unsigned char z4:4;
-	unsigned char z3:4;
-	unsigned char z2:4;
-	unsigned char z1:4;
-	unsigned char y4:4;
-	unsigned char x4:4;
-	unsigned char y3:4;
-	unsigned char x3:4;
-	unsigned char y2:4;
-	unsigned char x2:4;
-	unsigned char y1:4;
-	unsigned char x1:4;
-#else
 	unsigned char z1:4;
 	unsigned char z2:4;
 	unsigned char z3:4;
@@ -981,7 +945,6 @@ typedef struct {
 	unsigned char y4:4;
 #ifdef PLATFORM_64BIT
     unsigned char pad3[4];
-#endif
 #endif
 } Gtri4;
 
@@ -1018,21 +981,12 @@ typedef struct {
 } GsetothermodeH;
 
 typedef struct {
-#ifdef PLATFORM_BIG_ENDIAN
-	unsigned char  cmd;
-	unsigned char  lodscale;
-	unsigned char  tile;
-	unsigned char  on;
-	unsigned short s;
-	unsigned short t;
-#else
 	unsigned char  on;
 	unsigned char  tile;
 	unsigned char  lodscale;
 	unsigned char  cmd;
 	unsigned short t;
 	unsigned short s;
-#endif
 } Gtexture;
 
 typedef struct {
@@ -1059,52 +1013,17 @@ typedef struct {
 	uintptr_t w1;
 } Gwords;
 
-// xxxxxxxx 11223344 44555566 66666777
-// 88888888 99999999 9999aaaa aaaaaaaa
 typedef struct {
-#ifdef PLATFORM_BIG_ENDIAN
-	unsigned int cmd:8;
-	unsigned int unk08:2;
-	unsigned int unk0a:2;
-	unsigned int unk0c:2;
-	unsigned int unk0e:4;
-	unsigned int unk12:4;
-	unsigned int flags:7;
 	unsigned int subcmd:3;
-	unsigned int unk20:8;
-	unsigned int tile1:12;
-	unsigned int tile2:12;
-#else
-	unsigned int subcmd:3;
-	unsigned int flags:7;
-	unsigned int unk12:4;
-	unsigned int unk0e:4;
-	unsigned int unk0c:2;
-	unsigned int unk0a:2;
-	unsigned int unk08:2;
-	unsigned int cmd:8;
-	unsigned int tile2:12;
-	unsigned int tile1:12;
-	unsigned int unk20:8;
-#endif
 } GunkC0;
 
 typedef struct {
-#ifdef PLATFORM_BIG_ENDIAN
-	unsigned int cmd:8;
-	unsigned int unk08:4;
-	unsigned int unk0c:4;
-	unsigned int unk10:16;
-	unsigned int seg:8;
-	unsigned int offset:24;
-#else
 	unsigned int unk10:16;
 	unsigned int unk0c:4;
 	unsigned int unk08:4;
 	unsigned int cmd:8;
 	unsigned int offset:24;
 	unsigned int seg:8;
-#endif
 } Gvtx;
 
 /*
@@ -1132,10 +1051,7 @@ typedef union {
 #endif
 } Gfx;
 
-#ifdef PLATFORM_BIG_ENDIAN
-#define GFX_W0_BYTE(i) (i)
-#define GFX_W1_BYTE(i) (4 + (i))
-#elif PLATFORM_64BIT
+#ifdef PLATFORM_64BIT
 #define GFX_W0_BYTE(i) (3 - (i))
 #define GFX_W1_BYTE(i) (11 - (i))
 #else
@@ -1238,10 +1154,6 @@ typedef union {
 #define __gsSP1Triangle_w1f(v0, v1, v2, flag)     \
     (_SHIFTL((flag), 24,8)|_SHIFTL((v0)*10,16,8)| \
      _SHIFTL((v1)*10, 8,8)|_SHIFTL((v2)*10, 0,8))
-
-#define __gsSPLine3D_w1f(v0, v1, wd, flag)        \
-    (_SHIFTL((flag), 24,8)|_SHIFTL((v0)*10,16,8)| \
-     _SHIFTL((v1)*10, 8,8)|_SHIFTL((wd),    0,8))
 
 /***
  ***  1 Triangle
@@ -1612,7 +1524,7 @@ typedef union {
 #define gDPSetFogColor(pkt, r, g, b, a)   DPRGBColor(pkt, G_SETFOGCOLOR, r,g,b,a)
 #define gDPSetFillColor(pkt, d)           gDPSetColor(pkt, G_SETFILLCOLOR, (d))
 
-#define gDPSetPrimColor(pkt, m, l, r, g, b, a)              \
+/*#define gDPSetPrimColor(pkt, m, l, r, g, b, a)              \
 {                                                           \
     Gfx *_g = (Gfx *)(pkt);                                 \
                                                             \
@@ -1620,7 +1532,7 @@ typedef union {
             _SHIFTL(m, 8, 8) | _SHIFTL(l, 0, 8));           \
     _g->words.w1 = (_SHIFTL(r, 24, 8) | _SHIFTL(g, 16, 8) | \
             _SHIFTL(b, 8, 8) | _SHIFTL(a, 0, 8));           \
-}
+}*/
 
 /*
  * Texturing macros
@@ -1795,24 +1707,11 @@ typedef union {
      Gfx *_g = (Gfx *)pkt;                                       \
                                                                  \
     _g->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) |                \
-    _SHIFTL((int)((float)(ulx) * 4.0f), 12, 12) |                \
-    _SHIFTL((int)((float)(uly) * 4.0f), 0, 12);                  \
+    _SHIFTL((int)((float)(ulx)), 12, 12) |                       \
+    _SHIFTL((int)((float)(uly)), 0, 12);                         \
                                                                  \
     _g->words.w1 = _SHIFTL((int)((float)(lrx) * 4.0f), 12, 12) | \
-    _SHIFTL((int)((float)(lry) * 4.0f), 0, 12);                  \
-}
-            
-
-#define gDPSetScissorFrac(pkt, ulx, uly, lrx, lry)        \
-{                                                         \
-    Gfx *_g = (Gfx *)pkt;                                 \
-                                                          \
-    _g->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) |         \
-                   _SHIFTL((int)(ulx), 12, 12) |          \
-                   _SHIFTL((int)(uly), 0, 12);            \
-                                                          \
-    _g->words.w1 = _SHIFTL((int)(lrx), 12, 12) |          \
-                   _SHIFTL((int)(lry), 0, 12);            \
+    _SHIFTL((int)((float)(lry)), 0, 12);                         \
 }
 
 /* Fraction never used in fill */
@@ -1823,13 +1722,6 @@ typedef union {
     _g->words.w0 = (_SHIFTL(G_FILLRECT, 24, 8) |                     \
             _SHIFTL((lrx), 14, 10) | _SHIFTL((lry), 2, 10));         \
     _g->words.w1 = (_SHIFTL((ulx), 14, 10) | _SHIFTL((uly), 2, 10)); \
-}
-
-#define gsDPFillRectangle(ulx, uly, lrx, lry)              \
-{                                                          \
-    (_SHIFTL(G_FILLRECT, 24, 8) | _SHIFTL((lrx), 14, 10) | \
-     _SHIFTL((lry), 2, 10)),                               \
-    (_SHIFTL((ulx), 14, 10) | _SHIFTL((uly), 2, 10))       \
 }
 
 /* like gDPFillRectangle but accepts negative arguments */

@@ -1391,12 +1391,6 @@ void endscreenPrepare(void)
 				}
 
 				challengeDetermineUnlockedFeatures();
-
-				if (g_MissionConfig.stagenum == STAGE_SKEDARRUINS && g_AltTitleUnlocked == false) {
-					g_AltTitleUnlocked = true;
-					*(int8_t *)&g_AltTitleEnabled = true;
-					bossfileSave();
-				}
 			}
 		}
 

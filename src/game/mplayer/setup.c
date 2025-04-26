@@ -5181,14 +5181,6 @@ struct menuitem g_MpStuffMenuItems[] = {
 		MENUITEMTYPE_DROPDOWN,
 		0,
 		0,
-		L_OPTIONS_216, // "Ratio"
-		0,
-		menuhandlerScreenRatio,
-	},
-	{
-		MENUITEMTYPE_DROPDOWN,
-		0,
-		0,
 		L_MPWEAPONS_154, // "Split"
 		0,
 		menuhandlerScreenSplit,

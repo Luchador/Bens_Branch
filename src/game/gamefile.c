@@ -76,15 +76,6 @@ void gamefileApplyOptions(struct gamefile *file)
 	g_Vars.langfilteron = pakHasBitflag(GAMEFILEFLAG_LANGFILTERON, file->flags);
 
 	optionsSetScreenSplit(pakHasBitflag(GAMEFILEFLAG_SCREENSPLIT, file->flags));
-	optionsSetScreenRatio(pakHasBitflag(GAMEFILEFLAG_SCREENRATIO, file->flags));
-
-	if (pakHasBitflag(GAMEFILEFLAG_SCREENSIZE_CINEMA, file->flags)) {
-		optionsSetScreenSize(SCREENSIZE_CINEMA);
-	} else if (pakHasBitflag(GAMEFILEFLAG_SCREENSIZE_WIDE, file->flags)) {
-		optionsSetScreenSize(SCREENSIZE_WIDE);
-	} else {
-		optionsSetScreenSize(SCREENSIZE_FULL);
-	}
 
 	g_Vars.pendingantiplayernum = pakHasBitflag(GAMEFILEFLAG_ANTIPLAYERNUM, file->flags) ? 1 : 0;
 	g_Vars.coopradaron = pakHasBitflag(GAMEFILEFLAG_COOPRADARON, file->flags) ? true : false;
@@ -146,9 +137,6 @@ void gamefileLoadDefaults(struct gamefile *file)
 	pakSetBitflag(GAMEFILEFLAG_P2_SHOWMISSIONTIME, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_P2_PAINTBALL, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_SCREENSPLIT, file->flags, false);
-	pakSetBitflag(GAMEFILEFLAG_SCREENRATIO, file->flags, false);
-	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_CINEMA, file->flags, false);
-	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_WIDE, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_LANGFILTERON, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_FOUNDTIMEDMINE, file->flags, false);
 	pakSetBitflag(GAMEFILEFLAG_FOUNDPROXYMINE, file->flags, false);
@@ -289,7 +277,6 @@ int gamefileLoad(int device)
 				frSetWeaponFound(WEAPON_REMOTEMINE);
 			}
 
-			func0f0d54c4(&buffer);
 			gamefileApplyOptions(&g_GameFile);
 
 			return 0;
@@ -342,26 +329,12 @@ int gamefileSave(int device, int fileid, uint16_t deviceserial)
 	pakSetBitflag(GAMEFILEFLAG_P2_SHOWMISSIONTIME, g_GameFile.flags, optionsGetShowMissionTime(p2index));
 	pakSetBitflag(GAMEFILEFLAG_P2_PAINTBALL, g_GameFile.flags, optionsGetPaintball(p2index));
 	pakSetBitflag(GAMEFILEFLAG_SCREENSPLIT, g_GameFile.flags, optionsGetScreenSplit());
-	pakSetBitflag(GAMEFILEFLAG_SCREENRATIO, g_GameFile.flags, optionsGetScreenRatio());
-	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_WIDE, g_GameFile.flags, optionsGetScreenSize() == SCREENSIZE_WIDE);
-	pakSetBitflag(GAMEFILEFLAG_SCREENSIZE_CINEMA, g_GameFile.flags, optionsGetScreenSize() == SCREENSIZE_CINEMA);
 	pakSetBitflag(GAMEFILEFLAG_INGAMESUBTITLES, g_GameFile.flags, optionsGetInGameSubtitles());
 	pakSetBitflag(GAMEFILEFLAG_CUTSCENESUBTITLES, g_GameFile.flags, optionsGetCutsceneSubtitles());
 	pakSetBitflag(GAMEFILEFLAG_LANGFILTERON, g_GameFile.flags, g_Vars.langfilteron);
 	pakSetBitflag(GAMEFILEFLAG_FOUNDTIMEDMINE, g_GameFile.flags, frIsWeaponFound(WEAPON_TIMEDMINE));
 	pakSetBitflag(GAMEFILEFLAG_FOUNDPROXYMINE, g_GameFile.flags, frIsWeaponFound(WEAPON_PROXIMITYMINE));
 	pakSetBitflag(GAMEFILEFLAG_FOUNDREMOTEMINE, g_GameFile.flags, frIsWeaponFound(WEAPON_REMOTEMINE));
-
-	switch (optionsGetScreenSize())
-	{
-	case SCREENSIZE_FULL:
-		break;
-	case SCREENSIZE_WIDE:
-		break;
-	case SCREENSIZE_CINEMA:
-		break;
-	}
-
 	pakSetBitflag(GAMEFILEFLAG_ANTIPLAYERNUM, g_GameFile.flags, g_Vars.pendingantiplayernum == 1);
 	pakSetBitflag(GAMEFILEFLAG_COOPRADARON, g_GameFile.flags, g_Vars.coopradaron == true);
 	pakSetBitflag(GAMEFILEFLAG_COOPFRIENDLYFIRE, g_GameFile.flags, g_Vars.coopfriendlyfire == true);
@@ -421,8 +394,6 @@ int gamefileSave(int device, int fileid, uint16_t deviceserial)
 			savebufferOr(&buffer, g_GameFile.weaponsfound[i], 8);
 		}
 
-		func0f0d54c4(&buffer);
-
 		ret = pakSaveAtGuid(device, fileid, PAKFILETYPE_GAME, buffer.bytes, &newfileid, 0);
 		g_FilemgrLastPakError = ret;
 
@@ -465,6 +436,7 @@ void gamefileUnlockEverything(void)
 			g_MpChallenges[i].completions[j] = 0xff;
 		}
 	}
+	
 	challengeDetermineUnlockedFeatures();
 
 	// complete all missions in coop
@@ -483,9 +455,6 @@ void gamefileUnlockEverything(void)
 			g_GameFile.besttimes[i][j] = 7;
 		}
 	}
-
-	// unlock alternate intro sequence
-	g_AltTitleUnlocked = true;
 
 	// unlock all firing range challenges
 	for (i = 0; i < ARRAYCOUNT(g_GameFile.firingrangescores); ++i) {

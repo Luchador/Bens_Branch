@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "game/camera.h"
 #include "game/file.h"
@@ -22,8 +23,9 @@
 
 Mtx g_ActiveProjectionMtx;
 Mtx *g_CameraPerspectiveMtx;
-uint8_t g_ViFrontIndex;
 uint8_t g_ViBackIndex;
+static uint8_t *g_FbRawPtr = NULL;
+static uint8_t *g_FbPtr = NULL;
 
 struct rend_vidat g_ViDataArray[NUM_GFXTASKS] = {
 	{
@@ -74,9 +76,7 @@ void viConfigureForLegal(void)
  */
 void viReset(int stagenum)
 {
-	int i;
 	int fbsize;
-	uint8_t *ptr;
 	uint8_t *fb0;
 	uint8_t *fb1;
 
@@ -84,23 +84,25 @@ void viReset(int stagenum)
 
 	fbsize = FBALLOC_WIDTH_HI * FBALLOC_HEIGHT_HI * NUM_FRAMEBUFFERS;
 
-	ptr = mempAlloc(fbsize * sizeof(uint16_t) + 0x40, MEMPOOL_STAGE);
+	if (g_FbRawPtr) {
+		free(g_FbRawPtr);  // Only free the *original* pointer
+		g_FbRawPtr = NULL;
+		g_FbPtr = NULL;
+	}
 
-#ifdef PLATFORM_64BIT
-	ptr = (uint8_t*)(((uintptr_t)ptr + 0x3f) & 0xffffffffffffffc0);
-#else
-	ptr = (uint8_t *)(((uintptr_t) ptr + 0x3f) & 0xffffffc0);
-#endif
+	// Allocate raw memory and keep the original for later free
+	g_FbRawPtr = (uint8_t*)malloc(fbsize * sizeof(uint16_t) + 0x40);
+	g_FbPtr = (uint8_t*)(((uintptr_t)g_FbRawPtr + 0x3f) & ~0x3f);  // 64-byte aligned
 
-	g_FrameBuffers[0] = (uint16_t *) ptr;
-	g_FrameBuffers[1] = (uint16_t *) (fbsize + ptr);
+	g_FrameBuffers[0] = (uint16_t *) g_FbPtr;
+	g_FrameBuffers[1] = (uint16_t *) (g_FbPtr + fbsize);
 
 	g_ViBackData->fb = g_FrameBuffers[g_ViBackIndex];
 
 	fb0 = (uint8_t *) g_FrameBuffers[0];
 	fb1 = (uint8_t *) g_FrameBuffers[1];
 
-	for (i = 0; i < fbsize; i++) {
+	for (int i = 0; i < fbsize; i++) {
 		fb0[i] = 0;
 		fb1[i] = 0;
 	}
@@ -111,8 +113,6 @@ void viReset(int stagenum)
 // Offets the window during explosions to create a shaking effect
 void viHandleShake(void)
 {
-	int offset;
-
 	if (g_ViShakeTimer != 0) {
 		g_ViShakeTimer--;
 
@@ -121,7 +121,7 @@ void viHandleShake(void)
 		}
 	}
 
-	offset = g_ViShakeDirection * g_ViShakeIntensity;
+	int offset = g_ViShakeDirection * g_ViShakeIntensity;
 	g_ViShakeDirection = -g_ViShakeDirection;
 
 	videoSetWindowOffset(0, offset);
@@ -130,7 +130,6 @@ void viHandleShake(void)
 void viUpdateMode(void)
 {
 	struct rend_vidat *prevdata;
-	int slot;
 
 	switch (g_ViBackData->mode) {
 	case VIMODE_NONE:
@@ -140,7 +139,7 @@ void viUpdateMode(void)
 		break;
 	}
 
-	slot = g_ViSlot;
+	int slot = g_ViSlot;
 
 	if (g_ViBackData->mode == VIMODE_LO) {
 		g_SchedViModesPending[slot] = true;
@@ -153,7 +152,6 @@ void viUpdateMode(void)
 
 	prevdata = g_ViBackData;
 
-	g_ViFrontIndex = (g_ViFrontIndex + 1) % NUM_FRAMEBUFFERS;
 	g_ViBackIndex = (g_ViBackIndex + 1) % NUM_FRAMEBUFFERS;
 
 	g_ViBackData = g_ViDataArray + g_ViBackIndex;
@@ -236,13 +234,11 @@ Gfx *viSetCamNoTranslation(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *vi0000aca4(Gfx *gdl, float znear, float zfar)
+Gfx *viSetNearAndFarPlanes(Gfx *gdl, float znear, float zfar)
 {
-	Mtx tmp;
 	Mtx *mtx = gfxAllocateMatrix();
 
-	mtxPerspective(&tmp, g_ViBackData->fovy, g_ViBackData->aspect, znear, zfar);
-	memcpy(mtx, tmp, sizeof(*mtx));
+	mtxPerspective(mtx, g_ViBackData->fovy, g_ViBackData->aspect, znear, zfar);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
@@ -251,39 +247,11 @@ Gfx *vi0000aca4(Gfx *gdl, float znear, float zfar)
 
 Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 {
-	vp[g_ViBackIndex].vp.vscale[0] = g_ViBackData->viewx * 2;
-	vp[g_ViBackIndex].vp.vtrans[0] = g_ViBackData->viewx * 2 + g_ViBackData->viewleft * 4;
+	vp[g_ViBackIndex].vp.vscale[0] = g_ViBackData->viewx;
+	vp[g_ViBackIndex].vp.vtrans[0] = g_ViBackData->viewx / 2+ g_ViBackData->viewleft;
 
-	vp[g_ViBackIndex].vp.vscale[1] = g_ViBackData->viewy * 2;
-	vp[g_ViBackIndex].vp.vtrans[1] = g_ViBackData->viewy * 2 + g_ViBackData->viewtop * 4;
-
-	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
-
-	g_CameraPerspectiveMtx = gfxAllocateMatrix();
-	mtxPerspective(&g_ActiveProjectionMtx, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar);
-	memcpy(g_CameraPerspectiveMtx, g_ActiveProjectionMtx, sizeof(*g_CameraPerspectiveMtx));
-
-	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-
-	camSetPerspectiveMtxL(g_CameraPerspectiveMtx);
-	camSetSkyMtx(&g_ActiveProjectionMtx);
-
-	return gdl;
-}
-
-Gfx *vi0000af00(Gfx *gdl, Vp *vp)
-{
-	vp[g_ViBackIndex].vp.vscale[0] = g_ViBackData->viewx * 2;
-	vp[g_ViBackIndex].vp.vtrans[0] = g_ViBackData->viewx * 2 + g_ViBackData->viewleft * 4;
-
-	vp[g_ViBackIndex].vp.vscale[1] = g_ViBackData->viewy * 2;
-	vp[g_ViBackIndex].vp.vtrans[1] = g_ViBackData->viewy * 2 + g_ViBackData->viewtop * 4;
-
-	vp[g_ViBackIndex].vp.vscale[2] = 511;
-	vp[g_ViBackIndex].vp.vtrans[2] = 511;
-
-	vp[g_ViBackIndex].vp.vscale[3] = 0;
-	vp[g_ViBackIndex].vp.vtrans[3] = 0;
+	vp[g_ViBackIndex].vp.vscale[1] = g_ViBackData->viewy;
+	vp[g_ViBackIndex].vp.vtrans[1] = g_ViBackData->viewy / 2 + g_ViBackData->viewtop;
 
 	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
 
@@ -299,27 +267,20 @@ Gfx *vi0000af00(Gfx *gdl, Vp *vp)
 	return gdl;
 }
 
-Gfx *vi0000b0e8(Gfx *gdl, float fovy, float aspect)
+Gfx *viSetFovAndAspect(Gfx *gdl, float fovy, float aspect)
 {
-	Mtx tmp;
 	Mtx *mtx = gfxAllocateMatrix();
 
-	mtxPerspective(&tmp, fovy, aspect, g_ViBackData->znear, g_ViBackData->zfar);
-	memcpy(mtx, &tmp, sizeof(*mtx));
+	mtxPerspective(mtx, fovy, aspect, g_ViBackData->znear, g_ViBackData->zfar);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	return gdl;
 }
 
-Gfx *vi0000b1a8(Gfx *gdl)
-{
-	return vi0000ad5c(gdl, &g_Vars.currentplayer->viewport[0]);
-}
-
 Gfx *vi0000b1d0(Gfx *gdl)
 {
-	gdl = vi0000b1a8(gdl);
+	gdl = vi0000ad5c(gdl, &g_Vars.currentplayer->viewport[0]);
 
 	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_ViBackData->bufx, (uintptr_t)(g_ViBackData->fb));
 
@@ -554,4 +515,13 @@ Gfx *viSetFillColour(Gfx *gdl, int r, int g, int b)
 	gDPSetFillColor(gdl++, (GPACK_RGBA5551(r, g, b, 1) << 16) | GPACK_RGBA5551(r, g, b, 1));
 
 	return gdl;
+}
+
+void viStop(void)
+{
+	if (g_FbRawPtr) {
+		free(g_FbRawPtr);
+		g_FbRawPtr = NULL;
+		g_FbPtr = NULL;
+	}
 }

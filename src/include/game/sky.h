@@ -18,8 +18,6 @@ void skyChooseWaterVtxColour(struct skyvtx3d *arg0, float arg1);
 Gfx *skyRender(Gfx *gdl);
 void skyConvertVertex(struct skyvtx3d *arg0, Mtxf *arg1, uint16_t arg2, float arg3, float arg4, struct skyvtx2d *arg5);
 bool skyVerticesAreSame(struct skyvtx2d *arg0, struct skyvtx2d *arg1);
-Gfx *skyRenderTri(Gfx *gdl, struct skyvtx2d *arg1, struct skyvtx2d *arg2, struct skyvtx2d *arg3, float arg4, bool textured);
-Gfx *skyRenderFull(Gfx *gdl, struct skyvtx2d *arg1, struct skyvtx2d *arg2, struct skyvtx2d *arg3, struct skyvtx2d *arg4, float arg5);
 void skyCreateSunArtifact(struct artifact *artifact, int x, int y);
 float skyGetArtifactGroupIntensityFrac(struct artifact *artifacts);
 Gfx *skyRenderSuns(Gfx *gdl, bool xray);

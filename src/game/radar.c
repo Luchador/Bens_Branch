@@ -12,6 +12,7 @@
 #include "bss.h"
 #include "lib/vi.h"
 #include "data.h"
+#include "gfx.h"
 #include "gbiex.h"
 #include "types.h"
 
@@ -47,49 +48,52 @@ void radarSetYIndicatorsEnabled(bool enable)
 	g_RadarYIndicatorsEnabled = enable;
 }
 
-Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, int arg2, int arg3, int arg4)
+Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, int screenX, int screenY, int textureScale)
 {
-	float spb0[2];
-	float spa8[2];
+    float screenPos[2];
+    float scaleFactors[2];
 
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetTexturePersp(gdl++, G_TP_NONE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureFilter(gdl++, G_TF_POINT);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
-	gDPSetTextureLUT(gdl++, G_TT_NONE);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-	gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00000000);
+    // Setup simple (non-perspective) rendering state
+    gDPSetColorDither(gdl++, G_CD_DISABLE);
+    gDPSetTexturePersp(gdl++, G_TP_NONE);
+    gDPSetAlphaCompare(gdl++, G_AC_NONE);
+    gDPSetTextureLOD(gdl++, G_TL_TILE);
+    gDPSetTextureFilter(gdl++, G_TF_POINT);
+    gDPSetTextureConvert(gdl++, G_TC_FILT);
+    gDPSetTextureLUT(gdl++, G_TT_NONE);
+    gDPSetCycleType(gdl++, G_CYC_1CYCLE);
+    gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+	struct RGBA color = {0, 0, 0, 0};
+    gfx_Set_Prim_Color(gdl++, color);
 
-	gDPFillRectangle(gdl++,
-			arg2,
-			arg3,
-			(arg2 + tconfig->width),
-			arg3 + tconfig->width);
+    // Fill background rectangle
+    gDPFillRectangle(gdl++, screenX, screenY, (screenX + tconfig->width), (screenY + tconfig->width));
 
-	spb0[0] = arg2;
-	spb0[1] = arg3;
-	spa8[0] = arg4;
-	spa8[1] = arg4;
+    // Set texture rendering parameters
+    screenPos[0] = screenX;
+    screenPos[1] = screenY;
+    scaleFactors[0] = textureScale;
+    scaleFactors[1] = textureScale;
 
-	texSelect(&gdl, tconfig, 2, 0, 0, 1, NULL);
+    texSelect(&gdl, tconfig, 2, 0, 0, 1, NULL);
 
-	gDPSetEnvColor(gdl++, 0, 0xff, 0, 40);
-	gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
-	utilsRenderScreenTexture(&gdl, spb0, spa8, tconfig->width, tconfig->height, 0, 0, 0, false);
+    gDPSetEnvColor(gdl++, 0, 0xff, 0, 40);
+    gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
 
-	gDPSetColorDither(gdl++, G_CD_BAYER);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_LOD);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
-	gDPSetTextureLUT(gdl++, G_TT_NONE);
+    // Render the radar background texture
+    utilsRenderScreenTexture(&gdl, screenPos, scaleFactors, tconfig->width, tconfig->height, 0, 0, 0, false);
 
-	return gdl;
+    // Restore standard rendering state
+    gDPSetColorDither(gdl++, G_CD_BAYER);
+    gDPSetTexturePersp(gdl++, G_TP_PERSP);
+    gDPSetAlphaCompare(gdl++, G_AC_NONE);
+    gDPSetTextureLOD(gdl++, G_TL_LOD);
+    gDPSetTextureFilter(gdl++, G_TF_BILERP);
+    gDPSetTextureConvert(gdl++, G_TC_FILT);
+    gDPSetTextureLUT(gdl++, G_TT_NONE);
+
+    return gdl;
 }
 
 int radarGetTeamIndex(int team)
@@ -300,9 +304,6 @@ Gfx *radarRender(Gfx *gdl)
 			g_RadarY -= 2;
 		}
 	} else {
-		if (optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
-			g_RadarY -= 6;
-		}
 		gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeR);
 		gDPSetSubpixelOffsetEXT(gdl++, -2, 2);
 	}

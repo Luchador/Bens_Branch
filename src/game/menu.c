@@ -2055,8 +2055,8 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				viSetViewPosition(x1, g_MenuScissorY1);
 				viSetFovAspectAndSize(g_Vars.currentplayer->fovy, aspect, (x2 - x1), g_MenuScissorY2 - g_MenuScissorY1);
 
-				gdl = vi0000af00(gdl, var800a2048[g_MpPlayerNum]);
-				gdl = vi0000aca4(gdl, znear, zfar);
+				gdl = vi0000ad5c(gdl, var800a2048[g_MpPlayerNum]);
+				gdl = viSetNearAndFarPlanes(gdl, znear, zfar);
 			}
 		}
 
@@ -2967,11 +2967,6 @@ void menuFindAvailableSize(int *leftptr, int *topptr, int *rightptr, int *bottom
 	if (currentPlayerIsMenuOpenInSoloOrMp()) {
 		// Make room for health bar
 		top += 22;
-
-		if (optionsGetEffectiveScreenSize() == SCREENSIZE_CINEMA) {
-			top -= 8;
-			bottom += 4;
-		}
 	}
 
 	switch (g_MenuData.root) {

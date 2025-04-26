@@ -35,8 +35,7 @@
 
 #include "types.h"
 #include "data.h"
-#include <stdbool.h>
-#include <stdio.h>
+#include "gfx.h"
 
 uintptr_t gfxFramebuffer;
 
@@ -69,10 +68,6 @@ float g_ModelViewProj[4][4];
 
 #define C0(pos, width) ((cmd->words.w0 >> (pos)) & ((1U << width) - 1))
 #define C1(pos, width) ((cmd->words.w1 >> (pos)) & ((1U << width) - 1))
-
-struct RGBA {
-    uint8_t r, g, b, a;
-};
 
 struct NormalColor {
     union {
@@ -185,12 +180,9 @@ static struct RDP {
     bool textures_changed[2];
 
     uint8_t first_tile_index;
-    uint8_t tex_min_lod;
-    uint8_t tex_max_lod;
 
     uint32_t other_mode_l, other_mode_h;
     uint64_t combine_mode;
-    bool grayscale;
     bool tex_lod;
     bool tex_detail;
 
@@ -201,8 +193,8 @@ static struct RDP {
     void* z_buf_address;
     void* color_image_address;
 
-    int16_t subpixel_ofs_x;
-    int16_t subpixel_ofs_y;
+    int32_t subpixel_ofs_x;
+    int32_t subpixel_ofs_y;
 } rdp;
 
 static struct RenderingState {
@@ -1296,8 +1288,6 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
     const bool use_noise = (rdp.other_mode_l & (3U << G_MDSFT_ALPHACOMPARE)) == G_AC_DITHER;
     const bool use_2cyc = (rdp.other_mode_h & (3U << G_MDSFT_CYCLETYPE)) == G_CYC_2CYCLE;
     const bool alpha_threshold = (rdp.other_mode_l & (3U << G_MDSFT_ALPHACOMPARE)) == G_AC_THRESHOLD;
-    //const bool invisible = (rdp.other_mode_l & (3 << 24)) == (G_BL_0 << 24) && (rdp.other_mode_l & (3 << 20)) == (G_BL_CLR_MEM << 20);
-    const bool use_grayscale = rdp.grayscale;
     const bool use_modulate = use_alpha && (rsp.extra_geometry_mode & G_MODULATE_EXT) != 0;
     const bool use_blur = (rdp.other_mode_h & (3U << G_MDSFT_TEXTFILT)) == G_TF_BLUR_EXT;
 
@@ -1322,12 +1312,6 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
     }
     if (alpha_threshold) {
         cc_options |= (uint64_t)SHADER_OPT_ALPHA_THRESHOLD;
-    }
-    /*if (invisible) {
-        cc_options |= (uint64_t)SHADER_OPT_INVISIBLE;
-    }*/
-    if (use_grayscale) {
-        cc_options |= (uint64_t)SHADER_OPT_GRAYSCALE;
     }
     if (use_blur) {
         cc_options |= (uint64_t)SHADER_OPT_BLUR;
@@ -1513,13 +1497,6 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
             buf_vbo[buf_vbo_len++] = v_arr[i]->fog / 255.0f; // fog factor
         }
 
-        if (use_grayscale) {
-            buf_vbo[buf_vbo_len++] = rdp.grayscale_color.r / 255.0f;
-            buf_vbo[buf_vbo_len++] = rdp.grayscale_color.g / 255.0f;
-            buf_vbo[buf_vbo_len++] = rdp.grayscale_color.b / 255.0f;
-            buf_vbo[buf_vbo_len++] = rdp.grayscale_color.a / 255.0f; // lerp interpolation factor (not alpha)
-        }
-
         for (int j = 0; j < num_inputs; j++) {
             struct RGBA* color = 0;
             struct RGBA tmp = { 0 };
@@ -1687,10 +1664,10 @@ static void gfx_adjust_viewport_or_scissor(XYWidthHeight* area, bool preserve_as
 
 static void gfx_calc_and_set_viewport(const Vp_t* viewport) {
     // 2 bits fraction
-    float width = 2.0f * viewport->vscale[0] / 4.0f;
-    float height = 2.0f * viewport->vscale[1] / 4.0f;
-    float x = (viewport->vtrans[0] / 4.0f) - width / 2.0f;
-    float y = ((viewport->vtrans[1] / 4.0f) + height / 2.0f);
+    float width = viewport->vscale[0];
+    float height = viewport->vscale[1];
+    float x = (viewport->vtrans[0]) - width / 2.0f;
+    float y = ((viewport->vtrans[1]) + height / 2.0f);
 
     rdp.viewport.x = x;
     rdp.viewport.y = y;
@@ -1728,7 +1705,7 @@ static void gfx_sp_moveword(uint8_t index, uint16_t offset, uintptr_t data) {
     switch (index) {
         case G_MW_NUMLIGHT:
             // Ambient light is included
-            // The 31th bit is a flag that lights should be recalculated
+            // The 31st bit is a flag that lights should be recalculated
             rsp.current_num_lights = (data - 0x80000000U) / 32;
             rsp.lights_changed = 1;
             break;
@@ -1745,7 +1722,6 @@ static void gfx_sp_moveword(uint8_t index, uint16_t offset, uintptr_t data) {
 static void gfx_sp_texture(uint16_t sc, uint16_t tc, uint8_t level, uint8_t tile, uint8_t on) {
     rsp.texture_scaling_factor.s = sc;
     rsp.texture_scaling_factor.t = tc;
-    rdp.tex_max_lod = level;
     if (rdp.first_tile_index != tile) {
         rdp.textures_changed[0] = true;
         rdp.textures_changed[1] = true;
@@ -1754,10 +1730,10 @@ static void gfx_sp_texture(uint16_t sc, uint16_t tc, uint8_t level, uint8_t tile
 }
 
 static void gfx_dp_set_scissor(uint32_t ulx, uint32_t uly, uint32_t lrx, uint32_t lry) {
-    float x = ulx / 4.0f;
-    float y = lry / 4.0f;
-    float width = (lrx - ulx) / 4.0f;
-    float height = (lry - uly) / 4.0f;
+    float x = ulx;
+    float y = lry;
+    float width = lrx - ulx;
+    float height = lry - uly;
 
     rdp.scissor.x = x;
     rdp.scissor.y = y;
@@ -1946,13 +1922,6 @@ static inline uint32_t alpha_comb(uint32_t a, uint32_t b, uint32_t c, uint32_t d
     return (a & 7) | ((b & 7) << 3) | ((c & 7) << 6) | ((d & 7) << 9);
 }
 
-static void gfx_dp_set_grayscale_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-    rdp.grayscale_color.r = r;
-    rdp.grayscale_color.g = g;
-    rdp.grayscale_color.b = b;
-    rdp.grayscale_color.a = a;
-}
-
 static void gfx_dp_set_env_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     rdp.env_color.r = r;
     rdp.env_color.g = g;
@@ -1960,8 +1929,8 @@ static void gfx_dp_set_env_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     rdp.env_color.a = a;
 }
 
-static void gfx_dp_set_prim_color(uint8_t m, uint8_t l, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-    rdp.prim_lod_fraction = l;
+static void gfx_dp_set_prim_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    rdp.prim_lod_fraction = 0;
     rdp.prim_color.r = r;
     rdp.prim_color.g = g;
     rdp.prim_color.b = b;
@@ -1970,8 +1939,6 @@ static void gfx_dp_set_prim_color(uint8_t m, uint8_t l, uint8_t r, uint8_t g, ui
     rdp.fill_color.g = g;
     rdp.fill_color.b = b;
     rdp.fill_color.a = a;
-    rdp.tex_min_lod = m;
-
 }
 
 static void gfx_dp_set_fog_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
@@ -2352,9 +2319,6 @@ static void gfx_run_dl(Gfx* cmd) {
                 rdp.textures_changed[0] = false;
                 rdp.textures_changed[1] = false;
                 break;
-            case G_SETGRAYSCALE_EXT:
-                rdp.grayscale = cmd->words.w1;
-                break;
             case G_LOADBLOCK:
                 gfx_dp_load_block(C1(24, 3), C0(12, 12), C0(0, 12), C1(12, 12), C1(0, 12));
                 break;
@@ -2375,7 +2339,7 @@ static void gfx_run_dl(Gfx* cmd) {
                 gfx_dp_set_env_color(C1(24, 8), C1(16, 8), C1(8, 8), C1(0, 8));
                 break;
             case G_SETPRIMCOLOR:
-                gfx_dp_set_prim_color(C0(8, 8), C0(0, 8), C1(24, 8), C1(16, 8), C1(8, 8), C1(0, 8));
+                gfx_dp_set_prim_color(C1(24, 8), C1(16, 8), C1(8, 8), C1(0, 8));
                 break;
             case G_SETFOGCOLOR:
                 gfx_dp_set_fog_color(C1(24, 8), C1(16, 8), C1(8, 8), C1(0, 8));
@@ -2383,17 +2347,12 @@ static void gfx_run_dl(Gfx* cmd) {
             case G_SETFILLCOLOR:
                 gfx_dp_set_fill_color(cmd->words.w1);
                 break;
-            /*case G_SETINTENSITY_EXT:
-                gfx_dp_set_grayscale_color(C1(24, 8), C1(16, 8), C1(8, 8), C1(0, 8));
-                break;*/
             case G_SETCOMBINE:
                 gfx_dp_set_combine_mode(color_comb(C0(20, 4), C1(28, 4), C0(15, 5), C1(15, 3)),
                                         alpha_comb(C0(12, 3), C1(12, 3), C0(9, 3), C1(9, 3)),
                                         color_comb(C0(5, 4), C1(24, 4), C0(0, 5), C1(6, 3)),
                                         alpha_comb(C1(21, 3), C1(3, 3), C1(18, 3), C1(0, 3)));
                 break;
-            // G_SETPRIMCOLOR, G_CCMUX_PRIMITIVE, G_ACMUX_PRIMITIVE, is used by Goddard
-            // G_CCMUX_TEXEL1, LOD_FRACTION is used in Bowser room 1
             case G_SETSUBPIXELOFFSET_EXT: {
                 gfx_dp_set_subpixel_offset(C0(0, 16), C1(0, 16));
                 break;
@@ -2529,6 +2488,15 @@ static void gfx_run_dl(Gfx* cmd) {
         }
         ++cmd;
     }
+}
+
+extern "C" void gfx_Set_Prim_Color(Gfx *pkt, RGBA color)
+{
+    pkt->words.w0 = (_SHIFTL(G_SETPRIMCOLOR, 24, 8));
+    pkt->words.w1 = ((uint32_t)color.r << 24) |
+                    ((uint32_t)color.g << 16) |
+                    ((uint32_t)color.b << 8)  |
+                    ((uint32_t)color.a << 0);
 }
 
 static void gfx_sp_reset() {

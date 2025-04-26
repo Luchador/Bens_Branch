@@ -11,6 +11,7 @@
 #include "game/menuutils.h"
 #include "game/savebuffer.h"
 #include "game/textutils.h"
+#include "game/utils.h"
 #include "fs.h"
 #include "bss.h"
 #include "lib/vi.h"
@@ -18,6 +19,7 @@
 #include "lib/main.h"
 #include "lib/memp.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "platform.h"
 
@@ -246,7 +248,8 @@ Gfx *textSetPrimColour(Gfx *gdl, uint32_t colour)
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 
-	gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
+	struct RGBA tmp = utilsUnpackColorRGBA(colour);
+	gfx_Set_Prim_Color(gdl++, tmp);
 
 	return gdl;
 }
@@ -317,7 +320,7 @@ Gfx *text0f153ab0(Gfx *gdl)
 
 	gdl = func0f0d4c80(gdl);
 
-	var800a4634 = func0f0d4a3c(var800a4634, 0);
+	var800a4634 = func0f0d4a3c(var800a4634);
 	var8007fba4 = -1;
 
 	return gdl;
@@ -665,7 +668,8 @@ Gfx *text0f154ecc(Gfx *gdl, uint32_t arg1, uint32_t arg2)
 	uint32_t colour = textHighlightSweep(arg1, arg2, g_Blend.colour04);
 
 	if (colour != g_Blend.colour44) {
-		gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
+		struct RGBA tmp = utilsUnpackColorRGBA(colour);
+		gfx_Set_Prim_Color(gdl++, tmp);
 	}
 
 	g_Blend.colour44 = colour;
@@ -782,7 +786,8 @@ Gfx *textRenderCredit(Gfx *gdl, float x, float y, float widthscale, float height
 	gDPLoadTLUTCmd(gdl++, 6, 15);
 	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c);
-	gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
+	struct RGBA tmp = utilsUnpackColorRGBA(colour);
+	gfx_Set_Prim_Color(gdl++, tmp);
 
 	if (text != NULL) {
 		while (*text != '\0') {
@@ -984,7 +989,8 @@ Gfx *textRenderProjected(Gfx *gdl, int *x, int *y, char *text, struct fontchar *
 	//gDPSetTile(gdl++, G_IM_FMT_CUSTOMFONT, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c);
 	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 128, 128);
-	gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
+	struct RGBA tmp = utilsUnpackColorRGBA((uint32_t)colour);
+	gfx_Set_Prim_Color(gdl++, tmp);
 
 	g_Blend.colour04 = colour;
 	g_Blend.colour44 = colour;
@@ -1026,7 +1032,8 @@ Gfx *text0f1566cc(Gfx *gdl, uint32_t arg1, uint32_t arg2)
 	colour = (g_Blend.colour08 & 0xffffff00) | (textHighlightSweep(arg1, arg2, g_Blend.colour08) & 0xff);
 
 	if (colour != g_Blend.colour48) {
-		gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
+		struct RGBA tmp = utilsUnpackColorRGBA(colour);
+		gfx_Set_Prim_Color(gdl++, tmp);
 	}
 
 	g_Blend.colour48 = colour;
@@ -1156,7 +1163,8 @@ Gfx *textRender(Gfx *gdl, int *x, int *y, char *text,
 	gDPSetCombineLERP(gdl++,
 			ENVIRONMENT, PRIMITIVE, TEXEL1_ALPHA, PRIMITIVE, 0, 0, 0, TEXEL0,
 			0, 0, 0, COMBINED, COMBINED, 0, ENVIRONMENT, 0);
-	gDPSetPrimColorViaWord(gdl++, 0, 0, colour);
+	struct RGBA tmp = utilsUnpackColorRGBA(colour);
+	gfx_Set_Prim_Color(gdl++, tmp);
 	gDPSetEnvColorViaWord(gdl++, arg6);
 
 	g_Blend.colour08 = colour;

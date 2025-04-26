@@ -70,19 +70,6 @@
 	_g->words.w1 = _SHIFTL(0x06, 24, 8) | _SHIFTL((c), 14, 10) | _SHIFTL((d), 2, 10);       \
 }
 
-/**
- * Like gDPSetPrimColor, but is useful when the input colour is already in
- * RGBA format. It avoids unnecessary bitshifting and masking.
- */
-#define	gDPSetPrimColorViaWord(pkt, m, l, rgba)     \
-{                                                   \
-	Gfx *_g = (Gfx *)(pkt);                         \
-	_g->words.w0 =	(_SHIFTL(G_SETPRIMCOLOR, 24, 8) \
-			| _SHIFTL(m, 8, 8)                      \
-			| _SHIFTL(l, 0, 8));                    \
-	_g->words.w1 =  (rgba);                         \
-}
-
 #define	gDPSetEnvColorViaWord(pkt, rgba) gDPSetColor(pkt, G_SETENVCOLOR, rgba)
 #define	gDPSetFogColorViaWord(pkt, rgba) gDPSetColor(pkt, G_SETFOGCOLOR, rgba)
 

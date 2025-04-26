@@ -50,23 +50,20 @@ void func0f0d475c(Mtxf *mtx)
 
 Gfx *gfxSetCustomProjection(Gfx *gdl)
 {
-	Mtxf mtx;
-	Mtxf *mtx1;
-	Mtxf *mtx2;
+	Mtx mtx;
+	Mtx *mtx1;
+	Mtx *mtx2;
 
 	mtx1 = gfxAllocateMatrix();
 	mtx2 = gfxAllocateMatrix();
 
-	func0f0d475c(&mtx);
-	mtx4Copy((Mtx*)&mtx, (Mtx*)mtx2);
-	mtxIdent((Mtx*)&mtx);
+	func0f0d475c((Mtxf*)&mtx);
+	mtx4Copy(&mtx, mtx2);
+	mtxIdent(&mtx);
 
-	mtxFrustum((Mtx*)&mtx,
-			-(float) viGetWidth() * 0.5f, viGetWidth() * 0.5f,
-			-(float) viGetHeight() * 0.5f, viGetHeight() * 0.5f,
-			10, 10000, 1);
+	mtxFrustum(&mtx, -(float) viGetWidth() * 0.5f, viGetWidth() * 0.5f, -(float) viGetHeight() * 0.5f, viGetHeight() * 0.5f, 10, 10000, 1);
 
-	mtx4Copy((Mtx*)&mtx, (Mtx*)mtx1);
+	mtx4Copy(&mtx, mtx1);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtx2), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gSPMatrix(gdl++, (uintptr_t)(mtx1), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
@@ -76,15 +73,11 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 		g_Viewport = gfxAllocate(size);
 
 		if (g_Viewport != NULL) {
-			g_Viewport->vp.vscale[0] = viGetWidth() << 1;
-			g_Viewport->vp.vscale[1] = viGetHeight() << 1;
-			g_Viewport->vp.vscale[2] = 1;
-			g_Viewport->vp.vscale[3] = 0;
+			g_Viewport->vp.vscale[0] = viGetWidth();
+			g_Viewport->vp.vscale[1] = viGetHeight();
 
-			g_Viewport->vp.vtrans[0] = viGetWidth() << 1;
-			g_Viewport->vp.vtrans[1] = viGetHeight() << 1;
-			g_Viewport->vp.vtrans[2] = 0x1ff;
-			g_Viewport->vp.vtrans[3] = 0;
+			g_Viewport->vp.vtrans[0] = viGetWidth() / 2;
+			g_Viewport->vp.vtrans[1] = viGetHeight() / 2;
 		}
 	}
 
@@ -101,16 +94,12 @@ Gfx *savebufferSetup2DRender(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *func0f0d4a3c(Gfx *gdl, int arg1)
+Gfx *func0f0d4a3c(Gfx *gdl)
 {
 	Mtxf mtx;
 	Mtxf *mtxptr = gfxAllocateMatrix();
 
-	if (arg1 == 0) {
-		texSelect(&gdl, &g_TexGeneralConfigs[6], 2, 0, 2, 1, NULL);
-	} else if (arg1 == 1) {
-		texSelect(&gdl, &g_TexGeneralConfigs[11], 2, 0, 2, 1, NULL);
-	}
+	texSelect(&gdl, &g_TexGeneralConfigs[6], 2, 0, 2, 1, NULL);
 
 	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
@@ -133,13 +122,13 @@ Gfx *func0f0d4a3c(Gfx *gdl, int arg1)
 
 Gfx *func0f0d4c80(Gfx *gdl)
 {
-	Mtxf mtx;
-	Mtxf *mtxptr = gfxAllocateMatrix();
+	Mtx mtx;
+	Mtx *mtxptr = gfxAllocateMatrix();
 
-	func0f0d4690(&mtx);
-	mtxScaleRow0Full(0.1f, (Mtx*)&mtx);
-	mtxScaleRow1Full(0.1f, (Mtx*)&mtx);
-	mtx4Copy((Mtx*)&mtx, (Mtx*)mtxptr);
+	func0f0d4690((Mtxf*)&mtx);
+	mtxScaleRow0Full(0.1f, &mtx);
+	mtxScaleRow1Full(0.1f, &mtx);
+	mtx4Copy(&mtx, mtxptr);
 
 	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
@@ -423,13 +412,6 @@ void savebufferWriteData(struct savebuffer *buffer, uint8_t *data, uint8_t len)
 	for (i = 0; i < len; i++) {
 		buffer->bytes[i] = data[i];
 	}
-}
-
-void func0f0d54c4(struct savebuffer *buffer)
-{
-	int tmp = buffer->bitpos;
-
-	if (tmp / 8 && buffer->bitpos);
 }
 
 /**

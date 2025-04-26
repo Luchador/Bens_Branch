@@ -26,6 +26,7 @@
 #include "lib/ailist.h"
 #include "string.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "video.h"
 
@@ -834,11 +835,6 @@ Gfx *amRenderAibotInfo(Gfx *gdl, int buddynum)
 	char *weaponname;
 	char *aibotname;
 	int offset = 0;
-	bool wide = false;
-
-	if (PLAYERCOUNT() == 1 && optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
-		wide = true;
-	}
 
 	if (PLAYERCOUNT() == 2 && (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) || PLAYERCOUNT() >= 3)
 	{
@@ -877,9 +873,6 @@ Gfx *amRenderAibotInfo(Gfx *gdl, int buddynum)
 		} else {
 			y = viGetViewTop() + 10;
 		}
-		if (wide) {
-			x = viGetViewLeft() + 32;
-		}
 
 		gdl = textRenderProjected(gdl, &x, &y, aibotname, g_AmFont1, g_AmFont2, -1, videoGetWidth(), videoGetHeight(), 0, 0);
 
@@ -900,10 +893,6 @@ Gfx *amRenderAibotInfo(Gfx *gdl, int buddynum)
 			y = viGetViewTop() + 5;
 		} else {
 			y = viGetViewTop() + 10;
-		}
-
-		if (wide) {
-			x = viGetViewLeft() + 32;
 		}
 
 		gdl = textRender(gdl, &x, &y, title, g_AmFont1, g_AmFont2, -1,
@@ -1347,14 +1336,10 @@ Gfx *amRender(Gfx *gdl)
 			xoffset = (g_Vars.currentplayernum & 1) == 0 ? 8 : -8;
 		}
 
-		if (PLAYERCOUNT() == 1 && optionsGetEffectiveScreenSize() != SCREENSIZE_FULL) {
-			part1left = viGetViewLeft() + 32;
-		} else {
-			part1left = (int) ((viGetViewWidth()) * 0.5f)
-				+ (int) (viGetViewLeft())
-				- (int) (barwidth * 0.5f)
-				+ xoffset;
-		}
+		part1left = (int) ((viGetViewWidth()) * 0.5f)
+			+ (int) (viGetViewLeft())
+			- (int) (barwidth * 0.5f)
+			+ xoffset;
 
 		part1width = (int) (barwidth * 0.25f) - 1;
 
@@ -1379,12 +1364,17 @@ Gfx *amRender(Gfx *gdl)
 		if (redhealth) {
 			a2 = part1left + part1width - (int) (part1width * (0.25f - healthfrac) * 4.0f);
 
-			gDPSetPrimColorViaWord(gdl++, 0, 0, 0xff000060);
+			struct RGBA color = {255, 0, 0, 96};
+			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 1 red
 			RECT(gdl++, a2, y, part1left + part1width, y + barheight);
 
-			gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00000080);
+			color.r = 0;
+			color.g = 0;
+			color.b = 0;
+			color.a = 128;
+			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 1 black
 			RECT(gdl++, part1left, y, a2, y + barheight);
@@ -1392,7 +1382,8 @@ Gfx *amRender(Gfx *gdl)
 			// Part 2 black
 			RECT(gdl++, PART2LEFT(), y, part1left + barwidth, y + barheight);
 		} else {
-			gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00c00060);
+			struct RGBA color = {0, 192, 0, 96};
+			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 1 green
 			RECT(gdl++, part1left, y, part1left + part1width, y + barheight);
@@ -1402,7 +1393,11 @@ Gfx *amRender(Gfx *gdl)
 
 			RECT(gdl++, PART2LEFT(), y, a2, y + barheight);
 
-			gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00000080);
+			color.r = 0;
+			color.g = 0;
+			color.b = 0;
+			color.a = 128;
+			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 2 black
 			RECT(gdl++, a2, y, part1left + barwidth, y + barheight);
@@ -1412,13 +1407,18 @@ Gfx *amRender(Gfx *gdl)
 		y = y + barheight + 2;
 		barheight = barheight * 0.75f;
 
-		gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00c00060);
+		struct RGBA color = {0, 192, 0, 96};
+		gfx_Set_Prim_Color(gdl++, color);
 
 		a2 = part1left + (int) (barwidth * shieldfrac);
 
 		RECT(gdl++, part1left, y, a2, y + barheight);
 
-		gDPSetPrimColorViaWord(gdl++, 0, 0, 0x00000080);
+		color.r = 0;
+		color.g = 0;
+		color.b = 0;
+		color.a = 128;
+		gfx_Set_Prim_Color(gdl++, color);
 
 		RECT(gdl++, a2, y, part1left + barwidth, y + barheight);
 	}

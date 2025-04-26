@@ -865,7 +865,7 @@ void frInitTargets(void)
 	struct defaultobj *obj;
 	struct pad pad;
 	struct coord pos;
-	Mtxf sp144;
+	Mtx sp144;
 	float sp108[3][3];
 
 	for (i = 0; i < ARRAYCOUNT(g_FrData.targets); i++) {
@@ -918,14 +918,14 @@ void frInitTargets(void)
 			}
 
 			if (g_FrData.targets[i].flags & FRTARGETFLAG_SPAWNFACINGAWAY) {
-				mtx4LoadYRotation(0.0f, (Mtx*)&sp144);
+				mtx4LoadYRotation(0.0f, &sp144);
 				g_FrData.targets[i].angle = M_PI;
 			} else {
-				mtx4LoadYRotation(M_PI, (Mtx*)&sp144);
+				mtx4LoadYRotation(M_PI, &sp144);
 			}
 
-			mtxScaleRotationPart(obj->model->scale, (Mtx*)&sp144);
-			mtx4ToMtx3((Mtx*)&sp144, sp108);
+			mtxScaleRotationPart(obj->model->scale, &sp144);
+			mtx4ToMtx3(&sp144, sp108);
 			mtx3Copy(sp108, obj->realrot);
 
 			prop->pos.x = pos.x;
@@ -1521,7 +1521,6 @@ void frTick(void)
 	bool cloaked;
 	float toangle;
 	float speed;
-	Mtxf spbc;
 	float sp98[3][3];
 
 	if (g_FrIsValidWeapon
@@ -1945,9 +1944,10 @@ void frTick(void)
 					}
 				}
 
-				mtx4LoadYRotation(g_FrData.targets[i].angle + M_PI, (Mtx*)&spbc);
-				mtxScaleRotationPart(obj->model->scale, (Mtx*)&spbc);
-				mtx4ToMtx3((Mtx*)&spbc, sp98);
+				Mtx spbc;
+				mtx4LoadYRotation(g_FrData.targets[i].angle + M_PI, &spbc);
+				mtxScaleRotationPart(obj->model->scale, &spbc);
+				mtx4ToMtx3(&spbc, sp98);
 				mtx3Copy(sp98, obj->realrot);
 			}
 

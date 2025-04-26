@@ -21,7 +21,7 @@
 #include "gfx_pc.h"
 #include "gfx_api.h"
 #include "gfx_opengl.h"
-#include "gfxdata.h"
+#include "gfx.h"
 
 using namespace std;
 
@@ -628,10 +628,6 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     GLint uMVPLoc = glGetUniformLocation(shader_program, "uMVP");
     glUniformMatrix4fv(uMVPLoc, 1, GL_TRUE, &g_ModelViewProj[0][0]);
 
-    // Set camera position
-    GLint camPosLoc = glGetUniformLocation(shader_program, "uCamPos");
-    glUniform3f(camPosLoc, g_GfxCamPos.x, g_GfxCamPos.y, g_GfxCamPos.z);
-
     // Set fog start and fog end
     GLint fogStartLoc = glGetUniformLocation(shader_program, "uFogStart");
     GLint fogEndLoc = glGetUniformLocation(shader_program, "uFogEnd");
@@ -687,16 +683,6 @@ int debug_log(const char *message, int num)
     fclose(debug_file);
 
 	return 1;
-}
-
-void debug_log_coord(const struct coord *pos) {
-    FILE *file = fopen("debug.log", "a"); // Open in append mode
-    if (file) {
-        fprintf(file, "coord: x = %.6f, y = %.6f, z = %.6f\n", pos->x, pos->y, pos->z);
-        fclose(file);
-    } else {
-        perror("Failed to open debug.log");
-    }
 }
 
 void logModelViewProjMatrix(void)

@@ -2,7 +2,6 @@
 #include <math.h>
 #include <string.h>
 #include "constants.h"
-#include "gfxdata.h"
 #include "game/bondeyespy.h"
 #include "game/bondmove.h"
 #include "game/cheats.h"
@@ -70,6 +69,7 @@
 #include "lib/anim.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "video.h"
 #include "input.h"
@@ -103,8 +103,6 @@ float g_CutsceneTweenFrac; // 0 when bars across the top and bottom, 1 when full
 uint32_t var8009de34;
 int16_t g_SpawnPoints[24];
 int g_NumSpawnPoints;
-
-struct coord g_GfxCamPos = {0.0f, 0.0f, 0.0f};
 
 struct vimode g_ViModes[] = {
 	// fbwidth
@@ -2100,7 +2098,8 @@ Gfx *playerDrawFade(Gfx *gdl, uint32_t r, uint32_t g, uint32_t b, float frac)
 		gDPSetTextureLUT(gdl++, G_TT_NONE);
 		gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 		gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-		gDPSetPrimColor(gdl++, 0, 0, r, g, b, (int)(frac * 255));
+		struct RGBA color = {r, g, b, (int)(frac * 255)};
+		gfx_Set_Prim_Color(gdl++, color);
 		gDPFillRectangle(gdl++, viGetViewLeft(), viGetViewTop(),
 				viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 		gDPSetColorDither(gdl++, G_CD_BAYER);
@@ -2524,12 +2523,11 @@ Gfx *playerRenderHealthBar(Gfx *gdl)
 	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetAlphaCompare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
-	gDPSetPrimColorViaWord(gdl++, 0, 0, 0xe6e6e600);
+	struct RGBA color = {230, 230, 230, 0};
+	gfx_Set_Prim_Color(gdl++, color);
 	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-#ifndef PLATFORM_N64
 	// bug?
 	gSPClearGeometryMode(gdl++, G_ZBUFFER);
-#endif
 
 	gdl = healthbarDraw(gdl, NULL, 0, 0);
 
@@ -2686,11 +2684,7 @@ int16_t playerGetViewportHeight(void)
 			height--;
 		}
 	} else {
-		if (optionsGetEffectiveScreenSize() == SCREENSIZE_WIDE) {
-			height = g_ViModes[0].wideheight;
-		} else if (optionsGetEffectiveScreenSize() == SCREENSIZE_CINEMA) {
-			height = g_ViModes[0].cinemaheight;
-		} else if (g_InCutscene && !g_GamePaused) {
+		if (g_InCutscene && !g_GamePaused) {
 			if (g_CutsceneTweenDuration60 >= 1) {
 				float a = g_ViModes[0].wideheight;
 				float b = g_ViModes[0].fullheight;
@@ -2728,23 +2722,6 @@ int16_t playerGetViewportTop(void)
 			}
 		}
 	} else {
-		if (optionsGetEffectiveScreenSize() == SCREENSIZE_WIDE) {
-			if (g_InCutscene && optionsGetCutsceneSubtitles() && g_Vars.stagenum != STAGE_CITRAINING) {
-				if (g_CutsceneTweenDuration60 >= 1) {
-					float a = g_ViModes[0].fulltop;
-					float b = g_ViModes[0].widetop;
-					a = a * (1.0f - g_CutsceneTweenFrac);
-					b = b * g_CutsceneTweenFrac;
-					top = a + b;
-				} else {
-					top = g_ViModes[0].fulltop;
-				}
-			} else {
-				top = g_ViModes[0].widetop;
-			}
-		} else if (optionsGetEffectiveScreenSize() == SCREENSIZE_CINEMA) {
-			top = g_ViModes[0].cinematop;
-		} else {
 			if (g_InCutscene && !g_GamePaused
 					&& (!optionsGetCutsceneSubtitles() || g_Vars.stagenum == STAGE_CITRAINING)) {
 				if (g_CutsceneTweenDuration60 >= 1) {
@@ -2759,13 +2736,52 @@ int16_t playerGetViewportTop(void)
 			} else {
 				return g_ViModes[0].fulltop;
 			}
-		}
 	}
 
 	return top;
 }
 
-float player0f0bd358(void)
+Gfx *playerDrawCutsceneRects(Gfx *gdl)
+{
+	int top = 0;
+
+	if (g_CutsceneTweenDuration60 >= 1) 
+	{
+		float a = g_ViModes[0].widetop;
+		float b = g_ViModes[0].fulltop;
+		a = a * (1.0f - g_CutsceneTweenFrac);
+		b = b * g_CutsceneTweenFrac;
+		top = a + b;
+	} 
+	else 
+	{
+		top = g_ViModes[0].widetop;
+	}
+
+	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
+	gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+	struct RGBA color = {0, 0, 0, 255};
+	gfx_Set_Prim_Color(gdl++, color);
+
+	if (g_InCutscene && optionsGetCutsceneSubtitles() && g_Vars.stagenum != STAGE_CITRAINING) 
+	{
+		// For cutscenes with subtitles enabled, draw one double height rectangle on the bottom
+		gDPFillRectangle(gdl++, 0, viGetViewHeight() - top * 2, viGetViewWidth(), viGetViewHeight());
+	}
+	else
+	{
+		// Top Rectangle
+		gDPFillRectangle(gdl++, 0, 0, viGetViewWidth(), top);
+
+		// Bottom Rectangle
+		gDPFillRectangle(gdl++, 0, viGetViewHeight() - top, viGetViewWidth(), viGetViewHeight());
+	}
+
+	return gdl;
+}
+
+float playerGetAspect(void)
 {
 	float result;
 	int16_t height = playerGetViewportHeight();
@@ -2881,7 +2897,7 @@ void playerTickTeleport(float *aspectratio)
 
 void playerConfigureVi(void)
 {
-	float ratio = player0f0bd358();
+	float ratio = playerGetAspect();
 
 	playermgrSetFovY(PLAYER_DEFAULT_FOV);
 	playermgrSetAspectRatio(ratio);
@@ -2902,7 +2918,7 @@ void playerTick()
 	float aspectratio;
 	float f20;
 	
-	aspectratio = player0f0bd358();
+	aspectratio = playerGetAspect();
 
 	if (var8007083c != TELEPORTSTATE_INACTIVE) {
 		var8007083c = TELEPORTSTATE_INACTIVE;
@@ -3909,43 +3925,45 @@ void playerSetGlobalDrawWorldOffset(int room)
 
 void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struct coord *cam_up)
 {
-	Mtx spd0;
+	Mtx lookatMtx;
 	LookAt *lookat;
-	Mtx sp8c;
-	struct coord sp80;
-	struct coord sp74;
-	float scale;
-	Mtx *s0;
-	Mtx *s1;
-	int i;
-	int j;
+	Mtx cameraMtxWorldSpace;
+	struct coord camPosInWorld;
+	struct coord camTargetInWorld;
+	Mtx *artifactMtx;
+	Mtx *orthoMtx;
+	int i, j;
 
 	playerSetGlobalDrawWorldOffset(g_Vars.currentplayer->cam_room);
 
-	//g_Vars.currentplayer->mtxl005c = gfxAllocateMatrix();
-	g_Vars.currentplayer->mtxf0064 = gfxAllocateMatrix();
-	g_Vars.currentplayer->mtxf0068 = gfxAllocateMatrix();
+	g_Vars.currentplayer->mtxf0064 = gfxAllocateMatrix(); // World-to-screen
+	g_Vars.currentplayer->mtxf0068 = gfxAllocateMatrix(); // Projection
 
 	lookat = gfxAllocateLookAt(2);
 
-	sp74.x = (cam_pos->x - g_Vars.currentplayer->globaldrawworldoffset.x);
-	sp74.y = (cam_pos->y - g_Vars.currentplayer->globaldrawworldoffset.y);
-	sp74.z = (cam_pos->z - g_Vars.currentplayer->globaldrawworldoffset.z);
+	// Transform camera position into world-space coordinates
+	camPosInWorld.x = cam_pos->x - g_Vars.currentplayer->globaldrawworldoffset.x;
+	camPosInWorld.y = cam_pos->y - g_Vars.currentplayer->globaldrawworldoffset.y;
+	camPosInWorld.z = cam_pos->z - g_Vars.currentplayer->globaldrawworldoffset.z;
 
-	sp80.f[0] = sp74.f[0] + cam_look->f[0];
-	sp80.f[1] = sp74.f[1] + cam_look->f[1];
-	sp80.f[2] = sp74.f[2] + cam_look->f[2];
+	// Compute where the camera is looking, in world space
+	camTargetInWorld.x = camPosInWorld.x + cam_look->x;
+	camTargetInWorld.y = camPosInWorld.y + cam_look->y;
+	camTargetInWorld.z = camPosInWorld.z + cam_look->z;
 
-	mtxBuildCameraMatrix(&sp8c,
-			sp74.x, sp74.y, sp74.z,
+	// Build the camera's view matrix in world space
+	mtxBuildCameraMatrix(&cameraMtxWorldSpace,
+			camPosInWorld.x, camPosInWorld.y, camPosInWorld.z,
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
-	mtxLookAtReflect(&spd0, lookat,
-			sp74.x, sp74.y, sp74.z,
-			sp80.x, sp80.y, sp80.z,
+	// Build the LookAt matrix for lighting or viewport effects
+	mtxLookAtReflect(&lookatMtx, lookat,
+			camPosInWorld.x, camPosInWorld.y, camPosInWorld.z,
+			camTargetInWorld.x, camTargetInWorld.y, camTargetInWorld.z,
 			cam_up->x, cam_up->y, cam_up->z);
 
+	// Store the world-to-screen and projection matrices for the player
 	mtxBuildCameraMatrix((Mtx*)g_Vars.currentplayer->mtxf0064,
 			cam_pos->x, cam_pos->y, cam_pos->z,
 			cam_look->x, cam_look->y, cam_look->z,
@@ -3956,13 +3974,17 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
-	s1 = gfxAllocateMatrix();
-	s0 = gfxAllocateMatrix();
-	mtx4MultMtx4(camGetSkyMtx(), &sp8c, s0);
+	// Build the artifact and orthogonal matrices
+	artifactMtx = gfxAllocateMatrix();
+	orthoMtx = gfxAllocateMatrix();
 
-	camSetArtifactMtx(s0);
-	memcpy(s1, s0, sizeof(*s1));
-	camSetOrthogonalMtxL(s1);
+	mtx4MultMtx4(camGetSkyMtx(), &cameraMtxWorldSpace, artifactMtx);
+
+	camSetArtifactMtx(artifactMtx);
+	memcpy(orthoMtx, artifactMtx, sizeof(*orthoMtx));
+	camSetOrthogonalMtxL(orthoMtx);
+
+	// Final matrix setup
 	camSetWorldToScreenMtx((Mtx*)g_Vars.currentplayer->mtxf0064);
 	camSetProjectionMtx((Mtx*)g_Vars.currentplayer->mtxf0068);
 	camSetLookAt(lookat);
@@ -4103,7 +4125,8 @@ Gfx *playerRenderShield(Gfx *gdl)
 		gDPSetCycleType(gdl++, G_CYC_2CYCLE);
 		gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_CLD_SURF2);
 		gDPSetEnvColor(gdl++, red, green, blue, (int)(200 * f20));
-		gDPSetPrimColor(gdl++, 0, 0, 0xff, 0xff, 0xff, (int)(175 * f20 * f20));
+		struct RGBA color = {255, 255, 255, (int)(175 * f20 * f20)};
+		gfx_Set_Prim_Color(gdl++, color);
 		gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_01);
 
 		utilsRenderScreenTexture(&gdl, sp90, sp88, g_TexShieldConfigs->width, g_TexShieldConfigs->height,
@@ -4702,10 +4725,6 @@ void playerSetCamProperties(struct coord *pos, struct coord *up, struct coord *l
 	player->cam_look.y = look->y;
 	player->cam_look.z = look->z;
 	player->cam_room = room;
-
-	g_GfxCamPos.x = player->cam_pos.x;
-	g_GfxCamPos.y = player->cam_pos.y;
-	g_GfxCamPos.z = player->cam_pos.z;
 }
 
 void playerClearMemCamRoom(void)

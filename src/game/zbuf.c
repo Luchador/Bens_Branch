@@ -10,6 +10,7 @@
 #include "lib/vi.h"
 #include "lib/memp.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "video.h"
 
@@ -143,7 +144,8 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	gDPSetTile(gdl++, G_IM_FMT_I, G_IM_SIZ_8b, 160, 0x0080, 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 15);
 	gSPTexture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
 	gDPSetEnvColor(gdl++, 0xff, 0xff, 0xff, 0xff);
-	gDPSetPrimColor(gdl++, 0, 0, 0xff, 0xff, 0xff, 0xff);
+	struct RGBA color = {255, 255, 255, 255};
+	gfx_Set_Prim_Color(gdl++, color);
 	gDPSetRenderMode(gdl++, G_RM_NOOP, G_RM_NOOP2);
 	gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 	gDPSetTextureFilter(gdl++, G_TF_POINT);
@@ -175,7 +177,7 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	}
 
 	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
-	gDPSetScissorFrac(gdl++, 0, 0, viGetWidth() * 4.0f, viGetHeight() * 4.0f);
+	gDPSetScissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
 	gSPSetGeometryMode(gdl++, G_ZBUFFER);
 	gDPSetTextureFilter(gdl++, G_TF_BILERP);
 	gDPSetTexturePersp(gdl++, G_TP_PERSP);

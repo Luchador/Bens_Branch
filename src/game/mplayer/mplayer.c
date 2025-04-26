@@ -3476,7 +3476,6 @@ int mpplayerfileSave(int playernum, int device, int fileid, uint16_t deviceseria
 	if (device >= 0) {
 		savebufferClear(&buffer);
 		mpplayerfileSaveWad(playernum, &buffer);
-		func0f0d54c4(&buffer);
 
 		var80075bd0[2] = true;
 
@@ -3510,7 +3509,6 @@ int mpplayerfileLoad(int playernum, int device, int fileid, uint16_t deviceseria
 			g_PlayerConfigsArray[playernum].fileguid.deviceserial = deviceserial;
 
 			mpplayerfileLoadWad(playernum, &buffer, 1);
-			func0f0d54c4(&buffer);
 
 			g_PlayerConfigsArray[playernum].handicap = 0x80;
 			return 0;
@@ -3791,7 +3789,6 @@ int mpsetupfileSave(int device, int fileid, uint16_t deviceserial)
 	if (device >= 0) {
 		savebufferClear(&buffer);
 		mpsetupfileSaveWad(&buffer);
-		func0f0d54c4(&buffer);
 
 		ret = pakSaveAtGuid(device, fileid, PAKFILETYPE_MPSETUP, buffer.bytes, &newfileid, 0);
 		var80075bd0[1] = true;
@@ -3823,7 +3820,6 @@ int mpsetupfileLoad(int device, int fileid, uint16_t deviceserial)
 			g_MpSetup.fileguid.deviceserial = deviceserial;
 
 			mpsetupfileLoadWad(&buffer);
-			func0f0d54c4(&buffer);
 
 			return 0;
 		}
