@@ -40,7 +40,6 @@
 #include "lib/rzip.h"
 #include "lib/vi.h"
 #include "data.h"
-#include "gbiex.h"
 #include "types.h"
 #include "preprocess.h"
 #include "preprocess/common.h"
@@ -276,28 +275,19 @@ Gfx *bgRenderXrayData(Gfx *gdl, struct xraydata *xraydata)
 		}
 
 		count = xraydata->numvertices;
-		gSPColor(gdl++, colours, count);
+		gfx_Color(gdl++, colours, count);
 
 		count = xraydata->numvertices;
 		gSPVertex(gdl++, vertices, count, 0);
 
 		numgroups = (xraydata->numtris - 1) / 4 + 1;
 
-		// @bug: The original code overflows the tris array and unintentionally writes zero
-		// into the xraydata->numtris property. IDO reloads the xraydata->numtris value
-		// on each loop iteration so it reads the 0 value and ends the loop.
-#ifdef AVOID_UB
 		for (i = xraydata->numtris; i < numgroups * 4; i++) {
 			xraydata->tris[i][0] = xraydata->tris[i][1] = xraydata->tris[i][2] = 0;
 		}
-#else
-		for (i = xraydata->numtris; i < xraydata->numtris * 4; i++) {
-			xraydata->tris[i][0] = xraydata->tris[i][1] = xraydata->tris[i][2] = 0;
-		}
-#endif
 
 		for (i = 0; i < numgroups; i++) {
-			gSPTri4(gdl++,
+			gfx_Tri4(gdl++,
 					xraydata->tris[i * 4 + 0][0], xraydata->tris[i * 4 + 0][1], xraydata->tris[i * 4 + 0][2],
 					xraydata->tris[i * 4 + 1][0], xraydata->tris[i * 4 + 1][1], xraydata->tris[i * 4 + 1][2],
 					xraydata->tris[i * 4 + 2][0], xraydata->tris[i * 4 + 2][1], xraydata->tris[i * 4 + 2][2],
@@ -884,17 +874,17 @@ Gfx *bgRenderSceneInXray(Gfx *gdl)
 
 	gdl = envStopFog(gdl);
 
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gSPSetGeometryMode(gdl++, G_SHADE | G_SHADING_SMOOTH);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
 	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
-	gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+	gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
 
-	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 
 	// Render BG
 	gdl = bgScissorToViewport(gdl);
@@ -912,7 +902,7 @@ Gfx *bgRenderSceneInXray(Gfx *gdl)
 	// Render props
 	gdl = bgScissorToViewport(gdl);
 
-	gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	if (g_BgMinDrawOrder); \
 	if (g_BgNumDrawSlots); \
@@ -921,11 +911,11 @@ Gfx *bgRenderSceneInXray(Gfx *gdl)
 			struct drawslot *thing = &g_BgDrawSlots[k];
 
 			if (thing->draworder == i) {
-				gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+				gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 				gdl = bgScissorWithinViewportF(gdl, thing->box.xmin, thing->box.ymin, thing->box.xmax, thing->box.ymax);
 
-				gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+				gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 				if (thing->roomnum == -1) {
 					gdl = propsRender(gdl, 0, RENDERPASS_XLU, roomnumsbyprop);
@@ -1034,9 +1024,8 @@ Gfx *bgRenderScene(Gfx *gdl)
 					|| stagenum == STAGE_ATTACKSHIP) {
 			gdl = textConfigureGfxPipeline(gdl);
 
-			gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+			gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
-			gdl = playerLoadMatrix(gdl);
 			gdl = envStopFog(gdl);
 			gdl = starsRender(gdl);
 			gdl = text0f153780(gdl);
@@ -1090,7 +1079,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 		thing = &g_BgDrawSlots[roomnum];
 
 		// Render prop opaque components - pre BG pass
-		gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 		gdl = envStopFog(gdl);
 
 		if (firstroomnum == thing->roomnum) {
@@ -1100,14 +1089,14 @@ Gfx *bgRenderScene(Gfx *gdl)
 		gdl = propsRender(gdl, thing->roomnum, RENDERPASS_OPA_PREBG, roomnumsbyprop);
 
 		// Render BG opaque components
-		gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		gdl = bgScissorWithinViewportF(gdl, thing->box.xmin, thing->box.ymin, thing->box.xmax, thing->box.ymax);
-		gdl = envStartFog(gdl, false);
+		gdl = envStartFog(gdl);
 		gdl = bgRenderRoomOpaque(gdl, thing->roomnum);
 
 		// Render prop opaque components - post BG pass
-		gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		gdl = envStopFog(gdl);
 
@@ -1122,7 +1111,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 	gdl = bgScissorToViewport(gdl);
 
 	// Render wall hits
-	gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	if (g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
 		for (i = 0; i < g_BgNumDrawSlots; i++) {
@@ -1134,17 +1123,17 @@ Gfx *bgRenderScene(Gfx *gdl)
 	for (i = g_BgNumDrawSlots - 1; i >= 0; i--) {
 		roomnum = roomnums[i];
 
-		gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		thing = &g_BgDrawSlots[roomnum];
 
 		// Render BG translucent components
-		gSPClearGeometryMode(gdl++, G_CULL_BOTH); // Ben's comment: this fixes transparent textures like railings from going invisible in levels exported by the Setup Editor, though it doesn't fix their sorting problems
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH); // Ben's comment: this fixes transparent textures like railings from going invisible in levels exported by the Setup Editor, though it doesn't fix their sorting problems
 		gdl = bgScissorWithinViewportF(gdl, thing->box.xmin, thing->box.ymin, thing->box.xmax, thing->box.ymax);
-		gdl = envStartFog(gdl, true);
+		gdl = envStartFog(gdl);
 		gdl = bgRenderRoomXlu(gdl, thing->roomnum);
 
-		gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		gdl = envStopFog(gdl);
 
@@ -1841,16 +1830,14 @@ Gfx *bgRender(Gfx *gdl)
 {
 	gdl = lightsSetDefault(gdl);
 
-	gSPSegment(gdl++, SPSEGMENT_BG_DL, g_BgPrimaryData);
+	gfx_Segment(gdl++, SPSEGMENT_BG_DL, (uintptr_t)g_BgPrimaryData);
 
-	gdl = envStartFog(gdl, false);
+	gdl = envStartFog(gdl);
 	gdl = bgRenderSceneAndLoadCandidate(gdl);
 	gdl = bgScissorToViewport(gdl);
 	gdl = envStopFog(gdl);
 
-	gSPMatrix(gdl++, g_CameraPerspectiveMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-
-	gdl = playerLoadMatrix(gdl);
+	gfx_Matrix(gdl++, g_CameraPerspectiveMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	return gdl;
 }
@@ -1902,7 +1889,7 @@ Gfx *bgScissorWithinViewport(Gfx *gdl, int viewleft, int viewtop, int viewright,
 			viewbottom = g_Vars.currentplayer->viewtop + g_Vars.currentplayer->viewheight;
 		}
 
-		gDPSetScissor(gdl++, viewleft, viewtop, viewright, viewbottom);
+		gfx_Set_Scissor(gdl++, viewleft, viewtop, viewright, viewbottom);
 	}
 
 	return gdl;
@@ -2007,13 +1994,13 @@ bool bgRoomIntersectsScreenBox(int room, struct screenbox *screen)
 
 bool bg3dPosTo2dPos(struct coord *cornerpos, struct coord *screenpos)
 {
-	Mtxf *matrix = (Mtxf*)camGetPlayerWorldToScreenMtx();
+	Mtx *matrix = camGetPlayerWorldToScreenMtx();
 
 	screenpos->x = cornerpos->x;
 	screenpos->y = cornerpos->y;
 	screenpos->z = cornerpos->z;
 
-	mtx4TransformVecInPlace((Mtx*)matrix, screenpos);
+	mtx4TransformVecInPlace(matrix, screenpos);
 	camProjectViewToScreenSafe(screenpos, screenpos->f);
 
 	if (screenpos->z > 0) {
@@ -2025,8 +2012,6 @@ bool bg3dPosTo2dPos(struct coord *cornerpos, struct coord *screenpos)
 
 bool bgGetPortalScreenBbox(int portalnum, struct screenbox *box)
 {
-	int i;
-	int j;
 	int len;
 	int start;
 	int numvalid;
@@ -2049,7 +2034,7 @@ bool bgGetPortalScreenBbox(int portalnum, struct screenbox *box)
 	numvalid = 0;
 	thing = &things[start];
 
-	for (j = 0; j < len; j++) {
+	for (int j = 0; j < len; j++) {
 		if (thing->coord.z <= 0.0f) {
 			camProjectViewToScreenSafe(&thing->coord, sp2e4);
 
@@ -2097,8 +2082,8 @@ bool bgGetPortalScreenBbox(int portalnum, struct screenbox *box)
 		sp2d4[1][0] += 0.5f;
 		sp2d4[1][1] += 0.5f;
 
-		for (i = 0; i < 2; i++) {
-			for (j = 0; j < 2; j++) {
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 2; j++) {
 				float value = sp2d4[i][j];
 
 				if (value >= 0.0f) {
@@ -2124,23 +2109,6 @@ bool bgGetPortalScreenBbox(int portalnum, struct screenbox *box)
 	g_PortalCameraCache[portalnum].updatedframe2 = g_BgFrameCount;
 
 	return numvalid;
-}
-
-Gfx *bgDrawBoxEdge(Gfx *gdl, int x1, int y1, int x2, int y2)
-{
-	//gDPFillRectangle(gdl++, x1, y1, x2 + 1, y2 + 1);
-
-	return gdl;
-}
-
-Gfx *bgDrawBox(Gfx *gdl, int x1, int y1, int x2, int y2)
-{
-	gdl = bgDrawBoxEdge(gdl, x1, y1, x2, y1); // top
-	gdl = bgDrawBoxEdge(gdl, x2, y1, x2, y2); // right
-	gdl = bgDrawBoxEdge(gdl, x1, y2, x2, y2); // bottom
-	gdl = bgDrawBoxEdge(gdl, x1, y1, x1, y2); // left
-
-	return gdl;
 }
 
 bool bgGetBoxIntersection(struct screenbox *a, struct screenbox *b)
@@ -2655,7 +2623,7 @@ Gfx *bgRenderRoomPass(Gfx *gdl, int roomnum, struct roomblock *block, bool inclu
 			dyntexTickRoom(roomnum, block->vertices);
 		}
 
-		gSPSegment(gdl++, SPSEGMENT_BG_VTX, (uintptr_t)(block->vertices));
+		gfx_Segment(gdl++, SPSEGMENT_BG_VTX, (uintptr_t)(block->vertices));
 
 		lightHighlight(roomnum);
 
@@ -2668,7 +2636,7 @@ Gfx *bgRenderRoomPass(Gfx *gdl, int roomnum, struct roomblock *block, bool inclu
 			v0 = (uintptr_t)block->colours;
 		}
 
-		gSPSegment(gdl++, SPSEGMENT_BG_COL, (uintptr_t)(v0));
+		gfx_Segment(gdl++, SPSEGMENT_BG_COL, (uintptr_t)(v0));
 
 		gSPDisplayList(gdl++, (uintptr_t)(block->gdl));
 
@@ -3370,8 +3338,8 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 	struct coord *point3;
 	uint32_t word;
 	Gfx *tri4gdl;
-	Mtxf *mtx = gfxAllocateMatrix();
-	mtxIdent((Mtx*)mtx);
+	Mtx *mtx = gfxAllocateMatrix();
+	mtxIdent(mtx);
 	struct coord min;
 	struct coord max;
 	struct coord sp84;
@@ -3388,8 +3356,8 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 			break;
 		} else if (gdl->dma.cmd == G_MTX) {
 			word = UNSEGADDR(gdl->words.w1) & 0xffffff;
-			i = word / sizeof(Mtxf);
-			mtx = &model->matrices[i];
+			i = word / sizeof(Mtx);
+			mtx = (Mtx*)&model->matrices[i];
 		} else if (gdl->dma.cmd == G_VTX) {
 			count = (gdl->bytes[GFX_W0_BYTE(1)] & 0xf);
 			word = UNSEGADDR(gdl->words.w1) & 0xffffff;
@@ -3411,7 +3379,7 @@ bool bgTestHitOnChr(struct model *model, struct coord *arg1, struct coord *arg2,
 				ptr[1] = vtx->y;
 				ptr[2] = vtx->z;
 
-				mtx4TransformVecInPlace((Mtx*)mtx, (struct coord *) ptr);
+				mtx4TransformVecInPlace(mtx, (struct coord *) ptr);
 
 				numvertices--;
 				ptr += 3;
@@ -5215,7 +5183,6 @@ Gfx *bgRenderSceneAndLoadCandidate(Gfx *gdl)
 	// Consider loading one room by finding the load candidate that is closest to the player
 	if (g_BgLoadCandidateTimer240 == 0 && g_NumRoomLoadsLeftThisFrame == 4 && g_Vars.tickmode == TICKMODE_NORMAL) {
 		struct player *player = g_Vars.currentplayer;
-		int i;
 		float value;
 		struct coord dist;
 		float bestvalue = MAXFLOAT;
@@ -5223,7 +5190,7 @@ Gfx *bgRenderSceneAndLoadCandidate(Gfx *gdl)
 		float radius;
 
 		if (g_BgNumRoomLoadCandidates) {
-			for (i = 1; i < g_Vars.roomcount; i++) {
+			for (int i = 1; i < g_Vars.roomcount; i++) {
 				if (!g_Rooms[i].loaded240 && (g_Rooms[i].flags & ROOMFLAG_LOADCANDIDATE)) {
 					dist.x = g_Vars.currentplayer->prop->pos.x - g_Rooms[i].centre.x;
 					dist.y = g_Vars.currentplayer->prop->pos.y - g_Rooms[i].centre.y;
@@ -5233,9 +5200,12 @@ Gfx *bgRenderSceneAndLoadCandidate(Gfx *gdl)
 
 					radius = g_Rooms[i].radius;
 
-					if (g_CamFrustumViewOffset + radius < player->projectionmtx->m[2][0] * g_Rooms[i].centre.f[0]
-							+ player->projectionmtx->m[2][1] * g_Rooms[i].centre.f[1]
-							+ player->projectionmtx->m[2][2] * g_Rooms[i].centre.f[2]) {
+					Mtx tmp;
+					memcpy(&tmp, player->projectionmtx, sizeof(Mtx));
+
+					if (g_CamFrustumViewOffset + radius < tmp[2][0] * g_Rooms[i].centre.f[0]
+							+ tmp[2][1] * g_Rooms[i].centre.f[1]
+							+ tmp[2][2] * g_Rooms[i].centre.f[2]) {
 						value *= 3.0f;
 					}
 

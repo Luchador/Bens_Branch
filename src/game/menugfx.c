@@ -17,6 +17,7 @@
 #include "lib/main.h"
 #include "lib/rng.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "video.h"
 #include "game/bondview.h"
@@ -74,32 +75,32 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 		// blit the small blur texture onto a screen-sized framebuffer while blurring it
 		g_MenuBlurDone = true;
 		gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 0xff);
-		gDPSetTextureFilter(gdl++, G_TF_BLUR_EXT);
-		gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, g_MenuBlurFb);
-		gDPSetFramebufferTargetEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, g_MenuScreenFb);
-		gSPImageRectangleEXT(gdl++, 0, 0, 0, 0, width << 2, height << 2, BLURIMG_WIDTH, BLURIMG_HEIGHT, 0, BLURIMG_WIDTH, BLURIMG_HEIGHT);
-		gDPSetFramebufferTargetEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, 0);
-		gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, 0);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BLUR_EXT);
+		gfx_Set_Framebuffer_Texture_EXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, (uintptr_t)g_MenuBlurFb);
+		gfx_Set_Framebuffer_Target_EXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, (uintptr_t)g_MenuScreenFb);
+		gdl += gfx_Image_Rectangle_EXT(gdl, 0, 0, 0, 0, width << 2, height << 2, BLURIMG_WIDTH, BLURIMG_HEIGHT, 0, BLURIMG_WIDTH, BLURIMG_HEIGHT);
+		gfx_Set_Framebuffer_Target_EXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, (uintptr_t)0);
+		gfx_Set_Framebuffer_Texture_EXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, (uintptr_t)0);
 	}
 
 	colours = gfxAllocateColours(1);
 	vertices = gfxAllocateVertices(4);
 
-	gSPTexture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
+	gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
 
 	gDPLoadTextureBlock(gdl++, g_BlurBuffer, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, BLURIMG_HEIGHT, 0,
 			G_TX_NOMIRROR | G_TX_CLAMP, G_TX_NOMIRROR | G_TX_CLAMP,
 			G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
 
 	// LoadTextureBlock will set up the sizes, but we'll use the framebuffer instead of g_BlurBuffer
-	gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, g_MenuScreenFb);
+	gfx_Set_Framebuffer_Texture_EXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, (uintptr_t)g_MenuScreenFb);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	width = SCREEN_320 * 10;
 	height = viGetHeight() * 10;
@@ -133,12 +134,12 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 
 	colours[0].word = PD_BE32(colour);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 1);
+	gfx_Color(gdl++, colours, 1);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
-	gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
+	gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 	return gdl;
 }
@@ -151,7 +152,7 @@ Gfx *menugfxRenderDialogBackground(Gfx *gdl, int x1, int y1, int x2, int y2, str
 	// Render the dialog's background fill
 	gdl = textSetPrimColour(gdl, colour1);
 
-	gDPFillRectangleScaled(gdl++, x1, y1, x2, y2);
+	gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -182,15 +183,15 @@ Gfx *menugfxDrawDropdownBackground(Gfx *gdl, int x1, int y1, int x2, int y2)
 	uint32_t colour1;
 	uint32_t colour2;
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 	texSelect(&gdl, NULL, 2, 0, 2, true, NULL);
 
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	vertices[0].x = x1 * 10;
 	vertices[0].y = y1 * 10;
@@ -230,10 +231,10 @@ Gfx *menugfxDrawDropdownBackground(Gfx *gdl, int x1, int y1, int x2, int y2)
 	colours[1].word = PD_BE32(colour2);
 	colours[2].word = PD_BE32(colour1 | 0x00003f00);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 3);
+	gfx_Color(gdl++, colours, 3);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 6, 0);
 
-	gSPTri4(gdl++, 0, 1, 3, 3, 2, 0, 2, 3, 4, 4, 3, 5);
+	gfx_Tri4(gdl++, 0, 1, 3, 3, 2, 0, 2, 3, 4, 4, 3, 5);
 
 	return gdl;
 }
@@ -245,15 +246,15 @@ Gfx *menugfxDrawListGroupHeader(Gfx *gdl, int x1, int y1, int x2, int y2, int x3
 	uint32_t alpha1;
 	uint32_t alpha2;
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 	texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
 
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	vertices[0].x = x1 * 10;
 	vertices[0].y = y1 * 10;
@@ -304,11 +305,11 @@ Gfx *menugfxDrawListGroupHeader(Gfx *gdl, int x1, int y1, int x2, int y2, int x3
 	colours[5].word = PD_BE32((0x00003f00 | alpha1) & 0xffffff00);
 	colours[6].word = PD_BE32(0x6f6f6f00 | alpha1);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 7);
+	gfx_Color(gdl++, colours, 7);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 9, 0);
 
-	gSPTri4(gdl++, 0, 1, 3, 3, 2, 0, 2, 3, 4, 4, 3, 5);
-	gSPTri4(gdl++, 1, 6, 7, 7, 3, 1, 3, 7, 8, 8, 5, 3);
+	gfx_Tri4(gdl++, 0, 1, 3, 3, 2, 0, 2, 3, 4, 4, 3, 5);
+	gfx_Tri4(gdl++, 1, 6, 7, 7, 3, 1, 3, 7, 8, 8, 5, 3);
 
 	gdl = menugfxDrawShimmer(gdl, x1, y1, x2, y1 + 1, (alpha1 & 0xff) >> 2, 1, 0x28, 0);
 	gdl = menugfxDrawShimmer(gdl, x1, y2, x2, y2 + 1, (alpha1 & 0xff) >> 2, 0, 0x28, 1);
@@ -323,15 +324,15 @@ Gfx *menugfxRenderGradient(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t co
 	Vtx *vertices = gfxAllocateVertices(6);
 	int ymid;
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 	texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
 
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	ymid = (y1 + y2) / 2;
 
@@ -381,9 +382,9 @@ Gfx *menugfxRenderGradient(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t co
 	colours[2].word = PD_BE32(colourmid);
 	colours[1].word = PD_BE32(colourend);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 3);
+	gfx_Color(gdl++, colours, 3);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 6, 0);
-	gSPTri4(gdl++, 0, 1, 5, 5, 4, 0, 2, 3, 4, 4, 5, 2);
+	gfx_Tri4(gdl++, 0, 1, 5, 5, 4, 0, 2, 3, 4, 4, 5, 2);
 
 	return gdl;
 }
@@ -393,16 +394,16 @@ Gfx *menugfxRenderSlider(Gfx *gdl, int x1, int y1, int x2, int y2, int markerx, 
 	Col *colours = gfxAllocateColours(3);
 	Vtx *vertices = gfxAllocateVertices(6);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 	texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
 
-	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	// Marker triangle
 	vertices[0].x = markerx * 10 - 40;
@@ -438,16 +439,16 @@ Gfx *menugfxRenderSlider(Gfx *gdl, int x1, int y1, int x2, int y2, int markerx, 
 	colours[1].word = PD_BE32(0xffffffff);
 	colours[2].word = PD_BE32(0x0000ff4f);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 3);
+	gfx_Color(gdl++, colours, 3);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 6, 0);
 
-	gSPTri1(gdl++, 3, 4, 5);
+	gfx_Tri1(gdl++, 3, 4, 5);
 
-	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 
-	gSPTri1(gdl++, 0, 1, 2);
+	gfx_Tri1(gdl++, 0, 1, 2);
 
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	// Line to the left of the marker: blue -> white gradient
 	gdl = menugfxDrawLine(gdl, x1, y2, markerx, y2 + 1, 0x0000ffff, 0xffffffff);
@@ -460,35 +461,33 @@ Gfx *menugfxRenderSlider(Gfx *gdl, int x1, int y1, int x2, int y2, int markerx, 
 
 Gfx *menugfx0f0e2348(Gfx *gdl)
 {
-	gSPSetGeometryMode(gdl++, G_CULL_BACK);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPPipelineMode(gdl++, G_PM_1PRIMITIVE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureLUT(gdl++, G_TT_NONE);
-	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
+	gfx_Set_Geometry_Mode(gdl++, G_CULL_BACK);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Pipeline_Mode(gdl++, G_PM_1PRIMITIVE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
-	gDPSetCombineKey(gdl++, G_CK_NONE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetRenderMode(gdl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
-	gDPSetColorDither(gdl++, G_CD_MAGICSQ);
-	gSPSetGeometryMode(gdl++, G_ZBUFFER);
+	gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Render_Mode(gdl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
+	gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
 
 	return gdl;
 }
 
 Gfx *menugfx0f0e2498(Gfx *gdl)
 {
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 	texSelect(&gdl, 0, 2, 0, 2, 1, NULL);
 
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	return gdl;
 }
@@ -532,9 +531,9 @@ Gfx *menugfxDrawTri2(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1,
 	colours[0].word = PD_BE32(colour1);
 	colours[1].word = PD_BE32(colour2);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 2);
+	gfx_Color(gdl++, colours, 2);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
-	gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
+	gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 
 	return gdl;
 }
@@ -809,14 +808,14 @@ Gfx *menugfxDrawCarouselChevron(Gfx *gdl, int x, int y, int size, int direction,
 	colours = gfxAllocateColours(2);
 	vertices = gfxAllocateVertices(3);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 	texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
 
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	vertices[0].x = x * 10;
 	vertices[0].y = y * 10;
@@ -837,9 +836,9 @@ Gfx *menugfxDrawCarouselChevron(Gfx *gdl, int x, int y, int size, int direction,
 	colours[0].word = PD_BE32(colour1);
 	colours[1].word = PD_BE32(colour2);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 2);
+	gfx_Color(gdl++, colours, 2);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 3, 0);
-	gSPTri1(gdl++, 0, 1, 2);
+	gfx_Tri1(gdl++, 0, 1, 2);
 
 	return gdl;
 }
@@ -891,14 +890,14 @@ Gfx *menugfxDrawDialogChevron(Gfx *gdl, int x, int y, int size, int direction, u
 	colours = gfxAllocateColours(2);
 	vertices = gfxAllocateVertices(4);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 	texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
 
-	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 
 	// Apex
 	vertices[0].x = x * 10;
@@ -929,9 +928,9 @@ Gfx *menugfxDrawDialogChevron(Gfx *gdl, int x, int y, int size, int direction, u
 	colours[0].word = PD_BE32(colour1);
 	colours[1].word = PD_BE32(colour2);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 2);
+	gfx_Color(gdl++, colours, 2);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
-	gSPTri2(gdl++, 0, 1, 3, 3, 2, 0);
+	gfx_Tri2(gdl++, 0, 1, 3, 3, 2, 0);
 
 	return gdl;
 }
@@ -940,16 +939,16 @@ Gfx *menugfxDrawCheckbox(Gfx *gdl, int x, int y, int size, bool fill, uint32_t b
 {
 	if (fill) {
 		gdl = textSetPrimColour(gdl, fillcolour);
-		gDPFillRectangleScaled(gdl++, x, y, x + size, y + size);
+		gfx_Fill_Rectangle(gdl++, x, y, x + size, y + size);
 		gdl = textSetCCCustom02(gdl);
 	}
 
 	gdl = textSetPrimColour(gdl, bordercolour);
 
-	gDPFillRectangleScaled(gdl++, x, y, x + size + 1, y + 1);
-	gDPFillRectangleScaled(gdl++, x, y + size, x + size + 1, y + size + 1);
-	gDPFillRectangleScaled(gdl++, x, y + 1, x + 1, y + size);
-	gDPFillRectangleScaled(gdl++, x + size, y + 1, x + size + 1, y + size);
+	gfx_Fill_Rectangle(gdl++, x, y, x + size + 1, y + 1);
+	gfx_Fill_Rectangle(gdl++, x, y + size, x + size + 1, y + size + 1);
+	gfx_Fill_Rectangle(gdl++, x, y + 1, x + 1, y + size);
+	gfx_Fill_Rectangle(gdl++, x + size, y + 1, x + size + 1, y + size);
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -1164,8 +1163,8 @@ uint32_t menugfxGetParticleArraySize(void)
  */
 Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 {
-	Mtxf sp110;
-	Mtxf *modelmtx;
+	Mtx sp110;
+	Mtx *modelmtx;
 	Col *colours;
 	Col *ptr;
 	int i;
@@ -1240,23 +1239,22 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 
 	texSelect(&gdl, &g_TexGeneralConfigs[1], 2, 1, 2, true, NULL);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gDPSetCombineMode(gdl++, G_CC_CUSTOM_04, G_CC_CUSTOM_04);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
-	mtxIdent((Mtx*)&sp110);
+	mtxIdent(&sp110);
 
 	modelmtx = gfxAllocateMatrix();
 
-	mtx4Copy((Mtx*)&sp110, (Mtx*)modelmtx);
+	mtx4Copy(&sp110, modelmtx);
 
-	gSPMatrix(gdl++, (uintptr_t)(modelmtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(gdl++, modelmtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	colours = gfxAllocateColours(20);
 
@@ -1314,7 +1312,7 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 	{
 		struct coord pos;
 
-		gSPColor(gdl++, (uintptr_t)(colours), 20);
+		gfx_Color(gdl++, colours, 20);
 
 		// Draw the particles
 		for (i = NUM_SUCCESS_PARTICLES - 1; i >= 0; i--) {
@@ -1366,12 +1364,12 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 
 				gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
 
-				gSPTri4(gdl++, 0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1);
+				gfx_Tri4(gdl++, 0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1);
 			}
 		}
 	}
 
-	gdl = gfxSetCustomProjection(gdl);
+	gdl = savebufferSetCustomProjection(gdl);
 
 	return gdl;
 }

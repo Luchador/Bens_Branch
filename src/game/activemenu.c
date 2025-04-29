@@ -947,7 +947,7 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, int16_t x, int16_t y, int mode, int flag
 
 	gdl = textSetPrimColour(gdl, colour);
 
-	gDPFillRectangleScaled(gdl++,
+	gfx_Fill_Rectangle(gdl++,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y - paddingtop + 1,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2,
@@ -975,28 +975,28 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, int16_t x, int16_t y, int mode, int flag
 	gdl = textSetPrimColour(gdl, colour);
 
 	// Top border
-	gDPFillRectangleScaled(gdl++,
+	gfx_Fill_Rectangle(gdl++,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2,
 			y - paddingtop,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y - paddingtop + 1);
 
 	// Bottom border
-	gDPFillRectangleScaled(gdl++,
+	gfx_Fill_Rectangle(gdl++,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2,
 			y + paddingbottom,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y + paddingbottom + 1);
 
 	// Left border
-	gDPFillRectangleScaled(gdl++,
+	gfx_Fill_Rectangle(gdl++,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2,
 			y - paddingtop + 1,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y + paddingbottom);
 
 	// Right border
-	gDPFillRectangleScaled(gdl++,
+	gfx_Fill_Rectangle(gdl++,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2,
 			y - paddingtop + 1,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
@@ -1074,20 +1074,19 @@ Gfx *amRender(Gfx *gdl)
 					&g_AmMenus[g_AmIndex].dsty);
 		}
 
-		gdl = gfxSetCustomProjection(gdl);
+		gdl = savebufferSetCustomProjection(gdl);
 
 		colours = gfxAllocateColours(2);
 		vertices = gfxAllocateVertices(8);
 
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
-		gDPSetAlphaDither(gdl++, G_AD_NOISE);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-		gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 		texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
 
-		gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+		gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 		// Top
 		amCalculateSlotPosition(1, 0, &slotx, &sloty);
@@ -1146,12 +1145,12 @@ Gfx *amRender(Gfx *gdl)
 		colours[0].word = PD_BE32(0x22222200);
 		colours[1].word = PD_BE32(0x0000004f);
 
-		gSPColor(gdl++, (uintptr_t)(colours), 2);
+		gfx_Color(gdl++, colours, 2);
 		gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
 
-		gSPTri2(gdl++, 4, 5, 6, 6, 7, 4);
-		gSPTri4(gdl++, 0, 4, 7, 7, 3, 0, 0, 1, 5, 5, 4, 0);
-		gSPTri4(gdl++, 1, 2, 6, 6, 5, 1, 6, 2, 3, 3, 7, 6);
+		gfx_Tri2(gdl++, 4, 5, 6, 6, 7, 4);
+		gfx_Tri4(gdl++, 0, 4, 7, 7, 3, 0, 0, 1, 5, 5, 4, 0);
+		gfx_Tri4(gdl++, 1, 2, 6, 6, 5, 1, 6, 2, 3, 3, 7, 6);
 
 		gdl = savebufferSetup2DRender(gdl);
 
@@ -1275,28 +1274,28 @@ Gfx *amRender(Gfx *gdl)
 			}
 
 			// Top
-			gDPFillRectangleScaled(gdl++,
+			gfx_Fill_Rectangle(gdl++,
 					g_AmMenus[g_AmIndex].selx - halfwidth,
 					g_AmMenus[g_AmIndex].sely - above,
 					g_AmMenus[g_AmIndex].selx + halfwidth + 1,
 					g_AmMenus[g_AmIndex].sely - above + 1);
 
 			// Bottom
-			gDPFillRectangleScaled(gdl++,
+			gfx_Fill_Rectangle(gdl++,
 					g_AmMenus[g_AmIndex].selx - halfwidth,
 					g_AmMenus[g_AmIndex].sely + below,
 					g_AmMenus[g_AmIndex].selx + halfwidth + 1,
 					g_AmMenus[g_AmIndex].sely + below + 1);
 
 			// Left
-			gDPFillRectangleScaled(gdl++,
+			gfx_Fill_Rectangle(gdl++,
 					g_AmMenus[g_AmIndex].selx - halfwidth,
 					g_AmMenus[g_AmIndex].sely - above + 1,
 					g_AmMenus[g_AmIndex].selx - halfwidth + 1,
 					g_AmMenus[g_AmIndex].sely + below);
 
 			// Right
-			gDPFillRectangleScaled(gdl++,
+			gfx_Fill_Rectangle(gdl++,
 					g_AmMenus[g_AmIndex].selx + halfwidth,
 					g_AmMenus[g_AmIndex].sely - above + 1,
 					g_AmMenus[g_AmIndex].selx + halfwidth + 1,
@@ -1350,16 +1349,11 @@ Gfx *amRender(Gfx *gdl)
 			healthfrac = 0;
 		}
 
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 		gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 
 		y = viGetViewTop() + viGetViewHeight() - (PLAYERCOUNT() >= 2 ? 19 : 34);
-
-		// NTSC beta doesn't scale the health bar when hi-res is on,
-		// and it only matches if part2left is an inline expression
-#define RECT(gdl, x1, y1, x2, y2) gDPFillRectangleScaled(gdl, x1, y1, x2, y2)
-#define PART2LEFT() part2left
 
 		if (redhealth) {
 			a2 = part1left + part1width - (int) (part1width * (0.25f - healthfrac) * 4.0f);
@@ -1368,7 +1362,7 @@ Gfx *amRender(Gfx *gdl)
 			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 1 red
-			RECT(gdl++, a2, y, part1left + part1width, y + barheight);
+			gfx_Fill_Rectangle(gdl++, a2, y, part1left + part1width, y + barheight);
 
 			color.r = 0;
 			color.g = 0;
@@ -1377,21 +1371,21 @@ Gfx *amRender(Gfx *gdl)
 			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 1 black
-			RECT(gdl++, part1left, y, a2, y + barheight);
+			gfx_Fill_Rectangle(gdl++, part1left, y, a2, y + barheight);
 
 			// Part 2 black
-			RECT(gdl++, PART2LEFT(), y, part1left + barwidth, y + barheight);
+			gfx_Fill_Rectangle(gdl++, part2left, y, part1left + barwidth, y + barheight);
 		} else {
 			struct RGBA color = {0, 192, 0, 96};
 			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 1 green
-			RECT(gdl++, part1left, y, part1left + part1width, y + barheight);
+			gfx_Fill_Rectangle(gdl++, part1left, y, part1left + part1width, y + barheight);
 
 			// Part 2 green
 			a2 = part1left + (int) (barwidth * healthfrac);
 
-			RECT(gdl++, PART2LEFT(), y, a2, y + barheight);
+			gfx_Fill_Rectangle(gdl++, part2left, y, a2, y + barheight);
 
 			color.r = 0;
 			color.g = 0;
@@ -1400,7 +1394,7 @@ Gfx *amRender(Gfx *gdl)
 			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 2 black
-			RECT(gdl++, a2, y, part1left + barwidth, y + barheight);
+			gfx_Fill_Rectangle(gdl++, a2, y, part1left + barwidth, y + barheight);
 		}
 
 		// Render shield bar
@@ -1412,7 +1406,7 @@ Gfx *amRender(Gfx *gdl)
 
 		a2 = part1left + (int) (barwidth * shieldfrac);
 
-		RECT(gdl++, part1left, y, a2, y + barheight);
+		gfx_Fill_Rectangle(gdl++, part1left, y, a2, y + barheight);
 
 		color.r = 0;
 		color.g = 0;
@@ -1420,7 +1414,7 @@ Gfx *amRender(Gfx *gdl)
 		color.a = 128;
 		gfx_Set_Prim_Color(gdl++, color);
 
-		RECT(gdl++, a2, y, part1left + barwidth, y + barheight);
+		gfx_Fill_Rectangle(gdl++, a2, y, part1left + barwidth, y + barheight);
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);

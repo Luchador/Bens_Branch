@@ -8,6 +8,7 @@
 #include "game/texdecompress.h"
 #include "bss.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 int texGetMask(int value)
@@ -152,86 +153,86 @@ void texSetRenderMode(Gfx **gdlptr, int rendermode, int numcycles, int arg3)
 	Gfx *gdl = *gdlptr;
 
 	if (numcycles == 1) {
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 
 		switch (rendermode) {
 		default:
 		case 1:
 			if (arg3) {
 				if (arg3 >= 2) {
-					gDPSetRenderMode(gdl++, G_RM_AA_ZB_OPA_DECAL, G_RM_AA_ZB_OPA_DECAL2);
+					gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_OPA_DECAL, G_RM_AA_ZB_OPA_DECAL2);
 				} else {
-					gDPSetRenderMode(gdl++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
+					gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
 				}
 			} else {
-				gDPSetRenderMode(gdl++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+				gfx_Set_Render_Mode(gdl++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
 			}
 			break;
 		case 2:
 			if (arg3) {
 				if (arg3 >= 2) {
-					gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_DECAL, G_RM_AA_ZB_XLU_DECAL2);
+					gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_DECAL, G_RM_AA_ZB_XLU_DECAL2);
 				} else {
-					gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+					gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
 				}
 			} else {
-				gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+				gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 			}
 			break;
 		case 3:
 			if (arg3) {
-				gDPSetRenderMode(gdl++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
+				gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_TEX_EDGE, G_RM_AA_ZB_TEX_EDGE2);
 			} else {
-				gDPSetRenderMode(gdl++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
+				gfx_Set_Render_Mode(gdl++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
 			}
 			break;
 		case 4:
 			if (arg3) {
-				gDPSetRenderMode(gdl++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
+				gfx_Set_Render_Mode(gdl++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
 			} else {
-				gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+				gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 			}
 			break;
 		}
 	} else {
-		gDPSetCycleType(gdl++, G_CYC_2CYCLE);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_2CYCLE);
 
 		switch (rendermode) {
 		default:
 		case 1:
 			if (arg3) {
 				if (arg3 >= 2) {
-					gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_AA_ZB_OPA_DECAL2);
+					gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_AA_ZB_OPA_DECAL2);
 				} else {
-					gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_AA_ZB_OPA_SURF2);
+					gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_AA_ZB_OPA_SURF2);
 				}
 			} else {
-				gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_AA_OPA_SURF2);
+				gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_AA_OPA_SURF2);
 			}
 			break;
 		case 2:
 			if (arg3) {
 				if (arg3 >= 2) {
-					gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_AA_ZB_XLU_DECAL2);
+					gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_AA_ZB_XLU_DECAL2);
 				} else {
-					gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_AA_ZB_XLU_SURF2);
+					gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_AA_ZB_XLU_SURF2);
 				}
 			} else {
-				gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_AA_XLU_SURF2);
+				gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_AA_XLU_SURF2);
 			}
 			break;
 		case 3:
 			if (arg3) {
-				gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_AA_ZB_TEX_EDGE2);
+				gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_AA_ZB_TEX_EDGE2);
 			} else {
-				gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_AA_TEX_EDGE2);
+				gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_AA_TEX_EDGE2);
 			}
 			break;
 		case 4:
 			if (arg3) {
-				gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_ZB_CLD_SURF2);
+				gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_ZB_CLD_SURF2);
 			} else {
-				gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_CLD_SURF2);
+				gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_CLD_SURF2);
 			}
 			break;
 		}
@@ -258,11 +259,7 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 	if (tconfig == NULL) {
 		texSetRenderMode(&gdl, rendermode, 1, arg3);
 
-		if (arg3 >= 2) {
-			gSPTextureL(gdl++, 0xffff, 0xffff, 0, arg3, G_TX_RENDERTILE, G_ON);
-		} else {
-			gSPTextureL(gdl++, 0xffff, 0xffff, 0, 0, G_TX_RENDERTILE, G_ON);
-		}
+		gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
 
 		gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
 	} else {
@@ -354,13 +351,9 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 			if (arg5) {
 				texSetRenderMode(&gdl, rendermode, 1, arg3);
 
-				if (arg3 >= 2) {
-					gSPTextureL(gdl++, 0xffff, 0xffff, 0, arg3, G_TX_RENDERTILE, G_ON);
-				} else {
-					gSPTextureL(gdl++, 0xffff, 0xffff, 0, 0, G_TX_RENDERTILE, G_ON);
-				}
+				gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
 
-				gDPSetTextureLOD(gdl++, G_TL_TILE);
+				gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 
 				switch (format) {
 				case G_IM_FMT_RGBA:
@@ -388,10 +381,10 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 			gDPSetTextureImage(gdl++, format, depth2, 1, tconfig->textureptr);
 
 			if (depth2 == G_IM_SIZ_16b) {
-				gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, lrs, 0);
+				gfx_Load_Block(gdl++, G_TX_LOADTILE, 0, 0, lrs, 0);
 			} else {
-				gDPSetTile(gdl++, G_IM_FMT_RGBA, depth2, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-				gDPLoadBlock(gdl++, 5, 0, 0, lrs, 0);
+				gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, depth2, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+				gfx_Load_Block(gdl++, 5, 0, 0, lrs, 0);
 			}
 
 			if (format == G_IM_FMT_CI) {
@@ -400,23 +393,23 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 
 				a3 -= t0;
 
-				gDPLoadTLUT06(gdl++, a3, t0, tex->texTlutTmemOffset + a3, t0);
+				gfx_Load_TLUT06(gdl++, a3, t0, tex->texTlutTmemOffset + a3, t0);
 
 				if (arg5) {
-					gDPSetTextureLUT(gdl++, lutmode);
+					gfx_Set_Texture_LUT(gdl++, lutmode);
 				}
 			} else {
 				if (arg5) {
-					gDPSetTextureLUT(gdl++, G_TT_NONE);
+					gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 				}
 			}
 
 			if (arg5) {
-				gDPSetTile(gdl++, format, depth, line, 0x0000, G_TX_RENDERTILE, 0,
+				gfx_Set_Tile(gdl++, format, depth, line, 0x0000, G_TX_RENDERTILE, 0,
 						tconfig->t, texGetMask(height), G_TX_NOLOD,
 						tconfig->s, texGetMask(width), G_TX_NOLOD);
 
-				gDPSetTileSize(gdl++, G_TX_RENDERTILE, ulst, ulst, ((width - 1) << 2) + ulst, ((height - 1) << 2) + ulst);
+				gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, ulst, ulst, ((width - 1) << 2) + ulst, ((height - 1) << 2) + ulst);
 			}
 		} else {
 			int tmem = 0;
@@ -466,13 +459,9 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 			if (arg5) {
 				texSetRenderMode(&gdl, rendermode, 2, arg3);
 
-				if (arg3 >= 2) {
-					gSPTextureL(gdl++, 0xffff, 0xffff, lod - 1, arg3, G_TX_RENDERTILE, G_ON);
-				} else {
-					gSPTexture(gdl++, 0xffff, 0xffff, lod - 1, G_TX_RENDERTILE, G_ON);
-				}
+				gfx_Texture(gdl++, 0xffff, 0xffff, lod - 1, G_TX_RENDERTILE, G_ON);
 
-				gDPSetTextureLOD(gdl++, G_TL_LOD);
+				gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
 
 				switch (format) {
 				case G_IM_FMT_RGBA:
@@ -500,10 +489,10 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 			gDPSetTextureImage(gdl++, format, depth2, 1, tconfig->textureptr);
 
 			if (depth2 == G_IM_SIZ_16b) {
-				gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, lrs, 0);
+				gfx_Load_Block(gdl++, G_TX_LOADTILE, 0, 0, lrs, 0);
 			} else {
-				gDPSetTile(gdl++, G_IM_FMT_RGBA, depth2, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-				gDPLoadBlock(gdl++, 5, 0, 0, lrs, 0);
+				gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, depth2, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+				gfx_Load_Block(gdl++, 5, 0, 0, lrs, 0);
 			}
 
 			if (format == G_IM_FMT_CI) {
@@ -512,14 +501,14 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 
 				a2 -= a3;
 
-				gDPLoadTLUT06(gdl++, a2, a3, tex->texTlutTmemOffset + a2, a3);
+				gfx_Load_TLUT06(gdl++, a2, a3, tex->texTlutTmemOffset + a2, a3);
 
 				if (arg5) {
-					gDPSetTextureLUT(gdl++, lutmode);
+					gfx_Set_Texture_LUT(gdl++, lutmode);
 				}
 			} else {
 				if (arg5) {
-					gDPSetTextureLUT(gdl++, G_TT_NONE);
+					gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 				}
 			}
 
@@ -559,11 +548,11 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 				}
 
 				if (arg5) {
-					gDPSetTile(gdl++, format, depth, line, tmem, tile, 0,
+					gfx_Set_Tile(gdl++, format, depth, line, tmem, tile, 0,
 							tconfig->t, texGetMask(height), tile,
 							tconfig->s, texGetMask(width), tile);
 
-					gDPSetTileSize(gdl++, tile, ulst, ulst, ((width - 1) << 2) + ulst, ((height - 1) << 2) + ulst);
+					gfx_Set_Tile_Size(gdl++, tile, ulst, ulst, ((width - 1) << 2) + ulst, ((height - 1) << 2) + ulst);
 				}
 
 				tmem += line * height;

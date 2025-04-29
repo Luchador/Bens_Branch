@@ -29,8 +29,6 @@ Gfx var800613a0[] = {
 	gsDPSetCombineKey(G_CK_NONE),
 	gsDPSetAlphaCompare(G_AC_NONE),
 	gsDPSetRenderMode(G_RM_OPA_SURF, G_RM_OPA_SURF2),
-	gsDPSetColorDither(G_CD_MAGICSQ),
-	gsDPSetAlphaDither(G_AD_PATTERN),
 	gsSPEndDisplayList(),
 };
 

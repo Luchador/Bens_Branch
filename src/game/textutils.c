@@ -218,34 +218,32 @@ void textReset(void)
 
 Gfx *textConfigureGfxPipeline(Gfx *gdl)
 {
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineLERP(gdl++,
 			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0,
 			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
-	gDPSetTexturePersp(gdl++, G_TP_NONE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
-	gDPSetTextureLUT(gdl++, G_TT_NONE);
-	gDPSetTextureFilter(gdl++, TEX_FILTER_2D);
+	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+	gfx_Set_Texture_Filter(gdl++, TEX_FILTER_2D);
 
 	return gdl;
 }
 
 Gfx *text0f153780(Gfx *gdl)
 {
-	gDPSetColorDither(gdl++, G_CD_BAYER);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
-	gDPSetTextureLOD(gdl++, G_TL_LOD);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+	gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
 
 	return gdl;
 }
 
 Gfx *textSetPrimColour(Gfx *gdl, uint32_t colour)
 {
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 
 	struct RGBA tmp = utilsUnpackColorRGBA(colour);
@@ -265,7 +263,7 @@ Gfx *text0f153858(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
-	gDPFillRectangle(gdl++, *x1, *y1, *x2, *y2);
+	gfx_Fill_Rectangle(gdl++, *x1, *y1, *x2, *y2);
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -276,7 +274,7 @@ Gfx *text0f1538e4(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
-	gDPFillRectangleScaled(gdl++, *x1, *y1, *x2, *y2);
+	gfx_Fill_Rectangle(gdl++, *x1, *y1, *x2, *y2);
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -315,8 +313,7 @@ Gfx *text0f153ab0(Gfx *gdl)
 
 	var800a4634 = allocation;
 
-
-	gSPDisplayList(gdl++, var800a4634);
+	gfx_Display_List(gdl++, var800a4634);
 
 	gdl = func0f0d4c80(gdl);
 
@@ -330,7 +327,7 @@ void textStopRedrawEffect(void)
 {
 	g_DoRedrawEffect = false;
 
-	gSPEndDisplayList(var800a4634++);
+	gfx_End_Display_List(var800a4634++);
 }
 
 void text0f153b6c(int arg0)
@@ -697,7 +694,7 @@ Gfx *textMakeCreditVerts(Gfx *gdl, int *arg1, struct fontchar *curchar, struct f
 	*arg1 = *arg1 - tmp2 + 1;
 
 	gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, curchar->pixeldata);
-	gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, ((curchar->height * 8 + 17) >> 1) - 1, 2048);
+	gfx_Load_Block(gdl++, G_TX_LOADTILE, 0, 0, ((curchar->height * 8 + 17) >> 1) - 1, 2048);
 
 	tmp1 = 0;
 	tmp2 = 0;
@@ -746,10 +743,10 @@ Gfx *textMakeCreditVerts(Gfx *gdl, int *arg1, struct fontchar *curchar, struct f
 	vertices[3].s = sp36;
 	vertices[3].t = sp30;
 
-	gSPColor(gdl++, colours, 1);
+	gfx_Color(gdl++, colours, 1);
 	gSPVertex(gdl++, vertices, 4, 0);
 
-	gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
+	gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 
 	*arg1 += curchar->width;
 
@@ -780,12 +777,12 @@ Gfx *textRenderCredit(Gfx *gdl, float x, float y, float widthscale, float height
 	fx = *ptr - (widthscale - 1.0f) * textwidth * 0.5f * hdir;
 	fy = y - (heightscale - 1.0f) * lineheight * 0.5f * vdir;
 
-	gDPSetTextureLUT(gdl++, G_TT_IA16);
+	gfx_Set_Texture_LUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (uintptr_t)(var8007fb3c));
 
-	gDPLoadTLUTCmd(gdl++, 6, 15);
-	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c);
+	gfx_Load_TLUT(gdl++, 15);
+	gfx_Set_Tile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+	gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c);
 	struct RGBA tmp = utilsUnpackColorRGBA(colour);
 	gfx_Set_Prim_Color(gdl++, tmp);
 
@@ -833,8 +830,8 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, int *x, int *y, struct fontchar *curchar,
 			gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, curchar->pixeldata);
 			g_CharToRender = curchar;
 			//gDPSetTextureImage(gdl++, G_IM_FMT_CUSTOMFONT, G_IM_SIZ_16b, 1, &g_HandelGothicData[g_CharToRender->index].pixeldata);
-			gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-			gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, ((curchar->height * 8 + 17) >> 1) - 1, 2048);
+			gfx_Set_Tile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+			gfx_Load_Block(gdl++, G_TX_LOADTILE, 0, 0, ((curchar->height * 8 + 17) >> 1) - 1, 2048);
 
 			if (g_Blend.types) {
 				gdl = text0f154ecc(gdl, *x, *y + arg10);
@@ -855,7 +852,7 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, int *x, int *y, struct fontchar *curchar,
 									1024,
 									65536 - 1024);
 						} else {
-							gSPTextureRectangle(gdl++,
+							gdl += gfx_Texture_Rectangle(gdl,
 									*x * 4,
 									(sp90 + curchar->baseline) * 4,
 									(*x + curchar->width) * 4,
@@ -894,7 +891,7 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, int *x, int *y, struct fontchar *curchar,
 							}
 						}
 					} else if (savedy + height >= curchar->baseline + sp90) {
-						gSPTextureRectangle(gdl++,
+						gdl += gfx_Texture_Rectangle(gdl,
 								*x * 4,
 								(sp90 + curchar->baseline) * 4,
 								(*x + curchar->width) * 4,
@@ -907,7 +904,7 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, int *x, int *y, struct fontchar *curchar,
 					}
 				} else {
 					if (curchar->baseline + sp90 + curchar->height >= savedy) {
-						gSPTextureRectangle(gdl++,
+						gdl += gfx_Texture_Rectangle(gdl,
 								*x * 4,
 								savedy * 4,
 								(*x + curchar->width) * 4,
@@ -981,14 +978,12 @@ Gfx *textRenderProjected(Gfx *gdl, int *x, int *y, char *text, struct fontchar *
 		lineheight = chars['['].height + chars['['].baseline;
 	}
  
-	gDPSetTextureLUT(gdl++, G_TT_IA16);
+	gfx_Set_Texture_LUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (uintptr_t)(var8007fb3c));
-	//gDPSetTextureImage(gdl++, G_IM_FMT_CUSTOMFONT, G_IM_SIZ_16b, 1, &g_HandelGothicData[50].pixeldata);
-	gDPLoadTLUTCmd(gdl++, 6, 15);
-	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-	//gDPSetTile(gdl++, G_IM_FMT_CUSTOMFONT, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c);
-	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 128, 128);
+	gfx_Load_TLUT(gdl++, 15);
+	gfx_Set_Tile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+	gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 124, 124);
+	gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 128, 128);
 	struct RGBA tmp = utilsUnpackColorRGBA((uint32_t)colour);
 	gfx_Set_Prim_Color(gdl++, tmp);
 
@@ -1024,7 +1019,7 @@ Gfx *text0f1566cc(Gfx *gdl, uint32_t arg1, uint32_t arg2)
 	uint32_t colour = textHighlightSweep(arg1, arg2, g_Blend.colour04);
 
 	if (colour != g_Blend.colour44) {
-		gDPSetColor(gdl++, G_SETENVCOLOR, colour);
+		gfx_Set_Color(gdl++, G_SETENVCOLOR, (uintptr_t)(colour));
 	}
 
 	g_Blend.colour44 = colour;
@@ -1064,7 +1059,7 @@ Gfx *textRenderChar(Gfx *gdl, int *x, int *y, struct fontchar *char1, struct fon
 		}
 
 		gDPSetTextureImage(gdl++, G_IM_FMT_CI, G_IM_SIZ_16b, 1, char1->pixeldata);
-		gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, ((char1->height * 8 + 17) >> 1) - 1, 2048);
+		gfx_Load_Block(gdl++, G_TX_LOADTILE, 0, 0, ((char1->height * 8 + 17) >> 1) - 1, 2048);
 
 		gdl = textRenderOutline(gdl, *x - 1, sp38 - 1, char1, arg6, arg7 - 1, arg8, arg9);
 	}
@@ -1091,7 +1086,7 @@ Gfx *textRenderOutline(Gfx *gdl, int x, int y, struct fontchar *char1, int arg4,
 							1024,
 							-1024);
 				} else {
-					gSPTextureRectangle(gdl++,
+					gdl += gfx_Texture_Rectangle(gdl,
 							x * 4,
 							(y + char1->baseline) * 4,
 							(x + char1->width + 2) * 4,
@@ -1104,7 +1099,7 @@ Gfx *textRenderOutline(Gfx *gdl, int x, int y, struct fontchar *char1, int arg4,
 				}
 			} else {
 				if (arg5 + arg7 >= y + char1->baseline) {
-					gSPTextureRectangle(gdl++,
+					gdl += gfx_Texture_Rectangle(gdl,
 							x * 4,
 							(y + char1->baseline) * 4,
 							(x + char1->width + 2) * 4,
@@ -1118,7 +1113,7 @@ Gfx *textRenderOutline(Gfx *gdl, int x, int y, struct fontchar *char1, int arg4,
 			}
 		} else {
 			if (y + char1->baseline + char1->height + 2 >= arg5) {
-				gSPTextureRectangle(gdl++,
+				gdl += gfx_Texture_Rectangle(gdl,
 						x * 4,
 						arg5 * 4,
 						(x + char1->width + 2) * 4,
@@ -1151,21 +1146,20 @@ Gfx *textRender(Gfx *gdl, int *x, int *y, char *text,
 		lineheight = chars['['].height + chars['['].baseline;
 	}
 
-	gDPSetTextureLUT(gdl++, G_TT_IA16);
+	gfx_Set_Texture_LUT(gdl++, G_TT_IA16);
 	gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, (uintptr_t)(&var8007fb5c));
-	gDPLoadTLUTCmd(gdl++, 6, 31);
-	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c);
-	gDPSetTile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0x0000, 1, 1, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+	gfx_Load_TLUT(gdl++, 31);
+	gfx_Set_Tile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+	gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 124, 124);
+	gfx_Set_Tile(gdl++, G_IM_FMT_CI, G_IM_SIZ_4b, 1, 0, 1, 1, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 
-	gDPSetTileSize(gdl++, 1, 0, 0, 0x007c, 0x007c);
-	gDPSetCycleType(gdl++, G_CYC_2CYCLE);
+	gfx_Set_Tile_Size(gdl++, 1, 0, 0, 124, 124);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_2CYCLE);
 	gDPSetCombineLERP(gdl++,
 			ENVIRONMENT, PRIMITIVE, TEXEL1_ALPHA, PRIMITIVE, 0, 0, 0, TEXEL0,
 			0, 0, 0, COMBINED, COMBINED, 0, ENVIRONMENT, 0);
-	struct RGBA tmp = utilsUnpackColorRGBA(colour);
-	gfx_Set_Prim_Color(gdl++, tmp);
-	gDPSetEnvColorViaWord(gdl++, arg6);
+	gfx_Set_Prim_Color(gdl++, utilsUnpackColorRGBA(colour));
+	gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(arg6));
 
 	g_Blend.colour08 = colour;
 	g_Blend.colour48 = colour;
@@ -1192,7 +1186,7 @@ Gfx *textRender(Gfx *gdl, int *x, int *y, char *text,
 		}
 	}
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gDPSetCombineLERP(gdl++,
 			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0,
 			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);

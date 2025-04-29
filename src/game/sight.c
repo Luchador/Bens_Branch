@@ -427,14 +427,14 @@ Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, int textid, i
 
 		// Left
 		if (boxleft >= viewleft && boxleft <= viewright && boxtop <= viewbottom && boxbottom >= viewtop) {
-			gDPHudRectangle(gdl++,
+			gfx_HUD_Rectangle(gdl++,
 					boxleft, (boxtop > viewtop ? boxtop : viewtop),
 					boxleft, (boxbottom < viewbottom ? boxbottom : viewbottom));
 		}
 
 		// Right
 		if (boxright >= viewleft && boxright <= viewright && boxtop <= viewbottom && boxbottom >= viewtop) {
-			gDPHudRectangle(gdl++,
+			gfx_HUD_Rectangle(gdl++,
 					boxright, (boxtop > viewtop ? boxtop : viewtop),
 					boxright, (boxbottom < viewbottom ? boxbottom : viewbottom));
 		} else {
@@ -443,7 +443,7 @@ Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, int textid, i
 
 		// Top
 		if (boxtop >= viewtop && boxtop <= viewbottom && boxleft <= viewright && boxright >= viewleft) {
-			gDPHudRectangle(gdl++,
+			gfx_HUD_Rectangle(gdl++,
 					(boxleft > viewleft ? boxleft : viewleft), boxtop,
 					(boxright < viewright ? boxright : viewright), boxtop);
 		} else {
@@ -452,7 +452,7 @@ Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, int textid, i
 
 		// Bottom
 		if (boxbottom >= viewtop && boxbottom <= viewbottom && boxleft <= viewright && boxright >= viewleft) {
-			gDPHudRectangle(gdl++,
+			gfx_HUD_Rectangle(gdl++,
 					(boxleft > viewleft ? boxleft : viewleft), boxbottom,
 					(boxright < viewright ? boxright : viewright), boxbottom);
 		}
@@ -493,187 +493,44 @@ Gfx *sightDrawAimer(Gfx *gdl, int x, int y, int radius, int cornergap, uint32_t 
 
 	x = sightGetAdjustedX(x);
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-	gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
+	gfx_Set_Subpixel_Offset_EXT(gdl++, -2, -2);
 
 	// Draw the lines that span most of the viewport
 	if (PLAYERCOUNT() == 1) {
-		gDPHudRectangle(gdl++, viewleft + 48, y, x - radius + 2, y);
-		gDPHudRectangle(gdl++, x + radius - 2, y, viewright - 49, y);
-		gDPHudRectangle(gdl++, x, viewtop + 10, x, y - radius + 2);
-		gDPHudRectangle(gdl++, x, y + radius - 2, x, viewbottom - 10);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, viewleft + 48, y, x - radius + 2, y);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x + radius - 2, y, viewright - 49, y);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x, viewtop + 10, x, y - radius + 2);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x, y + radius - 2, x, viewbottom - 10);
 	} else {
-		gDPHudRectangle(gdl++, viewleft, y, x - radius + 2, y);
-		gDPHudRectangle(gdl++, x + radius - 2, y, viewright, y);
-		gDPHudRectangle(gdl++, x, viewtop, x, y - radius + 2);
-		gDPHudRectangle(gdl++, x, y + radius - 2, x, viewbottom);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, viewleft, y, x - radius + 2, y);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x + radius - 2, y, viewright, y);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x, viewtop, x, y - radius + 2);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x, y + radius - 2, x, viewbottom);
 	}
 
 	gdl = textSetCCCustom02(gdl);
 	gdl = textSetPrimColour(gdl, colour);
 
 	// Draw the box
-	gDPHudRectangle(gdl++, x - radius, y - radius, x - radius, y + radius);
-	gDPHudRectangle(gdl++, x + radius, y - radius, x + radius, y + radius);
-	gDPHudRectangle(gdl++, x - radius, y - radius, x + radius, y - radius);
-	gDPHudRectangle(gdl++, x - radius, y + radius, x + radius, y + radius);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y - radius, x - radius, y + radius);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x + radius, y - radius, x + radius, y + radius);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y - radius, x + radius, y - radius);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y + radius, x + radius, y + radius);
 
 	// Go over the corners a second time
-	gDPHudRectangle(gdl++, x - radius, y - radius, x - radius, y - cornergap);
-	gDPHudRectangle(gdl++, x - radius, y + cornergap, x - radius, y + radius);
-	gDPHudRectangle(gdl++, x + radius, y - radius, x + radius, y - cornergap);
-	gDPHudRectangle(gdl++, x + radius, y + cornergap, x + radius, y + radius);
-	gDPHudRectangle(gdl++, x - radius, y - radius, x - cornergap, y - radius);
-	gDPHudRectangle(gdl++, x + cornergap, y - radius, x + radius, y - radius);
-	gDPHudRectangle(gdl++, x - radius, y + radius, x - cornergap, y + radius);
-	gDPHudRectangle(gdl++, x + cornergap, y + radius, x + radius, y + radius);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y - radius, x - radius, y - cornergap);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y + cornergap, x - radius, y + radius);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x + radius, y - radius, x + radius, y - cornergap);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x + radius, y + cornergap, x + radius, y + radius);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y - radius, x - cornergap, y - radius);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x + cornergap, y - radius, x + radius, y - radius);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y + radius, x - cornergap, y + radius);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x + cornergap, y + radius, x + radius, y + radius);
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
+	gfx_Set_Subpixel_Offset_EXT(gdl++, 0, 0);
 
 	gdl = textSetCCCustom02(gdl);
-
-	return gdl;
-}
-
-/**
- * The delayed aimer is an unused aimer box. It's twice as big as the normal one
- * and follows the gun's cursor with a very noticeable delay. The lines that
- * span the viewport are not used here, and a 3x3 box is filled in with green
- * at the live crosshair position.
- *
- * Because its position and speed properties are static variables, they only get
- * updated when the aimer is held. This means releasing and pressing R again
- * causes the box to appear where it was last.
- *
- * The default Y position is not quite centered,
- * and is not reset for split screen play. There's also no viewport boundary
- * checks. It's likely that this feature was just a concept and was dropped
- * pretty early.
- */
-Gfx *sightDrawDelayedAimer(Gfx *gdl, int x, int y, int radius, int cornergap, uint32_t colour)
-{
-	int boxx;
-	int boxy;
-	int i;
-	float dist;
-	float accel;
-
-	static float xpos = 160;
-	static float ypos = 120;
-	static float xspeed = 0;
-	static float yspeed = 0;
-
-	x = sightGetAdjustedX(x);
-	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-
-	for (i = 0; i < g_Vars.lvupdate60; i++) {
-		dist = x - xpos;
-
-		if (dist > 0.5f || dist < -0.5f) {
-			accel = dist * 0.05f;
-
-			if (accel > 2.0f) {
-				accel = 2.0f;
-			}
-
-			if (accel < -2.0f) {
-				accel = -2.0f;
-			}
-
-			if (accel > xspeed) {
-				accel = 0.05f;
-			} else if (accel < xspeed) {
-				accel = -0.05f;
-			} else {
-				accel = 0.0f;
-			}
-
-			xspeed += accel;
-
-			if (xspeed > 2.0f) {
-				xspeed = 2.0f;
-			}
-
-			if (xspeed < -2.0f) {
-				xspeed = -2.0f;
-			}
-
-			xpos += xspeed;
-		} else {
-			xpos = x;
-			xspeed = 0.0f;
-		}
-
-		dist = y - ypos;
-
-		if (dist > 0.5f || dist < -0.5f) {
-			accel = dist * 0.05f;
-
-			if (accel > 2.0f) {
-				accel = 2.0f;
-			}
-			if (accel < -2.0f) {
-				accel = -2.0f;
-			}
-
-			if (yspeed < accel) {
-				accel = 0.05f;
-			} else if (accel < yspeed) {
-				accel = -0.05f;
-			} else {
-				accel = 0.0f;
-			}
-
-			yspeed += accel;
-
-			if (yspeed > 2.0f) {
-				yspeed = 2.0f;
-			}
-
-			if (yspeed < -2.0f) {
-				yspeed = -2.0f;
-			}
-
-			ypos += yspeed;
-		} else {
-			ypos = y;
-			yspeed = 0.0f;
-		}
-	}
-
-	boxx = xpos;
-	boxy = ypos;
-
-	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
-
-	// Fill a 3x3 box at the live crosshair
-	gDPHudRectangle(gdl++, x - 1, y - 1, x + 1, y - 1);
-	gDPHudRectangle(gdl++, x - 1, y + 0, x + 1, y + 0);
-	gDPHudRectangle(gdl++, x - 1, y + 1, x + 1, y + 1);
-
-	gdl = textSetCCCustom02(gdl);
-
-	gdl = textSetPrimColour(gdl, colour);
-
-	// Draw the box
-	gDPHudRectangle(gdl++, boxx - radius, boxy - radius, boxx - radius, boxy + radius);
-	gDPHudRectangle(gdl++, boxx + radius, boxy - radius, boxx + radius, boxy + radius);
-	gDPHudRectangle(gdl++, boxx - radius, boxy - radius, boxx + radius, boxy - radius);
-	gDPHudRectangle(gdl++, boxx - radius, boxy + radius, boxx + radius, boxy + radius);
-
-	// Go over the corners a second time
-	gDPHudRectangle(gdl++, boxx - radius, boxy - radius, boxx - radius, boxy - cornergap);
-	gDPHudRectangle(gdl++, boxx - radius, boxy + cornergap, boxx - radius, boxy + radius);
-	gDPHudRectangle(gdl++, boxx + radius, boxy - radius, boxx + radius, boxy - cornergap);
-	gDPHudRectangle(gdl++, boxx + radius, boxy + cornergap, boxx + radius, boxy + radius);
-	gDPHudRectangle(gdl++, boxx - radius, boxy - radius, boxx - cornergap, boxy - radius);
-	gDPHudRectangle(gdl++, boxx + cornergap, boxy - radius, boxx + radius, boxy - radius);
-	gDPHudRectangle(gdl++, boxx - radius, boxy + radius, boxx - cornergap, boxy + radius);
-	gDPHudRectangle(gdl++, boxx + cornergap, boxy + radius, boxx + radius, boxy + radius);
-
-	gdl = textSetCCCustom02(gdl);
-
-	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 
 	return gdl;
 }
@@ -720,9 +577,6 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, float crossx, float crossy)
 			switch (sight) {
 			case 0:
 				gdl = sightDrawAimer(gdl, x, y, radius, cornergap, colour);
-				break;
-			case 1:
-				gdl = sightDrawDelayedAimer(gdl, x, y, radius * 2, cornergap * 2, colour);
 				break;
 			}
 		}
@@ -882,17 +736,16 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 		return gdl;
 	}
 
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetTexturePersp(gdl++, G_TP_NONE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureFilter(gdl++, G_TF_POINT);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
-	gDPSetTextureLUT(gdl++, G_TT_NONE);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-	struct RGBA color = {0, 0, 0, 0};
+	RGBA color = {0, 0, 0, 0};
 	gfx_Set_Prim_Color(gdl++, color);
 
 	x1 = x - halfw;
@@ -900,7 +753,7 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 	x2 = x + halfw;
 	y2 = y + (tconfig->height >> 1);
 
-	gDPFillRectangle(gdl++, x1, y1, x2, y2);
+	gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
 
 	spc4[0] = x;
 	spc4[1] = y;
@@ -910,19 +763,19 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 	texSelect(&gdl, tconfig, 2, 0, 0, 1, NULL);
 
-	gDPSetEnvColor(gdl++, 0xff, 0xff, 0xff, 0x7f);
+	RGBA envColor = {255, 255, 255, 127};
+	gfx_Set_Env_Color(gdl++, envColor);
 
 	gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
 
 	utilsRenderScreenTexture(&gdl, spc4, spbc, tconfig->width, tconfig->height, 0, 0, 0, false);
 	
-	gDPSetColorDither(gdl++, G_CD_BAYER);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_LOD);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
-	gDPSetTextureLUT(gdl++, G_TT_NONE);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 
 	return gdl;
 }
@@ -1020,9 +873,9 @@ Gfx *sightDrawSkedarTriangle(Gfx *gdl, int x, int y, int dir, uint32_t colour)
 	vertices[1].colour = 4;
 	vertices[2].colour = 4;
 
-	gSPColor(gdl++, colours, 2);
+	gfx_Color(gdl++, colours, 2);
 	gSPVertex(gdl++, vertices, 3, 0);
-	gSPTri1(gdl++, 0, 1, 2);
+	gfx_Tri1(gdl++, 0, 1, 2);
 
 	return gdl;
 }
@@ -1061,14 +914,14 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, float crossx, float crossy)
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 #endif
 
-	gdl = gfxSetCustomProjection(gdl);
+	gdl = savebufferSetCustomProjection(gdl);
 
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gSPSetGeometryMode(gdl++, G_SHADE | G_SHADING_SMOOTH);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
 	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 
 	trix1 = x;
 	triy1 = y;
@@ -1322,49 +1175,47 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, float crossx, float crossy)
 		}
 
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-		gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
+		gfx_Set_Subpixel_Offset_EXT(gdl++, -2, -2);
 
 		// Top left
-		gDPHudRectangle(gdl++, BOXLEFT + 1, BOXTOP, BOXLEFT + cornerwidth - 1, BOXTOP);
-		gDPHudRectangle(gdl++, BOXLEFT, BOXTOP, BOXLEFT, BOXTOP + cornerheight - 1);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT + 1, BOXTOP, BOXLEFT + cornerwidth - 1, BOXTOP);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXTOP, BOXLEFT, BOXTOP + cornerheight - 1);
 
 		// Top right
-		gDPHudRectangle(gdl++, BOXRIGHT - cornerwidth + 2, BOXTOP, BOXRIGHT - 1, BOXTOP);
-		gDPHudRectangle(gdl++, BOXRIGHT, BOXTOP, BOXRIGHT, BOXTOP + cornerheight - 1);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT - cornerwidth + 2, BOXTOP, BOXRIGHT - 1, BOXTOP);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT, BOXTOP, BOXRIGHT, BOXTOP + cornerheight - 1);
 
 		// Bottom left
-		gDPHudRectangle(gdl++, BOXLEFT + 1, BOXBOTTOM, BOXLEFT + cornerwidth - 1, BOXBOTTOM);
-		gDPHudRectangle(gdl++, BOXLEFT, BOXBOTTOM - cornerheight + 1, BOXLEFT, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT + 1, BOXBOTTOM, BOXLEFT + cornerwidth - 1, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXBOTTOM - cornerheight + 1, BOXLEFT, BOXBOTTOM);
 
 		// Bottom right
-		gDPHudRectangle(gdl++, BOXRIGHT - cornerwidth + 2, BOXBOTTOM, BOXRIGHT - 1, BOXBOTTOM);
-		gDPHudRectangle(gdl++, BOXRIGHT, BOXBOTTOM - cornerheight + 1, BOXRIGHT, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT - cornerwidth + 2, BOXBOTTOM, BOXRIGHT - 1, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT, BOXBOTTOM - cornerheight + 1, BOXRIGHT, BOXBOTTOM);
 
 		// Draw over the corners again, but only half as wide/high
 		cornerwidth >>= 1;
 		cornerheight >>= 1;
 
 		// Top left
-		gDPHudRectangle(gdl++, BOXLEFT, BOXTOP, BOXLEFT + cornerwidth, BOXTOP);
-		gDPHudRectangle(gdl++, BOXLEFT, BOXTOP, BOXLEFT, BOXTOP + cornerheight);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXTOP, BOXLEFT + cornerwidth, BOXTOP);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXTOP, BOXLEFT, BOXTOP + cornerheight);
 
 		// Top right
-		gDPHudRectangle(gdl++, BOXRIGHT - cornerwidth, BOXTOP, BOXRIGHT, BOXTOP);
-		gDPHudRectangle(gdl++, BOXRIGHT, BOXTOP, BOXRIGHT, BOXTOP + cornerheight);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT - cornerwidth, BOXTOP, BOXRIGHT, BOXTOP);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT, BOXTOP, BOXRIGHT, BOXTOP + cornerheight);
 
 		// Bottom left
-		gDPHudRectangle(gdl++, BOXLEFT, BOXBOTTOM, BOXLEFT + cornerwidth, BOXBOTTOM);
-		gDPHudRectangle(gdl++, BOXLEFT, BOXBOTTOM - cornerheight, BOXLEFT, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXBOTTOM, BOXLEFT + cornerwidth, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXBOTTOM - cornerheight, BOXLEFT, BOXBOTTOM);
 
 		// Bottom right
-		gDPHudRectangle(gdl++, BOXRIGHT - cornerwidth, BOXBOTTOM, BOXRIGHT, BOXBOTTOM);
-		gDPHudRectangle(gdl++, BOXRIGHT, BOXBOTTOM - cornerheight, BOXRIGHT, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT - cornerwidth, BOXBOTTOM, BOXRIGHT, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT, BOXBOTTOM - cornerheight, BOXRIGHT, BOXBOTTOM);
 
 
-#ifndef PLATFORM_N64
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-		gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
-#endif
+		gfx_Set_Subpixel_Offset_EXT(gdl++, 0, 0);
 
 		gdl = textSetCCCustom02(gdl);
 		gdl = text0f153780(gdl);
@@ -1401,18 +1252,18 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 	x = sightGetAdjustedX(x);
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-	gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
+	gfx_Set_Subpixel_Offset_EXT(gdl++, -2, -2);
 
 	vertices = gfxAllocateVertices(8);
 	colours = gfxAllocateColours(2);
-	gdl = gfxSetCustomProjection(gdl);
+	gdl = savebufferSetCustomProjection(gdl);
 
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gSPSetGeometryMode(gdl++, G_SHADE | G_SHADING_SMOOTH);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
 	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 
 	vertices[0].x = (viewleft + (viewwidth >> 1)) * 10;
 	vertices[0].y = (viewtop + 10) * 10;
@@ -1464,25 +1315,24 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 	vertices[7].colour = 4;
 
 	// Draw the main 4 triangles
-	gSPColor(gdl++, colours, 2);
+	gfx_Color(gdl++, colours, 2);
 	gSPVertex(gdl++, vertices, 8, 0);
-	gSPTri4(gdl++, 0, 4, 5, 5, 3, 6, 7, 6, 1, 4, 7, 2);
+	gfx_Tri4(gdl++, 0, 4, 5, 5, 3, 6, 7, 6, 1, 4, 7, 2);
 
 	gdl = savebufferSetup2DRender(gdl);
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
 	// Draw border over inner points
-	gDPHudRectangle(gdl++, x - 4, y - 4, x - 4, y + 4); // left
-	gDPHudRectangle(gdl++, x + 4, y - 4, x + 4, y + 4); // right
-	gDPHudRectangle(gdl++, x - 4, y - 4, x + 4, y - 4); // top
-	gDPHudRectangle(gdl++, x - 4, y + 4, x + 4, y + 4); // bottom
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x - 4, y - 4, x - 4, y + 4); // left
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x + 4, y - 4, x + 4, y + 4); // right
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x - 4, y - 4, x + 4, y - 4); // top
+	gdl += gfx_HUD_Rectangle_EXT(gdl, x - 4, y + 4, x + 4, y + 4); // bottom
 
 	gdl = textSetCCCustom02(gdl);
 
-#ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
-#endif
+	gfx_Set_Subpixel_Offset_EXT(gdl++, 0, 0);
+
 
 	return gdl;
 }
@@ -1495,24 +1345,24 @@ Gfx *sightDrawTarget(Gfx *gdl, float crossx, float crossy)
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-	gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
+	gfx_Set_Subpixel_Offset_EXT(gdl++, -2, -2);
 	if (SIGHT_SCALE == 0) {
 		// Draw single rectangle to preserve intended opacity
-		gDPHudRectangle(gdl++, x, y, x, y);
+		gdl += gfx_HUD_Rectangle_EXT(gdl++, x, y, x, y);
 	} else
 	{
-		gDPHudRectangle(gdl++, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 3 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 2 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x - 3 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x - 2 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x + 0 * SIGHT_SCALE, y + 1 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 3 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x + 0 * SIGHT_SCALE, y + 1 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 2 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x + 0 * SIGHT_SCALE, y - 3 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1 * SIGHT_SCALE);
-		gDPHudRectangle(gdl++, x + 0 * SIGHT_SCALE, y - 2 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 3 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 2 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x - 3 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x - 2 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 0 * SIGHT_SCALE, y + 1 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 3 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 0 * SIGHT_SCALE, y + 1 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 2 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 0 * SIGHT_SCALE, y - 3 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 0 * SIGHT_SCALE, y - 2 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1 * SIGHT_SCALE);
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-	gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
+	gfx_Set_Subpixel_Offset_EXT(gdl++, 0, 0);
 
 	gdl = textSetCCCustom02(gdl);
 

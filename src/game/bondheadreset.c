@@ -101,14 +101,14 @@ void bheadReset(void)
 		modelUpdateInfo(&g_Vars.currentplayer->model);
 		mtxIdent(&sp48);
 		renderdata.unk00 = (Mtxf*)&sp48;
-		renderdata.unk10 = g_Vars.currentplayer->bondheadmatrices;
+		renderdata.unk10 = (Mtxf*)g_Vars.currentplayer->bondheadmatrices;
 		modelSetMatricesWithAnim(&renderdata, &g_Vars.currentplayer->model);
 
-		g_Vars.currentplayer->standheight = g_Vars.currentplayer->bondheadmatrices[0].m[3][1];
+		g_Vars.currentplayer->standheight = g_Vars.currentplayer->bondheadmatrices[0][3][1];
 
 		g_Vars.currentplayer->standbodyoffset.x = 0;
-		g_Vars.currentplayer->standbodyoffset.y = g_Vars.currentplayer->bondheadmatrices[1].m[3][1] - g_Vars.currentplayer->bondheadmatrices[0].m[3][1];
-		g_Vars.currentplayer->standbodyoffset.z = g_Vars.currentplayer->bondheadmatrices[1].m[3][2] - g_Vars.currentplayer->bondheadmatrices[0].m[3][2];
+		g_Vars.currentplayer->standbodyoffset.y = g_Vars.currentplayer->bondheadmatrices[1][3][1] - g_Vars.currentplayer->bondheadmatrices[0][3][1];
+		g_Vars.currentplayer->standbodyoffset.z = g_Vars.currentplayer->bondheadmatrices[1][3][2] - g_Vars.currentplayer->bondheadmatrices[0][3][2];
 
 		modelSetAnimation(&g_Vars.currentplayer->model,
 				g_HeadAnims[g_Vars.currentplayer->headanim].animnum,

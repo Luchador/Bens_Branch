@@ -19,7 +19,10 @@ struct headanim g_HeadAnims[] = {
 
 void bheadFlipAnimation(void)
 {
-	g_Vars.currentplayer->model.anim->flip = !g_Vars.currentplayer->model.anim->flip;
+	if(g_Vars.currentplayer->model.anim)
+	{
+		g_Vars.currentplayer->model.anim->flip = !g_Vars.currentplayer->model.anim->flip;
+	}
 }
 
 void bheadUpdateIdleRoll(void)
@@ -116,82 +119,85 @@ void bheadUpdate(float arg0, float arg1)
 	struct coord upvel = {0, 1, 0};
 	float animspeed = 0;
 
-	if (animHasFrames(g_Vars.currentplayer->model.anim->animnum)) {
-		animspeed = modelGetAbsAnimSpeed(&g_Vars.currentplayer->model);
+	if(g_Vars.currentplayer->model.anim)
+	{
+		if (animHasFrames(g_Vars.currentplayer->model.anim->animnum)) {
+			animspeed = modelGetAbsAnimSpeed(&g_Vars.currentplayer->model);
 
-		if (g_Vars.currentplayer->headanim == HEADANIM_RESTING) {
-			if (animspeed > 0.7f) {
-				g_Vars.currentplayer->headamplitude = 1;
-			} else if (animspeed > 0.1f) {
-				g_Vars.currentplayer->headamplitude = 0.4f + (animspeed - 0.1f) * 0.60000002384186f / 0.59999996423721f;
-			} else {
-				g_Vars.currentplayer->headamplitude = 0.4f;
-			}
+			if (g_Vars.currentplayer->headanim == HEADANIM_RESTING) {
+				if (animspeed > 0.7f) {
+					g_Vars.currentplayer->headamplitude = 1;
+				} else if (animspeed > 0.1f) {
+					g_Vars.currentplayer->headamplitude = 0.4f + (animspeed - 0.1f) * 0.60000002384186f / 0.59999996423721f;
+				} else {
+					g_Vars.currentplayer->headamplitude = 0.4f;
+				}
 
-			g_Vars.currentplayer->sideamplitude = g_Vars.currentplayer->headamplitude;
-		} else {
-			if (g_Vars.currentplayer->headanim == HEADANIM_MOVING) {
-				g_Vars.currentplayer->headamplitude = 0.89999997615814f;
-				g_Vars.currentplayer->sideamplitude = 0.5f;
-			} else {
-				g_Vars.currentplayer->headamplitude = 1;
 				g_Vars.currentplayer->sideamplitude = g_Vars.currentplayer->headamplitude;
+			} else {
+				if (g_Vars.currentplayer->headanim == HEADANIM_MOVING) {
+					g_Vars.currentplayer->headamplitude = 0.89999997615814f;
+					g_Vars.currentplayer->sideamplitude = 0.5f;
+				} else {
+					g_Vars.currentplayer->headamplitude = 1;
+					g_Vars.currentplayer->sideamplitude = g_Vars.currentplayer->headamplitude;
+				}
 			}
-		}
 
-		{
-			struct modelrenderdata sp80 = {NULL, 1, 3};
-			Mtx sp40;
-			struct coord modelpos = {0, 0, 0};
-			bool mergeenabled = modelIsAnimMergingEnabled();
+			{
+				struct modelrenderdata sp80 = {NULL, 1, 3};
+				Mtx sp40;
+				struct coord modelpos = {0, 0, 0};
+				bool mergeenabled = modelIsAnimMergingEnabled();
 
-			g_Vars.currentplayer->resetheadtick = false;
+				g_Vars.currentplayer->resetheadtick = false;
 
-			modelSetAnimMergingEnabled(false);
-			modelTickAnimQuarterSpeed(&g_Vars.currentplayer->model, g_Vars.lvupdate240, true);
-			modelSetAnimMergingEnabled(mergeenabled);
-			modelUpdateInfo(&g_Vars.currentplayer->model);
-			mtxIdent(&sp40);
+				modelSetAnimMergingEnabled(false);
+				modelTickAnimQuarterSpeed(&g_Vars.currentplayer->model, g_Vars.lvupdate240, true);
+				modelSetAnimMergingEnabled(mergeenabled);
+				modelUpdateInfo(&g_Vars.currentplayer->model);
+				mtxIdent(&sp40);
 
-			sp80.unk00 = (Mtxf*)&sp40;
-			sp80.unk10 = g_Vars.currentplayer->bondheadmatrices;
-			modelSetMatricesWithAnim(&sp80, &g_Vars.currentplayer->model);
+				sp80.unk00 = (Mtxf*)&sp40;
+				sp80.unk10 = (Mtxf*)g_Vars.currentplayer->bondheadmatrices;
+				modelSetMatricesWithAnim(&sp80, &g_Vars.currentplayer->model);
 
-			g_Vars.currentplayer->headbodyoffset.x = g_Vars.currentplayer->standbodyoffset.x;
-			g_Vars.currentplayer->headbodyoffset.y = g_Vars.currentplayer->standbodyoffset.y;
-			g_Vars.currentplayer->headbodyoffset.z = g_Vars.currentplayer->standbodyoffset.z;
+				g_Vars.currentplayer->headbodyoffset.x = g_Vars.currentplayer->standbodyoffset.x;
+				g_Vars.currentplayer->headbodyoffset.y = g_Vars.currentplayer->standbodyoffset.y;
+				g_Vars.currentplayer->headbodyoffset.z = g_Vars.currentplayer->standbodyoffset.z;
 
-			modelGetRootPosition(&g_Vars.currentplayer->model, &modelpos);
+				modelGetRootPosition(&g_Vars.currentplayer->model, &modelpos);
 
-			modelpos.x -= g_Vars.currentplayer->bondheadmatrices[0].m[3][0];
-			modelpos.z -= g_Vars.currentplayer->bondheadmatrices[0].m[3][2];
+				modelpos.x -= g_Vars.currentplayer->bondheadmatrices[0][3][0];
+				modelpos.z -= g_Vars.currentplayer->bondheadmatrices[0][3][2];
 
-			modelSetRootPosition(&g_Vars.currentplayer->model, &modelpos);
+				modelSetRootPosition(&g_Vars.currentplayer->model, &modelpos);
+			}
 		}
 	}
 
 	if (animspeed > 0) {
-		g_Vars.currentplayer->bondheadmatrices[0].m[3][0] += arg1;
-		g_Vars.currentplayer->bondheadmatrices[0].m[3][2] *= arg0;
+		g_Vars.currentplayer->bondheadmatrices[0][3][0] += arg1;
+		g_Vars.currentplayer->bondheadmatrices[0][3][2] *= arg0;
 
 		if (g_Vars.lvupdate240 > 0) {
-			g_Vars.currentplayer->bondheadmatrices[0].m[3][0] /= g_Vars.lvupdate60freal;
-			g_Vars.currentplayer->bondheadmatrices[0].m[3][2] /= g_Vars.lvupdate60freal;
+			g_Vars.currentplayer->bondheadmatrices[0][3][0] /= g_Vars.lvupdate60freal;
+			g_Vars.currentplayer->bondheadmatrices[0][3][2] /= g_Vars.lvupdate60freal;
 		}
 
-		headpos.x = g_Vars.currentplayer->bondheadmatrices[0].m[3][0] * g_Vars.currentplayer->headamplitude;
-		headpos.y = (g_Vars.currentplayer->bondheadmatrices[0].m[3][1] - g_Vars.currentplayer->standheight) *
+		headpos.x = g_Vars.currentplayer->bondheadmatrices[0][3][0] * g_Vars.currentplayer->headamplitude;
+		headpos.y = (g_Vars.currentplayer->bondheadmatrices[0][3][1] - g_Vars.currentplayer->standheight) *
 			g_Vars.currentplayer->headamplitude + g_Vars.currentplayer->standheight;
-		headpos.z = g_Vars.currentplayer->bondheadmatrices[0].m[3][2] * g_Vars.currentplayer->headamplitude;
+		headpos.z = g_Vars.currentplayer->bondheadmatrices[0][3][2] * g_Vars.currentplayer->headamplitude;
 
 		if (g_Vars.currentplayer->headanim >= 0) {
-			lookvel.x = g_Vars.currentplayer->bondheadmatrices[0].m[2][0] * g_Vars.currentplayer->sideamplitude;
-			lookvel.y = g_Vars.currentplayer->bondheadmatrices[0].m[2][1] * g_Vars.currentplayer->headamplitude;
-			lookvel.z = (g_Vars.currentplayer->bondheadmatrices[0].m[2][2] - 1.0f) * g_Vars.currentplayer->headamplitude + 1.0f;
+			lookvel.x = g_Vars.currentplayer->bondheadmatrices[0][2][0] * g_Vars.currentplayer->sideamplitude;
+			lookvel.y = g_Vars.currentplayer->bondheadmatrices[0][2][1] * g_Vars.currentplayer->headamplitude;
+			lookvel.z = (g_Vars.currentplayer->bondheadmatrices[0][2][2] - 1.0f) * g_Vars.currentplayer->headamplitude + 1.0f;
 
-			upvel.x = g_Vars.currentplayer->bondheadmatrices[0].m[1][0] * g_Vars.currentplayer->headamplitude;
-			upvel.y = (g_Vars.currentplayer->bondheadmatrices[0].m[1][1] - 1.0f) * g_Vars.currentplayer->headamplitude + 1.0f;
-			upvel.z = g_Vars.currentplayer->bondheadmatrices[0].m[1][2] * g_Vars.currentplayer->headamplitude;
+			upvel.x = g_Vars.currentplayer->bondheadmatrices[0][1][0] * g_Vars.currentplayer->headamplitude;
+			upvel.y = (g_Vars.currentplayer->bondheadmatrices[0][1][1] - 1.0f) * g_Vars.currentplayer->headamplitude + 1.0f;
+			upvel.z = g_Vars.currentplayer->bondheadmatrices[0][1][2] * g_Vars.currentplayer->headamplitude;
 
 			g_Vars.currentplayer->headwalkingtime60 += g_Vars.lvupdate60;
 
@@ -201,13 +207,13 @@ void bheadUpdate(float arg0, float arg1)
 				bheadSetDamp(0.99748998880386f);
 			}
 		} else {
-			lookvel.x = g_Vars.currentplayer->bondheadmatrices[0].m[2][0];
-			lookvel.y = g_Vars.currentplayer->bondheadmatrices[0].m[2][1];
-			lookvel.z = g_Vars.currentplayer->bondheadmatrices[0].m[2][2];
+			lookvel.x = g_Vars.currentplayer->bondheadmatrices[0][2][0];
+			lookvel.y = g_Vars.currentplayer->bondheadmatrices[0][2][1];
+			lookvel.z = g_Vars.currentplayer->bondheadmatrices[0][2][2];
 
-			upvel.x = g_Vars.currentplayer->bondheadmatrices[0].m[1][0];
-			upvel.y = g_Vars.currentplayer->bondheadmatrices[0].m[1][1];
-			upvel.z = g_Vars.currentplayer->bondheadmatrices[0].m[1][2];
+			upvel.x = g_Vars.currentplayer->bondheadmatrices[0][1][0];
+			upvel.y = g_Vars.currentplayer->bondheadmatrices[0][1][1];
+			upvel.z = g_Vars.currentplayer->bondheadmatrices[0][1][2];
 
 			bheadSetDamp(0.96f);
 		}
@@ -257,41 +263,44 @@ void bheadUpdate(float arg0, float arg1)
 
 void bheadAdjustAnimation(float speed)
 {
-	struct chrdata *chr = g_Vars.currentplayer->prop->chr;
-	int i;
+	if(g_Vars.currentplayer->model.anim)
+	{
+		struct chrdata *chr = g_Vars.currentplayer->prop->chr;
+		int i;
 
-	speed *= g_HeadAnims[HEADANIM_MOVING].translateperframe;
+		speed *= g_HeadAnims[HEADANIM_MOVING].translateperframe;
 
-	for (i = 0; i < ARRAYCOUNT(g_HeadAnims); i++) {
-		if (g_HeadAnims[i].maxspeed * g_HeadAnims[i].translateperframe >= speed) {
-			int prevheadanim = g_Vars.currentplayer->headanim;
+		for (i = 0; i < ARRAYCOUNT(g_HeadAnims); i++) {
+			if (g_HeadAnims[i].maxspeed * g_HeadAnims[i].translateperframe >= speed) {
+				int prevheadanim = g_Vars.currentplayer->headanim;
 
-			if (i != prevheadanim) {
-				float startframe = 0.0f;
+				if (i != prevheadanim) {
+					float startframe = 0.0f;
 
-				if (prevheadanim >= 0) {
-					startframe = (g_Vars.currentplayer->model.anim->frame - g_HeadAnims[prevheadanim].loopframe)
-						/ (g_HeadAnims[prevheadanim].endframe - g_HeadAnims[prevheadanim].loopframe);
-					startframe = g_HeadAnims[i].loopframe + (g_HeadAnims[i].endframe - g_HeadAnims[i].loopframe) * startframe;
+					if (prevheadanim >= 0) {
+						startframe = (g_Vars.currentplayer->model.anim->frame - g_HeadAnims[prevheadanim].loopframe)
+							/ (g_HeadAnims[prevheadanim].endframe - g_HeadAnims[prevheadanim].loopframe);
+						startframe = g_HeadAnims[i].loopframe + (g_HeadAnims[i].endframe - g_HeadAnims[i].loopframe) * startframe;
+					}
+
+					modelSetAnimation(&g_Vars.currentplayer->model, g_HeadAnims[i].animnum,
+							g_Vars.currentplayer->model.anim->flip, startframe, 0.5f, 12);
+					modelSetAnimLooping(&g_Vars.currentplayer->model, g_HeadAnims[i].loopframe, false);
+					modelSetAnimEndFrame(&g_Vars.currentplayer->model, g_HeadAnims[i].endframe);
+
+					modelSetAnimFlipFunction(&g_Vars.currentplayer->model, bheadFlipAnimation);
+					g_Vars.currentplayer->headanim = i;
 				}
 
-				modelSetAnimation(&g_Vars.currentplayer->model, g_HeadAnims[i].animnum,
-						g_Vars.currentplayer->model.anim->flip, startframe, 0.5f, 12);
-				modelSetAnimLooping(&g_Vars.currentplayer->model, g_HeadAnims[i].loopframe, false);
-				modelSetAnimEndFrame(&g_Vars.currentplayer->model, g_HeadAnims[i].endframe);
+				speed = speed / g_HeadAnims[i].translateperframe;
 
-				modelSetAnimFlipFunction(&g_Vars.currentplayer->model, bheadFlipAnimation);
-				g_Vars.currentplayer->headanim = i;
+				modelSetAnimSpeed(&g_Vars.currentplayer->model, speed * 0.5f, 0);
+				break;
 			}
-
-			speed = speed / g_HeadAnims[i].translateperframe;
-
-			modelSetAnimSpeed(&g_Vars.currentplayer->model, speed * 0.5f, 0);
-			break;
 		}
-	}
 
-	chr->oldframe = g_Vars.currentplayer->model.anim->frame;
+		chr->oldframe = g_Vars.currentplayer->model.anim->frame;
+	}
 }
 
 void bheadStartDeathAnimation(int16_t animnum, uint32_t flip, float fstarttime, float speed)

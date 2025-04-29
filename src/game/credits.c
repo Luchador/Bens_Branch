@@ -24,6 +24,7 @@
 #include "lib/rng.h"
 #include "lib/vi.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "input.h"
 
@@ -335,14 +336,14 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float 
 
 	gdl = menugfx0f0e2498(gdl);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 	texSelect(&gdl, &g_TexGeneralConfigs[g_CreditsBgTypes[type].texturenum], 1, 1, 2, 1, NULL);
 
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	colours = gfxAllocateColours(3);
 	vertices = gfxAllocateVertices(9);
@@ -366,11 +367,11 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float 
 
 	creditsChooseBgColours(vertices, colours, g_CreditsData->bglayers[layernum].confignum, alpha, arg5 * 90);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 3);
+	gfx_Color(gdl++, colours, 3);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 9, 0);
 
-	gSPTri4(gdl++, 0, 1, 3, 1, 4, 3, 1, 2, 5, 5, 4, 1);
-	gSPTri4(gdl++, 3, 4, 7, 7, 6, 3, 4, 5, 7, 5, 8, 7);
+	gfx_Tri4(gdl++, 0, 1, 3, 1, 4, 3, 1, 2, 5, 5, 4, 1);
+	gfx_Tri4(gdl++, 3, 4, 7, 7, 6, 3, 4, 5, 7, 5, 8, 7);
 
 	return gdl;
 }
@@ -529,7 +530,7 @@ Gfx *creditsFillFramebuffer(Gfx *gdl, uint32_t colour)
 
 	gdl = textSetPrimColour(gdl, colour);
 
-	gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+	gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -772,7 +773,7 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 		}
 	}
 
-	gSPColor(gdl++, (uintptr_t)(colours), 60);
+	gfx_Color(gdl++, colours, 60);
 
 	for (confignum = 0; confignum < ARRAYCOUNT(g_CreditParticleConfigs); confignum++) {
 		bool donetexture = false;
@@ -790,17 +791,16 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 				if (!donetexture) {
 					texSelect(&gdl, &g_TexGeneralConfigs[g_CreditParticleConfigs[confignum].texturenum], 2, 1, 2, 1, 0);
 
-					gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-					gDPSetColorDither(gdl++, G_CD_DISABLE);
-					gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-					gDPSetAlphaCompare(gdl++, G_AC_NONE);
-					gDPSetTextureLOD(gdl++, G_TL_TILE);
-					gDPSetTextureConvert(gdl++, G_TC_FILT);
+					gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+					gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+					gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+					gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+					gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 					gDPSetCombineLERP(gdl++,
 							0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0,
 							0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0);
-					gDPSetTextureFilter(gdl++, G_TF_BILERP);
-					gDPSetTexturePersp(gdl++, G_TP_PERSP);
+					gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+					gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
 					donetexture = true;
 				}
@@ -856,7 +856,7 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 
 				gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
-				gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
+				gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 			}
 		}
 	}
@@ -1526,8 +1526,8 @@ void creditsTick(void)
 
 Gfx *creditsDraw(Gfx *gdl)
 {
-	Mtxf sp68;
-	Mtxf *matrix = gfxAllocateMatrix();
+	Mtx sp68;
+	Mtx *matrix = gfxAllocateMatrix();
 
 	static uint32_t scrolltimer240 = 0;
 
@@ -1537,7 +1537,7 @@ Gfx *creditsDraw(Gfx *gdl)
 	gdl = vi0000b1d0(gdl);
 	gdl = creditsFillFramebuffer(gdl, 0x000000ff);
 
-	gDPSetScissor(gdl++, 0, 30, viGetWidth(), (viGetHeight() - 30));
+	gfx_Set_Scissor(gdl++, 0, 30, viGetWidth(), (viGetHeight() - 30));
 
 	creditsTick();
 
@@ -1582,22 +1582,22 @@ Gfx *creditsDraw(Gfx *gdl)
 
 			gdl = menuRenderModel(gdl, &g_CreditsData->menumodel, MENUMODELTYPE_CREDITSLOGO);
 
-			gSPMatrix(gdl++, (uintptr_t)(matrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+			gfx_Matrix(gdl++, matrix, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 			gdl = creditsFillFramebuffer(gdl, 0x000000d8);
 		}
 
-		mtxIdent((Mtx*)&sp68);
-		mtx4Copy((Mtx*)&sp68, (Mtx*)matrix);
-		camSetWorldToScreenMtx((Mtx*)&sp68);
+		mtxIdent(&sp68);
+		mtx4Copy(&sp68, matrix);
+		camSetWorldToScreenMtx(&sp68);
 
-		gSPMatrix(gdl++, (uintptr_t)(matrix), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+		gfx_Matrix(gdl++, matrix, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 		gdl = creditsDrawBackground(gdl);
 		gdl = creditsDrawParticles(gdl);
 
 		if (g_CreditsData->slidesenabled) {
-			gdl = creditsDrawSlide(gfxSetCustomProjection(gdl));
+			gdl = creditsDrawSlide(savebufferSetCustomProjection(gdl));
 		}
 
 		if (!g_CreditsData->slidesenabled) {

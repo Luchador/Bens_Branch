@@ -12,7 +12,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *arg1, float arg2, struct 
 Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3);
 void beamTick(struct beam *beam);
 
-struct casing *casingCreate(struct modeldef *modeldef, Mtxf *mtx);
+struct casing *casingCreate(struct modeldef *modeldef, Mtx *mtx);
 void casingCreateForHand(int handnum, float ground, Mtx *mtx);
 void casingRender(struct casing *casing, Gfx **gdlptr);
 void casingsRender(Gfx **gdlptr);

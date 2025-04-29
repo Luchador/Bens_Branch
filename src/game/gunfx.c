@@ -283,14 +283,14 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	vertices[3].t = texconfig->height * 32;
 	vertices[3].colour = 4;
 
-	gSPClearGeometryMode(gdl++, G_CULL_BACK);
-	gSPMatrix(gdl++, (uintptr_t)(spc8), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-	gSPColor(gdl++, (uintptr_t)(colours), 2);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BACK);
+	gfx_Matrix(gdl++, spc8, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Color(gdl++, colours, 2);
 
 	texSelect(&gdl, texconfig, 4, 1, 2, true, NULL);
 
 	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
-	gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
+	gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 
 	return gdl;
 }
@@ -561,31 +561,30 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 						vertices[7].colour = 0;
 					}
 
-					gSPClearGeometryMode(gdl++, G_CULL_BACK);
-					gSPMatrix(gdl++, (uintptr_t)(sp188), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-					gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-					gDPSetColorDither(gdl++, G_CD_DISABLE);
-					gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-					gDPSetAlphaCompare(gdl++, G_AC_NONE);
-					gDPSetTextureLOD(gdl++, G_TL_TILE);
-					gDPSetTextureConvert(gdl++, G_TC_FILT);
+					gfx_Clear_Geometry_Mode(gdl++, G_CULL_BACK);
+					gfx_Matrix(gdl++, sp188, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+					gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+					gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+					gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+					gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+					gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 					gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
-					gSPColor(gdl++, (uintptr_t)(colours), 1);
+					gfx_Color(gdl++, colours, 1);
 
 					if (beam->weaponnum == WEAPON_LASER) {
 						texSelect(&gdl, &g_TexGroup03Configs[0], 4, arg2, 2, true, NULL);
 
 						gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
-						gSPTri2(gdl++, 4, 5, 6, 4, 5, 7);
+						gfx_Tri2(gdl++, 4, 5, 6, 4, 5, 7);
 
 						texSelect(&gdl, texconfig, 4, arg2, 2, true, NULL);
 
-						gSPTri2(gdl++, 0, 2, 3, 0, 3, 1);
+						gfx_Tri2(gdl++, 0, 2, 3, 0, 3, 1);
 					} else {
 						texSelect(&gdl, texconfig, 4, arg2, 2, true, NULL);
 
 						gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
-						gSPTri2(gdl++, 0, 2, 3, 0, 3, 1);
+						gfx_Tri2(gdl++, 0, 2, 3, 0, 3, 1);
 					}
 				}
 			}
@@ -622,10 +621,8 @@ void beamTick(struct beam *beam)
 
 bool g_CasingsActive = false;
 
-struct casing *casingCreate(struct modeldef *modeldef, Mtxf *mtx)
+struct casing *casingCreate(struct modeldef *modeldef, Mtx *mtx)
 {
-	int i;
-	int j;
 	float rot[3][3];
 	struct casing *casing = g_Casings;
 	struct casing *end = g_Casings + ARRAYCOUNT(g_Casings);
@@ -636,14 +633,14 @@ struct casing *casingCreate(struct modeldef *modeldef, Mtxf *mtx)
 
 	if (casing < end) {
 		casing->modeldef = modeldef;
-		casing->pos.x = mtx->m[3][0];
-		casing->pos.y = mtx->m[3][1];
-		casing->pos.z = mtx->m[3][2];
+		casing->pos.x = (*mtx)[3][0];
+		casing->pos.y = (*mtx)[3][1];
+		casing->pos.z = (*mtx)[3][2];
 
-		mtx4ToMtx3((Mtx*)mtx, rot);
+		mtx4ToMtx3(mtx, rot);
 
-		for (i = 0; i < 3; i++) {
-			for (j = 0; j < 3; j++) {
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
 				casing->rot[i][j] = rot[i][j] * 4096.0f;
 			}
 		}
@@ -661,8 +658,6 @@ void casingCreateForHand(int handnum, float ground, Mtx *mtx)
 	float oldyspeed;
 	struct casing *casing = NULL;
 	struct player *player = g_Vars.currentplayer;
-	int i;
-	int j;
 	Mtx spec;
 	float spc8[3][3];
 	int weaponnum = bgunGetWeaponNum(handnum);
@@ -695,7 +690,7 @@ void casingCreateForHand(int handnum, float ground, Mtx *mtx)
 	modeldef = bgunGetCartModeldef();
 
 	if (modeldef != NULL) {
-		casing = casingCreate(modeldef, (Mtxf*)&spec);
+		casing = casingCreate(modeldef, &spec);
 	}
 
 	if (casing != NULL) {
@@ -724,8 +719,8 @@ void casingCreateForHand(int handnum, float ground, Mtx *mtx)
 			mtx4LoadRotation(&spa4, &sp64);
 			mtx4ToMtx3(&sp64, spc8);
 
-			for (i = 0; i < 3; i++) {
-				for (j = 0; j < 3; j++) {
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
 					casing->rotspeed[i][j] = spc8[i][j] * 4096.0f;
 				}
 			}
@@ -742,9 +737,9 @@ void casingCreateForHand(int handnum, float ground, Mtx *mtx)
 			casing->speed.y = newyspeed;
 
 			if (g_Vars.lvupdate240 > 0) {
-				casing->speed.x += (player->hands[handnum].posmtx.m[3][0] - player->hands[handnum].prevmtx.m[3][0]) / g_Vars.lvupdate60freal;
-				casing->speed.y += (player->hands[handnum].posmtx.m[3][1] - player->hands[handnum].prevmtx.m[3][1]) / g_Vars.lvupdate60freal;
-				casing->speed.z += (player->hands[handnum].posmtx.m[3][2] - player->hands[handnum].prevmtx.m[3][2]) / g_Vars.lvupdate60freal;
+				casing->speed.x += (player->hands[handnum].posmtx[3][0] - player->hands[handnum].prevmtx[3][0]) / g_Vars.lvupdate60freal;
+				casing->speed.y += (player->hands[handnum].posmtx[3][1] - player->hands[handnum].prevmtx[3][1]) / g_Vars.lvupdate60freal;
+				casing->speed.z += (player->hands[handnum].posmtx[3][2] - player->hands[handnum].prevmtx[3][2]) / g_Vars.lvupdate60freal;
 			}
 		} else {
 			if (weaponnum == WEAPON_REAPER) {
@@ -781,8 +776,8 @@ void casingCreateForHand(int handnum, float ground, Mtx *mtx)
 			mtx4LoadRotation(&spa4, &sp64);
 			mtx4ToMtx3(&sp64, spc8);
 
-			for (i = 0; i < 3; i++) {
-				for (j = 0; j < 3; j++) {
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
 					casing->rotspeed[i][j] = spc8[i][j] * 4096.0f;
 				}
 			}
@@ -799,9 +794,9 @@ void casingCreateForHand(int handnum, float ground, Mtx *mtx)
 			casing->speed.y = newyspeed;
 
 			if (g_Vars.lvupdate240 > 0) {
-				casing->speed.x += (player->hands[handnum].posmtx.m[3][0] - player->hands[handnum].prevmtx.m[3][0]) / g_Vars.lvupdate60freal;
-				casing->speed.y += (player->hands[handnum].posmtx.m[3][1] - player->hands[handnum].prevmtx.m[3][1]) / g_Vars.lvupdate60freal;
-				casing->speed.z += (player->hands[handnum].posmtx.m[3][2] - player->hands[handnum].prevmtx.m[3][2]) / g_Vars.lvupdate60freal;
+				casing->speed.x += (player->hands[handnum].posmtx[3][0] - player->hands[handnum].prevmtx[3][0]) / g_Vars.lvupdate60freal;
+				casing->speed.y += (player->hands[handnum].posmtx[3][1] - player->hands[handnum].prevmtx[3][1]) / g_Vars.lvupdate60freal;
+				casing->speed.z += (player->hands[handnum].posmtx[3][2] - player->hands[handnum].prevmtx[3][2]) / g_Vars.lvupdate60freal;
 			}
 		}
 	}
@@ -811,40 +806,38 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 {
 	Gfx *gdl = *gdlptr;
 	struct modeldef *modeldef = casing->modeldef;
-	Mtxf *matrices = gfxAllocate(modeldef->nummatrices * sizeof(Mtxf));
+	Mtx *matrices = gfxAllocate(modeldef->nummatrices * sizeof(Mtx));
 	struct model model;
 	struct modelrenderdata renderdata = { NULL, true, 3 };
-	Mtxf mtx;
-	int i;
-	int j;
+	Mtx mtx;
 	bool render = true;
 
 	modelAllocateRwData(modeldef);
 	modelInit(&model, modeldef, NULL, true);
 
-	model.matrices = matrices;
+	model.matrices = (Mtxf*)matrices;
 
-	for (i = 0; i < 3; i++) {
-		for (j = 0; j < 3; j++) {
-			mtx.m[i][j] = casing->rot[i][j] * (1.0f / 4096.0f);
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			mtx[i][j] = casing->rot[i][j] * (1.0f / 4096.0f);
 		}
 	}
 
-	mtx.m[3][0] = 0.0f;
-	mtx.m[3][1] = 0.0f;
-	mtx.m[3][2] = 0.0f;
+	mtx[3][0] = 0.0f;
+	mtx[3][1] = 0.0f;
+	mtx[3][2] = 0.0f;
 
-	mtx.m[0][3] = 0.0f;
-	mtx.m[1][3] = 0.0f;
-	mtx.m[2][3] = 0.0f;
-	mtx.m[3][3] = 1.0f;
+	mtx[0][3] = 0.0f;
+	mtx[1][3] = 0.0f;
+	mtx[2][3] = 0.0f;
+	mtx[3][3] = 1.0f;
 
-	mtxScaleRotationPart(0.10f, (Mtx*)&mtx);
-	mtx4SetTranslation(&casing->pos, (Mtx*)&mtx);
-	mtxApplyAffineTransform(camGetPlayerWorldToScreenMtx(), (Mtx*)&mtx, (Mtx*)model.matrices);
+	mtxScaleRotationPart(0.10f, &mtx);
+	mtx4SetTranslation(&casing->pos, &mtx);
+	mtxApplyAffineTransform(camGetPlayerWorldToScreenMtx(), &mtx, (Mtx*)model.matrices);
 
 	// Check if any coordinate is out of range
-	for (i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++) {
 		if (model.matrices[0].m[3][i] > 30000) {
 			render = false;
 		} else if (model.matrices[0].m[3][i] < -30000) {
@@ -855,7 +848,7 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 	if (render) {
 		renderdata.zbufferenabled = 1;
 		renderdata.gdl = gdl;
-		renderdata.unk10 = matrices;
+		renderdata.unk10 = (Mtxf*)matrices;
 		renderdata.unk30 = 4;
 		renderdata.envcolour = g_Vars.currentplayer->gunshadecol[0] << 24
 			| g_Vars.currentplayer->gunshadecol[1] << 16
@@ -1030,63 +1023,56 @@ bool lasersightExists(int id, int *index)
 
 Gfx *lasersightRenderDot(Gfx *gdl)
 {
-	Mtxf *mtx;
+	Mtx *mtx;
 	float f0;
 	float f20;
 	struct player *player = g_Vars.currentplayer;
-	Mtxf sp1b0;
+	Mtx sp1b0;
 	struct coord campos;
-	Mtxf sp164;
-	Mtxf sp124;
+	Mtx sp164;
+	Mtx sp124;
 	int i;
 
 	static uint32_t sp1 = 800;
-#ifndef PLATFORM_N64
-	// laser fades out farther away
 	static uint32_t sp2 = 7000 * 3;
 	static uint32_t sp3 = 9000 * 3;
-#else
-	static uint32_t sp2 = 7000;
-	static uint32_t sp3 = 9000;
-#endif
 	static uint32_t spb = 24;
 	static uint32_t spi = 6;
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
-	gDPSetTextureLUT(gdl++, G_TT_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 	gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
 
-	mtxIdent((Mtx*)&sp164);
-	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp164);
-	mtxIdent((Mtx*)&sp124);
-	mtxApplyAffineTransformInPlace(camGetProjectionMtx(), (Mtx*)&sp124);
+	mtxIdent(&sp164);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), &sp164);
+	mtxIdent(&sp124);
+	mtxApplyAffineTransformInPlace(camGetProjectionMtx(), &sp124);
 
-	sp124.m[3][0] = sp124.m[3][1] = sp124.m[3][2] = 0.0f;
+	sp124[3][0] = sp124[3][1] = sp124[3][2] = 0.0f;
 
-	mtxIdent((Mtx*)&sp1b0);
-	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp1b0);
+	mtxIdent(&sp1b0);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), &sp1b0);
 
 	campos.x = player->cam_pos.x;
 	campos.y = player->cam_pos.y;
 	campos.z = player->cam_pos.z;
 
-	sp1b0.m[3][0] = 0.0f;
-	sp1b0.m[3][1] = 0.0f;
-	sp1b0.m[3][2] = 0.0f;
+	sp1b0[3][0] = 0.0f;
+	sp1b0[3][1] = 0.0f;
+	sp1b0[3][2] = 0.0f;
 
-	mtxScale3x4(0.2f, (Mtx*)&sp1b0);
+	mtxScale3x4(0.2f, &sp1b0);
 
 	mtx = gfxAllocateMatrix();
-	mtx4Copy((Mtx*)&sp1b0, (Mtx*)mtx);
+	mtx4Copy(&sp1b0, mtx);
 
-	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	for (i = 0; i < ARRAYCOUNT(g_LaserSights); i++) {
 		if (g_LaserSights[i].id != -1) {
@@ -1108,7 +1094,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 			colours[0].word = PD_BE32(0xff00005f);
 			colours[1].word = PD_BE32(0xff00000f);
 
-			gSPColor(gdl++, (uintptr_t)(colours), 2);
+			gfx_Color(gdl++, colours, 2);
 
 			if (g_LaserSights[i].unk28 > 0.0f) {
 				if (!(g_LaserSights[i].dotpos.f[0] < 0.0000001f) || !(g_LaserSights[i].dotpos.f[0] > -0.000001f)
@@ -1214,7 +1200,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 
 					gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
-					gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
+					gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 				}
 			}
 		}
@@ -1226,52 +1212,51 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 Gfx *lasersightRenderBeam(Gfx *gdl)
 {
 	struct player *player = g_Vars.currentplayer;
-	Mtxf *mtx;
+	Mtx *mtx;
 	int i;
-	Mtxf sp198;
+	Mtx sp198;
 	struct coord campos;
-	Mtxf sp14c;
-	Mtxf sp10c;
+	Mtx sp14c;
+	Mtx sp10c;
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
-	gDPSetTextureLUT(gdl++, G_TT_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 	gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 	texSelect(&gdl, &g_TexGeneralConfigs[3], 4, 0, 2, 1, NULL);
-	mtxIdent((Mtx*)&sp14c);
+	mtxIdent(&sp14c);
 
-	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp14c);
-	mtxIdent((Mtx*)&sp10c);
-	mtxApplyAffineTransformInPlace(camGetProjectionMtx(), (Mtx*)&sp10c);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), &sp14c);
+	mtxIdent(&sp10c);
+	mtxApplyAffineTransformInPlace(camGetProjectionMtx(), &sp10c);
 
-	sp10c.m[3][1] = 0;
-	sp10c.m[3][0] = 0;
-	sp10c.m[3][2] = 0;
+	sp10c[3][1] = 0;
+	sp10c[3][0] = 0;
+	sp10c[3][2] = 0;
 
-	mtxIdent((Mtx*)&sp198);
-	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp198);
+	mtxIdent(&sp198);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), &sp198);
 
 	campos.x = player->cam_pos.x;
 	campos.y = player->cam_pos.y;
 	campos.z = player->cam_pos.z;
 
-	sp198.m[3][0] = 0;
-	sp198.m[3][1] = 0;
-	sp198.m[3][2] = 0;
+	sp198[3][0] = 0;
+	sp198[3][1] = 0;
+	sp198[3][2] = 0;
 
-	mtxScale3x4(0.2f, (Mtx*)&sp198);
+	mtxScale3x4(0.2f, &sp198);
 	mtx = gfxAllocateMatrix();
-	mtx4Copy((Mtx*)&sp198, (Mtx*)mtx);
+	mtx4Copy(&sp198, mtx);
 
-	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	for (i = 0; i < ARRAYCOUNT(g_LaserSights); i++) {
 		if (g_LaserSights[i].id != -1) {
@@ -1287,7 +1272,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 			sp98.y = g_LaserSights[i].beamnear.y;
 			sp98.z = g_LaserSights[i].beamnear.z;
 
-			mtx4TransformVecInPlace((Mtx*)&sp14c, &sp98);
+			mtx4TransformVecInPlace(&sp14c, &sp98);
 
 			spa8.x = sp98.f[0] < 0.0f ? 1.0f : -1.0f;
 			spa8.y = 2.0f;
@@ -1295,7 +1280,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 
 			utilsNormalizeF(&spa8.x, &spa8.y, &spa8.z);
 
-			mtx4RotateVecInPlace((Mtx*)&sp10c, &spa8);
+			mtx4RotateVecInPlace(&sp10c, &spa8);
 
 			spcc.x = g_LaserSights[i].beamnear.x;
 			spcc.y = g_LaserSights[i].beamnear.y;
@@ -1324,7 +1309,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 			colours[0].word = PD_BE32(0xff00005f);
 			colours[1].word = PD_BE32(0xff00000f);
 
-			gSPColor(gdl++, (uintptr_t)(colours), 2);
+			gfx_Color(gdl++, colours, 2);
 
 			vertices = gfxAllocateVertices(6);
 
@@ -1374,7 +1359,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 
 			gSPVertex(gdl++, (uintptr_t)(vertices), 6, 0);
 
-			gSPTri4(gdl++, 0, 1, 2, 2, 3, 1, 2, 3, 5, 2, 5, 4);
+			gfx_Tri4(gdl++, 0, 1, 2, 2, 3, 1, 2, 3, 5, 2, 5, 4);
 		}
 	}
 

@@ -24,6 +24,7 @@
 #include "lib/rng.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "platform.h"
 
@@ -95,7 +96,7 @@ Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, 
 	gSPVertex(gdl++, (uintptr_t)(vertices), 3, arg7);
 
 	if (depth == 0) {
-		gSPTri4(gdl++,
+		gfx_Tri4(gdl++,
 				arg4, arg7, arg7 + 2,
 				arg5, arg7 + 1, arg7,
 				arg6, arg7 + 2, arg7 + 1,
@@ -217,14 +218,13 @@ Gfx *nbombCreateGdl(void)
 
 	texSelect(&gdl, &g_TexGeneralConfigs[10], 2, 1, 2, 1, NULL);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetRenderMode(gdl++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Render_Mode(gdl++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
 	vertices = gfxAllocateVertices(1);
 
@@ -243,7 +243,7 @@ Gfx *nbombCreateGdl(void)
 		gdl = nbombCreateSphere(gdl, 2);
 	}
 
-	gSPEndDisplayList(gdl++);
+	gfx_End_Display_List(gdl++);
 
 	return gdlstart;
 }
@@ -268,7 +268,7 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 	colours[0].word = PD_BE32(colour);
 	colours[1].word = PD_BE32(0xffffff00);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 2);
+	gfx_Color(gdl++, colours, 2);
 
 	rotationAxis.x = 0;
 	rotationAxis.y = 0;
@@ -288,9 +288,9 @@ Gfx *nbombRender(Gfx *gdl, struct nbomb *nbomb, Gfx *subgdl)
 	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), &mtxLocalToWorld);
 	memcpy(mtx, &mtxLocalToWorld, sizeof(*mtx));
 
-	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-	gSPDisplayList(gdl++, subgdl);
+	gfx_Display_List(gdl++, subgdl);
 
 	return gdl;
 }
@@ -640,18 +640,17 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 
 		drawn = true;
 
-		gdl = gfxSetCustomProjection(gdl);
+		gdl = savebufferSetCustomProjection(gdl);
 
 		texSelect(&gdl, &g_TexGeneralConfigs[10], 2, 1, 2, true, NULL);
 
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-		gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-		gDPSetColorDither(gdl++, G_CD_DISABLE);
-		gDPSetTextureFilter(gdl++, G_TF_BILERP);
-		gDPSetRenderMode(gdl++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
-		gDPSetTexturePersp(gdl++, G_TP_PERSP);
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+		gfx_Set_Render_Mode(gdl++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
+		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
 		vertices[0].x = viewleft;
 		vertices[0].y = viewtop;
@@ -685,10 +684,10 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 
 		colours[0].word = PD_BE32(finalalpha);
 
-		gSPColor(gdl++, (uintptr_t)(colours), 1);
+		gfx_Color(gdl++, colours, 1);
 		gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
-		gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
+		gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 	}
 
 	if (drawn) {
@@ -807,18 +806,17 @@ Gfx *gasRender(Gfx *gdl)
 
 			drawn = true;
 
-			gdl = gfxSetCustomProjection(gdl);
+			gdl = savebufferSetCustomProjection(gdl);
 
 			texSelect(&gdl, &g_TexGeneralConfigs[6], 4, 1, 2, true, NULL);
 
-			gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-			gDPSetAlphaCompare(gdl++, G_AC_NONE);
+			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 			gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-			gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-			gDPSetColorDither(gdl++, G_CD_DISABLE);
-			gDPSetTextureFilter(gdl++, G_TF_BILERP);
-			gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-			gDPSetTexturePersp(gdl++, G_TP_PERSP);
+			gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+			gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
 			vertices[0].x = viewleft;
 			vertices[0].y = viewtop;
@@ -884,10 +882,10 @@ Gfx *gasRender(Gfx *gdl)
 
 			colours[0].word = PD_BE32(0x3faf1100 | alpha);
 
-			gSPColor(gdl++, (uintptr_t)(colours), 1);
+			gfx_Color(gdl++, colours, 1);
 			gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
 
-			gSPTri4(gdl++, 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4);
+			gfx_Tri4(gdl++, 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4);
 		}
 	}
 

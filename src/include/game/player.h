@@ -78,7 +78,6 @@ int playerTickBeams(struct prop *prop);
 int playerTickThirdPerson(struct prop *prop);
 void playerChooseThirdPersonAnimation(struct chrdata *chr, int crouchpos, float speedsideways, float speedforwards, float speedtheta, float *angleoffset, struct attackanimconfig **animcfg);
 Gfx *playerRender(struct prop *prop, Gfx *gdl, bool xlupass);
-Gfx *playerLoadMatrix(Gfx *gdl);
 void player0f0c3320(Mtx *matrices, int count);
 void playerSetTickMode(int tickmode);
 void playersBeginMpSwirl(void);

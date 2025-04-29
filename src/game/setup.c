@@ -382,7 +382,7 @@ void setupCreateObject(struct defaultobj *obj, int cmdindex)
 	float f0;
 	int modelnum;
 	struct pad pad;
-	Mtxf mtx;
+	Mtx mtx;
 	struct coord centre;
 	float scale;
 	struct coord pos;
@@ -439,7 +439,7 @@ void setupCreateObject(struct defaultobj *obj, int cmdindex)
 		padUnpack(obj->pad, PADFIELD_POS | PADFIELD_LOOK | PADFIELD_UP | PADFIELD_BBOX | PADFIELD_ROOM, &pad);
 
 		if (pad.room > 0) {
-			mtxBuildLookAtFromTarget((Mtx*)&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
+			mtxBuildLookAtFromTarget(&mtx, 0, 0, 0, -pad.look.x, -pad.look.y, -pad.look.z, pad.up.x, pad.up.y, pad.up.z);
 
 			pos.x = pad.pos.x;
 			pos.y = pad.pos.y;
@@ -571,25 +571,25 @@ void setupCreateObject(struct defaultobj *obj, int cmdindex)
 						xscale = yscale = zscale = 1;
 					}
 
-					mtxScaleRow0Vec(xscale, (Mtx*)&mtx);
-					mtxScaleRow1Vec(yscale, (Mtx*)&mtx);
-					mtxScaleRow2Vec(zscale, (Mtx*)&mtx);
+					mtxScaleRow0Vec(xscale, &mtx);
+					mtxScaleRow1Vec(yscale, &mtx);
+					mtxScaleRow2Vec(zscale, &mtx);
 
 					modelSetScale(obj->model, obj->model->scale * maxscale);
 				}
 			}
 
 			modelSetScale(obj->model, obj->model->scale * scale);
-			mtxScaleRotationPart(obj->model->scale, (Mtx*)&mtx);
+			mtxScaleRotationPart(obj->model->scale, &mtx);
 
 			if (obj->flags2 & OBJFLAG2_DONTPAUSE) {
 				prop2->flags |= PROPFLAG_DONTPAUSE;
 			}
 
 			if (obj->flags & OBJFLAG_00000002) {
-				objPlaceObjectAligned(obj, &pos, (Mtx*)&mtx, rooms, &centre);
+				objPlaceObjectAligned(obj, &pos, &mtx, rooms, &centre);
 			} else {
-				func0f06a730(obj, &pos, (Mtx*)&mtx, rooms, &centre);
+				func0f06a730(obj, &pos, &mtx, rooms, &centre);
 			}
 
 			if (obj->hidden & OBJHFLAG_00008000) {
@@ -796,8 +796,8 @@ void setupCreateCctv(struct cctvobj *cctv, int cmdindex)
 		ydiff = lenspos.y - pad.pos.y;
 		zdiff = lenspos.z - pad.pos.z;
 
-		mtxBuildLookAtFromTarget((Mtx*)&cctv->camrotm, 0.0f, 0.0f, 0.0f, xdiff, ydiff, zdiff, 0.0f, 1.0f, 0.0f);
-		mtxScaleRotationPart(obj->model->scale, (Mtx*)&cctv->camrotm);
+		mtxBuildLookAtFromTarget(&cctv->camrotm, 0.0f, 0.0f, 0.0f, xdiff, ydiff, zdiff, 0.0f, 1.0f, 0.0f);
+		mtxScaleRotationPart(obj->model->scale, &cctv->camrotm);
 
 		cctv->toleft = 0;
 		cctv->yleft = *(int *)&cctv->yleft * M_TAU / 65536.0f;
@@ -880,8 +880,8 @@ void setupCreateSingleMonitor(struct singlemonitorobj *monitor, int cmdindex)
 		struct prop *prop;
 		float scale;
 		struct coord spa4;
-		Mtxf sp64;
-		Mtxf sp24;
+		Mtx sp64;
+		Mtx sp24;
 
 		setupLoadModeldef(modelnum);
 
@@ -910,16 +910,16 @@ void setupCreateSingleMonitor(struct singlemonitorobj *monitor, int cmdindex)
 			}
 
 			propReparent(prop, owner->prop);
-			mtx4LoadXRotation(0.3664608001709f, (Mtx*)&sp64);
-			mtxScaleRotationPart(monitor->base.model->scale / owner->model->scale, (Mtx*)&sp64);
+			mtx4LoadXRotation(0.3664608001709f, &sp64);
+			mtxScaleRotationPart(monitor->base.model->scale / owner->model->scale, &sp64);
 			modelGetRootPosition(monitor->base.model, &spa4);
 
 			spa4.x = -spa4.x;
 			spa4.y = -spa4.y;
 			spa4.z = -spa4.z;
 
-			mtx4LoadTranslation(&spa4, (Mtx*)&sp24);
-			mtxApplyAffineTransform((Mtx*)&sp64, (Mtx*)&sp24, (Mtx*)&monitor->base.embedment->matrix);
+			mtx4LoadTranslation(&spa4, &sp24);
+			mtxApplyAffineTransform(&sp64, &sp24, (Mtx*)&monitor->base.embedment->matrix);
 		}
 	} else {
 		setupCreateObject(&monitor->base, cmdindex);
@@ -1046,14 +1046,14 @@ void setupCreateDoor(struct doorobj *door, int cmdindex)
 	}
 
 	if (pad.room > 0) {
-		Mtxf sp110;
+		Mtx sp110;
 		struct prop *prop;
 		int siblingcmdindex;
 		struct coord pos;
 		RoomNum rooms[8];
-		Mtxf finalmtx;
+		Mtx finalmtx;
 		struct coord centre;
-		Mtxf zrotmtx;
+		Mtx zrotmtx;
 		struct coord sp54;
 		float xscale;
 		float yscale;
@@ -1062,13 +1062,13 @@ void setupCreateDoor(struct doorobj *door, int cmdindex)
 
 		bbox = modeldefFindBboxRodata(g_ModelStates[modelnum].modeldef);
 
-		mtxBuildLookAtFromTarget((Mtx*)&sp110, 0, 0, 0,
+		mtxBuildLookAtFromTarget(&sp110, 0, 0, 0,
 				-pad.look.x, -pad.look.y, -pad.look.z,
 				pad.up.x, pad.up.y, pad.up.z);
-		mtx4LoadXRotation(1.5705462694168f, (Mtx*)&finalmtx);
-		mtx4LoadZRotation(1.5705462694168f, (Mtx*)&zrotmtx);
-		mtx4MultMtx4InPlace((Mtx*)&zrotmtx, (Mtx*)&finalmtx);
-		mtx4MultMtx4InPlace((Mtx*)&sp110, (Mtx*)&finalmtx);
+		mtx4LoadXRotation(1.5705462694168f, &finalmtx);
+		mtx4LoadZRotation(1.5705462694168f, &zrotmtx);
+		mtx4MultMtx4InPlace(&zrotmtx, &finalmtx);
+		mtx4MultMtx4InPlace(&sp110, &finalmtx);
 
 		padGetCentre(door->base.pad, &centre);
 
@@ -1080,9 +1080,9 @@ void setupCreateDoor(struct doorobj *door, int cmdindex)
 			xscale = yscale = zscale = 1;
 		}
 
-		mtxScaleRow0Vec(xscale, (Mtx*)&finalmtx);
-		mtxScaleRow1Vec(yscale, (Mtx*)&finalmtx);
-		mtxScaleRow2Vec(zscale, (Mtx*)&finalmtx);
+		mtxScaleRow0Vec(xscale, &finalmtx);
+		mtxScaleRow1Vec(yscale, &finalmtx);
+		mtxScaleRow2Vec(zscale, &finalmtx);
 
 		pos.x = pad.pos.x;
 		pos.y = pad.pos.y;
@@ -1117,7 +1117,7 @@ void setupCreateDoor(struct doorobj *door, int cmdindex)
 			door->sibling = (struct doorobj *) setupGetCmdByIndex(siblingcmdindex);
 		}
 
-		prop = doorInit(door, &pos, (Mtx*)&finalmtx, rooms, &sp54, &centre);
+		prop = doorInit(door, &pos, &finalmtx, rooms, &sp54, &centre);
 
 		if (door->base.flags & OBJFLAG_DOOR_HASPORTAL) {
 			door->portalnum = portalnum;
@@ -1695,14 +1695,7 @@ void setupCreateProps(int stagenum)
 						struct escalatorobj *step = (struct escalatorobj *)obj;
 						struct prop *prop;
 
-#ifdef AVOID_UB
-						Mtxf sp1a8;
-#else
-						// TODO: There is a stack problem here that should be
-						// resolved. sp1a8 is really an Mtxf which doesn't fit
-						// in its current location in the stack.
-						float sp1a8[12];
-#endif
+						Mtx sp1a8;
 						float sp184[3][3];
 
 						setupCreateObject(obj, index);
@@ -1718,14 +1711,14 @@ void setupCreateProps(int stagenum)
 						if (obj->flags & OBJFLAG_ESCSTEP_ZALIGNED) {
 							step->frame = escstepy;
 							escstepy += 40;
-							mtx4LoadYRotation(4.7116389274597f, (Mtx*) &sp1a8);
-							mtx4ToMtx3((Mtx *) &sp1a8, sp184);
+							mtx4LoadYRotation(4.7116389274597f, &sp1a8);
+							mtx4ToMtx3(&sp1a8, sp184);
 							mtx3x3TransposeMulInPlace(sp184, obj->realrot);
 						} else {
 							step->frame = escstepx;
 							escstepx += 40;
-							mtx4LoadYRotation(M_PI, (Mtx*) &sp1a8);
-							mtx4ToMtx3((Mtx *) &sp1a8, sp184);
+							mtx4LoadYRotation(M_PI, &sp1a8);
+							mtx4ToMtx3(&sp1a8, sp184);
 							mtx3x3TransposeMulInPlace(sp184, obj->realrot);
 						}
 					}

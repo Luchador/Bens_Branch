@@ -95,7 +95,7 @@ Gfx *zbufConfigureRdp(Gfx *gdl)
  */
 Gfx *zbufClear(Gfx *gdl)
 {
-	gDPClearDepthEXT(gdl++);
+	gfx_No_Param(gdl++, G_CLEAR_DEPTH_EXT);
 
 	return gdl;
 }
@@ -129,44 +129,41 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	uint16_t *sp44;
 	uint16_t *s2;
 	uint16_t *image;
-	int i;
 
 	viGetBackBuffer();
 	sp44 = zbufGetArtifactsCfb(g_SchedWriteArtifactsIndex);
 	g_SchedSpecialArtifactIndexes[g_SchedWriteArtifactsIndex] = 1;
 
-	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(sp44));
-	gDPSetScissor(gdl++, 0, 0, videoGetWidth(), videoGetHeight());
-	gDPSetCycleType(gdl++, G_CYC_COPY);
-	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0080, 4, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 160, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-	gDPSetTile(gdl++, G_IM_FMT_I, G_IM_SIZ_8b, 160, 0x0080, 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 15);
-	gSPTexture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
-	gDPSetEnvColor(gdl++, 0xff, 0xff, 0xff, 0xff);
-	struct RGBA color = {255, 255, 255, 255};
-	gfx_Set_Prim_Color(gdl++, color);
-	gDPSetRenderMode(gdl++, G_RM_NOOP, G_RM_NOOP2);
+	gfx_Set_Color_Image(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(sp44));
+	gfx_Set_Scissor(gdl++, 0, 0, videoGetWidth(), videoGetHeight());
+	gfx_Set_Cycle_Type(gdl++, G_CYC_COPY);
+	gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+	gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0080, 4, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+	gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 160, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+	gfx_Set_Tile(gdl++, G_IM_FMT_I, G_IM_SIZ_8b, 160, 0x0080, 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 15);
+	gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
+	RGBA envColor = {255, 255, 255, 255};
+	gfx_Set_Env_Color(gdl++, envColor);
+	RGBA primColor = {255, 255, 255, 255};
+	gfx_Set_Prim_Color(gdl++, primColor);
+	gfx_Set_Render_Mode(gdl++, G_RM_NOOP, G_RM_NOOP2);
 	gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-	gDPSetTextureFilter(gdl++, G_TF_POINT);
-	gDPSetTexturePersp(gdl++, G_TP_NONE);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetAlphaDither(gdl++, G_AD_DISABLE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-	gDPSetTextureLUT(gdl++, G_TT_NONE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gSPClearGeometryMode(gdl++, G_ZBUFFER);
+	gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
+	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Clear_Geometry_Mode(gdl++, G_ZBUFFER);
 
-	for (i = 0; i < MAX_ARTIFACTS; i++) {
+	for (int i = 0; i < MAX_ARTIFACTS; i++) {
 		if (artifacts[i].type != ARTIFACTTYPE_FREE) {
 			s2 = &sp44[s4];
 			image = &sp4c[artifacts[i].screenPos.screenY * viGetWidth()];
 
 			gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, videoGetWidth(), image);
-			gDPLoadBlock(gdl++, 5, 0, 0, viGetWidth() - 1, 0);
+			gfx_Load_Block(gdl++, 5, 0, 0, viGetWidth() - 1, 0);
 
-			gSPTextureRectangle(gdl++,
+			gdl += gfx_Texture_Rectangle(gdl,
 					s4 << 2, 0,
 					(s4 + 3) << 2, 0,
 					G_TX_RENDERTILE, (artifacts[i].screenPos.screenX * 32) + 16, 0x0010, 0x1000, 0);
@@ -176,12 +173,11 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 		}
 	}
 
-	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
-	gDPSetScissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
-	gSPSetGeometryMode(gdl++, G_ZBUFFER);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
-	gDPSetColorDither(gdl++, G_CD_BAYER);
+	gfx_Set_Color_Image(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
+	gfx_Set_Scissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
+	gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
 	return gdl;
 }

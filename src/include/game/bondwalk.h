@@ -14,7 +14,7 @@ bool bwalkCalculateNewPosition(struct coord *vel, float rotateamount, bool apply
 bool bwalkCalculateNewPositionWithPush(struct coord *delta, float rotateamount, bool apply, float extrawidth, int types);
 int bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, int types);
 int bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c, struct coord *d, struct coord *e, int types);
-int bwalk0f0c494c(struct coord *a, struct coord *b, struct coord *c, int types);
+int bwalkProjectPushOntoXZDir(struct coord *position, struct coord *from, struct coord *to, int types);
 int bwalk0f0c4a5c(struct coord *a, struct coord *b, struct coord *c, int types);
 void bwalkUpdateSpeedSideways(float targetspeed, float accelspeed, int mult);
 void bwalkUpdateSpeedForwards(float targetspeed, float accelspeed);

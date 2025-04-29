@@ -215,21 +215,19 @@ Gfx *weatherRender(Gfx *gdl)
 
 	weather = g_WeatherData;
 
-	gSPDisplayList(gdl++, &var800613a0);
-	gSPDisplayList(gdl++, &var80061380);
+	gfx_Display_List(gdl++, &var800613a0);
+	gfx_Display_List(gdl++, &var80061380);
 
 	if (weather->type == WEATHERTYPE_SNOW) {
 		texSelect(&gdl, &g_TexGeneralConfigs[1], 2, 1, 2, 1, NULL);
 
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetColorDither(gdl++, G_CD_NOISE);
-		gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
-		gDPSetTextureLOD(gdl++, G_TL_TILE);
-		gDPSetTextureConvert(gdl++, G_TC_FILT);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
-		gSPSetGeometryMode(gdl++, G_SHADE | G_SHADING_SMOOTH);
-		gDPSetAlphaDither(gdl++, G_AD_NOISE);
+		gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
 	}
 
 	switch (weather->type) {
@@ -804,7 +802,6 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 	int i;
 	int timings1[10];
 	struct weatherparticledata *particledata;
-	Mtxf *mtx;
 	struct weatherparticle *particle;
 	int timings2[8];
 	int numsparksavailable;
@@ -847,17 +844,17 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 	texSelect(&gdl, &g_TexGeneralConfigs[1], 2, 1, 2, 1, NULL);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gDPSetCombineLERP(gdl++,
 			0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0,
 			0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0);
 
 	{
+		Mtx *mtx;
 		struct coord campos;
 		struct coord sp224;
 		int numneighbours;
@@ -866,7 +863,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 		Vtx *vertices;
 		int n;
 		bool ok;
-		Mtxf worldtoscreenmtx;
+		Mtx worldtoscreenmtx;
 		struct coord positions[4];
 		int numtris;
 		float cddiv2;
@@ -881,27 +878,23 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 		float tmp;
 		struct coord distcamtobbmax;
 		struct coord distcamtobbmin;
-#ifdef AVOID_UB
 		RoomNum neighbours[21];
-#else
-		RoomNum neighbours[20];
-#endif
 
 		particledata = weather->particledata[arg2];
 		numtris = 0;
 
-		mtxIdent((Mtx*)&worldtoscreenmtx);
-		mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&worldtoscreenmtx);
+		mtxIdent(&worldtoscreenmtx);
+		mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), &worldtoscreenmtx);
 
-		worldtoscreenmtx.m[3][0] = 0.0f;
-		worldtoscreenmtx.m[3][1] = 0.0f;
-		worldtoscreenmtx.m[3][2] = 0.0f;
+		worldtoscreenmtx[3][0] = 0.0f;
+		worldtoscreenmtx[3][1] = 0.0f;
+		worldtoscreenmtx[3][2] = 0.0f;
 
 		mtx = gfxAllocateMatrix();
 
-		mtx4Copy((Mtx*)&worldtoscreenmtx, (Mtx*)mtx);
+		mtx4Copy(&worldtoscreenmtx, mtx);
 
-		gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+		gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 		campos.f[0] = g_Vars.currentplayer->cam_pos.f[0];
 		campos.f[1] = g_Vars.currentplayer->cam_pos.f[1];
@@ -1161,7 +1154,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 		colours[0].word = PD_BE32(raincol1);
 		colours[1].word = PD_BE32(raincol2);
 
-		gSPColor(gdl++, (uintptr_t)(colours), 2);
+		gfx_Color(gdl++, colours, 2);
 
 		timings2[0] = utilsGetCount();
 
@@ -1347,7 +1340,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 							if (numtris == 3) {
 								gSPVertex(gdl++, (uintptr_t)(vertices), 12, 0);
-								gSPTri4(gdl++, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+								gfx_Tri4(gdl++, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 								numtris = 0;
 							} else {
 								numtris++;
@@ -1357,8 +1350,6 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 							timings1[1] = timings1[1] + utilsGetCount() - timings2[1];
 						}
 					}
-
-					if (numtris);
 				}
 			}
 		}
@@ -1367,15 +1358,15 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 			gSPVertex(gdl++, (uintptr_t)(vertices), 12, 0);
 
 			if (numtris == 1) {
-				gSPTri1(gdl++, 0, 1, 2);
+				gfx_Tri1(gdl++, 0, 1, 2);
 			}
 
 			if (numtris == 2) {
-				gSPTri2(gdl++, 0, 1, 2, 3, 4, 5);
+				gfx_Tri2(gdl++, 0, 1, 2, 3, 4, 5);
 			}
 
 			if (numtris == 3) {
-				gSPTri3(gdl++, 0, 1, 2, 3, 4, 5, 6, 7, 8);
+				gfx_Tri3(gdl++, 0, 1, 2, 3, 4, 5, 6, 7, 8);
 			}
 		}
 	}
@@ -1420,21 +1411,17 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 	struct coord sp228;
 	float sp220;
 	float sp21c;
-	Mtxf *mtx;
+	Mtx *mtx;
 	Vtx *vertices; // 214
 	Vtx *vtxbatch;
-	Mtxf sp1cc;
+	Mtx sp1cc;
 	struct coord sp19c[4];
 	int sp198;
 	float f24;
 	int i; // 184
 	struct coord sp178;
 	struct coord sp16c;
-#ifdef AVOID_UB
-	RoomNum sp144[21]; // prevent bgRoomGetNeighbours from writing out of bounds
-#else
-	RoomNum sp144[20];
-#endif
+	RoomNum sp144[21];
 	struct coord sp124;
 	struct coord sp118;
 	float f26;
@@ -1454,12 +1441,11 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 	texSelect(&gdl, &g_TexGeneralConfigs[0], 4, 0, 2, 1, NULL);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gDPSetCombineLERP(gdl++,
 			0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0,
 			0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0);
@@ -1467,18 +1453,18 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 	sp198 = 0;
 
-	mtxIdent((Mtx*)&sp1cc);
-	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp1cc);
+	mtxIdent(&sp1cc);
+	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), &sp1cc);
 
-	sp1cc.m[3][0] = 0.0f;
-	sp1cc.m[3][1] = 0.0f;
-	sp1cc.m[3][2] = 0.0f;
+	sp1cc[3][0] = 0.0f;
+	sp1cc[3][1] = 0.0f;
+	sp1cc[3][2] = 0.0f;
 
 	mtx = gfxAllocateMatrix();
 
-	mtx4Copy((Mtx*)&sp1cc, (Mtx*)mtx);
+	mtx4Copy(&sp1cc, mtx);
 
-	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	sp234.f[0] = g_Vars.currentplayer->cam_pos.f[0];
 	sp234.f[1] = g_Vars.currentplayer->cam_pos.f[1];
@@ -1496,7 +1482,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 		sp228.f[2] = particledata->boundaryrange.f[2] / 2.0f;
 	}
 
-	// 4ac8
 	for (p = 0; p < 500; p++) {
 		particle = &particledata->particles[p];
 
@@ -1540,7 +1525,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 		particle->pos.f[2] = particledata->boundarymin.f[2] + f0;
 	}
 
-	// 4bbc
 	particledata->unk3e80.f[0] = sp234.f[0];
 	particledata->unk3e80.f[1] = sp234.f[1];
 	particledata->unk3e80.f[2] = sp234.f[2];
@@ -1557,7 +1541,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 		sp1268++;
 	}
 
-	// 4c54
 	for (i = 0; i < sp1268; i++) {
 		numneighbours = bgRoomGetNeighbours(sp126c[i], sp144, 20);
 
@@ -1593,7 +1576,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 		}
 	}
 
-	// 4dc0
 	for (i = 0; i < sp1268; i++) {
 		if (weatherIsRoomWeatherProof(sp126c[i])) {
 			spe20[s7].f[0] = g_Rooms[sp126c[i]].bbmin[0] / 1;
@@ -1612,9 +1594,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 	}
 
-	// 4ea4
 	for (j = 0; j < s7; j++) {
-		if (0);
 		sp264[j][6] = sp264[j][0] = g_Rooms[sp1078[j]].bbmin[0] / 1 - snowwidth;
 		sp264[j][9] = sp264[j][3] = g_Rooms[sp1078[j]].bbmax[0] / 1 + snowwidth;
 		sp264[j][6] -= var8007f100;
@@ -1631,7 +1611,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 		sp264[j][11] += var8007f100;
 	}
 
-	// 4ff0
 	for (j = 0; j < 8; j++) {
 		sp1168[j][0][0] = sinf(particledata->unk3ec8[j]);
 		sp1168[j][0][1] = cosf(particledata->unk3ec8[j]);
@@ -1643,7 +1622,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 		sp1168[j][3][1] = cosf(particledata->unk3ec8[j] + M_PI * 1.5f);
 	}
 
-	// 514c
 	colours = gfxAllocateColours(numcolours);
 
 	for (j = 0; j < numcolours; j++) {
@@ -1651,9 +1629,8 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 		colours[j].word = PD_BE32((snowcol1 & 0xffffff00) | alpha);
 	}
 
-	gSPColor(gdl++, (uintptr_t)(colours), numcolours);
+	gfx_Color(gdl++, colours, numcolours);
 
-	// 51f8
 	for (p = 0; p < 500; p++) {
 		struct weatherparticle *particle = &particledata->particles[p];
 		int tmp2;
@@ -1669,8 +1646,8 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 			if (camIsPointInFrustum(&sp124, 5)) {
 				sp137c[0] = sp137c[0] + utilsGetCount() - sp1354[0];
 
-				sp21c = particle->pos.f[0];
-				sp220 = particle->pos.f[2];
+				sp21c = particle->pos.x;
+				sp220 = particle->pos.z;
 
 				f20 = sqrtf(sp220 * sp220 + sp21c * sp21c);
 
@@ -1695,14 +1672,12 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 						sp19c[j].f[2] = particle->pos.f[2];
 					}
 
-					// 5344
 					if (s7 > 0) {
 						sp118.f[0] = particle->pos.f[0] + particledata->unk3e80.f[0];
 						sp118.f[1] = particle->pos.f[1] + particledata->unk3e80.f[1];
 						sp118.f[2] = particle->pos.f[2] + particledata->unk3e80.f[2];
 
 						for (j = 0; j < s7; j++) {
-							// 5398
 							if (s1
 									&& sp264[j][6] < sp118.f[0]
 									&& sp264[j][9] > sp118.f[0]
@@ -1718,23 +1693,18 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 										&& sp264[j][5] > sp118.f[2]) {
 									s1 = false;
 								} else {
-									// 54a8
 									f2 = 0.0f;
 
-									// 54d8
 									if (sp264[j][0] > sp118.f[0]) {
 										f2 = sp118.f[0] - sp264[j][6];
 									}
 
-									// 54ec
 									if (sp264[j][3] < sp118.f[0]) {
 										f2 = sp118.f[0] - sp264[j][9];
 									}
 
-									// 5500
 									f2 = fabsf(f2) / var8007f100;
 
-									// 5524
 									if (f2 > sp260) {
 										sp260 = f2;
 									}
@@ -1757,7 +1727,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 						}
 					}
 
-					// 559c
 					if (s1) {
 						int j;
 						float val1;
@@ -1765,8 +1734,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 						float val3;
 
 						tmp2 = sp198 * 4;
-
-						if (range);
 
 						f0_3 = sqrtf(particle->pos.f[0] * particle->pos.f[0]
 								+ particle->pos.f[1] * particle->pos.f[1]
@@ -1776,7 +1743,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 						sp108 = particle->pos.f[1] / f0_3;
 						f26 = particle->pos.f[2] / f0_3;
 
-						// 55fc
 						f0_3 = sqrtf(f24 * f24 + f26 * f26);
 
 						val2 = f24 / f0_3;
@@ -1791,14 +1757,12 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 						sp115c.f[1] = 1.0f;
 						sp115c.f[2] = sp21c;
 
-						// 5720
 						for (j = 0; j < 4; j++) {
 							sp19c[j].f[0] += snowwidth * val1 * sp1168[(p >> 2) & 7][j][0] + snowwidth * sp114c * sp1168[(p >> 2) & 7][j][1];
 							sp19c[j].f[1] += snowwidth *  f22 * sp1168[(p >> 2) & 7][j][0] + snowwidth * sp1148 * sp1168[(p >> 2) & 7][j][1];
 							sp19c[j].f[2] += snowwidth * val3 * sp1168[(p >> 2) & 7][j][0] + snowwidth * sp1144 * sp1168[(p >> 2) & 7][j][1];
 						}
 
-						// 5784
 						// x
 						f16 = 0.0f;
 
@@ -1816,7 +1780,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 							sp260 = f16;
 						}
 
-						// 5870
 						// y
 						f16 = 0.0f;
 
@@ -1834,7 +1797,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 							sp260 = f16;
 						}
 
-						// 58f8
 						// z
 						f16 = 0.0f;
 
@@ -1880,18 +1842,6 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 							vertices[tmp2 + 2].t = y1 * 32;
 							vertices[tmp2 + 3].s = x1 * 32;
 							vertices[tmp2 + 3].t = y1 * 32;
-
-							// rain order:
-							//vertices[tmp2 + 0].t = y2 * 32;
-							//vertices[tmp2 + 1].s = x2 * 32;
-							//vertices[tmp2 + 1].t = y2 * 32;
-							//vertices[tmp2 + 2].s = x2 * 32;
-							//vertices[tmp2 + 3].t = y1 * 32;
-							//vertices[tmp2 + 3].s = x1 * 32;
-							//vertices[tmp2 + 2].t = y1 * 32;
-							//vertices[tmp2 + 0].s = x1 * 32;
-
-							if (sp198 && sp198 && sp198);
 						}
 
 						vertices[tmp2 + 0].x = sp19c[0].f[0];
@@ -1912,7 +1862,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 						if (sp198 == 1) {
 							gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
-							gSPTri4(gdl++, 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4);
+							gfx_Tri4(gdl++, 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4);
 							sp198 = 0;
 						} else {
 							sp198 = 1;
@@ -1925,7 +1875,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 
 	if (sp198 > 0) {
 		gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
-		gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
+		gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 	}
 
 	return gdl;

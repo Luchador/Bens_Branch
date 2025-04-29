@@ -438,11 +438,11 @@ Gfx *lvRenderFade(Gfx *gdl)
 	}
 
 	struct RGBA tmp = utilsUnpackColorRGBA(colour);
-	gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 	gfx_Set_Prim_Color(gdl++, tmp);
 
-	gDPFillRectangle(gdl++,
+	gfx_Fill_Rectangle(gdl++,
 			viGetViewLeft(),
 			viGetViewTop() + inset,
 			viGetViewLeft() + viGetViewWidth() + 1,
@@ -846,24 +846,24 @@ Gfx *lvRenderFPS(Gfx *gdl)
  */
 Gfx *lvRender(Gfx *gdl)
 {
-	gSPSegment(gdl++, SPSEGMENT_PHYSICAL, 0x00000000);
+	gfx_Segment(gdl++, SPSEGMENT_PHYSICAL, 0x00000000);
 
 	savebufferResetVp();
 
 	if (g_Vars.stagenum == STAGE_TITLE) {
-		gSPDisplayList(gdl++, &var800613a0);
-		gSPDisplayList(gdl++, &var80061380);
+		gfx_Display_List(gdl++, &var800613a0);
+		gfx_Display_List(gdl++, &var80061380);
 
 		gdl = viPrepareZbuf(gdl);
 		gdl = vi0000b1d0(gdl);
 
-		gDPSetScissor(gdl++, viGetViewLeft(), viGetViewTop(), (viGetViewLeft() + viGetViewWidth()), (viGetViewTop() + viGetViewHeight()));
+		gfx_Set_Scissor(gdl++, viGetViewLeft(), viGetViewTop(), (viGetViewLeft() + viGetViewWidth()), (viGetViewTop() + viGetViewHeight()));
 
 		gdl = titleRender(gdl);
 		gdl = lvRenderFade(gdl);
 	} else if (g_Vars.stagenum == STAGE_BOOTPAKMENU) {
-		gSPDisplayList(gdl++, &var800613a0);
-		gSPDisplayList(gdl++, &var80061380);
+		gfx_Display_List(gdl++, &var800613a0);
+		gfx_Display_List(gdl++, &var80061380);
 
 		setCurrentPlayerNum(0);
 		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
@@ -875,8 +875,8 @@ Gfx *lvRender(Gfx *gdl)
 		gdl = bgScissorToViewport(gdl);
 		gdl = menuRender(gdl);
 	} else if (g_Vars.stagenum == STAGE_CREDITS) {
-		gSPDisplayList(gdl++, &var800613a0);
-		gSPDisplayList(gdl++, &var80061380);
+		gfx_Display_List(gdl++, &var800613a0);
+		gfx_Display_List(gdl++, &var80061380);
 
 		setCurrentPlayerNum(0);
 		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
@@ -949,8 +949,8 @@ Gfx *lvRender(Gfx *gdl)
 
 			bviewSetMotionBlur(bluramount);
 
-			gSPDisplayList(gdl++, &var800613a0);
-			gSPDisplayList(gdl++, &var80061380);
+			gfx_Display_List(gdl++, &var800613a0);
+			gfx_Display_List(gdl++, &var80061380);
 
 			viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 			viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
@@ -1399,7 +1399,7 @@ Gfx *lvRender(Gfx *gdl)
 		}
 	}
 
-	gDPSetScissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
+	gfx_Set_Scissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
 
 	if (videoGetDisplayFPS()) {
 		gdl = lvRenderFPS(gdl);

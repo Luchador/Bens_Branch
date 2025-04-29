@@ -26,7 +26,6 @@
 struct skeleton *g_Skeletons[] = {
 	&g_SkelChr,
 	&g_SkelClassicGun,
-	&g_Skel06,
 	&g_SkelBasic,
 	&g_SkelCctv,
 	&g_SkelWindowedDoor,

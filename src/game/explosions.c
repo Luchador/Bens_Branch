@@ -26,6 +26,7 @@
 #include "lib/rng.h"
 #include "lib/anim.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 #define SHAKE_TIME 12
@@ -1226,8 +1227,8 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 			gdl = bgScissorToViewport(gdl);
 		}
 
-		gSPClearGeometryMode(gdl++, G_CULL_BOTH | G_FOG);
-		gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH | G_FOG);
+		gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		gdl = roomApplyMtx(gdl, roomnum);
 
@@ -1267,14 +1268,14 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 			colours[0].word = var8007e93c;
 		}
 
-		gSPColor(gdl++, (uintptr_t)(colours), 1);
+		gfx_Color(gdl++, colours, 1);
 
 		for (i = 14; i >= 0; i--) {
 			gDPSetTextureImage(gdl++, G_IM_FMT_IA, G_IM_SIZ_16b, 1, g_ExplosionTexturePairs[i].texturenum1);
-			gDPLoadBlock(gdl++, G_TX_LOADTILE, 0, 0, 1567, 0);
+			gfx_Load_Block(gdl++, G_TX_LOADTILE, 0, 0, 1567, 0);
 
 			gDPSetTextureImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, g_ExplosionTexturePairs[i].texturenum2);
-			gDPLoadBlock(gdl++, 5, 0, 0, 223, 0);
+			gfx_Load_Block(gdl++, 5, 0, 0, 223, 0);
 
 			for (j = 0; j < ARRAYCOUNT(exp->parts); j++) {
 				if (exp->parts[j].frame > 0) {
@@ -1285,7 +1286,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 			}
 		}
 
-		gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		tmp = (g_ExplosionTypes[exp->type].flarespeed * 15.0f) * 0.83333331346512f;
 
@@ -1302,7 +1303,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx *gdl, struct coord *coord, int arg4)
 {
 	Vtx *vertices = gfxAllocateVertices(4);
-	Mtxf *mtx = (Mtxf*)camGetProjectionMtx();
+	Mtx *mtx = camGetProjectionMtx();
 	struct coord spbc;
 	struct coord spb0;
 	struct coord spa4;
@@ -1311,7 +1312,6 @@ Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx 
 	float y;
 	float z;
 	int i;
-	int j;
 	float size;
 	float cosine;
 	float max;
@@ -1341,7 +1341,7 @@ Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx 
 					&& pos.f[2] >= exp->bbs[i].bbmin.f[2] && pos.f[2] <= exp->bbs[i].bbmax.f[2]) {
 				float min = 65536.0f;
 
-				for (j = 0; j < 3; j++) {
+				for (int j = 0; j < 3; j++) {
 					value = pos.f[j] - exp->bbs[i].bbmin.f[j];
 
 					if (value < min) {
@@ -1412,21 +1412,21 @@ Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx 
 	cosine = cosf(part->rot) * size;
 	sine = sinf(part->rot) * size;
 
-	spbc.x = mtx->m[0][0] * cosine;
-	spbc.y = mtx->m[0][1] * cosine;
-	spbc.z = mtx->m[0][2] * cosine;
+	spbc.x = (*mtx)[0][0] * cosine;
+	spbc.y = (*mtx)[0][1] * cosine;
+	spbc.z = (*mtx)[0][2] * cosine;
 
-	spb0.x = mtx->m[0][0] * sine;
-	spb0.y = mtx->m[0][1] * sine;
-	spb0.z = mtx->m[0][2] * sine;
+	spb0.x = (*mtx)[0][0] * sine;
+	spb0.y = (*mtx)[0][1] * sine;
+	spb0.z = (*mtx)[0][2] * sine;
 
-	spa4.x = mtx->m[1][0] * cosine;
-	spa4.y = mtx->m[1][1] * cosine;
-	spa4.z = mtx->m[1][2] * cosine;
+	spa4.x = (*mtx)[1][0] * cosine;
+	spa4.y = (*mtx)[1][1] * cosine;
+	spa4.z = (*mtx)[1][2] * cosine;
 
-	sp98.x = mtx->m[1][0] * sine;
-	sp98.y = mtx->m[1][1] * sine;
-	sp98.z = mtx->m[1][2] * sine;
+	sp98.x = (*mtx)[1][0] * sine;
+	sp98.y = (*mtx)[1][1] * sine;
+	sp98.z = (*mtx)[1][2] * sine;
 
 	vertices[0].x = x - spbc.f[0] - sp98.f[0] - coord->f[0];
 	vertices[0].y = y - spbc.f[1] - sp98.f[1] - coord->f[1];
@@ -1452,13 +1452,13 @@ Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx 
 	vertices[3].s = 1760;
 	vertices[3].t = 1760;
 
-	for (j = 0; j < 4; j++) {
+	for (int j = 0; j < 4; j++) {
 		vertices[j].colour = 0;
 	}
 
 	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
-	gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
+	gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
 	return gdl;
 }

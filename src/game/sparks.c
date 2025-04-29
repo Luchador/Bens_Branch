@@ -14,6 +14,7 @@
 #include "lib/vi.h"
 #include "lib/rng.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 struct spark g_Sparks[MAX_SPARKS]; // Originally 100
@@ -272,14 +273,14 @@ Gfx *sparksRender(Gfx *gdl)
 	int index;
 	float sp13c;
 	float sp138;
-	Mtxf *mtx;
+	Mtx *mtx;
 	int v1;
 	struct coord sp124;
 	float sp120;
 	int diff1;
 	int diff2;
 	float frac;
-	Mtxf spd4;
+	Mtx spd4;
 
 	if (g_SparksAreActive) {
 		if (fabsf(g_Vars.currentplayer->cam_look.y) > fabsf(g_Vars.currentplayer->cam_look.x)) {
@@ -290,12 +291,11 @@ Gfx *sparksRender(Gfx *gdl)
 
 		texSelect(&gdl, &g_TexSparkConfigs[0], 4, 0, 2, 1, NULL);
 
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetColorDither(gdl++, G_CD_DISABLE);
-		gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
-		gDPSetTextureLOD(gdl++, G_TL_TILE);
-		gDPSetTextureConvert(gdl++, G_TC_FILT);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gDPSetCombineMode(gdl++, G_CC_CUSTOM_04, G_CC_CUSTOM_04);
 
 
@@ -378,26 +378,26 @@ Gfx *sparksRender(Gfx *gdl)
 						colours[1].a *= frac;
 					}
 
-					gSPColor(gdl++, (uintptr_t)(colours), 2);
+					gfx_Color(gdl++, colours, 2);
 
 					sp120 *= 0.2f;
 					sp120 *= viGetFovY() / 60.0f;
 					sp120 *= (float)(SCREEN_WIDTH_LO * SCREEN_HEIGHT_LO) / (float)(SCREEN_WIDTH_HI * SCREEN_HEIGHT_HI);
 
-					mtxIdent((Mtx*)&spd4);
+					mtxIdent(&spd4);
 
-					spd4.m[0][0] = 0.05f;
-					spd4.m[1][1] = 0.05f;
-					spd4.m[2][2] = 0.05f;
-					spd4.m[3][3] = 0.05f;
+					spd4[0][0] = 0.05f;
+					spd4[1][1] = 0.05f;
+					spd4[2][2] = 0.05f;
+					spd4[3][3] = 0.05f;
 
-					mtx4SetTranslation(&group->pos, (Mtx*)&spd4);
-					mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&spd4);
+					mtx4SetTranslation(&group->pos, &spd4);
+					mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), &spd4);
 
 					mtx = gfxAllocateMatrix();
-					mtx4Copy((Mtx*)&spd4, (Mtx*)mtx);
+					mtx4Copy(&spd4, mtx);
 
-					gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+					gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 					index = group->startindex;
 
@@ -469,7 +469,7 @@ Gfx *sparksRender(Gfx *gdl)
 							}
 
 							gSPVertex(gdl++, (uintptr_t)(vertices), 3, 0);
-							gSP1Triangle(gdl++, 0, 1, 2, 0);
+							gfx_1Triangle(gdl++, 0, 1, 2, 0);
 						}
 
 						index = (index + 1) % ARRAYCOUNT(g_Sparks);

@@ -1,5 +1,6 @@
 #include <ultra64.h>
 #include "data.h"
+#include "gfx.h"
 #include "textureconfig.h"
 #include "types.h"
 
@@ -84,14 +85,6 @@ struct textureconfig g_TcWallhitConfigs[] = {
 	/*16*/ { 0x0d74, 32,  24,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  },
 	/*17*/ { 0x0d72, 32,  24,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_CLAMP,  G_TX_CLAMP  },
 };
-
-// struct textureconfig g_TcBeamConfigs[] = {
-// 	/*0*/ { 0x0006, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
-// 	/*1*/ { 0x0007, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
-// 	/*2*/ { 0x0008, 16,  32,  1, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
-// 	/*3*/ { 0x0859, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
-// 	/*4*/ { 0x085a, 16,  32,  5, G_IM_FMT_RGBA, G_IM_SIZ_32b, G_TX_WRAP,   G_TX_WRAP   },
-// };
 
 // Ben's comment: levels exported from the Setup Editor break beams for some reason. This can be solved by setting the beam level (4th parameter) to 0. Except for the Cyclone, which breaks if set to 0.
 struct textureconfig g_TcBeamConfigs[] = {

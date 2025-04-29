@@ -20,9 +20,11 @@
 #include "game/tex.h"
 #include "game/title.h"
 #include "game/weaponutils.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/main.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 struct menudialogdef g_MpEndscreenChallengeCompletedMenuDialog;
@@ -570,17 +572,17 @@ MenuItemHandlerResult mpAwardsMenuHandler(int operation, struct menuitem *item, 
 				}
 
 				if (!configured) {
-					gDPSetTexturePersp(gdl++, G_TP_NONE);
-					gDPSetAlphaCompare(gdl++, G_AC_NONE);
-					gDPSetTextureLOD(gdl++, G_TL_TILE);
-					gDPSetTextureConvert(gdl++, G_TC_FILT);
-					gDPSetTextureFilter(gdl++, G_TF_POINT);
+					gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+					gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+					gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+					gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+					gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 					texSelect(&gdl, &g_TexGeneralConfigs[35], 2, 0, 2, 1, NULL);
 
-					gDPSetCycleType(gdl++, G_CYC_1CYCLE);
+					gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 					gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-					gDPSetTextureFilter(gdl++, G_TF_POINT);
+					gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 					gDPSetCombineLERP(gdl++,
 							TEXEL0, 0, ENVIRONMENT, 0,
@@ -591,14 +593,14 @@ MenuItemHandlerResult mpAwardsMenuHandler(int operation, struct menuitem *item, 
 					configured = true;
 				}
 
-				gDPSetEnvColorViaWord(gdl++, colour);
+				gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(colour));
 
-				gSPTextureRectangle(gdl++,
+				gdl += gfx_Texture_Rectangle(gdl,
 						(x << 2),
 						(renderdata->y - 2) << 2,
 						((x + 11) << 2),
 						(renderdata->y + 9) << 2,
-						G_TX_RENDERTILE, 0x0010, 0x0150, 1024, -1024);
+						G_TX_RENDERTILE, 16, 336, 1024, -1024);
 
 				x -= 14;
 			}

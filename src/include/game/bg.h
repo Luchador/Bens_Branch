@@ -33,7 +33,6 @@ void bgClearPortalCameraCache(void);
 bool bgRoomIntersectsScreenBox(int room, struct screenbox *arg1);
 bool bg3dPosTo2dPos(struct coord *cornerpos, struct coord *screenpos);
 bool bgGetPortalScreenBbox(int portal, struct screenbox *arg1);
-Gfx *bgDrawBoxEdge(Gfx *gdl, int x1, int y1, int x2, int y2);
 bool bgGetBoxIntersection(struct screenbox *a, struct screenbox *b);
 void bgExpandBox(struct screenbox *a, struct screenbox *b);
 void bgCopyBox(struct screenbox *dst, struct screenbox *src);

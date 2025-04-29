@@ -8,6 +8,7 @@
 #include "game/gfxmemory.h"
 #include "game/bg.h"
 #include "game/file.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/rng.h"
 #include "lib/anim.h"
@@ -798,16 +799,16 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 	float scale = model->scale;
 	struct coord *sp254 = &rwdata->chrinfo.pos;
 	float sp250 = rwdata->chrinfo.yrot;
-	Mtxf *sp24c;
-	Mtxf *mtx = &model->matrices[rodata->chrinfo.mtxindex];
+	Mtx *sp24c;
+	Mtx *mtx = (Mtx*)&model->matrices[rodata->chrinfo.mtxindex];
 	int animpart = rodata->chrinfo.animpart;
 	struct skeleton *skel = model->definition->skel;
 	struct coord rot1;
 	struct coord translate1;
 	struct coord scale1;
-	Mtxf sp1d8;
-	Mtxf sp198;
-	Mtxf sp158;
+	Mtx sp1d8;
+	Mtx sp198;
+	Mtx sp158;
 	float sp154;
 	struct coord rot2;
 	struct coord translate2;
@@ -821,15 +822,15 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 	struct coord rot4;
 	struct coord translate4;
 	struct coord scale4;
-	Mtxf sp78;
-	Mtxf sp38;
+	Mtx sp78;
+	Mtx sp38;
 
 	if (rodata->chrinfo.mtxindex);
 
 	if (node->parent) {
-		sp24c = (Mtxf*)modelFindNodeMtx(model, node->parent, 0);
+		sp24c = (Mtx*)modelFindNodeMtx(model, node->parent, 0);
 	} else {
-		sp24c = arg0->unk00;
+		sp24c = (Mtx*)arg0->unk00;
 	}
 
 	animGetRotTranslateScale(animpart, anim->flip, skel, anim->animnum, anim->frameslot1, &rot1, &translate1, &scale1);
@@ -854,10 +855,10 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 		}
 
 		if ((g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) && (g_Anims[anim->animnum2].flags & ANIMFLAG_ABSOLUTETRANSLATION) == 0) {
-			mtx4LoadYRotation(rwdata->chrinfo.yrot, (Mtx*)&sp78);
-			mtx4LoadRotation(&rot3, (Mtx*)&sp38);
-			mtxApplyAffineTransformInPlace((Mtx*)&sp78, (Mtx*)&sp38);
-			quaternion3x3MtxToQuat((Mtx*)&sp38, spec);
+			mtx4LoadYRotation(rwdata->chrinfo.yrot, &sp78);
+			mtx4LoadRotation(&rot3, &sp38);
+			mtxApplyAffineTransformInPlace(&sp78, &sp38);
+			quaternion3x3MtxToQuat(&sp38, spec);
 		} else {
 			quaternionEulerToQuat(&rot3, spec);
 		}
@@ -865,31 +866,31 @@ void modelUpdateChrNodeMtx(struct modelrenderdata *arg0, struct model *model, st
 		quaternionEulerToQuat(&rot1, spfc);
 		quaternionAvoidFlips(spfc, spec);
 		quaternionSlerp(spfc, spec, anim->fracmerge, spdc);
-		quaternionToMtx(spdc, (Mtx*)&sp1d8);
+		quaternionToMtx(spdc, &sp1d8);
 	} else {
-		mtx4LoadRotation(&rot1, (Mtx*)&sp1d8);
+		mtx4LoadRotation(&rot1, &sp1d8);
 	}
 
 	if (g_Anims[anim->animnum].flags & ANIMFLAG_ABSOLUTETRANSLATION) {
-		mtx4LoadTranslation(sp254, (Mtx*)&sp198);
+		mtx4LoadTranslation(sp254, &sp198);
 	} else {
 		if (rwdata->chrinfo.unk18 != 0.0f) {
 			sp250 = modelTweenRotAxis(sp250, rwdata->chrinfo.unk1c, rwdata->chrinfo.unk18);
 		}
 
-		mtx4LoadYRotationWithTranslation(sp254, sp250, (Mtx*)&sp198);
+		mtx4LoadYRotationWithTranslation(sp254, sp250, &sp198);
 	}
 
-	mtxApplyAffineTransform((Mtx*)&sp198, (Mtx*)&sp1d8, (Mtx*)&sp158);
+	mtxApplyAffineTransform(&sp198, &sp1d8, &sp158);
 
 	if (scale != 1.0f) {
-		mtxScaleRotationOnly(scale, (Mtx*)&sp158);
+		mtxScaleRotationOnly(scale, &sp158);
 	}
 
 	if (sp24c) {
-		mtxApplyAffineTransform((Mtx*)sp24c, (Mtx*)&sp158, (Mtx*)mtx);
+		mtxApplyAffineTransform(sp24c, &sp158, mtx);
 	} else {
-		mtx4Copy((Mtx*)&sp158, (Mtx*)mtx);
+		mtx4Copy(&sp158, mtx);
 	}
 }
 
@@ -2819,12 +2820,12 @@ void modelTickAnim(struct model *model, int lvupdate240, bool arg2)
 
 void modelApplyRenderModeType1(struct modelrenderdata *renderdata)
 {
-	gDPSetCycleType(renderdata->gdl++, G_CYC_1CYCLE);
+	gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_1CYCLE);
 
 	if (renderdata->zbufferenabled) {
-		gDPSetRenderMode(renderdata->gdl++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
+		gfx_Set_Render_Mode(renderdata->gdl++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
 	} else {
-		gDPSetRenderMode(renderdata->gdl++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+		gfx_Set_Render_Mode(renderdata->gdl++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
 	}
 
 	gDPSetCombineMode(renderdata->gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
@@ -2834,69 +2835,71 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 {
 	if (renderdata->unk30 == 7) {
 		if (arg1) {
-			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
-			gDPSetEnvColorViaWord(renderdata->gdl++, renderdata->envcolour | 0xff);
+			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+			gfx_Set_Env_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour | 0xff));
 			gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_17, G_CC_CUSTOM_18);
 
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
 			}
 		} else {
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 			}
 		}
 	} else if (renderdata->unk30 == 8) {
 		if (arg1) {
-			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
-			gDPSetEnvColorViaWord(renderdata->gdl++, renderdata->envcolour);
+			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+			gfx_Set_Env_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour));
 			gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_19, G_CC_CUSTOM_18);
 
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 			}
 		}
 	} else if (renderdata->unk30 == 9) {
 		if ((renderdata->envcolour & 0xff) == 0) {
 			if (arg1) {
-				gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-				gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
-				gDPSetEnvColorViaWord(renderdata->gdl++, 0xffffffff);
-				struct RGBA color = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
-				gfx_Set_Prim_Color(renderdata->gdl++, color);
+				gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+				gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+				RGBA envColor = {255, 255, 255, 255};
+				gfx_Set_Env_Color(renderdata->gdl++, envColor);
+				RGBA primColor = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
+				gfx_Set_Prim_Color(renderdata->gdl++, primColor);
 				gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_CUSTOM_20);
 
 				if (renderdata->zbufferenabled) {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
 				} else {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
 				}
 			} else {
 				if (renderdata->zbufferenabled) {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
 				} else {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 				}
 			}
 		} else {
 			if (arg1) {
-				gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-				gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
-				gDPSetEnvColor(renderdata->gdl++, 0, 0, 0, renderdata->envcolour);
+				gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+				gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+				RGBA envColor = {0, 0, 0, renderdata->envcolour};
+				gfx_Set_Env_Color(renderdata->gdl++, envColor);
 				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_21, G_CC_CUSTOM_18);
 
 				if (renderdata->zbufferenabled) {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
 				} else {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
 				}
 			} else {
 				struct RGBA color = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
@@ -2904,41 +2907,42 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_22, G_CC_CUSTOM_23);
 
 				if (renderdata->zbufferenabled) {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
 				} else {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
 				}
 			}
 		}
 	} else if (renderdata->unk30 == 4) {
 		if (arg1) {
-			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->envcolour);
+			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->envcolour);
 			gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
 
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
 			}
 		} else {
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 			}
 		}
 	} else if (renderdata->unk30 == 5) {
 		uint8_t alpha;
 
 		if (arg1) {
-			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
+			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
 
 			alpha = renderdata->envcolour & 0xff;
 
 			if (alpha < 255) {
-				gDPSetEnvColor(renderdata->gdl++, 0xff, 0xff, 0xff, alpha);
+				RGBA envColor = {255, 255, 255, alpha};
+				gfx_Set_Env_Color(renderdata->gdl++, envColor);
 
 				if (renderdata->envcolour & 0xff00) {
 					gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_24, G_CC_MODULATEIA2);
@@ -2950,9 +2954,9 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 			}
 
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 			}
 		} else {
 			alpha = renderdata->envcolour & 0xff;
@@ -2965,19 +2969,19 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 		}
 	} else {
 		if (arg1) {
-			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
+			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
 			gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
 
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_PASS, G_RM_AA_ZB_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_PASS, G_RM_AA_ZB_OPA_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_PASS, G_RM_AA_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_PASS, G_RM_AA_OPA_SURF2);
 			}
 		} else {
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_PASS, G_RM_AA_ZB_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_PASS, G_RM_AA_ZB_XLU_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_PASS, G_RM_AA_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_PASS, G_RM_AA_XLU_SURF2);
 			}
 		}
 	}
@@ -2986,72 +2990,73 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 {
 	if (renderdata->unk30 == 7) {
-		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-		gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
-		gDPSetEnvColorViaWord(renderdata->gdl++, renderdata->envcolour | 0x000000ff);
+		gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+		gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+		gfx_Set_Env_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour | 0x000000ff));
 		gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_17, G_CC_CUSTOM_18);
 
 		if (arg1) {
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
 			}
 		} else {
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 			}
 		}
 	} else if (renderdata->unk30 == 8) {
-		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-		gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
-		gDPSetEnvColorViaWord(renderdata->gdl++, renderdata->envcolour);
+		gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+		gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+		gfx_Set_Env_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour));
 		gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_19, G_CC_CUSTOM_18);
 
 		if (renderdata->zbufferenabled) {
-			gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
+			gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
 		} else {
-			gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
+			gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 		}
 	} else if (renderdata->unk30 == 9) {
 		if ((renderdata->envcolour & 0xff) == 0) {
-			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
-			gDPSetEnvColorViaWord(renderdata->gdl++, 0xffffffff);
-			struct RGBA color = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
-			gfx_Set_Prim_Color(renderdata->gdl++, color);
+			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+			RGBA envColor = {255, 255, 255, 255};
+			gfx_Set_Env_Color(renderdata->gdl++, envColor);
+			RGBA primColor = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
+			gfx_Set_Prim_Color(renderdata->gdl++, primColor);
 
 			if (arg1) {
 				gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_CUSTOM_20);
 
 				if (renderdata->zbufferenabled) {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
 				} else {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
 				}
 			} else {
 				gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_CUSTOM_20);
 
 				if (renderdata->zbufferenabled) {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
 				} else {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 				}
 			}
 		} else {
-			gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-			gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
-			gDPSetEnvColorViaWord(renderdata->gdl++, renderdata->envcolour & 0xff);
+			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+			gfx_Set_Env_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour & 0xff));
 
 			if (arg1) {
 				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_21, G_CC_CUSTOM_18);
 
 				if (renderdata->zbufferenabled) {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
 				} else {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
 				}
 			} else {
 				struct RGBA color = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
@@ -3059,40 +3064,41 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_22, G_CC_CUSTOM_23);
 
 				if (renderdata->zbufferenabled) {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
 				} else {
-					gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
+					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
 				}
 			}
 		}
 	} else if (renderdata->unk30 == 4) {
-		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-		gDPSetFogColorViaWord(renderdata->gdl++, renderdata->envcolour);
+		gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+		gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->envcolour);
 		gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
 
 		if (arg1) {
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
 			}
 		} else {
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 			}
 		}
 	} else if (renderdata->unk30 == 5) {
 		uint8_t alpha;
 
-		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-		gDPSetFogColorViaWord(renderdata->gdl++, renderdata->fogcolour);
+		gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+		gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
 
 		alpha = renderdata->envcolour & 0xff;
 
 		if (alpha < 255) {
-			gDPSetEnvColor(renderdata->gdl++, 0xff, 0xff, 0xff, alpha);
+			RGBA envColor = {255, 255, 255, alpha};
+			gfx_Set_Env_Color(renderdata->gdl++, envColor);
 
 			if (arg1) {
 				if (renderdata->envcolour & 0xff00) {
@@ -3108,26 +3114,26 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 		}
 
 		if (renderdata->zbufferenabled) {
-			gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
+			gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
 		} else {
-			gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
+			gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 		}
 	} else {
-		gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
-		gDPSetFogColorViaWord(renderdata->gdl++, 0xffffff00);
+		gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
+		gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)0xffffff00);
 		gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
 
 		if (arg1) {
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
 			}
 		} else {
 			if (renderdata->zbufferenabled) {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
 			} else {
-				gDPSetRenderMode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
+				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_XLU_SURF2);
 			}
 		}
 	}
@@ -3135,12 +3141,12 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 
 void modelApplyRenderModeType2(struct modelrenderdata *renderdata)
 {
-	gDPSetCycleType(renderdata->gdl++, G_CYC_2CYCLE);
+	gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
 
 	if (renderdata->zbufferenabled) {
-		gDPSetRenderMode(renderdata->gdl++, G_RM_PASS, G_RM_AA_ZB_OPA_SURF2);
+		gfx_Set_Render_Mode(renderdata->gdl++, G_RM_PASS, G_RM_AA_ZB_OPA_SURF2);
 	} else {
-		gDPSetRenderMode(renderdata->gdl++, G_RM_PASS, G_RM_AA_OPA_SURF2);
+		gfx_Set_Render_Mode(renderdata->gdl++, G_RM_PASS, G_RM_AA_OPA_SURF2);
 	}
 
 	gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
@@ -3149,11 +3155,11 @@ void modelApplyRenderModeType2(struct modelrenderdata *renderdata)
 void modelApplyCullMode(struct modelrenderdata *renderdata)
 {
 	if (renderdata->cullmode == CULLMODE_NONE) {
-		gSPClearGeometryMode(renderdata->gdl++, G_CULL_BOTH);
+		gfx_Clear_Geometry_Mode(renderdata->gdl++, G_CULL_BOTH);
 	} else if (renderdata->cullmode == CULLMODE_FRONT) {
-		gSPSetGeometryMode(renderdata->gdl++, G_CULL_FRONT);
+		gfx_Set_Geometry_Mode(renderdata->gdl++, G_CULL_FRONT);
 	} else if (renderdata->cullmode == CULLMODE_BACK) {
-		gSPSetGeometryMode(renderdata->gdl++, G_CULL_BACK);
+		gfx_Set_Geometry_Mode(renderdata->gdl++, G_CULL_BACK);
 	}
 }
 
@@ -3166,7 +3172,7 @@ void modelRenderNodeGundl(struct modelrenderdata *renderdata, struct model *mode
 	}
 
 	if ((renderdata->flags & MODELRENDERFLAG_OPA) && rodata->opagdl) {
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
+		gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)rodata->baseaddr);
 
 		if (renderdata->cullmode) {
 			modelApplyCullMode(renderdata);
@@ -3197,7 +3203,7 @@ void modelRenderNodeGundl(struct modelrenderdata *renderdata, struct model *mode
 	}
 
 	if ((renderdata->flags & MODELRENDERFLAG_XLU) && rodata->opagdl && rodata->unk12 == 4 && rodata->xlugdl) {
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
+		gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)rodata->baseaddr);
 
 		if (renderdata->cullmode) {
 			modelApplyCullMode(renderdata);
@@ -3221,7 +3227,7 @@ void modelRenderNodeDl(struct modelrenderdata *renderdata, struct model *model, 
 		union modelrwdata *rwdata = modelGetNodeRwData(model, node);
 
 		if (rwdata->dl.gdl) {
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->dl.colours);
+			gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)rodata->dl.colours);
 
 			if (renderdata->cullmode) {
 				modelApplyCullMode(renderdata);
@@ -3242,8 +3248,8 @@ void modelRenderNodeDl(struct modelrenderdata *renderdata, struct model *model, 
 				break;
 			}
 
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, rwdata->dl.vertices);
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, rwdata->dl.colours);
+			gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)rwdata->dl.vertices);
+			gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (uintptr_t)rwdata->dl.colours);
 
 			gSPDisplayList(renderdata->gdl++, rwdata->dl.gdl);
 
@@ -3259,14 +3265,14 @@ void modelRenderNodeDl(struct modelrenderdata *renderdata, struct model *model, 
 		union modelrwdata *rwdata = modelGetNodeRwData(model, node);
 
 		if (rwdata->dl.gdl && rodata->dl.mcount == 4 && rodata->dl.xlugdl) {
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->dl.colours);
+			gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)rodata->dl.colours);
 
 			if (renderdata->cullmode) {
 				modelApplyCullMode(renderdata);
 			}
 
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, rwdata->dl.vertices);
-			gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, rwdata->dl.colours);
+			gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)rwdata->dl.vertices);
+			gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (uintptr_t)rwdata->dl.colours);
 
 			modelApplyRenderModeType4(renderdata, false);
 
@@ -3290,7 +3296,6 @@ void modelRenderNodeStarGunfire(struct modelrenderdata *renderdata, struct model
 {
 	if (renderdata->flags & MODELRENDERFLAG_XLU) {
 		struct modelrodata_stargunfire *rodata = &node->rodata->stargunfire;
-		int i;
 
 		if (!rodata->gdl)
 		{
@@ -3300,14 +3305,15 @@ void modelRenderNodeStarGunfire(struct modelrenderdata *renderdata, struct model
 		Vtx *src = (Vtx *) rodata->vertices;
 		Vtx *dst = g_ModelVtxAllocatorFunc(rodata->unk00 * 4);
 
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, dst);
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2]));
-		gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
+		gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)dst);
+		gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_COL2, (uintptr_t)((void *)ALIGN8((uintptr_t)&rodata->vertices[rodata->unk00 << 2])));
+		gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)rodata->baseaddr);
 
-		gDPSetFogColor(renderdata->gdl++, 0, 0, 0, 0);
+		RGBA fogColor = {0, 0, 0, 0};
+		gfx_Set_Fog_Color(renderdata->gdl++, fogColor);
 		gSPDisplayList(renderdata->gdl++, rodata->gdl);
 
-		for (i = 0; i < rodata->unk00; i++) 
+		for (int i = 0; i < rodata->unk00; i++) 
 		{
 			float s4 = 724;
 			float s3 = 0;
@@ -3446,7 +3452,7 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 	vertices[3].y = center.f[1] - yoffset;
 	vertices[3].z = center.f[2] - zoffset - zrot;
 
-	gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, rodata->baseaddr);
+	gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_COL1, (uintptr_t)rodata->baseaddr);
 
 	if (rodata->texture) {
 
@@ -3471,11 +3477,11 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 		modelSelectTexture(renderdata, NULL, 1);
 	}
 
-	gSPSetGeometryMode(renderdata->gdl++, G_CULL_BACK);
-	gSPMatrix(renderdata->gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-	gSPColor(renderdata->gdl++, colours, 1);
+	gfx_Set_Geometry_Mode(renderdata->gdl++, G_CULL_BACK);
+	gfx_Matrix(renderdata->gdl++, (Mtx*)mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Color(renderdata->gdl++, colours, 1);
 	gSPVertex(renderdata->gdl++, vertices, 4, 0);
-	gSPTri2(renderdata->gdl++, 0, 1, 2, 2, 3, 0);
+	gfx_Tri2(renderdata->gdl++, 0, 1, 2, 2, 3, 0);
 }
 
 void modelRender(struct modelrenderdata *renderdata, struct model *model)
@@ -3485,7 +3491,7 @@ void modelRender(struct modelrenderdata *renderdata, struct model *model)
 	uint32_t type;
 	struct modelnode *node = model->definition->rootnode;
 
-	gSPSegment(renderdata->gdl++, SPSEGMENT_MODEL_MTX, model->matrices);
+	gfx_Segment(renderdata->gdl++, SPSEGMENT_MODEL_MTX, (uintptr_t)model->matrices);
 
 	while (node) {
 		type = node->type & 0xff;

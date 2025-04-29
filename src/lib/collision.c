@@ -59,12 +59,12 @@ void cdGetEdge(struct coord *vtx1, struct coord *vtx2)
 	vtx2->z = g_CdEdgeVtx2.z;
 }
 
-float cd00024e98(void)
+float cdGetSlideTimeToEdge(void)
 {
 	return g_SlideTimeToEdge;
 }
 
-int cd00024ea4(void)
+int cdGetHasSlideTimeToEdge(void)
 {
 	return g_HasSlideTimeToEdge;
 }

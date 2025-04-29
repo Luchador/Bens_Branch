@@ -265,7 +265,7 @@ Mtx *camGetProjectionMtxForPlayers(uint8_t *arg0)
 			if (g_Vars.currentplayerindex >= playermgrGetOrderOfPlayer(i)) {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_viewfmdynticknum) {
 					if (arg0 >= g_Vars.players[i]->unk0484 && (uint8_t *)result < g_Vars.players[i]->unk0484) {
-						result = (Mtx*)g_Vars.players[i]->projectionmtx;
+						result = g_Vars.players[i]->projectionmtx;
 					}
 				}
 			}
@@ -281,7 +281,7 @@ Mtx *camGetProjectionMtxForPlayers(uint8_t *arg0)
 			} else {
 				if (g_GfxNumSwaps == g_Vars.players[i]->c_viewfmdynticknum + 1) {
 					if (arg0 >= g_Vars.players[i]->unk0484 && (uint8_t *)result < g_Vars.players[i]->unk0484) {
-						result = (Mtx*)g_Vars.players[i]->projectionmtx;
+						result = g_Vars.players[i]->projectionmtx;
 					}
 				}
 			}
@@ -311,13 +311,13 @@ void camSetProjectionMtx(Mtx *mtx)
 	struct player *player = g_Vars.currentplayer;
 
 	player->c_prevviewfmdynticknum = player->c_viewfmdynticknum;
-	player->prevprojectionmtx = (Mtx*)player->projectionmtx;
-	player->projectionmtx = (Mtxf*)mtx;
+	player->prevprojectionmtx = player->projectionmtx;
+	player->projectionmtx = mtx;
 }
 
 Mtx *camGetProjectionMtx(void)
 {
-	return (Mtx*)g_Vars.currentplayer->projectionmtx;
+	return g_Vars.currentplayer->projectionmtx;
 }
 
 void camSetLookAt(LookAt *lookat)
@@ -378,7 +378,7 @@ void camComputeFrustumEdgePlanes(void)
 
 	player = g_Vars.currentplayer;
 	sp24 = player->c_halfheight * player->c_scaley;
-	mtx = (Mtx*)player->projectionmtx;
+	mtx = player->projectionmtx;
 
 	sp2c = 1.0f / sqrtf(sp24 * sp24 + 1.0f);
 	sp24 *= sp2c;
@@ -455,9 +455,9 @@ bool camIsPosInScreenBox(struct coord *pos, float radius, struct drawslot *draws
 	float planeOffset;
 
 	// Back-face culling: camera facing direction vs. point
-	float cameraDepth = g_Vars.currentplayer->projectionmtx->m[2][0] * pos->x +
-	                    g_Vars.currentplayer->projectionmtx->m[2][1] * pos->y +
-	                    g_Vars.currentplayer->projectionmtx->m[2][2] * pos->z;
+	float cameraDepth = (*g_Vars.currentplayer->projectionmtx)[2][0] * pos->x +
+	                    (*g_Vars.currentplayer->projectionmtx)[2][1] * pos->y +
+	                    (*g_Vars.currentplayer->projectionmtx)[2][2] * pos->z;
 
 	if (g_CamFrustumViewOffset + radius < cameraDepth) {
 		return false;
@@ -469,12 +469,12 @@ bool camIsPosInScreenBox(struct coord *pos, float radius, struct drawslot *draws
 	float leftX = leftOffset * leftLenInv;
 	float leftY = -leftLenInv;
 
-	planeNormal.x = leftY * g_Vars.currentplayer->projectionmtx->m[0][0] - leftX * g_Vars.currentplayer->projectionmtx->m[2][0];
-	planeNormal.y = leftY * g_Vars.currentplayer->projectionmtx->m[0][1] - leftX * g_Vars.currentplayer->projectionmtx->m[2][1];
-	planeNormal.z = leftY * g_Vars.currentplayer->projectionmtx->m[0][2] - leftX * g_Vars.currentplayer->projectionmtx->m[2][2];
-	planeOffset = planeNormal.x * g_Vars.currentplayer->projectionmtx->m[3][0] +
-	              planeNormal.y * g_Vars.currentplayer->projectionmtx->m[3][1] +
-	              planeNormal.z * g_Vars.currentplayer->projectionmtx->m[3][2];
+	planeNormal.x = leftY * (*g_Vars.currentplayer->projectionmtx)[0][0] - leftX * (*g_Vars.currentplayer->projectionmtx)[2][0];
+	planeNormal.y = leftY * (*g_Vars.currentplayer->projectionmtx)[0][1] - leftX * (*g_Vars.currentplayer->projectionmtx)[2][1];
+	planeNormal.z = leftY * (*g_Vars.currentplayer->projectionmtx)[0][2] - leftX * (*g_Vars.currentplayer->projectionmtx)[2][2];
+	planeOffset = planeNormal.x * (*g_Vars.currentplayer->projectionmtx)[3][0] +
+	              planeNormal.y * (*g_Vars.currentplayer->projectionmtx)[3][1] +
+	              planeNormal.z * (*g_Vars.currentplayer->projectionmtx)[3][2];
 
 	if (planeOffset + radius < planeNormal.x * pos->x + planeNormal.y * pos->y + planeNormal.z * pos->z) {
 		return false;
@@ -486,12 +486,12 @@ bool camIsPosInScreenBox(struct coord *pos, float radius, struct drawslot *draws
 	float rightX = rightOffset * rightLenInv;
 	float rightY = -rightLenInv;
 
-	planeNormal.x = -rightY * g_Vars.currentplayer->projectionmtx->m[0][0] - rightX * g_Vars.currentplayer->projectionmtx->m[2][0];
-	planeNormal.y = -rightY * g_Vars.currentplayer->projectionmtx->m[0][1] - rightX * g_Vars.currentplayer->projectionmtx->m[2][1];
-	planeNormal.z = -rightY * g_Vars.currentplayer->projectionmtx->m[0][2] - rightX * g_Vars.currentplayer->projectionmtx->m[2][2];
-	planeOffset = planeNormal.x * g_Vars.currentplayer->projectionmtx->m[3][0] +
-	              planeNormal.y * g_Vars.currentplayer->projectionmtx->m[3][1] +
-	              planeNormal.z * g_Vars.currentplayer->projectionmtx->m[3][2];
+	planeNormal.x = -rightY * (*g_Vars.currentplayer->projectionmtx)[0][0] - rightX * (*g_Vars.currentplayer->projectionmtx)[2][0];
+	planeNormal.y = -rightY * (*g_Vars.currentplayer->projectionmtx)[0][1] - rightX * (*g_Vars.currentplayer->projectionmtx)[2][1];
+	planeNormal.z = -rightY * (*g_Vars.currentplayer->projectionmtx)[0][2] - rightX * (*g_Vars.currentplayer->projectionmtx)[2][2];
+	planeOffset = planeNormal.x * (*g_Vars.currentplayer->projectionmtx)[3][0] +
+	              planeNormal.y * (*g_Vars.currentplayer->projectionmtx)[3][1] +
+	              planeNormal.z * (*g_Vars.currentplayer->projectionmtx)[3][2];
 
 	if (planeOffset + radius < planeNormal.x * pos->x + planeNormal.y * pos->y + planeNormal.z * pos->z) {
 		return false;
@@ -503,12 +503,12 @@ bool camIsPosInScreenBox(struct coord *pos, float radius, struct drawslot *draws
 	float topY = topOffset * topLenInv;
 	float topZ = -topLenInv;
 
-	planeNormal.x = -topZ * g_Vars.currentplayer->projectionmtx->m[1][0] + topY * g_Vars.currentplayer->projectionmtx->m[2][0];
-	planeNormal.y = -topZ * g_Vars.currentplayer->projectionmtx->m[1][1] + topY * g_Vars.currentplayer->projectionmtx->m[2][1];
-	planeNormal.z = -topZ * g_Vars.currentplayer->projectionmtx->m[1][2] + topY * g_Vars.currentplayer->projectionmtx->m[2][2];
-	planeOffset = planeNormal.x * g_Vars.currentplayer->projectionmtx->m[3][0] +
-	              planeNormal.y * g_Vars.currentplayer->projectionmtx->m[3][1] +
-	              planeNormal.z * g_Vars.currentplayer->projectionmtx->m[3][2];
+	planeNormal.x = -topZ * (*g_Vars.currentplayer->projectionmtx)[1][0] + topY * (*g_Vars.currentplayer->projectionmtx)[2][0];
+	planeNormal.y = -topZ * (*g_Vars.currentplayer->projectionmtx)[1][1] + topY * (*g_Vars.currentplayer->projectionmtx)[2][1];
+	planeNormal.z = -topZ * (*g_Vars.currentplayer->projectionmtx)[1][2] + topY * (*g_Vars.currentplayer->projectionmtx)[2][2];
+	planeOffset = planeNormal.x * (*g_Vars.currentplayer->projectionmtx)[3][0] +
+	              planeNormal.y * (*g_Vars.currentplayer->projectionmtx)[3][1] +
+	              planeNormal.z * (*g_Vars.currentplayer->projectionmtx)[3][2];
 
 	if (planeOffset + radius < planeNormal.x * pos->x + planeNormal.y * pos->y + planeNormal.z * pos->z) {
 		return false;
@@ -520,12 +520,12 @@ bool camIsPosInScreenBox(struct coord *pos, float radius, struct drawslot *draws
 	float bottomY = bottomOffset * bottomLenInv;
 	float bottomZ = -bottomLenInv;
 
-	planeNormal.x = bottomZ * g_Vars.currentplayer->projectionmtx->m[1][0] + bottomY * g_Vars.currentplayer->projectionmtx->m[2][0];
-	planeNormal.y = bottomZ * g_Vars.currentplayer->projectionmtx->m[1][1] + bottomY * g_Vars.currentplayer->projectionmtx->m[2][1];
-	planeNormal.z = bottomZ * g_Vars.currentplayer->projectionmtx->m[1][2] + bottomY * g_Vars.currentplayer->projectionmtx->m[2][2];
-	planeOffset = planeNormal.x * g_Vars.currentplayer->projectionmtx->m[3][0] +
-	              planeNormal.y * g_Vars.currentplayer->projectionmtx->m[3][1] +
-	              planeNormal.z * g_Vars.currentplayer->projectionmtx->m[3][2];
+	planeNormal.x = bottomZ * (*g_Vars.currentplayer->projectionmtx)[1][0] + bottomY * (*g_Vars.currentplayer->projectionmtx)[2][0];
+	planeNormal.y = bottomZ * (*g_Vars.currentplayer->projectionmtx)[1][1] + bottomY * (*g_Vars.currentplayer->projectionmtx)[2][1];
+	planeNormal.z = bottomZ * (*g_Vars.currentplayer->projectionmtx)[1][2] + bottomY * (*g_Vars.currentplayer->projectionmtx)[2][2];
+	planeOffset = planeNormal.x * (*g_Vars.currentplayer->projectionmtx)[3][0] +
+	              planeNormal.y * (*g_Vars.currentplayer->projectionmtx)[3][1] +
+	              planeNormal.z * (*g_Vars.currentplayer->projectionmtx)[3][2];
 
 	if (planeOffset + radius < planeNormal.x * pos->x + planeNormal.y * pos->y + planeNormal.z * pos->z) {
 		return false;

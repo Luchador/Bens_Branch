@@ -243,7 +243,7 @@ Gfx *starsRender(Gfx *gdl)
 
 	gdl = textSetPrimColour(gdl, 0xffffffff);
 
-	gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 	//texSelect(&gdl, &g_TexStarsConfigs[0], 2, 1, 2, 1, NULL);
 
 	for (i = 0; i < 6; i++) {
@@ -301,7 +301,7 @@ Gfx *starsRender(Gfx *gdl)
 									drawpos[0] = screenpos[0];
 									drawpos[1] = screenpos[1];
 
-									gDPFillRectangle(gdl++, drawpos[0], drawpos[1], drawpos[0] + 1, drawpos[1] + 1);
+									gfx_Fill_Rectangle(gdl++, drawpos[0], drawpos[1], drawpos[0] + 1, drawpos[1] + 1);
 								}
 							}
 						}

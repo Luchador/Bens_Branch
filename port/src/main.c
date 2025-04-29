@@ -5,6 +5,7 @@
 #include "lib/main.h"
 #include "bss.h"
 #include "data.h"
+#include "gfx.h"
 
 #include "video.h"
 #include "audio.h"

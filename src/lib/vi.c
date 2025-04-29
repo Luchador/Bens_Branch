@@ -17,6 +17,7 @@
 #include "lib/vi.h"
 #include "lib/memp.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "video.h"
 #include "platform.h"
@@ -226,10 +227,10 @@ Gfx *viSetCamNoTranslation(Gfx *gdl)
 	memcpy(modelviewMtx, &identityF, sizeof(*modelviewMtx));
 
 	// Set projection matrix
-	gSPMatrix(gdl++, (uintptr_t)(projMtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gfx_Matrix(gdl++, projMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	// Set modelview matrix
-	gSPMatrix(gdl++, (uintptr_t)(modelviewMtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(gdl++, modelviewMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	return gdl;
 }
@@ -240,7 +241,7 @@ Gfx *viSetNearAndFarPlanes(Gfx *gdl, float znear, float zfar)
 
 	mtxPerspective(mtx, g_ViBackData->fovy, g_ViBackData->aspect, znear, zfar);
 
-	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	return gdl;
 }
@@ -259,7 +260,7 @@ Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 	mtxPerspective(&g_ActiveProjectionMtx, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar);
 	memcpy(g_CameraPerspectiveMtx, g_ActiveProjectionMtx, sizeof(*g_CameraPerspectiveMtx));
 
-	gSPMatrix(gdl++, (uintptr_t)(g_CameraPerspectiveMtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gfx_Matrix(gdl++, g_CameraPerspectiveMtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	camSetPerspectiveMtxL(g_CameraPerspectiveMtx);
 	camSetSkyMtx(&g_ActiveProjectionMtx);
@@ -273,7 +274,7 @@ Gfx *viSetFovAndAspect(Gfx *gdl, float fovy, float aspect)
 
 	mtxPerspective(mtx, fovy, aspect, g_ViBackData->znear, g_ViBackData->zfar);
 
-	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	return gdl;
 }
@@ -282,7 +283,7 @@ Gfx *vi0000b1d0(Gfx *gdl)
 {
 	gdl = vi0000ad5c(gdl, &g_Vars.currentplayer->viewport[0]);
 
-	gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_ViBackData->bufx, (uintptr_t)(g_ViBackData->fb));
+	gfx_Set_Color_Image(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, g_ViBackData->bufx, (uintptr_t)(g_ViBackData->fb));
 
 	return gdl;
 }
@@ -290,8 +291,7 @@ Gfx *vi0000b1d0(Gfx *gdl)
 Gfx *viPrepareZbuf(Gfx *gdl)
 {
 	if (g_ViBackData->usezbuf) {
-		//gdl = zbufConfigureRdp(gdl);
-		gDPClearDepthEXT(gdl++);
+		gfx_No_Param(gdl++, G_CLEAR_DEPTH_EXT);
 	}
 
 	return gdl;
@@ -299,17 +299,18 @@ Gfx *viPrepareZbuf(Gfx *gdl)
 
 Gfx *viFillBuffer(Gfx *gdl)
 {
-	gDPSetCycleType(gdl++, G_CYC_FILL);
-	gDPFillRectangle(gdl++, 0, 0, g_ViBackData->bufx - 1, g_ViBackData->bufy - 1);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_FILL);
+	gfx_Fill_Rectangle(gdl++, 0, 0, g_ViBackData->bufx - 1, g_ViBackData->bufy - 1);
 
 	return gdl;
 }
 
 Gfx *viRenderViewportEdges(Gfx *gdl)
 {
-	gDPSetCycleType(gdl++, G_CYC_FILL);
-	gDPSetScissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
-	gDPSetFillColor(gdl++, GPACK_RGBA5551(0, 0, 0, 1) << 16 | GPACK_RGBA5551(0, 0, 0, 1));
+	gfx_Set_Cycle_Type(gdl++, G_CYC_FILL);
+	gfx_Set_Scissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
+	RGBA fillColor = {0, 0, 0, 255};
+	gfx_Set_Fill_Color(gdl++, fillColor);
 
 	if (PLAYERCOUNT() == 1
 			|| ((g_Vars.coopplayernum >= 0 || g_Vars.antiplayernum >= 0)
@@ -318,12 +319,12 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 		// Single viewport
 		if (viGetViewTop() > 0) {
 			// Fill above
-			gDPFillRectangle(gdl++, 0, 0, viGetWidth() - 1, viGetViewTop() - 1);
+			gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth() - 1, viGetViewTop() - 1);
 		}
 
 		if (viGetViewTop() + viGetViewHeight() < viGetHeight()) {
 			// Fill below
-			gDPFillRectangle(gdl++,
+			gfx_Fill_Rectangle(gdl++,
 					0, viGetViewTop() + viGetViewHeight(),
 					viGetWidth() - 1, viGetHeight() - 1);
 		}
@@ -343,18 +344,18 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 
 			if (g_Vars.players[topplayernum]->viewtop > 0) {
 				// Fill above all viewports - full width
-				gDPFillRectangle(gdl++, 0, 0, viGetWidth() - 1, g_Vars.players[topplayernum]->viewtop - 1);
+				gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth() - 1, g_Vars.players[topplayernum]->viewtop - 1);
 			}
 
 			if (g_Vars.players[bottomplayernum]->viewtop + g_Vars.players[bottomplayernum]->viewheight < viGetHeight()) {
 				// Fill below all viewports - full width
-				gDPFillRectangle(gdl++,
+				gfx_Fill_Rectangle(gdl++,
 						0, g_Vars.players[bottomplayernum]->viewtop + g_Vars.players[bottomplayernum]->viewheight,
 						viGetWidth() - 1, viGetHeight() - 1);
 			}
 
 			// Horizontal middle line
-			gDPFillRectangle(gdl++,
+			gfx_Fill_Rectangle(gdl++,
 					0, g_Vars.players[tmpplayernum]->viewtop - 1,
 					viGetWidth() - 1, g_Vars.players[tmpplayernum]->viewtop - 1);
 
@@ -365,14 +366,14 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 				}
 
 				// Vertical middle line
-				gDPFillRectangle(gdl++,
+				gfx_Fill_Rectangle(gdl++,
 						g_Vars.players[tmpplayernum]->viewleft + g_Vars.players[tmpplayernum]->viewwidth, 0,
 						g_Vars.players[tmpplayernum]->viewleft + g_Vars.players[tmpplayernum]->viewwidth, viGetHeight() - 1);
 			}
 
 			if (PLAYERCOUNT() == 3) {
 				// Blank square in P4 spot
-				gDPFillRectangle(gdl++,
+				gfx_Fill_Rectangle(gdl++,
 						g_Vars.players[tmpplayernum]->viewleft + g_Vars.players[tmpplayernum]->viewwidth + 1, g_Vars.players[tmpplayernum]->viewtop,
 						viGetWidth() - 1, viGetHeight() - 1);
 			}
@@ -512,7 +513,8 @@ void viGetZRange(struct zrange *zrange)
 // Used for setting sky background color
 Gfx *viSetFillColour(Gfx *gdl, int r, int g, int b)
 {
-	gDPSetFillColor(gdl++, (GPACK_RGBA5551(r, g, b, 1) << 16) | GPACK_RGBA5551(r, g, b, 1));
+	RGBA fillColor = {r, g, b, 255};
+	gfx_Set_Fill_Color(gdl++, fillColor);
 
 	return gdl;
 }

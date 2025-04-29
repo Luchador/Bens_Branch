@@ -15,7 +15,7 @@ void envTick(void);
 void envApplyEnvironment(struct environment *sky);
 void envChooseAndApply(int stagenum);
 //void envApplyTransitionFrac(float arg0);
-Gfx *envStartFog(Gfx *gdl, bool xlupass);
+Gfx *envStartFog(Gfx *gdl);
 Gfx *envStopFog(Gfx *gdl);
 bool envIsWithinFogRenderDistance(struct coord *pos, float tolerance);
 struct distfadesettings *envGetDistFadeSettings(void);

@@ -47,7 +47,6 @@
 #include "lib/collision.h"
 #include "game/debug.h"
 #include "data.h"
-#include "gbiex.h"
 #include "gfx.h"
 #include "types.h"
 #include "video.h"
@@ -1817,75 +1816,73 @@ void chrAdvanceAnims(struct chrdata *chr, int lvupdate240, bool arg2)
 	}
 }
 
-void chr0f022214(struct chrdata *chr, struct prop *prop, bool fulltick)
+void chrUpdatePropMatrices(struct chrdata *chr, struct prop *prop, bool fulltick)
 {
-	struct defaultobj *obj = prop->obj;
-	struct model *model = obj->model;
-	struct prop *child;
-	struct prop *next;
+    struct defaultobj *obj = prop->obj;
+    struct model *model = obj->model;
 
-	if (obj->hidden & OBJHFLAG_DELETING) {
-		objFree(obj, true, obj->hidden2 & OBJH2FLAG_CANREGEN);
-		return;
-	}
+    if (obj->hidden & OBJHFLAG_DELETING) {
+        objFree(obj, true, obj->hidden2 & OBJH2FLAG_CANREGEN);
+        return;
+    }
 
-	if (model->attachedtomodel && model->attachedtonode
-			&& (obj->hidden & OBJHFLAG_GONE) == 0
-			&& (obj->flags2 & OBJFLAG2_INVISIBLE) == 0) {
-		Mtxf *sp104 = (Mtxf*)modelFindNodeMtx(model->attachedtomodel, model->attachedtonode, 0);
-		struct modelrenderdata thing = {NULL, 1, 3};
-		Mtxf sp80;
-		Mtxf sp40;
+    struct prop *child = prop->child;
+    struct prop *next;
 
-		prop->flags |= PROPFLAG_ONTHISSCREENTHISTICK | PROPFLAG_ONANYSCREENTHISTICK;
+    if (model->attachedtomodel && model->attachedtonode
+            && (obj->hidden & OBJHFLAG_GONE) == 0
+            && (obj->flags2 & OBJFLAG2_INVISIBLE) == 0) {
+        
+        // Prop is attached and visible
+        Mtx *parentMtx = modelFindNodeMtx(model->attachedtomodel, model->attachedtonode, 0);
+        struct modelrenderdata renderdata = { NULL, 1, 3 };
+        Mtx transformMtx;
+        Mtx tempMtx;
 
-		if (obj->hidden & OBJHFLAG_EMBEDDED) {
-			mtxApplyAffineTransform((Mtx*)sp104, (Mtx*)&obj->embedment->matrix, (Mtx*)&sp80);
-			thing.unk00 = &sp80;
-		} else if (CHRRACE(chr) == RACE_SKEDAR) {
-			// The skedar hand position is rotated weirdly, so compensate for it
-			mtx4LoadYRotation(1.3192588090897f, (Mtx*)&sp80);
-			mtx4LoadZRotation(1.5705462694168f, (Mtx*)&sp40);
-			mtx4MultMtx4InPlace((Mtx*)&sp40, (Mtx*)&sp80);
-			mtx4MultMtx4InPlace((Mtx*)sp104, (Mtx*)&sp80);
-			thing.unk00 = &sp80;
-		} else if (prop == chr->weapons_held[HAND_LEFT]) {
-			// Flip the model
-			mtx4LoadZRotation(M_PI, (Mtx*)&sp80);
-			mtx4MultMtx4InPlace((Mtx*)sp104, (Mtx*)&sp80);
-			thing.unk00 = &sp80;
-		} else {
-			thing.unk00 = sp104;
-		}
+        prop->flags |= PROPFLAG_ONTHISSCREENTHISTICK | PROPFLAG_ONANYSCREENTHISTICK;
 
-		thing.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
-		modelSetMatrices(&thing, model);
+        if (obj->hidden & OBJHFLAG_EMBEDDED) {
+            mtxApplyAffineTransform(parentMtx, (Mtx*)&obj->embedment->matrix, &transformMtx);
+            renderdata.unk00 = (Mtxf*)&transformMtx;
+        } else if (CHRRACE(chr) == RACE_SKEDAR) {
+            // Skedar hand orientation fix
+            mtx4LoadYRotation(1.3192588090897f, &transformMtx);
+            mtx4LoadZRotation(1.5705462694168f, &tempMtx);
+            mtx4MultMtx4InPlace(&tempMtx, &transformMtx);
+            mtx4MultMtx4InPlace(parentMtx, &transformMtx);
+            renderdata.unk00 = (Mtxf*)&transformMtx;
+        } else if (prop == chr->weapons_held[HAND_LEFT]) {
+            // Flip model for left hand
+            mtx4LoadZRotation(M_PI, &transformMtx);
+            mtx4MultMtx4InPlace(parentMtx, &transformMtx);
+            renderdata.unk00 = (Mtxf*)&transformMtx;
+        } else {
+            renderdata.unk00 = (Mtxf*)parentMtx;
+        }
 
-		func0f07063c(prop, fulltick);
+        renderdata.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
+        modelSetMatrices(&renderdata, model);
 
-		child = prop->child;
+        propTickWeaponsAndAmmoCrates(prop, fulltick);
 
-		while (child) {
-			if (prop);
-			if (prop);
+        while (child) {
+            next = child->next;
+            chrUpdatePropMatrices(chr, child, fulltick);
+            child = next;
+        }
 
-			next = child->next;
-			chr0f022214(chr, child, fulltick);
-			child = next;
-		}
-	} else {
-		prop->flags &= ~PROPFLAG_ONTHISSCREENTHISTICK;
+    } else {
+        // Prop is not attached (or invisible)
+        prop->flags &= ~PROPFLAG_ONTHISSCREENTHISTICK;
 
-		func0f07063c(prop, fulltick);
+        propTickWeaponsAndAmmoCrates(prop, fulltick);
 
-		child = prop->child;
-
-		while (child) {
-			next = child->next;
-			func0f0706f8(child, fulltick);
-			child = next;
-		}
-	}
+        while (child) {
+            next = child->next;
+            propClearVisAndTickChildren(child, fulltick);
+            child = next;
+        }
+    }
 }
 
 void chrCloak(struct chrdata *chr, bool value)
@@ -2210,7 +2207,6 @@ int chrTick(struct prop *prop)
 	bool fulltick = false;
 	int race = CHRRACE(chr);
 	int sp1e8;
-	Mtxf sp1a8;
 	int sp1a4;
 	bool isrepeatframe;
 	bool isrepeatframe2;
@@ -2265,14 +2261,6 @@ int chrTick(struct prop *prop)
 			if (chr->model == NULL) {
 				return TICKOP_FREE;
 			}
-
-			/*if (var80062974) { //var80062974 is always 0
-				lvupdate240 = 0;
-
-				if (var80062978) {
-					lvupdate240 = 1;
-				}
-			}*/
 		}
 
 		if (chr->hidden & CHRHFLAG_DELETING) {
@@ -2483,6 +2471,7 @@ int chrTick(struct prop *prop)
 		g_ModelJointPositionedFunc = &chrHandleJointPositioned;
 		g_CurModelChr = chr;
 
+		Mtx sp1a8;
 		if (CHRRACE(chr) == RACE_DRCAROLL && g_Vars.tickmode != TICKMODE_CUTSCENE) {
 			angle = chrGetInverseTheta(chr);
 
@@ -2490,9 +2479,9 @@ int chrTick(struct prop *prop)
 			sp190.y = 0.0f;
 			sp190.z = cosf(angle) * 19;
 
-			mtx4LoadTranslation(&sp190, (Mtx*)&sp1a8);
-			mtx4MultMtx4InPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp1a8);
-			sp210.unk00 = &sp1a8;
+			mtx4LoadTranslation(&sp190, &sp1a8);
+			mtx4MultMtx4InPlace(camGetPlayerWorldToScreenMtx(), &sp1a8);
+			sp210.unk00 = (Mtxf*)&sp1a8;
 		} else if (prop->type == PROPTYPE_PLAYER) {
 			float sp130;
 			player = g_Vars.players[playermgrGetPlayerNumByProp(prop)];
@@ -2506,9 +2495,9 @@ int chrTick(struct prop *prop)
 				sp17c.y = fabsf(bike->w) * 200 + 25;
 				sp17c.z = sinf(-sp178) * sp130;
 
-				mtx4LoadTranslation(&sp17c, (Mtx*)&sp1a8);
-				mtx4MultMtx4InPlace(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp1a8);
-				sp210.unk00 = &sp1a8;
+				mtx4LoadTranslation(&sp17c, &sp1a8);
+				mtx4MultMtx4InPlace(camGetPlayerWorldToScreenMtx(), &sp1a8);
+				sp210.unk00 = (Mtxf*)&sp1a8;
 			} else {
 				sp210.unk00 = (Mtxf*)camGetPlayerWorldToScreenMtx();
 			}
@@ -2560,7 +2549,7 @@ int chrTick(struct prop *prop)
 
 			while (child) {
 				next = child->next;
-				chr0f022214(chr, child, fulltick);
+				chrUpdatePropMatrices(chr, child, fulltick);
 				child = next;
 			}
 
@@ -2593,7 +2582,7 @@ int chrTick(struct prop *prop)
 
 		while (child) {
 			next = child->next;
-			func0f0706f8(child, fulltick);
+			propClearVisAndTickChildren(child, fulltick);
 			child = next;
 		}
 
@@ -5141,12 +5130,12 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 	sp180[7][1] = ymax;
 	sp180[7][2] = zmax;
 
-	gSPMatrix(gdl++, (uintptr_t)(modelmtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(gdl++, modelmtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	if (side == -7) {
 		colours = gfxAllocateColours(1);
 
-		gSPColor(gdl++, (uintptr_t)(colours), 1);
+		gfx_Color(gdl++, colours, 1);
 
 		colours[0].r = 0xff;
 		colours[0].g = 0xff;
@@ -5180,7 +5169,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
-			gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
+			gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
 			vertices += 4;
 		}
@@ -5245,7 +5234,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 		if (side == -3 || side == -4 || side == -5 || side == -6) {
 			colours = gfxAllocateColours(1);
 
-			gSPColor(gdl++, (uintptr_t)(colours), 1);
+			gfx_Color(gdl++, colours, 1);
 
 			if (side == -3) {
 				colours[0].r = red2;
@@ -5307,7 +5296,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 				gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
-				gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
+				gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
 				vertices += 4;
 			}
@@ -5329,7 +5318,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			colours = gfxAllocateColours(3);
 
-			gSPColor(gdl++, (uintptr_t)(colours), 3);
+			gfx_Color(gdl++, colours, 3);
 
 			colours[0].r = red3;
 			colours[1].r = red3;
@@ -5370,7 +5359,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 				gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
 
-				gSPTri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
+				gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
 				vertices += 5;
 			}
@@ -5389,7 +5378,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 				colours = gfxAllocateColours(1);
 
-				gSPColor(gdl++, (uintptr_t)(colours), 1);
+				gfx_Color(gdl++, colours, 1);
 
 				colours[0].r = red1;
 				colours[0].g = green1;
@@ -5414,7 +5403,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 				colours = gfxAllocateColours(1);
 
-				gSPColor(gdl++, (uintptr_t)(colours), 1);
+				gfx_Color(gdl++, colours, 1);
 
 				colours[0].r = red3;
 				colours[0].g = green3;
@@ -5483,10 +5472,10 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			gSPVertex(gdl++, (uintptr_t)(vertices), 12, 0);
 
-			gSPTri4(gdl++, 0, 1, 9, 0, 9, 8, 11, 5, 4, 11, 4, 10);
+			gfx_Tri4(gdl++, 0, 1, 9, 0, 9, 8, 11, 5, 4, 11, 4, 10);
 
 			for (j = 2; j < 6; j++) {
-				gSPTri2(gdl++,
+				gfx_Tri2(gdl++,
 						sp104[j][0], sp104[j][1], sp104[j][2],
 						sp104[j][0], sp104[j][2], sp104[j][3]);
 			}
@@ -5512,7 +5501,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			colours = gfxAllocateColours(5);
 
-			gSPColor(gdl++, (uintptr_t)(colours), 5);
+			gfx_Color(gdl++, colours, 5);
 
 			colours[0].r = red1;
 			colours[0].g = green1;
@@ -5618,7 +5607,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
 
-			gSPTri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
+			gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
 			vertices += 5;
 
@@ -5696,7 +5685,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 				gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
 
-				gSPTri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
+				gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
 				vertices += 5;
 			}
@@ -5743,7 +5732,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
 
-			gSPTri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
+			gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 		}
 	}
 
@@ -5827,18 +5816,17 @@ Gfx *shieldhitRender(Gfx *gdl, struct prop *prop1, struct prop *prop2, int alpha
 								index = 0;
 							}
 
-							gDPSetTextureLUT(gdl++, G_TT_NONE);
+							gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 							gDPLoadTextureBlock(gdl++, var8009ccc0[index], G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
-							gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-							gDPSetRenderMode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
+							gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+							gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
 							gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-							gSPTexture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
-							gDPSetTextureFilter(gdl++, G_TF_BILERP);
-							gDPSetColorDither(gdl++, G_CD_BAYER);
-							gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, (((16 * G_IM_SIZ_16b_BYTES)+7)>>3), 0, 0, 0,
+							gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
+							gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+							gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, (((16 * G_IM_SIZ_16b_BYTES)+7)>>3), 0, 0, 0,
 								G_TX_MIRROR | G_TX_WRAP, 4, G_TX_NOLOD, G_TX_MIRROR | G_TX_WRAP, 4, G_TX_NOLOD);
-							gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 16 << G_TEXTURE_IMAGE_FRAC, 16 << G_TEXTURE_IMAGE_FRAC);
-							gDPSetFramebufferTextureEXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, var8009ccc0[index]);
+							gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 16 << G_TEXTURE_IMAGE_FRAC, 16 << G_TEXTURE_IMAGE_FRAC);
+							gfx_Set_Framebuffer_Texture_EXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, (uintptr_t)var8009ccc0[index]);
 
 							gdl = chrRenderShieldComponent(gdl, NULL, prop1, model, node, -7, -1, -1, 255);
 						} else {
@@ -5906,27 +5894,25 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 
 		if (thisprop->parent == NULL) {
 			// Rendering the chr prop - configure renderer
-			gDPSetScissor(gdl++, 0, 0, 16, 16);
-			gDPSetCycleType(gdl++, G_CYC_COPY);
-			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0080, 4, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-			gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 160, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-			gDPSetTile(gdl++, G_IM_FMT_I, G_IM_SIZ_8b, 160, 0x0080, 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 15);
-			gSPTexture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
-			gDPSetEnvColor(gdl++, 0xff, 0xff, 0xff, 0xff);
-			struct RGBA color = {255, 255, 255, 255};
-			gfx_Set_Prim_Color(gdl++, color);
-			gDPSetRenderMode(gdl++, G_RM_NOOP, G_RM_NOOP2);
+			gfx_Set_Scissor(gdl++, 0, 0, 16, 16);
+			gfx_Set_Cycle_Type(gdl++, G_CYC_COPY);
+			gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+			gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0080, 4, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+			gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 160, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+			gfx_Set_Tile(gdl++, G_IM_FMT_I, G_IM_SIZ_8b, 160, 0x0080, 1, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, 15);
+			gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
+			RGBA envColor ={255, 255, 255, 255};
+			gfx_Set_Prim_Color(gdl++, envColor);
+			RGBA primColor = {255, 255, 255, 255};
+			gfx_Set_Prim_Color(gdl++, primColor);
+			gfx_Set_Render_Mode(gdl++, G_RM_NOOP, G_RM_NOOP2);
 			gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-			gDPSetTextureFilter(gdl++, G_TF_POINT);
-			gDPSetTexturePersp(gdl++, G_TP_NONE);
-			gDPSetColorDither(gdl++, G_CD_DISABLE);
-			gDPSetAlphaDither(gdl++, G_AD_DISABLE);
-			gDPSetTextureLOD(gdl++, G_TL_TILE);
-			gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-			gDPSetTextureLUT(gdl++, G_TT_NONE);
-			gDPSetAlphaCompare(gdl++, G_AC_NONE);
-			gSPClearGeometryMode(gdl++, G_ZBUFFER);
+			gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
+			gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+			gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+			gfx_Clear_Geometry_Mode(gdl++, G_ZBUFFER);
 		}
 
 		// Iterate nodes in the prop and render each
@@ -5994,12 +5980,12 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 						lrs = uls + 15;
 						lrt = ult + 15;
 
-						gDPCopyFramebufferEXT(gdl++, var8009ccc0[index], 0, uls, ult, G_ON);
-						gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b,
+						gfx_Copy_Framebuffer_EXT(gdl++, var8009ccc0[index], 0, uls, ult, G_ON);
+						gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b,
 							((((lrs - uls + 1) * G_IM_SIZ_16b_BYTES)+7)>>3), 0, 0, 0,
 							G_TX_NOMIRROR | G_TX_WRAP, 4, G_TX_NOLOD,
 							G_TX_NOMIRROR | G_TX_WRAP, 4, G_TX_NOLOD);
-						gDPSetTileSize(gdl++, G_TX_RENDERTILE,
+						gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE,
 							uls << G_TEXTURE_IMAGE_FRAC, ult << G_TEXTURE_IMAGE_FRAC,
 							lrs << G_TEXTURE_IMAGE_FRAC, lrt << G_TEXTURE_IMAGE_FRAC);
 					}
@@ -6031,14 +6017,14 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 
 		if (thisprop->parent == NULL) {
 			// Back in the chr prop - reconfigure the renderer for normal use
-			gDPSetColorImage(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
-			gDPSetScissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
-			gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-			gDPSetRenderMode(gdl++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
+			gfx_Set_Color_Image(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
+			gfx_Set_Scissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
+			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+			gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
 			gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-			gDPSetTextureFilter(gdl++, G_TF_BILERP);
-			gDPSetTexturePersp(gdl++, G_TP_PERSP);
-			gSPSetGeometryMode(gdl++, G_ZBUFFER);
+			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+			gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
 		}
 	}
 
@@ -6119,13 +6105,13 @@ Gfx *chrRenderShield(Gfx *gdl, struct chrdata *chr, uint32_t alpha)
 			chr->cmnum = newcmnum;
 		}
 
-		gSPSetGeometryMode(gdl++, G_CULL_BACK);
+		gfx_Set_Geometry_Mode(gdl++, G_CULL_BACK);
 
 		gdl = shieldhitRender(gdl, chr->prop, chr->prop, alpha,
 				chr->cloakfadefrac > 0 && !chr->cloakfadefinished,
 				chr->cmnum, chr->cmnum2, chr->cmnum3, chr->cmnum4);
 
-		gSPSetGeometryMode(gdl++, G_CULL_BACK);
+		gfx_Set_Geometry_Mode(gdl++, G_CULL_BACK);
 	}
 
 	return gdl;

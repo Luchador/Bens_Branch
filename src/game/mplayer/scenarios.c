@@ -28,6 +28,7 @@
 #include "game/pad.h"
 #include "game/propobj.h"
 #include "game/options.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/vi.h"
 #include "lib/snd.h"
@@ -36,6 +37,7 @@
 #include "lib/anim.h"
 #include "lib/collision.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 /**
@@ -537,13 +539,12 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 	if (g_Vars.normmplayerisrunning) {
 		if (g_MpScenarios[g_MpSetup.scenario].hudfunc) {
 			if (g_MpSetup.paused != MPPAUSEMODE_GAMEOVER && g_NumReasonsToEndMpMatch == 0) {
-				gDPSetTextureFilter(gdl++, G_TF_POINT);
-				gDPSetColorDither(gdl++, G_CD_DISABLE);
-				gSPClearGeometryMode(gdl++, G_ZBUFFER);
-				gDPSetTexturePersp(gdl++, G_TP_NONE);
-				gDPSetCycleType(gdl++, G_CYC_FILL);
-				gDPSetRenderMode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-				gDPPipelineMode(gdl++, G_PM_1PRIMITIVE);
+				gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
+				gfx_Clear_Geometry_Mode(gdl++, G_ZBUFFER);
+				gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+				gfx_Set_Cycle_Type(gdl++, G_CYC_FILL);
+				gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+				gfx_Pipeline_Mode(gdl++, G_PM_1PRIMITIVE);
 
 				gdl = g_MpScenarios[g_MpSetup.scenario].hudfunc(gdl);
 			}
@@ -557,16 +558,15 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 			chr = g_Vars.currentplayer->prop->chr;
 			cplayernum = g_Vars.currentplayernum;
 
-			gDPSetTextureFilter(gdl++, G_TF_POINT);
-			gDPSetColorDither(gdl++, G_CD_DISABLE);
-			gSPClearGeometryMode(gdl++, G_ZBUFFER);
-			gDPSetTexturePersp(gdl++, G_TP_NONE);
-			gDPSetCycleType(gdl++, G_CYC_FILL);
-			gDPSetRenderMode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-			gDPPipelineMode(gdl++, G_PM_1PRIMITIVE);
+			gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
+			gfx_Clear_Geometry_Mode(gdl++, G_ZBUFFER);
+			gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+			gfx_Set_Cycle_Type(gdl++, G_CYC_FILL);
+			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+			gfx_Pipeline_Mode(gdl++, G_PM_1PRIMITIVE);
 
 			colour = var80087ce4[radarGetTeamIndex(chr->team)];
-			gDPSetFillColor(gdl++, colour);
+			gfx_Set_Fill_Color(gdl++, utilsUnpackColorRGBA(colour));
 
 			viewleft = viGetViewLeft();
 			viewright = viewleft + viGetViewWidth();
@@ -576,10 +576,10 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 			if (playercount >= 3) {
 				if (cplayernum <= 1) {
 					// Player on top quarter - draw line at bottom of viewport
-					gDPFillRectangle(gdl++, viewleft, viewheight + viewtop - 1, viewright - 1, viewheight + viewtop - 1);
+					gfx_Fill_Rectangle(gdl++, viewleft, viewheight + viewtop - 1, viewright - 1, viewheight + viewtop - 1);
 				} else {
 					// Player on bottom quarter - draw line at top of viewport
-					gDPFillRectangle(gdl++, viewleft, viewtop, viewright - 1, viewtop);
+					gfx_Fill_Rectangle(gdl++, viewleft, viewtop, viewright - 1, viewtop);
 				}
 			}
 			else {
@@ -588,10 +588,10 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 				// It's suspected that a screen border is drawn over the top of it.
 				if (cplayernum == 0) {
 					// Player on top half - draw line at bottom of viewport
-					gDPFillRectangle(gdl++, viewleft, viewheight + viewtop - 1, viewright - 1, viewheight + viewtop - 1);
+					gfx_Fill_Rectangle(gdl++, viewleft, viewheight + viewtop - 1, viewright - 1, viewheight + viewtop - 1);
 				} else {
 					// Player on bottom half - draw line at top of viewport
-					gDPFillRectangle(gdl++, viewleft, viewtop, viewright - 1, viewtop);
+					gfx_Fill_Rectangle(gdl++, viewleft, viewtop, viewright - 1, viewtop);
 				}
 			}
 		}

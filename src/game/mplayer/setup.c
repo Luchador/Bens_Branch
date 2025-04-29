@@ -15,13 +15,14 @@
 #include "game/lang.h"
 #include "game/mplayer/mplayer.h"
 #include "game/options.h"
+#include "game/utils.h"
 #include "bss.h"
 #include "lib/snd.h"
 #include "lib/vi.h"
 #include "lib/rng.h"
 #include "string.h"
 #include "data.h"
-#include "gbiex.h"
+#include "gfx.h"
 #include "types.h"
 
 struct menuitem g_MpCharacterMenuItems[];
@@ -689,21 +690,23 @@ MenuItemHandlerResult mpChallengesListHandler(int operation, struct menuitem *it
 
 		gdl = text0f153780(gdl);
 
-		gDPSetTexturePersp(gdl++, G_TP_NONE);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
-		gDPSetTextureLOD(gdl++, G_TL_TILE);
-		gDPSetTextureConvert(gdl++, G_TC_FILT);
+		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 		texSelect(&gdl, &g_TexGeneralConfigs[35], 2, 0, 2, 1, NULL);
 
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetTextureFilter(gdl++, G_TF_POINT);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 		for (i = 0, loopx = 10; i < maxplayers; i++) {
 			if (challengeIsCompletedByPlayerWithNumPlayers2(g_MpPlayerNum, challengeindex, i + 1)) {
-				gDPSetEnvColorViaWord(gdl++, 0xb2efff00 | (renderdata->colour & 0xff) * 255 / 256);
+				RGBA color = {178, 239, 255, (renderdata->colour & 0xff) * 255 / 256};
+				gfx_Set_Env_Color(gdl++, color);
 			} else {
-				gDPSetEnvColorViaWord(gdl++, 0x30407000 | (renderdata->colour & 0xff) * 255 / 256);
+				RGBA color = {48, 64, 112, (renderdata->colour & 0xff) * 255 / 256};
+				gfx_Set_Env_Color(gdl++, color);
 			}
 
 			gDPSetCombineLERP(gdl++,
@@ -712,7 +715,7 @@ MenuItemHandlerResult mpChallengesListHandler(int operation, struct menuitem *it
 					TEXEL0, 0, ENVIRONMENT, 0,
 					TEXEL0, 0, ENVIRONMENT, 0);
 
-			gSPTextureRectangle(gdl++,
+			gdl += gfx_Texture_Rectangle(gdl,
 					((renderdata->x + loopx) << 2),
 					(renderdata->y + size) << 2,
 					((renderdata->x + size + loopx) << 2),
@@ -894,17 +897,17 @@ MenuItemHandlerResult mpMedalMenuHandler(int operation, struct menuitem *item, u
 		struct menuitemrenderdata *renderdata = data->type19.renderdata2;
 		uint32_t colour;
 
-		gDPSetTexturePersp(gdl++, G_TP_NONE);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
-		gDPSetTextureLOD(gdl++, G_TL_TILE);
-		gDPSetTextureConvert(gdl++, G_TC_FILT);
-		gDPSetTextureFilter(gdl++, G_TF_POINT);
+		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 		texSelect(&gdl, &g_TexGeneralConfigs[35], 2, 0, 2, 1, NULL);
 
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 		gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-		gDPSetTextureFilter(gdl++, G_TF_POINT);
+		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 		switch (item->param) {
 		case 0: // KillMaster - red
@@ -923,7 +926,7 @@ MenuItemHandlerResult mpMedalMenuHandler(int operation, struct menuitem *item, u
 
 		colour = (colour & 0xffffff00) | (colour & 0xff) * (renderdata->colour & 0xff) >> 8;
 
-		gDPSetEnvColorViaWord(gdl++, colour);
+		gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(colour));
 
 		gDPSetCombineLERP(gdl++,
 				TEXEL0, 0, ENVIRONMENT, 0,
@@ -931,7 +934,7 @@ MenuItemHandlerResult mpMedalMenuHandler(int operation, struct menuitem *item, u
 				TEXEL0, 0, ENVIRONMENT, 0,
 				TEXEL0, 0, ENVIRONMENT, 0);
 
-		gSPTextureRectangle(gdl++,
+		gdl += gfx_Texture_Rectangle(gdl,
 				((renderdata->x + 9) << 2), renderdata->y << 2,
 				((renderdata->x + 20) << 2), (renderdata->y + 11) << 2,
 				G_TX_RENDERTILE, 0, 0x0160, 1024, -1024);
@@ -4507,21 +4510,21 @@ MenuItemHandlerResult mpChallengesListMenuHandler(int operation, struct menuitem
 		gdl = textRenderProjected(gdl, &x, &y, challengeGetNameBySlot(data->type19.unk04), g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 		gdl = text0f153780(gdl);
 
-		gDPSetTexturePersp(gdl++, G_TP_NONE);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
-		gDPSetTextureLOD(gdl++, G_TL_TILE);
-		gDPSetTextureConvert(gdl++, G_TC_FILT);
+		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 		texSelect(&gdl, &g_TexGeneralConfigs[35], 2, 0, 2, 1, NULL);
 
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetTextureFilter(gdl++, G_TF_POINT);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 		for (i = 0; i < maxchrs; i++) {
 			if (challengeIsCompletedByAnyChrWithNumPlayersBySlot(data->type19.unk04, i + 1)) {
-				gDPSetEnvColorViaWord(gdl++, (renderdata->colour & 0xff) * 0xff >> 8 | 0xffe56500);
+				gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA((renderdata->colour & 0xff) * 0xff >> 8 | 0xffe56500));
 			} else {
-				gDPSetEnvColorViaWord(gdl++, (renderdata->colour & 0xff) * 0xff >> 8 | 0x43430000);
+				gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA((renderdata->colour & 0xff) * 0xff >> 8 | 0x43430000));
 			}
 
 			gDPSetCombineLERP(gdl++,
@@ -4530,7 +4533,7 @@ MenuItemHandlerResult mpChallengesListMenuHandler(int operation, struct menuitem
 				TEXEL0, 0, ENVIRONMENT, 0,
 				TEXEL0, 0, ENVIRONMENT, 0);
 
-			gSPTextureRectangle(gdl++,
+		    gdl += gfx_Texture_Rectangle(gdl,
 				((renderdata->x + marginleft) << 2), (renderdata->y + 11) << 2,
 				((renderdata->x + marginleft + 11) << 2), (renderdata->y + 22) << 2,
 				G_TX_RENDERTILE, 0, 0x0160, 1024, -1024);

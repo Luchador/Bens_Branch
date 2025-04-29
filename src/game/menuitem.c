@@ -21,6 +21,7 @@
 #include "lib/main.h"
 #include "string.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "input.h"
 #define MENU_KEYBOARD_ROWS 6
@@ -177,7 +178,7 @@ Gfx *menuitemListRenderHeader(Gfx *gdl, int16_t x1, int16_t y1, int16_t width, i
 
 Gfx *menuitemListOverlay(Gfx *gdl, int16_t x, int16_t y, int16_t x2, int16_t y2)
 {
-	gDPFillRectangleScaled(gdl++, x, y, x + x2, y + y2);
+	gfx_Fill_Rectangle(gdl++, x, y, x + x2, y + y2);
 	return gdl;
 }
 
@@ -272,7 +273,7 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 	halfheight = context->height / 2;
 	halfheight /= g_LineHeight;
@@ -538,7 +539,7 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 							g_ScissorY2 = g_ScissorY1;
 						}
 
-						gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+						gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 						spb8.type19.gdl = gdl;
 						spb8.type19.unk04 = optionindex;
@@ -1069,12 +1070,12 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 
 	if (context->item->param3 == 0) {
 		// Half width
-		gDPFillRectangleScaled(gdl++,
+		gfx_Fill_Rectangle(gdl++,
 				context->x + 4, context->y + 1,
 				context->x + 63, context->y + 10);
 	} else {
 		// Full width
-		gDPFillRectangleScaled(gdl++,
+		gfx_Fill_Rectangle(gdl++,
 				context->x + 4, context->y + 1,
 				context->x + 125, context->y + 10);
 	}
@@ -1105,7 +1106,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 
 	gdl = textSetPrimColour(gdl, cursorcolour);
 
-	gDPFillRectangleScaled(gdl++, x + 1, context->y + 2, x + 3, context->y + 9);
+	gfx_Fill_Rectangle(gdl++, x + 1, context->y + 2, x + 3, context->y + 9);
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -2099,11 +2100,11 @@ Gfx *menuitemMeterRender(Gfx *gdl, struct menurendercontext *context)
 	x3 = x2 + 6;
 
 	gdl = textSetPrimColour(gdl, colour1);
-	gDPFillRectangleScaled(gdl++, x1, context->y, x2, context->y + 5);
+	gfx_Fill_Rectangle(gdl++, x1, context->y, x2, context->y + 5);
 	gdl = textSetCCCustom02(gdl);
 
 	gdl = textSetPrimColour(gdl, colour2);
-	gDPFillRectangleScaled(gdl++, x2, context->y, x3, context->y + 5);
+	gfx_Fill_Rectangle(gdl++, x2, context->y, x3, context->y + 5);
 	gdl = textSetCCCustom02(gdl);
 
 	text = menuResolveParam2Text(context->item);
@@ -2141,7 +2142,7 @@ Gfx* menuitemColorBoxRender(Gfx *gdl, struct menurendercontext *context)
 	colour1 = data.label.colour1;
 
 	gdl = textSetPrimColour(gdl, colour1);
-	gDPFillRectangleScaled(gdl++, x1, context->y, x2, context->y + height);
+	gfx_Fill_Rectangle(gdl++, x1, context->y, x2, context->y + height);
 	gdl = textSetCCCustom02(gdl);
 
 	return gdl;
@@ -3162,7 +3163,7 @@ Gfx *menuitemMarqueeRender(Gfx *gdl, struct menurendercontext *context)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 	textBackupAndResetBlends();
 
@@ -3396,7 +3397,7 @@ Gfx *menuitemRankingRender(Gfx *gdl, struct menurendercontext *context)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 	gdl = textConfigureGfxPipeline(gdl);
 
@@ -3642,7 +3643,7 @@ Gfx *menuitemPlayerStatsRender(Gfx *gdl, struct menurendercontext *context)
 			g_ScissorY2 = g_ScissorY1;
 		}
 
-		gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+		gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 		ypos -= data->scrolloffset;
 
@@ -3728,7 +3729,7 @@ Gfx *menuitemControllerRenderLine(Gfx *gdl, int speed, int x1, int y1, int x2, i
 {
 	speed = speed + (x1 % 4);
 
-	gSPTextureRectangle(gdl++,
+	gdl += gfx_Texture_Rectangle(gdl,
 			x1 * 4, y1 * 4,
 			x2 * 4, y2 * 4,
 			G_TX_RENDERTILE,
@@ -3741,15 +3742,15 @@ Gfx *menuitemControllerRenderLine(Gfx *gdl, int speed, int x1, int y1, int x2, i
 
 Gfx *menuitemControllerRenderTexture(Gfx *gdl, int x, int y, int texturenum, uint32_t alpha)
 {
-	gDPSetTexturePersp(gdl++, G_TP_NONE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
+	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 	texSelect(&gdl, &g_TexGeneralConfigs[texturenum], 2, 0, 2, 1, NULL);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetTextureFilter(gdl++, G_TF_POINT);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 	gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 
 	gDPSetCombineLERP(gdl++,
@@ -3758,9 +3759,9 @@ Gfx *menuitemControllerRenderTexture(Gfx *gdl, int x, int y, int texturenum, uin
 			TEXEL0, 0, ENVIRONMENT, 0,
 			TEXEL0, 0, ENVIRONMENT, 0);
 
-	gDPSetColor(gdl++, G_SETENVCOLOR, 0xffffff00 | alpha);
+	gfx_Set_Color(gdl++, G_SETENVCOLOR, (uintptr_t)(0xffffff00 | alpha));
 
-	gSPTextureRectangle(gdl++,
+	gdl += gfx_Texture_Rectangle(gdl,
 			(x << 2), y << 2,
 			((x + 32) << 2), (y + 32) << 2,
 			0, 16, 1008, 1024, 0xfc00);
@@ -3808,19 +3809,20 @@ Gfx *menuitemControllerRenderLines(Gfx *gdl, struct menurendercontext *context, 
 	speed = (int)(-g_20SecIntervalFrac * 4.0f * 50.0f) % 4;
 	alpha = alpha >> 1;
 
-	gDPSetTexturePersp(gdl++, G_TP_NONE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureConvert(gdl++, G_TC_FILT);
+	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 	texSelect(&gdl, &g_TexGeneralConfigs[55], 2, 0, 2, 1, NULL);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetTextureFilter(gdl++, G_TF_POINT);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 	gDPSetCombineLERP(gdl++,
 			TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
 			TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
-	gDPSetEnvColorViaWord(gdl++, 0xffffff00 | alpha);
+	RGBA envColor = {255, 255, 255, alpha};
+	gfx_Set_Env_Color(gdl++, envColor);
 
 	for (i = firstindex; i <= lastindex; i++) {
 		int thisspeed = speed;

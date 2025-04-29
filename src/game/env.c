@@ -6,6 +6,7 @@
 #include "game/bg.h"
 #include "game/env.h"
 #include "bss.h"
+#include "gfx.h"
 #include "lib/vi.h"
 #include "data.h"
 #include "types.h"
@@ -219,24 +220,16 @@ void envChooseAndApply(int stagenum)
 	g_EnvOrigEnvironment = NULL;
 }
 
-Gfx *envStartFog(Gfx *gdl, bool xlupass)
+Gfx *envStartFog(Gfx *gdl)
 {
-	if (!g_FogEnabled) {
-		return gdl;
-	}
+    if (!g_FogEnabled) return gdl;
 
-	if (xlupass) {
-		gDPSetFogColor(gdl++, g_Env.sky_r, g_Env.sky_g, g_Env.sky_b, 0xff);
-		gSPFogPosition(gdl++, g_Env.fogmin, g_Env.fogmax);
-	} else {
-		gDPSetFogColor(gdl++, g_Env.sky_r, g_Env.sky_g, g_Env.sky_b, 0xff);
-		gSPFogPosition(gdl++, g_Env.fogmin, g_Env.fogmax);
-	}
+	RGBA fogColor = {g_Env.sky_r, g_Env.sky_g, g_Env.sky_b, 255};
+    gfx_Set_Fog_Color(gdl++, fogColor);
+    gfx_Fog_Position(gdl++, g_Env.fogmin, g_Env.fogmax);
+    gfx_Set_Geometry_Mode(gdl++, G_FOG);
 
-	gSPSetGeometryMode(gdl++, G_FOG);
-	gDPSetAlphaDither(gdl++, G_AD_NOISE);
-
-	return gdl;
+    return gdl;
 }
 
 Gfx *envStopFog(Gfx *gdl)
@@ -245,7 +238,7 @@ Gfx *envStopFog(Gfx *gdl)
 		return gdl;
 	}
 
-	gSPClearGeometryMode(gdl++, G_FOG);
+	gfx_Clear_Geometry_Mode(gdl++, G_FOG);
 
 	return gdl;
 }

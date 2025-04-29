@@ -123,7 +123,6 @@
 	build/ROMID/game/modeldata/skel20.o (section); \
 	build/ROMID/game/modeldata/classicgun.o (section); \
 	build/ROMID/game/modeldata/casing.o (section); \
-	build/ROMID/game/modeldata/skel06.o (section); \
 	build/ROMID/game/modeldata/weapon.o (section); \
 	build/ROMID/game/modeldata/chr.o (section); \
 	build/ROMID/game/modeldata/skedar.o (section); \

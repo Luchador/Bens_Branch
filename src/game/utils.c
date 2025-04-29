@@ -143,7 +143,7 @@ void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *brightness,
 		int sp20 = 0;
 		int sp1c = 0;
 
-		gDPSetTexturePersp(gdl++, G_TP_NONE);
+		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 
 		xl = (screenpos[0] - brightness[0]) * 4.0f;
 		yl = (screenpos[1] - brightness[1]) * 4.0f;
@@ -218,13 +218,13 @@ void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *brightness,
 			}
 
 			if (arg5) {
-				gSPTextureRectangleFlip(gdl++, xl, yl, xh, yh, 0, s, t, dsdx, dtdy);
+				gSPTextureRectangleFlip(gdl, xl, yl, xh, yh, 0, s, t, dsdx, dtdy);
 			} else {
-				gSPTextureRectangle(gdl++, xl, yl, xh, yh, 0, s, t, dsdx, dtdy);
+				gdl += gfx_Texture_Rectangle(gdl, xl, yl, xh, yh, 0, s, t, dsdx, dtdy);
 			}
 		}
 
-		gDPSetTexturePersp(gdl++, G_TP_PERSP);
+		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
 		*gdlptr = gdl;
 	}

@@ -13,6 +13,7 @@
 #include "game/gfxmemory.h"
 #include "game/utils.h"
 #include "bss.h"
+#include "gfx.h"
 #include "lib/rng.h"
 #include "types.h"
 
@@ -214,13 +215,13 @@ Gfx *shardsRenderWood(Gfx *gdl)
 		RoomNum prevroom = 0;
 		Mtx shardmtx;
 
-		gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-		gSPSetGeometryMode(gdl++, G_SHADE | G_SHADING_SMOOTH);
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+		gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
 		gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
-		gDPSetTextureFilter(gdl++, G_TF_BILERP);
-		gDPSetCycleType(gdl++, G_CYC_2CYCLE);
-		gDPSetTextureLOD(gdl++, G_TL_LOD);
-		gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_2CYCLE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
+		gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		for (int i = 0; i < g_MaxShards; i++) {
 			if (g_Shards[i].age60 > 0 && g_Shards[i].type == SHARDTYPE_WOOD) {
@@ -260,7 +261,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 					{
 						mtx4Copy(&shardmtx, mtx);
 
-						gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+						gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 						if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 							Col *colours = gfxAllocateColours(3);
@@ -282,18 +283,18 @@ Gfx *shardsRenderWood(Gfx *gdl)
 								colours[j].a = g_Shards[g_NextShardNum].colours[j].a * alphamult;
 							}
 
-							gSPColor(gdl++, (uintptr_t)(colours), 3);
+							gfx_Color(gdl++, colours, 3);
 						} else {
 							if (g_Shards[i].room != prevroom) {
 								gdl = lightsSetForRoom(gdl, g_Shards[i].room);
 								prevroom = g_Shards[i].room;
 							}
 
-							gSPColor(gdl++, (uintptr_t)(g_Shards[i].colours), 3);
+							gfx_Color(gdl++, g_Shards[i].colours, 3);
 						}
 
 						gSPVertex(gdl++, (uintptr_t)(g_Shards[i].vertices), 3, 0);
-						gSP1Triangle(gdl++, 0, 1, 2, 0);
+						gfx_1Triangle(gdl++, 0, 1, 2, 0);
 					}
 				}
 			}
@@ -303,8 +304,8 @@ Gfx *shardsRenderWood(Gfx *gdl)
 			gdl = lightsSetDefault(gdl);
 		}
 
-		gSPClearGeometryMode(gdl++, G_LIGHTING | G_TEXTURE_GEN);
-		gSPMatrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Clear_Geometry_Mode(gdl++, G_LIGHTING | G_TEXTURE_GEN);
+		gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	}
 
 	return gdl;
@@ -322,17 +323,17 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 			texSelect(&gdl, &g_TexShardConfigs[1], 2, 1, 2, 1, NULL);
 		}
 
-		gSPTexture(gdl++, 0x0d80, 0x0d80, 2, G_TX_RENDERTILE, G_ON);
-		gDPSetCycleType(gdl++, G_CYC_2CYCLE);
-		gDPSetTextureLOD(gdl++, G_TL_LOD);
-		gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-		gDPSetTextureFilter(gdl++, G_TF_BILERP);
+		gfx_Texture(gdl++, 0x0d80, 0x0d80, 2, G_TX_RENDERTILE, G_ON);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_2CYCLE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 		if (g_Vars.currentplayer->visionmode != VISIONMODE_XRAY) {
-			gSPSetGeometryMode(gdl++, G_LIGHTING | G_TEXTURE_GEN);
+			gfx_Set_Geometry_Mode(gdl++, G_LIGHTING | G_TEXTURE_GEN);
 		}
 
-		gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		for (int i = 0; i < g_MaxShards; i++) {
 			if (g_Shards[i].age60 > 0 && g_Shards[i].type != SHARDTYPE_WOOD) {
@@ -374,7 +375,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 					{
 						mtx4Copy(&shardmtx, mtx);
 
-						gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+						gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 						if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY) {
 							Col *colours = gfxAllocateColours(3);
@@ -398,18 +399,18 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 								colours[j].a = g_Shards[g_NextShardNum].colours[j].a * alphamult;
 							}
 
-							gSPColor(gdl++, (uintptr_t)(colours), 3);
+							gfx_Color(gdl++, colours, 3);
 						} else {
 							if (g_Shards[i].room != prevroom) {
 								gdl = lightsSetForRoom(gdl, g_Shards[i].room);
 								prevroom = g_Shards[i].room;
 							}
 
-							gSPColor(gdl++, (uintptr_t)(g_Shards[i].colours), 3);
+							gfx_Color(gdl++, g_Shards[i].colours, 3);
 						}
 
 						gSPVertex(gdl++, (uintptr_t)(g_Shards[i].vertices), 3, 0);
-						gSP1Triangle(gdl++, 0, 1, 2, 0);
+						gfx_1Triangle(gdl++, 0, 1, 2, 0);
 					}
 				}
 			}
@@ -419,8 +420,8 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 			gdl = lightsSetDefault(gdl);
 		}
 
-		gSPClearGeometryMode(gdl++, G_LIGHTING | G_TEXTURE_GEN);
-		gSPMatrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Clear_Geometry_Mode(gdl++, G_LIGHTING | G_TEXTURE_GEN);
+		gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	}
 
 	return gdl;

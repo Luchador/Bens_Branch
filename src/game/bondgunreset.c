@@ -219,7 +219,6 @@ void bgunReset(void)
 	g_Vars.currentplayer->aimangle.x = 0;
 	g_Vars.currentplayer->aimangle.y = -M_PI;
 	g_Vars.currentplayer->aimangle.z = 0;
-	g_Vars.currentplayer->copiedgoldeneye = false;
 	g_Vars.currentplayer->magnetattracttime = -1;
 	g_Vars.currentplayer->gunsync = 0;
 	g_Vars.currentplayer->syncchange = 0;

@@ -47,6 +47,7 @@
 #include "string.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "video.h"
 #include "input.h"
@@ -290,18 +291,18 @@ Gfx *menuRenderBanner(Gfx *gdl, int x1, int y1, int x2, int y2, bool big, int ms
 
 	// Black fill
 	gdl = textSetPrimColour(gdl, 0x0000007f);
-	gDPFillRectangleScaled(gdl++, x1, y1, x2, y2);
+	gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
 	gdl = textSetCCCustom02(gdl);
 
 	// Dark blue fill
 	gdl = textSetPrimColour(gdl, 0x00007f7f);
-	gDPFillRectangleScaled(gdl++, x1, bannertop, x2, bannerbottom);
+	gfx_Fill_Rectangle(gdl++, x1, bannertop, x2, bannerbottom);
 	gdl = textSetCCCustom02(gdl);
 
 	// Top and bottom borders (light blue)
 	gdl = textSetPrimColour(gdl, 0x7f7fff7f);
-	gDPFillRectangleScaled(gdl++, x1, bannerbottom + 2, x2, bannerbottom + 4);
-	gDPFillRectangleScaled(gdl++, x1, bannertop - 4, x2, bannertop - 2);
+	gfx_Fill_Rectangle(gdl++, x1, bannerbottom + 2, x2, bannerbottom + 4);
+	gfx_Fill_Rectangle(gdl++, x1, bannertop - 4, x2, bannertop - 2);
 	gdl = textSetCCCustom02(gdl);
 
 	gdl = textConfigureGfxPipeline(gdl);
@@ -1753,11 +1754,10 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		struct modelrenderdata renderdata = {NULL, true, 3};
 		Mtx *matrices;
 		int i;
-		uint32_t stack[3];
 		struct coord tmpcoord;
 		float screenpos[2];
-		Mtxf rotmtx;
-		Mtxf posmtx;
+		Mtx rotmtx;
+		Mtx posmtx;
 		float screenz[1];
 		bool haszoom;
 		struct coord zoompos;
@@ -1776,11 +1776,11 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				gdl = menuApplyScissor(gdl);
 			}
 
-			gSPSetGeometryMode(gdl++, G_ZBUFFER);
+			gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
 		}
 
-		gSPDisplayList(gdl++, var80061380);
-		gSPDisplayList(gdl++, var800613a0);
+		gfx_Display_List(gdl++, var80061380);
+		gfx_Display_List(gdl++, var800613a0);
 
 		haszoom = false;
 
@@ -1822,7 +1822,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			}
 		}
 
-		mtxIdent((Mtx*)&rotmtx);
+		mtxIdent(&rotmtx);
 
 		// For the hudpiece, tween the position and scale to the new values and apply rotation.
 		if (modeltype == MENUMODELTYPE_HUDPIECE) {
@@ -1866,7 +1866,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			tmpcoord.y = roty;
 			tmpcoord.z = rotz;
 
-			mtx4LoadRotation(&tmpcoord, (Mtx*)&rotmtx);
+			mtx4LoadRotation(&tmpcoord, &rotmtx);
 		} else {
 			// If the caller is reconfiguring the model's position, rotation or scale, tween towards the new values.
 			if (menumodel->configuring) {
@@ -1917,7 +1917,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 						quaternionEulerToQuat(&tmprot, sp2ac);
 						quaternionSlerp(sp2bc, sp2ac, fracnew, sp29c);
-						quaternionToMtx(sp29c, (Mtx*)&rotmtx);
+						quaternionToMtx(sp29c, &rotmtx);
 					} else {
 						menumodel->currotx = rotx = menumodel->newrotx;
 						menumodel->curroty = roty = menumodel->newroty;
@@ -1927,7 +1927,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 						tmpcoord.y = roty;
 						tmpcoord.z = rotz;
 
-						mtx4LoadRotation(&tmpcoord, (Mtx*)&rotmtx);
+						mtx4LoadRotation(&tmpcoord, &rotmtx);
 					}
 				}
 			}
@@ -1947,7 +1947,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				tmpcoord.y = roty;
 				tmpcoord.z = rotz;
 
-				mtx4LoadRotation(&tmpcoord, (Mtx*)&rotmtx);
+				mtx4LoadRotation(&tmpcoord, &rotmtx);
 			}
 		}
 
@@ -1958,7 +1958,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 		camProjectScreenToWorldDir(screenpos, &tmpcoord, 1.0f);
 
-		mtxIdent((Mtx*)&posmtx);
+		mtxIdent(&posmtx);
 
 		// Show or hide model parts according to the visibility list
 		if (menumodel->partvisibility != NULL) {
@@ -1995,12 +1995,12 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			tmpcoord.z = rotz * tmpcoord.z;
 		}
 
-		mtx4LoadTranslation(&tmpcoord, (Mtx*)&posmtx);
+		mtx4LoadTranslation(&tmpcoord, &posmtx);
 
 		if (haszoom) {
-			mtxScaleRotationPart(scale * zoomy, (Mtx*)&posmtx);
+			mtxScaleRotationPart(scale * zoomy, &posmtx);
 		} else {
-			mtxScaleRotationPart(scale, (Mtx*)&posmtx);
+			mtxScaleRotationPart(scale, &posmtx);
 		}
 
 		{
@@ -2019,13 +2019,13 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 				mtx4LoadTranslation(&tmpcoord, &sp204);
 			}
 
-			mtx4MultMtx4((Mtx*)&posmtx, (Mtx*)&rotmtx, &sp244);
+			mtx4MultMtx4(&posmtx, &rotmtx, &sp244);
 
 			if (modeltype == MENUMODELTYPE_3) {
 				mtx4MultMtx4(&sp1c4, &sp244, &sp184);
-				mtx4MultMtx4(&sp184, &sp204, (Mtx*)&menumodel->mtx);
+				mtx4MultMtx4(&sp184, &sp204, &menumodel->mtx);
 			} else {
-				mtx4MultMtx4(&sp244, &sp204, (Mtx*)&menumodel->mtx);
+				mtx4MultMtx4(&sp244, &sp204, &menumodel->mtx);
 			}
 		}
 
@@ -2034,7 +2034,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		if (modeltype < MENUMODELTYPE_3) {
 			if (modeltype != MENUMODELTYPE_DEFAULT) {
 				gdl = savebufferSetup2DRender(gdl);
-				gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+				gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 			} else {
 				int halfScreenWidth = SCREEN_WIDTH_LO >> 1;
 				float scale = SCREEN_ASPECT / videoGetAspect();
@@ -2100,9 +2100,9 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			}
 		}
 
-		mtx4Copy((Mtx*)&menumodel->mtx, matrices);
+		mtx4Copy(&menumodel->mtx, matrices);
 
-		renderdata.unk00 = &menumodel->mtx;
+		renderdata.unk00 = (Mtxf*)&menumodel->mtx;
 		renderdata.unk10 = menumodel->bodymodel.matrices;
 
 		modelSetMatricesWithAnim(&renderdata, &menumodel->bodymodel);
@@ -2164,17 +2164,20 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			}
 		}
 
-		gSPSetLights1(gdl++, var80071468);
+		gfx_Set_Lights1(gdl++, &var80071468);
 
 		// during the credits camGetLookAt() can return NULL
-		if (camGetLookAt())
-		gSPLookAt(gdl++, camGetLookAt());
+		LookAt *lookat = camGetLookAt();
+
+		if (lookat) {
+			gfx_LookAt(gdl++, lookat);
+		}
 
 		renderdata.unk30 = 1;
 		renderdata.envcolour = 0xffffffff;
 		renderdata.fogcolour = 0xffffffff;
 
-		gSPSetGeometryMode(gdl++, G_ZBUFFER);
+		gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
 
 		renderdata.gdl = gdl;
 		renderdata.zbufferenabled = true;
@@ -2184,22 +2187,22 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		gdl = renderdata.gdl;
 
 		if (modeltype < MENUMODELTYPE_3) {
-			gdl = gfxSetCustomProjection(gdl);
+			gdl = savebufferSetCustomProjection(gdl);
 		}
 
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
-		gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-		gDPSetTextureFilter(gdl++, G_TF_BILERP);
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 		texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
 
-		gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+		gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 		texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
 
-		gSPDisplayList(gdl++, var800613a0);
+		gfx_Display_List(gdl++, var800613a0);
 	}
 
 	return gdl;
@@ -2271,7 +2274,7 @@ Gfx *menuApplyScissor(Gfx *gdl)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gDPSetScissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
 
 	return gdl;
 }
@@ -2326,9 +2329,9 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 	if (g_Menus[g_MpPlayerNum].curdialog == dialog
 			&& (dialog->definition->flags & MENUDIALOGFLAG_0002)
 			&& g_Menus[g_MpPlayerNum].menumodel.drawbehinddialog == true) {
-		gSPSetGeometryMode(gdl++, G_ZBUFFER);
+		gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
 		gdl = menuRenderModel(gdl, &g_Menus[g_MpPlayerNum].menumodel, MENUMODELTYPE_2);
-		gSPClearGeometryMode(gdl++, G_ZBUFFER);
+		gfx_Clear_Geometry_Mode(gdl++, G_ZBUFFER);
 	}
 
 	dialogwidth = dialog->width;
@@ -2361,7 +2364,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 	colour2 = MIXCOLOUR(dialog, dialog_titlebg);
 	colour3 = MIXCOLOUR(dialog, dialog_border2);
 
-	gSPClearGeometryMode(gdl++, G_ZBUFFER);
+	gfx_Clear_Geometry_Mode(gdl++, G_ZBUFFER);
 
 	colour4 = colour1;
 	colour5 = colour3;
@@ -2552,11 +2555,11 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 		if (g_Menus[g_MpPlayerNum].curdialog == dialog
 				&& (dialog->definition->flags & MENUDIALOGFLAG_0002)
 				&& !g_Menus[g_MpPlayerNum].menumodel.drawbehinddialog) {
-			gSPSetGeometryMode(gdl++, G_ZBUFFER);
+			gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
 
 			gdl = menuRenderModel(gdl, &g_Menus[g_MpPlayerNum].menumodel, MENUMODELTYPE_DEFAULT);
 
-			gSPClearGeometryMode(gdl++, G_ZBUFFER);
+			gfx_Clear_Geometry_Mode(gdl++, G_ZBUFFER);
 
 			viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 			viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
@@ -2664,7 +2667,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 							colour = colourBlend(colour2, colour2 & 0xffffff00, 127);
 
 							gdl = textSetPrimColour(gdl, colour);
-							gDPFillRectangleScaled(gdl++, x1, y1, x2, y2);
+							gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
 							gdl = textSetCCCustom02(gdl);
 						}
 
@@ -2764,10 +2767,10 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 			gdl = textSetCCCustom02(gdl);
 			
 
-			gDPSetScissor(gdl++, viGetViewLeft(), viGetViewTop(),
+			gfx_Set_Scissor(gdl++, viGetViewLeft(), viGetViewTop(),
 					viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 		} else {
-			gDPSetScissor(gdl++, viGetViewLeft(), viGetViewTop(),
+			gfx_Set_Scissor(gdl++, viGetViewLeft(), viGetViewTop(),
 					viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 		}
 
@@ -2883,7 +2886,7 @@ uint32_t g_MpNumJoined = 1;
  * Choose which direction a new dialog should swipe from in the combat simulator
  * menus.
  */
-void func0f0f7594(int arg0, int *vdir, int *hdir)
+void menuPickSwipeDirection(int arg0, int *vdir, int *hdir)
 {
 	if (g_MenuData.root == MENUROOT_MPSETUP) {
 		int playernum = g_Menus[g_MpPlayerNum].playernum;
@@ -3106,7 +3109,7 @@ void dialogCalculatePosition(struct menudialog *dialog)
 	dialog->dstheight = height;
 
 	if (dialog->swipedir != 0) {
-		func0f0f7594(dialog->swipedir, &vdir, &hdir);
+		menuPickSwipeDirection(dialog->swipedir, &vdir, &hdir);
 
 		if (hdir < 0) {
 			dialog->dstx = -4 - dialog->dstwidth;
@@ -4709,18 +4712,18 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 	case MENUBG_8:
 		{
 			uint32_t colour = 255 * frac;
-			gSPDisplayList(gdl++, var800613a0);
+			gfx_Display_List(gdl++, var800613a0);
 			gdl = textSetPrimColour(gdl, colour);
-			gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+			gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
 			gdl = textSetCCCustom02(gdl);
 		}
 		break;
 	case MENUBG_SUCCESS:
 		{
 			// Fill with black
-			gSPDisplayList(gdl++, var800613a0);
+			gfx_Display_List(gdl++, var800613a0);
 			gdl = textSetPrimColour(gdl, 0x000000ff);
-			gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+			gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
 			gdl = textSetCCCustom02(gdl);
 
 			// Render the success BG
@@ -4731,9 +4734,9 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 				uint32_t alpha = (1.0f - frac) * 255;
 
 				if (alpha) {
-					gSPDisplayList(gdl++, var800613a0);
+					gfx_Display_List(gdl++, var800613a0);
 					gdl = textSetPrimColour(gdl, alpha);
-					gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+					gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
 					gdl = textSetCCCustom02(gdl);
 				}
 			}
@@ -4744,9 +4747,9 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 			// Fill with white -> black while fading in
 			uint32_t stack;
 			uint32_t channel = (1.0f - frac) * 255;
-			gSPDisplayList(gdl++, var800613a0);
+			gfx_Display_List(gdl++, var800613a0);
 			gdl = textSetPrimColour(gdl, channel << 24 | channel << 16 | channel << 8 | 0xff);
-			gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+			gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
 			gdl = textSetCCCustom02(gdl);
 
 			// Render the failure BG
@@ -4767,10 +4770,10 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 				uint32_t alpha;
 				uint32_t stack;
 
-				gSPDisplayList(gdl++, var800613a0);
+				gfx_Display_List(gdl++, var800613a0);
 				alpha = (1.0f - frac) * 255;
 				gdl = textSetPrimColour(gdl, 0xff000000 | alpha);
-				gDPFillRectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+				gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
 				gdl = textSetCCCustom02(gdl);
 			}
 		}
@@ -4808,9 +4811,9 @@ Gfx *menuRender(Gfx *gdl)
 
 	g_MpPlayerNum = 0;
 
-	gdl = gfxSetCustomProjection(gdl);
+	gdl = savebufferSetCustomProjection(gdl);
 
-	gSPDisplayList(gdl++, var800613a0);
+	gfx_Display_List(gdl++, var800613a0);
 
 	// Render the background
 	if (g_MenuData.nextbg != 255) {
@@ -4839,7 +4842,7 @@ Gfx *menuRender(Gfx *gdl)
 	if (g_MenuData.unk5d4) {
 		bool removepiece = false;
 
-		gSPSetGeometryMode(gdl++, G_ZBUFFER);
+		gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
 
 		// Everyone 1 in 100 frames on average, calculate a new X/Y for the hudpiece
 		// Note: unintentional 64-bit float comparison done here
@@ -4891,7 +4894,7 @@ Gfx *menuRender(Gfx *gdl)
 			g_MenuData.usezbuf = false;
 
 			gdl = menuRenderModel(gdl, &g_MenuData.hudpiece, MENUMODELTYPE_HUDPIECE);
-			gSPClearGeometryMode(gdl++, G_ZBUFFER);
+			gfx_Clear_Geometry_Mode(gdl++, G_ZBUFFER);
 
 			g_MenuData.usezbuf = true;
 		}
@@ -4928,7 +4931,7 @@ Gfx *menuRender(Gfx *gdl)
 #ifndef PLATFORM_N64
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 #endif
-		gdl = gfxSetCustomProjection(gdl);
+		gdl = savebufferSetCustomProjection(gdl);
 	}
 
 	if (g_MenuData.count > 0) {
@@ -4949,8 +4952,8 @@ Gfx *menuRender(Gfx *gdl)
 
 		g_MpPlayerNum = 0;
 
-		gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-		gSPDisplayList(gdl++, var800613a0);
+		gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Display_List(gdl++, var800613a0);
 
 		// Don't do the redraw effect on the "Press Start" dialogs
 		textStopRedrawEffect();
@@ -5058,7 +5061,7 @@ Gfx *menuRender(Gfx *gdl)
 			gdl = text0f153780(gdl);
 		}
 
-		gSPSetGeometryMode(gdl++, G_ZBUFFER);
+		gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
 	}
 
 	// Render banner messages, such as "Please Wait...",

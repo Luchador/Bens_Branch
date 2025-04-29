@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "platform.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "game/mainmenu.h"
 #include "game/menu.h"

@@ -16,7 +16,7 @@ float skyRound(float value);
 void skyChooseCloudVtxColour(struct skyvtx3d *arg0, float arg1);
 void skyChooseWaterVtxColour(struct skyvtx3d *arg0, float arg1);
 Gfx *skyRender(Gfx *gdl);
-void skyConvertVertex(struct skyvtx3d *arg0, Mtxf *arg1, uint16_t arg2, float arg3, float arg4, struct skyvtx2d *arg5);
+void skyConvertVertex(struct skyvtx3d *arg0, Mtx *arg1, uint16_t arg2, float arg3, float arg4, struct skyvtx2d *arg5);
 bool skyVerticesAreSame(struct skyvtx2d *arg0, struct skyvtx2d *arg1);
 void skyCreateSunArtifact(struct artifact *artifact, int x, int y);
 float skyGetArtifactGroupIntensityFrac(struct artifact *artifacts);

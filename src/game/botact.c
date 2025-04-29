@@ -503,7 +503,7 @@ void botactCreateSlayerRocket(struct chrdata *chr)
 		mtxIdent(&identity);
 
 		// Create projectile with direction and rotation
-		bgunCreateXBowBolt(&rocket->base, &chr->prop->pos, chr->prop->rooms, (Mtxf *)&rotationX, &direction, (Mtxf *)&identity, chr->prop, &chr->prop->pos);
+		bgunCreateXBowBolt(&rocket->base, &chr->prop->pos, chr->prop->rooms, &rotationX, &direction, &identity, chr->prop, &chr->prop->pos);
 
 		if (rocket->base.hidden & OBJHFLAG_PROJECTILE) {
 			struct prop *target = chrGetTargetProp(chr);

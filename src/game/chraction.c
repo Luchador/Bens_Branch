@@ -8788,7 +8788,7 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 			Mtx spc8;
 			struct modelrodata_chrgunfire *burstrodata;
 			struct coord spb8;
-			Mtxf sp70;
+			Mtx sp70;
 			Mtx *sp6c;
 			struct coord sp60;
 			struct coord sp54;
@@ -8812,7 +8812,7 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 					burstnode = modelGetPart(gunmodel->definition, MODELPART_CHRGUN_GUNFIRE);
 
 					if (burstnode) {
-				    	Mtx *sp108 = (Mtx*)modelFindNodeMtx(gunmodel, burstnode, 0);
+				    	Mtx *sp108 = modelFindNodeMtx(gunmodel, burstnode, 0);
 						burstrodata = &burstnode->rodata->chrgunfire;
 						Mtx *spb4 = camGetProjectionMtxForPlayers((uint8_t *)sp108);
 
@@ -8834,16 +8834,16 @@ int chrTurn(struct chrdata *chr, int turning, float endanimframe, float speed, f
 						posnode = modelGetPart(gunmodel->definition, MODELPART_CHRGUN_0001);
 
 						if (posnode) {
-							Mtx *spb0 = (Mtx*)modelFindNodeMtx(gunmodel, posnode, 0);
+							Mtx *spb0 = modelFindNodeMtx(gunmodel, posnode, 0);
 							sp6c = camGetProjectionMtxForPlayers((uint8_t *)spb0);
 
 							if (sp6c) {
-								mtxApplyAffineTransformInPlace(sp6c, (Mtx*)&sp70);
+								mtxApplyAffineTransformInPlace(sp6c, &sp70);
 
 								sp114 = 1;
-								sp118.x = sp70.m[3][0];
-								sp118.y = sp70.m[3][1];
-								sp118.z = sp70.m[3][2];
+								sp118.x = sp70[3][0];
+								sp118.y = sp70[3][1];
+								sp118.z = sp70[3][2];
 							}
 						}
 					}
@@ -9706,12 +9706,12 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 					// in less than 4 metres of space
 					if (isaibot || sqshotdist > 400.0f * 400.0f) {
 						struct weaponobj *projectileobj;
-						Mtxf identmtx;
+						Mtx identmtx;
 						struct coord sp16c;
 						float sp168;
 						struct coord sp15c;
-						Mtxf projectilemtx;
-						Mtxf yrotmtx;
+						Mtx projectilemtx;
+						Mtx yrotmtx;
 						struct weapon *weapondef = weaponFindById(gset.weaponnum);
 						struct weaponfunc_shootprojectile *func = weapondef->functions[gset.weaponfunc];
 
@@ -9818,10 +9818,10 @@ void chrTickShoot(struct chrdata *chr, int handnum)
 
 							// Calculate and projectile's matrix,
 							// spawn position and speed
-							mtxIdent((Mtx*)&identmtx);
-							mtx4LoadXRotation(rotx, (Mtx*)&projectilemtx);
-							mtx4LoadYRotation(roty, (Mtx*)&yrotmtx);
-							mtxApplyAffineTransformInPlace((Mtx*)&yrotmtx, (Mtx*)&projectilemtx);
+							mtxIdent(&identmtx);
+							mtx4LoadXRotation(rotx, &projectilemtx);
+							mtx4LoadYRotation(roty, &yrotmtx);
+							mtxApplyAffineTransformInPlace(&yrotmtx, &projectilemtx);
 
 							sp15c.x = vector.x * sp168;
 							sp15c.y = vector.y * sp168;
@@ -10522,14 +10522,11 @@ void chrTickRobotAttack(struct chrdata *chr)
 			}
 		}
 
-		if (empty);
-		if ((float)empty);
-
 		if (!empty) {
 			float aimy;
 			union modelrodata *rodata;
 			struct coord spe4;
-			Mtxf spa4;
+			Mtx spa4;
 
 			aimy = targetprop->pos.y - 20.0f;
 			rodata = modelGetPartRodata(chr->model->definition, (i ? MODELPART_ROBOT_0000 : MODELPART_ROBOT_0001));
@@ -10538,8 +10535,8 @@ void chrTickRobotAttack(struct chrdata *chr)
 			act->pos[i].y = rodata->position.pos.y - 300.0f;
 			act->pos[i].z = rodata->position.pos.z;
 
-			mtx4LoadYRotation(invtheta, (Mtx*)&spa4);
-			mtx4RotateVec((Mtx*)&spa4, &act->pos[i], &spe4);
+			mtx4LoadYRotation(invtheta, &spa4);
+			mtx4RotateVec(&spa4, &act->pos[i], &spe4);
 
 			spe4.x *= chr->model->scale;
 			spe4.y *= chr->model->scale;

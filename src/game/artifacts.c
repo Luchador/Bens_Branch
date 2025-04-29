@@ -18,6 +18,7 @@
 #include "bss.h"
 #include "lib/vi.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "lib/collision.h"
 #include "lib/lib_17ce0.h"
@@ -312,22 +313,20 @@ Gfx *artifactsConfigureForGlares(Gfx *gdl)
 
 	texSelect(&gdl, &g_TexLightGlareConfigs[stage->light_type], 4, 0, 2, 1, NULL);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gDPSetCombineLERP(gdl++,
 			0, 0, 0, ENVIRONMENT, TEXEL0, 0, ENVIRONMENT, 0,
 			0, 0, 0, ENVIRONMENT, TEXEL0, 0, ENVIRONMENT, 0);
-	gDPSetColorDither(gdl++, G_CD_BAYER);
-	gDPSetAlphaDither(gdl++, G_AD_PATTERN);
-	gDPSetTexturePersp(gdl++, G_TP_NONE);
+	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 
 	return gdl;
 }
 
 Gfx *artifactsUnconfigureForGlares(Gfx *gdl)
 {
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
 	return gdl;
 }
@@ -494,12 +493,14 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 						if(alpha > 10.0f)
 						{
 							skySetOverexposure((int) ((float)overexposureAmount * r), (int) ((float)overexposureAmount * g), (int) ((float)overexposureAmount * b));
-							gDPSetEnvColor(gdl++, envColor[0], envColor[1], envColor[2], envColor[3]);
+							RGBA color = {envColor[0], envColor[1], envColor[2], envColor[3]};
+							gfx_Set_Env_Color(gdl++, color);
 						}
 						// Still render the light, but don't do overexposure
 						else
 						{
-							gDPSetEnvColor(gdl++, envColor[0], envColor[1], envColor[2], 0xff);
+							RGBA color = {envColor[0], envColor[1], envColor[2], 255};
+							gfx_Set_Env_Color(gdl++, color);
 						}
 
 						screenSize[0] = aspectScale;
@@ -509,13 +510,14 @@ Gfx *artifactsRenderGlaresForRoom(Gfx *gdl, int roomnum)
 
 						// Make artifacts slightly brighter when true
 						if (addWhiteOverlay) {
-							envColor[0] = 0xff;
-							envColor[1] = 0xff;
-							envColor[2] = 0xff;
+							envColor[0] = 255;
+							envColor[1] = 255;
+							envColor[2] = 255;
 							envColor[3] = stageGetCurrent()->light_alpha;
 							envColor[3] = lightStats[0] * envColor[3] / 8;
 
-							gDPSetEnvColor(gdl++, envColor[0], envColor[1], envColor[2], envColor[3]);
+							RGBA color = {envColor[0], envColor[1], envColor[2], envColor[3]};
+							gfx_Set_Env_Color(gdl++, color);
 
 							screenSize[0] = aspectScale * 0.4f;
 							screenSize[1] = screenScale * 0.4f;

@@ -73,6 +73,7 @@
 #include "lib/lib_317f0.h"
 #include "video.h"
 #include "data.h"
+#include "gfx.h"
 #include "textures.h"
 #include "types.h"
 #include "string.h"
@@ -1698,14 +1699,14 @@ struct hovtype g_HovTypes[];
 
 void func0f069850(struct defaultobj *obj, struct coord *pos, float rot[3][3], struct geocyl *cyl)
 {
-	Mtxf mtx;
+	Mtx mtx;
 	struct modelrodata_bbox *bbox = objFindBboxRodata(obj);
 	struct modelrodata_type19 *rodata19 = NULL;
 	struct hoverbikeobj *hoverbike;
 	struct hoverpropobj *hoverprop;
 
-	mtx3ToMtx4(rot, (Mtx*)&mtx);
-	mtx4SetTranslation(pos, (Mtx*)&mtx);
+	mtx3ToMtx4(rot, &mtx);
+	mtx4SetTranslation(pos, &mtx);
 
 	if (obj->model->definition->skel == &g_SkelHoverbike
 			|| obj->model->definition->skel == &g_SkelBasic
@@ -1727,8 +1728,8 @@ void func0f069850(struct defaultobj *obj, struct coord *pos, float rot[3][3], st
 			cyl->ymax = hoverprop->hov.ground + g_HovTypes[hoverprop->hov.type].bobymid + objGetLocalYMax(bbox) * obj->model->scale;
 			cyl->ymin = hoverprop->hov.ground + 20.0f;
 		} else {
-			cyl->ymin = mtx.m[3][1] + objGetRotatedLocalYMinByMtx4(bbox, (Mtx*)&mtx);
-			cyl->ymax = mtx.m[3][1] + objGetRotatedLocalYMaxByMtx4(bbox, (Mtx*)&mtx);
+			cyl->ymin = mtx[3][1] + objGetRotatedLocalYMinByMtx4(bbox, &mtx);
+			cyl->ymax = mtx[3][1] + objGetRotatedLocalYMaxByMtx4(bbox, &mtx);
 		}
 
 		cyl->x = pos->x;
@@ -1736,9 +1737,9 @@ void func0f069850(struct defaultobj *obj, struct coord *pos, float rot[3][3], st
 		cyl->radius = 90.0f;
 	} else {
 		if (rodata19 != NULL) {
-			objCalculateGeoBlockFromNode19Data(rodata19, bbox, (Mtx*)&mtx, (struct geoblock *)cyl);
+			objCalculateGeoBlockFromNode19Data(rodata19, bbox, &mtx, (struct geoblock *)cyl);
 		} else {
-			objCalculateGeoBlockFromBboxAndMtx(bbox, (Mtx*)&mtx, (struct geoblock *)cyl);
+			objCalculateGeoBlockFromBboxAndMtx(bbox, &mtx, (struct geoblock *)cyl);
 		}
 
 		if (obj->type == OBJTYPE_HOVERBIKE) {
@@ -3345,7 +3346,7 @@ bool projectileTryMove(struct defaultobj *obj, struct coord *arg1, struct coord 
 						}
 					}
 
-					f2 = cd00024e98() * 0.99f;
+					f2 = cdGetSlideTimeToEdge() * 0.99f;
 
 					sp4c.x = sp8c.x * f2 + prop->pos.x;
 					sp4c.y = sp80.y;
@@ -3761,19 +3762,19 @@ void knifePlayWooshSound(struct defaultobj *obj)
 
 void objLand2(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
 {
-	Mtxf sp40;
+	Mtx sp40;
 	struct coord newpos;
 	struct modelrodata_bbox *bbox = modelFindBboxRodata(obj->model);
 	float ymin = objGetLocalYMin(bbox);
 	struct prop *prop = obj->prop;
 	RoomNum newrooms[8];
 
-	mtxBuildRotationTowardsVector(arg2, (Mtx*)&sp40);
-	mtxScaleRotationPart(obj->model->scale, (Mtx*)&sp40);
+	mtxBuildRotationTowardsVector(arg2, &sp40);
+	mtxScaleRotationPart(obj->model->scale, &sp40);
 
-	newpos.x = arg1->x - sp40.m[1][0] * ymin;
-	newpos.y = arg1->y - sp40.m[1][1] * ymin;
-	newpos.z = arg1->z - sp40.m[1][2] * ymin;
+	newpos.x = arg1->x - sp40[1][0] * ymin;
+	newpos.y = arg1->y - sp40[1][1] * ymin;
+	newpos.z = arg1->z - sp40[1][2] * ymin;
 
 	propUpdatePositionRoomsSimple(&prop->pos, prop->rooms, &newpos, newrooms);
 	func0f06a580(obj, &newpos, (Mtx*)&sp40, newrooms);
@@ -3781,7 +3782,7 @@ void objLand2(struct defaultobj *obj, struct coord *arg1, struct coord *arg2)
 
 void boltLand(struct weaponobj *weapon, struct coord *arg1)
 {
-	Mtxf mtx;
+	Mtx mtx;
 	struct coord newpos;
 	struct modelrodata_bbox *bbox;
 	int beamnum;
@@ -3797,14 +3798,14 @@ void boltLand(struct weaponobj *weapon, struct coord *arg1)
 	zmax = objGetLocalZMax(bbox);
 	zmax -= 25.0f + 2.0f * RANDOMFRAC();
 
-	mtx3ToMtx4(weapon->base.realrot, (Mtx*)&mtx);
+	mtx3ToMtx4(weapon->base.realrot, &mtx);
 
-	newpos.x = arg1->x - mtx.m[2][0] * zmax;
-	newpos.y = arg1->y - mtx.m[2][1] * zmax;
-	newpos.z = arg1->z - mtx.m[2][2] * zmax;
+	newpos.x = arg1->x - mtx[2][0] * zmax;
+	newpos.y = arg1->y - mtx[2][1] * zmax;
+	newpos.z = arg1->z - mtx[2][2] * zmax;
 
 	propFindRoomsContainingNewPosSimple(&prop->pos, prop->rooms, &newpos, newrooms);
-	func0f06a580(&weapon->base, &newpos, (Mtx*)&mtx, newrooms);
+	func0f06a580(&weapon->base, &newpos, &mtx, newrooms);
 
 	beamnum = boltbeamFindByProp(prop);
 
@@ -4463,7 +4464,7 @@ void weaponTick(struct prop *prop)
 	}
 }
 
-void func0f07063c(struct prop *prop, bool arg1)
+void propTickWeaponsAndAmmoCrates(struct prop *prop, bool arg1)
 {
 	struct defaultobj *obj = prop->obj;
 
@@ -4488,7 +4489,7 @@ void objDropRecursively(struct prop *prop, bool arg1)
 	}
 }
 
-void func0f0706f8(struct prop *prop, bool arg1)
+void propClearVisAndTickChildren(struct prop *prop, bool arg1)
 {
 	struct defaultobj *obj = prop->obj;
 	struct prop *child;
@@ -4497,14 +4498,14 @@ void func0f0706f8(struct prop *prop, bool arg1)
 		objFree(obj, true, obj->hidden2 & OBJH2FLAG_CANREGEN);
 	} else {
 		prop->flags &= ~PROPFLAG_ONTHISSCREENTHISTICK;
-		func0f07063c(prop, arg1);
+		propTickWeaponsAndAmmoCrates(prop, arg1);
 
 		// Recurse into children
 		child = prop->child;
 
 		while (child) {
 			struct prop *next = child->next;
-			func0f0706f8(child, arg1);
+			propClearVisAndTickChildren(child, arg1);
 			child = next;
 		}
 	}
@@ -4534,7 +4535,7 @@ void func0f07079c(struct prop *prop, bool fulltick)
 		renderdata.unk00 = (Mtxf*)&sp30;
 
 		modelSetMatrices(&renderdata, model);
-		func0f07063c(prop, fulltick);
+		propTickWeaponsAndAmmoCrates(prop, fulltick);
 
 		child = prop->child;
 
@@ -4546,13 +4547,13 @@ void func0f07079c(struct prop *prop, bool fulltick)
 	} else {
 		prop->flags &= ~PROPFLAG_ONTHISSCREENTHISTICK;
 
-		func0f07063c(prop, fulltick);
+		propTickWeaponsAndAmmoCrates(prop, fulltick);
 
 		child = prop->child;
 
 		while (child) {
 			next = child->next;
-			func0f0706f8(child, fulltick);
+			propClearVisAndTickChildren(child, fulltick);
 			child = next;
 		}
 	}
@@ -5671,16 +5672,16 @@ void hoverbikeUpdateMovement(struct hoverbikeobj *bike, float speedforwards, flo
 	}
 }
 
-void platformDisplaceProps2(struct prop *platform, Mtxf *arg1)
+void platformDisplaceProps2(struct prop *platform, Mtx *arg1)
 {
 	struct prop *prop;
 	int16_t *propnumptr;
 	int16_t propnums[256];
-	uint8_t *sp9c;
-	uint8_t *sp98;
-	Mtxf sp58;
+	uint8_t *start;
+	uint8_t *end;
+	Mtx transformMtx;
 
-	if (propUpdateGeometry(platform, &sp9c, &sp98)) {
+	if (propUpdateGeometry(platform, &start, &end)) {
 		roomGetProps(platform->rooms, propnums, 256);
 
 		propnumptr = propnums;
@@ -5693,15 +5694,15 @@ void platformDisplaceProps2(struct prop *platform, Mtxf *arg1)
 
 				if (prop->pos.y > platform->pos.y
 						&& (obj->hidden & OBJHFLAG_00008000)
-						&& cd000266a4(prop->pos.x, prop->pos.z, (struct geo *)sp9c)) {
-					mtx3ToMtx4(obj->realrot, (Mtx*)&sp58);
-					mtx4SetTranslation(&prop->pos, (Mtx*)&sp58);
-					mtx4MultMtx4InPlace((Mtx*)arg1, (Mtx*)&sp58);
-					mtx4ToMtx3((Mtx*)&sp58, obj->realrot);
+						&& cd000266a4(prop->pos.x, prop->pos.z, (struct geo *)start)) {
+					mtx3ToMtx4(obj->realrot, &transformMtx);
+					mtx4SetTranslation(&prop->pos, &transformMtx);
+					mtx4MultMtx4InPlace(arg1, &transformMtx);
+					mtx4ToMtx3(&transformMtx, obj->realrot);
 
-					prop->pos.x = sp58.m[3][0];
-					prop->pos.y = sp58.m[3][1];
-					prop->pos.z = sp58.m[3][2];
+					prop->pos.x = transformMtx[3][0];
+					prop->pos.y = transformMtx[3][1];
+					prop->pos.z = transformMtx[3][2];
 
 					propDeregisterRooms(prop);
 					propUpdatePositionRoomsSimple(&platform->pos, platform->rooms, &prop->pos, prop->rooms);
@@ -5727,9 +5728,9 @@ bool rocketTickFbw(struct weaponobj *rocket)
 	struct chrdata *ownerchr;
 	struct coord sp164;
 	struct coord sp158;
-	Mtxf sp118;
-	Mtxf spd8;
-	Mtxf sp98;
+	Mtx sp118;
+	Mtx spd8;
+	Mtx sp98;
 	float xdist;
 	float ydist;
 	float zdist;
@@ -5775,11 +5776,11 @@ bool rocketTickFbw(struct weaponobj *rocket)
 			projectile->unk014 = modelTweenRotAxis(projectile->unk014, yrot, 0.01875f);
 		}
 
-		mtx4LoadXRotation(M_TAU - projectile->unk014, (Mtx*)&sp118);
-		mtx4LoadYRotation(projectile->unk018, (Mtx*)&spd8);
-		mtx4MultMtx4((Mtx*)&spd8, (Mtx*)&sp118, (Mtx*)&sp98);
-		mtxScaleRotationPart(rocket->base.model->scale, (Mtx*)&sp98);
-		mtx4ToMtx3((Mtx*)&sp98, rocket->base.realrot);
+		mtx4LoadXRotation(M_TAU - projectile->unk014, &sp118);
+		mtx4LoadYRotation(projectile->unk018, &spd8);
+		mtx4MultMtx4(&spd8, &sp118, &sp98);
+		mtxScaleRotationPart(rocket->base.model->scale, &sp98);
+		mtx4ToMtx3(&sp98, rocket->base.realrot);
 	}
 
 	// Calculate new pos
@@ -5966,10 +5967,6 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 	float sp58c;
 	bool haslimitedarea;
 	float ground;
-	Mtxf sp544;
-	Mtxf sp504;
-	Mtxf sp4c4;
-	Mtxf sp484;
 	struct pad pad;
 	float dist;
 	float shield;
@@ -6006,8 +6003,9 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 			float outerdist;
 			float z;
 
-			mtx3ToMtx4(obj->realrot, (Mtx*)&sp504);
-			mtx4SetTranslation(&prop->pos, (Mtx*)&sp504);
+			Mtx sp504;
+			mtx3ToMtx4(obj->realrot, &sp504);
+			mtx4SetTranslation(&prop->pos, &sp504);
 
 			if (projectile->unk0dc > 0.0f) {
 				projectile->unk0dc -= projectile->unk0e0 * g_Vars.lvupdate60freal;
@@ -6364,11 +6362,14 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 				}
 			}
 
+			Mtx sp544;
+			Mtx sp4c4;
+			Mtx sp484;
 			func0f069c70(obj, false, true);
-			mtx3ToMtx4(obj->realrot, (Mtx*)&sp484);
-			mtx4SetTranslation(&prop->pos, (Mtx*)&sp484);
-			mtxInvertAffine((Mtx*)&sp504.m, (Mtx*)&sp4c4.m);
-			mtx4MultMtx4((Mtx*)&sp484, (Mtx*)&sp4c4, (Mtx*)&sp544);
+			mtx3ToMtx4(obj->realrot, &sp484);
+			mtx4SetTranslation(&prop->pos, &sp484);
+			mtxInvertAffine(&sp504, &sp4c4);
+			mtx4MultMtx4(&sp484, &sp4c4, &sp544);
 			platformDisplaceProps2(prop, &sp544);
 			result = true;
 		} else if (projectile->flags & PROJECTILEFLAG_AIRBORNE) {
@@ -6380,7 +6381,7 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 			bool sp354 = false;
 			bool sp350 = false;
 			bool handled = false;
-			Mtxf sp30c;
+			Mtx sp30c;
 			bool homingrocket;
 
 			projectile->losttimer240 += g_Vars.lvupdate240;
@@ -6547,9 +6548,9 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 			sp5dc.x += projectile->speed.x * g_Vars.lvupdate60freal;
 			sp5dc.z += projectile->speed.z * g_Vars.lvupdate60freal;
 
-			mtx3ToMtx4(obj->realrot, (Mtx*)&sp30c);
-			mtxApplyRotation((Mtx*)&sp30c, (Mtx*)&projectile->mtx, g_Vars.lvupdate240); // Makes projectiles spin as they fall. This includes dropped weapons.
-			mtx4ToMtx3((Mtx*)&sp30c, obj->realrot);
+			mtx3ToMtx4(obj->realrot, &sp30c);
+			mtxApplyRotation(&sp30c, (Mtx*)&projectile->mtx, g_Vars.lvupdate240); // Makes projectiles spin as they fall. This includes dropped weapons.
+			mtx4ToMtx3(&sp30c, obj->realrot);
 
 			sp5c8.x = prop->pos.x;
 			sp5c8.y = prop->pos.y;
@@ -7997,7 +7998,7 @@ void cctvInitMatrices(struct prop *prop, Mtx *mtx)
 	}
 
 	mtx4LoadYRotation(yrot, &sp24);
-	mtx4MultMtx4(&sp24, (Mtx*)&cctv->camrotm, &matrices[1]);
+	mtx4MultMtx4(&sp24, &cctv->camrotm, &matrices[1]);
 
 	sp64.x = rodata->position.pos.x;
 	sp64.y = rodata->position.pos.y;
@@ -10849,7 +10850,7 @@ int objTickPlayer(struct prop *prop)
 		}
 
 		prop->z = -model->matrices[0].m[3][2];
-		func0f07063c(prop, fulltick);
+		propTickWeaponsAndAmmoCrates(prop, fulltick);
 		child = prop->child;
 
 		while (child) {
@@ -10859,12 +10860,12 @@ int objTickPlayer(struct prop *prop)
 		}
 	} else {
 		prop->flags &= ~PROPFLAG_ONTHISSCREENTHISTICK;
-		func0f07063c(prop, fulltick);
+		propTickWeaponsAndAmmoCrates(prop, fulltick);
 		child = prop->child;
 
 		while (child) {
 			next = child->next;
-			func0f0706f8(child, fulltick);
+			propClearVisAndTickChildren(child, fulltick);
 			child = next;
 		}
 	}
@@ -11866,18 +11867,18 @@ Gfx *tvscreenRender(struct model *model, struct modelnode *node, struct tvscreen
 		}
 
 		// Render the image
-		gSPSetGeometryMode(gdl++, G_CULL_BACK);
+		gfx_Set_Geometry_Mode(gdl++, G_CULL_BACK);
 
 		texSelect(&gdl, tconfig, arg5, arg4, 2, 1, NULL);
 
-		gSPMatrix(gdl++, (uintptr_t)(model->matrices), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-		gSPSegment(gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)(vertices));
-		gSPColor(gdl++, (uintptr_t)(colours), 1);
+		gfx_Matrix(gdl++, (Mtx*)model->matrices, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+		gfx_Segment(gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)(vertices));
+		gfx_Color(gdl++, colours, 1);
 		gSPVertex(gdl++, SEGADDR(SPSEGMENT_MODEL_VTX << 24), 4, 0);
-		gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
-		gSPEndDisplayList(gdl++);
+		gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
+		gfx_End_Display_List(gdl++);
 
-		gSPBranchList(savedgdl++, gdl);
+		gfx_Branch_List(savedgdl++, gdl);
 	}
 
 	return gdl;
@@ -11943,7 +11944,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 		if (obj->type == OBJTYPE_DOOR) {
 			struct doorobj *door = prop->door;
 
-			gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+			gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 			if (door->doorflags & DOORFLAG_FLIP) {
 				renderdata->cullmode = CULLMODE_FRONT;
@@ -11980,7 +11981,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 		}
 
 		if (orthogonal) {
-			gSPMatrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+			gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 		}
 
 		renderdata->gdl = gdl;
@@ -11988,7 +11989,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 		gdl = renderdata->gdl;
 
 		if (obj->type == OBJTYPE_DOOR) {
-			gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+			gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 		}
 
 		if (obj->hidden2 & (OBJH2FLAG_HASOPA << xlupass)) {
@@ -11996,7 +11997,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 		}
 
 		if (orthogonal) {
-			gSPMatrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+			gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 		}
 
 		renderdata->gdl = gdl;
@@ -12014,7 +12015,7 @@ void objRenderProp(struct prop *prop, struct modelrenderdata *renderdata, bool x
 			}
 
 			if ((obj->flags3 & (OBJFLAG3_SHOWSHIELD | OBJFLAG3_SHIELDHIT)) && objIsHealthy(obj)) {
-				gSPSetGeometryMode(renderdata->gdl++, G_CULL_BACK);
+				gfx_Set_Geometry_Mode(renderdata->gdl++, G_CULL_BACK);
 
 				renderdata->gdl = shieldhitRender(renderdata->gdl, prop, prop, 0xff, 0, 0, 1, 2, 3);
 			}
@@ -12082,12 +12083,12 @@ Gfx *gfxRenderRadialShadow(Gfx *gdl, float x, float y, float z, float angle, flo
 		texSelect(&gdl, NULL, 1, 1, 2, 1, NULL);
 	}
 
-	gSPSetGeometryMode(gdl++, G_CULL_BACK);
-	gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Set_Geometry_Mode(gdl++, G_CULL_BACK);
+	gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 1);
+	gfx_Color(gdl++, colours, 1);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
-	gSPTri2(gdl++, 0, 1, 2, 2, 3, 0);
+	gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 
 	return gdl;
 }
@@ -18812,24 +18813,24 @@ void projectileCreate(struct prop *fromprop, struct fireslotthing *arg1, struct 
 
 		if (weaponnum == WEAPON_ROCKETLAUNCHER) {
 			struct weaponobj *rocket;
-			Mtxf sp13c;
+			Mtx sp13c;
 			struct coord sp130;
 			struct chopperobj *chopper = chopperFromHovercar((struct chopperobj *)fromprop->obj);
 
 			if (chopper && sqdist > 400.0f * 400.0f) {
 				struct coord sp120;
-				Mtxf spe0;
-				Mtxf spa0;
+				Mtx spe0;
+				Mtx spa0;
 				float rotx = chopper->rotx;
 				float roty = chopper->roty;
 
 				rocket = weaponCreateProjectileFromWeaponNum(MODEL_CHRDYROCKETMIS, WEAPON_ROCKET, NULL); // dataDyne chopper fires a rocket
 
 				if (rocket) { 
-					mtxIdent((Mtx*)&sp13c);
-					mtx4LoadXRotation(rotx, (Mtx*)&spe0);
-					mtx4LoadYRotation(roty, (Mtx*)&spa0);
-					mtxApplyAffineTransformInPlace((Mtx*)&spa0, (Mtx*)&spe0);
+					mtxIdent(&sp13c);
+					mtx4LoadXRotation(rotx, &spe0);
+					mtx4LoadYRotation(roty, &spa0);
+					mtxApplyAffineTransformInPlace(&spa0, &spe0);
 
 					sp120.x = dir->x * 0.27777776f;
 					sp120.y = dir->y * 0.27777776f;

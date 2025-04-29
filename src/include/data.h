@@ -231,7 +231,6 @@ extern struct modeldef g_PlayerModeldef;
 extern struct skeleton g_Skel20;
 extern struct skeleton g_SkelClassicGun;
 extern struct skeleton g_SkelCasing;
-extern struct skeleton g_Skel06;
 extern struct skeleton g_SkelJoypad;
 extern struct skeleton g_Skel21;
 extern struct skeleton g_SkelLaptopGun;

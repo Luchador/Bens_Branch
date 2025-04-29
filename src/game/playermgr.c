@@ -8,8 +8,10 @@
 #include "bss.h"
 #include "lib/memp.h"
 #include "lib/rng.h"
+#include "lib/model.h"
 #include "data.h"
 #include "types.h"
+#include <string.h>
 
 void playermgrInit(void)
 {
@@ -291,8 +293,6 @@ void playermgrAllocatePlayer(int index)
 	g_Vars.players[index]->bondfadefracnew = 0;
 	g_Vars.players[index]->bondbreathing = 0;
 
-	g_Vars.players[index]->playwatchup = true;
-
 	g_Vars.players[index]->colourscreenred = 0xff;
 	g_Vars.players[index]->colourscreengreen = 0xff;
 	g_Vars.players[index]->colourscreenblue = 0xff;
@@ -446,7 +446,6 @@ void playermgrAllocatePlayer(int index)
 	g_Vars.players[index]->aimangle.y = -M_PI;
 	g_Vars.players[index]->aimangle.z = 0;
 
-	g_Vars.players[index]->copiedgoldeneye = 0;
 	g_Vars.players[index]->gunammooff = 0;
 	g_Vars.players[index]->gunsync = 0;
 	g_Vars.players[index]->syncchange = 0;
@@ -474,8 +473,6 @@ void playermgrAllocatePlayer(int index)
 	g_Vars.players[index]->c_recipscalex = 1;
 	g_Vars.players[index]->c_recipscaley = 1;
 
-	g_Vars.players[index]->mtxl1738 = NULL;
-	g_Vars.players[index]->mtxl173c = NULL;
 	g_Vars.players[index]->worldtoscreenmtx = NULL;
 	g_Vars.players[index]->c_viewfmdynticknum = -1;
 	g_Vars.players[index]->projectionmtx = NULL;
@@ -579,7 +576,14 @@ void playermgrAllocatePlayer(int index)
 	g_Vars.players[index]->gunextraaimx = 0;
 	g_Vars.players[index]->gunextraaimy = 0;
 
-	g_Vars.players[index]->model.anim = &g_Vars.players[index]->unk01c0;
+	/*
+	// Since the anim struct contains function pointers, model.anim cannot be set to NULL or it will cause a crash.
+	// Instead we make a dummy anim and set model.anim to that.
+	*/
+	memset(&g_Vars.players[index]->dummyanim, 0, sizeof(struct anim));
+	g_Vars.players[index]->dummyanim.animscale = 1.0f;
+	g_Vars.players[index]->dummyanim.playspeed = 1.0f;
+	g_Vars.players[index]->model.anim = &g_Vars.players[index]->dummyanim;
 
 	g_Vars.players[index]->eyespy = NULL;
 	g_Vars.players[index]->eyespydarts = MAX_EYESPYDARTS;

@@ -54,7 +54,7 @@ void menuGetTeamTitlebarColours(uint32_t *top, uint32_t *middle, uint32_t *botto
 Gfx *menuApplyScissor(Gfx *gdl);
 Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu);
 void menuGetContPads(int8_t *contpadnum1, int8_t *contpadnum2);
-void func0f0f7594(int arg0, int *vdir, int *hdir);
+void menuPickSwipeDirection(int arg0, int *vdir, int *hdir);
 void menuFindAvailableSize(int *xmin, int *ymin, int *xmax, int *ymax);
 void dialogCalculatePosition(struct menudialog *dialog);
 void menuClose(void);

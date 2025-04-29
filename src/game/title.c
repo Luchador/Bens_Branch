@@ -217,18 +217,18 @@ Gfx *titleRenderLegal(Gfx *gdl)
 			} else if (elem->type == LEGALELEMENTTYPE_DOLBYLOGO) {
 				gdl = text0f153780(gdl);
 
-				gDPSetTexturePersp(gdl++, G_TP_NONE);
-				gDPSetAlphaCompare(gdl++, G_AC_NONE);
-				gDPSetTextureLOD(gdl++, G_TL_TILE);
-				gDPSetTextureConvert(gdl++, G_TC_FILT);
+				gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+				gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+				gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+				gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 				texSelect(&gdl, &g_TexGeneralConfigs[47], 1, 0, 2, 1, 0);
 
-				gDPSetCycleType(gdl++, G_CYC_1CYCLE);
+				gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 				gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-				gDPSetTextureFilter(gdl++, G_TF_POINT);
+				gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
-				gSPTextureRectangle(gdl++,
+				gdl += gfx_Texture_Rectangle(gdl,
 						elem->x << 2,
 						elem->y << 2,
 						(elem->x + 64) << 2,
@@ -239,18 +239,18 @@ Gfx *titleRenderLegal(Gfx *gdl)
 			} else if (elem->type == LEGALELEMENTTYPE_RARELOGO) {
 				gdl = text0f153780(gdl);
 
-				gDPSetTexturePersp(gdl++, G_TP_NONE);
-				gDPSetAlphaCompare(gdl++, G_AC_NONE);
-				gDPSetTextureLOD(gdl++, G_TL_TILE);
-				gDPSetTextureConvert(gdl++, G_TC_FILT);
+				gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+				gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+				gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+				gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 				texSelect(&gdl, &g_TexGeneralConfigs[49], 1, 0, 2, 1, 0);
 
-				gDPSetCycleType(gdl++, G_CYC_1CYCLE);
+				gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 				gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-				gDPSetTextureFilter(gdl++, G_TF_POINT);
+				gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
-				gSPTextureRectangle(gdl++,
+				gdl += gfx_Texture_Rectangle(gdl,
 						elem->x << 2,
 						elem->y << 2,
 						(elem->x + 32) << 2,
@@ -914,7 +914,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 
 	lookat = gfxAllocateLookAt(2);
 	mtxLookAtReflect(&spf0, lookat, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-	gSPLookAt(gdl++, lookat);
+	gfx_LookAt(gdl++, lookat);
 
 	float angle1;
 	float angle2;
@@ -929,7 +929,6 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 	g_TitleLightPdLogoMain.l[0].l.dir[0] = 127.0f * sinf(angle1) * cosf(angle2);
 	g_TitleLightPdLogoMain.l[0].l.dir[1] = 127.0f * sinf(angle2);
 	g_TitleLightPdLogoMain.l[0].l.dir[2] = 127.0f * cosf(angle1) * cosf(angle2);
-	
 
 	mtxBuildLookAtMatrixF(&sp2b0, 0.0f, 0.0f, 4000.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
@@ -959,7 +958,7 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 		rwdata->gdl = tmpgdl = gfxAllocate(5 * sizeof(Gfx));
 
 		gSPSetLights1(tmpgdl++, g_TitleLightPdLogoFront);
-		gSPBranchList(tmpgdl++, rodata->opagdl);
+		gfx_Branch_List(tmpgdl++, rodata->opagdl);
 	}
 
 	node = modelGetPart(model->definition, MODELPART_LOGO_RIGHTSIDE);
@@ -973,9 +972,9 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 
 		if (g_PdLogoAmbientLightFrac > 0.0f) {
 			gSPSetLights1(tmpgdl++, g_TitleLightPdLogoNotFront);
-			gSPBranchList(tmpgdl++, rodata->opagdl);
+			gfx_Branch_List(tmpgdl++, rodata->opagdl);
 		} else {
-			gSPEndDisplayList(tmpgdl++);
+			gfx_End_Display_List(tmpgdl++);
 		}
 	}
 
@@ -990,9 +989,9 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 
 		if (g_PdLogoAmbientLightFrac > 0.0f) {
 			gSPSetLights1(tmpgdl++, g_TitleLightPdLogoNotFront);
-			gSPBranchList(tmpgdl++, rodata->opagdl);
+			gfx_Branch_List(tmpgdl++, rodata->opagdl);
 		} else {
-			gSPEndDisplayList(tmpgdl++);
+			gfx_End_Display_List(tmpgdl++);
 		}
 	}
 
@@ -1007,19 +1006,18 @@ Gfx *titleRenderPdLogo(Gfx *gdl)
 
 		if (g_PdLogoAmbientLightFrac > 0.0f) {
 			gSPSetLights1(tmpgdl++, g_TitleLightPdLogoNotFront);
-			gSPBranchList(tmpgdl++, rodata->opagdl);
+			gfx_Branch_List(tmpgdl++, rodata->opagdl);
 		} else {
-			gSPEndDisplayList(tmpgdl++);
+			gfx_End_Display_List(tmpgdl++);
 		}
 	}
 
 	gdl = titleRenderPdLogoModel(gdl, model, true, g_PdLogoFrac, 240, 1.0f, (Mtx*)&sp270, gfxAllocateVertices(numvertices), gfxAllocateColours(numcolours));
 
 	gSPSetLights1(gdl++, g_TitleLightPdLogoMain);
-	{
-		struct coord sp64 = {0, 0, 1000};
-		mtx4LoadTranslation(&sp64, &sp1e8);
-	}
+
+	struct coord sp64 = {0, 0, 1000};
+	mtx4LoadTranslation(&sp64, &sp1e8);
 
 	mtxScale3x4(1.0f + sp13c, &sp1e8);
 	mtx4MultMtx4(&sp2b0, &sp1e8, &sp230);

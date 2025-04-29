@@ -22,6 +22,7 @@
 #include "string.h"
 #include "lib/vi.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "string.h"
 
@@ -150,7 +151,7 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, uint32_t alpha)
 	y = timery;
 
 	if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
-		gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeL);
+		gfx_Extra_Geometry_Mode_EXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeL);
 	}
 
 	gdl = textRender(gdl, &x, &y, buffer, g_CharsNumeric, g_FontNumeric, textcolour, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
@@ -290,7 +291,7 @@ Gfx *hudmsgRenderBox(Gfx *gdl, int x1, int y1, int x2, int y2, float bgopacity, 
 		f20 *= (f0 - 0.5f) + (f0 - 0.5f);
 	}
 
-	gdl = gfxSetCustomProjection(gdl);
+	gdl = savebufferSetCustomProjection(gdl);
 
 	gdl = menugfxDrawFilledRect(gdl, x1, y1, x2, y1 + 1, bordercolour, bordercolour);
 	gdl = menugfxDrawFilledRect(gdl, x1, y2, x2, y2 + 1, bordercolour, bordercolour);
@@ -1262,16 +1263,16 @@ Gfx *hudmsgsRender(Gfx *gdl)
 		const bool doaspectfix = (playercount < 2) || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL);
 		if (doaspectfix && msg->state >= HUDMSGSTATE_FADINGIN) {
 			if (msg->alignh == HUDMSGALIGN_SCREENLEFT || msg->alignh == HUDMSGALIGN_LEFT) {
-				gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeL);
+				gfx_Extra_Geometry_Mode_EXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeL);
 			} else if (msg->alignh == HUDMSGALIGN_RIGHT) {
-				gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeR);
+				gfx_Extra_Geometry_Mode_EXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeR);
 			} else {
-				gSPExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT, G_ASPECT_CENTER_EXT);
+				gfx_Extra_Geometry_Mode_EXT(gdl++, G_ASPECT_MODE_EXT, G_ASPECT_CENTER_EXT);
 			}
 		}
 
 		if (msg->type == HUDMSGTYPE_CUTSCENESUBTITLE) {
-			gDPSetScissor(gdl++,
+			gfx_Set_Scissor(gdl++,
 					(x - 4), 0,
 					(x + msg->width + 3), viGetBufHeight());
 		}
@@ -1402,7 +1403,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
 		if (msg->type == HUDMSGTYPE_CUTSCENESUBTITLE) {
-			gDPSetScissor(gdl++,
+			gfx_Set_Scissor(gdl++,
 					viGetViewLeft(), viGetViewTop(),
 					viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 		}

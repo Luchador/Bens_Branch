@@ -1663,7 +1663,6 @@ static void gfx_adjust_viewport_or_scissor(XYWidthHeight* area, bool preserve_as
 }
 
 static void gfx_calc_and_set_viewport(const Vp_t* viewport) {
-    // 2 bits fraction
     float width = viewport->vscale[0];
     float height = viewport->vscale[1];
     float x = (viewport->vtrans[0]) - width / 2.0f;
@@ -1948,16 +1947,12 @@ static void gfx_dp_set_fog_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
     rdp.fog_color.a = a;
 }
 
-static void gfx_dp_set_fill_color(uint32_t packed_color) {
-    uint16_t col16 = (uint16_t)packed_color;
-    uint32_t r = col16 >> 11;
-    uint32_t g = (col16 >> 6) & 0x1f;
-    uint32_t b = (col16 >> 1) & 0x1f;
-    uint32_t a = col16 & 1;
-    rdp.fill_color.r = SCALE_5_8(r);
-    rdp.fill_color.g = SCALE_5_8(g);
-    rdp.fill_color.b = SCALE_5_8(b);
-    rdp.fill_color.a = a * 255;
+static void gfx_dp_set_fill_color(uint32_t packed_color)
+{
+    rdp.fill_color.r = (packed_color >> 24) & 0xFF;
+    rdp.fill_color.g = (packed_color >> 16) & 0xFF;
+    rdp.fill_color.b = (packed_color >> 8)  & 0xFF;
+    rdp.fill_color.a = (packed_color >> 0)  & 0xFF;
 }
 
 static void gfx_dp_set_subpixel_offset(int16_t x, int16_t y) {
@@ -2465,10 +2460,6 @@ static void gfx_run_dl(Gfx* cmd) {
                 break;
             case (uint8_t)G_RDPHALF_1:
             case (uint8_t)G_RDPHALF_2:
-            case (uint8_t)G_RDPHALF_CONT:
-                // on N64 skyRender uses these to render some types of skies and skybox water
-                // by issuing low-level ucode commands G_TRI_FILL and G_TRI_SHADE_TXTR
-                // the port renders the sky in a different manner
                 break;
             case G_RDPFLUSH_EXT:
                 gfx_flush();
@@ -2490,6 +2481,253 @@ static void gfx_run_dl(Gfx* cmd) {
     }
 }
 
+extern "C" void gfx_Immp1(Gfx *pkt, uint8_t command, uint32_t param)
+{
+    pkt->words.w0 = ((uint32_t)command << 24);
+    pkt->words.w1 = param;
+}
+
+extern "C" void gfx_Immp21(Gfx *pkt, uint8_t command, uint16_t p0, uint8_t p1, uintptr_t data)
+{
+    pkt->words.w0 = ((uint32_t)command << 24) |
+                    ((uint32_t)p0 << 8) |
+                    ((uint32_t)p1 << 0);
+
+    pkt->words.w1 = data;
+}
+
+extern "C" void gfx_Dma1p(Gfx *pkt, uint8_t command, uintptr_t src, uint16_t length, uint8_t param)
+{
+    pkt->words.w0 = ((uint32_t)command << 24) |
+                    ((uint32_t)param << 16) |
+                    ((uint32_t)length << 0);
+
+    pkt->words.w1 = src;
+}
+
+extern "C" void gfx_MoveWord(Gfx *pkt, uint8_t index, uint16_t offset, uintptr_t data)
+{
+    gfx_Immp21(pkt, G_MOVEWORD, offset, index, data);
+}
+
+extern "C" void gfx_Segment(Gfx *pkt, uint8_t segment, uintptr_t base)
+{
+    gfx_MoveWord(pkt, G_MW_SEGMENT, (uint16_t)(segment * 4), base);
+}
+
+extern "C" void gfx_Num_Lights(Gfx *pkt, uint32_t numlights)
+{
+    gfx_MoveWord(pkt, G_MW_NUMLIGHT, G_MWO_NUMLIGHT, NUML(numlights));
+}
+
+extern "C" void gfx_Light(Gfx *pkt, const Light *light, uint32_t n)
+{
+    gfx_Dma1p(pkt, G_MOVEMEM, (uintptr_t)light, sizeof(Light), ((n - 1) * 2) + G_MV_L0);
+}
+
+extern "C" void gfx_Set_Lights1(Gfx *pkt, const Lights1 *lights)
+{
+    gfx_Num_Lights(pkt, 2);
+    gfx_Light(pkt, &lights->l[0], 1);
+    gfx_Light(pkt, (const Light *)&lights->a, 2);
+}
+
+extern "C" void gfx_Matrix(Gfx *pkt, const Mtx *matrix, uint32_t flags)
+{
+    gfx_Dma1p(pkt, G_MTX, (uintptr_t)matrix, sizeof(Mtx), flags);
+}
+
+extern "C" void gfx_Pop_Matrix(Gfx *pkt, uint32_t count)
+{
+    gfx_Immp1(pkt, G_POPMTX, count);
+}
+
+extern "C" void gfx_Set_Geometry_Mode(Gfx *pkt, uint32_t word)
+{
+    pkt->words.w0 = ((uint32_t)G_SETGEOMETRYMODE << 24);
+    pkt->words.w1 = word;
+}
+
+extern "C" void gfx_Clear_Geometry_Mode(Gfx *pkt, uint32_t word)
+{
+    pkt->words.w0 = ((uint32_t)G_CLEARGEOMETRYMODE << 24);
+    pkt->words.w1 = word;
+}
+
+extern "C" void gfx_Extra_Geometry_Mode_EXT(Gfx *pkt, uint32_t clearbits, uint32_t setbits)
+{
+    pkt->words.w0 = ((uint32_t)G_EXTRAGEOMETRYMODE_EXT << 24) | (~clearbits & 0x00FFFFFF);
+    pkt->words.w1 = setbits;
+}
+
+extern "C" void gfx_1Triangle(Gfx *pkt, uint8_t v1, uint8_t v2, uint8_t v3, uint8_t flag)
+{
+    pkt->words.w0 = ((uint32_t)G_TRI1 << 24);
+    pkt->words.w1 = ((uint32_t)flag << 24) |
+                    ((uint32_t)(v1 * 10) << 16) |
+                    ((uint32_t)(v2 * 10) << 8)  |
+                    ((uint32_t)(v3 * 10) << 0);
+}
+
+extern "C" void gfx_Tri4(Gfx *pkt, uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2, uint8_t x3, uint8_t y3, uint8_t z3, uint8_t x4, uint8_t y4, uint8_t z4)
+{
+    pkt->words.w0 = ((uint32_t)G_TRI4 << 24) |
+    ((uint32_t)(z4 & 0xF) << 12) |
+    ((uint32_t)(z3 & 0xF) << 8)  |
+    ((uint32_t)(z2 & 0xF) << 4)  |
+    ((uint32_t)(z1 & 0xF));
+
+    pkt->words.w1 = 
+    ((uint32_t)(y4 & 0xF) << 28) |
+    ((uint32_t)(x4 & 0xF) << 24) |
+    ((uint32_t)(y3 & 0xF) << 20) |
+    ((uint32_t)(x3 & 0xF) << 16) |
+    ((uint32_t)(y2 & 0xF) << 12) |
+    ((uint32_t)(x2 & 0xF) << 8)  |
+    ((uint32_t)(y1 & 0xF) << 4)  |
+    ((uint32_t)(x1 & 0xF));
+}
+
+extern "C" void gfx_Tri3(Gfx *pkt, uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2, uint8_t x3, uint8_t y3, uint8_t z3)
+{
+    gfx_Tri4(pkt,
+    x1, y1, z1,
+    x2, y2, z2,
+    x3, y3, z3,
+    0, 0, 0);
+}
+
+extern "C" void gfx_Tri2(Gfx *pkt, uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2)
+{
+    gfx_Tri4(pkt,
+    x1, y1, z1,
+    x2, y2, z2,
+    0, 0, 0,
+    0, 0, 0);
+}
+
+extern "C" void gfx_Tri1(Gfx *pkt, uint8_t x1, uint8_t y1, uint8_t z1)
+{
+    gfx_Tri4(pkt,
+    x1, y1, z1,
+    0, 0, 0,
+    0, 0, 0,
+    0, 0, 0);
+}
+
+extern "C" void gfx_Fill_Rectangle(Gfx *pkt, int32_t ulx, int32_t uly, int32_t lrx, int32_t lry)
+{
+    pkt->words.w0 = ((uint32_t)G_FILLRECT << 24) |
+                    ((uint32_t)lrx << 14) |
+                    ((uint32_t)lry << 2);
+
+    pkt->words.w1 = ((uint32_t)ulx << 14) |
+                    ((uint32_t)uly << 2);
+}
+
+extern "C" int gfx_Fill_Rectangle_Wide_EXT(Gfx *pkt, uint32_t ulx, uint32_t uly, uint32_t lrx, uint32_t lry)
+{
+    pkt[0].words.w0 = ((uint32_t)G_FILLRECT_WIDE_EXT << 24) | ((lrx * 4) & 0x003FFFFF);
+    pkt[0].words.w1 = (lry * 4) & 0x003FFFFF;
+
+    pkt[1].words.w0 = (ulx * 4) & 0x003FFFFF;
+    pkt[1].words.w1 = (uly * 4) & 0x003FFFFF;
+
+    return 2;
+}
+
+extern "C" void gfx_HUD_Rectangle(Gfx *pkt, int32_t ulx, int32_t uly, int32_t lrx, int32_t lry)
+{
+    gfx_Fill_Rectangle(pkt, ulx, uly, lrx, lry);
+}
+
+extern "C" int gfx_HUD_Rectangle_EXT(Gfx *pkt, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
+{
+    return gfx_Fill_Rectangle_Wide_EXT(pkt, x1, y1, x2 + 1, y2 + 1);
+}
+
+extern "C" int gfx_Texture_Rectangle(Gfx *pkt, uint16_t xl, uint16_t yl, uint16_t xh, uint16_t yh, uint8_t tile, uint16_t s, uint16_t t, uint16_t dsdx, uint16_t dtdy)
+{
+    // First command: G_TEXRECT
+    pkt[0].words.w0 = ((uint32_t)G_TEXRECT << 24) |
+    ((uint32_t)xh << 12) |
+    ((uint32_t)yh << 0);
+
+    pkt[0].words.w1 = ((uint32_t)tile << 24) |
+    ((uint32_t)xl << 12) |
+    ((uint32_t)yl << 0);
+
+    // Second command: G_RDPHALF_1
+    pkt[1].words.w0 = ((uint32_t)G_RDPHALF_1 << 24);
+    pkt[1].words.w1 = ((uint32_t)s << 16) |
+    ((uint32_t)t << 0);
+
+    // Third command: G_RDPHALF_2
+    pkt[2].words.w0 = ((uint32_t)G_RDPHALF_2 << 24);
+    pkt[2].words.w1 = ((uint32_t)dsdx << 16) |
+    ((uint32_t)dtdy << 0);
+
+    return 3; // This function writes 3 Gfx packets
+}
+
+extern "C" int gfx_Texture_Rectangle_Flip(Gfx *pkt, uint16_t xl, uint16_t yl, uint16_t xh, uint16_t yh, uint8_t tile, uint16_t s, uint16_t t, uint16_t dsdx, uint16_t dtdy)
+{
+    // First packet: G_TEXRECTFLIP
+    pkt[0].words.w0 = ((uint32_t)G_TEXRECTFLIP << 24) |
+    ((uint32_t)xh << 12) |
+    ((uint32_t)yh << 0);
+
+    pkt[0].words.w1 = ((uint32_t)tile << 24) |
+    ((uint32_t)xl << 12) |
+    ((uint32_t)yl << 0);
+
+    // Second packet: G_RDPHALF_1
+    pkt[1].words.w0 = ((uint32_t)G_RDPHALF_1 << 24);
+    pkt[1].words.w1 = ((uint32_t)(uint16_t)s << 16) |
+    ((uint32_t)(uint16_t)t << 0);
+
+    // Third packet: G_RDPHALF_2
+    pkt[2].words.w0 = ((uint32_t)G_RDPHALF_2 << 24);
+    pkt[2].words.w1 = ((uint32_t)(uint16_t)dsdx << 16) |
+    ((uint32_t)(uint16_t)dtdy << 0);
+
+    return 3; // This function writes 3 Gfx packets
+}
+
+extern "C" int gfx_Image_Rectangle_EXT(Gfx *pkt, uint16_t x0, uint16_t y0, uint16_t s0, uint16_t t0, uint16_t x1, uint16_t y1, uint16_t s1, uint16_t t1, uint8_t tile, uint16_t iw, uint16_t ih)
+{
+    // First packet
+    pkt[0].words.w0 = ((uint32_t)G_IMAGERECT_EXT << 24) | ((uint32_t)tile << 0);
+    pkt[0].words.w1 = ((uint32_t)iw << 16) | ((uint32_t)ih << 0);
+
+    // Second packet
+    pkt[1].words.w0 = ((uint32_t)x0 << 16) | ((uint32_t)y0 << 0);
+    pkt[1].words.w1 = ((uint32_t)s0 << 16) | ((uint32_t)t0 << 0);
+
+    // Third packet
+    pkt[2].words.w0 = ((uint32_t)x1 << 16) | ((uint32_t)y1 << 0);
+    pkt[2].words.w1 = ((uint32_t)s1 << 16) | ((uint32_t)t1 << 0);
+
+    return 3; // 3 Gfx commands written
+}
+
+extern "C" void gfx_Set_Subpixel_Offset_EXT(Gfx *pkt, int16_t x, int16_t y)
+{
+    pkt->words.w0 = ((uint32_t)G_SETSUBPIXELOFFSET_EXT << 24) | ((uint16_t)x);
+    pkt->words.w1 = (uint16_t)y;
+}
+
+extern "C" void gfx_Color(Gfx *pkt, const Col *colors, uint32_t count)
+{
+    gfx_Dma1p(pkt, G_COL, (uintptr_t)colors, sizeof(Col) * count, ((count - 1) << 2));
+}
+
+extern "C" void gfx_Set_Color(Gfx *pkt, uint8_t command, uintptr_t data)
+{
+    pkt->words.w0 = ((uint32_t)command << 24);
+    pkt->words.w1 = data;
+}
+
 extern "C" void gfx_Set_Prim_Color(Gfx *pkt, RGBA color)
 {
     pkt->words.w0 = (_SHIFTL(G_SETPRIMCOLOR, 24, 8));
@@ -2497,6 +2735,286 @@ extern "C" void gfx_Set_Prim_Color(Gfx *pkt, RGBA color)
                     ((uint32_t)color.g << 16) |
                     ((uint32_t)color.b << 8)  |
                     ((uint32_t)color.a << 0);
+}
+
+extern "C" void gfx_Set_Fill_Color(Gfx *pkt, RGBA color)
+{
+    uint32_t packed = ((uint32_t)color.r << 24) |
+                      ((uint32_t)color.g << 16) |
+                      ((uint32_t)color.b << 8)  |
+                      ((uint32_t)color.a);
+
+    pkt->words.w0 = ((uint32_t)G_SETFILLCOLOR << 24);
+    pkt->words.w1 = packed;
+}
+
+extern "C" void gfx_Set_Env_Color(Gfx *pkt, RGBA color)
+{
+    pkt->words.w0 = ((uint32_t)G_SETENVCOLOR << 24);
+    pkt->words.w1 = ((uint32_t)color.r << 24) |
+                    ((uint32_t)color.g << 16) |
+                    ((uint32_t)color.b << 8)  |
+                    ((uint32_t)color.a);
+}
+
+extern "C" void gfx_Set_Fog_Color(Gfx *pkt, RGBA color)
+{
+    pkt->words.w0 = ((uint32_t)G_SETFOGCOLOR << 24);
+    pkt->words.w1 = ((uint32_t)color.r << 24) |
+                    ((uint32_t)color.g << 16) |
+                    ((uint32_t)color.b << 8)  |
+                    ((uint32_t)color.a);
+}
+
+extern "C" void gfx_Texture(Gfx *pkt, uint16_t s, uint16_t t, uint8_t level, uint8_t tile, uint8_t on)
+{
+    pkt->words.w0 = ((uint32_t)G_TEXTURE << 24) |
+                    ((uint32_t)level << 11) |
+                    ((uint32_t)tile << 8) |
+                    ((uint32_t)on << 0);
+
+    pkt->words.w1 = ((uint32_t)s << 16) |
+                    ((uint32_t)t);
+}
+
+extern "C" void gfx_Set_Image(Gfx *pkt, uint8_t cmd, uint8_t fmt, uint8_t siz, uint16_t width, uintptr_t address)
+{
+    pkt->words.w0 = ((uint32_t)cmd << 24) |
+                    ((uint32_t)(fmt & 0x7) << 21) |
+                    ((uint32_t)(siz & 0x3) << 19) |
+                    ((uint32_t)((width - 1) & 0xFFF));
+
+    pkt->words.w1 = (uint32_t)address;
+}
+
+extern "C" void gfx_Set_Color_Image(Gfx *pkt, uint8_t fmt, uint8_t siz, uint16_t width, uintptr_t address)
+{
+    gfx_Set_Image(pkt, G_SETCIMG, fmt, siz, width, address);
+}
+
+extern "C" void gfx_Set_Texture_Image(Gfx *pkt, uint8_t fmt, uint8_t siz, uint16_t width, uintptr_t address)
+{
+    gfx_Set_Image(pkt, G_SETTIMG, fmt, siz, width, address);
+}
+
+extern "C" void gfx_Copy_Framebuffer_EXT(Gfx *pkt, uint16_t dst, uint16_t src, uint16_t uls, uint16_t ult, uint8_t back)
+{
+    pkt->words.w0 = ((uint32_t)G_COPYFB_EXT << 24) |
+                    ((uint32_t)(back & 0x1) << 22) |
+                    ((uint32_t)(dst & 0x7FF) << 11) |
+                    ((uint32_t)(src & 0x7FF) << 0);
+
+    pkt->words.w1 = ((uint32_t)uls << 16) |
+                    ((uint32_t)ult << 0);
+}
+
+extern "C" void gfx_Set_Framebuffer_Texture_EXT(Gfx *pkt, uint8_t fmt, uint8_t siz, uint16_t width, uintptr_t image)
+{
+    gfx_Set_Image(pkt, G_SETTIMG_FB_EXT, fmt, siz, width, image);
+}
+
+extern "C" void gfx_Set_Framebuffer_Target_EXT(Gfx *pkt, uint8_t fmt, uint8_t siz, uint16_t width, uintptr_t image)
+{
+    gfx_Set_Image(pkt, G_SETFB_EXT, fmt, siz, width, image);
+}
+
+extern "C" void gfx_Set_Tile_Size(Gfx *pkt, uint8_t tile, uint16_t uls, uint16_t ult, uint16_t lrs, uint16_t lrt)
+{
+    pkt->words.w0 = ((uint32_t)G_SETTILESIZE << 24) |
+                    (((uint32_t)uls & 0xFFF) << 12) |
+                    ((uint32_t)ult & 0xFFF);
+
+    pkt->words.w1 = (((uint32_t)tile & 0x7) << 24) |
+                    (((uint32_t)lrs & 0xFFF) << 12) |
+                    ((uint32_t)lrt & 0xFFF);
+}
+
+extern "C" Gfx gfx_S_Set_Tile(uint8_t fmt, uint8_t siz, uint16_t line, uint16_t tmem,
+    uint8_t tile, uint8_t palette, uint8_t cmt, uint8_t maskt,
+    uint8_t shiftt, uint8_t cms, uint8_t masks, uint8_t shifts)
+{
+    Gfx g;
+
+    g.words.w0 = ((uint32_t)G_SETTILE << 24) |
+    ((uint32_t)(fmt & 0x7) << 21) |
+    ((uint32_t)(siz & 0x3) << 19) |
+    ((uint32_t)(line & 0x1FF) << 9) |
+    ((uint32_t)(tmem & 0x1FF));
+
+    g.words.w1 = ((uint32_t)(tile & 0x7) << 24) |
+    ((uint32_t)(palette & 0xF) << 20) |
+    ((uint32_t)(cmt & 0x3) << 18) |
+    ((uint32_t)(maskt & 0xF) << 14) |
+    ((uint32_t)(shiftt & 0xF) << 10) |
+    ((uint32_t)(cms & 0x3) << 8) |
+    ((uint32_t)(masks & 0xF) << 4) |
+    ((uint32_t)(shifts & 0xF));
+
+    return g;
+}
+
+extern "C" void gfx_Load_Block(Gfx *pkt, uint8_t tile, uint16_t uls, uint16_t ult, uint16_t lrs, uint16_t dxt)
+{
+    pkt->words.w0 = ((uint32_t)G_LOADBLOCK << 24) |
+                    (((uint32_t)(uls & 0xFFF)) << 12) |
+                    ((uint32_t)(ult & 0xFFF));
+
+    pkt->words.w1 = (((uint32_t)(tile & 0x7)) << 24) |
+                    (((uint32_t)(MIN(lrs, G_TX_LDBLK_MAX_TXL) & 0xFFF)) << 12) |
+                    ((uint32_t)(dxt & 0xFFF));
+}
+
+extern "C" void gfx_Set_Tile(Gfx *pkt, uint8_t fmt, uint8_t siz, uint16_t line, uint16_t tmem, uint8_t tile, uint8_t palette, uint8_t cmt, uint8_t maskt, uint8_t shiftt, uint8_t cms, uint8_t masks, uint8_t shifts)
+{
+    pkt->words.w0 = ((uint32_t)G_SETTILE << 24) |
+    ((uint32_t)(fmt & 0x7) << 21) |
+    ((uint32_t)(siz & 0x3) << 19) |
+    ((uint32_t)(line & 0x1FF) << 9) |
+    ((uint32_t)(tmem & 0x1FF));
+
+    pkt->words.w1 = ((uint32_t)(tile & 0x7) << 24) |
+    ((uint32_t)(palette & 0xF) << 20) |
+    ((uint32_t)(cmt & 0x3) << 18) |
+    ((uint32_t)(maskt & 0xF) << 14) |
+    ((uint32_t)(shiftt & 0xF) << 10) |
+    ((uint32_t)(cms & 0x3) << 8) |
+    ((uint32_t)(masks & 0xF) << 4) |
+    ((uint32_t)(shifts & 0xF));
+}
+
+extern "C" void gfx_Load_TLUT06(Gfx *pkt, uint16_t a, uint16_t b, uint16_t c, uint16_t d)
+{
+    pkt->words.w0 = ((uint32_t)G_LOADTLUT << 24) |
+                    ((uint32_t)(a & 0x3FF) << 14) |
+                    ((uint32_t)(b & 0x3FF) << 2);
+
+    pkt->words.w1 = ((uint32_t)(0x06) << 24) |
+                    ((uint32_t)(c & 0x3FF) << 14) |
+                    ((uint32_t)(d & 0x3FF) << 2);
+}
+
+extern "C" void gfx_Load_TLUT(Gfx *pkt, uint16_t count)
+{
+    pkt->words.w0 = ((uint32_t)G_LOADTLUT << 24);
+    pkt->words.w1 = ((uint32_t)6 << 24) | ((uint32_t)(count & 0x3FF) << 14);
+}
+
+extern "C" void gfx_Fog_Position(Gfx *pkt, uint16_t min, uint16_t max)
+{
+    uint16_t multiplier = 128000 / (max - min);
+    uint16_t offset = (500 - min) * 256 / (max - min);
+
+    uint32_t packed = ((uint32_t)multiplier << 16) | offset;
+
+    gMoveWd(pkt, G_MW_FOG, G_MWO_FOG, packed);
+}
+
+extern "C" void gfx_Set_Scissor(Gfx *pkt, int ulx, int uly, int lrx, int lry)
+{
+    pkt->words.w0 = ((uint32_t)G_SETSCISSOR << 24) |
+                    (((uint32_t)ulx & 0xFFF) << 12) |
+                    ((uint32_t)uly & 0xFFF);
+
+    pkt->words.w1 = (((uint32_t)(lrx * 4) & 0xFFF) << 12) |
+                    ((uint32_t)lry & 0xFFF);
+}
+
+extern "C" void gfx_LookAtX(Gfx *pkt, Light *l)
+{
+    gfx_Dma1p(pkt, G_MOVEMEM, (uintptr_t)l, sizeof(Light), G_MV_LOOKATX);
+}
+
+extern "C" void gfx_LookAtY(Gfx *pkt, Light *l)
+{
+    gfx_Dma1p(pkt, G_MOVEMEM, (uintptr_t)l, sizeof(Light), G_MV_LOOKATY);
+}
+
+// LookAt struct consists of two Lights: first 16 bytes (X), second 16 bytes (Y)
+extern "C" void gfx_LookAt(Gfx *pkt, LookAt *la)
+{
+    gfx_LookAtX(pkt, (Light *)la);
+    gfx_LookAtY(pkt, (Light *)((uintptr_t)la + 16));
+}
+
+extern "C" void gfx_Set_Other_Mode(Gfx *pkt, uint8_t cmd, uint8_t shift, uint8_t length, uint32_t data)
+{
+    pkt->words.w0 = ((uint32_t)cmd << 24) |
+                    ((uint32_t)shift << 8) |
+                    ((uint32_t)length << 0);
+
+    pkt->words.w1 = data;
+}
+
+extern "C" void gfx_Set_Texture_LOD(Gfx *pkt, uint32_t type)
+{
+    gfx_Set_Other_Mode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTLOD, 1, type);
+}
+
+extern "C" void gfx_Set_Texture_LUT(Gfx *pkt, uint32_t type)
+{
+    gfx_Set_Other_Mode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTLUT, 2, type);
+}
+
+extern "C" void gfx_Set_Texture_Persp(Gfx *pkt, uint32_t type)
+{
+    gfx_Set_Other_Mode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTPERSP, 1, type);
+}
+
+extern "C" void gfx_Set_Texture_Filter(Gfx *pkt, uint32_t type)
+{
+    gfx_Set_Other_Mode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTFILT, 2, type);
+}
+
+extern "C" void gfx_Set_Texture_Convert(Gfx *pkt, uint32_t type)
+{
+    gfx_Set_Other_Mode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTCONV, 3, type);
+}
+
+extern "C" void gfx_Display_List(Gfx *pkt, const void *dl)
+{
+    gfx_Dma1p(pkt, G_DL, (uintptr_t)dl, 0, G_DL_PUSH);
+}
+
+extern "C" void gfx_Branch_List(Gfx *pkt, const void *dl)
+{
+    gfx_Dma1p(pkt, G_DL, (uintptr_t)dl, 0, G_DL_NOPUSH);
+}
+
+extern "C" void gfx_Pipeline_Mode(Gfx *pkt, uint32_t mode)
+{
+    gfx_Set_Other_Mode(pkt, G_SETOTHERMODE_H, G_MDSFT_PIPELINE, 1, mode);
+}
+
+extern "C" void gfx_Set_Cycle_Type(Gfx *pkt, uint32_t type)
+{
+    gfx_Set_Other_Mode(pkt, G_SETOTHERMODE_H, G_MDSFT_CYCLETYPE, 2, type);
+}
+
+extern "C" void gfx_Set_Combine_Key(Gfx *pkt, uint32_t type)
+{
+    gfx_Set_Other_Mode(pkt, G_SETOTHERMODE_H, G_MDSFT_COMBKEY, 1, type);
+}
+
+extern "C" void gfx_Set_Alpha_Compare(Gfx *pkt, uint32_t type)
+{
+    gfx_Set_Other_Mode(pkt, G_SETOTHERMODE_L, G_MDSFT_ALPHACOMPARE, 2, type);
+}
+
+extern "C" void gfx_Set_Render_Mode(Gfx *pkt, uint32_t c0, uint32_t c1)
+{
+    gfx_Set_Other_Mode(pkt, G_SETOTHERMODE_L, G_MDSFT_RENDERMODE, 29, c0 | c1);
+}
+
+extern "C" void gfx_No_Param(Gfx *pkt, uint8_t cmd)
+{
+    pkt->words.w0 = ((uint32_t)cmd << 24);
+    pkt->words.w1 = 0;
+}
+
+extern "C" void gfx_End_Display_List(Gfx *pkt)
+{
+    pkt->words.w0 = ((uint32_t)G_ENDDL << 24);
+    pkt->words.w1 = 0;
 }
 
 static void gfx_sp_reset() {

@@ -835,7 +835,7 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 
 		if (objprop) {
 			struct defaultobj *obj = objprop->obj;
-			Mtxf *mtx = &obj->model->matrices[mtxindex];
+			Mtx *mtx = (Mtx*)&obj->model->matrices[mtxindex];
 			struct doorobj *door = objprop->door;
 			struct coord sp84;
 			struct coord sp78;
@@ -854,8 +854,8 @@ void wallhitCreateWith20Args(struct coord *relpos, struct coord *arg1, struct co
 			sp78.y = sp1d0.y;
 			sp78.z = sp1d0.z;
 
-			mtx4RotateVecInPlace((Mtx*)mtx, &sp84);
-			mtx4RotateVecInPlace((Mtx*)mtx, &sp78);
+			mtx4RotateVecInPlace(mtx, &sp84);
+			mtx4RotateVecInPlace(mtx, &sp78);
 
 			width /= sqrtf(sp84.x * sp84.x + sp84.y * sp84.y + sp84.z * sp84.z);
 			height /= sqrtf(sp78.x * sp78.x + sp78.y * sp78.y + sp78.z * sp78.z);
@@ -1050,9 +1050,9 @@ int wallhitCalcLiftDistance(struct coord *coord)
 	float z;
 	float tmp;
 
-	x = g_Vars.currentplayer->projectionmtx->m[3][0] - coord->f[0];
-	y = g_Vars.currentplayer->projectionmtx->m[3][1] - coord->f[1];
-	z = g_Vars.currentplayer->projectionmtx->m[3][2] - coord->f[2];
+	x = (*g_Vars.currentplayer->projectionmtx)[3][0] - coord->f[0];
+	y = (*g_Vars.currentplayer->projectionmtx)[3][1] - coord->f[1];
+	z = (*g_Vars.currentplayer->projectionmtx)[3][2] - coord->f[2];
 
 	if (x < 0) {
 		x = -x;
@@ -1106,11 +1106,9 @@ Gfx *wallhitRenderOpaBgHits(int roomnum, Gfx *gdl)
 	int prevtexturenum;
 	int prev6b;
 
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gSPSetGeometryMode(gdl++, G_CULL_BACK);
-	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-	gDPSetColorDither(gdl++, G_CD_NOISE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Geometry_Mode(gdl++, G_CULL_BACK);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 	prevtexturenum = -1;
 	prev6b = -1;
@@ -1140,7 +1138,7 @@ Gfx *wallhitRenderOpaBgHits(int roomnum, Gfx *gdl)
 			colours[2] = wallhit->finalcolours[2];
 			colours[3] = wallhit->finalcolours[3];
 
-			gSPColor(gdl++, (uintptr_t)(colours), 4);
+			gfx_Color(gdl++, colours, 4);
 
 			if (wallhit->vertices2 != NULL) {
 				gSPVertex(gdl++, wallhit->vertices2, 4, 0);
@@ -1148,14 +1146,13 @@ Gfx *wallhitRenderOpaBgHits(int roomnum, Gfx *gdl)
 				gSPVertex(gdl++, (uintptr_t)(&wallhit->vertices), 4, 0);
 			}
 
-			gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
+			gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 		}
 
 		wallhit = wallhit->localnext;
 	}
 
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetColorDither(gdl++, G_CD_BAYER);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 	return gdl;
 }
@@ -1167,10 +1164,8 @@ Gfx *wallhitRenderXluBgHits(int roomnum, Gfx *gdl)
 	int prevtexturenum;
 	int prev6b;
 
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-	gDPSetColorDither(gdl++, G_CD_NOISE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 	prevtexturenum = -1;
 	prev6b = -1;
@@ -1196,7 +1191,7 @@ Gfx *wallhitRenderXluBgHits(int roomnum, Gfx *gdl)
 			colours[2] = wallhit->finalcolours[2];
 			colours[3] = wallhit->finalcolours[3];
 
-			gSPColor(gdl++, (uintptr_t)(colours), 4);
+			gfx_Color(gdl++, colours, 4);
 
 			if (wallhit->vertices2 != NULL) {
 				gSPVertex(gdl++, wallhit->vertices2, 4, 0);
@@ -1204,14 +1199,13 @@ Gfx *wallhitRenderXluBgHits(int roomnum, Gfx *gdl)
 				gSPVertex(gdl++, (uintptr_t)(&wallhit->vertices), 4, 0);
 			}
 
-			gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
+			gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 		}
 
 		wallhit = wallhit->localnext;
 	}
 
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetColorDither(gdl++, G_CD_BAYER);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 	return gdl;
 }
@@ -1230,15 +1224,13 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 		return gdl;
 	}
 
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 	if (!xlu) {
-		gSPSetGeometryMode(gdl++, G_CULL_BACK);
+		gfx_Set_Geometry_Mode(gdl++, G_CULL_BACK);
 	}
 
-	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-	gDPSetColorDither(gdl++, G_CD_NOISE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 	wallhit = xlu ? prop->xluwallhits : prop->opawallhits;
 
@@ -1247,10 +1239,10 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 			hasany = true;
 
 			if (wallhit->mtxindex != prevmtxindex) {
-				Mtxf *mtx = &obj->model->matrices[wallhit->mtxindex];
+				Mtx *mtx = (Mtx*)&obj->model->matrices[wallhit->mtxindex];
 				if (wallhit->mtxindex);
 				prevmtxindex = wallhit->mtxindex;
-				gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+				gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 			}
 
 			if (!xlu) {
@@ -1281,7 +1273,7 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 			colours[2] = wallhit->finalcolours[2];
 			colours[3] = wallhit->finalcolours[3];
 
-			gSPColor(gdl++, (uintptr_t)(colours), 4);
+			gfx_Color(gdl++, colours, 4);
 
 			if (wallhit->vertices2 != NULL) {
 				gSPVertex(gdl++, wallhit->vertices2, 4, 0);
@@ -1289,7 +1281,7 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 				gSPVertex(gdl++, (uintptr_t)(&wallhit->vertices), 4, 0);
 			}
 
-			gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
+			gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 		}
 
 		wallhit = wallhit->localnext;
@@ -1299,8 +1291,7 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 		obj->hidden2 &= ~(1 << xlu);
 	}
 
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetColorDither(gdl++, G_CD_BAYER);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 	return gdl;
 }

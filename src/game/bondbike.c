@@ -622,9 +622,9 @@ int bbike0f0d3680(struct coord *arg0, struct coord *arg1, struct coord *arg2)
 
 int bbike0f0d36d4(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, struct coord *arg4)
 {
-	if (cd00024ea4()) {
+	if (cdGetHasSlideTimeToEdge()) {
 		struct coord sp24;
-		float somefloat = cd00024e98();
+		float somefloat = cdGetSlideTimeToEdge();
 		int someint;
 
 		sp24.x = arg0->x * somefloat * 0.25f;

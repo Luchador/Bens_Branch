@@ -4,6 +4,7 @@
 #include "game/mtxutils.h"
 #include "bss.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 /**
@@ -174,7 +175,7 @@ Gfx *roomApplyMtx(Gfx *gdl, int roomnum)
 {
 	int index = roomTouchMtx(roomnum);
 
-	gSPMatrix(gdl++, &g_RoomMtxMatrices[index], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(gdl++, &g_RoomMtxMatrices[index], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	return gdl;
 }

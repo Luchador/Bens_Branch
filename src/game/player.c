@@ -1729,7 +1729,7 @@ void playerTickCutscene(bool arg0)
 	struct coord translate;
 	struct coord scale;
 	uint8_t frameslot;
-	Mtxf rotmtx;
+	Mtx rotmtx;
 	float translatescale = 100.0f;
 	float fovy;
 	int endframe;
@@ -1737,8 +1737,8 @@ void playerTickCutscene(bool arg0)
 	uint32_t buttons;
 	float tweenfrac;
 	float sp104;
-	Mtxf spc4;
-	Mtxf sp84;
+	Mtx spc4;
+	Mtx sp84;
 	float sp74[4];
 	float sp64[4];
 	float sp54[4];
@@ -1789,15 +1789,15 @@ void playerTickCutscene(bool arg0)
 	pos.y = translate.y * translatescale;
 	pos.z = translate.z * translatescale;
 
-	mtx4LoadRotation(&rot, (Mtx*)&rotmtx);
+	mtx4LoadRotation(&rot, &rotmtx);
 
-	up.x = rotmtx.m[1][0];
-	up.y = rotmtx.m[1][1];
-	up.z = rotmtx.m[1][2];
+	up.x = rotmtx[1][0];
+	up.y = rotmtx[1][1];
+	up.z = rotmtx[1][2];
 
-	look.x = -rotmtx.m[2][0];
-	look.y = -rotmtx.m[2][1];
-	look.z = -rotmtx.m[2][2];
+	look.x = -rotmtx[2][0];
+	look.y = -rotmtx[2][1];
+	look.z = -rotmtx[2][2];
 
 	fovy = animGetCameraValue(1, g_CutsceneAnimNum, frameslot);
 	g_CutsceneBlurFrac = animGetCameraValue(2, g_CutsceneAnimNum, frameslot);
@@ -1817,23 +1817,23 @@ void playerTickCutscene(bool arg0)
 		pos.y += sp104 * (g_Vars.bond->bond2.unk10.y - pos.y);
 		pos.z += sp104 * (g_Vars.bond->bond2.unk10.z - pos.z);
 
-		mtxBuildLookAtFromTarget((Mtx*)&spc4, 0, 0, 0, -look.x, -look.y, -look.z, up.x, up.y, up.z);
-		mtxBuildLookAtFromTarget((Mtx*)&sp84, 0, 0, 0,
+		mtxBuildLookAtFromTarget(&spc4, 0, 0, 0, -look.x, -look.y, -look.z, up.x, up.y, up.z);
+		mtxBuildLookAtFromTarget(&sp84, 0, 0, 0,
 				-g_Vars.bond->bond2.unk1c.x, -g_Vars.bond->bond2.unk1c.y, -g_Vars.bond->bond2.unk1c.z,
 				g_Vars.bond->bond2.unk28.x, g_Vars.bond->bond2.unk28.y, g_Vars.bond->bond2.unk28.z);
-		quaternion3x3MtxToQuat((Mtx*)&spc4, sp74);
-		quaternion3x3MtxToQuat((Mtx*)&sp84, sp64);
+		quaternion3x3MtxToQuat(&spc4, sp74);
+		quaternion3x3MtxToQuat(&sp84, sp64);
 		quaternionAvoidFlips(sp64, sp74);
 		quaternionSlerp(sp74, sp64, sp104, sp54);
-		quaternionToMtx(sp54, (Mtx*)&rotmtx);
+		quaternionToMtx(sp54, &rotmtx);
 
-		up.x = rotmtx.m[1][0];
-		up.y = rotmtx.m[1][1];
-		up.z = rotmtx.m[1][2];
+		up.x = rotmtx[1][0];
+		up.y = rotmtx[1][1];
+		up.z = rotmtx[1][2];
 
-		look.x = rotmtx.m[2][0];
-		look.y = rotmtx.m[2][1];
-		look.z = rotmtx.m[2][2];
+		look.x = rotmtx[2][0];
+		look.y = rotmtx[2][1];
+		look.z = rotmtx[2][2];
 
 		g_CutsceneBlurFrac += tweenfrac * (0 - g_CutsceneBlurFrac);
 		fovy += tweenfrac * (60 - fovy);
@@ -2079,7 +2079,7 @@ Gfx *player0f0baf84(Gfx *gdl)
 
 		mtxPerspective(mtx, g_Vars.currentplayer->zoominfovy, 1.4545454978943f, 10, 300);
 
-		gSPMatrix(gdl++, (uintptr_t)(mtx), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	}
 
 	return gdl;
@@ -2088,23 +2088,21 @@ Gfx *player0f0baf84(Gfx *gdl)
 Gfx *playerDrawFade(Gfx *gdl, uint32_t r, uint32_t g, uint32_t b, float frac)
 {
 	if (frac > 0) {
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetColorDither(gdl++, G_CD_DISABLE);
-		gDPSetTexturePersp(gdl++, G_TP_NONE);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
-		gDPSetTextureLOD(gdl++, G_TL_TILE);
-		gDPSetTextureFilter(gdl++, G_TF_BILERP);
-		gDPSetTextureConvert(gdl++, G_TC_FILT);
-		gDPSetTextureLUT(gdl++, G_TT_NONE);
-		gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+		gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 		gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-		struct RGBA color = {r, g, b, (int)(frac * 255)};
+		RGBA color = {r, g, b, (int)(frac * 255)};
 		gfx_Set_Prim_Color(gdl++, color);
-		gDPFillRectangle(gdl++, viGetViewLeft(), viGetViewTop(),
+		gfx_Fill_Rectangle(gdl++, viGetViewLeft(), viGetViewTop(),
 				viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
-		gDPSetColorDither(gdl++, G_CD_BAYER);
-		gDPSetTexturePersp(gdl++, G_TP_PERSP);
-		gDPSetTextureLOD(gdl++, G_TL_LOD);
+		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+		gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
 	}
 
 	return gdl;
@@ -2508,30 +2506,30 @@ void playerDisplayDamage(void)
 
 Gfx *playerRenderHealthBar(Gfx *gdl)
 {
-	Mtxf matrix;
-	Mtxf *addr = gfxAllocateMatrix();
+	Mtx matrix;
+	Mtx *addr = gfxAllocateMatrix();
 
 	float fovsc = 60.f / PLAYER_DEFAULT_FOV;
 	if (fovsc > 1.01f) {
 		fovsc *= 1.1f;
 	}
-	mtxBuildLookAtMatrixF((Mtx*)&matrix, 0, 370.f * fovsc, 0, 0, 0, 0, 0, 0, -1);
-	mtx4Copy((Mtx*)&matrix, (Mtx*)addr);
+	mtxBuildLookAtMatrixF(&matrix, 0, 370.f * fovsc, 0, 0, 0, 0, 0, 0, -1);
+	mtx4Copy(&matrix, addr);
 
-	gSPMatrix(gdl++, (uintptr_t)((void *)addr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Matrix(gdl++, ((void *)addr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
 	struct RGBA color = {230, 230, 230, 0};
 	gfx_Set_Prim_Color(gdl++, color);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 	// bug?
-	gSPClearGeometryMode(gdl++, G_ZBUFFER);
+	gfx_Clear_Geometry_Mode(gdl++, G_ZBUFFER);
 
 	gdl = healthbarDraw(gdl, NULL, 0, 0);
 
-	gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	return gdl;
 }
@@ -2758,8 +2756,8 @@ Gfx *playerDrawCutsceneRects(Gfx *gdl)
 		top = g_ViModes[0].widetop;
 	}
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 	struct RGBA color = {0, 0, 0, 255};
 	gfx_Set_Prim_Color(gdl++, color);
@@ -2767,15 +2765,15 @@ Gfx *playerDrawCutsceneRects(Gfx *gdl)
 	if (g_InCutscene && optionsGetCutsceneSubtitles() && g_Vars.stagenum != STAGE_CITRAINING) 
 	{
 		// For cutscenes with subtitles enabled, draw one double height rectangle on the bottom
-		gDPFillRectangle(gdl++, 0, viGetViewHeight() - top * 2, viGetViewWidth(), viGetViewHeight());
+		gfx_Fill_Rectangle(gdl++, 0, viGetViewHeight() - top * 2, viGetViewWidth(), viGetViewHeight());
 	}
 	else
 	{
 		// Top Rectangle
-		gDPFillRectangle(gdl++, 0, 0, viGetViewWidth(), top);
+		gfx_Fill_Rectangle(gdl++, 0, 0, viGetViewWidth(), top);
 
 		// Bottom Rectangle
-		gDPFillRectangle(gdl++, 0, viGetViewHeight() - top, viGetViewWidth(), viGetViewHeight());
+		gfx_Fill_Rectangle(gdl++, 0, viGetViewHeight() - top, viGetViewWidth(), viGetViewHeight());
 	}
 
 	return gdl;
@@ -2913,12 +2911,393 @@ void playerConfigureVi(void)
 	viSetBufSize(playerGetFbWidth(), playerGetFbHeight());
 }
 
+void playerTickEyeSpy(void)
+{
+	// The stage uses an eyespy
+	struct eyespy *eyespy = g_Vars.currentplayer->eyespy;
+	uint32_t playernum = g_Vars.currentplayernum;
+
+	if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
+		// Turn off the eyespy if active
+		struct chrdata *chr = eyespy->prop->chr;
+		eyespy->deployed = false;
+		eyespy->held = true;
+		eyespy->active = false;
+		psStopSound(eyespy->prop, PSTYPE_GENERAL, 0xffff);
+		chr->chrflags |= CHRCFLAG_HIDDEN;
+		chr->chrflags |= CHRCFLAG_INVINCIBLE;
+		g_Vars.currentplayer->devicesactive &= ~DEVICE_EYESPY;
+	} else {
+		if (eyespy->held == false) {
+			// Eyespy is deployed
+			if (g_Vars.currentplayer->eyespy->active) {
+				// And is being controlled
+				playermgrSetFovY(120.0f); // Ben's comment: Reset FOV to default for CamSpy. This fixes a bug where if you zoom in with the Horizon Scanner then switch to the DrugSpy, the DrugSpy will also be zoomed in.
+				viSetFovY(120.0f);
+				int8_t contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
+				uint32_t buttons = joyGetButtons(contpad1, 0xffffffff);
+				if (inputKeyJustPressed(VK_ESCAPE)) {
+					buttons |= START_BUTTON;
+				}
+
+				if (g_Vars.currentplayer->isdead == false
+						&& g_Vars.currentplayer->pausemode == PAUSEMODE_UNPAUSED
+						&& (buttons & START_BUTTON)) {
+					if (g_Vars.mplayerisrunning == false) {
+						playerPause(MENUROOT_MAINMENU);
+					} else {
+						mpPushPauseDialog();
+					}
+				}
+			}
+
+			if (g_Vars.lvupdate240) {
+				eyespyProcessInput(true);
+			}
+		} else {
+			// Eyespy is held
+			// If eyespy is activated, launch it
+			if ((g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit & DEVICE_EYESPY)
+					&& g_PlayersWithControl[playernum]
+					&& !eyespyTryLaunch()) {
+				// Launch failed
+				eyespy->held = true;
+				eyespy->active = false;
+				g_Vars.currentplayer->devicesactive &= ~DEVICE_EYESPY;
+			}
+		}
+
+		if (eyespy->deployed
+				&& g_PlayersWithControl[playernum]
+				&& (g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit & DEVICE_EYESPY)) {
+			// Eyespy is being controlled
+			if (eyespy->active == false) {
+				// Eyespy is being turned off
+				eyespy->active = true;
+				eyespy->buttonheld = eyespy->camerabuttonheld = false;
+				eyespy->camerashuttertime = 0;
+				eyespy->startuptimer60 = 0;
+				eyespy->prop->chr->soundtimer = TICKS(10);
+				sndStart(var80095200, SFX_DETONATE, NULL, -1, -1, -1, -1, -1);
+			}
+
+			g_Vars.currentplayer->invdowntime = TICKS(-40);
+		}
+	}
+}
+
+void playerTickSlayer(void)
+{
+	float f20 = 0.0f;
+
+	struct coord rocketpos = {0, 0, 0};
+	struct coord sp2f0 = {0, 0, 1};
+	struct coord sp2e4 = {0, 1, 0};
+
+	bool rocketok = false;
+	struct weaponobj *rocket = g_Vars.currentplayer->slayerrocket;
+
+	playerSetCameraMode(CAMERAMODE_THIRDPERSON);
+	playerTickChrBody();
+	bmoveTick(0, 0, 0, 1);
+	playerUpdateShake();
+
+	if (rocket && rocket->base.prop) {
+		float sp2b8[3][3];
+		struct coord sp2ac;
+		float sp2a8 = sqrtf(
+				rocket->base.realrot[0][0] * rocket->base.realrot[0][0] +
+				rocket->base.realrot[1][0] * rocket->base.realrot[1][0] +
+				rocket->base.realrot[2][0] * rocket->base.realrot[2][0]);
+		RoomNum inrooms[21];
+		RoomNum aboverooms[21];
+		RoomNum bestroom;
+		int16_t outofbounds = false;
+
+		sp2b8[0][0] = rocket->base.realrot[0][0] / sp2a8;
+		sp2b8[0][1] = rocket->base.realrot[0][1] / sp2a8;
+		sp2b8[0][2] = rocket->base.realrot[0][2] / sp2a8;
+		sp2b8[1][0] = rocket->base.realrot[1][0] / sp2a8;
+		sp2b8[1][1] = rocket->base.realrot[1][1] / sp2a8;
+		sp2b8[1][2] = rocket->base.realrot[1][2] / sp2a8;
+		sp2b8[2][0] = rocket->base.realrot[2][0] / sp2a8;
+		sp2b8[2][1] = rocket->base.realrot[2][1] / sp2a8;
+		sp2b8[2][2] = rocket->base.realrot[2][2] / sp2a8;
+
+		rocketpos.x = rocket->base.prop->pos.x;
+		rocketpos.y = rocket->base.prop->pos.y;
+		rocketpos.z = rocket->base.prop->pos.z;
+
+		bgFindRoomsByPos(&rocketpos, inrooms, aboverooms, 20, &bestroom);
+
+		if (inrooms[0] == -1) {
+			outofbounds = true;
+		}
+
+		if (outofbounds) {
+			// Slayer rocket has flown out of bounds
+			// Allow 2 seconds of this, then blow up rocket
+			g_Vars.currentplayer->badrockettime += g_Vars.lvupdate60;
+
+			if (g_Vars.currentplayer->badrockettime > TICKS(120)) {
+				g_Vars.currentplayer->visionmode = VISIONMODE_SLAYERROCKETSTATIC;
+			}
+		} else if (g_Vars.currentplayer->badrockettime > 0) {
+			// Slayer rocket is in bounds, but was recently out
+			g_Vars.currentplayer->badrockettime -= g_Vars.lvupdate60;
+
+			if (g_Vars.currentplayer->badrockettime < 0) {
+				g_Vars.currentplayer->badrockettime = 0;
+			}
+		}
+
+		mtx00016208(sp2b8, &sp2f0);
+		mtx00016208(sp2b8, &sp2e4);
+
+		if (rocket->base.hidden & OBJHFLAG_PROJECTILE) {
+			struct projectile *projectile = rocket->base.projectile;
+			uint32_t mode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
+			float targetspeed;
+			int8_t contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
+			int8_t contpad2 = optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
+			int8_t stickx = 0;
+			int8_t sticky = 0;
+			int8_t rsticky = joyGetRStickY(contpad1);
+			Mtxf sp1fc;
+			Mtxf sp1bc;
+			Mtxf sp17c;
+			float sp178;
+			float sp174;
+			float sp15c[6];
+			float sp14c[4];
+			float sp13c[4];
+			float sp12c[4];
+			float prevspeed;
+			float sp11c[4];
+			bool explode = false;
+			// NOTE: slayer handling
+			bool slow = false;
+			bool pause = false;
+			float newspeed;
+
+			if (mode == CONTROLMODE_23
+					|| mode == CONTROLMODE_24
+					|| mode == CONTROLMODE_22
+					|| mode == CONTROLMODE_21) {
+				if (g_PlayersWithControl[g_Vars.currentplayernum]) {
+					if (mode == CONTROLMODE_21 || mode == CONTROLMODE_22) {
+						if (joyGetButtons(contpad1, A_BUTTON | B_BUTTON)
+								|| joyGetButtons(contpad2, A_BUTTON | B_BUTTON)
+								|| joyGetButtons(contpad2, Z_TRIG)) {
+							slow = true;
+						}
+
+						if (joyGetButtonsPressedThisFrame(contpad1, Z_TRIG)) {
+							explode = true;
+						}
+					} else {
+						if (joyGetButtons(contpad1, A_BUTTON | B_BUTTON)
+								|| joyGetButtons(contpad2, A_BUTTON | B_BUTTON)
+								|| joyGetButtons(contpad1, Z_TRIG)) {
+							slow = true;
+						}
+
+						if (joyGetButtonsPressedThisFrame(contpad2, Z_TRIG)) {
+							explode = true;
+						}
+					}
+
+					stickx = joyGetStickX(contpad1);
+					sticky = joyGetStickY(contpad1);
+				} else {
+					slow = true;
+				}
+
+				if (joyGetButtons(contpad1, START_BUTTON) || joyGetButtons(contpad2, START_BUTTON)) {
+					pause = true;
+				}
+			} else {
+				if (g_PlayersWithControl[g_Vars.currentplayernum]) {
+					if (mode == CONTROLMODE_13 || mode == CONTROLMODE_14) {
+						if (joyGetButtonsPressedThisFrame(contpad1, A_BUTTON)) {
+							explode = true;
+						}
+
+						if (joyGetButtons(contpad1, B_BUTTON | Z_TRIG | R_TRIG)) {
+							slow = true;
+						}
+					} else {
+						if (joyGetButtonsPressedThisFrame(contpad1, Z_TRIG)) {
+							explode = true;
+						}
+
+						if (joyGetButtons(contpad1, A_BUTTON | B_BUTTON | R_TRIG)) {
+							slow = true;
+						}
+					}
+
+					stickx = joyGetStickX(contpad1);
+					sticky = joyGetStickY(contpad1);
+				} else {
+					slow = true;
+				}
+
+				if (joyGetButtons(contpad1, START_BUTTON)) {
+					pause = true;
+				}
+			}
+
+			if (g_PlayersWithControl[g_Vars.currentplayernum] && inputKeyJustPressed(VK_ESCAPE)) {
+				pause = true;
+			}
+
+			if (pause) {
+				if (g_Vars.mplayerisrunning == false) {
+					playerPause(MENUROOT_MAINMENU);
+				} else {
+					mpPushPauseDialog();
+				}
+			}
+
+			rocketok = true;
+			sp2ac.x = sp2b8[0][0];
+			sp2ac.z = sp2b8[0][2];
+
+			sp178 = sticky * LVUPDATE60FREAL() * 0.00025f;
+			sp174 = -stickx * LVUPDATE60FREAL() * 0.00025f;
+
+			// respect the invert pitch setting
+			if (optionsGetForwardPitch(g_Vars.currentplayerstats->mpindex)) {
+				sp178 = -sp178;
+			}
+			// mouse control
+			if (g_Vars.currentplayernum == 0) {
+				float mdx, mdy;
+				inputMouseGetScaledDelta(&mdx, &mdy);
+				if (mdx || mdy) {
+					mdx *= 48.f;
+					mdy *= 48.f;
+					mdx = (mdx < -128.f) ? -128.f : (mdx > 127.f) ? 127.f : mdx;
+					mdy = (mdy < -128.f) ? -128.f : (mdy > 127.f) ? 127.f : mdy;
+					if (g_Vars.currentplayerstats && !optionsGetForwardPitch(g_Vars.currentplayerstats->mpindex)) {
+						mdy = -mdy;
+					}
+					sp178 += mdy * 0.00025f;
+					sp174 -= mdx * 0.00025f;
+				}
+			}
+
+			f20 = sqrtf(sp2ac.f[0] * sp2ac.f[0] + sp2ac.f[2] * sp2ac.f[2]);
+
+			sp2ac.x /= f20;
+			sp2ac.z /= f20;
+
+			f20 = sinf(sp178);
+
+			sp14c[0] = cosf(sp178);
+			sp14c[1] = sp2ac.f[0] * f20;
+			sp14c[2] = 0;
+			sp14c[3] = sp2ac.f[2] * f20;
+
+			f20 = sinf(sp174);
+
+			sp15c[0] = cosf(sp174);
+			sp15c[1] = 0;
+			sp15c[2] = sp2b8[1][1] >= 0 ? f20 : -f20;
+			sp15c[3] = 0;
+
+			quaternionMultQuaternion(sp15c, sp14c, sp13c);
+			quaternionToMtx(sp13c, (Mtx*)&sp1fc);
+			mtx4RotateVecInPlace((Mtx*)&sp1fc, &projectile->speed);
+
+			projectile->powerlimit240 = -1;
+			projectile->flags |= PROJECTILEFLAG_NOTIMELIMIT;
+			projectile->unk018 = 0;
+			projectile->unk014 = 0;
+			projectile->unk010 = 0;
+
+			if ((projectile->flags & PROJECTILEFLAG_LAUNCHING) == 0) {
+				projectile->ownerprop = NULL;
+			}
+
+			if (explode) {
+				rocket->team = TEAM_00;
+			}
+
+			prevspeed = sqrtf(
+					projectile->speed.f[0] * projectile->speed.f[0] +
+					projectile->speed.f[1] * projectile->speed.f[1] +
+					projectile->speed.f[2] * projectile->speed.f[2]);
+
+			if (slow) {
+				targetspeed = 1;
+			} else {
+				targetspeed = 12;
+			}
+
+			targetspeed += rsticky / 127.f * 12.f;
+			if (targetspeed > 12) {
+				targetspeed = 12;
+			}
+			if (targetspeed < 1) {
+				targetspeed = 1;
+			}
+
+			newspeed = prevspeed;
+
+			if (prevspeed < targetspeed) {
+				newspeed = prevspeed + 0.05f * LVUPDATE60FREAL();
+
+				if (newspeed > targetspeed) {
+					newspeed = targetspeed;
+				}
+			} else if (prevspeed > targetspeed) {
+				newspeed = prevspeed - 0.05f * LVUPDATE60FREAL();
+
+				if (newspeed < targetspeed) {
+					newspeed = targetspeed;
+				}
+			}
+
+			projectile->speed.x = (projectile->speed.x * newspeed) / prevspeed;
+			projectile->speed.y = (projectile->speed.y * newspeed) / prevspeed;
+			projectile->speed.z = (projectile->speed.z * newspeed) / prevspeed;
+
+			mtx3ToMtx4(sp2b8, (Mtx*)&sp1bc);
+			quaternion3x3MtxToQuat((Mtx*)&sp1bc, sp12c);
+			quaternionMultQuaternion(sp13c, sp12c, sp11c);
+			quaternionToMtx(sp11c, (Mtx*)&sp17c);
+			mtx4ToMtx3((Mtx*)&sp17c, sp2b8);
+
+			rocket->base.realrot[0][0] = sp2b8[0][0] * sp2a8;
+			rocket->base.realrot[0][1] = sp2b8[0][1] * sp2a8;
+			rocket->base.realrot[0][2] = sp2b8[0][2] * sp2a8;
+			rocket->base.realrot[1][0] = sp2b8[1][0] * sp2a8;
+			rocket->base.realrot[1][1] = sp2b8[1][1] * sp2a8;
+			rocket->base.realrot[1][2] = sp2b8[1][2] * sp2a8;
+			rocket->base.realrot[2][0] = sp2b8[2][0] * sp2a8;
+			rocket->base.realrot[2][1] = sp2b8[2][1] * sp2a8;
+			rocket->base.realrot[2][2] = sp2b8[2][2] * sp2a8;
+		}
+	}
+
+	if (!rocketok) {
+		g_Vars.currentplayer->slayerrocket = NULL;
+		g_Vars.currentplayer->visionmode = VISIONMODE_SLAYERROCKETSTATIC;
+	}
+
+	g_Vars.currentplayer->waitforzrelease = true;
+
+	if (rocket && rocket->base.prop) {
+		playerFindAndSetCameraRoom(&rocketpos, &sp2e4, &sp2f0, &rocket->base.prop->pos, rocket->base.prop->rooms);
+	} else {
+		playerFindAndSetCameraRoom(&rocketpos, &sp2e4, &sp2f0, NULL, NULL);
+	}
+}
+
 void playerTick()
 {
-	float aspectratio;
-	float f20;
-	
-	aspectratio = playerGetAspect();
+	float aspectratio = playerGetAspect();
 
 	if (var8007083c != TELEPORTSTATE_INACTIVE) {
 		var8007083c = TELEPORTSTATE_INACTIVE;
@@ -2969,77 +3348,7 @@ void playerTick()
 	}
 
 	if (g_Vars.currentplayer->eyespy) {
-		// The stage uses an eyespy
-		struct eyespy *eyespy = g_Vars.currentplayer->eyespy;
-		uint32_t playernum = g_Vars.currentplayernum;
-
-		if (g_Vars.tickmode == TICKMODE_CUTSCENE) {
-			// Turn off the eyespy if active
-			struct chrdata *chr = eyespy->prop->chr;
-			eyespy->deployed = false;
-			eyespy->held = true;
-			eyespy->active = false;
-			psStopSound(eyespy->prop, PSTYPE_GENERAL, 0xffff);
-			chr->chrflags |= CHRCFLAG_HIDDEN;
-			chr->chrflags |= CHRCFLAG_INVINCIBLE;
-			g_Vars.currentplayer->devicesactive &= ~DEVICE_EYESPY;
-		} else {
-			if (eyespy->held == false) {
-				// Eyespy is deployed
-				if (g_Vars.currentplayer->eyespy->active) {
-					// And is being controlled
-					playermgrSetFovY(120.0f); // Ben's comment: Reset FOV to default for CamSpy. This fixes a bug where if you zoom in with the Horizon Scanner then switch to the DrugSpy, the DrugSpy will also be zoomed in.
-					viSetFovY(120.0f);
-					int8_t contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-					uint32_t buttons = joyGetButtons(contpad1, 0xffffffff);
-					if (inputKeyJustPressed(VK_ESCAPE)) {
-						buttons |= START_BUTTON;
-					}
-
-					if (g_Vars.currentplayer->isdead == false
-							&& g_Vars.currentplayer->pausemode == PAUSEMODE_UNPAUSED
-							&& (buttons & START_BUTTON)) {
-						if (g_Vars.mplayerisrunning == false) {
-							playerPause(MENUROOT_MAINMENU);
-						} else {
-							mpPushPauseDialog();
-						}
-					}
-				}
-
-				if (g_Vars.lvupdate240) {
-					eyespyProcessInput(true);
-				}
-			} else {
-				// Eyespy is held
-				// If eyespy is activated, launch it
-				if ((g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit & DEVICE_EYESPY)
-						&& g_PlayersWithControl[playernum]
-						&& !eyespyTryLaunch()) {
-					// Launch failed
-					eyespy->held = true;
-					eyespy->active = false;
-					g_Vars.currentplayer->devicesactive &= ~DEVICE_EYESPY;
-				}
-			}
-
-			if (eyespy->deployed
-					&& g_PlayersWithControl[playernum]
-					&& (g_Vars.currentplayer->devicesactive & ~g_Vars.currentplayer->devicesinhibit & DEVICE_EYESPY)) {
-				// Eyespy is being controlled
-				if (eyespy->active == false) {
-					// Eyespy is being turned off
-					eyespy->active = true;
-					eyespy->buttonheld = eyespy->camerabuttonheld = false;
-					eyespy->camerashuttertime = 0;
-					eyespy->startuptimer60 = 0;
-					eyespy->prop->chr->soundtimer = TICKS(10);
-					sndStart(var80095200, SFX_DETONATE, NULL, -1, -1, -1, -1, -1);
-				}
-
-				g_Vars.currentplayer->invdowntime = TICKS(-40);
-			}
-		}
+		playerTickEyeSpy();
 	}
 
 	if (lvIsPaused()) {
@@ -3098,314 +3407,7 @@ void playerTick()
 		bmoveTick(0, 0, 0, 1);
 		playerExecutePreparedWarp();
 	} else if (g_Vars.currentplayer->visionmode == (uint32_t)VISIONMODE_SLAYERROCKET) {
-		// Controlling a Slayer rocket
-		struct coord rocketpos = {0, 0, 0};
-		struct coord sp2f0 = {0, 0, 1};
-		struct coord sp2e4 = {0, 1, 0};
-
-		bool rocketok = false;
-		struct weaponobj *rocket = g_Vars.currentplayer->slayerrocket;
-
-		playerSetCameraMode(CAMERAMODE_THIRDPERSON);
-		playerTickChrBody();
-		bmoveTick(0, 0, 0, 1);
-		playerUpdateShake();
-
-		if (rocket && rocket->base.prop) {
-			float sp2b8[3][3];
-			struct coord sp2ac;
-			float sp2a8 = sqrtf(
-					rocket->base.realrot[0][0] * rocket->base.realrot[0][0] +
-					rocket->base.realrot[1][0] * rocket->base.realrot[1][0] +
-					rocket->base.realrot[2][0] * rocket->base.realrot[2][0]);
-			RoomNum inrooms[21];
-			RoomNum aboverooms[21];
-			RoomNum bestroom;
-			int16_t outofbounds = false;
-
-			sp2b8[0][0] = rocket->base.realrot[0][0] / sp2a8;
-			sp2b8[0][1] = rocket->base.realrot[0][1] / sp2a8;
-			sp2b8[0][2] = rocket->base.realrot[0][2] / sp2a8;
-			sp2b8[1][0] = rocket->base.realrot[1][0] / sp2a8;
-			sp2b8[1][1] = rocket->base.realrot[1][1] / sp2a8;
-			sp2b8[1][2] = rocket->base.realrot[1][2] / sp2a8;
-			sp2b8[2][0] = rocket->base.realrot[2][0] / sp2a8;
-			sp2b8[2][1] = rocket->base.realrot[2][1] / sp2a8;
-			sp2b8[2][2] = rocket->base.realrot[2][2] / sp2a8;
-
-			rocketpos.x = rocket->base.prop->pos.x;
-			rocketpos.y = rocket->base.prop->pos.y;
-			rocketpos.z = rocket->base.prop->pos.z;
-
-			bgFindRoomsByPos(&rocketpos, inrooms, aboverooms, 20, &bestroom);
-
-			if (inrooms[0] == -1) {
-				outofbounds = true;
-			}
-
-			if (outofbounds) {
-				// Slayer rocket has flown out of bounds
-				// Allow 2 seconds of this, then blow up rocket
-				g_Vars.currentplayer->badrockettime += g_Vars.lvupdate60;
-
-				if (g_Vars.currentplayer->badrockettime > TICKS(120)) {
-					g_Vars.currentplayer->visionmode = VISIONMODE_SLAYERROCKETSTATIC;
-				}
-			} else if (g_Vars.currentplayer->badrockettime > 0) {
-				// Slayer rocket is in bounds, but was recently out
-				g_Vars.currentplayer->badrockettime -= g_Vars.lvupdate60;
-
-				if (g_Vars.currentplayer->badrockettime < 0) {
-					g_Vars.currentplayer->badrockettime = 0;
-				}
-			}
-
-			mtx00016208(sp2b8, &sp2f0);
-			mtx00016208(sp2b8, &sp2e4);
-
-			if (rocket->base.hidden & OBJHFLAG_PROJECTILE) {
-				struct projectile *projectile = rocket->base.projectile;
-				uint32_t mode = optionsGetControlMode(g_Vars.currentplayerstats->mpindex);
-				float targetspeed;
-				int8_t contpad1 = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
-				int8_t contpad2 = optionsGetContpadNum2(g_Vars.currentplayerstats->mpindex);
-				int8_t stickx = 0;
-				int8_t sticky = 0;
-				int8_t rsticky = joyGetRStickY(contpad1);
-				Mtxf sp1fc;
-				Mtxf sp1bc;
-				Mtxf sp17c;
-				float sp178;
-				float sp174;
-				float sp15c[6];
-				float sp14c[4];
-				float sp13c[4];
-				float sp12c[4];
-				float prevspeed;
-#ifdef AVOID_UB
-				float sp11c[4];
-#else
-				float sp11c[3];
-#endif
-				bool explode = false;
-				// NOTE: slayer handling
-				bool slow = false;
-				bool pause = false;
-				float newspeed;
-
-				if (mode == CONTROLMODE_23
-						|| mode == CONTROLMODE_24
-						|| mode == CONTROLMODE_22
-						|| mode == CONTROLMODE_21) {
-					if (g_PlayersWithControl[g_Vars.currentplayernum]) {
-						if (mode == CONTROLMODE_21 || mode == CONTROLMODE_22) {
-							if (joyGetButtons(contpad1, A_BUTTON | B_BUTTON)
-									|| joyGetButtons(contpad2, A_BUTTON | B_BUTTON)
-									|| joyGetButtons(contpad2, Z_TRIG)) {
-								slow = true;
-							}
-
-							if (joyGetButtonsPressedThisFrame(contpad1, Z_TRIG)) {
-								explode = true;
-							}
-						} else {
-							if (joyGetButtons(contpad1, A_BUTTON | B_BUTTON)
-									|| joyGetButtons(contpad2, A_BUTTON | B_BUTTON)
-									|| joyGetButtons(contpad1, Z_TRIG)) {
-								slow = true;
-							}
-
-							if (joyGetButtonsPressedThisFrame(contpad2, Z_TRIG)) {
-								explode = true;
-							}
-						}
-
-						stickx = joyGetStickX(contpad1);
-						sticky = joyGetStickY(contpad1);
-					} else {
-						slow = true;
-					}
-
-					if (joyGetButtons(contpad1, START_BUTTON) || joyGetButtons(contpad2, START_BUTTON)) {
-						pause = true;
-					}
-				} else {
-					if (g_PlayersWithControl[g_Vars.currentplayernum]) {
-						if (mode == CONTROLMODE_13 || mode == CONTROLMODE_14) {
-							if (joyGetButtonsPressedThisFrame(contpad1, A_BUTTON)) {
-								explode = true;
-							}
-
-							if (joyGetButtons(contpad1, B_BUTTON | Z_TRIG | R_TRIG)) {
-								slow = true;
-							}
-						} else {
-							if (joyGetButtonsPressedThisFrame(contpad1, Z_TRIG)) {
-								explode = true;
-							}
-
-							if (joyGetButtons(contpad1, A_BUTTON | B_BUTTON | R_TRIG)) {
-								slow = true;
-							}
-						}
-
-						stickx = joyGetStickX(contpad1);
-						sticky = joyGetStickY(contpad1);
-					} else {
-						slow = true;
-					}
-
-					if (joyGetButtons(contpad1, START_BUTTON)) {
-						pause = true;
-					}
-				}
-
-				if (g_PlayersWithControl[g_Vars.currentplayernum] && inputKeyJustPressed(VK_ESCAPE)) {
-					pause = true;
-				}
-
-				if (pause) {
-					if (g_Vars.mplayerisrunning == false) {
-						playerPause(MENUROOT_MAINMENU);
-					} else {
-						mpPushPauseDialog();
-					}
-				}
-
-				rocketok = true;
-				sp2ac.x = sp2b8[0][0];
-				sp2ac.z = sp2b8[0][2];
-
-				sp178 = sticky * LVUPDATE60FREAL() * 0.00025f;
-				sp174 = -stickx * LVUPDATE60FREAL() * 0.00025f;
-
-				// respect the invert pitch setting
-				if (optionsGetForwardPitch(g_Vars.currentplayerstats->mpindex)) {
-					sp178 = -sp178;
-				}
-				// mouse control
-				if (g_Vars.currentplayernum == 0) {
-					float mdx, mdy;
-					inputMouseGetScaledDelta(&mdx, &mdy);
-					if (mdx || mdy) {
-						mdx *= 48.f;
-						mdy *= 48.f;
-						mdx = (mdx < -128.f) ? -128.f : (mdx > 127.f) ? 127.f : mdx;
-						mdy = (mdy < -128.f) ? -128.f : (mdy > 127.f) ? 127.f : mdy;
-						if (g_Vars.currentplayerstats && !optionsGetForwardPitch(g_Vars.currentplayerstats->mpindex)) {
-							mdy = -mdy;
-						}
-						sp178 += mdy * 0.00025f;
-						sp174 -= mdx * 0.00025f;
-					}
-				}
-
-				f20 = sqrtf(sp2ac.f[0] * sp2ac.f[0] + sp2ac.f[2] * sp2ac.f[2]);
-
-				sp2ac.x /= f20;
-				sp2ac.z /= f20;
-
-				f20 = sinf(sp178);
-
-				sp14c[0] = cosf(sp178);
-				sp14c[1] = sp2ac.f[0] * f20;
-				sp14c[2] = 0;
-				sp14c[3] = sp2ac.f[2] * f20;
-
-				f20 = sinf(sp174);
-
-				sp15c[0] = cosf(sp174);
-				sp15c[1] = 0;
-				sp15c[2] = sp2b8[1][1] >= 0 ? f20 : -f20;
-				sp15c[3] = 0;
-
-				quaternionMultQuaternion(sp15c, sp14c, sp13c);
-				quaternionToMtx(sp13c, (Mtx*)&sp1fc);
-				mtx4RotateVecInPlace((Mtx*)&sp1fc, &projectile->speed);
-
-				projectile->powerlimit240 = -1;
-				projectile->flags |= PROJECTILEFLAG_NOTIMELIMIT;
-				projectile->unk018 = 0;
-				projectile->unk014 = 0;
-				projectile->unk010 = 0;
-
-				if ((projectile->flags & PROJECTILEFLAG_LAUNCHING) == 0) {
-					projectile->ownerprop = NULL;
-				}
-
-				if (explode) {
-					rocket->team = TEAM_00;
-				}
-
-				prevspeed = sqrtf(
-						projectile->speed.f[0] * projectile->speed.f[0] +
-						projectile->speed.f[1] * projectile->speed.f[1] +
-						projectile->speed.f[2] * projectile->speed.f[2]);
-
-				if (slow) {
-					targetspeed = 1;
-				} else {
-					targetspeed = 12;
-				}
-
-				targetspeed += rsticky / 127.f * 12.f;
-				if (targetspeed > 12) {
-					targetspeed = 12;
-				}
-				if (targetspeed < 1) {
-					targetspeed = 1;
-				}
-
-				newspeed = prevspeed;
-
-				if (prevspeed < targetspeed) {
-					newspeed = prevspeed + 0.05f * LVUPDATE60FREAL();
-
-					if (newspeed > targetspeed) {
-						newspeed = targetspeed;
-					}
-				} else if (prevspeed > targetspeed) {
-					newspeed = prevspeed - 0.05f * LVUPDATE60FREAL();
-
-					if (newspeed < targetspeed) {
-						newspeed = targetspeed;
-					}
-				}
-
-				projectile->speed.x = (projectile->speed.x * newspeed) / prevspeed;
-				projectile->speed.y = (projectile->speed.y * newspeed) / prevspeed;
-				projectile->speed.z = (projectile->speed.z * newspeed) / prevspeed;
-
-				mtx3ToMtx4(sp2b8, (Mtx*)&sp1bc);
-				quaternion3x3MtxToQuat((Mtx*)&sp1bc, sp12c);
-				quaternionMultQuaternion(sp13c, sp12c, sp11c);
-				quaternionToMtx(sp11c, (Mtx*)&sp17c);
-				mtx4ToMtx3((Mtx*)&sp17c, sp2b8);
-
-				rocket->base.realrot[0][0] = sp2b8[0][0] * sp2a8;
-				rocket->base.realrot[0][1] = sp2b8[0][1] * sp2a8;
-				rocket->base.realrot[0][2] = sp2b8[0][2] * sp2a8;
-				rocket->base.realrot[1][0] = sp2b8[1][0] * sp2a8;
-				rocket->base.realrot[1][1] = sp2b8[1][1] * sp2a8;
-				rocket->base.realrot[1][2] = sp2b8[1][2] * sp2a8;
-				rocket->base.realrot[2][0] = sp2b8[2][0] * sp2a8;
-				rocket->base.realrot[2][1] = sp2b8[2][1] * sp2a8;
-				rocket->base.realrot[2][2] = sp2b8[2][2] * sp2a8;
-			}
-		}
-
-		if (!rocketok) {
-			g_Vars.currentplayer->slayerrocket = NULL;
-			g_Vars.currentplayer->visionmode = VISIONMODE_SLAYERROCKETSTATIC;
-		}
-
-		g_Vars.currentplayer->waitforzrelease = true;
-
-		if (rocket && rocket->base.prop) {
-			playerFindAndSetCameraRoom(&rocketpos, &sp2e4, &sp2f0, &rocket->base.prop->pos, rocket->base.prop->rooms);
-		} else {
-			playerFindAndSetCameraRoom(&rocketpos, &sp2e4, &sp2f0, NULL, NULL);
-		}
+		playerTickSlayer();
 	} else if (g_Vars.tickmode == TICKMODE_NORMAL) {
 		// Normal movement
 		float a = 0;
@@ -3936,8 +3938,8 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 
 	playerSetGlobalDrawWorldOffset(g_Vars.currentplayer->cam_room);
 
-	g_Vars.currentplayer->mtxf0064 = gfxAllocateMatrix(); // World-to-screen
-	g_Vars.currentplayer->mtxf0068 = gfxAllocateMatrix(); // Projection
+	g_Vars.currentplayer->worldToScreenMtx = gfxAllocateMatrix(); // World-to-screen
+	g_Vars.currentplayer->initProjMtx = gfxAllocateMatrix(); // Projection
 
 	lookat = gfxAllocateLookAt(2);
 
@@ -3964,12 +3966,12 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 			cam_up->x, cam_up->y, cam_up->z);
 
 	// Store the world-to-screen and projection matrices for the player
-	mtxBuildCameraMatrix((Mtx*)g_Vars.currentplayer->mtxf0064,
+	mtxBuildCameraMatrix(g_Vars.currentplayer->worldToScreenMtx,
 			cam_pos->x, cam_pos->y, cam_pos->z,
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
 
-	mtxBuildLookAtMatrix2F((Mtx*)g_Vars.currentplayer->mtxf0068,
+	mtxBuildLookAtMatrix2F(g_Vars.currentplayer->initProjMtx,
 			cam_pos->x, cam_pos->y, cam_pos->z,
 			cam_look->x, cam_look->y, cam_look->z,
 			cam_up->x, cam_up->y, cam_up->z);
@@ -3985,8 +3987,8 @@ void playerAllocateMatrices(struct coord *cam_pos, struct coord *cam_look, struc
 	camSetOrthogonalMtxL(orthoMtx);
 
 	// Final matrix setup
-	camSetWorldToScreenMtx((Mtx*)g_Vars.currentplayer->mtxf0064);
-	camSetProjectionMtx((Mtx*)g_Vars.currentplayer->mtxf0068);
+	camSetWorldToScreenMtx(g_Vars.currentplayer->worldToScreenMtx);
+	camSetProjectionMtx(g_Vars.currentplayer->initProjMtx);
 	camSetLookAt(lookat);
 	camComputeFrustumEdgePlanes();
 }
@@ -4122,11 +4124,12 @@ Gfx *playerRenderShield(Gfx *gdl)
 		f20 = 1 - g_Vars.currentplayer->shieldshowtime * (1.0f / 60.0f);
 		texSelect(&gdl, &g_TexShieldConfigs[0], 4, 1, 2, 1, NULL);
 
-		gDPSetCycleType(gdl++, G_CYC_2CYCLE);
-		gDPSetRenderMode(gdl++, G_RM_PASS, G_RM_CLD_SURF2);
-		gDPSetEnvColor(gdl++, red, green, blue, (int)(200 * f20));
-		struct RGBA color = {255, 255, 255, (int)(175 * f20 * f20)};
-		gfx_Set_Prim_Color(gdl++, color);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_2CYCLE);
+		gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_CLD_SURF2);
+		RGBA envColor = {red, green, blue, (int)(200 * f20)};
+		gfx_Set_Env_Color(gdl++, envColor);
+		RGBA primColor = {255, 255, 255, (int)(175 * f20 * f20)};
+		gfx_Set_Prim_Color(gdl++, primColor);
 		gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_01);
 
 		utilsRenderScreenTexture(&gdl, sp90, sp88, g_TexShieldConfigs->width, g_TexShieldConfigs->height,
@@ -5338,12 +5341,6 @@ Gfx *playerRender(struct prop *prop, Gfx *gdl, bool xlupass)
 		gdl = chrRender(prop, gdl, xlupass);
 	}
 
-	return gdl;
-}
-
-Gfx *playerLoadMatrix(Gfx *gdl)
-{
-	//gSPMatrix(gdl++, g_Vars.currentplayer->mtxl005c, G_MTX_LOAD);
 	return gdl;
 }
 

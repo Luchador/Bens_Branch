@@ -1537,7 +1537,7 @@ struct cctvobj { // objtype 0x06
 	// Note y is being used as an abbreviation for yaw
 	/*0x5c*/ int16_t lookatpadnum;
 	/*0x5e*/ int16_t toleft;
-	/*0x60*/ Mtxf camrotm;
+	/*0x60*/ Mtx camrotm;
 	/*0xa0*/ float yzero;
 	/*0xa4*/ float yrot;
 	/*0xa8*/ float yleft;
@@ -2119,7 +2119,7 @@ struct hand {
 	/*0x0698*/ float rotxend;
 	/*0x069c*/ struct coord posoffset;
 	/*0x06a8*/ float rotxoffset;
-	/*0x06ac*/ Mtxf posrotmtx;
+	/*0x06ac*/ Mtx posrotmtx;
 	/*0x06ec*/ bool useposrot;
 	/*0x06f0*/ struct coord damppos;
 	/*0x06fc*/ struct coord damplook;
@@ -2163,9 +2163,9 @@ struct hand {
 	/*0x0888*/ float loadslide;
 	/*0x088c*/ float upgrademult[12];
 	/*0x08bc*/ float finalmult[12];
-	/*0x08ec*/ Mtxf cammtx;
-	/*0x092c*/ Mtxf posmtx;
-	/*0x096c*/ Mtxf prevmtx;
+	/*0x08ec*/ Mtx cammtx;
+	/*0x092c*/ Mtx posmtx;
+	/*0x096c*/ Mtx prevmtx;
 	/*0x09ac*/ struct coord muzzlepos;
 	/*0x09b8*/ float muzzlez;
 	/*0x09bc*/ struct model gunmodel;
@@ -2217,7 +2217,7 @@ struct hand {
 	/*0x0c4c*/ int stateframes;
 	/*0x0c50*/ int statecycles;
 	/*0x0c54*/ int statelastframe;
-	/*0x0c58*/ Mtxf muzzlemat;
+	/*0x0c58*/ Mtx muzzlemat;
 	/*0x0c98*/ float gs_float1;
 	/*0x0c9c*/ float gs_float2;
 	/*0x0ca0*/ float gs_float3;
@@ -2285,8 +2285,8 @@ struct hand {
 	/*0x0dc4*/ struct abmag abmag;
 	/*0x0dcc*/ uintptr_t *unk0dcc;
 	/*0x0dd0*/ uintptr_t *unk0dd0;
-	/*0x0dd4*/ int unk0dd4;
-	/*0x0dd8*/ Mtxf *unk0dd8;
+	/*0x0dd4*/ int unk0dd4; 
+	/*0x0dd8*/ Mtx *unk0dd8;
 };
 
 struct texpool {
@@ -2364,9 +2364,8 @@ struct player {
 	/*0x0030*/ bool isfalling;
 	/*0x0034*/ int fallstart; // lvframe60 when player started falling
 	/*0x0038*/ struct coord globaldrawworldoffset;
-	/*0x005c*/ Mtx *mtxl005c;
-	/*0x0064*/ Mtxf *mtxf0064;
-	/*0x0068*/ Mtxf *mtxf0068;
+	/*0x0064*/ Mtx *worldToScreenMtx;
+	/*0x0068*/ Mtx *initProjMtx;
 	/*0x006c*/ Mtx *artifactMtx;
 	/*0x0070*/ float sumground;
 	/*0x0074*/ float vv_manground; // Feet Y value in absolute coordinates
@@ -2453,8 +2452,7 @@ struct player {
 	/*0x01b0*/ int bondmovemode;
 	/*0x01b4*/ float gunextraaimx;
 	/*0x01b8*/ float gunextraaimy;
-	/*0x01bc*/ int playwatchup;
-	/*0x01c0*/ struct anim unk01c0;
+	/*0x01c0*/ struct anim dummyanim;
 	/*0x024c*/ int16_t invdowntime;
 	/*0x024e*/ int16_t usedowntime;
 	/*0x0250*/ uint8_t activemenumode;
@@ -2539,7 +2537,7 @@ struct player {
 	/*0x0490*/ int eyespydarts;
 	/*0x0494*/ uint32_t bondheadsave[30];
 	/*0x050c*/ uint32_t unk050c;
-	/*0x0510*/ Mtxf bondheadmatrices[4];
+	/*0x0510*/ Mtx bondheadmatrices[4];
 	/*0x0610*/ Vp viewport[NUM_FRAMEBUFFERS];
 	/*0x0630*/ int16_t viewwidth;  // 320 lo-res, 640 hi-res
 	/*0x0632*/ int16_t viewheight; // 220 regardless of res
@@ -2569,8 +2567,6 @@ struct player {
 	/*0x167c*/ float crosssum2[2];
 	/*0x1684*/ float gunaimdamp;
 	/*0x1688*/ struct coord aimangle;
-	/*0x1694*/ Mtxf aimanglemat;
-	/*0x16d4*/ bool copiedgoldeneye;
 	/*0x16d8*/ uint32_t gunammooff;
 	/*0x16dc*/ float gunsync;
 	/*0x16e0*/ float syncchange;
@@ -2592,11 +2588,9 @@ struct player {
 	/*0x172c*/ float c_scaley;
 	/*0x1730*/ float c_recipscalex;
 	/*0x1734*/ float c_recipscaley;
-	/*0x1738*/ Mtx *mtxl1738;
-	/*0x173c*/ Mtx *mtxl173c;
 	/*0x1740*/ Mtx *worldtoscreenmtx;
 	/*0x1744*/ int c_viewfmdynticknum;
-	/*0x174c*/ Mtxf *projectionmtx;
+	/*0x174c*/ Mtx *projectionmtx;
 	/*0x1750*/ Mtx *perspmtxl;
 	/*0x1754*/ Mtx *skyMtx;
 	/*0x1758*/ Mtx *orthomtxl;
@@ -3770,7 +3764,7 @@ struct menumodel {
 	/*0x008*/ uint32_t alloclen;
 	/*0x00c*/ uint32_t newparams;
 	/*0x010*/ uint32_t curparams;
-	/*0x014*/ Mtxf mtx;
+	/*0x014*/ Mtx mtx;
 	/*0x054*/ struct modeldef *bodymodeldef;
 	/*0x058*/ struct modeldef *headmodeldef;
 	/*0x05c*/ int16_t newanimnum;

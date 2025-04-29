@@ -18,6 +18,7 @@
 #include "lib/vi.h"
 #include "lib/joy.h"
 #include "string.h"
+#include "gfx.h"
 #include "data.h"
 #include "types.h"
 
@@ -2146,21 +2147,22 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(int operation, struct me
 			}
 		}
 
-		gDPSetTexturePersp(gdl++, G_TP_NONE);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
-		gDPSetTextureLOD(gdl++, G_TL_TILE);
-		gDPSetTextureConvert(gdl++, G_TC_FILT);
+		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 		texSelect(&gdl, &g_TexGeneralConfigs[texturenum], 2, 0, 2, 1, NULL);
 
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-		gDPSetTextureFilter(gdl++, G_TF_POINT);
-		gDPSetEnvColor(gdl++, 0xff, 0xff, 0xff, renderdata->colour);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
+		RGBA envColor = {255, 255, 255, (uint32_t)renderdata->colour & 0xff};
+		gfx_Set_Env_Color(gdl++, envColor);
 		gDPSetCombineLERP(gdl++,
 				TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
 				TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
 
-		gSPTextureRectangle(gdl++,
+		gdl += gfx_Texture_Rectangle(gdl,
 				((renderdata->x + 4) << 2),
 				(renderdata->y + 2) << 2,
 				((renderdata->x + 60) << 2),

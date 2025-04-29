@@ -25,6 +25,7 @@
 #include "lib/lib_17ce0.h"
 #include "lib/lib_317f0.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "platform.h"
 
@@ -273,10 +274,10 @@ Gfx *lightsSetForRoom(Gfx *gdl, RoomNum roomnum)
 	lights->l[0].l.dir[1] = 77;
 	lights->l[0].l.dir[2] = 46;
 
-	gSPSetLights1(gdl++, (*lights));
+	gfx_Set_Lights1(gdl++, &(*lights));
 
-	gSPLookAtX(gdl++, &camGetLookAt()->l[0]);
-	gSPLookAtY(gdl++, &camGetLookAt()->l[1]);
+	gfx_LookAtX(gdl++, &camGetLookAt()->l[0]);
+	gfx_LookAtY(gdl++, &camGetLookAt()->l[1]);
 
 	return gdl;
 }
@@ -285,10 +286,10 @@ Gfx *lightsSetDefault(Gfx *gdl)
 {
 	static Lights1 envLight = gdSPDefLights1(150, 150, 150, 255, 255, 255, 77, 77, 46);
 
-	gSPSetLights1(gdl++, envLight);
+	gfx_Set_Lights1(gdl++, &envLight);
 
-	gSPLookAtX(gdl++, &camGetLookAt()->l[0]);
-	gSPLookAtY(gdl++, &camGetLookAt()->l[1]);
+	gfx_LookAtX(gdl++, &camGetLookAt()->l[0]);
+	gfx_LookAtY(gdl++, &camGetLookAt()->l[1]);
 
 	return gdl;
 }

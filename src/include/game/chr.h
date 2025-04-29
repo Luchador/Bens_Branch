@@ -18,7 +18,7 @@ void chrFlinchHead(struct chrdata *chr, float arg1);
 float chrGetFlinchAmount(struct chrdata *chr);
 void chrFindEnteredRooms(struct chrdata *chr, struct coord *pos, RoomNum *rooms);
 void chrAdvanceAnims(struct chrdata *chr, int lvupdate240, bool arg2);
-void chr0f022214(struct chrdata *chr, struct prop *child, bool fulltick);
+void chrUpdatePropMatrices(struct chrdata *chr, struct prop *child, bool fulltick);
 void chrUpdateCloak(struct chrdata *chr);
 int chrGetCloakAlpha(struct chrdata *chr);
 void chrSetPoisoned(struct chrdata *chr, struct prop *poisonprop);

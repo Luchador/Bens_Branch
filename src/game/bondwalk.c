@@ -530,14 +530,13 @@ int bwalk0f0c4764(struct coord *delta, struct coord *arg1, struct coord *arg2, i
 	return result;
 }
 
-int bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c,
-		struct coord *d, struct coord *e, int types)
+int bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c, struct coord *d, struct coord *e, int types)
 {
 	struct coord quarter;
 	bool result;
 
-	if (cd00024ea4()) {
-		float mult = cd00024e98();
+	if (cdGetHasSlideTimeToEdge()) {
+		float mult = cdGetSlideTimeToEdge();
 		quarter.x = a->x * mult * 0.25f;
 		quarter.y = a->y * mult * 0.25f;
 		quarter.z = a->z * mult * 0.25f;
@@ -564,32 +563,36 @@ int bwalk0f0c47d0(struct coord *a, struct coord *b, struct coord *c,
 	return CDRESULT_ERROR;
 }
 
-int bwalk0f0c494c(struct coord *a, struct coord *b, struct coord *c, int types)
+int bwalkProjectPushOntoXZDir(struct coord *position, struct coord *from, struct coord *to, int types)
 {
-	if (b->f[0] != c->f[0] || b->f[2] != c->f[2]) {
-		float tmp;
-		struct coord sp38;
-		struct coord sp2c;
+    if (from->x != to->x || from->z != to->z) {
+        struct coord dir;
+        struct coord projected;
 
-		sp38.x = c->x - b->x;
-		sp38.y = 0;
-		sp38.z = c->z - b->z;
+        // Calculate XZ direction vector from "from" to "to"
+        dir.x = to->x - from->x;
+        dir.z = to->z - from->z;
 
-		tmp = sqrtf(sp38.f[0] * sp38.f[0] + sp38.f[2] * sp38.f[2]);
+        // Normalize the direction vector in XZ plane
+        float length = sqrtf(dir.x * dir.x + dir.z * dir.z);
 
-		sp38.x *= 1.0f / tmp;
-		sp38.z *= 1.0f / tmp;
+        if (length != 0.0f) {
+            float invLength = 1.0f / length;
+            dir.x *= invLength;
+            dir.z *= invLength;
+        }
 
-		tmp = a->f[0] * sp38.f[0] + a->f[2] * sp38.f[2];
+        // Project the current position onto the normalized direction
+        float projection = position->x * dir.x + position->z * dir.z;
 
-		sp2c.x = sp38.x * tmp;
-		sp2c.y = 0;
-		sp2c.z = sp38.z * tmp;
+        projected.x = dir.x * projection;
+        projected.y = 0.0f; // Y is explicitly zero
+        projected.z = dir.z * projection;
 
-		return bwalkCalculateNewPositionWithPush(&sp2c, 0, true, 0, types);
-	}
+        return bwalkCalculateNewPositionWithPush(&projected, 0, true, 0, types);
+    }
 
-	return -1;
+    return -1;
 }
 
 int bwalk0f0c4a5c(struct coord *arg0, struct coord *arg1, struct coord *arg2, int types)
@@ -1242,43 +1245,38 @@ void bwalkUpdateTheta(void)
 
 void bwalk0f0c63bc(struct coord *arg0, uint32_t arg1, int types)
 {
-	struct coord sp100;
-	struct coord sp88;
+    struct coord sp100;
+    struct coord sp88;
 
-	g_Vars.currentplayer->bondonturret = false;
-	g_Vars.currentplayer->autocrouchpos = CROUCHPOS_STAND;
+    g_Vars.currentplayer->bondonturret = false;
+    g_Vars.currentplayer->autocrouchpos = CROUCHPOS_STAND;
 
+    if (bwalk0f0c4764(arg0, &sp100, &sp88, types) == CDRESULT_COLLISION) {
+        struct coord sp76;
+        struct coord sp64;
 
-	if (bwalk0f0c4764(arg0, &sp100, &sp88, types) == CDRESULT_COLLISION) {
-		struct coord sp76;
-		struct coord sp64;
+        int result = bwalk0f0c47d0(arg0, &sp100, &sp88, &sp76, &sp64, types);
 
-		int result = bwalk0f0c47d0(arg0, &sp100, &sp88, &sp76, &sp64, types);
+        if (result >= CDRESULT_NOCOLLISION || result <= CDRESULT_ERROR) {
+            if (arg1
+                    && bwalkProjectPushOntoXZDir(arg0, &sp100, &sp88, types) <= CDRESULT_COLLISION
+                    && bwalk0f0c4a5c(arg0, &sp100, &sp88, types) <= CDRESULT_COLLISION) {
+                // Intentionally empty? Side effects from bwalkProjectPushOntoXZDir/bwalk0f0c4a5c
+            }
+        } else if (result == CDRESULT_COLLISION) {
+            struct coord sp48;
+            struct coord sp36;
 
-		if (result >= CDRESULT_NOCOLLISION || result <= CDRESULT_ERROR) {
-			if (result >= CDRESULT_NOCOLLISION) {
-			}
+            bwalk0f0c47d0(arg0, &sp76, &sp64, &sp48, &sp36, types);
 
-			if (arg1
-					&& bwalk0f0c494c(arg0, &sp100, &sp88, types) <= CDRESULT_COLLISION
-					&& bwalk0f0c4a5c(arg0, &sp100, &sp88, types) <= CDRESULT_COLLISION) {
-				// empty
-			}
-		} else if (result == CDRESULT_COLLISION) {
-			struct coord sp48;
-			struct coord sp36;
-
-			if (bwalk0f0c47d0(arg0, &sp76, &sp64, &sp48, &sp36, types) >= CDRESULT_NOCOLLISION) {
-			}
-
-			if (arg1
-					&& bwalk0f0c494c(arg0, &sp76, &sp64, types) <= CDRESULT_COLLISION
-					&& bwalk0f0c494c(arg0, &sp100, &sp88, types) <= CDRESULT_COLLISION
-					&& bwalk0f0c4a5c(arg0, &sp76, &sp64, types) <= CDRESULT_COLLISION) {
-				bwalk0f0c4a5c(arg0, &sp100, &sp88, types);
-			}
-		}
-	}
+            if (arg1
+                    && bwalkProjectPushOntoXZDir(arg0, &sp76, &sp64, types) <= CDRESULT_COLLISION
+                    && bwalkProjectPushOntoXZDir(arg0, &sp100, &sp88, types) <= CDRESULT_COLLISION
+                    && bwalk0f0c4a5c(arg0, &sp76, &sp64, types) <= CDRESULT_COLLISION) {
+                bwalk0f0c4a5c(arg0, &sp100, &sp88, types);
+            }
+        }
+    }
 }
 
 void bwalkUpdatePrevPos(void)
@@ -1451,7 +1449,7 @@ void bwalk0f0c69b8(void)
 
 		g_Vars.currentplayer->walkinitt2 = 1.0f - (cosf(g_Vars.currentplayer->walkinitt * M_PI) + 1.0f) * 0.5f;
 
-		bmoveUpdateHead(0.0f, 0.0f, 0.0f, &g_Vars.currentplayer->walkinitmtx, 1.0f - g_Vars.currentplayer->walkinitt2);
+		bmoveUpdateHead(0.0f, 0.0f, 0.0f, (Mtx*)&g_Vars.currentplayer->walkinitmtx, 1.0f - g_Vars.currentplayer->walkinitt2);
 
 		g_Vars.currentplayer->gunspeed = 0.0f;
 
@@ -1750,9 +1748,7 @@ void bwalkTick(void)
 	bwalk0f0c69b8();
 	bwalkUpdateVertical();
 
-	int i;
-
-	for (i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {
+	for (int i = 0; g_Vars.currentplayer->prop->rooms[i] != -1; i++) {
 		if (g_Vars.currentplayer->floorroom == g_Vars.currentplayer->prop->rooms[i]) {
 			propDeregisterRooms(g_Vars.currentplayer->prop);
 			g_Vars.currentplayer->prop->rooms[0] = g_Vars.currentplayer->floorroom;

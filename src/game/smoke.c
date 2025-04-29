@@ -15,6 +15,7 @@
 #include "bss.h"
 #include "lib/rng.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 struct smoke *g_Smokes;
@@ -63,7 +64,7 @@ Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, stru
 {
 	Vtx *vertices = gfxAllocateVertices(4);
 	Col *colours = (Col *)gfxAllocateColours(1);
-	Mtxf *mtx = (Mtxf*)camGetProjectionMtx();
+	Mtx *mtx = camGetProjectionMtx();
 	struct coord spa0;
 	struct coord sp94;
 	struct coord sp88;
@@ -128,18 +129,18 @@ Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, stru
 	sp6c = campos->f[1] + sp58 * mult;
 	sp68 = campos->f[2] + sp54 * mult;
 
-	spa0.f[0] = mtx->m[0][0] * sp78;
-	spa0.f[1] = mtx->m[0][1] * sp78;
-	spa0.f[2] = mtx->m[0][2] * sp78;
-	sp94.f[0] = mtx->m[0][0] * sp74;
-	sp94.f[1] = mtx->m[0][1] * sp74;
-	sp94.f[2] = mtx->m[0][2] * sp74;
-	sp88.f[0] = mtx->m[1][0] * sp78;
-	sp88.f[1] = mtx->m[1][1] * sp78;
-	sp88.f[2] = mtx->m[1][2] * sp78;
-	sp7c.f[0] = mtx->m[1][0] * sp74;
-	sp7c.f[1] = mtx->m[1][1] * sp74;
-	sp7c.f[2] = mtx->m[1][2] * sp74;
+	spa0.f[0] = (*mtx)[0][0] * sp78;
+	spa0.f[1] = (*mtx)[0][1] * sp78;
+	spa0.f[2] = (*mtx)[0][2] * sp78;
+	sp94.f[0] = (*mtx)[0][0] * sp74;
+	sp94.f[1] = (*mtx)[0][1] * sp74;
+	sp94.f[2] = (*mtx)[0][2] * sp74;
+	sp88.f[0] = (*mtx)[1][0] * sp78;
+	sp88.f[1] = (*mtx)[1][1] * sp78;
+	sp88.f[2] = (*mtx)[1][2] * sp78;
+	sp7c.f[0] = (*mtx)[1][0] * sp74;
+	sp7c.f[1] = (*mtx)[1][1] * sp74;
+	sp7c.f[2] = (*mtx)[1][2] * sp74;
 
 	sp44 = (sp70 - spa0.f[0] - sp7c.f[0]) * size - coord->f[0];
 	sp40 = (sp6c - spa0.f[1] - sp7c.f[1]) * size - coord->f[1];
@@ -227,10 +228,10 @@ Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, stru
 	vertices[3].t = 1760;
 	vertices[3].colour = 0;
 
-	gSPColor(gdl++, (uintptr_t)(colours), 1);
+	gfx_Color(gdl++, colours, 1);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
 
-	gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
+	gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
 	return gdl;
 }
@@ -560,9 +561,9 @@ uint32_t smokeTick(struct prop *prop)
 
 uint32_t smokeTickPlayer(struct prop *prop)
 {
-	Mtxf *matrix = (Mtxf*)camGetPlayerWorldToScreenMtx();
+	Mtx *matrix = camGetPlayerWorldToScreenMtx();
 
-	prop->z = -(matrix->m[0][2] * prop->pos.x + matrix->m[1][2] * prop->pos.y + matrix->m[2][2] * prop->pos.z + matrix->m[3][2]);
+	prop->z = -((*matrix)[0][2] * prop->pos.x + (*matrix)[1][2] * prop->pos.y + (*matrix)[2][2] * prop->pos.z + (*matrix)[3][2]);
 
 	if (prop->z < 100) {
 		prop->z *= 0.5f;
@@ -624,19 +625,18 @@ Gfx *smokeRender(struct prop *prop, Gfx *gdl, bool xlupass)
 			gdl = bgScissorToViewport(gdl);
 		}
 
-		gSPClearGeometryMode(gdl++, G_CULL_BOTH | G_FOG);
-		gSPMatrix(gdl++, (uintptr_t)(camGetOrthogonalMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH | G_FOG);
+		gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 		gdl = roomApplyMtx(gdl, roomnum);
 
 		if (near) {
-			gSPMatrix(gdl++, (uintptr_t)(&var800a3448), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+			gfx_Matrix(gdl++, &var800a3448, G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
 		} else {
-			gSPMatrix(gdl++, (uintptr_t)(&var800a3488), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+			gfx_Matrix(gdl++, &var800a3488, G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
 		}
 
-		gSPDisplayList(gdl++, g_TexGdl1);
-		gDPSetColorDither(gdl++, G_CD_NOISE);
+		gfx_Display_List(gdl++, g_TexGdl1);
 
 		if (near) {
 			sp8c.x = coord->x * 10.0f;
@@ -658,8 +658,7 @@ Gfx *smokeRender(struct prop *prop, Gfx *gdl, bool xlupass)
 			}
 		}
 
-		gDPSetColorDither(gdl++, G_CD_BAYER);
-		gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+		gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 	}
 
 	return gdl;

@@ -33,6 +33,7 @@
 #include "lib/snd.h"
 #include "string.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 uint8_t g_InventoryWeapon;
@@ -1790,18 +1791,19 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 		}
 
 		// Draw the thumbnail
-		gDPSetTexturePersp(gdl++, G_TP_NONE);
-		gDPSetAlphaCompare(gdl++, G_AC_NONE);
-		gDPSetTextureLOD(gdl++, G_TL_TILE);
-		gDPSetTextureConvert(gdl++, G_TC_FILT);
+		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 		texSelect(&gdl, g_TexGeneralConfigs + 13 + stageindex, 2, 0, 2, true, NULL);
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 		gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
-		gDPSetTextureFilter(gdl++, G_TF_POINT);
-		gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 255 / 256));
+		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
+		RGBA envColor = {255, 255, 255, (uint32_t)renderdata->colour & 0xff};
+		gfx_Set_Env_Color(gdl++, envColor);
 
-		gSPTextureRectangle(gdl++,
+		gdl += gfx_Texture_Rectangle(gdl,
 				((renderdata->x + 4) << 2), (renderdata->y + 3) << 2,
 				((renderdata->x + 60) << 2), (renderdata->y + 39) << 2,
 				G_TX_RENDERTILE, 0, 0x0480, 1024, -1024);
@@ -1811,23 +1813,25 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 		} else if (g_MissionConfig.iscoop) {
 			texSelect(&gdl, &g_TexGeneralConfigs[36], 2, 0, 2, true, NULL);
 
-			gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-			gDPSetTextureFilter(gdl++, G_TF_POINT);
+			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+			gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 			for (k = 0; k < 3; k++) {
 				int relx = 63 + k * 17;
 
 				if ((g_GameFile.coopcompletions[k] & (1 << stageindex)) == 0) {
-					gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 63 / 256));
+					RGBA envColor = {255, 255, 255, ((renderdata->colour & 0xff) * 63 / 256)};
+					gfx_Set_Env_Color(gdl++, envColor);
 					gDPSetCombineLERP(gdl++,
 							TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
 							TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
 				} else {
-					gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 207 / 256));
+					RGBA envColor = {255, 255, 255, ((renderdata->colour & 0xff) * 207 / 256)};
+					gfx_Set_Env_Color(gdl++, envColor);
 					gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
 				}
 
-				gSPTextureRectangle(gdl++,
+				gdl += gfx_Texture_Rectangle(gdl,
 						((renderdata->x + relx) << 2), (renderdata->y + 25) << 2,
 						((renderdata->x + relx + 14) << 2), (renderdata->y + 39) << 2,
 						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024);
@@ -1835,10 +1839,11 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 		} else {
 			texSelect(&gdl, &g_TexGeneralConfigs[34], 2, 0, 2, true, NULL);
 
-			gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-			gDPSetTextureFilter(gdl++, G_TF_POINT);
+			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+			gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 			gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-			gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 175 / 256));
+			RGBA envColor = {255, 255, 255, ((renderdata->colour & 0xff) * 175 / 256)};
+			gfx_Set_Env_Color(gdl++, envColor);
 
 			for (k = 0; k < 3; k++) {
 				if (g_GameFile.besttimes[stageindex][k] != 0) {
@@ -1851,13 +1856,14 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 
 				if (k == incompleteindex) {
 					// Set transparency
-					gDPSetEnvColorViaWord(gdl++, 0xffffff00 | ((renderdata->colour & 0xff) * 63 / 256));
+					RGBA envColor = {255, 255, 255, ((renderdata->colour & 0xff) * 63 / 256)};
+					gfx_Set_Env_Color(gdl++, envColor);
 					gDPSetCombineLERP(gdl++,
 							TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
 							TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
 				}
 
-				gSPTextureRectangle(gdl++,
+				gdl += gfx_Texture_Rectangle(gdl,
 						((renderdata->x + relx) << 2), (renderdata->y + 25) << 2,
 						((renderdata->x + relx + 14) << 2), (renderdata->y + 39) << 2,
 						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024);

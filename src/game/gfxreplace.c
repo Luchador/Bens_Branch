@@ -3,6 +3,7 @@
 #include "game/gfxreplace.h"
 #include "bss.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 /**

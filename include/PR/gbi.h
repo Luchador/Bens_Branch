@@ -20,7 +20,6 @@
 #ifndef _GBI_H_
 #define _GBI_H_
 
-#include "gbiex.h"
 #include <stdint.h>
 #include "platform.h"
 
@@ -116,7 +115,6 @@
 #define G_LINE3D            (G_IMMFIRST-10)  /* -75 / 0xb5 */
 #define G_RDPHALF_1         (G_IMMFIRST-11)  /* -76 / 0xb4 */
 #define G_RDPHALF_2         (G_IMMFIRST-12)  /* -77 / 0xb3 */
-#define G_RDPHALF_CONT      (G_IMMFIRST-13)  /* -78 / 0xb2 */
 #define G_TRI4              (G_IMMFIRST-14)  /* -79 / 0xb1 */
 
 /* RDP commands: */
@@ -151,32 +149,10 @@
 #define G_TEXRECTFLIP     0xe5 /* -27 */
 #define G_TEXRECT         0xe4 /* -28 */
 
-
-/*
- * The following commands are the "generated" RDP commands; the user
- * never sees them, the RSP microcode generates them.
- *
- * The layout of the bits is magical, to save work in the ucode.
- * These id's are -56, -52, -54, -50, -55, -51, -53, -49, ...
- *                                 edge, shade, texture, zbuff bits:  estz
- */
-#define G_TRI_FILL             0xc8 /* fill triangle:            11001000 */
-#define G_TRI_SHADE            0xcc /* shade triangle:           11001100 */
-#define G_TRI_SHADE_TXTR       0xce /* shade, texture triangle:  11001110 */
-
-/* macros for command parsing: */
-#define GDMACMD(x) (x)
-#define GIMMCMD(x) (G_IMMFIRST-(x))
-#define GRDPCMD(x) (0xff-(x))
-
 /*
  * Coordinate shift values, number of bits of fraction
  */
 #define G_TEXTURE_IMAGE_FRAC 2
-
-#define GPACK_RGBA5551(r, g, b, a) ((((r)<<8) & 0xf800) | \
-        (((g)<<3) & 0x7c0) |                              \
-        (((b)>>2) & 0x3e) | ((a) & 0x1))
 
 /*
  * G_MTX: parameter flags
@@ -749,13 +725,12 @@ typedef struct {
 typedef float Mtx[4][4];
 
 typedef struct {
-	short vscale[2];
-	short vtrans[2];
+	int vscale[2];
+	int vtrans[2];
 } Vp_t;
 
 typedef union {
 	Vp_t          vp;
-	long long int force_structure_alignment;
 } Vp;
 
 /*
@@ -786,9 +761,6 @@ typedef union {
 #define G_MW_CLIP      0x04
 #define G_MW_SEGMENT   0x06
 #define G_MW_FOG       0x08
-#define G_MW_LIGHTCOL  0x0a
-#define G_MW_POINTS    0x0c
-#define G_MW_PERSPNORM 0x0e
 
 /*
  * These are offsets from the address in the dmem table
@@ -799,39 +771,6 @@ typedef union {
 #define G_MWO_CLIP_RPX       0x14
 #define G_MWO_CLIP_RPY       0x1c
 #define G_MWO_FOG            0x00
-#define G_MWO_aLIGHT_1       0x00
-#define G_MWO_bLIGHT_1       0x04
-#define G_MWO_aLIGHT_2       0x20
-#define G_MWO_bLIGHT_2       0x24
-#define G_MWO_aLIGHT_3       0x40
-#define G_MWO_bLIGHT_3       0x44
-#define G_MWO_aLIGHT_4       0x60
-#define G_MWO_bLIGHT_4       0x64
-#define G_MWO_aLIGHT_5       0x80
-#define G_MWO_bLIGHT_5       0x84
-#define G_MWO_aLIGHT_6       0xa0
-#define G_MWO_bLIGHT_6       0xa4
-#define G_MWO_aLIGHT_7       0xc0
-#define G_MWO_bLIGHT_7       0xc4
-#define G_MWO_aLIGHT_8       0xe0
-#define G_MWO_bLIGHT_8       0xe4
-#define G_MWO_MATRIX_XX_XY_I 0x00
-#define G_MWO_MATRIX_XZ_XW_I 0x04
-#define G_MWO_MATRIX_YX_YY_I 0x08
-#define G_MWO_MATRIX_YZ_YW_I 0x0c
-#define G_MWO_MATRIX_ZX_ZY_I 0x10
-#define G_MWO_MATRIX_ZZ_ZW_I 0x14
-#define G_MWO_MATRIX_WX_WY_I 0x18
-#define G_MWO_MATRIX_WZ_WW_I 0x1c
-#define G_MWO_MATRIX_XX_XY_F 0x20
-#define G_MWO_MATRIX_XZ_XW_F 0x24
-#define G_MWO_MATRIX_YX_YY_F 0x28
-#define G_MWO_MATRIX_YZ_YW_F 0x2c
-#define G_MWO_MATRIX_ZX_ZY_F 0x30
-#define G_MWO_MATRIX_ZZ_ZW_F 0x34
-#define G_MWO_MATRIX_WX_WY_F 0x38
-#define G_MWO_MATRIX_WZ_WW_F 0x3c
-#define G_MWO_POINT_RGBA     0x10
 #define G_MWO_POINT_ST       0x14
 
 /*
@@ -897,17 +836,10 @@ typedef struct {
 } Gdma;
 #else
 typedef struct {
-#ifdef PLATFORM_BIG_ENDIAN
-	int          cmd:8;
-	unsigned int par:8;
-	unsigned int len:16;
-	unsigned int addr;
-#else // NOTE: changing signedness mid int will break up the bitfield on normal platforms, even BE
 	int len:16;
 	int par:8;
 	int cmd:8;
 	unsigned int addr;
-#endif
 } Gdma;
 #endif
 
@@ -915,13 +847,8 @@ typedef struct {
  * Graphics Immediate Mode Packet types
  */
 typedef struct {
-#ifdef PLATFORM_BIG_ENDIAN
-	int cmd:8;
-	int pad:24;
-#else
     int pad:24;
     int cmd:8;
-#endif
 	Tri tri;
 } Gtri;
 
@@ -963,22 +890,6 @@ typedef struct {
 	int pad1:8;
 	int base:24;
 } Gsegment;
-
-typedef struct {
-	int          cmd:8;
-	int          pad0:8;
-	int          sft:8;
-	int          len:8;
-	unsigned int data:32;
-} GsetothermodeL;
-
-typedef struct {
-	int          cmd:8;
-	int          pad0:8;
-	int          sft:8;
-	int          len:8;
-	unsigned int data:32;
-} GsetothermodeH;
 
 typedef struct {
 	unsigned char  on;
@@ -1076,15 +987,6 @@ typedef union {
     _g->words.w1 = (uintptr_t)(s);                              \
 }
 
-#define gsDma1p(c, s, l, p)                      \
-{                                                \
-    (_SHIFTL((c), 24, 8) | _SHIFTL((p), 16, 8) | \
-     _SHIFTL((l), 0, 16)),                       \
-    (uintptr_t)(s)                               \
-}
-
-#define gSPMatrix(pkt, m, p) gDma1p(pkt, G_MTX, m, sizeof(Mtx), p)
-
 #define gSPVertex(pkt, v, n, v0)                           \
     gDma1p(pkt, G_VTX, v, sizeof(Vtx)*(n),((n)-1)<<4|(v0))
 
@@ -1092,8 +994,6 @@ typedef union {
     gDma1p((pkt), G_MOVEMEM, (v), sizeof(Vp), G_MV_VIEWPORT)
 
 #define gSPDisplayList(pkt,dl)  gDma1p(pkt,G_DL,dl,0,G_DL_PUSH)
-
-#define gSPBranchList(pkt,dl)   gDma1p(pkt,G_DL,dl,0,G_DL_NOPUSH)
 
 /*
  * RSP short command (no DMA required) macros
@@ -1144,74 +1044,17 @@ typedef union {
 #define gMoveWd(pkt, index, offset, data)           \
     gImmp21((pkt), G_MOVEWORD, offset, index, data)
 
-#define gsMoveWd(index, offset, data)         \
-    gsImmp21(G_MOVEWORD, offset, index, data)
-
-/*
- * Note: the SP1Triangle() and line macros multiply the vertex indices
- * by 10, this is an optimization for the microcode.
- */
-#define __gsSP1Triangle_w1f(v0, v1, v2, flag)     \
-    (_SHIFTL((flag), 24,8)|_SHIFTL((v0)*10,16,8)| \
-     _SHIFTL((v1)*10, 8,8)|_SHIFTL((v2)*10, 0,8))
-
-/***
- ***  1 Triangle
- ***/
-#define gSP1Triangle(pkt, v0, v1, v2, flag)               \
-{                                                         \
-    Gfx *_g = (Gfx *)(pkt);                               \
-                                                          \
-    _g->words.w0 = _SHIFTL(G_TRI1, 24, 8);                \
-    _g->words.w1 = __gsSP1Triangle_w1f(v0, v1, v2, flag); \
-}
-
-#define gSPSegment(pkt, segment, base)            \
-    gMoveWd(pkt, G_MW_SEGMENT, (segment)*4, base)
-
-#ifdef PLATFORM_N64
-#define SEGADDR(x) x
-#define UNSEGADDR(x) x
-#else
 // we mark all segmented addresses so that it'll be easier to recognize them later
 #define SEGADDR(x) ((void *)((uintptr_t)(x) | 1))
 #define UNSEGADDR(x) ((uintptr_t)(x) & ~1)
-#endif
-
-/*
- * r should be one of: FRUSTRATIO_1, FRUSTRATIO_2, FRUSTRATIO_3, ... FRUSTRATIO_6
- */
-/*#define gSPClipRatio(pkt, r)                             \
-{                                                        \
-    gMoveWd(pkt, G_MW_CLIP, G_MWO_CLIP_RNX, FR_NEG_##r); \
-    gMoveWd(pkt, G_MW_CLIP, G_MWO_CLIP_RNY, FR_NEG_##r); \
-    gMoveWd(pkt, G_MW_CLIP, G_MWO_CLIP_RPX, FR_POS_##r); \
-    gMoveWd(pkt, G_MW_CLIP, G_MWO_CLIP_RPY, FR_POS_##r); \
-}*/
 
 /*
  * Lighting Macros
  */
 #define NUML(n)     (((n)+1)*32 + 0x80000000)
 
-#define NUMLIGHTS_0 1
-#define NUMLIGHTS_1 1
-#define NUMLIGHTS_2 2
-#define NUMLIGHTS_3 3
-#define NUMLIGHTS_4 4
-#define NUMLIGHTS_5 5
-#define NUMLIGHTS_6 6
-#define NUMLIGHTS_7 7
-/*
- * n should be one of: NUMLIGHTS_0, NUMLIGHTS_1, ..., NUMLIGHTS_7
- * NOTE: in addition to the number of directional lights specified,
- *       there is always 1 ambient light
- */
 #define gSPNumLights(pkt, n)                             \
     gMoveWd(pkt, G_MW_NUMLIGHT, G_MWO_NUMLIGHT, NUML(n))
-
-#define gsSPNumLights(n)                             \
-    gsMoveWd(G_MW_NUMLIGHT, G_MWO_NUMLIGHT, NUML(n))
 
 #define LIGHT_1 1
 #define LIGHT_2 2
@@ -1233,58 +1076,16 @@ typedef union {
 #define gSPLight(pkt, l, n)                                    \
     gDma1p(pkt, G_MOVEMEM, l, sizeof(Light),((n)-1)*2+G_MV_L0)
 
-/* These macros use a structure "name" which is init'd with the gdSPDefLights macros*/
-
 #define gSPSetLights1(pkt,name)    \
 {                                  \
-    gSPNumLights(pkt,NUMLIGHTS_1); \
+    gSPNumLights(pkt,1); \
     gSPLight(pkt,&name.l[0],1);    \
     gSPLight(pkt,&name.a,2);       \
 }
 
 /*
- * Reflection/Hiliting Macros
- */
-#define gSPLookAtX(pkt, l) gDma1p(pkt, G_MOVEMEM, l, sizeof(Light),G_MV_LOOKATX)
-#define gSPLookAtY(pkt, l) gDma1p(pkt, G_MOVEMEM, l, sizeof(Light),G_MV_LOOKATY)
-
-#define gSPLookAt(pkt, la)          \
-{                                   \
-    gSPLookAtX(pkt,la)              \
-    gSPLookAtY(pkt,(char *)(la)+16) \
-}
-
-/*
- * FOG macros
- * fm = z multiplier
- * fo = z offset
- * FOG FORMULA:    alpha(fog) = (eyespace z) * fm  + fo  CLAMPED 0 to 255
- *   note: (eyespace z) ranges -1 to 1
- *
- * Alternate method of setting fog:
- * min, max: range 0 to 1000: 0=nearplane, 1000=farplane
- * min is where fog begins (usually less than max and often 0)
- * max is where fog is thickest (usually 1000)
- *
- */
-
-#define gSPFogPosition(pkt, min, max)                        \
-    gMoveWd(pkt, G_MW_FOG, G_MWO_FOG,                        \
-            (_SHIFTL((128000/((max)-(min))),16,16) |         \
-             _SHIFTL(((500-(min))*256/((max)-(min))),0,16)))
-
-/*
  * Macros to turn texture on/off
  */
-#define gSPTexture(pkt, s, t, level, tile, on)             \
-{                                                          \
-    Gfx *_g = (Gfx *)(pkt);                                \
-                                                           \
-    _g->words.w0 = (_SHIFTL(G_TEXTURE,24,8)|               \
-            _SHIFTL((level),11,3)|_SHIFTL((tile),8,3)|     \
-            _SHIFTL((on),0,8));                            \
-    _g->words.w1 = (_SHIFTL((s),16,16)|_SHIFTL((t),0,16)); \
-}
 
 #define gsSPTexture(s, t, level, tile, on)                         \
 {                                                                  \
@@ -1293,54 +1094,14 @@ typedef union {
     (_SHIFTL((s),16,16)|_SHIFTL((t),0,16))                         \
 }
 
-/*
- * Different version of SPTexture macro, has an additional parameter
- * which is currently reserved in the microcode.
- */
-#define gSPTextureL(pkt, s, t, level, xparam, tile, on)             \
-{                                                                   \
-    Gfx *_g = (Gfx *)(pkt);                                         \
-                                                                    \
-    _g->words.w0 = (_SHIFTL(G_TEXTURE,24,8)|_SHIFTL((xparam),16,8)| \
-            _SHIFTL((level),11,3)|_SHIFTL((tile),8,3)|              \
-            _SHIFTL((on),0,8));                                     \
-    _g->words.w1 = (_SHIFTL((s),16,16)|_SHIFTL((t),0,16));          \
-}
-
-#define gSPPopMatrix(pkt, n) gImmp1(pkt, G_POPMTX, n)
-
-#define gSPEndDisplayList(pkt)              \
-{                                           \
-    Gfx *_g = (Gfx *)(pkt);                 \
-                                            \
-    _g->words.w0 = _SHIFTL(G_ENDDL, 24, 8); \
-    _g->words.w1 = 0;                       \
-}
-
 #define gsSPEndDisplayList()   \
 {                              \
     _SHIFTL(G_ENDDL, 24, 8), 0 \
 }
 
-#define gSPSetGeometryMode(pkt, word)                 \
-{                                                     \
-    Gfx *_g = (Gfx *)(pkt);                           \
-                                                      \
-    _g->words.w0 = _SHIFTL(G_SETGEOMETRYMODE, 24, 8); \
-    _g->words.w1 = (uintptr_t)(word);                 \
-}
-
 #define gsSPSetGeometryMode(word)                           \
 {                                                           \
     _SHIFTL(G_SETGEOMETRYMODE, 24, 8), (uintptr_t)(word)    \
-}
-
-#define gSPClearGeometryMode(pkt, word)                 \
-{                                                       \
-    Gfx *_g = (Gfx *)(pkt);                             \
-                                                        \
-    _g->words.w0 = _SHIFTL(G_CLEARGEOMETRYMODE, 24, 8); \
-    _g->words.w1 = (uintptr_t)(word);                   \
 }
 
 #define gsSPClearGeometryMode(word)                           \
@@ -1363,39 +1124,38 @@ typedef union {
     (uintptr_t)(data)                                              \
 }
 
+/* Fraction never used in fill */
+#define gDPFillRectangle(pkt, ulx, uly, lrx, lry)                    \
+{                                                                    \
+    Gfx *_g = (Gfx *)(pkt);                                          \
+                                                                     \
+    _g->words.w0 = (_SHIFTL(G_FILLRECT, 24, 8) |                     \
+            _SHIFTL((lrx), 14, 10) | _SHIFTL((lry), 2, 10));         \
+    _g->words.w1 = (_SHIFTL((ulx), 14, 10) | _SHIFTL((uly), 2, 10)); \
+}
+
 /*
  * RDP setothermode register commands - register shadowed in RSP
  */
-#define gDPPipelineMode(pkt, mode)      gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_PIPELINE, 1, mode)
 #define gsDPPipelineMode(mode)          gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_PIPELINE, 1, mode)
-#define gDPSetCycleType(pkt, type)      gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_CYCLETYPE, 2, type)
 #define gsDPSetCycleType(type)          gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_CYCLETYPE, 2, type)
-#define gDPSetTexturePersp(pkt, type)   gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTPERSP, 1, type)
-#define gsDPSetTexturePersp(type)       gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTPERSP, 1, type)
-#define gDPSetTextureDetail(pkt, type)  gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTDETAIL, 2, type)
-#define gsDPSetTextureDetail(type)      gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTDETAIL, 2, type)
-#define gDPSetTextureLOD(pkt, type)     gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTLOD, 1, type)
-#define gsDPSetTextureLOD(type)         gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTLOD, 1, type)
-#define gDPSetTextureLUT(pkt, type)     gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTLUT, 2, type)
-#define gsDPSetTextureLUT(type)         gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTLUT, 2, type)
-#define gDPSetTextureFilter(pkt, type)  gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTFILT, 2, type)
-#define gsDPSetTextureFilter(type)      gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTFILT, 2, type)
-#define gDPSetTextureConvert(pkt, type) gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_TEXTCONV, 3, type)
-#define gsDPSetTextureConvert(type)     gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTCONV, 3, type)
-#define gDPSetCombineKey(pkt, type)     gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_COMBKEY, 1, type)
-#define gsDPSetCombineKey(type)         gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_COMBKEY, 1, type)
-#define gDPSetColorDither(pkt, mode)    gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_RGBDITHER, 2, mode)
-#define gsDPSetColorDither(mode)        gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_RGBDITHER, 2, mode)
-#define gDPSetAlphaDither(pkt, mode)    gSPSetOtherMode(pkt, G_SETOTHERMODE_H, G_MDSFT_ALPHADITHER, 2, mode)
-#define gsDPSetAlphaDither(mode)        gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_ALPHADITHER, 2, mode)
 
-#define gDPSetAlphaCompare(pkt, type) gSPSetOtherMode(pkt, G_SETOTHERMODE_L, G_MDSFT_ALPHACOMPARE, 2, type)
+#define gsDPSetTexturePersp(type)       gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTPERSP, 1, type)
+
+#define gsDPSetTextureDetail(type)      gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTDETAIL, 2, type)
+
+#define gsDPSetTextureLOD(type)         gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTLOD, 1, type)
+
+#define gsDPSetTextureLUT(type)         gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTLUT, 2, type)
+
+#define gsDPSetTextureFilter(type)      gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTFILT, 2, type)
+
+#define gsDPSetTextureConvert(type)     gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTCONV, 3, type)
+
+#define gsDPSetCombineKey(type)         gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_COMBKEY, 1, type)
+
 #define gsDPSetAlphaCompare(type)     gsSPSetOtherMode(    G_SETOTHERMODE_L, G_MDSFT_ALPHACOMPARE, 2, type)
 
-#define gDPSetDepthSource(pkt, src)   gSPSetOtherMode(pkt, G_SETOTHERMODE_L, G_MDSFT_ZSRCSEL, 1, src)
-#define gsDPSetDepthSource(src)       gsSPSetOtherMode(    G_SETOTHERMODE_L, G_MDSFT_ZSRCSEL, 1, src)
-
-#define gDPSetRenderMode(pkt, c0, c1) gSPSetOtherMode(pkt, G_SETOTHERMODE_L, G_MDSFT_RENDERMODE, 29, (c0) | (c1))
 #define gsDPSetRenderMode(c0, c1)     gsSPSetOtherMode(    G_SETOTHERMODE_L, G_MDSFT_RENDERMODE, 29, (c0) | (c1))
 
 #define gSetImage(pkt, cmd, fmt, siz, width, i)                \
@@ -1414,28 +1174,12 @@ typedef union {
     (uintptr_t)(i)                                   \
 }
 
-#define gDPSetColorImage(pkt, f, s, w, i) gSetImage(pkt, G_SETCIMG, f, s, w, i)
-
 #define gDPSetTextureImage(pkt, f, s, w, i) gSetImage(pkt, G_SETTIMG, f, s, w, i)
 #define gsDPSetTextureImage(f, s, w, i)     gsSetImage(G_SETTIMG, f, s, w, i)
 
 /*
  * RDP macros
  */
-
-#define gDPSetCombine(pkt, muxs0, muxs1)                                 \
-{                                                                        \
-    Gfx *_g = (Gfx *)(pkt);                                              \
-                                                                         \
-    _g->words.w0 = _SHIFTL(G_SETCOMBINE, 24, 8) | _SHIFTL(muxs0, 0, 24); \
-    _g->words.w1 = (uintptr_t)(muxs1);                                   \
-}
-
-#define gsDPSetCombine(muxs0, muxs1)                      \
-{                                                         \
-    _SHIFTL(G_SETCOMBINE, 24, 8) | _SHIFTL(muxs0, 0, 24), \
-    (uintptr_t)(muxs1)                                    \
-}
 
 #define GCCc0w0(saRGB0, mRGB0, saA0, mA0)                 \
     (_SHIFTL((saRGB0), 20, 4) | _SHIFTL((mRGB0), 15, 5) | \
@@ -1501,38 +1245,6 @@ typedef union {
 
 #define gDPSetCombineMode(pkt, a, b) gDPSetCombineLERP(pkt, a, b)
 #define gsDPSetCombineMode(a, b)     gsDPSetCombineLERP(a, b)
-
-#define gDPSetColor(pkt, c, d)        \
-{                                     \
-    Gfx *_g = (Gfx *)(pkt);           \
-                                      \
-    _g->words.w0 = _SHIFTL(c, 24, 8); \
-    _g->words.w1 = (uintptr_t)(d);    \
-}
-
-#define gsDPSetColor(c, d)               \
-{                                        \
-    _SHIFTL(c, 24, 8), (uintptr_t)(d)    \
-}
-
-#define DPRGBColor(pkt, cmd, r, g, b, a)             \
-    gDPSetColor(pkt, cmd,                            \
-            (_SHIFTL(r, 24, 8) | _SHIFTL(g, 16, 8) | \
-             _SHIFTL(b, 8, 8) | _SHIFTL(a, 0, 8)))
-
-#define gDPSetEnvColor(pkt, r, g, b, a)   DPRGBColor(pkt, G_SETENVCOLOR, r,g,b,a)
-#define gDPSetFogColor(pkt, r, g, b, a)   DPRGBColor(pkt, G_SETFOGCOLOR, r,g,b,a)
-#define gDPSetFillColor(pkt, d)           gDPSetColor(pkt, G_SETFILLCOLOR, (d))
-
-/*#define gDPSetPrimColor(pkt, m, l, r, g, b, a)              \
-{                                                           \
-    Gfx *_g = (Gfx *)(pkt);                                 \
-                                                            \
-    _g->words.w0 = (_SHIFTL(G_SETPRIMCOLOR, 24, 8) |        \
-            _SHIFTL(m, 8, 8) | _SHIFTL(l, 0, 8));           \
-    _g->words.w1 = (_SHIFTL(r, 24, 8) | _SHIFTL(g, 16, 8) | \
-            _SHIFTL(b, 8, 8) | _SHIFTL(a, 0, 8));           \
-}*/
 
 /*
  * Texturing macros
@@ -1607,12 +1319,6 @@ typedef union {
 #define gsDPSetTileSize(t, uls, ult, lrs, lrt)                \
     gsDPLoadTileGeneric(G_SETTILESIZE, t, uls, ult, lrs, lrt)
 
-#define gDPLoadTile(pkt, t, uls, ult, lrs, lrt)                \
-    gDPLoadTileGeneric(pkt, G_LOADTILE, t, uls, ult, lrs, lrt)
-
-#define gsDPLoadTile(t, uls, ult, lrs, lrt)                \
-    gsDPLoadTileGeneric(G_LOADTILE, t, uls, ult, lrs, lrt)
-
 #define gDPSetTile(pkt, fmt, siz, line, tmem, tile, palette, cmt,    \
         maskt, shiftt, cms, masks, shifts)                           \
 {                                                                    \
@@ -1668,14 +1374,6 @@ typedef union {
      _SHIFTL(dxt, 0, 12))                                 \
 }
 
-#define gDPLoadTLUTCmd(pkt, tile, count)                              \
-{                                                                     \
-    Gfx *_g = (Gfx *)pkt;                                             \
-                                                                      \
-    _g->words.w0 = _SHIFTL(G_LOADTLUT, 24, 8);                        \
-    _g->words.w1 = _SHIFTL((tile), 24, 3) | _SHIFTL((count), 14, 10); \
-}
-
 #define gDPLoadTextureBlock(pkt, timg, fmt, siz, width, height,   \
         pal, cms, cmt, masks, maskt, shifts, shiftt)              \
 {                                                                 \
@@ -1694,86 +1392,6 @@ typedef union {
             ((height)-1) << G_TEXTURE_IMAGE_FRAC)                 \
 }
 
-#define gDPLoadTLUT(pkt, count, tmemaddr, dram)                    \
-{                                                                  \
-    gDPSetTextureImage(pkt, G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, dram); \
-    gDPSetTile(pkt, 0, 0, 0, tmemaddr,                             \
-            G_TX_LOADTILE, 0 , 0, 0, 0, 0, 0, 0);                  \
-    gDPLoadTLUTCmd(pkt, G_TX_LOADTILE, ((count)-1));               \
-}
-
-#define gDPSetScissor(pkt, ulx, uly, lrx, lry)                   \
-{                                                                \
-     Gfx *_g = (Gfx *)pkt;                                       \
-                                                                 \
-    _g->words.w0 = _SHIFTL(G_SETSCISSOR, 24, 8) |                \
-    _SHIFTL((int)((float)(ulx)), 12, 12) |                       \
-    _SHIFTL((int)((float)(uly)), 0, 12);                         \
-                                                                 \
-    _g->words.w1 = _SHIFTL((int)((float)(lrx) * 4.0f), 12, 12) | \
-    _SHIFTL((int)((float)(lry)), 0, 12);                         \
-}
-
-/* Fraction never used in fill */
-#define gDPFillRectangle(pkt, ulx, uly, lrx, lry)                    \
-{                                                                    \
-    Gfx *_g = (Gfx *)(pkt);                                          \
-                                                                     \
-    _g->words.w0 = (_SHIFTL(G_FILLRECT, 24, 8) |                     \
-            _SHIFTL((lrx), 14, 10) | _SHIFTL((lry), 2, 10));         \
-    _g->words.w1 = (_SHIFTL((ulx), 14, 10) | _SHIFTL((uly), 2, 10)); \
-}
-
-/* like gDPFillRectangle but accepts negative arguments */
-#define gDPScisFillRectangle(pkt, ulx, uly, lrx, lry) \
-{                                                     \
-    Gfx *_g = (Gfx *)(pkt);                           \
-                                                      \
-    _g->words.w0 = (_SHIFTL(G_FILLRECT, 24, 8) |      \
-            _SHIFTL(MAX((lrx),0), 14, 10) |           \
-            _SHIFTL(MAX((lry),0), 2, 10));            \
-    _g->words.w1 = (_SHIFTL(MAX((ulx),0), 14, 10) |   \
-            _SHIFTL(MAX((uly),0), 2, 10));            \
-}
-
-#define gDPNoParam(pkt, cmd)            \
-{                                       \
-    Gfx *_g = (Gfx *)(pkt);             \
-                                        \
-    _g->words.w0 = _SHIFTL(cmd, 24, 8); \
-    _g->words.w1 = 0;                   \
-}
-
-#define gsDPNoParam(cmd)   \
-{                          \
-    _SHIFTL(cmd, 24, 8), 0 \
-}
-
-#define gDPParam(pkt, cmd, param)       \
-{                                       \
-    Gfx *_g = (Gfx *)(pkt);             \
-                                        \
-    _g->words.w0 = _SHIFTL(cmd, 24, 8); \
-    _g->words.w1 = (param);             \
-}
-
-#define gsDPParam(cmd, param)    \
-{                                \
-    _SHIFTL(cmd, 24, 8), (param) \
-}
-
-#define gSPTextureRectangle(pkt, xl, yl, xh, yh, tile, s, t, dsdx, dtdy)      \
-{                                                                             \
-    Gfx *_g = (Gfx *)(pkt);                                                   \
-                                                                              \
-    _g->words.w0 = (_SHIFTL(G_TEXRECT, 24, 8) | _SHIFTL(xh, 12, 12) |         \
-            _SHIFTL(yh, 0, 12));                                              \
-    _g->words.w1 = (_SHIFTL(tile, 24, 3) | _SHIFTL(xl, 12, 12) |              \
-            _SHIFTL(yl, 0, 12));                                              \
-    gImmp1(pkt, G_RDPHALF_1, (_SHIFTL(s, 16, 16) | _SHIFTL(t, 0, 16)));       \
-    gImmp1(pkt, G_RDPHALF_2, (_SHIFTL(dsdx, 16, 16) | _SHIFTL(dtdy, 0, 16))); \
-}
-
 #define gSPTextureRectangleFlip(pkt, xl, yl, xh, yh, tile, s, t, dsdx, dtdy)  \
 {                                                                             \
     Gfx *_g = (Gfx *)(pkt);                                                   \
@@ -1785,23 +1403,5 @@ typedef union {
     gImmp1(pkt, G_RDPHALF_1, (_SHIFTL(s, 16, 16) | _SHIFTL(t, 0, 16)));       \
     gImmp1(pkt, G_RDPHALF_2, (_SHIFTL(dsdx, 16, 16) | _SHIFTL(dtdy, 0, 16))); \
 }
-
-#define gsDPWord(wordhi, wordlo)                  \
-    gsImmp1(G_RDPHALF_1, (unsigned int)(wordhi)), \
-    gsImmp1(G_RDPHALF_2, (unsigned int)(wordlo))
-
-#define gDPWord(pkt, wordhi, wordlo)                  \
-{                                                     \
-    Gfx *_g = (Gfx *)(pkt);                           \
-                                                      \
-    gImmp1(pkt, G_RDPHALF_1, (unsigned int)(wordhi)); \
-    gImmp1(pkt, G_RDPHALF_2, (unsigned int)(wordlo)); \
-}
-
-#define gsDPFullSync()       gsDPNoParam(G_RDPFULLSYNC)
-#define gDPNoOp(pkt)         gDPNoParam(pkt, G_NOOP)
-#define gsDPNoOp()           gsDPNoParam(G_NOOP)
-#define gDPNoOpTag(pkt, tag) gDPParam(pkt, G_NOOP, tag)
-#define gsDPNoOpTag(tag)     gsDPParam(G_NOOP, tag)
 
 #endif /* _GBI_H_ */

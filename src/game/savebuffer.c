@@ -22,11 +22,11 @@ int var8009de94;
 int g_MenuProjectFromX;
 int g_MenuProjectFromY;
 
-void func0f0d4690(Mtxf *mtx)
+void func0f0d4690(Mtx *mtx)
 {
 	struct coord pos;
 
-	mtxIdent((Mtx*)mtx);
+	mtxIdent(mtx);
 
 	pos.x = -159.75f;
 	pos.y = 120.25f;
@@ -36,19 +36,11 @@ void func0f0d4690(Mtxf *mtx)
 	pos.y = (.5f + viGetHeight()) * 0.5f;
 	pos.z = 0;
 
-	mtx4SetTranslation(&pos, (Mtx*)mtx);
-	mtxScaleRow1Full(-1, (Mtx*)mtx);
+	mtx4SetTranslation(&pos, mtx);
+	mtxScaleRow1Full(-1, mtx);
 }
 
-
-void func0f0d475c(Mtxf *mtx)
-{
-	func0f0d4690(mtx);
-	mtxScaleRow0Full(0.1f, (Mtx*)mtx);
-	mtxScaleRow1Full(0.1f, (Mtx*)mtx);
-}
-
-Gfx *gfxSetCustomProjection(Gfx *gdl)
+Gfx *savebufferSetCustomProjection(Gfx *gdl)
 {
 	Mtx mtx;
 	Mtx *mtx1;
@@ -57,7 +49,9 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 	mtx1 = gfxAllocateMatrix();
 	mtx2 = gfxAllocateMatrix();
 
-	func0f0d475c((Mtxf*)&mtx);
+	func0f0d4690(&mtx);
+	mtxScaleRow0Full(0.1f, &mtx);
+	mtxScaleRow1Full(0.1f, &mtx);
 	mtx4Copy(&mtx, mtx2);
 	mtxIdent(&mtx);
 
@@ -65,8 +59,8 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 
 	mtx4Copy(&mtx, mtx1);
 
-	gSPMatrix(gdl++, (uintptr_t)(mtx2), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-	gSPMatrix(gdl++, (uintptr_t)(mtx1), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gfx_Matrix(gdl++, mtx2, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(gdl++, mtx1, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	if (g_Viewport == NULL) {
 		uint32_t size = align16(sizeof(Vp));
@@ -89,33 +83,32 @@ Gfx *gfxSetCustomProjection(Gfx *gdl)
 Gfx *savebufferSetup2DRender(Gfx *gdl)
 {
 	gSPViewport(gdl++, (uintptr_t)(viGetCurrentPlayerViewport()));
-	gSPMatrix(gdl++, (uintptr_t)(camGetPerspectiveMtxL()), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+	gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	return gdl;
 }
 
 Gfx *func0f0d4a3c(Gfx *gdl)
 {
-	Mtxf mtx;
-	Mtxf *mtxptr = gfxAllocateMatrix();
+	Mtx mtx;
+	Mtx *mtxptr = gfxAllocateMatrix();
 
 	texSelect(&gdl, &g_TexGeneralConfigs[6], 2, 0, 2, 1, NULL);
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetAlphaCompare(gdl++, G_AC_NONE);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-	gSPSetGeometryMode(gdl++, G_SHADE);
-	gSPSetGeometryMode(gdl++, G_SHADING_SMOOTH);
-	gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetTextureFilter(gdl++, G_TF_BILERP);
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-	gDPSetTexturePersp(gdl++, G_TP_PERSP);
+	gfx_Set_Geometry_Mode(gdl++, G_SHADE);
+	gfx_Set_Geometry_Mode(gdl++, G_SHADING_SMOOTH);
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
 	func0f0d4690(&mtx);
-	mtx4Copy((Mtx*)&mtx, (Mtx*)mtxptr);
+	mtx4Copy(&mtx, mtxptr);
 
-	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(gdl++, mtxptr, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	return gdl;
 }
@@ -123,14 +116,14 @@ Gfx *func0f0d4a3c(Gfx *gdl)
 Gfx *func0f0d4c80(Gfx *gdl)
 {
 	Mtx mtx;
-	Mtx *mtxptr = gfxAllocateMatrix();
+	Mtx*mtxptr = gfxAllocateMatrix();
 
-	func0f0d4690((Mtxf*)&mtx);
+	func0f0d4690(&mtx);
 	mtxScaleRow0Full(0.1f, &mtx);
 	mtxScaleRow1Full(0.1f, &mtx);
 	mtx4Copy(&mtx, mtxptr);
 
-	gSPMatrix(gdl++, (uintptr_t)(mtxptr), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(gdl++, mtxptr, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	return gdl;
 }
@@ -310,9 +303,9 @@ Gfx *menugfxDrawPlane(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1
 	colours[0].word = PD_BE32(colour1);
 	colours[1].word = PD_BE32(colour2);
 
-	gSPColor(gdl++, (uintptr_t)(colours), 2);
+	gfx_Color(gdl++, colours, 2);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
-	gSPTri2(gdl++, 0, 1, 3, 3, 2, 0);
+	gfx_Tri2(gdl++, 0, 1, 3, 3, 2, 0);
 
 	return gdl;
 }

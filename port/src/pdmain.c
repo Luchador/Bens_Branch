@@ -45,6 +45,7 @@
 #include "lib/rng.h"
 #include "string.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "system.h"
 #include "video.h"
@@ -340,8 +341,8 @@ void mainTick(void)
 
 		gdl = gdlstart = gfxGetMasterDisplayList();
 
-		gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-		gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 0x0100, 6, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+		gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0, G_TX_LOADTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+		gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_4b, 0, 256, 6, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 
 		lvTick();
 		playermgrShuffle();
@@ -363,7 +364,7 @@ void mainTick(void)
 
 		gdl = lvRender(gdl);
 
-		gSPEndDisplayList(gdl++);
+		gfx_End_Display_List(gdl++);
 
 		gfxSwapBuffers();
 		viUpdateMode();

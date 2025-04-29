@@ -8,6 +8,7 @@
 #include "bss.h"
 #include "lib/main.h"
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 struct marker {
@@ -512,12 +513,12 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	gdl = text0f153a34(gdl, underleft, undertop, underright, underbottom, undercol);
 	gdl = text0f153780(gdl);
 
-	gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
 
 	// Same as gSPColor but casts the sizeof to an int, which is required for a match.
 #define gSPColor2(pkt, v, n) \
-	gDma1p(pkt, G_COL, v, (int)sizeof(uint32_t)*(n),((n)-1)<<2)
+	gfx_Dma1p(pkt, G_COL, v, (int)sizeof(uint32_t)*(n),((n)-1)<<2)
 
 	// Draw shield
 	// There's between 20 and 24 colours and vertices to load here.
@@ -527,9 +528,9 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	gSPColor2(gdl++, (uintptr_t)(colours), numverts);
 	gSPVertex(gdl++, (uintptr_t)(vertices), 14, 0);
 
-	gSPTri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
-	gSPTri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
-	gSPTri4(gdl++, 8, 9, 10, 9, 10, 11, 10, 11, 12, 11, 12, 13);
+	gfx_Tri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
+	gfx_Tri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
+	gfx_Tri4(gdl++, 8, 9, 10, 9, 10, 11, 10, 11, 12, 11, 12, 13);
 
 	// numvertsremaining will be 8-12
 	numvertsremaining = numverts - 12U;
@@ -537,20 +538,20 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	// This is a macro expansion of gSPVertex but cases the sizeof to an int,
 	// and separates numvertsremaining and numverts - 12.
 	// Both are required for a match.
-	gDma1p(gdl++, G_VTX,
+	gfx_Dma1p(gdl++, G_VTX,
 			(uintptr_t)(vertices + 12),
 			numvertsremaining * (int) sizeof(Vtx),
 			(numverts - 12 - 1) << 4);
 
-	gSPTri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
+	gfx_Tri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
 
 	if (numvertsremaining < 10) {
-		gSPTri2(gdl++, 4, 5, 6, 5, 6, 7);
+		gfx_Tri2(gdl++, 4, 5, 6, 5, 6, 7);
 	} else {
-		gSPTri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
+		gfx_Tri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
 
 		if (numvertsremaining >= 12) {
-			gSPTri2(gdl++, 8, 9, 10, 9, 10, 11);
+			gfx_Tri2(gdl++, 8, 9, 10, 9, 10, 11);
 		}
 	}
 
@@ -561,16 +562,16 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	gSPColor2(gdl++, (uintptr_t)(colours + 24), numverts);
 	gSPVertex(gdl++, (uintptr_t)(vertices + 24), numverts, 0);
 
-	gSPTri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
-	gSPTri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
+	gfx_Tri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
+	gfx_Tri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
 
 	if (coloursize < 56) {
-		gSPTri2(gdl++, 8, 9, 10, 9, 10, 11);
+		gfx_Tri2(gdl++, 8, 9, 10, 9, 10, 11);
 	} else {
-		gSPTri4(gdl++, 8, 9, 10, 9, 10, 11, 10, 11, 12, 11, 12, 13);
+		gfx_Tri4(gdl++, 8, 9, 10, 9, 10, 11, 10, 11, 12, 11, 12, 13);
 
 		if (coloursize >= 64) {
-			gSPTri2(gdl++, 12, 13, 14, 13, 14, 15);
+			gfx_Tri2(gdl++, 12, 13, 14, 13, 14, 15);
 		}
 	}
 
@@ -581,16 +582,16 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	gSPColor2(gdl++, (uintptr_t)(colours + 40), numverts);
 	gSPVertex(gdl++, (uintptr_t)(vertices + 40), numverts, 0);
 
-	gSPTri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
-	gSPTri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
+	gfx_Tri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
+	gfx_Tri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
 
 	if (coloursize < 56) {
-		gSPTri2(gdl++, 8, 9, 10, 9, 10, 11);
+		gfx_Tri2(gdl++, 8, 9, 10, 9, 10, 11);
 	} else {
-		gSPTri4(gdl++, 8, 9, 10, 9, 10, 11, 10, 11, 12, 11, 12, 13);
+		gfx_Tri4(gdl++, 8, 9, 10, 9, 10, 11, 10, 11, 12, 11, 12, 13);
 
 		if (coloursize >= 64) {
-			gSPTri2(gdl++, 12, 13, 14, 13, 14, 15);
+			gfx_Tri2(gdl++, 12, 13, 14, 13, 14, 15);
 		}
 	}
 

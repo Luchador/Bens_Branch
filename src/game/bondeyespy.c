@@ -247,10 +247,10 @@ bool eyespyCalculateNewPositionWithPush(struct coord *vel)
 
 int eyespy0f0cf890(struct coord *arg0, struct coord *arg1, struct coord *arg2, struct coord *arg3, struct coord *arg4)
 {
-	if (cd00024ea4()) {
+	if (cdGetHasSlideTimeToEdge()) {
 		struct coord sp24;
 		int someint;
-		float somefloat = cd00024e98();
+		float somefloat = cdGetSlideTimeToEdge();
 		sp24.x = arg0->x * somefloat * 0.25f;
 		sp24.y = arg0->y * somefloat * 0.25f;
 		sp24.z = arg0->z * somefloat * 0.25f;

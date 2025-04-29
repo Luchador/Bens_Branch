@@ -21,7 +21,6 @@
 #include "string.h"
 #include "data.h"
 #include "types.h"
-#include "gbiex.h"
 #include "gfx.h"
 #include "game/player.h"
 #include "video.h"
@@ -35,7 +34,7 @@ int var8007f850 = 3;
 
 Gfx *bviewDrawIrRect(Gfx *gdl, int x1, int y1, int x2, int y2)
 {
-	gDPFillRectangle(gdl++, x1, y1, x2, y2);
+	gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
 
 	return gdl;
 }
@@ -53,8 +52,8 @@ Gfx *bviewDrawFisheyeRect(Gfx *gdl, int arg1, float arg2, int arg3, int arg4)
 		float fVar4 = arg3 + tmp;
 		float fVar7 = (int)(arg2 * tmp);
 
-		gDPFillRectangle(gdl++, arg3, arg1, fVar4 - fVar7, arg1 + 1);
-		gDPFillRectangle(gdl++, fVar4 + fVar7, arg1, arg3 + arg4, arg1 + 1);
+		gfx_Fill_Rectangle(gdl++, arg3, arg1, fVar4 - fVar7, arg1 + 1);
+		gfx_Fill_Rectangle(gdl++, fVar4 + fVar7, arg1, arg3 + arg4, arg1 + 1);
 	}
 
 	return gdl;
@@ -65,27 +64,24 @@ Gfx *bviewPrepareStaticRgba16(Gfx *gdl, uint32_t colour, uint32_t alpha)
 	static uint32_t envcol = 0xffffffff;
 	static uint32_t primcol = 0x7f7f7fff;
 
-	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0,
+	gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gSPTexture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-	gDPSetTextureLUT(gdl++, G_TT_NONE);
-	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 160, 0, G_TX_RENDERTILE, 0,
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+	gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 160, 0, G_TX_RENDERTILE, 0,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x0800, 0x0020);
-	gDPSetTextureFilter(gdl++, G_TF_POINT);
-	gDPSetColor(gdl++, G_SETENVCOLOR, (colour & 0xffffff00) | (alpha & 0xff));
+	gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 2048, 32);
+	gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
+	gfx_Set_Color(gdl++, G_SETENVCOLOR, (uintptr_t)((colour & 0xffffff00) | (alpha & 0xff)));
 	gDPSetCombineLERP(gdl++,
 			TEXEL0, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT,
 			TEXEL0, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT);
-	gDPSetTexturePersp(gdl++, G_TP_NONE);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetAlphaDither(gdl++, G_AD_NOISE);
-	gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 
 	return gdl;
 }
@@ -95,27 +91,24 @@ Gfx *bviewPrepareStaticI8(Gfx *gdl, uint32_t colour, uint32_t alpha)
 	static uint32_t envcol = 0xffffffff;
 	static uint32_t primcol = 0x7f7f7fff;
 
-	gDPSetTile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_8b, 0, 0x0000, 5, 0,
+	gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_8b, 0, 0x0000, 5, 0,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gSPTexture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
-	gDPSetTextureLOD(gdl++, G_TL_TILE);
-	gDPSetTextureDetail(gdl++, G_TD_CLAMP);
-	gDPSetTextureLUT(gdl++, G_TT_NONE);
-	gDPSetTile(gdl++, G_IM_FMT_I, G_IM_SIZ_8b, 160, 0, G_TX_RENDERTILE, 0,
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+	gfx_Set_Tile(gdl++, G_IM_FMT_I, G_IM_SIZ_8b, 160, 0, G_TX_RENDERTILE, 0,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD,
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
-	gDPSetTileSize(gdl++, G_TX_RENDERTILE, 0, 0, 0x0800, 0x0020);
-	gDPSetTextureFilter(gdl++, G_TF_POINT);
-	gDPSetColor(gdl++, G_SETENVCOLOR, (colour & 0xffffff00) | (alpha & 0xff));
+	gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 2048, 32);
+	gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
+	gfx_Set_Color(gdl++, G_SETENVCOLOR, (uintptr_t)((colour & 0xffffff00) | (alpha & 0xff)));
 	gDPSetCombineLERP(gdl++,
 			TEXEL0, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT,
 			TEXEL0, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT);
-	gDPSetTexturePersp(gdl++, G_TP_NONE);
-	gDPSetColorDither(gdl++, G_CD_DISABLE);
-	gDPSetAlphaDither(gdl++, G_AD_NOISE);
-	gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 
 	return gdl;
 }
@@ -159,10 +152,10 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, uint32_t colour, uint32_t alpha)
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, newalpha);
 
-	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_BlurFb);
-	gSPImageRectangleEXT(gdl++,
-		viewleft << 2, viewtop << 2, viewleft, viewtop,
-		(viewleft + viewwidth) << 2, (viewtop + viewheight) << 2, viewleft + viewwidth, viewtop + viewheight,
+	gfx_Set_Framebuffer_Texture_EXT(gdl++, 0, 0, 0, (uintptr_t)g_BlurFb);
+	gdl += gfx_Image_Rectangle_EXT(gdl,
+		viewleft * 4, viewtop * 4, viewleft, viewtop,
+		(viewleft + viewwidth) * 4, (viewtop + viewheight) * 4, viewleft + viewwidth, viewtop + viewheight,
 		0, videoGetNativeWidth(), videoGetNativeHeight());
 
 	return gdl;
@@ -184,7 +177,7 @@ Gfx *bviewDrawStatic(Gfx *gdl, uint32_t arg1, int arg2)
 	gDPSetCombineLERP(gdl++,
 			NOISE, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT,
 			NOISE, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT);
-	gDPFillRectangleEXT(gdl++, viewleft, viewtop, viewleft + viewwidth, viewtop + viewheight);
+	gdl += gfx_HUD_Rectangle_EXT(gdl, viewleft, viewtop, viewleft + viewwidth + 1, viewtop + viewheight + 1);
 
 	return gdl;
 }
@@ -230,7 +223,7 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 			}
 		}
 
-		gDPFillRectangle(gdl++, viewleft, y, viewleft + viewwidth, y + 1);
+		gfx_Fill_Rectangle(gdl++, viewleft, y, viewleft + viewwidth, y + 1);
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
@@ -280,7 +273,7 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 			tmpy += rngRandom() % 200;
 		}
 
-		gDPFillRectangle(gdl++, viewleft, tmpy, viewleft + viewwidth, tmpy + 1);
+		gfx_Fill_Rectangle(gdl++, viewleft, tmpy, viewleft + viewwidth, tmpy + 1);
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
@@ -332,10 +325,10 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, uint32_t colour, int alpha, float arg3, float a
 	const int top = ycenter - halfh;
 	const int right = xcenter + halfw;
 	const int bottom = ycenter + halfh;
-	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_BlurFb);
-	gSPImageRectangleEXT(gdl++,
-		left << 2, top << 2, viewleft, viewtop,
-		right << 2, bottom << 2, viewleft + viewwidth, viewtop + viewheight,
+	gfx_Set_Framebuffer_Texture_EXT(gdl++, 0, 0, 0, (uintptr_t)g_BlurFb);
+	gdl += gfx_Image_Rectangle_EXT(gdl,
+		left * 4, top * 4, viewleft, viewtop,
+		right * 4, bottom * 4, viewleft + viewwidth, viewtop + viewheight,
 		0, videoGetNativeWidth(), videoGetNativeHeight());
 
 	return gdl;
@@ -373,9 +366,9 @@ static inline Gfx *bviewDrawFisheyeLine(Gfx *gdl, int viewleft, int viewwidth, i
 	const int left = xcenter - halfw;
 	const int right = xcenter + halfw;
 
-	gSPImageRectangleEXT(gdl++,
-		left << 2, y << 2, viewleft, y,
-		right << 2, (y + 1) << 2, viewleft + viewwidth, y + 1,
+	gdl += gfx_Image_Rectangle_EXT(gdl,
+		left * 4, y * 4, viewleft, y,
+		right * 4, (y + 1) * 4, viewleft + viewwidth, y + 1,
 		0, videoGetNativeWidth(), videoGetNativeHeight());
 
 	return gdl;
@@ -449,15 +442,15 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
 	// make a copy of the current back buffer contents that we will be using as a texture
-	gDPFlushEXT(gdl++);
-	gDPCopyFramebufferEXT(gdl++, g_PrevFrameFb, 0, 0, 0, G_ON);
-	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_PrevFrameFb);
+	gfx_No_Param(gdl++, G_RDPFLUSH_EXT);
+	gfx_Copy_Framebuffer_EXT(gdl++, g_PrevFrameFb, 0, 0, 0, G_ON);
+	gfx_Set_Framebuffer_Texture_EXT(gdl++, 0, 0, 0, (uintptr_t)g_PrevFrameFb);
 
 	if (starting) {
 		for (i = viewtop; i < viewtop + viewheight; i++) {
 			if (i % 2) {
 				if (i > viewtop + fullradius - curradius && i < viewtop + fullradius + curradius) {
-					gDPSetEnvColorViaWord(gdl++, (colour & 0xffffff00) | (spec & 0xff));
+					gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA((colour & 0xffffff00) | (spec & 0xff)));
 
 					tmp = bview0f142d74(s2, f26, halfheight, sqhalfheight) * startupfrac;
 					gdl = bviewDrawFisheyeLine(gdl, viewleft, viewwidth, i, tmp);
@@ -480,16 +473,18 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
 				colour = 0xff333300 | (alpha2 & 0xff);
 				f22 = ((rngRandom() % 32) + (float) FBALLOC_HEIGHT) * (1.0f / 256.0f);
 
-				gDPSetEnvColorViaWord(gdl++, colour);
+				gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(colour));
 			} else {
-				gDPSetEnvColorViaWord(gdl++, 0xffffffff);
+				RGBA color = {255, 255, 255, 255};
+				gfx_Set_Env_Color(gdl++, color);
 			}
 
 			tmp = bview0f142d74(s2, f26, halfheight, sqhalfheight) * f22;
 			gdl = bviewDrawFisheyeLine(gdl, viewleft, viewwidth, i, tmp);
 
 			if (hit == EYESPYHIT_DAMAGE) {
-				gDPSetEnvColorViaWord(gdl++, 0xddaaaa99);
+				RGBA color = {221, 170, 170, 153};
+				gfx_Set_Env_Color(gdl++, color);
 
 				tmp = bview0f142d74(s2, f26, halfheight, sqhalfheight) * 1.03f;
 				gdl = bviewDrawFisheyeLine(gdl, viewleft, viewwidth, i, tmp);
@@ -498,8 +493,9 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
 			s2 += s3;
 
 			if ((i % 2) == 0) {
-				gDPSetEnvColorViaWord(gdl++, 0x00000055);
-				gDPFillRectangle(gdl++, viewleft, i, viewleft + viewwidth, i + 1);
+				RGBA color = {0, 0, 0, 85};
+				gfx_Set_Env_Color(gdl++, color);
+				gfx_Fill_Rectangle(gdl++, viewleft, i, viewleft + viewwidth, i + 1);
 			}
 
 			if (s2 >= viewheight * 0.5f) {
@@ -509,8 +505,8 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
 		}
 	}
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 	struct RGBA color = {0, 0, 0, 255};
 	gfx_Set_Prim_Color(gdl++, color);
@@ -615,12 +611,10 @@ Gfx *bviewDrawEyespySideRect(Gfx *gdl, int *points, uint8_t r, uint8_t g, uint8_
 	vertices[2].colour = 4;
 	vertices[3].colour = 4;
 
-	gSPColor(gdl++, colours, 2);
+	gfx_Color(gdl++, colours, 2);
 	gSPVertex(gdl++, vertices, 4, 0);
 
-	if (colours);
-
-	gSPTri2(gdl++, 0, 1, 2, 0, 2, 3);
+	gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
 	return gdl;
 }
@@ -720,16 +714,16 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	if (!vsplit)
 	{
 		// Render borders/lines in background
-		gDPFillRectangle(gdl++, viewleft + 25, viewtop + 55, viewleft + 26, viewbottom - 24);
-		gDPFillRectangle(gdl++, viewleft + 31, viewtop + 55, viewleft + 32, viewbottom - 42);
-		gDPFillRectangle(gdl++, viewleft + 25, viewbottom - 25, viewleft + 25 + viewwidth / 5.0f + 1, viewbottom - 24);
-		gDPFillRectangle(gdl++, viewleft + 31, viewbottom - 43, viewleft + 25 + viewwidth / 7.0f + 1, viewbottom - 42);
-		gDPFillRectangle(gdl++, viewright - 25, viewtop + 25, viewright - 24, viewbottom - 54);
-		gDPFillRectangle(gdl++, viewright - 31, viewtop + 43, viewright - 30, viewbottom - 54);
-		gDPFillRectangle(gdl++, viewright - 25 - viewwidth / 5.0f, viewtop + 25, viewright - 24, viewtop + 26);
-		gDPFillRectangle(gdl++, viewright - 25 - viewwidth / 7.0f, viewtop + 43, viewright - 30, viewtop + 44);
-		gDPFillRectangle(gdl++, viewleft, viewtop + 55, viewleft + viewwidth / 5.0f + 1, viewtop + 56);
-		gDPFillRectangle(gdl++, viewright - viewwidth / 5.0f, viewbottom - 55, viewright + 1, viewbottom - 54);
+		gfx_Fill_Rectangle(gdl++, viewleft + 25, viewtop + 55, viewleft + 26, viewbottom - 24);
+		gfx_Fill_Rectangle(gdl++, viewleft + 31, viewtop + 55, viewleft + 32, viewbottom - 42);
+		gfx_Fill_Rectangle(gdl++, viewleft + 25, viewbottom - 25, viewleft + 25 + viewwidth / 5.0f + 1, viewbottom - 24);
+		gfx_Fill_Rectangle(gdl++, viewleft + 31, viewbottom - 43, viewleft + 25 + viewwidth / 7.0f + 1, viewbottom - 42);
+		gfx_Fill_Rectangle(gdl++, viewright - 25, viewtop + 25, viewright - 24, viewbottom - 54);
+		gfx_Fill_Rectangle(gdl++, viewright - 31, viewtop + 43, viewright - 30, viewbottom - 54);
+		gfx_Fill_Rectangle(gdl++, viewright - 25 - viewwidth / 5.0f, viewtop + 25, viewright - 24, viewtop + 26);
+		gfx_Fill_Rectangle(gdl++, viewright - 25 - viewwidth / 7.0f, viewtop + 43, viewright - 30, viewtop + 44);
+		gfx_Fill_Rectangle(gdl++, viewleft, viewtop + 55, viewleft + viewwidth / 5.0f + 1, viewtop + 56);
+		gfx_Fill_Rectangle(gdl++, viewright - viewwidth / 5.0f, viewbottom - 55, viewright + 1, viewbottom - 54);
 	}
 
 	if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
@@ -737,18 +731,18 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		int x = viewleft + (viewwidth >> 1);
 		int y = viewtop + (viewheight >> 1);
 
-		gDPSetSubpixelOffsetEXT(gdl++, -2, -2);
+		gfx_Set_Subpixel_Offset_EXT(gdl++, -2, -2);
 
-		gDPFillRectangle(gdl++, x + 2, y + 0, x + 7, y + 1);
-		gDPFillRectangle(gdl++, x + 2, y + 0, x + 5, y + 1);
-		gDPFillRectangle(gdl++, x - 6, y + 0, x - 1, y + 1);
-		gDPFillRectangle(gdl++, x - 4, y + 0, x - 1, y + 1);
-		gDPFillRectangle(gdl++, x + 0, y + 2, x + 1, y + 7);
-		gDPFillRectangle(gdl++, x + 0, y + 2, x + 1, y + 5);
-		gDPFillRectangle(gdl++, x + 0, y - 6, x + 1, y - 1);
-		gDPFillRectangle(gdl++, x + 0, y - 4, x + 1, y - 1);
+		gfx_Fill_Rectangle(gdl++, x + 2, y + 0, x + 7, y + 1);
+		gfx_Fill_Rectangle(gdl++, x + 2, y + 0, x + 5, y + 1);
+		gfx_Fill_Rectangle(gdl++, x - 6, y + 0, x - 1, y + 1);
+		gfx_Fill_Rectangle(gdl++, x - 4, y + 0, x - 1, y + 1);
+		gfx_Fill_Rectangle(gdl++, x + 0, y + 2, x + 1, y + 7);
+		gfx_Fill_Rectangle(gdl++, x + 0, y + 2, x + 1, y + 5);
+		gfx_Fill_Rectangle(gdl++, x + 0, y - 6, x + 1, y - 1);
+		gfx_Fill_Rectangle(gdl++, x + 0, y - 4, x + 1, y - 1);
 
-		gDPSetSubpixelOffsetEXT(gdl++, 0, 0);
+		gfx_Set_Subpixel_Offset_EXT(gdl++, 0, 0);
 	}
 
 	if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {
@@ -935,15 +929,14 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		int g;
 		int b;
 
-		gDPSetCycleType(gdl++, G_CYC_1CYCLE); \
-		gDPSetColorDither(gdl++, G_CD_DISABLE); \
-		gDPSetTexturePersp(gdl++, G_TP_NONE); \
-		gDPSetAlphaCompare(gdl++, G_AC_NONE); \
-		gDPSetTextureLOD(gdl++, G_TL_TILE); \
-		gDPSetTextureFilter(gdl++, G_TF_BILERP); \
-		gDPSetTextureConvert(gdl++, G_TC_FILT); \
-		gDPSetTextureLUT(gdl++, G_TT_NONE); \
-		gDPSetRenderMode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2); \
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+		gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 		gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 
 		if (!vsplit)
@@ -987,7 +980,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 			xpos += 10;
 
 			// Down
@@ -1028,7 +1021,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 			xpos += 10;
 
 			// Left
@@ -1069,7 +1062,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 			xpos += 10;
 
 			// Right
@@ -1110,7 +1103,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 			xpos += 10;
 
 			// Shoulder buttons
@@ -1151,7 +1144,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 			xpos += 10;
 
 			// Z button
@@ -1192,7 +1185,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gDPFillRectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 		}
 
 		xpos = (scale == 2) ? -48 : -55;
@@ -1220,13 +1213,13 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			tmpval = cstickx * 28.0f / 80.0f;
 
 			if (cstickx > 0) {
-				gDPFillRectangle(gdl++,
+				gfx_Fill_Rectangle(gdl++,
 						xpos * scale + viewright,
 						viewtop + 19,
 						(tmpval + xpos) * scale + viewright,
 						viewtop + 21);
 			} else {
-				gDPFillRectangle(gdl++,
+				gfx_Fill_Rectangle(gdl++,
 						(tmpval + xpos) * scale + viewright,
 						viewtop + 19,
 						xpos * scale + viewright,
@@ -1239,16 +1232,16 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		brightness = tmpval < 0 ? -tmpval : tmpval;
 
 		if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_CAMSPY) {
-			struct RGBA color = {0, brightness, 0, 255};
+			RGBA color = {0, brightness, 0, 255};
 			gfx_Set_Prim_Color(gdl++, color);
 		} else if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
 			r = brightness / 96.0f * 16.0f;
 			g = brightness / 96.0f * 32.0f;
 			b = brightness * 2.5f;
-			struct RGBA color = {r, g, b, 255};
+			RGBA color = {r, g, b, 255};
 			gfx_Set_Prim_Color(gdl++, color);
 		} else {
-			struct RGBA color = {brightness, brightness / 4, 0, 255};
+			RGBA color = {brightness, brightness / 4, 0, 255};
 			gfx_Set_Prim_Color(gdl++, color);
 		}
 
@@ -1257,13 +1250,13 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			tmpval = csticky * 28.0f / 80.0f;
 
 			if (csticky > 0) {
-				gDPFillRectangle(gdl++,
+				gfx_Fill_Rectangle(gdl++,
 						xpos * scale + viewright,
 						viewtop + 22,
 						(tmpval + xpos) * scale + viewright,
 						viewtop + 24);
 			} else {
-				gDPFillRectangle(gdl++,
+				gfx_Fill_Rectangle(gdl++,
 						(tmpval + xpos) * scale + viewright,
 						viewtop + 22,
 						xpos * scale + viewright,
@@ -1281,9 +1274,9 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				tmpval = g_Vars.currentplayer->eyespy->theta * 96.0f / 360.0f;
 				textheight = g_Vars.currentplayer->eyespy->theta * 35.0f / 360.0f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
-				struct RGBA color = {0, brightness, 0, 255};
+				RGBA color = {0, brightness, 0, 255};
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 2
 				x += scale * 2 + scale * 5;
@@ -1293,7 +1286,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 3
 				x += scale * 2 + scale * 5;
@@ -1303,7 +1296,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 4
 				x += scale * 2 + scale * 5;
@@ -1313,7 +1306,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 5
 				x += scale * 2 + scale * 5;
@@ -1323,7 +1316,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 6
 				x += scale * 2 + scale * 5;
@@ -1333,7 +1326,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				x += scale * 2 + scale * 5;
 			}
@@ -1348,9 +1341,9 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				textheight = g_Vars.currentplayer->eyespy->theta * 35.0f / 360.0f;
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
-				struct RGBA color = {brightness, brightness / 4, 0, 255};
+				RGBA color = {brightness, brightness / 4, 0, 255};
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 2
 				x += scale * 2 + scale * 5;
@@ -1360,7 +1353,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 3
 				x += scale * 2 + scale * 5;
@@ -1370,7 +1363,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 4
 				x += scale * 2 + scale * 5;
@@ -1380,7 +1373,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 5
 				x += scale * 2 + scale * 5;
@@ -1390,7 +1383,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 6
 				x += scale * 2 + scale * 5;
@@ -1400,13 +1393,12 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
 
 				x += scale * 2 + scale * 5;
 			}
 		} else {
 			// Drugspy ammo
-			int i;
 			int width;
 
 			brightness2 = 255;
@@ -1421,22 +1413,21 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				width = 15;
 			}
 
-			for (i = 0; i < MAX_EYESPYDARTS; i++) {
+			for (int i = 0; i < MAX_EYESPYDARTS; i++) {
 				if (i >= g_Vars.currentplayer->eyespydarts) {
 					brightness2 = 0x88;
 				}
 				
-				struct RGBA color = {16, 32, brightness2, 255};
+				RGBA color = {16, 32, brightness2, 255};
 				gfx_Set_Prim_Color(gdl++, color);
-				gDPFillRectangle(gdl++, x, y - 4, x + width, y);
+				gfx_Fill_Rectangle(gdl++, x, y - 4, x + width, y);
 
 				y -= 5;
 			}
 		}
 
-		gDPSetColorDither(gdl++, G_CD_BAYER); \
-		gDPSetTexturePersp(gdl++, G_TP_PERSP); \
-		gDPSetTextureLOD(gdl++, G_TL_LOD);
+		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+		gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
 
 		if (g_Vars.coopplayernum < 0 && g_Vars.antiplayernum < 0) {
 			int barheight = (viewbottom - viewtop - 103) / 17.0f - 1;
@@ -1465,14 +1456,14 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				yoffset = 0;
 			}
 
-			gdl = gfxSetCustomProjection(gdl);
+			gdl = savebufferSetCustomProjection(gdl);
 
-			gSPClearGeometryMode(gdl++, G_CULL_BOTH);
-			gSPSetGeometryMode(gdl++, G_SHADE | G_SHADING_SMOOTH);
+			gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
+			gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
 			gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
-			gDPSetTextureFilter(gdl++, G_TF_BILERP);
-			gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-			gDPSetRenderMode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
+			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+			gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 
 			// Speed bars (left side)
 			y = viewtop + 58;
@@ -1623,7 +1614,7 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 		struct RGBA color = {0, green, 0, 255};
 		gfx_Set_Prim_Color(gdl++, color);
 
-		gDPFillRectangle(gdl++, viewleft, y, viewleft + viewwidth, y + 1);
+		gfx_Fill_Rectangle(gdl++, viewleft, y, viewleft + viewwidth, y + 1);
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
@@ -1762,15 +1753,15 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 			int rightsidewidth = viewwidth - semicircleright;
 
 			// Left and right of semicircle
-			gDPFillRectangle(gdl++, viewleft, i, viewcentrex, i + 1);
-			gDPFillRectangle(gdl++, semicircleright, i, semicircleright + rightsidewidth, i + 1);
+			gfx_Fill_Rectangle(gdl++, viewleft, i, viewcentrex, i + 1);
+			gfx_Fill_Rectangle(gdl++, semicircleright, i, semicircleright + rightsidewidth, i + 1);
 
 			// The semicircle itself has a static colour
 			struct RGBA semicolor = {238, 0, 0, 255};
 			gfx_Set_Prim_Color(gdl++, semicolor);
-			gDPFillRectangle(gdl++, viewcentrex, i, viewcentrex + semicirclewidth, i + 1);
+			gfx_Fill_Rectangle(gdl++, viewcentrex, i, viewcentrex + semicirclewidth, i + 1);
 		} else {
-			gDPFillRectangle(gdl++, viewleft, i, viewleft + viewwidth, i + 1);
+			gfx_Fill_Rectangle(gdl++, viewleft, i, viewleft + viewwidth, i + 1);
 		}
 
 		if (g_IrScanlines[g_Vars.currentplayernum][i] > fadeincrement) {
@@ -1929,8 +1920,8 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	// Black out areas above and below lens
 	gdl = textSetPrimColour(gdl, 0x000000ff);
 
-	gDPFillRectangle(gdl++, viewleft, viewtop, viewleft + viewwidth, lenstop);
-	gDPFillRectangle(gdl++, viewleft, lenstop + lensheight, viewleft + viewwidth, viewtop + viewheight);
+	gfx_Fill_Rectangle(gdl++, viewleft, viewtop, viewleft + viewwidth, lenstop);
+	gfx_Fill_Rectangle(gdl++, viewleft, lenstop + lensheight, viewleft + viewwidth, viewtop + viewheight);
 
 	gdl = textSetCCCustom02(gdl);
 
@@ -2017,9 +2008,9 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 		return gdl;
 	}
 	// make a copy of what we have drawn so far and use it as a texture
-	gDPFlushEXT(gdl++);
-	gDPCopyFramebufferEXT(gdl++, g_PrevFrameFb, 0, 0, 0, G_ON);
-	gDPSetFramebufferTextureEXT(gdl++, 0, 0, 0, g_PrevFrameFb);
+	gfx_No_Param(gdl++, G_RDPFLUSH_EXT);
+	gfx_Copy_Framebuffer_EXT(gdl++, g_PrevFrameFb, 0, 0, 0, G_ON);
+	gfx_Set_Framebuffer_Texture_EXT(gdl++, 0, 0, 0, (uintptr_t)g_PrevFrameFb);
 
 	// Iterate horizontal lines down the lens with a bit extra on top and bottom
 	for (liney = lenstop - 9; liney < lenstop + lensheight + vsplit + 9; liney++) {
@@ -2066,15 +2057,15 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 			colour = 0xffffffff;
 		}
 
-		gDPSetColor(gdl++, G_SETENVCOLOR, colour);
+		gfx_Set_Color(gdl++, G_SETENVCOLOR, (uintptr_t)(colour));
 
 		const float xscale = RANDOMFRAC() * range + 1;
 		const float halfwidth = viewwidth / 2.f;
 		const int left = viewleft + halfwidth * (1.f - xscale);
 		const int right = viewleft + halfwidth * (1.f + xscale);
-		gSPImageRectangleEXT(gdl++,
-			0, liney << 2, viewleft, liney,
-			right << 2, (liney + 1) << 2, viewleft + viewwidth, liney + 1,
+		gdl += gfx_Image_Rectangle_EXT(gdl,
+			0, liney * 4, viewleft, liney,
+			right * 4, (liney + 1) * 4, viewleft + viewwidth, liney + 1,
 			0, videoGetNativeWidth(), videoGetNativeHeight());
 	}
 
@@ -2104,8 +2095,8 @@ Gfx *bviewDrawIrBinoculars(Gfx *gdl)
 	int sqradius = radius * radius;
 	int y;
 
-	gDPSetCycleType(gdl++, G_CYC_1CYCLE);
-	gDPSetRenderMode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
 	struct RGBA color = {0, 0, 0, 255};
 	gfx_Set_Prim_Color(gdl++, color);

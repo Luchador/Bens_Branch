@@ -2409,7 +2409,7 @@ void bmoveUpdateEyeHeight(struct coord *arg)
 	}
 }
 
-void bmoveUpdateHead(float animFrameDelta, float animSpeed, float headTilt, Mtxf *targetMatrix, float blendFraction)
+void bmoveUpdateHead(float animFrameDelta, float animSpeed, float headTilt, Mtx *targetMatrix, float blendFraction)
 {
 	float animationRate = 0;
 	Mtx headMatrix;             // Final head orientation matrix
@@ -2467,7 +2467,7 @@ void bmoveUpdateHead(float animFrameDelta, float animSpeed, float headTilt, Mtxf
 	// Blend toward the target orientation if one was provided
 	if (targetMatrix) {
 		quaternion3x3MtxToQuat(&headMatrix, currentQuat);
-		quaternion3x3MtxToQuat((Mtx *)targetMatrix, targetQuat);
+		quaternion3x3MtxToQuat(targetMatrix, targetQuat);
 		quaternionAvoidFlips(currentQuat, targetQuat);
 		quaternionSlerp(currentQuat, targetQuat, blendFraction, blendedQuat);
 		quaternionToMtx(blendedQuat, &headMatrix);

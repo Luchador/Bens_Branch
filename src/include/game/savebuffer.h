@@ -3,9 +3,8 @@
 #include "data.h"
 #include "types.h"
 
-void func0f0d4690(Mtxf *mtx);
-void func0f0d475c(Mtxf *mtx);
-Gfx *gfxSetCustomProjection(Gfx *gdl);
+void func0f0d4690(Mtx *mtx);
+Gfx *savebufferSetCustomProjection(Gfx *gdl);
 Gfx *savebufferSetup2DRender(Gfx *gdl);
 Gfx *func0f0d4a3c(Gfx *gdl);
 Gfx *func0f0d4c80(Gfx *gdl);

@@ -9,8 +9,8 @@ float getSlideTimeToEdgeXZ(struct widthxz *circle, struct xz *edgeStart, struct 
 
 float cd00024e40(void);
 void cdGetEdge(struct coord *pos1, struct coord *pos2);
-float cd00024e98(void);
-int cd00024ea4(void);
+float cdGetSlideTimeToEdge(void);
+int cdGetHasSlideTimeToEdge(void);
 struct prop *cdGetObstacleProp(void);
 void cdGetPos(struct coord *pos);
 void cdGetObstacleNormal(struct coord *normal);
