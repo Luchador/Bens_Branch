@@ -851,8 +851,8 @@ Gfx *lvRenderFPS(Gfx *gdl)
 Gfx *lvRender(Gfx *gdl)
 {
 	gfx_Segment(gdl++, SPSEGMENT_PHYSICAL, 0x00000000);
-	gfx_Set_Combine_Key(gdl++, G_CK_NONE); // PD doesn't use chroma keying at all, so this only has to be set once
-	gfx_Set_Texture_Convert(gdl++, G_TC_FILT); // This function is never called with anything other than G_TC_FILT in PD, so we only need to call it once
+	gfx_Set_Combine_Key(gdl++, G_CK_NONE); // PD doesn't use chroma keying at all, so this only has to be set once.
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT); // This function is never called with anything other than G_TC_FILT in PD, so we only need to call it once.
 
 	savebufferResetVp();
 
@@ -1280,13 +1280,13 @@ Gfx *lvRender(Gfx *gdl)
 
 					if (g_Vars.currentplayer->visionmode == VISIONMODE_XRAY
 							&& g_Vars.tickmode != TICKMODE_CUTSCENE) {
-						int xraything = 99;
+						int xrayalpha = 99;
 
 						if (g_Vars.currentplayer->erasertime < TICKS(200)) {
-							xraything = 249 - (g_Vars.currentplayer->erasertime * 3 >> 2);
+							xrayalpha = 249 - (g_Vars.currentplayer->erasertime * 3 >> 2);
 						}
 
-						gdl = bviewDrawZoomBlur(gdl, 0xffffffff, xraything, 1.05f, 1.05f);
+						gdl = bviewDrawZoomBlur(gdl, 0xffffffff, xrayalpha, 1.05f, 1.05f);
 					}
 
 					// Handle combat boosts
@@ -1298,17 +1298,25 @@ Gfx *lvRender(Gfx *gdl)
 						}
 
 						if (g_Vars.speedpillchange < 15) {
-							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
+							/*gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
 									g_Vars.speedpillchange * 180 / 15,
 									(float)g_Vars.speedpillchange * 0.02f + 1.1f,
-									(float)g_Vars.speedpillchange * 0.02f + 1.1f);
+									(float)g_Vars.speedpillchange * 0.02f + 1.1f);*/
+							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
+									g_Vars.speedpillchange * 180 / 15,
+									1.05f,
+									1.05f);
 							gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
 									g_Vars.speedpillchange * 0.0066666668280959f);
 						} else {
-							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
+							/*gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
 									(30 - g_Vars.speedpillchange) * 180 / 15,
 									(float)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f,
-									(float)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f);
+									(float)(30 - g_Vars.speedpillchange) * 0.02000000141561f + 1.1f);*/
+							gdl = bviewDrawZoomBlur(gdl, 0xffffffff,
+								g_Vars.speedpillchange * 180 / 15,
+								1.05f,
+								1.05f);
 							gdl = playerDrawFade(gdl, 0xff, 0xff, 0xff,
 									(30.0f - g_Vars.speedpillchange) * 0.0066666668280959f);
 						}

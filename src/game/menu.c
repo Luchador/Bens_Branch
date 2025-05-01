@@ -1776,7 +1776,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
-		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 		gfx_Set_Combine_LERP(
@@ -2209,7 +2208,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE          // alpha cycle 1 (same as cycle 0)
 		);
 		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
-		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 		texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
 
@@ -2221,7 +2219,6 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
-		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 		gfx_Set_Combine_LERP(
@@ -4749,7 +4746,6 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 			gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
-			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 			gfx_Set_Combine_LERP(
@@ -4776,7 +4772,6 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 			gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
-			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 			gfx_Set_Combine_LERP(
@@ -4807,7 +4802,6 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 					gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 					gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 					gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
-					gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 					gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 					gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 					gfx_Set_Combine_LERP(
@@ -4836,7 +4830,6 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 			gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
-			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 			gfx_Set_Combine_LERP(
@@ -4876,7 +4869,6 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 				gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 				gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 				gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
-				gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 				gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 				gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 				gfx_Set_Combine_LERP(
@@ -4938,7 +4930,6 @@ Gfx *menuRender(Gfx *gdl)
 	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
-	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 	gfx_Set_Combine_LERP(
@@ -5096,7 +5087,6 @@ Gfx *menuRender(Gfx *gdl)
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
-		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 		gfx_Set_Combine_LERP(

@@ -294,15 +294,18 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
  *
  * Used when entering/exiting combat boosts and when entering/exiting xray mode.
  */
-Gfx *bviewDrawZoomBlur(Gfx *gdl, uint32_t colour, int alpha, float arg3, float arg4)
+Gfx *bviewDrawZoomBlur(Gfx *gdl, uint32_t colour, int alpha, float zoomX, float zoomY)
 {
 	int viewtop = viGetViewTop();
 	int viewheight = viGetViewHeight();
 	int viewwidth = viGetViewWidth();
 	int viewleft = viGetViewLeft();
-	float somefloat;
-	int i;
 
+	if(PLAYERCOUNT() > 1)
+	{
+		return gdl;
+	}
+	
 	g_NumActiveEffects++;
 
 	if (g_NumActiveEffects >= 2) {
@@ -313,31 +316,43 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, uint32_t colour, int alpha, float arg3, float a
 		return gdl;
 	}
 
-	// capture fb at the end of this frame
 	g_BlurFbCapTimer = 0;
 
-	// don't render first blur frame as we haven't captured the fb yet
 	if (g_BlurFbDirty) {
 		return gdl;
 	}
 
-	somefloat = (viewheight - viewheight / arg4) * 0.5f;
-
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
-	const float xcenter = viewleft + viewwidth * 0.5f;
-	const float ycenter = viewtop + viewheight * 0.5f;
-	const float halfw = viewwidth * 0.5f * arg3;
-	const float halfh = viewheight * 0.5f * arg4;
-	const int left = xcenter - halfw;
-	const int top = ycenter - halfh;
-	const int right = xcenter + halfw;
-	const int bottom = ycenter + halfh;
+	int texw = videoGetNativeWidth();
+	int texh = videoGetNativeHeight();
+
+	// Center of the texture (in texel units)
+	const float s_center = texw * 0.5f;
+	const float t_center = texh * 0.5f;
+
+	// Half size of the sampled region
+	const float s_half = (texw * 0.5f) / zoomX;
+	const float t_half = (texh * 0.5f) / zoomY;
+
+	// Final texture sample region
+	const int s0 = (int)(s_center - s_half);
+	const int t0 = (int)(t_center - t_half);
+	const int s1 = (int)(s_center + s_half);
+	const int t1 = (int)(t_center + t_half);
+
+	// Fullscreen rectangle
+	const int x0 = viewleft << 2;
+	const int y0 = viewtop << 2;
+	const int x1 = (viewleft + viewwidth) << 2;
+	const int y1 = (viewtop + viewheight) << 2;
+
 	gfx_Set_Framebuffer_Texture_EXT(gdl++, 0, 0, 0, (uintptr_t)g_BlurFb);
+
 	gdl += gfx_Image_Rectangle_EXT(gdl,
-		left, top, viewleft, viewtop,
-		right, bottom, viewleft + viewwidth, viewtop + viewheight,
-		0, videoGetNativeWidth(), videoGetNativeHeight());
+		x0, y0, s0 - 2, t0 - 2,
+		x1, y1, s1 * 4, t1 * 4,
+		0, texw, texh);
 
 	return gdl;
 }
@@ -945,7 +960,6 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 		gfx_Set_Combine_LERP(gdl++,
@@ -1480,7 +1494,6 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
 				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
 				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
-			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 			gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 

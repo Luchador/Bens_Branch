@@ -180,7 +180,6 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	gfx_Set_Color_Image(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
 	gfx_Set_Scissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
 	gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
-	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
 	return gdl;

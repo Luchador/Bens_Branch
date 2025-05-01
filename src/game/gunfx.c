@@ -1041,7 +1041,6 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	static uint32_t spi = 6;
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
-	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 	gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
@@ -1224,7 +1223,6 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	Mtx sp10c;
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
-	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);

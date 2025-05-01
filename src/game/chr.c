@@ -5824,7 +5824,6 @@ Gfx *shieldhitRender(Gfx *gdl, struct prop *prop1, struct prop *prop2, int alpha
 							);
 					
 							gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
-							gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 							gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, (((16 * G_IM_SIZ_16b_BYTES)+7)>>3), 0, 0, 0,
 								G_TX_MIRROR | G_TX_WRAP, 4, G_TX_NOLOD, G_TX_MIRROR | G_TX_WRAP, 4, G_TX_NOLOD);
 							gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 16 << G_TEXTURE_IMAGE_FRAC, 16 << G_TEXTURE_IMAGE_FRAC);
@@ -6033,7 +6032,6 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 				G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 1 (same as cycle 0)
 				G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE          // alpha cycle 1 (same as cycle 0)
 			);
-			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 			gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
 		}

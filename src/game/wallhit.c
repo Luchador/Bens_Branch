@@ -1108,7 +1108,6 @@ Gfx *wallhitRenderOpaBgHits(int roomnum, Gfx *gdl)
 
 	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 	gfx_Set_Geometry_Mode(gdl++, G_CULL_BACK);
-	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 	prevtexturenum = -1;
 	prev6b = -1;
@@ -1165,7 +1164,6 @@ Gfx *wallhitRenderXluBgHits(int roomnum, Gfx *gdl)
 	int prev6b;
 
 	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
-	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 	prevtexturenum = -1;
 	prev6b = -1;
@@ -1229,8 +1227,6 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 	if (!xlu) {
 		gfx_Set_Geometry_Mode(gdl++, G_CULL_BACK);
 	}
-
-	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
 	wallhit = xlu ? prop->xluwallhits : prop->opawallhits;
 

@@ -535,7 +535,6 @@ Gfx *creditsFillFramebuffer(Gfx *gdl, uint32_t colour)
 	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
-	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 	gfx_Set_Combine_LERP(
@@ -821,7 +820,6 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 					gfx_Set_Combine_LERP(gdl++,
 							0, 0, 0, G_CCMUX_SHADE, G_ACMUX_TEXEL0, 0, G_ACMUX_SHADE, 0,
 							0, 0, 0, G_CCMUX_SHADE, G_ACMUX_TEXEL0, 0, G_ACMUX_SHADE, 0);
-					gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 					gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
 					donetexture = true;

@@ -2092,7 +2092,6 @@ Gfx *playerDrawFade(Gfx *gdl, uint32_t r, uint32_t g, uint32_t b, float frac)
 		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 		gfx_Set_Combine_LERP(gdl++,

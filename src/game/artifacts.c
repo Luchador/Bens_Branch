@@ -315,7 +315,6 @@ Gfx *artifactsConfigureForGlares(Gfx *gdl)
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gfx_Set_Combine_LERP(gdl++,
 			0, 0, 0, G_CCMUX_ENVIRONMENT, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0,
 			0, 0, 0, G_CCMUX_ENVIRONMENT, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);

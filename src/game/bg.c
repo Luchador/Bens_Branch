@@ -880,7 +880,6 @@ Gfx *bgRenderSceneInXray(Gfx *gdl)
 		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
 		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
 		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
-	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 	gfx_Matrix(gdl++, camGetOrthogonalMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);

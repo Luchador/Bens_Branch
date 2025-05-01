@@ -94,7 +94,6 @@ Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, int screenX,
     gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
     gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
     gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
-    gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
     gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 
     return gdl;
