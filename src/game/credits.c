@@ -338,7 +338,12 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float 
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-	gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 0
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE,         // alpha cycle 0
+		G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 1 (same as cycle 0)
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE          // alpha cycle 1 (same as cycle 0)
+	);
 	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 	texSelect(&gdl, &g_TexGeneralConfigs[g_CreditsBgTypes[type].texturenum], 1, 1, 2, 1, NULL);
@@ -368,7 +373,7 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float 
 	creditsChooseBgColours(vertices, colours, g_CreditsData->bglayers[layernum].confignum, alpha, arg5 * 90);
 
 	gfx_Color(gdl++, colours, 3);
-	gSPVertex(gdl++, (uintptr_t)(vertices), 9, 0);
+	gfx_Vertex(gdl++, vertices, 9, 0);
 
 	gfx_Tri4(gdl++, 0, 1, 3, 1, 4, 3, 1, 2, 5, 5, 4, 1);
 	gfx_Tri4(gdl++, 3, 4, 7, 7, 6, 3, 4, 5, 7, 5, 8, 7);
@@ -526,13 +531,33 @@ void creditsCreatePendingBgLayers(uint32_t mask)
 
 Gfx *creditsFillFramebuffer(Gfx *gdl, uint32_t colour)
 {
-	gSPDisplayList(gdl++, &var800613a0);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+	gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+	gfx_Set_Combine_LERP(
+		gdl++,
+		0, 0, 0, G_SHADE,
+		0, 0, 0, G_SHADE,
+		0, 0, 0, G_SHADE,
+		0, 0, 0, G_SHADE
+	);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 
 	gdl = textSetPrimColour(gdl, colour);
 
 	gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	return gdl;
 }
@@ -796,9 +821,9 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 					gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 					gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 					gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
-					gDPSetCombineLERP(gdl++,
-							0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0,
-							0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0);
+					gfx_Set_Combine_LERP(gdl++,
+							0, 0, 0, G_CCMUX_SHADE, G_ACMUX_TEXEL0, 0, G_ACMUX_SHADE, 0,
+							0, 0, 0, G_CCMUX_SHADE, G_ACMUX_TEXEL0, 0, G_ACMUX_SHADE, 0);
 					gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 					gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
@@ -854,7 +879,7 @@ Gfx *creditsDrawParticles(Gfx *gdl)
 				vertices[2].colour = offset;
 				vertices[3].colour = offset;
 
-				gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
+				gfx_Vertex(gdl++, vertices, 4, 0);
 
 				gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 			}
@@ -1470,7 +1495,7 @@ Gfx *creditsDrawSlide(Gfx *gdl)
 		}
 	}
 
-	gdl = text0f153780(gdl);
+	gdl = textSetPerspAndLOD(gdl);
 
 	return gdl;
 }

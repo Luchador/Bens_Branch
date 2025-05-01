@@ -1798,7 +1798,12 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 
 		texSelect(&gdl, g_TexGeneralConfigs + 13 + stageindex, 2, 0, 2, true, NULL);
 		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
-		gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_ENVIRONMENT, G_CCMUX_0,    // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_ENVIRONMENT, G_ACMUX_0,    // Alpha 0
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_0,                   // Color 1 (unused)
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_0);                  // Alpha 1 (unused)
+		
 		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 		RGBA envColor = {255, 255, 255, (uint32_t)renderdata->colour & 0xff};
 		gfx_Set_Env_Color(gdl++, envColor);
@@ -1822,13 +1827,17 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 				if ((g_GameFile.coopcompletions[k] & (1 << stageindex)) == 0) {
 					RGBA envColor = {255, 255, 255, ((renderdata->colour & 0xff) * 63 / 256)};
 					gfx_Set_Env_Color(gdl++, envColor);
-					gDPSetCombineLERP(gdl++,
-							TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
-							TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
+					gfx_Set_Combine_LERP(gdl++,
+							G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0,
+							G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 				} else {
 					RGBA envColor = {255, 255, 255, ((renderdata->colour & 0xff) * 207 / 256)};
 					gfx_Set_Env_Color(gdl++, envColor);
-					gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+					gfx_Set_Combine_LERP(gdl++,
+						G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 0
+						G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0,     // Alpha cycle 0
+						G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 1
+						G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0);    // Alpha cycle 1
 				}
 
 				gdl += gfx_Texture_Rectangle(gdl,
@@ -1841,7 +1850,11 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 
 			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 			gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
-			gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+			gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 0
+				G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0,     // Alpha cycle 0
+				G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 1
+				G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0);    // Alpha cycle 1
 			RGBA envColor = {255, 255, 255, ((renderdata->colour & 0xff) * 175 / 256)};
 			gfx_Set_Env_Color(gdl++, envColor);
 
@@ -1858,9 +1871,9 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 					// Set transparency
 					RGBA envColor = {255, 255, 255, ((renderdata->colour & 0xff) * 63 / 256)};
 					gfx_Set_Env_Color(gdl++, envColor);
-					gDPSetCombineLERP(gdl++,
-							TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
-							TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
+					gfx_Set_Combine_LERP(gdl++,
+						G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0,
+						G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 				}
 
 				gdl += gfx_Texture_Rectangle(gdl,
@@ -1888,7 +1901,7 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm,
 				renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 
 		return (uintptr_t) gdl;
 	case MENUOP_GETOPTIONHEIGHT:

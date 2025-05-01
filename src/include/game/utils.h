@@ -10,7 +10,7 @@ uint64_t utilsGetCount(void);
 uint32_t align4(uint32_t arg0);
 uint32_t align16(uint32_t arg0);
 uintptr_t align32(uintptr_t arg0);
-void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *brightness, int width, int height, int arg5, int arg6, int arg7, bool arg8);
+void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *screensize, int width, int height, bool flipU, bool flipV, bool arg8);
 bool utilsNormalizeVec(struct coord *arg0, struct coord *arg1);
 void utilsNormalizeF(float *x, float *y, float *z);
 void utilsInterpTwoPoints(struct coord *arg0, struct coord *arg1, float standfrac, struct coord *vel);

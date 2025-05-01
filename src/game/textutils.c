@@ -220,9 +220,9 @@ Gfx *textConfigureGfxPipeline(Gfx *gdl)
 {
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-	gDPSetCombineLERP(gdl++,
-			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0,
-			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
+	gfx_Set_Combine_LERP(gdl++,
+			0, 0, 0, G_CCMUX_PRIMITIVE, G_ACMUX_TEXEL0, 0, G_ACMUX_PRIMITIVE, 0,
+			0, 0, 0, G_CCMUX_PRIMITIVE, G_ACMUX_TEXEL0, 0, G_ACMUX_PRIMITIVE, 0);
 	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
@@ -233,7 +233,7 @@ Gfx *textConfigureGfxPipeline(Gfx *gdl)
 	return gdl;
 }
 
-Gfx *text0f153780(Gfx *gdl)
+Gfx *textSetPerspAndLOD(Gfx *gdl)
 {
 	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 	gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
@@ -244,17 +244,26 @@ Gfx *text0f153780(Gfx *gdl)
 Gfx *textSetPrimColour(Gfx *gdl, uint32_t colour)
 {
 	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 
-	struct RGBA tmp = utilsUnpackColorRGBA(colour);
-	gfx_Set_Prim_Color(gdl++, tmp);
+	RGBA primColor = utilsUnpackColorRGBA(colour);
+	gfx_Set_Prim_Color(gdl++, primColor);
 
 	return gdl;
 }
 
-Gfx *textSetCCCustom02(Gfx *gdl)
+Gfx *textSetCCPrimColorTexAlpha(Gfx *gdl)
 {
-	gDPSetCombineMode(gdl++, G_CC_CUSTOM_02, G_CC_CUSTOM_02);
+	// Prim for color, texture alpha * prim for alpha.
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,        // Color 0
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_PRIMITIVE, G_ACMUX_0,   // Alpha 0
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,        // Color 1 (mirror)
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_PRIMITIVE, G_ACMUX_0);  // Alpha 1 (mirror)
 
 	return gdl;
 }
@@ -265,7 +274,7 @@ Gfx *text0f153858(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 
 	gfx_Fill_Rectangle(gdl++, *x1, *y1, *x2, *y2);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	return gdl;
 }
@@ -276,7 +285,7 @@ Gfx *text0f1538e4(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 
 	gfx_Fill_Rectangle(gdl++, *x1, *y1, *x2, *y2);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	return gdl;
 }
@@ -287,7 +296,7 @@ Gfx *text0f153990(Gfx *gdl, int left, int top, int width, int height)
 
 	gDPFillRectangle(gdl++, left - 1, top - 1, width + left + 1, top + height + 1);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	return gdl;
 }
@@ -298,7 +307,7 @@ Gfx *text0f153a34(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour)
 
 	gDPFillRectangle(gdl++, x1, y1, x2, y2);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	return gdl;
 }
@@ -744,7 +753,7 @@ Gfx *textMakeCreditVerts(Gfx *gdl, int *arg1, struct fontchar *curchar, struct f
 	vertices[3].t = sp30;
 
 	gfx_Color(gdl++, colours, 1);
-	gSPVertex(gdl++, vertices, 4, 0);
+	gfx_Vertex(gdl++, vertices, 4, 0);
 
 	gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 
@@ -1019,7 +1028,7 @@ Gfx *text0f1566cc(Gfx *gdl, uint32_t arg1, uint32_t arg2)
 	uint32_t colour = textHighlightSweep(arg1, arg2, g_Blend.colour04);
 
 	if (colour != g_Blend.colour44) {
-		gfx_Set_Color(gdl++, G_SETENVCOLOR, (uintptr_t)(colour));
+		gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(colour));
 	}
 
 	g_Blend.colour44 = colour;
@@ -1155,9 +1164,9 @@ Gfx *textRender(Gfx *gdl, int *x, int *y, char *text,
 
 	gfx_Set_Tile_Size(gdl++, 1, 0, 0, 124, 124);
 	gfx_Set_Cycle_Type(gdl++, G_CYC_2CYCLE);
-	gDPSetCombineLERP(gdl++,
-			ENVIRONMENT, PRIMITIVE, TEXEL1_ALPHA, PRIMITIVE, 0, 0, 0, TEXEL0,
-			0, 0, 0, COMBINED, COMBINED, 0, ENVIRONMENT, 0);
+	gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_ENVIRONMENT, G_CCMUX_PRIMITIVE, G_CCMUX_TEXEL1_ALPHA, G_CCMUX_PRIMITIVE, G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_COMBINED, G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_ENVIRONMENT, G_ACMUX_0);
 	gfx_Set_Prim_Color(gdl++, utilsUnpackColorRGBA(colour));
 	gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(arg6));
 
@@ -1187,9 +1196,9 @@ Gfx *textRender(Gfx *gdl, int *x, int *y, char *text,
 	}
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
-	gDPSetCombineLERP(gdl++,
-			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0,
-			0, 0, 0, PRIMITIVE, TEXEL0, 0, PRIMITIVE, 0);
+	gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE, G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_PRIMITIVE, G_ACMUX_0,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE, G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_PRIMITIVE, G_ACMUX_0);
 
 	return gdl;
 }

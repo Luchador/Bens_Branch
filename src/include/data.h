@@ -42,8 +42,6 @@ extern uint32_t g_MP3Init;
 extern uint32_t var80060890;
 extern char ldigs[];
 extern char udigs[];
-extern Gfx var80061380[];
-extern Gfx var800613a0[];
 extern float g_20SecIntervalFrac;
 extern float g_Lv80SecIntervalFrac;
 extern bool g_NbombsActive;

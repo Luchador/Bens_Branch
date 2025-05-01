@@ -289,7 +289,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 
 	texSelect(&gdl, texconfig, 4, 1, 2, true, NULL);
 
-	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
+	gfx_Vertex(gdl++, vertices, 4, 0);
 	gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 
 	return gdl;
@@ -444,9 +444,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 			}
 
 			if (spd8) {
-				mtx4Copy((Mtx*)&sp148, (Mtx*)sp188);
-
-				if (beam->weaponnum);
+				mtx4Copy(&sp148, sp188);
 
 				if (beam->weaponnum == -2 && PLAYERCOUNT() == 1) {
 					spcc.f[0] = sp138.f[0] + beam->dir.f[0] * sp12c;
@@ -568,13 +566,17 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 					gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 					gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 					gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
-					gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
+					gfx_Set_Combine_LERP(gdl++,
+						G_CCMUX_ENVIRONMENT, G_CCMUX_SHADE, G_CCMUX_TEXEL0, G_CCMUX_SHADE,     // Color cycle 0
+						G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,                   // Alpha cycle 0
+						G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_0,                            // Color cycle 1 (unused)
+						G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_0);                           // Alpha cycle 1 (unused)
 					gfx_Color(gdl++, colours, 1);
 
 					if (beam->weaponnum == WEAPON_LASER) {
 						texSelect(&gdl, &g_TexGroup03Configs[0], 4, arg2, 2, true, NULL);
 
-						gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
+						gfx_Vertex(gdl++, vertices, 8, 0);
 						gfx_Tri2(gdl++, 4, 5, 6, 4, 5, 7);
 
 						texSelect(&gdl, texconfig, 4, arg2, 2, true, NULL);
@@ -583,7 +585,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 					} else {
 						texSelect(&gdl, texconfig, 4, arg2, 2, true, NULL);
 
-						gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
+						gfx_Vertex(gdl++, vertices, 4, 0);
 						gfx_Tri2(gdl++, 0, 2, 3, 0, 3, 1);
 					}
 				}
@@ -1047,7 +1049,11 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
-	gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_ENVIRONMENT, G_CCMUX_SHADE, G_CCMUX_TEXEL0, G_CCMUX_SHADE,     // Color cycle 0
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,                   // Alpha cycle 0
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_0,                            // Color cycle 1 (unused)
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_0);                           // Alpha cycle 1 (unused)
 
 	mtxIdent(&sp164);
 	mtxApplyAffineTransformInPlace(camGetPlayerWorldToScreenMtx(), &sp164);
@@ -1198,7 +1204,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 					vertices[3].y = pos.f[1] + (-f20 * f00) + (-f20 * spc8);
 					vertices[3].z = pos.f[2] + (-f20 * f24) + (-f20 * spc4);
 
-					gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
+					gfx_Vertex(gdl++, vertices, 4, 0);
 
 					gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 				}
@@ -1227,7 +1233,11 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
-	gDPSetCombineMode(gdl++, G_CC_BLENDIA, G_CC_BLENDIA);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_ENVIRONMENT, G_CCMUX_SHADE, G_CCMUX_TEXEL0, G_CCMUX_SHADE,     // Color cycle 0
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,                   // Alpha cycle 0
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_0,                            // Color cycle 1 (unused)
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_0);                           // Alpha cycle 1 (unused)
 	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 	texSelect(&gdl, &g_TexGeneralConfigs[3], 4, 0, 2, 1, NULL);
@@ -1357,7 +1367,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 			vertices[5].y = spcc.f[1] + (400 * spb4.f[1]) + (spa8.f[1] * 15.0f);
 			vertices[5].z = spcc.f[2] + (400 * spb4.f[2]) + (spa8.f[2] * 15.0f);
 
-			gSPVertex(gdl++, (uintptr_t)(vertices), 6, 0);
+			gfx_Vertex(gdl++, vertices, 6, 0);
 
 			gfx_Tri4(gdl++, 0, 1, 2, 2, 3, 1, 2, 3, 5, 2, 5, 4);
 		}

@@ -180,7 +180,7 @@ MenuItemHandlerResult amPickTargetMenuList(int operation, struct menuitem *item,
 
 			gdl = textConfigureGfxPipeline(gdl);
 			gdl = textRenderProjected(gdl, &x, &y, g_MpAllChrConfigPtrs[chrindex]->name, g_CharsHandelGothicSm, g_FontHandelGothicSm, colour, viGetWidth(), viGetHeight(), 0, 0);
-			gdl = text0f153780(gdl);
+			gdl = textSetPerspAndLOD(gdl);
 			return (uintptr_t)gdl;
 		}
 	case MENUOP_GETOPTIONHEIGHT:
@@ -953,7 +953,7 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, int16_t x, int16_t y, int mode, int flag
 			x + g_AmMenus[g_AmIndex].slotwidth / 2,
 			y + paddingbottom);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	// Render borders
 	colour = obcol;
@@ -1002,7 +1002,7 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, int16_t x, int16_t y, int mode, int flag
 			x + g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y + paddingbottom);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	// Render text
 	colour = defcol;
@@ -1081,7 +1081,13 @@ Gfx *amRender(Gfx *gdl)
 
 		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-		gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 0
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE,         // alpha cycle 0
+			G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 1 (same as cycle 0)
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE          // alpha cycle 1 (same as cycle 0)
+		);
+
 		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 
 		texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
@@ -1146,7 +1152,7 @@ Gfx *amRender(Gfx *gdl)
 		colours[1].word = PD_BE32(0x0000004f);
 
 		gfx_Color(gdl++, colours, 2);
-		gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
+		gfx_Vertex(gdl++, vertices, 8, 0);
 
 		gfx_Tri2(gdl++, 4, 5, 6, 6, 7, 4);
 		gfx_Tri4(gdl++, 0, 4, 7, 7, 3, 0, 0, 1, 5, 5, 4, 0);
@@ -1301,10 +1307,10 @@ Gfx *amRender(Gfx *gdl)
 					g_AmMenus[g_AmIndex].selx + halfwidth + 1,
 					g_AmMenus[g_AmIndex].sely + below);
 
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 		}
 
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 	}
 
 	chr = g_Vars.currentplayer->commandingaibot;
@@ -1351,7 +1357,11 @@ Gfx *amRender(Gfx *gdl)
 
 		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 		gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-		gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 
 		y = viGetViewTop() + viGetViewHeight() - (PLAYERCOUNT() >= 2 ? 19 : 34);
 

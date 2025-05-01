@@ -150,7 +150,7 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRenderProjected(gdl, &x, &y, bgunGetName(weaponnum2), g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 
 		// Prepare the star texture for the difficulties
 		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
@@ -162,7 +162,11 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 		texSelect(&gdl, &g_TexGeneralConfigs[35], 2, 0, 2, 1, NULL);
 
 		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
-		gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 0
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0,     // Alpha cycle 0
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 1
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0);    // Alpha cycle 1
 		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 		// Iterate and render the 3 difficulty stars
@@ -187,9 +191,9 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 
 			gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(colour));
 
-			gDPSetCombineLERP(gdl++,
-					TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
-					TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
+			gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0,
+				G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 
 			gdl += gfx_Texture_Rectangle(gdl,
 					(((renderdata->x + i * 13) + 125) << 2), (renderdata->y) << 2,
@@ -600,15 +604,19 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 		texSelect(&gdl, tconfig, 2, 0, 2, 1, NULL);
 
 		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
-		gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 0
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0,     // Alpha cycle 0
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 1
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0);    // Alpha cycle 1
 		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 		colour = ((failed ? 0xff777799 : 0x55ff5588) & 0xffffff00) | (((failed ? 0xff777799 : 0x55ff5588) & 0xff) * (renderdata->colour & 0xff) >> 8);
 		gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(colour));
 
-		gDPSetCombineLERP(gdl++,
-				TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
-				TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
+		gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0,
+				G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 
 		// Top left quarter of target
 		gdl += gfx_Texture_Rectangle(gdl,
@@ -786,7 +794,7 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 		gdl = text0f153858(gdl, &x, &y, &textheight, &textwidth);
 		gdl = textRenderProjected(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, COLOURWHITE(), viGetWidth(), viGetHeight(), 0, 0);
 
-		gdl = textSetCCCustom02(gdl);
+		gdl = textSetCCPrimColorTexAlpha(gdl);
 
 		// Render lines between the score table and the target texture
 
@@ -2379,7 +2387,11 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 			texSelect(&gdl, &g_TexGeneralConfigs[texturenum], 1, 0, 2, 1, NULL);
 
 			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
-			gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+			gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 0
+				G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0,     // Alpha cycle 0
+				G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 1
+				G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0);    // Alpha cycle 1
 			gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 			gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(0xffffff00 | ((renderdata->colour & 0xff) * 255) >> 8));
 			gdl += gfx_Texture_Rectangle(gdl,
@@ -2421,7 +2433,7 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 		textheight = renderdata->y + 25;
 		gdl = textRenderProjected(gdl, &textwidth, &textheight, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 
 		return (uintptr_t)gdl;
 	}

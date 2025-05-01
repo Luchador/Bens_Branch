@@ -1232,7 +1232,20 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 		gdl = roomApplyMtx(gdl, roomnum);
 
-		gSPDisplayList(gdl++, g_TexGdl2);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_2CYCLE);
+		gfx_Set_Render_Mode(gdl++, G_RM_PASS, G_RM_ZB_CLD_SURF2);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Combine_LERP(gdl++, G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_TEXEL1, G_CCMUX_0,
+			G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_TEXEL1, G_ACMUX_0,
+			G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+			G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);
+		gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
+		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+		gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0188, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
+		gfx_Set_Tile(gdl++, G_IM_FMT_IA, G_IM_SIZ_8b, 7, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD);
+		gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 0x00dc, 0x00dc);
+		gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, 0x0188, 1, 0, G_TX_NOMIRROR | G_TX_CLAMP, 4, 2, G_TX_NOMIRROR | G_TX_CLAMP, 4, 2);
+		gfx_Set_Tile_Size(gdl++, 1, 0, 0, 0x00dc, 0x00dc);
 
 		colours = gfxAllocateColours(1);
 
@@ -1456,7 +1469,7 @@ Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx 
 		vertices[j].colour = 0;
 	}
 
-	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
+	gfx_Vertex(gdl++, vertices, 4, 0);
 
 	gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 

@@ -581,14 +581,18 @@ MenuItemHandlerResult mpAwardsMenuHandler(int operation, struct menuitem *item, 
 					texSelect(&gdl, &g_TexGeneralConfigs[35], 2, 0, 2, 1, NULL);
 
 					gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
-					gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+					gfx_Set_Combine_LERP(gdl++,
+						G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 0
+						G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0,     // Alpha cycle 0
+						G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 1
+						G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0);    // Alpha cycle 1
 					gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
-					gDPSetCombineLERP(gdl++,
-							TEXEL0, 0, ENVIRONMENT, 0,
-							TEXEL0, 0, ENVIRONMENT, 0,
-							TEXEL0, 0, ENVIRONMENT, 0,
-							TEXEL0, 0, ENVIRONMENT, 0);
+					gfx_Set_Combine_LERP(gdl++,
+							G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0,
+							G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0,
+							G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0,
+							G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 
 					configured = true;
 				}

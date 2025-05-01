@@ -5167,7 +5167,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices[3].s = 0;
 			vertices[3].t = 512;
 
-			gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
+			gfx_Vertex(gdl++, vertices, 4, 0);
 
 			gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
@@ -5294,7 +5294,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				vertices[3].s = st1;
 				vertices[3].t = st4;
 
-				gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
+				gfx_Vertex(gdl++, vertices, 4, 0);
 
 				gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
@@ -5310,11 +5310,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				alpha3 *= alpha * (1.0f / 255.0f);
 			}
 
-			if (alpha3 > 255.0f) {
-				alpha3 = 255.0f;
-			} else if (alpha3 < 0.0f) {
-				alpha3 = 0.0f;
-			}
+			utilsClampF(alpha3, 0, 255);
 
 			colours = gfxAllocateColours(3);
 
@@ -5357,7 +5353,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				vertices[4].t = (st2 + st4) >> 1;
 				vertices[4].colour = 4;
 
-				gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
+				gfx_Vertex(gdl++, vertices, 5, 0);
 
 				gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
@@ -5470,7 +5466,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices[11].s = st3;
 			vertices[11].t = st2;
 
-			gSPVertex(gdl++, (uintptr_t)(vertices), 12, 0);
+			gfx_Vertex(gdl++, vertices, 12, 0);
 
 			gfx_Tri4(gdl++, 0, 1, 9, 0, 9, 8, 11, 5, 4, 11, 4, 10);
 
@@ -5605,7 +5601,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices[4].s = (st1 + st3) >> 1;
 			vertices[4].t = (st2 + st4) >> 1;
 
-			gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
+			gfx_Vertex(gdl++, vertices, 5, 0);
 
 			gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
@@ -5683,7 +5679,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				vertices[4].s = (st1 + st3) >> 1;
 				vertices[4].t = (st2 + st4) >> 1;
 
-				gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
+				gfx_Vertex(gdl++, vertices, 5, 0);
 
 				gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
@@ -5730,7 +5726,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices[4].s = (st1 + st3) >> 1;
 			vertices[4].t = (st2 + st4) >> 1;
 
-			gSPVertex(gdl++, (uintptr_t)(vertices), 5, 0);
+			gfx_Vertex(gdl++, vertices, 5, 0);
 
 			gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 		}
@@ -5820,7 +5816,13 @@ Gfx *shieldhitRender(Gfx *gdl, struct prop *prop1, struct prop *prop2, int alpha
 							gDPLoadTextureBlock(gdl++, var8009ccc0[index], G_IM_FMT_RGBA, G_IM_SIZ_16b, 16, 16, 0, G_TX_MIRROR | G_TX_WRAP, G_TX_MIRROR | G_TX_WRAP, 4, 4, G_TX_NOLOD, G_TX_NOLOD);
 							gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 							gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
-							gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
+							gfx_Set_Combine_LERP(gdl++,
+								G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 0
+								G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE,         // alpha cycle 0
+								G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 1 (same as cycle 0)
+								G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE          // alpha cycle 1 (same as cycle 0)
+							);
+					
 							gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
 							gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 							gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, (((16 * G_IM_SIZ_16b_BYTES)+7)>>3), 0, 0, 0,
@@ -5906,7 +5908,11 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 			RGBA primColor = {255, 255, 255, 255};
 			gfx_Set_Prim_Color(gdl++, primColor);
 			gfx_Set_Render_Mode(gdl++, G_RM_NOOP, G_RM_NOOP2);
-			gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+			gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 0
+				G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0,     // Alpha cycle 0
+				G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 1
+				G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0);    // Alpha cycle 1
 			gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 			gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 			gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
@@ -6021,7 +6027,12 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 			gfx_Set_Scissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
 			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 			gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
-			gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
+			gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 0
+				G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE,         // alpha cycle 0
+				G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 1 (same as cycle 0)
+				G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE          // alpha cycle 1 (same as cycle 0)
+			);
 			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 			gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);

@@ -296,8 +296,11 @@ Gfx *sparksRender(Gfx *gdl)
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
-		gDPSetCombineMode(gdl++, G_CC_CUSTOM_04, G_CC_CUSTOM_04);
-
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_SHADE,         // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // Alpha 0
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_SHADE,         // Color 1 (mirror)
+			G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);   // Alpha 1 (mirror)
 
 		for (i = 0; i < ARRAYCOUNT(g_SparkGroups); i++) {
 			group = &g_SparkGroups[i];
@@ -468,7 +471,7 @@ Gfx *sparksRender(Gfx *gdl)
 								break;
 							}
 
-							gSPVertex(gdl++, (uintptr_t)(vertices), 3, 0);
+							gfx_Vertex(gdl++, vertices, 3, 0);
 							gfx_1Triangle(gdl++, 0, 1, 2, 0);
 						}
 

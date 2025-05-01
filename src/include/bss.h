@@ -220,7 +220,6 @@ extern int g_TexNumConfigs;
 extern struct tex **g_TexWords;
 extern struct textureconfig *g_TexWallhitConfigs;
 extern Gfx *g_TexGdl1;
-extern Gfx *g_TexGdl2;
 extern struct texturepair *g_ExplosionTexturePairs;
 extern struct textureconfig *g_TexBeamConfigs;
 extern struct textureconfig *g_TexLaserConfigs;

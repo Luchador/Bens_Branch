@@ -151,7 +151,6 @@
 	build/ROMID/game/bgbss.o (section); \
 	build/ROMID/game/portalconv.o (section); \
 	build/ROMID/game/stagetable.o (section); \
-	build/ROMID/game/gfxreplace.o (section); \
 	build/ROMID/game/env.o (section); \
 	build/ROMID/game/room.o (section); \
 	build/ROMID/game/file.o (section); \

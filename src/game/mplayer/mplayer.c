@@ -1281,7 +1281,7 @@ Gfx *mpRenderModalText(Gfx *gdl)
 		x -= textwidth / 2;
 		gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicMd, g_FontHandelGothicMd, (red << 24) | 0x00ff00ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
 
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 	} else if (!g_MainIsEndscreen
 			&& g_MpSetup.paused == MPPAUSEMODE_UNPAUSED
 			&& g_Vars.currentplayer->isdead
@@ -1318,7 +1318,7 @@ Gfx *mpRenderModalText(Gfx *gdl)
 			gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicSm, g_FontHandelGothicSm, 0xff0000ff, 0x000000ff, viGetWidth(), viGetWidth(), 0, 0);
 		}
 
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 
 		g_Menus[g_Vars.currentplayerstats->mpindex].openinhibit = 10;
 	}

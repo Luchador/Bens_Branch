@@ -254,7 +254,7 @@ Gfx *vi0000ad5c(Gfx *gdl, Vp *vp)
 	vp[g_ViBackIndex].vp.vscale[1] = g_ViBackData->viewy;
 	vp[g_ViBackIndex].vp.vtrans[1] = g_ViBackData->viewy / 2 + g_ViBackData->viewtop;
 
-	gSPViewport(gdl++, (uintptr_t)(&vp[g_ViBackIndex]));
+	gfx_Viewport(gdl++, &vp[g_ViBackIndex]);
 
 	g_CameraPerspectiveMtx = gfxAllocateMatrix();
 	mtxPerspective(&g_ActiveProjectionMtx, g_ViBackData->fovy, g_ViBackData->aspect, g_ViBackData->znear, g_ViBackData->zfar);

@@ -261,7 +261,11 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 
 		gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
 
-		gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 	} else {
 		int width = tconfig->width;
 		int height = tconfig->height;
@@ -357,21 +361,41 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 
 				switch (format) {
 				case G_IM_FMT_RGBA:
-					gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+				gfx_Set_Combine_LERP(gdl++,
+					G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,  // color cycle 0
+					G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,  // alpha cycle 0
+					G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,  // color cycle 1 (same as cycle 0)
+					G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0); // alpha cycle 1 (same as cycle 0)
 					break;
 				case G_IM_FMT_IA:
-					gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+					gfx_Set_Combine_LERP(gdl++,
+						G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,    // Color 0
+						G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // Alpha 0
+						G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,    // Color 1 (same as cycle 0)
+						G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);   // Alpha 1 (same as cycle 1)
 					break;
 				case G_IM_FMT_I:
-					gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
+					gfx_Set_Combine_LERP(gdl++,
+						G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 0
+						G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE,         // alpha cycle 0
+						G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 1 (same as cycle 0)
+						G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE);        // alpha cycle 1 (same as cycle 0)
 					break;
 				case G_IM_FMT_CI:
 					switch (lutmode) {
 					case G_TT_RGBA16:
-						gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+						gfx_Set_Combine_LERP(gdl++,
+							G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,  // color cycle 0
+							G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,  // alpha cycle 0
+							G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,  // color cycle 1 (same as cycle 0)
+							G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0); // alpha cycle 1 (same as cycle 0)
 						break;
 					case G_TT_IA16:
-						gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+						gfx_Set_Combine_LERP(gdl++,
+							G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,  // color cycle 0
+							G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,  // alpha cycle 0
+							G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,  // color cycle 1 (same as cycle 0)
+							G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0); // alpha cycle 1 (same as cycle 0)
 						break;
 					}
 					break;
@@ -465,21 +489,42 @@ void texSelect(Gfx **gdlptr, struct textureconfig *tconfig, uint32_t rendermode,
 
 				switch (format) {
 				case G_IM_FMT_RGBA:
-					gDPSetCombineMode(gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
+					gfx_Set_Combine_LERP(gdl++,
+						G_CCMUX_TEXEL1, G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+						G_ACMUX_TEXEL1, G_ACMUX_TEXEL0, G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,       // Alpha 0
+						G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,                      // Color 1
+						G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);                     // Alpha 1
+				
 					break;
 				case G_IM_FMT_IA:
-					gDPSetCombineMode(gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
+					gfx_Set_Combine_LERP(gdl++,
+						G_CCMUX_TEXEL1, G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+						G_ACMUX_TEXEL1, G_ACMUX_TEXEL0, G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,       // Alpha 0
+						G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,                      // Color 1
+						G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);                     // Alpha 1
 					break;
 				case G_IM_FMT_I:
-					gDPSetCombineMode(gdl++, G_CC_TRILERP, G_CC_MODULATEI2);
+				gfx_Set_Combine_LERP(gdl++,
+					G_CCMUX_TEXEL1, G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+					G_ACMUX_TEXEL1, G_ACMUX_TEXEL0, G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,       // Alpha 0
+					G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,                      // Color 1
+					G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);                     // Alpha 1
 					break;
 				case G_IM_FMT_CI:
 					switch (lutmode) {
 					case G_TT_RGBA16:
-						gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+						gfx_Set_Combine_LERP(gdl++,
+							G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+							G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,
+							G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+							G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);
 						break;
 					case G_TT_IA16:
-						gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+						gfx_Set_Combine_LERP(gdl++,
+							G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+							G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,
+							G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+							G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);
 						break;
 					}
 					break;

@@ -436,7 +436,7 @@ Gfx *htbRenderHud(Gfx *gdl)
 		gdl = text0f153990(gdl, x, y, textwidth, textheight);
 		gdl = textRender(gdl, &x, &y, text, g_CharsNumeric, g_FontNumeric, 0x00ff00a0, 0xa0, viGetWidth(), viGetHeight(), 0, 0);
 
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 	}

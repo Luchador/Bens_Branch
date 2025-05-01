@@ -9074,7 +9074,7 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 		}
 	}
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 
@@ -9202,7 +9202,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 	gfx_Fill_Rectangle(gdl++, xpos - 13, bottom - 11, xpos - 2, bottom);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	// Draw weapon name and function name
 	if (optionsGetShowGunFunction(g_Vars.currentplayerstats->mpindex)) {
@@ -9249,7 +9249,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 			gfx_Fill_Rectangle(gdl++, x - 1, y - 1, xpos - 11, bottom);
 
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 			textSetWaveBlend(g_20SecIntervalFrac * 50.0f, 0, 50);
 			textSetWaveColours(0xffffffff, 0xffffffff);
 			gdl = textRenderProjected(gdl, &x, &y, str, g_CharsHandelGothicXs, g_FontHandelGothicXs, colour, textwidth, 1000, 0, 0);
@@ -9315,7 +9315,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 				gfx_Fill_Rectangle(gdl++, x - 1, y - 1, xpos - 11, bottom + 3);
 
-				gdl = textSetCCCustom02(gdl);
+				gdl = textSetCCPrimColorTexAlpha(gdl);
 
 				textSetWaveBlend(g_20SecIntervalFrac * 50.0f, 0, 50);
 				textSetWaveColours(0xffffffff, 0xffffffff);
@@ -9341,7 +9341,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 		if (ammoindex == -1) {
 			gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
-			gdl = text0f153780(gdl);
+			gdl = textSetPerspAndLOD(gdl);
 			return gdl;
 		}
 	}
@@ -9457,7 +9457,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
-	gdl = text0f153780(gdl);
+	gdl = textSetPerspAndLOD(gdl);
 
 	return gdl;
 }

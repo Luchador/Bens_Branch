@@ -511,10 +511,14 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 
 	gdl = textConfigureGfxPipeline(gdl);
 	gdl = text0f153a34(gdl, underleft, undertop, underright, underbottom, undercol);
-	gdl = text0f153780(gdl);
+	gdl = textSetPerspAndLOD(gdl);
 
 	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
-	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 
 	// Same as gSPColor but casts the sizeof to an int, which is required for a match.
 #define gSPColor2(pkt, v, n) \
@@ -526,7 +530,7 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	numverts = numshieldmarkers * 2;
 
 	gSPColor2(gdl++, (uintptr_t)(colours), numverts);
-	gSPVertex(gdl++, (uintptr_t)(vertices), 14, 0);
+	gfx_Vertex(gdl++, vertices, 14, 0);
 
 	gfx_Tri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
 	gfx_Tri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
@@ -560,7 +564,7 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	coloursize = numverts * 4;
 
 	gSPColor2(gdl++, (uintptr_t)(colours + 24), numverts);
-	gSPVertex(gdl++, (uintptr_t)(vertices + 24), numverts, 0);
+	gfx_Vertex(gdl++, vertices + 24, numverts, 0);
 
 	gfx_Tri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
 	gfx_Tri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
@@ -580,7 +584,7 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	coloursize = numverts * 4;
 
 	gSPColor2(gdl++, (uintptr_t)(colours + 40), numverts);
-	gSPVertex(gdl++, (uintptr_t)(vertices + 40), numverts, 0);
+	gfx_Vertex(gdl++, vertices + 40, numverts, 0);
 
 	gfx_Tri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
 	gfx_Tri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);

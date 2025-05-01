@@ -126,9 +126,9 @@ void utilsNormalizeF(float *x, float *y, float *z)
 	}
 }
 
-void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *brightness, int width, int height, int arg5, int arg6, int arg7, bool arg8)
+void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *screensize, int width, int height, bool flipU, bool flipV, bool arg8)
 {
-	if (brightness[0] > 0.0f && brightness[1] > 0.0f) {
+	if (screensize[0] > 0.0f && screensize[1] > 0.0f) {
 		Gfx *gdl = *gdlptr;
 		int xl;
 		int yl;
@@ -145,10 +145,10 @@ void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *brightness,
 
 		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 
-		xl = (screenpos[0] - brightness[0]) * 4.0f;
-		yl = (screenpos[1] - brightness[1]) * 4.0f;
-		xh = (screenpos[0] + brightness[0]) * 4.0f;
-		yh = (screenpos[1] + brightness[1]) * 4.0f;
+		xl = (screenpos[0] - screensize[0]) * 4.0f;
+		yl = (screenpos[1] - screensize[1]) * 4.0f;
+		xh = (screenpos[0] + screensize[0]) * 4.0f;
+		yh = (screenpos[1] + screensize[1]) * 4.0f;
 
 		if (xh >= 0 && yh >= 0) {
 			if (arg8) {
@@ -159,22 +159,12 @@ void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *brightness,
 			}
 
 			if (xl < 0) {
-				if (arg5) {
-					t += ((-xl * height) << 5) / (xh - xl);
-				} else {
-					s += ((-xl * width) << 5) / (xh - xl);
-				}
-
+				s += ((-xl * width) * 32) / (xh - xl);
 				xl = 0;
 			}
 
 			if (yl < 0) {
-				if (arg5) {
-					s += ((-yl * width) << 5) / (yh - yl);
-				} else {
-					t += ((-yl * height) << 5) / (yh - yl);
-				}
-
+				t += ((-yl * height) * 32) / (yh - yl);
 				yl = 0;
 			}
 
@@ -189,39 +179,30 @@ void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *brightness,
 				yh = heightx4;
 			}
 
-			if (arg5) {
-				dsdx = width / (2.0f * brightness[1]) * 1024.0f;
-				dtdy = height / (2.0f * brightness[0]) * 1024.0f;
-			} else {
-				dsdx = width / (2.0f * brightness[0]) * 1024.0f;
-				dtdy = height / (2.0f * brightness[1]) * 1024.0f;
-			}
+			dsdx = width / (2.0f * screensize[0]) * 1024.0f;
+			dtdy = height / (2.0f * screensize[1]) * 1024.0f;
 
-			if (arg6) {
+			if (flipU) {
 				dsdx = 0x10000 - dsdx;
 
 				if (arg8) {
-					s = (((width >> 1) - 1) << 5) - s;
+					s = (((width >> 1) - 1) * 32) - s;
 				} else {
-					s = ((width - 1) << 5) - s;
+					s = ((width - 1) * 32) - s;
 				}
 			}
 
-			if (arg7) {
+			if (flipV) {
 				dtdy = 0x10000 - dtdy;
 
 				if (arg8) {
-					t = (((height >> 1) - 1) << 5) - t;
+					t = (((height >> 1) - 1) * 32) - t;
 				} else {
-					t = ((height - 1) << 5) - t;
+					t = ((height - 1) * 32) - t;
 				}
 			}
 
-			if (arg5) {
-				gSPTextureRectangleFlip(gdl, xl, yl, xh, yh, 0, s, t, dsdx, dtdy);
-			} else {
-				gdl += gfx_Texture_Rectangle(gdl, xl, yl, xh, yh, 0, s, t, dsdx, dtdy);
-			}
+			gdl += gfx_Texture_Rectangle(gdl, xl, yl, xh, yh, 0, s, t, dsdx, dtdy);
 		}
 
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);

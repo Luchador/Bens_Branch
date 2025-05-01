@@ -211,11 +211,11 @@ Gfx *titleRenderLegal(Gfx *gdl)
 			}
 
 			if (elem->type == LEGALELEMENTTYPE_LINE) {
-				gdl = text0f153780(gdl);
+				gdl = textSetPerspAndLOD(gdl);
 				gdl = text0f153a34(gdl, elem->x, elem->y, viGetWidth(), elem->y + 2, 0x7f7fff7f);
 				gdl = textConfigureGfxPipeline(gdl);
 			} else if (elem->type == LEGALELEMENTTYPE_DOLBYLOGO) {
-				gdl = text0f153780(gdl);
+				gdl = textSetPerspAndLOD(gdl);
 
 				gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 				gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
@@ -225,7 +225,11 @@ Gfx *titleRenderLegal(Gfx *gdl)
 				texSelect(&gdl, &g_TexGeneralConfigs[47], 1, 0, 2, 1, 0);
 
 				gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
-				gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+				gfx_Set_Combine_LERP(gdl++,
+					G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 0
+					G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0,     // Alpha cycle 0
+					G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 1
+					G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0);    // Alpha cycle 1
 				gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 				gdl += gfx_Texture_Rectangle(gdl,
@@ -237,7 +241,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 
 				gdl = textConfigureGfxPipeline(gdl);
 			} else if (elem->type == LEGALELEMENTTYPE_RARELOGO) {
-				gdl = text0f153780(gdl);
+				gdl = textSetPerspAndLOD(gdl);
 
 				gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 				gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
@@ -247,7 +251,11 @@ Gfx *titleRenderLegal(Gfx *gdl)
 				texSelect(&gdl, &g_TexGeneralConfigs[49], 1, 0, 2, 1, 0);
 
 				gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
-				gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+				gfx_Set_Combine_LERP(gdl++,
+					G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 0
+					G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0,     // Alpha cycle 0
+					G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 1
+					G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0);    // Alpha cycle 1
 				gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 				gdl += gfx_Texture_Rectangle(gdl,
@@ -268,7 +276,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 	}
 
 	return gdl;

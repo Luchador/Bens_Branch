@@ -215,8 +215,30 @@ Gfx *weatherRender(Gfx *gdl)
 
 	weather = g_WeatherData;
 
-	gfx_Display_List(gdl++, &var800613a0);
-	gfx_Display_List(gdl++, &var80061380);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+	gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+	gfx_Set_Combine_LERP(
+		gdl++,
+		0, 0, 0, G_SHADE,
+		0, 0, 0, G_SHADE,
+		0, 0, 0, G_SHADE,
+		0, 0, 0, G_SHADE
+	);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
+	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH | G_FOG | G_LIGHTING);
+	gfx_Texture(gdl++, 0, 0, 0, G_TX_RENDERTILE, G_OFF);
+	gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
 
 	if (weather->type == WEATHERTYPE_SNOW) {
 		texSelect(&gdl, &g_TexGeneralConfigs[1], 2, 1, 2, 1, NULL);
@@ -226,7 +248,11 @@ Gfx *weatherRender(Gfx *gdl)
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
-		gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 		gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
 	}
 
@@ -849,9 +875,9 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
-	gDPSetCombineLERP(gdl++,
-			0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0,
-			0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0);
+	gfx_Set_Combine_LERP(gdl++,
+			0, 0, 0, G_CCMUX_SHADE, G_ACMUX_TEXEL0, 0, G_ACMUX_SHADE, 0,
+			0, 0, 0, G_CCMUX_SHADE, G_ACMUX_TEXEL0, 0, G_ACMUX_SHADE, 0);
 
 	{
 		Mtx *mtx;
@@ -1339,7 +1365,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 							vertices[vtxindex + 2].z = positions[2].f[2];
 
 							if (numtris == 3) {
-								gSPVertex(gdl++, (uintptr_t)(vertices), 12, 0);
+								gfx_Vertex(gdl++, vertices, 12, 0);
 								gfx_Tri4(gdl++, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 								numtris = 0;
 							} else {
@@ -1355,7 +1381,7 @@ Gfx *weatherRenderRain(Gfx *gdl, struct weatherdata *weather, int arg2)
 		}
 
 		if (numtris > 0) {
-			gSPVertex(gdl++, (uintptr_t)(vertices), 12, 0);
+			gfx_Vertex(gdl++, vertices, 12, 0);
 
 			if (numtris == 1) {
 				gfx_Tri1(gdl++, 0, 1, 2);
@@ -1446,9 +1472,9 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
-	gDPSetCombineLERP(gdl++,
-			0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0,
-			0, 0, 0, SHADE, TEXEL0, 0, SHADE, 0);
+	gfx_Set_Combine_LERP(gdl++,
+			0, 0, 0, G_CCMUX_SHADE, G_ACMUX_TEXEL0, 0, G_ACMUX_SHADE, 0,
+			0, 0, 0, G_CCMUX_SHADE, G_ACMUX_TEXEL0, 0, G_ACMUX_SHADE, 0);
 	particledata = weather->particledata[arg2];
 
 	sp198 = 0;
@@ -1861,7 +1887,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 						vertices[tmp2 + 3].z = sp19c[3].f[2];
 
 						if (sp198 == 1) {
-							gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
+							gfx_Vertex(gdl++, vertices, 8, 0);
 							gfx_Tri4(gdl++, 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4);
 							sp198 = 0;
 						} else {
@@ -1874,7 +1900,7 @@ Gfx *weatherRenderSnow(Gfx *gdl, struct weatherdata *weather, int arg2)
 	}
 
 	if (sp198 > 0) {
-		gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
+		gfx_Vertex(gdl++, vertices, 8, 0);
 		gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 	}
 

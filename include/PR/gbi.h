@@ -201,8 +201,6 @@
 #define G_LIGHTING           0x00020000
 #define G_TEXTURE_GEN        0x00040000
 #define G_TEXTURE_GEN_LINEAR 0x00080000
-#define G_LOD                0x00100000 /* NOT IMPLEMENTED */
-#define G_CLIPPING           0x00000000
 
 /*
  * G_SETIMG fmt: set image formats
@@ -293,13 +291,10 @@
 #define G_ACMUX_0             7
 
 /* typical CC cycle 1 modes */
-#define G_CC_PRIMITIVE              0,                        0,           0,            PRIMITIVE,   0,         0,     0,         PRIMITIVE
-#define G_CC_SHADE                  0,                        0,           0,            SHADE,       0,         0,     0,         SHADE
 #define G_CC_MODULATEI              TEXEL0,                   0,           SHADE,        0,           0,         0,     0,         SHADE
 #define G_CC_MODULATEIA             TEXEL0,                   0,           SHADE,        0,           TEXEL0,    0,     SHADE,     0
 #define G_CC_MODULATEIDECALA        TEXEL0,                   0,           SHADE,        0,           0,         0,     0,         TEXEL0
 #define G_CC_MODULATERGB            G_CC_MODULATEI
-#define G_CC_MODULATERGBA           G_CC_MODULATEIA
 #define G_CC_MODULATERGBDECALA      G_CC_MODULATEIDECALA
 #define G_CC_MODULATEI_PRIM         TEXEL0,                   0,           PRIMITIVE,    0,           0,         0,     0,         PRIMITIVE
 #define G_CC_MODULATEIA_PRIM        TEXEL0,                   0,           PRIMITIVE,    0,           TEXEL0,    0,     PRIMITIVE, 0
@@ -316,14 +311,6 @@
 #define G_CC_BLENDRGBDECALA         TEXEL0,                   SHADE,       TEXEL0_ALPHA, SHADE,       0,         0,     0,         TEXEL0
 #define G_CC_ADDRGB                 1,                        0,           TEXEL0,       SHADE,       0,         0,     0,         SHADE
 #define G_CC_ADDRGBDECALA           1,                        0,           TEXEL0,       SHADE,       0,         0,     0,         TEXEL0
-#define G_CC_REFLECTRGB             ENVIRONMENT,              0,           TEXEL0,       SHADE,       0,         0,     0,         SHADE
-#define G_CC_REFLECTRGBDECALA       ENVIRONMENT,              0,           TEXEL0,       SHADE,       0,         0,     0,         TEXEL0
-#define G_CC_HILITERGB              PRIMITIVE,                SHADE,       TEXEL0,       SHADE,       0,         0,     0,         SHADE
-#define G_CC_HILITERGBA             PRIMITIVE,                SHADE,       TEXEL0,       SHADE,       PRIMITIVE, SHADE, TEXEL0,    SHADE
-#define G_CC_HILITERGBDECALA        PRIMITIVE,                SHADE,       TEXEL0,       SHADE,       0,         0,     0,         TEXEL0
-#define G_CC_SHADEDECALA            0,                        0,           0,            SHADE,       0,         0,     0,         TEXEL0
-#define G_CC_BLENDPE                PRIMITIVE,                ENVIRONMENT, TEXEL0,       ENVIRONMENT, TEXEL0,    0,     SHADE,     0
-#define G_CC_BLENDPEDECALA          PRIMITIVE,                ENVIRONMENT, TEXEL0,       ENVIRONMENT, 0,         0,     0,         TEXEL0
 
 /* used for 1-cycle sparse mip-maps, primitive color has color of lowest LOD */
 #define _G_CC_SPARSEST      PRIMITIVE,   TEXEL0,    LOD_FRACTION,  TEXEL0,    PRIMITIVE, TEXEL0, LOD_FRACTION,  TEXEL0
@@ -334,16 +321,7 @@
 #define G_CC_INTERFERENCE   TEXEL0,      0,         TEXEL1,        0,         TEXEL0,    0,      TEXEL1,        0
 
 /* typical CC cycle 2 modes */
-#define G_CC_PASS2              0,                    0,        0,         COMBINED, 0,           0,        0,         COMBINED
-#define G_CC_MODULATEI2         COMBINED,             0,        SHADE,     0,        0,           0,        0,         SHADE
 #define G_CC_MODULATEIA2        COMBINED,             0,        SHADE,     0,        COMBINED,    0,        SHADE,     0
-#define G_CC_MODULATERGB2       G_CC_MODULATEI2
-#define G_CC_MODULATERGBA2      G_CC_MODULATEIA2
-#define G_CC_MODULATEI_PRIM2    COMBINED,             0,        PRIMITIVE, 0,        0,           0,        0,         PRIMITIVE
-#define G_CC_MODULATEIA_PRIM2   COMBINED,             0,        PRIMITIVE, 0,        COMBINED,    0,        PRIMITIVE, 0
-#define G_CC_MODULATERGB_PRIM2  G_CC_MODULATEI_PRIM2
-#define G_CC_MODULATERGBA_PRIM2 G_CC_MODULATEIA_PRIM2
-#define G_CC_DECALRGB2          0,                    0,        0,         COMBINED, 0,           0,        0,         SHADE
 
 /*
  * G_SETOTHERMODE_L sft: shift count
@@ -373,7 +351,6 @@
 
 /* G_SETOTHERMODE_H gPipelineMode */
 #define G_PM_1PRIMITIVE (1 << G_MDSFT_PIPELINE)
-#define G_PM_NPRIMITIVE (0 << G_MDSFT_PIPELINE)
 
 /* G_SETOTHERMODE_H gSetCycleType */
 #define G_CYC_1CYCLE    (0 << G_MDSFT_CYCLETYPE)
@@ -653,39 +630,6 @@
 #define G_DL_PUSH   0x00
 #define G_DL_NOPUSH 0x01
 
-/*
- * Data Structures
- *
- * NOTE:
- * The DMA transfer hardware requires 64-bit aligned, 64-bit multiple-
- * sized transfers. This important hardware optimization is unfortunately
- * reflected in the programming interface, with some structures
- * padded and alignment enforced.
- *
- * Since structures are aligned to the boundary of the "worst-case"
- * element, we can't depend on the C compiler to align things
- * properly.
- *
- * 64-bit structure alignment is enforced by wrapping structures with
- * unions that contain a dummy "long long int".  Why this works is
- * explained in the ANSI C Spec, or on page 186 of the second edition
- * of K&R, "The C Programming Language".
- *
- * The price we pay for this is a little awkwardness referencing the
- * structures through the union. There is no memory penalty, since
- * all the structures are at least 64-bits the dummy alignment field
- * does not increase the size of the union.
- *
- * Static initialization of these union structures works because
- * the ANSI C spec states that static initialization for unions
- * works by using the first union element. We put the dummy alignment
- * field last for this reason.
- *
- * (it's possible a newer 64-bit compiler from MIPS might make this
- * easier with a flag, but we can't wait for it...)
- *
- */
-
 typedef struct {
 	union {
 		struct {
@@ -900,12 +844,6 @@ typedef struct {
 	unsigned short s;
 } Gtexture;
 
-typedef struct {
-	int cmd:8;
-	int pad:24;
-	Tri line;
-} Gline3D;
-
 /*
  * Textured rectangles are 128 bits not 64 bits
  */
@@ -952,7 +890,6 @@ typedef union {
 	Gvtx           vtx;
 	Gtri           tri;
 	Gtri4          tri4;
-	Gline3D        line;
 	Gtexture       texture;
 	GunkC0         unkc0;
 #ifdef PLATFORM_64BIT
@@ -987,12 +924,6 @@ typedef union {
     _g->words.w1 = (uintptr_t)(s);                              \
 }
 
-#define gSPVertex(pkt, v, n, v0)                           \
-    gDma1p(pkt, G_VTX, v, sizeof(Vtx)*(n),((n)-1)<<4|(v0))
-
-#define gSPViewport(pkt,v)                                   \
-    gDma1p((pkt), G_MOVEMEM, (v), sizeof(Vp), G_MV_VIEWPORT)
-
 #define gSPDisplayList(pkt,dl)  gDma1p(pkt,G_DL,dl,0,G_DL_PUSH)
 
 /*
@@ -1008,24 +939,6 @@ typedef union {
     _g->words.w1 = (uintptr_t)(p0);     \
 }
 
-#define gsImmp1(c, p0)                      \
-{                                           \
-    _SHIFTL((c), 24, 8), (uintptr_t)(p0)    \
-}
-
-#define gImmp2(pkt, c, p0, p1)                                  \
-{                                                               \
-    Gfx *_g = (Gfx *)(pkt);                                     \
-                                                                \
-    _g->words.w0 = _SHIFTL((c), 24, 8);                         \
-    _g->words.w1 = _SHIFTL((p0), 16, 16) | _SHIFTL((p1), 8, 8); \
-}
-
-#define gsImmp2(c, p0, p1)                                            \
-{                                                                     \
-    _SHIFTL((c), 24, 8),  _SHIFTL((p0), 16, 16) | _SHIFTL((p1), 8, 8) \
-}
-
 #define gImmp21(pkt, c, p0, p1, dat)                              \
 {                                                                 \
     Gfx *_g = (Gfx *)(pkt);                                       \
@@ -1033,12 +946,6 @@ typedef union {
     _g->words.w0 = (_SHIFTL((c), 24, 8)  | _SHIFTL((p0), 8, 16) | \
             _SHIFTL((p1), 0, 8));                                 \
     _g->words.w1 = (uintptr_t) (dat);                             \
-}
-
-#define gsImmp21(c, p0, p1, dat)                                      \
-{                                                                     \
-    _SHIFTL((c), 24, 8) | _SHIFTL((p0), 8, 16) | _SHIFTL((p1), 0, 8), \
-    (uintptr_t) (dat)                                                 \
 }
 
 #define gMoveWd(pkt, index, offset, data)           \
@@ -1056,23 +963,6 @@ typedef union {
 #define gSPNumLights(pkt, n)                             \
     gMoveWd(pkt, G_MW_NUMLIGHT, G_MWO_NUMLIGHT, NUML(n))
 
-#define LIGHT_1 1
-#define LIGHT_2 2
-#define LIGHT_3 3
-#define LIGHT_4 4
-#define LIGHT_5 5
-#define LIGHT_6 6
-#define LIGHT_7 7
-#define LIGHT_8 8
-
-/*
- * l should point to a Light struct
- * n should be one of: LIGHT_1, LIGHT_2, ..., LIGHT_8
- * NOTE: the highest numbered light is always the ambient light (eg if there are
- *       3 directional lights defined: gsSPNumLights(NUMLIGHTS_3), then lights
- *       LIGHT_1 through LIGHT_3 will be the directional lights and light
- *       LIGHT_4 will be the ambient light.
- */
 #define gSPLight(pkt, l, n)                                    \
     gDma1p(pkt, G_MOVEMEM, l, sizeof(Light),((n)-1)*2+G_MV_L0)
 
@@ -1083,45 +973,9 @@ typedef union {
     gSPLight(pkt,&name.a,2);       \
 }
 
-/*
- * Macros to turn texture on/off
- */
-
-#define gsSPTexture(s, t, level, tile, on)                         \
-{                                                                  \
-    (_SHIFTL(G_TEXTURE,24,8)|                                      \
-     _SHIFTL((level),11,3)|_SHIFTL((tile),8,3)|_SHIFTL((on),0,8)), \
-    (_SHIFTL((s),16,16)|_SHIFTL((t),0,16))                         \
-}
-
 #define gsSPEndDisplayList()   \
 {                              \
     _SHIFTL(G_ENDDL, 24, 8), 0 \
-}
-
-#define gsSPSetGeometryMode(word)                           \
-{                                                           \
-    _SHIFTL(G_SETGEOMETRYMODE, 24, 8), (uintptr_t)(word)    \
-}
-
-#define gsSPClearGeometryMode(word)                           \
-{                                                             \
-    _SHIFTL(G_CLEARGEOMETRYMODE, 24, 8), (uintptr_t)(word)    \
-}
-
-#define gSPSetOtherMode(pkt, cmd, sft, len, data)              \
-{                                                              \
-    Gfx *_g = (Gfx *)(pkt);                                    \
-                                                               \
-    _g->words.w0 = (_SHIFTL(cmd, 24, 8) | _SHIFTL(sft, 8, 8) | \
-            _SHIFTL(len, 0, 8));                               \
-    _g->words.w1 = (uintptr_t)(data);                          \
-}
-
-#define gsSPSetOtherMode(cmd, sft, len, data)                      \
-{                                                                  \
-    _SHIFTL(cmd, 24, 8) | _SHIFTL(sft, 8, 8) | _SHIFTL(len, 0, 8), \
-    (uintptr_t)(data)                                              \
 }
 
 /* Fraction never used in fill */
@@ -1133,30 +987,6 @@ typedef union {
             _SHIFTL((lrx), 14, 10) | _SHIFTL((lry), 2, 10));         \
     _g->words.w1 = (_SHIFTL((ulx), 14, 10) | _SHIFTL((uly), 2, 10)); \
 }
-
-/*
- * RDP setothermode register commands - register shadowed in RSP
- */
-#define gsDPPipelineMode(mode)          gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_PIPELINE, 1, mode)
-#define gsDPSetCycleType(type)          gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_CYCLETYPE, 2, type)
-
-#define gsDPSetTexturePersp(type)       gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTPERSP, 1, type)
-
-#define gsDPSetTextureDetail(type)      gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTDETAIL, 2, type)
-
-#define gsDPSetTextureLOD(type)         gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTLOD, 1, type)
-
-#define gsDPSetTextureLUT(type)         gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTLUT, 2, type)
-
-#define gsDPSetTextureFilter(type)      gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTFILT, 2, type)
-
-#define gsDPSetTextureConvert(type)     gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_TEXTCONV, 3, type)
-
-#define gsDPSetCombineKey(type)         gsSPSetOtherMode(    G_SETOTHERMODE_H, G_MDSFT_COMBKEY, 1, type)
-
-#define gsDPSetAlphaCompare(type)     gsSPSetOtherMode(    G_SETOTHERMODE_L, G_MDSFT_ALPHACOMPARE, 2, type)
-
-#define gsDPSetRenderMode(c0, c1)     gsSPSetOtherMode(    G_SETOTHERMODE_L, G_MDSFT_RENDERMODE, 29, (c0) | (c1))
 
 #define gSetImage(pkt, cmd, fmt, siz, width, i)                \
 {                                                              \
@@ -1196,55 +1026,6 @@ typedef union {
     (_SHIFTL((sbRGB1), 24, 4) | _SHIFTL((saA1), 21, 3) | \
      _SHIFTL((mA1), 18, 3) | _SHIFTL((aRGB1), 6, 3) |    \
      _SHIFTL((sbA1), 3, 3) | _SHIFTL((aA1), 0, 3))
-
-#define gDPSetCombineLERP(pkt, a0, b0, c0, d0, Aa0, Ab0, Ac0, Ad0, \
-        a1, b1, c1, d1, Aa1, Ab1, Ac1, Ad1)                        \
-{                                                                  \
-    Gfx *_g = (Gfx *)(pkt);                                        \
-                                                                   \
-    _g->words.w0 = _SHIFTL(G_SETCOMBINE, 24, 8) |                  \
-    _SHIFTL(GCCc0w0(G_CCMUX_##a0, G_CCMUX_##c0,                    \
-                G_ACMUX_##Aa0, G_ACMUX_##Ac0) |                    \
-                GCCc1w0(G_CCMUX_##a1, G_CCMUX_##c1),               \
-                0, 24);                                            \
-    _g->words.w1 = (unsigned int)(GCCc0w1(G_CCMUX_##b0,            \
-                G_CCMUX_##d0,                                      \
-                G_ACMUX_##Ab0,                                     \
-                G_ACMUX_##Ad0) |                                   \
-                GCCc1w1(G_CCMUX_##b1,                              \
-                    G_ACMUX_##Aa1,                                 \
-                    G_ACMUX_##Ac1,                                 \
-                    G_CCMUX_##d1,                                  \
-                    G_ACMUX_##Ab1,                                 \
-                    G_ACMUX_##Ad1));                               \
-}
-
-#define gsDPSetCombineLERP(a0, b0, c0, d0, Aa0, Ab0, Ac0, Ad0, \
-        a1, b1, c1, d1, Aa1, Ab1, Ac1, Ad1)                    \
-{                                                              \
-    _SHIFTL(G_SETCOMBINE, 24, 8) |                             \
-    _SHIFTL(GCCc0w0(G_CCMUX_##a0, G_CCMUX_##c0,                \
-                G_ACMUX_##Aa0, G_ACMUX_##Ac0) |                \
-                GCCc1w0(G_CCMUX_##a1, G_CCMUX_##c1), 0, 24),   \
-    (unsigned int)(GCCc0w1(G_CCMUX_##b0, G_CCMUX_##d0,         \
-                G_ACMUX_##Ab0, G_ACMUX_##Ad0) |                \
-                GCCc1w1(G_CCMUX_##b1, G_ACMUX_##Aa1,           \
-                    G_ACMUX_##Ac1, G_CCMUX_##d1,               \
-                    G_ACMUX_##Ab1, G_ACMUX_##Ad1))             \
-}
-
-/*
- * SetCombineMode macros are NOT redunant. It allow the C preprocessor
- * to substitute single parameter which includes commas in the token and
- * rescan for higher parameter count macro substitution.
- *
- * eg. gsDPSetCombineMode(G_CC_MODULATE, G_CC_MODULATE) turns into
- *     gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, SHADE, 0,
- *     TEXEL0, 0, SHADE, 0, TEXEL0, 0, SHADE, 0)
- */
-
-#define gDPSetCombineMode(pkt, a, b) gDPSetCombineLERP(pkt, a, b)
-#define gsDPSetCombineMode(a, b)     gsDPSetCombineLERP(a, b)
 
 /*
  * Texturing macros
@@ -1307,17 +1088,8 @@ typedef union {
     _SHIFTL(lrt, 0, 12);                                         \
 }
 
-#define gsDPLoadTileGeneric(c, tile, uls, ult, lrs, lrt)              \
-{                                                                     \
-    _SHIFTL(c, 24, 8) | _SHIFTL(uls, 12, 12) | _SHIFTL(ult, 0, 12),   \
-    _SHIFTL(tile, 24, 3) | _SHIFTL(lrs, 12, 12) | _SHIFTL(lrt, 0, 12) \
-}
-
 #define gDPSetTileSize(pkt, t, uls, ult, lrs, lrt)                \
     gDPLoadTileGeneric(pkt, G_SETTILESIZE, t, uls, ult, lrs, lrt)
-
-#define gsDPSetTileSize(t, uls, ult, lrs, lrt)                \
-    gsDPLoadTileGeneric(G_SETTILESIZE, t, uls, ult, lrs, lrt)
 
 #define gDPSetTile(pkt, fmt, siz, line, tmem, tile, palette, cmt,    \
         maskt, shiftt, cms, masks, shifts)                           \
@@ -1331,17 +1103,6 @@ typedef union {
     _SHIFTL(cmt, 18, 2) | _SHIFTL(maskt, 14, 4) |                    \
     _SHIFTL(shiftt, 10, 4) |_SHIFTL(cms, 8, 2) |                     \
     _SHIFTL(masks, 4, 4) | _SHIFTL(shifts, 0, 4);                    \
-}
-
-#define gsDPSetTile(fmt, siz, line, tmem, tile, palette, cmt,          \
-        maskt, shiftt, cms, masks, shifts)                             \
-{                                                                      \
-    (_SHIFTL(G_SETTILE, 24, 8) | _SHIFTL(fmt, 21, 3) |                 \
-     _SHIFTL(siz, 19, 2) | _SHIFTL(line, 9, 9) | _SHIFTL(tmem, 0, 9)), \
-    (_SHIFTL(tile, 24, 3) | _SHIFTL(palette, 20, 4) |                  \
-     _SHIFTL(cmt, 18, 2) | _SHIFTL(maskt, 14, 4) |                     \
-     _SHIFTL(shiftt, 10, 4) | _SHIFTL(cms, 8, 2) |                     \
-     _SHIFTL(masks, 4, 4) | _SHIFTL(shifts, 0, 4))                     \
 }
 
 /*

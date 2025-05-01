@@ -61,9 +61,13 @@ Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, int screenX,
     gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
     gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
     gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-    gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-	struct RGBA color = {0, 0, 0, 0};
-    gfx_Set_Prim_Color(gdl++, color);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
+	RGBA primColor = {0, 0, 0, 0};
+    gfx_Set_Prim_Color(gdl++, primColor);
 
     // Fill background rectangle
     gfx_Fill_Rectangle(gdl++, screenX, screenY, (screenX + tconfig->width), (screenY + tconfig->width));
@@ -78,10 +82,14 @@ Gfx *radarRenderBackground(Gfx *gdl, struct textureconfig *tconfig, int screenX,
 
 	RGBA radarColor = {0, 255, 0, 40};
     gfx_Set_Env_Color(gdl++, radarColor);
-    gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_ENVIRONMENT, G_CCMUX_0,    // Color 0
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_ENVIRONMENT, G_ACMUX_0,    // Alpha 0
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_0,                   // Color 1 (unused)
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_0);                  // Alpha 1 (unused)
 
     // Render the radar background texture
-    utilsRenderScreenTexture(&gdl, screenPos, scaleFactors, tconfig->width, tconfig->height, 0, 0, 0, false);
+    utilsRenderScreenTexture(&gdl, screenPos, scaleFactors, tconfig->width, tconfig->height, false, false, false);
 
     // Restore standard rendering state
     gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
@@ -147,44 +155,44 @@ Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, uint32_t colo
 			gfx_Fill_Rectangle(gdl++, x - 2, y + 2, x + 1, y + 3);
 			gfx_Fill_Rectangle(gdl++, x - 3, y - 1, x + 2, y + 2);
 			gfx_Fill_Rectangle(gdl++, x - 2, y - 2, x + 1, y - 1);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gfx_Fill_Rectangle(gdl++, x - 1, y + 1, x + 0, y + 2);
 			gfx_Fill_Rectangle(gdl++, x - 2, y + 0, x + 1, y + 1);
 			gfx_Fill_Rectangle(gdl++, x - 1, y - 1, x + 0, y + 0);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y > 250) {
 			// Up triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gfx_Fill_Rectangle(gdl++, x - 3, y - 1, x + 2, y + 2);
 			gfx_Fill_Rectangle(gdl++, x - 2, y - 2, x + 1, y - 1);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gfx_Fill_Rectangle(gdl++, x - 2, y + 0, x + 1, y + 1);
 			gfx_Fill_Rectangle(gdl++, x - 1, y - 1, x + 0, y + 0);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y < -250) {
 			// Down triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gfx_Fill_Rectangle(gdl++, x - 3, y - 2, x + 2, y + 1);
 			gfx_Fill_Rectangle(gdl++, x - 2, y + 1, x + 1, y + 2);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gfx_Fill_Rectangle(gdl++, x - 2, y - 1, x + 1, y + 0);
 			gfx_Fill_Rectangle(gdl++, x - 1, y + 0, x + 0, y + 1);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 		} else {
 			// Dot
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gfx_Fill_Rectangle(gdl++, x - 2, y - 2, x + 2, y + 2);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gfx_Fill_Rectangle(gdl++, x - 1, y - 1, x + 1, y + 1);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 		}
 	} else {
 		if (prop == g_Vars.currentplayer->prop) {
@@ -193,44 +201,44 @@ Gfx *radarDrawDot(Gfx *gdl, struct prop *prop, struct coord *dist, uint32_t colo
 			gfx_Fill_Rectangle(gdl++, x - 2, y + 2, x + 1, y + 3);
 			gfx_Fill_Rectangle(gdl++, x - 3, y - 1, x + 2, y + 2);
 			gfx_Fill_Rectangle(gdl++, x - 2, y - 2, x + 1, y - 1);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gfx_Fill_Rectangle(gdl++, x - 1, y + 1, x + 0, y + 2);
 			gfx_Fill_Rectangle(gdl++, x - 2, y + 0, x + 1, y + 1);
 			gfx_Fill_Rectangle(gdl++, x - 1, y - 1, x + 0, y + 0);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y > 250) {
 			// Up triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gfx_Fill_Rectangle(gdl++, x - 3, y - 1, x + 2, y + 2);
 			gfx_Fill_Rectangle(gdl++, x - 2, y - 2, x + 1, y - 1);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gfx_Fill_Rectangle(gdl++, x - 2, y + 0, x + 1, y + 1);
 			gfx_Fill_Rectangle(gdl++, x - 1, y - 1, x + 0, y + 0);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 		} else if (g_RadarYIndicatorsEnabled && dist->y < -250) {
 			// Down triangle
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gfx_Fill_Rectangle(gdl++, x - 3, y - 2, x + 2, y + 1);
 			gfx_Fill_Rectangle(gdl++, x - 2, y + 1, x + 1, y + 2);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gfx_Fill_Rectangle(gdl++, x - 2, y - 1, x + 1, y + 0);
 			gfx_Fill_Rectangle(gdl++, x - 1, y + 0, x + 0, y + 1);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 		} else {
 			// Dot
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour2);
 			gfx_Fill_Rectangle(gdl++, x - 2, y - 2, x + 2, y + 2);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			gdl = textSetPrimColour(gdl, (0xff >> shiftamount) + colour1);
 			gfx_Fill_Rectangle(gdl++, x - 1, y - 1, x + 1, y + 1);
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 		}
 	}
 
@@ -309,7 +317,11 @@ Gfx *radarRender(Gfx *gdl)
 	gdl = radarRenderBackground(gdl, tconfig, g_RadarX, g_RadarY, 0x10);
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	// Draw dots for human players

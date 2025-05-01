@@ -3302,5 +3302,5 @@ Gfx *frRenderHud(Gfx *gdl)
 				string1, string2, 0x00ff00a0, alpha);
 	}
 
-	return text0f153780(gdl);
+	return textSetPerspAndLOD(gdl);
 }

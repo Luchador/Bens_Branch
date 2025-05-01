@@ -437,10 +437,14 @@ Gfx *lvRenderFade(Gfx *gdl)
 		return gdl;
 	}
 
-	struct RGBA tmp = utilsUnpackColorRGBA(colour);
+	RGBA primColor = utilsUnpackColorRGBA(colour);
 	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-	gfx_Set_Prim_Color(gdl++, tmp);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
+	gfx_Set_Prim_Color(gdl++, primColor);
 
 	gfx_Fill_Rectangle(gdl++,
 			viGetViewLeft(),
@@ -448,7 +452,7 @@ Gfx *lvRenderFade(Gfx *gdl)
 			viGetViewLeft() + viGetViewWidth() + 1,
 			viGetViewTop() + viGetViewHeight() - inset + 2);
 
-	return textSetCCCustom02(gdl);
+	return textSetCCPrimColorTexAlpha(gdl);
 }
 
 bool lvIsFadeActive(void)
@@ -808,7 +812,7 @@ Gfx *lvRenderFPS(Gfx *gdl)
 
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = textRender(gdl, &x, &y, buffer, g_CharsNumeric, g_FontNumeric, color, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 
 		gSPClearExtraGeometryModeEXT(gdl++, g_HudAlignModeL);
 	}
@@ -851,8 +855,23 @@ Gfx *lvRender(Gfx *gdl)
 	savebufferResetVp();
 
 	if (g_Vars.stagenum == STAGE_TITLE) {
-		gfx_Display_List(gdl++, &var800613a0);
-		gfx_Display_List(gdl++, &var80061380);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH | G_FOG | G_LIGHTING);
+		gfx_Texture(gdl++, 0, 0, 0, G_TX_RENDERTILE, G_OFF);
+		gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
 
 		gdl = viPrepareZbuf(gdl);
 		gdl = vi0000b1d0(gdl);
@@ -862,8 +881,23 @@ Gfx *lvRender(Gfx *gdl)
 		gdl = titleRender(gdl);
 		gdl = lvRenderFade(gdl);
 	} else if (g_Vars.stagenum == STAGE_BOOTPAKMENU) {
-		gfx_Display_List(gdl++, &var800613a0);
-		gfx_Display_List(gdl++, &var80061380);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH | G_FOG | G_LIGHTING);
+		gfx_Texture(gdl++, 0, 0, 0, G_TX_RENDERTILE, G_OFF);
+		gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
 
 		setCurrentPlayerNum(0);
 		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
@@ -875,8 +909,23 @@ Gfx *lvRender(Gfx *gdl)
 		gdl = bgScissorToViewport(gdl);
 		gdl = menuRender(gdl);
 	} else if (g_Vars.stagenum == STAGE_CREDITS) {
-		gfx_Display_List(gdl++, &var800613a0);
-		gfx_Display_List(gdl++, &var80061380);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH | G_FOG | G_LIGHTING);
+		gfx_Texture(gdl++, 0, 0, 0, G_TX_RENDERTILE, G_OFF);
+		gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
 
 		setCurrentPlayerNum(0);
 		viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
@@ -949,8 +998,23 @@ Gfx *lvRender(Gfx *gdl)
 
 			bviewSetMotionBlur(bluramount);
 
-			gfx_Display_List(gdl++, &var800613a0);
-			gfx_Display_List(gdl++, &var80061380);
+			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+			gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+			gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+			gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+			gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
+			gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH | G_FOG | G_LIGHTING);
+			gfx_Texture(gdl++, 0, 0, 0, G_TX_RENDERTILE, G_OFF);
+			gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
 
 			viSetViewPosition(g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop);
 			viSetFovAspectAndSize(g_Vars.currentplayer->fovy, g_Vars.currentplayer->aspect,
@@ -1319,7 +1383,7 @@ Gfx *lvRender(Gfx *gdl)
 									viGetViewLeft(), viGetViewTop(),
 									viGetViewLeft() + viGetViewWidth(),
 									viGetViewTop() + viGetViewHeight(), 0xffffff00 | alpha);
-							gdl = text0f153780(gdl);
+							gdl = textSetPerspAndLOD(gdl);
 						}
 					}
 				

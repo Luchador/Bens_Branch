@@ -837,7 +837,7 @@ Gfx *skyRender(Gfx *gdl)
 			gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
 			gfx_Matrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
 			gfx_Color(gdl++, cols, numvertices);
-			gSPVertex(gdl++, (uintptr_t)(verts), numvertices, 0);
+			gfx_Vertex(gdl++, verts, numvertices, 0);
 
 			for (int i = 0; i < numvertices; ++i) {
 				verts[i].x = watervertices3d[i].x;
@@ -1245,9 +1245,9 @@ Gfx *skyRender(Gfx *gdl)
 
 	RGBA skyColor = {env->sky_r, env->sky_g, env->sky_b, 255};
 	gfx_Set_Env_Color(gdl++, skyColor);
-	gDPSetCombineLERP(gdl++,
-			SHADE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0, SHADE,
-			SHADE, ENVIRONMENT, TEXEL0, ENVIRONMENT, 0, 0, 0, SHADE);
+	gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_SHADE, G_CCMUX_ENVIRONMENT, G_CCMUX_TEXEL0, G_CCMUX_ENVIRONMENT, 0, 0, 0, G_ACMUX_SHADE,
+			G_CCMUX_SHADE, G_CCMUX_ENVIRONMENT, G_CCMUX_TEXEL0, G_CCMUX_ENVIRONMENT, 0, 0, 0, G_ACMUX_SHADE);
 
 	Mtx sp1ec;
 	Mtx sp1ac;
@@ -1273,7 +1273,7 @@ Gfx *skyRender(Gfx *gdl)
 	gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
 	gfx_Matrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
 	gfx_Color(gdl++, cols, numvertices);
-	gSPVertex(gdl++, (uintptr_t)(verts), numvertices, 0);
+	gfx_Vertex(gdl++, verts, numvertices, 0);
 
 	for (int i = 0; i < numvertices; ++i) {
 		verts[i].x = skyvertices3d[i].x;
@@ -1561,9 +1561,9 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 					gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 					gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 					gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-					gDPSetCombineLERP(gdl++,
-							ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0,
-							ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0);
+					gfx_Set_Combine_LERP(gdl++,
+						G_CCMUX_ENVIRONMENT, 0, G_CCMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0,
+						G_CCMUX_ENVIRONMENT, 0, G_CCMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0);
 					RGBA envColor = {colour[0], colour[1], colour[2], (int)(g_SunAlphaFracs[i] * 255.0f)};
 					gfx_Set_Env_Color(gdl++, envColor);
 
@@ -1574,7 +1574,7 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 						radius * 0.5f
 					};
 
-					utilsRenderScreenTexture(&gdl, texCenter, texRadius, g_TexLightGlareConfigs[5].width, g_TexLightGlareConfigs[5].height, 0, 1, 1, true);
+					utilsRenderScreenTexture(&gdl, texCenter, texRadius, g_TexLightGlareConfigs[5].width, g_TexLightGlareConfigs[5].height, true, true, true);
 
 					gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 					gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
@@ -1638,9 +1638,9 @@ Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size,
 	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-	gDPSetCombineLERP(gdl++,
-			0, 0, 0, ENVIRONMENT, TEXEL0, 0, ENVIRONMENT, 0,
-			0, 0, 0, ENVIRONMENT, TEXEL0, 0, ENVIRONMENT, 0);
+	gfx_Set_Combine_LERP(gdl++,
+			0, 0, 0, G_CCMUX_ENVIRONMENT, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0,
+			0, 0, 0, G_CCMUX_ENVIRONMENT, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 
 	fovy = viGetFovY();
 
@@ -1655,7 +1655,7 @@ Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size,
 
 	sp174[0] *=  SCREEN_ASPECT / videoGetAspect();
 
-	utilsRenderScreenTexture(&gdl, sp17c, sp174, g_TexLightGlareConfigs[6].width, g_TexLightGlareConfigs[6].height, 0, 1, 1, true);
+	utilsRenderScreenTexture(&gdl, sp17c, sp174, g_TexLightGlareConfigs[6].width, g_TexLightGlareConfigs[6].height, true, true, true);
 
 	// Render the other artifacts
 	texSelect(&gdl, &g_TexLightGlareConfigs[1], 4, 0, 2, 1, NULL);
@@ -1668,9 +1668,9 @@ Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size,
 	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-	gDPSetCombineLERP(gdl++,
-			0, 0, 0, ENVIRONMENT, TEXEL0, 0, ENVIRONMENT, 0,
-			0, 0, 0, ENVIRONMENT, TEXEL0, 0, ENVIRONMENT, 0);
+	gfx_Set_Combine_LERP(gdl++,
+			0, 0, 0, G_CCMUX_ENVIRONMENT, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0,
+			0, 0, 0, G_CCMUX_ENVIRONMENT, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 
 	for (i = 0; i < 6; i++) {
 		float f12;
@@ -1709,7 +1709,7 @@ Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size,
 
 		sp174[0] *=  SCREEN_ASPECT / videoGetAspect();
 
-		utilsRenderScreenTexture(&gdl, sp17c, sp174, g_TexLightGlareConfigs[1].width, g_TexLightGlareConfigs[1].height, 0, 0, 0, false);
+		utilsRenderScreenTexture(&gdl, sp17c, sp174, g_TexLightGlareConfigs[1].width, g_TexLightGlareConfigs[1].height, false, false, false);
 	}
 
 	// Check if the source is close to the center of the screen and create the bloom effect if so
@@ -1959,7 +1959,11 @@ Gfx *skyRenderOverexposure(Gfx *gdl)
 
 		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-		gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 
 		if (USINGDEVICE(DEVICE_NIGHTVISION)) {
 			r *= 0.5f;
@@ -1971,8 +1975,8 @@ Gfx *skyRenderOverexposure(Gfx *gdl)
 			b *= 0.5f;
 		}
 
-		RGBA color = {r, g, b, a};
-		gfx_Set_Prim_Color(gdl++, color);
+		RGBA primColor = {r, g, b, a};
+		gfx_Set_Prim_Color(gdl++, primColor);
 
 		gfx_Fill_Rectangle(gdl++,
 				viGetViewLeft(),

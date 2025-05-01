@@ -147,7 +147,11 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	RGBA primColor = {255, 255, 255, 255};
 	gfx_Set_Prim_Color(gdl++, primColor);
 	gfx_Set_Render_Mode(gdl++, G_RM_NOOP, G_RM_NOOP2);
-	gDPSetCombineMode(gdl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 0
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0,     // Alpha cycle 0
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_TEXEL0,     // Color cycle 1
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_TEXEL0);    // Alpha cycle 1
 	gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);

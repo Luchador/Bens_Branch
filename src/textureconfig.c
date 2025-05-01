@@ -5,45 +5,7 @@
 #include "types.h"
 
 Gfx g_TcGdl1[] = {
-	gsDPSetCycleType(G_CYC_1CYCLE),
-	gsDPSetRenderMode(G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2),
-	gsDPSetTextureLOD(G_TL_TILE),
-	gsDPSetCombineMode(G_CC_MODULATEIA, G_CC_MODULATEIA),
-	gsSPTexture(0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON),
-	gsDPSetTextureLUT(G_TT_NONE),
 	gsDPSetTextureImage(G_IM_FMT_IA, G_IM_SIZ_16b, 1, 0xabcd002a),
-	gsDPLoadBlock(G_TX_LOADTILE, 0, 0, 1567, 0),
-	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b, 7, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, 6, G_TX_NOLOD),
-	gsDPSetTileSize(G_TX_RENDERTILE, 0, 0, 0x00dc, 0x00dc),
-	gsSPEndDisplayList(),
-};
-
-Gfx g_TcGdl2[] = {
-	gsDPSetCycleType(G_CYC_2CYCLE),
-	gsDPSetRenderMode(G_RM_PASS, G_RM_ZB_CLD_SURF2),
-	gsDPSetTextureLOD(G_TL_TILE),
-	gsDPSetCombineMode(G_CC_INTERFERENCE, G_CC_MODULATEIA2),
-	gsSPTexture(0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON),
-	gsDPSetTextureLUT(G_TT_NONE),
-	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0188, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD),
-	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b, 7, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_CLAMP, 6, G_TX_NOLOD),
-	gsDPSetTileSize(G_TX_RENDERTILE, 0, 0, 0x00dc, 0x00dc),
-	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, 0x0188, 1, 0, G_TX_NOMIRROR | G_TX_CLAMP, 4, 2, G_TX_NOMIRROR | G_TX_CLAMP, 4, 2),
-	gsDPSetTileSize(1, 0, 0, 0x00dc, 0x00dc),
-	gsSPEndDisplayList(),
-};
-
-Gfx g_TcGdl3[] = {
-	gsDPSetCycleType(G_CYC_1CYCLE),
-	gsDPSetRenderMode(G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2),
-	gsDPSetTextureLOD(G_TL_TILE),
-	gsDPSetCombineMode(G_CC_MODULATEIA, G_CC_MODULATEIA),
-	gsSPTexture(0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON),
-	gsDPSetTextureImage(G_IM_FMT_IA, G_IM_SIZ_16b, 1, 0xabcd0002),
-	gsDPLoadBlock(G_TX_LOADTILE, 0, 0, 511, 0),
-	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b, 4, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, 5, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, 5, G_TX_NOLOD),
-	gsDPSetTileSize(G_TX_RENDERTILE, 0, 0, 0x007c, 0x007c),
-	gsDPSetTextureLUT(G_TT_NONE),
 	gsSPEndDisplayList(),
 };
 

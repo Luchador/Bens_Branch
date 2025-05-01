@@ -35,7 +35,7 @@ struct nbomb g_Nbombs[6];
 bool g_NbombsActive = false;
 float g_SphereRadius = 2000.0f;
 
-// Ben's comment: if (secondhalf && vertices[i].t == 0) fixes texture seam when atan2f(src.x, src.z) returns 0
+// if (secondhalf && vertices[i].t == 0) fixes texture seam when atan2f(src.x, src.z) returns 0
 #define MAKEVERTEX(i, src) \
 	vertices[i].x = src.x * g_SphereRadius; \
 	vertices[i].y = src.y * g_SphereRadius; \
@@ -47,7 +47,7 @@ float g_SphereRadius = 2000.0f;
 	if (secondhalf && vertices[i].t == 0) { \
 	} \
 \
-	vertices[i].t += g_TCoordOffset; // Ben's comment: scrolls the T coord around the sphere but honestly I can't see much difference when this is commented out
+	vertices[i].t += g_TCoordOffset; // scrolls the T coord around the sphere but honestly I can't see much difference when this is commented out
 
 Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord *arg3, uint8_t arg4, uint8_t arg5, uint8_t arg6, uint8_t arg7, int8_t depth)
 {
@@ -93,7 +93,7 @@ Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, 
 	MAKEVERTEX(1, sp70);
 	MAKEVERTEX(2, sp64);
 
-	gSPVertex(gdl++, (uintptr_t)(vertices), 3, arg7);
+	gfx_Vertex(gdl++, vertices, 3, arg7);
 
 	if (depth == 0) {
 		gfx_Tri4(gdl++,
@@ -135,7 +135,7 @@ Gfx *nbombCreateSphere(Gfx *gdl, int depth)
 	MAKEVERTEX(4, sp5c[4]);
 	MAKEVERTEX(5, sp5c[5]);
 
-	gSPVertex(gdl++, (uintptr_t)(vertices), 6, 0);
+	gfx_Vertex(gdl++, vertices, 6, 0);
 
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[0], &sp5c[4], &sp5c[1], 0, 4, 1, 6, depth);
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[1], &sp5c[4], &sp5c[2], 1, 4, 2, 6, depth);
@@ -154,7 +154,7 @@ Gfx *nbombCreateSphere(Gfx *gdl, int depth)
 	MAKEVERTEX(4, sp5c[4]);
 	MAKEVERTEX(5, sp5c[5]);
 
-	gSPVertex(gdl++, (uintptr_t)(vertices), 6, 0);
+	gfx_Vertex(gdl++, vertices, 6, 0);
 
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[2], &sp5c[4], &sp5c[3], 2, 4, 3, 6, depth);
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[3], &sp5c[4], &sp5c[0], 3, 4, 0, 6, depth);
@@ -220,7 +220,11 @@ Gfx *nbombCreateGdl(void)
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-	gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,
+		G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);
 	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gfx_Set_Render_Mode(gdl++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
@@ -235,7 +239,7 @@ Gfx *nbombCreateGdl(void)
 	vertices[0].x = vertices[0].z;
 	vertices[0].s = vertices[0].t;
 
-	gSPVertex(gdl++, (uintptr_t)(vertices), 1, 0);
+	gfx_Vertex(gdl++, vertices, 1, 0);
 
 	if (index != 0) {
 		gdl = nbombCreateSphere(gdl, 1);
@@ -646,7 +650,11 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 
 		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-		gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+			G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,
+			G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+			G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);
 		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 		gfx_Set_Render_Mode(gdl++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
@@ -685,7 +693,7 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 		colours[0].word = PD_BE32(finalalpha);
 
 		gfx_Color(gdl++, colours, 1);
-		gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
+		gfx_Vertex(gdl++, vertices, 4, 0);
 
 		gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 	}
@@ -812,7 +820,11 @@ Gfx *gasRender(Gfx *gdl)
 
 			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-			gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+			gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+				G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,
+				G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+				G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);
 			gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 			gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
@@ -883,7 +895,7 @@ Gfx *gasRender(Gfx *gdl)
 			colours[0].word = PD_BE32(0x3faf1100 | alpha);
 
 			gfx_Color(gdl++, colours, 1);
-			gSPVertex(gdl++, (uintptr_t)(vertices), 8, 0);
+			gfx_Vertex(gdl++, vertices, 8, 0);
 
 			gfx_Tri4(gdl++, 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4);
 		}

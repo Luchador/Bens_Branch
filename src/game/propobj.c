@@ -11874,7 +11874,7 @@ Gfx *tvscreenRender(struct model *model, struct modelnode *node, struct tvscreen
 		gfx_Matrix(gdl++, (Mtx*)model->matrices, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 		gfx_Segment(gdl++, SPSEGMENT_MODEL_VTX, (uintptr_t)(vertices));
 		gfx_Color(gdl++, colours, 1);
-		gSPVertex(gdl++, SEGADDR(SPSEGMENT_MODEL_VTX << 24), 4, 0);
+		gfx_Vertex(gdl++, SEGADDR(SPSEGMENT_MODEL_VTX << 24), 4, 0);
 		gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 		gfx_End_Display_List(gdl++);
 
@@ -12087,7 +12087,7 @@ Gfx *gfxRenderRadialShadow(Gfx *gdl, float x, float y, float z, float angle, flo
 	gfx_Matrix(gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 
 	gfx_Color(gdl++, colours, 1);
-	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
+	gfx_Vertex(gdl++, vertices, 4, 0);
 	gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 
 	return gdl;
@@ -18602,7 +18602,7 @@ Gfx *countdownTimerRender(Gfx *gdl)
 		gdl = bgunDrawHudString(gdl, fmt, viewright + 8, HUDHALIGN_MIDDLE, y, HUDVALIGN_MIDDLE, 0x00ff00a0);
 		gdl = bgunDrawHudInteger(gdl, (ms % 100) / 10, viewright + 14, HUDHALIGN_MIDDLE, y, HUDVALIGN_MIDDLE, 0x00ff00a0);
 		gdl = bgunDrawHudInteger(gdl, ms % 10, viewright + 18, HUDHALIGN_MIDDLE, y, HUDVALIGN_MIDDLE, 0x00ff00a0);
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	}

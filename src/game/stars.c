@@ -311,7 +311,7 @@ Gfx *starsRender(Gfx *gdl)
 		}
 	}
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	return gdl;
 }

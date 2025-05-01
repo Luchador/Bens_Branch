@@ -217,7 +217,11 @@ Gfx *shardsRenderWood(Gfx *gdl)
 
 		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 		gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
-		gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 		gfx_Set_Cycle_Type(gdl++, G_CYC_2CYCLE);
 		gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
@@ -293,7 +297,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 							gfx_Color(gdl++, g_Shards[i].colours, 3);
 						}
 
-						gSPVertex(gdl++, (uintptr_t)(g_Shards[i].vertices), 3, 0);
+						gfx_Vertex(gdl++, g_Shards[i].vertices, 3, 0);
 						gfx_1Triangle(gdl++, 0, 1, 2, 0);
 					}
 				}
@@ -409,7 +413,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 							gfx_Color(gdl++, g_Shards[i].colours, 3);
 						}
 
-						gSPVertex(gdl++, (uintptr_t)(g_Shards[i].vertices), 3, 0);
+						gfx_Vertex(gdl++, g_Shards[i].vertices, 3, 0);
 						gfx_1Triangle(gdl++, 0, 1, 2, 0);
 					}
 				}

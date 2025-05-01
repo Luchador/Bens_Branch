@@ -9,6 +9,7 @@
 #include "lib/main.h"
 #include "lib/memp.h"
 #include "data.h"
+#include "gfx.h"
 #include "textureconfig.h"
 #include "types.h"
 #include "video.h"
@@ -35,7 +36,6 @@ int texReadBits(int wantnumbits)
 
 extern uint8_t *g_TextureConfigSegment;
 extern uint32_t g_TexBase;
-extern Gfx *g_TexGdl3;
 extern struct textureconfig *g_TexRedLinesConfigs;
 extern struct textureconfig *g_TexGroup11Configs;
 
@@ -57,8 +57,6 @@ void texReset(void)
 		int count;
 	} tcptrs[] = {
 		DEFINE_TCPTR(g_TexGdl1, g_TcGdl1),
-		DEFINE_TCPTR(g_TexGdl2, g_TcGdl2),
-		DEFINE_TCPTR(g_TexGdl3, g_TcGdl3),
 		DEFINE_TCPTR(g_ExplosionTexturePairs, g_TcExplosionTexturePairs),
 		DEFINE_TCPTR(g_TexWallhitConfigs, g_TcWallhitConfigs),
 		DEFINE_TCPTR(g_TexBeamConfigs, g_TcBeamConfigs),
@@ -124,7 +122,6 @@ void texReset(void)
 	}
 
 	texLoadFromDisplayList(g_TexGdl1, 0, 0);
-	texLoadFromDisplayList(g_TexGdl3, 0, 0);
 
 	stage = mainGetStageNum();
 }

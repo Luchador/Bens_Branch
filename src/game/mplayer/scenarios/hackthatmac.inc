@@ -580,7 +580,7 @@ Gfx *htmRenderHud(Gfx *gdl)
 
 		gfx_Fill_Rectangle(gdl++, barleft, viewtop + 8, barright, viewtop + 16);
 
-		gdl = textSetCCCustom02(gdl);
+		gdl = textSetCCPrimColorTexAlpha(gdl);
 		gdl = textSetPrimColour(gdl, 0xc00000d0);
 
 		v1 = barleft + 1;
@@ -592,8 +592,8 @@ Gfx *htmRenderHud(Gfx *gdl)
 			a0 += 2;
 		}
 
-		gdl = textSetCCCustom02(gdl);
-		gdl = text0f153780(gdl);
+		gdl = textSetCCPrimColorTexAlpha(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 	}
 
 	return gdl;

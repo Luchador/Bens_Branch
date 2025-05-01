@@ -544,7 +544,6 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 				gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 				gfx_Set_Cycle_Type(gdl++, G_CYC_FILL);
 				gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-				gfx_Pipeline_Mode(gdl++, G_PM_1PRIMITIVE);
 
 				gdl = g_MpScenarios[g_MpSetup.scenario].hudfunc(gdl);
 			}
@@ -563,7 +562,6 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 			gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 			gfx_Set_Cycle_Type(gdl++, G_CYC_FILL);
 			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
-			gfx_Pipeline_Mode(gdl++, G_PM_1PRIMITIVE);
 
 			colour = var80087ce4[radarGetTeamIndex(chr->team)];
 			gfx_Set_Fill_Color(gdl++, utilsUnpackColorRGBA(colour));

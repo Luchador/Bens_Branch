@@ -2828,7 +2828,11 @@ void modelApplyRenderModeType1(struct modelrenderdata *renderdata)
 		gfx_Set_Render_Mode(renderdata->gdl++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
 	}
 
-	gDPSetCombineMode(renderdata->gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+	gfx_Set_Combine_LERP(renderdata->gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,
+		G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);
 }
 
 void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
@@ -2836,9 +2840,13 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 	if (renderdata->unk30 == 7) {
 		if (arg1) {
 			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+			gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->fogcolour));
 			gfx_Set_Env_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour | 0xff));
-			gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_17, G_CC_CUSTOM_18);
+			gfx_Set_Combine_LERP(renderdata->gdl++,
+				G_CCMUX_TEXEL0,    G_CCMUX_ENVIRONMENT, G_CCMUX_SHADE_ALPHA, G_CCMUX_ENVIRONMENT,  // Color 0
+				G_ACMUX_TEXEL0,    G_ACMUX_ENVIRONMENT, G_ACMUX_SHADE,       G_ACMUX_ENVIRONMENT,  // Alpha 0
+				G_CCMUX_COMBINED,  G_CCMUX_0,            G_CCMUX_SHADE,       G_CCMUX_0,           // Color 1
+				G_ACMUX_0,         G_ACMUX_0,             G_ACMUX_0,           G_ACMUX_COMBINED);  // Alpha 1
 
 			if (renderdata->zbufferenabled) {
 				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
@@ -2855,9 +2863,13 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 	} else if (renderdata->unk30 == 8) {
 		if (arg1) {
 			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+			gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->fogcolour));
 			gfx_Set_Env_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour));
-			gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_19, G_CC_CUSTOM_18);
+			gfx_Set_Combine_LERP(renderdata->gdl++,
+				G_CCMUX_TEXEL0,     G_CCMUX_ENVIRONMENT, G_CCMUX_SHADE_ALPHA, G_CCMUX_ENVIRONMENT,  // Color 0
+				G_ACMUX_TEXEL0,     G_ACMUX_0,           G_ACMUX_ENVIRONMENT, G_ACMUX_0,            // Alpha 0
+				G_CCMUX_COMBINED,   G_CCMUX_0,           G_CCMUX_SHADE,       G_CCMUX_0,            // Color 1
+				G_ACMUX_0,          G_ACMUX_0,           G_ACMUX_0,           G_ACMUX_COMBINED);    // Alpha 1
 
 			if (renderdata->zbufferenabled) {
 				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
@@ -2869,12 +2881,16 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 		if ((renderdata->envcolour & 0xff) == 0) {
 			if (arg1) {
 				gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-				gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+				gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->fogcolour));
 				RGBA envColor = {255, 255, 255, 255};
 				gfx_Set_Env_Color(renderdata->gdl++, envColor);
 				RGBA primColor = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
 				gfx_Set_Prim_Color(renderdata->gdl++, primColor);
-				gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_CUSTOM_20);
+				gfx_Set_Combine_LERP(renderdata->gdl++,
+					G_CCMUX_TEXEL1,      G_CCMUX_TEXEL0,      G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,     // Color 0
+					G_ACMUX_TEXEL1,      G_ACMUX_TEXEL0,      G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,     // Alpha 0
+					G_CCMUX_COMBINED,    G_CCMUX_0,           G_CCMUX_SHADE,        G_CCMUX_0,          // Color 1
+					G_ACMUX_COMBINED,    G_ACMUX_0,           G_ACMUX_SHADE,        G_ACMUX_PRIMITIVE); // Alpha 1
 
 				if (renderdata->zbufferenabled) {
 					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
@@ -2891,10 +2907,14 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 		} else {
 			if (arg1) {
 				gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-				gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+				gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->fogcolour));
 				RGBA envColor = {0, 0, 0, renderdata->envcolour};
 				gfx_Set_Env_Color(renderdata->gdl++, envColor);
-				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_21, G_CC_CUSTOM_18);
+				gfx_Set_Combine_LERP(renderdata->gdl++,
+					G_CCMUX_TEXEL1,     G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,      // Color 0
+					G_ACMUX_1,          G_ACMUX_0,      G_ACMUX_SHADE,        G_ACMUX_ENVIRONMENT, // Alpha 0
+					G_CCMUX_COMBINED,   G_CCMUX_0,      G_CCMUX_SHADE,        G_CCMUX_0,           // Color 1
+					G_ACMUX_0,          G_ACMUX_0,      G_ACMUX_0,            G_ACMUX_COMBINED);   // Alpha 1
 
 				if (renderdata->zbufferenabled) {
 					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
@@ -2902,9 +2922,13 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
 				}
 			} else {
-				struct RGBA color = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
-				gfx_Set_Prim_Color(renderdata->gdl++, color);
-				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_22, G_CC_CUSTOM_23);
+				RGBA primColor = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
+				gfx_Set_Prim_Color(renderdata->gdl++, primColor);
+				gfx_Set_Combine_LERP(renderdata->gdl++,
+					G_CCMUX_TEXEL1,     G_CCMUX_TEXEL0,    G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+					G_ACMUX_SHADE,      G_ACMUX_ENVIRONMENT, G_ACMUX_TEXEL0,     G_ACMUX_0,            // Alpha 0
+					G_CCMUX_COMBINED,   G_CCMUX_0,          G_CCMUX_SHADE,       G_CCMUX_0,            // Color 1
+					G_ACMUX_1,          G_ACMUX_0,          G_ACMUX_PRIMITIVE,   G_ACMUX_COMBINED);    // Alpha 1
 
 				if (renderdata->zbufferenabled) {
 					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
@@ -2916,8 +2940,12 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 	} else if (renderdata->unk30 == 4) {
 		if (arg1) {
 			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->envcolour);
-			gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
+			gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour));
+			gfx_Set_Combine_LERP(renderdata->gdl++,
+				G_CCMUX_TEXEL1, G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+				G_ACMUX_TEXEL1, G_ACMUX_TEXEL0, G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,       // Alpha 0
+				G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,                      // Color 1
+				G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);                     // Alpha 1
 
 			if (renderdata->zbufferenabled) {
 				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
@@ -2936,7 +2964,7 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 
 		if (arg1) {
 			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+			gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->fogcolour));
 
 			alpha = renderdata->envcolour & 0xff;
 
@@ -2945,12 +2973,24 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 				gfx_Set_Env_Color(renderdata->gdl++, envColor);
 
 				if (renderdata->envcolour & 0xff00) {
-					gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_24, G_CC_MODULATEIA2);
+					gfx_Set_Combine_LERP(renderdata->gdl++,
+						G_CCMUX_TEXEL1,      G_CCMUX_TEXEL0,      G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,   // Color cycle 0
+						G_ACMUX_1,           G_ACMUX_SHADE,       G_ACMUX_ENVIRONMENT,  G_ACMUX_0,        // Alpha cycle 0
+						G_CCMUX_COMBINED,    G_CCMUX_0,            G_CCMUX_SHADE,        G_CCMUX_0,       // Color cycle 1
+						G_ACMUX_COMBINED,    G_ACMUX_0,            G_ACMUX_SHADE,        G_ACMUX_0);      // Alpha cycle 1
 				} else {
-					gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_25, G_CC_MODULATEIA2);
+					gfx_Set_Combine_LERP(renderdata->gdl++,
+						G_CCMUX_TEXEL1,      G_CCMUX_TEXEL0,      G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,   // Color 0
+						G_ACMUX_1,           G_ACMUX_0,           G_ACMUX_ENVIRONMENT,  G_ACMUX_0,        // Alpha 0
+						G_CCMUX_COMBINED,    G_CCMUX_0,           G_CCMUX_SHADE,        G_CCMUX_0,        // Color 1
+						G_ACMUX_COMBINED,    G_ACMUX_0,           G_ACMUX_SHADE,        G_ACMUX_0);       // Alpha 1
 				}
 			} else {
-				gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
+				gfx_Set_Combine_LERP(renderdata->gdl++,
+					G_CCMUX_TEXEL1, G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+					G_ACMUX_TEXEL1, G_ACMUX_TEXEL0, G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,       // Alpha 0
+					G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,                      // Color 1
+					G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);                     // Alpha 1
 			}
 
 			if (renderdata->zbufferenabled) {
@@ -2962,15 +3002,27 @@ void modelApplyRenderModeType3(struct modelrenderdata *renderdata, bool arg1)
 			alpha = renderdata->envcolour & 0xff;
 
 			if (alpha < 255) {
-				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_26, G_CC_MODULATEIA2);
+				gfx_Set_Combine_LERP(renderdata->gdl++,
+					G_CCMUX_TEXEL1,      G_CCMUX_TEXEL0,      G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,     // Color 0
+					G_ACMUX_TEXEL0,      G_ACMUX_0,           G_ACMUX_ENVIRONMENT,  G_ACMUX_0,          // Alpha 0
+					G_CCMUX_COMBINED,    G_CCMUX_0,           G_CCMUX_SHADE,        G_CCMUX_0,          // Color 1
+					G_ACMUX_COMBINED,    G_ACMUX_0,           G_ACMUX_SHADE,        G_ACMUX_0);         // Alpha 1
 			} else {
-				gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
+				gfx_Set_Combine_LERP(renderdata->gdl++,
+					G_CCMUX_TEXEL1, G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+					G_ACMUX_TEXEL1, G_ACMUX_TEXEL0, G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,       // Alpha 0
+					G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,                      // Color 1
+					G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);                     // Alpha 1
 			}
 		}
 	} else {
 		if (arg1) {
 			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-			gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
+			gfx_Set_Combine_LERP(renderdata->gdl++,
+				G_CCMUX_TEXEL1, G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+				G_ACMUX_TEXEL1, G_ACMUX_TEXEL0, G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,       // Alpha 0
+				G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,                      // Color 1
+				G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);                     // Alpha 1
 
 			if (renderdata->zbufferenabled) {
 				gfx_Set_Render_Mode(renderdata->gdl++, G_RM_PASS, G_RM_AA_ZB_OPA_SURF2);
@@ -2991,9 +3043,13 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 {
 	if (renderdata->unk30 == 7) {
 		gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-		gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+		gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->fogcolour));
 		gfx_Set_Env_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour | 0x000000ff));
-		gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_17, G_CC_CUSTOM_18);
+		gfx_Set_Combine_LERP(renderdata->gdl++,
+			G_CCMUX_TEXEL0,    G_CCMUX_ENVIRONMENT, G_CCMUX_SHADE_ALPHA, G_CCMUX_ENVIRONMENT,  // Color 0
+			G_ACMUX_TEXEL0,    G_ACMUX_ENVIRONMENT, G_ACMUX_SHADE,       G_ACMUX_ENVIRONMENT,  // Alpha 0
+			G_CCMUX_COMBINED,  G_CCMUX_0,            G_CCMUX_SHADE,       G_CCMUX_0,           // Color 1
+			G_ACMUX_0,         G_ACMUX_0,             G_ACMUX_0,           G_ACMUX_COMBINED);  // Alpha 1
 
 		if (arg1) {
 			if (renderdata->zbufferenabled) {
@@ -3010,9 +3066,13 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 		}
 	} else if (renderdata->unk30 == 8) {
 		gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-		gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+		gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->fogcolour));
 		gfx_Set_Env_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour));
-		gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_19, G_CC_CUSTOM_18);
+		gfx_Set_Combine_LERP(renderdata->gdl++,
+			G_CCMUX_TEXEL0,     G_CCMUX_ENVIRONMENT, G_CCMUX_SHADE_ALPHA, G_CCMUX_ENVIRONMENT,  // Color 0
+			G_ACMUX_TEXEL0,     G_ACMUX_0,           G_ACMUX_ENVIRONMENT, G_ACMUX_0,            // Alpha 0
+			G_CCMUX_COMBINED,   G_CCMUX_0,           G_CCMUX_SHADE,       G_CCMUX_0,            // Color 1
+			G_ACMUX_0,          G_ACMUX_0,           G_ACMUX_0,           G_ACMUX_COMBINED);    // Alpha 1
 
 		if (renderdata->zbufferenabled) {
 			gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
@@ -3022,14 +3082,18 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 	} else if (renderdata->unk30 == 9) {
 		if ((renderdata->envcolour & 0xff) == 0) {
 			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+			gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->fogcolour));
 			RGBA envColor = {255, 255, 255, 255};
 			gfx_Set_Env_Color(renderdata->gdl++, envColor);
 			RGBA primColor = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
 			gfx_Set_Prim_Color(renderdata->gdl++, primColor);
 
 			if (arg1) {
-				gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_CUSTOM_20);
+				gfx_Set_Combine_LERP(renderdata->gdl++,
+					G_CCMUX_TEXEL1,      G_CCMUX_TEXEL0,      G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,     // Color 0
+					G_ACMUX_TEXEL1,      G_ACMUX_TEXEL0,      G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,     // Alpha 0
+					G_CCMUX_COMBINED,    G_CCMUX_0,           G_CCMUX_SHADE,        G_CCMUX_0,          // Color 1
+					G_ACMUX_COMBINED,    G_ACMUX_0,           G_ACMUX_SHADE,        G_ACMUX_PRIMITIVE); // Alpha 1
 
 				if (renderdata->zbufferenabled) {
 					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_OPA_SURF2);
@@ -3037,7 +3101,11 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_OPA_SURF2);
 				}
 			} else {
-				gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_CUSTOM_20);
+				gfx_Set_Combine_LERP(renderdata->gdl++,
+					G_CCMUX_TEXEL1,      G_CCMUX_TEXEL0,      G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,     // Color 0
+					G_ACMUX_TEXEL1,      G_ACMUX_TEXEL0,      G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,     // Alpha 0
+					G_CCMUX_COMBINED,    G_CCMUX_0,           G_CCMUX_SHADE,        G_CCMUX_0,          // Color 1
+					G_ACMUX_COMBINED,    G_ACMUX_0,           G_ACMUX_SHADE,        G_ACMUX_PRIMITIVE); // Alpha 1
 
 				if (renderdata->zbufferenabled) {
 					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_XLU_SURF2);
@@ -3047,11 +3115,15 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 			}
 		} else {
 			gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-			gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+			gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->fogcolour));
 			gfx_Set_Env_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour & 0xff));
 
 			if (arg1) {
-				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_21, G_CC_CUSTOM_18);
+				gfx_Set_Combine_LERP(renderdata->gdl++,
+					G_CCMUX_TEXEL1,     G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,      // Color 0
+					G_ACMUX_1,          G_ACMUX_0,      G_ACMUX_SHADE,        G_ACMUX_ENVIRONMENT, // Alpha 0
+					G_CCMUX_COMBINED,   G_CCMUX_0,      G_CCMUX_SHADE,        G_CCMUX_0,           // Color 1
+					G_ACMUX_0,          G_ACMUX_0,      G_ACMUX_0,            G_ACMUX_COMBINED);   // Alpha 1
 
 				if (renderdata->zbufferenabled) {
 					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
@@ -3059,9 +3131,13 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_TEX_EDGE2);
 				}
 			} else {
-				struct RGBA color = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
-				gfx_Set_Prim_Color(renderdata->gdl++, color);
-				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_22, G_CC_CUSTOM_23);
+				RGBA primColor = {0, 0, 0, (renderdata->envcolour >> 8) & 0xff};
+				gfx_Set_Prim_Color(renderdata->gdl++, primColor);
+				gfx_Set_Combine_LERP(renderdata->gdl++,
+					G_CCMUX_TEXEL1,     G_CCMUX_TEXEL0,    G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+					G_ACMUX_SHADE,      G_ACMUX_ENVIRONMENT, G_ACMUX_TEXEL0,     G_ACMUX_0,            // Alpha 0
+					G_CCMUX_COMBINED,   G_CCMUX_0,          G_CCMUX_SHADE,       G_CCMUX_0,            // Color 1
+					G_ACMUX_1,          G_ACMUX_0,          G_ACMUX_PRIMITIVE,   G_ACMUX_COMBINED);    // Alpha 1
 
 				if (renderdata->zbufferenabled) {
 					gfx_Set_Render_Mode(renderdata->gdl++, G_RM_FOG_PRIM_A, G_RM_AA_ZB_TEX_EDGE2);
@@ -3072,8 +3148,12 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 		}
 	} else if (renderdata->unk30 == 4) {
 		gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-		gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->envcolour);
-		gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
+		gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->envcolour));
+		gfx_Set_Combine_LERP(renderdata->gdl++,
+			G_CCMUX_TEXEL1, G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+			G_ACMUX_TEXEL1, G_ACMUX_TEXEL0, G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,       // Alpha 0
+			G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,                      // Color 1
+			G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);                     // Alpha 1
 
 		if (arg1) {
 			if (renderdata->zbufferenabled) {
@@ -3092,7 +3172,7 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 		uint8_t alpha;
 
 		gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-		gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)renderdata->fogcolour);
+		gfx_Set_Fog_Color(renderdata->gdl++, utilsUnpackColorRGBA(renderdata->fogcolour));
 
 		alpha = renderdata->envcolour & 0xff;
 
@@ -3102,15 +3182,31 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 
 			if (arg1) {
 				if (renderdata->envcolour & 0xff00) {
-					gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_24, G_CC_MODULATEIA2);
+					gfx_Set_Combine_LERP(renderdata->gdl++,
+						G_CCMUX_TEXEL1,      G_CCMUX_TEXEL0,      G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,   // Color cycle 0
+						G_ACMUX_1,           G_ACMUX_SHADE,       G_ACMUX_ENVIRONMENT,  G_ACMUX_0,        // Alpha cycle 0
+						G_CCMUX_COMBINED,    G_CCMUX_0,           G_CCMUX_SHADE,        G_CCMUX_0,        // Color cycle 1
+						G_ACMUX_COMBINED,    G_ACMUX_0,           G_ACMUX_SHADE,        G_ACMUX_0);       // Alpha cycle 1
 				} else {
-					gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_25, G_CC_MODULATEIA2);
+					gfx_Set_Combine_LERP(renderdata->gdl++,
+						G_CCMUX_TEXEL1,      G_CCMUX_TEXEL0,      G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,   // Color 0
+						G_ACMUX_1,           G_ACMUX_0,           G_ACMUX_ENVIRONMENT,  G_ACMUX_0,        // Alpha 0
+						G_CCMUX_COMBINED,    G_CCMUX_0,           G_CCMUX_SHADE,        G_CCMUX_0,        // Color 1
+						G_ACMUX_COMBINED,    G_ACMUX_0,           G_ACMUX_SHADE,        G_ACMUX_0);       // Alpha 1
 				}
 			} else {
-				gDPSetCombineMode(renderdata->gdl++, G_CC_CUSTOM_26, G_CC_MODULATEIA2);
+				gfx_Set_Combine_LERP(renderdata->gdl++,
+					G_CCMUX_TEXEL1,      G_CCMUX_TEXEL0,      G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,     // Color 0
+					G_ACMUX_TEXEL0,      G_ACMUX_0,           G_ACMUX_ENVIRONMENT,  G_ACMUX_0,          // Alpha 0
+					G_CCMUX_COMBINED,    G_CCMUX_0,           G_CCMUX_SHADE,        G_CCMUX_0,          // Color 1
+					G_ACMUX_COMBINED,    G_ACMUX_0,           G_ACMUX_SHADE,        G_ACMUX_0);         // Alpha 1
 			}
 		} else {
-			gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
+			gfx_Set_Combine_LERP(renderdata->gdl++,
+				G_CCMUX_TEXEL1, G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+				G_ACMUX_TEXEL1, G_ACMUX_TEXEL0, G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,       // Alpha 0
+				G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,                      // Color 1
+				G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);                     // Alpha 1
 		}
 
 		if (renderdata->zbufferenabled) {
@@ -3120,8 +3216,13 @@ void modelApplyRenderModeType4(struct modelrenderdata *renderdata, bool arg1)
 		}
 	} else {
 		gfx_Set_Cycle_Type(renderdata->gdl++, G_CYC_2CYCLE);
-		gfx_Set_Color(renderdata->gdl++, G_SETFOGCOLOR, (uintptr_t)0xffffff00);
-		gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
+		RGBA fogColor = {255, 255, 255, 0};
+		gfx_Set_Fog_Color(renderdata->gdl++, fogColor);
+		gfx_Set_Combine_LERP(renderdata->gdl++,
+			G_CCMUX_TEXEL1, G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+			G_ACMUX_TEXEL1, G_ACMUX_TEXEL0, G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,       // Alpha 0
+			G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,                      // Color 1
+			G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);                     // Alpha 1
 
 		if (arg1) {
 			if (renderdata->zbufferenabled) {
@@ -3149,7 +3250,11 @@ void modelApplyRenderModeType2(struct modelrenderdata *renderdata)
 		gfx_Set_Render_Mode(renderdata->gdl++, G_RM_PASS, G_RM_AA_OPA_SURF2);
 	}
 
-	gDPSetCombineMode(renderdata->gdl++, G_CC_TRILERP, G_CC_MODULATEIA2);
+	gfx_Set_Combine_LERP(renderdata->gdl++,
+		G_CCMUX_TEXEL1, G_CCMUX_TEXEL0, G_CCMUX_LOD_FRACTION, G_CCMUX_TEXEL0,       // Color 0
+		G_ACMUX_TEXEL1, G_ACMUX_TEXEL0, G_ACMUX_LOD_FRACTION, G_ACMUX_TEXEL0,       // Alpha 0
+		G_CCMUX_COMBINED, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,                      // Color 1
+		G_ACMUX_COMBINED, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);                     // Alpha 1
 }
 
 void modelApplyCullMode(struct modelrenderdata *renderdata)
@@ -3480,7 +3585,7 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 	gfx_Set_Geometry_Mode(renderdata->gdl++, G_CULL_BACK);
 	gfx_Matrix(renderdata->gdl++, (Mtx*)mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gfx_Color(renderdata->gdl++, colours, 1);
-	gSPVertex(renderdata->gdl++, vertices, 4, 0);
+	gfx_Vertex(renderdata->gdl++, vertices, 4, 0);
 	gfx_Tri2(renderdata->gdl++, 0, 1, 2, 2, 3, 0);
 }
 

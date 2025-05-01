@@ -457,7 +457,7 @@ Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, int textid, i
 					(boxright < viewright ? boxright : viewright), boxbottom);
 		}
 
-		gdl = textSetCCCustom02(gdl);
+		gdl = textSetCCPrimColorTexAlpha(gdl);
 
 		if (textid != 0 && textonscreen) {
 			int x = boxright + 3;
@@ -508,7 +508,7 @@ Gfx *sightDrawAimer(Gfx *gdl, int x, int y, int radius, int cornergap, uint32_t 
 		gdl += gfx_HUD_Rectangle_EXT(gdl, x, y + radius - 2, x, viewbottom);
 	}
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 	gdl = textSetPrimColour(gdl, colour);
 
 	// Draw the box
@@ -530,7 +530,7 @@ Gfx *sightDrawAimer(Gfx *gdl, int x, int y, int radius, int cornergap, uint32_t 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gfx_Set_Subpixel_Offset_EXT(gdl++, 0, 0);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	return gdl;
 }
@@ -713,7 +713,7 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, float crossx, float crossy)
 		break;
 	}
 
-	gdl = text0f153780(gdl);
+	gdl = textSetPerspAndLOD(gdl);
 
 	return gdl;
 }
@@ -744,9 +744,13 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-	RGBA color = {0, 0, 0, 0};
-	gfx_Set_Prim_Color(gdl++, color);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
+	RGBA primColor = {0, 0, 0, 0};
+	gfx_Set_Prim_Color(gdl++, primColor);
 
 	x1 = x - halfw;
 	y1 = y - (tconfig->height >> 1);
@@ -766,9 +770,13 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 	RGBA envColor = {255, 255, 255, 127};
 	gfx_Set_Env_Color(gdl++, envColor);
 
-	gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_00);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_ENVIRONMENT, G_CCMUX_0,    // Color 0
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_ENVIRONMENT, G_ACMUX_0,    // Alpha 0
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_0,                   // Color 1 (unused)
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_0);                  // Alpha 1 (unused)
 
-	utilsRenderScreenTexture(&gdl, spc4, spbc, tconfig->width, tconfig->height, 0, 0, 0, false);
+	utilsRenderScreenTexture(&gdl, spc4, spbc, tconfig->width, tconfig->height, false, false, false);
 	
 	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
@@ -874,7 +882,7 @@ Gfx *sightDrawSkedarTriangle(Gfx *gdl, int x, int y, int dir, uint32_t colour)
 	vertices[2].colour = 4;
 
 	gfx_Color(gdl++, colours, 2);
-	gSPVertex(gdl++, vertices, 3, 0);
+	gfx_Vertex(gdl++, vertices, 3, 0);
 	gfx_Tri1(gdl++, 0, 1, 2);
 
 	return gdl;
@@ -918,7 +926,11 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 	gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
-	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
@@ -1217,8 +1229,8 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, float crossx, float crossy)
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 		gfx_Set_Subpixel_Offset_EXT(gdl++, 0, 0);
 
-		gdl = textSetCCCustom02(gdl);
-		gdl = text0f153780(gdl);
+		gdl = textSetCCPrimColorTexAlpha(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 	}
 
 	gdl = sightDrawDefault(gdl, sighton, crossx, crossy);
@@ -1260,7 +1272,11 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 	gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
-	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
@@ -1316,7 +1332,7 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 	// Draw the main 4 triangles
 	gfx_Color(gdl++, colours, 2);
-	gSPVertex(gdl++, vertices, 8, 0);
+	gfx_Vertex(gdl++, vertices, 8, 0);
 	gfx_Tri4(gdl++, 0, 4, 5, 5, 3, 6, 7, 6, 1, 4, 7, 2);
 
 	gdl = savebufferSetup2DRender(gdl);
@@ -1328,7 +1344,7 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 	gdl += gfx_HUD_Rectangle_EXT(gdl, x - 4, y - 4, x + 4, y - 4); // top
 	gdl += gfx_HUD_Rectangle_EXT(gdl, x - 4, y + 4, x + 4, y + 4); // bottom
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gfx_Set_Subpixel_Offset_EXT(gdl++, 0, 0);
@@ -1364,7 +1380,7 @@ Gfx *sightDrawTarget(Gfx *gdl, float crossx, float crossy)
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gfx_Set_Subpixel_Offset_EXT(gdl++, 0, 0);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	return gdl;
 }

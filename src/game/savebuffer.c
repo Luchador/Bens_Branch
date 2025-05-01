@@ -75,14 +75,14 @@ Gfx *savebufferSetCustomProjection(Gfx *gdl)
 		}
 	}
 
-	gSPViewport(gdl++, g_Viewport);
+	gfx_Viewport(gdl++, g_Viewport);
 
 	return gdl;
 }
 
 Gfx *savebufferSetup2DRender(Gfx *gdl)
 {
-	gSPViewport(gdl++, (uintptr_t)(viGetCurrentPlayerViewport()));
+	gfx_Viewport(gdl++, viGetCurrentPlayerViewport());
 	gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 
 	return gdl;
@@ -97,7 +97,11 @@ Gfx *func0f0d4a3c(Gfx *gdl)
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-	gDPSetCombineMode(gdl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,
+		G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,
+		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0);
 	gfx_Set_Geometry_Mode(gdl++, G_SHADE);
 	gfx_Set_Geometry_Mode(gdl++, G_SHADING_SMOOTH);
 	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
@@ -304,7 +308,7 @@ Gfx *menugfxDrawPlane(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1
 	colours[1].word = PD_BE32(colour2);
 
 	gfx_Color(gdl++, colours, 2);
-	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
+	gfx_Vertex(gdl++, vertices, 4, 0);
 	gfx_Tri2(gdl++, 0, 1, 3, 3, 2, 0);
 
 	return gdl;

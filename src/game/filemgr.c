@@ -1622,7 +1622,7 @@ MenuItemHandlerResult filemgrFileToCopyOrDeleteListMenuHandler(int operation, st
 					x = renderdata->x + 2;
 				}
 
-				gdl = text0f153780(gdl);
+				gdl = textSetPerspAndLOD(gdl);
 			}
 
 			return (uintptr_t) gdl;
@@ -2158,9 +2158,9 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(int operation, struct me
 		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 		RGBA envColor = {255, 255, 255, (uint32_t)renderdata->colour & 0xff};
 		gfx_Set_Env_Color(gdl++, envColor);
-		gDPSetCombineLERP(gdl++,
-				TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0,
-				TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, ENVIRONMENT, 0);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0,
+			G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 
 		gdl += gfx_Texture_Rectangle(gdl,
 				((renderdata->x + 4) << 2),
@@ -2223,7 +2223,7 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(int operation, struct me
 			gdl = textRenderProjected(gdl, &x, &y, buffer,
 					g_CharsHandelGothicXs, g_FontHandelGothicXs, renderdata->colour, viGetWidth(), viGetHeight(), 0, 0);
 		}
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 		return (uintptr_t) gdl;
 	case MENUOP_GETOPTIONHEIGHT:
 		data->list.value = 40;

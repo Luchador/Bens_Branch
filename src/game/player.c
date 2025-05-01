@@ -2096,7 +2096,11 @@ Gfx *playerDrawFade(Gfx *gdl, uint32_t r, uint32_t g, uint32_t b, float frac)
 		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-		gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 		RGBA color = {r, g, b, (int)(frac * 255)};
 		gfx_Set_Prim_Color(gdl++, color);
 		gfx_Fill_Rectangle(gdl++, viGetViewLeft(), viGetViewTop(),
@@ -2520,9 +2524,13 @@ Gfx *playerRenderHealthBar(Gfx *gdl)
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
-	struct RGBA color = {230, 230, 230, 0};
-	gfx_Set_Prim_Color(gdl++, color);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
+	RGBA primColor = {230, 230, 230, 0};
+	gfx_Set_Prim_Color(gdl++, primColor);
 	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 	// bug?
 	gfx_Clear_Geometry_Mode(gdl++, G_ZBUFFER);
@@ -2758,9 +2766,13 @@ Gfx *playerDrawCutsceneRects(Gfx *gdl)
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-	struct RGBA color = {0, 0, 0, 255};
-	gfx_Set_Prim_Color(gdl++, color);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
+	RGBA primColor = {0, 0, 0, 255};
+	gfx_Set_Prim_Color(gdl++, primColor);
 
 	if (g_InCutscene && optionsGetCutsceneSubtitles() && g_Vars.stagenum != STAGE_CITRAINING) 
 	{
@@ -4130,10 +4142,13 @@ Gfx *playerRenderShield(Gfx *gdl)
 		gfx_Set_Env_Color(gdl++, envColor);
 		RGBA primColor = {255, 255, 255, (int)(175 * f20 * f20)};
 		gfx_Set_Prim_Color(gdl++, primColor);
-		gDPSetCombineMode(gdl++, G_CC_CUSTOM_00, G_CC_CUSTOM_01);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_ENVIRONMENT, G_CCMUX_0,          // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_ENVIRONMENT, G_ACMUX_0,          // Alpha 0
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_COMBINED,                  // Color 1
+			G_ACMUX_1, G_ACMUX_COMBINED, G_ACMUX_PRIMITIVE, G_ACMUX_COMBINED);  // Alpha 1
 
 		utilsRenderScreenTexture(&gdl, sp90, sp88, g_TexShieldConfigs->width, g_TexShieldConfigs->height,
-				(g_Vars.currentplayer->shieldshowrnd & 1) != 0,
 				(g_Vars.currentplayer->shieldshowrnd & 2) != 0,
 				(g_Vars.currentplayer->shieldshowrnd & 4) != 0,
 				false);
@@ -4240,7 +4255,7 @@ Gfx *playerRenderHud(Gfx *gdl)
 
 		gdl = textConfigureGfxPipeline(gdl);
 		gdl = text0f153a34(gdl, a, b, c, d, 0x000000a0);
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 	}
 
 	if (g_Vars.currentplayer->cameramode != CAMERAMODE_EYESPY
@@ -4455,7 +4470,7 @@ Gfx *playerRenderHud(Gfx *gdl)
 
 			gdl = textConfigureGfxPipeline(gdl);
 			gdl = text0f153a34(gdl, a, b, c, d, 0x000000a0);
-			gdl = text0f153780(gdl);
+			gdl = textSetPerspAndLOD(gdl);
 		}
 
 		gdl = hudmsgsRender(gdl);

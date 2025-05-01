@@ -229,7 +229,7 @@ Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, stru
 	vertices[3].colour = 0;
 
 	gfx_Color(gdl++, colours, 1);
-	gSPVertex(gdl++, (uintptr_t)(vertices), 4, 0);
+	gfx_Vertex(gdl++, vertices, 4, 0);
 
 	gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
@@ -636,7 +636,21 @@ Gfx *smokeRender(struct prop *prop, Gfx *gdl, bool xlupass)
 			gfx_Matrix(gdl++, &var800a3488, G_MTX_NOPUSH | G_MTX_MUL | G_MTX_MODELVIEW);
 		}
 
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Render_Mode(gdl++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		// G_CC_MODULATEIA
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,  // Color cycle 0
+			G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,  // Alpha cycle 0
+			G_CCMUX_TEXEL0, G_CCMUX_0, G_CCMUX_SHADE, G_CCMUX_0,  // Color cycle 1
+			G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0); // Alpha cycle 1
+		gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
+		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+		gfx_Set_Tile(gdl++, G_IM_FMT_IA, G_IM_SIZ_8b, 7, 0x0000, G_TX_RENDERTILE, 0, G_TX_NOMIRROR | G_TX_WRAP, 6, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, 6, G_TX_NOLOD);
+		gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 0x00dc, 0x00dc);
 		gfx_Display_List(gdl++, g_TexGdl1);
+		gfx_Load_Block(gdl++, G_TX_LOADTILE, 0, 0, 1567, 0);
 
 		if (near) {
 			sp8c.x = coord->x * 10.0f;

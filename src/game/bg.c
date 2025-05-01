@@ -14,7 +14,6 @@
 #include "game/env.h"
 #include "game/file.h"
 #include "game/gfxmemory.h"
-#include "game/gfxreplace.h"
 #include "game/lv.h"
 #include "game/menuutils.h"
 #include "game/mtxutils.h"
@@ -278,7 +277,7 @@ Gfx *bgRenderXrayData(Gfx *gdl, struct xraydata *xraydata)
 		gfx_Color(gdl++, colours, count);
 
 		count = xraydata->numvertices;
-		gSPVertex(gdl++, vertices, count, 0);
+		gfx_Vertex(gdl++, vertices, count, 0);
 
 		numgroups = (xraydata->numtris - 1) / 4 + 1;
 
@@ -876,7 +875,11 @@ Gfx *bgRenderSceneInXray(Gfx *gdl)
 
 	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 	gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
-	gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
@@ -1028,7 +1031,7 @@ Gfx *bgRenderScene(Gfx *gdl)
 
 			gdl = envStopFog(gdl);
 			gdl = starsRender(gdl);
-			gdl = text0f153780(gdl);
+			gdl = textSetPerspAndLOD(gdl);
 			gdl = viSetCamNoTranslation(gdl);
 		}
 
@@ -2533,12 +2536,6 @@ void bgLoadRoom(int roomnum)
 			block2++;
 		}
 
-		// Do some find/replaces in the gdls based on environment configuration
-		if (g_FogEnabled) {
-			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->opablocks, 0);
-			gfxReplaceGbiCommandsRecursively(g_Rooms[roomnum].gfxdata->xlublocks, 1);
-		}
-
 		// Create vertex batches - these are used for hit detection
 		bgFindRoomVtxBatches(roomnum);
 
@@ -2826,7 +2823,6 @@ void bgFindRoomVtxBatches(int roomnum)
 		if (gdl != NULL) {
 			while (gdl) {
 				for (i = 0; gdl[i].dma.cmd != G_ENDDL; i++) {
-					// if gSPVertex
 					if (gdl[i].dma.cmd == G_VTX) {
 						batchindex++;
 					}
@@ -2841,7 +2837,6 @@ void bgFindRoomVtxBatches(int roomnum)
 
 			while (gdl) {
 				for (i = 0; gdl[i].dma.cmd != G_ENDDL; i++) {
-					// if gSPVertex
 					if (gdl[i].dma.cmd == G_VTX) {
 						xlucount++;
 					}

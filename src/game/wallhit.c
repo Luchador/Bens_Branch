@@ -1141,9 +1141,9 @@ Gfx *wallhitRenderOpaBgHits(int roomnum, Gfx *gdl)
 			gfx_Color(gdl++, colours, 4);
 
 			if (wallhit->vertices2 != NULL) {
-				gSPVertex(gdl++, wallhit->vertices2, 4, 0);
+				gfx_Vertex(gdl++, wallhit->vertices2, 4, 0);
 			} else {
-				gSPVertex(gdl++, (uintptr_t)(&wallhit->vertices), 4, 0);
+				gfx_Vertex(gdl++, wallhit->vertices, 4, 0);
 			}
 
 			gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
@@ -1194,9 +1194,9 @@ Gfx *wallhitRenderXluBgHits(int roomnum, Gfx *gdl)
 			gfx_Color(gdl++, colours, 4);
 
 			if (wallhit->vertices2 != NULL) {
-				gSPVertex(gdl++, wallhit->vertices2, 4, 0);
+				gfx_Vertex(gdl++, wallhit->vertices2, 4, 0);
 			} else {
-				gSPVertex(gdl++, (uintptr_t)(&wallhit->vertices), 4, 0);
+				gfx_Vertex(gdl++, wallhit->vertices, 4, 0);
 			}
 
 			gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
@@ -1276,9 +1276,9 @@ Gfx *wallhitRenderPropHits(Gfx *gdl, struct prop *prop, bool xlu)
 			gfx_Color(gdl++, colours, 4);
 
 			if (wallhit->vertices2 != NULL) {
-				gSPVertex(gdl++, wallhit->vertices2, 4, 0);
+				gfx_Vertex(gdl++, wallhit->vertices2, 4, 0);
 			} else {
-				gSPVertex(gdl++, (uintptr_t)(&wallhit->vertices), 4, 0);
+				gfx_Vertex(gdl++, wallhit->vertices, 4, 0);
 			}
 
 			gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);

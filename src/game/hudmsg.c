@@ -1425,7 +1425,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 		gdl = countdownTimerRender(gdl);
 	}
 
-	gdl = text0f153780(gdl);
+	gdl = textSetPerspAndLOD(gdl);
 
 	return gdl;
 }

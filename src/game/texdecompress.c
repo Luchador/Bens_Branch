@@ -32,8 +32,6 @@ int g_TexNumConfigs;
 struct tex **g_TexWords;
 struct textureconfig *g_TexWallhitConfigs;
 Gfx *g_TexGdl1;
-Gfx *g_TexGdl2;
-Gfx *g_TexGdl3;
 struct texturepair *g_ExplosionTexturePairs;
 struct textureconfig *g_TexBeamConfigs;
 struct textureconfig *g_TexLaserConfigs;

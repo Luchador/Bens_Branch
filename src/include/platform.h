@@ -57,21 +57,11 @@
 	#error "Implement PD_BSWAP macros for your compiler."
 #endif
 
-#ifdef PLATFORM_BIG_ENDIAN
-	#define PD_BE16(x) (x)
-	#define PD_BE32(x) (x)
-	#define PD_BE64(x) (x)
-	#define PD_LE16(x) PD_BSWAP16(x)
-	#define PD_LE32(x) PD_BSWAP32(x)
-	#define PD_LE64(x) PD_BSWAP64(x)
-#else
-	#define PD_BE16(x) PD_BSWAP16(x)
-	#define PD_BE32(x) PD_BSWAP32(x)
-	#define PD_BE64(x) PD_BSWAP64(x)
-	#define PD_LE16(x) (x)
-	#define PD_LE32(x) (x)
-	#define PD_LE64(x) (x)
-#endif
+#define PD_BE16(x) PD_BSWAP16(x)
+#define PD_BE32(x) PD_BSWAP32(x)
+#define PD_BE64(x) PD_BSWAP64(x)
+#define PD_LE32(x) (x)
+#define PD_LE64(x) (x)
 
 // TODO: use uintptr_t or something
 #ifdef PLATFORM_64BIT

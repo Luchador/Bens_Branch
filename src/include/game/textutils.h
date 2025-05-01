@@ -12,9 +12,8 @@ void textSetWrapIndent(int count);
 void textLoadFont(uint8_t *romstart, uint8_t *romend, struct font **fontptr, struct fontchar **charsptr, bool monospace);
 void textReset(void);
 Gfx *textConfigureGfxPipeline(Gfx *gdl);
-Gfx *text0f153780(Gfx *gdl);
 Gfx *textSetPrimColour(Gfx *gdl, uint32_t colour);
-Gfx *textSetCCCustom02(Gfx *gdl);
+Gfx *textSetCCPrimColorTexAlpha(Gfx *gdl);
 Gfx *text0f153858(Gfx *gdl, int *x1, int *y1, int *x2, int *y2);
 Gfx *text0f1538e4(Gfx *gdl, int *x1, int *y1, int *x2, int *y2);
 Gfx *text0f153990(Gfx *gdl, int left, int top, int width, int height);
@@ -47,6 +46,7 @@ Gfx *textRenderOutline(Gfx *gdl, int x, int y, struct fontchar *char1, int arg4,
 Gfx *textRender(Gfx *gdl, int *x, int *y, char *text, struct fontchar *font1, struct font *font2, uint32_t arg6, uint32_t colour, int width, int height, uint32_t arg10, int arg11);
 void textMeasure(int *textheight, int *textwidth, char *text, struct fontchar *font1, struct font *font2, int lineheight);
 void textWrap(int width, char *in, char *out, struct fontchar *font1, struct font *font2);
+Gfx *textSetPerspAndLOD(Gfx *gdl);
 struct fontchar *createChar(char* filename, uint16_t index);
 unsigned char *textLoadBMP(const char *filename, uint16_t *width, uint16_t *height);
 void textLoadCustomFont();

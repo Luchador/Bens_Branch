@@ -292,18 +292,18 @@ Gfx *menuRenderBanner(Gfx *gdl, int x1, int y1, int x2, int y2, bool big, int ms
 	// Black fill
 	gdl = textSetPrimColour(gdl, 0x0000007f);
 	gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	// Dark blue fill
 	gdl = textSetPrimColour(gdl, 0x00007f7f);
 	gfx_Fill_Rectangle(gdl++, x1, bannertop, x2, bannerbottom);
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	// Top and bottom borders (light blue)
 	gdl = textSetPrimColour(gdl, 0x7f7fff7f);
 	gfx_Fill_Rectangle(gdl++, x1, bannerbottom + 2, x2, bannerbottom + 4);
 	gfx_Fill_Rectangle(gdl++, x1, bannertop - 4, x2, bannertop - 2);
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	gdl = textConfigureGfxPipeline(gdl);
 
@@ -339,7 +339,7 @@ Gfx *menuRenderBanner(Gfx *gdl, int x1, int y1, int x2, int y2, bool big, int ms
 				g_CharsHandelGothicXs, g_FontHandelGothicXs, 0xbfbfffff, viGetWidth(), viGetWidth(), 0, 0);
 	}
 
-	gdl = text0f153780(gdl);
+	gdl = textSetPerspAndLOD(gdl);
 
 	return gdl;
 }
@@ -1779,8 +1779,30 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
 		}
 
-		gfx_Display_List(gdl++, var80061380);
-		gfx_Display_List(gdl++, var800613a0);
+		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH | G_FOG | G_LIGHTING);
+		gfx_Texture(gdl++, 0, 0, 0, G_TX_RENDERTILE, G_OFF);
+		gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+		gfx_Set_Combine_LERP(
+			gdl++,
+			0, 0, 0, G_SHADE,
+			0, 0, 0, G_SHADE,
+			0, 0, 0, G_SHADE,
+			0, 0, 0, G_SHADE
+		);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 
 		haszoom = false;
 
@@ -2192,7 +2214,12 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-		gDPSetCombineMode(gdl++, G_CC_MODULATEI, G_CC_MODULATEI);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 0
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE,         // alpha cycle 0
+			G_CCMUX_TEXEL0, G_CCMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // color cycle 1 (same as cycle 0)
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_SHADE          // alpha cycle 1 (same as cycle 0)
+		);
 		gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 
@@ -2202,7 +2229,27 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 		texSelect(&gdl, NULL, 2, 0, 2, 1, NULL);
 
-		gfx_Display_List(gdl++, var800613a0);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+		gfx_Set_Combine_LERP(
+			gdl++,
+			0, 0, 0, G_SHADE,
+			0, 0, 0, G_SHADE,
+			0, 0, 0, G_SHADE,
+			0, 0, 0, G_SHADE
+		);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 	}
 
 	return gdl;
@@ -2452,7 +2499,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 			}
 		}
 
-		gdl = text0f153780(gdl);
+		gdl = textSetPerspAndLOD(gdl);
 	}
 
 	// Configure things for the redraw effect
@@ -2668,7 +2715,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 
 							gdl = textSetPrimColour(gdl, colour);
 							gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
-							gdl = textSetCCCustom02(gdl);
+							gdl = textSetCCPrimColorTexAlpha(gdl);
 						}
 
 						if (focused) {
@@ -2764,7 +2811,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 				curx += menu->cols[colindex].width;
 			}
 
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 			
 
 			gfx_Set_Scissor(gdl++, viGetViewLeft(), viGetViewTop(),
@@ -2846,7 +2893,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 				}
 
 				gdl = textRenderProjected(gdl, &y, &x, title, g_CharsHandelGothicXs, g_FontHandelGothicXs, -1, dialogwidth, viGetHeight(), 0, 0);
-				gdl = text0f153780(gdl);
+				gdl = textSetPerspAndLOD(gdl);
 
 				textSetRotation90(false);
 			}
@@ -4712,19 +4759,59 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 	case MENUBG_8:
 		{
 			uint32_t colour = 255 * frac;
-			gfx_Display_List(gdl++, var800613a0);
+			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+			gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+			gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+			gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+			gfx_Set_Combine_LERP(
+				gdl++,
+				0, 0, 0, G_SHADE,
+				0, 0, 0, G_SHADE,
+				0, 0, 0, G_SHADE,
+				0, 0, 0, G_SHADE
+			);
+			gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 			gdl = textSetPrimColour(gdl, colour);
 			gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 		}
 		break;
 	case MENUBG_SUCCESS:
 		{
 			// Fill with black
-			gfx_Display_List(gdl++, var800613a0);
+			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+			gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+			gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+			gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+			gfx_Set_Combine_LERP(
+				gdl++,
+				0, 0, 0, G_SHADE,
+				0, 0, 0, G_SHADE,
+				0, 0, 0, G_SHADE,
+				0, 0, 0, G_SHADE
+			);
+			gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 			gdl = textSetPrimColour(gdl, 0x000000ff);
 			gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			// Render the success BG
 			gdl = menugfxRenderBgSuccess(gdl);
@@ -4734,10 +4821,30 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 				uint32_t alpha = (1.0f - frac) * 255;
 
 				if (alpha) {
-					gfx_Display_List(gdl++, var800613a0);
+					gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+					gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+					gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+					gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+					gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+					gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+					gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+					gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+					gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+					gfx_Set_Combine_LERP(
+						gdl++,
+						0, 0, 0, G_SHADE,
+						0, 0, 0, G_SHADE,
+						0, 0, 0, G_SHADE,
+						0, 0, 0, G_SHADE
+					);
+					gfx_Set_Combine_LERP(gdl++,
+						G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+						G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+						G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+						G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 					gdl = textSetPrimColour(gdl, alpha);
 					gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
-					gdl = textSetCCCustom02(gdl);
+					gdl = textSetCCPrimColorTexAlpha(gdl);
 				}
 			}
 		}
@@ -4745,12 +4852,30 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 	case MENUBG_FAILURE:
 		{
 			// Fill with white -> black while fading in
-			uint32_t stack;
 			uint32_t channel = (1.0f - frac) * 255;
-			gfx_Display_List(gdl++, var800613a0);
+			gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+			gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+			gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+			gfx_Set_Combine_LERP(
+				gdl++,
+				0, 0, 0, G_SHADE,
+				0, 0, 0, G_SHADE,
+				0, 0, 0, G_SHADE,
+				0, 0, 0, G_SHADE
+			);
+			gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 			gdl = textSetPrimColour(gdl, channel << 24 | channel << 16 | channel << 8 | 0xff);
 			gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
-			gdl = textSetCCCustom02(gdl);
+			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			// Render the failure BG
 			gdl = menugfxRenderBgFailure(gdl);
@@ -4768,13 +4893,34 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 			// While fading, render red
 			if (frac < 1.0f) {
 				uint32_t alpha;
-				uint32_t stack;
 
-				gfx_Display_List(gdl++, var800613a0);
+				gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+				gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+				gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+				gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+				gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+				gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+				gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+				gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+				gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+				gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+				gfx_Set_Combine_LERP(
+					gdl++,
+					0, 0, 0, G_SHADE,
+					0, 0, 0, G_SHADE,
+					0, 0, 0, G_SHADE,
+					0, 0, 0, G_SHADE
+				);
+				gfx_Set_Combine_LERP(gdl++,
+					G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+					G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+					G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+					G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
+
 				alpha = (1.0f - frac) * 255;
 				gdl = textSetPrimColour(gdl, 0xff000000 | alpha);
 				gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
-				gdl = textSetCCCustom02(gdl);
+				gdl = textSetCCPrimColorTexAlpha(gdl);
 			}
 		}
 		break;
@@ -4813,7 +4959,27 @@ Gfx *menuRender(Gfx *gdl)
 
 	gdl = savebufferSetCustomProjection(gdl);
 
-	gfx_Display_List(gdl++, var800613a0);
+	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+	gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+	gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+	gfx_Set_Combine_LERP(
+		gdl++,
+		0, 0, 0, G_SHADE,
+		0, 0, 0, G_SHADE,
+		0, 0, 0, G_SHADE,
+		0, 0, 0, G_SHADE
+	);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 
 	// Render the background
 	if (g_MenuData.nextbg != 255) {
@@ -4953,7 +5119,27 @@ Gfx *menuRender(Gfx *gdl)
 		g_MpPlayerNum = 0;
 
 		gfx_Matrix(gdl++, camGetPerspectiveMtxL(), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-		gfx_Display_List(gdl++, var800613a0);
+		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
+		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
+		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
+		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
+		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
+		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
+		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
+		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
+		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+		gfx_Set_Combine_LERP(
+			gdl++,
+			0, 0, 0, G_SHADE,
+			0, 0, 0, G_SHADE,
+			0, 0, 0, G_SHADE,
+			0, 0, 0, G_SHADE
+		);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+			G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 
 		// Don't do the redraw effect on the "Press Start" dialogs
 		textStopRedrawEffect();
@@ -5058,7 +5244,7 @@ Gfx *menuRender(Gfx *gdl)
 				}
 			}
 
-			gdl = text0f153780(gdl);
+			gdl = textSetPerspAndLOD(gdl);
 		}
 
 		gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);

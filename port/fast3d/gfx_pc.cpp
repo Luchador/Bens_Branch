@@ -45,11 +45,8 @@ float g_ModelViewProj[4][4];
 
 // SCALE_M_N: upscale/downscale M-bit integer to N-bit
 #define SCALE_5_8(VAL_) (((VAL_)*0xFF) / 0x1F)
-#define SCALE_8_5(VAL_) ((((VAL_) + 4) * 0x1F) / 0xFF)
 #define SCALE_4_8(VAL_) ((VAL_)*0x11)
-#define SCALE_8_4(VAL_) ((VAL_) / 0x11)
 #define SCALE_3_8(VAL_) ((VAL_)*0x24)
-#define SCALE_8_3(VAL_) ((VAL_) / 0x24)
 
 // SCREEN_WIDTH and SCREEN_HEIGHT are defined in the headerfile
 #define HALF_SCREEN_WIDTH (SCREEN_WIDTH / 2.f)
@@ -129,8 +126,7 @@ static struct RSP {
     float aspect_scale;
 
     struct {
-        // U0.16
-        uint16_t s, t;
+        float s, t;
     } texture_scaling_factor;
 
     struct LoadedVertex loaded_vertices[MAX_VERTICES + 4];
@@ -171,7 +167,7 @@ static struct RDP {
         uint8_t cms, cmt;
         uint8_t shifts, shiftt;
         uint16_t uls, ult, lrs, lrt; // U10.2
-        uint16_t width, height;      // in texels
+        uint16_t tilewidth, tileheight;      // in texels
         uint16_t tmem;               // 0-511, in 64-bit word units
         uint32_t line_size_bytes;
         uint8_t palette;
@@ -187,7 +183,7 @@ static struct RDP {
     bool tex_detail;
 
     uint8_t prim_lod_fraction;
-    struct RGBA env_color, prim_color, fog_color, fill_color, grayscale_color;
+    struct RGBA env_color, prim_color, fog_color, fill_color;
     struct XYWidthHeight viewport, scissor;
     bool viewport_or_scissor_changed;
     void* z_buf_address;
@@ -879,8 +875,8 @@ static void import_texture(int i, int tile, bool importReplacement) {
         loaded_texture.addr = rdp.texture_to_load.addr;
         loaded_texture.line_size_bytes = rdp.texture_tile[tile].line_size_bytes;
         loaded_texture.full_image_line_size_bytes = rdp.texture_tile[tile].line_size_bytes;
-        loaded_texture.full_size_bytes = loaded_texture.full_image_line_size_bytes * rdp.texture_tile[tile].height;
-        loaded_texture.size_bytes = loaded_texture.line_size_bytes * rdp.texture_tile[tile].height;
+        loaded_texture.full_size_bytes = loaded_texture.full_image_line_size_bytes * rdp.texture_tile[tile].tileheight;
+        loaded_texture.size_bytes = loaded_texture.line_size_bytes * rdp.texture_tile[tile].tileheight;
         if (siz == G_IM_SIZ_32b) {
             // HACK: fixup 32-bit LODed texture height
             loaded_texture.size_bytes <<= 1;
@@ -1057,8 +1053,8 @@ static void gfx_sp_vertex(size_t n_vertices, size_t dest_index, const Vtx* verti
 
         x = gfx_adjust_x_for_aspect_ratio(x, w);
 
-        int U = v->s * rsp.texture_scaling_factor.s >> 16;
-        int V = v->t * rsp.texture_scaling_factor.t >> 16;
+        int U = v->s * rsp.texture_scaling_factor.s / 65536;
+        int V = v->t * rsp.texture_scaling_factor.t / 65536;
 
         const struct NormalColor *vcn = &rsp.vertex_colors[v->colour >> 2];
 
@@ -1117,13 +1113,8 @@ static void gfx_sp_vertex(size_t n_vertices, size_t dest_index, const Vtx* verti
                 doty = clampf(doty, -1.0f, 1.0f);
 
                 if (rsp.geometry_mode & G_TEXTURE_GEN_LINEAR) {
-                    // Not sure exactly what formula we should use to get accurate values
-                    /*dotx = (2.906921f * dotx * dotx + 1.36114f) * dotx;
-                    doty = (2.906921f * doty * doty + 1.36114f) * doty;
-                    dotx = (dotx + 1.0f) / 4.0f;
-                    doty = (doty + 1.0f) / 4.0f;*/
-                    dotx = acosf(-dotx) /* M_PI */ / 4.0f;
-                    doty = acosf(-doty) /* M_PI */ / 4.0f;
+                    dotx = acosf(-dotx) / 4.0f;
+                    doty = acosf(-doty) / 4.0f;
                 } else {
                     dotx = (dotx + 1.0f) / 4.0f;
                     doty = (doty + 1.0f) / 4.0f;
@@ -1228,11 +1219,6 @@ static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bo
             // If all vertices lie behind the eye, the triangle will be rejected anyway.
             cross = -cross;
         }
-
-        // If inverted culling is requested, negate the cross
-        // if ((rsp.extra_geometry_mode & G_EX_INVERT_CULLING) == 1) {
-        //     cross = -cross;
-        // }
 
         switch (rsp.geometry_mode & G_CULL_BOTH) {
             case G_CULL_FRONT:
@@ -1792,8 +1778,8 @@ static void gfx_dp_set_tile_size(uint8_t tile, uint16_t uls, uint16_t ult, uint1
     rdp.texture_tile[tile].ult = ult;
     rdp.texture_tile[tile].lrs = lrs;
     rdp.texture_tile[tile].lrt = lrt;
-    rdp.texture_tile[tile].width = (lrs - uls + 4) / 4;
-    rdp.texture_tile[tile].height = (lrt - ult + 4) / 4;
+    rdp.texture_tile[tile].tilewidth = (lrs - uls + 4) / 4;
+    rdp.texture_tile[tile].tileheight = (lrt - ult + 4) / 4;
     rdp.textures_changed[0] = true;
     rdp.textures_changed[1] = true;
 }
@@ -1865,10 +1851,10 @@ static void gfx_dp_load_block(uint8_t tile, uint32_t uls, uint32_t ult, uint32_t
 static void gfx_dp_load_tile(uint8_t tile, uint32_t uls, uint32_t ult, uint32_t lrs, uint32_t lrt) {
     SUPPORT_CHECK(tile == G_TX_LOADTILE);
 
-    uint32_t offset_x = uls >> G_TEXTURE_IMAGE_FRAC;
-    uint32_t offset_y = ult >> G_TEXTURE_IMAGE_FRAC;
-    uint32_t tile_width = ((lrs - uls) >> G_TEXTURE_IMAGE_FRAC) + 1;
-    uint32_t tile_height = ((lrt - ult) >> G_TEXTURE_IMAGE_FRAC) + 1;
+    uint32_t offset_x = uls / 4;
+    uint32_t offset_y = ult / 4;
+    uint32_t tile_width = ((lrs - uls) / 4) + 1;
+    uint32_t tile_height = ((lrt - ult) / 4) + 1;
     uint32_t full_image_width = rdp.texture_to_load.width + 1;
 
     uint32_t offset_x_in_bytes = offset_x << rdp.texture_to_load.siz >> 1;
@@ -1903,8 +1889,8 @@ static void gfx_dp_load_tile(uint8_t tile, uint32_t uls, uint32_t ult, uint32_t 
     rdp.texture_tile[tile].ult = ult;
     rdp.texture_tile[tile].lrs = lrs;
     rdp.texture_tile[tile].lrt = lrt;
-    rdp.texture_tile[tile].width = ((lrs - uls) >> G_TEXTURE_IMAGE_FRAC) + 1;
-    rdp.texture_tile[tile].height = ((lrt - ult) >> G_TEXTURE_IMAGE_FRAC) + 1;
+    rdp.texture_tile[tile].tilewidth = ((lrs - uls) / 4) + 1;
+    rdp.texture_tile[tile].tileheight = ((lrt - ult) / 4) + 1;
 
     rdp.textures_changed[0] = rdp.textures_changed[1] = true;
 }
@@ -1973,7 +1959,6 @@ static void gfx_draw_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t lr
     uly += rdp.subpixel_ofs_y;
     lry += rdp.subpixel_ofs_y;
 
-    // U10.2 coordinates
     float ulxf = ulx;
     float ulyf = uly;
     float lrxf = lrx;
@@ -2041,14 +2026,14 @@ static void gfx_dp_texture_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int3
     if ((rdp.other_mode_h & (3U << G_MDSFT_CYCLETYPE)) == G_CYC_COPY) {
         // Per RDP Command Summary Set Tile's shift s and this dsdx should be set to 4 texels
         // Divide by 4 to get 1 instead
-        dsdx >>= 2;
+        dsdx /= 4;
 
         // Color combiner is turned off in copy mode
         gfx_dp_set_combine_mode(color_comb(0, 0, 0, G_CCMUX_TEXEL0), alpha_comb(0, 0, 0, G_ACMUX_TEXEL0), 0, 0);
 
         // Per documentation one extra pixel is added in this modes to each edge
-        lrx += 1 << 2;
-        lry += 1 << 2;
+        lrx += 1 * 4;
+        lry += 1 * 4;
     }
 
     // uls and ult are S10.5
@@ -2058,8 +2043,8 @@ static void gfx_dp_texture_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int3
 
     const int16_t width = flip ? lry - uly : lrx - ulx;
     const int16_t height = flip ? lrx - ulx : lry - uly;
-    const float lrs = ((uls << 7) + dsdx * width) >> 7;
-    const float lrt = ((ult << 7) + dtdy * height) >> 7;
+    const float lrs = ((uls * 128) + dsdx * width) / 128;
+    const float lrt = ((ult * 128) + dtdy * height) / 128;
 
     struct LoadedVertex* ul = &rsp.loaded_vertices[MAX_VERTICES + 0];
     struct LoadedVertex* ll = &rsp.loaded_vertices[MAX_VERTICES + 1];
@@ -2106,19 +2091,19 @@ static void gfx_dp_image_rectangle(int32_t tile, int32_t w, int32_t h,
     struct LoadedVertex* ll = &rsp.loaded_vertices[MAX_VERTICES + 1];
     struct LoadedVertex* lr = &rsp.loaded_vertices[MAX_VERTICES + 2];
     struct LoadedVertex* ur = &rsp.loaded_vertices[MAX_VERTICES + 3];
-    ul->u = uls * 32;
-    ul->v = ult * 32;
-    lr->u = lrs * 32;
-    lr->v = lrt * 32;
-    ll->u = uls * 32;
-    ll->v = lrt * 32;
-    ur->u = lrs * 32;
-    ur->v = ult * 32;
+    ul->u = uls;
+    ul->v = ult;
+    lr->u = lrs;
+    lr->v = lrt;
+    ll->u = uls;
+    ll->v = lrt;
+    ur->u = lrs;
+    ur->v = ult;
 
     // ensure we have the correct texture size
     rdp.texture_tile[tile].line_size_bytes = w << rdp.texture_tile[tile].siz >> 1;
-    rdp.texture_tile[tile].width = w;
-    rdp.texture_tile[tile].height = h;
+    rdp.texture_tile[tile].tilewidth = w;
+    rdp.texture_tile[tile].tileheight = h;
     rdp.texture_tile[tile].cms = 0;
     rdp.texture_tile[tile].cmt = 0;
     rdp.texture_tile[tile].shifts = 0;
@@ -2161,8 +2146,8 @@ static void gfx_dp_fill_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t
 
     if (mode == G_CYC_COPY || mode == G_CYC_FILL) {
         // Per documentation one extra pixel is added in this modes to each edge
-        lrx += 1 << 2;
-        lry += 1 << 2;
+        lrx += 1 * 4;
+        lry += 1 * 4;
     }
 
     for (int i = MAX_VERTICES; i < MAX_VERTICES + 4; i++) {
@@ -2403,9 +2388,6 @@ static void gfx_run_dl(Gfx* cmd) {
                 break;
             }
             case G_IMAGERECT_EXT: {
-                //int16_t tile, iw, ih;
-                //int16_t x0, y0, s0, t0;
-                //int16_t x1, y1, s1, t1;
                 int32_t tile, iw, ih;
                 int32_t x0, y0, s0, t0;
                 int32_t x1, y1, s1, t1;
@@ -2422,7 +2404,7 @@ static void gfx_run_dl(Gfx* cmd) {
                 y1 = C0(0, 16);
                 s1 = C1(16, 16);
                 t1 = C1(0, 16);
-                gfx_dp_image_rectangle(tile, iw, ih, x0, y0, s0, t0, x1, y1, s1, t1);
+                gfx_dp_image_rectangle(tile, iw, ih, x0 * 4, y0 * 4, s0 * 32, t0 * 32, x1 * 4, y1 * 4, s1 * 32, t1 * 32);
                 break;
             }
             case G_SETSCISSOR:
@@ -2558,6 +2540,17 @@ extern "C" void gfx_Extra_Geometry_Mode_EXT(Gfx *pkt, uint32_t clearbits, uint32
 {
     pkt->words.w0 = ((uint32_t)G_EXTRAGEOMETRYMODE_EXT << 24) | (~clearbits & 0x00FFFFFF);
     pkt->words.w1 = setbits;
+}
+
+extern "C" void gfx_Vertex(Gfx *pkt, const Vtx *v, uint8_t n, uint8_t v0)
+{
+    // Compute length in bytes of the vertex data
+    uint16_t length = sizeof(Vtx) * n;
+
+    // Compute packed parameter: ((n - 1) << 4) | v0
+    uint8_t param = ((n - 1) << 4) | v0;
+
+    gfx_Dma1p(pkt, G_VTX, (uintptr_t)v, length, param);
 }
 
 extern "C" void gfx_1Triangle(Gfx *pkt, uint8_t v1, uint8_t v2, uint8_t v3, uint8_t flag)
@@ -2722,12 +2715,6 @@ extern "C" void gfx_Color(Gfx *pkt, const Col *colors, uint32_t count)
     gfx_Dma1p(pkt, G_COL, (uintptr_t)colors, sizeof(Col) * count, ((count - 1) << 2));
 }
 
-extern "C" void gfx_Set_Color(Gfx *pkt, uint8_t command, uintptr_t data)
-{
-    pkt->words.w0 = ((uint32_t)command << 24);
-    pkt->words.w1 = data;
-}
-
 extern "C" void gfx_Set_Prim_Color(Gfx *pkt, RGBA color)
 {
     pkt->words.w0 = (_SHIFTL(G_SETPRIMCOLOR, 24, 8));
@@ -2829,30 +2816,6 @@ extern "C" void gfx_Set_Tile_Size(Gfx *pkt, uint8_t tile, uint16_t uls, uint16_t
                     ((uint32_t)lrt & 0xFFF);
 }
 
-extern "C" Gfx gfx_S_Set_Tile(uint8_t fmt, uint8_t siz, uint16_t line, uint16_t tmem,
-    uint8_t tile, uint8_t palette, uint8_t cmt, uint8_t maskt,
-    uint8_t shiftt, uint8_t cms, uint8_t masks, uint8_t shifts)
-{
-    Gfx g;
-
-    g.words.w0 = ((uint32_t)G_SETTILE << 24) |
-    ((uint32_t)(fmt & 0x7) << 21) |
-    ((uint32_t)(siz & 0x3) << 19) |
-    ((uint32_t)(line & 0x1FF) << 9) |
-    ((uint32_t)(tmem & 0x1FF));
-
-    g.words.w1 = ((uint32_t)(tile & 0x7) << 24) |
-    ((uint32_t)(palette & 0xF) << 20) |
-    ((uint32_t)(cmt & 0x3) << 18) |
-    ((uint32_t)(maskt & 0xF) << 14) |
-    ((uint32_t)(shiftt & 0xF) << 10) |
-    ((uint32_t)(cms & 0x3) << 8) |
-    ((uint32_t)(masks & 0xF) << 4) |
-    ((uint32_t)(shifts & 0xF));
-
-    return g;
-}
-
 extern "C" void gfx_Load_Block(Gfx *pkt, uint8_t tile, uint16_t uls, uint16_t ult, uint16_t lrs, uint16_t dxt)
 {
     pkt->words.w0 = ((uint32_t)G_LOADBLOCK << 24) |
@@ -2907,6 +2870,11 @@ extern "C" void gfx_Fog_Position(Gfx *pkt, uint16_t min, uint16_t max)
     uint32_t packed = ((uint32_t)multiplier << 16) | offset;
 
     gMoveWd(pkt, G_MW_FOG, G_MWO_FOG, packed);
+}
+
+extern "C" void gfx_Viewport(Gfx *pkt, const Vp *v)
+{
+    gfx_Dma1p(pkt, G_MOVEMEM, (uintptr_t)v, sizeof(Vp), G_MV_VIEWPORT);
 }
 
 extern "C" void gfx_Set_Scissor(Gfx *pkt, int ulx, int uly, int lrx, int lry)
@@ -2993,6 +2961,20 @@ extern "C" void gfx_Set_Cycle_Type(Gfx *pkt, uint32_t type)
 extern "C" void gfx_Set_Combine_Key(Gfx *pkt, uint32_t type)
 {
     gfx_Set_Other_Mode(pkt, G_SETOTHERMODE_H, G_MDSFT_COMBKEY, 1, type);
+}
+
+extern "C" void gfx_Set_Combine_Mode(Gfx *pkt, uint32_t w0bits, uint32_t w1bits)
+{
+    pkt->words.w0 = ((uint32_t)G_SETCOMBINE << 24) | (w0bits & 0xFFFFFF);
+    pkt->words.w1 = w1bits;
+}
+
+extern "C" void gfx_Set_Combine_LERP(Gfx *pkt, uint8_t a0, uint8_t b0, uint8_t c0, uint8_t d0, uint8_t Aa0, uint8_t Ab0, uint8_t Ac0, uint8_t Ad0, uint8_t a1, uint8_t b1, uint8_t c1, uint8_t d1, uint8_t Aa1, uint8_t Ab1, uint8_t Ac1, uint8_t Ad1)
+{
+    pkt->words.w0 = ((uint32_t)G_SETCOMBINE << 24) |
+                    (GCCc0w0(a0, c0, Aa0, Ac0) | GCCc1w0(a1, c1));
+    pkt->words.w1 = GCCc0w1(b0, d0, Ab0, Ad0) |
+                    GCCc1w1(b1, Aa1, Ac1, d1, Ab1, Ad1);
 }
 
 extern "C" void gfx_Set_Alpha_Compare(Gfx *pkt, uint32_t type)

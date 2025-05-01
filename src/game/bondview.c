@@ -76,10 +76,10 @@ Gfx *bviewPrepareStaticRgba16(Gfx *gdl, uint32_t colour, uint32_t alpha)
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 2048, 32);
 	gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
-	gfx_Set_Color(gdl++, G_SETENVCOLOR, (uintptr_t)((colour & 0xffffff00) | (alpha & 0xff)));
-	gDPSetCombineLERP(gdl++,
-			TEXEL0, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT,
-			TEXEL0, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT);
+	gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA((uintptr_t)((colour & 0xffffff00) | (alpha & 0xff))));
+	gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, 0, 0, 0, G_ACMUX_ENVIRONMENT,
+			G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, 0, 0, 0, G_ACMUX_ENVIRONMENT);
 	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 
@@ -103,10 +103,10 @@ Gfx *bviewPrepareStaticI8(Gfx *gdl, uint32_t colour, uint32_t alpha)
 			G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gfx_Set_Tile_Size(gdl++, G_TX_RENDERTILE, 0, 0, 2048, 32);
 	gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
-	gfx_Set_Color(gdl++, G_SETENVCOLOR, (uintptr_t)((colour & 0xffffff00) | (alpha & 0xff)));
-	gDPSetCombineLERP(gdl++,
-			TEXEL0, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT,
-			TEXEL0, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT);
+	gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA((uintptr_t)((colour & 0xffffff00) | (alpha & 0xff))));
+	gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, 0, 0, 0, G_ACMUX_ENVIRONMENT,
+			G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, 0, 0, 0, G_ACMUX_ENVIRONMENT);
 	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 
@@ -154,8 +154,8 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, uint32_t colour, uint32_t alpha)
 
 	gfx_Set_Framebuffer_Texture_EXT(gdl++, 0, 0, 0, (uintptr_t)g_BlurFb);
 	gdl += gfx_Image_Rectangle_EXT(gdl,
-		viewleft * 4, viewtop * 4, viewleft, viewtop,
-		(viewleft + viewwidth) * 4, (viewtop + viewheight) * 4, viewleft + viewwidth, viewtop + viewheight,
+		viewleft, viewtop, viewleft, viewtop,
+		(viewleft + viewwidth), (viewtop + viewheight), viewleft + viewwidth, viewtop + viewheight,
 		0, videoGetNativeWidth(), videoGetNativeHeight());
 
 	return gdl;
@@ -174,9 +174,9 @@ Gfx *bviewDrawStatic(Gfx *gdl, uint32_t arg1, int arg2)
 
 	gdl = bviewPrepareStaticI8(gdl, arg1, arg2);
 
-	gDPSetCombineLERP(gdl++,
-			NOISE, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT,
-			NOISE, 0, ENVIRONMENT, 0, 0, 0, 0, ENVIRONMENT);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_NOISE, 0, G_CCMUX_ENVIRONMENT, 0, 0, 0, 0, G_ACMUX_ENVIRONMENT,
+		G_CCMUX_NOISE, 0, G_CCMUX_ENVIRONMENT, 0, 0, 0, 0, G_ACMUX_ENVIRONMENT);
 	gdl += gfx_HUD_Rectangle_EXT(gdl, viewleft, viewtop, viewleft + viewwidth + 1, viewtop + viewheight + 1);
 
 	return gdl;
@@ -207,7 +207,11 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 	gSPSetExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
 
 	for (y = viewtop; y < viewtop + viewheight; y++) {
@@ -252,7 +256,11 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 
 	gdl = bviewPrepareStaticRgba16(gdl, colour, alpha);
 
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 	gSPSetExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
 
 	for (y = viewtop; y < viewtop + viewheight; y++) {
@@ -327,8 +335,8 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, uint32_t colour, int alpha, float arg3, float a
 	const int bottom = ycenter + halfh;
 	gfx_Set_Framebuffer_Texture_EXT(gdl++, 0, 0, 0, (uintptr_t)g_BlurFb);
 	gdl += gfx_Image_Rectangle_EXT(gdl,
-		left * 4, top * 4, viewleft, viewtop,
-		right * 4, bottom * 4, viewleft + viewwidth, viewtop + viewheight,
+		left, top, viewleft, viewtop,
+		right, bottom, viewleft + viewwidth, viewtop + viewheight,
 		0, videoGetNativeWidth(), videoGetNativeHeight());
 
 	return gdl;
@@ -367,8 +375,8 @@ static inline Gfx *bviewDrawFisheyeLine(Gfx *gdl, int viewleft, int viewwidth, i
 	const int right = xcenter + halfw;
 
 	gdl += gfx_Image_Rectangle_EXT(gdl,
-		left * 4, y * 4, viewleft, y,
-		right * 4, (y + 1) * 4, viewleft + viewwidth, y + 1,
+		left, y, viewleft, y,
+		right, (y + 1), viewleft + viewwidth, y + 1,
 		0, videoGetNativeWidth(), videoGetNativeHeight());
 
 	return gdl;
@@ -507,7 +515,11 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 	struct RGBA color = {0, 0, 0, 255};
 	gfx_Set_Prim_Color(gdl++, color);
 
@@ -612,7 +624,7 @@ Gfx *bviewDrawEyespySideRect(Gfx *gdl, int *points, uint8_t r, uint8_t g, uint8_
 	vertices[3].colour = 4;
 
 	gfx_Color(gdl++, colours, 2);
-	gSPVertex(gdl++, vertices, 4, 0);
+	gfx_Vertex(gdl++, vertices, 4, 0);
 
 	gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
@@ -912,7 +924,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	gdl = textRender(gdl, &x, &y, text, g_CharsHandelGothicXs, g_FontHandelGothicXs,
 			colourtextdull, colourglow, viGetWidth(), viGetHeight(), 0, 0);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	{
 		int8_t contpadnum = optionsGetContpadNum1(g_Vars.currentplayerstats->mpindex);
@@ -937,7 +949,11 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
-		gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+		gfx_Set_Combine_LERP(gdl++,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 
 		if (!vsplit)
 		{
@@ -1460,7 +1476,11 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 
 			gfx_Clear_Geometry_Mode(gdl++, G_CULL_BOTH);
 			gfx_Set_Geometry_Mode(gdl++, G_SHADE | G_SHADING_SMOOTH);
-			gDPSetCombineMode(gdl++, G_CC_SHADE, G_CC_SHADE);
+			gfx_Set_Combine_LERP(gdl++,
+				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
+				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
+				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
+				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
 			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 			gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
@@ -1598,7 +1618,11 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 
 	g_NightVisionFrameCounter++;
 
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 	gSPSetExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
 
 	for (y = viewtop; y < viewbottom; y++) {
@@ -1723,7 +1747,11 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 
 	sqinnerradius = innerradius * innerradius;
 
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 	gSPSetExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
 
 	for (i = scantop; i < scanbottom; i++) {
@@ -1923,7 +1951,7 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	gfx_Fill_Rectangle(gdl++, viewleft, viewtop, viewleft + viewwidth, lenstop);
 	gfx_Fill_Rectangle(gdl++, viewleft, lenstop + lensheight, viewleft + viewwidth, viewtop + viewheight);
 
-	gdl = textSetCCCustom02(gdl);
+	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	int index = ((int)(atan2f(-lookx, lookz) * (180.0f / M_PI) + 360 + 22) % 360) / 45;
 	index = utilsClamp(index, 0, 8);
@@ -1996,7 +2024,7 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 
 	gdl = textRenderProjected(gdl, &x, &y, directiontext,
 			g_CharsHandelGothicXs, g_FontHandelGothicXs, 0xffffff7f, viGetWidth(), viGetHeight(), 0, 0);
-	gdl = text0f153780(gdl);
+	gdl = textSetPerspAndLOD(gdl);
 
 	gdl = bviewPrepareStaticRgba16(gdl, 0xffffffff, 255);
 
@@ -2057,15 +2085,15 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 			colour = 0xffffffff;
 		}
 
-		gfx_Set_Color(gdl++, G_SETENVCOLOR, (uintptr_t)(colour));
+		gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(colour));
 
 		const float xscale = RANDOMFRAC() * range + 1;
 		const float halfwidth = viewwidth / 2.f;
 		const int left = viewleft + halfwidth * (1.f - xscale);
 		const int right = viewleft + halfwidth * (1.f + xscale);
 		gdl += gfx_Image_Rectangle_EXT(gdl,
-			0, liney * 4, viewleft, liney,
-			right * 4, (liney + 1) * 4, viewleft + viewwidth, liney + 1,
+			0, liney, viewleft, liney,
+			right, liney + 1, viewleft + viewwidth, liney + 1,
 			0, videoGetNativeWidth(), videoGetNativeHeight());
 	}
 
@@ -2097,9 +2125,13 @@ Gfx *bviewDrawIrBinoculars(Gfx *gdl)
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-	gDPSetCombineMode(gdl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-	struct RGBA color = {0, 0, 0, 255};
-	gfx_Set_Prim_Color(gdl++, color);
+	gfx_Set_Combine_LERP(gdl++,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE,
+		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_PRIMITIVE,
+		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
+	RGBA primColor = {0, 0, 0, 255};
+	gfx_Set_Prim_Color(gdl++, primColor);
 
 	for (y = viewtop; y < viewbottom; y++) {
 		int ytocentre = centrey - y;
