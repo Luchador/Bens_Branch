@@ -295,7 +295,6 @@ Gfx *sparksRender(Gfx *gdl)
 		gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gfx_Set_Combine_LERP(gdl++,
 			G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_SHADE,         // Color 0
 			G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // Alpha 0

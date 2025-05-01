@@ -575,7 +575,6 @@ MenuItemHandlerResult mpAwardsMenuHandler(int operation, struct menuitem *item, 
 					gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 					gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 					gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-					gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 					gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 					texSelect(&gdl, &g_TexGeneralConfigs[35], 2, 0, 2, 1, NULL);

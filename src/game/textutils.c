@@ -226,7 +226,6 @@ Gfx *textConfigureGfxPipeline(Gfx *gdl)
 	gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 	gfx_Set_Texture_Filter(gdl++, TEX_FILTER_2D);
 

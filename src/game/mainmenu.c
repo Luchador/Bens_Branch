@@ -1794,7 +1794,6 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 		texSelect(&gdl, g_TexGeneralConfigs + 13 + stageindex, 2, 0, 2, true, NULL);
 		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);

@@ -382,21 +382,10 @@
 #define G_TF_BILERP     (2 << G_MDSFT_TEXTFILT)
 
 /* G_SETOTHERMODE_H gSetTextureConvert */
-#define G_TC_CONV       (0 << G_MDSFT_TEXTCONV)
-#define G_TC_FILTCONV   (5 << G_MDSFT_TEXTCONV)
 #define G_TC_FILT       (6 << G_MDSFT_TEXTCONV)
 
 /* G_SETOTHERMODE_H gSetCombineKey */
 #define G_CK_NONE       (0 << G_MDSFT_COMBKEY)
-#define G_CK_KEY        (1 << G_MDSFT_COMBKEY)
-
-/* G_SETOTHERMODE_H gSetColorDither */
-#define G_CD_MAGICSQ    (0 << G_MDSFT_RGBDITHER)
-#define G_CD_BAYER      (1 << G_MDSFT_RGBDITHER)
-#define G_CD_NOISE      (2 << G_MDSFT_RGBDITHER)
-
-#define G_CD_DISABLE    (3 << G_MDSFT_RGBDITHER)
-#define G_CD_ENABLE     G_CD_NOISE /* HW 1.0 compatibility mode */
 
 /* G_SETOTHERMODE_H gSetAlphaDither */
 #define G_AD_PATTERN    (0 << G_MDSFT_ALPHADITHER)

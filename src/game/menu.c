@@ -1777,9 +1777,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 		gfx_Set_Combine_LERP(
 			gdl++,
@@ -2224,9 +2222,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 		gfx_Set_Combine_LERP(
 			gdl++,
@@ -4754,9 +4750,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-			gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-			gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 			gfx_Set_Combine_LERP(
 				gdl++,
@@ -4783,9 +4777,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-			gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-			gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 			gfx_Set_Combine_LERP(
 				gdl++,
@@ -4816,9 +4808,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 					gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 					gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 					gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-					gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 					gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-					gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 					gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 					gfx_Set_Combine_LERP(
 						gdl++,
@@ -4847,9 +4837,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-			gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-			gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 			gfx_Set_Combine_LERP(
 				gdl++,
@@ -4889,10 +4877,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 				gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 				gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 				gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-				gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 				gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-				gfx_Set_Combine_Key(gdl++, G_CK_NONE);
-				gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 				gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 				gfx_Set_Combine_LERP(
 					gdl++,
@@ -4954,9 +4939,7 @@ Gfx *menuRender(Gfx *gdl)
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-	gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 	gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 	gfx_Set_Combine_LERP(
 		gdl++,
@@ -5114,9 +5097,7 @@ Gfx *menuRender(Gfx *gdl)
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 		gfx_Set_Combine_LERP(
 			gdl++,

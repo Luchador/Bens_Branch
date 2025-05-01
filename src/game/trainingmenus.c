@@ -156,7 +156,6 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 		texSelect(&gdl, &g_TexGeneralConfigs[35], 2, 0, 2, 1, NULL);
@@ -598,7 +597,6 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 		texSelect(&gdl, tconfig, 2, 0, 2, 1, NULL);
@@ -2382,7 +2380,6 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 			gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 			gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-			gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 			texSelect(&gdl, &g_TexGeneralConfigs[texturenum], 1, 0, 2, 1, NULL);
 

@@ -740,7 +740,6 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
 	gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
-	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
@@ -782,7 +781,6 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
 	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 
 	return gdl;

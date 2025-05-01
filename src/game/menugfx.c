@@ -492,13 +492,11 @@ Gfx *menugfx0f0e2348(Gfx *gdl)
 	gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 	gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gfx_Set_Combine_LERP(gdl++,
 		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
 		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE,              // Alpha 0
 		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
 		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
-	gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gfx_Set_Render_Mode(gdl++, G_RM_ZB_OPA_SURF, G_RM_ZB_OPA_SURF2);
 	gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
@@ -1286,7 +1284,6 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 	gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 	gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-	gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 	gfx_Set_Combine_LERP(gdl++,
 		G_CCMUX_0, G_CCMUX_0, G_CCMUX_0, G_CCMUX_SHADE,         // Color 0
 		G_ACMUX_TEXEL0, G_ACMUX_0, G_ACMUX_SHADE, G_ACMUX_0,    // Alpha 0

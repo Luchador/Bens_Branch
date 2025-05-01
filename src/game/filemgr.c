@@ -2150,7 +2150,6 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(int operation, struct me
 		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 		gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 		texSelect(&gdl, &g_TexGeneralConfigs[texturenum], 2, 0, 2, 1, NULL);
 

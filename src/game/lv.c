@@ -851,6 +851,8 @@ Gfx *lvRenderFPS(Gfx *gdl)
 Gfx *lvRender(Gfx *gdl)
 {
 	gfx_Segment(gdl++, SPSEGMENT_PHYSICAL, 0x00000000);
+	gfx_Set_Combine_Key(gdl++, G_CK_NONE); // PD doesn't use chroma keying at all, so this only has to be set once
+	gfx_Set_Texture_Convert(gdl++, G_TC_FILT); // This function is never called with anything other than G_TC_FILT in PD, so we only need to call it once
 
 	savebufferResetVp();
 
@@ -860,9 +862,7 @@ Gfx *lvRender(Gfx *gdl)
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 		gfx_Set_Combine_LERP(gdl++,
 			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
@@ -886,9 +886,7 @@ Gfx *lvRender(Gfx *gdl)
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 		gfx_Set_Combine_LERP(gdl++,
 			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
@@ -914,9 +912,7 @@ Gfx *lvRender(Gfx *gdl)
 		gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 		gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-		gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-		gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 		gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 		gfx_Set_Combine_LERP(gdl++,
 			G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0
@@ -1003,9 +999,7 @@ Gfx *lvRender(Gfx *gdl)
 			gfx_Set_Texture_LUT(gdl++, G_TT_NONE);
 			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 			gfx_Set_Texture_Filter(gdl++, G_TF_BILERP);
-			gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 			gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
-			gfx_Set_Combine_Key(gdl++, G_CK_NONE);
 			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 			gfx_Set_Combine_LERP(gdl++,
 				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 0

@@ -220,7 +220,6 @@ Gfx *titleRenderLegal(Gfx *gdl)
 				gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 				gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 				gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-				gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 				texSelect(&gdl, &g_TexGeneralConfigs[47], 1, 0, 2, 1, 0);
 
@@ -246,7 +245,6 @@ Gfx *titleRenderLegal(Gfx *gdl)
 				gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 				gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
 				gfx_Set_Texture_LOD(gdl++, G_TL_TILE);
-				gfx_Set_Texture_Convert(gdl++, G_TC_FILT);
 
 				texSelect(&gdl, &g_TexGeneralConfigs[49], 1, 0, 2, 1, 0);
 
