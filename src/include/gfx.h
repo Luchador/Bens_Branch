@@ -65,8 +65,7 @@ void gfx_Fill_Rectangle(Gfx *pkt, int32_t ulx, int32_t uly, int32_t lrx, int32_t
 int  gfx_Fill_Rectangle_Wide_EXT(Gfx *pkt, uint32_t ulx, uint32_t uly, uint32_t lrx, uint32_t lry);
 void gfx_HUD_Rectangle(Gfx *pkt, int32_t ulx, int32_t uly, int32_t lrx, int32_t lry);
 int  gfx_HUD_Rectangle_EXT(Gfx *pkt, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
-int  gfx_Texture_Rectangle(Gfx *pkt, uint16_t xl, uint16_t yl, uint16_t xh, uint16_t yh, uint8_t tile, uint16_t s, uint16_t t, uint16_t dsdx, uint16_t dtdy);
-int  gfx_Texture_Rectangle_Flip(Gfx *pkt, uint16_t xl, uint16_t yl, uint16_t xh, uint16_t yh, uint8_t tile, uint16_t s, uint16_t t, uint16_t dsdx, uint16_t dtdy);
+int  gfx_Texture_Rectangle(Gfx *pkt, int32_t xl, int32_t yl, int32_t xh, int32_t yh, uint8_t tile, int32_t s, int32_t t, int32_t dsdx, int32_t dtdy, bool flip);
 int  gfx_Image_Rectangle_EXT(Gfx *pkt, uint16_t x0, uint16_t y0, uint16_t s0, uint16_t t0, uint16_t x1, uint16_t y1, uint16_t s1, uint16_t t1, uint8_t tile, uint16_t iw, uint16_t ih);
 void gfx_Set_Subpixel_Offset_EXT(Gfx *pkt, int16_t x, int16_t y);
 void gfx_Color(Gfx *pkt, const Col *colors, uint32_t count);

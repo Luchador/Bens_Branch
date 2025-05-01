@@ -2639,52 +2639,35 @@ extern "C" int gfx_HUD_Rectangle_EXT(Gfx *pkt, uint32_t x1, uint32_t y1, uint32_
     return gfx_Fill_Rectangle_Wide_EXT(pkt, x1, y1, x2 + 1, y2 + 1);
 }
 
-extern "C" int gfx_Texture_Rectangle(Gfx *pkt, uint16_t xl, uint16_t yl, uint16_t xh, uint16_t yh, uint8_t tile, uint16_t s, uint16_t t, uint16_t dsdx, uint16_t dtdy)
+
+extern "C" int gfx_Texture_Rectangle(Gfx *pkt, int32_t xl, int32_t yl, int32_t xh, int32_t yh, uint8_t tile, int32_t s, int32_t t, int32_t dsdx, int32_t dtdy, bool flip)
 {
-    // First command: G_TEXRECT
-    pkt[0].words.w0 = ((uint32_t)G_TEXRECT << 24) |
-    ((uint32_t)xh << 12) |
-    ((uint32_t)yh << 0);
+	uint32_t opcode = flip ? G_TEXRECTFLIP : G_TEXRECT;
 
-    pkt[0].words.w1 = ((uint32_t)tile << 24) |
-    ((uint32_t)xl << 12) |
-    ((uint32_t)yl << 0);
+	// First command: TEXRECT or TEXRECTFLIP
+	pkt[0].words.w0 =
+		(opcode << 24) |
+		((uint32_t)(xh & 0x0FFF) << 12) |
+		((uint32_t)(yh & 0x0FFF));
 
-    // Second command: G_RDPHALF_1
-    pkt[1].words.w0 = ((uint32_t)G_RDPHALF_1 << 24);
-    pkt[1].words.w1 = ((uint32_t)s << 16) |
-    ((uint32_t)t << 0);
+	pkt[0].words.w1 =
+		((uint32_t)tile << 24) |
+		((uint32_t)(xl & 0x0FFF) << 12) |
+		((uint32_t)(yl & 0x0FFF));
 
-    // Third command: G_RDPHALF_2
-    pkt[2].words.w0 = ((uint32_t)G_RDPHALF_2 << 24);
-    pkt[2].words.w1 = ((uint32_t)dsdx << 16) |
-    ((uint32_t)dtdy << 0);
+	// Second command: G_RDPHALF_1 (This command doesn't actually matter)
+	pkt[1].words.w0 = (G_RDPHALF_1 << 24);
+	pkt[1].words.w1 =
+		((uint32_t)(s & 0xFFFF) << 16) |
+		((uint32_t)(t & 0xFFFF));
 
-    return 3; // This function writes 3 Gfx packets
-}
+	// Third command: G_RDPHALF_2 (This command doesn't actually matter)
+	pkt[2].words.w0 = (G_RDPHALF_2 << 24);
+	pkt[2].words.w1 =
+		((uint32_t)(dsdx & 0xFFFF) << 16) |
+		((uint32_t)(dtdy & 0xFFFF));
 
-extern "C" int gfx_Texture_Rectangle_Flip(Gfx *pkt, uint16_t xl, uint16_t yl, uint16_t xh, uint16_t yh, uint8_t tile, uint16_t s, uint16_t t, uint16_t dsdx, uint16_t dtdy)
-{
-    // First packet: G_TEXRECTFLIP
-    pkt[0].words.w0 = ((uint32_t)G_TEXRECTFLIP << 24) |
-    ((uint32_t)xh << 12) |
-    ((uint32_t)yh << 0);
-
-    pkt[0].words.w1 = ((uint32_t)tile << 24) |
-    ((uint32_t)xl << 12) |
-    ((uint32_t)yl << 0);
-
-    // Second packet: G_RDPHALF_1
-    pkt[1].words.w0 = ((uint32_t)G_RDPHALF_1 << 24);
-    pkt[1].words.w1 = ((uint32_t)(uint16_t)s << 16) |
-    ((uint32_t)(uint16_t)t << 0);
-
-    // Third packet: G_RDPHALF_2
-    pkt[2].words.w0 = ((uint32_t)G_RDPHALF_2 << 24);
-    pkt[2].words.w1 = ((uint32_t)(uint16_t)dsdx << 16) |
-    ((uint32_t)(uint16_t)dtdy << 0);
-
-    return 3; // This function writes 3 Gfx packets
+	return 3;
 }
 
 extern "C" int gfx_Image_Rectangle_EXT(Gfx *pkt, uint16_t x0, uint16_t y0, uint16_t s0, uint16_t t0, uint16_t x1, uint16_t y1, uint16_t s1, uint16_t t1, uint8_t tile, uint16_t iw, uint16_t ih)

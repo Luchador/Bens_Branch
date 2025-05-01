@@ -170,7 +170,7 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 			gdl += gfx_Texture_Rectangle(gdl,
 					s4 << 2, 0,
 					(s4 + 3) << 2, 0,
-					G_TX_RENDERTILE, (artifacts[i].screenPos.screenX * 32) + 16, 0x0010, 0x1000, 0);
+					G_TX_RENDERTILE, (artifacts[i].screenPos.screenX * 32) + 16, 0x0010, 0x1000, 0, false);
 
 			artifacts[i].screenPos.outputPixelPtr = s2;
 			s4++;

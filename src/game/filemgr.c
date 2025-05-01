@@ -2167,7 +2167,7 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(int operation, struct me
 				(renderdata->y + 2) << 2,
 				((renderdata->x + 60) << 2),
 				(renderdata->y + 38) << 2,
-				G_TX_RENDERTILE, 0, 1152, 1024, -1024);
+				G_TX_RENDERTILE, 0, 1152, 1024, -1024, false);
 
 		x = renderdata->x + 62;
 		y = renderdata->y + 4;

@@ -253,7 +253,7 @@ void menuTick(void)
 		g_IsAnyMenuOpen = true;
 
 		if (g_MenuData.root == MENUROOT_MPSETUP) {
-			if (g_MenuData.unk008 == -1) {
+			if (g_MenuData.prevmenuroot == -1) {
 				g_MpSetup.chrslots &= 0xfff0;
 			}
 
@@ -263,7 +263,7 @@ void menuTick(void)
 				if (g_Menus[i].curdialog) {
 					g_Menus[i].playernum = g_MpNumJoined++;
 
-					if (g_MenuData.unk008 == -1) {
+					if (g_MenuData.prevmenuroot == -1) {
 						g_MpSetup.chrslots |= (1 << i);
 					}
 				}
@@ -426,20 +426,20 @@ void menuTick(void)
 		}
 	}
 
-	if ((g_MenuData.unk5d5_06 || g_MenuData.unk008 != -1) && sp344 == false) {
+	if ((g_MenuData.unk5d5_06 || g_MenuData.prevmenuroot != -1) && sp344 == false) {
 		if ((g_MenuData.root == MENUROOT_MPSETUP)
-				&& g_MenuData.unk008 == -1) {
+				&& g_MenuData.prevmenuroot == -1) {
 			if (g_Vars.mpsetupmenu == MPSETUPMENU_GENERAL) {
-				g_MenuData.unk008 = MENUROOT_MAINMENU;
-				g_MenuData.unk00c = &g_CiMenuViaPcMenuDialog;
+				g_MenuData.prevmenuroot = MENUROOT_MAINMENU;
+				g_MenuData.prevmenudialog = &g_CiMenuViaPcMenuDialog;
 			} else {
-				g_MenuData.unk008 = MENUROOT_MPSETUP;
-				g_MenuData.unk00c = &g_CombatSimulatorMenuDialog;
+				g_MenuData.prevmenuroot = MENUROOT_MPSETUP;
+				g_MenuData.prevmenudialog = &g_CombatSimulatorMenuDialog;
 			}
 		}
 
-		if (g_MenuData.unk008 != -1) {
-			if (g_MenuData.unk008 == -5) {
+		if (g_MenuData.prevmenuroot != -1) {
+			if (g_MenuData.prevmenuroot == -5) {
 				// Match is beginning
 				mpStartMatch();
 				menuStop();
@@ -448,7 +448,7 @@ void menuTick(void)
 					bossfileSave();
 					g_Vars.modifiedfiles &= ~MODFILE_MPSETUP;
 				}
-			} else if (g_MenuData.unk008 == -6) {
+			} else if (g_MenuData.prevmenuroot == -6) {
 				// Match is ending
 				int playernum = 0;
 
@@ -491,7 +491,7 @@ void menuTick(void)
 						playernum++;
 					}
 				}
-			} else if (g_MenuData.unk008 == -7) {
+			} else if (g_MenuData.prevmenuroot == -7) {
 				menuStop();
 				g_FileState = FILESTATE_CHANGINGAGENT;
 				gamefileLoadDefaults(&g_GameFile);
@@ -500,7 +500,7 @@ void menuTick(void)
 				musicQueueStopAllEvent();
 			} else {
 				bool startmusic = false;
-				menuPushRootDialog(g_MenuData.unk00c, g_MenuData.unk008);
+				menuPushRootDialog(g_MenuData.prevmenudialog, g_MenuData.prevmenuroot);
 				sp344 = true;
 
 				if (g_MenuData.root == MENUROOT_MPSETUP) {
@@ -527,8 +527,8 @@ void menuTick(void)
 				}
 			}
 
-			g_MenuData.unk00c = NULL;
-			g_MenuData.unk008 = -1;
+			g_MenuData.prevmenudialog = NULL;
+			g_MenuData.prevmenuroot = -1;
 		} else {
 			switch (g_MenuData.root) {
 			case MENUROOT_ENDSCREEN:

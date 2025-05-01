@@ -3735,7 +3735,7 @@ Gfx *menuitemControllerRenderLine(Gfx *gdl, int speed, int x1, int y1, int x2, i
 			G_TX_RENDERTILE,
 			speed * 32,
 			(y1 % 4) * 32,
-			1024, 1024);
+			1024, 1024, false);
 
 	return gdl;
 }
@@ -3769,7 +3769,7 @@ Gfx *menuitemControllerRenderTexture(Gfx *gdl, int x, int y, int texturenum, uin
 	gdl += gfx_Texture_Rectangle(gdl,
 			(x << 2), y << 2,
 			((x + 32) << 2), (y + 32) << 2,
-			0, 16, 1008, 1024, 0xfc00);
+			0, 16, 1008, 1024, 0xfc00, false);
 
 	return gdl;
 }

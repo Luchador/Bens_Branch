@@ -202,7 +202,7 @@ void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *screensize,
 				}
 			}
 
-			gdl += gfx_Texture_Rectangle(gdl, xl, yl, xh, yh, 0, s, t, dsdx, dtdy);
+			gdl += gfx_Texture_Rectangle(gdl, xl, yl, xh, yh, 0, s, t, dsdx, dtdy, false);
 		}
 
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);

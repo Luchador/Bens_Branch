@@ -198,7 +198,7 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 			gdl += gfx_Texture_Rectangle(gdl,
 					(((renderdata->x + i * 13) + 125) << 2), (renderdata->y) << 2,
 					(((renderdata->x + i * 13) + 136) << 2), (renderdata->y + 11) << 2,
-					G_TX_RENDERTILE, 0, 0x0160, 1024, -1024);
+					G_TX_RENDERTILE, 0, 0x0160, 1024, -1024, false);
 		}
 
 		return (uintptr_t)gdl;
@@ -622,25 +622,25 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 		gdl += gfx_Texture_Rectangle(gdl,
 				((renderdata->x + 10) << 2), (renderdata->y + 5) << 2,
 				((renderdata->x + 42) << 2), (renderdata->y + 37) << 2,
-				G_TX_RENDERTILE, 16, 1024, 1024, -1024);
+				G_TX_RENDERTILE, 16, 1024, 1024, -1024, false);
 
 		// Top right quarter of target
 		gdl += gfx_Texture_Rectangle(gdl,
 				((renderdata->x + 41) << 2), (renderdata->y + 5) << 2,
 				((renderdata->x + 73) << 2), (renderdata->y + 37) << 2,
-				G_TX_RENDERTILE, 16, 1024, -1024, -1024);
+				G_TX_RENDERTILE, 16, 1024, -1024, -1024, false);
 
 		// Bottom left quarter of target
 		gdl += gfx_Texture_Rectangle(gdl,
 				((renderdata->x + 10) << 2), (renderdata->y + 36) << 2,
 				((renderdata->x + 42) << 2), (renderdata->y + 68) << 2,
-				G_TX_RENDERTILE, 16, 1024, 1024, 1024);
+				G_TX_RENDERTILE, 16, 1024, 1024, 1024, false);
 
 		// Bottom right quarter of target
 		gdl += gfx_Texture_Rectangle(gdl,
 				((renderdata->x + 41) << 2), (renderdata->y + 36) << 2,
 				((renderdata->x + 73) << 2), (renderdata->y + 68) << 2,
-				G_TX_RENDERTILE, 16, 1024, -1024, 1024);
+				G_TX_RENDERTILE, 16, 1024, -1024, 1024, false);
 
 		gdl = textSetPrimColour(gdl, ((failed ? 0xff000055 : 0x00ff0055) & 0xffffff00) | (((failed ? 0xff000055 : 0x00ff0055) & 0xff) * (renderdata->colour & 0xff) >> 8));
 		colour = ((failed ? 0xff6969aa : renderdata->colour) & 0xffffff00) | ((((failed ? 0xff6969aa : renderdata->colour) & 0xff) * (renderdata->colour & 0xff)) >> 8);
@@ -2397,7 +2397,7 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 			gdl += gfx_Texture_Rectangle(gdl,
 					((renderdata->x + 6) << 2), (renderdata->y + 3) << 2,
 					((renderdata->x + 60) << 2), (renderdata->y + 39) << 2,
-					G_TX_RENDERTILE, 0, 0x0480, 1024, -1024);
+					G_TX_RENDERTILE, 0, 0x0480, 1024, -1024, false);
 
 			leftmargin = -1;
 		} else {

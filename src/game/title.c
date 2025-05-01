@@ -237,7 +237,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 						elem->y << 2,
 						(elem->x + 64) << 2,
 						(elem->y + 24) << 2,
-						G_TX_RENDERTILE, 0, 0x0300, 0x0400, -0x0400);
+						G_TX_RENDERTILE, 0, 0x0300, 0x0400, -0x0400, false);
 
 				gdl = textConfigureGfxPipeline(gdl);
 			} else if (elem->type == LEGALELEMENTTYPE_RARELOGO) {
@@ -263,7 +263,7 @@ Gfx *titleRenderLegal(Gfx *gdl)
 						elem->y << 2,
 						(elem->x + 32) << 2,
 						(elem->y + 42) << 2,
-						G_TX_RENDERTILE, 0, 0x0540, 0x0400, -0x0400);
+						G_TX_RENDERTILE, 0, 0x0540, 0x0400, -0x0400, false);
 
 				gdl = textConfigureGfxPipeline(gdl);
 			} else {

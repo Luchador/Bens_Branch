@@ -1811,7 +1811,7 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 		gdl += gfx_Texture_Rectangle(gdl,
 				((renderdata->x + 4) << 2), (renderdata->y + 3) << 2,
 				((renderdata->x + 60) << 2), (renderdata->y + 39) << 2,
-				G_TX_RENDERTILE, 0, 0x0480, 1024, -1024);
+				G_TX_RENDERTILE, 0, 0x0480, 1024, -1024, false);
 
 		if (g_MissionConfig.isanti) {
 			// No stars
@@ -1843,7 +1843,7 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 				gdl += gfx_Texture_Rectangle(gdl,
 						((renderdata->x + relx) << 2), (renderdata->y + 25) << 2,
 						((renderdata->x + relx + 14) << 2), (renderdata->y + 39) << 2,
-						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024);
+						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024, false);
 			}
 		} else {
 			texSelect(&gdl, &g_TexGeneralConfigs[34], 2, 0, 2, true, NULL);
@@ -1879,7 +1879,7 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 				gdl += gfx_Texture_Rectangle(gdl,
 						((renderdata->x + relx) << 2), (renderdata->y + 25) << 2,
 						((renderdata->x + relx + 14) << 2), (renderdata->y + 39) << 2,
-						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024);
+						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024, false);
 			}
 		}
 

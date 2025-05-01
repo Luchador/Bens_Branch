@@ -1197,8 +1197,6 @@ int dialogChangeItemFocusHorizontally(struct menudialog *dialog, int leftright)
 	return swipedir;
 }
 
-#ifndef PLATFORM_N64
-
 bool dialogChangeItemFocusWithMouse(struct menudialog *dialog, int mx, int my)
 {
 	struct menu *menu = &g_Menus[g_MpPlayerNum];
@@ -1237,20 +1235,14 @@ bool dialogChangeItemFocusWithMouse(struct menudialog *dialog, int mx, int my)
 	return false;
 }
 
-#endif
-
 int dialogChangeItemFocus(struct menudialog *dialog, struct menuinputs *inputs)
 {
 	int swipedir = 0;
 
 	if (inputs->leftright == 0 && inputs->updown == 0) {
-#ifndef PLATFORM_N64
 		if (!dialogChangeItemFocusWithMouse(dialog, inputs->mousex, inputs->mousey)) {
 			return 0;
 		}
-#else
-		return 0;
-#endif
 	}
 
 	if (inputs->updown != 0) {
@@ -1398,8 +1390,6 @@ void menuPushDialog(struct menudialogdef *dialogdef)
 					sibling = sibling->nextsibling;
 				}
 			}
-
-			if (sibling);
 
 			menuPlaySound(MENUSOUND_OPENDIALOG);
 
@@ -3239,8 +3229,8 @@ void menuResetAllDialogsAndSetNewRoot(struct menudialogdef *dialogdef, int root)
 
 	g_MpPlayerNum = prevplayernum;
 
-	g_MenuData.unk008 = root;
-	g_MenuData.unk00c = dialogdef;
+	g_MenuData.prevmenuroot = root;
+	g_MenuData.prevmenudialog = dialogdef;
 }
 
 void menuSetBackground(int bg)
@@ -3311,7 +3301,7 @@ void menuPushRootDialog(struct menudialogdef *dialogdef, int root)
 	g_Menus[g_MpPlayerNum].unk820 = 1;
 
 	g_MenuData.root = root;
-	g_MenuData.unk008 = -1;
+	g_MenuData.prevmenuroot = -1;
 	g_MenuData.unk5d5_02 = false;
 
 	if (root == MENUROOT_MAINMENU
@@ -3578,8 +3568,8 @@ void menuReset(void)
 	}
 
 	g_MenuData.unk668 = -1;
-	g_MenuData.unk00c = 0;
-	g_MenuData.unk008 = -1;
+	g_MenuData.prevmenudialog = 0;
+	g_MenuData.prevmenuroot = -1;
 	g_MenuData.count = 0;
 	g_MenuData.root = 0;
 	g_MenuData.unk010 = 0;
