@@ -436,10 +436,6 @@ bool modelasm00018680(struct modelrenderdata *renderdata, struct model *model)
 			rwdata = modelasmGetNodeRwData(model, node, sp7f8);
 			f0 = 0;
 
-			if (!g_ModelDistanceDisabled && t0mtx) {
-				f0 = -(*t0mtx)[3][2] * g_Vars.currentplayer->c_lodscalez * g_ModelDistanceScale;
-			}
-
 			if ((node->rodata->distance.near == 0.0f || f0 > node->rodata->distance.near * model->scale)
 					&& f0 <= node->rodata->distance.far * model->scale) {
 				rwdata->distance.visible = true;

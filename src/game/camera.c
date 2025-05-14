@@ -4,6 +4,7 @@
 #include "constants.h"
 #include "game/camera.h"
 #include "game/tex.h"
+#include "game/player.h"
 #include "game/playermgr.h"
 #include "game/bg.h"
 #include "game/texdecompress.h"
@@ -49,9 +50,9 @@ void camSetPerspective(float fovy, float aspect)
 }
 
 // Used by the FarSight
-float camGetEraserFOV(float arg0)
+float camGetEraserFOV(float autoeraserdist)
 {
-	float result = atan2f(g_Vars.currentplayer->c_scalelod60 * arg0 * g_Vars.currentplayer->c_halfheight, 1.0f);
+	float result = atan2f(sinf(0.52359879016876f) / (cosf(0.52359879016876f) * 120.0f) * autoeraserdist * g_Vars.currentplayer->c_halfheight, 1.0f);
 	result *= 114.591552f;
 
 	result = fabsf(result);
@@ -63,39 +64,15 @@ void camSetScale(void)
 {
 	struct player *player = g_Vars.currentplayer;
 	float fVar4;
-	float tmp;
-	float fVar5;
-	float fVar2;
 
 	player->c_scaley = sinf(player->c_perspfovy * (M_PI / 360.0f)) / (cosf(player->c_perspfovy * (M_PI / 360.0f)) * player->c_halfheight);
-	player->c_scalelod = player->c_scaley;
 	player->c_scalex = (player->c_scaley * player->c_perspaspect * player->c_halfheight) / player->c_halfwidth;
 
 	player->c_recipscalex = 1.0f / player->c_scalex;
 	player->c_recipscaley = 1.0f / player->c_scaley;
 
 	fVar4 = sinf(0.52359879016876f) / (cosf(0.52359879016876f) * 120.0f);
-	player->c_scalelod60 = fVar4;
-	player->c_lodscalez = player->c_scalelod / fVar4;
-	tmp = player->c_lodscalez * 65536.0f;
-
-	if (tmp > 4294967296.0f) {
-		player->c_lodscalezu32 = 0xffffffff;
-	} else {
-		player->c_lodscalezu32 = tmp;
-	}
-
-	fVar2 = player->c_halfheight * player->c_scaley;
-	fVar4 = 1.0f / sqrtf(fVar2 * fVar2 + 1.0f);
-	player->c_cameratopnorm.x = 0;
-	player->c_cameratopnorm.y = fVar4;
-	player->c_cameratopnorm.z = fVar2 * fVar4;
-
-	fVar5 = -player->c_halfwidth * player->c_scalex;
-	fVar4 = 1.0f / sqrtf(fVar5 * fVar5 + 1.0f);
-	player->c_cameraleftnorm.x = -fVar4;
-	player->c_cameraleftnorm.y = 0;
-	player->c_cameraleftnorm.z = -fVar5 * fVar4;
+	player->c_lodscalez = player->c_scaley / fVar4;
 }
 
 void camProjectScreenToWorldDir(float pos2d[2], struct coord *dir2d, float desiredLength)
@@ -178,11 +155,6 @@ void camProjectWithZoomAndAspect(struct coord *arg0, float arg1[2], float zoom, 
 void camSetArtifactMtx(Mtx *mtx)
 {
 	g_Vars.currentplayer->artifactMtx = mtx;
-}
-
-Mtx *camGetArtifactMtx(void)
-{
-	return g_Vars.currentplayer->artifactMtx;
 }
 
 void camSetPerspectiveMtxL(Mtx *mtx)

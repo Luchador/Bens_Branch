@@ -1,4 +1,4 @@
-#include <ultra64.h>
+#include <stdlib.h>
 #include <math.h>
 #include "constants.h"
 #include "game/chraction.h"
@@ -369,10 +369,6 @@ void dyntexSetCurrentRoom(RoomNum roomnum)
 
 void dyntexReset(void)
 {
-	uint32_t size3;
-	uint32_t size2;
-	uint32_t size1;
-
 	g_DyntexCurRoom = -1;
 	g_DyntexCurType = -1;
 	g_DyntexRoomPopulated = false;
@@ -384,17 +380,26 @@ void dyntexReset(void)
 	g_DyntexTypesMax = 50;
 	g_DyntexRoomsMax = 50;
 
-	size1 = ALIGN64(g_DyntexTypesMax * sizeof(struct dyntextype));
-	g_DyntexTypes = mempAlloc(size1, MEMPOOL_STAGE);
+	g_DyntexTypes = malloc(g_DyntexTypesMax * sizeof(struct dyntextype));
 
-	size2 = ALIGN64(g_DyntexVerticesMax * sizeof(struct dyntexvtx));
-	g_DyntexVertices = mempAlloc(size2, MEMPOOL_STAGE);
+	g_DyntexVertices = malloc(g_DyntexVerticesMax * sizeof(struct dyntexvtx));
 
-	size3 = ALIGN64(g_DyntexRoomsMax * sizeof(struct dyntexroom));
-	g_DyntexRooms = mempAlloc(size3, MEMPOOL_STAGE);
+	g_DyntexRooms = malloc(g_DyntexRoomsMax * sizeof(struct dyntexroom));
 }
 
 bool dyntexHasRoom(void)
 {
 	return g_DyntexCurRoom >= 0;
+}
+
+void dyntexStop(void)
+{
+	free(g_DyntexTypes);
+	g_DyntexTypes = NULL;
+
+	free(g_DyntexVertices);
+	g_DyntexVertices = NULL;
+
+	free(g_DyntexRooms);
+	g_DyntexRooms = NULL;
 }

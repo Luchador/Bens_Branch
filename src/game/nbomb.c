@@ -36,18 +36,15 @@ bool g_NbombsActive = false;
 float g_SphereRadius = 2000.0f;
 
 // if (secondhalf && vertices[i].t == 0) fixes texture seam when atan2f(src.x, src.z) returns 0
-#define MAKEVERTEX(i, src) \
-	vertices[i].x = src.x * g_SphereRadius; \
-	vertices[i].y = src.y * g_SphereRadius; \
-	vertices[i].z = src.z * g_SphereRadius; \
-	vertices[i].s = src.y * 256.0f * 32.0f; \
-	vertices[i].t = atan2f(src.x, src.z) / M_TAU * 256.0f * 32.0f; \
-	vertices[i].colour = 0; \
-\
-	if (secondhalf && vertices[i].t == 0) { \
-	} \
-\
-	vertices[i].t += g_TCoordOffset; // scrolls the T coord around the sphere but honestly I can't see much difference when this is commented out
+static inline void makeVertex(VtxF *vertices, int i, struct coord src) {
+	vertices[i].x = src.x * g_SphereRadius;
+	vertices[i].y = src.y * g_SphereRadius;
+	vertices[i].z = src.z * g_SphereRadius;
+	vertices[i].s = src.y * 256.0f * 32.0f; // TODOF
+	vertices[i].t = atan2f(src.x, src.z) / M_TAU * 256.0f * 32.0f; // TODOF
+	vertices[i].colour = 0;
+	vertices[i].t += g_TCoordOffset;
+}
 
 Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, struct coord *arg3, uint8_t arg4, uint8_t arg5, uint8_t arg6, uint8_t arg7, int8_t depth)
 {
@@ -55,7 +52,7 @@ Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, 
 	struct coord sp70;
 	struct coord sp64;
 	float dist;
-	Vtx *vertices;
+	VtxF *vertices;
 
 	sp7c.x = arg2->x + arg1->x;
 	sp7c.y = arg2->y + arg1->y;
@@ -87,13 +84,13 @@ Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, 
 	sp64.y /= dist;
 	sp64.z /= dist;
 
-	vertices = gfxAllocateVertices(3);
+	vertices = gfxAllocateVerticesF(3);
 
-	MAKEVERTEX(0, sp7c);
-	MAKEVERTEX(1, sp70);
-	MAKEVERTEX(2, sp64);
+	makeVertex(vertices, 0, sp7c);
+	makeVertex(vertices, 1, sp70);
+	makeVertex(vertices, 2, sp64);
 
-	gfx_Vertex(gdl++, vertices, 3, arg7);
+	gfx_VertexF(gdl++, vertices, 3, arg7);
 
 	if (depth == 0) {
 		gfx_Tri4(gdl++,
@@ -113,7 +110,7 @@ Gfx *nbombCreateSphereSegment(Gfx *gdl, struct coord *arg1, struct coord *arg2, 
 
 Gfx *nbombCreateSphere(Gfx *gdl, int depth)
 {
-	Vtx *vertices;
+	VtxF *vertices;
 	struct coord sp5c[] = {
 		{ 0,  0,  1  },
 		{ 1,  0,  0  },
@@ -125,17 +122,17 @@ Gfx *nbombCreateSphere(Gfx *gdl, int depth)
 
 	secondhalf = false;
 
-	vertices = gfxAllocateVertices(6);
+	vertices = gfxAllocateVerticesF(6);
 
 	// Make one half of the sphere
-	MAKEVERTEX(0, sp5c[0]);
-	MAKEVERTEX(1, sp5c[1]);
-	MAKEVERTEX(2, sp5c[2]);
-	MAKEVERTEX(3, sp5c[3]);
-	MAKEVERTEX(4, sp5c[4]);
-	MAKEVERTEX(5, sp5c[5]);
+	makeVertex(vertices, 0, sp5c[0]);
+	makeVertex(vertices, 1, sp5c[1]);
+	makeVertex(vertices, 2, sp5c[2]);
+	makeVertex(vertices, 3, sp5c[3]);
+	makeVertex(vertices, 4, sp5c[4]);
+	makeVertex(vertices, 5, sp5c[5]);
 
-	gfx_Vertex(gdl++, vertices, 6, 0);
+	gfx_VertexF(gdl++, vertices, 6, 0);
 
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[0], &sp5c[4], &sp5c[1], 0, 4, 1, 6, depth);
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[1], &sp5c[4], &sp5c[2], 1, 4, 2, 6, depth);
@@ -144,17 +141,17 @@ Gfx *nbombCreateSphere(Gfx *gdl, int depth)
 
 	secondhalf = true;
 
-	vertices = gfxAllocateVertices(6);
+	vertices = gfxAllocateVerticesF(6);
 
 	// Make the other half of the sphere
-	MAKEVERTEX(0, sp5c[0]);
-	MAKEVERTEX(1, sp5c[1]);
-	MAKEVERTEX(2, sp5c[2]);
-	MAKEVERTEX(3, sp5c[3]);
-	MAKEVERTEX(4, sp5c[4]);
-	MAKEVERTEX(5, sp5c[5]);
+	makeVertex(vertices, 0, sp5c[0]);
+	makeVertex(vertices, 1, sp5c[1]);
+	makeVertex(vertices, 2, sp5c[2]);
+	makeVertex(vertices, 3, sp5c[3]);
+	makeVertex(vertices, 4, sp5c[4]);
+	makeVertex(vertices, 5, sp5c[5]);
 
-	gfx_Vertex(gdl++, vertices, 6, 0);
+	gfx_VertexF(gdl++, vertices, 6, 0);
 
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[2], &sp5c[4], &sp5c[3], 2, 4, 3, 6, depth);
 	gdl = nbombCreateSphereSegment(gdl, &sp5c[3], &sp5c[4], &sp5c[0], 3, 4, 0, 6, depth);
@@ -198,7 +195,7 @@ int nbombCalculateAlpha(struct nbomb *nbomb)
  */
 Gfx *nbombCreateGdl(void)
 {
-	Vtx *vertices;
+	VtxF *vertices;
 #ifdef PLATFORM_64BIT
 	uint32_t gdlsizes[] = { 0x0a30*2, 0x0330*2 }; // 1 player, 2+ players
 #else
@@ -230,7 +227,7 @@ Gfx *nbombCreateGdl(void)
 	gfx_Set_Render_Mode(gdl++, G_RM_ZB_XLU_SURF, G_RM_ZB_XLU_SURF2);
 	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 
-	vertices = gfxAllocateVertices(1);
+	vertices = gfxAllocateVerticesF(1);
 
 	vertices[0].z = 0;
 	vertices[0].t = 0;
@@ -239,7 +236,7 @@ Gfx *nbombCreateGdl(void)
 	vertices[0].x = vertices[0].z;
 	vertices[0].s = vertices[0].t;
 
-	gfx_Vertex(gdl++, vertices, 1, 0);
+	gfx_VertexF(gdl++, vertices, 1, 0);
 
 	if (index != 0) {
 		gdl = nbombCreateSphere(gdl, 1);
@@ -602,7 +599,7 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 	int16_t s;
 	bool drawn = false;
 	Col *colours;
-	Vtx *vertices;
+	VtxF *vertices;
 	int16_t viewleft;
 	int16_t viewtop;
 	int16_t viewright;
@@ -632,7 +629,7 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 
 	if (inside) {
 		colours = gfxAllocateColours(1);
-		vertices = gfxAllocateVertices(4);
+		vertices = gfxAllocateVerticesF(4);
 
 		viewleft = viGetViewLeft() * 10;
 		viewtop = viGetViewTop() * 10;
@@ -678,12 +675,12 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 
 		vertices[0].s = s;
 		vertices[0].t = t;
-		vertices[1].s = s + 160;
+		vertices[1].s = s + 160; // TODOF
 		vertices[1].t = t;
-		vertices[2].s = s + 160;
-		vertices[2].t = t + 960;
+		vertices[2].s = s + 160; // TODOF
+		vertices[2].t = t + 960; // TODOF
 		vertices[3].s = s;
-		vertices[3].t = t + 960;
+		vertices[3].t = t + 960; // TODOF
 
 		vertices[0].colour = 0;
 		vertices[1].colour = 0;
@@ -693,7 +690,7 @@ Gfx *nbombRenderOverlay(Gfx *gdl)
 		colours[0].word = PD_BE32(finalalpha);
 
 		gfx_Color(gdl++, colours, 1);
-		gfx_Vertex(gdl++, vertices, 4, 0);
+		gfx_VertexF(gdl++, vertices, 4, 0);
 
 		gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 	}
@@ -785,7 +782,7 @@ Gfx *gasRender(Gfx *gdl)
 
 		if (show) {
 			Col *colours = gfxAllocateColours(1);
-			Vtx *vertices = gfxAllocateVertices(8);
+			VtxF *vertices = gfxAllocateVerticesF(8);
 			int16_t viewleft = viGetViewLeft() * 10;
 			int16_t viewtop = viGetViewTop() * 10;
 			int16_t viewright = (int16_t) (viGetViewLeft() + viGetViewWidth()) * 10;
@@ -864,12 +861,12 @@ Gfx *gasRender(Gfx *gdl)
 
 			vertices[0].s = layer1s;
 			vertices[0].t = layer1t;
-			vertices[1].s = layer1s + 960;
+			vertices[1].s = layer1s + 960; // TODOF
 			vertices[1].t = layer1t;
-			vertices[2].s = layer1s + 960;
-			vertices[2].t = layer1t + 640;
+			vertices[2].s = layer1s + 960; // TODOF
+			vertices[2].t = layer1t + 640; // TODOF
 			vertices[3].s = layer1s;
-			vertices[3].t = layer1t + 640;
+			vertices[3].t = layer1t + 640; // TODOF
 
 			vertices[0].colour = 0;
 			vertices[1].colour = 0;
@@ -878,12 +875,12 @@ Gfx *gasRender(Gfx *gdl)
 
 			vertices[4].s = layer2s;
 			vertices[4].t = layer2t;
-			vertices[5].s = layer2s + 640;
+			vertices[5].s = layer2s + 640; // TODOF
 			vertices[5].t = layer2t;
-			vertices[6].s = layer2s + 640;
-			vertices[6].t = layer2t + 480;
+			vertices[6].s = layer2s + 640; // TODOF
+			vertices[6].t = layer2t + 480; // TODOF
 			vertices[7].s = layer2s;
-			vertices[7].t = layer2t + 480;
+			vertices[7].t = layer2t + 480; // TODOF
 
 			vertices[4].colour = 0;
 			vertices[5].colour = 0;
@@ -895,7 +892,7 @@ Gfx *gasRender(Gfx *gdl)
 			colours[0].word = PD_BE32(0x3faf1100 | alpha);
 
 			gfx_Color(gdl++, colours, 1);
-			gfx_Vertex(gdl++, vertices, 8, 0);
+			gfx_VertexF(gdl++, vertices, 8, 0);
 
 			gfx_Tri4(gdl++, 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4);
 		}

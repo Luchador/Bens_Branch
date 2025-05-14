@@ -105,21 +105,6 @@ void mempSetHeap(uint8_t *heapstart, uint32_t heaplen)
 	}
 }
 
-/**
- * Return the amount of free space in the stage pool.
- *
- * If using the expansion pak, it's assumed that the onboard pool is full
- * so only the expansion pool is checked.
- */
-uint32_t mempGetStageFree(void)
-{
-	uint32_t free;
-
-	free = g_MempExpansionPools[MEMPOOL_STAGE].rightpos - g_MempExpansionPools[MEMPOOL_STAGE].leftpos;
-
-	return free;
-}
-
 void *mempGetNextStageAllocation(void)
 {
 	void *next;

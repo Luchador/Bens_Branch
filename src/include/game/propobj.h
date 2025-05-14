@@ -213,7 +213,7 @@ bool objDrop(struct prop *prop, bool lazy);
 void objFall(struct defaultobj *obj, int playernum);
 void objDestroySupportedObjects(struct prop *prop, int playernum);
 void objCheckDestroyed(struct defaultobj *obj, struct coord *pos, int playernum);
-bool func0f084594(struct model *model, struct modelnode *node, struct coord *arg2, struct coord *arg3, struct hitthing *arg4, int *arg5, struct modelnode **arg6);
+bool objTestAABBIntersection(struct model *model, struct modelnode *node, struct coord *arg2, struct coord *arg3, struct hitthing *arg4, int *arg5, struct modelnode **arg6);
 bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *arg2, struct coord *arg3, struct hitthing *hitthing, int *dstmtxindex, struct modelnode **dstnode);
 uint32_t add43214321(uint32_t value);
 void glassDestroy(struct defaultobj *obj);

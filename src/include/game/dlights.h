@@ -48,3 +48,4 @@ void lightComputeShortestPaths(void);
 float lightCalcDistanceBetweenPoints(int room1, struct coord *arg1, int portal1, int room2, struct coord *arg4, int portal2, float *arg6);
 void lightUpdateShortestDistanceBetweenRooms(int room1, struct coord *coord1, int room2, struct coord *coord2, int arg4, float *arg5, int arg6);
 void lightUpdateGoggles(void);
+void lightFreeDistanceMatrices(void);

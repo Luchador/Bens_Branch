@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "bss.h"
 #include "data.h"
@@ -21,6 +22,7 @@
 #include "game/chrutils.h"
 #include "game/credits.h"
 #include "game/dlights.h"
+#include "game/dyntex.h"
 #include "game/env.h"
 #include "game/explosions.h"
 #include "game/filemgr.h"
@@ -446,7 +448,7 @@ Gfx *lvRenderFade(Gfx *gdl)
 		G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 	gfx_Set_Prim_Color(gdl++, primColor);
 
-	gfx_Fill_Rectangle(gdl++,
+	gdl += gfx_Fill_Rectangle(gdl,
 			viGetViewLeft(),
 			viGetViewTop() + inset,
 			viGetViewLeft() + viGetViewWidth() + 1,
@@ -876,7 +878,7 @@ Gfx *lvRender(Gfx *gdl)
 		gdl = viPrepareZbuf(gdl);
 		gdl = vi0000b1d0(gdl);
 
-		gfx_Set_Scissor(gdl++, viGetViewLeft(), viGetViewTop(), (viGetViewLeft() + viGetViewWidth()), (viGetViewTop() + viGetViewHeight()));
+		gdl += gfx_Set_Scissor(gdl, (uint32_t)viGetViewLeft(), (uint32_t)viGetViewTop(), (uint32_t)(viGetViewLeft() + viGetViewWidth()), (uint32_t)(viGetViewTop() + viGetViewHeight()));
 
 		gdl = titleRender(gdl);
 		gdl = lvRenderFade(gdl);
@@ -1465,7 +1467,7 @@ Gfx *lvRender(Gfx *gdl)
 		}
 	}
 
-	gfx_Set_Scissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
+	gdl += gfx_Set_Scissor(gdl, 0, 0, (uint32_t)viGetWidth(), (uint32_t)viGetHeight());
 
 	if (videoGetDisplayFPS()) {
 		gdl = lvRenderFPS(gdl);
@@ -1994,7 +1996,6 @@ void lvStop(void)
 		audioStop(g_MiscAudioHandle);
 	}
 
-	chrmgrStop();
 	explosionsStop();
 	smokeStop();
 	shardsStop();
@@ -2020,6 +2021,11 @@ void lvStop(void)
 		g_FileState = FILESTATE_UNSELECTED;
 	}
 	menuStop();
+
+	chrmgrStop();
+
+	free(g_ThrownLaptops);
+	free(g_ThrownLaptopBeams);
 }
 
 void lvCheckPauseStateChanged(void)

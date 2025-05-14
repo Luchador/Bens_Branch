@@ -232,11 +232,11 @@ Gfx *titleRenderLegal(Gfx *gdl)
 				gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 				gdl += gfx_Texture_Rectangle(gdl,
-						elem->x << 2,
-						elem->y << 2,
-						(elem->x + 64) << 2,
-						(elem->y + 24) << 2,
-						G_TX_RENDERTILE, 0, 0x0300, 0x0400, -0x0400, false);
+						elem->x * 4.0f,
+						elem->y * 4.0f,
+						(elem->x + 64) * 4.0f,
+						(elem->y + 24) * 4.0f,
+						G_TX_RENDERTILE, 0, 768, 32.0f, -32.0f, false);
 
 				gdl = textConfigureGfxPipeline(gdl);
 			} else if (elem->type == LEGALELEMENTTYPE_RARELOGO) {
@@ -257,11 +257,11 @@ Gfx *titleRenderLegal(Gfx *gdl)
 				gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 
 				gdl += gfx_Texture_Rectangle(gdl,
-						elem->x << 2,
-						elem->y << 2,
-						(elem->x + 32) << 2,
-						(elem->y + 42) << 2,
-						G_TX_RENDERTILE, 0, 0x0540, 0x0400, -0x0400, false);
+						elem->x * 4.0f,
+						elem->y * 4.0f,
+						(elem->x + 32) * 4.0f,
+						(elem->y + 42) * 4.0f,
+						G_TX_RENDERTILE, 0, 1344, 32.0f, -32.0f, false);
 
 				gdl = textConfigureGfxPipeline(gdl);
 			} else {
@@ -574,7 +574,7 @@ Gfx *titleRenderPdLogoModel(Gfx *gdl, struct model *model, bool arg2, float arg3
 	struct RGBA color = {0, 0, 0, alpha1};
 	gfx_Set_Prim_Color(gdl++, color);
 
-	renderdata.unk00 = (Mtxf*)arg6;
+	renderdata.unk00 = arg6;
 	renderdata.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtx));
 
 	mtx4Copy(arg6, (Mtx*)renderdata.unk10);
@@ -1177,11 +1177,11 @@ Gfx *titleRenderNintendoLogo(Gfx *gdl)
 	mtx4Copy(&rotationMatrix, &viewMatrix);
 
 	// Assign to render data
-	renderdata.unk00 = (Mtxf*)&viewMatrix;
+	renderdata.unk00 = &viewMatrix;
 	modelMatrices = gfxAllocate(g_TitleModel->definition->nummatrices * sizeof(Mtx));
 	mtx4Copy(&viewMatrix, (Mtx*)modelMatrices);
 
-	g_TitleModel->matrices = (Mtxf*)modelMatrices;
+	g_TitleModel->matrices = modelMatrices;
 
 	modelUpdateRelations(g_TitleModel);
 
@@ -1348,9 +1348,9 @@ Gfx *titleRenderRareLogo(Gfx *gdl)
 	mtx4MultMtx4InPlace(&sp118, &spc0);
 	mtx4Copy(&spc0, &sp118);
 
-	renderdata.unk00 = (Mtxf*)&sp118;
-	renderdata.unk10 = gfxAllocate(g_TitleModel->definition->nummatrices * sizeof(Mtxf));
-	mtx4Copy(&sp118, (Mtx*)renderdata.unk10);
+	renderdata.unk00 = &sp118;
+	renderdata.unk10 = gfxAllocate(g_TitleModel->definition->nummatrices * sizeof(Mtx));
+	mtx4Copy(&sp118, renderdata.unk10);
 
 	g_TitleModel->matrices = renderdata.unk10;
 

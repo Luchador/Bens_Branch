@@ -715,12 +715,12 @@ MenuItemHandlerResult mpChallengesListHandler(int operation, struct menuitem *it
 					G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 
 			gdl += gfx_Texture_Rectangle(gdl,
-					((renderdata->x + loopx) << 2),
-					(renderdata->y + size) << 2,
-					((renderdata->x + size + loopx) << 2),
-					(renderdata->y + size * 2) << 2,
+					((renderdata->x + loopx) * 4.0f),
+					(renderdata->y + size) * 4.0f,
+					((renderdata->x + size + loopx) * 4.0f),
+					(renderdata->y + size * 2) * 4.0f,
 					G_TX_RENDERTILE,
-					0, 0x0160, 0x0400, 0xfc00, false);
+					0, 352, 32.0f, -32.0f, false);
 
 			loopx += 13;
 		}
@@ -937,9 +937,9 @@ MenuItemHandlerResult mpMedalMenuHandler(int operation, struct menuitem *item, u
 				G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 
 		gdl += gfx_Texture_Rectangle(gdl,
-				((renderdata->x + 9) << 2), renderdata->y << 2,
-				((renderdata->x + 20) << 2), (renderdata->y + 11) << 2,
-				G_TX_RENDERTILE, 0, 0x0160, 1024, -1024, false);
+				((renderdata->x + 9) * 4.0f), renderdata->y * 4.0f,
+				((renderdata->x + 20) * 4.0f), (renderdata->y + 11) * 4.0f,
+				G_TX_RENDERTILE, 0, 352.0f, 32.0f, -32.0f, false);
 
 		return (uintptr_t) gdl;
 	}
@@ -4537,7 +4537,7 @@ MenuItemHandlerResult mpChallengesListMenuHandler(int operation, struct menuitem
 		    gdl += gfx_Texture_Rectangle(gdl,
 				((renderdata->x + marginleft) * 4), (renderdata->y + 11) * 4,
 				((renderdata->x + marginleft + 11) * 4), (renderdata->y + 22) * 4,
-				G_TX_RENDERTILE, 0, 352, 1024, -1024, false);
+				G_TX_RENDERTILE, 0, 352.0f, 32.0f, -32.0f, false);
 
 			marginleft += 13;
 		}

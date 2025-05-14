@@ -13,6 +13,7 @@
 #include "game/gfxmemory.h"
 #include "game/lang.h"
 #include "game/options.h"
+#include "game/player.h"
 #include "game/propobj.h"
 #include "bss.h"
 #include "lib/vi.h"
@@ -83,6 +84,12 @@ static inline int sightGetAdjustedX(const float x)
 {
 	const float cx = (x - (float)(SCREEN_WIDTH_LO / 2)) * sightGetScaleX();
 	return roundf((float)(SCREEN_WIDTH_LO / 2) + cx);
+}
+
+static inline float sightGetAdjustedXF(const float x)
+{
+	const float cx = (x - (float)(SCREEN_WIDTH_LO / 2)) * sightGetScaleX();
+	return (float)(SCREEN_WIDTH_LO / 2) + cx;
 }
 
 /**
@@ -427,34 +434,34 @@ Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, int textid, i
 
 		// Left
 		if (boxleft >= viewleft && boxleft <= viewright && boxtop <= viewbottom && boxbottom >= viewtop) {
-			gfx_HUD_Rectangle(gdl++,
+			gdl += gfx_Fill_Rectangle(gdl,
 					boxleft, (boxtop > viewtop ? boxtop : viewtop),
-					boxleft, (boxbottom < viewbottom ? boxbottom : viewbottom));
+					boxleft + 1, (boxbottom < viewbottom ? boxbottom : viewbottom) + 1);
 		}
 
 		// Right
 		if (boxright >= viewleft && boxright <= viewright && boxtop <= viewbottom && boxbottom >= viewtop) {
-			gfx_HUD_Rectangle(gdl++,
+			gdl += gfx_Fill_Rectangle(gdl,
 					boxright, (boxtop > viewtop ? boxtop : viewtop),
-					boxright, (boxbottom < viewbottom ? boxbottom : viewbottom));
+					boxright + 1, (boxbottom < viewbottom ? boxbottom : viewbottom) + 1);
 		} else {
 			textonscreen = false;
 		}
 
 		// Top
 		if (boxtop >= viewtop && boxtop <= viewbottom && boxleft <= viewright && boxright >= viewleft) {
-			gfx_HUD_Rectangle(gdl++,
+			gdl += gfx_Fill_Rectangle(gdl,
 					(boxleft > viewleft ? boxleft : viewleft), boxtop,
-					(boxright < viewright ? boxright : viewright), boxtop);
+					(boxright < viewright ? boxright : viewright) + 1, boxtop + 1);
 		} else {
 			textonscreen = false;
 		}
 
 		// Bottom
 		if (boxbottom >= viewtop && boxbottom <= viewbottom && boxleft <= viewright && boxright >= viewleft) {
-			gfx_HUD_Rectangle(gdl++,
+			gdl += gfx_Fill_Rectangle(gdl,
 					(boxleft > viewleft ? boxleft : viewleft), boxbottom,
-					(boxright < viewright ? boxright : viewright), boxbottom);
+					(boxright < viewright ? boxright : viewright) + 1, boxbottom + 1);
 		}
 
 		gdl = textSetCCPrimColorTexAlpha(gdl);
@@ -480,14 +487,14 @@ Gfx *sightDrawTargetBox(Gfx *gdl, struct trackedprop *trackedprop, int textid, i
 	return gdl;
 }
 
-Gfx *sightDrawAimer(Gfx *gdl, int x, int y, int radius, int cornergap, uint32_t colour)
+Gfx *sightDrawAimer(Gfx *gdl, float x, float y, float radius, float cornergap, uint32_t colour)
 {
-	int viewleft = viGetViewLeft();
-	int viewtop = viGetViewTop();
-	int viewwidth = viGetViewWidth();
-	int viewheight = viGetViewHeight();
-	int viewright = viewleft + viewwidth - 1;
-	int viewbottom = viewtop + viewheight - 1;
+	float viewleft = (float)viGetViewLeft();
+	float viewtop = (float)viGetViewTop();
+	float viewwidth = (float)viGetViewWidth();
+	float viewheight = (float)viGetViewHeight();
+	float viewright = viewleft + viewwidth - 1.0f;
+	float viewbottom = viewtop + viewheight - 1.0f;
 
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
@@ -497,35 +504,35 @@ Gfx *sightDrawAimer(Gfx *gdl, int x, int y, int radius, int cornergap, uint32_t 
 
 	// Draw the lines that span most of the viewport
 	if (PLAYERCOUNT() == 1) {
-		gdl += gfx_HUD_Rectangle_EXT(gdl, viewleft + 48, y, x - radius + 2, y);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x + radius - 2, y, viewright - 49, y);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x, viewtop + 10, x, y - radius + 2);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x, y + radius - 2, x, viewbottom - 10);
+		gdl += gfx_HUD_Rectangle(gdl, viewleft + 48.0f, y, x - radius + 2.0f, y);
+		gdl += gfx_HUD_Rectangle(gdl, x + radius - 2.0f, y, viewright - 49.0f, y);
+		gdl += gfx_HUD_Rectangle(gdl, x, viewtop + 10.0f, x, y - radius + 2.0f);
+		gdl += gfx_HUD_Rectangle(gdl, x, y + radius - 2.0f, x, viewbottom - 10.0f);
 	} else {
-		gdl += gfx_HUD_Rectangle_EXT(gdl, viewleft, y, x - radius + 2, y);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x + radius - 2, y, viewright, y);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x, viewtop, x, y - radius + 2);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x, y + radius - 2, x, viewbottom);
+		gdl += gfx_HUD_Rectangle(gdl, viewleft, y, x - radius + 2.0f, y);
+		gdl += gfx_HUD_Rectangle(gdl, x + radius - 2.0f, y, viewright, y);
+		gdl += gfx_HUD_Rectangle(gdl, x, viewtop, x, y - radius + 2.0f);
+		gdl += gfx_HUD_Rectangle(gdl, x, y + radius - 2.0f, x, viewbottom);
 	}
 
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 	gdl = textSetPrimColour(gdl, colour);
 
 	// Draw the box
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y - radius, x - radius, y + radius);
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x + radius, y - radius, x + radius, y + radius);
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y - radius, x + radius, y - radius);
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y + radius, x + radius, y + radius);
+	gdl += gfx_HUD_Rectangle(gdl, x - radius, y - radius, x - radius, y + radius);
+	gdl += gfx_HUD_Rectangle(gdl, x + radius, y - radius, x + radius, y + radius);
+	gdl += gfx_HUD_Rectangle(gdl, x - radius, y - radius, x + radius, y - radius);
+	gdl += gfx_HUD_Rectangle(gdl, x - radius, y + radius, x + radius, y + radius);
 
 	// Go over the corners a second time
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y - radius, x - radius, y - cornergap);
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y + cornergap, x - radius, y + radius);
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x + radius, y - radius, x + radius, y - cornergap);
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x + radius, y + cornergap, x + radius, y + radius);
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y - radius, x - cornergap, y - radius);
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x + cornergap, y - radius, x + radius, y - radius);
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x - radius, y + radius, x - cornergap, y + radius);
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x + cornergap, y + radius, x + radius, y + radius);
+	gdl += gfx_HUD_Rectangle(gdl, x - radius, y - radius, x - radius, y - cornergap);
+	gdl += gfx_HUD_Rectangle(gdl, x - radius, y + cornergap, x - radius, y + radius);
+	gdl += gfx_HUD_Rectangle(gdl, x + radius, y - radius, x + radius, y - cornergap);
+	gdl += gfx_HUD_Rectangle(gdl, x + radius, y + cornergap, x + radius, y + radius);
+	gdl += gfx_HUD_Rectangle(gdl, x - radius, y - radius, x - cornergap, y - radius);
+	gdl += gfx_HUD_Rectangle(gdl, x + cornergap, y - radius, x + radius, y - radius);
+	gdl += gfx_HUD_Rectangle(gdl, x - radius, y + radius, x - cornergap, y + radius);
+	gdl += gfx_HUD_Rectangle(gdl, x + cornergap, y + radius, x + radius, y + radius);
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gfx_Set_Subpixel_Offset_EXT(gdl++, 0, 0);
@@ -558,7 +565,7 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, float crossx, float crossy)
 			colour = SIGHT_COLOUR;
 			radius = 8;
 			cornergap = 5;
-			gdl = sightDrawAimer(gdl, x, y, radius, cornergap, colour);
+			gdl = sightDrawAimer(gdl, (float)x, (float)y, (float)radius, (float)cornergap, colour);
 		}
 		break;
 	case SIGHTTRACKTYPE_DEFAULT:
@@ -576,7 +583,7 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 			switch (sight) {
 			case 0:
-				gdl = sightDrawAimer(gdl, x, y, radius, cornergap, colour);
+				gdl = sightDrawAimer(gdl, (float)x, (float)y, (float)radius, (float)cornergap, colour);
 				break;
 			}
 		}
@@ -610,7 +617,7 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, float crossx, float crossy)
 						viGetWidth(), viGetHeight(), 0, 0);
 			}
 
-			gdl = sightDrawAimer(gdl, x, y, radius, cornergap, colour);
+			gdl = sightDrawAimer(gdl, (float)x, (float)y, (float)radius, (float)cornergap, colour);
 
 			if (g_Vars.currentplayer->lookingatprop.prop) {
 				gdl = sightDrawTargetBox(gdl, &g_Vars.currentplayer->lookingatprop, 1, g_Vars.currentplayer->targetset[0]);
@@ -637,7 +644,7 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, float crossx, float crossy)
 				cornergap = 3;
 			}
 
-			gdl = sightDrawAimer(gdl, x, y, radius, cornergap, colour);
+			gdl = sightDrawAimer(gdl, (float)x, (float)y, (float)radius, (float)cornergap, colour);
 		}
 		break;
 	case SIGHTTRACKTYPE_FOLLOWLOCKON:
@@ -708,7 +715,7 @@ Gfx *sightDrawDefault(Gfx *gdl, bool sighton, float crossx, float crossy)
 				cornergap = 3;
 			}
 
-			gdl = sightDrawAimer(gdl, x, y, radius, cornergap, colour);
+			gdl = sightDrawAimer(gdl, (float)x, (float)y, (float)radius, (float)cornergap, colour);
 		}
 		break;
 	}
@@ -756,7 +763,7 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 	x2 = x + halfw;
 	y2 = y + (tconfig->height >> 1);
 
-	gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
+	gdl += gfx_Fill_Rectangle(gdl, x1, y1, x2, y2);
 
 	spc4[0] = x;
 	spc4[1] = y;
@@ -785,11 +792,6 @@ Gfx *sightDrawClassic(Gfx *gdl, bool sighton, float crossx, float crossy)
 	return gdl;
 }
 
-Gfx *sightDrawType2(Gfx *gdl, bool sighton, float crossx, float crossy)
-{
-	return sightDrawClassic(gdl, sighton, crossx, crossy);
-}
-
 #define COLOUR_LIGHTRED 0xff555564
 #define COLOUR_DARKRED  0xff0000b2
 #define COLOUR_GREEN    0x55ff5564
@@ -803,7 +805,7 @@ Gfx *sightDrawType2(Gfx *gdl, bool sighton, float crossx, float crossy)
 Gfx *sightDrawSkedarTriangle(Gfx *gdl, int x, int y, int dir, uint32_t colour)
 {
 	int points[6];
-	Vtx *vertices = gfxAllocateVertices(3);
+	VtxF *vertices = gfxAllocateVerticesF(3);
 	Col *colours = gfxAllocateColours(2);
 
 	switch (dir) {
@@ -853,13 +855,11 @@ Gfx *sightDrawSkedarTriangle(Gfx *gdl, int x, int y, int dir, uint32_t colour)
 	vertices[2].y = points[5] * 10;
 	vertices[2].z = -10;
 
-#ifndef PLATFORM_N64
 	// Center-align Skedar tris
 	for (int i = 0; i < 3; ++i) {
 		vertices[i].x -= 2;
 		vertices[i].y += 2;
 	}
-#endif
 
 	// @bug: This also needs to check for COLOUR_LIGHTRED because the caller can
 	// use two shades of red. The second colour is used when zeroing the sight
@@ -879,7 +879,7 @@ Gfx *sightDrawSkedarTriangle(Gfx *gdl, int x, int y, int dir, uint32_t colour)
 	vertices[2].colour = 4;
 
 	gfx_Color(gdl++, colours, 2);
-	gfx_Vertex(gdl++, vertices, 3, 0);
+	gfx_VertexF(gdl++, vertices, 3, 0);
 	gfx_Tri1(gdl++, 0, 1, 2);
 
 	return gdl;
@@ -887,10 +887,10 @@ Gfx *sightDrawSkedarTriangle(Gfx *gdl, int x, int y, int dir, uint32_t colour)
 
 Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, float crossx, float crossy)
 {
-	int viewleft = viGetViewLeft();
-	int viewtop = viGetViewTop();
-	int viewwidth = viGetViewWidth();
-	int viewheight = viGetViewHeight();
+	int viewleft = playerGetViewportLeftReal();
+	int viewtop = playerGetViewportTopReal();
+	int viewwidth = playerGetViewportWidthReal();
+	int viewheight = playerGetViewportHeightReal();
 	int viewright = viewleft + viewwidth - 1;
 	int viewbottom = viewtop + viewheight - 1;
 	int paddingy = viewheight / 4;
@@ -914,10 +914,8 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, float crossx, float crossy)
 		g_Vars.currentplayer->sighttimer240 = 0;
 	}
 
-#ifndef PLATFORM_N64
 	x = sightGetAdjustedX(x);
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-#endif
 
 	gdl = savebufferSetCustomProjection(gdl);
 
@@ -1074,48 +1072,46 @@ Gfx *sightDrawSkedar(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 	gdl = savebufferSetup2DRender(gdl);
 
-#ifndef PLATFORM_N64
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
-#endif
 
 	return gdl;
 }
 
 Gfx *sightDrawZoom(Gfx *gdl, bool sighton, float crossx, float crossy)
 {
-	int viewleft = viGetViewLeft();
-	int viewtop = viGetViewTop();
-	int viewhalfwidth = (viGetViewWidth()) >> 1;
-	int viewhalfheight = viGetViewHeight() >> 1;
-	int viewright = viewleft + viewhalfwidth * 2 - 1;
-	int viewbottom = viewtop + viewhalfheight * 2 - 1;
+	float viewleft = viGetViewLeft();
+	float viewtop = viGetViewTop();
+	float viewhalfwidth = (viGetViewWidth()) / 2.0f;
+	float viewhalfheight = viGetViewHeight() / 2.0f;
+	float viewright = viewleft + viewhalfwidth * 2.0f - 1.0f;
+	float viewbottom = viewtop + viewhalfheight * 2.0f - 1.0f;
 	float maxfovy;
-	int availableabove;
-	int availablebelow;
-	int availableleft;
-	int availableright;
+	float availableabove;
+	float availablebelow;
+	float availableleft;
+	float availableright;
 	float zoominfovy;
 	float frac;
 	float marginright;
 	float margintop;
 	float marginbottom;
 	float marginleft;
-	int cornerwidth;
-	int cornerheight;
+	float cornerwidth;
+	float cornerheight;
 	int weaponnum;
 	uint8_t showzoomrange;
 
 	// The 48, 49 and 10 numbers are padding values. When zoomed in, the left
 	// corner will be 48px from the viewport's left edge. The available values
 	// are the zoomable range from the padding to the middle of the viewport.
-	availableleft = viewhalfwidth - 48;
-	availableright = viewhalfwidth - 49;
-	availableabove = viewhalfheight - 10;
-	availablebelow = viewhalfheight - 10;
+	availableleft = viewhalfwidth - 48.0f;
+	availableright = viewhalfwidth - 49.0f;
+	availableabove = viewhalfheight - 10.0f;
+	availablebelow = viewhalfheight - 10.0f;
 	frac = 1.0f;
 	weaponnum = g_Vars.currentplayer->hands[HAND_RIGHT].gset.weaponnum;
-	cornerwidth = (viewhalfwidth >> 1) - 60;
-	cornerheight = (viewhalfheight >> 1) - 22;
+	cornerwidth = (viewhalfwidth / 2.0f) - 60.0f;
+	cornerheight = (viewhalfheight / 2.0f) - 22.0f;
 
 	showzoomrange = optionsGetShowZoomRange(g_Vars.currentplayerstats->mpindex)
 		&& optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex);
@@ -1144,15 +1140,15 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, float crossx, float crossy)
 		}
 
 		if (PLAYERCOUNT() >= 2) {
-			cornerheight *= 2;
+			cornerheight *= 2.0f;
 		}
 
-		if (cornerwidth < 5) {
-			cornerwidth = 5;
+		if (cornerwidth < 5.0f) {
+			cornerwidth = 5.0f;
 		}
 
-		if (cornerheight < 5) {
-			cornerheight = 5;
+		if (cornerheight < 5.0f) {
+			cornerheight = 5.0f;
 		}
 
 		// Margin is the gap from the viewport edge to the zoom box
@@ -1163,63 +1159,63 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 		// Center-align the zoom range
 		if (frac != 1.0f) {
-			viewleft += 1;
-			viewright += 1;
-			viewbottom += 1;
-			viewtop += 1;
+			viewleft += 1.0f;
+			viewright += 1.0f;
+			viewbottom += 1.0f;
+			viewtop += 1.0f;
 		}
 
-#define BOXLEFT   (viewleft + marginleft)
-#define BOXRIGHT  (viewright - marginright)
-#define BOXBOTTOM (viewbottom - marginbottom)
-#define BOXTOP    (viewtop + margintop)
+		float boxleft = viewleft + marginleft;
+		float boxright = viewright - marginright;
+		float boxbottom = viewbottom - marginbottom;
+		float boxtop = viewtop + margintop;
 
-		if (cornerwidth > BOXRIGHT - BOXLEFT) {
-			cornerwidth = BOXRIGHT - BOXLEFT;
+		if (cornerwidth > boxright - boxleft) {
+			cornerwidth = boxright - boxleft;
 		}
 
-		if (cornerheight > BOXBOTTOM - BOXTOP) {
-			cornerheight = BOXBOTTOM - BOXTOP;
+		if (cornerheight > boxbottom - boxtop) {
+			cornerheight = boxbottom - boxtop;
 		}
 
 		gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 		gfx_Set_Subpixel_Offset_EXT(gdl++, -2, -2);
 
 		// Top left
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT + 1, BOXTOP, BOXLEFT + cornerwidth - 1, BOXTOP);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXTOP, BOXLEFT, BOXTOP + cornerheight - 1);
+		gdl += gfx_HUD_Rectangle(gdl, boxleft + 1, boxtop, boxleft + cornerwidth - 1, boxtop);
+		gdl += gfx_HUD_Rectangle(gdl, boxleft, boxtop, boxleft, boxtop + cornerheight - 1);
 
 		// Top right
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT - cornerwidth + 2, BOXTOP, BOXRIGHT - 1, BOXTOP);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT, BOXTOP, BOXRIGHT, BOXTOP + cornerheight - 1);
+		gdl += gfx_HUD_Rectangle(gdl, boxright - cornerwidth + 2, boxtop, boxright - 1, boxtop);
+		gdl += gfx_HUD_Rectangle(gdl, boxright, boxtop, boxright, boxtop + cornerheight - 1);
 
 		// Bottom left
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT + 1, BOXBOTTOM, BOXLEFT + cornerwidth - 1, BOXBOTTOM);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXBOTTOM - cornerheight + 1, BOXLEFT, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle(gdl, boxleft + 1, boxbottom, boxleft + cornerwidth - 1, boxbottom);
+		gdl += gfx_HUD_Rectangle(gdl, boxleft, boxbottom - cornerheight + 1, boxleft, boxbottom);
 
 		// Bottom right
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT - cornerwidth + 2, BOXBOTTOM, BOXRIGHT - 1, BOXBOTTOM);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT, BOXBOTTOM - cornerheight + 1, BOXRIGHT, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle(gdl, boxright - cornerwidth + 2, boxbottom, boxright - 1, boxbottom);
+		gdl += gfx_HUD_Rectangle(gdl, boxright, boxbottom - cornerheight + 1, boxright, boxbottom);
 
 		// Draw over the corners again, but only half as wide/high
-		cornerwidth >>= 1;
-		cornerheight >>= 1;
+		cornerwidth /= 2.0f;
+		cornerheight /= 2.0f;
 
 		// Top left
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXTOP, BOXLEFT + cornerwidth, BOXTOP);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXTOP, BOXLEFT, BOXTOP + cornerheight);
+		gdl += gfx_HUD_Rectangle(gdl, boxleft, boxtop, boxleft + cornerwidth, boxtop);
+		gdl += gfx_HUD_Rectangle(gdl, boxleft, boxtop, boxleft, boxtop + cornerheight);
 
 		// Top right
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT - cornerwidth, BOXTOP, BOXRIGHT, BOXTOP);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT, BOXTOP, BOXRIGHT, BOXTOP + cornerheight);
+		gdl += gfx_HUD_Rectangle(gdl, boxright - cornerwidth, boxtop, boxright, boxtop);
+		gdl += gfx_HUD_Rectangle(gdl, boxright, boxtop, boxright, boxtop + cornerheight);
 
 		// Bottom left
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXBOTTOM, BOXLEFT + cornerwidth, BOXBOTTOM);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXLEFT, BOXBOTTOM - cornerheight, BOXLEFT, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle(gdl, boxleft, boxbottom, boxleft + cornerwidth, boxbottom);
+		gdl += gfx_HUD_Rectangle(gdl, boxleft, boxbottom - cornerheight, boxleft, boxbottom);
 
 		// Bottom right
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT - cornerwidth, BOXBOTTOM, BOXRIGHT, BOXBOTTOM);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, BOXRIGHT, BOXBOTTOM - cornerheight, BOXRIGHT, BOXBOTTOM);
+		gdl += gfx_HUD_Rectangle(gdl, boxright - cornerwidth, boxbottom, boxright, boxbottom);
+		gdl += gfx_HUD_Rectangle(gdl, boxright, boxbottom - cornerheight, boxright, boxbottom);
 
 
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
@@ -1236,17 +1232,17 @@ Gfx *sightDrawZoom(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 {
-	int viewleft = viGetViewLeft();
-	int viewtop = viGetViewTop();
-	int viewwidth = viGetViewWidth();
-	int viewheight = viGetViewHeight();
-	int viewright = viewleft + viewwidth - 1;
-	int viewbottom = viewtop + viewheight - 1;
-	int x = (int)crossx;
-	int y = crossy;
+	float viewleft = viGetViewLeft();
+	float viewtop = viGetViewTop();
+	float viewwidth = viGetViewWidth();
+	float viewheight = viGetViewHeight();
+	float viewright = viewleft + viewwidth - 1.0f;
+	float viewbottom = viewtop + viewheight - 1.0f;
+	float x = crossx;
+	float y = crossy;
 	Vtx *vertices;
 	Col *colours;
-	int inner[4];
+	float inner[4];
 	bool hasprop = g_Vars.currentplayer->lookingatprop.prop != NULL;
 	uint32_t colour = 0xff000060;
 
@@ -1258,7 +1254,7 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 		colour = 0x0000ff60;
 	}
 
-	x = sightGetAdjustedX(x);
+	x = sightGetAdjustedXF(x);
 	gSPSetExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
 	gfx_Set_Subpixel_Offset_EXT(gdl++, -2, -2);
 
@@ -1276,17 +1272,17 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Render_Mode(gdl++, G_RM_AA_XLU_SURF, G_RM_AA_XLU_SURF2);
 
-	vertices[0].x = (viewleft + (viewwidth >> 1)) * 10;
+	vertices[0].x = (viewleft + (viewwidth / 2.0f)) * 10;
 	vertices[0].y = (viewtop + 10) * 10;
 	vertices[0].z = -10;
-	vertices[1].x = (viewleft + (viewwidth >> 1)) * 10;
+	vertices[1].x = (viewleft + (viewwidth / 2.0f)) * 10;
 	vertices[1].y = (viewbottom - 10) * 10;
 	vertices[1].z = -10;
 	vertices[2].x = (viewleft + 48) * 10;
-	vertices[2].y = (viewtop + (viewheight >> 1)) * 10;
+	vertices[2].y = (viewtop + (viewheight / 2.0f)) * 10;
 	vertices[2].z = -10;
 	vertices[3].x = (viewright - 49) * 10;
-	vertices[3].y = (viewtop + (viewheight >> 1)) * 10;
+	vertices[3].y = (viewtop + (viewheight / 2.0f)) * 10;
 	vertices[3].z = -10;
 
 	inner[0] = x + 4;
@@ -1334,10 +1330,10 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
 	// Draw border over inner points
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x - 4, y - 4, x - 4, y + 4); // left
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x + 4, y - 4, x + 4, y + 4); // right
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x - 4, y - 4, x + 4, y - 4); // top
-	gdl += gfx_HUD_Rectangle_EXT(gdl, x - 4, y + 4, x + 4, y + 4); // bottom
+	gdl += gfx_HUD_Rectangle(gdl, x - 4.0f, y - 4.0f, x - 4.0f, y + 4.0f); // left
+	gdl += gfx_HUD_Rectangle(gdl, x + 4.0f, y - 4.0f, x + 4.0f, y + 4.0f); // right
+	gdl += gfx_HUD_Rectangle(gdl, x - 4.0f, y - 4.0f, x + 4.0f, y - 4.0f); // top
+	gdl += gfx_HUD_Rectangle(gdl, x - 4.0f, y + 4.0f, x + 4.0f, y + 4.0f); // bottom
 
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
@@ -1350,8 +1346,8 @@ Gfx *sightDrawMaian(Gfx *gdl, bool sighton, float crossx, float crossy)
 
 Gfx *sightDrawTarget(Gfx *gdl, float crossx, float crossy)
 {
-	int x = sightGetAdjustedX((int)crossx);
-	int y = crossy;
+	float x = sightGetAdjustedXF(crossx);
+	float y = crossy;
 
 	gdl = textSetPrimColour(gdl, SIGHT_COLOUR);
 
@@ -1359,17 +1355,17 @@ Gfx *sightDrawTarget(Gfx *gdl, float crossx, float crossy)
 	gfx_Set_Subpixel_Offset_EXT(gdl++, -2, -2);
 	if (SIGHT_SCALE == 0) {
 		// Draw single rectangle to preserve intended opacity
-		gdl += gfx_HUD_Rectangle_EXT(gdl++, x, y, x, y);
+		gdl += gfx_HUD_Rectangle(gdl++, x, y, x, y);
 	} else
 	{
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 3 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 2 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x - 3 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x - 2 * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1 * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 0 * SIGHT_SCALE, y + 1 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 3 * SIGHT_SCALE);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 0 * SIGHT_SCALE, y + 1 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 2 * SIGHT_SCALE);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 0 * SIGHT_SCALE, y - 3 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1 * SIGHT_SCALE);
-		gdl += gfx_HUD_Rectangle_EXT(gdl, x + 0 * SIGHT_SCALE, y - 2 * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle(gdl, x + 1.0f * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 3.0f * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle(gdl, x + 1.0f * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x + 2.0f * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle(gdl, x - 3.0f * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1.0f * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle(gdl, x - 2.0f * SIGHT_SCALE, y + 0 * SIGHT_SCALE, x - 1.0f * SIGHT_SCALE, y + 0 * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle(gdl, x + 0 * SIGHT_SCALE, y + 1.0f * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 3.0f * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle(gdl, x + 0 * SIGHT_SCALE, y + 1.0f * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y + 2.0f * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle(gdl, x + 0 * SIGHT_SCALE, y - 3.0f * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1.0f * SIGHT_SCALE);
+		gdl += gfx_HUD_Rectangle(gdl, x + 0 * SIGHT_SCALE, y - 2.0f * SIGHT_SCALE, x + 0 * SIGHT_SCALE, y - 1.0f * SIGHT_SCALE);
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);
@@ -1431,7 +1427,7 @@ Gfx *sightDraw(Gfx *gdl, bool sighton, int sight)
 		gdl = sightDrawClassic(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	case SIGHT_2:
-		gdl = sightDrawType2(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
+		gdl = sightDrawClassic(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);
 		break;
 	case SIGHT_3:
 		gdl = sightDrawDefault(gdl, sighton && optionsGetSightOnScreen(g_Vars.currentplayerstats->mpindex), crossx, crossy);

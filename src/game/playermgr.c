@@ -1,4 +1,4 @@
-#include <ultra64.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/bondgun.h"
@@ -487,10 +487,7 @@ void playermgrAllocatePlayer(int index)
 	g_Vars.players[index]->unk0484 = NULL;
 	g_Vars.players[index]->unk0488 = NULL;
 
-	g_Vars.players[index]->c_scalelod60 = 1;
-	g_Vars.players[index]->c_scalelod = 1;
 	g_Vars.players[index]->c_lodscalez = 1;
-	g_Vars.players[index]->c_lodscalezu32 = 0x10000;
 
 	g_Vars.players[index]->screenxminf = 0;
 	g_Vars.players[index]->screenyminf = 0;

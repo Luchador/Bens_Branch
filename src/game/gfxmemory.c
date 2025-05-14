@@ -10,6 +10,7 @@
 #include "string.h"
 #include <stdlib.h>
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 #include "platform.h"
 
@@ -124,6 +125,15 @@ Vtx *gfxAllocateVertices(uint32_t count)
 {
 	void *ptr = g_GfxMemPos;
 	g_GfxMemPos += count * sizeof(Vtx);
+	g_GfxMemPos = (uint8_t *)ALIGN16((uintptr_t)g_GfxMemPos);
+
+	return ptr;
+}
+
+VtxF *gfxAllocateVerticesF(uint32_t count)
+{
+	void *ptr = g_GfxMemPos;
+	g_GfxMemPos += count * sizeof(VtxF);
 	g_GfxMemPos = (uint8_t *)ALIGN16((uintptr_t)g_GfxMemPos);
 
 	return ptr;

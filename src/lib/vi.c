@@ -300,7 +300,7 @@ Gfx *viPrepareZbuf(Gfx *gdl)
 Gfx *viFillBuffer(Gfx *gdl)
 {
 	gfx_Set_Cycle_Type(gdl++, G_CYC_FILL);
-	gfx_Fill_Rectangle(gdl++, 0, 0, g_ViBackData->bufx - 1, g_ViBackData->bufy - 1);
+	gdl += gfx_Fill_Rectangle(gdl, 0, 0, g_ViBackData->bufx - 1, g_ViBackData->bufy - 1);
 
 	return gdl;
 }
@@ -308,7 +308,7 @@ Gfx *viFillBuffer(Gfx *gdl)
 Gfx *viRenderViewportEdges(Gfx *gdl)
 {
 	gfx_Set_Cycle_Type(gdl++, G_CYC_FILL);
-	gfx_Set_Scissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
+	gdl += gfx_Set_Scissor(gdl, 0, 0, (uint32_t)viGetWidth(), (uint32_t)viGetHeight());
 	RGBA fillColor = {0, 0, 0, 255};
 	gfx_Set_Fill_Color(gdl++, fillColor);
 
@@ -319,12 +319,12 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 		// Single viewport
 		if (viGetViewTop() > 0) {
 			// Fill above
-			gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth() - 1, viGetViewTop() - 1);
+			gdl += gfx_Fill_Rectangle(gdl, 0, 0, viGetWidth() - 1, viGetViewTop() - 1);
 		}
 
 		if (viGetViewTop() + viGetViewHeight() < viGetHeight()) {
 			// Fill below
-			gfx_Fill_Rectangle(gdl++,
+			gdl += gfx_Fill_Rectangle(gdl,
 					0, viGetViewTop() + viGetViewHeight(),
 					viGetWidth() - 1, viGetHeight() - 1);
 		}
@@ -344,18 +344,18 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 
 			if (g_Vars.players[topplayernum]->viewtop > 0) {
 				// Fill above all viewports - full width
-				gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth() - 1, g_Vars.players[topplayernum]->viewtop - 1);
+				gdl += gfx_Fill_Rectangle(gdl, 0, 0, viGetWidth() - 1, g_Vars.players[topplayernum]->viewtop - 1);
 			}
 
 			if (g_Vars.players[bottomplayernum]->viewtop + g_Vars.players[bottomplayernum]->viewheight < viGetHeight()) {
 				// Fill below all viewports - full width
-				gfx_Fill_Rectangle(gdl++,
+				gdl += gfx_Fill_Rectangle(gdl,
 						0, g_Vars.players[bottomplayernum]->viewtop + g_Vars.players[bottomplayernum]->viewheight,
 						viGetWidth() - 1, viGetHeight() - 1);
 			}
 
 			// Horizontal middle line
-			gfx_Fill_Rectangle(gdl++,
+			gdl += gfx_Fill_Rectangle(gdl,
 					0, g_Vars.players[tmpplayernum]->viewtop - 1,
 					viGetWidth() - 1, g_Vars.players[tmpplayernum]->viewtop - 1);
 
@@ -366,14 +366,14 @@ Gfx *viRenderViewportEdges(Gfx *gdl)
 				}
 
 				// Vertical middle line
-				gfx_Fill_Rectangle(gdl++,
+				gdl += gfx_Fill_Rectangle(gdl,
 						g_Vars.players[tmpplayernum]->viewleft + g_Vars.players[tmpplayernum]->viewwidth, 0,
 						g_Vars.players[tmpplayernum]->viewleft + g_Vars.players[tmpplayernum]->viewwidth, viGetHeight() - 1);
 			}
 
 			if (PLAYERCOUNT() == 3) {
 				// Blank square in P4 spot
-				gfx_Fill_Rectangle(gdl++,
+				gdl += gfx_Fill_Rectangle(gdl,
 						g_Vars.players[tmpplayernum]->viewleft + g_Vars.players[tmpplayernum]->viewwidth + 1, g_Vars.players[tmpplayernum]->viewtop,
 						viGetWidth() - 1, viGetHeight() - 1);
 			}
@@ -434,6 +434,16 @@ int16_t viGetViewHeight(void)
 	return g_ViBackData->viewy;
 }
 
+int32_t viGetViewWidthReal(void)
+{
+	return g_ViBackData->viewxreal;
+}
+
+int32_t viGetViewHeightReal(void)
+{
+	return g_ViBackData->viewyreal;
+}
+
 void viSetViewPosition(int16_t left, int16_t top)
 {
 	g_ViBackData->viewleft = left;
@@ -450,6 +460,16 @@ int16_t viGetViewLeft(void)
 int16_t viGetViewTop(void)
 {
 	return g_ViBackData->viewtop;
+}
+
+int32_t viGetViewLeftReal(void)
+{
+	return g_ViBackData->viewleftreal;
+}
+
+int32_t viGetViewTopReal(void)
+{
+	return g_ViBackData->viewtopreal;
 }
 
 void viSetUseZBuf(bool use)

@@ -5,6 +5,7 @@
 #include "n_libaudio.h"
 #include "constants.h"
 #include "tiles.h"
+#include "gfx.h"
 #include "gbi.h"
 #include "platform.h"
 
@@ -23,14 +24,6 @@ typedef uint32_t k_ptr_t;
 #endif
 
 #define texnum_t uintptr_t
-
-// Float version of a graphics matrix, which has higher precision than an Mtx.
-// Matrices are stored as Mtxfs then converted to an Mtx when passed to the GPU.
-// Mtxs use a union and a long long int to force alignments. Mtxfs are not
-// aligned but still use the union for consistency with Mtx.
-typedef struct {
-	float m[4][4];
-} Mtxf;
 
 // Ben's comment: used for loading plaintext files for game strings e.g. briefings, weapon names, etc...
 typedef struct {
@@ -618,7 +611,7 @@ struct model {
 		struct defaultobj *obj;
 	};
 	/*0x08*/ struct modeldef *definition;
-	/*0x0c*/ Mtxf *matrices;
+	/*0x0c*/ Mtx *matrices;
 	/*0x10*/ uint32_t *rwdatas;
 	/*0x14*/ float scale;
 	/*0x18*/ struct model *attachedtomodel;
@@ -1340,7 +1333,7 @@ struct projectile {
 	/*0x014*/ float unk014;
 	/*0x018*/ float unk018;
 	/*0x01c*/ float unk01c;
-	/*0x020*/ Mtxf mtx;
+	/*0x020*/ Mtx mtx;
 	/*0x060*/ float unk060;
 	/*0x064*/ float unk064;
 	/*0x068*/ float unk068[4];
@@ -1378,7 +1371,7 @@ struct projectile {
 
 struct embedment {
 	/*0x000*/ uint32_t flags;
-	/*0x004*/ Mtxf matrix;
+	/*0x004*/ Mtx matrix;
 	/*0x044*/ struct projectile *projectile;
 };
 
@@ -2598,12 +2591,7 @@ struct player {
 	/*0x1760*/ Mtx *prevworldtoscreenmtx;
 	/*0x1764*/ int c_prevviewfmdynticknum;
 	/*0x1768*/ Mtx *prevprojectionmtx;
-	/*0x176c*/ float c_scalelod60; // Used by FarSight target locator
-	/*0x1770*/ float c_scalelod;
 	/*0x1774*/ float c_lodscalez;
-	/*0x1778*/ uint32_t c_lodscalezu32;
-	/*0x177c*/ struct coord c_cameratopnorm;
-	/*0x1788*/ struct coord c_cameraleftnorm;
 	/*0x1794*/ float screenxminf;
 	/*0x1798*/ float screenyminf;
 	/*0x179c*/ float screenxmaxf;
@@ -2705,7 +2693,7 @@ struct player {
 	/*0x1a88*/ uint32_t bondentertheta;
 	/*0x1a8c*/ uint32_t bondenterverta;
 	/*0x1a90*/ struct coord bondenterpos;
-	/*0x1a9c*/ Mtxf bondentermtx;
+	/*0x1a9c*/ Mtx bondentermtx;
 	/*0x1adc*/ struct coord bondenteraim;
 
 	/*0x1ae8*/ float bondonground;
@@ -2714,7 +2702,7 @@ struct player {
 	/*0x1af4*/ uint32_t bondonturret;
 	/*0x1af8*/ int walkinitmove;
 	/*0x1afc*/ struct coord walkinitpos;
-	/*0x1b08*/ Mtxf walkinitmtx;
+	/*0x1b08*/ Mtx walkinitmtx;
 	/*0x1b48*/ float walkinitt;
 	/*0x1b4c*/ float walkinitt2;
 	/*0x1b50*/ struct coord walkinitstart;
@@ -2725,7 +2713,6 @@ struct player {
 	/*0x1b6c*/ struct coord bondforcespeed;
 	/*0x1b78*/ bool bondtankexplode;
 	/*0x1b7c*/ int bondviewlevtime60;
-	/*0x1b80*/ float bondwatchtime60;
 	/*0x1b84*/ bool tickdiefinished;
 	/*0x1b88*/ int introanimnum;
 	/*0x1b8c*/ int lastsighton;
@@ -4430,15 +4417,6 @@ typedef struct OSScTask_s {
     //OSMesg              msg;
 } OSScTask;
 
-struct gecreditsdata {
-	/*0x00*/ uint16_t text1;
-	/*0x02*/ uint16_t text2;
-	/*0x04*/ uint16_t posoffset1;
-	/*0x06*/ uint16_t alignoffset1;
-	/*0x08*/ uint16_t posoffset2;
-	/*0x0a*/ uint16_t alignoffset2;
-};
-
 struct invitem_weap {
 	int16_t weapon1;
 	int16_t pickuppad;
@@ -4994,11 +4972,11 @@ struct animtableentry {
 };
 
 struct modelrenderdata {
-	/*0x00*/ Mtxf *unk00;
+	/*0x00*/ Mtx *unk00;
 	/*0x04*/ bool zbufferenabled;
 	/*0x08*/ uint32_t flags;
 	/*0x0c*/ Gfx *gdl;
-	/*0x10*/ Mtxf *unk10;
+	/*0x10*/ Mtx *unk10;
 	/*0x14*/ uint32_t unk14;
 	/*0x18*/ uint32_t unk18;
 	/*0x1c*/ uint32_t unk1c;
@@ -5013,24 +4991,28 @@ struct modelrenderdata {
 };
 
 struct rend_vidat {
-	/*0x00*/ uint8_t mode;
-	/*0x01*/ uint8_t unk01;
-	/*0x02*/ uint8_t unk02;
-	/*0x03*/ uint8_t unk03;
-	/*0x04*/ int16_t x;
-	/*0x06*/ int16_t y;
-	/*0x08*/ float fovy;
-	/*0x0c*/ float aspect;
-	/*0x10*/ float znear;
-	/*0x14*/ float zfar;
-	/*0x18*/ int16_t bufx;
-	/*0x1a*/ int16_t bufy;
-	/*0x1c*/ int16_t viewx;
-	/*0x1e*/ int16_t viewy;
-	/*0x20*/ int16_t viewleft;
-	/*0x22*/ int16_t viewtop;
-	/*0x24*/ bool usezbuf;
-	/*0x28*/ uint16_t *fb;
+	uint8_t mode;
+	uint8_t unk01;
+	uint8_t unk02;
+	uint8_t unk03;
+	int16_t x;
+	int16_t y;
+	float fovy;
+	float aspect;
+	float znear;
+	float zfar;
+	int16_t bufx;
+	int16_t bufy;
+	int16_t viewx;
+	int16_t viewy;
+	int16_t viewleft;
+	int16_t viewtop;
+	int32_t viewxreal;
+	int32_t viewyreal;
+	int32_t viewleftreal;
+	int32_t viewtopreal;
+	bool usezbuf;
+	uint16_t *fb;
 };
 
 struct shieldhit {
@@ -5274,15 +5256,15 @@ struct animsmovement {
 };
 
 struct shard {
-	/*0x00*/ RoomNum room;
-	/*0x04*/ int age60;
-	/*0x08*/ struct coord pos;
-	/*0x14*/ struct coord rot;
-	/*0x20*/ struct coord vel;
-	/*0x2c*/ struct coord rotspeed;
-	/*0x38*/ Vtx vertices[3];
-	/*0x5c*/ Col colours[3];
-	/*0x68*/ uint8_t type;
+	RoomNum room;
+	int age60;
+	struct coord pos;
+	struct coord rot;
+	struct coord vel;
+	struct coord rotspeed;
+	VtxF vertices[3];
+	Col colours[3];
+	uint8_t type;
 };
 
 struct pschannel {
@@ -5623,10 +5605,10 @@ struct var80062960 {
 	/*0x008*/ float unk008;
 	/*0x00c*/ bool unk00c;
 	/*0x010*/ struct modelrodata_bbox bbox;
-	/*0x02c*/ Mtxf unk02c;
-	/*0x06c*/ Mtxf unk06c;
-	/*0x0ac*/ Mtxf unk0ac;
-	/*0x0ec*/ Mtxf unk0ec;
+	/*0x02c*/ Mtx unk02c;
+	/*0x06c*/ Mtx unk06c;
+	/*0x0ac*/ Mtx unk0ac;
+	/*0x0ec*/ Mtx unk0ec;
 	/*0x12c*/ float unk12c;
 	/*0x130*/ uint32_t unk130;
 	/*0x134*/ float unk134[2];
@@ -5677,48 +5659,48 @@ struct texcacheitem {
 };
 
 struct skyvtx3d {
-	/*0x00*/ float x;
-	/*0x04*/ float y;
-	/*0x08*/ float z;
-	/*0x0c*/ float s;
-	/*0x10*/ float t;
-	/*0x14*/ uint8_t r;
-	/*0x15*/ uint8_t g;
-	/*0x16*/ uint8_t b;
-	/*0x17*/ uint8_t a;
+	float x;
+	float y;
+	float z;
+	float s;
+	float t;
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a;
 };
 
 struct skyvtx2d {
-	/*0x00*/ float unk00;
-	/*0x04*/ float unk04;
-	/*0x08*/ float unk08;
-	/*0x0c*/ float unk0c;
-	/*0x10*/ float r;
-	/*0x14*/ float g;
-	/*0x18*/ float b;
-	/*0x1c*/ float a;
-	/*0x20*/ float s;
-	/*0x24*/ float t;
-	/*0x28*/ float x;
-	/*0x2c*/ float y;
-	/*0x30*/ float unk30;
-	/*0x34*/ float unk34;
+	float unk00;
+	float unk04;
+	float unk08;
+	float unk0c;
+	float r;
+	float g;
+	float b;
+	float a;
+	float s;
+	float t;
+	float x;
+	float y;
+	float unk30;
+	float unk34;
 };
 
 struct hovtype {
-	/*0x00*/ float bobymid;
-	/*0x04*/ float bobyminradius;
-	/*0x08*/ float bobyrandradius;
-	/*0x0c*/ float bobyaccel;
-	/*0x10*/ float bobymaxspeed;
-	/*0x14*/ float bobpitchminangle;
-	/*0x18*/ float bobpitchrandangle;
-	/*0x1c*/ float bobpitchaccel;
-	/*0x20*/ float bobpitchmaxspeed;
-	/*0x24*/ float bobrollminangle;
-	/*0x28*/ float bobrollrandangle;
-	/*0x2c*/ float bobrollaccel;
-	/*0x30*/ float bobrollmaxspeed;
+	float bobymid;
+	float bobyminradius;
+	float bobyrandradius;
+	float bobyaccel;
+	float bobymaxspeed;
+	float bobpitchminangle;
+	float bobpitchrandangle;
+	float bobpitchaccel;
+	float bobpitchmaxspeed;
+	float bobrollminangle;
+	float bobrollrandangle;
+	float bobrollaccel;
+	float bobrollmaxspeed;
 };
 
 struct modelrwdatabinding {
@@ -5737,21 +5719,21 @@ struct var800a6538 {
 };
 
 struct xraydata {
-	/*0x000*/ int unk000;
-	/*0x004*/ int unk004;
-	/*0x008*/ int unk008;
-	/*0x00c*/ float unk00c;
-	/*0x010*/ float unk010;
-	/*0x014*/ float unk014;
-	/*0x018*/ float unk018;
-	/*0x01c*/ float unk01c;
-	/*0x020*/ int maxEdgeLength;
-	/*0x024*/ int maxEdgeLengthSq;
-	/*0x028*/ int16_t vertices[16][3];
-	/*0x088*/ uint32_t colours[16];
-	/*0x0c8*/ int16_t tris[64][3];
-	/*0x248*/ int16_t numvertices;
-	/*0x24a*/ int16_t numtris;
+	int unk000;
+	int unk004;
+	int unk008;
+	float unk00c;
+	float unk010;
+	float unk014;
+	float unk018;
+	float unk01c;
+	int maxEdgeLength;
+	int maxEdgeLengthSq;
+	int16_t vertices[16][3];
+	uint32_t colours[16];
+	int16_t tris[64][3];
+	int16_t numvertices;
+	int16_t numtris;
 };
 
 struct widthxz {

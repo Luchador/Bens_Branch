@@ -62,7 +62,7 @@ struct smoketype g_SmokeTypes[] = {
 
 Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, struct coord *coord, float size)
 {
-	Vtx *vertices = gfxAllocateVertices(4);
+	VtxF *vertices = gfxAllocateVerticesF(4);
 	Col *colours = (Col *)gfxAllocateColours(1);
 	Mtx *mtx = camGetProjectionMtx();
 	struct coord spa0;
@@ -229,7 +229,7 @@ Gfx *smokeRenderPart(struct smoke *smoke, struct smokepart *part, Gfx *gdl, stru
 	vertices[3].colour = 0;
 
 	gfx_Color(gdl++, colours, 1);
-	gfx_Vertex(gdl++, vertices, 4, 0);
+	gfx_VertexF(gdl++, vertices, 4, 0);
 
 	gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 

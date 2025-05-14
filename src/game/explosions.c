@@ -212,25 +212,13 @@ bool explosionCreate(struct prop *sourceprop, struct coord *exppos, RoomNum *exp
 		return false;
 	}
 
-	// Bullet holes: only create the flame (explosion) if within 4 metres
 	if (type == EXPLOSIONTYPE_BULLETHOLE) {
-		float lodscale = camGetLodScaleZ();
-		struct coord *campos = &g_Vars.currentplayer->cam_pos;
-		float xdist = exppos->x - campos->x;
-		float ydist = exppos->y - campos->y;
-		float zdist = exppos->z - campos->z;
-		float sum = xdist * xdist + ydist * ydist + zdist * zdist;
-
-		if (sum * lodscale * lodscale > 400 * 400) {
-			if (rngRandom() % 2 == 0) {
-				if (sourceprop) {
-					smokeCreateSimple(&sourceprop->pos, sourceprop->rooms, g_ExplosionTypes[type].smoketype);
-				} else {
-					smokeCreateSimple(exppos, exprooms, g_ExplosionTypes[type].smoketype);
-				}
+		if (rngRandom() % 2 == 0) {
+			if (sourceprop) {
+				smokeCreateSimple(&sourceprop->pos, sourceprop->rooms, g_ExplosionTypes[type].smoketype);
+			} else {
+				smokeCreateSimple(exppos, exprooms, g_ExplosionTypes[type].smoketype);
 			}
-
-			return true;
 		}
 	}
 
@@ -1315,7 +1303,7 @@ Gfx *explosionRender(struct prop *prop, Gfx *gdl, bool xlupass)
 
 Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx *gdl, struct coord *coord, int arg4)
 {
-	Vtx *vertices = gfxAllocateVertices(4);
+	VtxF *vertices = gfxAllocateVerticesF(4);
 	Mtx *mtx = camGetProjectionMtx();
 	struct coord spbc;
 	struct coord spb0;
@@ -1349,9 +1337,9 @@ Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx 
 		max = 0.0f;
 
 		for (i = 0; i < exp->numbb; i++) {
-			if (pos.f[0] >= exp->bbs[i].bbmin.f[0] && pos.f[0] <= exp->bbs[i].bbmax.f[0]
-					&& pos.f[1] >= exp->bbs[i].bbmin.f[1] && pos.f[1] <= exp->bbs[i].bbmax.f[1]
-					&& pos.f[2] >= exp->bbs[i].bbmin.f[2] && pos.f[2] <= exp->bbs[i].bbmax.f[2]) {
+			if (pos.f[0] >= exp->bbs[i].bbmin.x && pos.x <= exp->bbs[i].bbmax.x
+					&& pos.y >= exp->bbs[i].bbmin.y && pos.y <= exp->bbs[i].bbmax.y
+					&& pos.z >= exp->bbs[i].bbmin.z && pos.z <= exp->bbs[i].bbmax.z) {
 				float min = 65536.0f;
 
 				for (int j = 0; j < 3; j++) {
@@ -1469,7 +1457,7 @@ Gfx *explosionRenderPart(struct explosion *exp, struct explosionpart *part, Gfx 
 		vertices[j].colour = 0;
 	}
 
-	gfx_Vertex(gdl++, vertices, 4, 0);
+	gfx_VertexF(gdl++, vertices, 4, 0);
 
 	gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 

@@ -255,14 +255,14 @@ struct drawslot *bgGetRoomDrawSlot(int roomnum)
 
 Gfx *bgRenderXrayData(Gfx *gdl, struct xraydata *xraydata)
 {
-	Vtx *vertices;
+	VtxF *vertices;
 	Col *colours;
 	int numgroups;
 	int i;
 	int count;
 
 	if (xraydata->numtris > 0) {
-		vertices = gfxAllocateVertices(xraydata->numvertices);
+		vertices = gfxAllocateVerticesF(xraydata->numvertices);
 		colours = gfxAllocateColours(xraydata->numvertices);
 
 		for (i = 0; i < xraydata->numvertices; i++) {
@@ -277,7 +277,7 @@ Gfx *bgRenderXrayData(Gfx *gdl, struct xraydata *xraydata)
 		gfx_Color(gdl++, colours, count);
 
 		count = xraydata->numvertices;
-		gfx_Vertex(gdl++, vertices, count, 0);
+		gfx_VertexF(gdl++, vertices, count, 0);
 
 		numgroups = (xraydata->numtris - 1) / 4 + 1;
 
@@ -300,7 +300,7 @@ Gfx *bgRenderXrayData(Gfx *gdl, struct xraydata *xraydata)
 	return gdl;
 }
 
-Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t vertices1[3], int16_t vertices2[3], int16_t vertices3[3], uint32_t colour1, uint32_t colour2, uint32_t colour3)
+Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, float vertices1[3], float vertices2[3], float vertices3[3], uint32_t colour1, uint32_t colour2, uint32_t colour3)
 {
 	int16_t sp30[3] = {-1, -1, -1};
 	int count = 0;
@@ -311,27 +311,27 @@ Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t vertices1[3], int
 	}
 
 	for (i = 0; i < xraydata->numvertices && sp30[0] == -1; i++) {
-		if (vertices1[0] == xraydata->vertices[i][0]
-				&& vertices1[1] == xraydata->vertices[i][1]
-				&& vertices1[2] == xraydata->vertices[i][2]) {
+		if (vertices1[0] == (float)xraydata->vertices[i][0]
+				&& vertices1[1] == (float)xraydata->vertices[i][1]
+				&& vertices1[2] == (float)xraydata->vertices[i][2]) {
 			sp30[0] = i;
 			count++;
 		}
 	}
 
 	for (i = 0; i < xraydata->numvertices && sp30[1] == -1; i++) {
-		if (vertices2[0] == xraydata->vertices[i][0]
-				&& vertices2[1] == xraydata->vertices[i][1]
-				&& vertices2[2] == xraydata->vertices[i][2]) {
+		if (vertices2[0] == (float)xraydata->vertices[i][0]
+				&& vertices2[1] == (float)xraydata->vertices[i][1]
+				&& vertices2[2] == (float)xraydata->vertices[i][2]) {
 			sp30[1] = i;
 			count++;
 		}
 	}
 
 	for (i = 0; i < xraydata->numvertices && sp30[2] == -1; i++) {
-		if (vertices3[0] == xraydata->vertices[i][0]
-				&& vertices3[1] == xraydata->vertices[i][1]
-				&& vertices3[2] == xraydata->vertices[i][2]) {
+		if (vertices3[0] == (float)xraydata->vertices[i][0]
+				&& vertices3[1] == (float)xraydata->vertices[i][1]
+				&& vertices3[2] == (float)xraydata->vertices[i][2]) {
 			sp30[2] = i;
 			count++;
 		}
@@ -341,19 +341,19 @@ Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t vertices1[3], int
 		if (xraydata->numvertices - count + 3 > 16) {
 			gdl = bgRenderXrayData(gdl, xraydata);
 
-			xraydata->vertices[0][0] = vertices1[0];
-			xraydata->vertices[0][1] = vertices1[1];
-			xraydata->vertices[0][2] = vertices1[2];
+			xraydata->vertices[0][0] = (int16_t)vertices1[0];
+			xraydata->vertices[0][1] = (int16_t)vertices1[1];
+			xraydata->vertices[0][2] = (int16_t)vertices1[2];
 			xraydata->colours[0] = colour1;
 
-			xraydata->vertices[1][0] = vertices2[0];
-			xraydata->vertices[1][1] = vertices2[1];
-			xraydata->vertices[1][2] = vertices2[2];
+			xraydata->vertices[1][0] = (int16_t)vertices2[0];
+			xraydata->vertices[1][1] = (int16_t)vertices2[1];
+			xraydata->vertices[1][2] = (int16_t)vertices2[2];
 			xraydata->colours[1] = colour2;
 
-			xraydata->vertices[2][0] = vertices3[0];
-			xraydata->vertices[2][1] = vertices3[1];
-			xraydata->vertices[2][2] = vertices3[2];
+			xraydata->vertices[2][0] = (int16_t)vertices3[0];
+			xraydata->vertices[2][1] = (int16_t)vertices3[1];
+			xraydata->vertices[2][2] = (int16_t)vertices3[2];
 			xraydata->colours[2] = colour3;
 
 			xraydata->numvertices = 3;
@@ -363,9 +363,9 @@ Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t vertices1[3], int
 			sp30[2] = 2;
 		} else {
 			if (sp30[0] == -1) {
-				xraydata->vertices[xraydata->numvertices][0] = vertices1[0];
-				xraydata->vertices[xraydata->numvertices][1] = vertices1[1];
-				xraydata->vertices[xraydata->numvertices][2] = vertices1[2];
+				xraydata->vertices[xraydata->numvertices][0] = (int16_t)vertices1[0];
+				xraydata->vertices[xraydata->numvertices][1] = (int16_t)vertices1[1];
+				xraydata->vertices[xraydata->numvertices][2] = (int16_t)vertices1[2];
 				xraydata->colours[xraydata->numvertices] = colour1;
 
 				sp30[0] = xraydata->numvertices;
@@ -374,9 +374,9 @@ Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t vertices1[3], int
 			}
 
 			if (sp30[1] == -1) {
-				xraydata->vertices[xraydata->numvertices][0] = vertices2[0];
-				xraydata->vertices[xraydata->numvertices][1] = vertices2[1];
-				xraydata->vertices[xraydata->numvertices][2] = vertices2[2];
+				xraydata->vertices[xraydata->numvertices][0] = (int16_t)vertices2[0];
+				xraydata->vertices[xraydata->numvertices][1] = (int16_t)vertices2[1];
+				xraydata->vertices[xraydata->numvertices][2] = (int16_t)vertices2[2];
 				xraydata->colours[xraydata->numvertices] = colour2;
 
 				sp30[1] = xraydata->numvertices;
@@ -385,9 +385,9 @@ Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t vertices1[3], int
 			}
 
 			if (sp30[2] == -1) {
-				xraydata->vertices[xraydata->numvertices][0] = vertices3[0];
-				xraydata->vertices[xraydata->numvertices][1] = vertices3[1];
-				xraydata->vertices[xraydata->numvertices][2] = vertices3[2];
+				xraydata->vertices[xraydata->numvertices][0] = (int16_t)vertices3[0];
+				xraydata->vertices[xraydata->numvertices][1] = (int16_t)vertices3[1];
+				xraydata->vertices[xraydata->numvertices][2] = (int16_t)vertices3[2];
 				xraydata->colours[xraydata->numvertices] = colour3;
 
 				sp30[2] = xraydata->numvertices;
@@ -468,76 +468,80 @@ void bgChooseXrayVtxColour(bool *inrange, int16_t vertex[3], uint32_t *colour, s
 	}
 }
 
+// This function subdivides triangles to ensure there's enough detail on screen in X-ray mode
 Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t arg2[3], int16_t arg3[3], int16_t arg4[3], int arg5, int arg6, int arg7, int arg8, int arg9, int arg10)
 {
-	int spa4[3];
-	int16_t sp9c[3] = {0, 0, 0};
-	int sum;
-	int16_t sp84[3][3];
+	int edgeVector[3];
+	int16_t edgeSplitFlags[3] = {0, 0, 0};
+	int edgeLengthSquared;
+	int16_t midpoints[3][3];
 	bool inrange[3];
 	uint32_t colours[3];
-	int sp68 = -1;
-	int sp64 = 0;
+	int onlySplitEdgeIndex = -1;
+	int numEdgesSplit = 0;
 
 	if (xraydata->maxEdgeLength > 0) {
-		spa4[0] = arg3[0] - arg2[0];
-		spa4[1] = arg3[1] - arg2[1];
-		spa4[2] = arg3[2] - arg2[2];
+		edgeVector[0] = arg3[0] - arg2[0];
+		edgeVector[1] = arg3[1] - arg2[1];
+		edgeVector[2] = arg3[2] - arg2[2];
 
-		sum = spa4[0] * spa4[0] + spa4[1] * spa4[1] + spa4[2] * spa4[2];
+		edgeLengthSquared = edgeVector[0] * edgeVector[0] + edgeVector[1] * edgeVector[1] + edgeVector[2] * edgeVector[2];
 
-		if (sum > xraydata->maxEdgeLengthSq) {
-			sp84[0][0] = (arg3[0] + arg2[0]) / 2;
-			sp84[0][1] = (arg3[1] + arg2[1]) / 2;
-			sp84[0][2] = (arg3[2] + arg2[2]) / 2;
-			sp9c[0] = 1;
+		if (edgeLengthSquared > xraydata->maxEdgeLengthSq) {
+			midpoints[0][0] = (arg3[0] + arg2[0]) / 2;
+			midpoints[0][1] = (arg3[1] + arg2[1]) / 2;
+			midpoints[0][2] = (arg3[2] + arg2[2]) / 2;
+			edgeSplitFlags[0] = 1;
 
-			sp64++;
-			sp68 = 0;
+			numEdgesSplit++;
+			onlySplitEdgeIndex = 0;
 
-			bgChooseXrayVtxColour(&inrange[0], sp84[0], &colours[0], xraydata);
+			bgChooseXrayVtxColour(&inrange[0], midpoints[0], &colours[0], xraydata);
 		}
 
-		spa4[0] = arg4[0] - arg3[0];
-		spa4[1] = arg4[1] - arg3[1];
-		spa4[2] = arg4[2] - arg3[2];
+		edgeVector[0] = arg4[0] - arg3[0];
+		edgeVector[1] = arg4[1] - arg3[1];
+		edgeVector[2] = arg4[2] - arg3[2];
 
-		sum = spa4[0] * spa4[0] + spa4[1] * spa4[1] + spa4[2] * spa4[2];
+		edgeLengthSquared = edgeVector[0] * edgeVector[0] + edgeVector[1] * edgeVector[1] + edgeVector[2] * edgeVector[2];
 
-		if (sum > xraydata->maxEdgeLengthSq) {
-			sp84[1][0] = (arg4[0] + arg3[0]) / 2;
-			sp84[1][1] = (arg4[1] + arg3[1]) / 2;
-			sp84[1][2] = (arg4[2] + arg3[2]) / 2;
-			sp9c[1] = 1;
+		if (edgeLengthSquared > xraydata->maxEdgeLengthSq) {
+			midpoints[1][0] = (arg4[0] + arg3[0]) / 2;
+			midpoints[1][1] = (arg4[1] + arg3[1]) / 2;
+			midpoints[1][2] = (arg4[2] + arg3[2]) / 2;
+			edgeSplitFlags[1] = 1;
 
-			sp64++;
-			sp68 = 1;
+			numEdgesSplit++;
+			onlySplitEdgeIndex = 1;
 
-			bgChooseXrayVtxColour(&inrange[1], sp84[1], &colours[1], xraydata);
+			bgChooseXrayVtxColour(&inrange[1], midpoints[1], &colours[1], xraydata);
 		}
 
-		spa4[0] = arg2[0] - arg4[0];
-		spa4[1] = arg2[1] - arg4[1];
-		spa4[2] = arg2[2] - arg4[2];
+		edgeVector[0] = arg2[0] - arg4[0];
+		edgeVector[1] = arg2[1] - arg4[1];
+		edgeVector[2] = arg2[2] - arg4[2];
 
-		sum = spa4[0] * spa4[0] + spa4[1] * spa4[1] + spa4[2] * spa4[2];
+		edgeLengthSquared = edgeVector[0] * edgeVector[0] + edgeVector[1] * edgeVector[1] + edgeVector[2] * edgeVector[2];
 
-		if (sum > xraydata->maxEdgeLengthSq) {
-			sp84[2][0] = (arg2[0] + arg4[0]) / 2;
-			sp84[2][1] = (arg2[1] + arg4[1]) / 2;
-			sp84[2][2] = (arg2[2] + arg4[2]) / 2;
-			sp9c[2] = 1;
+		if (edgeLengthSquared > xraydata->maxEdgeLengthSq) {
+			midpoints[2][0] = (arg2[0] + arg4[0]) / 2;
+			midpoints[2][1] = (arg2[1] + arg4[1]) / 2;
+			midpoints[2][2] = (arg2[2] + arg4[2]) / 2;
+			edgeSplitFlags[2] = 1;
 
-			sp64++;
-			sp68 = 2;
+			numEdgesSplit++;
+			onlySplitEdgeIndex = 2;
 
-			bgChooseXrayVtxColour(&inrange[2], sp84[2], &colours[2], xraydata);
+			bgChooseXrayVtxColour(&inrange[2], midpoints[2], &colours[2], xraydata);
 		}
 	}
 
-	if (sp64 == 0) {
+	if (numEdgesSplit == 0) {
 		if (arg8 || arg9 || arg10) {
-			return bgAddXrayTri(gdl, xraydata, arg2, arg3, arg4, arg5, arg6, arg7);
+			float v0[3] = { (float)arg2[0], (float)arg2[1], (float)arg2[2] };
+			float v1[3] = { (float)arg3[0], (float)arg3[1], (float)arg3[2] };
+			float v2[3] = { (float)arg4[0], (float)arg4[1], (float)arg4[2] };
+			return bgAddXrayTri(gdl, xraydata, v0, v1, v2, arg5, arg6, arg7);
 		}
 	} else {
 		bool render;
@@ -588,46 +592,46 @@ Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t arg2[3], int1
 		}
 
 		if (render) {
-			if (sp64 == 1) {
-				if (sp68 == 0) {
-					gdl = bgProcessXrayTri(gdl, xraydata, arg2, sp84[0], arg4, arg5, colours[0], arg7, arg8, inrange[0], arg10);
-					gdl = bgProcessXrayTri(gdl, xraydata, arg4, sp84[0], arg3, arg7, colours[0], arg6, arg10, inrange[0], arg9);
-				} else if (sp68 == 1) {
-					gdl = bgProcessXrayTri(gdl, xraydata, arg3, sp84[1], arg2, arg6, colours[1], arg5, arg9, inrange[1], arg8);
-					gdl = bgProcessXrayTri(gdl, xraydata, arg2, sp84[1], arg4, arg5, colours[1], arg7, arg8, inrange[1], arg10);
-				} else if (sp68 == 2) {
-					gdl = bgProcessXrayTri(gdl, xraydata, arg4, sp84[2], arg3, arg7, colours[2], arg6, arg10, inrange[2], arg9);
-					gdl = bgProcessXrayTri(gdl, xraydata, arg3, sp84[2], arg2, arg6, colours[2], arg5, arg9, inrange[2], arg8);
+			if (numEdgesSplit == 1) {
+				if (onlySplitEdgeIndex == 0) {
+					gdl = bgProcessXrayTri(gdl, xraydata, arg2, midpoints[0], arg4, arg5, colours[0], arg7, arg8, inrange[0], arg10);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg4, midpoints[0], arg3, arg7, colours[0], arg6, arg10, inrange[0], arg9);
+				} else if (onlySplitEdgeIndex == 1) {
+					gdl = bgProcessXrayTri(gdl, xraydata, arg3, midpoints[1], arg2, arg6, colours[1], arg5, arg9, inrange[1], arg8);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg2, midpoints[1], arg4, arg5, colours[1], arg7, arg8, inrange[1], arg10);
+				} else if (onlySplitEdgeIndex == 2) {
+					gdl = bgProcessXrayTri(gdl, xraydata, arg4, midpoints[2], arg3, arg7, colours[2], arg6, arg10, inrange[2], arg9);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg3, midpoints[2], arg2, arg6, colours[2], arg5, arg9, inrange[2], arg8);
 				}
-			} else if (sp64 == 2) {
+			} else if (numEdgesSplit == 2) {
 				int v0 = 0;
 
-				if (sp9c[1] == 0) {
+				if (edgeSplitFlags[1] == 0) {
 					v0 = 1;
 				}
 
-				if (sp9c[2] == 0) {
+				if (edgeSplitFlags[2] == 0) {
 					v0 = 2;
 				}
 
 				if (v0 == 0) {
-					gdl = bgProcessXrayTri(gdl, xraydata, arg4, sp84[2], sp84[1], arg7, colours[2], colours[1], arg10, inrange[2], inrange[1]);
-					gdl = bgProcessXrayTri(gdl, xraydata, arg3, sp84[1], sp84[2], arg6, colours[1], colours[2], arg9, inrange[1], inrange[2]);
-					gdl = bgProcessXrayTri(gdl, xraydata, arg2, arg3, sp84[2], arg5, arg6, colours[2], arg8, arg9, inrange[2]);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg4, midpoints[2], midpoints[1], arg7, colours[2], colours[1], arg10, inrange[2], inrange[1]);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg3, midpoints[1], midpoints[2], arg6, colours[1], colours[2], arg9, inrange[1], inrange[2]);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg2, arg3, midpoints[2], arg5, arg6, colours[2], arg8, arg9, inrange[2]);
 				} else if (v0 == 1) {
-					gdl = bgProcessXrayTri(gdl, xraydata, arg2, sp84[0], sp84[2], arg5, colours[0], colours[2], arg8, inrange[0], inrange[2]);
-					gdl = bgProcessXrayTri(gdl, xraydata, arg4, sp84[2], sp84[0], arg7, colours[2], colours[0], arg10, inrange[2], inrange[0]);
-					gdl = bgProcessXrayTri(gdl, xraydata, arg3, arg4, sp84[0], arg6, arg7, colours[0], arg9, arg10, inrange[0]);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg2, midpoints[0], midpoints[2], arg5, colours[0], colours[2], arg8, inrange[0], inrange[2]);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg4, midpoints[2], midpoints[0], arg7, colours[2], colours[0], arg10, inrange[2], inrange[0]);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg3, arg4, midpoints[0], arg6, arg7, colours[0], arg9, arg10, inrange[0]);
 				} else {
-					gdl = bgProcessXrayTri(gdl, xraydata, arg3, sp84[1], sp84[0], arg6, colours[1], colours[0], arg9, inrange[1], inrange[0]);
-					gdl = bgProcessXrayTri(gdl, xraydata, arg2, sp84[0], sp84[1], arg5, colours[0], colours[1], arg8, inrange[0], inrange[1]);
-					gdl = bgProcessXrayTri(gdl, xraydata, arg4, arg2, sp84[1], arg7, arg5, colours[1], arg10, arg8, inrange[1]);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg3, midpoints[1], midpoints[0], arg6, colours[1], colours[0], arg9, inrange[1], inrange[0]);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg2, midpoints[0], midpoints[1], arg5, colours[0], colours[1], arg8, inrange[0], inrange[1]);
+					gdl = bgProcessXrayTri(gdl, xraydata, arg4, arg2, midpoints[1], arg7, arg5, colours[1], arg10, arg8, inrange[1]);
 				}
-			} else if (sp64 == 3) {
-				gdl = bgProcessXrayTri(gdl, xraydata, arg2, sp84[0], sp84[2], arg5, colours[0], colours[2], arg8, inrange[0], inrange[2]);
-				gdl = bgProcessXrayTri(gdl, xraydata, arg3, sp84[1], sp84[0], arg6, colours[1], colours[0], arg9, inrange[1], inrange[0]);
-				gdl = bgProcessXrayTri(gdl, xraydata, arg4, sp84[2], sp84[1], arg7, colours[2], colours[1], arg10, inrange[2], inrange[1]);
-				gdl = bgProcessXrayTri(gdl, xraydata, sp84[0], sp84[1], sp84[2], colours[0], colours[1], colours[2], inrange[0], inrange[1], inrange[2]);
+			} else if (numEdgesSplit == 3) {
+				gdl = bgProcessXrayTri(gdl, xraydata, arg2, midpoints[0], midpoints[2], arg5, colours[0], colours[2], arg8, inrange[0], inrange[2]);
+				gdl = bgProcessXrayTri(gdl, xraydata, arg3, midpoints[1], midpoints[0], arg6, colours[1], colours[0], arg9, inrange[1], inrange[0]);
+				gdl = bgProcessXrayTri(gdl, xraydata, arg4, midpoints[2], midpoints[1], arg7, colours[2], colours[1], arg10, inrange[2], inrange[1]);
+				gdl = bgProcessXrayTri(gdl, xraydata, midpoints[0], midpoints[1], midpoints[2], colours[0], colours[1], colours[2], inrange[0], inrange[1], inrange[2]);
 			}
 		}
 	}
@@ -1297,11 +1301,11 @@ void bgReset(int stagenum)
 
 	// Allocate space for the primary bg data
 	// An extra 0x8000 or so is given as temporary scratch space
-	g_BgPrimaryData = mempAlloc(ALIGN16(inflatedsize + 0x8010), MEMPOOL_STAGE);
+	g_BgPrimaryData = malloc(ALIGN16(inflatedsize + 0x81100));
 
 	// Set up pointer to scratch space
 	scratch = (uintptr_t) g_BgPrimaryData + inflatedsize - primcompsize;
-	scratch = ALIGN16(scratch + 0x8000);
+	scratch = ALIGN16(scratch + 0x8100);
 
 	g_LoadType = LOADTYPE_BG;
 
@@ -1314,9 +1318,6 @@ void bgReset(int stagenum)
 
 	preprocessBgSection1(g_BgPrimaryData, inflatedsize, 0x0f000000);
 
-	// Shrink the allocation (ie. free the scratch space)
-	mempRealloc(g_BgPrimaryData, inflatedsize, MEMPOOL_STAGE);
-
 	// Load the section 2 header
 	section2start = section1compsize + 0xc;
 
@@ -1327,7 +1328,7 @@ void bgReset(int stagenum)
 	section2compsize = *(int16_t *) &header[2];
 	inflatedsize = (inflatedsize | 0xf) + 1;
 
-	section2 = mempAlloc(inflatedsize + section2compsize, MEMPOOL_STAGE);
+	section2 = malloc(inflatedsize + section2compsize + 0x100);
 	scratch = (uintptr_t) section2 + inflatedsize;
 
 	// Load compressed data from ROM to scratch
@@ -1339,12 +1340,13 @@ void bgReset(int stagenum)
 	// Iterate texture IDs and ensure they're loaded
 	inflatedsize = (*(int16_t *) &header[0] & 0x7fff) >> 1;
 
-	for (i = 0; i ^ inflatedsize; i++) {
+	for (i = 0; i < inflatedsize; i++) {
 		texLoadFromTextureNum(section2[i] & 0xffff, NULL);
 	}
 
 	// Free section 2
-	mempRealloc(section2, 0, MEMPOOL_STAGE);
+	free(section2);
+	section2 = NULL;
 
 	g_BgSection3 = section2start + section2compsize + 4;
 
@@ -1411,7 +1413,7 @@ void bgBuildTables(int stagenum)
 	uint8_t *numlightsptr;
 
 	g_Rooms = mempAlloc(ALIGN16(g_Vars.roomcount * sizeof(struct room)), MEMPOOL_STAGE);
-	g_BgDrawSlotsByRoom = mempAlloc(ALIGN16(g_Vars.roomcount * sizeof(struct drawslotpointer)), MEMPOOL_STAGE);
+	g_BgDrawSlotsByRoom = malloc(ALIGN16(g_Vars.roomcount * sizeof(struct drawslotpointer)));
 
 	for (i = 0; i < g_Vars.roomcount; i++) {
 		g_BgDrawSlotsByRoom[i].updatedframe = 0xffff;
@@ -1768,6 +1770,11 @@ void bgBuildTables(int stagenum)
 void bgStop(void)
 {
 	bgUnloadAllRooms();
+
+	dyntexStop();
+	lightFreeDistanceMatrices();
+	free(g_BgDrawSlotsByRoom);
+	free(g_LightVisData);
 }
 
 /**
@@ -1832,8 +1839,6 @@ Gfx *bgRender(Gfx *gdl)
 {
 	gdl = lightsSetDefault(gdl);
 
-	gfx_Segment(gdl++, SPSEGMENT_BG_DL, (uintptr_t)g_BgPrimaryData);
-
 	gdl = envStartFog(gdl);
 	gdl = bgRenderSceneAndLoadCandidate(gdl);
 	gdl = bgScissorToViewport(gdl);
@@ -1891,7 +1896,7 @@ Gfx *bgScissorWithinViewport(Gfx *gdl, int viewleft, int viewtop, int viewright,
 			viewbottom = g_Vars.currentplayer->viewtop + g_Vars.currentplayer->viewheight;
 		}
 
-		gfx_Set_Scissor(gdl++, viewleft, viewtop, viewright, viewbottom);
+		gdl += gfx_Set_Scissor(gdl, (uint32_t)viewleft, (uint32_t)viewtop, (uint32_t)viewright, (uint32_t)viewbottom);
 	}
 
 	return gdl;
@@ -2573,6 +2578,8 @@ void bgUnloadAllRooms(void)
 			bgUnloadRoom(i);
 		}
 	}
+
+	free(g_BgPrimaryData);
 }
 
 /**

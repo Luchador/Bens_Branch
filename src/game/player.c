@@ -2101,7 +2101,7 @@ Gfx *playerDrawFade(Gfx *gdl, uint32_t r, uint32_t g, uint32_t b, float frac)
 			G_ACMUX_0, G_ACMUX_0, G_ACMUX_0, G_ACMUX_PRIMITIVE);
 		RGBA color = {r, g, b, (int)(frac * 255)};
 		gfx_Set_Prim_Color(gdl++, color);
-		gfx_Fill_Rectangle(gdl++, viGetViewLeft(), viGetViewTop(),
+		gdl += gfx_Fill_Rectangle(gdl, viGetViewLeft(), viGetViewTop(),
 				viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 		gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 		gfx_Set_Texture_LOD(gdl++, G_TL_LOD);
@@ -2635,6 +2635,43 @@ int16_t playerGetViewportWidth(void)
 	return width;
 }
 
+int32_t playerGetViewportWidthReal(void)
+{
+	int32_t width;
+
+	if (!playerHasSharedViewport())
+	{
+		if (PLAYERCOUNT() >= 3) {
+			// 3/4 players
+			width = videoGetWidth() / 2;
+
+			if (g_Vars.currentplayernum == 0 || g_Vars.currentplayernum == 2) {
+				width--;
+			}
+		} else if (PLAYERCOUNT() == 2) {
+			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+				// 2 players vsplit
+				width = videoGetWidth() / 2;
+
+				if (g_Vars.currentplayernum == 0) {
+					width--;
+				}
+			} else {
+				// 2 players full width
+				width = videoGetWidth();
+			}
+		} else {
+			// 1 player
+			width = videoGetWidth();
+		}
+	} else {
+		// Probably cutscene
+		width = videoGetWidth();
+	}
+
+	return width;
+}
+
 int16_t playerGetViewportLeft(void)
 {
 	int playerHasSingleViewport = !playerHasSharedViewport();
@@ -2664,6 +2701,40 @@ int16_t playerGetViewportLeft(void)
 	} else {
 		// Full screen
 		left = g_ViModes[0].fbwidth - g_ViModes[0].width;
+	}
+
+	return left;
+}
+
+int32_t playerGetViewportLeftReal(void)
+{
+	int playerHasSingleViewport = !playerHasSharedViewport();
+	int32_t left;
+
+	if (PLAYERCOUNT() >= 3 && playerHasSingleViewport != 0) {
+		if (g_Vars.currentplayernum == 1 || g_Vars.currentplayernum == 3) {
+			// 3/4 players - left side
+			left = 0;
+		} else {
+			// 3/4 players - right side
+			left = videoGetWidth() / 2;
+		}
+	} else if (PLAYERCOUNT() == 2 && playerHasSingleViewport != 0) {
+		if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+			if (g_Vars.currentplayernum == 1) {
+				// 2 players vsplit - right side
+				left = videoGetWidth() / 2;
+			} else {
+				// 2 players vsplit - left side
+				left = 0;
+			}
+		} else {
+			// 2 players - full width
+			left = 0;
+		}
+	} else {
+		// Full screen
+		left = 0;
 	}
 
 	return left;
@@ -2700,6 +2771,44 @@ int16_t playerGetViewportHeight(void)
 			}
 		} else {
 			height = g_ViModes[0].fullheight;
+		}
+	}
+
+	return height;
+}
+
+int32_t playerGetViewportHeightReal(void)
+{
+	int32_t height;
+
+	if (PLAYERCOUNT() >= 2 && !playerHasSharedViewport()) {
+		int32_t tmp = videoGetHeight();
+
+		height = tmp / 2;
+
+		if (PLAYERCOUNT() == 2) {
+			if (optionsGetScreenSplit() == SCREENSPLIT_VERTICAL) {
+				height = tmp;
+			} else if (g_Vars.currentplayernum == 0) {
+				height--;
+			}
+		} else if (g_Vars.currentplayernum == 0 || g_Vars.currentplayernum == 1) {
+			height--;
+		}
+	} else {
+		if (g_InCutscene && !g_GamePaused) {
+			if (g_CutsceneTweenDuration60 >= 1) {
+				float a = videoGetHeight() * 0.82;
+				float b = videoGetHeight();
+				a = a * (1.0f - g_CutsceneTweenFrac);
+				b = b * g_CutsceneTweenFrac;
+				height = a + b;
+			} else {
+				// Roughly equal to the deprecated wide height
+				height = videoGetHeight() * 0.82;
+			}
+		} else {
+			height = videoGetHeight();
 		}
 	}
 
@@ -2745,6 +2854,47 @@ int16_t playerGetViewportTop(void)
 	return top;
 }
 
+int32_t playerGetViewportTopReal(void)
+{
+	int32_t top;
+
+	// 2 - 4 players
+	if (PLAYERCOUNT() >= 2 && !playerHasSharedViewport()) {
+		top = 0;
+
+		if (optionsGetScreenSplit() != SCREENSPLIT_VERTICAL || PLAYERCOUNT() != 2)
+		{
+			if (PLAYERCOUNT() == 2
+					&& g_Vars.currentplayernum == 1
+					&& optionsGetScreenSplit() != SCREENSPLIT_VERTICAL) {
+				// 2 players hsplit
+				top = 0;
+			} else if (g_Vars.currentplayernum == 2 || g_Vars.currentplayernum == 3) {
+				// 3/4 players - bottom side
+				top = videoGetHeight() / 2;
+			}
+		}
+	// 1 player / full screen
+	} else {
+			if (g_InCutscene && !g_GamePaused
+					&& (!optionsGetCutsceneSubtitles() || g_Vars.stagenum == STAGE_CITRAINING)) {
+				if (g_CutsceneTweenDuration60 >= 1) {
+					float a = videoGetHeight() * 0.18;
+					float b = videoGetHeight();
+					a = a * (1.0f - g_CutsceneTweenFrac);
+					b = b * g_CutsceneTweenFrac;
+					top = a + b;
+				} else {
+					top = videoGetHeight() * 0.18;
+				}
+			} else {
+				return 0;
+			}
+	}
+
+	return top;
+}
+
 Gfx *playerDrawCutsceneRects(Gfx *gdl)
 {
 	int top = 0;
@@ -2775,15 +2925,15 @@ Gfx *playerDrawCutsceneRects(Gfx *gdl)
 	if (g_InCutscene && optionsGetCutsceneSubtitles() && g_Vars.stagenum != STAGE_CITRAINING) 
 	{
 		// For cutscenes with subtitles enabled, draw one double height rectangle on the bottom
-		gfx_Fill_Rectangle(gdl++, 0, viGetViewHeight() - top * 2, viGetViewWidth(), viGetViewHeight());
+		gdl += gfx_Fill_Rectangle(gdl, 0, viGetViewHeight() - top * 2, viGetViewWidth(), viGetViewHeight());
 	}
 	else
 	{
 		// Top Rectangle
-		gfx_Fill_Rectangle(gdl++, 0, 0, viGetViewWidth(), top);
+		gdl += gfx_Fill_Rectangle(gdl, 0, 0, viGetViewWidth(), top);
 
 		// Bottom Rectangle
-		gfx_Fill_Rectangle(gdl++, 0, viGetViewHeight() - top, viGetViewWidth(), viGetViewHeight());
+		gdl += gfx_Fill_Rectangle(gdl, 0, viGetViewHeight() - top, viGetViewWidth(), viGetViewHeight());
 	}
 
 	return gdl;
@@ -3073,9 +3223,9 @@ void playerTickSlayer(void)
 			int8_t stickx = 0;
 			int8_t sticky = 0;
 			int8_t rsticky = joyGetRStickY(contpad1);
-			Mtxf sp1fc;
-			Mtxf sp1bc;
-			Mtxf sp17c;
+			Mtx sp1fc;
+			Mtx sp1bc;
+			Mtx sp17c;
 			float sp178;
 			float sp174;
 			float sp15c[6];
@@ -3217,8 +3367,8 @@ void playerTickSlayer(void)
 			sp15c[3] = 0;
 
 			quaternionMultQuaternion(sp15c, sp14c, sp13c);
-			quaternionToMtx(sp13c, (Mtx*)&sp1fc);
-			mtx4RotateVecInPlace((Mtx*)&sp1fc, &projectile->speed);
+			quaternionToMtx(sp13c, &sp1fc);
+			mtx4RotateVecInPlace(&sp1fc, &projectile->speed);
 
 			projectile->powerlimit240 = -1;
 			projectile->flags |= PROJECTILEFLAG_NOTIMELIMIT;
@@ -3273,11 +3423,11 @@ void playerTickSlayer(void)
 			projectile->speed.y = (projectile->speed.y * newspeed) / prevspeed;
 			projectile->speed.z = (projectile->speed.z * newspeed) / prevspeed;
 
-			mtx3ToMtx4(sp2b8, (Mtx*)&sp1bc);
-			quaternion3x3MtxToQuat((Mtx*)&sp1bc, sp12c);
+			mtx3ToMtx4(sp2b8, &sp1bc);
+			quaternion3x3MtxToQuat(&sp1bc, sp12c);
 			quaternionMultQuaternion(sp13c, sp12c, sp11c);
-			quaternionToMtx(sp11c, (Mtx*)&sp17c);
-			mtx4ToMtx3((Mtx*)&sp17c, sp2b8);
+			quaternionToMtx(sp11c, &sp17c);
+			mtx4ToMtx3(&sp17c, sp2b8);
 
 			rocket->base.realrot[0][0] = sp2b8[0][0] * sp2a8;
 			rocket->base.realrot[0][1] = sp2b8[0][1] * sp2a8;

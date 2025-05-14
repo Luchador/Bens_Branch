@@ -139,14 +139,14 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	int shieldmarkerindexes[12];
 	int armourmarkerindexes[8];
 	int traumamarkerindexes[8];
-	Vtx *vertices;
+	VtxF *vertices;
 	Col *colours;
 	Col *shieldcolours;
 	Col *armourcolours;
 	Col *traumacolours;
-	Vtx *shieldvertices;
-	Vtx *armourvertices;
-	Vtx *traumavertices;
+	VtxF *shieldvertices;
+	VtxF *armourvertices;
+	VtxF *traumavertices;
 	float shieldfillincfade;
 	float shieldfillexcfade;
 	float armourfillincfade;
@@ -170,29 +170,29 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	float len0 = 0.0f;
 	int coloursize;
 
-	static int radmax = 30; // outer radius of the shield
-	static int radmed = 18; // inner radius of the shield
-	static int radmin = 12; // radius of the health bar
-	static int len1 = 170; // x pos of right side radius centre
-	static int len2 = 47;  // x pos of the left side of armour
-	static int len3 = 40;  // x pos of the right side of trauma (left side is 0)
+	static float radmax = 30; // outer radius of the shield
+	static float radmed = 18; // inner radius of the shield
+	static float radmin = 12; // radius of the health bar
+	static float len1 = 170; // x pos of right side radius centre
+	static float len2 = 47;  // x pos of the left side of armour
+	static float len3 = 40;  // x pos of the right side of trauma (left side is 0)
 	static uint32_t shieldcol = 0x10500090;
 	static uint32_t armourcol = 0x00c00060;
 	static uint32_t traumacol = 0xff000060;
 	static uint32_t bgcol = 0x00000080;
-	static int offx = -85;
-	static int offy = -185;
-	static int shieldfade = 100;
-	static int armourfade = 100;
-	static int traumafade = 200;
+	static float offx = -85;
+	static float offy = -185;
+	static float shieldfade = 100;
+	static float armourfade = 100;
+	static float traumafade = 200;
 	static int shielddir = 1;
-	static int underleft = 95;
-	static int undertop = 18;
-	static int underright = 225;
-	static int underbottom = 46;
+	static float underleft = 95;
+	static float undertop = 18;
+	static float underright = 225;
+	static float underbottom = 46;
 	static uint32_t undercol = 0x00000000;
 
-	vertices = gfxAllocateVertices(56);
+	vertices = gfxAllocateVerticesF(56);
 	colours = gfxAllocateColours(56);
 
 	// 12 markers (24 vertices) for shield
@@ -247,7 +247,7 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	 */
 	shieldmarkers[0].x1 = len1 + radmax * 1.08f;
 	shieldmarkers[0].y1 = 0;
-	shieldmarkers[0].x2 = len1 + (float)radmed;
+	shieldmarkers[0].x2 = len1 + radmed;
 	shieldmarkers[0].y2 = 0;
 	shieldmarkers[0].frac = 0;
 
@@ -422,18 +422,18 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 			colour = healthbarChooseColour(shieldcol, bgcol, shieldfillexcfade, shieldfillincfade, marker->frac);
 		}
 
-		shieldvertices->x = (int)marker->x1 + offx;
+		shieldvertices->x = marker->x1 + offx;
 		shieldvertices->y = 0;
-		shieldvertices->z = (int)marker->y1 + offy;
+		shieldvertices->z = marker->y1 + offy;
 		shieldvertices->colour = (i + i) << 2;
 		shieldvertices++;
 
 		shieldcolours->word = PD_BE32(colour);
 		shieldcolours++;
 
-		shieldvertices->x = (int)marker->x2 + offx;
+		shieldvertices->x = marker->x2 + offx;
 		shieldvertices->y = 0;
-		shieldvertices->z = (int)marker->y2 + offy;
+		shieldvertices->z = marker->y2 + offy;
 		shieldvertices->colour = (i + i + 1) << 2;
 		shieldvertices++;
 
@@ -456,18 +456,18 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 
 		colour = healthbarChooseColour(armourcol, bgcol, armourfillexcfade, armourfillincfade, marker->frac);
 
-		armourvertices->x = (int)marker->x1 + offx;
+		armourvertices->x = marker->x1 + offx;
 		armourvertices->y = 0;
-		armourvertices->z = (int)marker->y1 + offy;
+		armourvertices->z = marker->y1 + offy;
 		armourvertices->colour = (i + i) << 2;
 		armourvertices++;
 
 		armourcolours->word = PD_BE32(colour);
 		armourcolours++;
 
-		armourvertices->x = (int)marker->x2 + offx;
+		armourvertices->x = marker->x2 + offx;
 		armourvertices->y = 0;
-		armourvertices->z = (int)marker->y2 + offy;
+		armourvertices->z = marker->y2 + offy;
 		armourvertices->colour = (i + i + 1) << 2;
 		armourvertices++;
 
@@ -490,18 +490,18 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 
 		colour = healthbarChooseColour(traumacol, bgcol, traumafillexcfade, traumafillincfade, marker->frac);
 
-		traumavertices->x = (int)marker->x1 + offx;
+		traumavertices->x = marker->x1 + offx;
 		traumavertices->y = 0;
-		traumavertices->z = (int)marker->y1 + offy;
+		traumavertices->z = marker->y1 + offy;
 		traumavertices->colour = (i + i) << 2;
 		traumavertices++;
 
 		traumacolours->word = PD_BE32(colour);
 		traumacolours++;
 
-		traumavertices->x = (int)marker->x2 + offx;
+		traumavertices->x = marker->x2 + offx;
 		traumavertices->y = 0;
-		traumavertices->z = (int)marker->y2 + offy;
+		traumavertices->z = marker->y2 + offy;
 		traumavertices->colour = (i + i + 1) << 2;
 		traumavertices++;
 
@@ -520,17 +520,13 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 		G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
 		G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 
-	// Same as gSPColor but casts the sizeof to an int, which is required for a match.
-#define gSPColor2(pkt, v, n) \
-	gfx_Dma1p(pkt, G_COL, v, (int)sizeof(uint32_t)*(n),((n)-1)<<2)
-
 	// Draw shield
 	// There's between 20 and 24 colours and vertices to load here.
 	// The colours are loaded all at once, but the vertices are split into two.
 	numverts = numshieldmarkers * 2;
 
-	gSPColor2(gdl++, (uintptr_t)(colours), numverts);
-	gfx_Vertex(gdl++, vertices, 14, 0);
+	gfx_Color(gdl++, colours, numverts);
+	gfx_VertexF(gdl++, vertices, 14, 0);
 
 	gfx_Tri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
 	gfx_Tri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
@@ -542,9 +538,9 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	// This is a macro expansion of gSPVertex but cases the sizeof to an int,
 	// and separates numvertsremaining and numverts - 12.
 	// Both are required for a match.
-	gfx_Dma1p(gdl++, G_VTX,
+	gfx_Dma1p(gdl++, G_VTXF,
 			(uintptr_t)(vertices + 12),
-			numvertsremaining * (int) sizeof(Vtx),
+			numvertsremaining * (int) sizeof(VtxF),
 			(numverts - 12 - 1) << 4);
 
 	gfx_Tri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
@@ -563,8 +559,8 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	numverts = numarmourmarkers * 2;
 	coloursize = numverts * 4;
 
-	gSPColor2(gdl++, (uintptr_t)(colours + 24), numverts);
-	gfx_Vertex(gdl++, vertices + 24, numverts, 0);
+	gfx_Color(gdl++, colours + 24, numverts);
+	gfx_VertexF(gdl++, vertices + 24, numverts, 0);
 
 	gfx_Tri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
 	gfx_Tri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);
@@ -583,8 +579,8 @@ Gfx *healthbarDraw(Gfx *gdl, struct chrdata *chr, int offyarg, float heightfraca
 	numverts = numtraumamarkers * 2;
 	coloursize = numverts * 4;
 
-	gSPColor2(gdl++, (uintptr_t)(colours + 40), numverts);
-	gfx_Vertex(gdl++, vertices + 40, numverts, 0);
+	gfx_Color(gdl++, colours + 40, numverts);
+	gfx_VertexF(gdl++, vertices + 40, numverts, 0);
 
 	gfx_Tri4(gdl++, 0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5);
 	gfx_Tri4(gdl++, 4, 5, 6, 5, 6, 7, 6, 7, 8, 7, 8, 9);

@@ -4,7 +4,6 @@
 #include "types.h"
 
 void mempSetHeap(uint8_t *heapstart, uint32_t heaplen);
-uint32_t mempGetStageFree(void);
 void *mempGetNextStageAllocation(void);
 void *mempAlloc(uint32_t len, uint8_t pool);
 int mempRealloc(void *allocation, int newsize, uint8_t poolnum);

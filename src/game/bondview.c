@@ -34,7 +34,7 @@ int var8007f850 = 3;
 
 Gfx *bviewDrawIrRect(Gfx *gdl, int x1, int y1, int x2, int y2)
 {
-	gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
+	gdl += gfx_Fill_Rectangle(gdl, x1, y1, x2, y2);
 
 	return gdl;
 }
@@ -52,8 +52,8 @@ Gfx *bviewDrawFisheyeRect(Gfx *gdl, int arg1, float arg2, int arg3, int arg4)
 		float fVar4 = arg3 + tmp;
 		float fVar7 = (int)(arg2 * tmp);
 
-		gfx_Fill_Rectangle(gdl++, arg3, arg1, fVar4 - fVar7, arg1 + 1);
-		gfx_Fill_Rectangle(gdl++, fVar4 + fVar7, arg1, arg3 + arg4, arg1 + 1);
+		gdl += gfx_Fill_Rectangle(gdl, arg3, arg1, fVar4 - fVar7, arg1 + 1);
+		gdl += gfx_Fill_Rectangle(gdl, fVar4 + fVar7, arg1, arg3 + arg4, arg1 + 1);
 	}
 
 	return gdl;
@@ -156,7 +156,7 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, uint32_t colour, uint32_t alpha)
 	gdl += gfx_Image_Rectangle_EXT(gdl,
 		viewleft, viewtop, viewleft, viewtop,
 		(viewleft + viewwidth), (viewtop + viewheight), viewleft + viewwidth, viewtop + viewheight,
-		0, videoGetNativeWidth(), videoGetNativeHeight());
+		(float)videoGetNativeWidth(), (float)videoGetNativeHeight());
 
 	return gdl;
 }
@@ -166,18 +166,17 @@ Gfx *bviewDrawMotionBlur(Gfx *gdl, uint32_t colour, uint32_t alpha)
  */
 Gfx *bviewDrawStatic(Gfx *gdl, uint32_t arg1, int arg2)
 {
-	int viewtop = viGetViewTop();
-	int viewheight = viGetViewHeight();
-	int viewwidth = viGetViewWidth();
-	int viewleft = viGetViewLeft();
-	uint16_t *fb2 = (uint16_t *) (k_ptr_t)(rngRandom() & 0xfff00);
+	float viewtop = (float)viGetViewTop();
+	float viewheight = (float)viGetViewHeight();
+	float viewwidth = (float)viGetViewWidth();
+	float viewleft = (float)viGetViewLeft();
 
 	gdl = bviewPrepareStaticI8(gdl, arg1, arg2);
 
 	gfx_Set_Combine_LERP(gdl++,
 		G_CCMUX_NOISE, 0, G_CCMUX_ENVIRONMENT, 0, 0, 0, 0, G_ACMUX_ENVIRONMENT,
 		G_CCMUX_NOISE, 0, G_CCMUX_ENVIRONMENT, 0, 0, 0, 0, G_ACMUX_ENVIRONMENT);
-	gdl += gfx_HUD_Rectangle_EXT(gdl, viewleft, viewtop, viewleft + viewwidth + 1, viewtop + viewheight + 1);
+	gdl += gfx_HUD_Rectangle(gdl, viewleft, viewtop, viewleft + viewwidth + 1.0f, viewtop + viewheight + 1.0f);
 
 	return gdl;
 }
@@ -227,7 +226,7 @@ Gfx *bviewDrawSlayerRocketInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 			}
 		}
 
-		gfx_Fill_Rectangle(gdl++, viewleft, y, viewleft + viewwidth, y + 1);
+		gdl += gfx_Fill_Rectangle(gdl, viewleft, y, viewleft + viewwidth, y + 1);
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
@@ -281,7 +280,7 @@ Gfx *bviewDrawFilmInterlace(Gfx *gdl, uint32_t colour, uint32_t alpha)
 			tmpy += rngRandom() % 200;
 		}
 
-		gfx_Fill_Rectangle(gdl++, viewleft, tmpy, viewleft + viewwidth, tmpy + 1);
+		gdl += gfx_Fill_Rectangle(gdl, viewleft, tmpy, viewleft + viewwidth, tmpy + 1);
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
@@ -352,7 +351,7 @@ Gfx *bviewDrawZoomBlur(Gfx *gdl, uint32_t colour, int alpha, float zoomX, float 
 	gdl += gfx_Image_Rectangle_EXT(gdl,
 		x0, y0, s0 - 2, t0 - 2,
 		x1, y1, s1 * 4, t1 * 4,
-		0, texw, texh);
+		(float)texw, (float)texh);
 
 	return gdl;
 }
@@ -392,7 +391,7 @@ static inline Gfx *bviewDrawFisheyeLine(Gfx *gdl, int viewleft, int viewwidth, i
 	gdl += gfx_Image_Rectangle_EXT(gdl,
 		left, y, viewleft, y,
 		right, (y + 1), viewleft + viewwidth, y + 1,
-		0, videoGetNativeWidth(), videoGetNativeHeight());
+		(float)videoGetNativeWidth(), (float)videoGetNativeHeight());
 
 	return gdl;
 }
@@ -518,7 +517,7 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
 			if ((i % 2) == 0) {
 				RGBA color = {0, 0, 0, 85};
 				gfx_Set_Env_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, viewleft, i, viewleft + viewwidth, i + 1);
+				gdl += gfx_Fill_Rectangle(gdl, viewleft, i, viewleft + viewwidth, i + 1);
 			}
 
 			if (s2 >= viewheight * 0.5f) {
@@ -611,7 +610,7 @@ Gfx *bviewDrawFisheye(Gfx *gdl, uint32_t colour, uint32_t alpha, int shuttertime
  */
 Gfx *bviewDrawEyespySideRect(Gfx *gdl, int *points, uint8_t r, uint8_t g, uint8_t b, uint8_t alpha)
 {
-	Vtx *vertices = gfxAllocateVertices(4);
+	VtxF *vertices = gfxAllocateVerticesF(4);
 	Col *colours = gfxAllocateColours(2);
 
 	vertices[0].x = points[0] * 10.0f;
@@ -639,7 +638,7 @@ Gfx *bviewDrawEyespySideRect(Gfx *gdl, int *points, uint8_t r, uint8_t g, uint8_
 	vertices[3].colour = 4;
 
 	gfx_Color(gdl++, colours, 2);
-	gfx_Vertex(gdl++, vertices, 4, 0);
+	gfx_VertexF(gdl++, vertices, 4, 0);
 
 	gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
@@ -741,16 +740,16 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 	if (!vsplit)
 	{
 		// Render borders/lines in background
-		gfx_Fill_Rectangle(gdl++, viewleft + 25, viewtop + 55, viewleft + 26, viewbottom - 24);
-		gfx_Fill_Rectangle(gdl++, viewleft + 31, viewtop + 55, viewleft + 32, viewbottom - 42);
-		gfx_Fill_Rectangle(gdl++, viewleft + 25, viewbottom - 25, viewleft + 25 + viewwidth / 5.0f + 1, viewbottom - 24);
-		gfx_Fill_Rectangle(gdl++, viewleft + 31, viewbottom - 43, viewleft + 25 + viewwidth / 7.0f + 1, viewbottom - 42);
-		gfx_Fill_Rectangle(gdl++, viewright - 25, viewtop + 25, viewright - 24, viewbottom - 54);
-		gfx_Fill_Rectangle(gdl++, viewright - 31, viewtop + 43, viewright - 30, viewbottom - 54);
-		gfx_Fill_Rectangle(gdl++, viewright - 25 - viewwidth / 5.0f, viewtop + 25, viewright - 24, viewtop + 26);
-		gfx_Fill_Rectangle(gdl++, viewright - 25 - viewwidth / 7.0f, viewtop + 43, viewright - 30, viewtop + 44);
-		gfx_Fill_Rectangle(gdl++, viewleft, viewtop + 55, viewleft + viewwidth / 5.0f + 1, viewtop + 56);
-		gfx_Fill_Rectangle(gdl++, viewright - viewwidth / 5.0f, viewbottom - 55, viewright + 1, viewbottom - 54);
+		gdl += gfx_Fill_Rectangle(gdl, viewleft + 25, viewtop + 55, viewleft + 26, viewbottom - 24);
+		gdl += gfx_Fill_Rectangle(gdl, viewleft + 31, viewtop + 55, viewleft + 32, viewbottom - 42);
+		gdl += gfx_Fill_Rectangle(gdl, viewleft + 25, viewbottom - 25, viewleft + 25 + viewwidth / 5.0f + 1, viewbottom - 24);
+		gdl += gfx_Fill_Rectangle(gdl, viewleft + 31, viewbottom - 43, viewleft + 25 + viewwidth / 7.0f + 1, viewbottom - 42);
+		gdl += gfx_Fill_Rectangle(gdl, viewright - 25, viewtop + 25, viewright - 24, viewbottom - 54);
+		gdl += gfx_Fill_Rectangle(gdl, viewright - 31, viewtop + 43, viewright - 30, viewbottom - 54);
+		gdl += gfx_Fill_Rectangle(gdl, viewright - 25 - viewwidth / 5.0f, viewtop + 25, viewright - 24, viewtop + 26);
+		gdl += gfx_Fill_Rectangle(gdl, viewright - 25 - viewwidth / 7.0f, viewtop + 43, viewright - 30, viewtop + 44);
+		gdl += gfx_Fill_Rectangle(gdl, viewleft, viewtop + 55, viewleft + viewwidth / 5.0f + 1, viewtop + 56);
+		gdl += gfx_Fill_Rectangle(gdl, viewright - viewwidth / 5.0f, viewbottom - 55, viewright + 1, viewbottom - 54);
 	}
 
 	if (g_Vars.currentplayer->eyespy->mode == EYESPYMODE_DRUGSPY) {
@@ -760,14 +759,14 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 
 		gfx_Set_Subpixel_Offset_EXT(gdl++, -2, -2);
 
-		gfx_Fill_Rectangle(gdl++, x + 2, y + 0, x + 7, y + 1);
-		gfx_Fill_Rectangle(gdl++, x + 2, y + 0, x + 5, y + 1);
-		gfx_Fill_Rectangle(gdl++, x - 6, y + 0, x - 1, y + 1);
-		gfx_Fill_Rectangle(gdl++, x - 4, y + 0, x - 1, y + 1);
-		gfx_Fill_Rectangle(gdl++, x + 0, y + 2, x + 1, y + 7);
-		gfx_Fill_Rectangle(gdl++, x + 0, y + 2, x + 1, y + 5);
-		gfx_Fill_Rectangle(gdl++, x + 0, y - 6, x + 1, y - 1);
-		gfx_Fill_Rectangle(gdl++, x + 0, y - 4, x + 1, y - 1);
+		gdl += gfx_Fill_Rectangle(gdl, x + 2, y + 0, x + 7, y + 1);
+		gdl += gfx_Fill_Rectangle(gdl, x + 2, y + 0, x + 5, y + 1);
+		gdl += gfx_Fill_Rectangle(gdl, x - 6, y + 0, x - 1, y + 1);
+		gdl += gfx_Fill_Rectangle(gdl, x - 4, y + 0, x - 1, y + 1);
+		gdl += gfx_Fill_Rectangle(gdl, x + 0, y + 2, x + 1, y + 7);
+		gdl += gfx_Fill_Rectangle(gdl, x + 0, y + 2, x + 1, y + 5);
+		gdl += gfx_Fill_Rectangle(gdl, x + 0, y - 6, x + 1, y - 1);
+		gdl += gfx_Fill_Rectangle(gdl, x + 0, y - 4, x + 1, y - 1);
 
 		gfx_Set_Subpixel_Offset_EXT(gdl++, 0, 0);
 	}
@@ -1009,7 +1008,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gdl += gfx_Fill_Rectangle(gdl, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 			xpos += 10;
 
 			// Down
@@ -1050,7 +1049,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gdl += gfx_Fill_Rectangle(gdl, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 			xpos += 10;
 
 			// Left
@@ -1091,7 +1090,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gdl += gfx_Fill_Rectangle(gdl, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 			xpos += 10;
 
 			// Right
@@ -1132,7 +1131,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gdl += gfx_Fill_Rectangle(gdl, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 			xpos += 10;
 
 			// Shoulder buttons
@@ -1173,7 +1172,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gdl += gfx_Fill_Rectangle(gdl, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 			xpos += 10;
 
 			// Z button
@@ -1214,7 +1213,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				gfx_Set_Prim_Color(gdl++, color);
 			}
 
-			gfx_Fill_Rectangle(gdl++, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
+			gdl += gfx_Fill_Rectangle(gdl, xpos * scale + viewright, viewtop + 10, (xpos + 8) * scale + viewright, viewtop + 18);
 		}
 
 		xpos = (scale == 2) ? -48 : -55;
@@ -1242,13 +1241,13 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			tmpval = cstickx * 28.0f / 80.0f;
 
 			if (cstickx > 0) {
-				gfx_Fill_Rectangle(gdl++,
+				gdl += gfx_Fill_Rectangle(gdl,
 						xpos * scale + viewright,
 						viewtop + 19,
 						(tmpval + xpos) * scale + viewright,
 						viewtop + 21);
 			} else {
-				gfx_Fill_Rectangle(gdl++,
+				gdl += gfx_Fill_Rectangle(gdl,
 						(tmpval + xpos) * scale + viewright,
 						viewtop + 19,
 						xpos * scale + viewright,
@@ -1279,13 +1278,13 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 			tmpval = csticky * 28.0f / 80.0f;
 
 			if (csticky > 0) {
-				gfx_Fill_Rectangle(gdl++,
+				gdl += gfx_Fill_Rectangle(gdl,
 						xpos * scale + viewright,
 						viewtop + 22,
 						(tmpval + xpos) * scale + viewright,
 						viewtop + 24);
 			} else {
-				gfx_Fill_Rectangle(gdl++,
+				gdl += gfx_Fill_Rectangle(gdl,
 						(tmpval + xpos) * scale + viewright,
 						viewtop + 22,
 						xpos * scale + viewright,
@@ -1305,7 +1304,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 				RGBA color = {0, brightness, 0, 255};
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 2
 				x += scale * 2 + scale * 5;
@@ -1315,7 +1314,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 3
 				x += scale * 2 + scale * 5;
@@ -1325,7 +1324,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 4
 				x += scale * 2 + scale * 5;
@@ -1335,7 +1334,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 5
 				x += scale * 2 + scale * 5;
@@ -1345,7 +1344,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				// Camspy gyrobar 6
 				x += scale * 2 + scale * 5;
@@ -1355,7 +1354,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				x += scale * 2 + scale * 5;
 			}
@@ -1372,7 +1371,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 
 				RGBA color = {brightness, brightness / 4, 0, 255};
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 2
 				x += scale * 2 + scale * 5;
@@ -1382,7 +1381,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 3
 				x += scale * 2 + scale * 5;
@@ -1392,7 +1391,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 4
 				x += scale * 2 + scale * 5;
@@ -1402,7 +1401,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 5
 				x += scale * 2 + scale * 5;
@@ -1412,7 +1411,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				// Bombspy gyrobar 6
 				x += scale * 2 + scale * 5;
@@ -1422,7 +1421,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				brightness = tmpval < 0 ? -tmpval : tmpval;
 
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - textheight, x + scale * 5, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - textheight, x + scale * 5, y);
 
 				x += scale * 2 + scale * 5;
 			}
@@ -1449,7 +1448,7 @@ Gfx *bviewDrawEyespyMetrics(Gfx *gdl)
 				
 				RGBA color = {16, 32, brightness2, 255};
 				gfx_Set_Prim_Color(gdl++, color);
-				gfx_Fill_Rectangle(gdl++, x, y - 4, x + width, y);
+				gdl += gfx_Fill_Rectangle(gdl, x, y - 4, x + width, y);
 
 				y -= 5;
 			}
@@ -1650,7 +1649,7 @@ Gfx *bviewDrawNvLens(Gfx *gdl)
 		struct RGBA color = {0, green, 0, 255};
 		gfx_Set_Prim_Color(gdl++, color);
 
-		gfx_Fill_Rectangle(gdl++, viewleft, y, viewleft + viewwidth, y + 1);
+		gdl += gfx_Fill_Rectangle(gdl, viewleft, y, viewleft + viewwidth, y + 1);
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_MODULATE_EXT);
@@ -1793,15 +1792,15 @@ Gfx *bviewDrawIrLens(Gfx *gdl)
 			int rightsidewidth = viewwidth - semicircleright;
 
 			// Left and right of semicircle
-			gfx_Fill_Rectangle(gdl++, viewleft, i, viewcentrex, i + 1);
-			gfx_Fill_Rectangle(gdl++, semicircleright, i, semicircleright + rightsidewidth, i + 1);
+			gdl += gfx_Fill_Rectangle(gdl, viewleft, i, viewcentrex, i + 1);
+			gdl += gfx_Fill_Rectangle(gdl, semicircleright, i, semicircleright + rightsidewidth, i + 1);
 
 			// The semicircle itself has a static colour
 			struct RGBA semicolor = {238, 0, 0, 255};
 			gfx_Set_Prim_Color(gdl++, semicolor);
-			gfx_Fill_Rectangle(gdl++, viewcentrex, i, viewcentrex + semicirclewidth, i + 1);
+			gdl += gfx_Fill_Rectangle(gdl, viewcentrex, i, viewcentrex + semicirclewidth, i + 1);
 		} else {
-			gfx_Fill_Rectangle(gdl++, viewleft, i, viewleft + viewwidth, i + 1);
+			gdl += gfx_Fill_Rectangle(gdl, viewleft, i, viewleft + viewwidth, i + 1);
 		}
 
 		if (g_IrScanlines[g_Vars.currentplayernum][i] > fadeincrement) {
@@ -1960,8 +1959,8 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 	// Black out areas above and below lens
 	gdl = textSetPrimColour(gdl, 0x000000ff);
 
-	gfx_Fill_Rectangle(gdl++, viewleft, viewtop, viewleft + viewwidth, lenstop);
-	gfx_Fill_Rectangle(gdl++, viewleft, lenstop + lensheight, viewleft + viewwidth, viewtop + viewheight);
+	gdl += gfx_Fill_Rectangle(gdl, viewleft, viewtop, viewleft + viewwidth, lenstop);
+	gdl += gfx_Fill_Rectangle(gdl, viewleft, lenstop + lensheight, viewleft + viewwidth, viewtop + viewheight);
 
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
@@ -2106,7 +2105,7 @@ Gfx *bviewDrawHorizonScanner(Gfx *gdl)
 		gdl += gfx_Image_Rectangle_EXT(gdl,
 			0, liney, viewleft, liney,
 			right, liney + 1, viewleft + viewwidth, liney + 1,
-			0, videoGetNativeWidth(), videoGetNativeHeight());
+			(float)videoGetNativeWidth(), (float)videoGetNativeHeight());
 	}
 
 	return gdl;

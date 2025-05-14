@@ -59,7 +59,6 @@
 #include "data.h"
 #include "types.h"
 
-struct roomacousticdata *g_RoomAcousticData;
 struct var8009dd78 var8009dd78[10];
 uint16_t *g_PortalXluFracs;
 int g_NumPortalXluFracs;
@@ -165,6 +164,8 @@ void portalsStop(void)
 
 void acousticReset(void)
 {
+	struct roomacousticdata *roomAcousticData;
+
 	int i;
 	int j;
 	uint32_t size = ALIGN16(g_Vars.roomcount * sizeof(struct roomacousticdata));
@@ -174,20 +175,20 @@ void acousticReset(void)
 	float depth;
 	float halfsurfacearea;
 
-	g_RoomAcousticData = mempAlloc(size, MEMPOOL_STAGE);
+	roomAcousticData = malloc(size);
 
 	for (i = 0; i < g_Vars.roomcount; i++) {
 		bool allgood = true;
 
-		g_RoomAcousticData[i].roomvolume = 1;
-		g_RoomAcousticData[i].surfacearea = 1;
+		roomAcousticData[i].roomvolume = 1;
+		roomAcousticData[i].surfacearea = 1;
 
 		for (j = 0; j < 3; j++) {
 
 			range = g_Rooms[i].bbmax[j] - g_Rooms[i].bbmin[j];
 
 			if (range > 0) {
-				g_RoomAcousticData[i].roomvolume *= (g_Rooms[i].bbmax[j] - g_Rooms[i].bbmin[j]) / 100;
+				roomAcousticData[i].roomvolume *= (g_Rooms[i].bbmax[j] - g_Rooms[i].bbmin[j]) / 100;
 			} else {
 				allgood = false;
 			}
@@ -214,19 +215,21 @@ void acousticReset(void)
 
 			halfsurfacearea = width * height + width * depth + height * depth;
 
-			g_RoomAcousticData[i].surfacearea = halfsurfacearea + halfsurfacearea;
+			roomAcousticData[i].surfacearea = halfsurfacearea + halfsurfacearea;
 		} else {
-			g_RoomAcousticData[i].surfacearea = 20000000;
+			roomAcousticData[i].surfacearea = 20000000;
 		}
 	}
 
 	for (j = 0; j < g_Vars.roomcount; j++) {
-		g_RoomAcousticData[j].unk08 = 0;
-		g_RoomAcousticData[j].unk04 = g_RoomAcousticData[j].unk08;
+		roomAcousticData[j].unk08 = 0;
+		roomAcousticData[j].unk04 = roomAcousticData[j].unk08;
 	}
 
 	for (j = 0; j < ARRAYCOUNT(var8009dd78); j++) {
 		var8009dd78[j].unk00 = -1;
 		var8009dd78[j].unk04 = 0;
 	}
+
+	free(roomAcousticData);
 }

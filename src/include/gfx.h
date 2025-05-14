@@ -7,6 +7,11 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
+#define MAX_BUFFERED 256
+#define MAX_LIGHTS 4
+#define MAX_VERTICES 128
+#define MAX_VERTEX_COLORS 64
+
 typedef struct RGBA {
     uint8_t r;
     uint8_t g;
@@ -14,12 +19,77 @@ typedef struct RGBA {
     uint8_t a;
 } RGBA;
 
+struct NormalColor {
+    union {
+        struct { uint8_t r, g, b, a; };
+        struct { int8_t x, y, z, w; };
+    };
+};
+
+struct LoadedVertex {
+    float x, y, z, w;
+    float u, v;
+    struct RGBA color;
+    uint8_t fog;
+    uint8_t clip_rej;
+};
+
+typedef struct {
+	union {
+		struct {
+			float x;
+			float y;
+			float z;
+		};
+		float v[3];
+	};
+	uint8_t flags;
+	uint8_t colour;
+	float s;
+	float t;
+} VtxF;
+
+struct RSP {
+    float modelview_matrix_stack[11][4][4];
+    uint8_t modelview_matrix_stack_size;
+
+    float MP_matrix[4][4];
+    float P_matrix[4][4];
+
+    Light_t lookat[2];
+    bool lookat_enabled;
+
+    Light_t current_lights[MAX_LIGHTS + 1];
+    float current_lights_coeffs[MAX_LIGHTS][3];
+    float current_lookat_coeffs[2][3]; // lookat_x, lookat_y
+    uint8_t current_num_lights;        // includes ambient light
+    bool lights_changed;
+
+    uint32_t geometry_mode;
+    int16_t fog_mul, fog_offset;
+
+    uint32_t extra_geometry_mode;
+
+    uint32_t aspect_mode;
+    float aspect_ofs;
+    float aspect_scale;
+
+    struct {
+        float s, t;
+    } texture_scaling_factor;
+
+    struct LoadedVertex loaded_vertices[MAX_VERTICES + 4];
+
+    const struct NormalColor *vertex_colors; //[MAX_VERTEX_COLORS];
+};
+
+extern struct RSP rsp;
+
 /* Extended commands */
 
 #define G_SETFB_EXT                  0x21
 #define G_SETTIMG_FB_EXT             0x23
 #define G_INVALTEXCACHE_EXT          0x34
-#define G_TEXRECT_WIDE_EXT           0x37
 #define G_FILLRECT_WIDE_EXT          0x38
 #define G_EXTRAGEOMETRYMODE_EXT      0x3a
 #define G_COPYFB_EXT                 0x41
@@ -56,17 +126,16 @@ void gfx_Clear_Geometry_Mode(Gfx *pkt, uint32_t word);
 void gfx_Set_Geometry_Mode(Gfx *pkt, uint32_t word);
 void gfx_Extra_Geometry_Mode_EXT(Gfx *pkt, uint32_t clearbits, uint32_t setbits);
 void gfx_Vertex(Gfx *pkt, const Vtx *v, uint8_t n, uint8_t v0);
+void gfx_VertexF(Gfx *pkt, const VtxF *v, uint8_t n, uint8_t v0);
 void gfx_1Triangle(Gfx *pkt, uint8_t v1, uint8_t v2, uint8_t v3, uint8_t flag);
 void gfx_Tri4(Gfx *pkt, uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2, uint8_t x3, uint8_t y3, uint8_t z3, uint8_t x4, uint8_t y4, uint8_t z4);
 void gfx_Tri3(Gfx *pkt, uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2, uint8_t x3, uint8_t y3, uint8_t z3);
 void gfx_Tri2(Gfx *pkt, uint8_t x1, uint8_t y1, uint8_t z1, uint8_t x2, uint8_t y2, uint8_t z2);
 void gfx_Tri1(Gfx *pkt, uint8_t x1, uint8_t y1, uint8_t z1);
-void gfx_Fill_Rectangle(Gfx *pkt, int32_t ulx, int32_t uly, int32_t lrx, int32_t lry);
-int  gfx_Fill_Rectangle_Wide_EXT(Gfx *pkt, uint32_t ulx, uint32_t uly, uint32_t lrx, uint32_t lry);
-void gfx_HUD_Rectangle(Gfx *pkt, int32_t ulx, int32_t uly, int32_t lrx, int32_t lry);
-int  gfx_HUD_Rectangle_EXT(Gfx *pkt, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2);
-int  gfx_Texture_Rectangle(Gfx *pkt, int32_t xl, int32_t yl, int32_t xh, int32_t yh, uint8_t tile, int32_t s, int32_t t, int32_t dsdx, int32_t dtdy, bool flip);
-int  gfx_Image_Rectangle_EXT(Gfx *pkt, uint16_t x0, uint16_t y0, uint16_t s0, uint16_t t0, uint16_t x1, uint16_t y1, uint16_t s1, uint16_t t1, uint8_t tile, uint16_t iw, uint16_t ih);
+int  gfx_Fill_Rectangle(Gfx *pkt, float ulx, float uly, float lrx, float lry);
+int  gfx_HUD_Rectangle(Gfx *pkt, float x1, float y1, float x2, float y2);
+int  gfx_Texture_Rectangle(Gfx *pkt, float xl, float yl, float xh, float yh, uint8_t tile, float s, float t, float dsdx, float dtdy, bool flip);
+int  gfx_Image_Rectangle_EXT(Gfx *pkt, float x0, float y0, float s0, float t0, float x1, float y1, float s1, float t1, float iw, float ih);
 void gfx_Set_Subpixel_Offset_EXT(Gfx *pkt, int16_t x, int16_t y);
 void gfx_Color(Gfx *pkt, const Col *colors, uint32_t count);
 void gfx_Set_Prim_Color(Gfx *pkt, RGBA color);
@@ -87,7 +156,7 @@ void gfx_Load_TLUT06(Gfx *pkt, uint16_t a, uint16_t b, uint16_t c, uint16_t d);
 void gfx_Load_TLUT(Gfx *pkt, uint16_t count);
 void gfx_Fog_Position(Gfx *pkt, uint16_t min, uint16_t max);
 void gfx_Viewport(Gfx *pkt, const Vp *v);
-void gfx_Set_Scissor(Gfx *pkt, int ulx, int uly, int lrx, int lry);
+int  gfx_Set_Scissor(Gfx *pkt, int ulx, int uly, int lrx, int lry);
 void gfx_LookAtX(Gfx *pkt, Light *l);
 void gfx_LookAtY(Gfx *pkt, Light *l);
 void gfx_LookAt(Gfx *pkt, LookAt *la);
@@ -108,6 +177,11 @@ void gfx_Set_Alpha_Compare(Gfx *pkt, uint32_t type);
 void gfx_Set_Render_Mode(Gfx *pkt, uint32_t c0, uint32_t c1);
 void gfx_No_Param(Gfx *pkt, uint8_t cmd);
 void gfx_End_Display_List(Gfx *pkt);
+
+void gfx_normalize_vector(float v[3]);
+void gfx_transposed_matrix_mul(float res[3], const float a[3], const float b[4][4]);
+void gfx_matrix_mul(float res[4][4], const float a[4][4], const float b[4][4]);
+void gfx_sp_matrix(uint8_t parameters, const int32_t *addr);
 
 #define gSPSetExtraGeometryModeEXT(pkt, word) gfx_Extra_Geometry_Mode_EXT((pkt), 0, word)
 #define gSPClearExtraGeometryModeEXT(pkt, word) gfx_Extra_Geometry_Mode_EXT((pkt), word, 0)

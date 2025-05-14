@@ -6,7 +6,7 @@
 void camSetScreenSize(float width, float height);
 void camSetScreenPosition(float left, float top);
 void camSetPerspective(float fovy, float aspect);
-float camGetEraserFOV(float arg0);
+float camGetEraserFOV(float autoeraserdist);
 void camSetScale(void);
 void camProjectScreenToWorldDir(float pos2d[2], struct coord *dir2d, float arg2);
 void camProjectViewToScreen(struct coord *in, float *out);
@@ -15,7 +15,6 @@ void camProjectViewToScreenAbsZ(struct coord *in, float out[2]);
 void camScaleViewToScreen(float in[2], float divisor, float out[2]);
 void camProjectWithZoomAndAspect(struct coord *arg0, float arg1[2], float zoom, float aspect);
 void camSetArtifactMtx(Mtx *mtx);
-Mtx *camGetArtifactMtx(void);
 void camSetPerspectiveMtxL(Mtx *value);
 Mtx *camGetPerspectiveMtxL(void);
 void camSetOrthogonalMtxL(Mtx *mtx);

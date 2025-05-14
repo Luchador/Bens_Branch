@@ -14,7 +14,6 @@
 #include "platform.h"
 
 struct stagesetup g_StageSetup;
-uint8_t *g_GeCreditsData;
 
 uint32_t setupGetCmdLength(uint32_t *cmd)
 {

@@ -36,7 +36,11 @@ struct ShaderProgram {
     GLint frame_count_location;
     GLint noise_scale_location;
     GLint three_point_filter_locations[2];
+    GLint uModelView_location;
+    GLint uProjection_location;
+    GLint uMVP_location;
 };
+
 
 struct Framebuffer {
     uint32_t width, height;
@@ -46,6 +50,8 @@ struct Framebuffer {
 
     GLuint fbo, clrbuf, clrbuf_msaa, rbo;
 };
+
+static struct ShaderProgram *g_CurrentProgram = NULL;
 
 static std::map<pair<uint64_t, uint32_t>, struct ShaderProgram> shader_program_pool;
 static GLuint opengl_vbo;
@@ -280,7 +286,8 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         }
     }
 
-    append_line(vs_buf, &vs_len, "uniform mat4 uMVP;");
+    append_line(vs_buf, &vs_len, "uniform mat4 uModelView;");
+    append_line(vs_buf, &vs_len, "uniform mat4 uProjection;");
 
     if (cc_features.opt_fog) {
         append_line(vs_buf, &vs_len, "INPUT vec4 aFog;");
@@ -505,12 +512,6 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     if (cc_features.opt_texture_edge && cc_features.opt_alpha) {
         append_line(fs_buf, &fs_len, "    if (texel.a > 0.19) texel.a = 1.0; else discard;");
     }
-    
-    /*if (cc_features.opt_alpha) {
-        append_line(fs_buf, &fs_len, "    texel = vec4(mix(texel.rgb, fogColor.rgb, vFogAmount), texel.a);");
-    } else {
-        append_line(fs_buf, &fs_len, "    texel = mix(texel.rgb, fogColor.rgb, vFogAmount);");
-    }*/
 
     if (cc_features.opt_alpha) {
         append_line(fs_buf, &fs_len, "    OUTPUT_COLOR = texel;");
@@ -519,11 +520,6 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     }
 
     append_line(fs_buf, &fs_len, "}");
-
-    /*if(cc_features.opt_fog)
-    {
-        writeShadersToFile(vs_buf, "shaderdump.txt");
-    }*/
 
     vs_buf[vs_len] = '\0';
     fs_buf[fs_len] = '\0';
@@ -571,6 +567,10 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
     size_t cnt = 0;
 
     struct ShaderProgram* prg = &shader_program_pool[make_pair(shader_id0, shader_id1)];
+    prg->opengl_program_id = shader_program;
+
+    g_CurrentProgram = prg;
+
     prg->attrib_locations[cnt] = glGetAttribLocation(shader_program, "aVtxPos");
     prg->attrib_sizes[cnt] = 4;
     ++cnt;
@@ -600,12 +600,6 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         ++cnt;
     }
 
-    /*if (cc_features.opt_grayscale) {
-        prg->attrib_locations[cnt] = glGetAttribLocation(shader_program, "aGrayscaleColor");
-        prg->attrib_sizes[cnt] = 4;
-        ++cnt;
-    }*/
-
     for (int i = 0; i < cc_features.num_inputs; i++) {
         char name[16];
         sprintf(name, "aInput%d", i + 1);
@@ -623,14 +617,20 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
 
     glUseProgram(shader_program);
 
-    //logModelViewProjMatrix();
+    // Cache and upload the MVP matrix
+    prg->uMVP_location = glGetUniformLocation(shader_program, "uMVP");
+    if (prg->uMVP_location != -1) {
+        glUniformMatrix4fv(prg->uMVP_location, 1, GL_TRUE, &g_ModelViewProj[0][0]);
+    }
 
-    GLint uMVPLoc = glGetUniformLocation(shader_program, "uMVP");
-    glUniformMatrix4fv(uMVPLoc, 1, GL_TRUE, &g_ModelViewProj[0][0]);
+    prg->uModelView_location = glGetUniformLocation(shader_program, "u_ModelView");
+    prg->uProjection_location = glGetUniformLocation(shader_program, "u_Projection");
 
-    // Set fog start and fog end
+    // Fog
     GLint fogStartLoc = glGetUniformLocation(shader_program, "uFogStart");
-    GLint fogEndLoc = glGetUniformLocation(shader_program, "uFogEnd");
+    GLint fogEndLoc   = glGetUniformLocation(shader_program, "uFogEnd");
+
+    //logModelViewProjMatrix();
 
     glUniform1f(fogStartLoc, 300.0f);
     glUniform1f(fogEndLoc, 1000.0f);
@@ -703,6 +703,42 @@ void logModelViewProjMatrix(void)
         fprintf(f, "\n");
         fclose(f);
     }
+}
+
+void gfx_sp_matrix(uint8_t parameters, const int32_t* addr) {
+    float matrix[4][4];
+
+    memcpy(matrix, addr, sizeof(matrix));
+
+    /*if (!g_CurrentProgram) {
+        return;
+    }*/
+
+   // GLuint program = g_CurrentProgram->opengl_program_id;
+   // glUseProgram(program);
+
+    if (parameters & G_MTX_PROJECTION) {
+        if (parameters & G_MTX_LOAD) {
+            memcpy(rsp.P_matrix, matrix, sizeof(matrix));
+        } else {
+            gfx_matrix_mul(rsp.P_matrix, matrix, rsp.P_matrix);
+        }
+    } else { // G_MTX_MODELVIEW
+        if ((parameters & G_MTX_PUSH) && rsp.modelview_matrix_stack_size < 11) {
+            ++rsp.modelview_matrix_stack_size;
+            memcpy(rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1],
+                   rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 2], sizeof(matrix));
+        }
+        if (parameters & G_MTX_LOAD) {
+            memcpy(rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1], matrix, sizeof(matrix));
+        } else {
+            gfx_matrix_mul(rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1], matrix,
+                           rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1]);
+        }
+        rsp.lights_changed = 1;
+    }
+    gfx_matrix_mul(rsp.MP_matrix, rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1], rsp.P_matrix);
+    memcpy(g_ModelViewProj, rsp.MP_matrix, sizeof(float[4][4]));
 }
 
 static struct ShaderProgram* gfx_opengl_lookup_shader(uint64_t shader_id0, uint32_t shader_id1) {

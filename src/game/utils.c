@@ -51,16 +51,6 @@ int utilsScaleY(int y)
     return (int)(y * (videoGetHeight() / SCREEN_240));
 }
 
-int utilsScaleW(int w)
-{
-    return (int)(w * (videoGetWidth() / SCREEN_320));
-}
-
-int utilsScaleH(int h)
-{
-    return (int)(h * (videoGetHeight() / SCREEN_240));
-}
-
 uint32_t align4(uint32_t arg0)
 {
 	if (arg0 & 3) {
@@ -86,6 +76,40 @@ uintptr_t align32(uintptr_t arg0)
 	}
 
 	return arg0;
+}
+
+VtxF utilsConvertVtxToVtxF(const Vtx *src) 
+{
+	VtxF dst;
+
+	dst.x = (float)src->x;
+	dst.y = (float)src->y;
+	dst.z = (float)src->z;
+
+	dst.flags = src->flags;
+	dst.colour = src->colour;
+
+	dst.s = (float)src->s;
+	dst.t = (float)src->t;
+
+	return dst;
+}
+
+Vtx utilsConvertVtxFToVtx(const VtxF *src) 
+{
+	Vtx dst;
+
+	dst.x = (int16_t)src->x;
+	dst.y = (int16_t)src->y;
+	dst.z = (int16_t)src->z;
+
+	dst.flags = src->flags;
+	dst.colour = src->colour;
+
+	dst.s = (int16_t)src->s;
+	dst.t = (int16_t)src->t;
+
+	return dst;
 }
 
 bool utilsNormalizeVec(struct coord *invec, struct coord *normalizedvec)
@@ -126,22 +150,15 @@ void utilsNormalizeF(float *x, float *y, float *z)
 	}
 }
 
-void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *screensize, int width, int height, bool flipU, bool flipV, bool arg8)
+void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *screensize, float width, float height, bool flipU, bool flipV, bool arg8)
 {
 	if (screensize[0] > 0.0f && screensize[1] > 0.0f) {
 		Gfx *gdl = *gdlptr;
-		int xl;
-		int yl;
-		int xh;
-		int yh;
-		int s = 0;
-		int t = 0;
-		int dsdx;
-		int dtdy;
-		int widthx4;
-		int heightx4;
-		int sp20 = 0;
-		int sp1c = 0;
+		float xl, yl, xh, yh;
+		float s = 0.0f;
+		float t = 0.0f;
+		float dsdx, dtdy;
+		float widthx4, heightx4;
 
 		gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
 
@@ -150,26 +167,26 @@ void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *screensize,
 		xh = (screenpos[0] + screensize[0]) * 4.0f;
 		yh = (screenpos[1] + screensize[1]) * 4.0f;
 
-		if (xh >= 0 && yh >= 0) {
+		if (xh >= 0.0f && yh >= 0.0f) {
 			if (arg8) {
-				width *= 2;
-				height *= 2;
-				s = -(width * 16);
-				t = -(height * 16);
+				width *= 2.0f;
+				height *= 2.0f;
+				s = -(width * 16.0f);
+				t = -(height * 16.0f);
 			}
 
-			if (xl < 0) {
-				s += ((-xl * width) * 32) / (xh - xl);
-				xl = 0;
+			if (xl < 0.0f) {
+				s += ((-xl * width) * 32.0f) / (xh - xl);
+				xl = 0.0f;
 			}
 
-			if (yl < 0) {
-				t += ((-yl * height) * 32) / (yh - yl);
-				yl = 0;
+			if (yl < 0.0f) {
+				t += ((-yl * height) * 32.0f) / (yh - yl);
+				yl = 0.0f;
 			}
 
-			widthx4 = viGetWidth() * 4;
-			heightx4 = viGetHeight() * 4;
+			widthx4 = (float)(viGetWidth()) * 4.0f;
+			heightx4 = (float)(viGetHeight()) * 4.0f;
 
 			if (widthx4 < xh) {
 				xh = widthx4;
@@ -179,27 +196,17 @@ void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *screensize,
 				yh = heightx4;
 			}
 
-			dsdx = width / (2.0f * screensize[0]) * 1024.0f;
-			dtdy = height / (2.0f * screensize[1]) * 1024.0f;
+			dsdx = width / (2.0f * screensize[0]) * 32.0f;
+			dtdy = height / (2.0f * screensize[1]) * 32.0f;
 
 			if (flipU) {
-				dsdx = 0x10000 - dsdx;
-
-				if (arg8) {
-					s = (((width >> 1) - 1) * 32) - s;
-				} else {
-					s = ((width - 1) * 32) - s;
-				}
+				dsdx = -dsdx;
+				s = (arg8 ? (((width * 0.5f) - 1.0f) * 32.0f) : ((width - 1.0f) * 32.0f)) - s;
 			}
 
 			if (flipV) {
-				dtdy = 0x10000 - dtdy;
-
-				if (arg8) {
-					t = (((height >> 1) - 1) * 32) - t;
-				} else {
-					t = ((height - 1) * 32) - t;
-				}
+				dtdy = -dtdy;
+				t = (arg8 ? (((height * 0.5f) - 1.0f) * 32.0f) : ((height - 1.0f) * 32.0f)) - t;
 			}
 
 			gdl += gfx_Texture_Rectangle(gdl, xl, yl, xh, yh, 0, s, t, dsdx, dtdy, false);
@@ -210,6 +217,7 @@ void utilsRenderScreenTexture(Gfx **gdlptr, float *screenpos, float *screensize,
 		*gdlptr = gdl;
 	}
 }
+
 
 bool isPointInBBox(struct coord *point, struct coord *bbox)
 {

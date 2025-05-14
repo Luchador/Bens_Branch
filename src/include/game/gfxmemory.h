@@ -1,6 +1,7 @@
 #pragma once
 
 #include "data.h"
+#include "gfx.h"
 #include "types.h"
 
 extern uint8_t *g_GfxBuffers[3];
@@ -8,6 +9,7 @@ extern uint8_t *g_GfxBuffers[3];
 void gfxReset(void);
 Gfx *gfxGetMasterDisplayList(void);
 Vtx *gfxAllocateVertices(uint32_t count);
+VtxF *gfxAllocateVerticesF(uint32_t count);
 void *gfxAllocateMatrix(void);
 LookAt *gfxAllocateLookAt(int count);
 Col *gfxAllocateColours(int count);

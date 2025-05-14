@@ -86,15 +86,7 @@ void shardsCreate(struct coord *pos, float *rotx, float *roty, float *rotz, floa
 		psCreate(NULL, NULL, SFX_GLASS_SHATTER, -1,
 				-1, 0, 0, PSTYPE_NONE, &prop->pos, -1.0f, prop->rooms, -1, -1.0f, -1.0f, -1.0f);
 	} else if (type == SHARDTYPE_BOTTLE) {
-		/**
-		 * @bug: This attempts to play one of two bottle breaking sounds
-		 * randomly, but one of the SFX IDs isn't valid. This is why on Villa
-		 * when you shoot the bottles, half of them don't play any breaking
-		 * sound effect.
-		 */
-		/*psCreate(NULL, NULL, SFX_BOTTLE_BREAK + (rngRandom() % 2) * 2, -1,
-			-1, 0, 0, PSTYPE_NONE, &prop->pos, -1.0f, prop->rooms, -1, -1.0f, -1.0f, -1.0f);*/
-		psCreate(NULL, NULL, SFX_BOTTLE_BREAK, -1, -1, 0, 0, PSTYPE_NONE, &prop->pos, -1.0f, prop->rooms, -1, -1.0f, -1.0f, -1.0f); // Ben's change: fixing the invalid sound effect issue
+		psCreate(NULL, NULL, SFX_BOTTLE_BREAK, -1, -1, 0, 0, PSTYPE_NONE, &prop->pos, -1.0f, prop->rooms, -1, -1.0f, -1.0f, -1.0f);
 	} else if (type == SHARDTYPE_WOOD) {
 		psCreate(NULL, NULL, SFX_WOOD_BREAK, -1, -1, 0, 0, PSTYPE_NONE, &prop->pos, -1.0f, prop->rooms, -1, -1.0f, -1.0f, -1.0f);
 	}
@@ -169,17 +161,17 @@ void shardCreate(RoomNum room, struct coord *pos, float rotx, float size, int ty
 			g_Shards[g_NextShardNum].colours[2].word = PD_BE32(0xddaa88f0);
 		}
 	} else {
-		g_Shards[g_NextShardNum].colours[0].r = 0x05;
-		g_Shards[g_NextShardNum].colours[0].g = 0x05;
-		g_Shards[g_NextShardNum].colours[0].b = 0x7e;
+		g_Shards[g_NextShardNum].colours[0].r = 5;
+		g_Shards[g_NextShardNum].colours[0].g = 5;
+		g_Shards[g_NextShardNum].colours[0].b = 126;
 
-		g_Shards[g_NextShardNum].colours[1].r = 0x05;
-		g_Shards[g_NextShardNum].colours[1].g = 0xfb;
-		g_Shards[g_NextShardNum].colours[1].b = 0x7e;
+		g_Shards[g_NextShardNum].colours[1].r = 5;
+		g_Shards[g_NextShardNum].colours[1].g = 251;
+		g_Shards[g_NextShardNum].colours[1].b = 126;
 
-		g_Shards[g_NextShardNum].colours[2].r = 0xfb;
-		g_Shards[g_NextShardNum].colours[2].g = 0xfb;
-		g_Shards[g_NextShardNum].colours[2].b = 0x7e;
+		g_Shards[g_NextShardNum].colours[2].r = 251;
+		g_Shards[g_NextShardNum].colours[2].g = 251;
+		g_Shards[g_NextShardNum].colours[2].b = 126;
 
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
@@ -297,7 +289,7 @@ Gfx *shardsRenderWood(Gfx *gdl)
 							gfx_Color(gdl++, g_Shards[i].colours, 3);
 						}
 
-						gfx_Vertex(gdl++, g_Shards[i].vertices, 3, 0);
+						gfx_VertexF(gdl++, g_Shards[i].vertices, 3, 0);
 						gfx_1Triangle(gdl++, 0, 1, 2, 0);
 					}
 				}
@@ -413,7 +405,7 @@ Gfx *shardsRenderGlass(Gfx *gdl)
 							gfx_Color(gdl++, g_Shards[i].colours, 3);
 						}
 
-						gfx_Vertex(gdl++, g_Shards[i].vertices, 3, 0);
+						gfx_VertexF(gdl++, g_Shards[i].vertices, 3, 0);
 						gfx_1Triangle(gdl++, 0, 1, 2, 0);
 					}
 				}

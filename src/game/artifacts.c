@@ -101,7 +101,7 @@ void artifactsCalculateGlaresForRoom(int roomnum)
 	uint8_t *lightGlares = &var800a41a0[g_Rooms[roomnum].gfxdata->lightsindex * 3];
 
 	roomPopulateMtx(&sp138, roomnum);
-	mtx4MultMtx4(camGetArtifactMtx(), &sp138, &spf8);
+	mtx4MultMtx4(g_Vars.currentplayer->artifactMtx, &sp138, &spf8);
 
 	float viewwidth = viGetViewWidth();
 	float viewheight = viGetViewHeight();

@@ -599,11 +599,11 @@ MenuItemHandlerResult mpAwardsMenuHandler(int operation, struct menuitem *item, 
 				gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(colour));
 
 				gdl += gfx_Texture_Rectangle(gdl,
-						(x << 2),
-						(renderdata->y - 2) << 2,
-						((x + 11) << 2),
-						(renderdata->y + 9) << 2,
-						G_TX_RENDERTILE, 16, 336, 1024, -1024, false);
+						(x * 4.0f),
+						(renderdata->y - 2) * 4.0f,
+						((x + 11) * 4.0f),
+						(renderdata->y + 9) * 4.0f,
+						G_TX_RENDERTILE, 16, 336, 32.0f, -32.0f, false);
 
 				x -= 14;
 			}

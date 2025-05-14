@@ -154,7 +154,7 @@ Gfx *hudmsgRenderMissionTimer(Gfx *gdl, uint32_t alpha)
 		gfx_Extra_Geometry_Mode_EXT(gdl++, G_ASPECT_MODE_EXT, g_HudAlignModeL);
 	}
 
-	gdl = textRender(gdl, &x, &y, buffer, g_CharsNumeric, g_FontNumeric, textcolour, 0x000000a0, viGetWidth(), viGetHeight(), 0, 0);
+	gdl = textRender(gdl, &x, &y, buffer, g_CharsNumeric, g_FontNumeric, textcolour, 160, viGetWidth(), viGetHeight(), 0, 0);
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
@@ -1272,7 +1272,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 		}
 
 		if (msg->type == HUDMSGTYPE_CUTSCENESUBTITLE) {
-			gfx_Set_Scissor(gdl++,
+			gdl += gfx_Set_Scissor(gdl,
 					(x - 4), 0,
 					(x + msg->width + 3), viGetBufHeight());
 		}
@@ -1403,7 +1403,7 @@ Gfx *hudmsgsRender(Gfx *gdl)
 		gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_MODE_EXT);
 
 		if (msg->type == HUDMSGTYPE_CUTSCENESUBTITLE) {
-			gfx_Set_Scissor(gdl++,
+			gdl += gfx_Set_Scissor(gdl,
 					viGetViewLeft(), viGetViewTop(),
 					viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 		}

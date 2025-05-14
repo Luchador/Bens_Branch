@@ -407,7 +407,7 @@ Gfx *sparksRender(Gfx *gdl)
 						struct spark *spark = &g_Sparks[index];
 
 						if (spark->ttl != 0) {
-							Vtx *vertices = gfxAllocateVertices(3);
+							VtxF *vertices = gfxAllocateVerticesF(3);
 							float f2;
 
 							for (k = 0; k < 3; k++) {
@@ -433,12 +433,12 @@ Gfx *sparksRender(Gfx *gdl)
 							vertices[2].z = spark->pos.z + spark->speed.f[2] * f2;
 							vertices[2].colour = 0;
 
-							vertices[0].s = 128;
-							vertices[0].t = -256;
-							vertices[1].s = -32;
-							vertices[1].t = 496;
-							vertices[2].s = 288;
-							vertices[2].t = 496;
+							vertices[0].s = 128; // TODOF
+							vertices[0].t = -256; // TODOF
+							vertices[1].s = -32; // TODOF
+							vertices[1].t = 496; // TODOF
+							vertices[2].s = 288; // TODOF
+							vertices[2].t = 496; // TODOF
 
 							switch (axis) {
 							case 0:
@@ -470,7 +470,7 @@ Gfx *sparksRender(Gfx *gdl)
 								break;
 							}
 
-							gfx_Vertex(gdl++, vertices, 3, 0);
+							gfx_VertexF(gdl++, vertices, 3, 0);
 							gfx_1Triangle(gdl++, 0, 1, 2, 0);
 						}
 

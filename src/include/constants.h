@@ -3851,7 +3851,6 @@
 #define SPSEGMENT_MODEL_COL2 6
 #define SPSEGMENT_BG_COL     13
 #define SPSEGMENT_BG_VTX     14
-#define SPSEGMENT_BG_DL      15
 
 #define SQUADRON_00 0x00
 #define SQUADRON_01 0x01

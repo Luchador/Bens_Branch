@@ -1808,9 +1808,9 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 		gfx_Set_Env_Color(gdl++, envColor);
 
 		gdl += gfx_Texture_Rectangle(gdl,
-				((renderdata->x + 4) << 2), (renderdata->y + 3) << 2,
-				((renderdata->x + 60) << 2), (renderdata->y + 39) << 2,
-				G_TX_RENDERTILE, 0, 0x0480, 1024, -1024, false);
+				((renderdata->x + 4) * 4.0f), (renderdata->y + 3) * 4.0f,
+				((renderdata->x + 60) * 4.0f), (renderdata->y + 39) * 4.0f,
+				G_TX_RENDERTILE, 0, 1152, 32.0f, -32.0f, false);
 
 		if (g_MissionConfig.isanti) {
 			// No stars
@@ -1840,9 +1840,9 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 				}
 
 				gdl += gfx_Texture_Rectangle(gdl,
-						((renderdata->x + relx) << 2), (renderdata->y + 25) << 2,
-						((renderdata->x + relx + 14) << 2), (renderdata->y + 39) << 2,
-						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024, false);
+						((renderdata->x + relx) * 4.0f), (renderdata->y + 25) * 4.0f,
+						((renderdata->x + relx + 14) * 4.0f), (renderdata->y + 39) * 4.0f,
+						G_TX_RENDERTILE, 16, 448, 32.0f, -32.0f, false);
 			}
 		} else {
 			texSelect(&gdl, &g_TexGeneralConfigs[34], 2, 0, 2, true, NULL);
@@ -1876,9 +1876,9 @@ MenuItemHandlerResult menuhandlerMissionList(int operation, struct menuitem *ite
 				}
 
 				gdl += gfx_Texture_Rectangle(gdl,
-						((renderdata->x + relx) << 2), (renderdata->y + 25) << 2,
-						((renderdata->x + relx + 14) << 2), (renderdata->y + 39) << 2,
-						G_TX_RENDERTILE, 0x0010, 0x01c0, 1024, -1024, false);
+						((renderdata->x + relx) * 4.0f), (renderdata->y + 25) * 4.0f,
+						((renderdata->x + relx + 14) * 4.0f), (renderdata->y + 39) * 4.0f,
+						G_TX_RENDERTILE, 16, 448, 32.0f, -32.0f, false);
 			}
 		}
 

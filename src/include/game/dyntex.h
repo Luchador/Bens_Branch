@@ -9,4 +9,5 @@ void dyntexSetCurrentType(int16_t type);
 void dyntexSetCurrentRoom(RoomNum roomnum);
 void dyntexReset(void);
 bool dyntexHasRoom(void);
+void dyntexStop(void);
 

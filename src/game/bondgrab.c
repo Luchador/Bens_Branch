@@ -305,7 +305,7 @@ bool bgrabTryMoveUpwards(float y)
 	return result;
 }
 
-int bgrabCalculateNewPosition(struct coord *delta, float angle, bool arg2)
+int bgrabCalculateNewPosition(struct coord *delta, float angle)
 {
 	int cdresult = CDRESULT_NOCOLLISION;
 	int i;
@@ -464,7 +464,7 @@ int bgrabCalculateNewPosition(struct coord *delta, float angle, bool arg2)
 		var8009de78.y = g_Vars.currentplayer->grabbedprop->pos.y + sp7c.y;
 		var8009de78.z = g_Vars.currentplayer->grabbedprop->pos.z + sp7c.z;
 
-		cdresult = func0f072144(g_Vars.currentplayer->grabbedprop->obj, &sp7c, sp78, arg2);
+		cdresult = func0f072144(g_Vars.currentplayer->grabbedprop->obj, &sp7c, sp78, true);
 
 		if (cdresult != CDRESULT_NOCOLLISION) {
 			var8009de70 = g_Vars.currentplayer->grabbedprop;
@@ -476,47 +476,45 @@ int bgrabCalculateNewPosition(struct coord *delta, float angle, bool arg2)
 	if (cdresult == CDRESULT_NOCOLLISION) {
 		var8009de70 = NULL;
 
-		if (arg2) {
-			float theta = g_Vars.currentplayer->vv_theta + angle * 360.0f / M_TAU;
+		float theta = g_Vars.currentplayer->vv_theta + angle * 360.0f / M_TAU;
 
-			while (theta < 0.0f) {
-				theta += 360.0f;
-			}
+		while (theta < 0.0f) {
+			theta += 360.0f;
+		}
 
-			while (theta >= 360.0f) {
-				theta -= 360.0f;
-			}
+		while (theta >= 360.0f) {
+			theta -= 360.0f;
+		}
 
-			g_Vars.currentplayer->vv_theta = theta;
+		g_Vars.currentplayer->vv_theta = theta;
 
-			g_Vars.currentplayer->prop->pos.x = pos.x;
-			g_Vars.currentplayer->prop->pos.y = pos.y;
-			g_Vars.currentplayer->prop->pos.z = pos.z;
+		g_Vars.currentplayer->prop->pos.x = pos.x;
+		g_Vars.currentplayer->prop->pos.y = pos.y;
+		g_Vars.currentplayer->prop->pos.z = pos.z;
 
-			if (ismoving) {
-				propDeregisterRooms(g_Vars.currentplayer->prop);
-				roomsCopy(rooms, g_Vars.currentplayer->prop->rooms);
-			}
+		if (ismoving) {
+			propDeregisterRooms(g_Vars.currentplayer->prop);
+			roomsCopy(rooms, g_Vars.currentplayer->prop->rooms);
+		}
 
-			if (g_Vars.currentplayer->grabbeddoextra) {
-				g_Vars.currentplayer->grabbedrotextra = rotextra;
-				g_Vars.currentplayer->grabbedposextra.x = posextra.x;
-				g_Vars.currentplayer->grabbedposextra.y = posextra.y;
-				g_Vars.currentplayer->grabbedposextra.z = posextra.z;
-				g_Vars.currentplayer->grabbedrotextrasum = rotextrasum;
-				g_Vars.currentplayer->grabbedposextrasum.x = posextrasum.x;
-				g_Vars.currentplayer->grabbedposextrasum.y = posextrasum.y;
-				g_Vars.currentplayer->grabbedposextrasum.z = posextrasum.z;
-			}
+		if (g_Vars.currentplayer->grabbeddoextra) {
+			g_Vars.currentplayer->grabbedrotextra = rotextra;
+			g_Vars.currentplayer->grabbedposextra.x = posextra.x;
+			g_Vars.currentplayer->grabbedposextra.y = posextra.y;
+			g_Vars.currentplayer->grabbedposextra.z = posextra.z;
+			g_Vars.currentplayer->grabbedrotextrasum = rotextrasum;
+			g_Vars.currentplayer->grabbedposextrasum.x = posextrasum.x;
+			g_Vars.currentplayer->grabbedposextrasum.y = posextrasum.y;
+			g_Vars.currentplayer->grabbedposextrasum.z = posextrasum.z;
 		}
 	}
 
 	return cdresult;
 }
 
-bool bgrabCalculateNewPositiontWithPush(struct coord *delta, float angle, bool arg2)
+bool bgrabCalculateNewPositiontWithPush(struct coord *delta, float angle)
 {
-	int result = bgrabCalculateNewPosition(delta, angle, arg2);
+	int result = bgrabCalculateNewPosition(delta, angle);
 
 	if (result != CDRESULT_NOCOLLISION) {
 		struct prop *obstacle = cdGetObstacleProp();
@@ -533,7 +531,6 @@ bool bgrabCalculateNewPositiontWithPush(struct coord *delta, float angle, bool a
 						&& (obj->hidden & OBJHFLAG_GRABBED) == 0
 						&& (obj->flags3 & OBJFLAG3_PUSHABLE)) {
 					bool canpush = true;
-					
 
 					g_Vars.currentplayer->speedmaxtime60 = 0;
 
@@ -562,7 +559,7 @@ bool bgrabCalculateNewPositiontWithPush(struct coord *delta, float angle, bool a
 							}
 
 							if (someint) {
-								result = bgrabCalculateNewPosition(delta, angle, arg2);
+								result = bgrabCalculateNewPosition(delta, angle);
 							}
 						}
 					}
@@ -574,13 +571,13 @@ bool bgrabCalculateNewPositiontWithPush(struct coord *delta, float angle, bool a
 	return result;
 }
 
-bool bgrab0f0cdb04(float angle, bool arg2)
+bool bgrab0f0cdb04(float angle)
 {
 	struct coord coord = {0, 0, 0};
 	bool result;
 
 	g_Vars.currentplayer->grabbeddoextra = true;
-	result = bgrabCalculateNewPositiontWithPush(&coord, angle, arg2);
+	result = bgrabCalculateNewPositiontWithPush(&coord, angle);
 	g_Vars.currentplayer->grabbeddoextra = false;
 
 	return result;
@@ -684,7 +681,7 @@ bool bgrab0f0cdb68(float angle)
 
 		bgrab0f0ce0bc(&sp54);
 
-		return bgrab0f0cdb04(angle, true);
+		return bgrab0f0cdb04(angle);
 	}
 
 	return false;
@@ -695,7 +692,7 @@ void bgrab0f0cdef0(void)
 	if (g_Vars.lvupdate240 > 0) {
 		float angle = g_Vars.currentplayer->speedtheta * g_Vars.lvupdate60freal * 0.017450513318181f * 3.5f;
 
-		if (bgrab0f0cdb04(angle, true) == 0) {
+		if (!bgrab0f0cdb04(angle)) {
 			bgrab0f0cdb68(angle);
 		}
 	}
@@ -703,7 +700,7 @@ void bgrab0f0cdef0(void)
 
 bool bgrab0f0cdf64(struct coord *delta, struct coord *arg1, struct coord *arg2)
 {
-	bool result = bgrabCalculateNewPositiontWithPush(delta, 0, true);
+	bool result = bgrabCalculateNewPositiontWithPush(delta, 0);
 
 	if (!result) {
 		cdGetEdge(arg1, arg2);
@@ -712,28 +709,28 @@ bool bgrab0f0cdf64(struct coord *delta, struct coord *arg1, struct coord *arg2)
 	return result;
 }
 
-int bgrab0f0cdfbc(struct coord *delta, struct coord *arg1, struct coord *arg2)
+int bgrabProjectMovementAlongAxis(struct coord *delta, struct coord *from, struct coord *to)
 {
-	if (arg1->f[0] != arg2->f[0] || arg1->f[2] != arg2->f[2]) {
+	if (from->f[0] != to->f[0] || from->f[2] != to->f[2]) {
 		float tmp;
-		struct coord sp30;
-		struct coord sp24;
+		struct coord direction;
+		struct coord projected;
 
-		sp30.x = arg2->x - arg1->x;
-		sp30.z = arg2->z - arg1->z;
+		direction.x = to->x - from->x;
+		direction.z = to->z - from->z;
 
-		tmp = 1.0f / sqrtf(sp30.f[0] * sp30.f[0] + sp30.f[2] * sp30.f[2]);
+		tmp = 1.0f / sqrtf(direction.f[0] * direction.f[0] + direction.f[2] * direction.f[2]);
 
-		sp30.x *= tmp;
-		sp30.z *= tmp;
+		direction.x *= tmp;
+		direction.z *= tmp;
 
-		tmp = delta->f[0] * sp30.f[0] + delta->f[2] * sp30.f[2];
+		tmp = delta->f[0] * direction.f[0] + delta->f[2] * direction.f[2];
 
-		sp24.x = sp30.x * tmp;
-		sp24.y = 0;
-		sp24.z = sp30.z * tmp;
+		projected.x = direction.x * tmp;
+		projected.y = 0;
+		projected.z = direction.z * tmp;
 
-		return bgrabCalculateNewPositiontWithPush(&sp24, 0, true);
+		return bgrabCalculateNewPositiontWithPush(&projected, 0);
 	}
 
 	return -1;
@@ -746,15 +743,11 @@ void bgrab0f0ce0bc(struct coord *arg0)
 	int value = bgrab0f0cdf64(arg0, &a, &b);
 
 	if (value == 0) {
-		value = bgrab0f0cdfbc(arg0, &a, &b);
+		value = bgrabProjectMovementAlongAxis(arg0, &a, &b);
 
 		if (value <= 0) {
 			value = 1;
 		}
-	}
-
-	if (value) {
-		// empty
 	}
 }
 

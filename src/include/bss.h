@@ -87,7 +87,6 @@ extern struct tvscreen var8009ce98;
 extern struct tvscreen var8009cf10;
 extern struct tvscreen var8009cf88;
 extern struct stagesetup g_StageSetup;
-extern uint8_t *g_GeCreditsData;
 extern struct objective *g_Objectives[MAX_OBJECTIVES];
 extern uint32_t g_ObjectiveStatuses[MAX_OBJECTIVES];
 extern struct tag *g_TagsLinkedList;

@@ -2,6 +2,7 @@
 #include <math.h>
 #include "constants.h"
 #include "game/menuutils.h"
+#include "game/player.h"
 #include "game/tex.h"
 #include "game/stars.h"
 #include "game/textutils.h"
@@ -191,19 +192,16 @@ void starsReset(void)
 Gfx *starsRender(Gfx *gdl)
 {
 	Mtx mtx;
-	float viewleft = viGetViewLeft();
-	float viewright = viewleft + viGetViewWidth();
-	float viewtop = viGetViewTop();
-	float viewbottom = viewtop + viGetViewHeight();
-	int i = 0;
+	float viewleft = playerGetViewportLeftReal();
+	float viewright = viewleft + playerGetViewportWidthReal();
+	float viewtop = playerGetViewportTopReal();
+	float viewbottom = viewtop + playerGetViewportHeightReal();
 	float fovCosThreshold;
 	struct coord camLookVector;
-	float screenmidx = g_Vars.currentplayer->c_screenleft + g_Vars.currentplayer->c_halfwidth;
-	float screenmidy = g_Vars.currentplayer->c_screentop + g_Vars.currentplayer->c_halfheight;
+	float screenmidx = playerGetViewportLeftReal() + g_Vars.currentplayer->c_halfwidth;
+	float screenmidy = playerGetViewportTopReal() + g_Vars.currentplayer->c_halfheight;
 	int j;
 	int k;
-	int l;
-	int tmp;
 	uint32_t colours[4];
 
 	if (g_StarPositions == NULL) {
@@ -216,7 +214,7 @@ Gfx *starsRender(Gfx *gdl)
 	colours[2] = colourBlend(0x0000ff7f, 0x5555ff7f, menuGetCosOscFrac(10) * 255);
 	colours[3] = colourBlend(0xaaaaff7f, 0x7777ff7f, menuGetCosOscFrac(20) * 255);
 
-	colours[i] = colourBlend(colours[i], colours[i] & 0xff, 0x5f);
+	colours[0] = colourBlend(colours[0], colours[0] & 0xff, 95);
 
 	fovCosThreshold = cosf(0.017453199252486f * (90.0f - viGetFovY() / videoGetAspect() * 0.5f));
 
@@ -246,7 +244,7 @@ Gfx *starsRender(Gfx *gdl)
 	gfx_Set_Render_Mode(gdl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
 	//texSelect(&gdl, &g_TexStarsConfigs[0], 2, 1, 2, 1, NULL);
 
-	for (i = 0; i < 6; i++) {
+	for (int i = 0; i < 6; i++) {
 		if (g_StarsBelowHorizon || i != 2) {
 			float f0;
 			float f0_2;
@@ -255,8 +253,8 @@ Gfx *starsRender(Gfx *gdl)
 
 			for (j = 0; j <= g_StarGridSize; j++) {
 				for (k = 0; k <= g_StarGridSize; k++) {
-					tmp = ((g_StarGridSize + 1) * i * (g_StarGridSize + 1) + k + j * (g_StarGridSize + 1)) * 3;
-					f0 = camLookVector.f[0] * g_StarData3[tmp] + camLookVector.f[1] * g_StarData3[tmp + 1] + camLookVector.f[2] * g_StarData3[tmp + 2];
+					int tmp = ((g_StarGridSize + 1) * i * (g_StarGridSize + 1) + k + j * (g_StarGridSize + 1)) * 3;
+					f0 = camLookVector.x * g_StarData3[tmp] + camLookVector.y * g_StarData3[tmp + 1] + camLookVector.z * g_StarData3[tmp + 2];
 
 					if (f0 <= fovCosThreshold) {
 						starVisible[k][j] = true;
@@ -272,12 +270,12 @@ Gfx *starsRender(Gfx *gdl)
 						int tmp = g_StarGridSize * g_StarGridSize * i + k + j * g_StarGridSize;
 						int colourindex = 0;
 						float screenpos[2];
-						int drawpos[2];
+						float drawpos[2];
 						int nextgroupstart = g_StarPosIndexes[tmp];
 						int groupsize = (g_StarPosIndexes[tmp + 1] - g_StarPosIndexes[tmp]) / 4 + 1;
 						int8_t *pos = &g_StarPositions[g_StarPosIndexes[tmp] * 3];
 
-						for (l = g_StarPosIndexes[tmp]; l < g_StarPosIndexes[tmp + 1]; l++) {
+						for (int l = g_StarPosIndexes[tmp]; l < g_StarPosIndexes[tmp + 1]; l++) {
 							if (nextgroupstart == l) {
 								struct RGBA tmp = utilsUnpackColorRGBA(colours[colourindex]);
 								gfx_Set_Prim_Color(gdl++, tmp);
@@ -286,22 +284,22 @@ Gfx *starsRender(Gfx *gdl)
 								nextgroupstart += groupsize;
 							}
 
-							starPos.f[0] = pos[0];
-							starPos.f[1] = pos[1];
-							starPos.f[2] = pos[2];
+							starPos.x = pos[0];
+							starPos.y = pos[1];
+							starPos.z = pos[2];
 							pos += 3;
 
-							f0_2 = 1.0f / (mtx[0][2] * starPos.f[0] + mtx[1][2] * starPos.f[1] + mtx[2][2] * starPos.f[2]);
-							screenpos[1] = screenmidy + (mtx[0][1] * starPos.f[0] + mtx[1][1] * starPos.f[1] + mtx[2][1] * starPos.f[2]) * f0_2;
+							f0_2 = 1.0f / (mtx[0][2] * starPos.x + mtx[1][2] * starPos.y + mtx[2][2] * starPos.z);
+							screenpos[1] = screenmidy + (mtx[0][1] * starPos.x + mtx[1][1] * starPos.y + mtx[2][1] * starPos.z) * f0_2;
 
 							if (screenpos[1] > viewtop && screenpos[1] < viewbottom) {
-								screenpos[0] = screenmidx - (mtx[0][0] * starPos.f[0] + mtx[1][0] * starPos.f[1] + mtx[2][0] * starPos.f[2]) * f0_2;
+								screenpos[0] = screenmidx - (mtx[0][0] * starPos.x + mtx[1][0] * starPos.y + mtx[2][0] * starPos.z) * f0_2;
 
 								if (screenpos[0] > viewleft && screenpos[0] < viewright) {
 									drawpos[0] = screenpos[0];
 									drawpos[1] = screenpos[1];
 
-									gfx_Fill_Rectangle(gdl++, drawpos[0], drawpos[1], drawpos[0] + 1, drawpos[1] + 1);
+									gdl += gfx_Fill_Rectangle(gdl, drawpos[0], drawpos[1], drawpos[0] + 1, drawpos[1] + 1);
 								}
 							}
 						}

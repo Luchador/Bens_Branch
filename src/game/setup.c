@@ -1,6 +1,7 @@
 #include <ultra64.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "game/cheats.h"
 #include "game/chrutils.h"
@@ -296,8 +297,8 @@ void propsReset(void)
 
 	g_MaxThrownLaptops = g_Vars.normmplayerisrunning ? 12 : PLAYERCOUNT();
 
-	g_ThrownLaptops = mempAlloc(ALIGN16(g_MaxThrownLaptops * sizeof(struct autogunobj)), MEMPOOL_STAGE);
-	g_ThrownLaptopBeams = mempAlloc(ALIGN16(g_MaxThrownLaptops * sizeof(struct beam)), MEMPOOL_STAGE);
+	g_ThrownLaptops = malloc(g_MaxThrownLaptops * sizeof(struct autogunobj));
+	g_ThrownLaptopBeams = malloc(g_MaxThrownLaptops * sizeof(struct beam));
 
 	for (i = 0; i < g_MaxThrownLaptops; i++) {
 		g_ThrownLaptops[i].base.prop = NULL;
@@ -1280,8 +1281,7 @@ void setupLoadFiles(int stagenum)
 
 		g_LoadType = LOADTYPE_SETUP;
 
-		g_GeCreditsData = (uint8_t *)fileLoadToNew(filenum, FILELOADMETHOD_DEFAULT, LOADTYPE_SETUP);
-		setup = (struct stagesetup *)g_GeCreditsData;
+		setup = (struct stagesetup *)(uint8_t *)fileLoadToNew(filenum, FILELOADMETHOD_DEFAULT, LOADTYPE_SETUP);
 
 		g_StageSetup.intro = (int *)((uintptr_t)setup + (uintptr_t)setup->intro);
 		g_StageSetup.props = (uint32_t *)((uintptr_t)setup + (uintptr_t)setup->props);

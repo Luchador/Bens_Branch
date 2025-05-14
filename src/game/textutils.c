@@ -271,7 +271,7 @@ Gfx *text0f153858(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
-	gfx_Fill_Rectangle(gdl++, *x1, *y1, *x2, *y2);
+	gdl += gfx_Fill_Rectangle(gdl, *x1, *y1, *x2, *y2);
 
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
@@ -282,7 +282,7 @@ Gfx *text0f1538e4(Gfx *gdl, int *x1, int *y1, int *x2, int *y2)
 {
 	gdl = textSetPrimColour(gdl, 0x00000000);
 
-	gfx_Fill_Rectangle(gdl++, *x1, *y1, *x2, *y2);
+	gdl += gfx_Fill_Rectangle(gdl, *x1, *y1, *x2, *y2);
 
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
@@ -855,10 +855,10 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, int *x, int *y, struct fontchar *curchar,
 									(sp90 - curchar->baseline) * 4,
 									(*x + curchar->width) * 4,
 									G_TX_RENDERTILE,
-									32,
-									((curchar->height) << 5) + 32,
-									1024,
-									65536 - 1024, true);
+									32.0f,
+									((curchar->height) * 32.0f) + 32.0f,
+									32.0f,
+									-32.0f, true);
 						} else {
 							gdl += gfx_Texture_Rectangle(gdl,
 									*x * 4,
@@ -866,10 +866,10 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, int *x, int *y, struct fontchar *curchar,
 									(*x + curchar->width) * 4,
 									(sp90 + curchar->baseline + curchar->height) * 4,
 									G_TX_RENDERTILE,
-									32,
-									32,
-									1024,
-									1024, false);
+									32.0f,
+									32.0f,
+									32.0f,
+									32.0f, false);
 
 							// Does the redraw effect for menus
 							if (g_DoRedrawEffect) {
@@ -905,10 +905,10 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, int *x, int *y, struct fontchar *curchar,
 								(*x + curchar->width) * 4,
 								(savedy + height) * 4,
 								G_TX_RENDERTILE,
-								32,
-								32,
-								1024,
-								1024, false);
+								32.0f,
+								32.0f,
+								32.0f,
+								32.0f, false);
 					}
 				} else {
 					if (curchar->baseline + sp90 + curchar->height >= savedy) {
@@ -918,10 +918,10 @@ Gfx *textRenderUnhighlighted(Gfx *gdl, int *x, int *y, struct fontchar *curchar,
 								(*x + curchar->width) * 4,
 								(curchar->baseline + sp90 + curchar->height) * 4,
 								G_TX_RENDERTILE,
-								32,
-								((savedy - sp90 - curchar->baseline) << 5) + 32,
-								1024,
-								1024, false);
+								32.0f,
+								((savedy - sp90 - curchar->baseline) * 32.0f) + 32.0f,
+								32.0f,
+								32.0f, false);
 					}
 				}
 			}
@@ -1009,7 +1009,7 @@ Gfx *textRenderProjected(Gfx *gdl, int *x, int *y, char *text, struct fontchar *
 				text++;
 				*y += lineheight;
 				*x = savedx;
-			} else if (*text < 0x80) {
+			} else if (*text < 128) {
 				gdl = textRenderUnhighlighted(gdl, x, y, &chars[*text - 0x21], &chars[prevchar - 0x21], font, savedx, savedy, width, height, arg9);
 				prevchar = *text;
 				text++;
@@ -1090,9 +1090,9 @@ Gfx *textRenderOutline(Gfx *gdl, int x, int y, struct fontchar *char1, int arg4,
 							(x + char1->width + 2) * 4,
 							G_TX_RENDERTILE,
 							0,
-							(char1->height + 1) << 5,
-							1024,
-							-1024, true);
+							(char1->height + 1) * 32.0f,
+							32.0f,
+							-32.0f, true);
 				} else {
 					gdl += gfx_Texture_Rectangle(gdl,
 							x * 4,
@@ -1102,8 +1102,8 @@ Gfx *textRenderOutline(Gfx *gdl, int x, int y, struct fontchar *char1, int arg4,
 							G_TX_RENDERTILE,
 							0,
 							0,
-							1024,
-							1024, false);
+							32.0f,
+							32.0f, false);
 				}
 			} else {
 				if (arg5 + arg7 >= y + char1->baseline) {
@@ -1115,8 +1115,8 @@ Gfx *textRenderOutline(Gfx *gdl, int x, int y, struct fontchar *char1, int arg4,
 							G_TX_RENDERTILE,
 							0,
 							0,
-							1024,
-							1024, false);
+							32.0f,
+							32.0f, false);
 				}
 			}
 		} else {
@@ -1128,9 +1128,9 @@ Gfx *textRenderOutline(Gfx *gdl, int x, int y, struct fontchar *char1, int arg4,
 						(y + char1->baseline + char1->height + 2) * 4,
 						G_TX_RENDERTILE,
 						0,
-						(arg5 - char1->baseline - y) << 5,
-						1024,
-						1024, false);
+						(arg5 - char1->baseline - y) * 32.0f,
+						32.0f,
+						32.0f, false);
 			}
 		}
 	}

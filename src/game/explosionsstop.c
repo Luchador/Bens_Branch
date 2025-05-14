@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "game/prop.h"
 #include "bss.h"
@@ -23,5 +24,7 @@ void explosionsStop(void)
 				g_Explosions[i].prop = NULL;
 			}
 		}
+
+		free(g_Explosions);
 	}
 }

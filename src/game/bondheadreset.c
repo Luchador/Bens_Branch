@@ -100,8 +100,8 @@ void bheadReset(void)
 
 		modelUpdateInfo(&g_Vars.currentplayer->model);
 		mtxIdent(&sp48);
-		renderdata.unk00 = (Mtxf*)&sp48;
-		renderdata.unk10 = (Mtxf*)g_Vars.currentplayer->bondheadmatrices;
+		renderdata.unk00 = &sp48;
+		renderdata.unk10 = g_Vars.currentplayer->bondheadmatrices;
 		modelSetMatricesWithAnim(&renderdata, &g_Vars.currentplayer->model);
 
 		g_Vars.currentplayer->standheight = g_Vars.currentplayer->bondheadmatrices[0][3][1];

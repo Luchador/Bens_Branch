@@ -2573,7 +2573,7 @@ bool projectileTestEmbedComplex(struct defaultobj *obj, struct coord *arg1, stru
 				hitpart = modelTestForHit(model, arg5, arg6, &spe4);
 
 				while (hitpart > 0) {
-					if (func0f084594(model, spe4, arg5, arg6, &thing1, &mtxindex1, &node1)) {
+					if (objTestAABBIntersection(model, spe4, arg5, arg6, &thing1, &mtxindex1, &node1)) {
 						mtx4TransformVec((Mtx*)&model->matrices[mtxindex1], &thing1.pos, &spfc);
 
 						sum2 = (spfc.f[0] - arg5->f[0]) * arg6->f[0]
@@ -2624,15 +2624,15 @@ bool projectileTestEmbedComplex(struct defaultobj *obj, struct coord *arg1, stru
 				if (obj->flags3 & OBJFLAG3_HOVERBEDSHIELD) {
 					node = modelGetPart(model->definition, MODELPART_BASIC_0067);
 
-					if (node && func0f084594(model, node, arg5, arg6, &thing2, &mtxindex2, &node2)) {
+					if (node && objTestAABBIntersection(model, node, arg5, arg6, &thing2, &mtxindex2, &node2)) {
 						if (hitpart <= 0 ||
-								+ model->matrices[mtxindex2].m[0][2] * thing2.pos.f[0]
-								+ model->matrices[mtxindex2].m[1][2] * thing2.pos.f[1]
-								+ model->matrices[mtxindex2].m[2][2] * thing2.pos.f[2]
+								+ model->matrices[mtxindex2][0][2] * thing2.pos.f[0]
+								+ model->matrices[mtxindex2][1][2] * thing2.pos.f[1]
+								+ model->matrices[mtxindex2][2][2] * thing2.pos.f[2]
 								>
-								+ model->matrices[mtxindex1].m[0][2] * thing1.pos.f[0]
-								+ model->matrices[mtxindex1].m[1][2] * thing1.pos.f[1]
-								+ model->matrices[mtxindex1].m[2][2] * thing1.pos.f[2]
+								+ model->matrices[mtxindex1][0][2] * thing1.pos.f[0]
+								+ model->matrices[mtxindex1][1][2] * thing1.pos.f[1]
+								+ model->matrices[mtxindex1][2][2] * thing1.pos.f[2]
 								) {
 							hitpart = 1;
 
@@ -2769,7 +2769,7 @@ bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelno
 		case MODELNODETYPE_BBOX:
 			rodata = node->rodata;
 
-			if (modelTestBboxNodeForHit(&rodata->bbox, (Mtxf*)modelFindNodeMtx(model, node, 0), arg3, arg4)) {
+			if (modelTestBboxNodeForHit(&rodata->bbox, modelFindNodeMtx(model, node, 0), arg3, arg4)) {
 				s7 = true;
 				sp84 = node;
 
@@ -2781,7 +2781,7 @@ bool func0f06bea0(struct model *model, struct modelnode *endnode, struct modelno
 				s7 = false;
 				g_ExtraBoundsDist = 10.0f / model->scale;
 
-				if (modelTestBboxNodeForHit(&rodata->bbox, (Mtxf*)modelFindNodeMtx(model, node, 0), arg3, arg4)) {
+				if (modelTestBboxNodeForHit(&rodata->bbox, modelFindNodeMtx(model, node, 0), arg3, arg4)) {
 					if (g_Vars.hitboundscount < ARRAYCOUNT(g_Vars.hitnodes)) {
 						g_Vars.hitnodes[g_Vars.hitboundscount] = node;
 						g_Vars.hitboundscount++;
@@ -2904,7 +2904,7 @@ bool projectileTryEmbedOnChr(struct chrdata *chr, struct coord *start, struct co
 				hitpart = modelTestForHit(model, rayStart, rayDir, &spcc);
 
 				while (hitpart > 0) {
-					if (func0f084594(model, spcc, rayStart, rayDir, &sp7c, &sp78, &sp74)) {
+					if (objTestAABBIntersection(model, spcc, rayStart, rayDir, &sp7c, &sp78, &sp74)) {
 						mtx4TransformVec((Mtx*)&model->matrices[sp78], &sp7c.pos, &spb8);
 
 						spec = (spb8.f[0] - rayStart->f[0]) * rayDir->f[0]
@@ -4380,11 +4380,11 @@ void weaponTick(struct prop *prop)
 					mtx4RotateVecInPlace(&spf8, &sp6c);
 					mtx4RotateVecInPlace(&sp78, &sp60);
 
-					sp78[3][0] = obj->embedment->matrix.m[3][0] - (sp60.f[0] - sp6c.f[0]);
-					sp78[3][1] = obj->embedment->matrix.m[3][1] - (sp60.f[1] - sp6c.f[1]);
-					sp78[3][2] = obj->embedment->matrix.m[3][2] - (sp60.f[2] - sp6c.f[2]);
+					sp78[3][0] = obj->embedment->matrix[3][0] - (sp60.f[0] - sp6c.f[0]);
+					sp78[3][1] = obj->embedment->matrix[3][1] - (sp60.f[1] - sp6c.f[1]);
+					sp78[3][2] = obj->embedment->matrix[3][2] - (sp60.f[2] - sp6c.f[2]);
 
-					mtx4Copy(&sp78, (Mtx*)&obj->embedment->matrix);
+					mtx4Copy(&sp78, &obj->embedment->matrix);
 				}
 			} else {
 				sp6c.f[0] = sp60.f[0] = sp6c.f[1] = sp60.f[1] = 0.0f;
@@ -4531,8 +4531,8 @@ void func0f07079c(struct prop *prop, bool fulltick)
 		prop->flags |= PROPFLAG_ONTHISSCREENTHISTICK | PROPFLAG_ONANYSCREENTHISTICK;
 		mtxApplyAffineTransform(mtx, (Mtx*)&obj->embedment->matrix, &sp30);
 
-		renderdata.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
-		renderdata.unk00 = (Mtxf*)&sp30;
+		renderdata.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtx));
+		renderdata.unk00 = &sp30;
 
 		modelSetMatrices(&renderdata, model);
 		propTickWeaponsAndAmmoCrates(prop, fulltick);
@@ -5228,8 +5228,8 @@ int func0f072144(struct defaultobj *obj, struct coord *arg1, float arg2, bool ar
 	union geounion geounion;
 	struct prop *prop = obj->prop;
 	struct hoverbikeobj *hoverbike;
-	Mtxf spa4;
-	Mtxf sp64;
+	Mtx spa4;
+	Mtx sp64;
 	float sp40[3][3];
 
 	if (objIsHoverpropOrBike(obj)) {
@@ -5245,9 +5245,9 @@ int func0f072144(struct defaultobj *obj, struct coord *arg1, float arg2, bool ar
 			yrot = hoverpropGetTurnAngle(obj);
 		}
 
-		mtx4LoadYRotation(yrot, (Mtx*)&spa4);
-		mtxScaleRotationPart(obj->model->scale, (Mtx*)&spa4);
-		mtx4ToMtx3((Mtx*)&spa4, sp460);
+		mtx4LoadYRotation(yrot, &spa4);
+		mtxScaleRotationPart(obj->model->scale, &spa4);
+		mtx4ToMtx3(&spa4, sp460);
 	} else {
 		yrot = 0.0f;
 
@@ -5258,8 +5258,8 @@ int func0f072144(struct defaultobj *obj, struct coord *arg1, float arg2, bool ar
 				arg2 += M_TAU;
 			}
 
-			mtx4LoadYRotation(arg2, (Mtx*)&sp64);
-			mtx4ToMtx3((Mtx*)&sp64, sp40);
+			mtx4LoadYRotation(arg2, &sp64);
+			mtx4ToMtx3(&sp64, sp40);
 			mtx3x3TransposeMul(sp40, obj->realrot, sp460);
 		} else {
 			mtx3Copy(obj->realrot, sp460);
@@ -6435,22 +6435,22 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 				struct coord sp2e0 = {0, 1, 0};
 
 				if (obj && obj->prop && projectile->targetprop) {
-					Mtxf mtx;
+					Mtx mtx;
 					float sp29c = sqrtf(obj->realrot[0][0] * obj->realrot[0][0] + obj->realrot[1][0] * obj->realrot[1][0] + obj->realrot[2][0] * obj->realrot[2][0]);
 					struct coord sp290;
 					float sp28c;
 
-					mtxIdent((Mtx*)&mtx);
+					mtxIdent(&mtx);
 
-					mtx.m[0][0] = obj->realrot[0][0] / sp29c;
-					mtx.m[0][1] = obj->realrot[0][1] / sp29c;
-					mtx.m[0][2] = obj->realrot[0][2] / sp29c;
-					mtx.m[1][0] = obj->realrot[1][0] / sp29c;
-					mtx.m[1][1] = obj->realrot[1][1] / sp29c;
-					mtx.m[1][2] = obj->realrot[1][2] / sp29c;
-					mtx.m[2][0] = obj->realrot[2][0] / sp29c;
-					mtx.m[2][1] = obj->realrot[2][1] / sp29c;
-					mtx.m[2][2] = obj->realrot[2][2] / sp29c;
+					mtx[0][0] = obj->realrot[0][0] / sp29c;
+					mtx[0][1] = obj->realrot[0][1] / sp29c;
+					mtx[0][2] = obj->realrot[0][2] / sp29c;
+					mtx[1][0] = obj->realrot[1][0] / sp29c;
+					mtx[1][1] = obj->realrot[1][1] / sp29c;
+					mtx[1][2] = obj->realrot[1][2] / sp29c;
+					mtx[2][0] = obj->realrot[2][0] / sp29c;
+					mtx[2][1] = obj->realrot[2][1] / sp29c;
+					mtx[2][2] = obj->realrot[2][2] / sp29c;
 
 					sp2f8.x = obj->prop->pos.x;
 					sp2f8.y = obj->prop->pos.y;
@@ -6692,13 +6692,13 @@ int projectileTick(struct defaultobj *obj, bool *embedded)
 										if (g_EmbedProp->flags & PROPFLAG_ONTHISSCREENTHISTICK) {
 											if (g_EmbedModel && g_EmbedHitPart != HITPART_GUN && g_EmbedHitPart != HITPART_HAT) {
 												struct coord sp1c8;
-												Mtxf sp188;
-												Mtxf *sp184;
+												Mtx sp188;
+												Mtx *sp184;
 
-												sp184 = (Mtxf*)modelFindNodeMtx(g_EmbedModel, g_EmbedNode, 0);
+												sp184 = modelFindNodeMtx(g_EmbedModel, g_EmbedNode, 0);
 												mtx4TransformVec(camGetPlayerWorldToScreenMtx(), &sp5e8, &sp1c8);
-												mtxInvertRigidBodyMatrix((Mtx*)&sp184->m, (Mtx*)&sp188.m);
-												mtx4TransformVecInPlace((Mtx*)&sp188, &sp1c8);
+												mtxInvertRigidBodyMatrix(sp184, &sp188);
+												mtx4TransformVecInPlace(&sp188, &sp1c8);
 
 												chr0f0260c4(g_EmbedModel, g_EmbedHitPart, g_EmbedNode, &sp1c8);
 											}
@@ -8061,7 +8061,7 @@ void fanTick(struct prop *prop)
 void fanUpdateModel(struct prop *prop)
 {
 	struct fanobj *fan = (struct fanobj *) prop->obj;
-	Mtxf sp6c;
+	Mtx fanTransformMtx;
 	float sp48[3][3];
 	float sp24[3][3];
 	float angle = fan->yspeed * g_Vars.lvupdate60freal;
@@ -8070,8 +8070,8 @@ void fanUpdateModel(struct prop *prop)
 		angle -= M_TAU;
 	}
 
-	mtx4LoadYRotation(angle, (Mtx*)&sp6c);
-	mtx4ToMtx3((Mtx*)&sp6c, sp48);
+	mtx4LoadYRotation(angle, &fanTransformMtx);
+	mtx4ToMtx3(&fanTransformMtx, sp48);
 	mtx3x3TransposeMul(fan->base.realrot, sp48, sp24);
 	mtx3Copy(sp24, fan->base.realrot);
 }
@@ -10385,7 +10385,7 @@ void objInitMatrices(struct prop *prop)
 				mtx4Copy((Mtx*)obj->model->matrices, &sp28);
 
 				thing.unk10 = obj->model->matrices;
-				thing.unk00 = (Mtxf*)&sp28;
+				thing.unk00 = &sp28;
 
 				modelSetMatrices(&thing, obj->model);
 			}
@@ -10569,7 +10569,7 @@ int objTickPlayer(struct prop *prop)
 			} else {
 				// In cutscene
 				struct modelrenderdata sp476 = {0, 1, 3};
-				Mtxf sp412;
+				Mtx sp412;
 				struct coord sp400;
 				RoomNum sp384[8];
 				struct hov *hov = NULL;
@@ -10595,17 +10595,17 @@ int objTickPlayer(struct prop *prop)
 					}
 
 					sp556 = true;
-					sp476.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
-					sp476.unk00 = (Mtxf*)camGetPlayerWorldToScreenMtx();
+					sp476.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtx));
+					sp476.unk00 = (Mtx*)camGetPlayerWorldToScreenMtx();
 					modelSetMatricesWithAnim(&sp476, model);
 
 					if (fulltick) {
-						mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)model->matrices, (Mtx*)&sp412);
-						mtx4ToMtx3((Mtx*)&sp412, obj->realrot);
+						mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)model->matrices, &sp412);
+						mtx4ToMtx3(&sp412, obj->realrot);
 
-						sp400.x = sp412.m[3][0];
-						sp400.y = sp412.m[3][1];
-						sp400.z = sp412.m[3][2];
+						sp400.x = sp412[3][0];
+						sp400.y = sp412[3][1];
+						sp400.z = sp412[3][2];
 
 						if (obj->flags3 & OBJFLAG3_00000010) {
 							propResolveNewPositionRooms(prop->rooms, &sp400, sp384);
@@ -10628,7 +10628,7 @@ int objTickPlayer(struct prop *prop)
 
 						if (hov) {
 							hovUpdateGround(obj, hov, &prop->pos, prop->rooms, obj->realrot);
-							hoverpropSetTurnAngle(obj, atan2f(sp412.m[2][0], sp412.m[2][2]));
+							hoverpropSetTurnAngle(obj, atan2f(sp412[2][0], sp412[2][2]));
 
 							hov->bobpitchcur = 0;
 							hov->bobpitchspeed = 0;
@@ -10655,11 +10655,11 @@ int objTickPlayer(struct prop *prop)
 			}
 		} else {
 			struct modelrenderdata sp312 = {0, 1, 3};
-			Mtxf sp248;
+			Mtx sp248;
 			struct coord sp236;
 			RoomNum sp220[8];
 			int numchrs;
-			Mtxf sp152;
+			Mtx sp152;
 			int sp148 = 0;
 			int sp144 = 0;
 			int i;
@@ -10688,12 +10688,12 @@ int objTickPlayer(struct prop *prop)
 				mtx00016208(obj->realrot, &sp116);
 			}
 
-			mtx3ToMtx4(obj->realrot, (Mtx*)&sp248);
-			mtx4SetTranslation(&prop->pos, (Mtx*)&sp248);
-			mtx4MultMtx4(camGetPlayerWorldToScreenMtx(), (Mtx*)&sp248, (Mtx*)&sp152);
+			mtx3ToMtx4(obj->realrot, &sp248);
+			mtx4SetTranslation(&prop->pos, &sp248);
+			mtx4MultMtx4(camGetPlayerWorldToScreenMtx(), &sp248, &sp152);
 
 			sp556 = true;
-			sp312.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
+			sp312.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtx));
 			sp312.unk00 = &sp152;
 			modelSetMatricesWithAnim(&sp312, model);
 
@@ -10711,8 +10711,8 @@ int objTickPlayer(struct prop *prop)
 				if (modelGetCurAnimFrame(model) >= modelGetNumAnimFrames(model) - 1) {
 					modelmgrFreeAnim(model->anim);
 					model->anim = NULL;
-					mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)model->matrices, (Mtx*)&sp248);
-					mtx4ToMtx3((Mtx*)&sp248, obj->realrot);
+					mtxApplyAffineTransform(camGetProjectionMtx(), (Mtx*)model->matrices, &sp248);
+					mtx4ToMtx3(&sp248, obj->realrot);
 					tagnum = objGetTagNum(obj);
 
 					if (tagnum >= 0) {
@@ -10844,12 +10844,12 @@ int objTickPlayer(struct prop *prop)
 		}
 
 		if (sp556 == false) {
-			model->matrices = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
+			model->matrices = gfxAllocate(model->definition->nummatrices * sizeof(Mtx));
 			objInitMatrices(prop);
 			modelUpdateRelationsQuick(model, model->definition->rootnode);
 		}
 
-		prop->z = -model->matrices[0].m[3][2];
+		prop->z = -model->matrices[0][3][2];
 		propTickWeaponsAndAmmoCrates(prop, fulltick);
 		child = prop->child;
 
@@ -11588,16 +11588,16 @@ static inline void tvscreenWrapTexCoord(int *s0, int *s1, int *s2, int *s3)
 Gfx *tvscreenRender(struct model *model, struct modelnode *node, struct tvscreen *screen, Gfx *gdl, int arg4, int arg5)
 {
 	if (node && (node->type & 0xff) == MODELNODETYPE_DL) {
-		Vtx *vertices = gfxAllocateVertices(4); // b4
-		Col *colours = gfxAllocateColours(1); // b0
-		Gfx *savedgdl = gdl++; // ac
-		union modelrodata *rodata = node->rodata; // a8
-		union modelrwdata *rwdata = modelGetNodeRwData(model, node); // a4
+		Vtx *vertices = gfxAllocateVertices(4);
+		Col *colours = gfxAllocateColours(1);
+		Gfx *savedgdl = gdl++;
+		union modelrodata *rodata = node->rodata;
+		union modelrwdata *rwdata = modelGetNodeRwData(model, node);
 		struct textureconfig *tconfig;
 		bool yielding = false;
 
 		while (!yielding) {
-			struct tvcmd *cmd = (struct tvcmd *) &screen->cmdlist[screen->offset]; // 98
+			struct tvcmd *cmd = (struct tvcmd *) &screen->cmdlist[screen->offset];
 
 			switch (cmd->type) {
 			case TVCMD_STOPSCROLL:
@@ -13273,7 +13273,7 @@ void objCheckDestroyed(struct defaultobj *obj, struct coord *pos, int playernum)
 	}
 }
 
-bool func0f084594(struct model *model, struct modelnode *node, struct coord *arg2, struct coord *arg3, struct hitthing *hitthing, int *mtxindexptr, struct modelnode **nodeptr)
+bool objTestAABBIntersection(struct model *model, struct modelnode *node, struct coord *arg2, struct coord *arg3, struct hitthing *hitthing, int *mtxindexptr, struct modelnode **nodeptr)
 {
 	int i;
 	int mtxindex;
@@ -13293,7 +13293,7 @@ bool func0f084594(struct model *model, struct modelnode *node, struct coord *arg
 	rodata = &node->rodata->bbox;
 
 	mtxindex = modelFindNodeMtxIndex(node, 0);
-	mtxInvertAffine((Mtx*)&model->matrices[mtxindex].m, &mtx);
+	mtxInvertAffine(&model->matrices[mtxindex], &mtx);
 
 	spb8.x = arg2->x;
 	spb8.y = arg2->y;
@@ -13481,7 +13481,7 @@ bool func0f0849dc(struct model *model, struct modelnode *nodearg, struct coord *
 			Mtx sp64;
 
 			if (mtxindex >= 0) {
-				mtx = (Mtx*)&model->matrices[mtxindex];
+				mtx = &model->matrices[mtxindex];
 			}
 
 			if (mtx && mtx != spd0) {
@@ -13970,7 +13970,7 @@ void propTestModelHit(struct prop *prop, struct shotdata *shotdata)
 		hitpart = modelTestForHit(model, &shotdata->gunpos2d, &shotdata->gundir2d, &node1);
 
 		while (hitpart > 0) {
-			if (func0f084594(model, node1, &shotdata->gunpos2d, &shotdata->gundir2d, &hitthing1, &spe4, &node2)) {
+			if (objTestAABBIntersection(model, node1, &shotdata->gunpos2d, &shotdata->gundir2d, &hitthing1, &spe4, &node2)) {
 				break;
 			}
 
@@ -13989,10 +13989,10 @@ void propTestModelHit(struct prop *prop, struct shotdata *shotdata)
 	if (obj->flags3 & OBJFLAG3_HOVERBEDSHIELD) {
 		node3 = modelGetPart(model->definition, MODELPART_0067);
 
-		if (node3 && func0f084594(model, node3, &shotdata->gunpos2d, &shotdata->gundir2d, &hitthing2, &sp90, &node4)) {
+		if (node3 && objTestAABBIntersection(model, node3, &shotdata->gunpos2d, &shotdata->gundir2d, &hitthing2, &sp90, &node4)) {
 			if (hitpart <= 0 ||
-					model->matrices[sp90].m[0][2] * hitthing2.pos.f[0] + model->matrices[sp90].m[1][2] * hitthing2.pos.f[1] + model->matrices[sp90].m[2][2] * hitthing2.pos.f[2] >
-					model->matrices[spe4].m[0][2] * hitthing1.pos.f[0] + model->matrices[spe4].m[1][2] * hitthing1.pos.f[1] + model->matrices[spe4].m[2][2] * hitthing1.pos.f[2]) {
+					model->matrices[sp90][0][2] * hitthing2.pos.f[0] + model->matrices[sp90][1][2] * hitthing2.pos.f[1] + model->matrices[sp90][2][2] * hitthing2.pos.f[2] >
+					model->matrices[spe4][0][2] * hitthing1.pos.f[0] + model->matrices[spe4][1][2] * hitthing1.pos.f[1] + model->matrices[spe4][2][2] * hitthing1.pos.f[2]) {
 				hitpart = HITPART_LFOOT;
 				hitthing1 = hitthing2;
 				node1 = node3;
@@ -14044,7 +14044,7 @@ void objTestHit(struct prop *prop, struct shotdata *shotdata)
 	if ((prop->flags & PROPFLAG_ONTHISSCREENTHISTICK)
 			&& (obj->hidden & OBJHFLAG_00001000) == 0
 			&& (obj->flags2 & OBJFLAG2_SHOOTTHROUGH) == 0) {
-		tmp = -(model->matrices[0].m[3][2] + objGetRotatedLocalZMaxByMtx4(bbox, (Mtx*)model->matrices));
+		tmp = -(model->matrices[0][3][2] + objGetRotatedLocalZMaxByMtx4(bbox, (Mtx*)model->matrices));
 
 		if (tmp <= shotdata->distance) {
 			propTestModelHit(prop, shotdata);
@@ -17601,36 +17601,6 @@ int func0f08e5a8(RoomNum *rooms2, struct screenbox *box)
 
 	return result;
 }
-
-/*bool posIsInObjFadeDistance(struct coord *pos, float modelscale)
-{
-	bool result = true;
-	struct distfadesettings *settings = envGetDistFadeSettings();
-	struct coord tmp;
-	float sp20;
-
-	if (settings != NULL) {
-		struct coord *campos = &g_Vars.currentplayer->cam_pos;
-		Mtxf *mtx = (Mtxf*)camGetPlayerWorldToScreenMtx();
-
-		tmp.x = pos->x - campos->x;
-		tmp.y = pos->y - campos->y;
-		tmp.z = pos->z - campos->z;
-
-		sp20 = tmp.f[0] * mtx->m[0][0] + tmp.f[1] * mtx->m[0][1] + tmp.f[2] * mtx->m[0][2];
-
-		if (sp20 > settings->refdist) {
-			float scalez = camGetLodScaleZ();
-			sp20 = ((sp20 - settings->refdist) * 100 / modelscale + settings->refdist) * scalez;
-
-			if (sp20 >= settings->xluperc) {
-				result = false;
-			}
-		}
-	}
-
-	return result;
-}*/
 
 bool posShouldRenderForProp(struct prop *prop, struct coord *pos, float arg2, bool arg3)
 {

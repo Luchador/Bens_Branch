@@ -39,6 +39,8 @@
 
 uintptr_t gfxFramebuffer;
 
+struct RSP rsp = { 0 };
+
 float g_ModelViewProj[4][4];
 
 #define SUPPORT_CHECK(x) assert(x)
@@ -55,31 +57,11 @@ float g_ModelViewProj[4][4];
 #define RATIO_X (gfx_current_dimensions.width / (float)SCREEN_WIDTH)
 #define RATIO_Y (gfx_current_dimensions.height / (float)SCREEN_HEIGHT)
 
-#define MAX_BUFFERED 256
-#define MAX_LIGHTS 4
-#define MAX_VERTICES 128
-#define MAX_VERTEX_COLORS 64
-
 //#define TEXTURE_CACHE_MAX_SIZE 1024
 #define TEXTURE_CACHE_MAX_SIZE 4096
 
 #define C0(pos, width) ((cmd->words.w0 >> (pos)) & ((1U << width) - 1))
 #define C1(pos, width) ((cmd->words.w1 >> (pos)) & ((1U << width) - 1))
-
-struct NormalColor {
-    union {
-        struct { uint8_t r, g, b, a; };
-        struct { int8_t x, y, z, w; };
-    };
-};
-
-struct LoadedVertex {
-    float x, y, z, w;
-    float u, v;
-    struct RGBA color;
-    uint8_t fog;
-    uint8_t clip_rej;
-};
 
 static struct {
     TextureCacheMap map;
@@ -99,40 +81,6 @@ static std::map<ColorCombinerKey, struct ColorCombiner> color_combiner_pool;
 static std::map<ColorCombinerKey, struct ColorCombiner>::iterator prev_combiner = color_combiner_pool.end();
 
 static uint8_t* tex_upload_buffer = nullptr;
-
-static struct RSP {
-    float modelview_matrix_stack[11][4][4];
-    uint8_t modelview_matrix_stack_size;
-
-    float MP_matrix[4][4];
-    float P_matrix[4][4];
-
-    Light_t lookat[2];
-    bool lookat_enabled;
-
-    Light_t current_lights[MAX_LIGHTS + 1];
-    float current_lights_coeffs[MAX_LIGHTS][3];
-    float current_lookat_coeffs[2][3]; // lookat_x, lookat_y
-    uint8_t current_num_lights;        // includes ambient light
-    bool lights_changed;
-
-    uint32_t geometry_mode;
-    int16_t fog_mul, fog_offset;
-
-    uint32_t extra_geometry_mode;
-
-    uint32_t aspect_mode;
-    float aspect_ofs;
-    float aspect_scale;
-
-    struct {
-        float s, t;
-    } texture_scaling_factor;
-
-    struct LoadedVertex loaded_vertices[MAX_VERTICES + 4];
-
-    const struct NormalColor *vertex_colors; //[MAX_VERTEX_COLORS];
-} rsp;
 
 struct RawTexMetadata {
     uint16_t width, height;
@@ -262,47 +210,6 @@ static struct ShaderProgram* gfx_lookup_or_create_shader_program(uint64_t shader
         rendering_state.shader_program = prg;
     }
     return prg;
-}
-
-static const char* ccmux_to_string(uint32_t ccmux) {
-    static const char* const tbl[] = {
-        "G_CCMUX_COMBINED",
-        "G_CCMUX_TEXEL0",
-        "G_CCMUX_TEXEL1",
-        "G_CCMUX_PRIMITIVE",
-        "G_CCMUX_SHADE",
-        "G_CCMUX_ENVIRONMENT",
-        "G_CCMUX_1",
-        "G_CCMUX_COMBINED_ALPHA",
-        "G_CCMUX_TEXEL0_ALPHA",
-        "G_CCMUX_TEXEL1_ALPHA",
-        "G_CCMUX_PRIMITIVE_ALPHA",
-        "G_CCMUX_SHADE_ALPHA",
-        "G_CCMUX_ENV_ALPHA",
-        "G_CCMUX_LOD_FRACTION",
-        "G_CCMUX_PRIM_LOD_FRAC",
-        "G_CCMUX_K5",
-    };
-    if (ccmux > 15) {
-        return "G_CCMUX_0";
-
-    } else {
-        return tbl[ccmux];
-    }
-}
-
-static const char* acmux_to_string(uint32_t acmux) {
-    static const char* const tbl[] = {
-        "G_ACMUX_COMBINED or G_ACMUX_LOD_FRACTION",
-        "G_ACMUX_TEXEL0",
-        "G_ACMUX_TEXEL1",
-        "G_ACMUX_PRIMITIVE",
-        "G_ACMUX_SHADE",
-        "G_ACMUX_ENVIRONMENT",
-        "G_ACMUX_1 or G_ACMUX_PRIM_LOD_FRAC",
-        "G_ACMUX_0",
-    };
-    return tbl[acmux];
 }
 
 static void gfx_generate_cc(struct ColorCombiner* comb, const ColorCombinerKey& key) {
@@ -941,14 +848,14 @@ static void import_texture(int i, int tile, bool importReplacement) {
     }
 }
 
-static void gfx_normalize_vector(float v[3]) {
+void gfx_normalize_vector(float v[3]) {
     float s = sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
     v[0] /= s;
     v[1] /= s;
     v[2] /= s;
 }
 
-static void gfx_transposed_matrix_mul(float res[3], const float a[3], const float b[4][4]) {
+void gfx_transposed_matrix_mul(float res[3], const float a[3], const float b[4][4]) {
     res[0] = a[0] * b[0][0] + a[1] * b[0][1] + a[2] * b[0][2];
     res[1] = a[0] * b[1][0] + a[1] * b[1][1] + a[2] * b[1][2];
     res[2] = a[0] * b[2][0] + a[1] * b[2][1] + a[2] * b[2][2];
@@ -968,7 +875,7 @@ static void calculate_normal_dir(const struct NormalColor *vcn, float coeffs[3])
     gfx_normalize_vector(coeffs);
 }
 
-static void gfx_matrix_mul(float res[4][4], const float a[4][4], const float b[4][4]) {
+void gfx_matrix_mul(float res[4][4], const float a[4][4], const float b[4][4]) {
     float tmp[4][4];
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
@@ -976,36 +883,6 @@ static void gfx_matrix_mul(float res[4][4], const float a[4][4], const float b[4
         }
     }
     memcpy(res, tmp, sizeof(tmp));
-}
-
-static void gfx_sp_matrix(uint8_t parameters, const int32_t* addr) {
-    float matrix[4][4];
-
-    memcpy(matrix, addr, sizeof(matrix));
-
-    if (parameters & G_MTX_PROJECTION) {
-        if (parameters & G_MTX_LOAD) {
-            memcpy(rsp.P_matrix, matrix, sizeof(matrix));
-        } else {
-            gfx_matrix_mul(rsp.P_matrix, matrix, rsp.P_matrix);
-        }
-    } else { // G_MTX_MODELVIEW
-        if ((parameters & G_MTX_PUSH) && rsp.modelview_matrix_stack_size < 11) {
-            ++rsp.modelview_matrix_stack_size;
-            memcpy(rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1],
-                   rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 2], sizeof(matrix));
-        }
-        if (parameters & G_MTX_LOAD) {
-            memcpy(rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1], matrix, sizeof(matrix));
-        } else {
-            gfx_matrix_mul(rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1], matrix,
-                           rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1]);
-        }
-        rsp.lights_changed = 1;
-    }
-    gfx_matrix_mul(rsp.MP_matrix, rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1], rsp.P_matrix);
-    //gfx_matrix_mul(rsp.MP_matrix, rsp.P_matrix, rsp.modelview_matrix_stack[rsp.modelview_matrix_stack_size - 1]);
-    memcpy(g_ModelViewProj, rsp.MP_matrix, sizeof(float[4][4]));
 }
 
 static void gfx_sp_pop_matrix(uint32_t count) {
@@ -1177,15 +1054,127 @@ static void gfx_sp_vertex(size_t n_vertices, size_t dest_index, const Vtx* verti
     }
 }
 
-static void gfx_sp_modify_vertex(uint16_t vtx_idx, uint8_t where, uint32_t val) {
-    SUPPORT_CHECK(where == G_MWO_POINT_ST);
+static void gfx_sp_vertex_f(size_t n_vertices, size_t dest_index, const VtxF* vertices)
+{
+	SUPPORT_CHECK(n_vertices <= MAX_VERTICES);
 
-    int32_t s = (int16_t)(val >> 16);
-    int32_t t = (int16_t)val;
+	for (size_t i = 0; i < n_vertices; i++, dest_index++) {
+		const VtxF* v = &vertices[i];
+		struct LoadedVertex* d = &rsp.loaded_vertices[dest_index];
 
-    struct LoadedVertex* v = &rsp.loaded_vertices[vtx_idx];
-    v->u = s;
-    v->v = t;
+        //TODO: Move these transforms to the GPU
+		float x = v->x * rsp.MP_matrix[0][0] + v->y * rsp.MP_matrix[1][0] + v->z * rsp.MP_matrix[2][0] + rsp.MP_matrix[3][0];
+		float y = v->x * rsp.MP_matrix[0][1] + v->y * rsp.MP_matrix[1][1] + v->z * rsp.MP_matrix[2][1] + rsp.MP_matrix[3][1];
+		float z = v->x * rsp.MP_matrix[0][2] + v->y * rsp.MP_matrix[1][2] + v->z * rsp.MP_matrix[2][2] + rsp.MP_matrix[3][2];
+		float w = v->x * rsp.MP_matrix[0][3] + v->y * rsp.MP_matrix[1][3] + v->z * rsp.MP_matrix[2][3] + rsp.MP_matrix[3][3];
+
+		x = gfx_adjust_x_for_aspect_ratio(x, w);
+
+        float U = v->s;
+        float V = v->t;
+
+		const struct NormalColor *vcn = &rsp.vertex_colors[v->colour >> 2];
+
+		if (rsp.geometry_mode & G_LIGHTING) {
+			if (rsp.lights_changed) {
+				for (int i = 0; i < rsp.current_num_lights - 1; i++) {
+					calculate_normal_dir(&rsp.current_lights[i], rsp.current_lights_coeffs[i]);
+				}
+				if (rsp.lookat_enabled) {
+					calculate_normal_dir(&rsp.lookat[0], rsp.current_lookat_coeffs[0]);
+					calculate_normal_dir(&rsp.lookat[1], rsp.current_lookat_coeffs[1]);
+				}
+				rsp.lights_changed = false;
+			}
+
+			int r = rsp.current_lights[rsp.current_num_lights - 1].col[0];
+			int g = rsp.current_lights[rsp.current_num_lights - 1].col[1];
+			int b = rsp.current_lights[rsp.current_num_lights - 1].col[2];
+
+			for (int i = 0; i < rsp.current_num_lights - 1; i++) {
+				float intensity = (
+					vcn->x * rsp.current_lights_coeffs[i][0] +
+					vcn->y * rsp.current_lights_coeffs[i][1] +
+					vcn->z * rsp.current_lights_coeffs[i][2]
+				) / 127.0f;
+
+				if (intensity > 0.0f) {
+					r += intensity * rsp.current_lights[i].col[0];
+					g += intensity * rsp.current_lights[i].col[1];
+					b += intensity * rsp.current_lights[i].col[2];
+				}
+			}
+
+			d->color.r = r > 255 ? 255 : r;
+			d->color.g = g > 255 ? 255 : g;
+			d->color.b = b > 255 ? 255 : b;
+
+			if (rsp.geometry_mode & G_TEXTURE_GEN) {
+				float dotx = 0, doty = 0;
+				if (rsp.lookat_enabled) {
+					dotx = vcn->x * rsp.current_lookat_coeffs[0][0]
+					     + vcn->y * rsp.current_lookat_coeffs[0][1]
+					     + vcn->z * rsp.current_lookat_coeffs[0][2];
+					doty = vcn->x * rsp.current_lookat_coeffs[1][0]
+					     + vcn->y * rsp.current_lookat_coeffs[1][1]
+					     + vcn->z * rsp.current_lookat_coeffs[1][2];
+					dotx /= 127.0f;
+					doty /= 127.0f;
+				} else {
+					float tvcn[3];
+					calculate_normal_dir(vcn, tvcn);
+					dotx = tvcn[0];
+					doty = tvcn[1];
+				}
+
+				dotx = clampf(dotx, -1.0f, 1.0f);
+				doty = clampf(doty, -1.0f, 1.0f);
+
+				if (rsp.geometry_mode & G_TEXTURE_GEN_LINEAR) {
+					dotx = acosf(-dotx) / 4.0f;
+					doty = acosf(-doty) / 4.0f;
+				} else {
+					dotx = (dotx + 1.0f) / 4.0f;
+					doty = (doty + 1.0f) / 4.0f;
+				}
+
+				U = (int32_t)(dotx * rsp.texture_scaling_factor.s);
+				V = (int32_t)(doty * rsp.texture_scaling_factor.t);
+			}
+		} else {
+			d->color.r = vcn->r;
+			d->color.g = vcn->g;
+			d->color.b = vcn->b;
+		}
+
+		d->u = U;
+		d->v = V;
+
+		// Trivial clip rejection
+		d->clip_rej = 0;
+		if (x < -w) d->clip_rej |= 1;
+		if (x >  w) d->clip_rej |= 2;
+		if (y < -w) d->clip_rej |= 4;
+		if (y >  w) d->clip_rej |= 8;
+		if (z >  w) d->clip_rej |= 32;
+
+		d->x = x;
+		d->y = y;
+		d->z = z;
+		d->w = w;
+
+		if (rsp.geometry_mode & G_FOG) {
+			if (fabsf(w) < 0.001f) w = 0.001f;
+			float winv = 1.0f / w;
+			if (winv < 0.0f) winv = std::numeric_limits<int16_t>::max();
+			float fog_z = z * winv * rsp.fog_mul + rsp.fog_offset;
+			d->fog = clampf(fog_z, 0.f, 255.f);
+		} else {
+			d->fog = rdp.fog_color.a;
+		}
+
+		d->color.a = vcn->a;
+	}
 }
 
 static inline int gfx_lod_tile_offset(const int i) {
@@ -1946,7 +1935,7 @@ static void gfx_dp_set_subpixel_offset(int16_t x, int16_t y) {
     rdp.subpixel_ofs_y = y;
 }
 
-static void gfx_draw_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry) {
+static void gfx_draw_rectangle(float ulx, float uly, float lrx, float lry) {
     uint32_t saved_other_mode_h = rdp.other_mode_h;
     uint32_t cycle_type = (rdp.other_mode_h & (3U << G_MDSFT_CYCLETYPE));
 
@@ -2020,29 +2009,12 @@ static void gfx_draw_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t lr
     }
 }
 
-static void gfx_dp_texture_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry, uint8_t tile, int16_t uls,
-                                     int16_t ult, int16_t dsdx, int16_t dtdy, bool flip) {
+static void gfx_dp_texture_rectangle(float ulx, float uly, float lrx, float lry, uint8_t tile, float uls,
+                                     float ult, float dsdx, float dtdy, bool flip) {
     uint64_t saved_combine_mode = rdp.combine_mode;
-    if ((rdp.other_mode_h & (3U << G_MDSFT_CYCLETYPE)) == G_CYC_COPY) {
-        // Per RDP Command Summary Set Tile's shift s and this dsdx should be set to 4 texels
-        // Divide by 4 to get 1 instead
-        dsdx /= 4;
 
-        // Color combiner is turned off in copy mode
-        gfx_dp_set_combine_mode(color_comb(0, 0, 0, G_CCMUX_TEXEL0), alpha_comb(0, 0, 0, G_ACMUX_TEXEL0), 0, 0);
-
-        // Per documentation one extra pixel is added in this modes to each edge
-        lrx += 1 * 4;
-        lry += 1 * 4;
-    }
-
-    // uls and ult are S10.5
-    // dsdx and dtdy are S5.10
-    // lrx, lry, ulx, uly are U10.2
-    // lrs, lrt are S10.5
-
-    const int16_t width = flip ? lry - uly : lrx - ulx;
-    const int16_t height = flip ? lrx - ulx : lry - uly;
+    const float width = flip ? lry - uly : lrx - ulx;
+    const float height = flip ? lrx - ulx : lry - uly;
     const float lrs = ((uls * 128) + dsdx * width) / 128;
     const float lrt = ((ult * 128) + dtdy * height) / 128;
 
@@ -2082,9 +2054,19 @@ static void gfx_dp_texture_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int3
     rdp.combine_mode = saved_combine_mode;
 }
 
-static void gfx_dp_image_rectangle(int32_t tile, int32_t w, int32_t h,
-                                   int32_t ulx, int32_t uly, int32_t uls, int32_t ult,
-                                   int32_t lrx, int32_t lry, int32_t lrs, int32_t lrt) {
+static void gfx_dp_image_rectangle(float ulx, float uly, float uls, float ult, float lrx, float lry, float lrs, float lrt, float w, float h) 
+{
+    int iw = (int)w;
+
+    ulx *= 4.0f;
+    uly *= 4.0f;
+    uls *= 32.0f;
+    ult *= 32.0f;
+    lrx *= 4.0f;
+    lry *= 4.0f;
+    lrs *= 32.0f;
+    lrt *= 32.0f;
+
     uint64_t saved_combine_mode = rdp.combine_mode;
 
     struct LoadedVertex* ul = &rsp.loaded_vertices[MAX_VERTICES + 0];
@@ -2101,26 +2083,26 @@ static void gfx_dp_image_rectangle(int32_t tile, int32_t w, int32_t h,
     ur->v = ult;
 
     // ensure we have the correct texture size
-    rdp.texture_tile[tile].line_size_bytes = w << rdp.texture_tile[tile].siz >> 1;
-    rdp.texture_tile[tile].tilewidth = w;
-    rdp.texture_tile[tile].tileheight = h;
-    rdp.texture_tile[tile].cms = 0;
-    rdp.texture_tile[tile].cmt = 0;
-    rdp.texture_tile[tile].shifts = 0;
-    rdp.texture_tile[tile].shiftt = 0;
-    auto& loadtex = rdp.loaded_texture[rdp.texture_tile[tile].tmem];
-    loadtex.full_image_line_size_bytes = loadtex.line_size_bytes = rdp.texture_tile[tile].line_size_bytes;
+    rdp.texture_tile[0].line_size_bytes = iw << rdp.texture_tile[0].siz >> 1;
+    rdp.texture_tile[0].tilewidth = w;
+    rdp.texture_tile[0].tileheight = h;
+    rdp.texture_tile[0].cms = 0;
+    rdp.texture_tile[0].cmt = 0;
+    rdp.texture_tile[0].shifts = 0;
+    rdp.texture_tile[0].shiftt = 0;
+    auto& loadtex = rdp.loaded_texture[rdp.texture_tile[0].tmem];
+    loadtex.full_image_line_size_bytes = loadtex.line_size_bytes = rdp.texture_tile[0].line_size_bytes;
     loadtex.size_bytes = loadtex.orig_size_bytes = loadtex.full_size_bytes = loadtex.line_size_bytes * h;
 
     uint8_t saved_tile = rdp.first_tile_index;
-    if (saved_tile != tile) {
+    if (saved_tile != 0) {
         rdp.textures_changed[0] = true;
         rdp.textures_changed[1] = true;
     }
-    rdp.first_tile_index = tile;
+    rdp.first_tile_index = 0;
 
     gfx_draw_rectangle(ulx, uly, lrx, lry);
-    if (saved_tile != tile) {
+    if (saved_tile != 0) {
         rdp.textures_changed[0] = true;
         rdp.textures_changed[1] = true;
     }
@@ -2129,26 +2111,12 @@ static void gfx_dp_image_rectangle(int32_t tile, int32_t w, int32_t h,
     rdp.combine_mode = saved_combine_mode;
 }
 
-static void gfx_dp_fill_rectangle(int32_t ulx, int32_t uly, int32_t lrx, int32_t lry) {
+static void gfx_dp_fill_rectangle(float ulx, float uly, float lrx, float lry) {
     if (rdp.color_image_address == rdp.z_buf_address) {
         // Don't clear Z buffer here since we already did it with glClear
         return;
     }
     uint32_t mode = (rdp.other_mode_h & (3U << G_MDSFT_CYCLETYPE));
-
-    // OTRTODO: This is a bit of a hack for widescreen screen fades, but it'll work for now...
-    if (ulx == 0 && uly == 0 && lrx == 319 * 4 && lry == 239 * 4) {
-        ulx = -1024;
-        uly = -1024;
-        lrx = 2048;
-        lry = 2048;
-    }
-
-    if (mode == G_CYC_COPY || mode == G_CYC_FILL) {
-        // Per documentation one extra pixel is added in this modes to each edge
-        lrx += 1 * 4;
-        lry += 1 * 4;
-    }
 
     for (int i = MAX_VERTICES; i < MAX_VERTICES + 4; i++) {
         struct LoadedVertex* v = &rsp.loaded_vertices[i];
@@ -2185,12 +2153,6 @@ static void gfx_sp_set_other_mode(uint32_t shift, uint32_t num_bits, uint64_t mo
 }
 
 static void gfx_sp_set_vertex_colors(uint32_t count, const struct NormalColor *vcn) {
-    // common sense dictates that we should copy the colors as the command is supposed to do,
-    // but it actually doesn't seem to matter
-    // SUPPORT_CHECK(count <= sizeof(rsp.vertex_colors) / sizeof(rsp.vertex_colors[0]));
-    // for (uint32_t i = 0; i < count; ++i) {
-    //     rsp.vertex_colors[i] = vcn[i];
-    // }
     rsp.vertex_colors = vcn;
 }
 
@@ -2247,6 +2209,9 @@ static void gfx_run_dl(Gfx* cmd) {
                 break;
             case G_VTX:
                 gfx_sp_vertex(C0(0, 16) / sizeof(Vtx), C0(16, 4), (const Vtx*)seg_addr(cmd->words.w1));
+                break;
+            case G_VTXF:
+                gfx_sp_vertex_f(C0(0, 16) / sizeof(VtxF), C0(16, 4), (const VtxF*)cmd->words.w1);
                 break;
             case G_DL:
                 if (C0(16, 1) == 0) {
@@ -2339,72 +2304,64 @@ static void gfx_run_dl(Gfx* cmd) {
             }
             case G_TEXRECT:
             case G_TEXRECTFLIP: {
-                int32_t lrx, lry, tile, ulx, uly;
-                uint32_t uls, ult, dsdx, dtdy;
-                lrx = C0(12, 12);
-                lry = C0(0, 12);
-                tile = C1(24, 3);
-                ulx = C1(12, 12);
-                uly = C1(0, 12);
-                ++cmd;
-                uls = C1(16, 16);
-                ult = C1(0, 16);
-                ++cmd;
-                dsdx = C1(16, 16);
-                dtdy = C1(0, 16);
-                gfx_dp_texture_rectangle(ulx, uly, lrx, lry, tile, uls, ult, dsdx, dtdy, opcode == G_TEXRECTFLIP);
+
+                uint32_t tile;
+                tile = C1(0, 8);
+
+                float xl, yl;
+                memcpy(&xl, &cmd[1].words.w0, sizeof(float));
+                memcpy(&yl, &cmd[1].words.w1, sizeof(float));
+
+                float xh, yh;
+                memcpy(&xh, &cmd[2].words.w0, sizeof(float));
+                memcpy(&yh, &cmd[2].words.w1, sizeof(float));
+
+                float s, t;
+                memcpy(&s, &cmd[3].words.w0, sizeof(float));
+                memcpy(&t, &cmd[3].words.w1, sizeof(float));
+
+                float dsdx, dtdy;
+                memcpy(&dsdx, &cmd[4].words.w0, sizeof(float));
+                memcpy(&dtdy, &cmd[4].words.w1, sizeof(float));
+
+                bool flip = (cmd[0].words.w0 >> 24) == G_TEXRECTFLIP;
+
+                gfx_dp_texture_rectangle(xl, yl, xh, yh, tile, s, t, dsdx, dtdy, flip);
+
+                cmd += 4;
                 break;
             }
             case G_FILLRECT:
                 gfx_dp_fill_rectangle(C1(12, 12), C1(0, 12), C0(12, 12), C0(0, 12));
                 break;
             case G_FILLRECT_WIDE_EXT: {
-                int32_t lrx, lry, ulx, uly;
-                lrx = (int32_t)(C0(0, 24) << 8) >> 8;
-                lry = (int32_t)(C1(0, 24) << 8) >> 8;
-                ++cmd;
-                ulx = (int32_t)(C0(0, 24) << 8) >> 8;
-                uly = (int32_t)(C1(0, 24) << 8) >> 8;
+                float lrx, lry, ulx, uly;
+                memcpy(&ulx, &cmd[1].words.w0, sizeof(float));
+                memcpy(&uly, &cmd[1].words.w1, sizeof(float));
+                memcpy(&lrx, &cmd[2].words.w0, sizeof(float));
+                memcpy(&lry, &cmd[2].words.w1, sizeof(float));
+
+                cmd += 2;
                 gfx_dp_fill_rectangle(ulx, uly, lrx, lry);
                 break;
             }
-            case G_TEXRECT_WIDE_EXT: {
-                int32_t lrx, lry, tile, ulx, uly;
-                uint32_t uls, ult, dsdx, dtdy;
-                bool flip;
-                lrx = (int32_t)((C0(0, 24) << 8)) >> 8;
-                lry = (int32_t)((C1(0, 24) << 8)) >> 8;
-                tile = C1(24, 3);
-                flip = C1(27, 1);
-                ++cmd;
-                ulx = (int32_t)((C0(0, 24) << 8)) >> 8;
-                uly = (int32_t)((C1(0, 24) << 8)) >> 8;
-                ++cmd;
-                uls = C0(16, 16);
-                ult = C0(0, 16);
-                dsdx = C1(16, 16);
-                dtdy = C1(0, 16);
-                gfx_dp_texture_rectangle(ulx, uly, lrx, lry, tile, uls, ult, dsdx, dtdy, flip);
-                break;
-            }
             case G_IMAGERECT_EXT: {
-                int32_t tile, iw, ih;
-                int32_t x0, y0, s0, t0;
-                int32_t x1, y1, s1, t1;
-                tile = C0(0, 3);
-                iw = C1(16, 16);
-                ih = C1(0, 16);
-                ++cmd;
-                x0 = C0(16, 16);
-                y0 = C0(0, 16);
-                s0 = C1(16, 16);
-                t0 = C1(0, 16);
-                ++cmd;
-                x1 = C0(16, 16);
-                y1 = C0(0, 16);
-                s1 = C1(16, 16);
-                t1 = C1(0, 16);
-                gfx_dp_image_rectangle(tile, iw, ih, x0 * 4, y0 * 4, s0 * 32, t0 * 32, x1 * 4, y1 * 4, s1 * 32, t1 * 32);
+                float x0, y0, s0, t0, x1, y1, s1, t1, iw, ih;
+
+                memcpy(&x0, &cmd[1].words.w0, sizeof(float));
+                memcpy(&y0, &cmd[1].words.w1, sizeof(float));
+                memcpy(&s0, &cmd[2].words.w0, sizeof(float));
+                memcpy(&t0, &cmd[2].words.w1, sizeof(float));
+                memcpy(&x1, &cmd[3].words.w0, sizeof(float));
+                memcpy(&y1, &cmd[3].words.w1, sizeof(float));
+                memcpy(&s1, &cmd[4].words.w0, sizeof(float));
+                memcpy(&t1, &cmd[4].words.w1, sizeof(float));
+                memcpy(&iw, &cmd[5].words.w0, sizeof(float));
+                memcpy(&ih, &cmd[5].words.w1, sizeof(float));
+
+                gfx_dp_image_rectangle(x0, y0, s0, t0, x1, y1, s1, t1, iw, ih);
+
+                cmd += 5;
                 break;
             }
             case G_SETSCISSOR:
@@ -2553,6 +2510,16 @@ extern "C" void gfx_Vertex(Gfx *pkt, const Vtx *v, uint8_t n, uint8_t v0)
     gfx_Dma1p(pkt, G_VTX, (uintptr_t)v, length, param);
 }
 
+// Floating point version of gfx_Vertex
+extern "C" void gfx_VertexF(Gfx *pkt, const VtxF *v, uint8_t n, uint8_t v0)
+{
+	uint16_t length = sizeof(VtxF) * n;
+
+	uint8_t param = ((n - 1) << 4) | v0;
+
+	gfx_Dma1p(pkt, G_VTXF, (uintptr_t)v, length, param);
+}
+
 extern "C" void gfx_1Triangle(Gfx *pkt, uint8_t v1, uint8_t v2, uint8_t v3, uint8_t flag)
 {
     pkt->words.w0 = ((uint32_t)G_TRI1 << 24);
@@ -2608,83 +2575,77 @@ extern "C" void gfx_Tri1(Gfx *pkt, uint8_t x1, uint8_t y1, uint8_t z1)
     0, 0, 0);
 }
 
-extern "C" void gfx_Fill_Rectangle(Gfx *pkt, int32_t ulx, int32_t uly, int32_t lrx, int32_t lry)
+extern "C" int gfx_Fill_Rectangle(Gfx *pkt, float ulx, float uly, float lrx, float lry)
 {
-    pkt->words.w0 = ((uint32_t)G_FILLRECT << 24) |
-                    ((uint32_t)lrx << 14) |
-                    ((uint32_t)lry << 2);
+    ulx *= 4.0f;
+    uly *= 4.0f;
+    lrx *= 4.0f;
+    lry *= 4.0f;
 
-    pkt->words.w1 = ((uint32_t)ulx << 14) |
-                    ((uint32_t)uly << 2);
+    pkt[0].words.w0 = ((uint32_t)G_FILLRECT_WIDE_EXT << 24);
+    pkt[0].words.w1 = 0;
+    
+    memcpy(&pkt[1].words.w0, &ulx, sizeof(float));
+    memcpy(&pkt[1].words.w1, &uly, sizeof(float));
+
+    memcpy(&pkt[2].words.w0, &lrx, sizeof(float));
+    memcpy(&pkt[2].words.w1, &lry, sizeof(float));
+
+    return 3;
 }
 
-extern "C" int gfx_Fill_Rectangle_Wide_EXT(Gfx *pkt, uint32_t ulx, uint32_t uly, uint32_t lrx, uint32_t lry)
+extern "C" int gfx_HUD_Rectangle(Gfx *pkt, float x1, float y1, float x2, float y2)
 {
-    pkt[0].words.w0 = ((uint32_t)G_FILLRECT_WIDE_EXT << 24) | ((lrx * 4) & 0x003FFFFF);
-    pkt[0].words.w1 = (lry * 4) & 0x003FFFFF;
-
-    pkt[1].words.w0 = (ulx * 4) & 0x003FFFFF;
-    pkt[1].words.w1 = (uly * 4) & 0x003FFFFF;
-
-    return 2;
+    return gfx_Fill_Rectangle(pkt, x1, y1, x2 + 1, y2 + 1);
 }
 
-extern "C" void gfx_HUD_Rectangle(Gfx *pkt, int32_t ulx, int32_t uly, int32_t lrx, int32_t lry)
+extern "C" int gfx_Texture_Rectangle(Gfx *pkt, float xl, float yl, float xh, float yh, uint8_t tile, float s, float t, float dsdx, float dtdy, bool flip)
 {
-    gfx_Fill_Rectangle(pkt, ulx, uly, lrx, lry);
+    uint32_t opcode = flip ? G_TEXRECTFLIP : G_TEXRECT;
+
+    dsdx *= 32.0f;
+    dtdy *= 32.0f;
+
+    // Primary command
+    pkt[0].words.w0 = ((uint32_t)(opcode << 24));
+    pkt[0].words.w1 = ((uint32_t)tile << 0);
+
+    memcpy(&pkt[1].words.w0, &xl, sizeof(float));
+    memcpy(&pkt[1].words.w1, &yl, sizeof(float));
+
+    memcpy(&pkt[2].words.w0, &xh, sizeof(float));
+    memcpy(&pkt[2].words.w1, &yh, sizeof(float));
+
+    memcpy(&pkt[3].words.w0, &s, sizeof(float));
+    memcpy(&pkt[3].words.w1, &t, sizeof(float));
+
+    memcpy(&pkt[4].words.w0, &dsdx, sizeof(float));
+    memcpy(&pkt[4].words.w1, &dtdy, sizeof(float));
+
+    return 5;
 }
 
-extern "C" int gfx_HUD_Rectangle_EXT(Gfx *pkt, uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2)
+extern "C" int gfx_Image_Rectangle_EXT( Gfx *pkt, float x0, float y0, float s0, float t0, float x1, float y1, float s1, float t1, float iw, float ih)
 {
-    return gfx_Fill_Rectangle_Wide_EXT(pkt, x1, y1, x2 + 1, y2 + 1);
-}
+	pkt[0].words.w0 = ((uint32_t)G_IMAGERECT_EXT << 24);
+	pkt[0].words.w1 = 0;
 
+	memcpy(&pkt[1].words.w0, &x0, sizeof(float));
+	memcpy(&pkt[1].words.w1, &y0, sizeof(float));
 
-extern "C" int gfx_Texture_Rectangle(Gfx *pkt, int32_t xl, int32_t yl, int32_t xh, int32_t yh, uint8_t tile, int32_t s, int32_t t, int32_t dsdx, int32_t dtdy, bool flip)
-{
-	uint32_t opcode = flip ? G_TEXRECTFLIP : G_TEXRECT;
+	memcpy(&pkt[2].words.w0, &s0, sizeof(float));
+	memcpy(&pkt[2].words.w1, &t0, sizeof(float));
 
-	// First command: TEXRECT or TEXRECTFLIP
-	pkt[0].words.w0 =
-		(opcode << 24) |
-		((uint32_t)(xh & 0x0FFF) << 12) |
-		((uint32_t)(yh & 0x0FFF));
+	memcpy(&pkt[3].words.w0, &x1, sizeof(float));
+	memcpy(&pkt[3].words.w1, &y1, sizeof(float));
 
-	pkt[0].words.w1 =
-		((uint32_t)tile << 24) |
-		((uint32_t)(xl & 0x0FFF) << 12) |
-		((uint32_t)(yl & 0x0FFF));
+	memcpy(&pkt[4].words.w0, &s1, sizeof(float));
+	memcpy(&pkt[4].words.w1, &t1, sizeof(float));
 
-	// Second command: G_RDPHALF_1 (This command doesn't actually matter)
-	pkt[1].words.w0 = (G_RDPHALF_1 << 24);
-	pkt[1].words.w1 =
-		((uint32_t)(s & 0xFFFF) << 16) |
-		((uint32_t)(t & 0xFFFF));
+	memcpy(&pkt[5].words.w0, &iw, sizeof(float));
+	memcpy(&pkt[5].words.w1, &ih, sizeof(float));
 
-	// Third command: G_RDPHALF_2 (This command doesn't actually matter)
-	pkt[2].words.w0 = (G_RDPHALF_2 << 24);
-	pkt[2].words.w1 =
-		((uint32_t)(dsdx & 0xFFFF) << 16) |
-		((uint32_t)(dtdy & 0xFFFF));
-
-	return 3;
-}
-
-extern "C" int gfx_Image_Rectangle_EXT(Gfx *pkt, uint16_t x0, uint16_t y0, uint16_t s0, uint16_t t0, uint16_t x1, uint16_t y1, uint16_t s1, uint16_t t1, uint8_t tile, uint16_t iw, uint16_t ih)
-{
-    // First packet
-    pkt[0].words.w0 = ((uint32_t)G_IMAGERECT_EXT << 24) | ((uint32_t)tile << 0);
-    pkt[0].words.w1 = ((uint32_t)iw << 16) | ((uint32_t)ih << 0);
-
-    // Second packet
-    pkt[1].words.w0 = ((uint32_t)x0 << 16) | ((uint32_t)y0 << 0);
-    pkt[1].words.w1 = ((uint32_t)s0 << 16) | ((uint32_t)t0 << 0);
-
-    // Third packet
-    pkt[2].words.w0 = ((uint32_t)x1 << 16) | ((uint32_t)y1 << 0);
-    pkt[2].words.w1 = ((uint32_t)s1 << 16) | ((uint32_t)t1 << 0);
-
-    return 3; // 3 Gfx commands written
+	return 6;
 }
 
 extern "C" void gfx_Set_Subpixel_Offset_EXT(Gfx *pkt, int16_t x, int16_t y)
@@ -2860,14 +2821,16 @@ extern "C" void gfx_Viewport(Gfx *pkt, const Vp *v)
     gfx_Dma1p(pkt, G_MOVEMEM, (uintptr_t)v, sizeof(Vp), G_MV_VIEWPORT);
 }
 
-extern "C" void gfx_Set_Scissor(Gfx *pkt, int ulx, int uly, int lrx, int lry)
+extern "C" int gfx_Set_Scissor(Gfx *pkt, int ulx, int uly, int lrx, int lry)
 {
-    pkt->words.w0 = ((uint32_t)G_SETSCISSOR << 24) |
+    pkt[0].words.w0 = ((uint32_t)G_SETSCISSOR << 24) |
                     (((uint32_t)ulx & 0xFFF) << 12) |
                     ((uint32_t)uly & 0xFFF);
 
-    pkt->words.w1 = (((uint32_t)(lrx * 4) & 0xFFF) << 12) |
+    pkt[0].words.w1 = (((uint32_t)(lrx * 4) & 0xFFF) << 12) |
                     ((uint32_t)lry & 0xFFF);
+
+    return 1;
 }
 
 extern "C" void gfx_LookAtX(Gfx *pkt, Light *l)

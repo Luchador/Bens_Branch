@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "game/bg.h"
 #include "game/camera.h"
@@ -29,8 +30,8 @@
 #include "types.h"
 #include "platform.h"
 
-int *g_PortalTraversalQueue;
-int *g_PortalIsTranslucent;
+int *g_PortalTraversalQueue = NULL;
+bool *g_PortalIsTranslucent = NULL;
 int g_NumPortals;
 int g_RoomCountStride; // The number of rooms in the level, used as the stride (width) of a 2D matrix stored in a 1D array
 float (*portalTransferLightAmount)(int roomnum, float mult, int portalnum1, int portalnum2);
@@ -44,6 +45,7 @@ struct lightvisdata *g_LightVisData = NULL;
 struct coord *g_PortalPositions = NULL;
 uint16_t **g_PortalWorkingDistances = NULL;
 uint16_t **g_PortalDistanceMatrix = NULL;
+uint8_t *g_PortalWorkingMemory = NULL;
 float *g_RoomLightInfluence = NULL;
 bool *g_IsPortalClosed = NULL;
 bool g_IsSwitchingGoggles = false;
@@ -486,7 +488,7 @@ void lightsReset(void)
  */
 void roomPreprocessVisibility(void)
 {
-	int i;
+	int i, j;
 	int sp68;
 	int table1size;
 	int table2size;
@@ -497,7 +499,6 @@ void roomPreprocessVisibility(void)
 	uint8_t *tempCompressedData;
 	uint8_t *uncompressedRoomVisMatrix;
 	int *compressedSizes;
-	int j;
 
 	lightsCalculateRoomDimensions();
 
@@ -516,8 +517,6 @@ void roomPreprocessVisibility(void)
 #else
 	sp68 = align16(g_Vars.roomcount * 8);
 #endif
-
-	mempGetStageFree();
 
 	/**
 	 * This lighting initialisation needs to build temporary tables in memory.
@@ -547,7 +546,7 @@ void roomPreprocessVisibility(void)
 
 	tempCompressedData = (uint8_t *)ptr;
 
-	g_LightVisData = mempAlloc(sp68, MEMPOOL_STAGE);
+	g_LightVisData = malloc(sp68);
 
 	for (i = 0; i < g_NumPortals; i++) {
 		if (PORTAL_IS_CLOSED(i)) {
@@ -569,7 +568,7 @@ void roomPreprocessVisibility(void)
 		table3size += align4(compressedSizes[i]);
 	}
 
-	ptr = mempAlloc(align16(table3size), MEMPOOL_STAGE);
+	ptr = malloc(align16(table3size));
 
 	sp68 += align16(table3size);
 
@@ -596,7 +595,7 @@ void roomPreprocessVisibility(void)
 		table3size += align4(compressedSizes[i]);
 	}
 
-	ptr = mempAlloc(align16(table3size), MEMPOOL_STAGE);
+	ptr = malloc(align16(table3size));
 
 	align16(table3size);
 
@@ -1558,82 +1557,74 @@ void lightHighlight(int roomnum)
  */
 void lightInitDistanceMatrices(void)
 {
-	int sp44;
-	int sp40;
-	int sp3c;
-	int sp38;
-	int sp34;
-	int i;
-	int j;
-	int s4;
+	int i, j;
 	uint8_t *ptr;
-	uint8_t *backupptr;
+	uint8_t *base;
+	int s4;
 
 #ifdef PLATFORM_64BIT
-	sp44 = align16(0x2000 * 2);
-	sp40 = align16(g_NumPortals * 4 * 2);
-	sp3c = align16(g_NumPortals * 0xc * 2);
-	sp38 = align16(g_NumPortals * 4 * 2);
-	sp34 = align16(g_NumPortals * 2 * 2);
+	const int sp44 = align16(0x2000 * 2);
+	const int sp40 = align16(g_NumPortals * 4 * 2);
+	const int sp3c = align16(g_NumPortals * 0xc * 2);
+	const int sp38 = align16(g_NumPortals * 4 * 2);
+	const int sp34 = align16(g_NumPortals * 2 * 2);
 #else
-	sp44 = align16(0x2000);
-	sp40 = align16(g_NumPortals * 4);
-	sp3c = align16(g_NumPortals * 0xc);
-	sp38 = align16(g_NumPortals * 4);
-	sp34 = align16(g_NumPortals * 2);
+	const int sp44 = align16(0x2000);
+	const int sp40 = align16(g_NumPortals * 4);
+	const int sp3c = align16(g_NumPortals * 0xc);
+	const int sp38 = align16(g_NumPortals * 4);
+	const int sp34 = align16(g_NumPortals * 2);
 #endif
 
-	for (i = 0, s4 = sp38; i < g_NumPortals; i++) {
+	// Allocate g_PortalDistanceMatrix (array of row pointers + flat data)
+	int distanceMatrixSize = sp38;
+
+	for (i = 0; i < g_NumPortals; i++) {
 		if (i != 0) {
-			s4 += i * 2;
+			distanceMatrixSize += align16(i * 2);
 		}
 	}
 
-	s4 = align16(s4);
-	ptr = mempAlloc(align16(s4), MEMPOOL_STAGE);
-	g_PortalDistanceMatrix = (void *)ptr;
+	g_PortalDistanceMatrix = malloc(distanceMatrixSize);
+	if (!g_PortalDistanceMatrix) return;
 
+	ptr = (uint8_t *)g_PortalDistanceMatrix;
 	ptr += sp38;
 
 	for (i = 0; i < g_NumPortals; i++) {
 		if (i != 0) {
-			g_PortalDistanceMatrix[i] = (void *)ptr;
-			ptr += i * 2;
+			g_PortalDistanceMatrix[i] = (uint16_t *)ptr;
+			ptr += align16(i * 2);
 		} else {
-			g_PortalDistanceMatrix[i] = 0;
+			g_PortalDistanceMatrix[i] = NULL;
 		}
 	}
 
-	s4 += sp3c;
-	s4 += sp44;
-	s4 += sp40;
-	s4 += sp38;
-	s4 += g_NumPortals * sp34;
+	// Allocate working memory block
+	const int workingMemorySize = sp44 + sp40 + sp38 + (g_NumPortals * sp34) + sp3c;
+	g_PortalWorkingMemory = malloc(workingMemorySize);
+	if (!g_PortalWorkingMemory) return;
 
-	align16((int)s4);
+	base = g_PortalWorkingMemory;
+	ptr = base;
 
-	ptr = mempGetNextStageAllocation();
-	g_PortalTraversalQueue = (void *)ptr;
+	g_PortalTraversalQueue = (int *)ptr;
 	ptr += sp44;
 
-	g_PortalIsTranslucent = (void *)ptr;
+	g_PortalIsTranslucent = (bool *)ptr;
 	ptr += sp40;
 
-	g_PortalWorkingDistances = (void *)ptr;
+	g_PortalWorkingDistances = (uint16_t **)ptr;
 	ptr += sp38;
 
-	backupptr = ptr;
+	uint8_t *backupPtr = ptr;
+	g_PortalPositions = (struct coord *)(backupPtr + g_NumPortals * sp34);
 
-	ptr += g_NumPortals * sp34;
-	g_PortalPositions = (void *)ptr;
-	ptr = backupptr;
-
-	s4 = sp38;
+	ptr = backupPtr;
 
 	for (i = 0; i < g_NumPortals; i++) {
-		g_PortalWorkingDistances[i] = (void *)ptr;
+		g_PortalWorkingDistances[i] = (uint16_t *)ptr;
 		ptr += sp34;
-		s4 += sp34;
 
 		for (j = 0; j < g_NumPortals; j++) {
 			g_PortalWorkingDistances[i][j] = 0x8009;
@@ -1642,12 +1633,11 @@ void lightInitDistanceMatrices(void)
 
 	for (i = 0; i < g_NumPortals; i++) {
 		g_PortalIsTranslucent[i] = portalGetXluFrac(i) > 0.5f;
-
 		portalGetAvgVertexPos(i, &g_PortalPositions[i]);
 	}
 
 	if (g_Vars.stagenum == STAGE_INVESTIGATION) {
-		g_PortalIsTranslucent[0] = 1;
+		g_PortalIsTranslucent[0] = true;
 	}
 
 	for (i = 0; i < g_NumPortals; i++) {
@@ -1660,10 +1650,23 @@ void lightInitDistanceMatrices(void)
 		for (j = 0; j < i; j++) {
 			uint16_t a = g_PortalWorkingDistances[i][j];
 			uint16_t b = g_PortalWorkingDistances[j][i];
-
 			g_PortalDistanceMatrix[i][j] = a < b ? a : b;
 		}
 	}
+}
+
+void lightFreeDistanceMatrices(void) 
+{
+    free(g_PortalDistanceMatrix);
+    g_PortalDistanceMatrix = NULL;
+
+    free(g_PortalWorkingMemory);
+    g_PortalWorkingMemory = NULL;
+
+    g_PortalTraversalQueue = NULL;
+    g_PortalIsTranslucent = NULL;
+    g_PortalWorkingDistances = NULL;
+    g_PortalPositions = NULL;
 }
 
 /**
@@ -1700,7 +1703,7 @@ void lightComputeShortestPaths(void)
 				for (l = 0; l < g_Rooms[roomnum].numportals; l++) {
 					portalnum2 = g_RoomPortals[g_Rooms[roomnum].roomportallistoffset + l];
 
-					if (portalnum2 != portalnum && g_PortalIsTranslucent[portalnum2] != 0) {
+					if (portalnum2 != portalnum && g_PortalIsTranslucent[portalnum2] != false) {
 						if (g_PortalWorkingDistances[portalnum][portalnum2] >= 0x8000) {
 							float xdiff = g_PortalPositions[portalnum].x - g_PortalPositions[portalnum2].x;
 							float ydiff = g_PortalPositions[portalnum].y - g_PortalPositions[portalnum2].y;

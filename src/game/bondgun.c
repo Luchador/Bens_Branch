@@ -4076,13 +4076,13 @@ void bgunUpdateHeldRocket(int handnum)
 				propDeregisterRooms(objprop);
 			}
 
-			model->matrices = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
+			model->matrices = gfxAllocate(model->definition->nummatrices * sizeof(Mtx));
 
 			memcpy(&model->matrices[0], hand->muzzlemat, sizeof(Mtx));
 			modelUpdateRelationsQuick(model, model->definition->rootnode);
 
 			objprop->flags |= PROPFLAG_ONANYSCREENTHISTICK | PROPFLAG_ONTHISSCREENTHISTICK;
-			objprop->z = -model->matrices[0].m[3][2];
+			objprop->z = -model->matrices[0][3][2];
 		}
 	}
 }
@@ -7058,8 +7058,8 @@ void bgunTickHandWeapModel(int handnum)
 			}
 		}
 
-		hand->gunmodel.matrices = (Mtxf *)mtxallocation;
-		hand->handmodel.matrices = (Mtxf *)mtxallocation;
+		hand->gunmodel.matrices = (Mtx*)mtxallocation;
+		hand->handmodel.matrices = (Mtx*)mtxallocation;
 
 		if (weaponHasFlag(weaponnum, WEAPONFLAG_DUALFLIP) && handnum == HAND_LEFT) {
 			mtxScaleRow0Vec(-1, &sp2c4);
@@ -7111,7 +7111,7 @@ void bgunTickHandWeapModel(int handnum)
 		struct coord sp74;
 		int sp6c;
 
-		renderdata.unk00 = (Mtxf*)&sp2c4;
+		renderdata.unk00 = &sp2c4;
 		renderdata.unk10 = hand->gunmodel.matrices;
 
 		if (hand->animmode != HANDANIMMODE_IDLE) {
@@ -7185,14 +7185,14 @@ void bgunTickHandWeapModel(int handnum)
 
 				spc4 = (Mtx*)hand->gunmodel.matrices;
 
-				renderdata.unk00 = (Mtxf*)&sp84;
-				renderdata.unk10 = (Mtxf*)player->hands[HAND_RIGHT].unk0dd8;
+				renderdata.unk00 = &sp84;
+				renderdata.unk10 = player->hands[HAND_RIGHT].unk0dd8;
 
 				modelSetMatricesWithAnim(&renderdata, &hand->gunmodel);
 
 				player->hands[HAND_RIGHT].unk0dd4 = 1;
 
-				hand->gunmodel.matrices = (Mtxf*)spc4;
+				hand->gunmodel.matrices = spc4;
 			}
 
 			spc8 = player->hands[HAND_RIGHT].unk0dd8;
@@ -7277,7 +7277,8 @@ void bgunTickHandWeapModel(int handnum)
 			mtx4Copy(mtx, &hand->muzzlemat);
 			mtx4TransformVecInPlace(camGetProjectionMtx(), &hand->muzzlepos);
 
-			hand->muzzlez = -((Mtxf *)((uintptr_t)mtxallocation + sp6c * sizeof(Mtxf)))->m[3][2];
+			Mtx *matrices = (Mtx *)mtxallocation;
+			hand->muzzlez = -matrices[sp6c][3][2];
 
 			if (hand->flashon && sp1e0 > 0 && weaponnum != WEAPON_SHOTGUN && g_Vars.lvupdate240 != 0) {
 				bgunMuzzleFlash(hand, weapondef, modeldef, funcdef, sp1e0, mtxallocation, weaponnum, sp1e4, sp6c, &sp234, &sp1f4);
@@ -7299,7 +7300,8 @@ void bgunTickHandWeapModel(int handnum)
 			mtx4Copy(mtx, &hand->muzzlemat);
 			mtx4TransformVecInPlace(camGetProjectionMtx(), &hand->muzzlepos);
 
-			hand->muzzlez = -((Mtxf *)((uintptr_t)mtxallocation + sp6c * sizeof(Mtxf)))->m[3][2];
+			Mtx *matrices = (Mtx *)mtxallocation;
+			hand->muzzlez = -matrices[sp6c][3][2];
 		} else {
 			hand->muzzlepos.x = hand->posmtx[3][0];
 			hand->muzzlepos.y = hand->posmtx[3][1];
@@ -7641,7 +7643,7 @@ void bgunRender(Gfx **gdlptr)
 	gdl = viPrepareZbuf(gdl);
 	gdl = vi0000b1d0(gdl);
 
-	gfx_Set_Scissor(gdl++, viGetViewLeft(), viGetViewTop(),
+	gdl += gfx_Set_Scissor(gdl, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 
 	gdl = viSetNearAndFarPlanes(gdl, 1.5, 1000);
@@ -7826,7 +7828,7 @@ void bgunRender(Gfx **gdlptr)
 	//gdl = zbufConfigureRdp(gdl);
 	gdl = vi0000b1d0(gdl);
 
-	gfx_Set_Scissor(gdl++, viGetViewLeft(), viGetViewTop(),
+	gdl += gfx_Set_Scissor(gdl, viGetViewLeft(), viGetViewTop(),
 			viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
 
 	*gdlptr = gdl;
@@ -9029,9 +9031,9 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 				if (unitbottom >= 0) {
 					// Render empty or transitioning unit of merged gauge
 					if (flip) {
-						gfx_Fill_Rectangle(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
+						gdl += gfx_Fill_Rectangle(gdl, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
 					} else {
-						gfx_Fill_Rectangle(gdl++, x1, unittop, x2, unitbottom);
+						gdl += gfx_Fill_Rectangle(gdl, x1, unittop, x2, unitbottom);
 					}
 				}
 
@@ -9058,9 +9060,9 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 		// Render separated blocks
 		if (unitheight >= 3) {
 			if (flip) {
-				gfx_Fill_Rectangle(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
+				gdl += gfx_Fill_Rectangle(gdl, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
 			} else {
-				gfx_Fill_Rectangle(gdl++, x1, unittop, x2, unitbottom);
+				gdl += gfx_Fill_Rectangle(gdl, x1, unittop, x2, unitbottom);
 			}
 		}
 	} // end loop
@@ -9068,9 +9070,9 @@ Gfx *bgunDrawHudGauge(Gfx *gdl, int x1, int y1, int x2, int y2, struct abmag *ab
 	// For merged gauges, render the final partition
 	if (unitheight <= 2) {
 		if (flip) {
-			gfx_Fill_Rectangle(gdl++, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
+			gdl += gfx_Fill_Rectangle(gdl, x1, y2 - unitbottom + y1, x2, y2 - unittop + y1);
 		} else {
-			gfx_Fill_Rectangle(gdl++, x1, unittop, x2, unitbottom);
+			gdl += gfx_Fill_Rectangle(gdl, x1, unittop, x2, unitbottom);
 		}
 	}
 
@@ -9200,7 +9202,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 	gdl = textSetPrimColour(gdl, fncolour);
 
-	gfx_Fill_Rectangle(gdl++, xpos - 13, bottom - 11, xpos - 2, bottom);
+	gdl += gfx_Fill_Rectangle(gdl, xpos - 13, bottom - 11, xpos - 2, bottom);
 
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
@@ -9247,7 +9249,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 			gdl = textSetPrimColour(gdl, 0);
 
-			gfx_Fill_Rectangle(gdl++, x - 1, y - 1, xpos - 11, bottom);
+			gdl += gfx_Fill_Rectangle(gdl, x - 1, y - 1, xpos - 11, bottom);
 
 			gdl = textSetCCPrimColorTexAlpha(gdl);
 			textSetWaveBlend(g_20SecIntervalFrac * 50.0f, 0, 50);
@@ -9313,7 +9315,7 @@ Gfx *bgunDrawHud(Gfx *gdl)
 
 				gdl = textSetPrimColour(gdl, 0);
 
-				gfx_Fill_Rectangle(gdl++, x - 1, y - 1, xpos - 11, bottom + 3);
+				gdl += gfx_Fill_Rectangle(gdl, x - 1, y - 1, xpos - 11, bottom + 3);
 
 				gdl = textSetCCPrimColorTexAlpha(gdl);
 

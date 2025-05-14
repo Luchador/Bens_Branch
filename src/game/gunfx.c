@@ -37,7 +37,7 @@ void beamCreate(struct beam *beam, int weaponnum, struct coord *from, struct coo
 	beam->dir.y = to->y - from->y;
 	beam->dir.z = to->z - from->z;
 
-	distance = sqrtf(beam->dir.f[0] * beam->dir.f[0] + beam->dir.f[1] * beam->dir.f[1] + beam->dir.f[2] * beam->dir.f[2]);
+	distance = sqrtf(beam->dir.x * beam->dir.x + beam->dir.y * beam->dir.y + beam->dir.z * beam->dir.z);
 
 	if (distance > 0) {
 		beam->dir.x *= 1.0f / distance;
@@ -109,7 +109,7 @@ void beamCreateForHand(int handnum)
 	Mtx *mtx = camGetPlayerWorldToScreenMtx();
 	float tmp;
 
-	tmp = hand->hitpos.f[0] * (*mtx)[0][2] + hand->hitpos.f[1] * (*mtx)[1][2] + hand->hitpos.f[2] * (*mtx)[2][2] + (*mtx)[3][2];
+	tmp = hand->hitpos.x * (*mtx)[0][2] + hand->hitpos.y * (*mtx)[1][2] + hand->hitpos.z * (*mtx)[2][2] + (*mtx)[3][2];
 	tmp = -tmp;
 
 	if (tmp < hand->muzzlez) {
@@ -152,7 +152,7 @@ void beamCreateForHand(int handnum)
 
 				utilsNormalizeF(&disttocur.x, &disttocur.y, &disttocur.z);
 
-				radians = acosf(disttolast.f[0] * disttocur.f[0] + disttolast.f[1] * disttocur.f[1] + disttolast.f[2] * disttocur.f[2]);
+				radians = acosf(disttolast.x * disttocur.x + disttolast.y * disttocur.y + disttolast.z * disttocur.z);
 
 				if (!(radians > 0.08725257f) || weaponnum == -2) {
 					beamCreate(&g_Fireslots[chr->fireslots[handnum]].beam, weaponnum, &player->chrmuzzlelastpos[handnum], &hand->hitpos);
@@ -172,7 +172,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 {
 	struct coord spe4;
 	float length;
-	Vtx *vertices;
+	VtxF *vertices;
 	struct coord spd0;
 	struct coord *campos = &g_Vars.currentplayer->cam_pos;
 	Mtx *spc8;
@@ -183,64 +183,64 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 	float mult;
 	struct coord sp5c;
 
-	spe4.f[0] = tailpos->f[0] - headpos->f[0];
-	spe4.f[1] = tailpos->f[1] - headpos->f[1];
-	spe4.f[2] = tailpos->f[2] - headpos->f[2];
+	spe4.x = tailpos->x - headpos->x;
+	spe4.y = tailpos->y - headpos->y;
+	spe4.z = tailpos->z - headpos->z;
 
-	length = sqrtf(spe4.f[0] * spe4.f[0] + spe4.f[1] * spe4.f[1] + spe4.f[2] * spe4.f[2]);
+	length = sqrtf(spe4.x * spe4.x + spe4.y * spe4.y + spe4.z * spe4.z);
 
 	if (length < 0.00001f && length > -0.00001f) {
 		return gdl;
 	}
 
-	spe4.f[0] /= length;
-	spe4.f[1] /= length;
-	spe4.f[2] /= length;
+	spe4.x /= length;
+	spe4.y /= length;
+	spe4.z /= length;
 
 	mtx4TransformVec(camGetPlayerWorldToScreenMtx(), headpos, &sp5c);
 
-	if (sp5c.f[0] * arg2 > 10000.0f || sp5c.f[0] * arg2 < -10000.0f) {
+	if (sp5c.x * arg2 > 10000.0f || sp5c.x * arg2 < -10000.0f) {
 		return gdl;
 	}
 
-	if (sp5c.f[1] * arg2 > 10000.0f || sp5c.f[1] * arg2 < -10000.0f) {
+	if (sp5c.y * arg2 > 10000.0f || sp5c.y * arg2 < -10000.0f) {
 		return gdl;
 	}
 
-	if (sp5c.f[2] * arg2 > 10000.0f || sp5c.f[2] * arg2 < -10000.0f) {
+	if (sp5c.z * arg2 > 10000.0f || sp5c.z * arg2 < -10000.0f) {
 		return gdl;
 	}
 
 	mtx4TransformVec(camGetPlayerWorldToScreenMtx(), tailpos, &sp5c);
 
-	if (sp5c.f[0] * arg2 > 10000.0f || sp5c.f[0] * arg2 < -10000.0f) {
+	if (sp5c.x * arg2 > 10000.0f || sp5c.x * arg2 < -10000.0f) {
 		return gdl;
 	}
 
-	if (sp5c.f[1] * arg2 > 10000.0f || sp5c.f[1] * arg2 < -10000.0f) {
+	if (sp5c.y * arg2 > 10000.0f || sp5c.y * arg2 < -10000.0f) {
 		return gdl;
 	}
 
-	if (sp5c.f[2] * arg2 > 10000.0f || sp5c.f[2] * arg2 < -10000.0f) {
+	if (sp5c.z * arg2 > 10000.0f || sp5c.z * arg2 < -10000.0f) {
 		return gdl;
 	}
 
 	colours[0].word = PD_BE32(headcolour);
 	colours[1].word = PD_BE32(tailcolour);
 
-	spd0.f[0] = (spe4.f[1] * (campos->f[2] - (headpos->f[2] + length * spe4.f[2]))) - (spe4.f[2] * (campos->f[1] - (headpos->f[1] + length * spe4.f[1])));
-	spd0.f[1] = (spe4.f[2] * (campos->f[0] - (headpos->f[0] + length * spe4.f[0]))) - (spe4.f[0] * (campos->f[2] - (headpos->f[2] + length * spe4.f[2])));
-	spd0.f[2] = (spe4.f[0] * (campos->f[1] - (headpos->f[1] + length * spe4.f[1]))) - (spe4.f[1] * (campos->f[0] - (headpos->f[0] + length * spe4.f[0])));
+	spd0.x = (spe4.y * (campos->z - (headpos->z + length * spe4.z))) - (spe4.z * (campos->y - (headpos->y + length * spe4.y)));
+	spd0.y = (spe4.z * (campos->x - (headpos->x + length * spe4.x))) - (spe4.x * (campos->z - (headpos->z + length * spe4.z)));
+	spd0.z = (spe4.x * (campos->y - (headpos->y + length * spe4.y))) - (spe4.y * (campos->x - (headpos->x + length * spe4.x)));
 
-	if (spd0.f[0] != 0.0f || spd0.f[1] != 0.0f || spd0.f[2] != 0.0f) {
-		utilsNormalizeF(&spd0.f[0], &spd0.f[1], &spd0.f[2]);
+	if (spd0.x != 0.0f || spd0.y != 0.0f || spd0.z != 0.0f) {
+		utilsNormalizeF(&spd0.x, &spd0.y, &spd0.z);
 	} else {
-		spd0.f[0] = 0.0f;
-		spd0.f[1] = 1.0f;
-		spd0.f[2] = 0.0f;
+		spd0.x = 0.0f;
+		spd0.y = 1.0f;
+		spd0.z = 0.0f;
 	}
 
-	vertices = gfxAllocateVertices(4);
+	vertices = gfxAllocateVerticesF(4);
 	spc8 = gfxAllocateMatrix();
 
 	mtx4LoadTranslation(headpos, &sp84);
@@ -251,36 +251,36 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 
 	mult = arg5 * arg2;
 
-	sp74.f[0] = spe4.f[0] * (length * arg2);
-	sp74.f[1] = spe4.f[1] * (length * arg2);
-	sp74.f[2] = spe4.f[2] * (length * arg2);
+	sp74.x = spe4.x * (length * arg2);
+	sp74.y = spe4.y * (length * arg2);
+	sp74.z = spe4.z * (length * arg2);
 
-	vertices[0].x = spd0.f[0] * mult;
-	vertices[0].y = spd0.f[1] * mult;
-	vertices[0].z = spd0.f[2] * mult;
+	vertices[0].x = spd0.x * mult;
+	vertices[0].y = spd0.y * mult;
+	vertices[0].z = spd0.z * mult;
 	vertices[0].s = 0;
 	vertices[0].t = 0;
 	vertices[0].colour = 0;
 
-	vertices[1].x = -spd0.f[0] * mult;
-	vertices[1].y = -spd0.f[1] * mult;
-	vertices[1].z = -spd0.f[2] * mult;
-	vertices[1].s = texconfig->width * 32;
+	vertices[1].x = -spd0.x * mult;
+	vertices[1].y = -spd0.y * mult;
+	vertices[1].z = -spd0.z * mult;
+	vertices[1].s = texconfig->width * 32; // TODOF
 	vertices[1].t = 0;
 	vertices[1].colour = 0;
 
-	vertices[2].x = sp74.f[0] - spd0.f[0] * mult;
-	vertices[2].y = sp74.f[1] - spd0.f[1] * mult;
-	vertices[2].z = sp74.f[2] - spd0.f[2] * mult;
-	vertices[2].s = texconfig->width * 32;
-	vertices[2].t = texconfig->height * 32;
+	vertices[2].x = sp74.x - spd0.x * mult;
+	vertices[2].y = sp74.y - spd0.y * mult;
+	vertices[2].z = sp74.z - spd0.z * mult;
+	vertices[2].s = texconfig->width * 32;// TODOF
+	vertices[2].t = texconfig->height * 32;// TODOF
 	vertices[2].colour = 4;
 
-	vertices[3].x = sp74.f[0] + spd0.f[0] * mult;
-	vertices[3].y = sp74.f[1] + spd0.f[1] * mult;
-	vertices[3].z = sp74.f[2] + spd0.f[2] * mult;
+	vertices[3].x = sp74.x + spd0.x * mult;
+	vertices[3].y = sp74.y + spd0.y * mult;
+	vertices[3].z = sp74.z + spd0.z * mult;
 	vertices[3].s = 0;
-	vertices[3].t = texconfig->height * 32;
+	vertices[3].t = texconfig->height * 32;// TODOF
 	vertices[3].colour = 4;
 
 	gfx_Clear_Geometry_Mode(gdl++, G_CULL_BACK);
@@ -289,7 +289,7 @@ Gfx *beamRenderGeneric(Gfx *gdl, struct textureconfig *texconfig,
 
 	texSelect(&gdl, texconfig, 4, 1, 2, true, NULL);
 
-	gfx_Vertex(gdl++, vertices, 4, 0);
+	gfx_VertexF(gdl++, vertices, 4, 0);
 	gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 
 	return gdl;
@@ -306,7 +306,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 		struct coord *campos = &g_Vars.currentplayer->cam_pos;
 		float sp130;
 		float sp12c = beam->mindist;
-		Vtx *vertices;
+		VtxF *vertices;
 		float sp124 = beam->dist;
 		struct coord sp118;
 		struct coord sp10c;
@@ -374,14 +374,14 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 			texconfig = &g_TexBeamConfigs[4];
 		}
 
-		sp138.f[0] = beam->from.f[0];
-		sp138.f[1] = beam->from.f[1];
-		sp138.f[2] = beam->from.f[2];
+		sp138.x = beam->from.x;
+		sp138.y = beam->from.y;
+		sp138.z = beam->from.z;
 
 		if (sp124 > 0.0f) {
-			sp138.f[0] += sp124 * beam->dir.f[0];
-			sp138.f[1] += sp124 * beam->dir.f[1];
-			sp138.f[2] += sp124 * beam->dir.f[2];
+			sp138.x += sp124 * beam->dir.x;
+			sp138.y += sp124 * beam->dir.y;
+			sp138.z += sp124 * beam->dir.z;
 		} else {
 			sp12c += sp124;
 			sp124 = 0.0f;
@@ -391,44 +391,44 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 			sp12c = beam->maxdist - sp124;
 		}
 
-		sp10c.f[0] = (beam->dir.f[1] * (campos->f[2] - (sp138.f[2] + sp12c * beam->dir.f[2]))) - (beam->dir.f[2] * (campos->f[1] - (sp138.f[1] + sp12c * beam->dir.f[1])));
-		sp10c.f[1] = (beam->dir.f[2] * (campos->f[0] - (sp138.f[0] + sp12c * beam->dir.f[0]))) - (beam->dir.f[0] * (campos->f[2] - (sp138.f[2] + sp12c * beam->dir.f[2])));
-		sp10c.f[2] = (beam->dir.f[0] * (campos->f[1] - (sp138.f[1] + sp12c * beam->dir.f[1]))) - (beam->dir.f[1] * (campos->f[0] - (sp138.f[0] + sp12c * beam->dir.f[0])));
+		sp10c.x = (beam->dir.y * (campos->z - (sp138.z + sp12c * beam->dir.z))) - (beam->dir.z * (campos->y - (sp138.y + sp12c * beam->dir.y)));
+		sp10c.y = (beam->dir.z * (campos->x - (sp138.x + sp12c * beam->dir.x))) - (beam->dir.x * (campos->z - (sp138.z + sp12c * beam->dir.z)));
+		sp10c.z = (beam->dir.x * (campos->y - (sp138.y + sp12c * beam->dir.y))) - (beam->dir.y * (campos->x - (sp138.x + sp12c * beam->dir.x)));
 
-		if (sp10c.f[0] != 0.0f || sp10c.f[1] != 0.0f || sp10c.f[2] != 0.0f) {
-			utilsNormalizeF(&sp10c.f[0], &sp10c.f[1], &sp10c.f[2]);
+		if (sp10c.x != 0.0f || sp10c.y != 0.0f || sp10c.z != 0.0f) {
+			utilsNormalizeF(&sp10c.x, &sp10c.y, &sp10c.z);
 
-			sp10c.f[0] *= sp130;
-			sp10c.f[1] *= sp130;
-			sp10c.f[2] *= sp130;
+			sp10c.x *= sp130;
+			sp10c.y *= sp130;
+			sp10c.z *= sp130;
 		} else {
-			sp10c.f[0] = 0.0f;
-			sp10c.f[1] = sp130;
-			sp10c.f[2] = 0.0f;
+			sp10c.x = 0.0f;
+			sp10c.y = sp130;
+			sp10c.z = 0.0f;
 		}
 
-		sp118.f[0] = beam->dir.f[1] * sp10c.f[2] - beam->dir.f[2] * sp10c.f[1];
-		sp118.f[1] = beam->dir.f[2] * sp10c.f[0] - beam->dir.f[0] * sp10c.f[2];
-		sp118.f[2] = beam->dir.f[0] * sp10c.f[1] - beam->dir.f[1] * sp10c.f[0];
+		sp118.x = beam->dir.y * sp10c.z - beam->dir.z * sp10c.y;
+		sp118.y = beam->dir.z * sp10c.x - beam->dir.x * sp10c.z;
+		sp118.z = beam->dir.x * sp10c.y - beam->dir.y * sp10c.x;
 
-		utilsNormalizeF(&sp118.f[0], &sp118.f[1], &sp118.f[2]);
+		utilsNormalizeF(&sp118.x, &sp118.y, &sp118.z);
 
-		sp118.f[0] *= sp130;
-		sp118.f[1] *= sp130;
-		sp118.f[2] *= sp130;
+		sp118.x *= sp130;
+		sp118.y *= sp130;
+		sp118.z *= sp130;
 
 		if (beam->weaponnum == WEAPON_LASER) {
-			vertices = gfxAllocateVertices(8);
+			vertices = gfxAllocateVerticesF(8);
 		} else {
-			vertices = gfxAllocateVertices(4);
+			vertices = gfxAllocateVerticesF(4);
 		}
 
 		sp188 = gfxAllocateMatrix();
 
 		if (sp12c > 0.0f
-				&& sp138.f[0] > -32000.0f && sp138.f[0] < 32000.0f
-				&& sp138.f[1] > -32000.0f && sp138.f[1] < 32000.0f
-				&& sp138.f[2] > -32000.0f && sp138.f[2] < 32000.0f) {
+				&& sp138.x > -32000.0f && sp138.x < 32000.0f
+				&& sp138.y > -32000.0f && sp138.y < 32000.0f
+				&& sp138.z > -32000.0f && sp138.z < 32000.0f) {
 			spd8 = true;
 			mtx4LoadTranslation(&sp138, &sp148);
 			mtxScaleRotationPart(0.1f, &sp148);
@@ -447,114 +447,114 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 				mtx4Copy(&sp148, sp188);
 
 				if (beam->weaponnum == -2 && PLAYERCOUNT() == 1) {
-					spcc.f[0] = sp138.f[0] + beam->dir.f[0] * sp12c;
-					spcc.f[1] = sp138.f[1] + beam->dir.f[1] * sp12c;
-					spcc.f[2] = sp138.f[2] + beam->dir.f[2] * sp12c;
+					spcc.x = sp138.x + beam->dir.x * sp12c;
+					spcc.y = sp138.y + beam->dir.y * sp12c;
+					spcc.z = sp138.z + beam->dir.z * sp12c;
 
 					mtx4TransformVecInPlace(worldtoscreenmtx, &spcc);
 
 					spb8[0] = spb8[1] = sp130 / 10;
-					tmp = -spcc.f[2];
+					tmp = -spcc.z;
 
 					camScaleViewToScreen(spb8, tmp, spc0);
 
 					if (spc0[0] < 2) {
-						spcc.f[0] *= spc0[0] * 0.5f;
-						spcc.f[1] *= spc0[0] * 0.5f;
-						spcc.f[2] *= spc0[0] * 0.5f;
+						spcc.x *= spc0[0] * 0.5f;
+						spcc.y *= spc0[0] * 0.5f;
+						spcc.z *= spc0[0] * 0.5f;
 					}
 
 					mtx4TransformVecInPlace(camGetProjectionMtx(), &spcc);
 
-					spcc.f[0] -= sp138.f[0];
-					spcc.f[1] -= sp138.f[1];
-					spcc.f[2] -= sp138.f[2];
+					spcc.x -= sp138.x;
+					spcc.y -= sp138.y;
+					spcc.z -= sp138.z;
 
-					sp100.f[0] = spcc.f[0] * 10;
-					sp100.f[1] = spcc.f[1] * 10;
-					sp100.f[2] = spcc.f[2] * 10;
+					sp100.x = spcc.x * 10;
+					sp100.y = spcc.y * 10;
+					sp100.z = spcc.z * 10;
 				} else {
-					sp100.f[0] = beam->dir.f[0] * (sp12c * 10);
-					sp100.f[1] = beam->dir.f[1] * (sp12c * 10);
-					sp100.f[2] = beam->dir.f[2] * (sp12c * 10);
+					sp100.x = beam->dir.x * (sp12c * 10);
+					sp100.y = beam->dir.y * (sp12c * 10);
+					sp100.z = beam->dir.z * (sp12c * 10);
 				}
 
-				if (sp100.f[0] > -30000.0f && sp100.f[0] < 30000.0f
-						&& sp100.f[1] > -30000.0f && sp100.f[1] < 30000.0f
-						&& sp100.f[2] > -30000.0f && sp100.f[2] < 30000.0f) {
-					vertices[0].x = sp10c.f[0];
-					vertices[0].y = sp10c.f[1];
-					vertices[0].z = sp10c.f[2];
-					vertices[0].s = texconfig->width * 32;
+				if (sp100.x > -30000.0f && sp100.x < 30000.0f
+						&& sp100.y > -30000.0f && sp100.y < 30000.0f
+						&& sp100.z > -30000.0f && sp100.z < 30000.0f) {
+					vertices[0].x = sp10c.x;
+					vertices[0].y = sp10c.y;
+					vertices[0].z = sp10c.z;
+					vertices[0].s = texconfig->width * 32.0f; // TODOF
 					vertices[0].t = 0;
 					vertices[0].colour = 0;
 
-					vertices[1].x = -sp10c.f[0];
-					vertices[1].y = -sp10c.f[1];
-					vertices[1].z = -sp10c.f[2];
+					vertices[1].x = -sp10c.x;
+					vertices[1].y = -sp10c.y;
+					vertices[1].z = -sp10c.z;
 					vertices[1].s = 0;
 					vertices[1].t = 0;
 					vertices[1].colour = 0;
 
-					vertices[2].x = sp100.f[0] + sp10c.f[0] * 0.9f;
-					vertices[2].y = sp100.f[1] + sp10c.f[1] * 0.9f;
-					vertices[2].z = sp100.f[2] + sp10c.f[2] * 0.9f;
-					vertices[2].s = texconfig->width * 32;
-					vertices[2].t = texconfig->height * 32;
+					vertices[2].x = sp100.x + sp10c.x * 0.9f;
+					vertices[2].y = sp100.y + sp10c.y * 0.9f;
+					vertices[2].z = sp100.z + sp10c.z * 0.9f;
+					vertices[2].s = texconfig->width * 32; // TODOF
+					vertices[2].t = texconfig->height * 32; // TODOF
 					vertices[2].colour = 0;
 
-					vertices[3].x = sp100.f[0] - sp10c.f[0] * 0.9f;
-					vertices[3].y = sp100.f[1] - sp10c.f[1] * 0.9f;
-					vertices[3].z = sp100.f[2] - sp10c.f[2] * 0.9f;
+					vertices[3].x = sp100.x - sp10c.x * 0.9f;
+					vertices[3].y = sp100.y - sp10c.y * 0.9f;
+					vertices[3].z = sp100.z - sp10c.z * 0.9f;
 					vertices[3].s = 0;
-					vertices[3].t = texconfig->height * 32;
+					vertices[3].t = texconfig->height * 32; // TODOF
 					vertices[3].colour = 0;
 
 					if (beam->weaponnum == WEAPON_LASER) {
-						f14 = campos->f[0] - sp138.f[0];
-						f16 = campos->f[1] - sp138.f[1];
-						f18 = campos->f[2] - sp138.f[2];
+						f14 = campos->x - sp138.x;
+						f16 = campos->y - sp138.y;
+						f18 = campos->z - sp138.z;
 
 						spa8 = f14 * f14 + f16 * f16 + f18 * f18;
 
-						f14 = campos->f[0] - (sp138.f[0] + beam->dir.f[0] * sp12c);
-						f16 = campos->f[1] - (sp138.f[1] + beam->dir.f[1] * sp12c);
-						f18 = campos->f[2] - (sp138.f[2] + beam->dir.f[2] * sp12c);
+						f14 = campos->x - (sp138.x + beam->dir.x * sp12c);
+						f16 = campos->y - (sp138.y + beam->dir.y * sp12c);
+						f18 = campos->z - (sp138.z + beam->dir.z * sp12c);
 
 						spa4 = f14 * f14 + f16 * f16 + f18 * f18;
 
 						if (spa4 < spa8) {
-							spf4.f[0] = sp100.f[0];
-							spf4.f[1] = sp100.f[1];
-							spf4.f[2] = sp100.f[2];
+							spf4.x = sp100.x;
+							spf4.y = sp100.y;
+							spf4.z = sp100.z;
 							spf0 *= 0.9f;
 						}
 
-						vertices[4].x = spf4.f[0] + sp118.f[0] * spf0;
-						vertices[4].y = spf4.f[1] + sp118.f[1] * spf0;
-						vertices[4].z = spf4.f[2] + sp118.f[2] * spf0;
-						vertices[4].s = g_TexGroup03Configs[0].width * 32;
-						vertices[4].t = g_TexGroup03Configs[0].height * 32;
+						vertices[4].x = spf4.x + sp118.x * spf0;
+						vertices[4].y = spf4.y + sp118.y * spf0;
+						vertices[4].z = spf4.z + sp118.z * spf0;
+						vertices[4].s = g_TexGroup03Configs[0].width * 32; // TODOF
+						vertices[4].t = g_TexGroup03Configs[0].height * 32; // TODOF
 						vertices[4].colour = 0;
 
-						vertices[5].x = spf4.f[0] - sp118.f[0] * spf0;
-						vertices[5].y = spf4.f[1] - sp118.f[1] * spf0;
-						vertices[5].z = spf4.f[2] - sp118.f[2] * spf0;
+						vertices[5].x = spf4.x - sp118.x * spf0;
+						vertices[5].y = spf4.y - sp118.y * spf0;
+						vertices[5].z = spf4.z - sp118.z * spf0;
 						vertices[5].s = 0;
 						vertices[5].t = 0;
 						vertices[5].colour = 0;
 
-						vertices[6].x = spf4.f[0] + sp10c.f[0] * spf0;
-						vertices[6].y = spf4.f[1] + sp10c.f[1] * spf0;
-						vertices[6].z = spf4.f[2] + sp10c.f[2] * spf0;
+						vertices[6].x = spf4.x + sp10c.x * spf0;
+						vertices[6].y = spf4.y + sp10c.y * spf0;
+						vertices[6].z = spf4.z + sp10c.z * spf0;
 						vertices[6].s = 0;
-						vertices[6].t = g_TexGroup03Configs[0].height * 32;
+						vertices[6].t = g_TexGroup03Configs[0].height * 32; // TODOF
 						vertices[6].colour = 0;
 
-						vertices[7].x = spf4.f[0] - sp10c.f[0] * spf0;
-						vertices[7].y = spf4.f[1] - sp10c.f[1] * spf0;
-						vertices[7].z = spf4.f[2] - sp10c.f[2] * spf0;
-						vertices[7].s = g_TexGroup03Configs[0].width * 32;
+						vertices[7].x = spf4.x - sp10c.x * spf0;
+						vertices[7].y = spf4.y - sp10c.y * spf0;
+						vertices[7].z = spf4.z - sp10c.z * spf0;
+						vertices[7].s = g_TexGroup03Configs[0].width * 32; // TODOF
 						vertices[7].t = 0;
 						vertices[7].colour = 0;
 					}
@@ -575,7 +575,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 					if (beam->weaponnum == WEAPON_LASER) {
 						texSelect(&gdl, &g_TexGroup03Configs[0], 4, arg2, 2, true, NULL);
 
-						gfx_Vertex(gdl++, vertices, 8, 0);
+						gfx_VertexF(gdl++, vertices, 8, 0);
 						gfx_Tri2(gdl++, 4, 5, 6, 4, 5, 7);
 
 						texSelect(&gdl, texconfig, 4, arg2, 2, true, NULL);
@@ -584,7 +584,7 @@ Gfx *beamRender(Gfx *gdl, struct beam *beam, bool arg2, uint8_t arg3)
 					} else {
 						texSelect(&gdl, texconfig, 4, arg2, 2, true, NULL);
 
-						gfx_Vertex(gdl++, vertices, 4, 0);
+						gfx_VertexF(gdl++, vertices, 4, 0);
 						gfx_Tri2(gdl++, 0, 2, 3, 0, 3, 1);
 					}
 				}
@@ -816,7 +816,7 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 	modelAllocateRwData(modeldef);
 	modelInit(&model, modeldef, NULL, true);
 
-	model.matrices = (Mtxf*)matrices;
+	model.matrices = matrices;
 
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 3; j++) {
@@ -839,9 +839,9 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 
 	// Check if any coordinate is out of range
 	for (int i = 0; i < 3; i++) {
-		if (model.matrices[0].m[3][i] > 30000) {
+		if (model.matrices[0][3][i] > 30000) {
 			render = false;
-		} else if (model.matrices[0].m[3][i] < -30000) {
+		} else if (model.matrices[0][3][i] < -30000) {
 			render = false;
 		}
 	}
@@ -849,7 +849,7 @@ void casingRender(struct casing *casing, Gfx **gdlptr)
 	if (render) {
 		renderdata.zbufferenabled = 1;
 		renderdata.gdl = gdl;
-		renderdata.unk10 = (Mtxf*)matrices;
+		renderdata.unk10 = matrices;
 		renderdata.unk30 = 4;
 		renderdata.envcolour = g_Vars.currentplayer->gunshadecol[0] << 24
 			| g_Vars.currentplayer->gunshadecol[1] << 16
@@ -941,13 +941,13 @@ void boltbeamIncrementHeadPos(int beamnum, float arg1, bool arg2)
 
 		if (1);
 
-		tmp[0] = (g_BoltBeams[beamnum].headpos.f[0] - g_BoltBeams[beamnum].tailpos.f[0]) / dist;
-		tmp[1] = (g_BoltBeams[beamnum].headpos.f[1] - g_BoltBeams[beamnum].tailpos.f[1]) / dist;
-		tmp[2] = (g_BoltBeams[beamnum].headpos.f[2] - g_BoltBeams[beamnum].tailpos.f[2]) / dist;
+		tmp[0] = (g_BoltBeams[beamnum].headpos.x - g_BoltBeams[beamnum].tailpos.x) / dist;
+		tmp[1] = (g_BoltBeams[beamnum].headpos.y - g_BoltBeams[beamnum].tailpos.y) / dist;
+		tmp[2] = (g_BoltBeams[beamnum].headpos.z - g_BoltBeams[beamnum].tailpos.z) / dist;
 
-		g_BoltBeams[beamnum].headpos.f[0] = g_BoltBeams[beamnum].tailpos.f[0] + tmp[0] * arg1;
-		g_BoltBeams[beamnum].headpos.f[1] = g_BoltBeams[beamnum].tailpos.f[1] + tmp[1] * arg1;
-		g_BoltBeams[beamnum].headpos.f[2] = g_BoltBeams[beamnum].tailpos.f[2] + tmp[2] * arg1;
+		g_BoltBeams[beamnum].headpos.x = g_BoltBeams[beamnum].tailpos.x + tmp[0] * arg1;
+		g_BoltBeams[beamnum].headpos.y = g_BoltBeams[beamnum].tailpos.y + tmp[1] * arg1;
+		g_BoltBeams[beamnum].headpos.z = g_BoltBeams[beamnum].tailpos.z + tmp[2] * arg1;
 	}
 }
 
@@ -976,9 +976,9 @@ void boltbeamsTick(void)
 	for (i = 0; i < ARRAYCOUNT(g_BoltBeams); i++) {
 		if (g_BoltBeams[i].unk00 != -1 && g_BoltBeams[i].tickmode == BOLTBEAMTICKMODE_AUTOMATIC) {
 			float length = sqrtf(
-					(g_BoltBeams[i].tailpos.f[0] - g_BoltBeams[i].headpos.f[0]) * (g_BoltBeams[i].tailpos.f[0] - g_BoltBeams[i].headpos.f[0]) +
-					(g_BoltBeams[i].tailpos.f[1] - g_BoltBeams[i].headpos.f[1]) * (g_BoltBeams[i].tailpos.f[1] - g_BoltBeams[i].headpos.f[1]) +
-					(g_BoltBeams[i].tailpos.f[2] - g_BoltBeams[i].headpos.f[2]) * (g_BoltBeams[i].tailpos.f[2] - g_BoltBeams[i].headpos.f[2]));
+					(g_BoltBeams[i].tailpos.x - g_BoltBeams[i].headpos.x) * (g_BoltBeams[i].tailpos.x - g_BoltBeams[i].headpos.x) +
+					(g_BoltBeams[i].tailpos.y - g_BoltBeams[i].headpos.y) * (g_BoltBeams[i].tailpos.y - g_BoltBeams[i].headpos.y) +
+					(g_BoltBeams[i].tailpos.z - g_BoltBeams[i].headpos.z) * (g_BoltBeams[i].tailpos.z - g_BoltBeams[i].headpos.z));
 
 			length -= g_BoltBeams[i].speed * LVUPDATE60FREAL() / 60.0f;
 
@@ -1082,7 +1082,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 			struct coord pos;
 			struct coord rot;
 			Col *colours;
-			Vtx *vertices;
+			VtxF *vertices;
 
 			pos.x = g_LaserSights[i].dotpos.x;
 			pos.y = g_LaserSights[i].dotpos.y;
@@ -1100,9 +1100,9 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 			gfx_Color(gdl++, colours, 2);
 
 			if (g_LaserSights[i].unk28 > 0.0f) {
-				if (!(g_LaserSights[i].dotpos.f[0] < 0.0000001f) || !(g_LaserSights[i].dotpos.f[0] > -0.000001f)
-						|| !(g_LaserSights[i].dotpos.f[1] < 0.0000001f) || !(g_LaserSights[i].dotpos.f[1] > -0.000001f)
-						|| !(g_LaserSights[i].dotpos.f[2] < 0.0000001f) || !(g_LaserSights[i].dotpos.f[2] > -0.000001f)) {
+				if (!(g_LaserSights[i].dotpos.x < 0.0000001f) || !(g_LaserSights[i].dotpos.x > -0.000001f)
+						|| !(g_LaserSights[i].dotpos.y < 0.0000001f) || !(g_LaserSights[i].dotpos.y > -0.000001f)
+						|| !(g_LaserSights[i].dotpos.z < 0.0000001f) || !(g_LaserSights[i].dotpos.z > -0.000001f)) {
 					float spcc;
 					float spc8;
 					float spc4;
@@ -1116,11 +1116,11 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 
 					f20 = spi;
 
-					pos.x = (pos.x - campos.f[0]) * 5.0f;
-					pos.y = (pos.y - campos.f[1]) * 5.0f;
-					pos.z = (pos.z - campos.f[2]) * 5.0f;
+					pos.x = (pos.x - campos.x) * 5.0f;
+					pos.y = (pos.y - campos.y) * 5.0f;
+					pos.z = (pos.z - campos.z) * 5.0f;
 
-					f0 = sqrtf(pos.f[0] * pos.f[0] + pos.f[1] * pos.f[1] + pos.f[2] * pos.f[2]);
+					f0 = sqrtf(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
 
 					spcc = sp1;
 
@@ -1144,7 +1144,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 
 					texSelect(&gdl, &g_TexGeneralConfigs[4], 4, 0, 2, true, NULL);
 
-					if (rot.f[0] == 0.0f && rot.f[2] == 0.0f) {
+					if (rot.x == 0.0f && rot.z == 0.0f) {
 						spcc = 0.0f;
 						spc8 = 0.0f;
 						spc4 = 1.0f;
@@ -1152,11 +1152,11 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 						f24 = 0.0f;
 						f00 = 0;
 					} else {
-						float f0 = sqrtf(rot.f[0] * rot.f[0] + rot.f[1] * rot.f[1] + rot.f[2] * rot.f[2]);
+						float f0 = sqrtf(rot.x * rot.x + rot.y * rot.y + rot.z * rot.z);
 
-						f26 = rot.f[0] / f0;
-						f30 = rot.f[1] / f0;
-						f28 = rot.f[2] / f0;
+						f26 = rot.x / f0;
+						f30 = rot.y / f0;
+						f28 = rot.z / f0;
 
 						f0 = sqrtf(f26 * f26 + f28 * f28);
 						f2 = f26 / f0;
@@ -1169,7 +1169,7 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 						f00 = 0;
 					}
 
-					vertices = gfxAllocateVertices(4);
+					vertices = gfxAllocateVerticesF(4);
 
 					vertices[3].colour = 0;
 					vertices[2].colour = 0;
@@ -1178,30 +1178,30 @@ Gfx *lasersightRenderDot(Gfx *gdl)
 
 					vertices[0].s = 0;
 					vertices[0].t = 0;
-					vertices[1].s = 512;
+					vertices[1].s = 512; // TODOF
 					vertices[1].t = 0;
-					vertices[2].s = 512;
-					vertices[2].t = 512;
+					vertices[2].s = 512; // TODOF
+					vertices[2].t = 512; // TODOF
 					vertices[3].s = 0;
-					vertices[3].t = 512;
+					vertices[3].t = 512; // TODOF
 
-					vertices[0].x = pos.f[0] + (-f20 * f22) + (f20 * spcc);
-					vertices[0].y = pos.f[1] + (-f20 * f00) + (f20 * spc8);
-					vertices[0].z = pos.f[2] + (-f20 * f24) + (f20 * spc4);
+					vertices[0].x = pos.x + (-f20 * f22) + (f20 * spcc);
+					vertices[0].y = pos.y + (-f20 * f00) + (f20 * spc8);
+					vertices[0].z = pos.z + (-f20 * f24) + (f20 * spc4);
 
-					vertices[1].x = pos.f[0] + (f20 * f22) + (f20 * spcc);
-					vertices[1].y = pos.f[1] + (f20 * f00) + (f20 * spc8);
-					vertices[1].z = pos.f[2] + (f20 * f24) + (f20 * spc4);
+					vertices[1].x = pos.x + (f20 * f22) + (f20 * spcc);
+					vertices[1].y = pos.y + (f20 * f00) + (f20 * spc8);
+					vertices[1].z = pos.z + (f20 * f24) + (f20 * spc4);
 
-					vertices[2].x = pos.f[0] + (f20 * f22) + (-f20 * spcc);
-					vertices[2].y = pos.f[1] + (f20 * f00) + (-f20 * spc8);
-					vertices[2].z = pos.f[2] + (f20 * f24) + (-f20 * spc4);
+					vertices[2].x = pos.x + (f20 * f22) + (-f20 * spcc);
+					vertices[2].y = pos.y + (f20 * f00) + (-f20 * spc8);
+					vertices[2].z = pos.z + (f20 * f24) + (-f20 * spc4);
 
-					vertices[3].x = pos.f[0] + (-f20 * f22) + (-f20 * spcc);
-					vertices[3].y = pos.f[1] + (-f20 * f00) + (-f20 * spc8);
-					vertices[3].z = pos.f[2] + (-f20 * f24) + (-f20 * spc4);
+					vertices[3].x = pos.x + (-f20 * f22) + (-f20 * spcc);
+					vertices[3].y = pos.y + (-f20 * f00) + (-f20 * spc8);
+					vertices[3].z = pos.z + (-f20 * f24) + (-f20 * spc4);
 
-					gfx_Vertex(gdl++, vertices, 4, 0);
+					gfx_VertexF(gdl++, vertices, 4, 0);
 
 					gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 				}
@@ -1270,7 +1270,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 			struct coord spc0;
 			struct coord spb4;
 			struct coord spa8;
-			Vtx *vertices;
+			VtxF *vertices;
 			struct coord sp98;
 
 			sp98.x = g_LaserSights[i].beamnear.x;
@@ -1279,7 +1279,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 
 			mtx4TransformVecInPlace(&sp14c, &sp98);
 
-			spa8.x = sp98.f[0] < 0.0f ? 1.0f : -1.0f;
+			spa8.x = sp98.x < 0.0f ? 1.0f : -1.0f;
 			spa8.y = 2.0f;
 			spa8.z = 0.0f;
 
@@ -1299,13 +1299,13 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 			spc0.y = g_LaserSights[i].beamfar.y;
 			spc0.z = g_LaserSights[i].beamfar.z;
 
-			spc0.x = (spc0.x - campos.f[0]) * 5.0f;
-			spc0.y = (spc0.y - campos.f[1]) * 5.0f;
-			spc0.z = (spc0.z - campos.f[2]) * 5.0f;
+			spc0.x = (spc0.x - campos.x) * 5.0f;
+			spc0.y = (spc0.y - campos.y) * 5.0f;
+			spc0.z = (spc0.z - campos.z) * 5.0f;
 
-			spb4.x = spc0.f[0] - spcc.x;
-			spb4.y = spc0.f[1] - spcc.y;
-			spb4.z = spc0.f[2] - spcc.z;
+			spb4.x = spc0.x - spcc.x;
+			spb4.y = spc0.y - spcc.y;
+			spb4.z = spc0.z - spcc.z;
 
 			utilsNormalizeF(&spb4.x, &spb4.y, &spb4.z);
 
@@ -1316,7 +1316,7 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 
 			gfx_Color(gdl++, colours, 2);
 
-			vertices = gfxAllocateVertices(6);
+			vertices = gfxAllocateVerticesF(6);
 
 			vertices[0].colour = 0;
 			vertices[1].colour = 0;
@@ -1328,41 +1328,41 @@ Gfx *lasersightRenderBeam(Gfx *gdl)
 			vertices[0].s = 0;
 			vertices[0].t = 0;
 			vertices[1].s = 0;
-			vertices[1].t = 256;
-			vertices[2].s = 32;
+			vertices[1].t = 256; // TODOF
+			vertices[2].s = 32; // TODOF
 			vertices[2].t = 0;
-			vertices[3].s = 32;
-			vertices[3].t = 256;
+			vertices[3].s = 32; // TODOF
+			vertices[3].t = 256; // TODOF
 			vertices[4].s = 0;
 			vertices[4].t = 0;
 			vertices[5].s = 0;
-			vertices[5].t = 256;
+			vertices[5].t = 256; // TODOF
 
-			vertices[0].x = spcc.f[0] - spa8.f[0] * 15.0f;
-			vertices[0].y = spcc.f[1] - spa8.f[1] * 15.0f;
-			vertices[0].z = spcc.f[2] - spa8.f[2] * 15.0f;
+			vertices[0].x = spcc.x - spa8.x * 15.0f;
+			vertices[0].y = spcc.y - spa8.y * 15.0f;
+			vertices[0].z = spcc.z - spa8.z * 15.0f;
 
-			vertices[1].x = spcc.f[0] + spa8.f[0] * 15.0f;
-			vertices[1].y = spcc.f[1] + spa8.f[1] * 15.0f;
-			vertices[1].z = spcc.f[2] + spa8.f[2] * 15.0f;
+			vertices[1].x = spcc.x + spa8.x * 15.0f;
+			vertices[1].y = spcc.y + spa8.y * 15.0f;
+			vertices[1].z = spcc.z + spa8.z * 15.0f;
 
-			vertices[2].x = spcc.f[0] + (200 * spb4.f[0]) - (spa8.f[0] * 15.0f);
-			vertices[2].y = spcc.f[1] + (200 * spb4.f[1]) - (spa8.f[1] * 15.0f);
-			vertices[2].z = spcc.f[2] + (200 * spb4.f[2]) - (spa8.f[2] * 15.0f);
+			vertices[2].x = spcc.x + (200 * spb4.x) - (spa8.x * 15.0f);
+			vertices[2].y = spcc.y + (200 * spb4.y) - (spa8.y * 15.0f);
+			vertices[2].z = spcc.z + (200 * spb4.z) - (spa8.z * 15.0f);
 
-			vertices[3].x = spcc.f[0] + (200 * spb4.f[0]) + (spa8.f[0] * 15.0f);
-			vertices[3].y = spcc.f[1] + (200 * spb4.f[1]) + (spa8.f[1] * 15.0f);
-			vertices[3].z = spcc.f[2] + (200 * spb4.f[2]) + (spa8.f[2] * 15.0f);
+			vertices[3].x = spcc.x + (200 * spb4.x) + (spa8.x * 15.0f);
+			vertices[3].y = spcc.y + (200 * spb4.y) + (spa8.y * 15.0f);
+			vertices[3].z = spcc.z + (200 * spb4.z) + (spa8.z * 15.0f);
 
-			vertices[4].x = spcc.f[0] + (400 * spb4.f[0]) - (spa8.f[0] * 15.0f);
-			vertices[4].y = spcc.f[1] + (400 * spb4.f[1]) - (spa8.f[1] * 15.0f);
-			vertices[4].z = spcc.f[2] + (400 * spb4.f[2]) - (spa8.f[2] * 15.0f);
+			vertices[4].x = spcc.x + (400 * spb4.x) - (spa8.x * 15.0f);
+			vertices[4].y = spcc.y + (400 * spb4.y) - (spa8.y * 15.0f);
+			vertices[4].z = spcc.z + (400 * spb4.z) - (spa8.z * 15.0f);
 
-			vertices[5].x = spcc.f[0] + (400 * spb4.f[0]) + (spa8.f[0] * 15.0f);
-			vertices[5].y = spcc.f[1] + (400 * spb4.f[1]) + (spa8.f[1] * 15.0f);
-			vertices[5].z = spcc.f[2] + (400 * spb4.f[2]) + (spa8.f[2] * 15.0f);
+			vertices[5].x = spcc.x + (400 * spb4.x) + (spa8.x * 15.0f);
+			vertices[5].y = spcc.y + (400 * spb4.y) + (spa8.y * 15.0f);
+			vertices[5].z = spcc.z + (400 * spb4.z) + (spa8.z * 15.0f);
 
-			gfx_Vertex(gdl++, vertices, 6, 0);
+			gfx_VertexF(gdl++, vertices, 6, 0);
 
 			gfx_Tri4(gdl++, 0, 1, 2, 2, 3, 1, 2, 3, 5, 2, 5, 4);
 		}

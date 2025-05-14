@@ -195,9 +195,9 @@ MenuItemHandlerResult frWeaponListMenuHandler(int operation, struct menuitem *it
 				G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 
 			gdl += gfx_Texture_Rectangle(gdl,
-					(((renderdata->x + i * 13) + 125) << 2), (renderdata->y) << 2,
-					(((renderdata->x + i * 13) + 136) << 2), (renderdata->y + 11) << 2,
-					G_TX_RENDERTILE, 0, 0x0160, 1024, -1024, false);
+					(((renderdata->x + i * 13) + 125) * 4.0f), (renderdata->y) * 4.0f,
+					(((renderdata->x + i * 13) + 136)* 4.0f), (renderdata->y + 11) * 4.0f,
+					G_TX_RENDERTILE, 0, 352, 32.0f, -32.0f, false);
 		}
 
 		return (uintptr_t)gdl;
@@ -618,27 +618,27 @@ MenuItemHandlerResult frScoringMenuHandler(int operation, struct menuitem *item,
 
 		// Top left quarter of target
 		gdl += gfx_Texture_Rectangle(gdl,
-				((renderdata->x + 10) << 2), (renderdata->y + 5) << 2,
-				((renderdata->x + 42) << 2), (renderdata->y + 37) << 2,
-				G_TX_RENDERTILE, 16, 1024, 1024, -1024, false);
+				((renderdata->x + 10) * 4.0f), (renderdata->y + 5) * 4.0f,
+				((renderdata->x + 42) * 4.0f), (renderdata->y + 37) * 4.0f,
+				G_TX_RENDERTILE, 16, 1024, 32.0f, -32.0f, false);
 
 		// Top right quarter of target
 		gdl += gfx_Texture_Rectangle(gdl,
-				((renderdata->x + 41) << 2), (renderdata->y + 5) << 2,
-				((renderdata->x + 73) << 2), (renderdata->y + 37) << 2,
-				G_TX_RENDERTILE, 16, 1024, -1024, -1024, false);
+				((renderdata->x + 41) * 4.0f), (renderdata->y + 5) * 4.0f,
+				((renderdata->x + 73) * 4.0f), (renderdata->y + 37) * 4.0f,
+				G_TX_RENDERTILE, 16, 1024, -32.0f, -32.0f, false);
 
 		// Bottom left quarter of target
 		gdl += gfx_Texture_Rectangle(gdl,
-				((renderdata->x + 10) << 2), (renderdata->y + 36) << 2,
-				((renderdata->x + 42) << 2), (renderdata->y + 68) << 2,
-				G_TX_RENDERTILE, 16, 1024, 1024, 1024, false);
+				((renderdata->x + 10) * 4.0f), (renderdata->y + 36) * 4.0f,
+				((renderdata->x + 42) * 4.0f), (renderdata->y + 68) * 4.0f,
+				G_TX_RENDERTILE, 16, 1024, 32.0f, 32.0f, false);
 
 		// Bottom right quarter of target
 		gdl += gfx_Texture_Rectangle(gdl,
-				((renderdata->x + 41) << 2), (renderdata->y + 36) << 2,
-				((renderdata->x + 73) << 2), (renderdata->y + 68) << 2,
-				G_TX_RENDERTILE, 16, 1024, -1024, 1024, false);
+				((renderdata->x + 41) * 4.0f), (renderdata->y + 36) * 4.0f,
+				((renderdata->x + 73) * 4.0f), (renderdata->y + 68) * 4.0f,
+				G_TX_RENDERTILE, 16, 1024, -32.0f, 32.0f, false);
 
 		gdl = textSetPrimColour(gdl, ((failed ? 0xff000055 : 0x00ff0055) & 0xffffff00) | (((failed ? 0xff000055 : 0x00ff0055) & 0xff) * (renderdata->colour & 0xff) >> 8));
 		colour = ((failed ? 0xff6969aa : renderdata->colour) & 0xffffff00) | ((((failed ? 0xff6969aa : renderdata->colour) & 0xff) * (renderdata->colour & 0xff)) >> 8);
@@ -2392,9 +2392,9 @@ MenuItemHandlerResult ciHangarTitleMenuHandler(int operation, struct menuitem *i
 			gfx_Set_Texture_Filter(gdl++, G_TF_POINT);
 			gfx_Set_Env_Color(gdl++, utilsUnpackColorRGBA(0xffffff00 | ((renderdata->colour & 0xff) * 255) >> 8));
 			gdl += gfx_Texture_Rectangle(gdl,
-					((renderdata->x + 6) << 2), (renderdata->y + 3) << 2,
-					((renderdata->x + 60) << 2), (renderdata->y + 39) << 2,
-					G_TX_RENDERTILE, 0, 0x0480, 1024, -1024, false);
+					((renderdata->x + 6) * 4.0f), (renderdata->y + 3) * 4.0f,
+					((renderdata->x + 60) * 4.0f), (renderdata->y + 39) * 4.0f,
+					G_TX_RENDERTILE, 0, 1152, 32.0f, -32.0f, false);
 
 			leftmargin = -1;
 		} else {

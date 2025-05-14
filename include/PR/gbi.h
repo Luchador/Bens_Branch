@@ -94,7 +94,7 @@
 #define G_RESERVED0     2 /* not implemeted */
 #define G_MOVEMEM       3 /* move a block of memory (up to 4 words) to dmem */
 #define G_VTX           4
-#define G_RESERVED1     5 /* not implemeted */
+#define G_VTXF          5
 #define G_DL            6
 #define G_COL           7 /* new in PD */
 #define G_RESERVED3     8 /* not implemeted */
@@ -622,16 +622,16 @@
 typedef struct {
 	union {
 		struct {
-			/*0x00*/ int16_t x;
-			/*0x02*/ int16_t y;
-			/*0x04*/ int16_t z;
+			int16_t x;
+			int16_t y;
+			int16_t z;
 		};
 		int16_t v[3];
 	};
-	/*0x06*/ uint8_t flags;
-	/*0x07*/ uint8_t colour;
-	/*0x08*/ int16_t s;
-	/*0x0a*/ int16_t t;
+	uint8_t flags;
+	uint8_t colour;
+	int16_t s;
+	int16_t t;
 } Vtx;
 
 typedef union {

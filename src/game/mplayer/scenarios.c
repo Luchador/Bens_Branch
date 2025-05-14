@@ -574,10 +574,10 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 			if (playercount >= 3) {
 				if (cplayernum <= 1) {
 					// Player on top quarter - draw line at bottom of viewport
-					gfx_Fill_Rectangle(gdl++, viewleft, viewheight + viewtop - 1, viewright - 1, viewheight + viewtop - 1);
+					gdl += gfx_Fill_Rectangle(gdl, viewleft, viewheight + viewtop - 1, viewright - 1, viewheight + viewtop - 1);
 				} else {
 					// Player on bottom quarter - draw line at top of viewport
-					gfx_Fill_Rectangle(gdl++, viewleft, viewtop, viewright - 1, viewtop);
+					gdl += gfx_Fill_Rectangle(gdl, viewleft, viewtop, viewright - 1, viewtop);
 				}
 			}
 			else {
@@ -586,10 +586,10 @@ Gfx *scenarioRenderHud(Gfx *gdl)
 				// It's suspected that a screen border is drawn over the top of it.
 				if (cplayernum == 0) {
 					// Player on top half - draw line at bottom of viewport
-					gfx_Fill_Rectangle(gdl++, viewleft, viewheight + viewtop - 1, viewright - 1, viewheight + viewtop - 1);
+					gdl += gfx_Fill_Rectangle(gdl, viewleft, viewheight + viewtop - 1, viewright - 1, viewheight + viewtop - 1);
 				} else {
 					// Player on bottom half - draw line at top of viewport
-					gfx_Fill_Rectangle(gdl++, viewleft, viewtop, viewright - 1, viewtop);
+					gdl += gfx_Fill_Rectangle(gdl, viewleft, viewtop, viewright - 1, viewtop);
 				}
 			}
 		}

@@ -158,8 +158,8 @@ void bheadUpdate(float arg0, float arg1)
 				modelUpdateInfo(&g_Vars.currentplayer->model);
 				mtxIdent(&sp40);
 
-				sp80.unk00 = (Mtxf*)&sp40;
-				sp80.unk10 = (Mtxf*)g_Vars.currentplayer->bondheadmatrices;
+				sp80.unk00 = &sp40;
+				sp80.unk10 = g_Vars.currentplayer->bondheadmatrices;
 				modelSetMatricesWithAnim(&sp80, &g_Vars.currentplayer->model);
 
 				g_Vars.currentplayer->headbodyoffset.x = g_Vars.currentplayer->standbodyoffset.x;

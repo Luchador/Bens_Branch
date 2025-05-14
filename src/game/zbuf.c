@@ -135,7 +135,7 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	g_SchedSpecialArtifactIndexes[g_SchedWriteArtifactsIndex] = 1;
 
 	gfx_Set_Color_Image(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(sp44));
-	gfx_Set_Scissor(gdl++, 0, 0, videoGetWidth(), videoGetHeight());
+	gdl += gfx_Set_Scissor(gdl, 0, 0, (uint32_t)videoGetWidth(), (uint32_t)videoGetHeight());
 	gfx_Set_Cycle_Type(gdl++, G_CYC_COPY);
 	gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 	gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0080, 4, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -168,9 +168,9 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 			gfx_Load_Block(gdl++, 5, 0, 0, viGetWidth() - 1, 0);
 
 			gdl += gfx_Texture_Rectangle(gdl,
-					s4 << 2, 0,
-					(s4 + 3) << 2, 0,
-					G_TX_RENDERTILE, (artifacts[i].screenPos.screenX * 32) + 16, 0x0010, 0x1000, 0, false);
+					s4 * 4.0f, 0,
+					(s4 + 3) * 4.0f, 0,
+					G_TX_RENDERTILE, (artifacts[i].screenPos.screenX * 32) + 16, 0, 4096.0f * 32, 0.0f, false);
 
 			artifacts[i].screenPos.outputPixelPtr = s2;
 			s4++;
@@ -178,7 +178,7 @@ Gfx *zbufDrawArtifactsOffscreen(Gfx *gdl)
 	}
 
 	gfx_Set_Color_Image(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
-	gfx_Set_Scissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
+	gdl += gfx_Set_Scissor(gdl, 0, 0, (uint32_t)viGetWidth(), (uint32_t)viGetHeight());
 	gfx_Set_Geometry_Mode(gdl++, G_ZBUFFER);
 	gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 

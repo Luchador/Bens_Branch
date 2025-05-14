@@ -285,7 +285,7 @@ Gfx *skyRender(Gfx *gdl)
 				gdl = viSetFillColour(gdl, env->sky_r, env->sky_g, env->sky_b);
 			}
 
-			gfx_Fill_Rectangle(gdl++, viGetViewLeft(), viGetViewTop(),
+			gdl += gfx_Fill_Rectangle(gdl, viGetViewLeft(), viGetViewTop(),
 					viGetViewLeft() + viGetViewWidth() - 1,
 					viGetViewTop() + viGetViewHeight() - 1);
 
@@ -302,7 +302,7 @@ Gfx *skyRender(Gfx *gdl)
 
 		gfx_Set_Render_Mode(gdl++, G_RM_NOOP, G_RM_NOOP2);
 
-		gfx_Fill_Rectangle(gdl++,
+		gdl += gfx_Fill_Rectangle(gdl,
 				g_Vars.currentplayer->viewleft, g_Vars.currentplayer->viewtop,
 				g_Vars.currentplayer->viewleft + g_Vars.currentplayer->viewwidth - 1,
 				g_Vars.currentplayer->viewtop + g_Vars.currentplayer->viewheight - 1);
@@ -821,7 +821,7 @@ Gfx *skyRender(Gfx *gdl)
 			gfx_Set_Cycle_Type(gdl++, G_CYC_FILL);
 			gfx_Set_Render_Mode(gdl++, G_RM_NOOP, G_RM_NOOP2);
 			gfx_Set_Texture_Persp(gdl++, G_TP_NONE);
-			gfx_Fill_Rectangle(gdl++, (int)(x1 * 0.25f), (int)(y1 * 0.25f), (int)(x2 * 0.25f), (int)(y2 * 0.25f));
+			gdl += gfx_Fill_Rectangle(gdl, (int)(x1 * 0.25f), (int)(y1 * 0.25f), (int)(x2 * 0.25f), (int)(y2 * 0.25f));
 			gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
 		} else {
 
@@ -829,7 +829,7 @@ Gfx *skyRender(Gfx *gdl)
 
 			gfx_Set_Render_Mode(gdl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
 
-			Vtx *verts = gfxAllocateVertices(numvertices);
+			VtxF *verts = gfxAllocateVerticesF(numvertices);
 			Col *cols = gfxAllocateColours(numvertices);
 			Mtx *mtx = gfxAllocateMatrix();
 			mtx4MultMtx4(camGetPlayerWorldToScreenMtx(), &g_SkyMtx, mtx);
@@ -837,14 +837,14 @@ Gfx *skyRender(Gfx *gdl)
 			gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
 			gfx_Matrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
 			gfx_Color(gdl++, cols, numvertices);
-			gfx_Vertex(gdl++, verts, numvertices, 0);
+			gfx_VertexF(gdl++, verts, numvertices, 0);
 
 			for (int i = 0; i < numvertices; ++i) {
 				verts[i].x = watervertices3d[i].x;
 				verts[i].y = watervertices3d[i].y;
 				verts[i].z = watervertices3d[i].z;
-				verts[i].s = skyClamp(watervertices3d[i].s * 0.1f + g_SkyCloudOffset, -32768.f, 32767.f);
-				verts[i].t = skyClamp((watervertices3d[i].t  - g_SkyCloudOffset) * 0.1f + g_SkyCloudOffset, -32768.f, 32767.f);
+				verts[i].s = watervertices3d[i].s * 0.1f + g_SkyCloudOffset;
+				verts[i].t = (watervertices3d[i].t  - g_SkyCloudOffset) * 0.1f + g_SkyCloudOffset;
 				verts[i].colour = i * 4;
 				cols[i].r = watervertices3d[i].r;
 				cols[i].g = watervertices3d[i].g;
@@ -1265,7 +1265,7 @@ Gfx *skyRender(Gfx *gdl)
 		skyvertices2d[i].y = skyClamp(skyvertices2d[i].y, camGetScreenTop() * 4.0f, (camGetScreenTop() + camGetScreenHeight()) * 4.0f - 1.0f);
 	}
 
-	Vtx *verts = gfxAllocateVertices(numvertices);
+	VtxF *verts = gfxAllocateVerticesF(numvertices);
 	Col *cols = gfxAllocateColours(numvertices);
 	Mtx *mtx = gfxAllocateMatrix();
 	mtx4MultMtx4(camGetPlayerWorldToScreenMtx(), &g_SkyMtx, mtx);
@@ -1273,14 +1273,14 @@ Gfx *skyRender(Gfx *gdl)
 	gSPSetExtraGeometryModeEXT(gdl++, G_NO_CLIPPING_EXT);
 	gfx_Matrix(gdl++, mtx, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
 	gfx_Color(gdl++, cols, numvertices);
-	gfx_Vertex(gdl++, verts, numvertices, 0);
+	gfx_VertexF(gdl++, verts, numvertices, 0);
 
 	for (int i = 0; i < numvertices; ++i) {
 		verts[i].x = skyvertices3d[i].x;
 		verts[i].y = skyvertices3d[i].y;
 		verts[i].z = skyvertices3d[i].z;
-		verts[i].s = skyClamp(skyvertices3d[i].s, -32768.f, 32767.f);
-		verts[i].t = skyClamp(skyvertices3d[i].t, -32768.f, 32767.f);
+		verts[i].s = skyvertices3d[i].s;
+		verts[i].t = skyvertices3d[i].t;
 		verts[i].colour = i * 4;
 		cols[i].r = skyvertices3d[i].r;
 		cols[i].g = skyvertices3d[i].g;
@@ -1569,10 +1569,11 @@ Gfx *skyRenderSuns(Gfx *gdl, bool xray)
 					
 					float texCenter[2] = { g_SunScreenXPositions[i], g_SunScreenYPositions[i] };
 					float texRadius[2] = {
-						(radius * 0.5f) * (SCREEN_ASPECT / videoGetAspect()),
-						radius * 0.5f
+						(radius * 0.4f) * (SCREEN_ASPECT / videoGetAspect()),
+						radius * 0.4f
 					};
 
+					// Render sun disk
 					utilsRenderScreenTexture(&gdl, texCenter, texRadius, g_TexLightGlareConfigs[5].width, g_TexLightGlareConfigs[5].height, true, true, true);
 
 					gfx_Set_Texture_Persp(gdl++, G_TP_PERSP);
@@ -1605,8 +1606,8 @@ Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size,
 	int i;
 	float f2;
 	float f12;
-	float sp17c[2];
-	float sp174[2];
+	float screenpos[2];
+	float screensize[2];
 	int sp15c[] = { 16, 32, 12, 32, 24, 64 }; // diameters?
 	int sp144[] = { 60, 80, 225, 275, 470, 570 }; // distances from the source?
 
@@ -1646,14 +1647,15 @@ Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size,
 	gfx_Set_Env_Color(gdl++, envColor);
 	f2 = ((int) ((60.0f / fovy) * (size * (0.5f + (0.5f * intensityfrac)))));
 
-	sp17c[0] = x;
-	sp17c[1] = y;
-	sp174[1] = f2 * 0.5f;
-	sp174[0] = f2 * 0.5f;
+	screenpos[0] = x;
+	screenpos[1] = y;
+	screensize[1] = f2 * 0.7f;
+	screensize[0] = f2 * 0.7f;
 
-	sp174[0] *=  SCREEN_ASPECT / videoGetAspect();
+	screensize[0] *=  SCREEN_ASPECT / videoGetAspect();
 
-	utilsRenderScreenTexture(&gdl, sp17c, sp174, g_TexLightGlareConfigs[6].width, g_TexLightGlareConfigs[6].height, true, true, true);
+	// Render the sun arm texture
+	utilsRenderScreenTexture(&gdl, screenpos, screensize, g_TexLightGlareConfigs[6].width, g_TexLightGlareConfigs[6].height, true, true, true);
 
 	// Render the other artifacts
 	texSelect(&gdl, &g_TexLightGlareConfigs[1], 4, 0, 2, 1, NULL);
@@ -1698,15 +1700,15 @@ Gfx *skyRenderFlare(Gfx *gdl, float x, float y, float intensityfrac, float size,
 		RGBA envColor = {(colours[i] >> 24) & 0xff, (colours[i] >> 16) & 0xff, (colours[i] >> 8) & 0xff, (int)((colours[i] & 0xff) * (alphafrac * f2))};
 		gfx_Set_Env_Color(gdl++, envColor);
 
-		sp17c[0] = f12;
-		sp17c[1] = f14;
+		screenpos[0] = f12;
+		screenpos[1] = f14;
 
-		sp174[1] = tmp * 0.5f;
-		sp174[0] = tmp * 0.5f;
+		screensize[1] = tmp * 0.5f;
+		screensize[0] = tmp * 0.5f;
 
-		sp174[0] *=  SCREEN_ASPECT / videoGetAspect();
+		screensize[0] *=  SCREEN_ASPECT / videoGetAspect();
 
-		utilsRenderScreenTexture(&gdl, sp17c, sp174, g_TexLightGlareConfigs[1].width, g_TexLightGlareConfigs[1].height, false, false, false);
+		utilsRenderScreenTexture(&gdl, screenpos, screensize, g_TexLightGlareConfigs[1].width, g_TexLightGlareConfigs[1].height, false, false, false);
 	}
 
 	// Check if the source is close to the center of the screen and create the bloom effect if so
@@ -1975,7 +1977,7 @@ Gfx *skyRenderOverexposure(Gfx *gdl)
 		RGBA primColor = {r, g, b, a};
 		gfx_Set_Prim_Color(gdl++, primColor);
 
-		gfx_Fill_Rectangle(gdl++,
+		gdl += gfx_Fill_Rectangle(gdl,
 				viGetViewLeft(),
 				viGetViewTop(),
 				viGetViewLeft() + viGetViewWidth(),

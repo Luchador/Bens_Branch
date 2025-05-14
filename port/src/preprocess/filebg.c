@@ -448,7 +448,7 @@ static uint32_t convertSection1(uint8_t *dst, uint8_t *src, uint32_t ofs)
 
 void preprocessBgSection1(uint8_t *data, uint32_t size, uint32_t ofs)
 {
-	uint8_t *dst = sysMemZeroAlloc(size);
+	uint8_t *dst = calloc(1, size);
 
 	uint32_t newSize = convertSection1(dst, data, ofs);
 
@@ -457,13 +457,13 @@ void preprocessBgSection1(uint8_t *data, uint32_t size, uint32_t ofs)
 	}
 
 	memcpy(data, dst, newSize);
-	sysMemFree(dst);
+	free(dst);
 }
 
 uint32_t preprocessBgRoom(uint8_t *data, uint32_t size, uint32_t room_ofs)
 {
 	size *= 2;
-	uint8_t *dst = sysMemZeroAlloc(size);
+	uint8_t *dst = calloc(1, size);
 	uint32_t newSize = convertRoomGfxData(dst, data, size, room_ofs);
 
 	if (newSize > size) {
@@ -471,7 +471,7 @@ uint32_t preprocessBgRoom(uint8_t *data, uint32_t size, uint32_t room_ofs)
 	}
 
 	memcpy(data, dst, newSize);
-	sysMemFree(dst);
+	free(dst);
 
 	return newSize;
 }

@@ -62,10 +62,10 @@ void menugfxCreateBlur(void)
 	g_MenuBlurDone = false;
 }
 
-Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
+Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t xoffset, int16_t yoffset)
 {
 	Col *colours;
-	Vtx *vertices;
+	VtxF *vertices;
 	int width;
 	int height;
 
@@ -78,13 +78,13 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 		gfx_Set_Texture_Filter(gdl++, G_TF_BLUR_EXT);
 		gfx_Set_Framebuffer_Texture_EXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, (uintptr_t)g_MenuBlurFb);
 		gfx_Set_Framebuffer_Target_EXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, (uintptr_t)g_MenuScreenFb);
-		gdl += gfx_Image_Rectangle_EXT(gdl, 0, 0, 0, 0, width, height, BLURIMG_WIDTH, BLURIMG_HEIGHT, 0, BLURIMG_WIDTH, BLURIMG_HEIGHT);
+		gdl += gfx_Image_Rectangle_EXT(gdl, 0, 0, 0, 0, (float)width, (float)height, (float)BLURIMG_WIDTH, (float)BLURIMG_HEIGHT, (float)BLURIMG_WIDTH, (float)BLURIMG_HEIGHT);
 		gfx_Set_Framebuffer_Target_EXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, width, (uintptr_t)0);
 		gfx_Set_Framebuffer_Texture_EXT(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, BLURIMG_WIDTH, (uintptr_t)0);
 	}
 
 	colours = gfxAllocateColours(1);
-	vertices = gfxAllocateVertices(4);
+	vertices = gfxAllocateVerticesF(4);
 
 	gfx_Texture(gdl++, 0xffff, 0xffff, 0, G_TX_RENDERTILE, G_ON);
 
@@ -110,18 +110,21 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 	width = SCREEN_320 * 10;
 	height = viGetHeight() * 10;
 
-	*(uint16_t *)&vertices[0].x = arg2;
-	*(uint16_t *)&vertices[0].y = arg3;
-	vertices[0].z = -10;
-	*(uint16_t *)&vertices[1].x = (int)width + arg2 + 40;
-	*(uint16_t *)&vertices[1].y = arg3;
-	vertices[1].z = -10;
-	*(uint16_t *)&vertices[2].x = (int)width + arg2 + 40;
-	*(uint16_t *)&vertices[2].y = (int)height + arg3 + 50;
-	vertices[2].z = -10;
-	*(uint16_t *)&vertices[3].x = arg2;
-	*(uint16_t *)&vertices[3].y = (int)height + arg3 + 50;
-	vertices[3].z = -10;
+	vertices[0].x = (float)xoffset;
+	vertices[0].y = (float)yoffset;
+	vertices[0].z = -10.0f;
+
+	vertices[1].x = (float)(width + xoffset + 40);
+	vertices[1].y = (float)yoffset;
+	vertices[1].z = -10.0f;
+
+	vertices[2].x = (float)(width + xoffset + 40);
+	vertices[2].y = (float)(height + yoffset + 50);
+	vertices[2].z = -10.0f;
+
+	vertices[3].x = (float)xoffset;
+	vertices[3].y = (float)(height + yoffset + 50);
+	vertices[3].z = -10.0f;
 
 	vertices[0].s = 0;
 	vertices[0].t = 0;
@@ -140,7 +143,7 @@ Gfx *menugfxRenderBgBlur(Gfx *gdl, uint32_t colour, int16_t arg2, int16_t arg3)
 	colours[0].word = PD_BE32(colour);
 
 	gfx_Color(gdl++, colours, 1);
-	gfx_Vertex(gdl++, vertices, 4, 0);
+	gfx_VertexF(gdl++, vertices, 4, 0);
 
 	gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 
@@ -157,7 +160,7 @@ Gfx *menugfxRenderDialogBackground(Gfx *gdl, int x1, int y1, int x2, int y2, str
 	// Render the dialog's background fill
 	gdl = textSetPrimColour(gdl, colour1);
 
-	gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
+	gdl += gfx_Fill_Rectangle(gdl, x1, y1, x2, y2);
 
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
@@ -184,7 +187,7 @@ Gfx *menugfxRenderDialogBackground(Gfx *gdl, int x1, int y1, int x2, int y2, str
 Gfx *menugfxDrawDropdownBackground(Gfx *gdl, int x1, int y1, int x2, int y2)
 {
 	Col *colours = gfxAllocateColours(3);
-	Vtx *vertices = gfxAllocateVertices(6);
+	VtxF *vertices = gfxAllocateVerticesF(6);
 	uint32_t colour1;
 	uint32_t colour2;
 
@@ -242,7 +245,7 @@ Gfx *menugfxDrawDropdownBackground(Gfx *gdl, int x1, int y1, int x2, int y2)
 	colours[2].word = PD_BE32(colour1 | 0x00003f00);
 
 	gfx_Color(gdl++, colours, 3);
-	gfx_Vertex(gdl++, vertices, 6, 0);
+	gfx_VertexF(gdl++, vertices, 6, 0);
 
 	gfx_Tri4(gdl++, 0, 1, 3, 3, 2, 0, 2, 3, 4, 4, 3, 5);
 
@@ -252,7 +255,7 @@ Gfx *menugfxDrawDropdownBackground(Gfx *gdl, int x1, int y1, int x2, int y2)
 Gfx *menugfxDrawListGroupHeader(Gfx *gdl, int x1, int y1, int x2, int y2, int x3, uint8_t alpha)
 {
 	Col *colours = gfxAllocateColours(7);
-	Vtx *vertices = gfxAllocateVertices(9);
+	VtxF *vertices = gfxAllocateVerticesF(9);
 	uint32_t alpha1;
 	uint32_t alpha2;
 
@@ -321,7 +324,7 @@ Gfx *menugfxDrawListGroupHeader(Gfx *gdl, int x1, int y1, int x2, int y2, int x3
 	colours[6].word = PD_BE32(0x6f6f6f00 | alpha1);
 
 	gfx_Color(gdl++, colours, 7);
-	gfx_Vertex(gdl++, vertices, 9, 0);
+	gfx_VertexF(gdl++, vertices, 9, 0);
 
 	gfx_Tri4(gdl++, 0, 1, 3, 3, 2, 0, 2, 3, 4, 4, 3, 5);
 	gfx_Tri4(gdl++, 1, 6, 7, 7, 3, 1, 3, 7, 8, 8, 5, 3);
@@ -336,7 +339,7 @@ Gfx *menugfxDrawListGroupHeader(Gfx *gdl, int x1, int y1, int x2, int y2, int x3
 Gfx *menugfxRenderGradient(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colourstart, uint32_t colourmid, uint32_t colourend)
 {
 	Col *colours = gfxAllocateColours(3);
-	Vtx *vertices = gfxAllocateVertices(6);
+	VtxF *vertices = gfxAllocateVerticesF(6);
 	int ymid;
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
@@ -403,7 +406,7 @@ Gfx *menugfxRenderGradient(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t co
 	colours[1].word = PD_BE32(colourend);
 
 	gfx_Color(gdl++, colours, 3);
-	gfx_Vertex(gdl++, vertices, 6, 0);
+	gfx_VertexF(gdl++, vertices, 6, 0);
 	gfx_Tri4(gdl++, 0, 1, 5, 5, 4, 0, 2, 3, 4, 4, 5, 2);
 
 	return gdl;
@@ -412,7 +415,7 @@ Gfx *menugfxRenderGradient(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t co
 Gfx *menugfxRenderSlider(Gfx *gdl, int x1, int y1, int x2, int y2, int markerx, uint32_t colour)
 {
 	Col *colours = gfxAllocateColours(3);
-	Vtx *vertices = gfxAllocateVertices(6);
+	VtxF *vertices = gfxAllocateVerticesF(6);
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
@@ -465,7 +468,7 @@ Gfx *menugfxRenderSlider(Gfx *gdl, int x1, int y1, int x2, int y2, int markerx, 
 	colours[2].word = PD_BE32(0x0000ff4f);
 
 	gfx_Color(gdl++, colours, 3);
-	gfx_Vertex(gdl++, vertices, 6, 0);
+	gfx_VertexF(gdl++, vertices, 6, 0);
 
 	gfx_Tri1(gdl++, 3, 4, 5);
 
@@ -525,11 +528,11 @@ Gfx *menugfx0f0e2498(Gfx *gdl)
 
 Gfx *menugfxDrawTri2(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1, uint32_t colour2, bool arg7)
 {
-	Vtx *vertices;
+	VtxF *vertices;
 	Col *colours;
 
 	colours = gfxAllocateColours(2);
-	vertices = gfxAllocateVertices(4);
+	vertices = gfxAllocateVerticesF(4);
 
 	vertices[0].x = x1 * 10;
 	vertices[0].y = y1 * 10;
@@ -563,7 +566,7 @@ Gfx *menugfxDrawTri2(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t colour1,
 	colours[1].word = PD_BE32(colour2);
 
 	gfx_Color(gdl++, colours, 2);
-	gfx_Vertex(gdl++, vertices, 4, 0);
+	gfx_VertexF(gdl++, vertices, 4, 0);
 	gfx_Tri2(gdl++, 0, 1, 2, 2, 3, 0);
 
 	return gdl;
@@ -803,7 +806,7 @@ Gfx *menugfxDrawFilledRect(Gfx *gdl, int x1, int y1, int x2, int y2, uint32_t co
  */
 Gfx *menugfxDrawCarouselChevron(Gfx *gdl, int x, int y, int size, int direction, uint32_t colour1, uint32_t colour2)
 {
-	Vtx *vertices;
+	VtxF *vertices;
 	Col *colours;
 	int16_t halfwidth;
 	int16_t halfheight;
@@ -837,7 +840,7 @@ Gfx *menugfxDrawCarouselChevron(Gfx *gdl, int x, int y, int size, int direction,
 	}
 
 	colours = gfxAllocateColours(2);
-	vertices = gfxAllocateVertices(3);
+	vertices = gfxAllocateVerticesF(3);
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
@@ -873,7 +876,7 @@ Gfx *menugfxDrawCarouselChevron(Gfx *gdl, int x, int y, int size, int direction,
 	colours[1].word = PD_BE32(colour2);
 
 	gfx_Color(gdl++, colours, 2);
-	gfx_Vertex(gdl++, vertices, 3, 0);
+	gfx_VertexF(gdl++, vertices, 3, 0);
 	gfx_Tri1(gdl++, 0, 1, 2);
 
 	return gdl;
@@ -891,7 +894,7 @@ Gfx *menugfxDrawCarouselChevron(Gfx *gdl, int x, int y, int size, int direction,
 Gfx *menugfxDrawDialogChevron(Gfx *gdl, int x, int y, int size, int direction, uint32_t colour1, uint32_t colour2, float arg7)
 {
 	Col *colours;
-	Vtx *vertices;
+	VtxF *vertices;
 	int16_t halfwidth;
 	int16_t halfheight;
 	int16_t relx;
@@ -924,7 +927,7 @@ Gfx *menugfxDrawDialogChevron(Gfx *gdl, int x, int y, int size, int direction, u
 	}
 
 	colours = gfxAllocateColours(2);
-	vertices = gfxAllocateVertices(4);
+	vertices = gfxAllocateVerticesF(4);
 
 	gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 	gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
@@ -970,7 +973,7 @@ Gfx *menugfxDrawDialogChevron(Gfx *gdl, int x, int y, int size, int direction, u
 	colours[1].word = PD_BE32(colour2);
 
 	gfx_Color(gdl++, colours, 2);
-	gfx_Vertex(gdl++, vertices, 4, 0);
+	gfx_VertexF(gdl++, vertices, 4, 0);
 	gfx_Tri2(gdl++, 0, 1, 3, 3, 2, 0);
 
 	return gdl;
@@ -980,16 +983,16 @@ Gfx *menugfxDrawCheckbox(Gfx *gdl, int x, int y, int size, bool fill, uint32_t b
 {
 	if (fill) {
 		gdl = textSetPrimColour(gdl, fillcolour);
-		gfx_Fill_Rectangle(gdl++, x, y, x + size, y + size);
+		gdl += gfx_Fill_Rectangle(gdl, x, y, x + size, y + size);
 		gdl = textSetCCPrimColorTexAlpha(gdl);
 	}
 
 	gdl = textSetPrimColour(gdl, bordercolour);
 
-	gfx_Fill_Rectangle(gdl++, x, y, x + size + 1, y + 1);
-	gfx_Fill_Rectangle(gdl++, x, y + size, x + size + 1, y + size + 1);
-	gfx_Fill_Rectangle(gdl++, x, y + 1, x + 1, y + size);
-	gfx_Fill_Rectangle(gdl++, x + size, y + 1, x + size + 1, y + size);
+	gdl += gfx_Fill_Rectangle(gdl, x, y, x + size + 1, y + 1);
+	gdl += gfx_Fill_Rectangle(gdl, x, y + size, x + size + 1, y + size + 1);
+	gdl += gfx_Fill_Rectangle(gdl, x, y + 1, x + 1, y + size);
+	gdl += gfx_Fill_Rectangle(gdl, x + size, y + 1, x + size + 1, y + size);
 
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
@@ -1378,7 +1381,7 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 				float invsine2 = -sine;
 				float invsine = -sine;
 				float invcosine = -cosine;
-				Vtx *vertices = gfxAllocateVertices(5);
+				VtxF *vertices = gfxAllocateVerticesF(5);
 
 				vertices[0].x = pos.f[0];
 				vertices[0].y = pos.f[1];
@@ -1406,7 +1409,7 @@ Gfx *menugfxRenderBgSuccess(Gfx *gdl)
 				vertices[3].colour = (s3 * 4 + (i % 2) * 2 + 1) * 4;
 				vertices[4].colour = (s3 * 4 + (i % 2) * 2 + 1) * 4;
 
-				gfx_Vertex(gdl++, vertices, 5, 0);
+				gfx_VertexF(gdl++, vertices, 5, 0);
 
 				gfx_Tri4(gdl++, 0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1);
 			}

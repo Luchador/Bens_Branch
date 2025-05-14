@@ -21,7 +21,6 @@ extern struct audioconfig g_AudioConfigs[];
 extern bool g_JoyPfsPollMasterEnabled;
 extern int g_NumGlobalAilists;
 extern int g_NumLvAilists;
-extern bool g_ModelDistanceDisabled;
 extern float g_ModelDistanceScale;
 extern float g_ExtraBoundsDist;
 extern bool g_ModelAnimMergingEnabled;
@@ -425,6 +424,8 @@ extern TextData *g_TextMPWeaponsData;
 extern TextData *g_TextOptionsData;
 extern TextData *g_TextPropObjData;
 extern TextData *g_TextTitleData;
+
+extern struct lightvisdata *g_LightVisData;
 
 extern struct fontchar g_HandelGothicData[93]; // HD Handel Gothic
 extern struct fontchar *g_CharToRender; // Character to render using the HD font

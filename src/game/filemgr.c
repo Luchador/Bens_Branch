@@ -2162,11 +2162,11 @@ MenuItemHandlerResult filemgrChooseAgentListMenuHandler(int operation, struct me
 			G_CCMUX_TEXEL0, 0, G_CCMUX_ENVIRONMENT, 0, G_ACMUX_TEXEL0, 0, G_ACMUX_ENVIRONMENT, 0);
 
 		gdl += gfx_Texture_Rectangle(gdl,
-				((renderdata->x + 4) << 2),
-				(renderdata->y + 2) << 2,
-				((renderdata->x + 60) << 2),
-				(renderdata->y + 38) << 2,
-				G_TX_RENDERTILE, 0, 1152, 1024, -1024, false);
+				((renderdata->x + 4) * 4.0f),
+				(renderdata->y + 2) * 4.0f,
+				((renderdata->x + 60) * 4.0f),
+				(renderdata->y + 38) * 4.0f,
+				G_TX_RENDERTILE, 0, 1152, 32.0f, -32.0f, false);
 
 		x = renderdata->x + 62;
 		y = renderdata->y + 4;

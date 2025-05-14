@@ -1,4 +1,5 @@
 #include "constants.h"
+#include <stdlib.h>
 #include "game/chrutils.h"
 #include "game/title.h"
 #include "bss.h"
@@ -17,7 +18,7 @@ void chrmgrReset(void)
 	g_ChrSlots = NULL;
 	g_NumChrSlots = 0;
 
-	g_ShieldHits = mempAlloc(sizeof(struct shieldhit) * 20, MEMPOOL_STAGE);
+	g_ShieldHits = malloc(sizeof(struct shieldhit) * 20);
 
 	for (i = 0; i < 20; i++) {
 		g_ShieldHits[i].prop = NULL;

@@ -1,4 +1,5 @@
 #include <ultra64.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "bss.h"
 #include "lib/memp.h"
@@ -23,7 +24,7 @@ void explosionsReset(void)
 	if (g_MaxExplosions == 0) {
 		g_Explosions = NULL;
 	} else {
-		g_Explosions = mempAlloc((g_MaxExplosions * sizeof(struct explosion) + 0xf) & ~0xf, MEMPOOL_STAGE);
+		g_Explosions = malloc((g_MaxExplosions * sizeof(struct explosion) + 0xf) & ~0xf);
 
 		for (i = 0; i < g_MaxExplosions; i++) {
 			g_Explosions[i].prop = NULL;

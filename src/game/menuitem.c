@@ -178,7 +178,7 @@ Gfx *menuitemListRenderHeader(Gfx *gdl, int16_t x1, int16_t y1, int16_t width, i
 
 Gfx *menuitemListOverlay(Gfx *gdl, int16_t x, int16_t y, int16_t x2, int16_t y2)
 {
-	gfx_Fill_Rectangle(gdl++, x, y, x + x2, y + y2);
+	gdl += gfx_Fill_Rectangle(gdl, x, y, x + x2, y + y2);
 	return gdl;
 }
 
@@ -273,7 +273,7 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gdl += gfx_Set_Scissor(gdl, (uint32_t)g_ScissorX1, (uint32_t)g_ScissorY1, (uint32_t)g_ScissorX2, (uint32_t)g_ScissorY2);
 
 	halfheight = context->height / 2;
 	halfheight /= g_LineHeight;
@@ -539,7 +539,7 @@ Gfx *menuitemListRender(Gfx *gdl, struct menurendercontext *context)
 							g_ScissorY2 = g_ScissorY1;
 						}
 
-						gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+						gdl += gfx_Set_Scissor(gdl, (uint32_t)g_ScissorX1, (uint32_t)g_ScissorY1, (uint32_t)g_ScissorX2, (uint32_t)g_ScissorY2);
 
 						spb8.type19.gdl = gdl;
 						spb8.type19.unk04 = optionindex;
@@ -1070,12 +1070,12 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 
 	if (context->item->param3 == 0) {
 		// Half width
-		gfx_Fill_Rectangle(gdl++,
+		gdl += gfx_Fill_Rectangle(gdl,
 				context->x + 4, context->y + 1,
 				context->x + 63, context->y + 10);
 	} else {
 		// Full width
-		gfx_Fill_Rectangle(gdl++,
+		gdl += gfx_Fill_Rectangle(gdl,
 				context->x + 4, context->y + 1,
 				context->x + 125, context->y + 10);
 	}
@@ -1106,7 +1106,7 @@ Gfx *menuitemKeyboardRender(Gfx *gdl, struct menurendercontext *context)
 
 	gdl = textSetPrimColour(gdl, cursorcolour);
 
-	gfx_Fill_Rectangle(gdl++, x + 1, context->y + 2, x + 3, context->y + 9);
+	gdl += gfx_Fill_Rectangle(gdl, x + 1, context->y + 2, x + 3, context->y + 9);
 
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
@@ -2100,11 +2100,11 @@ Gfx *menuitemMeterRender(Gfx *gdl, struct menurendercontext *context)
 	x3 = x2 + 6;
 
 	gdl = textSetPrimColour(gdl, colour1);
-	gfx_Fill_Rectangle(gdl++, x1, context->y, x2, context->y + 5);
+	gdl += gfx_Fill_Rectangle(gdl, x1, context->y, x2, context->y + 5);
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	gdl = textSetPrimColour(gdl, colour2);
-	gfx_Fill_Rectangle(gdl++, x2, context->y, x3, context->y + 5);
+	gdl += gfx_Fill_Rectangle(gdl, x2, context->y, x3, context->y + 5);
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	text = menuResolveParam2Text(context->item);
@@ -2142,7 +2142,7 @@ Gfx* menuitemColorBoxRender(Gfx *gdl, struct menurendercontext *context)
 	colour1 = data.label.colour1;
 
 	gdl = textSetPrimColour(gdl, colour1);
-	gfx_Fill_Rectangle(gdl++, x1, context->y, x2, context->y + height);
+	gdl += gfx_Fill_Rectangle(gdl, x1, context->y, x2, context->y + height);
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	return gdl;
@@ -3163,7 +3163,7 @@ Gfx *menuitemMarqueeRender(Gfx *gdl, struct menurendercontext *context)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gdl += gfx_Set_Scissor(gdl, (uint32_t)g_ScissorX1, (uint32_t)g_ScissorY1, (uint32_t)g_ScissorX2, (uint32_t)g_ScissorY2);
 
 	textBackupAndResetBlends();
 
@@ -3397,7 +3397,7 @@ Gfx *menuitemRankingRender(Gfx *gdl, struct menurendercontext *context)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gdl += gfx_Set_Scissor(gdl, (uint32_t)g_ScissorX1, (uint32_t)g_ScissorY1, (uint32_t)g_ScissorX2, (uint32_t)g_ScissorY2);
 
 	gdl = textConfigureGfxPipeline(gdl);
 
@@ -3643,7 +3643,7 @@ Gfx *menuitemPlayerStatsRender(Gfx *gdl, struct menurendercontext *context)
 			g_ScissorY2 = g_ScissorY1;
 		}
 
-		gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+		gdl += gfx_Set_Scissor(gdl, (uint32_t)g_ScissorX1, (uint32_t)g_ScissorY1, (uint32_t)g_ScissorX2, (uint32_t)g_ScissorY2);
 
 		ypos -= data->scrolloffset;
 
@@ -3735,7 +3735,7 @@ Gfx *menuitemControllerRenderLine(Gfx *gdl, int speed, int x1, int y1, int x2, i
 			G_TX_RENDERTILE,
 			speed * 32,
 			(y1 % 4) * 32,
-			1024, 1024, false);
+			32.0f, 32.0f, false);
 
 	return gdl;
 }
@@ -3766,9 +3766,9 @@ Gfx *menuitemControllerRenderTexture(Gfx *gdl, int x, int y, int texturenum, uin
 	gfx_Set_Env_Color(gdl++, envColor);
 
 	gdl += gfx_Texture_Rectangle(gdl,
-			(x << 2), y << 2,
-			((x + 32) << 2), (y + 32) << 2,
-			0, 16, 1008, 1024, 0xfc00, false);
+			(x * 4.0f), y * 4.0f,
+			((x + 32) * 4.0f), (y + 32) * 4.0f,
+			0, 16, 1008, 32.0f, -32.0f, false);
 
 	return gdl;
 }

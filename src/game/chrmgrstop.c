@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "constants.h"
 #include "game/chr.h"
 #include "game/prop.h"
@@ -20,4 +21,7 @@ void chrmgrStop(void)
 			propFree(g_ChrSlots[i].prop);
 		}
 	}
+
+	free(g_ShieldHits);
+	g_ShieldHits = NULL;
 }

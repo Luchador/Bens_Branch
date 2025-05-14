@@ -947,7 +947,7 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, int16_t x, int16_t y, int mode, int flag
 
 	gdl = textSetPrimColour(gdl, colour);
 
-	gfx_Fill_Rectangle(gdl++,
+	gdl += gfx_Fill_Rectangle(gdl,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y - paddingtop + 1,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2,
@@ -975,28 +975,28 @@ Gfx *amRenderSlot(Gfx *gdl, char *text, int16_t x, int16_t y, int mode, int flag
 	gdl = textSetPrimColour(gdl, colour);
 
 	// Top border
-	gfx_Fill_Rectangle(gdl++,
+	gdl += gfx_Fill_Rectangle(gdl,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2,
 			y - paddingtop,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y - paddingtop + 1);
 
 	// Bottom border
-	gfx_Fill_Rectangle(gdl++,
+	gdl += gfx_Fill_Rectangle(gdl,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2,
 			y + paddingbottom,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y + paddingbottom + 1);
 
 	// Left border
-	gfx_Fill_Rectangle(gdl++,
+	gdl += gfx_Fill_Rectangle(gdl,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2,
 			y - paddingtop + 1,
 			x - g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
 			y + paddingbottom);
 
 	// Right border
-	gfx_Fill_Rectangle(gdl++,
+	gdl += gfx_Fill_Rectangle(gdl,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2,
 			y - paddingtop + 1,
 			x + g_AmMenus[g_AmIndex].slotwidth / 2 + 1,
@@ -1031,15 +1031,15 @@ Gfx *amRender(Gfx *gdl)
 	struct chrdata *chr;
 	uint32_t flags;
 	Col *colours;
-	Vtx *vertices;
+	VtxF *vertices;
 	int mpchrnum;
 	int16_t column;
 	int16_t row;
 	uint32_t colour;
 	int16_t slotx;
 	int16_t sloty;
-	int16_t tmp1;
-	int16_t tmp2;
+	float tmp1;
+	float tmp2;
 
 	const int playercount = PLAYERCOUNT();
 	if (playercount < 2 || (playercount == 2 && optionsGetScreenSplit() == SCREENSPLIT_HORIZONTAL)) {
@@ -1077,7 +1077,7 @@ Gfx *amRender(Gfx *gdl)
 		gdl = savebufferSetCustomProjection(gdl);
 
 		colours = gfxAllocateColours(2);
-		vertices = gfxAllocateVertices(8);
+		vertices = gfxAllocateVerticesF(8);
 
 		gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 		gfx_Set_Alpha_Compare(gdl++, G_AC_NONE);
@@ -1097,38 +1097,38 @@ Gfx *amRender(Gfx *gdl)
 		// Top
 		amCalculateSlotPosition(1, 0, &slotx, &sloty);
 
-		vertices[0].x = slotx * 10;
-		vertices[0].y = sloty * 10;
-		vertices[0].z = -10;
+		vertices[0].x = slotx * 10.0f;
+		vertices[0].y = sloty * 10.0f;
+		vertices[0].z = -10.0f;
 
 		// Right
 		amCalculateSlotPosition(2, 1, &slotx, &sloty);
 
-		vertices[1].x = slotx * 10;
-		vertices[1].y = sloty * 10;
-		vertices[1].z = -10;
+		vertices[1].x = slotx * 10.0f;
+		vertices[1].y = sloty * 10.0f;
+		vertices[1].z = -10.0f;
 
 		// Bottom
 		amCalculateSlotPosition(1, 2, &slotx, &sloty);
 
-		vertices[2].x = slotx * 10;
-		vertices[2].y = sloty * 10;
-		vertices[2].z = -10;
+		vertices[2].x = slotx * 10.0f;
+		vertices[2].y = sloty * 10.0f;
+		vertices[2].z = -10.0f;
 
 		// Left
 		amCalculateSlotPosition(0, 1, &slotx, &sloty);
 
-		vertices[3].x = slotx * 10;
-		vertices[3].y = sloty * 10;
-		vertices[3].z = -10;
+		vertices[3].x = slotx * 10.0f;
+		vertices[3].y = sloty * 10.0f;
+		vertices[3].z = -10.0f;
 
-		vertices[4].z = -10;
-		vertices[5].z = -10;
-		vertices[6].z = -10;
-		vertices[7].z = -10;
+		vertices[4].z = -10.0f;
+		vertices[5].z = -10.0f;
+		vertices[6].z = -10.0f;
+		vertices[7].z = -10.0f;
 
-		tmp2 = (vertices[1].x - vertices[3].x) / 8;
-		tmp1 = (vertices[2].y - vertices[0].y) / 8;
+		tmp2 = (vertices[1].x - vertices[3].x) / 8.0f;
+		tmp1 = (vertices[2].y - vertices[0].y) / 8.0f;
 
 		vertices[4].x = vertices[0].x;
 		vertices[4].y = vertices[0].y + tmp1;
@@ -1152,7 +1152,7 @@ Gfx *amRender(Gfx *gdl)
 		colours[1].word = PD_BE32(0x0000004f);
 
 		gfx_Color(gdl++, colours, 2);
-		gfx_Vertex(gdl++, vertices, 8, 0);
+		gfx_VertexF(gdl++, vertices, 8, 0);
 
 		gfx_Tri2(gdl++, 4, 5, 6, 6, 7, 4);
 		gfx_Tri4(gdl++, 0, 4, 7, 7, 3, 0, 0, 1, 5, 5, 4, 0);
@@ -1280,28 +1280,28 @@ Gfx *amRender(Gfx *gdl)
 			}
 
 			// Top
-			gfx_Fill_Rectangle(gdl++,
+			gdl += gfx_Fill_Rectangle(gdl,
 					g_AmMenus[g_AmIndex].selx - halfwidth,
 					g_AmMenus[g_AmIndex].sely - above,
 					g_AmMenus[g_AmIndex].selx + halfwidth + 1,
 					g_AmMenus[g_AmIndex].sely - above + 1);
 
 			// Bottom
-			gfx_Fill_Rectangle(gdl++,
+			gdl += gfx_Fill_Rectangle(gdl,
 					g_AmMenus[g_AmIndex].selx - halfwidth,
 					g_AmMenus[g_AmIndex].sely + below,
 					g_AmMenus[g_AmIndex].selx + halfwidth + 1,
 					g_AmMenus[g_AmIndex].sely + below + 1);
 
 			// Left
-			gfx_Fill_Rectangle(gdl++,
+			gdl += gfx_Fill_Rectangle(gdl,
 					g_AmMenus[g_AmIndex].selx - halfwidth,
 					g_AmMenus[g_AmIndex].sely - above + 1,
 					g_AmMenus[g_AmIndex].selx - halfwidth + 1,
 					g_AmMenus[g_AmIndex].sely + below);
 
 			// Right
-			gfx_Fill_Rectangle(gdl++,
+			gdl += gfx_Fill_Rectangle(gdl,
 					g_AmMenus[g_AmIndex].selx + halfwidth,
 					g_AmMenus[g_AmIndex].sely - above + 1,
 					g_AmMenus[g_AmIndex].selx + halfwidth + 1,
@@ -1372,7 +1372,7 @@ Gfx *amRender(Gfx *gdl)
 			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 1 red
-			gfx_Fill_Rectangle(gdl++, a2, y, part1left + part1width, y + barheight);
+			gdl += gfx_Fill_Rectangle(gdl, a2, y, part1left + part1width, y + barheight);
 
 			color.r = 0;
 			color.g = 0;
@@ -1381,21 +1381,21 @@ Gfx *amRender(Gfx *gdl)
 			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 1 black
-			gfx_Fill_Rectangle(gdl++, part1left, y, a2, y + barheight);
+			gdl += gfx_Fill_Rectangle(gdl, part1left, y, a2, y + barheight);
 
 			// Part 2 black
-			gfx_Fill_Rectangle(gdl++, part2left, y, part1left + barwidth, y + barheight);
+			gdl += gfx_Fill_Rectangle(gdl, part2left, y, part1left + barwidth, y + barheight);
 		} else {
 			struct RGBA color = {0, 192, 0, 96};
 			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 1 green
-			gfx_Fill_Rectangle(gdl++, part1left, y, part1left + part1width, y + barheight);
+			gdl += gfx_Fill_Rectangle(gdl, part1left, y, part1left + part1width, y + barheight);
 
 			// Part 2 green
 			a2 = part1left + (int) (barwidth * healthfrac);
 
-			gfx_Fill_Rectangle(gdl++, part2left, y, a2, y + barheight);
+			gdl += gfx_Fill_Rectangle(gdl, part2left, y, a2, y + barheight);
 
 			color.r = 0;
 			color.g = 0;
@@ -1404,7 +1404,7 @@ Gfx *amRender(Gfx *gdl)
 			gfx_Set_Prim_Color(gdl++, color);
 
 			// Part 2 black
-			gfx_Fill_Rectangle(gdl++, a2, y, part1left + barwidth, y + barheight);
+			gdl += gfx_Fill_Rectangle(gdl, a2, y, part1left + barwidth, y + barheight);
 		}
 
 		// Render shield bar
@@ -1416,7 +1416,7 @@ Gfx *amRender(Gfx *gdl)
 
 		a2 = part1left + (int) (barwidth * shieldfrac);
 
-		gfx_Fill_Rectangle(gdl++, part1left, y, a2, y + barheight);
+		gdl += gfx_Fill_Rectangle(gdl, part1left, y, a2, y + barheight);
 
 		color.r = 0;
 		color.g = 0;
@@ -1424,7 +1424,7 @@ Gfx *amRender(Gfx *gdl)
 		color.a = 128;
 		gfx_Set_Prim_Color(gdl++, color);
 
-		gfx_Fill_Rectangle(gdl++, a2, y, part1left + barwidth, y + barheight);
+		gdl += gfx_Fill_Rectangle(gdl, a2, y, part1left + barwidth, y + barheight);
 	}
 
 	gSPClearExtraGeometryModeEXT(gdl++, G_ASPECT_CENTER_EXT);

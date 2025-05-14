@@ -291,18 +291,18 @@ Gfx *menuRenderBanner(Gfx *gdl, int x1, int y1, int x2, int y2, bool big, int ms
 
 	// Black fill
 	gdl = textSetPrimColour(gdl, 0x0000007f);
-	gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
+	gdl += gfx_Fill_Rectangle(gdl, x1, y1, x2, y2);
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	// Dark blue fill
 	gdl = textSetPrimColour(gdl, 0x00007f7f);
-	gfx_Fill_Rectangle(gdl++, x1, bannertop, x2, bannerbottom);
+	gdl += gfx_Fill_Rectangle(gdl, x1, bannertop, x2, bannerbottom);
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	// Top and bottom borders (light blue)
 	gdl = textSetPrimColour(gdl, 0x7f7fff7f);
-	gfx_Fill_Rectangle(gdl++, x1, bannerbottom + 2, x2, bannerbottom + 4);
-	gfx_Fill_Rectangle(gdl++, x1, bannertop - 4, x2, bannertop - 2);
+	gdl += gfx_Fill_Rectangle(gdl, x1, bannerbottom + 2, x2, bannerbottom + 4);
+	gdl += gfx_Fill_Rectangle(gdl, x1, bannertop - 4, x2, bannertop - 2);
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
 	gdl = textConfigureGfxPipeline(gdl);
@@ -2076,7 +2076,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 			mtxIdent(&matrices[i]);
 		}
 
-		menumodel->bodymodel.matrices = (Mtxf*)matrices;
+		menumodel->bodymodel.matrices = matrices;
 
 		// Set new animation if requested
 		if (menumodel->newanimnum && menumodel->curanimnum != menumodel->newanimnum) {
@@ -2111,7 +2111,7 @@ Gfx *menuRenderModel(Gfx *gdl, struct menumodel *menumodel, int modeltype)
 
 		mtx4Copy(&menumodel->mtx, matrices);
 
-		renderdata.unk00 = (Mtxf*)&menumodel->mtx;
+		renderdata.unk00 = &menumodel->mtx;
 		renderdata.unk10 = menumodel->bodymodel.matrices;
 
 		modelSetMatricesWithAnim(&renderdata, &menumodel->bodymodel);
@@ -2304,7 +2304,7 @@ Gfx *menuApplyScissor(Gfx *gdl)
 		g_ScissorY2 = g_ScissorY1;
 	}
 
-	gfx_Set_Scissor(gdl++, g_ScissorX1, g_ScissorY1, g_ScissorX2, g_ScissorY2);
+	gdl += gfx_Set_Scissor(gdl, (uint32_t)g_ScissorX1,  (uint32_t)g_ScissorY1, (uint32_t)g_ScissorX2, (uint32_t)g_ScissorY2);
 
 	return gdl;
 }
@@ -2697,7 +2697,7 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 							colour = colourBlend(colour2, colour2 & 0xffffff00, 127);
 
 							gdl = textSetPrimColour(gdl, colour);
-							gfx_Fill_Rectangle(gdl++, x1, y1, x2, y2);
+							gdl += gfx_Fill_Rectangle(gdl, x1, y1, x2, y2);
 							gdl = textSetCCPrimColorTexAlpha(gdl);
 						}
 
@@ -2797,11 +2797,11 @@ Gfx *dialogRender(Gfx *gdl, struct menudialog *dialog, struct menu *menu)
 			gdl = textSetCCPrimColorTexAlpha(gdl);
 			
 
-			gfx_Set_Scissor(gdl++, viGetViewLeft(), viGetViewTop(),
-					viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
+			gdl += gfx_Set_Scissor(gdl, (uint32_t)viGetViewLeft(), (uint32_t)viGetViewTop(),
+					(uint32_t)(viGetViewLeft() + viGetViewWidth()), (uint32_t)(viGetViewTop() + viGetViewHeight()));
 		} else {
-			gfx_Set_Scissor(gdl++, viGetViewLeft(), viGetViewTop(),
-					viGetViewLeft() + viGetViewWidth(), viGetViewTop() + viGetViewHeight());
+			gdl += gfx_Set_Scissor(gdl, (uint32_t)viGetViewLeft(), (uint32_t)viGetViewTop(),
+					(uint32_t)(viGetViewLeft() + viGetViewWidth()), (uint32_t)(viGetViewTop() + viGetViewHeight()));
 		}
 
 		// Render left/right chevrons and sibling dialog titles
@@ -4761,7 +4761,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
 				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 			gdl = textSetPrimColour(gdl, colour);
-			gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+			gdl += gfx_Fill_Rectangle(gdl, 0, 0, viGetWidth(), viGetHeight());
 			gdl = textSetCCPrimColorTexAlpha(gdl);
 		}
 		break;
@@ -4787,7 +4787,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
 				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 			gdl = textSetPrimColour(gdl, 0x000000ff);
-			gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+			gdl += gfx_Fill_Rectangle(gdl, 0, 0, viGetWidth(), viGetHeight());
 			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			// Render the success BG
@@ -4817,7 +4817,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 						G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
 						G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 					gdl = textSetPrimColour(gdl, alpha);
-					gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+					gdl += gfx_Fill_Rectangle(gdl, 0, 0, viGetWidth(), viGetHeight());
 					gdl = textSetCCPrimColorTexAlpha(gdl);
 				}
 			}
@@ -4845,7 +4845,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 				G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_TEXEL0, G_CCMUX_SHADE,              // Color 1
 				G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_TEXEL0, G_ACMUX_SHADE);             // Alpha 1
 			gdl = textSetPrimColour(gdl, channel << 24 | channel << 16 | channel << 8 | 0xff);
-			gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+			gdl += gfx_Fill_Rectangle(gdl, 0, 0, viGetWidth(), viGetHeight());
 			gdl = textSetCCPrimColorTexAlpha(gdl);
 
 			// Render the failure BG
@@ -4886,7 +4886,7 @@ Gfx *menuRenderBackgroundLayer1(Gfx *gdl, uint8_t bg, float frac)
 
 				alpha = (1.0f - frac) * 255;
 				gdl = textSetPrimColour(gdl, 0xff000000 | alpha);
-				gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+				gdl += gfx_Fill_Rectangle(gdl, 0, 0, viGetWidth(), viGetHeight());
 				gdl = textSetCCPrimColorTexAlpha(gdl);
 			}
 		}

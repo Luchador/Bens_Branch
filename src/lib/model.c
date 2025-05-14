@@ -79,7 +79,6 @@
  */
 
 uint32_t var8005efb0 = 0;
-bool g_ModelDistanceDisabled = false;
 float g_ModelDistanceScale = 1;
 float g_ExtraBoundsDist = 0;
 bool (*var8005efc4)(struct model *model, struct modelnode *node) = NULL;
@@ -174,7 +173,7 @@ float acosf(float value)
 
 void modelSetDistanceChecksDisabled(bool disabled)
 {
-	g_ModelDistanceDisabled = disabled;
+
 }
 
 void modelSetDistanceScale(float scale)
@@ -443,10 +442,10 @@ void *modelGetPartRodata(struct modeldef *modeldef, int partnum)
 
 float modelGetScreenDistance(struct model *model)
 {
-	Mtxf *mtx = (Mtxf*)modelGetRootMtx(model);
+	Mtx *mtx = modelGetRootMtx(model);
 
 	if (mtx) {
-		return -mtx->m[3][2];
+		return -(*mtx)[3][2];
 	}
 
 	return 0;
@@ -1011,21 +1010,21 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 {
 	int nodetype = node->type;
 	struct modelrodata_position *rodata = &node->rodata->position;
-	Mtxf *rendermtx;
+	Mtx *rendermtx;
 	Mtx mtx58;
 	int mtxindex0 = rodata->mtxindex0;
 	int mtxindex1 = rodata->mtxindex1;
 	int mtxindex2 = rodata->mtxindex2;
-	Mtxf *matrices = model->matrices;
+	Mtx *matrices = (Mtx*)model->matrices;
 
 	if (node->parent != NULL) {
-		rendermtx = (Mtxf*)modelFindNodeMtx(model, node->parent, 0);
+		rendermtx = modelFindNodeMtx(model, node->parent, 0);
 	} else {
-		rendermtx = renderdata->unk00;
+		rendermtx = (Mtx*)renderdata->unk00;
 	}
 
 	if (rendermtx != NULL) {
-		Mtx *nodemtx = (Mtx*)&matrices[mtxindex0];
+		Mtx *nodemtx = &matrices[mtxindex0];
 
 		quaternionToTransformMtx(pos, rot, &mtx58);
 
@@ -1041,40 +1040,40 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 			mtxScaleRow2Full(arg5->z, &mtx58);
 		}
 
-		mtxApplyAffineTransform((Mtx*)rendermtx, &mtx58, nodemtx);
+		mtxApplyAffineTransform(rendermtx, &mtx58, nodemtx);
 
 		if (g_ModelJointPositionedFunc != NULL) {
 			g_ModelJointPositionedFunc(mtxindex0, nodemtx);
 		}
 	} else {
-		Mtxf *nodemtx = &matrices[mtxindex0];
+		Mtx *nodemtx = &matrices[mtxindex0];
 
-		quaternionToTransformMtx(pos, rot, (Mtx*)nodemtx);
+		quaternionToTransformMtx(pos, rot, nodemtx);
 
 		if (arg5->x != 1.0f) {
-			mtxScaleRow0Full(arg5->x, (Mtx*)nodemtx);
+			mtxScaleRow0Full(arg5->x, nodemtx);
 		}
 
 		if (arg5->y != 1.0f) {
-			mtxScaleRow1Full(arg5->y, (Mtx*)nodemtx);
+			mtxScaleRow1Full(arg5->y, nodemtx);
 		}
 
 		if (arg5->z != 1.0f) {
-			mtxScaleRow2Full(arg5->z, (Mtx*)nodemtx);
+			mtxScaleRow2Full(arg5->z, nodemtx);
 		}
 	}
 
 	if (nodetype & MODELNODETYPE_0100) {
-		Mtxf *nodemtx = &matrices[mtxindex1];
+		Mtx *nodemtx = &matrices[mtxindex1];
 		float sp2c[4];
 
 		quaternionSlerpFromIdentity(rot, 0.5f, sp2c);
 
 		if (rendermtx != NULL) {
 			quaternionToTransformMtx(pos, sp2c, &mtx58);
-			mtxApplyAffineTransform((Mtx*)rendermtx, &mtx58, (Mtx*)nodemtx);
+			mtxApplyAffineTransform(rendermtx, &mtx58, nodemtx);
 		} else {
-			quaternionToTransformMtx(pos, sp2c, (Mtx*)nodemtx);
+			quaternionToTransformMtx(pos, sp2c, nodemtx);
 		}
 	}
 
@@ -1105,7 +1104,7 @@ void modelPositionJointUsingQuatRot(struct modelrenderdata *renderdata, struct m
 
 		if (rendermtx != NULL) {
 			Mtx *nodemtx = (Mtx*)&matrices[mtxindex2];
-			mtxApplyAffineTransform((Mtx*)rendermtx, finalmtx, nodemtx);
+			mtxApplyAffineTransform(rendermtx, finalmtx, nodemtx);
 		}
 	}
 }
@@ -1123,7 +1122,7 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 	struct coord rotNext, transNext, scaleNext;
 
 	bool useAbsoluteTranslation = false;
-	Mtxf tempMatrix;
+	Mtx tempMatrix;
 
 	if (anim != NULL) {
 		if (anim->animnum != 0) {
@@ -1208,11 +1207,11 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 			modelPositionJointUsingVecRot(renderdata, model, node, &rotBase, &transBase, false, &scaleBase);
 		}
 	} else {
-		Mtxf *parentMtx = node->parent ? (Mtxf*)modelFindNodeMtx(model, node->parent, 0) : renderdata->unk00;
+		Mtx *parentMtx = node->parent ? modelFindNodeMtx(model, node->parent, 0) : (Mtx*)renderdata->unk00;
 
 		if (parentMtx) {
-			mtx4LoadTranslation(&rodata->pos, (Mtx *)&tempMatrix);
-			mtxApplyAffineTransform((Mtx *)parentMtx, (Mtx *)&tempMatrix, (Mtx *)&model->matrices[rodata->mtxindex0]);
+			mtx4LoadTranslation(&rodata->pos, &tempMatrix);
+			mtxApplyAffineTransform(parentMtx, &tempMatrix, (Mtx *)&model->matrices[rodata->mtxindex0]);
 		} else {
 			mtx4LoadTranslation(&rodata->pos, (Mtx *)&model->matrices[rodata->mtxindex0]);
 		}
@@ -1223,20 +1222,20 @@ void modelUpdatePositionNodeMtx(struct modelrenderdata *renderdata, struct model
 void modelUpdatePositionHeldNodeMtx(struct modelrenderdata *arg0, struct model *model, struct modelnode *node)
 {
 	union modelrodata *rodata = node->rodata;
-	Mtxf *sp68;
-	Mtxf sp28;
+	Mtx *sp68;
+	Mtx sp28;
 	int mtxindex = rodata->positionheld.mtxindex;
-	Mtxf *matrices = model->matrices;
+	Mtx *matrices = (Mtx*)model->matrices;
 
 	if (node->parent) {
-		sp68 = (Mtxf*)modelFindNodeMtx(model, node->parent, 0);
+		sp68 = modelFindNodeMtx(model, node->parent, 0);
 	} else {
-		sp68 = arg0->unk00;
+		sp68 = (Mtx*)arg0->unk00;
 	}
 
 	if (sp68) {
-		mtx4LoadTranslation(&rodata->positionheld.pos, (Mtx*)&sp28);
-		mtxApplyAffineTransform((Mtx*)sp68, (Mtx*)&sp28, (Mtx*)&matrices[mtxindex]);
+		mtx4LoadTranslation(&rodata->positionheld.pos,&sp28);
+		mtxApplyAffineTransform(sp68, &sp28, (Mtx*)&matrices[mtxindex]);
 	} else {
 		mtx4LoadTranslation(&rodata->positionheld.pos, (Mtx*)&matrices[mtxindex]);
 	}
@@ -1249,18 +1248,8 @@ void modelUpdateDistanceRelations(struct model *model, struct modelnode *node)
 {
 	union modelrodata *rodata = node->rodata;
 	union modelrwdata *rwdata = modelGetNodeRwData(model, node);
-	Mtxf *mtx = (Mtxf*)modelFindNodeMtx(model, node, 0);
-	float distance;
-
-	if (g_ModelDistanceDisabled || !mtx) {
-		distance = 0;
-	} else {
-		distance = -mtx->m[3][2] * camGetLodScaleZ();
-
-		if (g_ModelDistanceScale != 1) {
-			distance *= g_ModelDistanceScale;
-		}
-	}
+	Mtx *mtx = modelFindNodeMtx(model, node, 0);
+	float distance = 0;
 
 	if (distance > rodata->distance.near * model->scale || rodata->distance.near == 0) {
 		if (distance <= rodata->distance.far * model->scale) {
@@ -1384,7 +1373,7 @@ void modelUpdateReorderRelations(struct model *model, struct modelnode *node)
 {
 	union modelrodata *rodata = node->rodata;
 	union modelrwdata *rwdata = modelGetNodeRwData(model, node);
-	Mtxf *mtx = (Mtxf*)modelFindNodeMtx(model, node, 0);
+	Mtx *mtx = modelFindNodeMtx(model, node, 0);
 	struct coord sp38;
 	struct coord sp2c;
 	float tmp;
@@ -1395,17 +1384,17 @@ void modelUpdateReorderRelations(struct model *model, struct modelnode *node)
 		sp38.z = rodata->reorder.unk0c[2];
 		mtx4RotateVecInPlace((Mtx*)mtx, &sp38);
 	} else if (rodata->reorder.side == 2) {
-		sp38.x = mtx->m[1][0] * rodata->reorder.unk0c[1];
-		sp38.y = mtx->m[1][1] * rodata->reorder.unk0c[1];
-		sp38.z = mtx->m[1][2] * rodata->reorder.unk0c[1];
+		sp38.x = (*mtx)[1][0] * rodata->reorder.unk0c[1];
+		sp38.y = (*mtx)[1][1] * rodata->reorder.unk0c[1];
+		sp38.z = (*mtx)[1][2] * rodata->reorder.unk0c[1];
 	} else if (rodata->reorder.side == 3) {
-		sp38.x = mtx->m[2][0] * rodata->reorder.unk0c[2];
-		sp38.y = mtx->m[2][1] * rodata->reorder.unk0c[2];
-		sp38.z = mtx->m[2][2] * rodata->reorder.unk0c[2];
+		sp38.x = (*mtx)[2][0] * rodata->reorder.unk0c[2];
+		sp38.y = (*mtx)[2][1] * rodata->reorder.unk0c[2];
+		sp38.z = (*mtx)[2][2] * rodata->reorder.unk0c[2];
 	} else if (rodata->reorder.side == 1) {
-		sp38.x = mtx->m[0][0] * rodata->reorder.unk0c[0];
-		sp38.y = mtx->m[0][1] * rodata->reorder.unk0c[0];
-		sp38.z = mtx->m[0][2] * rodata->reorder.unk0c[0];
+		sp38.x = (*mtx)[0][0] * rodata->reorder.unk0c[0];
+		sp38.y = (*mtx)[0][1] * rodata->reorder.unk0c[0];
+		sp38.z = (*mtx)[0][2] * rodata->reorder.unk0c[0];
 	}
 
 	sp2c.x = rodata->reorder.unk00;
@@ -3470,7 +3459,7 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 
 
 	struct modelrodata_chrgunfire *rodata = &node->rodata->chrgunfire;
-	Mtxf *mtx = &model->matrices[modelFindNodeMtxIndex(node, 0)];
+	Mtx *mtx = (Mtx*)&model->matrices[modelFindNodeMtxIndex(node, 0)];
 
 	Vtx *vertices;
 	Vtx vtxtemplate = {0};
@@ -3481,12 +3470,12 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 	float distance;
 
 	int index = modelFindNodeMtxIndex(node, 0);
-	mtx = &model->matrices[index];
+	mtx = (Mtx*)&model->matrices[index];
 
 	struct coord viewdir;
-	viewdir.x = -(rodata->pos.f[0] * mtx->m[0][0] + rodata->pos.f[1] * mtx->m[1][0] + rodata->pos.f[2] * mtx->m[2][0] + mtx->m[3][0]);
-	viewdir.y = -(rodata->pos.f[0] * mtx->m[0][1] + rodata->pos.f[1] * mtx->m[1][1] + rodata->pos.f[2] * mtx->m[2][1] + mtx->m[3][1]);
-	viewdir.z = -(rodata->pos.f[0] * mtx->m[0][2] + rodata->pos.f[1] * mtx->m[1][2] + rodata->pos.f[2] * mtx->m[2][2] + mtx->m[3][2]);
+	viewdir.x = -(rodata->pos.f[0] * (*mtx)[0][0] + rodata->pos.f[1] * (*mtx)[1][0] + rodata->pos.f[2] * (*mtx)[2][0] + (*mtx)[3][0]);
+	viewdir.y = -(rodata->pos.f[0] * (*mtx)[0][1] + rodata->pos.f[1] * (*mtx)[1][1] + rodata->pos.f[2] * (*mtx)[2][1] + (*mtx)[3][1]);
+	viewdir.z = -(rodata->pos.f[0] * (*mtx)[0][2] + rodata->pos.f[1] * (*mtx)[1][2] + rodata->pos.f[2] * (*mtx)[2][2] + (*mtx)[3][2]);
 
 	distance = sqrtf(viewdir.x * viewdir.x + viewdir.y * viewdir.y + viewdir.z * viewdir.z);
 
@@ -3501,9 +3490,9 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 		viewdir.z = 1 / model->scale;
 	}
 
-	float pitch = acosf(viewdir.x * mtx->m[1][0] + viewdir.y * mtx->m[1][1] + viewdir.z * mtx->m[1][2]);
-	float yaw = acosf(-(viewdir.x * mtx->m[2][0] + viewdir.y * mtx->m[2][1] + viewdir.z * mtx->m[2][2]) / sinf(pitch));
-	float forward = -(viewdir.x * mtx->m[0][0] + viewdir.y * mtx->m[0][1] + viewdir.z * mtx->m[0][2]);
+	float pitch = acosf(viewdir.x * (*mtx)[1][0] + viewdir.y * (*mtx)[1][1] + viewdir.z * (*mtx)[1][2]);
+	float yaw = acosf(-(viewdir.x * (*mtx)[2][0] + viewdir.y * (*mtx)[2][1] + viewdir.z * (*mtx)[2][2]) / sinf(pitch));
+	float forward = -(viewdir.x * (*mtx)[0][0] + viewdir.y * (*mtx)[0][1] + viewdir.z * (*mtx)[0][2]);
 
 	if (forward < 0) {
 		yaw = M_TAU - yaw;
@@ -3583,7 +3572,7 @@ void modelRenderNodeChrGunfire(struct modelrenderdata *renderdata, struct model 
 	}
 
 	gfx_Set_Geometry_Mode(renderdata->gdl++, G_CULL_BACK);
-	gfx_Matrix(renderdata->gdl++, (Mtx*)mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+	gfx_Matrix(renderdata->gdl++, mtx, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
 	gfx_Color(renderdata->gdl++, colours, 1);
 	gfx_Vertex(renderdata->gdl++, vertices, 4, 0);
 	gfx_Tri2(renderdata->gdl++, 0, 1, 2, 2, 3, 0);
@@ -3664,7 +3653,7 @@ void modelRender(struct modelrenderdata *renderdata, struct model *model)
 	}
 }
 
-bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct coord *arg2, struct coord *arg3)
+bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtx *mtx, struct coord *arg2, struct coord *arg3)
 {
 	float xthingx;
 	float xthingy;
@@ -3715,12 +3704,12 @@ bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct co
 	}
 
 	// x
-	xthingx = mtx->m[0][0] * mtx->m[0][0];
-	xthingy = mtx->m[0][1] * mtx->m[0][1];
-	xthingz = mtx->m[0][2] * mtx->m[0][2];
+	xthingx = (*mtx)[0][0] * (*mtx)[0][0];
+	xthingy = (*mtx)[0][1] * (*mtx)[0][1];
+	xthingz = (*mtx)[0][2] * (*mtx)[0][2];
 
-	xsum1 = mtx->m[0][0] * arg3->f[0] + mtx->m[0][1] * arg3->f[1] + mtx->m[0][2] * arg3->f[2];
-	xsum2 = mtx->m[0][0] * (arg2->f[0] - mtx->m[3][0]) + mtx->m[0][1] * (arg2->f[1] - mtx->m[3][1]) + mtx->m[0][2] * (arg2->f[2] - mtx->m[3][2]);
+	xsum1 = (*mtx)[0][0] * arg3->f[0] + (*mtx)[0][1] * arg3->f[1] + (*mtx)[0][2] * arg3->f[2];
+	xsum2 = (*mtx)[0][0] * (arg2->f[0] - (*mtx)[3][0]) + (*mtx)[0][1] * (arg2->f[1] - (*mtx)[3][1]) + (*mtx)[0][2] * (arg2->f[2] - (*mtx)[3][2]);
 
 	f0 = -(xthingx + xthingy + xthingz) * xmax;
 	xsum3 = -(xsum2 + f0);
@@ -3744,12 +3733,12 @@ bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct co
 	}
 
 	// y
-	ythingx = mtx->m[1][0] * mtx->m[1][0];
-	ythingy = mtx->m[1][1] * mtx->m[1][1];
-	ythingz = mtx->m[1][2] * mtx->m[1][2];
+	ythingx = (*mtx)[1][0] * (*mtx)[1][0];
+	ythingy = (*mtx)[1][1] * (*mtx)[1][1];
+	ythingz = (*mtx)[1][2] * (*mtx)[1][2];
 
-	ysum1 = mtx->m[1][0] * arg3->f[0] + mtx->m[1][1] * arg3->f[1] + mtx->m[1][2] * arg3->f[2];
-	ysum2 = mtx->m[1][0] * (arg2->f[0] - mtx->m[3][0]) + mtx->m[1][1] * (arg2->f[1] - mtx->m[3][1]) + mtx->m[1][2] * (arg2->f[2] - mtx->m[3][2]);
+	ysum1 = (*mtx)[1][0] * arg3->f[0] + (*mtx)[1][1] * arg3->f[1] + (*mtx)[1][2] * arg3->f[2];
+	ysum2 = (*mtx)[1][0] * (arg2->f[0] - (*mtx)[3][0]) + (*mtx)[1][1] * (arg2->f[1] - (*mtx)[3][1]) + (*mtx)[1][2] * (arg2->f[2] - (*mtx)[3][2]);
 
 	f0 = -(ythingx + ythingy + ythingz) * ymax;
 	ysum3 = -(ysum2 + f0);
@@ -3803,12 +3792,12 @@ bool modelTestBboxNodeForHit(struct modelrodata_bbox *bbox, Mtxf *mtx, struct co
 	}
 
 	// z
-	zthingx = mtx->m[2][0] * mtx->m[2][0];
-	zthingy = mtx->m[2][1] * mtx->m[2][1];
-	zthingz = mtx->m[2][2] * mtx->m[2][2];
+	zthingx = (*mtx)[2][0] * (*mtx)[2][0];
+	zthingy = (*mtx)[2][1] * (*mtx)[2][1];
+	zthingz = (*mtx)[2][2] * (*mtx)[2][2];
 
-	zsum1 = mtx->m[2][0] * arg3->f[0] + mtx->m[2][1] * arg3->f[1] + mtx->m[2][2] * arg3->f[2];
-	zsum2 = mtx->m[2][0] * (arg2->f[0] - mtx->m[3][0]) + mtx->m[2][1] * (arg2->f[1] - mtx->m[3][1]) + mtx->m[2][2] * (arg2->f[2] - mtx->m[3][2]);
+	zsum1 = (*mtx)[2][0] * arg3->f[0] + (*mtx)[2][1] * arg3->f[1] + (*mtx)[2][2] * arg3->f[2];
+	zsum2 = (*mtx)[2][0] * (arg2->f[0] - (*mtx)[3][0]) + (*mtx)[2][1] * (arg2->f[1] - (*mtx)[3][1]) + (*mtx)[2][2] * (arg2->f[2] - (*mtx)[3][2]);
 
 	f0 = -(zthingx + zthingy + zthingz) * zmax;
 	zsum3 = -(zsum2 + f0);
@@ -3854,7 +3843,7 @@ int modelTestForHit(struct model *model, struct coord *arg1, struct coord *arg2,
 {
 	struct modelnode *node;
 	bool dochildren = true;
-	Mtxf *mtx;
+	Mtx *mtx;
 	union modelrodata *rodata;
 	union modelrwdata *rwdata;
 	uint32_t type;
@@ -3892,7 +3881,7 @@ int modelTestForHit(struct model *model, struct coord *arg1, struct coord *arg2,
 		switch (type) {
 		case MODELNODETYPE_BBOX:
 			rodata = node->rodata;
-			mtx = (Mtxf*)modelFindNodeMtx(model, node, 0);
+			mtx = modelFindNodeMtx(model, node, 0);
 
 			if (modelTestBboxNodeForHit(&rodata->bbox, mtx, arg1, arg2)) {
 				*startnode = node;

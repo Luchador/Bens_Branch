@@ -187,7 +187,7 @@ bool g_CreditsScrollStarted = false;
 bool g_CreditsAltTitleRequested = false;
 bool g_CreditsUsingAltTitle = false;
 
-void creditsMap9BgVertices(Vtx *vertices, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6)
+void creditsMap9BgVertices(VtxF *vertices, float arg1, float arg2, float arg3, float arg4, float arg5, float arg6)
 {
 	float a = arg2 * sinf(arg1) + arg3 * cosf(arg1);
 	float b = arg2 * cosf(arg1) - arg3 * sinf(arg1);
@@ -233,7 +233,7 @@ void creditsMap9BgVertices(Vtx *vertices, float arg1, float arg2, float arg3, fl
  * 7:  0      1800
  * 8:  1800   1800
  */
-void creditsInitBgVertices(Vtx *vertices, int z)
+void creditsInitBgVertices(VtxF *vertices, int z)
 {
 	int i;
 
@@ -261,7 +261,7 @@ struct bgconfig g_CreditsBgConfigs[] = {
 	{ 0.01, { 2, 1, 2, 1, 0, 1, 2, 1, 2 }, { { 0x00ffff, 0x0000ff, 0x000000 }, { 0xffffff, 0xffffff, 0xffffff }, { 0xffffff, 0xffffff, 0xffffff } } },
 };
 
-void creditsChooseBgColours(Vtx *vertices, Col *colours, int confignum, int alpha, int arg4)
+void creditsChooseBgColours(VtxF *vertices, Col *colours, int confignum, int alpha, int arg4)
 {
 	int iVar1 = (int)(g_CreditsBgConfigs[confignum].unk00 * g_CreditsCurFrame2 * 0.25f + arg4) % 180;
 	int colour1index = iVar1 / 60;
@@ -327,7 +327,7 @@ struct creditsbgtype g_CreditsBgTypes[] = {
 
 Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float arg3, uint32_t alpha, int arg5)
 {
-	Vtx *vertices;
+	VtxF *vertices;
 	Col *colours;
 	float pan;
 	float b;
@@ -351,7 +351,7 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float 
 	gfx_Set_Render_Mode(gdl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
 
 	colours = gfxAllocateColours(3);
-	vertices = gfxAllocateVertices(9);
+	vertices = gfxAllocateVerticesF(9);
 
 	creditsInitBgVertices(vertices, (int)((g_CreditsBgTypes[type].unk04 + 2000) * arg3) - 2000);
 
@@ -373,7 +373,7 @@ Gfx *creditsDrawBackgroundLayer(Gfx *gdl, uint8_t type, uint8_t layernum, float 
 	creditsChooseBgColours(vertices, colours, g_CreditsData->bglayers[layernum].confignum, alpha, arg5 * 90);
 
 	gfx_Color(gdl++, colours, 3);
-	gfx_Vertex(gdl++, vertices, 9, 0);
+	gfx_VertexF(gdl++, vertices, 9, 0);
 
 	gfx_Tri4(gdl++, 0, 1, 3, 1, 4, 3, 1, 2, 5, 5, 4, 1);
 	gfx_Tri4(gdl++, 3, 4, 7, 7, 6, 3, 4, 5, 7, 5, 8, 7);
@@ -552,7 +552,7 @@ Gfx *creditsFillFramebuffer(Gfx *gdl, uint32_t colour)
 
 	gdl = textSetPrimColour(gdl, colour);
 
-	gfx_Fill_Rectangle(gdl++, 0, 0, viGetWidth(), viGetHeight());
+	gdl += gfx_Fill_Rectangle(gdl, 0, 0, viGetWidth(), viGetHeight());
 
 	gdl = textSetCCPrimColorTexAlpha(gdl);
 
@@ -1557,7 +1557,7 @@ Gfx *creditsDraw(Gfx *gdl)
 	gdl = vi0000b1d0(gdl);
 	gdl = creditsFillFramebuffer(gdl, 0x000000ff);
 
-	gfx_Set_Scissor(gdl++, 0, 30, viGetWidth(), (viGetHeight() - 30));
+	gdl += gfx_Set_Scissor(gdl, 0, 30, viGetWidth(), (viGetHeight() - 30));
 
 	creditsTick();
 

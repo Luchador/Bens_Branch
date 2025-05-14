@@ -8,7 +8,7 @@ void bgSetRoomOnscreen(int room, int draworder, struct screenbox *arg2);
 void bgGetRoomBrightnessRange(int roomnum, int8_t *min, int8_t *max);
 struct drawslot *bgGetRoomDrawSlot(int roomnum);
 Gfx *bgRenderXrayData(Gfx *gdl, struct xraydata *xraydata);
-Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t vertices1[3], int16_t vertices2[3], int16_t vertices3[3], uint32_t colour1, uint32_t colour2, uint32_t colour3);
+Gfx *bgAddXrayTri(Gfx *gdl, struct xraydata *xraydata, float vertices1[3], float vertices2[3], float vertices3[3], uint32_t colour1, uint32_t colour2, uint32_t colour3);
 void bgChooseXrayVtxColour(bool *inrange, int16_t vertex[3], uint32_t *colour, struct xraydata *xraydata);
 Gfx *bgProcessXrayTri(Gfx *gdl, struct xraydata *xraydata, int16_t arg2[3], int16_t arg3[3], int16_t arg4[3], int arg5, int arg6, int arg7, int arg8, int arg9, int arg10);
 Gfx *bgRenderGdlInXray(Gfx *gdl, int8_t *readgdl, Vtx *vertices, int16_t arg3[3]);

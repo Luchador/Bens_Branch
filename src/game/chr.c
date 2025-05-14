@@ -1842,25 +1842,25 @@ void chrUpdatePropMatrices(struct chrdata *chr, struct prop *prop, bool fulltick
         prop->flags |= PROPFLAG_ONTHISSCREENTHISTICK | PROPFLAG_ONANYSCREENTHISTICK;
 
         if (obj->hidden & OBJHFLAG_EMBEDDED) {
-            mtxApplyAffineTransform(parentMtx, (Mtx*)&obj->embedment->matrix, &transformMtx);
-            renderdata.unk00 = (Mtxf*)&transformMtx;
+            mtxApplyAffineTransform(parentMtx, &obj->embedment->matrix, &transformMtx);
+            renderdata.unk00 = &transformMtx;
         } else if (CHRRACE(chr) == RACE_SKEDAR) {
             // Skedar hand orientation fix
             mtx4LoadYRotation(1.3192588090897f, &transformMtx);
             mtx4LoadZRotation(1.5705462694168f, &tempMtx);
             mtx4MultMtx4InPlace(&tempMtx, &transformMtx);
             mtx4MultMtx4InPlace(parentMtx, &transformMtx);
-            renderdata.unk00 = (Mtxf*)&transformMtx;
+            renderdata.unk00 = &transformMtx;
         } else if (prop == chr->weapons_held[HAND_LEFT]) {
             // Flip model for left hand
             mtx4LoadZRotation(M_PI, &transformMtx);
             mtx4MultMtx4InPlace(parentMtx, &transformMtx);
-            renderdata.unk00 = (Mtxf*)&transformMtx;
+            renderdata.unk00 = &transformMtx;
         } else {
-            renderdata.unk00 = (Mtxf*)parentMtx;
+            renderdata.unk00 = parentMtx;
         }
 
-        renderdata.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
+        renderdata.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtx));
         modelSetMatrices(&renderdata, model);
 
         propTickWeaponsAndAmmoCrates(prop, fulltick);
@@ -2481,7 +2481,7 @@ int chrTick(struct prop *prop)
 
 			mtx4LoadTranslation(&sp190, &sp1a8);
 			mtx4MultMtx4InPlace(camGetPlayerWorldToScreenMtx(), &sp1a8);
-			sp210.unk00 = (Mtxf*)&sp1a8;
+			sp210.unk00 = &sp1a8;
 		} else if (prop->type == PROPTYPE_PLAYER) {
 			float sp130;
 			player = g_Vars.players[playermgrGetPlayerNumByProp(prop)];
@@ -2497,15 +2497,15 @@ int chrTick(struct prop *prop)
 
 				mtx4LoadTranslation(&sp17c, &sp1a8);
 				mtx4MultMtx4InPlace(camGetPlayerWorldToScreenMtx(), &sp1a8);
-				sp210.unk00 = (Mtxf*)&sp1a8;
+				sp210.unk00 = &sp1a8;
 			} else {
-				sp210.unk00 = (Mtxf*)camGetPlayerWorldToScreenMtx();
+				sp210.unk00 = camGetPlayerWorldToScreenMtx();
 			}
 		} else {
-			sp210.unk00 = (Mtxf*)camGetPlayerWorldToScreenMtx();
+			sp210.unk00 = camGetPlayerWorldToScreenMtx();
 		}
 
-		sp210.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtxf));
+		sp210.unk10 = gfxAllocate(model->definition->nummatrices * sizeof(Mtx));
 
 		if (fulltick && g_CurModelChr->flinchcnt >= 0) {
 			g_CurModelChr->flinchcnt += g_Vars.lvupdate60;
@@ -2738,27 +2738,27 @@ bool chr0f024738(struct chrdata *chr)
 						struct modelrodata_bbox *bbox = objFindBboxRodata(obj);
 						thing->bbox = *bbox;
 
-						mtx3ToMtx4(obj->realrot, (Mtx*)&thing->unk02c);
-						mtx4SetTranslation(&obj->prop->pos, (Mtx*)&thing->unk02c);
-						mtxInvertAffine((Mtx*)thing->unk02c.m, (Mtx*)thing->unk06c.m);
+						mtx3ToMtx4(obj->realrot, &thing->unk02c);
+						mtx4SetTranslation(&obj->prop->pos, &thing->unk02c);
+						mtxInvertAffine(&thing->unk02c, &thing->unk06c);
 
 						campos = &g_Vars.currentplayer->cam_pos;
 
 						thing->unk12c = (
-								+ thing->unk06c.m[0][2] * campos->f[0]
-								+ thing->unk06c.m[1][2] * campos->f[1]
-								+ thing->unk06c.m[2][2] * campos->f[2]) + thing->unk06c.m[3][2];
+								+ thing->unk06c[0][2] * campos->f[0]
+								+ thing->unk06c[1][2] * campos->f[1]
+								+ thing->unk06c[2][2] * campos->f[2]) + thing->unk06c[3][2];
 
-						mtxApplyAffineTransform((Mtx*)&thing->unk06c, camGetProjectionMtx(), (Mtx*)&thing->unk0ac);
+						mtxApplyAffineTransform(&thing->unk06c, camGetProjectionMtx(), &thing->unk0ac);
 						thing->unk00c = true;
 					}
 
 					modelGetRootPosition(chr->model, &pos);
 
 					thing->unk008 = (
-							thing->unk06c.m[0][2] * pos.f[0] +
-							thing->unk06c.m[1][2] * pos.f[1] +
-							thing->unk06c.m[2][2] * pos.f[2]) + thing->unk06c.m[3][2];
+							thing->unk06c[0][2] * pos.f[0] +
+							thing->unk06c[1][2] * pos.f[1] +
+							thing->unk06c[2][2] * pos.f[2]) + thing->unk06c[3][2];
 
 					if ((thing->unk008 > thing->bbox.zmax && thing->unk12c < thing->bbox.zmin)
 							|| (thing->unk008 < thing->bbox.zmin && thing->unk12c > thing->bbox.zmax)) {
@@ -3490,7 +3490,7 @@ void chr0f0260c4(struct model *model, int hitpart, struct modelnode *node, struc
 						}
 					} else if (op == G_MTX) {
 						uint32_t addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
-						posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtxf));
+						posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtx));
 						modelNodeGetModelRelativePosition(model, posnode, &spd4);
 
 						spbc[0] = spd4.x + spc8.x;
@@ -3620,7 +3620,7 @@ void chr0f0260c4(struct model *model, int hitpart, struct modelnode *node, struc
 						}
 					} else if (op == G_MTX) {
 						uint32_t addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
-						posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtxf));
+						posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtx));
 						modelNodeGetModelRelativePosition(model, posnode, &spd4);
 					} else if (op == G_COL) {
 						spac = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
@@ -3765,7 +3765,7 @@ void chrBruise(struct model *model, int hitpart, struct modelnode *node, struct 
 						}
 					} else if (op == G_MTX) {
 						uint32_t addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
-						posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtxf));
+						posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtx));
 						modelNodeGetModelRelativePosition(model, posnode, &spd4);
 
 						spbc[0] = spd4.x + spc8.x;
@@ -3918,7 +3918,7 @@ void chrBruise(struct model *model, int hitpart, struct modelnode *node, struct 
 							}
 						} else if (op == G_MTX) {
 							uint32_t addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
-							posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtxf));
+							posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtx));
 							modelNodeGetModelRelativePosition(model, posnode, &spd4);
 						} else if (op == G_COL) {
 							spac = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
@@ -4101,7 +4101,7 @@ void chrDisfigure(struct chrdata *chr, struct coord *exppos, float damageradius)
 							} else if (op == G_MTX) {
 								// Get the position of the node relative to the model
 								uint32_t addr = UNSEGADDR(gdlptr->words.w1) & 0xffffff;
-								posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtxf));
+								posnode = modelFindNodeByMtxIndex(model, addr / sizeof(Mtx));
 								modelNodeGetModelRelativePosition(model, posnode, &pos);
 							}
 
@@ -4230,7 +4230,7 @@ void chrTestHit(struct prop *prop, struct shotdata *shotdata, bool isshooting, b
 					hitpart = modelTestForHit(model, &shotdata->gunpos2d, &shotdata->gundir2d, &node);
 
 					while (hitpart > 0) {
-						if (func0f084594(model, node, &shotdata->gunpos2d, &shotdata->gundir2d, &sp88, &sp84, &sp80)) {
+						if (objTestAABBIntersection(model, node, &shotdata->gunpos2d, &shotdata->gundir2d, &sp88, &sp84, &sp80)) {
 							mtx4TransformVec((Mtx*)&model->matrices[sp84], &sp88.pos, &spdc);
 							mtx4TransformVecInPlace(camGetProjectionMtx(), &spdc);
 							mtx4RotateVec((Mtx*)&model->matrices[sp84], &sp88.unk0c, &spd0);
@@ -4627,17 +4627,17 @@ bool chrCalculateAutoAim(struct prop *prop, struct coord *arg1, float *arg2, flo
 		Mtx *mtx2;
 
 		if (model->definition->skel == &g_SkelChr) {
-			mtx1 = (Mtx*)&model->matrices[0];
-			mtx2 = (Mtx*)&model->matrices[1];
+			mtx1 = &model->matrices[0];
+			mtx2 = &model->matrices[1];
 			arg1->z = (*mtx2)[3][2] + ((*mtx1)[3][2] - (*mtx2)[3][2]) * 0.5f;
 		} else if (model->definition->skel == &g_SkelSkedar) {
-			mtx2 = (Mtx*)&model->matrices[0];
+			mtx2 = &model->matrices[0];
 			arg1->z = (*mtx2)[3][2];
 		} else if (model->definition->skel == &g_SkelDrCaroll) {
-			mtx2 = (Mtx*)&model->matrices[0];
+			mtx2 = &model->matrices[0];
 			arg1->z = (*mtx2)[3][2];
 		} else {
-			arg1->z = model->matrices[0].m[3][2];
+			arg1->z = model->matrices[0][3][2];
 		}
 
 		if (arg1->z < 0) {
@@ -4651,8 +4651,8 @@ bool chrCalculateAutoAim(struct prop *prop, struct coord *arg1, float *arg2, flo
 				arg1->x = (*mtx2)[3][0];
 				arg1->y = (*mtx2)[3][1];
 			} else {
-				arg1->x = model->matrices[0].m[3][0];
-				arg1->y = model->matrices[0].m[3][1];
+				arg1->x = model->matrices[0][3][0];
+				arg1->y = model->matrices[0][3][1];
 			}
 
 			arg3[0] = arg3[1] = 0;
@@ -5026,12 +5026,11 @@ float propGetShieldThing(struct prop **propptr)
 
 bool g_ShieldHitActive = false;
 
-Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop, struct model *model,
-		struct modelnode *node, int side, int arg6, int arg7, int alpha)
+Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop, struct model *model, struct modelnode *node, int side, int arg6, int arg7, int alpha)
 {
 	struct modelrodata_bbox *bbox = &node->rodata->bbox;
-	Vtx vtxtemplate = {0};
-	Vtx *vertices;
+	VtxF vtxtemplate = {0};
+	VtxF *vertices;
 	Col *colours;
 	Mtx *modelmtx;
 	int i;
@@ -5089,7 +5088,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 	}
 
 	mtxindex = modelFindNodeMtxIndex(node, 0);
-	modelmtx = (Mtx*)&model->matrices[mtxindex];
+	modelmtx = &model->matrices[mtxindex];
 
 	xmin = bbox->xmin - gap;
 	xmax = bbox->xmax + gap;
@@ -5147,7 +5146,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			colours[0].a = (int) ((127 - cloakfade) * (float) alpha * (1.0f / 85.0f));
 		}
 
-		vertices = gfxAllocateVertices(24);
+		vertices = gfxAllocateVerticesF(24);
 
 		for (i = 0; i < ARRAYCOUNT(sp104); i++) {
 			for (j = 0; j < ARRAYCOUNT(sp104[i]); j++) {
@@ -5167,7 +5166,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices[3].s = 0;
 			vertices[3].t = 512;
 
-			gfx_Vertex(gdl++, vertices, 4, 0);
+			gfx_VertexF(gdl++, vertices, 4, 0);
 
 			gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
@@ -5259,7 +5258,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				}
 			}
 
-			vertices = gfxAllocateVertices(24);
+			vertices = gfxAllocateVerticesF(24);
 
 			if ((prop->type == PROPTYPE_OBJ || prop->type == PROPTYPE_WEAPON || prop->type == PROPTYPE_DOOR)
 					&& (prop->obj->flags3 & OBJFLAG3_SHOWSHIELD)) {
@@ -5294,7 +5293,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				vertices[3].s = st1;
 				vertices[3].t = st4;
 
-				gfx_Vertex(gdl++, vertices, 4, 0);
+				gfx_VertexF(gdl++, vertices, 4, 0);
 
 				gfx_Tri2(gdl++, 0, 1, 2, 0, 2, 3);
 
@@ -5325,7 +5324,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			colours[0].a = (int) alpha3;
 			colours[1].a = 0;
 
-			vertices = gfxAllocateVertices(30);
+			vertices = gfxAllocateVerticesF(30);
 
 			for (i = 0; i < ARRAYCOUNT(sp104); i++) {
 				for (j = 0; j < ARRAYCOUNT(sp104[i]); j++) {
@@ -5346,21 +5345,21 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				vertices[3].t = st4;
 
 				vertices[4] = vtxtemplate;
-				vertices[4].x = (vertices[0].x + vertices[1].x + vertices[2].x + vertices[3].x) >> 2;
-				vertices[4].y = (vertices[0].y + vertices[1].y + vertices[2].y + vertices[3].y) >> 2;
-				vertices[4].z = (vertices[0].z + vertices[1].z + vertices[2].z + vertices[3].z) >> 2;
-				vertices[4].s = (st1 + st3) >> 1;
-				vertices[4].t = (st2 + st4) >> 1;
+				vertices[4].x = (vertices[0].x + vertices[1].x + vertices[2].x + vertices[3].x) / 4.0f;
+				vertices[4].y = (vertices[0].y + vertices[1].y + vertices[2].y + vertices[3].y) / 4.0f;
+				vertices[4].z = (vertices[0].z + vertices[1].z + vertices[2].z + vertices[3].z) / 4.0f;
+				vertices[4].s = (st1 + st3) / 2.0f;
+				vertices[4].t = (st2 + st4) / 2.0f;
 				vertices[4].colour = 4;
 
-				gfx_Vertex(gdl++, vertices, 5, 0);
+				gfx_VertexF(gdl++, vertices, 5, 0);
 
 				gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
 				vertices += 5;
 			}
 		} else if (side < 0) {
-			vertices = gfxAllocateVertices(12);
+			vertices = gfxAllocateVerticesF(12);
 
 			if (side == -1) {
 				if (g_Vars.lvframe60 - hit->lvframe60 <= TICKS(80)) {
@@ -5466,7 +5465,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices[11].s = st3;
 			vertices[11].t = st2;
 
-			gfx_Vertex(gdl++, vertices, 12, 0);
+			gfx_VertexF(gdl++, vertices, 12, 0);
 
 			gfx_Tri4(gdl++, 0, 1, 9, 0, 9, 8, 11, 5, 4, 11, 4, 10);
 
@@ -5566,7 +5565,7 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			colours[4].a = alpha1;
 
-			vertices = gfxAllocateVertices(30);
+			vertices = gfxAllocateVerticesF(30);
 
 			for (j = 0; j < ARRAYCOUNT(sp104[side]); j++) {
 				vertices[j] = vtxtemplate;
@@ -5588,20 +5587,20 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 			vertices[4] = vtxtemplate;
 
 			if (hit->unk012 == 0x7fff) {
-				vertices[4].x = (vertices[0].x + vertices[1].x + vertices[2].x + vertices[3].x) >> 2;
-				vertices[4].y = (vertices[0].y + vertices[1].y + vertices[2].y + vertices[3].y) >> 2;
-				vertices[4].z = (vertices[0].z + vertices[1].z + vertices[2].z + vertices[3].z) >> 2;
+				vertices[4].x = (vertices[0].x + vertices[1].x + vertices[2].x + vertices[3].x) / 4.0f;
+				vertices[4].y = (vertices[0].y + vertices[1].y + vertices[2].y + vertices[3].y) / 4.0f;
+				vertices[4].z = (vertices[0].z + vertices[1].z + vertices[2].z + vertices[3].z) / 4.0f;
 			} else {
 				vertices[4].x = hit->unk012;
 				vertices[4].y = hit->unk014;
 				vertices[4].z = hit->unk016;
 			}
 
-			vertices[4].colour = 0xc;
-			vertices[4].s = (st1 + st3) >> 1;
-			vertices[4].t = (st2 + st4) >> 1;
+			vertices[4].colour = 12;
+			vertices[4].s = (st1 + st3) / 2.0f;
+			vertices[4].t = (st2 + st4) / 2.0f;
 
-			gfx_Vertex(gdl++, vertices, 5, 0);
+			gfx_VertexF(gdl++, vertices, 5, 0);
 
 			gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
@@ -5672,14 +5671,14 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 				vertices[3].t = st4;
 
 				vertices[4] = vtxtemplate;
-				vertices[4].x = (vertices[0].x + vertices[1].x + vertices[2].x + vertices[3].x) >> 2;
-				vertices[4].y = (vertices[0].y + vertices[1].y + vertices[2].y + vertices[3].y) >> 2;
-				vertices[4].z = (vertices[0].z + vertices[1].z + vertices[2].z + vertices[3].z) >> 2;
-				vertices[4].colour = 0x10;
-				vertices[4].s = (st1 + st3) >> 1;
-				vertices[4].t = (st2 + st4) >> 1;
+				vertices[4].x = (vertices[0].x + vertices[1].x + vertices[2].x + vertices[3].x) / 4.0f;
+				vertices[4].y = (vertices[0].y + vertices[1].y + vertices[2].y + vertices[3].y) / 4.0f;
+				vertices[4].z = (vertices[0].z + vertices[1].z + vertices[2].z + vertices[3].z) / 4.0f;
+				vertices[4].colour = 16;
+				vertices[4].s = (st1 + st3) / 2.0f;
+				vertices[4].t = (st2 + st4) / 2.0f;
 
-				gfx_Vertex(gdl++, vertices, 5, 0);
+				gfx_VertexF(gdl++, vertices, 5, 0);
 
 				gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 
@@ -5719,14 +5718,14 @@ Gfx *chrRenderShieldComponent(Gfx *gdl, struct shieldhit *hit, struct prop *prop
 
 			vertices[4] = vtxtemplate;
 
-			vertices[4].x = (vertices[0].x + vertices[1].x + vertices[2].x + vertices[3].x) >> 2;
-			vertices[4].y = (vertices[0].y + vertices[1].y + vertices[2].y + vertices[3].y) >> 2;
-			vertices[4].z = (vertices[0].z + vertices[1].z + vertices[2].z + vertices[3].z) >> 2;
-			vertices[4].colour = 0x10;
-			vertices[4].s = (st1 + st3) >> 1;
-			vertices[4].t = (st2 + st4) >> 1;
+			vertices[4].x = (vertices[0].x + vertices[1].x + vertices[2].x + vertices[3].x) / 4.0f;
+			vertices[4].y = (vertices[0].y + vertices[1].y + vertices[2].y + vertices[3].y) / 4.0f;
+			vertices[4].z = (vertices[0].z + vertices[1].z + vertices[2].z + vertices[3].z) / 4.0f;
+			vertices[4].colour = 16;
+			vertices[4].s = (st1 + st3) / 2.0f;
+			vertices[4].t = (st2 + st4) / 2.0f;
 
-			gfx_Vertex(gdl++, vertices, 5, 0);
+			gfx_VertexF(gdl++, vertices, 5, 0);
 
 			gfx_Tri4(gdl++, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4);
 		}
@@ -5895,7 +5894,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 
 		if (thisprop->parent == NULL) {
 			// Rendering the chr prop - configure renderer
-			gfx_Set_Scissor(gdl++, 0, 0, 16, 16);
+			gdl += gfx_Set_Scissor(gdl, 0, 0, 16, 16);
 			gfx_Set_Cycle_Type(gdl++, G_CYC_COPY);
 			gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0000, 5, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
 			gfx_Set_Tile(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0, 0x0080, 4, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMASK, G_TX_NOLOD);
@@ -5933,7 +5932,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 					}
 
 					if (index <= 19) {
-						Mtxf *mtx = (Mtxf*)modelFindNodeMtx(model, modelNodeFindMtxNode(node), 0);
+						Mtx *mtx = modelFindNodeMtx(model, modelNodeFindMtxNode(node), 0);
 						int uls; // upper left s coordinate
 						int ult; // upper left t coordinate
 						struct coord coord;
@@ -5941,9 +5940,9 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 						int lrs; // lower right s coordinate
 						int lrt; // lower right t coordinate
 
-						coord.x = mtx->m[3][0];
-						coord.y = mtx->m[3][1];
-						coord.z = mtx->m[3][2];
+						coord.x = (*mtx)[3][0];
+						coord.y = (*mtx)[3][1];
+						coord.z = (*mtx)[3][2];
 
 						camProjectViewToScreenSafe(&coord, screenpos);
 
@@ -6023,7 +6022,7 @@ Gfx *chrRenderCloak(Gfx *gdl, struct prop *chrprop, struct prop *thisprop)
 		if (thisprop->parent == NULL) {
 			// Back in the chr prop - reconfigure the renderer for normal use
 			gfx_Set_Color_Image(gdl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, viGetBufWidth(), (uintptr_t)(viGetBackBuffer()));
-			gfx_Set_Scissor(gdl++, 0, 0, viGetWidth(), viGetHeight());
+			gdl += gfx_Set_Scissor(gdl, 0, 0, viGetWidth(), viGetHeight());
 			gfx_Set_Cycle_Type(gdl++, G_CYC_1CYCLE);
 			gfx_Set_Render_Mode(gdl++, G_RM_AA_ZB_OPA_SURF, G_RM_AA_ZB_OPA_SURF2);
 			gfx_Set_Combine_LERP(gdl++,
